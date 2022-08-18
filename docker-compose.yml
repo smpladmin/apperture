@@ -1,0 +1,35 @@
+version: "3.9"
+services:
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/code
+    depends_on:
+      - backend
+  backend:
+    build:
+      context: ./backend
+      target: dev
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend:/code
+    depends_on:
+      - db
+  db:
+    image: 'mongo'
+    container_name: 'mongodb'
+    environment:
+      - MONGO_INITDB_DATABASE=apperture_db
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}
+    ports:
+      - '27017-27019:27017-27019'
+    volumes:
+      - mongodata:/data/db
+volumes:
+  mongodata: {}
