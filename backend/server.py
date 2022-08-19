@@ -39,9 +39,7 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
-    print(os.environ.get("DB_URI"))
     client = motor.motor_asyncio.AsyncIOMotorClient(os.environ.get("DB_URI"))
-    print(client.apperture_db)
     await init_beanie(database=client.apperture_db, document_models=[Test])
 
 @app.post("/data/providers")

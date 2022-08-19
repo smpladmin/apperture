@@ -1,4 +1,4 @@
-import type { GetServerSideProps, NextPage } from 'next'
+import type { GetServerSideProps } from 'next'
 import Head from 'next/head'
 import { useEffect, useState } from 'react';
 import { getTests, getTestsV2 } from '../lib/services/testService';
@@ -18,7 +18,6 @@ const Home = (props: {tests: Array<{id: string; name: string}>}) => {
 
   useEffect(() => {
     getTestsV2().then(t => {
-      console.log(t);
       setTestsV2(t)
     });
   }, []);

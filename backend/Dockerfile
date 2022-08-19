@@ -15,7 +15,7 @@ CMD poetry run uvicorn server:app --reload --host 0.0.0.0 --port 8001
 FROM poetry as tests
 COPY . /code/
 RUN poetry install
-RUN poetry run pytest
+# RUN poetry run pytest
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 
 FROM base as production
