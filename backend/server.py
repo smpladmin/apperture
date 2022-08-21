@@ -10,6 +10,7 @@ load_dotenv()
 from beanie import Document, init_beanie
 import motor, os
 
+
 class Test(Document):
     name: str
 
@@ -19,11 +20,12 @@ class Test(Document):
 
 class TestResponse(Test):
     class Config:
-        fields = {'id': 'id'}
+        fields = {"id": "id"}
 
     def __init__(self, **pydict):
         super().__init__(**pydict)
-        self.id = pydict.get('_id')
+        self.id = pydict.get("_id")
+
 
 app = FastAPI()
 
@@ -37,15 +39,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.on_event("startup")
 async def startup_event():
     client = motor.motor_asyncio.AsyncIOMotorClient(os.environ.get("DB_URI"))
-    await init_beanie(database=client.apperture_db, document_models=[Test])
+    await init_beanie(
+        database=client[os.environ.get("DB_NAME")], document_models=[Test]
+    )
+
 
 @app.post("/data/providers")
 def trigger(background_tasks: BackgroundTasks):
     background_tasks.add_task(process_data_for_all_tenants)
     return {"submitted": True}
+
 
 @app.get("/test", response_model=List[TestResponse], response_model_by_alias=False)
 async def test():
