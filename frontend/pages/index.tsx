@@ -30,7 +30,7 @@ const Home = (props: {tests: Array<{id: string; name: string}>}) => {
       </Head>
       <div>
         <h2>
-          Testing Apperture
+          Testing Apperture | MVP
         </h2>
         <p>
           This data came from the backend and was rendered on the server
