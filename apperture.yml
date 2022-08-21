@@ -1,0 +1,62 @@
+version: '3.3'
+services:
+  backend:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/backend:latest
+    networks:
+     - net
+     - traefik-public
+    logging:
+      driver: json-file
+    deploy:
+      labels:
+        traefik.http.routers.backend-http.rule: Host(`${BACKEND_HOST}`)
+        traefik.http.routers.backend-https.tls.certresolver: le
+        traefik.http.routers.backend-http.entrypoints: http
+        traefik.http.routers.backend-https.entrypoints: https
+        traefik.constraint-label: traefik-public
+        traefik.http.services.backend.loadbalancer.server.port: '8001'
+        traefik.http.routers.backend-https.tls: 'true'
+        traefik.docker.network: traefik-public
+        traefik.enable: 'true'
+        traefik.http.routers.backend-https.rule: Host(`${BACKEND_HOST}`)
+        traefik.http.routers.backend-http.middlewares: https-redirect
+      resources:
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+        limits:
+          cpus: '0.5'
+          memory: 1024M
+  frontend:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/frontend:latest
+    networks:
+     - net
+     - traefik-public
+    logging:
+      driver: json-file
+    deploy:
+      labels:
+        traefik.http.routers.frontend-https.rule: Host(`${FRONTEND_HOST}`)
+        traefik.http.routers.frontend-https.entrypoints: https
+        traefik.http.routers.frontend-https.tls.certresolver: le
+        traefik.http.routers.frontend-http.middlewares: https-redirect
+        swarmpit.service.deployment.autoredeploy: 'true'
+        traefik.constraint-label: traefik-public
+        traefik.http.routers.frontend-http.rule: Host(`${FRONTEND_HOST}`)
+        traefik.http.routers.frontend-https.tls: 'true'
+        traefik.http.services.frontend.loadbalancer.server.port: '3000'
+        traefik.docker.network: traefik-public
+        traefik.enable: 'true'
+        traefik.http.routers.frontend-http.entrypoints: http
+      resources:
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+        limits:
+          cpus: '0.5'
+          memory: 512M
+networks:
+  net:
+    driver: overlay
+  traefik-public:
+    external: true
