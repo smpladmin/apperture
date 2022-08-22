@@ -13,14 +13,15 @@
   padding: 12px 30px;
 }
 
+.searchBar__dataSource {
+  width: 32px;
+  height: 32px;
+}
+
 .searchBar__right {
   display: flex;
   align-items: center;
   gap: 24px;
-}
-.searchBar__dataSource > img {
-  width: 32px;
-  height: 32px;
 }
 
 .searchBar__input {
