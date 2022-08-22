@@ -4,6 +4,8 @@ from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from main import process_data_for_all_tenants
 from dotenv import load_dotenv
+from starlette.middleware.sessions import SessionMiddleware
+from authorisation import router as oauth_router
 
 load_dotenv()
 
@@ -38,6 +40,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(SessionMiddleware, secret_key=os.environ.get("SESSION_SECRET"))
+app.include_router(oauth_router.router)
 
 
 @app.on_event("startup")
