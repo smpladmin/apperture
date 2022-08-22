@@ -5,6 +5,5 @@ export const getTests = (): Promise<Array<{id: string; name: string}>> => {
 }
 
 export const getTestsV2 = (): Promise<Array<{id: string; name: string}>> => {
-  console.log("called now");
   return http.get('/test').then(res => res.data);
 }
