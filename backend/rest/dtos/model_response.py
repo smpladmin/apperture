@@ -6,6 +6,6 @@ def to_camel(string: str) -> str:
     return string_split[0] + "".join(word.capitalize() for word in string_split[1:])
 
 
-class DocumentResponse(BaseModel):
+class ModelResponse(BaseModel):
     class Config:
         alias_generator = to_camel

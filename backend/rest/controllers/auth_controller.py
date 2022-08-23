@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Request, HTTPException, status, Depends
 from authlib.integrations.starlette_client import OAuthError
 
-from users.service import UserService
-from users.models import UserResponse
-from .oauth import oauth
+from domain.users.service import UserService
+from rest.dtos.users import UserResponse
+from authorisation.oauth import oauth
 
 router = APIRouter(tags=["auth"])
 
@@ -25,4 +25,4 @@ async def authorise(request: Request, user_service: UserService = Depends()):
             headers={"WWW-Authenticate": "Bearer"},
         )
     oauth_user = access_token.get("userinfo")
-    return await user_service.create_user_from_oauth_user(oauth_user)
+    return await user_service.create_user_if_not_exists(oauth_user)

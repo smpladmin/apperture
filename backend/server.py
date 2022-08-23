@@ -1,17 +1,30 @@
 import os
-from fastapi import FastAPI, BackgroundTasks, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
-
-from authorisation import controller as oauth_router
-from mongo import Mongo
-from main import process_data_for_all_tenants
 
 load_dotenv(override=False)
 
+from fastapi import FastAPI, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
-app = FastAPI()
+from rest.controllers import auth_controller as oauth_router
+from mongo import Mongo
+from main import process_data_for_all_tenants
+
+
+async def on_startup():
+    mongo = Mongo()
+    app.dependency_overrides[Mongo] = lambda: mongo
+    await mongo.init()
+
+
+async def on_shutdown():
+    mongo: Mongo = app.dependency_overrides[Mongo]()
+    await mongo.close()
+
+
+app = FastAPI(on_startup=[on_startup], on_shutdown=[on_shutdown])
+
 
 # TODO: allow only specific origins
 origins = ["*"]
@@ -25,11 +38,6 @@ app.add_middleware(
 
 app.add_middleware(SessionMiddleware, secret_key=os.environ.get("SESSION_SECRET"))
 app.include_router(oauth_router.router)
-
-
-@app.on_event("startup")
-async def startup_event(mongo: Mongo = Depends()):
-    mongo.init()
 
 
 @app.post("/data/providers")

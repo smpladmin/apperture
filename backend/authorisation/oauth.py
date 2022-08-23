@@ -1,6 +1,7 @@
 import os
 from starlette.config import Config
 from authlib.integrations.starlette_client import OAuth
+from pydantic import BaseModel
 
 
 config_data = {
@@ -23,3 +24,10 @@ oauth.register(
     },
     authorize_params={},
 )
+
+
+class OAuthUser(BaseModel):
+    given_name: str
+    family_name: str
+    email: str
+    picture: str
