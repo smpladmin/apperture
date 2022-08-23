@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Request, HTTPException, status
-from starlette.responses import JSONResponse
+from fastapi import APIRouter, Request, HTTPException, status, Depends
 from authlib.integrations.starlette_client import OAuthError
+
+from users.service import UserService
+from users.models import UserResponse
 from .oauth import oauth
 
 router = APIRouter(tags=["auth"])
@@ -12,8 +14,8 @@ async def login(request: Request):
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 
-@router.get("/authorise")
-async def authorise(request: Request):
+@router.get("/authorise", response_model=UserResponse)
+async def authorise(request: Request, user_service: UserService = Depends()):
     try:
         access_token = await oauth.google.authorize_access_token(request)
     except OAuthError:
@@ -23,6 +25,4 @@ async def authorise(request: Request):
             headers={"WWW-Authenticate": "Bearer"},
         )
     oauth_user = access_token.get("userinfo")
-    # TODO: save details in database and generate JWT token
-    # TODO: return the JWT token as cookie
-    return JSONResponse({"result": True, "access_token": "jwt"})
+    return await user_service.create_user_from_oauth_user(oauth_user)

@@ -1,32 +1,14 @@
-# TODO: refactor setup to different files
-from typing import List
-from fastapi import FastAPI, BackgroundTasks
+import os
+from fastapi import FastAPI, BackgroundTasks, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from main import process_data_for_all_tenants
-from dotenv import load_dotenv
 from starlette.middleware.sessions import SessionMiddleware
-from authorisation import router as oauth_router
+from dotenv import load_dotenv
 
-load_dotenv()
+from authorisation import controller as oauth_router
+from mongo import Mongo
+from main import process_data_for_all_tenants
 
-from beanie import Document, init_beanie
-import motor, os
-
-
-class Test(Document):
-    name: str
-
-    class Settings:
-        name = "test"
-
-
-class TestResponse(Test):
-    class Config:
-        fields = {"id": "id"}
-
-    def __init__(self, **pydict):
-        super().__init__(**pydict)
-        self.id = pydict.get("_id")
+load_dotenv(override=False)
 
 
 app = FastAPI()
@@ -46,19 +28,11 @@ app.include_router(oauth_router.router)
 
 
 @app.on_event("startup")
-async def startup_event():
-    client = motor.motor_asyncio.AsyncIOMotorClient(os.environ.get("DB_URI"))
-    await init_beanie(
-        database=client[os.environ.get("DB_NAME")], document_models=[Test]
-    )
+async def startup_event(mongo: Mongo = Depends()):
+    mongo.init()
 
 
 @app.post("/data/providers")
 def trigger(background_tasks: BackgroundTasks):
     background_tasks.add_task(process_data_for_all_tenants)
     return {"submitted": True}
-
-
-@app.get("/test", response_model=List[TestResponse], response_model_by_alias=False)
-async def test():
-    return await Test.find().to_list()
