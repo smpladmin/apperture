@@ -5,7 +5,7 @@
   max-width: 64px;
   height: 100vh;
   background-color: var(--apt-black);
-  padding: 14px 0 50px 0;
+  padding: 12px 0 44px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -63,12 +63,11 @@
   background-color: rgba(255, 255, 255, 0.08);
 }
 
-.rotate-45 {
+.rotate45 {
   rotate: 45deg;
 }
 .sideBar__logOut {
   margin-top: auto;
-  margin-bottom: 40px;
 }
 .coming__soon:hover {
   cursor: not-allowed;
@@ -82,10 +81,3 @@
   padding: 4px;
   border-radius: 2px;
 }
-
-/* @media only screen and (max-width: 768px) {
-    .sideBar {
-      display: none;
-    }
-  } */
-

@@ -16,7 +16,9 @@ const Sidebar = () => {
         <p className={styles.sideBar__headings}>EXPLORE</p>
         <div className={styles.sideBar_buttonWrapper}>
           <div className={styles.sideBar__buttons}>
-            <i className="ri-route-fill rotate-45"></i>
+            <div className={styles.rotate45}>
+              <i className="ri-route-fill"></i>
+            </div>
           </div>
           <div className={styles.sideBar__buttons}>
             <i className="ri-lightbulb-line"></i>

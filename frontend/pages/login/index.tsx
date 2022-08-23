@@ -1,12 +1,12 @@
 import styles from "./Login.module.css";
-import Sidebar from "../../components/Sidebar";
-import Searchbar from "../../components/Searchbar";
+// import Sidebar from "../../components/Sidebar";
+// import Searchbar from "../../components/Searchbar";
+import Loginscreen from "../../components/Loginscreen";
 
 const Login = () => {
   return (
-    <div className={styles.login}>
-      <Sidebar />
-      <Searchbar />
+    <div>
+      <Loginscreen />
     </div>
   );
 };
