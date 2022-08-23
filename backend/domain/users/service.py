@@ -7,7 +7,7 @@ class UserService:
         existing_user = await User.find_one(User.email == oauth_user.email)
         if existing_user:
             return existing_user
-        return self._create_user(oauth_user)
+        return await self._create_user(oauth_user)
 
     async def _create_user(self, oauth_user: OAuthUser):
         apperture_user = User(
