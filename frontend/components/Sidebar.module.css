@@ -1,0 +1,81 @@
+.sideBar {
+  width: 100%;
+  max-width: 64px;
+  height: 100vh;
+  background-color: var(--apt-black);
+  padding: 12px 0 44px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--apt-white);
+  font-size: 10px;
+  line-height: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.sideBar__headings {
+  opacity: 0.3;
+}
+
+.sideBar_logo {
+  padding-bottom: 40px;
+}
+.sideBar__accountImage {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--apt-yellow);
+  border-radius: 100%;
+  margin: 16px 0px 40px 0px;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.sideBar_buttonWrapper {
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.sideBar__buttons {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  color: var(--apt-hover-grey);
+  background-color: #ffffff00;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  transition: all 0.25s ease;
+}
+
+.sideBar__buttons:hover {
+  cursor: pointer;
+  color: var(--apt-white);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.rotate45 {
+  rotate: 45deg;
+}
+.sideBar__logOut {
+  margin-top: auto;
+}
+.coming__soon:hover {
+  cursor: not-allowed;
+}
+.sideBar__tag {
+  margin-top: -18px;
+  font-size: 8px;
+  line-height: 12px;
+  background-color: var(--apt-green);
+  font-weight: 500;
+  padding: 4px;
+  border-radius: 2px;
+}

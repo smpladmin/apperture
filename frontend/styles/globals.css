@@ -2,8 +2,15 @@ html,
 body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family: "Work Sans", sans-serif;
+  --apt-black: #0e0e1a;
+  --apt-black-v2: #07070d;
+  --apt-white: #ffffff;
+  --apt-grey: #d9d9da;
+  --apt-yellow: #fac213;
+  --apt-green: #57aa64;
+  --apt-hover-grey: #78787e;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
@@ -13,6 +20,7 @@ a {
 
 * {
   box-sizing: border-box;
+  margin: 0;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,7 +28,7 @@ a {
     color-scheme: dark;
   }
   body {
-    color: white;
-    background: black;
+    color: black;
+    background-color: rgb(234, 237, 237);
   }
 }
