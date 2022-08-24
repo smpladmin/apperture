@@ -27,6 +27,7 @@ httpx = "^0.23.0"
 Authlib = "^1.0.1"
 itsdangerous = "^2.1.2"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+pymongo = {extras = ["srv"], version = "^4.2.0"}
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
