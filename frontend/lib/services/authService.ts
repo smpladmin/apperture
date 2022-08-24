@@ -1,9 +1,14 @@
-import jwt from "jsonwebtoken";
+import {jwtVerify} from "jose";
 
-export const isValidToken = (token: string | undefined): boolean => {
+export const validateToken = async (token: string | undefined): Promise<string | null> => {
   try {
-    return !!token && !!jwt.verify(token, process.env.JWT_SECRET!!);
+    if (!token) {
+      return null
+    }
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const { payload } = await jwtVerify(token, secret);
+    return payload.user_id as string;
   } catch (err) {
-    return false;
+    return null;
   }
 };
