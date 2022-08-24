@@ -157,7 +157,10 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+next-env.d.ts
 
 # storybook
 storybook-static
 .env.storybook
+.env.staging
+.env.production
