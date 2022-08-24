@@ -2,6 +2,8 @@ import styles from "../components/Loginscreen.module.css";
 import Image from "next/image";
 import logo from "../assets/images/Logo_login.svg";
 import glogo from "../assets/images/Google_login.svg";
+import Link from "next/link";
+
 
 const Loginscreen = () => {
   return (
@@ -17,11 +19,15 @@ const Loginscreen = () => {
           <p className={styles.login__terms}> Terms of use</p>
         </div>
         <div className={styles.login__buttonwrapper}>
-          <button className={styles.login__google}>
-            <Image src={glogo}></Image>Sign up with Google
-          </button>
+          <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/login`}>
+            <button className={styles.login__google}>
+              <Image src={glogo}></Image>Sign up with Google
+            </button>
+          </Link>
           <p className={styles.login__already}>
-            Already a user?<span className={styles.login__login}>Log in</span>
+            Already a user?<Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/login`}>
+                <span className={styles.login__login}>Log in</span>
+              </Link>
           </p>
         </div>
       </div>

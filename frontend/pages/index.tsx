@@ -1,22 +1,15 @@
+import { GetServerSideProps } from 'next';
 import Head from 'next/head'
 
+export const getServerSideProps: GetServerSideProps = async () => {
+  return {
+    redirect: {
+      destination: "/explore",
+    },
+    props: {},
+  };
+}
 
-const Home = () => {
-
-  return (
-    <div>
-      <Head>
-        <title>Apperture</title>
-        <meta name="description" content="Apperture Analytics" />
-      </Head>
-
-      <div>
-        <h2>
-          Testing Apperture | MVP
-        </h2>
-      </div>
-    </div>
-  );
-};
+const Home = () => {};
 
 export default Home;
