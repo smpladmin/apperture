@@ -6,7 +6,7 @@ EXPOSE 3000
 
 FROM base as production
 ENV NODE_ENV=production
-COPY . /
+COPY . /code/
 RUN npm ci --include=dev
 RUN npm run build
 
@@ -14,7 +14,7 @@ CMD npm run start
 
 FROM base as dev
 ENV NODE_ENV=development
-COPY . /
+COPY . /code/
 RUN npm install
 
 CMD npm run dev
