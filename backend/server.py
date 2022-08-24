@@ -1,33 +1,30 @@
-# TODO: refactor setup to different files
-from typing import List
-from fastapi import FastAPI, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
-from main import process_data_for_all_tenants
+import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=False)
 
-from beanie import Document, init_beanie
-import motor, os
+from fastapi import FastAPI, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
-
-class Test(Document):
-    name: str
-
-    class Settings:
-        name = "test"
+from rest.controllers import auth_controller as oauth_router
+from mongo import Mongo
+from main import process_data_for_all_tenants
 
 
-class TestResponse(Test):
-    class Config:
-        fields = {"id": "id"}
-
-    def __init__(self, **pydict):
-        super().__init__(**pydict)
-        self.id = pydict.get("_id")
+async def on_startup():
+    mongo = Mongo()
+    app.dependency_overrides[Mongo] = lambda: mongo
+    await mongo.init()
 
 
-app = FastAPI()
+async def on_shutdown():
+    mongo: Mongo = app.dependency_overrides[Mongo]()
+    await mongo.close()
+
+
+app = FastAPI(on_startup=[on_startup], on_shutdown=[on_shutdown])
+
 
 # TODO: allow only specific origins
 origins = ["*"]
@@ -39,21 +36,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-@app.on_event("startup")
-async def startup_event():
-    client = motor.motor_asyncio.AsyncIOMotorClient(os.environ.get("DB_URI"))
-    await init_beanie(
-        database=client[os.environ.get("DB_NAME")], document_models=[Test]
-    )
+app.add_middleware(SessionMiddleware, secret_key=os.environ.get("SESSION_SECRET"))
+app.include_router(oauth_router.router)
 
 
 @app.post("/data/providers")
 def trigger(background_tasks: BackgroundTasks):
     background_tasks.add_task(process_data_for_all_tenants)
     return {"submitted": True}
-
-
-@app.get("/test", response_model=List[TestResponse], response_model_by_alias=False)
-async def test():
-    return await Test.find().to_list()
