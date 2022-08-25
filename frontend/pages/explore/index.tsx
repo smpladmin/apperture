@@ -1,9 +1,8 @@
-import Head from 'next/head'
+import Head from 'next/head';
 import { ReactNode } from 'react';
 import Layout from '../../components/Layout';
 
 const Explore = () => {
-
   return (
     <div>
       <Head>
@@ -12,20 +11,14 @@ const Explore = () => {
       </Head>
 
       <div>
-        <h2>
-          Explore
-        </h2>
+        <h2>Explore</h2>
       </div>
     </div>
   );
 };
 
 Explore.getLayout = function getLayout(page: ReactNode) {
-  return (
-    <Layout>
-      {page}
-    </Layout>
-  )
-}
+  return <Layout>{page}</Layout>;
+};
 
 export default Explore;
