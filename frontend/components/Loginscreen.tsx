@@ -7,26 +7,28 @@ import Link from "next/link";
 
 const Loginscreen = () => {
   return (
-    <div className={styles.login__wrapper}>
-      <div className={styles.login__container}>
-        <div>
-          <div className={styles.login__logoWrapper}>
-            <Image src={logo} className={styles.login__logo} layout="fill" />
+    <div className="bg-black text-white h-screen p-8">
+      <div className="h-full flex flex-col justify-between lg:ml-45 md:mx-36">
+        <div className="mt-25 md:mt-32">
+          <div className={"relative h-25 w-25 md:w-30 md:h-30 mb-3"}>
+            <Image src={logo} layout="fill" />
           </div>
-          <h1 className={styles.login__heading}>
+          <h1 className="mt-12 font-normal text-[34px] leading-[42px] md:text-[56px] md:leading-[65px]">
             Product Analytics <br /> for everyone
           </h1>
-          <p className={styles.login__terms}> Terms of use</p>
+          <p className="mt-4 underline font-normal text-[12px] md:text-[18px] leading-[22px] text-grey">
+            Terms of use
+          </p>
         </div>
-        <div className={styles.login__buttonwrapper}>
+        <div className="flex flex-col mt-24 mb-2 gap-6 md:max-w-[565px] items-center">
           <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/login`}>
-            <button className={styles.login__google}>
-              <Image src={glogo}></Image>Sign up with Google
-            </button>
+            <div className="bg-white text-black-100 font-semibold text-[20px] leading-[22px] rounded-lg flex justify-center items-center gap-6 p-6 w-full cursor-pointer">
+              <Image src={glogo} />Sign up with Google
+            </div>
           </Link>
-          <p className={styles.login__already}>
-            Already a user?<Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/login`}>
-                <span className={styles.login__login}>Log in</span>
+          <p className="font-normal text-[20px] leading-[22px] text-grey">
+            Already a user? <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/login`}>
+                <span className="text-white font-medium underline cursor-pointer">Log in</span>
               </Link>
           </p>
         </div>
