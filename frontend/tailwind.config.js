@@ -22,6 +22,7 @@ module.exports = {
       ...theme("colors"),
       aptBlack: "#0E0E1A",
       aptGreen: "#57AA64",
+      aptYellow:"#FAC213",
     }),
 
     maxWidth: {

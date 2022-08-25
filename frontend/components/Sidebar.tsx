@@ -8,7 +8,7 @@ const Sidebar = () => {
       <img src={logo.src} className="pb-10" alt="appertureLogo" />
       <div>
         <p className="opacity-30 text-xs-10">APP</p>
-        <div className="w-8 h-8 flex items-center justify-center bg-yellow-400 rounded-full	text-xs-14 font-bold mt-4 mb-10">
+        <div className="w-8 h-8 flex items-center justify-center bg-aptYellow rounded-full	text-xs-14 font-bold mt-4 mb-10">
           <p>ZA</p>
         </div>
       </div>
