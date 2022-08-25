@@ -1,10 +1,23 @@
 /** @type {import('tailwindcss').Config} */
+const colors = require('tailwindcss/colors')
+
 module.exports = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    colors: {
+      black: {
+        DEFAULT: '#07070d',
+        100: '#0e0e1a'
+      },
+      white: '#ffffff',
+      grey: '#d9d9da',
+      yellow: '#fac213',
+      green: '#57aa64',
+      'hover-grey': '#78787e'
+    },
     backgroundColor: (theme) => ({
       ...theme("colors"),
       aptBlack: "#0E0E1A",
@@ -20,6 +33,7 @@ module.exports = {
       "xs-10": ["0.625rem", "1.2"],
       "xs-14": ["0.875rem", "1.3"],
     },
+    extend: {},
   },
   plugins: [],
 };
