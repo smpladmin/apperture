@@ -55,3 +55,10 @@ async def _authorize_and_save_user(request: Request, user_service: UserService):
         )
     oauth_user = access_token.get("userinfo")
     return await user_service.create_user_if_not_exists(oauth_user)
+
+
+@router.get("/logout")
+async def logout(redirect_url: str = os.getenv("FRONTEND_LOGIN_REDIRECT_URL")):
+    response = RedirectResponse(url=redirect_url)
+    response.delete_cookie(key="auth_token")
+    return response

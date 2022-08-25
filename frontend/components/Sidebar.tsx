@@ -1,6 +1,7 @@
 import styles from "../components/Sidebar.module.css";
 import "remixicon/fonts/remixicon.css";
 import logo from "../assets/images/apperture_white-icon.svg";
+import Link from "next/link";
 
 const Sidebar = () => {
   return (
@@ -31,7 +32,9 @@ const Sidebar = () => {
       </div>
       <div className={styles.sideBar__logOut}>
         <div className={styles.sideBar__buttons}>
-          <i className="ri-logout-box-r-line"></i>
+          <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/logout`}>
+            <i className="ri-logout-box-r-line"></i>
+          </Link>
         </div>
       </div>
     </div>
