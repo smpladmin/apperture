@@ -1,13 +1,12 @@
 import { ReactNode } from "react";
 import Searchbar from "./Searchbar";
 import Sidebar from "./Sidebar";
-import styles from "./Layout.module.css";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className={styles.container}>
+    <div className="flex flex-row">
       <Sidebar />
-      <div className={styles.mainContainer}>
+      <div className="flex flex-col w-full">
         <Searchbar />
         <main>{children}</main>
       </div>
