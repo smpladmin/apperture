@@ -60,5 +60,12 @@ async def _authorize_and_save_user(request: Request, user_service: UserService):
 @router.get("/logout")
 async def logout(redirect_url: str = os.getenv("FRONTEND_LOGIN_REDIRECT_URL")):
     response = RedirectResponse(url=redirect_url)
-    response.delete_cookie(key="auth_token")
+    response.set_cookie(
+        key="auth_token",
+        domain=os.getenv("COOKIE_DOMAIN"),
+        httponly=True,
+        secure=True,
+        expires=0,
+        max_age=0,
+    )
     return response
