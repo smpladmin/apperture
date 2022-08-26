@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 const Loginscreen = () => {
   return (
-    <div className="h-screen bg-black p-8 text-white">
+    <div className="bg-black p-8 text-white">
       <div className="flex h-full flex-col justify-between md:mx-36 lg:ml-45">
         <div className="mt-25 md:mt-32">
           <div className={'relative mb-3 h-25 w-25 md:h-30 md:w-30'}>
