@@ -13,7 +13,11 @@ module.exports = {
         DEFAULT: '#07070d',
         100: '#0e0e1a',
       },
-      white: '#ffffff',
+      white: {
+        DEFAULT: '#ffffff',
+        100: '#f6f6f6',
+        200: '#ededed',
+      },
       grey: '#d9d9da',
       yellow: '#fac213',
       green: '#57aa64',
@@ -27,6 +31,7 @@ module.exports = {
         30: '7.5rem',
         33: '8.25rem',
         45: '11.25rem',
+        100: '25rem',
       },
       maxWidth: {
         16: '4rem',
@@ -40,6 +45,9 @@ module.exports = {
         'sh-18': ['1.125rem', ' 1.375rem'], //fs-18px lh-22px
         'sh-20': ['1.25rem', ' 1.5rem'], //fs-20px lh-24px
         'sh-24': ['1.5rem', ' 1.75rem'], //fs-20px lh-28px
+      },
+      boxShadow: {
+        xs: '0 1px 0 rgba(30, 25, 34, 0.08)',
       },
     },
   },
