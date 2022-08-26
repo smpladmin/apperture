@@ -17,7 +17,7 @@ const Sidebar = () => {
         <p className="text-xs-10 opacity-30">EXPLORE</p>
         <div className="flex flex-col items-center gap-y-5 pt-5 ">
           <div className="duration-250 grid h-10 w-10 cursor-pointer place-items-center	rounded-lg bg-white bg-opacity-0 transition ease-in	 hover:bg-opacity-10 ">
-            <div className="rotate-45 transform">
+            <div className='rotate-45 transform'>
               <i className="ri-route-fill"></i>
             </div>
           </div>
@@ -32,13 +32,12 @@ const Sidebar = () => {
           </div>
         </div>
       </div>
+      <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/logout`}>
       <div className="duration-250 mt-auto grid h-10 w-10 cursor-pointer place-items-center	rounded-lg bg-white bg-opacity-0 transition ease-in	 hover:bg-opacity-10 ">
         <div>
-          <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/logout`}>
-            <i className="ri-logout-box-r-line"></i>
-          </Link>
+          <i className="ri-logout-box-r-line"></i>
         </div>
-      </div>
+      </div></Link>
     </div>
   );
 };
