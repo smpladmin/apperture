@@ -1,4 +1,4 @@
-import Loginscreen from "../../components/Loginscreen";
+import Loginscreen from '../../components/Loginscreen';
 
 const Login = () => {
   return (

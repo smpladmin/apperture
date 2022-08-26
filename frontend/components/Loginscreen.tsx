@@ -1,33 +1,37 @@
-import styles from "../components/Loginscreen.module.css";
-import Image from "next/image";
-import logo from "../assets/images/Logo_login.svg";
-import glogo from "../assets/images/Google_login.svg";
-import Link from "next/link";
-
+import Image from 'next/image';
+import logo from '../assets/images/Logo_login.svg';
+import glogo from '../assets/images/Google_login.svg';
+import Link from 'next/link';
 
 const Loginscreen = () => {
   return (
-    <div className={styles.login__wrapper}>
-      <div className={styles.login__container}>
-        <div>
-          <div className={styles.login__logoWrapper}>
-            <Image src={logo} className={styles.login__logo} layout="fill" />
+    <div className="h-screen bg-black p-8 text-white">
+      <div className="flex h-full flex-col justify-between md:mx-36 lg:ml-45">
+        <div className="mt-25 md:mt-32">
+          <div className={'relative mb-3 h-25 w-25 md:h-30 md:w-30'}>
+            <Image src={logo} layout="fill" alt="Apperture logo" />
           </div>
-          <h1 className={styles.login__heading}>
+          <h1 className="mt-12 text-[34px] font-normal leading-[42px] md:text-[56px] md:leading-[65px]">
             Product Analytics <br /> for everyone
           </h1>
-          <p className={styles.login__terms}> Terms of use</p>
+          <p className="mt-4 text-[12px] font-normal leading-[22px] text-grey underline md:text-[18px]">
+            Terms of use
+          </p>
         </div>
-        <div className={styles.login__buttonwrapper}>
+        <div className="mt-24 mb-2 flex flex-col items-center gap-6 md:max-w-[565px]">
           <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/login`}>
-            <button className={styles.login__google}>
-              <Image src={glogo}></Image>Sign up with Google
-            </button>
+            <div className="flex w-full cursor-pointer items-center justify-center gap-6 rounded-lg bg-white p-6 text-[20px] font-semibold leading-[22px] text-black-100">
+              <Image src={glogo} alt="Google logo" />
+              Sign up with Google
+            </div>
           </Link>
-          <p className={styles.login__already}>
-            Already a user?<Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/login`}>
-                <span className={styles.login__login}>Log in</span>
-              </Link>
+          <p className="text-[20px] font-normal leading-[22px] text-grey">
+            Already a user?{' '}
+            <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/login`}>
+              <span className="cursor-pointer font-medium text-white underline">
+                Log in
+              </span>
+            </Link>
           </p>
         </div>
       </div>

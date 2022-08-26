@@ -1,25 +1,29 @@
-FROM python:3.9 as base
-
+FROM python:3.9-slim as base
 WORKDIR /code
 EXPOSE 8001
 
-FROM base as poetry
+FROM base as deps
+WORKDIR /code
+COPY pyproject.toml ./
+COPY poetry.lock ./
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install poetry
-
-FROM poetry as dev
-COPY . /code/
-RUN poetry install
-RUN poetry config virtualenvs.in-project false
-CMD poetry run uvicorn server:app --reload --host 0.0.0.0 --port 8001
-
-FROM poetry as tests
-COPY . /code/
-RUN poetry install
-# RUN poetry run pytest
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+FROM base as dev
+WORKDIR /code
+ENV FASTAPI_ENV=development
+COPY --from=deps /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+COPY . .
+CMD uvicorn server:app --reload --host 0.0.0.0 --port 8001
 
 FROM base as production
-COPY --from=tests /code/requirements.txt /code/requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
-COPY . /code/
+WORKDIR /code
+ENV FASTAPI_ENV=production
+COPY --from=deps /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+COPY . .
 CMD uvicorn server:app --host 0.0.0.0 --port 8001

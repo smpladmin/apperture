@@ -1,9 +1,11 @@
-import {jwtVerify} from "jose";
+import { jwtVerify } from 'jose';
 
-export const validateToken = async (token: string | undefined): Promise<string | null> => {
+export const validateToken = async (
+  token: string | undefined
+): Promise<string | null> => {
   try {
     if (!token) {
-      return null
+      return null;
     }
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);

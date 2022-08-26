@@ -1,14 +1,14 @@
 import { GetServerSideProps } from 'next';
-import Head from 'next/head'
+import Head from 'next/head';
 
 export const getServerSideProps: GetServerSideProps = async () => {
   return {
     redirect: {
-      destination: "/explore",
+      destination: '/explore',
     },
     props: {},
   };
-}
+};
 
 const Home = () => {};
 

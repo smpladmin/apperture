@@ -1,16 +1,17 @@
-import "../styles/globals.css";
+import '../styles/globals.css';
 import { AppLayoutProps } from 'next/app';
-import { ReactNode } from "react";
-import { ChakraProvider } from "@chakra-ui/react";
+import { ReactNode } from 'react';
+import { ChakraProvider } from '@chakra-ui/react';
+import { theme } from '../theme/chakra.theme';
 
 function MyApp({ Component, pageProps }: AppLayoutProps) {
-  const getLayout = Component.getLayout || ((page: ReactNode) => page)
+  const getLayout = Component.getLayout || ((page: ReactNode) => page);
 
   return (
-    <ChakraProvider>
+    <ChakraProvider theme={theme}>
       {getLayout(<Component {...pageProps} />)}
     </ChakraProvider>
-  )
+  );
 }
 
 export default MyApp;

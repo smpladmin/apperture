@@ -1,0 +1,11 @@
+node_modules
+build
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+package-lock.json
+.vscode
