@@ -28,6 +28,10 @@ services:
       - MONGO_INITDB_DATABASE=apperture_db
       - MONGO_INITDB_ROOT_USERNAME=${MONGODB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}
+    command:
+      - '--quiet'
+      - '--logpath'
+      - '/var/log/mongodb/mongod.log'
     ports:
       - '27017-27019:27017-27019'
     volumes:
