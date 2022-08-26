@@ -1,10 +1,25 @@
-import React from 'react';
+import { useState } from 'react';
 import 'remixicon/fonts/remixicon.css';
 import { Input } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
+
 const Create = () => {
+  const [appName, setAppName] = useState<string>('');
+  const router = useRouter();
+
+  const handleNextClick = (): void => {
+    // api call
+    router.push('/analytics/app/integrate');
+  };
+  const handleGoBack = (): void => router.back();
+
   return (
-    <div className="lg:max-w-screen-xl lg:px-48 lg:pt-20">
-      <div className="mb-11 grid h-9 w-9 place-content-center rounded-full border">
+    <div className="px-48 pt-20 lg:max-w-screen-xl">
+      <div
+        tabIndex={0}
+        className="mb-11 flex h-9 w-9 items-center justify-center rounded-full border"
+        onClick={handleGoBack}
+      >
         <i className="ri-close-fill"></i>
       </div>
       <div className="max-w-3xl">
@@ -16,7 +31,7 @@ const Create = () => {
           size={'lg'}
           w={100}
           bg={'white.200'}
-          rounded={'00.25rem'}
+          rounded={'0.25rem'}
           fontSize={'md'}
           placeholder="Ex- Food Web App"
           className="py-4 px-3.5 text-base text-black"
@@ -26,9 +41,16 @@ const Create = () => {
             fontWeight: 400,
             color: 'grey.100',
           }}
+          value={appName}
+          onChange={(e) => setAppName(e.target.value)}
         />
       </div>
-      <button className="mt-10 grid w-72 place-content-center rounded-lg bg-black-100 p-4 text-base font-semibold text-white-100">
+      {/* to decide whther to wrap in form or wrap inside div to make key board accessible*/}
+      <button
+        className="mt-10 flex w-72 items-center justify-center rounded-lg bg-black-100 p-4 text-base font-semibold text-white-100 disabled:pointer-events-none disabled:bg-grey"
+        disabled={!appName}
+        onClick={handleNextClick}
+      >
         Next
       </button>
     </div>
