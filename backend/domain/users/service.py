@@ -18,3 +18,6 @@ class UserService:
         )
         await apperture_user.insert()
         return apperture_user
+
+    async def get_user(self, id: str):
+        return await User.get(id)
