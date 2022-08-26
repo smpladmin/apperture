@@ -7,7 +7,9 @@ from rest.middlewares import get_user, validate_jwt
 
 
 router = APIRouter(
-    tags=["apps"], dependencies=[Depends(validate_jwt)], responses={401: {}}
+    tags=["apps"],
+    dependencies=[Depends(validate_jwt)],
+    responses={401: {}},
 )
 
 
