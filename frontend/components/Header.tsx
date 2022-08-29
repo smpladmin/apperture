@@ -6,15 +6,16 @@ import { Input } from '@chakra-ui/react';
 
 const Header = () => {
   return (
-    <div className="h-18 bg-white shadow-xs flex w-full items-center justify-between py-3 px-7">
+    <div className="flex h-18 w-full items-center justify-between bg-white py-3 px-7 shadow-xs">
       <Input
         size={'lg'}
         w={100}
         bg={'white.100'}
         rounded={'6.25rem'}
         fontSize={'md'}
+        borderColor={'white.200'}
         placeholder="Search for events"
-        className="text-black py-4 px-3.5 text-base"
+        className="py-4 px-3.5 text-base text-black"
         _placeholder={{
           fontSize: '1rem',
           lineHeight: '1.375rem',

@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import { ReactNode } from 'react';
-import Layout from '../../components/Layout';
+import Layout from '../../../components/Layout';
 
 const Explore = () => {
   return (
