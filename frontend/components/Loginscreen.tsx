@@ -6,15 +6,23 @@ import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react';
 
 const Loginscreen = () => {
   return (
-    <Box p={8} bg="black.DEFAULT" textColor="white.DEFAULT" height={'100%'}>
+    <Box
+      p={8}
+      pt={{ md: 40 }}
+      bg="black.DEFAULT"
+      textColor="white.DEFAULT"
+      height={'100%'}
+      overflowY={'auto'}
+    >
       <Flex
         direction="column"
         justifyContent="space-between"
         marginX={{ md: 36 }}
         marginLeft={{ lg: 45 }}
         height={'100%'}
+        gap={8}
       >
-        <Box marginTop={{ md: 32 }}>
+        <Box>
           <Box
             position={'relative'}
             mb={3}
@@ -44,7 +52,6 @@ const Loginscreen = () => {
           </Text>
         </Box>
         <Flex
-          mt={{ base: 8, lg: 24 }}
           mb={2}
           direction={'column'}
           alignItems={'center'}
@@ -60,7 +67,6 @@ const Loginscreen = () => {
               textColor={'black.100'}
               w={'100%'}
               gap={6}
-              display={'flex'}
             >
               <Image src={glogo} alt="Google logo" />
               <Text>Sign up with Google</Text>

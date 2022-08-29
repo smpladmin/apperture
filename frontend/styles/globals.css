@@ -27,14 +27,13 @@ a {
   margin: 0;
 }
 
-@media only screen and (max-width: 768px) {
-  html,
-  body {
-    height: 100vh;
-  }
-  body > div:first-child,
-  div#__next,
-  div#__next > div {
-    height: 100%;
-  }
+/* Nextjs full screen page */
+html,
+body {
+  height: 100vh;
+}
+body > div:first-child,
+div#__next,
+div#__next > div {
+  height: 100%;
 }
