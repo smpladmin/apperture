@@ -11,6 +11,7 @@ const colors = {
   grey: {
     DEFAULT: '#d9d9da',
     100: '#b2b2b5',
+    200: '#ededed',
   },
   yellow: '#fac213',
   green: '#57aa64',

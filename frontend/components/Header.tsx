@@ -11,7 +11,7 @@ const Header = () => {
         size={'lg'}
         fontSize={'md'}
         placeholder="Search for events"
-        className="w-100 rounded-full bg-white-100 py-4 px-3.5 text-base text-black"
+        className="border-grey-200 w-100 rounded-full bg-white-100 py-4 px-3.5 text-base text-black"
         _placeholder={{
           fontSize: '1rem',
           lineHeight: '1.375rem',
