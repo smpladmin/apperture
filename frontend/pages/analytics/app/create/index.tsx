@@ -27,7 +27,7 @@ const Create = () => {
           <p className="text-grey-200 pb-6 text-xs-14 font-medium">
             Step 1 of 3
           </p>
-          <h2 className="pb-10 text-[3.5rem] font-semibold leading-[4.125rem]">
+          <h2 className="text-[1.74rem] pb-8 font-semibold leading-[2.125rem] lg:pb-10 lg:text-[3.5rem] lg:leading-[4.125rem]">
             What would you like to name this application?
           </h2>
           <Input
@@ -39,7 +39,7 @@ const Create = () => {
             ]}
             bg={'white.200'}
             rounded={'0.25rem'}
-            fontSize={'md'}
+            fontSize={['xs,md']}
             placeholder="Ex- Food Web App"
             className="py-4 px-3.5 text-base text-black"
             _placeholder={{
