@@ -2,14 +2,19 @@ import { useState } from 'react';
 import 'remixicon/fonts/remixicon.css';
 import { Input } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
+import { addApp } from '../../../../lib/services/appService';
 
 const Create = () => {
   const [appName, setAppName] = useState<string>('');
   const router = useRouter();
 
-  const handleNextClick = (): void => {
-    // api call
-    router.push('/analytics/app/integrate');
+  const handleNextClick = async () => {
+    try {
+      await addApp(appName);
+      router.push('/analytics/app/integrate');
+    } catch (err) {
+      console.log(err);
+    }
   };
   const handleGoBack = (): void => router.back();
 
@@ -27,7 +32,7 @@ const Create = () => {
           <p className="text-grey-200 pb-6 text-xs-14 font-medium">
             Step 1 of 3
           </p>
-          <h2 className="text-[1.74rem] pb-8 font-semibold leading-[2.125rem] lg:pb-10 lg:text-[3.5rem] lg:leading-[4.125rem]">
+          <h2 className="pb-8 text-[1.74rem] font-semibold leading-[2.125rem] lg:pb-10 lg:text-[3.5rem] lg:leading-[4.125rem]">
             What would you like to name this application?
           </h2>
           <Input
@@ -35,7 +40,7 @@ const Create = () => {
             width={[
               '100%', // base
               '100%', // 480px upwards
-              '500px', // 768px upwards
+              '31.25rem', // 768px upwards
             ]}
             bg={'white.200'}
             rounded={'0.25rem'}
@@ -53,9 +58,8 @@ const Create = () => {
           />
         </div>
       </div>
-      {/* to decide whther to wrap in form or wrap inside div to make key board accessible*/}
       <button
-        className="mt-10 flex items-center justify-center rounded-lg bg-black-100 p-4 text-base font-semibold text-white-100 disabled:pointer-events-none disabled:bg-grey sm:w-full lg:w-72 lg:w-auto"
+        className="lg-72 mt-10 flex items-center justify-center rounded-lg bg-black-100 p-4 text-base font-semibold text-white-100 disabled:pointer-events-none disabled:bg-grey sm:w-full lg:w-72"
         disabled={!appName}
         onClick={handleNextClick}
       >

@@ -38,7 +38,7 @@ async def _redirect_with_auth_cookie(redirect_url: str, user_id: str):
         value=jwt,
         domain=os.getenv("COOKIE_DOMAIN"),
         httponly=True,
-        secure=True,
+        secure=os.getenv("FASTAPI_ENV") != "development",
         expires=int(os.getenv("JWT_EXPIRY_MINUTES")) * 60,
     )
     return response
