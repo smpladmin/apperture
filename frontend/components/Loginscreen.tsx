@@ -19,7 +19,7 @@ const Loginscreen = () => {
         justifyContent="space-between"
         marginX={{ md: 36 }}
         marginLeft={{ lg: 45 }}
-        height={'100%'}
+        height={'full'}
         gap={8}
       >
         <Box>
@@ -65,7 +65,7 @@ const Loginscreen = () => {
               lineHeight={{ base: 'base', md: 'sh-20' }}
               fontWeight={'semibold'}
               textColor={'black.100'}
-              w={'100%'}
+              w={'full'}
               gap={6}
             >
               <Image src={glogo} alt="Google logo" />
