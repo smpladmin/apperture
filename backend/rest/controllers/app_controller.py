@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends
 
 from domain.apps.service import AppService
@@ -19,5 +20,12 @@ async def create_app(
     user: User = Depends(get_user),
     app_service: AppService = Depends(),
 ):
-    app = await app_service.create_app(app_dto.name, user)
-    return app
+    return await app_service.create_app(app_dto.name, user)
+
+
+@router.get("/apps", response_model=List[AppResponse])
+async def get_apps(
+    user: User = Depends(get_user),
+    app_service: AppService = Depends(),
+):
+    return await app_service.get_apps(user)
