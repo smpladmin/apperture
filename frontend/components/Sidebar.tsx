@@ -18,7 +18,8 @@ const Sidebar = () => {
   return (
     <Flex
       zIndex={1}
-      position={{ base: 'absolute', md: 'relative' }}
+      // hidden for now, Need to implement using drawer component
+      display={{ base: 'none', md: 'flex' }}
       height={'full'}
       width={{ base: '18.25rem', md: 'full' }}
       maxWidth={{ base: '18.25rem', md: '4rem' }}
@@ -102,7 +103,7 @@ const Sidebar = () => {
               lineHeight={'xs-14'}
             ></Avatar>
           </Flex>
-          <Box display={{ base: 'block', md: 'none' }}>
+          <Box display={{ base: 'block', md: 'none' }} width={'full'}>
             <Flex
               width={'full'}
               gap={2}
@@ -148,7 +149,7 @@ const Sidebar = () => {
       >
         EXPLORE
       </Text>
-      <Box display={{ base: 'block', md: 'none' }}>
+      <Box display={{ base: 'block', md: 'none' }} width="full">
         <Box width={'full'}>
           <Flex
             width={'full'}
