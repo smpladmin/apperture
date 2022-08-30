@@ -1,15 +1,16 @@
+import { Flex } from '@chakra-ui/react';
 import { ReactNode } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-row">
+    <Flex flexDir={'row'}>
       <Sidebar />
-      <div className="flex w-full flex-col">
+      <Flex flexDir={'column'} w={'full'}>
         <Header />
         <main>{children}</main>
-      </div>
-    </div>
+      </Flex>
+    </Flex>
   );
 }
