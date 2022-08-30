@@ -19,6 +19,7 @@ const colors = {
 };
 
 const spacing = {
+  11: '2.75rem',
   18: '4.5rem',
   25: '6.25rem',
   30: '7.5rem',
