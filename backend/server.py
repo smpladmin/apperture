@@ -7,7 +7,11 @@ from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from rest.controllers import app_controller, auth_controller
+from rest.controllers import (
+    app_controller,
+    auth_controller,
+    integration_oauth_controller,
+)
 from mongo import Mongo
 from main import process_data_for_all_tenants
 
@@ -39,6 +43,7 @@ app.add_middleware(
 app.add_middleware(SessionMiddleware, secret_key=os.environ.get("SESSION_SECRET"))
 app.include_router(auth_controller.router)
 app.include_router(app_controller.router)
+app.include_router(integration_oauth_controller.router)
 
 
 @app.post("/data/providers")

@@ -5,9 +5,11 @@ from starlette.responses import RedirectResponse
 
 from authorisation.jwt_auth import create_access_token
 from domain.users.service import UserService
-from authorisation.oauth import oauth
+from authorisation import OAuthClientFactory, OAuthProvider
 
 router = APIRouter(tags=["auth"])
+
+oauth = OAuthClientFactory().init_client(OAuthProvider.GOOGLE)
 
 
 @router.get("/login")

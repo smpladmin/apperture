@@ -11,3 +11,6 @@ class AppService:
 
     async def get_apps(self, user: User) -> List[App]:
         return await App.find(App.user_id == str(user.id)).to_list()
+
+    async def get_app(self, id: str) -> App:
+        return await App.get(id)
