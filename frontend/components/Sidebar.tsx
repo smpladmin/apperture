@@ -9,8 +9,6 @@ import {
   Image,
   Text,
   Avatar,
-  Show,
-  Hide,
   Divider,
   AbsoluteCenter,
   Center,
@@ -35,7 +33,7 @@ const Sidebar = () => {
       paddingTop={{ md: 3 }}
       paddingBottom={{ md: 12 }}
     >
-      <Hide above="md">
+      <Box display={{ base: 'block', md: 'none' }}>
         <Image
           src={logoSmall.src}
           alt="appertureLogo"
@@ -44,8 +42,8 @@ const Sidebar = () => {
           paddingX={{ base: '4' }}
           paddingTop={{ base: '4' }}
         />
-      </Hide>
-      <Show above="md">
+      </Box>
+      <Box display={{ base: 'none', md: 'block' }}>
         <Image
           src={logo.src}
           paddingBottom={'10'}
@@ -53,16 +51,16 @@ const Sidebar = () => {
           width={'1.5rem'}
           height={'auto'}
         />
-      </Show>
+      </Box>
 
-      <Hide above="md">
+      <Box display={{ base: 'block', md: 'none' }} width={'full'}>
         <Divider
           orientation="horizontal"
           marginY={'4'}
           borderColor={'white.200'}
           opacity={1}
         />
-      </Hide>
+      </Box>
       <Box
         width={{ base: 'full', md: 'auto' }}
         display={{ base: 'flex', md: 'block' }}
@@ -86,12 +84,9 @@ const Sidebar = () => {
         >
           <Flex
             marginBottom={{ base: 0, md: 10 }}
-            h={8}
-            w={8}
             justifyContent={'center'}
             alignItems={'center'}
             borderRadius={100}
-            bg={'yellow'}
             fontWeight={'bold'}
             fontSize={'xs-14'}
             lineHeight={'xs-14'}
@@ -99,11 +94,15 @@ const Sidebar = () => {
             <Avatar
               name="Zomato Partner App"
               fontWeight={'bold'}
+              size="sm"
               textColor={'white'}
-              size={'sm'}
+              h={{ base: 10, md: 8 }}
+              w={{ base: 10, md: 8 }}
+              fontSize={{ base: 'xs', md: 'xs-14' }}
+              lineHeight={'xs-14'}
             ></Avatar>
           </Flex>
-          <Hide above="md">
+          <Box display={{ base: 'block', md: 'none' }}>
             <Flex
               width={'full'}
               gap={2}
@@ -128,16 +127,16 @@ const Sidebar = () => {
               </Box>
               <i className="ri-arrow-right-s-line"></i>
             </Flex>
-          </Hide>
+          </Box>
         </Flex>
-        <Hide above="md">
+        <Box display={{ base: 'block', md: 'none' }}>
           <Divider
             orientation="horizontal"
             marginY={'4'}
             borderColor={'white.200'}
             opacity={1}
           />
-        </Hide>
+        </Box>
       </Box>
       <Text
         fontSize={{ base: 'xs-12', md: 'xs-10' }}
@@ -149,7 +148,7 @@ const Sidebar = () => {
       >
         EXPLORE
       </Text>
-      <Hide above="md">
+      <Box display={{ base: 'block', md: 'none' }}>
         <Box width={'full'}>
           <Flex
             width={'full'}
@@ -225,8 +224,8 @@ const Sidebar = () => {
             </Box>
           </Flex>
         </Box>
-      </Hide>
-      <Show above="md">
+      </Box>
+      <Box display={{ base: 'none', md: 'block' }}>
         <Box>
           <Flex
             direction={'column'}
@@ -301,10 +300,10 @@ const Sidebar = () => {
             </Box>
           </Flex>
         </Box>
-      </Show>
+      </Box>
       <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/logout`}>
         <Box marginTop={'auto'} width={{ base: 'full', md: 'auto' }}>
-          <Hide above="md">
+          <Box display={{ base: 'block', md: 'none' }}>
             <Flex
               width={'full'}
               justifyContent={'flex-start'}
@@ -321,8 +320,8 @@ const Sidebar = () => {
             >
               <i className="ri-logout-box-r-line"></i> Logout
             </Flex>
-          </Hide>
-          <Show above="md">
+          </Box>
+          <Box display={{ base: 'none', md: 'block' }}>
             <Flex
               justifyContent={'center'}
               alignItems={'center'}
@@ -340,7 +339,7 @@ const Sidebar = () => {
             >
               <i className="ri-logout-box-r-line"></i>
             </Flex>
-          </Show>
+          </Box>
         </Box>
       </Link>
     </Flex>
