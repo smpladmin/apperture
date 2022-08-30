@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import 'remixicon/fonts/remixicon.css';
-import { Input } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  IconButton,
+  Input,
+  Text,
+} from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { addApp } from '../../../../lib/services/appService';
 
@@ -19,22 +27,43 @@ const Create = () => {
   const handleGoBack = (): void => router.back();
 
   return (
-    <div className="flex h-screen flex-col justify-between p-4 lg:h-auto lg:max-w-screen-xl lg:px-48 lg:pt-20">
-      <div>
-        <div
-          tabIndex={0}
-          className="mb-11 flex h-9 w-9 items-center justify-center rounded-full border"
+    <Flex
+      h={{ base: '100%', lg: 'auto' }}
+      flexDir={'column'}
+      p={4}
+      px={{ lg: 48 }}
+      pt={{ lg: 20 }}
+      maxW={{ lg: '1280px' }}
+    >
+      <Box>
+        <IconButton
+          aria-label="close"
+          icon={<i className="ri-close-fill" />}
+          rounded={'full'}
+          bg={'white'}
+          border={'1px'}
+          borderColor={'white.200'}
           onClick={handleGoBack}
-        >
-          <i className="ri-close-fill"></i>
-        </div>
-        <div className="sm:w-full lg:max-w-3xl">
-          <p className="text-grey-200 pb-6 text-xs-14 font-medium">
+        />
+        <Box mt={11} w={{ sm: 'full' }} maxW={{ lg: '44rem' }}>
+          <Text
+            textColor={'grey.200'}
+            pb={6}
+            fontSize={'xs-14'}
+            lineHeight={'xs-14'}
+            fontWeight={'medium'}
+          >
             Step 1 of 3
-          </p>
-          <h2 className="pb-8 text-[1.74rem] font-semibold leading-[2.125rem] lg:pb-10 lg:text-[3.5rem] lg:leading-[4.125rem]">
+          </Text>
+          <Heading
+            as={'h2'}
+            pb={{ base: 8, lg: 10 }}
+            fontSize={{ base: '1.74rem', lg: '3.5rem' }}
+            lineHeight={{ base: '2.125rem', lg: '4.125rem' }}
+            // className="pb-8 text-[1.74rem] font-semibold leading-[2.125rem] lg:pb-10 lg:text-[3.5rem] lg:leading-[4.125rem]"
+          >
             What would you like to name this application?
-          </h2>
+          </Heading>
           <Input
             size={'lg'}
             width={[
@@ -44,9 +73,12 @@ const Create = () => {
             ]}
             bg={'white.200'}
             rounded={'0.25rem'}
-            fontSize={['xs,md']}
+            fontSize={'base'}
+            lineHeight={'base'}
+            textColor={'black.DEFAULT'}
             placeholder="Ex- Food Web App"
-            className="py-4 px-3.5 text-base text-black"
+            py={4}
+            px={3.5}
             _placeholder={{
               fontSize: '1rem',
               lineHeight: '1.375rem',
@@ -56,16 +88,24 @@ const Create = () => {
             value={appName}
             onChange={(e) => setAppName(e.target.value)}
           />
-        </div>
-      </div>
-      <button
-        className="lg-72 mt-10 flex items-center justify-center rounded-lg bg-black-100 p-4 text-base font-semibold text-white-100 disabled:pointer-events-none disabled:bg-grey sm:w-full lg:w-72"
+        </Box>
+      </Box>
+      <Button
+        mt={10}
+        rounded={'lg'}
+        bg={'black.100'}
+        p={6}
+        fontSize={'base'}
+        fontWeight={'semibold'}
+        lineHeight={'base'}
+        textColor={'white.100'}
+        w={{ sm: 'full', lg: '72' }}
         disabled={!appName}
         onClick={handleNextClick}
       >
         Next
-      </button>
-    </div>
+      </Button>
+    </Flex>
   );
 };
 

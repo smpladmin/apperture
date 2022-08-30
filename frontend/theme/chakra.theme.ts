@@ -1,5 +1,5 @@
 import { extendTheme } from '@chakra-ui/react';
-import { colors, spacing } from './index';
+import { colors, fontSizes, spacing, lineHeights } from './index';
 
 // example theme
 export const theme = extendTheme({
@@ -8,5 +8,11 @@ export const theme = extendTheme({
   sizes: { ...spacing },
   fonts: {
     body: 'Work Sans, sans-serif',
+  },
+  fontSizes: {
+    ...fontSizes,
+  },
+  lineHeights: {
+    ...lineHeights,
   },
 });

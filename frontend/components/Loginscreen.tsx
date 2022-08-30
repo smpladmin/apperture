@@ -2,40 +2,98 @@ import Image from 'next/image';
 import logo from '../assets/images/Logo_login.svg';
 import glogo from '../assets/images/Google_login.svg';
 import Link from 'next/link';
+import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react';
 
 const Loginscreen = () => {
   return (
-    <div className="h-screen bg-black p-8 text-white">
-      <div className="flex h-full flex-col justify-between md:mx-36 lg:ml-45">
-        <div className="md:mt-32">
-          <div className={'relative mb-3 h-25 w-25 md:h-30 md:w-30'}>
+    <Box
+      p={8}
+      pt={{ md: 40 }}
+      bg="black.DEFAULT"
+      textColor="white.DEFAULT"
+      height={'100%'}
+      overflowY={'auto'}
+    >
+      <Flex
+        direction="column"
+        justifyContent="space-between"
+        marginX={{ md: 36 }}
+        marginLeft={{ lg: 45 }}
+        height={'full'}
+        gap={8}
+      >
+        <Box>
+          <Box
+            position={'relative'}
+            mb={3}
+            h={{ base: 25, md: 30 }}
+            w={{ base: 25, md: 30 }}
+          >
             <Image src={logo} layout="fill" alt="Apperture logo" />
-          </div>
-          <h1 className="mt-12 text-[34px] font-normal leading-[42px] md:text-[56px] md:leading-[65px]">
+          </Box>
+          <Heading
+            as="h1"
+            mt={12}
+            fontSize={{ base: '34px', md: '56px' }}
+            lineHeight={{ base: '42px', md: '65px' }}
+            fontWeight={'normal'}
+          >
             Product Analytics <br /> for everyone
-          </h1>
-          <p className="mt-4 text-xs font-normal leading-[22px] text-grey underline md:text-lg">
+          </Heading>
+          <Text
+            mt={4}
+            fontSize={{ base: 'xs', md: 'lg' }}
+            lineHeight={'sh-18'}
+            decoration={'underline'}
+            fontWeight={'normal'}
+            textColor={'grey.DEFAULT'}
+          >
             Terms of use
-          </p>
-        </div>
-        <div className="mt-8 lg:mt-24 mb-2 flex flex-col items-center gap-6 md:max-w-[565px]">
+          </Text>
+        </Box>
+        <Flex
+          mb={2}
+          direction={'column'}
+          alignItems={'center'}
+          gap={6}
+          maxW={{ md: 141 }}
+        >
           <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/login`}>
-            <div className="flex w-full cursor-pointer items-center justify-center gap-6 rounded-lg bg-white p-6 text-[20px] font-semibold leading-[22px] text-black-100">
+            <Button
+              p={8}
+              fontSize={{ base: 'base', md: 'sh-20' }}
+              lineHeight={{ base: 'base', md: 'sh-20' }}
+              fontWeight={'semibold'}
+              textColor={'black.100'}
+              w={'full'}
+              gap={6}
+            >
               <Image src={glogo} alt="Google logo" />
-              Sign up with Google
-            </div>
+              <Text>Sign up with Google</Text>
+            </Button>
           </Link>
-          <p className="text-[20px] font-normal leading-[22px] text-grey">
+          <Text
+            fontSize={{ base: 'xs-14', md: 'sh-20' }}
+            lineHeight={{ base: 'xs-14', md: 'sh-20' }}
+            fontWeight={'normal'}
+            textColor={'grey.DEFAULT'}
+          >
             Already a user?{' '}
             <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/login`}>
-              <span className="cursor-pointer font-medium text-white underline">
+              <Text
+                as={'span'}
+                cursor={'pointer'}
+                fontWeight={'medium'}
+                textColor={'white.DEFAULT'}
+                decoration={'underline'}
+              >
                 Log in
-              </span>
+              </Text>
             </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+          </Text>
+        </Flex>
+      </Flex>
+    </Box>
   );
 };
 
