@@ -1,4 +1,4 @@
-from authorisation.oauth import OAuthUser
+from authorisation import OAuthUser
 from .models import User
 
 
