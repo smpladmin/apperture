@@ -1,4 +1,6 @@
-from beanie import Document, Indexed
+from beanie import Indexed
+
+from repositories import Document
 
 
 class App(Document):

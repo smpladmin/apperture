@@ -1,7 +1,9 @@
 from enum import Enum
 from typing import List, Optional
-from beanie import Document, Indexed
+from beanie import Indexed
 from pydantic import BaseModel
+
+from repositories import Document
 
 
 class IntegrationVendor(str, Enum):
