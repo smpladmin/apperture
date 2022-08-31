@@ -3,7 +3,15 @@ import 'remixicon/fonts/remixicon.css';
 import logo from '../assets/images/apperture_white-icon.svg';
 import logoSmall from '../assets/images/apperture_small-icon.svg';
 import Link from 'next/link';
-import { Flex, Box, Image, Text, Avatar, Divider } from '@chakra-ui/react';
+import {
+  Flex,
+  Box,
+  Image,
+  Text,
+  Avatar,
+  Divider,
+  IconButton,
+} from '@chakra-ui/react';
 
 const Sidebar = () => {
   return (
@@ -117,7 +125,19 @@ const Sidebar = () => {
                   ID 098762
                 </Text>
               </Box>
-              <i className="ri-arrow-right-s-line"></i>
+              <IconButton
+                aria-label="close"
+                icon={<i className="ri-arrow-right-s-line" />}
+                bg={'transparent'}
+                minWidth={'auto'}
+                fontWeight={'inherit'}
+                _hover={{
+                  backgroundColor: 'transparent',
+                }}
+                _active={{
+                  backgroundColor: 'transparent',
+                }}
+              />
             </Flex>
           </Box>
         </Flex>
@@ -145,17 +165,34 @@ const Sidebar = () => {
           <Flex
             width={'full'}
             justifyContent={'flex-start'}
+            alignItems={'center'}
             gap={'3'}
             paddingX={'4'}
             paddingY={'5'}
             fontWeight={'400'}
             _hover={{
               backgroundColor: 'white.100',
-              fontWeight: '600',
+              fontWeight: '500',
               cursor: 'pointer',
             }}
+            _active={{
+              backgroundColor: 'transparent',
+            }}
           >
-            <i className="ri-route-fill"></i> Map
+            <IconButton
+              aria-label="close"
+              icon={<i className="ri-route-fill" />}
+              minWidth={'auto'}
+              bg={'transparent'}
+              fontWeight={'inherit'}
+              _hover={{
+                backgroundColor: 'transparent',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+            />
+            Map
           </Flex>
           <Flex
             width={'full'}
@@ -166,12 +203,33 @@ const Sidebar = () => {
             fontWeight={'400'}
             _hover={{
               backgroundColor: 'white.100',
-              fontWeight: '600',
+              fontWeight: '500',
               cursor: 'pointer',
             }}
+            _active={{
+              backgroundColor: 'transparent',
+            }}
           >
-            <Flex width={'full'} justifyContent={'flex-start'} gap={'3'}>
-              <i className="ri-lightbulb-line"></i> Insights
+            <Flex
+              width={'full'}
+              justifyContent={'flex-start'}
+              gap={'3'}
+              alignItems={'center'}
+            >
+              <IconButton
+                aria-label="close"
+                icon={<i className="ri-lightbulb-line" />}
+                minWidth={'auto'}
+                bg={'transparent'}
+                fontWeight={'inherit'}
+                _hover={{
+                  backgroundColor: 'transparent',
+                }}
+                _active={{
+                  backgroundColor: 'transparent',
+                }}
+              />
+              Insights
             </Flex>
             <Box
               flexShrink={0}
@@ -195,12 +253,34 @@ const Sidebar = () => {
             fontWeight={'400'}
             _hover={{
               backgroundColor: 'white.100',
-              fontWeight: '600',
+              fontWeight: '500',
               cursor: 'pointer',
             }}
+            _active={{
+              backgroundColor: 'transparent',
+            }}
           >
-            <Flex width={'full'} justifyContent={'flex-start'} gap={'3'}>
-              <i className="ri-bookmark-line"></i> Saved
+            <Flex
+              width={'full'}
+              justifyContent={'flex-start'}
+              minWidth={'auto'}
+              gap={'3'}
+              alignItems={'center'}
+            >
+              <IconButton
+                aria-label="close"
+                icon={<i className="ri-bookmark-line" />}
+                minWidth={'auto'}
+                bg={'transparent'}
+                fontWeight={'inherit'}
+                _hover={{
+                  backgroundColor: 'transparent',
+                }}
+                _active={{
+                  backgroundColor: 'transparent',
+                }}
+              />
+              Saved
             </Flex>
             <Box
               flexShrink={0}
@@ -225,59 +305,58 @@ const Sidebar = () => {
             gap={5}
             paddingTop={5}
           >
-            <Flex
-              justifyContent={'center'}
-              alignItems={'center'}
-              borderRadius={'lg'}
+            <IconButton
+              aria-label="close"
+              icon={<i className="ri-route-fill" />}
+              rounded={'lg'}
               h={{ base: 'auto', md: 10 }}
               w={{ base: 'auto', md: 10 }}
-              cursor={'pointer'}
+              bg={'black.0'}
+              fontWeight={'500'}
               color={'grey.100'}
-              transition={'all .25s ease'}
-              background={'black.0'}
               _hover={{
                 backgroundColor: 'white.0',
                 color: 'white',
               }}
-            >
-              <Box sx={{ transform: 'rotate(45deg)' }}>
-                <i className="ri-route-fill"></i>
-              </Box>
-            </Flex>
-            <Flex
-              justifyContent={'center'}
-              alignItems={'center'}
-              borderRadius={'lg'}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+            />
+
+            <IconButton
+              aria-label="close"
+              icon={<i className="ri-lightbulb-line" />}
+              rounded={'lg'}
               h={{ base: 'auto', md: 10 }}
               w={{ base: 'auto', md: 10 }}
-              cursor={'pointer'}
+              bg={'black.0'}
+              fontWeight={'500'}
               color={'grey.100'}
-              transition={'all .25s ease'}
-              background={'black.0'}
               _hover={{
                 backgroundColor: 'white.0',
                 color: 'white',
               }}
-            >
-              <i className="ri-lightbulb-line"></i>
-            </Flex>
-            <Flex
-              justifyContent={'center'}
-              alignItems={'center'}
-              borderRadius={'lg'}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+            />
+            <IconButton
+              aria-label="close"
+              icon={<i className="ri-bookmark-line" />}
+              rounded={'lg'}
               h={{ base: 'auto', md: 10 }}
               w={{ base: 'auto', md: 10 }}
-              cursor={'pointer'}
+              bg={'black.0'}
+              fontWeight={'500'}
               color={'grey.100'}
-              transition={'all .25s ease'}
-              background={'black.0'}
               _hover={{
                 backgroundColor: 'white.0',
                 color: 'white',
               }}
-            >
-              <i className="ri-bookmark-line"></i>
-            </Flex>
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+            />
             <Box
               marginTop={-4}
               borderRadius={'sm'}
@@ -299,38 +378,56 @@ const Sidebar = () => {
             <Flex
               width={'full'}
               justifyContent={'flex-start'}
+              alignItems={'center'}
               gap={'3'}
               paddingX={'4'}
               paddingY={'5'}
               fontWeight={'400'}
               backgroundColor={'white'}
+              transition={'all 250ms ease'}
               _hover={{
                 backgroundColor: 'white.100',
-                fontWeight: '600',
+                fontWeight: '500',
                 cursor: 'pointer',
               }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
             >
-              <i className="ri-logout-box-r-line"></i> Logout
+              <IconButton
+                aria-label="close"
+                icon={<i className="ri-logout-box-r-line" />}
+                bg={'transparent'}
+                minWidth={'auto'}
+                fontWeight={'inherit'}
+                _hover={{
+                  backgroundColor: 'transparent',
+                }}
+                _active={{
+                  backgroundColor: 'transparent',
+                }}
+              />
+              Logout
             </Flex>
           </Box>
           <Box display={{ base: 'none', md: 'block' }}>
-            <Flex
-              justifyContent={'center'}
-              alignItems={'center'}
-              borderRadius={'lg'}
+            <IconButton
+              aria-label="close"
+              icon={<i className="ri-logout-box-r-line" />}
+              rounded={'lg'}
               h={{ base: 'auto', md: 10 }}
               w={{ base: 'auto', md: 10 }}
-              cursor={'pointer'}
+              bg={'black.0'}
+              fontWeight={'500'}
               color={'grey.100'}
-              transition={'all .25s ease'}
-              background={'black.0'}
               _hover={{
                 backgroundColor: 'white.0',
                 color: 'white',
               }}
-            >
-              <i className="ri-logout-box-r-line"></i>
-            </Flex>
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+            />
           </Box>
         </Box>
       </Link>

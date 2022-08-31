@@ -9,7 +9,6 @@ const Explore = () => {
         <title>Apperture</title>
         <meta name="description" content="Apperture Analytics" />
       </Head>
-
       <div>
         <h2>Explore</h2>
       </div>
