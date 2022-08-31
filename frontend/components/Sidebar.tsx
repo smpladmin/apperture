@@ -3,16 +3,7 @@ import 'remixicon/fonts/remixicon.css';
 import logo from '../assets/images/apperture_white-icon.svg';
 import logoSmall from '../assets/images/apperture_small-icon.svg';
 import Link from 'next/link';
-import {
-  Flex,
-  Box,
-  Image,
-  Text,
-  Avatar,
-  Divider,
-  AbsoluteCenter,
-  Center,
-} from '@chakra-ui/react';
+import { Flex, Box, Image, Text, Avatar, Divider } from '@chakra-ui/react';
 
 const Sidebar = () => {
   return (
@@ -243,9 +234,9 @@ const Sidebar = () => {
               cursor={'pointer'}
               color={'grey.100'}
               transition={'all .25s ease'}
-              background={'rgba(14,14,26,0)'}
+              background={'black.0'}
               _hover={{
-                backgroundColor: 'rgba(255,255,255,0.08)',
+                backgroundColor: 'white.0',
                 color: 'white',
               }}
             >
@@ -257,14 +248,14 @@ const Sidebar = () => {
               justifyContent={'center'}
               alignItems={'center'}
               borderRadius={'lg'}
-              h={10}
-              w={10}
+              h={{ base: 'auto', md: 10 }}
+              w={{ base: 'auto', md: 10 }}
               cursor={'pointer'}
               color={'grey.100'}
               transition={'all .25s ease'}
-              background={'rgba(14,14,26,0)'}
+              background={'black.0'}
               _hover={{
-                backgroundColor: 'rgba(255,255,255,0.08)',
+                backgroundColor: 'white.0',
                 color: 'white',
               }}
             >
@@ -274,14 +265,14 @@ const Sidebar = () => {
               justifyContent={'center'}
               alignItems={'center'}
               borderRadius={'lg'}
-              h={10}
-              w={10}
+              h={{ base: 'auto', md: 10 }}
+              w={{ base: 'auto', md: 10 }}
               cursor={'pointer'}
               color={'grey.100'}
               transition={'all .25s ease'}
-              background={'rgba(14,14,26,0)'}
+              background={'black.0'}
               _hover={{
-                backgroundColor: 'rgba(255,255,255,0.08)',
+                backgroundColor: 'white.0',
                 color: 'white',
               }}
             >
@@ -327,14 +318,14 @@ const Sidebar = () => {
               justifyContent={'center'}
               alignItems={'center'}
               borderRadius={'lg'}
-              h={10}
-              w={10}
+              h={{ base: 'auto', md: 10 }}
+              w={{ base: 'auto', md: 10 }}
               cursor={'pointer'}
               color={'grey.100'}
               transition={'all .25s ease'}
-              background={'rgba(14,14,26,0)'}
+              background={'black.0'}
               _hover={{
-                backgroundColor: 'rgba(255,255,255,0.08)',
+                backgroundColor: 'white.0',
                 color: 'white',
               }}
             >
