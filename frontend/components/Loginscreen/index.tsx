@@ -1,6 +1,6 @@
 import Image from 'next/image';
-import logo from '../assets/images/Logo_login.svg';
-import glogo from '../assets/images/Google_login.svg';
+import logo from '@assets/images/Logo_login.svg';
+import glogo from '@assets/images/Google_login.svg';
 import Link from 'next/link';
 import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react';
 
