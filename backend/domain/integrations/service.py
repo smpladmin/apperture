@@ -1,7 +1,7 @@
 from authorisation.models import IntegrationOAuth
 from domain.apps.models import App
 from domain.users.models import User
-from .models import Credential, CredentialType, Integration, IntegrationVendor
+from .models import Credential, CredentialType, Integration, IntegrationProvider
 
 
 class IntegrationService:
@@ -9,7 +9,7 @@ class IntegrationService:
         self,
         user: User,
         app: App,
-        vendor: IntegrationVendor,
+        provider: IntegrationProvider,
         integration_oauth: IntegrationOAuth,
     ):
         credential = Credential(
@@ -18,10 +18,9 @@ class IntegrationService:
             refresh_token=integration_oauth.refresh_token,
         )
         integration = Integration(
-            user_id=str(user.id),
-            app_id=str(app.id),
-            vendor=vendor,
-            vendor_apps=[],
+            user_id=user.id,
+            app_id=app.id,
+            provider=provider,
             credential=credential,
         )
         await integration.insert()
