@@ -1,4 +1,4 @@
-from fetch.google_analytics_fetcher import GoogleAnalyticsFetcher
+from data_processor.fetch.google_analytics_fetcher import GoogleAnalyticsFetcher
 from unittest.mock import MagicMock
 
 

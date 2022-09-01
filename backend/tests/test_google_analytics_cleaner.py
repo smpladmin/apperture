@@ -1,6 +1,7 @@
 import pandas as pd
+import pytest
 
-from clean.google_analytics_cleaner import GoogleAnalyticsCleaner
+from data_processor.clean.google_analytics_cleaner import GoogleAnalyticsCleaner
 
 
 class TestGoogleAnalyticsCleaner:

@@ -1,11 +1,7 @@
 [tool.poetry]
 name = "backend"
 version = "0.1.0"
-description = """
-This service fetches data from an Analytics Service like Google Analytics,
-cleans it and transforms it to a format for visualisation.
-Also provides REST endpoints for the frontend.
-"""
+description = "Apperture Analytics"
 authors = ["Roopak Nijhara <roopak@parallelhq.com>"]
 
 [tool.poetry.dependencies]
