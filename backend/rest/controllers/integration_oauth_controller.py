@@ -7,7 +7,7 @@ from starlette.responses import RedirectResponse
 from authorisation import OAuthClientFactory, OAuthProvider
 from authorisation.models import IntegrationOAuth, OAuthUser
 from domain.apps.service import AppService
-from domain.integrations.models import IntegrationVendor
+from domain.integrations.models import IntegrationProvider
 from domain.integrations.service import IntegrationService
 from domain.users.models import User
 from domain.users.service import UserService
@@ -58,10 +58,12 @@ async def integration_google_authorise(
     )
     apperture_user = await user_service.get_user(oauth_state.user_id)
     app = await app_service.get_app(oauth_state.app_id)
-    await integration_service.create_oauth_integration(
-        apperture_user, app, IntegrationVendor.GOOGLE, integration_oauth
+    integration = await integration_service.create_oauth_integration(
+        apperture_user, app, IntegrationProvider.GOOGLE, integration_oauth
     )
-    return RedirectResponse(oauth_state.redirect_url)
+    return RedirectResponse(
+        f"{oauth_state.redirect_url}?integration_id={integration.id}"
+    )
 
 
 async def _authorise(request: Request):

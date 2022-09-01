@@ -1,6 +1,7 @@
-from domain.integrations.models import Integration
+from typing import Optional
+from domain.integrations.models import Credential, Integration
 from .model_response import ModelResponse
 
 
 class IntegrationResponse(Integration, ModelResponse):
-    pass
+    credential: Optional[Credential]
