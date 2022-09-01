@@ -2,16 +2,19 @@ const colors = {
   black: {
     DEFAULT: '#07070d',
     100: '#0e0e1a',
+    0: 'rgba(14,14,26,0)',
   },
   white: {
     DEFAULT: '#ffffff',
     100: '#f6f6f6',
     200: '#ededed',
+    0:'rgba(255,255,255,0.08)',
   },
   grey: {
     DEFAULT: '#d9d9da',
     100: '#b2b2b5',
     200: '#78787E',
+    dark: '0E0E19',
   },
   yellow: '#fac213',
   green: '#57aa64',

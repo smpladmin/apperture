@@ -1,7 +1,7 @@
-import { http } from '../http';
+import { AppertureAPI } from '../apiClient';
 
 export const addApp = async (name: string): Promise<void> => {
-  await http.post('/apps', {
+  await AppertureAPI.post('/apps', {
     name,
   });
 };

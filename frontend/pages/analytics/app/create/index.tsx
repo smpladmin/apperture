@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import 'remixicon/fonts/remixicon.css';
 import {
   Box,
@@ -10,16 +10,22 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { addApp } from '../../../../lib/services/appService';
+import { addApp } from '@lib/services/appService';
 
 const Create = () => {
   const [appName, setAppName] = useState<string>('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const router = useRouter();
+
+  useEffect(() => {
+    inputRef?.current?.focus();
+  }, []);
 
   const handleNextClick = async () => {
     try {
       await addApp(appName);
-      router.push('/analytics/app/integrate');
+      router.push(`/analytics/app/integrate`);
     } catch (err) {
       console.log(err);
     }
@@ -60,7 +66,6 @@ const Create = () => {
             pb={{ base: 8, lg: 10 }}
             fontSize={{ base: '1.74rem', lg: '3.5rem' }}
             lineHeight={{ base: '2.125rem', lg: '4.125rem' }}
-            // className="pb-8 text-[1.74rem] font-semibold leading-[2.125rem] lg:pb-10 lg:text-[3.5rem] lg:leading-[4.125rem]"
           >
             What would you like to name this application?
           </Heading>
@@ -85,6 +90,7 @@ const Create = () => {
               fontWeight: 400,
               color: 'grey.100',
             }}
+            ref={inputRef}
             value={appName}
             onChange={(e) => setAppName(e.target.value)}
           />
