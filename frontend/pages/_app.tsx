@@ -9,7 +9,7 @@ function MyApp({ Component, pageProps }: AppLayoutProps) {
 
   return (
     <ChakraProvider theme={theme}>
-      {getLayout(<Component {...pageProps} />)}
+      {getLayout(<Component {...pageProps} />, pageProps?.isMobile)}
     </ChakraProvider>
   );
 }

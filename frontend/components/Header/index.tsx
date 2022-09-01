@@ -1,10 +1,23 @@
 import 'remixicon/fonts/remixicon.css';
 import Image from 'next/image';
-import filterIcon from '../assets/icons/filter-icon.svg';
-import mixPanel from '../assets/images/mixPanel-icon.png';
-import { Box, Flex, Input } from '@chakra-ui/react';
+import filterIcon from '@assets/icons/filter-icon.svg';
+import mixPanel from '@assets/images/mixPanel-icon.png';
+import {
+  Box,
+  Flex,
+  IconButton,
+  Input,
+  useDisclosure,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerOverlay,
+} from '@chakra-ui/react';
+import Sidemenu from '../Sidebar/Sidemenu';
 
-const Header = () => {
+const Header = ({ isMobile }: { isMobile: boolean }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
     <Flex
       h={18}
@@ -16,6 +29,23 @@ const Header = () => {
       px={7}
       shadow={'xs'}
     >
+      <IconButton
+        hidden={!isMobile}
+        aria-label="menu"
+        icon={<i className="ri-menu-line"></i>}
+        minWidth={'auto'}
+        bg={'transparent'}
+        onClick={onOpen}
+      />
+      <Drawer placement="left" isOpen={isOpen} onClose={onClose}>
+        <DrawerOverlay />
+        <DrawerContent px={0}>
+          <DrawerBody>
+            <Sidemenu />
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+
       <Input
         size={'lg'}
         w={100}
