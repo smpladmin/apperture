@@ -14,6 +14,7 @@ import {
   RadioGroup,
   Stack,
   Text,
+  Divider
 } from '@chakra-ui/react';
 import React from 'react';
 
@@ -25,15 +26,18 @@ const AppsModal = ({
   onClose: () => void;
 }) => {
   const [value, setValue] = React.useState('1');
+  const [size, setSize] = React.useState('2xl');
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       isCentered
       blockScrollOnMount={true}
+      size={'2xl'}
     >
       <ModalOverlay />
-      <ModalContent padding={{ base: '4', md: '9' }}>
+      <ModalContent padding={{ base: '4', md: '9' }} margin={'1rem'}>
         <ModalHeader
           display={'flex'}
           justifyContent={'space-between'}
@@ -43,8 +47,14 @@ const AppsModal = ({
           My Applications
           <ModalCloseButton position={'relative'} top={'0'} right={'0'} />
         </ModalHeader>
+        <Divider
+          orientation="horizontal"
+          marginY={'4'}
+          borderColor={'white.200'}
+          opacity={1}
+        />
 
-        <ModalBody pt={9}>
+        <ModalBody p={0}>
           <Box pt={4}>
             <RadioGroup onChange={setValue} value={value}>
               <Stack direction="column">
@@ -85,7 +95,7 @@ const AppsModal = ({
                       </Text>
                     </Flex>
                   </Flex>
-                  <Radio value="1" />
+                  <Radio colorScheme="black.DEFAULT" value="1" />
                 </Flex>
               </Stack>
             </RadioGroup>

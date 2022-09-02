@@ -15,13 +15,4 @@ export const theme = extendTheme({
   lineHeights: {
     ...lineHeights,
   },
-
-  Modal:{
-    baseStyle: {
-           dialog: {
-               maxHeight: "calc(100vh - 50px)",
-               overflowY: "auto",
-           }
-       }
-   },
 });
