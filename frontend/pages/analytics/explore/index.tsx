@@ -13,6 +13,14 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     };
   }
   const apps = await _getApps(token);
+  if (!apps.length) {
+    return {
+      redirect: {
+        destination: '/analytics/app/create',
+      },
+      props: {},
+    };
+  }
   return {
     props: { apps },
   };
