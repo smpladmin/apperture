@@ -1,3 +1,4 @@
+from beanie import PydanticObjectId
 from authorisation.models import IntegrationOAuth
 from domain.apps.models import App
 from domain.users.models import User
@@ -25,3 +26,9 @@ class IntegrationService:
         )
         await integration.insert()
         return integration
+
+    async def get_integration(self, id: str, user_id: str) -> Integration:
+        return await Integration.find_one(
+            Integration.id == PydanticObjectId(id),
+            Integration.user_id == PydanticObjectId(user_id),
+        )

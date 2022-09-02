@@ -10,6 +10,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from rest.controllers import (
     app_controller,
     auth_controller,
+    integration_controller,
     integration_oauth_controller,
 )
 from mongo import Mongo
@@ -44,6 +45,7 @@ app.add_middleware(SessionMiddleware, secret_key=os.environ.get("SESSION_SECRET"
 app.include_router(auth_controller.router)
 app.include_router(app_controller.router)
 app.include_router(integration_oauth_controller.router)
+app.include_router(integration_controller.router)
 
 
 @app.post("/data/providers")

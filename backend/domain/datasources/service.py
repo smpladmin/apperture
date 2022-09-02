@@ -1,0 +1,83 @@
+import asyncio
+from beanie import PydanticObjectId
+from fastapi import Depends
+import httpx
+from authorisation.service import AuthService
+from domain.common.models import IntegrationProvider
+from domain.datasources.models import DataSource, DataSourceVersion, ProviderDataSource
+from domain.integrations.models import Credential
+
+
+class DataSourceService:
+    def __init__(self, auth_service: AuthService = Depends()):
+        self.provider_datasource_methods = {}
+        self.provider_datasource_methods[
+            IntegrationProvider.GOOGLE
+        ] = self.get_ga_datasources
+        self.auth_service = auth_service
+
+    async def get_provider_datasources(
+        self, provider: IntegrationProvider, credential: Credential
+    ):
+        if provider not in self.provider_datasource_methods:
+            raise NotImplementedError(
+                f"Datasources fetch is not implemented for {provider}"
+            )
+        return await self.provider_datasource_methods[provider](credential)
+
+    async def get_datasources(self, integration_id: str):
+        return await DataSource.find(
+            DataSource.integration_id == PydanticObjectId(integration_id)
+        ).to_list()
+
+    async def get_ga_datasources(self, credential: Credential):
+        access_token = await self.auth_service.get_access_token(
+            credential.refresh_token,
+            IntegrationProvider.GOOGLE,
+        )
+        [v4_sources, v3_sources] = await self._fetch_ga_properties(access_token)
+        return self._build_ga_provider_datasources(v4_sources, v3_sources)
+
+    async def _fetch_ga_properties(self, access_token: str):
+        async with httpx.AsyncClient() as client:
+            v4_sources_p = client.get(
+                "https://analyticsadmin.googleapis.com/v1alpha/accountSummaries",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+            v3_sources_p = client.get(
+                "https://analytics.googleapis.com/analytics/v3/management/accountSummaries",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+
+            [v4_sources_res, v3_sources_res] = await asyncio.gather(
+                v4_sources_p,
+                v3_sources_p,
+            )
+            v4_sources = v4_sources_res.json()
+            v3_sources = v3_sources_res.json()
+            return [v4_sources, v3_sources]
+
+    def _build_ga_provider_datasources(self, v4_sources, v3_sources):
+        datasources = []
+        for account in v4_sources.get("accountSummaries", []):
+            for property in account.get("propertySummaries", []):
+                datasources.append(
+                    ProviderDataSource(
+                        id=property["property"].split("/")[1],
+                        name=property["displayName"],
+                        version=DataSourceVersion.V4,
+                        provider=IntegrationProvider.GOOGLE,
+                    )
+                )
+        for item in v3_sources.get("items", []):
+            for property in item.get("webProperties", []):
+                for profile in property.get("profiles", []):
+                    datasources.append(
+                        ProviderDataSource(
+                            id=profile["id"],
+                            name=f"{property['name']} - {profile['name']}",
+                            version=DataSourceVersion.V3,
+                            provider=IntegrationProvider.GOOGLE,
+                        )
+                    )
+        return datasources
