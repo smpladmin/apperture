@@ -5,7 +5,7 @@ import httpx
 from authorisation.service import AuthService
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion, ProviderDataSource
-from domain.integrations.models import Credential
+from domain.integrations.models import Credential, Integration
 
 
 class DataSourceService:
@@ -30,12 +30,31 @@ class DataSourceService:
             DataSource.integration_id == PydanticObjectId(integration_id)
         ).to_list()
 
+    async def create_datasource(
+        self,
+        external_source_id: str,
+        name: str,
+        version: DataSourceVersion,
+        integration: Integration,
+    ):
+        datasource = DataSource(
+            external_source_id=external_source_id,
+            name=name,
+            version=version,
+            integration_id=integration.id,
+            user_id=integration.user_id,
+            app_id=integration.app_id,
+            provider=integration.provider,
+        )
+        await datasource.insert()
+        return datasource
+
     async def get_ga_datasources(self, credential: Credential):
         access_token = await self.auth_service.get_access_token(
             credential.refresh_token,
             IntegrationProvider.GOOGLE,
         )
-        [v4_sources, v3_sources] = await self._fetch_ga_properties(access_token)
+        v4_sources, v3_sources = await self._fetch_ga_properties(access_token)
         return self._build_ga_provider_datasources(v4_sources, v3_sources)
 
     async def _fetch_ga_properties(self, access_token: str):
@@ -49,7 +68,7 @@ class DataSourceService:
                 headers={"Authorization": f"Bearer {access_token}"},
             )
 
-            [v4_sources_res, v3_sources_res] = await asyncio.gather(
+            v4_sources_res, v3_sources_res = await asyncio.gather(
                 v4_sources_p,
                 v3_sources_p,
             )
