@@ -11,7 +11,7 @@ declare module 'next' {
     any,
     P
   > & {
-    getLayout?: (page: ReactNode, isMobile: boolean) => ReactNode;
+    getLayout?: (page: ReactNode) => ReactNode;
   };
 }
 

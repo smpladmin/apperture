@@ -1,17 +1,6 @@
 import Head from 'next/head';
 import { ReactNode } from 'react';
 import Layout from '@components/Layout';
-import mobile from 'is-mobile';
-import { GetServerSideProps } from 'next';
-
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const isMobile = mobile({ ua: req });
-  return {
-    props: {
-      isMobile,
-    },
-  };
-};
 
 const Explore = () => {
   return (
@@ -27,8 +16,8 @@ const Explore = () => {
   );
 };
 
-Explore.getLayout = function getLayout(page: ReactNode, isMobile: boolean) {
-  return <Layout isMobile={isMobile}>{page}</Layout>;
+Explore.getLayout = function getLayout(page: ReactNode) {
+  return <Layout>{page}</Layout>;
 };
 
 export default Explore;

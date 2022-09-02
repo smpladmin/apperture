@@ -3,12 +3,12 @@ import { ReactNode } from 'react';
 import Header from '../Header';
 import Sidebar from '../Sidebar';
 
-export default function Layout({ children, isMobile = false }: LayoutProps) {
+export default function Layout({ children }: LayoutProps) {
   return (
     <Flex flexDir={'row'}>
-      <Sidebar isMobile={isMobile} />
+      <Sidebar />
       <Flex flexDir={'column'} w={'full'}>
-        <Header isMobile={isMobile} />
+        <Header />
         <main>{children}</main>
       </Flex>
     </Flex>
@@ -17,5 +17,4 @@ export default function Layout({ children, isMobile = false }: LayoutProps) {
 
 type LayoutProps = {
   children: ReactNode;
-  isMobile: boolean;
 };

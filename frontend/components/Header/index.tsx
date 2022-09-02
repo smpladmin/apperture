@@ -14,9 +14,12 @@ import {
   DrawerOverlay,
 } from '@chakra-ui/react';
 import Sidemenu from '../Sidebar/Sidemenu';
+import { useContext } from 'react';
+import { AppertureContext } from '@lib/contexts/appertureContext';
 
-const Header = ({ isMobile }: { isMobile: boolean }) => {
+const Header = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const context = useContext(AppertureContext);
 
   return (
     <Flex
@@ -30,7 +33,7 @@ const Header = ({ isMobile }: { isMobile: boolean }) => {
       shadow={'xs'}
     >
       <IconButton
-        hidden={!isMobile}
+        hidden={!context.device.isMobile}
         aria-label="menu"
         icon={<i className="ri-menu-line"></i>}
         minWidth={'auto'}
