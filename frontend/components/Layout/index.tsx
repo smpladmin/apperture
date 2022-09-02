@@ -25,7 +25,7 @@ export default function Layout({ children, apps = [] }: LayoutProps) {
       />
       <Sidebar selectedApp={selectedApp} openAppsModal={onOpen} />
       <Flex flexDir={'column'} w={'full'}>
-        <Header apps={apps} />
+        <Header selectedApp={selectedApp} openAppsModal={onOpen} />
         <main>{children}</main>
       </Flex>
     </Flex>

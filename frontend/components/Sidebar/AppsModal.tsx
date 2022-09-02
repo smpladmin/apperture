@@ -36,7 +36,7 @@ const AppsModal = ({
       isOpen={isOpen}
       onClose={onClose}
       isCentered
-      blockScrollOnMount={true}
+      blockScrollOnMount={false}
       size={'2xl'}
     >
       <ModalOverlay />

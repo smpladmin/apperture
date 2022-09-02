@@ -1,8 +1,7 @@
 import 'remixicon/fonts/remixicon.css';
-import logo from '@assets/images/apperture_white-icon.svg';
 import logoSmall from '@assets/images/apperture_small-icon.svg';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Flex,
   Box,
@@ -11,62 +10,47 @@ import {
   Avatar,
   Divider,
   IconButton,
-  useDisclosure,
 } from '@chakra-ui/react';
-import AppsModal from './AppsModal';
 import { App } from '@lib/domain/app';
 
 type SidemenuProps = {
-  closeDrawer?: () => void;
-  apps: App[];
+  closeDrawer: Function;
+  openAppsModal: Function;
+  selectedApp: App;
 };
 
-const Sidemenu = ({ closeDrawer, apps }: SidemenuProps) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedApp, setSelectedApp] = useState<App>(apps[0]);
-
-  const handleModalOpen = () => {
-    closeDrawer?.();
-    onOpen();
-  };
-
+const MobileSidemenu = ({
+  closeDrawer,
+  openAppsModal,
+  selectedApp,
+}: SidemenuProps) => {
   return (
     <Flex
       height={'full'}
       width={'full'}
-      maxWidth={{ base: 'full', md: '4rem' }}
+      maxWidth={'full'}
       direction={'column'}
-      alignItems={{ base: 'flex-start', md: 'center' }}
+      alignItems={'flex-start'}
       flexShrink={'0'}
       flexGrow={'0'}
-      backgroundColor={{ base: 'white', md: 'black.100' }}
+      backgroundColor={'white'}
       textAlign={'center'}
-      textColor={{ base: 'black', md: 'white' }}
+      textColor={'black'}
       fontSize={'base'}
       paddingTop={{ md: 3 }}
       paddingBottom={{ md: 12 }}
     >
-      <Box display={{ base: 'block', md: 'none' }}>
+      <Box>
         <Image
           src={logoSmall.src}
           alt="appertureLogo"
           width={'7.125rem'}
           height={'auto'}
-          paddingX={{ base: '4' }}
-          paddingTop={{ base: '4' }}
+          paddingX={4}
+          paddingTop={4}
         />
       </Box>
-      <Box display={{ base: 'none', md: 'block' }}>
-        <Image
-          src={logo.src}
-          paddingBottom={'10'}
-          alt="appertureLogo"
-          width={'1.5rem'}
-          height={'auto'}
-        />
-      </Box>
-
-      <Box display={{ base: 'block', md: 'none' }} width={'full'}>
+      <Box width={'full'}>
         <Divider
           orientation="horizontal"
           marginY={'4'}
@@ -74,54 +58,48 @@ const Sidemenu = ({ closeDrawer, apps }: SidemenuProps) => {
           opacity={1}
         />
       </Box>
-      <Box
-        width={{ base: 'full', md: 'auto' }}
-        display={{ base: 'flex', md: 'block' }}
-        flexDirection={'column'}
-        alignItems={'flex-start'}
-      >
+      <Flex width={'full'} flexDirection={'column'} alignItems={'flex-start'}>
         <Text
-          fontSize={{ base: 'xs-12', md: 'xs-10' }}
-          lineHeight={{ base: 'xs-12', md: 'xs-10' }}
-          textColor={{ base: '#B2B2B5', md: 'white' }}
-          opacity={{ base: '1', md: '0.3' }}
-          paddingX={{ base: '4', md: '0' }}
+          fontSize={'xs-12'}
+          lineHeight={'xs-12'}
+          textColor={'grey.100'}
+          opacity={1}
+          paddingX={4}
         >
           APP
         </Text>
         <Flex
           width={'full'}
-          paddingX={{ base: '4', md: 'auto' }}
+          paddingX={4}
           marginTop={4}
           gap={2}
+          onClick={() => {
+            closeDrawer();
+            openAppsModal();
+          }}
         >
           <Flex
-            marginBottom={{ base: 0, md: 10 }}
+            marginBottom={0}
             justifyContent={'center'}
             alignItems={'center'}
             borderRadius={100}
             fontWeight={'bold'}
             fontSize={'xs-14'}
             lineHeight={'xs-14'}
-            onClick={onOpen}
           >
             <Avatar
               name={selectedApp.name}
               fontWeight={'bold'}
               size="sm"
               textColor={'white'}
-              h={{ base: 10, md: 8 }}
-              w={{ base: 10, md: 8 }}
-              fontSize={{ base: 'xs', md: 'xs-14' }}
+              h={10}
+              w={10}
+              fontSize={'xs'}
               lineHeight={'xs-14'}
               cursor={'pointer'}
             />
           </Flex>
-          <Box
-            display={{ base: 'block', md: 'none' }}
-            width={'full'}
-            onClick={handleModalOpen}
-          >
+          <Box width={'full'}>
             <Flex
               width={'full'}
               gap={2}
@@ -160,14 +138,7 @@ const Sidemenu = ({ closeDrawer, apps }: SidemenuProps) => {
             </Flex>
           </Box>
         </Flex>
-        <AppsModal
-          isOpen={isOpen}
-          onClose={onClose}
-          apps={apps}
-          selectApp={setSelectedApp}
-          selectedApp={selectedApp}
-        />
-        <Box display={{ base: 'block', md: 'none' }} width={'full'}>
+        <Box width={'full'}>
           <Divider
             orientation={'horizontal'}
             marginY={'4'}
@@ -175,19 +146,19 @@ const Sidemenu = ({ closeDrawer, apps }: SidemenuProps) => {
             opacity={1}
           />
         </Box>
-      </Box>
+      </Flex>
 
       <Text
-        fontSize={{ base: 'xs-12', md: 'xs-10' }}
-        lineHeight={{ base: 'xs-12', md: 'xs-10' }}
-        textColor={{ base: '#B2B2B5', md: 'white' }}
-        opacity={{ base: '1', md: '0.3' }}
-        paddingX={{ base: '4', md: 'auto' }}
-        paddingBottom={{ base: '4', md: 'auto' }}
+        fontSize={'xs-12'}
+        lineHeight={'xs-12'}
+        textColor={'grey.100'}
+        opacity={1}
+        paddingX={4}
+        paddingBottom={4}
       >
         EXPLORE
       </Text>
-      <Box display={{ base: 'block', md: 'none' }} width="full">
+      <Box width="full">
         <Box width={'full'}>
           <Flex
             width={'full'}
@@ -262,8 +233,8 @@ const Sidemenu = ({ closeDrawer, apps }: SidemenuProps) => {
               flexShrink={0}
               borderRadius={'sm'}
               backgroundColor={'green'}
-              fontSize={{ base: 'xs-10', md: 'xs-8' }}
-              lineHeight={{ base: 'xs-10', md: 'xs-8' }}
+              fontSize={'xs-10'}
+              lineHeight={'xs-10'}
               fontWeight={'medium'}
               padding={1}
               textColor={'white'}
@@ -313,83 +284,8 @@ const Sidemenu = ({ closeDrawer, apps }: SidemenuProps) => {
               flexShrink={0}
               borderRadius={'sm'}
               backgroundColor={'green'}
-              fontSize={{ base: 'xs-10', md: 'xs-8' }}
-              lineHeight={{ base: 'xs-10', md: 'xs-8' }}
-              fontWeight={'medium'}
-              padding={1}
-              textColor={'white'}
-            >
-              Coming soon
-            </Box>
-          </Flex>
-        </Box>
-      </Box>
-      <Box display={{ base: 'none', md: 'block' }}>
-        <Box>
-          <Flex
-            direction={'column'}
-            alignItems={'center'}
-            gap={5}
-            paddingTop={5}
-          >
-            <IconButton
-              aria-label="close"
-              icon={<i className="ri-route-fill" />}
-              rounded={'lg'}
-              h={{ base: 'auto', md: 10 }}
-              w={{ base: 'auto', md: 10 }}
-              bg={'black.0'}
-              fontWeight={'500'}
-              color={'grey.100'}
-              _hover={{
-                backgroundColor: 'white.0',
-                color: 'white',
-              }}
-              _active={{
-                backgroundColor: 'transparent',
-              }}
-            />
-
-            <IconButton
-              aria-label="close"
-              icon={<i className="ri-lightbulb-line" />}
-              rounded={'lg'}
-              h={{ base: 'auto', md: 10 }}
-              w={{ base: 'auto', md: 10 }}
-              bg={'black.0'}
-              fontWeight={'500'}
-              color={'grey.100'}
-              _hover={{
-                backgroundColor: 'white.0',
-                color: 'white',
-              }}
-              _active={{
-                backgroundColor: 'transparent',
-              }}
-            />
-            <IconButton
-              aria-label="close"
-              icon={<i className="ri-bookmark-line" />}
-              rounded={'lg'}
-              h={{ base: 'auto', md: 10 }}
-              w={{ base: 'auto', md: 10 }}
-              bg={'black.0'}
-              fontWeight={'500'}
-              color={'grey.100'}
-              _hover={{
-                backgroundColor: 'white.0',
-                color: 'white',
-              }}
-              _active={{
-                backgroundColor: 'transparent',
-              }}
-            />
-            <Box
-              marginTop={-4}
-              borderRadius={'sm'}
-              backgroundColor={'green'}
-              fontSize={'xs-8'}
-              lineHeight={'xs-8'}
+              fontSize={'xs-10'}
+              lineHeight={'xs-10'}
               fontWeight={'medium'}
               padding={1}
               textColor={'white'}
@@ -400,66 +296,45 @@ const Sidemenu = ({ closeDrawer, apps }: SidemenuProps) => {
         </Box>
       </Box>
       <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/logout`}>
-        <Box marginTop={'auto'} width={{ base: 'full', md: 'auto' }}>
-          <Box display={{ base: 'block', md: 'none' }}>
-            <Flex
-              width={'full'}
-              justifyContent={'flex-start'}
-              alignItems={'center'}
-              gap={'3'}
-              paddingX={'4'}
-              paddingY={'5'}
-              fontWeight={'400'}
-              backgroundColor={'white'}
-              transition={'all 250ms ease'}
-              _hover={{
-                backgroundColor: 'white.100',
-                fontWeight: '500',
-                cursor: 'pointer',
-              }}
-              _active={{
-                backgroundColor: 'transparent',
-              }}
-            >
-              <IconButton
-                aria-label="logout"
-                icon={<i className="ri-logout-box-r-line" />}
-                bg={'transparent'}
-                minWidth={'auto'}
-                fontWeight={'inherit'}
-                _hover={{
-                  backgroundColor: 'transparent',
-                }}
-                _active={{
-                  backgroundColor: 'transparent',
-                }}
-              />
-              Logout
-            </Flex>
-          </Box>
-          <Box display={{ base: 'none', md: 'block' }}>
+        <Box marginTop={'auto'} width={'full'}>
+          <Flex
+            width={'full'}
+            justifyContent={'flex-start'}
+            alignItems={'center'}
+            gap={'3'}
+            paddingX={'4'}
+            paddingY={'5'}
+            fontWeight={'400'}
+            backgroundColor={'white'}
+            transition={'all 250ms ease'}
+            _hover={{
+              backgroundColor: 'white.100',
+              fontWeight: '500',
+              cursor: 'pointer',
+            }}
+            _active={{
+              backgroundColor: 'transparent',
+            }}
+          >
             <IconButton
-              aria-label="close"
+              aria-label="logout"
               icon={<i className="ri-logout-box-r-line" />}
-              rounded={'lg'}
-              h={{ base: 'auto', md: 10 }}
-              w={{ base: 'auto', md: 10 }}
-              bg={'black.0'}
-              fontWeight={'500'}
-              color={'grey.100'}
+              bg={'transparent'}
+              minWidth={'auto'}
+              fontWeight={'inherit'}
               _hover={{
-                backgroundColor: 'white.0',
-                color: 'white',
+                backgroundColor: 'transparent',
               }}
               _active={{
                 backgroundColor: 'transparent',
               }}
             />
-          </Box>
+            Logout
+          </Flex>
         </Box>
       </Link>
     </Flex>
   );
 };
 
-export default Sidemenu;
+export default MobileSidemenu;
