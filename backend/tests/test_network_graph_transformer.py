@@ -1,6 +1,6 @@
 import pandas as pd
 
-from transform.network_graph_transformer import NetworkGraphTransformer
+from data_processor.transform.network_graph_transformer import NetworkGraphTransformer
 
 
 class TestNetworkGraphTransformer:
