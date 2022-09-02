@@ -16,10 +16,9 @@ import {
 const Sidemenu = () => {
   return (
     <Flex
-      zIndex={1}
       height={'full'}
-      width={{ base: '18.25rem', md: 'full' }}
-      maxWidth={{ base: '18.25rem', md: '4rem' }}
+      width={'full'}
+      maxWidth={{ base: 'full', md: '4rem' }}
       direction={'column'}
       alignItems={{ base: 'flex-start', md: 'center' }}
       flexShrink={'0'}
@@ -139,15 +138,16 @@ const Sidemenu = () => {
             </Flex>
           </Box>
         </Flex>
-        <Box display={{ base: 'block', md: 'none' }}>
+        <Box display={{ base: 'block', md: 'none' }} width={'full'}>
           <Divider
-            orientation="horizontal"
+            orientation={'horizontal'}
             marginY={'4'}
             borderColor={'white.200'}
             opacity={1}
           />
         </Box>
       </Box>
+
       <Text
         fontSize={{ base: 'xs-12', md: 'xs-10' }}
         lineHeight={{ base: 'xs-12', md: 'xs-10' }}

@@ -43,7 +43,7 @@ const Header = () => {
       <Drawer placement="left" isOpen={isOpen} onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent px={0}>
-          <DrawerBody>
+          <DrawerBody p={0}>
             <Sidemenu />
           </DrawerBody>
         </DrawerContent>
