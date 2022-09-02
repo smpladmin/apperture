@@ -10,10 +10,10 @@ import {
   ModalOverlay,
   Text,
   Divider,
+  RadioGroup,
 } from '@chakra-ui/react';
 import { App } from '@lib/domain/app';
 import Link from 'next/link';
-import { useState } from 'react';
 import UserApp from './UserApp';
 
 type AppsModalProps = {
@@ -60,16 +60,14 @@ const AppsModal = ({
 
         <ModalBody px={6}>
           <Box pt={4}>
-            {apps.map((app, i) => {
-              return (
-                <UserApp
-                  app={app}
-                  selectApp={selectApp}
-                  key={app._id}
-                  value={selectedApp}
-                />
-              );
-            })}
+            <RadioGroup
+              value={selectedApp._id}
+              onChange={(appId) => selectApp(appId)}
+            >
+              {apps.map((app) => {
+                return <UserApp key={app._id} app={app} />;
+              })}
+            </RadioGroup>
           </Box>
           <Text
             pt={'6'}
