@@ -13,11 +13,17 @@ import {
   DrawerContent,
   DrawerOverlay,
 } from '@chakra-ui/react';
-import Sidemenu from '../Sidebar/Sidemenu';
+import MobileSidemenu from '../Sidebar/MobileSidemenu';
 import { useContext } from 'react';
 import { AppertureContext } from '@lib/contexts/appertureContext';
+import { App } from '@lib/domain/app';
 
-const Header = () => {
+type HeaderProps = {
+  selectedApp: App;
+  openAppsModal: Function;
+};
+
+const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const context = useContext(AppertureContext);
 
@@ -42,9 +48,13 @@ const Header = () => {
       />
       <Drawer placement="left" isOpen={isOpen} onClose={onClose}>
         <DrawerOverlay />
-        <DrawerContent px={0}>
-          <DrawerBody>
-            <Sidemenu />
+        <DrawerContent>
+          <DrawerBody p={0}>
+            <MobileSidemenu
+              closeDrawer={onClose}
+              openAppsModal={openAppsModal}
+              selectedApp={selectedApp}
+            />
           </DrawerBody>
         </DrawerContent>
       </Drawer>

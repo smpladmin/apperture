@@ -8,7 +8,7 @@ const colors = {
     DEFAULT: '#ffffff',
     100: '#f6f6f6',
     200: '#ededed',
-    0:'rgba(255,255,255,0.08)',
+    0: 'rgba(255,255,255,0.08)',
   },
   grey: {
     DEFAULT: '#d9d9da',
@@ -30,6 +30,7 @@ const spacing = {
   45: '11.25rem',
   100: '25rem',
   141: '35.25rem',
+  168: '42rem',
 };
 
 const maxWidth = {

@@ -1,13 +1,22 @@
 import { Box } from '@chakra-ui/react';
 import { AppertureContext } from '@lib/contexts/appertureContext';
+import { App } from '@lib/domain/app';
 import { useContext } from 'react';
-import Sidemenu from './Sidemenu';
+import DesktopSideMenu from './DesktopSidemenu';
 
-const Sidebar = () => {
+type SidebarProps = {
+  selectedApp: App;
+  openAppsModal: Function;
+};
+
+const Sidebar = ({ selectedApp, openAppsModal }: SidebarProps) => {
   const context = useContext(AppertureContext);
   return (
     <Box hidden={context.device.isMobile}>
-      <Sidemenu />
+      <DesktopSideMenu
+        selectedApp={selectedApp}
+        openAppsModal={openAppsModal}
+      />
     </Box>
   );
 };
