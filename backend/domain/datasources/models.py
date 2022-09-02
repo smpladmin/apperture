@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Optional
 
 from beanie import Indexed, PydanticObjectId
+from pydantic import BaseModel
 from domain.common.models import IntegrationProvider
 from repositories.document import Document
 
@@ -23,3 +24,10 @@ class DataSource(Document):
 
     class Settings:
         name = "datasources"
+
+
+class ProviderDataSource(BaseModel):
+    id: str
+    name: str
+    version: DataSourceVersion
+    provider: IntegrationProvider

@@ -14,3 +14,10 @@ async def get_user(
         return None
     principal = decode(token)
     return await user_service.get_user(principal["user_id"])
+
+
+async def get_user_id(token: Optional[str] = Depends(get_token)):
+    if not token:
+        return None
+    principal = decode(token)
+    return principal["user_id"]
