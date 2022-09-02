@@ -16,7 +16,6 @@ import {
 const Sidemenu = () => {
   return (
     <Flex
-      zIndex={1}
       height={'full'}
       width={{ base: '18.25rem', md: 'full' }}
       maxWidth={{ base: '18.25rem', md: '4rem' }}
@@ -178,7 +177,7 @@ const Sidemenu = () => {
             }}
           >
             <IconButton
-              aria-label="close"
+              aria-label="map"
               icon={<i className="ri-route-fill" />}
               minWidth={'auto'}
               bg={'transparent'}
@@ -215,7 +214,7 @@ const Sidemenu = () => {
               alignItems={'center'}
             >
               <IconButton
-                aria-label="close"
+                aria-label="insights"
                 icon={<i className="ri-lightbulb-line" />}
                 minWidth={'auto'}
                 bg={'transparent'}
@@ -266,7 +265,7 @@ const Sidemenu = () => {
               alignItems={'center'}
             >
               <IconButton
-                aria-label="close"
+                aria-label="saved"
                 icon={<i className="ri-bookmark-line" />}
                 minWidth={'auto'}
                 bg={'transparent'}
@@ -393,7 +392,7 @@ const Sidemenu = () => {
               }}
             >
               <IconButton
-                aria-label="close"
+                aria-label="logout"
                 icon={<i className="ri-logout-box-r-line" />}
                 bg={'transparent'}
                 minWidth={'auto'}
