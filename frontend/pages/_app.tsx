@@ -20,7 +20,7 @@ function AppertureApp({
   return (
     <AppertureContext.Provider value={{ device }}>
       <ChakraProvider theme={theme}>
-        {getLayout(<Component {...pageProps} />)}
+        {getLayout(<Component {...pageProps} />, pageProps?.apps)}
       </ChakraProvider>
     </AppertureContext.Provider>
   );

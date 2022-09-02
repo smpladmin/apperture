@@ -16,8 +16,9 @@ import {
 import Sidemenu from '../Sidebar/Sidemenu';
 import { useContext } from 'react';
 import { AppertureContext } from '@lib/contexts/appertureContext';
+import { App } from '@lib/domain/app';
 
-const Header = () => {
+const Header = ({ apps }: { apps: App[] }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const context = useContext(AppertureContext);
 
@@ -44,7 +45,7 @@ const Header = () => {
         <DrawerOverlay />
         <DrawerContent>
           <DrawerBody p={0}>
-            <Sidemenu closeDrawer={onClose} />
+            <Sidemenu closeDrawer={onClose} apps={apps} />
           </DrawerBody>
         </DrawerContent>
       </Drawer>

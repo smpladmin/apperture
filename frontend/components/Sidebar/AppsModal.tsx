@@ -1,8 +1,6 @@
 import {
-  Avatar,
   Box,
   Button,
-  Flex,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -10,24 +8,29 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Radio,
-  RadioGroup,
-  Stack,
   Text,
   Divider,
 } from '@chakra-ui/react';
-import React from 'react';
+import { App } from '@lib/domain/app';
+import Link from 'next/link';
+import { useState } from 'react';
+import UserApp from './UserApp';
+
+type AppsModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  apps: App[];
+  selectApp: Function;
+  selectedApp: any;
+};
 
 const AppsModal = ({
   isOpen,
   onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) => {
-  const [value, setValue] = React.useState('1');
-  const [size, setSize] = React.useState('2xl');
-
+  apps,
+  selectApp,
+  selectedApp,
+}: AppsModalProps) => {
   return (
     <Modal
       isOpen={isOpen}
@@ -37,7 +40,7 @@ const AppsModal = ({
       size={'2xl'}
     >
       <ModalOverlay />
-      <ModalContent margin={'1rem'}>
+      <ModalContent margin={'1rem'} maxWidth="168">
         <ModalHeader
           display={'flex'}
           justifyContent={'space-between'}
@@ -46,7 +49,7 @@ const AppsModal = ({
           px={9}
         >
           My Applications
-          <ModalCloseButton position={'relative'} top={'0'} right={'0'} />
+          <ModalCloseButton position={'relative'} top={0} right={0} />
         </ModalHeader>
         <Divider
           orientation="horizontal"
@@ -56,50 +59,17 @@ const AppsModal = ({
         />
 
         <ModalBody px={6}>
-          <Box>
-            <RadioGroup onChange={setValue} value={value}>
-              <Stack direction="column">
-                <Flex
-                  paddingY={'4'}
-                  justifyContent={'space-between'}
-                  alignItems="flex-start"
-                  borderBottom={'1px'}
-                  borderStyle={'solid'}
-                  borderColor={'white.100'}
-                >
-                  <Flex textAlign={'left'} gap={'3'}>
-                    <Avatar
-                      name="Zomato Partner App"
-                      fontWeight={'bold'}
-                      size="sm"
-                      textColor={'white'}
-                      h={{ base: '8', md: '12' }}
-                      w={{ base: '8', md: '12' }}
-                      fontSize={{ base: 'xs', md: 'xs-14' }}
-                      lineHeight={{ base: 'xs', md: 'xs-14' }}
-                    ></Avatar>
-                    <Flex direction={'column'}>
-                      <Text
-                        fontSize={'base'}
-                        fontWeight={'500'}
-                        lineHeight={'base'}
-                      >
-                        Zomato Partner App
-                      </Text>
-                      <Text
-                        fontSize={'xs-14'}
-                        fontWeight={'400'}
-                        lineHeight={'xs-14'}
-                        textColor={'grey.200'}
-                      >
-                        GA, Mix Panel
-                      </Text>
-                    </Flex>
-                  </Flex>
-                  <Radio colorScheme="black.DEFAULT" value="1" />
-                </Flex>
-              </Stack>
-            </RadioGroup>
+          <Box pt={4}>
+            {apps.map((app, i) => {
+              return (
+                <UserApp
+                  app={app}
+                  selectApp={selectApp}
+                  key={app._id}
+                  value={selectedApp}
+                />
+              );
+            })}
           </Box>
           <Text
             pt={'6'}
@@ -114,19 +84,21 @@ const AppsModal = ({
           </Text>
         </ModalBody>
         <ModalFooter pt={0} px={6}>
-          <Button
-            width={'full'}
-            padding={'4'}
-            fontSize={{ base: 'xs-14', md: 'base' }}
-            lineHeight={{ base: 'xs-14', md: 'base' }}
-            height={'auto'}
-            bg={'transparent'}
-            border={'1px'}
-            borderStyle={'solid'}
-            borderColor={'black'}
-          >
-            + Add Application
-          </Button>
+          <Link href={'/analytics/app/create'}>
+            <Button
+              width={'full'}
+              padding={'4'}
+              fontSize={{ base: 'xs-14', md: 'base' }}
+              lineHeight={{ base: 'xs-14', md: 'base' }}
+              height={'auto'}
+              bg={'transparent'}
+              border={'1px'}
+              borderStyle={'solid'}
+              borderColor={'black'}
+            >
+              + Add Application
+            </Button>
+          </Link>
         </ModalFooter>
       </ModalContent>
     </Modal>

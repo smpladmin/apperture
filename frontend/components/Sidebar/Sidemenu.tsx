@@ -2,7 +2,7 @@ import 'remixicon/fonts/remixicon.css';
 import logo from '@assets/images/apperture_white-icon.svg';
 import logoSmall from '@assets/images/apperture_small-icon.svg';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Flex,
   Box,
@@ -14,13 +14,21 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import AppsModal from './AppsModal';
+import { App } from '@lib/domain/app';
 
 type SidemenuProps = {
   closeDrawer?: () => void;
+  apps: App[];
 };
 
-const Sidemenu = ({ closeDrawer }: SidemenuProps) => {
+const Sidemenu = ({ closeDrawer, apps }: SidemenuProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedApp, setSelectedApp] = useState<App>(apps[0]);
+
+  const handleModalOpen = () => {
+    closeDrawer?.();
+    onOpen();
+  };
 
   return (
     <Flex
@@ -98,7 +106,7 @@ const Sidemenu = ({ closeDrawer }: SidemenuProps) => {
             onClick={onOpen}
           >
             <Avatar
-              name="Zomato Partner App"
+              name={selectedApp.name}
               fontWeight={'bold'}
               size="sm"
               textColor={'white'}
@@ -107,30 +115,33 @@ const Sidemenu = ({ closeDrawer }: SidemenuProps) => {
               fontSize={{ base: 'xs', md: 'xs-14' }}
               lineHeight={'xs-14'}
               cursor={'pointer'}
-            ></Avatar>
+            />
           </Flex>
-          <AppsModal isOpen={isOpen} onClose={onClose} />
-          <Box display={{ base: 'block', md: 'none' }} width={'full'}>
+          <Box
+            display={{ base: 'block', md: 'none' }}
+            width={'full'}
+            onClick={handleModalOpen}
+          >
             <Flex
               width={'full'}
               gap={2}
               justifyContent={'space-between'}
               alignItems={'center'}
             >
-              <Box textAlign={'left'} onClick={closeDrawer}>
+              <Box textAlign={'left'}>
                 <Text
                   fontSize={'base'}
                   fontWeight={'semibold'}
                   lineHeight={'base'}
                 >
-                  Zomato Partner App
+                  {selectedApp.name}
                 </Text>
                 <Text
                   fontSize={'xs-12'}
                   fontWeight={'regular'}
                   lineHeight={'xs-12'}
                 >
-                  ID 098762
+                  {`ID ${selectedApp._id}`}
                 </Text>
               </Box>
               <IconButton
@@ -149,6 +160,13 @@ const Sidemenu = ({ closeDrawer }: SidemenuProps) => {
             </Flex>
           </Box>
         </Flex>
+        <AppsModal
+          isOpen={isOpen}
+          onClose={onClose}
+          apps={apps}
+          selectApp={setSelectedApp}
+          selectedApp={selectedApp}
+        />
         <Box display={{ base: 'block', md: 'none' }} width={'full'}>
           <Divider
             orientation={'horizontal'}
