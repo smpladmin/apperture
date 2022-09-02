@@ -11,9 +11,17 @@ import {
   Avatar,
   Divider,
   IconButton,
+  useDisclosure,
 } from '@chakra-ui/react';
+import AppsModal from './AppsModal';
 
-const Sidemenu = () => {
+type SidemenuProps = {
+  closeDrawer?: () => void;
+};
+
+const Sidemenu = ({ closeDrawer }: SidemenuProps) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
     <Flex
       height={'full'}
@@ -87,6 +95,7 @@ const Sidemenu = () => {
             fontWeight={'bold'}
             fontSize={'xs-14'}
             lineHeight={'xs-14'}
+            onClick={onOpen}
           >
             <Avatar
               name="Zomato Partner App"
@@ -97,8 +106,10 @@ const Sidemenu = () => {
               w={{ base: 10, md: 8 }}
               fontSize={{ base: 'xs', md: 'xs-14' }}
               lineHeight={'xs-14'}
+              cursor={'pointer'}
             ></Avatar>
           </Flex>
+          <AppsModal isOpen={isOpen} onClose={onClose} />
           <Box display={{ base: 'block', md: 'none' }} width={'full'}>
             <Flex
               width={'full'}
@@ -106,7 +117,7 @@ const Sidemenu = () => {
               justifyContent={'space-between'}
               alignItems={'center'}
             >
-              <Box textAlign={'left'}>
+              <Box textAlign={'left'} onClick={closeDrawer}>
                 <Text
                   fontSize={'base'}
                   fontWeight={'semibold'}

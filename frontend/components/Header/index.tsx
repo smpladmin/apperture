@@ -44,7 +44,7 @@ const Header = () => {
         <DrawerOverlay />
         <DrawerContent>
           <DrawerBody px={0}>
-            <Sidemenu />
+            <Sidemenu closeDrawer={onClose} />
           </DrawerBody>
         </DrawerContent>
       </Drawer>
