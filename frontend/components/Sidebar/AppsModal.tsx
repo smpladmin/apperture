@@ -49,7 +49,14 @@ const AppsModal = ({
           px={9}
         >
           My Applications
-          <ModalCloseButton position={'relative'} top={0} right={0} />
+          <ModalCloseButton
+            position={'relative'}
+            top={0}
+            right={0}
+            border={'1px'}
+            borderColor={'white.200'}
+            rounded={'full'}
+          />
         </ModalHeader>
         <Divider
           orientation="horizontal"

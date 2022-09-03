@@ -42,7 +42,7 @@ const UserApp = ({ app }: UserAppProps) => {
             </Text>
           </Flex>
         </Flex>
-        <Radio value={app._id} colorScheme="red" />
+        <Radio value={app._id} colorScheme={'radio'} />
       </Flex>
     </Stack>
   );
