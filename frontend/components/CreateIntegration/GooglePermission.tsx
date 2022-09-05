@@ -63,7 +63,7 @@ const GooglePermission = ({
             lineHeight={{ base: 'xs-14', md: 'base' }}
             color={'grey.200'}
           >
-            Apperture wants to connect with your Google Analytics account{' '}
+            Apperture wants to connect with your Google Analytics account
           </Text>
           <Flex
             alignItems={'center'}
@@ -81,7 +81,7 @@ const GooglePermission = ({
               onClick={() => navigateBack()}
             />
             <Link
-              href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/integrations/oauth/google?app_id=${appId}&redirect_url=${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}analytics/app/${appId}/integration/google/apps`}
+              href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/integrations/oauth/google?app_id=${appId}&redirect_url=${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/analytics/app/${appId}/integration/google/apps`}
             >
               <Button
                 rounded={'lg'}
