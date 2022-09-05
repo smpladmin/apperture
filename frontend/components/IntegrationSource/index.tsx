@@ -1,4 +1,4 @@
-import { Avatar, Box, Flex, Radio, Text } from '@chakra-ui/react';
+import { Flex, Radio, Text } from '@chakra-ui/react';
 import Image, { StaticImageData } from 'next/image';
 import React from 'react';
 
@@ -17,7 +17,7 @@ const IntegrationSource = ({
 }: IntegrationSourceProps) => {
   return (
     <Flex
-      w={'125'}
+      width={{ base: 'auto', md: '125' }}
       px={'3'}
       py={'4'}
       border={'1px'}
@@ -43,7 +43,7 @@ const IntegrationSource = ({
           alignItems={'center'}
           justifyContent={'center'}
         >
-          <Image src={imgSrc} alt="gaLogo" />
+          <Image src={imgSrc} alt="gaLogo" objectFit="cover" />
         </Flex>
         <Flex direction={'column'}>
           <Text fontSize={'base'} fontWeight={'500'} lineHeight={'base'}>
