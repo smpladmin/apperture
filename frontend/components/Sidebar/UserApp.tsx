@@ -11,12 +11,18 @@ const UserApp = ({ app }: UserAppProps) => {
     <Flex
       paddingY={'4'}
       justifyContent={'space-between'}
-      alignItems="flex-start"
       borderBottom={'1px'}
       borderStyle={'solid'}
       borderColor={'white.100'}
     >
-      <Flex textAlign={'left'} gap={'3'}>
+      <Flex
+        w={'full'}
+        as={'label'}
+        cursor={'pointer'}
+        alignItems={'center'}
+        justifyContent={'center'}
+        gap={'3'}
+      >
         <Avatar
           name={app.name}
           fontWeight={'bold'}
@@ -27,7 +33,7 @@ const UserApp = ({ app }: UserAppProps) => {
           fontSize={{ base: 'xs', md: 'xs-14' }}
           lineHeight={{ base: 'xs', md: 'xs-14' }}
         />
-        <Flex direction={'column'}>
+        <Flex direction={'column'} ml={''}>
           <Text fontSize={'base'} fontWeight={'500'} lineHeight={'base'}>
             {app.name}
           </Text>
@@ -40,8 +46,8 @@ const UserApp = ({ app }: UserAppProps) => {
             GA, Mix Panel
           </Text>
         </Flex>
+        <Radio ml={'auto'} value={app._id} colorScheme={'radio'} />
       </Flex>
-      <Radio value={app._id} colorScheme={'radio'} />
     </Flex>
   );
 };

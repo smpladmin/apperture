@@ -12,6 +12,7 @@ import {
   Divider,
   RadioGroup,
   Stack,
+  Flex,
 } from '@chakra-ui/react';
 import { App } from '@lib/domain/app';
 import Link from 'next/link';
@@ -41,7 +42,11 @@ const AppsModal = ({
       size={'2xl'}
     >
       <ModalOverlay />
-      <ModalContent margin={'1rem'} maxWidth="168">
+      <ModalContent
+        margin={'1rem'}
+        maxWidth="168"
+        maxHeight={{ base: 'calc(100% - 100px)', md: 'calc(100% - 200px)' }}
+      >
         <ModalHeader
           display={'flex'}
           justifyContent={'space-between'}
@@ -66,7 +71,7 @@ const AppsModal = ({
           opacity={1}
         />
 
-        <ModalBody px={6}>
+        <ModalBody px={9} overflowY={'auto'}>
           <Box pt={4}>
             <RadioGroup
               value={selectedApp._id}
@@ -79,34 +84,36 @@ const AppsModal = ({
               </Stack>
             </RadioGroup>
           </Box>
-          <Text
-            pt={'6'}
-            pb={{ base: '6', md: '9' }}
-            fontSize={{ base: 'xs-12', md: 'xs-14' }}
-            lineHeight={{ base: 'xs-12', md: 'xs-14' }}
-            color={'grey.200'}
-            textAlign={'center'}
-          >
-            Switching applications clears out the current configuration and
-            filters.
-          </Text>
         </ModalBody>
-        <ModalFooter pt={0} px={6}>
-          <Link href={'/analytics/app/create'}>
-            <Button
-              width={'full'}
-              padding={'4'}
-              fontSize={{ base: 'xs-14', md: 'base' }}
-              lineHeight={{ base: 'xs-14', md: 'base' }}
-              height={'auto'}
-              bg={'transparent'}
-              border={'1px'}
-              borderStyle={'solid'}
-              borderColor={'black'}
+        <ModalFooter pt={0} px={9} pb={9} display={'block'}>
+          <Flex direction={'column'}>
+            <Text
+              pt={'6'}
+              pb={{ base: '6', md: '9' }}
+              fontSize={{ base: 'xs-12', md: 'xs-14' }}
+              lineHeight={{ base: 'xs-12', md: 'xs-14' }}
+              color={'grey.200'}
+              textAlign={'center'}
             >
-              + Add Application
-            </Button>
-          </Link>
+              Switching applications clears out the current configuration and
+              filters.
+            </Text>
+            <Link href={'/analytics/app/create'}>
+              <Button
+                width={'full'}
+                padding={'4'}
+                fontSize={{ base: 'xs-14', md: 'base' }}
+                lineHeight={{ base: 'xs-14', md: 'base' }}
+                height={'auto'}
+                bg={'transparent'}
+                border={'1px'}
+                borderStyle={'solid'}
+                borderColor={'black'}
+              >
+                + Add Application
+              </Button>
+            </Link>
+          </Flex>
         </ModalFooter>
       </ModalContent>
     </Modal>
