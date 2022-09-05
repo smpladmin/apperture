@@ -1,5 +1,5 @@
-const Apps = () => {
+const SelectDataSources = () => {
   return <div>Apps page</div>;
 };
 
-export default Apps;
+export default SelectDataSources;
