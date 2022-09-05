@@ -11,6 +11,7 @@ import {
   Text,
   Divider,
   RadioGroup,
+  Stack,
 } from '@chakra-ui/react';
 import { App } from '@lib/domain/app';
 import Link from 'next/link';
@@ -71,9 +72,11 @@ const AppsModal = ({
               value={selectedApp._id}
               onChange={(appId) => selectApp(appId)}
             >
-              {apps.map((app) => {
-                return <UserApp key={app._id} app={app} />;
-              })}
+              <Stack direction="column">
+                {apps.map((app) => {
+                  return <UserApp key={app._id} app={app} />;
+                })}
+              </Stack>
             </RadioGroup>
           </Box>
           <Text
