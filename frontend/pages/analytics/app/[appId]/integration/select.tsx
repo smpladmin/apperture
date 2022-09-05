@@ -33,7 +33,7 @@ const SelectIntegration = () => {
       p={4}
       px={{ lg: 48 }}
       pt={{ lg: 20 }}
-      maxW={{ lg: '1280px' }}
+      maxW={{ base: 'full', lg: '1280px' }}
     >
       <Box>
         <IconButton
@@ -70,17 +70,19 @@ const SelectIntegration = () => {
               sourceName="Google Analytics"
               value="google"
               imgSrc={gaLogo}
+              selected={integration === 'google'}
             />
             <IntegrationSource
               sourceName="MixPanel"
               value="mixpanel"
               imgSrc={mixpanelLogo}
+              selected={integration === 'mixpanel'}
             />
           </Stack>
         </RadioGroup>
       </Box>
 
-      <Flex alignItems={'center'} direction={'row'} gap={'2'} mt={'10'}>
+      <Flex gap={'2'} mt={'10'} w={'full'}>
         <IconButton
           aria-label="back"
           icon={<i className="ri-arrow-left-line"></i>}
@@ -98,7 +100,7 @@ const SelectIntegration = () => {
           fontWeight={'semibold'}
           lineHeight={'base'}
           textColor={'white.100'}
-          w={{ sm: 'full', md: '72' }}
+          width={{ base: 'full', md: '72' }}
           disabled={!integration}
           onClick={() =>
             router.push(

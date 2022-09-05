@@ -6,12 +6,14 @@ type IntegrationSourceProps = {
   sourceName: string;
   value: string;
   imgSrc: StaticImageData;
+  selected: boolean;
 };
 
 const IntegrationSource = ({
   sourceName,
   value,
   imgSrc,
+  selected,
 }: IntegrationSourceProps) => {
   return (
     <Flex
@@ -20,7 +22,8 @@ const IntegrationSource = ({
       py={'4'}
       border={'1px'}
       rounded={'xl'}
-      borderColor={'white.200'}
+      borderColor={selected ? 'black.100' : 'white.200'}
+      bg={selected ? 'white.100' : 'none'}
       justifyContent={'space-between'}
     >
       <Flex
