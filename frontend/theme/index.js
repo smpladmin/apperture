@@ -19,6 +19,9 @@ const colors = {
   yellow: '#fac213',
   green: '#57aa64',
   'hover-grey': '#78787e',
+  radio: {
+    500: '#0e0e1a',
+  },
 };
 
 const spacing = {
