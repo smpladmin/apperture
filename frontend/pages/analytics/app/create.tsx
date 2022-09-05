@@ -23,11 +23,11 @@ const Create = () => {
   }, []);
 
   const handleNextClick = async () => {
-    try {
-      await addApp(appName);
-      router.push(`/analytics/app/integrate`);
-    } catch (err) {
-      console.log(err);
+    const app = await addApp(appName);
+    if (app?._id) {
+      router.push(
+        `/analytics/app/${encodeURIComponent(app._id)}/integration/select`
+      );
     }
   };
   const handleGoBack = (): void => router.back();
@@ -105,7 +105,7 @@ const Create = () => {
         fontWeight={'semibold'}
         lineHeight={'base'}
         textColor={'white.100'}
-        w={{ sm: 'full', lg: '72' }}
+        w={{ sm: 'full', md: '72' }}
         disabled={!appName}
         onClick={handleNextClick}
       >

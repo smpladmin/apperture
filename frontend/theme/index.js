@@ -19,19 +19,21 @@ const colors = {
   yellow: '#fac213',
   green: '#57aa64',
   'hover-grey': '#78787e',
-  radio: {
+  radioBlack: {
     500: '#0e0e1a',
   },
 };
 
 const spacing = {
   11: '2.75rem',
+  13: '3.25rem',
   18: '4.5rem',
   25: '6.25rem',
   30: '7.5rem',
   33: '8.25rem',
   45: '11.25rem',
   100: '25rem',
+  125: '31.25rem',
   141: '35.25rem',
   168: '42rem',
 };
