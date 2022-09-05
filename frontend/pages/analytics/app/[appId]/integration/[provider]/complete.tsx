@@ -1,4 +1,3 @@
-// export const Complete = {};
 import { Image, Flex, Box, Text, Button, Link } from '@chakra-ui/react';
 import folder from '@assets/images/folder.svg';
 import { relative } from 'path';
