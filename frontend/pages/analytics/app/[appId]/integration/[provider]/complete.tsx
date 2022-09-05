@@ -1,7 +1,7 @@
 import { Image, Flex, Box, Text, Button, Link } from '@chakra-ui/react';
 import folder from '@assets/images/folder.svg';
-import { relative } from 'path';
-const Complete = () => {
+
+const CompleteIntegration = () => {
   return (
     <Flex
       width={'full'}
@@ -75,4 +75,4 @@ const Complete = () => {
   );
 };
 
-export default Complete;
+export default CompleteIntegration;
