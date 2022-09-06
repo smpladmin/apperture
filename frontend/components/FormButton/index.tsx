@@ -1,15 +1,20 @@
 import { Button, Flex, IconButton } from '@chakra-ui/react';
+import Link from 'next/link';
 import React from 'react';
 type FormButtonProps = {
   navigateBack: Function;
-  handleNextClick: Function;
-  disabled: boolean;
+  handleNextClick?: Function;
+  disabled?: boolean;
+  link?: string;
+  buttonText: string;
 };
 
 const FormButton = ({
   navigateBack,
   handleNextClick,
   disabled,
+  link,
+  buttonText,
 }: FormButtonProps) => {
   return (
     <Flex gap={'2'} width={'full'}>
@@ -22,20 +27,38 @@ const FormButton = ({
         w={'13'}
         onClick={() => navigateBack()}
       />
-      <Button
-        rounded={'lg'}
-        bg={'black.100'}
-        p={6}
-        fontSize={'base'}
-        fontWeight={'semibold'}
-        lineHeight={'base'}
-        textColor={'white.100'}
-        width={{ base: 'full', md: '72' }}
-        disabled={disabled}
-        onClick={() => handleNextClick()}
-      >
-        Next
-      </Button>
+      {link ? (
+        <Link href={link}>
+          <Button
+            rounded={'lg'}
+            bg={'black.100'}
+            p={6}
+            fontSize={'base'}
+            fontWeight={'semibold'}
+            lineHeight={'base'}
+            textColor={'white.100'}
+            width={{ base: 'full', md: '72' }}
+            disabled={disabled}
+          >
+            {buttonText}
+          </Button>
+        </Link>
+      ) : (
+        <Button
+          rounded={'lg'}
+          bg={'black.100'}
+          p={6}
+          fontSize={'base'}
+          fontWeight={'semibold'}
+          lineHeight={'base'}
+          textColor={'white.100'}
+          width={{ base: 'full', md: '72' }}
+          disabled={disabled}
+          onClick={() => handleNextClick?.()}
+        >
+          {buttonText}
+        </Button>
+      )}
     </Flex>
   );
 };

@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import gaLogo from '@assets/images/ga-logo.svg';
 import 'remixicon/fonts/remixicon.css';
+import FormButton from '@components/FormButton';
 
 type GooglePermissionProps = {
   navigateBack: Function;
@@ -17,37 +18,33 @@ const GooglePermission = ({
 }: GooglePermissionProps) => {
   return (
     <Flex direction={'column'}>
-      <IconButton
-        aria-label="close"
-        icon={<i className="ri-close-fill" />}
-        rounded={'full'}
-        bg={'white.DEFAULT'}
-        border={'1px'}
-        borderColor={'white.200'}
-        top={{ base: '4', md: '20' }}
-        left={{ base: '4', md: '45' }}
-        position={'absolute'}
-        onClick={() => handleClose()}
-      />
-
+      <Box p={4} px={{ md: 45 }} pt={{ md: 10 }}>
+        <IconButton
+          aria-label="close"
+          icon={<i className="ri-close-fill" />}
+          rounded={'full'}
+          bg={'white.DEFAULT'}
+          border={'1px'}
+          borderColor={'white.200'}
+          onClick={() => handleClose()}
+        />
+      </Box>
       <Flex
-        top={{ base: '45', md: '56' }}
-        position={'absolute'}
         width={'full'}
         direction={'column'}
         justifyContent={'center'}
         alignItems={'center'}
         textAlign={'center'}
-        paddingX={{ base: '4' }}
+        mt={{ base: '30', md: '20' }}
       >
         <Box
-          height={{ base: '20', md: '30' }}
-          width={{ base: '20', md: '30' }}
-          marginBottom={{ base: '13', md: '17' }}
+          height={{ base: '20', md: '20' }}
+          width={{ base: '20', md: '20' }}
+          marginBottom={{ base: '13', md: '8' }}
         >
           <Image src={gaLogo} alt="google analytics" layout="responsive" />
         </Box>
-        <Box>
+        <Box maxWidth={'82'} paddingX={'4'}>
           <Text
             fontWeight={'semibold'}
             fontSize={'sh-24'}
@@ -64,7 +61,23 @@ const GooglePermission = ({
           >
             Apperture wants to connect with your Google Analytics account
           </Text>
-          <Flex
+          <Box mt={'12'}>
+            <FormButton
+              navigateBack={navigateBack}
+              link={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/integrations/oauth/google?app_id=${appId}&redirect_url=${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/analytics/app/${appId}/integration/google/apps`}
+              buttonText={'Give Access'}
+            />
+          </Box>
+        </Box>
+      </Flex>
+    </Flex>
+  );
+};
+
+export default GooglePermission;
+
+{
+  /* <Flex
             alignItems={'center'}
             justifyContent={'center'}
             gap={'2'}
@@ -95,11 +108,5 @@ const GooglePermission = ({
                 Give Access
               </Button>
             </Link>
-          </Flex>
-        </Box>
-      </Flex>
-    </Flex>
-  );
-};
-
-export default GooglePermission;
+          </Flex> */
+}
