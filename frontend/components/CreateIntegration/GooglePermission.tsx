@@ -75,38 +75,3 @@ const GooglePermission = ({
 };
 
 export default GooglePermission;
-
-{
-  /* <Flex
-            alignItems={'center'}
-            justifyContent={'center'}
-            gap={'2'}
-            mt={'16'}
-          >
-            <IconButton
-              aria-label="back"
-              icon={<i className="ri-arrow-left-line"></i>}
-              rounded={'lg'}
-              bg={'white.100'}
-              p={6}
-              w={'13'}
-              onClick={() => navigateBack()}
-            />
-            <Link
-              href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/integrations/oauth/google?app_id=${appId}&redirect_url=${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/analytics/app/${appId}/integration/google/apps`}
-            >
-              <Button
-                rounded={'lg'}
-                bg={'black.100'}
-                p={6}
-                fontSize={'base'}
-                fontWeight={'semibold'}
-                lineHeight={'base'}
-                textColor={'white.100'}
-                w={{ sm: 'full', md: '72' }}
-              >
-                Give Access
-              </Button>
-            </Link>
-          </Flex> */
-}
