@@ -3,6 +3,9 @@ WORKDIR /code
 EXPOSE 8001
 
 FROM base as deps
+RUN apt-get update \
+  && apt-get install gcc -y \
+  && apt-get clean
 WORKDIR /code
 COPY pyproject.toml ./
 COPY poetry.lock ./
