@@ -24,13 +24,13 @@ const Create = () => {
 
   const handleNextClick = async () => {
     const app = await addApp(appName);
-    if (app?._id) {
+    if (app) {
       router.push(
         `/analytics/app/${encodeURIComponent(app._id)}/integration/select`
       );
     }
   };
-  const handleGoBack = (): void => router.back();
+  const handleGoBack = () => router.push('/analytics/explore?apps=1');
 
   return (
     <Flex
@@ -66,16 +66,13 @@ const Create = () => {
             pb={{ base: 8, lg: 10 }}
             fontSize={{ base: '1.74rem', lg: '3.5rem' }}
             lineHeight={{ base: '2.125rem', lg: '4.125rem' }}
+            fontWeight={'semibold'}
           >
             What would you like to name this application?
           </Heading>
           <Input
             size={'lg'}
-            width={[
-              '100%', // base
-              '100%', // 480px upwards
-              '31.25rem', // 768px upwards
-            ]}
+            width={['100%', '100%', '31.25rem']}
             bg={'white.200'}
             rounded={'0.25rem'}
             fontSize={'base'}
@@ -84,6 +81,7 @@ const Create = () => {
             placeholder="Ex- Food Web App"
             py={4}
             px={3.5}
+            focusBorderColor={'black.100'}
             _placeholder={{
               fontSize: '1rem',
               lineHeight: '1.375rem',

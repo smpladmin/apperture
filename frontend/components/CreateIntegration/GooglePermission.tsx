@@ -17,21 +17,19 @@ const GooglePermission = ({
 }: GooglePermissionProps) => {
   return (
     <Flex direction={'column'}>
-      <Box
+      <IconButton
+        aria-label="close"
+        icon={<i className="ri-close-fill" />}
+        rounded={'full'}
+        bg={'white.DEFAULT'}
+        border={'1px'}
+        borderColor={'white.200'}
         top={{ base: '4', md: '20' }}
         left={{ base: '4', md: '45' }}
         position={'absolute'}
-      >
-        <IconButton
-          aria-label="close"
-          icon={<i className="ri-close-fill" />}
-          rounded={'full'}
-          bg={'white.DEFAULT'}
-          border={'1px'}
-          borderColor={'white.200'}
-          onClick={() => handleClose()}
-        />
-      </Box>
+        onClick={() => handleClose()}
+      />
+
       <Flex
         top={{ base: '45', md: '56' }}
         position={'absolute'}
@@ -43,11 +41,11 @@ const GooglePermission = ({
         paddingX={{ base: '4' }}
       >
         <Box
-          height={{ base: '30', md: '40' }}
-          width={{ base: '30', md: '40' }}
-          marginBottom={{ base: '3', md: '10' }}
+          height={{ base: '20', md: '30' }}
+          width={{ base: '20', md: '30' }}
+          marginBottom={{ base: '13', md: '17' }}
         >
-          <Image src={gaLogo} alt="google analytics" />
+          <Image src={gaLogo} alt="google analytics" layout="responsive" />
         </Box>
         <Box>
           <Text
@@ -62,6 +60,7 @@ const GooglePermission = ({
             fontSize={{ base: 'xs-14', md: 'base' }}
             lineHeight={{ base: 'xs-14', md: 'base' }}
             color={'grey.200'}
+            fontWeight={'normal'}
           >
             Apperture wants to connect with your Google Analytics account
           </Text>
