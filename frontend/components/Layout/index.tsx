@@ -1,4 +1,4 @@
-import { Flex, useDisclosure } from '@chakra-ui/react';
+import { Box, Flex, useDisclosure } from '@chakra-ui/react';
 import { ReactNode, useEffect, useState } from 'react';
 import Header from '../Header';
 import Sidebar from '../Sidebar';
@@ -42,7 +42,9 @@ export default function Layout({ children, apps = [] }: LayoutProps) {
       <Sidebar selectedApp={selectedApp} openAppsModal={onModalOpen} />
       <Flex flexDir={'column'} w={'full'}>
         <Header selectedApp={selectedApp} openAppsModal={onModalOpen} />
-        <main style={{ height: '100%' }}>{children}</main>
+        <Box as="main" h={'full'}>
+          {children}
+        </Box>
       </Flex>
     </Flex>
   );

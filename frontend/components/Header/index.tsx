@@ -1,5 +1,4 @@
 import 'remixicon/fonts/remixicon.css';
-import Image from 'next/image';
 import filterIcon from '@assets/icons/filter-icon.svg';
 import mixPanel from '@assets/images/mixPanel-icon.png';
 import {
@@ -12,6 +11,7 @@ import {
   DrawerBody,
   DrawerContent,
   DrawerOverlay,
+  Image,
 } from '@chakra-ui/react';
 import MobileSidemenu from '../Sidebar/MobileSidemenu';
 import { useContext } from 'react';
@@ -30,6 +30,7 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
   return (
     <Flex
       h={18}
+      gap={{ base: 6, md: '0' }}
       w={'100%'}
       alignItems={'center'}
       justifyContent={'space-between'}
@@ -46,22 +47,25 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
         bg={'transparent'}
         onClick={onOpen}
       />
-      <Drawer placement="left" isOpen={isOpen} onClose={onClose}>
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerBody p={0}>
-            <MobileSidemenu
-              closeDrawer={onClose}
-              openAppsModal={openAppsModal}
-              selectedApp={selectedApp}
-            />
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
+      {context.device.isMobile && (
+        <Drawer placement="left" isOpen={isOpen} onClose={onClose}>
+          <DrawerOverlay />
+          <DrawerContent>
+            <DrawerBody p={0}>
+              <MobileSidemenu
+                closeDrawer={onClose}
+                openAppsModal={openAppsModal}
+                selectedApp={selectedApp}
+              />
+            </DrawerBody>
+          </DrawerContent>
+        </Drawer>
+      )}
 
       <Input
         size={'lg'}
-        w={100}
+        w={{ base: 'full', md: 100 }}
+        h={{ base: 10, md: 12 }}
         bg={'white.100'}
         rounded={'6.25rem'}
         fontSize={'base'}
@@ -79,14 +83,19 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
         }}
       />
       <Flex alignItems={'center'} justifyContent={'space-between'} gap={6}>
-        <Box>
+        <Box hidden={context.device.isMobile}>
           <i className="ri-calendar-fill"></i>
         </Box>
-        <Box>
-          <Image src={filterIcon} alt="filter-icon" />
+        <Box hidden={context.device.isMobile}>
+          <Image src={filterIcon.src} alt="filter-icon" />
         </Box>
-        <Box h={8} w={8}>
-          <Image src={mixPanel} alt="data-source-mix-panel" />
+        <Box flexShrink={0}>
+          <Image
+            h={{ base: 5, md: 8 }}
+            w={{ base: 5, md: 8 }}
+            src={mixPanel.src}
+            alt="data-source-mix-panel"
+          />
         </Box>
       </Flex>
     </Flex>
