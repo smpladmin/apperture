@@ -12,9 +12,9 @@ import { useRouter } from 'next/router';
 import 'remixicon/fonts/remixicon.css';
 import gaLogo from '@assets/images/ga-logo-small.svg';
 import mixpanelLogo from '@assets/images/mixPanel-icon.png';
-import { Providers } from '@lib/constants';
 import FormButton from '@components/FormButton';
 import IntegrationSource from '@components/IntegrationSource';
+import { Provider } from '@lib/domain/provider';
 
 const SelectProvider = () => {
   const [provider, setProvider] = useState<string>('');
@@ -76,15 +76,15 @@ const SelectProvider = () => {
             <Stack direction="column">
               <IntegrationSource
                 sourceName="Google Analytics"
-                value="google"
+                value={Provider.GOOGLE}
                 imgSrc={gaLogo}
-                selected={provider === Providers.Google}
+                selected={provider === Provider.GOOGLE}
               />
               <IntegrationSource
                 sourceName="MixPanel"
-                value="mixpanel"
+                value={Provider.MIXPANEL}
                 imgSrc={mixpanelLogo}
-                selected={provider === Providers.Mixpanel}
+                selected={provider === Provider.GOOGLE}
               />
             </Stack>
           </RadioGroup>
