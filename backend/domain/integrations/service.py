@@ -32,3 +32,26 @@ class IntegrationService:
             Integration.id == PydanticObjectId(id),
             Integration.user_id == PydanticObjectId(user_id),
         )
+
+    async def create_integration(
+        self,
+        app: App,
+        provider: IntegrationProvider,
+        account_id: str,
+        api_key: str,
+        secret: str,
+    ):
+        credential = Credential(
+            type=CredentialType.API_KEY,
+            account_id=account_id,
+            api_key=api_key,
+            secret=secret,
+        )
+        integration = Integration(
+            user_id=app.user_id,
+            app_id=app.id,
+            provider=provider,
+            credential=credential,
+        )
+        await integration.insert()
+        return integration

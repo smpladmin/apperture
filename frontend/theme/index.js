@@ -54,9 +54,10 @@ const fontSize = {
   'xs-12': ['0.75rem', '1rem'], // fs-12px lh-16px
   'xs-14': ['0.875rem', '1.125rem'], // fs-14px lh-18px
   base: ['1rem', '1.375rem'], // fs-16px lh-22px
-  'sh-18': ['1.125rem', ' 1.375rem'], //fs-18px lh-22px
-  'sh-20': ['1.25rem', ' 1.5rem'], //fs-20px lh-24px
-  'sh-24': ['1.5rem', ' 1.75rem'], //fs-24px lh-28px
+  'sh-18': ['1.125rem', '1.375rem'], //fs-18px lh-22px
+  'sh-20': ['1.25rem', '1.5rem'], //fs-20px lh-24px
+  'sh-24': ['1.5rem', '1.75rem'], //fs-24px lh-28px
+  'sh-28': ['1.75rem', '2.215rem'], //fs-28px lh-34px
 };
 
 const fontSizes = {
@@ -68,6 +69,7 @@ const fontSizes = {
   'sh-18': '1.125rem', // fs-18px
   'sh-20': '1.25rem', // fs-20px
   'sh-24': '1.5rem', // fs-24px
+  'sh-28': '1.75rem', //fs-28px
 };
 
 const lineHeights = {
@@ -76,9 +78,10 @@ const lineHeights = {
   'xs-12': '1rem', // lh-16px,
   'xs-14': '1.125rem', // lh-18px,
   base: '1.375rem', // lh-22px,
-  'sh-18': ' 1.375rem', //lh-22px,
-  'sh-20': ' 1.5rem', //lh-24px,
-  'sh-24': ' 1.75rem', //lh-28px,
+  'sh-18': '1.375rem', //lh-22px,
+  'sh-20': '1.5rem', //lh-24px,
+  'sh-24': '1.75rem', //lh-28px,
+  'sh-28': '2.215rem', //lh-34px
 };
 
 const boxShadow = {
