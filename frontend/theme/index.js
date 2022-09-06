@@ -44,6 +44,7 @@ const spacing = {
   168: '42rem',
   176: '44rem',
   200: '50rem',
+  320: '80rem',
 };
 
 const maxWidth = {

@@ -7,7 +7,6 @@ import {
   Heading,
   IconButton,
   Stack,
-  Checkbox,
   Text,
   Image,
   CheckboxGroup,
@@ -20,7 +19,7 @@ import {
 import { ProviderDataSource as DataSource } from '@lib/domain/datasource';
 import { ProviderDataSource } from '@components/ProviderDataSource';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -73,7 +72,7 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
       p={4}
       px={{ lg: 48 }}
       pt={{ lg: 20 }}
-      maxW={{ lg: 'xl' }}
+      maxW={{ lg: 320 }}
     >
       <Box>
         <IconButton
@@ -84,7 +83,7 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           border={'1px'}
           borderColor={'white.200'}
         />
-        <Box mt={11} w={{ sm: 'full' }} maxW={{ lg: 200 }}>
+        <Box mt={11} w={{ sm: 'full' }} maxW={{ lg: '200' }}>
           <Image
             src={gaIcon.src}
             alt="Integration completed"

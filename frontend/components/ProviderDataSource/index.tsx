@@ -16,7 +16,7 @@ export const ProviderDataSource = ({ datasource }: ProviderDataSourceProps) => {
       borderRadius={'12px'}
       bgColor={'white.Default'}
       borderColor={'white.200'}
-      colorScheme={'radio'}
+      colorScheme={'radioBlack'}
       _checked={{
         backgroundColor: 'white.100',
         borderColor: 'black',
@@ -33,7 +33,7 @@ export const ProviderDataSource = ({ datasource }: ProviderDataSourceProps) => {
         >
           {datasource.name}
         </Text>
-        <Flex justifyContent={'space-between'} mt={'0.375rem'}>
+        <Flex justifyContent={'flex-start'} mt={'0.375rem'}>
           <Text
             lineHeight={'xs-12'}
             fontSize={'xs-12'}
