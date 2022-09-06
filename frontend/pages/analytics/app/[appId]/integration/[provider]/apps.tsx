@@ -10,12 +10,52 @@ import {
   Checkbox,
   Text,
   Image,
+  CheckboxGroup,
 } from '@chakra-ui/react';
+import { GetServerSideProps } from 'next';
+import { _getProviderDatasources } from '@lib/services/datasourceService';
+import { ProviderDataSource as DataSource } from '@lib/domain/datasource';
+import { ProviderDataSource } from '@components/ProviderDataSource';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 
-const SelectDataSources = () => {
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  query,
+}) => {
+  const datasources = await _getProviderDatasources(
+    req.cookies.auth_token as string,
+    query.integration_id as string
+  );
+  return {
+    props: {
+      datasources,
+    },
+  };
+};
+
+type SelectDataSourcesProps = {
+  datasources: Array<DataSource>;
+};
+
+const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
+  const router = useRouter();
+
+  const handleGoBack = () => {
+    const appId = router.query.appId;
+    const provider = router.query.provider;
+    router.push(`/analytics/app/${appId}/integration/${provider}/create`);
+  };
+
+  const [selectedDataSources, setSelectedDataSources] = useState<Array<string>>(
+    []
+  );
+
+  const saveDataSources = () => {};
+
   return (
     <Flex
-      h={{ base: '100%', lg: 'auto' }}
+      h={{ base: 'full', lg: 'auto' }}
       flexDir={'column'}
       p={4}
       px={{ lg: 48 }}
@@ -37,7 +77,7 @@ const SelectDataSources = () => {
             alt="Integration completed"
             width={{ base: '52px', md: '18' }}
             height={{ base: '52px', md: '18' }}
-          ></Image>
+          />
           <Text
             textColor={'grey.200'}
             paddingY={6}
@@ -58,46 +98,15 @@ const SelectDataSources = () => {
           </Heading>
         </Box>
         <Stack width={'full'} maxW={'31.25rem'} spacing={'6'}>
-          <Checkbox
-            gap={'14.5px'}
-            paddingY={4}
-            paddingX={3}
-            borderWidth={'1px'}
-            borderRadius={'12px'}
-            bgColor={'white.Default'}
-            borderColor={'white.200'}
-            _checked={{
-              backgroundColor: 'white.100',
-              borderColor: 'black',
-              fontWeight: '500',
-              cursor: 'pointer',
-            }}
+          <CheckboxGroup
+            onChange={(selected: Array<string>) =>
+              setSelectedDataSources(selected)
+            }
           >
-            <Box>
-              <Text lineHeight={'base'} fontSize={'base'} fontWeight={'500'}>
-                Zomato Delivery
-              </Text>
-              <Flex justifyContent={'space-between'} mt={'0.375rem'}>
-                <Text
-                  lineHeight={'xs-12'}
-                  fontSize={'xs-12'}
-                  fontWeight={'400'}
-                  color={'grey.200'}
-                  width={'40'}
-                >
-                  UA-3456789
-                </Text>
-                <Text
-                  lineHeight={'xs-12'}
-                  fontSize={'xs-12'}
-                  fontWeight={'400'}
-                  color={'grey.200'}
-                >
-                  GA 3
-                </Text>
-              </Flex>
-            </Box>
-          </Checkbox>
+            {datasources.map((ds) => {
+              return <ProviderDataSource key={ds._id} datasource={ds} />;
+            })}
+          </CheckboxGroup>
         </Stack>
       </Box>
       <Flex gap={'2'} mt={'10'} w={'full'}>
@@ -109,9 +118,10 @@ const SelectDataSources = () => {
           p={6}
           w={'3.375rem'}
           h={'3.375rem'}
-          // onClick={handleGoBack}
+          onClick={handleGoBack}
         />
         <Button
+          disabled={!selectedDataSources.length}
           rounded={'lg'}
           bg={'black.100'}
           p={6}
@@ -122,7 +132,7 @@ const SelectDataSources = () => {
           width={{ base: 'full', md: '72' }}
           h={'3.375rem'}
         >
-          Next
+          Create Application
         </Button>
       </Flex>
     </Flex>
