@@ -15,6 +15,13 @@ export const addApp = async (name: string): Promise<App | null> => {
   }
 };
 
+export const _getApp = async (id: string, token: string): Promise<App> => {
+  const res = await ApperturePrivateAPI.get(`/apps/${id}`, {
+    headers: { Authorization: token },
+  });
+  return res.data;
+};
+
 /* 
   Apperture convention: Prefix server side calls with an underscore.
   This indicates these are private calls, 

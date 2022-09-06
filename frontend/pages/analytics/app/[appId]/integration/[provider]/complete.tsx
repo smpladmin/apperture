@@ -1,7 +1,28 @@
-import { Image, Flex, Box, Text, Button, Link } from '@chakra-ui/react';
+import { Image, Flex, Box, Text, Button } from '@chakra-ui/react';
 import folder from '@assets/images/folder.svg';
+import { GetServerSideProps } from 'next';
+import { _getApp } from '@lib/services/appService';
+import { App } from '@lib/domain/app';
+import Link from 'next/link';
 
-const CompleteIntegration = () => {
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  query,
+}) => {
+  const app = await _getApp(
+    query.appId as string,
+    req.cookies.auth_token as string
+  );
+  return {
+    props: { app },
+  };
+};
+
+type CompleteIntegrationProps = {
+  app: App;
+};
+
+const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
   return (
     <Flex
       width={'full'}
@@ -35,7 +56,7 @@ const CompleteIntegration = () => {
           lineHeight={{ base: 'xs-14', md: 'base' }}
           color={'grey.200'}
         >
-          “Zomato Mobile App” has been created and added to your applications.
+          “{app.name}” has been created and added to your applications.
         </Text>
         <Box
           w={'full'}
@@ -44,22 +65,25 @@ const CompleteIntegration = () => {
           bottom={'0'}
           right={'0'}
           left={'0'}
-          padding={{ base: '1rem', sm: '0' }}
+          padding={{ base: '9.75rem', sm: '0' }}
         >
-          <Button
-            rounded={'lg'}
-            bg={'black.100'}
-            p={6}
-            fontSize={{ base: 'xs-14', md: 'base' }}
-            lineHeight={{ base: 'xs-14', md: 'base' }}
-            fontWeight={'semibold'}
-            textColor={'white.100'}
-            w={'full'}
-          >
-            Explore
-          </Button>
-          <Link>
+          <Link href={'/analytics/explore'}>
+            <Button
+              rounded={'lg'}
+              bg={'black.100'}
+              p={6}
+              fontSize={{ base: 'xs-14', md: 'base' }}
+              lineHeight={{ base: 'xs-14', md: 'base' }}
+              fontWeight={'semibold'}
+              textColor={'white.100'}
+              w={'full'}
+            >
+              Explore
+            </Button>
+          </Link>
+          <Link href={'/analytics/explore'}>
             <Text
+              cursor={'pointer'}
               pt={'4'}
               decoration={'underline'}
               fontWeight={'500'}

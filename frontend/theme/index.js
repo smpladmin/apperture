@@ -27,12 +27,14 @@ const colors = {
 const spacing = {
   11: '2.75rem',
   13: '3.25rem',
+  13.5: '3.375rem',
   17: '4.25rem',
   18: '4.5rem',
   22: '5.5rem',
   25: '6.25rem',
   30: '7.5rem',
   33: '8.25rem',
+  39: '9.75rem',
   45: '11.25rem',
   78: '19.5rem',
   82: '23.25rem',
@@ -96,4 +98,5 @@ module.exports = {
   boxShadow,
   fontSizes,
   lineHeights,
+  spacing,
 };
