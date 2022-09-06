@@ -4,6 +4,8 @@ import Layout from '@components/Layout';
 import { GetServerSideProps } from 'next';
 import { _getApps } from '@lib/services/appService';
 import { App } from '@lib/domain/app';
+import { Flex, Image, Button, Link, Text, Box } from '@chakra-ui/react';
+import paper from '@assets/images/longDataPaper.svg';
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const token = req.cookies.auth_token;
@@ -28,15 +30,50 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 
 const Explore = () => {
   return (
-    <div>
+    <Box height={'full'} paddingX={{ base: '1rem', md: '0' }}>
       <Head>
         <title>Apperture</title>
         <meta name="description" content="Apperture Analytics" />
       </Head>
-      <div>
-        <h2>Explore</h2>
-      </div>
-    </div>
+      <Flex
+        width={'full'}
+        height={'full'}
+        direction={'column'}
+        justifyContent={'center'}
+        alignItems={'center'}
+        textAlign={'center'}
+        position={'relative'}
+      >
+        <Image
+          src={paper.src}
+          paddingBottom={'10'}
+          alt="Integration completed"
+          width={'18.6rem'}
+          height={'auto'}
+        />
+        <Box
+          width={{ base: 'full', sm: 87.5 }}
+          paddingX={{ base: '1rem', md: '0' }}
+        >
+          <Text
+            fontWeight={'bold'}
+            fontSize={'sh-28'}
+            lineHeight={'sh-28'}
+            marginBottom={'2'}
+          >
+            Loading your data
+          </Text>
+          <Text
+            fontSize={{ base: 'xs-14', md: 'base' }}
+            lineHeight={{ base: 'xs-14', md: 'base' }}
+            color={'grey.200'}
+          >
+            Apperture is fetching data from the original source. This may take
+            some time
+          </Text>
+        </Box>
+      </Flex>
+    </Box>
   );
 };
 
