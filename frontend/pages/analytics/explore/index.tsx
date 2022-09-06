@@ -41,7 +41,6 @@ const Explore = () => {
 };
 
 Explore.getLayout = function getLayout(page: ReactNode, apps: App[]) {
-  console.log('layout props', apps);
   return <Layout apps={apps}>{page}</Layout>;
 };
 

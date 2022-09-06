@@ -15,4 +15,13 @@ export const theme = extendTheme({
   lineHeights: {
     ...lineHeights,
   },
+  components: {
+    Button: {
+      baseStyle: {
+        _disabled: {
+          backgroundColor: 'grey.DEFAULT',
+        },
+      },
+    },
+  },
 });

@@ -33,7 +33,7 @@ const UserApp = ({ app }: UserAppProps) => {
           fontSize={{ base: 'xs', md: 'xs-14' }}
           lineHeight={{ base: 'xs', md: 'xs-14' }}
         />
-        <Flex direction={'column'} ml={''}>
+        <Flex direction={'column'}>
           <Text fontSize={'base'} fontWeight={'500'} lineHeight={'base'}>
             {app.name}
           </Text>
@@ -46,7 +46,7 @@ const UserApp = ({ app }: UserAppProps) => {
             GA, Mix Panel
           </Text>
         </Flex>
-        <Radio ml={'auto'} value={app._id} colorScheme={'radio'} />
+        <Radio ml={'auto'} value={app._id} colorScheme={'radioBlack'} />
       </Flex>
     </Flex>
   );
