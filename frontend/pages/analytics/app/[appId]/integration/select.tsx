@@ -36,8 +36,8 @@ const SelectProvider = () => {
       direction={'column'}
       h={{ base: '100%', lg: 'auto' }}
       p={4}
-      px={{ md: 48 }}
-      pt={{ md: 20 }}
+      px={{ base: 4, md: 48 }}
+      pt={{ base: 4, md: 20 }}
       maxW={{ lg: '1280px' }}
       justifyContent={{ base: 'space-between', md: 'start' }}
     >

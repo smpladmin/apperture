@@ -40,7 +40,7 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
         height={'auto'}
       />
       <Box
-        width={{ base: 'full', sm: 'xs' }}
+        width={{ base: 'full', md: 'xs' }}
         paddingX={{ base: '1rem', md: '0' }}
       >
         <Text
@@ -61,11 +61,11 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
         <Box
           w={'full'}
           mt={'12'}
-          position={{ base: 'absolute', sm: 'relative' }}
+          position={{ base: 'absolute', md: 'relative' }}
           bottom={'0'}
           right={'0'}
           left={'0'}
-          padding={{ base: '9.75rem', sm: '0' }}
+          padding={{ base: '9.75rem', md: '0' }}
         >
           <Link href={'/analytics/explore'}>
             <Button

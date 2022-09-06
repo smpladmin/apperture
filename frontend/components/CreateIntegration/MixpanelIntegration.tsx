@@ -61,6 +61,7 @@ const MixpanelIntegration = () => {
           bg={'white.DEFAULT'}
           border={'1px'}
           borderColor={'white.200'}
+          onClick={() => router.push('/analytics/explore?apps=1')}
         />
         <Box height={{ base: 12, md: 18 }} width={{ base: 12, md: 18 }} mb={2}>
           <Image src={mpLogo} alt="mixpanel" layout="responsive" />
