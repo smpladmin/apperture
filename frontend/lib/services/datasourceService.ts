@@ -31,6 +31,5 @@ export const saveDataSources = async (
     `/integrations/${integrationId}/datasources`,
     datasources
   );
-  console.log(res.data);
   return res.data;
 };

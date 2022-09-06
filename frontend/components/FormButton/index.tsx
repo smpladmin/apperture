@@ -4,12 +4,14 @@ type FormButtonProps = {
   navigateBack: Function;
   handleNextClick: Function;
   disabled: boolean;
+  nextButtonName?: string;
 };
 
 const FormButton = ({
   navigateBack,
   handleNextClick,
   disabled,
+  nextButtonName = 'Next',
 }: FormButtonProps) => {
   return (
     <Flex gap={'2'} width={'full'}>
@@ -34,7 +36,7 @@ const FormButton = ({
         disabled={disabled}
         onClick={() => handleNextClick()}
       >
-        Next
+        {nextButtonName}
       </Button>
     </Flex>
   );
