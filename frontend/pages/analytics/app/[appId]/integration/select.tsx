@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Flex,
   Heading,
   IconButton,
@@ -17,8 +16,8 @@ import { Providers } from '@lib/constants';
 import FormButton from '@components/FormButton';
 import IntegrationSource from '@components/IntegrationSource';
 
-const SelectIntegration = () => {
-  const [integration, setIntegration] = useState<string>('');
+const SelectProvider = () => {
+  const [provider, setProvider] = useState<string>('');
   const router = useRouter();
   const { appId } = router.query;
 
@@ -29,7 +28,7 @@ const SelectIntegration = () => {
   const handleNextClick = () =>
     router.push(
       `/analytics/app/${appId}/integration/${encodeURIComponent(
-        integration
+        provider
       )}/create`
     );
   return (
@@ -73,19 +72,19 @@ const SelectIntegration = () => {
           Select a data source
         </Heading>
         <Box width={'full'} marginBottom={'10'}>
-          <RadioGroup value={integration} onChange={setIntegration}>
+          <RadioGroup value={provider} onChange={setProvider}>
             <Stack direction="column">
               <IntegrationSource
                 sourceName="Google Analytics"
                 value="google"
                 imgSrc={gaLogo}
-                selected={integration === Providers.Google}
+                selected={provider === Providers.Google}
               />
               <IntegrationSource
                 sourceName="MixPanel"
                 value="mixpanel"
                 imgSrc={mixpanelLogo}
-                selected={integration === Providers.Mixpanel}
+                selected={provider === Providers.Mixpanel}
               />
             </Stack>
           </RadioGroup>
@@ -93,11 +92,11 @@ const SelectIntegration = () => {
         <FormButton
           navigateBack={handleGoBack}
           handleNextClick={handleNextClick}
-          disabled={!integration}
+          disabled={!provider}
         />
       </Box>
     </Flex>
   );
 };
 
-export default SelectIntegration;
+export default SelectProvider;
