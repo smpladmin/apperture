@@ -3,10 +3,16 @@ import { App } from '@lib/domain/app';
 import { AxiosError } from 'axios';
 import { AppertureAPI } from '../apiClient';
 
-export const addApp = async (name: string): Promise<void> => {
-  await AppertureAPI.post('/apps', {
-    name,
-  });
+export const addApp = async (name: string): Promise<App | null> => {
+  try {
+    const app = await AppertureAPI.post('/apps', {
+      name,
+    });
+    return app.data;
+  } catch (error) {
+    console.log((error as AxiosError).message);
+    return null;
+  }
 };
 
 export const _getApp = async (id: string, token: string): Promise<App> => {
