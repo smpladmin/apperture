@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from domain.apps.service import AppService
 from domain.users.models import User
 from rest.dtos.apps import AppResponse, CreateAppDto
-from rest.middlewares import get_user, validate_jwt
+from rest.middlewares import get_user, get_user_id, validate_jwt
 
 
 router = APIRouter(
@@ -29,3 +29,12 @@ async def get_apps(
     app_service: AppService = Depends(),
 ):
     return await app_service.get_apps(user)
+
+
+@router.get("/apps/{id}", response_model=AppResponse)
+async def get_app(
+    id: str,
+    user_id: str = Depends(get_user_id),
+    app_service: AppService = Depends(),
+):
+    return await app_service.get_user_app(id, user_id)

@@ -20,9 +20,16 @@ export const saveDataSources = async (
   selectedDataSources: Array<ProviderDataSource>,
   integrationId: string
 ) => {
+  const datasources = selectedDataSources.map((ds) => {
+    return {
+      externalSourceId: ds._id,
+      name: ds.name,
+      version: ds.version,
+    };
+  });
   const res = await AppertureAPI.post(
     `/integrations/${integrationId}/datasources`,
-    selectedDataSources
+    datasources
   );
   console.log(res.data);
   return res.data;

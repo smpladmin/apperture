@@ -13,7 +13,10 @@ import {
   CheckboxGroup,
 } from '@chakra-ui/react';
 import { GetServerSideProps } from 'next';
-import { _getProviderDatasources } from '@lib/services/datasourceService';
+import {
+  saveDataSources,
+  _getProviderDatasources,
+} from '@lib/services/datasourceService';
 import { ProviderDataSource as DataSource } from '@lib/domain/datasource';
 import { ProviderDataSource } from '@components/ProviderDataSource';
 import { useRouter } from 'next/router';
@@ -42,16 +45,26 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
   const router = useRouter();
 
   const handleGoBack = () => {
-    const appId = router.query.appId;
-    const provider = router.query.provider;
-    router.push(`/analytics/app/${appId}/integration/${provider}/create`);
+    router.push({
+      pathname: '/analytics/app/[appId]/integration/[provider]/create',
+      query: { appId: router.query.appId, provider: router.query.provider },
+    });
   };
 
   const [selectedDataSources, setSelectedDataSources] = useState<Array<string>>(
     []
   );
 
-  const saveDataSources = () => {};
+  const handleSave = async () => {
+    const selected = datasources.filter((ds) =>
+      selectedDataSources.includes(ds._id)
+    );
+    await saveDataSources(selected, router.query.integration_id as string);
+    router.replace({
+      pathname: '/analytics/app/[appId]/integration/[provider]/complete',
+      query: { appId: router.query.appId, provider: router.query.provider },
+    });
+  };
 
   return (
     <Flex
@@ -131,6 +144,7 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           textColor={'white.100'}
           width={{ base: 'full', md: '72' }}
           h={'3.375rem'}
+          onClick={handleSave}
         >
           Create Application
         </Button>
