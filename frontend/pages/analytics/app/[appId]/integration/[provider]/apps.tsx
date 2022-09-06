@@ -73,7 +73,7 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
       p={4}
       px={{ lg: 48 }}
       pt={{ lg: 20 }}
-      maxW={{ lg: '1280px' }}
+      maxW={{ lg: 'xl' }}
     >
       <Box>
         <IconButton
@@ -84,12 +84,12 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           border={'1px'}
           borderColor={'white.200'}
         />
-        <Box mt={11} w={{ sm: 'full' }} maxW={{ lg: '50rem' }}>
+        <Box mt={11} w={{ sm: 'full' }} maxW={{ lg: 200 }}>
           <Image
             src={gaIcon.src}
             alt="Integration completed"
-            width={{ base: '52px', md: '18' }}
-            height={{ base: '52px', md: '18' }}
+            width={{ base: '3.25rem', md: '18' }}
+            height={{ base: '3.25rem', md: '18' }}
           />
           <Text
             textColor={'grey.200'}
@@ -110,7 +110,7 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
             Select applications from Google Analytics that you want to track
           </Heading>
         </Box>
-        <Stack width={'full'} maxW={'31.25rem'} spacing={'6'}>
+        <Stack width={'full'} maxW={125} spacing={6}>
           <CheckboxGroup
             onChange={(selected: Array<string>) =>
               setSelectedDataSources(selected)
@@ -129,8 +129,8 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           rounded={'lg'}
           bg={'white.100'}
           p={6}
-          w={'3.375rem'}
-          h={'3.375rem'}
+          w={'13.5'}
+          h={'13.5'}
           onClick={handleGoBack}
         />
         <Button
@@ -143,7 +143,7 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           lineHeight={'base'}
           textColor={'white.100'}
           width={{ base: 'full', md: '72' }}
-          h={'3.375rem'}
+          h={'13.5'}
           onClick={handleSave}
         >
           Create Application

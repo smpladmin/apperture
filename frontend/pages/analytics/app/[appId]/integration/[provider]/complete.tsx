@@ -65,7 +65,7 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
           bottom={'0'}
           right={'0'}
           left={'0'}
-          padding={{ base: '1rem', sm: '0' }}
+          padding={{ base: '9.75rem', sm: '0' }}
         >
           <Link href={'/analytics/explore'}>
             <Button

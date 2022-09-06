@@ -26,14 +26,18 @@ const colors = {
 
 const spacing = {
   11: '2.75rem',
+  13.5: '3.375rem',
   18: '4.5rem',
   25: '6.25rem',
   30: '7.5rem',
   33: '8.25rem',
+  39: '9.75rem',
   45: '11.25rem',
   100: '25rem',
+  125: '31.25rem',
   141: '35.25rem',
   168: '42rem',
+  200: '50rem',
 };
 
 const maxWidth = {
@@ -88,4 +92,5 @@ module.exports = {
   boxShadow,
   fontSizes,
   lineHeights,
+  spacing,
 };
