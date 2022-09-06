@@ -26,19 +26,17 @@ const SelectProvider = () => {
   const handleClose = () => router.push('/analytics/explore?apps=1');
 
   const handleNextClick = () =>
-    router.push(
-      `/analytics/app/${appId}/integration/${encodeURIComponent(
-        provider
-      )}/create`
-    );
+    router.push({
+      pathname: `/analytics/app/[appId]/integration/[provider]/create`,
+      query: { appId, provider },
+    });
   return (
     <Flex
-      direction={'column'}
-      h={{ base: '100%', lg: 'auto' }}
-      p={4}
-      px={{ base: 4, md: 48 }}
-      pt={{ base: 4, md: 20 }}
-      maxW={{ lg: '1280px' }}
+      flexDirection={'column'}
+      h={'full'}
+      py={{ base: 4, md: 10 }}
+      pl={{ base: 4, md: 45 }}
+      pr={{ base: 4, md: 'auto' }}
       justifyContent={{ base: 'space-between', md: 'start' }}
     >
       <Box>

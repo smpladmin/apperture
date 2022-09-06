@@ -25,21 +25,21 @@ const Create = () => {
   const handleNextClick = async () => {
     const app = await addApp(appName);
     if (app) {
-      router.push(
-        `/analytics/app/${encodeURIComponent(app._id)}/integration/select`
-      );
+      router.push({
+        pathname: `/analytics/app/[appId]/integration/select`,
+        query: { appId: app._id },
+      });
     }
   };
   const handleGoBack = () => router.push('/analytics/explore?apps=1');
 
   return (
     <Flex
-      h={{ base: '100%', lg: 'auto' }}
-      direction={'column'}
-      p={4}
-      px={{ base: 4, md: 48 }}
-      pt={{ base: 4, md: 20 }}
-      maxW={{ lg: '1280px' }}
+      flexDirection={'column'}
+      h={'full'}
+      py={{ base: 4, md: 10 }}
+      pl={{ base: 4, md: 45 }}
+      pr={{ base: 4, md: 'auto' }}
       justifyContent={{ base: 'space-between', md: 'start' }}
     >
       <Box>
