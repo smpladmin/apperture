@@ -6,7 +6,7 @@ type FormButtonProps = {
   handleNextClick?: Function;
   disabled?: boolean;
   link?: string;
-  buttonText: string;
+  nextButtonName?: string;
 };
 
 const FormButton = ({
@@ -14,7 +14,7 @@ const FormButton = ({
   handleNextClick,
   disabled,
   link,
-  buttonText,
+  nextButtonName = 'Next',
 }: FormButtonProps) => {
   return (
     <Flex gap={'2'} width={'full'}>
@@ -40,7 +40,7 @@ const FormButton = ({
             width={{ base: 'full', md: '72' }}
             disabled={disabled}
           >
-            {buttonText}
+            {nextButtonName}
           </Button>
         </Link>
       ) : (
@@ -56,7 +56,7 @@ const FormButton = ({
           disabled={disabled}
           onClick={() => handleNextClick?.()}
         >
-          {buttonText}
+          {nextButtonName}
         </Button>
       )}
     </Flex>

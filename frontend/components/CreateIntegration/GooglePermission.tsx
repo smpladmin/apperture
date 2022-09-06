@@ -65,7 +65,7 @@ const GooglePermission = ({
             <FormButton
               navigateBack={navigateBack}
               link={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/integrations/oauth/google?app_id=${appId}&redirect_url=${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/analytics/app/${appId}/integration/google/apps`}
-              buttonText={'Give Access'}
+              nextButtonName={'Give Access'}
             />
           </Box>
         </Box>
