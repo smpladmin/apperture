@@ -12,7 +12,6 @@ import {
   DrawerContent,
   DrawerOverlay,
   Image,
-  Center,
 } from '@chakra-ui/react';
 import MobileSidemenu from '../Sidebar/MobileSidemenu';
 import { useContext } from 'react';
@@ -48,18 +47,20 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
         bg={'transparent'}
         onClick={onOpen}
       />
-      <Drawer placement="left" isOpen={isOpen} onClose={onClose}>
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerBody p={0}>
-            <MobileSidemenu
-              closeDrawer={onClose}
-              openAppsModal={openAppsModal}
-              selectedApp={selectedApp}
-            />
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
+      {context.device.isMobile && (
+        <Drawer placement="left" isOpen={isOpen} onClose={onClose}>
+          <DrawerOverlay />
+          <DrawerContent>
+            <DrawerBody p={0}>
+              <MobileSidemenu
+                closeDrawer={onClose}
+                openAppsModal={openAppsModal}
+                selectedApp={selectedApp}
+              />
+            </DrawerBody>
+          </DrawerContent>
+        </Drawer>
+      )}
 
       <Input
         size={'lg'}
