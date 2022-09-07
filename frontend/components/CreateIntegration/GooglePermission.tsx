@@ -21,6 +21,7 @@ const GooglePermission = ({
       <Box p={4} px={{ md: 45 }} pt={{ md: 10 }}>
         <IconButton
           aria-label="close"
+          variant={'secondary'}
           icon={<i className="ri-close-fill" />}
           rounded={'full'}
           bg={'white.DEFAULT'}

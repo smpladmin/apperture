@@ -1,4 +1,4 @@
-import { extendTheme } from '@chakra-ui/react';
+import { Button, extendTheme } from '@chakra-ui/react';
 import { colors, fontSizes, spacing, lineHeights } from './index';
 
 export const theme = extendTheme({
@@ -17,9 +17,20 @@ export const theme = extendTheme({
   },
   components: {
     Button: {
-      baseStyle: {
-        _disabled: {
-          backgroundColor: 'grey.DEFAULT',
+      variants: {
+        primary: {
+          _hover: {
+            bg: 'black.50',
+          },
+          _disabled: {
+            bg: 'grey.DEFAULT',
+            pointerEvents: 'none',
+          },
+        },
+        secondary: {
+          _hover: {
+            bg: 'grey.50',
+          },
         },
       },
     },

@@ -56,6 +56,7 @@ const MixpanelIntegration = () => {
           mb={8}
           size={'sm'}
           aria-label="close"
+          variant={'secondary'}
           icon={<chakra.i className="ri-close-fill" />}
           rounded={'full'}
           bg={'white.DEFAULT'}

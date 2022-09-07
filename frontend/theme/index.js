@@ -1,7 +1,7 @@
 const colors = {
   black: {
     DEFAULT: '#07070d',
-    50: '#0e0e19',
+    50: 'linear-gradient(0deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), #0E0E19',
     100: '#0e0e1a',
     0: 'rgba(14,14,26,0)',
   },
@@ -13,6 +13,7 @@ const colors = {
   },
   grey: {
     DEFAULT: '#d9d9da',
+    50: '#e5e5e5',
     100: '#b2b2b5',
     200: '#78787E',
     dark: '0E0E19',
@@ -29,7 +30,6 @@ const spacing = {
   0.15: '0.0375rem',
   11: '2.75rem',
   13: '3.25rem',
-  13.5: '3.375rem',
   17: '4.25rem',
   18: '4.5rem',
   22: '5.5rem',
