@@ -20,6 +20,7 @@ import { ProviderDataSource as DataSource } from '@lib/domain/datasource';
 import { ProviderDataSource } from '@components/ProviderDataSource';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import FormButton from '@components/FormButton';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -121,33 +122,15 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           </CheckboxGroup>
         </Stack>
       </Box>
-      <Flex gap={2} mt={10} w={'full'}>
-        <IconButton
-          aria-label="back"
-          icon={<i className="ri-arrow-left-line"></i>}
-          rounded={'lg'}
-          bg={'white.100'}
-          p={6}
-          w={'13.5'}
-          h={'13.5'}
-          onClick={handleGoBack}
-        />
-        <Button
+
+      <Box mt={10} w={'full'}>
+        <FormButton
+          navigateBack={handleGoBack}
+          handleNextClick={handleSave}
           disabled={!selectedDataSources.length}
-          rounded={'lg'}
-          bg={'black.100'}
-          p={6}
-          fontSize={'base'}
-          fontWeight={'semibold'}
-          lineHeight={'base'}
-          textColor={'white.100'}
-          w={{ base: 'full', md: '72' }}
-          h={'13.5'}
-          onClick={handleSave}
-        >
-          Create Application
-        </Button>
-      </Flex>
+          nextButtonName={'Create Application'}
+        />
+      </Box>
     </Flex>
   );
 };
