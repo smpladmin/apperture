@@ -45,6 +45,7 @@ const Create = () => {
       <Box>
         <IconButton
           aria-label="close"
+          variant={'secondary'}
           icon={<i className="ri-close-fill" />}
           rounded={'full'}
           bg={'white'}
@@ -97,6 +98,7 @@ const Create = () => {
         </Box>
       </Box>
       <Button
+        variant={'primary'}
         mt={10}
         rounded={'lg'}
         bg={'black.100'}

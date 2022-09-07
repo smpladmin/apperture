@@ -17,9 +17,20 @@ export const theme = extendTheme({
   },
   components: {
     Button: {
-      baseStyle: {
-        _disabled: {
-          backgroundColor: 'grey.DEFAULT',
+      variants: {
+        primary: {
+          _hover: {
+            bg: 'black.50',
+          },
+          _disabled: {
+            bg: 'grey.DEFAULT',
+            pointerEvents: 'none',
+          },
+        },
+        secondary: {
+          _hover: {
+            bg: 'grey.50',
+          },
         },
       },
     },

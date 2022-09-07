@@ -42,6 +42,7 @@ const SelectProvider = () => {
       <Box>
         <IconButton
           aria-label="close"
+          variant={'secondary'}
           icon={<i className="ri-close-fill" />}
           rounded={'full'}
           bg={'white.DEFAULT'}

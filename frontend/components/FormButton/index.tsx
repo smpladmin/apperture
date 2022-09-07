@@ -30,6 +30,7 @@ const FormButton = ({
       {link ? (
         <Link href={link}>
           <Button
+            variant={'primary'}
             rounded={'lg'}
             bg={'black.100'}
             p={6}
@@ -45,6 +46,7 @@ const FormButton = ({
         </Link>
       ) : (
         <Button
+          variant={'primary'}
           rounded={'lg'}
           bg={'black.100'}
           p={6}
