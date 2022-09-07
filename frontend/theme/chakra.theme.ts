@@ -1,4 +1,4 @@
-import { Button, extendTheme } from '@chakra-ui/react';
+import { extendTheme } from '@chakra-ui/react';
 import { colors, fontSizes, spacing, lineHeights } from './index';
 
 export const theme = extendTheme({
