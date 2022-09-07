@@ -1,6 +1,7 @@
 const colors = {
   black: {
     DEFAULT: '#07070d',
+    50: '#0e0e19',
     100: '#0e0e1a',
     0: 'rgba(14,14,26,0)',
   },
