@@ -30,7 +30,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 
 const Explore = () => {
   return (
-    <Box height={'full'} paddingX={{ base: '1rem', md: '0' }}>
+    <Box height={'full'} paddingX={{ base: 4, md: 0 }}>
       <Head>
         <title>Apperture</title>
         <meta name="description" content="Apperture Analytics" />
@@ -46,20 +46,17 @@ const Explore = () => {
       >
         <Image
           src={paper.src}
-          paddingBottom={'10'}
+          pb={10}
           alt="Integration completed"
-          width={'18.6rem'}
-          height={'auto'}
+          w={'18.6rem'}
+          h={'auto'}
         />
-        <Box
-          width={{ base: 'full', sm: 87.5 }}
-          paddingX={{ base: '1rem', md: '0' }}
-        >
+        <Box width={{ base: 'full', md: 88 }} paddingX={{ base: 4, md: 0 }}>
           <Text
             fontWeight={'bold'}
             fontSize={'sh-28'}
             lineHeight={'sh-28'}
-            marginBottom={'2'}
+            marginBottom={2}
           >
             Loading your data
           </Text>

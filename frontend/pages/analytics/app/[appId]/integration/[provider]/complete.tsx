@@ -27,73 +27,66 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
     <Flex
       width={'full'}
       direction={'column'}
-      justifyContent={'center'}
+      justifyContent={{ base: 'space-between', md: 'center' }}
       alignItems={'center'}
       textAlign={'center'}
-      position={'relative'}
+      pt={{ base: 55, md: 0 }}
+      pb={{ base: 4, md: 0 }}
+      px={{ base: 4, md: 0 }}
     >
-      <Image
-        src={folder.src}
-        paddingBottom={'10'}
-        alt="Integration completed"
-        width={'9.75rem'}
-        height={'auto'}
-      />
-      <Box
-        width={{ base: 'full', md: 'xs' }}
-        paddingX={{ base: '1rem', md: '0' }}
-      >
-        <Text
-          fontWeight={'bold'}
-          fontSize={'sh-28'}
-          lineHeight={'sh-28'}
-          marginBottom={'2'}
-        >
-          We are all set!
-        </Text>
-        <Text
-          fontSize={{ base: 'xs-14', md: 'base' }}
-          lineHeight={{ base: 'xs-14', md: 'base' }}
-          color={'grey.200'}
-        >
-          “{app.name}” has been created and added to your applications.
-        </Text>
-        <Box
-          w={'full'}
-          mt={'12'}
-          position={{ base: 'absolute', md: 'relative' }}
-          bottom={'0'}
-          right={'0'}
-          left={'0'}
-          padding={{ base: '9.75rem', md: '0' }}
-        >
-          <Link href={'/analytics/explore'}>
-            <Button
-              rounded={'lg'}
-              bg={'black.100'}
-              p={6}
-              fontSize={{ base: 'xs-14', md: 'base' }}
-              lineHeight={{ base: 'xs-14', md: 'base' }}
-              fontWeight={'semibold'}
-              textColor={'white.100'}
-              w={'full'}
-            >
-              Explore
-            </Button>
-          </Link>
-          <Link href={'/analytics/explore'}>
-            <Text
-              cursor={'pointer'}
-              pt={'4'}
-              decoration={'underline'}
-              fontWeight={'500'}
-              fontSize={'base'}
-              lineHeight={'base'}
-            >
-              Go to Home
-            </Text>
-          </Link>
+      <Flex direction={'column'} alignItems={'center'}>
+        <Image
+          src={folder.src}
+          pb={10}
+          alt="Integration completed"
+          w={39}
+          h={'auto'}
+        />
+        <Box maxW={'xs'} w={'full'}>
+          <Text
+            fontWeight={'bold'}
+            fontSize={'sh-28'}
+            lineHeight={'sh-28'}
+            marginBottom={'2'}
+          >
+            We are all set!
+          </Text>
+          <Text
+            fontSize={{ base: 'xs-14', md: 'base' }}
+            lineHeight={{ base: 'xs-14', md: 'base' }}
+            color={'grey.200'}
+          >
+            “{app.name}” has been created and added to your applications.
+          </Text>
         </Box>
+      </Flex>
+      <Box w={'full'} marginX="auto" maxW={70} mt={12}>
+        <Link href={'/analytics/explore'}>
+          <Button
+            rounded={'lg'}
+            bg={'black.100'}
+            p={6}
+            fontSize={{ base: 'xs-14', md: 'base' }}
+            lineHeight={{ base: 'xs-14', md: 'base' }}
+            fontWeight={'semibold'}
+            textColor={'white.100'}
+            w={'full'}
+          >
+            Explore
+          </Button>
+        </Link>
+        <Link href={'/analytics/explore'}>
+          <Text
+            cursor={'pointer'}
+            pt={'4'}
+            decoration={'underline'}
+            fontWeight={'500'}
+            fontSize={'base'}
+            lineHeight={'base'}
+          >
+            Go to Home
+          </Text>
+        </Link>
       </Box>
     </Flex>
   );

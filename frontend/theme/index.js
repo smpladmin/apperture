@@ -37,9 +37,11 @@ const spacing = {
   33: '8.25rem',
   39: '9.75rem',
   45: '11.25rem',
+  55: '13.75rem',
+  70: '17.5rem',
   78: '19.5rem',
   82: '20.5rem',
-  87.5: '21.975rem',
+  88: '22rem',
   100: '25rem',
   125: '31.25rem',
   141: '35.25rem',
@@ -63,6 +65,7 @@ const fontSize = {
   'sh-20': ['1.25rem', '1.5rem'], //fs-20px lh-24px
   'sh-24': ['1.5rem', '1.75rem'], //fs-24px lh-28px
   'sh-28': ['1.75rem', '2.215rem'], //fs-28px lh-34px
+  'sh-52': ['3.5rem', '4.125rem'], //fs-52px lh-66px
 };
 
 const fontSizes = {
@@ -75,6 +78,7 @@ const fontSizes = {
   'sh-20': '1.25rem', // fs-20px
   'sh-24': '1.5rem', // fs-24px
   'sh-28': '1.75rem', //fs-28px
+  'sh-52': '3.5rem', //fs-52px
 };
 
 const lineHeights = {
@@ -87,6 +91,7 @@ const lineHeights = {
   'sh-20': '1.5rem', //lh-24px,
   'sh-24': '1.75rem', //lh-28px,
   'sh-28': '2.215rem', //lh-34px
+  'sh-52': '4.125rem', //lh-66px
 };
 
 const boxShadow = {
