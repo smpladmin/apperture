@@ -67,12 +67,12 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
 
   return (
     <Flex
-      h={{ base: 'full', lg: 'auto' }}
-      flexDir={'column'}
-      p={4}
-      px={{ lg: 48 }}
-      pt={{ lg: 20 }}
-      maxW={{ lg: 320 }}
+      flexDirection={'column'}
+      h={'full'}
+      py={{ base: 4, md: 10 }}
+      pl={{ base: 4, md: 45 }}
+      pr={{ base: 4, md: 'auto' }}
+      justifyContent={{ base: 'space-between', md: 'start' }}
     >
       <Box>
         <IconButton
@@ -83,12 +83,12 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           border={'1px'}
           borderColor={'white.200'}
         />
-        <Box mt={11} w={{ sm: 'full' }} maxW={{ lg: '200' }}>
+        <Box mt={11} w={{ base: 'full' }} maxW={{ md: '200' }}>
           <Image
             src={gaIcon.src}
             alt="Integration completed"
-            width={{ base: '3.25rem', md: '18' }}
-            height={{ base: '3.25rem', md: '18' }}
+            width={{ base: '13', md: '18' }}
+            height={{ base: '13', md: '18' }}
           />
           <Text
             textColor={'grey.200'}
@@ -101,10 +101,10 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           </Text>
           <Heading
             as={'h2'}
-            fontWeight={'600'}
-            pb={{ base: 8, lg: 10 }}
-            fontSize={{ base: '1.74rem', lg: '3.5rem' }}
-            lineHeight={{ base: '2.125rem', lg: '4.125rem' }}
+            pb={{ base: 8, md: 10 }}
+            fontSize={{ base: 'sh-28', md: 'sh-52' }}
+            lineHeight={{ base: 'sh-28', md: 'sh-52' }}
+            fontWeight={'semibold'}
           >
             Select applications from Google Analytics that you want to track
           </Heading>
@@ -121,7 +121,7 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           </CheckboxGroup>
         </Stack>
       </Box>
-      <Flex gap={'2'} mt={'10'} w={'full'}>
+      <Flex gap={2} mt={10} w={'full'}>
         <IconButton
           aria-label="back"
           icon={<i className="ri-arrow-left-line"></i>}
@@ -141,7 +141,7 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           fontWeight={'semibold'}
           lineHeight={'base'}
           textColor={'white.100'}
-          width={{ base: 'full', md: '72' }}
+          w={{ base: 'full', md: '72' }}
           h={'13.5'}
           onClick={handleSave}
         >

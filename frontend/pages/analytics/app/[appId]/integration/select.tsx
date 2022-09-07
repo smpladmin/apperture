@@ -49,7 +49,7 @@ const SelectProvider = () => {
           borderColor={'white.200'}
           onClick={handleClose}
         />
-        <Box width={{ base: 'full' }} maxWidth={{ lg: '200' }} mt={11}>
+        <Box width={{ base: 'full' }} maxWidth={{ md: '200' }} mt={11}>
           <Text
             textColor={'grey.200'}
             pb={6}
@@ -61,9 +61,9 @@ const SelectProvider = () => {
           </Text>
           <Heading
             as={'h2'}
-            pb={{ base: 8, lg: 10 }}
-            fontSize={{ base: '1.74rem', lg: '3.5rem' }}
-            lineHeight={{ base: '2.125rem', lg: '4.125rem' }}
+            pb={{ base: 8, md: 10 }}
+            fontSize={{ base: 'sh-28', md: 'sh-52' }}
+            lineHeight={{ base: 'sh-28', md: 'sh-52' }}
             fontWeight={'semibold'}
           >
             Select a data source

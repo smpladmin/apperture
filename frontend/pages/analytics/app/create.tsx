@@ -52,7 +52,7 @@ const Create = () => {
           borderColor={'white.200'}
           onClick={handleGoBack}
         />
-        <Box mt={11} width={{ base: 'full' }} maxW={{ lg: '176' }}>
+        <Box mt={11} width={{ base: 'full' }} maxW={{ md: '176' }}>
           <Text
             textColor={'grey.200'}
             pb={6}
@@ -64,9 +64,9 @@ const Create = () => {
           </Text>
           <Heading
             as={'h2'}
-            pb={{ base: 8, lg: 10 }}
-            fontSize={{ base: '1.74rem', lg: '3.5rem' }}
-            lineHeight={{ base: '2.125rem', lg: '4.125rem' }}
+            pb={{ base: 8, md: 10 }}
+            fontSize={{ base: 'sh-28', md: 'sh-52' }}
+            lineHeight={{ base: 'sh-28', md: 'sh-52' }}
             fontWeight={'semibold'}
           >
             What would you like to name this application?
