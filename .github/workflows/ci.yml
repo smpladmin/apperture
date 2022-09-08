@@ -56,3 +56,16 @@ jobs:
           docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+      
+      - name: Build and Push Data Processor
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: data_processor
+          IMAGE_TAG: latest
+          DP_ENV: ${{ secrets.DP_ENV }}
+        run: |
+          cd data_processor
+          echo "$DP_ENV" > .env
+          docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags

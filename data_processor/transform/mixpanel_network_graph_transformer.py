@@ -1,6 +1,6 @@
 import pandas as pd
 import datetime
-from data_processor.transform.transformer import Transformer
+from .transformer import Transformer
 
 
 class MixpanelNetworkGraphTransformer(Transformer):

@@ -1,6 +1,6 @@
 import traceback
 
-from data_processor.strategies.strategy_builder import StrategyBuilder
+from strategies.strategy_builder import StrategyBuilder
 from tenants.tenants_service import TenantsService
 
 

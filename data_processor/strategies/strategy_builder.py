@@ -1,8 +1,8 @@
-from data_processor.strategies.google_analytics_4_strategy import (
+from .google_analytics_4_strategy import (
     GoogleAnalytics4Strategy,
 )
-from data_processor.strategies.google_analytics_strategy import GoogleAnalyticsStrategy
-from data_processor.strategies.mixpanel_analytics_strategy import (
+from .google_analytics_strategy import GoogleAnalyticsStrategy
+from .mixpanel_analytics_strategy import (
     MixpanelAnalyticsStrategy,
 )
 

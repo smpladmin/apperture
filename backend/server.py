@@ -3,9 +3,14 @@ from dotenv import load_dotenv
 
 load_dotenv(override=False)
 
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from rq import Queue
+from redis import Redis
+
+redis_conn = Redis(host=os.getenv("REDIS_HOST"), password=os.getenv("REDIS_PASSWORD"))
+q = Queue(connection=redis_conn)
 
 from rest.controllers import (
     app_controller,
@@ -14,7 +19,6 @@ from rest.controllers import (
     integration_oauth_controller,
 )
 from mongo import Mongo
-from main import process_data_for_all_tenants
 
 
 async def on_startup():
@@ -48,7 +52,7 @@ app.include_router(integration_oauth_controller.router)
 app.include_router(integration_controller.router)
 
 
-@app.post("/data/providers")
-def trigger(background_tasks: BackgroundTasks):
-    background_tasks.add_task(process_data_for_all_tenants)
-    return {"submitted": True}
+@app.post("/data/providers", status_code=202)
+def trigger():
+    job = q.enqueue("main2.test", "test argument")
+    return {"submitted": True, "job_id": job.id}

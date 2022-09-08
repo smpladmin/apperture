@@ -1,6 +1,6 @@
 import pandas as pd
 
-from data_processor.fetch.report_timeframe import ReportTimeframe
+from .report_timeframe import ReportTimeframe
 from .fetcher import Fetcher
 
 

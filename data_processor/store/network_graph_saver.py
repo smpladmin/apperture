@@ -1,5 +1,5 @@
 import pandas as pd
-from data_processor.store.saver import Saver
+from .saver import Saver
 
 
 class NetworkGraphSaver(Saver):

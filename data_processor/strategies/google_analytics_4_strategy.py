@@ -1,25 +1,24 @@
 import os
 import traceback
 from datetime import date
-
 from dateutil.relativedelta import relativedelta
 
-from data_processor.clean.google_analytics_cleaner import GoogleAnalyticsCleaner
-from data_processor.fetch.google_analytics import initialize_v3_analytics
-from data_processor.fetch.google_analytics_fetcher import GoogleAnalyticsFetcher
-from data_processor.store.network_graph_saver import NetworkGraphSaver
-from data_processor.strategies.strategy import Strategy
+from .clean.google_analytics_cleaner import GoogleAnalyticsCleaner
+from .fetch.google_analytics import initialize_v4_analytics
+from .fetch.google_analytics_4_fetcher import GoogleAnalytics4Fetcher
+from .store.network_graph_saver import NetworkGraphSaver
+from .strategy import Strategy
 from tenants.tenants_service import TenantsService
-from data_processor.transform.network_graph_transformer import NetworkGraphTransformer
+from .transform.network_graph_transformer import NetworkGraphTransformer
 
 
-class GoogleAnalyticsStrategy(Strategy):
+class GoogleAnalytics4Strategy(Strategy):
     def __init__(self, access_token, refresh_token):
         self.tenants_service = TenantsService()
-        analytics = initialize_v3_analytics(access_token, refresh_token)
+        analytics = initialize_v4_analytics(access_token, refresh_token)
         today = date.today()
         six_months_back = (date.today() + relativedelta(months=-6)).replace(day=1)
-        self.fetcher = GoogleAnalyticsFetcher(
+        self.fetcher = GoogleAnalytics4Fetcher(
             analytics,
             int(os.environ["PAGE_SIZE"]),
             six_months_back.isoformat(),

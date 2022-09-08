@@ -1,4 +1,4 @@
-from data_processor.clean.cleaner import Cleaner
+from .cleaner import Cleaner
 import pandas as pd
 
 
