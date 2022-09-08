@@ -21,6 +21,16 @@ services:
       - ./backend:/code
     depends_on:
       - db
+      - redis
+  data_processor:
+    build:
+      context: ./data_processor
+      target: dev
+    volumes:
+      - ./data_processor:/code
+    depends_on:
+      - backend
+      - redis
   db:
     image: 'mongo'
     container_name: 'mongodb'
@@ -36,5 +46,13 @@ services:
       - '27017-27019:27017-27019'
     volumes:
       - mongodata:/data/db
+  redis:
+    image: 'redis'
+    container_name: 'redis'
+    ports:
+      - '6379:6379'
+    volumes:
+      - 'redisdata:/data/db'
 volumes:
   mongodata: {}
+  redisdata: {}

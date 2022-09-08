@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from data_processor.transform.transformer import Transformer
+from .transformer import Transformer
 
 
 class NetworkGraphTransformer(Transformer):
