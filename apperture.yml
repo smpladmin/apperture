@@ -8,6 +8,7 @@ services:
     logging:
       driver: json-file
     deploy:
+      replicas: 2
       labels:
         traefik.http.routers.backend-http.rule: Host(`${BACKEND_HOST}`)
         traefik.http.routers.backend-https.tls.certresolver: le
@@ -23,10 +24,10 @@ services:
       resources:
         reservations:
           cpus: '0.25'
-          memory: 512M
+          memory: 256M
         limits:
           cpus: '0.5'
-          memory: 1024M
+          memory: 512M
   frontend:
     image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/frontend:latest
     networks:
@@ -55,8 +56,50 @@ services:
         limits:
           cpus: '0.5'
           memory: 512M
+  data_processor:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/data_processor:latest
+    networks:
+     - net
+    logging:
+      driver: json-file
+    deploy:
+      replicas: 2
+      labels:
+        swarmpit.service.deployment.autoredeploy: 'true'
+      resources:
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+        limits:
+          cpus: '0.5'
+          memory: 1024M
+  redis:
+    image: 'redis'
+    volumes: 
+      - 'redisdata:/data/db'
+    networks:
+      - net
+    command: >
+      --requirepass ${REDIS_PASSWORD}
+    ports:
+      - '6379:6379'
+    logging:
+      driver: json-file
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
 networks:
   net:
     driver: overlay
   traefik-public:
     external: true
+
+volumes:
+  redisdata: 
+    driver: local

@@ -9,7 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from rq import Queue
 from redis import Redis
 
-redis_conn = Redis(host="redis")
+redis_conn = Redis(host=os.getenv("REDIS_HOST"), password=os.getenv("REDIS_PASSWORD"))
 q = Queue(connection=redis_conn)
 
 from rest.controllers import (
