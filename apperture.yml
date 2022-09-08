@@ -8,7 +8,7 @@ services:
     logging:
       driver: json-file
     deploy:
-      replicas: 2
+      replicas: 1
       labels:
         traefik.http.routers.backend-http.rule: Host(`${BACKEND_HOST}`)
         traefik.http.routers.backend-https.tls.certresolver: le
@@ -63,7 +63,7 @@ services:
     logging:
       driver: json-file
     deploy:
-      replicas: 2
+      replicas: 1
       labels:
         swarmpit.service.deployment.autoredeploy: 'true'
       resources:
@@ -74,13 +74,13 @@ services:
           cpus: '0.5'
           memory: 1024M
   redis:
-    image: 'redis'
+    image: 'bitnami/redis'
     volumes: 
       - 'redisdata:/data/db'
     networks:
       - net
-    command: >
-      --requirepass ${REDIS_PASSWORD}
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     ports:
       - '6379:6379'
     logging:
