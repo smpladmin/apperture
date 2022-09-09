@@ -1,22 +1,28 @@
+const WHITE_DEFAULT = '#ffffff';
+const PURPLE = '#7A4AA4';
+const WHITE_300 = '#efefef';
+const BLACK_200 = '0E0E19';
+
 const colors = {
   black: {
     DEFAULT: '#07070d',
+    0: 'rgba(14,14,26,0)',
     50: 'linear-gradient(0deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), #0E0E19',
     100: '#0e0e1a',
-    0: 'rgba(14,14,26,0)',
+    200: BLACK_200,
   },
   white: {
-    DEFAULT: '#ffffff',
+    DEFAULT: WHITE_DEFAULT,
+    0: 'rgba(255,255,255,0.08)',
     100: '#f6f6f6',
     200: '#ededed',
-    0: 'rgba(255,255,255,0.08)',
+    300: WHITE_300,
   },
   grey: {
     DEFAULT: '#d9d9da',
     50: '#e5e5e5',
     100: '#b2b2b5',
     200: '#78787E',
-    dark: '0E0E19',
   },
   yellow: '#fac213',
   green: '#57aa64',
@@ -108,4 +114,8 @@ module.exports = {
   fontSizes,
   lineHeights,
   spacing,
+  WHITE_DEFAULT,
+  WHITE_300,
+  PURPLE,
+  BLACK_200,
 };
