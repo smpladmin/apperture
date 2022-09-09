@@ -30,8 +30,8 @@ const Graph = ({ visualisationData }: GraphProps) => {
       G6.registerNode(
         'primary',
         {
-          draw(cfg?: ModelConfig, group?: IGroup): IShape {
-            const keyshape = primaryNode(cfg, group);
+          draw(cfg, group) {
+            const keyshape = primaryNode(cfg!!, group!!);
             return keyshape;
           },
           update: undefined,
@@ -42,11 +42,11 @@ const Graph = ({ visualisationData }: GraphProps) => {
       G6.registerEdge(
         'primary-line',
         {
-          draw(cfg?: ModelConfig, group?: IGroup): IShape {
-            const keyshape = basicEdge(cfg, group);
+          draw(cfg, group): IShape {
+            const keyshape = basicEdge(cfg!!, group!!);
             return keyshape;
           },
-          afterDraw(cfg?: ModelConfig, group?: IGroup): void {
+          afterDraw(cfg, group): void {
             const edge = group?.get('children')[0];
             const startLabel = group?.get('children')[1];
             const length = edge.getTotalLength();

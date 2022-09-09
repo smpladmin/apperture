@@ -1,6 +1,7 @@
+import { IGroup, ModelConfig } from '@antv/g6';
 import { basicLine, startLabel, endLabel } from './shapes';
 
-const basicEdge = (cfg: any, group: any) => {
+const basicEdge = (cfg: ModelConfig, group: IGroup) => {
   const keyshape = basicLine(cfg, group);
   startLabel(cfg, group);
   if (cfg.node2Label) {
