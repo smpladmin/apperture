@@ -30,7 +30,7 @@ async def get_datasources(
     ds_service: DataSourceService = Depends(),
 ):
     if from_provider:
-        integration = await integration_service.get_integration(id, user_id)
+        integration = await integration_service.get_user_integration(id, user_id)
         datasources = await ds_service.get_provider_datasources(
             integration.provider, integration.credential
         )
@@ -46,7 +46,7 @@ async def create_datasources(
     ds_service: DataSourceService = Depends(),
     integration_service: IntegrationService = Depends(),
 ):
-    integration = await integration_service.get_integration(id, user_id)
+    integration = await integration_service.get_user_integration(id, user_id)
     ds_promises = [
         ds_service.create_datasource(
             ds.externalSourceId,

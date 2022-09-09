@@ -17,6 +17,7 @@ from rest.controllers import (
     auth_controller,
     integration_controller,
     integration_oauth_controller,
+    private_apis_controller,
 )
 from mongo import Mongo
 
@@ -50,6 +51,7 @@ app.include_router(auth_controller.router)
 app.include_router(app_controller.router)
 app.include_router(integration_oauth_controller.router)
 app.include_router(integration_controller.router)
+app.include_router(private_apis_controller.router)
 
 
 @app.post("/data/providers", status_code=202)
