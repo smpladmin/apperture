@@ -1,7 +1,7 @@
 import { IGroup, INode } from '@antv/g6';
 import { nodeShapes } from '@lib/config/graphConfig';
 
-const nodesOnZoom = (nodes: INode[], zoomRatio: number) => {
+const nodesOnZoom = (nodes?: INode[], zoomRatio: number = 1) => {
   nodes?.forEach((node: INode) => {
     const group = node.getContainer();
     const nodeMetric = group.find(

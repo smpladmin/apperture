@@ -71,23 +71,23 @@ export const transformData = (data: Array<ApiDataType>): resultType => {
     nodes[entranceNodeIndex].totalViews = entranceSum;
   }
 
-  // const biDirectionalNodes: Array<string> = [];
-  // edges.forEach((e1) => {
-  //   edges.forEach((e2) => {
-  //     if (e1.source + e1.target === e2.target + e2.source) {
-  //       if (
-  //         !biDirectionalNodes.includes(
-  //           e2.source + e2.target || e1.source + e1.target
-  //         )
-  //       ) {
-  //         biDirectionalNodes.push(e1.source + e1.target);
-  //         e1.node2Label = e2.node1Label;
-  //         e2.isHiddenEdge = true;
-  //       }
-  //       e1.traffic = e1.node1Label + e2.node1Label;
-  //     }
-  //   });
-  // });
+  const biDirectionalNodes: Array<string> = [];
+  edges.forEach((e1) => {
+    edges.forEach((e2) => {
+      if (e1.source + e1.target === e2.target + e2.source) {
+        if (
+          !biDirectionalNodes.includes(
+            e2.source + e2.target || e1.source + e1.target
+          )
+        ) {
+          biDirectionalNodes.push(e1.source + e1.target);
+          e1.node2Label = e2.node1Label;
+          e2.isHiddenEdge = true;
+        }
+        e1.traffic = e1.node1Label + e2.node1Label;
+      }
+    });
+  });
 
   const sortedNodes = nodes.sort((a: NodeType, b: NodeType) => {
     return b.totalViews!! - a.totalViews!!;

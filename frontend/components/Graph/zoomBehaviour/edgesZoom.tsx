@@ -1,8 +1,8 @@
 import { IEdge, IGroup } from '@antv/g6';
 import { edgeShapes } from '@lib/config/graphConfig';
 
-const edgesOnZoom = (edges: IEdge[], zoomRatio: number) => {
-  edges.forEach((edge: IEdge) => {
+const edgesOnZoom = (edges?: IEdge[], zoomRatio: number = 1) => {
+  edges?.forEach((edge: IEdge) => {
     const group = edge.getContainer();
     const model = edge.getModel();
 

@@ -2,11 +2,9 @@ import { useEffect, useRef } from 'react';
 import G6, {
   Graph as G6Graph,
   IG6GraphEvent,
-  IGroup,
   INode,
   IShape,
   Item,
-  ModelConfig,
 } from '@antv/g6';
 import { ApiDataType, NodeType } from '@lib/types/graph';
 import primaryNode from './nodes';
@@ -100,8 +98,8 @@ const Graph = ({ visualisationData }: GraphProps) => {
           const zoomRatio = gRef.current.graph?.getZoom();
           const nodes = gRef.current.graph?.getNodes();
           const edges = gRef.current.graph?.getEdges();
-          nodesOnZoom(nodes!!, zoomRatio!!);
-          edgesOnZoom(edges!!, zoomRatio!!);
+          nodesOnZoom(nodes, zoomRatio);
+          edgesOnZoom(edges, zoomRatio);
         },
       });
 
@@ -117,7 +115,8 @@ const Graph = ({ visualisationData }: GraphProps) => {
             'wheel-zoom',
             {
               type: 'zoom-canvas',
-              sensitivity: 0.25,
+              sensitivity: 0.5,
+              minZoom: 1,
             },
           ],
         },
@@ -125,17 +124,16 @@ const Graph = ({ visualisationData }: GraphProps) => {
           type: graphConfig.layout,
           linkDistance: graphConfig.linkDistance,
           preventOverlap: true,
-          nodeSpacing: 112,
+          nodeSpacing: graphConfig.nodeSpacing,
           nodeSize: graphConfig.nodeSize,
         },
       });
     }
 
     let graph = gRef.current.graph;
-    graph.on('beforelayout', (evt) => {
+    graph.on('beforelayout', () => {
       const nodes = graph.getNodes();
       const zoomRatio = graph.getZoom();
-
       nodes.forEach((node) => {
         const model = node.getModel() as NodeType;
         const nodeVisibleAt = model?.visibleAt || 0;
@@ -152,7 +150,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
       if (zoomRatio >= 1) {
         nodes.forEach((node) => {
           const model = node.getModel() as NodeType;
-          const nodeVisibleAt = model?.visibleAt || 0;
+          const nodeVisibleAt = model?.visibleAt || 1;
           if (zoomRatio >= nodeVisibleAt) {
             graph.showItem(node);
           } else {
