@@ -1,6 +1,6 @@
 import G6 from '@antv/g6';
 
-const fittingString = (str: any, maxWidth: any, fontSize: any) => {
+const fittingString = (str: string, maxWidth: number, fontSize: number) => {
   let currentWidth = 0;
   let res = str.toString();
   const pattern = new RegExp('[\u4E00-\u9FA5]+'); // distinguish the Chinese charactors and letters

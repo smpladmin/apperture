@@ -1,16 +1,16 @@
-import { IEdge } from '@antv/g6';
+import { IEdge, IGroup } from '@antv/g6';
 import { edgeShapes } from '@lib/config/graphConfig';
 
 const edgesOnZoom = (edges: IEdge[], zoomRatio: number) => {
-  edges.forEach((edge: any) => {
+  edges.forEach((edge: IEdge) => {
     const group = edge.getContainer();
     const model = edge.getModel();
 
     const edgeStartLabel = group.find(
-      (e: any) => e.get('name') === edgeShapes.startLabel
+      (e: IGroup) => e.get('name') === edgeShapes.startLabel
     );
     const edgeEndLabel = group.find(
-      (e: any) => e.get('name') === edgeShapes.endLabel
+      (e: IGroup) => e.get('name') === edgeShapes.endLabel
     );
 
     if (edgeEndLabel) {

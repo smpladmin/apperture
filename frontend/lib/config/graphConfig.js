@@ -29,6 +29,7 @@ export const graphConfig = {
   layout: 'gForce',
   linkDistance: 150,
   nodeSize: 56,
+  nodeSpacing: 112,
 };
 
 export const nodeShapes = {

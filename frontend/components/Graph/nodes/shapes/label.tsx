@@ -7,12 +7,11 @@ const label = (cfg: ModelConfig, group: IGroup) => {
     (e: IGroup) => e.get('name') === nodeShapes.nucleus
   );
   const nucleusBBox = nucleus.getBBox();
-
   const keyShape = group.addShape('text', {
     attrs: {
       x: nucleusBBox.minX,
       y: nucleusBBox.maxY + 4,
-      text: fittingString(cfg.label, 86, 12),
+      text: fittingString(cfg.label as string, 86, 12),
       fontSize: 12,
       fontWeight: 600,
       fill: '#0E0E19',
