@@ -1,11 +1,15 @@
 export const zoomConfig = [
   {
-    ratio: 1,
+    ratio: 0.75,
     percentile: 100,
   },
   {
+    ratio: 1,
+    percentile: 75,
+  },
+  {
     ratio: 1.25,
-    percentile: 70,
+    percentile: 60,
   },
   {
     ratio: 1.5,
@@ -13,14 +17,14 @@ export const zoomConfig = [
   },
   {
     ratio: 2,
-    percentile: 20,
+    percentile: 30,
   },
   {
-    ratio: 3,
+    ratio: 2.5,
     percentile: 10,
   },
   {
-    ratio: 3.5,
+    ratio: 3,
     percentile: 0,
   },
 ];
@@ -30,6 +34,8 @@ export const graphConfig = {
   linkDistance: 150,
   nodeSize: 56,
   nodeSpacing: 112,
+  minZoom: 1,
+  maxZoom: 3,
 };
 
 export const nodeShapes = {

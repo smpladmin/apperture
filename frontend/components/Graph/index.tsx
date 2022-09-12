@@ -105,8 +105,8 @@ const Graph = ({ visualisationData }: GraphProps) => {
 
       gRef.current.graph = new G6Graph({
         container: ref.current || '',
-        width: ref.current?.scrollWidth,
-        height: ref.current?.scrollHeight || 800,
+        width: ref.current?.offsetWidth,
+        height: ref.current?.clientHeight,
         fitCenter: true,
         modes: {
           default: [
@@ -116,7 +116,8 @@ const Graph = ({ visualisationData }: GraphProps) => {
             {
               type: 'zoom-canvas',
               sensitivity: 0.5,
-              minZoom: 1,
+              minZoom: graphConfig.minZoom,
+              maxZoom: graphConfig.maxZoom,
             },
           ],
         },
@@ -174,7 +175,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
     graph.render();
   }, [visualisationData]);
 
-  return <div id="network-graph" ref={ref}></div>;
+  return <div id="network-graph" ref={ref} style={{ height: '100%' }}></div>;
 };
 
 export default Graph;
