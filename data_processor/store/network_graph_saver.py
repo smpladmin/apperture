@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 from .saver import Saver
 
@@ -11,5 +12,5 @@ class NetworkGraphSaver(Saver):
         df = df.rename(
             columns={"previousPage": "previous_page", "pagePath": "page_path"}
         )
-        print(df)
-        print("SAVED")
+        logging.info(df)
+        logging.info("SAVED")

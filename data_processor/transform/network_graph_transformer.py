@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 import numpy as np
 from .transformer import Transformer
@@ -19,7 +20,7 @@ class NetworkGraphTransformer(Transformer):
         return transformed
 
     def print_transformed_data(self, transformed):
-        print("Transformed data")
+        logging.info("Transformed data")
         with pd.option_context(
             "display.max_columns",
             None,
@@ -28,7 +29,7 @@ class NetworkGraphTransformer(Transformer):
             "max_colwidth",
             None,
         ):
-            print(transformed)
+            logging.info(transformed)
 
     def transform_to_plot(self, df):
         data_to_plot = (

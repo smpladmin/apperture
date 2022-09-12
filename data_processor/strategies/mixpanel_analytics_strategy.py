@@ -1,3 +1,4 @@
+import logging
 from fetch.mixpanel_analytics_fetcher import MixpanelAnalyticsFetcher
 from clean.mixpanel_analytics_cleaner import MixpanelAnalyticsCleaner
 from transform.mixpanel_network_graph_transformer import (
@@ -15,7 +16,7 @@ class MixpanelAnalyticsStrategy(Strategy):
         self.saver = MixpanelNetworkGraphSaver()
 
     def execute(self, email: str, view_id: str):
-        print("Running strategy for the mixpanel")
+        logging.info("Running strategy for the mixpanel")
         df = self.fetcher.daily_data(view_id)
         df = self.cleaner.clean(df)
         network_graph_data = self.transformer.transform(df)

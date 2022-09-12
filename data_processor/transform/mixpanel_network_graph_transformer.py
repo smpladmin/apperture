@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 import datetime
 from .transformer import Transformer
@@ -13,7 +14,7 @@ class MixpanelNetworkGraphTransformer(Transformer):
         return transformed
 
     def print_transformed_data(self, transformed):
-        print("Transformed data")
+        logging.info("Transformed data")
         with pd.option_context(
             "display.max_columns",
             None,
@@ -22,14 +23,14 @@ class MixpanelNetworkGraphTransformer(Transformer):
             "max_colwidth",
             None,
         ):
-            print(transformed)
+            logging.info(transformed)
 
     def transform_to_plot(self, df):
         date = df["time"].iloc[0]
-        print(date)
+        logging.info(date)
         date_time = datetime.datetime.fromtimestamp(date)
         date_time = date_time.replace(hour=0, minute=0, second=0, microsecond=0)
-        print(date_time)
+        logging.info(date_time)
         df["time"] = date_time
 
         data_to_plot = (

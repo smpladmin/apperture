@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 from .saver import Saver
 
@@ -8,7 +9,7 @@ class MixpanelNetworkGraphSaver(Saver):
         self.schema = "perpendicular"
 
     def save(self, view_id: str, df: pd.DataFrame):
-        print(f"Saving to {self.schema}.{self.table}")
+        logging.info(f"Saving to {self.schema}.{self.table}")
         df["view_id"] = view_id
         df = df.rename(
             columns={
@@ -21,11 +22,11 @@ class MixpanelNetworkGraphSaver(Saver):
                 "time": "event_time",
             }
         )
-        print(df)
+        logging.info(df)
         df.to_sql(
             "mixpanel_visualization_data",
             if_exists="append",
             schema="perpendicular",
             index=False,
         )
-        print("SAVED")
+        logging.info("SAVED")

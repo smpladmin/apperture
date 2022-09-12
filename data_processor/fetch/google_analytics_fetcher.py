@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 
 from .report_timeframe import ReportTimeframe
@@ -18,7 +19,7 @@ class GoogleAnalyticsFetcher(Fetcher):
         pass
 
     def timeframe_data(self, timeframe: ReportTimeframe, view_id: str):
-        print(
+        logging.info(
             f"Starting data fetch for timeframe {timeframe.name} from {self.start_date} to {self.end_date}"
         )
         response = self.get_timeframe_report(timeframe, view_id)
@@ -32,14 +33,14 @@ class GoogleAnalyticsFetcher(Fetcher):
             df = pd.concat([df, temp])
         df.columns = ["date", "previousPage", "pagePath", "users", "pageViews"]
         df = df.drop(columns=["date"])
-        print("Done data fetch for timeframe", timeframe.name)
-        print(df.head(5))
+        logging.info(f"Done data fetch for timeframe {timeframe.name}")
+        logging.info(df.head(5))
         return df
 
     def get_timeframe_report(
         self, timeframe: ReportTimeframe, view_id: str, page_token="unknown"
     ):
-        print("Fetching for page -", page_token)
+        logging.info(f"Fetching for page - {page_token}", )
         return (
             self.analytics.reports()
             .batchGet(

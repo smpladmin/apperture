@@ -1,11 +1,12 @@
+import logging
 from .cleaner import Cleaner
 import pandas as pd
 
 
 class MixpanelAnalyticsCleaner(Cleaner):
     def clean(self, df: pd.DataFrame) -> pd.DataFrame:
-        print("Cleaning data")
-        print(df.head(5))
+        logging.info("Cleaning data")
+        logging.info(df.head(5))
         df.rename(
             columns={
                 "$city": "city",

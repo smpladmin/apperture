@@ -1,3 +1,4 @@
+import logging
 import os
 import traceback
 from datetime import date
@@ -17,23 +18,20 @@ class GoogleAnalyticsStrategy(Strategy):
     def __init__(self, access_token, refresh_token):
         self.tenants_service = TenantsService()
         analytics = initialize_v3_analytics(access_token, refresh_token)
-        today = date.today()
-        six_months_back = (date.today() + relativedelta(months=-2)).replace(day=1)
+        yesterday = date.today() + relativedelta(days=-1)
+        months_back = (date.today() + relativedelta(months=-3)).replace(day=1)
         self.fetcher = GoogleAnalyticsFetcher(
             analytics,
             int(os.environ["PAGE_SIZE"]),
-            six_months_back.isoformat(),
-            today.isoformat(),
+            months_back.isoformat(),
+            yesterday.isoformat(),
         )
         self.cleaner = GoogleAnalyticsCleaner()
         self.transformer = NetworkGraphTransformer()
         self.saver = NetworkGraphSaver()
 
     def execute(self, email, app_id):
-        try:
-            df = self.fetcher.daily_data(app_id)
-            cleaned_data = self.cleaner.clean(df)
-            network_graph_data = self.transformer.transform(cleaned_data)
-            self.saver.save(app_id, network_graph_data)
-        except Exception as err:
-            traceback.print_exc()
+        df = self.fetcher.daily_data(app_id)
+        cleaned_data = self.cleaner.clean(df)
+        network_graph_data = self.transformer.transform(cleaned_data)
+        self.saver.save(app_id, network_graph_data)

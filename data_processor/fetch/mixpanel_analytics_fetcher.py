@@ -1,3 +1,4 @@
+import logging
 import boto3
 import pandas as pd
 import os
@@ -15,7 +16,7 @@ class MixpanelAnalyticsFetcher(Fetcher):
         pass
 
     def timeframe_data(self, timeframe: ReportTimeframe, app_id: str):
-        print(f"Starting data fetch for timeframe {timeframe.name}")
+        logging.info(f"Starting data fetch for timeframe {timeframe.name}")
         yesterday = (date.today() - timedelta(days=1)).isoformat()
         s3_file_name = f"{app_id}/{yesterday.replace('-', '/')}/fullday/data"
 
@@ -25,9 +26,9 @@ class MixpanelAnalyticsFetcher(Fetcher):
             .get()["Body"]
             .read()
         )
-        print("fetched data")
+        logging.info("fetched data")
         df = pd.read_json(response.decode("utf8"), lines=True)
         df2 = pd.json_normalize(df["properties"])
         df2["eventname"] = df["event"]
-        print("created DF")
+        logging.info("created DF")
         return df2
