@@ -1,4 +1,5 @@
 import { Box, Divider, Flex, IconButton, Text } from '@chakra-ui/react';
+import { Fragment } from 'react';
 
 type FilterProps = {
   isCategoryLabel?: boolean;
@@ -11,10 +12,10 @@ type FiltersProp = {
     label: string;
     id: string;
     isCategory: boolean;
-    subSections: {
+    subSections: Array<{
       label: string;
       id: string;
-    }[];
+    }>;
   }>;
 };
 
@@ -55,11 +56,17 @@ const Filters = ({ filters }: FiltersProp) => {
       <Filter filterLabel="Frequently Used" />
       {filters.map((filter, i) => {
         return (
-          <Filter
-            key={filter.id}
-            filterLabel={filter.label}
-            isCategoryLabel={!!filter.isCategory}
-          />
+          <Fragment key={filter.id}>
+            <Divider
+              orientation="horizontal"
+              borderColor={'white.200'}
+              opacity={1}
+            />
+            <Filter
+              filterLabel={filter.label}
+              isCategoryLabel={!!filter.isCategory}
+            />
+          </Fragment>
         );
       })}
     </Flex>

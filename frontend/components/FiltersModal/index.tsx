@@ -26,7 +26,7 @@ const FilterModal = () => {
       trapFocus={false}
     >
       <ModalOverlay backdropFilter={'blur(20px)'} />
-      <ModalContent maxWidth="168">
+      <ModalContent maxWidth="168" rounded={'2xl'} margin={'1rem'}>
         <ModalHeader
           display={'flex'}
           justifyContent={'space-between'}
@@ -61,7 +61,11 @@ const FilterModal = () => {
           borderColor={'white.200'}
           opacity={1}
         />
-        <ModalFooter py={{ base: '3', md: '5' }} px={{ base: '2', md: '5' }}>
+        <ModalFooter
+          py={{ base: '3', md: '5' }}
+          pl={{ base: '6', md: '9' }}
+          pr={{ base: '2', md: '9' }}
+        >
           <Flex
             justifyContent={'space-between'}
             alignItems={'center'}
