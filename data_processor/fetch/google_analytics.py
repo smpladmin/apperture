@@ -5,6 +5,7 @@ from googleapiclient.discovery import build
 from oauth2client.client import GoogleCredentials
 from google.analytics.data import BetaAnalyticsDataClient
 from google.oauth2.credentials import Credentials
+import google.auth.transport.requests
 
 load_dotenv()
 
@@ -30,4 +31,6 @@ def initialize_v4_analytics(access_token, refresh_token):
         client_id=os.environ["CLIENT_ID"],
         client_secret=os.environ["CLIENT_SECRET"],
     )
+    request = google.auth.transport.requests.Request()
+    creds.refresh(request)
     return BetaAnalyticsDataClient(credentials=creds)

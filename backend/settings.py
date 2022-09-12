@@ -15,6 +15,7 @@ class AppertureSettings(BaseSettings):
     redis_host: str
     redis_password: str
     apperture_api_key: str
+    fastapi_env: str
 
     class Config:
         env_file = ".env"
