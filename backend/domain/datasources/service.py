@@ -30,6 +30,9 @@ class DataSourceService:
             DataSource.integration_id == PydanticObjectId(integration_id)
         ).to_list()
 
+    async def get_datasource(self, id: str):
+        return await DataSource.get(id)
+
     async def create_datasource(
         self,
         external_source_id: str,

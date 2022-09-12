@@ -27,11 +27,14 @@ class IntegrationService:
         await integration.insert()
         return integration
 
-    async def get_integration(self, id: str, user_id: str) -> Integration:
+    async def get_user_integration(self, id: str, user_id: str) -> Integration:
         return await Integration.find_one(
             Integration.id == PydanticObjectId(id),
             Integration.user_id == PydanticObjectId(user_id),
         )
+
+    async def get_integration(self, id: str) -> Integration:
+        return await Integration.get(id)
 
     async def create_integration(
         self,

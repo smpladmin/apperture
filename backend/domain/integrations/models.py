@@ -19,6 +19,9 @@ class Credential(BaseModel):
     api_key: Optional[str]
     secret: Optional[str]
 
+    class Config:
+        allow_population_by_field_name = True
+
 
 class Integration(Document):
     user_id: PydanticObjectId
