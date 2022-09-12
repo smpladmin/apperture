@@ -1,3 +1,4 @@
+import logging
 from domain.common.models import IntegrationProvider
 from .google_analytics_4_strategy import (
     GoogleAnalytics4Strategy,
@@ -17,6 +18,9 @@ class StrategyBuilder:
         refresh_token: str,
         datasource_id: str,
     ):
+        logging.debug(
+            f"{provider}, {version}, {access_token}, {refresh_token}, {datasource_id} "
+        )
         if provider == IntegrationProvider.GOOGLE and version == "V3":
             return GoogleAnalyticsStrategy(
                 access_token,
@@ -25,6 +29,7 @@ class StrategyBuilder:
                 IntegrationProvider.GOOGLE,
             )
         elif provider == IntegrationProvider.GOOGLE and version == "V4":
+            logging.debug("selected v4 strategy")
             return GoogleAnalytics4Strategy(
                 access_token,
                 refresh_token,

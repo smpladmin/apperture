@@ -1,6 +1,8 @@
 import asyncio
+import logging
 from typing import Union
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
+from data_processor_queue.service import DPQueueService
 from domain.apps.service import AppService
 from domain.datasources.models import DataSourceVersion, ProviderDataSource
 
@@ -42,9 +44,11 @@ async def get_datasources(
 async def create_datasources(
     id: str,
     datasource_dtos: list[CreateDataSourceDto],
+    trigger_data_processor: bool = Query(None),
     user_id: str = Depends(get_user_id),
     ds_service: DataSourceService = Depends(),
     integration_service: IntegrationService = Depends(),
+    dpq_service: DPQueueService = Depends(),
 ):
     integration = await integration_service.get_user_integration(id, user_id)
     ds_promises = [
@@ -56,7 +60,13 @@ async def create_datasources(
         )
         for ds in datasource_dtos
     ]
-    return await asyncio.gather(*ds_promises)
+    datasources = await asyncio.gather(*ds_promises)
+    if trigger_data_processor:
+        jobs = [dpq_service.enqueue(str(ds.id)) for ds in datasources]
+        logging.info(
+            f"Scheduled jobs - {jobs} for datasources - {[ds.id for ds in datasources]}"
+        )
+    return datasources
 
 
 @router.post("/integrations", response_model=IntegrationResponse)

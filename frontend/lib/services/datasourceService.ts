@@ -29,7 +29,10 @@ export const saveDataSources = async (
   });
   const res = await AppertureAPI.post(
     `/integrations/${integrationId}/datasources`,
-    datasources
+    datasources,
+    {
+      params: { trigger_data_processor: true },
+    }
   );
   return res.data;
 };
