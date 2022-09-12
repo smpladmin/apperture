@@ -10,7 +10,7 @@ from fetch.google_analytics_fetcher import GoogleAnalyticsFetcher
 from store.network_graph_saver import NetworkGraphSaver
 from strategies.strategy import Strategy
 from tenants.tenants_service import TenantsService
-from transform.network_graph_transformer import NetworkGraphTransformer
+from transform.ga_new_rollup import NetworkGraphTransformer
 
 
 class GoogleAnalyticsStrategy(Strategy):

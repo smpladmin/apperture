@@ -1,4 +1,3 @@
-import pandas as pd
 from fetch.mixpanel_analytics_fetcher import MixpanelAnalyticsFetcher
 from clean.mixpanel_analytics_cleaner import MixpanelAnalyticsCleaner
 from transform.mixpanel_network_graph_transformer import (
