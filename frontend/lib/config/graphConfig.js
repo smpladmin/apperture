@@ -34,7 +34,7 @@ export const graphConfig = {
   linkDistance: 150,
   nodeSize: 56,
   nodeSpacing: 112,
-  minZoom: 1,
+  minZoom: 0.75,
   maxZoom: 3,
 };
 

@@ -123,6 +123,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
         },
         layout: {
           type: graphConfig.layout,
+          center: [0, 0],
           linkDistance: graphConfig.linkDistance,
           preventOverlap: true,
           nodeSpacing: graphConfig.nodeSpacing,
@@ -137,7 +138,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
       const zoomRatio = graph.getZoom();
       nodes.forEach((node) => {
         const model = node.getModel() as NodeType;
-        const nodeVisibleAt = model?.visibleAt || 0;
+        const nodeVisibleAt = model?.visibleAt || graphConfig.minZoom;
         if (nodeVisibleAt > zoomRatio) {
           graph.hideItem(node);
         }
@@ -148,10 +149,10 @@ const Graph = ({ visualisationData }: GraphProps) => {
       const nodes = graph.getNodes();
       const zoomRatio = graph.getZoom();
 
-      if (zoomRatio >= 1) {
+      if (zoomRatio >= graphConfig.minZoom) {
         nodes.forEach((node) => {
           const model = node.getModel() as NodeType;
-          const nodeVisibleAt = model?.visibleAt || 1;
+          const nodeVisibleAt = model?.visibleAt || graphConfig.minZoom;
           if (zoomRatio >= nodeVisibleAt) {
             graph.showItem(node);
           } else {
