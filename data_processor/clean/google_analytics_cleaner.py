@@ -1,18 +1,19 @@
+import logging
 from .cleaner import Cleaner
 import pandas as pd
 
 
 class GoogleAnalyticsCleaner(Cleaner):
     def clean(self, df: pd.DataFrame) -> pd.DataFrame:
-        print("Cleaning data")
-        print(df.head(5))
+        logging.info("Cleaning data")
+        logging.info(df.head(5))
         self.convert_data_types(df)
         self.remove_query_params_from_path(df)
         self.remove_tenant_base_url_from_path(df)
         self.remove_tenant_weblight_base_url_from_path(df)
         self.remove_tenant_google_ad_base_url_from_path(df)
-        print("Cleaned data")
-        print(df.head(5))
+        logging.info("Cleaned data")
+        logging.info(df.head(5))
         return df
 
     def convert_data_types(self, df):

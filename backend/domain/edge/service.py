@@ -34,5 +34,3 @@ class EdgeService:
             async with s.start_transaction():
                 await Edge.find(Edge.datasource_id == datasource_id).delete()
                 await Edge.insert_many(edges)
-
-        return await Edge.find(Edge.datasource_id == datasource_id).to_list()

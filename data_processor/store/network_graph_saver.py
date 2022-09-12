@@ -1,23 +1,40 @@
+import logging
+import os
 import pandas as pd
+import requests
+
+from domain.common.models import IntegrationProvider
 from .saver import Saver
 
 
 class NetworkGraphSaver(Saver):
     def __init__(self):
-        self.table = "visualization_data"
-        self.schema = "perpendicular"
+        pass
 
-    def save(self, view_id: str, df: pd.DataFrame):
-        print(f"Saving to {self.schema}.{self.table}")
-        df["view_id"] = view_id
+    def save(self, datasource_id: str, provider: IntegrationProvider, df: pd.DataFrame):
         df = df.rename(
-            columns={"previousPage": "previous_page", "pagePath": "page_path"}
+            columns={
+                "previousPage": "previousEvent",
+                "pagePath": "currentEvent",
+                "pageViews": "hits",
+            }
         )
-        print(df)
-        df.to_sql(
-            "visualization_data",
-            if_exists="append",
-            schema="perpendicular",
-            index=False,
+        edges = df.to_dict("records")
+        data = {"datasourceId": datasource_id, "provider": provider, "edges": edges}
+        res = self._save_data(data)
+        if not res.ok:
+            raise Exception(
+                f"Error saving data for datasource_id {datasource_id}, response status - {res.status_code}"
+            )
+        logging.info("SAVED")
+
+    def _save_data(self, data):
+        return requests.post(
+            f"{os.getenv('BACKEND_BASE_URL')}/private/edges",
+            headers={
+                f"{os.getenv('BACKEND_API_KEY_NAME')}": os.getenv(
+                    "BACKEND_API_KEY_SECRET"
+                )
+            },
+            json=data,
         )
-        print("SAVED")

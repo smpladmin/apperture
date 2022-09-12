@@ -6,15 +6,12 @@ load_dotenv(override=False)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from rq import Queue
-from redis import Redis
-
-redis_conn = Redis(host=os.getenv("REDIS_HOST"), password=os.getenv("REDIS_PASSWORD"))
-q = Queue(connection=redis_conn)
+from data_processor_queue import dpq
 
 from rest.controllers import (
     app_controller,
     auth_controller,
+    data_processor_controller,
     integration_controller,
     integration_oauth_controller,
     private_apis_controller,
@@ -52,9 +49,4 @@ app.include_router(app_controller.router)
 app.include_router(integration_oauth_controller.router)
 app.include_router(integration_controller.router)
 app.include_router(private_apis_controller.router)
-
-
-@app.post("/data/providers", status_code=202)
-def trigger():
-    job = q.enqueue("main2.test", "test argument")
-    return {"submitted": True, "job_id": job.id}
+app.include_router(data_processor_controller.router)
