@@ -1,11 +1,11 @@
 import pandas as pd
-from .fetch.mixpanel_analytics_fetcher import MixpanelAnalyticsFetcher
-from .clean.mixpanel_analytics_cleaner import MixpanelAnalyticsCleaner
-from .transform.mixpanel_network_graph_transformer import (
+from fetch.mixpanel_analytics_fetcher import MixpanelAnalyticsFetcher
+from clean.mixpanel_analytics_cleaner import MixpanelAnalyticsCleaner
+from transform.mixpanel_network_graph_transformer import (
     MixpanelNetworkGraphTransformer,
 )
-from .strategies.strategy import Strategy
-from .store.mixpanel_network_graph_saver import MixpanelNetworkGraphSaver
+from strategies.strategy import Strategy
+from store.mixpanel_network_graph_saver import MixpanelNetworkGraphSaver
 
 
 class MixpanelAnalyticsStrategy(Strategy):

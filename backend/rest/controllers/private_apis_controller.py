@@ -30,7 +30,7 @@ async def get_datasource_with_credentials(
     )
 
 
-@router.post("/edges", response_model=list[EdgeResponse])
+@router.post("/edges")
 async def update_edges(
     dto: CreateEdgesDto,
     ds_service: DataSourceService = Depends(),
@@ -48,4 +48,5 @@ async def update_edges(
         )
         for e in dto.edges
     ]
-    return await edge_service.update_edges(edges, datasource.id)
+    await edge_service.update_edges(edges, datasource.id)
+    return {"updated": True}

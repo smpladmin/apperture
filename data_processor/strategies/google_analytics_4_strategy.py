@@ -3,13 +3,13 @@ import traceback
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
-from .clean.google_analytics_cleaner import GoogleAnalyticsCleaner
-from .fetch.google_analytics import initialize_v4_analytics
-from .fetch.google_analytics_4_fetcher import GoogleAnalytics4Fetcher
-from .store.network_graph_saver import NetworkGraphSaver
+from clean.google_analytics_cleaner import GoogleAnalyticsCleaner
+from fetch.google_analytics import initialize_v4_analytics
+from fetch.google_analytics_4_fetcher import GoogleAnalytics4Fetcher
+from store.network_graph_saver import NetworkGraphSaver
 from .strategy import Strategy
 from tenants.tenants_service import TenantsService
-from .transform.network_graph_transformer import NetworkGraphTransformer
+from transform.network_graph_transformer import NetworkGraphTransformer
 
 
 class GoogleAnalytics4Strategy(Strategy):

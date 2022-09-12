@@ -29,11 +29,11 @@ WORKDIR /code
 COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . .
-CMD rq worker -c settings
+CMD rq worker apperture_default -c settings 
 
 FROM base as production
 WORKDIR /code
 COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . .
-CMD rq worker -c settings
+CMD rq worker apperture_default -c settings
