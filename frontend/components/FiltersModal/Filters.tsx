@@ -36,7 +36,7 @@ export const Filter = ({
         >
           {filterLabel}
         </Text>
-        {selected ?? '*'}
+        {selected && '*'}
       </Flex>
     </Box>
   );
@@ -55,17 +55,21 @@ const Filters = ({ filters }: FiltersProp) => {
     >
       <Filter filterLabel="Frequently Used" />
       {filters.map((filter, i) => {
+        const { label, id, isCategory, subSections } = filter;
         return (
-          <Fragment key={filter.id}>
+          <Fragment key={id}>
             <Divider
               orientation="horizontal"
               borderColor={'white.200'}
               opacity={1}
             />
-            <Filter
-              filterLabel={filter.label}
-              isCategoryLabel={!!filter.isCategory}
-            />
+            <Filter filterLabel={label} isCategoryLabel={isCategory} />
+            {!!subSections.length &&
+              subSections.map((subSection) => {
+                return (
+                  <Filter key={subSection.id} filterLabel={subSection.label} />
+                );
+              })}
           </Fragment>
         );
       })}

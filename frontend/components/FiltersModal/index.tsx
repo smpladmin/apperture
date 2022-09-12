@@ -26,7 +26,12 @@ const FilterModal = () => {
       trapFocus={false}
     >
       <ModalOverlay backdropFilter={'blur(20px)'} />
-      <ModalContent maxWidth="168" rounded={'2xl'} margin={'1rem'}>
+      <ModalContent
+        maxWidth="168"
+        rounded={'2xl'}
+        margin={'1rem'}
+        maxHeight={'calc(100% - 100px)'}
+      >
         <ModalHeader
           display={'flex'}
           justifyContent={'space-between'}
@@ -50,7 +55,7 @@ const FilterModal = () => {
           borderColor={'white.200'}
           opacity={1}
         />
-        <ModalBody p={0}>
+        <ModalBody p={0} overflowY={'auto'}>
           <Flex>
             <Filters filters={filtersSchema.filterTypes} />
             <FilterOptions />
