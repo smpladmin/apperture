@@ -1,3 +1,4 @@
+import os
 import requests
 
 from domain.datasource.models import DataSourceResponse
@@ -6,8 +7,12 @@ from domain.datasource.models import DataSourceResponse
 class DataSourceService:
     def get_datasource_with_credential(self, id: str) -> DataSourceResponse:
         res = requests.get(
-            f"http://backend:8001/private/datasources/{id}",
-            headers={"apperture-api-key": "aeb47e74a662452451c25ad604937597"},
+            f"{os.getenv('BACKEND_BASE_URL')}/private/datasources/{id}",
+            headers={
+                f"{os.getenv('BACKEND_API_KEY_NAME')}": os.getenv(
+                    "BACKEND_API_KEY_SECRET"
+                )
+            },
         )
         ds_response = res.json()
         ds = DataSourceResponse(**ds_response)

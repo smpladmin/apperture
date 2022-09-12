@@ -15,6 +15,7 @@ def process_data_for_datasource(ds_id: str):
         res.datasource.version,
         "",
         res.credential.refresh_token,
+        ds_id,
     )
     strategy.execute(
         res.credential.account_id,
