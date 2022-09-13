@@ -13,6 +13,16 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+            data_processor:
+              - 'data_processor/**'
 
       - name: Set short commit-sha
         id: commit
@@ -32,6 +42,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build and Push Backend
+        if: steps.filter.outputs.backend == 'true'
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: backend
@@ -45,6 +56,7 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
       
       - name: Build and Push Frontend
+        if: steps.filter.outputs.frontend == 'true'
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: frontend
@@ -58,6 +70,7 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
       
       - name: Build and Push Data Processor
+        if: steps.filter.outputs.data_processor == 'true'
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: data_processor
