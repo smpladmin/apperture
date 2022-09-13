@@ -59,10 +59,17 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
     const selected = datasources.filter((ds) =>
       selectedDataSources.includes(ds._id)
     );
-    await saveDataSources(selected, router.query.integration_id as string);
+    const created = await saveDataSources(
+      selected,
+      router.query.integration_id as string
+    );
     router.replace({
       pathname: '/analytics/app/[appId]/integration/[provider]/complete',
-      query: { appId: router.query.appId, provider: router.query.provider },
+      query: {
+        appId: router.query.appId,
+        provider: router.query.provider,
+        dsId: created[0]._id,
+      },
     });
   };
 

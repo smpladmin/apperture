@@ -33,6 +33,9 @@ class IntegrationService:
             Integration.user_id == PydanticObjectId(user_id),
         )
 
+    async def get_app_integrations(self, app_id: PydanticObjectId) -> list[Integration]:
+        return await Integration.find(Integration.app_id == app_id).to_list()
+
     async def get_integration(self, id: str) -> Integration:
         return await Integration.get(id)
 

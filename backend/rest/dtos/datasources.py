@@ -8,6 +8,9 @@ from rest.dtos.model_response import ModelResponse
 class DataSourceResponse(DataSource, ModelResponse):
     pass
 
+    class Config:
+        orm_mode = True
+
 
 class CreateDataSourceDto(BaseModel):
     externalSourceId: str

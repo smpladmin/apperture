@@ -21,3 +21,11 @@ class CreateIntegrationDto(BaseModel):
     accountId: str
     apiKey: str
     apiSecret: str
+
+
+class IntegrationWithDataSources(Integration, ModelResponse):
+    credential: Optional[Credential]
+    datasources: list[DataSourceResponse] = []
+
+    class Config:
+        orm_mode = True

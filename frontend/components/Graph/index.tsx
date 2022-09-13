@@ -6,15 +6,16 @@ import G6, {
   IShape,
   Item,
 } from '@antv/g6';
-import { ApiDataType, NodeType } from '@lib/types/graph';
+import { NodeType } from '@lib/types/graph';
 import primaryNode from './nodes';
 import basicEdge from './edges';
 import { edgesOnZoom, nodesOnZoom } from './zoomBehaviour';
 import { graphConfig } from '@lib/config/graphConfig';
 import { transformData } from './transformData';
+import { Edge } from '@lib/domain/edge';
 
 type GraphProps = {
-  visualisationData: Array<ApiDataType>;
+  visualisationData: Array<Edge>;
 };
 
 const Graph = ({ visualisationData }: GraphProps) => {
