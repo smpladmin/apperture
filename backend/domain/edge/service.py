@@ -34,3 +34,8 @@ class EdgeService:
             async with s.start_transaction():
                 await Edge.find(Edge.datasource_id == datasource_id).delete()
                 await Edge.insert_many(edges)
+
+    async def get_edges(self, datasource_id: str) -> list[Edge]:
+        return await Edge.find(
+            Edge.datasource_id == PydanticObjectId(datasource_id)
+        ).to_list()
