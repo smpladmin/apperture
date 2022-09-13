@@ -1,5 +1,5 @@
 import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
-import { App } from '@lib/domain/app';
+import { App, AppWithIntegrations } from '@lib/domain/app';
 import { AxiosError } from 'axios';
 import { AppertureAPI } from '../apiClient';
 
@@ -28,6 +28,20 @@ export const _getApp = async (id: string, token: string): Promise<App> => {
   and should be used in Next's getServerSideProps
 */
 export const _getApps = async (token: string): Promise<Array<App>> => {
+  try {
+    const res = await ApperturePrivateAPI.get('/apps', {
+      headers: { Authorization: token },
+    });
+    return res.data;
+  } catch (e) {
+    console.log((e as AxiosError).message);
+    return [];
+  }
+};
+
+export const _getAppsWithIntegrations = async (
+  token: string
+): Promise<Array<AppWithIntegrations>> => {
   try {
     const res = await ApperturePrivateAPI.get('/apps', {
       headers: { Authorization: token },
