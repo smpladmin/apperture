@@ -10,17 +10,29 @@ import {
   Text,
   Divider,
   Flex,
-  Box,
 } from '@chakra-ui/react';
 import { filtersSchema } from './filtersSchema';
-import Filters from './Filters';
+import FilterCategories from './Filters';
 import FilterOptions from './FilterOptions';
+import { useState } from 'react';
+import { FilterTypes, Filters as FiltersClass } from '@lib/domain/filters';
 
-const FilterModal = () => {
+const FiltersModal = ({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
+  const [selectedFilters, setSelectedFilters] = useState(new FiltersClass());
+  const [currentFilter, setCurrentFilter] = useState<FilterTypes>(
+    filtersSchema.filterTypes[0].subSections[0].id as FilterTypes
+  );
+
   return (
     <Modal
-      isOpen={true}
-      onClose={() => {}}
+      isOpen={isOpen}
+      onClose={onClose}
       isCentered
       size={'2xl'}
       trapFocus={false}
@@ -57,8 +69,20 @@ const FilterModal = () => {
         />
         <ModalBody p={0} overflowY={'auto'}>
           <Flex>
-            <Filters filters={filtersSchema.filterTypes} />
-            <FilterOptions />
+            <FilterCategories
+              // @ts-ignore
+              filters={filtersSchema.filterTypes}
+              setCurrentFilter={setCurrentFilter}
+              currentFilter={currentFilter}
+              selectedFilters={selectedFilters}
+            />
+            <FilterOptions
+              // @ts-ignore
+              options={filtersSchema.filterOptions}
+              currentFilter={currentFilter}
+              setSelectedFilter={setSelectedFilters}
+              selectedFilters={selectedFilters}
+            />
           </Flex>
         </ModalBody>
         <Divider
@@ -81,6 +105,7 @@ const FilterModal = () => {
               lineHeight={{ base: 'xs-14', md: 'base' }}
               textDecoration={'underline'}
               cursor={'pointer'}
+              onClick={() => setSelectedFilters(new FiltersClass())}
             >
               Clear all
             </Text>
@@ -105,4 +130,4 @@ const FilterModal = () => {
   );
 };
 
-export default FilterModal;
+export default FiltersModal;

@@ -51,13 +51,19 @@ export const filtersSchema = {
     },
   ],
   filterOptions: {
+    deviceType: [
+      {
+        label: 'XYZ',
+        id: 'XYZ',
+      },
+    ],
     os: [
       {
         label: 'Android',
         id: 'android',
       },
       {
-        label: 'IOS',
+        label: 'iOS',
         id: 'ios',
       },
       {
@@ -107,6 +113,12 @@ export const filtersSchema = {
       {
         label: 'cpc',
         id: 'cpc',
+      },
+    ],
+    utmCampaign: [
+      {
+        label: 'Campaign',
+        id: 'Campaign',
       },
     ],
   },
