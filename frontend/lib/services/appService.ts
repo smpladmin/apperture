@@ -45,6 +45,7 @@ export const _getAppsWithIntegrations = async (
   try {
     const res = await ApperturePrivateAPI.get('/apps', {
       headers: { Authorization: token },
+      params: { with_integrations: true },
     });
     return res.data;
   } catch (e) {
