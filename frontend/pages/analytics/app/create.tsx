@@ -78,7 +78,9 @@ const Create = () => {
             bg={'white.100'}
             rounded={'0.25rem'}
             fontSize={'base'}
+            fontWeight={{ base: '400', md: '500' }}
             lineHeight={'base'}
+            height={{ base: '12', md: '15' }}
             textColor={'black.DEFAULT'}
             placeholder="Ex- Food Web App"
             py={4}

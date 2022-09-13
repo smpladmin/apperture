@@ -46,13 +46,17 @@ const AppsModal = ({
         margin={'1rem'}
         maxWidth="168"
         maxHeight={{ base: 'calc(100% - 100px)', md: 'calc(100% - 200px)' }}
+        borderRadius={{ base: '16px', md: '20px' }}
       >
         <ModalHeader
           display={'flex'}
           justifyContent={'space-between'}
           alignItems={'center'}
-          pt={10}
-          px={9}
+          fontSize={{ base: 'sh-20', md: 'sh-24' }}
+          lineHeight={{ base: 'sh-20', md: 'sh-24' }}
+          pt={{ base: '5', md: '20px' }}
+          pb={{ base: '7', md: '20px' }}
+          px={{ base: '5', md: '20px' }}
         >
           My Applications
           <ModalCloseButton
@@ -66,13 +70,15 @@ const AppsModal = ({
         </ModalHeader>
         <Divider
           orientation="horizontal"
-          marginY={'4'}
+          mt={'7'}
+          mb={'9'}
           borderColor={'white.200'}
           opacity={1}
+          display={{ base: 'none', md: 'block' }}
         />
 
-        <ModalBody px={9} overflowY={'auto'}>
-          <Box pt={4}>
+        <ModalBody px={{ base: '5', md: '9' }} overflowY={'auto'} pt={'0'}>
+          <Box pt={0}>
             <RadioGroup
               value={selectedApp._id}
               onChange={(appId) => selectApp(appId)}
