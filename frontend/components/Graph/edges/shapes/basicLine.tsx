@@ -15,9 +15,9 @@ const basicLine = (cfg: ModelConfig, group: IGroup) => {
         ['L', endPoint?.x, endPoint?.y],
       ],
       zIndex: 10,
-      percentile:cfg.percentile,
-      startPoint:cfg.startPoint,
-      endPoint:cfg.endPoint,
+      percentile: cfg.percentile,
+      startPoint: cfg.startPoint,
+      endPoint: cfg.endPoint,
     },
     name: edgeShapes.basicLine,
   });

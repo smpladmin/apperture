@@ -4,7 +4,7 @@ import { formatDatalabel } from '@lib/utils/graph';
 
 const startLabel = (cfg: ModelConfig, group: IGroup) => {
   const shape = group.get('children')[0];
-  const midPoint = shape.getPoint(0.30);
+  const midPoint = shape.getPoint(0.3);
 
   const keyShape = group.addShape('text', {
     attrs: {

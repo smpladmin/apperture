@@ -4,8 +4,8 @@ const WHITE_300 = '#efefef';
 const BLACK_200 = '0E0E19';
 const NUCLEUS_TEAL = '#66A7BD';
 const SHADOW_TEAL = '#66A7BD';
-const EDGE_GRAY ='#E7EDF2';
-const ARROW_GRAY ='#78787E';
+const EDGE_GRAY = '#E7EDF2';
+const ARROW_GRAY = '#78787E';
 
 const colors = {
   black: {

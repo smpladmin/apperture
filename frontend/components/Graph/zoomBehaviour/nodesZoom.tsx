@@ -1,4 +1,4 @@
-import { IGroup, INode } from '@antv/g6';
+import { IElementWithAttr, IGroup, INode } from '@antv/g6';
 import { nodeShapes } from '@lib/config/graphConfig';
 
 const nodesOnZoom = (nodes?: INode[], zoomRatio: number = 1) => {
@@ -10,7 +10,7 @@ const nodesOnZoom = (nodes?: INode[], zoomRatio: number = 1) => {
     const nodeLabel = group.find(
       (e: IGroup) => e.get('name') === nodeShapes.label
     );
-    const nodeShadow = group.find(
+    const nodeShadow: IElementWithAttr = group.find(
       (e: IGroup) => e.get('name') === nodeShapes.shadow
     );
     const nodeNucleus = group.find(
@@ -24,22 +24,20 @@ const nodesOnZoom = (nodes?: INode[], zoomRatio: number = 1) => {
     nodeLabel.attr({
       fontSize: 12 / zoomRatio,
       lineHeight: 12 / zoomRatio,
-      y:(nucleusBBox.maxY + 4) / zoomRatio,
+      y: (nucleusBBox.maxY + 4) / zoomRatio,
     });
-
-
     nodeShadow.attr({
-      r: ((28 * (nodeShadow.attrs.percentile as number)) / 100) /(zoomRatio/2)
+      r: (28 * (nodeShadow.attrs.percentile as number)) / 100 / (zoomRatio / 2),
     });
 
     nodeNucleus.attr({
-      r: 8/zoomRatio
+      r: 8 / zoomRatio,
     });
 
     nodeMetric.attr({
       fontSize: 10 / zoomRatio,
       lineHeight: 12 / zoomRatio,
-      y:(nucleusBBox.maxY + 20) / zoomRatio,
+      y: (nucleusBBox.maxY + 20) / zoomRatio,
     });
   });
 };

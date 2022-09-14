@@ -29,7 +29,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
         'primary',
         {
           draw(cfg, group) {
-            const keyshape = primaryNode(cfg!!, group!!,gRef.current.graph?.getZoom());
+            const keyshape = primaryNode(cfg!!, group!!);
             return keyshape;
           },
           update: undefined,
@@ -53,7 +53,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
                 path: G6.Arrow.triangleRect(
                   2.5,
                   1,
-                  .5,
+                  0.5,
                   2,
                   0,
                   length * 0.5 - length * 0.15
@@ -68,7 +68,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
                   path: G6.Arrow.triangleRect(
                     2.5,
                     1,
-                    .5,
+                    0.5,
                     2,
                     0,
                     length * 0.5 - length * 0.15
