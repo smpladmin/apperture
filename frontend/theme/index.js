@@ -102,7 +102,7 @@ const lineHeights = {
   'sh-20': '1.5rem', //lh-24px,
   'sh-24': '1.75rem', //lh-28px,
   'sh-28': '2.215rem', //lh-34px
-  'sh-34': '2.625rem', //fs-34px
+  'sh-34': '2.625rem', //lh-42px
   'sh-56': '4.125rem', //lh-66px
 };
 
