@@ -6,11 +6,13 @@ import { App } from '@lib/domain/app';
 import Loading from '@components/Loading';
 import Graph from '@components/Graph';
 import Head from 'next/head';
-import { visualisationData } from '@lib/data/data';
-import { Flex } from '@chakra-ui/react';
+import { _getEdges } from '@lib/services/datasourceService';
 import { Edge } from '@lib/domain/edge';
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  query,
+}) => {
   const token = req.cookies.auth_token;
   if (!token) {
     return {
@@ -18,6 +20,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     };
   }
   const apps = await _getApps(token);
+  const edges = await _getEdges(token, query.dsId as string);
   if (!apps.length) {
     return {
       redirect: {
@@ -27,31 +30,30 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     };
   }
   return {
-    props: { apps },
+    props: { apps, edges },
   };
 };
 
-const Explore = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+type ExploreDataSourceProps = {
+  apps: Array<App>;
+  edges: Array<Edge>;
+};
+
+const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
+  const [isLoading] = useState<boolean>(!edges.length);
   return (
     <>
       <Head>
         <title>Apperture</title>
         <meta name="description" content="Apperture Analytics" />
       </Head>
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <Graph
-          visualisationData={visualisationData as unknown as Array<Edge>}
-        />
-      )}
+      {isLoading ? <Loading /> : <Graph visualisationData={edges} />}
     </>
   );
 };
 
-Explore.getLayout = function getLayout(page: ReactNode, apps: App[]) {
+ExploreDataSource.getLayout = function getLayout(page: ReactNode, apps: App[]) {
   return <Layout apps={apps}>{page}</Layout>;
 };
 
-export default Explore;
+export default ExploreDataSource;

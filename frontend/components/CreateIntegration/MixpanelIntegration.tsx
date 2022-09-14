@@ -29,7 +29,7 @@ const MixpanelIntegration = () => {
   const onSubmit = async () => {
     const appId = router.query.appId as string;
     const provider = router.query.provider as Provider;
-    await createIntegrationWithDataSource(
+    const integration = await createIntegrationWithDataSource(
       appId,
       provider,
       projectId,
@@ -38,7 +38,11 @@ const MixpanelIntegration = () => {
     );
     router.replace({
       pathname: '/analytics/app/[appId]/integration/[provider]/complete',
-      query: { appId: router.query.appId, provider: router.query.provider },
+      query: {
+        appId: router.query.appId,
+        provider: router.query.provider,
+        dsId: integration.datasource._id,
+      },
     });
   };
 

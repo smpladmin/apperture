@@ -1,6 +1,7 @@
 import { AppertureAPI } from '@lib/apiClient';
 import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
 import { ProviderDataSource } from '@lib/domain/datasource';
+import { AxiosError } from 'axios';
 
 export const _getProviderDatasources = async (
   token: string,
@@ -35,4 +36,16 @@ export const saveDataSources = async (
     }
   );
   return res.data;
+};
+
+export const _getEdges = async (token: string, dsId: string) => {
+  try {
+    const res = await ApperturePrivateAPI.get(`/datasources/${dsId}/edges`, {
+      headers: { Authorization: token },
+    });
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
 };

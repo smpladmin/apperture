@@ -170,11 +170,11 @@ class NetworkGraphTransformer(Transformer):
         return res_df
 
     # Wrapper on level_wise_rollup for multi-level rollup.
-    def multilevel_rollup(self, input_df, thresholds):
+    def multilevel_rollup(self, input_df):
         logging.info('{msg}: {x}'.format(msg='Mutli-level rollup', x='starts'))
 
         init_lvl = self.rollup_start_lvl
-        for threshold in thresholds:
+        for threshold in self.lvl_thresholds:
             logging.info('{msg}: {x}'.format(msg='Rolling up for lvl', x=init_lvl))
             if init_lvl < self.rollup_end_lvl:
                 logging.info('{msg}: {x}'.format(msg='End lvl reached', x='exiting'))
@@ -197,7 +197,12 @@ class NetworkGraphTransformer(Transformer):
             df = NetworkGraphTransformer.auto_rollup(df)
             logging.info('{msg}: {x}'.format(msg='Automatic rollup for higher lvls', x='ends'))
 
-        rollup_df = self.multilevel_rollup(df[['rolled_url', 'pageViews']], thresholds=[40, 20, 10, 5])
+        else:
+            df['rolled_url'] = df['pagePath']
+            self.rollup_start_lvl = self.last_viable_lvl
+            self.lvl_thresholds = self.lvl_thresholds[self.rollup_start_lvl-1:]
+
+        rollup_df = self.multilevel_rollup(df[['rolled_url', 'pageViews']])
 
         logging.info('{msg}: {x}'.format(msg='Generating rolled urls', x='ends'))
         return rollup_df
