@@ -17,6 +17,7 @@ import MobileSidemenu from '../Sidebar/MobileSidemenu';
 import { useContext } from 'react';
 import { AppertureContext } from '@lib/contexts/appertureContext';
 import { App } from '@lib/domain/app';
+import FiltersModal from '@components/FiltersModal';
 
 type HeaderProps = {
   selectedApp: App;
@@ -25,6 +26,11 @@ type HeaderProps = {
 
 const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isfiltersModalOpen,
+    onOpen: openFiltersModal,
+    onClose: closeFiltersModal,
+  } = useDisclosure();
   const context = useContext(AppertureContext);
 
   return (
@@ -86,9 +92,10 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
         <Box hidden={context.device.isMobile}>
           <i className="ri-calendar-fill"></i>
         </Box>
-        <Box hidden={context.device.isMobile}>
+        <Box hidden={context.device.isMobile} onClick={openFiltersModal}>
           <Image src={filterIcon.src} alt="filter-icon" />
         </Box>
+        <FiltersModal isOpen={isfiltersModalOpen} onClose={closeFiltersModal} />
         <Box flexShrink={0}>
           <Image
             h={{ base: 5, md: 8 }}

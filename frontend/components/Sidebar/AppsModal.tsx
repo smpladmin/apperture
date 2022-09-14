@@ -40,10 +40,12 @@ const AppsModal = ({
       isCentered
       blockScrollOnMount={false}
       size={'2xl'}
+      trapFocus={false}
     >
-      <ModalOverlay />
+      <ModalOverlay backdropFilter={'blur(20px)'} />
       <ModalContent
         margin={'1rem'}
+        rounded={'2xl'}
         maxWidth="168"
         maxHeight={{ base: 'calc(100% - 100px)', md: 'calc(100% - 200px)' }}
       >
