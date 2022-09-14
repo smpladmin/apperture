@@ -4,13 +4,13 @@ import { formatDatalabel } from '@lib/utils/graph';
 
 const startLabel = (cfg: ModelConfig, group: IGroup) => {
   const shape = group.get('children')[0];
-  const midPoint = shape.getPoint(0.3);
+  const midPoint = shape.getPoint(0.30);
 
   const keyShape = group.addShape('text', {
     attrs: {
       lineHeight: 16,
       fontSize: 8,
-      fill: '#521D7C',
+      fill: '#808080',
       fillOpacity: 0.8,
       text: formatDatalabel(parseFloat(cfg.node1Label as string)),
       x: midPoint.x,

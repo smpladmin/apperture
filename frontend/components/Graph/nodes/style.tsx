@@ -1,9 +1,9 @@
-import { WHITE_DEFAULT, PURPLE, WHITE_300 } from '../../../theme';
+import { WHITE_DEFAULT, PURPLE, WHITE_300,NUCLEUS_TEAL, SHADOW_TEAL} from '../../../theme';
 
-export const shadowStartColor = PURPLE;
+export const shadowStartColor = SHADOW_TEAL;
 export const shadowEndColor = WHITE_300;
 
-export const nodeStartColor = PURPLE;
+export const nodeStartColor = NUCLEUS_TEAL;
 export const nodeEndColor = WHITE_DEFAULT;
 
 export var getShadowColor = function (percentile: any) {

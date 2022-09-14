@@ -12,6 +12,9 @@ const edgesOnZoom = (edges?: IEdge[], zoomRatio: number = 1) => {
     const edgeEndLabel = group.find(
       (e: IGroup) => e.get('name') === edgeShapes.endLabel
     );
+    const edgeBasicLine = group.find(
+      (e: IGroup) => e.get('name') === edgeShapes.basicLine
+    );
 
     if (edgeEndLabel) {
       edgeEndLabel.attr({
@@ -26,6 +29,18 @@ const edgesOnZoom = (edges?: IEdge[], zoomRatio: number = 1) => {
         lineHeight: 16 / zoomRatio,
       });
     }
+    
+    if (edgeBasicLine) {
+      edgeBasicLine.attr({
+      lineWidth: ((9 * (edgeBasicLine.attrs.percentile  as number)) / 100) / zoomRatio ,
+    });
+    }
+    
+
+   
+    
+
+
   });
 };
 
