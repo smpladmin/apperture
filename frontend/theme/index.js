@@ -37,7 +37,7 @@ const colors = {
 };
 
 const spacing = {
-  0.15: '0.0375rem',
+  0.15: '0.375rem',
   11: '2.75rem',
   13: '3.25rem',
   15: '3.75rem',

@@ -2,7 +2,6 @@ import 'remixicon/fonts/remixicon.css';
 import gaIcon from '@assets/images/ga-icon.png';
 import {
   Box,
-  Button,
   Flex,
   Heading,
   IconButton,

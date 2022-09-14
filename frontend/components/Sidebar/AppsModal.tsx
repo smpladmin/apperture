@@ -56,9 +56,9 @@ const AppsModal = ({
           alignItems={'center'}
           fontSize={{ base: 'sh-20', md: 'sh-24' }}
           lineHeight={{ base: 'sh-20', md: 'sh-24' }}
-          pt={{ base: '5', md: '20px' }}
-          pb={{ base: '7', md: '20px' }}
-          px={{ base: '5', md: '20px' }}
+          pt={{ base: '4', md: '10' }}
+          pb={{ base: '6', md: '0' }}
+          px={{ base: '4', md: '9' }}
         >
           My Applications
           <ModalCloseButton
@@ -80,7 +80,12 @@ const AppsModal = ({
           display={{ base: 'none', md: 'block' }}
         />
 
-        <ModalBody px={{ base: '5', md: '9' }} overflowY={'auto'} pt={'0'}>
+        <ModalBody
+          px={{ base: '4', md: '9' }}
+          overflowY={'auto'}
+          pt={'0'}
+          pb={'0'}
+        >
           <Box pt={0}>
             <RadioGroup
               value={selectedApp._id}
@@ -94,7 +99,12 @@ const AppsModal = ({
             </RadioGroup>
           </Box>
         </ModalBody>
-        <ModalFooter pt={0} px={9} pb={9} display={'block'}>
+        <ModalFooter
+          pt={{ base: '0', md: '0' }}
+          px={{ base: '4', md: '9' }}
+          pb={{ base: '4', md: '9' }}
+          display={'block'}
+        >
           <Flex direction={'column'}>
             <Text
               pt={'6'}
