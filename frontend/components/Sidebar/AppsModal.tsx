@@ -23,7 +23,7 @@ type AppsModalProps = {
   onClose: () => void;
   apps: AppWithIntegrations[];
   selectApp: Function;
-  selectedApp: any;
+  selectedApp: AppWithIntegrations;
   openEditAppsModal: () => void;
 };
 
@@ -87,6 +87,7 @@ const AppsModal = ({
                     <UserApp
                       key={app._id}
                       app={app}
+                      isSelected={app._id === selectedApp._id}
                       closeAppsModal={onClose}
                       openEditAppsModal={openEditAppsModal}
                     />

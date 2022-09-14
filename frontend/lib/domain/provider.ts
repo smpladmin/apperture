@@ -1,7 +1,6 @@
 export enum Provider {
   GOOGLE = 'google',
   MIXPANEL = 'mixpanel',
-  CLEVER = 'clever',
 }
 export namespace Provider {
   export function getDisplayName(provider: Provider): string {

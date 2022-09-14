@@ -11,12 +11,12 @@ import {
   Divider,
   IconButton,
 } from '@chakra-ui/react';
-import { App } from '@lib/domain/app';
+import { AppWithIntegrations } from '@lib/domain/app';
 
 type SidemenuProps = {
   closeDrawer: Function;
   openAppsModal: Function;
-  selectedApp: App;
+  selectedApp: AppWithIntegrations;
 };
 
 const MobileSidemenu = ({

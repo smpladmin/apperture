@@ -7,9 +7,15 @@ type UserAppProps = {
   app: AppWithIntegrations;
   closeAppsModal: () => void;
   openEditAppsModal: () => void;
+  isSelected: boolean;
 };
 
-const UserApp = ({ app, closeAppsModal, openEditAppsModal }: UserAppProps) => {
+const UserApp = ({
+  app,
+  closeAppsModal,
+  openEditAppsModal,
+  isSelected,
+}: UserAppProps) => {
   const getProviders = (app: AppWithIntegrations): string => {
     const providerNames = app.integrations.map((integration: any) => {
       return Provider.getDisplayName(integration.provider);
@@ -44,31 +50,35 @@ const UserApp = ({ app, closeAppsModal, openEditAppsModal }: UserAppProps) => {
           fontSize={{ base: 'xs', md: 'xs-14' }}
           lineHeight={{ base: 'xs', md: 'xs-14' }}
         />
-        <Flex direction={'column'}>
-          <Text fontSize={'base'} fontWeight={'medium'} lineHeight={'base'}>
-            {app.name}
-          </Text>
-          <Text
-            fontSize={'xs-14'}
-            fontWeight={'400'}
-            lineHeight={'xs-14'}
-            textColor={'grey.200'}
-          >
-            {getProviders(app)}
-          </Text>
-          <Text
-            fontSize={'base'}
-            fontWeight={'medium'}
-            lineHeight={'base'}
-            decoration={'underline'}
-            cursor={'pointer'}
-            onClick={() => {
-              closeAppsModal();
-              openEditAppsModal();
-            }}
-          >
-            Configure
-          </Text>
+        <Flex direction={'column'} gap={'3'}>
+          <Flex gap={'1'} direction={'column'}>
+            <Text fontSize={'base'} fontWeight={'medium'} lineHeight={'base'}>
+              {app.name}
+            </Text>
+            <Text
+              fontSize={'xs-14'}
+              fontWeight={'400'}
+              lineHeight={'xs-14'}
+              textColor={'grey.200'}
+            >
+              {getProviders(app) || 'GA'}
+            </Text>
+          </Flex>
+          {isSelected && (
+            <Text
+              fontSize={'base'}
+              fontWeight={'medium'}
+              lineHeight={'base'}
+              decoration={'underline'}
+              cursor={'pointer'}
+              onClick={() => {
+                closeAppsModal();
+                openEditAppsModal();
+              }}
+            >
+              Configure
+            </Text>
+          )}
         </Flex>
         <Radio ml={'auto'} value={app._id} colorScheme={'radioBlack'} />
       </Flex>

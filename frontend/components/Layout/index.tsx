@@ -49,6 +49,7 @@ export default function Layout({ children, apps = [] }: LayoutProps) {
       <EditAppsModal
         isEditAppsModalOpen={isEditAppsModalOpen}
         closeEditAppsModal={closeEditAppsModal}
+        app={selectedApp}
       />
       <Sidebar selectedApp={selectedApp} openAppsModal={onModalOpen} />
       <Flex flexDir={'column'} w={'full'}>
