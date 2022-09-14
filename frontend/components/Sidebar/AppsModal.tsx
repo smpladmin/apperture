@@ -68,6 +68,7 @@ const AppsModal = ({
             border={'1px'}
             borderColor={'white.200'}
             rounded={'full'}
+            fontSize={'0.55rem'}
           />
         </ModalHeader>
         <Divider
