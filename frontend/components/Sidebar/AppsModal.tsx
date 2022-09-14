@@ -14,16 +14,17 @@ import {
   Stack,
   Flex,
 } from '@chakra-ui/react';
-import { App } from '@lib/domain/app';
+import { AppWithIntegrations } from '@lib/domain/app';
 import Link from 'next/link';
 import UserApp from './UserApp';
 
 type AppsModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  apps: App[];
+  apps: AppWithIntegrations[];
   selectApp: Function;
   selectedApp: any;
+  openEditAppsModal: () => void;
 };
 
 const AppsModal = ({
@@ -32,6 +33,7 @@ const AppsModal = ({
   apps,
   selectApp,
   selectedApp,
+  openEditAppsModal,
 }: AppsModalProps) => {
   return (
     <Modal
@@ -81,7 +83,14 @@ const AppsModal = ({
             >
               <Stack direction="column">
                 {apps.map((app) => {
-                  return <UserApp key={app._id} app={app} />;
+                  return (
+                    <UserApp
+                      key={app._id}
+                      app={app}
+                      closeAppsModal={onClose}
+                      openEditAppsModal={openEditAppsModal}
+                    />
+                  );
                 })}
               </Stack>
             </RadioGroup>

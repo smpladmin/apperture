@@ -2,9 +2,10 @@ import { Box, Flex, useDisclosure } from '@chakra-ui/react';
 import { ReactNode, useEffect, useState } from 'react';
 import Header from '../Header';
 import Sidebar from '../Sidebar';
-import { App } from '@lib/domain/app';
+import { AppWithIntegrations } from '@lib/domain/app';
 import AppsModal from '@components/Sidebar/AppsModal';
 import { useRouter } from 'next/router';
+import EditAppsModal from '@components/EditAppsModal';
 
 export default function Layout({ children, apps = [] }: LayoutProps) {
   const router = useRouter();
@@ -13,6 +14,11 @@ export default function Layout({ children, apps = [] }: LayoutProps) {
   const { isOpen, onOpen, onClose } = useDisclosure({
     defaultIsOpen: !!router.query.apps,
   });
+  const {
+    isOpen: isEditAppsModalOpen,
+    onOpen: openEditAppsModal,
+    onClose: closeEditAppsModal,
+  } = useDisclosure();
 
   useEffect(() => {
     setSelectedApp(apps.find((a) => a._id === selectedAppId)!!);
@@ -38,6 +44,11 @@ export default function Layout({ children, apps = [] }: LayoutProps) {
         apps={apps}
         selectApp={setSelectedAppId}
         selectedApp={selectedApp}
+        openEditAppsModal={openEditAppsModal}
+      />
+      <EditAppsModal
+        isEditAppsModalOpen={isEditAppsModalOpen}
+        closeEditAppsModal={closeEditAppsModal}
       />
       <Sidebar selectedApp={selectedApp} openAppsModal={onModalOpen} />
       <Flex flexDir={'column'} w={'full'}>
@@ -52,5 +63,5 @@ export default function Layout({ children, apps = [] }: LayoutProps) {
 
 type LayoutProps = {
   children: ReactNode;
-  apps: App[];
+  apps: AppWithIntegrations[];
 };

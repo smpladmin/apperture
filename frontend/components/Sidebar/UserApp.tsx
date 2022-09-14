@@ -1,12 +1,23 @@
 import React from 'react';
-import { Avatar, Flex, Radio, Text } from '@chakra-ui/react';
-import { App } from '@lib/domain/app';
+import { Avatar, Flex, Radio, Text, useDisclosure } from '@chakra-ui/react';
+import { AppWithIntegrations } from '@lib/domain/app';
+import { Provider } from '@lib/domain/provider';
 
 type UserAppProps = {
-  app: App;
+  app: AppWithIntegrations;
+  closeAppsModal: () => void;
+  openEditAppsModal: () => void;
 };
 
-const UserApp = ({ app }: UserAppProps) => {
+const UserApp = ({ app, closeAppsModal, openEditAppsModal }: UserAppProps) => {
+  const getProviders = (app: AppWithIntegrations): string => {
+    const providerNames = app.integrations.map((integration: any) => {
+      return Provider.getDisplayName(integration.provider);
+    });
+    const uniqueProviders = [...new Set(providerNames)];
+    return uniqueProviders.join(', ');
+  };
+
   return (
     <Flex
       paddingY={'4'}
@@ -34,7 +45,7 @@ const UserApp = ({ app }: UserAppProps) => {
           lineHeight={{ base: 'xs', md: 'xs-14' }}
         />
         <Flex direction={'column'}>
-          <Text fontSize={'base'} fontWeight={'500'} lineHeight={'base'}>
+          <Text fontSize={'base'} fontWeight={'medium'} lineHeight={'base'}>
             {app.name}
           </Text>
           <Text
@@ -43,7 +54,20 @@ const UserApp = ({ app }: UserAppProps) => {
             lineHeight={'xs-14'}
             textColor={'grey.200'}
           >
-            GA, Mix Panel
+            {getProviders(app)}
+          </Text>
+          <Text
+            fontSize={'base'}
+            fontWeight={'medium'}
+            lineHeight={'base'}
+            decoration={'underline'}
+            cursor={'pointer'}
+            onClick={() => {
+              closeAppsModal();
+              openEditAppsModal();
+            }}
+          >
+            Configure
           </Text>
         </Flex>
         <Radio ml={'auto'} value={app._id} colorScheme={'radioBlack'} />

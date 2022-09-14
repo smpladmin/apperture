@@ -65,6 +65,7 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
       <Box w={'full'} marginX="auto" maxW={70} mt={12}>
         <Link href={`/analytics/explore/${router.query.dsId}`}>
           <Button
+            variant={'primary'}
             rounded={'lg'}
             bg={'black.100'}
             p={6}

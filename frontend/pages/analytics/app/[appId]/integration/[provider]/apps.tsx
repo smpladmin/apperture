@@ -43,6 +43,7 @@ type SelectDataSourcesProps = {
 
 const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
   const router = useRouter();
+  const handleClose = () => router.push('/analytics/explore?apps=1');
 
   const handleGoBack = () => {
     router.push({
@@ -90,6 +91,7 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           bg={'white'}
           border={'1px'}
           borderColor={'white.200'}
+          onClick={handleClose}
         />
         <Box mt={11} w={{ base: 'full' }} maxW={{ md: '200' }}>
           <Image
