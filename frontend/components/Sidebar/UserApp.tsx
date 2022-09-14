@@ -34,13 +34,17 @@ const UserApp = ({ app }: UserAppProps) => {
           lineHeight={{ base: 'xs', md: 'xs-14' }}
         />
         <Flex direction={'column'}>
-          <Text fontSize={'base'} fontWeight={'500'} lineHeight={'base'}>
+          <Text
+            fontSize={{ base: 'xs-14', md: 'base' }}
+            fontWeight={{ base: '600', md: '500' }}
+            lineHeight={'base'}
+          >
             {app.name}
           </Text>
           <Text
-            fontSize={'xs-14'}
+            fontSize={{ base: 'xs-12', md: 'xs-14' }}
             fontWeight={'400'}
-            lineHeight={'xs-14'}
+            lineHeight={{ base: 'xs-12', md: 'xs-14' }}
             textColor={'grey.200'}
           >
             GA, Mix Panel

@@ -110,8 +110,8 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           <Heading
             as={'h2'}
             pb={{ base: 8, md: 10 }}
-            fontSize={{ base: 'sh-28', md: 'sh-52' }}
-            lineHeight={{ base: 'sh-28', md: 'sh-52' }}
+            fontSize={{ base: 'sh-28', md: 'sh-56' }}
+            lineHeight={{ base: 'sh-28', md: 'sh-56' }}
             fontWeight={'semibold'}
           >
             Select applications from Google Analytics that you want to track

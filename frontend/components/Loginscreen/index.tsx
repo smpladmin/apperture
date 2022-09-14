@@ -1,14 +1,13 @@
-import Image from 'next/image';
 import logo from '@assets/images/Logo_login.svg';
 import glogo from '@assets/images/Google_login.svg';
 import Link from 'next/link';
-import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading, Text, Image } from '@chakra-ui/react';
 
 const Loginscreen = () => {
   return (
     <Box
       p={8}
-      pt={{ md: 40 }}
+      pt={{ base: 33, md: 40 }}
       bg="black.DEFAULT"
       textColor="white.DEFAULT"
       height={'100%'}
@@ -23,20 +22,15 @@ const Loginscreen = () => {
         gap={8}
       >
         <Box>
-          <Box
-            position={'relative'}
-            mb={3}
-            h={{ base: 25, md: 30 }}
-            w={{ base: 25, md: 30 }}
-          >
-            <Image src={logo} layout="fill" alt="Apperture logo" />
+          <Box mb={3} h={{ base: 25, md: 30 }} w={{ base: 25, md: 30 }}>
+            <Image src={logo.src} alt="Apperture logo" />
           </Box>
           <Heading
             as="h1"
             mt={12}
-            fontSize={{ base: '34px', md: '56px' }}
-            lineHeight={{ base: '42px', md: '65px' }}
-            fontWeight={'normal'}
+            fontSize={{ base: 'sh-34', md: 'sh-56' }}
+            lineHeight={{ base: 'sh-34', md: 'sh-56' }}
+            fontWeight={{ base: '500', md: '400' }}
           >
             Product Analytics <br /> for everyone
           </Heading>
@@ -60,15 +54,15 @@ const Loginscreen = () => {
         >
           <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/login`}>
             <Button
-              p={8}
+              p={{ base: 7, md: 10 }}
               fontSize={{ base: 'base', md: 'sh-20' }}
               lineHeight={{ base: 'base', md: 'sh-20' }}
               fontWeight={'semibold'}
               textColor={'black.100'}
               w={'full'}
-              gap={6}
+              gap={{ base: 4, md: 6 }}
             >
-              <Image src={glogo} alt="Google logo" />
+              <Image src={glogo.src} alt="Google logo" />
               <Text>Sign up with Google</Text>
             </Button>
           </Link>
