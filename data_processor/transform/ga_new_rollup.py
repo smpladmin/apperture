@@ -38,6 +38,9 @@ class NetworkGraphTransformer(Transformer):
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         logging.info('{msg}: {x}'.format(msg='NetworkGraphTransformer', x='starts'))
+        df = df.groupby(by=['previousPage', 'pagePath'], sort=False, as_index=False).agg(lambda x: x.sum())
+        df = df.drop(columns=['date'])
+        df = df.reset_index(drop=True)
         logging.info('{msg}: {x}'.format(msg='No. of unique URLs before regex ', x=df['pagePath'].nunique()))
 
         # Replacing ids with a placeholder.
