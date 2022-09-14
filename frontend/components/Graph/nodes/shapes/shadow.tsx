@@ -6,9 +6,10 @@ const shadow = (cfg: ModelConfig, group: IGroup) => {
   const { percentile } = cfg;
   const keyShape = group.addShape('circle', {
     attrs: {
-      r: (28 * (percentile as number)) / 100,
+      r: ((28 * (percentile as number)) / 100) * 2,
       fill: getShadowColor(percentile),
       fillOpacity: 0.4,
+      percentile: percentile,
     },
     name: nodeShapes.shadow,
     draggable: true,

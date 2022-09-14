@@ -30,11 +30,11 @@ export const zoomConfig = [
 ];
 
 export const graphConfig = {
-  layout: 'gForce',
+  layout: 'fruchterman',
   linkDistance: 150,
   nodeSize: 56,
   nodeSpacing: 112,
-  minZoom: 0.75,
+  minZoom: 1,
   maxZoom: 3,
 };
 
