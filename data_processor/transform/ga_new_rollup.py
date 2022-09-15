@@ -2,6 +2,7 @@ import re
 import logging
 import numpy as np
 import pandas as pd
+from copy import deepcopy
 
 from .transformer import Transformer
 
@@ -38,6 +39,10 @@ class NetworkGraphTransformer(Transformer):
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         logging.info('{msg}: {x}'.format(msg='NetworkGraphTransformer', x='starts'))
+        cleaned_df = deepcopy(df)
+        cleaned_df['pagePath'] = cleaned_df['pagePath'].apply(lambda x: re.sub("/[\d]+", "/:id", x))
+        cleaned_df['previousPage'] = cleaned_df['previousPage'].apply(lambda x: re.sub("/[\d]+", "/:id", x))
+
         df = df.groupby(by=['previousPage', 'pagePath'], sort=False, as_index=False).agg(lambda x: x.sum())
         df = df.drop(columns=['date'])
         df = df.reset_index(drop=True)
@@ -59,28 +64,15 @@ class NetworkGraphTransformer(Transformer):
 
         # Generating a map of original url vs rolled url.
         map_df = NetworkGraphTransformer.create_rollup_map(df[['pagePath']], rolled_urls)
+        map_df = map_df.set_index('pagePath')
+        map_dict = map_df.to_dict()
+        map_dict = map_dict['rolled_url']
 
-        # Applying map
-        df = pd.merge(df, map_df, on=['pagePath'], how='left')
-        map_df = map_df.rename(columns={'pagePath': 'previousPage', 'rolled_url': 'previous_rolled_url'})
-        df = pd.merge(df, map_df, on=['previousPage'], how='left')
-
-        df['previous_rolled_url'] = df['previous_rolled_url'].fillna(df['previousPage'])
-        df['previousPage'] = df['previous_rolled_url']
-        df['pagePath'] = df['rolled_url']
-        df.drop(columns=['rolled_url', 'previous_rolled_url'], inplace=True)
-
-        df = df.groupby(by=['previousPage', 'pagePath'], sort=False, as_index=False).agg(lambda x: x.sum())
-        df = df[df['pagePath'] != df['previousPage']]
-        df.sort_values(by=['pageViews'], ascending=False, inplace=True)
-
-        # Temporary solution to reduce edges for now.
-        if len(df) > 100:
-            df = df[df['pageViews'] >= 100]
-        df = df.reset_index(drop=True)
+        cleaned_df['rolledCurrentEvent'] = cleaned_df['pagePath'].apply(lambda x: map_dict.get(x, x))
+        cleaned_df['rolledPreviousEvent'] = cleaned_df['previousPage'].apply(lambda x: map_dict.get(x, x))
 
         logging.info('{msg}: {x}'.format(msg='NetworkGraphTransformer', x='ends'))
-        return df
+        return cleaned_df
 
     # Creates a map of original url vs rolled url
     @staticmethod

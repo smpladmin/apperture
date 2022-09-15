@@ -8,7 +8,7 @@ from domain.common.models import IntegrationProvider
 from .saver import Saver
 
 
-class CleanedDataSaver(Saver):
+class TransformedDataSaver(Saver):
     def __init__(self):
         pass
 
@@ -21,8 +21,8 @@ class CleanedDataSaver(Saver):
             }
         )
         df['date'] = df['date'].apply(lambda x: dt.strptime(x, '%Y%m%d').strftime('%Y-%m-%d'))
-        rows = df.to_dict("records")
-        data = {"datasourceId": datasource_id, "provider": provider.value, "rows": rows}
+        edges = df.to_dict("records")
+        data = {"datasourceId": datasource_id, "provider": provider.value, "edges": edges}
         res = self._save_data(data)
         if not res.ok:
             raise Exception(
@@ -32,7 +32,7 @@ class CleanedDataSaver(Saver):
 
     def _save_data(self, data):
         return requests.post(
-            f"{os.getenv('BACKEND_BASE_URL')}/private/cleaned_data",
+            f"{os.getenv('BACKEND_BASE_URL')}/private/edges",
             headers={
                 f"{os.getenv('BACKEND_API_KEY_NAME')}": os.getenv(
                     "BACKEND_API_KEY_SECRET"

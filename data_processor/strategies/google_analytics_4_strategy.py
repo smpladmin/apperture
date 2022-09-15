@@ -6,8 +6,7 @@ from clean.google_analytics_cleaner import GoogleAnalyticsCleaner
 from domain.common.models import IntegrationProvider
 from fetch.google_analytics import initialize_v4_analytics
 from fetch.google_analytics_4_fetcher import GoogleAnalytics4Fetcher
-from store.network_graph_saver import NetworkGraphSaver
-from store.cleaned_data_saver import CleanedDataSaver
+from store.transformed_data_saver import TransformedDataSaver
 from .strategy import Strategy
 from tenants.tenants_service import TenantsService
 from transform.ga_new_rollup import NetworkGraphTransformer
@@ -36,12 +35,10 @@ class GoogleAnalytics4Strategy(Strategy):
         )
         self.cleaner = GoogleAnalyticsCleaner()
         self.transformer = NetworkGraphTransformer()
-        self.saver = NetworkGraphSaver()
-        self.cleaned_data_saver = CleanedDataSaver()
+        self.saver = TransformedDataSaver()
 
     def execute(self, email, external_source_id):
         df = self.fetcher.daily_data(external_source_id)
         cleaned_data = self.cleaner.clean(df)
-        self.cleaned_data_saver.save(self.datasource_id, self.provider, cleaned_data)
-        network_graph_data = self.transformer.transform(cleaned_data)
-        self.saver.save(self.datasource_id, self.provider, network_graph_data)
+        transformed_data = self.transformer.transform(cleaned_data)
+        self.saver.save(self.datasource_id, self.provider, transformed_data)
