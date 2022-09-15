@@ -14,16 +14,17 @@ import {
   Stack,
   Flex,
 } from '@chakra-ui/react';
-import { App } from '@lib/domain/app';
+import { AppWithIntegrations } from '@lib/domain/app';
 import Link from 'next/link';
 import UserApp from './UserApp';
 
 type AppsModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  apps: App[];
+  apps: AppWithIntegrations[];
   selectApp: Function;
-  selectedApp: any;
+  selectedApp: AppWithIntegrations;
+  openConfigureAppsModal: () => void;
 };
 
 const AppsModal = ({
@@ -32,6 +33,7 @@ const AppsModal = ({
   apps,
   selectApp,
   selectedApp,
+  openConfigureAppsModal,
 }: AppsModalProps) => {
   return (
     <Modal
@@ -42,11 +44,11 @@ const AppsModal = ({
       size={'2xl'}
       trapFocus={false}
     >
-      <ModalOverlay backdropFilter={'blur(20px)'} />
+      <ModalOverlay backdropFilter={'blur(20px)'} bg={'grey.0'} />
       <ModalContent
         margin={'1rem'}
         maxWidth="168"
-        maxHeight={{ base: 'calc(100% - 100px)', md: 'calc(100% - 200px)' }}
+        maxHeight={'calc(100% - 100px)'}
         borderRadius={{ base: '16px', md: '20px' }}
       >
         <ModalHeader
@@ -92,7 +94,14 @@ const AppsModal = ({
             >
               <Stack direction="column">
                 {apps.map((app) => {
-                  return <UserApp key={app._id} app={app} />;
+                  return (
+                    <UserApp
+                      key={app._id}
+                      app={app}
+                      isSelected={app._id === selectedApp._id}
+                      openConfigureAppsModal={openConfigureAppsModal}
+                    />
+                  );
                 })}
               </Stack>
             </RadioGroup>

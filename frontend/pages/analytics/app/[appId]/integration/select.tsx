@@ -19,17 +19,19 @@ import { Provider } from '@lib/domain/provider';
 const SelectProvider = () => {
   const [provider, setProvider] = useState<string>('');
   const router = useRouter();
-  const { appId } = router.query;
+  const { appId, add } = router.query;
 
   const handleGoBack = (): void => router.back();
 
   const handleClose = () => router.push('/analytics/explore?apps=1');
 
-  const handleNextClick = () =>
+  const handleNextClick = () => {
+    const queryParams = { appId, provider, ...router.query };
     router.push({
       pathname: `/analytics/app/[appId]/integration/[provider]/create`,
-      query: { appId, provider },
+      query: queryParams,
     });
+  };
   return (
     <Flex
       flexDirection={'column'}
@@ -58,7 +60,7 @@ const SelectProvider = () => {
             lineHeight={'xs-14'}
             fontWeight={'medium'}
           >
-            Step 2 of 3
+            {add ? 'Step 1 of 2' : 'Step 2 of 3'}
           </Text>
           <Heading
             as={'h2'}

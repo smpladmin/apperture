@@ -18,4 +18,5 @@ export type DataSource = {
   provider: Provider;
   name: string | null;
   version: DataSourceVersion;
+  externalSourceId: string;
 };

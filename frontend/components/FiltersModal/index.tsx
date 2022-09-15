@@ -12,7 +12,7 @@ import {
   Flex,
 } from '@chakra-ui/react';
 import { filtersSchema } from './filtersSchema';
-import FilterCategories from './Filters';
+import FilterCategories from './FilterCategories';
 import FilterOptions from './FilterOptions';
 import { useState } from 'react';
 import { FilterTypes, Filters as FiltersClass } from '@lib/domain/filters';
@@ -37,7 +37,7 @@ const FiltersModal = ({
       size={'2xl'}
       trapFocus={false}
     >
-      <ModalOverlay backdropFilter={'blur(20px)'} />
+      <ModalOverlay backdropFilter={'blur(20px)'} bg={'grey.0'} />
       <ModalContent
         maxWidth="168"
         rounded={'2xl'}

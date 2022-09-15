@@ -1,4 +1,4 @@
-import { App } from '@lib/domain/app';
+import { AppWithIntegrations } from '@lib/domain/app';
 import type {
   NextComponentType,
   NextPageContext,
@@ -12,7 +12,7 @@ declare module 'next' {
     any,
     P
   > & {
-    getLayout?: (page: ReactNode, apps: App[]) => ReactNode;
+    getLayout?: (page: ReactNode, apps: AppWithIntegrations[]) => ReactNode;
   };
 }
 

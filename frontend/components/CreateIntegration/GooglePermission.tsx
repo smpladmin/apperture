@@ -1,6 +1,5 @@
-import { Box, Button, Flex, IconButton, Text } from '@chakra-ui/react';
+import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import Image from 'next/image';
-import Link from 'next/link';
 import gaLogo from '@assets/images/ga-logo.svg';
 import 'remixicon/fonts/remixicon.css';
 import FormButton from '@components/FormButton';
@@ -9,13 +8,17 @@ type GooglePermissionProps = {
   navigateBack: Function;
   handleClose: Function;
   appId: string | string[] | undefined;
+  add: string | string[] | undefined;
 };
 
 const GooglePermission = ({
   navigateBack,
   handleClose,
   appId,
+  add,
 }: GooglePermissionProps) => {
+  const link = `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/integrations/oauth/google?app_id=${appId}&redirect_url=${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/analytics/app/${appId}/integration/google/apps`;
+  const oauthUrl = add ? link.concat('?add=true') : link;
   return (
     <Flex direction={'column'}>
       <Box p={4} px={{ md: 45 }} pt={{ md: 10 }}>
@@ -65,7 +68,7 @@ const GooglePermission = ({
           <Box mt={'12'}>
             <FormButton
               navigateBack={navigateBack}
-              link={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/integrations/oauth/google?app_id=${appId}&redirect_url=${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/analytics/app/${appId}/integration/google/apps`}
+              link={oauthUrl}
               nextButtonName={'Give Access'}
             />
           </Box>

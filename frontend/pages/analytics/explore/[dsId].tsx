@@ -1,8 +1,8 @@
 import { ReactNode, useState } from 'react';
 import Layout from '@components/Layout';
 import { GetServerSideProps } from 'next';
-import { _getApps } from '@lib/services/appService';
-import { App } from '@lib/domain/app';
+import { _getApps, _getAppsWithIntegrations } from '@lib/services/appService';
+import { App, AppWithIntegrations } from '@lib/domain/app';
 import Loading from '@components/Loading';
 import Graph from '@components/Graph';
 import Head from 'next/head';
@@ -19,7 +19,7 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
-  const apps = await _getApps(token);
+  const apps = await _getAppsWithIntegrations(token);
   const edges = await _getEdges(token, query.dsId as string);
   if (!apps.length) {
     return {
@@ -52,7 +52,10 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   );
 };
 
-ExploreDataSource.getLayout = function getLayout(page: ReactNode, apps: App[]) {
+ExploreDataSource.getLayout = function getLayout(
+  page: ReactNode,
+  apps: AppWithIntegrations[]
+) {
   return <Layout apps={apps}>{page}</Layout>;
 };
 
