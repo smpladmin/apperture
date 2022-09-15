@@ -1,4 +1,4 @@
-import { IEdge, IGroup } from '@antv/g6';
+import { IEdge, IElementWithAttr, IGroup } from '@antv/g6';
 import { edgeShapes } from '@lib/config/graphConfig';
 
 const edgesOnZoom = (edges?: IEdge[], zoomRatio: number = 1) => {
@@ -12,6 +12,9 @@ const edgesOnZoom = (edges?: IEdge[], zoomRatio: number = 1) => {
     const edgeEndLabel = group.find(
       (e: IGroup) => e.get('name') === edgeShapes.endLabel
     );
+    const edgeBasicLine: IElementWithAttr = group.find(
+      (e: IGroup) => e.get('name') === edgeShapes.basicLine
+    );
 
     if (edgeEndLabel) {
       edgeEndLabel.attr({
@@ -24,6 +27,13 @@ const edgesOnZoom = (edges?: IEdge[], zoomRatio: number = 1) => {
       edgeStartLabel.attr({
         fontSize: 8 / zoomRatio + 2,
         lineHeight: 16 / zoomRatio,
+      });
+    }
+
+    if (edgeBasicLine) {
+      edgeBasicLine.attr({
+        lineWidth:
+          (9 * (edgeBasicLine.attrs.percentile as number)) / 100 / zoomRatio,
       });
     }
   });

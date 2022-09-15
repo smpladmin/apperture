@@ -10,7 +10,7 @@ const startLabel = (cfg: ModelConfig, group: IGroup) => {
     attrs: {
       lineHeight: 16,
       fontSize: 8,
-      fill: '#521D7C',
+      fill: '#808080',
       fillOpacity: 0.8,
       text: formatDatalabel(parseFloat(cfg.node1Label as string)),
       x: midPoint.x,

@@ -55,7 +55,7 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
       />
       {context.device.isMobile && (
         <Drawer placement="left" isOpen={isOpen} onClose={onClose}>
-          <DrawerOverlay />
+          <DrawerOverlay backdropFilter="auto" backdropBlur="20px" />
           <DrawerContent>
             <DrawerBody p={0}>
               <MobileSidemenu

@@ -52,14 +52,14 @@ const Graph = ({ visualisationData }: GraphProps) => {
             edge.attr({
               endArrow: {
                 path: G6.Arrow.triangleRect(
-                  4,
+                  2.5,
+                  1,
+                  0.5,
                   2,
-                  2,
-                  8,
                   0,
                   length * 0.5 - length * 0.15
                 ),
-                fill: '#6BBDDFCC',
+                fill: '#a9a9aa',
                 stroke: 'transparent',
               },
             });
@@ -67,14 +67,14 @@ const Graph = ({ visualisationData }: GraphProps) => {
               edge.attr({
                 startArrow: {
                   path: G6.Arrow.triangleRect(
-                    4,
+                    2.5,
+                    1,
+                    0.5,
                     2,
-                    2,
-                    8,
                     0,
                     length * 0.5 - length * 0.15
                   ),
-                  fill: '#6BBDDFCC',
+                  fill: '#a9a9aa',
                   stroke: 'transparent',
                 },
               });

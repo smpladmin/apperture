@@ -8,13 +8,16 @@ const basicLine = (cfg: ModelConfig, group: IGroup) => {
   const keyShape = group.addShape('path', {
     attrs: {
       lineWidth: (9 * (cfg.percentile as number)) / 100,
-      stroke: '#E1E1E1',
-      strokeOpacity: 1,
+      stroke: '#E7EDF2',
+      strokeOpacity: 0.75,
       path: [
         ['M', startPoint?.x, startPoint?.y],
         ['L', endPoint?.x, endPoint?.y],
       ],
       zIndex: 10,
+      percentile: cfg.percentile,
+      startPoint: cfg.startPoint,
+      endPoint: cfg.endPoint,
     },
     name: edgeShapes.basicLine,
   });
