@@ -2,8 +2,10 @@ from fastapi import APIRouter, Depends
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.integrations.service import IntegrationService
+from domain.runlogs.service import RunLogService
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto, EdgeResponse
+from rest.dtos.runlogs import CreateRunLogDto
 
 from rest.middlewares import validate_api_key
 
@@ -50,3 +52,8 @@ async def update_edges(
     ]
     await edge_service.update_edges(edges, datasource.id)
     return {"updated": True}
+
+
+@router.post("/runlogs")
+async def create_runlog(dto: CreateRunLogDto, service: RunLogService = Depends()):
+    return await service.create(dto.datasource_id, dto.date)
