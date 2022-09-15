@@ -22,7 +22,7 @@ class TransformedDataSaver(Saver):
         )
         df['date'] = df['date'].apply(lambda x: dt.strptime(x, '%Y%m%d').strftime('%Y-%m-%d'))
         edges = df.to_dict("records")
-        data = {"datasourceId": datasource_id, "provider": provider.value, "edges": edges}
+        data = {"datasourceId": datasource_id, "provider": provider, "edges": edges}
         res = self._save_data(data)
         if not res.ok:
             raise Exception(
