@@ -16,11 +16,11 @@ import {
 import MobileSidemenu from '../Sidebar/MobileSidemenu';
 import { useContext } from 'react';
 import { AppertureContext } from '@lib/contexts/appertureContext';
-import { App } from '@lib/domain/app';
+import { AppWithIntegrations } from '@lib/domain/app';
 import FiltersModal from '@components/FiltersModal';
 
 type HeaderProps = {
-  selectedApp: App;
+  selectedApp: AppWithIntegrations;
   openAppsModal: Function;
 };
 
