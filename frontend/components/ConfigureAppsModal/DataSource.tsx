@@ -9,9 +9,9 @@ const ProviderProperty = ({ propertyName }: { propertyName: string }) => {
   return (
     <Text
       color={'grey.200'}
-      fontSize={'xs-14'}
+      fontSize={{ base: 'xs-12', md: 'xs-14' }}
       fontWeight={'normal'}
-      lineHeight={'sh-18'}
+      lineHeight={{ base: 'xs-12', md: 'sh-18' }}
       width={'25'}
     >
       {propertyName}
@@ -22,16 +22,22 @@ const ProviderProperty = ({ propertyName }: { propertyName: string }) => {
 const DataSource = ({ dataSource }: { dataSource: DataSource }) => {
   const { provider, name, externalSourceId, version } = dataSource;
   return (
-    <Flex direction={'column'} py={'5'} px={6}>
+    <Flex direction={'column'} py={'5'} px={'6'}>
       <Flex gap={'3'}>
-        <Box height={{ base: '6', md: '6' }} width={{ base: '6', md: '6' }}>
+        <Box height={{ base: '4', md: '6' }} width={{ base: '4', md: '6' }}>
           <Image
             src={provider === Provider.GOOGLE ? gaLogo : mixpanelLogo}
             alt="provider"
             layout="responsive"
           />
         </Box>
-        <Text>{name || externalSourceId}</Text>
+        <Text
+          fontSize={{ base: 'xs-14', md: 'base' }}
+          lineHeight={{ base: 'base', md: 'xs-14' }}
+          fontWeight={'medium'}
+        >
+          {name || externalSourceId}
+        </Text>
       </Flex>
       <Flex pl={'9'} mt={'2'} gap={'5'}>
         <ProviderProperty propertyName={Provider.getDisplayName(provider)} />

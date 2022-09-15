@@ -20,6 +20,7 @@ const colors = {
   },
   grey: {
     DEFAULT: '#d9d9da',
+    0: 'rgba(14, 14, 26, 0.6)',
     50: '#e5e5e5',
     100: '#b2b2b5',
     200: '#78787E',

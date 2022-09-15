@@ -44,12 +44,12 @@ const AppsModal = ({
       size={'2xl'}
       trapFocus={false}
     >
-      <ModalOverlay backdropFilter={'blur(20px)'} />
+      <ModalOverlay backdropFilter={'blur(20px)'} bg={'grey.0'} />
       <ModalContent
         margin={'1rem'}
         rounded={'2xl'}
         maxWidth="168"
-        maxHeight={{ base: 'calc(100% - 100px)', md: 'calc(100% - 200px)' }}
+        maxHeight={'calc(100% - 100px)'}
       >
         <ModalHeader
           display={'flex'}

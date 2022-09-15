@@ -75,7 +75,7 @@ const MobileSidemenu = ({
           gap={2}
           onClick={() => {
             closeDrawer();
-            openAppsModal();
+            openAppsModal('apps');
           }}
         >
           <Flex

@@ -44,13 +44,13 @@ const ConfigureAppsModal = ({
       size={'2xl'}
       trapFocus={false}
     >
-      <ModalOverlay backdropFilter={'blur(20px)'} />
+      <ModalOverlay backdropFilter={'blur(20px)'} bg={'grey.0'} />
       <ModalContent
-        margin={'1rem'}
-        rounded={'2xl'}
-        maxWidth="168"
-        maxHeight={'calc(100% - 100px)'}
-        pt={'9'}
+        h={{ base: 'full', md: 'auto' }}
+        rounded={{ base: 0, md: '2xl' }}
+        maxWidth={{ base: 'full', md: '168' }}
+        maxHeight={{ base: 'full', md: 'calc(100% - 100px)' }}
+        pt={{ base: 0, md: '9' }}
       >
         <ModalHeader
           display={'flex'}
@@ -76,8 +76,8 @@ const ConfigureAppsModal = ({
               fontWeight={'bold'}
               size="sm"
               textColor={'white'}
-              h={{ base: '8', md: '14' }}
-              w={{ base: '8', md: '14' }}
+              h={'14'}
+              w={'14'}
               fontSize={{ base: 'xs', md: 'xs-14' }}
               lineHeight={{ base: 'xs', md: 'xs-14' }}
             />

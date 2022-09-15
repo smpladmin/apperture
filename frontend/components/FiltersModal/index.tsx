@@ -37,7 +37,7 @@ const FiltersModal = ({
       size={'2xl'}
       trapFocus={false}
     >
-      <ModalOverlay backdropFilter={'blur(20px)'} />
+      <ModalOverlay backdropFilter={'blur(20px)'} bg={'grey.0'} />
       <ModalContent
         maxWidth="168"
         rounded={'2xl'}
