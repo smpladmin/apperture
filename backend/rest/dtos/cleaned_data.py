@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 
 from domain.common.models import IntegrationProvider
-from domain.ga_cleaned_data.models import GACleanedData
+from domain.cleaned_data.models import CleanedData
 from rest.dtos.model_response import ModelResponse
 
 
-class CreateGACleanedDataDto(BaseModel):
+class CreateCleanedDataDto(BaseModel):
     previousEvent: str
     currentEvent: str
     users: int
@@ -13,11 +13,11 @@ class CreateGACleanedDataDto(BaseModel):
     date: str
 
 
-class CreateGACleanedDataRowsDto(BaseModel):
+class CreateCleanedDataRowsDto(BaseModel):
     datasourceId: str
     provider: IntegrationProvider
-    rows: list[CreateGACleanedDataDto]
+    rows: list[CreateCleanedDataDto]
 
 
-class GACleanedDataResponse(GACleanedData, ModelResponse):
+class CleanedDataResponse(CleanedData, ModelResponse):
     pass

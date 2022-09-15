@@ -2,12 +2,13 @@ import logging
 import os
 import pandas as pd
 import requests
+from datetime import datetime as dt
 
 from domain.common.models import IntegrationProvider
 from .saver import Saver
 
 
-class GACleanedDataSaver(Saver):
+class CleanedDataSaver(Saver):
     def __init__(self):
         pass
 
@@ -19,6 +20,7 @@ class GACleanedDataSaver(Saver):
                 "pageViews": "hits",
             }
         )
+        df['date'] = df['date'].apply(lambda x: dt.strptime(x, '%Y%m%d').strftime('%Y-%m-%d'))
         rows = df.to_dict("records")
         data = {"datasourceId": datasource_id, "provider": provider.value, "rows": rows}
         res = self._save_data(data)
@@ -30,7 +32,7 @@ class GACleanedDataSaver(Saver):
 
     def _save_data(self, data):
         return requests.post(
-            f"{os.getenv('BACKEND_BASE_URL')}/private/ga_cleaned_data",
+            f"{os.getenv('BACKEND_BASE_URL')}/private/cleaned_data",
             headers={
                 f"{os.getenv('BACKEND_API_KEY_NAME')}": os.getenv(
                     "BACKEND_API_KEY_SECRET"

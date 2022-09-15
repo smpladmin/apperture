@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
-from domain.ga_cleaned_data.service import GACleanedDataService
+from domain.cleaned_data.service import CleanedDataService
 from domain.integrations.service import IntegrationService
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto, EdgeResponse
-from rest.dtos.ga_cleaned_data import CreateGACleanedDataRowsDto, GACleanedDataResponse
+from rest.dtos.cleaned_data import CreateCleanedDataRowsDto, CleanedDataResponse
 
 from rest.middlewares import validate_api_key
 
@@ -54,11 +54,11 @@ async def update_edges(
     return {"updated": True}
 
 
-@router.post("/ga_cleaned_data")
-async def update_ga_cleaned_data(
-    dto: CreateGACleanedDataRowsDto,
+@router.post("/cleaned_data")
+async def update_cleaned_data(
+    dto: CreateCleanedDataRowsDto,
     ds_service: DataSourceService = Depends(),
-    data_service: GACleanedDataService = Depends(),
+    data_service: CleanedDataService = Depends(),
 ):
     datasource = await ds_service.get_datasource(dto.datasourceId)
     rows = [

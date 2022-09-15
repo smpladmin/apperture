@@ -3,7 +3,7 @@ from domain.common.models import IntegrationProvider
 from repositories import Document
 
 
-class GACleanedData(Document):
+class CleanedData(Document):
     datasource_id: PydanticObjectId
     provider: IntegrationProvider
     previous_event: str
@@ -13,4 +13,4 @@ class GACleanedData(Document):
     date: str
 
     class Settings:
-        name = "ga_cleaned_data"
+        name = "cleaned_data"
