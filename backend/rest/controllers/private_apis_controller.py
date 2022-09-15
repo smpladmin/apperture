@@ -1,11 +1,9 @@
 from fastapi import APIRouter, Depends
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
-from domain.cleaned_data.service import CleanedDataService
 from domain.integrations.service import IntegrationService
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto, EdgeResponse
-from rest.dtos.cleaned_data import CreateCleanedDataRowsDto, CleanedDataResponse
 
 from rest.middlewares import validate_api_key
 
@@ -47,32 +45,11 @@ async def update_edges(
             e.currentEvent,
             e.users,
             e.hits,
+            e.date,
+            e.rolledPreviousEvent,
+            e.rolledCurrentEvent,
         )
         for e in dto.edges
     ]
     await edge_service.update_edges(edges, datasource.id)
-    return {"updated": True}
-
-
-@router.post("/cleaned_data")
-async def update_cleaned_data(
-    dto: CreateCleanedDataRowsDto,
-    ds_service: DataSourceService = Depends(),
-    data_service: CleanedDataService = Depends(),
-):
-    datasource = await ds_service.get_datasource(dto.datasourceId)
-    rows = [
-        data_service.build(
-            dto.datasourceId,
-            dto.provider,
-            r.previousEvent,
-            r.currentEvent,
-            r.users,
-            r.hits,
-            r.date,
-        )
-        for r in dto.rows
-    ]
-    print('success')
-    await data_service.update_data(rows, datasource.id)
     return {"updated": True}

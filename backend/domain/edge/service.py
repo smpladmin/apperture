@@ -17,6 +17,9 @@ class EdgeService:
         current_event: str,
         users: int,
         hits: int,
+        date: str,
+        rolled_previous_event: str,
+        rolled_current_event: str,
     ):
         return Edge(
             datasource_id=PydanticObjectId(datasource_id),
@@ -25,6 +28,9 @@ class EdgeService:
             current_event=current_event,
             users=users,
             hits=hits,
+            date=date,
+            rolled_previous_event=rolled_previous_event,
+            rolled_current_event=rolled_current_event,
         )
 
     async def update_edges(self, edges: list[Edge], datasource_id: PydanticObjectId):

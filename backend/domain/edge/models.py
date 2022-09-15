@@ -10,6 +10,9 @@ class Edge(Document):
     current_event: str
     users: int
     hits: int
+    date: str
+    rolled_previous_event: str
+    rolled_current_event: str
 
     class Settings:
         name = "edges"
