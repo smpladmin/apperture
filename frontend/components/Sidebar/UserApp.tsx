@@ -1,21 +1,15 @@
 import React from 'react';
-import { Avatar, Flex, Radio, Text, useDisclosure } from '@chakra-ui/react';
+import { Avatar, Flex, Radio, Text } from '@chakra-ui/react';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { Provider } from '@lib/domain/provider';
 
 type UserAppProps = {
   app: AppWithIntegrations;
-  closeAppsModal: () => void;
-  openEditAppsModal: () => void;
+  openConfigureAppsModal: () => void;
   isSelected: boolean;
 };
 
-const UserApp = ({
-  app,
-  closeAppsModal,
-  openEditAppsModal,
-  isSelected,
-}: UserAppProps) => {
+const UserApp = ({ app, openConfigureAppsModal, isSelected }: UserAppProps) => {
   const getProviders = (app: AppWithIntegrations): string => {
     const providerNames = app.integrations.map((integration: any) => {
       return Provider.getDisplayName(integration.provider);
@@ -61,7 +55,7 @@ const UserApp = ({
               lineHeight={'xs-14'}
               textColor={'grey.200'}
             >
-              {getProviders(app) || 'GA'}
+              {getProviders(app)}
             </Text>
           </Flex>
           {isSelected && (
@@ -72,8 +66,7 @@ const UserApp = ({
               decoration={'underline'}
               cursor={'pointer'}
               onClick={() => {
-                closeAppsModal();
-                openEditAppsModal();
+                openConfigureAppsModal();
               }}
             >
               Configure

@@ -5,7 +5,7 @@ import Sidebar from '../Sidebar';
 import { AppWithIntegrations } from '@lib/domain/app';
 import AppsModal from '@components/Sidebar/AppsModal';
 import { useRouter } from 'next/router';
-import EditAppsModal from '@components/EditAppsModal';
+import ConfigureAppsModal from '@components/ConfigureAppsModal';
 
 export default function Layout({ children, apps = [] }: LayoutProps) {
   const router = useRouter();
@@ -15,24 +15,27 @@ export default function Layout({ children, apps = [] }: LayoutProps) {
     defaultIsOpen: !!router.query.apps,
   });
   const {
-    isOpen: isEditAppsModalOpen,
-    onOpen: openEditAppsModal,
-    onClose: closeEditAppsModal,
-  } = useDisclosure();
+    isOpen: isConfigureAppsModalOpen,
+    onOpen: openConfigureAppsModal,
+    onClose: closeConfigureAppsModal,
+  } = useDisclosure({
+    defaultIsOpen: !!router.query.configure,
+  });
 
   useEffect(() => {
     setSelectedApp(apps.find((a) => a._id === selectedAppId)!!);
   }, [apps, selectedAppId]);
 
-  const onModalOpen = () => {
-    onOpen();
-    router.replace({ query: { ...router.query, apps: 1 } });
+  const onModalOpen = (modalQuery: string) => {
+    modalQuery === 'apps' ? onOpen() : openConfigureAppsModal();
+    router.replace({ query: { ...router.query, [modalQuery]: 1 } });
   };
 
-  const onModalClose = () => {
-    onClose();
+  const onModalClose = (modalQuery: string) => {
+    modalQuery === 'apps' ? onClose() : closeConfigureAppsModal();
+
     const query = router.query;
-    delete query.apps;
+    delete query[modalQuery];
     router.replace({ query: { ...query } });
   };
 
@@ -40,18 +43,21 @@ export default function Layout({ children, apps = [] }: LayoutProps) {
     <Flex flexDir={'row'}>
       <AppsModal
         isOpen={isOpen}
-        onClose={onModalClose}
+        onClose={() => onModalClose('apps')}
         apps={apps}
         selectApp={setSelectedAppId}
         selectedApp={selectedApp}
-        openEditAppsModal={openEditAppsModal}
+        openConfigureAppsModal={() => onModalOpen('configure')}
       />
-      <EditAppsModal
-        isEditAppsModalOpen={isEditAppsModalOpen}
-        closeEditAppsModal={closeEditAppsModal}
+      <ConfigureAppsModal
+        isConfigureAppsModalOpen={isConfigureAppsModalOpen}
+        closeConfigureAppsModal={() => onModalClose('configure')}
         app={selectedApp}
       />
-      <Sidebar selectedApp={selectedApp} openAppsModal={onModalOpen} />
+      <Sidebar
+        selectedApp={selectedApp}
+        openAppsModal={() => onModalOpen('apps')}
+      />
       <Flex flexDir={'column'} w={'full'}>
         <Header selectedApp={selectedApp} openAppsModal={onModalOpen} />
         <Box as="main" h={'full'}>

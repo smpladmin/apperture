@@ -20,25 +20,25 @@ const ProviderProperty = ({ propertyName }: { propertyName: string }) => {
 };
 
 const DataSource = ({ dataSource }: { dataSource: DataSource }) => {
-  const { provider, name } = dataSource;
+  const { provider, name, externalSourceId, version } = dataSource;
   return (
     <Flex direction={'column'} py={'5'} px={6}>
       <Flex gap={'3'}>
         <Box height={{ base: '6', md: '6' }} width={{ base: '6', md: '6' }}>
           <Image
             src={provider === Provider.GOOGLE ? gaLogo : mixpanelLogo}
-            alt="google analytics"
+            alt="provider"
             layout="responsive"
           />
         </Box>
-        <Text>{name || 'MixPanel'}</Text>
+        <Text>{name || externalSourceId}</Text>
       </Flex>
       <Flex pl={'9'} mt={'2'} gap={'5'}>
         <ProviderProperty propertyName={Provider.getDisplayName(provider)} />
         {provider === Provider.GOOGLE && (
           <>
-            <ProviderProperty propertyName={dataSource.externalSourceId!!} />
-            <ProviderProperty propertyName={dataSource.version} />
+            <ProviderProperty propertyName={externalSourceId} />
+            <ProviderProperty propertyName={version} />
           </>
         )}
       </Flex>

@@ -43,12 +43,13 @@ type SelectDataSourcesProps = {
 
 const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
   const router = useRouter();
+  const { appId, provider, add } = router.query;
   const handleClose = () => router.push('/analytics/explore?apps=1');
 
   const handleGoBack = () => {
     router.push({
       pathname: '/analytics/app/[appId]/integration/[provider]/create',
-      query: { appId: router.query.appId, provider: router.query.provider },
+      query: { appId: appId, provider: provider },
     });
   };
 
@@ -107,7 +108,7 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
             lineHeight={'xs-14'}
             fontWeight={'medium'}
           >
-            Step 3 of 3
+            {add ? 'Step 2 of 2' : 'Step 3 of 3'}
           </Text>
           <Heading
             as={'h2'}
@@ -137,7 +138,7 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           navigateBack={handleGoBack}
           handleNextClick={handleSave}
           disabled={!selectedDataSources.length}
-          nextButtonName={'Create Application'}
+          nextButtonName={add ? 'Add Data Source' : 'Create Application'}
         />
       </Box>
     </Flex>

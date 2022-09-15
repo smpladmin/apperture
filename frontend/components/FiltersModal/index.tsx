@@ -12,7 +12,7 @@ import {
   Flex,
 } from '@chakra-ui/react';
 import { filtersSchema } from './filtersSchema';
-import FilterCategories from './Filters';
+import FilterCategories from './FilterCategories';
 import FilterOptions from './FilterOptions';
 import { useState } from 'react';
 import { FilterTypes, Filters as FiltersClass } from '@lib/domain/filters';

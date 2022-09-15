@@ -12,31 +12,33 @@ import {
 } from '@chakra-ui/react';
 import { AppWithIntegrations } from '@lib/domain/app';
 import DataSourceComponent from './DataSource';
-import { appData } from './dummyData';
 import { DataSource } from '@lib/domain/datasource';
 import { Fragment } from 'react';
-import { useRouter } from 'next/router';
+import Link from 'next/link';
 
-type EditAppsModalProps = {
-  isEditAppsModalOpen: boolean;
-  closeEditAppsModal: () => void;
+type ConfigureAppsModalProps = {
+  isConfigureAppsModalOpen: boolean;
+  closeConfigureAppsModal: () => void;
   app: AppWithIntegrations;
 };
 
-const EditAppsModal = ({
-  isEditAppsModalOpen,
-  closeEditAppsModal,
+const ConfigureAppsModal = ({
+  isConfigureAppsModalOpen,
+  closeConfigureAppsModal,
   app,
-}: EditAppsModalProps) => {
-  const router = useRouter();
+}: ConfigureAppsModalProps) => {
+  const handleCloseAndNavigateBack = () => {
+    closeConfigureAppsModal();
+  };
 
-  const dataSources = appData[0].integrations.flatMap(
-    (integration) => integration.datasources as unknown as DataSource
+  const dataSources = app?.integrations.flatMap(
+    (integration) => integration.datasources as DataSource[]
   );
+
   return (
     <Modal
-      isOpen={isEditAppsModalOpen}
-      onClose={closeEditAppsModal}
+      isOpen={isConfigureAppsModalOpen}
+      onClose={closeConfigureAppsModal}
       isCentered
       blockScrollOnMount={false}
       size={'2xl'}
@@ -47,7 +49,7 @@ const EditAppsModal = ({
         margin={'1rem'}
         rounded={'2xl'}
         maxWidth="168"
-        maxHeight={{ base: 'calc(100% - 100px)', md: 'calc(100% - 200px)' }}
+        maxHeight={'calc(100% - 100px)'}
         pt={'9'}
       >
         <ModalHeader
@@ -67,6 +69,7 @@ const EditAppsModal = ({
               bg={'white.DEFAULT'}
               border={'1px'}
               borderColor={'white.200'}
+              onClick={handleCloseAndNavigateBack}
             />
             <Avatar
               name={app.name}
@@ -118,9 +121,20 @@ const EditAppsModal = ({
             >
               {`Data Sources (${dataSources.length})`}
             </Text>
-            <Text fontWeight={'normal'} fontSize={'xs-14'} lineHeight={'sh-24'}>
-              {'+Add'}
-            </Text>
+            <Link
+              href={`/analytics/app/${encodeURIComponent(
+                app._id
+              )}/integration/select?add=true`}
+            >
+              <Text
+                fontWeight={'normal'}
+                fontSize={'xs-14'}
+                lineHeight={'sh-24'}
+                cursor={'pointer'}
+              >
+                {'+Add'}
+              </Text>
+            </Link>
           </Flex>
           {dataSources.map((dataSource, i, dataSources) => {
             return (
@@ -142,4 +156,4 @@ const EditAppsModal = ({
   );
 };
 
-export default EditAppsModal;
+export default ConfigureAppsModal;

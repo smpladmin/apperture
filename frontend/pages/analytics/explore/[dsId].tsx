@@ -2,7 +2,7 @@ import { ReactNode, useState } from 'react';
 import Layout from '@components/Layout';
 import { GetServerSideProps } from 'next';
 import { _getApps } from '@lib/services/appService';
-import { App } from '@lib/domain/app';
+import { App, AppWithIntegrations } from '@lib/domain/app';
 import Loading from '@components/Loading';
 import Graph from '@components/Graph';
 import Head from 'next/head';
@@ -52,7 +52,10 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   );
 };
 
-ExploreDataSource.getLayout = function getLayout(page: ReactNode, apps: App[]) {
+ExploreDataSource.getLayout = function getLayout(
+  page: ReactNode,
+  apps: AppWithIntegrations[]
+) {
   return <Layout apps={apps}>{page}</Layout>;
 };
 

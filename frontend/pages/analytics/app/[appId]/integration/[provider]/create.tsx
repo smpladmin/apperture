@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 
 const Create = () => {
   const router = useRouter();
-  const { appId, provider } = router.query;
+  const { appId, provider, add } = router.query;
 
   const handleGoBack = () => router.back();
 
@@ -18,9 +18,10 @@ const Create = () => {
           navigateBack={handleGoBack}
           handleClose={handleClose}
           appId={appId}
+          add={add}
         />
       ) : (
-        <MixpanelIntegration />
+        <MixpanelIntegration add={add} />
       )}
     </>
   );
