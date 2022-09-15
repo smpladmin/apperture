@@ -51,6 +51,7 @@ const ConfigureAppsModal = ({
         maxWidth={{ base: 'full', md: '168' }}
         maxHeight={{ base: 'full', md: 'calc(100% - 100px)' }}
         pt={{ base: 0, md: '9' }}
+        marginY={0}
       >
         <ModalHeader
           display={'flex'}
