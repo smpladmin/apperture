@@ -13,86 +13,37 @@ import {
   Divider,
   RadioGroup,
   Stack,
-  Radio,
-  Image,
 } from '@chakra-ui/react';
-import mixpanelLogo from '@assets/images/mixPanel-icon.png';
-import gaLogo from '@assets/images/ga-logo-small.svg';
 import { DataSource } from '@lib/domain/datasource';
-import { useState } from 'react';
-import { Provider } from '@lib/domain/provider';
+import { Fragment, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import DataSourceComponent from '../DataSource';
+import { AppWithIntegrations } from '@lib/domain/app';
 
 type SwitchDataSourceProps = {
   isOpen: boolean;
   onClose: () => void;
   dataSources: DataSource[];
-};
-
-const DataSourceOption = ({ dataSource }: { dataSource: DataSource }) => {
-  const { _id, name, provider, externalSourceId, version } = dataSource;
-  return (
-    <Flex
-      justifyContent={'space-between'}
-      borderBottom={'1px'}
-      borderStyle={'solid'}
-      borderColor={'white.100'}
-    >
-      <Flex
-        w={'full'}
-        as={'label'}
-        cursor={'pointer'}
-        alignItems={'center'}
-        justifyContent={'center'}
-        gap={'3'}
-        px={'3'}
-        py={{ base: '3', md: '6' }}
-      >
-        <Image
-          src={provider === Provider.GOOGLE ? gaLogo.src : mixpanelLogo.src}
-          h={'8'}
-          w={'8'}
-        />
-        <Flex direction={'column'} gap={0.15}>
-          <Text fontSize={'base'} fontWeight={'500'} lineHeight={'base'}>
-            {name || Provider.getDisplayName(provider)}
-          </Text>
-          <Flex dir="row" justifyContent="flex-start">
-            <Text
-              width={{ base: '30', md: '40' }}
-              fontSize={'xs-12'}
-              fontWeight={'400'}
-              lineHeight={'xs-12'}
-              textColor={'grey.200'}
-            >
-              {externalSourceId}
-            </Text>
-            {provider === Provider.GOOGLE && (
-              <Text
-                fontSize={'xs-12'}
-                fontWeight={'400'}
-                lineHeight={'xs-12'}
-                textColor={'grey.200'}
-              >
-                {version}
-              </Text>
-            )}
-          </Flex>
-        </Flex>
-        <Radio ml={'auto'} colorScheme={'radioBlack'} value={_id} />
-      </Flex>
-    </Flex>
-  );
+  selectedApp: AppWithIntegrations;
 };
 
 const SwitchDataSource = ({
   isOpen,
   onClose,
   dataSources,
+  selectedApp,
 }: SwitchDataSourceProps) => {
-  const [selectedDataSourceId, setSelectedDataSourceId] = useState('');
-
   const router = useRouter();
+  const { dsId } = router.query;
+
+  const [selectedDataSourceId, setSelectedDataSourceId] = useState(
+    dsId as string
+  );
+
+  useEffect(() => {
+    setSelectedDataSourceId(dsId as string);
+  }, [selectedApp, dsId]);
+
   const updateDataSourceId = () => {
     onClose();
     router.push({
@@ -159,7 +110,7 @@ const SwitchDataSource = ({
             fontSize={{ base: 'xs-14', md: 'base' }}
             lineHeight={{ base: 'xs-14', md: 'base' }}
           >
-            {'Zomato Devilery App V3.6.1'}
+            {selectedApp?.name}
           </Text>
         </Box>
         <ModalBody
@@ -173,11 +124,24 @@ const SwitchDataSource = ({
               value={selectedDataSourceId}
               onChange={setSelectedDataSourceId}
             >
-              <Stack direction="column">
-                {dataSources.map((ds, i) => {
-                  return <DataSourceOption key={ds._id} dataSource={ds} />;
+              <Flex direction="column">
+                {dataSources.map((ds) => {
+                  return (
+                    <Fragment key={ds._id}>
+                      <DataSourceComponent
+                        dataSource={ds}
+                        hasRadio={true}
+                        isSelected={ds._id === selectedDataSourceId}
+                      />
+                      <Divider
+                        orientation="horizontal"
+                        borderColor={'white.200'}
+                        opacity={1}
+                      />
+                    </Fragment>
+                  );
                 })}
-              </Stack>
+              </Flex>
             </RadioGroup>
           </Box>
         </ModalBody>

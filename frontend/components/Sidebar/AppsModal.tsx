@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { AppWithIntegrations } from '@lib/domain/app';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import UserApp from './UserApp';
 
 type AppsModalProps = {
@@ -35,6 +36,21 @@ const AppsModal = ({
   selectedApp,
   openConfigureAppsModal,
 }: AppsModalProps) => {
+  const router = useRouter();
+  const toggleApps = (appId: string) => {
+    selectApp(appId);
+    onClose();
+    const defaultDataSourceId = apps
+      .find((app) => app._id === appId)
+      ?.integrations.filter((integration) => integration.datasources.length)[0]
+      ?.datasources[0]?._id;
+
+    router.push({
+      pathname: '/analytics/explore/[dsId]',
+      query: { dsId: defaultDataSourceId },
+    });
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -88,10 +104,7 @@ const AppsModal = ({
           pb={'0'}
         >
           <Box pt={0}>
-            <RadioGroup
-              value={selectedApp._id}
-              onChange={(appId) => selectApp(appId)}
-            >
+            <RadioGroup value={selectedApp._id} onChange={toggleApps}>
               <Stack direction="column">
                 {apps.map((app) => {
                   return (

@@ -136,6 +136,7 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
           isOpen={isSwitchDataSourceModalOpen}
           onClose={closeSwitchDataSourceModal}
           dataSources={dataSources}
+          selectedApp={selectedApp}
         />
       </Flex>
     </Flex>
