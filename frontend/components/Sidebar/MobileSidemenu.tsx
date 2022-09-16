@@ -11,12 +11,12 @@ import {
   Divider,
   IconButton,
 } from '@chakra-ui/react';
-import { App } from '@lib/domain/app';
+import { AppWithIntegrations } from '@lib/domain/app';
 
 type SidemenuProps = {
   closeDrawer: Function;
   openAppsModal: Function;
-  selectedApp: App;
+  selectedApp: AppWithIntegrations;
 };
 
 const MobileSidemenu = ({
@@ -76,7 +76,7 @@ const MobileSidemenu = ({
           gap={2}
           onClick={() => {
             closeDrawer();
-            openAppsModal();
+            openAppsModal('apps');
           }}
         >
           <Flex

@@ -15,7 +15,11 @@ import { useEffect, useState } from 'react';
 import { createIntegrationWithDataSource } from '@lib/services/integrationService';
 import { Provider } from '@lib/domain/provider';
 
-const MixpanelIntegration = () => {
+const MixpanelIntegration = ({
+  add,
+}: {
+  add: string | string[] | undefined;
+}) => {
   const router = useRouter();
   const [projectId, setProjectId] = useState('');
   const [apiKey, setApiKey] = useState('');
@@ -29,6 +33,7 @@ const MixpanelIntegration = () => {
   const onSubmit = async () => {
     const appId = router.query.appId as string;
     const provider = router.query.provider as Provider;
+
     const integration = await createIntegrationWithDataSource(
       appId,
       provider,
@@ -78,7 +83,7 @@ const MixpanelIntegration = () => {
           lineHeight={'xs-14'}
           fontWeight={'medium'}
         >
-          Step 3 of 3
+          {add ? 'Step 2 of 2' : 'Step 3 of 3'}
         </Text>
         <Heading
           as={'h2'}
@@ -203,7 +208,7 @@ const MixpanelIntegration = () => {
           navigateBack={() => router.back()}
           handleNextClick={() => onSubmit()}
           disabled={!validData}
-          nextButtonName={'Create Application'}
+          nextButtonName={add ? 'Add Data Source' : 'Create Application'}
         />
       </Box>
     </Flex>

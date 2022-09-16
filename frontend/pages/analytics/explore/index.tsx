@@ -2,12 +2,11 @@ import { ReactNode, useState } from 'react';
 import Layout from '@components/Layout';
 import { GetServerSideProps } from 'next';
 import { _getApps } from '@lib/services/appService';
-import { App } from '@lib/domain/app';
+import { AppWithIntegrations } from '@lib/domain/app';
 import Loading from '@components/Loading';
 import Graph from '@components/Graph';
 import Head from 'next/head';
 import { visualisationData } from '@lib/data/data';
-import { Flex } from '@chakra-ui/react';
 import { Edge } from '@lib/domain/edge';
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
@@ -50,7 +49,10 @@ const Explore = () => {
   );
 };
 
-Explore.getLayout = function getLayout(page: ReactNode, apps: App[]) {
+Explore.getLayout = function getLayout(
+  page: ReactNode,
+  apps: AppWithIntegrations[]
+) {
   return <Layout apps={apps}>{page}</Layout>;
 };
 
