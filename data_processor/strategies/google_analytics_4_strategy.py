@@ -25,7 +25,7 @@ class GoogleAnalytics4Strategy(Strategy):
         self.provider = provider
         self.tenants_service = TenantsService()
         analytics = initialize_v4_analytics(access_token, refresh_token)
-        start_date = (date.today() + relativedelta(days=-120))
+        start_date = date.today() + relativedelta(days=-120)
         end_date = date.today() + relativedelta(days=-1)
         self.fetcher = GoogleAnalytics4Fetcher(
             analytics,

@@ -20,7 +20,9 @@ class TransformedDataSaver(Saver):
                 "pageViews": "hits",
             }
         )
-        df['date'] = df['date'].apply(lambda x: dt.strptime(x, '%Y%m%d').strftime('%Y-%m-%d'))
+        df["date"] = df["date"].apply(
+            lambda x: dt.strptime(x, "%Y%m%d").strftime("%Y-%m-%d")
+        )
         edges = df.to_dict("records")
         data = {"datasourceId": datasource_id, "provider": provider, "edges": edges}
         res = self._save_data(data)

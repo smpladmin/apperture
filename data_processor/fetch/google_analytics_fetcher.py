@@ -39,7 +39,9 @@ class GoogleAnalyticsFetcher(Fetcher):
     def get_timeframe_report(
         self, timeframe: ReportTimeframe, view_id: str, page_token="unknown"
     ):
-        logging.info(f"Fetching for page - {page_token}", )
+        logging.info(
+            f"Fetching for page - {page_token}",
+        )
         return (
             self.analytics.reports()
             .batchGet(

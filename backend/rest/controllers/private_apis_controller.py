@@ -44,7 +44,7 @@ async def update_edges(
             e.currentEvent,
             e.users,
             e.hits,
-            dt.strptime(e.date, '%Y-%m-%d'),
+            dt.strptime(e.date, "%Y-%m-%d"),
         )
         for e in dto.edges
     ]

@@ -2,7 +2,7 @@ import datetime
 from beanie import PydanticObjectId
 from fastapi import Depends
 from domain.common.models import IntegrationProvider
-from domain.edge.models import Edge
+from domain.edge.models import Edge, AggregatedEdge
 from mongo.mongo import Mongo
 
 
@@ -39,6 +39,39 @@ class EdgeService:
                 await Edge.insert_many(edges)
 
     async def get_edges(self, datasource_id: str) -> list[Edge]:
-        return await Edge.find(
-            Edge.datasource_id == PydanticObjectId(datasource_id)
-        ).to_list()
+        minimum_edge_count = 100
+        pipeline = [
+            {"$match": {"datasource_id": PydanticObjectId(datasource_id)}},
+            {
+                "$group": {
+                    "_id": {
+                        "current_event": "$current_event",
+                        "previous_event": "$previous_event",
+                    },
+                    "hits": {"$sum": "$hits"},
+                    "users": {"$sum": "$users"},
+                }
+            },
+            {"$setWindowFields": {"output": {"totalCount": {"$count": {}}}}},
+            {
+                "$match": {
+                    "$and": [
+                        {"totalCount": {"$gte": minimum_edge_count}},
+                        {"hits": {"$gte": minimum_edge_count}},
+                    ]
+                }
+            },
+            {
+                "$project": {
+                    "current_event": "$_id.current_event",
+                    "previous_event": "$_id.previous_event",
+                    "hits": 1,
+                    "users": 1,
+                }
+            },
+        ]
+        return (
+            await Edge.find()
+            .aggregate(pipeline, projection_model=AggregatedEdge)
+            .to_list()
+        )
