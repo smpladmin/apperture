@@ -11,8 +11,6 @@ class CreateEdgeDto(BaseModel):
     users: int
     hits: int
     date: str
-    rolledPreviousEvent: str
-    rolledCurrentEvent: str
 
 
 class CreateEdgesDto(BaseModel):

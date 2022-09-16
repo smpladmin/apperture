@@ -1,12 +1,11 @@
+from datetime import datetime as dt
 from fastapi import APIRouter, Depends
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.integrations.service import IntegrationService
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto, EdgeResponse
-
 from rest.middlewares import validate_api_key
-
 
 router = APIRouter(
     tags=["private"],
@@ -45,9 +44,7 @@ async def update_edges(
             e.currentEvent,
             e.users,
             e.hits,
-            e.date,
-            e.rolledPreviousEvent,
-            e.rolledCurrentEvent,
+            dt.strptime(e.date, '%Y-%m-%d'),
         )
         for e in dto.edges
     ]

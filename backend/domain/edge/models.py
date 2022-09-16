@@ -1,3 +1,4 @@
+import datetime
 from beanie import PydanticObjectId
 from domain.common.models import IntegrationProvider
 from repositories import Document
@@ -10,9 +11,7 @@ class Edge(Document):
     current_event: str
     users: int
     hits: int
-    date: str
-    rolled_previous_event: str
-    rolled_current_event: str
+    date: datetime.datetime
 
     class Settings:
         name = "edges"

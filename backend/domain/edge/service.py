@@ -1,3 +1,4 @@
+import datetime
 from beanie import PydanticObjectId
 from fastapi import Depends
 from domain.common.models import IntegrationProvider
@@ -17,9 +18,7 @@ class EdgeService:
         current_event: str,
         users: int,
         hits: int,
-        date: str,
-        rolled_previous_event: str,
-        rolled_current_event: str,
+        date: datetime.datetime,
     ):
         return Edge(
             datasource_id=PydanticObjectId(datasource_id),
@@ -29,8 +28,6 @@ class EdgeService:
             users=users,
             hits=hits,
             date=date,
-            rolled_previous_event=rolled_previous_event,
-            rolled_current_event=rolled_current_event,
         )
 
     async def update_edges(self, edges: list[Edge], datasource_id: PydanticObjectId):

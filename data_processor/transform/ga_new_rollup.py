@@ -68,8 +68,10 @@ class NetworkGraphTransformer(Transformer):
         map_dict = map_df.to_dict()
         map_dict = map_dict['rolled_url']
 
-        cleaned_df['rolledCurrentEvent'] = cleaned_df['pagePath'].apply(lambda x: map_dict.get(x, x))
-        cleaned_df['rolledPreviousEvent'] = cleaned_df['previousPage'].apply(lambda x: map_dict.get(x, x))
+        cleaned_df['pagePath'] = cleaned_df['pagePath'].apply(lambda x: map_dict.get(x, x))
+        cleaned_df['previousPage'] = cleaned_df['previousPage'].apply(lambda x: map_dict.get(x, x))
+        cleaned_df = cleaned_df[cleaned_df['previousPage'] != cleaned_df['pagePath']]
+        cleaned_df = cleaned_df.groupby(by=['previousPage', 'pagePath', 'date'], sort=False, as_index=False).agg(lambda x: x.sum())
 
         logging.info('{msg}: {x}'.format(msg='NetworkGraphTransformer', x='ends'))
         return cleaned_df
