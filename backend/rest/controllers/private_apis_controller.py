@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from dateutil.parser import parse
+from fastapi import APIRouter, Depends, HTTPException
+from data_processor_queue.service import DPQueueService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.integrations.service import IntegrationService
@@ -54,6 +56,15 @@ async def update_edges(
     return {"updated": True}
 
 
-@router.post("/runlogs")
-async def create_runlog(dto: CreateRunLogDto, service: RunLogService = Depends()):
-    return await service.create(dto.datasource_id, dto.date)
+@router.put("/runlogs", responses={404: {}})
+async def update_runlog(
+    dto: CreateRunLogDto,
+    service: RunLogService = Depends(),
+):
+    runlog = await service.update(dto.datasource_id, parse(dto.date), dto.status)
+    if runlog:
+        return runlog
+    raise HTTPException(
+        status_code=404,
+        detail=f"Runlog not found for - {dto.datasource_id} {dto.date}",
+    )
