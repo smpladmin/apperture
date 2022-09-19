@@ -3,10 +3,10 @@ import logo from '@assets/images/apperture_white-icon.svg';
 import Link from 'next/link';
 import React from 'react';
 import { Flex, Box, Image, Text, Avatar, IconButton } from '@chakra-ui/react';
-import { App } from '@lib/domain/app';
+import { AppWithIntegrations } from '@lib/domain/app';
 
 type SidemenuProps = {
-  selectedApp: App;
+  selectedApp: AppWithIntegrations;
   openAppsModal: Function;
 };
 

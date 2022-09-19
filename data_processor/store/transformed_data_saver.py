@@ -2,22 +2,27 @@ import logging
 import os
 import pandas as pd
 import requests
+from datetime import datetime as dt
 
 from domain.common.models import IntegrationProvider
 from .saver import Saver
 
 
-class NetworkGraphSaver(Saver):
+class TransformedDataSaver(Saver):
     def __init__(self):
         pass
 
     def save(self, datasource_id: str, provider: IntegrationProvider, df: pd.DataFrame):
+        df['previousPage'] = df['previousPage'].str.replace('\(entrance\)', 'Entrance')
         df = df.rename(
             columns={
                 "previousPage": "previousEvent",
                 "pagePath": "currentEvent",
                 "pageViews": "hits",
             }
+        )
+        df["date"] = df["date"].apply(
+            lambda x: dt.strptime(x, "%Y%m%d").strftime("%Y-%m-%d")
         )
         edges = df.to_dict("records")
         data = {"datasourceId": datasource_id, "provider": provider, "edges": edges}

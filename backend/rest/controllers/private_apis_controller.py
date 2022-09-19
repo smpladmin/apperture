@@ -1,6 +1,6 @@
+from datetime import datetime as dt
 from dateutil.parser import parse
 from fastapi import APIRouter, Depends, HTTPException
-from data_processor_queue.service import DPQueueService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.integrations.service import IntegrationService
@@ -10,7 +10,6 @@ from rest.dtos.edges import CreateEdgesDto, EdgeResponse
 from rest.dtos.runlogs import CreateRunLogDto
 
 from rest.middlewares import validate_api_key
-
 
 router = APIRouter(
     tags=["private"],
@@ -49,6 +48,7 @@ async def update_edges(
             e.currentEvent,
             e.users,
             e.hits,
+            dt.strptime(e.date, "%Y-%m-%d"),
         )
         for e in dto.edges
     ]
