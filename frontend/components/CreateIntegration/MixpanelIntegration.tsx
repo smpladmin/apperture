@@ -15,11 +15,14 @@ import { useEffect, useState } from 'react';
 import { createIntegrationWithDataSource } from '@lib/services/integrationService';
 import { Provider } from '@lib/domain/provider';
 
+type MixpanelIntegrationProps = {
+  handleClose: Function;
+  add: string | string[] | undefined;
+};
 const MixpanelIntegration = ({
   add,
-}: {
-  add: string | string[] | undefined;
-}) => {
+  handleClose,
+}: MixpanelIntegrationProps) => {
   const router = useRouter();
   const [projectId, setProjectId] = useState('');
   const [apiKey, setApiKey] = useState('');
@@ -71,7 +74,7 @@ const MixpanelIntegration = ({
           bg={'white.DEFAULT'}
           border={'1px'}
           borderColor={'white.200'}
-          onClick={() => router.push('/analytics/explore?apps=1')}
+          onClick={() => handleClose()}
         />
         <Box height={{ base: 12, md: 18 }} width={{ base: 12, md: 18 }} mb={2}>
           <Image src={mpLogo} alt="mixpanel" layout="responsive" />

@@ -11,10 +11,11 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { AppWithIntegrations } from '@lib/domain/app';
-import DataSourceComponent from './DataSource';
+import DataSourceComponent from '../DataSource';
 import { DataSource } from '@lib/domain/datasource';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 type ConfigureAppsModalProps = {
   isConfigureAppsModalOpen: boolean;
@@ -31,8 +32,13 @@ const ConfigureAppsModal = ({
     closeConfigureAppsModal();
   };
 
-  const dataSources = app?.integrations.flatMap(
-    (integration) => integration.datasources as DataSource[]
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  const [dataSources] = useState(
+    app?.integrations.flatMap(
+      (integration) => integration.datasources as DataSource[]
+    )
   );
 
   return (
@@ -58,7 +64,7 @@ const ConfigureAppsModal = ({
           w={'full'}
           flexDirection={'column'}
           gap={'3'}
-          px={6}
+          px={{ base: '4', md: '9' }}
           pb={0}
         >
           <Flex justifyContent={'space-between'}>
@@ -83,7 +89,7 @@ const ConfigureAppsModal = ({
               lineHeight={{ base: 'xs', md: 'xs-14' }}
             />
             <IconButton
-              aria-label="close"
+              aria-label="more"
               variant={'secondary'}
               icon={<i className="ri-more-2-line"></i>}
               rounded={'full'}
@@ -97,7 +103,7 @@ const ConfigureAppsModal = ({
               {app.name}
             </Text>
             <IconButton
-              aria-label="close"
+              aria-label="edit app name"
               icon={<i className="ri-edit-2-line"></i>}
               color={'grey.DEFAULT'}
               bg={'white.DEFAULT'}
@@ -112,8 +118,8 @@ const ConfigureAppsModal = ({
           borderColor={'white.200'}
           opacity={1}
         />
-        <ModalBody py={6} px={0} overflowY={'auto'}>
-          <Flex justifyContent={'space-between'} px={6}>
+        <ModalBody py={6} px={{ base: '4', md: '9' }} overflowY={'auto'}>
+          <Flex justifyContent={'space-between'}>
             <Text
               fontWeight={'normal'}
               fontSize={'xs-14'}
@@ -125,7 +131,7 @@ const ConfigureAppsModal = ({
             <Link
               href={`/analytics/app/${encodeURIComponent(
                 app._id
-              )}/integration/select?add=true`}
+              )}/integration/select?add=true&previousDsId=${dsId}`}
             >
               <Text
                 fontWeight={'normal'}

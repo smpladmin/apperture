@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { AppWithIntegrations } from '@lib/domain/app';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import UserApp from './UserApp';
 
 type AppsModalProps = {
@@ -35,6 +36,23 @@ const AppsModal = ({
   selectedApp,
   openConfigureAppsModal,
 }: AppsModalProps) => {
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  const toggleApps = (appId: string) => {
+    selectApp(appId);
+    onClose();
+    const defaultDataSourceId = apps
+      .find((app) => app._id === appId)
+      ?.integrations.filter((integration) => integration.datasources.length)[0]
+      ?.datasources[0]?._id;
+
+    router.push({
+      pathname: '/analytics/explore/[dsId]',
+      query: { dsId: defaultDataSourceId },
+    });
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -57,9 +75,9 @@ const AppsModal = ({
           alignItems={'center'}
           fontSize={{ base: 'sh-20', md: 'sh-24' }}
           lineHeight={{ base: 'sh-20', md: 'sh-24' }}
-          pt={{ base: '5', md: '20px' }}
-          pb={{ base: '7', md: '20px' }}
-          px={{ base: '5', md: '20px' }}
+          pt={{ base: '4', md: '10' }}
+          pb={{ base: '6', md: '0' }}
+          px={{ base: '4', md: '9' }}
         >
           My Applications
           <ModalCloseButton
@@ -81,12 +99,14 @@ const AppsModal = ({
           display={{ base: 'none', md: 'block' }}
         />
 
-        <ModalBody px={{ base: '5', md: '9' }} overflowY={'auto'} pt={'0'}>
+        <ModalBody
+          px={{ base: '4', md: '9' }}
+          overflowY={'auto'}
+          pt={'0'}
+          pb={'0'}
+        >
           <Box pt={0}>
-            <RadioGroup
-              value={selectedApp._id}
-              onChange={(appId) => selectApp(appId)}
-            >
+            <RadioGroup value={selectedApp._id} onChange={toggleApps}>
               <Stack direction="column">
                 {apps.map((app) => {
                   return (
@@ -102,7 +122,12 @@ const AppsModal = ({
             </RadioGroup>
           </Box>
         </ModalBody>
-        <ModalFooter pt={0} px={9} pb={9} display={'block'}>
+        <ModalFooter
+          pt={{ base: '0', md: '0' }}
+          px={{ base: '4', md: '9' }}
+          pb={{ base: '4', md: '9' }}
+          display={'block'}
+        >
           <Flex direction={'column'}>
             <Text
               pt={'6'}
@@ -115,7 +140,7 @@ const AppsModal = ({
               Switching applications clears out the current configuration and
               filters.
             </Text>
-            <Link href={'/analytics/app/create'}>
+            <Link href={`/analytics/app/create?previousDsId=${dsId}`}>
               <Button
                 width={'full'}
                 padding={'4'}

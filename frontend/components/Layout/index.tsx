@@ -9,8 +9,19 @@ import ConfigureAppsModal from '@components/ConfigureAppsModal';
 
 export default function Layout({ children, apps = [] }: LayoutProps) {
   const router = useRouter();
-  const [selectedAppId, setSelectedAppId] = useState(apps[0]._id);
-  const [selectedApp, setSelectedApp] = useState(apps[0]);
+  const defaultAppId = apps
+    .flatMap((app) =>
+      app.integrations.flatMap((integration) => integration.datasources)
+    )
+    .find((app) => app._id === router.query.dsId)?.appId;
+
+  const [selectedAppId, setSelectedAppId] = useState(
+    defaultAppId || apps[0]._id
+  );
+  const [selectedApp, setSelectedApp] = useState(
+    apps.find((a) => a._id === defaultAppId) || apps[0]
+  );
+
   const { isOpen, onOpen, onClose } = useDisclosure({
     defaultIsOpen: !!router.query.apps,
   });

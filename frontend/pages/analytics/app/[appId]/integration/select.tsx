@@ -19,11 +19,15 @@ import { Provider } from '@lib/domain/provider';
 const SelectProvider = () => {
   const [provider, setProvider] = useState<string>('');
   const router = useRouter();
-  const { appId, add } = router.query;
+  const { appId, add, previousDsId } = router.query;
 
   const handleGoBack = (): void => router.back();
 
-  const handleClose = () => router.push('/analytics/explore?apps=1');
+  const handleClose = () =>
+    router.push({
+      pathname: `/analytics/explore/[dsId]`,
+      query: { dsId: previousDsId, apps: 1 },
+    });
 
   const handleNextClick = () => {
     const queryParams = { appId, provider, ...router.query };

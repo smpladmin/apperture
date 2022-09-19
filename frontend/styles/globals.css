@@ -23,6 +23,14 @@ a {
   margin: 0;
 }
 
+*:focus {
+  box-shadow: none !important;
+}
+
+*[data-focus] {
+  box-shadow: none !important;
+}
+
 /* Nextjs full screen page */
 html,
 body {

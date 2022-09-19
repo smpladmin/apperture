@@ -2,6 +2,7 @@ import 'remixicon/fonts/remixicon.css';
 import filterIcon from '@assets/icons/filter-icon.svg';
 import filterMobile from '@assets/images/filterIconMobile.svg';
 import mixPanel from '@assets/images/mixPanel-icon.png';
+import gaLogo from '@assets/images/ga-logo-small.svg';
 import {
   Box,
   Flex,
@@ -16,10 +17,14 @@ import {
   Text,
 } from '@chakra-ui/react';
 import MobileSidemenu from '../Sidebar/MobileSidemenu';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { AppertureContext } from '@lib/contexts/appertureContext';
 import { AppWithIntegrations } from '@lib/domain/app';
 import FiltersModal from '@components/FiltersModal';
+import SwitchDataSource from '@components/SwitchDataSource';
+import { DataSource } from '@lib/domain/datasource';
+import { useRouter } from 'next/router';
+import { Provider } from '@lib/domain/provider';
 
 type HeaderProps = {
   selectedApp: AppWithIntegrations;
@@ -27,13 +32,42 @@ type HeaderProps = {
 };
 
 const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isDrawerOpen,
+    onOpen: openDrawer,
+    onClose: closeDrawer,
+  } = useDisclosure();
   const {
     isOpen: isfiltersModalOpen,
     onOpen: openFiltersModal,
     onClose: closeFiltersModal,
   } = useDisclosure();
+  const {
+    isOpen: isSwitchDataSourceModalOpen,
+    onOpen: openSwitchDataSourceModal,
+    onClose: closeSwitchDataSourceModal,
+  } = useDisclosure();
+
   const context = useContext(AppertureContext);
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  const [dataSources, setDataSources] = useState(
+    selectedApp?.integrations.flatMap(
+      (integration) => integration.datasources as DataSource[]
+    )
+  );
+  const [dataSourceType] = useState(
+    dataSources.find((ds) => ds._id === dsId)?.provider
+  );
+
+  useEffect(() => {
+    setDataSources(
+      selectedApp?.integrations.flatMap(
+        (integration) => integration.datasources as DataSource[]
+      )
+    );
+  }, [selectedApp, dsId]);
 
   return (
     <Flex
@@ -58,15 +92,15 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
           icon={<i className="ri-menu-line"></i>}
           minWidth={'auto'}
           bg={'transparent'}
-          onClick={onOpen}
+          onClick={openDrawer}
         />
         {context.device.isMobile && (
-          <Drawer placement="left" isOpen={isOpen} onClose={onClose}>
+          <Drawer placement="left" isOpen={isDrawerOpen} onClose={closeDrawer}>
             <DrawerOverlay backdropFilter="auto" backdropBlur="20px" />
             <DrawerContent>
               <DrawerBody p={0}>
                 <MobileSidemenu
-                  closeDrawer={onClose}
+                  closeDrawer={closeDrawer}
                   openAppsModal={openAppsModal}
                   selectedApp={selectedApp}
                 />
@@ -111,14 +145,26 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
             isOpen={isfiltersModalOpen}
             onClose={closeFiltersModal}
           />
-          <Box flexShrink={0}>
+          <Box
+            flexShrink={0}
+            onClick={openSwitchDataSourceModal}
+            cursor={'pointer'}
+          >
             <Image
               h={{ base: 5, md: 8 }}
               w={{ base: 5, md: 8 }}
-              src={mixPanel.src}
+              src={
+                dataSourceType === Provider.MIXPANEL ? mixPanel.src : gaLogo.src
+              }
               alt="data-source-mix-panel"
             />
           </Box>
+          <SwitchDataSource
+            isOpen={isSwitchDataSourceModalOpen}
+            onClose={closeSwitchDataSourceModal}
+            dataSources={dataSources}
+            selectedApp={selectedApp}
+          />
         </Flex>
       </Flex>
       <Flex
@@ -130,7 +176,7 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
         <Flex alignItems={'center'} gap={2}>
           <i className="ri-calendar-fill"></i>
           <Text fontSize={'xs-12'} lineHeight={'xs-12'} fontWeight={'500'}>
-            1 Apr - 30 Apr
+            {''}
           </Text>
         </Flex>
         <Box h={3} onClick={openFiltersModal}>
