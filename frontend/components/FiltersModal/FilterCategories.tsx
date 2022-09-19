@@ -53,7 +53,6 @@ export const FilterCategory = ({
   setCurrentFilter,
   isFilterEnabled,
 }: FilterCategoryProps) => {
-  console.log();
   return (
     <Box
       w={'full'}
@@ -101,8 +100,6 @@ const FilterCategories = ({
   currentFilter,
   selectedFilters,
 }: FilterCategoriesProps) => {
-  console.log('selected final filter', selectedFilters[currentFilter].length);
-
   return (
     <Flex
       direction={'column'}
