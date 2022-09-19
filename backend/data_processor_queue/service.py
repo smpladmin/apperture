@@ -3,6 +3,7 @@ from data_processor_queue import dpq
 from rq import Retry
 
 from settings import apperture_settings
+from domain.runlogs.models import RunLog
 
 
 class DPQueueService:
@@ -33,3 +34,13 @@ class DPQueueService:
             job_timeout=self.job_timeout,
         )
         return job.id
+
+    def enqueue_from_runlogs(
+        self,
+        datasource_id: str,
+        runlogs: list[RunLog],
+    ) -> list[str]:
+        return [
+            self.enqueue_events_fetch_job(datasource_id, r.date.strftime("%Y-%m-%d"))
+            for r in runlogs
+        ]

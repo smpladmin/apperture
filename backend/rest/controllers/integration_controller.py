@@ -6,6 +6,7 @@ from data_processor_queue.service import DPQueueService
 from domain.apps.service import AppService
 from domain.datasources.models import DataSourceVersion, ProviderDataSource
 
+from domain.runlogs.service import RunLogService
 from domain.datasources.service import DataSourceService
 from domain.integrations.service import IntegrationService
 from rest.dtos.datasources import CreateDataSourceDto, DataSourceResponse
@@ -77,6 +78,8 @@ async def create_integration(
     app_service: AppService = Depends(),
     ds_service: DataSourceService = Depends(),
     integration_service: IntegrationService = Depends(),
+    runlog_service: RunLogService = Depends(),
+    dpq_service: DPQueueService = Depends(),
 ):
     app = await app_service.get_user_app(dto.appId, user_id)
     integration = await integration_service.create_integration(
@@ -95,8 +98,25 @@ async def create_integration(
             integration,
         )
 
+        runlogs = await runlog_service.create_runlogs(datasource.id)
+        jobs = dpq_service.enqueue_from_runlogs(str(datasource.id), runlogs)
+        logging.info(f"Scheduled {len(jobs)} for data processing")
+
         response = IntegrationResponse.from_orm(integration)
         response.datasource = datasource
         return response
 
     return integration
+
+
+@router.post("/testing/{ds_id}")
+async def create_integration(
+    ds_id: str,
+    ds_service: DataSourceService = Depends(),
+    runlog_service: RunLogService = Depends(),
+    dpq_service: DPQueueService = Depends(),
+):
+    datasource = await ds_service.get_datasource(ds_id)
+    runlogs = await runlog_service.create_runlogs(datasource.id)
+    jobs = dpq_service.enqueue_from_runlogs(str(datasource.id), runlogs)
+    return jobs
