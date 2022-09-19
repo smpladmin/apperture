@@ -7,18 +7,24 @@ import FormButton from '@components/FormButton';
 type GooglePermissionProps = {
   navigateBack: Function;
   handleClose: Function;
-  appId: string | string[] | undefined;
-  add: string | string[] | undefined;
+  query: {
+    [key in string]: string | string[] | undefined;
+  };
 };
 
 const GooglePermission = ({
   navigateBack,
   handleClose,
-  appId,
-  add,
+  query,
 }: GooglePermissionProps) => {
-  const link = `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/integrations/oauth/google?app_id=${appId}&redirect_url=${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/analytics/app/${appId}/integration/google/apps`;
-  const oauthUrl = add ? link.concat('?add=true') : link;
+  const link = `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/integrations/oauth/google?app_id=${query.appId}&redirect_url=${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}/analytics/app/${query.appId}/integration/google/apps`;
+  const oauthUrl =
+    query.add && query.previousDsId
+      ? link.concat(`?add=true&previousDsId=${query.previousDsId}`)
+      : query.previousDsId
+      ? link.concat(`?previousDsId=${query.previousDsId}`)
+      : link;
+
   return (
     <Flex direction={'column'}>
       <Box p={4} px={{ md: 45 }} pt={{ md: 10 }}>

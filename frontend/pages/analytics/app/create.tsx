@@ -27,11 +27,11 @@ const Create = () => {
     if (app) {
       router.push({
         pathname: `/analytics/app/[appId]/integration/select`,
-        query: { appId: app._id },
+        query: { appId: app._id, ...router.query },
       });
     }
   };
-  const handleGoBack = () => router.push('/analytics/explore?apps=1');
+  const handleGoBack = () => router.back();
 
   return (
     <Flex

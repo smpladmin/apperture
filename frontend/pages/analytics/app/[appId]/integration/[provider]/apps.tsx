@@ -42,13 +42,17 @@ type SelectDataSourcesProps = {
 
 const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
   const router = useRouter();
-  const { appId, provider, add } = router.query;
-  const handleClose = () => router.push('/analytics/explore?apps=1');
+  const { appId, provider, add, previousDsId } = router.query;
+  const handleClose = () =>
+    router.push({
+      pathname: `/analytics/explore/[dsId]`,
+      query: { dsId: previousDsId, apps: 1 },
+    });
 
   const handleGoBack = () => {
     router.push({
       pathname: '/analytics/app/[appId]/integration/[provider]/create',
-      query: { appId: appId, provider: provider },
+      query: { appId: appId, provider: provider, ...router.query },
     });
   };
 

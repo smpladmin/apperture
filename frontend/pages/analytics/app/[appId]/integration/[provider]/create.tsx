@@ -5,11 +5,14 @@ import { useRouter } from 'next/router';
 
 const Create = () => {
   const router = useRouter();
-  const { appId, provider, add } = router.query;
-
+  const { appId, provider, add, previousDsId } = router.query;
   const handleGoBack = () => router.back();
 
-  const handleClose = () => router.push('/analytics/explore?apps=1');
+  const handleClose = () =>
+    router.push({
+      pathname: `/analytics/explore/[dsId]`,
+      query: { dsId: previousDsId, apps: 1 },
+    });
 
   return (
     <>
@@ -17,11 +20,10 @@ const Create = () => {
         <GooglePermission
           navigateBack={handleGoBack}
           handleClose={handleClose}
-          appId={appId}
-          add={add}
+          query={{ ...router.query }}
         />
       ) : (
-        <MixpanelIntegration add={add} />
+        <MixpanelIntegration add={add} handleClose={handleClose} />
       )}
     </>
   );

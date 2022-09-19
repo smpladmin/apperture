@@ -37,6 +37,8 @@ const AppsModal = ({
   openConfigureAppsModal,
 }: AppsModalProps) => {
   const router = useRouter();
+  const { dsId } = router.query;
+
   const toggleApps = (appId: string) => {
     selectApp(appId);
     onClose();
@@ -138,7 +140,7 @@ const AppsModal = ({
               Switching applications clears out the current configuration and
               filters.
             </Text>
-            <Link href={'/analytics/app/create'}>
+            <Link href={`/analytics/app/create?previousDsId=${dsId}`}>
               <Button
                 width={'full'}
                 padding={'4'}

@@ -13,8 +13,9 @@ import {
 import { AppWithIntegrations } from '@lib/domain/app';
 import DataSourceComponent from '../DataSource';
 import { DataSource } from '@lib/domain/datasource';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 type ConfigureAppsModalProps = {
   isConfigureAppsModalOpen: boolean;
@@ -31,8 +32,13 @@ const ConfigureAppsModal = ({
     closeConfigureAppsModal();
   };
 
-  const dataSources = app?.integrations.flatMap(
-    (integration) => integration.datasources as DataSource[]
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  const [dataSources] = useState(
+    app?.integrations.flatMap(
+      (integration) => integration.datasources as DataSource[]
+    )
   );
 
   return (
@@ -125,7 +131,7 @@ const ConfigureAppsModal = ({
             <Link
               href={`/analytics/app/${encodeURIComponent(
                 app._id
-              )}/integration/select?add=true`}
+              )}/integration/select?add=true&previousDsId=${dsId}`}
             >
               <Text
                 fontWeight={'normal'}
