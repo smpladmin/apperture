@@ -1,9 +1,17 @@
 import 'remixicon/fonts/remixicon.css';
 import logo from '@assets/images/apperture_white-icon.svg';
-import Link from 'next/link';
 import React from 'react';
-import { Flex, Box, Image, Text, Avatar, IconButton } from '@chakra-ui/react';
+import {
+  Flex,
+  Box,
+  Image,
+  Text,
+  Avatar,
+  IconButton,
+  useDisclosure,
+} from '@chakra-ui/react';
 import { AppWithIntegrations } from '@lib/domain/app';
+import LogoutModal from '@components/Logout';
 
 type SidemenuProps = {
   selectedApp: AppWithIntegrations;
@@ -11,6 +19,11 @@ type SidemenuProps = {
 };
 
 const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
+  const {
+    isOpen: isLogoutModalOpen,
+    onOpen: openLogoutModal,
+    onClose: closeLogoutModal,
+  } = useDisclosure();
   return (
     <Flex
       height={'full'}
@@ -150,27 +163,26 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           </Box>
         </Flex>
       </Box>
-      <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/logout`}>
-        <Box marginTop={'auto'}>
-          <IconButton
-            aria-label="close"
-            icon={<i className="ri-logout-box-r-line" />}
-            rounded={'lg'}
-            h={10}
-            w={10}
-            bg={'black.0'}
-            fontWeight={'500'}
-            color={'grey.100'}
-            _hover={{
-              backgroundColor: 'white.0',
-              color: 'white',
-            }}
-            _active={{
-              backgroundColor: 'transparent',
-            }}
-          />
-        </Box>
-      </Link>
+      <Box marginTop={'auto'} onClick={openLogoutModal}>
+        <IconButton
+          aria-label="close"
+          icon={<i className="ri-logout-box-r-line" />}
+          rounded={'lg'}
+          h={10}
+          w={10}
+          bg={'black.0'}
+          fontWeight={'500'}
+          color={'grey.100'}
+          _hover={{
+            backgroundColor: 'white.0',
+            color: 'white',
+          }}
+          _active={{
+            backgroundColor: 'transparent',
+          }}
+        />
+      </Box>
+      <LogoutModal isOpen={isLogoutModalOpen} onClose={closeLogoutModal} />
     </Flex>
   );
 };

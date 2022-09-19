@@ -57,7 +57,7 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
       (integration) => integration.datasources as DataSource[]
     )
   );
-  const [dataSourceType] = useState(
+  const [dataSourceType, setDataSourceType] = useState(
     dataSources.find((ds) => ds._id === dsId)?.provider
   );
 
@@ -68,6 +68,10 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
       )
     );
   }, [selectedApp, dsId]);
+
+  useEffect(() => {
+    setDataSourceType(dataSources.find((ds) => ds._id === dsId)?.provider);
+  }, [dataSources, dsId]);
 
   return (
     <Flex

@@ -1,6 +1,5 @@
 import 'remixicon/fonts/remixicon.css';
 import logoSmall from '@assets/images/apperture_small-icon.svg';
-import Link from 'next/link';
 import React from 'react';
 import {
   Flex,
@@ -10,10 +9,12 @@ import {
   Avatar,
   Divider,
   IconButton,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { AppWithIntegrations } from '@lib/domain/app';
+import LogoutModal from '@components/Logout';
 
-type SidemenuProps = {
+type MobileSidemenuProps = {
   closeDrawer: Function;
   openAppsModal: Function;
   selectedApp: AppWithIntegrations;
@@ -23,7 +24,13 @@ const MobileSidemenu = ({
   closeDrawer,
   openAppsModal,
   selectedApp,
-}: SidemenuProps) => {
+}: MobileSidemenuProps) => {
+  const {
+    isOpen: isLogoutModalOpen,
+    onOpen: openLogoutModal,
+    onClose: closeLogoutModal,
+  } = useDisclosure();
+
   return (
     <Flex
       height={'full'}
@@ -316,46 +323,45 @@ const MobileSidemenu = ({
           </Box>
         </Box>
       </Box>
-      <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/logout`}>
-        <Box marginTop={'auto'} width={'full'}>
-          <Flex
-            width={'full'}
-            height={'3.375rem'}
-            borderRadius={'12px'}
-            justifyContent={'flex-start'}
-            alignItems={'center'}
-            mb={'4'}
-            gap={'3'}
-            p={'4'}
-            fontWeight={'400'}
-            backgroundColor={'white'}
-            transition={'all 250ms ease'}
+      <Box marginTop={'auto'} width={'full'} onClick={openLogoutModal}>
+        <Flex
+          width={'full'}
+          height={'3.375rem'}
+          borderRadius={'12px'}
+          justifyContent={'flex-start'}
+          alignItems={'center'}
+          mb={'4'}
+          gap={'3'}
+          p={'4'}
+          fontWeight={'400'}
+          backgroundColor={'white'}
+          transition={'all 250ms ease'}
+          _hover={{
+            backgroundColor: 'white.100',
+            fontWeight: '500',
+            cursor: 'pointer',
+          }}
+          _active={{
+            backgroundColor: 'transparent',
+          }}
+        >
+          <IconButton
+            aria-label="logout"
+            icon={<i className="ri-logout-box-r-line" />}
+            bg={'transparent'}
+            minWidth={'auto'}
+            fontWeight={'inherit'}
             _hover={{
-              backgroundColor: 'white.100',
-              fontWeight: '500',
-              cursor: 'pointer',
+              backgroundColor: 'transparent',
             }}
             _active={{
               backgroundColor: 'transparent',
             }}
-          >
-            <IconButton
-              aria-label="logout"
-              icon={<i className="ri-logout-box-r-line" />}
-              bg={'transparent'}
-              minWidth={'auto'}
-              fontWeight={'inherit'}
-              _hover={{
-                backgroundColor: 'transparent',
-              }}
-              _active={{
-                backgroundColor: 'transparent',
-              }}
-            />
-            Logout
-          </Flex>
-        </Box>
-      </Link>
+          />
+          Logout
+        </Flex>
+      </Box>
+      <LogoutModal isOpen={isLogoutModalOpen} onClose={closeLogoutModal} />
     </Flex>
   );
 };
