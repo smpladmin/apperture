@@ -40,7 +40,7 @@ const DataSource = ({ dataSource, hasRadio, isSelected }: DataSourceProps) => {
     >
       <Flex direction={'column'} py={'5'}>
         <Flex gap={'3'} alignItems={'center'}>
-          <Box height={{ base: '4', md: '6' }} width={{ base: '4', md: '6' }}>
+          <Box height={'6'} width={'6'}>
             <Image
               src={provider === Provider.GOOGLE ? gaLogo : mixpanelLogo}
               alt="provider"
@@ -77,7 +77,7 @@ const DataSource = ({ dataSource, hasRadio, isSelected }: DataSourceProps) => {
           _hover={{
             bg: 'white.DEFAULT',
           }}
-          disabled={true}
+          opacity={0}
         />
       )}
     </Flex>

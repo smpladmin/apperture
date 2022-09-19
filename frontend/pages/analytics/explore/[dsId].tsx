@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import Layout from '@components/Layout';
 import { GetServerSideProps } from 'next';
 import { _getApps, _getAppsWithIntegrations } from '@lib/services/appService';
@@ -40,7 +40,12 @@ type ExploreDataSourceProps = {
 };
 
 const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
-  const [isLoading] = useState<boolean>(!edges.length);
+  const [isLoading, setIsLoading] = useState<boolean>(!edges.length);
+
+  useEffect(() => {
+    setIsLoading(!edges.length);
+  }, [edges.length]);
+
   return (
     <>
       <Head>
