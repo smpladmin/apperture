@@ -14,7 +14,7 @@ import {
   DrawerOverlay,
 } from '@chakra-ui/react';
 import MobileSidemenu from '../Sidebar/MobileSidemenu';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { AppertureContext } from '@lib/contexts/appertureContext';
 import { AppWithIntegrations } from '@lib/domain/app';
 import FiltersModal from '@components/FiltersModal';
@@ -49,13 +49,24 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
   const context = useContext(AppertureContext);
   const router = useRouter();
   const { dsId } = router.query;
-  const dataSources = selectedApp?.integrations.flatMap(
-    (integration) => integration.datasources as DataSource[]
+
+  const [dataSources, setDataSources] = useState(
+    selectedApp?.integrations.flatMap(
+      (integration) => integration.datasources as DataSource[]
+    )
   );
 
-  const selectedDataSourceType = dataSources.find(
-    (ds) => ds._id === dsId
-  )?.provider;
+  const [selectedDataSourceType] = useState(
+    dataSources.find((ds) => ds._id === dsId)?.provider
+  );
+
+  useEffect(() => {
+    setDataSources(
+      selectedApp?.integrations.flatMap(
+        (integration) => integration.datasources as DataSource[]
+      )
+    );
+  }, [selectedApp]);
 
   return (
     <Flex
