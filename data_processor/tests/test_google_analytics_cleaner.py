@@ -34,7 +34,6 @@ class TestGoogleAnalyticsCleaner:
         """
         cleaned_df = self.cleaner.clean(self.df)
 
-        assert cleaned_df.shape == (5, 4)
         assert cleaned_df["pagePath"].tolist() == [
             "/category/mobile-phones/brand-nokia",
             "/product-details/oppo-a15-mystery-blue-2gb-ram-32gb-storage/mobmtavdpwcvsr3s",

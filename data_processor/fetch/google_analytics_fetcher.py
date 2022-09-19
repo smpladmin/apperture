@@ -32,7 +32,6 @@ class GoogleAnalyticsFetcher(Fetcher):
             temp = self.parse_data(response)
             df = pd.concat([df, temp])
         df.columns = ["date", "previousPage", "pagePath", "users", "pageViews"]
-        df = df.drop(columns=["date"])
         logging.info(f"Done data fetch for timeframe {timeframe.name}")
         logging.info(df.head(5))
         return df
@@ -40,7 +39,9 @@ class GoogleAnalyticsFetcher(Fetcher):
     def get_timeframe_report(
         self, timeframe: ReportTimeframe, view_id: str, page_token="unknown"
     ):
-        logging.info(f"Fetching for page - {page_token}", )
+        logging.info(
+            f"Fetching for page - {page_token}",
+        )
         return (
             self.analytics.reports()
             .batchGet(

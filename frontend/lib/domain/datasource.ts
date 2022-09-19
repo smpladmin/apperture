@@ -15,6 +15,7 @@ export type ProviderDataSource = {
 
 export type DataSource = {
   _id: string;
+  appId: string;
   provider: Provider;
   name: string | null;
   version: DataSourceVersion;
