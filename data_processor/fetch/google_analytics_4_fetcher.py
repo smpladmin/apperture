@@ -17,7 +17,7 @@ class GoogleAnalytics4Fetcher(Fetcher):
     def daily_data(self, view_id: str) -> DataFrame:
         request = RunReportRequest(
             property=f"properties/{view_id}",
-            dimensions=[Dimension(name="pageReferrer"), Dimension(name="pagepath")],
+            dimensions=[Dimension(name="pageReferrer"), Dimension(name="pagepath"), Dimension(name="date")],
             metrics=[Metric(name="screenPageViews"), Metric(name="totalUsers")],
             date_ranges=[DateRange(start_date=self.start_date, end_date=self.end_date)],
         )
@@ -30,6 +30,7 @@ class GoogleAnalytics4Fetcher(Fetcher):
                     "pagePath": row.dimension_values[1].value,
                     "pageViews": row.metric_values[0].value,
                     "users": row.metric_values[1].value,
+                    "date": row.dimension_values[2].value,
                 }
             )
         df = DataFrame(output)
