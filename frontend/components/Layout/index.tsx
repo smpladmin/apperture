@@ -50,13 +50,42 @@ export default function Layout({ children, apps = [] }: LayoutProps) {
     router.replace({ query: { ...query } });
   };
 
+  const navigateToIntegrationSelect = (appId: string) => {
+    router.push({
+      pathname: '/analytics/app/[appId]/integration/select',
+      query: { appId, add: true },
+    });
+  };
+
+  const navigateToExploreDataSource = (dsId: string) => {
+    router.push({
+      pathname: '/analytics/explore/[dsId]',
+      query: { dsId },
+    });
+  };
+
+  const onAppSelect = (appId: string) => {
+    setSelectedAppId(appId);
+    onClose();
+    const defaultDataSourceId = apps
+      .find((app) => app._id === appId)
+      ?.integrations.filter((integration) => integration.datasources.length)[0]
+      ?.datasources[0]?._id;
+
+    if (!defaultDataSourceId) {
+      navigateToIntegrationSelect(appId);
+    } else {
+      navigateToExploreDataSource(defaultDataSourceId);
+    }
+  };
+
   return (
     <Flex flexDir={'row'}>
       <AppsModal
         isOpen={isOpen}
+        onAppSelect={onAppSelect}
         onClose={() => onModalClose('apps')}
         apps={apps}
-        selectApp={setSelectedAppId}
         selectedApp={selectedApp}
         openConfigureAppsModal={() => onModalOpen('configure')}
       />
