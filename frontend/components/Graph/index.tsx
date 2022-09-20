@@ -13,6 +13,7 @@ import { edgesOnZoom, nodesOnZoom } from './zoomBehaviour';
 import { graphConfig } from '@lib/config/graphConfig';
 import { transformData } from './transformData';
 import { Edge } from '@lib/domain/edge';
+import isEqual from 'lodash.isequal';
 
 type GraphProps = {
   visualisationData: Array<Edge>;
@@ -24,9 +25,14 @@ const Graph = ({ visualisationData }: GraphProps) => {
     graph: null,
   });
 
+  const prevValueRef = useRef({ data: visualisationData });
+  if (!isEqual(prevValueRef.current.data, visualisationData)) {
+    prevValueRef.current.data = visualisationData;
+  }
+
   const graphData = useMemo(
     () => transformData(visualisationData),
-    [visualisationData]
+    [isEqual(prevValueRef.current.data, visualisationData)]
   );
 
   useEffect(() => {
