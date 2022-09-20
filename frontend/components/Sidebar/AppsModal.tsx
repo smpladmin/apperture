@@ -47,10 +47,13 @@ const AppsModal = ({
       ?.integrations.filter((integration) => integration.datasources.length)[0]
       ?.datasources[0]?._id;
 
-    router.push({
-      pathname: '/analytics/explore/[dsId]',
-      query: { dsId: defaultDataSourceId },
-    });
+    /* to find a better way to avoid this */
+    setTimeout(() => {
+      router.push({
+        pathname: '/analytics/explore/[dsId]',
+        query: { dsId: defaultDataSourceId },
+      });
+    }, 100);
   };
 
   return (

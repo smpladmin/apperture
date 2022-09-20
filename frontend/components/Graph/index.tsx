@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import G6, {
   Graph as G6Graph,
   IG6GraphEvent,
@@ -23,6 +23,11 @@ const Graph = ({ visualisationData }: GraphProps) => {
   const gRef = useRef<{ graph: G6Graph | null }>({
     graph: null,
   });
+
+  const graphData = useMemo(
+    () => transformData(visualisationData),
+    [visualisationData]
+  );
 
   useEffect(() => {
     if (!gRef.current.graph) {
@@ -173,9 +178,9 @@ const Graph = ({ visualisationData }: GraphProps) => {
       }, 100);
     });
 
-    graph.data(transformData(visualisationData));
+    graph.data(graphData);
     graph.render();
-  }, [visualisationData]);
+  }, [graphData]);
 
   return <div id="network-graph" ref={ref} style={{ height: '100%' }}></div>;
 };

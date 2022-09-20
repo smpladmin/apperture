@@ -17,6 +17,7 @@ const Create = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const router = useRouter();
+  const { previousDsId } = router.query;
 
   useEffect(() => {
     inputRef?.current?.focus();
@@ -31,7 +32,11 @@ const Create = () => {
       });
     }
   };
-  const handleGoBack = () => router.back();
+  const handleGoBack = () =>
+    router.push({
+      pathname: `/analytics/explore/[dsId]`,
+      query: { dsId: previousDsId, apps: 1 },
+    });
 
   return (
     <Flex

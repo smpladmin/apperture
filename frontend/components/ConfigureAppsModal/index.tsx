@@ -13,7 +13,7 @@ import {
 import { AppWithIntegrations } from '@lib/domain/app';
 import DataSourceComponent from '../DataSource';
 import { DataSource } from '@lib/domain/datasource';
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
@@ -35,11 +35,19 @@ const ConfigureAppsModal = ({
   const router = useRouter();
   const { dsId } = router.query;
 
-  const [dataSources] = useState(
+  const [dataSources, setDataSources] = useState(
     app?.integrations.flatMap(
       (integration) => integration.datasources as DataSource[]
     )
   );
+
+  useEffect(() => {
+    setDataSources(
+      app?.integrations.flatMap(
+        (integration) => integration.datasources as DataSource[]
+      )
+    );
+  }, [app, dsId]);
 
   return (
     <Modal
