@@ -12,7 +12,7 @@ const ProviderProperty = ({ propertyName }: { propertyName: string }) => {
       fontSize={{ base: 'xs-12', md: 'xs-14' }}
       fontWeight={'normal'}
       lineHeight={{ base: 'xs-12', md: 'sh-18' }}
-      width={'25'}
+      width={{ base: 'auto', md: '25' }}
     >
       {propertyName}
     </Text>
