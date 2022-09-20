@@ -34,6 +34,10 @@ class GoogleAnalytics4Fetcher(Fetcher):
                 }
             )
         df = DataFrame(output)
+        try:
+            df['previousPage'] = df['previousPage'].apply(lambda x: '/'+x.split('/', 3)[-1] if x != '' else x)
+        except Exception as e:
+            print(e)
         return df
 
     def monthly_data(self) -> DataFrame:
