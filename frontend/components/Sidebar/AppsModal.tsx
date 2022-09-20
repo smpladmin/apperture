@@ -87,7 +87,7 @@ const AppsModal = ({
         <ModalBody
           px={{ base: '4', md: '9' }}
           overflowY={'auto'}
-          pt={'9'}
+          pt={{ base: '0', md: '9' }}
           pb={'0'}
         >
           <Box pt={0}>

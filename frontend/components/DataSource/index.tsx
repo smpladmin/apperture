@@ -38,7 +38,7 @@ const DataSource = ({ dataSource, hasRadio, isSelected }: DataSourceProps) => {
       bg={isSelected ? 'white.100' : ''}
       px={hasRadio ? '3' : '0'}
     >
-      <Flex direction={'column'} py={'5'}>
+      <Flex direction={'column'} py={'5'} gap={'1'}>
         <Flex gap={'3'} alignItems={'center'}>
           <Box height={'6'} width={'6'}>
             <Image
@@ -55,7 +55,7 @@ const DataSource = ({ dataSource, hasRadio, isSelected }: DataSourceProps) => {
             {name || externalSourceId}
           </Text>
         </Flex>
-        <Flex pl={'9'} mt={'2'} gap={'5'}>
+        <Flex pl={'9'} gap={'5'}>
           <ProviderProperty propertyName={Provider.getDisplayName(provider)} />
           {provider === Provider.GOOGLE && (
             <>
