@@ -13,7 +13,6 @@ const ProviderProperty = ({ propertyName }: { propertyName: string }) => {
       fontWeight={'normal'}
       lineHeight={{ base: 'xs-12', md: 'sh-18' }}
       width={{ base: 'auto', md: '25' }}
-      marginRight={'4'}
     >
       {propertyName}
     </Text>
