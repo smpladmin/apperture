@@ -13,6 +13,14 @@ const isEntrance = (eventName: string) => {
 
 export const transformData = (data: Array<ApiDataType>): resultType => {
   let entranceSum = 0;
+  /*
+   * Temporary fix to pick hits as users for Mixpanel,
+   * because right now we are only using users metric on the frontend.
+   * We should change to hits/users based on which metric is selected.
+   */
+  if (data.every((d) => !d.users)) {
+    data = data.map((d) => ({ ...d, users: d.hits }));
+  }
 
   const edges: Array<EdgeType> = [];
   const allEvents: Array<string> = [];

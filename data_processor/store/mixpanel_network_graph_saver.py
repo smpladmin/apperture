@@ -3,8 +3,6 @@ import os
 import pandas as pd
 import requests
 
-from inflection import underscore
-
 from domain.common.models import IntegrationProvider
 from .saver import Saver
 
@@ -22,7 +20,7 @@ class MixpanelNetworkGraphSaver(Saver):
                 "time": "date",
             }
         )
-        df.columns = [underscore(c) for c in df.columns]
+        df.date = df.date.apply(lambda x: x.strftime("%Y-%m-%d"))
         edges = df.to_dict("records")
         data = {"datasourceId": datasource_id, "provider": provider, "edges": edges}
         res = self._save_data(data)

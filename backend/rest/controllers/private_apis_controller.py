@@ -1,4 +1,3 @@
-from datetime import datetime as dt
 from dateutil.parser import parse
 from fastapi import APIRouter, Depends, HTTPException
 from domain.datasources.service import DataSourceService
@@ -44,15 +43,11 @@ async def update_edges(
         edge_service.build(
             dto.datasourceId,
             dto.provider,
-            e.previousEvent,
-            e.currentEvent,
-            e.users,
-            e.hits,
-            dt.strptime(e.date, "%Y-%m-%d"),
+            **e.dict(),
         )
         for e in dto.edges
     ]
-    await edge_service.update_edges(edges, datasource.id)
+    await edge_service.update_edges(edges, dto.provider, datasource.id)
     return {"updated": True}
 
 
