@@ -104,7 +104,7 @@ const SwitchDataSource = ({
           pt={'0'}
           pb={'0'}
         >
-          <Box pt={{ base: '0', md: '9' }} pb={{ base: '6', md: '9' }}>
+          <Box pt={{ base: '0', md: '8' }} pb={{ base: '6', md: '8' }}>
             <Text
               color={'grey.100'}
               fontWeight={'500'}
