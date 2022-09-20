@@ -13,6 +13,7 @@ import { edgesOnZoom, nodesOnZoom } from './zoomBehaviour';
 import { graphConfig } from '@lib/config/graphConfig';
 import { transformData } from './transformData';
 import { Edge } from '@lib/domain/edge';
+import { useRouter } from 'next/router';
 
 type GraphProps = {
   visualisationData: Array<Edge>;
@@ -24,10 +25,10 @@ const Graph = ({ visualisationData }: GraphProps) => {
     graph: null,
   });
 
-  const graphData = useMemo(
-    () => transformData(visualisationData),
-    [visualisationData]
-  );
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  const graphData = useMemo(() => transformData(visualisationData), [dsId]);
 
   useEffect(() => {
     if (!gRef.current.graph) {
