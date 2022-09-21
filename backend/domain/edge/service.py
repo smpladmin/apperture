@@ -185,5 +185,5 @@ class EdgeService:
                                             'date': '$date'}
 
         return (
-            await Edge.find().aggregate(pipeline, projection_model=NodeTrend).to_list()
+            await BaseEdge.find().aggregate(pipeline, projection_model=NodeTrend).to_list()
         )
