@@ -1,3 +1,4 @@
+from typing import Union
 from pydantic import BaseModel
 
 from domain.common.models import IntegrationProvider
@@ -13,10 +14,24 @@ class CreateEdgeDto(BaseModel):
     date: str
 
 
+class CreateRichEdgeDto(BaseModel):
+    previousEvent: str
+    currentEvent: str
+    hits: int
+    date: str
+    city: str
+    region: str
+    country: str
+    utmSource: str
+    utmMedium: str
+    os: str
+    appVersion: str
+
+
 class CreateEdgesDto(BaseModel):
     datasourceId: str
     provider: IntegrationProvider
-    edges: list[CreateEdgeDto]
+    edges: Union[list[CreateEdgeDto], list[CreateRichEdgeDto]]
 
 
 class EdgeResponse(Edge, ModelResponse):

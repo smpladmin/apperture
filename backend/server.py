@@ -1,7 +1,9 @@
+import logging
 import os
 from dotenv import load_dotenv
 
 load_dotenv(override=False)
+logging.getLogger().setLevel(logging.INFO)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

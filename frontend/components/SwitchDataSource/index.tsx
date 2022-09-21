@@ -12,7 +12,6 @@ import {
   Flex,
   Divider,
   RadioGroup,
-  Stack,
 } from '@chakra-ui/react';
 import { DataSource } from '@lib/domain/datasource';
 import { Fragment, useEffect, useState } from 'react';
@@ -98,27 +97,23 @@ const SwitchDataSource = ({
           opacity={1}
           display={{ base: 'none', md: 'block' }}
         />
-        <Box
-          pt={{ base: '0', md: '9' }}
-          pl={{ base: '4', md: '9' }}
-          pr={{ base: '4', md: '9' }}
-          pb={{ base: '6', md: '9' }}
-        >
-          <Text
-            color={'grey.100'}
-            fontWeight={'500'}
-            fontSize={{ base: 'xs-14', md: 'base' }}
-            lineHeight={{ base: 'xs-14', md: 'base' }}
-          >
-            {selectedApp?.name}
-          </Text>
-        </Box>
+
         <ModalBody
           px={{ base: '4', md: '9' }}
           overflowY={'auto'}
           pt={'0'}
           pb={'0'}
         >
+          <Box pt={{ base: '0', md: '8' }} pb={{ base: '6', md: '8' }}>
+            <Text
+              color={'grey.100'}
+              fontWeight={'500'}
+              fontSize={{ base: 'xs-14', md: 'base' }}
+              lineHeight={{ base: 'xs-14', md: 'base' }}
+            >
+              {selectedApp?.name}
+            </Text>
+          </Box>
           <Box pt={0}>
             <RadioGroup
               value={selectedDataSourceId}

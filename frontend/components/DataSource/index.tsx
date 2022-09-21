@@ -12,7 +12,7 @@ const ProviderProperty = ({ propertyName }: { propertyName: string }) => {
       fontSize={{ base: 'xs-12', md: 'xs-14' }}
       fontWeight={'normal'}
       lineHeight={{ base: 'xs-12', md: 'sh-18' }}
-      width={'25'}
+      width={{ base: 'auto', md: '25' }}
     >
       {propertyName}
     </Text>
@@ -38,9 +38,9 @@ const DataSource = ({ dataSource, hasRadio, isSelected }: DataSourceProps) => {
       bg={isSelected ? 'white.100' : ''}
       px={hasRadio ? '3' : '0'}
     >
-      <Flex direction={'column'} py={'5'}>
+      <Flex direction={'column'} py={'5'} gap={'1'}>
         <Flex gap={'3'} alignItems={'center'}>
-          <Box height={{ base: '4', md: '6' }} width={{ base: '4', md: '6' }}>
+          <Box height={'6'} width={'6'}>
             <Image
               src={provider === Provider.GOOGLE ? gaLogo : mixpanelLogo}
               alt="provider"
@@ -55,7 +55,7 @@ const DataSource = ({ dataSource, hasRadio, isSelected }: DataSourceProps) => {
             {name || externalSourceId}
           </Text>
         </Flex>
-        <Flex pl={'9'} mt={'2'} gap={'5'}>
+        <Flex pl={'9'} gap={'5'}>
           <ProviderProperty propertyName={Provider.getDisplayName(provider)} />
           {provider === Provider.GOOGLE && (
             <>
@@ -77,7 +77,7 @@ const DataSource = ({ dataSource, hasRadio, isSelected }: DataSourceProps) => {
           _hover={{
             bg: 'white.DEFAULT',
           }}
-          disabled={true}
+          opacity={0}
         />
       )}
     </Flex>

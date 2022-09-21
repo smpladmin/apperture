@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import G6, {
   Graph as G6Graph,
   IG6GraphEvent,
@@ -13,6 +13,7 @@ import { edgesOnZoom, nodesOnZoom } from './zoomBehaviour';
 import { graphConfig } from '@lib/config/graphConfig';
 import { transformData } from './transformData';
 import { Edge } from '@lib/domain/edge';
+import { useRouter } from 'next/router';
 
 type GraphProps = {
   visualisationData: Array<Edge>;
@@ -23,6 +24,11 @@ const Graph = ({ visualisationData }: GraphProps) => {
   const gRef = useRef<{ graph: G6Graph | null }>({
     graph: null,
   });
+
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  const graphData = useMemo(() => transformData(visualisationData), [dsId]);
 
   useEffect(() => {
     if (!gRef.current.graph) {
@@ -173,9 +179,9 @@ const Graph = ({ visualisationData }: GraphProps) => {
       }, 100);
     });
 
-    graph.data(transformData(visualisationData));
+    graph.data(graphData);
     graph.render();
-  }, [visualisationData]);
+  }, [graphData]);
 
   return <div id="network-graph" ref={ref} style={{ height: '100%' }}></div>;
 };

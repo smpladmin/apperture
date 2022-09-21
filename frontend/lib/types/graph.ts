@@ -2,6 +2,7 @@ export type ApiDataType = {
   previousEvent: string;
   currentEvent: string;
   users: number;
+  hits: number;
   _id: number | string;
 };
 

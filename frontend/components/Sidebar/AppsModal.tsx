@@ -23,7 +23,7 @@ type AppsModalProps = {
   isOpen: boolean;
   onClose: () => void;
   apps: AppWithIntegrations[];
-  selectApp: Function;
+  onAppSelect: Function;
   selectedApp: AppWithIntegrations;
   openConfigureAppsModal: () => void;
 };
@@ -32,26 +32,12 @@ const AppsModal = ({
   isOpen,
   onClose,
   apps,
-  selectApp,
+  onAppSelect,
   selectedApp,
   openConfigureAppsModal,
 }: AppsModalProps) => {
   const router = useRouter();
   const { dsId } = router.query;
-
-  const toggleApps = (appId: string) => {
-    selectApp(appId);
-    onClose();
-    const defaultDataSourceId = apps
-      .find((app) => app._id === appId)
-      ?.integrations.filter((integration) => integration.datasources.length)[0]
-      ?.datasources[0]?._id;
-
-    router.push({
-      pathname: '/analytics/explore/[dsId]',
-      query: { dsId: defaultDataSourceId },
-    });
-  };
 
   return (
     <Modal
@@ -93,7 +79,6 @@ const AppsModal = ({
         <Divider
           orientation="horizontal"
           mt={'7'}
-          mb={'9'}
           borderColor={'white.200'}
           opacity={1}
           display={{ base: 'none', md: 'block' }}
@@ -102,11 +87,14 @@ const AppsModal = ({
         <ModalBody
           px={{ base: '4', md: '9' }}
           overflowY={'auto'}
-          pt={'0'}
+          pt={{ base: '0', md: '9' }}
           pb={'0'}
         >
           <Box pt={0}>
-            <RadioGroup value={selectedApp._id} onChange={toggleApps}>
+            <RadioGroup
+              value={selectedApp._id}
+              onChange={(appId) => onAppSelect(appId)}
+            >
               <Stack direction="column">
                 {apps.map((app) => {
                   return (

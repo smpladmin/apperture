@@ -21,6 +21,7 @@ boto3 = "^1.23.8"
 rq = "^1.11.0"
 pydantic = "^1.10.2"
 smart-open = {extras = ["s3"], version = "^6.2.0"}
+inflection = "^0.5.1"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
