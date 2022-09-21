@@ -2,7 +2,7 @@ import datetime
 from beanie import PydanticObjectId
 from fastapi import Depends
 from domain.common.models import IntegrationProvider
-from domain.edge.models import Edge, AggregatedEdge
+from domain.edge.models import Edge, AggregatedEdge, NodeTrend
 from mongo.mongo import Mongo
 
 
@@ -74,4 +74,40 @@ class EdgeService:
             await Edge.find()
             .aggregate(pipeline, projection_model=AggregatedEdge)
             .to_list()
+        )
+
+    async def get_node_trends(self, datasource_id: str, node: str, trend_type: str) -> list[Edge]:
+        pipeline = [
+            {
+                "$match": {
+                    "datasource_id": PydanticObjectId(datasource_id),
+                    "current_event": node,
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "current_event": "$current_event",
+                        "{}".format(trend_type): {"${}".format(trend_type): "$date"},
+                        "year": {"$year": "$date"}
+                    },
+                    "node": {"$max": "$current_event"},
+                    "hits": {"$sum": "$hits"},
+                    "users": {"$sum": "$users"},
+                    "date": {"$max": "$date"},
+                    "week": {"$max": {"$week": "$date"}},
+                    "month": {"$max": {"$month": "$date"}},
+                    "year": {"$max": {"$year": "$date"}},
+                    "start_date": {"$min": "$date"},
+                    "end_date": {"$max": "$date"},
+                }
+            },
+        ]
+
+        if trend_type == 'date':
+            pipeline[1]['$group']['_id'] = {'current_event': '$current_event',
+                                            'date': '$date'}
+
+        return (
+            await Edge.find().aggregate(pipeline, projection_model=NodeTrend).to_list()
         )

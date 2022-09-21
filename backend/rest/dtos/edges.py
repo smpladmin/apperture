@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 from domain.common.models import IntegrationProvider
-from domain.edge.models import Edge, AggregatedEdge
+from domain.edge.models import Edge, AggregatedEdge, NodeTrend
 from rest.dtos.model_response import ModelResponse
 
 
@@ -24,5 +24,10 @@ class EdgeResponse(Edge, ModelResponse):
 
 
 class AggregatedEdgeResponse(AggregatedEdge, ModelResponse):
+    class Config:
+        allow_population_by_field_name = True
+
+
+class NodeTrendResponse(NodeTrend, ModelResponse):
     class Config:
         allow_population_by_field_name = True

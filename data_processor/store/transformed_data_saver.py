@@ -13,7 +13,7 @@ class TransformedDataSaver(Saver):
         pass
 
     def save(self, datasource_id: str, provider: IntegrationProvider, df: pd.DataFrame):
-        df['previousPage'] = df['previousPage'].str.replace('\(entrance\)', 'Entrance')
+        df["previousPage"] = df["previousPage"].str.replace("\(entrance\)", "Entrance")
         df = df.rename(
             columns={
                 "previousPage": "previousEvent",
