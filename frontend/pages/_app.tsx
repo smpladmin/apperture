@@ -6,6 +6,7 @@ import { theme } from '../theme/chakra.theme';
 import { AppertureContext } from '@lib/contexts/appertureContext';
 import mobile from 'is-mobile';
 import { Device } from '@lib/types';
+import 'userAnalytics';
 
 type CustomAppProps = {
   device: Device;
