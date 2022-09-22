@@ -49,3 +49,15 @@ class AggregatedEdge(BaseModel):
     current_event: str
     users: int
     hits: int
+
+
+class NodeTrend(BaseModel):
+    node: str
+    users: int
+    hits: int
+    date: datetime.datetime
+    week: int
+    month: int
+    year: int
+    start_date: datetime.datetime
+    end_date: datetime.datetime
