@@ -178,6 +178,12 @@ class EdgeService:
                     "end_date": {"$max": "$date"},
                 }
             },
+            {
+                "$sort": {
+                    "year": 1,
+                    "{}".format(trend_type): 1
+                }
+            }
         ]
 
         if trend_type == 'date':
