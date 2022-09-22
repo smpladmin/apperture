@@ -3,7 +3,7 @@ from typing import Union
 from beanie import PydanticObjectId
 from fastapi import Depends
 from domain.common.models import IntegrationProvider
-from domain.edge.models import Edge, BaseEdge, RichEdge, AggregatedEdge, NodeTrend
+from domain.edge.models import Edge, BaseEdge, RichEdge, AggregatedEdge, NodeTrend, NodeSankey
 from mongo.mongo import Mongo
 
 
@@ -152,7 +152,7 @@ class EdgeService:
             .to_list()
         )
 
-    async def get_node_trends(self, datasource_id: str, node: str, trend_type: str) -> list[Edge]:
+    async def get_node_trends(self, datasource_id: str, node: str, trend_type: str) -> list[NodeTrend]:
         pipeline = [
             {
                 "$match": {
@@ -192,4 +192,75 @@ class EdgeService:
 
         return (
             await BaseEdge.find().aggregate(pipeline, projection_model=NodeTrend).to_list()
+        )
+
+    async def get_node_sankey(self, datasource_id: str, node: str) -> list[NodeSankey]:
+
+        pipeline = [
+            {
+                '$match': {
+                    'datasource_id': PydanticObjectId(datasource_id),
+                    'current_event': node
+                }
+            }, {
+                '$group': {
+                    '_id': {
+                        'previous_event': '$previous_event'
+                    },
+                    'node': {
+                        '$max': '$previous_event'
+                    },
+                    'hits': {
+                        '$sum': '$hits'
+                    },
+                    'users': {
+                        '$sum': '$users'
+                    },
+                    'flow': {
+                        '$max': 'inward'
+                    }
+                }
+            }, {
+                '$sort': {
+                    'hits': -1
+                }
+            }, {
+                '$unionWith': {
+                    'coll': 'edges',
+                    'pipeline': [
+                        {
+                            '$match': {
+                                'datasource_id': PydanticObjectId(datasource_id),
+                                'previous_event': node
+                            }
+                        }, {
+                            '$group': {
+                                '_id': {
+                                    'current_event': '$current_event'
+                                },
+                                'node': {
+                                    '$max': '$current_event'
+                                },
+                                'hits': {
+                                    '$sum': '$hits'
+                                },
+                                'users': {
+                                    '$sum': '$users'
+                                },
+                                'flow': {
+                                    '$max': 'outward'
+                                }
+                            }
+                        }, {
+                            '$sort': {
+                                'hits': -1
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+
+        return (
+            await BaseEdge.find().aggregate(pipeline, projection_model=NodeSankey).to_list()
         )
