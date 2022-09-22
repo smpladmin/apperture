@@ -1,31 +1,31 @@
 import { Mix } from '@antv/g2plot';
 import { Box } from '@chakra-ui/react';
-import { useEffect } from 'react';
-import { gaDataWithDate } from './data';
-
-const data1 = gaDataWithDate.filter((item) => {
-  return item.currentEvent == 'Login';
-});
+import { useEffect, useRef } from 'react';
 
 const Trend = ({ trendsData }: { trendsData: any }) => {
-  useEffect(() => {
-    const plot = new Mix('trend', {
-      autoFit: false,
-    });
+  const ref = useRef<HTMLDivElement>(null);
+  const plot = useRef<{ trend: Mix | null }>({ trend: null });
 
-    plot.update({
+  useEffect(() => {
+    plot.current.trend = new Mix(ref.current!!, {
+      autoFit: true,
+    });
+  }, []);
+
+  useEffect(() => {
+    plot.current.trend?.update({
       plots: [
         {
           type: 'area',
           region: {
             start: { x: 0, y: 0 },
-            end: { x: 1, y: 0.5 },
+            end: { x: 1, y: 1 },
           },
           options: {
             data: trendsData,
-            xField: 'date',
+            xField: 'week',
             yField: 'hits',
-            seriesField: 'currentEvent',
+            seriesField: 'node',
 
             yAxis: {},
             tooltip: {
@@ -45,40 +45,11 @@ const Trend = ({ trendsData }: { trendsData: any }) => {
           },
         },
       ],
-      //   views: [
-      //     {
-      //       data: data1,
-      //       geometries: [
-      //         {
-      //           type: 'point',
-      //           xField: 'date',
-      //           yField: 'hits',
-      //         },
-      //       ],
-      //       //   @ts-ignore
-      //       annotations: [
-      //         ...data1.map((d) => {
-      //           return {
-      //             type: 'line',
-      //             start: [d.hits, 'min'],
-      //             end: [d.hits, 'max'],
-      //             top: false,
-      //             style: {
-      //               lineWidth: 2,
-      //               radius: 2,
-      //               lineDash: [2, 4],
-      //               stroke: 'd9d9da',
-      //             },
-      //           };
-      //         }),
-      //       ],
-      //     },
-      //   ],
     });
-    plot.render();
-  }, [data1]);
+    plot.current.trend?.render();
+  }, [trendsData]);
 
-  return <Box id="trend" />;
+  return <Box ref={ref} height={'60'} />;
 };
 
 export default Trend;

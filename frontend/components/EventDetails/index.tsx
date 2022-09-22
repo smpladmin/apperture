@@ -1,3 +1,4 @@
+import { Item } from '@antv/g6';
 import { Box, Divider, Flex, Text } from '@chakra-ui/react';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { useRef } from 'react';
@@ -7,6 +8,7 @@ type EventDetailsDrawer = {
   isEventDetailsDrawerOpen: boolean;
   closeEventDetailsDrawer: () => void;
   setSelectedNode: Function;
+  selectedNode: Item | null;
   trendsData: any;
 };
 
@@ -14,6 +16,7 @@ const EventDetails = ({
   isEventDetailsDrawerOpen,
   closeEventDetailsDrawer,
   setSelectedNode,
+  selectedNode,
   trendsData,
 }: EventDetailsDrawer) => {
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -26,7 +29,7 @@ const EventDetails = ({
   useOnClickOutside(drawerRef, handleClickOutside);
   return (
     <>
-      {isEventDetailsDrawerOpen && (
+      {isEventDetailsDrawerOpen && trendsData && (
         <>
           <Box
             ref={drawerRef}
@@ -39,7 +42,9 @@ const EventDetails = ({
             pt={'2'}
             backgroundColor={'white.DEFAULT'}
             shadow={'1px 1px 0 rgba(30, 25, 34, 0.08)'}
-            transition={'all 0.3s ease-out 10s'}
+            // transition={'all 0.3s ease-out 10s'}
+            transitionDuration="0.5s"
+            transitionTimingFunction="ease-out"
             overflowY={'auto'}
           >
             <Flex direction={'column'}>
@@ -49,7 +54,7 @@ const EventDetails = ({
                   fontSize={'base'}
                   lineHeight={'base'}
                 >
-                  Event Details
+                  {selectedNode?._cfg?.id}
                 </Text>
               </Box>
               <Divider
@@ -65,9 +70,9 @@ const EventDetails = ({
                         fontWeight={'bold'}
                         fontSize={'sh-28'}
                         lineHeight={'sh-28'}
-                        fontFamily={'Space Grotesk'}
+                        fontFamily={'Space Grotesk, Work Sans, sans-serif'}
                       >
-                        {'6.1 k '}
+                        {'6.1 k'}
                       </Text>
                       <Text
                         fontWeight={'medium'}
@@ -99,7 +104,7 @@ const EventDetails = ({
                 borderColor={'white.200'}
                 opacity={1}
               />
-              <Flex py={'6'} h={'88'} direction={'column'} gap={'4'}>
+              <Flex py={'6'} direction={'column'} gap={'4'}>
                 <Text
                   fontWeight={'medium'}
                   fontSize={'sh-18'}
@@ -134,7 +139,6 @@ const EventDetails = ({
                 >
                   Sankey
                 </Text>
-                <Box id="sankey"></Box>
               </Box>
             </Flex>
           </Box>

@@ -83,6 +83,7 @@ const Graph = ({
           });
         }
         setSelectedNode(item);
+
         // Set the 'active' state of the clicked node to be true
         graph?.setItemState(item, 'active', true);
 

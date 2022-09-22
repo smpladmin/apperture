@@ -47,7 +47,6 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(!edges.length);
   const [selectedNode, setSelectedNode] = useState<Item | null>(null);
   const [trendsData, setTrendsData] = useState();
-
   const router = useRouter();
   const { dsId } = router.query;
 
@@ -87,6 +86,7 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
           <EventDetails
             isEventDetailsDrawerOpen={isEventDetailsDrawerOpen}
             closeEventDetailsDrawer={closeEventDetailsDrawer}
+            selectedNode={selectedNode}
             setSelectedNode={setSelectedNode}
             trendsData={trendsData}
           />
