@@ -18,6 +18,10 @@ a {
   text-decoration: none;
 }
 
+p {
+  color: #0e0e1a;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

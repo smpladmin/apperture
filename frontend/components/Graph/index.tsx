@@ -17,9 +17,17 @@ import { useRouter } from 'next/router';
 
 type GraphProps = {
   visualisationData: Array<Edge>;
+  openEventDetailsDrawer: () => void;
+  selectedNode: Item | null;
+  setSelectedNode: Function;
 };
 
-const Graph = ({ visualisationData }: GraphProps) => {
+const Graph = ({
+  visualisationData,
+  openEventDetailsDrawer,
+  selectedNode,
+  setSelectedNode,
+}: GraphProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const gRef = useRef<{ graph: G6Graph | null }>({
     graph: null,
@@ -29,6 +37,66 @@ const Graph = ({ visualisationData }: GraphProps) => {
   const { dsId } = router.query;
 
   const graphData = useMemo(() => transformData(visualisationData), [dsId]);
+
+  useEffect(() => {
+    let graph = gRef.current.graph;
+
+    if (!selectedNode) {
+      graph?.findAllByState('node', 'active').forEach((node) => {
+        graph?.setItemState(node, 'active', false);
+      });
+    }
+
+    G6.registerBehavior('activate-node', {
+      getDefaultCfg() {
+        return {
+          multiple: false,
+        };
+      },
+      getEvents() {
+        return {
+          'node:click': 'onNodeClick',
+          'canvas:click': 'onCanvasClick',
+        };
+      },
+
+      removeNodesState() {
+        graph?.findAllByState('node', 'active').forEach((node) => {
+          graph?.setItemState(node, 'active', false);
+        });
+      },
+
+      onNodeClick(e: any) {
+        const graph = gRef.current.graph;
+        const item = e.item as Item;
+        console.log(item);
+
+        if (item.hasState('active')) {
+          graph?.setItemState(item, 'active', false);
+          return;
+        }
+
+        // Get the configurations by this. If you do not allow multiple nodes to be 'active', cancel the 'active' state for other nodes
+        if (!this.multiple) {
+          graph?.findAllByState('node', 'active').forEach((node) => {
+            graph.setItemState(node, 'active', false);
+          });
+        }
+        setSelectedNode(item);
+        // Set the 'active' state of the clicked node to be true
+        graph?.setItemState(item, 'active', true);
+
+        //open eventDetails drawer
+        openEventDetailsDrawer();
+      },
+      onCanvasClick(e: any) {
+        // shouldUpdate can be overrode by users. Returning true means turning the 'active' to be false for all the nodes
+        // if (shouldUpdate(e)) {
+        //   removeNodesState();
+        // }
+      },
+    });
+  }, [selectedNode]);
 
   useEffect(() => {
     if (!gRef.current.graph) {
@@ -120,6 +188,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
             'drag-canvas',
             'drag-node',
             'wheel-zoom',
+            'activate-node',
             {
               type: 'zoom-canvas',
               sensitivity: 0.5,
@@ -183,7 +252,13 @@ const Graph = ({ visualisationData }: GraphProps) => {
     graph.render();
   }, [graphData]);
 
-  return <div id="network-graph" ref={ref} style={{ height: '100%' }}></div>;
+  return (
+    <div
+      id="network-graph"
+      ref={ref}
+      style={{ height: '100%', backgroundColor: '#E5E5E5' }}
+    ></div>
+  );
 };
 
 export default Graph;

@@ -122,14 +122,6 @@ const MobileSidemenu = ({
                 >
                   {selectedApp.name}
                 </Text>
-                <Text
-                  fontSize={'xs-12'}
-                  fontWeight={'regular'}
-                  lineHeight={'xs-12'}
-                  color={'grey.200'}
-                >
-                  {`ID ${selectedApp._id}`}
-                </Text>
               </Box>
               <IconButton
                 aria-label="close"

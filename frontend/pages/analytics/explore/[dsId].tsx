@@ -6,8 +6,12 @@ import { App, AppWithIntegrations } from '@lib/domain/app';
 import Loading from '@components/Loading';
 import Graph from '@components/Graph';
 import Head from 'next/head';
-import { _getEdges } from '@lib/services/datasourceService';
+import { getTrendsData, _getEdges } from '@lib/services/datasourceService';
 import { Edge } from '@lib/domain/edge';
+import { useDisclosure } from '@chakra-ui/react';
+import EventDetails from '@components/EventDetails';
+import { Item } from '@antv/g6';
+import { useRouter } from 'next/router';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -41,10 +45,34 @@ type ExploreDataSourceProps = {
 
 const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(!edges.length);
+  const [selectedNode, setSelectedNode] = useState<Item | null>(null);
+  const [trendsData, setTrendsData] = useState();
+
+  const router = useRouter();
+  const { dsId } = router.query;
 
   useEffect(() => {
     setIsLoading(!edges.length);
   }, [edges.length]);
+
+  useEffect(() => {
+    if (!selectedNode) return;
+    const fetchTrendsData = async () => {
+      const data = await getTrendsData(
+        selectedNode?._cfg?.id!!,
+        dsId as string,
+        'week'
+      );
+      setTrendsData(data);
+    };
+    fetchTrendsData();
+  }, [selectedNode]);
+
+  const {
+    isOpen: isEventDetailsDrawerOpen,
+    onOpen: openEventDetailsDrawer,
+    onClose: closeEventDetailsDrawer,
+  } = useDisclosure();
 
   return (
     <>
@@ -52,7 +80,24 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
         <title>Apperture</title>
         <meta name="description" content="Apperture Analytics" />
       </Head>
-      {isLoading ? <Loading /> : <Graph visualisationData={edges} />}
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <>
+          <EventDetails
+            isEventDetailsDrawerOpen={isEventDetailsDrawerOpen}
+            closeEventDetailsDrawer={closeEventDetailsDrawer}
+            setSelectedNode={setSelectedNode}
+            trendsData={trendsData}
+          />
+          <Graph
+            visualisationData={edges}
+            openEventDetailsDrawer={openEventDetailsDrawer}
+            selectedNode={selectedNode}
+            setSelectedNode={setSelectedNode}
+          />
+        </>
+      )}
     </>
   );
 };

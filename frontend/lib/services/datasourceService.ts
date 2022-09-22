@@ -49,3 +49,19 @@ export const _getEdges = async (token: string, dsId: string) => {
     return [];
   }
 };
+
+export const getTrendsData = async (
+  nodeId: string,
+  dsId: string,
+  trendType: string
+) => {
+  try {
+    const res = await AppertureAPI.get(
+      `/datasources/${dsId}/trends?node=${nodeId}&trend_type=${trendType}`
+    );
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};
