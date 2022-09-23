@@ -199,7 +199,7 @@ class EdgeService:
         if len(nodes) > threshold:
             others_node = nodes[threshold-1]
             others_node.node = "Others"
-            if nodes[0].flow == 'inward':
+            if nodes[0].flow == 'inflow':
                 others_node.previous_event = "Others"
             else:
                 others_node.current_event = "Others"
@@ -209,8 +209,8 @@ class EdgeService:
 
         return nodes
 
-    def create_exits_node(self, outward_node, hits, users):
-        exits_node = deepcopy(outward_node)
+    def create_exits_node(self, outflow_node, hits, users):
+        exits_node = deepcopy(outflow_node)
         exits_node.users = users
         exits_node.hits = hits
         exits_node.node = "Exits"
@@ -246,7 +246,7 @@ class EdgeService:
                         '$sum': '$users'
                     },
                     'flow': {
-                        '$max': 'inward'
+                        '$max': 'inflow'
                     },
                     'hits_percentage': {
                         '$max': 0
@@ -289,7 +289,7 @@ class EdgeService:
                                     '$sum': '$users'
                                 },
                                 'flow': {
-                                    '$max': 'outward'
+                                    '$max': 'outflow'
                                 },
                                 'hits_percentage': {
                                     '$max': 0
@@ -309,25 +309,25 @@ class EdgeService:
         ]
 
         sankey_nodes = await BaseEdge.find().aggregate(pipeline, projection_model=NodeSankey).to_list()
-        inward_nodes = [node for node in sankey_nodes if node.flow == 'inward']
-        outward_nodes = [node for node in sankey_nodes if node.flow == 'outward']
-        inward_nodes = self.create_others_node(inward_nodes, 5)
-        outward_nodes = self.create_others_node(outward_nodes, 4)
+        inflow_nodes = [node for node in sankey_nodes if node.flow == 'inflow']
+        outflow_nodes = [node for node in sankey_nodes if node.flow == 'outflow']
+        inflow_nodes = self.create_others_node(inflow_nodes, 5)
+        outflow_nodes = self.create_others_node(outflow_nodes, 4)
 
         # Temporary fix for sankey duplicate names
-        for node in inward_nodes:
+        for node in inflow_nodes:
             node.previous_event += ' '
 
-        inward_hits = sum([node.hits for node in inward_nodes])
-        outward_hits = sum([node.hits for node in outward_nodes])
-        inward_users = sum([node.users for node in inward_nodes])
-        outward_user = sum([node.users for node in outward_nodes])
-        outward_nodes.append(self.create_exits_node(outward_nodes[0],
-                                                    inward_hits-outward_hits, inward_users-outward_user))
-        sankey_nodes = inward_nodes+outward_nodes
+        inflow_hits = sum([node.hits for node in inflow_nodes])
+        outflow_hits = sum([node.hits for node in outflow_nodes])
+        inflow_users = sum([node.users for node in inflow_nodes])
+        outflow_user = sum([node.users for node in outflow_nodes])
+        outflow_nodes.append(self.create_exits_node(outflow_nodes[0],
+                                                    inflow_hits-outflow_hits, inflow_users-outflow_user))
+        sankey_nodes = inflow_nodes+outflow_nodes
         for node in sankey_nodes:
-            node.hits_percentage = float("{:.2f}".format((node.hits*100)/inward_hits))
-            node.users_percentage = float("{:.2f}".format((node.users*100)/inward_users))
+            node.hits_percentage = float("{:.2f}".format((node.hits*100)/inflow_hits))
+            node.users_percentage = float("{:.2f}".format((node.users*100)/inflow_users))
 
         return (
             sankey_nodes
