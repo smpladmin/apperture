@@ -61,3 +61,15 @@ class NodeTrend(BaseModel):
     year: int
     start_date: datetime.datetime
     end_date: datetime.datetime
+
+
+class NodeSankey(BaseModel):
+    node: str
+    current_event: str
+    previous_event: str
+    hits: int
+    users: int
+    flow: str
+    hits_percentage: float
+    users_percentage: float
+
