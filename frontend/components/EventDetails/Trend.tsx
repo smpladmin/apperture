@@ -1,5 +1,9 @@
 import { Mix } from '@antv/g2plot';
-import { Box } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
+import {
+  convertISODateToReadableDate,
+  formatDatalabel,
+} from '@lib/utils/graph';
 import { useEffect, useRef } from 'react';
 
 const Trend = ({ trendsData }: { trendsData: any }) => {
@@ -21,17 +25,37 @@ const Trend = ({ trendsData }: { trendsData: any }) => {
             start: { x: 0, y: 0 },
             end: { x: 1, y: 1 },
           },
+
           options: {
             data: trendsData,
-            xField: 'week',
+            xField: 'startDate',
             yField: 'hits',
             seriesField: 'node',
-
-            yAxis: {},
+            xAxis: {
+              label: {
+                formatter: (text) => {
+                  return convertISODateToReadableDate(text);
+                },
+              },
+            },
+            yAxis: {
+              label: {
+                formatter: (text) => {
+                  return formatDatalabel(Number(text));
+                },
+              },
+            },
             tooltip: {
               showMarkers: true,
               showCrosshairs: true,
               shared: true,
+              formatter: ({ startDate, hits }) => {
+                return {
+                  title: convertISODateToReadableDate(startDate),
+                  name: 'Hits',
+                  value: hits,
+                };
+              },
             },
             areaStyle: () => {
               return {
@@ -49,7 +73,20 @@ const Trend = ({ trendsData }: { trendsData: any }) => {
     plot.current.trend?.render();
   }, [trendsData]);
 
-  return <Box ref={ref} height={'60'} />;
+  return (
+    <Flex py={'6'} direction={'column'} gap={'4'}>
+      <Text fontWeight={'medium'} fontSize={'sh-18'} lineHeight={'sh-18'}>
+        Trend
+      </Text>
+      <Flex gap={'1'} alignItems={'center'}>
+        <Box w={'3'} h={'3'} bg={'teal.100'} />
+        <Text fontWeight={'normal'} fontSize={'xs-10'} lineHeight={'xs-10'}>
+          Hits-Total
+        </Text>
+      </Flex>
+      <Box ref={ref} height={'60'} pt={'4'} />
+    </Flex>
+  );
 };
 
 export default Trend;

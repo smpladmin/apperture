@@ -2,6 +2,7 @@ import { Item } from '@antv/g6';
 import { Box, Divider, Flex, Text } from '@chakra-ui/react';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { useRef } from 'react';
+import Sankey from './Sankey';
 import Trend from './Trend';
 
 type EventDetailsDrawer = {
@@ -42,10 +43,8 @@ const EventDetails = ({
             pt={'2'}
             backgroundColor={'white.DEFAULT'}
             shadow={'1px 1px 0 rgba(30, 25, 34, 0.08)'}
-            // transition={'all 0.3s ease-out 10s'}
-            transitionDuration="0.5s"
-            transitionTimingFunction="ease-out"
             overflowY={'auto'}
+            animation={'ease-out 1s'}
           >
             <Flex direction={'column'}>
               <Box h={'18'} pt={'6'} pb={'7'}>
@@ -87,7 +86,7 @@ const EventDetails = ({
                       fontSize={'xs-12'}
                       lineHeight={'xs-12'}
                     >
-                      {'2.1% increase in overall traffic'}
+                      {'2.1% of overall traffic'}
                     </Text>
                   </Flex>
                   <Text
@@ -104,42 +103,13 @@ const EventDetails = ({
                 borderColor={'white.200'}
                 opacity={1}
               />
-              <Flex py={'6'} direction={'column'} gap={'4'}>
-                <Text
-                  fontWeight={'medium'}
-                  fontSize={'sh-18'}
-                  lineHeight={'sh-18'}
-                >
-                  Trend
-                </Text>
-                <Flex gap={'1'} alignItems={'center'}>
-                  <Box w={'3'} h={'3'} bg={'teal.100'} />
-                  <Text
-                    fontWeight={'normal'}
-                    fontSize={'xs-10'}
-                    lineHeight={'xs-10'}
-                  >
-                    Hits-Total
-                  </Text>
-                </Flex>
-                <Box pt={'4'}>
-                  <Trend trendsData={trendsData} />
-                </Box>
-              </Flex>
+              <Trend trendsData={trendsData} />
               <Divider
                 orientation="horizontal"
                 borderColor={'white.200'}
                 opacity={1}
               />
-              <Box py={'6'} h={'88'}>
-                <Text
-                  fontWeight={'medium'}
-                  fontSize={'sh-18'}
-                  lineHeight={'sh-18'}
-                >
-                  Sankey
-                </Text>
-              </Box>
+              <Sankey />
             </Flex>
           </Box>
           <Box position={'fixed'} zIndex={'100'} w={'full'} h={'full'} />
