@@ -1,0 +1,4 @@
+name: apperture
+description: Infra for Apperture
+runtime: python
+main: src/
