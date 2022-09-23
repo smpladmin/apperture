@@ -1,4 +1,5 @@
 import os
+import logging
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
@@ -38,7 +39,18 @@ class GoogleAnalyticsStrategy(Strategy):
         self.saver = TransformedDataSaver()
 
     def execute(self, email, external_source_id):
+        logging.info("{x}: {y}".format(x='Data Fetcher for {}'.format(external_source_id), y='starts'))
         df = self.fetcher.daily_data(external_source_id)
+        logging.info("{x}: {y}".format(x='Data Fetcher for {}'.format(external_source_id), y='ends'))
+
+        logging.info("{x}: {y}".format(x='Data Cleaner for {}'.format(external_source_id), y='starts'))
         cleaned_data = self.cleaner.clean(df)
+        logging.info("{x}: {y}".format(x='Data Cleaner for {}'.format(external_source_id), y='ends'))
+
+        logging.info("{x}: {y}".format(x='Data Transformer for {}'.format(external_source_id), y='starts'))
         transformed_data = self.transformer.transform(cleaned_data)
+        logging.info("{x}: {y}".format(x='Data Transformer for {}'.format(external_source_id), y='ends'))
+
+        logging.info("{x}: {y}".format(x='Data Saver for {}'.format(external_source_id), y='starts'))
         self.saver.save(self.datasource_id, self.provider, transformed_data)
+        logging.info("{x}: {y}".format(x='Data Saver for {}'.format(external_source_id), y='ends'))
