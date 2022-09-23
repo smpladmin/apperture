@@ -56,7 +56,6 @@ const Graph = ({
       getEvents() {
         return {
           'node:click': 'onNodeClick',
-          'canvas:click': 'onCanvasClick',
         };
       },
 
@@ -69,7 +68,6 @@ const Graph = ({
       onNodeClick(e: any) {
         const graph = gRef.current.graph;
         const item = e.item as Item;
-        console.log(item);
 
         if (item.hasState('active')) {
           graph?.setItemState(item, 'active', false);
@@ -89,12 +87,6 @@ const Graph = ({
 
         //open eventDetails drawer
         openEventDetailsDrawer();
-      },
-      onCanvasClick(e: any) {
-        // shouldUpdate can be overrode by users. Returning true means turning the 'active' to be false for all the nodes
-        // if (shouldUpdate(e)) {
-        //   removeNodesState();
-        // }
       },
     });
   }, [selectedNode]);

@@ -9,11 +9,12 @@ import {
   Tabs,
   Text,
 } from '@chakra-ui/react';
-import { sankeyData } from '../data';
+import { FlowType, SankeyData } from '@lib/domain/eventData';
+
 import { formatDatalabel } from '@lib/utils/graph';
 import { Fragment } from 'react';
 
-const StatsNode = ({ data }: { data: any }) => {
+const StatsNode = ({ data }: { data: SankeyData }) => {
   return (
     <Flex justifyContent={'space-between'} py={'6'} alignItems={'center'}>
       <Text
@@ -39,7 +40,7 @@ const StatsNode = ({ data }: { data: any }) => {
   );
 };
 
-const SankeyNodesTabs = () => {
+const SankeyNodesTabs = ({ sankeyData }: { sankeyData: Array<SankeyData> }) => {
   return (
     <Tabs>
       <TabList>
@@ -74,7 +75,7 @@ const SankeyNodesTabs = () => {
       <TabPanels>
         <TabPanel p={0}>
           {sankeyData
-            .filter((sd) => sd.flow === 'inward')
+            .filter((sd) => sd.flow === FlowType.INFLOW)
             .map((data, i, inflowNode) => {
               return (
                 <Fragment key={data.node}>
@@ -92,7 +93,7 @@ const SankeyNodesTabs = () => {
         </TabPanel>
         <TabPanel p={0}>
           {sankeyData
-            .filter((sd) => sd.flow === 'outward')
+            .filter((sd) => sd.flow === FlowType.OUTFLOW)
             .map((data, i, outflowNode) => {
               return (
                 <Fragment key={data.node}>

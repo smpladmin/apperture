@@ -6,7 +6,11 @@ import { App, AppWithIntegrations } from '@lib/domain/app';
 import Loading from '@components/Loading';
 import Graph from '@components/Graph';
 import Head from 'next/head';
-import { getTrendsData, _getEdges } from '@lib/services/datasourceService';
+import {
+  getSankeyData,
+  getTrendsData,
+  _getEdges,
+} from '@lib/services/datasourceService';
 import { Edge } from '@lib/domain/edge';
 import { useDisclosure } from '@chakra-ui/react';
 import EventDetails from '@components/EventDetails';
@@ -46,7 +50,10 @@ type ExploreDataSourceProps = {
 const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(!edges.length);
   const [selectedNode, setSelectedNode] = useState<Item | null>(null);
-  const [trendsData, setTrendsData] = useState();
+  const [eventData, setEventData] = useState({
+    trendsData: [],
+    sankeyData: [],
+  });
   const router = useRouter();
   const { dsId } = router.query;
 
@@ -57,12 +64,15 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   useEffect(() => {
     if (!selectedNode) return;
     const fetchTrendsData = async () => {
-      const data = await getTrendsData(
-        selectedNode?._cfg?.id!!,
-        dsId as string,
-        'week'
-      );
-      setTrendsData(data);
+      const data = await Promise.all([
+        getTrendsData(dsId as string, selectedNode?._cfg?.id!!, 'week'),
+        getSankeyData(dsId as string, selectedNode._cfg?.id!!),
+      ]);
+
+      setEventData({
+        trendsData: data[0],
+        sankeyData: data[1],
+      });
     };
     fetchTrendsData();
   }, [selectedNode]);
@@ -88,7 +98,7 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
             closeEventDetailsDrawer={closeEventDetailsDrawer}
             selectedNode={selectedNode}
             setSelectedNode={setSelectedNode}
-            trendsData={trendsData}
+            eventData={eventData}
           />
           <Graph
             visualisationData={edges}

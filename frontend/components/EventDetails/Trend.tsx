@@ -1,12 +1,13 @@
 import { Mix } from '@antv/g2plot';
 import { Box, Flex, Text } from '@chakra-ui/react';
+import { TrendData } from '@lib/domain/eventData';
 import {
   convertISODateToReadableDate,
   formatDatalabel,
 } from '@lib/utils/graph';
 import { useEffect, useRef } from 'react';
 
-const Trend = ({ trendsData }: { trendsData: any }) => {
+const Trend = ({ trendsData }: { trendsData: Array<TrendData> }) => {
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ trend: Mix | null }>({ trend: null });
 

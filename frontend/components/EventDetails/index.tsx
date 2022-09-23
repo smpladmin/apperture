@@ -1,5 +1,6 @@
 import { Item } from '@antv/g6';
 import { Box, Divider, Flex, Text } from '@chakra-ui/react';
+import { TrendData, SankeyData } from '@lib/domain/eventData';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { useRef } from 'react';
 import Sankey from './Sankey';
@@ -10,7 +11,7 @@ type EventDetailsDrawer = {
   closeEventDetailsDrawer: () => void;
   setSelectedNode: Function;
   selectedNode: Item | null;
-  trendsData: any;
+  eventData: { [key in string]: Array<TrendData | SankeyData> };
 };
 
 const EventDetails = ({
@@ -18,7 +19,7 @@ const EventDetails = ({
   closeEventDetailsDrawer,
   setSelectedNode,
   selectedNode,
-  trendsData,
+  eventData,
 }: EventDetailsDrawer) => {
   const drawerRef = useRef<HTMLDivElement>(null);
 
@@ -28,9 +29,11 @@ const EventDetails = ({
   };
 
   useOnClickOutside(drawerRef, handleClickOutside);
+  const { trendsData, sankeyData } = eventData;
+
   return (
     <>
-      {isEventDetailsDrawerOpen && trendsData && (
+      {isEventDetailsDrawerOpen && trendsData.length && sankeyData.length ? (
         <>
           <Box
             ref={drawerRef}
@@ -103,18 +106,18 @@ const EventDetails = ({
                 borderColor={'white.200'}
                 opacity={1}
               />
-              <Trend trendsData={trendsData} />
+              <Trend trendsData={trendsData as Array<TrendData>} />
               <Divider
                 orientation="horizontal"
                 borderColor={'white.200'}
                 opacity={1}
               />
-              <Sankey />
+              <Sankey sankeyData={sankeyData as Array<SankeyData>} />
             </Flex>
           </Box>
           <Box position={'fixed'} zIndex={'100'} w={'full'} h={'full'} />
         </>
-      )}
+      ) : null}
     </>
   );
 };

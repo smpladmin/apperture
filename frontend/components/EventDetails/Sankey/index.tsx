@@ -1,17 +1,24 @@
 import { Sankey } from '@antv/g2plot';
+
 import { Box, Flex, Text } from '@chakra-ui/react';
+import { SankeyData } from '@lib/domain/eventData';
 
 import { useEffect, useRef } from 'react';
-import { sankeyData } from '../data';
 import SankeyNodesTabs from './SankeyNodesTabs';
 
-const SankeyGraph = () => {
+const SankeyGraph = ({ sankeyData }: { sankeyData: Array<SankeyData> }) => {
   const sankeyRef = useRef<HTMLDivElement>(null);
   const plot = useRef<{ sankey: Sankey | null }>({ sankey: null });
-
   useEffect(() => {
     plot.current.sankey = new Sankey(sankeyRef.current!!, {
       data: sankeyData,
+    });
+  }, []);
+
+  useEffect(() => {
+    plot.current.sankey?.update({
+      data: sankeyData,
+      autoFit: true,
       sourceField: 'previousEvent',
       targetField: 'currentEvent',
       weightField: 'hitsPercentage',
@@ -28,8 +35,8 @@ const SankeyGraph = () => {
         },
       },
     });
-    plot.current.sankey.render();
-  }, []);
+    plot.current.sankey?.render();
+  }, [sankeyData]);
 
   return (
     <Flex py={'6'} direction={'column'} gap={'5'}>
@@ -38,7 +45,7 @@ const SankeyGraph = () => {
       </Text>
       <Box ref={sankeyRef} />
       <Box py={'5'} mb={'5'}>
-        <SankeyNodesTabs />
+        <SankeyNodesTabs sankeyData={sankeyData} />
       </Box>
     </Flex>
   );
