@@ -166,7 +166,14 @@ public_ec2_instance = aws.ec2.Instance(
     ami=ami.id,
     key_name=keypair.key_name,
     subnet_id=publicsubnet.id,
-    associate_public_ip_address=True,
+)
+
+dev_eip = aws.ec2.Eip("apperture-dev-ip", vpc=True)
+
+eip_assoc = aws.ec2.EipAssociation(
+    "apperture-dev-eip-assoc",
+    instance_id=public_ec2_instance.id,
+    allocation_id=dev_eip.id,
 )
 
 for i in range(1, data.get("ec2_private_count") + 1):
