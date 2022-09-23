@@ -1,3 +1,4 @@
+from copy import deepcopy
 from datetime import datetime as dt
 from typing import Union
 from beanie import PydanticObjectId
@@ -194,6 +195,28 @@ class EdgeService:
             await BaseEdge.find().aggregate(pipeline, projection_model=NodeTrend).to_list()
         )
 
+    def create_others_node(self, nodes, threshold):
+        if len(nodes) > threshold:
+            others_node = nodes[threshold-1]
+            others_node.node = "Others"
+            if nodes[0].flow == 'inward':
+                others_node.previous_event = "Others"
+            else:
+                others_node.current_event = "Others"
+            others_node.hits = sum([node.hits for node in nodes[threshold-1:]])
+            others_node.users = sum([node.users for node in nodes[threshold-1:]])
+            nodes = nodes[:threshold]
+
+        return nodes
+
+    def create_exits_node(self, outward_node, hits, users):
+        exits_node = deepcopy(outward_node)
+        exits_node.users = users
+        exits_node.hits = hits
+        exits_node.node = "Exits"
+        exits_node.current_event = "Exits"
+        return exits_node
+
     async def get_node_sankey(self, datasource_id: str, node: str) -> list[NodeSankey]:
 
         pipeline = [
@@ -210,6 +233,12 @@ class EdgeService:
                     'node': {
                         '$max': '$previous_event'
                     },
+                    'current_event': {
+                        '$max': '$current_event'
+                    },
+                    'previous_event': {
+                        '$max': '$previous_event'
+                    },
                     'hits': {
                         '$sum': '$hits'
                     },
@@ -218,6 +247,12 @@ class EdgeService:
                     },
                     'flow': {
                         '$max': 'inward'
+                    },
+                    'hits_percentage': {
+                        '$max': 0
+                    },
+                    'users_percentage': {
+                        '$max': 0
                     }
                 }
             }, {
@@ -241,6 +276,12 @@ class EdgeService:
                                 'node': {
                                     '$max': '$current_event'
                                 },
+                                'current_event': {
+                                    '$max': '$current_event'
+                                },
+                                'previous_event': {
+                                    '$max': '$previous_event'
+                                },
                                 'hits': {
                                     '$sum': '$hits'
                                 },
@@ -249,6 +290,12 @@ class EdgeService:
                                 },
                                 'flow': {
                                     '$max': 'outward'
+                                },
+                                'hits_percentage': {
+                                    '$max': 0
+                                },
+                                'users_percentage': {
+                                    '$max': 0
                                 }
                             }
                         }, {
@@ -261,6 +308,27 @@ class EdgeService:
             }
         ]
 
+        sankey_nodes = await BaseEdge.find().aggregate(pipeline, projection_model=NodeSankey).to_list()
+        inward_nodes = [node for node in sankey_nodes if node.flow == 'inward']
+        outward_nodes = [node for node in sankey_nodes if node.flow == 'outward']
+        inward_nodes = self.create_others_node(inward_nodes, 5)
+        outward_nodes = self.create_others_node(outward_nodes, 4)
+
+        # Temporary fix for sankey duplicate names
+        for node in inward_nodes:
+            node.previous_event += ' '
+
+        inward_hits = sum([node.hits for node in inward_nodes])
+        outward_hits = sum([node.hits for node in outward_nodes])
+        inward_users = sum([node.users for node in inward_nodes])
+        outward_user = sum([node.users for node in outward_nodes])
+        outward_nodes.append(self.create_exits_node(outward_nodes[0],
+                                                    inward_hits-outward_hits, inward_users-outward_user))
+        sankey_nodes = inward_nodes+outward_nodes
+        for node in sankey_nodes:
+            node.hits_percentage = float("{:.2f}".format((node.hits*100)/inward_hits))
+            node.users_percentage = float("{:.2f}".format((node.users*100)/inward_users))
+
         return (
-            await BaseEdge.find().aggregate(pipeline, projection_model=NodeSankey).to_list()
+            sankey_nodes
         )

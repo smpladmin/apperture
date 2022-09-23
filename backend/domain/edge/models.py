@@ -65,7 +65,11 @@ class NodeTrend(BaseModel):
 
 class NodeSankey(BaseModel):
     node: str
+    current_event: str
+    previous_event: str
     hits: int
     users: int
     flow: str
+    hits_percentage: float
+    users_percentage: float
 
