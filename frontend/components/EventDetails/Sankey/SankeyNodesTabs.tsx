@@ -42,7 +42,11 @@ const SankeyNodeStats = ({ data }: { data: SankeyData }) => {
 
 const SankeyNodesTabs = ({ sankeyData }: { sankeyData: Array<SankeyData> }) => {
   return (
-    <Tabs>
+    <Tabs
+      defaultIndex={
+        !sankeyData.some((sd) => sd.flow === FlowType.INFLOW) ? 1 : 0
+      }
+    >
       <TabList>
         <Tab
           fontSize={'xs-14'}
