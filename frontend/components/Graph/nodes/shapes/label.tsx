@@ -11,7 +11,7 @@ const label = (cfg: ModelConfig, group: IGroup) => {
     attrs: {
       x: nucleusBBox.minX,
       y: nucleusBBox.maxY + 4,
-      text: fittingString(cfg.label as string, 86, 12),
+      text: fittingString(cfg.label.length>graphConfig.labelLength? cfg.label.substring(0,graphConfig.labelLength)+'...':cfg.label  as string, 86, 12),
       fontSize: 14,
       fontWeight: 500,
       fill: '#0E0E19',

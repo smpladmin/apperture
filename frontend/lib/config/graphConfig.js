@@ -36,6 +36,7 @@ export const graphConfig = {
   nodeSpacing: 112,
   minZoom: 1,
   maxZoom: 3,
+  labelLength: 20,
 };
 
 export const nodeShapes = {
