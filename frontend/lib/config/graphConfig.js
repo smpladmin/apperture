@@ -30,7 +30,7 @@ export const zoomConfig = [
 ];
 
 export const graphConfig = {
-  layout: 'forceAtlas2',
+  layout: 'fruchterman',
   linkDistance: 150,
   nodeSize: 56,
   nodeSpacing: 112,

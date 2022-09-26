@@ -1,5 +1,5 @@
 import fittingString from '@lib/utils/graph/fittingString';
-import { nodeShapes,graphConfig } from '@lib/config/graphConfig';
+import { nodeShapes, graphConfig } from '@lib/config/graphConfig';
 import { IGroup, ModelConfig } from '@antv/g6';
 // TODO: Move colors to common congif file and use from there
 const label = (cfg: ModelConfig, group: IGroup) => {
@@ -11,7 +11,13 @@ const label = (cfg: ModelConfig, group: IGroup) => {
     attrs: {
       x: nucleusBBox.minX,
       y: nucleusBBox.maxY + 4,
-      text: fittingString(cfg.label.length>graphConfig.labelLength? cfg.label.substring(0,graphConfig.labelLength)+'...':cfg.label  as string, 86, 12),
+      text: fittingString(
+        (cfg.label as string).length > graphConfig.labelLength
+          ? (cfg.label as string).substring(0, graphConfig.labelLength) + '...'
+          : (cfg.label as string),
+        86,
+        12
+      ),
       fontSize: 14,
       fontWeight: 500,
       fill: '#0E0E19',
