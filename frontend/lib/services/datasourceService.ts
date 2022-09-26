@@ -49,3 +49,31 @@ export const _getEdges = async (token: string, dsId: string) => {
     return [];
   }
 };
+
+export const getTrendsData = async (
+  dsId: string,
+  nodeId: string,
+  trendType: string
+) => {
+  try {
+    const res = await AppertureAPI.get(
+      `/datasources/${dsId}/trends?node=${nodeId}&trend_type=${trendType}`
+    );
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};
+
+export const getSankeyData = async (dsId: string, nodeId: string) => {
+  try {
+    const res = await AppertureAPI.get(
+      `/datasources/${dsId}/sankey?node=${nodeId}`
+    );
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};
