@@ -37,7 +37,7 @@ const nodesOnZoom = (nodes?: INode[], zoomRatio: number = 1) => {
     nodeMetric.attr({
       fontSize: 10 / zoomRatio,
       lineHeight: 12 / zoomRatio,
-      y: (nucleusBBox.maxY + 20) / zoomRatio,
+      y: (nodeLabelBbox.maxY  + 2),
     });
   });
 };
