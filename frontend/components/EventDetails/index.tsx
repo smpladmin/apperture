@@ -43,7 +43,7 @@ const EventDetails = ({
             selectedNode={selectedNode}
           />
         </>
-      ) : isEventDetailsDrawerOpen ? (
+      ) : isEventDetailsDrawerOpen && eventData ? (
         <>
           <Box
             ref={drawerRef}
