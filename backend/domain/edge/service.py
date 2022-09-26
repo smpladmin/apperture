@@ -4,7 +4,7 @@ from typing import Union
 from beanie import PydanticObjectId
 from fastapi import Depends
 from domain.common.models import IntegrationProvider
-from domain.edge.models import Edge, BaseEdge, RichEdge, AggregatedEdge, NodeTrend, NodeSankey
+from domain.edge.models import Edge, BaseEdge, RichEdge, AggregatedEdge, NodeTrend, NodeSankey, NodeSignificance
 from mongo.mongo import Mongo
 
 
@@ -334,4 +334,57 @@ class EdgeService:
 
         return (
             sankey_nodes
+        )
+
+    async def get_node_significance(self, datasource_id: str, node: str) -> list[NodeSignificance]:
+        pipeline = [
+            {
+                '$match': {
+                    'datasource_id': PydanticObjectId(datasource_id)
+                }
+            }, {
+                '$facet': {
+                    'total_count': [
+                        {
+                            '$group': {
+                                '_id': {
+                                    '_class_id': '$_class_id'
+                                },
+                                'hits': {
+                                    '$sum': '$hits'
+                                }
+                            }
+                        }
+                    ],
+                    'node_count': [
+                        {
+                            '$match': {
+                                'current_event': node
+                            }
+                        }, {
+                            '$group': {
+                                '_id': {
+                                    'current_event': '$current_event'
+                                },
+                                'hits': {
+                                    '$sum': '$hits'
+                                }
+                            }
+                        }
+                    ]
+                }
+            }, {
+                '$project': {
+                    'node_hits': {
+                        '$ifNull': [{'$max': "$node_count.hits"}, 0]
+                    },
+                    'total_hits': {
+                        '$max': '$total_count.hits'
+                    },
+                }
+            }
+        ]
+
+        return (
+            await BaseEdge.find().aggregate(pipeline, projection_model=NodeSignificance).to_list()
         )
