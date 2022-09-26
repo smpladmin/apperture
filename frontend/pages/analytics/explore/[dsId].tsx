@@ -100,7 +100,6 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
           <EventDetails
             isEventDetailsDrawerOpen={isEventDetailsDrawerOpen}
             closeEventDetailsDrawer={closeEventDetailsDrawer}
-            selectedNode={selectedNode}
             setSelectedNode={setSelectedNode}
             eventData={eventData}
             setEventData={setEventData}

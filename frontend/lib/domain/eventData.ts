@@ -22,6 +22,7 @@ export type SankeyData = {
 };
 
 export type NodeSignificanceData = {
+  node: string;
   nodeHits: number;
   totalHits: number;
 };
