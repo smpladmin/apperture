@@ -20,35 +20,22 @@ const EventDetailsInfo = ({ eventData, selectedNode }: EventDetailsInfo) => {
       </Box>
       <Divider orientation="horizontal" borderColor={'white.200'} opacity={1} />
       <Box h={'25'} py={'6'}>
-        <Flex justifyContent={'space-between'} alignItems={'center'}>
-          <Flex direction={'column'} gap={'1'}>
-            <Flex alignItems={'baseline'}>
-              <Text
-                fontWeight={'bold'}
-                fontSize={'sh-28'}
-                lineHeight={'sh-28'}
-                fontFamily={'Space Grotesk, Work Sans, sans-serif'}
-              >
-                {'6.1 k'}
-              </Text>
-              <Text
-                fontWeight={'medium'}
-                fontSize={'xs-14'}
-                lineHeight={'xs-14'}
-              >
-                &nbsp;Hits
-              </Text>
-            </Flex>
-            <Text fontWeight={'normal'} fontSize={'xs-12'} lineHeight={'xs-12'}>
-              {'2.1% of overall traffic'}
+        <Flex direction={'column'} gap={'1'}>
+          <Flex alignItems={'baseline'}>
+            <Text
+              fontWeight={'bold'}
+              fontSize={'sh-28'}
+              lineHeight={'sh-28'}
+              fontFamily={'Space Grotesk, Work Sans, sans-serif'}
+            >
+              {'6.1 k'}
+            </Text>
+            <Text fontWeight={'medium'} fontSize={'xs-14'} lineHeight={'xs-14'}>
+              &nbsp;Hits
             </Text>
           </Flex>
-          <Text
-            fontWeight={'semi-bold'}
-            fontSize={'xs-14'}
-            lineHeight={'xs-14'}
-          >
-            11%
+          <Text fontWeight={'normal'} fontSize={'xs-12'} lineHeight={'xs-12'}>
+            {'2.1% of overall traffic'}
           </Text>
         </Flex>
       </Box>
