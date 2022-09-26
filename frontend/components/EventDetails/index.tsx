@@ -13,6 +13,7 @@ type EventDetailsDrawerProps = {
   setSelectedNode: Function;
   selectedNode: Item | null;
   eventData: { [key in string]: Array<TrendData | SankeyData> };
+  setEventData: Function;
 };
 
 const EventDetails = ({
@@ -21,12 +22,14 @@ const EventDetails = ({
   setSelectedNode,
   selectedNode,
   eventData,
+  setEventData,
 }: EventDetailsDrawerProps) => {
   const drawerRef = useRef<HTMLDivElement>(null);
 
   const handleClickOutside = () => {
     closeEventDetailsDrawer();
     setSelectedNode(null);
+    setEventData(null);
   };
   const context = useContext(AppertureContext);
 

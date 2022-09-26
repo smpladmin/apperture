@@ -99,6 +99,7 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
             selectedNode={selectedNode}
             setSelectedNode={setSelectedNode}
             eventData={eventData}
+            setEventData={setEventData}
           />
           <Graph
             visualisationData={edges}
