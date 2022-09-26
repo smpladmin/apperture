@@ -13,7 +13,6 @@ import { SankeyData, TrendData } from '@lib/domain/eventData';
 type EventDetailsModalInfoProps = {
   isEventDetailsDrawerOpen: boolean;
   closeEventDetailsDrawer: () => void;
-  selectedNode: Item | null;
   eventData: { [key in string]: Array<TrendData | SankeyData> };
 };
 
@@ -21,7 +20,6 @@ const EventDetailsModal = ({
   isEventDetailsDrawerOpen,
   closeEventDetailsDrawer,
   eventData,
-  selectedNode,
 }: EventDetailsModalInfoProps) => {
   return (
     <Modal
@@ -62,7 +60,7 @@ const EventDetailsModal = ({
           </Box>
         </ModalHeader>
         <ModalBody>
-          <EventDetailsInfo eventData={eventData} selectedNode={selectedNode} />
+          <EventDetailsInfo eventData={eventData} />
         </ModalBody>
       </ModalContent>
     </Modal>
