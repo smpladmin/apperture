@@ -374,6 +374,7 @@ class EdgeService:
                 }
             }, {
                 '$project': {
+                    'node': node,
                     'node_hits': {
                         '$ifNull': [{'$max': "$node_count.hits"}, 0]
                     },
