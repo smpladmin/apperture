@@ -36,7 +36,6 @@ const EventDetails = ({
     <>
       {context.device.isMobile && isEventDetailsDrawerOpen ? (
         <>
-          {console.log('mobile check', isEventDetailsDrawerOpen)}
           <EventDetailsModal
             isEventDetailsDrawerOpen={isEventDetailsDrawerOpen}
             closeEventDetailsDrawer={closeEventDetailsDrawer}
@@ -46,8 +45,6 @@ const EventDetails = ({
         </>
       ) : isEventDetailsDrawerOpen ? (
         <>
-          {console.log('desktop check', context.device.isMobile)}
-          {console.log('desktop check drawer detail', isEventDetailsDrawerOpen)}
           <Box
             ref={drawerRef}
             position={'fixed'}

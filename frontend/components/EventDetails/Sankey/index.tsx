@@ -22,6 +22,8 @@ const SankeyGraph = ({ sankeyData }: { sankeyData: Array<SankeyData> }) => {
       sourceField: 'previousEvent',
       targetField: 'currentEvent',
       weightField: 'hitsPercentage',
+      nodeWidth: 22,
+      nodeDraggable: true,
       nodeWidthRatio: 0.04,
       nodePaddingRatio: 0.05,
       rawFields: ['path'],
@@ -29,7 +31,7 @@ const SankeyGraph = ({ sankeyData }: { sankeyData: Array<SankeyData> }) => {
         fields: ['source', 'target', 'value'],
         formatter: ({ source, target, value }) => {
           return {
-            name: source + '-->' + target,
+            name: source + ' -> ' + target,
             value: value + '%',
           };
         },
