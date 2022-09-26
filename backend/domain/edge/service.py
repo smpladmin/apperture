@@ -311,8 +311,10 @@ class EdgeService:
         sankey_nodes = await BaseEdge.find().aggregate(pipeline, projection_model=NodeSankey).to_list()
         inflow_nodes = [node for node in sankey_nodes if node.flow == 'inflow']
         outflow_nodes = [node for node in sankey_nodes if node.flow == 'outflow']
-        inflow_nodes = self.create_others_node(inflow_nodes, 5)
-        outflow_nodes = self.create_others_node(outflow_nodes, 4)
+        if len(inflow_nodes) > 5:
+            inflow_nodes = self.create_others_node(inflow_nodes, 5)
+        if len(outflow_nodes) > 4:
+            outflow_nodes = self.create_others_node(outflow_nodes, 4)
 
         # Temporary fix for sankey duplicate names
         for node in inflow_nodes:
@@ -321,13 +323,14 @@ class EdgeService:
         inflow_hits = sum([node.hits for node in inflow_nodes])
         outflow_hits = sum([node.hits for node in outflow_nodes])
         inflow_users = sum([node.users for node in inflow_nodes])
-        outflow_user = sum([node.users for node in outflow_nodes])
-        outflow_nodes.append(self.create_exits_node(outflow_nodes[0],
-                                                    inflow_hits-outflow_hits, inflow_users-outflow_user))
+        outflow_users = sum([node.users for node in outflow_nodes])
+        if (len(outflow_nodes) > 0) and (inflow_users > outflow_users) and (inflow_hits > outflow_hits):
+            outflow_nodes.append(self.create_exits_node(outflow_nodes[0],
+                                                        inflow_hits-outflow_hits, inflow_users-outflow_users))
         sankey_nodes = inflow_nodes+outflow_nodes
         for node in sankey_nodes:
-            node.hits_percentage = float("{:.2f}".format((node.hits*100)/inflow_hits))
-            node.users_percentage = float("{:.2f}".format((node.users*100)/inflow_users))
+            node.hits_percentage = float("{:.2f}".format((node.hits*100)/max(inflow_hits, outflow_hits)))
+            node.users_percentage = float("{:.2f}".format((node.users*100)/max(inflow_users, outflow_users)))
 
         return (
             sankey_nodes
