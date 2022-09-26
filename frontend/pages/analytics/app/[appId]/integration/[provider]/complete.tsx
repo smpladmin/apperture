@@ -4,6 +4,7 @@ import { GetServerSideProps } from 'next';
 import { _getApp } from '@lib/services/appService';
 import { App } from '@lib/domain/app';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -23,6 +24,7 @@ type CompleteIntegrationProps = {
 };
 
 const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
+  const router = useRouter();
   return (
     <Flex
       width={'full'}
@@ -61,8 +63,9 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
         </Box>
       </Flex>
       <Box w={'full'} marginX="auto" maxW={70} mt={12}>
-        <Link href={'/analytics/explore'}>
+        <Link href={`/analytics/explore/${router.query.dsId}`}>
           <Button
+            variant={'primary'}
             rounded={'lg'}
             bg={'black.100'}
             p={6}

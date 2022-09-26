@@ -1,4 +1,10 @@
-import { WHITE_DEFAULT, PURPLE, WHITE_300,NUCLEUS_TEAL, SHADOW_TEAL} from '../../../theme';
+import {
+  WHITE_DEFAULT,
+  PURPLE,
+  WHITE_300,
+  NUCLEUS_TEAL,
+  SHADOW_TEAL,
+} from '../../../theme';
 
 export const shadowStartColor = SHADOW_TEAL;
 export const shadowEndColor = WHITE_300;

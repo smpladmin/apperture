@@ -1,6 +1,5 @@
 import 'remixicon/fonts/remixicon.css';
 import logoSmall from '@assets/images/apperture_small-icon.svg';
-import Link from 'next/link';
 import React from 'react';
 import {
   Flex,
@@ -10,20 +9,28 @@ import {
   Avatar,
   Divider,
   IconButton,
+  useDisclosure,
 } from '@chakra-ui/react';
-import { App } from '@lib/domain/app';
+import { AppWithIntegrations } from '@lib/domain/app';
+import LogoutModal from '@components/Logout';
 
-type SidemenuProps = {
+type MobileSidemenuProps = {
   closeDrawer: Function;
   openAppsModal: Function;
-  selectedApp: App;
+  selectedApp: AppWithIntegrations;
 };
 
 const MobileSidemenu = ({
   closeDrawer,
   openAppsModal,
   selectedApp,
-}: SidemenuProps) => {
+}: MobileSidemenuProps) => {
+  const {
+    isOpen: isLogoutModalOpen,
+    onOpen: openLogoutModal,
+    onClose: closeLogoutModal,
+  } = useDisclosure();
+
   return (
     <Flex
       height={'full'}
@@ -64,6 +71,7 @@ const MobileSidemenu = ({
           lineHeight={'xs-12'}
           textColor={'grey.100'}
           opacity={1}
+          fontWeight={500}
           paddingX={4}
         >
           APP
@@ -75,7 +83,7 @@ const MobileSidemenu = ({
           gap={2}
           onClick={() => {
             closeDrawer();
-            openAppsModal();
+            openAppsModal('apps');
           }}
         >
           <Flex
@@ -114,13 +122,6 @@ const MobileSidemenu = ({
                 >
                   {selectedApp.name}
                 </Text>
-                <Text
-                  fontSize={'xs-12'}
-                  fontWeight={'regular'}
-                  lineHeight={'xs-12'}
-                >
-                  {`ID ${selectedApp._id}`}
-                </Text>
               </Box>
               <IconButton
                 aria-label="close"
@@ -141,7 +142,8 @@ const MobileSidemenu = ({
         <Box width={'full'}>
           <Divider
             orientation={'horizontal'}
-            marginY={'4'}
+            mt={'4'}
+            mb={'6'}
             borderColor={'white.200'}
             opacity={1}
           />
@@ -155,6 +157,7 @@ const MobileSidemenu = ({
         opacity={1}
         paddingX={4}
         paddingBottom={4}
+        fontWeight={500}
       >
         EXPLORE
       </Text>
@@ -162,11 +165,13 @@ const MobileSidemenu = ({
         <Box width={'full'}>
           <Flex
             width={'full'}
+            height={'3.375rem'}
+            borderRadius={'12px'}
             justifyContent={'flex-start'}
             alignItems={'center'}
             gap={'3'}
-            paddingX={'4'}
-            paddingY={'5'}
+            p={'4'}
+            mb={'4'}
             fontWeight={'400'}
             _hover={{
               backgroundColor: 'white.100',
@@ -194,10 +199,12 @@ const MobileSidemenu = ({
           </Flex>
           <Flex
             width={'full'}
+            height={'3.375rem'}
+            borderRadius={'12px'}
             justifyContent={'space-between'}
             alignItems={'center'}
-            paddingX={'4'}
-            paddingY={'5'}
+            p={'4'}
+            mb={'4'}
             fontWeight={'400'}
             _hover={{
               backgroundColor: 'white.100',
@@ -244,10 +251,12 @@ const MobileSidemenu = ({
           </Flex>
           <Flex
             width={'full'}
+            height={'3.375rem'}
+            mb={'4'}
+            borderRadius={'12px'}
             justifyContent={'space-between'}
             alignItems={'center'}
-            paddingX={'4'}
-            paddingY={'5'}
+            p={'4'}
             fontWeight={'400'}
             _hover={{
               backgroundColor: 'white.100',
@@ -260,6 +269,8 @@ const MobileSidemenu = ({
           >
             <Flex
               width={'full'}
+              height={'3.375rem'}
+              borderRadius={'12px'}
               justifyContent={'flex-start'}
               minWidth={'auto'}
               gap={'3'}
@@ -293,46 +304,56 @@ const MobileSidemenu = ({
               Coming soon
             </Box>
           </Flex>
+          <Box width={'full'}>
+            <Divider
+              orientation={'horizontal'}
+              mt={'4'}
+              mb={'6'}
+              borderColor={'white.200'}
+              opacity={1}
+            />
+          </Box>
         </Box>
       </Box>
-      <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/logout`}>
-        <Box marginTop={'auto'} width={'full'}>
-          <Flex
-            width={'full'}
-            justifyContent={'flex-start'}
-            alignItems={'center'}
-            gap={'3'}
-            paddingX={'4'}
-            paddingY={'5'}
-            fontWeight={'400'}
-            backgroundColor={'white'}
-            transition={'all 250ms ease'}
+      <Box marginTop={'auto'} width={'full'} onClick={openLogoutModal}>
+        <Flex
+          width={'full'}
+          height={'3.375rem'}
+          borderRadius={'12px'}
+          justifyContent={'flex-start'}
+          alignItems={'center'}
+          mb={'4'}
+          gap={'3'}
+          p={'4'}
+          fontWeight={'400'}
+          backgroundColor={'white'}
+          transition={'all 250ms ease'}
+          _hover={{
+            backgroundColor: 'white.100',
+            fontWeight: '500',
+            cursor: 'pointer',
+          }}
+          _active={{
+            backgroundColor: 'transparent',
+          }}
+        >
+          <IconButton
+            aria-label="logout"
+            icon={<i className="ri-logout-box-r-line" />}
+            bg={'transparent'}
+            minWidth={'auto'}
+            fontWeight={'inherit'}
             _hover={{
-              backgroundColor: 'white.100',
-              fontWeight: '500',
-              cursor: 'pointer',
+              backgroundColor: 'transparent',
             }}
             _active={{
               backgroundColor: 'transparent',
             }}
-          >
-            <IconButton
-              aria-label="logout"
-              icon={<i className="ri-logout-box-r-line" />}
-              bg={'transparent'}
-              minWidth={'auto'}
-              fontWeight={'inherit'}
-              _hover={{
-                backgroundColor: 'transparent',
-              }}
-              _active={{
-                backgroundColor: 'transparent',
-              }}
-            />
-            Logout
-          </Flex>
-        </Box>
-      </Link>
+          />
+          Logout
+        </Flex>
+      </Box>
+      <LogoutModal isOpen={isLogoutModalOpen} onClose={closeLogoutModal} />
     </Flex>
   );
 };

@@ -6,6 +6,9 @@ import { theme } from '../theme/chakra.theme';
 import { AppertureContext } from '@lib/contexts/appertureContext';
 import mobile from 'is-mobile';
 import { Device } from '@lib/types';
+import 'userAnalytics';
+import { MotionConfig } from 'framer-motion';
+import isValidProp from '@emotion/is-prop-valid';
 
 type CustomAppProps = {
   device: Device;
@@ -19,9 +22,11 @@ function AppertureApp({
 
   return (
     <AppertureContext.Provider value={{ device }}>
-      <ChakraProvider theme={theme}>
-        {getLayout(<Component {...pageProps} />, pageProps?.apps)}
-      </ChakraProvider>
+      <MotionConfig isValidProp={isValidProp}>
+        <ChakraProvider theme={theme}>
+          {getLayout(<Component {...pageProps} />, pageProps?.apps)}
+        </ChakraProvider>
+      </MotionConfig>
     </AppertureContext.Provider>
   );
 }

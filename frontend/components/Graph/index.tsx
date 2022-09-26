@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import G6, {
   Graph as G6Graph,
   IG6GraphEvent,
@@ -6,22 +6,90 @@ import G6, {
   IShape,
   Item,
 } from '@antv/g6';
-import { ApiDataType, NodeType } from '@lib/types/graph';
+import { NodeType } from '@lib/types/graph';
 import primaryNode from './nodes';
 import basicEdge from './edges';
 import { edgesOnZoom, nodesOnZoom } from './zoomBehaviour';
 import { graphConfig } from '@lib/config/graphConfig';
 import { transformData } from './transformData';
+import { Edge } from '@lib/domain/edge';
+import { useRouter } from 'next/router';
 
 type GraphProps = {
-  visualisationData: Array<ApiDataType>;
+  visualisationData: Array<Edge>;
+  openEventDetailsDrawer: () => void;
+  selectedNode: Item | null;
+  setSelectedNode: Function;
 };
 
-const Graph = ({ visualisationData }: GraphProps) => {
+const Graph = ({
+  visualisationData,
+  openEventDetailsDrawer,
+  selectedNode,
+  setSelectedNode,
+}: GraphProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const gRef = useRef<{ graph: G6Graph | null }>({
     graph: null,
   });
+
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  const graphData = useMemo(() => transformData(visualisationData), [dsId]);
+
+  useEffect(() => {
+    let graph = gRef.current.graph;
+
+    if (!selectedNode) {
+      graph?.findAllByState('node', 'active').forEach((node) => {
+        graph?.setItemState(node, 'active', false);
+      });
+    }
+
+    G6.registerBehavior('activate-node', {
+      getDefaultCfg() {
+        return {
+          multiple: false,
+        };
+      },
+      getEvents() {
+        return {
+          'node:click': 'onNodeClick',
+        };
+      },
+
+      removeNodesState() {
+        graph?.findAllByState('node', 'active').forEach((node) => {
+          graph?.setItemState(node, 'active', false);
+        });
+      },
+
+      onNodeClick(e: any) {
+        const graph = gRef.current.graph;
+        const item = e.item as Item;
+
+        if (item.hasState('active')) {
+          graph?.setItemState(item, 'active', false);
+          return;
+        }
+
+        // Get the configurations by this. If you do not allow multiple nodes to be 'active', cancel the 'active' state for other nodes
+        if (!this.multiple) {
+          graph?.findAllByState('node', 'active').forEach((node) => {
+            graph.setItemState(node, 'active', false);
+          });
+        }
+        setSelectedNode(item);
+
+        // Set the 'active' state of the clicked node to be true
+        graph?.setItemState(item, 'active', true);
+
+        //open eventDetails drawer
+        openEventDetailsDrawer();
+      },
+    });
+  }, [selectedNode]);
 
   useEffect(() => {
     if (!gRef.current.graph) {
@@ -29,7 +97,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
         'primary',
         {
           draw(cfg, group) {
-            const keyshape = primaryNode(cfg!!, group!!,gRef.current.graph?.getZoom());
+            const keyshape = primaryNode(cfg!!, group!!);
             return keyshape;
           },
           update: undefined,
@@ -53,7 +121,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
                 path: G6.Arrow.triangleRect(
                   2.5,
                   1,
-                  .5,
+                  0.5,
                   2,
                   0,
                   length * 0.5 - length * 0.15
@@ -68,7 +136,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
                   path: G6.Arrow.triangleRect(
                     2.5,
                     1,
-                    .5,
+                    0.5,
                     2,
                     0,
                     length * 0.5 - length * 0.15
@@ -113,6 +181,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
             'drag-canvas',
             'drag-node',
             'wheel-zoom',
+            'activate-node',
             {
               type: 'zoom-canvas',
               sensitivity: 0.5,
@@ -172,11 +241,17 @@ const Graph = ({ visualisationData }: GraphProps) => {
       }, 100);
     });
 
-    graph.data(transformData(visualisationData));
+    graph.data(graphData);
     graph.render();
-  }, [visualisationData]);
+  }, [graphData]);
 
-  return <div id="network-graph" ref={ref} style={{ height: '100%' }}></div>;
+  return (
+    <div
+      id="network-graph"
+      ref={ref}
+      style={{ height: '100%', backgroundColor: '#E5E5E5' }}
+    ></div>
+  );
 };
 
 export default Graph;

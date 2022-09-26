@@ -14,25 +14,31 @@ import {
   Stack,
   Flex,
 } from '@chakra-ui/react';
-import { App } from '@lib/domain/app';
+import { AppWithIntegrations } from '@lib/domain/app';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import UserApp from './UserApp';
 
 type AppsModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  apps: App[];
-  selectApp: Function;
-  selectedApp: any;
+  apps: AppWithIntegrations[];
+  onAppSelect: Function;
+  selectedApp: AppWithIntegrations;
+  openConfigureAppsModal: () => void;
 };
 
 const AppsModal = ({
   isOpen,
   onClose,
   apps,
-  selectApp,
+  onAppSelect,
   selectedApp,
+  openConfigureAppsModal,
 }: AppsModalProps) => {
+  const router = useRouter();
+  const { dsId } = router.query;
+
   return (
     <Modal
       isOpen={isOpen}
@@ -40,19 +46,24 @@ const AppsModal = ({
       isCentered
       blockScrollOnMount={false}
       size={'2xl'}
+      trapFocus={false}
     >
-      <ModalOverlay />
+      <ModalOverlay backdropFilter={'blur(20px)'} bg={'grey.0'} />
       <ModalContent
         margin={'1rem'}
         maxWidth="168"
-        maxHeight={{ base: 'calc(100% - 100px)', md: 'calc(100% - 200px)' }}
+        maxHeight={'calc(100% - 100px)'}
+        borderRadius={{ base: '16px', md: '20px' }}
       >
         <ModalHeader
           display={'flex'}
           justifyContent={'space-between'}
           alignItems={'center'}
-          pt={10}
-          px={9}
+          fontSize={{ base: 'sh-20', md: 'sh-24' }}
+          lineHeight={{ base: 'sh-20', md: 'sh-24' }}
+          pt={{ base: '4', md: '10' }}
+          pb={{ base: '6', md: '0' }}
+          px={{ base: '4', md: '9' }}
         >
           My Applications
           <ModalCloseButton
@@ -62,30 +73,49 @@ const AppsModal = ({
             border={'1px'}
             borderColor={'white.200'}
             rounded={'full'}
+            fontSize={'0.55rem'}
           />
         </ModalHeader>
         <Divider
           orientation="horizontal"
-          marginY={'4'}
+          mt={'7'}
           borderColor={'white.200'}
           opacity={1}
+          display={{ base: 'none', md: 'block' }}
         />
 
-        <ModalBody px={9} overflowY={'auto'}>
-          <Box pt={4}>
+        <ModalBody
+          px={{ base: '4', md: '9' }}
+          overflowY={'auto'}
+          pt={{ base: '0', md: '9' }}
+          pb={'0'}
+        >
+          <Box pt={0}>
             <RadioGroup
               value={selectedApp._id}
-              onChange={(appId) => selectApp(appId)}
+              onChange={(appId) => onAppSelect(appId)}
             >
               <Stack direction="column">
                 {apps.map((app) => {
-                  return <UserApp key={app._id} app={app} />;
+                  return (
+                    <UserApp
+                      key={app._id}
+                      app={app}
+                      isSelected={app._id === selectedApp._id}
+                      openConfigureAppsModal={openConfigureAppsModal}
+                    />
+                  );
                 })}
               </Stack>
             </RadioGroup>
           </Box>
         </ModalBody>
-        <ModalFooter pt={0} px={9} pb={9} display={'block'}>
+        <ModalFooter
+          pt={{ base: '0', md: '0' }}
+          px={{ base: '4', md: '9' }}
+          pb={{ base: '4', md: '9' }}
+          display={'block'}
+        >
           <Flex direction={'column'}>
             <Text
               pt={'6'}
@@ -98,7 +128,7 @@ const AppsModal = ({
               Switching applications clears out the current configuration and
               filters.
             </Text>
-            <Link href={'/analytics/app/create'}>
+            <Link href={`/analytics/app/create?previousDsId=${dsId}`}>
               <Button
                 width={'full'}
                 padding={'4'}

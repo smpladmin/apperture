@@ -2,7 +2,6 @@ import 'remixicon/fonts/remixicon.css';
 import gaIcon from '@assets/images/ga-icon.png';
 import {
   Box,
-  Button,
   Flex,
   Heading,
   IconButton,
@@ -43,11 +42,17 @@ type SelectDataSourcesProps = {
 
 const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
   const router = useRouter();
+  const { appId, provider, add, previousDsId } = router.query;
+  const handleClose = () =>
+    router.push({
+      pathname: `/analytics/explore/[dsId]`,
+      query: { dsId: previousDsId, apps: 1 },
+    });
 
   const handleGoBack = () => {
     router.push({
       pathname: '/analytics/app/[appId]/integration/[provider]/create',
-      query: { appId: router.query.appId, provider: router.query.provider },
+      query: { appId: appId, provider: provider, ...router.query },
     });
   };
 
@@ -59,10 +64,17 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
     const selected = datasources.filter((ds) =>
       selectedDataSources.includes(ds._id)
     );
-    await saveDataSources(selected, router.query.integration_id as string);
+    const created = await saveDataSources(
+      selected,
+      router.query.integration_id as string
+    );
     router.replace({
       pathname: '/analytics/app/[appId]/integration/[provider]/complete',
-      query: { appId: router.query.appId, provider: router.query.provider },
+      query: {
+        appId: router.query.appId,
+        provider: router.query.provider,
+        dsId: created[0]._id,
+      },
     });
   };
 
@@ -83,6 +95,7 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           bg={'white'}
           border={'1px'}
           borderColor={'white.200'}
+          onClick={handleClose}
         />
         <Box mt={11} w={{ base: 'full' }} maxW={{ md: '200' }}>
           <Image
@@ -98,13 +111,13 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
             lineHeight={'xs-14'}
             fontWeight={'medium'}
           >
-            Step 3 of 3
+            {add ? 'Step 2 of 2' : 'Step 3 of 3'}
           </Text>
           <Heading
             as={'h2'}
             pb={{ base: 8, md: 10 }}
-            fontSize={{ base: 'sh-28', md: 'sh-52' }}
-            lineHeight={{ base: 'sh-28', md: 'sh-52' }}
+            fontSize={{ base: 'sh-28', md: 'sh-56' }}
+            lineHeight={{ base: 'sh-28', md: 'sh-56' }}
             fontWeight={'semibold'}
           >
             Select applications from Google Analytics that you want to track
@@ -128,7 +141,7 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
           navigateBack={handleGoBack}
           handleNextClick={handleSave}
           disabled={!selectedDataSources.length}
-          nextButtonName={'Create Application'}
+          nextButtonName={add ? 'Add Data Source' : 'Create Application'}
         />
       </Box>
     </Flex>

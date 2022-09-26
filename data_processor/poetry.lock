@@ -292,6 +292,14 @@ optional = false
 python-versions = ">=3.5"
 
 [[package]]
+name = "inflection"
+version = "0.5.1"
+description = "A port of Ruby on Rails inflector to Python"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[[package]]
 name = "iniconfig"
 version = "1.1.1"
 description = "iniconfig: brain-dead simple config-ini parsing"
@@ -650,6 +658,26 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
+name = "smart-open"
+version = "6.2.0"
+description = "Utils for streaming large files (S3, HDFS, GCS, Azure Blob Storage, gzip, bz2...)"
+category = "main"
+optional = false
+python-versions = ">=3.6,<4.0"
+
+[package.dependencies]
+boto3 = {version = "*", optional = true, markers = "extra == \"s3\""}
+
+[package.extras]
+all = ["azure-common", "azure-core", "azure-storage-blob", "boto3", "google-cloud-storage (>=1.31.0)", "requests"]
+azure = ["azure-common", "azure-core", "azure-storage-blob"]
+gcs = ["google-cloud-storage (>=1.31.0)"]
+http = ["requests"]
+s3 = ["boto3"]
+test = ["azure-common", "azure-core", "azure-storage-blob", "boto3", "google-cloud-storage (>=1.31.0)", "moto[server]", "paramiko", "pathlib2", "pytest", "pytest-rerunfailures", "requests", "responses"]
+webhdfs = ["requests"]
+
+[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -697,7 +725,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "134d3bcfb10dd79618840d465ed94b236f6c0c24b8c9220309a6b10a0fd9a6db"
+content-hash = "2e8a8e276eee10a3ae24d9c517cd00c15057d844a76552c6ee7e712899b87671"
 
 [metadata.files]
 async-timeout = [
@@ -852,6 +880,10 @@ httplib2 = [
 idna = [
     {file = "idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},
     {file = "idna-3.3.tar.gz", hash = "sha256:9d643ff0a55b762d5cdb124b8eaa99c66322e2157b69160bc32796e824360e6d"},
+]
+inflection = [
+    {file = "inflection-0.5.1-py2.py3-none-any.whl", hash = "sha256:f38b2b640938a4f35ade69ac3d053042959b62a0f1076a5bbaa1b9526605a8a2"},
+    {file = "inflection-0.5.1.tar.gz", hash = "sha256:1a29730d366e996aaacffb2f1f1cb9593dc38e2ddd30c91250c6dde09ea9b417"},
 ]
 iniconfig = [
     {file = "iniconfig-1.1.1-py2.py3-none-any.whl", hash = "sha256:011e24c64b7f47f6ebd835bb12a743f2fbe9a26d4cecaa7f53bc4f35ee9da8b3"},
@@ -1085,6 +1117,10 @@ s3transfer = [
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
+]
+smart-open = [
+    {file = "smart_open-6.2.0-py3-none-any.whl", hash = "sha256:088bf00f9327c71e549bc2f86567d3320df5d89667f009ce1c16568976068ef7"},
+    {file = "smart_open-6.2.0.tar.gz", hash = "sha256:1b4df5c8365218f3852c507451920ccad606c80b0acb4e67508e50ba9b5d2632"},
 ]
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},

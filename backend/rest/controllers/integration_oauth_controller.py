@@ -3,6 +3,7 @@ import os
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from authlib.integrations.starlette_client import OAuthError
 from starlette.responses import RedirectResponse
+from urllib.parse import urlparse
 
 from authorisation import OAuthClientFactory, OAuthProvider
 from authorisation.models import IntegrationOAuth, OAuthUser
@@ -61,9 +62,8 @@ async def integration_google_authorise(
     integration = await integration_service.create_oauth_integration(
         apperture_user, app, IntegrationProvider.GOOGLE, integration_oauth
     )
-    return RedirectResponse(
-        f"{oauth_state.redirect_url}?integration_id={integration.id}"
-    )
+    redirect_url = _build_redirect_url(oauth_state.redirect_url, integration.id)
+    return RedirectResponse(redirect_url)
 
 
 async def _authorise(request: Request):
@@ -76,3 +76,12 @@ async def _authorise(request: Request):
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+def _build_redirect_url(url: str, integration_id: str):
+    redirect_url = urlparse(url)
+    if redirect_url.query:
+        redirect_url = redirect_url._replace(query=f"{redirect_url.query}&integration_id={integration_id}")
+    else:
+        redirect_url = redirect_url._replace(query=f"integration_id={integration_id}")
+    return redirect_url.geturl()

@@ -7,40 +7,48 @@ type resultType = {
   nodes: Array<NodeType>;
 };
 
-const isEntrance = (pagePath: string) => {
-  return pagePath === 'Entrance';
+const isEntrance = (eventName: string) => {
+  return eventName === 'Entrance';
 };
 
 export const transformData = (data: Array<ApiDataType>): resultType => {
   let entranceSum = 0;
+  /*
+   * Temporary fix to pick hits as users for Mixpanel,
+   * because right now we are only using users metric on the frontend.
+   * We should change to hits/users based on which metric is selected.
+   */
+  if (data.every((d) => !d.users)) {
+    data = data.map((d) => ({ ...d, users: d.hits }));
+  }
 
   const edges: Array<EdgeType> = [];
-  const allPages: Array<string> = [];
+  const allEvents: Array<string> = [];
   const nodes: Array<NodeType> = [];
 
   data.forEach((d) => {
-    const { pagePath, previousPage } = d || {};
-    if (!allPages.includes(pagePath)) {
-      allPages.push(pagePath);
+    const { currentEvent, previousEvent } = d || {};
+    if (!allEvents.includes(currentEvent)) {
+      allEvents.push(currentEvent);
       nodes.push({
-        id: pagePath || '/empty-page',
-        label: pagePath || 'empty page',
+        id: currentEvent || '/empty-event',
+        label: currentEvent || 'empty event',
         type: 'primary',
-        pageName: pagePath || '/empty-page',
+        eventName: currentEvent || '/empty-event',
       });
     }
 
-    if (!allPages.includes(previousPage)) {
-      allPages.push(previousPage);
+    if (!allEvents.includes(previousEvent)) {
+      allEvents.push(previousEvent);
       nodes.push({
-        id: previousPage || '/empty-page',
-        label: previousPage || 'empty page',
+        id: previousEvent || '/empty-event',
+        label: previousEvent || 'empty event',
         type: 'primary',
-        pageName: previousPage || '/empty-page',
+        eventName: previousEvent || '/empty-event',
       });
     }
 
-    if (isEntrance(d.previousPage!!)) {
+    if (isEntrance(d.previousEvent!!)) {
       entranceSum = entranceSum + d.users!!;
     }
   });
@@ -48,12 +56,12 @@ export const transformData = (data: Array<ApiDataType>): resultType => {
   nodes.forEach((n: NodeType) => {
     n.totalViews = 0;
     data.forEach((d) => {
-      if (n.pageName === (d.pagePath || '/empty-page')) {
+      if (n.eventName === (d.currentEvent || '/empty-event')) {
         const edge = {
-          source: d.previousPage,
-          target: d.pagePath,
-          previousPage: d.previousPage || '/empty-page',
-          pagePath: d.pagePath,
+          source: d.previousEvent,
+          target: d.currentEvent,
+          previousEvent: d.previousEvent || '/empty-event',
+          currentEvent: d.currentEvent,
           type: 'primary-line',
           node1Label: d.users,
           traffic: d.users,
@@ -65,7 +73,7 @@ export const transformData = (data: Array<ApiDataType>): resultType => {
   });
 
   const entranceNodeIndex = nodes.findIndex((node: NodeType) =>
-    isEntrance(node.pageName)
+    isEntrance(node.eventName)
   );
   if (entranceNodeIndex !== -1) {
     nodes[entranceNodeIndex].totalViews = entranceSum;

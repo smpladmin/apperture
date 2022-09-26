@@ -12,3 +12,12 @@ export type ProviderDataSource = {
   version: DataSourceVersion;
   provider: Provider;
 };
+
+export type DataSource = {
+  _id: string;
+  appId: string;
+  provider: Provider;
+  name: string | null;
+  version: DataSourceVersion;
+  externalSourceId: string;
+};

@@ -1,17 +1,16 @@
 export type ApiDataType = {
-  previousPage: string;
-  pagePath: string;
+  previousEvent: string;
+  currentEvent: string;
   users: number;
-  id: number | string;
-  createdAt: number;
-  viewId: string;
+  hits: number;
+  _id: number | string;
 };
 
 export type EdgeType = {
   source: string;
   target: string;
-  previousPage: string;
-  pagePath: string;
+  previousEvent: string;
+  currentEvent: string;
   type: string;
   node1Label: number;
   traffic: number;
@@ -26,7 +25,7 @@ export type NodeType = {
   label: string;
   type: string;
   isHidden?: boolean;
-  pageName: string;
+  eventName: string;
   percentile?: number;
   visibleAt?: number;
   totalViews?: number;

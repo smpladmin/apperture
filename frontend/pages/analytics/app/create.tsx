@@ -17,6 +17,7 @@ const Create = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const router = useRouter();
+  const { previousDsId } = router.query;
 
   useEffect(() => {
     inputRef?.current?.focus();
@@ -27,11 +28,15 @@ const Create = () => {
     if (app) {
       router.push({
         pathname: `/analytics/app/[appId]/integration/select`,
-        query: { appId: app._id },
+        query: { appId: app._id, ...router.query },
       });
     }
   };
-  const handleGoBack = () => router.push('/analytics/explore?apps=1');
+  const handleGoBack = () =>
+    router.push({
+      pathname: `/analytics/explore/[dsId]`,
+      query: { dsId: previousDsId, apps: 1 },
+    });
 
   return (
     <Flex
@@ -66,8 +71,8 @@ const Create = () => {
           <Heading
             as={'h2'}
             pb={{ base: 8, md: 10 }}
-            fontSize={{ base: 'sh-28', md: 'sh-52' }}
-            lineHeight={{ base: 'sh-28', md: 'sh-52' }}
+            fontSize={{ base: 'sh-28', md: 'sh-56' }}
+            lineHeight={{ base: 'sh-28', md: 'sh-56' }}
             fontWeight={'semibold'}
           >
             What would you like to name this application?
@@ -78,7 +83,9 @@ const Create = () => {
             bg={'white.100'}
             rounded={'0.25rem'}
             fontSize={'base'}
+            fontWeight={{ base: '400', md: '500' }}
             lineHeight={'base'}
+            height={{ base: '12', md: '15' }}
             textColor={'black.DEFAULT'}
             placeholder="Ex- Food Web App"
             py={4}

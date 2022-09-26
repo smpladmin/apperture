@@ -1,11 +1,11 @@
 import { Box } from '@chakra-ui/react';
 import { AppertureContext } from '@lib/contexts/appertureContext';
-import { App } from '@lib/domain/app';
+import { AppWithIntegrations } from '@lib/domain/app';
 import { useContext } from 'react';
 import DesktopSideMenu from './DesktopSidemenu';
 
 type SidebarProps = {
-  selectedApp: App;
+  selectedApp: AppWithIntegrations;
   openAppsModal: Function;
 };
 

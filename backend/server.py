@@ -1,7 +1,9 @@
+import logging
 import os
 from dotenv import load_dotenv
 
 load_dotenv(override=False)
+logging.getLogger().setLevel(logging.INFO)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +14,7 @@ from rest.controllers import (
     app_controller,
     auth_controller,
     data_processor_controller,
+    datasource_controller,
     integration_controller,
     integration_oauth_controller,
     private_apis_controller,
@@ -50,3 +53,4 @@ app.include_router(integration_oauth_controller.router)
 app.include_router(integration_controller.router)
 app.include_router(private_apis_controller.router)
 app.include_router(data_processor_controller.router)
+app.include_router(datasource_controller.router)

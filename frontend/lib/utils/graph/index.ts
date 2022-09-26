@@ -35,3 +35,14 @@ export const formatDatalabel = (datalabel: number) => {
     return datalabel + '';
   }
 };
+
+export const convertISODateToReadableDate = (isoDate: string) => {
+  const date = new Date(isoDate);
+  const month = date.toLocaleString('default', { month: 'short' });
+  let day = date.getDate().toString();
+  if (Number(day) < 10) {
+    day = '0' + day;
+  }
+
+  return `${day}-${month}`;
+};

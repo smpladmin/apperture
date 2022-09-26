@@ -76,8 +76,9 @@ class TestGoogleAnalyticsFetcher:
 
         data_frame = fetcher.daily_data("mock-view-id")
 
-        assert data_frame.shape == (5, 4)
+        assert data_frame.shape == (5, 5)
         assert data_frame.columns.tolist() == [
+            "date",
             "previousPage",
             "pagePath",
             "users",
