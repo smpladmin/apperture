@@ -73,3 +73,8 @@ class NodeSankey(BaseModel):
     hits_percentage: float
     users_percentage: float
 
+
+class NodeSignificance(BaseModel):
+    node_hits: int
+    total_hits: int
+
