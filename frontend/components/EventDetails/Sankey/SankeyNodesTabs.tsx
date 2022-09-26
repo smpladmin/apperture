@@ -14,11 +14,11 @@ import { FlowType, SankeyData } from '@lib/domain/eventData';
 import { formatDatalabel } from '@lib/utils/graph';
 import { Fragment } from 'react';
 
-const StatsNode = ({ data }: { data: SankeyData }) => {
+const SankeyNodeStats = ({ data }: { data: SankeyData }) => {
   return (
     <Flex justifyContent={'space-between'} py={'6'} alignItems={'center'}>
       <Text
-        w={'55'}
+        w={{ base: '40', md: '55' }}
         fontSize={'xs-14'}
         lineHeight={'xs-14'}
         fontWeight={'normal'}
@@ -79,7 +79,7 @@ const SankeyNodesTabs = ({ sankeyData }: { sankeyData: Array<SankeyData> }) => {
             .map((data, i, inflowNode) => {
               return (
                 <Fragment key={data.node}>
-                  <StatsNode data={data} />
+                  <SankeyNodeStats data={data} />
                   {i !== inflowNode.length - 1 && (
                     <Divider
                       orientation="horizontal"
@@ -97,7 +97,7 @@ const SankeyNodesTabs = ({ sankeyData }: { sankeyData: Array<SankeyData> }) => {
             .map((data, i, outflowNode) => {
               return (
                 <Fragment key={data.node}>
-                  <StatsNode data={data} />
+                  <SankeyNodeStats data={data} />
                   {i !== outflowNode.length - 1 && (
                     <Divider
                       orientation="horizontal"
