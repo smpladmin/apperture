@@ -7,6 +7,7 @@ import Loading from '@components/Loading';
 import Graph from '@components/Graph';
 import Head from 'next/head';
 import {
+  getNodeSignificanceData,
   getSankeyData,
   getTrendsData,
   _getEdges,
@@ -51,6 +52,7 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(!edges.length);
   const [selectedNode, setSelectedNode] = useState<Item | null>(null);
   const [eventData, setEventData] = useState({
+    nodeSignificanceData: [],
     trendsData: [],
     sankeyData: [],
   });
@@ -64,14 +66,16 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   useEffect(() => {
     if (!selectedNode) return;
     const fetchTrendsData = async () => {
-      const data = await Promise.all([
+      const [nodeSignificanceData, trendsData, sankeyData] = await Promise.all([
+        getNodeSignificanceData(dsId as string, selectedNode?._cfg?.id!!),
         getTrendsData(dsId as string, selectedNode?._cfg?.id!!, 'week'),
         getSankeyData(dsId as string, selectedNode._cfg?.id!!),
       ]);
 
       setEventData({
-        trendsData: data[0],
-        sankeyData: data[1],
+        nodeSignificanceData,
+        trendsData,
+        sankeyData,
       });
     };
     fetchTrendsData();

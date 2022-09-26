@@ -23,7 +23,7 @@ export const getVisibilityZoomRatio = (
   zoomConfig: ZoomConfigType
 ): number => {
   const z = zoomConfig.find((z) => z.percentile <= percentile)!!;
-  return z.ratio;
+  return z?.ratio;
 };
 
 export const formatDatalabel = (datalabel: number) => {
@@ -45,4 +45,9 @@ export const convertISODateToReadableDate = (isoDate: string) => {
   }
 
   return `${day}-${month}`;
+};
+
+export const getPercentageOfHits = (nodeHits: number, totalHits: number) => {
+  // rounding off to 1 digit after decimal
+  return Math.round((nodeHits / totalHits) * 1000) / 10;
 };
