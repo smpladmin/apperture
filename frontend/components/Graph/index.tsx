@@ -47,6 +47,12 @@ const Graph = ({
       });
     }
 
+      const zoomRatio = gRef.current.graph?.getZoom();
+      const nodes = gRef.current.graph?.getNodes();
+      const edges = gRef.current.graph?.getEdges();
+      nodesOnZoom(nodes, zoomRatio);
+      edgesOnZoom(edges, zoomRatio);
+
     G6.registerBehavior('activate-node', {
       getDefaultCfg() {
         return {
