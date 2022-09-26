@@ -131,12 +131,10 @@ class EdgeService:
             },
             {"$setWindowFields": {"output": {"totalCount": {"$count": {}}}}},
             {
-                "$match": {
-                    "$and": [
-                        {"totalCount": {"$gte": minimum_edge_count}},
-                        {"hits": {"$gte": minimum_edge_count}},
-                    ]
-                }
+                "$sort": {"hits": -1}
+            },
+            {
+                "$limit": minimum_edge_count
             },
             {
                 "$project": {
@@ -336,6 +334,7 @@ class EdgeService:
             sankey_nodes
         )
 
+    # Remove facet in-future, might cause performance issues.
     async def get_node_significance(self, datasource_id: str, node: str) -> list[NodeSignificance]:
         pipeline = [
             {
