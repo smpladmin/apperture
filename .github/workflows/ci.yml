@@ -50,7 +50,6 @@ jobs:
           BACKEND_ENV: ${{ secrets.BACKEND_ENV }}
         run: |
           cd backend
-          echo "$BACKEND_ENV" > .env
           docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
@@ -78,7 +77,6 @@ jobs:
           DP_ENV: ${{ secrets.DP_ENV }}
         run: |
           cd data_processor
-          echo "$DP_ENV" > .env
           docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
