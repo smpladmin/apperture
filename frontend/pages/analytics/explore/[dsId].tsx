@@ -51,11 +51,7 @@ type ExploreDataSourceProps = {
 const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(!edges.length);
   const [selectedNode, setSelectedNode] = useState<Item | null>(null);
-  const [eventData, setEventData] = useState({
-    nodeSignificanceData: [],
-    trendsData: [],
-    sankeyData: [],
-  });
+  const [eventData, setEventData] = useState({});
   const router = useRouter();
   const { dsId } = router.query;
 
