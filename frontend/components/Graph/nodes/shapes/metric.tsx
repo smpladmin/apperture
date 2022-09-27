@@ -22,7 +22,7 @@ const shadow = (cfg: ModelConfig, group: IGroup) => {
   const keyShape = group.addShape('text', {
     attrs: {
       x: nucleusBBox.minX,
-      y: nucleusBBox.maxY + 20,
+      y: nodeLabelBbox.maxY + 2,
       text: fittingString(
         formatDatalabel(parseFloat(cfg.totalViews as string)),
         86,

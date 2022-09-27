@@ -13,6 +13,7 @@ class TransformedDataSaver(Saver):
         pass
 
     def save(self, datasource_id: str, provider: IntegrationProvider, df: pd.DataFrame):
+        logging.info("{x}: {y}".format(x='Saving Transformed data for', y=datasource_id))
         df['previousPage'] = df['previousPage'].str.replace('\(entrance\)', 'Entrance')
         df = df.rename(
             columns={
@@ -28,10 +29,10 @@ class TransformedDataSaver(Saver):
         data = {"datasourceId": datasource_id, "provider": provider, "edges": edges}
         res = self._save_data(data)
         if not res.ok:
-            raise Exception(
-                f"Error saving data for datasource_id {datasource_id}, response status - {res.status_code}"
-            )
-        logging.info("SAVED")
+            logging.info("{x}: {y}".format(x='Error saving data for datasource_id', y=datasource_id))
+            logging.info("{x}: {y}".format(x='Error saving data with response status', y=res.status_code))
+            return
+        logging.info("Saved Successfully")
 
     def _save_data(self, data):
         return requests.post(

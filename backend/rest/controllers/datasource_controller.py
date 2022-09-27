@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from domain.edge.service import EdgeService
-from rest.dtos.edges import AggregatedEdgeResponse
+from rest.dtos.edges import AggregatedEdgeResponse, NodeTrendResponse, NodeSankeyResponse, NodeSignificanceResponse
 
 from rest.middlewares import validate_jwt
 
@@ -15,3 +15,18 @@ router = APIRouter(
 @router.get("/datasources/{ds_id}/edges", response_model=list[AggregatedEdgeResponse])
 async def get_edges(ds_id: str, edge_service: EdgeService = Depends()):
     return await edge_service.get_edges(ds_id)
+
+
+@router.get("/datasources/{ds_id}/trends", response_model=list[NodeTrendResponse])
+async def get_trend_nodes(ds_id: str, node: str, trend_type: str, edge_service: EdgeService = Depends()):
+    return await edge_service.get_node_trends(ds_id, node, trend_type)
+
+
+@router.get("/datasources/{ds_id}/sankey", response_model=list[NodeSankeyResponse])
+async def get_sankey_nodes(ds_id: str, node: str, edge_service: EdgeService = Depends()):
+    return await edge_service.get_node_sankey(ds_id, node)
+
+
+@router.get("/datasources/{ds_id}/node_significance", response_model=list[NodeSignificanceResponse])
+async def get_sankey_nodes(ds_id: str, node: str, edge_service: EdgeService = Depends()):
+    return await edge_service.get_node_significance(ds_id, node)

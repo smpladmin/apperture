@@ -77,6 +77,7 @@ async def _authorise(request: Request):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+
 def _build_redirect_url(url: str, integration_id: str):
     redirect_url = urlparse(url)
     if redirect_url.query:
@@ -84,4 +85,3 @@ def _build_redirect_url(url: str, integration_id: str):
     else:
         redirect_url = redirect_url._replace(query=f"integration_id={integration_id}")
     return redirect_url.geturl()
-    

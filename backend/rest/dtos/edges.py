@@ -2,7 +2,7 @@ from typing import Union
 from pydantic import BaseModel
 
 from domain.common.models import IntegrationProvider
-from domain.edge.models import Edge, AggregatedEdge
+from domain.edge.models import Edge, AggregatedEdge, NodeTrend, NodeSankey, NodeSignificance
 from rest.dtos.model_response import ModelResponse
 
 
@@ -39,5 +39,20 @@ class EdgeResponse(Edge, ModelResponse):
 
 
 class AggregatedEdgeResponse(AggregatedEdge, ModelResponse):
+    class Config:
+        allow_population_by_field_name = True
+
+
+class NodeTrendResponse(NodeTrend, ModelResponse):
+    class Config:
+        allow_population_by_field_name = True
+
+
+class NodeSankeyResponse(NodeSankey, ModelResponse):
+    class Config:
+        allow_population_by_field_name = True
+
+
+class NodeSignificanceResponse(NodeSignificance, ModelResponse):
     class Config:
         allow_population_by_field_name = True

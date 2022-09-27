@@ -19,12 +19,14 @@ class GoogleAnalyticsFetcher(Fetcher):
         pass
 
     def timeframe_data(self, timeframe: ReportTimeframe, view_id: str):
-        logging.info(
-            f"Starting data fetch for timeframe {timeframe.name} from {self.start_date} to {self.end_date}"
-        )
+        logging.info("{x}: {y}".format(x='Fetching GA data for', y=view_id))
+        logging.info("{x}: {y}".format(x='Start date', y=self.start_date))
+        logging.info("{x}: {y}".format(x='End date', y=self.end_date))
+
         response = self.get_timeframe_report(timeframe, view_id)
         page_token = self.get_page_token(response)
         df = self.parse_data(response)
+        logging.info("{x}: {y}".format(x='Length of GA Response', y=len(df)))
 
         while page_token:
             response = self.get_timeframe_report(timeframe, view_id, page_token)
@@ -32,7 +34,7 @@ class GoogleAnalyticsFetcher(Fetcher):
             temp = self.parse_data(response)
             df = pd.concat([df, temp])
         df.columns = ["date", "previousPage", "pagePath", "users", "pageViews"]
-        logging.info(f"Done data fetch for timeframe {timeframe.name}")
+        logging.info("{x}: {y}".format(x='Done data fetch for timeframe', y=timeframe.name))
         logging.info(df.head(5))
         return df
 
