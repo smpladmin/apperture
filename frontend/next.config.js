@@ -1,4 +1,10 @@
 /** @type {import('next').NextConfig} */
+console.log(
+  process.env.BACKEND_BASE_URL,
+  process.env.PUBLIC_BACKEND_BASE_URL,
+  process.env.PUBLIC_FRONTEND_BASE_URL,
+  process.env.PUBLIC_AMPLITUDE_API_KEY
+);
 const nextConfig = {
   swcMinify: true,
   output: 'standalone',
