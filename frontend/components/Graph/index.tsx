@@ -47,6 +47,12 @@ const Graph = ({
       });
     }
 
+      const zoomRatio = gRef.current.graph?.getZoom();
+      const nodes = gRef.current.graph?.getNodes();
+      const edges = gRef.current.graph?.getEdges();
+      nodesOnZoom(nodes, zoomRatio);
+      edgesOnZoom(edges, zoomRatio);
+
     G6.registerBehavior('activate-node', {
       getDefaultCfg() {
         return {
@@ -249,7 +255,7 @@ const Graph = ({
     <div
       id="network-graph"
       ref={ref}
-      style={{ height: '100%', backgroundColor: '#E5E5E5' }}
+      style={{ height: '100%', backgroundColor: '#F6F6F6' }}
     ></div>
   );
 };

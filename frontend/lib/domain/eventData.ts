@@ -21,6 +21,12 @@ export type SankeyData = {
   usersPercentage: number;
 };
 
+export type NodeSignificanceData = {
+  node: string;
+  nodeHits: number;
+  totalHits: number;
+};
+
 export enum FlowType {
   INFLOW = 'inflow',
   OUTFLOW = 'outflow',

@@ -11,7 +11,6 @@ type EventDetailsDrawerProps = {
   isEventDetailsDrawerOpen: boolean;
   closeEventDetailsDrawer: () => void;
   setSelectedNode: Function;
-  selectedNode: Item | null;
   eventData: { [key in string]: Array<TrendData | SankeyData> };
   setEventData: Function;
 };
@@ -20,7 +19,6 @@ const EventDetails = ({
   isEventDetailsDrawerOpen,
   closeEventDetailsDrawer,
   setSelectedNode,
-  selectedNode,
   eventData,
   setEventData,
 }: EventDetailsDrawerProps) => {
@@ -29,10 +27,9 @@ const EventDetails = ({
   const handleClickOutside = () => {
     closeEventDetailsDrawer();
     setSelectedNode(null);
-    setEventData(null);
+    setEventData({});
   };
   const context = useContext(AppertureContext);
-
   useOnClickOutside(drawerRef, handleClickOutside);
 
   return (
@@ -43,10 +40,9 @@ const EventDetails = ({
             isEventDetailsDrawerOpen={isEventDetailsDrawerOpen}
             closeEventDetailsDrawer={closeEventDetailsDrawer}
             eventData={eventData}
-            selectedNode={selectedNode}
           />
         </>
-      ) : isEventDetailsDrawerOpen && eventData ? (
+      ) : isEventDetailsDrawerOpen ? (
         <>
           <Box
             ref={drawerRef}
@@ -62,10 +58,7 @@ const EventDetails = ({
             overflowY={'auto'}
             animation={'ease-out 1s'}
           >
-            <EventDetailsInfo
-              eventData={eventData}
-              selectedNode={selectedNode}
-            />
+            <EventDetailsInfo eventData={eventData} />
           </Box>
           <Box position={'fixed'} zIndex={'100'} w={'full'} h={'full'} />
         </>

@@ -77,3 +77,15 @@ export const getSankeyData = async (dsId: string, nodeId: string) => {
     return [];
   }
 };
+
+export const getNodeSignificanceData = async (dsId: string, nodeId: string) => {
+  try {
+    const res = await AppertureAPI.get(
+      `/datasources/${dsId}/node_significance?node=${nodeId}`
+    );
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};

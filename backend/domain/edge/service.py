@@ -355,7 +355,7 @@ class EdgeService:
                             }
                         }
                     ],
-                    'node_count': [
+                    'current_node_count': [
                         {
                             '$match': {
                                 'current_event': node
@@ -363,7 +363,23 @@ class EdgeService:
                         }, {
                             '$group': {
                                 '_id': {
-                                    'current_event': '$current_event'
+                                    'event': '$current_event'
+                                },
+                                'hits': {
+                                    '$sum': '$hits'
+                                }
+                            }
+                        }
+                    ],
+                    'previous_node_count': [
+                        {
+                            '$match': {
+                                'previous_event': node
+                            }
+                        }, {
+                            '$group': {
+                                '_id': {
+                                    'event': '$previous_event'
                                 },
                                 'hits': {
                                     '$sum': '$hits'
@@ -376,7 +392,7 @@ class EdgeService:
                 '$project': {
                     'node': node,
                     'node_hits': {
-                        '$ifNull': [{'$max': "$node_count.hits"}, 0]
+                        '$ifNull': [{'$max': "$current_node_count.hits"}, {'$max': "$previous_node_count.hits"}]
                     },
                     'total_hits': {
                         '$max': '$total_count.hits'
