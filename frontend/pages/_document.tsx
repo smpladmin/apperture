@@ -1,5 +1,3 @@
-// pages/_document.js
-
 import Document, { Html, Head, Main, NextScript } from 'next/document';
 
 class MyDocument extends Document {
@@ -18,6 +16,7 @@ class MyDocument extends Document {
             href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@100;200;300;400;500;600;700&display=swap"
             rel="stylesheet"
           />
+          <script async src="/__ENV.js" />
         </Head>
         <body>
           <Main />
