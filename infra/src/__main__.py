@@ -4,7 +4,15 @@ import pulumi_aws as aws
 config = pulumi.Config()
 data = config.require_object("data")
 
-virtualprivatecloud = aws.ec2.Vpc(data.get("vpc_name"), cidr_block=data.get("vpc_cidr"))
+virtualprivatecloud = aws.ec2.Vpc(
+    data.get("vpc_name"),
+    cidr_block=data.get("vpc_cidr"),
+    enable_dns_support=True,
+    enable_dns_hostnames=True,
+    tags={
+        "Name": data.get("vpc_name"),
+    },
+)
 
 igw = aws.ec2.InternetGateway(
     data.get("igw_name"),
@@ -96,6 +104,12 @@ sg = aws.ec2.SecurityGroup(
             "to_port": 4789,
             "cidr_blocks": [data.get("pub_cidr")],
         },
+        {
+            "protocol": "udp",
+            "from_port": 4789,
+            "to_port": 4789,
+            "cidr_blocks": [data.get("pub_cidr")],
+        },
     ],
     egress=[
         {
@@ -119,7 +133,13 @@ keypair = aws.ec2.KeyPair(
 ami = aws.ec2.get_ami(
     most_recent=True,
     owners=["099720109477"],
-    filters=[aws.GetAmiFilterArgs(name="name", values=["ubuntu/images/hvm-ssd/*"])],
+    filters=[
+        aws.GetAmiFilterArgs(
+            name="name",
+            values=["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"],
+        ),
+        aws.GetAmiFilterArgs(name="architecture", values=["x86_64"]),
+    ],
 )
 
 public_ec2_instance = aws.ec2.Instance(
@@ -129,6 +149,7 @@ public_ec2_instance = aws.ec2.Instance(
     ami=ami.id,
     key_name=keypair.key_name,
     subnet_id=publicsubnet.id,
+    root_block_device={"volume_size": 30},
     tags={
         "Name": data.get("ec2_public_name"),
         "Swarm": "manager",
@@ -158,6 +179,7 @@ for i in range(1, data.get("ec2_private_count") + 1):
         key_name=keypair.key_name,
         subnet_id=publicsubnet.id,
         associate_public_ip_address=True,
+        root_block_device={"volume_size": 30},
         tags={
             "Name": f"{data.get('ec2_private_name')}-{i}",
             "Swarm": f"worker-{i}",

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 export USE_HOSTNAME=$1
 echo $USE_HOSTNAME > /etc/hostname
 hostname -F /etc/hostname
