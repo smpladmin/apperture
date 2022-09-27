@@ -14,14 +14,6 @@ type CustomAppProps = {
   device: Device;
 };
 
-console.log(
-  process.env.BACKEND_BASE_URL,
-  process.env.JWT_SECRET,
-  process.env.PUBLIC_BACKEND_BASE_URL,
-  process.env.PUBLIC_FRONTEND_BASE_URL,
-  process.env.PUBLIC_AMPLITUDE_API_KEY
-);
-
 function AppertureApp({
   Component,
   pageProps,

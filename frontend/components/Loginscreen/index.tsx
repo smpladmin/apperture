@@ -3,7 +3,10 @@ import glogo from '@assets/images/Google_login.svg';
 import Link from 'next/link';
 import { Box, Button, Flex, Heading, Text, Image } from '@chakra-ui/react';
 import getConfig from 'next/config';
-const { publicRuntimeConfig: config } = getConfig();
+const { publicRuntimeConfig: config, serverRuntimeConfig } = getConfig();
+
+console.log(config);
+console.log(serverRuntimeConfig);
 
 const Loginscreen = () => {
   return (
