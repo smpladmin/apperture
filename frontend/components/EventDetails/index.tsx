@@ -27,10 +27,9 @@ const EventDetails = ({
   const handleClickOutside = () => {
     closeEventDetailsDrawer();
     setSelectedNode(null);
-    setEventData(null);
+    setEventData({});
   };
   const context = useContext(AppertureContext);
-
   useOnClickOutside(drawerRef, handleClickOutside);
 
   return (
@@ -43,7 +42,7 @@ const EventDetails = ({
             eventData={eventData}
           />
         </>
-      ) : isEventDetailsDrawerOpen && eventData ? (
+      ) : isEventDetailsDrawerOpen ? (
         <>
           <Box
             ref={drawerRef}
