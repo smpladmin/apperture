@@ -63,6 +63,7 @@ jobs:
           FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}
         run: |
           cd frontend
+          echo "$FRONTEND_ENV" > .env
           docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
