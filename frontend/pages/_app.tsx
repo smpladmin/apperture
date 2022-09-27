@@ -13,6 +13,7 @@ import isValidProp from '@emotion/is-prop-valid';
 type CustomAppProps = {
   device: Device;
 };
+
 function AppertureApp({
   Component,
   pageProps,
