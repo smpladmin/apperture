@@ -1,0 +1,26 @@
+config:
+  aws:region: ap-south-1
+  apperture:data:
+    active: false
+    vpc_name: apperture-dev-vpc
+    vpc_cidr: 10.0.0.0/16
+    igw_name: apperture-dev-igw
+    prv_subnet_name: apperture-dev-private-subnet
+    pub_subnet_name: apperture-dev-public-subnet
+    parent_cidr: 10.0.0.0/23
+    prv_cidr: 10.0.1.0/24
+    pub_cidr: 10.0.0.0/24
+    eip_name: apperture-dev-eip
+    natgw_name: apperture_dev_ngw
+    pubrttable_name: apperture_dev_pubrttable
+    prvrttable_name: apperture_dev_prvrttable
+    pubrtasst_name: apperture_dev_pub_rt_asst
+    prvrtasst_name: apperture_dev_prv_rt_asst
+    sec_grp_name: apperture_dev_sec_grp
+    key_name: apperture-dev-key
+    public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCzh69tzOebPrNLyPyKorbzLzTEDUyuDP6V8g0qsHOimAu5g2FC+LQNip8C3kLyMX2Em7sh50a3E7/TL4s+R/OnDrVB2i4rYsDwrru6ZffPtd3bX8MG92KtJlsAH+Qs7bRwQNJYsFZXNL5GGPBWbUHVyQtG86hvRawAox6WeSH2dShkd3JwlbrV+9GGzEzdhAA06zXUm2ZZPrxDXxzDoewZHSiox85D9xlE2+6ZX0A+SlwhVCuwWxlBelSvWoFiAVfB92U52xlbagtpUexM1lGihFJgMQAhShkITGsuKFfKqfJqF3s5keZjg3icWcnqJFvdYJtqqxvNjjwbWBuXG2atr8O3Wb1ftVDMqVwf7PZw3fPWGYYVmBWn8BK47y0w0+9d2mW6zHMa5uzmwekR7XYbHpKPsuPY4lRQNpeMYMu2oqtgypS/VCw6CNEso90BdiPAD0qWJJ/pa+n6Zk4/4jonyToaikscMz1mhmCAhGuYhuT/17uHv8mdRCEvz/iK6ak= roopak@parallelhq.com
+    ec2_public_name: apperture_dev_bastion
+    ec2_public_type: t2.micro
+    ec2_private_name: apperture_dev_private
+    ec2_private_type: t2.micro
+    ec2_private_count: 2

@@ -2,6 +2,8 @@ import logo from '@assets/images/Logo_login.svg';
 import glogo from '@assets/images/Google_login.svg';
 import Link from 'next/link';
 import { Box, Button, Flex, Heading, Text, Image } from '@chakra-ui/react';
+import getConfig from 'next/config';
+const { publicRuntimeConfig: config } = getConfig();
 
 const Loginscreen = () => {
   return (
@@ -52,7 +54,7 @@ const Loginscreen = () => {
           gap={6}
           maxW={{ md: 141 }}
         >
-          <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/login`}>
+          <Link href={`${config.PUBLIC_BACKEND_BASE_URL}/login`}>
             <Button
               p={{ base: 7, md: 10 }}
               fontSize={{ base: 'base', md: 'sh-20' }}
@@ -73,7 +75,7 @@ const Loginscreen = () => {
             textColor={'grey.DEFAULT'}
           >
             Already a user?{' '}
-            <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/login`}>
+            <Link href={`${config.PUBLIC_BACKEND_BASE_URL}/login`}>
               <Text
                 as={'span'}
                 cursor={'pointer'}

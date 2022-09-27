@@ -9,6 +9,8 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react';
 import Link from 'next/link';
+import getConfig from 'next/config';
+const { publicRuntimeConfig: config } = getConfig();
 
 type LogoutModalProps = {
   isOpen: boolean;
@@ -73,7 +75,7 @@ const LogoutModal = ({ isOpen, onClose }: LogoutModalProps) => {
           >
             Cancel
           </Button>
-          <Link href={`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/logout`}>
+          <Link href={`${config.PUBLIC_BACKEND_BASE_URL}/logout`}>
             <Button
               w="50%"
               variant={'primary'}
