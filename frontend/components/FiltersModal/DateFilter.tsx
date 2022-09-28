@@ -12,7 +12,56 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
+  useRadio,
+  useRadioGroup,
+  HStack,
 } from '@chakra-ui/react';
+
+
+function DateRangeRadio(props) {
+  const { getInputProps, getCheckboxProps } = useRadio(props);
+  const input = getInputProps();
+  const checkbox = getCheckboxProps();
+
+  return (
+    <Flex as="label" gap={3}>
+      <input {...input} />
+      <Box
+        paddingX={'6'}
+        paddingY={'3'}
+        cursor={'pointer'}
+        {...checkbox}
+        _checked={{
+          color: 'white',
+          backgroundColor: 'black',
+          borderRadius: '100px',
+        }}
+      >
+        {props.children}
+      </Box>
+    </Flex>
+  );
+}
+
+function MappedGroup() {
+  const list = ['7D', '30D', '3M', '6M', '12M', 'Custom'];
+  const { getRootProps, getRadioProps } = useRadioGroup({
+    name: 'Date Filter Range',
+    defaultValue: '7D',
+    onChange: console.log,
+  });
+
+  const group = getRootProps();
+  return (
+    <HStack {...group}>
+      {list.map((item) => (
+        <DateRangeRadio key={item} {...getRadioProps({ value: item })}>
+          {item}
+        </DateRangeRadio>
+      ))}
+    </HStack>
+  );
+}
 
 const DateFilter = () => {
   return (
@@ -53,16 +102,63 @@ const DateFilter = () => {
           borderColor={'white.200'}
           opacity={1}
         />
-        <ModalBody p={0} overflowY={'auto'}>
-          <Input
-            placeholder="Select Date and Time"
-            size="sm"
-            type="date"
-            w={'50'}
-            min="2022-06-01"
-            max="2022-09-27"
-          />
+        <ModalBody p={9} overflowY={'auto'}>
+          <Box>
+            <Text>Showing Data for</Text>
+          </Box>
+          <Box my={9}>
+            <MappedGroup />
+          </Box>
+          <Flex gap={3}>
+            <Box width={'50%'}>
+              <Text
+                color={'grey.100'}
+                fontSize={'xs-14'}
+                lineHeight={'xs-14'}
+                mb={1}
+                fontWeight={'500'}
+              >
+                Start Date
+              </Text>
+              <Input
+                height={'13'}
+                borderWidth={'0'}
+                borderRadius={'4'}
+                bg={'#F6F6F6'}
+                placeholder="Select Date and Time"
+                size="sm"
+                type="date"
+                w={'full'}
+                min="2022-06-01"
+                max="2022-09-27"
+              />
+            </Box>
+            <Box width={'50%'}>
+              <Text
+                color={'grey.100'}
+                fontSize={'xs-14'}
+                lineHeight={'xs-14'}
+                mb={1}
+                fontWeight={'500'}
+              >
+                End Date
+              </Text>
+              <Input
+                height={'13'}
+                bg={'#F6F6F6'}
+                placeholder="Select Date and Time"
+                size="sm"
+                type="date"
+                w={'full'}
+                borderWidth={'0'}
+                borderRadius={'4'}
+                min="2022-06-01"
+                max="2022-09-27"
+              />
+            </Box>
+          </Flex>
         </ModalBody>
+
         <Divider
           orientation="horizontal"
           borderColor={'white.200'}
@@ -71,6 +167,7 @@ const DateFilter = () => {
         <ModalFooter py={{ base: '3', md: '5' }} px={{ base: '', md: '6' }}>
           <Button
             variant={'primary'}
+            w={'full'}
             rounded={'lg'}
             bg={'black.100'}
             p={6}
