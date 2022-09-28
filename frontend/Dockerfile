@@ -21,7 +21,8 @@ ENV NODE_ENV=production
 COPY --from=builder /code/public ./public
 COPY --from=builder /code/.next/standalone ./
 COPY --from=builder /code/.next/static ./.next/static
-CMD ["node", "server.js"]
+RUN npm i -g @beam-australia/react-env
+ENTRYPOINT react-env --path ./.env --prefix NEXT_APP -- node server.js
 
 FROM base as dev
 WORKDIR /code

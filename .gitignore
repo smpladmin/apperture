@@ -165,3 +165,4 @@ storybook-static
 .env.staging
 .env.production
 frontend/lib/data/data.js
+frontend/public/__ENV.js
