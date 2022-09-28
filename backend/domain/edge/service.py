@@ -115,10 +115,14 @@ class EdgeService:
                 ).delete()
                 await RichEdge.insert_many(edges)
 
-    async def get_edges(self, datasource_id: str) -> list[AggregatedEdge]:
+    async def get_edges(self, datasource_id: str, start_date: str, end_date: str) -> list[AggregatedEdge]:
+        start_date = dt.strptime(start_date, '%Y-%m-%d')
+        end_date = dt.strptime(end_date, '%Y-%m-%d')
         minimum_edge_count = 100
         pipeline = [
-            {"$match": {"datasource_id": PydanticObjectId(datasource_id)}},
+            {"$match": {"$and": [{"datasource_id": PydanticObjectId(datasource_id)},
+                                 {"date": {"$gte": start_date}},
+                                 {"date": {"$lte": end_date}}]}},
             {
                 "$group": {
                     "_id": {
