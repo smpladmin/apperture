@@ -20,13 +20,14 @@ import { ProviderDataSource } from '@components/ProviderDataSource';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import FormButton from '@components/FormButton';
+import { getAuthToken } from '@lib/utils/request';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
   query,
 }) => {
   const datasources = await _getProviderDatasources(
-    req.cookies.auth_token as string,
+    getAuthToken(req) as string,
     query.integration_id as string
   );
   return {
