@@ -1,6 +1,7 @@
 import { AppWithIntegrations } from '@lib/domain/app';
 import { Provider } from '@lib/domain/provider';
 import { _getApps, _getAppsWithIntegrations } from '@lib/services/appService';
+import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
 
 const checkDataSource = (apps: Array<AppWithIntegrations>) => {
@@ -69,7 +70,7 @@ const four0four = () => {
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const token = req.cookies.auth_token;
+  const token = getAuthToken(req);
   const apps = await _getAppsWithIntegrations(token!!);
   return (
     checkDataSource(apps) ||
