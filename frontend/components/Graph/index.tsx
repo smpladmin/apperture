@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useContext } from 'react';
 import G6, {
   Graph as G6Graph,
   IG6GraphEvent,
@@ -47,11 +47,11 @@ const Graph = ({
       });
     }
 
-      const zoomRatio = gRef.current.graph?.getZoom();
-      const nodes = gRef.current.graph?.getNodes();
-      const edges = gRef.current.graph?.getEdges();
-      nodesOnZoom(nodes, zoomRatio);
-      edgesOnZoom(edges, zoomRatio);
+    const zoomRatio = gRef.current.graph?.getZoom();
+    const nodes = gRef.current.graph?.getNodes();
+    const edges = gRef.current.graph?.getEdges();
+    nodesOnZoom(nodes, zoomRatio);
+    edgesOnZoom(edges, zoomRatio);
 
     G6.registerBehavior('activate-node', {
       getDefaultCfg() {
@@ -71,7 +71,7 @@ const Graph = ({
         });
       },
 
-      onNodeClick(e: any) {
+      onNodeClick(e: IG6GraphEvent) {
         const graph = gRef.current.graph;
         const item = e.item as Item;
 
@@ -195,6 +195,17 @@ const Graph = ({
               maxZoom: graphConfig.maxZoom,
             },
           ],
+        },
+        nodeStateStyles: {
+          active: {
+            stroke: '#000000',
+            fill: '#ffffff',
+            opacity: 1,
+            lineWidth: 8,
+            r: 16,
+            shadowColor: '#ffffff',
+            shadowBlur: 6,
+          },
         },
         layout: {
           type: graphConfig.layout,

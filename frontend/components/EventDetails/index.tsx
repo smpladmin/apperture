@@ -1,4 +1,3 @@
-import { Item } from '@antv/g6';
 import { Box } from '@chakra-ui/react';
 import { AppertureContext } from '@lib/contexts/appertureContext';
 import { TrendData, SankeyData } from '@lib/domain/eventData';
