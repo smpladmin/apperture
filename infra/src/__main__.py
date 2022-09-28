@@ -165,7 +165,7 @@ eip = aws.ec2.Eip(
 )
 
 eip_assoc = aws.ec2.EipAssociation(
-    "apperture-eip-assoc",
+    f"{data.get('eip_name')}-{data.get('ec2_public_name')}-eip-assoc",
     instance_id=public_ec2_instance.id,
     allocation_id=eip.id,
 )
