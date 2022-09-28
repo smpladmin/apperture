@@ -1,4 +1,3 @@
-import { App } from '@lib/domain/app';
 import { Device } from '@lib/types';
 import { createContext } from 'react';
 

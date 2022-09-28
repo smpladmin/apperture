@@ -25,6 +25,7 @@ import SwitchDataSource from '@components/SwitchDataSource';
 import { DataSource } from '@lib/domain/datasource';
 import { useRouter } from 'next/router';
 import { Provider } from '@lib/domain/provider';
+import SearchSuggestionBox from './SearchSuggestionBox';
 
 type HeaderProps = {
   selectedApp: AppWithIntegrations;
@@ -112,28 +113,7 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
             </DrawerContent>
           </Drawer>
         )}
-
-        <Input
-          size={'lg'}
-          w={{ base: 'full', md: 100 }}
-          h={{ base: 10, md: 12 }}
-          bg={'white.100'}
-          rounded={'6.25rem'}
-          fontSize={'base'}
-          lineHeight={'base'}
-          textColor={'black'}
-          borderColor={'white.200'}
-          textAlign={{ base: 'center', md: 'left' }}
-          placeholder="Search for events"
-          py={4}
-          px={3.5}
-          _placeholder={{
-            fontSize: '1rem',
-            lineHeight: '1.375rem',
-            fontWeight: 400,
-            color: 'grey.100',
-          }}
-        />
+        <SearchSuggestionBox dataSourceType={dataSourceType!!} />
         <Flex alignItems={'center'} justifyContent={'space-between'} gap={6}>
           <Box hidden={context.device.isMobile}>
             <i className="ri-calendar-fill"></i>

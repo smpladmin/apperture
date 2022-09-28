@@ -14,6 +14,7 @@ import { graphConfig } from '@lib/config/graphConfig';
 import { transformData } from './transformData';
 import { Edge } from '@lib/domain/edge';
 import { useRouter } from 'next/router';
+import { MapContext } from '@lib/contexts/mapContext';
 
 type GraphProps = {
   visualisationData: Array<Edge>;
@@ -37,6 +38,15 @@ const Graph = ({
   const { dsId } = router.query;
 
   const graphData = useMemo(() => transformData(visualisationData), [dsId]);
+
+  const { dispatch } = useContext(MapContext);
+
+  useEffect(() => {
+    dispatch({
+      type: 'SET_VISUALISATION_DATA',
+      payload: graphData,
+    });
+  }, [dsId]);
 
   useEffect(() => {
     let graph = gRef.current.graph;
