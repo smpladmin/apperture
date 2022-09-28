@@ -3,8 +3,7 @@ import Image from 'next/image';
 import gaLogo from '@assets/images/ga-logo.svg';
 import 'remixicon/fonts/remixicon.css';
 import FormButton from '@components/FormButton';
-import getConfig from 'next/config';
-const { publicRuntimeConfig: config } = getConfig();
+import { BACKEND_BASE_URL, FRONTEND_BASE_URL } from 'config';
 
 type GooglePermissionProps = {
   navigateBack: Function;
@@ -19,7 +18,7 @@ const GooglePermission = ({
   handleClose,
   query,
 }: GooglePermissionProps) => {
-  const link = `${config.PUBLIC_BACKEND_BASE_URL}/integrations/oauth/google?app_id=${query.appId}&redirect_url=${config.PUBLIC_FRONTEND_BASE_URL}/analytics/app/${query.appId}/integration/google/apps`;
+  const link = `${BACKEND_BASE_URL}/integrations/oauth/google?app_id=${query.appId}&redirect_url=${FRONTEND_BASE_URL}/analytics/app/${query.appId}/integration/google/apps`;
   const oauthUrl =
     query.add && query.previousDsId
       ? link.concat(`?add=true&previousDsId=${query.previousDsId}`)
