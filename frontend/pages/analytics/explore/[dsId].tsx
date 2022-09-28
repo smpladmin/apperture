@@ -17,12 +17,13 @@ import { useDisclosure } from '@chakra-ui/react';
 import EventDetails from '@components/EventDetails';
 import { Item } from '@antv/g6';
 import { useRouter } from 'next/router';
+import { getAuthToken } from '@lib/utils/request';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
   query,
 }) => {
-  const token = req.cookies.auth_token;
+  const token = getAuthToken(req);
   if (!token) {
     return {
       props: {},
