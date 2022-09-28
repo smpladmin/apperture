@@ -5,6 +5,7 @@ import { _getApp } from '@lib/services/appService';
 import { App } from '@lib/domain/app';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { getAuthToken } from '@lib/utils/request';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -12,7 +13,7 @@ export const getServerSideProps: GetServerSideProps = async ({
 }) => {
   const app = await _getApp(
     query.appId as string,
-    req.cookies.auth_token as string
+    getAuthToken(req) as string,
   );
   return {
     props: { app },

@@ -3,7 +3,8 @@ import type { NextRequest } from 'next/server';
 import { validateToken } from './lib/services/authService';
 
 export async function middleware(request: NextRequest) {
-  const userId = await validateToken(request.cookies.get('auth_token'));
+  const cookieKey = process.env.COOKIE_KEY || 'auth_token'
+  const userId = await validateToken(request.cookies.get(cookieKey));
   if (!userId) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
