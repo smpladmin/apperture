@@ -6,10 +6,12 @@ from starlette.responses import RedirectResponse
 from authorisation.jwt_auth import create_access_token
 from domain.users.service import UserService
 from authorisation import OAuthClientFactory, OAuthProvider
+from settings import apperture_settings
 
 router = APIRouter(tags=["auth"])
 
 oauth = OAuthClientFactory().init_client(OAuthProvider.GOOGLE)
+settings = apperture_settings()
 
 
 @router.get("/login")
@@ -36,7 +38,7 @@ async def _redirect_with_auth_cookie(redirect_url: str, user_id: str):
     jwt = create_access_token({"user_id": user_id})
     response = RedirectResponse(url=redirect_url)
     response.set_cookie(
-        key="auth_token",
+        key=settings.cookie_key,
         value=jwt,
         domain=os.getenv("COOKIE_DOMAIN"),
         httponly=True,
@@ -63,7 +65,7 @@ async def _authorize_and_save_user(request: Request, user_service: UserService):
 async def logout(redirect_url: str = os.getenv("FRONTEND_LOGIN_REDIRECT_URL")):
     response = RedirectResponse(url=redirect_url)
     response.set_cookie(
-        key="auth_token",
+        key=settings.cookie_key,
         domain=os.getenv("COOKIE_DOMAIN"),
         httponly=True,
         secure=True,
