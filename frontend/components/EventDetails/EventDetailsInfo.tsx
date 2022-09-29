@@ -29,7 +29,7 @@ const EventDetailsInfo = ({ eventData }: EventDetailsInfo) => {
   return (
     <>
       {isLoading ? (
-        <Flex direction={'column'} gap={'6'}>
+        <Flex direction={'column'} gap={'6'} pt={'4'}>
           <Skeleton height={'18'} fadeDuration={1} bg={'white.100'} />
           <Skeleton height={'20'} fadeDuration={1} bg={'white.100'} />
           <Skeleton height={'82'} fadeDuration={1} bg={'white.100'} />

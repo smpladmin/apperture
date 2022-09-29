@@ -1,16 +1,16 @@
-import { Item } from '@antv/g6';
 import { Box } from '@chakra-ui/react';
 import { AppertureContext } from '@lib/contexts/appertureContext';
+import { MapContext } from '@lib/contexts/mapContext';
 import { TrendData, SankeyData } from '@lib/domain/eventData';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { useContext, useRef } from 'react';
 import EventDetailsInfo from './EventDetailsInfo';
 import EventDetailsModal from './MobileEventDetailsModal';
 
-type EventDetailsDrawerProps = {
+type EventDetailsProps = {
   isEventDetailsDrawerOpen: boolean;
   closeEventDetailsDrawer: () => void;
-  setSelectedNode: Function;
+
   eventData: { [key in string]: Array<TrendData | SankeyData> };
   setEventData: Function;
 };
@@ -18,17 +18,21 @@ type EventDetailsDrawerProps = {
 const EventDetails = ({
   isEventDetailsDrawerOpen,
   closeEventDetailsDrawer,
-  setSelectedNode,
   eventData,
   setEventData,
-}: EventDetailsDrawerProps) => {
+}: EventDetailsProps) => {
   const drawerRef = useRef<HTMLDivElement>(null);
+  const { dispatch } = useContext(MapContext);
 
   const handleClickOutside = () => {
     closeEventDetailsDrawer();
-    setSelectedNode(null);
+    dispatch({
+      type: 'SET_ACTIVE_NODE',
+      payload: null,
+    });
     setEventData({});
   };
+
   const context = useContext(AppertureContext);
   useOnClickOutside(drawerRef, handleClickOutside);
 

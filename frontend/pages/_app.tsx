@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
 import { theme } from '../theme/chakra.theme';
 import { AppertureContext } from '@lib/contexts/appertureContext';
+import MapContextProvider from '@lib/contexts/mapContext';
 import mobile from 'is-mobile';
 import { Device } from '@lib/types';
 import 'userAnalytics';
@@ -23,11 +24,13 @@ function AppertureApp({
 
   return (
     <AppertureContext.Provider value={{ device }}>
-      <MotionConfig isValidProp={isValidProp}>
-        <ChakraProvider theme={theme}>
-          {getLayout(<Component {...pageProps} />, pageProps?.apps)}
-        </ChakraProvider>
-      </MotionConfig>
+      <MapContextProvider>
+        <MotionConfig isValidProp={isValidProp}>
+          <ChakraProvider theme={theme}>
+            {getLayout(<Component {...pageProps} />, pageProps?.apps)}
+          </ChakraProvider>
+        </MotionConfig>
+      </MapContextProvider>
     </AppertureContext.Provider>
   );
 }
