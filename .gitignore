@@ -162,3 +162,5 @@ next-env.d.ts
 storybook-static
 frontend/lib/data/data.js
 frontend/public/__ENV.js
+
+.flaskenv*

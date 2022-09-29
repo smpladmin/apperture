@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useContext } from 'react';
 import G6, {
   Graph as G6Graph,
   IG6GraphEvent,
@@ -14,20 +14,14 @@ import { graphConfig } from '@lib/config/graphConfig';
 import { transformData } from './transformData';
 import { Edge } from '@lib/domain/edge';
 import { useRouter } from 'next/router';
+import { MapContext } from '@lib/contexts/mapContext';
+import { Actions } from '@lib/types/context';
 
 type GraphProps = {
   visualisationData: Array<Edge>;
-  openEventDetailsDrawer: () => void;
-  selectedNode: Item | null;
-  setSelectedNode: Function;
 };
 
-const Graph = ({
-  visualisationData,
-  openEventDetailsDrawer,
-  selectedNode,
-  setSelectedNode,
-}: GraphProps) => {
+const Graph = ({ visualisationData }: GraphProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const gRef = useRef<{ graph: G6Graph | null }>({
     graph: null,
@@ -38,20 +32,29 @@ const Graph = ({
 
   const graphData = useMemo(() => transformData(visualisationData), [dsId]);
 
+  const {
+    state: { activeNode },
+    dispatch,
+  } = useContext(MapContext);
+
   useEffect(() => {
     let graph = gRef.current.graph;
 
-    if (!selectedNode) {
+    if (!activeNode) {
       graph?.findAllByState('node', 'active').forEach((node) => {
         graph?.setItemState(node, 'active', false);
       });
     }
 
-      const zoomRatio = gRef.current.graph?.getZoom();
-      const nodes = gRef.current.graph?.getNodes();
-      const edges = gRef.current.graph?.getEdges();
-      nodesOnZoom(nodes, zoomRatio);
-      edgesOnZoom(edges, zoomRatio);
+    if (activeNode) {
+      graph?.setItemState(activeNode, 'active', true);
+    }
+
+    const zoomRatio = graph?.getZoom();
+    const nodes = graph?.getNodes();
+    const edges = graph?.getEdges();
+    nodesOnZoom(nodes, zoomRatio);
+    edgesOnZoom(edges, zoomRatio);
 
     G6.registerBehavior('activate-node', {
       getDefaultCfg() {
@@ -71,7 +74,7 @@ const Graph = ({
         });
       },
 
-      onNodeClick(e: any) {
+      onNodeClick(e: IG6GraphEvent) {
         const graph = gRef.current.graph;
         const item = e.item as Item;
 
@@ -86,16 +89,29 @@ const Graph = ({
             graph.setItemState(node, 'active', false);
           });
         }
-        setSelectedNode(item);
 
+        dispatch({
+          type: Actions.SET_ACTIVE_NODE,
+          payload: item,
+        });
         // Set the 'active' state of the clicked node to be true
         graph?.setItemState(item, 'active', true);
 
-        //open eventDetails drawer
-        openEventDetailsDrawer();
+        // customize active state style for node
+        graph?.updateItem(item, {
+          stateStyles: {
+            active: {
+              stroke: '#000000',
+              fill: '#ffffff',
+              lineWidth: 6 / graph?.getZoom(),
+              shadowColor: '#ffffff',
+              shadowBlur: 6,
+            },
+          },
+        });
       },
     });
-  }, [selectedNode]);
+  }, [activeNode]);
 
   useEffect(() => {
     if (!gRef.current.graph) {
@@ -250,6 +266,14 @@ const Graph = ({
     graph.data(graphData);
     graph.render();
   }, [graphData]);
+
+  useEffect(() => {
+    let graph = gRef.current.graph;
+    dispatch({
+      type: Actions.SET_VISUALISATION_DATA,
+      payload: graph?.getNodes(),
+    });
+  }, [dsId]);
 
   return (
     <div

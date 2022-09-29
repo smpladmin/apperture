@@ -78,4 +78,3 @@ class NodeSignificance(BaseModel):
     node: str
     node_hits: int
     total_hits: int
-
