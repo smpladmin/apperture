@@ -3,6 +3,7 @@ import { AppertureContext } from '@lib/contexts/appertureContext';
 import { MapContext } from '@lib/contexts/mapContext';
 import { TrendData, SankeyData } from '@lib/domain/eventData';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
+import { Actions } from '@lib/types/context';
 import { useContext, useRef } from 'react';
 import EventDetailsInfo from './EventDetailsInfo';
 import EventDetailsModal from './MobileEventDetailsModal';
@@ -27,7 +28,7 @@ const EventDetails = ({
   const handleClickOutside = () => {
     closeEventDetailsDrawer();
     dispatch({
-      type: 'SET_ACTIVE_NODE',
+      type: Actions.SET_ACTIVE_NODE,
       payload: null,
     });
     setEventData({});

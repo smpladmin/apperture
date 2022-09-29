@@ -1,6 +1,5 @@
 import { Box, Divider, Flex, Input, Text } from '@chakra-ui/react';
 import { Provider } from '@lib/domain/provider';
-import { NodeType } from '@lib/types/graph';
 import Image from 'next/image';
 import React, {
   Fragment,
@@ -13,6 +12,7 @@ import mixPanel from '@assets/images/mixPanel-icon.png';
 import gaLogo from '@assets/images/ga-logo-small.svg';
 import { MapContext } from '@lib/contexts/mapContext';
 import { Item } from '@antv/g6';
+import { Actions } from '@lib/types/context';
 
 type SuggestionListProps = {
   suggestion: Item;
@@ -96,7 +96,7 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
   const suggestionsClickHandler = (suggestion: Item) => {
     setSearchText(suggestion?._cfg?.id!!);
     dispatch({
-      type: 'SET_ACTIVE_NODE',
+      type: Actions.SET_ACTIVE_NODE,
       payload: suggestion,
     });
     setSuggestions([]);
@@ -110,14 +110,27 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
     if (e.key === 'ArrowUp') {
       setCursor((c) => (c > 0 ? c - 1 : 0));
     }
-    if (e.key === 'Enter' && cursor >= 0) {
-      setSearchText(suggestions[cursor]?._cfg?.id!!);
-      dispatch({
-        type: 'SET_ACTIVE_NODE',
-        payload: suggestions[cursor],
-      });
-      setSuggestions([]);
-      setCursor(-1);
+    if (e.key === 'Enter') {
+      if (cursor >= 0) {
+        setSearchText(suggestions[cursor]?._cfg?.id!!);
+        dispatch({
+          type: Actions.SET_ACTIVE_NODE,
+          payload: suggestions[cursor],
+        });
+        setSuggestions([]);
+        setCursor(-1);
+      } else {
+        const searchNode = visualisationData.find(
+          (node) => node._cfg?.id === searchText
+        );
+        if (searchNode) {
+          dispatch({
+            type: Actions.SET_ACTIVE_NODE,
+            payload: searchNode,
+          });
+          setSuggestions([]);
+        }
+      }
     }
   };
 
