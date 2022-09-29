@@ -5,61 +5,39 @@ services:
     networks:
      - net
      - traefik-public
+    secrets:
+     -
+      source: backend.env
+      target: /code/.env
     logging:
       driver: json-file
     deploy:
-      replicas: 1
       labels:
-        traefik.http.routers.backend-http.rule: Host(`${BACKEND_HOST}`)
+        traefik.http.routers.backend-https.service: backend
+        traefik.http.routers.backend-docs.rule: Host(`api.apperture.io`) &&
+          PathPrefix(`/docs`, `/openapi.json`, `/redoc`)
+        traefik.http.routers.backend-http.service: backend
+        traefik.http.routers.backend-docs.tls: 'true'
+        traefik.http.routers.backend-http.rule: Host(`api.apperture.io`)
+        traefik.http.middlewares.docs-auth.basicauth.users: <username>:<aprhashedpassword>
         traefik.http.routers.backend-https.tls.certresolver: le
         traefik.http.routers.backend-http.entrypoints: http
         traefik.http.routers.backend-https.entrypoints: https
         traefik.constraint-label: traefik-public
+        traefik.http.routers.backend-docs.entrypoints: https
+        traefik.http.routers.backend-docs.tls.certresolver: le
+        traefik.http.routers.backend-docs.service: backend-docs
         traefik.http.services.backend.loadbalancer.server.port: '8001'
+        traefik.http.services.backend-docs.loadbalancer.server.port: '8001'
         traefik.http.routers.backend-https.tls: 'true'
         traefik.docker.network: traefik-public
         traefik.enable: 'true'
-        traefik.http.routers.backend-https.rule: Host(`${BACKEND_HOST}`)
+        traefik.http.routers.backend-https.rule: Host(`api.apperture.io`)
         traefik.http.routers.backend-http.middlewares: https-redirect
-        traefik.http.routers.backend-http.service: backend
-        traefik.http.routers.backend-https.service: backend
-        traefik.http.routers.backend-docs.rule: Host(`${BACKEND_HOST}`) && PathPrefix(`/docs`, `/openapi.json`, `/redoc`)
         traefik.http.routers.backend-docs.middlewares: docs-auth
-        traefik.http.routers.backend-docs.entrypoints: https
-        traefik.http.routers.backend-docs.tls.certresolver: le
-        traefik.http.routers.backend-docs.tls: 'true'
-        traefik.http.routers.backend-docs.service: backend-docs
-        traefik.http.services.backend-docs.loadbalancer.server.port: '8001'
-        traefik.http.middlewares.docs-auth.basicauth.users: ${USER}:${PASSWORD}
-        swarmpit.service.deployment.autoredeploy: 'true'
-      resources:
-        reservations:
-          cpus: '0.25'
-          memory: 256M
-        limits:
-          cpus: '0.5'
-          memory: 512M
-  frontend:
-    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/frontend:latest
-    networks:
-     - net
-     - traefik-public
-    logging:
-      driver: json-file
-    deploy:
-      labels:
-        traefik.http.routers.frontend-https.rule: Host(`${FRONTEND_HOST}`)
-        traefik.http.routers.frontend-https.entrypoints: https
-        traefik.http.routers.frontend-https.tls.certresolver: le
-        traefik.http.routers.frontend-http.middlewares: https-redirect
-        swarmpit.service.deployment.autoredeploy: 'true'
-        traefik.constraint-label: traefik-public
-        traefik.http.routers.frontend-http.rule: Host(`${FRONTEND_HOST}`)
-        traefik.http.routers.frontend-https.tls: 'true'
-        traefik.http.services.frontend.loadbalancer.server.port: '3000'
-        traefik.docker.network: traefik-public
-        traefik.enable: 'true'
-        traefik.http.routers.frontend-http.entrypoints: http
+      placement:
+        constraints:
+         - node.hostname == worker1
       resources:
         reservations:
           cpus: '0.25'
@@ -71,29 +49,68 @@ services:
     image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/data_processor:latest
     networks:
      - net
+    secrets:
+     -
+      source: data_processor.env
+      target: /code/.env
     logging:
       driver: json-file
     deploy:
-      replicas: 1
+      replicas: 2
+      placement:
+        constraints:
+         - node.hostname == worker2
+      resources:
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+        limits:
+          cpus: '0.9'
+          memory: 1000M
+  frontend:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/frontend:latest
+    networks:
+     - net
+     - traefik-public
+    secrets:
+     -
+      source: frontend.env
+      target: /code/.env
+    logging:
+      driver: json-file
+    deploy:
       labels:
-        swarmpit.service.deployment.autoredeploy: 'true'
+        traefik.http.routers.frontend-https.rule: Host(`app.apperture.io`)
+        traefik.http.routers.frontend-https.entrypoints: https
+        traefik.http.routers.frontend-https.tls.certresolver: le
+        traefik.http.routers.frontend-http.middlewares: https-redirect
+        traefik.constraint-label: traefik-public
+        traefik.http.routers.frontend-http.rule: Host(`app.apperture.io`)
+        traefik.http.routers.frontend-https.tls: 'true'
+        traefik.http.services.frontend.loadbalancer.server.port: '3000'
+        traefik.docker.network: traefik-public
+        traefik.enable: 'true'
+        traefik.http.routers.frontend-http.entrypoints: http
+      placement:
+        constraints:
+         - node.hostname == worker1
       resources:
         reservations:
           cpus: '0.25'
           memory: 256M
         limits:
           cpus: '0.5'
-          memory: 1024M
+          memory: 512M
   redis:
-    image: 'bitnami/redis'
-    volumes: 
-      - 'redisdata:/data/db'
-    networks:
-      - net
+    image: bitnami/redis:latest
     environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_PASSWORD: <redispassword>
     ports:
-      - '6379:6379'
+     - 6379:6379
+    volumes:
+     - redisdata:/data/db
+    networks:
+     - net
     logging:
       driver: json-file
     deploy:
@@ -111,6 +128,14 @@ networks:
   traefik-public:
     external: true
 
+secrets:
+  backend.env:
+    external: true
+  data_processor.env:
+    external: true
+  frontend.env:
+    external: true
+
 volumes:
-  redisdata: 
+  redisdata:
     driver: local

@@ -5,3 +5,8 @@ __pycache__
 .vscode
 .pytest_cache
 .github
+.env*
+.flaskenv*
+!.env.project
+!.env.vault
+!.env
