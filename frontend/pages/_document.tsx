@@ -1,6 +1,5 @@
-// pages/_document.js
-
 import Document, { Html, Head, Main, NextScript } from 'next/document';
+import Script from 'next/script';
 
 class MyDocument extends Document {
   render() {
@@ -18,6 +17,7 @@ class MyDocument extends Document {
             href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@100;200;300;400;500;600;700&display=swap"
             rel="stylesheet"
           />
+          <Script strategy="beforeInteractive" src="/__ENV.js" />
         </Head>
         <body>
           <Main />

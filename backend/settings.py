@@ -11,6 +11,7 @@ class AppertureSettings(BaseSettings):
     jwt_secret: str
     jwt_expiry_minutes: int
     cookie_domain: str
+    cookie_key: str = "auth_token"
     frontend_login_redirect_url: str
     redis_host: str
     redis_password: str

@@ -115,10 +115,14 @@ class EdgeService:
                 ).delete()
                 await RichEdge.insert_many(edges)
 
-    async def get_edges(self, datasource_id: str) -> list[AggregatedEdge]:
+    async def get_edges(self, datasource_id: str, start_date: str, end_date: str) -> list[AggregatedEdge]:
+        start_date = dt.strptime(start_date, '%Y-%m-%d')
+        end_date = dt.strptime(end_date, '%Y-%m-%d')
         minimum_edge_count = 100
         pipeline = [
-            {"$match": {"datasource_id": PydanticObjectId(datasource_id)}},
+            {"$match": {"$and": [{"datasource_id": PydanticObjectId(datasource_id)},
+                                 {"date": {"$gte": start_date}},
+                                 {"date": {"$lte": end_date}}]}},
             {
                 "$group": {
                     "_id": {
@@ -151,13 +155,16 @@ class EdgeService:
             .to_list()
         )
 
-    async def get_node_trends(self, datasource_id: str, node: str, trend_type: str) -> list[NodeTrend]:
+    async def get_node_trends(self, datasource_id: str, node: str, trend_type: str,
+                              start_date: str, end_date: str) -> list[NodeTrend]:
+        start_date = dt.strptime(start_date, '%Y-%m-%d')
+        end_date = dt.strptime(end_date, '%Y-%m-%d')
         pipeline = [
             {
-                "$match": {
-                    "datasource_id": PydanticObjectId(datasource_id),
-                    "current_event": node,
-                }
+                "$match": {"$and": [{"datasource_id": PydanticObjectId(datasource_id)},
+                                    {"current_event": node},
+                                    {"date": {"$gte": start_date}},
+                                    {"date": {"$lte": end_date}}]}
             },
             {
                 "$group": {
@@ -215,14 +222,16 @@ class EdgeService:
         exits_node.current_event = "Exits"
         return exits_node
 
-    async def get_node_sankey(self, datasource_id: str, node: str) -> list[NodeSankey]:
-
+    async def get_node_sankey(self, datasource_id: str, node: str,
+                              start_date: str, end_date: str) -> list[NodeSankey]:
+        start_date = dt.strptime(start_date, '%Y-%m-%d')
+        end_date = dt.strptime(end_date, '%Y-%m-%d')
         pipeline = [
             {
-                '$match': {
-                    'datasource_id': PydanticObjectId(datasource_id),
-                    'current_event': node
-                }
+                '$match': {"$and": [{"datasource_id": PydanticObjectId(datasource_id)},
+                                    {"current_event": node},
+                                    {"date": {"$gte": start_date}},
+                                    {"date": {"$lte": end_date}}]}
             }, {
                 '$group': {
                     '_id': {
@@ -262,10 +271,10 @@ class EdgeService:
                     'coll': 'edges',
                     'pipeline': [
                         {
-                            '$match': {
-                                'datasource_id': PydanticObjectId(datasource_id),
-                                'previous_event': node
-                            }
+                            '$match': {"$and": [{"datasource_id": PydanticObjectId(datasource_id)},
+                                                {"previous_event": node},
+                                                {"date": {"$gte": start_date}},
+                                                {"date": {"$lte": end_date}}]}
                         }, {
                             '$group': {
                                 '_id': {
@@ -322,25 +331,29 @@ class EdgeService:
         outflow_hits = sum([node.hits for node in outflow_nodes])
         inflow_users = sum([node.users for node in inflow_nodes])
         outflow_users = sum([node.users for node in outflow_nodes])
-        if (len(outflow_nodes) > 0) and (inflow_users > outflow_users) and (inflow_hits > outflow_hits):
+        if (len(outflow_nodes) > 0) and (inflow_hits > outflow_hits):
             outflow_nodes.append(self.create_exits_node(outflow_nodes[0],
                                                         inflow_hits-outflow_hits, inflow_users-outflow_users))
         sankey_nodes = inflow_nodes+outflow_nodes
         for node in sankey_nodes:
             node.hits_percentage = float("{:.2f}".format((node.hits*100)/max(inflow_hits, outflow_hits)))
-            node.users_percentage = float("{:.2f}".format((node.users*100)/max(inflow_users, outflow_users)))
+            # Placeholder for now
+            node.users_percentage = 0
 
         return (
             sankey_nodes
         )
 
     # Remove facet in-future, might cause performance issues.
-    async def get_node_significance(self, datasource_id: str, node: str) -> list[NodeSignificance]:
+    async def get_node_significance(self, datasource_id: str, node: str,
+                                    start_date: str, end_date: str) -> list[NodeSignificance]:
+        start_date = dt.strptime(start_date, '%Y-%m-%d')
+        end_date = dt.strptime(end_date, '%Y-%m-%d')
         pipeline = [
             {
-                '$match': {
-                    'datasource_id': PydanticObjectId(datasource_id)
-                }
+                '$match': {"$and": [{"datasource_id": PydanticObjectId(datasource_id)},
+                                    {"date": {"$gte": start_date}},
+                                    {"date": {"$lte": end_date}}]}
             }, {
                 '$facet': {
                     'total_count': [
