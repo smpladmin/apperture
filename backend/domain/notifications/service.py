@@ -41,7 +41,7 @@ class NotificationService:
             frequency=frequency,
             preferred_hour_gmt=preferredHourGMT,
             preferred_channels=preferredChannels,
-            notification_active=notificationActive
+            notification_active=notificationActive,
         )
 
     async def add_notification(self, notification: Notification):
@@ -49,3 +49,17 @@ class NotificationService:
         async with await self.mongo.client.start_session() as s:
             async with s.start_transaction():
                 await Notification.insert(notification)
+
+    async def get_notifications(
+        self, notification_type: str, frequency: str
+    ) -> list[Notification]:
+        pipeline = [
+            {
+                "$match": {
+                    "frequency": frequency,
+                    "notification_type": notification_type,
+                    "notification_active": True,
+                }
+            }
+        ]
+        return await Notification.find().aggregate(pipeline).to_list()

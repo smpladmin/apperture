@@ -19,20 +19,20 @@ async def add_notification(
     notification_service: NotificationService = Depends(),
 ):
     notification = notification_service.build_notification(
-                    dto.datasourceId,
-                    user.id,
-                    dto.notificationType,
-                    dto.appertureManaged,
-                    dto.pctThresholdActive,
-                    dto.pctThresholdValues,
-                    dto.absoluteThresholdActive,
-                    dto.absoluteThresholdValues,
-                    dto.formula,
-                    dto.variableMap,
-                    dto.frequency,
-                    dto.preferredHourGMT,
-                    dto.preferredChannels,
-                    dto.notificationActive
-                )
+        dto.datasourceId,
+        user.id,
+        dto.notificationType,
+        dto.appertureManaged,
+        dto.pctThresholdActive,
+        dto.pctThresholdValues,
+        dto.absoluteThresholdActive,
+        dto.absoluteThresholdValues,
+        dto.formula,
+        dto.variableMap,
+        dto.frequency,
+        dto.preferredHourGMT,
+        dto.preferredChannels,
+        dto.notificationActive,
+    )
     await notification_service.add_notification(notification)
-    return {"updated": True}
+    return notification

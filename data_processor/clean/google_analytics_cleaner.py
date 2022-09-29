@@ -5,13 +5,13 @@ import pandas as pd
 
 class GoogleAnalyticsCleaner(Cleaner):
     def clean(self, df: pd.DataFrame) -> pd.DataFrame:
-        logging.info("{x}: {y}".format(x='Cleaning GA data of length', y=len(df)))
+        logging.info("{x}: {y}".format(x="Cleaning GA data of length", y=len(df)))
         self.convert_data_types(df)
         self.remove_query_params_from_path(df)
         self.remove_tenant_base_url_from_path(df)
         self.remove_tenant_weblight_base_url_from_path(df)
         self.remove_tenant_google_ad_base_url_from_path(df)
-        logging.info("{x}: {y}".format(x='Length of df after cleanup', y=len(df)))
+        logging.info("{x}: {y}".format(x="Length of df after cleanup", y=len(df)))
         return df
 
     def convert_data_types(self, df):
