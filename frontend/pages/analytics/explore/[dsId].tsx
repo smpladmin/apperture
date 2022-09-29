@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useContext, useEffect, useState } from 'react';
 import Layout from '@components/Layout';
 import { GetServerSideProps } from 'next';
 import { _getApps, _getAppsWithIntegrations } from '@lib/services/appService';
@@ -15,8 +15,8 @@ import {
 import { Edge } from '@lib/domain/edge';
 import { useDisclosure } from '@chakra-ui/react';
 import EventDetails from '@components/EventDetails';
-import { Item } from '@antv/g6';
 import { useRouter } from 'next/router';
+import { MapContext } from '@lib/contexts/mapContext';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -50,22 +50,38 @@ type ExploreDataSourceProps = {
 
 const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(!edges.length);
-  const [selectedNode, setSelectedNode] = useState<Item | null>(null);
   const [eventData, setEventData] = useState({});
   const router = useRouter();
   const { dsId } = router.query;
+  const {
+    state: { activeNode },
+  } = useContext(MapContext);
+
+  const {
+    isOpen: isEventDetailsDrawerOpen,
+    onOpen: openEventDetailsDrawer,
+    onClose: closeEventDetailsDrawer,
+  } = useDisclosure();
 
   useEffect(() => {
     setIsLoading(!edges.length);
   }, [edges.length]);
 
   useEffect(() => {
-    if (!selectedNode) return;
+    if (activeNode) {
+      openEventDetailsDrawer();
+    } else {
+      closeEventDetailsDrawer();
+    }
+  }, [activeNode]);
+
+  useEffect(() => {
+    if (!activeNode) return;
     const fetchTrendsData = async () => {
       const [nodeSignificanceData, trendsData, sankeyData] = await Promise.all([
-        getNodeSignificanceData(dsId as string, selectedNode?._cfg?.id!!),
-        getTrendsData(dsId as string, selectedNode?._cfg?.id!!, 'week'),
-        getSankeyData(dsId as string, selectedNode._cfg?.id!!),
+        getNodeSignificanceData(dsId as string, activeNode?._cfg?.id!!),
+        getTrendsData(dsId as string, activeNode?._cfg?.id!!, 'week'),
+        getSankeyData(dsId as string, activeNode?._cfg?.id!!),
       ]);
 
       setEventData({
@@ -75,13 +91,7 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
       });
     };
     fetchTrendsData();
-  }, [selectedNode]);
-
-  const {
-    isOpen: isEventDetailsDrawerOpen,
-    onOpen: openEventDetailsDrawer,
-    onClose: closeEventDetailsDrawer,
-  } = useDisclosure();
+  }, [activeNode]);
 
   return (
     <>
@@ -96,16 +106,10 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
           <EventDetails
             isEventDetailsDrawerOpen={isEventDetailsDrawerOpen}
             closeEventDetailsDrawer={closeEventDetailsDrawer}
-            setSelectedNode={setSelectedNode}
             eventData={eventData}
             setEventData={setEventData}
           />
-          <Graph
-            visualisationData={edges}
-            openEventDetailsDrawer={openEventDetailsDrawer}
-            selectedNode={selectedNode}
-            setSelectedNode={setSelectedNode}
-          />
+          <Graph visualisationData={edges} />
         </>
       )}
     </>

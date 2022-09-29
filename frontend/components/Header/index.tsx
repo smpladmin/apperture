@@ -25,7 +25,7 @@ import SwitchDataSource from '@components/SwitchDataSource';
 import { DataSource } from '@lib/domain/datasource';
 import { useRouter } from 'next/router';
 import { Provider } from '@lib/domain/provider';
-import SearchSuggestionBox from './SearchSuggestionBox';
+import Search from './Search';
 
 type HeaderProps = {
   selectedApp: AppWithIntegrations;
@@ -113,7 +113,7 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
             </DrawerContent>
           </Drawer>
         )}
-        <SearchSuggestionBox dataSourceType={dataSourceType!!} />
+        <Search dataSourceType={dataSourceType!!} />
         <Flex alignItems={'center'} justifyContent={'space-between'} gap={6}>
           <Box hidden={context.device.isMobile}>
             <i className="ri-calendar-fill"></i>

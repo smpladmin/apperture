@@ -1,24 +1,29 @@
-import { EdgeType, NodeType } from '@lib/types/graph';
+import { Item } from '@antv/g6';
 import { createContext, ReactElement, useReducer } from 'react';
 
-type State = {
-  visualisationData: Array<any>;
-  selectedNode: Array<any>;
+type InitialStateType = {
+  visualisationData: Array<Item>;
+  activeNode: Item | null;
 };
 
 interface ContextType {
-  state: State;
+  state: InitialStateType;
   dispatch: React.Dispatch<any>;
 }
 
-type LayoutActions = {
-  type: 'SET_VISUALISATION_DATA';
-  payload: { [key in string]: Array<EdgeType & NodeType> };
-};
+type LayoutActions =
+  | {
+      type: 'SET_VISUALISATION_DATA';
+      payload: Item[];
+    }
+  | {
+      type: 'SET_ACTIVE_NODE';
+      payload: Item;
+    };
 
-const initialState: State = {
+const initialState: InitialStateType = {
   visualisationData: [],
-  selectedNode: [],
+  activeNode: null,
 };
 
 export const MapContext = createContext<ContextType>({
@@ -32,7 +37,10 @@ const visualisationDataReducer = (
 ) => {
   switch (action.type) {
     case 'SET_VISUALISATION_DATA': {
-      return { ...state, visualisationData: [action.payload] };
+      return { ...state, visualisationData: [...action.payload] };
+    }
+    case 'SET_ACTIVE_NODE': {
+      return { ...state, activeNode: action.payload };
     }
     default:
       return state;

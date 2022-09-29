@@ -18,17 +18,9 @@ import { MapContext } from '@lib/contexts/mapContext';
 
 type GraphProps = {
   visualisationData: Array<Edge>;
-  openEventDetailsDrawer: () => void;
-  selectedNode: Item | null;
-  setSelectedNode: Function;
 };
 
-const Graph = ({
-  visualisationData,
-  openEventDetailsDrawer,
-  selectedNode,
-  setSelectedNode,
-}: GraphProps) => {
+const Graph = ({ visualisationData }: GraphProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const gRef = useRef<{ graph: G6Graph | null }>({
     graph: null,
@@ -37,29 +29,32 @@ const Graph = ({
   const router = useRouter();
   const { dsId } = router.query;
 
-  const graphData = useMemo(() => transformData(visualisationData), [dsId]);
+  const graphData = useMemo(
+    () => transformData(visualisationData),
+    [dsId, visualisationData]
+  );
 
-  const { dispatch } = useContext(MapContext);
-
-  useEffect(() => {
-    dispatch({
-      type: 'SET_VISUALISATION_DATA',
-      payload: graphData,
-    });
-  }, [dsId]);
+  const {
+    state: { activeNode },
+    dispatch,
+  } = useContext(MapContext);
 
   useEffect(() => {
     let graph = gRef.current.graph;
 
-    if (!selectedNode) {
+    if (!activeNode) {
       graph?.findAllByState('node', 'active').forEach((node) => {
         graph?.setItemState(node, 'active', false);
       });
     }
 
-    const zoomRatio = gRef.current.graph?.getZoom();
-    const nodes = gRef.current.graph?.getNodes();
-    const edges = gRef.current.graph?.getEdges();
+    if (activeNode) {
+      graph?.setItemState(activeNode, 'active', true);
+    }
+
+    const zoomRatio = graph?.getZoom();
+    const nodes = graph?.getNodes();
+    const edges = graph?.getEdges();
     nodesOnZoom(nodes, zoomRatio);
     edgesOnZoom(edges, zoomRatio);
 
@@ -96,16 +91,16 @@ const Graph = ({
             graph.setItemState(node, 'active', false);
           });
         }
-        setSelectedNode(item);
 
+        dispatch({
+          type: 'SET_ACTIVE_NODE',
+          payload: item,
+        });
         // Set the 'active' state of the clicked node to be true
         graph?.setItemState(item, 'active', true);
-
-        //open eventDetails drawer
-        openEventDetailsDrawer();
       },
     });
-  }, [selectedNode]);
+  }, [activeNode]);
 
   useEffect(() => {
     if (!gRef.current.graph) {
@@ -271,6 +266,14 @@ const Graph = ({
     graph.data(graphData);
     graph.render();
   }, [graphData]);
+
+  useEffect(() => {
+    let graph = gRef.current.graph;
+    dispatch({
+      type: 'SET_VISUALISATION_DATA',
+      payload: graph?.getNodes(),
+    });
+  }, [dsId]);
 
   return (
     <div

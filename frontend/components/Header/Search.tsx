@@ -12,9 +12,10 @@ import React, {
 import mixPanel from '@assets/images/mixPanel-icon.png';
 import gaLogo from '@assets/images/ga-logo-small.svg';
 import { MapContext } from '@lib/contexts/mapContext';
+import { Item } from '@antv/g6';
 
 type SuggestionListProps = {
-  suggestion: NodeType;
+  suggestion: Item;
   dataSourceType: Provider;
   suggestionsClickHandler: Function;
 
@@ -30,7 +31,7 @@ const SuggestionsList = ({
   return (
     <Fragment>
       <Flex
-        onClick={() => suggestionsClickHandler(suggestion.id)}
+        onClick={() => suggestionsClickHandler(suggestion)}
         cursor={'pointer'}
         height={'20'}
         alignItems={'center'}
@@ -54,7 +55,7 @@ const SuggestionsList = ({
           lineHeight={'base'}
           wordBreak={'break-word'}
         >
-          {suggestion.id}
+          {suggestion?._cfg?.id}
         </Text>
       </Flex>
     </Fragment>
@@ -65,32 +66,39 @@ type SearchSuggestionBoxProps = {
   dataSourceType: Provider;
 };
 
-const SearchSuggestionBox = ({ dataSourceType }: SearchSuggestionBoxProps) => {
+const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
   const [searchText, setSearchText] = useState('');
-  const [suggestions, setSuggestions] = useState<Array<NodeType>>([]);
+  const [suggestions, setSuggestions] = useState<Array<Item>>([]);
   const [cursor, setCursor] = useState(-1);
   const searchResultRef = useRef<HTMLDivElement>(null);
+
   const {
     state: { visualisationData },
+    dispatch,
   } = useContext(MapContext);
 
   const onChangeHandler = (text: string) => {
-    let matches: NodeType[] = [];
+    let matches: Item[] = [];
     if (text) {
-      matches = visualisationData[0].nodes.filter((node: NodeType) => {
+      matches = visualisationData.filter((item: Item) => {
         return (
-          node.id.toLowerCase().startsWith(text.toLowerCase()) ||
-          node.id.toLowerCase().includes(text.toLowerCase())
+          item?._cfg?.id!!.toLowerCase().startsWith(text.toLowerCase()) ||
+          item?._cfg?.id!!.toLowerCase().includes(text.toLowerCase())
         );
       });
+      matches.sort((a, b) => a._cfg?.id?.length!! - b._cfg?.id?.length!!);
       setCursor(-1);
     }
-    setSuggestions([...new Set(matches)]);
+    setSuggestions(matches);
     setSearchText(text);
   };
 
-  const suggestionsClickHandler = (suggestion: string) => {
-    setSearchText(suggestion);
+  const suggestionsClickHandler = (suggestion: Item) => {
+    setSearchText(suggestion?._cfg?.id!!);
+    dispatch({
+      type: 'SET_ACTIVE_NODE',
+      payload: suggestion,
+    });
     setSuggestions([]);
   };
 
@@ -103,7 +111,11 @@ const SearchSuggestionBox = ({ dataSourceType }: SearchSuggestionBoxProps) => {
       setCursor((c) => (c > 0 ? c - 1 : 0));
     }
     if (e.key === 'Enter' && cursor >= 0) {
-      setSearchText(suggestions[cursor]?.id);
+      setSearchText(suggestions[cursor]?._cfg?.id!!);
+      dispatch({
+        type: 'SET_ACTIVE_NODE',
+        payload: suggestions[cursor],
+      });
       setSuggestions([]);
       setCursor(-1);
     }
@@ -164,7 +176,7 @@ const SearchSuggestionBox = ({ dataSourceType }: SearchSuggestionBoxProps) => {
           <>
             {suggestions.map((suggestion, i, suggestions) => {
               return (
-                <Fragment key={suggestion.id}>
+                <Fragment key={suggestion?._cfg?.id}>
                   <SuggestionsList
                     suggestion={suggestion}
                     suggestionsClickHandler={suggestionsClickHandler}
@@ -187,4 +199,4 @@ const SearchSuggestionBox = ({ dataSourceType }: SearchSuggestionBoxProps) => {
     </Flex>
   );
 };
-export default SearchSuggestionBox;
+export default Search;
