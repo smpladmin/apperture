@@ -15,6 +15,7 @@ import { transformData } from './transformData';
 import { Edge } from '@lib/domain/edge';
 import { useRouter } from 'next/router';
 import { MapContext } from '@lib/contexts/mapContext';
+import { Actions } from '@lib/types/context';
 
 type GraphProps = {
   visualisationData: Array<Edge>;
@@ -90,7 +91,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
         }
 
         dispatch({
-          type: 'SET_ACTIVE_NODE',
+          type: Actions.SET_ACTIVE_NODE,
           payload: item,
         });
         // Set the 'active' state of the clicked node to be true
@@ -267,7 +268,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
   useEffect(() => {
     let graph = gRef.current.graph;
     dispatch({
-      type: 'SET_VISUALISATION_DATA',
+      type: Actions.SET_VISUALISATION_DATA,
       payload: graph?.getNodes(),
     });
   }, [dsId]);
