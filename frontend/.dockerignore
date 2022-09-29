@@ -6,3 +6,8 @@ node_modules
 .nvmrc
 .vscode
 README.md
+.env*
+.flaskenv*
+!.env.project
+!.env.vault
+!.env
