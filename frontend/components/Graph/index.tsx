@@ -29,10 +29,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
   const router = useRouter();
   const { dsId } = router.query;
 
-  const graphData = useMemo(
-    () => transformData(visualisationData),
-    [dsId, visualisationData]
-  );
+  const graphData = useMemo(() => transformData(visualisationData), [dsId]);
 
   const {
     state: { activeNode },
