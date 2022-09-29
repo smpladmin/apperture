@@ -96,6 +96,19 @@ const Graph = ({ visualisationData }: GraphProps) => {
         });
         // Set the 'active' state of the clicked node to be true
         graph?.setItemState(item, 'active', true);
+
+        // customize active state style for node
+        graph?.updateItem(item, {
+          stateStyles: {
+            active: {
+              stroke: '#000000',
+              fill: '#ffffff',
+              lineWidth: 6 / graph?.getZoom(),
+              shadowColor: '#ffffff',
+              shadowBlur: 6,
+            },
+          },
+        });
       },
     });
   }, [activeNode]);
@@ -198,17 +211,6 @@ const Graph = ({ visualisationData }: GraphProps) => {
               maxZoom: graphConfig.maxZoom,
             },
           ],
-        },
-        nodeStateStyles: {
-          active: {
-            stroke: '#000000',
-            fill: '#ffffff',
-            opacity: 1,
-            lineWidth: 8,
-            r: 16,
-            shadowColor: '#ffffff',
-            shadowBlur: 6,
-          },
         },
         layout: {
           type: graphConfig.layout,
