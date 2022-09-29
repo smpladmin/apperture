@@ -5,6 +5,7 @@ import React, {
   Fragment,
   KeyboardEvent,
   useContext,
+  useEffect,
   useRef,
   useState,
 } from 'react';
@@ -28,37 +29,45 @@ const SuggestionsList = ({
   suggestionsClickHandler,
   active,
 }: SuggestionListProps) => {
-  return (
-    <Fragment>
-      <Flex
-        onClick={() => suggestionsClickHandler(suggestion)}
-        cursor={'pointer'}
-        height={'20'}
-        alignItems={'center'}
-        bg={active ? 'white.100' : ''}
-        _hover={{
-          bg: 'white.100',
-        }}
-        gap={'3'}
-        px={'3'}
-      >
-        <Box h={'8'} w={'8'}>
-          <Image
-            src={dataSourceType === Provider.MIXPANEL ? mixPanel : gaLogo}
-            alt="data-source-mix-panel"
-          />
-        </Box>
+  const searchResultRef = useRef<HTMLDivElement>(null);
 
-        <Text
-          fontSize={'base'}
-          fontWeight={'medium'}
-          lineHeight={'base'}
-          wordBreak={'break-word'}
-        >
-          {suggestion?._cfg?.id}
-        </Text>
-      </Flex>
-    </Fragment>
+  useEffect(() => {
+    if (!searchResultRef.current) return;
+    searchResultRef.current?.scrollIntoView({
+      block: 'center',
+    });
+  }, [active]);
+
+  return (
+    <Flex
+      onClick={() => suggestionsClickHandler(suggestion)}
+      cursor={'pointer'}
+      height={'20'}
+      alignItems={'center'}
+      bg={active ? 'white.100' : ''}
+      _hover={{
+        bg: 'white.100',
+      }}
+      gap={'3'}
+      px={'3'}
+      ref={active ? searchResultRef : null}
+    >
+      <Box h={'8'} w={'8'}>
+        <Image
+          src={dataSourceType === Provider.MIXPANEL ? mixPanel : gaLogo}
+          alt="data-source-mix-panel"
+        />
+      </Box>
+
+      <Text
+        fontSize={'base'}
+        fontWeight={'medium'}
+        lineHeight={'base'}
+        wordBreak={'break-word'}
+      >
+        {suggestion?._cfg?.id}
+      </Text>
+    </Flex>
   );
 };
 
@@ -70,7 +79,6 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
   const [searchText, setSearchText] = useState('');
   const [suggestions, setSuggestions] = useState<Array<Item>>([]);
   const [cursor, setCursor] = useState(-1);
-  const searchResultRef = useRef<HTMLDivElement>(null);
 
   const {
     state: { visualisationData },
@@ -105,10 +113,10 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
   const keyboardNavigation = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
       suggestions.length &&
-        setCursor((c) => (c < suggestions.length - 1 ? c + 1 : c));
+        setCursor((c) => (c < suggestions.length - 1 ? c + 1 : 0));
     }
     if (e.key === 'ArrowUp') {
-      setCursor((c) => (c > 0 ? c - 1 : 0));
+      setCursor((c) => (c > 0 ? c - 1 : suggestions.length - 1));
     }
     if (e.key === 'Enter') {
       if (cursor >= 0) {
@@ -181,10 +189,10 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
           position={'absolute'}
           rounded={'16'}
           mt={'13'}
-          py={'7'}
+          pt={'7'}
+          pb={'5'}
           px={'6'}
           maxHeight={'112'}
-          ref={searchResultRef}
         >
           <>
             {suggestions.map((suggestion, i, suggestions) => {
