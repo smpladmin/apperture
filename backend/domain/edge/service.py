@@ -4,7 +4,15 @@ from typing import Union
 from beanie import PydanticObjectId
 from fastapi import Depends
 from domain.common.models import IntegrationProvider
-from domain.edge.models import Edge, BaseEdge, RichEdge, AggregatedEdge, NodeTrend, NodeSankey, NodeSignificance
+from domain.edge.models import (
+    Edge,
+    BaseEdge,
+    RichEdge,
+    AggregatedEdge,
+    NodeTrend,
+    NodeSankey,
+    NodeSignificance,
+)
 from mongo.mongo import Mongo
 
 
@@ -115,14 +123,22 @@ class EdgeService:
                 ).delete()
                 await RichEdge.insert_many(edges)
 
-    async def get_edges(self, datasource_id: str, start_date: str, end_date: str) -> list[AggregatedEdge]:
-        start_date = dt.strptime(start_date, '%Y-%m-%d')
-        end_date = dt.strptime(end_date, '%Y-%m-%d')
+    async def get_edges(
+        self, datasource_id: str, start_date: str, end_date: str
+    ) -> list[AggregatedEdge]:
+        start_date = dt.strptime(start_date, "%Y-%m-%d")
+        end_date = dt.strptime(end_date, "%Y-%m-%d")
         minimum_edge_count = 100
         pipeline = [
-            {"$match": {"$and": [{"datasource_id": PydanticObjectId(datasource_id)},
-                                 {"date": {"$gte": start_date}},
-                                 {"date": {"$lte": end_date}}]}},
+            {
+                "$match": {
+                    "$and": [
+                        {"datasource_id": PydanticObjectId(datasource_id)},
+                        {"date": {"$gte": start_date}},
+                        {"date": {"$lte": end_date}},
+                    ]
+                }
+            },
             {
                 "$group": {
                     "_id": {
@@ -134,12 +150,8 @@ class EdgeService:
                 }
             },
             {"$setWindowFields": {"output": {"totalCount": {"$count": {}}}}},
-            {
-                "$sort": {"hits": -1}
-            },
-            {
-                "$limit": minimum_edge_count
-            },
+            {"$sort": {"hits": -1}},
+            {"$limit": minimum_edge_count},
             {
                 "$project": {
                     "current_event": "$_id.current_event",
@@ -155,23 +167,33 @@ class EdgeService:
             .to_list()
         )
 
-    async def get_node_trends(self, datasource_id: str, node: str, trend_type: str,
-                              start_date: str, end_date: str) -> list[NodeTrend]:
-        start_date = dt.strptime(start_date, '%Y-%m-%d')
-        end_date = dt.strptime(end_date, '%Y-%m-%d')
+    async def get_node_trends(
+        self,
+        datasource_id: str,
+        node: str,
+        trend_type: str,
+        start_date: str,
+        end_date: str,
+    ) -> list[NodeTrend]:
+        start_date = dt.strptime(start_date, "%Y-%m-%d")
+        end_date = dt.strptime(end_date, "%Y-%m-%d")
         pipeline = [
             {
-                "$match": {"$and": [{"datasource_id": PydanticObjectId(datasource_id)},
-                                    {"current_event": node},
-                                    {"date": {"$gte": start_date}},
-                                    {"date": {"$lte": end_date}}]}
+                "$match": {
+                    "$and": [
+                        {"datasource_id": PydanticObjectId(datasource_id)},
+                        {"current_event": node},
+                        {"date": {"$gte": start_date}},
+                        {"date": {"$lte": end_date}},
+                    ]
+                }
             },
             {
                 "$group": {
                     "_id": {
                         "current_event": "$current_event",
                         "{}".format(trend_type): {"${}".format(trend_type): "$date"},
-                        "year": {"$year": "$date"}
+                        "year": {"$year": "$date"},
                     },
                     "node": {"$max": "$current_event"},
                     "hits": {"$sum": "$hits"},
@@ -184,32 +206,31 @@ class EdgeService:
                     "end_date": {"$max": "$date"},
                 }
             },
-            {
-                "$sort": {
-                    "year": 1,
-                    "{}".format(trend_type): 1
-                }
-            }
+            {"$sort": {"year": 1, "{}".format(trend_type): 1}},
         ]
 
-        if trend_type == 'date':
-            pipeline[1]['$group']['_id'] = {'current_event': '$current_event',
-                                            'date': '$date'}
+        if trend_type == "date":
+            pipeline[1]["$group"]["_id"] = {
+                "current_event": "$current_event",
+                "date": "$date",
+            }
 
         return (
-            await BaseEdge.find().aggregate(pipeline, projection_model=NodeTrend).to_list()
+            await BaseEdge.find()
+            .aggregate(pipeline, projection_model=NodeTrend)
+            .to_list()
         )
 
     def create_others_node(self, nodes, threshold):
         if len(nodes) > threshold:
-            others_node = nodes[threshold-1]
+            others_node = nodes[threshold - 1]
             others_node.node = "Others"
-            if nodes[0].flow == 'inflow':
+            if nodes[0].flow == "inflow":
                 others_node.previous_event = "Others"
             else:
                 others_node.current_event = "Others"
-            others_node.hits = sum([node.hits for node in nodes[threshold-1:]])
-            others_node.users = sum([node.users for node in nodes[threshold-1:]])
+            others_node.hits = sum([node.hits for node in nodes[threshold - 1 :]])
+            others_node.users = sum([node.users for node in nodes[threshold - 1 :]])
             nodes = nodes[:threshold]
 
         return nodes
@@ -222,102 +243,76 @@ class EdgeService:
         exits_node.current_event = "Exits"
         return exits_node
 
-    async def get_node_sankey(self, datasource_id: str, node: str,
-                              start_date: str, end_date: str) -> list[NodeSankey]:
-        start_date = dt.strptime(start_date, '%Y-%m-%d')
-        end_date = dt.strptime(end_date, '%Y-%m-%d')
+    async def get_node_sankey(
+        self, datasource_id: str, node: str, start_date: str, end_date: str
+    ) -> list[NodeSankey]:
+        start_date = dt.strptime(start_date, "%Y-%m-%d")
+        end_date = dt.strptime(end_date, "%Y-%m-%d")
         pipeline = [
             {
-                '$match': {"$and": [{"datasource_id": PydanticObjectId(datasource_id)},
-                                    {"current_event": node},
-                                    {"date": {"$gte": start_date}},
-                                    {"date": {"$lte": end_date}}]}
-            }, {
-                '$group': {
-                    '_id': {
-                        'previous_event': '$previous_event'
-                    },
-                    'node': {
-                        '$max': '$previous_event'
-                    },
-                    'current_event': {
-                        '$max': '$current_event'
-                    },
-                    'previous_event': {
-                        '$max': '$previous_event'
-                    },
-                    'hits': {
-                        '$sum': '$hits'
-                    },
-                    'users': {
-                        '$sum': '$users'
-                    },
-                    'flow': {
-                        '$max': 'inflow'
-                    },
-                    'hits_percentage': {
-                        '$max': 0
-                    },
-                    'users_percentage': {
-                        '$max': 0
-                    }
-                }
-            }, {
-                '$sort': {
-                    'hits': -1
-                }
-            }, {
-                '$unionWith': {
-                    'coll': 'edges',
-                    'pipeline': [
-                        {
-                            '$match': {"$and": [{"datasource_id": PydanticObjectId(datasource_id)},
-                                                {"previous_event": node},
-                                                {"date": {"$gte": start_date}},
-                                                {"date": {"$lte": end_date}}]}
-                        }, {
-                            '$group': {
-                                '_id': {
-                                    'current_event': '$current_event'
-                                },
-                                'node': {
-                                    '$max': '$current_event'
-                                },
-                                'current_event': {
-                                    '$max': '$current_event'
-                                },
-                                'previous_event': {
-                                    '$max': '$previous_event'
-                                },
-                                'hits': {
-                                    '$sum': '$hits'
-                                },
-                                'users': {
-                                    '$sum': '$users'
-                                },
-                                'flow': {
-                                    '$max': 'outflow'
-                                },
-                                'hits_percentage': {
-                                    '$max': 0
-                                },
-                                'users_percentage': {
-                                    '$max': 0
-                                }
-                            }
-                        }, {
-                            '$sort': {
-                                'hits': -1
-                            }
-                        }
+                "$match": {
+                    "$and": [
+                        {"datasource_id": PydanticObjectId(datasource_id)},
+                        {"current_event": node},
+                        {"date": {"$gte": start_date}},
+                        {"date": {"$lte": end_date}},
                     ]
                 }
-            }
+            },
+            {
+                "$group": {
+                    "_id": {"previous_event": "$previous_event"},
+                    "node": {"$max": "$previous_event"},
+                    "current_event": {"$max": "$current_event"},
+                    "previous_event": {"$max": "$previous_event"},
+                    "hits": {"$sum": "$hits"},
+                    "users": {"$sum": "$users"},
+                    "flow": {"$max": "inflow"},
+                    "hits_percentage": {"$max": 0},
+                    "users_percentage": {"$max": 0},
+                }
+            },
+            {"$sort": {"hits": -1}},
+            {
+                "$unionWith": {
+                    "coll": "edges",
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$and": [
+                                    {"datasource_id": PydanticObjectId(datasource_id)},
+                                    {"previous_event": node},
+                                    {"date": {"$gte": start_date}},
+                                    {"date": {"$lte": end_date}},
+                                ]
+                            }
+                        },
+                        {
+                            "$group": {
+                                "_id": {"current_event": "$current_event"},
+                                "node": {"$max": "$current_event"},
+                                "current_event": {"$max": "$current_event"},
+                                "previous_event": {"$max": "$previous_event"},
+                                "hits": {"$sum": "$hits"},
+                                "users": {"$sum": "$users"},
+                                "flow": {"$max": "outflow"},
+                                "hits_percentage": {"$max": 0},
+                                "users_percentage": {"$max": 0},
+                            }
+                        },
+                        {"$sort": {"hits": -1}},
+                    ],
+                }
+            },
         ]
 
-        sankey_nodes = await BaseEdge.find().aggregate(pipeline, projection_model=NodeSankey).to_list()
-        inflow_nodes = [node for node in sankey_nodes if node.flow == 'inflow']
-        outflow_nodes = [node for node in sankey_nodes if node.flow == 'outflow']
+        sankey_nodes = (
+            await BaseEdge.find()
+            .aggregate(pipeline, projection_model=NodeSankey)
+            .to_list()
+        )
+        inflow_nodes = [node for node in sankey_nodes if node.flow == "inflow"]
+        outflow_nodes = [node for node in sankey_nodes if node.flow == "outflow"]
         if len(inflow_nodes) > 5:
             inflow_nodes = self.create_others_node(inflow_nodes, 5)
         if len(outflow_nodes) > 4:
@@ -325,95 +320,92 @@ class EdgeService:
 
         # Temporary fix for sankey duplicate names
         for node in inflow_nodes:
-            node.previous_event += ' '
+            node.previous_event += " "
 
         inflow_hits = sum([node.hits for node in inflow_nodes])
         outflow_hits = sum([node.hits for node in outflow_nodes])
         inflow_users = sum([node.users for node in inflow_nodes])
         outflow_users = sum([node.users for node in outflow_nodes])
         if (len(outflow_nodes) > 0) and (inflow_hits > outflow_hits):
-            outflow_nodes.append(self.create_exits_node(outflow_nodes[0],
-                                                        inflow_hits-outflow_hits, inflow_users-outflow_users))
-        sankey_nodes = inflow_nodes+outflow_nodes
+            outflow_nodes.append(
+                self.create_exits_node(
+                    outflow_nodes[0],
+                    inflow_hits - outflow_hits,
+                    inflow_users - outflow_users,
+                )
+            )
+        sankey_nodes = inflow_nodes + outflow_nodes
         for node in sankey_nodes:
-            node.hits_percentage = float("{:.2f}".format((node.hits*100)/max(inflow_hits, outflow_hits)))
+            node.hits_percentage = float(
+                "{:.2f}".format((node.hits * 100) / max(inflow_hits, outflow_hits))
+            )
             # Placeholder for now
             node.users_percentage = 0
 
-        return (
-            sankey_nodes
-        )
+        return sankey_nodes
 
     # Remove facet in-future, might cause performance issues.
-    async def get_node_significance(self, datasource_id: str, node: str,
-                                    start_date: str, end_date: str) -> list[NodeSignificance]:
-        start_date = dt.strptime(start_date, '%Y-%m-%d')
-        end_date = dt.strptime(end_date, '%Y-%m-%d')
+    async def get_node_significance(
+        self, datasource_id: str, node: str, start_date: str, end_date: str
+    ) -> list[NodeSignificance]:
+        start_date = dt.strptime(start_date, "%Y-%m-%d")
+        end_date = dt.strptime(end_date, "%Y-%m-%d")
         pipeline = [
             {
-                '$match': {"$and": [{"datasource_id": PydanticObjectId(datasource_id)},
-                                    {"date": {"$gte": start_date}},
-                                    {"date": {"$lte": end_date}}]}
-            }, {
-                '$facet': {
-                    'total_count': [
-                        {
-                            '$group': {
-                                '_id': {
-                                    '_class_id': '$_class_id'
-                                },
-                                'hits': {
-                                    '$sum': '$hits'
-                                }
-                            }
-                        }
-                    ],
-                    'current_node_count': [
-                        {
-                            '$match': {
-                                'current_event': node
-                            }
-                        }, {
-                            '$group': {
-                                '_id': {
-                                    'event': '$current_event'
-                                },
-                                'hits': {
-                                    '$sum': '$hits'
-                                }
-                            }
-                        }
-                    ],
-                    'previous_node_count': [
-                        {
-                            '$match': {
-                                'previous_event': node
-                            }
-                        }, {
-                            '$group': {
-                                '_id': {
-                                    'event': '$previous_event'
-                                },
-                                'hits': {
-                                    '$sum': '$hits'
-                                }
-                            }
-                        }
+                "$match": {
+                    "$and": [
+                        {"datasource_id": PydanticObjectId(datasource_id)},
+                        {"date": {"$gte": start_date}},
+                        {"date": {"$lte": end_date}},
                     ]
                 }
-            }, {
-                '$project': {
-                    'node': node,
-                    'node_hits': {
-                        '$ifNull': [{'$max': "$current_node_count.hits"}, {'$max': "$previous_node_count.hits"}]
-                    },
-                    'total_hits': {
-                        '$max': '$total_count.hits'
-                    },
+            },
+            {
+                "$facet": {
+                    "total_count": [
+                        {
+                            "$group": {
+                                "_id": {"_class_id": "$_class_id"},
+                                "hits": {"$sum": "$hits"},
+                            }
+                        }
+                    ],
+                    "current_node_count": [
+                        {"$match": {"current_event": node}},
+                        {
+                            "$group": {
+                                "_id": {"event": "$current_event"},
+                                "hits": {"$sum": "$hits"},
+                            }
+                        },
+                    ],
+                    "previous_node_count": [
+                        {"$match": {"previous_event": node}},
+                        {
+                            "$group": {
+                                "_id": {"event": "$previous_event"},
+                                "hits": {"$sum": "$hits"},
+                            }
+                        },
+                    ],
                 }
-            }
+            },
+            {
+                "$project": {
+                    "node": node,
+                    "node_hits": {
+                        "$ifNull": [
+                            {"$max": "$current_node_count.hits"},
+                            {"$max": "$previous_node_count.hits"},
+                        ]
+                    },
+                    "total_hits": {"$max": "$total_count.hits"},
+                }
+            },
         ]
 
         return (
-            await BaseEdge.find().aggregate(pipeline, projection_model=NodeSignificance).to_list()
+            await BaseEdge.find()
+            .aggregate(pipeline, projection_model=NodeSignificance)
+            .to_list()
         )

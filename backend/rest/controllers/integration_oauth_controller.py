@@ -81,7 +81,9 @@ async def _authorise(request: Request):
 def _build_redirect_url(url: str, integration_id: str):
     redirect_url = urlparse(url)
     if redirect_url.query:
-        redirect_url = redirect_url._replace(query=f"{redirect_url.query}&integration_id={integration_id}")
+        redirect_url = redirect_url._replace(
+            query=f"{redirect_url.query}&integration_id={integration_id}"
+        )
     else:
         redirect_url = redirect_url._replace(query=f"integration_id={integration_id}")
     return redirect_url.geturl()
