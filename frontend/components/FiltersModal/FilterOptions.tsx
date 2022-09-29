@@ -19,9 +19,9 @@ const FilterOption = ({ option }: FilterOptionProps) => {
     <Flex as={'label'} gap={'3'} py={'4'} px={'3'}>
       <Checkbox colorScheme={'radioBlack'} value={option.id} />
       <Text
-        fontSize={'xs-14'}
+        fontSize={{ base: 'xs-12', md: 'xs-14' }}
+        lineHeight={{ base: 'xs-12', md: 'xs-14' }}
         fontWeight={'medium'}
-        lineHeight={'xs-14'}
         cursor={'pointer'}
       >
         {option.label}
@@ -42,7 +42,12 @@ const FiltersOption = ({
     setSelectedFilter(result);
   };
   return (
-    <Flex direction={'column'} pt={'4'} pl={'7'} w={'full'}>
+    <Flex
+      direction={'column'}
+      pt={{ base: '0', md: '4' }}
+      pl={{ base: '3', md: '7' }}
+      w={'full'}
+    >
       <CheckboxGroup
         value={selectedFilter[currentFilter]}
         onChange={setFilterValues}
