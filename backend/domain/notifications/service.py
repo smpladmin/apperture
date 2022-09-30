@@ -77,36 +77,38 @@ class NotificationService:
 
     def compute_updates(
         self,
-        node_data_bulk,
-    ):
+        node_data_bulk: Dict,
+    ) -> List[Dict]:
         computed_updates = []
-        for notification_id, node_data in node_data_bulk.items():
-            if len(node_data) == 1:
-                val = (
-                    sum([node.hits for node in node_data[0]])
-                    if len(node_data[0]) > 0
-                    else 0
-                )
 
-            elif len(node_data) == 2:
-                num = (
-                    sum([node.hits for node in node_data[0]])
-                    if len(node_data[0]) > 0
-                    else 0
-                )
-                den = (
-                    sum([node.hits for node in node_data[1]])
-                    if len(node_data[1]) > 0
-                    else 0
-                )
-                val = num / den if den != 0 else 0
+        if node_data_bulk:
+            for notification_id, node_data in node_data_bulk.items():
+                if len(node_data) == 1:
+                    val = (
+                        sum([node.hits for node in node_data[0]])
+                        if len(node_data[0]) > 0
+                        else 0
+                    )
 
-            else:
-                val = 0
+                elif len(node_data) == 2:
+                    num = (
+                        sum([node.hits for node in node_data[0]])
+                        if len(node_data[0]) > 0
+                        else 0
+                    )
+                    den = (
+                        sum([node.hits for node in node_data[1]])
+                        if len(node_data[1]) > 0
+                        else 0
+                    )
+                    val = num / den if den != 0 else 0
 
-            computed_update = {}
-            computed_update["name"] = str(notification_id)
-            computed_update["value"] = float("{:.2f}".format(val))
-            computed_updates.append(computed_update)
+                else:
+                    val = 0
+
+                computed_update = {}
+                computed_update["name"] = str(notification_id)
+                computed_update["value"] = float("{:.2f}".format(val))
+                computed_updates.append(computed_update)
 
         return computed_updates

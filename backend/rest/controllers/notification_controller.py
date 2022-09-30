@@ -58,9 +58,7 @@ async def compute_notifications(
     ]
     alerts = [notif for notif in notifications if notif["notification_type"] == "alert"]
 
-    computed_updates = None
-    if len(updates) > 0:
-        node_data_bulk = await edge_service.get_node_data_bulk(updates=updates)
-        computed_updates = notification_service.compute_updates(node_data_bulk)
+    node_data_bulk = await edge_service.get_node_data_bulk(updates=updates)
+    computed_updates = notification_service.compute_updates(node_data_bulk)
 
     return computed_updates

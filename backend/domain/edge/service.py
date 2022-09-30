@@ -1,6 +1,6 @@
 import asyncio
 from copy import deepcopy
-from typing import List
+from typing import List, Dict
 from datetime import datetime as dt
 from datetime import timedelta
 from typing import Union
@@ -445,14 +445,15 @@ class EdgeService:
     async def get_node_data_bulk(
         self,
         updates,
-    ):
+    ) -> Dict:
         node_data_bulk = {}
-        for update in updates:
-            node_data_promises = [
-                self.get_node_data(nodes, update["datasource_id"])
-                for ratio_name, nodes in update["variable_map"].items()
-            ]
-            node_data = await asyncio.gather(*node_data_promises)
-            node_data_bulk[update["_id"]] = node_data
+        if updates:
+            for update in updates:
+                node_data_promises = [
+                    self.get_node_data(nodes, update["datasource_id"])
+                    for ratio_name, nodes in update["variable_map"].items()
+                ]
+                node_data = await asyncio.gather(*node_data_promises)
+                node_data_bulk[update["_id"]] = node_data
 
         return node_data_bulk
