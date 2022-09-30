@@ -24,10 +24,3 @@ async def update_edges(
 ):
     job = dpq_service.schedule_test(dto.datasource_id)
     print(job)
-
-
-@router.post("/runall")
-async def runall():
-    # Get all datasources
-    # For each datasource, enqueue fetch
-    pass

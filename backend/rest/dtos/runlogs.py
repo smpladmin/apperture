@@ -4,7 +4,7 @@ from domain.runlogs.models import RunLogStatus
 from pydantic import BaseModel
 
 
-class CreateRunLogDto(BaseModel):
+class UpdateRunLogDto(BaseModel):
     datasource_id: str
-    date: datetime
+    date: str
     status: RunLogStatus

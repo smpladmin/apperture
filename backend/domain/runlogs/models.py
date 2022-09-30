@@ -8,6 +8,8 @@ from repositories import Document
 class RunLogStatus(str, Enum):
     SCHEDULED = "scheduled"
     COMPLETED = "completed"
+    STARTED = "started"
+    FAILED = "failed"
 
 
 class RunLog(Document):

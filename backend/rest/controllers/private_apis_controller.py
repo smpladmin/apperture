@@ -6,7 +6,7 @@ from domain.integrations.service import IntegrationService
 from domain.runlogs.service import RunLogService
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto, EdgeResponse
-from rest.dtos.runlogs import CreateRunLogDto
+from rest.dtos.runlogs import UpdateRunLogDto
 
 from rest.middlewares import validate_api_key
 
@@ -53,7 +53,7 @@ async def update_edges(
 
 @router.put("/runlogs", responses={404: {}})
 async def update_runlog(
-    dto: CreateRunLogDto,
+    dto: UpdateRunLogDto,
     service: RunLogService = Depends(),
 ):
     runlog = await service.update(dto.datasource_id, parse(dto.date), dto.status)

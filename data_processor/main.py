@@ -3,6 +3,9 @@ from strategies.events_strategy_builder import EventsStrategyBuilder
 from strategies.strategy_builder import StrategyBuilder
 from domain.datasource.service import DataSourceService
 
+logging.getLogger().setLevel(logging.INFO)
+
+
 ds_service = DataSourceService()
 
 
