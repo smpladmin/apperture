@@ -2,4 +2,6 @@ from pydantic import BaseModel
 
 
 class ScheduleJobForDatasourceDto(BaseModel):
-    datasource_id: str
+    name: str
+    description: str = ""
+    cron: str

@@ -1,4 +1,7 @@
 import logging
+import os
+
+import requests
 from strategies.events_strategy_builder import EventsStrategyBuilder
 from strategies.strategy_builder import StrategyBuilder
 from domain.datasource.service import DataSourceService
@@ -50,3 +53,17 @@ def process_event_data_for_datasource(ds_id: str, runlog_id: str, date: str):
     logging.info("{x}: {y}".format(x="Strategy Execution", y="ends"))
 
     logging.info("{x}: {y}".format(x="process_event_data_for_datasource", y="ends"))
+
+
+def trigger_data_processing():
+    logging.info("{x}: {y}".format(x="Triggering data processing", y=""))
+    headers = {
+        f"{os.getenv('BACKEND_API_KEY_NAME')}": os.getenv("BACKEND_API_KEY_SECRET")
+    }
+    response = requests.post(
+        f"{os.getenv('BACKEND_BASE_URL')}/private/datasources",
+        headers=headers,
+    )
+    logging.info(
+        "{x}: {y}".format(x="Triggered data processing, status", y=response.status_code)
+    )

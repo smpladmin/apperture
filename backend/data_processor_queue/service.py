@@ -74,14 +74,34 @@ class DPQueueService:
         )
         return job.id
 
-    def schedule_test(self, datasource_id: str):
-        job = scheduler.enqueue_in(
-            timedelta(minutes=1),
-            "main.process_data_for_datasource",
-            datasource_id,
+    def schedule_data_processing(self, cron: str, name: str, description: str):
+        job = scheduler.cron(
+            cron,
+            "main.trigger_data_processing",
+            meta={
+                "cron": cron,
+                "name": name,
+                "description": description,
+            },
         )
-        return {"id": job.id, "status": job.get_status()}
+        return {
+            "id": job.id,
+            "cron": cron,
+            "name": name,
+            "description": description,
+        }
 
     def get_scheduled_jobs(self):
-        jobs = scheduler.get_jobs(with_times=True)
-        return [{"id": job.id, "scheduled_for": time} for (job, time) in jobs]
+        jobs = scheduler.get_jobs()
+        return [
+            {
+                "id": job.id,
+                "cron": job.meta["cron"],
+                "name": job.meta["name"],
+                "description": job.meta["description"],
+            }
+            for job in jobs
+        ]
+
+    def cancel_job(self, id):
+        scheduler.cancel(id)

@@ -13,14 +13,17 @@ router = APIRouter(
 
 @router.get("/schedules")
 async def get_scheduled_jobs(dpq_service: DPQueueService = Depends()):
-    jobs = dpq_service.get_scheduled_jobs()
-    print(jobs)
-    return jobs
+    return dpq_service.get_scheduled_jobs()
 
 
 @router.post("/schedules")
-async def update_edges(
+async def schedule_data_processing(
     dto: ScheduleJobForDatasourceDto, dpq_service: DPQueueService = Depends()
 ):
-    job = dpq_service.schedule_test(dto.datasource_id)
-    print(job)
+    job = dpq_service.schedule_data_processing(dto.cron, dto.name, dto.description)
+    return job
+
+
+@router.delete("/schedules/{id}")
+async def cancel_job(id: str, dpq_service: DPQueueService = Depends()):
+    dpq_service.cancel_job(id)
