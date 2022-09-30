@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "scheduler-dashboard"
+version = "0.1.0"
+description = ""
+authors = []
+readme = "README.md"
+packages = [{include = "scheduler_dashboard"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+python-dotenv = "^0.21.0"
+rqmonitor = "^1.0.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

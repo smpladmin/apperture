@@ -1,0 +1,12 @@
+__pycache__
+.idea
+.pytest_cache
+.venv
+.vscode
+.pytest_cache
+.github
+.env*
+.flaskenv*
+!.env.project
+!.env.vault
+!.env
