@@ -48,6 +48,17 @@ const Graph = ({ visualisationData }: GraphProps) => {
 
     if (activeNode) {
       graph?.setItemState(activeNode, 'active', true);
+      graph?.updateItem(activeNode, {
+        stateStyles: {
+          active: {
+            stroke: '#000000',
+            fill: '#ffffff',
+            lineWidth: 6 / graph?.getZoom(),
+            shadowColor: '#ffffff',
+            shadowBlur: 6,
+          },
+        },
+      });
     }
 
     const zoomRatio = graph?.getZoom();
@@ -98,17 +109,6 @@ const Graph = ({ visualisationData }: GraphProps) => {
         graph?.setItemState(item, 'active', true);
 
         // customize active state style for node
-        graph?.updateItem(item, {
-          stateStyles: {
-            active: {
-              stroke: '#000000',
-              fill: '#ffffff',
-              lineWidth: 6 / graph?.getZoom(),
-              shadowColor: '#ffffff',
-              shadowBlur: 6,
-            },
-          },
-        });
       },
     });
   }, [activeNode]);
