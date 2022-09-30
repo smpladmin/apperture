@@ -10,7 +10,7 @@ import { NodeType } from '@lib/types/graph';
 import primaryNode from './nodes';
 import basicEdge from './edges';
 import { edgesOnZoom, nodesOnZoom } from './zoomBehaviour';
-import { graphConfig } from '@lib/config/graphConfig';
+import { graphConfig, zoomConfig } from '@lib/config/graphConfig';
 import { transformData } from './transformData';
 import { Edge } from '@lib/domain/edge';
 import { useRouter } from 'next/router';
@@ -274,6 +274,38 @@ const Graph = ({ visualisationData }: GraphProps) => {
       payload: graph?.getNodes(),
     });
   }, [dsId]);
+
+  useEffect(() => {
+    let graph = gRef.current.graph;
+    if (activeNode) {
+      let zoomRatio = zoomConfig.find(
+        (z) => z.percentile <= activeNode._cfg?.model?.percentile!!
+      )?.ratio!!;
+      if (zoomRatio < 1) {
+        zoomRatio = 1;
+      }
+
+      const nodes = graph?.getNodes()!!;
+      const edges = graph?.getEdges();
+
+      if (zoomRatio >= graphConfig.minZoom) {
+        nodes.forEach((node) => {
+          const model = node.getModel() as NodeType;
+          const nodeVisibleAt = model?.visibleAt || graphConfig.minZoom;
+          if (zoomRatio >= nodeVisibleAt) {
+            graph?.showItem(node);
+          } else {
+            graph?.hideItem(node);
+          }
+        });
+      }
+      graph?.zoomTo(zoomRatio!!);
+      graph?.focusItem(activeNode, true);
+
+      nodesOnZoom(nodes, zoomRatio);
+      edgesOnZoom(edges, zoomRatio);
+    }
+  }, [activeNode]);
 
   return (
     <div

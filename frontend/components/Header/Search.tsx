@@ -14,6 +14,7 @@ import gaLogo from '@assets/images/ga-logo-small.svg';
 import { MapContext } from '@lib/contexts/mapContext';
 import { Item } from '@antv/g6';
 import { Actions } from '@lib/types/context';
+import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 
 type SuggestionListProps = {
   suggestion: Item;
@@ -42,28 +43,35 @@ const SuggestionsList = ({
     <Flex
       onClick={() => suggestionsClickHandler(suggestion)}
       cursor={'pointer'}
-      height={'20'}
-      alignItems={'center'}
+      height={{ base: '18', md: '20' }}
       bg={active ? 'white.100' : ''}
       _hover={{
         bg: 'white.100',
       }}
       gap={'3'}
       px={'3'}
+      alignItems={'center'}
       ref={active ? searchResultRef : null}
     >
-      <Box h={'8'} w={'8'}>
+      <Box
+        h={{ base: '6', md: '7' }}
+        w={{ base: '6', md: '7' }}
+        minW={{ base: '6', md: '7' }}
+      >
         <Image
           src={dataSourceType === Provider.MIXPANEL ? mixPanel : gaLogo}
           alt="data-source-mix-panel"
+          layout="responsive"
         />
       </Box>
-
       <Text
         fontSize={'base'}
+        maxH={'18'}
+        alignItems={'center'}
         fontWeight={'medium'}
-        lineHeight={'base'}
+        lineHeight={{ base: 'xs-14', md: 'base' }}
         wordBreak={'break-word'}
+        overflow={'hidden'}
       >
         {suggestion?._cfg?.id}
       </Text>
@@ -79,6 +87,9 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
   const [searchText, setSearchText] = useState('');
   const [suggestions, setSuggestions] = useState<Array<Item>>([]);
   const [cursor, setCursor] = useState(-1);
+  const searchContainerRef = useRef(null);
+
+  useOnClickOutside(searchContainerRef, () => setSuggestions([]));
 
   const {
     state: { visualisationData },
@@ -88,12 +99,14 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
   const onChangeHandler = (text: string) => {
     let matches: Item[] = [];
     if (text) {
-      matches = visualisationData.filter((item: Item) => {
-        return (
-          item?._cfg?.id!!.toLowerCase().startsWith(text.toLowerCase()) ||
-          item?._cfg?.id!!.toLowerCase().includes(text.toLowerCase())
-        );
-      });
+      matches = visualisationData
+        .filter((item: Item) => {
+          return (
+            item?._cfg?.id!!.toLowerCase().startsWith(text.toLowerCase()) ||
+            item?._cfg?.id!!.toLowerCase().includes(text.toLowerCase())
+          );
+        })
+        .slice(0, 10);
       matches.sort((a, b) => a._cfg?.id?.length!! - b._cfg?.id?.length!!);
       setCursor(-1);
     }
@@ -148,6 +161,7 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
       py={4}
       direction={'column'}
       position={'relative'}
+      ref={searchContainerRef}
     >
       <Input
         size={'lg'}
@@ -161,6 +175,7 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
         textAlign={'left'}
         placeholder="Search for events"
         disabled={!visualisationData.length}
+        focusBorderColor={'black.100'}
         _placeholder={{
           fontSize: '1rem',
           lineHeight: '1.375rem',
@@ -169,12 +184,6 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
         }}
         onChange={(e) => onChangeHandler(e.target.value)}
         value={searchText}
-        onBlur={() => {
-          setTimeout(() => {
-            setSuggestions([]);
-            setCursor(-1);
-          }, 200);
-        }}
         onKeyDown={keyboardNavigation}
       />
 
@@ -188,11 +197,11 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
           zIndex={'300'}
           position={'absolute'}
           rounded={'16'}
-          mt={'13'}
-          pt={'7'}
-          pb={'5'}
-          px={'6'}
-          maxHeight={'112'}
+          mt={{ base: '11', md: '13' }}
+          pt={{ base: '4', md: '4' }}
+          pb={'4'}
+          px={'4'}
+          maxHeight={{ base: '80', md: '106' }}
         >
           <>
             {suggestions.map((suggestion, i, suggestions) => {
