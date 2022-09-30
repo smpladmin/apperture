@@ -5,6 +5,4 @@ from pydantic import BaseModel
 
 
 class UpdateRunLogDto(BaseModel):
-    datasource_id: str
-    date: str
     status: RunLogStatus

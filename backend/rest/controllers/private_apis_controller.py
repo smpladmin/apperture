@@ -1,11 +1,12 @@
-from dateutil.parser import parse
-from fastapi import APIRouter, Depends, HTTPException
+import asyncio
+from fastapi import APIRouter, Depends
+from data_processor_queue.service import DPQueueService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.integrations.service import IntegrationService
 from domain.runlogs.service import RunLogService
 from rest.dtos.datasources import PrivateDataSourceResponse
-from rest.dtos.edges import CreateEdgesDto, EdgeResponse
+from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.runlogs import UpdateRunLogDto
 
 from rest.middlewares import validate_api_key
@@ -51,15 +52,30 @@ async def update_edges(
     return {"updated": True}
 
 
-@router.put("/runlogs", responses={404: {}})
+@router.put("/runlogs/{id}", responses={404: {}})
 async def update_runlog(
+    id: str,
     dto: UpdateRunLogDto,
     service: RunLogService = Depends(),
 ):
-    runlog = await service.update(dto.datasource_id, parse(dto.date), dto.status)
-    if runlog:
-        return runlog
-    raise HTTPException(
-        status_code=404,
-        detail=f"Runlog not found for - {dto.datasource_id} {dto.date}",
-    )
+    runlog = await service.update_runlog(id, dto.status)
+    return runlog
+
+
+@router.post("/datasources")
+async def trigger_fetch_for_all_datasources(
+    ds_service: DataSourceService = Depends(),
+    runlog_service: RunLogService = Depends(),
+    dpq_service: DPQueueService = Depends(),
+):
+    datasources = await ds_service.get_all_datasources()
+    runlog_promises = [runlog_service.create_pending_runlogs(ds) for ds in datasources]
+    runlogs = await asyncio.gather(*runlog_promises)
+    jobs = [
+        {
+            "datasource_id": ds.id,
+            "jobs": dpq_service.enqueue_for_provider(ds.provider, logs),
+        }
+        for logs, ds in zip(runlogs, datasources)
+    ]
+    return jobs

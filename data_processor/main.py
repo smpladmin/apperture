@@ -35,13 +35,15 @@ def process_data_for_datasource(ds_id: str):
     logging.info("{x}: {y}".format(x="process_data_for_datasource", y="ends"))
 
 
-def process_event_data_for_datasource(ds_id: str, date: str):
+def process_event_data_for_datasource(ds_id: str, runlog_id: str, date: str):
     logging.info("{x}: {y}".format(x="process_event_data_for_datasource", y="starts"))
     logging.info("{x}: {y}".format(x="Process running for id", y=ds_id))
 
     res = ds_service.get_datasource_with_credential(ds_id)
     logging.info("{x}: {y}".format(x="Strategy Building", y="starts"))
-    strategy = EventsStrategyBuilder.build(res.datasource, res.credential, date)
+    strategy = EventsStrategyBuilder.build(
+        res.datasource, res.credential, runlog_id, date
+    )
     logging.info("{x}: {y}".format(x="Strategy Building", y="ends"))
     logging.info("{x}: {y}".format(x="Strategy Execution", y="starts"))
     strategy.execute()

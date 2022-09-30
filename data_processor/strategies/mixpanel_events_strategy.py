@@ -13,10 +13,13 @@ from transform.mixpanel_network_graph_transformer import MixpanelNetworkGraphTra
 
 
 class MixpanelEventsStrategy:
-    def __init__(self, datasource: DataSource, credential: Credential, date: str):
+    def __init__(
+        self, datasource: DataSource, credential: Credential, runlog_id: str, date: str
+    ):
         self.datasource = datasource
         self.credential = credential
         self.date = date
+        self.runlog_id = runlog_id
         self.fetcher = MixpanelEventsFetcher(credential, date)
         self.events_saver = MixpanelEventsSaver(credential, date)
         self.cleaner = MixpanelAnalyticsCleaner()
@@ -26,7 +29,7 @@ class MixpanelEventsStrategy:
 
     def execute(self):
         try:
-            self.runlog_service.update_started(self.datasource.id, self.date)
+            self.runlog_service.update_started(self.runlog_id)
             events_data = ""
             with self.fetcher.open() as source:
                 with self.events_saver.open() as dest:
@@ -48,7 +51,7 @@ class MixpanelEventsStrategy:
                 IntegrationProvider.MIXPANEL,
                 network_graph_data,
             )
-            self.runlog_service.update_completed(self.datasource.id, self.date)
+            self.runlog_service.update_completed(self.runlog_id)
         except Exception as e:
-            self.runlog_service.update_failed(self.datasource.id, self.date)
+            self.runlog_service.update_failed(self.runlog_id)
             raise e

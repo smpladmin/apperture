@@ -7,19 +7,19 @@ from domain.runlog.models import RunLogStatus
 
 
 class RunLogService:
-    def update_started(self, datasource_id: str, date: str):
-        self._update_status(datasource_id, date, RunLogStatus.STARTED)
+    def update_started(self, runlog_id: str):
+        self._update_status(runlog_id, RunLogStatus.STARTED)
 
-    def update_completed(self, datasource_id: str, date: str):
-        self._update_status(datasource_id, date, RunLogStatus.COMPLETED)
+    def update_completed(self, runlog_id: str):
+        self._update_status(runlog_id, RunLogStatus.COMPLETED)
 
-    def update_failed(self, datasource_id: str, date: str):
-        self._update_status(datasource_id, date, RunLogStatus.FAILED)
+    def update_failed(self, runlog_id: str):
+        self._update_status(runlog_id, RunLogStatus.FAILED)
 
-    def _update_status(self, datasource_id: str, date: str, status: RunLogStatus):
+    def _update_status(self, runlog_id: str, status: RunLogStatus):
         requests.put(
-            f"{os.getenv('BACKEND_BASE_URL')}/private/runlogs",
-            json={"datasource_id": datasource_id, "date": date, "status": status},
+            f"{os.getenv('BACKEND_BASE_URL')}/private/runlogs/{runlog_id}",
+            json={"status": status},
             headers={
                 f"{os.getenv('BACKEND_API_KEY_NAME')}": os.getenv(
                     "BACKEND_API_KEY_SECRET"
