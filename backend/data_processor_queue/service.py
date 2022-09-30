@@ -1,5 +1,6 @@
+from datetime import timedelta
 from fastapi import Depends
-from data_processor_queue import dpq
+from data_processor_queue import dpq, scheduler
 from rq import Retry
 
 from settings import apperture_settings
@@ -44,3 +45,24 @@ class DPQueueService:
             self.enqueue_events_fetch_job(datasource_id, r.date.strftime("%Y-%m-%d"))
             for r in runlogs
         ]
+
+    def enqueue_notification(self, notification_id):
+        job = dpq.enqueue(
+            "main.process_notification",
+            notification_id,
+            retry=self.retry,
+            job_timeout=self.job_timeout,
+        )
+        return job.id
+
+    def schedule_test(self, datasource_id: str):
+        job = scheduler.enqueue_in(
+            timedelta(minutes=1),
+            "main.process_data_for_datasource",
+            datasource_id,
+        )
+        return {"id": job.id, "status": job.get_status()}
+
+    def get_scheduled_jobs(self):
+        jobs = scheduler.get_jobs(with_times=True)
+        return [{"id": job.id, "scheduled_for": time} for (job, time) in jobs]

@@ -45,7 +45,3 @@ def process_event_data_for_datasource(ds_id: str, date: str):
     logging.info("{x}: {y}".format(x="Strategy Execution", y="ends"))
 
     logging.info("{x}: {y}".format(x="process_event_data_for_datasource", y="ends"))
-
-
-def testing(arg):
-    logging.info(arg)
