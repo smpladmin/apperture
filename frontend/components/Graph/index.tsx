@@ -98,7 +98,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
       graph?.setItemState(activeNode, 'active', true);
 
       let zoomRatio = zoomConfig.find(
-        (z) => z.percentile <= activeNode._cfg?.model?.percentile!!
+        (z) => z.percentile <= (activeNode?._cfg?.model?.percentile as number)!!
       )?.ratio!!;
 
       if (zoomRatio < 1) {
