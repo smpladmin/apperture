@@ -1,5 +1,5 @@
 import { nodeShapes } from '@lib/config/graphConfig';
-import fittingString from '@lib/utils/graph/fittingString';
+import { fittingString } from '@lib/utils/graph/';
 import { formatDatalabel } from '@lib/utils/graph';
 import { IGroup, ModelConfig } from '@antv/g6';
 

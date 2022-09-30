@@ -19,7 +19,7 @@ import {
   setNodesAndEdgesStyleOnZoom,
   showAndHideNodesOnZoom,
   removeNodesActiveState,
-} from './graphUtil';
+} from '@lib/utils/graph';
 
 type GraphProps = {
   visualisationData: Array<Edge>;

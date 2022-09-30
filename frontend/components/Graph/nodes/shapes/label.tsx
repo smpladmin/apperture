@@ -1,4 +1,4 @@
-import fittingString from '@lib/utils/graph/fittingString';
+import { fittingString } from '@lib/utils/graph';
 import { nodeShapes, graphConfig } from '@lib/config/graphConfig';
 import { IGroup, ModelConfig } from '@antv/g6';
 // TODO: Move colors to common congif file and use from there
