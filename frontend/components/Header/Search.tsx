@@ -116,7 +116,7 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
 
   const setNodeSearchState = () => {
     dispatch({
-      type: Actions.SET_NODE_SEARCHED,
+      type: Actions.SET_IS_NODE_SEARCHED,
       payload: true,
     });
   };
@@ -127,7 +127,7 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
       type: Actions.SET_ACTIVE_NODE,
       payload: suggestion,
     });
-    setNodeSearchState;
+    setNodeSearchState();
     setSuggestions([]);
   };
 

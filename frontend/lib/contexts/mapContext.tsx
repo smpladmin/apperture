@@ -25,7 +25,7 @@ const nodesDataReducer = (state = initialState, action: LayoutActions) => {
     case Actions.SET_ACTIVE_NODE: {
       return { ...state, activeNode: action.payload };
     }
-    case Actions.SET_NODE_SEARCHED: {
+    case Actions.SET_IS_NODE_SEARCHED: {
       return { ...state, isNodeSearched: action.payload };
     }
     default:

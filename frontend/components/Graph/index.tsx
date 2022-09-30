@@ -69,7 +69,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
         });
 
         dispatch({
-          type: Actions.SET_NODE_SEARCHED,
+          type: Actions.SET_IS_NODE_SEARCHED,
           payload: false,
         });
         // Set the 'active' state of the clicked node to be true
@@ -83,6 +83,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
     const currentZoom = graph?.getZoom()!!;
     const nodes = graph?.getNodes();
     const edges = graph?.getEdges();
+
     if (!activeNode) {
       removeNodesActiveState(graph);
       setNodesAndEdgesStyleOnZoom(nodes, edges, currentZoom);
@@ -114,6 +115,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
         duration: 100,
       });
 
+      // add custom styles for node's active state
       graph?.updateItem(activeNode, {
         stateStyles: {
           active: {
@@ -125,6 +127,8 @@ const Graph = ({ visualisationData }: GraphProps) => {
           },
         },
       });
+      // normalise size of node as per current zoom
+      setNodesAndEdgesStyleOnZoom(nodes, edges, currentZoom);
     }
   }, [activeNode]);
 
