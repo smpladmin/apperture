@@ -7,8 +7,9 @@ import {
 import { createContext, ReactElement, useReducer } from 'react';
 
 const initialState: InitialStateType = {
-  visualisationData: [],
+  nodesData: [],
   activeNode: null,
+  isNodeSearched: false,
 };
 
 export const MapContext = createContext<ContextType>({
@@ -16,16 +17,16 @@ export const MapContext = createContext<ContextType>({
   dispatch: () => {},
 });
 
-const visualisationDataReducer = (
-  state = initialState,
-  action: LayoutActions
-) => {
+const nodesDataReducer = (state = initialState, action: LayoutActions) => {
   switch (action.type) {
-    case Actions.SET_VISUALISATION_DATA: {
-      return { ...state, visualisationData: [...action.payload] };
+    case Actions.SET_NODES_DATA: {
+      return { ...state, nodesData: [...action.payload] };
     }
     case Actions.SET_ACTIVE_NODE: {
       return { ...state, activeNode: action.payload };
+    }
+    case Actions.SET_NODE_SEARCHED: {
+      return { ...state, isNodeSearched: action.payload };
     }
     default:
       return state;
@@ -33,7 +34,7 @@ const visualisationDataReducer = (
 };
 
 const MapContextProvider = ({ children }: { children: ReactElement }) => {
-  const [state, dispatch] = useReducer(visualisationDataReducer, initialState);
+  const [state, dispatch] = useReducer(nodesDataReducer, initialState);
 
   return (
     <MapContext.Provider value={{ state, dispatch }}>

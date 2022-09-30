@@ -6,7 +6,6 @@ import G6, {
   IShape,
   Item,
 } from '@antv/g6';
-import { NodeType } from '@lib/types/graph';
 import primaryNode from './nodes';
 import basicEdge from './edges';
 import { edgesOnZoom, nodesOnZoom } from './zoomBehaviour';
@@ -38,7 +37,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
   const graphData = useMemo(() => transformData(visualisationData), [dsId]);
 
   const {
-    state: { activeNode },
+    state: { activeNode, isNodeSearched },
     dispatch,
   } = useContext(MapContext);
 
@@ -68,10 +67,65 @@ const Graph = ({ visualisationData }: GraphProps) => {
           type: Actions.SET_ACTIVE_NODE,
           payload: item,
         });
+
+        dispatch({
+          type: Actions.SET_NODE_SEARCHED,
+          payload: false,
+        });
         // Set the 'active' state of the clicked node to be true
         graph?.setItemState(item, 'active', true);
       },
     });
+  }, [activeNode]);
+
+  useEffect(() => {
+    let graph = gRef.current.graph;
+    const currentZoom = graph?.getZoom()!!;
+    const nodes = graph?.getNodes();
+    const edges = graph?.getEdges();
+    if (!activeNode) {
+      removeNodesActiveState(graph);
+      setNodesAndEdgesStyleOnZoom(nodes, edges, currentZoom);
+      return;
+    }
+
+    if (activeNode) {
+      // remove active state of any node before making it active
+      removeNodesActiveState(graph);
+
+      // set node state to active
+      graph?.setItemState(activeNode, 'active', true);
+
+      let zoomRatio = zoomConfig.find(
+        (z) => z.percentile <= activeNode._cfg?.model?.percentile!!
+      )?.ratio!!;
+
+      if (zoomRatio < 1) {
+        zoomRatio = 1;
+      }
+
+      if (isNodeSearched) {
+        showAndHideNodesOnZoom(graph, nodes!!, zoomRatio);
+        setNodesAndEdgesStyleOnZoom(nodes, edges, zoomRatio);
+        graph?.zoomTo(zoomRatio!!);
+      }
+
+      graph?.focusItem(activeNode, true, {
+        duration: 100,
+      });
+
+      graph?.updateItem(activeNode, {
+        stateStyles: {
+          active: {
+            stroke: '#000000',
+            fill: '#ffffff',
+            lineWidth: 6 / currentZoom,
+            shadowColor: '#ffffff',
+            shadowBlur: 6,
+          },
+        },
+      });
+    }
   }, [activeNode]);
 
   useEffect(() => {
@@ -217,58 +271,10 @@ const Graph = ({ visualisationData }: GraphProps) => {
   useEffect(() => {
     let graph = gRef.current.graph;
     dispatch({
-      type: Actions.SET_VISUALISATION_DATA,
+      type: Actions.SET_NODES_DATA,
       payload: graph?.getNodes(),
     });
   }, [dsId]);
-
-  useEffect(() => {
-    let graph = gRef.current.graph;
-    const currentZoom = graph?.getZoom()!!;
-    const nodes = graph?.getNodes();
-    const edges = graph?.getEdges();
-
-    if (!activeNode) {
-      removeNodesActiveState(graph);
-      setNodesAndEdgesStyleOnZoom(nodes, edges, currentZoom);
-      return;
-    }
-
-    if (activeNode) {
-      // remove active state of any node before making it active
-      removeNodesActiveState(graph);
-
-      // set node state to active
-      graph?.setItemState(activeNode, 'active', true);
-
-      let zoomRatio = zoomConfig.find(
-        (z) => z.percentile <= activeNode._cfg?.model?.percentile!!
-      )?.ratio!!;
-
-      if (zoomRatio < 1) {
-        zoomRatio = 1;
-      }
-      showAndHideNodesOnZoom(graph, nodes!!, zoomRatio);
-      setNodesAndEdgesStyleOnZoom(nodes, edges, zoomRatio);
-
-      graph?.zoomTo(zoomRatio!!);
-      graph?.focusItem(activeNode, true, {
-        duration: 100,
-      });
-
-      graph?.updateItem(activeNode, {
-        stateStyles: {
-          active: {
-            stroke: '#000000',
-            fill: '#ffffff',
-            lineWidth: 6 / currentZoom,
-            shadowColor: '#ffffff',
-            shadowBlur: 6,
-          },
-        },
-      });
-    }
-  }, [activeNode]);
 
   return (
     <div

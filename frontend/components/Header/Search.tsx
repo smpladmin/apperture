@@ -92,14 +92,14 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
   useOnClickOutside(searchContainerRef, () => setSuggestions([]));
 
   const {
-    state: { visualisationData },
+    state: { nodesData },
     dispatch,
   } = useContext(MapContext);
 
   const onChangeHandler = (text: string) => {
     let matches: Item[] = [];
     if (text) {
-      matches = visualisationData
+      matches = nodesData
         .filter((item: Item) => {
           return (
             item?._cfg?.id!!.toLowerCase().startsWith(text.toLowerCase()) ||
@@ -114,12 +114,20 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
     setSearchText(text);
   };
 
+  const setNodeSearchState = () => {
+    dispatch({
+      type: Actions.SET_NODE_SEARCHED,
+      payload: true,
+    });
+  };
+
   const suggestionsClickHandler = (suggestion: Item) => {
     setSearchText(suggestion?._cfg?.id!!);
     dispatch({
       type: Actions.SET_ACTIVE_NODE,
       payload: suggestion,
     });
+    setNodeSearchState;
     setSuggestions([]);
   };
 
@@ -138,10 +146,11 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
           type: Actions.SET_ACTIVE_NODE,
           payload: suggestions[cursor],
         });
+        setNodeSearchState();
         setSuggestions([]);
         setCursor(-1);
       } else {
-        const searchNode = visualisationData.find(
+        const searchNode = nodesData.find(
           (node) => node._cfg?.id === searchText
         );
         if (searchNode) {
@@ -149,6 +158,7 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
             type: Actions.SET_ACTIVE_NODE,
             payload: searchNode,
           });
+          setNodeSearchState();
           setSuggestions([]);
         }
       }
@@ -174,7 +184,7 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
         borderColor={'white.200'}
         textAlign={'left'}
         placeholder="Search for events"
-        disabled={!visualisationData.length}
+        disabled={!Object.keys(nodesData).length}
         focusBorderColor={'black.100'}
         _placeholder={{
           fontSize: '1rem',
