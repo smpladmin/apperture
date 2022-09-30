@@ -1,8 +1,9 @@
 import { Item } from '@antv/g6';
 
 export type InitialStateType = {
-  visualisationData: Array<Item>;
+  nodesData: Array<Item>;
   activeNode: Item | null;
+  isNodeSearched: boolean;
 };
 
 export interface ContextType {
@@ -11,16 +12,21 @@ export interface ContextType {
 }
 
 export enum Actions {
-  SET_VISUALISATION_DATA = 'SET_VISUALISATION_DATA',
+  SET_NODES_DATA = 'SET_VISUALISATION_DATA',
   SET_ACTIVE_NODE = 'SET_ACTIVE_NODE',
+  SET_IS_NODE_SEARCHED = 'SET_IS_NODE_SEARCHED',
 }
 
 export type LayoutActions =
   | {
-      type: Actions.SET_VISUALISATION_DATA;
+      type: Actions.SET_NODES_DATA;
       payload: Item[];
     }
   | {
       type: Actions.SET_ACTIVE_NODE;
       payload: Item;
+    }
+  | {
+      type: Actions.SET_IS_NODE_SEARCHED;
+      payload: boolean;
     };
