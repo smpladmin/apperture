@@ -184,7 +184,7 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
         borderColor={'white.200'}
         textAlign={'left'}
         placeholder="Search for events"
-        disabled={!Object.keys(nodesData).length}
+        disabled={!nodesData.length}
         focusBorderColor={'black.100'}
         _placeholder={{
           fontSize: '1rem',

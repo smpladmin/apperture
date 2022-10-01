@@ -68,6 +68,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
           payload: item,
         });
 
+        // set isNodeSearched flag to false as node is getting active via click
         dispatch({
           type: Actions.SET_IS_NODE_SEARCHED,
           payload: false,
@@ -97,6 +98,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
       // set node state to active
       graph?.setItemState(activeNode, 'active', true);
 
+      // find zoom ratio of active node by using percentile logic which is initially used for displaying node on zoom
       let zoomRatio = zoomConfig.find(
         (z) => z.percentile <= (activeNode?._cfg?.model?.percentile as number)!!
       )?.ratio!!;
@@ -105,30 +107,34 @@ const Graph = ({ visualisationData }: GraphProps) => {
         zoomRatio = 1;
       }
 
-      if (isNodeSearched) {
-        showAndHideNodesOnZoom(graph, nodes!!, zoomRatio);
-        setNodesAndEdgesStyleOnZoom(nodes, edges, zoomRatio);
-        graph?.zoomTo(zoomRatio!!);
-      }
-
-      graph?.focusItem(activeNode, true, {
-        duration: 100,
-      });
-
       // add custom styles for node's active state
+      // lineWidth depends on if users makes node active via click or via search
       graph?.updateItem(activeNode, {
         stateStyles: {
           active: {
             stroke: '#000000',
             fill: '#ffffff',
-            lineWidth: 6 / currentZoom,
+            lineWidth: 6 / (isNodeSearched ? zoomRatio : currentZoom),
             shadowColor: '#ffffff',
             shadowBlur: 6,
           },
         },
       });
-      // normalise size of node as per current zoom
-      setNodesAndEdgesStyleOnZoom(nodes, edges, currentZoom);
+
+      if (isNodeSearched) {
+        graph?.zoomTo(zoomRatio);
+        showAndHideNodesOnZoom(graph, nodes!!, zoomRatio);
+        setNodesAndEdgesStyleOnZoom(nodes, edges, zoomRatio);
+      } else {
+        // normalise size of node as per current zoom
+        // case:user clicks on node when graph is zoomed
+        setNodesAndEdgesStyleOnZoom(nodes, edges, currentZoom);
+      }
+
+      // focus on active node and move it to center of graph canvas
+      graph?.focusItem(activeNode, true, {
+        duration: 100,
+      });
     }
   }, [activeNode]);
 
