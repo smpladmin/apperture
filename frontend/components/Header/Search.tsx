@@ -15,6 +15,7 @@ import { MapContext } from '@lib/contexts/mapContext';
 import { Item } from '@antv/g6';
 import { Actions } from '@lib/types/context';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
+import { useRouter } from 'next/router';
 
 type SuggestionListProps = {
   suggestion: Item;
@@ -88,6 +89,9 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
   const [suggestions, setSuggestions] = useState<Array<Item>>([]);
   const [cursor, setCursor] = useState(-1);
   const searchContainerRef = useRef(null);
+  const inputSearchRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const { dsId } = router.query;
 
   useOnClickOutside(searchContainerRef, () => setSuggestions([]));
 
@@ -95,6 +99,11 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
     state: { nodesData },
     dispatch,
   } = useContext(MapContext);
+
+  useEffect(() => {
+    inputSearchRef?.current?.focus();
+    setSearchText('');
+  }, [dsId]);
 
   const onChangeHandler = (text: string) => {
     let matches: Item[] = [];
@@ -160,6 +169,7 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
           });
           setNodeSearchState();
           setSuggestions([]);
+          inputSearchRef.current?.blur();
         }
       }
     }
@@ -195,6 +205,7 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
         onChange={(e) => onChangeHandler(e.target.value)}
         value={searchText}
         onKeyDown={keyboardNavigation}
+        ref={inputSearchRef}
       />
 
       {suggestions.length ? (
