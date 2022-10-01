@@ -169,9 +169,9 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
           });
           setNodeSearchState();
           setSuggestions([]);
-          inputSearchRef.current?.blur();
         }
       }
+      inputSearchRef.current?.blur();
     }
   };
 
