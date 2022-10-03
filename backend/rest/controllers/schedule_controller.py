@@ -20,7 +20,9 @@ async def get_scheduled_jobs(dpq_service: DPQueueService = Depends()):
 async def schedule_data_processing(
     dto: ScheduleJobForDatasourceDto, dpq_service: DPQueueService = Depends()
 ):
-    job = dpq_service.schedule_data_processing(dto.cron, dto.name, dto.description)
+    job = dpq_service.schedule_data_processing(
+        dto.job_name, dto.cron, dto.name, dto.description, dto.args
+    )
     return job
 
 

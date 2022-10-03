@@ -2,8 +2,13 @@ import logging
 import os
 
 import requests
-from strategies.events_strategy_builder import EventsStrategyBuilder
-from strategies.strategy_builder import StrategyBuilder
+from apperture.backend_action import post
+from domain.notification.models import NotificationFrequency, NotificationType
+from strategies.strategy_builder import (
+    StrategyBuilder,
+    EventsStrategyBuilder,
+    NotificationStrategyBuilder,
+)
 from domain.datasource.service import DataSourceService
 
 logging.getLogger().setLevel(logging.INFO)
@@ -67,3 +72,21 @@ def trigger_data_processing():
     logging.info(
         "{x}: {y}".format(x="Triggered data processing, status", y=response.status_code)
     )
+
+
+def trigger_notifications_processing(
+    notification_type: NotificationType, frequency: NotificationFrequency
+):
+    logging.info("{x}: {y}".format(x="Triggering notifications processing", y=""))
+    response = post(
+        "/private/notifications",
+        {"notification_type": notification_type, "frequency": frequency},
+    )
+    logging.info(
+        "{x}: {y}".format(x="Triggered data processing, status", y=response.status_code)
+    )
+
+
+def send_notification(user_id: str):
+    strategy = NotificationStrategyBuilder.build(user_id)
+    strategy.execute()

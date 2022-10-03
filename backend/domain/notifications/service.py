@@ -3,7 +3,11 @@ from beanie import PydanticObjectId
 from fastapi import Depends
 from mongo.mongo import Mongo
 
-from domain.notifications.models import Notification
+from domain.notifications.models import (
+    Notification,
+    NotificationFrequency,
+    NotificationType,
+)
 
 
 class NotificationService:
@@ -51,18 +55,13 @@ class NotificationService:
                 await Notification.insert(notification)
 
     async def get_notifications(
-        self, notification_type: str, frequency: str
+        self, notification_type: NotificationType, frequency: NotificationFrequency
     ) -> list[Notification]:
-        pipeline = [
-            {
-                "$match": {
-                    "frequency": frequency,
-                    "notification_type": notification_type,
-                    "notification_active": True,
-                }
-            }
-        ]
-        return await Notification.find().aggregate(pipeline).to_list()
+        return await Notification.find(
+            Notification.frequency == frequency,
+            Notification.notification_type == notification_type,
+            Notification.notification_active == True,
+        ).to_list()
 
     async def get_notifications_to_compute(self, user_id: str):
         pipeline = [
