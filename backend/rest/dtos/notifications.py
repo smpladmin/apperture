@@ -28,3 +28,8 @@ class NotificationResponse(Notification, ModelResponse):
 class ComputedNotificationResponse(ComputedNotification, ModelResponse):
     class Config:
         allow_population_by_field_name = True
+
+
+class TriggerNotificationsDto(BaseModel):
+    notification_type: str
+    frequency: str

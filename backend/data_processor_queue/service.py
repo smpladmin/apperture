@@ -17,13 +17,18 @@ class DPQueueService:
             if self.settings.fastapi_env == "development"
             else Retry(max=3, interval=4200)
         )
+        self.retry_5_mins = (
+            None
+            if self.settings.fastapi_env == "development"
+            else Retry(max=3, interval=300)
+        )
         self.job_timeout = 1800  # 30 mins
 
     def enqueue(self, datasource_id) -> str:
         job = dpq.enqueue(
             "main.process_data_for_datasource",
             datasource_id,
-            retry=self.retry,
+            retry=self.retry_70_mins,
             job_timeout=self.job_timeout,
         )
         return job.id
@@ -36,7 +41,16 @@ class DPQueueService:
             datasource_id,
             runlog_id,
             date,
-            retry=self.retry,
+            retry=self.retry_70_mins,
+            job_timeout=self.job_timeout,
+        )
+        return job.id
+
+    def enqueue_user_notification(self, user_id: str):
+        job = dpq.enqueue(
+            "main.send_notification",
+            user_id,
+            retry=self.retry_5_mins,
             job_timeout=self.job_timeout,
         )
         return job.id
@@ -69,7 +83,7 @@ class DPQueueService:
         job = dpq.enqueue(
             "main.process_notification",
             notification_id,
-            retry=self.retry,
+            retry=self.retry_70_mins,
             job_timeout=self.job_timeout,
         )
         return job.id

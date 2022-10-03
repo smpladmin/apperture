@@ -11,7 +11,7 @@ from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.runlogs import UpdateRunLogDto
 from rest.dtos.edges import CreateEdgesDto
-from rest.dtos.notifications import NotificationResponse
+from rest.dtos.notifications import NotificationResponse, TriggerNotificationsDto
 
 from rest.middlewares import validate_api_key
 
@@ -88,13 +88,18 @@ async def trigger_fetch_for_all_datasources(
     return jobs
 
 
-@router.get(
-    "/notifications/{notification_type}/{frequency}",
-    response_model=list[NotificationResponse],
-)
+@router.post("/notifications")
 async def get_notifications(
-    notification_type: str,
-    frequency: str,
+    dto: TriggerNotificationsDto,
     notification_service: NotificationService = Depends(),
+    dpq_service: DPQueueService = Depends(),
 ):
-    return await notification_service.get_notifications(notification_type, frequency)
+    notifications = await notification_service.get_notifications(
+        dto.notification_type, dto.frequency
+    )
+    user_ids = set([str(n.user_id) for n in notifications])
+    jobs = [dpq_service.enqueue_user_notification(user_id) for user_id in user_ids]
+    jobs = [{"user_id": user_id, "job": job} for user_id, job in zip(user_ids, jobs)]
+    logging.info("Scheduled notification jobs")
+    logging.info(jobs)
+    return jobs

@@ -1,13 +1,29 @@
+from enum import Enum
 from typing import List, Dict, Optional
 from pydantic import BaseModel
 from beanie import PydanticObjectId
 from repositories.document import Document
 
 
+class NotificationType(str, Enum):
+    ALERT = "alert"
+    UPDATE = "update"
+
+
+class NotificationFrequency(str, Enum):
+    DAILY = "daily"
+    WEEKLY = "weekly"
+
+
+class NotificationChannel(str, Enum):
+    SLACK = "slack"
+    EMAIL = "email"
+
+
 class Notification(Document):
     datasource_id: PydanticObjectId
     user_id: PydanticObjectId
-    notification_type: str
+    notification_type: NotificationType
     apperture_managed: bool
     pct_threshold_active: bool
     pct_threshold_values: Dict
@@ -16,8 +32,8 @@ class Notification(Document):
     formula: str
     variable_map: Dict
     preferred_hour_gmt: int
-    frequency: str
-    preferred_channels: List[str]
+    frequency: NotificationFrequency
+    preferred_channels: List[NotificationChannel]
     notification_active: bool
 
     class Settings:

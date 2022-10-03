@@ -67,3 +67,21 @@ def trigger_data_processing():
     logging.info(
         "{x}: {y}".format(x="Triggered data processing, status", y=response.status_code)
     )
+
+
+def trigger_notifications_processing():
+    logging.info("{x}: {y}".format(x="Triggering notifications processing", y=""))
+    headers = {
+        f"{os.getenv('BACKEND_API_KEY_NAME')}": os.getenv("BACKEND_API_KEY_SECRET")
+    }
+    response = requests.post(
+        f"{os.getenv('BACKEND_BASE_URL')}/private/notifications",
+        headers=headers,
+    )
+    logging.info(
+        "{x}: {y}".format(x="Triggered data processing, status", y=response.status_code)
+    )
+
+
+def send_notification(user_id: str):
+    logging.info(f"Sending notifications to {user_id}")
