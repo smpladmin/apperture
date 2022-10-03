@@ -1,9 +1,12 @@
+from datetime import timedelta
+from typing import Union
 from fastapi import Depends
-from data_processor_queue import dpq
+from data_processor_queue import dpq, scheduler
 from rq import Retry
+from domain.common.models import IntegrationProvider
 
 from settings import apperture_settings
-from domain.runlogs.models import RunLog
+from domain.runlogs.models import DummyRunLog, RunLog
 
 
 class DPQueueService:
@@ -25,10 +28,13 @@ class DPQueueService:
         )
         return job.id
 
-    def enqueue_events_fetch_job(self, datasource_id: str, date: str) -> str:
+    def enqueue_events_fetch_job(
+        self, datasource_id: str, runlog_id: str, date: str
+    ) -> str:
         job = dpq.enqueue(
             "main.process_event_data_for_datasource",
             datasource_id,
+            runlog_id,
             date,
             retry=self.retry,
             job_timeout=self.job_timeout,
@@ -37,10 +43,65 @@ class DPQueueService:
 
     def enqueue_from_runlogs(
         self,
-        datasource_id: str,
         runlogs: list[RunLog],
     ) -> list[str]:
         return [
-            self.enqueue_events_fetch_job(datasource_id, r.date.strftime("%Y-%m-%d"))
+            self.enqueue_events_fetch_job(
+                str(r.datasource_id), str(r.id), r.date.strftime("%Y-%m-%d")
+            )
             for r in runlogs
         ]
+
+    def enqueue_from_dummy_runlogs(self, runlogs: list[DummyRunLog]):
+        return [self.enqueue(str(r.datasource_id)) for r in runlogs]
+
+    def enqueue_for_provider(
+        self,
+        provider: IntegrationProvider,
+        runlogs: Union[list[RunLog], list[DummyRunLog]],
+    ):
+        if provider.supports_runlogs():
+            return self.enqueue_from_runlogs(runlogs)
+        else:
+            return self.enqueue_from_dummy_runlogs(runlogs)
+
+    def enqueue_notification(self, notification_id):
+        job = dpq.enqueue(
+            "main.process_notification",
+            notification_id,
+            retry=self.retry,
+            job_timeout=self.job_timeout,
+        )
+        return job.id
+
+    def schedule_data_processing(self, cron: str, name: str, description: str):
+        job = scheduler.cron(
+            cron,
+            "main.trigger_data_processing",
+            meta={
+                "cron": cron,
+                "name": name,
+                "description": description,
+            },
+        )
+        return {
+            "id": job.id,
+            "cron": cron,
+            "name": name,
+            "description": description,
+        }
+
+    def get_scheduled_jobs(self):
+        jobs = scheduler.get_jobs()
+        return [
+            {
+                "id": job.id,
+                "cron": job.meta["cron"],
+                "name": job.meta["name"],
+                "description": job.meta["description"],
+            }
+            for job in jobs
+        ]
+
+    def cancel_job(self, id):
+        scheduler.cancel(id)

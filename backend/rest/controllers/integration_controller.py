@@ -99,7 +99,7 @@ async def create_integration(
         )
 
         runlogs = await runlog_service.create_runlogs(datasource.id)
-        jobs = dpq_service.enqueue_from_runlogs(str(datasource.id), runlogs)
+        jobs = dpq_service.enqueue_from_runlogs(runlogs)
         logging.info(f"Scheduled {len(jobs)} for data processing")
 
         response = IntegrationResponse.from_orm(integration)
@@ -118,5 +118,5 @@ async def create_integration(
 ):
     datasource = await ds_service.get_datasource(ds_id)
     runlogs = await runlog_service.create_runlogs(datasource.id)
-    jobs = dpq_service.enqueue_from_runlogs(str(datasource.id), runlogs)
+    jobs = dpq_service.enqueue_from_runlogs(runlogs)
     return jobs

@@ -7,7 +7,6 @@ from copy import deepcopy
 from .transformer import Transformer
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
 
 
 class NetworkGraphTransformer(Transformer):

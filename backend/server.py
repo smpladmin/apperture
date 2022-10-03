@@ -18,6 +18,7 @@ from rest.controllers import (
     integration_controller,
     integration_oauth_controller,
     private_apis_controller,
+    schedule_controller,
     notification_controller,
 )
 from mongo import Mongo
@@ -55,4 +56,5 @@ app.include_router(integration_controller.router)
 app.include_router(private_apis_controller.router)
 app.include_router(data_processor_controller.router)
 app.include_router(datasource_controller.router)
+app.include_router(schedule_controller.router)
 app.include_router(notification_controller.router)
