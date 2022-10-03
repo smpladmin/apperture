@@ -1,5 +1,8 @@
+import asyncio
 from copy import deepcopy
+from typing import List, Dict
 from datetime import datetime as dt
+from datetime import timedelta
 from typing import Union
 from beanie import PydanticObjectId
 from fastapi import Depends
@@ -409,3 +412,48 @@ class EdgeService:
             .aggregate(pipeline, projection_model=NodeSignificance)
             .to_list()
         )
+
+    async def get_node_data(self, nodes: List, ds_id: str) -> List[AggregatedEdge]:
+        pipeline = [
+            {
+                "$match": {
+                    "datasource_id": PydanticObjectId(ds_id),
+                    "current_event": {"$in": nodes},
+                    "date": dt.strptime(
+                        (dt.today() - timedelta(days=1)).strftime("%Y-%m-%d"),
+                        "%Y-%m-%d",
+                    ),
+                }
+            },
+            {
+                "$group": {
+                    "_id": {"current_event": "$current_event"},
+                    "hits": {"$sum": "$hits"},
+                    "users": {"$sum": "$users"},
+                    "current_event": {"$max": "$current_event"},
+                    "previous_event": {"$max": ""},
+                }
+            },
+        ]
+
+        return (
+            await BaseEdge.find()
+            .aggregate(pipeline, projection_model=AggregatedEdge)
+            .to_list()
+        )
+
+    async def get_node_data_bulk(
+        self,
+        updates,
+    ) -> Dict:
+        node_data_bulk = {}
+        if updates:
+            for update in updates:
+                node_data_promises = [
+                    self.get_node_data(nodes, update["datasource_id"])
+                    for ratio_name, nodes in update["variable_map"].items()
+                ]
+                node_data = await asyncio.gather(*node_data_promises)
+                node_data_bulk[update["_id"]] = node_data
+
+        return node_data_bulk
