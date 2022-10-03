@@ -119,6 +119,7 @@ const ConfigureAppsModal = ({
               _hover={{
                 bg: 'white.DEFAULT',
               }}
+              cursor={'default'}
               opacity={0}
             />
           </Flex>
