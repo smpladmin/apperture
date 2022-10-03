@@ -9,6 +9,7 @@ from domain.edge.models import RichEdge
 from domain.integrations.models import Integration
 from domain.users.models import User
 from domain.runlogs.models import RunLog
+from domain.notifications.models import Notification
 
 
 class Mongo:
@@ -25,6 +26,7 @@ class Mongo:
                 Edge,
                 RichEdge,
                 RunLog,
+                Notification,
             ],
         )
 

@@ -3,11 +3,14 @@ from fastapi import APIRouter, Depends
 from data_processor_queue.service import DPQueueService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
+from domain.notifications.service import NotificationService
 from domain.integrations.service import IntegrationService
 from domain.runlogs.service import RunLogService
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.runlogs import UpdateRunLogDto
+from rest.dtos.edges import CreateEdgesDto
+from rest.dtos.notifications import NotificationResponse
 
 from rest.middlewares import validate_api_key
 
@@ -79,3 +82,15 @@ async def trigger_fetch_for_all_datasources(
         for logs, ds in zip(runlogs, datasources)
     ]
     return jobs
+
+
+@router.get(
+    "/notifications/{notification_type}/{frequency}",
+    response_model=list[NotificationResponse],
+)
+async def get_notifications(
+    notification_type: str,
+    frequency: str,
+    notification_service: NotificationService = Depends(),
+):
+    return await notification_service.get_notifications(notification_type, frequency)
