@@ -17,9 +17,8 @@ import {
   HStack,
 } from '@chakra-ui/react';
 
-
-function DateRangeRadio(props) {
-  const { getInputProps, getCheckboxProps } = useRadio(props);
+function DateRangeRadio({ children }: { children: string }) {
+  const { getInputProps, getCheckboxProps } = useRadio();
   const input = getInputProps();
   const checkbox = getCheckboxProps();
 
@@ -37,18 +36,18 @@ function DateRangeRadio(props) {
           borderRadius: '100px',
         }}
       >
-        {props.children}
+        {children}
       </Box>
     </Flex>
   );
 }
 
 function MappedGroup() {
-  const list = ['7D', '30D', '3M', '6M', '12M', 'Custom'];
+  const list = ['7D', '30D', '3M'];
   const { getRootProps, getRadioProps } = useRadioGroup({
     name: 'Date Filter Range',
     defaultValue: '7D',
-    onChange: console.log,
+    onChange: () => {},
   });
 
   const group = getRootProps();
@@ -66,7 +65,7 @@ function MappedGroup() {
 const DateFilter = () => {
   return (
     <Modal
-      isOpen={true}
+      isOpen={false}
       onClose={() => {}}
       isCentered
       size={'2xl'}

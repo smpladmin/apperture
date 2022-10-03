@@ -135,14 +135,10 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
           }}
         />
         <Flex alignItems={'center'} justifyContent={'space-between'} gap={6}>
-          <Box hidden={context.device.isMobile}>
+          <Box hidden={context.device.isMobile} cursor={'not-allowed'}>
             <i className="ri-calendar-fill"></i>
           </Box>
-          <Box
-            cursor={'pointer'}
-            hidden={context.device.isMobile}
-            onClick={openFiltersModal}
-          >
+          <Box cursor={'not-allowed'} hidden={context.device.isMobile}>
             <Image src={filterIcon.src} alt="filter-icon" />
           </Box>
           <FiltersModal
@@ -177,13 +173,13 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
         justifyContent={'space-between'}
         alignItems={'center'}
       >
-        <Flex alignItems={'center'} gap={2}>
+        <Flex alignItems={'center'} gap={2} cursor={'not-allowed'}>
           <i className="ri-calendar-fill"></i>
           <Text fontSize={'xs-12'} lineHeight={'xs-12'} fontWeight={'500'}>
             {''}
           </Text>
         </Flex>
-        <Box h={3} onClick={openFiltersModal}>
+        <Box h={3} cursor={'not-allowed'}>
           <Image src={filterMobile.src} alt="filter-icon" />
         </Box>
       </Flex>
