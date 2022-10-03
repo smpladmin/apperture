@@ -9,6 +9,7 @@ import {
   Avatar,
   IconButton,
   useDisclosure,
+  Tooltip,
 } from '@chakra-ui/react';
 import { AppWithIntegrations } from '@lib/domain/app';
 import LogoutModal from '@components/Logout';
@@ -83,7 +84,6 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           </Flex>
         </Flex>
       </Box>
-
       <Text
         fontSize={'xs-10'}
         lineHeight={'xs-10'}
@@ -97,26 +97,33 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
 
       <Box>
         <Flex direction={'column'} alignItems={'center'} gap={5} paddingTop={5}>
-          <IconButton
-            aria-label="close"
-            icon={<i className="ri-route-fill" />}
-            rounded={'lg'}
-            h={10}
-            w={10}
-            bg={'black.0'}
-            fontWeight={'500'}
-            color={'grey.100'}
-            _hover={{
-              backgroundColor: 'white.0',
-              color: 'white',
-            }}
-            _active={{
-              backgroundColor: 'transparent',
-            }}
-          />
+          <Tooltip
+            label={'Explore'}
+            aria-label={'Explore'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Explore"
+              icon={<i className="ri-route-fill" />}
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+            />
+          </Tooltip>
 
           <IconButton
-            aria-label="close"
+            aria-label="Insights"
             icon={<i className="ri-lightbulb-line" />}
             rounded={'lg'}
             h={10}
@@ -124,6 +131,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
             bg={'black.0'}
             fontWeight={'500'}
             color={'grey.100'}
+            disabled={true}
             _hover={{
               backgroundColor: 'white.0',
               color: 'white',
@@ -136,6 +144,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
             aria-label="close"
             icon={<i className="ri-bookmark-line" />}
             rounded={'lg'}
+            disabled={true}
             h={10}
             w={10}
             bg={'black.0'}
