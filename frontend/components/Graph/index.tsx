@@ -114,14 +114,18 @@ const Graph = ({ visualisationData }: GraphProps) => {
           active: {
             stroke: '#000000',
             fill: '#ffffff',
-            lineWidth: 6 / (isNodeSearched ? zoomRatio : currentZoom),
+            lineWidth:
+              6 /
+              (isNodeSearched && currentZoom < zoomRatio
+                ? zoomRatio
+                : currentZoom),
             shadowColor: '#ffffff',
             shadowBlur: 6,
           },
         },
       });
 
-      if (isNodeSearched) {
+      if (isNodeSearched && currentZoom < zoomRatio) {
         graph?.zoomTo(zoomRatio);
         showAndHideNodesOnZoom(graph, nodes!!, zoomRatio);
         setNodesAndEdgesStyleOnZoom(nodes, edges, zoomRatio);

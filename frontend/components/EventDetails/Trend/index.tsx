@@ -82,7 +82,7 @@ const Trend = ({ trendsData }: { trendsData: Array<TrendData> }) => {
       <Flex gap={'1'} alignItems={'center'}>
         <Box w={'3'} h={'3'} bg={'teal.100'} />
         <Text fontWeight={'normal'} fontSize={'xs-10'} lineHeight={'xs-10'}>
-          Hits-Total
+          Hits-Weekly
         </Text>
       </Flex>
       <Box ref={ref} height={'60'} pt={'4'} />

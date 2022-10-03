@@ -37,7 +37,7 @@ const EventDetailsInfo = ({ eventData }: EventDetailsInfo) => {
         </Flex>
       ) : (
         <Flex direction={'column'}>
-          <Box h={'18'} pt={'6'} pb={'7'}>
+          <Box h={'auto'} minHeight={'18'} pt={'6'} pb={'7'}>
             <Text fontWeight={'medium'} fontSize={'base'} lineHeight={'base'}>
               {(nodeSignificanceData[0] as NodeSignificanceData)?.['node']}
             </Text>

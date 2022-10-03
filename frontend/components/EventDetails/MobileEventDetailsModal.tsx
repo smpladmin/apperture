@@ -7,8 +7,10 @@ import {
   ModalHeader,
 } from '@chakra-ui/react';
 import EventDetailsInfo from './EventDetailsInfo';
-import { Item } from '@antv/g6';
 import { SankeyData, TrendData } from '@lib/domain/eventData';
+import { useContext } from 'react';
+import { MapContext } from '@lib/contexts/mapContext';
+import { Actions } from '@lib/types/context';
 
 type EventDetailsModalInfoProps = {
   isEventDetailsDrawerOpen: boolean;
@@ -21,10 +23,20 @@ const EventDetailsModal = ({
   closeEventDetailsDrawer,
   eventData,
 }: EventDetailsModalInfoProps) => {
+  const { dispatch } = useContext(MapContext);
+
+  const handleCloseModal = () => {
+    dispatch({
+      type: Actions.SET_ACTIVE_NODE,
+      payload: null,
+    });
+    closeEventDetailsDrawer();
+  };
+
   return (
     <Modal
       isOpen={isEventDetailsDrawerOpen}
-      onClose={closeEventDetailsDrawer}
+      onClose={handleCloseModal}
       isCentered
       blockScrollOnMount={false}
       trapFocus={false}
@@ -55,7 +67,7 @@ const EventDetailsModal = ({
               bg={'white.DEFAULT'}
               border={'1px'}
               borderColor={'white.200'}
-              onClick={closeEventDetailsDrawer}
+              onClick={handleCloseModal}
             />
           </Box>
         </ModalHeader>
