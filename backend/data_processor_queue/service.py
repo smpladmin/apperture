@@ -15,7 +15,7 @@ class DPQueueService:
         self.retry = (
             None
             if self.settings.fastapi_env == "development"
-            else Retry(max=3, interval=60)
+            else Retry(max=3, interval=4200)
         )
         self.job_timeout = 1800  # 30 mins
 
