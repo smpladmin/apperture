@@ -4,8 +4,8 @@ import {
   SankeyData,
   NodeSignificanceData,
 } from '@lib/domain/eventData';
-import Sankey from './Sankey';
-import Trend from './Trend';
+import Sankey from '../Sankey';
+import Trend from '../Trend';
 import { formatDatalabel, getPercentageOfHits } from '@lib/utils/graph';
 import { useEffect, useState } from 'react';
 

@@ -5,8 +5,9 @@ import { TrendData, SankeyData } from '@lib/domain/eventData';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { Actions } from '@lib/types/context';
 import { useContext, useRef } from 'react';
+import EventDetailFloater from './MobileEventDetailsInfo/EventDetailFloater';
 import EventDetailsInfo from './EventDetailsInfo';
-import EventDetailsModal from './MobileEventDetailsModal';
+import EventDetailsModal from './MobileEventDetailsInfo/EventDetailsModal';
 
 type EventDetailsProps = {
   isEventDetailsDrawerOpen: boolean;
@@ -39,13 +40,23 @@ const EventDetails = ({
 
   return (
     <>
-      {context.device.isMobile && isEventDetailsDrawerOpen ? (
+      {context.device.isMobile ? (
         <>
-          <EventDetailsModal
+          {/* <EventDetailsModal
             isEventDetailsDrawerOpen={isEventDetailsDrawerOpen}
             closeEventDetailsDrawer={closeEventDetailsDrawer}
             eventData={eventData}
-          />
+          /> */}
+          <Box
+            w={'full'}
+            px={'3'}
+            pb={'3'}
+            position={'fixed'}
+            zIndex={'200'}
+            bottom={0}
+          >
+            <EventDetailFloater />
+          </Box>
         </>
       ) : isEventDetailsDrawerOpen ? (
         <>

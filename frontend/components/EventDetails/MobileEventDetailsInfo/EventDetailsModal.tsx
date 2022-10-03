@@ -6,7 +6,7 @@ import {
   ModalContent,
   ModalHeader,
 } from '@chakra-ui/react';
-import EventDetailsInfo from './EventDetailsInfo';
+import EventDetailsInfo from '../EventDetailsInfo';
 import { SankeyData, TrendData } from '@lib/domain/eventData';
 import { useContext } from 'react';
 import { MapContext } from '@lib/contexts/mapContext';
