@@ -10,6 +10,7 @@ import {
   Text,
   Divider,
   Flex,
+  Box,
 } from '@chakra-ui/react';
 import { filtersSchema } from './filtersSchema';
 import FilterCategories from './FilterCategories';
@@ -34,22 +35,27 @@ const FiltersModal = ({
       isOpen={isOpen}
       onClose={onClose}
       isCentered
-      size={'2xl'}
+      size={{ base: 'full', md: '2xl' }}
       trapFocus={false}
     >
       <ModalOverlay backdropFilter={'blur(20px)'} bg={'grey.0'} />
       <ModalContent
         maxWidth="168"
         rounded={'2xl'}
-        margin={'1rem'}
+        margin={{ base: '0', md: '4' }}
         maxHeight={'calc(100% - 100px)'}
       >
         <ModalHeader
           display={'flex'}
+          flexDirection={{ base: 'column-reverse', md: 'row' }}
           justifyContent={'space-between'}
-          alignItems={'center'}
-          pt={10}
-          px={9}
+          gap={'4'}
+          alignItems={{ base: 'flex-start', md: 'center' }}
+          fontSize={{ base: 'sh-20', md: 'sh-24' }}
+          lineHeight={{ base: 'sh-20', md: 'sh-24' }}
+          pt={{ base: '4', md: '9' }}
+          px={{ base: '4', md: '9' }}
+          pb={{ base: '4', md: '6' }}
         >
           Filters
           <ModalCloseButton
@@ -67,23 +73,35 @@ const FiltersModal = ({
           borderColor={'white.200'}
           opacity={1}
         />
-        <ModalBody p={0} overflowY={'auto'}>
-          <Flex>
-            <FilterCategories
-              // @ts-ignore
-              filters={filtersSchema.filterTypes}
-              setCurrentFilter={setCurrentFilter}
-              currentFilter={currentFilter}
-              selectedFilters={selectedFilters}
-            />
-            <FilterOptions
-              // @ts-ignore
-              options={filtersSchema.filterOptions}
-              currentFilter={currentFilter}
-              setSelectedFilter={setSelectedFilters}
-              selectedFilters={selectedFilters}
-            />
-          </Flex>
+        <ModalBody p={0}>
+          <Box>
+            <Flex>
+              <Box
+                flexShrink={0}
+                maxHeight={{ base: '72vh', md: '112' }}
+                overflowY={'auto'}
+                overflowX={'hidden'}
+                width={{ base: '37', md: '62' }}
+                margin={0}
+              >
+                <FilterCategories
+                  width={'full'}
+                  // @ts-ignore
+                  filters={filtersSchema.filterTypes}
+                  setCurrentFilter={setCurrentFilter}
+                  currentFilter={currentFilter}
+                  selectedFilters={selectedFilters}
+                />
+              </Box>
+              <FilterOptions
+                // @ts-ignore
+                options={filtersSchema.filterOptions}
+                currentFilter={currentFilter}
+                setSelectedFilter={setSelectedFilters}
+                selectedFilters={selectedFilters}
+              />
+            </Flex>
+          </Box>
         </ModalBody>
         <Divider
           orientation="horizontal"
@@ -94,6 +112,7 @@ const FiltersModal = ({
           py={{ base: '3', md: '5' }}
           pl={{ base: '6', md: '9' }}
           pr={{ base: '2', md: '9' }}
+          w={'full'}
         >
           <Flex
             justifyContent={'space-between'}

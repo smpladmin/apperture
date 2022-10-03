@@ -104,6 +104,7 @@ const ConfigureAppsModal = ({
               bg={'white.DEFAULT'}
               border={'1px'}
               borderColor={'white.200'}
+              disabled={true}
             />
           </Flex>
           <Flex justifyContent={'space-between'} py={'2'}>
@@ -118,6 +119,8 @@ const ConfigureAppsModal = ({
               _hover={{
                 bg: 'white.DEFAULT',
               }}
+              cursor={'default'}
+              opacity={0}
             />
           </Flex>
         </ModalHeader>

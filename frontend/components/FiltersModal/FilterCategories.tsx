@@ -15,13 +15,13 @@ const FilterCategoryHeader = ({
     <Flex
       rounded={'lg'}
       alignItems={'center'}
-      width={{ base: '32', md: '50' }}
+      width={'full'}
       height={{ base: '8', md: '9' }}
     >
       <Text
         pl={'3'}
-        fontSize={'xs-14'}
-        lineHeight={'xs-14'}
+        fontSize={{ base: 'xs-12', md: 'xs-14' }}
+        lineHeight={{ base: 'xs-12', md: 'xs-14' }}
         fontWeight={isCategoryLabel ? 'medium' : 'normal'}
         color={isCategoryLabel ? 'grey.100' : 'black.100'}
       >
@@ -60,23 +60,26 @@ export const FilterCategory = ({
       cursor={'pointer'}
       bg={selected ? 'white.200' : ''}
       rounded={'lg'}
+      minWidth={'50'}
     >
       <Flex
         justifyContent={'space-between'}
         alignItems={'center'}
-        width={{ base: '32', md: '50' }}
+        paddingY={'2.5'}
+        paddingRight={2}
+        paddingLeft={3}
         height={{ base: '8', md: '9' }}
+        width={'full'}
       >
         <Text
-          pl={'3'}
-          fontSize={'xs-14'}
-          lineHeight={'xs-14'}
+          fontSize={{ base: 'xs-12', md: 'xs-14' }}
+          lineHeight={{ base: 'xs-12', md: 'xs-14' }}
           fontWeight={isCategoryLabel ? 'medium' : 'normal'}
           color={isCategoryLabel ? 'grey.100' : 'black.100'}
         >
           {filterLabel}
         </Text>
-        {isFilterEnabled && '•'}
+        <Box fontSize={'sh-28'}>{isFilterEnabled && '•'}</Box>
       </Flex>
     </Box>
   );
@@ -104,9 +107,9 @@ const FilterCategories = ({
     <Flex
       direction={'column'}
       gap={{ base: '2', md: '3' }}
-      px={'4'}
-      py={'3'}
-      width={{ base: '36', md: '62' }}
+      px={{ base: '2', md: '4' }}
+      py={{ base: '2', md: '3' }}
+      width={'full'}
       borderRight={'1px'}
       borderColor={'white.200'}
       overflowY={'auto'}
@@ -117,6 +120,7 @@ const FilterCategories = ({
         return (
           <Fragment key={id}>
             <Divider
+              width={'full'}
               orientation="horizontal"
               borderColor={'white.200'}
               opacity={1}

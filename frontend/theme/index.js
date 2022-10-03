@@ -1,7 +1,7 @@
 const WHITE_DEFAULT = '#ffffff';
 const PURPLE = '#7A4AA4';
 const WHITE_300 = '#efefef';
-const BLACK_200 = '0E0E19';
+const BLACK_200 = '#0E0E19';
 const NUCLEUS_TEAL = '#66A7BD';
 const SHADOW_TEAL = '#66A7BD';
 const EDGE_GRAY = '#E7EDF2';
@@ -51,6 +51,7 @@ const spacing = {
   25: '6.25rem',
   30: '7.5rem',
   33: '8.25rem',
+  37: '9.25rem',
   39: '9.75rem',
   45: '11.25rem',
   55: '13.75rem',
