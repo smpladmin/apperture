@@ -38,15 +38,6 @@ services:
     depends_on:
       - backend
       - redis
-  scheduler_dashboard:
-    build:
-      context: ./scheduler_dashboard
-      target: dev
-    ports:
-      - "8899:8899"
-    depends_on:
-      - backend
-      - redis
   db:
     image: 'mongo'
     container_name: 'mongodb'

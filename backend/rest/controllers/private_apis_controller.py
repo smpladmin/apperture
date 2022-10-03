@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from fastapi import APIRouter, Depends
 from data_processor_queue.service import DPQueueService
 from domain.datasources.service import DataSourceService
@@ -77,10 +78,13 @@ async def trigger_fetch_for_all_datasources(
     jobs = [
         {
             "datasource_id": ds.id,
+            "runlogs": logs,
             "jobs": dpq_service.enqueue_for_provider(ds.provider, logs),
         }
         for logs, ds in zip(runlogs, datasources)
     ]
+    logging.info("Scheduled jobs for all datasources")
+    logging.info(jobs)
     return jobs
 
 

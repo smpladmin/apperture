@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 import os
 from beanie.operators import In
 from dateutil.parser import parse
@@ -71,6 +72,9 @@ class RunLogService:
         return await self._runlogs_for_supported_provider(datasource, yesterday)
 
     async def _runlogs_for_supported_provider(self, datasource, yesterday):
+        runlog_count = await RunLog.find(RunLog.datasource_id == datasource.id).count()
+        if not runlog_count:
+            return await self.create_runlogs(datasource.id)
         fetch_condition = [
             RunLog.datasource_id == datasource.id,
             In(RunLog.status, [RunLogStatus.FAILED, RunLogStatus.SCHEDULED]),
