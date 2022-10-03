@@ -23,6 +23,8 @@ jobs:
               - 'frontend/**'
             data_processor:
               - 'data_processor/**'
+            scheduler:
+              - 'scheduler/**'
 
       - name: Set short commit-sha
         id: commit
@@ -47,7 +49,6 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: backend
           IMAGE_TAG: latest
-          BACKEND_ENV: ${{ secrets.BACKEND_ENV }}
         run: |
           cd backend
           docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
@@ -60,7 +61,6 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: frontend
           IMAGE_TAG: latest
-          FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}
         run: |
           cd frontend
           docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
@@ -73,9 +73,20 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: data_processor
           IMAGE_TAG: latest
-          DP_ENV: ${{ secrets.DP_ENV }}
         run: |
           cd data_processor
+          docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+      
+      - name: Build and Push Scheduler
+        if: steps.filter.outputs.scheduler == 'true'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: scheduler
+          IMAGE_TAG: latest
+        run: |
+          cd scheduler
           docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
