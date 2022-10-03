@@ -2,6 +2,8 @@ import logging
 import os
 
 import requests
+from apperture.backend_action import post
+from domain.notification.models import NotificationFrequency, NotificationType
 from strategies.strategy_builder import (
     StrategyBuilder,
     EventsStrategyBuilder,
@@ -72,14 +74,13 @@ def trigger_data_processing():
     )
 
 
-def trigger_notifications_processing():
+def trigger_notifications_processing(
+    notification_type: NotificationType, frequency: NotificationFrequency
+):
     logging.info("{x}: {y}".format(x="Triggering notifications processing", y=""))
-    headers = {
-        f"{os.getenv('BACKEND_API_KEY_NAME')}": os.getenv("BACKEND_API_KEY_SECRET")
-    }
-    response = requests.post(
-        f"{os.getenv('BACKEND_BASE_URL')}/private/notifications",
-        headers=headers,
+    response = post(
+        "/private/notifications",
+        {"notification_type": notification_type, "frequency": frequency},
     )
     logging.info(
         "{x}: {y}".format(x="Triggered data processing, status", y=response.status_code)

@@ -1,4 +1,5 @@
 from datetime import timedelta
+import logging
 from typing import Union
 from fastapi import Depends
 from data_processor_queue import dpq, scheduler
@@ -88,21 +89,32 @@ class DPQueueService:
         )
         return job.id
 
-    def schedule_data_processing(self, cron: str, name: str, description: str):
+    def schedule_data_processing(
+        self,
+        job_name: str,
+        cron: str,
+        name: str,
+        description: str,
+        args,
+    ):
+        logging.info(args)
         job = scheduler.cron(
             cron,
-            "main.trigger_data_processing",
+            job_name,
+            args=args,
             meta={
                 "cron": cron,
                 "name": name,
                 "description": description,
             },
         )
+        print(vars(job))
         return {
             "id": job.id,
             "cron": cron,
             "name": name,
             "description": description,
+            "job_description": job.description,
         }
 
     def get_scheduled_jobs(self):
@@ -113,6 +125,7 @@ class DPQueueService:
                 "cron": job.meta["cron"],
                 "name": job.meta["name"],
                 "description": job.meta["description"],
+                "job_description": job.description,
             }
             for job in jobs
         ]
