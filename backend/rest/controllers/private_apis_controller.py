@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import List
 from fastapi import APIRouter, Depends
 from data_processor_queue.service import DPQueueService
 from domain.datasources.service import DataSourceService
@@ -11,7 +12,11 @@ from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.runlogs import UpdateRunLogDto
 from rest.dtos.edges import CreateEdgesDto
-from rest.dtos.notifications import NotificationResponse, TriggerNotificationsDto
+from rest.dtos.notifications import (
+    ComputedNotificationResponse,
+    NotificationResponse,
+    TriggerNotificationsDto,
+)
 
 from rest.middlewares import validate_api_key
 
@@ -103,3 +108,25 @@ async def get_notifications(
     logging.info("Scheduled notification jobs")
     logging.info(jobs)
     return jobs
+
+
+@router.get(
+    "/compute_notifications/{user_id}",
+    response_model=List[ComputedNotificationResponse],
+)
+async def compute_notifications(
+    user_id: str,
+    notification_service: NotificationService = Depends(),
+    edge_service: EdgeService = Depends(),
+):
+    notifications = await notification_service.get_notifications_to_compute(
+        user_id=user_id
+    )
+    updates = [
+        notif for notif in notifications if notif["notification_type"] == "update"
+    ]
+
+    node_data_bulk = await edge_service.get_node_data_bulk(updates=updates)
+    computed_updates = notification_service.compute_updates(node_data_bulk)
+
+    return computed_updates

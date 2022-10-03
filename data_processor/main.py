@@ -2,8 +2,11 @@ import logging
 import os
 
 import requests
-from strategies.events_strategy_builder import EventsStrategyBuilder
-from strategies.strategy_builder import StrategyBuilder
+from strategies.strategy_builder import (
+    StrategyBuilder,
+    EventsStrategyBuilder,
+    NotificationStrategyBuilder,
+)
 from domain.datasource.service import DataSourceService
 
 logging.getLogger().setLevel(logging.INFO)
@@ -84,4 +87,5 @@ def trigger_notifications_processing():
 
 
 def send_notification(user_id: str):
-    logging.info(f"Sending notifications to {user_id}")
+    strategy = NotificationStrategyBuilder.build(user_id)
+    strategy.execute()
