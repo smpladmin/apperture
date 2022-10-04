@@ -1,22 +1,4 @@
-import 'remixicon/fonts/remixicon.css';
-import filterIcon from '@assets/icons/filter-icon.svg';
-import filterMobile from '@assets/images/filterIconMobile.svg';
-import mixPanel from '@assets/images/mixPanel-icon.png';
-import gaLogo from '@assets/images/ga-logo-small.svg';
-import {
-  Box,
-  Flex,
-  IconButton,
-  Input,
-  useDisclosure,
-  Drawer,
-  DrawerBody,
-  DrawerContent,
-  DrawerOverlay,
-  Image,
-  Text,
-} from '@chakra-ui/react';
-import MobileSidemenu from '../Sidebar/MobileSidemenu';
+import { Box, useDisclosure } from '@chakra-ui/react';
 import { useContext, useEffect, useState } from 'react';
 import { AppertureContext } from '@lib/contexts/appertureContext';
 import { AppWithIntegrations } from '@lib/domain/app';
@@ -24,8 +6,8 @@ import FiltersModal from '@components/FiltersModal';
 import SwitchDataSource from '@components/SwitchDataSource';
 import { DataSource } from '@lib/domain/datasource';
 import { useRouter } from 'next/router';
-import { Provider } from '@lib/domain/provider';
-import Search from './Search';
+import MobileHeader from './MobileHeader';
+import DesktopHeader from './DesktopHeader';
 
 type HeaderProps = {
   selectedApp: AppWithIntegrations;
@@ -33,11 +15,6 @@ type HeaderProps = {
 };
 
 const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
-  const {
-    isOpen: isDrawerOpen,
-    onOpen: openDrawer,
-    onClose: closeDrawer,
-  } = useDisclosure();
   const {
     isOpen: isfiltersModalOpen,
     onOpen: openFiltersModal,
@@ -75,95 +52,29 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
   }, [dataSources, dsId]);
 
   return (
-    <Flex
-      direction={{ base: 'column', md: 'row' }}
-      h={{ base: 'auto', md: '18' }}
-      w={'full'}
-      gap={'4'}
-      bg={'white.DEFAULT'}
-      py={{ base: '4', md: '3' }}
-      px={{ base: '4', md: '7' }}
-      shadow={'xs'}
-    >
-      <Flex
-        w={'full'}
-        gap={{ base: 3, md: '0' }}
-        alignItems={'center'}
-        justifyContent={'space-between'}
-      >
-        <IconButton
-          hidden={!context.device.isMobile}
-          aria-label="menu"
-          icon={<i className="ri-menu-line"></i>}
-          minWidth={'auto'}
-          bg={'transparent'}
-          onClick={openDrawer}
+    <Box>
+      {context.device.isMobile ? (
+        <MobileHeader
+          openAppsModal={openAppsModal}
+          dataSourceType={dataSourceType!!}
+          openSwitchDataSourceModal={openSwitchDataSourceModal}
+          selectedApp={selectedApp}
         />
-        {context.device.isMobile && (
-          <Drawer placement="left" isOpen={isDrawerOpen} onClose={closeDrawer}>
-            <DrawerOverlay backdropFilter="auto" backdropBlur="20px" />
-            <DrawerContent>
-              <DrawerBody p={0}>
-                <MobileSidemenu
-                  closeDrawer={closeDrawer}
-                  openAppsModal={openAppsModal}
-                  selectedApp={selectedApp}
-                />
-              </DrawerBody>
-            </DrawerContent>
-          </Drawer>
-        )}
-        <Search dataSourceType={dataSourceType!!} />
-        <Flex alignItems={'center'} justifyContent={'space-between'} gap={6}>
-          <Box hidden={context.device.isMobile} cursor={'not-allowed'}>
-            <i className="ri-calendar-fill"></i>
-          </Box>
-          <Box cursor={'not-allowed'} hidden={context.device.isMobile}>
-            <Image src={filterIcon.src} alt="filter-icon" />
-          </Box>
-          <FiltersModal
-            isOpen={isfiltersModalOpen}
-            onClose={closeFiltersModal}
-          />
-          <Box
-            flexShrink={0}
-            onClick={openSwitchDataSourceModal}
-            cursor={'pointer'}
-          >
-            <Image
-              h={{ base: 5, md: 8 }}
-              w={{ base: 5, md: 8 }}
-              src={
-                dataSourceType === Provider.MIXPANEL ? mixPanel.src : gaLogo.src
-              }
-              alt="data-source-mix-panel"
-            />
-          </Box>
-          <SwitchDataSource
-            isOpen={isSwitchDataSourceModalOpen}
-            onClose={closeSwitchDataSourceModal}
-            dataSources={dataSources}
-            selectedApp={selectedApp}
-          />
-        </Flex>
-      </Flex>
-      <Flex
-        w={'full'}
-        hidden={!context.device.isMobile}
-        justifyContent={'space-between'}
-        alignItems={'center'}
-      >
-        <Flex alignItems={'center'} gap={2} cursor={'not-allowed'}>
-          <i className="ri-calendar-fill"></i>
-          <Text fontSize={'xs-12'} lineHeight={'xs-12'} fontWeight={'500'}>
-            {''}
-          </Text>
-        </Flex>
-        <Box h={3} cursor={'not-allowed'}>
-          <Image src={filterMobile.src} alt="filter-icon" />
-        </Box>
-      </Flex>
-    </Flex>
+      ) : (
+        <DesktopHeader
+          dataSourceType={dataSourceType!!}
+          openSwitchDataSourceModal={openSwitchDataSourceModal}
+          openFiltersModal={openFiltersModal}
+        />
+      )}
+      <SwitchDataSource
+        isOpen={isSwitchDataSourceModalOpen}
+        onClose={closeSwitchDataSourceModal}
+        dataSources={dataSources}
+        selectedApp={selectedApp}
+      />
+      <FiltersModal isOpen={isfiltersModalOpen} onClose={closeFiltersModal} />
+    </Box>
   );
 };
 
