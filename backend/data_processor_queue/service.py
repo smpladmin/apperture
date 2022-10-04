@@ -13,7 +13,7 @@ from domain.runlogs.models import DummyRunLog, RunLog
 class DPQueueService:
     def __init__(self, settings=Depends(apperture_settings)):
         self.settings = settings
-        self.retry = (
+        self.retry_70_mins = (
             None
             if self.settings.fastapi_env == "development"
             else Retry(max=3, interval=4200)
