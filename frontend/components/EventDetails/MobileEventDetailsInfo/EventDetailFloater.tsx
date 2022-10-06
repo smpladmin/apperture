@@ -2,8 +2,22 @@ import { Box, Button, Flex, Icon, Image, Text } from '@chakra-ui/react';
 import funnelIcon from '@assets/icons/funnel-icon.svg';
 import notificationBellIcon from '@assets/icons/notification-bell.svg';
 import 'remixicon/fonts/remixicon.css';
+import {
+  NodeSignificanceData,
+  SankeyData,
+  TrendData,
+} from '@lib/domain/eventData';
+import { formatDatalabel, getPercentageOfHits } from '@lib/utils/graph';
 
-const EventDetailFloater = () => {
+type EventDetailsFloaterProps = {
+  eventData: {
+    [key in string]: Array<TrendData | SankeyData | NodeSignificanceData>;
+  };
+};
+
+const EventDetailFloater = ({ eventData }: EventDetailsFloaterProps) => {
+  const { nodeSignificanceData } = eventData;
+
   return (
     <Box
       p={'4'}
@@ -14,7 +28,7 @@ const EventDetailFloater = () => {
       borderColor={'white.200'}
     >
       <Text fontSize={'sh-18'} lineHeight={'sh-18'} fontWeight={'medium'}>
-        App Launched
+        {(nodeSignificanceData?.[0] as NodeSignificanceData)?.['node']}
       </Text>
       <Text
         fontSize={'xs-14'}
@@ -23,11 +37,16 @@ const EventDetailFloater = () => {
         color={'grey.200'}
         mt={'3'}
       >
-        13.6% of overall app traffic on this event
+        {`${getPercentageOfHits(
+          (nodeSignificanceData?.[0] as NodeSignificanceData)?.['nodeHits'],
+          (nodeSignificanceData?.[0] as NodeSignificanceData)?.['totalHits']
+        )}% of overall traffic on this event`}
       </Text>
       <Flex alignItems={'baseline'} gap={'1'}>
         <Text fontSize={'xs-14'} fontWeight={'medium'} lineHeight={'base'}>
-          6293 M
+          {formatDatalabel(
+            (nodeSignificanceData?.[0] as NodeSignificanceData)?.['nodeHits']
+          )}
         </Text>
         <Text fontSize={'xs-12'} fontWeight={'medium'} lineHeight={'xs-12'}>
           Hits

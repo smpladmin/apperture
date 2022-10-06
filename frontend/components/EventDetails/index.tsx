@@ -12,7 +12,8 @@ import EventDetailsModal from './MobileEventDetailsInfo/EventDetailsModal';
 type EventDetailsProps = {
   isEventDetailsDrawerOpen: boolean;
   closeEventDetailsDrawer: () => void;
-
+  closeMobileEventDetailFloater: () => void;
+  isMobileEventDetailFloaterOpen: boolean;
   eventData: { [key in string]: Array<TrendData | SankeyData> };
   setEventData: Function;
 };
@@ -22,6 +23,7 @@ const EventDetails = ({
   closeEventDetailsDrawer,
   eventData,
   setEventData,
+  isMobileEventDetailFloaterOpen,
 }: EventDetailsProps) => {
   const drawerRef = useRef<HTMLDivElement>(null);
   const { dispatch } = useContext(MapContext);
@@ -41,12 +43,7 @@ const EventDetails = ({
   return (
     <>
       {context.device.isMobile ? (
-        <>
-          {/* <EventDetailsModal
-            isEventDetailsDrawerOpen={isEventDetailsDrawerOpen}
-            closeEventDetailsDrawer={closeEventDetailsDrawer}
-            eventData={eventData}
-          /> */}
+        isMobileEventDetailFloaterOpen && (
           <Box
             w={'full'}
             px={'3'}
@@ -55,9 +52,9 @@ const EventDetails = ({
             zIndex={'200'}
             bottom={0}
           >
-            <EventDetailFloater />
+            <EventDetailFloater eventData={eventData} />
           </Box>
-        </>
+        )
       ) : isEventDetailsDrawerOpen ? (
         <>
           <Box
@@ -76,7 +73,6 @@ const EventDetails = ({
           >
             <EventDetailsInfo eventData={eventData} />
           </Box>
-          <Box position={'fixed'} zIndex={'100'} w={'full'} h={'full'} />
         </>
       ) : null}
     </>

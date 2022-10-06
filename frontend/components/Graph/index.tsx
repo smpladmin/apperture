@@ -8,7 +8,7 @@ import G6, {
 } from '@antv/g6';
 import primaryNode from './nodes';
 import basicEdge from './edges';
-import { edgesOnZoom, nodesOnZoom } from './zoomBehaviour';
+import { edgesOnZoom } from './zoomBehaviour';
 import { graphConfig, zoomConfig } from '@lib/config/graphConfig';
 import { transformData } from './transformData';
 import { Edge } from '@lib/domain/edge';
@@ -51,6 +51,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
       getEvents() {
         return {
           'node:click': 'onNodeClick',
+          'node:touchstart': 'onNodeClick',
         };
       },
 

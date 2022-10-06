@@ -19,7 +19,6 @@ import { useRouter } from 'next/router';
 import { MapContext } from '@lib/contexts/mapContext';
 import { getAuthToken } from '@lib/utils/request';
 
-
 export const getServerSideProps: GetServerSideProps = async ({
   req,
   query,
@@ -65,6 +64,12 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
     onClose: closeEventDetailsDrawer,
   } = useDisclosure();
 
+  const {
+    isOpen: isMobileEventDetailFloaterOpen,
+    onOpen: openMobileEventDetailFloater,
+    onClose: closeMobileEventDetailFloater,
+  } = useDisclosure();
+
   useEffect(() => {
     setIsLoading(!edges.length);
   }, [edges.length]);
@@ -72,6 +77,7 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   useEffect(() => {
     if (activeNode) {
       openEventDetailsDrawer();
+      openMobileEventDetailFloater();
     } else {
       closeEventDetailsDrawer();
     }
@@ -110,6 +116,8 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
             closeEventDetailsDrawer={closeEventDetailsDrawer}
             eventData={eventData}
             setEventData={setEventData}
+            isMobileEventDetailFloaterOpen={isMobileEventDetailFloaterOpen}
+            closeMobileEventDetailFloater={closeMobileEventDetailFloater}
           />
           <Graph visualisationData={edges} />
         </>
