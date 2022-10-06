@@ -20,6 +20,7 @@ import {
   showAndHideNodesOnZoom,
   removeNodesActiveState,
 } from '@lib/utils/graph';
+import { BLACK, WHITE_DEFAULT } from '@theme/index';
 
 type GraphProps = {
   visualisationData: Array<Edge>;
@@ -112,14 +113,14 @@ const Graph = ({ visualisationData }: GraphProps) => {
       graph?.updateItem(activeNode, {
         stateStyles: {
           active: {
-            stroke: '#000000',
-            fill: '#ffffff',
+            stroke: BLACK,
+            fill: WHITE_DEFAULT,
             lineWidth:
               6 /
               (isNodeSearched && currentZoom < zoomRatio
                 ? zoomRatio
                 : currentZoom),
-            shadowColor: '#ffffff',
+            shadowColor: WHITE_DEFAULT,
             shadowBlur: 6,
           },
         },
@@ -164,10 +165,10 @@ const Graph = ({ visualisationData }: GraphProps) => {
           graph?.updateItem(activatedNodes[0], {
             stateStyles: {
               active: {
-                stroke: '#000000',
-                fill: '#ffffff',
+                stroke: BLACK,
+                fill: WHITE_DEFAULT,
                 lineWidth: 6 / zoomRatio!!,
-                shadowColor: '#ffffff',
+                shadowColor: WHITE_DEFAULT,
                 shadowBlur: 6,
               },
             },
