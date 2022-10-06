@@ -65,7 +65,6 @@ const EventDetails = ({
           >
             <EventDetailsInfo eventData={eventData} />
           </Box>
-          <Box position={'fixed'} zIndex={'100'} w={'full'} h={'full'} />
         </>
       ) : null}
     </>
