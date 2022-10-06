@@ -20,7 +20,8 @@
       "@styles/*": ["styles/*"],
       "@lib/*": ["lib/*"],
       "@components/*": ["components/*"],
-      "@assets/*": ["assets/*"]
+      "@assets/*": ["assets/*"],
+      "@theme/*": ["theme/*"]
     }
   },
   "include": [
