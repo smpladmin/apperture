@@ -6,6 +6,7 @@ const NUCLEUS_TEAL = '#66A7BD';
 const SHADOW_TEAL = '#66A7BD';
 const EDGE_GRAY = '#E7EDF2';
 const ARROW_GRAY = '#78787E';
+const BLACK = '#000000';
 
 const colors = {
   black: {
@@ -139,4 +140,5 @@ module.exports = {
   SHADOW_TEAL,
   EDGE_GRAY,
   ARROW_GRAY,
+  BLACK,
 };

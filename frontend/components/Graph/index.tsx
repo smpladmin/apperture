@@ -20,6 +20,7 @@ import {
   showAndHideNodesOnZoom,
   removeNodesActiveState,
 } from '@lib/utils/graph';
+import { BLACK, WHITE_DEFAULT } from '@theme/index';
 
 type GraphProps = {
   visualisationData: Array<Edge>;
@@ -113,14 +114,14 @@ const Graph = ({ visualisationData }: GraphProps) => {
       graph?.updateItem(activeNode, {
         stateStyles: {
           active: {
-            stroke: '#000000',
-            fill: '#ffffff',
+            stroke: BLACK,
+            fill: WHITE_DEFAULT,
             lineWidth:
               6 /
               (isNodeSearched && currentZoom < zoomRatio
                 ? zoomRatio
                 : currentZoom),
-            shadowColor: '#ffffff',
+            shadowColor: WHITE_DEFAULT,
             shadowBlur: 6,
           },
         },
@@ -142,6 +143,42 @@ const Graph = ({ visualisationData }: GraphProps) => {
       });
     }
   }, [activeNode]);
+
+  useEffect(() => {
+    G6.registerBehavior('wheel-zoom', {
+      getEvents() {
+        return {
+          wheelzoom: 'onWheelZoom',
+        };
+      },
+      onWheelZoom() {
+        const graph = gRef.current.graph;
+        const zoomRatio = graph?.getZoom()!!;
+        const nodes = graph?.getNodes()!!;
+        const edges = graph?.getEdges();
+
+        const activatedNodes = graph?.findAllByState('node', 'active');
+
+        if (zoomRatio >= graphConfig.minZoom) {
+          showAndHideNodesOnZoom(graph, nodes, zoomRatio);
+        }
+        if (activatedNodes?.length) {
+          graph?.updateItem(activatedNodes[0], {
+            stateStyles: {
+              active: {
+                stroke: BLACK,
+                fill: WHITE_DEFAULT,
+                lineWidth: 6 / zoomRatio!!,
+                shadowColor: WHITE_DEFAULT,
+                shadowBlur: 6,
+              },
+            },
+          });
+        }
+        setNodesAndEdgesStyleOnZoom(nodes!!, edges!!, zoomRatio!!);
+      },
+    });
+  }, []);
 
   useEffect(() => {
     if (!gRef.current.graph) {
@@ -208,21 +245,6 @@ const Graph = ({ visualisationData }: GraphProps) => {
         'line'
       );
 
-      G6.registerBehavior('wheel-zoom', {
-        getEvents() {
-          return {
-            wheelzoom: 'onWheelZoom',
-          };
-        },
-        onWheelZoom() {
-          const graph = gRef.current.graph;
-          const zoomRatio = graph?.getZoom();
-          const nodes = graph?.getNodes();
-          const edges = graph?.getEdges();
-          setNodesAndEdgesStyleOnZoom(nodes!!, edges!!, zoomRatio!!);
-        },
-      });
-
       gRef.current.graph = new G6Graph({
         container: ref.current || '',
         width: ref.current?.offsetWidth,
@@ -259,14 +281,6 @@ const Graph = ({ visualisationData }: GraphProps) => {
       const nodes = graph.getNodes();
       const zoomRatio = graph.getZoom();
       showAndHideNodesOnZoom(graph, nodes, zoomRatio);
-    });
-
-    graph.on('wheelzoom', () => {
-      const nodes = graph.getNodes();
-      const zoomRatio = graph.getZoom();
-      if (zoomRatio >= graphConfig.minZoom) {
-        showAndHideNodesOnZoom(graph, nodes, zoomRatio);
-      }
     });
 
     graph.on('dragnodeend', (evt: IG6GraphEvent) => {
