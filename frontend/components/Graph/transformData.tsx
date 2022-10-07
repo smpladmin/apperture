@@ -1,5 +1,5 @@
 import { ApiDataType, EdgeType, NodeType } from '@lib/types/graph';
-import { addVisibilityInfo } from '@lib/utils/graph';
+import { addVisibilityInfo } from './graphUtil';
 import { zoomConfig } from '@lib/config/graphConfig';
 
 type resultType = {

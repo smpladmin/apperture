@@ -1,6 +1,7 @@
-import { fittingString } from '@lib/utils/graph';
+import { fittingString } from '@components/Graph/graphUtil';
 import { nodeShapes, graphConfig } from '@lib/config/graphConfig';
 import { IGroup, ModelConfig } from '@antv/g6';
+import { BLACK_200 } from '@theme/index';
 // TODO: Move colors to common congif file and use from there
 const label = (cfg: ModelConfig, group: IGroup) => {
   const nucleus = group.find(
@@ -20,7 +21,7 @@ const label = (cfg: ModelConfig, group: IGroup) => {
       ),
       fontSize: 14,
       fontWeight: 500,
-      fill: '#0E0E19',
+      fill: BLACK_200,
       lineHeight: 11,
       textBaseline: 'top',
     },

@@ -1,5 +1,6 @@
 import { IGroup, ModelConfig } from '@antv/g6';
 import { edgeShapes } from '@lib/config/graphConfig';
+import { EDGE_GRAY } from '@theme/index';
 
 const basicLine = (cfg: ModelConfig, group: IGroup) => {
   const startPoint = cfg.startPoint;
@@ -8,7 +9,7 @@ const basicLine = (cfg: ModelConfig, group: IGroup) => {
   const keyShape = group.addShape('path', {
     attrs: {
       lineWidth: (9 * (cfg.percentile as number)) / 100,
-      stroke: '#E7EDF2',
+      stroke: EDGE_GRAY,
       strokeOpacity: 0.75,
       path: [
         ['M', startPoint?.x, startPoint?.y],

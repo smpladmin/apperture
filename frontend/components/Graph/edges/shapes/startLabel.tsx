@@ -1,6 +1,6 @@
 import { IGroup, ModelConfig } from '@antv/g6';
 import { edgeShapes } from '@lib/config/graphConfig';
-import { formatDatalabel } from '@lib/utils/graph';
+import { formatDatalabel } from '@components/Graph/graphUtil';
 
 const startLabel = (cfg: ModelConfig, group: IGroup) => {
   const shape = group.get('children')[0];

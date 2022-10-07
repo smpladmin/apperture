@@ -4,7 +4,7 @@ import { TrendData } from '@lib/domain/eventData';
 import {
   convertISODateToReadableDate,
   formatDatalabel,
-} from '@lib/utils/graph';
+} from '@components/Graph/graphUtil';
 import { useEffect, useRef } from 'react';
 
 const Trend = ({ trendsData }: { trendsData: Array<TrendData> }) => {

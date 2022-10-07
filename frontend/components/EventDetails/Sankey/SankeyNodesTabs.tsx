@@ -11,7 +11,7 @@ import {
 } from '@chakra-ui/react';
 import { FlowType, SankeyData } from '@lib/domain/eventData';
 
-import { formatDatalabel } from '@lib/utils/graph';
+import { formatDatalabel } from '@components/Graph/graphUtil';
 import { Fragment } from 'react';
 
 const SankeyNodeStats = ({ data }: { data: SankeyData }) => {

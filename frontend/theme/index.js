@@ -1,5 +1,6 @@
 const WHITE_DEFAULT = '#ffffff';
 const PURPLE = '#7A4AA4';
+const WHITE_100 = '#f6f6f6';
 const WHITE_300 = '#efefef';
 const BLACK_200 = '#0E0E19';
 const NUCLEUS_TEAL = '#66A7BD';
@@ -19,7 +20,7 @@ const colors = {
   white: {
     DEFAULT: WHITE_DEFAULT,
     0: 'rgba(255,255,255,0.08)',
-    100: '#f6f6f6',
+    100: WHITE_100,
     200: '#ededed',
     300: WHITE_300,
   },
@@ -141,4 +142,5 @@ module.exports = {
   EDGE_GRAY,
   ARROW_GRAY,
   BLACK,
+  WHITE_100,
 };
