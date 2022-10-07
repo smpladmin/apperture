@@ -1,13 +1,19 @@
 from typing import List, Dict
+
 from beanie import PydanticObjectId
 from fastapi import Depends
-from mongo.mongo import Mongo
 
 from domain.notifications.models import (
     Notification,
     NotificationFrequency,
     NotificationType,
+    ThresholdMap,
+    NotificationChannel,
+    ComputedUpdate,
 )
+from domain.edge.models import NodeDataUpdate
+
+from mongo.mongo import Mongo
 
 
 class NotificationService:
@@ -21,14 +27,14 @@ class NotificationService:
         notificationType: str,
         appertureManaged: bool,
         pctThresholdActive: bool,
-        pctThresholdValues: Dict,
+        pctThresholdValues: ThresholdMap,
         absoluteThresholdActive: bool,
-        absoluteThresholdValues: Dict,
+        absoluteThresholdValues: ThresholdMap,
         formula: str,
         variableMap: Dict,
         frequency: str,
         preferredHourGMT: int,
-        preferredChannels: List[str],
+        preferredChannels: List[NotificationChannel],
         notificationActive: bool,
     ):
         return Notification(
@@ -64,50 +70,52 @@ class NotificationService:
         ).to_list()
 
     async def get_notifications_to_compute(self, user_id: str):
-        pipeline = [
-            {
-                "$match": {
-                    "user_id": PydanticObjectId(user_id),
-                    "notification_active": True,
-                }
-            }
-        ]
-        return await (Notification.find().aggregate(pipeline).to_list())
+        return await Notification.find(
+            Notification.user_id == PydanticObjectId(user_id),
+            Notification.notification_active == True,
+        ).to_list()
+
+    def compute_update_values(self, data):
+        if len(data.node_data) == 1:
+            val = (
+                sum([node.hits for node in data.node_data[0]])
+                if len(data.node_data[0]) > 0
+                else 0
+            )
+
+        elif len(data.node_data) == 2:
+            num = (
+                sum([node.hits for node in data.node_data[0]])
+                if len(data.node_data[0]) > 0
+                else 0
+            )
+            den = (
+                sum([node.hits for node in data.node_data[1]])
+                if len(data.node_data[1]) > 0
+                else 0
+            )
+            val = num / den if den != 0 else 0
+
+        else:
+            val = 0
+
+        return val
 
     def compute_updates(
         self,
-        node_data_bulk: Dict,
-    ) -> List[Dict]:
-        computed_updates = []
+        node_data_for_updates: List[NodeDataUpdate],
+    ) -> List[ComputedUpdate]:
 
-        if node_data_bulk:
-            for notification_id, node_data in node_data_bulk.items():
-                if len(node_data) == 1:
-                    val = (
-                        sum([node.hits for node in node_data[0]])
-                        if len(node_data[0]) > 0
-                        else 0
-                    )
-
-                elif len(node_data) == 2:
-                    num = (
-                        sum([node.hits for node in node_data[0]])
-                        if len(node_data[0]) > 0
-                        else 0
-                    )
-                    den = (
-                        sum([node.hits for node in node_data[1]])
-                        if len(node_data[1]) > 0
-                        else 0
-                    )
-                    val = num / den if den != 0 else 0
-
-                else:
-                    val = 0
-
-                computed_update = {}
-                computed_update["name"] = str(notification_id)
-                computed_update["value"] = float("{:.2f}".format(val))
-                computed_updates.append(computed_update)
+        computed_updates = (
+            [
+                ComputedUpdate(
+                    name=str(data.update_id),
+                    value=float("{:.2f}".format(self.compute_update_values(data))),
+                )
+                for data in node_data_for_updates
+            ]
+            if node_data_for_updates
+            else []
+        )
 
         return computed_updates

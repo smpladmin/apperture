@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional
+from typing import List
 from beanie import PydanticObjectId, UnionDoc
 from pydantic import BaseModel
 
@@ -78,3 +78,8 @@ class NodeSignificance(BaseModel):
     node: str
     node_hits: int
     total_hits: int
+
+
+class NodeDataUpdate(BaseModel):
+    update_id: PydanticObjectId
+    node_data: List[List[AggregatedEdge]]

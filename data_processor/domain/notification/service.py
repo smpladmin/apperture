@@ -10,7 +10,7 @@ from domain.notification.models import Notification, NotificationChannel
 
 class NotificationService:
     def fetch_notifications(self, user_id: str):
-        response = get(f"/private/compute_notifications/{user_id}")
+        response = get(f"/private/notifications?user_id={user_id}")
         if response.ok:
             return parse_obj_as(List[Notification], response.json())
 
