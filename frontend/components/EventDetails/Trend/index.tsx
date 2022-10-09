@@ -6,6 +6,7 @@ import {
   formatDatalabel,
 } from '@components/Graph/graphUtil';
 import { useEffect, useRef } from 'react';
+import { TEAL_100 } from '@theme/index';
 
 const Trend = ({ trendsData }: { trendsData: Array<TrendData> }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -60,12 +61,12 @@ const Trend = ({ trendsData }: { trendsData: Array<TrendData> }) => {
             },
             areaStyle: () => {
               return {
-                fill: 'rgba(189, 230, 241, 1)',
+                fill: TEAL_100,
                 fillOpacity: 1,
               };
             },
             line: {
-              style: { lineWidth: 1.5, stroke: 'rgba(189, 230, 241, 1)' },
+              style: { lineWidth: 1.5, stroke: TEAL_100 },
             },
           },
         },

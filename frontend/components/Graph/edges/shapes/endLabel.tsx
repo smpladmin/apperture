@@ -1,6 +1,7 @@
 import { IGroup, ModelConfig } from '@antv/g6';
 import { edgeShapes } from '@lib/config/graphConfig';
 import { formatDatalabel } from '@components/Graph/graphUtil';
+import { EDGE_LABEL_GRAY } from '@theme/index';
 
 const endLabel = (cfg: ModelConfig, group: IGroup) => {
   const shape = group.get('children')[0];
@@ -10,7 +11,7 @@ const endLabel = (cfg: ModelConfig, group: IGroup) => {
     attrs: {
       lineHeight: 16,
       fontSize: 8,
-      fill: '#808080',
+      fill: EDGE_LABEL_GRAY,
       fillOpacity: 0.8,
       text: formatDatalabel(parseFloat(cfg.node2Label as string)),
       x: midPoint.x,

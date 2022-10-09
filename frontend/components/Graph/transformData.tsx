@@ -1,6 +1,5 @@
 import { ApiDataType, EdgeType, NodeType } from '@lib/types/graph';
 import { addVisibilityInfo } from './graphUtil';
-import { zoomConfig } from '@lib/config/graphConfig';
 
 type resultType = {
   edges: Array<EdgeType>;
@@ -106,7 +105,7 @@ export const transformData = (data: Array<ApiDataType>): resultType => {
   });
 
   return {
-    nodes: addVisibilityInfo(sortedNodes, zoomConfig, true),
-    edges: addVisibilityInfo(sortedEdges, zoomConfig, false),
+    nodes: addVisibilityInfo(sortedNodes, true),
+    edges: addVisibilityInfo(sortedEdges, false),
   };
 };

@@ -2,7 +2,7 @@ import { fittingString } from '@components/Graph/graphUtil';
 import { nodeShapes, graphConfig } from '@lib/config/graphConfig';
 import { IGroup, ModelConfig } from '@antv/g6';
 import { BLACK_200 } from '@theme/index';
-// TODO: Move colors to common congif file and use from there
+
 const label = (cfg: ModelConfig, group: IGroup) => {
   const nucleus = group.find(
     (e: IGroup) => e.get('name') === nodeShapes.nucleus
