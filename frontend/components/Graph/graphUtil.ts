@@ -1,7 +1,6 @@
-import { ZoomConfigType } from '@lib/types/graph';
 import G6, { Graph, IEdge, INode, Item } from '@antv/g6';
 import { graphConfig, zoomConfig } from '@lib/config/graphConfig';
-import { NodeType } from '@lib/types/graph';
+import { NodeType, EdgeType } from '@lib/types/graph';
 import { edgesOnZoom, nodesOnZoom } from '@components/Graph/zoomBehaviour';
 import { BLACK, WHITE_DEFAULT } from '@theme/index';
 
@@ -90,11 +89,10 @@ export const fittingString = (
   return res;
 };
 
-type itemsType = Array<any>;
 export const addVisibilityInfo = (
-  items: itemsType,
+  items: Array<NodeType | EdgeType>,
   addVisibleAt: boolean
-): itemsType => {
+) => {
   const fItems = items.map((item, index) => {
     item.percentile = ((items.length - index) / items.length) * 100;
 
