@@ -168,7 +168,7 @@ export const registerActivateNodeEvent = (
   gRef: MutableRefObject<{
     graph: G6Graph | null;
   }>,
-  onActivateNode: any
+  onActivateNode: Function
 ) => {
   G6.registerBehavior('activate-node', {
     getDefaultCfg() {
