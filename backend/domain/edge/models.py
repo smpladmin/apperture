@@ -81,5 +81,6 @@ class NodeSignificance(BaseModel):
 
 
 class NodeDataUpdate(BaseModel):
+    name: str
     update_id: PydanticObjectId
     node_data: List[List[AggregatedEdge]]

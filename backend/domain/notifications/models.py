@@ -28,6 +28,7 @@ class ThresholdMap(BaseModel):
 class Notification(Document):
     datasource_id: PydanticObjectId
     user_id: PydanticObjectId
+    name: str
     notification_type: NotificationType
     apperture_managed: bool
     pct_threshold_active: bool
@@ -47,6 +48,7 @@ class Notification(Document):
 
 class ComputedNotification(BaseModel):
     name: str
+    notification_id: PydanticObjectId
     value: float
     pct_change: Optional[float]
     metric: Optional[str]
@@ -55,4 +57,5 @@ class ComputedNotification(BaseModel):
 
 class ComputedUpdate(BaseModel):
     name: str
+    notification_id: PydanticObjectId
     value: float

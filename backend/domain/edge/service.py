@@ -458,6 +458,7 @@ class EdgeService:
         node_data_for_updates = (
             [
                 NodeDataUpdate(
+                    name=update.name,
                     update_id=update.id,
                     node_data=await self.get_node_data_for_update(update),
                 )

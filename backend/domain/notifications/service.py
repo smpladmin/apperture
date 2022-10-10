@@ -23,6 +23,7 @@ class NotificationService:
     def build_notification(
         self,
         datasourceId: str,
+        name: str,
         userId: PydanticObjectId,
         notificationType: str,
         appertureManaged: bool,
@@ -39,6 +40,7 @@ class NotificationService:
     ):
         return Notification(
             datasource_id=PydanticObjectId(datasourceId),
+            name=name,
             user_id=userId,
             notification_type=notificationType,
             apperture_managed=appertureManaged,
@@ -109,7 +111,8 @@ class NotificationService:
         computed_updates = (
             [
                 ComputedUpdate(
-                    name=str(data.update_id),
+                    name=data.name,
+                    notification_id=data.update_id,
                     value=float("{:.2f}".format(self.compute_update_values(data))),
                 )
                 for data in node_data_for_updates

@@ -11,6 +11,7 @@ from domain.notifications.models import (
 
 class CreateNotificationDto(BaseModel):
     datasourceId: str
+    name: str
     notificationType: str
     appertureManaged: bool
     pctThresholdActive: bool
