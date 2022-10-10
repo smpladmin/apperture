@@ -12,7 +12,6 @@ import EventDetailsModal from './MobileEventDetailsInfo/EventDetailsModal';
 type EventDetailsProps = {
   isEventDetailsDrawerOpen: boolean;
   closeEventDetailsDrawer: () => void;
-  closeMobileEventDetailFloater: () => void;
   isMobileEventDetailFloaterOpen: boolean;
   eventData: { [key in string]: Array<TrendData | SankeyData> };
   setEventData: Function;

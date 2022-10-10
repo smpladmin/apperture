@@ -17,16 +17,16 @@ import { MapContext } from '@lib/contexts/mapContext';
 import { Actions } from '@lib/types/context';
 
 type EventDetailsModalInfoProps = {
-  isEventDetailsDrawerOpen: boolean;
-  closeEventDetailsDrawer: () => void;
+  isEventDetailsModalOpen: boolean;
+  closeEventDetailsModal: () => void;
   eventData: {
     [key in string]: Array<TrendData | SankeyData | NodeSignificanceData>;
   };
 };
 
 const EventDetailsModal = ({
-  isEventDetailsDrawerOpen,
-  closeEventDetailsDrawer,
+  isEventDetailsModalOpen,
+  closeEventDetailsModal,
   eventData,
 }: EventDetailsModalInfoProps) => {
   const { dispatch } = useContext(MapContext);
@@ -36,12 +36,12 @@ const EventDetailsModal = ({
       type: Actions.SET_ACTIVE_NODE,
       payload: null,
     });
-    closeEventDetailsDrawer();
+    closeEventDetailsModal();
   };
 
   return (
     <Modal
-      isOpen={isEventDetailsDrawerOpen}
+      isOpen={isEventDetailsModalOpen}
       onClose={handleCloseModal}
       isCentered
       blockScrollOnMount={false}

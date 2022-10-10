@@ -1,6 +1,4 @@
-import { Box, Button, Flex, Icon, Image, Text } from '@chakra-ui/react';
-import funnelIcon from '@assets/icons/funnel-icon.svg';
-import notificationBellIcon from '@assets/icons/notification-bell.svg';
+import { Box, Flex, IconButton, Text, useDisclosure } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import {
   NodeSignificanceData,
@@ -8,6 +6,11 @@ import {
   TrendData,
 } from '@lib/domain/eventData';
 import { formatDatalabel, getPercentageOfHits } from '@lib/utils/graph';
+import EventDetailsModal from './EventDetailsModal';
+import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
+import { useContext, useRef } from 'react';
+import { MapContext } from '@lib/contexts/mapContext';
+import { Actions } from '@lib/types/context';
 
 type EventDetailsFloaterProps = {
   eventData: {
@@ -17,70 +20,101 @@ type EventDetailsFloaterProps = {
 
 const EventDetailFloater = ({ eventData }: EventDetailsFloaterProps) => {
   const { nodeSignificanceData } = eventData;
+  const {
+    isOpen: isEventDetailsModalOpen,
+    onOpen: openEventDetailsModal,
+    onClose: closeEventDetailsModal,
+  } = useDisclosure();
+  const eventDetailsRef = useRef<HTMLDivElement>(null);
+  const { dispatch } = useContext(MapContext);
+
+  useOnClickOutside(eventDetailsRef, () => {
+    dispatch({
+      type: Actions.SET_ACTIVE_NODE,
+      payload: null,
+    });
+  });
 
   return (
-    <Box
-      p={'4'}
-      bg={'white.DEFAULT'}
-      shadow={'4px 4px 12px rgba(0, 0, 0, 0.12)'}
-      rounded={'xl'}
-      border={'1px'}
-      borderColor={'white.200'}
-    >
-      <Text fontSize={'sh-18'} lineHeight={'sh-18'} fontWeight={'medium'}>
-        {(nodeSignificanceData?.[0] as NodeSignificanceData)?.['node']}
-      </Text>
-      <Text
-        fontSize={'xs-14'}
-        lineHeight={'base'}
-        fontWeight={'normal'}
-        color={'grey.200'}
-        mt={'3'}
+    <>
+      <Box
+        p={'4'}
+        bg={'white.DEFAULT'}
+        shadow={'4px 4px 12px rgba(0, 0, 0, 0.12)'}
+        rounded={'xl'}
+        border={'1px'}
+        borderColor={'white.200'}
+        ref={!isEventDetailsModalOpen ? eventDetailsRef : null}
       >
-        {`${getPercentageOfHits(
-          (nodeSignificanceData?.[0] as NodeSignificanceData)?.['nodeHits'],
-          (nodeSignificanceData?.[0] as NodeSignificanceData)?.['totalHits']
-        )}% of overall traffic on this event`}
-      </Text>
-      <Flex alignItems={'baseline'} gap={'1'}>
-        <Text fontSize={'xs-14'} fontWeight={'medium'} lineHeight={'base'}>
-          {formatDatalabel(
-            (nodeSignificanceData?.[0] as NodeSignificanceData)?.['nodeHits']
-          )}
+        <Flex justifyContent={'space-between'} alignItems={'center'}>
+          <Text
+            fontSize={'sh-20'}
+            lineHeight={'sh-20'}
+            fontWeight={'medium'}
+            wordBreak={'break-word'}
+          >
+            {(nodeSignificanceData?.[0] as NodeSignificanceData)?.['node']}
+          </Text>
+          <Box
+            borderRadius={'25'}
+            bg={'white.200'}
+            color={'black.100'}
+            fontSize={'xs-12'}
+            fontWeight={'600'}
+            px={'2'}
+            py={'1'}
+            h={'8'}
+          >
+            Event
+          </Box>
+        </Flex>
+        <Text
+          fontSize={'xs-14'}
+          lineHeight={'base'}
+          fontWeight={'normal'}
+          color={'grey.200'}
+          mt={'2'}
+        >
+          {`${getPercentageOfHits(
+            (nodeSignificanceData?.[0] as NodeSignificanceData)?.['nodeHits'],
+            (nodeSignificanceData?.[0] as NodeSignificanceData)?.['totalHits']
+          )}% of overall traffic on this event`}
         </Text>
-        <Text fontSize={'xs-12'} fontWeight={'medium'} lineHeight={'xs-12'}>
-          Hits
-        </Text>
-      </Flex>
-      <Flex gap={'2'} h={'10'} mt={'5'} w={'full'}>
-        <Button bg={'black.100'} borderRadius={'25'}>
-          <Flex gap={'2'} alignItems={'center'} justifyContent={'center'}>
-            <Image src={notificationBellIcon.src} alt={'notification-bell'} />
+        <Flex mt={'6'} justifyContent={'space-between'} alignItems={'center'}>
+          <Flex alignItems={'baseline'} gap={'1'}>
             <Text
-              color={'white.DEFAULT'}
-              fontSize={'xs-12'}
-              lineHeight={'xs-12'}
-              fontWeight={'medium'}
+              fontSize={'sh-28'}
+              fontWeight={'700'}
+              lineHeight={'sh-28'}
+              fontFamily={'Space Grotesk, Work Sans, sans-serif'}
             >
-              {'Set Update'}
+              {formatDatalabel(
+                (nodeSignificanceData?.[0] as NodeSignificanceData)?.[
+                  'nodeHits'
+                ]
+              )}
+            </Text>
+            <Text fontSize={'xs-12'} fontWeight={'medium'} lineHeight={'xs-12'}>
+              Hits
             </Text>
           </Flex>
-        </Button>
-        <Button bg={'white.200'} borderRadius={'25'}>
-          <Flex gap={'2'} alignItems={'center'} justifyContent={'center'}>
-            <Image src={funnelIcon.src} alt={'funnel-icon'} />
-            <Text
-              color={'black.100'}
-              fontSize={'xs-12'}
-              lineHeight={'xs-12'}
-              fontWeight={'medium'}
-            >
-              {'Measure Conversion'}
-            </Text>
-          </Flex>
-        </Button>
-      </Flex>
-    </Box>
+          <IconButton
+            aria-label="next"
+            icon={<i className="ri-arrow-right-s-line"></i>}
+            color={'white.DEFAULT'}
+            bg={'black.100'}
+            size={'sm'}
+            rounded={'full'}
+            onClick={openEventDetailsModal}
+          />
+        </Flex>
+      </Box>
+      <EventDetailsModal
+        isEventDetailsModalOpen={isEventDetailsModalOpen}
+        closeEventDetailsModal={closeEventDetailsModal}
+        eventData={eventData}
+      />
+    </>
   );
 };
 
