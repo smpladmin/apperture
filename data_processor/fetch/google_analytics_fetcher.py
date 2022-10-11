@@ -26,6 +26,8 @@ class GoogleAnalyticsFetcher(Fetcher):
         response = self.get_timeframe_report(timeframe, view_id)
         page_token = self.get_page_token(response)
         df = self.parse_data(response)
+        if len(df) == 0:
+            return df
         logging.info("{x}: {y}".format(x="Length of GA Response", y=len(df)))
 
         while page_token:
@@ -87,6 +89,11 @@ class GoogleAnalyticsFetcher(Fetcher):
         columns = column_header
         for metric in metric_header:
             columns.append(metric["name"])
+        if "rows" not in reports["data"].keys():
+            logging.info(
+                "{x}: {y}".format(x="GA data not available", y=reports["data"])
+            )
+            return pd.DataFrame()
         data = pd.json_normalize(reports["data"]["rows"])
         data_dimensions = pd.DataFrame(data["dimensions"].tolist())
         data_metrics = pd.DataFrame(data["metrics"].tolist())
