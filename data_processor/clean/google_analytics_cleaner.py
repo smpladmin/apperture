@@ -1,18 +1,27 @@
 import logging
 from .cleaner import Cleaner
 import pandas as pd
+from urllib.parse import urlparse
+
 
 
 class GoogleAnalyticsCleaner(Cleaner):
     def clean(self, df: pd.DataFrame) -> pd.DataFrame:
-        logging.info("{x}: {y}".format(x="Cleaning GA data of length", y=len(df)))
+        logging.info("{x}: {y}".format(x="Cleaning GA data of length", y=len(df))) 
         self.convert_data_types(df)
         self.remove_query_params_from_path(df)
-        self.remove_tenant_base_url_from_path(df)
-        self.remove_tenant_weblight_base_url_from_path(df)
-        self.remove_tenant_google_ad_base_url_from_path(df)
+        self.convert_url_to_path(df)
         logging.info("{x}: {y}".format(x="Length of df after cleanup", y=len(df)))
         return df
+
+    def convert_url_to_path(self,df):
+        print(df["previousPage"][0])
+        df["previousPage"] = df["previousPage"].apply(
+            lambda x: urlparse(x).path if x != "" else x
+        )
+        df["pagePath"] = df["pagePath"].apply(
+            lambda x: urlparse(x).path if x != "" else x
+        )
 
     def convert_data_types(self, df):
         df["pageViews"] = pd.to_numeric(df["pageViews"])
