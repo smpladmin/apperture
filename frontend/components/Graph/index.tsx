@@ -35,7 +35,11 @@ const Graph = ({ visualisationData }: GraphProps) => {
   } = useContext(MapContext);
 
   useEffect(() => {
-    handleActivatingNodeOnSearchAndClick(gRef, activeNode, isNodeSearched);
+    handleActivatingNodeOnSearchAndClick(
+      gRef.current.graph,
+      activeNode,
+      isNodeSearched
+    );
   }, [activeNode]);
 
   useEffect(() => {
@@ -52,7 +56,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
         payload: false,
       });
     };
-    registerActivateNodeEvent(gRef, onActivateNode);
+    registerActivateNodeEvent(gRef.current.graph, onActivateNode);
   }, []);
 
   useEffect(() => {

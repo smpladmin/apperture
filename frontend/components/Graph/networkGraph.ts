@@ -165,9 +165,7 @@ export const registerWheelZoomEvent = (
 };
 
 export const registerActivateNodeEvent = (
-  gRef: MutableRefObject<{
-    graph: G6Graph | null;
-  }>,
+  graph: G6Graph | null,
   onActivateNode: Function
 ) => {
   G6.registerBehavior('activate-node', {
@@ -183,7 +181,6 @@ export const registerActivateNodeEvent = (
     },
 
     onNodeClick(e: IG6GraphEvent) {
-      const graph = gRef.current.graph;
       const item = e.item as Item;
 
       if (item.hasState('active')) {
@@ -205,13 +202,10 @@ const _getNodeZoomRatio = (activeNode: Item) => {
 };
 
 export const handleActivatingNodeOnSearchAndClick = (
-  gRef: MutableRefObject<{
-    graph: G6Graph | null;
-  }>,
+  graph: G6Graph | null,
   activeNode: Item | null,
   isNodeSearched: boolean
 ) => {
-  let graph = gRef.current.graph;
   const currentZoom = graph?.getZoom()!!;
   const nodes = graph?.getNodes();
   const edges = graph?.getEdges();
