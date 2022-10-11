@@ -1,22 +1,28 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 from pydantic import BaseModel
 from rest.dtos.model_response import ModelResponse
-from domain.notifications.models import Notification, ComputedNotification
+from domain.notifications.models import (
+    Notification,
+    ComputedNotification,
+    ThresholdMap,
+    NotificationChannel,
+)
 
 
 class CreateNotificationDto(BaseModel):
     datasourceId: str
+    name: str
     notificationType: str
     appertureManaged: bool
     pctThresholdActive: bool
-    pctThresholdValues: Dict
+    pctThresholdValues: Optional[ThresholdMap]
     absoluteThresholdActive: bool
-    absoluteThresholdValues: Dict
+    absoluteThresholdValues: Optional[ThresholdMap]
     formula: str
     variableMap: Dict
     frequency: str
     preferredHourGMT: int
-    preferredChannels: List[str]
+    preferredChannels: List[NotificationChannel]
     notificationActive: bool
 
 

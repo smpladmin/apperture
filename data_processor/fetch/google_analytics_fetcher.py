@@ -1,8 +1,9 @@
 import logging
+
 import pandas as pd
 
-from .report_timeframe import ReportTimeframe
 from .fetcher import Fetcher
+from .report_timeframe import ReportTimeframe
 
 
 class GoogleAnalyticsFetcher(Fetcher):
