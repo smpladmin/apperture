@@ -49,7 +49,7 @@ class GoogleAnalytics4Fetcher(Fetcher):
         df = DataFrame(output)
         try:
             df["previousPage"] = df["previousPage"].apply(
-                lambda x: urlparse(x).path if x != "" else x
+                lambda x: urlparse(x).path
             )
         except Exception as e:
             logging.info(e)

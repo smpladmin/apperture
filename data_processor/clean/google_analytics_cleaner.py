@@ -1,8 +1,9 @@
+import re
 import logging
-from .cleaner import Cleaner
 import pandas as pd
 from urllib.parse import urlparse
 
+from .cleaner import Cleaner
 
 
 class GoogleAnalyticsCleaner(Cleaner):
@@ -14,13 +15,12 @@ class GoogleAnalyticsCleaner(Cleaner):
         logging.info("{x}: {y}".format(x="Length of df after cleanup", y=len(df)))
         return df
 
-    def convert_url_to_path(self,df):
-        print(df["previousPage"][0])
+    def convert_url_to_path(self, df):
         df["previousPage"] = df["previousPage"].apply(
-            lambda x: urlparse(x).path if x != "" else x
+            lambda x: urlparse(x).path
         )
         df["pagePath"] = df["pagePath"].apply(
-            lambda x: urlparse(x).path if x != "" else x
+            lambda x: urlparse(x).path
         )
 
     def convert_data_types(self, df):
