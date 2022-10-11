@@ -29,6 +29,11 @@ class GoogleAnalytics4Fetcher(Fetcher):
             date_ranges=[DateRange(start_date=self.start_date, end_date=self.end_date)],
         )
         response = self.analytics.run_report(request)
+        if len(response.rows) == 0:
+            logging.info("{x}".format(x="No data available for given timeframe"))
+            logging.info("{x}".format(x=response))
+            return DataFrame()
+
         output = []
         for row in response.rows:
             output.append(

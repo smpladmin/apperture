@@ -1,16 +1,14 @@
 import {
   WHITE_DEFAULT,
-  PURPLE,
   WHITE_300,
   NUCLEUS_TEAL,
   SHADOW_TEAL,
-} from '../../../theme';
+} from '@theme/index';
 
-export const shadowStartColor = SHADOW_TEAL;
-export const shadowEndColor = WHITE_300;
-
-export const nodeStartColor = NUCLEUS_TEAL;
-export const nodeEndColor = WHITE_DEFAULT;
+const shadowStartColor = SHADOW_TEAL;
+const shadowEndColor = WHITE_300;
+const nodeStartColor = NUCLEUS_TEAL;
+const nodeEndColor = WHITE_DEFAULT;
 
 export var getShadowColor = function (percentile: any) {
   var R1 = parseInt(shadowStartColor.substring(1, 3), 16);

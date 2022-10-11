@@ -20,15 +20,21 @@ class NotificationChannel(str, Enum):
     EMAIL = "email"
 
 
+class ThresholdMap(BaseModel):
+    min: Optional[float]
+    max: Optional[float]
+
+
 class Notification(Document):
     datasource_id: PydanticObjectId
     user_id: PydanticObjectId
+    name: str
     notification_type: NotificationType
     apperture_managed: bool
     pct_threshold_active: bool
-    pct_threshold_values: Dict
+    pct_threshold_values: Optional[ThresholdMap]
     absolute_threshold_active: bool
-    absolute_threshold_values: Dict
+    absolute_threshold_values: Optional[ThresholdMap]
     formula: str
     variable_map: Dict
     preferred_hour_gmt: int
@@ -42,7 +48,14 @@ class Notification(Document):
 
 class ComputedNotification(BaseModel):
     name: str
+    notification_id: PydanticObjectId
     value: float
     pct_change: Optional[float]
     metric: Optional[str]
     user_threshold: Optional[float]
+
+
+class ComputedUpdate(BaseModel):
+    name: str
+    notification_id: PydanticObjectId
+    value: float

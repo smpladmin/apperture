@@ -1,6 +1,6 @@
 import asyncio
 from copy import deepcopy
-from typing import List, Dict
+from typing import List
 from datetime import datetime as dt
 from datetime import timedelta
 from typing import Union
@@ -15,6 +15,7 @@ from domain.edge.models import (
     NodeTrend,
     NodeSankey,
     NodeSignificance,
+    NodeDataUpdate,
 )
 from mongo.mongo import Mongo
 
@@ -442,18 +443,29 @@ class EdgeService:
             .to_list()
         )
 
-    async def get_node_data_bulk(
+    async def get_node_data_for_update(self, update):
+        return await asyncio.gather(
+            *[
+                self.get_node_data(nodes, update.datasource_id)
+                for ratio_name, nodes in update.variable_map.items()
+            ]
+        )
+
+    async def get_node_data_for_updates(
         self,
         updates,
-    ) -> Dict:
-        node_data_bulk = {}
-        if updates:
-            for update in updates:
-                node_data_promises = [
-                    self.get_node_data(nodes, update["datasource_id"])
-                    for ratio_name, nodes in update["variable_map"].items()
-                ]
-                node_data = await asyncio.gather(*node_data_promises)
-                node_data_bulk[update["_id"]] = node_data
+    ) -> [NodeDataUpdate]:
+        node_data_for_updates = (
+            [
+                NodeDataUpdate(
+                    name=update.name,
+                    update_id=update.id,
+                    node_data=await self.get_node_data_for_update(update),
+                )
+                for update in updates
+            ]
+            if updates
+            else []
+        )
 
-        return node_data_bulk
+        return node_data_for_updates

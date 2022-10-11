@@ -1,8 +1,8 @@
-import { ZoomConfigType } from '@lib/types/graph';
-import G6, { Graph, IEdge, INode } from '@antv/g6';
-import { graphConfig } from '@lib/config/graphConfig';
-import { NodeType } from '@lib/types/graph';
+import G6, { Graph, IEdge, INode, Item } from '@antv/g6';
+import { graphConfig, zoomConfig } from '@lib/config/graphConfig';
+import { NodeType, EdgeType } from '@lib/types/graph';
 import { edgesOnZoom, nodesOnZoom } from '@components/Graph/zoomBehaviour';
+import { BLACK, WHITE_DEFAULT } from '@theme/index';
 
 export const setNodesAndEdgesStyleOnZoom = (
   nodes?: INode[],
@@ -35,6 +35,32 @@ export const showAndHideNodesOnZoom = (
   });
 };
 
+export const setActiveNodeStyle = (
+  graph: Graph,
+  activeNode: Item,
+  zoomRatio: number
+) => {
+  graph?.updateItem(activeNode, {
+    stateStyles: {
+      active: {
+        stroke: BLACK,
+        fill: WHITE_DEFAULT,
+        lineWidth: 6 / zoomRatio,
+        shadowColor: WHITE_DEFAULT,
+        shadowBlur: 6,
+      },
+    },
+  });
+};
+
+export const setNodeActive = (graph: Graph, node: Item) => {
+  graph?.setItemState(node, 'active', true);
+};
+
+export const focusItem = (graph: Graph, item: Item) => {
+  graph?.focusItem(item, true, { duration: 100 });
+};
+
 export const fittingString = (
   str: string,
   maxWidth: number,
@@ -63,17 +89,15 @@ export const fittingString = (
   return res;
 };
 
-type itemsType = Array<any>;
 export const addVisibilityInfo = (
-  items: itemsType,
-  zoomConfig: ZoomConfigType,
+  items: Array<NodeType | EdgeType>,
   addVisibleAt: boolean
-): itemsType => {
+) => {
   const fItems = items.map((item, index) => {
     item.percentile = ((items.length - index) / items.length) * 100;
 
     if (addVisibleAt) {
-      item.visibleAt = getVisibilityZoomRatio(item.percentile, zoomConfig);
+      item.visibleAt = getVisibilityZoomRatio(item.percentile);
     }
     return item;
   });
@@ -81,10 +105,7 @@ export const addVisibilityInfo = (
   return fItems;
 };
 
-export const getVisibilityZoomRatio = (
-  percentile: number,
-  zoomConfig: ZoomConfigType
-): number => {
+export const getVisibilityZoomRatio = (percentile: number): number => {
   const z = zoomConfig.find((z) => z.percentile <= percentile)!!;
   return z?.ratio;
 };

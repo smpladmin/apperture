@@ -1,8 +1,6 @@
 import { Sankey } from '@antv/g2plot';
-
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { SankeyData } from '@lib/domain/eventData';
-
 import { useEffect, useRef } from 'react';
 import SankeyNodesTabs from './SankeyNodesTabs';
 

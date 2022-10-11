@@ -51,6 +51,10 @@ class GoogleAnalyticsStrategy(Strategy):
             )
         )
 
+        if len(df) == 0:
+            logging.info("{x}: {y}".format(x="GA data not available", y="Exiting"))
+            return
+
         logging.info(
             "{x}: {y}".format(
                 x="Data Cleaner for {}".format(external_source_id), y="starts"
