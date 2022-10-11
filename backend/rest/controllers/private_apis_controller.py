@@ -111,11 +111,12 @@ async def get_notifications(
 
 
 @router.get(
-    "/compute_notifications/{user_id}",
+    "/notifications",
     response_model=List[ComputedNotificationResponse],
 )
 async def compute_notifications(
     user_id: str,
+    compute: bool = True,
     notification_service: NotificationService = Depends(),
     edge_service: EdgeService = Depends(),
 ):
@@ -123,10 +124,12 @@ async def compute_notifications(
         user_id=user_id
     )
     updates = [
-        notif for notif in notifications if notif["notification_type"] == "update"
+        notif for notif in notifications if notif.notification_type.value == "update"
     ]
 
-    node_data_bulk = await edge_service.get_node_data_bulk(updates=updates)
-    computed_updates = notification_service.compute_updates(node_data_bulk)
+    node_data_for_updates = await edge_service.get_node_data_for_updates(
+        updates=updates
+    )
+    computed_updates = notification_service.compute_updates(node_data_for_updates)
 
     return computed_updates

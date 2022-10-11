@@ -57,7 +57,7 @@ async def get_sankey_nodes(
     "/datasources/{ds_id}/node_significance",
     response_model=list[NodeSignificanceResponse],
 )
-async def get_sankey_nodes(
+async def get_node_significance(
     ds_id: str,
     node: str,
     start_date: str = "1970-01-01",

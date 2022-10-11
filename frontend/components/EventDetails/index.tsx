@@ -55,24 +55,22 @@ const EventDetails = ({
           </Box>
         )
       ) : isEventDetailsDrawerOpen ? (
-        <>
-          <Box
-            ref={drawerRef}
-            position={'fixed'}
-            zIndex={'200'}
-            mt={'0.15'}
-            width={'106'}
-            h={'full'}
-            px={'7'}
-            pt={'2'}
-            backgroundColor={'white.DEFAULT'}
-            shadow={'1px 1px 0 rgba(30, 25, 34, 0.08)'}
-            overflowY={'auto'}
-            animation={'ease-out 1s'}
-          >
-            <EventDetailsInfo eventData={eventData} />
-          </Box>
-        </>
+        <Box
+          ref={drawerRef}
+          position={'fixed'}
+          zIndex={'200'}
+          mt={'0.15'}
+          width={'106'}
+          h={'full'}
+          px={'7'}
+          pt={'2'}
+          backgroundColor={'white.DEFAULT'}
+          shadow={'1px 1px 0 rgba(30, 25, 34, 0.08)'}
+          overflowY={'auto'}
+          animation={'ease-out 1s'}
+        >
+          <EventDetailsInfo eventData={eventData} />
+        </Box>
       ) : null}
     </>
   );
