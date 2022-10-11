@@ -14,6 +14,7 @@ import {
   handleActivatingNodeOnSearchAndClick,
 } from './networkGraph';
 import { WHITE_100 } from '@theme/index';
+import { AppertureContext } from '@lib/contexts/appertureContext';
 
 type GraphProps = {
   visualisationData: Array<Edge>;
@@ -33,12 +34,14 @@ const Graph = ({ visualisationData }: GraphProps) => {
     state: { activeNode, isNodeSearched },
     dispatch,
   } = useContext(MapContext);
+  const { device } = useContext(AppertureContext);
 
   useEffect(() => {
     handleActivatingNodeOnSearchAndClick(
       gRef.current.graph,
       activeNode,
-      isNodeSearched
+      isNodeSearched,
+      device.isMobile
     );
   }, [activeNode]);
 

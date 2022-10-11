@@ -178,7 +178,6 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
   return (
     <Flex
       w={{ base: 'full', md: 100 }}
-      py={4}
       direction={'column'}
       position={'relative'}
       ref={searchContainerRef}

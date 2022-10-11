@@ -177,6 +177,7 @@ export const registerActivateNodeEvent = (
     getEvents() {
       return {
         'node:click': 'onNodeClick',
+        'node:touchstart': 'onNodeClick',
       };
     },
 
@@ -204,7 +205,8 @@ const _getNodeZoomRatio = (activeNode: Item) => {
 export const handleActivatingNodeOnSearchAndClick = (
   graph: G6Graph | null,
   activeNode: Item | null,
-  isNodeSearched: boolean
+  isNodeSearched: boolean,
+  isMobile: boolean
 ) => {
   const currentZoom = graph?.getZoom()!!;
   const nodes = graph?.getNodes();
@@ -238,6 +240,6 @@ export const handleActivatingNodeOnSearchAndClick = (
       // case:user clicks on node when graph is zoomed
       setNodesAndEdgesStyleOnZoom(nodes, edges, currentZoom);
     }
-    focusItem(graph!!, activeNode);
+    if (!(isMobile && !isNodeSearched)) focusItem(graph!!, activeNode);
   }
 };
