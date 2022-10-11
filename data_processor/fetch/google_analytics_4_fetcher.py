@@ -48,9 +48,7 @@ class GoogleAnalytics4Fetcher(Fetcher):
         logging.info("{x}: {y}".format(x="Length of response from GA", y=len(output)))
         df = DataFrame(output)
         try:
-            df["previousPage"] = df["previousPage"].apply(
-                lambda x: urlparse(x).path
-            )
+            df["previousPage"] = df["previousPage"].apply(lambda x: urlparse(x).path)
         except Exception as e:
             logging.info(e)
         return df
