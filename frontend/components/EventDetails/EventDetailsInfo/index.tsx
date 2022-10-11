@@ -6,8 +6,8 @@ import {
 } from '@lib/domain/eventData';
 import Sankey from '../Sankey';
 import Trend from '../Trend';
-import { formatDatalabel, getPercentageOfHits } from '@lib/utils/graph';
 import { useEffect, useState } from 'react';
+import { formatDatalabel, getPercentageOfHits } from '@lib/utils/common';
 
 type EventDetailsInfo = {
   eventData: {

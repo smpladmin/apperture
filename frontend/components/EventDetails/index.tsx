@@ -7,7 +7,6 @@ import { Actions } from '@lib/types/context';
 import { useContext, useRef } from 'react';
 import EventDetailFloater from './MobileEventDetailsInfo/EventDetailFloater';
 import EventDetailsInfo from './EventDetailsInfo';
-import EventDetailsModal from './MobileEventDetailsInfo/EventDetailsModal';
 
 type EventDetailsProps = {
   isEventDetailsDrawerOpen: boolean;

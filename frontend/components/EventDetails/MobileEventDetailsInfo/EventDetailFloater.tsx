@@ -5,12 +5,12 @@ import {
   SankeyData,
   TrendData,
 } from '@lib/domain/eventData';
-import { formatDatalabel, getPercentageOfHits } from '@lib/utils/graph';
 import EventDetailsModal from './EventDetailsModal';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { useContext, useRef } from 'react';
 import { MapContext } from '@lib/contexts/mapContext';
 import { Actions } from '@lib/types/context';
+import { formatDatalabel, getPercentageOfHits } from '@lib/utils/common';
 
 type EventDetailsFloaterProps = {
   eventData: {
