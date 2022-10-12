@@ -14,10 +14,10 @@ class GoogleAnalyticsCleaner(Cleaner):
         logging.info("{x}: {y}".format(x="Length of df after cleanup", y=len(df)))
         return df
 
-    def remove_locale_from_endpoint(self, url: str) -> str:
-        endpoint = re.sub("/[a-zA-Z]{2,2}(-[a-zA-Z]{2})?/", "/", url)
+    def remove_locale_from_endpoint(self, url: str) -> str: 
+        endpoint = re.sub("/[a-zA-Z]{2,2}(-[a-zA-Z]{2,2})?/", "/", url)
         # Regex to remove locale at end
-        endpoint = re.sub("/[a-zA-Z]{2,2}(-[a-zA-Z]{2})?$", "/", endpoint)
+        endpoint = re.sub("/[a-zA-Z]{2,2}(-[a-zA-Z]{2,2})?$", "/", endpoint)
         if url != endpoint:
             logging.info(
                 "{x}: {y}".format(x="Removed locale for {0}".format(url), y=endpoint)
