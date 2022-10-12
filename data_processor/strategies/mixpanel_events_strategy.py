@@ -6,8 +6,9 @@ from clean.mixpanel_analytics_cleaner import MixpanelAnalyticsCleaner
 from domain.common.models import IntegrationProvider
 from domain.datasource.models import Credential, DataSource
 from domain.runlog.service import RunLogService
+from fetch.data_orchestrator import DataOrchestrator
 from fetch.mixpanel_events_fetcher import MixpanelEventsFetcher
-from store.mixpanel_events_saver import MixpanelEventsSaver
+from store.mixpanel_events_saver import S3EventsSaver
 from store.mixpanel_network_graph_saver import MixpanelNetworkGraphSaver
 from transform.mixpanel_network_graph_transformer import MixpanelNetworkGraphTransformer
 
@@ -20,8 +21,9 @@ class MixpanelEventsStrategy:
         self.credential = credential
         self.date = date
         self.runlog_id = runlog_id
-        self.fetcher = MixpanelEventsFetcher(credential, date)
-        self.events_saver = MixpanelEventsSaver(credential, date)
+        fetcher = MixpanelEventsFetcher(credential, date)
+        events_saver = S3EventsSaver(credential, date)
+        self.data_orchestrator = DataOrchestrator(fetcher, events_saver)
         self.cleaner = MixpanelAnalyticsCleaner()
         self.transformer = MixpanelNetworkGraphTransformer()
         self.saver = MixpanelNetworkGraphSaver()
@@ -30,12 +32,7 @@ class MixpanelEventsStrategy:
     def execute(self):
         try:
             self.runlog_service.update_started(self.runlog_id)
-            events_data = ""
-            with self.fetcher.open() as source:
-                with self.events_saver.open() as dest:
-                    for data in source:
-                        dest.write(data.encode())
-                        events_data += data
+            events_data = self.data_orchestrator.orchestrate()
             logging.info(
                 f"Saved Event Data to S3 for Mixpanel datasource, name - {self.datasource.name} id - {self.datasource.id} date - {self.date}"
             )
