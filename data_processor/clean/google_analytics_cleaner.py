@@ -1,4 +1,5 @@
 import re
+import babel
 import logging
 import pandas as pd
 
@@ -14,15 +15,36 @@ class GoogleAnalyticsCleaner(Cleaner):
         logging.info("{x}: {y}".format(x="Length of df after cleanup", y=len(df)))
         return df
 
-    def remove_locale_from_endpoint(self, url: str) -> str:
-        endpoint = re.sub("/[a-zA-Z]{2,2}(-[a-zA-Z]{2})?/", "/", url)
-        # Regex to remove locale at end
-        endpoint = re.sub("/[a-zA-Z]{2,2}(-[a-zA-Z]{2})?$", "/", endpoint)
-        if url != endpoint:
+    def is_valid_locale(self, locale) -> bool:
+        try:
+            babel.Locale.parse(locale)
+        except babel.core.UnknownLocaleError:
+            logging.info("{x}: {y}".format(x="Not a valid locale", y=locale))
+            return False
+        return True
+
+    def remove_locale_from_endpoint(self, endpoint: str) -> str:
+        logging.info("{x}: {y}".format(x="Processing for", y=endpoint))
+        pattern = re.search("/(?P<locale>[a-zA-Z]{2,2}(-[a-zA-Z]{2})?)/", endpoint)
+        if not pattern:
+            pattern = re.search("/(?P<locale>[a-zA-Z]{2,2}(-[a-zA-Z]{2})?)$", endpoint)
+
+        if not pattern:
+            logging.info("{x}: {y}".format(x="Pattern not present", y="Skipping"))
+            return endpoint
+        else:
+            locale = pattern.group("locale").replace("-", "_")
+            reversed_locale = "_".join(locale.split("_")[::-1])
+            if not (
+                self.is_valid_locale(locale) or self.is_valid_locale(reversed_locale)
+            ):
+                return endpoint
+
+            res = endpoint.replace("/" + pattern.group("locale"), "")
             logging.info(
-                "{x}: {y}".format(x="Removed locale for {0}".format(url), y=endpoint)
+                "{x}: {y}".format(x="Removed locale for {0}".format(endpoint), y=res)
             )
-        return endpoint
+            return res
 
     def convert_url_to_endpoint(self, url: str) -> str:
         endpoint = re.search("(?P<domain>.+(\.\w{2,})+)(?P<endpoint>/.*)", url)
