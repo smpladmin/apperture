@@ -1,5 +1,6 @@
 import logging
 from pandas import DataFrame
+from urllib.parse import urlparse
 
 from .fetcher import Fetcher
 from google.analytics.data_v1beta.types import DateRange
@@ -47,9 +48,7 @@ class GoogleAnalytics4Fetcher(Fetcher):
         logging.info("{x}: {y}".format(x="Length of response from GA", y=len(output)))
         df = DataFrame(output)
         try:
-            df["previousPage"] = df["previousPage"].apply(
-                lambda x: "/" + x.split("/", 3)[-1] if x != "" else x
-            )
+            df["previousPage"] = df["previousPage"].apply(lambda x: urlparse(x).path)
         except Exception as e:
             logging.info(e)
         return df
