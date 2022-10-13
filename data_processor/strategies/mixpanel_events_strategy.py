@@ -4,6 +4,7 @@ import pandas as pd
 
 from clean.mixpanel_analytics_cleaner import MixpanelAnalyticsCleaner
 from domain.common.models import IntegrationProvider
+from domain.common.models import DataFormat
 from domain.datasource.models import Credential, DataSource
 from domain.runlog.service import RunLogService
 from fetch.data_orchestrator import DataOrchestrator
@@ -21,7 +22,7 @@ class MixpanelEventsStrategy:
         self.credential = credential
         self.date = date
         self.runlog_id = runlog_id
-        fetcher = MixpanelEventsFetcher(credential, date)
+        fetcher = MixpanelEventsFetcher(credential, date, DataFormat.UNICODE)
         events_saver = S3EventsSaver(credential, date)
         self.data_orchestrator = DataOrchestrator(fetcher, events_saver)
         self.cleaner = MixpanelAnalyticsCleaner()
