@@ -93,7 +93,6 @@ export const initGraph = (ref: RefObject<HTMLDivElement>) =>
     modes: {
       default: [
         'drag-canvas',
-        'drag-node',
         'wheel-zoom',
         'activate-node',
         {
@@ -122,15 +121,33 @@ export const registerBeforeLayoutEvent = (graph: G6Graph) => {
   });
 };
 
+const _refreshDragedNodePosition = (e: IG6GraphEvent) => {
+  const model = e.item?.get('model');
+  model.fx = e.x;
+  model.fy = e.y;
+  model.x = e.x;
+  model.y = e.y;
+};
+
 export const registerDragNodeEndEvent = (graph: G6Graph) => {
   graph.on('dragnodeend', (evt: IG6GraphEvent) => {
-    const items = evt.items as Item[];
-    const node = items[0] as INode;
-    const edges = node.getEdges();
+    const item = evt.items as Item[];
+    const edges = (item[0] as INode)?.getEdges();
     const zoomRatio = graph.getZoom();
+
     setTimeout(() => {
       edgesOnZoom(edges, zoomRatio);
     }, 100);
+  });
+
+  graph.on('node:touchmove', (evt: IG6GraphEvent) => {
+    const item = evt.item as INode;
+    const edges = item.getEdges();
+    const nodes = graph.getNodes();
+    const zoomRatio = graph.getZoom();
+    _refreshDragedNodePosition(evt);
+    graph.refresh();
+    setNodesAndEdgesStyleOnZoom(nodes, edges, zoomRatio);
   });
 };
 
@@ -177,7 +194,7 @@ export const registerActivateNodeEvent = (
     getEvents() {
       return {
         'node:click': 'onNodeClick',
-        'node:touchstart': 'onNodeClick',
+        'node:touchend': 'onNodeClick',
       };
     },
 
@@ -190,6 +207,7 @@ export const registerActivateNodeEvent = (
       }
       onActivateNode(item);
       setNodeActive(graph!!, item);
+      graph?.addBehaviors(['drag-node'], 'default');
     },
   });
 };
@@ -205,8 +223,7 @@ const _getNodeZoomRatio = (activeNode: Item) => {
 export const handleActivatingNodeOnSearchAndClick = (
   graph: G6Graph | null,
   activeNode: Item | null,
-  isNodeSearched: boolean,
-  isMobile: boolean
+  isNodeSearched: boolean
 ) => {
   const currentZoom = graph?.getZoom()!!;
   const nodes = graph?.getNodes();
@@ -240,6 +257,6 @@ export const handleActivatingNodeOnSearchAndClick = (
       // case:user clicks on node when graph is zoomed
       setNodesAndEdgesStyleOnZoom(nodes, edges, currentZoom);
     }
-    if (!(isMobile && !isNodeSearched)) focusItem(graph!!, activeNode);
+    focusItem(graph!!, activeNode);
   }
 };

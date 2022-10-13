@@ -40,8 +40,7 @@ const Graph = ({ visualisationData }: GraphProps) => {
     handleActivatingNodeOnSearchAndClick(
       gRef.current.graph,
       activeNode,
-      isNodeSearched,
-      device.isMobile
+      isNodeSearched
     );
   }, [activeNode]);
 
@@ -73,6 +72,9 @@ const Graph = ({ visualisationData }: GraphProps) => {
 
     graph.data(graphData);
     graph.render();
+    if (!device.isMobile) {
+      graph?.addBehaviors('drag-node', 'default');
+    }
   }, [graphData]);
 
   useEffect(() => {
