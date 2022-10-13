@@ -7,33 +7,17 @@ import {
   Flex,
   IconButton,
   Input,
-  RadioGroup,
-  RangeSlider,
-  RangeSliderFilledTrack,
-  RangeSliderThumb,
-  RangeSliderTrack,
   Text,
 } from '@chakra-ui/react';
-import AlertMetricOption from './AlertOption';
 import 'remixicon/fonts/remixicon.css';
-import { formatDatalabel } from '@components/Graph/graphUtil';
+import AlertMetrics from './AlertMetrics';
+import { notificationMetricOptions, thresholdMetricOptions } from './util';
+import ThresholdMetric from './ThresholdMetric';
 
-const Parallelline = () => {
-  return (
-    <svg
-      width="6"
-      height="8"
-      viewBox="0 0 6 8"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M5.3999 0.159607L4.4399 0.159607L4.4399 7.83961L5.3999 7.83961L5.3999 0.159607ZM1.5599 0.159607L0.599902 0.159607L0.599902 7.83961L1.5599 7.83961L1.5599 0.159607Z"
-        fill="white"
-      />
-    </svg>
-  );
-};
+enum AlertThresholdType {
+  Range = 'range',
+  Percentage = 'percentage',
+}
 
 const AlertsHeader = ({ setOpen }: { setOpen: Function }) => {
   return (
@@ -67,36 +51,15 @@ const AlertsHeader = ({ setOpen }: { setOpen: Function }) => {
 
 const Alerts = () => {
   const [isOpen, setOpen] = useState(false);
-  const metricOptions = [
-    {
-      name: 'users',
-      label: '#Users',
-    },
-    {
-      name: 'hits',
-      label: '#Hits',
-    },
-  ];
 
-  const thresholdOptions = [
-    {
-      name: 'range',
-      label: 'out of Range',
-    },
-    {
-      name: 'percentage',
-      label: 'more than %',
-    },
-  ];
-
-  const [notificationMetric, setnotificationMetric] = useState(
-    metricOptions[0].name
+  const [notificationMetric, setNotificationMetric] = useState(
+    notificationMetricOptions[0].name
   );
   const [thresholdMetric, setThresholdMetric] = useState(
-    thresholdOptions[0].name
+    thresholdMetricOptions[0].name
   );
-
   const [thresholdRange, setThresholdRange] = useState<number[]>([5000, 15000]);
+
   return (
     <>
       <button onClick={() => setOpen(true)}>Open sheet</button>
@@ -112,128 +75,21 @@ const Alerts = () => {
           </Sheet.Header>
           <Sheet.Content>
             <Box px={'4'} py={'4'}>
-              {/* user/hits */}
-              <Flex direction={'column'} gap={'2'} mb={'4'}>
-                <Text
-                  fontSize={'xs-14'}
-                  lineHeight={'xs-14'}
-                  fontWeight={'semibold'}
-                >
-                  When daily
-                </Text>
-
-                <RadioGroup
-                  value={notificationMetric}
-                  onChange={(value) => setnotificationMetric(value)}
-                >
-                  <Flex gap={'2'}>
-                    {metricOptions.map((option) => {
-                      return (
-                        <Flex key={option.name}>
-                          <AlertMetricOption
-                            option={option}
-                            isChecked={option.name === notificationMetric}
-                          />
-                        </Flex>
-                      );
-                    })}
-                  </Flex>
-                </RadioGroup>
-              </Flex>
-
-              <Divider
-                orientation="horizontal"
-                borderColor={'white.200'}
-                opacity={1}
-                mb={'4'}
+              <AlertMetrics
+                notificationMetric={notificationMetric}
+                setNotificationMetric={setNotificationMetric}
+                thresholdMetric={thresholdMetric}
+                setThresholdMetric={setThresholdMetric}
               />
-              {/* movement */}
-              <Flex direction={'column'} gap={'2'} mb={'4'}>
-                <Text
-                  fontSize={'xs-14'}
-                  lineHeight={'xs-14'}
-                  fontWeight={'semibold'}
-                >
-                  moves
-                </Text>
-                <RadioGroup
-                  value={thresholdMetric}
-                  onChange={(value) => setThresholdMetric(value)}
-                >
-                  <Flex gap={'2'}>
-                    {thresholdOptions.map((option) => {
-                      return (
-                        <Flex key={option.name}>
-                          <AlertMetricOption
-                            option={option}
-                            isChecked={option.name === thresholdMetric}
-                          />
-                        </Flex>
-                      );
-                    })}
-                  </Flex>
-                </RadioGroup>
-              </Flex>
+
               {/* slider */}
-              {thresholdMetric === 'range' ? (
-                <Box>
-                  <Flex justifyContent={'space-between'}>
-                    <Flex direction={'column'} gap={'1'}>
-                      <Text
-                        fontSize={'xs-10'}
-                        lineHeight={'xs-10'}
-                        color={'grey.100'}
-                        fontWeight={'normal'}
-                      >
-                        Lower Bound
-                      </Text>
-                      <Text
-                        fontSize={'xs-14'}
-                        lineHeight={'xs-14'}
-                        fontWeight={'semibold'}
-                      >
-                        {formatDatalabel(thresholdRange[0])}
-                      </Text>
-                    </Flex>
-                    <Flex direction={'column'}>
-                      <Text
-                        fontSize={'xs-10'}
-                        lineHeight={'xs-10'}
-                        color={'grey.100'}
-                        fontWeight={'normal'}
-                      >
-                        Upper Bound
-                      </Text>
-                      <Text
-                        fontSize={'xs-14'}
-                        lineHeight={'xs-14'}
-                        fontWeight={'semibold'}
-                      >
-                        {formatDatalabel(thresholdRange[1])}
-                      </Text>
-                    </Flex>
-                  </Flex>
-                  <Flex mt={'2'} py={'4'}>
-                    <RangeSlider
-                      defaultValue={thresholdRange}
-                      min={999}
-                      max={20000}
-                      onChange={(val) => setThresholdRange(val)}
-                    >
-                      <RangeSliderTrack bg="white.200">
-                        <RangeSliderFilledTrack bg="black.100" />
-                      </RangeSliderTrack>
-                      <RangeSliderThumb boxSize={5} index={0} bg={'black.100'}>
-                        <Parallelline />
-                      </RangeSliderThumb>
-                      <RangeSliderThumb boxSize={5} index={1} bg={'black.100'}>
-                        <Parallelline />
-                      </RangeSliderThumb>
-                    </RangeSlider>
-                  </Flex>
-                </Box>
+              {thresholdMetric === AlertThresholdType.Range ? (
+                <ThresholdMetric
+                  thresholdRange={thresholdRange}
+                  setThresholdRange={setThresholdRange}
+                />
               ) : null}
-              {thresholdMetric === 'percentage' ? (
+              {thresholdMetric === AlertThresholdType.Percentage ? (
                 <Flex direction={'column'} gap={'1'}>
                   <Text
                     fontSize={'xs-10'}
@@ -247,6 +103,7 @@ const Alerts = () => {
                     type={'number'}
                     bg={'white.100'}
                     focusBorderColor={'black.100'}
+                    autoFocus
                   />
                 </Flex>
               ) : null}

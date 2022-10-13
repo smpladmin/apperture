@@ -4,7 +4,10 @@ const AlertMetricOption = ({
   option,
   isChecked,
 }: {
-  option: any;
+  option: {
+    name: string;
+    label: string;
+  };
   isChecked: boolean;
 }) => {
   return (
