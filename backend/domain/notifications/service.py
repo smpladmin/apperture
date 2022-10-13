@@ -10,6 +10,7 @@ from domain.notifications.models import (
     ThresholdMap,
     NotificationChannel,
     ComputedUpdate,
+    NotificationMetric
 )
 from domain.edge.models import NodeDataUpdate
 
@@ -25,8 +26,8 @@ class NotificationService:
         datasourceId: str,
         name: str,
         userId: PydanticObjectId,
-        notificationType: str,
-        metric: str,
+        notificationType: NotificationType,
+        metric: NotificationMetric,
         multiNode: bool,
         appertureManaged: bool,
         pctThresholdActive: bool,
@@ -35,7 +36,7 @@ class NotificationService:
         absoluteThresholdValues: ThresholdMap,
         formula: str,
         variableMap: Dict,
-        frequency: str,
+        frequency: NotificationFrequency,
         preferredHourGMT: int,
         preferredChannels: List[NotificationChannel],
         notificationActive: bool,
