@@ -13,6 +13,8 @@ class CreateNotificationDto(BaseModel):
     datasourceId: str
     name: str
     notificationType: str
+    metric: str
+    multiNode: bool
     appertureManaged: bool
     pctThresholdActive: bool
     pctThresholdValues: Optional[ThresholdMap]

@@ -30,6 +30,8 @@ class Notification(Document):
     user_id: PydanticObjectId
     name: str
     notification_type: NotificationType
+    metric: str
+    multi_node: bool
     apperture_managed: bool
     pct_threshold_active: bool
     pct_threshold_values: Optional[ThresholdMap]
