@@ -58,7 +58,7 @@ const Alerts = () => {
   const [thresholdMetric, setThresholdMetric] = useState(
     thresholdMetricOptions[0].name
   );
-  const [thresholdRange, setThresholdRange] = useState<number[]>([5000, 15000]);
+  const [thresholdRange, setThresholdRange] = useState<number[]>([800, 950]);
 
   return (
     <>
@@ -74,7 +74,7 @@ const Alerts = () => {
             <AlertsHeader setOpen={setOpen} />
           </Sheet.Header>
           <Sheet.Content>
-            <Box px={'4'} py={'4'}>
+            <Box px={'4'} py={'4'} overflowY={'scroll'}>
               <AlertMetrics
                 notificationMetric={notificationMetric}
                 setNotificationMetric={setNotificationMetric}

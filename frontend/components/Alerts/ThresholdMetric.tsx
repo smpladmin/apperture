@@ -1,3 +1,4 @@
+import { Line } from '@antv/g2plot';
 import {
   Box,
   Flex,
@@ -8,6 +9,8 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { formatDatalabel } from '@components/Graph/graphUtil';
+import { useEffect, useRef } from 'react';
+import { data } from './data';
 
 export const Parallelline = () => {
   return (
@@ -35,6 +38,71 @@ const ThresholdMetric = ({
   thresholdRange,
   setThresholdRange,
 }: ThresholdMetricProps) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const plot = useRef<{ line: any | null }>({ line: null });
+
+  useEffect(() => {
+    plot.current.line = new Line(ref.current!!, {
+      data,
+      padding: 'auto',
+      xField: 'startDate',
+      yField: 'hits',
+      yAxis: {
+        tickCount: 6,
+      },
+      xAxis: {
+        label: {
+          style: {
+            opacity: 0,
+          },
+        },
+        tickCount: 0,
+      },
+      meta: {
+        hits: {},
+      },
+      lineStyle: {
+        stroke: '#6BBDF9',
+      },
+      animation: false,
+    });
+    plot.current.line?.render();
+  }, [data]);
+
+  useEffect(() => {
+    plot.current.line?.update({
+      annotations: [
+        {
+          type: 'line',
+          start: ['min', thresholdRange?.[0]],
+          end: ['max', thresholdRange?.[0]],
+          style: {
+            lineDash: [4, 4],
+            stroke: '#FABC41',
+          },
+        },
+        {
+          type: 'line',
+          start: ['min', thresholdRange?.[1]],
+          end: ['max', thresholdRange?.[1]],
+          style: {
+            lineDash: [4, 4],
+            stroke: '#FABC41',
+          },
+        },
+        {
+          type: 'region',
+          start: ['min', thresholdRange?.[0]],
+          end: ['max', thresholdRange?.[1]],
+          style: {
+            fill: '#FFD98A',
+            fillOpacity: '0.15',
+          },
+        },
+      ],
+    });
+  }, [thresholdRange]);
+
   return (
     <Box>
       <Flex justifyContent={'space-between'}>
@@ -68,8 +136,8 @@ const ThresholdMetric = ({
       <Flex mt={'2'} py={'4'}>
         <RangeSlider
           defaultValue={thresholdRange}
-          min={999}
-          max={20000}
+          min={10}
+          max={1200}
           onChange={(val) => setThresholdRange(val)}
         >
           <RangeSliderTrack bg="white.200">
@@ -83,6 +151,7 @@ const ThresholdMetric = ({
           </RangeSliderThumb>
         </RangeSlider>
       </Flex>
+      <Box ref={ref} mt={'4'} overflowY={'scroll'} height={'50'}></Box>
     </Box>
   );
 };

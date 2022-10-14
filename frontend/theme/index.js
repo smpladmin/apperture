@@ -59,6 +59,7 @@ const spacing = {
   37: '9.25rem',
   39: '9.75rem',
   45: '11.25rem',
+  50: '12.5rem',
   55: '13.75rem',
   62: '15.5rem',
   70: '17.5rem',
@@ -127,7 +128,7 @@ const boxShadow = {
   xs: '0 1px 0 rgba(30, 25, 34, 0.08)',
 };
 
-module.exports = {
+export {
   colors,
   spacing,
   maxWidth,
@@ -135,7 +136,6 @@ module.exports = {
   boxShadow,
   fontSizes,
   lineHeights,
-  spacing,
   WHITE_DEFAULT,
   WHITE_300,
   PURPLE,

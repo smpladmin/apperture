@@ -1,6 +1,6 @@
 import { Divider, Flex, RadioGroup, Text } from '@chakra-ui/react';
 import React from 'react';
-import AlertMetricOption from './AlertMetricOption';
+import AlertMetricOption from './AlertOption';
 import { notificationMetricOptions, thresholdMetricOptions } from './util';
 
 type AlertMetricsProps = {
@@ -17,28 +17,30 @@ const AlertMetrics = ({
   setThresholdMetric,
 }: AlertMetricsProps) => {
   return (
-    <Flex direction={'column'} gap={'2'} mb={'4'}>
-      <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'semibold'}>
-        When daily
-      </Text>
+    <>
+      <Flex direction={'column'} gap={'2'} mb={'4'}>
+        <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'semibold'}>
+          When daily
+        </Text>
 
-      <RadioGroup
-        value={notificationMetric}
-        onChange={(value) => setNotificationMetric(value)}
-      >
-        <Flex gap={'2'}>
-          {notificationMetricOptions.map((option) => {
-            return (
-              <Flex key={option.name}>
-                <AlertMetricOption
-                  option={option}
-                  isChecked={option.name === notificationMetric}
-                />
-              </Flex>
-            );
-          })}
-        </Flex>
-      </RadioGroup>
+        <RadioGroup
+          value={notificationMetric}
+          onChange={(value) => setNotificationMetric(value)}
+        >
+          <Flex gap={'2'}>
+            {notificationMetricOptions.map((option) => {
+              return (
+                <Flex key={option.name}>
+                  <AlertMetricOption
+                    option={option}
+                    isChecked={option.name === notificationMetric}
+                  />
+                </Flex>
+              );
+            })}
+          </Flex>
+        </RadioGroup>
+      </Flex>
       <Divider
         orientation="horizontal"
         borderColor={'white.200'}
@@ -68,7 +70,7 @@ const AlertMetrics = ({
           </Flex>
         </RadioGroup>
       </Flex>
-    </Flex>
+    </>
   );
 };
 
