@@ -38,3 +38,42 @@ async def add_notification(
     )
     await notification_service.add_notification(notification)
     return notification
+
+
+@router.get("/notifications")
+async def get_notification(
+    name: str,
+    notification_service: NotificationService = Depends(),
+):
+    notification = await notification_service.get_notification_for_node(name)
+    return notification
+
+
+@router.put("/notifications/{notification_id}")
+async def update_notification(
+    notification_id: str,
+    dto: CreateNotificationDto,
+    user: User = Depends(get_user),
+    notification_service: NotificationService = Depends(),
+):
+    new_notification = notification_service.build_notification(
+        dto.datasourceId,
+        dto.name,
+        user.id,
+        dto.notificationType,
+        dto.appertureManaged,
+        dto.pctThresholdActive,
+        dto.pctThresholdValues,
+        dto.absoluteThresholdActive,
+        dto.absoluteThresholdValues,
+        dto.formula,
+        dto.variableMap,
+        dto.frequency,
+        dto.preferredHourGMT,
+        dto.preferredChannels,
+        dto.notificationActive,
+    )
+    notification = await notification_service.update_notification(
+        notification_id, new_notification
+    )
+    return notification

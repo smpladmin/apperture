@@ -10,7 +10,7 @@ class TestGoogleAnalyticsCleaner:
             "www.google.com/en-us/search",
             "/jobs/1234/candidates",
             "www.google.com/en-in",
-            "/uk-en/login"
+            "/uk-en/login",
         ]
         self.df = pd.DataFrame.from_dict(
             {
