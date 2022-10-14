@@ -12,7 +12,7 @@ import { formatDatalabel } from '@components/Graph/graphUtil';
 import { useEffect, useRef } from 'react';
 import { data } from './data';
 
-export const Parallelline = () => {
+export const ParallelLine = () => {
   return (
     <svg
       width="6"
@@ -32,11 +32,15 @@ export const Parallelline = () => {
 type ThresholdMetricProps = {
   thresholdRange: number[];
   setThresholdRange: Function;
+  minHits: number;
+  maxHits: number;
 };
 
 const ThresholdMetric = ({
   thresholdRange,
   setThresholdRange,
+  minHits,
+  maxHits,
 }: ThresholdMetricProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ line: any | null }>({ line: null });
@@ -59,7 +63,10 @@ const ThresholdMetric = ({
         tickCount: 0,
       },
       meta: {
-        hits: {},
+        hits: {
+          min: minHits - 0.2 * minHits,
+          max: maxHits + 0.2 * maxHits,
+        },
       },
       lineStyle: {
         stroke: '#6BBDF9',
@@ -133,21 +140,21 @@ const ThresholdMetric = ({
           </Text>
         </Flex>
       </Flex>
-      <Flex mt={'2'} py={'4'}>
+      <Flex mt={'2'} py={'4'} px={'2'}>
         <RangeSlider
           defaultValue={thresholdRange}
-          min={10}
-          max={1200}
+          min={minHits - 0.2 * minHits}
+          max={maxHits + 0.2 * maxHits}
           onChange={(val) => setThresholdRange(val)}
         >
           <RangeSliderTrack bg="white.200">
             <RangeSliderFilledTrack bg="black.100" />
           </RangeSliderTrack>
           <RangeSliderThumb boxSize={5} index={0} bg={'black.100'}>
-            <Parallelline />
+            <ParallelLine />
           </RangeSliderThumb>
           <RangeSliderThumb boxSize={5} index={1} bg={'black.100'}>
-            <Parallelline />
+            <ParallelLine />
           </RangeSliderThumb>
         </RangeSlider>
       </Flex>

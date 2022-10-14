@@ -13,6 +13,7 @@ import 'remixicon/fonts/remixicon.css';
 import AlertMetrics from './AlertMetrics';
 import { notificationMetricOptions, thresholdMetricOptions } from './util';
 import ThresholdMetric from './ThresholdMetric';
+import { data } from './data';
 
 enum AlertThresholdType {
   Range = 'range',
@@ -52,13 +53,24 @@ const AlertsHeader = ({ setOpen }: { setOpen: Function }) => {
 const Alerts = () => {
   const [isOpen, setOpen] = useState(false);
 
+  const minHits = data.reduce((acc, val) => {
+    return acc < val.hits ? acc : val.hits;
+  }, data[0].hits);
+
+  const maxHits = data.reduce((acc, val) => {
+    return acc > val.hits ? acc : val.hits;
+  }, data[0].hits);
+
   const [notificationMetric, setNotificationMetric] = useState(
     notificationMetricOptions[0].name
   );
   const [thresholdMetric, setThresholdMetric] = useState(
     thresholdMetricOptions[0].name
   );
-  const [thresholdRange, setThresholdRange] = useState<number[]>([800, 950]);
+  const [thresholdRange, setThresholdRange] = useState<number[]>([
+    minHits,
+    maxHits,
+  ]);
 
   return (
     <>
@@ -81,12 +93,12 @@ const Alerts = () => {
                 thresholdMetric={thresholdMetric}
                 setThresholdMetric={setThresholdMetric}
               />
-
-              {/* slider */}
               {thresholdMetric === AlertThresholdType.Range ? (
                 <ThresholdMetric
                   thresholdRange={thresholdRange}
                   setThresholdRange={setThresholdRange}
+                  minHits={minHits}
+                  maxHits={maxHits}
                 />
               ) : null}
               {thresholdMetric === AlertThresholdType.Percentage ? (
