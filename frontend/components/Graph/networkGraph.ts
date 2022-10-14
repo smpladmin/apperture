@@ -84,7 +84,11 @@ G6.registerEdge(
   'line'
 );
 
-export const initGraph = (ref: RefObject<HTMLDivElement>) =>
+export const initGraph = (
+  ref: RefObject<HTMLDivElement>,
+  onNodeTouch: Function,
+  onNodeDrag: Function
+) =>
   new G6Graph({
     container: ref.current || '',
     width: ref.current?.offsetWidth,
@@ -95,6 +99,17 @@ export const initGraph = (ref: RefObject<HTMLDivElement>) =>
         'drag-canvas',
         'wheel-zoom',
         'activate-node',
+        {
+          type: 'drag-node',
+          shouldBegin(e) {
+            onNodeTouch();
+            return true;
+          },
+          shouldUpdate(e) {
+            onNodeDrag();
+            return true;
+          },
+        },
         {
           type: 'zoom-canvas',
           sensitivity: graphConfig.zoomSensitivity,
@@ -129,25 +144,23 @@ const _refreshDragedNodePosition = (e: IG6GraphEvent) => {
   model.y = e.y;
 };
 
-export const registerDragNodeEndEvent = (graph: G6Graph) => {
+export const registerDragNodeEndEvent = (
+  graph: G6Graph,
+  isMobile: boolean,
+  onNodeDragEnd: Function
+) => {
   graph.on('dragnodeend', (evt: IG6GraphEvent) => {
-    const item = evt.items as Item[];
-    const edges = (item[0] as INode)?.getEdges();
+    const items = evt.items as Item[];
+    const node = items[0] as INode;
+    const edges = node?.getEdges();
     const zoomRatio = graph.getZoom();
-
     setTimeout(() => {
       edgesOnZoom(edges, zoomRatio);
     }, 100);
-  });
 
-  graph.on('node:touchmove', (evt: IG6GraphEvent) => {
-    const item = evt.item as INode;
-    const edges = item.getEdges();
-    const nodes = graph.getNodes();
-    const zoomRatio = graph.getZoom();
-    _refreshDragedNodePosition(evt);
-    graph.refresh();
-    setNodesAndEdgesStyleOnZoom(nodes, edges, zoomRatio);
+    if (isMobile) {
+      onNodeDragEnd(node);
+    }
   });
 };
 
@@ -181,10 +194,7 @@ export const registerWheelZoomEvent = (
   });
 };
 
-export const registerActivateNodeEvent = (
-  graph: G6Graph | null,
-  onActivateNode: Function
-) => {
+export const registerActivateNodeEvent = (onActivateNode: Function) => {
   G6.registerBehavior('activate-node', {
     getDefaultCfg() {
       return {
@@ -194,20 +204,11 @@ export const registerActivateNodeEvent = (
     getEvents() {
       return {
         'node:click': 'onNodeClick',
-        'node:touchend': 'onNodeClick',
       };
     },
-
     onNodeClick(e: IG6GraphEvent) {
-      const item = e.item as Item;
-
-      if (item.hasState('active')) {
-        graph?.setItemState(item, 'active', false);
-        return;
-      }
-      onActivateNode(item);
-      setNodeActive(graph!!, item);
-      graph?.addBehaviors(['drag-node'], 'default');
+      const node = e.item as INode;
+      onActivateNode(node);
     },
   });
 };
@@ -222,7 +223,7 @@ const _getNodeZoomRatio = (activeNode: Item) => {
 
 export const handleActivatingNodeOnSearchAndClick = (
   graph: G6Graph | null,
-  activeNode: Item | null,
+  activeNode: INode | null,
   isNodeSearched: boolean
 ) => {
   const currentZoom = graph?.getZoom()!!;

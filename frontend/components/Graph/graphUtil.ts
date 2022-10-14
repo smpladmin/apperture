@@ -53,7 +53,7 @@ export const setActiveNodeStyle = (
   });
 };
 
-export const setNodeActive = (graph: Graph, node: Item) => {
+export const setNodeActive = (graph: Graph, node: INode) => {
   graph?.setItemState(node, 'active', true);
 };
 
