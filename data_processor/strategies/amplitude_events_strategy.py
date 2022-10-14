@@ -1,6 +1,7 @@
 import logging
 import zipfile
 import vaex as vx
+import io
 
 from clean.amplitude_analytics_cleaner import AmplitudeAnalyticsCleaner
 from domain.common.models import IntegrationProvider
