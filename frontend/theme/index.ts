@@ -11,6 +11,9 @@ const EDGE_LABEL_GRAY = '#808080';
 const ARROW_GRAY = '#78787E';
 const BLACK = '#000000';
 const TEAL_100 = '#BDE6F1';
+const YELLOW_100 = '#FFD98A';
+const YELLOW_200 = '#FABC41';
+const BLUE = '#6BBDF9';
 
 const colors = {
   black: {
@@ -149,4 +152,7 @@ export {
   TEAL_100,
   EDGE_LABEL_GRAY,
   EDGE_ARROW_GRAY,
+  YELLOW_100,
+  YELLOW_200,
+  BLUE,
 };

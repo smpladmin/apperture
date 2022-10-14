@@ -14,6 +14,7 @@ import AlertMetrics from './AlertMetrics';
 import { notificationMetricOptions, thresholdMetricOptions } from './util';
 import ThresholdMetric from './ThresholdMetric';
 import { data } from './data';
+import PercentageMetric from './PercentageMetric';
 
 enum AlertThresholdType {
   Range = 'range',
@@ -102,22 +103,7 @@ const Alerts = () => {
                 />
               ) : null}
               {thresholdMetric === AlertThresholdType.Percentage ? (
-                <Flex direction={'column'} gap={'1'}>
-                  <Text
-                    fontSize={'xs-10'}
-                    lineHeight={'xs-10'}
-                    color={'grey.100'}
-                    fontWeight={'normal'}
-                  >
-                    % Change
-                  </Text>
-                  <Input
-                    type={'number'}
-                    bg={'white.100'}
-                    focusBorderColor={'black.100'}
-                    autoFocus
-                  />
-                </Flex>
+                <PercentageMetric />
               ) : null}
               <Button
                 variant={'primary'}

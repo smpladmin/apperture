@@ -9,6 +9,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { formatDatalabel } from '@components/Graph/graphUtil';
+import { BLUE, YELLOW_100, YELLOW_200 } from '@theme/index';
 import { useEffect, useRef } from 'react';
 import { data } from './data';
 
@@ -43,7 +44,7 @@ const ThresholdMetric = ({
   maxHits,
 }: ThresholdMetricProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const plot = useRef<{ line: any | null }>({ line: null });
+  const plot = useRef<{ line: Line | null }>({ line: null });
 
   useEffect(() => {
     plot.current.line = new Line(ref.current!!, {
@@ -69,7 +70,7 @@ const ThresholdMetric = ({
         },
       },
       lineStyle: {
-        stroke: '#6BBDF9',
+        stroke: BLUE,
       },
       animation: false,
     });
@@ -85,7 +86,7 @@ const ThresholdMetric = ({
           end: ['max', thresholdRange?.[0]],
           style: {
             lineDash: [4, 4],
-            stroke: '#FABC41',
+            stroke: YELLOW_200,
           },
         },
         {
@@ -94,7 +95,7 @@ const ThresholdMetric = ({
           end: ['max', thresholdRange?.[1]],
           style: {
             lineDash: [4, 4],
-            stroke: '#FABC41',
+            stroke: YELLOW_200,
           },
         },
         {
@@ -102,8 +103,8 @@ const ThresholdMetric = ({
           start: ['min', thresholdRange?.[0]],
           end: ['max', thresholdRange?.[1]],
           style: {
-            fill: '#FFD98A',
-            fillOpacity: '0.15',
+            fill: YELLOW_100,
+            fillOpacity: 0.15,
           },
         },
       ],
