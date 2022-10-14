@@ -10,7 +10,7 @@ from domain.notifications.models import (
     ThresholdMap,
     NotificationChannel,
     ComputedUpdate,
-    NotificationMetric
+    NotificationMetric,
 )
 from domain.edge.models import NodeDataUpdate
 

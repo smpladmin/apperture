@@ -8,7 +8,7 @@ from domain.notifications.models import (
     NotificationChannel,
     NotificationType,
     NotificationFrequency,
-    NotificationMetric
+    NotificationMetric,
 )
 
 
