@@ -14,7 +14,7 @@ from store.amplitude_network_graph_saver import AmplitudeNetworkGraphSaver
 from transform.amplitude_network_graph_transformer import AmplitudeNetworkGraphTransformer
 
 
-class MixpanelEventsStrategy:
+class AmplitudeEventsStrategy:
     def __init__(
         self, datasource: DataSource, credential: Credential, runlog_id: str, date: str
     ):
