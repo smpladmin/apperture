@@ -6,13 +6,18 @@ from domain.notifications.models import (
     ComputedNotification,
     ThresholdMap,
     NotificationChannel,
+    NotificationType,
+    NotificationFrequency,
+    NotificationMetric,
 )
 
 
 class CreateNotificationDto(BaseModel):
     datasourceId: str
     name: str
-    notificationType: str
+    notificationType: NotificationType
+    metric: NotificationMetric
+    multiNode: bool
     appertureManaged: bool
     pctThresholdActive: bool
     pctThresholdValues: Optional[ThresholdMap]
@@ -20,7 +25,7 @@ class CreateNotificationDto(BaseModel):
     absoluteThresholdValues: Optional[ThresholdMap]
     formula: str
     variableMap: Dict
-    frequency: str
+    frequency: NotificationFrequency
     preferredHourGMT: int
     preferredChannels: List[NotificationChannel]
     notificationActive: bool
