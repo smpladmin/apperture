@@ -1,12 +1,12 @@
 import { Mix } from '@antv/g2plot';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { TrendData } from '@lib/domain/eventData';
+import { useEffect, useRef } from 'react';
+import { TEAL_100 } from '@theme/index';
 import {
   convertISODateToReadableDate,
   formatDatalabel,
-} from '@components/Graph/graphUtil';
-import { useEffect, useRef } from 'react';
-import { TEAL_100 } from '@theme/index';
+} from '@lib/utils/common';
 
 const Trend = ({ trendsData }: { trendsData: Array<TrendData> }) => {
   const ref = useRef<HTMLDivElement>(null);

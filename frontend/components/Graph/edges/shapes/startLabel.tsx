@@ -1,6 +1,6 @@
 import { IGroup, ModelConfig } from '@antv/g6';
 import { edgeShapes } from '@lib/config/graphConfig';
-import { formatDatalabel } from '@components/Graph/graphUtil';
+import { formatDatalabel } from '@lib/utils/common';
 import { EDGE_LABEL_GRAY } from '@theme/index';
 
 const startLabel = (cfg: ModelConfig, group: IGroup) => {

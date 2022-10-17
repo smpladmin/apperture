@@ -8,8 +8,9 @@ import {
   RangeSliderTrack,
   Text,
 } from '@chakra-ui/react';
-import { formatDatalabel } from '@components/Graph/graphUtil';
+
 import { TrendData } from '@lib/domain/eventData';
+import { formatDatalabel } from '@lib/utils/common';
 import { BLUE, YELLOW_100, YELLOW_200 } from '@theme/index';
 import { useEffect, useRef } from 'react';
 

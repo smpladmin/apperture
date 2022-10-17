@@ -5,12 +5,13 @@ import { TrendData, SankeyData } from '@lib/domain/eventData';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { Actions } from '@lib/types/context';
 import { useContext, useRef } from 'react';
+import EventDetailFloater from './MobileEventDetailsInfo/EventDetailFloater';
 import EventDetailsInfo from './EventDetailsInfo';
-import EventDetailsModal from './MobileEventDetailsModal';
 
 type EventDetailsProps = {
   isEventDetailsDrawerOpen: boolean;
   closeEventDetailsDrawer: () => void;
+  isMobileEventDetailFloaterOpen: boolean;
   eventData: { [key in string]: Array<TrendData | SankeyData> };
   setEventData: Function;
 };
@@ -20,6 +21,7 @@ const EventDetails = ({
   closeEventDetailsDrawer,
   eventData,
   setEventData,
+  isMobileEventDetailFloaterOpen,
 }: EventDetailsProps) => {
   const drawerRef = useRef<HTMLDivElement>(null);
   const { dispatch } = useContext(MapContext);
@@ -38,14 +40,19 @@ const EventDetails = ({
 
   return (
     <>
-      {context.device.isMobile && isEventDetailsDrawerOpen ? (
-        <>
-          <EventDetailsModal
-            isEventDetailsDrawerOpen={isEventDetailsDrawerOpen}
-            closeEventDetailsDrawer={closeEventDetailsDrawer}
-            eventData={eventData}
-          />
-        </>
+      {context.device.isMobile ? (
+        isMobileEventDetailFloaterOpen && (
+          <Box
+            w={'full'}
+            px={'3'}
+            pb={'3'}
+            position={'fixed'}
+            zIndex={'200'}
+            bottom={0}
+          >
+            <EventDetailFloater eventData={eventData} />
+          </Box>
+        )
       ) : isEventDetailsDrawerOpen ? (
         <Box
           ref={drawerRef}

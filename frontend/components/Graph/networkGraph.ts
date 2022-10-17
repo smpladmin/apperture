@@ -84,7 +84,11 @@ G6.registerEdge(
   'line'
 );
 
-export const initGraph = (ref: RefObject<HTMLDivElement>) =>
+export const initGraph = (
+  ref: RefObject<HTMLDivElement>,
+  onNodeTouch: Function,
+  onNodeDrag: Function
+) =>
   new G6Graph({
     container: ref.current || '',
     width: ref.current?.offsetWidth,
@@ -93,9 +97,29 @@ export const initGraph = (ref: RefObject<HTMLDivElement>) =>
     modes: {
       default: [
         'drag-canvas',
-        'drag-node',
         'wheel-zoom',
         'activate-node',
+        {
+          /**
+           * drag-node mode is used to enable node dragging functionality
+           * in the graph. The implementation of drag-node prevents the touchmove
+           * and touchend events from bubbling up in the mobile view. Also the click
+           * event is not fired in the mobile view. So as a workaround we need to set
+           * states on shouldBegin which is fired on node click or drag start and shouldUpdate
+           * which is fired while dragging the node. The shouldEnd function is not fired
+           * on dragend/touchend so we have to handle this on dragnodeend event registered below.
+           * dragnodeend is fired once node stops dragging or right after the touchstart/shouldBegin.
+           */
+          type: 'drag-node',
+          shouldBegin(e) {
+            onNodeTouch();
+            return true;
+          },
+          shouldUpdate(e) {
+            onNodeDrag();
+            return true;
+          },
+        },
         {
           type: 'zoom-canvas',
           sensitivity: graphConfig.zoomSensitivity,
@@ -122,15 +146,28 @@ export const registerBeforeLayoutEvent = (graph: G6Graph) => {
   });
 };
 
-export const registerDragNodeEndEvent = (graph: G6Graph) => {
+export const registerDragNodeEndEvent = (
+  graph: G6Graph,
+  isMobile: boolean,
+  onNodeDragEnd: Function
+) => {
   graph.on('dragnodeend', (evt: IG6GraphEvent) => {
     const items = evt.items as Item[];
     const node = items[0] as INode;
-    const edges = node.getEdges();
+    const edges = node?.getEdges();
     const zoomRatio = graph.getZoom();
     setTimeout(() => {
       edgesOnZoom(edges, zoomRatio);
     }, 100);
+
+    /**
+     * if the device is mobile then we should track node drag end and
+     * open the details drawer for that node if the previous event was
+     * a node dragging event. There is not
+     */
+    if (isMobile) {
+      onNodeDragEnd(node);
+    }
   });
 };
 
@@ -164,10 +201,7 @@ export const registerWheelZoomEvent = (
   });
 };
 
-export const registerActivateNodeEvent = (
-  graph: G6Graph | null,
-  onActivateNode: Function
-) => {
+export const registerActivateNodeEvent = (onActivateNode: Function) => {
   G6.registerBehavior('activate-node', {
     getDefaultCfg() {
       return {
@@ -179,16 +213,9 @@ export const registerActivateNodeEvent = (
         'node:click': 'onNodeClick',
       };
     },
-
     onNodeClick(e: IG6GraphEvent) {
-      const item = e.item as Item;
-
-      if (item.hasState('active')) {
-        graph?.setItemState(item, 'active', false);
-        return;
-      }
-      onActivateNode(item);
-      setNodeActive(graph!!, item);
+      const node = e.item as INode;
+      onActivateNode(node);
     },
   });
 };
@@ -203,7 +230,7 @@ const _getNodeZoomRatio = (activeNode: Item) => {
 
 export const handleActivatingNodeOnSearchAndClick = (
   graph: G6Graph | null,
-  activeNode: Item | null,
+  activeNode: INode | null,
   isNodeSearched: boolean
 ) => {
   const currentZoom = graph?.getZoom()!!;

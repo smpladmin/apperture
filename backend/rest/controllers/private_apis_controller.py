@@ -9,12 +9,10 @@ from domain.notifications.service import NotificationService
 from domain.integrations.service import IntegrationService
 from domain.runlogs.service import RunLogService
 from rest.dtos.datasources import PrivateDataSourceResponse
-from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.runlogs import UpdateRunLogDto
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.notifications import (
     ComputedNotificationResponse,
-    NotificationResponse,
     TriggerNotificationsDto,
 )
 

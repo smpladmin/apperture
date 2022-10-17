@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Dict
 
 from beanie import PydanticObjectId
@@ -10,6 +11,7 @@ from domain.notifications.models import (
     ThresholdMap,
     NotificationChannel,
     ComputedUpdate,
+    NotificationMetric,
 )
 from domain.edge.models import NodeDataUpdate
 
@@ -25,7 +27,9 @@ class NotificationService:
         datasourceId: str,
         name: str,
         userId: PydanticObjectId,
-        notificationType: str,
+        notificationType: NotificationType,
+        metric: NotificationMetric,
+        multiNode: bool,
         appertureManaged: bool,
         pctThresholdActive: bool,
         pctThresholdValues: ThresholdMap,
@@ -33,7 +37,7 @@ class NotificationService:
         absoluteThresholdValues: ThresholdMap,
         formula: str,
         variableMap: Dict,
-        frequency: str,
+        frequency: NotificationFrequency,
         preferredHourGMT: int,
         preferredChannels: List[NotificationChannel],
         notificationActive: bool,
@@ -43,6 +47,8 @@ class NotificationService:
             name=name,
             user_id=userId,
             notification_type=notificationType,
+            metric=metric,
+            multi_node=multiNode,
             apperture_managed=appertureManaged,
             pct_threshold_active=pctThresholdActive,
             pct_threshold_values=pctThresholdValues,
@@ -122,3 +128,23 @@ class NotificationService:
         )
 
         return computed_updates
+
+    async def get_notification_for_node(self, name: str) -> list[Notification]:
+        return await Notification.find(
+            Notification.name == name,
+            Notification.notification_active == True,
+        ).to_list()
+
+    async def update_notification(
+        self, notification_id: str, new_notification: Notification
+    ):
+        to_update = new_notification.dict()
+        to_update.pop("id")
+        to_update.pop("created_at")
+        to_update["updated_at"] = datetime.utcnow()
+
+        await Notification.find_one(
+            Notification.id == PydanticObjectId(notification_id),
+        ).update({"$set": to_update})
+
+        return

@@ -6,10 +6,7 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import {
-  formatDatalabel,
-  getPercentageOfHits,
-} from '@components/Graph/graphUtil';
+import { formatDatalabel, getPercentageOfHits } from '@lib/utils/common';
 import {
   NodeSignificanceData,
   SankeyData,
