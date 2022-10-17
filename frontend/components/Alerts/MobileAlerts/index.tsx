@@ -9,7 +9,7 @@ import {
   SankeyData,
   TrendData,
 } from '@lib/domain/eventData';
-import Alerts from '../AlertsInfo';
+import AlertsInfo from '../AlertsInfo';
 
 type MobileAlertsProps = {
   eventData: {
@@ -35,7 +35,10 @@ const MobileAlerts = ({
           <AlertsHeader closeAlertsSheet={closeAlertsSheet} />
         </Sheet.Header>
         <Sheet.Content>
-          <Alerts eventData={eventData} closeAlertsSheet={closeAlertsSheet} />
+          <AlertsInfo
+            eventData={eventData}
+            closeAlertsSheet={closeAlertsSheet}
+          />
         </Sheet.Content>
       </Sheet.Container>
       <Sheet.Backdrop

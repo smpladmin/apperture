@@ -37,10 +37,10 @@ const AlertsInfo = ({ eventData, closeAlertsSheet }: AlertsProps) => {
   const router = useRouter();
   const { dsId } = router.query;
 
-  const [minHits, setMinHits] = useState(
+  const [minHit, setMinHit] = useState(
     getMinimumValue(trendsData as TrendData[], NotificationMetricType.Hits)
   );
-  const [maxHits, setMaxHits] = useState(
+  const [maxHit, setMaxHit] = useState(
     getMaximumValue(trendsData as TrendData[], NotificationMetricType.Hits)
   );
 
@@ -51,23 +51,23 @@ const AlertsInfo = ({ eventData, closeAlertsSheet }: AlertsProps) => {
     thresholdMetricOptions[0].name
   );
   const [hitsThresholdRange, setHitsThresholdRange] = useState<number[]>([
-    minHits,
-    maxHits,
+    minHit,
+    maxHit,
   ]);
   const [percentageValue, setPercentageValue] = useState<number | string>('');
 
   useEffect(() => {
-    setMinHits(
+    setMinHit(
       getMinimumValue(trendsData as TrendData[], NotificationMetricType.Hits)
     );
-    setMaxHits(
+    setMaxHit(
       getMaximumValue(trendsData as TrendData[], NotificationMetricType.Hits)
     );
     setHitsThresholdRange([
       getMinimumValue(trendsData as TrendData[], NotificationMetricType.Hits),
       getMaximumValue(trendsData as TrendData[], NotificationMetricType.Hits),
     ]);
-  }, [(nodeSignificanceData?.[0] as NodeSignificanceData)?.['node']]);
+  }, [trendsData]);
 
   const closeToast = () => {
     if (toastRef.current) {
@@ -111,8 +111,8 @@ const AlertsInfo = ({ eventData, closeAlertsSheet }: AlertsProps) => {
           data={eventData?.trendsData as TrendData[]}
           thresholdRange={hitsThresholdRange}
           setThresholdRange={setHitsThresholdRange}
-          minHits={minHits}
-          maxHits={maxHits}
+          minHit={minHit}
+          maxHit={maxHit}
         />
       ) : null}
       {thresholdMetric === ThresholdMetricType.Percentage ? (

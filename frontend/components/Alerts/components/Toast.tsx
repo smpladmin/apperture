@@ -13,7 +13,7 @@ const AlertToast = ({ closeToast }: { closeToast: () => void }) => {
       p={'3'}
     >
       <Flex alignItems={'center'} gap={'2'}>
-        <Image src={checkIcon} height={'16'} width={'16'} />
+        <Image src={checkIcon} height={'16'} width={'16'} alt={'check-icon'} />
         <Text
           fontSize={'xs-12'}
           lineHeight={'xs-12'}

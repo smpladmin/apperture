@@ -8,7 +8,6 @@ import {
   RangeSliderTrack,
   Text,
 } from '@chakra-ui/react';
-
 import { TrendData } from '@lib/domain/eventData';
 import { formatDatalabel } from '@lib/utils/common';
 import { BLUE, YELLOW_100, YELLOW_200 } from '@theme/index';
@@ -35,16 +34,16 @@ type ThresholdMetricProps = {
   data: TrendData[];
   thresholdRange: number[];
   setThresholdRange: Function;
-  minHits: number;
-  maxHits: number;
+  minHit: number;
+  maxHit: number;
 };
 
 const ThresholdMetric = ({
   data,
   thresholdRange,
   setThresholdRange,
-  minHits,
-  maxHits,
+  minHit,
+  maxHit,
 }: ThresholdMetricProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ line: Line | null }>({ line: null });
@@ -68,8 +67,8 @@ const ThresholdMetric = ({
       },
       meta: {
         hits: {
-          min: 0.6 * minHits,
-          max: 1.4 * maxHits,
+          min: 0.6 * minHit,
+          max: 1.4 * maxHit,
         },
       },
       lineStyle: {
@@ -78,7 +77,7 @@ const ThresholdMetric = ({
       animation: false,
     });
     plot.current.line?.render();
-  }, [data]);
+  }, [data, minHit, maxHit]);
 
   useEffect(() => {
     plot.current.line?.update({
@@ -147,8 +146,8 @@ const ThresholdMetric = ({
       <Flex mt={'2'} py={'4'} px={'2'}>
         <RangeSlider
           defaultValue={thresholdRange}
-          min={0.6 * minHits}
-          max={1.4 * maxHits}
+          min={0.6 * minHit}
+          max={1.4 * maxHit}
           onChange={(val) => setThresholdRange(val)}
         >
           <RangeSliderTrack bg="white.200">
