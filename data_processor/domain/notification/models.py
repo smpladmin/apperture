@@ -18,9 +18,19 @@ class NotificationChannel(str, Enum):
     EMAIL = "email"
 
 
+class ThresholdMap(BaseModel):
+    min: float
+    max: float
+
+
+class NotificationThresholdType(str, Enum):
+    PCT = "pct"
+    ABSOLUTE = "absolute"
+
+
 class Notification(BaseModel):
     name: str
     value: float
-    pctChange: Optional[float]
-    metric: Optional[str]
-    userThreshold: Optional[float]
+    threshold_type: Optional[NotificationThresholdType]
+    user_threshold: Optional[ThresholdMap]
+    triggered: Optional[bool]

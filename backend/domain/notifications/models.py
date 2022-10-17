@@ -20,9 +20,14 @@ class NotificationChannel(str, Enum):
     EMAIL = "email"
 
 
+class NotificationThresholdType(str, Enum):
+    PCT = "pct"
+    ABSOLUTE = "absolute"
+
+
 class ThresholdMap(BaseModel):
-    min: Optional[float]
-    max: Optional[float]
+    min: float
+    max: float
 
 
 class Notification(Document):
@@ -50,12 +55,6 @@ class ComputedNotification(BaseModel):
     name: str
     notification_id: PydanticObjectId
     value: float
-    pct_change: Optional[float]
-    metric: Optional[str]
-    user_threshold: Optional[float]
-
-
-class ComputedUpdate(BaseModel):
-    name: str
-    notification_id: PydanticObjectId
-    value: float
+    threshold_type: Optional[NotificationThresholdType]
+    user_threshold: Optional[ThresholdMap]
+    triggered: Optional[bool]

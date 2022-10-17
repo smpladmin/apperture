@@ -9,9 +9,10 @@ from domain.notifications.models import (
     NotificationType,
     ThresholdMap,
     NotificationChannel,
-    ComputedUpdate,
+    ComputedNotification,
+    NotificationThresholdType,
 )
-from domain.edge.models import NodeDataUpdate
+from domain.edge.models import AggregatedEdge, NotificationNodeData
 
 from mongo.mongo import Mongo
 
@@ -71,29 +72,45 @@ class NotificationService:
             Notification.notification_active == True,
         ).to_list()
 
-    async def get_notifications_to_compute(self, user_id: str):
+    async def get_notifications_to_compute(self, user_id: str) -> List[Notification]:
         return await Notification.find(
             Notification.user_id == PydanticObjectId(user_id),
             Notification.notification_active == True,
         ).to_list()
 
-    def compute_update_values(self, data):
-        if len(data.node_data) == 1:
+    def alert_criteria(self, data: NotificationNodeData, value: float):
+        if data.threshold_type == NotificationThresholdType.ABSOLUTE:
+            if (value > data.threshold_value.max) or (value < data.threshold_value.min):
+                return True
+        if data.threshold_type == NotificationThresholdType.PCT:
+            prev_value = self.compute_value(data.prev_day_node_data)
+            pct_change = (
+                (value - prev_value) * 100 / prev_value if prev_value != 0 else 0
+            )
+            if (pct_change > data.threshold_value.max) or (
+                pct_change < data.threshold_value.min
+            ):
+                return True
+        return False
+
+    def compute_value(self, node_data: List[List[AggregatedEdge]]):
+
+        if len(node_data) == 1:
             val = (
-                sum([node.hits for node in data.node_data[0]])
-                if len(data.node_data[0]) > 0
+                sum([node.hits for node in node_data[0]])
+                if len(node_data[0]) > 0
                 else 0
             )
 
-        elif len(data.node_data) == 2:
+        elif len(node_data) == 2:
             num = (
-                sum([node.hits for node in data.node_data[0]])
-                if len(data.node_data[0]) > 0
+                sum([node.hits for node in node_data[0]])
+                if len(node_data[0]) > 0
                 else 0
             )
             den = (
-                sum([node.hits for node in data.node_data[1]])
-                if len(data.node_data[1]) > 0
+                sum([node.hits for node in node_data[1]])
+                if len(node_data[1]) > 0
                 else 0
             )
             val = num / den if den != 0 else 0
@@ -103,17 +120,35 @@ class NotificationService:
 
         return val
 
+    def compute_notification_values(
+        self, data: NotificationNodeData, notification_type: NotificationType
+    ):
+        triggered = False
+
+        val = self.compute_value(node_data=data.node_data)
+
+        if notification_type == NotificationType.ALERT:
+            triggered = self.alert_criteria(data, val)
+
+        return val, triggered
+
     def compute_updates(
         self,
-        node_data_for_updates: List[NodeDataUpdate],
-    ) -> List[ComputedUpdate]:
+        node_data_for_updates: List[NotificationNodeData],
+    ) -> List[ComputedNotification]:
 
         computed_updates = (
             [
-                ComputedUpdate(
+                ComputedNotification(
                     name=data.name,
-                    notification_id=data.update_id,
-                    value=float("{:.2f}".format(self.compute_update_values(data))),
+                    notification_id=data.notification_id,
+                    value=float(
+                        "{:.2f}".format(
+                            self.compute_notification_values(
+                                data=data, notification_type=NotificationType.UPDATE
+                            )[0]
+                        )
+                    ),
                 )
                 for data in node_data_for_updates
             ]
@@ -122,3 +157,26 @@ class NotificationService:
         )
 
         return computed_updates
+
+    def compute_alerts(
+        self,
+        node_data_for_alerts: List[NotificationNodeData],
+    ) -> List[ComputedNotification]:
+
+        computed_alerts = []
+        if node_data_for_alerts:
+            for data in node_data_for_alerts:
+                value, triggered = self.compute_notification_values(
+                    data=data, notification_type=NotificationType.ALERT
+                )
+                computed_alert = ComputedNotification(
+                    name=data.name,
+                    notification_id=data.notification_id,
+                    value=float("{:.2f}".format(value)),
+                    threshold_type=data.threshold_type,
+                    user_threshold=data.threshold_value,
+                    triggered=triggered,
+                )
+                computed_alerts.append(computed_alert)
+
+        return computed_alerts
