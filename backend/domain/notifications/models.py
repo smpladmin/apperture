@@ -61,6 +61,7 @@ class Notification(Document):
 class ComputedNotification(BaseModel):
     name: str
     notification_id: PydanticObjectId
+    notification_type: NotificationType
     value: float
     threshold_type: Optional[NotificationThresholdType]
     user_threshold: Optional[ThresholdMap]

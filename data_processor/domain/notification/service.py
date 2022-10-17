@@ -5,7 +5,11 @@ from pydantic import parse_obj_as
 
 import requests
 from apperture.backend_action import get
-from domain.notification.models import Notification, NotificationChannel
+from domain.notification.models import (
+    Notification,
+    NotificationChannel,
+    NotificationType,
+)
 
 
 class NotificationService:
@@ -16,11 +20,8 @@ class NotificationService:
 
         raise Exception(f"Error fetching notifications for user {user_id}")
 
-    def send_notification(
-        self, notifications: List[Notification], channel: NotificationChannel
-    ):
-        logging.info(f"Sending {notifications} to {channel}")
-        text = "\n".join([f"{n.name}, {n.value}" for n in notifications])
+    def send_updates(self, updates):
+        text = "\n".join([f"name: {u.name}, \tvalue: {u.value}" for u in updates])
         response = requests.post(
             os.environ.get("SLACK_URL"),
             json={
@@ -29,7 +30,7 @@ class NotificationService:
                         "color": "#9733EE",
                         "fields": [
                             {
-                                "title": "Here is your update! :zap:",
+                                "title": "Here are your updates! :zap:",
                                 "value": text,
                                 "short": "false",
                             }
@@ -38,4 +39,48 @@ class NotificationService:
                 ],
             },
         )
-        logging.info(f"Sent notification with status {response.status_code}")
+        logging.info(f"Sent updates with status {response.status_code}")
+
+    def send_alerts(self, alerts):
+        text = "\n==================\n".join(
+            [
+                f"name: {a.name}, \tvalue: {a.value}, \tthreshold_type: {a.thresholdType},"
+                f" \tuser_threshold: {a.userThreshold}"
+                for a in alerts
+            ]
+        )
+        response = requests.post(
+            os.environ.get("SLACK_URL"),
+            json={
+                "attachments": [
+                    {
+                        "color": "#9733EE",
+                        "fields": [
+                            {
+                                "title": "Here are your alerts! :zap:",
+                                "value": text,
+                                "short": "false",
+                            }
+                        ],
+                    }
+                ],
+            },
+        )
+        logging.info(f"Sent alert with status {response.status_code}")
+
+    def send_notification(
+        self, notifications: List[Notification], channel: NotificationChannel
+    ):
+        logging.info(f"Sending {notifications} to {channel}")
+        updates = [
+            n for n in notifications if n.notificationType == NotificationType.UPDATE
+        ]
+        alerts = [
+            n
+            for n in notifications
+            if n.notificationType == NotificationType.ALERT and n.triggered
+        ]
+        self.send_updates(updates)
+        self.send_alerts(alerts)
+
+        logging.info("Sent notification")

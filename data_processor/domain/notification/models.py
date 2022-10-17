@@ -30,7 +30,8 @@ class NotificationThresholdType(str, Enum):
 
 class Notification(BaseModel):
     name: str
+    notificationType: NotificationType
     value: float
-    threshold_type: Optional[NotificationThresholdType]
-    user_threshold: Optional[ThresholdMap]
+    thresholdType: Optional[NotificationThresholdType]
+    userThreshold: Optional[ThresholdMap]
     triggered: Optional[bool]

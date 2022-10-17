@@ -135,11 +135,11 @@ async def compute_notifications(
     ]
 
     node_data_for_updates = await edge_service.get_node_data_for_notifications(
-        notifications=updates, notification_type=NotificationType.UPDATE
+        notifications=updates
     )
 
     node_data_for_alerts = await edge_service.get_node_data_for_notifications(
-        notifications=alerts, notification_type=NotificationType.ALERT
+        notifications=alerts
     )
 
     computed_updates = notification_service.compute_updates(node_data_for_updates)

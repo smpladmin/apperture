@@ -147,6 +147,7 @@ class NotificationService:
                 ComputedNotification(
                     name=data.name,
                     notification_id=data.notification_id,
+                    notification_type=NotificationType.UPDATE,
                     value=float(
                         "{:.2f}".format(
                             self.compute_notification_values(
@@ -177,6 +178,7 @@ class NotificationService:
                 computed_alert = ComputedNotification(
                     name=data.name,
                     notification_id=data.notification_id,
+                    notification_type=NotificationType.ALERT,
                     value=float("{:.2f}".format(value)),
                     threshold_type=data.threshold_type,
                     user_threshold=data.threshold_value,

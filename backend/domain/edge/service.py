@@ -463,7 +463,6 @@ class EdgeService:
     async def get_node_data_for_notifications(
         self,
         notifications: List[Notification],
-        notification_type: NotificationType,
     ) -> [NotificationNodeData]:
 
         node_data_for_notifications = (
