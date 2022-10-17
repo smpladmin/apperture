@@ -1,11 +1,17 @@
+import { TrendData } from '@lib/domain/eventData';
+import {
+  NotificationMetricType,
+  ThresholdMetricType,
+} from '@lib/domain/notification';
+
 export const notificationMetricOptions = [
   {
-    name: 'users',
+    name: NotificationMetricType.Users,
     label: '#Users',
     isDisabled: true,
   },
   {
-    name: 'hits',
+    name: NotificationMetricType.Hits,
     label: '#Hits',
     isDisabled: false,
   },
@@ -13,25 +19,31 @@ export const notificationMetricOptions = [
 
 export const thresholdMetricOptions = [
   {
-    name: 'range',
+    name: ThresholdMetricType.Range,
     label: 'out of Range',
     isDisabled: false,
   },
   {
-    name: 'percentage',
+    name: ThresholdMetricType.Percentage,
     label: 'more than %',
     isDisabled: false,
   },
 ];
 
-export const getMinimumValue = (data: any, type: any) => {
+export const getMinimumValue = (
+  data: TrendData[],
+  type: NotificationMetricType
+) => {
   return data.reduce(
     (acc: any, val: any) => (acc < val?.[type] ? acc : val?.[type]),
     data[0].hits
   );
 };
 
-export const getMaximumValue = (data: any, type: any) => {
+export const getMaximumValue = (
+  data: TrendData[],
+  type: NotificationMetricType
+) => {
   return data.reduce(
     (acc: any, val: any) => (acc > val?.[type] ? acc : val?.[type]),
     data[0].hits

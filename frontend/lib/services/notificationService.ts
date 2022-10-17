@@ -19,14 +19,16 @@ export const setAlert = async (
       appertureManaged: false,
       pctThresholdActive:
         thresholdMetric === ThresholdMetricType.Percentage ? true : false,
+      pctThresholdValues:
+        thresholdMetric === ThresholdMetricType.Percentage
+          ? { min: values?.[0], max: values?.[1] }
+          : null,
       absoluteThresholdActive:
         thresholdMetric === ThresholdMetricType.Range ? true : false,
-      pctThresholdValues: ThresholdMetricType.Percentage
-        ? { min: values?.[0], max: values?.[1] }
-        : null,
-      absoluteThresholdValues: ThresholdMetricType.Range
-        ? { min: values?.[0], max: values?.[1] }
-        : null,
+      absoluteThresholdValues:
+        thresholdMetric === ThresholdMetricType.Range
+          ? { min: values?.[0], max: values?.[1] }
+          : null,
       formula: 'a',
       variableMap: { a: [nodeName] },
       frequency: 'daily',

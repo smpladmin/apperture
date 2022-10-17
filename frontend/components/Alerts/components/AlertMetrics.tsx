@@ -1,7 +1,7 @@
 import { Divider, Flex, RadioGroup, Text } from '@chakra-ui/react';
 import React from 'react';
 import AlertMetricOption from './AlertMetricOption';
-import { notificationMetricOptions, thresholdMetricOptions } from './util';
+import { notificationMetricOptions, thresholdMetricOptions } from '../util';
 
 type AlertMetricsProps = {
   notificationMetric: string;
