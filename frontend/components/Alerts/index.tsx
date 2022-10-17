@@ -1,6 +1,6 @@
 import Sheet from 'react-modal-sheet';
-import { useEffect, useState } from 'react';
-import { Box, Button } from '@chakra-ui/react';
+import { useEffect, useRef, useState } from 'react';
+import { Box, Button, ToastId, useToast } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import AlertMetrics from './AlertMetrics';
 import {
@@ -18,16 +18,10 @@ import {
   SankeyData,
   TrendData,
 } from '@lib/domain/eventData';
-
-enum ThresholdMetricType {
-  Range = 'range',
-  Percentage = 'percentage',
-}
-
-enum NotificationMetricType {
-  Users = 'users',
-  Hits = 'hits',
-}
+import { setAlert } from '@lib/services/notificationService';
+import { useRouter } from 'next/router';
+import { ThresholdMetricType } from '@lib/domain/notification';
+import AlertToast from './Toast';
 
 type AlertsProps = {
   eventData: {
@@ -42,6 +36,11 @@ const Alerts = ({
   closeAlertsSheet,
 }: AlertsProps) => {
   const { nodeSignificanceData, trendsData } = eventData;
+  const toast = useToast();
+  const toastRef = useRef<ToastId>();
+
+  const router = useRouter();
+  const { dsId } = router.query;
 
   const [minHits, setMinHits] = useState(getMinimumValue(trendsData, 'hits'));
   const [maxHits, setMaxHits] = useState(getMaximumValue(trendsData, 'hits'));
@@ -56,7 +55,7 @@ const Alerts = ({
     minHits,
     maxHits,
   ]);
-  const [percentageValue, setPercentageValue] = useState('');
+  const [percentageValue, setPercentageValue] = useState<number | string>('');
 
   useEffect(() => {
     setMinHits(getMinimumValue(trendsData, 'hits'));
@@ -67,12 +66,35 @@ const Alerts = ({
     ]);
   }, [(nodeSignificanceData?.[0] as NodeSignificanceData)?.['node']]);
 
-  console.log(
-    'percent hai kya',
-    notificationMetric === ThresholdMetricType.Percentage && !percentageValue,
-    'percnetage',
-    !percentageValue
-  );
+  const closeToast = () => {
+    if (toastRef.current) {
+      toast.close(toastRef.current);
+    }
+  };
+
+  const showToast = () => {
+    toastRef.current = toast({
+      position: 'bottom',
+      render: () => <AlertToast closeToast={closeToast} />,
+    });
+  };
+
+  const setEventAlert = async () => {
+    const response = await setAlert(
+      dsId as string,
+      (nodeSignificanceData?.[0] as NodeSignificanceData)?.['node'],
+      notificationMetric,
+      thresholdMetric,
+      thresholdMetric === ThresholdMetricType.Percentage
+        ? [-percentageValue, +percentageValue]
+        : hitsThresholdRange
+    );
+
+    if (response?.status === 200) {
+      closeAlertsSheet();
+      showToast();
+    }
+  };
   return (
     <Sheet
       isOpen={isAlertsSheetOpen}
@@ -122,6 +144,7 @@ const Alerts = ({
                 thresholdMetric === ThresholdMetricType.Percentage &&
                 !percentageValue
               }
+              onClick={setEventAlert}
             >
               Done
             </Button>
