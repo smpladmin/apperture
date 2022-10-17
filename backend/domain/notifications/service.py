@@ -142,4 +142,4 @@ class NotificationService:
             Notification.id == PydanticObjectId(notification_id),
         ).update({"$set": to_update})
 
-        return "Notification Updated Successfully"
+        return

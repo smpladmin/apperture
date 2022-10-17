@@ -45,8 +45,7 @@ async def get_notification(
     name: str,
     notification_service: NotificationService = Depends(),
 ):
-    notification = await notification_service.get_notification_for_node(name)
-    return notification
+    return await notification_service.get_notification_for_node(name)
 
 
 @router.put("/notifications/{notification_id}")
