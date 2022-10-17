@@ -25,6 +25,11 @@ class NotificationThresholdType(str, Enum):
     ABSOLUTE = "absolute"
 
 
+class NotificationMetric(str, Enum):
+    HITS = "hits"
+    USERS = "users"
+
+
 class ThresholdMap(BaseModel):
     min: float
     max: float
@@ -35,6 +40,8 @@ class Notification(Document):
     user_id: PydanticObjectId
     name: str
     notification_type: NotificationType
+    metric: NotificationMetric
+    multi_node: bool
     apperture_managed: bool
     pct_threshold_active: bool
     pct_threshold_values: Optional[ThresholdMap]

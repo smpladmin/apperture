@@ -24,6 +24,8 @@ async def add_notification(
         dto.name,
         user.id,
         dto.notificationType,
+        dto.metric,
+        dto.multiNode,
         dto.appertureManaged,
         dto.pctThresholdActive,
         dto.pctThresholdValues,
