@@ -100,6 +100,16 @@ export const initGraph = (
         'wheel-zoom',
         'activate-node',
         {
+          /**
+           * drag-node mode is used to enable node dragging functionality
+           * in the graph. The implementation of drag-node prevents the touchmove
+           * and touchend events from bubbling up in the mobile view. Also the click
+           * event is not fired in the mobile view. So as a workaround we need to set
+           * states on shouldBegin which is fired on node click or drag start and shouldUpdate
+           * which is fired while dragging the node. The shouldEnd function is not fired
+           * on dragend/touchend so we have to handle this on dragnodeend event registered below.
+           * dragnodeend is fired once node stops dragging or right after the touchstart/shouldBegin.
+           */
           type: 'drag-node',
           shouldBegin(e) {
             onNodeTouch();
@@ -136,14 +146,6 @@ export const registerBeforeLayoutEvent = (graph: G6Graph) => {
   });
 };
 
-const _refreshDragedNodePosition = (e: IG6GraphEvent) => {
-  const model = e.item?.get('model');
-  model.fx = e.x;
-  model.fy = e.y;
-  model.x = e.x;
-  model.y = e.y;
-};
-
 export const registerDragNodeEndEvent = (
   graph: G6Graph,
   isMobile: boolean,
@@ -158,6 +160,11 @@ export const registerDragNodeEndEvent = (
       edgesOnZoom(edges, zoomRatio);
     }, 100);
 
+    /**
+     * if the device is mobile then we should track node drag end and
+     * open the details drawer for that node if the previous event was
+     * a node dragging event. There is not
+     */
     if (isMobile) {
       onNodeDragEnd(node);
     }

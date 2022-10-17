@@ -6,7 +6,7 @@ import {
   useState,
   useCallback,
 } from 'react';
-import { Graph as G6Graph, IG6GraphEvent, INode, Item } from '@antv/g6';
+import { Graph as G6Graph, INode } from '@antv/g6';
 import { transformData } from './transformData';
 import { Edge } from '@lib/domain/edge';
 import { useRouter } from 'next/router';
@@ -83,6 +83,13 @@ const Graph = ({ visualisationData }: GraphProps) => {
   );
 
   useEffect(() => {
+    /**
+     * Track whether a node was touched and dragged on mobile.
+     * If a node is just touched and not dragged then we want to
+     * activate it and open the drawer for that node.
+     * The reason to implement it this way, specifically for mobile
+     * can be found in the networkGraph.ts file.
+     */
     if (!device.isMobile) return;
     if (nodeTouched.value && !nodeDragged.value && interactedNode) {
       onActivateNode(interactedNode);
