@@ -4,13 +4,10 @@ import {
   SankeyData,
   NodeSignificanceData,
 } from '@lib/domain/eventData';
-import Sankey from './Sankey';
-import Trend from './Trend';
-import {
-  formatDatalabel,
-  getPercentageOfHits,
-} from '@components/Graph/graphUtil';
+import Sankey from '../Sankey';
+import Trend from '../Trend';
 import { useEffect, useState } from 'react';
+import { formatDatalabel, getPercentageOfHits } from '@lib/utils/common';
 
 type EventDetailsInfo = {
   eventData: {
@@ -42,7 +39,7 @@ const EventDetailsInfo = ({ eventData }: EventDetailsInfo) => {
         <Flex direction={'column'}>
           <Box h={'auto'} minHeight={'18'} pt={'6'} pb={'7'}>
             <Text fontWeight={'medium'} fontSize={'base'} lineHeight={'base'}>
-              {(nodeSignificanceData[0] as NodeSignificanceData)?.['node']}
+              {(nodeSignificanceData?.[0] as NodeSignificanceData)?.['node']}
             </Text>
           </Box>
           <Divider
@@ -61,7 +58,7 @@ const EventDetailsInfo = ({ eventData }: EventDetailsInfo) => {
                     fontFamily={'Space Grotesk, Work Sans, sans-serif'}
                   >
                     {formatDatalabel(
-                      (nodeSignificanceData[0] as NodeSignificanceData)?.[
+                      (nodeSignificanceData?.[0] as NodeSignificanceData)?.[
                         'nodeHits'
                       ]
                     )}
@@ -80,10 +77,10 @@ const EventDetailsInfo = ({ eventData }: EventDetailsInfo) => {
                   lineHeight={'xs-12'}
                 >
                   {`${getPercentageOfHits(
-                    (nodeSignificanceData[0] as NodeSignificanceData)?.[
+                    (nodeSignificanceData?.[0] as NodeSignificanceData)?.[
                       'nodeHits'
                     ],
-                    (nodeSignificanceData[0] as NodeSignificanceData)?.[
+                    (nodeSignificanceData?.[0] as NodeSignificanceData)?.[
                       'totalHits'
                     ]
                   )}% of overall traffic`}

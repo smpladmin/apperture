@@ -1,7 +1,8 @@
 import { nodeShapes } from '@lib/config/graphConfig';
-import { fittingString, formatDatalabel } from '@components/Graph/graphUtil';
+import { fittingString } from '@components/Graph/graphUtil';
 import { IGroup, ModelConfig } from '@antv/g6';
 import { BLACK_200 } from '@theme/index';
+import { formatDatalabel } from '@lib/utils/common';
 
 //TODO: create a utility for these sahpe selectors
 const shadow = (cfg: ModelConfig, group: IGroup) => {
