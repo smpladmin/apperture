@@ -1,131 +1,140 @@
 import Sheet from 'react-modal-sheet';
-import { useState } from 'react';
-import {
-  Box,
-  Button,
-  Divider,
-  Flex,
-  IconButton,
-  Input,
-  Text,
-} from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
+import { Box, Button } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import AlertMetrics from './AlertMetrics';
-import { notificationMetricOptions, thresholdMetricOptions } from './util';
+import {
+  getMaximumValue,
+  getMinimumValue,
+  notificationMetricOptions,
+  thresholdMetricOptions,
+} from './util';
 import ThresholdMetric from './ThresholdMetric';
-import { data } from './data';
 import PercentageMetric from './PercentageMetric';
+import { OVERLAY_GRAY } from '@theme/index';
+import AlertsHeader from './AlertsHeader';
+import {
+  NodeSignificanceData,
+  SankeyData,
+  TrendData,
+} from '@lib/domain/eventData';
 
-enum AlertThresholdType {
+enum ThresholdMetricType {
   Range = 'range',
   Percentage = 'percentage',
 }
 
-const AlertsHeader = ({ setOpen }: { setOpen: Function }) => {
-  return (
-    <>
-      <Flex
-        justifyContent={'space-between'}
-        pt={'5'}
-        px={'4'}
-        pb={'4'}
-        alignItems={'center'}
-      >
-        <Text fontSize={'sh-20'} lineHeight={'sh-20'} fontWeight={'semibold'}>
-          Alert me
-        </Text>
-        <IconButton
-          aria-label="close"
-          variant={'secondary'}
-          icon={<i className="ri-close-fill" />}
-          rounded={'full'}
-          bg={'white.DEFAULT'}
-          border={'1px'}
-          borderColor={'white.200'}
-          size={'sm'}
-          onClick={() => setOpen(false)}
-        />
-      </Flex>
-      <Divider orientation="horizontal" borderColor={'white.200'} opacity={1} />
-    </>
-  );
+enum NotificationMetricType {
+  Users = 'users',
+  Hits = 'hits',
+}
+
+type AlertsProps = {
+  eventData: {
+    [key in string]: Array<TrendData | SankeyData | NodeSignificanceData>;
+  };
+  isAlertsSheetOpen: boolean;
+  closeAlertsSheet: () => void;
 };
+const Alerts = ({
+  eventData,
+  isAlertsSheetOpen,
+  closeAlertsSheet,
+}: AlertsProps) => {
+  const { nodeSignificanceData, trendsData } = eventData;
 
-const Alerts = () => {
-  const [isOpen, setOpen] = useState(false);
-
-  const minHits = data.reduce((acc, val) => {
-    return acc < val.hits ? acc : val.hits;
-  }, data[0].hits);
-
-  const maxHits = data.reduce((acc, val) => {
-    return acc > val.hits ? acc : val.hits;
-  }, data[0].hits);
+  const [minHits, setMinHits] = useState(getMinimumValue(trendsData, 'hits'));
+  const [maxHits, setMaxHits] = useState(getMaximumValue(trendsData, 'hits'));
 
   const [notificationMetric, setNotificationMetric] = useState(
-    notificationMetricOptions[0].name
+    notificationMetricOptions[1].name
   );
   const [thresholdMetric, setThresholdMetric] = useState(
     thresholdMetricOptions[0].name
   );
-  const [thresholdRange, setThresholdRange] = useState<number[]>([
+  const [hitsThresholdRange, setHitsThresholdRange] = useState<number[]>([
     minHits,
     maxHits,
   ]);
+  const [percentageValue, setPercentageValue] = useState('');
 
+  useEffect(() => {
+    setMinHits(getMinimumValue(trendsData, 'hits'));
+    setMaxHits(getMaximumValue(trendsData, 'hits'));
+    setHitsThresholdRange([
+      getMinimumValue(trendsData, 'hits'),
+      getMaximumValue(trendsData, 'hits'),
+    ]);
+  }, [(nodeSignificanceData?.[0] as NodeSignificanceData)?.['node']]);
+
+  console.log(
+    'percent hai kya',
+    notificationMetric === ThresholdMetricType.Percentage && !percentageValue,
+    'percnetage',
+    !percentageValue
+  );
   return (
-    <>
-      <button onClick={() => setOpen(true)}>Open sheet</button>
-      <Sheet
-        isOpen={isOpen}
-        onClose={() => setOpen(false)}
-        disableDrag={true}
-        detent="content-height"
-      >
-        <Sheet.Container>
-          <Sheet.Header>
-            <AlertsHeader setOpen={setOpen} />
-          </Sheet.Header>
-          <Sheet.Content>
-            <Box px={'4'} py={'4'} overflowY={'scroll'}>
-              <AlertMetrics
-                notificationMetric={notificationMetric}
-                setNotificationMetric={setNotificationMetric}
-                thresholdMetric={thresholdMetric}
-                setThresholdMetric={setThresholdMetric}
+    <Sheet
+      isOpen={isAlertsSheetOpen}
+      onClose={closeAlertsSheet}
+      disableDrag={true}
+      detent="content-height"
+    >
+      <Sheet.Container style={{ borderRadius: '1rem 1rem 0 0' }}>
+        <Sheet.Header>
+          <AlertsHeader closeAlertsSheet={closeAlertsSheet} />
+        </Sheet.Header>
+        <Sheet.Content>
+          <Box px={'4'} py={'4'} overflowY={'scroll'}>
+            <AlertMetrics
+              notificationMetric={notificationMetric}
+              setNotificationMetric={setNotificationMetric}
+              thresholdMetric={thresholdMetric}
+              setThresholdMetric={setThresholdMetric}
+            />
+            {thresholdMetric === ThresholdMetricType.Range ? (
+              <ThresholdMetric
+                data={eventData?.trendsData as TrendData[]}
+                thresholdRange={hitsThresholdRange}
+                setThresholdRange={setHitsThresholdRange}
+                minHits={minHits}
+                maxHits={maxHits}
               />
-              {thresholdMetric === AlertThresholdType.Range ? (
-                <ThresholdMetric
-                  thresholdRange={thresholdRange}
-                  setThresholdRange={setThresholdRange}
-                  minHits={minHits}
-                  maxHits={maxHits}
-                />
-              ) : null}
-              {thresholdMetric === AlertThresholdType.Percentage ? (
-                <PercentageMetric />
-              ) : null}
-              <Button
-                variant={'primary'}
-                rounded={'lg'}
-                bg={'black.100'}
-                p={6}
-                fontSize={{ base: 'xs-14', md: 'base' }}
-                lineHeight={{ base: 'xs-14', md: 'base' }}
-                fontWeight={'semibold'}
-                textColor={'white.100'}
-                w={'full'}
-                mt={'4'}
-              >
-                Done
-              </Button>
-            </Box>
-          </Sheet.Content>
-        </Sheet.Container>
-
-        <Sheet.Backdrop />
-      </Sheet>
-    </>
+            ) : null}
+            {thresholdMetric === ThresholdMetricType.Percentage ? (
+              <PercentageMetric
+                percentageValue={percentageValue}
+                setPercentageValue={setPercentageValue}
+              />
+            ) : null}
+            <Button
+              variant={'primary'}
+              rounded={'lg'}
+              bg={'black.100'}
+              p={6}
+              fontSize={{ base: 'xs-14', md: 'base' }}
+              lineHeight={{ base: 'xs-14', md: 'base' }}
+              fontWeight={'semibold'}
+              textColor={'white.100'}
+              w={'full'}
+              mt={'4'}
+              disabled={
+                thresholdMetric === ThresholdMetricType.Percentage &&
+                !percentageValue
+              }
+            >
+              Done
+            </Button>
+          </Box>
+        </Sheet.Content>
+      </Sheet.Container>
+      <Sheet.Backdrop
+        style={{
+          background: OVERLAY_GRAY,
+          backdropFilter: 'blur(20px)',
+        }}
+      />
+    </Sheet>
   );
 };
 

@@ -1,21 +1,28 @@
 import { Flex, Radio, Text } from '@chakra-ui/react';
 
-const AlertMetricOption = ({
-  option,
-  isChecked,
-}: {
+type AlertMetricOptionProps = {
   option: {
     name: string;
     label: string;
+    isDisabled: boolean;
   };
   isChecked: boolean;
-}) => {
+};
+
+const AlertMetricOption = ({ option, isChecked }: AlertMetricOptionProps) => {
   return (
     <Flex
       paddingX={'3'}
       paddingY={'2'}
       cursor={'pointer'}
-      bg={isChecked ? 'black.100' : 'white.DEFAULT'}
+      pointerEvents={option.isDisabled ? 'none' : 'all'}
+      bg={
+        isChecked
+          ? 'black.100'
+          : option.isDisabled
+          ? 'grey.DEFAULT'
+          : 'white.DEFAULT'
+      }
       border={'1px'}
       borderColor={isChecked ? 'black.100' : 'white.200'}
       borderRadius={'25'}
@@ -30,7 +37,7 @@ const AlertMetricOption = ({
       >
         {option.label}
       </Text>
-      <Radio value={option.name} hidden />
+      <Radio value={option.name} hidden disabled={option.isDisabled} />
     </Flex>
   );
 };

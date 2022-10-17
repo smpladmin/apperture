@@ -14,6 +14,7 @@ const TEAL_100 = '#BDE6F1';
 const YELLOW_100 = '#FFD98A';
 const YELLOW_200 = '#FABC41';
 const BLUE = '#6BBDF9';
+const OVERLAY_GRAY = 'rgba(0, 0, 0, 0.6)';
 
 const colors = {
   black: {
@@ -155,4 +156,5 @@ export {
   YELLOW_100,
   YELLOW_200,
   BLUE,
+  OVERLAY_GRAY,
 };

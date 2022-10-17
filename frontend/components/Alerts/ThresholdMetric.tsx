@@ -9,9 +9,9 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { formatDatalabel } from '@components/Graph/graphUtil';
+import { TrendData } from '@lib/domain/eventData';
 import { BLUE, YELLOW_100, YELLOW_200 } from '@theme/index';
 import { useEffect, useRef } from 'react';
-import { data } from './data';
 
 export const ParallelLine = () => {
   return (
@@ -31,6 +31,7 @@ export const ParallelLine = () => {
 };
 
 type ThresholdMetricProps = {
+  data: TrendData[];
   thresholdRange: number[];
   setThresholdRange: Function;
   minHits: number;
@@ -38,6 +39,7 @@ type ThresholdMetricProps = {
 };
 
 const ThresholdMetric = ({
+  data,
   thresholdRange,
   setThresholdRange,
   minHits,
@@ -53,7 +55,7 @@ const ThresholdMetric = ({
       xField: 'startDate',
       yField: 'hits',
       yAxis: {
-        tickCount: 6,
+        tickCount: 5,
       },
       xAxis: {
         label: {
