@@ -7,6 +7,7 @@ import 'remixicon/fonts/remixicon.css';
 import MobileAlerts from './MobileAlerts';
 import { useContext } from 'react';
 import { AppertureContext } from '@lib/contexts/appertureContext';
+import DesktopAlerts from './DesktopAlert';
 
 type AlertsProps = {
   eventData: {
@@ -29,7 +30,13 @@ const Alert = ({
           isAlertsSheetOpen={isAlertsSheetOpen}
           closeAlertsSheet={closeAlertsSheet}
         />
-      ) : null}
+      ) : (
+        <DesktopAlerts
+          eventData={eventData}
+          isAlertsSheetOpen={isAlertsSheetOpen}
+          closeAlertsSheet={closeAlertsSheet}
+        />
+      )}
     </>
   );
 };
