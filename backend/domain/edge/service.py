@@ -15,7 +15,12 @@ from domain.edge.models import (
     NodeTrend,
     NodeSankey,
     NodeSignificance,
-    NodeDataUpdate,
+    NotificationNodeData,
+)
+from domain.notifications.models import (
+    Notification,
+    NotificationType,
+    NotificationThresholdType,
 )
 from mongo.mongo import Mongo
 
@@ -414,14 +419,16 @@ class EdgeService:
             .to_list()
         )
 
-    async def get_node_data(self, nodes: List, ds_id: str) -> List[AggregatedEdge]:
+    async def get_node_data(
+        self, nodes: List, ds_id: str, days_ago: int
+    ) -> List[AggregatedEdge]:
         pipeline = [
             {
                 "$match": {
                     "datasource_id": PydanticObjectId(ds_id),
                     "current_event": {"$in": nodes},
                     "date": dt.strptime(
-                        (dt.today() - timedelta(days=1)).strftime("%Y-%m-%d"),
+                        (dt.today() - timedelta(days=days_ago)).strftime("%Y-%m-%d"),
                         "%Y-%m-%d",
                     ),
                 }
@@ -443,29 +450,43 @@ class EdgeService:
             .to_list()
         )
 
-    async def get_node_data_for_update(self, update):
+    async def get_node_data_for_notification(
+        self, notification: Notification, days_ago: int
+    ):
         return await asyncio.gather(
             *[
-                self.get_node_data(nodes, update.datasource_id)
-                for ratio_name, nodes in update.variable_map.items()
+                self.get_node_data(nodes, notification.datasource_id, days_ago=days_ago)
+                for ratio_name, nodes in notification.variable_map.items()
             ]
         )
 
-    async def get_node_data_for_updates(
+    async def get_node_data_for_notifications(
         self,
-        updates,
-    ) -> [NodeDataUpdate]:
-        node_data_for_updates = (
+        notifications: List[Notification],
+    ) -> [NotificationNodeData]:
+
+        node_data_for_notifications = (
             [
-                NodeDataUpdate(
-                    name=update.name,
-                    update_id=update.id,
-                    node_data=await self.get_node_data_for_update(update),
+                NotificationNodeData(
+                    name=notification.name,
+                    notification_id=notification.id,
+                    node_data=await self.get_node_data_for_notification(
+                        notification, days_ago=1
+                    ),
+                    prev_day_node_data=await self.get_node_data_for_notification(
+                        notification, days_ago=2
+                    ),
+                    threshold_type=NotificationThresholdType.PCT
+                    if notification.pct_threshold_active
+                    else NotificationThresholdType.ABSOLUTE,
+                    threshold_value=notification.pct_threshold_values
+                    if notification.pct_threshold_active
+                    else notification.absolute_threshold_values,
                 )
-                for update in updates
+                for notification in notifications
             ]
-            if updates
+            if notifications
             else []
         )
 
-        return node_data_for_updates
+        return node_data_for_notifications
