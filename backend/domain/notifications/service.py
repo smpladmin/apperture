@@ -165,29 +165,26 @@ class NotificationService:
 
         return computed_updates
 
+    def compute_alert(self, data: NotificationNodeData):
+        value, triggered = self.compute_notification_values(
+            data=data, notification_type=NotificationType.ALERT
+        )
+        computed_alert = ComputedNotification(
+            name=data.name,
+            notification_id=data.notification_id,
+            notification_type=NotificationType.ALERT,
+            value=float("{:.2f}".format(value)),
+            threshold_type=data.threshold_type,
+            user_threshold=data.threshold_value,
+            triggered=triggered,
+        )
+        return computed_alert
+
     def compute_alerts(
         self,
         node_data_for_alerts: List[NotificationNodeData],
     ) -> List[ComputedNotification]:
-
-        computed_alerts = []
-        if node_data_for_alerts:
-            for data in node_data_for_alerts:
-                value, triggered = self.compute_notification_values(
-                    data=data, notification_type=NotificationType.ALERT
-                )
-                computed_alert = ComputedNotification(
-                    name=data.name,
-                    notification_id=data.notification_id,
-                    notification_type=NotificationType.ALERT,
-                    value=float("{:.2f}".format(value)),
-                    threshold_type=data.threshold_type,
-                    user_threshold=data.threshold_value,
-                    triggered=triggered,
-                )
-                computed_alerts.append(computed_alert)
-
-        return computed_alerts
+        return [self.compute_alert(data) for data in node_data_for_alerts]
 
     async def get_notification_for_node(self, name: str) -> list[Notification]:
         return await Notification.find(
