@@ -23,7 +23,7 @@ const NodeSignificance = ({
     [key in string]: Array<TrendData | SankeyData | NodeSignificanceData>;
   };
 }) => {
-  const { nodeSignificanceData, trendsData } = eventData;
+  const { nodeSignificanceData } = eventData;
   const {
     isOpen: isAlertsSheetOpen,
     onOpen: openAlertsSheet,
@@ -96,7 +96,7 @@ const NodeSignificance = ({
         </Box>
       </Box>
       <Alert
-        eventData={eventData}
+        nodeName={(nodeSignificanceData?.[0] as NodeSignificanceData)?.['node']}
         isAlertsSheetOpen={isAlertsSheetOpen}
         closeAlertsSheet={closeAlertsSheet}
       />

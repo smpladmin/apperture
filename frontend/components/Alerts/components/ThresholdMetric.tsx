@@ -107,27 +107,35 @@ const ThresholdMetric = ({
       <Flex justifyContent={'space-between'}>
         <Flex direction={'column'} gap={'1'}>
           <Text
-            fontSize={'xs-10'}
-            lineHeight={'xs-10'}
+            fontSize={{ base: 'xs-10', md: 'xs-14' }}
+            lineHeight={{ base: 'xs-10', md: 'xs-14' }}
+            fontWeight={{ base: 'normal', md: 'medium' }}
             color={'grey.100'}
-            fontWeight={'normal'}
           >
             Lower Bound
           </Text>
-          <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'semibold'}>
+          <Text
+            fontSize={{ base: 'xs-14', md: 'sh-20' }}
+            lineHeight={{ base: 'xs-14', md: 'xs-14' }}
+            fontWeight={'semibold'}
+          >
             {formatDatalabel(thresholdRange?.[0])}
           </Text>
         </Flex>
-        <Flex direction={'column'}>
+        <Flex direction={'column'} gap={'1'}>
           <Text
-            fontSize={'xs-10'}
-            lineHeight={'xs-10'}
+            fontSize={{ base: 'xs-10', md: 'xs-14' }}
+            lineHeight={{ base: 'xs-10', md: 'xs-14' }}
+            fontWeight={{ base: 'normal', md: 'medium' }}
             color={'grey.100'}
-            fontWeight={'normal'}
           >
             Upper Bound
           </Text>
-          <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'semibold'}>
+          <Text
+            fontSize={{ base: 'xs-14', md: 'sh-20' }}
+            lineHeight={{ base: 'xs-14', md: 'xs-14' }}
+            fontWeight={'semibold'}
+          >
             {formatDatalabel(thresholdRange?.[1])}
           </Text>
         </Flex>
@@ -142,10 +150,18 @@ const ThresholdMetric = ({
           <RangeSliderTrack bg="white.200">
             <RangeSliderFilledTrack bg="black.100" />
           </RangeSliderTrack>
-          <RangeSliderThumb boxSize={5} index={0} bg={'black.100'}>
+          <RangeSliderThumb
+            boxSize={{ base: '5', md: '6' }}
+            index={0}
+            bg={'black.100'}
+          >
             <ParallelLine />
           </RangeSliderThumb>
-          <RangeSliderThumb boxSize={5} index={1} bg={'black.100'}>
+          <RangeSliderThumb
+            boxSize={{ base: '5', md: '6' }}
+            index={1}
+            bg={'black.100'}
+          >
             <ParallelLine />
           </RangeSliderThumb>
         </RangeSlider>

@@ -12,8 +12,8 @@ const PercentageMetric = ({
   return (
     <Flex direction={'column'} gap={'1'}>
       <Text
-        fontSize={'xs-10'}
-        lineHeight={'xs-10'}
+        fontSize={{ base: 'xs-10', md: 'xs-14' }}
+        lineHeight={{ base: 'xs-10', md: 'xs-14' }}
         color={'grey.100'}
         fontWeight={'normal'}
       >
@@ -23,6 +23,7 @@ const PercentageMetric = ({
         autoFocus
         type={'number'}
         bg={'white.100'}
+        height={{ base: '9', md: '14' }}
         focusBorderColor={'black.100'}
         value={percentageValue}
         onChange={(e) => setPercentageValue(e.target.value)}

@@ -86,7 +86,7 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
 
   useEffect(() => {
     if (!activeNode) return;
-    const fetchTrendsData = async () => {
+    const fetchEventData = async () => {
       const [nodeSignificanceData, trendsData, sankeyData] = await Promise.all([
         getNodeSignificanceData(dsId as string, activeNode?._cfg?.id!!),
         getTrendsData(dsId as string, activeNode?._cfg?.id!!, 'week'),
@@ -99,7 +99,7 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
         sankeyData,
       });
     };
-    fetchTrendsData();
+    fetchEventData();
   }, [activeNode]);
 
   return (

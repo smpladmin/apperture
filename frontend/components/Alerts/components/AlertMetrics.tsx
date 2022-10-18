@@ -18,8 +18,12 @@ const AlertMetrics = ({
 }: AlertMetricsProps) => {
   return (
     <>
-      <Flex direction={'column'} gap={'2'} mb={'4'}>
-        <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'semibold'}>
+      <Flex direction={'column'} gap={{ base: '2', md: '6' }}>
+        <Text
+          fontSize={{ base: 'xs-14', md: 'sh-18' }}
+          lineHeight={{ base: 'xs-14', md: 'sh-18' }}
+          fontWeight={{ base: 'semibold', md: 'medium' }}
+        >
           When daily
         </Text>
 
@@ -30,12 +34,11 @@ const AlertMetrics = ({
           <Flex gap={'2'}>
             {notificationMetricOptions.map((option) => {
               return (
-                <Flex key={option.name}>
-                  <AlertMetricOption
-                    option={option}
-                    isChecked={option.name === notificationMetric}
-                  />
-                </Flex>
+                <AlertMetricOption
+                  key={option.name}
+                  option={option}
+                  isChecked={option.name === notificationMetric}
+                />
               );
             })}
           </Flex>
@@ -45,11 +48,14 @@ const AlertMetrics = ({
         orientation="horizontal"
         borderColor={'white.200'}
         opacity={1}
-        mb={'4'}
+        my={{ base: '4', md: '8' }}
       />
-
-      <Flex direction={'column'} gap={'2'} mb={'4'}>
-        <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'semibold'}>
+      <Flex direction={'column'} gap={{ base: '2', md: '6' }}>
+        <Text
+          fontSize={{ base: 'xs-14', md: 'sh-18' }}
+          lineHeight={{ base: 'xs-14', md: 'sh-18' }}
+          fontWeight={{ base: 'semibold', md: 'medium' }}
+        >
           moves
         </Text>
         <RadioGroup
@@ -59,17 +65,21 @@ const AlertMetrics = ({
           <Flex gap={'2'}>
             {thresholdMetricOptions.map((option) => {
               return (
-                <Flex key={option.name}>
-                  <AlertMetricOption
-                    option={option}
-                    isChecked={option.name === thresholdMetric}
-                  />
-                </Flex>
+                <AlertMetricOption
+                  option={option}
+                  isChecked={option.name === thresholdMetric}
+                />
               );
             })}
           </Flex>
         </RadioGroup>
       </Flex>
+      <Divider
+        orientation="horizontal"
+        borderColor={'white.200'}
+        opacity={1}
+        my={{ base: '4', md: '8' }}
+      />
     </>
   );
 };

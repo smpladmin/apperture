@@ -1,31 +1,30 @@
 import {
   Box,
+  Divider,
   IconButton,
   Modal,
   ModalBody,
+  ModalCloseButton,
   ModalContent,
   ModalHeader,
+  ModalOverlay,
 } from '@chakra-ui/react';
-import {
-  NodeSignificanceData,
-  SankeyData,
-  TrendData,
-} from '@lib/domain/eventData';
+import { TrendData } from '@lib/domain/eventData';
 
 import AlertsInfo from '../components/AlertsInfo';
 
 type DesktopAlertsProps = {
-  eventData: {
-    [key in string]: Array<TrendData | SankeyData | NodeSignificanceData>;
-  };
+  nodeName: string;
+  eventData: TrendData[] | [];
   isAlertsSheetOpen: boolean;
   closeAlertsSheet: () => void;
 };
 
 const DesktopAlerts = ({
+  nodeName,
+  eventData,
   isAlertsSheetOpen,
   closeAlertsSheet,
-  eventData,
 }: DesktopAlertsProps) => {
   return (
     <Modal
@@ -35,38 +34,40 @@ const DesktopAlerts = ({
       blockScrollOnMount={false}
       trapFocus={false}
     >
+      <ModalOverlay backdropFilter={'blur(20px)'} bg={'grey.0'} />
       <ModalContent
-        h={'full'}
-        rounded={0}
-        maxWidth={'full'}
-        maxHeight={'full'}
-        pt={0}
-        marginY={0}
-        overflowY={'auto'}
+        maxWidth="168"
+        maxHeight={'calc(100% - 50px)'}
+        borderRadius={'20px'}
       >
         <ModalHeader
           display={'flex'}
-          w={'full'}
-          flexDirection={'column'}
-          gap={'3'}
-          px={'4'}
-          pb={0}
+          justifyContent={'space-between'}
+          alignItems={'center'}
+          fontSize={'sh-24'}
+          lineHeight={'sh-24'}
+          pt={'7'}
+          pb={'5'}
+          px={'9'}
         >
-          <Box>
-            <IconButton
-              aria-label="close"
-              variant={'secondary'}
-              icon={<i className="ri-arrow-left-line"></i>}
-              rounded={'full'}
-              bg={'white.DEFAULT'}
-              border={'1px'}
-              borderColor={'white.200'}
-              onClick={closeAlertsSheet}
-            />
-          </Box>
+          Alert Me
+          <ModalCloseButton
+            position={'relative'}
+            top={0}
+            right={0}
+            border={'1px'}
+            borderColor={'white.200'}
+            rounded={'full'}
+          />
         </ModalHeader>
-        <ModalBody>
+        <Divider
+          orientation="horizontal"
+          borderColor={'white.200'}
+          opacity={1}
+        />
+        <ModalBody px={'9'} pt={'4'} pb={'9'} overflowY={'auto'}>
           <AlertsInfo
+            nodeName={nodeName}
             eventData={eventData}
             closeAlertsSheet={closeAlertsSheet}
           />

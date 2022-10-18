@@ -1,24 +1,18 @@
 import Sheet from 'react-modal-sheet';
-
 import 'remixicon/fonts/remixicon.css';
-
 import { OVERLAY_GRAY } from '@theme/index';
 import AlertsHeader from './AlertsMobileHeader';
-import {
-  NodeSignificanceData,
-  SankeyData,
-  TrendData,
-} from '@lib/domain/eventData';
+import { TrendData } from '@lib/domain/eventData';
 import AlertsInfo from '../components/AlertsInfo';
 
 type MobileAlertsProps = {
-  eventData: {
-    [key in string]: Array<TrendData | SankeyData | NodeSignificanceData>;
-  };
+  nodeName: string;
+  eventData: TrendData[];
   isAlertsSheetOpen: boolean;
   closeAlertsSheet: () => void;
 };
 const MobileAlerts = ({
+  nodeName,
   eventData,
   isAlertsSheetOpen,
   closeAlertsSheet,
@@ -36,6 +30,7 @@ const MobileAlerts = ({
         </Sheet.Header>
         <Sheet.Content>
           <AlertsInfo
+            nodeName={nodeName}
             eventData={eventData}
             closeAlertsSheet={closeAlertsSheet}
           />
