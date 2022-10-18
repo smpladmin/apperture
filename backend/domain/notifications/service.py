@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Dict
 
 from beanie import PydanticObjectId
@@ -187,3 +188,23 @@ class NotificationService:
                 computed_alerts.append(computed_alert)
 
         return computed_alerts
+
+    async def get_notification_for_node(self, name: str) -> list[Notification]:
+        return await Notification.find(
+            Notification.name == name,
+            Notification.notification_active == True,
+        ).to_list()
+
+    async def update_notification(
+        self, notification_id: str, new_notification: Notification
+    ):
+        to_update = new_notification.dict()
+        to_update.pop("id")
+        to_update.pop("created_at")
+        to_update["updated_at"] = datetime.utcnow()
+
+        await Notification.find_one(
+            Notification.id == PydanticObjectId(notification_id),
+        ).update({"$set": to_update})
+
+        return

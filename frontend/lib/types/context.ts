@@ -1,8 +1,8 @@
-import { Item } from '@antv/g6';
+import { INode, Item } from '@antv/g6';
 
 export type InitialStateType = {
-  nodesData: Array<Item>;
-  activeNode: Item | null;
+  nodesData: Array<INode>;
+  activeNode: INode | null;
   isNodeSearched: boolean;
 };
 
@@ -20,11 +20,11 @@ export enum Actions {
 export type LayoutActions =
   | {
       type: Actions.SET_NODES_DATA;
-      payload: Item[];
+      payload: INode[];
     }
   | {
       type: Actions.SET_ACTIVE_NODE;
-      payload: Item;
+      payload: INode;
     }
   | {
       type: Actions.SET_IS_NODE_SEARCHED;
