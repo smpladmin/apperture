@@ -42,31 +42,29 @@ class NotificationService:
         logging.info(f"Sent updates with status {response.status_code}")
 
     def send_alerts(self, alerts):
-        text = "\n==================\n".join(
-            [
-                f"name: {a.name}, \tvalue: {a.value}, \tthreshold_type: {a.thresholdType},"
-                f" \tuser_threshold: {a.userThreshold}"
-                for a in alerts
-            ]
-        )
-        response = requests.post(
-            os.environ.get("SLACK_URL"),
-            json={
-                "attachments": [
-                    {
-                        "color": "#9733EE",
-                        "fields": [
-                            {
-                                "title": "Here are your alerts! :zap:",
-                                "value": text,
-                                "short": "false",
-                            }
-                        ],
-                    }
-                ],
-            },
-        )
-        logging.info(f"Sent alert with status {response.status_code}")
+        for alert in alerts:
+            text = (
+                f"name: {alert.name}, \tvalue: {alert.value}, \tthreshold_type: {alert.thresholdType},"
+                f" \tuser_threshold: {alert.userThreshold}"
+            )
+            response = requests.post(
+                os.environ.get("SLACK_URL"),
+                json={
+                    "attachments": [
+                        {
+                            "color": "#9733EE",
+                            "fields": [
+                                {
+                                    "title": "Here is your alert! :zap:",
+                                    "value": text,
+                                    "short": "false",
+                                }
+                            ],
+                        }
+                    ],
+                },
+            )
+            logging.info(f"Sent alert with status {response.status_code}")
 
     def send_notification(
         self, notifications: List[Notification], channel: NotificationChannel
@@ -83,4 +81,4 @@ class NotificationService:
         self.send_updates(updates)
         self.send_alerts(alerts)
 
-        logging.info("Sent notification")
+        logging.info("Sent notifications")
