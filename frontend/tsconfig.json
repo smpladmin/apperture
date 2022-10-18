@@ -29,7 +29,7 @@
     "**/*.ts",
     "**/*.tsx",
     "pages/_document.tsx",
-    "theme/index.js"
+    "theme/index.ts"
   ],
   "exclude": ["node_modules"]
 }

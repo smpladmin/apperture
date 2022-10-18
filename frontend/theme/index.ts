@@ -11,6 +11,10 @@ const EDGE_LABEL_GRAY = '#808080';
 const ARROW_GRAY = '#78787E';
 const BLACK = '#000000';
 const TEAL_100 = '#BDE6F1';
+const YELLOW_100 = '#FFD98A';
+const YELLOW_200 = '#FABC41';
+const BLUE = '#6BBDF9';
+const OVERLAY_GRAY = 'rgba(0, 0, 0, 0.6)';
 
 const colors = {
   black: {
@@ -59,6 +63,7 @@ const spacing = {
   37: '9.25rem',
   39: '9.75rem',
   45: '11.25rem',
+  50: '12.5rem',
   55: '13.75rem',
   62: '15.5rem',
   70: '17.5rem',
@@ -127,7 +132,7 @@ const boxShadow = {
   xs: '0 1px 0 rgba(30, 25, 34, 0.08)',
 };
 
-module.exports = {
+export {
   colors,
   spacing,
   maxWidth,
@@ -135,7 +140,6 @@ module.exports = {
   boxShadow,
   fontSizes,
   lineHeights,
-  spacing,
   WHITE_DEFAULT,
   WHITE_300,
   PURPLE,
@@ -149,4 +153,8 @@ module.exports = {
   TEAL_100,
   EDGE_LABEL_GRAY,
   EDGE_ARROW_GRAY,
+  YELLOW_100,
+  YELLOW_200,
+  BLUE,
+  OVERLAY_GRAY,
 };
