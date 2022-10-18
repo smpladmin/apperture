@@ -11,23 +11,12 @@ import {
 import { TrendData } from '@lib/domain/eventData';
 import { formatDatalabel } from '@lib/utils/common';
 import { BLUE, YELLOW_100, YELLOW_200 } from '@theme/index';
+import Image from 'next/image';
 import { useEffect, useRef } from 'react';
+import ParallelLineIcon from '@assets/icons/parallel-line.svg';
 
-export const ParallelLine = () => {
-  return (
-    <svg
-      width="6"
-      height="8"
-      viewBox="0 0 6 8"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M5.3999 0.159607L4.4399 0.159607L4.4399 7.83961L5.3999 7.83961L5.3999 0.159607ZM1.5599 0.159607L0.599902 0.159607L0.599902 7.83961L1.5599 7.83961L1.5599 0.159607Z"
-        fill="white"
-      />
-    </svg>
-  );
+const ParallelLine = () => {
+  return <Image src={ParallelLineIcon} alt={'parallel-line-icon'} />;
 };
 
 type ThresholdMetricProps = {
@@ -67,8 +56,8 @@ const ThresholdMetric = ({
       },
       meta: {
         hits: {
-          min: 0.6 * minHit,
-          max: 1.4 * maxHit,
+          min: 0.8 * minHit,
+          max: 1.2 * maxHit,
         },
       },
       lineStyle: {
@@ -146,8 +135,8 @@ const ThresholdMetric = ({
       <Flex mt={'2'} py={'4'} px={'2'}>
         <RangeSlider
           defaultValue={thresholdRange}
-          min={0.6 * minHit}
-          max={1.4 * maxHit}
+          min={0.8 * minHit}
+          max={1.2 * maxHit}
           onChange={(val) => setThresholdRange(val)}
         >
           <RangeSliderTrack bg="white.200">

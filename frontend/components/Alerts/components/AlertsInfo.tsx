@@ -11,16 +11,16 @@ import {
 import { setAlert } from '@lib/services/notificationService';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
-import AlertMetrics from './components/AlertMetrics';
-import PercentageMetric from './components/PercentageMetric';
-import ThresholdMetric from './components/ThresholdMetric';
-import AlertToast from './components/Toast';
+import AlertMetrics from './AlertMetrics';
+import PercentageMetric from './PercentageMetric';
+import ThresholdMetric from './ThresholdMetric';
+import AlertToast from './Toast';
 import {
   getMaximumValue,
   getMinimumValue,
   notificationMetricOptions,
   thresholdMetricOptions,
-} from './util';
+} from '../util';
 
 type AlertsProps = {
   eventData: {

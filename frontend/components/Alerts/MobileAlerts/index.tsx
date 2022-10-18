@@ -9,7 +9,7 @@ import {
   SankeyData,
   TrendData,
 } from '@lib/domain/eventData';
-import AlertsInfo from '../AlertsInfo';
+import AlertsInfo from '../components/AlertsInfo';
 
 type MobileAlertsProps = {
   eventData: {
