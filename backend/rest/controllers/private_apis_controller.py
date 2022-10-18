@@ -6,6 +6,7 @@ from data_processor_queue.service import DPQueueService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.notifications.service import NotificationService
+from domain.notifications.models import NotificationType
 from domain.integrations.service import IntegrationService
 from domain.runlogs.service import RunLogService
 from rest.dtos.datasources import PrivateDataSourceResponse
@@ -122,12 +123,26 @@ async def compute_notifications(
         user_id=user_id
     )
     updates = [
-        notif for notif in notifications if notif.notification_type.value == "update"
+        notif
+        for notif in notifications
+        if notif.notification_type.value == NotificationType.UPDATE
     ]
 
-    node_data_for_updates = await edge_service.get_node_data_for_updates(
-        updates=updates
-    )
-    computed_updates = notification_service.compute_updates(node_data_for_updates)
+    alerts = [
+        notif
+        for notif in notifications
+        if notif.notification_type.value == NotificationType.ALERT
+    ]
 
-    return computed_updates
+    node_data_for_updates = await edge_service.get_node_data_for_notifications(
+        notifications=updates
+    )
+
+    node_data_for_alerts = await edge_service.get_node_data_for_notifications(
+        notifications=alerts
+    )
+
+    computed_updates = notification_service.compute_updates(node_data_for_updates)
+    computed_alerts = notification_service.compute_alerts(node_data_for_alerts)
+
+    return computed_alerts + computed_updates
