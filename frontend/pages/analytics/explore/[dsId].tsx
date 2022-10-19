@@ -79,6 +79,7 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
       openEventDetailsDrawer();
       openMobileEventDetailFloater();
     } else {
+      setEventData({});
       closeEventDetailsDrawer();
       closeMobileEventDetailFloater();
     }
@@ -87,7 +88,6 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   useEffect(() => {
     if (!activeNode) return;
     const fetchTrendsData = async () => {
-      setEventData({});
       const [nodeSignificanceData, trendsData, sankeyData] = await Promise.all([
         getNodeSignificanceData(dsId as string, activeNode?._cfg?.id!!),
         getTrendsData(dsId as string, activeNode?._cfg?.id!!, 'week'),
@@ -117,7 +117,6 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
             isEventDetailsDrawerOpen={isEventDetailsDrawerOpen}
             closeEventDetailsDrawer={closeEventDetailsDrawer}
             eventData={eventData}
-            setEventData={setEventData}
             isMobileEventDetailFloaterOpen={isMobileEventDetailFloaterOpen}
           />
           <Graph visualisationData={edges} />
