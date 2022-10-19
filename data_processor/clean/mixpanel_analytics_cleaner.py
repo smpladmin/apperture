@@ -1,6 +1,8 @@
 import logging
-from .cleaner import Cleaner
+
 import pandas as pd
+
+from .cleaner import Cleaner
 
 
 class MixpanelAnalyticsCleaner(Cleaner):

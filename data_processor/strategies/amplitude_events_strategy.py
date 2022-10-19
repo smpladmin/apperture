@@ -1,18 +1,17 @@
 import logging
-import zipfile
-import vaex as vx
-import io
 
 from clean.amplitude_analytics_cleaner import AmplitudeAnalyticsCleaner
-from domain.common.models import IntegrationProvider
-from domain.common.models import DataFormat
+from domain.common.models import DataFormat, IntegrationProvider
 from domain.datasource.models import Credential, DataSource
 from domain.runlog.service import RunLogService
-from fetch.data_orchestrator import DataOrchestrator
 from fetch.amplitude_events_fetcher import AmplitudeEventsFetcher
-from store.mixpanel_events_saver import S3EventsSaver
+from fetch.data_orchestrator import DataOrchestrator
 from store.amplitude_network_graph_saver import AmplitudeNetworkGraphSaver
-from transform.amplitude_network_graph_transformer import AmplitudeNetworkGraphTransformer
+from store.mixpanel_events_saver import S3EventsSaver
+from transform.amplitude_network_graph_transformer import \
+    AmplitudeNetworkGraphTransformer
+
+from .amplitude_event_processor import AmplitudeEventProcessor
 
 
 class AmplitudeEventsStrategy:
@@ -23,6 +22,7 @@ class AmplitudeEventsStrategy:
         self.credential = credential
         self.date = date
         self.runlog_id = runlog_id
+        self.event_processor=AmplitudeEventProcessor()
         fetcher = AmplitudeEventsFetcher(credential, date, DataFormat.BINARY)
         events_saver = S3EventsSaver(credential, date)
         self.data_orchestrator = DataOrchestrator(fetcher, events_saver,DataFormat.BINARY)
@@ -39,16 +39,15 @@ class AmplitudeEventsStrategy:
                 f"Saved Event Data to S3 for Amplitude datasource, name - {self.datasource.name} id - {self.datasource.id} date - {self.date}"
             )
             logging.info(f"Processing events data for date - {self.date}")
-            agg_df = None
-            with zipfile.ZipFile(io.BytesIO(zip_data)) as zip_source:
-                for info in zip_source.infolist():
-                    file_bytes = zip_source.read(info.filename)
-                    json = zlib.decompress(file_bytes, 15+32)
-                    df = vx.from_json(json.decode("utf8"), lines=True)
-                    agg_df = vx.concat([agg_df, df]) if agg_df else df
-            
-             
-            # df = self.cleaner.clean(df)
+            df = self.event_processor.process(events_data)
+            logging.info(f"Cleaning data for date - {self.date}")
+            df = self.cleaner.clean(df)
+            logging.info(f"Transforming data for date - {self.date}")
+            network_graph_data = self.transformer.transform(df) 
+
+            self.saver.save(self.datasource.id,
+                IntegrationProvider.AMPLITUDE,
+                network_graph_data,)
             
             self.runlog_service.update_completed(self.runlog_id)
         except Exception as e:

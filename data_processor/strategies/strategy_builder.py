@@ -12,6 +12,7 @@ from .mixpanel_analytics_strategy import (
 from domain.common.models import IntegrationProvider
 from domain.datasource.models import Credential, DataSource
 from strategies.mixpanel_events_strategy import MixpanelEventsStrategy
+from strategies.amplitude_events_strategy import AmplitudeEventsStrategy
 
 
 class StrategyBuilder:
@@ -55,6 +56,11 @@ class EventsStrategyBuilder:
             and datasource.version == "DEFAULT"
         ):
             return MixpanelEventsStrategy(datasource, credential, runlog_id, date)
+        elif (
+            datasource.provider == IntegrationProvider.AMPLITUDE
+            and datasource.version == "DEFAULT"
+        ):
+            return AmplitudeEventsStrategy(datasource, credential, runlog_id, date)
         else:
             raise NotImplementedError(
                 f"Strategy not implemented for given provider - {datasource.provider}"

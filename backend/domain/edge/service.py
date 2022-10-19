@@ -25,10 +25,12 @@ class EdgeService:
         self.provider_edge_build = {
             IntegrationProvider.GOOGLE: self._build_edge,
             IntegrationProvider.MIXPANEL: self._build_rich_edge,
+            IntegrationProvider.AMPLITUDE: self._build_rich_edge,
         }
         self.provider_edge_update = {
             IntegrationProvider.GOOGLE: self._update_edges,
             IntegrationProvider.MIXPANEL: self._update_rich_edges,
+            IntegrationProvider.AMPLITUDE: self._update_rich_edges,
         }
 
     def build(
