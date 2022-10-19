@@ -7,28 +7,32 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { formatDatalabel, getPercentageOfHits } from '@lib/utils/common';
-import {
-  NodeSignificanceData,
-  SankeyData,
-  TrendData,
-} from '@lib/domain/eventData';
+import { NodeSignificanceData } from '@lib/domain/eventData';
 import Alert from '@components/Alerts';
 import BellIcon from '@assets/icons/bell-icon.svg';
 import Image from 'next/image';
 
+type NodeSignificanceProps = {
+  nodeSignificanceData: Array<NodeSignificanceData>;
+  setClickOutsideEnabled?: Function;
+};
+
 const NodeSignificance = ({
-  eventData,
-}: {
-  eventData: {
-    [key in string]: Array<TrendData | SankeyData | NodeSignificanceData>;
+  nodeSignificanceData,
+  setClickOutsideEnabled,
+}: NodeSignificanceProps) => {
+  const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
+
+  const openAlertsSheet = () => {
+    setClickOutsideEnabled?.(false);
+    onOpen();
   };
-}) => {
-  const { nodeSignificanceData } = eventData;
-  const {
-    isOpen: isAlertsSheetOpen,
-    onOpen: openAlertsSheet,
-    onClose: closeAlertsSheet,
-  } = useDisclosure();
+
+  const closeAlertsSheet = () => {
+    setClickOutsideEnabled?.(true);
+    onClose();
+  };
+
   return (
     <>
       <Box h={'auto'} minHeight={'18'} pt={'6'} pb={'7'}>

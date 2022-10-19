@@ -4,7 +4,7 @@ import { MapContext } from '@lib/contexts/mapContext';
 import { TrendData, SankeyData } from '@lib/domain/eventData';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { Actions } from '@lib/types/context';
-import { useContext, useRef } from 'react';
+import { useContext, useRef, useState } from 'react';
 import EventDetailFloater from './MobileEventDetailsInfo/EventDetailFloater';
 import EventDetailsInfo from './EventDetailsInfo';
 
@@ -25,6 +25,7 @@ const EventDetails = ({
 }: EventDetailsProps) => {
   const drawerRef = useRef<HTMLDivElement>(null);
   const { dispatch } = useContext(MapContext);
+  const [clickOutsideEnabled, setClickOutsideEnabled] = useState(true);
 
   const handleClickOutside = () => {
     closeEventDetailsDrawer();
@@ -36,7 +37,7 @@ const EventDetails = ({
   };
 
   const context = useContext(AppertureContext);
-  useOnClickOutside(drawerRef, handleClickOutside);
+  useOnClickOutside(drawerRef, handleClickOutside, clickOutsideEnabled);
 
   return (
     <>
@@ -68,7 +69,10 @@ const EventDetails = ({
           overflowY={'auto'}
           animation={'ease-out 1s'}
         >
-          <EventDetailsInfo eventData={eventData} />
+          <EventDetailsInfo
+            eventData={eventData}
+            setClickOutsideEnabled={setClickOutsideEnabled}
+          />
         </Box>
       ) : null}
     </>

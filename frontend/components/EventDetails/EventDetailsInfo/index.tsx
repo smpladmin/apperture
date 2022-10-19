@@ -13,9 +13,13 @@ type EventDetailsInfoProps = {
   eventData: {
     [key in string]: Array<TrendData | SankeyData | NodeSignificanceData>;
   };
+  setClickOutsideEnabled?: Function;
 };
 
-const EventDetailsInfo = ({ eventData }: EventDetailsInfoProps) => {
+const EventDetailsInfo = ({
+  eventData,
+  setClickOutsideEnabled,
+}: EventDetailsInfoProps) => {
   const [isLoading, setIsLoading] = useState<Boolean>(true);
 
   useEffect(() => {
@@ -24,7 +28,7 @@ const EventDetailsInfo = ({ eventData }: EventDetailsInfoProps) => {
     }
   }, [eventData]);
 
-  const { trendsData, sankeyData } = eventData;
+  const { nodeSignificanceData, trendsData, sankeyData } = eventData;
 
   return (
     <>
@@ -37,7 +41,12 @@ const EventDetailsInfo = ({ eventData }: EventDetailsInfoProps) => {
         </Flex>
       ) : (
         <Flex direction={'column'} overflowY={'auto'}>
-          <NodeSignificance eventData={eventData} />
+          <NodeSignificance
+            nodeSignificanceData={
+              nodeSignificanceData as Array<NodeSignificanceData>
+            }
+            setClickOutsideEnabled={setClickOutsideEnabled}
+          />
           <Divider
             orientation="horizontal"
             borderColor={'white.200'}

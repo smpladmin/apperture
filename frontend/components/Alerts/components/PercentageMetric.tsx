@@ -1,4 +1,10 @@
-import { Flex, Input, Text } from '@chakra-ui/react';
+import {
+  Flex,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Text,
+} from '@chakra-ui/react';
 
 type PercentageMetricProps = {
   percentageValue: number | string;
@@ -19,15 +25,23 @@ const PercentageMetric = ({
       >
         % Change
       </Text>
-      <Input
-        autoFocus
-        type={'number'}
-        bg={'white.100'}
-        height={{ base: '9', md: '14' }}
-        focusBorderColor={'black.100'}
-        value={percentageValue}
-        onChange={(e) => setPercentageValue(e.target.value)}
-      />
+      <InputGroup>
+        <Input
+          autoFocus
+          type={'number'}
+          bg={'white.100'}
+          height={{ base: '10', md: '13' }}
+          focusBorderColor={'black.100'}
+          value={percentageValue}
+          onChange={(e) => setPercentageValue(e.target.value)}
+          placeholder={'Enter % change'}
+        />
+        <InputRightElement
+          children={'%'}
+          pointerEvents="none"
+          height={{ base: '10', md: '13' }}
+        />
+      </InputGroup>
     </Flex>
   );
 };

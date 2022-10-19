@@ -8,15 +8,16 @@ const AlertToast = ({ closeToast }: { closeToast: () => void }) => {
       bg={'black.100'}
       alignItems={'center'}
       justifyContent={'space-between'}
-      h={'10'}
+      h={{ base: '10', md: '13' }}
+      w={{ base: 'auto', md: '112' }}
       borderRadius={'25'}
-      p={'3'}
+      p={{ base: '3', md: '4' }}
     >
       <Flex alignItems={'center'} gap={'2'}>
         <Image src={checkIcon} height={'16'} width={'16'} alt={'check-icon'} />
         <Text
-          fontSize={'xs-12'}
-          lineHeight={'xs-12'}
+          fontSize={{ base: 'xs-12', md: 'xs-14' }}
+          lineHeight={{ base: 'xs-12', md: 'xs-14' }}
           color={'white.DEFAULT'}
           fontWeight={'normal'}
         >
