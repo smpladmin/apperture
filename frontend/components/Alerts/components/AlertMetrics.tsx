@@ -66,6 +66,7 @@ const AlertMetrics = ({
             {thresholdMetricOptions.map((option) => {
               return (
                 <AlertMetricOption
+                  key={option.name}
                   option={option}
                   isChecked={option.name === thresholdMetric}
                 />
