@@ -9,7 +9,10 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { TrendData } from '@lib/domain/eventData';
-import { formatDatalabel } from '@lib/utils/common';
+import {
+  convertISODateToReadableDate,
+  formatDatalabel,
+} from '@lib/utils/common';
 import { BLUE, YELLOW_100, YELLOW_200 } from '@theme/index';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
@@ -53,6 +56,18 @@ const ThresholdMetric = ({
           },
         },
         tickCount: 0,
+      },
+      tooltip: {
+        showMarkers: true,
+        showCrosshairs: true,
+        shared: true,
+        formatter: ({ startDate, hits }) => {
+          return {
+            title: convertISODateToReadableDate(startDate),
+            name: 'Hits',
+            value: hits,
+          };
+        },
       },
       meta: {
         hits: {
