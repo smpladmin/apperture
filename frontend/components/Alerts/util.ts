@@ -35,8 +35,8 @@ export const getMinimumValue = (
   type: NotificationMetricType
 ) => {
   return data.reduce(
-    (acc: any, val: any) => (acc < val?.[type] ? acc : val?.[type]),
-    data[0].hits
+    (acc: number, val: TrendData) => (acc < val?.[type] ? acc : val?.[type]),
+    data[0]?.hits
   );
 };
 
@@ -45,7 +45,7 @@ export const getMaximumValue = (
   type: NotificationMetricType
 ) => {
   return data.reduce(
-    (acc: any, val: any) => (acc > val?.[type] ? acc : val?.[type]),
-    data[0].hits
+    (acc: number, val: TrendData) => (acc > val?.[type] ? acc : val?.[type]),
+    data[0]?.hits
   );
 };
