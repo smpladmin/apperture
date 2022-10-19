@@ -1,15 +1,16 @@
 import {
-  Box,
   Divider,
-  IconButton,
+  Flex,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Skeleton,
 } from '@chakra-ui/react';
 import { TrendData } from '@lib/domain/eventData';
+import { useEffect, useState } from 'react';
 
 import AlertsInfo from '../components/AlertsInfo';
 
@@ -26,6 +27,13 @@ const DesktopAlerts = ({
   isAlertsSheetOpen,
   closeAlertsSheet,
 }: DesktopAlertsProps) => {
+  const [isLoading, setIsLoading] = useState<Boolean>(true);
+
+  useEffect(() => {
+    if (eventData.length > 0) {
+      setIsLoading(false);
+    }
+  }, [eventData]);
   return (
     <Modal
       isOpen={isAlertsSheetOpen}
@@ -65,12 +73,20 @@ const DesktopAlerts = ({
           borderColor={'white.200'}
           opacity={1}
         />
-        <ModalBody px={'9'} pt={'4'} pb={'9'} overflowY={'auto'}>
-          <AlertsInfo
-            nodeName={nodeName}
-            eventData={eventData}
-            closeAlertsSheet={closeAlertsSheet}
-          />
+        <ModalBody px={'9'} pt={'4'} pb={'4'} overflowY={'auto'}>
+          {isLoading ? (
+            <Flex direction={'column'} gap={'6'} p={'4'}>
+              <Skeleton height={'12'} fadeDuration={1} bg={'white.100'} />
+              <Skeleton height={'12'} fadeDuration={1} bg={'white.100'} />
+              <Skeleton height={'70'} fadeDuration={1} bg={'white.100'} />
+            </Flex>
+          ) : (
+            <AlertsInfo
+              nodeName={nodeName}
+              eventData={eventData}
+              closeAlertsSheet={closeAlertsSheet}
+            />
+          )}
         </ModalBody>
       </ModalContent>
     </Modal>

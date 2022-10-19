@@ -40,13 +40,11 @@ const MobileAlerts = ({
         </Sheet.Header>
         <Sheet.Content>
           {isLoading ? (
-            <Box>
-              <Flex direction={'column'} gap={'6'} p={'4'}>
-                <Skeleton height={'12'} fadeDuration={1} bg={'white.100'} />
-                <Skeleton height={'12'} fadeDuration={1} bg={'white.100'} />
-                <Skeleton height={'70'} fadeDuration={1} bg={'white.100'} />
-              </Flex>
-            </Box>
+            <Flex direction={'column'} gap={'6'} p={'4'}>
+              <Skeleton height={'12'} fadeDuration={1} bg={'white.100'} />
+              <Skeleton height={'12'} fadeDuration={1} bg={'white.100'} />
+              <Skeleton height={'70'} fadeDuration={1} bg={'white.100'} />
+            </Flex>
           ) : (
             <AlertsInfo
               nodeName={nodeName}
