@@ -36,7 +36,7 @@ export const getMinimumValue = (
 ) => {
   return data.reduce(
     (acc: number, val: TrendData) => (acc < val?.[type] ? acc : val?.[type]),
-    data[0].hits
+    data[0]?.hits
   );
 };
 
