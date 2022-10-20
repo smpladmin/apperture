@@ -5,7 +5,7 @@ import AlertsHeader from './AlertsMobileHeader';
 import { TrendData } from '@lib/domain/eventData';
 import AlertsInfo from '../components/AlertsInfo';
 import { useEffect, useState } from 'react';
-import { Box, Flex, Skeleton } from '@chakra-ui/react';
+import { Flex, Skeleton } from '@chakra-ui/react';
 
 type MobileAlertsProps = {
   nodeName: string;
