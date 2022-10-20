@@ -22,7 +22,7 @@ const MobileAlerts = ({
   const [isLoading, setIsLoading] = useState<Boolean>(true);
 
   useEffect(() => {
-    if (eventData.length > 0) {
+    if (eventData.length) {
       setIsLoading(false);
     }
   }, [eventData]);
