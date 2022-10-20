@@ -5,7 +5,7 @@ import AlertsHeader from './AlertsMobileHeader';
 import { TrendData } from '@lib/domain/eventData';
 import AlertsInfo from '../components/AlertsInfo';
 import { useEffect, useState } from 'react';
-import { Flex, Skeleton } from '@chakra-ui/react';
+import Loading from '../components/Loading';
 
 type MobileAlertsProps = {
   nodeName: string;
@@ -40,11 +40,7 @@ const MobileAlerts = ({
         </Sheet.Header>
         <Sheet.Content>
           {isLoading ? (
-            <Flex direction={'column'} gap={'6'} p={'4'}>
-              <Skeleton height={'12'} fadeDuration={1} bg={'white.100'} />
-              <Skeleton height={'12'} fadeDuration={1} bg={'white.100'} />
-              <Skeleton height={'70'} fadeDuration={1} bg={'white.100'} />
-            </Flex>
+            <Loading />
           ) : (
             <AlertsInfo
               nodeName={nodeName}

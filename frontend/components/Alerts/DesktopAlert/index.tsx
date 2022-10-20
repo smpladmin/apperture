@@ -1,17 +1,15 @@
 import {
   Divider,
-  Flex,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Skeleton,
 } from '@chakra-ui/react';
+import Loading from '../components/Loading';
 import { TrendData } from '@lib/domain/eventData';
 import { useEffect, useState } from 'react';
-
 import AlertsInfo from '../components/AlertsInfo';
 
 type DesktopAlertsProps = {
@@ -75,11 +73,7 @@ const DesktopAlerts = ({
         />
         <ModalBody px={'9'} pt={'4'} pb={'4'} overflowY={'auto'}>
           {isLoading ? (
-            <Flex direction={'column'} gap={'6'} p={'4'}>
-              <Skeleton height={'12'} fadeDuration={1} bg={'white.100'} />
-              <Skeleton height={'12'} fadeDuration={1} bg={'white.100'} />
-              <Skeleton height={'70'} fadeDuration={1} bg={'white.100'} />
-            </Flex>
+            <Loading />
           ) : (
             <AlertsInfo
               nodeName={nodeName}
