@@ -183,7 +183,9 @@ class EdgeService:
         trend_type: str,
         start_date: str,
         end_date: str,
+        is_entrance_node: bool,
     ) -> list[NodeTrend]:
+        event = "previous_event" if is_entrance_node else "current_event"
         start_date = dt.strptime(start_date, "%Y-%m-%d")
         end_date = dt.strptime(end_date, "%Y-%m-%d")
         pipeline = [
@@ -191,7 +193,7 @@ class EdgeService:
                 "$match": {
                     "$and": [
                         {"datasource_id": PydanticObjectId(datasource_id)},
-                        {"current_event": node},
+                        {f"{event}": node},
                         {"date": {"$gte": start_date}},
                         {"date": {"$lte": end_date}},
                     ]
@@ -200,11 +202,11 @@ class EdgeService:
             {
                 "$group": {
                     "_id": {
-                        "current_event": "$current_event",
-                        "{}".format(trend_type): {"${}".format(trend_type): "$date"},
+                        f"{event}": f"${event}",
+                        f"{trend_type}": {f"${trend_type}": "$date"},
                         "year": {"$year": "$date"},
                     },
-                    "node": {"$max": "$current_event"},
+                    "node": {"$max": f"${event}"},
                     "hits": {"$sum": "$hits"},
                     "users": {"$sum": "$users"},
                     "date": {"$max": "$date"},
@@ -215,7 +217,7 @@ class EdgeService:
                     "end_date": {"$max": "$date"},
                 }
             },
-            {"$sort": {"year": 1, "{}".format(trend_type): 1}},
+            {"$sort": {"year": 1, f"{trend_type}": 1}},
         ]
 
         if trend_type == "date":
