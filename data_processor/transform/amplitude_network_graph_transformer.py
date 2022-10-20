@@ -30,8 +30,8 @@ class AmplitudeNetworkGraphTransformer(Transformer):
     def transform_to_plot(self, df):
         date = df["time"].iloc[0]
         logging.info(date)
-        date_format = "%Y-%m-%dT%H:%M:%S.%f" 
-        date_time = datetime.datetime.strptime(date,date_format)
+        date_format = "%Y-%m-%d" 
+        date_time = datetime.datetime.strptime(date[:10],date_format)
         date_time = date_time.replace(hour=0, minute=0, second=0, microsecond=0)
         logging.info(date_time)
         df["time"] = date_time
@@ -77,15 +77,15 @@ class AmplitudeNetworkGraphTransformer(Transformer):
 
     def transform_for_previous_page_path(self, df):
         df["previousevent"] = (
-            df.sort_values(by=["event_timestamp", "event_name"], ascending=True)
-            .groupby(["user_id"])["event_name"]
+            df.sort_values(by=["event.timestamp", "event.name"], ascending=True)
+            .groupby(["user_id"])["event.name"]
             .shift(1)
         )
         df.dropna(subset=["previousevent"], inplace=True)
-        df.dropna(subset=["event_name"], inplace=True)
+        df.dropna(subset=["event.name"], inplace=True)
         
         df.rename(
-            columns={"event_name": "node_id", "previousevent": "previousnode_id","event_timestamp":"time","os_name":"os","country":"mp_country_code"},
+            columns={"event.name": "node_id", "previousevent": "previousnode_id","event.timestamp":"time","os_name":"os","country":"mp_country_code"},
             inplace=True,
         )
         return df

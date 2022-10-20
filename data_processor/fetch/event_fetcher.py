@@ -1,3 +1,4 @@
+import logging
 from smart_open import open as sopen
 
 from domain.common.models import DataFormat
@@ -10,4 +11,5 @@ class EventFetcher:
         self.data_url = url
 
     def open(self):
+        logging.info(f"Beginning to fetch events data from {self.data_url}")
         return sopen(self.data_url,self.data_format)
