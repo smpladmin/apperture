@@ -89,5 +89,3 @@ def trigger_notifications_processing(
 def send_notification(user_id: str):
     strategy = NotificationStrategyBuilder.build(user_id)
     strategy.execute()
-
-process_event_data_for_datasource("634ef7cd7d79c4e9766f54a2","634ef8d47d79c4e9766f54bb","2022-10-18")
