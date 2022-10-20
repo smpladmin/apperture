@@ -37,8 +37,9 @@ async def get_trend_nodes(
     end_date: str = dt.today().strftime("%Y-%m-%d"),
     edge_service: EdgeService = Depends(),
 ):
+    is_entrance_node = True if node == "Entrance" else False
     return await edge_service.get_node_trends(
-        ds_id, node, trend_type, start_date, end_date
+        ds_id, node, trend_type, start_date, end_date, is_entrance_node
     )
 
 
