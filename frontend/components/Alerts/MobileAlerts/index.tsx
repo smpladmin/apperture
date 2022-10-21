@@ -9,7 +9,7 @@ import Loading from '../components/Loading';
 
 type MobileAlertsProps = {
   nodeName: string;
-  eventData: TrendData[] | [];
+  eventData: TrendData[];
   isAlertsSheetOpen: boolean;
   closeAlertsSheet: () => void;
 };

@@ -14,7 +14,7 @@ import AlertsInfo from '../components/AlertsInfo';
 
 type DesktopAlertsProps = {
   nodeName: string;
-  eventData: TrendData[] | [];
+  eventData: TrendData[];
   isAlertsSheetOpen: boolean;
   closeAlertsSheet: () => void;
 };

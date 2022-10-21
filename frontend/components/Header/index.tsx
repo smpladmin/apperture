@@ -1,6 +1,5 @@
-import { Box, useDisclosure } from '@chakra-ui/react';
-import { useContext, useEffect, useState } from 'react';
-import { AppertureContext } from '@lib/contexts/appertureContext';
+import { useDisclosure } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
 import { AppWithIntegrations } from '@lib/domain/app';
 import FiltersModal from '@components/FiltersModal';
 import SwitchDataSource from '@components/SwitchDataSource';
@@ -8,6 +7,7 @@ import { DataSource } from '@lib/domain/datasource';
 import { useRouter } from 'next/router';
 import MobileHeader from './MobileHeader';
 import DesktopHeader from './DesktopHeader';
+import Render from '@components/Render';
 
 type HeaderProps = {
   selectedApp: AppWithIntegrations;
@@ -26,7 +26,6 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
     onClose: closeSwitchDataSourceModal,
   } = useDisclosure();
 
-  const context = useContext(AppertureContext);
   const router = useRouter();
   const { dsId } = router.query;
 
@@ -52,21 +51,22 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
   }, [dataSources, dsId]);
 
   return (
-    <Box>
-      {context.device.isMobile ? (
+    <>
+      <Render on="mobile">
         <MobileHeader
           openAppsModal={openAppsModal}
           dataSourceType={dataSourceType!!}
           openSwitchDataSourceModal={openSwitchDataSourceModal}
           selectedApp={selectedApp}
         />
-      ) : (
+      </Render>
+      <Render on="desktop">
         <DesktopHeader
           dataSourceType={dataSourceType!!}
           openSwitchDataSourceModal={openSwitchDataSourceModal}
           openFiltersModal={openFiltersModal}
         />
-      )}
+      </Render>
       <SwitchDataSource
         isOpen={isSwitchDataSourceModalOpen}
         onClose={closeSwitchDataSourceModal}
@@ -74,7 +74,7 @@ const Header = ({ selectedApp, openAppsModal }: HeaderProps) => {
         selectedApp={selectedApp}
       />
       <FiltersModal isOpen={isfiltersModalOpen} onClose={closeFiltersModal} />
-    </Box>
+    </>
   );
 };
 

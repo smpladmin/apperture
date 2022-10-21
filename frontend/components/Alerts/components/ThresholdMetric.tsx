@@ -71,8 +71,8 @@ const ThresholdMetric = ({
       },
       meta: {
         hits: {
-          min: 0.8 * minHit,
-          max: 1.2 * maxHit,
+          min: Math.floor(0.8 * minHit),
+          max: Math.ceil(1.2 * maxHit),
         },
       },
       lineStyle: {
@@ -158,8 +158,8 @@ const ThresholdMetric = ({
       <Flex mt={'2'} py={'4'} px={'2'}>
         <RangeSlider
           defaultValue={thresholdRange}
-          min={0.8 * minHit}
-          max={1.2 * maxHit}
+          min={Math.floor(0.8 * minHit)}
+          max={Math.ceil(1.2 * maxHit)}
           onChange={(val) => setThresholdRange(val)}
         >
           <RangeSliderTrack bg="white.200">

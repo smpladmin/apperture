@@ -37,10 +37,11 @@ const PercentageMetric = ({
           placeholder={'Enter % change'}
         />
         <InputRightElement
-          children={'%'}
           pointerEvents="none"
           height={{ base: '10', md: '13' }}
-        />
+        >
+          {'%'}
+        </InputRightElement>
       </InputGroup>
     </Flex>
   );
