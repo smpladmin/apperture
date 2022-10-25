@@ -21,5 +21,5 @@ export function useOnClickOutside(
       document.removeEventListener('mousedown', listener);
       document.removeEventListener('touchstart', listener);
     };
-  }, [ref, handler]);
+  }, [ref, handler, enabled]);
 }

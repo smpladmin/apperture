@@ -21,7 +21,7 @@ const Render = ({
     if (on === 'desktop' && !ctx.device.isMobile) {
       setRender(true);
     }
-  }, []);
+  }, [on, ctx.device.isMobile]);
 
   return <>{render ? children : null}</>;
 };

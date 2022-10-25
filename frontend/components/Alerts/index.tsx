@@ -26,7 +26,7 @@ const Alert = ({
       setDailyTrendData(await getTrendsData(dsId as string, nodeName, 'date'));
     };
     fetchTrendsData();
-  }, [nodeName]);
+  }, [nodeName, dsId]);
 
   return (
     <>

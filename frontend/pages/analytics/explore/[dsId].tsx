@@ -18,6 +18,7 @@ import EventDetails from '@components/EventDetails';
 import { useRouter } from 'next/router';
 import { MapContext } from '@lib/contexts/mapContext';
 import { getAuthToken } from '@lib/utils/request';
+import { EventData } from '@lib/domain/eventData';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -51,7 +52,7 @@ type ExploreDataSourceProps = {
 
 const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(!edges.length);
-  const [eventData, setEventData] = useState({});
+  const [eventData, setEventData] = useState<EventData | {}>({});
   const router = useRouter();
   const { dsId } = router.query;
   const {
@@ -101,7 +102,7 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
       });
     };
     fetchEventData();
-  }, [activeNode]);
+  }, [activeNode, dsId]);
 
   return (
     <>

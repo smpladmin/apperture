@@ -1,18 +1,12 @@
-import { Box, Divider, Flex, Skeleton, Text } from '@chakra-ui/react';
-import {
-  TrendData,
-  SankeyData,
-  NodeSignificanceData,
-} from '@lib/domain/eventData';
+import { Divider, Flex, Skeleton } from '@chakra-ui/react';
+import { EventData } from '@lib/domain/eventData';
 import Sankey from '../Sankey';
 import Trend from '../Trend';
 import { useEffect, useState } from 'react';
 import NodeSignificance from '../NodeSignificance';
 
 type EventDetailsInfoProps = {
-  eventData: {
-    [key in string]: Array<TrendData | SankeyData | NodeSignificanceData>;
-  };
+  eventData: EventData | {};
   setClickOutsideEnabled?: Function;
 };
 
@@ -28,7 +22,8 @@ const EventDetailsInfo = ({
     }
   }, [eventData]);
 
-  const { nodeSignificanceData, trendsData, sankeyData } = eventData;
+  const { nodeSignificanceData, trendsData, sankeyData } =
+    eventData as EventData;
 
   return (
     <>
@@ -42,9 +37,7 @@ const EventDetailsInfo = ({
       ) : (
         <Flex direction={'column'} overflowY={'auto'}>
           <NodeSignificance
-            nodeSignificanceData={
-              nodeSignificanceData as Array<NodeSignificanceData>
-            }
+            nodeSignificanceData={nodeSignificanceData}
             setClickOutsideEnabled={setClickOutsideEnabled}
           />
           <Divider
@@ -52,17 +45,13 @@ const EventDetailsInfo = ({
             borderColor={'white.200'}
             opacity={1}
           />
-          {trendsData.length ? (
-            <Trend trendsData={trendsData as Array<TrendData>} />
-          ) : null}
+          {trendsData.length ? <Trend trendsData={trendsData} /> : null}
           <Divider
             orientation="horizontal"
             borderColor={'white.200'}
             opacity={1}
           />
-          {sankeyData.length ? (
-            <Sankey sankeyData={sankeyData as Array<SankeyData>} />
-          ) : null}
+          {sankeyData.length ? <Sankey sankeyData={sankeyData} /> : null}
         </Flex>
       )}
     </>

@@ -37,7 +37,7 @@ const NodeSignificance = ({
     <>
       <Box h={'auto'} minHeight={'18'} pt={'6'} pb={'7'}>
         <Text fontWeight={'medium'} fontSize={'base'} lineHeight={'base'}>
-          {(nodeSignificanceData?.[0] as NodeSignificanceData)?.['node']}
+          {nodeSignificanceData?.[0]?.['node']}
         </Text>
       </Box>
       <Divider orientation="horizontal" borderColor={'white.200'} opacity={1} />
@@ -51,11 +51,7 @@ const NodeSignificance = ({
                 lineHeight={'sh-28'}
                 fontFamily={'Space Grotesk, Work Sans, sans-serif'}
               >
-                {formatDatalabel(
-                  (nodeSignificanceData?.[0] as NodeSignificanceData)?.[
-                    'nodeHits'
-                  ]
-                )}
+                {formatDatalabel(nodeSignificanceData?.[0]?.['nodeHits'])}
               </Text>
               <Text
                 fontWeight={'medium'}
@@ -67,12 +63,8 @@ const NodeSignificance = ({
             </Flex>
             <Text fontWeight={'normal'} fontSize={'xs-12'} lineHeight={'xs-12'}>
               {`${getPercentageOfHits(
-                (nodeSignificanceData?.[0] as NodeSignificanceData)?.[
-                  'nodeHits'
-                ],
-                (nodeSignificanceData?.[0] as NodeSignificanceData)?.[
-                  'totalHits'
-                ]
+                nodeSignificanceData?.[0]?.['nodeHits'],
+                nodeSignificanceData?.[0]?.['totalHits']
               )}% of overall traffic`}
             </Text>
           </Flex>
@@ -100,7 +92,7 @@ const NodeSignificance = ({
         </Box>
       </Box>
       <Alert
-        nodeName={(nodeSignificanceData?.[0] as NodeSignificanceData)?.['node']}
+        nodeName={nodeSignificanceData?.[0]?.['node']}
         isAlertsSheetOpen={isAlertsSheetOpen}
         closeAlertsSheet={closeAlertsSheet}
       />

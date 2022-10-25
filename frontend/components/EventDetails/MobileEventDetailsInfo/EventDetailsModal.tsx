@@ -7,11 +7,7 @@ import {
   ModalHeader,
 } from '@chakra-ui/react';
 import EventDetailsInfo from '../EventDetailsInfo';
-import {
-  NodeSignificanceData,
-  SankeyData,
-  TrendData,
-} from '@lib/domain/eventData';
+import { EventData } from '@lib/domain/eventData';
 import { useContext } from 'react';
 import { MapContext } from '@lib/contexts/mapContext';
 import { Actions } from '@lib/types/context';
@@ -19,9 +15,7 @@ import { Actions } from '@lib/types/context';
 type EventDetailsModalInfoProps = {
   isEventDetailsModalOpen: boolean;
   closeEventDetailsModal: () => void;
-  eventData: {
-    [key in string]: Array<TrendData | SankeyData | NodeSignificanceData>;
-  };
+  eventData: EventData | {};
 };
 
 const EventDetailsModal = ({

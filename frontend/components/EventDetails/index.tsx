@@ -1,10 +1,6 @@
 import { Box } from '@chakra-ui/react';
 import { MapContext } from '@lib/contexts/mapContext';
-import {
-  TrendData,
-  SankeyData,
-  NodeSignificanceData,
-} from '@lib/domain/eventData';
+import { EventData } from '@lib/domain/eventData';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { Actions } from '@lib/types/context';
 import { useContext, useRef, useState } from 'react';
@@ -16,9 +12,7 @@ type EventDetailsProps = {
   isEventDetailsDrawerOpen: boolean;
   closeEventDetailsDrawer: () => void;
   isMobileEventDetailFloaterOpen: boolean;
-  eventData: {
-    [key in string]: Array<TrendData | SankeyData | NodeSignificanceData>;
-  };
+  eventData: EventData | {};
 };
 
 const EventDetails = ({
