@@ -10,6 +10,8 @@ import {
   TrendData,
 } from '@lib/domain/eventData';
 import AlertsInfo from '../components/AlertsInfo';
+import { useEffect, useState } from 'react';
+import { Box, Flex, Skeleton } from '@chakra-ui/react';
 
 type MobileAlertsProps = {
   eventData: {
@@ -23,6 +25,14 @@ const MobileAlerts = ({
   isAlertsSheetOpen,
   closeAlertsSheet,
 }: MobileAlertsProps) => {
+  const [isLoading, setIsLoading] = useState<Boolean>(true);
+
+  useEffect(() => {
+    if (eventData?.['trendsData'].length) {
+      setIsLoading(false);
+    }
+  }, [eventData]);
+
   return (
     <Sheet
       isOpen={isAlertsSheetOpen}
@@ -35,10 +45,20 @@ const MobileAlerts = ({
           <AlertsHeader closeAlertsSheet={closeAlertsSheet} />
         </Sheet.Header>
         <Sheet.Content>
-          <AlertsInfo
-            eventData={eventData}
-            closeAlertsSheet={closeAlertsSheet}
-          />
+          {isLoading ? (
+            <Box>
+              <Flex direction={'column'} gap={'6'} p={'4'}>
+                <Skeleton height={'12'} fadeDuration={1} bg={'white.100'} />
+                <Skeleton height={'12'} fadeDuration={1} bg={'white.100'} />
+                <Skeleton height={'70'} fadeDuration={1} bg={'white.100'} />
+              </Flex>
+            </Box>
+          ) : (
+            <AlertsInfo
+              eventData={eventData}
+              closeAlertsSheet={closeAlertsSheet}
+            />
+          )}
         </Sheet.Content>
       </Sheet.Container>
       <Sheet.Backdrop

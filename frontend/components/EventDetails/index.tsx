@@ -13,14 +13,12 @@ type EventDetailsProps = {
   closeEventDetailsDrawer: () => void;
   isMobileEventDetailFloaterOpen: boolean;
   eventData: { [key in string]: Array<TrendData | SankeyData> };
-  setEventData: Function;
 };
 
 const EventDetails = ({
   isEventDetailsDrawerOpen,
   closeEventDetailsDrawer,
   eventData,
-  setEventData,
   isMobileEventDetailFloaterOpen,
 }: EventDetailsProps) => {
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -32,7 +30,6 @@ const EventDetails = ({
       type: Actions.SET_ACTIVE_NODE,
       payload: null,
     });
-    setEventData({});
   };
 
   const context = useContext(AppertureContext);

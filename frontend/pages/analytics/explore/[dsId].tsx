@@ -79,6 +79,7 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
       openEventDetailsDrawer();
       openMobileEventDetailFloater();
     } else {
+      setEventData({});
       closeEventDetailsDrawer();
       closeMobileEventDetailFloater();
     }
@@ -116,7 +117,6 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
             isEventDetailsDrawerOpen={isEventDetailsDrawerOpen}
             closeEventDetailsDrawer={closeEventDetailsDrawer}
             eventData={eventData}
-            setEventData={setEventData}
             isMobileEventDetailFloaterOpen={isMobileEventDetailFloaterOpen}
           />
           <Graph visualisationData={edges} />
