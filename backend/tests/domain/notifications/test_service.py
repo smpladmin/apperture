@@ -12,7 +12,7 @@ from domain.notifications.models import (
 
 
 class TestNotificationService:
-    def setup(self):
+    def setup_method(self):
         self.notification_service = NotificationService()
         self.value = 1.3571428571428572
         self.notification_node_data = NotificationNodeData(
