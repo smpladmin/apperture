@@ -7,7 +7,7 @@ from rest.middlewares import validate_jwt, get_user
 from rest.dtos.notifications import CreateNotificationDto
 
 router = APIRouter(
-    tags=["datasource"],
+    tags=["notification"],
     dependencies=[Depends(validate_jwt)],
     responses={401: {}},
 )
