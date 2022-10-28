@@ -13,6 +13,7 @@ import { AppWithIntegrations } from '@lib/domain/app';
 import LogoutModal from '@components/Logout';
 import Image from 'next/image';
 import MobileSidemenuOption from './MobileSideMenuOption';
+import { useRouter } from 'next/router';
 
 type MobileSidemenuProps = {
   closeDrawer: Function;
@@ -30,6 +31,9 @@ const MobileSidemenu = ({
     onOpen: openLogoutModal,
     onClose: closeLogoutModal,
   } = useDisclosure();
+
+  const router = useRouter();
+  const { dsId } = router.query;
 
   return (
     <Flex
@@ -185,6 +189,9 @@ const MobileSidemenu = ({
               label: 'Settings',
               icon: <i className="ri-settings-3-line" />,
             }}
+            onMenuClick={() =>
+              router.push(`/analytics/settings?previousDsId=${dsId}`)
+            }
           />
           <MobileSidemenuOption
             menuOption={{

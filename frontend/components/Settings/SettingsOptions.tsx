@@ -7,6 +7,7 @@ import { useRouter } from 'next/router';
 
 const SettingsOptions = () => {
   const router = useRouter();
+  const { previousDsId } = router.query;
 
   return (
     <Box py={'3'}>
@@ -20,7 +21,7 @@ const SettingsOptions = () => {
           border={'1px'}
           size={'sm'}
           borderColor={'white.200'}
-          onClick={() => router.push('/analytics/explore')}
+          onClick={() => router.push(`/analytics/explore/${previousDsId}`)}
         />
       </Box>
 
