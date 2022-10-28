@@ -1,0 +1,34 @@
+name: Pull Request Test automation
+
+on:
+  pull_request: [main]
+
+jobs:
+  test_pull_request:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout codebase
+        uses: actions/checkout@v2
+      - name: Filter changes from backend
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+
+      - name: Setup Python Environment
+        if: steps.filter.outputs.backend == 'true'
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9.X'
+      - name: Installing dependencies
+        run: |
+          cd backend
+          python -m venv /opt/venv
+          poetry export -f requirements.txt --output requirements.txt --without-hashes
+          pip install --no-cache-dir --upgrade -r /code/requirements.txt
+      - name: Running tests
+        run: |
+          poetry run pytest
