@@ -1,6 +1,5 @@
 import os
 import json
-import logging
 from urllib.parse import urlparse
 
 from starlette.responses import RedirectResponse
@@ -118,7 +117,5 @@ async def integration_slack_authorize(
     response = await slack_oauth.slack.authorize_access_token(request)
     slack_url = response["incoming_webhook"]["url"]
     state = json.loads(state)
-    logging.info(slack_url)
-    logging.info(state["user_id"])
     await user_service.save_slack_url(state["user_id"], slack_url)
     return RedirectResponse(state["redirect_url"])
