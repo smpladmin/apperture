@@ -21,12 +21,11 @@ class NotificationService:
         raise Exception(f"Error fetching notifications for user {user_id}")
 
     def fetch_slack_url(self, user_id: str):
-        response = get(f"/private/users?user_id={user_id}")
-        if response.ok:
+        response = get(f"/private/users/{user_id}")
+        if response.ok and json.loads(response.text).get("slackUrl"):
             slack_url = json.loads(response.text).get("slackUrl")
-            if slack_url:
-                logging.info(f"Got slack url: {slack_url} for user: {user_id}")
-                return slack_url
+            logging.info(f"Got slack url: {slack_url} for user: {user_id}")
+            return slack_url
 
         raise Exception(f"Error fetching slack url for user {user_id}")
 
@@ -74,10 +73,17 @@ class NotificationService:
                     ],
                 },
             )
-            logging.info(f"Sent alert with status {response.status_code}")
+            logging.info(
+                f"Sent alert with status {response.status_code}"
+            ) if response.ok else logging.info(
+                f"Failed to send alert with status {response.status_code}"
+            )
 
     def send_notification(
-        self, notifications: List[Notification], channel: NotificationChannel, slack_url: str
+        self,
+        notifications: List[Notification],
+        channel: NotificationChannel,
+        slack_url: str,
     ):
         logging.info(f"Sending {notifications} to {channel}")
         updates = [

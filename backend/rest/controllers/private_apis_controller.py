@@ -150,13 +150,9 @@ async def compute_notifications(
     return computed_alerts + computed_updates
 
 
-@router.get(
-    "/users",
-    response_model=UserResponse
-)
+@router.get("/users/{user_id}", response_model=UserResponse)
 async def slack_url(
     user_id: str,
     user_service: UserService = Depends(),
 ):
-    user = await user_service.get_user(user_id)
-    return user
+    return await user_service.get_user(user_id)
