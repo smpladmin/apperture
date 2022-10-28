@@ -1,7 +1,8 @@
 name: Pull Request Test automation
 
 on:
-  pull_request: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   test_pull_request:
