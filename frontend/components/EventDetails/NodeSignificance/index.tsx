@@ -7,33 +7,37 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { formatDatalabel, getPercentageOfHits } from '@lib/utils/common';
-import {
-  NodeSignificanceData,
-  SankeyData,
-  TrendData,
-} from '@lib/domain/eventData';
+import { NodeSignificanceData } from '@lib/domain/eventData';
 import Alert from '@components/Alerts';
 import BellIcon from '@assets/icons/bell-icon.svg';
 import Image from 'next/image';
 
+type NodeSignificanceProps = {
+  nodeSignificanceData: Array<NodeSignificanceData>;
+  setClickOutsideEnabled?: Function;
+};
+
 const NodeSignificance = ({
-  eventData,
-}: {
-  eventData: {
-    [key in string]: Array<TrendData | SankeyData | NodeSignificanceData>;
+  nodeSignificanceData,
+  setClickOutsideEnabled,
+}: NodeSignificanceProps) => {
+  const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
+
+  const openAlertsSheet = () => {
+    setClickOutsideEnabled?.(false);
+    onOpen();
   };
-}) => {
-  const { nodeSignificanceData, trendsData } = eventData;
-  const {
-    isOpen: isAlertsSheetOpen,
-    onOpen: openAlertsSheet,
-    onClose: closeAlertsSheet,
-  } = useDisclosure();
+
+  const closeAlertsSheet = () => {
+    setClickOutsideEnabled?.(true);
+    onClose();
+  };
+
   return (
     <>
       <Box h={'auto'} minHeight={'18'} pt={'6'} pb={'7'}>
         <Text fontWeight={'medium'} fontSize={'base'} lineHeight={'base'}>
-          {(nodeSignificanceData?.[0] as NodeSignificanceData)?.['node']}
+          {nodeSignificanceData?.[0]?.['node']}
         </Text>
       </Box>
       <Divider orientation="horizontal" borderColor={'white.200'} opacity={1} />
@@ -47,11 +51,7 @@ const NodeSignificance = ({
                 lineHeight={'sh-28'}
                 fontFamily={'Space Grotesk, Work Sans, sans-serif'}
               >
-                {formatDatalabel(
-                  (nodeSignificanceData?.[0] as NodeSignificanceData)?.[
-                    'nodeHits'
-                  ]
-                )}
+                {formatDatalabel(nodeSignificanceData?.[0]?.['nodeHits'])}
               </Text>
               <Text
                 fontWeight={'medium'}
@@ -63,12 +63,8 @@ const NodeSignificance = ({
             </Flex>
             <Text fontWeight={'normal'} fontSize={'xs-12'} lineHeight={'xs-12'}>
               {`${getPercentageOfHits(
-                (nodeSignificanceData?.[0] as NodeSignificanceData)?.[
-                  'nodeHits'
-                ],
-                (nodeSignificanceData?.[0] as NodeSignificanceData)?.[
-                  'totalHits'
-                ]
+                nodeSignificanceData?.[0]?.['nodeHits'],
+                nodeSignificanceData?.[0]?.['totalHits']
               )}% of overall traffic`}
             </Text>
           </Flex>
@@ -96,7 +92,7 @@ const NodeSignificance = ({
         </Box>
       </Box>
       <Alert
-        eventData={eventData}
+        nodeName={nodeSignificanceData?.[0]?.['node']}
         isAlertsSheetOpen={isAlertsSheetOpen}
         closeAlertsSheet={closeAlertsSheet}
       />

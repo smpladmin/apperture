@@ -9,7 +9,10 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { TrendData } from '@lib/domain/eventData';
-import { formatDatalabel } from '@lib/utils/common';
+import {
+  convertISODateToReadableDate,
+  formatDatalabel,
+} from '@lib/utils/common';
 import { BLUE, YELLOW_100, YELLOW_200 } from '@theme/index';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
@@ -54,10 +57,22 @@ const ThresholdMetric = ({
         },
         tickCount: 0,
       },
+      tooltip: {
+        showMarkers: true,
+        showCrosshairs: true,
+        shared: true,
+        formatter: ({ startDate, hits }) => {
+          return {
+            title: convertISODateToReadableDate(startDate),
+            name: 'Hits',
+            value: hits,
+          };
+        },
+      },
       meta: {
         hits: {
-          min: 0.8 * minHit,
-          max: 1.2 * maxHit,
+          min: Math.floor(0.8 * minHit),
+          max: Math.ceil(1.2 * maxHit),
         },
       },
       lineStyle: {
@@ -107,27 +122,35 @@ const ThresholdMetric = ({
       <Flex justifyContent={'space-between'}>
         <Flex direction={'column'} gap={'1'}>
           <Text
-            fontSize={'xs-10'}
-            lineHeight={'xs-10'}
+            fontSize={{ base: 'xs-10', md: 'xs-14' }}
+            lineHeight={{ base: 'xs-10', md: 'xs-14' }}
+            fontWeight={{ base: 'normal', md: 'medium' }}
             color={'grey.100'}
-            fontWeight={'normal'}
           >
             Lower Bound
           </Text>
-          <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'semibold'}>
+          <Text
+            fontSize={{ base: 'xs-14', md: 'sh-20' }}
+            lineHeight={{ base: 'xs-14', md: 'xs-14' }}
+            fontWeight={'semibold'}
+          >
             {formatDatalabel(thresholdRange?.[0])}
           </Text>
         </Flex>
-        <Flex direction={'column'}>
+        <Flex direction={'column'} gap={'1'}>
           <Text
-            fontSize={'xs-10'}
-            lineHeight={'xs-10'}
+            fontSize={{ base: 'xs-10', md: 'xs-14' }}
+            lineHeight={{ base: 'xs-10', md: 'xs-14' }}
+            fontWeight={{ base: 'normal', md: 'medium' }}
             color={'grey.100'}
-            fontWeight={'normal'}
           >
             Upper Bound
           </Text>
-          <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'semibold'}>
+          <Text
+            fontSize={{ base: 'xs-14', md: 'sh-20' }}
+            lineHeight={{ base: 'xs-14', md: 'xs-14' }}
+            fontWeight={'semibold'}
+          >
             {formatDatalabel(thresholdRange?.[1])}
           </Text>
         </Flex>
@@ -135,17 +158,25 @@ const ThresholdMetric = ({
       <Flex mt={'2'} py={'4'} px={'2'}>
         <RangeSlider
           defaultValue={thresholdRange}
-          min={0.8 * minHit}
-          max={1.2 * maxHit}
+          min={Math.floor(0.8 * minHit)}
+          max={Math.ceil(1.2 * maxHit)}
           onChange={(val) => setThresholdRange(val)}
         >
           <RangeSliderTrack bg="white.200">
             <RangeSliderFilledTrack bg="black.100" />
           </RangeSliderTrack>
-          <RangeSliderThumb boxSize={5} index={0} bg={'black.100'}>
+          <RangeSliderThumb
+            boxSize={{ base: '5', md: '6' }}
+            index={0}
+            bg={'black.100'}
+          >
             <ParallelLine />
           </RangeSliderThumb>
-          <RangeSliderThumb boxSize={5} index={1} bg={'black.100'}>
+          <RangeSliderThumb
+            boxSize={{ base: '5', md: '6' }}
+            index={1}
+            bg={'black.100'}
+          >
             <ParallelLine />
           </RangeSliderThumb>
         </RangeSlider>

@@ -7,11 +7,7 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
-import {
-  NodeSignificanceData,
-  SankeyData,
-  TrendData,
-} from '@lib/domain/eventData';
+import { EventData } from '@lib/domain/eventData';
 import EventDetailsModal from './EventDetailsModal';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -20,13 +16,11 @@ import { Actions } from '@lib/types/context';
 import { formatDatalabel, getPercentageOfHits } from '@lib/utils/common';
 
 type EventDetailsFloaterProps = {
-  eventData: {
-    [key in string]: Array<TrendData | SankeyData | NodeSignificanceData>;
-  };
+  eventData: EventData | {};
 };
 
 const EventDetailFloater = ({ eventData }: EventDetailsFloaterProps) => {
-  const { nodeSignificanceData } = eventData;
+  const { nodeSignificanceData } = eventData as EventData;
   const {
     isOpen: isEventDetailsModalOpen,
     onOpen: openEventDetailsModal,
@@ -84,7 +78,7 @@ const EventDetailFloater = ({ eventData }: EventDetailsFloaterProps) => {
                 fontWeight={'medium'}
                 wordBreak={'break-word'}
               >
-                {(nodeSignificanceData?.[0] as NodeSignificanceData)?.['node']}
+                {nodeSignificanceData?.[0]?.['node']}
               </Text>
               <Box
                 borderRadius={'25'}
@@ -107,12 +101,8 @@ const EventDetailFloater = ({ eventData }: EventDetailsFloaterProps) => {
               mt={'2'}
             >
               {`${getPercentageOfHits(
-                (nodeSignificanceData?.[0] as NodeSignificanceData)?.[
-                  'nodeHits'
-                ],
-                (nodeSignificanceData?.[0] as NodeSignificanceData)?.[
-                  'totalHits'
-                ]
+                nodeSignificanceData?.[0]?.['nodeHits'],
+                nodeSignificanceData?.[0]?.['totalHits']
               )}% of overall traffic on this event`}
             </Text>
             <Flex
@@ -127,11 +117,7 @@ const EventDetailFloater = ({ eventData }: EventDetailsFloaterProps) => {
                   lineHeight={'sh-28'}
                   fontFamily={'Space Grotesk, Work Sans, sans-serif'}
                 >
-                  {formatDatalabel(
-                    (nodeSignificanceData?.[0] as NodeSignificanceData)?.[
-                      'nodeHits'
-                    ]
-                  )}
+                  {formatDatalabel(nodeSignificanceData?.[0]?.['nodeHits'])}
                 </Text>
                 <Text
                   fontSize={'xs-12'}
