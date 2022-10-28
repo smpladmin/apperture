@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from domain.users.models import User
+from domain.notifications.models import NotificationResponse
 from domain.notifications.service import NotificationService
 
 from rest.middlewares import validate_jwt, get_user
@@ -42,7 +43,7 @@ async def add_notification(
     return notification
 
 
-@router.get("/notifications")
+@router.get("/notifications", response_model=NotificationResponse)
 async def get_notification(
     name: str,
     notification_service: NotificationService = Depends(),
