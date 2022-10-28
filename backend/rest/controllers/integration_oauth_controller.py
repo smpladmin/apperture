@@ -1,19 +1,20 @@
-import json
 import os
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from authlib.integrations.starlette_client import OAuthError
-from starlette.responses import RedirectResponse
+import json
 from urllib.parse import urlparse
 
-from authorisation import OAuthClientFactory, OAuthProvider
-from authorisation.models import IntegrationOAuth, OAuthUser
+from starlette.responses import RedirectResponse
+from authlib.integrations.starlette_client import OAuthError
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+
+from domain.users.models import User
+from rest.dtos.oauth import OAuthState
 from domain.apps.service import AppService
+from domain.users.service import UserService
+from rest.middlewares import get_user, validate_jwt
 from domain.integrations.models import IntegrationProvider
 from domain.integrations.service import IntegrationService
-from domain.users.models import User
-from domain.users.service import UserService
-from rest.dtos.oauth import OAuthState
-from rest.middlewares import get_user, validate_jwt
+from authorisation import OAuthClientFactory, OAuthProvider
+from authorisation.models import IntegrationOAuth, OAuthUser
 
 router = APIRouter(tags=["integration"], responses={401: {}})
 
@@ -21,6 +22,7 @@ oauth = OAuthClientFactory().init_client(
     OAuthProvider.GOOGLE,
     scope="openid email profile https://www.googleapis.com/auth/analytics.readonly",
 )
+slack_oauth = OAuthClientFactory().init_client(OAuthProvider.SLACK, scope="incoming-webhook")
 
 
 @router.get("/integrations/oauth/google", dependencies=[Depends(validate_jwt)])
@@ -87,3 +89,33 @@ def _build_redirect_url(url: str, integration_id: str):
     else:
         redirect_url = redirect_url._replace(query=f"integration_id={integration_id}")
     return redirect_url.geturl()
+
+
+@router.get("/integrations/oauth/slack")
+async def oauth_slack(
+    request: Request,
+    user: User = Depends(get_user),
+    redirect_url: str = os.getenv("FRONTEND_SLACK_INTEGRATION_REDIRECT_URL"),
+):
+    redirect_uri = request.url_for("integration_slack_authorize").replace(
+        "http", "https"
+    )
+    return await slack_oauth.slack.authorize_redirect(
+        request,
+        redirect_uri,
+        state=json.dumps({"user_id": str(user.id), "redirect_url": redirect_url}),
+    )
+
+
+@router.get("/integrations/oauth/slack/authorize")
+async def integration_slack_authorize(
+    code: str,
+    state: str,
+    request: Request,
+    user_service: UserService = Depends(),
+):
+    response = await slack_oauth.slack.authorize_access_token(request)
+    slack_url = response["incoming_webhook"]["url"]
+    state = json.loads(state)
+    await user_service.save_slack_url(state["user_id"], slack_url)
+    return RedirectResponse(state["redirect_url"])

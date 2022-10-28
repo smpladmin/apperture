@@ -31,3 +31,9 @@ export enum FlowType {
   INFLOW = 'inflow',
   OUTFLOW = 'outflow',
 }
+
+export type EventData = {
+  trendsData: TrendData[];
+  sankeyData: SankeyData[];
+  nodeSignificanceData: NodeSignificanceData[];
+};

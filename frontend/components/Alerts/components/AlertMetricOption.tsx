@@ -12,8 +12,8 @@ type AlertMetricOptionProps = {
 const AlertMetricOption = ({ option, isChecked }: AlertMetricOptionProps) => {
   return (
     <Flex
-      paddingX={'3'}
-      paddingY={'2'}
+      paddingX={{ base: '3', md: '6' }}
+      paddingY={{ base: '2', md: '3' }}
       cursor={'pointer'}
       pointerEvents={option.isDisabled ? 'none' : 'all'}
       bg={
@@ -30,10 +30,10 @@ const AlertMetricOption = ({ option, isChecked }: AlertMetricOptionProps) => {
       as={'label'}
     >
       <Text
-        fontSize={'xs-12'}
+        fontSize={{ base: 'xs-12', md: 'xs-14' }}
+        lineHeight={{ base: 'xs-12', md: 'xs-14' }}
         fontWeight={isChecked ? 'medium' : 'normal'}
         color={isChecked ? 'white.DEFAULT' : 'black.100'}
-        lineHeight={'xs-12'}
       >
         {option.label}
       </Text>
