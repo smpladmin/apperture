@@ -1,26 +1,20 @@
 import Sheet from 'react-modal-sheet';
-
 import 'remixicon/fonts/remixicon.css';
-
 import { OVERLAY_GRAY } from '@theme/index';
 import AlertsHeader from './AlertsMobileHeader';
-import {
-  NodeSignificanceData,
-  SankeyData,
-  TrendData,
-} from '@lib/domain/eventData';
+import { TrendData } from '@lib/domain/eventData';
 import AlertsInfo from '../components/AlertsInfo';
 import { useEffect, useState } from 'react';
-import { Box, Flex, Skeleton } from '@chakra-ui/react';
+import Loading from '../components/Loading';
 
 type MobileAlertsProps = {
-  eventData: {
-    [key in string]: Array<TrendData | SankeyData | NodeSignificanceData>;
-  };
+  nodeName: string;
+  eventData: TrendData[];
   isAlertsSheetOpen: boolean;
   closeAlertsSheet: () => void;
 };
 const MobileAlerts = ({
+  nodeName,
   eventData,
   isAlertsSheetOpen,
   closeAlertsSheet,
@@ -28,7 +22,7 @@ const MobileAlerts = ({
   const [isLoading, setIsLoading] = useState<Boolean>(true);
 
   useEffect(() => {
-    if (eventData?.['trendsData'].length) {
+    if (eventData.length) {
       setIsLoading(false);
     }
   }, [eventData]);
@@ -46,15 +40,10 @@ const MobileAlerts = ({
         </Sheet.Header>
         <Sheet.Content>
           {isLoading ? (
-            <Box>
-              <Flex direction={'column'} gap={'6'} p={'4'}>
-                <Skeleton height={'12'} fadeDuration={1} bg={'white.100'} />
-                <Skeleton height={'12'} fadeDuration={1} bg={'white.100'} />
-                <Skeleton height={'70'} fadeDuration={1} bg={'white.100'} />
-              </Flex>
-            </Box>
+            <Loading />
           ) : (
             <AlertsInfo
+              nodeName={nodeName}
               eventData={eventData}
               closeAlertsSheet={closeAlertsSheet}
             />

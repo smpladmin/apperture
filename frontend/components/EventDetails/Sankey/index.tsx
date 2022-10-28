@@ -11,7 +11,7 @@ const SankeyGraph = ({ sankeyData }: { sankeyData: Array<SankeyData> }) => {
     plot.current.sankey = new Sankey(sankeyRef.current!!, {
       data: sankeyData,
     });
-  }, []);
+  }, [sankeyData]);
 
   useEffect(() => {
     plot.current.sankey?.update({
