@@ -12,7 +12,7 @@ from domain.notifications.models import (
 )
 
 
-@pytest.fixture()
+@pytest.fixture(autouse=True)
 def notification_service():
     notification_service_mock = mock.MagicMock()
     Notification.get_settings = mock.MagicMock()
