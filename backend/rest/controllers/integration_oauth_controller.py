@@ -127,7 +127,10 @@ async def integration_slack_authorize(
         try:
             response = await slack_oauth.slack.authorize_access_token(request)
             slack_url = response["incoming_webhook"]["url"]
-            await user_service.save_slack_credentials(state["user_id"], slack_url)
+            slack_channel = response["incoming_webhook"]["channel"]
+            await user_service.save_slack_credentials(
+                state["user_id"], slack_url, slack_channel
+            )
             integration_status = "success"
         except Exception as e:
             logging.error(e)
