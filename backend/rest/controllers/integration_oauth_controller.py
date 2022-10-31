@@ -68,7 +68,9 @@ async def integration_google_authorise(
     integration = await integration_service.create_oauth_integration(
         apperture_user, app, IntegrationProvider.GOOGLE, integration_oauth
     )
-    redirect_url = _build_redirect_url(oauth_state.redirect_url, key='integration_id', value=integration.id)
+    redirect_url = _build_redirect_url(
+        oauth_state.redirect_url, key="integration_id", value=integration.id
+    )
     return RedirectResponse(redirect_url)
 
 
@@ -82,6 +84,7 @@ async def _authorise(request: Request):
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
 
 def _build_redirect_url(url: str, key: str, value: str):
     redirect_url = urlparse(url)
@@ -118,17 +121,18 @@ async def integration_slack_authorize(
     user_service: UserService = Depends(),
 ):
     state = json.loads(state)
-    if error: 
-        status = 'failed'
-    else:
+    integration_status = "failed"
+
+    if not error:
         try:
             response = await slack_oauth.slack.authorize_access_token(request)
             slack_url = response["incoming_webhook"]["url"]
             await user_service.save_slack_url(state["user_id"], slack_url)
-            status = 'success'
+            integration_status = "success"
         except Exception as e:
-            status = 'failed'
             logging.error(e)
 
-    redirect_url = _build_redirect_url(state["redirect_url"], key='status', value=status)
+    redirect_url = _build_redirect_url(
+        state["redirect_url"], key="status", value=integration_status
+    )
     return RedirectResponse(redirect_url)
