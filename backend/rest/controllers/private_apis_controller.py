@@ -12,7 +12,7 @@ from domain.integrations.service import IntegrationService
 from domain.runlogs.service import RunLogService
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.runlogs import UpdateRunLogDto
-from rest.dtos.users import UserResponse
+from rest.dtos.users import PrivateUserResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.notifications import (
     ComputedNotificationResponse,
@@ -150,7 +150,7 @@ async def compute_notifications(
     return computed_alerts + computed_updates
 
 
-@router.get("/users/{user_id}", response_model=UserResponse)
+@router.get("/users/{user_id}", response_model=PrivateUserResponse)
 async def slack_url(
     user_id: str,
     user_service: UserService = Depends(),

@@ -22,7 +22,9 @@ oauth = OAuthClientFactory().init_client(
     OAuthProvider.GOOGLE,
     scope="openid email profile https://www.googleapis.com/auth/analytics.readonly",
 )
-slack_oauth = OAuthClientFactory().init_client(OAuthProvider.SLACK, scope="incoming-webhook")
+slack_oauth = OAuthClientFactory().init_client(
+    OAuthProvider.SLACK, scope="incoming-webhook"
+)
 
 
 @router.get("/integrations/oauth/google", dependencies=[Depends(validate_jwt)])
@@ -109,13 +111,15 @@ async def oauth_slack(
 
 @router.get("/integrations/oauth/slack/authorize")
 async def integration_slack_authorize(
-    code: str,
     state: str,
     request: Request,
     user_service: UserService = Depends(),
 ):
     response = await slack_oauth.slack.authorize_access_token(request)
     slack_url = response["incoming_webhook"]["url"]
+    slack_channel = response["incoming_webhook"]["channel"]
     state = json.loads(state)
-    await user_service.save_slack_url(state["user_id"], slack_url)
+    await user_service.save_slack_credentials(
+        state["user_id"], slack_url, slack_channel
+    )
     return RedirectResponse(state["redirect_url"])
