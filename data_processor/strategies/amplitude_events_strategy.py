@@ -11,7 +11,7 @@ from store.mixpanel_events_saver import S3EventsSaver
 from transform.amplitude_network_graph_transformer import \
     AmplitudeNetworkGraphTransformer
 
-from .amplitude_event_processor import AmplitudeEventProcessor
+from ..event_processors.amplitude_event_processor import AmplitudeEventProcessor
 
 
 class AmplitudeEventsStrategy:

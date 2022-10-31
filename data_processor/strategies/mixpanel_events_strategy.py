@@ -12,7 +12,7 @@ from store.mixpanel_network_graph_saver import MixpanelNetworkGraphSaver
 from transform.mixpanel_network_graph_transformer import \
     MixpanelNetworkGraphTransformer
 
-from .mix_panel_event_processor import MixPanelEventProcessor
+from ..event_processors.mix_panel_event_processor import MixPanelEventProcessor
 
 
 class MixpanelEventsStrategy:
