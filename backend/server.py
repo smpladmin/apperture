@@ -8,7 +8,6 @@ logging.getLogger().setLevel(logging.INFO)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from data_processor_queue import dpq
 
 from rest.controllers import (
     app_controller,

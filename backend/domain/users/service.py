@@ -34,6 +34,6 @@ class UserService:
     async def remove_slack_credentials(self, user_id):
         await User.find_one(
             User.id == PydanticObjectId(user_id),
-        ).update({ "$unset": { 'slack_url': 1, 'slack_channel': 1 } })
-        
+        ).update({"$unset": {"slack_url": 1, "slack_channel": 1}})
+
         return

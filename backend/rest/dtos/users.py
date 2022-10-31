@@ -15,6 +15,6 @@ class UserResponse(ModelResponse):
     email: Indexed(str)
     picture: str
     slack_channel: Optional[str]
-    
+
     class Config:
         allow_population_by_field_name = True
