@@ -9,6 +9,7 @@ class User(Document):
     last_name: str
     email: Indexed(str)
     picture: str
+    slack_channel: Optional[str]
     slack_url: Optional[str]
 
     class Settings:
