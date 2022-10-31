@@ -6,6 +6,7 @@ import tickIcon from '@assets/icons/tick-icon.svg';
 import { useRouter } from 'next/router';
 import { FRONTEND_BASE_URL, BACKEND_BASE_URL } from 'config';
 import Link from 'next/link';
+import { User } from '@lib/domain/user';
 
 const IntegrationConnectionInfo = () => {
   return (
@@ -23,7 +24,7 @@ const IntegrationConnectionInfo = () => {
   );
 };
 
-const Integrations = () => {
+const Integrations = ({ user }: { user: User }) => {
   const router = useRouter();
   const { previousDsId } = router.query;
 
@@ -75,7 +76,7 @@ const Integrations = () => {
               >
                 Slack
               </Text>
-              <IntegrationConnectionInfo />
+              {user?.slackChannel ? <IntegrationConnectionInfo /> : null}
             </Flex>
             <Text
               fontSize={'xs-12'}
@@ -83,34 +84,45 @@ const Integrations = () => {
               fontWeight={'normal'}
               color={'grey.200'}
             >
-              {'Connect your organisation’s slack to Apperture'}
+              {user?.slackChannel
+                ? `Sending notifications to ‘${user?.slackChannel}’`
+                : 'Connect your organisation’s slack to Apperture'}
             </Text>
           </Flex>
         </Flex>
-        <Link href={SLACK_OAUTH_LINK}>
+        {user?.slackChannel ? (
           <Button
             h={'8'}
             borderRadius={'25'}
             px={'3'}
             py={'2'}
-            bg={'black.100'}
-            minW={'18'}
+            bg={'white.100'}
           >
-            <Text
-              fontSize={'xs-12'}
-              lineHeight={'xs-12'}
-              fontWeight={'medium'}
-              color={'white.DEFAULT'}
-            >
-              {'Connect'}
+            <Text fontSize={'xs-12'} lineHeight={'xs-12'} fontWeight={'medium'}>
+              Remove
             </Text>
           </Button>
-        </Link>
-        {/* <Button h={'8'} borderRadius={'25'} px={'3'} py={'2'} bg={'white.100'}>
-          <Text fontSize={'xs-12'} lineHeight={'xs-12'} fontWeight={'medium'}>
-            Remove
-          </Text>
-        </Button> */}
+        ) : (
+          <Link href={SLACK_OAUTH_LINK}>
+            <Button
+              h={'8'}
+              borderRadius={'25'}
+              px={'3'}
+              py={'2'}
+              bg={'black.100'}
+              minW={'18'}
+            >
+              <Text
+                fontSize={'xs-12'}
+                lineHeight={'xs-12'}
+                fontWeight={'medium'}
+                color={'white.DEFAULT'}
+              >
+                {'Connect'}
+              </Text>
+            </Button>
+          </Link>
+        )}
       </Flex>
       <Divider orientation="horizontal" borderColor={'white.200'} opacity={1} />
     </Box>
