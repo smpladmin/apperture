@@ -44,7 +44,11 @@ const SettingsOptions = () => {
         px={'4'}
         justifyContent={'space-between'}
         cursor={'pointer'}
-        onClick={() => router.push('/analytics/settings/integrations')}
+        onClick={() =>
+          router.push(
+            `/analytics/settings/integrations?previousDsId=${previousDsId}`
+          )
+        }
       >
         <Flex py={'2'} direction={'column'} gap={'2'}>
           <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'semibold'}>
