@@ -5,16 +5,17 @@ from fastapi import APIRouter, Depends
 from data_processor_queue.service import DPQueueService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
+from domain.users.service import UserService
 from domain.notifications.service import NotificationService
+from domain.notifications.models import NotificationType
 from domain.integrations.service import IntegrationService
 from domain.runlogs.service import RunLogService
 from rest.dtos.datasources import PrivateDataSourceResponse
-from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.runlogs import UpdateRunLogDto
+from rest.dtos.users import PrivateUserResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.notifications import (
     ComputedNotificationResponse,
-    NotificationResponse,
     TriggerNotificationsDto,
 )
 
@@ -111,11 +112,12 @@ async def get_notifications(
 
 
 @router.get(
-    "/compute_notifications/{user_id}",
+    "/notifications",
     response_model=List[ComputedNotificationResponse],
 )
 async def compute_notifications(
     user_id: str,
+    compute: bool = True,
     notification_service: NotificationService = Depends(),
     edge_service: EdgeService = Depends(),
 ):
@@ -123,10 +125,34 @@ async def compute_notifications(
         user_id=user_id
     )
     updates = [
-        notif for notif in notifications if notif["notification_type"] == "update"
+        notif
+        for notif in notifications
+        if notif.notification_type.value == NotificationType.UPDATE
     ]
 
-    node_data_bulk = await edge_service.get_node_data_bulk(updates=updates)
-    computed_updates = notification_service.compute_updates(node_data_bulk)
+    alerts = [
+        notif
+        for notif in notifications
+        if notif.notification_type.value == NotificationType.ALERT
+    ]
 
-    return computed_updates
+    node_data_for_updates = await edge_service.get_node_data_for_notifications(
+        notifications=updates
+    )
+
+    node_data_for_alerts = await edge_service.get_node_data_for_notifications(
+        notifications=alerts
+    )
+
+    computed_updates = notification_service.compute_updates(node_data_for_updates)
+    computed_alerts = notification_service.compute_alerts(node_data_for_alerts)
+
+    return computed_alerts + computed_updates
+
+
+@router.get("/users/{user_id}", response_model=PrivateUserResponse)
+async def slack_url(
+    user_id: str,
+    user_service: UserService = Depends(),
+):
+    return await user_service.get_user(user_id)

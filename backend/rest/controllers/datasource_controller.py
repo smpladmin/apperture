@@ -37,8 +37,9 @@ async def get_trend_nodes(
     end_date: str = dt.today().strftime("%Y-%m-%d"),
     edge_service: EdgeService = Depends(),
 ):
+    is_entrance_node = True if node == "Entrance" else False
     return await edge_service.get_node_trends(
-        ds_id, node, trend_type, start_date, end_date
+        ds_id, node, trend_type, start_date, end_date, is_entrance_node
     )
 
 
@@ -57,7 +58,7 @@ async def get_sankey_nodes(
     "/datasources/{ds_id}/node_significance",
     response_model=list[NodeSignificanceResponse],
 )
-async def get_sankey_nodes(
+async def get_node_significance(
     ds_id: str,
     node: str,
     start_date: str = "1970-01-01",

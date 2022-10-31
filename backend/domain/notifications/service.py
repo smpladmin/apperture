@@ -1,13 +1,22 @@
+from datetime import datetime
 from typing import List, Dict
+
 from beanie import PydanticObjectId
 from fastapi import Depends
-from mongo.mongo import Mongo
 
 from domain.notifications.models import (
     Notification,
     NotificationFrequency,
     NotificationType,
+    ThresholdMap,
+    NotificationChannel,
+    ComputedNotification,
+    NotificationThresholdType,
+    NotificationMetric,
 )
+from domain.edge.models import AggregatedEdge, NotificationNodeData
+
+from mongo.mongo import Mongo
 
 
 class NotificationService:
@@ -17,24 +26,30 @@ class NotificationService:
     def build_notification(
         self,
         datasourceId: str,
+        name: str,
         userId: PydanticObjectId,
-        notificationType: str,
+        notificationType: NotificationType,
+        metric: NotificationMetric,
+        multiNode: bool,
         appertureManaged: bool,
         pctThresholdActive: bool,
-        pctThresholdValues: Dict,
+        pctThresholdValues: ThresholdMap,
         absoluteThresholdActive: bool,
-        absoluteThresholdValues: Dict,
+        absoluteThresholdValues: ThresholdMap,
         formula: str,
         variableMap: Dict,
-        frequency: str,
+        frequency: NotificationFrequency,
         preferredHourGMT: int,
-        preferredChannels: List[str],
+        preferredChannels: List[NotificationChannel],
         notificationActive: bool,
     ):
         return Notification(
             datasource_id=PydanticObjectId(datasourceId),
+            name=name,
             user_id=userId,
             notification_type=notificationType,
+            metric=metric,
+            multi_node=multiNode,
             apperture_managed=appertureManaged,
             pct_threshold_active=pctThresholdActive,
             pct_threshold_values=pctThresholdValues,
@@ -63,51 +78,130 @@ class NotificationService:
             Notification.notification_active == True,
         ).to_list()
 
-    async def get_notifications_to_compute(self, user_id: str):
-        pipeline = [
-            {
-                "$match": {
-                    "user_id": PydanticObjectId(user_id),
-                    "notification_active": True,
-                }
-            }
-        ]
-        return await (Notification.find().aggregate(pipeline).to_list())
+    async def get_notifications_to_compute(self, user_id: str) -> List[Notification]:
+        return await Notification.find(
+            Notification.user_id == PydanticObjectId(user_id),
+            Notification.notification_active == True,
+        ).to_list()
+
+    def alert_criteria(self, data: NotificationNodeData, value: float):
+        if data.threshold_type == NotificationThresholdType.ABSOLUTE:
+            if (value > data.threshold_value.max) or (value < data.threshold_value.min):
+                return True
+        if data.threshold_type == NotificationThresholdType.PCT:
+            prev_value = self.compute_value(data.prev_day_node_data)
+            pct_change = (
+                (value - prev_value) * 100 / prev_value if prev_value != 0 else 0
+            )
+            if (pct_change > data.threshold_value.max) or (
+                pct_change < data.threshold_value.min
+            ):
+                return True
+        return False
+
+    def compute_value(self, node_data: List[List[AggregatedEdge]]):
+
+        if len(node_data) == 1:
+            val = (
+                sum([node.hits for node in node_data[0]])
+                if len(node_data[0]) > 0
+                else 0
+            )
+
+        elif len(node_data) == 2:
+            num = (
+                sum([node.hits for node in node_data[0]])
+                if len(node_data[0]) > 0
+                else 0
+            )
+            den = (
+                sum([node.hits for node in node_data[1]])
+                if len(node_data[1]) > 0
+                else 0
+            )
+            val = num / den if den != 0 else 0
+
+        else:
+            val = 0
+
+        return val
+
+    def compute_notification_values(
+        self, data: NotificationNodeData, notification_type: NotificationType
+    ):
+        triggered = False
+
+        val = self.compute_value(node_data=data.node_data)
+
+        if notification_type == NotificationType.ALERT:
+            triggered = self.alert_criteria(data, val)
+
+        return val, triggered
 
     def compute_updates(
         self,
-        node_data_bulk: Dict,
-    ) -> List[Dict]:
-        computed_updates = []
+        node_data_for_updates: List[NotificationNodeData],
+    ) -> List[ComputedNotification]:
 
-        if node_data_bulk:
-            for notification_id, node_data in node_data_bulk.items():
-                if len(node_data) == 1:
-                    val = (
-                        sum([node.hits for node in node_data[0]])
-                        if len(node_data[0]) > 0
-                        else 0
-                    )
-
-                elif len(node_data) == 2:
-                    num = (
-                        sum([node.hits for node in node_data[0]])
-                        if len(node_data[0]) > 0
-                        else 0
-                    )
-                    den = (
-                        sum([node.hits for node in node_data[1]])
-                        if len(node_data[1]) > 0
-                        else 0
-                    )
-                    val = num / den if den != 0 else 0
-
-                else:
-                    val = 0
-
-                computed_update = {}
-                computed_update["name"] = str(notification_id)
-                computed_update["value"] = float("{:.2f}".format(val))
-                computed_updates.append(computed_update)
+        computed_updates = (
+            [
+                ComputedNotification(
+                    name=data.name,
+                    notification_id=data.notification_id,
+                    notification_type=NotificationType.UPDATE,
+                    value=float(
+                        "{:.2f}".format(
+                            self.compute_notification_values(
+                                data=data, notification_type=NotificationType.UPDATE
+                            )[0]
+                        )
+                    ),
+                )
+                for data in node_data_for_updates
+            ]
+            if node_data_for_updates
+            else []
+        )
 
         return computed_updates
+
+    def compute_alert(self, data: NotificationNodeData):
+        value, triggered = self.compute_notification_values(
+            data=data, notification_type=NotificationType.ALERT
+        )
+        computed_alert = ComputedNotification(
+            name=data.name,
+            notification_id=data.notification_id,
+            notification_type=NotificationType.ALERT,
+            value=float("{:.2f}".format(value)),
+            threshold_type=data.threshold_type,
+            user_threshold=data.threshold_value,
+            triggered=triggered,
+        )
+        return computed_alert
+
+    def compute_alerts(
+        self,
+        node_data_for_alerts: List[NotificationNodeData],
+    ) -> List[ComputedNotification]:
+        return [self.compute_alert(data) for data in node_data_for_alerts]
+
+    async def get_notification_for_node(self, name: str) -> list[Notification]:
+        return await Notification.find(
+            Notification.name == name,
+            Notification.notification_active == True,
+        ).to_list()
+
+    async def update_notification(
+        self, notification_id: str, new_notification: Notification
+    ):
+        to_update = new_notification.dict()
+        to_update.pop("id")
+        to_update.pop("created_at")
+        to_update["updated_at"] = datetime.utcnow()
+
+        await Notification.find_one(
+            Notification.id == PydanticObjectId(notification_id),
+        ).update({"$set": to_update})
+
+        return

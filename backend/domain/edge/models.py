@@ -1,9 +1,11 @@
 import datetime
-from typing import Optional
+from typing import List, Optional
+from beanie import PydanticObjectId, UnionDoc
+from pydantic import BaseModel
 
 from beanie import PydanticObjectId, UnionDoc
 from domain.common.models import IntegrationProvider
-from pydantic import BaseModel
+from domain.notifications.models import ThresholdMap
 from repositories import Document
 
 
@@ -78,3 +80,12 @@ class NodeSignificance(BaseModel):
     node: str
     node_hits: int
     total_hits: int
+
+
+class NotificationNodeData(BaseModel):
+    name: str
+    notification_id: PydanticObjectId
+    node_data: List[List[AggregatedEdge]]
+    prev_day_node_data: List[List[AggregatedEdge]]
+    threshold_type: Optional[str]
+    threshold_value: Optional[ThresholdMap]

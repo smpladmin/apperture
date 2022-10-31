@@ -1,11 +1,17 @@
-import pandas as pd
 import pytest
+import pandas as pd
 
 from clean.google_analytics_cleaner import GoogleAnalyticsCleaner
 
 
 class TestGoogleAnalyticsCleaner:
     def setup(self):
+        self.urls = [
+            "www.google.com/en-us/search",
+            "/jobs/1234/candidates",
+            "www.google.com/en-in",
+            "/uk-en/login",
+        ]
         self.df = pd.DataFrame.from_dict(
             {
                 "previousPage": {
@@ -49,4 +55,28 @@ class TestGoogleAnalyticsCleaner:
             "(entrance)",
             "(entrance)",
             "(entrance)",
+        ]
+
+    def test_convert_url_to_endpoint(self):
+        results = []
+        for url in self.urls:
+            results.append(self.cleaner.convert_url_to_endpoint(url))
+
+        assert results == [
+            "/en-us/search",
+            "/jobs/1234/candidates",
+            "/en-in",
+            "/uk-en/login",
+        ]
+
+    def test_remove_locale_from_endpoint(self):
+        results = []
+        for url in self.urls:
+            results.append(self.cleaner.remove_locale_from_endpoint(url))
+
+        assert results == [
+            "www.google.com/search",
+            "/jobs/1234/candidates",
+            "www.google.com",
+            "/login",
         ]

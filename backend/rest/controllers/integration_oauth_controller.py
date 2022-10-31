@@ -1,25 +1,31 @@
-import json
+import logging
 import os
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from authlib.integrations.starlette_client import OAuthError
-from starlette.responses import RedirectResponse
+import json
+from typing import Union
 from urllib.parse import urlparse
 
-from authorisation import OAuthClientFactory, OAuthProvider
-from authorisation.models import IntegrationOAuth, OAuthUser
+from starlette.responses import RedirectResponse
+from authlib.integrations.starlette_client import OAuthError
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+
+from domain.users.models import User
+from rest.dtos.oauth import OAuthState
 from domain.apps.service import AppService
+from domain.users.service import UserService
+from rest.middlewares import get_user, validate_jwt
 from domain.integrations.models import IntegrationProvider
 from domain.integrations.service import IntegrationService
-from domain.users.models import User
-from domain.users.service import UserService
-from rest.dtos.oauth import OAuthState
-from rest.middlewares import get_user, validate_jwt
+from authorisation import OAuthClientFactory, OAuthProvider
+from authorisation.models import IntegrationOAuth, OAuthUser
 
 router = APIRouter(tags=["integration"], responses={401: {}})
 
 oauth = OAuthClientFactory().init_client(
     OAuthProvider.GOOGLE,
     scope="openid email profile https://www.googleapis.com/auth/analytics.readonly",
+)
+slack_oauth = OAuthClientFactory().init_client(
+    OAuthProvider.SLACK, scope="incoming-webhook"
 )
 
 
@@ -62,7 +68,9 @@ async def integration_google_authorise(
     integration = await integration_service.create_oauth_integration(
         apperture_user, app, IntegrationProvider.GOOGLE, integration_oauth
     )
-    redirect_url = _build_redirect_url(oauth_state.redirect_url, integration.id)
+    redirect_url = _build_redirect_url(
+        oauth_state.redirect_url, key="integration_id", value=integration.id
+    )
     return RedirectResponse(redirect_url)
 
 
@@ -78,12 +86,56 @@ async def _authorise(request: Request):
         )
 
 
-def _build_redirect_url(url: str, integration_id: str):
+def _build_redirect_url(url: str, key: str, value: str):
     redirect_url = urlparse(url)
     if redirect_url.query:
         redirect_url = redirect_url._replace(
-            query=f"{redirect_url.query}&integration_id={integration_id}"
+            query=f"{redirect_url.query}&{key}={value}"
         )
     else:
-        redirect_url = redirect_url._replace(query=f"integration_id={integration_id}")
+        redirect_url = redirect_url._replace(query=f"{key}={value}")
     return redirect_url.geturl()
+
+
+@router.get("/integrations/oauth/slack")
+async def oauth_slack(
+    request: Request,
+    user: User = Depends(get_user),
+    redirect_url: str = os.getenv("FRONTEND_SLACK_INTEGRATION_REDIRECT_URL"),
+):
+    redirect_uri = request.url_for("integration_slack_authorize").replace(
+        "http", "https"
+    )
+    return await slack_oauth.slack.authorize_redirect(
+        request,
+        redirect_uri,
+        state=json.dumps({"user_id": str(user.id), "redirect_url": redirect_url}),
+    )
+
+
+@router.get("/integrations/oauth/slack/authorize")
+async def integration_slack_authorize(
+    state: str,
+    request: Request,
+    error: Union[str, None] = None,
+    user_service: UserService = Depends(),
+):
+    state = json.loads(state)
+    integration_status = "failed"
+
+    if not error:
+        try:
+            response = await slack_oauth.slack.authorize_access_token(request)
+            slack_url = response["incoming_webhook"]["url"]
+            slack_channel = response["incoming_webhook"]["channel"]
+            await user_service.save_slack_credentials(
+                state["user_id"], slack_url, slack_channel
+            )
+            integration_status = "success"
+        except Exception as e:
+            logging.error(e)
+
+    redirect_url = _build_redirect_url(
+        state["redirect_url"], key="status", value=integration_status
+    )
+    return RedirectResponse(redirect_url)

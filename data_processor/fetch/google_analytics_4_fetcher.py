@@ -1,5 +1,6 @@
 import logging
 from pandas import DataFrame
+from urllib.parse import urlparse
 
 from .fetcher import Fetcher
 from google.analytics.data_v1beta.types import DateRange
@@ -28,6 +29,11 @@ class GoogleAnalytics4Fetcher(Fetcher):
             date_ranges=[DateRange(start_date=self.start_date, end_date=self.end_date)],
         )
         response = self.analytics.run_report(request)
+        if len(response.rows) == 0:
+            logging.info("{x}".format(x="No data available for given timeframe"))
+            logging.info("{x}".format(x=response))
+            return DataFrame()
+
         output = []
         for row in response.rows:
             output.append(
@@ -42,9 +48,7 @@ class GoogleAnalytics4Fetcher(Fetcher):
         logging.info("{x}: {y}".format(x="Length of response from GA", y=len(output)))
         df = DataFrame(output)
         try:
-            df["previousPage"] = df["previousPage"].apply(
-                lambda x: "/" + x.split("/", 3)[-1] if x != "" else x
-            )
+            df["previousPage"] = df["previousPage"].apply(lambda x: urlparse(x).path)
         except Exception as e:
             logging.info(e)
         return df

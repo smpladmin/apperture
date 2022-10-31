@@ -1,11 +1,20 @@
 const WHITE_DEFAULT = '#ffffff';
 const PURPLE = '#7A4AA4';
+const WHITE_100 = '#f6f6f6';
 const WHITE_300 = '#efefef';
 const BLACK_200 = '#0E0E19';
 const NUCLEUS_TEAL = '#66A7BD';
 const SHADOW_TEAL = '#66A7BD';
 const EDGE_GRAY = '#E7EDF2';
+const EDGE_ARROW_GRAY = '#a9a9aa';
+const EDGE_LABEL_GRAY = '#808080';
 const ARROW_GRAY = '#78787E';
+const BLACK = '#000000';
+const TEAL_100 = '#BDE6F1';
+const YELLOW_100 = '#FFD98A';
+const YELLOW_200 = '#FABC41';
+const BLUE = '#6BBDF9';
+const OVERLAY_GRAY = 'rgba(0, 0, 0, 0.6)';
 
 const colors = {
   black: {
@@ -18,7 +27,7 @@ const colors = {
   white: {
     DEFAULT: WHITE_DEFAULT,
     0: 'rgba(255,255,255,0.08)',
-    100: '#f6f6f6',
+    100: WHITE_100,
     200: '#ededed',
     300: WHITE_300,
   },
@@ -33,7 +42,7 @@ const colors = {
   green: '#57aa64',
   'hover-grey': '#78787e',
   teal: {
-    100: '#BDE6F1',
+    100: TEAL_100,
   },
   radioBlack: {
     500: '#0e0e1a',
@@ -54,6 +63,7 @@ const spacing = {
   37: '9.25rem',
   39: '9.75rem',
   45: '11.25rem',
+  50: '12.5rem',
   55: '13.75rem',
   62: '15.5rem',
   70: '17.5rem',
@@ -74,20 +84,6 @@ const spacing = {
 
 const maxWidth = {
   16: '4rem',
-};
-
-const fontSize = {
-  'xs-8': ['0.5rem', '0.75rem'], // fs-8px lh-12px
-  'xs-10': ['0.625rem', '0.75rem'], // fs-10px lh-12px
-  'xs-12': ['0.75rem', '1rem'], // fs-12px lh-16px
-  'xs-14': ['0.875rem', '1.125rem'], // fs-14px lh-18px
-  base: ['1rem', '1.375rem'], // fs-16px lh-22px
-  'sh-18': ['1.125rem', '1.375rem'], //fs-18px lh-22px
-  'sh-20': ['1.25rem', '1.5rem'], //fs-20px lh-24px
-  'sh-24': ['1.5rem', '1.75rem'], //fs-24px lh-28px
-  'sh-28': ['1.75rem', '2.215rem'], //fs-28px lh-34px
-  'sh-34': ['2.125rem', '2.625rem'], //fs-34px lh-42px
-  'sh-56': ['3.5rem', '4.125rem'], //fs-56px lh-66px
 };
 
 const fontSizes = {
@@ -122,15 +118,13 @@ const boxShadow = {
   xs: '0 1px 0 rgba(30, 25, 34, 0.08)',
 };
 
-module.exports = {
+export {
   colors,
   spacing,
   maxWidth,
-  fontSize,
   boxShadow,
   fontSizes,
   lineHeights,
-  spacing,
   WHITE_DEFAULT,
   WHITE_300,
   PURPLE,
@@ -139,4 +133,13 @@ module.exports = {
   SHADOW_TEAL,
   EDGE_GRAY,
   ARROW_GRAY,
+  BLACK,
+  WHITE_100,
+  TEAL_100,
+  EDGE_LABEL_GRAY,
+  EDGE_ARROW_GRAY,
+  YELLOW_100,
+  YELLOW_200,
+  BLUE,
+  OVERLAY_GRAY,
 };
