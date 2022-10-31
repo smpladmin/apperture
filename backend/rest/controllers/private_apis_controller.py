@@ -5,12 +5,14 @@ from fastapi import APIRouter, Depends
 from data_processor_queue.service import DPQueueService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
+from domain.users.service import UserService
 from domain.notifications.service import NotificationService
 from domain.notifications.models import NotificationType
 from domain.integrations.service import IntegrationService
 from domain.runlogs.service import RunLogService
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.runlogs import UpdateRunLogDto
+from rest.dtos.users import UserResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.notifications import (
     ComputedNotificationResponse,
@@ -146,3 +148,11 @@ async def compute_notifications(
     computed_alerts = notification_service.compute_alerts(node_data_for_alerts)
 
     return computed_alerts + computed_updates
+
+
+@router.get("/users/{user_id}", response_model=UserResponse)
+async def slack_url(
+    user_id: str,
+    user_service: UserService = Depends(),
+):
+    return await user_service.get_user(user_id)
