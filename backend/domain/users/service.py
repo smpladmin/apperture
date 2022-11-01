@@ -35,5 +35,3 @@ class UserService:
         await User.find_one(
             User.id == PydanticObjectId(user_id),
         ).update({"$unset": {"slack_url": 1, "slack_channel": 1}})
-
-        return

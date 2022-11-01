@@ -1,3 +1,4 @@
+from xmlrpc.client import Boolean
 from fastapi import APIRouter, Depends
 
 from domain.users.models import User
@@ -21,9 +22,11 @@ async def get_current_user(
     return await user_service.get_user(user_id)
 
 
-@router.delete("/users/slack_credentials")
+@router.put('/users')
 async def remove_slack_credentials(
+    delete_slack_credentials: bool,
     user_id: User = Depends(get_user_id),
     user_service: UserService = Depends(),
-):
-    return await user_service.remove_slack_credentials(user_id)
+): 
+    if delete_slack_credentials:
+        return await user_service.remove_slack_credentials(user_id)
