@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 
 class TestGoogleAnalyticsFetcher:
-    def setup(self):
+    def setup_method(self):
         self.analytics = MagicMock()
         mock_response = {
             "reports": [

@@ -4,7 +4,7 @@ from transform.network_graph_transformer import NetworkGraphTransformer
 
 
 class TestNetworkGraphTransformer:
-    def setup(self):
+    def setup_method(self):
         self.df = pd.DataFrame.from_dict(
             {
                 "previousPage": {

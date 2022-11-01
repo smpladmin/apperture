@@ -9,4 +9,5 @@ class SlackNotificationStrategy:
 
     def execute(self):
         notifications = self.service.fetch_notifications(self.user_id)
-        self.service.send_notification(notifications, self.channel)
+        slack_url = self.service.fetch_slack_url(self.user_id)
+        self.service.send_notification(notifications, self.channel, slack_url)

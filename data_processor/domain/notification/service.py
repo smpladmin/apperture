@@ -1,5 +1,5 @@
+import json
 import logging
-import os
 from typing import List
 from pydantic import parse_obj_as
 
@@ -20,10 +20,19 @@ class NotificationService:
 
         raise Exception(f"Error fetching notifications for user {user_id}")
 
-    def send_updates(self, updates):
+    def fetch_slack_url(self, user_id: str):
+        response = get(f"/private/users/{user_id}")
+        if response.ok and json.loads(response.text).get("slackUrl"):
+            slack_url = json.loads(response.text).get("slackUrl")
+            logging.info(f"Got slack url: {slack_url} for user: {user_id}")
+            return slack_url
+
+        raise Exception(f"Error fetching slack url for user {user_id}")
+
+    def send_updates(self, updates: List[Notification], slack_url: str):
         text = "\n".join([f"name: {u.name}, \tvalue: {u.value}" for u in updates])
         response = requests.post(
-            os.environ.get("SLACK_URL"),
+            slack_url,
             json={
                 "attachments": [
                     {
@@ -41,14 +50,14 @@ class NotificationService:
         )
         logging.info(f"Sent updates with status {response.status_code}")
 
-    def send_alerts(self, alerts):
+    def send_alerts(self, alerts: List[Notification], slack_url: str):
         for alert in alerts:
             text = (
                 f"name: {alert.name}, \tvalue: {alert.value}, \tthreshold_type: {alert.thresholdType},"
                 f" \tuser_threshold: {alert.userThreshold}"
             )
             response = requests.post(
-                os.environ.get("SLACK_URL"),
+                slack_url,
                 json={
                     "attachments": [
                         {
@@ -64,10 +73,17 @@ class NotificationService:
                     ],
                 },
             )
-            logging.info(f"Sent alert with status {response.status_code}")
+            logging.info(
+                f"Sent alert with status {response.status_code}"
+            ) if response.ok else logging.info(
+                f"Failed to send alert with status {response.status_code}"
+            )
 
     def send_notification(
-        self, notifications: List[Notification], channel: NotificationChannel
+        self,
+        notifications: List[Notification],
+        channel: NotificationChannel,
+        slack_url: str,
     ):
         logging.info(f"Sending {notifications} to {channel}")
         updates = [
@@ -78,7 +94,7 @@ class NotificationService:
             for n in notifications
             if n.notificationType == NotificationType.ALERT and n.triggered
         ]
-        self.send_updates(updates)
-        self.send_alerts(alerts)
+        self.send_updates(updates, slack_url)
+        self.send_alerts(alerts, slack_url)
 
         logging.info("Sent notifications")

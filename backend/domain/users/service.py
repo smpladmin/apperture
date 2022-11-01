@@ -24,9 +24,14 @@ class UserService:
     async def get_user(self, id: str):
         return await User.get(id)
 
-    async def save_slack_url(self, user_id, slack_url):
+    async def save_slack_credentials(self, user_id, slack_url, slack_channel):
         await User.find_one(
             User.id == PydanticObjectId(user_id),
-        ).update({"$set": {"slack_url": slack_url}})
+        ).update({"$set": {"slack_url": slack_url, "slack_channel": slack_channel}})
 
         return
+
+    async def remove_slack_credentials(self, user_id):
+        await User.find_one(
+            User.id == PydanticObjectId(user_id),
+        ).update({"$unset": {"slack_url": 1, "slack_channel": 1}})

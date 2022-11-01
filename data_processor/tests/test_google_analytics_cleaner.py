@@ -5,7 +5,7 @@ from clean.google_analytics_cleaner import GoogleAnalyticsCleaner
 
 
 class TestGoogleAnalyticsCleaner:
-    def setup(self):
+    def setup_method(self):
         self.urls = [
             "www.google.com/en-us/search",
             "/jobs/1234/candidates",
