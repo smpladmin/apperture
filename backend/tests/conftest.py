@@ -19,4 +19,4 @@ def app_init(notification_service):
     yield app
 
     print("Tearing down app")
-    app.dependency_overrides={}
+    app.dependency_overrides = {}
