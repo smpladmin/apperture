@@ -3,5 +3,5 @@ export type User = {
   lastName: string;
   email: string;
   picture: string;
-  slackChannel: string;
+  slackChannel: string | null;
 };

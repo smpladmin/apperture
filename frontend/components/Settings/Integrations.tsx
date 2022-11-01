@@ -44,16 +44,16 @@ const Integrations = ({ user }: { user: User }) => {
   const openConfirmationModal = () => {
     router.push({
       pathname: '/analytics/settings/integrations',
-      query:{...router.query, removeSlackCredentials:true}
+      query: { ...router.query, removeSlackCredentials: true },
     });
     onOpen();
   };
 
   const closeConfirmationModal = () => {
-    delete router.query?.['removeSlackCredentials']
+    delete router.query?.['removeSlackCredentials'];
     router.push({
       pathname: '/analytics/settings/integrations',
-      query:{...router.query}
+      query: { ...router.query },
     });
     onClose();
   };
@@ -118,9 +118,14 @@ const Integrations = ({ user }: { user: User }) => {
                 fontWeight={'normal'}
                 color={'grey.200'}
               >
-                {user?.slackChannel
-                  ? <Highlight query={user?.slackChannel} styles={{fontWeight:'bold', color:'grey.200'}}>{`Sending notifications to ‘${user?.slackChannel}’`}</Highlight>
-                  : 'Connect your organisation’s slack to Apperture'}
+                {user?.slackChannel ? (
+                  <Highlight
+                    query={user?.slackChannel}
+                    styles={{ fontWeight: 'bold', color: 'grey.200' }}
+                  >{`Sending notifications to ‘${user?.slackChannel}’`}</Highlight>
+                ) : (
+                  'Connect your organisation’s slack to Apperture'
+                )}
               </Text>
             </Flex>
           </Flex>
