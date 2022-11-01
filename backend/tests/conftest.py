@@ -7,11 +7,16 @@ from rest.middlewares import get_user, validate_jwt
 from domain.notifications.service import NotificationService
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture()
 def app_init(notification_service):
+
+    print("Setting up App")
     app.dependency_overrides[validate_jwt] = lambda: mock.MagicMock()
     app.dependency_overrides[get_user] = lambda: mock.MagicMock()
     app.dependency_overrides[Mongo] = lambda: mock.MagicMock()
     app.dependency_overrides[NotificationService] = lambda: notification_service
 
-    return app
+    yield app
+
+    print("Tearing down app")
+    app.dependency_overrides={}

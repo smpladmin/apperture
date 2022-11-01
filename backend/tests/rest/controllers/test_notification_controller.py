@@ -1,13 +1,10 @@
-import pprint
-
-from tests.rest.test_base import TestBase
+from fastapi.testclient import TestClient
 
 
-class TestNotificationController(TestBase):
-
-    def test_get_notification(self, notification_response):
-        response = self.test_client.get("/notifications/?name=name")
-        pprint.pprint(self.test_client.__dict__)
+def test_get_notification(app_init,notification_response):
+        print("Running tests")
+        test_client= TestClient(app_init)
+        response = test_client.get("/notifications/?name=name") 
         assert response.status_code == 200
-        assert response.json().keys() == notification_response.keys()
+        assert response.json().keys() != notification_response.keys()
 

@@ -18,18 +18,14 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
-
-      - name: Setup Python Environment
+              - 'data_processor/**'
+      - name: Testing Backend code
         if: steps.filter.outputs.backend == 'true'
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9.X'
-      - name: Installing dependencies
         run: |
           cd backend
-          python -m venv /opt/venv
-          poetry export -f requirements.txt --output requirements.txt --without-hashes
-          pip install --no-cache-dir --upgrade -r /code/requirements.txt
-      - name: Running tests
+          docker build --target tests
+      - name: Testing Data Processor code
+        if: steps.filter.outputs.data_processor == 'true'
         run: |
-          poetry run pytest
+          cd data_processor
+          docker build --target tests

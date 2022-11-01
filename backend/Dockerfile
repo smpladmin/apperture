@@ -23,7 +23,6 @@ COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . .
 CMD uvicorn server:app --reload --host 0.0.0.0 --port 8001
-ENTRYPOINT poetry run pytest
 
 FROM base as production
 WORKDIR /code
@@ -32,3 +31,11 @@ COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . .
 CMD uvicorn server:app --host 0.0.0.0 --port 8001
+
+FROM base as tests
+WORKDIR /code
+ENV FASTAPI_ENV=test
+COPY --from=deps /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+COPY . .
+RUN poetry run pytest
