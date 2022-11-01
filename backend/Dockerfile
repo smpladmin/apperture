@@ -34,7 +34,7 @@ CMD uvicorn server:app --host 0.0.0.0 --port 8001
 
 FROM base as tests
 WORKDIR /code
-ENV FASTAPI_ENV=test
+ENV FASTAPI_ENV=development
 COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . .
