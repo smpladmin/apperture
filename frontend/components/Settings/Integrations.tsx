@@ -104,7 +104,7 @@ const Integrations = ({ user }: { user: User }) => {
             <Flex direction={'column'} gap={'2'}>
               <Flex gap={'2'} alignItems={'center'}>
                 <Text
-                  fontSize={'xs-14'}
+                  fontSize={'base'}
                   lineHeight={'xs-14'}
                   fontWeight={'semibold'}
                 >
@@ -121,7 +121,7 @@ const Integrations = ({ user }: { user: User }) => {
                 {user?.slackChannel ? (
                   <Highlight
                     query={user?.slackChannel}
-                    styles={{ fontWeight: 'bold', color: 'grey.200' }}
+                    styles={{ fontWeight: 'semibold', color: 'grey.200' }}
                   >{`Sending notifications to ‘${user?.slackChannel}’`}</Highlight>
                 ) : (
                   'Connect your organisation’s slack to Apperture'
