@@ -3,6 +3,7 @@ import {
   Button,
   Divider,
   Flex,
+  Highlight,
   IconButton,
   Text,
   useDisclosure,
@@ -37,25 +38,30 @@ const IntegrationConnectionInfo = () => {
 const Integrations = ({ user }: { user: User }) => {
   const router = useRouter();
   const { previousDsId } = router.query;
-
+  const SLACK_OAUTH_LINK = `${BACKEND_BASE_URL}/integrations/oauth/slack?redirect_url=${FRONTEND_BASE_URL}/analytics/settings/integrations?previousDsId=${previousDsId}`;
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const openConfirmationModal = () => {
-    router.push('/analytics/settings/integrations?removeIntegration=true');
+    router.push({
+      pathname: '/analytics/settings/integrations',
+      query:{...router.query, removeSlackCredentials:true}
+    });
     onOpen();
   };
 
   const closeConfirmationModal = () => {
-    router.push('/analytics/settings/integrations');
+    delete router.query?.['removeSlackCredentials']
+    router.push({
+      pathname: '/analytics/settings/integrations',
+      query:{...router.query}
+    });
     onClose();
   };
 
-  const handleDelete = async () => {
+  const handleDeleteSlackCredentials = async () => {
     await removeSlackCredentials();
     closeConfirmationModal();
   };
-
-  const SLACK_OAUTH_LINK = `${BACKEND_BASE_URL}/integrations/oauth/slack?redirect_url=${FRONTEND_BASE_URL}/analytics/settings/integrations?previousDsId=${previousDsId}`;
 
   return (
     <>
@@ -113,7 +119,7 @@ const Integrations = ({ user }: { user: User }) => {
                 color={'grey.200'}
               >
                 {user?.slackChannel
-                  ? `Sending notifications to ‘${user?.slackChannel}’`
+                  ? <Highlight query={user?.slackChannel} styles={{fontWeight:'bold', color:'grey.200'}}>{`Sending notifications to ‘${user?.slackChannel}’`}</Highlight>
                   : 'Connect your organisation’s slack to Apperture'}
               </Text>
             </Flex>
@@ -170,7 +176,7 @@ const Integrations = ({ user }: { user: User }) => {
         headerText={'Stop getting alerts on Slack?'}
         bodyText={'Are your sure you want to remove integration with Slack?'}
         primaryButtonText={'Remove'}
-        primaryAction={handleDelete}
+        primaryAction={handleDeleteSlackCredentials}
         secondaryAction={closeConfirmationModal}
       />
     </>
