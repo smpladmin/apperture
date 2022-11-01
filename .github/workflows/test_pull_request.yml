@@ -23,6 +23,7 @@ jobs:
         if: steps.filter.outputs.backend == 'true'
         run: |
           cd backend
+          mv .defaults .env
           docker build . --target tests
       - name: Testing Data Processor code
         if: steps.filter.outputs.data_processor == 'true'
