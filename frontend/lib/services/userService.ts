@@ -16,7 +16,7 @@ export const _getUserInfo = async (token: string) => {
 
 export const removeSlackCredentials = async () => {
   try {
-    await AppertureAPI.delete('/users/slack_credentials');
+    await AppertureAPI.put('/users?delete_slack_credentials=true');
   } catch (e) {
     console.error((e as AxiosError).message);
   }
