@@ -1,5 +1,6 @@
 from xmlrpc.client import Boolean
 from fastapi import APIRouter, Depends
+from clickhouse.clickhouse import Clickhouse
 
 from domain.users.models import User
 from domain.users.service import UserService
@@ -30,3 +31,12 @@ async def remove_slack_credentials(
 ):
     if delete_slack_credentials:
         return await user_service.remove_slack_credentials(user_id)
+
+
+@router.get("/clickhouse")
+def clickhouse_connection(
+    clickhouse: Clickhouse = Depends(),
+):
+    clickhouse.client.execute('DROP TABLE IF NOT EXISTS test2 (x Int32) ENGINE = Memory')
+    clickhouse.close()
+    return

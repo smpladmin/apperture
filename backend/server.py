@@ -22,17 +22,22 @@ from rest.controllers import (
     user_controller,
 )
 from mongo import Mongo
+from clickhouse import Clickhouse
 
 
 async def on_startup():
     mongo = Mongo()
+    clickhouse = Clickhouse()
     app.dependency_overrides[Mongo] = lambda: mongo
+    app.dependency_overrides[Clickhouse] = lambda: clickhouse
     await mongo.init()
 
 
 async def on_shutdown():
     mongo: Mongo = app.dependency_overrides[Mongo]()
+    clickhouse: Clickhouse = app.dependency_overrides[Clickhouse]()
     await mongo.close()
+    await clickhouse.close()
 
 
 app = FastAPI(on_startup=[on_startup], on_shutdown=[on_shutdown])
