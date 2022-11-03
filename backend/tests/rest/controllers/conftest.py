@@ -11,6 +11,7 @@ from domain.notifications.models import (
     NotificationMetric,
     NotificationType,
 )
+from domain.common.models import IntegrationProvider
 
 
 @pytest.fixture(scope="module")
@@ -99,3 +100,23 @@ def notification_data():
         "preferredChannels": [NotificationChannel.SLACK],
         "notificationActive": False,
     }
+
+
+@pytest.fixture(scope="module")
+def events_data():
+    return [
+        {
+            "datasourceId": "1234",
+            "provider": IntegrationProvider.MIXPANEL,
+            "timestamp": "2019-01-01 00:00:00.000000",
+            "event_name": "event_a",
+            "properties": {},
+        },
+        {
+            "datasourceId": "1234",
+            "provider": IntegrationProvider.MIXPANEL,
+            "timestamp": "2019-01-01 00:00:00.000000",
+            "event_name": "event_b",
+            "properties": {"a": "b", "b": "c"},
+        },
+    ]
