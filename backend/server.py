@@ -8,7 +8,6 @@ logging.getLogger().setLevel(logging.INFO)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from data_processor_queue import dpq
 
 from rest.controllers import (
     app_controller,
@@ -20,6 +19,7 @@ from rest.controllers import (
     private_apis_controller,
     schedule_controller,
     notification_controller,
+    user_controller,
 )
 from mongo import Mongo
 
@@ -58,3 +58,4 @@ app.include_router(data_processor_controller.router)
 app.include_router(datasource_controller.router)
 app.include_router(schedule_controller.router)
 app.include_router(notification_controller.router)
+app.include_router(user_controller.router)

@@ -15,6 +15,7 @@ const YELLOW_100 = '#FFD98A';
 const YELLOW_200 = '#FABC41';
 const BLUE = '#6BBDF9';
 const OVERLAY_GRAY = 'rgba(0, 0, 0, 0.6)';
+const GREEN = '#57AA64';
 
 const colors = {
   black: {
@@ -39,7 +40,7 @@ const colors = {
     200: '#78787E',
   },
   yellow: '#fac213',
-  green: '#57aa64',
+  green: GREEN,
   'hover-grey': '#78787e',
   teal: {
     100: TEAL_100,
@@ -142,4 +143,5 @@ export {
   YELLOW_200,
   BLUE,
   OVERLAY_GRAY,
+  GREEN,
 };

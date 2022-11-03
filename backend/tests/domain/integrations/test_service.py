@@ -8,7 +8,7 @@ from domain.integrations.service import IntegrationService
 
 
 class TestIntegrationService:
-    def setup(self):
+    def setup_method(self):
         App.get_settings = MagicMock()
         Integration.get_settings = MagicMock()
         Integration.insert = AsyncMock()

@@ -3,6 +3,7 @@ from typing import List, Dict, Optional
 from pydantic import BaseModel
 from beanie import PydanticObjectId
 from repositories.document import Document
+from rest.dtos.model_response import ModelResponse
 
 
 class NotificationType(str, Enum):
@@ -66,3 +67,8 @@ class ComputedNotification(BaseModel):
     threshold_type: Optional[NotificationThresholdType]
     user_threshold: Optional[ThresholdMap]
     triggered: Optional[bool]
+
+
+class NotificationResponse(Notification, ModelResponse):
+    class Config:
+        allow_population_by_field_name = True
