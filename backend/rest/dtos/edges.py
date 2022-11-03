@@ -1,8 +1,13 @@
 from typing import Optional, Union
 
 from domain.common.models import IntegrationProvider
-from domain.edge.models import (AggregatedEdge, Edge, NodeSankey,
-                                NodeSignificance, NodeTrend)
+from domain.edge.models import (
+    AggregatedEdge,
+    Edge,
+    NodeSankey,
+    NodeSignificance,
+    NodeTrend,
+)
 from pydantic import BaseModel
 from rest.dtos.model_response import ModelResponse
 

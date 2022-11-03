@@ -30,8 +30,8 @@ class AmplitudeNetworkGraphTransformer(Transformer):
     def transform_to_plot(self, df):
         date = df["time"].iloc[0]
         logging.info(date)
-        date_format = "%Y-%m-%d" 
-        date_time = datetime.datetime.strptime(date[:10],date_format)
+        date_format = "%Y-%m-%d"
+        date_time = datetime.datetime.strptime(date[:10], date_format)
         date_time = date_time.replace(hour=0, minute=0, second=0, microsecond=0)
         logging.info(date_time)
         df["time"] = date_time
@@ -47,31 +47,30 @@ class AmplitudeNetworkGraphTransformer(Transformer):
                     "os",
                     "time",
                 ],
-                dropna=False
+                dropna=False,
             )
             .apply(lambda grp: grp.agg({"user_id": "count"}))
             .reset_index()
             .sort_values(by="user_id", ascending=False)
             .reset_index()
-        ) 
+        )
 
         data_to_plot = data_to_plot.loc[
             data_to_plot.previousnode_id != data_to_plot.node_id
         ]
         data_to_plot = data_to_plot.drop(columns=["index"]).reset_index(drop=True)
         data_to_plot.rename(
-            columns={"node_id": "pagePath", "previousnode_id": "previousPage","user_id":"pageViews"},
+            columns={
+                "node_id": "pagePath",
+                "previousnode_id": "previousPage",
+                "user_id": "pageViews",
+            },
             inplace=True,
         )
         return data_to_plot
 
     def add_counts(self, df):
-        cnts = (
-            df[["user_id"]]
-            .groupby(["user_id"])
-            .size()
-            .reset_index(name="counts")
-        )
+        cnts = df[["user_id"]].groupby(["user_id"]).size().reset_index(name="counts")
         df = df.merge(cnts, on="user_id")
         return df
 
@@ -83,9 +82,15 @@ class AmplitudeNetworkGraphTransformer(Transformer):
         )
         df.dropna(subset=["previousevent"], inplace=True)
         df.dropna(subset=["event.name"], inplace=True)
-        
+
         df.rename(
-            columns={"event.name": "node_id", "previousevent": "previousnode_id","event.timestamp":"time","os_name":"os","country":"mp_country_code"},
+            columns={
+                "event.name": "node_id",
+                "previousevent": "previousnode_id",
+                "event.timestamp": "time",
+                "os_name": "os",
+                "country": "mp_country_code",
+            },
             inplace=True,
         )
         return df

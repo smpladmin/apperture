@@ -4,8 +4,7 @@ from clean.mixpanel_analytics_cleaner import MixpanelAnalyticsCleaner
 from fetch.mixpanel_analytics_fetcher import MixpanelAnalyticsFetcher
 from store.mixpanel_network_graph_saver import MixpanelNetworkGraphSaver
 from strategies.strategy import Strategy
-from transform.mixpanel_network_graph_transformer import \
-    MixpanelNetworkGraphTransformer
+from transform.mixpanel_network_graph_transformer import MixpanelNetworkGraphTransformer
 
 
 class MixpanelAnalyticsStrategy(Strategy):

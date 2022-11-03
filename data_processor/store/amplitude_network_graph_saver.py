@@ -24,11 +24,11 @@ class AmplitudeNetworkGraphSaver(Saver):
             }
         )
         df.date = df.date.apply(lambda x: x.strftime("%Y-%m-%d"))
-        df=df.replace({np.nan:None})
+        df = df.replace({np.nan: None})
         edges = df.to_dict("records")
-        data = {"datasourceId": datasource_id, "provider": provider, "edges": edges} 
+        data = {"datasourceId": datasource_id, "provider": provider, "edges": edges}
         res = self._save_data(data)
-        if not res.ok: 
+        if not res.ok:
             raise Exception(
                 f"Error saving data for datasource_id {datasource_id}, response status - {res.status_code}"
             )

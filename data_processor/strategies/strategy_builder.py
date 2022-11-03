@@ -24,31 +24,28 @@ class StrategyBuilder:
         refresh_token: str,
         datasource_id: str,
     ):
-        strategies={
-            IntegrationProvider.GOOGLE:{
-                "V3":GoogleAnalyticsStrategy(
+        strategies = {
+            IntegrationProvider.GOOGLE: {
+                "V3": GoogleAnalyticsStrategy(
                     access_token,
                     refresh_token,
                     datasource_id,
                     IntegrationProvider.GOOGLE,
                 ),
-                "V4":GoogleAnalytics4Strategy(
+                "V4": GoogleAnalytics4Strategy(
                     access_token,
                     refresh_token,
                     datasource_id,
                     IntegrationProvider.GOOGLE,
-                )
+                ),
             },
-            IntegrationProvider.MIXPANEL:{
-                "DEFAULT": MixpanelAnalyticsStrategy()
-            }
+            IntegrationProvider.MIXPANEL: {"DEFAULT": MixpanelAnalyticsStrategy()},
         }
-        if not strategies[provider][version]:  raise NotImplementedError(
+        if not strategies[provider][version]:
+            raise NotImplementedError(
                 f"Strategy not implemented for given provider - {provider}"
             )
-        return strategies[provider][version] 
- 
-            
+        return strategies[provider][version]
 
 
 class EventsStrategyBuilder:
@@ -56,14 +53,18 @@ class EventsStrategyBuilder:
     def build(
         datasource: DataSource, credential: Credential, runlog_id: str, date: str
     ):
-        strategies={
-            IntegrationProvider.MIXPANEL:{
-                "DEFAULT": MixpanelAnalyticsStrategy(datasource, credential, runlog_id, date)
+        strategies = {
+            IntegrationProvider.MIXPANEL: {
+                "DEFAULT": MixpanelAnalyticsStrategy(
+                    datasource, credential, runlog_id, date
+                )
             },
-            IntegrationProvider.AMPLITUDE:{
-                "DEFAULT": AmplitudeEventsStrategy(datasource, credential, runlog_id, date)
+            IntegrationProvider.AMPLITUDE: {
+                "DEFAULT": AmplitudeEventsStrategy(
+                    datasource, credential, runlog_id, date
+                )
             },
-        }  
+        }
         if not strategies[datasource.provider][datasource.version]:
             raise NotImplementedError(
                 f"Strategy not implemented for given provider - {datasource.provider}"

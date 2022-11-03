@@ -8,8 +8,9 @@ from fetch.amplitude_events_fetcher import AmplitudeEventsFetcher
 from fetch.data_orchestrator import DataOrchestrator
 from store.amplitude_network_graph_saver import AmplitudeNetworkGraphSaver
 from store.mixpanel_events_saver import S3EventsSaver
-from transform.amplitude_network_graph_transformer import \
-    AmplitudeNetworkGraphTransformer
+from transform.amplitude_network_graph_transformer import (
+    AmplitudeNetworkGraphTransformer,
+)
 
 from ..event_processors.amplitude_event_processor import AmplitudeEventProcessor
 
@@ -22,10 +23,12 @@ class AmplitudeEventsStrategy:
         self.credential = credential
         self.date = date
         self.runlog_id = runlog_id
-        self.event_processor=AmplitudeEventProcessor()
+        self.event_processor = AmplitudeEventProcessor()
         fetcher = AmplitudeEventsFetcher(credential, date, DataFormat.BINARY)
         events_saver = S3EventsSaver(credential, date)
-        self.data_orchestrator = DataOrchestrator(fetcher, events_saver,DataFormat.BINARY)
+        self.data_orchestrator = DataOrchestrator(
+            fetcher, events_saver, DataFormat.BINARY
+        )
         self.cleaner = AmplitudeAnalyticsCleaner()
         self.transformer = AmplitudeNetworkGraphTransformer()
         self.saver = AmplitudeNetworkGraphSaver()
@@ -43,12 +46,14 @@ class AmplitudeEventsStrategy:
             logging.info(f"Cleaning data for date - {self.date}")
             df = self.cleaner.clean(df)
             logging.info(f"Transforming data for date - {self.date}")
-            network_graph_data = self.transformer.transform(df) 
+            network_graph_data = self.transformer.transform(df)
 
-            self.saver.save(self.datasource.id,
+            self.saver.save(
+                self.datasource.id,
                 IntegrationProvider.AMPLITUDE,
-                network_graph_data,)
-            
+                network_graph_data,
+            )
+
             self.runlog_service.update_completed(self.runlog_id)
         except Exception as e:
             self.runlog_service.update_failed(self.runlog_id)
