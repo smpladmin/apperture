@@ -19,7 +19,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   }
   const apps = await _getAppsWithIntegrations(token);
   const edges = await _getEdges(token, query.dsId as string);
-  const hideHeader = true;
+
   if (!apps.length) {
     return {
       redirect: {
@@ -29,7 +29,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
   return {
-    props: { apps, edges, hideHeader },
+    props: { apps, edges },
   };
 };
 
