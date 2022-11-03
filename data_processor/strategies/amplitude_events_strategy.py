@@ -1,20 +1,21 @@
 import logging
 
-import pandas as pd
-from clean.mixpanel_analytics_cleaner import MixpanelAnalyticsCleaner
+from clean.amplitude_analytics_cleaner import AmplitudeAnalyticsCleaner
 from domain.common.models import DataFormat, IntegrationProvider
 from domain.datasource.models import Credential, DataSource
 from domain.runlog.service import RunLogService
+from fetch.amplitude_events_fetcher import AmplitudeEventsFetcher
 from fetch.data_orchestrator import DataOrchestrator
-from fetch.mixpanel_events_fetcher import MixpanelEventsFetcher
+from store.amplitude_network_graph_saver import AmplitudeNetworkGraphSaver
 from store.mixpanel_events_saver import S3EventsSaver
-from store.mixpanel_network_graph_saver import MixpanelNetworkGraphSaver
-from transform.mixpanel_network_graph_transformer import MixpanelNetworkGraphTransformer
+from transform.amplitude_network_graph_transformer import (
+    AmplitudeNetworkGraphTransformer,
+)
 
-from ..event_processors.mix_panel_event_processor import MixPanelEventProcessor
+from ..event_processors.amplitude_event_processor import AmplitudeEventProcessor
 
 
-class MixpanelEventsStrategy:
+class AmplitudeEventsStrategy:
     def __init__(
         self, datasource: DataSource, credential: Credential, runlog_id: str, date: str
     ):
@@ -22,15 +23,15 @@ class MixpanelEventsStrategy:
         self.credential = credential
         self.date = date
         self.runlog_id = runlog_id
-        self.event_processor = MixPanelEventProcessor()
-        fetcher = MixpanelEventsFetcher(credential, date, DataFormat.UNICODE)
+        self.event_processor = AmplitudeEventProcessor()
+        fetcher = AmplitudeEventsFetcher(credential, date, DataFormat.BINARY)
         events_saver = S3EventsSaver(credential, date)
         self.data_orchestrator = DataOrchestrator(
-            fetcher, events_saver, DataFormat.UNICODE
+            fetcher, events_saver, DataFormat.BINARY
         )
-        self.cleaner = MixpanelAnalyticsCleaner()
-        self.transformer = MixpanelNetworkGraphTransformer()
-        self.saver = MixpanelNetworkGraphSaver()
+        self.cleaner = AmplitudeAnalyticsCleaner()
+        self.transformer = AmplitudeNetworkGraphTransformer()
+        self.saver = AmplitudeNetworkGraphSaver()
         self.runlog_service = RunLogService()
 
     def execute(self):
@@ -38,18 +39,21 @@ class MixpanelEventsStrategy:
             self.runlog_service.update_started(self.runlog_id)
             events_data = self.data_orchestrator.orchestrate()
             logging.info(
-                f"Saved Event Data to S3 for Mixpanel datasource, name - {self.datasource.name} id - {self.datasource.id} date - {self.date}"
+                f"Saved Event Data to S3 for Amplitude datasource, name - {self.datasource.name} id - {self.datasource.id} date - {self.date}"
             )
             logging.info(f"Processing events data for date - {self.date}")
-
             df = self.event_processor.process(events_data)
+            logging.info(f"Cleaning data for date - {self.date}")
             df = self.cleaner.clean(df)
+            logging.info(f"Transforming data for date - {self.date}")
             network_graph_data = self.transformer.transform(df)
+
             self.saver.save(
                 self.datasource.id,
-                IntegrationProvider.MIXPANEL,
+                IntegrationProvider.AMPLITUDE,
                 network_graph_data,
             )
+
             self.runlog_service.update_completed(self.runlog_id)
         except Exception as e:
             self.runlog_service.update_failed(self.runlog_id)

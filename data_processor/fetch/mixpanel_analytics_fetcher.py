@@ -1,9 +1,11 @@
 import logging
-import boto3
-import pandas as pd
 import os
 from datetime import date, timedelta
+
+import boto3
+import pandas as pd
 from pandas import DataFrame
+
 from .fetcher import Fetcher
 from .report_timeframe import ReportTimeframe
 

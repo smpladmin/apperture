@@ -2,14 +2,15 @@ import logging
 import os
 
 import requests
+
 from apperture.backend_action import post
+from domain.datasource.service import DataSourceService
 from domain.notification.models import NotificationFrequency, NotificationType
 from strategies.strategy_builder import (
-    StrategyBuilder,
     EventsStrategyBuilder,
     NotificationStrategyBuilder,
+    StrategyBuilder,
 )
-from domain.datasource.service import DataSourceService
 
 logging.getLogger().setLevel(logging.INFO)
 
