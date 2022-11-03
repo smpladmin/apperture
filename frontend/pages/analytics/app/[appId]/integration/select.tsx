@@ -12,6 +12,7 @@ import { useRouter } from 'next/router';
 import 'remixicon/fonts/remixicon.css';
 import gaLogo from '@assets/images/ga-logo-small.svg';
 import mixpanelLogo from '@assets/images/mixPanel-icon.png';
+import amplitudeLogo from '@assets/images/amplitude-icon.png';
 import FormButton from '@components/FormButton';
 import IntegrationSource from '@components/IntegrationSource';
 import { Provider } from '@lib/domain/provider';
@@ -89,6 +90,12 @@ const SelectProvider = () => {
                   value={Provider.MIXPANEL}
                   imgSrc={mixpanelLogo}
                   selected={provider === Provider.MIXPANEL}
+                />
+                <IntegrationSource
+                  sourceName="Amplitude"
+                  value={Provider.AMPLITUDE}
+                  imgSrc={amplitudeLogo}
+                  selected={provider === Provider.AMPLITUDE}
                 />
               </Stack>
             </RadioGroup>

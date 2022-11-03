@@ -5,7 +5,7 @@ from smart_open import open as sopen
 from domain.datasource.models import Credential, DataSource
 
 
-class MixpanelEventsSaver:
+class S3EventsSaver:
     def __init__(self, credential: Credential, date: str):
         self.session = boto3.Session(
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
