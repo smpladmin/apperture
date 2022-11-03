@@ -1,3 +1,4 @@
+import AmplitudeIntegration from '@components/CreateIntegration/AmplitudeIntegration';
 import GooglePermission from '@components/CreateIntegration/GooglePermission';
 import MixpanelIntegration from '@components/CreateIntegration/MixpanelIntegration';
 import { Provider } from '@lib/domain/provider';
@@ -22,9 +23,9 @@ const Create = () => {
           handleClose={handleClose}
           query={{ ...router.query }}
         />
-      ) : (
+      ) : provider === Provider.MIXPANEL?(
         <MixpanelIntegration add={add} handleClose={handleClose} />
-      )}
+      ):<AmplitudeIntegration add={add} handleClose={handleClose} />}
     </>
   );
 };

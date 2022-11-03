@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.post("/notifications")
+@router.post("/notifications", response_model=NotificationResponse)
 async def add_notification(
     dto: CreateNotificationDto,
     user: User = Depends(get_user),
@@ -51,7 +51,7 @@ async def get_notification(
     return await notification_service.get_notification_for_node(name)
 
 
-@router.put("/notifications/{notification_id}")
+@router.put("/notifications/{notification_id}", response_model=NotificationResponse)
 async def update_notification(
     notification_id: str,
     dto: CreateNotificationDto,

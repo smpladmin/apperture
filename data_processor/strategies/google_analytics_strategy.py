@@ -9,7 +9,6 @@ from fetch.google_analytics import initialize_v3_analytics
 from fetch.google_analytics_fetcher import GoogleAnalyticsFetcher
 from store.transformed_data_saver import TransformedDataSaver
 from strategies.strategy import Strategy
-from tenants.tenants_service import TenantsService
 from transform.ga_new_rollup import NetworkGraphTransformer
 
 
@@ -23,7 +22,6 @@ class GoogleAnalyticsStrategy(Strategy):
     ):
         self.datasource_id = datasource_id
         self.provider = provider
-        self.tenants_service = TenantsService()
         analytics = initialize_v3_analytics(access_token, refresh_token)
         # TODO: Abstract date logic, duplicated in v3 and v4 strategies
         start_date = date.today() + relativedelta(days=-120)

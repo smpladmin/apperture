@@ -7,7 +7,7 @@ from rest.middlewares import get_user, validate_jwt
 from domain.notifications.service import NotificationService
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def app_init(notification_service):
 
     print("Setting up App")
@@ -19,4 +19,4 @@ def app_init(notification_service):
     yield app
 
     print("Tearing down app")
-    app.dependency_overrides={}
+    app.dependency_overrides = {}

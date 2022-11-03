@@ -136,7 +136,7 @@ ami = aws.ec2.get_ami(
     filters=[
         aws.GetAmiFilterArgs(
             name="name",
-            values=["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"],
+            values=["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20220921.1"],
         ),
         aws.GetAmiFilterArgs(name="architecture", values=["x86_64"]),
     ],
@@ -185,3 +185,32 @@ for i in range(1, data.get("ec2_private_count") + 1):
             "Swarm": f"worker-{i}",
         },
     )
+
+# clickhouse instance
+ch_instance = aws.ec2.Instance(
+    data.get("ec2_clickhouse_name"),
+    instance_type=data.get("ec2_clickhouse_type"),
+    vpc_security_group_ids=[sg.id],
+    ami=ami.id,
+    key_name=keypair.key_name,
+    subnet_id=publicsubnet.id,
+    associate_public_ip_address=True,
+    root_block_device={"volume_size": 30},
+    tags={
+        "Name": data.get("ec2_clickhouse_name"),
+        "Swarm": "clickhouse-wroker",
+    },
+)
+
+ch_volume = aws.ebs.Volume(
+    f'{data.get("ec2_clickhouse_name")}-volume',
+    availability_zone=ch_instance.availability_zone,
+    size=100,
+)
+
+aws.ec2.VolumeAttachment(
+    f'{data.get("ec2_clickhouse_name")}-volume-att',
+    device_name="/dev/sdh",
+    volume_id=ch_volume.id,
+    instance_id=ch_instance.id,
+)

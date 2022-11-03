@@ -3,6 +3,7 @@ from typing import List, Optional
 from beanie import PydanticObjectId, UnionDoc
 from pydantic import BaseModel
 
+from beanie import PydanticObjectId, UnionDoc
 from domain.common.models import IntegrationProvider
 from domain.notifications.models import ThresholdMap
 from repositories import Document
@@ -33,13 +34,13 @@ class RichEdge(Document):
     current_event: str
     hits: int
     date: datetime.datetime
-    city: str
-    region: str
-    country: str
-    utm_source: str
-    utm_medium: str
-    os: str
-    app_version: str
+    city: Optional[str]
+    region: Optional[str]
+    country: Optional[str]
+    utm_source: Optional[str]
+    utm_medium: Optional[str]
+    os: Optional[str]
+    app_version: Optional[str]
 
     class Settings:
         union_doc = BaseEdge
