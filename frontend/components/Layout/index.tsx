@@ -10,16 +10,16 @@ import ConfigureAppsModal from '@components/ConfigureAppsModal';
 export default function Layout({ children, apps = [] }: LayoutProps) {
   const router = useRouter();
   const defaultAppId = apps
-    .flatMap((app) =>
-      app.integrations.flatMap((integration) => integration.datasources)
+    ?.flatMap((app) =>
+      app?.integrations.flatMap((integration) => integration.datasources)
     )
-    .find((app) => app._id === router.query.dsId)?.appId;
+    .find((app) => app?._id === router.query.dsId)?.appId;
 
   const [selectedAppId, setSelectedAppId] = useState(
-    defaultAppId || apps[0]._id
+    defaultAppId || apps[0]?._id
   );
   const [selectedApp, setSelectedApp] = useState(
-    apps.find((a) => a._id === defaultAppId) || apps[0]
+    apps.find((a) => a?._id === defaultAppId) || apps?.[0]
   );
 
   const { isOpen, onOpen, onClose } = useDisclosure({
@@ -34,7 +34,7 @@ export default function Layout({ children, apps = [] }: LayoutProps) {
   });
 
   useEffect(() => {
-    setSelectedApp(apps.find((a) => a._id === selectedAppId)!!);
+    setSelectedApp(apps.find((a) => a?._id === selectedAppId)!!);
   }, [apps, selectedAppId]);
 
   const onModalOpen = (modalQuery: string) => {
