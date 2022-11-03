@@ -1,9 +1,11 @@
-import aioch
+import clickhouse_connect
 
 
 class Clickhouse:
-    async def init(self):
-        self.client = aioch.Client(host='clickhouse')
+    def init(self):
+        self.client = clickhouse_connect.get_client(
+            host="clickhouse", allow_experimental_object_type=1
+        )
 
-    async def close(self):
-        await self.client.disconnect()
+    def close(self):
+        self.client.close()
