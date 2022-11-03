@@ -1,9 +1,9 @@
-import clickhouse_driver
+import aioch
 
 
 class Clickhouse:
-    def __init__(self):
-        self.client = clickhouse_driver.Client(host='clickhouse')
+    async def init(self):
+        self.client = aioch.Client(host='clickhouse')
 
-    def close(self):
-        self.client.disconnect()
+    async def close(self):
+        await self.client.disconnect()

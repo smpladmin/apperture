@@ -31,6 +31,7 @@ async def on_startup():
     app.dependency_overrides[Mongo] = lambda: mongo
     app.dependency_overrides[Clickhouse] = lambda: clickhouse
     await mongo.init()
+    await clickhouse.init()
 
 
 async def on_shutdown():
