@@ -12,10 +12,12 @@ import {
 } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import Image from 'next/image';
-import React, { ChangeEvent, Fragment, useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import HorizontalParallelLineIcon from '@assets/icons/horizontal-parallel-line.svg';
 import CrossIcon from '@assets/icons/cross-icon.svg';
 import FunnelIcon from '@assets/icons/funnel-icon.svg';
+import dot from '@assets/icons/dot.svg';
+import line from '@assets/icons/line.svg';
 
 const CreateFunnel = () => {
   const [inputFieldsValue, setInputFieldsValue] = useState([
@@ -24,10 +26,13 @@ const CreateFunnel = () => {
   ]);
   const [showCrossIcon, setShowCrossIcon] = useState(false);
 
+  const dragItem = useRef<{ index: number | null }>({ index: null });
+  const dragOverItem = useRef<{ index: number | null }>({ index: null });
+
   useEffect(() => {
-    if (inputFieldsValue.length <= 2) return;
-    setShowCrossIcon(true);
-  }, [inputFieldsValue.length]);
+    if (inputFieldsValue.length <= 2) setShowCrossIcon(false);
+    else setShowCrossIcon(true);
+  }, [inputFieldsValue]);
 
   const addNewInputField = () => {
     const newField = { eventName: '' };
@@ -49,7 +54,19 @@ const CreateFunnel = () => {
     inputValues[index].eventName = e.target.value;
     setInputFieldsValue(inputValues);
   };
-  console.log(inputFieldsValue);
+
+  const handleSort = () => {
+    if (dragItem.current.index === null || dragOverItem.current.index === null)
+      return;
+
+    const inputValues = [...inputFieldsValue];
+    const [itemToReplace] = inputValues.splice(dragItem.current.index, 1);
+    inputValues.splice(dragOverItem.current.index, 0, itemToReplace);
+
+    setInputFieldsValue(inputValues);
+    dragItem.current.index = null;
+    dragOverItem.current.index = null;
+  };
 
   return (
     <Flex direction={'column'} gap={'4'}>
@@ -73,55 +90,83 @@ const CreateFunnel = () => {
           {'+'}
         </Button>
       </Flex>
-      <Flex direction={'column'} gap={'4'}>
-        {inputFieldsValue.map((inputValue, i) => {
-          return (
-            <Box key={i} draggable>
-              <InputGroup>
-                <InputLeftElement cursor={'all-scroll'}>
-                  <Image
-                    src={HorizontalParallelLineIcon}
-                    alt={'parallel-line-icon'}
+      <Flex gap={'4'}>
+        <Flex direction={'column'} alignItems={'center'} py={'5'} gap={'1'}>
+          <Image src={dot} />
+          {Array.from({ length: inputFieldsValue.length - 1 }).map((_, i) => {
+            return (
+              <Flex
+                key={i}
+                direction={'column'}
+                alignItems={'center'}
+                gap={'1'}
+              >
+                <Image src={line} />
+                <Image src={dot} />
+              </Flex>
+            );
+          })}
+        </Flex>
+        <Flex direction={'column'} gap={'4'} w={'full'}>
+          {inputFieldsValue.map((inputValue, i) => {
+            return (
+              <Flex
+                key={i}
+                draggable
+                onDragStart={() => (dragItem.current.index = i)}
+                onDragOver={(event) => event?.preventDefault()}
+                onDragEnter={() => (dragOverItem.current.index = i)}
+                onDragEnd={handleSort}
+              >
+                <InputGroup>
+                  <InputLeftElement cursor={'all-scroll'}>
+                    <Flex alignItems={'center'}>
+                      <Image
+                        src={HorizontalParallelLineIcon}
+                        alt={'parallel-line-icon'}
+                      />
+                    </Flex>
+                  </InputLeftElement>
+                  <Input
+                    type={'text'}
+                    autoFocus
+                    fontSize={'xs-14'}
+                    lineHeight={'xs-14'}
+                    fontWeight={'medium'}
+                    textColor={'white.DEFAULT'}
+                    height={'12'}
+                    bg={'rgba(255, 255, 255, 0.04)'}
+                    border={'0'}
+                    borderRadius={'200'}
+                    placeholder={'Add event'}
+                    _placeholder={{
+                      fontSize: 'xs-14',
+                      lineHeight: 'sh-18',
+                      fontWeight: 400,
+                      color: 'rgba(255, 255, 255, 0.2)',
+                    }}
+                    value={inputValue?.eventName}
+                    onChange={(e) => handleInputChangeValue(e, i)}
                   />
-                </InputLeftElement>
-                <Input
-                  type={'text'}
-                  fontSize={'xs-14'}
-                  lineHeight={'xs-14'}
-                  fontWeight={'medium'}
-                  textColor={'white.DEFAULT'}
-                  height={'12'}
-                  bg={'rgba(255, 255, 255, 0.04)'}
-                  border={'0'}
-                  borderRadius={'200'}
-                  placeholder={'Add event'}
-                  _placeholder={{
-                    fontSize: 'xs-14',
-                    lineHeight: 'sh-18',
-                    fontWeight: 400,
-                    color: 'rgba(255, 255, 255, 0.2)',
-                  }}
-                  value={inputValue?.eventName}
-                  onChange={(e) => handleInputChangeValue(e, i)}
-                />
-                <InputRightElement
-                  color={'white'}
-                  cursor={'pointer'}
-                  pr={'4'}
-                  alignItems={'center'}
-                >
-                  {showCrossIcon ? (
-                    <Image
-                      src={CrossIcon}
-                      onClick={() => removeInputField(i)}
-                      alt={'cross-icon'}
-                    />
-                  ) : null}
-                </InputRightElement>
-              </InputGroup>
-            </Box>
-          );
-        })}
+                  <InputRightElement
+                    color={'white'}
+                    cursor={'pointer'}
+                    pr={'4'}
+                    alignItems={'center'}
+                  >
+                    {showCrossIcon ? (
+                      <Image
+                        src={CrossIcon}
+                        onClick={() => removeInputField(i)}
+                        alt={'cross-icon'}
+                      />
+                    ) : null}
+                  </InputRightElement>
+                </InputGroup>
+              </Flex>
+            );
+          })}
+        </Flex>
       </Flex>
       <Divider
         mt={'4'}
