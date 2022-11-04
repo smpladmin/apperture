@@ -1,5 +1,3 @@
-import logging
-from domain.common.models import IntegrationProvider
 from domain.notification.models import NotificationChannel
 from strategies.slack_notification_strategy import SlackNotificationStrategy
 from .google_analytics_4_strategy import (
@@ -55,7 +53,7 @@ class EventsStrategyBuilder:
     ):
         strategies = {
             IntegrationProvider.MIXPANEL: {
-                "DEFAULT": MixpanelAnalyticsStrategy(
+                "DEFAULT": MixpanelEventsStrategy(
                     datasource, credential, runlog_id, date
                 )
             },

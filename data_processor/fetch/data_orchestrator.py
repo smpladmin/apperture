@@ -12,7 +12,8 @@ class DataOrchestrator:
         with self.fetcher.open() as source:
             with self.events_saver.open() as dest:
                 for data in source:
-                    dest.write(data)
+                    writable_data = data if self.data_format == DataFormat.BINARY else data.encode()
+                    dest.write(writable_data)
                     events_data += data
 
         return events_data
