@@ -7,7 +7,11 @@ import AppsModal from '@components/Sidebar/AppsModal';
 import { useRouter } from 'next/router';
 import ConfigureAppsModal from '@components/ConfigureAppsModal';
 
-export default function Layout({ children, apps = [] }: LayoutProps) {
+export default function Layout({
+  children,
+  apps = [],
+  hideHeader = false,
+}: LayoutProps) {
   const router = useRouter();
   const defaultAppId = apps
     ?.flatMap((app) =>
@@ -80,7 +84,21 @@ export default function Layout({ children, apps = [] }: LayoutProps) {
   };
 
   return (
-    <Flex flexDir={'row'}>
+    <>
+      <Flex flexDir={'row'}>
+        <Sidebar
+          selectedApp={selectedApp}
+          openAppsModal={() => onModalOpen('apps')}
+        />
+        <Flex flexDir={'column'} w={'full'}>
+          {!hideHeader ? (
+            <Header selectedApp={selectedApp} openAppsModal={onModalOpen} />
+          ) : null}
+          <Box as="main" h={'full'}>
+            {children}
+          </Box>
+        </Flex>
+      </Flex>
       <AppsModal
         isOpen={isOpen}
         onAppSelect={onAppSelect}
@@ -94,21 +112,12 @@ export default function Layout({ children, apps = [] }: LayoutProps) {
         closeConfigureAppsModal={() => onModalClose('configure')}
         app={selectedApp}
       />
-      <Sidebar
-        selectedApp={selectedApp}
-        openAppsModal={() => onModalOpen('apps')}
-      />
-      <Flex flexDir={'column'} w={'full'}>
-        <Header selectedApp={selectedApp} openAppsModal={onModalOpen} />
-        <Box as="main" h={'full'}>
-          {children}
-        </Box>
-      </Flex>
-    </Flex>
+    </>
   );
 }
 
 type LayoutProps = {
   children: ReactNode;
   apps: AppWithIntegrations[];
+  hideHeader?: boolean;
 };

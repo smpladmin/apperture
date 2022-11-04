@@ -41,7 +41,11 @@ CreateFunnel.getLayout = function getLayout(
   page: ReactElement,
   apps: AppWithIntegrations[]
 ) {
-  return <Layout apps={apps}>{page}</Layout>;
+  return (
+    <Layout apps={apps} hideHeader={true}>
+      {page}
+    </Layout>
+  );
 };
 
 export default CreateFunnel;
