@@ -1,6 +1,6 @@
 import { Box, Button, Flex, IconButton, Input, Text } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
-import funnelImage from '@assets/images/funnel.svg';
+import FunnelImage from '@assets/images/funnel.svg';
 import React, { useState } from 'react';
 import Image from 'next/image';
 import CreateFunnel from './CreateFunnel';
@@ -10,8 +10,15 @@ const Funnel = () => {
   const [emptyState, setEmptyState] = useState(true);
 
   return (
-    <Flex w={'full'} height={'full'} overflowY={'auto'}>
-      <Box w={'100'} bg={' #181822'} py={'6'} px={'6'}>
+    <Flex w={'full'} height={'full'}>
+      <Box
+        minW={'102'}
+        height={'full'}
+        overflowY={'auto'}
+        bg={' #181822'}
+        py={'6'}
+        px={'6'}
+      >
         <Flex justifyContent={'space-between'} alignItems={'center'}>
           <IconButton
             aria-label="close"
@@ -43,6 +50,7 @@ const Funnel = () => {
             Alias
           </Text>
           <Input
+            pr={'4'}
             type={'text'}
             variant="flushed"
             fontSize={'sh-32'}
@@ -63,7 +71,7 @@ const Funnel = () => {
         <Flex w={'full'} alignItems={'center'} justifyContent={'center'}>
           <Box>
             <Image
-              src={funnelImage}
+              src={FunnelImage}
               priority={true}
               alt={'funnel-empty-state'}
             />
