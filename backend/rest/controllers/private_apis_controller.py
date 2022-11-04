@@ -10,10 +10,12 @@ from domain.notifications.service import NotificationService
 from domain.notifications.models import NotificationType
 from domain.integrations.service import IntegrationService
 from domain.runlogs.service import RunLogService
+from domain.events.service import EventsService
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.runlogs import UpdateRunLogDto
 from rest.dtos.users import PrivateUserResponse
 from rest.dtos.edges import CreateEdgesDto
+from rest.dtos.events import CreateEventDto
 from rest.dtos.notifications import (
     ComputedNotificationResponse,
     TriggerNotificationsDto,
@@ -59,6 +61,15 @@ async def update_edges(
         for e in dto.edges
     ]
     await edge_service.update_edges(edges, dto.provider, datasource.id)
+    return {"updated": True}
+
+
+@router.post("/events")
+async def update_events(
+    dto: List[CreateEventDto],
+    events_service: EventsService = Depends(),
+):
+    await events_service.update_events(dto)
     return {"updated": True}
 
 

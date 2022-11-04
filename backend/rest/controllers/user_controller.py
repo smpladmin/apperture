@@ -1,4 +1,3 @@
-from xmlrpc.client import Boolean
 from fastapi import APIRouter, Depends
 
 from domain.users.models import User

@@ -1,6 +1,5 @@
 import logging
 
-import pandas as pd
 from clean.mixpanel_analytics_cleaner import MixpanelAnalyticsCleaner
 from domain.common.models import DataFormat, IntegrationProvider
 from domain.datasource.models import Credential, DataSource
@@ -11,7 +10,7 @@ from store.mixpanel_events_saver import S3EventsSaver
 from store.mixpanel_network_graph_saver import MixpanelNetworkGraphSaver
 from transform.mixpanel_network_graph_transformer import MixpanelNetworkGraphTransformer
 
-from ..event_processors.mix_panel_event_processor import MixPanelEventProcessor
+from event_processors.mix_panel_event_processor import MixPanelEventProcessor
 
 
 class MixpanelEventsStrategy:
