@@ -18,7 +18,9 @@ settings = apperture_settings()
 async def login(
     request: Request, redirect_url: str = os.getenv("FRONTEND_LOGIN_REDIRECT_URL")
 ):
-    redirect_uri = request.url_for("authorise").replace("http", "https")
+    redirect_uri = request.url_for("authorise")
+    if not "localhost" in redirect_uri:
+        redirect_uri = redirect_uri.replace("http", "https")
     return await oauth.google.authorize_redirect(
         request, redirect_uri, state=redirect_url
     )
