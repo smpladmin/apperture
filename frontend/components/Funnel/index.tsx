@@ -7,7 +7,6 @@ import CreateFunnel from './CreateFunnel';
 
 const Funnel = () => {
   const [funnelName, setFunnelName] = useState('Untitled Funnel');
-  const [emptyState, setEmptyState] = useState(true);
 
   return (
     <Flex w={'full'} height={'full'}>
@@ -67,27 +66,22 @@ const Funnel = () => {
           <CreateFunnel />
         </Box>
       </Box>
-      {emptyState ? (
-        <Flex w={'full'} alignItems={'center'} justifyContent={'center'}>
-          <Box>
-            <Image
-              src={FunnelImage}
-              priority={true}
-              alt={'funnel-empty-state'}
-            />
-            <Text
-              textAlign={'center'}
-              mt={'10'}
-              fontSize={'sh-20'}
-              lineHeight={'sh-20'}
-              fontWeight={'normal'}
-              color={'grey.100'}
-            >
-              Enter events to create a funnel
-            </Text>
-          </Box>
-        </Flex>
-      ) : null}
+
+      <Flex w={'full'} alignItems={'center'} justifyContent={'center'}>
+        <Box>
+          <Image src={FunnelImage} priority={true} alt={'funnel-empty-state'} />
+          <Text
+            textAlign={'center'}
+            mt={'10'}
+            fontSize={'sh-20'}
+            lineHeight={'sh-20'}
+            fontWeight={'normal'}
+            color={'grey.100'}
+          >
+            Enter events to create a funnel
+          </Text>
+        </Box>
+      </Flex>
     </Flex>
   );
 };
