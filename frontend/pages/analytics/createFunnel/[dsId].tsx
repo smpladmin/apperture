@@ -1,4 +1,4 @@
-import Funnel from '@components/Funnel';
+import Funnel from '@components/Funnel/CreateFunnel';
 import Layout from '@components/Layout';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { _getAppsWithIntegrations } from '@lib/services/appService';

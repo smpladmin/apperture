@@ -16,6 +16,7 @@ const YELLOW_200 = '#FABC41';
 const BLUE = '#6BBDF9';
 const OVERLAY_GRAY = 'rgba(0, 0, 0, 0.6)';
 const GREEN = '#57AA64';
+const BLACK_RUSSIAN = '#181822';
 
 const colors = {
   black: {
@@ -147,4 +148,5 @@ export {
   BLUE,
   OVERLAY_GRAY,
   GREEN,
+  BLACK_RUSSIAN,
 };

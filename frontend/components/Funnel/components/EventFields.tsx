@@ -77,7 +77,7 @@ const EventFields = ({
             >
               <InputGroup>
                 <InputLeftElement
-                  cursor={'all-scroll'}
+                  cursor={'move'}
                   h={'12'}
                   display={'flex'}
                   alignItems={'center'}
@@ -117,6 +117,7 @@ const EventFields = ({
                   h={'12'}
                   alignItems={'center'}
                   pr={'4'}
+                  pl={'4'}
                 >
                   <Flex gap={'2'} alignItems={'center'}>
                     <Box minH={'4'} minW={'4'} p={'1px'} cursor={'not-allowed'}>
