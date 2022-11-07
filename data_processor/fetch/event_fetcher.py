@@ -2,7 +2,6 @@ import logging
 from smart_open import open as sopen
 
 from domain.common.models import DataFormat
-from domain.datasource.models import Credential
 
 
 class EventFetcher:

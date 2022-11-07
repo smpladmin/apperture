@@ -6,10 +6,7 @@ from domain.datasource.models import Credential, DataSource
 from domain.runlog.service import RunLogService
 from fetch.amplitude_events_fetcher import AmplitudeEventsFetcher
 from fetch.data_orchestrator import DataOrchestrator
-from store.amplitude_network_graph_saver import AmplitudeNetworkGraphSaver
-from transform.amplitude_network_graph_transformer import (
-    AmplitudeNetworkGraphTransformer,
-)
+from store.events_saver import EventsSaver
 
 from event_processors.amplitude_event_processor import AmplitudeEventProcessor
 
@@ -26,8 +23,7 @@ class AmplitudeEventsStrategy:
         fetcher = AmplitudeEventsFetcher(credential, date, DataFormat.BINARY)
         self.data_orchestrator = DataOrchestrator(fetcher, DataFormat.BINARY)
         self.cleaner = AmplitudeAnalyticsCleaner()
-        self.transformer = AmplitudeNetworkGraphTransformer()
-        self.saver = AmplitudeNetworkGraphSaver()
+        self.saver = EventsSaver()
         self.runlog_service = RunLogService()
 
     def execute(self):
@@ -38,13 +34,11 @@ class AmplitudeEventsStrategy:
             df = self.event_processor.process(events_data)
             logging.info(f"Cleaning data for date - {self.date}")
             df = self.cleaner.clean(df)
-            logging.info(f"Transforming data for date - {self.date}")
-            network_graph_data = self.transformer.transform(df)
 
             self.saver.save(
                 self.datasource.id,
                 IntegrationProvider.AMPLITUDE,
-                network_graph_data,
+                df,
             )
 
             self.runlog_service.update_completed(self.runlog_id)

@@ -1,7 +1,6 @@
 import io
 import zipfile
 import zlib
-
 import pandas as pd
 
 from .event_processor import EventProcessor

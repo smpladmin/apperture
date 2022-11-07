@@ -1,20 +1,15 @@
 import pandas as pd
-
 from .cleaner import Cleaner
 
 
 class AmplitudeAnalyticsCleaner(Cleaner):
     def clean(self, df: pd.DataFrame()) -> pd.DataFrame():
-        df = df.join(pd.json_normalize(df["event_properties"]).add_prefix("event."))
-        df = df[
-            [
-                "user_id",
-                "os_name",
-                "city",
-                "region",
-                "country",
-                "event.name",
-                "event.timestamp",
-            ]
+        event_properties = pd.json_normalize(df["event_properties"])
+        properties = df[
+            ["user_id", "os_name", "city", "region", "country", "event_type"]
         ]
-        return df
+        properties = properties.fillna("")
+        cleaned_df = event_properties[["name", "timestamp"]]
+        cleaned_df["properties"] = properties.to_dict(orient="records")
+        cleaned_df.rename(columns={"name": "eventName"}, inplace=True)
+        return cleaned_df
