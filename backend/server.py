@@ -8,7 +8,6 @@ logging.getLogger().setLevel(logging.INFO)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from data_processor_queue import dpq
 
 from rest.controllers import (
     app_controller,
@@ -20,19 +19,26 @@ from rest.controllers import (
     private_apis_controller,
     schedule_controller,
     notification_controller,
+    user_controller,
 )
 from mongo import Mongo
+from clickhouse import Clickhouse
 
 
 async def on_startup():
     mongo = Mongo()
+    clickhouse = Clickhouse()
     app.dependency_overrides[Mongo] = lambda: mongo
+    app.dependency_overrides[Clickhouse] = lambda: clickhouse
     await mongo.init()
+    clickhouse.init()
 
 
 async def on_shutdown():
     mongo: Mongo = app.dependency_overrides[Mongo]()
+    clickhouse: Clickhouse = app.dependency_overrides[Clickhouse]()
     await mongo.close()
+    clickhouse.close()
 
 
 app = FastAPI(on_startup=[on_startup], on_shutdown=[on_shutdown])
@@ -58,3 +64,4 @@ app.include_router(data_processor_controller.router)
 app.include_router(datasource_controller.router)
 app.include_router(schedule_controller.router)
 app.include_router(notification_controller.router)
+app.include_router(user_controller.router)

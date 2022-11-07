@@ -1,0 +1,32 @@
+name: Pull Request Test automation
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test_pull_request:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout codebase
+        uses: actions/checkout@v2
+      - name: Filter changes from backend
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - 'data_processor/**'
+      - name: Testing Backend code
+        if: steps.filter.outputs.backend == 'true'
+        run: |
+          cd backend
+          mv .defaults .env
+          docker build . --target tests
+      - name: Testing Data Processor code
+        if: steps.filter.outputs.data_processor == 'true'
+        run: |
+          cd data_processor
+          docker build . --target tests

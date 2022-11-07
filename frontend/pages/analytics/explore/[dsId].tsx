@@ -18,7 +18,7 @@ import EventDetails from '@components/EventDetails';
 import { useRouter } from 'next/router';
 import { MapContext } from '@lib/contexts/mapContext';
 import { getAuthToken } from '@lib/utils/request';
-
+import { EventData } from '@lib/domain/eventData';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -52,7 +52,7 @@ type ExploreDataSourceProps = {
 
 const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(!edges.length);
-  const [eventData, setEventData] = useState({});
+  const [eventData, setEventData] = useState<EventData | {}>({});
   const router = useRouter();
   const { dsId } = router.query;
   const {
@@ -65,6 +65,12 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
     onClose: closeEventDetailsDrawer,
   } = useDisclosure();
 
+  const {
+    isOpen: isMobileEventDetailFloaterOpen,
+    onOpen: openMobileEventDetailFloater,
+    onClose: closeMobileEventDetailFloater,
+  } = useDisclosure();
+
   useEffect(() => {
     setIsLoading(!edges.length);
   }, [edges.length]);
@@ -72,14 +78,17 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   useEffect(() => {
     if (activeNode) {
       openEventDetailsDrawer();
+      openMobileEventDetailFloater();
     } else {
+      setEventData({});
       closeEventDetailsDrawer();
+      closeMobileEventDetailFloater();
     }
   }, [activeNode]);
 
   useEffect(() => {
     if (!activeNode) return;
-    const fetchTrendsData = async () => {
+    const fetchEventData = async () => {
       const [nodeSignificanceData, trendsData, sankeyData] = await Promise.all([
         getNodeSignificanceData(dsId as string, activeNode?._cfg?.id!!),
         getTrendsData(dsId as string, activeNode?._cfg?.id!!, 'week'),
@@ -92,8 +101,8 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
         sankeyData,
       });
     };
-    fetchTrendsData();
-  }, [activeNode]);
+    fetchEventData();
+  }, [activeNode, dsId]);
 
   return (
     <>
@@ -109,7 +118,7 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
             isEventDetailsDrawerOpen={isEventDetailsDrawerOpen}
             closeEventDetailsDrawer={closeEventDetailsDrawer}
             eventData={eventData}
-            setEventData={setEventData}
+            isMobileEventDetailFloaterOpen={isMobileEventDetailFloaterOpen}
           />
           <Graph visualisationData={edges} />
         </>

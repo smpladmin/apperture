@@ -45,6 +45,39 @@ services:
         limits:
           cpus: '0.5'
           memory: 512M
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    environment:
+      CLICKHOUSE_PASSWORD: <clickhouse-password>
+    ports:
+     - 8123:8123
+     - 9000:9000
+    volumes:
+     - /ch/data:/var/lib/clickhouse/
+     - /ch/logs:/var/log/clickhouse-server/
+    networks:
+     - net
+     - traefik-public
+    logging:
+      driver: json-file
+    deploy:
+      labels:
+        traefik.http.routers.clickhouse-https.tls: 'true'
+        traefik.http.routers.clickhouse-http.middlewares: https-redirect
+        traefik.http.routers.clickhouse-https.rule: Host(`clickhouse.apperture.io`)
+        traefik.http.routers.clickhouse-https.tls.certresolver: le
+        traefik.http.routers.clickhouse-http.service: clickhouse
+        traefik.http.services.clickhouse.loadbalancer.server.port: '8123'
+        traefik.http.routers.clickhouse-https.entrypoints: https
+        traefik.constraint-label: traefik-public
+        traefik.http.routers.clickhouse-https.service: clickhouse
+        traefik.docker.network: traefik-public
+        traefik.enable: 'true'
+        traefik.http.routers.clickhouse-http.entrypoints: http
+        traefik.http.routers.clickhouse-http.rule: Host(`clickhouse.apperture.io`)
+      placement:
+        constraints:
+         - node.hostname == worker3ch
   data_processor:
     image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/data_processor:latest
     networks:
@@ -108,12 +141,15 @@ services:
     ports:
      - 6379:6379
     volumes:
-     - redisdata:/data/db
+     - apperture_redisdata:/data/db
     networks:
      - net
     logging:
       driver: json-file
     deploy:
+      placement:
+        constraints:
+         - node.hostname == worker1
       resources:
         reservations:
           cpus: '0.25'
@@ -121,7 +157,26 @@ services:
         limits:
           cpus: '0.5'
           memory: 256M
-
+  scheduler:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/scheduler:latest
+    networks:
+     - net
+    secrets:
+     -
+      source: scheduler.env
+      target: /code/.env
+    logging:
+      driver: json-file
+    deploy:
+      labels:
+        swarmpit.service.deployment.autoredeploy: 'true'
+      resources:
+        reservations:
+          cpus: '0.2'
+          memory: 124M
+        limits:
+          cpus: '0.4'
+          memory: 256M
 networks:
   net:
     driver: overlay
@@ -137,5 +192,5 @@ secrets:
     external: true
 
 volumes:
-  redisdata:
-    driver: local
+  apperture_redisdata:
+    external: true

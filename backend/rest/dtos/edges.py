@@ -1,14 +1,14 @@
-from typing import Union
-from pydantic import BaseModel
+from typing import Optional, Union
 
 from domain.common.models import IntegrationProvider
 from domain.edge.models import (
-    Edge,
     AggregatedEdge,
-    NodeTrend,
+    Edge,
     NodeSankey,
     NodeSignificance,
+    NodeTrend,
 )
+from pydantic import BaseModel
 from rest.dtos.model_response import ModelResponse
 
 
@@ -25,13 +25,13 @@ class CreateRichEdgeDto(BaseModel):
     currentEvent: str
     hits: int
     date: str
-    city: str
-    region: str
-    country: str
-    utmSource: str
-    utmMedium: str
-    os: str
-    appVersion: str
+    city: Optional[str]
+    region: Optional[str]
+    country: Optional[str]
+    utmSource: Optional[str]
+    utmMedium: Optional[str]
+    os: Optional[str]
+    appVersion: Optional[str]
 
 
 class CreateEdgesDto(BaseModel):

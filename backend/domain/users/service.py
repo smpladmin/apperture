@@ -1,3 +1,5 @@
+from beanie import PydanticObjectId
+
 from authorisation import OAuthUser
 from .models import User
 
@@ -21,3 +23,15 @@ class UserService:
 
     async def get_user(self, id: str):
         return await User.get(id)
+
+    async def save_slack_credentials(self, user_id, slack_url, slack_channel):
+        await User.find_one(
+            User.id == PydanticObjectId(user_id),
+        ).update({"$set": {"slack_url": slack_url, "slack_channel": slack_channel}})
+
+        return
+
+    async def remove_slack_credentials(self, user_id):
+        await User.find_one(
+            User.id == PydanticObjectId(user_id),
+        ).update({"$unset": {"slack_url": 1, "slack_channel": 1}})

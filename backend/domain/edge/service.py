@@ -15,7 +15,12 @@ from domain.edge.models import (
     NodeTrend,
     NodeSankey,
     NodeSignificance,
-    NodeDataUpdate,
+    NotificationNodeData,
+)
+from domain.notifications.models import (
+    Notification,
+    NotificationType,
+    NotificationThresholdType,
 )
 from mongo.mongo import Mongo
 
@@ -26,10 +31,12 @@ class EdgeService:
         self.provider_edge_build = {
             IntegrationProvider.GOOGLE: self._build_edge,
             IntegrationProvider.MIXPANEL: self._build_rich_edge,
+            IntegrationProvider.AMPLITUDE: self._build_rich_edge,
         }
         self.provider_edge_update = {
             IntegrationProvider.GOOGLE: self._update_edges,
             IntegrationProvider.MIXPANEL: self._update_rich_edges,
+            IntegrationProvider.AMPLITUDE: self._update_rich_edges,
         }
 
     def build(
@@ -178,7 +185,9 @@ class EdgeService:
         trend_type: str,
         start_date: str,
         end_date: str,
+        is_entrance_node: bool,
     ) -> list[NodeTrend]:
+        event = "previous_event" if is_entrance_node else "current_event"
         start_date = dt.strptime(start_date, "%Y-%m-%d")
         end_date = dt.strptime(end_date, "%Y-%m-%d")
         pipeline = [
@@ -186,7 +195,7 @@ class EdgeService:
                 "$match": {
                     "$and": [
                         {"datasource_id": PydanticObjectId(datasource_id)},
-                        {"current_event": node},
+                        {f"{event}": node},
                         {"date": {"$gte": start_date}},
                         {"date": {"$lte": end_date}},
                     ]
@@ -195,11 +204,11 @@ class EdgeService:
             {
                 "$group": {
                     "_id": {
-                        "current_event": "$current_event",
-                        "{}".format(trend_type): {"${}".format(trend_type): "$date"},
+                        f"{event}": f"${event}",
+                        f"{trend_type}": {f"${trend_type}": "$date"},
                         "year": {"$year": "$date"},
                     },
-                    "node": {"$max": "$current_event"},
+                    "node": {"$max": f"${event}"},
                     "hits": {"$sum": "$hits"},
                     "users": {"$sum": "$users"},
                     "date": {"$max": "$date"},
@@ -210,7 +219,7 @@ class EdgeService:
                     "end_date": {"$max": "$date"},
                 }
             },
-            {"$sort": {"year": 1, "{}".format(trend_type): 1}},
+            {"$sort": {"year": 1, f"{trend_type}": 1}},
         ]
 
         if trend_type == "date":
@@ -414,14 +423,16 @@ class EdgeService:
             .to_list()
         )
 
-    async def get_node_data(self, nodes: List, ds_id: str) -> List[AggregatedEdge]:
+    async def get_node_data(
+        self, nodes: List, ds_id: str, days_ago: int
+    ) -> List[AggregatedEdge]:
         pipeline = [
             {
                 "$match": {
                     "datasource_id": PydanticObjectId(ds_id),
                     "current_event": {"$in": nodes},
                     "date": dt.strptime(
-                        (dt.today() - timedelta(days=1)).strftime("%Y-%m-%d"),
+                        (dt.today() - timedelta(days=days_ago)).strftime("%Y-%m-%d"),
                         "%Y-%m-%d",
                     ),
                 }
@@ -443,29 +454,43 @@ class EdgeService:
             .to_list()
         )
 
-    async def get_node_data_for_update(self, update):
+    async def get_node_data_for_notification(
+        self, notification: Notification, days_ago: int
+    ):
         return await asyncio.gather(
             *[
-                self.get_node_data(nodes, update.datasource_id)
-                for ratio_name, nodes in update.variable_map.items()
+                self.get_node_data(nodes, notification.datasource_id, days_ago=days_ago)
+                for ratio_name, nodes in notification.variable_map.items()
             ]
         )
 
-    async def get_node_data_for_updates(
+    async def get_node_data_for_notifications(
         self,
-        updates,
-    ) -> [NodeDataUpdate]:
-        node_data_for_updates = (
+        notifications: List[Notification],
+    ) -> [NotificationNodeData]:
+
+        node_data_for_notifications = (
             [
-                NodeDataUpdate(
-                    name=update.name,
-                    update_id=update.id,
-                    node_data=await self.get_node_data_for_update(update),
+                NotificationNodeData(
+                    name=notification.name,
+                    notification_id=notification.id,
+                    node_data=await self.get_node_data_for_notification(
+                        notification, days_ago=1
+                    ),
+                    prev_day_node_data=await self.get_node_data_for_notification(
+                        notification, days_ago=2
+                    ),
+                    threshold_type=NotificationThresholdType.PCT
+                    if notification.pct_threshold_active
+                    else NotificationThresholdType.ABSOLUTE,
+                    threshold_value=notification.pct_threshold_values
+                    if notification.pct_threshold_active
+                    else notification.absolute_threshold_values,
                 )
-                for update in updates
+                for notification in notifications
             ]
-            if updates
+            if notifications
             else []
         )
 
-        return node_data_for_updates
+        return node_data_for_notifications

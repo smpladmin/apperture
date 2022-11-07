@@ -3,6 +3,7 @@ from typing import List, Dict, Optional
 from pydantic import BaseModel
 from beanie import PydanticObjectId
 from repositories.document import Document
+from rest.dtos.model_response import ModelResponse
 
 
 class NotificationType(str, Enum):
@@ -20,9 +21,19 @@ class NotificationChannel(str, Enum):
     EMAIL = "email"
 
 
+class NotificationThresholdType(str, Enum):
+    PCT = "pct"
+    ABSOLUTE = "absolute"
+
+
+class NotificationMetric(str, Enum):
+    HITS = "hits"
+    USERS = "users"
+
+
 class ThresholdMap(BaseModel):
-    min: Optional[float]
-    max: Optional[float]
+    min: float
+    max: float
 
 
 class Notification(Document):
@@ -30,6 +41,8 @@ class Notification(Document):
     user_id: PydanticObjectId
     name: str
     notification_type: NotificationType
+    metric: NotificationMetric
+    multi_node: bool
     apperture_managed: bool
     pct_threshold_active: bool
     pct_threshold_values: Optional[ThresholdMap]
@@ -49,13 +62,13 @@ class Notification(Document):
 class ComputedNotification(BaseModel):
     name: str
     notification_id: PydanticObjectId
+    notification_type: NotificationType
     value: float
-    pct_change: Optional[float]
-    metric: Optional[str]
-    user_threshold: Optional[float]
+    threshold_type: Optional[NotificationThresholdType]
+    user_threshold: Optional[ThresholdMap]
+    triggered: Optional[bool]
 
 
-class ComputedUpdate(BaseModel):
-    name: str
-    notification_id: PydanticObjectId
-    value: float
+class NotificationResponse(Notification, ModelResponse):
+    class Config:
+        allow_population_by_field_name = True

@@ -1,6 +1,8 @@
-import logging
-import pandas as pd
 import datetime
+import logging
+
+import pandas as pd
+
 from .transformer import Transformer
 
 
@@ -117,9 +119,6 @@ class MixpanelNetworkGraphTransformer(Transformer):
                 ]
             )
         ]
-        df.loc[
-            df.distinct_id == "cfd68e224d080b72",
-        ].sort_values(by=["time", "eventname"])
         df.rename(
             columns={"eventname": "node_id", "previousevent": "previousnode_id"},
             inplace=True,

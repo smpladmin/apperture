@@ -18,3 +18,5 @@ config:
     ec2_private_name: apperture-staging-private-instance
     ec2_private_type: t3.small
     ec2_private_count: 2
+    ec2_clickhouse_name: apperture-staging-chdb
+    ec2_clickhouse_type: t3.medium

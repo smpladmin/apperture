@@ -12,7 +12,7 @@ import {
 } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import filterMobile from '@assets/images/filterIconMobile.svg';
-import MobileSidemenu from './MobileSidemenu';
+import MobileSidemenu from './MobileSideMenu';
 import Search from './Search';
 import mixPanel from '@assets/images/mixPanel-icon.png';
 import gaLogo from '@assets/images/ga-logo-small.svg';
