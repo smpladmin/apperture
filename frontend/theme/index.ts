@@ -17,11 +17,15 @@ const BLUE = '#6BBDF9';
 const OVERLAY_GRAY = 'rgba(0, 0, 0, 0.6)';
 const GREEN = '#57AA64';
 const BLACK_RUSSIAN = '#181822';
+const BASTILLE = '#282836';
 
 const colors = {
   black: {
     DEFAULT: '#07070d',
     0: 'rgba(14,14,26,0)',
+    10: 'rgba(255, 255, 255, 0.04)',
+    20: 'rgba(255, 255, 255, 0.05)',
+    30: 'rgba(255, 255, 255, 0.06)',
     50: 'linear-gradient(0deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), #0E0E19',
     100: '#0e0e1a',
     200: BLACK_200,
@@ -36,6 +40,7 @@ const colors = {
   grey: {
     DEFAULT: '#d9d9da',
     0: 'rgba(14, 14, 26, 0.6)',
+    10: 'rgba(255, 255, 255, 0.2)',
     50: '#e5e5e5',
     100: '#b2b2b5',
     200: '#78787E',
@@ -149,4 +154,5 @@ export {
   OVERLAY_GRAY,
   GREEN,
   BLACK_RUSSIAN,
+  BASTILLE,
 };

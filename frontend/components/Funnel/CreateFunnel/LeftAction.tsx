@@ -10,6 +10,9 @@ import {
 import LeftPanel from '@components/EventsLayout/LeftPanel';
 import React, { useState } from 'react';
 import EventFields from '../components/EventFields';
+import tickIcon from '@assets/icons/black-tick-icon.svg';
+import Image from 'next/image';
+import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
 
 const LeftAction = () => {
   const [funnelName, setFunnelName] = useState('Untitled Funnel');
@@ -32,18 +35,28 @@ const LeftAction = () => {
           icon={<i className="ri-arrow-left-line"></i>}
           rounded={'full'}
           color={'white.DEFAULT'}
-          bg={'rgba(255, 255, 255, 0.05)'}
+          bg={'black.20'}
           onClick={() => {}}
         />
         <Button
           disabled={true}
           borderRadius={'50'}
           _disabled={{
-            bg: 'rgba(255, 255, 255,0.08)',
+            bg: 'black.30',
             pointerEvents: 'none',
           }}
         >
-          {'Save'}
+          <Flex alignItems={'center'} gap={'1'}>
+            <Image src={tickIcon} />
+            <Text
+              color={BLACK_RUSSIAN}
+              fontSize={'xs-14'}
+              lineHeight={'xs-14'}
+              fontWeight={'medium'}
+            >
+              Save
+            </Text>
+          </Flex>
         </Button>
       </Flex>
 
@@ -66,7 +79,7 @@ const LeftAction = () => {
           textColor={'white.DEFAULT'}
           value={funnelName}
           onChange={(e) => setFunnelName(e.target.value)}
-          borderColor={'rgba(255, 255, 255, 0.2)'}
+          borderColor={'grey.10'}
           px={0}
         />
       </Flex>
@@ -85,7 +98,7 @@ const LeftAction = () => {
             rounded={'full'}
             variant={'primary'}
             size={'md'}
-            bg={'rgba(255, 255, 255, 0.05)'}
+            bg={'black.20'}
             color={'white.DEFAULT'}
             onClick={addNewInputField}
           >
@@ -99,7 +112,7 @@ const LeftAction = () => {
         <Divider
           mt={'4'}
           orientation="horizontal"
-          borderColor={'#282836'}
+          borderColor={BASTILLE}
           opacity={1}
         />
         <Flex justifyContent={'space-between'} alignItems={'center'}>

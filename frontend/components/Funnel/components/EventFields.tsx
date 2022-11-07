@@ -98,7 +98,7 @@ const EventFields = ({
                   lineHeight={'xs-14'}
                   fontWeight={'medium'}
                   textColor={'white.DEFAULT'}
-                  bg={'rgba(255, 255, 255, 0.04)'}
+                  bg={'black.10'}
                   border={'0'}
                   borderRadius={'200'}
                   placeholder={'Add event'}
@@ -106,7 +106,7 @@ const EventFields = ({
                     fontSize: 'xs-14',
                     lineHeight: 'xs-14',
                     fontWeight: 400,
-                    color: 'rgba(255, 255, 255, 0.2)',
+                    color: 'grey.10',
                   }}
                   value={inputValue?.eventName}
                   onChange={(e) => handleInputChangeValue(e, i)}
