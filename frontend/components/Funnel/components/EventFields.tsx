@@ -119,18 +119,28 @@ const EventFields = ({
                   pr={'4'}
                   pl={'4'}
                 >
-                  <Flex gap={'2'} alignItems={'center'}>
-                    <Box minH={'4'} minW={'4'} p={'1px'} cursor={'not-allowed'}>
+                  <Flex
+                    gap={'2'}
+                    alignItems={'center'}
+                    paddingRight={{ base: '6' }}
+                    justifyContent={'center'}
+                  >
+                    <Flex
+                      minH={'4'}
+                      minW={'4'}
+                      p={'1px'}
+                      cursor={'not-allowed'}
+                    >
                       <Image src={FunnelIcon} />
-                    </Box>
+                    </Flex>
                     {showCrossIcon ? (
-                      <Box minH={'5'} minW={'5'}>
+                      <Flex minH={'5'} minW={'5'} justifyContent={'center'}>
                         <Image
                           src={CrossIcon}
                           onClick={() => removeInputField(i)}
                           alt={'cross-icon'}
                         />
-                      </Box>
+                      </Flex>
                     ) : null}
                   </Flex>
                 </InputRightElement>

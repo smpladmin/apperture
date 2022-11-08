@@ -5,7 +5,7 @@ import React, { ReactNode } from 'react';
 const LeftPanel = ({ children }: { children: ReactNode }) => {
   return (
     <Box
-      width={'30%'}
+      width={{ base: 'full', md: '30%' }}
       minWidth={'82'}
       bg={BLACK_RUSSIAN}
       overflowY={'auto'}
