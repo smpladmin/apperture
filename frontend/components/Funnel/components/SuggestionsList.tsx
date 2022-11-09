@@ -1,8 +1,9 @@
 import { Flex, Text } from '@chakra-ui/react';
+import { NodeType } from '@lib/types/graph';
 import React, { useEffect, useRef } from 'react';
 
 type SuggestionListProps = {
-  suggestion: any;
+  suggestion: NodeType;
   suggestionsClickHandler: Function;
   active: boolean;
 };

@@ -1,10 +1,11 @@
 import { INode, Item } from '@antv/g6';
+import { NodeType } from './graph';
 
 export type InitialStateType = {
   nodesData: Array<INode>;
   activeNode: INode | null;
   isNodeSearched: boolean;
-  edges: Array<any>;
+  nodes: NodeType[];
 };
 
 export interface ContextType {
@@ -16,7 +17,7 @@ export enum Actions {
   SET_NODES_DATA = 'SET_VISUALISATION_DATA',
   SET_ACTIVE_NODE = 'SET_ACTIVE_NODE',
   SET_IS_NODE_SEARCHED = 'SET_IS_NODE_SEARCHED',
-  SET_EDGES = 'SET_EDGES',
+  SET_NODES = 'SET_NODES',
 }
 
 export type LayoutActions =
@@ -33,6 +34,6 @@ export type LayoutActions =
       payload: boolean;
     }
   | {
-      type: Actions.SET_EDGES;
-      payload: any;
+      type: Actions.SET_NODES;
+      payload: NodeType[];
     };

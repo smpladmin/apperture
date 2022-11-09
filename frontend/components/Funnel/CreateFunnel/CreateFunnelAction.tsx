@@ -13,13 +13,13 @@ import EventFields from '../components/EventFields';
 import tickIcon from '@assets/icons/black-tick-icon.svg';
 import Image from 'next/image';
 import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
-import { getCountOfInputFieldsValue } from './util';
+import { getCountOfAddedSteps } from './util';
 import { saveFunnel } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 
 const CreateFunnelAction = () => {
   const [funnelName, setFunnelName] = useState('Untitled Funnel');
-  const [inputFieldsValue, setInputFieldsValue] = useState([
+  const [funnelSteps, setfunnelSteps] = useState([
     { event: '', filters: [] },
     { event: '', filters: [] },
   ]);
@@ -30,11 +30,11 @@ const CreateFunnelAction = () => {
 
   const addNewInputField = () => {
     const newField = { event: '', filters: [] };
-    setInputFieldsValue([...inputFieldsValue, newField]);
+    setfunnelSteps([...funnelSteps, newField]);
   };
 
   useEffect(() => {
-    if (getCountOfInputFieldsValue(inputFieldsValue) >= 2) {
+    if (getCountOfAddedSteps(funnelSteps) >= 2) {
       setSaveButtonDisabled(false);
     } else {
       setSaveButtonDisabled(true);
@@ -45,12 +45,12 @@ const CreateFunnelAction = () => {
     const res = await saveFunnel(
       dsId as string,
       funnelName,
-      inputFieldsValue,
+      funnelSteps,
       false
     );
 
-    if (res.status === '200') {
-      router.push('/analytics/viewFunnel/${res.id}');
+    if (res?.status === 200) {
+      router.push(`/analytics/viewFunnel/${res.id}`);
     }
   };
 
@@ -135,8 +135,8 @@ const CreateFunnelAction = () => {
           </Button>
         </Flex>
         <EventFields
-          eventFieldsValue={inputFieldsValue}
-          setEventFieldsValue={setInputFieldsValue}
+          eventFieldsValue={funnelSteps}
+          setEventFieldsValue={setfunnelSteps}
         />
         <Divider
           mt={'4'}

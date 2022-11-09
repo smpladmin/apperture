@@ -4,9 +4,11 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import EventsConnectingLine from './EventsConnectingLine';
 import Autocomplete from './Autocomplete';
 import { MapContext } from '@lib/contexts/mapContext';
+import { NodeType } from '@lib/types/graph';
+import { FunnelSteps } from '@lib/domain/funnel';
 
 type EventFieldsValue = {
-  eventFieldsValue: Array<any>;
+  eventFieldsValue: Array<FunnelSteps>;
   setEventFieldsValue: Function;
 };
 
@@ -15,11 +17,11 @@ const EventFields = ({
   setEventFieldsValue,
 }: EventFieldsValue) => {
   const {
-    state: { edges },
+    state: { nodes },
   } = useContext(MapContext);
 
   const [showCrossIcon, setShowCrossIcon] = useState(false);
-  const [suggestions, setSuggestions] = useState<Array<any>>([]);
+  const [suggestions, setSuggestions] = useState<Array<NodeType>>([]);
   const [focusedInputIndex, setFocusedInputIndex] = useState(-1);
 
   const dragItem = useRef<{ index: number | null }>({ index: null });
@@ -38,10 +40,10 @@ const EventFields = ({
   };
 
   const handleInputChangeValue = (eventValue: string, index: number) => {
-    let matches = [];
+    let matches: NodeType[] = [];
     if (eventValue) {
-      matches = edges
-        .filter((item: any) => {
+      matches = nodes
+        .filter((item: NodeType) => {
           return (
             item?.id?.toLowerCase()?.startsWith(eventValue.toLowerCase()) ||
             item?.id?.toLowerCase()?.includes(eventValue?.toLowerCase())

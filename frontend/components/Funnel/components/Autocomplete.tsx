@@ -14,19 +14,21 @@ import CrossIcon from '@assets/icons/cross-icon.svg';
 import FunnelIcon from '@assets/icons/funnel-icon.svg';
 import SuggestionsList from './SuggestionsList';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
+import { NodeType } from '@lib/types/graph';
+import { FunnelSteps } from '@lib/domain/funnel';
 
 type AutocompleteProps = {
-  data: any;
+  data: FunnelSteps;
   index: number;
-  handleSort: any;
-  handleInputChangeValue: any;
-  removeInputField: any;
-  showCrossIcon: any;
-  saveDragStartIndex: any;
-  saveDragEnterIndex: any;
-  suggestions: any;
-  setSuggestions: any;
-  focusedInputIndex: any;
+  handleSort: Function;
+  handleInputChangeValue: Function;
+  removeInputField: Function;
+  showCrossIcon: boolean;
+  saveDragStartIndex: Function;
+  saveDragEnterIndex: Function;
+  suggestions: NodeType[];
+  setSuggestions: Function;
+  focusedInputIndex: number;
   setFocusedInputIndex: Function;
 };
 
@@ -72,20 +74,19 @@ const Autocomplete = ({
     }
   };
 
-  const suggestionsClickHandler = (suggestion: any) => {
+  const suggestionsClickHandler = (suggestion: NodeType) => {
     handleInputChangeValue(suggestion?.id, focusedInputIndex);
     setSuggestions([]);
     setFocusedInputIndex(-1);
   };
 
-  console.log('focus index', focusedInputIndex);
   return (
     <Flex direction={'column'} gap={'4'} position={'relative'}>
       <InputGroup
         draggable
         onDragStart={() => saveDragStartIndex(index)}
         onDragEnter={() => saveDragEnterIndex(index)}
-        onDragEnd={handleSort}
+        onDragEnd={() => handleSort()}
         onDragOver={(event) => event?.preventDefault()}
       >
         <InputLeftElement
@@ -139,12 +140,12 @@ const Autocomplete = ({
               <Image src={FunnelIcon} />
             </Box>
             {showCrossIcon ? (
-              <Box minH={'5'} minW={'5'}>
-                <Image
-                  src={CrossIcon}
-                  onClick={() => removeInputField(index)}
-                  alt={'cross-icon'}
-                />
+              <Box
+                minH={'5'}
+                minW={'5'}
+                onClick={() => removeInputField(index)}
+              >
+                <Image src={CrossIcon} alt={'cross-icon'} />
               </Box>
             ) : null}
           </Flex>
@@ -166,7 +167,7 @@ const Autocomplete = ({
           pb={'4'}
           ref={searchContainerRef}
         >
-          {suggestions.map((suggestion: any, i: number) => {
+          {suggestions.map((suggestion: NodeType, i: number) => {
             return (
               <Fragment key={i}>
                 {i === 0 ? (

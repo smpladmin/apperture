@@ -42,7 +42,7 @@ const CreateFunnel = ({ edges }: any) => {
   useEffect(() => {
     const { nodes } = transformData(edges);
     dispatch({
-      type: Actions.SET_EDGES,
+      type: Actions.SET_NODES,
       payload: nodes,
     });
   }, []);
