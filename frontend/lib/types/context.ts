@@ -4,6 +4,7 @@ export type InitialStateType = {
   nodesData: Array<INode>;
   activeNode: INode | null;
   isNodeSearched: boolean;
+  edges: Array<any>;
 };
 
 export interface ContextType {
@@ -15,6 +16,7 @@ export enum Actions {
   SET_NODES_DATA = 'SET_VISUALISATION_DATA',
   SET_ACTIVE_NODE = 'SET_ACTIVE_NODE',
   SET_IS_NODE_SEARCHED = 'SET_IS_NODE_SEARCHED',
+  SET_EDGES = 'SET_EDGES',
 }
 
 export type LayoutActions =
@@ -29,4 +31,8 @@ export type LayoutActions =
   | {
       type: Actions.SET_IS_NODE_SEARCHED;
       payload: boolean;
+    }
+  | {
+      type: Actions.SET_EDGES;
+      payload: any;
     };

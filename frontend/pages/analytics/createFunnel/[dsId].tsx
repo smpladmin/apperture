@@ -1,11 +1,14 @@
 import Funnel from '@components/Funnel/CreateFunnel';
 import Layout from '@components/Layout';
+import { MapContext } from '@lib/contexts/mapContext';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { _getEdges } from '@lib/services/datasourceService';
+import { Actions } from '@lib/types/context';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
-import { ReactElement } from 'react';
+import { ReactElement, useContext, useEffect } from 'react';
+import { transformData } from '@components/Graph/transformData';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -33,7 +36,17 @@ export const getServerSideProps: GetServerSideProps = async ({
   };
 };
 
-const CreateFunnel = () => {
+const CreateFunnel = ({ edges }: any) => {
+  const { dispatch } = useContext(MapContext);
+
+  useEffect(() => {
+    const { nodes } = transformData(edges);
+    dispatch({
+      type: Actions.SET_EDGES,
+      payload: nodes,
+    });
+  }, []);
+
   return <Funnel />;
 };
 
