@@ -2,7 +2,7 @@ import logging
 
 from clean.mixpanel_analytics_cleaner import MixpanelAnalyticsCleaner
 from fetch.mixpanel_analytics_fetcher import MixpanelAnalyticsFetcher
-from store.mixpanel_network_graph_saver import MixpanelNetworkGraphSaver
+from store.events_saver import EventsSaver
 from strategies.strategy import Strategy
 from transform.mixpanel_network_graph_transformer import MixpanelNetworkGraphTransformer
 
@@ -12,7 +12,7 @@ class MixpanelAnalyticsStrategy(Strategy):
         self.fetcher = MixpanelAnalyticsFetcher()
         self.cleaner = MixpanelAnalyticsCleaner()
         self.transformer = MixpanelNetworkGraphTransformer()
-        self.saver = MixpanelNetworkGraphSaver()
+        self.saver = EventsSaver()
 
     def execute(self, email: str, external_source_id: str):
         logging.info("Running strategy for the mixpanel")

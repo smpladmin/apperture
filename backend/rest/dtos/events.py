@@ -8,5 +8,5 @@ class CreateEventDto(BaseModel):
     datasourceId: str
     timestamp: datetime.datetime
     provider: IntegrationProvider
-    event_name: str
+    eventName: str
     properties: dict
