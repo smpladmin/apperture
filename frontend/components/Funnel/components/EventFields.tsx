@@ -20,6 +20,7 @@ const EventFields = ({
 
   const [showCrossIcon, setShowCrossIcon] = useState(false);
   const [suggestions, setSuggestions] = useState<Array<any>>([]);
+  const [focusedInputIndex, setFocusedInputIndex] = useState(-1);
 
   const dragItem = useRef<{ index: number | null }>({ index: null });
   const dragOverItem = useRef<{ index: number | null }>({ index: null });
@@ -49,10 +50,9 @@ const EventFields = ({
         .slice(0, 10);
       matches?.sort((a, b) => a?.id.length - b?.id.length);
     }
-    setSuggestions([...new Set(matches)]);
-    console.log('input change value', eventValue, index);
+    setSuggestions(matches);
     const inputValues = [...eventFieldsValue];
-    inputValues[index].eventName = eventValue;
+    inputValues[index]['event'] = eventValue;
     setEventFieldsValue(inputValues);
   };
 
@@ -93,6 +93,8 @@ const EventFields = ({
               saveDragEnterIndex={saveDragEnterIndex}
               suggestions={suggestions}
               setSuggestions={setSuggestions}
+              focusedInputIndex={focusedInputIndex}
+              setFocusedInputIndex={setFocusedInputIndex}
             />
           );
         })}

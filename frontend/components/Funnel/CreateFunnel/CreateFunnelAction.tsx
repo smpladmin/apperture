@@ -8,22 +8,50 @@ import {
   Text,
 } from '@chakra-ui/react';
 import LeftPanel from '@components/EventsLayout/LeftPanel';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import EventFields from '../components/EventFields';
 import tickIcon from '@assets/icons/black-tick-icon.svg';
 import Image from 'next/image';
 import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
+import { getCountOfInputFieldsValue } from './util';
+import { saveFunnel } from '@lib/services/funnelService';
+import { useRouter } from 'next/router';
 
-const LeftAction = () => {
+const CreateFunnelAction = () => {
   const [funnelName, setFunnelName] = useState('Untitled Funnel');
   const [inputFieldsValue, setInputFieldsValue] = useState([
-    { eventName: '' },
-    { eventName: '' },
+    { event: '', filters: [] },
+    { event: '', filters: [] },
   ]);
+  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
+
+  const router = useRouter();
+  const { dsId } = router.query;
 
   const addNewInputField = () => {
-    const newField = { eventName: '' };
+    const newField = { event: '', filters: [] };
     setInputFieldsValue([...inputFieldsValue, newField]);
+  };
+
+  useEffect(() => {
+    if (getCountOfInputFieldsValue(inputFieldsValue) >= 2) {
+      setSaveButtonDisabled(false);
+    } else {
+      setSaveButtonDisabled(true);
+    }
+  });
+
+  const handleSaveFunnel = async () => {
+    const res = await saveFunnel(
+      dsId as string,
+      funnelName,
+      inputFieldsValue,
+      false
+    );
+
+    if (res.status === '200') {
+      router.push('/analytics/viewFunnel/${res.id}');
+    }
   };
 
   return (
@@ -39,12 +67,13 @@ const LeftAction = () => {
           onClick={() => {}}
         />
         <Button
-          disabled={true}
+          disabled={isSaveButtonDisabled}
           borderRadius={'50'}
           _disabled={{
             bg: 'black.30',
             pointerEvents: 'none',
           }}
+          onClick={handleSaveFunnel}
         >
           <Flex alignItems={'center'} gap={'1'}>
             <Image src={tickIcon} />
@@ -131,4 +160,4 @@ const LeftAction = () => {
   );
 };
 
-export default LeftAction;
+export default CreateFunnelAction;

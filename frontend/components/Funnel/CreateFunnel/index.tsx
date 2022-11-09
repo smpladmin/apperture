@@ -2,13 +2,13 @@ import { Box, Flex, Text } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import FunnelImage from '@assets/images/funnel.svg';
 import Image from 'next/image';
-import LeftAction from './LeftAction';
+import CreateFunnelAction from './CreateFunnelAction';
 import RightPanel from '@components/EventsLayout/RightPanel';
 
 const Funnel = () => {
   return (
     <Flex w={'full'} height={'full'}>
-      <LeftAction />
+      <CreateFunnelAction />
       <RightPanel>
         <Flex
           h={'full'}

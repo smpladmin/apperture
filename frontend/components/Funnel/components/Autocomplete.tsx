@@ -6,16 +6,9 @@ import {
   InputGroup,
   InputLeftElement,
   InputRightElement,
-  Text,
 } from '@chakra-ui/react';
 import Image from 'next/image';
-import React, {
-  Fragment,
-  KeyboardEvent,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { Fragment, KeyboardEvent, useRef, useState } from 'react';
 import HorizontalParallelLineIcon from '@assets/icons/horizontal-parallel-line.svg';
 import CrossIcon from '@assets/icons/cross-icon.svg';
 import FunnelIcon from '@assets/icons/funnel-icon.svg';
@@ -33,6 +26,8 @@ type AutocompleteProps = {
   saveDragEnterIndex: any;
   suggestions: any;
   setSuggestions: any;
+  focusedInputIndex: any;
+  setFocusedInputIndex: Function;
 };
 
 const Autocomplete = ({
@@ -46,13 +41,17 @@ const Autocomplete = ({
   saveDragEnterIndex,
   suggestions,
   setSuggestions,
+  focusedInputIndex,
+  setFocusedInputIndex,
 }: AutocompleteProps) => {
-  const [focusedInputIndex, setFocusedInputIndex] = useState(-1);
   const [cursor, setCursor] = useState(-1);
   const inputSearchRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef(null);
 
-  useOnClickOutside(searchContainerRef, () => setSuggestions([]));
+  useOnClickOutside(searchContainerRef, () => {
+    setSuggestions([]);
+    setFocusedInputIndex(-1);
+  });
 
   const keyboardNavigation = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
@@ -122,7 +121,7 @@ const Autocomplete = ({
             fontWeight: 400,
             color: 'grey.10',
           }}
-          value={data?.eventName}
+          value={data?.event}
           onChange={(e) => handleInputChangeValue(e.target.value, index)}
           onFocus={() => setFocusedInputIndex(index)}
           onKeyDown={keyboardNavigation}
@@ -162,7 +161,7 @@ const Autocomplete = ({
           zIndex={'10'}
           borderRadius={'12'}
           overflow={'auto'}
-          maxHeight={{ base: '80', md: '106' }}
+          maxHeight={{ base: '80', md: '108' }}
           pt={'2'}
           pb={'4'}
           ref={searchContainerRef}
