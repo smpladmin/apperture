@@ -4,38 +4,41 @@ import FunnelImage from '@assets/images/funnel.svg';
 import Image from 'next/image';
 import LeftAction from './LeftAction';
 import RightPanel from '@components/EventsLayout/RightPanel';
+import Render from '@components/Render';
 
 const Funnel = () => {
   return (
     <Flex w={'full'} height={'full'}>
       <LeftAction />
-      <RightPanel>
-        <Flex
-          h={'full'}
-          alignItems={'center'}
-          justifyContent={'center'}
-          px={'6'}
-          py={'6'}
-        >
-          <Box>
-            <Image
-              src={FunnelImage}
-              priority={true}
-              alt={'funnel-empty-state'}
-            />
-            <Text
-              textAlign={'center'}
-              mt={'10'}
-              fontSize={'sh-20'}
-              lineHeight={'sh-20'}
-              fontWeight={'normal'}
-              color={'grey.100'}
-            >
-              Enter events to create a funnel
-            </Text>
-          </Box>
-        </Flex>
-      </RightPanel>
+      <Render on="desktop">
+        <RightPanel>
+          <Flex
+            h={'full'}
+            alignItems={'center'}
+            justifyContent={'center'}
+            px={'6'}
+            py={'6'}
+          >
+            <Box>
+              <Image
+                src={FunnelImage}
+                priority={true}
+                alt={'funnel-empty-state'}
+              />
+              <Text
+                textAlign={'center'}
+                mt={'10'}
+                fontSize={'sh-20'}
+                lineHeight={'sh-20'}
+                fontWeight={'normal'}
+                color={'grey.100'}
+              >
+                Enter events to create a funnel
+              </Text>
+            </Box>
+          </Flex>
+        </RightPanel>
+      </Render>
     </Flex>
   );
 };
