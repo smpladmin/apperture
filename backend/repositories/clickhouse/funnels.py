@@ -11,14 +11,6 @@ class Funnels:
         self.clickhouse = clickhouse
         self.table = "events"
 
-    def get_provider(self, ds_id: str) -> str:
-        query = (
-            f"select provider from {self.table} where datasource_id=%(ds_id)s limit 1"
-        )
-        parameters = {"ds_id": ds_id}
-        query_result = self.clickhouse.client.query(query=query, parameters=parameters)
-        return query_result.result_set[0][0]
-
     def get_events_data(
         self, ds_id: str, steps: List[FunnelStep], provider: str
     ) -> List[Tuple]:

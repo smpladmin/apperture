@@ -3,14 +3,21 @@ from typing import List
 from mongo import Mongo
 from beanie import PydanticObjectId
 
+from domain.datasources.service import DataSourceService
 from domain.funnels.models import Funnel, FunnelStep, ComputedFunnelStep
 from repositories.clickhouse.funnels import Funnels
 
 
 class FunnelsService:
-    def __init__(self, mongo: Mongo = Depends(), funnels: Funnels = Depends()):
+    def __init__(
+        self,
+        mongo: Mongo = Depends(),
+        funnels: Funnels = Depends(),
+        datasource_service: DataSourceService = Depends(),
+    ):
         self.mongo = mongo
         self.funnels = funnels
+        self.ds_service = datasource_service
 
     def build_funnel(
         self,
@@ -30,21 +37,19 @@ class FunnelsService:
 
     async def add_funnel(self, funnel: Funnel):
         funnel.updated_at = funnel.created_at
-        async with await self.mongo.client.start_session() as s:
-            async with s.start_transaction():
-                await Funnel.insert(funnel)
+        await Funnel.insert(funnel)
 
     def compute_conversion(self, n, data) -> float:
         return (
             (data[n] * 100 / data[n - 1] if data[n - 1] != 0 else 0) if n != 0 else 100
         )
 
-    def compute_funnel(
+    async def compute_funnel(
         self, ds_id: str, steps: List[FunnelStep]
     ) -> List[ComputedFunnelStep]:
 
-        provider = self.funnels.get_provider(ds_id)
-        events_data = self.funnels.get_events_data(ds_id, steps, provider)
+        datasource = await self.ds_service.get_datasource(id=ds_id)
+        events_data = self.funnels.get_events_data(ds_id, steps, datasource.provider)
         computed_funnel = [
             ComputedFunnelStep(
                 event_name=step.event,

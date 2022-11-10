@@ -37,5 +37,4 @@ async def compute_transient_funnel(
     dto: TransientFunnelDto,
     funnel_service: FunnelsService = Depends(),
 ):
-    res = funnel_service.compute_funnel(ds_id=dto.datasourceId, steps=dto.steps)
-    return res
+    return await funnel_service.compute_funnel(ds_id=dto.datasourceId, steps=dto.steps)
