@@ -11,6 +11,7 @@ from domain.notifications.models import (
     NotificationMetric,
     NotificationType,
 )
+from domain.funnels.models import Funnel, ComputedFunnelStep
 from domain.common.models import IntegrationProvider
 
 
@@ -54,6 +55,52 @@ def notification_service():
 
 
 @pytest.fixture(scope="module")
+def funnel_service():
+    funnel_service_mock = mock.MagicMock()
+    Funnel.get_settings = mock.MagicMock()
+    funnel = Funnel(
+        id=PydanticObjectId("635ba034807ab86d8a2aadd8"),
+        datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        name="name",
+        user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+        steps=[
+            {
+                "event": "Login",
+                "filters": [{"property": "mp_country_code", "value": "IN"}],
+            },
+            {"event": "Chapter_Click"},
+            {
+                "event": "Topic_Click",
+                "filters": [{"property": "os", "value": "Android"}],
+            },
+        ],
+        random_sequence=False,
+    )
+    funnel_future = asyncio.Future()
+    funnel_future.set_result(funnel)
+
+    computed_funnel = [
+        ComputedFunnelStep(event_name="Login", users=956, conversion=100.0),
+        ComputedFunnelStep(event_name="Chapter_Click", users=547, conversion=57.22),
+    ]
+    computed_funnel_future = asyncio.Future()
+    computed_funnel_future.set_result(computed_funnel)
+
+    funnel_service_mock.build_funnel.return_value = funnel
+    funnel_service_mock.add_funnel.return_value = funnel_future
+    funnel_service_mock.compute_funnel.return_value = computed_funnel_future
+    return funnel_service_mock
+
+
+@pytest.fixture(scope="module")
+def computed_funnel_response():
+    return [
+        {"eventName": "Login", "users": 956, "conversion": 100.0},
+        {"eventName": "Chapter_Click", "users": 547, "conversion": 57.22},
+    ]
+
+
+@pytest.fixture(scope="module")
 def notification_response():
     return {
         "_id": "635ba034807ab86d8a2aadd8",
@@ -77,6 +124,34 @@ def notification_response():
         "frequency": NotificationFrequency.DAILY,
         "preferredChannels": [NotificationChannel.SLACK],
         "notificationActive": False,
+    }
+
+
+@pytest.fixture(scope="module")
+def funnel_response():
+    return {
+        "_id": "635ba034807ab86d8a2aadd8",
+        "revisionId": "8fc1083c-0e63-4358-9139-785b77b6236a",
+        "createdAt": "2022-10-28T09:26:12.682829",
+        "updatedAt": None,
+        "datasourceId": "635ba034807ab86d8a2aadd9",
+        "userId": "635ba034807ab86d8a2aadda",
+        "name": "name",
+        "steps": [
+            {
+                "event": "Login",
+                "filters": [{"property": "mp_country_code", "value": "IN"}],
+            },
+            {
+                "event": "Chapter_Click",
+                "filters": None,
+            },
+            {
+                "event": "Topic_Click",
+                "filters": [{"property": "os", "value": "Android"}],
+            },
+        ],
+        "randomSequence": False,
     }
 
 
@@ -120,3 +195,26 @@ def events_data():
             "properties": {"a": "b", "b": "c"},
         },
     ]
+
+
+@pytest.fixture(scope="module")
+def funnel_data():
+    return {
+        "datasourceId": "636a1c61d715ca6baae65611",
+        "name": "test2",
+        "steps": [
+            {
+                "event": "Login",
+                "filters": [{"property": "mp_country_code", "value": "IN"}],
+            },
+            {
+                "event": "Chapter_Click",
+                "filters": None,
+            },
+            {
+                "event": "Topic_Click",
+                "filters": [{"property": "os", "value": "Android"}],
+            },
+        ],
+        "randomSequence": False,
+    }
