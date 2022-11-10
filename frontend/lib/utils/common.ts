@@ -1,3 +1,10 @@
+import { Provider } from './../domain/provider';
+import mixPanelLogo from '@assets/images/mixpanel-icon.svg';
+import gaLogo from '@assets/images/ga-logo-small.svg';
+import amplitudeLogo from '@assets/images/amplitude-icon.svg';
+
+import { StaticImageData } from 'next/image';
+
 export const formatDatalabel = (datalabel: number) => {
   if (datalabel > 999999) {
     return Math.round(datalabel / 100000) / 10 + 'Mn';
@@ -22,4 +29,20 @@ export const convertISODateToReadableDate = (isoDate: string) => {
 export const getPercentageOfHits = (nodeHits: number, totalHits: number) => {
   // rounding off to 1 digit after decimal
   return Math.round((nodeHits / totalHits) * 1000) / 10;
+};
+
+export const getProviderLogo = (provider: Provider): StaticImageData => {
+  switch (provider) {
+    case Provider.GOOGLE:
+      return gaLogo;
+
+    case Provider.MIXPANEL:
+      return mixPanelLogo;
+
+    case Provider.AMPLITUDE:
+      return amplitudeLogo;
+
+    default:
+      return gaLogo;
+  }
 };

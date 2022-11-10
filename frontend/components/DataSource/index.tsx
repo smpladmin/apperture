@@ -1,9 +1,8 @@
 import { Box, Flex, IconButton, Radio, Text } from '@chakra-ui/react';
-import gaLogo from '@assets/images/ga-logo-small.svg';
-import mixpanelLogo from '@assets/images/mixPanel-icon.png';
 import Image from 'next/image';
 import { DataSource } from '@lib/domain/datasource';
 import { Provider } from '@lib/domain/provider';
+import { getProviderLogo } from '@lib/utils/common';
 
 const ProviderProperty = ({ propertyName }: { propertyName: string }) => {
   return (
@@ -42,7 +41,7 @@ const DataSource = ({ dataSource, hasRadio, isSelected }: DataSourceProps) => {
         <Flex gap={'3'} alignItems={'center'}>
           <Box height={'6'} width={'6'}>
             <Image
-              src={provider === Provider.GOOGLE ? gaLogo : mixpanelLogo}
+              src={getProviderLogo(provider)}
               alt="provider"
               layout="responsive"
             />

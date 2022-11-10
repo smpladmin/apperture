@@ -1,10 +1,10 @@
-import { Box, Flex, Image } from '@chakra-ui/react';
+import { Box, Flex } from '@chakra-ui/react';
 import { Provider } from '@lib/domain/provider';
 import 'remixicon/fonts/remixicon.css';
 import filterIcon from '@assets/icons/filter-icon.svg';
-import mixPanel from '@assets/images/mixPanel-icon.png';
-import gaLogo from '@assets/images/ga-logo-small.svg';
 import Search from './Search';
+import Image from 'next/image';
+import { getProviderLogo } from '@lib/utils/common';
 
 type DesktopHeaderProps = {
   dataSourceType: Provider;
@@ -34,21 +34,16 @@ const DesktopHeader = ({
             <i className="ri-calendar-fill"></i>
           </Box>
           <Box cursor={'not-allowed'}>
-            <Image src={filterIcon.src} alt="filter-icon" />
+            <Image src={filterIcon} alt="filter-icon" />
           </Box>
           <Box
             flexShrink={0}
             onClick={openSwitchDataSourceModal}
             cursor={'pointer'}
           >
-            <Image
-              h={'8'}
-              w={'8'}
-              src={
-                dataSourceType === Provider.MIXPANEL ? mixPanel.src : gaLogo.src
-              }
-              alt="data-source"
-            />
+            <Box h={'8'} w={'8'}>
+              <Image src={getProviderLogo(dataSourceType)} alt="data-source" />
+            </Box>
           </Box>
         </Flex>
       </Flex>
