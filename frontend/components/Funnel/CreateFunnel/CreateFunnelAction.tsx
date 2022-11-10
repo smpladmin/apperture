@@ -130,6 +130,7 @@ const CreateFunnelAction = () => {
             bg={'black.20'}
             color={'white.DEFAULT'}
             onClick={addNewInputField}
+            fontSize={'sh-20'}
           >
             {'+'}
           </Button>

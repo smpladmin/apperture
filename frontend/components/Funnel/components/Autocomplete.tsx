@@ -110,7 +110,7 @@ const Autocomplete = ({
           lineHeight={'xs-14'}
           fontWeight={'medium'}
           textColor={'white.DEFAULT'}
-          bg={'black.10'}
+          bg={'black.50'}
           border={'0'}
           borderRadius={'200'}
           placeholder={'Add event'}
@@ -120,7 +120,7 @@ const Autocomplete = ({
             fontSize: 'xs-14',
             lineHeight: 'xs-14',
             fontWeight: 400,
-            color: 'grey.10',
+            color: 'grey.200',
           }}
           value={data?.event}
           onChange={(e) => handleInputChangeValue(e.target.value, index)}
