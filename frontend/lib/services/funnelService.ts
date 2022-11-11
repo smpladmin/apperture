@@ -1,10 +1,11 @@
+import { FunnelStep } from '@lib/domain/funnel';
 import { AxiosError } from 'axios';
 import { AppertureAPI } from '../apiClient';
 
 export const saveFunnel = async (
   dsId: string,
   funnelName: string,
-  steps: any[],
+  steps: FunnelStep[],
   randomSequence: boolean
 ) => {
   try {
@@ -13,6 +14,22 @@ export const saveFunnel = async (
       name: funnelName,
       steps,
       randomSequence,
+    });
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};
+
+export const getTransientFunnelData = async (
+  dsId: string,
+  steps: FunnelStep[]
+) => {
+  try {
+    const res = await AppertureAPI.post('/funnels.transient', {
+      datasourceId: dsId,
+      steps,
     });
     return res.data;
   } catch (e) {

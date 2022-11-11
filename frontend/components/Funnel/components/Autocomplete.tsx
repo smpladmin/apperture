@@ -15,10 +15,10 @@ import FunnelIcon from '@assets/icons/funnel-icon.svg';
 import SuggestionsList from './SuggestionsList';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { NodeType } from '@lib/types/graph';
-import { FunnelSteps } from '@lib/domain/funnel';
+import { FunnelStep } from '@lib/domain/funnel';
 
 type AutocompleteProps = {
-  data: FunnelSteps;
+  data: FunnelStep;
   index: number;
   handleSort: Function;
   handleInputChangeValue: Function;
@@ -137,7 +137,7 @@ const Autocomplete = ({
         >
           <Flex gap={'2'} alignItems={'center'} pr={'4'}>
             <Box minH={'4'} minW={'4'} p={'1px'} cursor={'not-allowed'}>
-              <Image src={FunnelIcon} />
+              <Image src={FunnelIcon} alt={'filter'} />
             </Box>
             {showCrossIcon ? (
               <Box

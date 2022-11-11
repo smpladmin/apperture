@@ -8,16 +8,21 @@ import {
   Text,
 } from '@chakra-ui/react';
 import LeftPanel from '@components/EventsLayout/LeftPanel';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import EventFields from '../components/EventFields';
 import tickIcon from '@assets/icons/black-tick-icon.svg';
 import Image from 'next/image';
 import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
-import { getCountOfAddedSteps } from './util';
+import { filterEmptySteps, getCountOfValidAddedSteps } from '../util';
 import { saveFunnel } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
+import { MapContext } from '@lib/contexts/mapContext';
 
 const CreateFunnelAction = () => {
+  const {
+    state: { nodes },
+  } = useContext(MapContext);
+
   const [funnelName, setFunnelName] = useState('Untitled Funnel');
   const [funnelSteps, setfunnelSteps] = useState([
     { event: '', filters: [] },
@@ -34,18 +39,18 @@ const CreateFunnelAction = () => {
   };
 
   useEffect(() => {
-    if (getCountOfAddedSteps(funnelSteps) >= 2) {
+    if (getCountOfValidAddedSteps(funnelSteps, nodes) >= 2) {
       setSaveButtonDisabled(false);
     } else {
       setSaveButtonDisabled(true);
     }
-  });
+  }, [funnelSteps, nodes]);
 
   const handleSaveFunnel = async () => {
     const res = await saveFunnel(
       dsId as string,
       funnelName,
-      funnelSteps,
+      filterEmptySteps(funnelSteps),
       false
     );
 
@@ -76,7 +81,7 @@ const CreateFunnelAction = () => {
           onClick={handleSaveFunnel}
         >
           <Flex alignItems={'center'} gap={'1'}>
-            <Image src={tickIcon} />
+            <Image src={tickIcon} alt={'tick'} />
             <Text
               color={BLACK_RUSSIAN}
               fontSize={'xs-14'}

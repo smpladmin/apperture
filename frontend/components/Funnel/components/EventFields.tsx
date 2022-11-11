@@ -5,10 +5,10 @@ import EventsConnectingLine from './EventsConnectingLine';
 import Autocomplete from './Autocomplete';
 import { MapContext } from '@lib/contexts/mapContext';
 import { NodeType } from '@lib/types/graph';
-import { FunnelSteps } from '@lib/domain/funnel';
+import { FunnelStep } from '@lib/domain/funnel';
 
 type EventFieldsValue = {
-  eventFieldsValue: Array<FunnelSteps>;
+  eventFieldsValue: Array<FunnelStep>;
   setEventFieldsValue: Function;
 };
 
