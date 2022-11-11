@@ -13,6 +13,7 @@ from domain.notifications.models import (
 )
 from domain.funnels.models import Funnel, ComputedFunnelStep
 from domain.common.models import IntegrationProvider
+from domain.datasources.models import DataSource, DataSourceVersion
 
 
 @pytest.fixture(scope="module")
@@ -218,3 +219,20 @@ def funnel_data():
         ],
         "randomSequence": False,
     }
+
+
+@pytest.fixture(scope="module")
+def datasource_service():
+    datasource_service_mock = mock.MagicMock()
+    DataSource.get_settings = mock.MagicMock()
+    datasource = DataSource(
+        integration_id="636a1c61d715ca6baae65611",
+        app_id="636a1c61d715ca6baae65611",
+        user_id="636a1c61d715ca6baae65611",
+        provider=IntegrationProvider.MIXPANEL,
+        external_source_id="123",
+        version=DataSourceVersion.DEFAULT,
+    )
+
+    datasource_service_mock.get_datasource.return_value = datasource
+    return datasource_service_mock
