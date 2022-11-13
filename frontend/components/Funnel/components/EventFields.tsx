@@ -33,7 +33,7 @@ const EventFields = ({
   const router = useRouter();
   const { dsId } = router.query;
 
-  const [isStepDragged, setIsStepDragged] = useState(false);
+  const [stepDragCount, setStepDragCount] = useState(0);
   const [showCrossIcon, setShowCrossIcon] = useState(false);
   const [suggestions, setSuggestions] = useState<Array<NodeType>>([]);
   const [focusedInputIndex, setFocusedInputIndex] = useState(-1);
@@ -44,8 +44,9 @@ const EventFields = ({
   }, [eventFieldsValue]);
 
   useEffect(() => {
+    if (!stepDragCount) return;
     getFunnelData();
-  }, [isStepDragged]);
+  }, [stepDragCount]);
 
   const removeInputField = (index: number) => {
     if (eventFieldsValue.length === 2) return;
@@ -87,7 +88,7 @@ const EventFields = ({
     const [itemToReplace] = inputValues.splice(result.source.index, 1);
     inputValues.splice(result.destination.index, 0, itemToReplace);
     setEventFieldsValue(inputValues);
-    setIsStepDragged(!isStepDragged);
+    setStepDragCount((count) => count + 1);
   };
 
   return (

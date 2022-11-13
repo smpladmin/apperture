@@ -27,7 +27,7 @@ export const getTransientFunnelData = async (
   steps: FunnelStep[]
 ) => {
   try {
-    const res = await AppertureAPI.post('/funnels.transient', {
+    const res = await AppertureAPI.post('/funnels/transient', {
       datasourceId: dsId,
       steps,
     });

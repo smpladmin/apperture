@@ -6,7 +6,7 @@ import FunnelChart from '../components/FunnelChart';
 import { useContext, useEffect, useState } from 'react';
 import { getCountOfValidAddedSteps } from '../util';
 import { MapContext } from '@lib/contexts/mapContext';
-import FunnelEmptyState from './FunnelEmptyState';
+import FunnelEmptyState from '../components/FunnelEmptyState';
 import { BLACK_RUSSIAN } from '@theme/index';
 
 const Funnel = () => {
