@@ -16,6 +16,7 @@ import { Item } from '@antv/g6';
 import { Actions } from '@lib/types/context';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { useRouter } from 'next/router';
+import { getSearchResult } from '@lib/utils/common';
 
 type SuggestionListProps = {
   suggestion: Item;
@@ -106,21 +107,11 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
   }, [dsId]);
 
   const onChangeHandler = (text: string) => {
-    let matches: Item[] = [];
-    if (text) {
-      matches = nodesData
-        .filter((item: Item) => {
-          return (
-            item?._cfg?.id!!.toLowerCase().startsWith(text.toLowerCase()) ||
-            item?._cfg?.id!!.toLowerCase().includes(text.toLowerCase())
-          );
-        })
-        .slice(0, 10);
-      matches.sort((a, b) => a._cfg?.id?.length!! - b._cfg?.id?.length!!);
-      setCursor(-1);
-    }
-    setSuggestions(matches);
     setSearchText(text);
+    const matches = getSearchResult(nodesData, text, {
+      keys: [['_cfg', 'id']],
+    });
+    setSuggestions(matches);
   };
 
   const setNodeSearchState = () => {
@@ -138,6 +129,14 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
     });
     setNodeSearchState();
     setSuggestions([]);
+    setCursor(-1);
+  };
+
+  const onSubmit = (searchText: string) => {
+    const searchNode = nodesData.find((node) => node._cfg?.id === searchText);
+    if (searchNode) {
+      suggestionsClickHandler(searchNode);
+    }
   };
 
   const keyboardNavigation = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -150,26 +149,9 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
     }
     if (e.key === 'Enter') {
       if (cursor >= 0) {
-        setSearchText(suggestions[cursor]?._cfg?.id!!);
-        dispatch({
-          type: Actions.SET_ACTIVE_NODE,
-          payload: suggestions[cursor],
-        });
-        setNodeSearchState();
-        setSuggestions([]);
-        setCursor(-1);
+        suggestionsClickHandler(suggestions[cursor]);
       } else {
-        const searchNode = nodesData.find(
-          (node) => node._cfg?.id === searchText
-        );
-        if (searchNode) {
-          dispatch({
-            type: Actions.SET_ACTIVE_NODE,
-            payload: searchNode,
-          });
-          setNodeSearchState();
-          setSuggestions([]);
-        }
+        onSubmit(searchText);
       }
       inputSearchRef.current?.blur();
     }

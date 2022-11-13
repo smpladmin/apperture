@@ -15,6 +15,7 @@ import {
   Droppable,
   DropResult,
 } from 'react-beautiful-dnd';
+import { getSearchResult } from '@lib/utils/common';
 
 type EventFieldsValue = {
   eventFieldsValue: Array<FunnelStep>;
@@ -56,19 +57,11 @@ const EventFields = ({
   };
 
   const handleInputChangeValue = (eventValue: string, index: number) => {
-    let matches: NodeType[] = [];
-    if (eventValue) {
-      matches = nodes
-        .filter((item: NodeType) => {
-          return (
-            item?.id?.toLowerCase()?.startsWith(eventValue.toLowerCase()) ||
-            item?.id?.toLowerCase()?.includes(eventValue?.toLowerCase())
-          );
-        })
-        .slice(0, 10);
-      matches?.sort((a, b) => a?.id.length - b?.id.length);
-    }
+    const matches = getSearchResult(nodes, eventValue, {
+      keys: ['id'],
+    }) as NodeType[];
     setSuggestions(matches);
+
     const inputValues = [...eventFieldsValue];
     inputValues[index]['event'] = eventValue;
     setEventFieldsValue(inputValues);
