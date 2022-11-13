@@ -20,31 +20,27 @@ import { FunnelStep } from '@lib/domain/funnel';
 type AutocompleteProps = {
   data: FunnelStep;
   index: number;
-  handleSort: Function;
   handleInputChangeValue: Function;
   removeInputField: Function;
   showCrossIcon: boolean;
-  saveDragStartIndex: Function;
-  saveDragEnterIndex: Function;
   suggestions: NodeType[];
   setSuggestions: Function;
   focusedInputIndex: number;
   setFocusedInputIndex: Function;
+  getFunnelData: Function;
 };
 
 const Autocomplete = ({
   data,
   index,
-  handleSort,
   handleInputChangeValue,
   removeInputField,
   showCrossIcon,
-  saveDragStartIndex,
-  saveDragEnterIndex,
   suggestions,
   setSuggestions,
   focusedInputIndex,
   setFocusedInputIndex,
+  getFunnelData,
 }: AutocompleteProps) => {
   const [cursor, setCursor] = useState(-1);
   const inputSearchRef = useRef<HTMLInputElement>(null);
@@ -76,19 +72,14 @@ const Autocomplete = ({
 
   const suggestionsClickHandler = (suggestion: NodeType) => {
     handleInputChangeValue(suggestion?.id, focusedInputIndex);
+    getFunnelData();
     setSuggestions([]);
     setFocusedInputIndex(-1);
   };
 
   return (
-    <Flex direction={'column'} gap={'4'} position={'relative'}>
-      <InputGroup
-        draggable
-        onDragStart={() => saveDragStartIndex(index)}
-        onDragEnter={() => saveDragEnterIndex(index)}
-        onDragEnd={() => handleSort()}
-        onDragOver={(event) => event?.preventDefault()}
-      >
+    <Flex direction={'column'} position={'relative'} pb={'4'}>
+      <InputGroup>
         <InputLeftElement
           cursor={'move'}
           h={'12'}
@@ -114,6 +105,7 @@ const Autocomplete = ({
           border={'0'}
           borderRadius={'200'}
           placeholder={'Add event'}
+          autoFocus
           focusBorderColor={'white.DEFAULT'}
           ref={inputSearchRef}
           _placeholder={{

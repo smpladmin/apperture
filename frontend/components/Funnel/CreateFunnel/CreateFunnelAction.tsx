@@ -17,17 +17,27 @@ import { filterEmptySteps, getCountOfValidAddedSteps } from '../util';
 import { saveFunnel } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { MapContext } from '@lib/contexts/mapContext';
+import { FunnelStep } from '@lib/domain/funnel';
 
-const CreateFunnelAction = () => {
+type CreateFunnelActionProps = {
+  funnelName: string;
+  setFunnelName: Function;
+  funnelSteps: FunnelStep[];
+  setFunnelSteps: Function;
+  setFunnelData: Function;
+};
+
+const CreateFunnelAction = ({
+  funnelName,
+  setFunnelName,
+  funnelSteps,
+  setFunnelSteps,
+  setFunnelData,
+}: CreateFunnelActionProps) => {
   const {
     state: { nodes },
   } = useContext(MapContext);
 
-  const [funnelName, setFunnelName] = useState('Untitled Funnel');
-  const [funnelSteps, setfunnelSteps] = useState([
-    { event: '', filters: [] },
-    { event: '', filters: [] },
-  ]);
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
 
   const router = useRouter();
@@ -35,7 +45,7 @@ const CreateFunnelAction = () => {
 
   const addNewInputField = () => {
     const newField = { event: '', filters: [] };
-    setfunnelSteps([...funnelSteps, newField]);
+    setFunnelSteps([...funnelSteps, newField]);
   };
 
   useEffect(() => {
@@ -112,6 +122,7 @@ const CreateFunnelAction = () => {
           fontWeight={'semibold'}
           textColor={'white.DEFAULT'}
           value={funnelName}
+          focusBorderColor={'white.DEFAULT'}
           onChange={(e) => setFunnelName(e.target.value)}
           borderColor={'grey.10'}
           px={0}
@@ -142,7 +153,8 @@ const CreateFunnelAction = () => {
         </Flex>
         <EventFields
           eventFieldsValue={funnelSteps}
-          setEventFieldsValue={setfunnelSteps}
+          setEventFieldsValue={setFunnelSteps}
+          setFunnelData={setFunnelData}
         />
         <Divider
           mt={'4'}

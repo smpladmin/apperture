@@ -1,4 +1,4 @@
-import { Flex } from '@chakra-ui/react';
+import { Box, Flex } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import EventsConnectingLine from './EventsConnectingLine';
@@ -6,31 +6,46 @@ import Autocomplete from './Autocomplete';
 import { MapContext } from '@lib/contexts/mapContext';
 import { NodeType } from '@lib/types/graph';
 import { FunnelStep } from '@lib/domain/funnel';
+import { getCountOfValidAddedSteps } from '../util';
+import { getTransientFunnelData } from '@lib/services/funnelService';
+import { useRouter } from 'next/router';
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  DropResult,
+} from 'react-beautiful-dnd';
 
 type EventFieldsValue = {
   eventFieldsValue: Array<FunnelStep>;
   setEventFieldsValue: Function;
+  setFunnelData: Function;
 };
 
 const EventFields = ({
   eventFieldsValue,
   setEventFieldsValue,
+  setFunnelData,
 }: EventFieldsValue) => {
   const {
     state: { nodes },
   } = useContext(MapContext);
+  const router = useRouter();
+  const { dsId } = router.query;
 
+  const [isStepDragged, setIsStepDragged] = useState(false);
   const [showCrossIcon, setShowCrossIcon] = useState(false);
   const [suggestions, setSuggestions] = useState<Array<NodeType>>([]);
   const [focusedInputIndex, setFocusedInputIndex] = useState(-1);
-
-  const dragItem = useRef<{ index: number | null }>({ index: null });
-  const dragOverItem = useRef<{ index: number | null }>({ index: null });
 
   useEffect(() => {
     if (eventFieldsValue.length <= 2) setShowCrossIcon(false);
     else setShowCrossIcon(true);
   }, [eventFieldsValue]);
+
+  useEffect(() => {
+    getFunnelData();
+  }, [isStepDragged]);
 
   const removeInputField = (index: number) => {
     if (eventFieldsValue.length === 2) return;
@@ -58,49 +73,69 @@ const EventFields = ({
     setEventFieldsValue(inputValues);
   };
 
-  const saveDragStartIndex = (i: number) => {
-    dragItem.current.index = i;
-  };
-  const saveDragEnterIndex = (i: number) => {
-    dragOverItem.current.index = i;
+  const getFunnelData = async () => {
+    if (getCountOfValidAddedSteps(eventFieldsValue, nodes) < 2) return;
+    setFunnelData([]);
+    const res = await getTransientFunnelData(dsId as string, eventFieldsValue);
+    setFunnelData(res);
   };
 
-  const handleSort = () => {
-    if (dragItem.current.index === null || dragOverItem.current.index === null)
-      return;
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
 
     const inputValues = [...eventFieldsValue];
-    const [itemToReplace] = inputValues.splice(dragItem.current.index, 1);
-    inputValues.splice(dragOverItem.current.index, 0, itemToReplace);
-
+    const [itemToReplace] = inputValues.splice(result.source.index, 1);
+    inputValues.splice(result.destination.index, 0, itemToReplace);
     setEventFieldsValue(inputValues);
-    dragItem.current.index = null;
-    dragOverItem.current.index = null;
+    setIsStepDragged(!isStepDragged);
   };
+
   return (
     <Flex gap={'4'}>
       <EventsConnectingLine eventsLength={eventFieldsValue.length} />
-      <Flex direction={'column'} gap={'4'} w={'full'}>
-        {eventFieldsValue.map((inputValue, i) => {
-          return (
-            <Autocomplete
-              key={i}
-              data={inputValue}
-              index={i}
-              handleSort={handleSort}
-              handleInputChangeValue={handleInputChangeValue}
-              removeInputField={removeInputField}
-              showCrossIcon={showCrossIcon}
-              saveDragStartIndex={saveDragStartIndex}
-              saveDragEnterIndex={saveDragEnterIndex}
-              suggestions={suggestions}
-              setSuggestions={setSuggestions}
-              focusedInputIndex={focusedInputIndex}
-              setFocusedInputIndex={setFocusedInputIndex}
-            />
-          );
-        })}
-      </Flex>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="droppable">
+          {(provided) => (
+            <Box
+              w={'full'}
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
+              {eventFieldsValue.map((inputValue, i) => {
+                return (
+                  <Draggable
+                    key={`event-${i}`}
+                    draggableId={`event-${i}`}
+                    index={i}
+                  >
+                    {(provided) => (
+                      <Box
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      >
+                        <Autocomplete
+                          data={inputValue}
+                          index={i}
+                          handleInputChangeValue={handleInputChangeValue}
+                          removeInputField={removeInputField}
+                          showCrossIcon={showCrossIcon}
+                          suggestions={suggestions}
+                          setSuggestions={setSuggestions}
+                          focusedInputIndex={focusedInputIndex}
+                          setFocusedInputIndex={setFocusedInputIndex}
+                          getFunnelData={getFunnelData}
+                        />
+                      </Box>
+                    )}
+                  </Draggable>
+                );
+              })}
+              {provided.placeholder}
+            </Box>
+          )}
+        </Droppable>
+      </DragDropContext>
     </Flex>
   );
 };
