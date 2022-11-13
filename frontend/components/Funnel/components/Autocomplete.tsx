@@ -74,7 +74,6 @@ const Autocomplete = ({
     handleInputChangeValue(suggestion?.id, focusedInputIndex);
     getFunnelData();
     setSuggestions([]);
-    setFocusedInputIndex(-1);
   };
 
   return (
