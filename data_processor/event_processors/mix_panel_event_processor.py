@@ -9,7 +9,7 @@ class MixPanelEventProcessor(EventProcessor):
         df = pd.read_json(events_data, lines=True)
         df2 = pd.json_normalize(df["properties"])
         df2 = df2.fillna("")
-        df2.columns = [str(column).replace('$', '') for column in df2.columns]
+        df2.columns = [str(column).replace("$", "") for column in df2.columns]
 
         df["properties"] = df2.to_dict("records")
         df["timestamp"] = df2["time"].apply(
