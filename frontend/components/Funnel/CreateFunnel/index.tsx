@@ -73,7 +73,7 @@ const Funnel = () => {
                   />
                 </Flex>
               ) : (
-                <FunnelChart />
+                <FunnelChart data={funnelData} />
               )}
             </Flex>
           )}

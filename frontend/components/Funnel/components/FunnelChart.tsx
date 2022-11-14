@@ -1,9 +1,13 @@
 import { Box } from '@chakra-ui/react';
 import React, { useEffect, useRef } from 'react';
 import { Chart, registerTheme } from '@antv/g2';
-import { data } from '../data';
 
-const FunnelChart = () => {
+type FunnelChartProps = {
+  data: any[];
+};
+
+const FunnelChart = ({ data }: FunnelChartProps) => {
+  console.log(data);
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ funnel: any }>({ funnel: null });
 
@@ -15,24 +19,15 @@ const FunnelChart = () => {
     });
 
     plot.current.funnel.data(data.reverse());
-    plot.current.funnel.scale('value', { nice: true });
+    plot.current.funnel.scale('users', { nice: true });
     plot.current.funnel.coordinate().transpose();
     plot.current.funnel.tooltip({
       showMarkers: false,
     });
-    plot.current.funnel.axis('event', {
-      label: {
-        formatter: ({ text }: any) => {
-          console.log('hi', text);
-          return text;
-        },
-      },
-    });
-    plot.current.funnel.axis('event', {});
     plot.current.funnel
       .interval()
-      .position('event*value')
-      .label('percentage', {
+      .position('eventName*users')
+      .label('conversion', {
         offset: 10,
         style: {
           fill: '#595959',
@@ -40,9 +35,8 @@ const FunnelChart = () => {
         },
       });
     plot.current.funnel.render();
-  }, []);
+  }, [data]);
 
-  //   useEffect(() => {});
   return <Box ref={ref}></Box>;
 };
 

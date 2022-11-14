@@ -38,6 +38,7 @@ const EventFields = ({
   const [showCrossIcon, setShowCrossIcon] = useState(false);
   const [suggestions, setSuggestions] = useState<Array<NodeType>>([]);
   const [focusedInputIndex, setFocusedInputIndex] = useState(-1);
+  const [stepRemovedCount, setStepRemovedCount] = useState(0);
 
   useEffect(() => {
     if (eventFieldsValue.length <= 2) setShowCrossIcon(false);
@@ -49,11 +50,17 @@ const EventFields = ({
     getFunnelData();
   }, [stepDragCount]);
 
+  useEffect(() => {
+    if (!stepRemovedCount) return;
+    getFunnelData();
+  }, [stepRemovedCount]);
+
   const removeInputField = (index: number) => {
     if (eventFieldsValue.length === 2) return;
     let deletedInputValues = [...eventFieldsValue];
     deletedInputValues.splice(index, 1);
     setEventFieldsValue(deletedInputValues);
+    setStepRemovedCount((count) => count + 1);
   };
 
   const handleInputChangeValue = (eventValue: string, index: number) => {
