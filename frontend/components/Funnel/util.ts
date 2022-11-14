@@ -19,10 +19,11 @@ export const isEveryStepValid = (steps: FunnelStep[], nodes: NodeType[]) => {
   return steps.every((step) => isValidStep(step?.['event'], nodes));
 };
 
-export const transformFunnelData = (funnelData: FunnelStep[]) => {
+export const transformFunnelData = (funnelData: any[]) => {
   return funnelData.map((data, i) => {
     const transformedData = { ...data };
-    transformedData['event'] += `${Array(i + 1).join(' ')}`;
+    transformedData['event'] =
+      `${Array(i + 1).join(' ')}` + transformedData['event'];
     return transformedData;
   });
 };
