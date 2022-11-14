@@ -121,12 +121,16 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
     });
   };
 
-  const suggestionsClickHandler = (suggestion: Item) => {
-    setSearchText(suggestion?._cfg?.id!!);
+  const setActiveNode = (suggestion: Item) => {
     dispatch({
       type: Actions.SET_ACTIVE_NODE,
       payload: suggestion,
     });
+  };
+
+  const suggestionsClickHandler = (suggestion: Item) => {
+    setSearchText(suggestion?._cfg?.id!!);
+    setActiveNode(suggestion);
     setNodeSearchState();
     setSuggestions([]);
     setCursor(-1);

@@ -44,12 +44,24 @@ const Autocomplete = ({
 }: AutocompleteProps) => {
   const [cursor, setCursor] = useState(-1);
   const inputSearchRef = useRef<HTMLInputElement>(null);
-  const searchContainerRef = useRef(null);
+  const suggestionsContainerRef = useRef(null);
 
-  useOnClickOutside(searchContainerRef, () => {
+  useOnClickOutside(suggestionsContainerRef, () => {
     setSuggestions([]);
     setFocusedInputIndex(-1);
   });
+
+  const suggestionsSubmitHandler = (suggestion: NodeType) => {
+    handleInputChangeValue(suggestion?.id, focusedInputIndex);
+    getFunnelData();
+    setSuggestions([]);
+    setCursor(-1);
+  };
+
+  const handlEnterKeyPressed = () => {
+    setSuggestions([]);
+    getFunnelData();
+  };
 
   const keyboardNavigation = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
@@ -61,19 +73,12 @@ const Autocomplete = ({
     }
     if (e.key === 'Enter') {
       if (cursor >= 0) {
-        suggestionsClickHandler(suggestions?.[cursor]);
-        setCursor(-1);
+        suggestionsSubmitHandler(suggestions?.[cursor]);
       } else {
-        setSuggestions([]);
+        handlEnterKeyPressed();
       }
       inputSearchRef.current?.blur();
     }
-  };
-
-  const suggestionsClickHandler = (suggestion: NodeType) => {
-    handleInputChangeValue(suggestion?.id, focusedInputIndex);
-    getFunnelData();
-    setSuggestions([]);
   };
 
   return (
@@ -156,7 +161,7 @@ const Autocomplete = ({
           maxHeight={{ base: '80', md: '108' }}
           pt={'2'}
           pb={'4'}
-          ref={searchContainerRef}
+          ref={suggestionsContainerRef}
         >
           {suggestions.map((suggestion: NodeType, i: number) => {
             return (
@@ -170,7 +175,7 @@ const Autocomplete = ({
                 ) : null}
                 <SuggestionsList
                   suggestion={suggestion}
-                  suggestionsClickHandler={suggestionsClickHandler}
+                  suggestionsSubmitHandler={suggestionsSubmitHandler}
                   active={cursor === i}
                 />
                 <Divider

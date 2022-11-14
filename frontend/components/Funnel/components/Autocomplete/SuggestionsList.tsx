@@ -4,13 +4,13 @@ import React, { useEffect, useRef } from 'react';
 
 type SuggestionListProps = {
   suggestion: NodeType;
-  suggestionsClickHandler: Function;
+  suggestionsSubmitHandler: Function;
   active: boolean;
 };
 
 const SuggestionsList = ({
   suggestion,
-  suggestionsClickHandler,
+  suggestionsSubmitHandler,
   active,
 }: SuggestionListProps) => {
   const searchResultRef = useRef<HTMLDivElement>(null);
@@ -24,7 +24,7 @@ const SuggestionsList = ({
 
   return (
     <Flex
-      onClick={() => suggestionsClickHandler(suggestion)}
+      onClick={() => suggestionsSubmitHandler(suggestion)}
       cursor={'pointer'}
       h={'auto'}
       minHeight={{ base: '18', md: '15' }}
