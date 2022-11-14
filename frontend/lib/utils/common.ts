@@ -1,13 +1,10 @@
 import Fuse from 'fuse.js';
+import { Provider } from './../domain/provider';
+import mixPanelLogo from '@assets/images/mixpanel-icon.svg';
+import gaLogo from '@assets/images/ga-logo-small.svg';
+import amplitudeLogo from '@assets/images/amplitude-icon.svg';
 
-export const getSearchResult = (
-  data: any[],
-  query: string,
-  options: Fuse.IFuseOptions<any>
-) => {
-  const fuse = new Fuse(data, options);
-  return fuse.search(query).map((result) => result.item);
-};
+import { StaticImageData } from 'next/image';
 
 export const formatDatalabel = (datalabel: number) => {
   if (datalabel > 999999) {
@@ -33,4 +30,29 @@ export const convertISODateToReadableDate = (isoDate: string) => {
 export const getPercentageOfHits = (nodeHits: number, totalHits: number) => {
   // rounding off to 1 digit after decimal
   return Math.round((nodeHits / totalHits) * 1000) / 10;
+};
+
+export const getProviderLogo = (provider: Provider): StaticImageData => {
+  switch (provider) {
+    case Provider.GOOGLE:
+      return gaLogo;
+
+    case Provider.MIXPANEL:
+      return mixPanelLogo;
+
+    case Provider.AMPLITUDE:
+      return amplitudeLogo;
+
+    default:
+      return gaLogo;
+  }
+};
+
+export const getSearchResult = (
+  data: any[],
+  query: string,
+  options: Fuse.IFuseOptions<any>
+) => {
+  const fuse = new Fuse(data, options);
+  return fuse.search(query).map((result) => result.item);
 };

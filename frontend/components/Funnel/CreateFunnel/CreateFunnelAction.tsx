@@ -84,6 +84,7 @@ const CreateFunnelAction = ({
           bg={'black.20'}
           onClick={() => {}}
         />
+
         <Button
           disabled={isSaveButtonDisabled}
           borderRadius={'50'}
@@ -120,8 +121,8 @@ const CreateFunnelAction = ({
           pr={'4'}
           type={'text'}
           variant="flushed"
-          fontSize={'sh-32'}
-          lineHeight={'sh-32'}
+          fontSize={{ base: 'sh-20', md: 'sh-32' }}
+          lineHeight={{ base: 'sh-20', md: 'sh-32' }}
           fontWeight={'semibold'}
           textColor={'white.DEFAULT'}
           value={funnelName}
@@ -135,9 +136,9 @@ const CreateFunnelAction = ({
       <Flex direction={'column'} gap={'4'} mt={'9'}>
         <Flex justifyContent={'space-between'} alignItems={'center'}>
           <Text
-            fontSize={'sh-24'}
-            lineHeight={'sh-24'}
-            fontWeight={'normal'}
+            fontSize={{ base: 'sh-18', md: 'sh-24' }}
+            lineHeight={{ base: 'sh-18', md: 'sh-24' }}
+            fontWeight={{ base: '500', md: '400' }}
             color={'white.DEFAULT'}
           >
             Steps
@@ -167,8 +168,8 @@ const CreateFunnelAction = ({
         />
         <Flex justifyContent={'space-between'} alignItems={'center'}>
           <Text
-            fontSize={'base'}
-            lineHeight={'base'}
+            fontSize={{ base: 'xs-14', md: 'base' }}
+            lineHeight={{ base: 'xs-14', md: 'base' }}
             fontWeight={'normal'}
             color={'white.DEFAULT'}
           >

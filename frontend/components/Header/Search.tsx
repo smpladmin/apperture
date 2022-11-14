@@ -9,14 +9,13 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import mixPanel from '@assets/images/mixPanel-icon.png';
-import gaLogo from '@assets/images/ga-logo-small.svg';
 import { MapContext } from '@lib/contexts/mapContext';
 import { Item } from '@antv/g6';
 import { Actions } from '@lib/types/context';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { useRouter } from 'next/router';
 import { getSearchResult } from '@lib/utils/common';
+import { getProviderLogo } from '@lib/utils/common';
 
 type SuggestionListProps = {
   suggestion: Item;
@@ -61,7 +60,7 @@ const SuggestionsList = ({
         minW={{ base: '6', md: '7' }}
       >
         <Image
-          src={dataSourceType === Provider.MIXPANEL ? mixPanel : gaLogo}
+          src={getProviderLogo(dataSourceType)}
           alt="data-source-mix-panel"
           layout="responsive"
         />

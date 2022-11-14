@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 
-from domain.users.models import User
 from domain.users.service import UserService
 from rest.dtos.users import UserResponse
 from rest.middlewares import get_user_id, validate_jwt
@@ -15,7 +14,7 @@ router = APIRouter(
 
 @router.get("/users/me", response_model=UserResponse)
 async def get_current_user(
-    user_id: User = Depends(get_user_id),
+    user_id: str = Depends(get_user_id),
     user_service: UserService = Depends(),
 ):
     return await user_service.get_user(user_id)
@@ -24,7 +23,7 @@ async def get_current_user(
 @router.put("/users")
 async def remove_slack_credentials(
     delete_slack_credentials: bool,
-    user_id: User = Depends(get_user_id),
+    user_id: str = Depends(get_user_id),
     user_service: UserService = Depends(),
 ):
     if delete_slack_credentials:

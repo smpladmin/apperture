@@ -10,6 +10,7 @@ from domain.integrations.models import Integration
 from domain.users.models import User
 from domain.runlogs.models import RunLog
 from domain.notifications.models import Notification
+from domain.funnels.models import Funnel
 
 
 class Mongo:
@@ -27,6 +28,7 @@ class Mongo:
                 RichEdge,
                 RunLog,
                 Notification,
+                Funnel,
             ],
         )
 

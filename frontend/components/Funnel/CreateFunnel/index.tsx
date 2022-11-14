@@ -8,6 +8,7 @@ import { getCountOfValidAddedSteps } from '../util';
 import { MapContext } from '@lib/contexts/mapContext';
 import FunnelEmptyState from '../components/FunnelEmptyState';
 import { BLACK_RUSSIAN } from '@theme/index';
+import Render from '@components/Render';
 
 const Funnel = () => {
   const {
@@ -47,35 +48,37 @@ const Funnel = () => {
         setFunnelSteps={setFunnelSteps}
         setFunnelData={setFunnelData}
       />
-      <RightPanel>
-        {isEmpty ? (
-          <FunnelEmptyState />
-        ) : (
-          <Flex px={'30'} py={'30'} direction={'column'} gap={'8'} h={'full'}>
-            <Text fontSize={'sh-20'} fontWeight={'semibold'}>
-              Funnel
-            </Text>
-            {isLoading ? (
-              <Flex
-                w="full"
-                h="full"
-                justifyContent={'center'}
-                alignItems={'center'}
-              >
-                <Spinner
-                  thickness="4px"
-                  speed="0.5s"
-                  emptyColor="gray.200"
-                  color={BLACK_RUSSIAN}
-                  size="xl"
-                />
-              </Flex>
-            ) : (
-              <FunnelChart />
-            )}
-          </Flex>
-        )}
-      </RightPanel>
+      <Render on="desktop">
+        <RightPanel>
+          {isEmpty ? (
+            <FunnelEmptyState />
+          ) : (
+            <Flex px={'30'} py={'30'} direction={'column'} gap={'8'} h={'full'}>
+              <Text fontSize={'sh-20'} fontWeight={'semibold'}>
+                Funnel
+              </Text>
+              {isLoading ? (
+                <Flex
+                  w="full"
+                  h="full"
+                  justifyContent={'center'}
+                  alignItems={'center'}
+                >
+                  <Spinner
+                    thickness="4px"
+                    speed="0.5s"
+                    emptyColor="gray.200"
+                    color={BLACK_RUSSIAN}
+                    size="xl"
+                  />
+                </Flex>
+              ) : (
+                <FunnelChart />
+              )}
+            </Flex>
+          )}
+        </RightPanel>
+      </Render>
     </Flex>
   );
 };
