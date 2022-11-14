@@ -81,8 +81,8 @@ def funnel_service():
     funnel_future.set_result(funnel)
 
     computed_funnel = [
-        ComputedFunnelStep(event_name="Login", users=956, conversion=100.0),
-        ComputedFunnelStep(event_name="Chapter_Click", users=547, conversion=57.22),
+        ComputedFunnelStep(event="Login", users=956, conversion=100.0),
+        ComputedFunnelStep(event="Chapter_Click", users=547, conversion=57.22),
     ]
     computed_funnel_future = asyncio.Future()
     computed_funnel_future.set_result(computed_funnel)

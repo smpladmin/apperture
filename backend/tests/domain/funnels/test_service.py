@@ -35,8 +35,8 @@ class TestFunnelService:
             random_sequence=False,
         )
         self.computed_funnel = [
-            ComputedFunnelStep(event_name="Login", users=100, conversion=100.0),
-            ComputedFunnelStep(event_name="Chapter Click", users=40, conversion=40.0),
+            ComputedFunnelStep(event="Login", users=100, conversion=100.0),
+            ComputedFunnelStep(event="Chapter Click", users=40, conversion=40.0),
         ]
 
     def test_build_funnel(self):
