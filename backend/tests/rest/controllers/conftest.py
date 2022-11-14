@@ -96,8 +96,8 @@ def funnel_service():
 @pytest.fixture(scope="module")
 def computed_funnel_response():
     return [
-        {"eventName": "Login", "users": 956, "conversion": 100.0},
-        {"eventName": "Chapter_Click", "users": 547, "conversion": 57.22},
+        {"event": "Login", "users": 956, "conversion": 100.0},
+        {"event": "Chapter_Click", "users": 547, "conversion": 57.22},
     ]
 
 
