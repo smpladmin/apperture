@@ -3,7 +3,6 @@ from typing import List
 from mongo import Mongo
 from beanie import PydanticObjectId
 
-from domain.datasources.service import DataSourceService
 from domain.funnels.models import Funnel, FunnelStep, ComputedFunnelStep
 from repositories.clickhouse.funnels import Funnels
 
@@ -13,11 +12,9 @@ class FunnelsService:
         self,
         mongo: Mongo = Depends(),
         funnels: Funnels = Depends(),
-        datasource_service: DataSourceService = Depends(),
     ):
         self.mongo = mongo
         self.funnels = funnels
-        self.ds_service = datasource_service
 
     def build_funnel(
         self,
@@ -45,11 +42,10 @@ class FunnelsService:
         )
 
     async def compute_funnel(
-        self, ds_id: str, steps: List[FunnelStep]
+        self, ds_id: str, provider: str, steps: List[FunnelStep]
     ) -> List[ComputedFunnelStep]:
 
-        datasource = await self.ds_service.get_datasource(id=ds_id)
-        events_data = self.funnels.get_events_data(ds_id, steps, datasource.provider)
+        events_data = self.funnels.get_events_data(ds_id, steps, provider)
         computed_funnel = [
             ComputedFunnelStep(
                 event_name=step.event,
