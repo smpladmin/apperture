@@ -1,6 +1,6 @@
 import { Box, Flex } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import EventsConnectingLine from './EventsConnectingLine';
 import Autocomplete from './Autocomplete';
 import { MapContext } from '@lib/contexts/mapContext';

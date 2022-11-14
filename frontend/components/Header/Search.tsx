@@ -132,7 +132,9 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
     setCursor(-1);
   };
 
-  const onSubmit = (searchText: string) => {
+  const searchAndSetValidNodeOnSubmit = (searchText: string) => {
+    // we need to set active node on submit i.e. on  'Enter' keypress event
+    // so we need to find the corresponding node w.r.t to searchtext
     const searchNode = nodesData.find((node) => node._cfg?.id === searchText);
     if (searchNode) {
       suggestionsClickHandler(searchNode);
@@ -151,7 +153,7 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
       if (cursor >= 0) {
         suggestionsClickHandler(suggestions[cursor]);
       } else {
-        onSubmit(searchText);
+        searchAndSetValidNodeOnSubmit(searchText);
       }
       inputSearchRef.current?.blur();
     }
