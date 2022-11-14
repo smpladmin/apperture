@@ -234,5 +234,7 @@ def datasource_service():
         version=DataSourceVersion.DEFAULT,
     )
 
-    datasource_service_mock.get_datasource.return_value = datasource
+    datasource_future = asyncio.Future()
+    datasource_future.set_result(datasource)
+    datasource_service_mock.get_datasource.return_value = datasource_future
     return datasource_service_mock

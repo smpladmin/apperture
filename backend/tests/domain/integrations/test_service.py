@@ -1,5 +1,5 @@
 from unittest.mock import AsyncMock, MagicMock
-from beanie import PydanticObjectId, init_beanie
+from beanie import PydanticObjectId
 import pytest
 from domain.apps.models import App
 from domain.common.models import IntegrationProvider

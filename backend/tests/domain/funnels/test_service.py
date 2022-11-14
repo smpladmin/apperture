@@ -18,6 +18,7 @@ class TestFunnelService:
         self.funnels = MagicMock()
         self.service = FunnelsService()
         self.ds_id = "636a1c61d715ca6baae65611"
+        self.provider = IntegrationProvider.MIXPANEL
         self.user_id = "636a1c61d715ca6baae65611"
         self.name = "name"
         self.funnel_steps = [
@@ -32,14 +33,6 @@ class TestFunnelService:
             name=self.name,
             steps=self.funnel_steps,
             random_sequence=False,
-        )
-        self.datasource = DataSource(
-            integration_id="636a1c61d715ca6baae65611",
-            app_id="636a1c61d715ca6baae65611",
-            user_id="636a1c61d715ca6baae65611",
-            provider=IntegrationProvider.MIXPANEL,
-            external_source_id="123",
-            version=DataSourceVersion.DEFAULT,
         )
         self.computed_funnel = [
             ComputedFunnelStep(event_name="Login", users=100, conversion=100.0),
@@ -67,12 +60,8 @@ class TestFunnelService:
 
     @pytest.mark.asyncio
     async def test_compute_funnel(self):
-        self.service.ds_service.get_datasource = MagicMock()
-        datasource_future = asyncio.Future()
-        datasource_future.set_result(self.datasource)
-        self.service.ds_service.get_datasource.return_value = datasource_future
         self.service.funnels.get_events_data = MagicMock()
         self.service.funnels.get_events_data.return_value = [(100, 40)]
         assert self.computed_funnel == await self.service.compute_funnel(
-            ds_id=self.ds_id, steps=self.funnel_steps
+            ds_id=self.ds_id, provider=self.provider, steps=self.funnel_steps
         )
