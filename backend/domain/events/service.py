@@ -10,6 +10,7 @@ class EventsService:
             "datasource_id",
             "timestamp",
             "provider",
+            "user_id",
             "event_name",
             "properties",
         ]

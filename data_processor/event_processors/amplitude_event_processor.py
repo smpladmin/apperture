@@ -30,7 +30,9 @@ class AmplitudeEventProcessor(EventProcessor):
         cleaned_df["userId"] = flattened_df.user_id.apply(
             lambda x: x if isnan(x) else str(int(x))
         ).fillna(flattened_df.device_id)
-        cleaned_df["timestamp"] = flattened_df.event_time
+        cleaned_df["timestamp"] = flattened_df.event_time.dt.strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
         cleaned_df["eventName"] = flattened_df.event_type
         cleaned_df["properties"] = flattened_df.to_dict(orient="records")
         return cleaned_df

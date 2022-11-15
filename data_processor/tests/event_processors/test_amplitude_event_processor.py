@@ -36,11 +36,11 @@ class TestAmplitudeEventProcessor:
 
         df = self.processor.process_dataframe(self.agg_df)
         assert df.timestamp.to_list() == [
-            pd.Timestamp("2022-11-14 00:57:33.008000"),
-            pd.Timestamp("2022-11-14 00:57:32.668000"),
-            pd.Timestamp("2022-11-14 00:57:35.755000"),
-            pd.Timestamp("2022-11-14 00:57:36.233000"),
-            pd.Timestamp("2022-11-14 00:57:35.597000"),
+            "2022-11-14 00:57:33",
+            "2022-11-14 00:57:32",
+            "2022-11-14 00:57:35",
+            "2022-11-14 00:57:36",
+            "2022-11-14 00:57:35",
         ]
 
     def test_process_dataframe_event_name(self):

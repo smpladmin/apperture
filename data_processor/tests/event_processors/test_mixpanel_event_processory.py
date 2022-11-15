@@ -34,11 +34,11 @@ class TestMixpanelEventProcessor:
 
         df = self.processor.process(self.events_data)
         assert df.timestamp.to_list() == [
-            pd.Timestamp("2022-10-17 17:11:02+0000", tz="UTC"),
-            pd.Timestamp("2022-10-17 17:11:40+0000", tz="UTC"),
-            pd.Timestamp("2022-10-17 00:56:11+0000", tz="UTC"),
-            pd.Timestamp("2022-10-17 00:59:35+0000", tz="UTC"),
-            pd.Timestamp("2022-10-17 05:53:57+0000", tz="UTC"),
+            "2022-10-17 17:11:02",
+            "2022-10-17 17:11:40",
+            "2022-10-17 00:56:11",
+            "2022-10-17 00:59:35",
+            "2022-10-17 05:53:57",
         ]
 
     def test_process_event_name(self):

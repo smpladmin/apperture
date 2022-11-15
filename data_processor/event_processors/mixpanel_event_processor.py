@@ -14,7 +14,9 @@ class MixPanelEventProcessor(EventProcessor):
         cleaned_df = pd.DataFrame()
         cleaned_df["userId"] = flattened_df["properties.distinct_id"]
         cleaned_df["timestamp"] = flattened_df["properties.time"].apply(
-            lambda x: pd.to_datetime(int(x), unit="s", utc=True)
+            lambda x: pd.to_datetime(int(x), unit="s", utc=True).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
         )
         cleaned_df["eventName"] = flattened_df.event
         cleaned_df["properties"] = flattened_df.to_dict(orient="records")

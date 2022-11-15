@@ -1,7 +1,9 @@
 import logging
 import os
+import numpy as np
 import pandas as pd
 import requests
+from apperture.backend_action import post
 
 from domain.common.models import IntegrationProvider
 from .saver import Saver
@@ -16,13 +18,15 @@ class EventsSaver(Saver):
         df["datasourceId"] = datasource_id
         df = df.fillna("")
 
-        events = df.to_dict("records")
-        res = self._save_data(events)
-        if not res.ok:
-            raise Exception(
-                f"Error saving data for datasource_id {datasource_id}, response status - {res.status_code}"
-            )
-        logging.info("SAVED")
+        chunks = np.array_split(df, 10)
+        for chunk in chunks:
+            events = chunk.to_json(orient="records")
+            res = self._save_data(events)
+            if not res.ok:
+                raise Exception(
+                    f"Error saving data for datasource_id {datasource_id}, response status - {res.status_code} - {res.content}"
+                )
+            logging.info("SAVED")
 
     def _save_data(self, data):
         return requests.post(
@@ -32,5 +36,5 @@ class EventsSaver(Saver):
                     "BACKEND_API_KEY_SECRET"
                 )
             },
-            json=data,
+            data=data,
         )
