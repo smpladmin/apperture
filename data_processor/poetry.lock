@@ -146,6 +146,17 @@ wrapt = ">=1.10,<2"
 dev = ["PyTest", "PyTest (<5)", "PyTest-Cov", "PyTest-Cov (<2.6)", "bump2version (<1)", "configparser (<5)", "importlib-metadata (<3)", "importlib-resources (<4)", "sphinx (<2)", "sphinxcontrib-websupport (<2)", "tox", "zipp (<2)"]
 
 [[package]]
+name = "flatten-json"
+version = "0.1.13"
+description = "Flatten JSON objects"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+six = "*"
+
+[[package]]
 name = "google-analytics-data"
 version = "0.11.2"
 description = ""
@@ -736,7 +747,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "6b9b8a15566ad467dd810891e9d415e375609e71c8ff343ce61fdbc03580e8f3"
+content-hash = "91af89dc4f4f0acfbfb365a822a2b52d4edb5e6adc5715459430efe399020694"
 
 [metadata.files]
 async-timeout = [
@@ -807,6 +818,9 @@ colorama = [
 Deprecated = [
     {file = "Deprecated-1.2.13-py2.py3-none-any.whl", hash = "sha256:64756e3e14c8c5eea9795d93c524551432a0be75629f8f29e67ab8caf076c76d"},
     {file = "Deprecated-1.2.13.tar.gz", hash = "sha256:43ac5335da90c31c24ba028af536a91d41d53f9e6901ddb021bcc572ce44e38d"},
+]
+flatten-json = [
+    {file = "flatten_json-0.1.13.tar.gz", hash = "sha256:ee352333e8293e957ccb1b4597a111fc4f6da88ab74b8cb3f8f51eed1e12f500"},
 ]
 google-analytics-data = [
     {file = "google-analytics-data-0.11.2.tar.gz", hash = "sha256:8ac63e79226cc4d4d634f40e08f9e4408be296dfe8afec37acb4ef55eb817d58"},
