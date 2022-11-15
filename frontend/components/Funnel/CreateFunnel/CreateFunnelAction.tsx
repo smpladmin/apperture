@@ -67,9 +67,7 @@ const CreateFunnelAction = ({
       false
     );
 
-    if (res?.status === 200) {
-      router.push(`/analytics/viewFunnel/${res.id}`);
-    }
+    router.push(`/analytics/viewFunnel/${res._id}`);
   };
 
   return (

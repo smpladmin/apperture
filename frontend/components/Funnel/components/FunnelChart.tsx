@@ -16,7 +16,6 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
     plot.current.funnel = new Chart({
       container: ref.current!!,
       autoFit: true,
-      height: 420,
       padding: [28, 44, 52, 108],
       limitInPlot: true,
     });
@@ -39,11 +38,12 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
             content: item.users,
             style: {
               textAlign: 'left',
-              color: GRAY_100,
+              fill: GRAY_100,
               fontSize: 12,
+              fontWeight: 500,
             },
             offsetX: 8,
-            offsetY: 12,
+            offsetY: 6,
           })
           .text({
             position: [item.event, item.users],
@@ -51,14 +51,14 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
             style: {
               textAlign: 'left',
               fontWeight: 700,
-              color: BLACK_200,
+              fill: BLACK_200,
               fontSize: 12,
             },
             offsetX: 8,
-            offsetY: -12,
+            offsetY: -6,
           });
       });
-    plot.current.funnel.coordinate().transpose();
+
     plot.current.funnel.axis('users', {
       title: {
         offset: 40,
@@ -73,14 +73,16 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
         style: {
           fontSize: 14,
           fontWeight: 500,
-          color: BLACK_200,
+          fill: BLACK_200,
         },
       },
     });
+
+    plot.current.funnel.coordinate().transpose();
     plot.current.funnel.render();
   }, [data]);
 
-  return <Box ref={ref} paddingX={'4'}></Box>;
+  return <Box ref={ref} paddingX={'4'} height={'125'} overflow={'auto'}></Box>;
 };
 
 export default FunnelChart;
