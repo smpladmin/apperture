@@ -3,7 +3,7 @@ from typing import List
 from mongo import Mongo
 from beanie import PydanticObjectId
 
-from domain.funnels.models import Funnel, FunnelStep, ComputedFunnelStep
+from domain.funnels.models import Funnel, FunnelStep, ComputedFunnelStep, ComputedFunnel
 from repositories.clickhouse.funnels import Funnels
 
 
@@ -58,3 +58,18 @@ class FunnelsService:
         ]
 
         return computed_funnel
+
+    async def get_funnel(self, id : str) -> Funnel :
+        return await Funnel.get(id)
+
+    async def get_computed_funnel(self, funnel:Funnel, provider:str) -> ComputedFunnel:
+        computed_funnel = await self.compute_funnel(ds_id=str(funnel.datasource_id), provider=provider,
+        steps=funnel.steps)
+        return ComputedFunnel(
+             datasource_id=funnel.datasource_id,
+             steps=funnel.steps,
+             name=funnel.name,
+             random_sequence=funnel.random_sequence,
+             computed_funnel=computed_funnel
+        )
+

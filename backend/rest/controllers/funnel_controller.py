@@ -3,7 +3,7 @@ from typing import List
 
 from domain.funnels.service import FunnelsService
 from domain.datasources.service import DataSourceService
-from rest.dtos.funnels import FunnelResponse, ComputedFunnelStepResponse
+from rest.dtos.funnels import FunnelResponse, ComputedFunnelStepResponse, ComputedFunnelResponse
 from rest.dtos.funnels import CreateFunnelDto, TransientFunnelDto
 from rest.middlewares import validate_jwt, get_user_id
 
@@ -43,3 +43,14 @@ async def compute_transient_funnel(
     return await funnel_service.compute_funnel(
         ds_id=dto.datasourceId, provider=datasource.provider, steps=dto.steps
     )
+
+@router.get("/funnels/{id}", response_model=ComputedFunnelResponse)
+async def get_computed_funnel(
+    id: str,
+    funnel_service: FunnelsService = Depends(),
+    datasource_service: DataSourceService = Depends(),
+):
+    funnel = await funnel_service.get_funnel(id)
+    datasource = await datasource_service.get_datasource(id=funnel.datasource_id)
+    return await funnel_service.get_computed_funnel(funnel=funnel, provider=datasource.provider)
+
