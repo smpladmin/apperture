@@ -6,7 +6,11 @@ import Autocomplete from './Autocomplete';
 import { MapContext } from '@lib/contexts/mapContext';
 import { NodeType } from '@lib/types/graph';
 import { FunnelStep } from '@lib/domain/funnel';
-import { getCountOfValidAddedSteps } from '../util';
+import {
+  filterFunnelSteps,
+  getCountOfValidAddedSteps,
+  isEveryNonEmptyStepValid,
+} from '../util';
 import { getTransientFunnelData } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import {
@@ -41,6 +45,10 @@ const EventFields = ({
   const [stepRemovedCount, setStepRemovedCount] = useState(0);
 
   useEffect(() => {
+    setSuggestions(nodes);
+  }, [focusedInputIndex, nodes]);
+
+  useEffect(() => {
     if (eventFieldsValue.length <= 2) setShowCrossIcon(false);
     else setShowCrossIcon(true);
   }, [eventFieldsValue]);
@@ -56,7 +64,7 @@ const EventFields = ({
   }, [stepRemovedCount]);
 
   const removeInputField = (index: number) => {
-    if (eventFieldsValue.length === 2) return;
+    if (eventFieldsValue.length <= 2) return;
     let deletedInputValues = [...eventFieldsValue];
     deletedInputValues.splice(index, 1);
     setEventFieldsValue(deletedInputValues);
@@ -75,9 +83,16 @@ const EventFields = ({
   };
 
   const getFunnelData = async () => {
-    if (getCountOfValidAddedSteps(eventFieldsValue, nodes) < 2) return;
+    if (
+      getCountOfValidAddedSteps(eventFieldsValue, nodes) < 2 ||
+      !isEveryNonEmptyStepValid(eventFieldsValue, nodes)
+    )
+      return;
     setFunnelData([]);
-    const res = await getTransientFunnelData(dsId as string, eventFieldsValue);
+    const res = await getTransientFunnelData(
+      dsId as string,
+      filterFunnelSteps(eventFieldsValue)
+    );
     setFunnelData(res);
   };
 

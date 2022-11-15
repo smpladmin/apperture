@@ -27,3 +27,18 @@ export const transformFunnelData = (funnelData: any[]) => {
     return transformedData;
   });
 };
+
+export const filterFunnelSteps = (steps: FunnelStep[]) => {
+  return steps.filter((data, i) => data?.['event']);
+};
+
+export const isValidNonEmptyStep = (stepName: string, nodes: NodeType[]) => {
+  return !stepName || isValidStep(stepName, nodes);
+};
+
+export const isEveryNonEmptyStepValid = (
+  steps: FunnelStep[],
+  nodes: NodeType[]
+) => {
+  return steps.every((step) => isValidNonEmptyStep(step?.['event'], nodes));
+};

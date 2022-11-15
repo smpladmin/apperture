@@ -13,7 +13,11 @@ import EventFields from '../components/EventFields';
 import tickIcon from '@assets/icons/black-tick-icon.svg';
 import Image from 'next/image';
 import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
-import { getCountOfValidAddedSteps, isEveryStepValid } from '../util';
+import {
+  filterFunnelSteps,
+  getCountOfValidAddedSteps,
+  isEveryStepValid,
+} from '../util';
 import { saveFunnel } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { MapContext } from '@lib/contexts/mapContext';
@@ -51,7 +55,7 @@ const CreateFunnelAction = ({
   useEffect(() => {
     if (
       getCountOfValidAddedSteps(funnelSteps, nodes) >= 2 &&
-      isEveryStepValid(funnelSteps, nodes)
+      isEveryStepValid(filterFunnelSteps(funnelSteps), nodes)
     ) {
       setSaveButtonDisabled(false);
     } else {
@@ -63,7 +67,7 @@ const CreateFunnelAction = ({
     const res = await saveFunnel(
       dsId as string,
       funnelName,
-      funnelSteps,
+      filterFunnelSteps(funnelSteps),
       false
     );
 

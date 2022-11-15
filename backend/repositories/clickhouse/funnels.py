@@ -43,7 +43,7 @@ class Funnels:
             if i > 0:
                 ts_conditionals = ""
                 for j in range(i, 0, -1):
-                    ts_conditionals += f"table{i+1}.ts > table{j}.ts and "
+                    ts_conditionals += f"table{j+1}.ts > table{j}.ts and "
 
                 cte2 = f"count(case when({ts_conditionals}year(table{i}.ts) > %(epoch_year)s) then table{i + 1}.distinct_id else null end) as {step.event}{i}"
                 cte3 = f"left join table{i + 1} on (table{i}.{self.uid}=table{i + 1}.{self.uid}) "

@@ -8,7 +8,13 @@ import {
   InputRightElement,
 } from '@chakra-ui/react';
 import Image from 'next/image';
-import React, { Fragment, KeyboardEvent, useRef, useState } from 'react';
+import React, {
+  Fragment,
+  KeyboardEvent,
+  useContext,
+  useRef,
+  useState,
+} from 'react';
 import HorizontalParallelLineIcon from '@assets/icons/horizontal-parallel-line.svg';
 import CrossIcon from '@assets/icons/cross-icon.svg';
 import FunnelIcon from '@assets/icons/funnel-icon.svg';
@@ -16,6 +22,8 @@ import SuggestionsList from './SuggestionsList';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { NodeType } from '@lib/types/graph';
 import { FunnelStep } from '@lib/domain/funnel';
+import { isValidNonEmptyStep } from '@components/Funnel/util';
+import { MapContext } from '@lib/contexts/mapContext';
 
 type AutocompleteProps = {
   data: FunnelStep;
@@ -42,11 +50,21 @@ const Autocomplete = ({
   setFocusedInputIndex,
   getFunnelData,
 }: AutocompleteProps) => {
+  const {
+    state: { nodes },
+  } = useContext(MapContext);
   const [cursor, setCursor] = useState(-1);
   const inputSearchRef = useRef<HTMLInputElement>(null);
   const suggestionsContainerRef = useRef(null);
 
+  const removeInvalidStep = () => {
+    if (!isValidNonEmptyStep(data?.['event'], nodes)) {
+      removeInputField(index);
+    }
+  };
+
   useOnClickOutside(suggestionsContainerRef, () => {
+    removeInvalidStep();
     setSuggestions([]);
     setFocusedInputIndex(-1);
   });
@@ -59,6 +77,7 @@ const Autocomplete = ({
   };
 
   const handlEnterKeyPressed = () => {
+    removeInvalidStep();
     setSuggestions([]);
     getFunnelData();
   };
