@@ -1,18 +1,18 @@
-import asyncio
-
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, AsyncMock
 
 from tests.utils import filter_response
+from domain.datasources.models import DataSource
 from domain.funnels.service import FunnelsService
-from domain.funnels.models import FunnelStep, Funnel, ComputedFunnelStep
-from domain.datasources.models import DataSource, DataSourceVersion
 from domain.common.models import IntegrationProvider
+from domain.funnels.models import FunnelStep, Funnel, ComputedFunnelStep, ComputedFunnel
 
 
 class TestFunnelService:
     def setup_method(self):
         Funnel.get_settings = MagicMock()
+        Funnel.find_one = AsyncMock()
+        Funnel.update = AsyncMock()
         DataSource.get_settings = MagicMock()
         self.mongo = MagicMock()
         self.funnels = MagicMock()
@@ -34,10 +34,19 @@ class TestFunnelService:
             steps=self.funnel_steps,
             random_sequence=False,
         )
-        self.computed_funnel = [
+        self.computed_steps = [
             ComputedFunnelStep(event_name="Login", users=100, conversion=100.0),
             ComputedFunnelStep(event_name="Chapter Click", users=40, conversion=40.0),
         ]
+        self.computed_funnel = ComputedFunnel(
+            datasource_id=self.ds_id,
+            steps=self.funnel_steps,
+            name=self.name,
+            random_sequence=False,
+            computed_funnel=self.computed_steps,
+        )
+        self.service.funnels.get_events_data = MagicMock()
+        self.service.funnels.get_events_data.return_value = [(100, 40)]
 
     def test_build_funnel(self):
 
@@ -60,8 +69,12 @@ class TestFunnelService:
 
     @pytest.mark.asyncio
     async def test_compute_funnel(self):
-        self.service.funnels.get_events_data = MagicMock()
-        self.service.funnels.get_events_data.return_value = [(100, 40)]
-        assert self.computed_funnel == await self.service.compute_funnel(
+        assert self.computed_steps == await self.service.compute_funnel(
             ds_id=self.ds_id, provider=self.provider, steps=self.funnel_steps
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_computed_funnel(self):
+        assert self.computed_funnel == await self.service.get_computed_funnel(
+            funnel=self.funnel, provider=self.provider
         )
