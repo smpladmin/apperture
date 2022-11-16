@@ -10,8 +10,12 @@ const SettingsOptions = () => {
   const { previousDsId } = router.query;
 
   return (
-    <Box py={'3'}>
-      <Box pt={'4'} pl={'4'} mb={'4'}>
+    <Box>
+      <Flex
+        p={{ base: '4', md: '6 ' }}
+        w={'full'}
+        justifyContent={{ base: 'flex-start', md: 'flex-end' }}
+      >
         <IconButton
           aria-label="close"
           variant={'secondary'}
@@ -23,7 +27,7 @@ const SettingsOptions = () => {
           borderColor={'white.200'}
           onClick={() => router.push(`/analytics/explore/${previousDsId}`)}
         />
-      </Box>
+      </Flex>
 
       <Text
         fontSize={'sh-20'}
@@ -33,6 +37,7 @@ const SettingsOptions = () => {
       >
         Settings
       </Text>
+
       <Divider
         orientation="horizontal"
         borderColor={'white.200'}
