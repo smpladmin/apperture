@@ -1,10 +1,11 @@
 import datetime
-from pydantic import BaseModel
+from typing import NamedTuple
+
 
 from domain.common.models import IntegrationProvider
 
 
-class CreateEventDto(BaseModel):
+class CreateEventDto(NamedTuple):
     datasourceId: str
     timestamp: datetime.datetime
     provider: IntegrationProvider

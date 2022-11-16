@@ -17,10 +17,20 @@ class EventsSaver(Saver):
         df["provider"] = provider.value
         df["datasourceId"] = datasource_id
         df = df.fillna("")
+        df = df[
+            [
+                "datasourceId",
+                "timestamp",
+                "provider",
+                "userId",
+                "eventName",
+                "properties",
+            ]
+        ]
 
         chunks = np.array_split(df, 10)
         for chunk in chunks:
-            events = chunk.to_json(orient="records")
+            events = chunk.to_json(orient="values")
             res = self._save_data(events)
             if not res.ok:
                 raise Exception(
