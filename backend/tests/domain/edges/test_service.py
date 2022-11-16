@@ -86,3 +86,44 @@ class TestEdgeService:
             ],
             projection_model=AggregatedEdge,
         )
+
+    @pytest.mark.asyncio
+    async def test_get_edges_others(self):
+        """
+        Should query clickhousedb to fetch edges data and convert it to Aggregated Edge model
+        """
+        datasource = DataSource(
+            integration_id="636a1c61d715ca6baae65611",
+            app_id="636a1c61d715ca6baae65611",
+            user_id="636a1c61d715ca6baae65611",
+            provider=IntegrationProvider.MIXPANEL,
+            external_source_id="123",
+            version=DataSourceVersion.DEFAULT,
+        )
+        datasource.id = "test-id"
+        self.service.edges.get_edges.return_value = [
+            ("login", "home", 123, 200),
+            ("home", "base", 155, 300),
+        ]
+
+        edges = await self.service.get_edges(
+            datasource,
+            "2019-01-01",
+            "2019-03-31",
+        )
+
+        self.service.edges.get_edges.assert_called_once_with("test-id")
+        assert edges == [
+            AggregatedEdge(
+                previous_event="login",
+                current_event="home",
+                users=123,
+                hits=200,
+            ),
+            AggregatedEdge(
+                previous_event="home",
+                current_event="base",
+                users=155,
+                hits=300,
+            ),
+        ]
