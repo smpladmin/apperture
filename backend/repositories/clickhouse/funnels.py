@@ -14,7 +14,7 @@ class Funnels:
     def get_events_data(
         self, ds_id: str, steps: List[FunnelStep], provider: str
     ) -> List[Tuple]:
-        self.uid = "distinct_id" if provider == "mixpanel" else "user_id"
+        self.uid = "user_id"
         query, parameters = self.query_builder(ds_id, steps)
         query_result = self.clickhouse.client.query(query=query, parameters=parameters)
         return query_result.result_set
@@ -32,7 +32,7 @@ class Funnels:
 
         for i, step in enumerate(steps):
             parameters[f"event{i}"] = step.event
-            cte1 = f"table{i+1} as (select properties.{self.uid} as distinct_id, min(timestamp) as ts from {self.table} where datasource_id=%(ds_id)s and event_name=%(event{i})s "
+            cte1 = f"table{i+1} as (select {self.uid} as distinct_id, min(timestamp) as ts from {self.table} where datasource_id=%(ds_id)s and event_name=%(event{i})s "
             if step.filters:
                 for j, filter in enumerate(step.filters):
                     parameters[f"filter{i}{j}"] = filter.value
