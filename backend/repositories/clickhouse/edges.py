@@ -1,7 +1,7 @@
+from textwrap import dedent
 from fastapi import Depends
 
 from clickhouse.clickhouse import Clickhouse
-from domain.common.models import IntegrationProvider
 
 
 class Edges:
@@ -10,7 +10,8 @@ class Edges:
         self.table = "events"
 
     def get_edges(self, ds_id: str):
-        query = f"""
+        query = dedent(
+            """
         select 
           previous_event, 
           event_name as current_event, 
@@ -41,5 +42,6 @@ class Edges:
         limit 
           100
         """
+        )
         res = self.clickhouse.client.query(query=query, parameters={"ds_id": ds_id})
         return res.result_set
