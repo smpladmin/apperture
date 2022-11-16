@@ -121,9 +121,9 @@ const Integrations = ({ user }: { user: User }) => {
               <Flex direction={'column'} gap={'2'}>
                 <Flex gap={'2'} alignItems={'center'}>
                   <Text
-                    fontSize={'base'}
-                    lineHeight={'xs-14'}
-                    fontWeight={'semibold'}
+                    fontSize={{ base: 'xs-14', md: 'sh-18' }}
+                    lineHeight={{ base: 'xs-14', md: 'sh-18' }}
+                    fontWeight={{ base: '600', md: '500' }}
                   >
                     Slack
                   </Text>
@@ -134,6 +134,7 @@ const Integrations = ({ user }: { user: User }) => {
                   lineHeight={'xs-12'}
                   fontWeight={'normal'}
                   color={'grey.200'}
+                  maxW={{ base: 'auto', md: '45' }}
                 >
                   {user?.slackChannel ? (
                     <Highlight
