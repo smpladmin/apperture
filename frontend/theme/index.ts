@@ -107,6 +107,7 @@ const fontSizes = {
   'sh-28': '1.75rem', //fs-28px
   'sh-32': '2rem', // fs-32px
   'sh-34': '2.125rem', //fs-34px
+  'sh-44': '2.75rem', //fs-44px
   'sh-56': '3.5rem', //fs-56px
 };
 
@@ -122,6 +123,7 @@ const lineHeights = {
   'sh-28': '2.215rem', //lh-34px
   'sh-32': '2.5rem', // lh-40px
   'sh-34': '2.625rem', //lh-42px
+  'sh-44': '3.25rem', //lh-52px
   'sh-56': '4.125rem', //lh-66px
 };
 
