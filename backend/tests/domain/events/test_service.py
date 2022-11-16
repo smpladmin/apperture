@@ -32,4 +32,15 @@ class TestEventsService:
 
         await events_service.update_events(events)
 
-        assert clickhouse.client.insert.called
+        clickhouse.client.insert.assert_called_once_with(
+            "events",
+            events,
+            column_names=[
+                "datasource_id",
+                "timestamp",
+                "provider",
+                "user_id",
+                "event_name",
+                "properties",
+            ],
+        )

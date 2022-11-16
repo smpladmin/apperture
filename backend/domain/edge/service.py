@@ -182,7 +182,7 @@ class EdgeService:
                 .to_list()
             )
         else:
-            edges_tuples = self.edges.get_edges(str(datasource.id), datasource.provider)
+            edges_tuples = self.edges.get_edges(str(datasource.id))
             edges = [
                 AggregatedEdge(
                     **{

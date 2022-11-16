@@ -9,28 +9,25 @@ class Edges:
         self.clickhouse = clickhouse
         self.table = "events"
 
-    def get_edges(self, ds_id: str, provider: IntegrationProvider):
-        uid = (
-            "properties.distinct_id" if provider == "mixpanel" else "properties.user_id"
-        )
+    def get_edges(self, ds_id: str):
         query = f"""
         select 
           previous_event, 
           event_name as current_event, 
-          count(distinct distinct_id) as users,
+          count(distinct user_id) as users,
           count(*) as hits
         from
         (
             select 
-              {uid} as distinct_id, 
+              user_id, 
               any(event_name) over (
-                partition by {uid}
+                partition by user_id
                 order by 
                   toDateTime(timestamp) rows between 1 preceding and 0 preceding
             ) as previous_event, 
             event_name 
             from 
-              default.events 
+              events 
             where 
               datasource_id = %(ds_id)s 
               and event_name not like '%%/%%'
