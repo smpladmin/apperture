@@ -134,6 +134,7 @@ const Integrations = ({ user }: { user: User }) => {
                   lineHeight={'xs-12'}
                   fontWeight={'normal'}
                   color={'grey.200'}
+                  maxW={{ base: 'auto', md: '45' }}
                 >
                   {user?.slackChannel ? (
                     <Highlight
