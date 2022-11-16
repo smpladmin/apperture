@@ -69,10 +69,10 @@ const Integrations = ({ user }: { user: User }) => {
       <Flex>
         <Box w={{ base: 'full', md: '150' }} p={{ base: '0', md: '6 ' }}>
           <Box>
-            <Flex
+            <Box
               p={{ base: '4', md: '0 ' }}
               w={'full'}
-              justifyContent={{ base: 'flex-start', md: 'flex-end' }}
+              mb={{ base: '0', md: '6' }}
             >
               <IconButton
                 aria-label="close"
@@ -89,7 +89,7 @@ const Integrations = ({ user }: { user: User }) => {
                   )
                 }
               />
-            </Flex>
+            </Box>
           </Box>
           <Box
             fontSize={{ base: 'sh-20', md: 'sh-44' }}
