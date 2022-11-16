@@ -121,8 +121,8 @@ const Integrations = ({ user }: { user: User }) => {
               <Flex direction={'column'} gap={'2'}>
                 <Flex gap={'2'} alignItems={'center'}>
                   <Text
-                    fontSize={'base'}
-                    lineHeight={'xs-14'}
+                    fontSize={{ base: 'base', md: 'sh-18' }}
+                    lineHeight={{ base: 'xs-14', md: 'sh-18' }}
                     fontWeight={'semibold'}
                   >
                     Slack
@@ -193,7 +193,7 @@ const Integrations = ({ user }: { user: User }) => {
           />
         </Box>
         <Render on="desktop">
-          <Box flexGrow={'1'} bg={'#64646B'}></Box>
+          <Box flexGrow={'1'} bg={'grey.0'} backdropFilter={'blur(20px)'}></Box>
         </Render>
         <ConfirmationModal
           isOpen={isOpen}
