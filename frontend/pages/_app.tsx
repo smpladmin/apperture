@@ -10,7 +10,6 @@ import { Device } from '@lib/types';
 import 'userAnalytics';
 import { MotionConfig } from 'framer-motion';
 import isValidProp from '@emotion/is-prop-valid';
-import { resetServerContext } from 'react-beautiful-dnd';
 
 type CustomAppProps = {
   device: Device;
@@ -42,7 +41,7 @@ AppertureApp.getInitialProps = async ({ Component, ctx }: AppContext) => {
   if (Component.getInitialProps) {
     pageProps = await Component.getInitialProps(ctx);
   }
-  resetServerContext();
+
   return {
     pageProps,
     device: { isMobile: mobile({ ua: ctx.req }) },

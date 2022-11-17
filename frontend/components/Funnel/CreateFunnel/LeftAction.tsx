@@ -8,70 +8,22 @@ import {
   Text,
 } from '@chakra-ui/react';
 import LeftPanel from '@components/EventsLayout/LeftPanel';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import EventFields from '../components/EventFields';
 import tickIcon from '@assets/icons/black-tick-icon.svg';
 import Image from 'next/image';
 import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
-import {
-  filterFunnelSteps,
-  getCountOfValidAddedSteps,
-  isEveryStepValid,
-} from '../util';
-import { saveFunnel } from '@lib/services/funnelService';
-import { useRouter } from 'next/router';
-import { MapContext } from '@lib/contexts/mapContext';
-import { FunnelStep } from '@lib/domain/funnel';
 
-type CreateFunnelActionProps = {
-  funnelName: string;
-  setFunnelName: Function;
-  funnelSteps: FunnelStep[];
-  setFunnelSteps: Function;
-  setFunnelData: Function;
-};
-
-const CreateFunnelAction = ({
-  funnelName,
-  setFunnelName,
-  funnelSteps,
-  setFunnelSteps,
-  setFunnelData,
-}: CreateFunnelActionProps) => {
-  const {
-    state: { nodes },
-  } = useContext(MapContext);
-
-  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
-
-  const router = useRouter();
-  const { dsId } = router.query;
+const LeftAction = () => {
+  const [funnelName, setFunnelName] = useState('Untitled Funnel');
+  const [inputFieldsValue, setInputFieldsValue] = useState([
+    { eventName: '' },
+    { eventName: '' },
+  ]);
 
   const addNewInputField = () => {
-    const newField = { event: '', filters: [] };
-    setFunnelSteps([...funnelSteps, newField]);
-  };
-
-  useEffect(() => {
-    if (
-      getCountOfValidAddedSteps(funnelSteps, nodes) >= 2 &&
-      isEveryStepValid(filterFunnelSteps(funnelSteps), nodes)
-    ) {
-      setSaveButtonDisabled(false);
-    } else {
-      setSaveButtonDisabled(true);
-    }
-  }, [funnelSteps, nodes]);
-
-  const handleSaveFunnel = async () => {
-    const res = await saveFunnel(
-      dsId as string,
-      funnelName,
-      filterFunnelSteps(funnelSteps),
-      false
-    );
-
-    router.push(`/analytics/viewFunnel/${res._id}`);
+    const newField = { eventName: '' };
+    setInputFieldsValue([...inputFieldsValue, newField]);
   };
 
   return (
@@ -88,16 +40,15 @@ const CreateFunnelAction = ({
         />
 
         <Button
-          disabled={isSaveButtonDisabled}
+          disabled={true}
           borderRadius={'50'}
           _disabled={{
             bg: 'black.30',
             pointerEvents: 'none',
           }}
-          onClick={handleSaveFunnel}
         >
           <Flex alignItems={'center'} gap={'1'}>
-            <Image src={tickIcon} alt={'tick'} />
+            <Image src={tickIcon} />
             <Text
               color={BLACK_RUSSIAN}
               fontSize={'xs-14'}
@@ -128,7 +79,6 @@ const CreateFunnelAction = ({
           fontWeight={'semibold'}
           textColor={'white.DEFAULT'}
           value={funnelName}
-          focusBorderColor={'white.DEFAULT'}
           onChange={(e) => setFunnelName(e.target.value)}
           borderColor={'grey.10'}
           px={0}
@@ -152,15 +102,13 @@ const CreateFunnelAction = ({
             bg={'black.20'}
             color={'white.DEFAULT'}
             onClick={addNewInputField}
-            fontSize={'sh-20'}
           >
             {'+'}
           </Button>
         </Flex>
         <EventFields
-          eventFieldsValue={funnelSteps}
-          setEventFieldsValue={setFunnelSteps}
-          setFunnelData={setFunnelData}
+          eventFieldsValue={inputFieldsValue}
+          setEventFieldsValue={setInputFieldsValue}
         />
         <Divider
           mt={'4'}
@@ -184,4 +132,4 @@ const CreateFunnelAction = ({
   );
 };
 
-export default CreateFunnelAction;
+export default LeftAction;
