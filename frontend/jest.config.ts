@@ -5,7 +5,11 @@ const createJestConfig = nextJest({
 });
 const customJestConfig = {
   moduleNameMapper: {
-    '^@/components/(.*)$': '<rootDir>/components/$1',
+    '^@components/(.*)$': '<rootDir>/components/$1',
+    '^@theme/(.*)$': '<rootDir>/theme/$1',
+    '^@lib/(.*)$': '<rootDir>/lib/$1',
+    '^@assets/(.*)$': '<rootDir>/assets/$1',
+    '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleDirectories: ['node_modules', '<rootDir>/'],
