@@ -2,8 +2,9 @@ from fastapi import Depends
 from typing import List
 from mongo import Mongo
 from beanie import PydanticObjectId
+from datetime import datetime
 
-from domain.funnels.models import Funnel, FunnelStep, ComputedFunnelStep
+from domain.funnels.models import Funnel, FunnelStep, ComputedFunnelStep, ComputedFunnel
 from repositories.clickhouse.funnels import Funnels
 
 
@@ -58,3 +59,30 @@ class FunnelsService:
         ]
 
         return computed_funnel
+
+    async def get_funnel(self, id: str) -> Funnel:
+        return await Funnel.get(id)
+
+    async def get_computed_funnel(
+        self, funnel: Funnel, provider: str
+    ) -> ComputedFunnel:
+        computed_funnel = await self.compute_funnel(
+            ds_id=str(funnel.datasource_id), provider=provider, steps=funnel.steps
+        )
+        return ComputedFunnel(
+            datasource_id=funnel.datasource_id,
+            steps=funnel.steps,
+            name=funnel.name,
+            random_sequence=funnel.random_sequence,
+            computed_funnel=computed_funnel,
+        )
+
+    async def update_funnel(self, funnel_id: str, new_funnel: Funnel):
+        to_update = new_funnel.dict()
+        to_update.pop("id")
+        to_update.pop("created_at")
+        to_update["updated_at"] = datetime.utcnow()
+
+        await Funnel.find_one(
+            Funnel.id == PydanticObjectId(funnel_id),
+        ).update({"$set": to_update})
