@@ -66,8 +66,18 @@ const Integrations = ({ user }: { user: User }) => {
 
   return (
     <>
-      <Flex>
-        <Box w={{ base: 'full', md: '150' }} p={{ base: '0', md: '6 ' }}>
+      <Flex
+        justifyContent={{ md: 'center' }}
+        alignItems={{ md: 'center' }}
+        h={'full'}
+      >
+        <Box
+          w={{ base: 'full', md: '150' }}
+          p={{ base: '0', md: '8 ' }}
+          borderWidth={{ md: '1px' }}
+          borderColor={{ md: 'white.200' }}
+          borderRadius={{ md: '12px' }}
+        >
           <Box>
             <Box
               p={{ base: '4', md: '0 ' }}
@@ -193,9 +203,6 @@ const Integrations = ({ user }: { user: User }) => {
             opacity={1}
           />
         </Box>
-        <Render on="desktop">
-          <Box flexGrow={'1'} bg={'grey.0'} backdropFilter={'blur(20px)'}></Box>
-        </Render>
         <ConfirmationModal
           isOpen={isOpen}
           onClose={closeConfirmationModal}

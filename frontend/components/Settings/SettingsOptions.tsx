@@ -11,13 +11,19 @@ const SettingsOptions = () => {
   const { previousDsId } = router.query;
 
   return (
-    <Flex>
-      <Box w={{ base: 'full', md: '150' }} p={{ base: '0', md: '6 ' }}>
-        <Flex
-          p={{ base: '4', md: '0 ' }}
-          w={'full'}
-          justifyContent={{ base: 'flex-start', md: 'flex-end' }}
-        >
+    <Flex
+      justifyContent={{ md: 'center' }}
+      alignItems={{ md: 'center' }}
+      h={'full'}
+    >
+      <Box
+        w={{ base: 'full', md: '150' }}
+        p={{ base: '0', md: '8 ' }}
+        borderWidth={{ md: '1px' }}
+        borderColor={{ md: 'white.200' }}
+        borderRadius={{ md: '12px' }}
+      >
+        <Flex p={{ base: '4', md: '0' }} mb={{ base: '0', md: '6' }} w={'full'}>
           <IconButton
             aria-label="close"
             variant={'secondary'}
@@ -36,6 +42,7 @@ const SettingsOptions = () => {
           fontWeight={'semibold'}
           lineHeight={{ base: 'sh-20', md: 'sh-44' }}
           pl={{ base: '4', md: '0' }}
+          mb={{ md: '1' }}
         >
           Settings
         </Text>
@@ -97,9 +104,6 @@ const SettingsOptions = () => {
           opacity={1}
         />
       </Box>
-      <Render on="desktop">
-        <Box flexGrow={'1'} bg={'#64646B'}></Box>
-      </Render>
     </Flex>
   );
 };
