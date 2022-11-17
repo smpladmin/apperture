@@ -101,6 +101,17 @@ const Integrations = ({ user }: { user: User }) => {
               />
             </Box>
           </Box>
+          <Render on="desktop">
+            <Text
+              my={'6'}
+              color={'grey.200'}
+              fontSize={'base'}
+              lineHeight={'base'}
+            >
+              {' '}
+              Settings &#62; Integrations
+            </Text>
+          </Render>
           <Box
             fontSize={{ base: 'sh-20', md: 'sh-44' }}
             fontWeight={'semibold'}
