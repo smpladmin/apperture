@@ -1,6 +1,7 @@
 import pytest
 import asyncio
 from unittest import mock
+from collections import namedtuple
 from beanie import PydanticObjectId
 from fastapi.testclient import TestClient
 
@@ -122,6 +123,12 @@ def datasource_service():
     datasource_future.set_result(datasource)
     datasource_service_mock.get_datasource.return_value = datasource_future
     return datasource_service_mock
+
+
+@pytest.fixture(scope="module")
+def events_service():
+    events_service_mock = mock.AsyncMock()
+    return events_service_mock
 
 
 @pytest.fixture(scope="module")
