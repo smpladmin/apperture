@@ -77,13 +77,13 @@ class TestFunnelService:
     @pytest.mark.asyncio
     async def test_compute_funnel(self):
         assert self.computed_steps == await self.service.compute_funnel(
-            ds_id=self.ds_id, provider=self.provider, steps=self.funnel_steps
+            ds_id=self.ds_id, steps=self.funnel_steps
         )
 
     @pytest.mark.asyncio
     async def test_get_computed_funnel(self):
         assert self.computed_funnel == await self.service.get_computed_funnel(
-            funnel=self.funnel, provider=self.provider
+            funnel=self.funnel
         )
 
     @pytest.mark.asyncio

@@ -32,9 +32,6 @@ def test_get_computed_funnel(
     funnel_service.get_funnel.assert_called_once_with(
         "635ba034807ab86d8a2aadd8",
     )
-    datasource_service.get_datasource.assert_called_with(
-        **{"id": "635ba034807ab86d8a2aadd9"}
-    )
     get_computed_funnel_kwargs = funnel_service.get_computed_funnel.call_args.kwargs
     funnel_service.get_computed_funnel.assert_called_once()
 
@@ -59,7 +56,6 @@ def test_get_computed_funnel(
         "updated_at": None,
         "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
     } == get_computed_funnel_kwargs["funnel"].dict()
-    assert IntegrationProvider.MIXPANEL == get_computed_funnel_kwargs["provider"]
 
 
 def test_update_funnel(client_init, funnel_data, funnel_response, funnel_service):
