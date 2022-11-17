@@ -27,14 +27,6 @@ class Funnel(Document):
 
 
 class ComputedFunnelStep(BaseModel):
-    event_name: str
+    event: str
     users: int
     conversion: float
-
-
-class ComputedFunnel(BaseModel):
-    datasource_id: PydanticObjectId
-    name: str
-    steps: List[FunnelStep]
-    random_sequence: bool
-    computed_funnel: List[ComputedFunnelStep]
