@@ -37,9 +37,9 @@ class TestFunnelService:
             steps=self.funnel_steps,
             random_sequence=False,
         )
-        self.computed_steps = [
-            ComputedFunnelStep(event_name="Login", users=100, conversion=100.0),
-            ComputedFunnelStep(event_name="Chapter Click", users=40, conversion=40.0),
+        self.computed_funnel = [
+            ComputedFunnelStep(event="Login", users=100, conversion=100.0),
+            ComputedFunnelStep(event="Chapter Click", users=40, conversion=40.0),
         ]
         self.computed_funnel = ComputedFunnel(
             datasource_id=self.ds_id,

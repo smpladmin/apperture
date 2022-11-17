@@ -27,7 +27,7 @@ class Funnel(Document):
 
 
 class ComputedFunnelStep(BaseModel):
-    event_name: str
+    event: str
     users: int
     conversion: float
 

@@ -1,3 +1,4 @@
+import Fuse from 'fuse.js';
 import { Provider } from './../domain/provider';
 import mixPanelLogo from '@assets/images/mixpanel-icon.svg';
 import gaLogo from '@assets/images/ga-logo-small.svg';
@@ -45,4 +46,13 @@ export const getProviderLogo = (provider: Provider): StaticImageData => {
     default:
       return gaLogo;
   }
+};
+
+export const getSearchResult = (
+  data: any[],
+  query: string,
+  options: Fuse.IFuseOptions<any>
+) => {
+  const fuse = new Fuse(data, options);
+  return fuse.search(query).map((result) => result.item);
 };

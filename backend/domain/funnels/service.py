@@ -49,7 +49,7 @@ class FunnelsService:
         events_data = self.funnels.get_events_data(ds_id, steps, provider)
         computed_funnel = [
             ComputedFunnelStep(
-                event_name=step.event,
+                event=step.event,
                 users=events_data[0][i],
                 conversion=float(
                     "{:.2f}".format(self.compute_conversion(i, events_data[0]))

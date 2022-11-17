@@ -81,9 +81,9 @@ def funnel_service():
     funnel_future = asyncio.Future()
     funnel_future.set_result(funnel)
 
-    computed_transient_funnel = [
-        ComputedFunnelStep(event_name="Login", users=956, conversion=100.0),
-        ComputedFunnelStep(event_name="Chapter_Click", users=547, conversion=57.22),
+    computed_funnel = [
+        ComputedFunnelStep(event="Login", users=956, conversion=100.0),
+        ComputedFunnelStep(event="Chapter_Click", users=547, conversion=57.22),
     ]
     computed_funnel = ComputedFunnel(
         datasource_id=funnel.datasource_id,
@@ -134,8 +134,8 @@ def events_service():
 @pytest.fixture(scope="module")
 def computed_transient_funnel_response():
     return [
-        {"eventName": "Login", "users": 956, "conversion": 100.0},
-        {"eventName": "Chapter_Click", "users": 547, "conversion": 57.22},
+        {"event": "Login", "users": 956, "conversion": 100.0},
+        {"event": "Chapter_Click", "users": 547, "conversion": 57.22},
     ]
 
 
