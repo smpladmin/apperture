@@ -7,6 +7,7 @@ from typing import Union
 from beanie import PydanticObjectId
 from fastapi import Depends
 from domain.common.models import IntegrationProvider
+from domain.datasources.models import DataSource
 from domain.edge.models import (
     Edge,
     BaseEdge,
@@ -23,11 +24,13 @@ from domain.notifications.models import (
     NotificationThresholdType,
 )
 from mongo.mongo import Mongo
+from repositories.clickhouse.edges import Edges
 
 
 class EdgeService:
-    def __init__(self, mongo: Mongo = Depends()):
+    def __init__(self, mongo: Mongo = Depends(), edges: Edges = Depends()):
         self.mongo = mongo
+        self.edges = edges
         self.provider_edge_build = {
             IntegrationProvider.GOOGLE: self._build_edge,
             IntegrationProvider.MIXPANEL: self._build_rich_edge,
@@ -135,48 +138,61 @@ class EdgeService:
                 await RichEdge.insert_many(edges)
 
     async def get_edges(
-        self, datasource_id: str, start_date: str, end_date: str
+        self, datasource: DataSource, start_date: str, end_date: str
     ) -> list[AggregatedEdge]:
-        start_date = dt.strptime(start_date, "%Y-%m-%d")
-        end_date = dt.strptime(end_date, "%Y-%m-%d")
-        minimum_edge_count = 100
-        pipeline = [
-            {
-                "$match": {
-                    "$and": [
-                        {"datasource_id": PydanticObjectId(datasource_id)},
-                        {"date": {"$gte": start_date}},
-                        {"date": {"$lte": end_date}},
-                    ]
-                }
-            },
-            {
-                "$group": {
-                    "_id": {
-                        "current_event": "$current_event",
-                        "previous_event": "$previous_event",
-                    },
-                    "hits": {"$sum": "$hits"},
-                    "users": {"$sum": "$users"},
-                }
-            },
-            {"$setWindowFields": {"output": {"totalCount": {"$count": {}}}}},
-            {"$sort": {"hits": -1}},
-            {"$limit": minimum_edge_count},
-            {
-                "$project": {
-                    "current_event": "$_id.current_event",
-                    "previous_event": "$_id.previous_event",
-                    "hits": 1,
-                    "users": 1,
-                }
-            },
-        ]
-        return (
-            await BaseEdge.find()
-            .aggregate(pipeline, projection_model=AggregatedEdge)
-            .to_list()
-        )
+        if datasource.provider == IntegrationProvider.GOOGLE:
+            start_date = dt.strptime(start_date, "%Y-%m-%d")
+            end_date = dt.strptime(end_date, "%Y-%m-%d")
+            minimum_edge_count = 100
+            pipeline = [
+                {
+                    "$match": {
+                        "$and": [
+                            {"datasource_id": datasource.id},
+                            {"date": {"$gte": start_date}},
+                            {"date": {"$lte": end_date}},
+                        ]
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": {
+                            "current_event": "$current_event",
+                            "previous_event": "$previous_event",
+                        },
+                        "hits": {"$sum": "$hits"},
+                        "users": {"$sum": "$users"},
+                    }
+                },
+                {"$setWindowFields": {"output": {"totalCount": {"$count": {}}}}},
+                {"$sort": {"hits": -1}},
+                {"$limit": minimum_edge_count},
+                {
+                    "$project": {
+                        "current_event": "$_id.current_event",
+                        "previous_event": "$_id.previous_event",
+                        "hits": 1,
+                        "users": 1,
+                    }
+                },
+            ]
+            return (
+                await BaseEdge.find()
+                .aggregate(pipeline, projection_model=AggregatedEdge)
+                .to_list()
+            )
+        else:
+            edges_tuples = self.edges.get_edges(str(datasource.id))
+            edges = [
+                AggregatedEdge(
+                    **{
+                        key: tuple[i]
+                        for i, key in enumerate(AggregatedEdge.__fields__.keys())
+                    }
+                )
+                for tuple in edges_tuples
+            ]
+            return edges
 
     async def get_node_trends(
         self,
@@ -467,7 +483,7 @@ class EdgeService:
     async def get_node_data_for_notifications(
         self,
         notifications: List[Notification],
-    ) -> [NotificationNodeData]:
+    ) -> List[NotificationNodeData]:
 
         node_data_for_notifications = (
             [

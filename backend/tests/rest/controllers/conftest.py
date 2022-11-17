@@ -245,15 +245,17 @@ def events_data():
     return [
         {
             "datasourceId": "1234",
+            "timestamp": "2019-01-01 00:00:00",
             "provider": IntegrationProvider.MIXPANEL,
-            "timestamp": "2019-01-01 00:00:00.000000",
+            "userId": "123",
             "eventName": "event_a",
             "properties": {},
         },
         {
             "datasourceId": "1234",
+            "timestamp": "2019-01-01 00:00:00",
             "provider": IntegrationProvider.MIXPANEL,
-            "timestamp": "2019-01-01 00:00:00.000000",
+            "userId": "123",
             "eventName": "event_b",
             "properties": {"a": "b", "b": "c"},
         },
