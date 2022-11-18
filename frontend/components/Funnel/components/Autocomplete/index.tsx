@@ -141,6 +141,7 @@ const Autocomplete = ({
           onChange={(e) => handleInputChangeValue(e.target.value, index)}
           onFocus={() => setFocusedInputIndex(index)}
           onKeyDown={keyboardNavigation}
+          data-testid={`autocomplete`}
         />
         <InputRightElement
           color={'white'}

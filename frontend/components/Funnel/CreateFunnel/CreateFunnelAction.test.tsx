@@ -1,8 +1,20 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+jest.mock('@antv/g2', () => ({
+  Chart: jest.fn(),
+}));
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { getCountOfValidAddedSteps, isEveryStepValid } from '../util';
+
+jest.mock('../util');
+
+Object.defineProperty(global.URL, 'createObjectURL', {
+  value: () => {},
+  writable: true,
+});
+
 import CreateFunnelAction from './CreateFunnelAction';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
-import { getCountOfValidAddedSteps, isEveryStepValid } from '../util';
+import Funnel from './index';
 
 jest.mock('next/router', () => ({
   useRouter: () => ({
@@ -22,12 +34,18 @@ describe('create funnel action component', () => {
     setFunnelData: jest.fn(),
   };
 
-  // beforeEach(() => {
-  //   jest.fn(getCountOfValidAddedSteps).mockReturnValue(2);
-  //   jest.fn(isEveryStepValid).mockReturnValue(true);
-  // });
+  let mockedGetCountOfValidAddedSteps: jest.Mock;
+  let mockedIsEveryStepValid: jest.Mock;
+
+  beforeEach(() => {
+    mockedGetCountOfValidAddedSteps = jest.mocked(getCountOfValidAddedSteps);
+    mockedIsEveryStepValid = jest.mocked(isEveryStepValid);
+    mockedGetCountOfValidAddedSteps.mockReturnValue(2);
+    mockedIsEveryStepValid.mockReturnValue(true);
+  });
 
   it('save button is rendered and disabled', () => {
+    mockedIsEveryStepValid.mockReturnValue(false);
     render(<CreateFunnelAction {...props} />);
     const saveButton = screen.getByText('Save').closest('button');
 
@@ -37,30 +55,29 @@ describe('create funnel action component', () => {
 
   it('save button should get enabled when two valid steps are added', () => {
     render(<CreateFunnelAction {...props} />);
-    jest.fn(getCountOfValidAddedSteps).mockReturnValue(2);
-    jest.fn(isEveryStepValid).mockReturnValue(true);
-    const saveButton = screen.getByText('Save').closest('button');
 
+    const saveButton = screen.getByText('Save').closest('button');
     expect(saveButton).toBeEnabled();
     expect(saveButton).toBeInTheDocument();
   });
 
-  it('adds new input field on click of + button', async () => {
-    render(<CreateFunnelAction {...props} />);
-    const addButton = screen.getByRole('button', {
-      name: '+',
-    });
+  it.only('adds new input field on click of + button', async () => {
+    render(<Funnel />);
 
+    const addButton = screen.getByTestId('add-button');
     fireEvent.click(addButton);
-    expect(props.setFunnelSteps).toBeCalledTimes(1);
-    // expect(props.funnelSteps).toHaveLength(3);
+
+    await waitFor(() => {
+      const inputFields = screen.getAllByTestId('autocomplete');
+      screen.debug(inputFields);
+    });
   });
 });
 
-{
-  /* <RouterContext.Provider
-  value={createMockRouter({ query: { dsId: '654212033222' } })}
->
-  <CreateFunnelAction {...defaultProps} />
-</RouterContext.Provider>; */
-}
+// {
+//   /* <RouterContext.Provider
+//   value={createMockRouter({ query: { dsId: '654212033222' } })}
+// >
+//   <CreateFunnelAction {...defaultProps} />
+// </RouterContext.Provider>; */
+// }

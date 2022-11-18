@@ -11,7 +11,7 @@ const customJestConfig = {
     '^@assets/(.*)$': '<rootDir>/assets/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts', 'jest-canvas-mock'],
   moduleDirectories: ['node_modules', '<rootDir>/'],
   testEnvironment: 'jest-environment-jsdom',
 };
