@@ -8,7 +8,7 @@ const RightView = ({ computedFunnel }: { computedFunnel: FunnelData[] }) => {
   return (
     <RightPanel>
       <Flex alignItems={'center'} justifyContent={'center'} h={'full'}>
-        <Flex direction={'column'} gap={'8'}>
+        <Flex direction={'column'} gap={'8'} px={'30'} py={'30'} w={'full'}>
           <Text fontSize={'sh-20'} lineHeight={'sh-20'} fontWeight={'semibold'}>
             Funnel
           </Text>
