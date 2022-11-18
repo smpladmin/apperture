@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends
 from typing import List
 
 from domain.funnels.service import FunnelsService
-from domain.datasources.service import DataSourceService
 from rest.dtos.funnels import (
     FunnelResponse,
     ComputedFunnelStepResponse,
@@ -41,11 +40,9 @@ async def create_funnel(
 async def compute_transient_funnel(
     dto: TransientFunnelDto,
     funnel_service: FunnelsService = Depends(),
-    datasource_service: DataSourceService = Depends(),
 ):
-    datasource = await datasource_service.get_datasource(id=dto.datasourceId)
     return await funnel_service.compute_funnel(
-        ds_id=dto.datasourceId, provider=datasource.provider, steps=dto.steps
+        ds_id=dto.datasourceId, steps=dto.steps
     )
 
 
@@ -53,12 +50,10 @@ async def compute_transient_funnel(
 async def get_computed_funnel(
     id: str,
     funnel_service: FunnelsService = Depends(),
-    datasource_service: DataSourceService = Depends(),
 ):
     funnel = await funnel_service.get_funnel(id)
-    datasource = await datasource_service.get_datasource(id=str(funnel.datasource_id))
     return await funnel_service.get_computed_funnel(
-        funnel=funnel, provider=datasource.provider
+        funnel=funnel
     )
 
 

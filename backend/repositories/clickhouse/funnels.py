@@ -11,9 +11,7 @@ class Funnels:
         self.clickhouse = clickhouse
         self.table = "events"
 
-    def get_events_data(
-        self, ds_id: str, steps: List[FunnelStep], provider: str
-    ) -> List[Tuple]:
+    def get_events_data(self, ds_id: str, steps: List[FunnelStep]) -> List[Tuple]:
         self.uid = "user_id"
         query, parameters = self.query_builder(ds_id, steps)
         query_result = self.clickhouse.client.query(query=query, parameters=parameters)
@@ -32,7 +30,7 @@ class Funnels:
 
         for i, step in enumerate(steps):
             parameters[f"event{i}"] = step.event
-            cte1 = f"table{i+1} as (select {self.uid} as distinct_id, min(timestamp) as ts from {self.table} where datasource_id=%(ds_id)s and event_name=%(event{i})s "
+            cte1 = f"table{i+1} as (select {self.uid}, min(timestamp) as ts from {self.table} where datasource_id=%(ds_id)s and event_name=%(event{i})s "
             if step.filters:
                 for j, filter in enumerate(step.filters):
                     parameters[f"filter{i}{j}"] = filter.value
@@ -45,7 +43,7 @@ class Funnels:
                 for j in range(i, 0, -1):
                     ts_conditionals += f"table{j+1}.ts > table{j}.ts and "
 
-                cte2 = f"count(case when({ts_conditionals}year(table{i}.ts) > %(epoch_year)s) then table{i + 1}.distinct_id else null end) as {step.event}{i}"
+                cte2 = f"count(case when({ts_conditionals}year(table{i}.ts) > %(epoch_year)s) then table{i + 1}.user_id else null end) as {step.event}{i}"
                 cte3 = f"left join table{i + 1} on (table{i}.{self.uid}=table{i + 1}.{self.uid}) "
                 dynamic_components_2.append(cte2)
                 dynamic_components_3.append(cte3)
