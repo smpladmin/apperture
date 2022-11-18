@@ -1,7 +1,13 @@
 from typing import List
 from pydantic import BaseModel
 
-from domain.funnels.models import FunnelStep, Funnel, ComputedFunnelStep, ComputedFunnel
+from domain.funnels.models import (
+    FunnelStep,
+    Funnel,
+    ComputedFunnelStep,
+    ComputedFunnel,
+    FunnelTrendsData,
+)
 from rest.dtos.model_response import ModelResponse
 
 
@@ -28,5 +34,10 @@ class ComputedFunnelStepResponse(ComputedFunnelStep, ModelResponse):
 
 
 class ComputedFunnelResponse(ComputedFunnel, ModelResponse):
+    class Config:
+        allow_population_by_field_name = True
+
+
+class FunnelTrendResponse(FunnelTrendsData, ModelResponse):
     class Config:
         allow_population_by_field_name = True

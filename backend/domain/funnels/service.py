@@ -1,10 +1,17 @@
-from fastapi import Depends
 from typing import List
 from mongo import Mongo
-from beanie import PydanticObjectId
+from fastapi import Depends
 from datetime import datetime
+from beanie import PydanticObjectId
 
-from domain.funnels.models import Funnel, FunnelStep, ComputedFunnelStep, ComputedFunnel
+
+from domain.funnels.models import (
+    Funnel,
+    FunnelStep,
+    ComputedFunnelStep,
+    ComputedFunnel,
+    FunnelTrendsData,
+)
 from repositories.clickhouse.funnels import Funnels
 
 
@@ -84,3 +91,16 @@ class FunnelsService:
         await Funnel.find_one(
             Funnel.id == PydanticObjectId(funnel_id),
         ).update({"$set": to_update})
+
+    async def get_funnel_trends(self, funnel: Funnel) -> List[FunnelTrendsData]:
+        conversion_data = self.funnels.get_conversion_data(
+            ds_id=str(funnel.datasource_id), steps=funnel.steps
+        )
+        return [
+            FunnelTrendsData(
+                conversion=data[2],
+                start_date=datetime.strptime(f"{data[1]}-{data[0]}-1", "%Y-%W-%w"),
+                end_date=datetime.strptime(f"{data[1]}-{data[0]}-0", "%Y-%W-%w"),
+            )
+            for data in conversion_data
+        ]
