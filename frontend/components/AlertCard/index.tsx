@@ -1,7 +1,7 @@
 import { Box, Flex, Text, Highlight, IconButton } from '@chakra-ui/react';
 import React from 'react';
 
-function ConversionCard() {
+function AlertCard() {
   return (
     <Box
       p={4}
@@ -107,4 +107,4 @@ function ConversionCard() {
   );
 }
 
-export default ConversionCard;
+export default AlertCard;

@@ -19,6 +19,7 @@ function IconButtonSet() {
           />
           <Text
             mt={2}
+            textAlign={'center'}
             fontSize={{ base: 'xs-10', md: 'xs-12' }}
             lineHeight={{ base: 'xs-10', md: 'xs-12' }}
             color={'grey.DEFAULT'}
@@ -40,6 +41,7 @@ function IconButtonSet() {
           />
           <Text
             mt={2}
+            textAlign={'center'}
             fontSize={{ base: 'xs-10', md: 'xs-12' }}
             lineHeight={{ base: 'xs-10', md: 'xs-12' }}
             color={'grey.DEFAULT'}
@@ -61,6 +63,7 @@ function IconButtonSet() {
           />
           <Text
             mt={2}
+            textAlign={'center'}
             fontSize={{ base: 'xs-10', md: 'xs-12' }}
             lineHeight={{ base: 'xs-10', md: 'xs-12' }}
             color={'grey.DEFAULT'}
@@ -82,6 +85,7 @@ function IconButtonSet() {
           />
           <Text
             mt={2}
+            textAlign={'center'}
             fontSize={{ base: 'xs-10', md: 'xs-12' }}
             lineHeight={{ base: 'xs-10', md: 'xs-12' }}
             color={'grey.DEFAULT'}

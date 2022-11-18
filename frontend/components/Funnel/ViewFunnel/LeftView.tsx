@@ -1,25 +1,13 @@
 import { Button, Divider, Flex, IconButton, Text } from '@chakra-ui/react';
 import LeftPanel from '@components/EventsLayout/LeftPanel';
-import React, { useState } from 'react';
+import Render from '@components/Render';
+import React from 'react';
+import ViewFunnelSteps from '../components/ViewFunnelSteps';
+import ActionMenu from '../../ActionMenu';
 import 'remixicon/fonts/remixicon.css';
 import { BASTILLE } from '@theme/index';
-import IconButtonSet from './IconButtonSet';
-import FunnelFlow from './FunnelFlow';
-import ConversionCard from './ConversionCard';
-import Render from '@components/Render';
 
-const Leftview = () => {
-  const [funnelName, setFunnelName] = useState('Untitled Funnel');
-  const [inputFieldsValue, setInputFieldsValue] = useState([
-    { eventName: '' },
-    { eventName: '' },
-  ]);
-
-  const addNewInputField = () => {
-    const newField = { eventName: '' };
-    setInputFieldsValue([...inputFieldsValue, newField]);
-  };
-
+const LeftView = ({ name, steps }: any) => {
   return (
     <LeftPanel>
       <Flex justifyContent={'space-between'} alignItems={'center'}>
@@ -69,7 +57,7 @@ const Leftview = () => {
           borderColor={'grey.10'}
           px={0}
         >
-          Checkout Flow
+          {name}
         </Text>
         <Render on="mobile">
           <Button
@@ -95,22 +83,17 @@ const Leftview = () => {
         </Render>
       </Flex>
       <Flex direction={'column'} mt={{ base: '1', md: '4' }}>
-        <FunnelFlow />
-        <IconButtonSet />
-        <Render on="desktop">
-          <Divider
-            my={'8'}
-            orientation="horizontal"
-            borderColor={BASTILLE}
-            opacity={1}
-          />
-          <Flex direction={'column'} gap={'4'}>
-            <ConversionCard />
-          </Flex>
-        </Render>
+        <ViewFunnelSteps steps={steps} />
+        <ActionMenu />
+        <Divider
+          mt={'4'}
+          orientation="horizontal"
+          borderColor={BASTILLE}
+          opacity={1}
+        />
       </Flex>
     </LeftPanel>
   );
 };
 
-export default Leftview;
+export default LeftView;

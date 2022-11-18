@@ -1,7 +1,8 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import React from 'react';
+import React, { useState } from 'react';
 
-function FunnelFlow() {
+function ViewFunnelSteps({ steps }: any) {
+  const [stepsLength] = useState(steps?.length);
   return (
     <Flex gap={'4'} alignItems={'center'}>
       <Flex flexDir={'column'} alignItems={'center'}>
@@ -11,17 +12,22 @@ function FunnelFlow() {
       </Flex>
       <Flex gap={'1'} direction={'column'}>
         <Text color={'white'} fontSize={'xs-14'} lineHeight={'sh-20'}>
-          App Launched
+          {steps?.[0]?.['event']}
         </Text>
-        <Text color={'grey.200'} fontSize={'xs-14'} lineHeight={'sh-20'}>
-          +4 Steps
+        <Text
+          color={'grey.200'}
+          fontSize={'xs-14'}
+          lineHeight={'sh-20'}
+          minH={'6'}
+        >
+          {stepsLength > 2 ? `+${stepsLength - 2} Steps` : null}
         </Text>
         <Text color={'white'} fontSize={'xs-14'} lineHeight={'sh-20'}>
-          Cart Page
+          {steps?.[stepsLength - 1]?.['event']}
         </Text>
       </Flex>
     </Flex>
   );
 }
 
-export default FunnelFlow;
+export default ViewFunnelSteps;

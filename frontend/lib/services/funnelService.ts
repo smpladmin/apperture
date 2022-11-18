@@ -1,3 +1,4 @@
+import { ApperturePrivateAPI } from './../apiClient/client.server';
 import { FunnelStep } from '@lib/domain/funnel';
 import { AxiosError } from 'axios';
 import { AppertureAPI } from '../apiClient';
@@ -30,6 +31,21 @@ export const getTransientFunnelData = async (
     const res = await AppertureAPI.post('/funnels/transient', {
       datasourceId: dsId,
       steps,
+    });
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};
+
+export const _getComputedFunnelData = async (
+  token: string,
+  funnelId: string
+) => {
+  try {
+    const res = await ApperturePrivateAPI.get(`/funnels/${funnelId}`, {
+      headers: { Authorization: token },
     });
     return res.data;
   } catch (e) {
