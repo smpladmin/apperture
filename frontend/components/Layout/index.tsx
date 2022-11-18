@@ -94,7 +94,7 @@ export default function Layout({
           {!hideHeader ? (
             <Header selectedApp={selectedApp} openAppsModal={onModalOpen} />
           ) : null}
-          <Box as="main" h={'full'}>
+          <Box as="main" h={'full'} overflowY={'auto'}>
             {children}
           </Box>
         </Flex>
