@@ -23,9 +23,7 @@ class GoogleAnalyticsStrategy(Strategy):
         self.datasource_id = datasource_id
         self.provider = provider
         analytics = initialize_v3_analytics(access_token, refresh_token)
-        # TODO: Abstract date logic, duplicated in v3 and v4 strategies
-        start_date = date.today() + relativedelta(days=-120)
-        end_date = date.today() + relativedelta(days=-1)
+        start_date, end_date = self.get_dates()
         self.fetcher = GoogleAnalyticsFetcher(
             analytics,
             int(os.environ["PAGE_SIZE"]),
