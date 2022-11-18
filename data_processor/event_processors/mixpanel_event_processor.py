@@ -12,7 +12,12 @@ class MixPanelEventProcessor(EventProcessor):
         flattened_data = [flatten(d, ".") for d in df.to_dict("records")]
         flattened_df = pd.DataFrame(flattened_data)
         cleaned_df = pd.DataFrame()
-        cleaned_df["userId"] = flattened_df["properties.distinct_id"]
+        if pd.api.types.is_float_dtype(flattened_df["properties.distinct_id"]):
+            cleaned_df["userId"] = (
+                flattened_df["properties.distinct_id"].astype("Int64").astype("string")
+            )
+        else:
+            cleaned_df["userId"] = flattened_df["properties.distinct_id"]
         cleaned_df["timestamp"] = flattened_df["properties.time"].apply(
             lambda x: pd.to_datetime(int(x), unit="s", utc=True).strftime(
                 "%Y-%m-%d %H:%M:%S"

@@ -27,9 +27,16 @@ class AmplitudeEventProcessor(EventProcessor):
         flattened_data = [flatten(d, ".") for d in agg_df.to_dict("records")]
         flattened_df = pd.DataFrame(flattened_data)
         cleaned_df = pd.DataFrame()
-        cleaned_df["userId"] = flattened_df.user_id.apply(
-            lambda x: x if isnan(x) else str(int(x))
-        ).fillna(flattened_df.device_id)
+        if pd.api.types.is_float_dtype(flattened_df.user_id):
+            cleaned_df["userId"] = (
+                flattened_df.user_id.astype("Int64")
+                .astype("string")
+                .fillna(flattened_df.device_id)
+            )
+        else:
+            cleaned_df["userId"] = flattened_df.user_id.astype("string").fillna(
+                flattened_df.device_id
+            )
         cleaned_df["timestamp"] = flattened_df.event_time.dt.strftime(
             "%Y-%m-%d %H:%M:%S"
         )
