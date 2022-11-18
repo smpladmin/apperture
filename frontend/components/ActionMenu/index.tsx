@@ -1,7 +1,7 @@
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import React from 'react';
 
-function IconButtonSet() {
+function ActionMenu() {
   return (
     <Box>
       <Flex mt={'8'} w={'full'} justifyContent={'space-between'}>
@@ -98,4 +98,4 @@ function IconButtonSet() {
   );
 }
 
-export default IconButtonSet;
+export default ActionMenu;

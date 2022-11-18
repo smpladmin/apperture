@@ -6,8 +6,14 @@ import ViewFunnelSteps from '../components/ViewFunnelSteps';
 import ActionMenu from '../../ActionMenu';
 import 'remixicon/fonts/remixicon.css';
 import { BASTILLE } from '@theme/index';
+import { FunnelStep } from '@lib/domain/funnel';
 
-const LeftView = ({ name, steps }: any) => {
+type LeftViewProps = {
+  name: string;
+  steps: FunnelStep[];
+};
+
+const LeftView = ({ name, steps }: LeftViewProps) => {
   return (
     <LeftPanel>
       <Flex justifyContent={'space-between'} alignItems={'center'}>

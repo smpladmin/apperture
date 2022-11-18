@@ -1,5 +1,5 @@
 import { NodeType } from '@lib/types/graph';
-import { FunnelStep } from '@lib/domain/funnel';
+import { FunnelStep, FunnelData } from '@lib/domain/funnel';
 
 export const getCountOfValidAddedSteps = (
   steps: FunnelStep[],
@@ -19,8 +19,8 @@ export const isEveryStepValid = (steps: FunnelStep[], nodes: NodeType[]) => {
   return steps.every((step) => isValidStep(step?.['event'], nodes));
 };
 
-export const transformFunnelData = (funnelData: any[]) => {
-  return funnelData.map((data, i) => {
+export const transformFunnelData = (funnelData: FunnelData[]) => {
+  return funnelData?.map((data, i) => {
     const transformedData = { ...data };
     transformedData['event'] =
       `${Array(i + 1).join(' ')}` + transformedData['event'];

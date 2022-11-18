@@ -90,7 +90,7 @@ export default function Layout({
           selectedApp={selectedApp}
           openAppsModal={() => onModalOpen('apps')}
         />
-        <Flex flexDir={'column'} w={'full'}>
+        <Flex flexDir={'column'} w={'full'} overflow={'auto'}>
           {!hideHeader ? (
             <Header selectedApp={selectedApp} openAppsModal={onModalOpen} />
           ) : null}

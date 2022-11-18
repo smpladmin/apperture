@@ -1,6 +1,7 @@
 import Funnel from '@components/Funnel/ViewFunnel';
 import Layout from '@components/Layout';
 import { AppWithIntegrations } from '@lib/domain/app';
+import { ComputedFunnel } from '@lib/domain/funnel';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { _getEdges } from '@lib/services/datasourceService';
 import { _getComputedFunnelData } from '@lib/services/funnelService';
@@ -20,7 +21,10 @@ export const getServerSideProps: GetServerSideProps = async ({
   }
   const { funnelId } = query;
   const apps = await _getAppsWithIntegrations(token);
-  const funnelData = await _getComputedFunnelData(token, funnelId as string);
+  const computedFunnelData = await _getComputedFunnelData(
+    token,
+    funnelId as string
+  );
 
   if (!apps.length) {
     return {
@@ -31,12 +35,16 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
   return {
-    props: { apps, funnelData },
+    props: { apps, computedFunnelData },
   };
 };
 
-const ViewFunnel = ({ funnelData }: any) => {
-  return <Funnel computedFunnelData={funnelData} />;
+const ViewFunnel = ({
+  computedFunnelData,
+}: {
+  computedFunnelData: ComputedFunnel;
+}) => {
+  return <Funnel computedFunnelData={computedFunnelData} />;
 };
 
 ViewFunnel.getLayout = function getLayout(
