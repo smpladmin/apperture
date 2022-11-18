@@ -95,10 +95,14 @@ const SettingsOptions = () => {
               bg={'transparent'}
               fontWeight={'600'}
               size={'lg'}
+              _hover={{
+                bg: '',
+              }}
             />
           </Flex>
         </Flex>
         <Divider
+          display={{ md: 'none' }}
           orientation="horizontal"
           borderColor={'white.200'}
           opacity={1}

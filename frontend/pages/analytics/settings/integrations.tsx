@@ -8,12 +8,9 @@ import { GetServerSideProps } from 'next';
 import { ReactElement } from 'react';
 import { AppWithIntegrations } from '@lib/domain/app';
 
-export const getServerSideProps: GetServerSideProps = async ({
-  req,
-  query,
-}) => {
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const token = getAuthToken(req);
-  if (!token || query?.status === 'failed') {
+  if (!token) {
     return {
       props: {},
     };

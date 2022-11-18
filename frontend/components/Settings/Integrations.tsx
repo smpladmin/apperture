@@ -108,7 +108,6 @@ const Integrations = ({ user }: { user: User }) => {
               fontSize={'base'}
               lineHeight={'base'}
             >
-              {' '}
               Settings &#62; Integrations
             </Text>
           </Render>
@@ -190,6 +189,7 @@ const Integrations = ({ user }: { user: User }) => {
               <Link href={SLACK_OAUTH_LINK}>
                 <Button
                   h={'8'}
+                  variant={'primary'}
                   borderRadius={'25'}
                   px={'3'}
                   py={'2'}
@@ -209,6 +209,7 @@ const Integrations = ({ user }: { user: User }) => {
             )}
           </Flex>
           <Divider
+            display={{ md: 'none' }}
             orientation="horizontal"
             borderColor={'white.200'}
             opacity={1}
