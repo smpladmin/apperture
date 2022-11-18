@@ -6,10 +6,13 @@ from mongo.mongo import Mongo
 from clickhouse import Clickhouse
 from rest.middlewares import get_user, validate_jwt, validate_api_key
 from domain.notifications.service import NotificationService
+from domain.funnels.service import FunnelsService
+from domain.datasources.service import DataSourceService
+from domain.events.service import EventsService
 
 
 @pytest.fixture(scope="module")
-def app_init(notification_service):
+def app_init(notification_service, funnel_service, datasource_service, events_service):
 
     print("Setting up App")
     app.dependency_overrides[validate_jwt] = lambda: mock.MagicMock()
@@ -18,6 +21,9 @@ def app_init(notification_service):
     app.dependency_overrides[Mongo] = lambda: mock.MagicMock()
     app.dependency_overrides[Clickhouse] = lambda: mock.MagicMock()
     app.dependency_overrides[NotificationService] = lambda: notification_service
+    app.dependency_overrides[FunnelsService] = lambda: funnel_service
+    app.dependency_overrides[DataSourceService] = lambda: datasource_service
+    app.dependency_overrides[EventsService] = lambda: events_service
 
     yield app
 

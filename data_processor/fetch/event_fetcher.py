@@ -11,7 +11,7 @@ class EventFetcher:
         self.data_url = url
 
     def open(self):
-        logging.info(f"Beginning to fetch events data from {self.data_url}")
+        logging.info(f"Beginning to fetch events data")
         return sopen(self.data_url, self.open_format)
 
     def fetch(self):

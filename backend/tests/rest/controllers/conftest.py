@@ -1,9 +1,13 @@
 import pytest
 import asyncio
 from unittest import mock
+from collections import namedtuple
 from beanie import PydanticObjectId
 from fastapi.testclient import TestClient
 
+from domain.common.models import IntegrationProvider
+from domain.datasources.models import DataSource, DataSourceVersion
+from domain.funnels.models import Funnel, ComputedFunnelStep, ComputedFunnel
 from domain.notifications.models import (
     Notification,
     NotificationChannel,
@@ -11,7 +15,6 @@ from domain.notifications.models import (
     NotificationMetric,
     NotificationType,
 )
-from domain.common.models import IntegrationProvider
 
 
 @pytest.fixture(scope="module")
@@ -54,6 +57,113 @@ def notification_service():
 
 
 @pytest.fixture(scope="module")
+def funnel_service():
+    funnel_service_mock = mock.MagicMock()
+    Funnel.get_settings = mock.MagicMock()
+    funnel = Funnel(
+        id=PydanticObjectId("635ba034807ab86d8a2aadd8"),
+        datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        name="name",
+        user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+        steps=[
+            {
+                "event": "Login",
+                "filters": [{"property": "mp_country_code", "value": "IN"}],
+            },
+            {"event": "Chapter_Click"},
+            {
+                "event": "Topic_Click",
+                "filters": [{"property": "os", "value": "Android"}],
+            },
+        ],
+        random_sequence=False,
+    )
+    funnel_future = asyncio.Future()
+    funnel_future.set_result(funnel)
+
+    computed_transient_funnel = [
+        ComputedFunnelStep(event="Login", users=956, conversion=100.0),
+        ComputedFunnelStep(event="Chapter_Click", users=547, conversion=57.22),
+    ]
+    computed_funnel = ComputedFunnel(
+        datasource_id=funnel.datasource_id,
+        name=funnel.name,
+        steps=funnel.steps,
+        random_sequence=funnel.random_sequence,
+        computed_funnel=computed_transient_funnel,
+    )
+    computed_transient_funnel_future = asyncio.Future()
+    computed_transient_funnel_future.set_result(computed_transient_funnel)
+    computed_funnel_future = asyncio.Future()
+    computed_funnel_future.set_result(computed_funnel)
+
+    funnel_service_mock.build_funnel.return_value = funnel
+    funnel_service_mock.add_funnel.return_value = funnel_future
+    funnel_service_mock.get_funnel.return_value = funnel_future
+    funnel_service_mock.compute_funnel.return_value = computed_transient_funnel_future
+    funnel_service_mock.get_computed_funnel.return_value = computed_funnel_future
+    funnel_service_mock.update_funnel = mock.AsyncMock()
+    return funnel_service_mock
+
+
+@pytest.fixture(scope="module")
+def datasource_service():
+    datasource_service_mock = mock.MagicMock()
+    DataSource.get_settings = mock.MagicMock()
+    datasource = DataSource(
+        integration_id="636a1c61d715ca6baae65611",
+        app_id="636a1c61d715ca6baae65611",
+        user_id="636a1c61d715ca6baae65611",
+        provider=IntegrationProvider.MIXPANEL,
+        external_source_id="123",
+        version=DataSourceVersion.DEFAULT,
+    )
+
+    datasource_future = asyncio.Future()
+    datasource_future.set_result(datasource)
+    datasource_service_mock.get_datasource.return_value = datasource_future
+    return datasource_service_mock
+
+
+@pytest.fixture(scope="module")
+def events_service():
+    events_service_mock = mock.AsyncMock()
+    return events_service_mock
+
+
+@pytest.fixture(scope="module")
+def computed_transient_funnel_response():
+    return [
+        {"event": "Login", "users": 956, "conversion": 100.0},
+        {"event": "Chapter_Click", "users": 547, "conversion": 57.22},
+    ]
+
+
+@pytest.fixture(scope="module")
+def computed_funnel_response():
+    return {
+        "datasourceId": "635ba034807ab86d8a2aadd9",
+        "name": "name",
+        "steps": [
+            {
+                "event": "Login",
+                "filters": [{"property": "mp_country_code", "value": "IN"}],
+            },
+            {"event": "Chapter_Click", "filters": None},
+            {
+                "event": "Topic_Click",
+                "filters": [{"property": "os", "value": "Android"}],
+            },
+        ],
+        "randomSequence": False,
+        "computedFunnel": [
+            {"event": "Login", "users": 956, "conversion": 100.0},
+            {"event": "Chapter_Click", "users": 547, "conversion": 57.22},
+        ],
+    }
+
+
+@pytest.fixture(scope="module")
 def notification_response():
     return {
         "_id": "635ba034807ab86d8a2aadd8",
@@ -77,6 +187,34 @@ def notification_response():
         "frequency": NotificationFrequency.DAILY,
         "preferredChannels": [NotificationChannel.SLACK],
         "notificationActive": False,
+    }
+
+
+@pytest.fixture(scope="module")
+def funnel_response():
+    return {
+        "_id": "635ba034807ab86d8a2aadd8",
+        "revisionId": "8fc1083c-0e63-4358-9139-785b77b6236a",
+        "createdAt": "2022-10-28T09:26:12.682829",
+        "updatedAt": None,
+        "datasourceId": "635ba034807ab86d8a2aadd9",
+        "userId": "635ba034807ab86d8a2aadda",
+        "name": "name",
+        "steps": [
+            {
+                "event": "Login",
+                "filters": [{"property": "mp_country_code", "value": "IN"}],
+            },
+            {
+                "event": "Chapter_Click",
+                "filters": None,
+            },
+            {
+                "event": "Topic_Click",
+                "filters": [{"property": "os", "value": "Android"}],
+            },
+        ],
+        "randomSequence": False,
     }
 
 
@@ -107,16 +245,41 @@ def events_data():
     return [
         {
             "datasourceId": "1234",
+            "timestamp": "2019-01-01 00:00:00",
             "provider": IntegrationProvider.MIXPANEL,
-            "timestamp": "2019-01-01 00:00:00.000000",
+            "userId": "123",
             "eventName": "event_a",
             "properties": {},
         },
         {
             "datasourceId": "1234",
+            "timestamp": "2019-01-01 00:00:00",
             "provider": IntegrationProvider.MIXPANEL,
-            "timestamp": "2019-01-01 00:00:00.000000",
+            "userId": "123",
             "eventName": "event_b",
             "properties": {"a": "b", "b": "c"},
         },
     ]
+
+
+@pytest.fixture(scope="module")
+def funnel_data():
+    return {
+        "datasourceId": "636a1c61d715ca6baae65611",
+        "name": "test2",
+        "steps": [
+            {
+                "event": "Login",
+                "filters": [{"property": "mp_country_code", "value": "IN"}],
+            },
+            {
+                "event": "Chapter_Click",
+                "filters": None,
+            },
+            {
+                "event": "Topic_Click",
+                "filters": [{"property": "os", "value": "Android"}],
+            },
+        ],
+        "randomSequence": False,
+    }
