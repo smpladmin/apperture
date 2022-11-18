@@ -19,7 +19,6 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
   const apps = await _getAppsWithIntegrations(token);
-  const edges = await _getEdges(token, query.dsId as string);
   if (!apps.length) {
     return {
       redirect: {
