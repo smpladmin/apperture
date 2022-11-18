@@ -2,7 +2,7 @@ import { Box } from '@chakra-ui/react';
 import React, { useEffect, useRef } from 'react';
 import { Chart } from '@antv/g2';
 import { transformFunnelData } from '../util';
-import { BLACK_200, GRAY_100, MEDIUM_BLUE } from '@theme/index';
+import { BLACK_200, MEDIUM_BLUE } from '@theme/index';
 import { FunnelData } from '@lib/domain/funnel';
 
 type FunnelChartProps = {
@@ -13,6 +13,7 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ funnel: any }>({ funnel: null });
   const funnelData = transformFunnelData(data).reverse();
+
   useEffect(() => {
     plot.current.funnel = new Chart({
       container: ref.current!!,

@@ -9,6 +9,7 @@ import { MapContext } from '@lib/contexts/mapContext';
 import FunnelEmptyState from '../components/FunnelEmptyState';
 import { BLACK_RUSSIAN } from '@theme/index';
 import Render from '@components/Render';
+import { FunnelData } from '@lib/domain/funnel';
 
 const Funnel = () => {
   const {
@@ -20,7 +21,7 @@ const Funnel = () => {
     { event: '', filters: [] },
     { event: '', filters: [] },
   ]);
-  const [funnelData, setFunnelData] = useState([]);
+  const [funnelData, setFunnelData] = useState<FunnelData[]>([]);
 
   const [isEmpty, setIsEmpty] = useState(true);
   const [isLoading, setIsLoading] = useState(true);

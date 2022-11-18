@@ -66,7 +66,6 @@ const Autocomplete = ({
   useOnClickOutside(suggestionsContainerRef, () => {
     removeInvalidStep();
     setSuggestions([]);
-    setFocusedInputIndex(-1);
   });
 
   const suggestionsSubmitHandler = (suggestion: NodeType) => {
@@ -101,7 +100,7 @@ const Autocomplete = ({
   };
 
   return (
-    <Flex direction={'column'} position={'relative'} pb={'4'}>
+    <Flex direction={'column'} position={'relative'} mb={'4'}>
       <InputGroup>
         <InputLeftElement
           cursor={'move'}
@@ -139,7 +138,9 @@ const Autocomplete = ({
           }}
           value={data?.event}
           onChange={(e) => handleInputChangeValue(e.target.value, index)}
-          onFocus={() => setFocusedInputIndex(index)}
+          onFocus={() => {
+            setFocusedInputIndex(index);
+          }}
           onKeyDown={keyboardNavigation}
         />
         <InputRightElement

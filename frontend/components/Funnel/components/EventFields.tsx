@@ -75,7 +75,7 @@ const EventFields = ({
     const matches = getSearchResult(nodes, eventValue, {
       keys: ['id'],
     }) as NodeType[];
-    setSuggestions(matches);
+    setSuggestions(eventValue ? matches : nodes);
 
     const inputValues = [...eventFieldsValue];
     inputValues[index]['event'] = eventValue;
