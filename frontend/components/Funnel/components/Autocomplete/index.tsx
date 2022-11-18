@@ -100,7 +100,7 @@ const Autocomplete = ({
   };
 
   return (
-    <Flex direction={'column'} position={'relative'} mb={'4'}>
+    <Flex direction={'column'} position={'relative'} py={'2'}>
       <InputGroup>
         <InputLeftElement
           cursor={'move'}
