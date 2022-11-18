@@ -146,6 +146,7 @@ const CreateFunnelAction = ({
             Steps
           </Text>
           <Button
+            data-testid={'add-button'}
             rounded={'full'}
             variant={'primary'}
             size={'md'}
