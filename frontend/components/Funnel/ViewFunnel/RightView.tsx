@@ -12,7 +12,7 @@ const RightView = ({ computedFunnel }: { computedFunnel: FunnelData[] }) => {
           <Text fontSize={'sh-20'} lineHeight={'sh-20'} fontWeight={'semibold'}>
             Funnel
           </Text>
-          <FunnelChart data={computedFunnel} />
+          {computedFunnel.length ? <FunnelChart data={computedFunnel} /> : null}
         </Flex>
       </Flex>
     </RightPanel>
