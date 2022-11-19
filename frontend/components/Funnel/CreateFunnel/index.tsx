@@ -35,8 +35,6 @@ const Funnel = ({ name, steps, computedFunnel }: FunnelProps) => {
     computedFunnel?.length ? computedFunnel : []
   );
 
-  console.log(funnelData, nodes);
-
   const [isEmpty, setIsEmpty] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 

@@ -16,7 +16,7 @@ import {
   getCountOfValidAddedSteps,
   isEveryStepValid,
 } from '../util';
-import { saveFunnel } from '@lib/services/funnelService';
+import { saveFunnel, updateFunnel } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { MapContext } from '@lib/contexts/mapContext';
 import { FunnelStep } from '@lib/domain/funnel';
@@ -41,13 +41,19 @@ const CreateFunnelAction = ({
   } = useContext(MapContext);
   const funnelInputRef = useRef<HTMLInputElement>(null);
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
+  const [isFunnelBeingEdited, setFunnelBeingEdited] = useState(false);
+
   const router = useRouter();
-  const { dsId } = router.query;
+  const { dsId, funnelId } = router.query;
 
   const addNewInputField = () => {
     const newField = { event: '', filters: [] };
     setFunnelSteps([...funnelSteps, newField]);
   };
+
+  useEffect(() => {
+    if (router.pathname.includes('edit')) setFunnelBeingEdited(true);
+  }, []);
 
   useEffect(() => {
     funnelInputRef?.current?.focus();
@@ -65,16 +71,25 @@ const CreateFunnelAction = ({
   }, [funnelSteps, nodes]);
 
   const handleSaveFunnel = async () => {
-    const { data, status } = await saveFunnel(
-      dsId as string,
-      funnelName,
-      filterFunnelSteps(funnelSteps),
-      false
-    );
+    const { data, status } = isFunnelBeingEdited
+      ? await updateFunnel(
+          funnelId as string,
+          dsId as string,
+          funnelName,
+          filterFunnelSteps(funnelSteps),
+          false
+        )
+      : await saveFunnel(
+          dsId as string,
+          funnelName,
+          filterFunnelSteps(funnelSteps),
+          false
+        );
+
     if (status === 200)
       router.push({
         pathname: '/analytics/funnel/view/[funnelId]',
-        query: { funnelId: data._id },
+        query: { funnelId: data._id || funnelId },
       });
   };
 
