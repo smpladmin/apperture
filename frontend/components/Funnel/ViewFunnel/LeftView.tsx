@@ -7,13 +7,25 @@ import ActionMenu from '../../ActionMenu';
 import 'remixicon/fonts/remixicon.css';
 import { BASTILLE } from '@theme/index';
 import { FunnelStep } from '@lib/domain/funnel';
+import { useRouter } from 'next/router';
 
 type LeftViewProps = {
+  datasourceId: string;
   name: string;
   steps: FunnelStep[];
 };
 
-const LeftView = ({ name, steps }: LeftViewProps) => {
+const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
+  const router = useRouter();
+  const { funnelId } = router?.query;
+
+  const handleEditFunnel = () => {
+    router.push({
+      pathname: '/analytics/funnel/edit/[funnelId]',
+      query: { funnelId, dsId: datasourceId },
+    });
+  };
+
   return (
     <LeftPanel>
       <Flex justifyContent={'space-between'} alignItems={'center'}>
@@ -33,6 +45,7 @@ const LeftView = ({ name, steps }: LeftViewProps) => {
             borderWidth={'1px'}
             color={'white'}
             variant={'primary'}
+            onClick={handleEditFunnel}
           >
             <Flex alignItems={'center'} gap={'1'}>
               <i className="ri-edit-fill"></i>

@@ -141,6 +141,9 @@ const Autocomplete = ({
           onFocus={() => {
             setFocusedInputIndex(index);
           }}
+          onBlur={() => {
+            setFocusedInputIndex(-1);
+          }}
           onKeyDown={keyboardNavigation}
         />
         <InputRightElement

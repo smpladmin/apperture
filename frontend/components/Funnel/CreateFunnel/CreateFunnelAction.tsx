@@ -71,7 +71,11 @@ const CreateFunnelAction = ({
       filterFunnelSteps(funnelSteps),
       false
     );
-    if (status === 200) router.push(`/analytics/funnel/view/${data._id}`);
+    if (status === 200)
+      router.push({
+        pathname: '/analytics/funnel/view/[funnelId]',
+        query: { funnelId: data._id },
+      });
   };
 
   return (

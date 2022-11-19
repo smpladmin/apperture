@@ -9,19 +9,33 @@ import { MapContext } from '@lib/contexts/mapContext';
 import FunnelEmptyState from '../components/FunnelEmptyState';
 import { BLACK_RUSSIAN } from '@theme/index';
 import Render from '@components/Render';
-import { FunnelData } from '@lib/domain/funnel';
+import { FunnelData, FunnelStep } from '@lib/domain/funnel';
 
-const Funnel = () => {
+type FunnelProps = {
+  name?: string;
+  steps?: FunnelStep[];
+  computedFunnel?: FunnelData[];
+};
+
+const Funnel = ({ name, steps, computedFunnel }: FunnelProps) => {
   const {
     state: { nodes },
   } = useContext(MapContext);
 
-  const [funnelName, setFunnelName] = useState('Untitled Funnel');
-  const [funnelSteps, setFunnelSteps] = useState([
-    { event: '', filters: [] },
-    { event: '', filters: [] },
-  ]);
-  const [funnelData, setFunnelData] = useState<FunnelData[]>([]);
+  const [funnelName, setFunnelName] = useState(name || 'Untitled Funnel');
+  const [funnelSteps, setFunnelSteps] = useState(
+    steps?.length
+      ? steps
+      : [
+          { event: '', filters: [] },
+          { event: '', filters: [] },
+        ]
+  );
+  const [funnelData, setFunnelData] = useState<FunnelData[]>(
+    computedFunnel?.length ? computedFunnel : []
+  );
+
+  console.log(funnelData, nodes);
 
   const [isEmpty, setIsEmpty] = useState(true);
   const [isLoading, setIsLoading] = useState(true);

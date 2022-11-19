@@ -8,11 +8,11 @@ const ViewFunnel = ({
 }: {
   computedFunnelData: ComputedFunnel;
 }) => {
-  const { name, steps, computedFunnel } = computedFunnelData;
+  const { datasourceId, name, steps, computedFunnel } = computedFunnelData;
 
   return (
     <Flex h={'full'} w={'full'}>
-      <LeftView name={name} steps={steps} />
+      <LeftView datasourceId={datasourceId} name={name} steps={steps} />
       <RightView computedFunnel={computedFunnel} />
     </Flex>
   );
