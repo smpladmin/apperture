@@ -10,7 +10,7 @@ export type FunnelData = {
 };
 
 export type ComputedFunnel = {
-  dataSourceId: string;
+  datasourceId: string;
   name: string;
   steps: FunnelStep[];
   randomSequence: boolean;
