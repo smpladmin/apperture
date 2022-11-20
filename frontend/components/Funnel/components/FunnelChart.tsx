@@ -20,7 +20,7 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
       container: ref.current!!,
       height: data.length * 120,
       autoFit: true,
-      appendPadding: [12, 24],
+      appendPadding: [0, 24, 0, 12],
     });
 
     plot.current.funnel.data(funnelData);
