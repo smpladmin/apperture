@@ -3,7 +3,7 @@ import React, { ReactNode } from 'react';
 
 const RightPanel = ({ children }: { children: ReactNode }) => {
   return (
-    <Box w={'full'} overflowY={'auto'}>
+    <Box w={'full'} overflowY={{ md: 'auto' }}>
       {children}
     </Box>
   );

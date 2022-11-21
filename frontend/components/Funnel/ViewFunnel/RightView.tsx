@@ -7,15 +7,16 @@ import FunnelChart from '../components/FunnelChart';
 const RightView = ({ computedFunnel }: { computedFunnel: FunnelData[] }) => {
   return (
     <RightPanel>
-      <Flex alignItems={'center'} justifyContent={'center'} h={'full'}>
-        <Flex direction={'column'} gap={'8'} px={'30'} py={'30'} w={'full'}>
-          <Text fontSize={'sh-20'} lineHeight={'sh-20'} fontWeight={'semibold'}>
-            Funnel
-          </Text>
-          {computedFunnel?.length ? (
-            <FunnelChart data={computedFunnel} />
-          ) : null}
-        </Flex>
+      <Flex
+        direction={'column'}
+        gap={'8'}
+        px={{ base: '4', md: '30' }}
+        py={{ base: '8', md: '30' }}
+      >
+        <Text fontSize={'sh-20'} lineHeight={'sh-20'} fontWeight={'semibold'}>
+          Funnel
+        </Text>
+        {computedFunnel?.length ? <FunnelChart data={computedFunnel} /> : null}
       </Flex>
     </RightPanel>
   );

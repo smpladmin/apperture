@@ -67,6 +67,7 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
         mt={'8'}
         gap={'2'}
         justifyContent={'space-between'}
+        alignItems={'center'}
       >
         <Text
           fontSize={{ base: 'sh-20', md: 'sh-32' }}
@@ -86,6 +87,7 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
             borderWidth={'1px'}
             color={'white'}
             variant={'primary'}
+            onClick={handleEditFunnel}
           >
             <Flex alignItems={'center'} gap={'1'}>
               <i className="ri-edit-fill"></i>

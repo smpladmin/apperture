@@ -8,7 +8,7 @@ const LeftPanel = ({ children }: { children: ReactNode }) => {
       width={{ base: 'full', md: '35%' }}
       minWidth={'82'}
       bg={BLACK_RUSSIAN}
-      overflowY={'auto'}
+      overflowY={{ md: 'auto' }}
       py={'6'}
       px={'6'}
     >
