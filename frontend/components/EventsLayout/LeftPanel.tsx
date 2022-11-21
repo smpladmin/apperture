@@ -10,7 +10,7 @@ const LeftPanel = ({ children }: { children: ReactNode }) => {
       bg={BLACK_RUSSIAN}
       overflowY={{ md: 'auto' }}
       py={'6'}
-      px={'6'}
+      px={{ base: '4', md: '6' }}
     >
       {children}
     </Box>

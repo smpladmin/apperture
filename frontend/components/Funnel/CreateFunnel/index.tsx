@@ -8,8 +8,8 @@ import { getCountOfValidAddedSteps } from '../util';
 import { MapContext } from '@lib/contexts/mapContext';
 import FunnelEmptyState from '../components/FunnelEmptyState';
 import { FunnelData, FunnelStep } from '@lib/domain/funnel';
-import LeftPanel from '@components/EventsLayout/LeftPanel';
 import Loader from '../components/Loader';
+import LeftPanel from '@components/EventsLayout/LeftPanel';
 
 type FunnelProps = {
   name?: string;
@@ -51,7 +51,7 @@ const Funnel = ({ name, steps, computedFunnel }: FunnelProps) => {
   }, [funnelData]);
 
   return (
-    <Flex direction={{ base: 'column', md: 'row' }} w={'full'} height={'full'}>
+    <Flex direction={{ base: 'column', md: 'row' }}>
       <LeftPanel>
         <CreateFunnelAction
           funnelName={funnelName}
@@ -66,8 +66,8 @@ const Funnel = ({ name, steps, computedFunnel }: FunnelProps) => {
           <FunnelEmptyState />
         ) : (
           <Flex
-            px={{ base: '4', md: '30' }}
-            py={{ base: '8', md: '30' }}
+            px={{ base: '0', md: '30' }}
+            pt={{ base: '8', md: '30' }}
             direction={'column'}
             gap={'8'}
           >

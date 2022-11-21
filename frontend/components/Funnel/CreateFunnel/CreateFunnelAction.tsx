@@ -7,7 +7,6 @@ import {
   Switch,
   Text,
 } from '@chakra-ui/react';
-import LeftPanel from '@components/EventsLayout/LeftPanel';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import EventFields from '../components/EventFields';
 import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
@@ -94,7 +93,7 @@ const CreateFunnelAction = ({
   };
 
   return (
-    <LeftPanel>
+    <>
       <Flex justifyContent={'space-between'} alignItems={'center'}>
         <IconButton
           aria-label="close"
@@ -159,7 +158,7 @@ const CreateFunnelAction = ({
         />
       </Flex>
 
-      <Flex direction={'column'} gap={'4'} mt={'9'}>
+      <Flex direction={'column'} gap={'4'} mt={{ base: '6', md: '8' }}>
         <Flex justifyContent={'space-between'} alignItems={'center'}>
           <Text
             fontSize={{ base: 'sh-18', md: 'sh-24' }}
@@ -186,12 +185,7 @@ const CreateFunnelAction = ({
           setEventFieldsValue={setFunnelSteps}
           setFunnelData={setFunnelData}
         />
-        <Divider
-          mt={'4'}
-          orientation="horizontal"
-          borderColor={BASTILLE}
-          opacity={1}
-        />
+        <Divider orientation="horizontal" borderColor={BASTILLE} opacity={1} />
         <Flex justifyContent={'space-between'} alignItems={'center'}>
           <Text
             fontSize={{ base: 'xs-14', md: 'base' }}
@@ -199,12 +193,12 @@ const CreateFunnelAction = ({
             fontWeight={'normal'}
             color={'white.DEFAULT'}
           >
-            Steps in any order
+            In any sequence
           </Text>
           <Switch background={'black'} size={'sm'} />
         </Flex>
       </Flex>
-    </LeftPanel>
+    </>
   );
 };
 

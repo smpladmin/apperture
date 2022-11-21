@@ -107,7 +107,7 @@ const EventFields = ({
   };
 
   return (
-    <Flex gap={'4'}>
+    <Flex gap={{ base: '2', md: '4' }}>
       <EventsConnectingLine eventsLength={eventFieldsValue.length} />
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="droppable">

@@ -10,10 +10,14 @@ const RightView = ({ computedFunnel }: { computedFunnel: FunnelData[] }) => {
       <Flex
         direction={'column'}
         gap={'8'}
-        px={{ base: '4', md: '30' }}
-        py={{ base: '8', md: '30' }}
+        px={{ base: '0', md: '30' }}
+        py={{ base: '8', md: '8' }}
       >
-        <Text fontSize={'sh-20'} lineHeight={'sh-20'} fontWeight={'semibold'}>
+        <Text
+          fontSize={{ base: 'sh-18', md: 'sh-20' }}
+          lineHeight={{ base: 'sh-18', md: 'sh-20' }}
+          fontWeight={{ base: 'medium', md: 'semibold' }}
+        >
           Funnel
         </Text>
         {computedFunnel?.length ? <FunnelChart data={computedFunnel} /> : null}
