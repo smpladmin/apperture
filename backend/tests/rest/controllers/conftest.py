@@ -15,6 +15,7 @@ from domain.notifications.models import (
     NotificationMetric,
     NotificationType,
 )
+from domain.users.models import User
 
 
 @pytest.fixture(scope="module")
@@ -129,6 +130,21 @@ def datasource_service():
 def events_service():
     events_service_mock = mock.AsyncMock()
     return events_service_mock
+
+
+@pytest.fixture(scope="module")
+def user_service(mock_find_email_user):
+    service = mock.AsyncMock()
+    service.find_user.return_value = mock_find_email_user
+    return service
+
+
+@pytest.fixture(scope="module")
+def app_service():
+    service = mock.AsyncMock()
+    future = asyncio.Future()
+    service.find_user.return_value = future
+    return service
 
 
 @pytest.fixture(scope="module")
@@ -283,3 +299,17 @@ def funnel_data():
         ],
         "randomSequence": False,
     }
+
+
+@pytest.fixture(scope="module")
+def mock_find_email_user():
+    User.get_settings = mock.MagicMock()
+    user = User(
+        first_name="mock",
+        last_name="mock",
+        email="test@email.com",
+        picture="",
+    )
+    future = asyncio.Future()
+    future.set_result(user)
+    return future

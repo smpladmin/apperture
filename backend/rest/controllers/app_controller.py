@@ -8,7 +8,8 @@ from domain.datasources.service import DataSourceService
 from domain.integrations.models import Integration
 from domain.integrations.service import IntegrationService
 from domain.users.models import User
-from rest.dtos.apps import AppResponse, AppWithIntegrations, CreateAppDto
+from domain.users.service import UserService
+from rest.dtos.apps import AppResponse, AppWithIntegrations, CreateAppDto, UpdateAppDto
 from rest.dtos.datasources import DataSourceResponse
 from rest.dtos.integrations import IntegrationWithDataSources
 from rest.middlewares import get_user, get_user_id, validate_jwt
@@ -64,6 +65,18 @@ async def get_app(
     app_service: AppService = Depends(),
 ):
     return await app_service.get_user_app(id, user_id)
+
+
+@router.put("/apps/{id}")
+async def update_app(
+    id: str,
+    dto: UpdateAppDto,
+    app_service: AppService = Depends(),
+    user_service: UserService = Depends(),
+):
+    if dto.share_with_email:
+        user = await user_service.find_user(email=dto.share_with_email)
+        await app_service.share_app(id, user)
 
 
 async def build_app_with_integrations(

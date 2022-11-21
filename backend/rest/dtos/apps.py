@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
 
 from domain.apps.models import App
@@ -18,3 +19,7 @@ class AppWithIntegrations(App, ModelResponse):
 
     class Config:
         orm_mode = True
+
+
+class UpdateAppDto(BaseModel):
+    share_with_email: Optional[str]
