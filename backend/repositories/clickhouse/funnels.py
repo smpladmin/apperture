@@ -27,7 +27,7 @@ class Funnels:
 
         static_components = [
             "with ",
-            f" select count(distinct table1.{self.uid}) as {steps[0].event}, ",
+            f" select count(distinct table1.{self.uid}), ",
             " from table1 ",
         ]
 
@@ -48,7 +48,7 @@ class Funnels:
                 for j in range(i, 0, -1):
                     ts_conditionals += f"table{j+1}.ts > table{j}.ts and "
 
-                cte2 = f"count(case when({ts_conditionals}year(table{i}.ts) > %(epoch_year)s) then table{i + 1}.user_id else null end) as {step.event}{i}"
+                cte2 = f"count(case when({ts_conditionals}year(table{i}.ts) > %(epoch_year)s) then table{i + 1}.user_id else null end)"
                 cte3 = f"left join table{i + 1} on (table{i}.{self.uid}=table{i + 1}.{self.uid}) "
                 dynamic_components_2.append(cte2)
                 dynamic_components_3.append(cte3)
