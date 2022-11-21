@@ -58,7 +58,9 @@ def test_get_computed_funnel(
     } == get_computed_funnel_kwargs["funnel"].dict()
 
 
-def test_update_funnel(client_init, funnel_data, funnel_response, funnel_service):
+def test_update_funnel(
+    client_init, funnel_data, funnel_response, funnel_service, mock_user_id
+):
     response = client_init.put(
         "/funnels/635ba034807ab86d8a2aadd8", data=json.dumps(funnel_data)
     )
@@ -67,7 +69,7 @@ def test_update_funnel(client_init, funnel_data, funnel_response, funnel_service
 
     funnel_service.build_funnel.assert_called_with(
         funnel_data["datasourceId"],
-        None,
+        mock_user_id,
         funnel_data["name"],
         [
             FunnelStep(

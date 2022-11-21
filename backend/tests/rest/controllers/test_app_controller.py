@@ -1,13 +1,10 @@
-from asyncio import Future
 import json
-from unittest.mock import MagicMock
-from domain.users.models import User
 
 from rest.dtos.apps import UpdateAppDto
 
 
 def test_update_app_share_with_email(
-    client_init, app_service, user_service, mock_find_email_user
+    client_init, app_service, user_service, mock_find_email_user, mock_user_id
 ):
     dto = UpdateAppDto(share_with_email="test@email.com")
 
@@ -15,4 +12,6 @@ def test_update_app_share_with_email(
 
     assert response.status_code == 200
     user_service.find_user.assert_called_once_with(email="test@email.com")
-    app_service.share_app.assert_called_once_with("mock-id", mock_find_email_user)
+    app_service.share_app.assert_called_once_with(
+        "mock-id", mock_user_id, mock_find_email_user
+    )

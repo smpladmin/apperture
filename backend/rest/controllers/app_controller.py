@@ -71,12 +71,13 @@ async def get_app(
 async def update_app(
     id: str,
     dto: UpdateAppDto,
+    user_id: str = Depends(get_user_id),
     app_service: AppService = Depends(),
     user_service: UserService = Depends(),
 ):
     if dto.share_with_email:
         user = await user_service.find_user(email=dto.share_with_email)
-        await app_service.share_app(id, user)
+        await app_service.share_app(id, user_id, user)
 
 
 async def build_app_with_integrations(

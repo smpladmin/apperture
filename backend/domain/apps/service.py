@@ -22,3 +22,9 @@ class AppService:
             App.id == PydanticObjectId(id),
             App.user_id == PydanticObjectId(user_id),
         )
+
+    async def share_app(self, id: str, owner_id: str, user: User):
+        app = await self.get_user_app(id, owner_id)
+        app.shared_with.add(user.id)
+        await app.save()
+        return app
