@@ -86,7 +86,7 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
 
     plot.current.funnel.coordinate().transpose();
     plot.current.funnel.render();
-  }, [funnelData]);
+  }, [data]);
 
   return <Box ref={ref}></Box>;
 };
