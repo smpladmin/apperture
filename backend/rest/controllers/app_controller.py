@@ -47,6 +47,7 @@ async def get_apps(
         *list(
             map(
                 lambda app: build_app_with_integrations(
+                    user,
                     app,
                     integration_service,
                     ds_service,
@@ -81,7 +82,10 @@ async def update_app(
 
 
 async def build_app_with_integrations(
-    app: App, integration_service: IntegrationService, ds_service: DataSourceService
+    user: User,
+    app: App,
+    integration_service: IntegrationService,
+    ds_service: DataSourceService,
 ):
     integrations = await integration_service.get_app_integrations(app.id)
     integraiton_wds = await asyncio.gather(
@@ -95,6 +99,7 @@ async def build_app_with_integrations(
         )
     )
     app_wi = AppWithIntegrations.from_orm(app)
+    app_wi.shared = user.id in app_wi.shared_with
     app_wi.integrations = integraiton_wds
     return app_wi
 

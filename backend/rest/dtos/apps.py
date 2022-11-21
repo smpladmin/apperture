@@ -15,6 +15,7 @@ class AppResponse(App, ModelResponse):
 
 
 class AppWithIntegrations(App, ModelResponse):
+    shared: bool = False
     integrations: list[IntegrationWithDataSources] = []
 
     class Config:

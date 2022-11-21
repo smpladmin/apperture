@@ -6,5 +6,6 @@ export type App = {
 };
 
 export type AppWithIntegrations = App & {
+  shared: boolean;
   integrations: Array<IntegrationWithDataSources>;
 };
