@@ -24,15 +24,13 @@ const Funnel = ({ name, steps, computedFunnel }: FunnelProps) => {
 
   const [funnelName, setFunnelName] = useState(name || 'Untitled Funnel');
   const [funnelSteps, setFunnelSteps] = useState(
-    steps?.length
-      ? steps
-      : [
-          { event: '', filters: [] },
-          { event: '', filters: [] },
-        ]
+    steps || [
+      { event: '', filters: [] },
+      { event: '', filters: [] },
+    ]
   );
   const [funnelData, setFunnelData] = useState<FunnelData[]>(
-    computedFunnel?.length ? computedFunnel : []
+    computedFunnel || []
   );
 
   const [isEmpty, setIsEmpty] = useState(true);
