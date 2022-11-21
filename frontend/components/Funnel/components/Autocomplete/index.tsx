@@ -159,6 +159,7 @@ const Autocomplete = ({
               <Box
                 minH={'5'}
                 minW={'5'}
+                data-testid={`remove-button-${index}`}
                 onClick={() => removeInputField(index)}
               >
                 <Image src={CrossIcon} alt={'cross-icon'} />
