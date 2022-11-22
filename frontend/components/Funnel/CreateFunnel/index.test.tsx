@@ -19,20 +19,23 @@ jest.mock('@lib/utils/common');
 describe('create funnel action component', () => {
   let mockedGetCountOfValidAddedSteps: jest.Mock;
   let mockedIsEveryStepValid: jest.Mock;
-  let mockedGetTransientFunnelData: jest.Mock;
   let mockedSearchResult: jest.Mock;
   let mockedIsEveryNonEmptyStepValid: jest.Mock;
   let mockedTransformFunnelData: jest.Mock;
+  let mockedGetTransientFunnelData: jest.Mock;
+  let mockedSaveFunnel: jest.Mock;
 
   beforeEach(() => {
     mockedGetCountOfValidAddedSteps = jest.mocked(getCountOfValidAddedSteps);
     mockedIsEveryStepValid = jest.mocked(isEveryStepValid);
-    mockedGetTransientFunnelData = jest.mocked(
-      APIService.getTransientFunnelData
-    );
     mockedSearchResult = jest.mocked(getSearchResult);
     mockedIsEveryNonEmptyStepValid = jest.mocked(isEveryNonEmptyStepValid);
     mockedTransformFunnelData = jest.mocked(transformFunnelData);
+    mockedGetTransientFunnelData = jest.mocked(
+      APIService.getTransientFunnelData
+    );
+    mockedSaveFunnel = jest.mocked(APIService.saveFunnel);
+
     mockedGetCountOfValidAddedSteps.mockReturnValue(2);
     mockedIsEveryStepValid.mockReturnValue(true);
   });
@@ -50,7 +53,7 @@ describe('create funnel action component', () => {
           <Funnel />
         </RouterContext.Provider>
       );
-      const saveButton = screen.getByText('Save').closest('button');
+      const saveButton = screen.getByTestId('save');
 
       expect(saveButton).toBeDisabled();
       expect(saveButton).toBeInTheDocument();
@@ -65,7 +68,7 @@ describe('create funnel action component', () => {
         </RouterContext.Provider>
       );
 
-      const saveButton = screen.getByText('Save').closest('button');
+      const saveButton = screen.getByTestId('save');
       expect(saveButton).toBeEnabled();
       expect(saveButton).toBeInTheDocument();
     });
@@ -121,6 +124,50 @@ describe('create funnel action component', () => {
 
       const newAddedInputFields = screen.getAllByTestId('autocomplete');
       expect(newAddedInputFields.length).toEqual(inputFields.length);
+    });
+
+    it.only('should be able to save funnel when atleast two valid events are added', async () => {
+      mockedSearchResult.mockReturnValue([{ id: 'Chapter_Click' }]);
+      mockedSaveFunnel.mockReturnValue({
+        status: 200,
+        data: {
+          _id: '64349843748',
+          datasourceId: '654212033222',
+          steps: [
+            { event: 'Video_Click', filters: [] },
+            { event: 'Chapter_Click', filters: [] },
+          ],
+        },
+      });
+
+      const router = createMockRouter({
+        query: { dsId: '654212033222' },
+        pathname: '/analytics/funnel/create',
+      });
+
+      render(
+        <RouterContext.Provider value={router}>
+          <Funnel />
+        </RouterContext.Provider>
+      );
+      const saveButton = screen.getByTestId('save');
+      const inputFields = screen.getAllByTestId('autocomplete');
+      fireEvent.change(inputFields[0], { target: { value: 'Video_Click' } });
+      fireEvent.blur(inputFields[0]);
+
+      fireEvent.focus(inputFields[1]);
+      fireEvent.change(inputFields[1], {
+        target: { value: 'Chapter_Click' },
+      });
+
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(router.push).toHaveBeenCalledWith({
+          pathname: '/analytics/funnel/view/[funnelId]',
+          query: { funnelId: '64349843748' },
+        });
+      });
     });
   });
 

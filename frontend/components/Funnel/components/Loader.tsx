@@ -4,7 +4,13 @@ import React from 'react';
 
 const Loader = () => {
   return (
-    <Flex w="full" h="full" justifyContent={'center'} alignItems={'center'}>
+    <Flex
+      w="full"
+      h="full"
+      justifyContent={'center'}
+      alignItems={'center'}
+      data-testid={'funnel-loader'}
+    >
       <Spinner
         thickness="4px"
         speed="0.5s"
