@@ -16,3 +16,9 @@ export type ComputedFunnel = {
   randomSequence: boolean;
   computedFunnel: FunnelData[];
 };
+
+export type FunnelTrendsData = {
+  conversion: string;
+  startDate: Date;
+  endDate: Date;
+};

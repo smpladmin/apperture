@@ -74,3 +74,18 @@ export const updateFunnel = async (
     return {} as any;
   }
 };
+
+export const _getComputedTrendsData = async (
+  token: string,
+  funnelId: string
+) => {
+  try {
+    const res = await ApperturePrivateAPI.get(`/funnels/${funnelId}/trends`, {
+      headers: { Authorization: token },
+    });
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};

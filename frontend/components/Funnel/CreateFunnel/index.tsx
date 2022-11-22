@@ -71,7 +71,11 @@ const Funnel = ({ name, steps, computedFunnel }: FunnelProps) => {
             direction={'column'}
             gap={'8'}
           >
-            <Text fontSize={'sh-20'} fontWeight={'semibold'}>
+            <Text
+              fontSize={{ base: 'sh-18', md: 'sh-20' }}
+              lineHeight={{ base: 'sh-18', md: 'sh-20' }}
+              fontWeight={'semibold'}
+            >
               Funnel
             </Text>
             {isLoading ? <Loader /> : <FunnelChart data={funnelData} />}
