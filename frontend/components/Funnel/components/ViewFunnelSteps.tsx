@@ -11,7 +11,12 @@ function ViewFunnelSteps({ steps }: any) {
         <Box bg={'grey.200'} w={'7px'} h={'7px'} borderRadius={'full'}></Box>
       </Flex>
       <Flex gap={'1'} direction={'column'}>
-        <Text color={'white'} fontSize={'xs-14'} lineHeight={'sh-20'}>
+        <Text
+          color={'white'}
+          fontSize={'xs-14'}
+          lineHeight={'sh-20'}
+          data-testid={'first-step'}
+        >
           {steps?.[0]?.['event']}
         </Text>
         <Text
@@ -19,10 +24,16 @@ function ViewFunnelSteps({ steps }: any) {
           fontSize={'xs-14'}
           lineHeight={'sh-20'}
           minH={'6'}
+          data-testid={'intermediate-steps'}
         >
           {stepsLength > 2 ? `+${stepsLength - 2} Steps` : null}
         </Text>
-        <Text color={'white'} fontSize={'xs-14'} lineHeight={'sh-20'}>
+        <Text
+          color={'white'}
+          fontSize={'xs-14'}
+          lineHeight={'sh-20'}
+          data-testid={'last-step'}
+        >
           {steps?.[stepsLength - 1]?.['event']}
         </Text>
       </Flex>

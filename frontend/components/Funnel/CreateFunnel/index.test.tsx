@@ -295,7 +295,7 @@ describe('create funnel action component', () => {
       const suggestionContainer = screen.getByTestId('suggestion-container');
       expect(suggestionContainer).toBeVisible();
 
-      // move surson using Arrow Down key
+      // move cursor using Arrow Down key
       fireEvent.keyDown(inputFields[1], {
         key: 'ArrowDown',
       });
