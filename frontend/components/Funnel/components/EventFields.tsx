@@ -20,6 +20,8 @@ import {
   DropResult,
 } from 'react-beautiful-dnd';
 import { getSearchResult } from '@lib/utils/common';
+import usePrevious from '@lib/hooks/usePrevious';
+import isEqual from 'lodash/isEqual';
 
 type EventFieldsValue = {
   eventFieldsValue: Array<FunnelStep>;
@@ -43,6 +45,7 @@ const EventFields = ({
   const [suggestions, setSuggestions] = useState<Array<NodeType>>([]);
   const [focusedInputIndex, setFocusedInputIndex] = useState(-1);
   const [stepRemovedCount, setStepRemovedCount] = useState(0);
+  const previousStepsState = usePrevious(eventFieldsValue);
 
   useEffect(() => {
     setSuggestions(nodes);
@@ -54,7 +57,7 @@ const EventFields = ({
   }, [eventFieldsValue]);
 
   useEffect(() => {
-    if (!stepDragCount) return;
+    if (!stepDragCount || isEqual(eventFieldsValue, previousStepsState)) return;
     getFunnelData();
   }, [stepDragCount]);
 

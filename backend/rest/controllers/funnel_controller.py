@@ -7,7 +7,7 @@ from rest.dtos.funnels import (
     ComputedFunnelStepResponse,
     ComputedFunnelResponse,
 )
-from rest.dtos.funnels import CreateFunnelDto, TransientFunnelDto
+from rest.dtos.funnels import CreateFunnelDto, TransientFunnelDto, FunnelTrendResponse
 from rest.middlewares import validate_jwt, get_user_id
 
 
@@ -41,9 +41,7 @@ async def compute_transient_funnel(
     dto: TransientFunnelDto,
     funnel_service: FunnelsService = Depends(),
 ):
-    return await funnel_service.compute_funnel(
-        ds_id=dto.datasourceId, steps=dto.steps
-    )
+    return await funnel_service.compute_funnel(ds_id=dto.datasourceId, steps=dto.steps)
 
 
 @router.get("/funnels/{id}", response_model=ComputedFunnelResponse)
@@ -52,9 +50,7 @@ async def get_computed_funnel(
     funnel_service: FunnelsService = Depends(),
 ):
     funnel = await funnel_service.get_funnel(id)
-    return await funnel_service.get_computed_funnel(
-        funnel=funnel
-    )
+    return await funnel_service.get_computed_funnel(funnel=funnel)
 
 
 @router.put("/funnels/{id}", response_model=FunnelResponse)
@@ -73,3 +69,12 @@ async def update_funnel(
     )
     await funnel_service.update_funnel(funnel_id=id, new_funnel=new_funnel)
     return new_funnel
+
+
+@router.get("/funnels/{id}/trends", response_model=List[FunnelTrendResponse])
+async def get_funnel_trends(
+    id: str,
+    funnel_service: FunnelsService = Depends(),
+):
+    funnel = await funnel_service.get_funnel(id)
+    return await funnel_service.get_funnel_trends(funnel=funnel)

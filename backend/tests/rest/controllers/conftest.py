@@ -1,13 +1,18 @@
 import pytest
 import asyncio
 from unittest import mock
-from collections import namedtuple
+from datetime import datetime
 from beanie import PydanticObjectId
 from fastapi.testclient import TestClient
 
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
-from domain.funnels.models import Funnel, ComputedFunnelStep, ComputedFunnel
+from domain.funnels.models import (
+    Funnel,
+    ComputedFunnelStep,
+    ComputedFunnel,
+    FunnelTrendsData,
+)
 from domain.notifications.models import (
     Notification,
     NotificationChannel,
@@ -92,10 +97,24 @@ def funnel_service():
         random_sequence=funnel.random_sequence,
         computed_funnel=computed_transient_funnel,
     )
+    funnel_trends = [
+        FunnelTrendsData(
+            conversion=0.5,
+            start_date=datetime(2022, 1, 1, 0, 0),
+            end_date=datetime(2022, 1, 7, 0, 0),
+        ),
+        FunnelTrendsData(
+            conversion=0.6,
+            start_date=datetime(2022, 1, 8, 0, 0),
+            end_date=datetime(2022, 1, 14, 0, 0),
+        ),
+    ]
     computed_transient_funnel_future = asyncio.Future()
     computed_transient_funnel_future.set_result(computed_transient_funnel)
     computed_funnel_future = asyncio.Future()
     computed_funnel_future.set_result(computed_funnel)
+    funnel_trends_future = asyncio.Future()
+    funnel_trends_future.set_result(funnel_trends)
 
     funnel_service_mock.build_funnel.return_value = funnel
     funnel_service_mock.add_funnel.return_value = funnel_future
@@ -103,6 +122,7 @@ def funnel_service():
     funnel_service_mock.compute_funnel.return_value = computed_transient_funnel_future
     funnel_service_mock.get_computed_funnel.return_value = computed_funnel_future
     funnel_service_mock.update_funnel = mock.AsyncMock()
+    funnel_service_mock.get_funnel_trends.return_value = funnel_trends_future
     return funnel_service_mock
 
 
@@ -216,6 +236,22 @@ def funnel_response():
         ],
         "randomSequence": False,
     }
+
+
+@pytest.fixture(scope="module")
+def funnel_trend_response():
+    return [
+        {
+            "conversion": "0.5",
+            "startDate": "2022-01-01T00:00:00",
+            "endDate": "2022-01-07T00:00:00",
+        },
+        {
+            "conversion": "0.6",
+            "startDate": "2022-01-08T00:00:00",
+            "endDate": "2022-01-14T00:00:00",
+        },
+    ]
 
 
 @pytest.fixture(scope="module")

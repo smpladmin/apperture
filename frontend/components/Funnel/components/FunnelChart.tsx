@@ -6,6 +6,8 @@ import { BLACK_200, MEDIUM_BLUE } from '@theme/index';
 import { FunnelData } from '@lib/domain/funnel';
 import { formatDatalabel } from '@lib/utils/common';
 import { AppertureContext } from '@lib/contexts/appertureContext';
+import usePrevious from '@lib/hooks/usePrevious';
+import isEqual from 'lodash/isEqual';
 
 type FunnelChartProps = {
   data: FunnelData[];
@@ -23,8 +25,11 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ funnel: any }>({ funnel: null });
   const funnelData = transformFunnelData(data).reverse();
+  const previousData = usePrevious(funnelData);
 
   useEffect(() => {
+    if (isEqual(previousData, funnelData)) return;
+
     plot.current.funnel = new Chart({
       container: ref.current!!,
       height: CONATINER_HEIGHT,
