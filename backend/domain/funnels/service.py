@@ -1,10 +1,17 @@
-from fastapi import Depends
 from typing import List
 from mongo import Mongo
-from beanie import PydanticObjectId
+from fastapi import Depends
 from datetime import datetime
+from beanie import PydanticObjectId
 
-from domain.funnels.models import Funnel, FunnelStep, ComputedFunnelStep, ComputedFunnel
+
+from domain.funnels.models import (
+    Funnel,
+    FunnelStep,
+    ComputedFunnelStep,
+    ComputedFunnel,
+    FunnelTrendsData,
+)
 from repositories.clickhouse.funnels import Funnels
 
 
@@ -43,10 +50,10 @@ class FunnelsService:
         )
 
     async def compute_funnel(
-        self, ds_id: str, provider: str, steps: List[FunnelStep]
+        self, ds_id: str, steps: List[FunnelStep]
     ) -> List[ComputedFunnelStep]:
 
-        events_data = self.funnels.get_events_data(ds_id, steps, provider)
+        events_data = self.funnels.get_events_data(ds_id, steps)
         computed_funnel = [
             ComputedFunnelStep(
                 event=step.event,
@@ -63,11 +70,9 @@ class FunnelsService:
     async def get_funnel(self, id: str) -> Funnel:
         return await Funnel.get(id)
 
-    async def get_computed_funnel(
-        self, funnel: Funnel, provider: str
-    ) -> ComputedFunnel:
+    async def get_computed_funnel(self, funnel: Funnel) -> ComputedFunnel:
         computed_funnel = await self.compute_funnel(
-            ds_id=str(funnel.datasource_id), provider=provider, steps=funnel.steps
+            ds_id=str(funnel.datasource_id), steps=funnel.steps
         )
         return ComputedFunnel(
             datasource_id=funnel.datasource_id,
@@ -86,3 +91,16 @@ class FunnelsService:
         await Funnel.find_one(
             Funnel.id == PydanticObjectId(funnel_id),
         ).update({"$set": to_update})
+
+    async def get_funnel_trends(self, funnel: Funnel) -> List[FunnelTrendsData]:
+        conversion_data = self.funnels.get_conversion_data(
+            ds_id=str(funnel.datasource_id), steps=funnel.steps
+        )
+        return [
+            FunnelTrendsData(
+                conversion=data[2],
+                start_date=datetime.strptime(f"{data[1]}-{data[0]}-1", "%Y-%W-%w"),
+                end_date=datetime.strptime(f"{data[1]}-{data[0]}-0", "%Y-%W-%w"),
+            )
+            for data in conversion_data
+        ]

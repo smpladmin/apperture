@@ -19,18 +19,18 @@ class GoogleAnalyticsCleaner(Cleaner):
         try:
             babel.Locale.parse(locale)
         except babel.core.UnknownLocaleError:
-            logging.info("{x}: {y}".format(x="Not a valid locale", y=locale))
+            logging.debug("{x}: {y}".format(x="Not a valid locale", y=locale))
             return False
         return True
 
     def remove_locale_from_endpoint(self, endpoint: str) -> str:
-        logging.info("{x}: {y}".format(x="Processing for", y=endpoint))
+        logging.debug("{x}: {y}".format(x="Processing for", y=endpoint))
         pattern = re.search("/(?P<locale>[a-zA-Z]{2,2}(-[a-zA-Z]{2})?)/", endpoint)
         if not pattern:
             pattern = re.search("/(?P<locale>[a-zA-Z]{2,2}(-[a-zA-Z]{2})?)$", endpoint)
 
         if not pattern:
-            logging.info("{x}: {y}".format(x="Pattern not present", y="Skipping"))
+            logging.debug("{x}: {y}".format(x="Pattern not present", y="Skipping"))
             return endpoint
         else:
             locale = pattern.group("locale").replace("-", "_")

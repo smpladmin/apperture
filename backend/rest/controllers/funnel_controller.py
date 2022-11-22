@@ -2,13 +2,12 @@ from fastapi import APIRouter, Depends
 from typing import List
 
 from domain.funnels.service import FunnelsService
-from domain.datasources.service import DataSourceService
 from rest.dtos.funnels import (
     FunnelResponse,
     ComputedFunnelStepResponse,
     ComputedFunnelResponse,
 )
-from rest.dtos.funnels import CreateFunnelDto, TransientFunnelDto
+from rest.dtos.funnels import CreateFunnelDto, TransientFunnelDto, FunnelTrendResponse
 from rest.middlewares import validate_jwt, get_user_id
 
 
@@ -41,25 +40,17 @@ async def create_funnel(
 async def compute_transient_funnel(
     dto: TransientFunnelDto,
     funnel_service: FunnelsService = Depends(),
-    datasource_service: DataSourceService = Depends(),
 ):
-    datasource = await datasource_service.get_datasource(id=dto.datasourceId)
-    return await funnel_service.compute_funnel(
-        ds_id=dto.datasourceId, provider=datasource.provider, steps=dto.steps
-    )
+    return await funnel_service.compute_funnel(ds_id=dto.datasourceId, steps=dto.steps)
 
 
 @router.get("/funnels/{id}", response_model=ComputedFunnelResponse)
 async def get_computed_funnel(
     id: str,
     funnel_service: FunnelsService = Depends(),
-    datasource_service: DataSourceService = Depends(),
 ):
     funnel = await funnel_service.get_funnel(id)
-    datasource = await datasource_service.get_datasource(id=str(funnel.datasource_id))
-    return await funnel_service.get_computed_funnel(
-        funnel=funnel, provider=datasource.provider
-    )
+    return await funnel_service.get_computed_funnel(funnel=funnel)
 
 
 @router.put("/funnels/{id}", response_model=FunnelResponse)
@@ -78,3 +69,12 @@ async def update_funnel(
     )
     await funnel_service.update_funnel(funnel_id=id, new_funnel=new_funnel)
     return new_funnel
+
+
+@router.get("/funnels/{id}/trends", response_model=List[FunnelTrendResponse])
+async def get_funnel_trends(
+    id: str,
+    funnel_service: FunnelsService = Depends(),
+):
+    funnel = await funnel_service.get_funnel(id)
+    return await funnel_service.get_funnel_trends(funnel=funnel)

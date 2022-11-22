@@ -108,7 +108,6 @@ class DPQueueService:
                 "description": description,
             },
         )
-        print(vars(job))
         return {
             "id": job.id,
             "cron": cron,

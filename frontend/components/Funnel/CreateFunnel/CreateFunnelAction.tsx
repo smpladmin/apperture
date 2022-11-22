@@ -8,10 +8,8 @@ import {
   Text,
 } from '@chakra-ui/react';
 import LeftPanel from '@components/EventsLayout/LeftPanel';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import EventFields from '../components/EventFields';
-import tickIcon from '@assets/icons/black-tick-icon.svg';
-import Image from 'next/image';
 import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
 import {
   filterFunnelSteps,
@@ -41,9 +39,8 @@ const CreateFunnelAction = ({
   const {
     state: { nodes },
   } = useContext(MapContext);
-
+  const funnelInputRef = useRef<HTMLInputElement>(null);
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
-
   const router = useRouter();
   const { dsId } = router.query;
 
@@ -51,6 +48,10 @@ const CreateFunnelAction = ({
     const newField = { event: '', filters: [] };
     setFunnelSteps([...funnelSteps, newField]);
   };
+
+  useEffect(() => {
+    funnelInputRef?.current?.focus();
+  }, []);
 
   useEffect(() => {
     if (
@@ -64,14 +65,13 @@ const CreateFunnelAction = ({
   }, [funnelSteps, nodes]);
 
   const handleSaveFunnel = async () => {
-    const res = await saveFunnel(
+    const { data, status } = await saveFunnel(
       dsId as string,
       funnelName,
       filterFunnelSteps(funnelSteps),
       false
     );
-
-    router.push(`/analytics/viewFunnel/${res._id}`);
+    if (status === 200) router.push(`/analytics/funnel/view/${data._id}`);
   };
 
   return (
@@ -96,17 +96,15 @@ const CreateFunnelAction = ({
           }}
           onClick={handleSaveFunnel}
         >
-          <Flex alignItems={'center'} gap={'1'}>
-            <Image src={tickIcon} alt={'tick'} />
-            <Text
-              color={BLACK_RUSSIAN}
-              fontSize={'xs-14'}
-              lineHeight={'xs-14'}
-              fontWeight={'medium'}
-            >
-              Save
-            </Text>
-          </Flex>
+          <Text
+            textAlign={'center'}
+            color={BLACK_RUSSIAN}
+            fontSize={'xs-14'}
+            lineHeight={'xs-14'}
+            fontWeight={'medium'}
+          >
+            Save
+          </Text>
         </Button>
       </Flex>
 
@@ -127,6 +125,13 @@ const CreateFunnelAction = ({
           lineHeight={{ base: 'sh-20', md: 'sh-32' }}
           fontWeight={'semibold'}
           textColor={'white.DEFAULT'}
+          ref={funnelInputRef}
+          onFocus={(e) =>
+            e.currentTarget.setSelectionRange(
+              e.currentTarget.value.length,
+              e.currentTarget.value.length
+            )
+          }
           value={funnelName}
           focusBorderColor={'white.DEFAULT'}
           onChange={(e) => setFunnelName(e.target.value)}

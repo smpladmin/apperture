@@ -117,6 +117,6 @@ async def create_integration(
     dpq_service: DPQueueService = Depends(),
 ):
     datasource = await ds_service.get_datasource(ds_id)
-    runlogs = await runlog_service.create_runlogs(datasource.id)
+    runlogs = await runlog_service.create_pending_runlogs(datasource)
     jobs = dpq_service.enqueue_from_runlogs(runlogs)
     return jobs

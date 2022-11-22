@@ -10,6 +10,7 @@ class EventsService:
             "datasource_id",
             "timestamp",
             "provider",
+            "user_id",
             "event_name",
             "properties",
         ]
@@ -17,6 +18,6 @@ class EventsService:
     async def update_events(self, events):
         self.clickhouse.insert(
             self.table,
-            [list(event.dict().values()) for event in events],
+            events,
             column_names=self.columns,
         )

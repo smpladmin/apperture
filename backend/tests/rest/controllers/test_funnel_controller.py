@@ -3,7 +3,6 @@ from unittest.mock import ANY
 from beanie import PydanticObjectId
 
 from tests.utils import filter_response
-from domain.common.models import IntegrationProvider
 from domain.funnels.models import FunnelStep, EventFilters, Funnel
 
 
@@ -32,9 +31,6 @@ def test_get_computed_funnel(
     funnel_service.get_funnel.assert_called_once_with(
         "635ba034807ab86d8a2aadd8",
     )
-    datasource_service.get_datasource.assert_called_with(
-        **{"id": "635ba034807ab86d8a2aadd9"}
-    )
     get_computed_funnel_kwargs = funnel_service.get_computed_funnel.call_args.kwargs
     funnel_service.get_computed_funnel.assert_called_once()
 
@@ -59,7 +55,6 @@ def test_get_computed_funnel(
         "updated_at": None,
         "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
     } == get_computed_funnel_kwargs["funnel"].dict()
-    assert IntegrationProvider.MIXPANEL == get_computed_funnel_kwargs["provider"]
 
 
 def test_update_funnel(client_init, funnel_data, funnel_response, funnel_service):
@@ -113,3 +108,34 @@ def test_update_funnel(client_init, funnel_data, funnel_response, funnel_service
     } == update_funnel_kwargs["new_funnel"].dict()
 
     assert "635ba034807ab86d8a2aadd8" == update_funnel_kwargs["funnel_id"]
+
+
+def test_get_funnel_trends(client_init, funnel_trend_response, funnel_service):
+    response = client_init.get("/funnels/635ba034807ab86d8a2aadd8/trends")
+    assert response.status_code == 200
+    assert response.json() == funnel_trend_response
+
+    funnel_service.get_funnel_trends.assert_called_once()
+    get_funnel_trends_kwargs = funnel_service.get_funnel_trends.call_args.kwargs
+
+    assert {
+        "created_at": ANY,
+        "datasource_id": PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        "id": PydanticObjectId("635ba034807ab86d8a2aadd8"),
+        "name": "name",
+        "random_sequence": False,
+        "revision_id": ANY,
+        "steps": [
+            {
+                "event": "Login",
+                "filters": [{"property": "mp_country_code", "value": "IN"}],
+            },
+            {"event": "Chapter_Click", "filters": None},
+            {
+                "event": "Topic_Click",
+                "filters": [{"property": "os", "value": "Android"}],
+            },
+        ],
+        "updated_at": None,
+        "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
+    } == get_funnel_trends_kwargs["funnel"].dict()

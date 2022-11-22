@@ -1,3 +1,5 @@
+import datetime
+
 from beanie import PydanticObjectId
 from typing import List, Optional
 from pydantic import BaseModel
@@ -38,3 +40,9 @@ class ComputedFunnel(BaseModel):
     steps: List[FunnelStep]
     random_sequence: bool
     computed_funnel: List[ComputedFunnelStep]
+
+
+class FunnelTrendsData(BaseModel):
+    conversion: str
+    start_date: datetime.datetime
+    end_date: datetime.datetime
