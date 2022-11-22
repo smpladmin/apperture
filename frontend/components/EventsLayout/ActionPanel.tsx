@@ -2,7 +2,7 @@ import { Box } from '@chakra-ui/react';
 import { BLACK_RUSSIAN } from '@theme/index';
 import React, { ReactNode } from 'react';
 
-const LeftPanel = ({ children }: { children: ReactNode }) => {
+const ActionPanel = ({ children }: { children: ReactNode }) => {
   return (
     <Box
       width={{ base: 'full', md: '35%' }}
@@ -17,4 +17,4 @@ const LeftPanel = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export default LeftPanel;
+export default ActionPanel;

@@ -1,12 +1,12 @@
 import { Flex, Text } from '@chakra-ui/react';
-import RightPanel from '@components/EventsLayout/RightPanel';
+import ViewPanel from '@components/EventsLayout/ViewPanel';
 import { FunnelData } from '@lib/domain/funnel';
 import React from 'react';
 import FunnelChart from '../components/FunnelChart';
 
 const RightView = ({ computedFunnel }: { computedFunnel: FunnelData[] }) => {
   return (
-    <RightPanel>
+    <ViewPanel>
       <Flex
         direction={'column'}
         gap={'8'}
@@ -22,7 +22,7 @@ const RightView = ({ computedFunnel }: { computedFunnel: FunnelData[] }) => {
         </Text>
         {computedFunnel?.length ? <FunnelChart data={computedFunnel} /> : null}
       </Flex>
-    </RightPanel>
+    </ViewPanel>
   );
 };
 

@@ -1,7 +1,6 @@
 import { Flex, Text } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import CreateFunnelAction from './CreateFunnelAction';
-import RightPanel from '@components/EventsLayout/RightPanel';
 import FunnelChart from '../components/FunnelChart';
 import { useContext, useEffect, useState } from 'react';
 import { getCountOfValidAddedSteps } from '../util';
@@ -9,7 +8,8 @@ import { MapContext } from '@lib/contexts/mapContext';
 import FunnelEmptyState from '../components/FunnelEmptyState';
 import { FunnelData, FunnelStep } from '@lib/domain/funnel';
 import Loader from '../components/Loader';
-import LeftPanel from '@components/EventsLayout/LeftPanel';
+import ActionPanel from '@components/EventsLayout/ActionPanel';
+import ViewPanel from '@components/EventsLayout/ViewPanel';
 
 type FunnelProps = {
   name?: string;
@@ -51,8 +51,8 @@ const Funnel = ({ name, steps, computedFunnel }: FunnelProps) => {
   }, [funnelData]);
 
   return (
-    <Flex direction={{ base: 'column', md: 'row' }}>
-      <LeftPanel>
+    <Flex direction={{ base: 'column', md: 'row' }} h={'full'}>
+      <ActionPanel>
         <CreateFunnelAction
           funnelName={funnelName}
           setFunnelName={setFunnelName}
@@ -60,8 +60,8 @@ const Funnel = ({ name, steps, computedFunnel }: FunnelProps) => {
           setFunnelSteps={setFunnelSteps}
           setFunnelData={setFunnelData}
         />
-      </LeftPanel>
-      <RightPanel>
+      </ActionPanel>
+      <ViewPanel>
         {isEmpty ? (
           <FunnelEmptyState />
         ) : (
@@ -77,7 +77,7 @@ const Funnel = ({ name, steps, computedFunnel }: FunnelProps) => {
             {isLoading ? <Loader /> : <FunnelChart data={funnelData} />}
           </Flex>
         )}
-      </RightPanel>
+      </ViewPanel>
     </Flex>
   );
 };

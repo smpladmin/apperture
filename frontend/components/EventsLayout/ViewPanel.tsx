@@ -1,7 +1,7 @@
 import { Box } from '@chakra-ui/react';
 import React, { ReactNode } from 'react';
 
-const RightPanel = ({ children }: { children: ReactNode }) => {
+const ViewPanel = ({ children }: { children: ReactNode }) => {
   return (
     <Box
       w={'full'}
@@ -14,4 +14,4 @@ const RightPanel = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export default RightPanel;
+export default ViewPanel;

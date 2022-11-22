@@ -1,5 +1,5 @@
 import { Button, Divider, Flex, IconButton, Text } from '@chakra-ui/react';
-import LeftPanel from '@components/EventsLayout/LeftPanel';
+import ActionPanel from '@components/EventsLayout/ActionPanel';
 import Render from '@components/Render';
 import React from 'react';
 import ViewFunnelSteps from '../components/ViewFunnelSteps';
@@ -27,7 +27,7 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
   };
 
   return (
-    <LeftPanel>
+    <ActionPanel>
       <Flex justifyContent={'space-between'} alignItems={'center'}>
         <IconButton
           aria-label="close"
@@ -113,7 +113,7 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
           opacity={1}
         />
       </Flex>
-    </LeftPanel>
+    </ActionPanel>
   );
 };
 

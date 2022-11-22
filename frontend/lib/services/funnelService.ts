@@ -68,10 +68,9 @@ export const updateFunnel = async (
       steps,
       randomSequence,
     });
-    console.log(res);
     return res;
   } catch (e) {
     console.error((e as AxiosError).message);
-    return [];
+    return {} as any;
   }
 };
