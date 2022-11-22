@@ -13,7 +13,12 @@ const FunnelEmptyState = () => {
       py={'6'}
     >
       <Box>
-        <Image src={FunnelImage} priority={true} alt={'funnel-empty-state'} />
+        <Image
+          src={FunnelImage}
+          priority={true}
+          alt={'funnel-empty-state'}
+          data-testid={'funnel-empty-state'}
+        />
         <Text
           textAlign={'center'}
           mt={'10'}
