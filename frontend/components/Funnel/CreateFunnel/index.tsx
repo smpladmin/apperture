@@ -1,27 +1,37 @@
-import { Flex, Spinner, Text } from '@chakra-ui/react';
+import { Flex, Text } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import CreateFunnelAction from './CreateFunnelAction';
-import RightPanel from '@components/EventsLayout/RightPanel';
 import FunnelChart from '../components/FunnelChart';
 import { useContext, useEffect, useState } from 'react';
 import { getCountOfValidAddedSteps } from '../util';
 import { MapContext } from '@lib/contexts/mapContext';
 import FunnelEmptyState from '../components/FunnelEmptyState';
-import { BLACK_RUSSIAN } from '@theme/index';
-import Render from '@components/Render';
-import { FunnelData } from '@lib/domain/funnel';
+import { FunnelData, FunnelStep } from '@lib/domain/funnel';
+import Loader from '../components/Loader';
+import ActionPanel from '@components/EventsLayout/ActionPanel';
+import ViewPanel from '@components/EventsLayout/ViewPanel';
 
-const Funnel = () => {
+type FunnelProps = {
+  name?: string;
+  steps?: FunnelStep[];
+  computedFunnel?: FunnelData[];
+};
+
+const Funnel = ({ name, steps, computedFunnel }: FunnelProps) => {
   const {
     state: { nodes },
   } = useContext(MapContext);
 
-  const [funnelName, setFunnelName] = useState('Untitled Funnel');
-  const [funnelSteps, setFunnelSteps] = useState([
-    { event: '', filters: [] },
-    { event: '', filters: [] },
-  ]);
-  const [funnelData, setFunnelData] = useState<FunnelData[]>([]);
+  const [funnelName, setFunnelName] = useState(name || 'Untitled Funnel');
+  const [funnelSteps, setFunnelSteps] = useState(
+    steps || [
+      { event: '', filters: [] },
+      { event: '', filters: [] },
+    ]
+  );
+  const [funnelData, setFunnelData] = useState<FunnelData[]>(
+    computedFunnel || []
+  );
 
   const [isEmpty, setIsEmpty] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,46 +51,33 @@ const Funnel = () => {
   }, [funnelData]);
 
   return (
-    <Flex w={'full'} height={'full'}>
-      <CreateFunnelAction
-        funnelName={funnelName}
-        setFunnelName={setFunnelName}
-        funnelSteps={funnelSteps}
-        setFunnelSteps={setFunnelSteps}
-        setFunnelData={setFunnelData}
-      />
-      <Render on="desktop">
-        <RightPanel>
-          {isEmpty ? (
-            <FunnelEmptyState />
-          ) : (
-            <Flex px={'30'} py={'30'} direction={'column'} gap={'8'} h={'full'}>
-              <Text fontSize={'sh-20'} fontWeight={'semibold'}>
-                Funnel
-              </Text>
-              {isLoading ? (
-                <Flex
-                  w="full"
-                  h="full"
-                  justifyContent={'center'}
-                  alignItems={'center'}
-                  data-testid={'funnel-loader'}
-                >
-                  <Spinner
-                    thickness="4px"
-                    speed="0.5s"
-                    emptyColor="gray.200"
-                    color={BLACK_RUSSIAN}
-                    size="xl"
-                  />
-                </Flex>
-              ) : (
-                <FunnelChart data={funnelData} />
-              )}
-            </Flex>
-          )}
-        </RightPanel>
-      </Render>
+    <Flex direction={{ base: 'column', md: 'row' }} h={'full'}>
+      <ActionPanel>
+        <CreateFunnelAction
+          funnelName={funnelName}
+          setFunnelName={setFunnelName}
+          funnelSteps={funnelSteps}
+          setFunnelSteps={setFunnelSteps}
+          setFunnelData={setFunnelData}
+        />
+      </ActionPanel>
+      <ViewPanel>
+        {isEmpty ? (
+          <FunnelEmptyState />
+        ) : (
+          <Flex
+            px={{ base: '0', md: '30' }}
+            pt={{ base: '8', md: '30' }}
+            direction={'column'}
+            gap={'8'}
+          >
+            <Text fontSize={'sh-20'} fontWeight={'semibold'}>
+              Funnel
+            </Text>
+            {isLoading ? <Loader /> : <FunnelChart data={funnelData} />}
+          </Flex>
+        )}
+      </ViewPanel>
     </Flex>
   );
 };

@@ -7,7 +7,6 @@ import {
   Switch,
   Text,
 } from '@chakra-ui/react';
-import LeftPanel from '@components/EventsLayout/LeftPanel';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import EventFields from '../components/EventFields';
 import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
@@ -16,7 +15,7 @@ import {
   getCountOfValidAddedSteps,
   isEveryStepValid,
 } from '../util';
-import { saveFunnel } from '@lib/services/funnelService';
+import { saveFunnel, updateFunnel } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { MapContext } from '@lib/contexts/mapContext';
 import { FunnelStep } from '@lib/domain/funnel';
@@ -41,13 +40,19 @@ const CreateFunnelAction = ({
   } = useContext(MapContext);
   const funnelInputRef = useRef<HTMLInputElement>(null);
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
+  const [isFunnelBeingEdited, setFunnelBeingEdited] = useState(false);
+
   const router = useRouter();
-  const { dsId } = router.query;
+  const { dsId, funnelId } = router.query;
 
   const addNewInputField = () => {
     const newField = { event: '', filters: [] };
     setFunnelSteps([...funnelSteps, newField]);
   };
+
+  useEffect(() => {
+    if (router.pathname.includes('edit')) setFunnelBeingEdited(true);
+  }, []);
 
   useEffect(() => {
     funnelInputRef?.current?.focus();
@@ -65,17 +70,30 @@ const CreateFunnelAction = ({
   }, [funnelSteps, nodes]);
 
   const handleSaveFunnel = async () => {
-    const { data, status } = await saveFunnel(
-      dsId as string,
-      funnelName,
-      filterFunnelSteps(funnelSteps),
-      false
-    );
-    if (status === 200) router.push(`/analytics/funnel/view/${data._id}`);
+    const { data, status } = isFunnelBeingEdited
+      ? await updateFunnel(
+          funnelId as string,
+          dsId as string,
+          funnelName,
+          filterFunnelSteps(funnelSteps),
+          false
+        )
+      : await saveFunnel(
+          dsId as string,
+          funnelName,
+          filterFunnelSteps(funnelSteps),
+          false
+        );
+
+    if (status === 200)
+      router.push({
+        pathname: '/analytics/funnel/view/[funnelId]',
+        query: { funnelId: data._id || funnelId },
+      });
   };
 
   return (
-    <LeftPanel>
+    <>
       <Flex justifyContent={'space-between'} alignItems={'center'}>
         <IconButton
           aria-label="close"
@@ -140,7 +158,7 @@ const CreateFunnelAction = ({
         />
       </Flex>
 
-      <Flex direction={'column'} gap={'4'} mt={'9'}>
+      <Flex direction={'column'} gap={'4'} mt={{ base: '6', md: '8' }}>
         <Flex justifyContent={'space-between'} alignItems={'center'}>
           <Text
             fontSize={{ base: 'sh-18', md: 'sh-24' }}
@@ -168,12 +186,7 @@ const CreateFunnelAction = ({
           setEventFieldsValue={setFunnelSteps}
           setFunnelData={setFunnelData}
         />
-        <Divider
-          mt={'4'}
-          orientation="horizontal"
-          borderColor={BASTILLE}
-          opacity={1}
-        />
+        <Divider orientation="horizontal" borderColor={BASTILLE} opacity={1} />
         <Flex justifyContent={'space-between'} alignItems={'center'}>
           <Text
             fontSize={{ base: 'xs-14', md: 'base' }}
@@ -181,12 +194,12 @@ const CreateFunnelAction = ({
             fontWeight={'normal'}
             color={'white.DEFAULT'}
           >
-            Steps in any order
+            In any sequence
           </Text>
           <Switch background={'black'} size={'sm'} />
         </Flex>
       </Flex>
-    </LeftPanel>
+    </>
   );
 };
 

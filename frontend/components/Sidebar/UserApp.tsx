@@ -62,7 +62,7 @@ const UserApp = ({ app, openConfigureAppsModal, isSelected }: UserAppProps) => {
               {getProviders(app)}
             </Text>
           </Flex>
-          {isSelected && (
+          {isSelected && !app.shared && (
             <Text
               fontSize={'base'}
               fontWeight={'medium'}

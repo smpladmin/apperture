@@ -1,10 +1,11 @@
 import { Box } from '@chakra-ui/react';
-import React, { useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { Chart } from '@antv/g2';
 import { transformFunnelData } from '../util';
 import { BLACK_200, MEDIUM_BLUE } from '@theme/index';
 import { FunnelData } from '@lib/domain/funnel';
 import { formatDatalabel } from '@lib/utils/common';
+import { AppertureContext } from '@lib/contexts/appertureContext';
 import usePrevious from '@lib/hooks/usePrevious';
 import isEqual from 'lodash/isEqual';
 
@@ -13,6 +14,14 @@ type FunnelChartProps = {
 };
 
 const FunnelChart = ({ data }: FunnelChartProps) => {
+  const {
+    device: { isMobile },
+  } = useContext(AppertureContext);
+
+  const CONATINER_HEIGHT = isMobile ? data.length * 80 : data.length * 100;
+  const LABEL_FONT_SIZE = isMobile ? 10 : 12;
+  const AXIS_FONT_SIZE = isMobile ? 10 : 14;
+
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ funnel: any }>({ funnel: null });
   const funnelData = transformFunnelData(data).reverse();
@@ -23,9 +32,9 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
 
     plot.current.funnel = new Chart({
       container: ref.current!!,
-      height: data.length * 120,
+      height: CONATINER_HEIGHT,
       autoFit: true,
-      appendPadding: [0, 24, 0, 12],
+      appendPadding: [0, 24, 0, 0],
     });
 
     plot.current.funnel.data(funnelData);
@@ -44,7 +53,7 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
           style: {
             textAlign: 'left',
             fill: BLACK_200,
-            fontSize: 12,
+            fontSize: LABEL_FONT_SIZE,
             fontWeight: 500,
           },
           offsetX: 8,
@@ -55,9 +64,9 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
           content: item.conversion.toFixed(1) + '%',
           style: {
             textAlign: 'left',
+            fontSize: LABEL_FONT_SIZE,
             fontWeight: 500,
             fill: BLACK_200,
-            fontSize: 12,
           },
           offsetX: 8,
           offsetY: -8,
@@ -68,7 +77,7 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
       title: {
         offset: 40,
         style: {
-          fontSize: 14,
+          fontSize: AXIS_FONT_SIZE,
           fill: BLACK_200,
           fontWeight: 500,
         },
@@ -77,7 +86,7 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
     plot.current.funnel.axis('event', {
       label: {
         style: {
-          fontSize: 14,
+          fontSize: AXIS_FONT_SIZE,
           fontWeight: 500,
           fill: BLACK_200,
         },
