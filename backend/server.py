@@ -20,6 +20,7 @@ from rest.controllers import (
     schedule_controller,
     notification_controller,
     user_controller,
+    funnel_controller,
 )
 from mongo import Mongo
 from clickhouse import Clickhouse
@@ -65,3 +66,4 @@ app.include_router(datasource_controller.router)
 app.include_router(schedule_controller.router)
 app.include_router(notification_controller.router)
 app.include_router(user_controller.router)
+app.include_router(funnel_controller.router)

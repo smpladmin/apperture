@@ -9,13 +9,13 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import mixPanel from '@assets/images/mixPanel-icon.png';
-import gaLogo from '@assets/images/ga-logo-small.svg';
 import { MapContext } from '@lib/contexts/mapContext';
 import { Item } from '@antv/g6';
 import { Actions } from '@lib/types/context';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { useRouter } from 'next/router';
+import { getSearchResult } from '@lib/utils/common';
+import { getProviderLogo } from '@lib/utils/common';
 
 type SuggestionListProps = {
   suggestion: Item;
@@ -60,7 +60,7 @@ const SuggestionsList = ({
         minW={{ base: '6', md: '7' }}
       >
         <Image
-          src={dataSourceType === Provider.MIXPANEL ? mixPanel : gaLogo}
+          src={getProviderLogo(dataSourceType)}
           alt="data-source-mix-panel"
           layout="responsive"
         />
@@ -106,21 +106,11 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
   }, [dsId]);
 
   const onChangeHandler = (text: string) => {
-    let matches: Item[] = [];
-    if (text) {
-      matches = nodesData
-        .filter((item: Item) => {
-          return (
-            item?._cfg?.id!!.toLowerCase().startsWith(text.toLowerCase()) ||
-            item?._cfg?.id!!.toLowerCase().includes(text.toLowerCase())
-          );
-        })
-        .slice(0, 10);
-      matches.sort((a, b) => a._cfg?.id?.length!! - b._cfg?.id?.length!!);
-      setCursor(-1);
-    }
-    setSuggestions(matches);
     setSearchText(text);
+    const matches = getSearchResult(nodesData, text, {
+      keys: [['_cfg', 'id']],
+    });
+    setSuggestions(matches);
   };
 
   const setNodeSearchState = () => {
@@ -130,14 +120,28 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
     });
   };
 
-  const suggestionsClickHandler = (suggestion: Item) => {
-    setSearchText(suggestion?._cfg?.id!!);
+  const setActiveNode = (suggestion: Item) => {
     dispatch({
       type: Actions.SET_ACTIVE_NODE,
       payload: suggestion,
     });
+  };
+
+  const suggestionsClickHandler = (suggestion: Item) => {
+    setSearchText(suggestion?._cfg?.id!!);
+    setActiveNode(suggestion);
     setNodeSearchState();
     setSuggestions([]);
+    setCursor(-1);
+  };
+
+  const searchAndSetValidNodeOnSubmit = (searchText: string) => {
+    // we need to set active node on submit i.e. on  'Enter' keypress event
+    // so we need to find the corresponding node w.r.t to searchtext
+    const searchNode = nodesData.find((node) => node._cfg?.id === searchText);
+    if (searchNode) {
+      suggestionsClickHandler(searchNode);
+    }
   };
 
   const keyboardNavigation = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -150,26 +154,9 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
     }
     if (e.key === 'Enter') {
       if (cursor >= 0) {
-        setSearchText(suggestions[cursor]?._cfg?.id!!);
-        dispatch({
-          type: Actions.SET_ACTIVE_NODE,
-          payload: suggestions[cursor],
-        });
-        setNodeSearchState();
-        setSuggestions([]);
-        setCursor(-1);
+        suggestionsClickHandler(suggestions[cursor]);
       } else {
-        const searchNode = nodesData.find(
-          (node) => node._cfg?.id === searchText
-        );
-        if (searchNode) {
-          dispatch({
-            type: Actions.SET_ACTIVE_NODE,
-            payload: searchNode,
-          });
-          setNodeSearchState();
-          setSuggestions([]);
-        }
+        searchAndSetValidNodeOnSubmit(searchText);
       }
       inputSearchRef.current?.blur();
     }

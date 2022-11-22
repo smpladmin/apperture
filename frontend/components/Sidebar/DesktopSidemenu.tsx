@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { AppWithIntegrations } from '@lib/domain/app';
 import LogoutModal from '@components/Logout';
+import { useRouter } from 'next/router';
 
 type SidemenuProps = {
   selectedApp: AppWithIntegrations;
@@ -25,6 +26,10 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
     onOpen: openLogoutModal,
     onClose: closeLogoutModal,
   } = useDisclosure();
+
+  const router = useRouter();
+  const { dsId } = router.query;
+
   return (
     <Flex
       height={'full'}
@@ -172,24 +177,60 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           </Box>
         </Flex>
       </Box>
-      <Box marginTop={'auto'} onClick={openLogoutModal}>
-        <IconButton
-          aria-label="close"
-          icon={<i className="ri-logout-box-r-line" />}
-          rounded={'lg'}
-          h={10}
-          w={10}
-          bg={'black.0'}
-          fontWeight={'500'}
-          color={'grey.100'}
-          _hover={{
-            backgroundColor: 'white.0',
-            color: 'white',
-          }}
-          _active={{
-            backgroundColor: 'transparent',
-          }}
-        />
+      <Box
+        marginTop={'auto'}
+        onClick={() => router.push(`/analytics/settings?previousDsId=${dsId}`)}
+      >
+        <Tooltip
+          label={'Settings'}
+          aria-label={'Settings'}
+          bg={'white.DEFAULT'}
+          color={'black.100'}
+        >
+          <IconButton
+            aria-label="settings"
+            icon={<i className="ri-settings-3-line"></i>}
+            rounded={'lg'}
+            h={10}
+            w={10}
+            bg={'black.0'}
+            fontWeight={'500'}
+            color={'grey.100'}
+            _hover={{
+              backgroundColor: 'white.0',
+              color: 'white',
+            }}
+            _active={{
+              backgroundColor: 'transparent',
+            }}
+          />
+        </Tooltip>
+      </Box>
+      <Box marginTop={'4'} onClick={openLogoutModal}>
+        <Tooltip
+          label={'Logout'}
+          aria-label={'Logout'}
+          bg={'white.DEFAULT'}
+          color={'black.100'}
+        >
+          <IconButton
+            aria-label="close"
+            icon={<i className="ri-logout-box-r-line" />}
+            rounded={'lg'}
+            h={10}
+            w={10}
+            bg={'black.0'}
+            fontWeight={'500'}
+            color={'grey.100'}
+            _hover={{
+              backgroundColor: 'white.0',
+              color: 'white',
+            }}
+            _active={{
+              backgroundColor: 'transparent',
+            }}
+          />
+        </Tooltip>
       </Box>
       <LogoutModal isOpen={isLogoutModalOpen} onClose={closeLogoutModal} />
     </Flex>

@@ -6,7 +6,7 @@ from domain.runlog.service import RunLogService
 from fetch.mixpanel_events_fetcher import MixpanelEventsFetcher
 from store.events_saver import EventsSaver
 
-from event_processors.mix_panel_event_processor import MixPanelEventProcessor
+from event_processors.mixpanel_event_processor import MixPanelEventProcessor
 
 
 class MixpanelEventsStrategy:

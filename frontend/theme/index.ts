@@ -18,6 +18,8 @@ const OVERLAY_GRAY = 'rgba(0, 0, 0, 0.6)';
 const GREEN = '#57AA64';
 const BLACK_RUSSIAN = '#181822';
 const BASTILLE = '#282836';
+const GRAY_100 = '#b2b2b5';
+const MEDIUM_BLUE = '#646FD4';
 
 const colors = {
   black: {
@@ -28,7 +30,9 @@ const colors = {
     30: 'rgba(255, 255, 255, 0.06)',
     50: 'linear-gradient(0deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), #0E0E19',
     100: '#0e0e1a',
+    150: '#0E0E19',
     200: BLACK_200,
+    300: BLACK_RUSSIAN,
   },
   white: {
     DEFAULT: WHITE_DEFAULT,
@@ -44,6 +48,7 @@ const colors = {
     50: '#e5e5e5',
     100: '#b2b2b5',
     200: '#78787E',
+    300: '#3E3E47',
   },
   yellow: '#fac213',
   green: GREEN,
@@ -81,6 +86,7 @@ const spacing = {
   100: '25rem',
   102: '25.5rem',
   106: '26.5rem',
+  108: '27rem',
   112: '28rem',
   125: '31.25rem',
   141: '35.25rem',
@@ -107,6 +113,7 @@ const fontSizes = {
   'sh-28': '1.75rem', //fs-28px
   'sh-32': '2rem', // fs-32px
   'sh-34': '2.125rem', //fs-34px
+  'sh-44': '2.75rem', //fs-44px
   'sh-56': '3.5rem', //fs-56px
 };
 
@@ -122,6 +129,7 @@ const lineHeights = {
   'sh-28': '2.215rem', //lh-34px
   'sh-32': '2.5rem', // lh-40px
   'sh-34': '2.625rem', //lh-42px
+  'sh-44': '3.25rem', //lh-52px
   'sh-56': '4.125rem', //lh-66px
 };
 
@@ -156,4 +164,6 @@ export {
   GREEN,
   BLACK_RUSSIAN,
   BASTILLE,
+  GRAY_100,
+  MEDIUM_BLUE,
 };

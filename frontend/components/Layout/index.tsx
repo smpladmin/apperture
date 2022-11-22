@@ -90,11 +90,11 @@ export default function Layout({
           selectedApp={selectedApp}
           openAppsModal={() => onModalOpen('apps')}
         />
-        <Flex flexDir={'column'} w={'full'}>
+        <Flex flexDir={'column'} w={'full'} overflow={'auto'}>
           {!hideHeader ? (
             <Header selectedApp={selectedApp} openAppsModal={onModalOpen} />
           ) : null}
-          <Box as="main" h={'full'}>
+          <Box as="main" h={'full'} overflowY={'auto'}>
             {children}
           </Box>
         </Flex>

@@ -32,6 +32,11 @@ export const theme = extendTheme({
             bg: 'grey.50',
           },
         },
+        iconButton: {
+          _hover: {
+            bg: 'grey.200',
+          },
+        },
       },
     },
   },

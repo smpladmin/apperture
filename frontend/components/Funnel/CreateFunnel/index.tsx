@@ -1,41 +1,83 @@
-import { Box, Flex, Text } from '@chakra-ui/react';
+import { Flex, Text } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
-import FunnelImage from '@assets/images/funnel.svg';
-import Image from 'next/image';
-import LeftAction from './LeftAction';
-import RightPanel from '@components/EventsLayout/RightPanel';
+import CreateFunnelAction from './CreateFunnelAction';
+import FunnelChart from '../components/FunnelChart';
+import { useContext, useEffect, useState } from 'react';
+import { getCountOfValidAddedSteps } from '../util';
+import { MapContext } from '@lib/contexts/mapContext';
+import FunnelEmptyState from '../components/FunnelEmptyState';
+import { FunnelData, FunnelStep } from '@lib/domain/funnel';
+import Loader from '../components/Loader';
+import ActionPanel from '@components/EventsLayout/ActionPanel';
+import ViewPanel from '@components/EventsLayout/ViewPanel';
 
-const Funnel = () => {
+type FunnelProps = {
+  name?: string;
+  steps?: FunnelStep[];
+  computedFunnel?: FunnelData[];
+};
+
+const Funnel = ({ name, steps, computedFunnel }: FunnelProps) => {
+  const {
+    state: { nodes },
+  } = useContext(MapContext);
+
+  const [funnelName, setFunnelName] = useState(name || 'Untitled Funnel');
+  const [funnelSteps, setFunnelSteps] = useState(
+    steps || [
+      { event: '', filters: [] },
+      { event: '', filters: [] },
+    ]
+  );
+  const [funnelData, setFunnelData] = useState<FunnelData[]>(
+    computedFunnel || []
+  );
+
+  const [isEmpty, setIsEmpty] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (getCountOfValidAddedSteps(funnelSteps, nodes) >= 2) {
+      setIsEmpty(false);
+    } else {
+      setIsEmpty(true);
+    }
+  }, [funnelSteps, nodes]);
+
+  useEffect(() => {
+    if (funnelData.length) {
+      setIsLoading(false);
+    } else setIsLoading(true);
+  }, [funnelData]);
+
   return (
-    <Flex w={'full'} height={'full'}>
-      <LeftAction />
-      <RightPanel>
-        <Flex
-          h={'full'}
-          alignItems={'center'}
-          justifyContent={'center'}
-          px={'6'}
-          py={'6'}
-        >
-          <Box>
-            <Image
-              src={FunnelImage}
-              priority={true}
-              alt={'funnel-empty-state'}
-            />
-            <Text
-              textAlign={'center'}
-              mt={'10'}
-              fontSize={'sh-20'}
-              lineHeight={'sh-20'}
-              fontWeight={'normal'}
-              color={'grey.100'}
-            >
-              Enter events to create a funnel
+    <Flex direction={{ base: 'column', md: 'row' }} h={'full'}>
+      <ActionPanel>
+        <CreateFunnelAction
+          funnelName={funnelName}
+          setFunnelName={setFunnelName}
+          funnelSteps={funnelSteps}
+          setFunnelSteps={setFunnelSteps}
+          setFunnelData={setFunnelData}
+        />
+      </ActionPanel>
+      <ViewPanel>
+        {isEmpty ? (
+          <FunnelEmptyState />
+        ) : (
+          <Flex
+            px={{ base: '0', md: '30' }}
+            pt={{ base: '8', md: '30' }}
+            direction={'column'}
+            gap={'8'}
+          >
+            <Text fontSize={'sh-20'} fontWeight={'semibold'}>
+              Funnel
             </Text>
-          </Box>
-        </Flex>
-      </RightPanel>
+            {isLoading ? <Loader /> : <FunnelChart data={funnelData} />}
+          </Flex>
+        )}
+      </ViewPanel>
     </Flex>
   );
 };
