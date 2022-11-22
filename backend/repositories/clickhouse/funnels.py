@@ -92,7 +92,7 @@ class Funnels:
                     ts_conditionals += f"table{j+1}.ts > table{j}.ts and "
 
                 cte2 = f"count(case when({ts_conditionals}year(table{i}.ts) > %(epoch_year)s) then table{i + 1}.user_id else null end)"
-                cte3 = f"left join table{i + 1} on (table{i}.{self.uid}=table{i + 1}.{self.uid} and week(table{i + 1}.ts)=week(table{i}.ts) and year(table{i + 1}.ts)=year(table{i + 1}.ts)) "
+                cte3 = f"left join table{i + 1} on (table{i}.{self.uid}=table{i + 1}.{self.uid}) "
                 dynamic_components_2.append(cte2)
                 dynamic_components_3.append(cte3)
 
