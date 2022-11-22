@@ -9,3 +9,5 @@ Object.defineProperty(global.URL, 'createObjectURL', {
   value: () => {},
   writable: true,
 });
+
+window.HTMLElement.prototype.scrollIntoView = jest.fn();

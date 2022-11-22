@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   getCountOfValidAddedSteps,
   isEveryStepValid,
@@ -276,7 +276,6 @@ describe('create funnel action component', () => {
         { id: 'Chapter_Open' },
       ]);
       mockedIsEveryNonEmptyStepValid.mockReturnValue(true);
-      window.HTMLElement.prototype.scrollIntoView = jest.fn();
       render(
         <RouterContext.Provider
           value={createMockRouter({ query: { dsId: '654212033222' } })}
@@ -375,11 +374,7 @@ describe('create funnel action component', () => {
       expect(suggestionContainer).toBeVisible();
       fireEvent.click(suggestion);
 
-      // await waitFor(() => {
-      //   const chart = screen.getByTestId('funnel-chart');
-
-      //   expect(chart).toBeInTheDocument();
-      // });
+      await waitFor(() => {});
     });
   });
 });
