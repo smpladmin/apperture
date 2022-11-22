@@ -8,7 +8,8 @@ from domain.datasources.service import DataSourceService
 from domain.integrations.models import Integration
 from domain.integrations.service import IntegrationService
 from domain.users.models import User
-from rest.dtos.apps import AppResponse, AppWithIntegrations, CreateAppDto
+from domain.users.service import UserService
+from rest.dtos.apps import AppResponse, AppWithIntegrations, CreateAppDto, UpdateAppDto
 from rest.dtos.datasources import DataSourceResponse
 from rest.dtos.integrations import IntegrationWithDataSources
 from rest.middlewares import get_user, get_user_id, validate_jwt
@@ -46,6 +47,7 @@ async def get_apps(
         *list(
             map(
                 lambda app: build_app_with_integrations(
+                    user,
                     app,
                     integration_service,
                     ds_service,
@@ -66,8 +68,24 @@ async def get_app(
     return await app_service.get_user_app(id, user_id)
 
 
+@router.put("/apps/{id}")
+async def update_app(
+    id: str,
+    dto: UpdateAppDto,
+    user_id: str = Depends(get_user_id),
+    app_service: AppService = Depends(),
+    user_service: UserService = Depends(),
+):
+    if dto.share_with_email:
+        user = await user_service.find_user(email=dto.share_with_email)
+        await app_service.share_app(id, user_id, user)
+
+
 async def build_app_with_integrations(
-    app: App, integration_service: IntegrationService, ds_service: DataSourceService
+    user: User,
+    app: App,
+    integration_service: IntegrationService,
+    ds_service: DataSourceService,
 ):
     integrations = await integration_service.get_app_integrations(app.id)
     integraiton_wds = await asyncio.gather(
@@ -81,6 +99,7 @@ async def build_app_with_integrations(
         )
     )
     app_wi = AppWithIntegrations.from_orm(app)
+    app_wi.shared = user.id in app_wi.shared_with
     app_wi.integrations = integraiton_wds
     return app_wi
 

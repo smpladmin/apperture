@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel
 
 from domain.apps.models import App
@@ -14,7 +15,12 @@ class AppResponse(App, ModelResponse):
 
 
 class AppWithIntegrations(App, ModelResponse):
+    shared: bool = False
     integrations: list[IntegrationWithDataSources] = []
 
     class Config:
         orm_mode = True
+
+
+class UpdateAppDto(BaseModel):
+    share_with_email: Optional[str]
