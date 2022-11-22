@@ -184,6 +184,7 @@ const Autocomplete = ({
           pt={'2'}
           pb={'4'}
           ref={suggestionsContainerRef}
+          data-testid={'suggestion-container'}
         >
           {suggestions.map((suggestion: NodeType, i: number) => {
             return (

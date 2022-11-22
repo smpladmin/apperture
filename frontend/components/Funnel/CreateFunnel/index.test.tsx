@@ -1,26 +1,38 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { getCountOfValidAddedSteps, isEveryStepValid } from '../util';
+import {
+  getCountOfValidAddedSteps,
+  isEveryStepValid,
+  isEveryNonEmptyStepValid,
+  transformFunnelData,
+} from '../util';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import Funnel from './index';
 import { createMockRouter } from 'tests/util';
+import * as APIService from '@lib/services/funnelService';
+import { getSearchResult } from '@lib/utils/common';
 
-jest.mock('@antv/g2', () => ({
-  Chart: jest.fn(),
-}));
 jest.mock('../util');
-Object.defineProperty(global.URL, 'createObjectURL', {
-  value: () => {},
-  writable: true,
-});
+jest.mock('@lib/services/funnelService');
+jest.mock('@lib/utils/common');
 
 describe('create funnel action component', () => {
   let mockedGetCountOfValidAddedSteps: jest.Mock;
   let mockedIsEveryStepValid: jest.Mock;
+  let mockedGetTransientFunnelData: jest.Mock;
+  let mockedSearchResult: jest.Mock;
+  let mockedIsEveryNonEmptyStepValid: jest.Mock;
+  let mockedTransformFunnelData: jest.Mock;
 
   beforeEach(() => {
     mockedGetCountOfValidAddedSteps = jest.mocked(getCountOfValidAddedSteps);
     mockedIsEveryStepValid = jest.mocked(isEveryStepValid);
+    mockedGetTransientFunnelData = jest.mocked(
+      APIService.getTransientFunnelData
+    );
+    mockedSearchResult = jest.mocked(getSearchResult);
+    mockedIsEveryNonEmptyStepValid = jest.mocked(isEveryNonEmptyStepValid);
+    mockedTransformFunnelData = jest.mocked(transformFunnelData);
     mockedGetCountOfValidAddedSteps.mockReturnValue(2);
     mockedIsEveryStepValid.mockReturnValue(true);
   });
@@ -113,6 +125,8 @@ describe('create funnel action component', () => {
   });
 
   describe('right view of create funnel action', () => {
+    beforeEach(() => {});
+
     it('should render empty state initially when there are no or less than 2 valid events for creating funnel', () => {
       mockedGetCountOfValidAddedSteps.mockReturnValue(0);
       render(
@@ -122,15 +136,13 @@ describe('create funnel action component', () => {
           <Funnel />
         </RouterContext.Provider>
       );
-      const emptyFunnelImage = screen.getByTestId('funnel-empty-state');
-      const emptyFunnelStateText = screen.getByText(
-        'Enter events to create a funnel'
-      );
-      expect(emptyFunnelImage).toBeVisible();
-      expect(emptyFunnelStateText).toBeVisible();
+      const emptyFunnelState = screen.getByTestId('funnel-empty-state');
+      expect(emptyFunnelState).toBeInTheDocument();
     });
 
     it('should render loading state when there are 2 or more valid events and data is being fetched', () => {
+      mockedGetCountOfValidAddedSteps.mockReturnValue(2);
+      mockedGetTransientFunnelData.mockReturnValue([]);
       render(
         <RouterContext.Provider
           value={createMockRouter({ query: { dsId: '654212033222' } })}
@@ -138,6 +150,51 @@ describe('create funnel action component', () => {
           <Funnel />
         </RouterContext.Provider>
       );
+      const loader = screen.getByTestId('funnel-loader');
+      expect(loader).toBeInTheDocument();
+    });
+
+    it('should  paint the funnel chart when you select atleast two valid events', async () => {
+      mockedGetTransientFunnelData.mockReturnValue([
+        { event: 'Video_Click', users: 2000, conversion: 100 },
+        { event: 'Chapter_Click', users: 1000, conversion: 50 },
+      ]);
+      mockedSearchResult.mockReturnValue([{ id: 'Chapter_Click' }]);
+      mockedIsEveryNonEmptyStepValid.mockReturnValue(true);
+      mockedTransformFunnelData.mockReturnValue([
+        { event: ' Video_Click', users: 2000, conversion: 100 },
+        { event: '  Chapter_Click', users: 1000, conversion: 50 },
+      ]);
+
+      render(
+        <RouterContext.Provider
+          value={createMockRouter({ query: { dsId: '654212033222' } })}
+        >
+          <Funnel />
+        </RouterContext.Provider>
+      );
+
+      const inputFields = screen.getAllByTestId('autocomplete');
+      const loader = screen.getByTestId('funnel-loader');
+
+      fireEvent.change(inputFields[0], { target: { value: 'Video_Click' } });
+      fireEvent.blur(inputFields[0]);
+
+      fireEvent.focus(inputFields[1]);
+      fireEvent.change(inputFields[1], {
+        target: { value: 'Chapter_Click' },
+      });
+
+      const suggestionContainer = screen.getByTestId('suggestion-container');
+      const suggestion = screen.getByTestId('suggestion');
+      expect(suggestionContainer).toBeVisible();
+      fireEvent.click(suggestion);
+
+      await waitFor(() => {
+        const chart = screen.getByTestId('funnel-chart');
+
+        expect(chart).toBeInTheDocument();
+      });
     });
   });
 });

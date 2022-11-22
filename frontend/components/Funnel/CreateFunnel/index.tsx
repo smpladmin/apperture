@@ -64,6 +64,7 @@ const Funnel = () => {
                   h="full"
                   justifyContent={'center'}
                   alignItems={'center'}
+                  data-testid={'funnel-loader'}
                 >
                   <Spinner
                     thickness="4px"

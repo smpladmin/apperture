@@ -6,7 +6,12 @@ import FunnelImage from '@assets/images/funnel.svg';
 const FunnelEmptyState = () => {
   return (
     <Flex h={'full'} justifyContent={'center'} px={'6'}>
-      <Flex direction={'column'} justifyContent={'center'} gap={'6'}>
+      <Flex
+        direction={'column'}
+        justifyContent={'center'}
+        gap={'6'}
+        data-testid={'funnel-empty-state'}
+      >
         <Image src={FunnelImage} priority={true} alt={'funnel-empty-state'} />
         <Flex direction={'column'} gap={'1'}>
           <Text

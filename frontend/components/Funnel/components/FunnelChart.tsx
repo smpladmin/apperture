@@ -88,7 +88,7 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
     plot.current.funnel.render();
   }, [data]);
 
-  return <Box ref={ref}></Box>;
+  return <Box ref={ref} data-testid={'funnel-chart'}></Box>;
 };
 
 export default FunnelChart;
