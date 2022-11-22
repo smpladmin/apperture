@@ -4,6 +4,9 @@ import { Chart } from '@antv/g2';
 import { transformFunnelData } from '../util';
 import { BLACK_200, MEDIUM_BLUE } from '@theme/index';
 import { FunnelData } from '@lib/domain/funnel';
+import { formatDatalabel } from '@lib/utils/common';
+import usePrevious from '@lib/hooks/usePrevious';
+import isEqual from 'lodash/isEqual';
 
 type FunnelChartProps = {
   data: FunnelData[];
@@ -13,12 +16,16 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ funnel: any }>({ funnel: null });
   const funnelData = transformFunnelData(data).reverse();
+  const previousData = usePrevious(funnelData);
 
   useEffect(() => {
+    if (isEqual(previousData, funnelData)) return;
+
     plot.current.funnel = new Chart({
       container: ref.current!!,
       height: data.length * 120,
       autoFit: true,
+      appendPadding: [0, 24, 0, 12],
     });
 
     plot.current.funnel.data(funnelData);
@@ -33,7 +40,7 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
         .annotation()
         .text({
           position: [item.event, item.users],
-          content: item.users,
+          content: formatDatalabel(item.users),
           style: {
             textAlign: 'left',
             fill: BLACK_200,

@@ -30,7 +30,9 @@ const colors = {
     30: 'rgba(255, 255, 255, 0.06)',
     50: 'linear-gradient(0deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), #0E0E19',
     100: '#0e0e1a',
+    150: '#0E0E19',
     200: BLACK_200,
+    300: BLACK_RUSSIAN,
   },
   white: {
     DEFAULT: WHITE_DEFAULT,
@@ -46,6 +48,7 @@ const colors = {
     50: '#e5e5e5',
     100: '#b2b2b5',
     200: '#78787E',
+    300: '#3E3E47',
   },
   yellow: '#fac213',
   green: GREEN,

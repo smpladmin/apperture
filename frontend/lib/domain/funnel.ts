@@ -8,3 +8,11 @@ export type FunnelData = {
   users: number;
   conversion: number;
 };
+
+export type ComputedFunnel = {
+  datasourceId: string;
+  name: string;
+  steps: FunnelStep[];
+  randomSequence: boolean;
+  computedFunnel: FunnelData[];
+};
