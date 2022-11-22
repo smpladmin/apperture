@@ -1,5 +1,5 @@
 import { Button, Divider, Flex, IconButton, Text } from '@chakra-ui/react';
-import LeftPanel from '@components/EventsLayout/LeftPanel';
+import ActionPanel from '@components/EventsLayout/ActionPanel';
 import Render from '@components/Render';
 import React from 'react';
 import ViewFunnelSteps from '../components/ViewFunnelSteps';
@@ -7,15 +7,27 @@ import ActionMenu from '../../ActionMenu';
 import 'remixicon/fonts/remixicon.css';
 import { BASTILLE } from '@theme/index';
 import { FunnelStep } from '@lib/domain/funnel';
+import { useRouter } from 'next/router';
 
 type LeftViewProps = {
+  datasourceId: string;
   name: string;
   steps: FunnelStep[];
 };
 
-const LeftView = ({ name, steps }: LeftViewProps) => {
+const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
+  const router = useRouter();
+  const { funnelId } = router?.query;
+
+  const handleEditFunnel = () => {
+    router.push({
+      pathname: '/analytics/funnel/edit/[funnelId]',
+      query: { funnelId, dsId: datasourceId },
+    });
+  };
+
   return (
-    <LeftPanel>
+    <ActionPanel>
       <Flex justifyContent={'space-between'} alignItems={'center'}>
         <IconButton
           aria-label="close"
@@ -33,6 +45,7 @@ const LeftView = ({ name, steps }: LeftViewProps) => {
             borderWidth={'1px'}
             color={'white'}
             variant={'primary'}
+            onClick={handleEditFunnel}
           >
             <Flex alignItems={'center'} gap={'1'}>
               <i className="ri-edit-fill"></i>
@@ -54,6 +67,7 @@ const LeftView = ({ name, steps }: LeftViewProps) => {
         mt={'8'}
         gap={'2'}
         justifyContent={'space-between'}
+        alignItems={'center'}
       >
         <Text
           fontSize={{ base: 'sh-20', md: 'sh-32' }}
@@ -73,6 +87,7 @@ const LeftView = ({ name, steps }: LeftViewProps) => {
             borderWidth={'1px'}
             color={'white'}
             variant={'primary'}
+            onClick={handleEditFunnel}
           >
             <Flex alignItems={'center'} gap={'1'}>
               <i className="ri-edit-fill"></i>
@@ -98,7 +113,7 @@ const LeftView = ({ name, steps }: LeftViewProps) => {
           opacity={1}
         />
       </Flex>
-    </LeftPanel>
+    </ActionPanel>
   );
 };
 

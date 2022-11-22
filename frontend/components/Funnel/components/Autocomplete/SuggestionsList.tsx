@@ -27,7 +27,7 @@ const SuggestionsList = ({
       onClick={() => suggestionsSubmitHandler(suggestion)}
       cursor={'pointer'}
       h={'auto'}
-      minHeight={{ base: '18', md: '15' }}
+      minHeight={'16'}
       bg={active ? 'white.100' : ''}
       _hover={{
         bg: 'white.100',
@@ -37,7 +37,7 @@ const SuggestionsList = ({
       ref={active ? searchResultRef : null}
     >
       <Text
-        fontSize={'base'}
+        fontSize={{ base: 'xs-14', md: 'base' }}
         w={'full'}
         alignItems={'center'}
         fontWeight={active ? 'semibold' : 'medium'}

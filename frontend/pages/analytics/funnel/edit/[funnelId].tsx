@@ -1,15 +1,17 @@
 import Funnel from '@components/Funnel/CreateFunnel';
+import { transformData } from '@components/Graph/transformData';
 import Layout from '@components/Layout';
 import { MapContext } from '@lib/contexts/mapContext';
 import { AppWithIntegrations } from '@lib/domain/app';
+import { Edge } from '@lib/domain/edge';
+import { ComputedFunnel } from '@lib/domain/funnel';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { _getEdges } from '@lib/services/datasourceService';
+import { _getComputedFunnelData } from '@lib/services/funnelService';
 import { Actions } from '@lib/types/context';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
 import { ReactElement, useContext, useEffect } from 'react';
-import { transformData } from '@components/Graph/transformData';
-import { Edge } from '@lib/domain/edge';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -21,8 +23,14 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
+  const { funnelId } = query;
   const apps = await _getAppsWithIntegrations(token);
   const edges = await _getEdges(token, query.dsId as string);
+
+  const computedFunnelData = await _getComputedFunnelData(
+    token,
+    funnelId as string
+  );
 
   if (!apps.length) {
     return {
@@ -33,11 +41,17 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
   return {
-    props: { apps, edges },
+    props: { edges, apps, computedFunnelData },
   };
 };
 
-const CreateFunnel = ({ edges }: { edges: Edge[] }) => {
+const EditFunnel = ({
+  computedFunnelData,
+  edges,
+}: {
+  edges: Edge[];
+  computedFunnelData: ComputedFunnel;
+}) => {
   const { dispatch } = useContext(MapContext);
 
   useEffect(() => {
@@ -47,11 +61,10 @@ const CreateFunnel = ({ edges }: { edges: Edge[] }) => {
       payload: nodes,
     });
   }, []);
-
-  return <Funnel />;
+  return <Funnel {...computedFunnelData} />;
 };
 
-CreateFunnel.getLayout = function getLayout(
+EditFunnel.getLayout = function getLayout(
   page: ReactElement,
   apps: AppWithIntegrations[]
 ) {
@@ -62,4 +75,4 @@ CreateFunnel.getLayout = function getLayout(
   );
 };
 
-export default CreateFunnel;
+export default EditFunnel;

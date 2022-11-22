@@ -53,3 +53,24 @@ export const _getComputedFunnelData = async (
     return [];
   }
 };
+
+export const updateFunnel = async (
+  funnelId: string,
+  dsId: string,
+  funnelName: string,
+  steps: FunnelStep[],
+  randomSequence: boolean
+) => {
+  try {
+    const res = await AppertureAPI.put(`/funnels/${funnelId}`, {
+      datasourceId: dsId,
+      name: funnelName,
+      steps,
+      randomSequence,
+    });
+    return res;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return {} as any;
+  }
+};
