@@ -88,7 +88,7 @@ const CreateFunnelAction = ({
     if (status === 200)
       router.push({
         pathname: '/analytics/funnel/view/[funnelId]',
-        query: { funnelId: data._id || funnelId },
+        query: { funnelId: data?._id || funnelId },
       });
   };
 
@@ -113,6 +113,7 @@ const CreateFunnelAction = ({
             pointerEvents: 'none',
           }}
           onClick={handleSaveFunnel}
+          data-testid={'save'}
         >
           <Text
             textAlign={'center'}
