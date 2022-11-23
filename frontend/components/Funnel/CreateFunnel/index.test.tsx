@@ -16,7 +16,7 @@ jest.mock('../util');
 jest.mock('@lib/services/funnelService');
 jest.mock('@lib/utils/common');
 
-describe('create funnel action component', () => {
+describe('create funnel', () => {
   let mockedGetCountOfValidAddedSteps: jest.Mock;
   let mockedIsEveryStepValid: jest.Mock;
   let mockedSearchResult: jest.Mock;
