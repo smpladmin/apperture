@@ -380,4 +380,33 @@ describe('create funnel', () => {
       });
     });
   });
+
+  describe('edit funnel flow - when props are passed to component', () => {
+    const props = {
+      name: 'Test Funnel',
+      steps: [
+        { event: 'Video_Open', filters: [] },
+        { event: 'Video_Seen', filters: [] },
+        { event: 'Video_Download', filters: [] },
+      ],
+    };
+
+    it('should render prefil funnel name with passed prop name and have input fields equal to steps length passed in props', () => {
+      render(
+        <RouterContext.Provider
+          value={createMockRouter({
+            query: { funnelid: '64349843748', dsId: '654212033222' },
+            pathname: '/analytics/funnel/edit',
+          })}
+        >
+          <Funnel {...props} />
+        </RouterContext.Provider>
+      );
+      const funnelName = screen.getByTestId('funnel-name');
+      const inputFields = screen.getAllByTestId('autocomplete');
+
+      expect(funnelName).toHaveDisplayValue('Test Funnel');
+      expect(inputFields.length).toEqual(props.steps.length);
+    });
+  });
 });

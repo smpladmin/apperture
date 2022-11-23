@@ -1,5 +1,4 @@
 import '@testing-library/jest-dom';
-import 'jest-canvas-mock';
 
 const mockChart = jest.fn();
 mockChart.mockImplementation(() => {

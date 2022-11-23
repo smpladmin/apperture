@@ -156,6 +156,7 @@ const CreateFunnelAction = ({
           onChange={(e) => setFunnelName(e.target.value)}
           borderColor={'grey.10'}
           px={0}
+          data-testid={'funnel-name'}
         />
       </Flex>
 
