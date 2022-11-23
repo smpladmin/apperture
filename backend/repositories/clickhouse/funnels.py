@@ -110,16 +110,20 @@ class Funnels:
             week_func(AliasedQuery("table1").ts),
             Extract(DatePart.year, AliasedQuery("table1").ts),
         )
-        query = query.select(
-            fn.Count(
-                Case()
-                .when(
-                    Criterion.all(conditions),
-                    AliasedQuery(f"table{len(steps)}").user_id,
-                )
-                .else_(NULL),
+        query = (
+            query.select(
+                fn.Count(
+                    Case()
+                    .when(
+                        Criterion.all(conditions),
+                        AliasedQuery(f"table{len(steps)}").user_id,
+                    )
+                    .else_(NULL),
+                ),
+                fn.Count(AliasedQuery("table1").user_id).distinct(),
             )
-            / fn.Count(AliasedQuery("table1").user_id).distinct()
-        ).groupby(1, 2)
+            .groupby(1, 2)
+            .orderby(2, 1)
+        )
 
         return query.get_sql(), parameters

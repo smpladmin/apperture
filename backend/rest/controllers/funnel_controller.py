@@ -77,4 +77,16 @@ async def get_funnel_trends(
     funnel_service: FunnelsService = Depends(),
 ):
     funnel = await funnel_service.get_funnel(id)
-    return await funnel_service.get_funnel_trends(funnel=funnel)
+    return await funnel_service.get_funnel_trends(
+        datasource_id=str(funnel.datasource_id), steps=funnel.steps
+    )
+
+
+@router.post("/funnels/trends/transient", response_model=List[FunnelTrendResponse])
+async def get_transient_funnel_trends(
+    dto: TransientFunnelDto,
+    funnel_service: FunnelsService = Depends(),
+):
+    return await funnel_service.get_funnel_trends(
+        datasource_id=dto.datasourceId, steps=dto.steps
+    )
