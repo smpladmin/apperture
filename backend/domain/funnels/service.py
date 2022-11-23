@@ -53,13 +53,13 @@ class FunnelsService:
         self, ds_id: str, steps: List[FunnelStep]
     ) -> List[ComputedFunnelStep]:
 
-        events_data = self.funnels.get_events_data(ds_id, steps)
+        users_data = self.funnels.get_users_count(ds_id, steps)
         computed_funnel = [
             ComputedFunnelStep(
                 event=step.event,
-                users=events_data[0][i],
+                users=users_data[0][i],
                 conversion=float(
-                    "{:.2f}".format(self.compute_conversion(i, events_data[0]))
+                    "{:.2f}".format(self.compute_conversion(i, users_data[0]))
                 ),
             )
             for i, step in enumerate(steps)
@@ -93,7 +93,7 @@ class FunnelsService:
         ).update({"$set": to_update})
 
     async def get_funnel_trends(self, funnel: Funnel) -> List[FunnelTrendsData]:
-        conversion_data = self.funnels.get_conversion_data(
+        conversion_data = self.funnels.get_conversion_trend(
             ds_id=str(funnel.datasource_id), steps=funnel.steps
         )
         return [

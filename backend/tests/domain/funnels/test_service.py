@@ -69,10 +69,10 @@ class TestFunnelService:
             )
             for data in self.conversion_data
         ]
-        self.funnels.get_events_data = MagicMock()
-        self.funnels.get_events_data.return_value = [(100, 40)]
-        self.funnels.get_conversion_data = MagicMock()
-        self.funnels.get_conversion_data.return_value = self.conversion_data
+        self.funnels.get_users_count = MagicMock()
+        self.funnels.get_users_count.return_value = [(100, 40)]
+        self.funnels.get_conversion_trend = MagicMock()
+        self.funnels.get_conversion_trend.return_value = self.conversion_data
         FindOneMock = namedtuple("FindOneMock", ["update"])
         self.update_mock = AsyncMock()
         Funnel.find_one = MagicMock(return_value=FindOneMock(update=self.update_mock))
@@ -140,7 +140,7 @@ class TestFunnelService:
             == self.funnel_trends_data
         )
 
-        self.funnels.get_conversion_data.assert_called_once_with(
+        self.funnels.get_conversion_trend.assert_called_once_with(
             **{
                 "ds_id": "636a1c61d715ca6baae65611",
                 "steps": [
