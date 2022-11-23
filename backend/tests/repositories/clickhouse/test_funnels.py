@@ -48,9 +48,9 @@ class TestFunnelsRepository:
             'WEEK("table1"."ts"),EXTRACT(YEAR FROM "table1"."ts"),COUNT(CASE WHEN '
             'EXTRACT(YEAR FROM "table2"."ts")>%(epoch_year)s AND '
             '"table2"."ts">="table1"."ts" AND "table3"."ts">="table2"."ts" THEN '
-            '"table3"."user_id" ELSE NULL END)/COUNT(DISTINCT "table1"."user_id") FROM '
+            '"table3"."user_id" ELSE NULL END),COUNT(DISTINCT "table1"."user_id") FROM '
             'table1 LEFT JOIN table2 ON "table1"."user_id"="table2"."user_id" LEFT JOIN '
-            'table3 ON "table1"."user_id"="table3"."user_id" GROUP BY 1,2'
+            'table3 ON "table1"."user_id"="table3"."user_id" GROUP BY 1,2 ORDER BY 2,1'
         )
 
     def test_get_users_count(self):
