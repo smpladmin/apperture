@@ -36,7 +36,7 @@ class Funnels:
     def get_users_count(self, ds_id: str, steps: List[FunnelStep]) -> List[Tuple]:
         return self.execute_get_query(*self.build_users_query(ds_id, steps))
 
-    def build_users_query(self, ds_id: str, steps: List[FunnelStep]):
+    def _builder(self, ds_id: str, steps: List[FunnelStep]):
         query = ClickHouseQuery
         events = Table(self.table)
         parameters = {"ds_id": ds_id, "epoch_year": self.epoch_year}
@@ -62,6 +62,10 @@ class Funnels:
             query = query.with_(sub_query, f"table{i + 1}")
 
         query = query.from_(AliasedQuery("table1"))
+        return query, parameters
+
+    def build_users_query(self, ds_id: str, steps: List[FunnelStep]):
+        query, parameters = self._builder(ds_id=ds_id, steps=steps)
         for i in range(1, len(steps)):
             query = query.left_join(AliasedQuery(f"table{i + 1}")).on_field("user_id")
 
@@ -89,36 +93,13 @@ class Funnels:
         return query.get_sql(), parameters
 
     def build_trends_query(self, ds_id: str, steps: List[FunnelStep]):
-        query = ClickHouseQuery
-        events = Table(self.table)
-        parameters = {"ds_id": ds_id, "epoch_year": self.epoch_year}
         week_func = CustomFunction("WEEK", ["timestamp"])
-
-        for i, step in enumerate(steps):
-            parameters[f"event{i}"] = step.event
-            sub_query = (
-                ClickHouseQuery.from_(events)
-                .select(
-                    events.user_id,
-                    fn.Min(events.timestamp).as_("ts"),
-                )
-                .where(
-                    Criterion.all(
-                        [
-                            events.datasource_id == Parameter("%(ds_id)s"),
-                            events.event_name == Parameter(f"%(event{i})s"),
-                        ]
-                    )
-                )
-                .groupby(1)
-            )
-            query = query.with_(sub_query, f"table{i + 1}")
-
-        query = query.from_(AliasedQuery("table1"))
+        query, parameters = self._builder(ds_id=ds_id, steps=steps)
         conditions = [
             Extract(DatePart.year, AliasedQuery(f"table{len(steps) - 1}").ts)
             > Parameter("%(epoch_year)s")
         ]
+
         for i in range(1, len(steps)):
             query = query.left_join(AliasedQuery(f"table{i + 1}")).on_field("user_id")
             conditions.append(
