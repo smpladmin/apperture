@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React, { useRef } from 'react';
+import React from 'react';
 import {
   getCountOfValidAddedSteps,
   isEveryStepValid,
@@ -374,7 +374,10 @@ describe('create funnel', () => {
       expect(suggestionContainer).toBeVisible();
       fireEvent.click(suggestion);
 
-      await waitFor(() => {});
+      await waitFor(() => {
+        const chart = screen.getByTestId('funnel-chart');
+        expect(chart).toBeInTheDocument();
+      });
     });
   });
 });

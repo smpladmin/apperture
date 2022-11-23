@@ -3,7 +3,7 @@ import React from 'react';
 
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from 'tests/util';
-import ViewFunnel from './LeftView';
+import ViewFunnel from './index';
 
 describe('View Funnel', () => {
   const props = {
@@ -14,12 +14,12 @@ describe('View Funnel', () => {
       { event: 'Chapter_Click', filters: [] },
       { event: 'Topic_Click', filters: [] },
     ],
-    // computedFunnel: [
-    //   { event: 'Video_Click', users: 2000, conversion: 100 },
-    //   { event: 'Chapter_Click', users: 1000, conversion: 50 },
-    //   { event: 'Topic_Click', users: 750, conversion: 75 },
-    // ],
-    // randomSequence: false,
+    computedFunnel: [
+      { event: 'Video_Click', users: 2000, conversion: 100 },
+      { event: 'Chapter_Click', users: 1000, conversion: 50 },
+      { event: 'Topic_Click', users: 750, conversion: 75 },
+    ],
+    randomSequence: false,
   };
 
   it('renders funnel name, first step and last step name and (n-2) steps count', () => {
@@ -27,7 +27,7 @@ describe('View Funnel', () => {
       <RouterContext.Provider
         value={createMockRouter({ query: { funnelId: '64349843748' } })}
       >
-        <ViewFunnel {...props} />
+        <ViewFunnel computedFunnelData={{ ...props }} />
       </RouterContext.Provider>
     );
 
@@ -50,12 +50,14 @@ describe('View Funnel', () => {
         value={createMockRouter({ query: { funnelId: '64349843748' } })}
       >
         <ViewFunnel
-          {...{
-            ...props,
-            steps: [
-              { event: 'Video_Click', filters: [] },
-              { event: 'Chapter_Click', filters: [] },
-            ],
+          computedFunnelData={{
+            ...{
+              ...props,
+              steps: [
+                { event: 'Video_Click', filters: [] },
+                { event: 'Chapter_Click', filters: [] },
+              ],
+            },
           }}
         />
       </RouterContext.Provider>
@@ -72,7 +74,7 @@ describe('View Funnel', () => {
     });
     render(
       <RouterContext.Provider value={router}>
-        <ViewFunnel {...props} />
+        <ViewFunnel computedFunnelData={{ ...props }} />
       </RouterContext.Provider>
     );
 
@@ -84,5 +86,22 @@ describe('View Funnel', () => {
         query: { funnelId: '64349843748', dsId: '654212033222' },
       });
     });
+  });
+
+  it('should render funnel chart', async () => {
+    const router = createMockRouter({
+      query: { funnelId: '64349843748' },
+      pathname: '/analytics/funnel/view',
+    });
+    render(
+      <RouterContext.Provider value={router}>
+        <ViewFunnel computedFunnelData={{ ...props }} />
+      </RouterContext.Provider>
+    );
+
+    const editFunnelButton = screen.getByTestId('edit-funnel');
+    fireEvent.click(editFunnelButton);
+    const chart = screen.getByTestId('funnel-chart');
+    expect(chart).toBeInTheDocument();
   });
 });
