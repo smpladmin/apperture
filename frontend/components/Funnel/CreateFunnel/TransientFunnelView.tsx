@@ -1,4 +1,4 @@
-import { Divider, Flex, Highlight, Text } from '@chakra-ui/react';
+import { Button, Divider, Flex, Highlight, Text } from '@chakra-ui/react';
 import { FunnelData, FunnelTrendsData } from '@lib/domain/funnel';
 import React from 'react';
 import FunnelChart from '../components/FunnelChart';
@@ -23,7 +23,7 @@ const TransientFunnelView = ({
       px={{ base: '0', md: '25' }}
       py={{ base: '8', md: '12' }}
     >
-      <>
+      <Flex justifyContent={'space-between'}>
         <Flex direction={'column'} gap={'1'}>
           <Text fontSize={'sh-18'} lineHeight={'sh-18'} fontWeight={'500'}>
             <Highlight
@@ -46,7 +46,16 @@ const TransientFunnelView = ({
             } users`}
           </Text>
         </Flex>
-      </>
+        <Button
+          h={'15'}
+          fontSize={'xs-14'}
+          lineHeight={'xs-14'}
+          fontWeight={'600'}
+          bg={'white.200'}
+        >
+          {'Analyse Factors'}
+        </Button>
+      </Flex>
       <Divider orientation="horizontal" borderColor={'white.200'} opacity={1} />
       <Flex direction={'column'} gap={'8'}>
         <Text

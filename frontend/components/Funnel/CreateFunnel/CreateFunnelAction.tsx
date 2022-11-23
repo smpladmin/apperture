@@ -200,7 +200,7 @@ const CreateFunnelAction = ({
           >
             In any sequence
           </Text>
-          <Switch background={'black'} size={'sm'} />
+          <Switch background={'black'} size={'sm'} isDisabled />
         </Flex>
       </Flex>
     </>

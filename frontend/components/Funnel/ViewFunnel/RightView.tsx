@@ -74,7 +74,7 @@ const RightView = ({
           >
             Funnel
           </Text>
-          {computedFunnel ? <FunnelChart data={computedFunnel} /> : null}
+          {computedFunnel.length ? <FunnelChart data={computedFunnel} /> : null}
         </Flex>
         <Divider
           orientation="horizontal"
@@ -89,7 +89,9 @@ const RightView = ({
           >
             Trend
           </Text>
-          {computedTrendsData ? <Trend data={computedTrendsData} /> : null}
+          {computedTrendsData.length ? (
+            <Trend data={computedTrendsData} />
+          ) : null}
         </Flex>
       </Flex>
     </ViewPanel>
