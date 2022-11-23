@@ -9,11 +9,11 @@ import React, { useEffect, useRef } from 'react';
 const Trend = ({ data }: { data: FunnelTrendsData[] }) => {
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ line: Line | null }>({ line: null });
-
   const previousData = usePrevious(data);
 
   useEffect(() => {
     if (isEqual(previousData, data)) return;
+
     plot.current.line = new Line(ref.current!!, {
       data,
       padding: 'auto',
@@ -22,7 +22,7 @@ const Trend = ({ data }: { data: FunnelTrendsData[] }) => {
       yAxis: {
         label: {
           formatter: (text) => {
-            return `${Number(text) * 100}%`;
+            return `${text}%`;
           },
         },
       },
@@ -41,7 +41,7 @@ const Trend = ({ data }: { data: FunnelTrendsData[] }) => {
           return {
             title: convertISODateToReadableDate(startDate),
             name: 'Conversion',
-            value: `${(conversion * 100).toFixed(1)}%`,
+            value: `${conversion}%`,
           };
         },
       },
@@ -52,7 +52,7 @@ const Trend = ({ data }: { data: FunnelTrendsData[] }) => {
     });
     plot.current.line?.render();
   }, [data]);
-  return <Box ref={ref}></Box>;
+  return <Box ref={ref} h={'88'}></Box>;
 };
 
 export default Trend;

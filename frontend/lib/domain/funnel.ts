@@ -18,7 +18,9 @@ export type ComputedFunnel = {
 };
 
 export type FunnelTrendsData = {
-  conversion: string;
+  conversion: Number;
   startDate: Date;
   endDate: Date;
+  firstStepUsers: Number;
+  lastStepUsers: Number;
 };

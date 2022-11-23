@@ -1,4 +1,4 @@
-import { Box, Flex, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Text, Highlight, Divider } from '@chakra-ui/react';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import { FunnelData, FunnelTrendsData } from '@lib/domain/funnel';
 import React from 'react';
@@ -17,15 +17,56 @@ const RightView = ({
       <Flex
         direction={'column'}
         gap={'8'}
-        px={{ base: '0', md: '30' }}
-        pt={{ base: '8', md: '4' }}
+        px={{ base: '0', md: '25' }}
+        py={{ base: '8', md: '12' }}
       >
-        <Flex
-          px={{ base: '0', md: '4' }}
-          pt={{ base: '8', md: '8' }}
-          direction={'column'}
-          gap={'8'}
-        >
+        <Flex justifyContent={'space-between'}>
+          <Flex direction={'column'} gap={'1'}>
+            <Text fontSize={'sh-18'} lineHeight={'sh-18'} fontWeight={'500'}>
+              <Highlight
+                query={`${
+                  computedTrendsData?.[computedTrendsData.length - 1]?.[
+                    'conversion'
+                  ]
+                }%`}
+                styles={{ fontSize: 'sh-28', fontWeight: 700 }}
+              >
+                {`${
+                  computedTrendsData?.[computedTrendsData.length - 1]?.[
+                    'conversion'
+                  ]
+                }% Conversion `}
+              </Highlight>
+            </Text>
+            <Text
+              fontSize={'base'}
+              lineHeight={'base'}
+              fontWeight={'400'}
+              color={'grey.100'}
+            >
+              {`${
+                computedTrendsData?.[computedTrendsData.length - 1]?.[
+                  'lastStepUsers'
+                ]
+              } users`}
+            </Text>
+          </Flex>
+          <Button
+            h={'15'}
+            fontSize={'xs-14'}
+            lineHeight={'xs-14'}
+            fontWeight={'600'}
+            bg={'white.200'}
+          >
+            {'Analyse Factors'}
+          </Button>
+        </Flex>
+        <Divider
+          orientation="horizontal"
+          borderColor={'white.200'}
+          opacity={1}
+        />
+        <Flex direction={'column'} gap={'8'}>
           <Text
             fontSize={{ base: 'sh-18', md: 'sh-20' }}
             lineHeight={{ base: 'sh-18', md: 'sh-20' }}
@@ -33,14 +74,14 @@ const RightView = ({
           >
             Funnel
           </Text>
-          <FunnelChart data={computedFunnel} />
+          {computedFunnel ? <FunnelChart data={computedFunnel} /> : null}
         </Flex>
-        <Flex
-          px={{ base: '0', md: '4' }}
-          pt={{ base: '8', md: '8' }}
-          direction={'column'}
-          gap={'8'}
-        >
+        <Divider
+          orientation="horizontal"
+          borderColor={'white.200'}
+          opacity={1}
+        />
+        <Flex direction={'column'} gap={'8'}>
           <Text
             fontSize={{ base: 'sh-18', md: 'sh-20' }}
             lineHeight={{ base: 'sh-18', md: 'sh-20' }}
@@ -48,7 +89,7 @@ const RightView = ({
           >
             Trend
           </Text>
-          <Trend data={computedTrendsData} />
+          {computedTrendsData ? <Trend data={computedTrendsData} /> : null}
         </Flex>
       </Flex>
     </ViewPanel>
