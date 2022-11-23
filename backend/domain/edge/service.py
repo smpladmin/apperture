@@ -20,7 +20,6 @@ from domain.edge.models import (
 )
 from domain.notifications.models import (
     Notification,
-    NotificationType,
     NotificationThresholdType,
 )
 from mongo.mongo import Mongo
