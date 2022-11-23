@@ -89,3 +89,19 @@ export const _getComputedTrendsData = async (
     return [];
   }
 };
+
+export const getTransientTrendsData = async (
+  dsId: string,
+  steps: FunnelStep[]
+) => {
+  try {
+    const res = await AppertureAPI.post('/funnels/trends/transient', {
+      datasourceId: dsId,
+      steps,
+    });
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};

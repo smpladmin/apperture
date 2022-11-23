@@ -1,10 +1,15 @@
 import { Flex, Spinner } from '@chakra-ui/react';
 import { BLACK_RUSSIAN } from '@theme/index';
-import React from 'react';
 
 const Loader = () => {
   return (
-    <Flex w="full" h="full" justifyContent={'center'} alignItems={'center'}>
+    <Flex
+      w="full"
+      h="full"
+      justifyContent={'center'}
+      alignItems={'center'}
+      minH={'50'}
+    >
       <Spinner
         thickness="4px"
         speed="0.5s"

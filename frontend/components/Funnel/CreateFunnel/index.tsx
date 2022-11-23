@@ -1,23 +1,28 @@
-import { Flex, Text } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import CreateFunnelAction from './CreateFunnelAction';
-import FunnelChart from '../components/FunnelChart';
 import { useContext, useEffect, useState } from 'react';
 import { getCountOfValidAddedSteps } from '../util';
 import { MapContext } from '@lib/contexts/mapContext';
 import FunnelEmptyState from '../components/FunnelEmptyState';
-import { FunnelData, FunnelStep } from '@lib/domain/funnel';
-import Loader from '../components/Loader';
+import { FunnelData, FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
+import TransientFunnelView from './TransientFunnelView';
 
 type FunnelProps = {
   name?: string;
   steps?: FunnelStep[];
   computedFunnel?: FunnelData[];
+  computedTrendsData?: FunnelTrendsData[];
 };
 
-const Funnel = ({ name, steps, computedFunnel }: FunnelProps) => {
+const Funnel = ({
+  name,
+  steps,
+  computedFunnel,
+  computedTrendsData,
+}: FunnelProps) => {
   const {
     state: { nodes },
   } = useContext(MapContext);
@@ -32,7 +37,9 @@ const Funnel = ({ name, steps, computedFunnel }: FunnelProps) => {
   const [funnelData, setFunnelData] = useState<FunnelData[]>(
     computedFunnel || []
   );
-
+  const [trendsData, setTrendsData] = useState<FunnelTrendsData[]>(
+    computedTrendsData || []
+  );
   const [isEmpty, setIsEmpty] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -59,27 +66,18 @@ const Funnel = ({ name, steps, computedFunnel }: FunnelProps) => {
           funnelSteps={funnelSteps}
           setFunnelSteps={setFunnelSteps}
           setFunnelData={setFunnelData}
+          setTrendsData={setTrendsData}
         />
       </ActionPanel>
       <ViewPanel>
         {isEmpty ? (
           <FunnelEmptyState />
         ) : (
-          <Flex
-            px={{ base: '0', md: '30' }}
-            pt={{ base: '8', md: '30' }}
-            direction={'column'}
-            gap={'8'}
-          >
-            <Text
-              fontSize={{ base: 'sh-18', md: 'sh-20' }}
-              lineHeight={{ base: 'sh-18', md: 'sh-20' }}
-              fontWeight={'semibold'}
-            >
-              Funnel
-            </Text>
-            {isLoading ? <Loader /> : <FunnelChart data={funnelData} />}
-          </Flex>
+          <TransientFunnelView
+            isLoading={isLoading}
+            funnelData={funnelData}
+            trendsData={trendsData}
+          />
         )}
       </ViewPanel>
     </Flex>

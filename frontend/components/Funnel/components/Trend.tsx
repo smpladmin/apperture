@@ -25,6 +25,7 @@ const Trend = ({ data }: { data: FunnelTrendsData[] }) => {
             return `${text}%`;
           },
         },
+        tickCount: 4,
       },
       xAxis: {
         label: {

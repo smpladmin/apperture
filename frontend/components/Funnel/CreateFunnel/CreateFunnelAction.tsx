@@ -26,6 +26,7 @@ type CreateFunnelActionProps = {
   funnelSteps: FunnelStep[];
   setFunnelSteps: Function;
   setFunnelData: Function;
+  setTrendsData: Function;
 };
 
 const CreateFunnelAction = ({
@@ -34,6 +35,7 @@ const CreateFunnelAction = ({
   funnelSteps,
   setFunnelSteps,
   setFunnelData,
+  setTrendsData,
 }: CreateFunnelActionProps) => {
   const {
     state: { nodes },
@@ -102,7 +104,9 @@ const CreateFunnelAction = ({
           rounded={'full'}
           color={'white.DEFAULT'}
           bg={'black.20'}
-          onClick={() => {}}
+          onClick={() => {
+            router.back();
+          }}
         />
 
         <Button
@@ -184,6 +188,7 @@ const CreateFunnelAction = ({
           eventFieldsValue={funnelSteps}
           setEventFieldsValue={setFunnelSteps}
           setFunnelData={setFunnelData}
+          setTrendsData={setTrendsData}
         />
         <Divider orientation="horizontal" borderColor={BASTILLE} opacity={1} />
         <Flex justifyContent={'space-between'} alignItems={'center'}>
