@@ -4,5 +4,6 @@ from pydantic import BaseModel
 
 class SegmentFilter(BaseModel):
     event: str
-    condition: Optional[str]
+    operator: Optional[str]
+    operand: Optional[int]
     function: str = "count"

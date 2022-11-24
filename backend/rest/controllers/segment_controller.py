@@ -12,9 +12,9 @@ router = APIRouter(
 )
 
 
-@router.get("/segments/transient")
+@router.post("/segments/transient")
 async def compute_segment(
     dto: TransientSegmentDto,
     segment_service: SegmentService = Depends(),
 ):
-    return segment_service.compute_segment(dto.datasourceId, dto.filters)
+    return await segment_service.compute_segment(dto.datasourceId, dto.filters)

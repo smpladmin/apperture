@@ -8,5 +8,5 @@ class SegmentService:
     def __init__(self, segments: Segments = Depends()):
         self.segments = segments
 
-    def compute_segment(self, datasource_id: str, events: List[SegmentFilter]):
+    async def compute_segment(self, datasource_id: str, events: List[SegmentFilter]):
         return self.segments.get_segment(datasource_id, events)

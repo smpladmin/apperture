@@ -19,6 +19,7 @@ from rest.controllers import (
     private_apis_controller,
     schedule_controller,
     notification_controller,
+    segment_controller,
     user_controller,
     funnel_controller,
 )
@@ -67,3 +68,4 @@ app.include_router(schedule_controller.router)
 app.include_router(notification_controller.router)
 app.include_router(user_controller.router)
 app.include_router(funnel_controller.router)
+app.include_router(segment_controller.router)
