@@ -16,6 +16,9 @@ const TransientFunnelView = ({
   funnelData,
   trendsData,
 }: TransientFunnelViewProps) => {
+  const funnelConversion = trendsData?.[trendsData.length - 1]?.['conversion'];
+  const funnelLastStepUsers =
+    trendsData?.[trendsData.length - 1]?.['lastStepUsers'];
   return (
     <Flex
       direction={'column'}
@@ -27,12 +30,10 @@ const TransientFunnelView = ({
         <Flex direction={'column'} gap={'1'}>
           <Text fontSize={'sh-18'} lineHeight={'sh-18'} fontWeight={'500'}>
             <Highlight
-              query={`${trendsData?.[trendsData.length - 1]?.['conversion']}%`}
+              query={`${funnelConversion}%`}
               styles={{ fontSize: 'sh-28', fontWeight: 700 }}
             >
-              {`${
-                trendsData?.[trendsData.length - 1]?.['conversion'] || ''
-              }% Conversion `}
+              {`${funnelConversion || ''}% Conversion `}
             </Highlight>
           </Text>
           <Text
@@ -41,9 +42,7 @@ const TransientFunnelView = ({
             fontWeight={'400'}
             color={'grey.100'}
           >
-            {`${
-              trendsData?.[trendsData.length - 1]?.['lastStepUsers'] || ''
-            } users`}
+            {`${funnelLastStepUsers || ''} users`}
           </Text>
         </Flex>
         <Button

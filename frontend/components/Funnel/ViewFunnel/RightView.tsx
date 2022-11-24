@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Text, Highlight, Divider } from '@chakra-ui/react';
+import { Button, Flex, Text, Highlight, Divider } from '@chakra-ui/react';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import { FunnelData, FunnelTrendsData } from '@lib/domain/funnel';
 import React from 'react';
@@ -12,6 +12,11 @@ const RightView = ({
   computedFunnel: FunnelData[];
   computedTrendsData: FunnelTrendsData[];
 }) => {
+  const funnelConversion =
+    computedTrendsData?.[computedTrendsData.length - 1]?.['conversion'];
+  const funnelLastStepUsers =
+    computedTrendsData?.[computedTrendsData.length - 1]?.['lastStepUsers'];
+
   return (
     <ViewPanel>
       <Flex
@@ -24,18 +29,10 @@ const RightView = ({
           <Flex direction={'column'} gap={'1'}>
             <Text fontSize={'sh-18'} lineHeight={'sh-18'} fontWeight={'500'}>
               <Highlight
-                query={`${
-                  computedTrendsData?.[computedTrendsData.length - 1]?.[
-                    'conversion'
-                  ]
-                }%`}
+                query={`${funnelConversion}%`}
                 styles={{ fontSize: 'sh-28', fontWeight: 700 }}
               >
-                {`${
-                  computedTrendsData?.[computedTrendsData.length - 1]?.[
-                    'conversion'
-                  ]
-                }% Conversion `}
+                {`${funnelConversion}% Conversion `}
               </Highlight>
             </Text>
             <Text
@@ -44,11 +41,7 @@ const RightView = ({
               fontWeight={'400'}
               color={'grey.100'}
             >
-              {`${
-                computedTrendsData?.[computedTrendsData.length - 1]?.[
-                  'lastStepUsers'
-                ]
-              } users`}
+              {`${funnelLastStepUsers} users`}
             </Text>
           </Flex>
           <Button
