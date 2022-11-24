@@ -43,6 +43,8 @@ class ComputedFunnel(BaseModel):
 
 
 class FunnelTrendsData(BaseModel):
-    conversion: str
+    conversion: float
+    first_step_users: int
+    last_step_users: int
     start_date: datetime.datetime
     end_date: datetime.datetime
