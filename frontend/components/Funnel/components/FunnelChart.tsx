@@ -17,7 +17,7 @@ const FunnelChart = ({ data }: FunnelChartProps) => {
   const {
     device: { isMobile },
   } = useContext(AppertureContext);
-  console.log(data);
+
   const CONATINER_HEIGHT = isMobile ? data?.length * 80 : data?.length * 100;
   const LABEL_FONT_SIZE = isMobile ? 10 : 12;
   const AXIS_FONT_SIZE = isMobile ? 10 : 14;
