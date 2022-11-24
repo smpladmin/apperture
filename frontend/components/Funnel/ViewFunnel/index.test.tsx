@@ -20,6 +20,15 @@ describe('View Funnel', () => {
       { event: 'Topic_Click', users: 750, conversion: 75 },
     ],
     randomSequence: false,
+    computedTrendsData: [
+      {
+        conversion: 23.1,
+        startDate: new Date('2022-10-11'),
+        endDate: new Date('2022-10-17'),
+        firstStepUsers: 49,
+        lastStepUsers: 8,
+      },
+    ],
   };
 
   it('renders funnel name, first step and last step name and (n-2) steps count', () => {
@@ -27,7 +36,10 @@ describe('View Funnel', () => {
       <RouterContext.Provider
         value={createMockRouter({ query: { funnelId: '64349843748' } })}
       >
-        <ViewFunnel computedFunnelData={{ ...props }} />
+        <ViewFunnel
+          computedFunnelData={{ ...props }}
+          computedTrendsData={props.computedTrendsData}
+        />
       </RouterContext.Provider>
     );
 
@@ -59,6 +71,7 @@ describe('View Funnel', () => {
               ],
             },
           }}
+          computedTrendsData={props.computedTrendsData}
         />
       </RouterContext.Provider>
     );
@@ -74,7 +87,10 @@ describe('View Funnel', () => {
     });
     render(
       <RouterContext.Provider value={router}>
-        <ViewFunnel computedFunnelData={{ ...props }} />
+        <ViewFunnel
+          computedFunnelData={{ ...props }}
+          computedTrendsData={props.computedTrendsData}
+        />
       </RouterContext.Provider>
     );
 
@@ -95,7 +111,10 @@ describe('View Funnel', () => {
     });
     render(
       <RouterContext.Provider value={router}>
-        <ViewFunnel computedFunnelData={{ ...props }} />
+        <ViewFunnel
+          computedFunnelData={{ ...props }}
+          computedTrendsData={props.computedTrendsData}
+        />
       </RouterContext.Provider>
     );
 

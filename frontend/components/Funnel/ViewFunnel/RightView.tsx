@@ -13,9 +13,9 @@ const RightView = ({
   computedTrendsData: FunnelTrendsData[];
 }) => {
   const funnelConversion =
-    computedTrendsData?.[computedTrendsData.length - 1]?.['conversion'];
+    computedTrendsData?.[computedTrendsData?.length - 1]?.['conversion'];
   const funnelLastStepUsers =
-    computedTrendsData?.[computedTrendsData.length - 1]?.['lastStepUsers'];
+    computedTrendsData?.[computedTrendsData?.length - 1]?.['lastStepUsers'];
 
   return (
     <ViewPanel>
@@ -70,7 +70,9 @@ const RightView = ({
           >
             Funnel
           </Text>
-          {computedFunnel.length ? <FunnelChart data={computedFunnel} /> : null}
+          {computedFunnel?.length ? (
+            <FunnelChart data={computedFunnel} />
+          ) : null}
         </Flex>
         <Divider
           orientation="horizontal"
@@ -85,7 +87,7 @@ const RightView = ({
           >
             Trend
           </Text>
-          {computedTrendsData.length ? (
+          {computedTrendsData?.length ? (
             <Trend data={computedTrendsData} />
           ) : null}
         </Flex>
