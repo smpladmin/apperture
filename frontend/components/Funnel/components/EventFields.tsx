@@ -133,6 +133,7 @@ const EventFields = ({
               w={'full'}
               {...provided.droppableProps}
               ref={provided.innerRef}
+              data-testid={'droppable'}
             >
               {eventFieldsValue.map((inputValue, i) => {
                 return (
@@ -146,6 +147,7 @@ const EventFields = ({
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
+                        data-testid={'draggable-input'}
                       >
                         <Autocomplete
                           data={inputValue}

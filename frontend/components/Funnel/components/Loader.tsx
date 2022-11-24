@@ -9,6 +9,7 @@ const Loader = () => {
       emptyColor="gray.200"
       color={BLACK_RUSSIAN}
       size="xl"
+      data-testid="funnel-loader"
     />
   );
 };

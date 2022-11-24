@@ -46,6 +46,7 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
             color={'white'}
             variant={'primary'}
             onClick={handleEditFunnel}
+            data-testid={'edit-funnel'}
           >
             <Flex alignItems={'center'} gap={'1'}>
               <i className="ri-edit-fill"></i>
@@ -76,6 +77,7 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
           textColor={'white.DEFAULT'}
           borderColor={'grey.10'}
           px={0}
+          data-testid={'funnel-name'}
         >
           {name}
         </Text>

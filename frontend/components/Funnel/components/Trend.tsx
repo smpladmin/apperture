@@ -53,7 +53,7 @@ const Trend = ({ data }: { data: FunnelTrendsData[] }) => {
     });
     plot.current.line?.render();
   }, [data]);
-  return <Box ref={ref} h={'88'}></Box>;
+  return <Box ref={ref} h={'88'} data-testid={'funnel-trend'}></Box>;
 };
 
 export default Trend;

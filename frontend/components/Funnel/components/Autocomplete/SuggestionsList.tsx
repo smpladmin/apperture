@@ -35,6 +35,7 @@ const SuggestionsList = ({
       alignItems={'center'}
       px={'6'}
       ref={active ? searchResultRef : null}
+      data-testid={'suggestion'}
     >
       <Text
         fontSize={{ base: 'xs-14', md: 'base' }}

@@ -145,6 +145,7 @@ const Autocomplete = ({
             setFocusedInputIndex(-1);
           }}
           onKeyDown={keyboardNavigation}
+          data-testid={`autocomplete`}
         />
         <InputRightElement
           color={'white'}
@@ -162,6 +163,7 @@ const Autocomplete = ({
               <Box
                 minH={'5'}
                 minW={'5'}
+                data-testid={`remove-button ${index}`}
                 onClick={() => removeInputField(index)}
               >
                 <Image src={CrossIcon} alt={'cross-icon'} />
@@ -185,6 +187,7 @@ const Autocomplete = ({
           pt={'2'}
           pb={'4'}
           ref={suggestionsContainerRef}
+          data-testid={'suggestion-container'}
         >
           {suggestions.map((suggestion: NodeType, i: number) => {
             return (

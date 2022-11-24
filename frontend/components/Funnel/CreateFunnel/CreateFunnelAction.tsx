@@ -90,7 +90,7 @@ const CreateFunnelAction = ({
     if (status === 200)
       router.push({
         pathname: '/analytics/funnel/view/[funnelId]',
-        query: { funnelId: data._id || funnelId },
+        query: { funnelId: data?._id || funnelId },
       });
   };
 
@@ -117,6 +117,7 @@ const CreateFunnelAction = ({
             pointerEvents: 'none',
           }}
           onClick={handleSaveFunnel}
+          data-testid={'save'}
         >
           <Text
             textAlign={'center'}
@@ -159,6 +160,7 @@ const CreateFunnelAction = ({
           onChange={(e) => setFunnelName(e.target.value)}
           borderColor={'grey.10'}
           px={0}
+          data-testid={'funnel-name'}
         />
       </Flex>
 
@@ -173,6 +175,7 @@ const CreateFunnelAction = ({
             Steps
           </Text>
           <Button
+            data-testid={'add-button'}
             rounded={'full'}
             variant={'primary'}
             size={'md'}
