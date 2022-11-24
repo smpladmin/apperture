@@ -11,7 +11,8 @@ import 'userAnalytics';
 import { MotionConfig } from 'framer-motion';
 import isValidProp from '@emotion/is-prop-valid';
 import { resetServerContext } from 'react-beautiful-dnd';
-
+import NextNProgress from 'nextjs-progressbar';
+import { BLACK_200 } from '@theme/index';
 type CustomAppProps = {
   device: Device;
 };
@@ -28,6 +29,7 @@ function AppertureApp({
       <MapContextProvider>
         <MotionConfig isValidProp={isValidProp}>
           <ChakraProvider theme={theme}>
+            <NextNProgress color={BLACK_200} />
             {getLayout(<Component {...pageProps} />, pageProps?.apps)}
           </ChakraProvider>
         </MotionConfig>

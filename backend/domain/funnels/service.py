@@ -45,21 +45,19 @@ class FunnelsService:
         await Funnel.insert(funnel)
 
     def compute_conversion(self, n, data) -> float:
-        return (
-            (data[n] * 100 / data[n - 1] if data[n - 1] != 0 else 0) if n != 0 else 100
-        )
+        return data[n] * 100 / data[0] if data[0] != 0 else 0
 
     async def compute_funnel(
         self, ds_id: str, steps: List[FunnelStep]
     ) -> List[ComputedFunnelStep]:
 
-        events_data = self.funnels.get_events_data(ds_id, steps)
+        users_data = self.funnels.get_users_count(ds_id, steps)
         computed_funnel = [
             ComputedFunnelStep(
                 event=step.event,
-                users=events_data[0][i],
+                users=users_data[0][i],
                 conversion=float(
-                    "{:.2f}".format(self.compute_conversion(i, events_data[0]))
+                    "{:.2f}".format(self.compute_conversion(i, users_data[0]))
                 ),
             )
             for i, step in enumerate(steps)
@@ -92,13 +90,17 @@ class FunnelsService:
             Funnel.id == PydanticObjectId(funnel_id),
         ).update({"$set": to_update})
 
-    async def get_funnel_trends(self, funnel: Funnel) -> List[FunnelTrendsData]:
-        conversion_data = self.funnels.get_conversion_data(
-            ds_id=str(funnel.datasource_id), steps=funnel.steps
+    async def get_funnel_trends(
+        self, datasource_id: str, steps: List[FunnelStep]
+    ) -> List[FunnelTrendsData]:
+        conversion_data = self.funnels.get_conversion_trend(
+            ds_id=datasource_id, steps=steps
         )
         return [
             FunnelTrendsData(
-                conversion=data[2],
+                conversion="{:.2f}".format(data[2] * 100 / data[3]),
+                first_step_users=data[3],
+                last_step_users=data[2],
                 start_date=datetime.strptime(f"{data[1]}-{data[0]}-1", "%Y-%W-%w"),
                 end_date=datetime.strptime(f"{data[1]}-{data[0]}-0", "%Y-%W-%w"),
             )

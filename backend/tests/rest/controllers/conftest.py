@@ -100,12 +100,16 @@ def funnel_service():
     )
     funnel_trends = [
         FunnelTrendsData(
-            conversion=0.5,
+            conversion=50.00,
+            first_step_users=100,
+            last_step_users=50,
             start_date=datetime(2022, 1, 1, 0, 0),
             end_date=datetime(2022, 1, 7, 0, 0),
         ),
         FunnelTrendsData(
-            conversion=0.6,
+            conversion=60.00,
+            first_step_users=100,
+            last_step_users=60,
             start_date=datetime(2022, 1, 8, 0, 0),
             end_date=datetime(2022, 1, 14, 0, 0),
         ),
@@ -258,12 +262,16 @@ def funnel_response():
 def funnel_trend_response():
     return [
         {
-            "conversion": "0.5",
+            "conversion": 50.00,
+            "firstStepUsers": 100,
+            "lastStepUsers": 50,
             "startDate": "2022-01-01T00:00:00",
             "endDate": "2022-01-07T00:00:00",
         },
         {
-            "conversion": "0.6",
+            "conversion": 60.00,
+            "firstStepUsers": 100,
+            "lastStepUsers": 60,
             "startDate": "2022-01-08T00:00:00",
             "endDate": "2022-01-14T00:00:00",
         },
