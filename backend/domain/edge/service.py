@@ -439,7 +439,7 @@ class EdgeService:
                 .to_list()
             )
         else:
-            node_significance = self.edges.get_node_significance(
+            ((node_users, total_users, node_hits, total_hits), ) = self.edges.get_node_significance(
                 ds_id=str(datasource.id),
                 event_name=node,
                 start_date=start_date,
@@ -448,10 +448,10 @@ class EdgeService:
             return [
                 NodeSignificance(
                     node=node,
-                    node_users=node_significance[0][0],
-                    total_users=node_significance[0][1],
-                    node_hits=node_significance[0][2],
-                    total_hits=node_significance[0][3],
+                    node_users=node_users,
+                    total_users=total_users,
+                    node_hits=node_hits,
+                    total_hits=total_hits,
                 )
             ]
 
