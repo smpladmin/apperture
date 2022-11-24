@@ -37,7 +37,7 @@ const TransientFunnelView = ({
                   query={`${funnelConversion}%`}
                   styles={{ fontSize: 'sh-28', fontWeight: 700 }}
                 >
-                  {`${funnelConversion}% Conversion last week`}
+                  {`${funnelConversion}% Conversion`}
                 </Highlight>
               </Text>
               <Text
@@ -47,6 +47,9 @@ const TransientFunnelView = ({
                 color={'grey.100'}
               >
                 {`${funnelLastStepUsers} users`}
+              </Text>
+              <Text fontSize={'base'} lineHeight={'base'} fontWeight={'500'}>
+                {'last week'}
               </Text>
             </>
           )}
