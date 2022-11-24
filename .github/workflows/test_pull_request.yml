@@ -30,7 +30,7 @@ jobs:
         run: |
           cd data_processor
           docker build . --target tests
-       - name: Testing Frontend code
+      - name: Testing Frontend code
         if: steps.filter.outputs.frontend == 'true'
         run: |
           cd frontend
