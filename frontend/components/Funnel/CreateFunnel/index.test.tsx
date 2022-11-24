@@ -346,7 +346,7 @@ describe('create funnel', () => {
       });
     });
 
-    it('should  paint the funnel chart when you select atleast two valid events', async () => {
+    it('should  paint the funnel chart/ trend chart when you select atleast two valid events', async () => {
       mockedGetTransientFunnelData.mockReturnValue([
         { event: 'Video_Click', users: 2000, conversion: 100 },
         { event: 'Chapter_Click', users: 1000, conversion: 50 },
@@ -383,7 +383,12 @@ describe('create funnel', () => {
 
       await waitFor(() => {
         const chart = screen.getByTestId('funnel-chart');
+        const trendChart = screen.getByTestId('funnel-trend');
+        const funnelConversion = screen.getByTestId('funnel-conversion');
+
         expect(chart).toBeInTheDocument();
+        expect(trendChart).toBeInTheDocument();
+        expect(funnelConversion).toBeInTheDocument();
       });
     });
   });
