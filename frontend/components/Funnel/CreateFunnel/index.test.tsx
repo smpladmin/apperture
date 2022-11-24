@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import React from 'react';
 import {
   getCountOfValidAddedSteps,
@@ -264,7 +270,9 @@ describe('create funnel', () => {
       expect(suggestionContainer).toBeVisible();
 
       const suggestions = screen.getAllByTestId('suggestion');
-      fireEvent.click(suggestions[0]);
+      act(() => {
+        fireEvent.click(suggestions[0]);
+      });
       await waitFor(() =>
         expect(inputFields[1]).toHaveDisplayValue('Chapter_Click')
       );
@@ -287,7 +295,6 @@ describe('create funnel', () => {
       const inputFields = screen.getAllByTestId('autocomplete');
       fireEvent.change(inputFields[0], { target: { value: 'Video_Click' } });
       fireEvent.blur(inputFields[0]);
-
       fireEvent.focus(inputFields[1]);
       fireEvent.change(inputFields[1], {
         target: { value: 'Cha' },
@@ -299,7 +306,6 @@ describe('create funnel', () => {
       fireEvent.keyDown(inputFields[1], {
         key: 'ArrowDown',
       });
-
       // select suggestion by pressing Enter key
       fireEvent.keyDown(inputFields[1], {
         key: 'Enter',
@@ -324,7 +330,7 @@ describe('create funnel', () => {
       expect(emptyFunnelState).toBeInTheDocument();
     });
 
-    it('should render loading state when there are 2 or more valid events and data is being fetched', () => {
+    it('should render loading state when there are 2 or more valid events and data is being fetched', async () => {
       mockedGetCountOfValidAddedSteps.mockReturnValue(2);
       mockedGetTransientFunnelData.mockReturnValue([]);
       render(
@@ -334,8 +340,10 @@ describe('create funnel', () => {
           <Funnel />
         </RouterContext.Provider>
       );
-      const loader = screen.getByTestId('funnel-loader');
-      expect(loader).toBeInTheDocument();
+      const loader = screen.getAllByTestId('funnel-loader');
+      await waitFor(() => {
+        expect(loader[0]).toBeInTheDocument();
+      });
     });
 
     it('should  paint the funnel chart when you select atleast two valid events', async () => {
@@ -359,7 +367,6 @@ describe('create funnel', () => {
       );
 
       const inputFields = screen.getAllByTestId('autocomplete');
-      const loader = screen.getByTestId('funnel-loader');
 
       fireEvent.change(inputFields[0], { target: { value: 'Video_Click' } });
       fireEvent.blur(inputFields[0]);

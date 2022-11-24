@@ -21,4 +21,11 @@ jest.mock('@antv/g2', () => ({
   Chart: mockChart,
 }));
 
+jest.mock('@antv/g2plot', () => ({
+  Line: jest.fn(),
+}));
+
+// @ts-ignore
+global.IS_REACT_ACT_ENVIRONMENT = true;
+
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
