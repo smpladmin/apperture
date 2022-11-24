@@ -121,6 +121,8 @@ describe('View Funnel', () => {
     const editFunnelButton = screen.getByTestId('edit-funnel');
     fireEvent.click(editFunnelButton);
     const chart = screen.getByTestId('funnel-chart');
+    const trendsChart = screen.getByTestId('funnel-trend');
     expect(chart).toBeInTheDocument();
+    expect(trendsChart).toBeInTheDocument();
   });
 });
