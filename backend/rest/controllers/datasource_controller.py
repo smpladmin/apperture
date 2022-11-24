@@ -71,5 +71,5 @@ async def get_node_significance(
 ):
     datasource = await ds_service.get_datasource(ds_id)
     return await edge_service.get_node_significance(
-        datasource, node, start_date, end_date
+        datasource=datasource, node=node, start_date=start_date, end_date=end_date
     )

@@ -4,7 +4,7 @@ from collections import namedtuple
 from unittest.mock import AsyncMock, MagicMock
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
-from domain.edge.models import AggregatedEdge, BaseEdge
+from domain.edge.models import AggregatedEdge, BaseEdge, NodeSignificance
 
 from domain.edge.service import EdgeService
 
@@ -29,13 +29,7 @@ class TestEdgeService:
         )
         DataSource.get_settings = MagicMock()
         self.service = EdgeService(mongo, edges_repository)
-
-    @pytest.mark.asyncio
-    async def test_get_edges_google(self):
-        """
-        Should query mongodb to fetch edges data for GA provider
-        """
-        ga_datasource = DataSource(
+        self.ga_datasource = DataSource(
             integration_id="636a1c61d715ca6baae65611",
             app_id="636a1c61d715ca6baae65611",
             user_id="636a1c61d715ca6baae65611",
@@ -43,10 +37,24 @@ class TestEdgeService:
             external_source_id="123",
             version=DataSourceVersion.V4,
         )
-        ga_datasource.id = "test-id"
+        self.datasource = DataSource(
+            integration_id="636a1c61d715ca6baae65611",
+            app_id="636a1c61d715ca6baae65611",
+            user_id="636a1c61d715ca6baae65611",
+            provider=IntegrationProvider.MIXPANEL,
+            external_source_id="123",
+            version=DataSourceVersion.DEFAULT,
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_edges_google(self):
+        """
+        Should query mongodb to fetch edges data for GA provider
+        """
+        self.ga_datasource.id = "test-id"
 
         await self.service.get_edges(
-            ga_datasource,
+            self.ga_datasource,
             "2019-01-01",
             "2019-03-31",
         )
@@ -92,22 +100,15 @@ class TestEdgeService:
         """
         Should query clickhousedb to fetch edges data and convert it to Aggregated Edge model
         """
-        datasource = DataSource(
-            integration_id="636a1c61d715ca6baae65611",
-            app_id="636a1c61d715ca6baae65611",
-            user_id="636a1c61d715ca6baae65611",
-            provider=IntegrationProvider.MIXPANEL,
-            external_source_id="123",
-            version=DataSourceVersion.DEFAULT,
-        )
-        datasource.id = "test-id"
+
+        self.datasource.id = "test-id"
         self.service.edges.get_edges.return_value = [
             ("login", "home", 123, 200),
             ("home", "base", 155, 300),
         ]
 
         edges = await self.service.get_edges(
-            datasource,
+            self.datasource,
             "2019-01-01",
             "2019-03-31",
         )
@@ -127,3 +128,98 @@ class TestEdgeService:
                 hits=300,
             ),
         ]
+
+    @pytest.mark.asyncio
+    async def test_get_node_significance_google(self):
+        await self.service.get_node_significance(
+            datasource=self.ga_datasource,
+            node="test",
+            start_date="2022-01-01",
+            end_date="2023-01-01",
+        )
+        self.agg_mock.assert_called_once_with(
+            [
+                {
+                    "$match": {
+                        "$and": [
+                            {"datasource_id": None},
+                            {"date": {"$gte": datetime(2022, 1, 1, 0, 0)}},
+                            {"date": {"$lte": datetime(2023, 1, 1, 0, 0)}},
+                        ]
+                    }
+                },
+                {
+                    "$facet": {
+                        "total_count": [
+                            {
+                                "$group": {
+                                    "_id": {"_class_id": "$_class_id"},
+                                    "hits": {"$sum": "$hits"},
+                                }
+                            }
+                        ],
+                        "current_node_count": [
+                            {"$match": {"current_event": "test"}},
+                            {
+                                "$group": {
+                                    "_id": {"event": "$current_event"},
+                                    "hits": {"$sum": "$hits"},
+                                }
+                            },
+                        ],
+                        "previous_node_count": [
+                            {"$match": {"previous_event": "test"}},
+                            {
+                                "$group": {
+                                    "_id": {"event": "$previous_event"},
+                                    "hits": {"$sum": "$hits"},
+                                }
+                            },
+                        ],
+                    }
+                },
+                {
+                    "$project": {
+                        "node": "test",
+                        "node_hits": {
+                            "$ifNull": [
+                                {"$max": "$current_node_count.hits"},
+                                {"$max": "$previous_node_count.hits"},
+                            ]
+                        },
+                        "total_hits": {"$max": "$total_count.hits"},
+                    }
+                },
+            ],
+            projection_model=NodeSignificance,
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_node_significance_others(self):
+        self.datasource.id = "test-id"
+        self.service.edges.get_node_significance.return_value = [
+            (10, 100, 12, 144),
+        ]
+        assert [
+            NodeSignificance(
+                node="test",
+                node_hits=12,
+                total_hits=144,
+                node_users=10,
+                total_users=100,
+            )
+        ] == await self.service.get_node_significance(
+            datasource=self.datasource,
+            node="test",
+            start_date="2022-01-01",
+            end_date="2023-01-01",
+        )
+
+        self.service.edges.get_node_significance.assert_called_once_with(
+            **{
+                "ds_id": "test-id",
+                "end_date": "2023-01-01",
+                "event_name": "test",
+                "start_date": "2022-01-01",
+            }
+        )
