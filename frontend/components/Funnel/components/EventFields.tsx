@@ -11,7 +11,10 @@ import {
   getCountOfValidAddedSteps,
   isEveryNonEmptyStepValid,
 } from '../util';
-import { getTransientFunnelData } from '@lib/services/funnelService';
+import {
+  getTransientFunnelData,
+  getTransientTrendsData,
+} from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import {
   DragDropContext,
@@ -27,12 +30,14 @@ type EventFieldsValue = {
   eventFieldsValue: Array<FunnelStep>;
   setEventFieldsValue: Function;
   setFunnelData: Function;
+  setTrendsData: Function;
 };
 
 const EventFields = ({
   eventFieldsValue,
   setEventFieldsValue,
   setFunnelData,
+  setTrendsData,
 }: EventFieldsValue) => {
   const {
     state: { nodes },
@@ -58,12 +63,12 @@ const EventFields = ({
 
   useEffect(() => {
     if (!stepDragCount || isEqual(eventFieldsValue, previousStepsState)) return;
-    getFunnelData();
+    getFunnelMetricsData();
   }, [stepDragCount]);
 
   useEffect(() => {
     if (!stepRemovedCount) return;
-    getFunnelData();
+    getFunnelMetricsData();
   }, [stepRemovedCount]);
 
   const removeInputField = (index: number) => {
@@ -85,18 +90,27 @@ const EventFields = ({
     setEventFieldsValue(inputValues);
   };
 
-  const getFunnelData = async () => {
+  const getFunnelMetricsData = async () => {
     if (
       getCountOfValidAddedSteps(eventFieldsValue, nodes) < 2 ||
       !isEveryNonEmptyStepValid(eventFieldsValue, nodes)
     )
       return;
+
     setFunnelData([]);
-    const res = await getTransientFunnelData(
-      dsId as string,
-      filterFunnelSteps(eventFieldsValue)
-    );
-    setFunnelData(res);
+    setTrendsData([]);
+    const [funnelData, trendsData] = await Promise.all([
+      getTransientFunnelData(
+        dsId as string,
+        filterFunnelSteps(eventFieldsValue)
+      ),
+      getTransientTrendsData(
+        dsId as string,
+        filterFunnelSteps(eventFieldsValue)
+      ),
+    ]);
+    setFunnelData(funnelData);
+    setTrendsData(trendsData);
   };
 
   const handleDragEnd = (result: DropResult) => {
@@ -143,7 +157,7 @@ const EventFields = ({
                           setSuggestions={setSuggestions}
                           focusedInputIndex={focusedInputIndex}
                           setFocusedInputIndex={setFocusedInputIndex}
-                          getFunnelData={getFunnelData}
+                          getFunnelData={getFunnelMetricsData}
                         />
                       </Box>
                     )}

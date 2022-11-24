@@ -1,7 +1,8 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
+import { FunnelStep } from '@lib/domain/funnel';
 import React, { useState } from 'react';
 
-function ViewFunnelSteps({ steps }: any) {
+function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
   const [stepsLength] = useState(steps?.length);
   return (
     <Flex gap={'4'} alignItems={'center'}>
