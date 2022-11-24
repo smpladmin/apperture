@@ -117,27 +117,46 @@ def test_get_funnel_trends(client_init, funnel_trend_response, funnel_service):
     assert response.status_code == 200
     assert response.json() == funnel_trend_response
 
-    funnel_service.get_funnel_trends.assert_called_once()
-    get_funnel_trends_kwargs = funnel_service.get_funnel_trends.call_args.kwargs
+    funnel_service.get_funnel_trends.assert_called_once_with(
+        **{
+            "datasource_id": "635ba034807ab86d8a2aadd9",
+            "steps": [
+                FunnelStep(
+                    event="Login",
+                    filters=[EventFilters(property="mp_country_code", value="IN")],
+                ),
+                FunnelStep(event="Chapter_Click", filters=None),
+                FunnelStep(
+                    event="Topic_Click",
+                    filters=[EventFilters(property="os", value="Android")],
+                ),
+            ],
+        }
+    )
 
-    assert {
-        "created_at": ANY,
-        "datasource_id": PydanticObjectId("635ba034807ab86d8a2aadd9"),
-        "id": PydanticObjectId("635ba034807ab86d8a2aadd8"),
-        "name": "name",
-        "random_sequence": False,
-        "revision_id": ANY,
-        "steps": [
-            {
-                "event": "Login",
-                "filters": [{"property": "mp_country_code", "value": "IN"}],
-            },
-            {"event": "Chapter_Click", "filters": None},
-            {
-                "event": "Topic_Click",
-                "filters": [{"property": "os", "value": "Android"}],
-            },
-        ],
-        "updated_at": None,
-        "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
-    } == get_funnel_trends_kwargs["funnel"].dict()
+
+def test_get_transient_funnel_trends(
+    client_init, funnel_data, funnel_trend_response, funnel_service
+):
+    response = client_init.post(
+        "/funnels/trends/transient", data=json.dumps(funnel_data)
+    )
+    assert response.status_code == 200
+    assert response.json() == funnel_trend_response
+
+    funnel_service.get_funnel_trends.assert_called_with(
+        **{
+            "datasource_id": "636a1c61d715ca6baae65611",
+            "steps": [
+                FunnelStep(
+                    event="Login",
+                    filters=[EventFilters(property="mp_country_code", value="IN")],
+                ),
+                FunnelStep(event="Chapter_Click", filters=None),
+                FunnelStep(
+                    event="Topic_Click",
+                    filters=[EventFilters(property="os", value="Android")],
+                ),
+            ],
+        }
+    )
