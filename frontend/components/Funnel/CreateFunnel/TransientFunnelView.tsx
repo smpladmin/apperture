@@ -28,23 +28,33 @@ const TransientFunnelView = ({
     >
       <Flex justifyContent={'space-between'}>
         <Flex direction={'column'} gap={'1'}>
-          <Text fontSize={'sh-18'} lineHeight={'sh-18'} fontWeight={'500'}>
-            <Highlight
-              query={`${funnelConversion}%`}
-              styles={{ fontSize: 'sh-28', fontWeight: 700 }}
-            >
-              {`${funnelConversion || ''}% Conversion `}
-            </Highlight>
-          </Text>
-          <Text
-            fontSize={'base'}
-            lineHeight={'base'}
-            fontWeight={'400'}
-            color={'grey.100'}
-          >
-            {`${funnelLastStepUsers || ''} users`}
-          </Text>
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <>
+              <Text fontSize={'sh-18'} lineHeight={'sh-18'} fontWeight={'500'}>
+                <Highlight
+                  query={`${funnelConversion}%`}
+                  styles={{ fontSize: 'sh-28', fontWeight: 700 }}
+                >
+                  {`${funnelConversion}% Conversion`}
+                </Highlight>
+              </Text>
+              <Text
+                fontSize={'base'}
+                lineHeight={'base'}
+                fontWeight={'400'}
+                color={'grey.100'}
+              >
+                {`${funnelLastStepUsers} users`}
+              </Text>
+              <Text fontSize={'base'} lineHeight={'base'} fontWeight={'500'}>
+                {'last week'}
+              </Text>
+            </>
+          )}
         </Flex>
+
         <Button
           h={'15'}
           fontSize={'xs-14'}
@@ -64,7 +74,19 @@ const TransientFunnelView = ({
         >
           Funnel
         </Text>
-        {isLoading ? <Loader /> : <FunnelChart data={funnelData} />}
+        {isLoading ? (
+          <Flex
+            w="full"
+            h="full"
+            justifyContent={'center'}
+            alignItems={'center'}
+            minH={'50'}
+          >
+            <Loader />
+          </Flex>
+        ) : (
+          <FunnelChart data={funnelData} />
+        )}
       </Flex>
       <Divider orientation="horizontal" borderColor={'white.200'} opacity={1} />
       <Flex direction={'column'} gap={'8'}>
@@ -75,7 +97,19 @@ const TransientFunnelView = ({
         >
           Trend
         </Text>
-        {isLoading ? <Loader /> : <Trend data={trendsData} />}
+        {isLoading ? (
+          <Flex
+            w="full"
+            h="full"
+            justifyContent={'center'}
+            alignItems={'center'}
+            minH={'50'}
+          >
+            <Loader />
+          </Flex>
+        ) : (
+          <Trend data={trendsData} />
+        )}
       </Flex>
     </Flex>
   );
