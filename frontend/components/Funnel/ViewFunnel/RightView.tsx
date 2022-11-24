@@ -32,7 +32,7 @@ const RightView = ({
                 query={`${funnelConversion}%`}
                 styles={{ fontSize: 'sh-28', fontWeight: 700 }}
               >
-                {`${funnelConversion}% Conversion `}
+                {`${funnelConversion}% Conversion last week`}
               </Highlight>
             </Text>
             <Text
