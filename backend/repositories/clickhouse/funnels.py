@@ -1,6 +1,4 @@
-import logging
 from pypika import (
-    Table,
     ClickHouseQuery,
     Criterion,
     AliasedQuery,
@@ -12,24 +10,13 @@ from pypika import (
 )
 from pypika import functions as fn
 from pypika.functions import Extract
-from fastapi import Depends
-from typing import List, Tuple, Dict
+from typing import List, Tuple
 
-from clickhouse import Clickhouse
 from domain.funnels.models import FunnelStep
+from repositories.clickhouse.events import Events
 
 
-class Funnels:
-    def __init__(self, clickhouse: Clickhouse = Depends()):
-        self.clickhouse = clickhouse
-        self.table = "events"
-        self.epoch_year = 1970
-
-    def execute_get_query(self, query: str, parameters: Dict):
-        logging.info(f"Executing query: {query}")
-        query_result = self.clickhouse.client.query(query=query, parameters=parameters)
-        return query_result.result_set
-
+class Funnels(Events):
     def get_conversion_trend(self, ds_id: str, steps: List[FunnelStep]) -> List[Tuple]:
         return self.execute_get_query(*self.build_trends_query(ds_id, steps))
 
@@ -38,22 +25,21 @@ class Funnels:
 
     def _builder(self, ds_id: str, steps: List[FunnelStep]):
         query = ClickHouseQuery
-        events = Table(self.table)
         parameters = {"ds_id": ds_id, "epoch_year": self.epoch_year}
 
         for i, step in enumerate(steps):
             parameters[f"event{i}"] = step.event
             sub_query = (
-                ClickHouseQuery.from_(events)
+                ClickHouseQuery.from_(self.table)
                 .select(
-                    events.user_id,
-                    fn.Min(events.timestamp).as_("ts"),
+                    self.table.user_id,
+                    fn.Min(self.table.timestamp).as_("ts"),
                 )
                 .where(
                     Criterion.all(
                         [
-                            events.datasource_id == Parameter("%(ds_id)s"),
-                            events.event_name == Parameter(f"%(event{i})s"),
+                            self.table.datasource_id == Parameter("%(ds_id)s"),
+                            self.table.event_name == Parameter(f"%(event{i})s"),
                         ]
                     )
                 )

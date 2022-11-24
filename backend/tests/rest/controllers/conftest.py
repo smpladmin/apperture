@@ -21,6 +21,7 @@ from domain.notifications.models import (
     NotificationType,
 )
 from domain.users.models import User
+from domain.edge.models import Edge, NodeSignificance
 
 
 @pytest.fixture(scope="module")
@@ -169,6 +170,38 @@ def app_service():
     future = asyncio.Future()
     service.find_user.return_value = future
     return service
+
+
+@pytest.fixture(scope="module")
+def edge_service():
+    edge_service_mock = mock.MagicMock()
+    Edge.get_settings = mock.MagicMock()
+    node_significance = [
+        NodeSignificance(
+            node="Video_Open",
+            node_hits=39268,
+            total_hits=374844,
+            node_users=8922,
+            total_users=28882,
+        )
+    ]
+    node_significance_future = asyncio.Future()
+    node_significance_future.set_result(node_significance)
+    edge_service_mock.get_node_significance.return_value = node_significance_future
+    return edge_service_mock
+
+
+@pytest.fixture(scope="module")
+def node_significance_response():
+    return [
+        {
+            "node": "Video_Open",
+            "nodeHits": 39268,
+            "totalHits": 374844,
+            "nodeUsers": 8922,
+            "totalUsers": 28882,
+        }
+    ]
 
 
 @pytest.fixture(scope="module")

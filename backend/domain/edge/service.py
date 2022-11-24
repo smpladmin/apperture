@@ -374,69 +374,86 @@ class EdgeService:
 
     # Remove facet in-future, might cause performance issues.
     async def get_node_significance(
-        self, datasource_id: str, node: str, start_date: str, end_date: str
+        self, datasource: DataSource, node: str, start_date: str, end_date: str
     ) -> list[NodeSignificance]:
-        start_date = dt.strptime(start_date, "%Y-%m-%d")
-        end_date = dt.strptime(end_date, "%Y-%m-%d")
-        pipeline = [
-            {
-                "$match": {
-                    "$and": [
-                        {"datasource_id": PydanticObjectId(datasource_id)},
-                        {"date": {"$gte": start_date}},
-                        {"date": {"$lte": end_date}},
-                    ]
-                }
-            },
-            {
-                "$facet": {
-                    "total_count": [
-                        {
-                            "$group": {
-                                "_id": {"_class_id": "$_class_id"},
-                                "hits": {"$sum": "$hits"},
-                            }
-                        }
-                    ],
-                    "current_node_count": [
-                        {"$match": {"current_event": node}},
-                        {
-                            "$group": {
-                                "_id": {"event": "$current_event"},
-                                "hits": {"$sum": "$hits"},
-                            }
-                        },
-                    ],
-                    "previous_node_count": [
-                        {"$match": {"previous_event": node}},
-                        {
-                            "$group": {
-                                "_id": {"event": "$previous_event"},
-                                "hits": {"$sum": "$hits"},
-                            }
-                        },
-                    ],
-                }
-            },
-            {
-                "$project": {
-                    "node": node,
-                    "node_hits": {
-                        "$ifNull": [
-                            {"$max": "$current_node_count.hits"},
-                            {"$max": "$previous_node_count.hits"},
+        if datasource.provider == IntegrationProvider.GOOGLE:
+            start_date = dt.strptime(start_date, "%Y-%m-%d")
+            end_date = dt.strptime(end_date, "%Y-%m-%d")
+            pipeline = [
+                {
+                    "$match": {
+                        "$and": [
+                            {"datasource_id": datasource.id},
+                            {"date": {"$gte": start_date}},
+                            {"date": {"$lte": end_date}},
                         ]
-                    },
-                    "total_hits": {"$max": "$total_count.hits"},
-                }
-            },
-        ]
+                    }
+                },
+                {
+                    "$facet": {
+                        "total_count": [
+                            {
+                                "$group": {
+                                    "_id": {"_class_id": "$_class_id"},
+                                    "hits": {"$sum": "$hits"},
+                                }
+                            }
+                        ],
+                        "current_node_count": [
+                            {"$match": {"current_event": node}},
+                            {
+                                "$group": {
+                                    "_id": {"event": "$current_event"},
+                                    "hits": {"$sum": "$hits"},
+                                }
+                            },
+                        ],
+                        "previous_node_count": [
+                            {"$match": {"previous_event": node}},
+                            {
+                                "$group": {
+                                    "_id": {"event": "$previous_event"},
+                                    "hits": {"$sum": "$hits"},
+                                }
+                            },
+                        ],
+                    }
+                },
+                {
+                    "$project": {
+                        "node": node,
+                        "node_hits": {
+                            "$ifNull": [
+                                {"$max": "$current_node_count.hits"},
+                                {"$max": "$previous_node_count.hits"},
+                            ]
+                        },
+                        "total_hits": {"$max": "$total_count.hits"},
+                    }
+                },
+            ]
 
-        return (
-            await BaseEdge.find()
-            .aggregate(pipeline, projection_model=NodeSignificance)
-            .to_list()
-        )
+            return (
+                await BaseEdge.find()
+                .aggregate(pipeline, projection_model=NodeSignificance)
+                .to_list()
+            )
+        else:
+            ((node_users, total_users, node_hits, total_hits), ) = self.edges.get_node_significance(
+                ds_id=str(datasource.id),
+                event_name=node,
+                start_date=start_date,
+                end_date=end_date,
+            )
+            return [
+                NodeSignificance(
+                    node=node,
+                    node_users=node_users,
+                    total_users=total_users,
+                    node_hits=node_hits,
+                    total_hits=total_hits,
+                )
+            ]
 
     async def get_node_data(
         self, nodes: List, ds_id: str, days_ago: int
