@@ -50,6 +50,18 @@ export const _getEdges = async (token: string, dsId: string) => {
   }
 };
 
+export const _getNodes = async (token: string, dsId: string) => {
+  try {
+    const res = await ApperturePrivateAPI.get(`/datasources/${dsId}/nodes`, {
+      headers: { Authorization: token },
+    });
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};
+
 export const getTrendsData = async (
   dsId: string,
   nodeId: string,

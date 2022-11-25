@@ -54,6 +54,16 @@ export const _getComputedFunnelData = async (
   }
 };
 
+export const getComputedFunnelData = async (funnelId: string) => {
+  try {
+    const res = await AppertureAPI.get(`/funnels/${funnelId}`);
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};
+
 export const updateFunnel = async (
   funnelId: string,
   dsId: string,
@@ -83,6 +93,16 @@ export const _getComputedTrendsData = async (
     const res = await ApperturePrivateAPI.get(`/funnels/${funnelId}/trends`, {
       headers: { Authorization: token },
     });
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};
+
+export const getComputedTrendsData = async (funnelId: string) => {
+  try {
+    const res = await AppertureAPI.get(`/funnels/${funnelId}/trends`);
     return res.data;
   } catch (e) {
     console.error((e as AxiosError).message);
