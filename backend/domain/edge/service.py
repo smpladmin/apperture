@@ -17,6 +17,7 @@ from domain.edge.models import (
     NodeSankey,
     NodeSignificance,
     NotificationNodeData,
+    TrendType,
 )
 from domain.notifications.models import (
     Notification,
@@ -195,59 +196,79 @@ class EdgeService:
 
     async def get_node_trends(
         self,
-        datasource_id: str,
+        datasource: DataSource,
         node: str,
-        trend_type: str,
+        trend_type: TrendType,
         start_date: str,
         end_date: str,
         is_entrance_node: bool,
     ) -> list[NodeTrend]:
-        event = "previous_event" if is_entrance_node else "current_event"
-        start_date = dt.strptime(start_date, "%Y-%m-%d")
-        end_date = dt.strptime(end_date, "%Y-%m-%d")
-        pipeline = [
-            {
-                "$match": {
-                    "$and": [
-                        {"datasource_id": PydanticObjectId(datasource_id)},
-                        {f"{event}": node},
-                        {"date": {"$gte": start_date}},
-                        {"date": {"$lte": end_date}},
-                    ]
-                }
-            },
-            {
-                "$group": {
-                    "_id": {
-                        f"{event}": f"${event}",
-                        f"{trend_type}": {f"${trend_type}": "$date"},
-                        "year": {"$year": "$date"},
-                    },
-                    "node": {"$max": f"${event}"},
-                    "hits": {"$sum": "$hits"},
-                    "users": {"$sum": "$users"},
-                    "date": {"$max": "$date"},
-                    "week": {"$max": {"$week": "$date"}},
-                    "month": {"$max": {"$month": "$date"}},
-                    "year": {"$max": {"$year": "$date"}},
-                    "start_date": {"$min": "$date"},
-                    "end_date": {"$max": "$date"},
-                }
-            },
-            {"$sort": {"year": 1, f"{trend_type}": 1}},
-        ]
+        if datasource.provider == IntegrationProvider.GOOGLE:
+            event = "previous_event" if is_entrance_node else "current_event"
+            start_date = dt.strptime(start_date, "%Y-%m-%d")
+            end_date = dt.strptime(end_date, "%Y-%m-%d")
+            pipeline = [
+                {
+                    "$match": {
+                        "$and": [
+                            {"datasource_id": datasource.id},
+                            {f"{event}": node},
+                            {"date": {"$gte": start_date}},
+                            {"date": {"$lte": end_date}},
+                        ]
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": {
+                            f"{event}": f"${event}",
+                            f"{trend_type}": {f"${trend_type}": "$date"},
+                            "year": {"$year": "$date"},
+                        },
+                        "node": {"$max": f"${event}"},
+                        "hits": {"$sum": "$hits"},
+                        "users": {"$sum": "$users"},
+                        "trend": {"$max": {f"${trend_type}": "$date"}},
+                        "year": {"$max": {"$year": "$date"}},
+                        "start_date": {"$min": "$date"},
+                        "end_date": {"$max": "$date"},
+                    }
+                },
+                {"$sort": {"year": 1, "trend": 1}},
+            ]
 
-        if trend_type == "date":
-            pipeline[1]["$group"]["_id"] = {
-                "current_event": "$current_event",
-                "date": "$date",
-            }
+            if trend_type == "date":
+                pipeline[1]["$group"]["_id"] = {
+                    "current_event": "$current_event",
+                    "date": "$date",
+                }
+                pipeline[1]["$group"]["trend"] = {"$max": "$date"}
 
-        return (
-            await BaseEdge.find()
-            .aggregate(pipeline, projection_model=NodeTrend)
-            .to_list()
-        )
+            return (
+                await BaseEdge.find()
+                .aggregate(pipeline, projection_model=NodeTrend)
+                .to_list()
+            )
+        else:
+            trends = self.edges.get_node_trends(
+                ds_id=str(datasource.id),
+                event_name=node,
+                start_date=start_date,
+                end_date=end_date,
+                trend_type=trend_type,
+            )
+            return [
+                NodeTrend(
+                    node=node,
+                    year=year,
+                    trend=trend,
+                    users=users,
+                    hits=hits,
+                    start_date=start_date,
+                    end_date=end_date,
+                )
+                for (year, trend, users, hits, start_date, end_date) in trends
+            ]
 
     def create_others_node(self, nodes, threshold):
         if len(nodes) > threshold:
@@ -439,7 +460,9 @@ class EdgeService:
                 .to_list()
             )
         else:
-            ((node_users, total_users, node_hits, total_hits), ) = self.edges.get_node_significance(
+            (
+                (node_users, total_users, node_hits, total_hits),
+            ) = self.edges.get_node_significance(
                 ds_id=str(datasource.id),
                 event_name=node,
                 start_date=start_date,

@@ -8,7 +8,7 @@ from rest.dtos.edges import (
     NodeSankeyResponse,
     NodeSignificanceResponse,
 )
-
+from domain.edge.models import TrendType
 from rest.middlewares import validate_jwt
 
 
@@ -35,14 +35,21 @@ async def get_edges(
 async def get_trend_nodes(
     ds_id: str,
     node: str,
-    trend_type: str,
+    trend_type: TrendType,
     start_date: str = "1970-01-01",
     end_date: str = dt.today().strftime("%Y-%m-%d"),
     edge_service: EdgeService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
     is_entrance_node = True if node == "Entrance" else False
+    datasource = await ds_service.get_datasource(ds_id)
     return await edge_service.get_node_trends(
-        ds_id, node, trend_type, start_date, end_date, is_entrance_node
+        datasource=datasource,
+        node=node,
+        trend_type=trend_type,
+        start_date=start_date,
+        end_date=end_date,
+        is_entrance_node=is_entrance_node,
     )
 
 

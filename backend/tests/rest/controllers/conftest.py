@@ -21,7 +21,7 @@ from domain.notifications.models import (
     NotificationType,
 )
 from domain.users.models import User
-from domain.edge.models import Edge, NodeSignificance
+from domain.edge.models import Edge, NodeSignificance, NodeTrend
 
 
 @pytest.fixture(scope="module")
@@ -185,9 +185,32 @@ def edge_service():
             total_users=28882,
         )
     ]
+    node_trends = [
+        NodeTrend(
+            node="test",
+            year=2022,
+            trend=1,
+            users=1111,
+            hits=6483,
+            start_date=datetime.strptime("2022-11-06", "%Y-%m-%d"),
+            end_date=datetime.strptime("2022-11-12", "%Y-%m-%d"),
+        ),
+        NodeTrend(
+            node="test",
+            year=2022,
+            trend=2,
+            users=1371,
+            hits=6972,
+            start_date=datetime.strptime("2022-11-13", "%Y-%m-%d"),
+            end_date=datetime.strptime("2022-11-19", "%Y-%m-%d"),
+        ),
+    ]
     node_significance_future = asyncio.Future()
     node_significance_future.set_result(node_significance)
     edge_service_mock.get_node_significance.return_value = node_significance_future
+    node_trends_future = asyncio.Future()
+    node_trends_future.set_result(node_trends)
+    edge_service_mock.get_node_trends.return_value = node_trends_future
     return edge_service_mock
 
 
@@ -201,6 +224,30 @@ def node_significance_response():
             "nodeUsers": 8922,
             "totalUsers": 28882,
         }
+    ]
+
+
+@pytest.fixture(scope="module")
+def node_trends_response():
+    return [
+        {
+            "node": "test",
+            "users": 1111,
+            "hits": 6483,
+            "year": 2022,
+            "trend": 1,
+            "startDate": "2022-11-06T00:00:00",
+            "endDate": "2022-11-12T00:00:00",
+        },
+        {
+            "node": "test",
+            "users": 1371,
+            "hits": 6972,
+            "year": 2022,
+            "trend": 2,
+            "startDate": "2022-11-13T00:00:00",
+            "endDate": "2022-11-19T00:00:00",
+        },
     ]
 
 
