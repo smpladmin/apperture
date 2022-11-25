@@ -31,7 +31,7 @@ def test_get_node_significance(client_init, edge_service, node_significance_resp
 
     kwargs.pop("datasource")
     assert {
-        "end_date": "2022-11-25",
+        "end_date": "2022-11-24",
         "node": "'Login'",
         "start_date": "1970-01-01",
     } == kwargs
