@@ -2,6 +2,7 @@ from datetime import datetime as dt
 from fastapi import APIRouter, Depends
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
+from domain.events.service import EventsService
 from rest.dtos.edges import (
     AggregatedEdgeResponse,
     NodeTrendResponse,
@@ -29,6 +30,14 @@ async def get_edges(
 ):
     datasource = await ds_service.get_datasource(ds_id)
     return await edge_service.get_edges(datasource, start_date, end_date)
+
+
+@router.get("/datasources/{ds_id}/nodes")
+async def get_edges(
+    ds_id: str,
+    event_service: EventsService = Depends(),
+):
+    return await event_service.get_unique_nodes(ds_id)
 
 
 @router.get("/datasources/{ds_id}/trends", response_model=list[NodeTrendResponse])

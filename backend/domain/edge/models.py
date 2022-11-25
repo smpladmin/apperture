@@ -53,6 +53,11 @@ class AggregatedEdge(BaseModel):
     hits: int
 
 
+class Node(BaseModel):
+    id: str
+    name: str
+
+
 class NodeTrend(BaseModel):
     node: str
     users: int
