@@ -9,6 +9,12 @@ WORKDIR /code
 COPY package*.json /code/
 RUN npm ci --include=dev
 
+FROM base as tests
+WORKDIR /code
+COPY --from=deps /code/node_modules ./node_modules
+COPY . .
+RUN npm run test
+
 FROM base as builder
 WORKDIR /code
 COPY --from=deps /code/node_modules ./node_modules

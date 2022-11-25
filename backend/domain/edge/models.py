@@ -59,6 +59,11 @@ class TrendType(str, Enum):
     DATE = "date"
 
 
+class Node(BaseModel):
+    id: str
+    name: str
+
+
 class NodeTrend(BaseModel):
     node: str
     users: int

@@ -32,7 +32,12 @@ const TransientFunnelView = ({
             <Loader />
           ) : (
             <>
-              <Text fontSize={'sh-18'} lineHeight={'sh-18'} fontWeight={'500'}>
+              <Text
+                fontSize={'sh-18'}
+                lineHeight={'sh-18'}
+                fontWeight={'500'}
+                data-testid={'funnel-conversion'}
+              >
                 <Highlight
                   query={`${funnelConversion}%`}
                   styles={{ fontSize: 'sh-28', fontWeight: 700 }}
