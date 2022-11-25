@@ -27,7 +27,8 @@ class TestSegmentsRepository:
             'FROM "events" '
             'WHERE "datasource_id"=%(ds_id)s '
             'GROUP BY "user_id" '
-            'ORDER BY "event0" DESC'
+            'ORDER BY "event0" DESC '
+            "LIMIT 100"
         )
 
     def test_build_segment_query_without_filters(self):
@@ -41,7 +42,8 @@ class TestSegmentsRepository:
             'SELECT "user_id" '
             'FROM "events" '
             'WHERE "datasource_id"=%(ds_id)s '
-            'GROUP BY "user_id"'
+            'GROUP BY "user_id" '
+            "LIMIT 100"
         )
 
     def test_build_segment_query_filters_with_operator(self):
@@ -69,5 +71,6 @@ class TestSegmentsRepository:
             'WHERE "datasource_id"=%(ds_id)s '
             'GROUP BY "user_id" '
             'HAVING "event0">=5 AND "event1"<5 AND "event2"=1 '
-            'ORDER BY "event0" DESC'
+            'ORDER BY "event0" DESC '
+            "LIMIT 100"
         )
