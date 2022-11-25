@@ -4,7 +4,13 @@ from collections import namedtuple
 from unittest.mock import AsyncMock, MagicMock
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
-from domain.edge.models import AggregatedEdge, BaseEdge, NodeSignificance
+from domain.edge.models import (
+    AggregatedEdge,
+    BaseEdge,
+    NodeSignificance,
+    NodeTrend,
+    TrendType,
+)
 
 from domain.edge.service import EdgeService
 
@@ -221,5 +227,146 @@ class TestEdgeService:
                 "end_date": "2023-01-01",
                 "event_name": "test",
                 "start_date": "2022-01-01",
+            }
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_node_trends_google_date(self):
+        await self.service.get_node_trends(
+            datasource=self.ga_datasource,
+            node="test",
+            start_date="2022-01-01",
+            end_date="2023-01-01",
+            trend_type=TrendType.DATE,
+            is_entrance_node=False,
+        )
+        self.agg_mock.assert_called_once_with(
+            [
+                {
+                    "$match": {
+                        "$and": [
+                            {"datasource_id": None},
+                            {"current_event": "test"},
+                            {"date": {"$gte": datetime(2022, 1, 1, 0, 0)}},
+                            {"date": {"$lte": datetime(2023, 1, 1, 0, 0)}},
+                        ]
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": {"current_event": "$current_event", "date": "$date"},
+                        "end_date": {"$max": "$date"},
+                        "hits": {"$sum": "$hits"},
+                        "node": {"$max": "$current_event"},
+                        "start_date": {"$min": "$date"},
+                        "trend": {"$max": "$date"},
+                        "users": {"$sum": "$users"},
+                        "year": {"$max": {"$year": "$date"}},
+                    }
+                },
+                {"$sort": {"trend": 1, "year": 1}},
+            ],
+            projection_model=NodeTrend,
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_node_trends_google_week(self):
+        await self.service.get_node_trends(
+            datasource=self.ga_datasource,
+            node="test",
+            start_date="2022-01-01",
+            end_date="2023-01-01",
+            trend_type=TrendType.WEEK,
+            is_entrance_node=True,
+        )
+        self.agg_mock.assert_called_once_with(
+            [
+                {
+                    "$match": {
+                        "$and": [
+                            {"datasource_id": None},
+                            {"previous_event": "test"},
+                            {"date": {"$gte": datetime(2022, 1, 1, 0, 0)}},
+                            {"date": {"$lte": datetime(2023, 1, 1, 0, 0)}},
+                        ]
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": {
+                            "previous_event": "$previous_event",
+                            "week": {"$week": "$date"},
+                            "year": {"$year": "$date"},
+                        },
+                        "end_date": {"$max": "$date"},
+                        "hits": {"$sum": "$hits"},
+                        "node": {"$max": "$previous_event"},
+                        "start_date": {"$min": "$date"},
+                        "trend": {"$max": {"$week": "$date"}},
+                        "users": {"$sum": "$users"},
+                        "year": {"$max": {"$year": "$date"}},
+                    }
+                },
+                {"$sort": {"trend": 1, "year": 1}},
+            ],
+            projection_model=NodeTrend,
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_node_trends_others(self):
+        self.datasource.id = "test-id"
+        self.service.edges.get_node_trends.return_value = (
+            (
+                2022,
+                1,
+                1111,
+                6488,
+                datetime(2022, 11, 6, 0, 0),
+                datetime(2022, 11, 12, 0, 0),
+            ),
+            (
+                2022,
+                2,
+                1371,
+                6972,
+                datetime(2022, 11, 13, 0, 0),
+                datetime(2022, 11, 19, 0, 0),
+            ),
+        )
+        assert [
+            NodeTrend(
+                node="test",
+                year=2022,
+                trend=1,
+                users=1111,
+                hits=6488,
+                start_date=datetime(2022, 11, 6, 0, 0),
+                end_date=datetime(2022, 11, 12, 0, 0),
+            ),
+            NodeTrend(
+                node="test",
+                year=2022,
+                trend=2,
+                users=1371,
+                hits=6972,
+                start_date=datetime(2022, 11, 13, 0, 0),
+                end_date=datetime(2022, 11, 19, 0, 0),
+            ),
+        ] == await self.service.get_node_trends(
+            datasource=self.datasource,
+            node="test",
+            start_date="2022-01-01",
+            end_date="2023-01-01",
+            trend_type=TrendType.WEEK,
+            is_entrance_node=False,
+        )
+
+        self.service.edges.get_node_trends.assert_called_once_with(
+            **{
+                "ds_id": "test-id",
+                "end_date": "2023-01-01",
+                "event_name": "test",
+                "start_date": "2022-01-01",
+                "trend_type": TrendType.WEEK,
             }
         )

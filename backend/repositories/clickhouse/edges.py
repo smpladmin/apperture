@@ -4,11 +4,13 @@ from textwrap import dedent
 from pypika import (
     ClickHouseQuery,
     Criterion,
-    Parameter,
     functions as fn,
     AliasedQuery,
     CustomFunction,
+    DatePart,
 )
+from pypika.functions import Extract
+
 from repositories.clickhouse.events import Events
 
 
@@ -69,22 +71,15 @@ class Edges(Events):
     def build_node_significance_query(
         self, ds_id: str, event_name: str, start_date: str, end_date: str
     ):
-        date_func = CustomFunction("DATE", ["timestamp"])
-        parameters = {"ds_id": ds_id, "event_name": event_name}
+        parameters = {
+            "ds_id": ds_id,
+            "event_name": event_name,
+            "start_date": start_date,
+            "end_date": end_date,
+        }
         query = ClickHouseQuery
-        total_criterion = [
-            self.table.datasource_id == Parameter("%(ds_id)s"),
-            date_func(self.table.timestamp) >= start_date,
-            date_func(self.table.timestamp) <= end_date,
-        ]
-        event_criterion = [
-            self.table.datasource_id == Parameter("%(ds_id)s"),
-            self.table.event_name == Parameter("%(event_name)s"),
-            date_func(self.table.timestamp) >= start_date,
-            date_func(self.table.timestamp) <= end_date,
-        ]
-        event = self._build_subquery(criterion=event_criterion)
-        total = self._build_subquery(criterion=total_criterion)
+        event = self._build_subquery(criterion=self.event_criterion)
+        total = self._build_subquery(criterion=self.total_criterion)
 
         query = query.with_(event, "event").with_(total, "total")
         query = query.from_(AliasedQuery("event")).from_(AliasedQuery("total"))
@@ -94,4 +89,50 @@ class Edges(Events):
             AliasedQuery("event").hits,
             AliasedQuery("total").hits,
         )
+        return query.get_sql(with_alias=True), parameters
+
+    def get_node_trends(
+        self,
+        ds_id: str,
+        event_name: str,
+        start_date: str,
+        end_date: str,
+        trend_type: str,
+    ):
+        return self.execute_get_query(
+            *self.build_node_trends_query(
+                ds_id, event_name, start_date, end_date, trend_type
+            )
+        )
+
+    def build_node_trends_query(
+        self,
+        ds_id: str,
+        event_name: str,
+        start_date: str,
+        end_date: str,
+        trend_type: str,
+    ):
+        parameters = {
+            "ds_id": ds_id,
+            "event_name": event_name,
+            "start_date": start_date,
+            "end_date": end_date,
+        }
+        trend_type_func = CustomFunction(f"{trend_type}", ["timestamp"])
+        query = ClickHouseQuery.from_(self.table)
+        query = (
+            query.select(
+                Extract(DatePart.year, self.table.timestamp),
+                trend_type_func(self.table.timestamp),
+                fn.Count(self.table.user_id).distinct().as_("users"),
+                fn.Count("*").as_("hits"),
+                fn.Min(self.table.timestamp).as_("start_date"),
+                fn.Max(self.table.timestamp).as_("end_date"),
+            )
+            .where(Criterion.all(self.event_criterion))
+            .groupby(1, 2)
+            .orderby(2, 1)
+        )
+
         return query.get_sql(with_alias=True), parameters
