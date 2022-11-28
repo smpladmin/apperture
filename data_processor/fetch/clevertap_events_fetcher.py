@@ -15,13 +15,19 @@ class ClevertapEventsFetcher:
             "Content-Type": "application/json",
         }
         self.params = (("batch_size", "50000"),)
-        self.date = date.replace("-", "")
-        self.request_data = '{"event_name":"UTM Visited","from":20221117,"to":20221117}'
+        self.date = "".join(date.split("-")[::-1])
+        self.request_data = (
+            f'"event_name":"UTM Visited","from":{self.date},"to":{self.date} '
+        )
+        self.request_data = "{" + self.request_data + "}"
         self.url = "https://api.clevertap.com"
         self.data_url = f"{self.url}/1/events.json"
-        self.cursor = self.get_start_cursor()
 
     def get_start_cursor(self):
+
+        logging.info(
+            f"Beginning to fetch events data from start={self.date} & end={self.date}"
+        )
         requestCursor = requests.post(
             self.data_url,
             headers=self.headers,
@@ -38,9 +44,8 @@ class ClevertapEventsFetcher:
         return json.loads(events_data_response.content)
 
     def fetch(self):
-        logging.info(
-            f"Beginning to fetch events data from start={self.date} & end={self.date}"
-        )
+        self.cursor = self.get_start_cursor()
+
         while self.cursor:
             response = self.open()
             if "records" in response:
@@ -48,12 +53,11 @@ class ClevertapEventsFetcher:
             else:
                 logging.info("Fetching ends: {}")
                 break
-            df = pd.json_normalize(events_data)
-            logging.info(f"Event data successfully fetched : {df.shape}")
-            yield df
+            logging.info(
+                f"Event data successfully fetched : {0}".format(len(events_data))
+            )
+            yield events_data
             if "next_cursor" in response:
                 self.cursor = response["next_cursor"]
             else:
                 self.cursor = None
-
-        return self.cursor

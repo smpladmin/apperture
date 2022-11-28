@@ -9,7 +9,7 @@ from store.events_saver import EventsSaver
 from event_processors.clevertap_event_processor import ClevertapEventProcessor
 
 
-class AmplitudeEventsStrategy:
+class ClevertapEventsStrategy:
     def __init__(
         self, datasource: DataSource, credential: Credential, runlog_id: str, date: str
     ):
@@ -26,15 +26,15 @@ class AmplitudeEventsStrategy:
         try:
             self.runlog_service.update_started(self.runlog_id)
             logging.info(f"Fetching events data for date - {self.date}")
-            events_data = self.fetcher.fetch()
-            logging.info(f"Processing events data for date - {self.date}")
-            df = self.event_processor.process(events_data)
-            logging.info(f"Saving events data for date - {self.date}")
-            self.saver.save(
-                self.datasource.id,
-                IntegrationProvider.CLEVERTAP,
-                df,
-            )
+            for events_data in self.fetcher.fetch():
+                logging.info(f"Processing events data for date - {self.date}")
+                df = self.event_processor.process(events_data)
+                logging.info(f"Saving events data for date - {self.date}")
+                self.saver.save(
+                    self.datasource.id,
+                    IntegrationProvider.CLEVERTAP,
+                    df,
+                )
 
             self.runlog_service.update_completed(self.runlog_id)
         except Exception as e:
