@@ -284,112 +284,172 @@ class EdgeService:
 
         return nodes
 
-    def create_exits_node(self, outflow_node, hits, users):
+    def create_exits_node(
+        self, outflow_node: NodeSankey, hits: float, exits: bool = True
+    ):
         exits_node = deepcopy(outflow_node)
-        exits_node.users = users
         exits_node.hits = hits
         exits_node.node = "Exits"
-        exits_node.current_event = "Exits"
+        if exits:
+            exits_node.current_event = "Exits"
+        else:
+            exits_node.previous_event = "Entrances"
         return exits_node
 
     async def get_node_sankey(
-        self, datasource_id: str, node: str, start_date: str, end_date: str
+        self, datasource: DataSource, node: str, start_date: str, end_date: str
     ) -> list[NodeSankey]:
-        start_date = dt.strptime(start_date, "%Y-%m-%d")
-        end_date = dt.strptime(end_date, "%Y-%m-%d")
-        pipeline = [
-            {
-                "$match": {
-                    "$and": [
-                        {"datasource_id": PydanticObjectId(datasource_id)},
-                        {"current_event": node},
-                        {"date": {"$gte": start_date}},
-                        {"date": {"$lte": end_date}},
-                    ]
-                }
-            },
-            {
-                "$group": {
-                    "_id": {"previous_event": "$previous_event"},
-                    "node": {"$max": "$previous_event"},
-                    "current_event": {"$max": "$current_event"},
-                    "previous_event": {"$max": "$previous_event"},
-                    "hits": {"$sum": "$hits"},
-                    "users": {"$sum": "$users"},
-                    "flow": {"$max": "inflow"},
-                    "hits_percentage": {"$max": 0},
-                    "users_percentage": {"$max": 0},
-                }
-            },
-            {"$sort": {"hits": -1}},
-            {
-                "$unionWith": {
-                    "coll": "edges",
-                    "pipeline": [
-                        {
-                            "$match": {
-                                "$and": [
-                                    {"datasource_id": PydanticObjectId(datasource_id)},
-                                    {"previous_event": node},
-                                    {"date": {"$gte": start_date}},
-                                    {"date": {"$lte": end_date}},
-                                ]
-                            }
-                        },
-                        {
-                            "$group": {
-                                "_id": {"current_event": "$current_event"},
-                                "node": {"$max": "$current_event"},
-                                "current_event": {"$max": "$current_event"},
-                                "previous_event": {"$max": "$previous_event"},
-                                "hits": {"$sum": "$hits"},
-                                "users": {"$sum": "$users"},
-                                "flow": {"$max": "outflow"},
-                                "hits_percentage": {"$max": 0},
-                                "users_percentage": {"$max": 0},
-                            }
-                        },
-                        {"$sort": {"hits": -1}},
-                    ],
-                }
-            },
-        ]
+        if datasource.provider == IntegrationProvider.GOOGLE:
+            start_date = dt.strptime(start_date, "%Y-%m-%d")
+            end_date = dt.strptime(end_date, "%Y-%m-%d")
+            pipeline = [
+                {
+                    "$match": {
+                        "$and": [
+                            {"datasource_id": datasource.id},
+                            {"current_event": node},
+                            {"date": {"$gte": start_date}},
+                            {"date": {"$lte": end_date}},
+                        ]
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": {"previous_event": "$previous_event"},
+                        "node": {"$max": "$previous_event"},
+                        "current_event": {"$max": "$current_event"},
+                        "previous_event": {"$max": "$previous_event"},
+                        "hits": {"$sum": "$hits"},
+                        "users": {"$sum": "$users"},
+                        "flow": {"$max": "inflow"},
+                        "hits_percentage": {"$max": 0},
+                        "users_percentage": {"$max": 0},
+                    }
+                },
+                {"$sort": {"hits": -1}},
+                {
+                    "$unionWith": {
+                        "coll": "edges",
+                        "pipeline": [
+                            {
+                                "$match": {
+                                    "$and": [
+                                        {"datasource_id": datasource.id},
+                                        {"previous_event": node},
+                                        {"date": {"$gte": start_date}},
+                                        {"date": {"$lte": end_date}},
+                                    ]
+                                }
+                            },
+                            {
+                                "$group": {
+                                    "_id": {"current_event": "$current_event"},
+                                    "node": {"$max": "$current_event"},
+                                    "current_event": {"$max": "$current_event"},
+                                    "previous_event": {"$max": "$previous_event"},
+                                    "hits": {"$sum": "$hits"},
+                                    "users": {"$sum": "$users"},
+                                    "flow": {"$max": "outflow"},
+                                    "hits_percentage": {"$max": 0},
+                                    "users_percentage": {"$max": 0},
+                                }
+                            },
+                            {"$sort": {"hits": -1}},
+                        ],
+                    }
+                },
+            ]
 
-        sankey_nodes = (
-            await BaseEdge.find()
-            .aggregate(pipeline, projection_model=NodeSankey)
-            .to_list()
-        )
+            sankey_nodes = (
+                await BaseEdge.find()
+                .aggregate(pipeline, projection_model=NodeSankey)
+                .to_list()
+            )
+        else:
+            sankey_nodes = self.edges.get_node_sankey(
+                ds_id=str(datasource.id),
+                event_name=node,
+                start_date=start_date,
+                end_date=end_date,
+            )
+            sankey_nodes = [
+                NodeSankey(
+                    flow=flow,
+                    node=node,
+                    current_event=curr_event,
+                    previous_event=prev_event,
+                    hits=hits,
+                    users=users,
+                    hits_percentage=0,
+                    users_percentage=0,
+                )
+                for (flow, prev_event, curr_event, hits, users) in sankey_nodes
+            ]
+
         inflow_nodes = [node for node in sankey_nodes if node.flow == "inflow"]
         outflow_nodes = [node for node in sankey_nodes if node.flow == "outflow"]
-        if len(inflow_nodes) > 5:
-            inflow_nodes = self.create_others_node(inflow_nodes, 5)
-        if len(outflow_nodes) > 4:
-            outflow_nodes = self.create_others_node(outflow_nodes, 4)
-
-        # Temporary fix for sankey duplicate names
-        for node in inflow_nodes:
-            node.previous_event += " "
 
         inflow_hits = sum([node.hits for node in inflow_nodes])
         outflow_hits = sum([node.hits for node in outflow_nodes])
         inflow_users = sum([node.users for node in inflow_nodes])
         outflow_users = sum([node.users for node in outflow_nodes])
+
+        inflow_nodes_threshold = (
+            5
+            if (
+                datasource.provider == IntegrationProvider.GOOGLE
+                or (inflow_hits > outflow_hits)
+            )
+            else 4
+        )
+        outflow_nodes_threshold = (
+            5
+            if (
+                datasource.provider != IntegrationProvider.GOOGLE
+                and (inflow_hits < outflow_hits)
+            )
+            else 4
+        )
+        if len(inflow_nodes) > inflow_nodes_threshold:
+            inflow_nodes = self.create_others_node(inflow_nodes, inflow_nodes_threshold)
+        if len(outflow_nodes) > outflow_nodes_threshold:
+            outflow_nodes = self.create_others_node(outflow_nodes, outflow_nodes_threshold)
+
+        # Temporary fix for sankey duplicate names
+        for node in inflow_nodes:
+            node.previous_event += " "
+
         if (len(outflow_nodes) > 0) and (inflow_hits > outflow_hits):
             outflow_nodes.append(
                 self.create_exits_node(
                     outflow_nodes[0],
                     inflow_hits - outflow_hits,
-                    inflow_users - outflow_users,
+                )
+            )
+        if (
+            (len(inflow_nodes) > 0)
+            and (inflow_hits < outflow_hits)
+            and datasource.provider != IntegrationProvider.GOOGLE
+        ):
+            inflow_nodes.append(
+                self.create_exits_node(
+                    inflow_nodes[0],
+                    outflow_hits - inflow_hits,
+                    exits=False,
                 )
             )
         sankey_nodes = inflow_nodes + outflow_nodes
         for node in sankey_nodes:
             node.hits_percentage = float(
                 "{:.2f}".format((node.hits * 100) / max(inflow_hits, outflow_hits))
+                if max(inflow_hits, outflow_hits) != 0
+                else 0
             )
-            # Placeholder for now
-            node.users_percentage = 0
+            node.users_percentage = float(
+                "{:.2f}".format((node.users * 100) / max(inflow_users, outflow_users))
+                if max(inflow_users, outflow_users) != 0
+                else 0
+            )
 
         return sankey_nodes
 
