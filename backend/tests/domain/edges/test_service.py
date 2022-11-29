@@ -10,6 +10,7 @@ from domain.edge.models import (
     NodeSignificance,
     NodeTrend,
     TrendType,
+    NodeSankey,
 )
 
 from domain.edge.service import EdgeService
@@ -368,5 +369,208 @@ class TestEdgeService:
                 "event_name": "test",
                 "start_date": "2022-01-01",
                 "trend_type": TrendType.WEEK,
+            }
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_node_sankey_google(self):
+        await self.service.get_node_sankey(
+            datasource=self.ga_datasource,
+            node="test",
+            start_date="2022-01-01",
+            end_date="2023-01-01",
+        )
+        self.agg_mock.assert_called_once_with(
+            [
+                {
+                    "$match": {
+                        "$and": [
+                            {"datasource_id": None},
+                            {"current_event": "test"},
+                            {"date": {"$gte": datetime(2022, 1, 1, 0, 0)}},
+                            {"date": {"$lte": datetime(2023, 1, 1, 0, 0)}},
+                        ]
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": {"previous_event": "$previous_event"},
+                        "node": {"$max": "$previous_event"},
+                        "current_event": {"$max": "$current_event"},
+                        "previous_event": {"$max": "$previous_event"},
+                        "hits": {"$sum": "$hits"},
+                        "users": {"$sum": "$users"},
+                        "flow": {"$max": "inflow"},
+                        "hits_percentage": {"$max": 0},
+                        "users_percentage": {"$max": 0},
+                    }
+                },
+                {"$sort": {"hits": -1}},
+                {
+                    "$unionWith": {
+                        "coll": "edges",
+                        "pipeline": [
+                            {
+                                "$match": {
+                                    "$and": [
+                                        {"datasource_id": None},
+                                        {"previous_event": "test"},
+                                        {"date": {"$gte": datetime(2022, 1, 1, 0, 0)}},
+                                        {"date": {"$lte": datetime(2023, 1, 1, 0, 0)}},
+                                    ]
+                                }
+                            },
+                            {
+                                "$group": {
+                                    "_id": {"current_event": "$current_event"},
+                                    "node": {"$max": "$current_event"},
+                                    "current_event": {"$max": "$current_event"},
+                                    "previous_event": {"$max": "$previous_event"},
+                                    "hits": {"$sum": "$hits"},
+                                    "users": {"$sum": "$users"},
+                                    "flow": {"$max": "outflow"},
+                                    "hits_percentage": {"$max": 0},
+                                    "users_percentage": {"$max": 0},
+                                }
+                            },
+                            {"$sort": {"hits": -1}},
+                        ],
+                    }
+                },
+            ],
+            projection_model=NodeSankey,
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_node_sankey_others(self):
+        self.datasource.id = "test-id"
+        self.service.edges.get_node_sankey.return_value = [
+            ("inflow", "WebView_Open", "$ae_session", 691, 294),
+            ("inflow", "Video_Open", "$ae_session", 374, 265),
+            ("inflow", "Topic_Click", "$ae_session", 336, 234),
+            ("inflow", "Safety_Net_Data", "$ae_session", 247, 246),
+            ("inflow", "Login", "$ae_session", 235, 232),
+            ("inflow", "Video_Seen", "$ae_session", 210, 152),
+            ("outflow", "$ae_session", "Chapter_Click", 454, 262),
+            ("outflow", "$ae_session", "WebView_Open", 391, 143),
+            ("outflow", "$ae_session", "Video_Open", 158, 115),
+            ("outflow", "$ae_session", "Topic_Click", 126, 78),
+            ("outflow", "$ae_session", "Video_Seen", 115, 65),
+            ("outflow", "$ae_session", "Download_Video", 79, 54),
+        ]
+        assert [
+            NodeSankey(
+                node="$ae_session",
+                current_event="$ae_session",
+                previous_event="WebView_Open ",
+                hits=691,
+                users=294,
+                flow="inflow",
+                hits_percentage=33.01,
+                users_percentage=20.66,
+            ),
+            NodeSankey(
+                node="$ae_session",
+                current_event="$ae_session",
+                previous_event="Video_Open ",
+                hits=374,
+                users=265,
+                flow="inflow",
+                hits_percentage=17.87,
+                users_percentage=18.62,
+            ),
+            NodeSankey(
+                node="$ae_session",
+                current_event="$ae_session",
+                previous_event="Topic_Click ",
+                hits=336,
+                users=234,
+                flow="inflow",
+                hits_percentage=16.05,
+                users_percentage=16.44,
+            ),
+            NodeSankey(
+                node="$ae_session",
+                current_event="$ae_session",
+                previous_event="Safety_Net_Data ",
+                hits=247,
+                users=246,
+                flow="inflow",
+                hits_percentage=11.8,
+                users_percentage=17.29,
+            ),
+            NodeSankey(
+                node="Others",
+                current_event="$ae_session",
+                previous_event="Others ",
+                hits=445,
+                users=384,
+                flow="inflow",
+                hits_percentage=21.26,
+                users_percentage=26.99,
+            ),
+            NodeSankey(
+                node="$ae_session",
+                current_event="Chapter_Click",
+                previous_event="$ae_session",
+                hits=454,
+                users=262,
+                flow="outflow",
+                hits_percentage=21.69,
+                users_percentage=18.41,
+            ),
+            NodeSankey(
+                node="$ae_session",
+                current_event="WebView_Open",
+                previous_event="$ae_session",
+                hits=391,
+                users=143,
+                flow="outflow",
+                hits_percentage=18.68,
+                users_percentage=10.05,
+            ),
+            NodeSankey(
+                node="$ae_session",
+                current_event="Video_Open",
+                previous_event="$ae_session",
+                hits=158,
+                users=115,
+                flow="outflow",
+                hits_percentage=7.55,
+                users_percentage=8.08,
+            ),
+            NodeSankey(
+                node="Others",
+                current_event="Others",
+                previous_event="$ae_session",
+                hits=320,
+                users=197,
+                flow="outflow",
+                hits_percentage=15.29,
+                users_percentage=13.84,
+            ),
+            NodeSankey(
+                node="Exits",
+                current_event="Exits",
+                previous_event="$ae_session",
+                hits=770,
+                users=262,
+                flow="outflow",
+                hits_percentage=36.79,
+                users_percentage=18.41,
+            ),
+        ] == await self.service.get_node_sankey(
+            datasource=self.datasource,
+            node="$ae_session",
+            start_date="2022-01-01",
+            end_date="2023-01-01",
+        )
+
+        self.service.edges.get_node_sankey.assert_called_once_with(
+            **{
+                "ds_id": "test-id",
+                "end_date": "2023-01-01",
+                "event_name": "$ae_session",
+                "start_date": "2022-01-01",
             }
         )

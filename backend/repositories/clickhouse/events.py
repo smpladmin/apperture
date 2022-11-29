@@ -29,7 +29,6 @@ class Events:
         logging.info(f"Executing query: {query}")
         logging.info(f"Parameters: {parameters}")
         query_result = self.clickhouse.client.query(query=query, parameters=parameters)
-        logging.debug(f"Query Result: {query_result.result_set}")
         return query_result.result_set
 
     def get_unique_events(self, datasource_id: str):

@@ -40,6 +40,26 @@ class TestEdgeRepository:
             'DATE("timestamp")>=%(start_date)s AND DATE("timestamp")<=%(end_date)s GROUP '
             "BY 1,2 ORDER BY 2,1"
         )
+        self.sankey_query = (
+            'WITH cte AS (SELECT "user_id",any("event_name") OVER(PARTITION BY "user_id" '
+            'ORDER BY "timestamp" ROWS BETWEEN 1 PRECEDING AND 0 PRECEDING) AS '
+            '"prev_event","event_name" AS "curr_event" FROM "events" WHERE '
+            '"datasource_id"=%(ds_id)s AND DATE("timestamp")>=%(start_date)s AND '
+            "DATE(\"timestamp\")<=%(end_date)s) SELECT 'inflow' AS "
+            '"direction","cte"."prev_event","cte"."curr_event",COUNT(*) AS '
+            '"hits",COUNT(DISTINCT "user_id") AS "users" FROM cte WHERE '
+            '"cte"."curr_event"=%(event_name)s AND "cte"."prev_event"<>%(event_name)s '
+            "GROUP BY 1,2,3 ORDER BY 4 DESC UNION ALL WITH cte AS (SELECT "
+            '"user_id",any("event_name") OVER(PARTITION BY "user_id" ORDER BY "timestamp" '
+            'ROWS BETWEEN 1 PRECEDING AND 0 PRECEDING) AS "prev_event","event_name" AS '
+            '"curr_event" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
+            'DATE("timestamp")>=%(start_date)s AND DATE("timestamp")<=%(end_date)s) '
+            "SELECT 'outflow' AS "
+            '"direction","cte"."prev_event","cte"."curr_event",COUNT(*) AS '
+            '"hits",COUNT(DISTINCT "user_id") AS "users" FROM cte WHERE '
+            '"cte"."curr_event"<>%(event_name)s AND "cte"."prev_event"=%(event_name)s '
+            "GROUP BY 1,2,3 ORDER BY 4 DESC"
+        )
 
     def test_get_edges(self):
         clickhouse = MagicMock()
@@ -124,3 +144,22 @@ class TestEdgeRepository:
             end_date=self.end_date,
             trend_type=TrendType.DATE,
         ) == (self.trends_query, self.parameters)
+
+    def test_get_node_sankey(self):
+        self.repo.get_node_sankey(
+            ds_id=self.datasource_id,
+            event_name=self.event_name,
+            start_date=self.start_date,
+            end_date=self.end_date,
+        )
+        self.repo.execute_get_query.assert_called_once_with(
+            self.sankey_query, self.parameters
+        )
+
+    def test_build_node_sankey_query(self):
+        assert self.repo.build_node_sankey_query(
+            ds_id=self.datasource_id,
+            event_name=self.event_name,
+            start_date=self.start_date,
+            end_date=self.end_date,
+        ) == (self.sankey_query, self.parameters)

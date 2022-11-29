@@ -413,7 +413,9 @@ class EdgeService:
         if len(inflow_nodes) > inflow_nodes_threshold:
             inflow_nodes = self.create_others_node(inflow_nodes, inflow_nodes_threshold)
         if len(outflow_nodes) > outflow_nodes_threshold:
-            outflow_nodes = self.create_others_node(outflow_nodes, outflow_nodes_threshold)
+            outflow_nodes = self.create_others_node(
+                outflow_nodes, outflow_nodes_threshold
+            )
 
         # Temporary fix for sankey duplicate names
         for node in inflow_nodes:
