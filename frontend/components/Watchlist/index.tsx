@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import Table from './Table';
 
 const Watchlist = () => {
-  const [selected] = useState(false);
+  const [selected, setSelected] = useState('all');
+
   return (
     <Box px={'30'} py={'9'} overflowY={'auto'}>
       <Flex justifyContent={'space-between'}>
@@ -26,47 +27,59 @@ const Watchlist = () => {
       </Flex>
 
       <Flex justifyContent={'flex-start'} mt={'6'}>
-        <RadioGroup>
+        <RadioGroup
+          value={selected}
+          onChange={(value) => {
+            console.log(value);
+            setSelected(value);
+          }}
+        >
           <Flex gap={'3'}>
-            <Button
+            <Flex
+              as={'label'}
               borderRadius={'100'}
               bg={'white.DEFAULT'}
               px={'6'}
               py={'2'}
               border={'1px'}
-              borderColor={selected ? 'black.100' : 'white.200'}
+              borderColor={selected === 'all' ? 'black.100' : 'white.200'}
+              cursor={'pointer'}
             >
               <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
                 All
               </Text>
               <Radio value={'all'} hidden />
-            </Button>
-            <Button
+            </Flex>
+            <Flex
+              as={'label'}
               borderRadius={'100'}
               bg={'white.DEFAULT'}
               px={'6'}
               py={'2'}
               border={'1px'}
-              borderColor={selected ? 'black.100' : 'white.200'}
+              borderColor={selected === 'event' ? 'black.100' : 'white.200'}
+              cursor={'pointer'}
             >
               <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
                 Events
               </Text>
-              <Radio value={'Events'} hidden />
-            </Button>
-            <Button
+              <Radio value={'event'} hidden />
+            </Flex>
+            <Flex
+              as={'label'}
               borderRadius={'100'}
               bg={'white.DEFAULT'}
               px={'6'}
               py={'2'}
               border={'1px'}
-              borderColor={selected ? 'black.100' : 'white.200'}
+              borderColor={selected === 'funnel' ? 'black.100' : 'white.200'}
+              cursor={'pointer'}
             >
               <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
                 Funnel
               </Text>
-              <Radio value={'Funnel'} hidden />
-            </Button>
+              <Radio value={'funnel'} hidden />
+            </Flex>
           </Flex>
         </RadioGroup>
       </Flex>
