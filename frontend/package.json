@@ -18,6 +18,7 @@
     "@emotion/is-prop-valid": "^1.2.0",
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
+    "@tanstack/react-table": "^8.7.0",
     "analytics": "^0.8.1",
     "axios": "^0.27.2",
     "framer-motion": "^7.3.6",
