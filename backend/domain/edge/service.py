@@ -273,7 +273,6 @@ class EdgeService:
     def create_others_node(self, nodes, threshold):
         if len(nodes) > threshold:
             others_node = nodes[threshold - 1]
-            others_node.node = "Others"
             if nodes[0].flow == "inflow":
                 others_node.previous_event = "Others"
             else:
@@ -289,12 +288,107 @@ class EdgeService:
     ):
         exits_node = deepcopy(outflow_node)
         exits_node.hits = hits
-        exits_node.node = "Exits"
         if exits:
             exits_node.current_event = "Exits"
         else:
             exits_node.previous_event = "Entrances"
         return exits_node
+
+    def inflow_nodes_threshold(
+        self, provider: IntegrationProvider, inflow_hits: int, outflow_hits: int
+    ):
+        return (
+            5
+            if (provider == IntegrationProvider.GOOGLE or (inflow_hits > outflow_hits))
+            else 4
+        )
+
+    def outflow_nodes_threshold(
+        self, provider: IntegrationProvider, inflow_hits: int, outflow_hits: int
+    ):
+        return (
+            5
+            if (provider != IntegrationProvider.GOOGLE and (inflow_hits < outflow_hits))
+            else 4
+        )
+
+    def calculate_sankey_percentages(
+        self,
+        sankey_nodes: List[NodeSankey],
+        inflow_hits: int,
+        outflow_hits: int,
+        inflow_users: int,
+        outflow_users: int,
+    ):
+        for node in sankey_nodes:
+            node.hits_percentage = float(
+                "{:.2f}".format((node.hits * 100) / max(inflow_hits, outflow_hits))
+                if max(inflow_hits, outflow_hits) != 0
+                else 0
+            )
+            node.users_percentage = float(
+                "{:.2f}".format((node.users * 100) / max(inflow_users, outflow_users))
+                if max(inflow_users, outflow_users) != 0
+                else 0
+            )
+        return sankey_nodes
+
+    def sankey_postprocessing(
+        self, sankey_nodes: List[NodeSankey], provider: IntegrationProvider
+    ):
+        inflow_nodes = [node for node in sankey_nodes if node.flow == "inflow"]
+        outflow_nodes = [node for node in sankey_nodes if node.flow == "outflow"]
+
+        inflow_hits = sum([node.hits for node in inflow_nodes])
+        outflow_hits = sum([node.hits for node in outflow_nodes])
+        inflow_users = sum([node.users for node in inflow_nodes])
+        outflow_users = sum([node.users for node in outflow_nodes])
+
+        inflow_nodes_threshold = self.inflow_nodes_threshold(
+            provider=provider, inflow_hits=inflow_hits, outflow_hits=outflow_hits
+        )
+        outflow_nodes_threshold = self.outflow_nodes_threshold(
+            provider=provider, inflow_hits=inflow_hits, outflow_hits=outflow_hits
+        )
+        if len(inflow_nodes) > inflow_nodes_threshold:
+            inflow_nodes = self.create_others_node(inflow_nodes, inflow_nodes_threshold)
+        if len(outflow_nodes) > outflow_nodes_threshold:
+            outflow_nodes = self.create_others_node(
+                outflow_nodes, outflow_nodes_threshold
+            )
+
+        # Temporary fix for sankey duplicate names
+        for node in inflow_nodes:
+            node.previous_event += " "
+
+        if (len(outflow_nodes) > 0) and (inflow_hits > outflow_hits):
+            outflow_nodes.append(
+                self.create_exits_node(
+                    outflow_nodes[0],
+                    inflow_hits - outflow_hits,
+                )
+            )
+        if (
+            (len(inflow_nodes) > 0)
+            and (inflow_hits < outflow_hits)
+            and provider != IntegrationProvider.GOOGLE
+        ):
+            inflow_nodes.append(
+                self.create_exits_node(
+                    inflow_nodes[0],
+                    outflow_hits - inflow_hits,
+                    exits=False,
+                )
+            )
+        sankey_nodes = inflow_nodes + outflow_nodes
+        sankey_nodes = self.calculate_sankey_percentages(
+            sankey_nodes=sankey_nodes,
+            inflow_hits=inflow_hits,
+            outflow_hits=outflow_hits,
+            inflow_users=inflow_users,
+            outflow_users=outflow_users,
+        )
+        return sankey_nodes
 
     async def get_node_sankey(
         self, datasource: DataSource, node: str, start_date: str, end_date: str
@@ -386,74 +480,9 @@ class EdgeService:
                 for (flow, prev_event, curr_event, hits, users) in sankey_nodes
             ]
 
-        inflow_nodes = [node for node in sankey_nodes if node.flow == "inflow"]
-        outflow_nodes = [node for node in sankey_nodes if node.flow == "outflow"]
-
-        inflow_hits = sum([node.hits for node in inflow_nodes])
-        outflow_hits = sum([node.hits for node in outflow_nodes])
-        inflow_users = sum([node.users for node in inflow_nodes])
-        outflow_users = sum([node.users for node in outflow_nodes])
-
-        inflow_nodes_threshold = (
-            5
-            if (
-                datasource.provider == IntegrationProvider.GOOGLE
-                or (inflow_hits > outflow_hits)
-            )
-            else 4
+        return self.sankey_postprocessing(
+            sankey_nodes=sankey_nodes, provider=datasource.provider
         )
-        outflow_nodes_threshold = (
-            5
-            if (
-                datasource.provider != IntegrationProvider.GOOGLE
-                and (inflow_hits < outflow_hits)
-            )
-            else 4
-        )
-        if len(inflow_nodes) > inflow_nodes_threshold:
-            inflow_nodes = self.create_others_node(inflow_nodes, inflow_nodes_threshold)
-        if len(outflow_nodes) > outflow_nodes_threshold:
-            outflow_nodes = self.create_others_node(
-                outflow_nodes, outflow_nodes_threshold
-            )
-
-        # Temporary fix for sankey duplicate names
-        for node in inflow_nodes:
-            node.previous_event += " "
-
-        if (len(outflow_nodes) > 0) and (inflow_hits > outflow_hits):
-            outflow_nodes.append(
-                self.create_exits_node(
-                    outflow_nodes[0],
-                    inflow_hits - outflow_hits,
-                )
-            )
-        if (
-            (len(inflow_nodes) > 0)
-            and (inflow_hits < outflow_hits)
-            and datasource.provider != IntegrationProvider.GOOGLE
-        ):
-            inflow_nodes.append(
-                self.create_exits_node(
-                    inflow_nodes[0],
-                    outflow_hits - inflow_hits,
-                    exits=False,
-                )
-            )
-        sankey_nodes = inflow_nodes + outflow_nodes
-        for node in sankey_nodes:
-            node.hits_percentage = float(
-                "{:.2f}".format((node.hits * 100) / max(inflow_hits, outflow_hits))
-                if max(inflow_hits, outflow_hits) != 0
-                else 0
-            )
-            node.users_percentage = float(
-                "{:.2f}".format((node.users * 100) / max(inflow_users, outflow_users))
-                if max(inflow_users, outflow_users) != 0
-                else 0
-            )
-
-        return sankey_nodes
 
     # Remove facet in-future, might cause performance issues.
     async def get_node_significance(
