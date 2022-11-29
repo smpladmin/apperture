@@ -53,6 +53,11 @@ class AggregatedEdge(BaseModel):
     hits: int
 
 
+class SankeyDirection(str, Enum):
+    INFLOW = "inflow"
+    OUTFLOW = "outflow"
+
+
 class TrendType(str, Enum):
     MONTH = "month"
     WEEK = "week"
@@ -80,7 +85,7 @@ class NodeSankey(BaseModel):
     previous_event: str
     hits: int
     users: int
-    flow: str
+    flow: SankeyDirection
     hits_percentage: float
     users_percentage: float
 

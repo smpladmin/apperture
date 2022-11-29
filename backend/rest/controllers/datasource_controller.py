@@ -69,8 +69,12 @@ async def get_sankey_nodes(
     start_date: str = "1970-01-01",
     end_date: str = dt.today().strftime("%Y-%m-%d"),
     edge_service: EdgeService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
-    return await edge_service.get_node_sankey(ds_id, node, start_date, end_date)
+    datasource = await ds_service.get_datasource(ds_id)
+    return await edge_service.get_node_sankey(
+        datasource=datasource, node=node, start_date=start_date, end_date=end_date
+    )
 
 
 @router.get(
