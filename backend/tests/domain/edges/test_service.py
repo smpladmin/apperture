@@ -699,7 +699,7 @@ class TestEdgeService:
         )
 
     def test_sankey_postprocessing(self):
-        assert self.processed_sankey == self.service.sankey_postprocessing(
+        assert self.processed_sankey == self.service.postprocessed_sankey(
             sankey_nodes=self.preprocessed_sankey, provider=self.datasource.provider
         )
 

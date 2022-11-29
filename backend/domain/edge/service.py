@@ -18,6 +18,7 @@ from domain.edge.models import (
     NodeSignificance,
     NotificationNodeData,
     TrendType,
+    SankeyDirection,
 )
 from domain.notifications.models import (
     Notification,
@@ -273,7 +274,7 @@ class EdgeService:
     def create_others_node(self, nodes, threshold):
         if len(nodes) > threshold:
             others_node = nodes[threshold - 1]
-            if nodes[0].flow == "inflow":
+            if nodes[0].flow == SankeyDirection.INFLOW:
                 others_node.previous_event = "Others"
             else:
                 others_node.current_event = "Others"
@@ -333,11 +334,11 @@ class EdgeService:
             )
         return sankey_nodes
 
-    def sankey_postprocessing(
+    def postprocessed_sankey(
         self, sankey_nodes: List[NodeSankey], provider: IntegrationProvider
     ):
-        inflow_nodes = [node for node in sankey_nodes if node.flow == "inflow"]
-        outflow_nodes = [node for node in sankey_nodes if node.flow == "outflow"]
+        inflow_nodes = [node for node in sankey_nodes if node.flow == SankeyDirection.INFLOW]
+        outflow_nodes = [node for node in sankey_nodes if node.flow == SankeyDirection.OUTFLOW]
 
         inflow_hits = sum([node.hits for node in inflow_nodes])
         outflow_hits = sum([node.hits for node in outflow_nodes])
@@ -415,7 +416,7 @@ class EdgeService:
                         "previous_event": {"$max": "$previous_event"},
                         "hits": {"$sum": "$hits"},
                         "users": {"$sum": "$users"},
-                        "flow": {"$max": "inflow"},
+                        "flow": {"$max": f"{SankeyDirection.INFLOW}"},
                         "hits_percentage": {"$max": 0},
                         "users_percentage": {"$max": 0},
                     }
@@ -443,7 +444,7 @@ class EdgeService:
                                     "previous_event": {"$max": "$previous_event"},
                                     "hits": {"$sum": "$hits"},
                                     "users": {"$sum": "$users"},
-                                    "flow": {"$max": "outflow"},
+                                    "flow": {"$max": f"{SankeyDirection.OUTFLOW}"},
                                     "hits_percentage": {"$max": 0},
                                     "users_percentage": {"$max": 0},
                                 }
@@ -480,7 +481,7 @@ class EdgeService:
                 for (flow, prev_event, curr_event, hits, users) in sankey_nodes
             ]
 
-        return self.sankey_postprocessing(
+        return self.postprocessed_sankey(
             sankey_nodes=sankey_nodes, provider=datasource.provider
         )
 

@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import List
 from textwrap import dedent
 
@@ -15,17 +14,13 @@ from pypika import (
     Parameter,
 )
 
+from domain.edge.models import SankeyDirection
 from repositories.clickhouse.events import Events
 
 
 class Any(an.WindowFrameAnalyticFunction):
     def __init__(self, column: str):
         super().__init__("any", column)
-
-
-class SankeyDirection(Enum):
-    INFLOW = "inflow"
-    OUTFLOW = "outflow"
 
 
 class Edges(Events):
