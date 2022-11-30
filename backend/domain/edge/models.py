@@ -1,6 +1,6 @@
 import datetime
-from typing import List, Optional
-from beanie import PydanticObjectId, UnionDoc
+from enum import Enum
+from typing import List, Optional, Union
 from pydantic import BaseModel
 
 from beanie import PydanticObjectId, UnionDoc
@@ -53,14 +53,28 @@ class AggregatedEdge(BaseModel):
     hits: int
 
 
+class SankeyDirection(str, Enum):
+    INFLOW = "inflow"
+    OUTFLOW = "outflow"
+
+
+class TrendType(str, Enum):
+    MONTH = "month"
+    WEEK = "week"
+    DATE = "date"
+
+
+class Node(BaseModel):
+    id: str
+    name: str
+
+
 class NodeTrend(BaseModel):
     node: str
     users: int
     hits: int
-    date: datetime.datetime
-    week: int
-    month: int
     year: int
+    trend: Union[int, datetime.date]
     start_date: datetime.datetime
     end_date: datetime.datetime
 
@@ -71,7 +85,7 @@ class NodeSankey(BaseModel):
     previous_event: str
     hits: int
     users: int
-    flow: str
+    flow: SankeyDirection
     hits_percentage: float
     users_percentage: float
 

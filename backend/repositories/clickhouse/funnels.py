@@ -6,7 +6,6 @@ from pypika import (
     NULL,
     DatePart,
     Parameter,
-    CustomFunction,
 )
 from pypika import functions as fn
 from pypika.functions import Extract
@@ -79,7 +78,6 @@ class Funnels(Events):
         return query.get_sql(), parameters
 
     def build_trends_query(self, ds_id: str, steps: List[FunnelStep]):
-        week_func = CustomFunction("WEEK", ["timestamp"])
         query, parameters = self._builder(ds_id=ds_id, steps=steps)
         conditions = [
             Extract(DatePart.year, AliasedQuery(f"table{len(steps) - 1}").ts)
@@ -93,7 +91,7 @@ class Funnels(Events):
             )
 
         query = query.select(
-            week_func(AliasedQuery("table1").ts),
+            self.week_func(AliasedQuery("table1").ts),
             Extract(DatePart.year, AliasedQuery("table1").ts),
         )
         query = (

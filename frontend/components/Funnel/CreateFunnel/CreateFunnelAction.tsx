@@ -99,7 +99,7 @@ const CreateFunnelAction = ({
       <Flex justifyContent={'space-between'} alignItems={'center'}>
         <IconButton
           aria-label="close"
-          variant={'secondary'}
+          variant={'primary'}
           icon={<i className="ri-arrow-left-line"></i>}
           rounded={'full'}
           color={'white.DEFAULT'}

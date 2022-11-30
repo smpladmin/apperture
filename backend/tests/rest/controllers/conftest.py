@@ -21,7 +21,7 @@ from domain.notifications.models import (
     NotificationType,
 )
 from domain.users.models import User
-from domain.edge.models import Edge, NodeSignificance
+from domain.edge.models import Edge, NodeSignificance, NodeTrend, NodeSankey
 
 
 @pytest.fixture(scope="module")
@@ -185,9 +185,137 @@ def edge_service():
             total_users=28882,
         )
     ]
+    node_trends = [
+        NodeTrend(
+            node="test",
+            year=2022,
+            trend=1,
+            users=1111,
+            hits=6483,
+            start_date=datetime.strptime("2022-11-06", "%Y-%m-%d"),
+            end_date=datetime.strptime("2022-11-12", "%Y-%m-%d"),
+        ),
+        NodeTrend(
+            node="test",
+            year=2022,
+            trend=2,
+            users=1371,
+            hits=6972,
+            start_date=datetime.strptime("2022-11-13", "%Y-%m-%d"),
+            end_date=datetime.strptime("2022-11-19", "%Y-%m-%d"),
+        ),
+    ]
+    node_sankey = [
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="inflow1",
+            hits=10,
+            users=8,
+            flow="inflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="inflow2",
+            hits=10,
+            users=8,
+            flow="inflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="inflow3",
+            hits=10,
+            users=8,
+            flow="inflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="Exits",
+            hits=10,
+            users=8,
+            flow="inflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="Others",
+            hits=10,
+            users=8,
+            flow="inflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="outflow1",
+            hits=10,
+            users=8,
+            flow="outflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="outflow2",
+            hits=10,
+            users=8,
+            flow="outflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="outflow3",
+            hits=10,
+            users=8,
+            flow="outflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="outflow4",
+            hits=10,
+            users=8,
+            flow="outflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="Others",
+            hits=10,
+            users=8,
+            flow="outflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+    ]
     node_significance_future = asyncio.Future()
     node_significance_future.set_result(node_significance)
     edge_service_mock.get_node_significance.return_value = node_significance_future
+    node_trends_future = asyncio.Future()
+    node_trends_future.set_result(node_trends)
+    edge_service_mock.get_node_trends.return_value = node_trends_future
+    node_sankey_future = asyncio.Future()
+    node_sankey_future.set_result(node_sankey)
+    edge_service_mock.get_node_sankey.return_value = node_sankey_future
     return edge_service_mock
 
 
@@ -201,6 +329,136 @@ def node_significance_response():
             "nodeUsers": 8922,
             "totalUsers": 28882,
         }
+    ]
+
+
+@pytest.fixture(scope="module")
+def node_sankey_response():
+    return [
+        {
+            "currentEvent": "test",
+            "flow": "inflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "inflow1",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "inflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "inflow2",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "inflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "inflow3",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "inflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "Exits",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "inflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "Others",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "outflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "outflow1",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "outflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "outflow2",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "outflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "outflow3",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "outflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "outflow4",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "outflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "Others",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+    ]
+
+
+@pytest.fixture(scope="module")
+def node_trends_response():
+    return [
+        {
+            "node": "test",
+            "users": 1111,
+            "hits": 6483,
+            "year": 2022,
+            "trend": 1,
+            "startDate": "2022-11-06T00:00:00",
+            "endDate": "2022-11-12T00:00:00",
+        },
+        {
+            "node": "test",
+            "users": 1371,
+            "hits": 6972,
+            "year": 2022,
+            "trend": 2,
+            "startDate": "2022-11-13T00:00:00",
+            "endDate": "2022-11-19T00:00:00",
+        },
     ]
 
 

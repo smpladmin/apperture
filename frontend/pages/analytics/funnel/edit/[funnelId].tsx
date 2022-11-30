@@ -1,12 +1,11 @@
 import Funnel from '@components/Funnel/CreateFunnel';
-import { transformData } from '@components/Graph/transformData';
 import Layout from '@components/Layout';
 import { MapContext } from '@lib/contexts/mapContext';
 import { AppWithIntegrations } from '@lib/domain/app';
-import { Edge } from '@lib/domain/edge';
 import { ComputedFunnel, FunnelTrendsData } from '@lib/domain/funnel';
+import { Node } from '@lib/domain/node';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
-import { _getEdges } from '@lib/services/datasourceService';
+import { _getEdges, _getNodes } from '@lib/services/datasourceService';
 import {
   _getComputedFunnelData,
   _getComputedTrendsData,
@@ -28,7 +27,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   }
   const { funnelId } = query;
   const apps = await _getAppsWithIntegrations(token);
-  const edges = await _getEdges(token, query.dsId as string);
+  const nodes = await _getNodes(token, query.dsId as string);
 
   const [computedFunnelData, computedTrendsData] = await Promise.all([
     _getComputedFunnelData(token, funnelId as string),
@@ -44,23 +43,22 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
   return {
-    props: { edges, apps, computedFunnelData, computedTrendsData },
+    props: { nodes, apps, computedFunnelData, computedTrendsData },
   };
 };
 
 const EditFunnel = ({
-  edges,
+  nodes,
   computedFunnelData,
   computedTrendsData,
 }: {
-  edges: Edge[];
+  nodes: Node[];
   computedFunnelData: ComputedFunnel;
   computedTrendsData: FunnelTrendsData[];
 }) => {
   const { dispatch } = useContext(MapContext);
 
   useEffect(() => {
-    const { nodes } = transformData(edges);
     dispatch({
       type: Actions.SET_NODES,
       payload: nodes,

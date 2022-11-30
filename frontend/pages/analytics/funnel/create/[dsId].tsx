@@ -3,13 +3,12 @@ import Layout from '@components/Layout';
 import { MapContext } from '@lib/contexts/mapContext';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
-import { _getEdges } from '@lib/services/datasourceService';
+import { _getNodes } from '@lib/services/datasourceService';
 import { Actions } from '@lib/types/context';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
 import { ReactElement, useContext, useEffect } from 'react';
-import { transformData } from '@components/Graph/transformData';
-import { Edge } from '@lib/domain/edge';
+import { Node } from '@lib/domain/node';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -22,7 +21,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
   const apps = await _getAppsWithIntegrations(token);
-  const edges = await _getEdges(token, query.dsId as string);
+  const nodes = await _getNodes(token, query.dsId as string);
 
   if (!apps.length) {
     return {
@@ -33,15 +32,14 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
   return {
-    props: { apps, edges },
+    props: { apps, nodes },
   };
 };
 
-const CreateFunnel = ({ edges }: { edges: Edge[] }) => {
+const CreateFunnel = ({ nodes }: { nodes: Node[] }) => {
   const { dispatch } = useContext(MapContext);
 
   useEffect(() => {
-    const { nodes } = transformData(edges);
     dispatch({
       type: Actions.SET_NODES,
       payload: nodes,
