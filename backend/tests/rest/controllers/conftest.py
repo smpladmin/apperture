@@ -145,6 +145,7 @@ def datasource_service():
         external_source_id="123",
         version=DataSourceVersion.DEFAULT,
     )
+    datasource.id = PydanticObjectId("636a1c61d715ca6baae65611")
 
     datasource_future = asyncio.Future()
     datasource_future.set_result(datasource)
@@ -619,7 +620,7 @@ def events_data():
 def funnel_data():
     return {
         "datasourceId": "636a1c61d715ca6baae65611",
-        "appId": "636a1c61d715ca6baae65612",
+        "appId": "636a1c61d715ca6baae65611",
         "name": "test2",
         "steps": [
             {

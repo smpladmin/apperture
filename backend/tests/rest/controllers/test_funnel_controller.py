@@ -1,5 +1,7 @@
 import json
 from unittest.mock import ANY
+
+import pytest
 from beanie import PydanticObjectId
 
 from tests.utils import filter_response
@@ -58,14 +60,23 @@ def test_get_computed_funnel(
     } == get_computed_funnel_kwargs["funnel"].dict()
 
 
-def test_update_funnel(
-    client_init, funnel_data, datasource_service, funnel_response, funnel_service, mock_user_id
+@pytest.mark.asyncio
+async def test_update_funnel(
+    client_init,
+    funnel_data,
+    datasource_service,
+    funnel_response,
+    funnel_service,
+    mock_user_id,
 ):
     response = client_init.put(
         "/funnels/635ba034807ab86d8a2aadd8", data=json.dumps(funnel_data)
     )
     assert response.status_code == 200
     assert filter_response(response.json()) == filter_response(funnel_response)
+    datasource_service.get_datasource.assert_called_with(
+        "636a1c61d715ca6baae65611",
+    )
     funnel_service.build_funnel.assert_called_with(
         PydanticObjectId(funnel_data["datasourceId"]),
         PydanticObjectId(funnel_data["appId"]),

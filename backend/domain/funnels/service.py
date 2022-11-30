@@ -35,7 +35,7 @@ class FunnelsService:
     ) -> Funnel:
         return Funnel(
             datasource_id=datasourceId,
-            app_id=appId, 
+            app_id=appId,
             user_id=userId,
             name=name,
             steps=steps,
