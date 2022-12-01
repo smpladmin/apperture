@@ -1,7 +1,6 @@
 from enum import Enum
-from typing import List, Union
+from typing import Union
 from pydantic import BaseModel
-from beanie import PydanticObjectId
 from domain.funnels.models import Funnel
 from domain.notifications.models import Notification
 

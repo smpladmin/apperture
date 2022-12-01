@@ -47,11 +47,14 @@ async def add_notification(
         dto.preferredChannels,
         dto.notificationActive,
     )
-    await notification_service.add_notification(notification)
+    await notification_service.add_notification(notification=notification)
     return notification
 
 
-@router.get("/notifications", response_model=Union[List[NotificationResponse], List[SavedItemsResponse]])
+@router.get(
+    "/notifications",
+    response_model=Union[NotificationResponse, List[SavedItemsResponse]],
+)
 async def get_notification(
     name: Union[str, None] = None,
     ds_id: Union[str, None] = None,
@@ -60,10 +63,14 @@ async def get_notification(
     notification_service: NotificationService = Depends(),
 ):
     if name:
-        return await notification_service.get_notification_for_node(name=name, ds_id=ds_id)
+        return await notification_service.get_notification_for_node(
+            name=name, ds_id=ds_id
+        )
     else:
         apps = await app_service.get_apps(user=user)
-        return await notification_service.get_notifications_for_apps(app_ids=[app.id for app in apps])
+        return await notification_service.get_notifications_for_apps(
+            app_ids=[app.id for app in apps]
+        )
 
 
 @router.put("/notifications/{notification_id}", response_model=NotificationResponse)

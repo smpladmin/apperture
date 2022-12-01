@@ -190,12 +190,12 @@ class NotificationService:
     ) -> List[ComputedNotification]:
         return [self.compute_alert(data) for data in node_data_for_alerts]
 
-    async def get_notification_for_node(self, name: str, ds_id: str) -> list[Notification]:
-        return await Notification.find(
+    async def get_notification_for_node(self, name: str, ds_id: str) -> Notification:
+        return await Notification.find_one(
             Notification.name == name,
             Notification.datasource_id == PydanticObjectId(ds_id),
             Notification.notification_active == True,
-        ).to_list()
+        )
 
     async def update_notification(
         self, notification_id: str, new_notification: Notification
@@ -222,4 +222,3 @@ class NotificationService:
             SavedItems(type=WatchlistItemType.NOTIFICATIONS, details=notification)
             for notification in notifications
         ]
-
