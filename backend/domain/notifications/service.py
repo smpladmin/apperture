@@ -1,9 +1,11 @@
 from datetime import datetime
 from typing import List, Dict
 
+from beanie.operators import In
 from beanie import PydanticObjectId
 from fastapi import Depends
 
+from domain.common.models import SavedItems, WatchlistItemType
 from domain.notifications.models import (
     Notification,
     NotificationFrequency,
@@ -25,7 +27,8 @@ class NotificationService:
 
     def build_notification(
         self,
-        datasourceId: str,
+        datasourceId: PydanticObjectId,
+        appId: PydanticObjectId,
         name: str,
         userId: PydanticObjectId,
         notificationType: NotificationType,
@@ -44,7 +47,8 @@ class NotificationService:
         notificationActive: bool,
     ):
         return Notification(
-            datasource_id=PydanticObjectId(datasourceId),
+            datasource_id=datasourceId,
+            app_id=appId,
             name=name,
             user_id=userId,
             notification_type=notificationType,
@@ -186,9 +190,10 @@ class NotificationService:
     ) -> List[ComputedNotification]:
         return [self.compute_alert(data) for data in node_data_for_alerts]
 
-    async def get_notification_for_node(self, name: str) -> list[Notification]:
+    async def get_notification_for_node(self, name: str, ds_id: str) -> list[Notification]:
         return await Notification.find(
             Notification.name == name,
+            Notification.datasource_id == PydanticObjectId(ds_id),
             Notification.notification_active == True,
         ).to_list()
 
@@ -205,3 +210,16 @@ class NotificationService:
         ).update({"$set": to_update})
 
         return
+
+    async def get_notifications_for_apps(
+        self, app_ids: List[PydanticObjectId]
+    ) -> List[SavedItems]:
+
+        notifications = await Notification.find(
+            In(Notification.app_id, app_ids),
+        ).to_list()
+        return [
+            SavedItems(type=WatchlistItemType.NOTIFICATIONS, details=notification)
+            for notification in notifications
+        ]
+

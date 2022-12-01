@@ -1,10 +1,15 @@
+from typing import Union, List
+
 from fastapi import APIRouter, Depends
 
 from domain.users.models import User
+from domain.apps.service import AppService
 from domain.notifications.models import NotificationResponse
 from domain.notifications.service import NotificationService
+from domain.datasources.service import DataSourceService
 
 from rest.middlewares import validate_jwt, get_user
+from rest.dtos.saved_items import SavedItemsResponse
 from rest.dtos.notifications import CreateNotificationDto
 
 router = APIRouter(
@@ -19,9 +24,12 @@ async def add_notification(
     dto: CreateNotificationDto,
     user: User = Depends(get_user),
     notification_service: NotificationService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
+    datasource = await ds_service.get_datasource(dto.datasourceId)
     notification = notification_service.build_notification(
-        dto.datasourceId,
+        datasource.id,
+        datasource.app_id,
         dto.name,
         user.id,
         dto.notificationType,
@@ -43,12 +51,19 @@ async def add_notification(
     return notification
 
 
-@router.get("/notifications", response_model=NotificationResponse)
+@router.get("/notifications", response_model=Union[List[NotificationResponse], List[SavedItemsResponse]])
 async def get_notification(
-    name: str,
+    name: Union[str, None] = None,
+    ds_id: Union[str, None] = None,
+    user: User = Depends(get_user),
+    app_service: AppService = Depends(),
     notification_service: NotificationService = Depends(),
 ):
-    return await notification_service.get_notification_for_node(name)
+    if name:
+        return await notification_service.get_notification_for_node(name=name, ds_id=ds_id)
+    else:
+        apps = await app_service.get_apps(user=user)
+        return await notification_service.get_notifications_for_apps(app_ids=[app.id for app in apps])
 
 
 @router.put("/notifications/{notification_id}", response_model=NotificationResponse)
@@ -57,9 +72,12 @@ async def update_notification(
     dto: CreateNotificationDto,
     user: User = Depends(get_user),
     notification_service: NotificationService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
+    datasource = await ds_service.get_datasource(dto.datasourceId)
     new_notification = notification_service.build_notification(
-        dto.datasourceId,
+        datasource.id,
+        datasource.app_id,
         dto.name,
         user.id,
         dto.notificationType,
