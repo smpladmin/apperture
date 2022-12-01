@@ -28,24 +28,24 @@ async def add_notification(
 ):
     datasource = await ds_service.get_datasource(dto.datasourceId)
     notification = notification_service.build_notification(
-        datasource.id,
-        datasource.app_id,
-        dto.name,
-        user.id,
-        dto.notificationType,
-        dto.metric,
-        dto.multiNode,
-        dto.appertureManaged,
-        dto.pctThresholdActive,
-        dto.pctThresholdValues,
-        dto.absoluteThresholdActive,
-        dto.absoluteThresholdValues,
-        dto.formula,
-        dto.variableMap,
-        dto.frequency,
-        dto.preferredHourGMT,
-        dto.preferredChannels,
-        dto.notificationActive,
+        datasourceId=datasource.id,
+        appId=datasource.app_id,
+        name=dto.name,
+        userId=user.id,
+        notificationType=dto.notificationType,
+        metric=dto.metric,
+        multiNode=dto.multiNode,
+        appertureManaged=dto.appertureManaged,
+        pctThresholdActive=dto.pctThresholdActive,
+        pctThresholdValues=dto.pctThresholdValues,
+        absoluteThresholdActive=dto.absoluteThresholdActive,
+        absoluteThresholdValues=dto.absoluteThresholdValues,
+        formula=dto.formula,
+        variableMap=dto.variableMap,
+        frequency=dto.frequency,
+        preferredHourGMT=dto.preferredHourGMT,
+        preferredChannels=dto.preferredChannels,
+        notificationActive=dto.notificationActive,
     )
     await notification_service.add_notification(notification=notification)
     return notification
@@ -83,24 +83,24 @@ async def update_notification(
 ):
     datasource = await ds_service.get_datasource(dto.datasourceId)
     new_notification = notification_service.build_notification(
-        datasource.id,
-        datasource.app_id,
-        dto.name,
-        user.id,
-        dto.notificationType,
-        dto.appertureManaged,
-        dto.pctThresholdActive,
-        dto.pctThresholdValues,
-        dto.absoluteThresholdActive,
-        dto.absoluteThresholdValues,
-        dto.formula,
-        dto.variableMap,
-        dto.frequency,
-        dto.preferredHourGMT,
-        dto.preferredChannels,
-        dto.notificationActive,
+        datasourceId=datasource.id,
+        appId=datasource.app_id,
+        name=dto.name,
+        userId=user.id,
+        notificationType=dto.notificationType,
+        appertureManaged=dto.appertureManaged,
+        pctThresholdActive=dto.pctThresholdActive,
+        pctThresholdValues=dto.pctThresholdValues,
+        absoluteThresholdActive=dto.absoluteThresholdActive,
+        absoluteThresholdValues=dto.absoluteThresholdValues,
+        formula=dto.formula,
+        variableMap=dto.variableMap,
+        frequency=dto.frequency,
+        preferredHourGMT=dto.preferredHourGMT,
+        preferredChannels=dto.preferredChannels,
+        notificationActive=dto.notificationActive,
     )
     notification = await notification_service.update_notification(
-        notification_id, new_notification
+        notification_id=notification_id, new_notification=new_notification
     )
     return notification

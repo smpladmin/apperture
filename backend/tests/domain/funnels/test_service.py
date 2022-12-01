@@ -33,6 +33,15 @@ class TestFunnelService:
         self.provider = IntegrationProvider.MIXPANEL
         self.user_id = "636a1c61d715ca6baae65611"
         self.name = "name"
+        FindMock = namedtuple("FindMock", ["to_list"])
+        Funnel.find = MagicMock(
+            return_value=FindMock(
+                to_list=AsyncMock(),
+            ),
+        )
+        Funnel.app_id = MagicMock(
+            return_value=PydanticObjectId(self.ds_id)
+        )
         self.funnel_steps = [
             FunnelStep(
                 event="Login", filters=[{"property": "mp_country_code", "value": "IN"}]
@@ -165,3 +174,8 @@ class TestFunnelService:
                 ],
             }
         )
+
+    @pytest.mark.asyncio
+    async def test_get_funnels_for_apps(self):
+        await self.service.get_funnels_for_apps(app_ids=[PydanticObjectId("6384a65e0a397236d9de236a")])
+        Funnel.find.assert_called_once()

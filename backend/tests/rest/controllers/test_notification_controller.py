@@ -52,6 +52,27 @@ def test_add_notification(
     assert response.json().keys() == notification_response.keys()
     assert filter_response(response.json()) == filter_response(notification_response)
     notification_service.build_notification.assert_called()
+    notification_service.add_notification.assert_called_once()
+    assert notification_service.build_notification.call_args.kwargs == {
+        "absoluteThresholdActive": False,
+        "absoluteThresholdValues": None,
+        "appId": PydanticObjectId("636a1c61d715ca6baae65611"),
+        "appertureManaged": True,
+        "datasourceId": PydanticObjectId("636a1c61d715ca6baae65611"),
+        "formula": "",
+        "frequency": NotificationFrequency.DAILY,
+        "metric": NotificationMetric.HITS,
+        "multiNode": True,
+        "name": "name",
+        "notificationActive": False,
+        "notificationType": NotificationType.UPDATE,
+        "pctThresholdActive": False,
+        "pctThresholdValues": None,
+        "preferredChannels": [NotificationChannel.SLACK],
+        "preferredHourGMT": 5,
+        "userId": ANY,
+        "variableMap": {},
+    }
     assert notification_service.add_notification.call_args.kwargs[
         "notification"
     ].dict() == {
@@ -78,13 +99,65 @@ def test_add_notification(
         "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
         "variable_map": {},
     }
-    notification_service.add_notification.assert_called()
 
 
-def test_update_notification(client_init, notification_data, notification_response):
+def test_update_notification(
+    client_init, notification_data, notification_service, notification_response
+):
     response = client_init.put(
         "/notifications/635ba034807ab86d8a2aadd8", data=json.dumps(notification_data)
     )
     assert response.status_code == 200
     assert response.json().keys() == notification_response.keys()
     assert filter_response(response.json()) == filter_response(notification_response)
+    notification_service.build_notification.assert_called()
+    notification_service.update_notification.assert_called_once()
+    assert notification_service.build_notification.call_args.kwargs == {
+        "absoluteThresholdActive": False,
+        "absoluteThresholdValues": None,
+        "appId": PydanticObjectId("636a1c61d715ca6baae65611"),
+        "appertureManaged": True,
+        "datasourceId": PydanticObjectId("636a1c61d715ca6baae65611"),
+        "formula": "",
+        "frequency": NotificationFrequency.DAILY,
+        "name": "name",
+        "notificationActive": False,
+        "notificationType": NotificationType.UPDATE,
+        "pctThresholdActive": False,
+        "pctThresholdValues": None,
+        "preferredChannels": [NotificationChannel.SLACK],
+        "preferredHourGMT": 5,
+        "userId": ANY,
+        "variableMap": {},
+    }
+
+    assert notification_service.update_notification.call_args.kwargs[
+        "new_notification"
+    ].dict() == {
+        "absolute_threshold_active": False,
+        "absolute_threshold_values": None,
+        "app_id": PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        "apperture_managed": True,
+        "created_at": ANY,
+        "datasource_id": PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        "formula": "",
+        "frequency": NotificationFrequency.DAILY,
+        "id": PydanticObjectId("635ba034807ab86d8a2aadd8"),
+        "metric": NotificationMetric.HITS,
+        "multi_node": True,
+        "name": "name",
+        "notification_active": False,
+        "notification_type": NotificationType.UPDATE,
+        "pct_threshold_active": False,
+        "pct_threshold_values": None,
+        "preferred_channels": [NotificationChannel.SLACK],
+        "preferred_hour_gmt": 5,
+        "revision_id": ANY,
+        "updated_at": None,
+        "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
+        "variable_map": {},
+    }
+    assert (
+        notification_service.update_notification.call_args.kwargs["notification_id"]
+        == "635ba034807ab86d8a2aadd8"
+    )
