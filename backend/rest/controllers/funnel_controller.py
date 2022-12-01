@@ -4,6 +4,7 @@ from typing import List
 from domain.funnels.service import FunnelsService
 from domain.apps.service import AppService
 from domain.users.models import User
+from domain.datasources.service import DataSourceService
 from rest.dtos.funnels import (
     FunnelResponse,
     ComputedFunnelStepResponse,
@@ -26,9 +27,12 @@ async def create_funnel(
     dto: CreateFunnelDto,
     user_id: str = Depends(get_user_id),
     funnel_service: FunnelsService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
+    datasource = await ds_service.get_datasource(dto.datasourceId)
     funnel = funnel_service.build_funnel(
-        dto.datasourceId,
+        datasource.id,
+        datasource.app_id,
         user_id,
         dto.name,
         dto.steps,
@@ -62,9 +66,12 @@ async def update_funnel(
     dto: CreateFunnelDto,
     user_id: str = Depends(get_user_id),
     funnel_service: FunnelsService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
+    datasource = await ds_service.get_datasource(dto.datasourceId)
     new_funnel = funnel_service.build_funnel(
-        dto.datasourceId,
+        datasource.id,
+        datasource.app_id,
         user_id,
         dto.name,
         dto.steps,

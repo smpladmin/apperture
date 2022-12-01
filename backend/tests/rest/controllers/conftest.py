@@ -106,6 +106,7 @@ def funnel_service():
     Funnel.get_settings = mock.MagicMock()
     funnel = Funnel(
         id=PydanticObjectId("635ba034807ab86d8a2aadd8"),
+        app_id=PydanticObjectId("635ba034807ab86d8a2aadd7"),
         datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
         name="name",
         user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
@@ -181,6 +182,7 @@ def datasource_service():
         external_source_id="123",
         version=DataSourceVersion.DEFAULT,
     )
+    datasource.id = PydanticObjectId("636a1c61d715ca6baae65611")
 
     datasource_future = asyncio.Future()
     datasource_future.set_result(datasource)
@@ -611,6 +613,7 @@ def saved_notification_response():
 def funnel_response():
     return {
         "_id": "635ba034807ab86d8a2aadd8",
+        "appId": "635ba034807ab86d8a2aadd7",
         "revisionId": "8fc1083c-0e63-4358-9139-785b77b6236a",
         "createdAt": "2022-10-28T09:26:12.682829",
         "updatedAt": None,
@@ -703,6 +706,7 @@ def events_data():
 def funnel_data():
     return {
         "datasourceId": "636a1c61d715ca6baae65611",
+        "appId": "636a1c61d715ca6baae65611",
         "name": "test2",
         "steps": [
             {
