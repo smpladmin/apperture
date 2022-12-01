@@ -29,6 +29,7 @@ class TestFunnelService:
         self.funnels = MagicMock()
         self.service = FunnelsService(mongo=self.mongo, funnels=self.funnels)
         self.ds_id = "636a1c61d715ca6baae65611"
+        self.app_id = "636a1c61d715ca6baae65612"
         self.provider = IntegrationProvider.MIXPANEL
         self.user_id = "636a1c61d715ca6baae65611"
         self.name = "name"
@@ -40,6 +41,7 @@ class TestFunnelService:
         ]
         self.funnel = Funnel(
             datasource_id=self.ds_id,
+            app_id=self.app_id,
             user_id=self.user_id,
             name=self.name,
             steps=self.funnel_steps,
@@ -84,6 +86,7 @@ class TestFunnelService:
 
         funnel = self.service.build_funnel(
             datasourceId=self.ds_id,
+            appId=self.app_id,
             userId=self.user_id,
             name=self.name,
             steps=self.funnel_steps,
@@ -124,6 +127,7 @@ class TestFunnelService:
             {
                 "$set": {
                     "datasource_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+                    "app_id": PydanticObjectId("636a1c61d715ca6baae65612"),
                     "name": "name",
                     "random_sequence": False,
                     "revision_id": ANY,

@@ -26,14 +26,16 @@ class FunnelsService:
 
     def build_funnel(
         self,
-        datasourceId: str,
+        datasourceId: PydanticObjectId,
+        appId: PydanticObjectId,
         userId: str,
         name: str,
         steps: List[FunnelStep],
         randomSequence: bool,
     ) -> Funnel:
         return Funnel(
-            datasource_id=PydanticObjectId(datasourceId),
+            datasource_id=datasourceId,
+            app_id=appId,
             user_id=userId,
             name=name,
             steps=steps,
