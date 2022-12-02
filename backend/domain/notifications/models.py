@@ -39,6 +39,7 @@ class ThresholdMap(BaseModel):
 class Notification(Document):
     datasource_id: PydanticObjectId
     user_id: PydanticObjectId
+    app_id: PydanticObjectId
     name: str
     notification_type: NotificationType
     metric: NotificationMetric

@@ -3,8 +3,10 @@ from mongo import Mongo
 from fastapi import Depends
 from datetime import datetime
 from beanie import PydanticObjectId
+from beanie.operators import In
 
 
+from domain.common.models import SavedItems, WatchlistItemType
 from domain.funnels.models import (
     Funnel,
     FunnelStep,
@@ -26,14 +28,16 @@ class FunnelsService:
 
     def build_funnel(
         self,
-        datasourceId: str,
+        datasourceId: PydanticObjectId,
+        appId: PydanticObjectId,
         userId: str,
         name: str,
         steps: List[FunnelStep],
         randomSequence: bool,
     ) -> Funnel:
         return Funnel(
-            datasource_id=PydanticObjectId(datasourceId),
+            datasource_id=datasourceId,
+            app_id=appId,
             user_id=userId,
             name=name,
             steps=steps,
@@ -105,4 +109,16 @@ class FunnelsService:
                 end_date=datetime.strptime(f"{data[1]}-{data[0]}-0", "%Y-%W-%w"),
             )
             for data in conversion_data
+        ]
+
+    async def get_funnels_for_apps(
+        self, app_ids: List[PydanticObjectId]
+    ) -> List[SavedItems]:
+
+        funnels = await Funnel.find(
+            In(Funnel.app_id, app_ids),
+        ).to_list()
+        return [
+            SavedItems(type=WatchlistItemType.FUNNELS, details=funnel)
+            for funnel in funnels
         ]

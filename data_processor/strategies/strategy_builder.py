@@ -11,6 +11,7 @@ from domain.common.models import IntegrationProvider
 from domain.datasource.models import Credential, DataSource
 from strategies.mixpanel_events_strategy import MixpanelEventsStrategy
 from strategies.amplitude_events_strategy import AmplitudeEventsStrategy
+from strategies.clevertap_events_strategy import ClevertapEventsStrategy
 
 
 class StrategyBuilder:
@@ -59,6 +60,11 @@ class EventsStrategyBuilder:
             },
             IntegrationProvider.AMPLITUDE: {
                 "DEFAULT": AmplitudeEventsStrategy(
+                    datasource, credential, runlog_id, date
+                )
+            },
+            IntegrationProvider.CLEVERTAP: {
+                "DEFAULT": ClevertapEventsStrategy(
                     datasource, credential, runlog_id, date
                 )
             },

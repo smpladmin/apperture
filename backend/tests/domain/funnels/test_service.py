@@ -29,9 +29,19 @@ class TestFunnelService:
         self.funnels = MagicMock()
         self.service = FunnelsService(mongo=self.mongo, funnels=self.funnels)
         self.ds_id = "636a1c61d715ca6baae65611"
+        self.app_id = "636a1c61d715ca6baae65612"
         self.provider = IntegrationProvider.MIXPANEL
         self.user_id = "636a1c61d715ca6baae65611"
         self.name = "name"
+        FindMock = namedtuple("FindMock", ["to_list"])
+        Funnel.find = MagicMock(
+            return_value=FindMock(
+                to_list=AsyncMock(),
+            ),
+        )
+        Funnel.app_id = MagicMock(
+            return_value=PydanticObjectId(self.ds_id)
+        )
         self.funnel_steps = [
             FunnelStep(
                 event="Login", filters=[{"property": "mp_country_code", "value": "IN"}]
@@ -40,6 +50,7 @@ class TestFunnelService:
         ]
         self.funnel = Funnel(
             datasource_id=self.ds_id,
+            app_id=self.app_id,
             user_id=self.user_id,
             name=self.name,
             steps=self.funnel_steps,
@@ -84,6 +95,7 @@ class TestFunnelService:
 
         funnel = self.service.build_funnel(
             datasourceId=self.ds_id,
+            appId=self.app_id,
             userId=self.user_id,
             name=self.name,
             steps=self.funnel_steps,
@@ -124,6 +136,7 @@ class TestFunnelService:
             {
                 "$set": {
                     "datasource_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+                    "app_id": PydanticObjectId("636a1c61d715ca6baae65612"),
                     "name": "name",
                     "random_sequence": False,
                     "revision_id": ANY,
@@ -161,3 +174,8 @@ class TestFunnelService:
                 ],
             }
         )
+
+    @pytest.mark.asyncio
+    async def test_get_funnels_for_apps(self):
+        await self.service.get_funnels_for_apps(app_ids=[PydanticObjectId("6384a65e0a397236d9de236a")])
+        Funnel.find.assert_called_once()

@@ -19,6 +19,7 @@ class FunnelStep(BaseModel):
 
 class Funnel(Document):
     datasource_id: PydanticObjectId
+    app_id: PydanticObjectId
     user_id: PydanticObjectId
     name: str
     steps: List[FunnelStep]

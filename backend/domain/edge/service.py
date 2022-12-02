@@ -337,8 +337,12 @@ class EdgeService:
     def postprocessed_sankey(
         self, sankey_nodes: List[NodeSankey], provider: IntegrationProvider
     ):
-        inflow_nodes = [node for node in sankey_nodes if node.flow == SankeyDirection.INFLOW]
-        outflow_nodes = [node for node in sankey_nodes if node.flow == SankeyDirection.OUTFLOW]
+        inflow_nodes = [
+            node for node in sankey_nodes if node.flow == SankeyDirection.INFLOW
+        ]
+        outflow_nodes = [
+            node for node in sankey_nodes if node.flow == SankeyDirection.OUTFLOW
+        ]
 
         inflow_hits = sum([node.hits for node in inflow_nodes])
         outflow_hits = sum([node.hits for node in outflow_nodes])

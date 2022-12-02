@@ -2,13 +2,17 @@ from fastapi import APIRouter, Depends
 from typing import List
 
 from domain.funnels.service import FunnelsService
+from domain.apps.service import AppService
+from domain.users.models import User
+from domain.datasources.service import DataSourceService
 from rest.dtos.funnels import (
     FunnelResponse,
     ComputedFunnelStepResponse,
     ComputedFunnelResponse,
 )
 from rest.dtos.funnels import CreateFunnelDto, TransientFunnelDto, FunnelTrendResponse
-from rest.middlewares import validate_jwt, get_user_id
+from rest.dtos.saved_items import SavedItemsResponse
+from rest.middlewares import validate_jwt, get_user_id, get_user
 
 
 router = APIRouter(
@@ -23,9 +27,12 @@ async def create_funnel(
     dto: CreateFunnelDto,
     user_id: str = Depends(get_user_id),
     funnel_service: FunnelsService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
+    datasource = await ds_service.get_datasource(dto.datasourceId)
     funnel = funnel_service.build_funnel(
-        dto.datasourceId,
+        datasource.id,
+        datasource.app_id,
         user_id,
         dto.name,
         dto.steps,
@@ -59,9 +66,12 @@ async def update_funnel(
     dto: CreateFunnelDto,
     user_id: str = Depends(get_user_id),
     funnel_service: FunnelsService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
+    datasource = await ds_service.get_datasource(dto.datasourceId)
     new_funnel = funnel_service.build_funnel(
-        dto.datasourceId,
+        datasource.id,
+        datasource.app_id,
         user_id,
         dto.name,
         dto.steps,
@@ -90,3 +100,13 @@ async def get_transient_funnel_trends(
     return await funnel_service.get_funnel_trends(
         datasource_id=dto.datasourceId, steps=dto.steps
     )
+
+
+@router.get("/funnels", response_model=List[SavedItemsResponse])
+async def get_funnels(
+    user: User = Depends(get_user),
+    funnel_service: FunnelsService = Depends(),
+    app_service: AppService = Depends(),
+):
+    apps = await app_service.get_apps(user=user)
+    return await funnel_service.get_funnels_for_apps(app_ids=[app.id for app in apps])
