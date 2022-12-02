@@ -1,9 +1,13 @@
-import { Flex, Text } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
+import Render from '@components/Render';
 import { WatchListItemType } from '@lib/domain/watchlist';
+import LabelType from './LabelType';
 
 export const Details = ({ info }: { info: any }) => {
-  const { type } = info?.row?.original;
-  const { name, steps } = info?.getValue();
+  const {
+    type,
+    details: { name, steps },
+  } = info?.row?.original;
 
   return (
     <Flex direction={'column'} gap={'1'}>
@@ -15,6 +19,11 @@ export const Details = ({ info }: { info: any }) => {
           {`${steps?.[0]?.event} -> ${steps?.[steps.length - 1]?.event}`}
         </Text>
       ) : null}
+      <Render on={'mobile'}>
+        <Box mt={'4'}>
+          <LabelType type={type} />
+        </Box>
+      </Render>
     </Flex>
   );
 };

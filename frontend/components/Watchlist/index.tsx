@@ -43,14 +43,14 @@ const Watchlist = () => {
   }, [selectedItem]);
 
   return (
-    <Box px={'30'} py={'9'} overflowY={'auto'}>
+    <Box px={{ base: '4', md: '30' }} py={'9'} overflowY={'auto'}>
       <Flex justifyContent={'space-between'}>
         <Text fontSize={'sh-20'} lineHeight={'sh-20'} fontWeight={'600'}>
           Saved
         </Text>
         <Button
-          px={'6'}
-          py={'3'}
+          px={{ base: '4', md: '6' }}
+          py={{ base: '2', md: '3' }}
           bg={'black.100'}
           variant={'primary'}
           borderRadius={'100'}

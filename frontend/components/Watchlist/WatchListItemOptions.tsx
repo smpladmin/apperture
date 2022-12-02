@@ -12,7 +12,11 @@ const WatchListItemOptions = ({ watchListItem, isSelected }: any) => {
       borderColor={isSelected ? 'black.100' : 'white.200'}
       cursor={'pointer'}
     >
-      <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
+      <Text
+        fontSize={{ base: 'xs-12', md: 'xs-14' }}
+        lineHeight={{ base: 'xs-12', md: 'xs-14' }}
+        fontWeight={'500'}
+      >
         {watchListItem.label}
       </Text>
       <Radio value={watchListItem.id} hidden />

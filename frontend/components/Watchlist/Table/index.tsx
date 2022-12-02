@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import {
   createColumnHelper,
   useReactTable,
@@ -12,32 +12,51 @@ import TableActionMenu from './ActionMenu';
 import Details from './Details';
 import { WatchListItemType } from '@lib/domain/watchlist';
 import { useRouter } from 'next/router';
+import UsersMetric from './UsersMetric';
+import { AppertureContext } from '@lib/contexts/appertureContext';
 
 const WatchlistTable = ({ savedItemsData }: any) => {
+  const router = useRouter();
+  const {
+    device: { isMobile },
+  } = useContext(AppertureContext);
+
   const columnHelper = createColumnHelper<any>();
   const columns = useMemo(
-    () => [
-      columnHelper.accessor('type', {
-        header: 'Type',
-        cell: (info) => <LabelType info={info} />,
-      }),
-      columnHelper.accessor('details', {
-        header: 'Name',
-        cell: (info) => <Details info={info} />,
-      }),
-      columnHelper.accessor('users', {
-        cell: (info) => info.getValue(),
-        header: 'Users',
-      }),
-      columnHelper.accessor('change', {
-        cell: (info) => info.getValue(),
-        header: '% Change',
-      }),
-      columnHelper.accessor('actions', {
-        cell: () => <TableActionMenu />,
-        header: '',
-      }),
-    ],
+    () =>
+      isMobile
+        ? [
+            columnHelper.accessor('details', {
+              header: 'Name',
+              cell: (info) => <Details info={info} />,
+            }),
+            columnHelper.accessor('users', {
+              cell: (info) => <UsersMetric info={info} />,
+              header: 'Users',
+            }),
+          ]
+        : [
+            columnHelper.accessor('type', {
+              header: 'Type',
+              cell: (info) => <LabelType type={info.getValue()} />,
+            }),
+            columnHelper.accessor('details', {
+              header: 'Name',
+              cell: (info) => <Details info={info} />,
+            }),
+            columnHelper.accessor('users', {
+              cell: (info) => <UsersMetric info={info} />,
+              header: 'Users',
+            }),
+            columnHelper.accessor('change', {
+              cell: (info) => info.getValue(),
+              header: '% Change',
+            }),
+            columnHelper.accessor('actions', {
+              cell: () => <TableActionMenu />,
+              header: '',
+            }),
+          ],
     []
   );
 
@@ -48,7 +67,6 @@ const WatchlistTable = ({ savedItemsData }: any) => {
     getSortedRowModel: getSortedRowModel(),
   });
   const { getHeaderGroups, getRowModel } = tableInstance;
-  const router = useRouter();
 
   const onRowClick = (row: any) => {
     if (row?.original?.type === WatchListItemType.FUNNELS) {

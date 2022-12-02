@@ -26,6 +26,10 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
     });
   };
 
+  const handleGoBack = () => {
+    router.push('/analytics/saved');
+  };
+
   return (
     <ActionPanel>
       <Flex justifyContent={'space-between'} alignItems={'center'}>
@@ -36,6 +40,7 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
           rounded={'full'}
           color={'white.DEFAULT'}
           bg={'black.20'}
+          onClick={handleGoBack}
         />
         <Render on="desktop">
           <Button
