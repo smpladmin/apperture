@@ -1,19 +1,26 @@
+import asyncio
+from collections import namedtuple
+
 import pytest
 from beanie import PydanticObjectId
+from unittest.mock import MagicMock, AsyncMock, ANY
 
 from domain.notifications.service import NotificationService
+from domain.notifications.models import Notification
 from domain.edge.models import NotificationNodeData, AggregatedEdge
 from domain.notifications.models import (
     ThresholdMap,
     ComputedNotification,
     NotificationType,
     NotificationThresholdType,
+    NotificationMetric,
+    NotificationFrequency,
+    NotificationChannel,
 )
 
 
 class TestNotificationService:
     def setup_method(self):
-        self.notification_service = NotificationService()
         self.value = 1.3571428571428572
         self.notification_node_data = NotificationNodeData(
             name="test",
@@ -151,23 +158,66 @@ class TestNotificationService:
             user_threshold=ThresholdMap(min=0.15, max=0.15),
             triggered=True,
         )
+        self.name = "test"
+        self.ds_id = "6384a66e0a397236d9de236c"
+        Notification.get_settings = MagicMock()
+        Notification.find_one = MagicMock()
+        Notification.name = MagicMock(return_value=self.name)
+        Notification.datasource_id = MagicMock(
+            return_value=PydanticObjectId(self.ds_id)
+        )
+        Notification.app_id = MagicMock(
+            return_value=PydanticObjectId(self.ds_id)
+        )
+        Notification.notification_active = MagicMock(return_value=True)
+        self.notification = Notification(
+            id=PydanticObjectId("6384a66e0a397236d9de236c"),
+            datasource_id=PydanticObjectId("6384a66e0a397236d9de236c"),
+            user_id=PydanticObjectId("636a0be89684fdc9a380dfd6"),
+            app_id=PydanticObjectId("6384a65e0a397236d9de236a"),
+            name="user_login",
+            notification_type=NotificationType.ALERT,
+            metric=NotificationMetric.HITS,
+            multi_node=False,
+            apperture_managed=False,
+            pct_threshold_active=False,
+            pct_threshold_values=None,
+            absolute_threshold_active=True,
+            absolute_threshold_values=ThresholdMap(min=1.0, max=16834.0),
+            formula="a",
+            variable_map={"a": ["user_login"]},
+            preferred_hour_gmt=5,
+            frequency=NotificationFrequency.DAILY,
+            preferred_channels=[NotificationChannel.SLACK],
+            notification_active=True,
+        )
+        notif_future = asyncio.Future()
+        notif_future.set_result(self.notification)
+        Notification.find_one.return_value = notif_future
+        self.mongo = MagicMock()
+        self.service = NotificationService(mongo=self.mongo)
+
+        FindMock = namedtuple("FindMock", ["to_list"])
+        Notification.find = MagicMock(
+            return_value=FindMock(
+                to_list=AsyncMock(),
+            ),
+        )
 
     def test_alert_criteria(self):
-        assert self.notification_service.alert_criteria(
+        assert self.service.alert_criteria(
             data=self.notification_node_data, value=self.value
         )
 
     def test_compute_value(self):
         assert (
-            self.notification_service.compute_value(
-                node_data=self.notification_node_data.node_data
-            )
+            self.service.compute_value(node_data=self.notification_node_data.node_data)
             == 1.3571428571428572
         )
 
     def test_compute_updates(self):
         assert (
-            self.notification_service.compute_updates(
+            self.service.compute_updates(
                 node_data_for_updates=self.node_data_for_updates
             )
             == self.computed_updates
@@ -175,6 +225,42 @@ class TestNotificationService:
 
     def test_compute_alert(self):
         assert (
-            self.notification_service.compute_alert(data=self.notification_node_data)
+            self.service.compute_alert(data=self.notification_node_data)
             == self.computed_alert
         )
+
+    @pytest.mark.asyncio
+    async def test_get_notification_for_node(self):
+        notif = await self.service.get_notification_for_node(
+            name=self.name, ds_id=self.ds_id
+        )
+        assert {
+            "absolute_threshold_active": True,
+            "absolute_threshold_values": {"max": 16834.0, "min": 1.0},
+            "app_id": PydanticObjectId("6384a65e0a397236d9de236a"),
+            "apperture_managed": False,
+            "created_at": ANY,
+            "datasource_id": PydanticObjectId("6384a66e0a397236d9de236c"),
+            "formula": "a",
+            "frequency": NotificationFrequency.DAILY,
+            "id": PydanticObjectId("6384a66e0a397236d9de236c"),
+            "metric": NotificationMetric.HITS,
+            "multi_node": False,
+            "name": "user_login",
+            "notification_active": True,
+            "notification_type": NotificationType.ALERT,
+            "pct_threshold_active": False,
+            "pct_threshold_values": None,
+            "preferred_channels": [NotificationChannel.SLACK],
+            "preferred_hour_gmt": 5,
+            "revision_id": ANY,
+            "updated_at": None,
+            "user_id": PydanticObjectId("636a0be89684fdc9a380dfd6"),
+            "variable_map": {"a": ["user_login"]},
+        } == notif.dict()
+
+    @pytest.mark.asyncio
+    async def test_get_notifications_for_apps(self):
+        await self.service.get_notifications_for_apps(app_ids=[PydanticObjectId("6384a65e0a397236d9de236a")])
+        Notification.find.assert_called_once()
+        print(Notification.find.call_args.args[0])

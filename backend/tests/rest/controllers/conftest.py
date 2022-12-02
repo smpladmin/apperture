@@ -5,7 +5,8 @@ from datetime import datetime
 from beanie import PydanticObjectId
 from fastapi.testclient import TestClient
 
-from domain.common.models import IntegrationProvider
+from domain.apps.models import App
+from domain.common.models import IntegrationProvider, SavedItems, WatchlistItemType
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.funnels.models import (
     Funnel,
@@ -19,6 +20,7 @@ from domain.notifications.models import (
     NotificationFrequency,
     NotificationMetric,
     NotificationType,
+    ThresholdMap,
 )
 from domain.users.models import User
 from domain.edge.models import Edge, NodeSignificance, NodeTrend, NodeSankey
@@ -35,9 +37,38 @@ def client_init(app_init):
 def notification_service():
     notification_service_mock = mock.MagicMock()
     Notification.get_settings = mock.MagicMock()
+    saved_notif = [
+        SavedItems(
+            type=WatchlistItemType.NOTIFICATIONS,
+            details=Notification(
+                id=PydanticObjectId("635ba034807ab86d8a2aadd8"),
+                created_at=datetime(2022, 12, 1, 7, 4, 59, 390000),
+                updated_at=datetime(2022, 12, 1, 7, 4, 59, 390000),
+                datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+                user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+                app_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+                name="/p/partner/job",
+                notification_type=NotificationType.ALERT,
+                metric=NotificationMetric.HITS,
+                multi_node=False,
+                apperture_managed=False,
+                pct_threshold_active=False,
+                pct_threshold_values=None,
+                absolute_threshold_active=True,
+                absolute_threshold_values=ThresholdMap(min=26.0, max=381.0),
+                formula="a",
+                variable_map={"a": ["/p/partner/job"]},
+                preferred_hour_gmt=5,
+                frequency=NotificationFrequency.DAILY,
+                preferred_channels=[NotificationChannel.SLACK],
+                notification_active=True,
+            ),
+        )
+    ]
     notif = Notification(
         id=PydanticObjectId("635ba034807ab86d8a2aadd8"),
         datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        app_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
         name="name",
         user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
         notification_type=NotificationType.UPDATE,
@@ -56,10 +87,16 @@ def notification_service():
     notif_future = asyncio.Future()
     notif_future.set_result(notif)
 
+    saved_notif_future = asyncio.Future()
+    saved_notif_future.set_result(saved_notif)
+
     notification_service_mock.build_notification.return_value = notif
     notification_service_mock.add_notification.return_value = notif_future
     notification_service_mock.update_notification.return_value = notif_future
     notification_service_mock.get_notification_for_node.return_value = notif_future
+    notification_service_mock.get_notifications_for_apps.return_value = (
+        saved_notif_future
+    )
     return notification_service_mock
 
 
@@ -168,10 +205,26 @@ def user_service(mock_find_email_user):
 
 @pytest.fixture(scope="module")
 def app_service():
-    service = mock.AsyncMock()
-    future = asyncio.Future()
-    service.find_user.return_value = future
-    return service
+    app_service_mock = mock.MagicMock()
+    App.get_settings = mock.MagicMock()
+    apps = [
+        App(
+            id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+            revision_id=None,
+            created_at=datetime(2022, 11, 8, 7, 57, 35, 691000),
+            updated_at=datetime(2022, 11, 8, 7, 57, 35, 691000),
+            name="mixpanel1",
+            user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+            shared_with=set(),
+        )
+    ]
+    user_future = asyncio.Future()
+    app_service_mock.find_user.return_value = user_future
+    app_service_mock.share_app = mock.AsyncMock()
+    apps_future = asyncio.Future()
+    apps_future.set_result(apps)
+    app_service_mock.get_apps.return_value = apps_future
+    return app_service_mock
 
 
 @pytest.fixture(scope="module")
@@ -504,6 +557,7 @@ def notification_response():
         "createdAt": "2022-10-28T09:26:12.682829",
         "updatedAt": None,
         "datasourceId": "635ba034807ab86d8a2aadd9",
+        "appId": "635ba034807ab86d8a2aadd9",
         "userId": "635ba034807ab86d8a2aadda",
         "name": "name",
         "notificationType": NotificationType.UPDATE,
@@ -521,6 +575,38 @@ def notification_response():
         "preferredChannels": [NotificationChannel.SLACK],
         "notificationActive": False,
     }
+
+
+@pytest.fixture(scope="module")
+def saved_notification_response():
+    return [
+        {
+            "type": "notifications",
+            "details": {
+                "_id": "635ba034807ab86d8a2aadd8",
+                "created_at": "2022-12-01T07:04:59.390000",
+                "updated_at": "2022-12-01T07:04:59.390000",
+                "datasource_id": "635ba034807ab86d8a2aadd9",
+                "user_id": "635ba034807ab86d8a2aadda",
+                "app_id": "635ba034807ab86d8a2aadd9",
+                "name": "/p/partner/job",
+                "notification_type": "alert",
+                "metric": "hits",
+                "multi_node": False,
+                "apperture_managed": False,
+                "pct_threshold_active": False,
+                "pct_threshold_values": None,
+                "absolute_threshold_active": True,
+                "absolute_threshold_values": {"min": 26.0, "max": 381.0},
+                "formula": "a",
+                "variable_map": {"a": ["/p/partner/job"]},
+                "preferred_hour_gmt": 5,
+                "frequency": "daily",
+                "preferred_channels": ["slack"],
+                "notification_active": True,
+            },
+        }
+    ]
 
 
 @pytest.fixture(scope="module")
