@@ -166,9 +166,7 @@ class TestNotificationService:
         Notification.datasource_id = MagicMock(
             return_value=PydanticObjectId(self.ds_id)
         )
-        Notification.app_id = MagicMock(
-            return_value=PydanticObjectId(self.ds_id)
-        )
+        Notification.app_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         Notification.notification_active = MagicMock(return_value=True)
         self.notification = Notification(
             id=PydanticObjectId("6384a66e0a397236d9de236c"),
@@ -261,6 +259,8 @@ class TestNotificationService:
 
     @pytest.mark.asyncio
     async def test_get_notifications_for_apps(self):
-        await self.service.get_notifications_for_apps(app_ids=[PydanticObjectId("6384a65e0a397236d9de236a")])
+        await self.service.get_notifications_for_apps(
+            app_ids=[PydanticObjectId("6384a65e0a397236d9de236a")]
+        )
         Notification.find.assert_called_once()
         print(Notification.find.call_args.args[0])

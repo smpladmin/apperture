@@ -344,7 +344,9 @@ class TestEdgeService:
             "2019-03-31",
         )
 
-        self.service.edges.get_edges.assert_called_once_with("test-id")
+        self.service.edges.get_edges.assert_called_once_with(
+            **{"ds_id": "test-id", "end_date": "2019-03-31", "start_date": "2019-01-01"}
+        )
         assert edges == [
             AggregatedEdge(
                 previous_event="login",

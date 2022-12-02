@@ -1,5 +1,5 @@
-from typing import List
-from textwrap import dedent
+from copy import deepcopy
+from typing import List, Union
 
 from pypika import (
     ClickHouseQuery,
@@ -33,41 +33,40 @@ class Edges(Events):
             "end_date": end_date,
         }
 
-    def get_edges(self, ds_id: str):
-        query = dedent(
-            """
-        select 
-          previous_event, 
-          event_name as current_event, 
-          count(distinct user_id) as users,
-          count(*) as hits
-        from
-        (
-            select 
-              user_id, 
-              any(event_name) over (
-                partition by user_id
-                order by 
-                  toDateTime(timestamp) rows between 1 preceding and 0 preceding
-            ) as previous_event, 
-            event_name 
-            from 
-              events 
-            where 
-              datasource_id = %(ds_id)s 
-              and event_name not like '%%/%%'
-              and event_name not like '%%?%%'
+    def get_edges(self, ds_id: str, start_date: str, end_date: str):
+        return self.execute_get_query(
+            *self.build_edges_query(ds_id, start_date, end_date)
         )
-        group by 
-          1, 
-          2 
-        order by 
-          3 desc 
-        limit 
-          100
-        """
+
+    def build_edges_query(self, ds_id: str, start_date: str, end_date: str):
+        extra_criterion = [
+            self.table.event_name.not_like("%%/%%"),
+            self.table.event_name.not_like("%%?%%"),
+        ]
+        sub_query = self._build_sankey_subquery(extra_criterion=extra_criterion)
+
+        cte_name = "cte"
+        query = ClickHouseQuery
+        query = query.with_(sub_query, cte_name)
+        cte = AliasedQuery(cte_name)
+        query = (
+            query.from_(cte)
+            .select(
+                cte.prev_event,
+                cte.curr_event,
+                fn.Count(cte.user_id).distinct().as_("users"),
+                fn.Count("*").as_("hits"),
+            )
+            .groupby(1, 2)
+            .orderby(3, order=Order.desc)
+            .limit(100)
         )
-        return self.execute_get_query(query, parameters={"ds_id": ds_id})
+
+        return query.get_sql(), {
+            "ds_id": ds_id,
+            "start_date": start_date,
+            "end_date": end_date,
+        }
 
     def get_node_significance(
         self, ds_id: str, event_name: str, start_date: str, end_date: str
@@ -154,7 +153,7 @@ class Edges(Events):
             *self.build_node_sankey_query(ds_id, event_name, start_date, end_date)
         )
 
-    def _build_sankey_subquery(self):
+    def _build_sankey_subquery(self, extra_criterion: Union[List, None] = None):
         sub_query = ClickHouseQuery
         sub_query = sub_query.from_(self.table)
         prev_event = (
@@ -168,7 +167,10 @@ class Edges(Events):
             prev_event.as_("prev_event"),
             self.table.event_name.as_("curr_event"),
         )
-        sub_query = sub_query.where(Criterion.all(self.total_criterion))
+        criterion = deepcopy(self.total_criterion)
+        if extra_criterion:
+            criterion.extend(extra_criterion)
+        sub_query = sub_query.where(Criterion.all(criterion))
         return sub_query
 
     def _sankey_direction_query(
