@@ -39,9 +39,7 @@ class TestFunnelService:
                 to_list=AsyncMock(),
             ),
         )
-        Funnel.app_id = MagicMock(
-            return_value=PydanticObjectId(self.ds_id)
-        )
+        Funnel.app_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.funnel_steps = [
             FunnelStep(
                 event="Login", filters=[{"property": "mp_country_code", "value": "IN"}]
@@ -177,5 +175,7 @@ class TestFunnelService:
 
     @pytest.mark.asyncio
     async def test_get_funnels_for_apps(self):
-        await self.service.get_funnels_for_apps(app_ids=[PydanticObjectId("6384a65e0a397236d9de236a")])
+        await self.service.get_funnels_for_apps(
+            app_ids=[PydanticObjectId("6384a65e0a397236d9de236a")]
+        )
         Funnel.find.assert_called_once()

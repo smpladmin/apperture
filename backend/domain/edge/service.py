@@ -183,7 +183,9 @@ class EdgeService:
                 .to_list()
             )
         else:
-            edges_tuples = self.edges.get_edges(str(datasource.id))
+            edges_tuples = self.edges.get_edges(
+                ds_id=str(datasource.id), start_date=start_date, end_date=end_date
+            )
             edges = [
                 AggregatedEdge(
                     **{
