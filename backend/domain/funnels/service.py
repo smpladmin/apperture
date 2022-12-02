@@ -116,7 +116,7 @@ class FunnelsService:
     ) -> List[SavedItems]:
 
         funnels = await Funnel.find(
-            In(app_ids, Funnel.app_id),
+            In(Funnel.app_id, app_ids),
         ).to_list()
         return [
             SavedItems(type=WatchlistItemType.FUNNELS, details=funnel)
