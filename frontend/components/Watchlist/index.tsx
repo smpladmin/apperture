@@ -1,9 +1,10 @@
 import { Box, Button, Flex, Radio, RadioGroup, Text } from '@chakra-ui/react';
+import { WatchlistItemType } from '@lib/domain/watchlist';
 import React, { useState } from 'react';
 import Table from './Table';
 
 const Watchlist = () => {
-  const [selected, setSelected] = useState('all');
+  const [selected, setSelected] = useState(WatchlistItemType.ALL);
 
   return (
     <Box px={'30'} py={'9'} overflowY={'auto'}>
@@ -29,8 +30,7 @@ const Watchlist = () => {
       <Flex justifyContent={'flex-start'} mt={'6'}>
         <RadioGroup
           value={selected}
-          onChange={(value) => {
-            console.log(value);
+          onChange={(value: WatchlistItemType) => {
             setSelected(value);
           }}
         >
@@ -42,7 +42,9 @@ const Watchlist = () => {
               px={'6'}
               py={'2'}
               border={'1px'}
-              borderColor={selected === 'all' ? 'black.100' : 'white.200'}
+              borderColor={
+                selected === WatchlistItemType.ALL ? 'black.100' : 'white.200'
+              }
               cursor={'pointer'}
             >
               <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
@@ -57,13 +59,17 @@ const Watchlist = () => {
               px={'6'}
               py={'2'}
               border={'1px'}
-              borderColor={selected === 'event' ? 'black.100' : 'white.200'}
+              borderColor={
+                selected === WatchlistItemType.NOTIFICATIONS
+                  ? 'black.100'
+                  : 'white.200'
+              }
               cursor={'pointer'}
             >
               <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
-                Events
+                Notifications
               </Text>
-              <Radio value={'event'} hidden />
+              <Radio value={WatchlistItemType.NOTIFICATIONS} hidden />
             </Flex>
             <Flex
               as={'label'}
@@ -72,13 +78,17 @@ const Watchlist = () => {
               px={'6'}
               py={'2'}
               border={'1px'}
-              borderColor={selected === 'funnel' ? 'black.100' : 'white.200'}
+              borderColor={
+                selected === WatchlistItemType.FUNNELS
+                  ? 'black.100'
+                  : 'white.200'
+              }
               cursor={'pointer'}
             >
               <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
                 Funnel
               </Text>
-              <Radio value={'funnel'} hidden />
+              <Radio value={WatchlistItemType.FUNNELS} hidden />
             </Flex>
           </Flex>
         </RadioGroup>

@@ -4,7 +4,7 @@ import React from 'react';
 
 const TableActionMenu = () => {
   return (
-    <Flex gap={'2'} alignItems={'center'}>
+    <Flex gap={'2'} alignItems={'center'} justifyContent={'flex-end'}>
       <IconButton
         aria-label="alert"
         variant={'secondary'}

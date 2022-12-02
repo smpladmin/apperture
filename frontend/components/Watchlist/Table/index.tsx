@@ -8,33 +8,46 @@ import {
 } from '@tanstack/react-table';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 import LabelType from './LabelType';
-import TableActionMenu from './TableActionMenu';
+import TableActionMenu from './ActionMenu';
+import Details from './Details';
 
 const WatchlistTable = () => {
   const data: any[] = useMemo(
     () => [
       {
         type: 'event',
-        name: 'Login',
-        users: 120000,
+        // name: 'Login',
+        name: {
+          id: 'Login',
+          value: '80',
+        },
         change: '10',
       },
       {
-        type: 'event',
-        name: 'Add_to_cart',
-        users: 9000,
+        type: 'notifications',
+        name: {
+          name: 'Add_to_Cart',
+          value: '80',
+        },
+
         change: '8',
       },
       {
-        type: 'funnel',
-        name: 'Otp_Funnel',
-        users: 800,
+        type: 'funnels',
+        // name: 'Otp_Funnel',
+        name: {
+          name: 'Otp_Funnel',
+          value: '80',
+        },
         change: '2',
       },
       {
         type: 'funnel',
-        name: 'Video_Funnel',
-        users: 1890,
+        // name: 'Video_Funnel',
+        name: {
+          name: 'Video_Funnel',
+          steps: '80',
+        },
         change: '4',
       },
     ],
@@ -53,7 +66,7 @@ const WatchlistTable = () => {
       columnHelper.accessor('name', {
         header: 'Name',
         enableSorting: false,
-        cell: (info) => info.getValue(),
+        cell: (info) => <Details info={info} />,
       }),
       columnHelper.accessor('users', {
         cell: (info) => info.getValue(),
@@ -103,7 +116,11 @@ const WatchlistTable = () => {
       </Thead>
       <Tbody>
         {getRowModel().rows.map((row) => (
-          <Tr key={row.id}>
+          <Tr
+            key={row.id}
+            onClick={() => console.log('row clicked', row.original)}
+            _hover={{ bg: 'white.100' }}
+          >
             {row.getVisibleCells().map((cell) => {
               return (
                 <Td key={cell.id}>
