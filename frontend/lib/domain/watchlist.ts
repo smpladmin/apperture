@@ -1,4 +1,4 @@
-export enum WatchlistItemType {
+export enum WatchListItemType {
   ALL = 'all',
   EVENTS = 'events',
   NOTIFICATIONS = 'notifications',

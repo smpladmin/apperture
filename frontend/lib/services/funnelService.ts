@@ -125,3 +125,13 @@ export const getTransientTrendsData = async (
     return [];
   }
 };
+
+export const getSavedFunnelsForUser = async () => {
+  try {
+    const res = await AppertureAPI.get(`/funnels`);
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};

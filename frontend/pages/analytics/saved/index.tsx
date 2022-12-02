@@ -1,5 +1,5 @@
 import Layout from '@components/Layout';
-import Watchlist from '@components/Watchlist';
+import Watchlist from '@components/WatchList';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { getAuthToken } from '@lib/utils/request';

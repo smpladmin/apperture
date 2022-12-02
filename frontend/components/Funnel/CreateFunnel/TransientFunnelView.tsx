@@ -3,7 +3,7 @@ import { FunnelData, FunnelTrendsData } from '@lib/domain/funnel';
 import React from 'react';
 import FunnelChart from '../components/FunnelChart';
 import Trend from '../components/Trend';
-import Loader from '../components/Loader';
+import Loader from '@components/LoadingSpinner';
 
 type TransientFunnelViewProps = {
   isLoading: boolean;

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   createColumnHelper,
   useReactTable,
@@ -10,77 +10,31 @@ import { Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 import LabelType from './LabelType';
 import TableActionMenu from './ActionMenu';
 import Details from './Details';
+import { WatchListItemType } from '@lib/domain/watchlist';
+import { useRouter } from 'next/router';
 
-const WatchlistTable = () => {
-  const data: any[] = useMemo(
-    () => [
-      {
-        type: 'event',
-        // name: 'Login',
-        name: {
-          id: 'Login',
-          value: '80',
-        },
-        change: '10',
-      },
-      {
-        type: 'notifications',
-        name: {
-          name: 'Add_to_Cart',
-          value: '80',
-        },
-
-        change: '8',
-      },
-      {
-        type: 'funnels',
-        // name: 'Otp_Funnel',
-        name: {
-          name: 'Otp_Funnel',
-          value: '80',
-        },
-        change: '2',
-      },
-      {
-        type: 'funnel',
-        // name: 'Video_Funnel',
-        name: {
-          name: 'Video_Funnel',
-          steps: '80',
-        },
-        change: '4',
-      },
-    ],
-    []
-  );
-
+const WatchlistTable = ({ savedItemsData }: any) => {
   const columnHelper = createColumnHelper<any>();
-
   const columns = useMemo(
     () => [
       columnHelper.accessor('type', {
         header: 'Type',
-        enableSorting: false,
         cell: (info) => <LabelType info={info} />,
       }),
-      columnHelper.accessor('name', {
+      columnHelper.accessor('details', {
         header: 'Name',
-        enableSorting: false,
         cell: (info) => <Details info={info} />,
       }),
       columnHelper.accessor('users', {
         cell: (info) => info.getValue(),
-        enableSorting: true,
         header: 'Users',
       }),
       columnHelper.accessor('change', {
         cell: (info) => info.getValue(),
-        enableSorting: false,
         header: '% Change',
       }),
       columnHelper.accessor('actions', {
-        cell: (info) => <TableActionMenu />,
-        enableSorting: false,
+        cell: () => <TableActionMenu />,
         header: '',
       }),
     ],
@@ -89,12 +43,22 @@ const WatchlistTable = () => {
 
   const tableInstance = useReactTable({
     columns,
-    data,
+    data: savedItemsData,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
-
   const { getHeaderGroups, getRowModel } = tableInstance;
+  const router = useRouter();
+
+  const onRowClick = (row: any) => {
+    if (row?.original?.type === WatchListItemType.FUNNELS) {
+      const { _id } = row?.original?.details;
+      router.push({
+        pathname: '/analytics/funnel/view/[funnelId]',
+        query: { funnelId: _id },
+      });
+    }
+  };
 
   return (
     <Table>
@@ -118,7 +82,7 @@ const WatchlistTable = () => {
         {getRowModel().rows.map((row) => (
           <Tr
             key={row.id}
-            onClick={() => console.log('row clicked', row.original)}
+            onClick={() => onRowClick(row)}
             _hover={{ bg: 'white.100' }}
           >
             {row.getVisibleCells().map((cell) => {

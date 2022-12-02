@@ -14,6 +14,7 @@ const TableActionMenu = () => {
         border={'1px'}
         color={'white.200'}
         borderColor={'white.200'}
+        onClick={(e) => e.stopPropagation()}
       />
       <IconButton
         aria-label="notification"
@@ -24,6 +25,7 @@ const TableActionMenu = () => {
         border={'1px'}
         color={'white.200'}
         borderColor={'white.200'}
+        onClick={(e) => e.stopPropagation()}
       />
       <IconButton
         aria-label="more"
@@ -33,6 +35,7 @@ const TableActionMenu = () => {
         bg={'white.DEFAULT'}
         border={'1px'}
         borderColor={'white.200'}
+        onClick={(e) => e.stopPropagation()}
       />
     </Flex>
   );
