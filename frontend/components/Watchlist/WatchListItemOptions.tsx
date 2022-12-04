@@ -1,5 +1,4 @@
 import { Flex, Radio, Text } from '@chakra-ui/react';
-import { WatchListItemType } from '@lib/domain/watchlist';
 
 type WatchListItemOptionsProps = {
   watchListItem: any;
@@ -20,6 +19,7 @@ const WatchListItemOptions = ({
       border={'1px'}
       borderColor={isSelected ? 'black.100' : 'white.200'}
       cursor={'pointer'}
+      data-testid={'watchlistitem'}
     >
       <Text
         fontSize={{ base: 'xs-12', md: 'xs-14' }}

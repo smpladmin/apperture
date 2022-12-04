@@ -1,12 +1,12 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
-
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from 'tests/util';
 import ViewFunnel from './index';
 
 describe('View Funnel', () => {
   const props = {
+    _id: '64834034092324',
+    appId: '645439584475',
     datasourceId: '654212033222',
     name: 'Test Funnel',
     steps: [

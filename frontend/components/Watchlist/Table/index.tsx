@@ -84,13 +84,13 @@ const WatchlistTable = ({
   };
 
   return (
-    <Table>
+    <Table data-testid={'watchlist-table'}>
       <Thead py={'3'} px={'8'} bg={'white.100'}>
         {getHeaderGroups().map((headerGroup) => (
           <Tr key={headerGroup.id}>
             {headerGroup.headers.map((header) => {
               return (
-                <Th key={header.id}>
+                <Th key={header.id} data-testid={'watchlist-table-headers'}>
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()
@@ -107,6 +107,7 @@ const WatchlistTable = ({
             key={row.id}
             onClick={() => onRowClick(row)}
             _hover={{ bg: 'white.100' }}
+            data-testid={'table-body-rows'}
           >
             {row.getVisibleCells().map((cell) => {
               return (
