@@ -1,18 +1,25 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import Render from '@components/Render';
-import { WatchListItemType } from '@lib/domain/watchlist';
+import { ComputedFunnel } from '@lib/domain/funnel';
+import { Notifications } from '@lib/domain/notification';
+import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
+import { CellContext } from '@tanstack/react-table';
 import LabelType from './LabelType';
 
-export const Details = ({ info }: { info: any }) => {
-  const {
-    type,
-    details: { name, steps },
-  } = info?.row?.original;
+export const Details = ({
+  info,
+}: {
+  info: CellContext<SavedItems, ComputedFunnel | Notifications>;
+}) => {
+  const { type, details } = info?.row?.original;
+
+  /*Temporary change - look for a better alternative for such usecase */
+  const { steps } = details as ComputedFunnel;
 
   return (
     <Flex direction={'column'} gap={'1'}>
       <Text fontSize={'base'} lineHeight={'base'} fontWeight={'600'}>
-        {name}
+        {details?.name}
       </Text>
       {type === WatchListItemType.FUNNELS ? (
         <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'400'}>

@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Radio, RadioGroup, Text } from '@chakra-ui/react';
-import { WatchListItemType } from '@lib/domain/watchlist';
+import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import React, { useEffect, useState } from 'react';
 import WatchListTable from './Table';
 import LoadingSpinner from '@components/LoadingSpinner';
@@ -10,7 +10,7 @@ import WatchListItemTypeOptions from './WatchListItemOptions';
 
 const Watchlist = () => {
   const [selectedItem, setSelectedItem] = useState(WatchListItemType.ALL);
-  const [savedItemsData, setSavedItemsData] = useState<any[]>([]);
+  const [savedItemsData, setSavedItemsData] = useState<SavedItems[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const getSavedItems = async () => {

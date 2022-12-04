@@ -5,7 +5,7 @@ import FunnelIcon from '@assets/icons/funnel-filter.svg';
 import JourneyIcon from '@assets/icons/journey.svg';
 import { WatchListItemType } from '@lib/domain/watchlist';
 
-const getLableTypeIcon = (labelType: string) => {
+const getLableTypeIcon = (labelType: WatchListItemType) => {
   switch (labelType) {
     case WatchListItemType.EVENTS:
       return <Image src={EventIcon} alt={'event-arrow-up-icon'} />;
@@ -18,7 +18,7 @@ const getLableTypeIcon = (labelType: string) => {
   }
 };
 
-const getLabelText = (labelType: string) => {
+const getLabelText = (labelType: WatchListItemType) => {
   switch (labelType) {
     case WatchListItemType.EVENTS:
       return 'Event';
@@ -31,7 +31,7 @@ const getLabelText = (labelType: string) => {
   }
 };
 
-const LabelType = ({ type }: { type: string }) => {
+const LabelType = ({ type }: { type: WatchListItemType }) => {
   return (
     <Box bg={'white.100'} borderRadius={'100'} py={'2'} px={'2'} w={'30'}>
       <Flex gap={'1'} justifyContent={'center'}>

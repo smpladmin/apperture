@@ -1,6 +1,15 @@
 import { Flex, Radio, Text } from '@chakra-ui/react';
+import { WatchListItemType } from '@lib/domain/watchlist';
 
-const WatchListItemOptions = ({ watchListItem, isSelected }: any) => {
+type WatchListItemOptionsProps = {
+  watchListItem: any;
+  isSelected: boolean;
+};
+
+const WatchListItemOptions = ({
+  watchListItem,
+  isSelected,
+}: WatchListItemOptionsProps) => {
   return (
     <Flex
       as={'label'}

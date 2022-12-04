@@ -5,23 +5,28 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   flexRender,
+  Row,
 } from '@tanstack/react-table';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 import LabelType from './LabelType';
 import TableActionMenu from './ActionMenu';
 import Details from './Details';
-import { WatchListItemType } from '@lib/domain/watchlist';
+import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { useRouter } from 'next/router';
 import UsersMetric from './UsersMetric';
 import { AppertureContext } from '@lib/contexts/appertureContext';
 
-const WatchlistTable = ({ savedItemsData }: any) => {
+const WatchlistTable = ({
+  savedItemsData,
+}: {
+  savedItemsData: SavedItems[];
+}) => {
   const router = useRouter();
   const {
     device: { isMobile },
   } = useContext(AppertureContext);
 
-  const columnHelper = createColumnHelper<any>();
+  const columnHelper = createColumnHelper<SavedItems>();
   const columns = useMemo(
     () =>
       isMobile
@@ -68,7 +73,7 @@ const WatchlistTable = ({ savedItemsData }: any) => {
   });
   const { getHeaderGroups, getRowModel } = tableInstance;
 
-  const onRowClick = (row: any) => {
+  const onRowClick = (row: Row<SavedItems>) => {
     if (row?.original?.type === WatchListItemType.FUNNELS) {
       const { _id } = row?.original?.details;
       router.push({
