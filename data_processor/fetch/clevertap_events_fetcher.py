@@ -15,7 +15,7 @@ class ClevertapEventsFetcher:
             "Content-Type": "application/json",
         }
         self.params = (("batch_size", "50000"),)
-        self.date = "".join(date.split("-")[::-1])
+        self.date = date.replace("-", "")
         self.request_data = (
             f'"event_name":"UTM Visited","from":{self.date},"to":{self.date} '
         )

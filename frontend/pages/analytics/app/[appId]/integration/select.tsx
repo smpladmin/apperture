@@ -13,6 +13,7 @@ import 'remixicon/fonts/remixicon.css';
 import gaLogo from '@assets/images/ga-logo-small.svg';
 import mixpanelLogo from '@assets/images/mixPanel-icon.png';
 import amplitudeLogo from '@assets/images/amplitude-icon.png';
+import clevertapLogo from '@assets/images/clevertap-icon.png';
 import FormButton from '@components/FormButton';
 import IntegrationSource from '@components/IntegrationSource';
 import { Provider } from '@lib/domain/provider';
@@ -96,6 +97,12 @@ const SelectProvider = () => {
                   value={Provider.AMPLITUDE}
                   imgSrc={amplitudeLogo}
                   selected={provider === Provider.AMPLITUDE}
+                />
+                <IntegrationSource
+                  sourceName="Clevertap"
+                  value={Provider.CLEVERTAP}
+                  imgSrc={clevertapLogo}
+                  selected={provider === Provider.CLEVERTAP}
                 />
               </Stack>
             </RadioGroup>

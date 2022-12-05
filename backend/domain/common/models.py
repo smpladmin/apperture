@@ -8,4 +8,4 @@ class IntegrationProvider(str, Enum):
     CLEVERTAP = "clevertap"
 
     def supports_runlogs(self):
-        return self in [self.MIXPANEL, self.AMPLITUDE]
+        return self in [self.MIXPANEL, self.AMPLITUDE, self.CLEVERTAP]
