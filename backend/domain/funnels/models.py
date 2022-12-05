@@ -19,6 +19,7 @@ class FunnelStep(BaseModel):
 
 class Funnel(Document):
     datasource_id: PydanticObjectId
+    app_id: PydanticObjectId
     user_id: PydanticObjectId
     name: str
     steps: List[FunnelStep]
@@ -43,6 +44,8 @@ class ComputedFunnel(BaseModel):
 
 
 class FunnelTrendsData(BaseModel):
-    conversion: str
+    conversion: float
+    first_step_users: int
+    last_step_users: int
     start_date: datetime.datetime
     end_date: datetime.datetime

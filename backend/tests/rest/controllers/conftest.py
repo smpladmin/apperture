@@ -5,7 +5,8 @@ from datetime import datetime
 from beanie import PydanticObjectId
 from fastapi.testclient import TestClient
 
-from domain.common.models import IntegrationProvider
+from domain.apps.models import App
+from domain.common.models import IntegrationProvider, SavedItems, WatchlistItemType
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.funnels.models import (
     Funnel,
@@ -19,8 +20,10 @@ from domain.notifications.models import (
     NotificationFrequency,
     NotificationMetric,
     NotificationType,
+    ThresholdMap,
 )
 from domain.users.models import User
+from domain.edge.models import Edge, NodeSignificance, NodeTrend, NodeSankey
 
 
 @pytest.fixture(scope="module")
@@ -34,9 +37,38 @@ def client_init(app_init):
 def notification_service():
     notification_service_mock = mock.MagicMock()
     Notification.get_settings = mock.MagicMock()
+    saved_notif = [
+        SavedItems(
+            type=WatchlistItemType.NOTIFICATIONS,
+            details=Notification(
+                id=PydanticObjectId("635ba034807ab86d8a2aadd8"),
+                created_at=datetime(2022, 12, 1, 7, 4, 59, 390000),
+                updated_at=datetime(2022, 12, 1, 7, 4, 59, 390000),
+                datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+                user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+                app_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+                name="/p/partner/job",
+                notification_type=NotificationType.ALERT,
+                metric=NotificationMetric.HITS,
+                multi_node=False,
+                apperture_managed=False,
+                pct_threshold_active=False,
+                pct_threshold_values=None,
+                absolute_threshold_active=True,
+                absolute_threshold_values=ThresholdMap(min=26.0, max=381.0),
+                formula="a",
+                variable_map={"a": ["/p/partner/job"]},
+                preferred_hour_gmt=5,
+                frequency=NotificationFrequency.DAILY,
+                preferred_channels=[NotificationChannel.SLACK],
+                notification_active=True,
+            ),
+        )
+    ]
     notif = Notification(
         id=PydanticObjectId("635ba034807ab86d8a2aadd8"),
         datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        app_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
         name="name",
         user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
         notification_type=NotificationType.UPDATE,
@@ -55,10 +87,16 @@ def notification_service():
     notif_future = asyncio.Future()
     notif_future.set_result(notif)
 
+    saved_notif_future = asyncio.Future()
+    saved_notif_future.set_result(saved_notif)
+
     notification_service_mock.build_notification.return_value = notif
     notification_service_mock.add_notification.return_value = notif_future
     notification_service_mock.update_notification.return_value = notif_future
     notification_service_mock.get_notification_for_node.return_value = notif_future
+    notification_service_mock.get_notifications_for_apps.return_value = (
+        saved_notif_future
+    )
     return notification_service_mock
 
 
@@ -68,6 +106,7 @@ def funnel_service():
     Funnel.get_settings = mock.MagicMock()
     funnel = Funnel(
         id=PydanticObjectId("635ba034807ab86d8a2aadd8"),
+        app_id=PydanticObjectId("635ba034807ab86d8a2aadd7"),
         datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
         name="name",
         user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
@@ -100,12 +139,16 @@ def funnel_service():
     )
     funnel_trends = [
         FunnelTrendsData(
-            conversion=0.5,
+            conversion=50.00,
+            first_step_users=100,
+            last_step_users=50,
             start_date=datetime(2022, 1, 1, 0, 0),
             end_date=datetime(2022, 1, 7, 0, 0),
         ),
         FunnelTrendsData(
-            conversion=0.6,
+            conversion=60.00,
+            first_step_users=100,
+            last_step_users=60,
             start_date=datetime(2022, 1, 8, 0, 0),
             end_date=datetime(2022, 1, 14, 0, 0),
         ),
@@ -139,6 +182,7 @@ def datasource_service():
         external_source_id="123",
         version=DataSourceVersion.DEFAULT,
     )
+    datasource.id = PydanticObjectId("636a1c61d715ca6baae65611")
 
     datasource_future = asyncio.Future()
     datasource_future.set_result(datasource)
@@ -161,10 +205,316 @@ def user_service(mock_find_email_user):
 
 @pytest.fixture(scope="module")
 def app_service():
-    service = mock.AsyncMock()
-    future = asyncio.Future()
-    service.find_user.return_value = future
-    return service
+    app_service_mock = mock.MagicMock()
+    App.get_settings = mock.MagicMock()
+    apps = [
+        App(
+            id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+            revision_id=None,
+            created_at=datetime(2022, 11, 8, 7, 57, 35, 691000),
+            updated_at=datetime(2022, 11, 8, 7, 57, 35, 691000),
+            name="mixpanel1",
+            user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+            shared_with=set(),
+        )
+    ]
+    user_future = asyncio.Future()
+    app_service_mock.find_user.return_value = user_future
+    app_service_mock.share_app = mock.AsyncMock()
+    apps_future = asyncio.Future()
+    apps_future.set_result(apps)
+    app_service_mock.get_apps.return_value = apps_future
+    return app_service_mock
+
+
+@pytest.fixture(scope="module")
+def edge_service():
+    edge_service_mock = mock.MagicMock()
+    Edge.get_settings = mock.MagicMock()
+    node_significance = [
+        NodeSignificance(
+            node="Video_Open",
+            node_hits=39268,
+            total_hits=374844,
+            node_users=8922,
+            total_users=28882,
+        )
+    ]
+    node_trends = [
+        NodeTrend(
+            node="test",
+            year=2022,
+            trend=1,
+            users=1111,
+            hits=6483,
+            start_date=datetime.strptime("2022-11-06", "%Y-%m-%d"),
+            end_date=datetime.strptime("2022-11-12", "%Y-%m-%d"),
+        ),
+        NodeTrend(
+            node="test",
+            year=2022,
+            trend=2,
+            users=1371,
+            hits=6972,
+            start_date=datetime.strptime("2022-11-13", "%Y-%m-%d"),
+            end_date=datetime.strptime("2022-11-19", "%Y-%m-%d"),
+        ),
+    ]
+    node_sankey = [
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="inflow1",
+            hits=10,
+            users=8,
+            flow="inflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="inflow2",
+            hits=10,
+            users=8,
+            flow="inflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="inflow3",
+            hits=10,
+            users=8,
+            flow="inflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="Exits",
+            hits=10,
+            users=8,
+            flow="inflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="Others",
+            hits=10,
+            users=8,
+            flow="inflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="outflow1",
+            hits=10,
+            users=8,
+            flow="outflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="outflow2",
+            hits=10,
+            users=8,
+            flow="outflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="outflow3",
+            hits=10,
+            users=8,
+            flow="outflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="outflow4",
+            hits=10,
+            users=8,
+            flow="outflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+        NodeSankey(
+            node="test",
+            current_event="test",
+            previous_event="Others",
+            hits=10,
+            users=8,
+            flow="outflow",
+            hits_percentage=10,
+            users_percentage=12,
+        ),
+    ]
+    node_significance_future = asyncio.Future()
+    node_significance_future.set_result(node_significance)
+    edge_service_mock.get_node_significance.return_value = node_significance_future
+    node_trends_future = asyncio.Future()
+    node_trends_future.set_result(node_trends)
+    edge_service_mock.get_node_trends.return_value = node_trends_future
+    node_sankey_future = asyncio.Future()
+    node_sankey_future.set_result(node_sankey)
+    edge_service_mock.get_node_sankey.return_value = node_sankey_future
+    return edge_service_mock
+
+
+@pytest.fixture(scope="module")
+def node_significance_response():
+    return [
+        {
+            "node": "Video_Open",
+            "nodeHits": 39268,
+            "totalHits": 374844,
+            "nodeUsers": 8922,
+            "totalUsers": 28882,
+        }
+    ]
+
+
+@pytest.fixture(scope="module")
+def node_sankey_response():
+    return [
+        {
+            "currentEvent": "test",
+            "flow": "inflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "inflow1",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "inflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "inflow2",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "inflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "inflow3",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "inflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "Exits",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "inflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "Others",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "outflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "outflow1",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "outflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "outflow2",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "outflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "outflow3",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "outflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "outflow4",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+        {
+            "currentEvent": "test",
+            "flow": "outflow",
+            "hits": 10,
+            "hitsPercentage": 10.0,
+            "node": "test",
+            "previousEvent": "Others",
+            "users": 8,
+            "usersPercentage": 12.0,
+        },
+    ]
+
+
+@pytest.fixture(scope="module")
+def node_trends_response():
+    return [
+        {
+            "node": "test",
+            "users": 1111,
+            "hits": 6483,
+            "year": 2022,
+            "trend": 1,
+            "startDate": "2022-11-06T00:00:00",
+            "endDate": "2022-11-12T00:00:00",
+        },
+        {
+            "node": "test",
+            "users": 1371,
+            "hits": 6972,
+            "year": 2022,
+            "trend": 2,
+            "startDate": "2022-11-13T00:00:00",
+            "endDate": "2022-11-19T00:00:00",
+        },
+    ]
 
 
 @pytest.fixture(scope="module")
@@ -207,6 +557,7 @@ def notification_response():
         "createdAt": "2022-10-28T09:26:12.682829",
         "updatedAt": None,
         "datasourceId": "635ba034807ab86d8a2aadd9",
+        "appId": "635ba034807ab86d8a2aadd9",
         "userId": "635ba034807ab86d8a2aadda",
         "name": "name",
         "notificationType": NotificationType.UPDATE,
@@ -227,9 +578,42 @@ def notification_response():
 
 
 @pytest.fixture(scope="module")
+def saved_notification_response():
+    return [
+        {
+            "type": "notifications",
+            "details": {
+                "_id": "635ba034807ab86d8a2aadd8",
+                "created_at": "2022-12-01T07:04:59.390000",
+                "updated_at": "2022-12-01T07:04:59.390000",
+                "datasource_id": "635ba034807ab86d8a2aadd9",
+                "user_id": "635ba034807ab86d8a2aadda",
+                "app_id": "635ba034807ab86d8a2aadd9",
+                "name": "/p/partner/job",
+                "notification_type": "alert",
+                "metric": "hits",
+                "multi_node": False,
+                "apperture_managed": False,
+                "pct_threshold_active": False,
+                "pct_threshold_values": None,
+                "absolute_threshold_active": True,
+                "absolute_threshold_values": {"min": 26.0, "max": 381.0},
+                "formula": "a",
+                "variable_map": {"a": ["/p/partner/job"]},
+                "preferred_hour_gmt": 5,
+                "frequency": "daily",
+                "preferred_channels": ["slack"],
+                "notification_active": True,
+            },
+        }
+    ]
+
+
+@pytest.fixture(scope="module")
 def funnel_response():
     return {
         "_id": "635ba034807ab86d8a2aadd8",
+        "appId": "635ba034807ab86d8a2aadd7",
         "revisionId": "8fc1083c-0e63-4358-9139-785b77b6236a",
         "createdAt": "2022-10-28T09:26:12.682829",
         "updatedAt": None,
@@ -258,12 +642,16 @@ def funnel_response():
 def funnel_trend_response():
     return [
         {
-            "conversion": "0.5",
+            "conversion": 50.00,
+            "firstStepUsers": 100,
+            "lastStepUsers": 50,
             "startDate": "2022-01-01T00:00:00",
             "endDate": "2022-01-07T00:00:00",
         },
         {
-            "conversion": "0.6",
+            "conversion": 60.00,
+            "firstStepUsers": 100,
+            "lastStepUsers": 60,
             "startDate": "2022-01-08T00:00:00",
             "endDate": "2022-01-14T00:00:00",
         },
@@ -318,6 +706,7 @@ def events_data():
 def funnel_data():
     return {
         "datasourceId": "636a1c61d715ca6baae65611",
+        "appId": "636a1c61d715ca6baae65611",
         "name": "test2",
         "steps": [
             {

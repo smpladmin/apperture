@@ -7,17 +7,16 @@ import {
   DrawerBody,
   DrawerContent,
   DrawerOverlay,
-  Image,
   Text,
 } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import filterMobile from '@assets/images/filterIconMobile.svg';
 import MobileSidemenu from './MobileSideMenu';
 import Search from './Search';
-import mixPanel from '@assets/images/mixPanel-icon.png';
-import gaLogo from '@assets/images/ga-logo-small.svg';
 import { Provider } from '@lib/domain/provider';
 import { AppWithIntegrations } from '@lib/domain/app';
+import { getProviderLogo } from '@lib/utils/common';
+import Image from 'next/image';
 
 type MobileHeaderProps = {
   openAppsModal: Function;
@@ -82,14 +81,9 @@ const MobileHeader = ({
           onClick={openSwitchDataSourceModal}
           cursor={'pointer'}
         >
-          <Image
-            h={'5'}
-            w={'5'}
-            src={
-              dataSourceType === Provider.MIXPANEL ? mixPanel.src : gaLogo.src
-            }
-            alt="data-source"
-          />
+          <Box h={'5'} w={'5'}>
+            <Image src={getProviderLogo(dataSourceType)} alt="data-source" />
+          </Box>
         </Box>
       </Flex>
       <Flex w={'full'} justifyContent={'space-between'} alignItems={'center'}>
@@ -100,7 +94,7 @@ const MobileHeader = ({
           </Text>
         </Flex>
         <Box h={3} cursor={'not-allowed'}>
-          <Image src={filterMobile.src} alt="filter-icon" />
+          <Image src={filterMobile} alt="filter-icon" />
         </Box>
       </Flex>
     </Flex>

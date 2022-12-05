@@ -26,6 +26,7 @@ type CreateFunnelActionProps = {
   funnelSteps: FunnelStep[];
   setFunnelSteps: Function;
   setFunnelData: Function;
+  setTrendsData: Function;
 };
 
 const CreateFunnelAction = ({
@@ -34,6 +35,7 @@ const CreateFunnelAction = ({
   funnelSteps,
   setFunnelSteps,
   setFunnelData,
+  setTrendsData,
 }: CreateFunnelActionProps) => {
   const {
     state: { nodes },
@@ -88,7 +90,7 @@ const CreateFunnelAction = ({
     if (status === 200)
       router.push({
         pathname: '/analytics/funnel/view/[funnelId]',
-        query: { funnelId: data._id || funnelId },
+        query: { funnelId: data?._id || funnelId },
       });
   };
 
@@ -97,12 +99,14 @@ const CreateFunnelAction = ({
       <Flex justifyContent={'space-between'} alignItems={'center'}>
         <IconButton
           aria-label="close"
-          variant={'secondary'}
+          variant={'primary'}
           icon={<i className="ri-arrow-left-line"></i>}
           rounded={'full'}
           color={'white.DEFAULT'}
           bg={'black.20'}
-          onClick={() => {}}
+          onClick={() => {
+            router.back();
+          }}
         />
 
         <Button
@@ -113,6 +117,7 @@ const CreateFunnelAction = ({
             pointerEvents: 'none',
           }}
           onClick={handleSaveFunnel}
+          data-testid={'save'}
         >
           <Text
             textAlign={'center'}
@@ -155,6 +160,7 @@ const CreateFunnelAction = ({
           onChange={(e) => setFunnelName(e.target.value)}
           borderColor={'grey.10'}
           px={0}
+          data-testid={'funnel-name'}
         />
       </Flex>
 
@@ -169,6 +175,7 @@ const CreateFunnelAction = ({
             Steps
           </Text>
           <Button
+            data-testid={'add-button'}
             rounded={'full'}
             variant={'primary'}
             size={'md'}
@@ -184,6 +191,7 @@ const CreateFunnelAction = ({
           eventFieldsValue={funnelSteps}
           setEventFieldsValue={setFunnelSteps}
           setFunnelData={setFunnelData}
+          setTrendsData={setTrendsData}
         />
         <Divider orientation="horizontal" borderColor={BASTILLE} opacity={1} />
         <Flex justifyContent={'space-between'} alignItems={'center'}>
@@ -195,7 +203,7 @@ const CreateFunnelAction = ({
           >
             In any sequence
           </Text>
-          <Switch background={'black'} size={'sm'} />
+          <Switch background={'black'} size={'sm'} isDisabled />
         </Flex>
       </Flex>
     </>
