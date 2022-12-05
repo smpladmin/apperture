@@ -1,9 +1,7 @@
 import logging
 import json
 import requests
-import pandas as pd
 
-from domain.common.models import DataFormat
 from domain.datasource.models import Credential
 
 
@@ -28,13 +26,13 @@ class ClevertapEventsFetcher:
         logging.info(
             f"Beginning to fetch events data from start={self.date} & end={self.date}"
         )
-        requestCursor = requests.post(
+        request_cursor = requests.post(
             self.data_url,
             headers=self.headers,
             params=self.params,
             data=self.request_data,
         )
-        return json.loads(requestCursor.content)["cursor"]
+        return json.loads(request_cursor.content)["cursor"]
 
     def open(self):
         events_data_response = requests.post(
@@ -54,7 +52,7 @@ class ClevertapEventsFetcher:
                 logging.info("Fetching ends: {}")
                 break
             logging.info(
-                f"Event data successfully fetched : {0}".format(len(events_data))
+                f"Event data successfully fetched : {len(events_data)}"
             )
             yield events_data
             if "next_cursor" in response:
