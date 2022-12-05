@@ -162,19 +162,11 @@ const MobileSidemenu = ({
                 label: 'Saved',
                 icon: <i className="ri-bookmark-line" />,
               }}
+              onMenuClick={() => {
+                closeDrawer();
+                router.push('/analytics/saved');
+              }}
             />
-            <Box
-              my={'4'}
-              borderRadius={'sm'}
-              backgroundColor={'green'}
-              fontSize={'xs-10'}
-              lineHeight={'xs-10'}
-              fontWeight={'medium'}
-              padding={1}
-              textColor={'white'}
-            >
-              Coming soon
-            </Box>
           </Flex>
           <Divider
             orientation={'horizontal'}

@@ -56,3 +56,8 @@ export const getSearchResult = (
   const fuse = new Fuse(data, options);
   return fuse.search(query).map((result) => result.item);
 };
+
+export const capitalizeFirstLetter = (text: string): string => {
+  const capitalized = text?.charAt(0)?.toUpperCase() + text?.slice(1);
+  return capitalized;
+};

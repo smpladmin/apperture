@@ -145,24 +145,31 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               backgroundColor: 'transparent',
             }}
           />
-          <IconButton
-            aria-label="close"
-            icon={<i className="ri-bookmark-line" />}
-            rounded={'lg'}
-            disabled={true}
-            h={10}
-            w={10}
-            bg={'black.0'}
-            fontWeight={'500'}
-            color={'grey.100'}
-            _hover={{
-              backgroundColor: 'white.0',
-              color: 'white',
-            }}
-            _active={{
-              backgroundColor: 'transparent',
-            }}
-          />
+          <Tooltip
+            label={'Saved'}
+            aria-label={'Saved'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="close"
+              icon={<i className="ri-bookmark-line" />}
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={() => router.push('/analytics/saved')}
+            />
+          </Tooltip>
           <Box
             marginTop={-4}
             borderRadius={'sm'}

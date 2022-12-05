@@ -41,3 +41,13 @@ export const setAlert = async (
     return null;
   }
 };
+
+export const getSavedNotificationsForUser = async () => {
+  try {
+    const res = await AppertureAPI.get(`/notifications`);
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};
