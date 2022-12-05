@@ -1,4 +1,5 @@
 import AmplitudeIntegration from '@components/CreateIntegration/AmplitudeIntegration';
+import ClevertapIntegration from '@components/CreateIntegration/ClevertapIntegration';
 import GooglePermission from '@components/CreateIntegration/GooglePermission';
 import MixpanelIntegration from '@components/CreateIntegration/MixpanelIntegration';
 import { Provider } from '@lib/domain/provider';
@@ -14,20 +15,22 @@ const Create = () => {
       pathname: `/analytics/explore/[dsId]`,
       query: { dsId: previousDsId, apps: 1 },
     });
-
-  return (
-    <>
-      {provider === Provider.GOOGLE ? (
-        <GooglePermission
+    switch(provider){
+      case Provider.GOOGLE:
+        return <GooglePermission
           navigateBack={handleGoBack}
           handleClose={handleClose}
           query={{ ...router.query }}
         />
-      ) : provider === Provider.MIXPANEL?(
-        <MixpanelIntegration add={add} handleClose={handleClose} />
-      ):<AmplitudeIntegration add={add} handleClose={handleClose} />}
-    </>
-  );
+      case Provider.MIXPANEL:
+        return <MixpanelIntegration add={add} handleClose={handleClose} />
+      case Provider.AMPLITUDE:
+        return<AmplitudeIntegration add={add} handleClose={handleClose} />
+      case Provider.CLEVERTAP:
+        return <ClevertapIntegration add={add} handleClose={handleClose}/>
+      default:
+        return<></>
+    } 
 };
 
 export default Create;

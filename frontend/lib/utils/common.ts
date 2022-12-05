@@ -2,6 +2,7 @@ import Fuse from 'fuse.js';
 import { Provider } from './../domain/provider';
 import mixPanelLogo from '@assets/images/mixpanel-icon.svg';
 import gaLogo from '@assets/images/ga-logo-small.svg';
+import clevertapLogo from '@assets/images/clevertap-icon.png';
 import amplitudeLogo from '@assets/images/amplitude-icon.svg';
 
 import { StaticImageData } from 'next/image';
@@ -42,7 +43,8 @@ export const getProviderLogo = (provider: Provider): StaticImageData => {
 
     case Provider.AMPLITUDE:
       return amplitudeLogo;
-
+    case Provider.CLEVERTAP:
+      return clevertapLogo;
     default:
       return gaLogo;
   }
