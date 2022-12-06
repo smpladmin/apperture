@@ -62,3 +62,13 @@ class EventsService:
         return self.validate_properties(
             all_props=all_properties, date=date, ds_id=datasource_id
         )
+
+    def get_values_for_property(
+        self, datasource_id: str, event_property: str, start_date: str, end_date: str
+    ):
+        return self.events.get_values_for_property(
+            datasource_id=datasource_id,
+            event_property=event_property,
+            start_date=start_date,
+            end_date=end_date,
+        )
