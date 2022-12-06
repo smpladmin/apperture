@@ -51,9 +51,7 @@ class ClevertapEventsFetcher:
             else:
                 logging.info("Fetching ends: {}")
                 break
-            logging.info(
-                f"Event data successfully fetched : {len(events_data)}"
-            )
+            logging.info(f"Event data successfully fetched : {len(events_data)}")
             yield events_data
             if "next_cursor" in response:
                 self.cursor = response["next_cursor"]

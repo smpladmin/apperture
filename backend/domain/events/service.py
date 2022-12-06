@@ -42,18 +42,23 @@ class EventsService:
             )[0]
         )
         all_props = np.array(all_props)
-        return str((all_props[value_counts > 1]).tolist())
+        return (all_props[value_counts > 1]).tolist()
 
     def get_event_properties(self, datasource_id: str, chunk_size: int):
         [(all_properties, date)] = self.events.get_event_properties(
             datasource_id=datasource_id
         )
-        n = len(all_properties)//chunk_size
-        for i in range(1, n+1):
-            yield self.validate_properties(
-                all_props=all_properties[(i-1)*chunk_size:i*chunk_size], date=date, ds_id=datasource_id
-            )
-        yield self.validate_properties(
-            all_props=all_properties[n*chunk_size:], date=date, ds_id=datasource_id
+
+        # StreamingResponse implementation
+        # n = len(all_properties)//chunk_size
+        # for i in range(1, n+1):
+        #     yield self.validate_properties(
+        #         all_props=all_properties[(i-1)*chunk_size:i*chunk_size], date=date, ds_id=datasource_id
+        #     )
+        # yield self.validate_properties(
+        #     all_props=all_properties[n*chunk_size:], date=date, ds_id=datasource_id
+        # )
+
+        return self.validate_properties(
+            all_props=all_properties, date=date, ds_id=datasource_id
         )
-        return
