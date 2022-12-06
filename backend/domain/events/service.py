@@ -1,3 +1,5 @@
+from typing import List
+import numpy as np
 from fastapi import Depends
 from clickhouse.clickhouse import Clickhouse
 from domain.edge.models import Node
@@ -32,3 +34,26 @@ class EventsService:
     async def get_unique_nodes(self, datasource_id: str):
         events = self.events.get_unique_events(datasource_id)
         return [Node(id=e, name=e) for [e] in events]
+
+    def validate_properties(self, all_props: List[str], date: str, ds_id: str):
+        value_counts = np.array(
+            self.events.get_distinct_values_for_properties(
+                all_props=all_props, date=date, ds_id=ds_id
+            )[0]
+        )
+        all_props = np.array(all_props)
+        return str((all_props[value_counts > 1]).tolist())
+
+    def get_event_properties(self, datasource_id: str, chunk_size: int):
+        [(all_properties, date)] = self.events.get_event_properties(
+            datasource_id=datasource_id
+        )
+        n = len(all_properties)//chunk_size
+        for i in range(1, n+1):
+            yield self.validate_properties(
+                all_props=all_properties[(i-1)*chunk_size:i*chunk_size], date=date, ds_id=datasource_id
+            )
+        yield self.validate_properties(
+            all_props=all_properties[n*chunk_size:], date=date, ds_id=datasource_id
+        )
+        return

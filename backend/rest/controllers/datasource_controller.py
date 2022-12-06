@@ -1,5 +1,6 @@
 from datetime import datetime as dt
 from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.events.service import EventsService
@@ -93,3 +94,14 @@ async def get_node_significance(
     return await edge_service.get_node_significance(
         datasource=datasource, node=node, start_date=start_date, end_date=end_date
     )
+
+
+@router.get(
+    "/datasources/{ds_id}/event_properties",
+)
+async def get_event_properties(
+    ds_id: str,
+    chunk_size: int = 50,
+    events_service: EventsService = Depends(),
+):
+    return StreamingResponse(events_service.get_event_properties(datasource_id=ds_id, chunk_size=chunk_size))
