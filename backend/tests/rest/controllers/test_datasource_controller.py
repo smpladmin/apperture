@@ -97,3 +97,12 @@ def test_get_sankey_nodes(client_init, edge_service, node_sankey_response):
         "node": "'Login'",
         "start_date": "1970-01-01",
     } == kwargs
+
+
+def test_get_event_properties(client_init, events_service):
+    response = client_init.get("/datasources/637739d383ea7fda83e72a2d/event_properties")
+    assert response.status_code == 200
+    assert response.json() == ["prop1", "prop2"]
+    events_service.get_event_properties.assert_called_once_with(
+        **{"chunk_size": 50, "datasource_id": "637739d383ea7fda83e72a2d"}
+    )
