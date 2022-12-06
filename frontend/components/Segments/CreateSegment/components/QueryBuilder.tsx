@@ -1,20 +1,32 @@
-import { Box, Button, Flex, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, IconButton, Text } from '@chakra-ui/react';
 import { ARROW_GRAY } from '@theme/index';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import AddFilter from './AddFilter';
+import 'remixicon/fonts/remixicon.css';
+import { useRouter } from 'next/router';
+import { getEventProperties } from '@lib/services/datasourceService';
 
 const QueryBuilder = () => {
-  const [group, setGroup] = useState([
-    {
-      filterOperators: [],
-      filters: [
-        {
-          operand: '',
-          operator: '',
-          value: [],
-        },
-      ],
-    },
-  ]);
+  const [groups, setGroups] = useState<any[]>([]);
+  const [filters, setFilters] = useState([]);
+  const [filterOperators, setFilterOperators] = useState([]);
+  const [eventProperties, setEventProperties] = useState([]);
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  useEffect(() => {
+    const fetchEventProperties = async () => {
+      const data = await getEventProperties(dsId as string);
+      setEventProperties(data);
+    };
+    fetchEventProperties();
+  }, []);
+
+  const removeFilter = (i: number) => {
+    const updatedFilter = [...filters];
+    updatedFilter.splice(i, 1);
+    setFilters([...updatedFilter]);
+  };
 
   return (
     <Box
@@ -22,7 +34,7 @@ const QueryBuilder = () => {
       borderRadius={'12'}
       borderWidth={'0.4px'}
       borderColor={'grey.100'}
-      h={'20'}
+      minH={'20'}
       mt={'4'}
     >
       <Text
@@ -33,49 +45,26 @@ const QueryBuilder = () => {
       >
         ALL USERS
       </Text>
-      <Flex>
-        <Box position={'relative'}>
-          <Button>Filter</Button>
-          <Box
-            position={'absolute'}
-            zIndex={99}
-            borderRadius={'12'}
-            borderWidth={'0.4px'}
-            borderColor={'grey.100'}
-            bg={'white.DEFAULT'}
-            shadow={'0px 0px 4px rgba(0, 0, 0, 0.12)'}
-            maxH={'100'}
-            overflowY={'auto'}
-          >
-            <li>14847483498749wewewewewsdsdsde</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-            <li>1</li>
-          </Box>
-        </Box>
+      <Flex direction={'column'}>
+        {filters.map((filter: any, i) => {
+          return (
+            <Flex key={i} gap={'3'}>
+              <Text>{filterOperators[i]}</Text>
+              <Box>{filter.operand}</Box>
+              <Box>{filter.operator}</Box>
+              <Box>{filter.value || 'Select Value...'}</Box>
+              <IconButton
+                aria-label="delete"
+                icon={<i className="ri-delete-bin-6-line"></i>}
+                onClick={() => removeFilter(i)}
+              />
+            </Flex>
+          );
+        })}
+        <AddFilter
+          setFilters={setFilters}
+          setFilterOperators={setFilterOperators}
+        />
       </Flex>
     </Box>
   );
