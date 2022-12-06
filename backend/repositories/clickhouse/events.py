@@ -1,7 +1,15 @@
 import logging
-from typing import Dict
+from typing import Dict, List
 from fastapi import Depends
-from pypika import Table, ClickHouseQuery, Parameter, CustomFunction
+from pypika import (
+    Table,
+    ClickHouseQuery,
+    Parameter,
+    CustomFunction,
+    functions as fn,
+    Criterion,
+    Field,
+)
 
 from clickhouse import Clickhouse
 
@@ -13,6 +21,8 @@ class Events:
         self.epoch_year = 1970
         self.week_func = CustomFunction("WEEK", ["timestamp"])
         self.date_func = CustomFunction("DATE", ["timestamp"])
+        self.json_extract_keys_func = CustomFunction("JSONExtractKeys", ["string"])
+        self.to_json_string_func = CustomFunction("toJSONString", ["json"])
         self.event_criterion = [
             self.table.datasource_id == Parameter("%(ds_id)s"),
             self.table.event_name == Parameter("%(event_name)s"),
@@ -46,3 +56,43 @@ class Events:
             .distinct()
         )
         return query.get_sql(), params
+
+    def get_event_properties(self, datasource_id: str):
+        return self.execute_get_query(*self.build_event_properties_query(datasource_id))
+
+    def build_event_properties_query(self, datasource_id: str):
+        query = (
+            ClickHouseQuery.from_(self.table)
+            .select(
+                self.json_extract_keys_func(
+                    self.to_json_string_func(self.table.properties)
+                ),
+                self.date_func(self.table.timestamp),
+            )
+            .where(self.table.datasource_id == Parameter("%(ds_id)s"))
+            .limit(1)
+        )
+        return query.get_sql(), {"ds_id": datasource_id}
+
+    def get_distinct_values_for_properties(
+        self, all_props: List[str], date: str, ds_id: str
+    ):
+        return self.execute_get_query(
+            *self.build_distinct_values_for_properties_query(all_props, date, ds_id)
+        )
+
+    def build_distinct_values_for_properties_query(
+        self, all_props: List[str], date: str, ds_id: str
+    ):
+        query = ClickHouseQuery.from_(self.table)
+        for prop in all_props:
+            query = query.select(fn.Count(Field(f"properties.{prop}")).distinct())
+        query = query.where(
+            Criterion.all(
+                [
+                    self.table.datasource_id == Parameter("%(ds_id)s"),
+                    self.date_func(self.table.timestamp) == Parameter("%(date)s"),
+                ]
+            )
+        )
+        return query.get_sql(), {"ds_id": ds_id, "date": date}
