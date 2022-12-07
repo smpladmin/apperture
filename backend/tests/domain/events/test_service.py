@@ -107,3 +107,23 @@ class TestEventsService:
                 "ds_id": "test-id",
             }
         )
+
+    def test_get_values_for_property(self):
+        self.events_repo.get_values_for_property.return_value = [
+            ["Philippines"],
+            ["Hong Kong"],
+        ]
+        assert self.events_service.get_values_for_property(
+            datasource_id=self.ds_id,
+            event_property="country",
+            start_date="1970-01-01",
+            end_date="2022-01-01",
+        ) == [["Philippines"], ["Hong Kong"]]
+        self.events_repo.get_values_for_property.assert_called_once_with(
+            **{
+                "datasource_id": "test-id",
+                "end_date": "2022-01-01",
+                "event_property": "country",
+                "start_date": "1970-01-01",
+            }
+        )

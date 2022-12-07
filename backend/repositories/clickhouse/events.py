@@ -96,3 +96,27 @@ class Events:
             )
         )
         return query.get_sql(), {"ds_id": ds_id, "date": date}
+
+    def get_values_for_property(
+        self, datasource_id: str, event_property: str, start_date: str, end_date: str
+    ):
+        return self.execute_get_query(
+            *self.build_values_for_property_query(
+                datasource_id, event_property, start_date, end_date
+            )
+        )
+
+    def build_values_for_property_query(
+        self, datasource_id: str, event_property: str, start_date: str, end_date: str
+    ):
+        query = (
+            ClickHouseQuery.from_(self.table)
+            .select(Field(f"properties.{event_property}"))
+            .distinct()
+            .where(Criterion.all(self.total_criterion))
+        )
+        return query.get_sql(), {
+            "ds_id": datasource_id,
+            "start_date": start_date,
+            "end_date": end_date,
+        }

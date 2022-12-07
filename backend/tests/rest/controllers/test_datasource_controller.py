@@ -106,3 +106,19 @@ def test_get_event_properties(client_init, events_service):
     events_service.get_event_properties.assert_called_once_with(
         **{"chunk_size": 50, "datasource_id": "637739d383ea7fda83e72a2d"}
     )
+
+
+def test_get_event_property_values(client_init, events_service):
+    response = client_init.get(
+        "/datasources/637739d383ea7fda83e72a2d/property_values?event_property=country&end_date=2022-01-01"
+    )
+    assert response.status_code == 200
+    assert response.json() == [["Philippines"], ["Hong Kong"]]
+    events_service.get_values_for_property.assert_called_once_with(
+        **{
+            "datasource_id": "637739d383ea7fda83e72a2d",
+            "end_date": "2022-01-01",
+            "event_property": "country",
+            "start_date": "1970-01-01",
+        }
+    )

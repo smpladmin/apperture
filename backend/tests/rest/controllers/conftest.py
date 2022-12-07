@@ -196,6 +196,9 @@ def events_service():
     events_service_mock.get_event_properties = mock.MagicMock(
         return_value=["prop1", "prop2"]
     )
+    events_service_mock.get_values_for_property = mock.MagicMock(
+        return_value=[["Philippines"], ["Hong Kong"]]
+    )
     return events_service_mock
 
 
