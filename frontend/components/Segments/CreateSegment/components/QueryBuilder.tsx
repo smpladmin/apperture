@@ -57,7 +57,7 @@ const QueryBuilder = () => {
       </Text>
       <Flex direction={'column'} mt={'4'} gap={'3'}>
         <Flex direction={'column'} gap={'4'}>
-          {filters.map((filter: any, i) => {
+          {filters.map((filter: any, i: number, filters: any) => {
             return (
               <Flex key={i} gap={'3'} alignItems={'center'}>
                 <Text
@@ -94,7 +94,12 @@ const QueryBuilder = () => {
                     {filter.operator}
                   </Text>
                 </Box>
-                <SelectValue filter={filter} />
+                <SelectValue
+                  filter={filter}
+                  filters={filters}
+                  setFilters={setFilters}
+                  index={i}
+                />
                 <IconButton
                   aria-label="delete"
                   size={'sm'}

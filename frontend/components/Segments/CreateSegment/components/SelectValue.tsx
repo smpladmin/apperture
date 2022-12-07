@@ -12,46 +12,77 @@ import { getEventPropertiesValue } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
 
-const SelectValue = ({ filter }: any) => {
-  const [isValueListOpen, setIsValueListOpen] = useState(true);
+const SelectValue = ({ filter, filters, setFilters, index }: any) => {
+  const [isFilterValuesListOpen, setIsFilterValuesListOpen] = useState(true);
   const [loadingPropertyValues, setLoadingPropertyValues] = useState(false);
   const [eventPropertiesValues, setEventPropertiesValues] = useState([]);
   const [filterValues, setFilterValues] = useState<any[]>([]);
+  const [allValuesSelected, setAllValuesSelected] = useState(false);
 
   const router = useRouter();
   const { dsId } = router.query;
 
   const eventValueRef = useRef(null);
-  useOnClickOutside(eventValueRef, () => setIsValueListOpen(false));
+  useOnClickOutside(eventValueRef, () => setIsFilterValuesListOpen(false));
 
   useEffect(() => {
     const fetchEventPropertiesValue = async () => {
       const res = await getEventPropertiesValue(dsId as string, filter.operand);
-      setEventPropertiesValues(res);
+      setEventPropertiesValues(res.slice(0, 100));
       setLoadingPropertyValues(false);
     };
     setLoadingPropertyValues(true);
     fetchEventPropertiesValue();
   }, []);
 
+  useEffect(() => {
+    if (
+      filterValues.length === eventPropertiesValues.length &&
+      !setLoadingPropertyValues
+    ) {
+      setAllValuesSelected(true);
+    }
+  }, [filterValues, eventPropertiesValues]);
+
+  const handleSelectValues = () => {
+    setIsFilterValuesListOpen(false);
+
+    const updatedFilters = [...filters];
+    updatedFilters[index]['values'] = filterValues;
+    setFilters(updatedFilters);
+  };
+
+  const handleAllSelect = (e: any) => {
+    const checked = e.target.checked;
+    if (checked) {
+      setAllValuesSelected(true);
+      setFilterValues(eventPropertiesValues.map((property) => property[0]));
+    } else {
+      setAllValuesSelected(false);
+      setFilterValues([]);
+    }
+  };
+
+  const getValuesText = (values: any[]) => {
+    if (!values.length) return 'Select value...';
+    if (values.length <= 2) return values.join(', ');
+    return `${values[0]}, ${values[1]} or ${values.length - 2} more`;
+  };
   return (
-    <Box
-      position={'relative'}
-      ref={eventValueRef}
-      onClick={() => setIsValueListOpen(true)}
-    >
+    <Box position={'relative'} ref={eventValueRef}>
       <Text
         fontSize={'xs-14'}
         lineHeight={'xs-14'}
         fontWeight={'600'}
         px={'2'}
-        py={'2'}
+        p={'3'}
         bg={'white.100'}
         cursor={'pointer'}
+        onClick={() => setIsFilterValuesListOpen(true)}
       >
-        {filter.value || 'Select Value...'}
+        {getValuesText(filter?.values)}
       </Text>
-      {isValueListOpen ? (
+      {isFilterValuesListOpen ? (
         <Box
           position={'absolute'}
           zIndex={1}
@@ -75,27 +106,47 @@ const SelectValue = ({ filter }: any) => {
               <LoadingSpinner />
             </Flex>
           ) : (
-            <Flex direction={'column'}>
-              <Box overflowY={'auto'}>
+            <Flex direction={'column'} minW={'80'}>
+              <>
+                <Checkbox
+                  colorScheme={'radioBlack'}
+                  px={'2'}
+                  py={'3'}
+                  isChecked={allValuesSelected}
+                  onChange={handleAllSelect}
+                >
+                  <Text
+                    fontSize={'xs-14'}
+                    lineHeight={'xs-14'}
+                    fontWeight={'medium'}
+                    cursor={'pointer'}
+                  >
+                    {'Select all'}
+                  </Text>
+                </Checkbox>
                 <CheckboxGroup
                   value={filterValues}
                   onChange={(values) => {
+                    setAllValuesSelected(false);
                     setFilterValues(values);
                   }}
                 >
-                  {eventPropertiesValues.map((value: any, i) => {
+                  {eventPropertiesValues.map((value: any) => {
                     return (
                       <Flex
                         as={'label'}
                         gap={'3'}
-                        py={'4'}
-                        px={'3'}
+                        px={'2'}
+                        py={'3'}
                         key={value[0]}
+                        _hover={{
+                          bg: 'white.100',
+                        }}
                       >
                         <Checkbox colorScheme={'radioBlack'} value={value[0]}>
                           <Text
-                            fontSize={{ base: 'xs-12', md: 'xs-14' }}
-                            lineHeight={{ base: 'xs-12', md: 'xs-14' }}
+                            fontSize={'xs-14'}
+                            lineHeight={'xs-14'}
                             fontWeight={'medium'}
                             cursor={'pointer'}
                           >
@@ -106,8 +157,18 @@ const SelectValue = ({ filter }: any) => {
                     );
                   })}
                 </CheckboxGroup>
-              </Box>
-              <Button w="full">Add</Button>
+              </>
+              <Button
+                position={'sticky'}
+                bottom={'0'}
+                w="full"
+                bg={'black.100'}
+                color={'white.DEFAULT'}
+                variant={'primary'}
+                onClick={handleSelectValues}
+              >
+                Add
+              </Button>
             </Flex>
           )}
         </Box>

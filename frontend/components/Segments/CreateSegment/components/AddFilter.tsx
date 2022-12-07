@@ -20,7 +20,7 @@ const AddFilter = ({
       {
         operand: val,
         operator: 'Equals',
-        value: '',
+        values: [],
       },
     ]);
     setConditions((prevState: any) => {
@@ -80,6 +80,9 @@ const AddFilter = ({
                 _hover={{
                   bg: 'white.100',
                 }}
+                fontSize={'xs-14'}
+                lineHeight={'xs-14'}
+                fontWeight={'500'}
               >
                 {property}
               </Box>
