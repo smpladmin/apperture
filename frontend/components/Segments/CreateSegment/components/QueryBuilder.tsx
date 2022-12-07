@@ -10,7 +10,7 @@ import SelectValue from './SelectValue';
 const QueryBuilder = () => {
   const [groups, setGroups] = useState<any[]>([]);
   const [filters, setFilters] = useState([]);
-  const [filterOperators, setFilterOperators] = useState<any[]>([]);
+  const [conditions, setConditions] = useState<any[]>([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
   const [eventProperties, setEventProperties] = useState([]);
 
@@ -30,12 +30,12 @@ const QueryBuilder = () => {
   const removeFilter = (i: number) => {
     const updatedFilter = [...filters];
     updatedFilter.splice(i, 1);
-    const updatedFilterOperators = [...filterOperators];
+    const updatedFilterOperators = [...conditions];
     updatedFilterOperators.splice(i, 1);
     updatedFilterOperators[0] = 'Where';
 
     setFilters([...updatedFilter]);
-    setFilterOperators([...updatedFilterOperators]);
+    setConditions([...updatedFilterOperators]);
   };
 
   return (
@@ -55,7 +55,7 @@ const QueryBuilder = () => {
       >
         ALL USERS
       </Text>
-      <Flex direction={'column'} mt={'4'}>
+      <Flex direction={'column'} mt={'4'} gap={'3'}>
         <Flex direction={'column'} gap={'4'}>
           {filters.map((filter: any, i) => {
             return (
@@ -66,7 +66,7 @@ const QueryBuilder = () => {
                   fontWeight={'500'}
                   color={'grey.200'}
                 >
-                  {filterOperators[i]}
+                  {conditions[i]}
                 </Text>
                 <Box>
                   <Text
@@ -110,7 +110,7 @@ const QueryBuilder = () => {
         <AddFilter
           eventProperties={eventProperties}
           setFilters={setFilters}
-          setFilterOperators={setFilterOperators}
+          setConditions={setConditions}
           loadingEventProperties={loadingEventProperties}
         />
       </Flex>

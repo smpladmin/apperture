@@ -7,7 +7,7 @@ const AddFilter = ({
   loadingEventProperties,
   eventProperties,
   setFilters,
-  setFilterOperators,
+  setConditions,
 }: any) => {
   const [isFiltersListOpen, setOpenFiltersList] = useState(false);
   const addFilterRef = useRef(null);
@@ -23,7 +23,7 @@ const AddFilter = ({
         value: '',
       },
     ]);
-    setFilterOperators((prevState: any) => {
+    setConditions((prevState: any) => {
       if (prevState.length === 0) {
         return ['Where'];
       }
@@ -33,12 +33,7 @@ const AddFilter = ({
   };
 
   return (
-    <Box
-      position={'relative'}
-      ref={addFilterRef}
-      borderColor={'grey.100'}
-      mt={'3'}
-    >
+    <Box position={'relative'} ref={addFilterRef} borderColor={'grey.100'}>
       <Button
         onClick={() => setOpenFiltersList(true)}
         bg={'white.DEFAULT'}

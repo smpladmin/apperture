@@ -1,4 +1,11 @@
-import { Box, CheckboxGroup, Flex, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Checkbox,
+  CheckboxGroup,
+  Flex,
+  Text,
+} from '@chakra-ui/react';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { getEventPropertiesValue } from '@lib/services/datasourceService';
@@ -9,6 +16,7 @@ const SelectValue = ({ filter }: any) => {
   const [isValueListOpen, setIsValueListOpen] = useState(true);
   const [loadingPropertyValues, setLoadingPropertyValues] = useState(false);
   const [eventPropertiesValues, setEventPropertiesValues] = useState([]);
+  const [filterValues, setFilterValues] = useState<any[]>([]);
 
   const router = useRouter();
   const { dsId } = router.query;
@@ -27,7 +35,11 @@ const SelectValue = ({ filter }: any) => {
   }, []);
 
   return (
-    <Box position={'relative'} ref={eventValueRef}>
+    <Box
+      position={'relative'}
+      ref={eventValueRef}
+      onClick={() => setIsValueListOpen(true)}
+    >
       <Text
         fontSize={'xs-14'}
         lineHeight={'xs-14'}
@@ -36,7 +48,6 @@ const SelectValue = ({ filter }: any) => {
         py={'2'}
         bg={'white.100'}
         cursor={'pointer'}
-        onClick={() => setIsValueListOpen(true)}
       >
         {filter.value || 'Select Value...'}
       </Text>
@@ -64,20 +75,40 @@ const SelectValue = ({ filter }: any) => {
               <LoadingSpinner />
             </Flex>
           ) : (
-            eventPropertiesValues.map((value: any) => (
-              <Box
-                key={value}
-                onClick={() => {}}
-                cursor={'pointer'}
-                px={'2'}
-                py={'3'}
-                _hover={{
-                  bg: 'white.100',
-                }}
-              >
-                {value}
+            <Flex direction={'column'}>
+              <Box overflowY={'auto'}>
+                <CheckboxGroup
+                  value={filterValues}
+                  onChange={(values) => {
+                    setFilterValues(values);
+                  }}
+                >
+                  {eventPropertiesValues.map((value: any, i) => {
+                    return (
+                      <Flex
+                        as={'label'}
+                        gap={'3'}
+                        py={'4'}
+                        px={'3'}
+                        key={value[0]}
+                      >
+                        <Checkbox colorScheme={'radioBlack'} value={value[0]}>
+                          <Text
+                            fontSize={{ base: 'xs-12', md: 'xs-14' }}
+                            lineHeight={{ base: 'xs-12', md: 'xs-14' }}
+                            fontWeight={'medium'}
+                            cursor={'pointer'}
+                          >
+                            {value[0] || '(empty string)'}
+                          </Text>
+                        </Checkbox>
+                      </Flex>
+                    );
+                  })}
+                </CheckboxGroup>
               </Box>
-            ))
+              <Button w="full">Add</Button>
+            </Flex>
           )}
         </Box>
       ) : null}
