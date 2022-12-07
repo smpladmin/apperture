@@ -111,3 +111,18 @@ export const getEventProperties = async (dsId: string) => {
     return [];
   }
 };
+
+export const getEventPropertiesValue = async (
+  dsId: string,
+  eventProperty: any
+) => {
+  try {
+    const res = await AppertureAPI.get(
+      `/datasources/${dsId}/property_values?event_property=${eventProperty}`
+    );
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};

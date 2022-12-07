@@ -1,16 +1,19 @@
-import { Box, Button, Flex, IconButton, Text } from '@chakra-ui/react';
+import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import { ARROW_GRAY } from '@theme/index';
 import { useEffect, useState } from 'react';
 import AddFilter from './AddFilter';
 import 'remixicon/fonts/remixicon.css';
 import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
+import SelectValue from './SelectValue';
 
 const QueryBuilder = () => {
   const [groups, setGroups] = useState<any[]>([]);
   const [filters, setFilters] = useState([]);
-  const [filterOperators, setFilterOperators] = useState([]);
+  const [filterOperators, setFilterOperators] = useState<any[]>([]);
+  const [loadingEventProperties, setLoadingEventProperties] = useState(false);
   const [eventProperties, setEventProperties] = useState([]);
+
   const router = useRouter();
   const { dsId } = router.query;
 
@@ -18,14 +21,21 @@ const QueryBuilder = () => {
     const fetchEventProperties = async () => {
       const data = await getEventProperties(dsId as string);
       setEventProperties(data);
+      setLoadingEventProperties(false);
     };
+    setLoadingEventProperties(true);
     fetchEventProperties();
   }, []);
 
   const removeFilter = (i: number) => {
     const updatedFilter = [...filters];
     updatedFilter.splice(i, 1);
+    const updatedFilterOperators = [...filterOperators];
+    updatedFilterOperators.splice(i, 1);
+    updatedFilterOperators[0] = 'Where';
+
     setFilters([...updatedFilter]);
+    setFilterOperators([...updatedFilterOperators]);
   };
 
   return (
@@ -45,25 +55,63 @@ const QueryBuilder = () => {
       >
         ALL USERS
       </Text>
-      <Flex direction={'column'}>
-        {filters.map((filter: any, i) => {
-          return (
-            <Flex key={i} gap={'3'}>
-              <Text>{filterOperators[i]}</Text>
-              <Box>{filter.operand}</Box>
-              <Box>{filter.operator}</Box>
-              <Box>{filter.value || 'Select Value...'}</Box>
-              <IconButton
-                aria-label="delete"
-                icon={<i className="ri-delete-bin-6-line"></i>}
-                onClick={() => removeFilter(i)}
-              />
-            </Flex>
-          );
-        })}
+      <Flex direction={'column'} mt={'4'}>
+        <Flex direction={'column'} gap={'4'}>
+          {filters.map((filter: any, i) => {
+            return (
+              <Flex key={i} gap={'3'} alignItems={'center'}>
+                <Text
+                  fontSize={'xs-14'}
+                  lineHeight={'xs-14'}
+                  fontWeight={'500'}
+                  color={'grey.200'}
+                >
+                  {filterOperators[i]}
+                </Text>
+                <Box>
+                  <Text
+                    fontSize={'xs-14'}
+                    lineHeight={'xs-14'}
+                    fontWeight={'600'}
+                    px={'2'}
+                    py={'2'}
+                    bg={'white.100'}
+                    cursor={'pointer'}
+                  >
+                    {filter.operand}
+                  </Text>
+                </Box>
+                <Box>
+                  <Text
+                    fontSize={'xs-14'}
+                    lineHeight={'xs-14'}
+                    fontWeight={'600'}
+                    px={'2'}
+                    py={'2'}
+                    bg={'white.100'}
+                    cursor={'pointer'}
+                  >
+                    {filter.operator}
+                  </Text>
+                </Box>
+                <SelectValue filter={filter} />
+                <IconButton
+                  aria-label="delete"
+                  size={'sm'}
+                  icon={<i className="ri-delete-bin-6-line"></i>}
+                  onClick={() => removeFilter(i)}
+                  bg={'white.DEFAULT'}
+                  variant={'secondary'}
+                />
+              </Flex>
+            );
+          })}
+        </Flex>
         <AddFilter
+          eventProperties={eventProperties}
           setFilters={setFilters}
           setFilterOperators={setFilterOperators}
+          loadingEventProperties={loadingEventProperties}
         />
       </Flex>
     </Box>
