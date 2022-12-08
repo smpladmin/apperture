@@ -140,9 +140,7 @@ const ConfigureAppsModal = ({
               {`Data Sources (${dataSources.length})`}
             </Text>
             <Link
-              href={`/analytics/app/${encodeURIComponent(
-                app._id
-              )}/integration/select?add=true&previousDsId=${dsId}`}
+              href={`/analytics/app/${app._id}/integration/select?add=true&previousDsId=${dsId}`}
             >
               <Text
                 fontWeight={'normal'}
