@@ -100,11 +100,6 @@ const Search = ({ dataSourceType }: SearchSuggestionBoxProps) => {
     dispatch,
   } = useContext(MapContext);
 
-  useEffect(() => {
-    inputSearchRef?.current?.focus();
-    setSearchText('');
-  }, [dsId]);
-
   const onChangeHandler = (text: string) => {
     setSearchText(text);
     const matches = getSearchResult(nodesData, text, {
