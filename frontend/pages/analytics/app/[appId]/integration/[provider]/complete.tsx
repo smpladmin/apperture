@@ -11,10 +11,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   req,
   query,
 }) => {
-  const app = await _getApp(
-    query.appId as string,
-    getAuthToken(req) as string,
-  );
+  const app = await _getApp(query.appId as string, getAuthToken(req) as string);
   return {
     props: { app },
   };
@@ -79,7 +76,7 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
             Explore
           </Button>
         </Link>
-        <Link href={'/analytics/explore'}>
+        <Link href={`/analytics/explore/${router.query.dsId}`}>
           <Text
             cursor={'pointer'}
             pt={'4'}
