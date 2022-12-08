@@ -6,6 +6,7 @@ import 'remixicon/fonts/remixicon.css';
 import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
 import SelectValue from './SelectValue';
+import SelectEventProperty from './SelectEventProperty';
 
 const QueryBuilder = () => {
   const [groups, setGroups] = useState<any[]>([]);
@@ -68,19 +69,13 @@ const QueryBuilder = () => {
                 >
                   {conditions[i]}
                 </Text>
-                <Box>
-                  <Text
-                    fontSize={'xs-14'}
-                    lineHeight={'xs-14'}
-                    fontWeight={'600'}
-                    px={'2'}
-                    py={'2'}
-                    bg={'white.100'}
-                    cursor={'pointer'}
-                  >
-                    {filter.operand}
-                  </Text>
-                </Box>
+                <SelectEventProperty
+                  index={i}
+                  filter={filter}
+                  eventProperties={eventProperties}
+                  filters={filters}
+                  setFilters={setFilters}
+                />
                 <Box>
                   <Text
                     fontSize={'xs-14'}

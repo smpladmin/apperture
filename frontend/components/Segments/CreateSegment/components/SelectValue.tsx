@@ -33,9 +33,10 @@ const SelectValue = ({ filter, filters, setFilters, index }: any) => {
     };
     setLoadingPropertyValues(true);
     fetchEventPropertiesValue();
-  }, []);
+  }, [filter.operand]);
 
   useEffect(() => {
+    // check 'Select all' checkbox if all the options are selected
     if (
       filterValues.length === eventPropertiesValues.length &&
       !setLoadingPropertyValues
@@ -68,6 +69,7 @@ const SelectValue = ({ filter, filters, setFilters, index }: any) => {
     if (values.length <= 2) return values.join(', ');
     return `${values[0]}, ${values[1]} or ${values.length - 2} more`;
   };
+
   return (
     <Box position={'relative'} ref={eventValueRef}>
       <Text
