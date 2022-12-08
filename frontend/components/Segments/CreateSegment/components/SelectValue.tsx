@@ -108,8 +108,8 @@ const SelectValue = ({ filter, filters, setFilters, index }: any) => {
               <LoadingSpinner />
             </Flex>
           ) : (
-            <Flex direction={'column'} minW={'80'}>
-              <>
+            <Flex direction={'column'} minW={'80'} gap={'3'}>
+              <Box overflowY={'auto'} maxHeight={'82'}>
                 <Checkbox
                   colorScheme={'radioBlack'}
                   px={'2'}
@@ -159,10 +159,8 @@ const SelectValue = ({ filter, filters, setFilters, index }: any) => {
                     );
                   })}
                 </CheckboxGroup>
-              </>
+              </Box>
               <Button
-                position={'sticky'}
-                bottom={'0'}
                 w="full"
                 bg={'black.100'}
                 color={'white.DEFAULT'}
