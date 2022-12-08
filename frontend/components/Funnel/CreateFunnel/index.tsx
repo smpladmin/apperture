@@ -52,7 +52,7 @@ const Funnel = ({
   }, [funnelSteps, nodes]);
 
   useEffect(() => {
-    if (funnelData.length) {
+    if (funnelData?.length) {
       setIsLoading(false);
     } else setIsLoading(true);
   }, [funnelData]);
