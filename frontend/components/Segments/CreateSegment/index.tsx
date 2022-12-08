@@ -2,6 +2,9 @@ import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import { SegmentGroup } from '@lib/domain/segment';
 import React, { useState } from 'react';
 import QueryBuilder from './components/QueryBuilder';
+import SegmentTable from './components/Table/SegmentTable';
+import { getEventPropertiesValue } from '@lib/services/datasourceService';
+import { useRouter } from 'next/router';
 
 const CreateSegment = () => {
   const [groups, setGroups] = useState<SegmentGroup[]>([]);
@@ -58,6 +61,7 @@ const CreateSegment = () => {
           </Text>
         </Flex>
         <QueryBuilder />
+        <SegmentTable />
       </Box>
     </Box>
   );
