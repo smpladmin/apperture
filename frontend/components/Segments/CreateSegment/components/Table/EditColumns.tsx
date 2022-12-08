@@ -11,25 +11,14 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import 'remixicon/fonts/remixicon.css';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 
-const EditColumns = ({ setSelectedColumns }) => {
+const EditColumns = ({ eventProperties, setSelectedColumns }) => {
   const [isFilterValuesListOpen, setIsFilterValuesListOpen] = useState(true);
   const [filterValues, setFilterValues] = useState([]);
   const [allValuesSelected, setAllValuesSelected] = useState(false);
   const [loadingPropertyValues, setLoadingPropertyValues] = useState(false);
-  const [eventPropertiesValues, setEventPropertiesValues] = useState([]);
 
   const eventValueRef = useRef(null);
   useOnClickOutside(eventValueRef, () => setIsFilterValuesListOpen(false));
-
-  useEffect(() => {
-    // check 'Select all' checkbox if all the options are selected
-    if (
-      filterValues.length === eventPropertiesValues.length &&
-      !setLoadingPropertyValues
-    ) {
-      setAllValuesSelected(true);
-    }
-  }, [filterValues, eventPropertiesValues]);
 
   const handleSelectValues = () => {
     setIsFilterValuesListOpen(false);
@@ -43,7 +32,7 @@ const EditColumns = ({ setSelectedColumns }) => {
     const checked = e.target.checked;
     if (checked) {
       setAllValuesSelected(true);
-      setFilterValues(eventPropertiesValues.map((property) => property[0]));
+      setFilterValues(eventProperties.map((property) => property[0]));
     } else {
       setAllValuesSelected(false);
       setFilterValues([]);
@@ -119,7 +108,7 @@ const EditColumns = ({ setSelectedColumns }) => {
                       setFilterValues(values);
                     }}
                   >
-                    {eventPropertiesValues.map((value) => {
+                    {eventProperties.map((value) => {
                       return (
                         <Flex
                           as={'label'}
@@ -131,14 +120,14 @@ const EditColumns = ({ setSelectedColumns }) => {
                             bg: 'white.100',
                           }}
                         >
-                          <Checkbox colorScheme={'radioBlack'} value={value[0]}>
+                          <Checkbox colorScheme={'radioBlack'} value={value}>
                             <Text
                               fontSize={'xs-14'}
                               lineHeight={'xs-14'}
                               fontWeight={'medium'}
                               cursor={'pointer'}
                             >
-                              {value[0] || '(empty string)'}
+                              {value || '(empty string)'}
                             </Text>
                           </Checkbox>
                         </Flex>

@@ -23,7 +23,7 @@ import {
 import { response } from './dummy';
 import EditColumns from './editColumns';
 
-const SegmentTable = ({}) => {
+const SegmentTable = ({ eventProperties }) => {
   const columnHelper = createColumnHelper();
   const [selectedColumns, setSelectedColumns] = useState(['user_id', 'city']);
   const [data, setData] = useState(response);
@@ -88,7 +88,10 @@ const SegmentTable = ({}) => {
               Export
             </Text>
           </Button>
-          <EditColumns setSelectedColumns={setSelectedColumns} />
+          <EditColumns
+            eventProperties={eventProperties}
+            setSelectedColumns={setSelectedColumns}
+          />
         </Flex>
       </Flex>
 

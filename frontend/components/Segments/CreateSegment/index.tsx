@@ -1,13 +1,35 @@
+import React, { useState, useEffect } from 'react';
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import { SegmentGroup } from '@lib/domain/segment';
-import React, { useState } from 'react';
 import QueryBuilder from './components/QueryBuilder';
 import SegmentTable from './components/Table/SegmentTable';
-import { getEventPropertiesValue } from '@lib/services/datasourceService';
+import { getEventProperties } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
 
 const CreateSegment = () => {
-  const [groups, setGroups] = useState<SegmentGroup[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
+  const [eventProperties, setEventProperties] = useState([]);
+  const [loadingEventProperties, setLoadingEventProperties] = useState(false);
+
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  useEffect(() => {
+    if (!loadingEventProperties) {
+      console.log(eventProperties);
+    }
+  }, [loadingEventProperties]);
+
+  useEffect(() => {
+    const fetchEventProperties = async () => {
+      const data = await getEventProperties(dsId as string);
+      setEventProperties(data);
+      setLoadingEventProperties(false);
+    };
+    setLoadingEventProperties(true);
+    fetchEventProperties();
+  }, []);
+
   return (
     <Box>
       <Flex
@@ -60,8 +82,11 @@ const CreateSegment = () => {
             Clear all
           </Text>
         </Flex>
-        <QueryBuilder />
-        <SegmentTable />
+        <QueryBuilder
+          eventProperties={eventProperties}
+          loadingEventProperties={loadingEventProperties}
+        />
+        <SegmentTable eventProperties={eventProperties} />
       </Box>
     </Box>
   );

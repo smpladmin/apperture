@@ -9,25 +9,9 @@ import SelectValue from './SelectValue';
 import SelectEventProperty from './SelectEventProperty';
 import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
 
-const QueryBuilder = () => {
-  const [filters, setFilters] = useState<SegmentFilter[]>([]);
-  const [conditions, setConditions] = useState<SegmentFilterConditions[]>([]);
-  const [loadingEventProperties, setLoadingEventProperties] =
-    useState<boolean>(false);
-  const [eventProperties, setEventProperties] = useState<string[]>([]);
-
-  const router = useRouter();
-  const { dsId } = router.query;
-
-  useEffect(() => {
-    const fetchEventProperties = async () => {
-      const data = await getEventProperties(dsId as string);
-      setEventProperties(data);
-      setLoadingEventProperties(false);
-    };
-    setLoadingEventProperties(true);
-    fetchEventProperties();
-  }, []);
+const QueryBuilder = ({ eventProperties, loadingEventProperties }: any) => {
+  const [filters, setFilters] = useState([]);
+  const [conditions, setConditions] = useState<any[]>([]);
 
   const removeFilter = (i: number) => {
     const updatedFilter = [...filters];
