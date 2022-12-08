@@ -23,7 +23,11 @@ class TestEventsRepository:
             '"properties.prop2"),COUNT(DISTINCT "properties.prop3") FROM "events" WHERE '
             '"datasource_id"=%(ds_id)s AND DATE("timestamp")=%(date)s'
         )
-        self.values_for_property_param = {'ds_id': 'test-id', 'end_date': '2022-01-01', 'start_date': '1970-01-01'}
+        self.values_for_property_param = {
+            "ds_id": "test-id",
+            "end_date": "2022-01-01",
+            "start_date": "1970-01-01",
+        }
         self.values_for_property_query = (
             'SELECT DISTINCT "properties.country" FROM "events" WHERE '
             '"datasource_id"=%(ds_id)s AND DATE("timestamp")>=%(start_date)s AND '
@@ -71,8 +75,8 @@ class TestEventsRepository:
     def test_get_values_for_property(self):
         self.repo.get_values_for_property(
             datasource_id=self.datasource_id,
-            event_property='country',
-            start_date='1970-01-01',
+            event_property="country",
+            start_date="1970-01-01",
             end_date=self.date,
         )
         self.repo.execute_get_query.assert_called_once_with(
@@ -82,7 +86,7 @@ class TestEventsRepository:
     def test_build_get_values_for_property_query(self):
         assert self.repo.build_values_for_property_query(
             datasource_id=self.datasource_id,
-            event_property='country',
-            start_date='1970-01-01',
+            event_property="country",
+            start_date="1970-01-01",
             end_date=self.date,
         ) == (self.values_for_property_query, self.values_for_property_param)

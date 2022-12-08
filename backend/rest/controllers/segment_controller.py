@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from domain.segments.service import SegmentService
-from rest.dtos.segments import TransientSegmentDto
+from rest.dtos.segments import TransientSegmentDto, ComputedSegmentResponse
 
 from rest.middlewares import validate_jwt
 
@@ -12,9 +12,14 @@ router = APIRouter(
 )
 
 
-@router.post("/segments/transient")
-async def compute_segment(
+@router.post("/segments/transient", response_model=ComputedSegmentResponse)
+async def compute_transient_segment(
     dto: TransientSegmentDto,
     segment_service: SegmentService = Depends(),
 ):
-    return await segment_service.compute_segment(dto.datasourceId, dto.filters)
+    return await segment_service.compute_segment(
+        datasource_id=str(dto.datasourceId),
+        groups=dto.groups,
+        columns=dto.columns,
+        group_conditions=dto.groupConditions,
+    )

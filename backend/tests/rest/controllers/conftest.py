@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from domain.apps.models import App
 from domain.common.models import IntegrationProvider, SavedItems, WatchlistItemType
 from domain.datasources.models import DataSource, DataSourceVersion
+from domain.segments.models import ComputedSegment
 from domain.funnels.models import (
     Funnel,
     ComputedFunnelStep,
@@ -207,6 +208,20 @@ def user_service(mock_find_email_user):
     service = mock.AsyncMock()
     service.find_user.return_value = mock_find_email_user
     return service
+
+
+@pytest.fixture(scope="module")
+def segment_service():
+    segment_service = mock.AsyncMock()
+    computed_segment = ComputedSegment(
+        count=2,
+        data=[
+            ["3313e47d-bcfa-4d84-8f7e-6e6e2e33ae72", "5003", "Indore"],
+            ["rudragurjar2912@gmail.com", "5003", "Indore"],
+        ],
+    )
+    segment_service.compute_segment.return_value = computed_segment
+    return segment_service
 
 
 @pytest.fixture(scope="module")
@@ -665,6 +680,17 @@ def funnel_trend_response():
 
 
 @pytest.fixture(scope="module")
+def computed_segment_response():
+    return {
+        "count": 2,
+        "data": [
+            ["3313e47d-bcfa-4d84-8f7e-6e6e2e33ae72", "5003", "Indore"],
+            ["rudragurjar2912@gmail.com", "5003", "Indore"],
+        ],
+    }
+
+
+@pytest.fixture(scope="module")
 def notification_data():
     return {
         "datasourceId": "635ba034807ab86d8a2aadd9",
@@ -729,6 +755,32 @@ def funnel_data():
             },
         ],
         "randomSequence": False,
+    }
+
+
+@pytest.fixture(scope="module")
+def segment_data():
+    return {
+        "datasourceId": "63771fc960527aba9354399c",
+        "groups": [
+            {
+                "filters": [
+                    {
+                        "operand": "properties.$city",
+                        "operator": "equals",
+                        "values": ["Delhi", "Indore", "Bhopal"],
+                    },
+                    {
+                        "operand": "properties.$app_release",
+                        "operator": "equals",
+                        "values": ["5003", "2077", "5002"],
+                    },
+                ],
+                "conditions": ["where", "and"],
+            }
+        ],
+        "columns": ["properties.$app_release", "properties.$city"],
+        "groupConditions": [],
     }
 
 
