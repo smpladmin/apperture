@@ -1,8 +1,10 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
-import React from 'react';
+import { SegmentGroup } from '@lib/domain/segment';
+import React, { useState } from 'react';
 import QueryBuilder from './components/QueryBuilder';
 
 const CreateSegment = () => {
+  const [grouos, setGroups] = useState<SegmentGroup[]>([]);
   return (
     <Box>
       <Flex

@@ -7,17 +7,34 @@ import {
   Text,
 } from '@chakra-ui/react';
 import LoadingSpinner from '@components/LoadingSpinner';
+import { SegmentFilter } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { getEventPropertiesValue } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 
-const SelectValue = ({ filter, filters, setFilters, index }: any) => {
-  const [isFilterValuesListOpen, setIsFilterValuesListOpen] = useState(true);
-  const [loadingPropertyValues, setLoadingPropertyValues] = useState(false);
-  const [eventPropertiesValues, setEventPropertiesValues] = useState([]);
-  const [filterValues, setFilterValues] = useState<any[]>([]);
-  const [allValuesSelected, setAllValuesSelected] = useState(false);
+type SelectValueProps = {
+  filter: SegmentFilter;
+  filters: SegmentFilter[];
+  setFilters: Function;
+  index: number;
+};
+
+const SelectValue = ({
+  filter,
+  filters,
+  setFilters,
+  index,
+}: SelectValueProps) => {
+  const [isFilterValuesListOpen, setIsFilterValuesListOpen] =
+    useState<boolean>(true);
+  const [loadingPropertyValues, setLoadingPropertyValues] =
+    useState<boolean>(false);
+  const [eventPropertiesValues, setEventPropertiesValues] = useState<
+    string[][]
+  >([]);
+  const [filterValues, setFilterValues] = useState<string[]>([]);
+  const [allValuesSelected, setAllValuesSelected] = useState<boolean>(false);
 
   const router = useRouter();
   const { dsId } = router.query;
@@ -53,7 +70,7 @@ const SelectValue = ({ filter, filters, setFilters, index }: any) => {
     setFilters(updatedFilters);
   };
 
-  const handleAllSelect = (e: any) => {
+  const handleAllSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     if (checked) {
       setAllValuesSelected(true);
@@ -64,7 +81,7 @@ const SelectValue = ({ filter, filters, setFilters, index }: any) => {
     }
   };
 
-  const getValuesText = (values: any[]) => {
+  const getValuesText = (values: string[]) => {
     if (!values.length) return 'Select value...';
     if (values.length <= 2) return values.join(', ');
     return `${values[0]}, ${values[1]} or ${values.length - 2} more`;
@@ -128,12 +145,12 @@ const SelectValue = ({ filter, filters, setFilters, index }: any) => {
                 </Checkbox>
                 <CheckboxGroup
                   value={filterValues}
-                  onChange={(values) => {
+                  onChange={(values: string[]) => {
                     setAllValuesSelected(false);
                     setFilterValues(values);
                   }}
                 >
-                  {eventPropertiesValues.map((value: any) => {
+                  {eventPropertiesValues.map((value) => {
                     return (
                       <Flex
                         as={'label'}

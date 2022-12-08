@@ -1,21 +1,29 @@
 import { Box, Button, Flex } from '@chakra-ui/react';
 import LoadingSpinner from '@components/LoadingSpinner';
+import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
+
+type AddFilterProps = {
+  loadingEventProperties: boolean;
+  eventProperties: string[];
+  setFilters: Function;
+  setConditions: Function;
+};
 
 const AddFilter = ({
   loadingEventProperties,
   eventProperties,
   setFilters,
   setConditions,
-}: any) => {
-  const [isFiltersListOpen, setOpenFiltersList] = useState(false);
+}: AddFilterProps) => {
+  const [isFiltersListOpen, setOpenFiltersList] = useState<boolean>(false);
   const addFilterRef = useRef(null);
 
   useOnClickOutside(addFilterRef, () => setOpenFiltersList(false));
 
   const onSuggestionClick = (val: string) => {
-    setFilters((prevState: any) => [
+    setFilters((prevState: SegmentFilter[]) => [
       ...prevState,
       {
         operand: val,
@@ -23,11 +31,11 @@ const AddFilter = ({
         values: [],
       },
     ]);
-    setConditions((prevState: any) => {
+    setConditions((prevState: SegmentFilterConditions[]) => {
       if (prevState.length === 0) {
-        return ['Where'];
+        return [SegmentFilterConditions.WHERE];
       }
-      return [...prevState, 'and'];
+      return [...prevState, SegmentFilterConditions.AND];
     });
     setOpenFiltersList(false);
   };
@@ -70,7 +78,7 @@ const AddFilter = ({
               <LoadingSpinner />
             </Flex>
           ) : (
-            eventProperties.map((property: any) => (
+            eventProperties.map((property) => (
               <Box
                 key={property}
                 onClick={() => onSuggestionClick(property)}

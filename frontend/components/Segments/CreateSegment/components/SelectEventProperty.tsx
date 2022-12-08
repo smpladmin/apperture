@@ -1,6 +1,15 @@
 import { Box, Text } from '@chakra-ui/react';
+import { SegmentFilter } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
+
+type SelectEventPropertyProps = {
+  filter: SegmentFilter;
+  eventProperties: string[];
+  filters: SegmentFilter[];
+  setFilters: Function;
+  index: number;
+};
 
 const SelectEventProperty = ({
   filter,
@@ -8,7 +17,7 @@ const SelectEventProperty = ({
   filters,
   setFilters,
   index,
-}: any) => {
+}: SelectEventPropertyProps) => {
   const [isFiltersListOpen, setOpenFiltersList] = useState(false);
   const selectFilterRef = useRef(null);
 
@@ -50,7 +59,7 @@ const SelectEventProperty = ({
           maxH={'100'}
           overflowY={'auto'}
         >
-          {eventProperties.map((property: any) => (
+          {eventProperties.map((property) => (
             <Box
               key={property}
               onClick={() => onSuggestionClick(property)}

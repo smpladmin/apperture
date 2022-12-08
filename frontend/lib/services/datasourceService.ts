@@ -114,7 +114,7 @@ export const getEventProperties = async (dsId: string) => {
 
 export const getEventPropertiesValue = async (
   dsId: string,
-  eventProperty: any
+  eventProperty: string
 ) => {
   try {
     const res = await AppertureAPI.get(

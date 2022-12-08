@@ -7,13 +7,14 @@ import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
 import SelectValue from './SelectValue';
 import SelectEventProperty from './SelectEventProperty';
+import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
 
 const QueryBuilder = () => {
-  const [groups, setGroups] = useState<any[]>([]);
-  const [filters, setFilters] = useState([]);
-  const [conditions, setConditions] = useState<any[]>([]);
-  const [loadingEventProperties, setLoadingEventProperties] = useState(false);
-  const [eventProperties, setEventProperties] = useState([]);
+  const [filters, setFilters] = useState<SegmentFilter[]>([]);
+  const [conditions, setConditions] = useState<SegmentFilterConditions[]>([]);
+  const [loadingEventProperties, setLoadingEventProperties] =
+    useState<boolean>(false);
+  const [eventProperties, setEventProperties] = useState<string[]>([]);
 
   const router = useRouter();
   const { dsId } = router.query;
@@ -33,7 +34,7 @@ const QueryBuilder = () => {
     updatedFilter.splice(i, 1);
     const updatedFilterOperators = [...conditions];
     updatedFilterOperators.splice(i, 1);
-    updatedFilterOperators[0] = 'Where';
+    updatedFilterOperators[0] = SegmentFilterConditions.WHERE;
 
     setFilters([...updatedFilter]);
     setConditions([...updatedFilterOperators]);
@@ -58,54 +59,56 @@ const QueryBuilder = () => {
       </Text>
       <Flex direction={'column'} mt={'4'} gap={'3'}>
         <Flex direction={'column'} gap={'4'}>
-          {filters.map((filter: any, i: number, filters: any) => {
-            return (
-              <Flex key={i} gap={'3'} alignItems={'center'}>
-                <Text
-                  fontSize={'xs-14'}
-                  lineHeight={'xs-14'}
-                  fontWeight={'500'}
-                  color={'grey.200'}
-                >
-                  {conditions[i]}
-                </Text>
-                <SelectEventProperty
-                  index={i}
-                  filter={filter}
-                  eventProperties={eventProperties}
-                  filters={filters}
-                  setFilters={setFilters}
-                />
-                <Box>
+          {filters.map(
+            (filter: SegmentFilter, i: number, filters: SegmentFilter[]) => {
+              return (
+                <Flex key={i} gap={'3'} alignItems={'center'}>
                   <Text
                     fontSize={'xs-14'}
                     lineHeight={'xs-14'}
-                    fontWeight={'600'}
-                    px={'2'}
-                    py={'2'}
-                    bg={'white.100'}
-                    cursor={'pointer'}
+                    fontWeight={'500'}
+                    color={'grey.200'}
                   >
-                    {filter.operator}
+                    {conditions[i]}
                   </Text>
-                </Box>
-                <SelectValue
-                  filter={filter}
-                  filters={filters}
-                  setFilters={setFilters}
-                  index={i}
-                />
-                <IconButton
-                  aria-label="delete"
-                  size={'sm'}
-                  icon={<i className="ri-delete-bin-6-line"></i>}
-                  onClick={() => removeFilter(i)}
-                  bg={'white.DEFAULT'}
-                  variant={'secondary'}
-                />
-              </Flex>
-            );
-          })}
+                  <SelectEventProperty
+                    index={i}
+                    filter={filter}
+                    eventProperties={eventProperties}
+                    filters={filters}
+                    setFilters={setFilters}
+                  />
+                  <Box>
+                    <Text
+                      fontSize={'xs-14'}
+                      lineHeight={'xs-14'}
+                      fontWeight={'600'}
+                      px={'2'}
+                      py={'2'}
+                      bg={'white.100'}
+                      cursor={'pointer'}
+                    >
+                      {filter.operator}
+                    </Text>
+                  </Box>
+                  <SelectValue
+                    filter={filter}
+                    filters={filters}
+                    setFilters={setFilters}
+                    index={i}
+                  />
+                  <IconButton
+                    aria-label="delete"
+                    size={'sm'}
+                    icon={<i className="ri-delete-bin-6-line"></i>}
+                    onClick={() => removeFilter(i)}
+                    bg={'white.DEFAULT'}
+                    variant={'secondary'}
+                  />
+                </Flex>
+              );
+            }
+          )}
         </Flex>
         <AddFilter
           eventProperties={eventProperties}
