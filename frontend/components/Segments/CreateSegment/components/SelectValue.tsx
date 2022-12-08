@@ -48,9 +48,12 @@ const SelectValue = ({
         dsId as string,
         filter.operand
       );
+      // TODO: to remove slice once we add search in all dropdowns and imlement infinite scroll
+      // adding '(empty string)' is a workaround to handle '' case for property values
       const transformedResponse = response
         .map((res: any) => (!res[0] ? '(empty string)' : res[0]))
         .slice(0, 100);
+
       setEventPropertiesValues(transformedResponse);
       setLoadingPropertyValues(false);
     };

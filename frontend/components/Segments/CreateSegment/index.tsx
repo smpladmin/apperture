@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import QueryBuilder from './components/QueryBuilder';
 
 const CreateSegment = () => {
-  const [grouos, setGroups] = useState<SegmentGroup[]>([]);
+  const [groups, setGroups] = useState<SegmentGroup[]>([]);
   return (
     <Box>
       <Flex

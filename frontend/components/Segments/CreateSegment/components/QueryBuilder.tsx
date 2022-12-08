@@ -34,6 +34,8 @@ const QueryBuilder = () => {
     updatedFilter.splice(i, 1);
     const updatedFilterOperators = [...conditions];
     updatedFilterOperators.splice(i, 1);
+
+    // default value of operator for first query should always be 'where'
     updatedFilterOperators[0] = SegmentFilterConditions.WHERE;
 
     setFilters([...updatedFilter]);
