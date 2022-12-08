@@ -27,7 +27,7 @@ const AddFilter = ({
       ...prevState,
       {
         operand: val,
-        operator: 'Equals',
+        operator: 'equals',
         values: [],
       },
     ]);

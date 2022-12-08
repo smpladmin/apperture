@@ -140,8 +140,12 @@ const SelectValue = ({
                   colorScheme={'radioBlack'}
                   px={'2'}
                   py={'3'}
+                  w={'full'}
                   isChecked={allValuesSelected}
                   onChange={handleAllSelect}
+                  _hover={{
+                    bg: 'white.100',
+                  }}
                 >
                   <Text
                     fontSize={'xs-14'}
