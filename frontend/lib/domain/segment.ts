@@ -11,6 +11,6 @@ export enum SegmentFilterConditions {
 }
 
 export type SegmentGroup = {
-  filter: SegmentFilter[];
+  filters: SegmentFilter[];
   conditions: SegmentFilterConditions[];
 };

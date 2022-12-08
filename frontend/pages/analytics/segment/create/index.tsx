@@ -44,113 +44,105 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 };
 
 const CreateSegment = () => {
-  const router = useRouter();
-  const [segments, setSegments] = useState([[]]);
-  const [events, setEvents] = useState(Array(5).fill(''));
-
-  useEffect(() => {
-    const fetchSegments = async () => {
-      const _segments = await computeSegment(router.query.dsId as string, []);
-      setSegments(_segments);
-    };
-    fetchSegments();
-  }, [router.query.dsId]);
-
-  const onInputChange = (text: string, index: number) => {
-    const _events = [...events];
-    _events[index] = text;
-    setEvents(_events);
-  };
-
-  const getOperator = (text: string) => {
-    const operators = [
-      { sign: '>=', name: 'ge' },
-      { sign: '<=', name: 'le' },
-      { sign: '>', name: 'gt' },
-      { sign: '<', name: 'lt' },
-    ];
-    for (let operator of operators) {
-      if (text.includes(operator.sign)) {
-        return operator;
-      }
-    }
-  };
-
-  useEffect(() => {
-    const filters = events
-      .filter((e) => e)
-      .map((event) => {
-        const operator = getOperator(event);
-        if (!operator) {
-          return { event };
-        }
-        const [eventName, operand] = event.split(operator.sign);
-        return {
-          event: eventName.trim(),
-          operator: operator.name,
-          operand: Number(operand.trim()),
-        };
-      });
-
-    console.log(filters);
-
-    if (!filters.length) return;
-
-    const fetchSegments = async () => {
-      const _segments = await computeSegment(
-        router.query.dsId as string,
-        filters
-      );
-      setSegments(_segments);
-    };
-    fetchSegments();
-  }, [events]);
-
-  return (
-    <Box>
-      <TableContainer>
-        <Table variant="simple">
-          <TableCaption>Segments</TableCaption>
-          <Thead>
-            <Tr>
-              <Th>
-                <Input disabled />
-              </Th>
-              {range(5).map((i) => {
-                return (
-                  <Th key={`input-${i}`}>
-                    <Input
-                      value={events[i]}
-                      onChange={(e) => onInputChange(e.target.value, i)}
-                    />
-                  </Th>
-                );
-              })}
-            </Tr>
-          </Thead>
-          <Thead>
-            <Tr>
-              <Th>User ID</Th>
-              {range(5).map((i) => {
-                return <Th key={`col-${i}`}>{`Col${i}`}</Th>;
-              })}
-            </Tr>
-          </Thead>
-          <Tbody>
-            {segments.map((_, i) => {
-              return (
-                <Tr key={`dr-${i}`}>
-                  {range(6).map((j) => {
-                    return <Td key={`di-${j}`}>{segments[i][j]}</Td>;
-                  })}
-                </Tr>
-              );
-            })}
-          </Tbody>
-        </Table>
-      </TableContainer>
-    </Box>
-  );
+  // const router = useRouter();
+  // const [segments, setSegments] = useState([[]]);
+  // const [events, setEvents] = useState(Array(5).fill(''));
+  // useEffect(() => {
+  //   const fetchSegments = async () => {
+  //     const _segments = await computeSegment(router.query.dsId as string, []);
+  //     setSegments(_segments);
+  //   };
+  //   fetchSegments();
+  // }, [router.query.dsId]);
+  // const onInputChange = (text: string, index: number) => {
+  //   const _events = [...events];
+  //   _events[index] = text;
+  //   setEvents(_events);
+  // };
+  // const getOperator = (text: string) => {
+  //   const operators = [
+  //     { sign: '>=', name: 'ge' },
+  //     { sign: '<=', name: 'le' },
+  //     { sign: '>', name: 'gt' },
+  //     { sign: '<', name: 'lt' },
+  //   ];
+  //   for (let operator of operators) {
+  //     if (text.includes(operator.sign)) {
+  //       return operator;
+  //     }
+  //   }
+  // };
+  // useEffect(() => {
+  //   const filters = events
+  //     .filter((e) => e)
+  //     .map((event) => {
+  //       const operator = getOperator(event);
+  //       if (!operator) {
+  //         return { event };
+  //       }
+  //       const [eventName, operand] = event.split(operator.sign);
+  //       return {
+  //         event: eventName.trim(),
+  //         operator: operator.name,
+  //         operand: Number(operand.trim()),
+  //       };
+  //     });
+  //   console.log(filters);
+  //   if (!filters.length) return;
+  //   const fetchSegments = async () => {
+  //     const _segments = await computeSegment(
+  //       router.query.dsId as string,
+  //       filters
+  //     );
+  //     setSegments(_segments);
+  //   };
+  //   fetchSegments();
+  // }, [events]);
+  // return (
+  //   <Box>
+  //     <TableContainer>
+  //       <Table variant="simple">
+  //         <TableCaption>Segments</TableCaption>
+  //         <Thead>
+  //           <Tr>
+  //             <Th>
+  //               <Input disabled />
+  //             </Th>
+  //             {range(5).map((i) => {
+  //               return (
+  //                 <Th key={`input-${i}`}>
+  //                   <Input
+  //                     value={events[i]}
+  //                     onChange={(e) => onInputChange(e.target.value, i)}
+  //                   />
+  //                 </Th>
+  //               );
+  //             })}
+  //           </Tr>
+  //         </Thead>
+  //         <Thead>
+  //           <Tr>
+  //             <Th>User ID</Th>
+  //             {range(5).map((i) => {
+  //               return <Th key={`col-${i}`}>{`Col${i}`}</Th>;
+  //             })}
+  //           </Tr>
+  //         </Thead>
+  //         <Tbody>
+  //           {segments.map((_, i) => {
+  //             return (
+  //               <Tr key={`dr-${i}`}>
+  //                 {range(6).map((j) => {
+  //                   return <Td key={`di-${j}`}>{segments[i][j]}</Td>;
+  //                 })}
+  //               </Tr>
+  //             );
+  //           })}
+  //         </Tbody>
+  //       </Table>
+  //     </TableContainer>
+  //   </Box>
+  // );
 };
 
 CreateSegment.getLayout = function getLayout(

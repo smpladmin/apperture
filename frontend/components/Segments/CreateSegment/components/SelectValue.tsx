@@ -30,9 +30,9 @@ const SelectValue = ({
     useState<boolean>(true);
   const [loadingPropertyValues, setLoadingPropertyValues] =
     useState<boolean>(false);
-  const [eventPropertiesValues, setEventPropertiesValues] = useState<
-    string[][]
-  >([]);
+  const [eventPropertiesValues, setEventPropertiesValues] = useState<string[]>(
+    []
+  );
   const [filterValues, setFilterValues] = useState<string[]>([]);
   const [allValuesSelected, setAllValuesSelected] = useState<boolean>(false);
 
@@ -44,23 +44,32 @@ const SelectValue = ({
 
   useEffect(() => {
     const fetchEventPropertiesValue = async () => {
-      const res = await getEventPropertiesValue(dsId as string, filter.operand);
-      setEventPropertiesValues(res.slice(0, 100));
+      const response = await getEventPropertiesValue(
+        dsId as string,
+        filter.operand
+      );
+      const transformedResponse = response
+        .map((res: any) => (!res[0] ? '(empty string)' : res[0]))
+        .slice(0, 100);
+      setEventPropertiesValues(transformedResponse);
       setLoadingPropertyValues(false);
     };
     setLoadingPropertyValues(true);
     fetchEventPropertiesValue();
+    setFilterValues([]);
   }, [filter.operand]);
 
   useEffect(() => {
     // check 'Select all' checkbox if all the options are selected
     if (
       filterValues.length === eventPropertiesValues.length &&
-      !setLoadingPropertyValues
+      !loadingPropertyValues
     ) {
       setAllValuesSelected(true);
+    } else {
+      setAllValuesSelected(false);
     }
-  }, [filterValues, eventPropertiesValues]);
+  }, [filterValues, eventPropertiesValues, filter.operand]);
 
   const handleSelectValues = () => {
     setIsFilterValuesListOpen(false);
@@ -74,7 +83,7 @@ const SelectValue = ({
     const checked = e.target.checked;
     if (checked) {
       setAllValuesSelected(true);
-      setFilterValues(eventPropertiesValues.map((property) => property[0]));
+      setFilterValues(eventPropertiesValues.map((property) => property));
     } else {
       setAllValuesSelected(false);
       setFilterValues([]);
@@ -157,19 +166,19 @@ const SelectValue = ({
                         gap={'3'}
                         px={'2'}
                         py={'3'}
-                        key={value[0]}
+                        key={value}
                         _hover={{
                           bg: 'white.100',
                         }}
                       >
-                        <Checkbox colorScheme={'radioBlack'} value={value[0]}>
+                        <Checkbox colorScheme={'radioBlack'} value={value}>
                           <Text
                             fontSize={'xs-14'}
                             lineHeight={'xs-14'}
                             fontWeight={'medium'}
                             cursor={'pointer'}
                           >
-                            {value[0] || '(empty string)'}
+                            {value}
                           </Text>
                         </Checkbox>
                       </Flex>

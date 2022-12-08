@@ -1,15 +1,17 @@
 import { AppertureAPI } from '@lib/apiClient';
-import { SegmentFilter } from '@lib/domain/segment';
+import { SegmentGroup } from '@lib/domain/segment';
 import { AxiosError } from 'axios';
 
 export const computeSegment = async (
   dsId: string,
-  filters: SegmentFilter[]
+  groups: SegmentGroup[],
+  columns: string[]
 ) => {
   try {
     const res = await AppertureAPI.post('/segments/transient', {
       datasourceId: dsId,
-      filters,
+      groups,
+      columns,
     });
     return res.data;
   } catch (e) {
