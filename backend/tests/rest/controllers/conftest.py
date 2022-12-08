@@ -216,8 +216,16 @@ def segment_service():
     computed_segment = ComputedSegment(
         count=2,
         data=[
-            ["3313e47d-bcfa-4d84-8f7e-6e6e2e33ae72", "5003", "Indore"],
-            ["rudragurjar2912@gmail.com", "5003", "Indore"],
+            {
+                "user_id": "3313e47d-bcfa-4d84-8f7e-6e6e2e33ae72",
+                "properties.$app_release": "5003",
+                "properties.$city": "Indore",
+            },
+            {
+                "user_id": "rudragurjar2912@gmail.com",
+                "properties.$app_release": "5003",
+                "properties.$city": "Indore",
+            },
         ],
     )
     segment_service.compute_segment.return_value = computed_segment
@@ -684,8 +692,16 @@ def computed_segment_response():
     return {
         "count": 2,
         "data": [
-            ["3313e47d-bcfa-4d84-8f7e-6e6e2e33ae72", "5003", "Indore"],
-            ["rudragurjar2912@gmail.com", "5003", "Indore"],
+            {
+                "properties.$app_release": "5003",
+                "properties.$city": "Indore",
+                "user_id": "3313e47d-bcfa-4d84-8f7e-6e6e2e33ae72",
+            },
+            {
+                "properties.$app_release": "5003",
+                "properties.$city": "Indore",
+                "user_id": "rudragurjar2912@gmail.com",
+            },
         ],
     }
 

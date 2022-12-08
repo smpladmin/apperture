@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Tuple
+from typing import List, Dict
 from pydantic import BaseModel
 
 
@@ -27,4 +27,4 @@ class SegmentGroup(BaseModel):
 
 class ComputedSegment(BaseModel):
     count: int
-    data: List[Tuple]
+    data: List[Dict]

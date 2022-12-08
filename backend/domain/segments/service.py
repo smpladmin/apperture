@@ -26,4 +26,7 @@ class SegmentService:
             group_conditions=group_conditions,
         )
         n = 100 if len(segment) > 100 else len(segment)
-        return ComputedSegment(count=len(segment), data=segment[:n])
+
+        columns.insert(0, "user_id")
+        data = [dict(zip(columns, row)) for row in segment]
+        return ComputedSegment(count=len(segment), data=data[:n])
