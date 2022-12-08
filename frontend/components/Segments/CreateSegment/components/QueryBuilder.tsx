@@ -63,12 +63,13 @@ const QueryBuilder = () => {
             (filter: SegmentFilter, i: number, filters: SegmentFilter[]) => {
               return (
                 <Flex key={i} gap={'3'} alignItems={'center'}>
-                  <Box>
+                  <Box w={'12'}>
                     <Text
                       fontSize={'xs-14'}
                       lineHeight={'xs-14'}
                       fontWeight={'500'}
                       color={'grey.200'}
+                      textAlign={'right'}
                     >
                       {conditions[i]}
                     </Text>
