@@ -26,8 +26,8 @@ type SegmentTableProps = {
   eventProperties: string[];
   selectedColumns: string[];
   setSelectedColumns: Function;
-  userTableData: { count: number; data: [] };
-  isSegmentDataLoading: Function;
+  userTableData: any;
+  isSegmentDataLoading: boolean;
 };
 
 const SegmentTable = ({
