@@ -23,9 +23,12 @@ import {
 import { response } from './dummy';
 import EditColumns from './editColumns';
 
-const SegmentTable = ({ eventProperties }) => {
+const SegmentTable = ({
+  eventProperties,
+  selectedColumns,
+  setSelectedColumns,
+}: any) => {
   const columnHelper = createColumnHelper();
-  const [selectedColumns, setSelectedColumns] = useState(['user_id', 'city']);
   const [data, setData] = useState(response);
   const generateColumnHeader = () => {
     if (Array.isArray(selectedColumns)) {

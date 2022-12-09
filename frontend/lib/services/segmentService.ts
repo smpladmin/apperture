@@ -12,6 +12,7 @@ export const computeSegment = async (
       datasourceId: dsId,
       groups,
       columns,
+      groupConditions: [],
     });
     return res.data;
   } catch (e) {

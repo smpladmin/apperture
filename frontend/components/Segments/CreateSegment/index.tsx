@@ -5,20 +5,39 @@ import QueryBuilder from './components/QueryBuilder';
 import SegmentTable from './components/Table/SegmentTable';
 import { getEventProperties } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
+import { computeSegment } from '@lib/services/segmentService';
 
 const CreateSegment = () => {
-  const [groups, setGroups] = useState<any[]>([]);
+  const [groups, setGroups] = useState<SegmentGroup[]>([]);
   const [eventProperties, setEventProperties] = useState([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
-
+  const [selectedColumns, setSelectedColumns] = useState(['user_id']);
+  const [userTableData, setUserTableData] = useState([]);
+  const [isSegmentDataLoading, setIsSegmentDataLoading] = useState(false);
   const router = useRouter();
   const { dsId } = router.query;
 
+  const fetchSegmentResponse = async () => {
+    const data = await computeSegment(dsId as string, groups, []);
+    setUserTableData(data);
+    setIsSegmentDataLoading(false);
+  };
+
   useEffect(() => {
-    if (!loadingEventProperties) {
-      console.log(eventProperties);
+    setIsSegmentDataLoading(true);
+    fetchSegmentResponse();
+  }, []);
+
+  useEffect(() => {
+    if (
+      groups.some((group) =>
+        group.filters.some((filter) => filter.values.length)
+      )
+    ) {
+      setIsSegmentDataLoading(true);
+      fetchSegmentResponse();
     }
-  }, [loadingEventProperties]);
+  }, [groups, selectedColumns]);
 
   useEffect(() => {
     const fetchEventProperties = async () => {
@@ -85,8 +104,13 @@ const CreateSegment = () => {
         <QueryBuilder
           eventProperties={eventProperties}
           loadingEventProperties={loadingEventProperties}
+          setGroups={setGroups}
         />
-        <SegmentTable eventProperties={eventProperties} />
+        <SegmentTable
+          eventProperties={eventProperties}
+          selectedColumns={selectedColumns}
+          setSelectedColumns={setSelectedColumns}
+        />
       </Box>
     </Box>
   );

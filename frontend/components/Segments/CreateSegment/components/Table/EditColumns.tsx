@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, ChangeEvent } from 'react';
 import {
   Box,
   Button,
@@ -11,44 +11,39 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import 'remixicon/fonts/remixicon.css';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 
-const EditColumns = ({ eventProperties, setSelectedColumns }) => {
-  const [isFilterValuesListOpen, setIsFilterValuesListOpen] = useState(true);
-  const [filterValues, setFilterValues] = useState([]);
+const EditColumns = ({ eventProperties, setSelectedColumns }: any) => {
+  const [isColumnListOpen, setIsColumnListOpen] = useState(true);
+  const [checkedValues, setCheckedValues] = useState<string[]>([]);
   const [allValuesSelected, setAllValuesSelected] = useState(false);
   const [loadingPropertyValues, setLoadingPropertyValues] = useState(false);
 
   const eventValueRef = useRef(null);
-  useOnClickOutside(eventValueRef, () => setIsFilterValuesListOpen(false));
+  useOnClickOutside(eventValueRef, () => setIsColumnListOpen(false));
 
   const handleSelectValues = () => {
-    setIsFilterValuesListOpen(false);
+    setIsColumnListOpen(false);
 
-    const updatedFilters = [...filters];
-    updatedFilters[index]['values'] = filterValues;
-    setFilters(updatedFilters);
+    setSelectedColumns((prevState: any) => [
+      ...new Set([...prevState, ...checkedValues]),
+    ]);
   };
 
-  const handleAllSelect = (e: any) => {
+  const handleAllSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     if (checked) {
       setAllValuesSelected(true);
-      setFilterValues(eventProperties.map((property) => property[0]));
+      setCheckedValues(eventProperties);
     } else {
       setAllValuesSelected(false);
-      setFilterValues([]);
+      setCheckedValues([]);
     }
   };
 
-  const getValuesText = (values: any[]) => {
-    if (!values.length) return 'Select value...';
-    if (values.length <= 2) return values.join(', ');
-    return `${values[0]}, ${values[1]} or ${values.length - 2} more`;
-  };
   return (
     <>
       <Box position={'relative'} ref={eventValueRef}>
         <Button
-          onClick={() => setIsFilterValuesListOpen(true)}
+          onClick={() => setIsColumnListOpen(true)}
           bg={'none'}
           fontSize={'sh-14'}
           fontWeight={500}
@@ -58,7 +53,7 @@ const EditColumns = ({ eventProperties, setSelectedColumns }) => {
           Edit Columns
         </Button>
 
-        {isFilterValuesListOpen ? (
+        {isColumnListOpen ? (
           <Box
             position={'absolute'}
             zIndex={1}
@@ -102,34 +97,36 @@ const EditColumns = ({ eventProperties, setSelectedColumns }) => {
                     </Text>
                   </Checkbox>
                   <CheckboxGroup
-                    value={filterValues}
-                    onChange={(values) => {
+                    value={checkedValues}
+                    onChange={(values: string[]) => {
                       setAllValuesSelected(false);
-                      setFilterValues(values);
+                      setCheckedValues(values);
                     }}
                   >
-                    {eventProperties.map((value) => {
+                    {eventProperties.map((value: string) => {
                       return (
                         <Flex
                           as={'label'}
                           gap={'3'}
                           px={'2'}
                           py={'3'}
-                          key={value[0]}
+                          key={value}
                           _hover={{
                             bg: 'white.100',
                           }}
                         >
-                          <Checkbox colorScheme={'radioBlack'} value={value}>
-                            <Text
-                              fontSize={'xs-14'}
-                              lineHeight={'xs-14'}
-                              fontWeight={'medium'}
-                              cursor={'pointer'}
-                            >
-                              {value || '(empty string)'}
-                            </Text>
-                          </Checkbox>
+                          {value && (
+                            <Checkbox colorScheme={'radioBlack'} value={value}>
+                              <Text
+                                fontSize={'xs-14'}
+                                lineHeight={'xs-14'}
+                                fontWeight={'medium'}
+                                cursor={'pointer'}
+                              >
+                                {value}
+                              </Text>
+                            </Checkbox>
+                          )}
                         </Flex>
                       );
                     })}

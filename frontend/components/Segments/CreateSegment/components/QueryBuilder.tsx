@@ -9,9 +9,17 @@ import SelectValue from './SelectValue';
 import SelectEventProperty from './SelectEventProperty';
 import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
 
-const QueryBuilder = ({ eventProperties, loadingEventProperties }: any) => {
+const QueryBuilder = ({
+  eventProperties,
+  loadingEventProperties,
+  setGroups,
+}: any) => {
   const [filters, setFilters] = useState([]);
   const [conditions, setConditions] = useState<any[]>([]);
+
+  useEffect(() => {
+    setGroups([{ filters, conditions }]);
+  }, [filters, conditions]);
 
   const removeFilter = (i: number) => {
     const updatedFilter = [...filters];
