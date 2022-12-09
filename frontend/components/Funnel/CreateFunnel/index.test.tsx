@@ -270,7 +270,7 @@ describe('create funnel', () => {
       expect(suggestionContainer).toBeVisible();
 
       const suggestions = screen.getAllByTestId('suggestion');
-      act(() => {
+      await act(async () => {
         fireEvent.click(suggestions[0]);
       });
       await waitFor(() =>
@@ -307,8 +307,10 @@ describe('create funnel', () => {
         key: 'ArrowDown',
       });
       // select suggestion by pressing Enter key
-      fireEvent.keyDown(inputFields[1], {
-        key: 'Enter',
+      await act(async () => {
+        fireEvent.keyDown(inputFields[1], {
+          key: 'Enter',
+        });
       });
       await waitFor(() =>
         expect(inputFields[1]).toHaveDisplayValue('Chapter_Click')

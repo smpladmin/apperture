@@ -101,3 +101,28 @@ export const getNodeSignificanceData = async (dsId: string, nodeId: string) => {
     return [];
   }
 };
+
+export const getEventProperties = async (dsId: string) => {
+  try {
+    const res = await AppertureAPI.get(`/datasources/${dsId}/event_properties`);
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};
+
+export const getEventPropertiesValue = async (
+  dsId: string,
+  eventProperty: string
+) => {
+  try {
+    const res = await AppertureAPI.get(
+      `/datasources/${dsId}/property_values?event_property=${eventProperty}`
+    );
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};
