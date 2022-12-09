@@ -1,76 +1,57 @@
-from domain.segments.models import SegmentFilter
+from unittest.mock import MagicMock
+
+from domain.segments.models import (
+    SegmentGroup,
+    SegmentFilter,
+    SegmentFilterOperators,
+    SegmentFilterConditions,
+)
 from repositories.clickhouse.segments import Segments
 
 
 class TestSegmentsRepository:
     def setup_method(self):
-        self.repo = Segments()
-
-    def test_build_segment_query(self):
-        ds_id = "mock-ds-id"
-        filters = [
-            SegmentFilter(event="otp_sent"),
-            SegmentFilter(event="log_in_clicked"),
+        self.clickhouse = MagicMock()
+        repo = Segments(self.clickhouse)
+        repo.execute_get_query = MagicMock()
+        self.repo = repo
+        self.datasource_id = "test-id"
+        self.filters = [
+            SegmentFilter(
+                operator=SegmentFilterOperators.EQUALS,
+                operand="prop1",
+                values=["va1", "val2"],
+            ),
+            SegmentFilter(
+                operator=SegmentFilterOperators.EQUALS,
+                operand="prop2",
+                values=["va3", "val4"],
+            ),
         ]
-
-        query, params = self.repo.build_segment_query(ds_id, filters)
-
-        assert params == {
-            "ds_id": ds_id,
-            "event0": "otp_sent",
-            "event1": "log_in_clicked",
-        }
-        assert query == (
-            'SELECT "user_id",'
-            'COUNT(CASE WHEN "event_name"=%(event0)s THEN 1 END) AS "event0",'
-            'COUNT(CASE WHEN "event_name"=%(event1)s THEN 1 END) AS "event1" '
-            'FROM "events" '
-            'WHERE "datasource_id"=%(ds_id)s '
-            'GROUP BY "user_id" '
-            'ORDER BY "event0" DESC '
-            "LIMIT 100"
+        self.conditions = [SegmentFilterConditions.WHERE, SegmentFilterConditions.AND]
+        self.groups = [SegmentGroup(filters=self.filters, conditions=self.conditions)]
+        self.columns = ["prop1", "prop2", "prop3"]
+        self.params = {"ds_id": "test-id"}
+        self.query = (
+            "SELECT DISTINCT "
+            '"user_id","properties.prop1","properties.prop2","properties.prop3" FROM '
+            '"events" WHERE "datasource_id"=%(ds_id)s AND "properties.prop1" IN '
+            "('va1','val2') AND \"properties.prop2\" IN ('va3','val4')"
         )
 
-    def test_build_segment_query_without_filters(self):
-        ds_id = "mock-ds-id"
-        filters = []
-
-        query, params = self.repo.build_segment_query(ds_id, filters)
-
-        assert params == {"ds_id": ds_id}
-        assert query == (
-            'SELECT "user_id" '
-            'FROM "events" '
-            'WHERE "datasource_id"=%(ds_id)s '
-            'GROUP BY "user_id" '
-            "LIMIT 100"
+    def test_get_segment(self):
+        self.repo.get_segment(
+            datasource_id=self.datasource_id,
+            groups=self.groups,
+            columns=self.columns,
+            group_conditions=[],
         )
+        self.repo.execute_get_query.assert_called_once_with(self.query, self.params)
 
-    def test_build_segment_query_filters_with_operator(self):
-        ds_id = "mock-ds-id"
-        filters = [
-            SegmentFilter(event="otp_sent", operator="ge", operand=5),
-            SegmentFilter(event="log_in_clicked", operator="lt", operand=5),
-            SegmentFilter(event="add_to_cart", operator="eq", operand=1),
-        ]
-
-        query, params = self.repo.build_segment_query(ds_id, filters)
-
-        assert params == {
-            "ds_id": ds_id,
-            "event0": "otp_sent",
-            "event1": "log_in_clicked",
-            "event2": "add_to_cart",
-        }
-        assert query == (
-            'SELECT "user_id",'
-            'COUNT(CASE WHEN "event_name"=%(event0)s THEN 1 END) AS "event0",'
-            'COUNT(CASE WHEN "event_name"=%(event1)s THEN 1 END) AS "event1",'
-            'COUNT(CASE WHEN "event_name"=%(event2)s THEN 1 END) AS "event2" '
-            'FROM "events" '
-            'WHERE "datasource_id"=%(ds_id)s '
-            'GROUP BY "user_id" '
-            'HAVING "event0">=5 AND "event1"<5 AND "event2"=1 '
-            'ORDER BY "event0" DESC '
-            "LIMIT 100"
-        )
+    def test_build_segment_query_for_single_group(self):
+        assert self.repo.build_segment_query(
+            datasource_id=self.datasource_id,
+            groups=self.groups,
+            columns=self.columns,
+            group_conditions=[],
+        ) == (self.query, self.params)
