@@ -6,7 +6,6 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   flexRender,
-  Row,
 } from '@tanstack/react-table';
 import {
   Button,
@@ -21,6 +20,15 @@ import {
   Text,
 } from '@chakra-ui/react';
 import EditColumns from './EditColumns';
+import TableSkeleton from '@components/Skeleton/TableSkeleton';
+
+type SegmentTableProps = {
+  eventProperties: string[];
+  selectedColumns: string[];
+  setSelectedColumns: Function;
+  userTableData: { count: number; data: [] };
+  isSegmentDataLoading: Function;
+};
 
 const SegmentTable = ({
   eventProperties,
@@ -28,7 +36,7 @@ const SegmentTable = ({
   setSelectedColumns,
   userTableData,
   isSegmentDataLoading,
-}: any) => {
+}: SegmentTableProps) => {
   const columnHelper = createColumnHelper();
 
   const columns = useMemo(() => {
@@ -67,10 +75,6 @@ const SegmentTable = ({
   });
 
   const { getHeaderGroups, getRowModel } = tableInstance;
-
-  if (isSegmentDataLoading) {
-    return <p>Loading...</p>;
-  }
 
   return (
     <Box
@@ -125,7 +129,9 @@ const SegmentTable = ({
         justifyContent={'space-between'}
         overflow={'auto'}
       >
-        {userTableData.data?.length ? (
+        {isSegmentDataLoading ? (
+          <TableSkeleton tableHeader={selectedColumns} />
+        ) : userTableData.data?.length ? (
           <Table data-testid={'watchlist-table'}>
             <Thead py={'3'} px={'8'} bg={'white.100'}>
               {getHeaderGroups().map((headerGroup) => (

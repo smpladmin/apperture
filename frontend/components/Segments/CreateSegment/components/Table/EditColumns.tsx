@@ -11,11 +11,17 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import 'remixicon/fonts/remixicon.css';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 
+type EditColumnsProps = {
+  eventProperties: string[];
+  setSelectedColumns: Function;
+  selectedColumns: string[];
+};
+
 const EditColumns = ({
   eventProperties,
   setSelectedColumns,
   selectedColumns,
-}: any) => {
+}: EditColumnsProps) => {
   const [isColumnListOpen, setIsColumnListOpen] = useState(false);
   const [checkedValues, setCheckedValues] = useState<string[]>([
     ...selectedColumns,
