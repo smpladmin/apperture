@@ -3,31 +3,22 @@ import { ARROW_GRAY } from '@theme/index';
 import { useEffect, useState } from 'react';
 import AddFilter from './AddFilter';
 import 'remixicon/fonts/remixicon.css';
-import { useRouter } from 'next/router';
-import { getEventProperties } from '@lib/services/datasourceService';
 import SelectValue from './SelectValue';
 import SelectEventProperty from './SelectEventProperty';
 import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
 
-const QueryBuilder = () => {
-  const [filters, setFilters] = useState<SegmentFilter[]>([]);
-  const [conditions, setConditions] = useState<SegmentFilterConditions[]>([]);
-  const [loadingEventProperties, setLoadingEventProperties] =
-    useState<boolean>(false);
-  const [eventProperties, setEventProperties] = useState<string[]>([]);
-
-  const router = useRouter();
-  const { dsId } = router.query;
+const QueryBuilder = ({
+  eventProperties,
+  loadingEventProperties,
+  setGroups,
+  setRefreshOnDelete,
+}: any) => {
+  const [filters, setFilters] = useState([]);
+  const [conditions, setConditions] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchEventProperties = async () => {
-      const data = await getEventProperties(dsId as string);
-      setEventProperties(data);
-      setLoadingEventProperties(false);
-    };
-    setLoadingEventProperties(true);
-    fetchEventProperties();
-  }, []);
+    setGroups([{ filters, conditions }]);
+  }, [filters, conditions]);
 
   const removeFilter = (i: number) => {
     const updatedFilter = [...filters];
@@ -36,10 +27,12 @@ const QueryBuilder = () => {
     updatedFilterOperators.splice(i, 1);
 
     // default value of operator for first query should always be 'where'
-    updatedFilterOperators[0] = SegmentFilterConditions.WHERE;
+    if (updatedFilterOperators[0])
+      updatedFilterOperators[0] = SegmentFilterConditions.WHERE;
 
     setFilters([...updatedFilter]);
     setConditions([...updatedFilterOperators]);
+    setRefreshOnDelete(true);
   };
 
   return (

@@ -1,10 +1,63 @@
+import React, { useState, useEffect } from 'react';
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
-import { SegmentGroup } from '@lib/domain/segment';
-import React, { useState } from 'react';
+import { SegmentGroup, SegmentTableData } from '@lib/domain/segment';
 import QueryBuilder from './components/QueryBuilder';
+import SegmentTable from './components/Table/SegmentTable';
+import { getEventProperties } from '@lib/services/datasourceService';
+import { useRouter } from 'next/router';
+import { computeSegment } from '@lib/services/segmentService';
+import { getFilteredColumns } from '../util';
 
 const CreateSegment = () => {
   const [groups, setGroups] = useState<SegmentGroup[]>([]);
+  const [eventProperties, setEventProperties] = useState([]);
+  const [loadingEventProperties, setLoadingEventProperties] = useState(false);
+  const [selectedColumns, setSelectedColumns] = useState(['user_id']);
+  const [userTableData, setUserTableData] = useState<SegmentTableData>({
+    count: 0,
+    data: [],
+  });
+  const [isSegmentDataLoading, setIsSegmentDataLoading] = useState(false);
+  const [refreshOnDelete, setRefreshOnDelete] = useState(false);
+
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  const fetchSegmentResponse = async (columns: string[]) => {
+    const data = await computeSegment(dsId as string, groups, columns);
+    setUserTableData(data);
+    setIsSegmentDataLoading(false);
+  };
+
+  useEffect(() => {
+    setIsSegmentDataLoading(true);
+    fetchSegmentResponse(getFilteredColumns(selectedColumns));
+  }, [selectedColumns]);
+
+  useEffect(() => {
+    if (
+      (groups.length &&
+        groups.every((group) => {
+          return group.filters.every((filter) => filter.values.length);
+        })) ||
+      refreshOnDelete
+    ) {
+      if (refreshOnDelete) setRefreshOnDelete(false);
+      setIsSegmentDataLoading(true);
+      fetchSegmentResponse(getFilteredColumns(selectedColumns));
+    }
+  }, [groups]);
+
+  useEffect(() => {
+    const fetchEventProperties = async () => {
+      const data = await getEventProperties(dsId as string);
+      setEventProperties(data);
+      setLoadingEventProperties(false);
+    };
+    setLoadingEventProperties(true);
+    fetchEventProperties();
+  }, []);
+
   return (
     <Box>
       <Flex
@@ -57,7 +110,19 @@ const CreateSegment = () => {
             Clear all
           </Text>
         </Flex>
-        <QueryBuilder />
+        <QueryBuilder
+          eventProperties={eventProperties}
+          loadingEventProperties={loadingEventProperties}
+          setGroups={setGroups}
+          setRefreshOnDelete={setRefreshOnDelete}
+        />
+        <SegmentTable
+          isSegmentDataLoading={isSegmentDataLoading}
+          eventProperties={eventProperties}
+          selectedColumns={selectedColumns}
+          setSelectedColumns={setSelectedColumns}
+          userTableData={userTableData}
+        />
       </Box>
     </Box>
   );
