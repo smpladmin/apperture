@@ -5,11 +5,12 @@ export const getFilteredColumns = (columns: string[]) => {
 };
 
 export const replaceEmptyStringPlaceholder = (groups: SegmentGroup[]) => {
-  return groups.map((group) => {
-    return group.filters.map((filter) => {
-      const index = filter.values.indexOf('(empty string)');
-      if (index !== -1) filter.values[index] = '';
+  return groups.flatMap((group) => {
+    group.filters.flatMap((filter) => {
+      const emptyStringIndex = filter.values.indexOf('(empty string)');
+      if (emptyStringIndex !== -1) filter.values[emptyStringIndex] = '';
       return filter;
     });
-  })[0];
+    return group;
+  });
 };

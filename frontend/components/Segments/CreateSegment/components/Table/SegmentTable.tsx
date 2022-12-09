@@ -45,7 +45,7 @@ const SegmentTable = ({
               accessorKey.includes('.') &&
               index !== undefined
             ) {
-              return userTableData.data[index][accessorKey];
+              return userTableData.data[index][accessorKey] || '-';
             }
             return info.getValue();
           } catch (err) {
