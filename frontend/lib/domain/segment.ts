@@ -14,3 +14,8 @@ export type SegmentGroup = {
   filters: SegmentFilter[];
   conditions: SegmentFilterConditions[];
 };
+
+export type SegmentTableData = {
+  count: number;
+  data: any[];
+};

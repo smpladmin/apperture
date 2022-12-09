@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
-import { SegmentGroup } from '@lib/domain/segment';
+import { SegmentGroup, SegmentTableData } from '@lib/domain/segment';
 import QueryBuilder from './components/QueryBuilder';
 import SegmentTable from './components/Table/SegmentTable';
 import { getEventProperties } from '@lib/services/datasourceService';
@@ -13,7 +13,10 @@ const CreateSegment = () => {
   const [eventProperties, setEventProperties] = useState([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState(['user_id']);
-  const [userTableData, setUserTableData] = useState([]);
+  const [userTableData, setUserTableData] = useState<SegmentTableData>({
+    count: 0,
+    data: [],
+  });
   const [isSegmentDataLoading, setIsSegmentDataLoading] = useState(false);
   const [refreshOnDelete, setRefreshOnDelete] = useState(false);
 
