@@ -11,6 +11,7 @@ from domain.users.models import User
 from domain.runlogs.models import RunLog
 from domain.notifications.models import Notification
 from domain.funnels.models import Funnel
+from domain.segments.models import Segment
 
 
 class Mongo:
@@ -29,6 +30,7 @@ class Mongo:
                 RunLog,
                 Notification,
                 Funnel,
+                Segment,
             ],
         )
 

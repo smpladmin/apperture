@@ -1,3 +1,5 @@
+from unittest.mock import ANY
+
 import pytest
 import asyncio
 from unittest import mock
@@ -8,7 +10,14 @@ from fastapi.testclient import TestClient
 from domain.apps.models import App
 from domain.common.models import IntegrationProvider, SavedItems, WatchlistItemType
 from domain.datasources.models import DataSource, DataSourceVersion
-from domain.segments.models import ComputedSegment
+from domain.segments.models import (
+    ComputedSegment,
+    Segment,
+    SegmentFilter,
+    SegmentFilterOperators,
+    SegmentFilterConditions,
+    SegmentGroup,
+)
 from domain.funnels.models import (
     Funnel,
     ComputedFunnelStep,
@@ -213,6 +222,7 @@ def user_service(mock_find_email_user):
 @pytest.fixture(scope="module")
 def segment_service():
     segment_service = mock.AsyncMock()
+    Segment.get_settings = mock.MagicMock()
     computed_segment = ComputedSegment(
         count=2,
         data=[
@@ -228,7 +238,36 @@ def segment_service():
             },
         ],
     )
+    filters = [
+        SegmentFilter(
+            operator=SegmentFilterOperators.EQUALS,
+            operand="properties.$city",
+            values=["Delhi", "Indore", "Bhopal"],
+        ),
+        SegmentFilter(
+            operator=SegmentFilterOperators.EQUALS,
+            operand="properties.$app_release",
+            values=["5003", "2077", "5002"],
+        ),
+    ]
+    conditions = [SegmentFilterConditions.WHERE, SegmentFilterConditions.AND]
+    groups = [SegmentGroup(filters=filters, conditions=conditions)]
+    columns = ["properties.$app_release", "properties.$city"]
+    segment = Segment(
+        name="name",
+        description="test",
+        datasource_id="63771fc960527aba9354399c",
+        user_id="63771fc960527aba9354399c",
+        app_id="63771fc960527aba9354399c",
+        groups=groups,
+        columns=columns,
+        group_conditions=[],
+    )
     segment_service.compute_segment.return_value = computed_segment
+    segment_service.build_segment.return_value = segment
+    segment_future = asyncio.Future()
+    segment_future.set_result(segment)
+    segment_service.add_segment.return_value = segment_future
     return segment_service
 
 
@@ -414,6 +453,40 @@ def node_significance_response():
             "totalUsers": 28882,
         }
     ]
+
+
+@pytest.fixture(scope="module")
+def saved_segment_response():
+    return {
+        "_id": None,
+        "app_id": "63771fc960527aba9354399c",
+        "columns": ["properties.$app_release", "properties.$city"],
+        "created_at": ANY,
+        "datasource_id": "63771fc960527aba9354399c",
+        "description": "test",
+        "group_conditions": [],
+        "groups": [
+            {
+                "conditions": ["where", "and"],
+                "filters": [
+                    {
+                        "operand": "properties.$city",
+                        "operator": "equals",
+                        "values": ["Delhi", "Indore", "Bhopal"],
+                    },
+                    {
+                        "operand": "properties.$app_release",
+                        "operator": "equals",
+                        "values": ["5003", "2077", "5002"],
+                    },
+                ],
+            }
+        ],
+        "name": "name",
+        "revision_id": ANY,
+        "updated_at": None,
+        "user_id": "63771fc960527aba9354399c",
+    }
 
 
 @pytest.fixture(scope="module")
@@ -775,8 +848,36 @@ def funnel_data():
 
 
 @pytest.fixture(scope="module")
+def transient_segment_data():
+    return {
+        "datasourceId": "63771fc960527aba9354399c",
+        "groups": [
+            {
+                "filters": [
+                    {
+                        "operand": "properties.$city",
+                        "operator": "equals",
+                        "values": ["Delhi", "Indore", "Bhopal"],
+                    },
+                    {
+                        "operand": "properties.$app_release",
+                        "operator": "equals",
+                        "values": ["5003", "2077", "5002"],
+                    },
+                ],
+                "conditions": ["where", "and"],
+            }
+        ],
+        "columns": ["properties.$app_release", "properties.$city"],
+        "groupConditions": [],
+    }
+
+
+@pytest.fixture(scope="module")
 def segment_data():
     return {
+        "name": "name",
+        "description": "test",
         "datasourceId": "63771fc960527aba9354399c",
         "groups": [
             {
