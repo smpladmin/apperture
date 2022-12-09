@@ -100,7 +100,13 @@ const SegmentTable = ({
           </Text>
         </Flex>
         <Flex gap={'1'}>
-          <Button variant={'secondary'} bg={'none'} gap={2}>
+          <Button
+            _hover={{
+              bg: 'white.100',
+            }}
+            bg={'none'}
+            gap={2}
+          >
             <i className="ri-upload-2-line"></i>
             <Text fontSize={'xs-14'} fontWeight={500}>
               Export

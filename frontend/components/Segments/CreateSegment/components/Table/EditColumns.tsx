@@ -52,6 +52,9 @@ const EditColumns = ({
           fontSize={'sh-14'}
           fontWeight={500}
           gap={2}
+          _hover={{
+            bg: 'white.100',
+          }}
         >
           <i className="ri-pencil-fill"></i>
           <Text fontSize={'xs-14'} fontWeight={500}>
