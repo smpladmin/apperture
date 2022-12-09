@@ -20,8 +20,7 @@ import {
   Flex,
   Text,
 } from '@chakra-ui/react';
-import { response } from './dummy';
-import EditColumns from './editColumns';
+import EditColumns from './EditColumns';
 
 const SegmentTable = ({
   eventProperties,
@@ -31,37 +30,30 @@ const SegmentTable = ({
   isSegmentDataLoading,
 }: any) => {
   const columnHelper = createColumnHelper();
-  const [data, setData] = useState(response);
+
   const generateColumnHeader = () => {
-    if (Array.isArray(selectedColumns)) {
-      return selectedColumns.map((key) =>
-        columnHelper.accessor(key, {
-          header: key,
-          cell: (info) => {
-            try {
-              const accessorKey = info?.column?.columnDef?.accessorKey;
-              const index = info?.row?.index;
-              if (
-                accessorKey &&
-                accessorKey.includes('.') &&
-                index !== undefined
-              ) {
-                return userTableData.data[index][accessorKey];
-              }
-              return info.getValue();
-            } catch (err) {
-              return '-';
+    return selectedColumns.map((key: any) =>
+      columnHelper.accessor(key, {
+        header: key,
+        cell: (info) => {
+          try {
+            //@ts-ignore
+            const accessorKey = info?.column?.columnDef?.accessorKey;
+            const index = info?.row?.index;
+            if (
+              accessorKey &&
+              accessorKey.includes('.') &&
+              index !== undefined
+            ) {
+              return userTableData.data[index][accessorKey];
             }
-          },
-        })
-      );
-    }
-    return [
-      columnHelper.accessor('user_id', {
-        header: 'user_id',
-        cell: (info) => info.getValue(),
-      }),
-    ];
+            return info.getValue();
+          } catch (err) {
+            return '-';
+          }
+        },
+      })
+    );
   };
   const columns = useMemo(
     () => [...generateColumnHeader()],

@@ -6,6 +6,7 @@ import SegmentTable from './components/Table/SegmentTable';
 import { getEventProperties } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
 import { computeSegment } from '@lib/services/segmentService';
+import { getFilteredColumns } from '../util';
 
 const CreateSegment = () => {
   const [groups, setGroups] = useState<SegmentGroup[]>([]);
@@ -14,6 +15,8 @@ const CreateSegment = () => {
   const [selectedColumns, setSelectedColumns] = useState(['user_id']);
   const [userTableData, setUserTableData] = useState([]);
   const [isSegmentDataLoading, setIsSegmentDataLoading] = useState(false);
+  const [refreshOnDelete, setRefreshOnDelete] = useState(false);
+
   const router = useRouter();
   const { dsId } = router.query;
 
@@ -25,24 +28,21 @@ const CreateSegment = () => {
 
   useEffect(() => {
     setIsSegmentDataLoading(true);
-    fetchSegmentResponse([]);
-  }, []);
+    fetchSegmentResponse(getFilteredColumns(selectedColumns));
+  }, [selectedColumns]);
 
   useEffect(() => {
-    const requestColumn = selectedColumns.filter(
-      (value) => value !== 'user_id'
-    );
     if (
       groups.some((group) =>
         group.filters.some((filter) => filter.values.length)
       ) ||
-      requestColumn.length > 0
+      refreshOnDelete
     ) {
+      if (refreshOnDelete) setRefreshOnDelete(false);
       setIsSegmentDataLoading(true);
-      fetchSegmentResponse(requestColumn);
+      fetchSegmentResponse(getFilteredColumns(selectedColumns));
     }
-    console.log('rerendered', selectedColumns);
-  }, [groups, selectedColumns]);
+  }, [groups]);
 
   useEffect(() => {
     const fetchEventProperties = async () => {
@@ -110,6 +110,7 @@ const CreateSegment = () => {
           eventProperties={eventProperties}
           loadingEventProperties={loadingEventProperties}
           setGroups={setGroups}
+          setRefreshOnDelete={setRefreshOnDelete}
         />
         <SegmentTable
           isSegmentDataLoading={isSegmentDataLoading}

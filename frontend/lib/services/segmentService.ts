@@ -1,3 +1,5 @@
+import { cloneDeep } from 'lodash';
+import { replaceEmptyStringPlaceholder } from './../../components/Segments/util';
 import { AppertureAPI } from '@lib/apiClient';
 import { SegmentGroup } from '@lib/domain/segment';
 import { AxiosError } from 'axios';
@@ -10,7 +12,7 @@ export const computeSegment = async (
   try {
     const res = await AppertureAPI.post('/segments/transient', {
       datasourceId: dsId,
-      groups,
+      groups: replaceEmptyStringPlaceholder(cloneDeep(groups)),
       columns,
       groupConditions: [],
     });

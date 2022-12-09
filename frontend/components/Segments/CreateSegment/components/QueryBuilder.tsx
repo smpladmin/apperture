@@ -3,8 +3,7 @@ import { ARROW_GRAY } from '@theme/index';
 import { useEffect, useState } from 'react';
 import AddFilter from './AddFilter';
 import 'remixicon/fonts/remixicon.css';
-import { useRouter } from 'next/router';
-import { getEventProperties } from '@lib/services/datasourceService';
+
 import SelectValue from './SelectValue';
 import SelectEventProperty from './SelectEventProperty';
 import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
@@ -13,6 +12,7 @@ const QueryBuilder = ({
   eventProperties,
   loadingEventProperties,
   setGroups,
+  setRefreshOnDelete,
 }: any) => {
   const [filters, setFilters] = useState([]);
   const [conditions, setConditions] = useState<any[]>([]);
@@ -32,6 +32,7 @@ const QueryBuilder = ({
 
     setFilters([...updatedFilter]);
     setConditions([...updatedFilterOperators]);
+    setRefreshOnDelete(true);
   };
 
   return (

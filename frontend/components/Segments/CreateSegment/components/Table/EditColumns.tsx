@@ -29,9 +29,7 @@ const EditColumns = ({
   const handleSelectValues = () => {
     setIsColumnListOpen(false);
 
-    setSelectedColumns((prevState: any) => [
-      ...new Set([...prevState, ...checkedValues]),
-    ]);
+    setSelectedColumns([...new Set(['user_id', ...checkedValues])]);
   };
 
   const handleAllSelect = (e: ChangeEvent<HTMLInputElement>) => {
