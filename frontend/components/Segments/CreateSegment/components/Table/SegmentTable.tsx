@@ -31,34 +31,34 @@ const SegmentTable = ({
 }: any) => {
   const columnHelper = createColumnHelper();
 
-  const generateColumnHeader = () => {
-    return selectedColumns.map((key: any) =>
-      columnHelper.accessor(key, {
-        header: key,
-        cell: (info) => {
-          try {
-            //@ts-ignore
-            const accessorKey = info?.column?.columnDef?.accessorKey;
-            const index = info?.row?.index;
-            if (
-              accessorKey &&
-              accessorKey.includes('.') &&
-              index !== undefined
-            ) {
-              return userTableData.data[index][accessorKey] || '-';
+  const columns = useMemo(() => {
+    const generateColumnHeader = () => {
+      return selectedColumns.map((key: any) =>
+        columnHelper.accessor(key, {
+          header: key,
+          cell: (info) => {
+            try {
+              //@ts-ignore
+              const accessorKey = info?.column?.columnDef?.accessorKey;
+              const index = info?.row?.index;
+              if (
+                accessorKey &&
+                accessorKey.includes('.') &&
+                index !== undefined
+              ) {
+                return userTableData.data[index][accessorKey] || '-';
+              }
+              return info.getValue();
+            } catch (err) {
+              return '-';
             }
-            return info.getValue();
-          } catch (err) {
-            return '-';
-          }
-        },
-      })
-    );
-  };
-  const columns = useMemo(
-    () => [...generateColumnHeader()],
-    [selectedColumns, userTableData]
-  );
+          },
+        })
+      );
+    };
+    return [...generateColumnHeader()];
+  }, [selectedColumns, userTableData]);
+
   const tableInstance = useReactTable({
     columns,
     data: userTableData?.data || [],
@@ -125,44 +125,55 @@ const SegmentTable = ({
         justifyContent={'space-between'}
         overflow={'auto'}
       >
-        <Table data-testid={'watchlist-table'}>
-          <Thead py={'3'} px={'8'} bg={'white.100'}>
-            {getHeaderGroups().map((headerGroup) => (
-              <Tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <Th key={header.id} data-testid={'watchlist-table-headers'}>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </Th>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Thead>
-          <Tbody>
-            {getRowModel().rows.map((row) => (
-              <Tr
-                key={row.id}
-                _hover={{ bg: 'white.100' }}
-                data-testid={'table-body-rows'}
-              >
-                {row.getVisibleCells().map((cell) => {
-                  return (
-                    <Td key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </Td>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
+        {userTableData.data?.length ? (
+          <Table data-testid={'watchlist-table'}>
+            <Thead py={'3'} px={'8'} bg={'white.100'}>
+              {getHeaderGroups().map((headerGroup) => (
+                <Tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <Th
+                        key={header.id}
+                        data-testid={'watchlist-table-headers'}
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </Th>
+                    );
+                  })}
+                </Tr>
+              ))}
+            </Thead>
+            <Tbody>
+              {getRowModel().rows.map((row) => (
+                <Tr
+                  key={row.id}
+                  _hover={{ bg: 'white.100' }}
+                  data-testid={'table-body-rows'}
+                >
+                  {row.getVisibleCells().map((cell) => {
+                    return (
+                      <Td key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </Td>
+                    );
+                  })}
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        ) : (
+          <Flex w={'full'} justifyContent={'center'} py={'2'}>
+            <Text fontSize={'xs-14'} lineHeight={'xs-18'} fontWeight={'500'}>
+              No data found
+            </Text>
+          </Flex>
+        )}
       </Flex>
     </Box>
   );

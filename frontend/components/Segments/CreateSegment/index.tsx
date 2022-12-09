@@ -33,8 +33,8 @@ const CreateSegment = () => {
 
   useEffect(() => {
     if (
-      groups.some((group) =>
-        group.filters.some((filter) => filter.values.length)
+      groups.every((group) =>
+        group.filters.every((filter) => filter.values.length)
       ) ||
       refreshOnDelete
     ) {
