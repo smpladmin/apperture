@@ -17,26 +17,31 @@ const CreateSegment = () => {
   const router = useRouter();
   const { dsId } = router.query;
 
-  const fetchSegmentResponse = async () => {
-    const data = await computeSegment(dsId as string, groups, []);
+  const fetchSegmentResponse = async (columns: string[]) => {
+    const data = await computeSegment(dsId as string, groups, columns);
     setUserTableData(data);
     setIsSegmentDataLoading(false);
   };
 
   useEffect(() => {
     setIsSegmentDataLoading(true);
-    fetchSegmentResponse();
+    fetchSegmentResponse([]);
   }, []);
 
   useEffect(() => {
+    const requestColumn = selectedColumns.filter(
+      (value) => value !== 'user_id'
+    );
     if (
       groups.some((group) =>
         group.filters.some((filter) => filter.values.length)
-      )
+      ) ||
+      requestColumn.length > 0
     ) {
       setIsSegmentDataLoading(true);
-      fetchSegmentResponse();
+      fetchSegmentResponse(requestColumn);
     }
+    console.log('rerendered', selectedColumns);
   }, [groups, selectedColumns]);
 
   useEffect(() => {
@@ -107,9 +112,11 @@ const CreateSegment = () => {
           setGroups={setGroups}
         />
         <SegmentTable
+          isSegmentDataLoading={isSegmentDataLoading}
           eventProperties={eventProperties}
           selectedColumns={selectedColumns}
           setSelectedColumns={setSelectedColumns}
+          userTableData={userTableData}
         />
       </Box>
     </Box>

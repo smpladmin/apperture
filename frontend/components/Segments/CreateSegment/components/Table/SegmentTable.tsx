@@ -27,6 +27,8 @@ const SegmentTable = ({
   eventProperties,
   selectedColumns,
   setSelectedColumns,
+  userTableData,
+  isSegmentDataLoading,
 }: any) => {
   const columnHelper = createColumnHelper();
   const [data, setData] = useState(response);
@@ -35,7 +37,22 @@ const SegmentTable = ({
       return selectedColumns.map((key) =>
         columnHelper.accessor(key, {
           header: key,
-          cell: (info) => info.getValue(),
+          cell: (info) => {
+            try {
+              const accessorKey = info?.column?.columnDef?.accessorKey;
+              const index = info?.row?.index;
+              if (
+                accessorKey &&
+                accessorKey.includes('.') &&
+                index !== undefined
+              ) {
+                return userTableData.data[index][accessorKey];
+              }
+              return info.getValue();
+            } catch (err) {
+              return '-';
+            }
+          },
         })
       );
     }
@@ -46,16 +63,22 @@ const SegmentTable = ({
       }),
     ];
   };
-
-  const columns = useMemo(() => [...generateColumnHeader()], []);
+  const columns = useMemo(
+    () => [...generateColumnHeader()],
+    [selectedColumns, userTableData]
+  );
   const tableInstance = useReactTable({
     columns,
-    data,
+    data: userTableData?.data || [],
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
 
   const { getHeaderGroups, getRowModel } = tableInstance;
+
+  if (isSegmentDataLoading) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <Box
@@ -81,7 +104,7 @@ const SegmentTable = ({
             Showing:
           </Text>
           <Text fontSize={'xs-14'} lineHeight={'xs-18'} fontWeight={'500'}>
-            {data.length} Users
+            {userTableData.count || 0} Users
           </Text>
         </Flex>
         <Flex gap={'1'}>
@@ -94,11 +117,16 @@ const SegmentTable = ({
           <EditColumns
             eventProperties={eventProperties}
             setSelectedColumns={setSelectedColumns}
+            selectedColumns={selectedColumns}
           />
         </Flex>
       </Flex>
 
-      <Flex alignItems={'center'} justifyContent={'space-between'}>
+      <Flex
+        alignItems={'center'}
+        justifyContent={'space-between'}
+        overflow={'auto'}
+      >
         <Table data-testid={'watchlist-table'}>
           <Thead py={'3'} px={'8'} bg={'white.100'}>
             {getHeaderGroups().map((headerGroup) => (

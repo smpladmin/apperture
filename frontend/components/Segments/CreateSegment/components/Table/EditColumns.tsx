@@ -11,9 +11,15 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import 'remixicon/fonts/remixicon.css';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 
-const EditColumns = ({ eventProperties, setSelectedColumns }: any) => {
-  const [isColumnListOpen, setIsColumnListOpen] = useState(true);
-  const [checkedValues, setCheckedValues] = useState<string[]>([]);
+const EditColumns = ({
+  eventProperties,
+  setSelectedColumns,
+  selectedColumns,
+}: any) => {
+  const [isColumnListOpen, setIsColumnListOpen] = useState(false);
+  const [checkedValues, setCheckedValues] = useState<string[]>([
+    ...selectedColumns,
+  ]);
   const [allValuesSelected, setAllValuesSelected] = useState(false);
   const [loadingPropertyValues, setLoadingPropertyValues] = useState(false);
 
@@ -50,7 +56,9 @@ const EditColumns = ({ eventProperties, setSelectedColumns }: any) => {
           gap={2}
         >
           <i className="ri-pencil-fill"></i>
-          Edit Columns
+          <Text fontSize={'xs-14'} fontWeight={500}>
+            Edit Columns
+          </Text>
         </Button>
 
         {isColumnListOpen ? (
