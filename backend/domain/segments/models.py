@@ -1,9 +1,30 @@
-from typing import Optional
+from enum import Enum
+from typing import List, Dict
 from pydantic import BaseModel
 
 
+class SegmentFilterConditions(str, Enum):
+    WHERE = "where"
+    WHO = "who"
+    AND = "and"
+    OR = "or"
+
+
+class SegmentFilterOperators(str, Enum):
+    EQUALS = "equals"
+
+
 class SegmentFilter(BaseModel):
-    event: str
-    operator: Optional[str]
-    operand: Optional[int]
-    function: str = "count"
+    operator: SegmentFilterOperators
+    operand: str
+    values: List[str]
+
+
+class SegmentGroup(BaseModel):
+    filters: List[SegmentFilter]
+    conditions: List[SegmentFilterConditions]
+
+
+class ComputedSegment(BaseModel):
+    count: int
+    data: List[Dict]

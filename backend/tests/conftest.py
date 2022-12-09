@@ -12,6 +12,7 @@ from domain.funnels.service import FunnelsService
 from domain.datasources.service import DataSourceService
 from domain.events.service import EventsService
 from domain.edge.service import EdgeService
+from domain.segments.service import SegmentService
 
 
 @pytest.fixture(scope="module")
@@ -24,6 +25,7 @@ def app_init(
     user_service,
     app_service,
     edge_service,
+    segment_service,
 ):
 
     print("Setting up App")
@@ -40,6 +42,7 @@ def app_init(
     app.dependency_overrides[UserService] = lambda: user_service
     app.dependency_overrides[AppService] = lambda: app_service
     app.dependency_overrides[EdgeService] = lambda: edge_service
+    app.dependency_overrides[SegmentService] = lambda: segment_service
 
     yield app
 
