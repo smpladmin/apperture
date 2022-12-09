@@ -40,10 +40,20 @@ const CreateSegment = () => {
       </Flex>
       <Box py={'7'} px={'10'}>
         <Flex justifyContent={'space-between'} alignItems={'center'}>
-          <Text fontSize={'sh-18'} lineHeight={'sh-18'} fontWeight={'500'}>
+          <Text
+            fontSize={'sh-18'}
+            lineHeight={'sh-18'}
+            fontWeight={'500'}
+            data-testid={'segment-builder'}
+          >
             Segment Builder
           </Text>
-          <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
+          <Text
+            fontSize={'xs-14'}
+            lineHeight={'xs-14'}
+            fontWeight={'500'}
+            data-testid={'clear-all'}
+          >
             Clear all
           </Text>
         </Flex>

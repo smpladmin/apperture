@@ -41,6 +41,7 @@ const SelectEventProperty = ({
         bg={'white.100'}
         cursor={'pointer'}
         onClick={() => setOpenFiltersList(true)}
+        data-testid={'event-property'}
       >
         {filter.operand}
       </Text>
@@ -58,6 +59,7 @@ const SelectEventProperty = ({
           shadow={'0px 0px 4px rgba(0, 0, 0, 0.12)'}
           maxH={'100'}
           overflowY={'auto'}
+          data-testid={'event-property-dropdown-container'}
         >
           {eventProperties.map((property) => (
             <Box
@@ -72,6 +74,7 @@ const SelectEventProperty = ({
               fontSize={'xs-14'}
               lineHeight={'xs-14'}
               fontWeight={'500'}
+              data-testid={'dropdown-options'}
             >
               {property}
             </Box>

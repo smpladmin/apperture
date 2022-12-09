@@ -51,6 +51,7 @@ const AddFilter = ({
         _hover={{
           bg: 'white.100',
         }}
+        data-testid={'add-filter'}
       >
         + Filter
       </Button>
@@ -67,6 +68,7 @@ const AddFilter = ({
           shadow={'0px 0px 4px rgba(0, 0, 0, 0.12)'}
           maxH={'100'}
           overflowY={'auto'}
+          data-testid={'event-property-dropdown-container'}
         >
           {loadingEventProperties ? (
             <Flex
@@ -91,6 +93,7 @@ const AddFilter = ({
                 fontSize={'xs-14'}
                 lineHeight={'xs-14'}
                 fontWeight={'500'}
+                data-testid={'dropdown-options'}
               >
                 {property}
               </Box>

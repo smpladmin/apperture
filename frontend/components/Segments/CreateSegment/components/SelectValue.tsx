@@ -46,10 +46,10 @@ const SelectValue = ({
     const fetchEventPropertiesValue = async () => {
       const response = await getEventPropertiesValue(
         dsId as string,
-        filter.operand
+        filter?.operand
       );
       // TODO: to remove slice once we add search in all dropdowns and imlement infinite scroll
-      // adding '(empty string)' is a workaround to handle '' case for property values
+      // adding '(empty string)' is a workaround to handle '' string case for property values
       const transformedResponse = response
         .map((res: any) => (!res[0] ? '(empty string)' : res[0]))
         .slice(0, 100);
@@ -72,7 +72,7 @@ const SelectValue = ({
     } else {
       setAllValuesSelected(false);
     }
-  }, [filterValues, eventPropertiesValues, filter.operand]);
+  }, [filterValues, eventPropertiesValues]);
 
   const handleSelectValues = () => {
     setIsFilterValuesListOpen(false);
@@ -110,6 +110,7 @@ const SelectValue = ({
         bg={'white.100'}
         cursor={'pointer'}
         onClick={() => setIsFilterValuesListOpen(true)}
+        data-testid={'event-property-value'}
       >
         {getValuesText(filter?.values)}
       </Text>
@@ -126,6 +127,7 @@ const SelectValue = ({
           shadow={'0px 0px 4px rgba(0, 0, 0, 0.12)'}
           maxH={'100'}
           overflowY={'auto'}
+          data-testid={'property-values-dropdown-container'}
         >
           {loadingPropertyValues ? (
             <Flex
@@ -149,6 +151,7 @@ const SelectValue = ({
                   _hover={{
                     bg: 'white.100',
                   }}
+                  data-testid={'select-all-values'}
                 >
                   <Text
                     fontSize={'xs-14'}
@@ -177,6 +180,7 @@ const SelectValue = ({
                         _hover={{
                           bg: 'white.100',
                         }}
+                        data-testid={'property-value-dropdown-option'}
                       >
                         <Checkbox colorScheme={'radioBlack'} value={value}>
                           <Text
@@ -199,6 +203,7 @@ const SelectValue = ({
                 color={'white.DEFAULT'}
                 variant={'primary'}
                 onClick={handleSelectValues}
+                data-testid={'add-event-property-values'}
               >
                 Add
               </Button>
