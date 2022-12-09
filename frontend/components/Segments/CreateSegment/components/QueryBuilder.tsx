@@ -3,7 +3,6 @@ import { ARROW_GRAY } from '@theme/index';
 import { useEffect, useState } from 'react';
 import AddFilter from './AddFilter';
 import 'remixicon/fonts/remixicon.css';
-
 import SelectValue from './SelectValue';
 import SelectEventProperty from './SelectEventProperty';
 import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
@@ -28,7 +27,8 @@ const QueryBuilder = ({
     updatedFilterOperators.splice(i, 1);
 
     // default value of operator for first query should always be 'where'
-    updatedFilterOperators[0] = SegmentFilterConditions.WHERE;
+    if (updatedFilterOperators[0])
+      updatedFilterOperators[0] = SegmentFilterConditions.WHERE;
 
     setFilters([...updatedFilter]);
     setConditions([...updatedFilterOperators]);

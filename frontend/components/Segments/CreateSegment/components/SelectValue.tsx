@@ -48,7 +48,7 @@ const SelectValue = ({
         dsId as string,
         filter?.operand
       );
-      // TODO: to remove slice once we add search in all dropdowns and imlement infinite scroll
+      // TODO: to remove slice once we add search in all dropdowns and implement infinite scroll
       // adding '(empty string)' is a workaround to handle '' string case for property values
       const transformedResponse = response
         .map((res: any) => (!res[0] ? '(empty string)' : res[0]))
@@ -61,6 +61,11 @@ const SelectValue = ({
     fetchEventPropertiesValue();
     setFilterValues([]);
   }, [filter.operand]);
+
+  useEffect(() => {
+    // updated filter values whenever a filter changes so that selected values are checked when dropdown is opened
+    setFilterValues(filter.values);
+  }, [filters]);
 
   useEffect(() => {
     // check 'Select all' checkbox if all the options are selected
