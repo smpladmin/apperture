@@ -1,5 +1,21 @@
 export type SegmentFilter = {
-  event: string;
-  operator?: string;
-  operand?: number;
+  operand: string;
+  operator: string;
+  values: string[];
+};
+
+export enum SegmentFilterConditions {
+  WHERE = 'where',
+  AND = 'and',
+  OR = 'or',
+}
+
+export type SegmentGroup = {
+  filters: SegmentFilter[];
+  conditions: SegmentFilterConditions[];
+};
+
+export type SegmentTableData = {
+  count: number;
+  data: any[];
 };

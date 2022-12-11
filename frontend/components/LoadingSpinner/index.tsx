@@ -1,7 +1,7 @@
-import { Flex, Spinner } from '@chakra-ui/react';
+import { Spinner } from '@chakra-ui/react';
 import { BLACK_RUSSIAN } from '@theme/index';
 
-const Loader = () => {
+const LoadingSpinner = () => {
   return (
     <Spinner
       thickness="4px"
@@ -14,4 +14,4 @@ const Loader = () => {
   );
 };
 
-export default Loader;
+export default LoadingSpinner;
