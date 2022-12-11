@@ -28,17 +28,17 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 };
 
 const Saved = () => {
-  return (
-    <>
-      <Watchlist />
-    </>
-  );
+  return <Watchlist />;
 };
 
 Saved.getLayout = function getLayout(
   page: ReactNode,
   apps: AppWithIntegrations[]
 ) {
-  return <Layout apps={apps}>{page}</Layout>;
+  return (
+    <Layout apps={apps} hideHeader={true}>
+      {page}
+    </Layout>
+  );
 };
 export default Saved;
