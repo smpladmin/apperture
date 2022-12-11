@@ -17,15 +17,28 @@ export const formatDatalabel = (datalabel: number) => {
   }
 };
 
-export const convertISODateToReadableDate = (isoDate: string) => {
+export const convertISODateToReadableDate = (
+  isoDate: string,
+  fullDate?: boolean
+) => {
   const date = new Date(isoDate);
   const month = date.toLocaleString('default', { month: 'short' });
+  const year = date.getFullYear();
+
   let day = date.getDate().toString();
   if (Number(day) < 10) {
     day = '0' + day;
   }
 
-  return `${day}-${month}`;
+  let hours = date.getHours();
+  let minutes = date.getMinutes().toString();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  minutes = Number(minutes) < 10 ? '0' + minutes : minutes;
+  const strTime = `${hours}:${minutes}${ampm}`;
+
+  return fullDate ? `${day} ${month} ${year}, ${strTime}` : `${day}-${month}`;
 };
 
 export const getPercentageOfHits = (nodeHits: number, totalHits: number) => {

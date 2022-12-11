@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Modal,
   ModalBody,
@@ -11,25 +10,42 @@ import {
   Text,
   Divider,
   Flex,
+  Input,
+  Textarea,
+  Highlight,
 } from '@chakra-ui/react';
-import Link from 'next/link';
+import { SegmentGroup } from '@lib/domain/segment';
+import { User } from '@lib/domain/user';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import { convertISODateToReadableDate } from '@lib/utils/common';
 
-type AppsModalProps = {
+type SaveSegmentModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  groups: SegmentGroup[];
+  user?: User;
 };
 
-const SaveModal = ({ isOpen, onClose }: any) => {
+const SaveSegmentModal = ({
+  isOpen,
+  onClose,
+  groups,
+  user,
+}: SaveSegmentModalProps) => {
   const [segmentName, setSegmentName] = useState('');
   const [segmentDesciption, setSegmentDescription] = useState('');
   const router = useRouter();
   const { dsId } = router.query;
 
+  const getCurrentData = convertISODateToReadableDate(
+    new Date().toISOString(),
+    true
+  );
+
   return (
     <Modal
-      isOpen={true}
+      isOpen={isOpen}
       onClose={onClose}
       isCentered
       blockScrollOnMount={false}
@@ -49,6 +65,7 @@ const SaveModal = ({ isOpen, onClose }: any) => {
           alignItems={'center'}
           pt={'9'}
           px={'9'}
+          pb={'6'}
         >
           <Text fontSize={'sh-24'} lineHeight={'sh-24'} fontWeight={'600'}>
             Save User Segment
@@ -65,19 +82,61 @@ const SaveModal = ({ isOpen, onClose }: any) => {
         </ModalHeader>
         <Divider
           orientation="horizontal"
-          mt={'7'}
           borderColor={'white.200'}
           opacity={1}
-          display={{ base: 'none', md: 'block' }}
         />
 
-        <ModalBody
-          px={{ base: '4', md: '9' }}
-          overflowY={'auto'}
-          pt={{ base: '0', md: '9' }}
-          pb={'0'}
-        >
-          <Text>Body</Text>
+        <ModalBody px={'9'} overflowY={'auto'} py={'9'}>
+          <Flex direction={'column'} gap={'3'}>
+            <Text
+              fontSize={'xs-14'}
+              lineHeight={'xs-14'}
+              fontWeight={'400'}
+              color={'grey.200'}
+            >
+              <Highlight
+                query={'*'}
+                styles={{
+                  color: 'red',
+                }}
+              >
+                Segment Name*
+              </Highlight>
+            </Text>
+            <Input
+              autoFocus
+              type={'text'}
+              size={'lg'}
+              p={'3'}
+              focusBorderColor={'black.100'}
+              borderRadius={'8'}
+              onChange={(e) => setSegmentName(e.target.value)}
+            />
+          </Flex>
+          <Flex direction={'column'} mt={'8'} gap={'3'}>
+            <Text
+              fontSize={'xs-14'}
+              lineHeight={'xs-14'}
+              fontWeight={'400'}
+              color={'grey.200'}
+            >
+              Add a Description (Optional)
+            </Text>
+            <Textarea
+              bg={'white.100'}
+              maxLength={120}
+              focusBorderColor={'black.100'}
+              resize={'none'}
+              onChange={(e) => setSegmentDescription(e.target.value)}
+            />
+            <Text
+              textAlign={'right'}
+              fontSize={'xs-12'}
+              lineHeight={'xs-12'}
+              fontWeight={'400'}
+              color={'grey.200'}
+            >{`${segmentDesciption.length}/ 120`}</Text>
+          </Flex>
         </ModalBody>
         <Divider
           orientation="horizontal"
@@ -93,7 +152,7 @@ const SaveModal = ({ isOpen, onClose }: any) => {
                 fontWeight={'400'}
                 color={'grey.200'}
               >
-                Created by: Anish
+                {`Created by: ${user?.firstName} ${user?.lastName}`}
               </Text>
               <Text
                 fontSize={'xs-14'}
@@ -101,7 +160,7 @@ const SaveModal = ({ isOpen, onClose }: any) => {
                 fontWeight={'400'}
                 color={'grey.200'}
               >
-                Date: 9 Dec. 2020
+                {`Date: ${getCurrentData}`}
               </Text>
             </Flex>
             <Button
@@ -114,6 +173,7 @@ const SaveModal = ({ isOpen, onClose }: any) => {
               height={'auto'}
               bg={'black.100'}
               color={'white.DEFAULT'}
+              disabled={!segmentName}
             >
               Save
             </Button>
@@ -124,4 +184,4 @@ const SaveModal = ({ isOpen, onClose }: any) => {
   );
 };
 
-export default SaveModal;
+export default SaveSegmentModal;
