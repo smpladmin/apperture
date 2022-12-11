@@ -38,7 +38,7 @@ const SaveSegmentModal = ({
   const router = useRouter();
   const { dsId } = router.query;
 
-  const getCurrentData = convertISODateToReadableDate(
+  const currentDateAndTime = convertISODateToReadableDate(
     new Date().toISOString(),
     true
   );
@@ -135,7 +135,7 @@ const SaveSegmentModal = ({
               lineHeight={'xs-12'}
               fontWeight={'400'}
               color={'grey.200'}
-            >{`${segmentDesciption.length}/ 120`}</Text>
+            >{`${segmentDesciption.length}/120`}</Text>
           </Flex>
         </ModalBody>
         <Divider
@@ -160,7 +160,7 @@ const SaveSegmentModal = ({
                 fontWeight={'400'}
                 color={'grey.200'}
               >
-                {`Date: ${getCurrentData}`}
+                {`Date: ${currentDateAndTime}`}
               </Text>
             </Flex>
             <Button
