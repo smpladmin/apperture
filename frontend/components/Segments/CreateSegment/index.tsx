@@ -33,9 +33,12 @@ const CreateSegment = () => {
 
   useEffect(() => {
     if (
-      groups.every((group) =>
-        group.filters.every((filter) => filter.values.length)
-      ) ||
+      (groups.length &&
+        groups.every(
+          (group) =>
+            group.filters.length &&
+            group.filters.every((filter) => filter.values.length)
+        )) ||
       refreshOnDelete
     ) {
       if (refreshOnDelete) setRefreshOnDelete(false);
