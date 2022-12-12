@@ -22,3 +22,26 @@ export const computeSegment = async (
     return [];
   }
 };
+
+export const saveSegment = async (
+  name: string,
+  description: string,
+  dsId: string,
+  groups: SegmentGroup[],
+  columns: string[]
+) => {
+  try {
+    const res = await AppertureAPI.post('/segments/', {
+      name,
+      description,
+      datasourceId: dsId,
+      groups: replaceEmptyStringPlaceholder(cloneDeep(groups)),
+      columns,
+      groupConditions: [],
+    });
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};

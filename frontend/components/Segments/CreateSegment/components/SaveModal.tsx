@@ -19,11 +19,13 @@ import { User } from '@lib/domain/user';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { convertISODateToReadableDate } from '@lib/utils/common';
+import { saveSegment } from '@lib/services/segmentService';
 
 type SaveSegmentModalProps = {
   isOpen: boolean;
   onClose: () => void;
   groups: SegmentGroup[];
+  columns: string[];
   user?: User;
 };
 
@@ -31,6 +33,7 @@ const SaveSegmentModal = ({
   isOpen,
   onClose,
   groups,
+  columns,
   user,
 }: SaveSegmentModalProps) => {
   const [segmentName, setSegmentName] = useState('');
@@ -42,6 +45,18 @@ const SaveSegmentModal = ({
     new Date().toISOString(),
     true
   );
+
+  const handleSave = async () => {
+    const response = await saveSegment(
+      segmentName,
+      segmentDesciption,
+      dsId as string,
+      groups,
+      columns
+    );
+    console.log(response);
+    onClose();
+  };
 
   return (
     <Modal
@@ -174,6 +189,7 @@ const SaveSegmentModal = ({
               bg={'black.100'}
               color={'white.DEFAULT'}
               disabled={!segmentName}
+              onClick={handleSave}
             >
               Save
             </Button>

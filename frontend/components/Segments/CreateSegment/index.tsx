@@ -153,6 +153,7 @@ const CreateSegment = () => {
         onClose={closeSaveSegmentModal}
         groups={groups}
         user={user}
+        columns={selectedColumns}
       />
     </Box>
   );
