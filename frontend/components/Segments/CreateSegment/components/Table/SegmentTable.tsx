@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import 'remixicon/fonts/remixicon.css';
 import {
   createColumnHelper,
@@ -21,12 +21,13 @@ import {
 } from '@chakra-ui/react';
 import EditColumns from './EditColumns';
 import TableSkeleton from '@components/Skeleton/TableSkeleton';
+import { SegmentTableData } from '@lib/domain/segment';
 
 type SegmentTableProps = {
   eventProperties: string[];
   selectedColumns: string[];
   setSelectedColumns: Function;
-  userTableData: any;
+  userTableData: SegmentTableData;
   isSegmentDataLoading: boolean;
 };
 
