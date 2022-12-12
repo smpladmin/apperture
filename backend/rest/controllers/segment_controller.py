@@ -1,9 +1,15 @@
 from fastapi import APIRouter, Depends
+
+from domain.datasources.service import DataSourceService
 from domain.segments.service import SegmentService
-from rest.dtos.segments import TransientSegmentDto, ComputedSegmentResponse
+from domain.users.models import User
+from rest.dtos.segments import (
+    TransientSegmentDto,
+    ComputedSegmentResponse,
+    CreateSegmentDto,
+)
 
-from rest.middlewares import validate_jwt
-
+from rest.middlewares import validate_jwt, get_user
 
 router = APIRouter(
     tags=["segments"],
@@ -23,3 +29,25 @@ async def compute_transient_segment(
         columns=dto.columns,
         group_conditions=dto.groupConditions,
     )
+
+
+@router.post("/segments")
+async def save_segment(
+    dto: CreateSegmentDto,
+    user: User = Depends(get_user),
+    segment_service: SegmentService = Depends(),
+    ds_service: DataSourceService = Depends(),
+):
+    datasource = await ds_service.get_datasource(str(dto.datasourceId))
+    segment = await segment_service.build_segment(
+        datasourceId=dto.datasourceId,
+        appId=datasource.app_id,
+        userId=user.id,
+        name=dto.name,
+        description=dto.description,
+        groups=dto.groups,
+        groupConditions=dto.groupConditions,
+        columns=dto.columns,
+    )
+    await segment_service.add_segment(segment=segment)
+    return segment

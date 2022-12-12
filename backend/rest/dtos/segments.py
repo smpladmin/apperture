@@ -17,6 +17,15 @@ class TransientSegmentDto(BaseModel):
     columns: List[str]
 
 
+class CreateSegmentDto(BaseModel):
+    name: str
+    description: str
+    datasourceId: PydanticObjectId
+    groups: List[SegmentGroup]
+    groupConditions: List[SegmentFilterConditions]
+    columns: List[str]
+
+
 class ComputedSegmentResponse(ComputedSegment, ModelResponse):
     class Config:
         allow_population_by_field_name = True

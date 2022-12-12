@@ -132,6 +132,9 @@ const AppsModal = ({
               <Button
                 width={'full'}
                 padding={'4'}
+                _hover={{
+                  bg: 'white.100',
+                }}
                 fontSize={{ base: 'xs-14', md: 'base' }}
                 lineHeight={{ base: 'xs-14', md: 'base' }}
                 height={'auto'}

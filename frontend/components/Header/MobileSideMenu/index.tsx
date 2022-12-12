@@ -33,7 +33,17 @@ const MobileSidemenu = ({
   } = useDisclosure();
 
   const router = useRouter();
-  const { dsId } = router.query;
+  const path = router.pathname;
+  const { dsId, previousDsId } = router.query;
+
+  const handleRedirectToExplorePage = () => {
+    if (path.includes('explore')) return;
+
+    router.push({
+      pathname: '/analytics/explore/[dsId]',
+      query: { dsId: dsId || previousDsId },
+    });
+  };
 
   return (
     <Flex
@@ -134,6 +144,10 @@ const MobileSidemenu = ({
             menuOption={{
               label: 'Map',
               icon: <i className="ri-route-fill" />,
+            }}
+            onMenuClick={() => {
+              closeDrawer();
+              handleRedirectToExplorePage();
             }}
           />
           <Flex justifyContent={'space-between'} pr={'4'}>

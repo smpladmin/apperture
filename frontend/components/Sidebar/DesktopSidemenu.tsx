@@ -28,7 +28,17 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
   } = useDisclosure();
 
   const router = useRouter();
-  const { dsId } = router.query;
+  const path = router.pathname;
+  const { dsId, previousDsId } = router.query;
+
+  const handleRedirectToExplorePage = () => {
+    if (path.includes('explore')) return;
+
+    router.push({
+      pathname: '/analytics/explore/[dsId]',
+      query: { dsId: dsId || previousDsId },
+    });
+  };
 
   return (
     <Flex
@@ -124,27 +134,10 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
+              onClick={handleRedirectToExplorePage}
             />
           </Tooltip>
 
-          <IconButton
-            aria-label="Insights"
-            icon={<i className="ri-lightbulb-line" />}
-            rounded={'lg'}
-            h={10}
-            w={10}
-            bg={'black.0'}
-            fontWeight={'500'}
-            color={'grey.100'}
-            disabled={true}
-            _hover={{
-              backgroundColor: 'white.0',
-              color: 'white',
-            }}
-            _active={{
-              backgroundColor: 'transparent',
-            }}
-          />
           <Tooltip
             label={'Saved'}
             aria-label={'Saved'}
@@ -170,6 +163,25 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               onClick={() => router.push('/analytics/saved')}
             />
           </Tooltip>
+
+          <IconButton
+            aria-label="Insights"
+            icon={<i className="ri-lightbulb-line" />}
+            rounded={'lg'}
+            h={10}
+            w={10}
+            bg={'black.0'}
+            fontWeight={'500'}
+            color={'grey.100'}
+            disabled={true}
+            _hover={{
+              backgroundColor: 'white.0',
+              color: 'white',
+            }}
+            _active={{
+              backgroundColor: 'transparent',
+            }}
+          />
           <Box
             marginTop={-4}
             borderRadius={'sm'}
