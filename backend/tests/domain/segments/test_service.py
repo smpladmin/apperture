@@ -1,6 +1,7 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, ANY, AsyncMock
 
 import pytest
+from beanie import PydanticObjectId
 
 from domain.segments.service import SegmentService
 from domain.segments.models import (
@@ -9,14 +10,18 @@ from domain.segments.models import (
     SegmentFilterConditions,
     SegmentGroup,
     ComputedSegment,
+    Segment,
 )
 
 
 class TestSegmentService:
     def setup_method(self):
+        Segment.get_settings = MagicMock()
+        Segment.insert = AsyncMock()
         self.segments = MagicMock()
-        self.service = SegmentService(segments=self.segments)
-        self.ds_id = "test-id"
+        self.mongo = MagicMock()
+        self.service = SegmentService(segments=self.segments, mongo=self.mongo)
+        self.ds_id = "63771fc960527aba9354399c"
         self.filters = [
             SegmentFilter(
                 operator=SegmentFilterOperators.EQUALS,
@@ -32,6 +37,16 @@ class TestSegmentService:
         self.conditions = [SegmentFilterConditions.WHERE, SegmentFilterConditions.AND]
         self.groups = [SegmentGroup(filters=self.filters, conditions=self.conditions)]
         self.columns = ["prop1", "prop2", "prop3"]
+        self.segment = Segment(
+            name="test",
+            description="sample",
+            datasource_id=PydanticObjectId(self.ds_id),
+            user_id=PydanticObjectId(self.ds_id),
+            app_id=PydanticObjectId(self.ds_id),
+            groups=self.groups,
+            columns=self.columns,
+            group_conditions=[],
+        )
 
     @pytest.mark.asyncio
     async def test_compute_segment(self):
@@ -54,7 +69,7 @@ class TestSegmentService:
         self.segments.get_segment.assert_called_once_with(
             **{
                 "columns": ["user_id", "prop1", "prop2", "prop3"],
-                "datasource_id": "test-id",
+                "datasource_id": self.ds_id,
                 "group_conditions": [],
                 "groups": [
                     SegmentGroup(
@@ -78,3 +93,87 @@ class TestSegmentService:
                 ],
             }
         )
+
+    @pytest.mark.asyncio
+    async def test_build_segment(self):
+        segment = await self.service.build_segment(
+            datasourceId=PydanticObjectId(self.ds_id),
+            appId=PydanticObjectId(self.ds_id),
+            userId=PydanticObjectId(self.ds_id),
+            name="test",
+            description="sample",
+            groups=self.groups,
+            groupConditions=[],
+            columns=self.columns,
+        )
+
+        assert segment.dict() == {
+            "app_id": PydanticObjectId("63771fc960527aba9354399c"),
+            "columns": ["prop1", "prop2", "prop3"],
+            "created_at": ANY,
+            "datasource_id": PydanticObjectId("63771fc960527aba9354399c"),
+            "description": "sample",
+            "group_conditions": [],
+            "groups": [
+                {
+                    "conditions": [
+                        SegmentFilterConditions.WHERE,
+                        SegmentFilterConditions.AND,
+                    ],
+                    "filters": [
+                        {
+                            "operand": "prop1",
+                            "operator": SegmentFilterOperators.EQUALS,
+                            "values": ["va1", "val2"],
+                        },
+                        {
+                            "operand": "prop2",
+                            "operator": SegmentFilterOperators.EQUALS,
+                            "values": ["va3", "val4"],
+                        },
+                    ],
+                }
+            ],
+            "id": None,
+            "name": "test",
+            "revision_id": ANY,
+            "updated_at": None,
+            "user_id": PydanticObjectId("63771fc960527aba9354399c"),
+        }
+
+    @pytest.mark.asyncio
+    async def test_add_segment(self):
+        await self.service.add_segment(segment=self.segment)
+        assert Segment.insert.call_args.args[0].dict() == {
+            "app_id": PydanticObjectId("63771fc960527aba9354399c"),
+            "columns": ["prop1", "prop2", "prop3"],
+            "created_at": ANY,
+            "datasource_id": PydanticObjectId("63771fc960527aba9354399c"),
+            "description": "sample",
+            "group_conditions": [],
+            "groups": [
+                {
+                    "conditions": [
+                        SegmentFilterConditions.WHERE,
+                        SegmentFilterConditions.AND,
+                    ],
+                    "filters": [
+                        {
+                            "operand": "prop1",
+                            "operator": SegmentFilterOperators.EQUALS,
+                            "values": ["va1", "val2"],
+                        },
+                        {
+                            "operand": "prop2",
+                            "operator": SegmentFilterOperators.EQUALS,
+                            "values": ["va3", "val4"],
+                        },
+                    ],
+                }
+            ],
+            "id": None,
+            "name": "test",
+            "revision_id": ANY,
+            "updated_at": ANY,
+            "user_id": PydanticObjectId("63771fc960527aba9354399c"),
+        }

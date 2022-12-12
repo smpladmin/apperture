@@ -1,16 +1,25 @@
 from typing import List
+
+from beanie import PydanticObjectId
 from fastapi import Depends
 from domain.segments.models import (
     SegmentGroup,
     SegmentFilterConditions,
     ComputedSegment,
+    Segment,
 )
+from mongo import Mongo
 from repositories.clickhouse.segments import Segments
 
 
 class SegmentService:
-    def __init__(self, segments: Segments = Depends()):
+    def __init__(
+        self,
+        segments: Segments = Depends(),
+        mongo: Mongo = Depends(),
+    ):
         self.segments = segments
+        self.mongo = mongo
 
     async def compute_segment(
         self,
@@ -30,3 +39,29 @@ class SegmentService:
         columns.insert(0, "user_id")
         data = [dict(zip(columns, row)) for row in segment]
         return ComputedSegment(count=len(segment), data=data[:n])
+
+    async def build_segment(
+        self,
+        datasourceId: PydanticObjectId,
+        appId: PydanticObjectId,
+        userId: PydanticObjectId,
+        name: str,
+        description: str,
+        groups: List[SegmentGroup],
+        groupConditions: List[SegmentFilterConditions],
+        columns: List[str],
+    ):
+        return Segment(
+            datasource_id=datasourceId,
+            app_id=appId,
+            user_id=userId,
+            name=name,
+            description=description,
+            groups=groups,
+            group_conditions=groupConditions,
+            columns=columns,
+        )
+
+    async def add_segment(self, segment: Segment):
+        segment.updated_at = segment.created_at
+        await Segment.insert(segment)
