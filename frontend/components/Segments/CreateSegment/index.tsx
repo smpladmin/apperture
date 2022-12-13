@@ -144,6 +144,9 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
           loadingEventProperties={loadingEventProperties}
           setGroups={setGroups}
           setRefreshOnDelete={setRefreshOnDelete}
+          group={groups[0]}
+          groups={groups}
+          groupIndex={0}
         />
         <SegmentTable
           isSegmentDataLoading={isSegmentDataLoading}
