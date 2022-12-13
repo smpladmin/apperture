@@ -40,10 +40,10 @@ export const saveSegment = async (
       columns,
       groupConditions: [],
     });
-    return res.data;
+    return res;
   } catch (e) {
     console.error((e as AxiosError).message);
-    return [];
+    return {} as any;
   }
 };
 
