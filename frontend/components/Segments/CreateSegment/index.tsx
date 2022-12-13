@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Flex, Text, useDisclosure } from '@chakra-ui/react';
-import { SegmentGroup, SegmentTableData } from '@lib/domain/segment';
+import { Segment, SegmentGroup, SegmentTableData } from '@lib/domain/segment';
 import QueryBuilder from './components/QueryBuilder';
 import SegmentTable from './components/Table/SegmentTable';
 import { getEventProperties } from '@lib/services/datasourceService';
@@ -11,8 +11,13 @@ import SaveSegmentModal from './components/SaveModal';
 import { User } from '@lib/domain/user';
 import { getUserInfo } from '@lib/services/userService';
 
-const CreateSegment = () => {
-  const [groups, setGroups] = useState<SegmentGroup[]>([]);
+type CreateSegmentProp = {
+  savedSegment?: Segment;
+};
+const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
+  const [groups, setGroups] = useState<SegmentGroup[]>(
+    savedSegment?.groups || []
+  );
   const [eventProperties, setEventProperties] = useState([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState(['user_id']);

@@ -54,7 +54,13 @@ const SaveSegmentModal = ({
       groups,
       columns
     );
-    console.log(response);
+    if (response.status === 200) {
+      const { _id, datasourceId } = response.data;
+      router.push({
+        pathname: '/segments/edit/[segmentId]',
+        query: { segmentId: _id, dsId: datasourceId },
+      });
+    }
     onClose();
   };
 
