@@ -55,10 +55,10 @@ const SaveSegmentModal = ({
       columns
     );
     if (response?.status === 200) {
-      const { _id, datasource_id } = response?.data;
+      const { _id, datasourceId } = response?.data;
       router.push({
         pathname: '/analytics/segment/edit/[segmentId]',
-        query: { segmentId: _id, dsId: datasource_id },
+        query: { segmentId: _id, dsId: datasourceId },
       });
     }
     onClose();
