@@ -9,6 +9,8 @@ type AddFilterProps = {
   eventProperties: string[];
   setFilters: Function;
   setConditions: Function;
+  filters: SegmentFilter[];
+  conditions: SegmentFilterConditions[];
 };
 
 const AddFilter = ({
@@ -16,27 +18,35 @@ const AddFilter = ({
   eventProperties,
   setFilters,
   setConditions,
+  filters,
+  conditions,
 }: AddFilterProps) => {
   const [isFiltersListOpen, setOpenFiltersList] = useState<boolean>(false);
   const addFilterRef = useRef(null);
-
+  console.log('passed filters', filters);
   useOnClickOutside(addFilterRef, () => setOpenFiltersList(false));
-
   const onSuggestionClick = (val: string) => {
-    setFilters((prevState: SegmentFilter[]) => [
-      ...prevState,
+    console.log('adding filter', [
+      ...filters,
       {
         operand: val,
         operator: 'equals',
         values: [],
       },
     ]);
-    setConditions((prevState: SegmentFilterConditions[]) => {
-      if (prevState.length === 0) {
-        return [SegmentFilterConditions.WHERE];
-      }
-      return [...prevState, SegmentFilterConditions.AND];
-    });
+    setFilters([
+      ...filters,
+      {
+        operand: val,
+        operator: 'equals',
+        values: [],
+      },
+    ]);
+    if (conditions.length === 0) {
+      setConditions([SegmentFilterConditions.WHERE]);
+    } else {
+      setConditions([...conditions, SegmentFilterConditions.AND]);
+    }
     setOpenFiltersList(false);
   };
 

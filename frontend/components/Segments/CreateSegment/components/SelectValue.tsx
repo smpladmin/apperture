@@ -10,6 +10,7 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import { SegmentFilter } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { getEventPropertiesValue } from '@lib/services/datasourceService';
+import { cloneDeep } from 'lodash';
 import { useRouter } from 'next/router';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 
@@ -26,8 +27,9 @@ const SelectValue = ({
   setFilters,
   index,
 }: SelectValueProps) => {
-  const [isFilterValuesListOpen, setIsFilterValuesListOpen] =
-    useState<boolean>(true);
+  const [isFilterValuesListOpen, setIsFilterValuesListOpen] = useState<boolean>(
+    filter.values.length ? false : true
+  );
   const [loadingPropertyValues, setLoadingPropertyValues] =
     useState<boolean>(false);
   const [eventPropertiesValues, setEventPropertiesValues] = useState<string[]>(
@@ -81,7 +83,7 @@ const SelectValue = ({
 
   const handleSelectValues = () => {
     setIsFilterValuesListOpen(false);
-
+    console.log('updating values', filter, filters);
     const updatedFilters = [...filters];
     updatedFilters[index]['values'] = filterValues;
     setFilters(updatedFilters);

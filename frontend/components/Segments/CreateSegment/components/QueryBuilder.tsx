@@ -6,25 +6,46 @@ import 'remixicon/fonts/remixicon.css';
 import SelectValue from './SelectValue';
 import SelectEventProperty from './SelectEventProperty';
 import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
+import { cloneDeep } from 'lodash';
 
 const QueryBuilder = ({
   eventProperties,
   loadingEventProperties,
   setGroups,
   setRefreshOnDelete,
+  group,
+  groupIndex,
+  groups,
 }: any) => {
-  const [filters, setFilters] = useState([]);
-  const [conditions, setConditions] = useState<any[]>([]);
+  // const [filters, setFilters] = useState([]);
+  // const [conditions, setConditions] = useState<any[]>([]);
 
-  useEffect(() => {
-    setGroups([{ filters, conditions }]);
-  }, [filters, conditions]);
+  // useEffect(() => {
+  //   setGroups([{ filters, conditions }]);
+  // }, [filters, conditions]);
+  console.log(groups);
 
-  const removeFilter = (i: number) => {
-    const updatedFilter = [...filters];
-    updatedFilter.splice(i, 1);
-    const updatedFilterOperators = [...conditions];
-    updatedFilterOperators.splice(i, 1);
+  const setFilters = (value: any) => {
+    console.log('parameter value', value);
+    // const dummyGroup = cloneDeep(groups);
+    // // console.log('dummy group', dummyGroup);
+    // dummyGroup[groupIndex]['filters'] = value;
+    setGroups((prevState: any) => {
+      prevState[groupIndex]['filters'] = value;
+      return prevState;
+    });
+  };
+  const setConditions = (value: any) => {
+    const dummyGroup = cloneDeep(groups);
+    dummyGroup[groupIndex]['conditions'] = value;
+    setGroups(dummyGroup);
+  };
+
+  const removeFilter = (filterIndex: number) => {
+    const updatedFilter = [...group.filters];
+    updatedFilter.splice(filterIndex, 1);
+    const updatedFilterOperators = [...group.conditions];
+    updatedFilterOperators.splice(filterIndex, 1);
 
     // default value of operator for first query should always be 'where'
     if (updatedFilterOperators[0])
@@ -54,7 +75,7 @@ const QueryBuilder = ({
       </Text>
       <Flex direction={'column'} mt={'4'} gap={'3'}>
         <Flex direction={'column'} gap={'4'}>
-          {filters.map(
+          {group.filters.map(
             (filter: SegmentFilter, i: number, filters: SegmentFilter[]) => {
               return (
                 <Flex key={i} gap={'3'} alignItems={'center'}>
@@ -66,7 +87,7 @@ const QueryBuilder = ({
                       color={'grey.200'}
                       textAlign={'right'}
                     >
-                      {conditions[i]}
+                      {group.conditions[i]}
                     </Text>
                   </Box>
                   <SelectEventProperty
@@ -113,6 +134,8 @@ const QueryBuilder = ({
           setFilters={setFilters}
           setConditions={setConditions}
           loadingEventProperties={loadingEventProperties}
+          filters={cloneDeep(group.filters)}
+          conditions={group.conditions}
         />
       </Flex>
     </Box>
