@@ -1,6 +1,6 @@
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import { ARROW_GRAY } from '@theme/index';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import AddFilter from './AddFilter';
 import 'remixicon/fonts/remixicon.css';
 import SelectValue from './SelectValue';
@@ -31,20 +31,25 @@ const QueryBuilder = ({
   groupIndex,
   groups,
 }: QueryBuilderProps) => {
-  const updateGroupsState = (
-    filtersToUpdate?: SegmentFilter[],
-    conditionsToUpdate?: SegmentFilterConditions[]
-  ) => {
-    const tempGroup = cloneDeep(groups);
-    if (filtersToUpdate) {
-      tempGroup[groupIndex]['filters'] = filtersToUpdate;
-    }
-    if (conditionsToUpdate) {
-      tempGroup[groupIndex]['conditions'] = conditionsToUpdate;
-    }
+  // a utility function to update group state
+  // should be used across all segment components, so it remains easy to track state update
+  const updateGroupsState = useCallback(
+    (
+      filtersToUpdate?: SegmentFilter[],
+      conditionsToUpdate?: SegmentFilterConditions[]
+    ) => {
+      const tempGroup = cloneDeep(groups);
+      if (filtersToUpdate) {
+        tempGroup[groupIndex]['filters'] = filtersToUpdate;
+      }
+      if (conditionsToUpdate) {
+        tempGroup[groupIndex]['conditions'] = conditionsToUpdate;
+      }
 
-    setGroups(tempGroup);
-  };
+      setGroups(tempGroup);
+    },
+    []
+  );
 
   const removeFilter = (filterIndex: number) => {
     const updatedFilter = [...group.filters];
