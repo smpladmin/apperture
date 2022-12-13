@@ -17,14 +17,14 @@ import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 type SelectValueProps = {
   filter: SegmentFilter;
   filters: SegmentFilter[];
-  setFilters: Function;
+  updateGroupsState: Function;
   index: number;
 };
 
 const SelectValue = ({
   filter,
   filters,
-  setFilters,
+  updateGroupsState,
   index,
 }: SelectValueProps) => {
   const [isFilterValuesListOpen, setIsFilterValuesListOpen] = useState<boolean>(
@@ -82,11 +82,11 @@ const SelectValue = ({
   }, [filterValues, eventPropertiesValues]);
 
   const handleSelectValues = () => {
-    setIsFilterValuesListOpen(false);
-    console.log('updating values', filter, filters);
     const updatedFilters = [...filters];
     updatedFilters[index]['values'] = filterValues;
-    setFilters(updatedFilters);
+    updateGroupsState(updatedFilters);
+
+    setIsFilterValuesListOpen(false);
   };
 
   const handleAllSelect = (e: ChangeEvent<HTMLInputElement>) => {

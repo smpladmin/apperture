@@ -7,8 +7,8 @@ import React, { useRef, useState } from 'react';
 type AddFilterProps = {
   loadingEventProperties: boolean;
   eventProperties: string[];
-  setFilters: Function;
-  setConditions: Function;
+  updateGroupsState: Function;
+
   filters: SegmentFilter[];
   conditions: SegmentFilterConditions[];
 };
@@ -16,36 +16,40 @@ type AddFilterProps = {
 const AddFilter = ({
   loadingEventProperties,
   eventProperties,
-  setFilters,
-  setConditions,
+  updateGroupsState,
   filters,
   conditions,
 }: AddFilterProps) => {
   const [isFiltersListOpen, setOpenFiltersList] = useState<boolean>(false);
   const addFilterRef = useRef(null);
-  console.log('passed filters', filters);
+
   useOnClickOutside(addFilterRef, () => setOpenFiltersList(false));
+
   const onSuggestionClick = (val: string) => {
-    console.log('adding filter', [
-      ...filters,
-      {
-        operand: val,
-        operator: 'equals',
-        values: [],
-      },
-    ]);
-    setFilters([
-      ...filters,
-      {
-        operand: val,
-        operator: 'equals',
-        values: [],
-      },
-    ]);
     if (conditions.length === 0) {
-      setConditions([SegmentFilterConditions.WHERE]);
+      updateGroupsState(
+        [
+          ...filters,
+          {
+            operand: val,
+            operator: 'equals',
+            values: [],
+          },
+        ],
+        [SegmentFilterConditions.WHERE]
+      );
     } else {
-      setConditions([...conditions, SegmentFilterConditions.AND]);
+      updateGroupsState(
+        [
+          ...filters,
+          {
+            operand: val,
+            operator: 'equals',
+            values: [],
+          },
+        ],
+        [...conditions, SegmentFilterConditions.AND]
+      );
     }
     setOpenFiltersList(false);
   };

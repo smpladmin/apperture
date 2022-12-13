@@ -16,7 +16,12 @@ type CreateSegmentProp = {
 };
 const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
   const [groups, setGroups] = useState<SegmentGroup[]>(
-    savedSegment?.groups || []
+    savedSegment?.groups || [
+      {
+        filters: [],
+        conditions: [],
+      },
+    ]
   );
   const [eventProperties, setEventProperties] = useState([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);

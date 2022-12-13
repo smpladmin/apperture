@@ -5,8 +5,22 @@ import AddFilter from './AddFilter';
 import 'remixicon/fonts/remixicon.css';
 import SelectValue from './SelectValue';
 import SelectEventProperty from './SelectEventProperty';
-import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
+import {
+  SegmentFilter,
+  SegmentFilterConditions,
+  SegmentGroup,
+} from '@lib/domain/segment';
 import { cloneDeep } from 'lodash';
+
+type QueryBuilderProps = {
+  eventProperties: string[];
+  loadingEventProperties: boolean;
+  setGroups: Function;
+  setRefreshOnDelete: Function;
+  group: SegmentGroup;
+  groupIndex: number;
+  groups: SegmentGroup[];
+};
 
 const QueryBuilder = ({
   eventProperties,
@@ -16,43 +30,33 @@ const QueryBuilder = ({
   group,
   groupIndex,
   groups,
-}: any) => {
-  // const [filters, setFilters] = useState([]);
-  // const [conditions, setConditions] = useState<any[]>([]);
+}: QueryBuilderProps) => {
+  const updateGroupsState = (
+    filtersToUpdate?: SegmentFilter[],
+    conditionsToUpdate?: SegmentFilterConditions[]
+  ) => {
+    const tempGroup = cloneDeep(groups);
+    if (filtersToUpdate) {
+      tempGroup[groupIndex]['filters'] = filtersToUpdate;
+    }
+    if (conditionsToUpdate) {
+      tempGroup[groupIndex]['conditions'] = conditionsToUpdate;
+    }
 
-  // useEffect(() => {
-  //   setGroups([{ filters, conditions }]);
-  // }, [filters, conditions]);
-  console.log(groups);
-
-  const setFilters = (value: any) => {
-    console.log('parameter value', value);
-    // const dummyGroup = cloneDeep(groups);
-    // // console.log('dummy group', dummyGroup);
-    // dummyGroup[groupIndex]['filters'] = value;
-    setGroups((prevState: any) => {
-      prevState[groupIndex]['filters'] = value;
-      return prevState;
-    });
-  };
-  const setConditions = (value: any) => {
-    const dummyGroup = cloneDeep(groups);
-    dummyGroup[groupIndex]['conditions'] = value;
-    setGroups(dummyGroup);
+    setGroups(tempGroup);
   };
 
   const removeFilter = (filterIndex: number) => {
     const updatedFilter = [...group.filters];
     updatedFilter.splice(filterIndex, 1);
+
     const updatedFilterOperators = [...group.conditions];
     updatedFilterOperators.splice(filterIndex, 1);
-
     // default value of operator for first query should always be 'where'
     if (updatedFilterOperators[0])
       updatedFilterOperators[0] = SegmentFilterConditions.WHERE;
 
-    setFilters([...updatedFilter]);
-    setConditions([...updatedFilterOperators]);
+    updateGroupsState(updatedFilter, updatedFilterOperators);
     setRefreshOnDelete(true);
   };
 
@@ -87,7 +91,7 @@ const QueryBuilder = ({
                       color={'grey.200'}
                       textAlign={'right'}
                     >
-                      {group.conditions[i]}
+                      {group?.conditions[i]}
                     </Text>
                   </Box>
                   <SelectEventProperty
@@ -95,7 +99,7 @@ const QueryBuilder = ({
                     filter={filter}
                     eventProperties={eventProperties}
                     filters={filters}
-                    setFilters={setFilters}
+                    updateGroupsState={updateGroupsState}
                   />
                   <Box>
                     <Text
@@ -113,7 +117,7 @@ const QueryBuilder = ({
                   <SelectValue
                     filter={filter}
                     filters={filters}
-                    setFilters={setFilters}
+                    updateGroupsState={updateGroupsState}
                     index={i}
                   />
                   <IconButton
@@ -131,11 +135,10 @@ const QueryBuilder = ({
         </Flex>
         <AddFilter
           eventProperties={eventProperties}
-          setFilters={setFilters}
-          setConditions={setConditions}
           loadingEventProperties={loadingEventProperties}
           filters={cloneDeep(group.filters)}
           conditions={group.conditions}
+          updateGroupsState={updateGroupsState}
         />
       </Flex>
     </Box>
