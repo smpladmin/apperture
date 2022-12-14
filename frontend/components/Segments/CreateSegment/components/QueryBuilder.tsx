@@ -48,7 +48,7 @@ const QueryBuilder = ({
 
       setGroups(tempGroup);
     },
-    []
+    [groups]
   );
 
   const removeFilter = (filterIndex: number) => {
