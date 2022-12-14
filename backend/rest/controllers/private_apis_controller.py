@@ -1,10 +1,9 @@
 import asyncio
-from datetime import datetime
 import logging
 from typing import List
 from fastapi import APIRouter, Depends
 from data_processor_queue.service import DPQueueService
-from domain.common.models import IntegrationProvider
+from domain.properties.service import PropertiesService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.users.service import UserService
@@ -18,6 +17,7 @@ from rest.dtos.runlogs import UpdateRunLogDto
 from rest.dtos.users import PrivateUserResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.events import CreateEventDto
+from rest.dtos.properties import PropertiesResponse
 from rest.dtos.notifications import (
     ComputedNotificationResponse,
     TriggerNotificationsDto,
@@ -169,3 +169,18 @@ async def slack_url(
     user_service: UserService = Depends(),
 ):
     return await user_service.get_user(user_id)
+
+
+@router.put("/properties/{ds_id}", response_model=PropertiesResponse)
+async def refresh_properties(
+    ds_id: str,
+    properties_service: PropertiesService = Depends(),
+):
+    return await properties_service.refresh_properties(ds_id=ds_id)
+
+
+@router.put("/properties")
+async def refresh_properties_for_all_datasources(
+    properties_service: PropertiesService = Depends(),
+):
+    return await properties_service.refresh_properties_for_all_datasources()
