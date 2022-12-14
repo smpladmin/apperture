@@ -122,14 +122,14 @@ def test_save_segment(
 
 
 def test_get_segment(client_init, segment_service):
-    response1 = client_init.get("/segments/63761779818ec577b69c21e6")
+    response1 = client_init.get("/segments?segment_id=63761779818ec577b69c21e6")
     assert response1.status_code == 200
     segment_service.get_segment.assert_called_once_with(
         **{"segment_id": "63761779818ec577b69c21e6"}
     )
 
     response2 = client_init.get(
-        "/segments/63761779818ec577b69c21e6?is_segment_id=False"
+        "/segments?app_id=63761779818ec577b69c21e6"
     )
     assert response2.status_code == 200
     segment_service.get_segments_for_app.assert_called_once_with(
