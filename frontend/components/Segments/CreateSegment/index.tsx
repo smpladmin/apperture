@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Flex, Text, useDisclosure } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  IconButton,
+  Text,
+  Tooltip,
+  useDisclosure,
+} from '@chakra-ui/react';
 import { Segment, SegmentGroup, SegmentTableData } from '@lib/domain/segment';
 import QueryBuilder from './components/QueryBuilder';
 import SegmentTable from './components/Table/SegmentTable';
@@ -10,6 +18,7 @@ import { getFilteredColumns } from '../util';
 import SaveSegmentModal from './components/SaveModal';
 import { User } from '@lib/domain/user';
 import { getUserInfo } from '@lib/services/userService';
+import { isEqual } from 'lodash';
 
 type CreateSegmentProp = {
   savedSegment?: Segment;
@@ -18,9 +27,12 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
   const [groups, setGroups] = useState<SegmentGroup[]>(
     savedSegment?.groups || []
   );
+  const [isSaveDisabled, setIsSaveDisabled] = useState(false);
   const [eventProperties, setEventProperties] = useState([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
-  const [selectedColumns, setSelectedColumns] = useState(['user_id']);
+  const [selectedColumns, setSelectedColumns] = useState(
+    savedSegment?.columns ? ['user-id', ...savedSegment?.columns] : ['user_id']
+  );
   const [userTableData, setUserTableData] = useState<SegmentTableData>({
     count: 0,
     data: [],
@@ -70,6 +82,11 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
       setIsSegmentDataLoading(true);
       fetchSegmentResponse(getFilteredColumns(selectedColumns));
     }
+
+    if (savedSegment?.groups) {
+      const check = isEqual(savedSegment.groups, groups);
+      setIsSaveDisabled(check);
+    }
   }, [groups]);
 
   useEffect(() => {
@@ -95,14 +112,43 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
           <Box color={'white.DEFAULT'} cursor={'pointer'}>
             <i className="ri-arrow-left-line"></i>
           </Box>
-          <Text
-            fontSize={'sh-20'}
-            lineHeight={'sh-20'}
-            fontWeight={'600'}
-            color={'white.DEFAULT'}
+          <Flex
+            alignItems={'center'}
+            alignContent={'center'}
+            justifyContent={'center'}
+            gap={'1'}
           >
-            New Segment
-          </Text>
+            <Text
+              fontSize={'sh-20'}
+              lineHeight={'sh-20'}
+              fontWeight={'600'}
+              color={'white.DEFAULT'}
+            >
+              {savedSegment?.name || 'New Segment'}
+            </Text>
+            {savedSegment?.description ? (
+              <Tooltip
+                label={savedSegment?.description}
+                placement={'bottom-start'}
+                bg={'black.100'}
+              >
+                <IconButton
+                  icon={<i className="ri-information-fill" />}
+                  aria-label="description"
+                  bg={'black.0'}
+                  fontWeight={'500'}
+                  color={'white.100'}
+                  cursor={'pointer'}
+                  _hover={{}}
+                  _active={{}}
+                  height={'auto'}
+                  width={'max-content'}
+                  p={0}
+                  m={0}
+                />
+              </Tooltip>
+            ) : null}
+          </Flex>
         </Flex>
         <Button
           px={'6'}
@@ -116,6 +162,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
             color: 'white.DEFAULT',
             bg: 'black.100',
           }}
+          disabled={isSaveDisabled}
         >
           Save Segment
         </Button>
