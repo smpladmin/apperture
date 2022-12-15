@@ -1,5 +1,5 @@
 import { Box, Flex, Input } from '@chakra-ui/react';
-import { ChangeEvent, ReactNode } from 'react';
+import { ChangeEvent, ReactNode, useEffect } from 'react';
 import { getSearchResult } from '@lib/utils/common';
 import LoadingSpinner from '@components/LoadingSpinner';
 
@@ -31,6 +31,12 @@ const SearchableDropdown = ({
     });
     setSearchData(results);
   };
+
+  useEffect(() => {
+    //reset list data when dropdown is open
+    setSearchData(data);
+  }, [isOpen]);
+
   return (
     <>
       {isOpen ? (
