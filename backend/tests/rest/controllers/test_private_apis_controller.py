@@ -33,7 +33,7 @@ def test_update_events(client_init, events_service, events_data):
 
 
 def test_refresh_properties(client_init, properties_service):
-    response = client_init.put("/private/properties/635ba034807ab86d8a2aadd9")
+    response = client_init.put("/private/properties?ds_id=635ba034807ab86d8a2aadd9")
     assert response.status_code == 200
     assert response.json() == {
         "_id": None,
@@ -50,8 +50,6 @@ def test_refresh_properties(client_init, properties_service):
         **{"ds_id": "635ba034807ab86d8a2aadd9"}
     )
 
-
-def test_refresh_properties_for_all_datasources(client_init, properties_service):
-    response = client_init.put("/private/properties")
-    assert response.status_code == 200
+    response1 = client_init.put("/private/properties")
+    assert response1.status_code == 200
     properties_service.refresh_properties_for_all_datasources.assert_called_once()

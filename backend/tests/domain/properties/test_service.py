@@ -72,13 +72,17 @@ class TestPropertiesService:
     @pytest.mark.asyncio
     async def test_refresh_properties_for_all_datasources(self):
         self.events.get_all_datasources.return_value = [
-            ("637739d383ea7fda83e72a2d", ),
-            ("637739d383ea7fda83e72a2e", )
+            ("637739d383ea7fda83e72a2d",),
+            ("637739d383ea7fda83e72a2e",),
         ]
         self.service.refresh_properties = AsyncMock()
         await self.service.refresh_properties_for_all_datasources()
         self.service.refresh_properties.assert_has_calls(
-            [mock.call(ds_id="637739d383ea7fda83e72a2d"), mock.call(ds_id="637739d383ea7fda83e72a2e")], any_order=True
+            [
+                mock.call(ds_id="637739d383ea7fda83e72a2d"),
+                mock.call(ds_id="637739d383ea7fda83e72a2e"),
+            ],
+            any_order=True,
         )
 
     @pytest.mark.asyncio
