@@ -26,30 +26,21 @@ const AddFilter = ({
   useOnClickOutside(addFilterRef, () => setOpenFiltersList(false));
 
   const onSuggestionClick = (val: string) => {
+    const updatedFilter = [
+      ...filters,
+      {
+        operand: val,
+        operator: 'equals',
+        values: [],
+      },
+    ];
     if (conditions.length === 0) {
-      updateGroupsState(
-        [
-          ...filters,
-          {
-            operand: val,
-            operator: 'equals',
-            values: [],
-          },
-        ],
-        [SegmentFilterConditions.WHERE]
-      );
+      updateGroupsState(updatedFilter, [SegmentFilterConditions.WHERE]);
     } else {
-      updateGroupsState(
-        [
-          ...filters,
-          {
-            operand: val,
-            operator: 'equals',
-            values: [],
-          },
-        ],
-        [...conditions, SegmentFilterConditions.AND]
-      );
+      updateGroupsState(updatedFilter, [
+        ...conditions,
+        SegmentFilterConditions.AND,
+      ]);
     }
     setOpenFiltersList(false);
   };

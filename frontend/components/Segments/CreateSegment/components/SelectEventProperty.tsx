@@ -26,6 +26,7 @@ const SelectEventProperty = ({
   const onSuggestionClick = (val: string) => {
     const updatedFilters = [...filters];
     updatedFilters[index]['operand'] = val;
+    updatedFilters[index]['values'] = [];
     updateGroupsState(updatedFilters);
     setOpenFiltersList(false);
   };
