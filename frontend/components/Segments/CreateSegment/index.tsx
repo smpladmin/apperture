@@ -18,25 +18,28 @@ import { getFilteredColumns } from '../util';
 import SaveSegmentModal from './components/SaveModal';
 import { User } from '@lib/domain/user';
 import { getUserInfo } from '@lib/services/userService';
-import { isEqual } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
+import ExitConfirmationModal from './components/ExitConfirmationModal';
 
 type CreateSegmentProp = {
   savedSegment?: Segment;
 };
 const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
   const [groups, setGroups] = useState<SegmentGroup[]>(
-    savedSegment?.groups || [
-      {
-        filters: [],
-        conditions: [],
-      },
-    ]
+    savedSegment?.groups
+      ? cloneDeep(savedSegment?.groups)
+      : [
+          {
+            filters: [],
+            conditions: [],
+          },
+        ]
   );
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
   const [eventProperties, setEventProperties] = useState([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState(
-    savedSegment?.columns ? ['user-id', ...savedSegment?.columns] : ['user_id']
+    savedSegment?.columns ? [...savedSegment?.columns] : ['user_id']
   );
   const [userTableData, setUserTableData] = useState<SegmentTableData>({
     count: 0,
@@ -51,6 +54,12 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
     onClose: closeSaveSegmentModal,
   } = useDisclosure();
 
+  const {
+    isOpen: isExitConfirmationModalOpen,
+    onOpen: openExitConfirmModal,
+    onClose: closeExitConfirmationModal,
+  } = useDisclosure();
+
   const router = useRouter();
   const { dsId } = router.query;
 
@@ -58,6 +67,16 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
     const data = await computeSegment(dsId as string, groups, columns);
     setUserTableData(data);
     setIsSegmentDataLoading(false);
+  };
+
+  const showExitConfirmationModal = () => {
+    if (!isSaveDisabled) {
+      openExitConfirmModal();
+    } else {
+      router.push({
+        pathname: '/analytics/saved',
+      });
+    }
   };
 
   useEffect(() => {
@@ -71,25 +90,38 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
   useEffect(() => {
     setIsSegmentDataLoading(true);
     fetchSegmentResponse(getFilteredColumns(selectedColumns));
+    // Enable save segment button when the groups have same value but columns have changed.
+    if (isSaveDisabled && savedSegment?.columns) {
+      const check = isEqual(savedSegment.columns, selectedColumns);
+      setIsSaveDisabled(check);
+    }
   }, [selectedColumns]);
 
   useEffect(() => {
-    if (
-      (groups.length &&
-        groups.every(
-          (group) =>
-            group.filters.length &&
-            group.filters.every((filter) => filter.values.length)
-        )) ||
-      refreshOnDelete
-    ) {
+    const validGroupQuery =
+      groups.length &&
+      groups.every(
+        (group) =>
+          group.filters.length &&
+          group.filters.every((filter) => filter.values.length)
+      );
+    if (validGroupQuery || refreshOnDelete) {
       if (refreshOnDelete) setRefreshOnDelete(false);
       setIsSegmentDataLoading(true);
       fetchSegmentResponse(getFilteredColumns(selectedColumns));
     }
-
     if (savedSegment?.groups) {
-      const check = isEqual(savedSegment.groups, groups);
+      //Disable save buttons if the group queries are not changed or the query is invalid
+      const check = Boolean(
+        isEqual(savedSegment.groups, groups) || !validGroupQuery
+      );
+      console.log({
+        isEqual: isEqual(savedSegment.groups, groups),
+        'savedSegment.groups': savedSegment.groups,
+        groups,
+        '!validGroupQuery': !validGroupQuery,
+        check,
+      });
       setIsSaveDisabled(check);
     }
   }, [groups]);
@@ -114,7 +146,11 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
         px={'4'}
       >
         <Flex alignItems={'center'} gap={'1'}>
-          <Box color={'white.DEFAULT'} cursor={'pointer'}>
+          <Box
+            color={'white.DEFAULT'}
+            cursor={'pointer'}
+            onClick={showExitConfirmationModal}
+          >
             <i className="ri-arrow-left-line"></i>
           </Box>
           <Flex
@@ -214,6 +250,11 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
         groups={groups}
         user={user}
         columns={selectedColumns}
+      />
+      <ExitConfirmationModal
+        isOpen={isExitConfirmationModalOpen}
+        onClose={closeExitConfirmationModal}
+        openSaveSegmentModal={openSaveSegmentModal}
       />
     </Box>
   );
