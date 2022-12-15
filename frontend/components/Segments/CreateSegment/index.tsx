@@ -25,7 +25,12 @@ type CreateSegmentProp = {
 };
 const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
   const [groups, setGroups] = useState<SegmentGroup[]>(
-    savedSegment?.groups || []
+    savedSegment?.groups || [
+      {
+        filters: [],
+        conditions: [],
+      },
+    ]
   );
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
   const [eventProperties, setEventProperties] = useState([]);
@@ -191,6 +196,9 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
           loadingEventProperties={loadingEventProperties}
           setGroups={setGroups}
           setRefreshOnDelete={setRefreshOnDelete}
+          group={groups[0]}
+          groups={groups}
+          groupIndex={0}
         />
         <SegmentTable
           isSegmentDataLoading={isSegmentDataLoading}

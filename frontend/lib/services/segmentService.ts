@@ -32,7 +32,7 @@ export const saveSegment = async (
   columns: string[]
 ) => {
   try {
-    const res = await AppertureAPI.post('/segments/', {
+    const res = await AppertureAPI.post('/segments', {
       name,
       description,
       datasourceId: dsId,

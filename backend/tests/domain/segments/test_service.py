@@ -189,10 +189,19 @@ class TestSegmentService:
 
     @pytest.mark.asyncio
     async def test_get_segment(self):
-        assert await self.service.get_segment(segment_id='63771fc960527aba9354399c') == self.segment
-        Segment.get.assert_called_once_with(PydanticObjectId('63771fc960527aba9354399c'),)
+        assert (
+            await self.service.get_segment(segment_id="63771fc960527aba9354399c")
+            == self.segment
+        )
+        Segment.get.assert_called_once_with(
+            PydanticObjectId("63771fc960527aba9354399c"),
+        )
 
     @pytest.mark.asyncio
     async def test_get_segments_for_app(self):
-        assert await self.service.get_segments_for_app(app_id=self.ds_id) == [self.segment]
-        Segment.find.assert_called_once_with(False,)
+        assert await self.service.get_segments_for_app(app_id=self.ds_id) == [
+            self.segment
+        ]
+        Segment.find.assert_called_once_with(
+            False,
+        )

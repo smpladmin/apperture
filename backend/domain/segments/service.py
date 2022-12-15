@@ -64,7 +64,7 @@ class SegmentService:
 
     async def add_segment(self, segment: Segment):
         segment.updated_at = segment.created_at
-        await Segment.insert(segment)
+        return await Segment.insert(segment)
 
     async def get_segment(self, segment_id: str) -> Segment:
         return await Segment.get(PydanticObjectId(segment_id))
