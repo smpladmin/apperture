@@ -1,3 +1,4 @@
+from collections import namedtuple
 from unittest.mock import MagicMock, ANY, AsyncMock
 
 import pytest
@@ -22,6 +23,7 @@ class TestSegmentService:
         self.mongo = MagicMock()
         self.service = SegmentService(segments=self.segments, mongo=self.mongo)
         self.ds_id = "63771fc960527aba9354399c"
+        Segment.app_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.filters = [
             SegmentFilter(
                 operator=SegmentFilterOperators.EQUALS,
@@ -46,6 +48,13 @@ class TestSegmentService:
             groups=self.groups,
             columns=self.columns,
             group_conditions=[],
+        )
+        Segment.get = AsyncMock(return_value=self.segment)
+        FindMock = namedtuple("FindMock", ["to_list"])
+        Segment.find = MagicMock(
+            return_value=FindMock(
+                to_list=AsyncMock(return_value=[self.segment]),
+            ),
         )
 
     @pytest.mark.asyncio
@@ -177,3 +186,22 @@ class TestSegmentService:
             "updated_at": ANY,
             "user_id": PydanticObjectId("63771fc960527aba9354399c"),
         }
+
+    @pytest.mark.asyncio
+    async def test_get_segment(self):
+        assert (
+            await self.service.get_segment(segment_id="63771fc960527aba9354399c")
+            == self.segment
+        )
+        Segment.get.assert_called_once_with(
+            PydanticObjectId("63771fc960527aba9354399c"),
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_segments_for_app(self):
+        assert await self.service.get_segments_for_app(app_id=self.ds_id) == [
+            self.segment
+        ]
+        Segment.find.assert_called_once_with(
+            False,
+        )
