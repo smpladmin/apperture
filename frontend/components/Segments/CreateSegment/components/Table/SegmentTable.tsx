@@ -135,12 +135,12 @@ const SegmentTable = ({
         ) : userTableData.data?.length ? (
           <Table data-testid={'watchlist-table'}>
             <Thead py={'3'} px={'8'} bg={'white.100'}>
-              {getHeaderGroups().map((headerGroup) => (
-                <Tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
+              {getHeaderGroups().map((headerGroup, groupIndex) => (
+                <Tr key={headerGroup.id + groupIndex}>
+                  {headerGroup.headers.map((header, index) => {
                     return (
                       <Th
-                        key={header.id}
+                        key={header.id + index}
                         data-testid={'watchlist-table-headers'}
                       >
                         {flexRender(
@@ -154,15 +154,15 @@ const SegmentTable = ({
               ))}
             </Thead>
             <Tbody>
-              {getRowModel().rows.map((row) => (
+              {getRowModel().rows.map((row, index) => (
                 <Tr
-                  key={row.id}
+                  key={row.id + index}
                   _hover={{ bg: 'white.100' }}
                   data-testid={'table-body-rows'}
                 >
-                  {row.getVisibleCells().map((cell) => {
+                  {row.getVisibleCells().map((cell, cellIndex) => {
                     return (
-                      <Td key={cell.id}>
+                      <Td key={cell.id + cellIndex}>
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
