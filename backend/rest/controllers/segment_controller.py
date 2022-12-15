@@ -55,15 +55,17 @@ async def save_segment(
     return await segment_service.add_segment(segment=segment)
 
 
-@router.get(
-    "/segments", response_model=Union[SegmentResponse, List[SegmentResponse]]
-)
+@router.get("/segments/{segment_id}", response_model=SegmentResponse)
 async def get_segment(
-    segment_id: Union[str, None] = None,
-    app_id: Union[str, None] = None,
+    segment_id: str,
     segment_service: SegmentService = Depends(),
 ):
-    if segment_id:
-        return await segment_service.get_segment(segment_id=segment_id)
-    elif app_id:
-        return await segment_service.get_segments_for_app(app_id=app_id)
+    return await segment_service.get_segment(segment_id=segment_id)
+
+
+@router.get("/segments", response_model=List[SegmentResponse])
+async def get_segments(
+    app_id: str,
+    segment_service: SegmentService = Depends(),
+):
+    return await segment_service.get_segments_for_app(app_id=app_id)
