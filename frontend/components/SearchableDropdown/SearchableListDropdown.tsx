@@ -21,6 +21,11 @@ const SearchableListDropdown = ({
     if (!listData.length) setListData(data);
   }, [data]);
 
+  useEffect(() => {
+    //reset list data when dropdown is open
+    setListData(data);
+  }, [isOpen]);
+
   return (
     <SearchableDropdown
       isOpen={isOpen}

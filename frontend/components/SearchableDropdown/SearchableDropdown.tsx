@@ -1,5 +1,5 @@
 import { Box, Flex, Input } from '@chakra-ui/react';
-import { ReactNode } from 'react';
+import { ChangeEvent, ReactNode } from 'react';
 import { getSearchResult } from '@lib/utils/common';
 import LoadingSpinner from '@components/LoadingSpinner';
 
@@ -20,7 +20,7 @@ const SearchableDropdown = ({
   setSearchData,
   dropdownPosition,
 }: SearchableDropdownProps) => {
-  const handleSearch = (e: any) => {
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
     if (!searchTerm) {
       setSearchData(data);
@@ -61,8 +61,9 @@ const SearchableDropdown = ({
           ) : (
             <Flex direction={'column'} gap={'3'}>
               <Input
-                h={'11'}
+                autoFocus
                 type="text"
+                h={'11'}
                 focusBorderColor="black.100"
                 onChange={handleSearch}
                 placeholder="Search for events or properties..."

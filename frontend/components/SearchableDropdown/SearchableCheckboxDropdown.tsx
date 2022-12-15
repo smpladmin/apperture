@@ -32,11 +32,17 @@ const SearchableCheckboxDropdown = ({
   selectedValues,
   dropdownPosition,
 }: SearchableCheckboxDropdownProps) => {
+  console.log(data);
   const [listData, setListData] = useState<string[]>([]);
 
   useEffect(() => {
     if (!listData.length) setListData(data);
   }, [data]);
+
+  useEffect(() => {
+    //reset list data when dropdown is open
+    setListData(data);
+  }, [isOpen]);
 
   return (
     <SearchableDropdown
