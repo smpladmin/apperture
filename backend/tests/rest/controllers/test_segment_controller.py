@@ -119,3 +119,19 @@ def test_save_segment(
         "updated_at": None,
         "user_id": PydanticObjectId("63771fc960527aba9354399c"),
     }
+
+
+def test_get_segment(client_init, segment_service):
+    response = client_init.get("/segments/63761779818ec577b69c21e6")
+    assert response.status_code == 200
+    segment_service.get_segment.assert_called_once_with(
+        **{"segment_id": "63761779818ec577b69c21e6"}
+    )
+
+
+def test_get_segments(client_init, segment_service):
+    response = client_init.get("/segments?app_id=63761779818ec577b69c21e6")
+    assert response.status_code == 200
+    segment_service.get_segment.assert_called_once_with(
+        **{"segment_id": "63761779818ec577b69c21e6"}
+    )

@@ -267,7 +267,9 @@ def segment_service():
     segment_service.build_segment.return_value = segment
     segment_future = asyncio.Future()
     segment_future.set_result(segment)
-    segment_service.add_segment.return_value = segment_future
+    segment_service.add_segment.return_value = segment
+    segment_service.get_segment.return_value = segment
+    segment_service.get_segments_for_app.return_value = [segment]
     return segment_service
 
 
@@ -459,12 +461,12 @@ def node_significance_response():
 def saved_segment_response():
     return {
         "_id": None,
-        "app_id": "63771fc960527aba9354399c",
+        "appId": "63771fc960527aba9354399c",
         "columns": ["properties.$app_release", "properties.$city"],
-        "created_at": ANY,
-        "datasource_id": "63771fc960527aba9354399c",
+        "createdAt": ANY,
+        "datasourceId": "63771fc960527aba9354399c",
         "description": "test",
-        "group_conditions": [],
+        "groupConditions": [],
         "groups": [
             {
                 "conditions": ["where", "and"],
@@ -483,9 +485,9 @@ def saved_segment_response():
             }
         ],
         "name": "name",
-        "revision_id": ANY,
-        "updated_at": None,
-        "user_id": "63771fc960527aba9354399c",
+        "revisionId": ANY,
+        "updatedAt": None,
+        "userId": "63771fc960527aba9354399c",
     }
 
 
