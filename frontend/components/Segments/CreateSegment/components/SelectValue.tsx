@@ -42,9 +42,9 @@ const SelectValue = ({
         dsId as string,
         filter?.operand
       );
-      // TODO: to remove slice once we add search in all dropdowns and implement infinite scroll
+
       // adding '(empty string)' is a workaround to handle '' string case for property values
-      const transformedResponse = response.map((res: any) =>
+      const transformedResponse = response.map((res: string[]) =>
         !res[0] ? '(empty string)' : res[0]
       );
 

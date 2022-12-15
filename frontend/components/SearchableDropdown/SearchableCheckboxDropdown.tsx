@@ -32,7 +32,6 @@ const SearchableCheckboxDropdown = ({
   selectedValues,
   dropdownPosition,
 }: SearchableCheckboxDropdownProps) => {
-  console.log(data);
   const [listData, setListData] = useState<string[]>([]);
 
   useEffect(() => {
