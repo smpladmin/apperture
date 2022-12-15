@@ -1,0 +1,85 @@
+import { Box, Flex, Input } from '@chakra-ui/react';
+import { ReactNode } from 'react';
+import { getSearchResult } from '@lib/utils/common';
+import LoadingSpinner from '@components/LoadingSpinner';
+
+type SearchableDropdownProps = {
+  isOpen: boolean;
+  isLoading: boolean;
+  children: ReactNode;
+  data: string[];
+  setSearchData: Function;
+  dropdownPosition?: string;
+};
+
+const SearchableDropdown = ({
+  isOpen,
+  isLoading,
+  children,
+  data,
+  setSearchData,
+  dropdownPosition,
+}: SearchableDropdownProps) => {
+  const handleSearch = (e: any) => {
+    const searchTerm = e.target.value;
+    if (!searchTerm) {
+      setSearchData(data);
+      return;
+    }
+    const results = getSearchResult(data, e.target.value, {
+      keys: [],
+    });
+    setSearchData(results);
+  };
+  return (
+    <>
+      {isOpen ? (
+        <Box
+          position={'absolute'}
+          zIndex={1}
+          px={'3'}
+          py={'3'}
+          borderRadius={'12'}
+          borderWidth={'0.4px'}
+          borderColor={'grey.100'}
+          bg={'white.DEFAULT'}
+          shadow={'0px 0px 4px rgba(0, 0, 0, 0.12)'}
+          maxH={'102'}
+          overflowY={'auto'}
+          data-testid={'event-property-dropdown-container'}
+          right={dropdownPosition === 'right' ? 0 : ''}
+        >
+          {isLoading ? (
+            <Flex
+              w={'80'}
+              h={'80'}
+              alignItems={'center'}
+              justifyContent={'center'}
+            >
+              <LoadingSpinner />
+            </Flex>
+          ) : (
+            <Flex direction={'column'} gap={'3'}>
+              <Input
+                h={'11'}
+                type="text"
+                focusBorderColor="black.100"
+                onChange={handleSearch}
+                placeholder="Search for events or properties..."
+                _placeholder={{
+                  fontSize: 'xs-14',
+                  lineHeight: 'xs-14',
+                  fontWeight: '400',
+                  textColor: 'grey.200',
+                }}
+              />
+              {children}
+            </Flex>
+          )}
+        </Box>
+      ) : null}
+    </>
+  );
+};
+
+export default SearchableDropdown;
