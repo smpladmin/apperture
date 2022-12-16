@@ -115,13 +115,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
       const check = Boolean(
         isEqual(savedSegment.groups, groups) || !validGroupQuery
       );
-      console.log({
-        isEqual: isEqual(savedSegment.groups, groups),
-        'savedSegment.groups': savedSegment.groups,
-        groups,
-        '!validGroupQuery': !validGroupQuery,
-        check,
-      });
+
       setIsSaveDisabled(check);
     }
   }, [groups]);
