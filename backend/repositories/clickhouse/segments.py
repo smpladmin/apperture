@@ -39,9 +39,13 @@ class Segments(Events):
         criterion = [self.table.datasource_id == Parameter("%(ds_id)s")]
         for group in groups:
             for filter in group.filters:
-                if filter.operator == SegmentFilterOperators.EQUALS:
-                    criterion.append(
-                        Field(f"properties.{filter.operand}").isin(filter.values)
-                    )
-            query = query.where(Criterion.all(criterion))
+                if group.conditions[0] == SegmentFilterConditions.WHERE:
+                    if filter.operator == SegmentFilterOperators.EQUALS:
+                        criterion.append(
+                            Field(f"properties.{filter.operand}").isin(filter.values)
+                        )
+            if SegmentFilterConditions.AND in group.conditions:
+                query = query.where(Criterion.all(criterion))
+            else:
+                query = query.where(Criterion.any(criterion))
         return query.get_sql(), {"ds_id": datasource_id}

@@ -6,6 +6,7 @@ import 'remixicon/fonts/remixicon.css';
 import SelectValue from './SelectValue';
 import SelectEventProperty from './SelectEventProperty';
 import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
+import FilterConditions from './FilterConditions';
 
 const QueryBuilder = ({
   eventProperties,
@@ -58,17 +59,11 @@ const QueryBuilder = ({
             (filter: SegmentFilter, i: number, filters: SegmentFilter[]) => {
               return (
                 <Flex key={i} gap={'3'} alignItems={'center'}>
-                  <Box w={'12'}>
-                    <Text
-                      fontSize={'xs-14'}
-                      lineHeight={'xs-14'}
-                      fontWeight={'500'}
-                      color={'grey.200'}
-                      textAlign={'right'}
-                    >
-                      {conditions[i]}
-                    </Text>
-                  </Box>
+                  <FilterConditions
+                    conditions={conditions}
+                    index={i}
+                    setConditions={setConditions}
+                  />
                   <SelectEventProperty
                     index={i}
                     filter={filter}
