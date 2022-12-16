@@ -1,5 +1,4 @@
-from typing import Union, List
-
+from typing import List
 from fastapi import APIRouter, Depends
 
 from domain.datasources.service import DataSourceService
@@ -55,16 +54,17 @@ async def save_segment(
     return await segment_service.add_segment(segment=segment)
 
 
-@router.get(
-    "/segments/{id}", response_model=Union[SegmentResponse, List[SegmentResponse]]
-)
+@router.get("/segments/{segment_id}", response_model=SegmentResponse)
 async def get_segment(
-    id: str,
-    is_segment_id: bool = True,
+    segment_id: str,
     segment_service: SegmentService = Depends(),
 ):
-    return (
-        await segment_service.get_segment(segment_id=id)
-        if is_segment_id
-        else await segment_service.get_segments_for_app(app_id=id)
-    )
+    return await segment_service.get_segment(segment_id=segment_id)
+
+
+@router.get("/segments", response_model=List[SegmentResponse])
+async def get_segments(
+    app_id: str,
+    segment_service: SegmentService = Depends(),
+):
+    return await segment_service.get_segments_for_app(app_id=app_id)

@@ -90,3 +90,15 @@ class TestEventsRepository:
             start_date="1970-01-01",
             end_date=self.date,
         ) == (self.values_for_property_query, self.values_for_property_param)
+
+    def test_get_all_datasources(self):
+        self.repo.get_all_datasources()
+        self.repo.execute_get_query.assert_called_once_with(
+            'SELECT DISTINCT "datasource_id" FROM "events"', {}
+        )
+
+    def test_build_get_all_datasources_query(self):
+        assert self.repo.build_get_all_datasources_query() == (
+            'SELECT DISTINCT "datasource_id" FROM "events"',
+            {},
+        )

@@ -99,15 +99,6 @@ def test_get_sankey_nodes(client_init, edge_service, node_sankey_response):
     } == kwargs
 
 
-def test_get_event_properties(client_init, events_service):
-    response = client_init.get("/datasources/637739d383ea7fda83e72a2d/event_properties")
-    assert response.status_code == 200
-    assert response.json() == ["prop1", "prop2"]
-    events_service.get_event_properties.assert_called_once_with(
-        **{"chunk_size": 50, "datasource_id": "637739d383ea7fda83e72a2d"}
-    )
-
-
 def test_get_event_property_values(client_init, events_service):
     response = client_init.get(
         "/datasources/637739d383ea7fda83e72a2d/property_values?event_property=country&end_date=2022-01-01"
@@ -121,4 +112,13 @@ def test_get_event_property_values(client_init, events_service):
             "event_property": "country",
             "start_date": "1970-01-01",
         }
+    )
+
+
+def test_get_event_properties(client_init, properties_service):
+    response = client_init.get("/datasources/637739d383ea7fda83e72a2d/event_properties")
+    assert response.status_code == 200
+    assert response.json() == ["prop1", "prop2"]
+    properties_service.fetch_properties.assert_called_once_with(
+        **{"ds_id": "637739d383ea7fda83e72a2d"}
     )
