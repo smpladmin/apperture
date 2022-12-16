@@ -35,34 +35,6 @@ class EventsService:
         events = self.events.get_unique_events(datasource_id)
         return [Node(id=e, name=e) for [e] in events]
 
-    def validate_properties(self, all_props: List[str], date: str, ds_id: str):
-        value_counts = np.array(
-            self.events.get_distinct_values_for_properties(
-                all_props=all_props, date=date, ds_id=ds_id
-            )[0]
-        )
-        all_props = np.array(all_props)
-        return (all_props[value_counts > 1]).tolist()
-
-    def get_event_properties(self, datasource_id: str, chunk_size: int):
-        [(all_properties, date)] = self.events.get_event_properties(
-            datasource_id=datasource_id
-        )
-
-        # StreamingResponse implementation
-        # n = len(all_properties)//chunk_size
-        # for i in range(1, n+1):
-        #     yield self.validate_properties(
-        #         all_props=all_properties[(i-1)*chunk_size:i*chunk_size], date=date, ds_id=datasource_id
-        #     )
-        # yield self.validate_properties(
-        #     all_props=all_properties[n*chunk_size:], date=date, ds_id=datasource_id
-        # )
-
-        return self.validate_properties(
-            all_props=all_properties, date=date, ds_id=datasource_id
-        )
-
     def get_values_for_property(
         self, datasource_id: str, event_property: str, start_date: str, end_date: str
     ):

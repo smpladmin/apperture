@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from domain.apps.models import App
 from domain.common.models import IntegrationProvider, SavedItems, WatchlistItemType
 from domain.datasources.models import DataSource, DataSourceVersion
+from domain.properties.models import Properties, Property, PropertyDataType
 from domain.segments.models import (
     ComputedSegment,
     Segment,
@@ -203,9 +204,6 @@ def datasource_service():
 @pytest.fixture(scope="module")
 def events_service():
     events_service_mock = mock.AsyncMock()
-    events_service_mock.get_event_properties = mock.MagicMock(
-        return_value=["prop1", "prop2"]
-    )
     events_service_mock.get_values_for_property = mock.MagicMock(
         return_value=[["Philippines"], ["Hong Kong"]]
     )
@@ -217,6 +215,23 @@ def user_service(mock_find_email_user):
     service = mock.AsyncMock()
     service.find_user.return_value = mock_find_email_user
     return service
+
+
+@pytest.fixture(scope="module")
+def properties_service():
+    properties_service = mock.AsyncMock()
+    Properties.get_settings = mock.MagicMock()
+    properties = Properties(
+        datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        properties=[
+            Property(name="prop1", type=PropertyDataType.DEFAULT),
+            Property(name="prop2", type=PropertyDataType.DEFAULT),
+        ],
+    )
+    properties_service.fetch_properties.return_value = ["prop1", "prop2"]
+    properties_service.refresh_properties.return_value = properties
+    properties_service.refresh_properties_for_all_datasources.return_value = None
+    return properties_service
 
 
 @pytest.fixture(scope="module")
