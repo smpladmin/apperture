@@ -10,8 +10,6 @@ import {
   Text,
   Divider,
   Flex,
-  Input,
-  Textarea,
   Highlight,
 } from '@chakra-ui/react';
 import { SegmentGroup } from '@lib/domain/segment';
@@ -27,11 +25,6 @@ const ExitConfirmationModal = ({
   openSaveSegmentModal,
 }: any) => {
   const router = useRouter();
-
-  const currentDateAndTime = convertISODateToReadableDate(
-    new Date().toISOString(),
-    true
-  );
 
   const handleSaveAsNewSegment = () => {
     onClose();
