@@ -46,7 +46,12 @@ const SearchableCheckboxDropdown = ({
       setSearchData={setListData}
       dropdownPosition={dropdownPosition}
     >
-      <Flex direction={'column'} minW={'80'} gap={'3'}>
+      <Flex
+        direction={'column'}
+        minW={'80'}
+        gap={'3'}
+        data-testid={'property-values-dropdown-container'}
+      >
         <Box overflowY={'auto'} maxHeight={'70'}>
           <Checkbox
             colorScheme={'radioBlack'}

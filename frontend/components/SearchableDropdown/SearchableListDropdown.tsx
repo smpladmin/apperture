@@ -29,7 +29,7 @@ const SearchableListDropdown = ({
       setSearchData={setListData}
     >
       {listData.length ? (
-        <>
+        <Box data-testid={'event-property-dropdown-container'}>
           {listData.map((item) => (
             <Box
               key={item}
@@ -48,7 +48,7 @@ const SearchableListDropdown = ({
               {item}
             </Box>
           ))}
-        </>
+        </Box>
       ) : (
         <Text
           px={'2'}

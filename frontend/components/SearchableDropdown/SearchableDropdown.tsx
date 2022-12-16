@@ -8,7 +8,7 @@ type SearchableDropdownProps = {
   isLoading: boolean;
   children: ReactNode;
   data: string[];
-  setSearchData: Function;
+  setSearchData?: Function;
   dropdownPosition?: string;
 };
 
@@ -23,18 +23,18 @@ const SearchableDropdown = ({
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
     if (!searchTerm) {
-      setSearchData(data);
+      setSearchData?.(data);
       return;
     }
     const results = getSearchResult(data, e.target.value, {
       keys: [],
     });
-    setSearchData(results);
+    setSearchData?.(results);
   };
 
   useEffect(() => {
     //reset list data when dropdown is open
-    setSearchData(data);
+    setSearchData?.(data);
   }, [isOpen]);
 
   return (
@@ -52,7 +52,6 @@ const SearchableDropdown = ({
           shadow={'0px 0px 4px rgba(0, 0, 0, 0.12)'}
           maxH={'102'}
           overflowY={'auto'}
-          data-testid={'event-property-dropdown-container'}
           right={dropdownPosition === 'right' ? 0 : ''}
         >
           {isLoading ? (
@@ -79,6 +78,7 @@ const SearchableDropdown = ({
                   fontWeight: '400',
                   textColor: 'grey.200',
                 }}
+                data-testid={'dropdown-search-input'}
               />
               {children}
             </Flex>
