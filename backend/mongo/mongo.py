@@ -12,6 +12,7 @@ from domain.runlogs.models import RunLog
 from domain.notifications.models import Notification
 from domain.funnels.models import Funnel
 from domain.segments.models import Segment
+from domain.properties.models import Properties
 
 
 class Mongo:
@@ -31,6 +32,7 @@ class Mongo:
                 Notification,
                 Funnel,
                 Segment,
+                Properties,
             ],
         )
 

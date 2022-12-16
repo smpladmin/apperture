@@ -120,3 +120,15 @@ class Events:
             "start_date": start_date,
             "end_date": end_date,
         }
+
+    def get_all_datasources(self):
+        query, params = self.build_get_all_datasources_query()
+        return self.execute_get_query(query, params)
+
+    def build_get_all_datasources_query(self):
+        query = (
+            ClickHouseQuery.from_(self.table)
+            .select(self.table.datasource_id)
+            .distinct()
+        )
+        return query.get_sql(), {}

@@ -12,6 +12,7 @@ from rest.dtos.edges import (
     NodeSignificanceResponse,
 )
 from domain.edge.models import TrendType
+from domain.properties.service import PropertiesService
 from rest.middlewares import validate_jwt
 
 
@@ -100,13 +101,9 @@ async def get_node_significance(
 @router.get("/datasources/{ds_id}/event_properties", response_model=List[str])
 async def get_event_properties(
     ds_id: str,
-    chunk_size: int = 50,
-    events_service: EventsService = Depends(),
+    properties_service: PropertiesService = Depends(),
 ):
-    return events_service.get_event_properties(
-        datasource_id=ds_id, chunk_size=chunk_size
-    )
-    # return StreamingResponse(events_service.get_event_properties(datasource_id=ds_id, chunk_size=chunk_size))
+    return await properties_service.fetch_properties(ds_id=ds_id)
 
 
 @router.get("/datasources/{ds_id}/property_values", response_model=List[List[str]])

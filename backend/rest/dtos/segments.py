@@ -6,6 +6,7 @@ from domain.segments.models import (
     SegmentGroup,
     SegmentFilterConditions,
     ComputedSegment,
+    Segment,
 )
 from rest.dtos.model_response import ModelResponse
 
@@ -27,5 +28,10 @@ class CreateSegmentDto(BaseModel):
 
 
 class ComputedSegmentResponse(ComputedSegment, ModelResponse):
+    class Config:
+        allow_population_by_field_name = True
+
+
+class SegmentResponse(Segment, ModelResponse):
     class Config:
         allow_population_by_field_name = True
