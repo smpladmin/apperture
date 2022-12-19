@@ -13,14 +13,17 @@ import {
   getEventPropertiesValue,
 } from '@lib/services/datasourceService';
 import { getSearchResult } from '@lib/utils/common';
+import { computeSegment } from '@lib/services/segmentService';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/utils/common');
+jest.mock('@lib/services/segmentService');
 
 describe('Create Segment', () => {
   let mockedGetEventProperties: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
   let mockedSearchResult: jest.Mock;
+  let mockedTransientSegment: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -33,6 +36,7 @@ describe('Create Segment', () => {
     mockedGetEventProperties = jest.mocked(getEventProperties);
     mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
     mockedSearchResult = jest.mocked(getSearchResult);
+    mockedTransientSegment = jest.mocked(computeSegment);
 
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetEventPropertiesValue.mockReturnValue([
@@ -41,6 +45,7 @@ describe('Create Segment', () => {
       ['mac'],
       ['windows'],
     ]);
+    mockedTransientSegment.mockReturnValue([]);
   });
 
   it('renders create segment folder', async () => {
