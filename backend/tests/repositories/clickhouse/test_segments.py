@@ -39,16 +39,20 @@ class TestSegmentsRepository:
         self.columns = ["prop1", "prop2", "prop3"]
         self.params = {"ds_id": "test-id"}
         self.query = (
-            "SELECT DISTINCT "
-            '"user_id","properties.prop1","properties.prop2","properties.prop3" FROM '
+            "WITH cte AS (SELECT "
+            '"user_id","properties.prop1","properties.prop2","properties.prop3",RANK() '
+            'OVER(PARTITION BY "user_id" ORDER BY "timestamp" DESC) AS "rank" FROM '
             '"events" WHERE "datasource_id"=%(ds_id)s AND "properties.prop1" IN '
-            "('va1','val2') AND \"properties.prop2\" IN ('va3','val4')"
+            "('va1','val2') AND \"properties.prop2\" IN ('va3','val4')) SELECT * "
+            'FROM cte WHERE "rank"=1'
         )
         self.or_query = (
-            "SELECT DISTINCT "
-            '"user_id","properties.prop1","properties.prop2","properties.prop3" FROM '
-            '"events" WHERE "datasource_id"=%(ds_id)s OR "properties.prop1" IN '
-            "('va1','val2') OR \"properties.prop2\" IN ('va3','val4')"
+            "WITH cte AS (SELECT "
+            '"user_id","properties.prop1","properties.prop2","properties.prop3",RANK() '
+            'OVER(PARTITION BY "user_id" ORDER BY "timestamp" DESC) AS "rank" FROM '
+            '"events" WHERE "datasource_id"=%(ds_id)s AND ("properties.prop1" IN '
+            "('va1','val2') OR \"properties.prop2\" IN ('va3','val4'))) SELECT * "
+            'FROM cte WHERE "rank"=1'
         )
 
     def test_get_segment(self):
