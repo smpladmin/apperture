@@ -58,7 +58,7 @@ const SearchableListDropdown = ({
           fontWeight={'400'}
           color={'grey.100'}
         >
-          'No results found...'
+          {'No results found...'}
         </Text>
       )}
     </SearchableDropdown>
