@@ -87,7 +87,12 @@ const QueryBuilder = ({
           {group.filters.map(
             (filter: SegmentFilter, i: number, filters: SegmentFilter[]) => {
               return (
-                <Flex key={i} gap={'3'} alignItems={'center'}>
+                <Flex
+                  data-testid="query-builder"
+                  key={i}
+                  gap={'3'}
+                  alignItems={'center'}
+                >
                   <Box w={'12'}>
                     <Text
                       fontSize={'xs-14'}

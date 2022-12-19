@@ -14,6 +14,7 @@ import {
 } from '@lib/services/datasourceService';
 import { getSearchResult } from '@lib/utils/common';
 import { computeSegment } from '@lib/services/segmentService';
+import { SegmentFilterConditions } from '@lib/domain/segment';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/utils/common');
@@ -32,6 +33,27 @@ describe('Create Segment', () => {
     'app_version',
     'session_length',
   ];
+  const transientSegmentResponse = {
+    count: 3,
+    data: [
+      {
+        user_id: 'sabiha6514@gmail.com',
+        'properties.$city': 'Chennai',
+        'properties.$app_version': '1.5.5',
+      },
+      {
+        user_id: 'bordoloidebojit69@gmail.com',
+        'properties.$city': 'Guwahati',
+        'properties.$app_version': '1.5.5',
+      },
+      {
+        user_id: '4f36e6e5-3534-4e54-976a-fdcc6369a6e6',
+        'properties.$city': 'Patna',
+        'properties.$app_version': '1.5.6',
+      },
+    ],
+  };
+
   beforeEach(() => {
     mockedGetEventProperties = jest.mocked(getEventProperties);
     mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
@@ -45,7 +67,7 @@ describe('Create Segment', () => {
       ['mac'],
       ['windows'],
     ]);
-    mockedTransientSegment.mockReturnValue([]);
+    mockedTransientSegment.mockReturnValue(transientSegmentResponse);
   });
 
   it('renders create segment folder', async () => {
@@ -379,5 +401,63 @@ describe('Create Segment', () => {
         expect(option).toHaveTextContent(eventProperties[index]);
       });
     });
+  });
+});
+
+describe('Show savedSegment in Edit mode', () => {
+  it.only('Test segmentService', async () => {
+    await act(async () => {
+      render(
+        <RouterContext.Provider
+          value={createMockRouter({
+            query: {
+              segmentId: '639821f7f5903afb0a1b5fa6',
+              dsId: '638f1aac8e54760eafc64d70',
+            },
+          })}
+        >
+          <CreateSegment
+            savedSegment={{
+              app_id: '638f1a928e54760eafc64d6e',
+              columns: [
+                'user_id',
+                'properties.$city',
+                'properties.$app_version',
+              ],
+              createdAt: new Date('2022-12-19T09:04:44.566000'),
+              datasourceId: '638f1aac8e54760eafc64d70',
+              description: 'Dummy segment to test Edit segment component',
+              groupConditions: [],
+              groups: [
+                {
+                  filters: [
+                    {
+                      operand: 'properties.$city',
+                      operator: 'equals',
+                      values: ['Chennai', 'Guwahati', 'Patna'],
+                    },
+                    {
+                      operand: 'properties.$app_version',
+                      operator: 'equals',
+                      values: ['1.5.5', '1.5.6'],
+                    },
+                  ],
+                  conditions: [
+                    SegmentFilterConditions.WHERE,
+                    SegmentFilterConditions.AND,
+                  ],
+                },
+              ],
+              name: 'Testing edit Segments ',
+              updatedAt: new Date('2022-12-19T09:04:44.567000'),
+              userId: '638f1a128e54760eafc64d6c',
+              _id: '63a0292cd9ae5bf509df9ac7',
+            }}
+          />
+        </RouterContext.Provider>
+      );
+    });
+    const queries = screen.getAllByTestId('query-builder');
+    console.debug({ queries });
   });
 });
