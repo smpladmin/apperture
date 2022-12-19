@@ -1,4 +1,5 @@
 import { Box, Text } from '@chakra-ui/react';
+import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { SegmentFilter } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
@@ -26,6 +27,7 @@ const SelectEventProperty = ({
   const onSuggestionClick = (val: string) => {
     const updatedFilters = [...filters];
     updatedFilters[index]['operand'] = val;
+    updatedFilters[index]['values'] = [];
     setFilters(updatedFilters);
     setOpenFiltersList(false);
   };
@@ -46,41 +48,12 @@ const SelectEventProperty = ({
         {filter.operand}
       </Text>
 
-      {isFiltersListOpen ? (
-        <Box
-          position={'absolute'}
-          zIndex={1}
-          px={'3'}
-          py={'3'}
-          borderRadius={'12'}
-          borderWidth={'0.4px'}
-          borderColor={'grey.100'}
-          bg={'white.DEFAULT'}
-          shadow={'0px 0px 4px rgba(0, 0, 0, 0.12)'}
-          maxH={'100'}
-          overflowY={'auto'}
-          data-testid={'event-property-dropdown-container'}
-        >
-          {eventProperties.map((property) => (
-            <Box
-              key={property}
-              onClick={() => onSuggestionClick(property)}
-              cursor={'pointer'}
-              px={'2'}
-              py={'3'}
-              _hover={{
-                bg: 'white.100',
-              }}
-              fontSize={'xs-14'}
-              lineHeight={'xs-14'}
-              fontWeight={'500'}
-              data-testid={'dropdown-options'}
-            >
-              {property}
-            </Box>
-          ))}
-        </Box>
-      ) : null}
+      <SearchableListDropdown
+        isOpen={isFiltersListOpen}
+        data={eventProperties}
+        isLoading={false}
+        onSubmit={(val: string) => onSuggestionClick(val)}
+      />
     </Box>
   );
 };

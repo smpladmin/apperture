@@ -12,6 +12,7 @@ import {
   getEventProperties,
   getEventPropertiesValue,
 } from '@lib/services/datasourceService';
+import { getSearchResult } from '@lib/utils/common';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/utils/common');
@@ -19,18 +20,21 @@ jest.mock('@lib/utils/common');
 describe('Create Segment', () => {
   let mockedGetEventProperties: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
+  let mockedSearchResult: jest.Mock;
 
+  const eventProperties = [
+    'city',
+    'device',
+    'country',
+    'app_version',
+    'session_length',
+  ];
   beforeEach(() => {
     mockedGetEventProperties = jest.mocked(getEventProperties);
     mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
+    mockedSearchResult = jest.mocked(getSearchResult);
 
-    mockedGetEventProperties.mockReturnValue([
-      'city',
-      'device',
-      'country',
-      'app_version',
-      'session_length',
-    ]);
+    mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetEventPropertiesValue.mockReturnValue([
       ['android'],
       ['ios'],
@@ -89,7 +93,7 @@ describe('Create Segment', () => {
     });
   });
 
-  describe('select event property ', () => {
+  describe('select event property from property drodpown', () => {
     it(`should be able to change property by clicking on the event property text and selecting from dropdown after adding it from filter`, async () => {
       await act(async () => {
         render(
@@ -229,6 +233,145 @@ describe('Create Segment', () => {
         // properties values text should be the options which are selected and dropdown should be closed
         expect(propertyValuesText).toHaveTextContent('android, ios or 2 more');
         expect(propertyValuesDropdown).not.toBeVisible();
+      });
+    });
+  });
+
+  describe('search', () => {
+    it('should be able to search event properties', async () => {
+      const searchResults = ['city', 'nomination_city', 'proximity'];
+      mockedSearchResult.mockReturnValue(searchResults);
+
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      const addFilterButton = screen.getByTestId('add-filter');
+      fireEvent.click(addFilterButton);
+      const dropDownContainer = screen.getByTestId(
+        'event-property-dropdown-container'
+      );
+
+      expect(dropDownContainer).toBeVisible();
+      const searchInput = screen.getByTestId('dropdown-search-input');
+
+      fireEvent.change(searchInput, { target: { value: 'cit' } });
+      const dropdownOptionsAfterSearch =
+        screen.getAllByTestId('dropdown-options');
+
+      dropdownOptionsAfterSearch.forEach((dropdownOption, i) => {
+        expect(dropdownOption).toHaveTextContent(searchResults[i]);
+      });
+
+      await act(async () => {
+        fireEvent.click(dropdownOptionsAfterSearch[0]);
+      });
+
+      await waitFor(() => {
+        const eventPropertyText = screen.getByTestId('event-property');
+        // eventProperty should be equal to value selected from drodown (i.e. 'city' in this case)and dropdown should get closed
+        expect(eventPropertyText).toHaveTextContent('city');
+        expect(dropDownContainer).not.toBeVisible();
+      });
+    });
+
+    it('should be able to search values for event properties', async () => {
+      const searchResults = [
+        'Mumbai',
+        'Navi Mumbai',
+        'Muzzafurpur',
+        'Muridkle',
+      ];
+      mockedSearchResult.mockReturnValue(searchResults);
+
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      const addFilterButton = screen.getByTestId('add-filter');
+      fireEvent.click(addFilterButton);
+      const dropDownContainer = screen.getByTestId(
+        'event-property-dropdown-container'
+      );
+      const dropdownOptions = screen.getAllByTestId('dropdown-options');
+      await act(async () => {
+        fireEvent.click(dropdownOptions[0]);
+      });
+      const propertyValuesText = screen.getByTestId('event-property-value');
+      const addPropertyValuesButton = screen.getByTestId(
+        'add-event-property-values'
+      );
+
+      const searchInput = screen.getByTestId('dropdown-search-input');
+      fireEvent.change(searchInput, { target: { value: 'Mu' } });
+
+      const propertyValuesAfterSearch = screen.getAllByTestId(
+        'property-value-dropdown-option'
+      );
+      propertyValuesAfterSearch.forEach((value, i) => {
+        expect(value).toHaveTextContent(searchResults[i]);
+      });
+
+      await act(async () => {
+        fireEvent.click(propertyValuesAfterSearch[0]);
+        fireEvent.click(propertyValuesAfterSearch[1]);
+        fireEvent.click(addPropertyValuesButton);
+      });
+
+      await waitFor(() => {
+        expect(propertyValuesText).toHaveTextContent('Mumbai, Navi Mumbai');
+      });
+    });
+
+    it('should reset to show all the data options after search once dropdown is open again', async () => {
+      const searchResults = ['city', 'nomination_city', 'proximity'];
+      mockedSearchResult.mockReturnValue(searchResults);
+
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      const addFilterButton = screen.getByTestId('add-filter');
+      fireEvent.click(addFilterButton);
+      const dropDownContainer = screen.getByTestId(
+        'event-property-dropdown-container'
+      );
+
+      expect(dropDownContainer).toBeVisible();
+      const searchInput = screen.getByTestId('dropdown-search-input');
+
+      fireEvent.change(searchInput, { target: { value: 'cit' } });
+      const dropdownOptionsAfterSearch =
+        screen.getAllByTestId('dropdown-options');
+      await act(async () => {
+        fireEvent.click(dropdownOptionsAfterSearch[0]);
+      });
+
+      // again open dropdown by clicking on add filter button
+      fireEvent.click(addFilterButton);
+      const dropdownOptions = screen.getAllByTestId('dropdown-options');
+
+      // dropdown options should be the event properties(not the search result)
+      dropdownOptions.forEach((option, index) => {
+        expect(option).toHaveTextContent(eventProperties[index]);
       });
     });
   });
