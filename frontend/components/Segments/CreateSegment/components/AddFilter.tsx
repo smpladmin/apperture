@@ -1,5 +1,5 @@
-import { Box, Button, Flex } from '@chakra-ui/react';
-import LoadingSpinner from '@components/LoadingSpinner';
+import { Box, Button } from '@chakra-ui/react';
+import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
@@ -55,52 +55,13 @@ const AddFilter = ({
       >
         + Filter
       </Button>
-      {isFiltersListOpen ? (
-        <Box
-          position={'absolute'}
-          zIndex={1}
-          px={'3'}
-          py={'3'}
-          borderRadius={'12'}
-          borderWidth={'0.4px'}
-          borderColor={'grey.100'}
-          bg={'white.DEFAULT'}
-          shadow={'0px 0px 4px rgba(0, 0, 0, 0.12)'}
-          maxH={'100'}
-          overflowY={'auto'}
-          data-testid={'event-property-dropdown-container'}
-        >
-          {loadingEventProperties ? (
-            <Flex
-              w={'80'}
-              h={'80'}
-              alignItems={'center'}
-              justifyContent={'center'}
-            >
-              <LoadingSpinner />
-            </Flex>
-          ) : (
-            eventProperties.map((property) => (
-              <Box
-                key={property}
-                onClick={() => onSuggestionClick(property)}
-                cursor={'pointer'}
-                px={'2'}
-                py={'3'}
-                _hover={{
-                  bg: 'white.100',
-                }}
-                fontSize={'xs-14'}
-                lineHeight={'xs-14'}
-                fontWeight={'500'}
-                data-testid={'dropdown-options'}
-              >
-                {property}
-              </Box>
-            ))
-          )}
-        </Box>
-      ) : null}
+
+      <SearchableListDropdown
+        isOpen={isFiltersListOpen}
+        data={eventProperties}
+        isLoading={loadingEventProperties}
+        onSubmit={(val: string) => onSuggestionClick(val)}
+      />
     </Box>
   );
 };
