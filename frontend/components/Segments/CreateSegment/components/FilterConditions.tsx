@@ -24,7 +24,7 @@ const FilterConditions = ({ conditions, index, setConditions }: any) => {
   );
 
   return (
-    <Box w={'12'} ref={filterConditionsRef}>
+    <Box w={'12'} ref={filterConditionsRef} position="relative">
       <Text
         fontSize={'xs-14'}
         lineHeight={'xs-14'}
@@ -67,13 +67,13 @@ const FilterConditions = ({ conditions, index, setConditions }: any) => {
                         bg: 'white.100',
                       }}
                       data-testid={'property-value-dropdown-option'}
+                      onClick={() => updateFilterConditions(value)}
+                      cursor={'pointer'}
                     >
                       <Text
                         fontSize={'xs-14'}
                         lineHeight={'xs-14'}
                         fontWeight={'medium'}
-                        cursor={'pointer'}
-                        onClick={() => updateFilterConditions(value)}
                       >
                         {value}
                       </Text>

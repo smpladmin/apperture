@@ -35,7 +35,11 @@ const AddFilter = ({
       if (prevState.length === 0) {
         return [SegmentFilterConditions.WHERE];
       }
-      return [...prevState, SegmentFilterConditions.AND];
+      if (prevState[prevState.length - 1] === SegmentFilterConditions.WHERE) {
+        return [...prevState, SegmentFilterConditions.AND];
+      }
+
+      return [...prevState, prevState[prevState.length - 1]];
     });
     setOpenFiltersList(false);
   };
