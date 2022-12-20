@@ -58,6 +58,38 @@ describe('Create Segment', () => {
     ],
   };
 
+  const savedSegmentprops = {
+    appId: '638f1a928e54760eafc64d6e',
+    columns: ['user_id', 'properties.$city', 'properties.$app_version'],
+    createdAt: new Date('2022-12-19T09:04:44.566000'),
+    datasourceId: '638f1aac8e54760eafc64d70',
+    description: 'Dummy segment to test Edit segment component',
+    groupConditions: [],
+    groups: [
+      {
+        filters: [
+          {
+            operand: 'properties.$city',
+            operator: 'equals',
+            values: ['Chennai', 'Guwahati', 'Patna'],
+          },
+          {
+            operand: 'properties.$app_version',
+            operator: 'equals',
+            values: ['1.5.5', '1.5.6'],
+          },
+        ],
+        conditions: [
+          SegmentFilterConditions.WHERE,
+          SegmentFilterConditions.AND,
+        ],
+      },
+    ],
+    name: 'Testing edit Segments ',
+    updatedAt: new Date('2022-12-19T09:04:44.567000'),
+    userId: '638f1a128e54760eafc64d6c',
+    _id: '63a0292cd9ae5bf509df9ac7',
+  };
   beforeEach(() => {
     mockedGetEventProperties = jest.mocked(getEventProperties);
     mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
@@ -470,39 +502,6 @@ describe('Create Segment', () => {
   });
 
   describe('show savedSegment in Edit mode', () => {
-    const savedSegmentprops = {
-      appId: '638f1a928e54760eafc64d6e',
-      columns: ['user_id', 'properties.$city', 'properties.$app_version'],
-      createdAt: new Date('2022-12-19T09:04:44.566000'),
-      datasourceId: '638f1aac8e54760eafc64d70',
-      description: 'Dummy segment to test Edit segment component',
-      groupConditions: [],
-      groups: [
-        {
-          filters: [
-            {
-              operand: 'properties.$city',
-              operator: 'equals',
-              values: ['Chennai', 'Guwahati', 'Patna'],
-            },
-            {
-              operand: 'properties.$app_version',
-              operator: 'equals',
-              values: ['1.5.5', '1.5.6'],
-            },
-          ],
-          conditions: [
-            SegmentFilterConditions.WHERE,
-            SegmentFilterConditions.AND,
-          ],
-        },
-      ],
-      name: 'Testing edit Segments ',
-      updatedAt: new Date('2022-12-19T09:04:44.567000'),
-      userId: '638f1a128e54760eafc64d6c',
-      _id: '63a0292cd9ae5bf509df9ac7',
-    };
-
     it('should render queries with what being sent in props', async () => {
       await act(async () => {
         render(
@@ -597,6 +596,104 @@ describe('Create Segment', () => {
         'Patna',
         '1.5.6',
       ]);
+    });
+  });
+
+  describe('filter conditions ', () => {
+    it(`should add new filter condition as 'and' initially after where`, async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      const addFilterButton = screen.getByTestId('add-filter');
+
+      fireEvent.click(addFilterButton);
+      const dropdownOptions = screen.getAllByTestId('dropdown-options');
+      await act(async () => {
+        fireEvent.click(dropdownOptions[0]);
+      });
+
+      // add another filter, new added condition shpuld be 'and'
+      fireEvent.click(addFilterButton);
+      await act(async () => {
+        fireEvent.click(dropdownOptions[1]);
+      });
+
+      const filterConditions = screen.getAllByTestId('filter-condition');
+      await waitFor(() => {
+        const expectedFilterConditions = ['where', 'and'];
+        filterConditions.forEach((condition, i) => {
+          expect(condition).toHaveTextContent(expectedFilterConditions[i]);
+        });
+      });
+    });
+
+    it('should be able to switch b/w and/or options for filter condition and after switching a new added filter should have the latest conditon value', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({
+              query: {
+                segmentId: '639821f7f5903afb0a1b5fa6',
+                dsId: '638f1aac8e54760eafc64d70',
+              },
+            })}
+          >
+            <CreateSegment savedSegment={savedSegmentprops} />
+          </RouterContext.Provider>
+        );
+      });
+
+      const filterConditions = screen.getAllByTestId('filter-condition');
+      const initialFilterConditions = ['where', 'and', 'and'];
+      filterConditions.forEach((condition, i) => {
+        expect(condition).toHaveTextContent(initialFilterConditions[i]);
+      });
+      // click first 'and' from filters
+      fireEvent.click(filterConditions[1]);
+      const filterConditionOptions = screen.getAllByTestId(
+        'filter-conditions-options'
+      );
+      const options = ['and', 'or'];
+      filterConditionOptions.forEach((option, i) => {
+        expect(option).toHaveTextContent(options[i]);
+      });
+
+      await act(async () => {
+        //click on 'or' option to change all filter conditions to `or`
+        fireEvent.click(filterConditionOptions[1]);
+      });
+
+      await waitFor(() => {
+        /// after clicking on 'or' option, all 'and' conditions should be 'or' now
+        const expectedFilterConditions = ['where', 'or', 'or'];
+        filterConditions.forEach((condition, i) => {
+          expect(condition).toHaveTextContent(expectedFilterConditions[i]);
+        });
+      });
+
+      // add new filter, new added filter condition should be 'or'
+      const addFilterButton = screen.getByTestId('add-filter');
+      fireEvent.click(addFilterButton);
+
+      const eventPropertiesOptions = screen.getAllByTestId('dropdown-options');
+      await act(async () => {
+        fireEvent.click(eventPropertiesOptions[0]);
+      });
+
+      await waitFor(() => {
+        const newFilterConditions = screen.getAllByTestId('filter-condition');
+        const expectedNewFilterConditions = ['where', 'or', 'or', 'or'];
+        newFilterConditions.forEach((condition, i) => {
+          expect(condition).toHaveTextContent(expectedNewFilterConditions[i]);
+        });
+      });
     });
   });
 

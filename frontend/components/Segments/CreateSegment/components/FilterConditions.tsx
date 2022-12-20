@@ -43,6 +43,7 @@ const FilterConditions = ({
         textAlign={'right'}
         cursor={'pointer'}
         onClick={() => setIsFilterConditionsListOpen(true)}
+        data-testid={'filter-condition'}
       >
         {conditions[index]}
       </Text>
@@ -60,37 +61,34 @@ const FilterConditions = ({
           shadow={'0px 0px 4px rgba(0, 0, 0, 0.12)'}
           maxH={'100'}
           overflowY={'auto'}
-          data-testid={'property-values-dropdown-container'}
         >
           {
             <Flex direction={'column'} minW={'15'} gap={'3'}>
-              <Box overflowY={'auto'} maxHeight={'82'}>
-                {filterCondtionsValues.map((value) => {
-                  return (
-                    <Flex
-                      as={'label'}
-                      gap={'3'}
-                      px={'2'}
-                      py={'3'}
-                      key={value}
-                      _hover={{
-                        bg: 'white.100',
-                      }}
-                      data-testid={'property-value-dropdown-option'}
-                      onClick={() => updateFilterConditions(value)}
-                      cursor={'pointer'}
+              {filterCondtionsValues.map((value) => {
+                return (
+                  <Flex
+                    as={'label'}
+                    gap={'3'}
+                    px={'2'}
+                    py={'3'}
+                    key={value}
+                    _hover={{
+                      bg: 'white.100',
+                    }}
+                    data-testid={'filter-conditions-options'}
+                    onClick={() => updateFilterConditions(value)}
+                    cursor={'pointer'}
+                  >
+                    <Text
+                      fontSize={'xs-14'}
+                      lineHeight={'xs-14'}
+                      fontWeight={'medium'}
                     >
-                      <Text
-                        fontSize={'xs-14'}
-                        lineHeight={'xs-14'}
-                        fontWeight={'medium'}
-                      >
-                        {value}
-                      </Text>
-                    </Flex>
-                  );
-                })}
-              </Box>
+                      {value}
+                    </Text>
+                  </Flex>
+                );
+              })}
             </Flex>
           }
         </Box>
