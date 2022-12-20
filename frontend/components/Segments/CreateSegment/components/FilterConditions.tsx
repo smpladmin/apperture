@@ -3,7 +3,17 @@ import { SegmentFilterConditions } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 
-const FilterConditions = ({ conditions, index, setConditions }: any) => {
+type FilterConditionsProps = {
+  conditions: SegmentFilterConditions[];
+  index: number;
+  updateGroupsState: Function;
+};
+
+const FilterConditions = ({
+  conditions,
+  index,
+  updateGroupsState,
+}: FilterConditionsProps) => {
   const [isFilterConditionsListOpen, setIsFilterConditionsListOpen] =
     useState(false);
 
@@ -11,7 +21,7 @@ const FilterConditions = ({ conditions, index, setConditions }: any) => {
     const newConditions = conditions.map((condition: SegmentFilterConditions) =>
       condition === SegmentFilterConditions.WHERE ? condition : value
     );
-    setConditions(newConditions);
+    updateGroupsState(false, newConditions);
     setIsFilterConditionsListOpen(false);
   };
   const filterCondtionsValues = [

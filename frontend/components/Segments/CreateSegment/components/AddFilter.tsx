@@ -26,6 +26,8 @@ const AddFilter = ({
   useOnClickOutside(addFilterRef, () => setOpenFiltersList(false));
 
   const onSuggestionClick = (val: string) => {
+    setOpenFiltersList(false);
+
     const updatedFilter = [
       ...filters,
       {
@@ -36,13 +38,16 @@ const AddFilter = ({
     ];
     if (conditions.length === 0) {
       updateGroupsState(updatedFilter, [SegmentFilterConditions.WHERE]);
-    } else {
-      updateGroupsState(updatedFilter, [
-        ...conditions,
-        SegmentFilterConditions.AND,
-      ]);
+      return;
     }
-    setOpenFiltersList(false);
+
+    let updatedConditions = [];
+    if (conditions[conditions.length - 1] === SegmentFilterConditions.WHERE) {
+      updatedConditions = [...conditions, SegmentFilterConditions.AND];
+    } else {
+      updatedConditions = [...conditions, conditions[conditions.length - 1]];
+    }
+    updateGroupsState(updatedFilter, updatedConditions);
   };
 
   return (

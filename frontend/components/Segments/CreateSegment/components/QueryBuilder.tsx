@@ -95,9 +95,9 @@ const QueryBuilder = ({
                   data-testid="query-builder"
                 >
                   <FilterConditions
-                    conditions={conditions}
                     index={i}
-                    setConditions={setConditions}
+                    conditions={group.conditions}
+                    updateGroupsState={updateGroupsState}
                   />
                   <SelectEventProperty
                     index={i}
