@@ -59,6 +59,7 @@ const EditColumns = ({
           _hover={{
             bg: 'white.100',
           }}
+          data-testid={'edit-column'}
         >
           <i className="ri-pencil-fill"></i>
           <Text fontSize={'xs-14'} fontWeight={500}>

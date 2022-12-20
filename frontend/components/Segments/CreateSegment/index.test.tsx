@@ -13,17 +13,22 @@ import {
   getEventPropertiesValue,
 } from '@lib/services/datasourceService';
 import { getSearchResult } from '@lib/utils/common';
-import { computeSegment } from '@lib/services/segmentService';
+import { computeSegment, saveSegment } from '@lib/services/segmentService';
+import { SegmentFilterConditions } from '@lib/domain/segment';
+import { getUserInfo } from '@lib/services/userService';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/utils/common');
 jest.mock('@lib/services/segmentService');
+jest.mock('@lib/services/userService');
 
 describe('Create Segment', () => {
   let mockedGetEventProperties: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
   let mockedSearchResult: jest.Mock;
   let mockedTransientSegment: jest.Mock;
+  let mockedGetUserInfo: jest.Mock;
+  let mockedSaveSegment: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -32,11 +37,34 @@ describe('Create Segment', () => {
     'app_version',
     'session_length',
   ];
+  const transientSegmentResponse = {
+    count: 3,
+    data: [
+      {
+        user_id: 'sabiha6514@gmail.com',
+        'properties.$city': 'Chennai',
+        'properties.$app_version': '1.5.5',
+      },
+      {
+        user_id: 'bordoloidebojit69@gmail.com',
+        'properties.$city': 'Guwahati',
+        'properties.$app_version': '1.5.5',
+      },
+      {
+        user_id: '4f36e6e5-3534-4e54-976a-fdcc6369a6e6',
+        'properties.$city': 'Patna',
+        'properties.$app_version': '1.5.6',
+      },
+    ],
+  };
+
   beforeEach(() => {
     mockedGetEventProperties = jest.mocked(getEventProperties);
     mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
     mockedSearchResult = jest.mocked(getSearchResult);
     mockedTransientSegment = jest.mocked(computeSegment);
+    mockedGetUserInfo = jest.mocked(getUserInfo);
+    mockedSaveSegment = jest.mocked(saveSegment);
 
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetEventPropertiesValue.mockReturnValue([
@@ -45,22 +73,34 @@ describe('Create Segment', () => {
       ['mac'],
       ['windows'],
     ]);
-    mockedTransientSegment.mockReturnValue([]);
+    mockedTransientSegment.mockReturnValue(transientSegmentResponse);
+    mockedGetUserInfo.mockReturnValue({
+      email: 'apperture@parallelhq.com',
+      firstName: 'Apperture',
+      lastName: 'Analytics',
+      picture: 'https://lh2.googleusercontent.com',
+      slackChannel: null,
+    });
   });
 
-  it('renders create segment folder', async () => {
-    await act(async () => {
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '654212033222' } })}
-        >
-          <CreateSegment />
-        </RouterContext.Provider>
-      );
-    });
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
 
-    const segmentBuilderText = screen.getByTestId('segment-builder');
-    expect(segmentBuilderText).toBeInTheDocument();
+  describe('renders create segment component', () => {
+    it('render segment', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      const segmentBuilderText = screen.getByTestId('segment-builder');
+      expect(segmentBuilderText).toBeInTheDocument();
+    });
   });
 
   describe('add filter', () => {
@@ -377,6 +417,268 @@ describe('Create Segment', () => {
       // dropdown options should be the event properties(not the search result)
       dropdownOptions.forEach((option, index) => {
         expect(option).toHaveTextContent(eventProperties[index]);
+      });
+    });
+  });
+
+  describe('edit columns', () => {
+    it('should add columns to table which are selected from edit column dropdown', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      const usersCountText = screen.getByTestId('users-count');
+      const segmentTable = screen.getByTestId('segment-table');
+      const segmentTableHeaders = screen.getByTestId('segment-table-headers');
+      const editColumnButton = screen.getByTestId('edit-column');
+
+      expect(usersCountText).toHaveTextContent('3 Users');
+      expect(segmentTable).toBeInTheDocument();
+      // initially there would be only one column header i.e. user_id
+      expect(segmentTableHeaders).toHaveTextContent('user_id');
+
+      fireEvent.click(editColumnButton);
+      const columnOptions = screen.getAllByTestId(
+        'property-value-dropdown-option'
+      );
+      const addColumnButton = screen.getByTestId('add-event-property-values');
+
+      await act(async () => {
+        // select two event properties from dropdown, (here those two properties are 'city' and 'device')
+        fireEvent.click(columnOptions[0]);
+        fireEvent.click(columnOptions[1]);
+        fireEvent.click(addColumnButton);
+      });
+
+      await waitFor(() => {
+        const newSegmentTableHeaders = screen.getAllByTestId(
+          'segment-table-headers'
+        );
+        // expected columns should be user_id and the two selected columns
+        const expectedColumnn = ['user_id', 'city', 'device'];
+
+        newSegmentTableHeaders.forEach((header, index) => {
+          expect(header).toHaveTextContent(expectedColumnn[index]);
+        });
+      });
+    });
+  });
+
+  describe('show savedSegment in Edit mode', () => {
+    const savedSegmentprops = {
+      appId: '638f1a928e54760eafc64d6e',
+      columns: ['user_id', 'properties.$city', 'properties.$app_version'],
+      createdAt: new Date('2022-12-19T09:04:44.566000'),
+      datasourceId: '638f1aac8e54760eafc64d70',
+      description: 'Dummy segment to test Edit segment component',
+      groupConditions: [],
+      groups: [
+        {
+          filters: [
+            {
+              operand: 'properties.$city',
+              operator: 'equals',
+              values: ['Chennai', 'Guwahati', 'Patna'],
+            },
+            {
+              operand: 'properties.$app_version',
+              operator: 'equals',
+              values: ['1.5.5', '1.5.6'],
+            },
+          ],
+          conditions: [
+            SegmentFilterConditions.WHERE,
+            SegmentFilterConditions.AND,
+          ],
+        },
+      ],
+      name: 'Testing edit Segments ',
+      updatedAt: new Date('2022-12-19T09:04:44.567000'),
+      userId: '638f1a128e54760eafc64d6c',
+      _id: '63a0292cd9ae5bf509df9ac7',
+    };
+
+    it('should render queries with what being sent in props', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({
+              query: {
+                segmentId: '639821f7f5903afb0a1b5fa6',
+                dsId: '638f1aac8e54760eafc64d70',
+              },
+            })}
+          >
+            <CreateSegment savedSegment={savedSegmentprops} />
+          </RouterContext.Provider>
+        );
+      });
+      const queries = screen.getAllByTestId('query-builder');
+
+      const filterOneTextElements = Array.from(
+        queries[0].getElementsByTagName('p')
+      ).map((el) => el.textContent);
+      //first query -  `where properties.$city equals Chennai, Guwahati or 1 more
+      expect(filterOneTextElements).toEqual([
+        'where',
+        'properties.$city',
+        'equals',
+        'Chennai, Guwahati or 1 more',
+      ]);
+
+      const filterTwoTextElements = Array.from(
+        queries[1].getElementsByTagName('p')
+      ).map((el) => el.textContent);
+      //first query -  `and properties.$app_version equals 1.5.5, 1.5.6
+      expect(filterTwoTextElements).toEqual([
+        'and',
+        'properties.$app_version',
+        'equals',
+        '1.5.5, 1.5.6',
+      ]);
+    });
+
+    it('should render table data with response coming from backend', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({
+              query: {
+                segmentId: '639821f7f5903afb0a1b5fa6',
+                dsId: '638f1aac8e54760eafc64d70',
+              },
+            })}
+          >
+            <CreateSegment savedSegment={savedSegmentprops} />
+          </RouterContext.Provider>
+        );
+      });
+
+      const segmentTable = screen.getByTestId('segment-table');
+      const segmentTableHeaders = screen.getAllByTestId(
+        'segment-table-headers'
+      );
+      const segmentTableRows = screen.getAllByTestId('segment-table-body-rows');
+
+      expect(segmentTable).toBeInTheDocument();
+      segmentTableHeaders.forEach((header, i) => {
+        expect(header).toHaveTextContent(savedSegmentprops.columns[i]);
+      });
+      // should have 3 data rows as users count is 3
+      expect(segmentTableRows.length).toEqual(3);
+      const firstRowTableCellsData = Array.from(
+        segmentTableRows[0].getElementsByTagName('td')
+      ).map((cell) => cell.textContent);
+      expect(firstRowTableCellsData).toEqual([
+        'sabiha6514@gmail.com',
+        'Chennai',
+        '1.5.5',
+      ]);
+
+      const secondRowTableCellsData = Array.from(
+        segmentTableRows[1].getElementsByTagName('td')
+      ).map((cell) => cell.textContent);
+      expect(secondRowTableCellsData).toEqual([
+        'bordoloidebojit69@gmail.com',
+        'Guwahati',
+        '1.5.5',
+      ]);
+
+      const thirdRowTableCellsData = Array.from(
+        segmentTableRows[2].getElementsByTagName('td')
+      ).map((cell) => cell.textContent);
+      expect(thirdRowTableCellsData).toEqual([
+        '4f36e6e5-3534-4e54-976a-fdcc6369a6e6',
+        'Patna',
+        '1.5.6',
+      ]);
+    });
+  });
+
+  describe('save segment', () => {
+    it('should be able to save segment and redirect the user to edit segment page', async () => {
+      const router = createMockRouter({
+        pathname: '/analytics/segment/create/[dsId]',
+        query: { dsId: '654212033222' },
+      });
+
+      mockedSaveSegment.mockReturnValue({
+        status: 200,
+        data: {
+          _id: '654212033111',
+          name: 'Test Segment',
+          datasourceId: '654212033222',
+          description: 'Dummy segment to test segment component',
+          groups: [
+            {
+              filters: [
+                {
+                  operand: 'device',
+                  operator: 'equals',
+                  values: ['android', 'ios', 'mac', 'windows'],
+                },
+              ],
+              conditions: [SegmentFilterConditions.WHERE],
+            },
+          ],
+        },
+      });
+
+      await act(async () => {
+        render(
+          <RouterContext.Provider value={router}>
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      // add a filter
+      const addFilterButton = screen.getByTestId('add-filter');
+      fireEvent.click(addFilterButton);
+      const dropdownOptions = screen.getAllByTestId('dropdown-options');
+      await act(async () => {
+        fireEvent.click(dropdownOptions[1]);
+      });
+      const addPropertyValuesButton = screen.getByTestId(
+        'add-event-property-values'
+      );
+      const selectAllCheckbox = screen.getByTestId('select-all-values');
+      fireEvent.click(selectAllCheckbox);
+      await act(async () => {
+        fireEvent.click(addPropertyValuesButton);
+      });
+
+      // open save modal to save segment
+      const openSaveSegmentModalButton = screen.getByTestId(
+        'open-save-segment-modal'
+      );
+      fireEvent.click(openSaveSegmentModalButton);
+
+      const segmentNameInput = screen.getByTestId('segment-name');
+      const segmentDesciptionInput = screen.getByTestId('segment-description');
+      const saveSegmentButton = screen.getByTestId('save-segment');
+
+      await act(async () => {
+        // add segment name and description
+        fireEvent.change(segmentNameInput, {
+          target: { value: 'Test Segment' },
+        });
+        fireEvent.change(segmentDesciptionInput, {
+          target: { value: 'Dummy segment to test segment component' },
+        });
+        fireEvent.click(saveSegmentButton);
+      });
+
+      await waitFor(() => {
+        expect(router.push).toHaveBeenCalledWith({
+          pathname: '/analytics/segment/edit/[segmentId]',
+          query: { dsId: '654212033222', segmentId: '654212033111' },
+        });
       });
     });
   });

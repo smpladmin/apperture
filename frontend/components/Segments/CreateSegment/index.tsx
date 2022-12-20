@@ -1,24 +1,64 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Flex, Text } from '@chakra-ui/react';
-import { SegmentGroup, SegmentTableData } from '@lib/domain/segment';
+import {
+  Box,
+  Button,
+  Flex,
+  IconButton,
+  Text,
+  Tooltip,
+  useDisclosure,
+} from '@chakra-ui/react';
+import { Segment, SegmentGroup, SegmentTableData } from '@lib/domain/segment';
 import QueryBuilder from './components/QueryBuilder';
 import SegmentTable from './components/Table/SegmentTable';
 import { getEventProperties } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
 import { computeSegment } from '@lib/services/segmentService';
 import { getFilteredColumns } from '../util';
+import SaveSegmentModal from './components/SaveModal';
+import { User } from '@lib/domain/user';
+import { getUserInfo } from '@lib/services/userService';
+import { cloneDeep, isEqual } from 'lodash';
+import ExitConfirmationModal from './components/ExitConfirmationModal';
 
-const CreateSegment = () => {
-  const [groups, setGroups] = useState<SegmentGroup[]>([]);
+type CreateSegmentProp = {
+  savedSegment?: Segment;
+};
+const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
+  const [groups, setGroups] = useState<SegmentGroup[]>(
+    savedSegment?.groups
+      ? cloneDeep(savedSegment?.groups)
+      : [
+          {
+            filters: [],
+            conditions: [],
+          },
+        ]
+  );
+  const [isSaveDisabled, setIsSaveDisabled] = useState(false);
   const [eventProperties, setEventProperties] = useState([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
-  const [selectedColumns, setSelectedColumns] = useState(['user_id']);
+  const [selectedColumns, setSelectedColumns] = useState(
+    savedSegment?.columns ? [...savedSegment?.columns] : ['user_id']
+  );
   const [userTableData, setUserTableData] = useState<SegmentTableData>({
     count: 0,
     data: [],
   });
   const [isSegmentDataLoading, setIsSegmentDataLoading] = useState(false);
   const [refreshOnDelete, setRefreshOnDelete] = useState(false);
+  const [user, setUser] = useState<User>();
+  const {
+    isOpen: isSaveSegmentModalOpen,
+    onOpen: openSaveSegmentModal,
+    onClose: closeSaveSegmentModal,
+  } = useDisclosure();
+
+  const {
+    isOpen: isExitConfirmationModalOpen,
+    onOpen: openExitConfirmModal,
+    onClose: closeExitConfirmationModal,
+  } = useDisclosure();
 
   const router = useRouter();
   const { dsId } = router.query;
@@ -29,22 +69,54 @@ const CreateSegment = () => {
     setIsSegmentDataLoading(false);
   };
 
+  const showExitConfirmationModal = () => {
+    if (!isSaveDisabled) {
+      openExitConfirmModal();
+    } else {
+      router.push({
+        pathname: '/analytics/saved',
+      });
+    }
+  };
+
+  useEffect(() => {
+    const getUser = async () => {
+      const user = await getUserInfo();
+      setUser(user);
+    };
+    getUser();
+  }, []);
+
   useEffect(() => {
     setIsSegmentDataLoading(true);
     fetchSegmentResponse(getFilteredColumns(selectedColumns));
+    // Enable save segment button when the groups have same value but columns have changed.
+    if (isSaveDisabled && savedSegment?.columns) {
+      const check = isEqual(savedSegment.columns, selectedColumns);
+      setIsSaveDisabled(check);
+    }
   }, [selectedColumns]);
 
   useEffect(() => {
-    if (
-      (groups.length &&
-        groups.every((group) => {
-          return group.filters.every((filter) => filter.values.length);
-        })) ||
-      refreshOnDelete
-    ) {
+    const validGroupQuery =
+      groups.length &&
+      groups.every(
+        (group) =>
+          group.filters.length &&
+          group.filters.every((filter) => filter.values.length)
+      );
+    if (validGroupQuery || refreshOnDelete) {
       if (refreshOnDelete) setRefreshOnDelete(false);
       setIsSegmentDataLoading(true);
       fetchSegmentResponse(getFilteredColumns(selectedColumns));
+    }
+    if (savedSegment?.groups) {
+      //Disable save buttons if the group queries are not changed or the query is invalid
+      const check = Boolean(
+        isEqual(savedSegment.groups, groups) || !validGroupQuery
+      );
+
+      setIsSaveDisabled(check);
     }
   }, [groups]);
 
@@ -68,17 +140,50 @@ const CreateSegment = () => {
         px={'4'}
       >
         <Flex alignItems={'center'} gap={'1'}>
-          <Box color={'white.DEFAULT'} cursor={'pointer'}>
+          <Box
+            color={'white.DEFAULT'}
+            cursor={'pointer'}
+            onClick={showExitConfirmationModal}
+          >
             <i className="ri-arrow-left-line"></i>
           </Box>
-          <Text
-            fontSize={'sh-20'}
-            lineHeight={'sh-20'}
-            fontWeight={'600'}
-            color={'white.DEFAULT'}
+          <Flex
+            alignItems={'center'}
+            alignContent={'center'}
+            justifyContent={'center'}
+            gap={'1'}
           >
-            New Segment
-          </Text>
+            <Text
+              fontSize={'sh-20'}
+              lineHeight={'sh-20'}
+              fontWeight={'600'}
+              color={'white.DEFAULT'}
+            >
+              {savedSegment?.name || 'New Segment'}
+            </Text>
+            {savedSegment?.description ? (
+              <Tooltip
+                label={savedSegment?.description}
+                placement={'bottom-start'}
+                bg={'black.100'}
+              >
+                <IconButton
+                  icon={<i className="ri-information-fill" />}
+                  aria-label="description"
+                  bg={'black.0'}
+                  fontWeight={'500'}
+                  color={'white.100'}
+                  cursor={'pointer'}
+                  _hover={{}}
+                  _active={{}}
+                  height={'auto'}
+                  width={'max-content'}
+                  p={0}
+                  m={0}
+                />
+              </Tooltip>
+            ) : null}
+          </Flex>
         </Flex>
         <Button
           px={'6'}
@@ -87,6 +192,13 @@ const CreateSegment = () => {
           lineHeight={'base'}
           fontWeight={'600'}
           bg={'white.DEFAULT'}
+          onClick={openSaveSegmentModal}
+          _hover={{
+            color: 'white.DEFAULT',
+            bg: 'black.100',
+          }}
+          disabled={isSaveDisabled}
+          data-testid={'open-save-segment-modal'}
         >
           Save Segment
         </Button>
@@ -110,12 +222,20 @@ const CreateSegment = () => {
             Clear all
           </Text>
         </Flex>
-        <QueryBuilder
-          eventProperties={eventProperties}
-          loadingEventProperties={loadingEventProperties}
-          setGroups={setGroups}
-          setRefreshOnDelete={setRefreshOnDelete}
-        />
+        {groups.map((group, index, groups) => {
+          return (
+            <QueryBuilder
+              key={index}
+              eventProperties={eventProperties}
+              loadingEventProperties={loadingEventProperties}
+              setGroups={setGroups}
+              setRefreshOnDelete={setRefreshOnDelete}
+              group={group}
+              groups={groups}
+              groupIndex={index}
+            />
+          );
+        })}
         <SegmentTable
           isSegmentDataLoading={isSegmentDataLoading}
           eventProperties={eventProperties}
@@ -124,6 +244,18 @@ const CreateSegment = () => {
           userTableData={userTableData}
         />
       </Box>
+      <SaveSegmentModal
+        isOpen={isSaveSegmentModalOpen}
+        onClose={closeSaveSegmentModal}
+        groups={groups}
+        user={user}
+        columns={selectedColumns}
+      />
+      <ExitConfirmationModal
+        isOpen={isExitConfirmationModalOpen}
+        onClose={closeExitConfirmationModal}
+        openSaveSegmentModal={openSaveSegmentModal}
+      />
     </Box>
   );
 };

@@ -14,6 +14,16 @@ export const _getUserInfo = async (token: string) => {
   }
 };
 
+export const getUserInfo = async () => {
+  try {
+    const user = await AppertureAPI.get('/users/me');
+    return user.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return {};
+  }
+};
+
 export const removeSlackCredentials = async () => {
   try {
     await AppertureAPI.put('/users?delete_slack_credentials=true');
