@@ -198,6 +198,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
             bg: 'black.100',
           }}
           disabled={isSaveDisabled}
+          data-testid={'open-save-segment-modal'}
         >
           Save Segment
         </Button>
@@ -221,15 +222,20 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
             Clear all
           </Text>
         </Flex>
-        <QueryBuilder
-          eventProperties={eventProperties}
-          loadingEventProperties={loadingEventProperties}
-          setGroups={setGroups}
-          setRefreshOnDelete={setRefreshOnDelete}
-          group={groups[0]}
-          groups={groups}
-          groupIndex={0}
-        />
+        {groups.map((group, index, groups) => {
+          return (
+            <QueryBuilder
+              key={index}
+              eventProperties={eventProperties}
+              loadingEventProperties={loadingEventProperties}
+              setGroups={setGroups}
+              setRefreshOnDelete={setRefreshOnDelete}
+              group={group}
+              groups={groups}
+              groupIndex={index}
+            />
+          );
+        })}
         <SegmentTable
           isSegmentDataLoading={isSegmentDataLoading}
           eventProperties={eventProperties}

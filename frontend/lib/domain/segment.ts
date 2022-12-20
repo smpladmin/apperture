@@ -21,7 +21,7 @@ export type SegmentTableData = {
 };
 
 export type Segment = {
-  app_id: string;
+  appId: string;
   columns: string[];
   createdAt: Date;
   datasourceId: string;

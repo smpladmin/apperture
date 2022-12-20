@@ -132,6 +132,7 @@ const SaveSegmentModal = ({
               focusBorderColor={'black.100'}
               borderRadius={'8'}
               onChange={(e) => setSegmentName(e.target.value)}
+              data-testid={'segment-name'}
             />
           </Flex>
           <Flex direction={'column'} mt={'8'} gap={'3'}>
@@ -149,6 +150,7 @@ const SaveSegmentModal = ({
               focusBorderColor={'black.100'}
               resize={'none'}
               onChange={(e) => setSegmentDescription(e.target.value)}
+              data-testid={'segment-description'}
             />
             <Text
               textAlign={'right'}
@@ -172,6 +174,7 @@ const SaveSegmentModal = ({
                 lineHeight={'xs-14'}
                 fontWeight={'400'}
                 color={'grey.200'}
+                data-testid={'created-by'}
               >
                 {`Created by: ${user?.firstName} ${user?.lastName}`}
               </Text>
@@ -196,6 +199,7 @@ const SaveSegmentModal = ({
               color={'white.DEFAULT'}
               disabled={!segmentName}
               onClick={handleSave}
+              data-testid={'save-segment'}
             >
               Save
             </Button>

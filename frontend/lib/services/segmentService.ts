@@ -20,7 +20,7 @@ export const computeSegment = async (
     return res.data;
   } catch (e) {
     console.error((e as AxiosError).message);
-    return [];
+    return {} as any;
   }
 };
 

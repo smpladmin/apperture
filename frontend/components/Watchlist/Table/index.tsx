@@ -106,7 +106,7 @@ const WatchlistTable = ({
           <Tr
             key={row.id}
             onClick={() => onRowClick(row)}
-            _hover={{ bg: 'white.100' }}
+            _hover={{ bg: 'white.100', cursor: 'pointer' }}
             data-testid={'table-body-rows'}
           >
             {row.getVisibleCells().map((cell) => {
