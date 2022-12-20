@@ -1,11 +1,26 @@
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import { ARROW_GRAY } from '@theme/index';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import AddFilter from './AddFilter';
 import 'remixicon/fonts/remixicon.css';
 import SelectValue from './SelectValue';
 import SelectEventProperty from './SelectEventProperty';
-import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
+import {
+  SegmentFilter,
+  SegmentFilterConditions,
+  SegmentGroup,
+} from '@lib/domain/segment';
+import { cloneDeep } from 'lodash';
+
+type QueryBuilderProps = {
+  eventProperties: string[];
+  loadingEventProperties: boolean;
+  setGroups: Function;
+  setRefreshOnDelete: Function;
+  group: SegmentGroup;
+  groupIndex: number;
+  groups: SegmentGroup[];
+};
 import FilterConditions from './FilterConditions';
 
 const QueryBuilder = ({
@@ -13,26 +28,41 @@ const QueryBuilder = ({
   loadingEventProperties,
   setGroups,
   setRefreshOnDelete,
-}: any) => {
-  const [filters, setFilters] = useState([]);
-  const [conditions, setConditions] = useState<any[]>([]);
+  group,
+  groupIndex,
+  groups,
+}: QueryBuilderProps) => {
+  // a utility function to update group state
+  // should be used across all segment components, so it remains easy to track state update
+  const updateGroupsState = useCallback(
+    (
+      filtersToUpdate?: SegmentFilter[],
+      conditionsToUpdate?: SegmentFilterConditions[]
+    ) => {
+      const tempGroup = cloneDeep(groups);
+      if (filtersToUpdate) {
+        tempGroup[groupIndex]['filters'] = filtersToUpdate;
+      }
+      if (conditionsToUpdate) {
+        tempGroup[groupIndex]['conditions'] = conditionsToUpdate;
+      }
 
-  useEffect(() => {
-    setGroups([{ filters, conditions }]);
-  }, [filters, conditions]);
+      setGroups(tempGroup);
+    },
+    [groups]
+  );
 
-  const removeFilter = (i: number) => {
-    const updatedFilter = [...filters];
-    updatedFilter.splice(i, 1);
-    const updatedFilterOperators = [...conditions];
-    updatedFilterOperators.splice(i, 1);
+  const removeFilter = (filterIndex: number) => {
+    const updatedFilter = [...group.filters];
+    updatedFilter.splice(filterIndex, 1);
 
+    const updatedFilterOperators = [...group.conditions];
+    updatedFilterOperators.splice(filterIndex, 1);
     // default value of operator for first query should always be 'where'
     if (updatedFilterOperators[0])
       updatedFilterOperators[0] = SegmentFilterConditions.WHERE;
 
-    setFilters([...updatedFilter]);
-    setConditions([...updatedFilterOperators]);
+    updateGroupsState(updatedFilter, updatedFilterOperators);
     setRefreshOnDelete(true);
   };
 
@@ -55,10 +85,15 @@ const QueryBuilder = ({
       </Text>
       <Flex direction={'column'} mt={'4'} gap={'3'}>
         <Flex direction={'column'} gap={'4'}>
-          {filters.map(
+          {group.filters.map(
             (filter: SegmentFilter, i: number, filters: SegmentFilter[]) => {
               return (
-                <Flex key={i} gap={'3'} alignItems={'center'}>
+                <Flex
+                  key={i}
+                  gap={'3'}
+                  alignItems={'center'}
+                  data-testid="query-builder"
+                >
                   <FilterConditions
                     conditions={conditions}
                     index={i}
@@ -69,7 +104,7 @@ const QueryBuilder = ({
                     filter={filter}
                     eventProperties={eventProperties}
                     filters={filters}
-                    setFilters={setFilters}
+                    updateGroupsState={updateGroupsState}
                   />
                   <Box>
                     <Text
@@ -87,7 +122,7 @@ const QueryBuilder = ({
                   <SelectValue
                     filter={filter}
                     filters={filters}
-                    setFilters={setFilters}
+                    updateGroupsState={updateGroupsState}
                     index={i}
                   />
                   <IconButton
@@ -105,9 +140,10 @@ const QueryBuilder = ({
         </Flex>
         <AddFilter
           eventProperties={eventProperties}
-          setFilters={setFilters}
-          setConditions={setConditions}
           loadingEventProperties={loadingEventProperties}
+          filters={cloneDeep(group.filters)}
+          conditions={group.conditions}
+          updateGroupsState={updateGroupsState}
         />
       </Flex>
     </Box>

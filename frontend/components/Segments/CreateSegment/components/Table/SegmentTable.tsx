@@ -100,7 +100,12 @@ const SegmentTable = ({
           >
             Showing:
           </Text>
-          <Text fontSize={'xs-14'} lineHeight={'xs-18'} fontWeight={'500'}>
+          <Text
+            fontSize={'xs-14'}
+            lineHeight={'xs-18'}
+            fontWeight={'500'}
+            data-testid={'users-count'}
+          >
             {userTableData.count || 0} Users
           </Text>
         </Flex>
@@ -133,15 +138,15 @@ const SegmentTable = ({
         {isSegmentDataLoading ? (
           <TableSkeleton tableHeader={selectedColumns} />
         ) : userTableData.data?.length ? (
-          <Table data-testid={'watchlist-table'}>
+          <Table data-testid={'segment-table'}>
             <Thead py={'3'} px={'8'} bg={'white.100'}>
-              {getHeaderGroups().map((headerGroup) => (
-                <Tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
+              {getHeaderGroups().map((headerGroup, groupIndex) => (
+                <Tr key={headerGroup.id + groupIndex}>
+                  {headerGroup.headers.map((header, index) => {
                     return (
                       <Th
-                        key={header.id}
-                        data-testid={'watchlist-table-headers'}
+                        key={header.id + index}
+                        data-testid={'segment-table-headers'}
                       >
                         {flexRender(
                           header.column.columnDef.header,
@@ -154,15 +159,18 @@ const SegmentTable = ({
               ))}
             </Thead>
             <Tbody>
-              {getRowModel().rows.map((row) => (
+              {getRowModel().rows.map((row, index) => (
                 <Tr
-                  key={row.id}
+                  key={row.id + index}
                   _hover={{ bg: 'white.100' }}
-                  data-testid={'table-body-rows'}
+                  data-testid={'segment-table-body-rows'}
                 >
-                  {row.getVisibleCells().map((cell) => {
+                  {row.getVisibleCells().map((cell, cellIndex) => {
                     return (
-                      <Td key={cell.id}>
+                      <Td
+                        key={cell.id + cellIndex}
+                        data-testid={'segment-table--body-data'}
+                      >
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()

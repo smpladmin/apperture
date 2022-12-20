@@ -6,8 +6,8 @@ const TableSkeleton = ({ tableHeader }: { tableHeader: string[] }) => {
     <Table>
       <Thead py={'3'} px={'8'} bg={'white.100'}>
         <Tr>
-          {tableHeader.map((heading) => (
-            <Th key={`skeleton_${heading}`}>{heading}</Th>
+          {tableHeader.map((heading, index) => (
+            <Th key={`skeleton_${heading}_${index}`}>{heading}</Th>
           ))}
         </Tr>
       </Thead>

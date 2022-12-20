@@ -8,7 +8,7 @@ type SelectEventPropertyProps = {
   filter: SegmentFilter;
   eventProperties: string[];
   filters: SegmentFilter[];
-  setFilters: Function;
+  updateGroupsState: Function;
   index: number;
 };
 
@@ -16,7 +16,7 @@ const SelectEventProperty = ({
   filter,
   eventProperties,
   filters,
-  setFilters,
+  updateGroupsState,
   index,
 }: SelectEventPropertyProps) => {
   const [isFiltersListOpen, setOpenFiltersList] = useState(false);
@@ -28,7 +28,7 @@ const SelectEventProperty = ({
     const updatedFilters = [...filters];
     updatedFilters[index]['operand'] = val;
     updatedFilters[index]['values'] = [];
-    setFilters(updatedFilters);
+    updateGroupsState(updatedFilters);
     setOpenFiltersList(false);
   };
 

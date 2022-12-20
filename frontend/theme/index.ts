@@ -59,6 +59,9 @@ const colors = {
   radioBlack: {
     500: '#0e0e1a',
   },
+  red: {
+    DEFAULT: '#F96B6B',
+  },
 };
 
 const spacing = {

@@ -66,6 +66,10 @@ describe('Watchlist', () => {
     ]);
   });
 
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+
   describe('render watchlist page', () => {
     it('should render three watchlist options, i.e. All , Notifications, funnel ', async () => {
       await act(async () => {
