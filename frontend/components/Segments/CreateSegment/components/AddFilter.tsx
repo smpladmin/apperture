@@ -26,6 +26,8 @@ const AddFilter = ({
   useOnClickOutside(addFilterRef, () => setOpenFiltersList(false));
 
   const onSuggestionClick = (val: string) => {
+    setOpenFiltersList(false);
+
     const updatedFilter = [
       ...filters,
       {
@@ -36,13 +38,19 @@ const AddFilter = ({
     ];
     if (conditions.length === 0) {
       updateGroupsState(updatedFilter, [SegmentFilterConditions.WHERE]);
-    } else {
-      updateGroupsState(updatedFilter, [
-        ...conditions,
-        SegmentFilterConditions.AND,
-      ]);
+      return;
     }
-    setOpenFiltersList(false);
+
+    let conditionToAdd;
+    const isLastConditionWhere =
+      conditions[conditions.length - 1] === SegmentFilterConditions.WHERE;
+    if (isLastConditionWhere) {
+      conditionToAdd = SegmentFilterConditions.AND;
+    } else {
+      // add 'and' / 'or' depending on last condition present
+      conditionToAdd = conditions[conditions.length - 1];
+    }
+    updateGroupsState(updatedFilter, [...conditions, conditionToAdd]);
   };
 
   return (

@@ -21,6 +21,7 @@ type QueryBuilderProps = {
   groupIndex: number;
   groups: SegmentGroup[];
 };
+import FilterConditions from './FilterConditions';
 
 const QueryBuilder = ({
   eventProperties,
@@ -88,22 +89,16 @@ const QueryBuilder = ({
             (filter: SegmentFilter, i: number, filters: SegmentFilter[]) => {
               return (
                 <Flex
-                  data-testid="query-builder"
                   key={i}
                   gap={'3'}
                   alignItems={'center'}
+                  data-testid="query-builder"
                 >
-                  <Box w={'12'}>
-                    <Text
-                      fontSize={'xs-14'}
-                      lineHeight={'xs-14'}
-                      fontWeight={'500'}
-                      color={'grey.200'}
-                      textAlign={'right'}
-                    >
-                      {group?.conditions[i]}
-                    </Text>
-                  </Box>
+                  <FilterConditions
+                    index={i}
+                    conditions={group.conditions}
+                    updateGroupsState={updateGroupsState}
+                  />
                   <SelectEventProperty
                     index={i}
                     filter={filter}
