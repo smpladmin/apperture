@@ -19,6 +19,7 @@ type SearchableCheckboxDropdownProps = {
   isSelectAllChecked: boolean;
   selectedValues: string[];
   dropdownPosition?: string;
+  listKey?: string;
 };
 
 const SearchableCheckboxDropdown = ({
@@ -31,8 +32,9 @@ const SearchableCheckboxDropdown = ({
   isSelectAllChecked,
   selectedValues,
   dropdownPosition,
+  listKey,
 }: SearchableCheckboxDropdownProps) => {
-  const [listData, setListData] = useState<string[]>([]);
+  const [listData, setListData] = useState<any[]>([]);
 
   useEffect(() => {
     if (!listData.length) setListData(data);
@@ -45,6 +47,7 @@ const SearchableCheckboxDropdown = ({
       data={data}
       setSearchData={setListData}
       dropdownPosition={dropdownPosition}
+      searchKey={listKey}
     >
       <Flex
         direction={'column'}
@@ -87,20 +90,23 @@ const SearchableCheckboxDropdown = ({
                   gap={'3'}
                   px={'2'}
                   py={'3'}
-                  key={value}
+                  key={listKey ? value[listKey] : value}
                   _hover={{
                     bg: 'white.100',
                   }}
                   data-testid={'property-value-dropdown-option'}
                 >
-                  <Checkbox colorScheme={'radioBlack'} value={value}>
+                  <Checkbox
+                    colorScheme={'radioBlack'}
+                    value={listKey ? value[listKey] : value}
+                  >
                     <Text
                       fontSize={'xs-14'}
                       lineHeight={'xs-14'}
                       fontWeight={'medium'}
                       cursor={'pointer'}
                     >
-                      {value}
+                      {listKey ? value[listKey] : value}
                     </Text>
                   </Checkbox>
                 </Flex>

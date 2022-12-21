@@ -11,6 +11,7 @@ import { createMockRouter } from 'tests/util';
 import {
   getEventProperties,
   getEventPropertiesValue,
+  getNodes,
 } from '@lib/services/datasourceService';
 import { getSearchResult } from '@lib/utils/common';
 import { computeSegment, saveSegment } from '@lib/services/segmentService';
@@ -24,6 +25,7 @@ jest.mock('@lib/services/userService');
 
 describe('Create Segment', () => {
   let mockedGetEventProperties: jest.Mock;
+  let mockedGetNodes: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
   let mockedSearchResult: jest.Mock;
   let mockedTransientSegment: jest.Mock;
@@ -37,6 +39,14 @@ describe('Create Segment', () => {
     'app_version',
     'session_length',
   ];
+
+  const events = [
+    { id: 'App_Open' },
+    { id: 'Login' },
+    { id: 'Video_Open' },
+    { id: 'Video_Seen' },
+  ];
+
   const transientSegmentResponse = {
     count: 3,
     data: [
@@ -92,6 +102,7 @@ describe('Create Segment', () => {
   };
   beforeEach(() => {
     mockedGetEventProperties = jest.mocked(getEventProperties);
+    mockedGetNodes = jest.mocked(getNodes);
     mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
     mockedSearchResult = jest.mocked(getSearchResult);
     mockedTransientSegment = jest.mocked(computeSegment);
@@ -99,6 +110,7 @@ describe('Create Segment', () => {
     mockedSaveSegment = jest.mocked(saveSegment);
 
     mockedGetEventProperties.mockReturnValue(eventProperties);
+    mockedGetNodes.mockReturnValue(events);
     mockedGetEventPropertiesValue.mockReturnValue([
       ['android'],
       ['ios'],
@@ -316,7 +328,11 @@ describe('Create Segment', () => {
 
   describe('search', () => {
     it('should be able to search event properties', async () => {
-      const searchResults = ['city', 'nomination_city', 'proximity'];
+      const searchResults = [
+        { id: 'city' },
+        { id: 'nomination_city' },
+        { id: 'proximity' },
+      ];
       mockedSearchResult.mockReturnValue(searchResults);
 
       await act(async () => {
@@ -343,7 +359,7 @@ describe('Create Segment', () => {
         screen.getAllByTestId('dropdown-options');
 
       dropdownOptionsAfterSearch.forEach((dropdownOption, i) => {
-        expect(dropdownOption).toHaveTextContent(searchResults[i]);
+        expect(dropdownOption).toHaveTextContent(searchResults[i]['id']);
       });
 
       await act(async () => {
@@ -413,7 +429,11 @@ describe('Create Segment', () => {
     });
 
     it('should reset to show all the data options after search once dropdown is open again', async () => {
-      const searchResults = ['city', 'nomination_city', 'proximity'];
+      const searchResults = [
+        { id: 'city' },
+        { id: 'nomination_city' },
+        { id: 'proximity' },
+      ];
       mockedSearchResult.mockReturnValue(searchResults);
 
       await act(async () => {
@@ -447,8 +467,19 @@ describe('Create Segment', () => {
       const dropdownOptions = screen.getAllByTestId('dropdown-options');
 
       // dropdown options should be the event properties(not the search result)
+      const expectedDropdownOption = [
+        'city',
+        'device',
+        'country',
+        'app_version',
+        'session_length',
+        'App_Open',
+        'Login',
+        'Video_Open',
+        'Video_Seen',
+      ];
       dropdownOptions.forEach((option, index) => {
-        expect(option).toHaveTextContent(eventProperties[index]);
+        expect(option).toHaveTextContent(expectedDropdownOption[index]);
       });
     });
   });

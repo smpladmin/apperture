@@ -53,6 +53,7 @@ const SelectEventProperty = ({
         data={eventProperties}
         isLoading={false}
         onSubmit={(val: string) => onSuggestionClick(val)}
+        listKey={'id'}
       />
     </Box>
   );

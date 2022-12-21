@@ -10,6 +10,7 @@ type SearchableDropdownProps = {
   data: string[];
   setSearchData?: Function;
   dropdownPosition?: string;
+  searchKey?: string;
 };
 
 const SearchableDropdown = ({
@@ -19,6 +20,7 @@ const SearchableDropdown = ({
   data,
   setSearchData,
   dropdownPosition,
+  searchKey,
 }: SearchableDropdownProps) => {
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
@@ -27,7 +29,7 @@ const SearchableDropdown = ({
       return;
     }
     const results = getSearchResult(data, e.target.value, {
-      keys: [],
+      keys: searchKey ? [searchKey] : [],
     });
     setSearchData?.(results);
   };

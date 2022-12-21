@@ -77,6 +77,7 @@ const AddFilter = ({
         data={eventProperties}
         isLoading={loadingEventProperties}
         onSubmit={(val: string) => onSuggestionClick(val)}
+        listKey={'id'}
       />
     </Box>
   );

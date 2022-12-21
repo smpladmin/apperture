@@ -77,6 +77,7 @@ const EditColumns = ({
           onSelect={handleCheckboxChange}
           isSelectAllChecked={allValuesSelected}
           selectedValues={checkedValues}
+          listKey={'id'}
         />
       </Box>
     </>

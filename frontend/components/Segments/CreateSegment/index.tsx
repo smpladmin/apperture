@@ -146,14 +146,12 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
         }
       );
 
-      console.log('properies', transformedEventProperties);
       const transformedEvents = events.map((event) => {
         return {
           id: event.id,
           type: 'event',
         };
       });
-      console.log('events', transformedEvents);
 
       setEventProperties([...transformedEventProperties, ...transformedEvents]);
       setLoadingEventProperties(false);

@@ -7,6 +7,7 @@ type SearchableListDropdownProps = {
   isLoading: boolean;
   data: any[];
   onSubmit: Function;
+  listKey?: string;
 };
 
 const SearchableListDropdown = ({
@@ -14,6 +15,7 @@ const SearchableListDropdown = ({
   isLoading,
   data,
   onSubmit,
+  listKey,
 }: SearchableListDropdownProps) => {
   const [listData, setListData] = useState<any[]>([]);
 
@@ -27,13 +29,14 @@ const SearchableListDropdown = ({
       isLoading={isLoading}
       data={data}
       setSearchData={setListData}
+      searchKey={listKey}
     >
       {listData.length ? (
         <Box data-testid={'event-property-dropdown-container'}>
           {listData.map((item) => (
             <Box
-              key={item.id}
-              onClick={() => onSubmit(item.id)}
+              key={listKey ? item[listKey] : item}
+              onClick={() => onSubmit(listKey ? item[listKey] : item)}
               cursor={'pointer'}
               px={'2'}
               py={'3'}
@@ -45,7 +48,7 @@ const SearchableListDropdown = ({
               fontWeight={'500'}
               data-testid={'dropdown-options'}
             >
-              {item.id}
+              {listKey ? item[listKey] : item}
             </Box>
           ))}
         </Box>
