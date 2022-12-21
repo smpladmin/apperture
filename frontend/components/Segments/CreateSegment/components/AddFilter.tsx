@@ -57,7 +57,12 @@ const AddFilter = ({
   };
 
   return (
-    <Box position={'relative'} ref={addFilterRef} borderColor={'grey.100'}>
+    <Box
+      position={'relative'}
+      ref={addFilterRef}
+      borderColor={'grey.100'}
+      w={'fit-content'}
+    >
       <Button
         onClick={() => setOpenFiltersList(true)}
         bg={'white.DEFAULT'}
@@ -76,7 +81,7 @@ const AddFilter = ({
         isOpen={isFiltersListOpen}
         data={eventProperties}
         isLoading={loadingEventProperties}
-        onSubmit={(val: string) => onSuggestionClick(val)}
+        onSubmit={onSuggestionClick}
         listKey={'id'}
       />
     </Box>

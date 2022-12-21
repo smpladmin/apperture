@@ -52,7 +52,7 @@ const SelectEventProperty = ({
         isOpen={isFiltersListOpen}
         data={eventProperties}
         isLoading={false}
-        onSubmit={(val: string) => onSuggestionClick(val)}
+        onSubmit={onSuggestionClick}
         listKey={'id'}
       />
     </Box>
