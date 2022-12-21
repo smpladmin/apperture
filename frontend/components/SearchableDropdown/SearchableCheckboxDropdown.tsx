@@ -12,7 +12,7 @@ import SearchableDropdown from './SearchableDropdown';
 type SearchableCheckboxDropdownProps = {
   isOpen: boolean;
   isLoading: boolean;
-  data: string[];
+  data: any[];
   onSubmit: Function;
   onSelect: Function;
   onAllSelect: Function;

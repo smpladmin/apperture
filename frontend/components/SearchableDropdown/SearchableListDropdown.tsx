@@ -5,7 +5,7 @@ import SearchableDropdown from './SearchableDropdown';
 type SearchableListDropdownProps = {
   isOpen: boolean;
   isLoading: boolean;
-  data: string[];
+  data: any[];
   onSubmit: Function;
 };
 
@@ -15,7 +15,7 @@ const SearchableListDropdown = ({
   data,
   onSubmit,
 }: SearchableListDropdownProps) => {
-  const [listData, setListData] = useState<string[]>([]);
+  const [listData, setListData] = useState<any[]>([]);
 
   useEffect(() => {
     if (!listData.length) setListData(data);
@@ -32,8 +32,8 @@ const SearchableListDropdown = ({
         <Box data-testid={'event-property-dropdown-container'}>
           {listData.map((item) => (
             <Box
-              key={item}
-              onClick={() => onSubmit(item)}
+              key={item.id}
+              onClick={() => onSubmit(item.id)}
               cursor={'pointer'}
               px={'2'}
               py={'3'}
@@ -45,7 +45,7 @@ const SearchableListDropdown = ({
               fontWeight={'500'}
               data-testid={'dropdown-options'}
             >
-              {item}
+              {item.id}
             </Box>
           ))}
         </Box>

@@ -1,19 +1,19 @@
-import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
 import { ARROW_GRAY } from '@theme/index';
 import { useCallback } from 'react';
 import AddFilter from './AddFilter';
 import 'remixicon/fonts/remixicon.css';
-import SelectValue from './SelectValue';
-import SelectEventProperty from './SelectEventProperty';
 import {
   SegmentFilter,
   SegmentFilterConditions,
   SegmentGroup,
+  SegmentProperty,
 } from '@lib/domain/segment';
 import { cloneDeep } from 'lodash';
+import WhereSegmentFilter from './SegmentFilter/WhereSegmentFilter';
 
 type QueryBuilderProps = {
-  eventProperties: string[];
+  eventProperties: SegmentProperty[];
   loadingEventProperties: boolean;
   setGroups: Function;
   setRefreshOnDelete: Function;
@@ -21,8 +21,6 @@ type QueryBuilderProps = {
   groupIndex: number;
   groups: SegmentGroup[];
 };
-import FilterConditions from './FilterConditions';
-import FilterOperator from './FilterOperator';
 
 const QueryBuilder = ({
   eventProperties,
@@ -89,40 +87,16 @@ const QueryBuilder = ({
           {group.filters.map(
             (filter: SegmentFilter, i: number, filters: SegmentFilter[]) => {
               return (
-                <Flex
+                <WhereSegmentFilter
                   key={i}
-                  gap={'3'}
-                  alignItems={'center'}
-                  data-testid="query-builder"
-                >
-                  <FilterConditions
-                    index={i}
-                    conditions={group.conditions}
-                    updateGroupsState={updateGroupsState}
-                  />
-                  <SelectEventProperty
-                    index={i}
-                    filter={filter}
-                    eventProperties={eventProperties}
-                    filters={filters}
-                    updateGroupsState={updateGroupsState}
-                  />
-                  <FilterOperator filter={filter} />
-                  <SelectValue
-                    filter={filter}
-                    filters={filters}
-                    updateGroupsState={updateGroupsState}
-                    index={i}
-                  />
-                  <IconButton
-                    aria-label="delete"
-                    size={'sm'}
-                    icon={<i className="ri-delete-bin-6-line"></i>}
-                    onClick={() => removeFilter(i)}
-                    bg={'white.DEFAULT'}
-                    variant={'secondary'}
-                  />
-                </Flex>
+                  filter={filter}
+                  filters={filters}
+                  group={group}
+                  updateGroupsState={updateGroupsState}
+                  eventProperties={eventProperties}
+                  index={i}
+                  removeFilter={removeFilter}
+                />
               );
             }
           )}

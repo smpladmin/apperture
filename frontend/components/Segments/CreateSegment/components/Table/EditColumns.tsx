@@ -3,9 +3,10 @@ import { Box, Button, Text } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import SearchableCheckboxDropdown from '@components/SearchableDropdown/SearchableCheckboxDropdown';
+import { SegmentProperty } from '@lib/domain/segment';
 
 type EditColumnsProps = {
-  eventProperties: string[];
+  eventProperties: SegmentProperty[];
   setSelectedColumns: Function;
   selectedColumns: string[];
 };
@@ -35,7 +36,7 @@ const EditColumns = ({
     const checked = e.target.checked;
     if (checked) {
       setAllValuesSelected(true);
-      setCheckedValues(eventProperties);
+      setCheckedValues(eventProperties.map((property) => property.id));
     } else {
       setAllValuesSelected(false);
       setCheckedValues([]);

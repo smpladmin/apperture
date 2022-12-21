@@ -1,14 +1,17 @@
 import { Box, Button } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
+import {
+  SegmentFilter,
+  SegmentFilterConditions,
+  SegmentProperty,
+} from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 
 type AddFilterProps = {
   loadingEventProperties: boolean;
-  eventProperties: string[];
+  eventProperties: SegmentProperty[];
   updateGroupsState: Function;
-
   filters: SegmentFilter[];
   conditions: SegmentFilterConditions[];
 };
