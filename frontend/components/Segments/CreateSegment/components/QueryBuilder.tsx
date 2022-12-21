@@ -1,6 +1,6 @@
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import { ARROW_GRAY } from '@theme/index';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import AddFilter from './AddFilter';
 import 'remixicon/fonts/remixicon.css';
 import SelectValue from './SelectValue';
@@ -22,6 +22,7 @@ type QueryBuilderProps = {
   groups: SegmentGroup[];
 };
 import FilterConditions from './FilterConditions';
+import FilterOperator from './FilterOperator';
 
 const QueryBuilder = ({
   eventProperties,
@@ -106,19 +107,7 @@ const QueryBuilder = ({
                     filters={filters}
                     updateGroupsState={updateGroupsState}
                   />
-                  <Box>
-                    <Text
-                      fontSize={'xs-14'}
-                      lineHeight={'xs-14'}
-                      fontWeight={'600'}
-                      px={'2'}
-                      py={'2'}
-                      bg={'white.100'}
-                      cursor={'pointer'}
-                    >
-                      {filter.operator}
-                    </Text>
-                  </Box>
+                  <FilterOperator filter={filter} />
                   <SelectValue
                     filter={filter}
                     filters={filters}
@@ -141,7 +130,7 @@ const QueryBuilder = ({
         <AddFilter
           eventProperties={eventProperties}
           loadingEventProperties={loadingEventProperties}
-          filters={cloneDeep(group.filters)}
+          filters={group.filters}
           conditions={group.conditions}
           updateGroupsState={updateGroupsState}
         />
