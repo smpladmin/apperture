@@ -58,7 +58,7 @@ class Segments(Events):
                         criterion.append(
                             Field(f"properties.{filter.operand}").isin(filter.values)
                         )
-                elif group.conditions[0] == SegmentFilterConditions.WHERE:
+                elif group.conditions[0] == SegmentFilterConditions.WHO:
                     pass
             sub_query = sub_query.where(
                 self.table.datasource_id == Parameter("%(ds_id)s")
