@@ -41,13 +41,16 @@ const AddFilter = ({
       return;
     }
 
-    let updatedConditions = [];
-    if (conditions[conditions.length - 1] === SegmentFilterConditions.WHERE) {
-      updatedConditions = [...conditions, SegmentFilterConditions.AND];
+    let conditionToAdd;
+    const isLastConditionWhere =
+      conditions[conditions.length - 1] === SegmentFilterConditions.WHERE;
+    if (isLastConditionWhere) {
+      conditionToAdd = SegmentFilterConditions.AND;
     } else {
-      updatedConditions = [...conditions, conditions[conditions.length - 1]];
+      // add 'and' / 'or' depending on last condition present
+      conditionToAdd = conditions[conditions.length - 1];
     }
-    updateGroupsState(updatedFilter, updatedConditions);
+    updateGroupsState(updatedFilter, [...conditions, conditionToAdd]);
   };
 
   return (
