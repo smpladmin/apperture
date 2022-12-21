@@ -63,14 +63,11 @@ const FilterConditions = ({
           overflowY={'auto'}
         >
           {
-            <Flex direction={'column'} minW={'15'} gap={'3'}>
+            <Flex direction={'column'} minW={'15'}>
               {filterCondtionsValues.map((value) => {
                 return (
                   <Flex
-                    as={'label'}
-                    gap={'3'}
-                    px={'2'}
-                    py={'3'}
+                    p={'2'}
                     key={value}
                     _hover={{
                       bg: 'white.100',
