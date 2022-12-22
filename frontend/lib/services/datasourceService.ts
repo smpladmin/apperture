@@ -1,4 +1,4 @@
-import { AppertureGetCall, ApperturePrivateGetCall } from './util';
+import { AppertureGet, ApperturePrivateGet } from './util';
 import { AppertureAPI } from '@lib/apiClient';
 import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
 import { ProviderDataSource } from '@lib/domain/datasource';
@@ -53,15 +53,12 @@ export const _getEdges = async (token: string, dsId: string) => {
 };
 
 export const _getNodes = async (token: string, dsId: string) => {
-  const res = await ApperturePrivateGetCall(
-    token,
-    `/datasources/${dsId}/nodes`
-  );
+  const res = await ApperturePrivateGet(`/datasources/${dsId}/nodes`, token);
   return res.data;
 };
 
 export const getNodes = async (dsId: string): Promise<Node[]> => {
-  const res = await AppertureGetCall(`/datasources/${dsId}/nodes`);
+  const res = await AppertureGet(`/datasources/${dsId}/nodes`);
   return res.data;
 };
 

@@ -1,4 +1,4 @@
-import { ApperturePostCall, AppertureGetCall } from './util';
+import { ApperturePost, AppertureGet } from './util';
 import { ThresholdMetricType } from '../domain/notification';
 
 export const setAlert = async (
@@ -8,7 +8,7 @@ export const setAlert = async (
   thresholdMetric: string,
   values: number[]
 ) => {
-  return await ApperturePostCall('/notifications', {
+  return await ApperturePost('/notifications', {
     datasourceId: dsId,
     name: nodeName,
     notificationType: 'alert',
@@ -37,6 +37,6 @@ export const setAlert = async (
 };
 
 export const getSavedNotificationsForUser = async () => {
-  const res = await AppertureGetCall(`/notifications`);
+  const res = await AppertureGet(`/notifications`);
   return res.data;
 };

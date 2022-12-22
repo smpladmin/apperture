@@ -2,7 +2,7 @@ import { AppertureAPI } from '@lib/apiClient';
 import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
 import { AxiosError } from 'axios';
 
-export const AppertureGetCall = async (path: string) => {
+export const AppertureGet = async (path: string) => {
   try {
     return await AppertureAPI.get(path);
   } catch (e) {
@@ -12,7 +12,7 @@ export const AppertureGetCall = async (path: string) => {
   }
 };
 
-export const ApperturePrivateGetCall = async (token: string, path: string) => {
+export const ApperturePrivateGet = async (path: string, token: string) => {
   try {
     return await ApperturePrivateAPI.get(path, {
       headers: { Authorization: token },
@@ -24,7 +24,7 @@ export const ApperturePrivateGetCall = async (token: string, path: string) => {
   }
 };
 
-export const ApperturePostCall = async (
+export const ApperturePost = async (
   path: string,
   payload: {
     [key: string]: string | number | boolean | Array<any> | object | null;
@@ -39,7 +39,7 @@ export const ApperturePostCall = async (
   }
 };
 
-export const ApperturePutCall = async (
+export const ApperturePut = async (
   path: string,
   payload: { [key: string]: string | number | Array<any> | object | null }
 ) => {

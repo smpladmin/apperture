@@ -1,4 +1,4 @@
-import { ApperturePrivateGetCall, ApperturePostCall } from './util';
+import { ApperturePrivateGet, ApperturePost } from './util';
 import { cloneDeep } from 'lodash';
 import { replaceEmptyStringPlaceholder } from './../../components/Segments/util';
 import { SegmentGroup } from '@lib/domain/segment';
@@ -8,7 +8,7 @@ export const computeSegment = async (
   groups: SegmentGroup[],
   columns: string[]
 ) => {
-  const res = await ApperturePostCall('/segments/transient', {
+  const res = await ApperturePost('/segments/transient', {
     datasourceId: dsId,
     groups: replaceEmptyStringPlaceholder(cloneDeep(groups)),
     columns,
@@ -24,7 +24,7 @@ export const saveSegment = async (
   groups: SegmentGroup[],
   columns: string[]
 ) => {
-  return await ApperturePostCall('/segments', {
+  return await ApperturePost('/segments', {
     name,
     description,
     datasourceId: dsId,
@@ -35,6 +35,6 @@ export const saveSegment = async (
 };
 
 export const _getSavedSegment = async (token: string, segementId: string) => {
-  const res = await ApperturePrivateGetCall(token, `/segments/${segementId}`);
+  const res = await ApperturePrivateGet(`/segments/${segementId}`, token);
   return res.data;
 };
