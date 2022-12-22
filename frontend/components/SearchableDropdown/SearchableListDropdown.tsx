@@ -1,13 +1,16 @@
-import { Box, Text } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
+import { SegmentProperty } from '@lib/domain/segment';
+import { capitalizeFirstLetter } from '@lib/utils/common';
 import React, { useEffect, useState } from 'react';
 import SearchableDropdown from './SearchableDropdown';
 
 type SearchableListDropdownProps = {
   isOpen: boolean;
   isLoading: boolean;
-  data: any[];
+  data: Array<string | SegmentProperty>;
   onSubmit: Function;
-  listKey?: string;
+  listKey?: keyof SegmentProperty;
+  showBadge?: boolean;
 };
 
 const SearchableListDropdown = ({
@@ -16,8 +19,9 @@ const SearchableListDropdown = ({
   data,
   onSubmit,
   listKey,
+  showBadge,
 }: SearchableListDropdownProps) => {
-  const [listData, setListData] = useState<any[]>([]);
+  const [listData, setListData] = useState<Array<string | SegmentProperty>>([]);
 
   useEffect(() => {
     if (!listData.length) setListData(data);
@@ -33,24 +37,53 @@ const SearchableListDropdown = ({
     >
       {listData.length ? (
         <Box data-testid={'event-property-dropdown-container'}>
-          {listData.map((item) => (
-            <Box
-              key={listKey ? item[listKey] : item}
-              onClick={() => onSubmit(listKey ? item[listKey] : item)}
-              cursor={'pointer'}
-              px={'2'}
-              py={'3'}
-              _hover={{
-                bg: 'white.100',
-              }}
-              fontSize={'xs-14'}
-              lineHeight={'xs-14'}
-              fontWeight={'500'}
-              data-testid={'dropdown-options'}
-            >
-              {listKey ? item[listKey] : item}
-            </Box>
-          ))}
+          {listData.map((item) => {
+            const segmentPropertyItem =
+              listKey && (item as SegmentProperty)[listKey];
+            return (
+              <Flex
+                key={listKey ? segmentPropertyItem : (item as string)}
+                alignItems={'center'}
+                justifyContent={'space-between'}
+                _hover={{
+                  bg: 'white.100',
+                  cursor: 'pointer',
+                }}
+                px={'2'}
+                onClick={() => onSubmit(listKey ? segmentPropertyItem : item)}
+              >
+                <Box
+                  cursor={'pointer'}
+                  px={'2'}
+                  py={'3'}
+                  fontSize={'xs-14'}
+                  lineHeight={'xs-14'}
+                  fontWeight={'500'}
+                  data-testid={'dropdown-options'}
+                  maxW={'75'}
+                >
+                  {listKey ? segmentPropertyItem : (item as string)}
+                </Box>
+                {showBadge ? (
+                  <Box
+                    h={'6'}
+                    px={'2'}
+                    py={'1'}
+                    bg={'grey.DEFAULT'}
+                    borderRadius={'4'}
+                  >
+                    <Text
+                      fontSize={'xs-12'}
+                      lineHeight={'xs-12'}
+                      fontWeight={'400'}
+                    >
+                      {capitalizeFirstLetter((item as SegmentProperty)?.type)}
+                    </Text>
+                  </Box>
+                ) : null}
+              </Flex>
+            );
+          })}
         </Box>
       ) : (
         <Text

@@ -2,12 +2,13 @@ import { Box, Flex, Input } from '@chakra-ui/react';
 import { ChangeEvent, ReactNode, useEffect } from 'react';
 import { getSearchResult } from '@lib/utils/common';
 import LoadingSpinner from '@components/LoadingSpinner';
+import { SegmentProperty } from '@lib/domain/segment';
 
 type SearchableDropdownProps = {
   isOpen: boolean;
   isLoading: boolean;
   children: ReactNode;
-  data: string[];
+  data: Array<string | SegmentProperty>;
   setSearchData?: Function;
   dropdownPosition?: string;
   searchKey?: string;
@@ -53,6 +54,7 @@ const SearchableDropdown = ({
           bg={'white.DEFAULT'}
           shadow={'0px 0px 4px rgba(0, 0, 0, 0.12)'}
           maxH={'102'}
+          maxWidth={'102'}
           overflowY={'auto'}
           right={dropdownPosition === 'right' ? 0 : ''}
         >

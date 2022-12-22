@@ -79,10 +79,11 @@ const AddFilter = ({
 
       <SearchableListDropdown
         isOpen={isFiltersListOpen}
-        data={eventProperties}
+        data={eventProperties as SegmentProperty[]}
         isLoading={loadingEventProperties}
         onSubmit={onSuggestionClick}
         listKey={'id'}
+        showBadge={true}
       />
     </Box>
   );

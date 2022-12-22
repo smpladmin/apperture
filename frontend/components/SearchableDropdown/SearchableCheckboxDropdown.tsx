@@ -6,20 +6,21 @@ import {
   Flex,
   Text,
 } from '@chakra-ui/react';
+import { SegmentProperty } from '@lib/domain/segment';
 import React, { useEffect, useState } from 'react';
 import SearchableDropdown from './SearchableDropdown';
 
 type SearchableCheckboxDropdownProps = {
   isOpen: boolean;
   isLoading: boolean;
-  data: any[];
+  data: Array<string | SegmentProperty>;
   onSubmit: Function;
   onSelect: Function;
   onAllSelect: Function;
   isSelectAllChecked: boolean;
   selectedValues: string[];
   dropdownPosition?: string;
-  listKey?: string;
+  listKey?: keyof SegmentProperty;
 };
 
 const SearchableCheckboxDropdown = ({
@@ -34,7 +35,7 @@ const SearchableCheckboxDropdown = ({
   dropdownPosition,
   listKey,
 }: SearchableCheckboxDropdownProps) => {
-  const [listData, setListData] = useState<any[]>([]);
+  const [listData, setListData] = useState<Array<string | SegmentProperty>>([]);
 
   useEffect(() => {
     if (!listData.length) setListData(data);
@@ -84,13 +85,15 @@ const SearchableCheckboxDropdown = ({
             }}
           >
             {listData?.slice(0, 100).map((value) => {
+              const segmentPropertyItem =
+                listKey && (value as SegmentProperty)[listKey];
               return (
                 <Flex
                   as={'label'}
                   gap={'3'}
                   px={'2'}
                   py={'3'}
-                  key={listKey ? value[listKey] : value}
+                  key={listKey ? segmentPropertyItem : (value as string)}
                   _hover={{
                     bg: 'white.100',
                   }}
@@ -98,7 +101,7 @@ const SearchableCheckboxDropdown = ({
                 >
                   <Checkbox
                     colorScheme={'radioBlack'}
-                    value={listKey ? value[listKey] : value}
+                    value={listKey ? segmentPropertyItem : (value as string)}
                   >
                     <Text
                       fontSize={'xs-14'}
@@ -106,7 +109,7 @@ const SearchableCheckboxDropdown = ({
                       fontWeight={'medium'}
                       cursor={'pointer'}
                     >
-                      {listKey ? value[listKey] : value}
+                      {listKey ? segmentPropertyItem : (value as string)}
                     </Text>
                   </Checkbox>
                 </Flex>
