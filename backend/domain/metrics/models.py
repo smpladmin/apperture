@@ -10,15 +10,15 @@ class SegmentsAndEventsType(str, Enum):
     SEGMENT = "segment"
 
 class SegmentsAndEventsFilterOperator(str, Enum):
-    IN = "IN"
-    NOT_IN = "NOT_IN"
-    EQUAL = "EQUAL"
-    NOT_EQUAL = "NOT_EQUAL"
-    GREATER = "GREATER"
-    GREATER_OR_EQUAL = "GREATER_OR_EQUAL"
-    LESS = "LESS"
-    LESS_OR_EQUAL = "LESS_OR_EQUAL"
-    BETWEEN = "BETWEEN"
+    IN = "in"
+    NOT_IN = "not_in"
+    EQUALS = "equals"
+    NOT_EQUAL = "not_equal"
+    GREATER = "greater"
+    GREATER_OR_EQUAL = "greater_or_equal"
+    LESS = "less"
+    LESS_OR_EQUAL = "less_or_equal"
+    BETWEEN = "between"
     
 
 class SegmentsAndEventsAggregationsFunctions(str,Enum):
@@ -29,7 +29,7 @@ class SegmentsAndEventsAggregationsFunctions(str,Enum):
     COUNT = "count"
 
 class SegmentsAndEventsAggregations(BaseModel):
-    functions:str
+    functions:SegmentsAndEventsAggregationsFunctions
     property:str
 
 class SegmentsAndEventsFilter(BaseModel):
@@ -38,11 +38,12 @@ class SegmentsAndEventsFilter(BaseModel):
     values: List[str]
 
 class SegmentsAndEvents(BaseModel):
-    variables:str
+    variable:str
     variant:SegmentsAndEventsType
     aggregations: SegmentsAndEventsAggregations
-    reference:str
-    filter: SegmentsAndEventsFilter
+    reference_id:str
+    filters: List[SegmentsAndEventsFilter]
+    conditions:List[str]
 
 class Metric(BaseModel):
     datasource_id: PydanticObjectId
@@ -51,5 +52,15 @@ class Metric(BaseModel):
     name: str
     description: str
     functions:str
+    aggregates:List[SegmentsAndEvents]
+    breakdown:List[str]
+
+class ComputedMetricResult(BaseModel):
+    metric:int
+    data:List[Dict]
+
+class ComputeMetricRequest(BaseModel):
+    datasource_id:PydanticObjectId
+    function: str
     aggregates:List[SegmentsAndEvents]
     breakdown:List[str]

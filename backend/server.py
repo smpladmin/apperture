@@ -22,6 +22,7 @@ from rest.controllers import (
     segment_controller,
     user_controller,
     funnel_controller,
+    metric_controller
 )
 from mongo import Mongo
 from clickhouse import Clickhouse
@@ -69,3 +70,4 @@ app.include_router(notification_controller.router)
 app.include_router(user_controller.router)
 app.include_router(funnel_controller.router)
 app.include_router(segment_controller.router)
+app.include_router(metric_controller.router)
