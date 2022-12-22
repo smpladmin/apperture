@@ -1,12 +1,12 @@
 import { Box, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import { SegmentFilter } from '@lib/domain/segment';
+import { SegmentFilter, SegmentProperty } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 
 type SelectEventPropertyProps = {
   filter: SegmentFilter;
-  eventProperties: string[];
+  eventProperties: SegmentProperty[];
   filters: SegmentFilter[];
   updateGroupsState: Function;
   index: number;
@@ -52,7 +52,8 @@ const SelectEventProperty = ({
         isOpen={isFiltersListOpen}
         data={eventProperties}
         isLoading={false}
-        onSubmit={(val: string) => onSuggestionClick(val)}
+        onSubmit={onSuggestionClick}
+        listKey={'id'}
       />
     </Box>
   );

@@ -1,14 +1,17 @@
 import { Box, Button } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
+import {
+  SegmentFilter,
+  SegmentFilterConditions,
+  SegmentProperty,
+} from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 
 type AddFilterProps = {
   loadingEventProperties: boolean;
-  eventProperties: string[];
+  eventProperties: SegmentProperty[];
   updateGroupsState: Function;
-
   filters: SegmentFilter[];
   conditions: SegmentFilterConditions[];
 };
@@ -54,7 +57,12 @@ const AddFilter = ({
   };
 
   return (
-    <Box position={'relative'} ref={addFilterRef} borderColor={'grey.100'}>
+    <Box
+      position={'relative'}
+      ref={addFilterRef}
+      borderColor={'grey.100'}
+      w={'fit-content'}
+    >
       <Button
         onClick={() => setOpenFiltersList(true)}
         bg={'white.DEFAULT'}
@@ -71,9 +79,11 @@ const AddFilter = ({
 
       <SearchableListDropdown
         isOpen={isFiltersListOpen}
-        data={eventProperties}
+        data={eventProperties as SegmentProperty[]}
         isLoading={loadingEventProperties}
-        onSubmit={(val: string) => onSuggestionClick(val)}
+        onSubmit={onSuggestionClick}
+        listKey={'id'}
+        showBadge={true}
       />
     </Box>
   );

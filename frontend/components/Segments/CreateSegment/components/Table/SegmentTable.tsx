@@ -21,10 +21,10 @@ import {
 } from '@chakra-ui/react';
 import EditColumns from './EditColumns';
 import TableSkeleton from '@components/Skeleton/TableSkeleton';
-import { SegmentTableData } from '@lib/domain/segment';
+import { SegmentProperty, SegmentTableData } from '@lib/domain/segment';
 
 type SegmentTableProps = {
-  eventProperties: string[];
+  eventProperties: SegmentProperty[];
   selectedColumns: string[];
   setSelectedColumns: Function;
   userTableData: SegmentTableData;

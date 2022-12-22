@@ -3,7 +3,6 @@ import SearchableCheckBoxDropdown from '@components/SearchableDropdown/Searchabl
 import { SegmentFilter } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { getEventPropertiesValue } from '@lib/services/datasourceService';
-import { cloneDeep } from 'lodash';
 import { useRouter } from 'next/router';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 

@@ -31,13 +31,21 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
+
+  if (!savedSegment) {
+    return {
+      redirect: {
+        destination: '/404',
+      },
+      props: {},
+    };
+  }
   return {
     props: { apps, savedSegment },
   };
 };
 
 const EditSegments = ({ savedSegment }: { savedSegment: Segment }) => {
-  console.log({ savedSegment });
   return <CreateSegment {...{ savedSegment }} />;
 };
 

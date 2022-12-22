@@ -4,10 +4,16 @@ export type SegmentFilter = {
   values: string[];
 };
 
+export type SegmentProperty = {
+  id: string;
+  type: string;
+};
+
 export enum SegmentFilterConditions {
   WHERE = 'where',
   AND = 'and',
   OR = 'or',
+  WHO = 'who',
 }
 
 export type SegmentGroup = {

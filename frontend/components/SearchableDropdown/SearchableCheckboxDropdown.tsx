@@ -6,19 +6,21 @@ import {
   Flex,
   Text,
 } from '@chakra-ui/react';
+import { SegmentProperty } from '@lib/domain/segment';
 import React, { useEffect, useState } from 'react';
 import SearchableDropdown from './SearchableDropdown';
 
 type SearchableCheckboxDropdownProps = {
   isOpen: boolean;
   isLoading: boolean;
-  data: string[];
+  data: Array<string | SegmentProperty>;
   onSubmit: Function;
   onSelect: Function;
   onAllSelect: Function;
   isSelectAllChecked: boolean;
   selectedValues: string[];
   dropdownPosition?: string;
+  listKey?: keyof SegmentProperty;
 };
 
 const SearchableCheckboxDropdown = ({
@@ -31,8 +33,9 @@ const SearchableCheckboxDropdown = ({
   isSelectAllChecked,
   selectedValues,
   dropdownPosition,
+  listKey,
 }: SearchableCheckboxDropdownProps) => {
-  const [listData, setListData] = useState<string[]>([]);
+  const [listData, setListData] = useState<Array<string | SegmentProperty>>([]);
 
   useEffect(() => {
     if (!listData.length) setListData(data);
@@ -45,6 +48,7 @@ const SearchableCheckboxDropdown = ({
       data={data}
       setSearchData={setListData}
       dropdownPosition={dropdownPosition}
+      searchKey={listKey}
     >
       <Flex
         direction={'column'}
@@ -81,26 +85,31 @@ const SearchableCheckboxDropdown = ({
             }}
           >
             {listData?.slice(0, 100).map((value) => {
+              const segmentPropertyItem =
+                listKey && (value as SegmentProperty)[listKey];
               return (
                 <Flex
                   as={'label'}
                   gap={'3'}
                   px={'2'}
                   py={'3'}
-                  key={value}
+                  key={listKey ? segmentPropertyItem : (value as string)}
                   _hover={{
                     bg: 'white.100',
                   }}
                   data-testid={'property-value-dropdown-option'}
                 >
-                  <Checkbox colorScheme={'radioBlack'} value={value}>
+                  <Checkbox
+                    colorScheme={'radioBlack'}
+                    value={listKey ? segmentPropertyItem : (value as string)}
+                  >
                     <Text
                       fontSize={'xs-14'}
                       lineHeight={'xs-14'}
                       fontWeight={'medium'}
                       cursor={'pointer'}
                     >
-                      {value}
+                      {listKey ? segmentPropertyItem : (value as string)}
                     </Text>
                   </Checkbox>
                 </Flex>
