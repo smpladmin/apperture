@@ -46,7 +46,6 @@ export const getServerSideProps: GetServerSideProps = async ({
 };
 
 const EditSegments = ({ savedSegment }: { savedSegment: Segment }) => {
-  console.log({ savedSegment });
   return <CreateSegment {...{ savedSegment }} />;
 };
 
