@@ -1,8 +1,9 @@
+from typing import List
 from beanie import PydanticObjectId
 from pydantic import BaseModel
 
 from rest.dtos.model_response import ModelResponse
-from domain.metrics.models import ComputedMetricResult,ComputeMetricRequest
+from domain.metrics.models import ComputedMetricResult,SegmentsAndEvents
 
 
 
@@ -10,6 +11,10 @@ class MetricsComputeResponse(ComputedMetricResult,ModelResponse):
     class Config:
         allow_population_by_field_name = True
     
-class MetricsComputeDto(ComputeMetricRequest,BaseModel):
+class MetricsComputeDto(BaseModel):
     class Config:
         allow_population_by_field_name = True
+    datasourceId:PydanticObjectId
+    function: str
+    aggregates:List[SegmentsAndEvents]
+    breakdown:List[str]

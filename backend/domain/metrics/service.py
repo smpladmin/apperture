@@ -26,6 +26,5 @@ class MetricService:
             breakdown=breakdown,
             function=function,
         )
-        
-        return ComputedMetricResult(metric=computed_metric,data=[])
+        return ComputedMetricResult(metric=computed_metric)
 

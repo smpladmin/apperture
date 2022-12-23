@@ -56,11 +56,5 @@ class Metric(BaseModel):
     breakdown:List[str]
 
 class ComputedMetricResult(BaseModel):
-    metric:int
-    data:List[Dict]
+    metric:List[tuple]
 
-class ComputeMetricRequest(BaseModel):
-    datasource_id:PydanticObjectId
-    function: str
-    aggregates:List[SegmentsAndEvents]
-    breakdown:List[str]
