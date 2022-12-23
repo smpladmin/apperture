@@ -1,8 +1,31 @@
-export type SegmentFilter = {
+export type WhereSegmentFilter = {
   operand: string;
-  operator: string;
+  operator: SegmentFilterOperators;
   values: string[];
+  type: FilterType;
 };
+
+export type WhoSegmentFilter = {
+  triggered: boolean;
+  operand: string;
+  aggregation: string;
+  operator: SegmentFilterOperators;
+  values: string[];
+  start_date: Date;
+  end_date: Date;
+  type: FilterType;
+};
+
+export type SegmentFilter = WhereSegmentFilter | WhoSegmentFilter;
+
+export enum SegmentFilterOperators {
+  EQUALS = 'equals',
+}
+
+export enum FilterType {
+  WHERE = 'where',
+  WHO = 'who',
+}
 
 export type SegmentProperty = {
   id: string;

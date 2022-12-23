@@ -1,15 +1,22 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import { SegmentFilterConditions } from '@lib/domain/segment';
+import { getWhereAndWhoConditionsList } from '@components/Segments/util';
+import {
+  FilterType,
+  SegmentFilter,
+  SegmentFilterConditions,
+} from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 
 type FilterConditionsProps = {
+  filter: SegmentFilter;
   conditions: SegmentFilterConditions[];
   index: number;
   updateGroupsState: Function;
 };
 
 const FilterConditions = ({
+  filter,
   conditions,
   index,
   updateGroupsState,
@@ -18,12 +25,29 @@ const FilterConditions = ({
     useState(false);
 
   const updateFilterConditions = (value: SegmentFilterConditions) => {
-    const newConditions = conditions.map((condition: SegmentFilterConditions) =>
-      condition === SegmentFilterConditions.WHERE ? condition : value
-    );
-    updateGroupsState(false, newConditions);
     setIsFilterConditionsListOpen(false);
+
+    const { whereConditions, whoConditions } =
+      getWhereAndWhoConditionsList(conditions);
+    let updatedWhereConditions = whereConditions;
+    let updatedWhoConditions = whoConditions;
+
+    if (filter.type === FilterType.WHERE) {
+      updatedWhereConditions = whereConditions.map(
+        (condition: SegmentFilterConditions) =>
+          condition === SegmentFilterConditions.WHERE ? condition : value
+      );
+    } else {
+      updatedWhoConditions = whoConditions.map(
+        (condition: SegmentFilterConditions) =>
+          condition === SegmentFilterConditions.WHO ? condition : value
+      );
+    }
+
+    const newConditions = [...updatedWhereConditions, ...updatedWhoConditions];
+    updateGroupsState(false, newConditions);
   };
+
   const filterCondtionsValues = [
     SegmentFilterConditions.AND,
     SegmentFilterConditions.OR,
@@ -32,6 +56,11 @@ const FilterConditions = ({
   useOnClickOutside(filterConditionsRef, () =>
     setIsFilterConditionsListOpen(false)
   );
+
+  const isConditionWhereOrWho = [
+    SegmentFilterConditions.WHERE,
+    SegmentFilterConditions.WHO,
+  ].includes(conditions[index]);
 
   return (
     <Box w={'12'} ref={filterConditionsRef} position="relative">
@@ -47,8 +76,7 @@ const FilterConditions = ({
       >
         {conditions[index]}
       </Text>
-      {isFilterConditionsListOpen &&
-      conditions[index] !== SegmentFilterConditions.WHERE ? (
+      {isFilterConditionsListOpen && !isConditionWhereOrWho ? (
         <Box
           position={'absolute'}
           zIndex={1}

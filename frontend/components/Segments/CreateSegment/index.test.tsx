@@ -15,7 +15,11 @@ import {
 } from '@lib/services/datasourceService';
 import { getSearchResult } from '@lib/utils/common';
 import { computeSegment, saveSegment } from '@lib/services/segmentService';
-import { SegmentFilterConditions } from '@lib/domain/segment';
+import {
+  FilterType,
+  SegmentFilterConditions,
+  WhereSegmentFilter,
+} from '@lib/domain/segment';
 import { getUserInfo } from '@lib/services/userService';
 
 jest.mock('@lib/services/datasourceService');
@@ -82,13 +86,15 @@ describe('Create Segment', () => {
             operand: 'properties.$city',
             operator: 'equals',
             values: ['Chennai', 'Guwahati', 'Patna'],
+            type: FilterType.WHERE,
           },
           {
             operand: 'properties.$app_version',
             operator: 'equals',
             values: ['1.5.5', '1.5.6'],
+            type: FilterType.WHERE,
           },
-        ],
+        ] as WhereSegmentFilter[],
         conditions: [
           SegmentFilterConditions.WHERE,
           SegmentFilterConditions.AND,

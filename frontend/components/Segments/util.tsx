@@ -1,7 +1,31 @@
-import { SegmentGroup } from '@lib/domain/segment';
+import { SegmentFilterConditions, SegmentGroup } from '@lib/domain/segment';
 
 export const getFilteredColumns = (columns: string[]) => {
   return columns.filter((value) => value !== 'user_id');
+};
+
+export const getWhereAndWhoConditionsList = (
+  conditions: SegmentFilterConditions[]
+) => {
+  const whereConditionIndex = conditions.indexOf(SegmentFilterConditions.WHERE);
+  const whoConditionIndex = conditions.indexOf(SegmentFilterConditions.WHO);
+
+  // note: 'where' conditions would always be present before 'who' conditions
+  // therefore, while finding 'where' conditions be sure to check whether 'who' condition is present
+  // incase, no 'who' condition is found that signifies that all the conditions are 'where' conditions
+
+  // ['where', 'and', 'and', 'who'];
+  const whereConditions =
+    whereConditionIndex === -1
+      ? []
+      : whoConditionIndex === -1
+      ? conditions.slice(whereConditionIndex)
+      : conditions.slice(whereConditionIndex, whoConditionIndex);
+
+  const whoConditions =
+    whoConditionIndex === -1 ? [] : conditions.slice(whoConditionIndex);
+
+  return { whereConditions, whoConditions };
 };
 
 export const replaceEmptyStringPlaceholder = (groups: SegmentGroup[]) => {

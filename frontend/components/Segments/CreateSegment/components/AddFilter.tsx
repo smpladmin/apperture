@@ -1,12 +1,15 @@
 import { Box, Button } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
+import { getWhereAndWhoConditionsList } from '@components/Segments/util';
 import {
+  FilterType,
   SegmentFilter,
   SegmentFilterConditions,
+  SegmentFilterOperators,
   SegmentProperty,
 } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 type AddFilterProps = {
   loadingEventProperties: boolean;
@@ -28,32 +31,83 @@ const AddFilter = ({
 
   useOnClickOutside(addFilterRef, () => setOpenFiltersList(false));
 
-  const onSuggestionClick = (val: string) => {
+  const getFiltersList = (
+    whereFilters: SegmentFilter[],
+    whoFilters: SegmentFilter[],
+    item: SegmentProperty
+  ) => {
+    if (item.type === 'property') {
+      whereFilters.push({
+        operand: item.id,
+        operator: SegmentFilterOperators.EQUALS,
+        values: [],
+        type: FilterType.WHERE,
+      });
+    } else {
+      whoFilters.push({
+        triggered: true,
+        operand: item.id,
+        aggregation: 'Total',
+        operator: SegmentFilterOperators.EQUALS,
+        values: [],
+        start_date: new Date(),
+        end_date: new Date(),
+        type: FilterType.WHO,
+      });
+    }
+    return [...whereFilters, ...whoFilters];
+  };
+
+  const getFilterConditionsList = (item: SegmentProperty) => {
+    /* cases:-
+    1. first filter - where / who depending on filter selected from dropdown
+    2. by default - add 'and' condition for next filter for both where, who
+    3. add 'or' condition only for where filter if last condition of where filter conditions is 'or' if item selected is property
+    4. add 'or' condition only for who filter if last condition of who filter conditionsis 'or' if item selected is event
+    */
+
+    const { whereConditions, whoConditions } =
+      getWhereAndWhoConditionsList(conditions);
+    const lastWhereCondition = whereConditions[whereConditions.length - 1];
+    const lastWhoCondition = whoConditions[whoConditions.length - 1];
+
+    const isLastConditionWhere =
+      lastWhereCondition === SegmentFilterConditions.WHERE;
+    const isLastConditionWho = lastWhoCondition === SegmentFilterConditions.WHO;
+
+    switch (item.type) {
+      case 'property':
+        if (!whereConditions.length)
+          whereConditions.push(SegmentFilterConditions.WHERE);
+        else if (isLastConditionWhere)
+          whereConditions.push(SegmentFilterConditions.AND);
+        else whereConditions.push(lastWhereCondition);
+        break;
+      case 'event':
+        if (!whoConditions.length)
+          whoConditions.push(SegmentFilterConditions.WHO);
+        else if (isLastConditionWho)
+          whoConditions.push(SegmentFilterConditions.AND);
+        else whoConditions.push(lastWhoCondition);
+    }
+
+    return [...whereConditions, ...whoConditions];
+  };
+
+  const onAddFilter = (item: SegmentProperty) => {
     setOpenFiltersList(false);
 
-    const updatedFilter = [
-      ...filters,
-      {
-        operand: val,
-        operator: 'equals',
-        values: [],
-      },
-    ];
-    if (conditions.length === 0) {
-      updateGroupsState(updatedFilter, [SegmentFilterConditions.WHERE]);
-      return;
-    }
+    const whereFilters = filters.filter(
+      (filter) => filter.type === FilterType.WHERE
+    );
+    const whoFilters = filters.filter(
+      (filter) => filter.type === FilterType.WHO
+    );
 
-    let conditionToAdd;
-    const isLastConditionWhere =
-      conditions[conditions.length - 1] === SegmentFilterConditions.WHERE;
-    if (isLastConditionWhere) {
-      conditionToAdd = SegmentFilterConditions.AND;
-    } else {
-      // add 'and' / 'or' depending on last condition present
-      conditionToAdd = conditions[conditions.length - 1];
-    }
-    updateGroupsState(updatedFilter, [...conditions, conditionToAdd]);
+    const updatedFilter = getFiltersList(whereFilters, whoFilters, item);
+    const updatedConditions = getFilterConditionsList(item);
+
+    updateGroupsState(updatedFilter, updatedConditions);
   };
 
   return (
@@ -81,7 +135,7 @@ const AddFilter = ({
         isOpen={isFiltersListOpen}
         data={eventProperties as SegmentProperty[]}
         isLoading={loadingEventProperties}
-        onSubmit={onSuggestionClick}
+        onSubmit={onAddFilter}
         listKey={'id'}
         showBadge={true}
       />

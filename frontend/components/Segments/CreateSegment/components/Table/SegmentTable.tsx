@@ -106,7 +106,7 @@ const SegmentTable = ({
             fontWeight={'500'}
             data-testid={'users-count'}
           >
-            {userTableData.count || 0} Users
+            {userTableData?.count || 0} Users
           </Text>
         </Flex>
         <Flex gap={'1'}>
@@ -137,7 +137,7 @@ const SegmentTable = ({
       >
         {isSegmentDataLoading ? (
           <TableSkeleton tableHeader={selectedColumns} />
-        ) : userTableData.data?.length ? (
+        ) : userTableData?.data?.length ? (
           <Table data-testid={'segment-table'}>
             <Thead py={'3'} px={'8'} bg={'white.100'}>
               {getHeaderGroups().map((headerGroup, groupIndex) => (
