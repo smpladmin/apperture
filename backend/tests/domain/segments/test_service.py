@@ -6,7 +6,8 @@ from beanie import PydanticObjectId
 
 from domain.segments.service import SegmentService
 from domain.segments.models import (
-    SegmentFilter,
+    WhoSegmentFilter,
+    WhereSegmentFilter,
     SegmentFilterOperators,
     SegmentFilterConditions,
     SegmentGroup,
@@ -25,12 +26,12 @@ class TestSegmentService:
         self.ds_id = "63771fc960527aba9354399c"
         Segment.app_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.filters = [
-            SegmentFilter(
+            WhereSegmentFilter(
                 operator=SegmentFilterOperators.EQUALS,
                 operand="prop1",
                 values=["va1", "val2"],
             ),
-            SegmentFilter(
+            WhereSegmentFilter(
                 operator=SegmentFilterOperators.EQUALS,
                 operand="prop2",
                 values=["va3", "val4"],
@@ -83,12 +84,12 @@ class TestSegmentService:
                 "groups": [
                     SegmentGroup(
                         filters=[
-                            SegmentFilter(
+                            WhereSegmentFilter(
                                 operator=SegmentFilterOperators.EQUALS,
                                 operand="prop1",
                                 values=["va1", "val2"],
                             ),
-                            SegmentFilter(
+                            WhereSegmentFilter(
                                 operator=SegmentFilterOperators.EQUALS,
                                 operand="prop2",
                                 values=["va3", "val4"],

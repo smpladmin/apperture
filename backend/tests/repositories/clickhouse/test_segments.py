@@ -2,7 +2,8 @@ from unittest.mock import MagicMock
 
 from domain.segments.models import (
     SegmentGroup,
-    SegmentFilter,
+    WhoSegmentFilter,
+    WhereSegmentFilter,
     SegmentFilterOperators,
     SegmentFilterConditions,
 )
@@ -17,12 +18,12 @@ class TestSegmentsRepository:
         self.repo = repo
         self.datasource_id = "test-id"
         self.filters = [
-            SegmentFilter(
+            WhereSegmentFilter(
                 operator=SegmentFilterOperators.EQUALS,
                 operand="prop1",
                 values=["va1", "val2"],
             ),
-            SegmentFilter(
+            WhereSegmentFilter(
                 operator=SegmentFilterOperators.EQUALS,
                 operand="prop2",
                 values=["va3", "val4"],
