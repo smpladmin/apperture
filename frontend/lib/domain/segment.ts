@@ -4,10 +4,16 @@ export type SegmentFilter = {
   values: string[];
 };
 
+export type SegmentProperty = {
+  id: string;
+  type: string;
+};
+
 export enum SegmentFilterConditions {
   WHERE = 'where',
   AND = 'and',
   OR = 'or',
+  WHO = 'who',
 }
 
 export type SegmentGroup = {
@@ -21,7 +27,7 @@ export type SegmentTableData = {
 };
 
 export type Segment = {
-  app_id: string;
+  appId: string;
   columns: string[];
   createdAt: Date;
   datasourceId: string;

@@ -8,10 +8,19 @@ import {
   Tooltip,
   useDisclosure,
 } from '@chakra-ui/react';
-import { Segment, SegmentGroup, SegmentTableData } from '@lib/domain/segment';
+import {
+  Segment,
+  SegmentGroup,
+  SegmentProperty,
+  SegmentTableData,
+} from '@lib/domain/segment';
 import QueryBuilder from './components/QueryBuilder';
 import SegmentTable from './components/Table/SegmentTable';
-import { getEventProperties } from '@lib/services/datasourceService';
+import {
+  getEventProperties,
+  getNodes,
+  _getNodes,
+} from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
 import { computeSegment } from '@lib/services/segmentService';
 import { getFilteredColumns } from '../util';
@@ -24,6 +33,7 @@ import ExitConfirmationModal from './components/ExitConfirmationModal';
 type CreateSegmentProp = {
   savedSegment?: Segment;
 };
+
 const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
   const [groups, setGroups] = useState<SegmentGroup[]>(
     savedSegment?.groups
@@ -36,7 +46,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
         ]
   );
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
-  const [eventProperties, setEventProperties] = useState([]);
+  const [eventProperties, setEventProperties] = useState<SegmentProperty[]>([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState(
     savedSegment?.columns ? [...savedSegment?.columns] : ['user_id']
@@ -122,8 +132,28 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
 
   useEffect(() => {
     const fetchEventProperties = async () => {
-      const data = await getEventProperties(dsId as string);
-      setEventProperties(data);
+      const [eventProperties, events] = await Promise.all([
+        getEventProperties(dsId as string),
+        getNodes(dsId as string),
+      ]);
+
+      const transformedEventProperties = eventProperties.map(
+        (eventProperty) => {
+          return {
+            id: eventProperty,
+            type: 'property',
+          };
+        }
+      );
+
+      const transformedEvents = events.map((event) => {
+        return {
+          id: event.id,
+          type: 'event',
+        };
+      });
+
+      setEventProperties([...transformedEventProperties, ...transformedEvents]);
       setLoadingEventProperties(false);
     };
     setLoadingEventProperties(true);
@@ -198,6 +228,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
             bg: 'black.100',
           }}
           disabled={isSaveDisabled}
+          data-testid={'open-save-segment-modal'}
         >
           Save Segment
         </Button>
@@ -217,19 +248,34 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
             lineHeight={'xs-14'}
             fontWeight={'500'}
             data-testid={'clear-all'}
+            cursor={'pointer'}
+            onClick={() => {
+              setRefreshOnDelete(true);
+              setGroups([
+                {
+                  filters: [],
+                  conditions: [],
+                },
+              ]);
+            }}
           >
             Clear all
           </Text>
         </Flex>
-        <QueryBuilder
-          eventProperties={eventProperties}
-          loadingEventProperties={loadingEventProperties}
-          setGroups={setGroups}
-          setRefreshOnDelete={setRefreshOnDelete}
-          group={groups[0]}
-          groups={groups}
-          groupIndex={0}
-        />
+        {groups.map((group, index, groups) => {
+          return (
+            <QueryBuilder
+              key={index}
+              eventProperties={eventProperties}
+              loadingEventProperties={loadingEventProperties}
+              setGroups={setGroups}
+              setRefreshOnDelete={setRefreshOnDelete}
+              group={group}
+              groups={groups}
+              groupIndex={index}
+            />
+          );
+        })}
         <SegmentTable
           isSegmentDataLoading={isSegmentDataLoading}
           eventProperties={eventProperties}

@@ -1,14 +1,17 @@
-import { Box, Button, Flex } from '@chakra-ui/react';
-import LoadingSpinner from '@components/LoadingSpinner';
-import { SegmentFilter, SegmentFilterConditions } from '@lib/domain/segment';
+import { Box, Button } from '@chakra-ui/react';
+import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
+import {
+  SegmentFilter,
+  SegmentFilterConditions,
+  SegmentProperty,
+} from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 
 type AddFilterProps = {
   loadingEventProperties: boolean;
-  eventProperties: string[];
+  eventProperties: SegmentProperty[];
   updateGroupsState: Function;
-
   filters: SegmentFilter[];
   conditions: SegmentFilterConditions[];
 };
@@ -26,6 +29,8 @@ const AddFilter = ({
   useOnClickOutside(addFilterRef, () => setOpenFiltersList(false));
 
   const onSuggestionClick = (val: string) => {
+    setOpenFiltersList(false);
+
     const updatedFilter = [
       ...filters,
       {
@@ -36,17 +41,28 @@ const AddFilter = ({
     ];
     if (conditions.length === 0) {
       updateGroupsState(updatedFilter, [SegmentFilterConditions.WHERE]);
-    } else {
-      updateGroupsState(updatedFilter, [
-        ...conditions,
-        SegmentFilterConditions.AND,
-      ]);
+      return;
     }
-    setOpenFiltersList(false);
+
+    let conditionToAdd;
+    const isLastConditionWhere =
+      conditions[conditions.length - 1] === SegmentFilterConditions.WHERE;
+    if (isLastConditionWhere) {
+      conditionToAdd = SegmentFilterConditions.AND;
+    } else {
+      // add 'and' / 'or' depending on last condition present
+      conditionToAdd = conditions[conditions.length - 1];
+    }
+    updateGroupsState(updatedFilter, [...conditions, conditionToAdd]);
   };
 
   return (
-    <Box position={'relative'} ref={addFilterRef} borderColor={'grey.100'}>
+    <Box
+      position={'relative'}
+      ref={addFilterRef}
+      borderColor={'grey.100'}
+      w={'fit-content'}
+    >
       <Button
         onClick={() => setOpenFiltersList(true)}
         bg={'white.DEFAULT'}
@@ -60,52 +76,15 @@ const AddFilter = ({
       >
         + Filter
       </Button>
-      {isFiltersListOpen ? (
-        <Box
-          position={'absolute'}
-          zIndex={1}
-          px={'3'}
-          py={'3'}
-          borderRadius={'12'}
-          borderWidth={'0.4px'}
-          borderColor={'grey.100'}
-          bg={'white.DEFAULT'}
-          shadow={'0px 0px 4px rgba(0, 0, 0, 0.12)'}
-          maxH={'100'}
-          overflowY={'auto'}
-          data-testid={'event-property-dropdown-container'}
-        >
-          {loadingEventProperties ? (
-            <Flex
-              w={'80'}
-              h={'80'}
-              alignItems={'center'}
-              justifyContent={'center'}
-            >
-              <LoadingSpinner />
-            </Flex>
-          ) : (
-            eventProperties.map((property) => (
-              <Box
-                key={property}
-                onClick={() => onSuggestionClick(property)}
-                cursor={'pointer'}
-                px={'2'}
-                py={'3'}
-                _hover={{
-                  bg: 'white.100',
-                }}
-                fontSize={'xs-14'}
-                lineHeight={'xs-14'}
-                fontWeight={'500'}
-                data-testid={'dropdown-options'}
-              >
-                {property}
-              </Box>
-            ))
-          )}
-        </Box>
-      ) : null}
+
+      <SearchableListDropdown
+        isOpen={isFiltersListOpen}
+        data={eventProperties as SegmentProperty[]}
+        isLoading={loadingEventProperties}
+        onSubmit={onSuggestionClick}
+        listKey={'id'}
+        showBadge={true}
+      />
     </Box>
   );
 };

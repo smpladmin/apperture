@@ -5,7 +5,15 @@ from domain.segments.models import (
     SegmentGroup,
     SegmentFilterOperators,
 )
-from pypika import ClickHouseQuery, Parameter, Field, Criterion
+from pypika import (
+    ClickHouseQuery,
+    Parameter,
+    Field,
+    Criterion,
+    AliasedQuery,
+    analytics as an,
+    Order,
+)
 
 
 class Segments(Events):
@@ -32,16 +40,36 @@ class Segments(Events):
         columns: List[str],
         group_conditions: List[SegmentFilterConditions],
     ):
-        query = ClickHouseQuery.from_(self.table).select(self.table.user_id).distinct()
+        sub_query = ClickHouseQuery.from_(self.table).select(self.table.user_id)
         for column in columns:
-            query = query.select(Field(f"properties.{column}"))
+            sub_query = sub_query.select(Field(f"properties.{column}"))
 
-        criterion = [self.table.datasource_id == Parameter("%(ds_id)s")]
+        sub_query = sub_query.select(
+            an.Rank()
+            .over(self.table.user_id)
+            .orderby(self.table.timestamp, order=Order.desc)
+            .as_("rank")
+        )
+        criterion = []
         for group in groups:
             for filter in group.filters:
-                if filter.operator == SegmentFilterOperators.EQUALS:
-                    criterion.append(
-                        Field(f"properties.{filter.operand}").isin(filter.values)
-                    )
-            query = query.where(Criterion.all(criterion))
+                if group.conditions[0] == SegmentFilterConditions.WHERE:
+                    if filter.operator == SegmentFilterOperators.EQUALS:
+                        criterion.append(
+                            Field(f"properties.{filter.operand}").isin(filter.values)
+                        )
+                elif group.conditions[0] == SegmentFilterConditions.WHO:
+                    pass
+            sub_query = sub_query.where(
+                self.table.datasource_id == Parameter("%(ds_id)s")
+            )
+            if SegmentFilterConditions.AND in group.conditions:
+                sub_query = sub_query.where(Criterion.all(criterion))
+            else:
+                sub_query = sub_query.where(Criterion.any(criterion))
+
+        cte_name = "cte"
+        query = ClickHouseQuery.with_(sub_query, cte_name)
+        cte = AliasedQuery(cte_name)
+        query = query.from_(cte).select("*").where(Field("rank") == 1)
         return query.get_sql(), {"ds_id": datasource_id}

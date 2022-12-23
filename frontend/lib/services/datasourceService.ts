@@ -1,6 +1,8 @@
+import { AppertureGet, ApperturePrivateGet } from './util';
 import { AppertureAPI } from '@lib/apiClient';
 import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
 import { ProviderDataSource } from '@lib/domain/datasource';
+import { Node } from '@lib/domain/node';
 import { AxiosError } from 'axios';
 
 export const _getProviderDatasources = async (
@@ -51,15 +53,13 @@ export const _getEdges = async (token: string, dsId: string) => {
 };
 
 export const _getNodes = async (token: string, dsId: string) => {
-  try {
-    const res = await ApperturePrivateAPI.get(`/datasources/${dsId}/nodes`, {
-      headers: { Authorization: token },
-    });
-    return res.data;
-  } catch (e) {
-    console.error((e as AxiosError).message);
-    return [];
-  }
+  const res = await ApperturePrivateGet(`/datasources/${dsId}/nodes`, token);
+  return res.data;
+};
+
+export const getNodes = async (dsId: string): Promise<Node[]> => {
+  const res = await AppertureGet(`/datasources/${dsId}/nodes`);
+  return res.data;
 };
 
 export const getTrendsData = async (
@@ -102,7 +102,7 @@ export const getNodeSignificanceData = async (dsId: string, nodeId: string) => {
   }
 };
 
-export const getEventProperties = async (dsId: string) => {
+export const getEventProperties = async (dsId: string): Promise<string[]> => {
   try {
     const res = await AppertureAPI.get(`/datasources/${dsId}/event_properties`);
     return res.data;
