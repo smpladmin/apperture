@@ -48,7 +48,7 @@ const AddFilter = ({
       whoFilters.push({
         triggered: true,
         operand: item.id,
-        aggregation: 'Total',
+        aggregation: 'total',
         operator: SegmentFilterOperators.EQUALS,
         values: ['1'],
         startDate: new Date(),

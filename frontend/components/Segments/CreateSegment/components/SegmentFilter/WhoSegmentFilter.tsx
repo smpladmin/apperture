@@ -5,6 +5,7 @@ import {
   SegmentProperty,
   WhoSegmentFilter,
 } from '@lib/domain/segment';
+import { capitalizeFirstLetter } from '@lib/utils/common';
 import React from 'react';
 import DateField from '../DateField';
 import FilterConditions from '../FilterConditions';
@@ -69,7 +70,7 @@ const WhoSegmentFilter = ({
           bg={'white.100'}
           cursor={'pointer'}
         >
-          {filter.aggregation}
+          {capitalizeFirstLetter(filter.aggregation)}
         </Text>
       </Box>
       <FilterOperator filter={filter} />
