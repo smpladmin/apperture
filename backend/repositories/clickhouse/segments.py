@@ -13,7 +13,8 @@ from pypika import (
     AliasedQuery,
     analytics as an,
     functions as fn,
-    Order, CustomFunction,
+    Order,
+    CustomFunction,
 )
 from pypika.dialects import ClickHouseQueryBuilder
 
@@ -27,7 +28,9 @@ class Segments(Events):
             .where(self.table.datasource_id == Parameter("%(ds_id)s"))
         )
 
-    def build_where_clause_users_query(self, group: SegmentGroup, segment_users: ClickHouseQueryBuilder):
+    def build_where_clause_users_query(
+        self, group: SegmentGroup, segment_users: ClickHouseQueryBuilder
+    ):
         criterion = []
         idx = 0
         for i, filter in enumerate(group.filters):
@@ -47,13 +50,13 @@ class Segments(Events):
         )
         return segment_users, idx
 
-    def build_who_clause_users_query(self, group: SegmentGroup, segment_users: ClickHouseQueryBuilder, idx: int):
+    def build_who_clause_users_query(
+        self, group: SegmentGroup, segment_users: ClickHouseQueryBuilder, idx: int
+    ):
         query = ClickHouseQuery
         for i in range(idx, len(group.conditions)):
             filter = group.filters[i]
-            sub_query = ClickHouseQuery.from_(self.table).select(
-                self.table.user_id
-            )
+            sub_query = ClickHouseQuery.from_(self.table).select(self.table.user_id)
             criterion = [
                 self.table.datasource_id == Parameter("%(ds_id)s"),
                 self.table.user_id.isin(segment_users),
@@ -70,13 +73,17 @@ class Segments(Events):
                 )
             query = query.with_(sub_query, f"cte{i}")
 
-        segment_users = query.from_(AliasedQuery(f"cte{idx}")).select(
-            AliasedQuery(f"cte{idx}").user_id
+        segment_users = (
+            query.from_(AliasedQuery(f"cte{idx}"))
+            .select(AliasedQuery(f"cte{idx}").user_id)
+            .distinct()
         )
         for i in range(idx + 1, len(group.filters)):
-            filter_users = ClickHouseQuery.from_(
-                AliasedQuery(f"cte{i}")
-            ).select(AliasedQuery(f"cte{i}").user_id).distinct()
+            filter_users = (
+                ClickHouseQuery.from_(AliasedQuery(f"cte{i}"))
+                .select(AliasedQuery(f"cte{i}").user_id)
+                .distinct()
+            )
 
             segment_users = (
                 segment_users.intersect(filter_users)
@@ -96,10 +103,14 @@ class Segments(Events):
         for group in groups:
             idx = 0
             if SegmentFilterConditions.WHERE in group.conditions:
-                segment_users, idx = self.build_where_clause_users_query(group=group, segment_users=segment_users)
+                segment_users, idx = self.build_where_clause_users_query(
+                    group=group, segment_users=segment_users
+                )
 
             if SegmentFilterConditions.WHO in group.conditions:
-                segment_users = self.build_who_clause_users_query(group=group, segment_users=segment_users, idx=idx)
+                segment_users = self.build_who_clause_users_query(
+                    group=group, segment_users=segment_users, idx=idx
+                )
 
         return segment_users
 

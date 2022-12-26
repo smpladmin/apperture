@@ -60,9 +60,9 @@ class TestSegmentService:
 
     @pytest.mark.asyncio
     async def test_compute_segment(self):
-        self.segments.get_segment.return_value = [
-            ("a", "b", "c", "d"),
-            ("e", "f", "g", "h"),
+        self.segments.get_segment_data.return_value = [
+            {"user_id": "a", "prop1": "b", "prop2": "c", "prop3": "d"},
+            {"user_id": "e", "prop1": "f", "prop2": "g", "prop3": "h"},
         ]
         assert await self.service.compute_segment(
             datasource_id=self.ds_id,
@@ -76,9 +76,9 @@ class TestSegmentService:
                 {"user_id": "e", "prop1": "f", "prop2": "g", "prop3": "h"},
             ],
         )
-        self.segments.get_segment.assert_called_once_with(
+        self.segments.get_segment_data.assert_called_once_with(
             **{
-                "columns": ["user_id", "prop1", "prop2", "prop3"],
+                "columns": ["prop1", "prop2", "prop3"],
                 "datasource_id": self.ds_id,
                 "group_conditions": [],
                 "groups": [
