@@ -1,5 +1,6 @@
+from datetime import datetime
 from enum import Enum
-from typing import List, Dict
+from typing import List, Dict, Union, Optional
 from pydantic import BaseModel
 from beanie import PydanticObjectId
 
@@ -17,14 +18,30 @@ class SegmentFilterOperators(str, Enum):
     EQUALS = "equals"
 
 
-class SegmentFilter(BaseModel):
+class SegmentAggregationOperators(str, Enum):
+    TOTAL = "total"
+    SUM = "sum"
+    AVERAGE = "average"
+
+
+class WhereSegmentFilter(BaseModel):
     operand: str
     operator: SegmentFilterOperators
     values: List[str]
 
 
+class WhoSegmentFilter(BaseModel):
+    operand: str
+    operator: SegmentFilterOperators
+    values: List[str]
+    triggered: bool
+    aggregation: SegmentAggregationOperators
+    start_date: Optional[datetime]
+    end_date: Optional[datetime]
+
+
 class SegmentGroup(BaseModel):
-    filters: List[SegmentFilter]
+    filters: List[Union[WhoSegmentFilter, WhereSegmentFilter]]
     conditions: List[SegmentFilterConditions]
 
 

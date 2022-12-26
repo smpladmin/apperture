@@ -28,17 +28,14 @@ class SegmentService:
         columns: List[str],
         group_conditions: List[SegmentFilterConditions],
     ) -> ComputedSegment:
-        segment = self.segments.get_segment(
+        segment = self.segments.get_segment_data(
             datasource_id=datasource_id,
             groups=groups,
             columns=columns,
             group_conditions=group_conditions,
         )
         n = 100 if len(segment) > 100 else len(segment)
-
-        columns.insert(0, "user_id")
-        data = [dict(zip(columns, row)) for row in segment]
-        return ComputedSegment(count=len(segment), data=data[:n])
+        return ComputedSegment(count=len(segment), data=segment[:n])
 
     async def build_segment(
         self,
