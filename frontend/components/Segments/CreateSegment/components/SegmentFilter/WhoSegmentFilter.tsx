@@ -8,6 +8,7 @@ import {
 import React from 'react';
 import FilterConditions from '../FilterConditions';
 import FilterOperator from '../FilterOperator';
+import InputValue from '../InputValue';
 import SelectEventProperty from '../SelectEventProperty';
 
 type WhoSegmentFilterProps = {
@@ -71,13 +72,10 @@ const WhoSegmentFilter = ({
         </Text>
       </Box>
       <FilterOperator filter={filter} />
-      <Input
-        type={'number'}
-        size={'sm'}
-        w={'20'}
-        focusBorderColor={'black.100'}
-        borderRadius={'4'}
-        autoFocus
+      <InputValue
+        index={index}
+        filters={filters}
+        updateGroupsState={updateGroupsState}
       />
       <IconButton
         aria-label="delete"

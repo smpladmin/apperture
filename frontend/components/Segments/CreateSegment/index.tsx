@@ -9,6 +9,7 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import {
+  FilterItemType,
   Segment,
   SegmentGroup,
   SegmentProperty,
@@ -141,7 +142,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
         (eventProperty) => {
           return {
             id: eventProperty,
-            type: 'property',
+            type: FilterItemType.PROPERTY,
           };
         }
       );
@@ -149,7 +150,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
       const transformedEvents = events.map((event) => {
         return {
           id: event.id,
-          type: 'event',
+          type: FilterItemType.EVENT,
         };
       });
 
@@ -278,7 +279,9 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
         })}
         <SegmentTable
           isSegmentDataLoading={isSegmentDataLoading}
-          eventProperties={eventProperties}
+          eventProperties={eventProperties.filter(
+            (property) => property.type === FilterItemType.PROPERTY
+          )}
           selectedColumns={selectedColumns}
           setSelectedColumns={setSelectedColumns}
           userTableData={userTableData}

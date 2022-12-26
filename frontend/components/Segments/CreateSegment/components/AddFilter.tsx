@@ -2,6 +2,7 @@ import { Box, Button } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { getWhereAndWhoConditionsList } from '@components/Segments/util';
 import {
+  FilterItemType,
   FilterType,
   SegmentFilter,
   SegmentFilterConditions,
@@ -36,7 +37,7 @@ const AddFilter = ({
     whoFilters: SegmentFilter[],
     item: SegmentProperty
   ) => {
-    if (item.type === 'property') {
+    if (item.type === FilterItemType.PROPERTY) {
       whereFilters.push({
         operand: item.id,
         operator: SegmentFilterOperators.EQUALS,
@@ -76,14 +77,14 @@ const AddFilter = ({
     const isLastConditionWho = lastWhoCondition === SegmentFilterConditions.WHO;
 
     switch (item.type) {
-      case 'property':
+      case FilterItemType.PROPERTY:
         if (!whereConditions.length)
           whereConditions.push(SegmentFilterConditions.WHERE);
         else if (isLastConditionWhere)
           whereConditions.push(SegmentFilterConditions.AND);
         else whereConditions.push(lastWhereCondition);
         break;
-      case 'event':
+      case FilterItemType.EVENT:
         if (!whoConditions.length)
           whoConditions.push(SegmentFilterConditions.WHO);
         else if (isLastConditionWho)

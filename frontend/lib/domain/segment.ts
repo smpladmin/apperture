@@ -1,3 +1,4 @@
+import { property } from 'lodash';
 export type WhereSegmentFilter = {
   operand: string;
   operator: SegmentFilterOperators;
@@ -31,6 +32,11 @@ export type SegmentProperty = {
   id: string;
   type: string;
 };
+
+export enum FilterItemType {
+  PROPERTY = 'property',
+  EVENT = 'event',
+}
 
 export enum SegmentFilterConditions {
   WHERE = 'where',
