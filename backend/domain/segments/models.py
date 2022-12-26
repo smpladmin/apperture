@@ -28,6 +28,8 @@ class WhereSegmentFilter(BaseModel):
     operand: str
     operator: SegmentFilterOperators
     values: List[str]
+    start_date: Optional[datetime]
+    end_date: Optional[datetime]
 
 
 class WhoSegmentFilter(BaseModel):
