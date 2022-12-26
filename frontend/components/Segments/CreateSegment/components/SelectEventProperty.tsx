@@ -45,9 +45,9 @@ const SelectEventProperty = ({
     setDropDownItems(items);
   }, []);
 
-  const onSuggestionClick = (val: string) => {
+  const onSuggestionClick = (item: SegmentProperty) => {
     const updatedFilters = [...filters];
-    updatedFilters[index]['operand'] = val;
+    updatedFilters[index]['operand'] = item.id;
     updatedFilters[index]['values'] = [];
     updateGroupsState(updatedFilters);
     setOpenFiltersList(false);

@@ -10,7 +10,7 @@ import {
   SegmentProperty,
 } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 type AddFilterProps = {
   loadingEventProperties: boolean;
@@ -50,9 +50,9 @@ const AddFilter = ({
         operand: item.id,
         aggregation: 'Total',
         operator: SegmentFilterOperators.EQUALS,
-        values: [],
-        start_date: new Date(),
-        end_date: new Date(),
+        values: ['1'],
+        startDate: new Date(),
+        endDate: new Date(),
         type: FilterType.WHO,
       });
     }

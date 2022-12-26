@@ -63,6 +63,12 @@ const QueryBuilder = ({
     const updatedFilterConditions = [...group.conditions];
     const conditionRemoved = updatedFilterConditions.splice(filterIndex, 1);
 
+    if (!updatedFilterConditions.length) {
+      updateGroupsState(updatedFilters, []);
+      setRefreshOnDelete(true);
+      return;
+    }
+
     if (conditionRemoved[0] === SegmentFilterConditions.WHERE) {
       updatedFilterConditions[filterIndex] = SegmentFilterConditions.WHERE;
     }

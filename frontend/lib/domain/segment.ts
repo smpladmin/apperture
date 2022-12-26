@@ -1,4 +1,3 @@
-import { property } from 'lodash';
 export type WhereSegmentFilter = {
   operand: string;
   operator: SegmentFilterOperators;
@@ -12,8 +11,8 @@ export type WhoSegmentFilter = {
   aggregation: string;
   operator: SegmentFilterOperators;
   values: string[];
-  start_date: Date;
-  end_date: Date;
+  startDate: Date;
+  endDate: Date;
   type: FilterType;
 };
 

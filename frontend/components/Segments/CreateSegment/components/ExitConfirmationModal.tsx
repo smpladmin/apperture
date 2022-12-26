@@ -4,7 +4,6 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalFooter,
   ModalHeader,
   ModalOverlay,
   Text,
@@ -12,12 +11,7 @@ import {
   Flex,
   Highlight,
 } from '@chakra-ui/react';
-import { SegmentGroup } from '@lib/domain/segment';
-import { User } from '@lib/domain/user';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
-import { convertISODateToReadableDate } from '@lib/utils/common';
-import { saveSegment } from '@lib/services/segmentService';
 
 const ExitConfirmationModal = ({
   isOpen,

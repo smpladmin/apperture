@@ -6,6 +6,7 @@ import {
   WhoSegmentFilter,
 } from '@lib/domain/segment';
 import React from 'react';
+import DateField from '../DateField';
 import FilterConditions from '../FilterConditions';
 import FilterOperator from '../FilterOperator';
 import InputValue from '../InputValue';
@@ -74,9 +75,11 @@ const WhoSegmentFilter = ({
       <FilterOperator filter={filter} />
       <InputValue
         index={index}
+        filter={filter}
         filters={filters}
         updateGroupsState={updateGroupsState}
       />
+      <DateField filter={filter} updateGroupsState={updateGroupsState} />
       <IconButton
         aria-label="delete"
         size={'sm'}
