@@ -14,7 +14,7 @@ from domain.properties.models import Properties, Property, PropertyDataType
 from domain.segments.models import (
     ComputedSegment,
     Segment,
-    SegmentFilter,
+    WhereSegmentFilter,
     SegmentFilterOperators,
     SegmentFilterConditions,
     SegmentGroup,
@@ -254,12 +254,12 @@ def segment_service():
         ],
     )
     filters = [
-        SegmentFilter(
+        WhereSegmentFilter(
             operator=SegmentFilterOperators.EQUALS,
             operand="properties.$city",
             values=["Delhi", "Indore", "Bhopal"],
         ),
-        SegmentFilter(
+        WhereSegmentFilter(
             operator=SegmentFilterOperators.EQUALS,
             operand="properties.$app_release",
             values=["5003", "2077", "5002"],

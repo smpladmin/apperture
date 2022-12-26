@@ -5,7 +5,7 @@ from beanie import PydanticObjectId
 
 from domain.segments.models import (
     SegmentGroup,
-    SegmentFilter,
+    WhereSegmentFilter,
     SegmentFilterOperators,
     SegmentFilterConditions,
 )
@@ -27,12 +27,12 @@ def test_compute_transient_segment(
             "groups": [
                 SegmentGroup(
                     filters=[
-                        SegmentFilter(
+                        WhereSegmentFilter(
                             operator=SegmentFilterOperators.EQUALS,
                             operand="properties.$city",
                             values=["Delhi", "Indore", "Bhopal"],
                         ),
-                        SegmentFilter(
+                        WhereSegmentFilter(
                             operator=SegmentFilterOperators.EQUALS,
                             operand="properties.$app_release",
                             values=["5003", "2077", "5002"],
@@ -64,12 +64,12 @@ def test_save_segment(
             "groups": [
                 SegmentGroup(
                     filters=[
-                        SegmentFilter(
+                        WhereSegmentFilter(
                             operand="properties.$city",
                             operator=SegmentFilterOperators.EQUALS,
                             values=["Delhi", "Indore", "Bhopal"],
                         ),
-                        SegmentFilter(
+                        WhereSegmentFilter(
                             operand="properties.$app_release",
                             operator=SegmentFilterOperators.EQUALS,
                             values=["5003", "2077", "5002"],
