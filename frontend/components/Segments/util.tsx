@@ -14,7 +14,6 @@ export const getWhereAndWhoConditionsList = (
   // therefore, while finding 'where' conditions be sure to check whether 'who' condition is present
   // incase, no 'who' condition is found that signifies that all the conditions are 'where' conditions
 
-  // ['where', 'and', 'and', 'who'];
   const whereConditions =
     whereConditionIndex === -1
       ? []

@@ -32,7 +32,7 @@ const WhoSegmentFilter = ({
   removeFilter,
 }: WhoSegmentFilterProps) => {
   return (
-    <Flex gap={'3'} alignItems={'center'} data-testid="query-builder">
+    <Flex gap={'3'} alignItems={'center'}>
       <FilterConditions
         filter={filter}
         index={index}
@@ -87,6 +87,7 @@ const WhoSegmentFilter = ({
         onClick={() => removeFilter(index)}
         bg={'white.DEFAULT'}
         variant={'secondary'}
+        data-testid={'remove-filter'}
       />
     </Flex>
   );

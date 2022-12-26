@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Input, Radio, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Input, Text } from '@chakra-ui/react';
 import { WhoSegmentFilter } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
@@ -35,9 +35,8 @@ const DateField = ({ filter, updateGroupsState }: DateFieldProps) => {
         onClick={() => {
           setisDateFieldBoxOpen(true);
         }}
-        data-testid={'filter-condition'}
       >
-        {`Last ${days} days `}
+        {`Last ${days} days`}
       </Text>
       {isDateFieldBoxOpen ? (
         <Box

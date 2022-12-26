@@ -112,7 +112,7 @@ const QueryBuilder = ({
           {group.filters.map(
             (filter: SegmentFilter, i: number, filters: SegmentFilter[]) => {
               return (
-                <Fragment key={i}>
+                <Flex key={i} data-testid="query-builder">
                   {filter.type === FilterType.WHERE ? (
                     <WhereSegmentFilterComponent
                       filter={filter as WhereSegmentFilter}
@@ -134,7 +134,7 @@ const QueryBuilder = ({
                       removeFilter={removeFilter}
                     />
                   )}
-                </Fragment>
+                </Flex>
               );
             }
           )}
