@@ -1,13 +1,12 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { ARROW_GRAY } from '@theme/index';
-import { Fragment, useCallback } from 'react';
+import { useCallback } from 'react';
 import AddFilter from './AddFilter';
 import 'remixicon/fonts/remixicon.css';
 import {
   FilterType,
   SegmentFilter,
   SegmentFilterConditions,
-  SegmentFilterOperators,
   SegmentGroup,
   SegmentProperty,
   WhereSegmentFilter,
@@ -63,19 +62,20 @@ const QueryBuilder = ({
     const updatedFilterConditions = [...group.conditions];
     const conditionRemoved = updatedFilterConditions.splice(filterIndex, 1);
 
-    if (!updatedFilterConditions.length) {
-      updateGroupsState(updatedFilters, []);
-      setRefreshOnDelete(true);
-      return;
-    }
-
-    if (conditionRemoved[0] === SegmentFilterConditions.WHERE) {
-      updatedFilterConditions[filterIndex] = SegmentFilterConditions.WHERE;
-    }
-    // if first 'who' filter type condition is removed from list of filter,
-    // then make the next who filter type condition 'who'
-    else if (conditionRemoved[0] === SegmentFilterConditions.WHO) {
-      updatedFilterConditions[filterIndex] = SegmentFilterConditions.WHO;
+    // check if the filterIndex removed is less than updatedFilterConditions length
+    // to ensure we don't replace condition on wrong index while solving for where/who conditions
+    if (
+      filterIndex < updatedFilterConditions.length &&
+      updatedFilterConditions.length
+    ) {
+      if (conditionRemoved[0] === SegmentFilterConditions.WHERE) {
+        updatedFilterConditions[filterIndex] = SegmentFilterConditions.WHERE;
+      }
+      // if first 'who' filter type condition is removed from list of filter,
+      // then make the next who filter type condition 'who'
+      else if (conditionRemoved[0] === SegmentFilterConditions.WHO) {
+        updatedFilterConditions[filterIndex] = SegmentFilterConditions.WHO;
+      }
     }
 
     if (updatedFilterConditions[0])

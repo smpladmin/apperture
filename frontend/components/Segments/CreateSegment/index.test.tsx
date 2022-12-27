@@ -1055,9 +1055,9 @@ describe('Create Segment', () => {
       });
 
       // case4: remove all the filters, there removeFilter button should not be visible
-      await removeFilter(0);
+      await removeFilter(1);
       await waitFor(() => {
-        assertFilterConditions(['who']);
+        assertFilterConditions(['where']);
       });
 
       await removeFilter(0);

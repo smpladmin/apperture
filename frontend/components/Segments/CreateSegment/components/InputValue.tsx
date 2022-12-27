@@ -1,6 +1,6 @@
 import { Input } from '@chakra-ui/react';
 import { SegmentFilter } from '@lib/domain/segment';
-import React, { KeyboardEvent, useRef, useState } from 'react';
+import React, { KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 type InputValueProps = {
   index: number;
@@ -16,8 +16,14 @@ const InputValue = ({
   updateGroupsState,
 }: InputValueProps) => {
   const inputSearchRef = useRef<HTMLInputElement>(null);
+  const [inputCount, setInputCount] = useState(filter.values[0]);
 
-  const [inputCount, setInputCount] = useState(filter.values);
+  useEffect(() => {
+    // need to update values whenever filter changes
+    // case - when filter gets deleted, input field
+    // should have correct value
+    setInputCount(filter.values[0]);
+  }, [filter]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -28,7 +34,7 @@ const InputValue = ({
 
   const updateFilterValue = () => {
     const updatedFilters = [...filters];
-    updatedFilters[index]['values'] = inputCount;
+    updatedFilters[index]['values'] = [inputCount];
     updateGroupsState(updatedFilters);
   };
 
@@ -41,7 +47,7 @@ const InputValue = ({
       focusBorderColor={'black.100'}
       borderRadius={'4'}
       value={inputCount}
-      onChange={(e) => setInputCount([e.target.value])}
+      onChange={(e) => setInputCount(e.target.value)}
       onBlur={updateFilterValue}
       onKeyDown={handleKeyDown}
       placeholder={'Value...'}
