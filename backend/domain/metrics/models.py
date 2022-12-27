@@ -56,5 +56,5 @@ class Metric(BaseModel):
     breakdown:List[str]
 
 class ComputedMetricResult(BaseModel):
-    metric:List[tuple]
+    metric:List[dict]
 
