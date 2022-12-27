@@ -44,6 +44,7 @@ const InputValue = ({
       type={'number'}
       size={'sm'}
       w={'20'}
+      bg={'white.100'}
       focusBorderColor={'black.100'}
       borderRadius={'4'}
       value={inputCount}
@@ -51,7 +52,6 @@ const InputValue = ({
       onBlur={updateFilterValue}
       onKeyDown={handleKeyDown}
       placeholder={'Value...'}
-      autoFocus
     />
   );
 };

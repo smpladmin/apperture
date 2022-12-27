@@ -46,17 +46,19 @@ const DateField = ({
       filter.endDate
     );
     return (
-      <Flex alignItems={'center'} bg={'white.100'} px={'2'} p={'3'} gap={'2'}>
+      <Flex
+        alignItems={'center'}
+        bg={'white.100'}
+        px={'2'}
+        p={'3'}
+        gap={'2'}
+        onClick={() => {
+          setisDateFieldBoxOpen(true);
+        }}
+        cursor={'pointer'}
+      >
         <i className="ri-calendar-line"></i>
-        <Text
-          fontSize={'xs-14'}
-          lineHeight={'xs-14'}
-          fontWeight={'600'}
-          cursor={'pointer'}
-          onClick={() => {
-            setisDateFieldBoxOpen(true);
-          }}
-        >
+        <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'600'}>
           {`Last ${diffInDays} days`}
         </Text>
       </Flex>
