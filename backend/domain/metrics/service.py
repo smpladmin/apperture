@@ -26,5 +26,6 @@ class MetricService:
             breakdown=breakdown,
             function=function,
         )
-        return ComputedMetricResult(metric=computed_metric)
+        data=[dict(zip(["date","val"],row)) for row in computed_metric]
+        return ComputedMetricResult(metric=data)
 
