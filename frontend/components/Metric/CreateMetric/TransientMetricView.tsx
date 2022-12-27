@@ -10,9 +10,15 @@ import { FunnelData, FunnelTrendsData } from '@lib/domain/funnel';
 import React, { useContext, useEffect, useState } from 'react';
 import Loader from '@components/LoadingSpinner';
 import MetricEmptyState from './MetricEmptyState';
-import DateFilter from '@components/Metric/CreateMetric/DateFilter';
+import DateFilter from './DateFilter';
+import { Metric } from '@lib/domain/metric';
+import MetricTrend from './MetricTrend';
 
-const TransientMetricView = () => {
+type TransientMetricViewProps = {
+  metric: Metric | null;
+};
+
+const TransientMetricView = ({ metric }: TransientMetricViewProps) => {
   return (
     <Flex
       direction={'column'}
@@ -48,7 +54,11 @@ const TransientMetricView = () => {
           </Button>
         </Flex>
       </Flex>
-      <MetricEmptyState />
+      {metric && metric.data.length > 0 ? (
+        <MetricTrend data={metric.data} definition={metric.definition} />
+      ) : (
+        <MetricEmptyState />
+      )}
     </Flex>
   );
 };

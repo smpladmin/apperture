@@ -24,3 +24,8 @@ export type EventOrSegmentComponent = {
   conditions: string[];
   aggregations: MetricComponentAggregation;
 };
+
+export type Metric = {
+  data: { date: string; value: number }[];
+  definition: string;
+};

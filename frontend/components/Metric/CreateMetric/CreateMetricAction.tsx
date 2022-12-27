@@ -12,15 +12,16 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
 
 import { useRouter } from 'next/router';
-import { MapContext } from '@lib/contexts/mapContext';
 import MetricComponentCard from './MetricComponentCard';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
 import _ from 'lodash';
 import { computeMetric } from '@lib/services/metricService';
 
-type CreateMetricActionProps = {};
+type CreateMetricActionProps = {
+  setMetric: Function;
+};
 
-const CreateMetricAction = () => {
+const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
   const [metricName, setMetricName] = useState('Untitled Metric');
   const [metricDefinition, setmetricDefinition] = useState('A');
   const router = useRouter();
@@ -63,7 +64,7 @@ const CreateMetricAction = () => {
     setAggregates(
       aggregates.map((aggregate) =>
         aggregate.variable == variable
-          ? _.merge(aggregate, updatedValue)
+          ? { ...aggregate, ...updatedValue }
           : aggregate
       )
     );
@@ -93,13 +94,16 @@ const CreateMetricAction = () => {
         aggregates,
         []
       );
+      setMetric({
+        data: result.metric,
+        definition: metricDefinition,
+      });
     };
     if (
       aggregates.every(
         (aggregate) =>
           aggregate.reference_id &&
           aggregate.variable &&
-          aggregate.filters.length &&
           aggregate.filters.every((filter: any) => filter.values.length)
       )
     ) {

@@ -51,7 +51,7 @@ const MetricComponentCard = ({
     setIsEventOrSegmentListOpen(false);
     updateAggregate(variable, {
       reference_id: selection,
-      aggregations: { property: selection },
+      aggregations: { property: selection, functions: 'count' },
     });
     setReference(selection);
   };
@@ -72,7 +72,7 @@ const MetricComponentCard = ({
   const handleSetFilter = (ref: number, updatedFilter: any) => {
     setFilters(
       filters.map((filter, index) =>
-        ref == index ? _.merge(filter, updatedFilter) : filter
+        ref == index ? { ...filter, ...updatedFilter } : filter
       )
     );
   };
