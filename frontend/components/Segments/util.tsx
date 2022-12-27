@@ -1,14 +1,26 @@
-import { SegmentFilterConditions, SegmentGroup } from '@lib/domain/segment';
+import {
+  FilterType,
+  SegmentFilterConditions,
+  SegmentGroup,
+} from '@lib/domain/segment';
 
 export const getFilteredColumns = (columns: string[]) => {
   return columns.filter((value) => value !== 'user_id');
 };
 
-export const getWhereAndWhoConditionsList = (
+const _getWhereAndWhoConditionIndex = (
   conditions: SegmentFilterConditions[]
 ) => {
   const whereConditionIndex = conditions.indexOf(SegmentFilterConditions.WHERE);
   const whoConditionIndex = conditions.indexOf(SegmentFilterConditions.WHO);
+  return { whereConditionIndex, whoConditionIndex };
+};
+
+export const getWhereAndWhoConditionsList = (
+  conditions: SegmentFilterConditions[]
+) => {
+  const { whereConditionIndex, whoConditionIndex } =
+    _getWhereAndWhoConditionIndex(conditions);
 
   // note: 'where' conditions would always be present before 'who' conditions
   // therefore, while finding 'where' conditions be sure to check whether 'who' condition is present
@@ -28,12 +40,42 @@ export const getWhereAndWhoConditionsList = (
 };
 
 export const replaceEmptyStringPlaceholder = (groups: SegmentGroup[]) => {
-  return groups.flatMap((group) => {
-    group.filters.flatMap((filter) => {
+  return groups.map((group) => {
+    group.filters.map((filter) => {
       const emptyStringIndex = filter.values.indexOf('(empty string)');
       if (emptyStringIndex !== -1) filter.values[emptyStringIndex] = '';
       return filter;
     });
     return group;
   });
+};
+
+export const addTypeForFiltersInSavedSegmentResponse = (
+  groups: SegmentGroup[]
+) => {
+  return groups.map((group) => {
+    const { whereConditionIndex, whoConditionIndex } =
+      _getWhereAndWhoConditionIndex(group.conditions);
+
+    group.filters.map((filter, index) => {
+      if (whoConditionIndex === -1 || index < whoConditionIndex) {
+        filter['type'] = FilterType.WHERE;
+      } else {
+        filter['type'] = FilterType.WHO;
+      }
+      return filter;
+    });
+    return group;
+  });
+};
+
+export const getDateOfNDaysBack = (days: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return date;
+};
+
+export const getNumberOfDaysBetweenDates = (startDate: Date, endDate: Date) => {
+  const diff = endDate?.valueOf() - startDate?.valueOf();
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
 };

@@ -1,17 +1,30 @@
 import { Box, Button, Flex, Input, Text } from '@chakra-ui/react';
-import { WhoSegmentFilter } from '@lib/domain/segment';
+import {
+  getDateOfNDaysBack,
+  getNumberOfDaysBetweenDates,
+} from '@components/Segments/util';
+import { SegmentFilter, WhoSegmentFilter } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 
 type DateFieldProps = {
+  index: number;
   filter: WhoSegmentFilter;
+  filters: SegmentFilter[];
   updateGroupsState: Function;
 };
 
-const DateField = ({ filter, updateGroupsState }: DateFieldProps) => {
+const DateField = ({
+  index,
+  filter,
+  filters,
+  updateGroupsState,
+}: DateFieldProps) => {
   const dateFieldRef = useRef(null);
   const [isDateFieldBoxOpen, setisDateFieldBoxOpen] = useState(false);
-  const [days, setDays] = useState(false || 30);
+  const [days, setDays] = useState(
+    getNumberOfDaysBetweenDates(filter.startDate, filter.endDate).toString()
+  );
 
   const closeDropdown = () => {
     setisDateFieldBoxOpen(false);
@@ -20,24 +33,40 @@ const DateField = ({ filter, updateGroupsState }: DateFieldProps) => {
 
   const handleDateChange = () => {
     closeDropdown();
+
+    const updatedFilters = [...filters];
+    // @ts-ignore
+    updatedFilters[index]['startDate'] = getDateOfNDaysBack(Number(days));
+    updateGroupsState(updatedFilters);
+  };
+
+  const getDateDisplayValue = () => {
+    const diffInDays = getNumberOfDaysBetweenDates(
+      filter.startDate,
+      filter.endDate
+    );
+    return (
+      <Flex alignItems={'center'} bg={'white.100'} px={'2'} p={'3'} gap={'2'}>
+        <i className="ri-calendar-line"></i>
+        <Text
+          fontSize={'xs-14'}
+          lineHeight={'xs-14'}
+          fontWeight={'600'}
+          cursor={'pointer'}
+          onClick={() => {
+            setisDateFieldBoxOpen(true);
+          }}
+        >
+          {`Last ${diffInDays}
+      days`}
+        </Text>
+      </Flex>
+    );
   };
 
   return (
     <Box w={'auto'} ref={dateFieldRef} position="relative">
-      <Text
-        fontSize={'xs-14'}
-        lineHeight={'xs-14'}
-        fontWeight={'600'}
-        cursor={'pointer'}
-        px={'2'}
-        p={'3'}
-        bg={'white.100'}
-        onClick={() => {
-          setisDateFieldBoxOpen(true);
-        }}
-      >
-        {`Last ${days} days`}
-      </Text>
+      {getDateDisplayValue()}
       {isDateFieldBoxOpen ? (
         <Box
           position={'absolute'}
@@ -84,7 +113,7 @@ const DateField = ({ filter, updateGroupsState }: DateFieldProps) => {
                   type={'number'}
                   value={days}
                   onChange={(e) => {
-                    setDays(Number(e.target.value));
+                    setDays(e.target.value);
                   }}
                 />
                 <Flex h={'13'} bg={'white.100'} alignItems={'center'} px={'4'}>

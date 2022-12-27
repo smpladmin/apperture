@@ -80,7 +80,12 @@ const WhoSegmentFilter = ({
         filters={filters}
         updateGroupsState={updateGroupsState}
       />
-      <DateField filter={filter} updateGroupsState={updateGroupsState} />
+      <DateField
+        index={index}
+        filter={filter}
+        filters={filters}
+        updateGroupsState={updateGroupsState}
+      />
       <IconButton
         aria-label="delete"
         size={'sm'}

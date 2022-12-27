@@ -1,6 +1,9 @@
 import { Box, Button } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import { getWhereAndWhoConditionsList } from '@components/Segments/util';
+import {
+  getDateOfNDaysBack,
+  getWhereAndWhoConditionsList,
+} from '@components/Segments/util';
 import {
   FilterItemType,
   FilterType,
@@ -51,7 +54,7 @@ const AddFilter = ({
         aggregation: 'total',
         operator: SegmentFilterOperators.EQUALS,
         values: ['1'],
-        startDate: new Date(),
+        startDate: getDateOfNDaysBack(30),
         endDate: new Date(),
         type: FilterType.WHO,
       });

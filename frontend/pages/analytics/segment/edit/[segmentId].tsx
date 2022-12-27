@@ -1,10 +1,12 @@
 import Layout from '@components/Layout';
 import CreateSegment from '@components/Segments/CreateSegment';
+import { addTypeForFiltersInSavedSegmentResponse } from '@components/Segments/util';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { Segment } from '@lib/domain/segment';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { _getSavedSegment } from '@lib/services/segmentService';
 import { getAuthToken } from '@lib/utils/request';
+import { cloneDeep } from 'lodash';
 import { GetServerSideProps } from 'next';
 import { ReactElement } from 'react';
 
@@ -46,7 +48,17 @@ export const getServerSideProps: GetServerSideProps = async ({
 };
 
 const EditSegments = ({ savedSegment }: { savedSegment: Segment }) => {
-  return <CreateSegment {...{ savedSegment }} />;
+  const transformedGroups = addTypeForFiltersInSavedSegmentResponse(
+    cloneDeep(savedSegment.groups)
+  );
+
+  const transformedSavedSegment = {
+    ...savedSegment,
+    groups: transformedGroups,
+  };
+  console.log(transformedSavedSegment);
+
+  return <CreateSegment savedSegment={transformedSavedSegment} />;
 };
 
 EditSegments.getLayout = function getLayout(
