@@ -57,8 +57,7 @@ const DateField = ({
             setisDateFieldBoxOpen(true);
           }}
         >
-          {`Last ${diffInDays}
-      days`}
+          {`Last ${diffInDays} days`}
         </Text>
       </Flex>
     );

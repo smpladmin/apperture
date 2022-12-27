@@ -1064,7 +1064,7 @@ describe('Create Segment', () => {
       expect(screen.queryByTestId('remove-filter')).not.toBeInTheDocument();
     });
 
-    it.only('remove filter condition after switching the who filter conditions to `and` and then add new filters', async () => {
+    it('remove filter condition after switching the who filter conditions to `and` and then add new filters', async () => {
       await act(async () => {
         render(
           <RouterContext.Provider
