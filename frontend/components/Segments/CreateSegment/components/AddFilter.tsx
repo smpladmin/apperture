@@ -115,18 +115,13 @@ const AddFilter = ({
   };
 
   return (
-    <Box
-      position={'relative'}
-      ref={addFilterRef}
-      borderColor={'grey.100'}
-      w={'fit-content'}
-    >
+    <Box position={'relative'} ref={addFilterRef} w={'fit-content'}>
       <Button
         onClick={() => setOpenFiltersList(true)}
         bg={'white.DEFAULT'}
         borderRadius={'4'}
-        borderColor={'red'}
         border={'1px'}
+        borderColor={'grey.100'}
         _hover={{
           bg: 'white.100',
         }}

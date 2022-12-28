@@ -49,6 +49,11 @@ export type SegmentGroup = {
   conditions: SegmentFilterConditions[];
 };
 
+export enum SegmentGroupConditions {
+  AND = 'and',
+  OR = 'or',
+}
+
 export type SegmentTableData = {
   count: number;
   data: any[];

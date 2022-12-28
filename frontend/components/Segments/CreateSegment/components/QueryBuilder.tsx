@@ -94,7 +94,6 @@ const QueryBuilder = ({
       borderWidth={'0.4px'}
       borderColor={'grey.100'}
       minH={'20'}
-      mt={'4'}
     >
       <Text
         fontSize={'xs-14'}

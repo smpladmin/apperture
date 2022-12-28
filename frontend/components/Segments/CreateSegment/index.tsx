@@ -12,6 +12,7 @@ import {
   FilterItemType,
   Segment,
   SegmentGroup,
+  SegmentGroupConditions,
   SegmentProperty,
   SegmentTableData,
 } from '@lib/domain/segment';
@@ -46,6 +47,9 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
           },
         ]
   );
+  const [groupConditions, setGroupConditions] = useState<
+    SegmentGroupConditions[]
+  >([]);
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
   const [eventProperties, setEventProperties] = useState<SegmentProperty[]>([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
@@ -75,7 +79,12 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
   const { dsId } = router.query;
 
   const fetchSegmentResponse = async (columns: string[]) => {
-    const data = await computeSegment(dsId as string, groups, columns);
+    const data = await computeSegment(
+      dsId as string,
+      groups,
+      columns,
+      groupConditions
+    );
     setUserTableData(data);
     setIsSegmentDataLoading(false);
   };
@@ -109,13 +118,11 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
   }, [selectedColumns]);
 
   useEffect(() => {
-    const validGroupQuery =
-      groups.length &&
-      groups.every(
-        (group) =>
-          group.filters.length &&
-          group.filters.every((filter) => filter.values.length)
-      );
+    const validGroupQuery = groups.some(
+      (group) =>
+        group.filters.length &&
+        group.filters.every((filter) => filter.values.length)
+    );
     if (validGroupQuery || refreshOnDelete) {
       if (refreshOnDelete) setRefreshOnDelete(false);
       setIsSegmentDataLoading(true);
@@ -129,7 +136,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
 
       setIsSaveDisabled(check);
     }
-  }, [groups]);
+  }, [groups, groupConditions]);
 
   useEffect(() => {
     const fetchEventProperties = async () => {
@@ -160,6 +167,38 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
     setLoadingEventProperties(true);
     fetchEventProperties();
   }, []);
+
+  const handleClearGroups = () => {
+    setRefreshOnDelete(true);
+    setGroups([
+      {
+        filters: [],
+        conditions: [],
+      },
+    ]);
+    setGroupConditions([]);
+  };
+
+  const addNewGroup = () => {
+    const newGroup = {
+      filters: [],
+      conditions: [],
+    };
+    const newGroupCondition = SegmentGroupConditions.AND;
+
+    setGroups([...groups, newGroup]);
+    setGroupConditions([...groupConditions, newGroupCondition]);
+  };
+
+  const handleGroupConditionsChange = (index: number) => {
+    const updatedGroupConditions = [...groupConditions];
+    if (updatedGroupConditions[index] === SegmentGroupConditions.AND) {
+      updatedGroupConditions[index] = SegmentGroupConditions.OR;
+    } else {
+      updatedGroupConditions[index] = SegmentGroupConditions.AND;
+    }
+    setGroupConditions(updatedGroupConditions);
+  };
 
   return (
     <Box>
@@ -235,7 +274,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
         </Button>
       </Flex>
       <Box py={'7'} px={'10'}>
-        <Flex justifyContent={'space-between'} alignItems={'center'}>
+        <Flex justifyContent={'space-between'} alignItems={'center'} mb={'4'}>
           <Text
             fontSize={'sh-18'}
             lineHeight={'sh-18'}
@@ -244,39 +283,76 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
           >
             Segment Builder
           </Text>
-          <Text
+          <Button
+            bg={''}
             fontSize={'xs-14'}
             lineHeight={'xs-14'}
             fontWeight={'500'}
             data-testid={'clear-all'}
             cursor={'pointer'}
-            onClick={() => {
-              setRefreshOnDelete(true);
-              setGroups([
-                {
-                  filters: [],
-                  conditions: [],
-                },
-              ]);
+            _hover={{
+              bg: 'white.100',
             }}
+            onClick={handleClearGroups}
           >
             Clear all
-          </Text>
+          </Button>
         </Flex>
         {groups.map((group, index, groups) => {
           return (
-            <QueryBuilder
-              key={index}
-              eventProperties={eventProperties}
-              loadingEventProperties={loadingEventProperties}
-              setGroups={setGroups}
-              setRefreshOnDelete={setRefreshOnDelete}
-              group={group}
-              groups={groups}
-              groupIndex={index}
-            />
+            <>
+              <QueryBuilder
+                key={index}
+                eventProperties={eventProperties}
+                loadingEventProperties={loadingEventProperties}
+                setGroups={setGroups}
+                setRefreshOnDelete={setRefreshOnDelete}
+                group={group}
+                groups={groups}
+                groupIndex={index}
+              />
+              {groupConditions[index] ? (
+                <Flex
+                  justifyContent={'center'}
+                  my={
+                    groupConditions[index] === SegmentGroupConditions.AND
+                      ? '-3'
+                      : '2'
+                  }
+                >
+                  <Text
+                    px={'2'}
+                    py={'1'}
+                    fontSize={'xs-14'}
+                    lineHeight={'xs-14'}
+                    fontWeight={'500'}
+                    bg={'black.50'}
+                    borderRadius={'4'}
+                    color={'white.DEFAULT'}
+                    onClick={() => {
+                      handleGroupConditionsChange(index);
+                    }}
+                    h={'6'}
+                    cursor={'pointer'}
+                  >
+                    {groupConditions[index].toLocaleUpperCase()}
+                  </Text>
+                </Flex>
+              ) : null}
+            </>
           );
         })}
+        <Button
+          mt={'4'}
+          bg={''}
+          _hover={{ bg: 'white.100' }}
+          fontSize={'xs-14'}
+          lineHeight={'xs-14'}
+          fontWeight={'500'}
+          onClick={addNewGroup}
+        >
+          {'+ Group'}
+        </Button>
         <SegmentTable
           isSegmentDataLoading={isSegmentDataLoading}
           eventProperties={eventProperties.filter(
