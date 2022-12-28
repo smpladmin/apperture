@@ -4,13 +4,17 @@ import { useCallback } from 'react';
 import AddFilter from './AddFilter';
 import 'remixicon/fonts/remixicon.css';
 import {
+  FilterType,
   SegmentFilter,
   SegmentFilterConditions,
   SegmentGroup,
   SegmentProperty,
+  WhereSegmentFilter,
+  WhoSegmentFilter,
 } from '@lib/domain/segment';
 import { cloneDeep } from 'lodash';
-import WhereSegmentFilter from './SegmentFilter/WhereSegmentFilter';
+import WhereSegmentFilterComponent from './SegmentFilter/WhereSegmentFilter';
+import WhoSegmentFilterComponent from './SegmentFilter/WhoSegmentFilter';
 
 type QueryBuilderProps = {
   eventProperties: SegmentProperty[];
@@ -52,16 +56,34 @@ const QueryBuilder = ({
   );
 
   const removeFilter = (filterIndex: number) => {
-    const updatedFilter = [...group.filters];
-    updatedFilter.splice(filterIndex, 1);
+    const updatedFilters = [...group.filters];
+    updatedFilters.splice(filterIndex, 1);
 
-    const updatedFilterOperators = [...group.conditions];
-    updatedFilterOperators.splice(filterIndex, 1);
-    // default value of operator for first query should always be 'where'
-    if (updatedFilterOperators[0])
-      updatedFilterOperators[0] = SegmentFilterConditions.WHERE;
+    const updatedFilterConditions = [...group.conditions];
+    const conditionRemoved = updatedFilterConditions.splice(filterIndex, 1);
 
-    updateGroupsState(updatedFilter, updatedFilterOperators);
+    // check if the filterIndex removed is less than updatedFilterConditions length
+    // to ensure we don't replace condition on wrong index while solving for where/who conditions
+    if (filterIndex < updatedFilterConditions.length) {
+      if (conditionRemoved[0] === SegmentFilterConditions.WHERE) {
+        updatedFilterConditions[filterIndex] = SegmentFilterConditions.WHERE;
+      }
+      // if first 'who' filter type condition is removed from list of filter,
+      // then make the next who filter type condition 'who'
+      else if (conditionRemoved[0] === SegmentFilterConditions.WHO) {
+        updatedFilterConditions[filterIndex] = SegmentFilterConditions.WHO;
+      }
+    }
+
+    if (updatedFilterConditions[0])
+      // default value of operator for first query should always be
+      // either 'where' or 'who' depending upon the filter type
+      updatedFilterConditions[0] =
+        updatedFilters[0]?.type === FilterType.WHERE
+          ? SegmentFilterConditions.WHERE
+          : SegmentFilterConditions.WHO;
+
+    updateGroupsState(updatedFilters, updatedFilterConditions);
     setRefreshOnDelete(true);
   };
 
@@ -87,16 +109,29 @@ const QueryBuilder = ({
           {group.filters.map(
             (filter: SegmentFilter, i: number, filters: SegmentFilter[]) => {
               return (
-                <WhereSegmentFilter
-                  key={i}
-                  filter={filter}
-                  filters={filters}
-                  group={group}
-                  updateGroupsState={updateGroupsState}
-                  eventProperties={eventProperties}
-                  index={i}
-                  removeFilter={removeFilter}
-                />
+                <Flex key={i} data-testid="query-builder">
+                  {filter.type === FilterType.WHERE ? (
+                    <WhereSegmentFilterComponent
+                      filter={filter as WhereSegmentFilter}
+                      filters={filters}
+                      group={group}
+                      updateGroupsState={updateGroupsState}
+                      eventProperties={eventProperties}
+                      index={i}
+                      removeFilter={removeFilter}
+                    />
+                  ) : (
+                    <WhoSegmentFilterComponent
+                      filter={filter as WhoSegmentFilter}
+                      filters={filters}
+                      group={group}
+                      updateGroupsState={updateGroupsState}
+                      eventProperties={eventProperties}
+                      index={i}
+                      removeFilter={removeFilter}
+                    />
+                  )}
+                </Flex>
               );
             }
           )}
