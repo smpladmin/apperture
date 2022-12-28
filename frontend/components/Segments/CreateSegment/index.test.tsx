@@ -991,6 +991,8 @@ describe('Create Segment', () => {
               aggregation: 'total',
               operator: 'equals',
               values: ['15'],
+              startDate: '2022-11-28',
+              endDate: '2022-12-28',
               type: FilterType.WHO,
             },
             {
@@ -999,6 +1001,8 @@ describe('Create Segment', () => {
               aggregation: 'total',
               operator: 'equals',
               values: ['50'],
+              startDate: '2022-11-28',
+              endDate: '2022-12-28',
               type: FilterType.WHO,
             },
             {
@@ -1007,6 +1011,8 @@ describe('Create Segment', () => {
               aggregation: 'total',
               operator: 'equals',
               values: ['10'],
+              startDate: '2022-11-28',
+              endDate: '2022-12-28',
               type: FilterType.WHO,
             },
           ] as SegmentFilter[],

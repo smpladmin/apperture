@@ -2,6 +2,7 @@ import { Box, Button } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import {
   getDateOfNDaysBack,
+  getDateStringFromDate,
   getWhereAndWhoConditionsList,
 } from '@components/Segments/util';
 import {
@@ -55,7 +56,7 @@ const AddFilter = ({
         operator: SegmentFilterOperators.EQUALS,
         values: ['1'],
         startDate: getDateOfNDaysBack(30),
-        endDate: new Date(),
+        endDate: getDateStringFromDate(new Date()),
         type: FilterType.WHO,
       });
     }

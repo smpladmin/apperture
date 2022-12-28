@@ -11,8 +11,8 @@ export type WhoSegmentFilter = {
   aggregation: string;
   operator: SegmentFilterOperators;
   values: string[];
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
   type: FilterType;
 };
 

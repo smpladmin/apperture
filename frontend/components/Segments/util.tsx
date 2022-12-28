@@ -69,13 +69,21 @@ export const addTypeForFiltersInSavedSegmentResponse = (
   });
 };
 
+export const getDateStringFromDate = (date: Date) => {
+  const [dateString] = date.toISOString().split('T');
+  return dateString;
+};
+
 export const getDateOfNDaysBack = (days: number) => {
   const date = new Date();
   date.setDate(date.getDate() - days);
-  return date;
+  return getDateStringFromDate(date);
 };
 
-export const getNumberOfDaysBetweenDates = (startDate: Date, endDate: Date) => {
-  const diff = endDate?.valueOf() - startDate?.valueOf();
+export const getNumberOfDaysBetweenDates = (
+  startDate: string,
+  endDate: string
+) => {
+  const diff = new Date(endDate)?.valueOf() - new Date(startDate)?.valueOf();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 };
