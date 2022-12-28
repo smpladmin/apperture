@@ -94,6 +94,11 @@ describe('Create Segment', () => {
     });
   };
 
+  const getGroupConditionText = () => {
+    const groupConditions = screen.getAllByTestId('group-condition');
+    return groupConditions.map((condition) => condition.textContent);
+  };
+
   let mockedGetEventProperties: jest.Mock;
   let mockedGetNodes: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
@@ -1119,11 +1124,6 @@ describe('Create Segment', () => {
   });
 
   describe('add multiple groups and clear groups', () => {
-    const getGroupConditionText = () => {
-      const groupConditions = screen.getAllByTestId('group-condition');
-      return groupConditions.map((condition) => condition.textContent);
-    };
-
     it('add group', async () => {
       await act(async () => {
         render(
@@ -1199,7 +1199,6 @@ describe('Create Segment', () => {
       await addWhereFilter();
       await addWhoFilter();
 
-      // add two new group and then change first group condition to 'OR'
       const addGroupButton = screen.getByTestId('add-group');
       await act(async () => {
         fireEvent.click(addGroupButton);
