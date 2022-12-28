@@ -1,14 +1,12 @@
 import Layout from '@components/Layout';
-import { MapContext } from '@lib/contexts/mapContext';
+import CreateSegment from '@components/Segments/CreateSegment';
 import { AppWithIntegrations } from '@lib/domain/app';
+import { Segment } from '@lib/domain/segment';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
-import { _getNodes } from '@lib/services/datasourceService';
-import { Actions } from '@lib/types/context';
+import { _getSavedSegment } from '@lib/services/segmentService';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
-import { ReactElement, useContext, useEffect } from 'react';
-import { Node } from '@lib/domain/node';
-import Metric from '@components/Metric/CreateMetric';
+import { ReactElement } from 'react';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -20,8 +18,10 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
+
+  const { segmentId } = query;
   const apps = await _getAppsWithIntegrations(token);
-  const nodes = await _getNodes(token, query.dsId as string);
+  const savedSegment = await _getSavedSegment(token, segmentId as string);
 
   if (!apps.length) {
     return {
@@ -32,24 +32,15 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
   return {
-    props: { apps, nodes },
+    props: { apps, savedSegment },
   };
 };
 
-const CreateFunnel = ({ nodes }: { nodes: Node[] }) => {
-  const { dispatch } = useContext(MapContext);
-
-  useEffect(() => {
-    dispatch({
-      type: Actions.SET_NODES,
-      payload: nodes,
-    });
-  }, []);
-
-  return <Metric />;
+const EditSegments = ({ savedSegment }: { savedSegment: Segment }) => {
+  return <CreateSegment {...{ savedSegment }} />;
 };
 
-CreateFunnel.getLayout = function getLayout(
+EditSegments.getLayout = function getLayout(
   page: ReactElement,
   apps: AppWithIntegrations[]
 ) {
@@ -59,5 +50,4 @@ CreateFunnel.getLayout = function getLayout(
     </Layout>
   );
 };
-
-export default CreateFunnel;
+export default EditSegments;

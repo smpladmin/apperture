@@ -3,8 +3,8 @@ import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import { Metric } from '@lib/domain/metric';
 import React, { useState } from 'react';
-import CreateMetricAction from './CreateMetric/CreateMetricAction';
-import TransientMetricView from './CreateMetric/TransientMetricView';
+import CreateMetricAction from './Components/CreateMetricAction';
+import TransientMetricView from './Components/TransientMetricView';
 
 const Metric = () => {
   const [metric, setMetric] = useState<Metric | null>(null);

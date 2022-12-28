@@ -13,6 +13,7 @@ type MetricComponentCardProps = {
   loadingEventProperties: boolean;
   loadingEventsList: boolean;
   updateAggregate: Function;
+  removeAggregate: Function;
 };
 
 const MetricComponentCard = ({
@@ -22,6 +23,7 @@ const MetricComponentCard = ({
   loadingEventProperties,
   loadingEventsList,
   updateAggregate,
+  removeAggregate,
 }: MetricComponentCardProps) => {
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [variant, setVariant] = useState<MetricComponentVariant>(
@@ -68,13 +70,31 @@ const MetricComponentCard = ({
       ...filters,
       { operand: value, operator: 'equals', values: [] },
     ]);
+    setConditions((prevState) => [
+      ...prevState,
+      prevState.length ? 'and' : 'where',
+    ]);
   };
+
   const handleSetFilter = (ref: number, updatedFilter: any) => {
     setFilters(
       filters.map((filter, index) =>
         ref == index ? { ...filter, ...updatedFilter } : filter
       )
     );
+  };
+
+  const handleRemoveComponent = () => {
+    removeAggregate(variable);
+  };
+
+  const removeFilter = (reference: number) => {
+    setFilters(filters.filter((_, index) => index != reference));
+    const updatedConditions = conditions.filter(
+      (_, index) => index != reference
+    );
+    if (updatedConditions.length) updatedConditions[0] = 'where';
+    setConditions([...updatedConditions]);
   };
 
   useEffect(() => {
@@ -216,6 +236,7 @@ const MetricComponentCard = ({
           color={'grey.200'}
           opacity={isHovered ? 1 : 0}
           _hover={{ color: 'white', background: 'grey.300' }}
+          onClick={handleRemoveComponent}
         />
       </Flex>
       {reference && (
@@ -245,6 +266,7 @@ const MetricComponentCard = ({
                 index={index}
                 handleSetCondition={handleSetCondition}
                 handleSetFilter={handleSetFilter}
+                removeFilter={removeFilter}
               />
             ))}
           <MetricAddFilterComponent

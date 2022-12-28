@@ -1,4 +1,4 @@
-import { Box, Flex, Text } from '@chakra-ui/react';
+import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import indent from '@assets/icons/indent.svg';
 import Image from 'next/image';
@@ -16,6 +16,7 @@ type MetricFilterComponentProps = {
   index: number;
   handleSetCondition: Function;
   handleSetFilter: Function;
+  removeFilter: Function;
 };
 
 const MetricFilterComponent = ({
@@ -26,9 +27,11 @@ const MetricFilterComponent = ({
   index,
   handleSetCondition,
   handleSetFilter,
+  removeFilter,
 }: MetricFilterComponentProps) => {
   const router = useRouter();
   const { dsId } = router.query;
+  const [isHovered, setIsHovered] = useState(false);
   const [valueList, setValueList] = useState<string[]>([]);
   const [selectedValues, setSelectedValues] = useState<string[]>(values || []);
   const [loadingPropertyValues, setLoadingPropertyValues] = useState(false);
@@ -82,36 +85,55 @@ const MetricFilterComponent = ({
     }
   };
 
+  const handleRemoveComponent = () => {
+    removeFilter(index);
+  };
+
   return (
     <Flex
       width={'full'}
       _first={{ borderTop: '1px solid rgba(255, 255, 255, 0.2)' }}
-      m={2}
-      py={2}
+      marginTop={2}
       px={5}
       direction={'column'}
       gap={1}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <Text fontSize={'xs-12'} lineHeight={'xs-14'} color={'grey.100'}>
         {condition}
       </Text>
-      <Text
-        fontSize={'xs-12'}
-        lineHeight={'xs-14'}
-        color={'white'}
-        fontWeight={500}
-        marginLeft={6}
-        position="relative"
-        cursor={'pointer'}
-        p={1}
-        borderRadius={4}
-        _hover={{ color: 'white', background: 'grey.300' }}
-      >
-        <Box position={'absolute'} left={-6}>
-          <Image src={indent} />
-        </Box>
-        {operand}
-      </Text>
+      <Flex width={'full'} justifyContent={'space-between'}>
+        <Text
+          fontSize={'xs-12'}
+          lineHeight={'xs-14'}
+          color={'white'}
+          fontWeight={500}
+          marginLeft={6}
+          position="relative"
+          cursor={'pointer'}
+          p={1}
+          borderRadius={4}
+          _hover={{ color: 'white', background: 'grey.300' }}
+          width={'max-content'}
+        >
+          <Box position={'absolute'} left={-6}>
+            <Image src={indent} />
+          </Box>
+          {operand}
+        </Text>
+        <IconButton
+          size={'xs'}
+          fontWeight={'500'}
+          aria-label="set alerts"
+          variant={'iconButton'}
+          icon={<i className="ri-close-fill"></i>}
+          color={'grey.200'}
+          opacity={isHovered ? 1 : 0}
+          _hover={{ color: 'white', background: 'grey.300' }}
+          onClick={handleRemoveComponent}
+        />
+      </Flex>
       <Flex marginLeft={6} gap={2}>
         <Text
           fontSize={'xs-12'}

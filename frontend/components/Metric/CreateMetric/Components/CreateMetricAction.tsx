@@ -86,18 +86,46 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
     ]);
   };
 
+  const removeAggregate = (variable: string) => {
+    const updatedAggregates = aggregates.filter(
+      (aggregate) => aggregate.variable !== variable
+    );
+
+    setAggregates(
+      updatedAggregates.map((aggregate, index) => {
+        return { ...aggregate, variable: String.fromCharCode(65 + index) };
+      })
+    );
+  };
+
   useEffect(() => {
     const fetchMetric = async (aggregates: any) => {
+      const processedAggregate = aggregates.map((aggregate: any) => {
+        const processedFilter = aggregate?.filters.map((filter: any) => {
+          const processedValues = filter.values.map((value: string) =>
+            value === '(empty string)' ? '' : value
+          );
+          return { ...filter, values: processedValues };
+        });
+        return {
+          ...aggregate,
+          filters: processedFilter,
+        };
+      });
       const result = await computeMetric(
         dsId as string,
         metricDefinition as string,
-        aggregates,
+        processedAggregate,
         []
       );
-      setMetric({
-        data: result.metric,
-        definition: metricDefinition,
-      });
+      if (result) {
+        setMetric({
+          data: result.metric,
+          definition: metricDefinition,
+        });
+      } else {
+        setMetric(null);
+      }
     };
     if (
       aggregates.every(
@@ -212,6 +240,7 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
             loadingEventProperties={loadingEventProperties}
             loadingEventsList={loadingEventsList}
             updateAggregate={updateAggregate}
+            removeAggregate={removeAggregate}
           />
         ))}
       </Flex>
