@@ -31,6 +31,7 @@ import { User } from '@lib/domain/user';
 import { getUserInfo } from '@lib/services/userService';
 import { cloneDeep, isEqual } from 'lodash';
 import ExitConfirmationModal from './components/ExitConfirmationModal';
+import GroupCondition from './components/GroupConditions';
 
 type CreateSegmentProp = {
   savedSegment?: Segment;
@@ -311,35 +312,11 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
                 groups={groups}
                 groupIndex={index}
               />
-              {groupConditions[index] ? (
-                <Flex
-                  justifyContent={'center'}
-                  my={
-                    groupConditions[index] === SegmentGroupConditions.AND
-                      ? '-3'
-                      : '2'
-                  }
-                >
-                  <Text
-                    px={'2'}
-                    py={'1'}
-                    fontSize={'xs-14'}
-                    lineHeight={'xs-14'}
-                    fontWeight={'500'}
-                    bg={'black.50'}
-                    borderRadius={'4'}
-                    color={'white.DEFAULT'}
-                    onClick={() => {
-                      handleGroupConditionsChange(index);
-                    }}
-                    h={'6'}
-                    cursor={'pointer'}
-                    data-testid={'group-condition'}
-                  >
-                    {groupConditions[index].toLocaleUpperCase()}
-                  </Text>
-                </Flex>
-              ) : null}
+              <GroupCondition
+                index={index}
+                groupConditions={groupConditions}
+                handleGroupConditionsChange={handleGroupConditionsChange}
+              />
             </Box>
           );
         })}
