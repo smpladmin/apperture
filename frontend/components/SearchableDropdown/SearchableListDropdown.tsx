@@ -52,7 +52,7 @@ const SearchableListDropdown = ({
                 px={'2'}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onSubmit(listKey ? segmentPropertyItem : item);
+                  onSubmit(item);
                 }}
               >
                 <Box
