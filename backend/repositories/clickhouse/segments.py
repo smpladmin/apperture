@@ -163,7 +163,9 @@ class Segments(Events):
         ]
         criterion.append(
             self.table.user_id.isin(segment_user_ids)
-        ) if segment_user_ids else self.table.user_id.isin(segment_users_query)
+        ) if segment_user_ids else criterion.append(
+            self.table.user_id.isin(segment_users_query)
+        )
         sub_query = (
             ClickHouseQuery.from_(self.table)
             .select(
@@ -209,14 +211,9 @@ class Segments(Events):
             return segment_data
 
         for column in columns:
-            if len(user_ids) < 5000:
-                column_data_query = self.build_valid_column_data_query(
-                    column=column, segment_user_ids=user_ids
-                )
-            else:
-                column_data_query = self.build_valid_column_data_query(
-                    column=column, segment_users_query=segment_users_query
-                )
+            column_data_query = self.build_valid_column_data_query(
+                column=column, segment_users_query=segment_users_query
+            )
             column_data = self.execute_get_query(
                 query=column_data_query, parameters=params
             )
