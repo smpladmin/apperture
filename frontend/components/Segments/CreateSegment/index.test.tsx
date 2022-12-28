@@ -56,7 +56,7 @@ describe('Create Segment', () => {
     });
   };
 
-  const addWhoFilter = async (elementIndex: number) => {
+  const addWhoFilter = async (elementIndex: number = 5) => {
     const addFilterButton = screen.getByTestId('add-filter');
 
     fireEvent.click(addFilterButton);
@@ -1115,6 +1115,113 @@ describe('Create Segment', () => {
       await waitFor(() => {
         assertFilterConditions(['where', 'or', 'who', 'and', 'and']);
       });
+    });
+  });
+
+  describe('add multiple groups and clear groups', () => {
+    const getGroupConditionText = () => {
+      const groupConditions = screen.getAllByTestId('group-condition');
+      return groupConditions.map((condition) => condition.textContent);
+    };
+
+    it('add group', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+      await addWhoFilter();
+
+      // add new group
+      const addGroupButton = screen.getByTestId('add-group');
+      await act(async () => {
+        fireEvent.click(addGroupButton);
+      });
+
+      const groups = screen.getAllByTestId('segment-group');
+
+      expect(groups.length).toEqual(2);
+      expect(getGroupConditionText()).toEqual(['AND']);
+    });
+
+    it('add groups and switch first `and` condition to `or`', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+      await addWhoFilter();
+
+      // add two new group and then change first group condition to 'OR'
+      const addGroupButton = screen.getByTestId('add-group');
+      await act(async () => {
+        fireEvent.click(addGroupButton);
+      });
+      await act(async () => {
+        fireEvent.click(addGroupButton);
+      });
+      const groupConditions = screen.getAllByTestId('group-condition');
+      expect(getGroupConditionText()).toEqual(['AND', 'AND']);
+
+      // switch first 'AND' condition to 'OR'
+      await act(async () => {
+        fireEvent.click(groupConditions[0]);
+      });
+      expect(getGroupConditionText()).toEqual(['OR', 'AND']);
+
+      // again clicking on same condition would change the text back to 'AND' from 'OR'
+      await act(async () => {
+        fireEvent.click(groupConditions[0]);
+      });
+      expect(getGroupConditionText()).toEqual(['AND', 'AND']);
+    });
+
+    it('clear all group ', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+      await addWhoFilter();
+
+      // add two new group and then change first group condition to 'OR'
+      const addGroupButton = screen.getByTestId('add-group');
+      await act(async () => {
+        fireEvent.click(addGroupButton);
+      });
+      await act(async () => {
+        fireEvent.click(addGroupButton);
+      });
+
+      const groups = screen.getAllByTestId('segment-group');
+      expect(groups.length).toEqual(3);
+
+      const clearAllButton = screen.getByTestId('clear-all');
+
+      // after clicking on clear-all only one group should be there with no filters/queries
+      await act(async () => {
+        fireEvent.click(clearAllButton);
+      });
+      const newGroup = screen.getAllByTestId('segment-group');
+      const queries = screen.queryByTestId('query-builder');
+
+      expect(newGroup.length).toEqual(1);
+      expect(queries).not.toBeInTheDocument();
     });
   });
 });

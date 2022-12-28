@@ -300,7 +300,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
         </Flex>
         {groups.map((group, index, groups) => {
           return (
-            <>
+            <Box key={index} data-testid={'segment-group'}>
               <QueryBuilder
                 key={index}
                 eventProperties={eventProperties}
@@ -334,12 +334,13 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
                     }}
                     h={'6'}
                     cursor={'pointer'}
+                    data-testid={'group-condition'}
                   >
                     {groupConditions[index].toLocaleUpperCase()}
                   </Text>
                 </Flex>
               ) : null}
-            </>
+            </Box>
           );
         })}
         <Button
@@ -350,6 +351,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
           lineHeight={'xs-14'}
           fontWeight={'500'}
           onClick={addNewGroup}
+          data-testid={'add-group'}
         >
           {'+ Group'}
         </Button>
