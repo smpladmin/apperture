@@ -24,6 +24,7 @@ const MetricAddFilterComponent = ({
   return (
     <Flex position="relative" width={'full'} direction={'column'}>
       <Text
+        data-testid={'add-filter-button'}
         color={'grey.200'}
         fontSize={'xs-12'}
         lineHeight={'xs-16'}

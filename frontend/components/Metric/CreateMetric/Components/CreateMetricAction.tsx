@@ -50,7 +50,7 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
         getNodes(dsId as string),
       ]);
 
-      setEventList(events.map((i) => i.name));
+      setEventList(events.map((i) => i.id));
       setEventProperties([...eventPropertiesResult]);
       setLoadingEventProperties(false);
       setLoadingEventsList(false);
@@ -152,6 +152,7 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
           onClick={() => {
             router.back();
           }}
+          data-testid="back-button"
         />
 
         <Button
@@ -161,6 +162,7 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
             pointerEvents: 'none',
           }}
           data-testid={'save'}
+          disabled={true}
         >
           <Text
             textAlign={'center'}
@@ -220,7 +222,7 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
             EVENTS & SEGMENT
           </Text>
           <Button
-            data-testid={'add-button'}
+            data-testid={'add-events-or-segments-button'}
             variant="unstyled"
             rounded={'full'}
             size={'md'}

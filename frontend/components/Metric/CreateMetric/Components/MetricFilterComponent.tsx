@@ -91,6 +91,7 @@ const MetricFilterComponent = ({
 
   return (
     <Flex
+      data-testid={'event-filter-component'}
       width={'full'}
       _first={{ borderTop: '1px solid rgba(255, 255, 255, 0.2)' }}
       marginTop={2}
@@ -104,7 +105,7 @@ const MetricFilterComponent = ({
         {condition}
       </Text>
       <Flex width={'full'} justifyContent={'space-between'}>
-        <Text
+        <Flex
           fontSize={'xs-12'}
           lineHeight={'xs-14'}
           color={'white'}
@@ -121,7 +122,7 @@ const MetricFilterComponent = ({
             <Image src={indent} />
           </Box>
           {operand}
-        </Text>
+        </Flex>
         <IconButton
           size={'xs'}
           fontWeight={'500'}
@@ -148,6 +149,7 @@ const MetricFilterComponent = ({
         </Text>
         <Box position={'relative'} ref={eventValueRef}>
           <Text
+            data-testid={'event-filter-values'}
             p={1}
             fontSize={'xs-12'}
             borderRadius={4}

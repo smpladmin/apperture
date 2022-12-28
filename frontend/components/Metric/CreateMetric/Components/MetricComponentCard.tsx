@@ -117,6 +117,7 @@ const MetricComponentCard = ({
 
   return (
     <Flex
+      data-testid="event-or-segment-component"
       justifyContent={'space-between'}
       alignItems={'center'}
       direction={'column'}
@@ -128,6 +129,7 @@ const MetricComponentCard = ({
     >
       <Flex px={5} width={'full'} alignItems={'center'}>
         <Flex
+          data-testid="event-or-segment-component-variable"
           background={'#9999B6'}
           borderRadius={'2px'}
           textAlign="center"
@@ -149,10 +151,12 @@ const MetricComponentCard = ({
           cursor={'pointer'}
           borderRadius={4}
           _hover={{ background: 'grey.300' }}
+          data-testid="select-event-segment"
           onClick={() => setIsEventOrSegmentListOpen((prevState) => !prevState)}
         >
           <Box position="relative" ref={EventOrSegmentBox}>
             <Text
+              data-testid={'event-or-segment-name'}
               color={'white'}
               fontSize={'xs-14'}
               fontWeight={500}
@@ -171,6 +175,7 @@ const MetricComponentCard = ({
                   borderRadius={12}
                 >
                   <Flex
+                    data-testid={'event-option'}
                     lineHeight={'xs-18'}
                     color={'black'}
                     fontSize={'xs-14'}
@@ -228,6 +233,7 @@ const MetricComponentCard = ({
           </Box>
         </Flex>
         <IconButton
+          data-testid="remove-event-or-segment-component"
           size={'xs'}
           fontWeight={'500'}
           aria-label="set alerts"

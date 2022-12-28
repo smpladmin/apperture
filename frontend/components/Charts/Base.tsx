@@ -28,7 +28,6 @@ const syncRef = <C extends any>(
   source: MutableRefObject<any | null>,
   target?: RefCallback<any | null> | MutableRefObject<any | null>
 ) => {
-  /* istanbul ignore else */
   if (typeof target === 'function') {
     target(source.current);
   } else if (target) {
@@ -73,7 +72,7 @@ const BaseChart = <C extends any>(
 
   useEffect(() => {
     const { current: container } = containerRef;
-    /* istanbul ignore else */
+
     if (container) {
       const { data, ...config } = restProps as any;
       configRef.current = cloneDeep(config);
@@ -91,19 +90,17 @@ const BaseChart = <C extends any>(
       onReady?.(chartRef.current);
     }
     return () => {
-      /* istanbul ignore else */
-      if (chartRef.current) {
+      if (chartRef.current && chartRef.current.destroy) {
         chartRef.current.destroy();
         chartRef.current = null;
         syncRef(chartRef, chart);
       }
     };
-    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
     const { current: chart } = chartRef;
-    /* istanbul ignore else */
+
     if (chart) {
       // avoid update in first time
       if (!isFirstRenderRef.current) {
@@ -118,7 +115,7 @@ const BaseChart = <C extends any>(
 
           chart.update(mergedConfig as any);
           chart.render();
-        } else {
+        } else if (chart.changeData) {
           chart.changeData(normalizedData);
         }
         dataRef.current = normalizedData;
