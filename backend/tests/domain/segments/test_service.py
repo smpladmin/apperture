@@ -135,11 +135,13 @@ class TestSegmentService:
                             "operand": "prop1",
                             "operator": SegmentFilterOperators.EQUALS,
                             "values": ["va1", "val2"],
+                            "type": SegmentFilterConditions.WHERE,
                         },
                         {
                             "operand": "prop2",
                             "operator": SegmentFilterOperators.EQUALS,
                             "values": ["va3", "val4"],
+                            "type": SegmentFilterConditions.WHERE,
                         },
                     ],
                 }
@@ -172,11 +174,13 @@ class TestSegmentService:
                             "operand": "prop1",
                             "operator": SegmentFilterOperators.EQUALS,
                             "values": ["va1", "val2"],
+                            "type": SegmentFilterConditions.WHERE,
                         },
                         {
                             "operand": "prop2",
                             "operator": SegmentFilterOperators.EQUALS,
                             "values": ["va3", "val4"],
+                            "type": SegmentFilterConditions.WHERE,
                         },
                     ],
                 }

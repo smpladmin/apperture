@@ -490,11 +490,13 @@ def saved_segment_response():
                         "operand": "properties.$city",
                         "operator": "equals",
                         "values": ["Delhi", "Indore", "Bhopal"],
+                        "type": SegmentFilterConditions.WHERE
                     },
                     {
                         "operand": "properties.$app_release",
                         "operator": "equals",
                         "values": ["5003", "2077", "5002"],
+                        "type": SegmentFilterConditions.WHERE
                     },
                 ],
             }
@@ -903,11 +905,13 @@ def segment_data():
                         "operand": "properties.$city",
                         "operator": "equals",
                         "values": ["Delhi", "Indore", "Bhopal"],
+                        "type": SegmentFilterConditions.WHERE,
                     },
                     {
                         "operand": "properties.$app_release",
                         "operator": "equals",
                         "values": ["5003", "2077", "5002"],
+                        "type": SegmentFilterConditions.WHERE,
                     },
                 ],
                 "conditions": ["where", "and"],
