@@ -34,7 +34,7 @@ const MetricComponentCard = ({
   const [isEventOrSegmentListLoading, setIsEventOrSegmentListLoading] =
     useState<boolean>(false);
   const [EventorSegmentListSearchData, setEventOrSegmentListSearchData] =
-    useState<any>([]);
+    useState<string[]>([]);
   const [reference, setReference] = useState('');
   const [aggregationFunction, setAggregationFunction] = useState('count');
   const [filters, setFilters] = useState<MetricEventFilter[]>([]);

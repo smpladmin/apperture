@@ -22,7 +22,7 @@ from rest.controllers import (
     segment_controller,
     user_controller,
     funnel_controller,
-    metric_controller
+    metric_controller,
 )
 from mongo import Mongo
 from clickhouse import Clickhouse

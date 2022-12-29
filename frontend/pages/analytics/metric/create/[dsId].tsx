@@ -8,7 +8,7 @@ import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
 import { ReactElement, useContext, useEffect } from 'react';
 import { Node } from '@lib/domain/node';
-import Metric from '@components/Metric/CreateMetric';
+import CreateMetric from '@components/Metric/CreateMetric';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -46,7 +46,7 @@ const CreateFunnel = ({ nodes }: { nodes: Node[] }) => {
     });
   }, []);
 
-  return <Metric />;
+  return <CreateMetric />;
 };
 
 CreateFunnel.getLayout = function getLayout(

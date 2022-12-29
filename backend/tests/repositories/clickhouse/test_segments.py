@@ -160,19 +160,28 @@ class TestSegmentsRepository:
         assert segment_users.get_sql() == self.who_filters_query
 
     def test_build_segment_users_query_for_where_filters(self):
-        assert self.repo.build_segment_users_query(
-            groups=self.groups[:1], group_conditions=[]
-        ).get_sql() == self.where_filters_query
+        assert (
+            self.repo.build_segment_users_query(
+                groups=self.groups[:1], group_conditions=[]
+            ).get_sql()
+            == self.where_filters_query
+        )
 
     def test_build_segment_users_query_for_who_filters(self):
-        assert self.repo.build_segment_users_query(
-            groups=self.groups[1:2], group_conditions=[]
-        ).get_sql() == self.who_filters_query
+        assert (
+            self.repo.build_segment_users_query(
+                groups=self.groups[1:2], group_conditions=[]
+            ).get_sql()
+            == self.who_filters_query
+        )
 
     def test_build_segment_users_query_for_composite_filters(self):
-        assert self.repo.build_segment_users_query(
-            groups=self.groups[2:], group_conditions=[]
-        ).get_sql() == self.composite_filters_query
+        assert (
+            self.repo.build_segment_users_query(
+                groups=self.groups[2:], group_conditions=[]
+            ).get_sql()
+            == self.composite_filters_query
+        )
 
     def test_build_valid_column_data_query(self):
         assert self.repo.build_valid_column_data_query(
@@ -207,23 +216,29 @@ class TestSegmentsRepository:
             columns=self.columns,
             group_conditions=[],
         )
-        calls = [call(parameters=self.params, query=(
-            'WITH column_data AS (SELECT '
-            f'"user_id","timestamp","properties.{column}",RANK() OVER(PARTITION BY '
-            '"user_id" ORDER BY "timestamp" DESC) AS "Rank" FROM "events" WHERE '
-            '"datasource_id"=%(ds_id)s AND "user_id" IN (WITH cte0 AS (SELECT '
-            '"user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
-            '"user_id" IN (SELECT DISTINCT "user_id" FROM "events" WHERE '
-            '"datasource_id"=%(ds_id)s) AND "event_name"=\'Topic_Click\' GROUP '
-            'BY "user_id" HAVING COUNT("user_id")=\'2\') ,cte1 AS (SELECT '
-            '"user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
-            '"user_id" IN (SELECT DISTINCT "user_id" FROM "events" WHERE '
-            '"datasource_id"=%(ds_id)s) AND "event_name"<>\'Video_Open\') SELECT '
-            'DISTINCT "cte0"."user_id" FROM cte0 INTERSECT SELECT DISTINCT '
-            '"cte1"."user_id" FROM cte1) AND '
-            f'char_length(toString("properties.{column}"))>0 ORDER BY "user_id") '
-            f'SELECT "properties.{column}","user_id" FROM column_data WHERE "Rank"=1 '
-            'ORDER BY "user_id"'
-        )) for column in self.columns]
+        calls = [
+            call(
+                parameters=self.params,
+                query=(
+                    "WITH column_data AS (SELECT "
+                    f'"user_id","timestamp","properties.{column}",RANK() OVER(PARTITION BY '
+                    '"user_id" ORDER BY "timestamp" DESC) AS "Rank" FROM "events" WHERE '
+                    '"datasource_id"=%(ds_id)s AND "user_id" IN (WITH cte0 AS (SELECT '
+                    '"user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
+                    '"user_id" IN (SELECT DISTINCT "user_id" FROM "events" WHERE '
+                    '"datasource_id"=%(ds_id)s) AND "event_name"=\'Topic_Click\' GROUP '
+                    'BY "user_id" HAVING COUNT("user_id")=\'2\') ,cte1 AS (SELECT '
+                    '"user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
+                    '"user_id" IN (SELECT DISTINCT "user_id" FROM "events" WHERE '
+                    '"datasource_id"=%(ds_id)s) AND "event_name"<>\'Video_Open\') SELECT '
+                    'DISTINCT "cte0"."user_id" FROM cte0 INTERSECT SELECT DISTINCT '
+                    '"cte1"."user_id" FROM cte1) AND '
+                    f'char_length(toString("properties.{column}"))>0 ORDER BY "user_id") '
+                    f'SELECT "properties.{column}","user_id" FROM column_data WHERE "Rank"=1 '
+                    'ORDER BY "user_id"'
+                ),
+            )
+            for column in self.columns
+        ]
 
         self.repo.execute_get_query.assert_has_calls(calls, any_order=True)

@@ -14,7 +14,7 @@ const config = {
   yField: 'value',
   xAxis: {
     label: {
-      formatter: (text: any) => {
+      formatter: (text: string) => {
         return convertISODateToReadableDate(text);
       },
     },
@@ -23,7 +23,7 @@ const config = {
   tooltip: {
     showMarkers: true,
     shared: true,
-    formatter: ({ date, value }: any) => {
+    formatter: ({ date, value }: { date: string; value: string }) => {
       return {
         title: convertISODateToReadableDate(date),
         name: 'value',

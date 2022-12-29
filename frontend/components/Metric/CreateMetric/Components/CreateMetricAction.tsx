@@ -16,6 +16,7 @@ import MetricComponentCard from './MetricComponentCard';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
 import _ from 'lodash';
 import { computeMetric } from '@lib/services/metricService';
+import { EventOrSegmentComponent, MetricEventFilter } from '@lib/domain/metric';
 
 type CreateMetricActionProps = {
   setMetric: Function;
@@ -32,7 +33,7 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
   const [eventProperties, setEventProperties] = useState<string[]>([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
   const [loadingEventsList, setLoadingEventsList] = useState(false);
-  const [aggregates, setAggregates] = useState<any[]>([
+  const [aggregates, setAggregates] = useState<EventOrSegmentComponent[]>([
     {
       variable: 'A',
       reference_id: '',
@@ -60,7 +61,10 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
     fetchEventProperties();
   }, []);
 
-  const updateAggregate = (variable: string, updatedValue: any) => {
+  const updateAggregate = (
+    variable: string,
+    updatedValue: MetricEventFilter
+  ) => {
     setAggregates(
       aggregates.map((aggregate) =>
         aggregate.variable == variable
@@ -99,19 +103,23 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
   };
 
   useEffect(() => {
-    const fetchMetric = async (aggregates: any) => {
-      const processedAggregate = aggregates.map((aggregate: any) => {
-        const processedFilter = aggregate?.filters.map((filter: any) => {
-          const processedValues = filter.values.map((value: string) =>
-            value === '(empty string)' ? '' : value
+    const fetchMetric = async (aggregates: EventOrSegmentComponent[]) => {
+      const processedAggregate = aggregates.map(
+        (aggregate: EventOrSegmentComponent) => {
+          const processedFilter = aggregate?.filters.map(
+            (filter: MetricEventFilter) => {
+              const processedValues = filter.values.map((value: string) =>
+                value === '(empty string)' ? '' : value
+              );
+              return { ...filter, values: processedValues };
+            }
           );
-          return { ...filter, values: processedValues };
-        });
-        return {
-          ...aggregate,
-          filters: processedFilter,
-        };
-      });
+          return {
+            ...aggregate,
+            filters: processedFilter,
+          };
+        }
+      );
       const result = await computeMetric(
         dsId as string,
         metricDefinition as string,
@@ -132,7 +140,9 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
         (aggregate) =>
           aggregate.reference_id &&
           aggregate.variable &&
-          aggregate.filters.every((filter: any) => filter.values.length)
+          aggregate.filters.every(
+            (filter: MetricEventFilter) => filter.values.length
+          )
       )
     ) {
       fetchMetric(aggregates);

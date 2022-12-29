@@ -17,7 +17,7 @@ export type MetricComponentAggregation = {
 
 export type EventOrSegmentComponent = {
   variable: string;
-  reference: string;
+  reference_id: string;
   function: string;
   variant: string;
   filters: MetricEventFilter[];
