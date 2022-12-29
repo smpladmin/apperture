@@ -14,6 +14,11 @@ class SegmentFilterConditions(str, Enum):
     OR = "or"
 
 
+class SegmentGroupConditions(str, Enum):
+    AND = "and"
+    OR = "or"
+
+
 class SegmentFilterOperators(str, Enum):
     EQUALS = "equals"
 
@@ -28,6 +33,7 @@ class WhereSegmentFilter(BaseModel):
     operand: str
     operator: SegmentFilterOperators
     values: List[str]
+    type = SegmentFilterConditions.WHERE
 
 
 class WhoSegmentFilter(BaseModel):
@@ -36,8 +42,9 @@ class WhoSegmentFilter(BaseModel):
     values: List[str]
     triggered: bool
     aggregation: SegmentAggregationOperators
-    start_date: Optional[datetime]
-    end_date: Optional[datetime]
+    start_date: Optional[str]
+    end_date: Optional[str]
+    type = SegmentFilterConditions.WHO
 
 
 class SegmentGroup(BaseModel):
