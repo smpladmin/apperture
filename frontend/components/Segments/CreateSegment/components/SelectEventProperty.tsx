@@ -48,7 +48,11 @@ const SelectEventProperty = ({
   const onSuggestionClick = (item: SegmentProperty) => {
     const updatedFilters = [...filters];
     updatedFilters[index]['operand'] = item.id;
-    updatedFilters[index]['values'] = [];
+
+    // reset the value to empty [] in case of where filter and ['1'] in case of who filter
+    // when changing property/event for a query
+    const value = item.type === FilterItemType.PROPERTY ? [] : ['1'];
+    updatedFilters[index]['values'] = value;
     updateGroupsState(updatedFilters);
     setOpenFiltersList(false);
   };

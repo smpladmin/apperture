@@ -1,3 +1,4 @@
+import { SegmentGroupConditions } from './../domain/segment';
 import { ApperturePrivateGet, ApperturePost } from './util';
 import { cloneDeep } from 'lodash';
 import { replaceEmptyStringPlaceholder } from './../../components/Segments/util';
@@ -6,13 +7,14 @@ import { SegmentGroup } from '@lib/domain/segment';
 export const computeSegment = async (
   dsId: string,
   groups: SegmentGroup[],
-  columns: string[]
+  columns: string[],
+  groupConditions: SegmentGroupConditions[]
 ) => {
   const res = await ApperturePost('/segments/transient', {
     datasourceId: dsId,
     groups: replaceEmptyStringPlaceholder(cloneDeep(groups)),
     columns,
-    groupConditions: [],
+    groupConditions,
   });
   return res.data;
 };

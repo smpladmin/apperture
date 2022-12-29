@@ -11,8 +11,8 @@ export type WhoSegmentFilter = {
   aggregation: string;
   operator: SegmentFilterOperators;
   values: string[];
-  startDate: Date;
-  endDate: Date;
+  startDate: string;
+  endDate: string;
   type: FilterType;
 };
 
@@ -48,6 +48,11 @@ export type SegmentGroup = {
   filters: SegmentFilter[];
   conditions: SegmentFilterConditions[];
 };
+
+export enum SegmentGroupConditions {
+  AND = 'and',
+  OR = 'or',
+}
 
 export type SegmentTableData = {
   count: number;

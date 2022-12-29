@@ -35,8 +35,8 @@ const DateField = ({
     closeDropdown();
 
     const updatedFilters = [...filters];
-    // @ts-ignore
-    updatedFilters[index]['startDate'] = getDateOfNDaysBack(Number(days));
+    (updatedFilters[index] as WhoSegmentFilter)['startDate'] =
+      getDateOfNDaysBack(Number(days));
     updateGroupsState(updatedFilters);
   };
 
@@ -45,6 +45,7 @@ const DateField = ({
       filter.startDate,
       filter.endDate
     );
+
     return (
       <Flex
         alignItems={'center'}

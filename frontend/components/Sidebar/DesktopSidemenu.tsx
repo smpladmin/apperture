@@ -55,6 +55,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
       fontSize={'base'}
       paddingTop={3}
       paddingBottom={12}
+      overflowY={'auto'}
     >
       <Box>
         <Image
