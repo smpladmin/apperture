@@ -5,6 +5,7 @@ import React from 'react';
 type GroupConditionsProps = {
   index: number;
   groupConditions: SegmentGroupConditions[];
+  setIsGroupConditionChanged: Function;
   handleGroupConditionsChange: Function;
 };
 
@@ -12,6 +13,7 @@ const GroupCondition = ({
   index,
   groupConditions,
   handleGroupConditionsChange,
+  setIsGroupConditionChanged,
 }: GroupConditionsProps) => {
   return (
     <div>
@@ -32,6 +34,7 @@ const GroupCondition = ({
             borderRadius={'4'}
             color={'white.DEFAULT'}
             onClick={() => {
+              setIsGroupConditionChanged(true);
               handleGroupConditionsChange(index);
             }}
             h={'6'}

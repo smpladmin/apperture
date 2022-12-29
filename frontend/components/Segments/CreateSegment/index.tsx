@@ -63,6 +63,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
   });
   const [isSegmentDataLoading, setIsSegmentDataLoading] = useState(false);
   const [refreshOnDelete, setRefreshOnDelete] = useState(false);
+  const [isGroupConditionChanged, setIsGroupConditionChanged] = useState(false);
   const [user, setUser] = useState<User>();
   const {
     isOpen: isSaveSegmentModalOpen,
@@ -119,13 +120,14 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
   }, [selectedColumns]);
 
   useEffect(() => {
-    const validGroupQuery = groups.some(
+    const validGroupQuery = groups.every(
       (group) =>
         group.filters.length &&
         group.filters.every((filter) => filter.values.length)
     );
-    if (validGroupQuery || refreshOnDelete) {
+    if (validGroupQuery || refreshOnDelete || isGroupConditionChanged) {
       if (refreshOnDelete) setRefreshOnDelete(false);
+      setIsGroupConditionChanged(false);
       setIsSegmentDataLoading(true);
       fetchSegmentResponse(getFilteredColumns(selectedColumns));
     }
@@ -186,7 +188,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
       conditions: [],
     };
     const newGroupCondition = SegmentGroupConditions.AND;
-
+    setIsGroupConditionChanged(true);
     setGroups([...groups, newGroup]);
     setGroupConditions([...groupConditions, newGroupCondition]);
   };
@@ -316,6 +318,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
                 index={index}
                 groupConditions={groupConditions}
                 handleGroupConditionsChange={handleGroupConditionsChange}
+                setIsGroupConditionChanged={setIsGroupConditionChanged}
               />
             </Box>
           );
