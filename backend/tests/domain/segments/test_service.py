@@ -13,6 +13,7 @@ from domain.segments.models import (
     SegmentGroup,
     ComputedSegment,
     Segment,
+    SegmentGroupConditions,
 )
 
 
@@ -30,15 +31,22 @@ class TestSegmentService:
                 operator=SegmentFilterOperators.EQUALS,
                 operand="prop1",
                 values=["va1", "val2"],
+                all=False,
+                type=SegmentFilterConditions.WHERE,
+                condition=SegmentFilterConditions.WHERE,
             ),
             WhereSegmentFilter(
                 operator=SegmentFilterOperators.EQUALS,
                 operand="prop2",
                 values=["va3", "val4"],
+                all=False,
+                type=SegmentFilterConditions.WHERE,
+                condition=SegmentFilterConditions.AND,
             ),
         ]
-        self.conditions = [SegmentFilterConditions.WHERE, SegmentFilterConditions.AND]
-        self.groups = [SegmentGroup(filters=self.filters, conditions=self.conditions)]
+        self.groups = [
+            SegmentGroup(filters=self.filters, condition=SegmentGroupConditions.AND)
+        ]
         self.columns = ["prop1", "prop2", "prop3"]
         self.segment = Segment(
             name="test",
@@ -48,7 +56,6 @@ class TestSegmentService:
             app_id=PydanticObjectId(self.ds_id),
             groups=self.groups,
             columns=self.columns,
-            group_conditions=[],
         )
         Segment.get = AsyncMock(return_value=self.segment)
         FindMock = namedtuple("FindMock", ["to_list"])
@@ -68,7 +75,6 @@ class TestSegmentService:
             datasource_id=self.ds_id,
             columns=self.columns,
             groups=self.groups,
-            group_conditions=[],
         ) == ComputedSegment(
             count=2,
             data=[
@@ -80,25 +86,27 @@ class TestSegmentService:
             **{
                 "columns": ["prop1", "prop2", "prop3"],
                 "datasource_id": self.ds_id,
-                "group_conditions": [],
                 "groups": [
                     SegmentGroup(
                         filters=[
                             WhereSegmentFilter(
-                                operator=SegmentFilterOperators.EQUALS,
                                 operand="prop1",
+                                operator=SegmentFilterOperators.EQUALS,
                                 values=["va1", "val2"],
+                                all=False,
+                                condition=SegmentFilterConditions.WHERE,
+                                type=SegmentFilterConditions.WHERE,
                             ),
                             WhereSegmentFilter(
-                                operator=SegmentFilterOperators.EQUALS,
                                 operand="prop2",
+                                operator=SegmentFilterOperators.EQUALS,
                                 values=["va3", "val4"],
+                                all=False,
+                                condition=SegmentFilterConditions.AND,
+                                type=SegmentFilterConditions.WHERE,
                             ),
                         ],
-                        conditions=[
-                            SegmentFilterConditions.WHERE,
-                            SegmentFilterConditions.AND,
-                        ],
+                        condition=SegmentGroupConditions.AND,
                     )
                 ],
             }
@@ -113,7 +121,6 @@ class TestSegmentService:
             name="test",
             description="sample",
             groups=self.groups,
-            groupConditions=[],
             columns=self.columns,
         )
 
@@ -123,21 +130,21 @@ class TestSegmentService:
             "created_at": ANY,
             "datasource_id": PydanticObjectId("63771fc960527aba9354399c"),
             "description": "sample",
-            "group_conditions": [],
             "groups": [
                 {
-                    "conditions": [
-                        SegmentFilterConditions.WHERE,
-                        SegmentFilterConditions.AND,
-                    ],
+                    "condition": SegmentGroupConditions.AND,
                     "filters": [
                         {
+                            "all": False,
+                            "condition": SegmentFilterConditions.WHERE,
                             "operand": "prop1",
                             "operator": SegmentFilterOperators.EQUALS,
                             "values": ["va1", "val2"],
                             "type": SegmentFilterConditions.WHERE,
                         },
                         {
+                            "all": False,
+                            "condition": SegmentFilterConditions.AND,
                             "operand": "prop2",
                             "operator": SegmentFilterOperators.EQUALS,
                             "values": ["va3", "val4"],
@@ -162,21 +169,21 @@ class TestSegmentService:
             "created_at": ANY,
             "datasource_id": PydanticObjectId("63771fc960527aba9354399c"),
             "description": "sample",
-            "group_conditions": [],
             "groups": [
                 {
-                    "conditions": [
-                        SegmentFilterConditions.WHERE,
-                        SegmentFilterConditions.AND,
-                    ],
+                    "condition": SegmentGroupConditions.AND,
                     "filters": [
                         {
+                            "all": False,
+                            "condition": SegmentFilterConditions.WHERE,
                             "operand": "prop1",
                             "operator": SegmentFilterOperators.EQUALS,
                             "values": ["va1", "val2"],
                             "type": SegmentFilterConditions.WHERE,
                         },
                         {
+                            "all": False,
+                            "condition": SegmentFilterConditions.AND,
                             "operand": "prop2",
                             "operator": SegmentFilterOperators.EQUALS,
                             "values": ["va3", "val4"],

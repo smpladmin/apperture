@@ -8,6 +8,7 @@ from domain.segments.models import (
     WhereSegmentFilter,
     SegmentFilterOperators,
     SegmentFilterConditions,
+    SegmentGroupConditions,
 )
 
 
@@ -23,7 +24,6 @@ def test_compute_transient_segment(
         **{
             "columns": ["properties.$app_release", "properties.$city"],
             "datasource_id": "63771fc960527aba9354399c",
-            "group_conditions": [],
             "groups": [
                 SegmentGroup(
                     filters=[
@@ -31,17 +31,18 @@ def test_compute_transient_segment(
                             operator=SegmentFilterOperators.EQUALS,
                             operand="properties.$city",
                             values=["Delhi", "Indore", "Bhopal"],
+                            all=False,
+                            condition=SegmentFilterConditions.WHERE,
                         ),
                         WhereSegmentFilter(
                             operator=SegmentFilterOperators.EQUALS,
                             operand="properties.$app_release",
                             values=["5003", "2077", "5002"],
+                            all=False,
+                            condition=SegmentFilterConditions.AND,
                         ),
                     ],
-                    conditions=[
-                        SegmentFilterConditions.WHERE,
-                        SegmentFilterConditions.AND,
-                    ],
+                    condition=SegmentGroupConditions.AND,
                 )
             ],
         }
@@ -60,7 +61,6 @@ def test_save_segment(
             "columns": ["properties.$app_release", "properties.$city"],
             "datasourceId": PydanticObjectId("63771fc960527aba9354399c"),
             "description": "test",
-            "groupConditions": [],
             "groups": [
                 SegmentGroup(
                     filters=[
@@ -69,18 +69,19 @@ def test_save_segment(
                             operator=SegmentFilterOperators.EQUALS,
                             values=["Delhi", "Indore", "Bhopal"],
                             type=SegmentFilterConditions.WHERE,
+                            all=False,
+                            condition=SegmentFilterConditions.WHERE,
                         ),
                         WhereSegmentFilter(
                             operand="properties.$app_release",
                             operator=SegmentFilterOperators.EQUALS,
                             values=["5003", "2077", "5002"],
                             type=SegmentFilterConditions.WHERE,
+                            all=False,
+                            condition=SegmentFilterConditions.AND,
                         ),
                     ],
-                    conditions=[
-                        SegmentFilterConditions.WHERE,
-                        SegmentFilterConditions.AND,
-                    ],
+                    condition=SegmentGroupConditions.AND,
                 )
             ],
             "name": "name",
@@ -94,21 +95,21 @@ def test_save_segment(
         "created_at": ANY,
         "datasource_id": PydanticObjectId("63771fc960527aba9354399c"),
         "description": "test",
-        "group_conditions": [],
         "groups": [
             {
-                "conditions": [
-                    SegmentFilterConditions.WHERE,
-                    SegmentFilterConditions.AND,
-                ],
+                "condition": SegmentGroupConditions.AND,
                 "filters": [
                     {
+                        "all": False,
+                        "condition": SegmentFilterConditions.WHERE,
                         "operand": "properties.$city",
                         "operator": SegmentFilterOperators.EQUALS,
                         "type": SegmentFilterConditions.WHERE,
                         "values": ["Delhi", "Indore", "Bhopal"],
                     },
                     {
+                        "all": False,
+                        "condition": SegmentFilterConditions.AND,
                         "operand": "properties.$app_release",
                         "operator": SegmentFilterOperators.EQUALS,
                         "type": "where",

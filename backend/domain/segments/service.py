@@ -4,7 +4,6 @@ from beanie import PydanticObjectId
 from fastapi import Depends
 from domain.segments.models import (
     SegmentGroup,
-    SegmentFilterConditions,
     ComputedSegment,
     Segment,
 )
@@ -26,13 +25,11 @@ class SegmentService:
         datasource_id: str,
         groups: List[SegmentGroup],
         columns: List[str],
-        group_conditions: List[SegmentFilterConditions],
     ) -> ComputedSegment:
         segment = self.segments.get_segment_data(
             datasource_id=datasource_id,
             groups=groups,
             columns=columns,
-            group_conditions=group_conditions,
         )
         n = 100 if len(segment) > 100 else len(segment)
         return ComputedSegment(count=len(segment), data=segment[:n])
@@ -45,7 +42,6 @@ class SegmentService:
         name: str,
         description: str,
         groups: List[SegmentGroup],
-        groupConditions: List[SegmentFilterConditions],
         columns: List[str],
     ):
         return Segment(
@@ -55,7 +51,6 @@ class SegmentService:
             name=name,
             description=description,
             groups=groups,
-            group_conditions=groupConditions,
             columns=columns,
         )
 

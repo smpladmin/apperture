@@ -33,7 +33,9 @@ class WhereSegmentFilter(BaseModel):
     operand: str
     operator: SegmentFilterOperators
     values: List[str]
+    all: bool
     type = SegmentFilterConditions.WHERE
+    condition: SegmentFilterConditions
 
 
 class WhoSegmentFilter(BaseModel):
@@ -45,11 +47,12 @@ class WhoSegmentFilter(BaseModel):
     start_date: Optional[str]
     end_date: Optional[str]
     type = SegmentFilterConditions.WHO
+    condition: SegmentFilterConditions
 
 
 class SegmentGroup(BaseModel):
     filters: List[Union[WhoSegmentFilter, WhereSegmentFilter]]
-    conditions: List[SegmentFilterConditions]
+    condition: SegmentGroupConditions
 
 
 class ComputedSegment(BaseModel):
@@ -64,7 +67,6 @@ class Segment(Document):
     name: str
     description: str
     groups: List[SegmentGroup]
-    group_conditions: List[SegmentFilterConditions]
     columns: List[str]
 
     class Settings:
