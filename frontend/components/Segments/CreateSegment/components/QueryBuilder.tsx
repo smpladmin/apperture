@@ -38,12 +38,9 @@ const QueryBuilder = ({
   // a utility function to update group state
   // should be used across all segment components, so it remains easy to track state update
   const updateGroupsState = useCallback(
-    (filtersToUpdate?: SegmentFilter[]) => {
+    (filtersToUpdate: SegmentFilter[]) => {
       const tempGroup = cloneDeep(groups);
-      if (filtersToUpdate) {
-        tempGroup[groupIndex]['filters'] = filtersToUpdate;
-      }
-
+      tempGroup[groupIndex]['filters'] = filtersToUpdate;
       setGroups(tempGroup);
     },
     [groups]
