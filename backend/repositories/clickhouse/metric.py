@@ -1,31 +1,22 @@
 import logging
 from repositories.clickhouse.segments import Segments
 from typing import List
+from fastapi import Depends
 from domain.metrics.models import (
     SegmentsAndEventsType,
     SegmentsAndEvents,
     SegmentsAndEventsAggregationsFunctions,
     SegmentsAndEventsFilterOperator,
 )
-from pypika import ClickHouseQuery, Parameter, Field, Criterion, functions as fn, Case
-from domain.metrics.utils import Conversion
+from pypika import ClickHouseQuery, Table, Parameter, Field, Criterion, functions as fn, Case
+from repositories.clickhouse.parser.formula_parser import Parser
 
-class Metrics(Segments):
-    def get_metric_result(
-        self,
-        datasource_id: str,
-        aggregates: List[SegmentsAndEvents],
-        breakdown: List[str],
-        function: str,
-    ):
-        return self.execute_get_query(
-            *self.build_metric_compute_query(
-                datasource_id=datasource_id,
-                aggregates=aggregates,
-                breakdown=breakdown,
-                function=function,
-            )
-        )
+class Metrics:
+
+    def __init__(self,
+    parser:Parser =Depends()):
+        self.parser = parser 
+        self.table = Table('events')
 
     def build_aggregation_function(
         self,
@@ -64,38 +55,11 @@ class Metrics(Segments):
             )
         query = (
             ClickHouseQuery.from_(innerquery.as_("innerquery"))
-            .select(Parameter("date"), self.get_metric_function_expression(function))
+            .select(Parameter("date"), 
+            self.parser.function_parser(function,fn.Sum))
             .groupby(Parameter("date"))
         )
         return query.get_sql(), {"ds_id": datasource_id}
 
-    def get_metric_function_expression(self, function: str):
-        try:
-            # Parses only variables and single digit numbers to expressions for now
-            obj = Conversion(len(function))
-            # Changed to postfix notation to maintain precedence
-            postfix_expression = obj.infixToPostfix(function)
-            expression = None
-            stack = []
-            for c in postfix_expression:
-                if c == "+" or c == "-" or c == "/" or c == "*":
-                    b = stack.pop()
-                    a = stack.pop()
-                    if c == "+":
-                        expression = a + b
-                    elif c == "-":
-                        expression = a - b
-                    elif c == "/":
-                        expression = a / b
-                    elif c == "*":
-                        expression = a * b
-                    stack.append(expression)
-                elif c >= "A" and c <= "Z":
-                    stack.append(fn.Sum(Field(c)))
-                elif c >= "1" and c <= "9":
-                    stack.append(int(c))
-        except:
-            logging.error(f"Invalid formula expression:\t{function}")
-            return fn.Sum(Field("A"))
-        return stack[0] if len(stack) == 1 else fn.Sum(Field("A"))
+    
 
