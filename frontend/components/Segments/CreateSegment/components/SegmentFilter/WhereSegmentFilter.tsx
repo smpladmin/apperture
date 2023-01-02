@@ -14,7 +14,6 @@ import SelectValue from '../SelectValue';
 type WhereSegmentFilterProps = {
   filter: WhereSegmentFilter;
   filters: SegmentFilter[];
-  group: SegmentGroup;
   updateGroupsState: Function;
   eventProperties: SegmentProperty[];
   index: number;
@@ -24,7 +23,6 @@ type WhereSegmentFilterProps = {
 const WhereSegmentFilter = ({
   filter,
   filters,
-  group,
   updateGroupsState,
   eventProperties,
   index,
@@ -34,8 +32,7 @@ const WhereSegmentFilter = ({
     <Flex gap={'3'} alignItems={'center'}>
       <FilterConditions
         filter={filter}
-        index={index}
-        conditions={group.conditions}
+        filters={filters}
         updateGroupsState={updateGroupsState}
       />
       <SelectEventProperty

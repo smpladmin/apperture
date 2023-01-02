@@ -44,7 +44,6 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
       : [
           {
             filters: [],
-            conditions: [],
           },
         ]
   );
@@ -176,7 +175,6 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
     setGroups([
       {
         filters: [],
-        conditions: [],
       },
     ]);
     setGroupConditions([]);
@@ -185,7 +183,6 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
   const addNewGroup = () => {
     const newGroup = {
       filters: [],
-      conditions: [],
     };
     const newGroupCondition = SegmentGroupConditions.AND;
     setIsGroupConditionChanged(true);

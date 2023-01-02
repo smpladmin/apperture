@@ -3,7 +3,7 @@ import SearchableListDropdown from '@components/SearchableDropdown/SearchableLis
 import {
   getDateOfNDaysBack,
   getDateStringFromDate,
-  getWhereAndWhoConditionsList,
+  getWhereAndWhoFilters,
 } from '@components/Segments/util';
 import {
   FilterItemType,
@@ -14,14 +14,13 @@ import {
   SegmentProperty,
 } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 type AddFilterProps = {
   loadingEventProperties: boolean;
   eventProperties: SegmentProperty[];
   updateGroupsState: Function;
   filters: SegmentFilter[];
-  conditions: SegmentFilterConditions[];
 };
 
 const AddFilter = ({
@@ -29,12 +28,38 @@ const AddFilter = ({
   eventProperties,
   updateGroupsState,
   filters,
-  conditions,
 }: AddFilterProps) => {
   const [isFiltersListOpen, setOpenFiltersList] = useState<boolean>(false);
   const addFilterRef = useRef(null);
 
   useOnClickOutside(addFilterRef, () => setOpenFiltersList(false));
+
+  const getWhereFilterCondition = useCallback(
+    (whereFilters: SegmentFilter[]) => {
+      if (!whereFilters.length) return SegmentFilterConditions.WHERE;
+
+      const lastWhereCondition =
+        whereFilters[whereFilters.length - 1]?.condition;
+      if (lastWhereCondition === SegmentFilterConditions.WHERE)
+        return SegmentFilterConditions.AND;
+
+      return lastWhereCondition;
+    },
+    [filters]
+  );
+
+  const getWhoFilterCondition = useCallback(
+    (whoFilters: SegmentFilter[]) => {
+      if (!whoFilters.length) return SegmentFilterConditions.WHO;
+
+      const lastWhoCondition = whoFilters[whoFilters.length - 1]?.condition;
+      if (lastWhoCondition === SegmentFilterConditions.WHO)
+        return SegmentFilterConditions.AND;
+
+      return lastWhoCondition;
+    },
+    [filters]
+  );
 
   const getFiltersList = (
     whereFilters: SegmentFilter[],
@@ -43,6 +68,7 @@ const AddFilter = ({
   ) => {
     if (item.type === FilterItemType.PROPERTY) {
       whereFilters.push({
+        condition: getWhereFilterCondition(whereFilters),
         operand: item.id,
         operator: SegmentFilterOperators.EQUALS,
         values: [],
@@ -50,6 +76,7 @@ const AddFilter = ({
       });
     } else {
       whoFilters.push({
+        condition: getWhoFilterCondition(whoFilters),
         triggered: true,
         operand: item.id,
         aggregation: 'total',
@@ -63,56 +90,12 @@ const AddFilter = ({
     return [...whereFilters, ...whoFilters];
   };
 
-  const getFilterConditionsList = (item: SegmentProperty) => {
-    /* cases:-
-    1. first filter - where / who depending on filter selected from dropdown
-    2. by default - add 'and' condition for next filter for both where, who
-    3. add 'or' condition only for where filter if last condition of where filter conditions is 'or' if item selected is property
-    4. add 'or' condition only for who filter if last condition of who filter conditionsis 'or' if item selected is event
-    */
-
-    const { whereConditions, whoConditions } =
-      getWhereAndWhoConditionsList(conditions);
-    const lastWhereCondition = whereConditions[whereConditions.length - 1];
-    const lastWhoCondition = whoConditions[whoConditions.length - 1];
-
-    const isLastConditionWhere =
-      lastWhereCondition === SegmentFilterConditions.WHERE;
-    const isLastConditionWho = lastWhoCondition === SegmentFilterConditions.WHO;
-
-    switch (item.type) {
-      case FilterItemType.PROPERTY:
-        if (!whereConditions.length)
-          whereConditions.push(SegmentFilterConditions.WHERE);
-        else if (isLastConditionWhere)
-          whereConditions.push(SegmentFilterConditions.AND);
-        else whereConditions.push(lastWhereCondition);
-        break;
-      case FilterItemType.EVENT:
-        if (!whoConditions.length)
-          whoConditions.push(SegmentFilterConditions.WHO);
-        else if (isLastConditionWho)
-          whoConditions.push(SegmentFilterConditions.AND);
-        else whoConditions.push(lastWhoCondition);
-    }
-
-    return [...whereConditions, ...whoConditions];
-  };
-
   const onAddFilter = (item: SegmentProperty) => {
     setOpenFiltersList(false);
 
-    const whereFilters = filters.filter(
-      (filter) => filter.type === FilterType.WHERE
-    );
-    const whoFilters = filters.filter(
-      (filter) => filter.type === FilterType.WHO
-    );
-
+    const { whereFilters, whoFilters } = getWhereAndWhoFilters(filters);
     const updatedFilter = getFiltersList(whereFilters, whoFilters, item);
-    const updatedConditions = getFilterConditionsList(item);
-
-    updateGroupsState(updatedFilter, updatedConditions);
+    updateGroupsState(updatedFilter);
   };
 
   return (

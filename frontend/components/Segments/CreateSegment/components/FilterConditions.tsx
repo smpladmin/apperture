@@ -1,51 +1,65 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import { getWhereAndWhoConditionsList } from '@components/Segments/util';
+import { getWhereAndWhoFilters } from '@components/Segments/util';
 import {
   FilterType,
   SegmentFilter,
   SegmentFilterConditions,
 } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 type FilterConditionsProps = {
   filter: SegmentFilter;
-  conditions: SegmentFilterConditions[];
-  index: number;
+  filters: SegmentFilter[];
   updateGroupsState: Function;
 };
 
 const FilterConditions = ({
   filter,
-  conditions,
-  index,
+  filters,
   updateGroupsState,
 }: FilterConditionsProps) => {
   const [isFilterConditionsListOpen, setIsFilterConditionsListOpen] =
     useState(false);
 
-  const updateFilterConditions = (value: SegmentFilterConditions) => {
-    setIsFilterConditionsListOpen(false);
+  const updateWhereFiltersCondition = useCallback(
+    (whereFilters: SegmentFilter[], value: SegmentFilterConditions) => {
+      return whereFilters.map((filter: SegmentFilter) => {
+        filter.condition =
+          filter.condition === SegmentFilterConditions.WHERE
+            ? filter.condition
+            : value;
+        return filter;
+      });
+    },
+    [filters]
+  );
 
-    const { whereConditions, whoConditions } =
-      getWhereAndWhoConditionsList(conditions);
-    let updatedWhereConditions = whereConditions;
-    let updatedWhoConditions = whoConditions;
+  const updateWhoFiltersCondition = useCallback(
+    (whoFilters: SegmentFilter[], value: SegmentFilterConditions) => {
+      return whoFilters.map((filter: SegmentFilter) => {
+        filter.condition =
+          filter.condition === SegmentFilterConditions.WHO
+            ? filter.condition
+            : value;
+        return filter;
+      });
+    },
+    [filters]
+  );
+
+  const handleSwitchFilterConditions = (value: SegmentFilterConditions) => {
+    setIsFilterConditionsListOpen(false);
+    let { whereFilters, whoFilters } = getWhereAndWhoFilters(filters);
 
     if (filter.type === FilterType.WHERE) {
-      updatedWhereConditions = whereConditions.map(
-        (condition: SegmentFilterConditions) =>
-          condition === SegmentFilterConditions.WHERE ? condition : value
-      );
+      whereFilters = updateWhereFiltersCondition(whereFilters, value);
     } else {
-      updatedWhoConditions = whoConditions.map(
-        (condition: SegmentFilterConditions) =>
-          condition === SegmentFilterConditions.WHO ? condition : value
-      );
+      whoFilters = updateWhoFiltersCondition(whoFilters, value);
     }
 
-    const newConditions = [...updatedWhereConditions, ...updatedWhoConditions];
-    updateGroupsState(false, newConditions);
+    const newFilters = [...whereFilters, ...whoFilters];
+    updateGroupsState(newFilters);
   };
 
   const filterCondtionsValues = [
@@ -60,7 +74,7 @@ const FilterConditions = ({
   const isConditionWhereOrWho = [
     SegmentFilterConditions.WHERE,
     SegmentFilterConditions.WHO,
-  ].includes(conditions[index]);
+  ].includes(filter?.condition);
 
   return (
     <Box w={'12'} ref={filterConditionsRef} position="relative">
@@ -74,7 +88,7 @@ const FilterConditions = ({
         onClick={() => setIsFilterConditionsListOpen(true)}
         data-testid={'filter-condition'}
       >
-        {conditions[index]}
+        {filter?.condition}
       </Text>
       {isFilterConditionsListOpen && !isConditionWhereOrWho ? (
         <Box
@@ -101,7 +115,7 @@ const FilterConditions = ({
                       bg: 'white.100',
                     }}
                     data-testid={'filter-conditions-options'}
-                    onClick={() => updateFilterConditions(value)}
+                    onClick={() => handleSwitchFilterConditions(value)}
                     cursor={'pointer'}
                   >
                     <Text

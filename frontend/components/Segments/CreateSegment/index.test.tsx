@@ -155,12 +155,14 @@ describe('Create Segment', () => {
       {
         filters: [
           {
+            condition: SegmentFilterConditions.WHERE,
             operand: 'properties.$city',
             operator: 'equals',
             values: ['Chennai', 'Guwahati', 'Patna'],
             type: FilterType.WHERE,
           },
           {
+            condition: SegmentFilterConditions.AND,
             operand: 'properties.$app_version',
             operator: 'equals',
             values: ['1.5.5', '1.5.6'],
@@ -974,18 +976,21 @@ describe('Create Segment', () => {
         {
           filters: [
             {
+              condition: SegmentFilterConditions.WHERE,
               operand: 'properties.$city',
               operator: 'equals',
               values: ['Chennai', 'Guwahati', 'Patna'],
               type: FilterType.WHERE,
             },
             {
+              condition: SegmentFilterConditions.AND,
               operand: 'properties.$app_version',
               operator: 'equals',
               values: ['1.5.5', '1.5.6'],
               type: FilterType.WHERE,
             },
             {
+              condition: SegmentFilterConditions.WHO,
               triggered: true,
               operand: 'App_Open',
               aggregation: 'total',
@@ -996,6 +1001,7 @@ describe('Create Segment', () => {
               type: FilterType.WHO,
             },
             {
+              condition: SegmentFilterConditions.OR,
               triggered: true,
               operand: 'Login',
               aggregation: 'total',
@@ -1006,6 +1012,7 @@ describe('Create Segment', () => {
               type: FilterType.WHO,
             },
             {
+              condition: SegmentFilterConditions.OR,
               triggered: true,
               operand: 'Video_Open',
               aggregation: 'total',
@@ -1016,13 +1023,6 @@ describe('Create Segment', () => {
               type: FilterType.WHO,
             },
           ] as SegmentFilter[],
-          conditions: [
-            SegmentFilterConditions.WHERE,
-            SegmentFilterConditions.AND,
-            SegmentFilterConditions.WHO,
-            SegmentFilterConditions.OR,
-            SegmentFilterConditions.OR,
-          ],
         },
       ],
       name: 'Testing edit Segments ',

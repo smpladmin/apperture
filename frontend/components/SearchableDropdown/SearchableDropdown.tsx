@@ -1,5 +1,5 @@
 import { Box, Flex, Input } from '@chakra-ui/react';
-import { ChangeEvent, ReactNode, useEffect } from 'react';
+import { ChangeEvent, ReactNode, useEffect, useRef } from 'react';
 import { getSearchResult } from '@lib/utils/common';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { SegmentProperty } from '@lib/domain/segment';
@@ -23,6 +23,7 @@ const SearchableDropdown = ({
   dropdownPosition,
   searchKey,
 }: SearchableDropdownProps) => {
+  const dropDownRef = useRef<HTMLDivElement>(null);
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
     if (!searchTerm) {
@@ -40,11 +41,21 @@ const SearchableDropdown = ({
     setSearchData?.(data);
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    // scroll the dropdown into view whenever it is opened
+    dropDownRef.current?.scrollIntoView({
+      block: 'end',
+      behavior: 'smooth',
+    });
+  });
+
   return (
     <>
       {isOpen ? (
         <Box
           position={'absolute'}
+          ref={dropDownRef}
           zIndex={1}
           px={'3'}
           py={'3'}
