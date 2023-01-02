@@ -75,19 +75,21 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
   };
 
   const addAggregate = () => {
-    const variable = String.fromCharCode(65 + aggregates.length);
-    setAggregates([
-      ...aggregates,
-      {
-        variable,
-        reference_id: '',
-        function: 'count',
-        variant: '',
-        filters: [],
-        conditions: [],
-        aggregations: { functions: 'count', property: '' },
-      },
-    ]);
+    if (aggregates.every((aggregate) => aggregate.variant)) {
+      const variable = String.fromCharCode(65 + aggregates.length);
+      setAggregates([
+        ...aggregates,
+        {
+          variable,
+          reference_id: '',
+          function: 'count',
+          variant: '',
+          filters: [],
+          conditions: [],
+          aggregations: { functions: 'count', property: '' },
+        },
+      ]);
+    }
   };
 
   const removeAggregate = (variable: string) => {
@@ -218,10 +220,13 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
           borderColor={'grey.10'}
           height="10"
           borderRadius={'25'}
+          border={'1px solid grey.10'}
           px={4}
           marginBottom={4}
           data-testid={'metric-definition'}
           background="grey.10"
+          _focus={{ border: '1px solid white' }}
+          _active={{ border: '1px solid white' }}
         />
         <Divider orientation="horizontal" borderColor={BASTILLE} opacity={1} />
       </Flex>
@@ -233,11 +238,10 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
           </Text>
           <Button
             data-testid={'add-events-or-segments-button'}
-            variant="unstyled"
-            rounded={'full'}
-            size={'md'}
+            size={'xs'}
             color={'white.DEFAULT'}
             onClick={addAggregate}
+            background={'none'}
             _hover={{ color: 'white', background: 'grey.300' }}
           >
             +

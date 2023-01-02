@@ -236,7 +236,7 @@ const MetricComponentCard = ({
           data-testid="remove-event-or-segment-component"
           size={'xs'}
           fontWeight={'500'}
-          aria-label="set alerts"
+          aria-label="remove-component"
           variant={'iconButton'}
           icon={<i className="ri-close-fill"></i>}
           color={'grey.200'}
