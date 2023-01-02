@@ -16,7 +16,7 @@ class MetricService:
         self,
         metric: Metrics = Depends(),
         mongo: Mongo = Depends(),
-        event:Events = Depends(),
+        event: Events = Depends(),
     ):
         self.metric = metric
         self.mongo = mongo
@@ -29,11 +29,13 @@ class MetricService:
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
     ) -> ComputedMetricResult:
-        computed_metric = self.event.execute_get_query( *self.metric.build_metric_compute_query(
-            datasource_id=datasource_id,
-            aggregates=aggregates,
-            breakdown=breakdown,
-            function=function,
-        ))
+        computed_metric = self.event.execute_get_query(
+            *self.metric.build_metric_compute_query(
+                datasource_id=datasource_id,
+                aggregates=aggregates,
+                breakdown=breakdown,
+                function=function,
+            )
+        )
         data = [dict(zip(["date", "value"], row)) for row in computed_metric]
         return ComputedMetricResult(metric=data)

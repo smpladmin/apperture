@@ -1,4 +1,3 @@
-
 class Conversion:
 
     # Constructor to initialize the class variables

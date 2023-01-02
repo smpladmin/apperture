@@ -8,15 +8,22 @@ from domain.metrics.models import (
     SegmentsAndEventsAggregationsFunctions,
     SegmentsAndEventsFilterOperator,
 )
-from pypika import ClickHouseQuery, Table, Parameter, Field, Criterion, functions as fn, Case
+from pypika import (
+    ClickHouseQuery,
+    Table,
+    Parameter,
+    Field,
+    Criterion,
+    functions as fn,
+    Case,
+)
 from repositories.clickhouse.parser.formula_parser import Parser
 
-class Metrics:
 
-    def __init__(self,
-    parser:Parser =Depends()):
-        self.parser = parser 
-        self.table = Table('events')
+class Metrics:
+    def __init__(self, parser: Parser = Depends()):
+        self.parser = parser
+        self.table = Table("events")
 
     def build_aggregation_function(
         self,
@@ -55,11 +62,7 @@ class Metrics:
             )
         query = (
             ClickHouseQuery.from_(innerquery.as_("innerquery"))
-            .select(Parameter("date"), 
-            self.parser.function_parser(function,fn.Sum))
+            .select(Parameter("date"), self.parser.function_parser(function, fn.Sum))
             .groupby(Parameter("date"))
         )
         return query.get_sql(), {"ds_id": datasource_id}
-
-    
-

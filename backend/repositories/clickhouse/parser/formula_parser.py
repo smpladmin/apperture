@@ -1,6 +1,7 @@
 import logging
 from pypika import Field
 
+
 class PostFixConverter:
 
     # Constructor to initialize the class variables
@@ -85,9 +86,10 @@ class PostFixConverter:
 
         return "".join(self.output)
 
+
 class Parser:
     def function_parser(self, function: str, wrapper_function):
-        if(wrapper_function == None):
+        if wrapper_function == None:
             raise ValueError("Wrapper function not defined")
         try:
             # Parses only variables and single digit numbers to expressions for now
@@ -117,4 +119,3 @@ class Parser:
             logging.error(f"Invalid formula expression:\t{function}")
             return wrapper_function(Field("A"))
         return stack[0] if len(stack) == 1 else wrapper_function(Field("A"))
-        

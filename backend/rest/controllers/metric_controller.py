@@ -9,10 +9,7 @@ router = APIRouter(
 )
 
 
-@router.post(
-    "/metrics/compute",
-     response_model=MetricsComputeResponse
-)
+@router.post("/metrics/compute", response_model=MetricsComputeResponse)
 async def compute_metrics(
     dto: MetricsComputeDto,
     metric_service: MetricService = Depends(),
