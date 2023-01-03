@@ -164,16 +164,12 @@ class TestSegmentsRepository:
             self.repo.build_segment_users_query(
                 groups=self.groups[:1], group_conditions=[]
             ).get_sql()
-<<<<<<< HEAD
-            == self.where_filters_query
-=======
             == (
                 'WITH group0 AS (SELECT DISTINCT "user_id" FROM "events" WHERE '
                 '"datasource_id"=%(ds_id)s AND "properties.prop1" IN (\'va1\',\'val2\') AND '
                 '"properties.prop2" IN (\'va3\',\'val4\')) SELECT DISTINCT "group0"."user_id" '
                 'FROM group0'
             )
->>>>>>> main
         )
 
     def test_build_segment_users_query_for_who_filters(self):
@@ -181,9 +177,6 @@ class TestSegmentsRepository:
             self.repo.build_segment_users_query(
                 groups=self.groups[1:2], group_conditions=[]
             ).get_sql()
-<<<<<<< HEAD
-            == self.who_filters_query
-=======
             == (
                 'WITH group0 AS (WITH cte0 AS (SELECT "user_id" FROM "events" WHERE '
                 '"datasource_id"=%(ds_id)s AND "user_id" IN (SELECT DISTINCT "user_id" FROM '
@@ -195,7 +188,6 @@ class TestSegmentsRepository:
                 'INTERSECT SELECT DISTINCT "cte1"."user_id" FROM cte1) SELECT DISTINCT '
                 '"group0"."user_id" FROM group0'
             )
->>>>>>> main
         )
 
     def test_build_segment_users_query_for_composite_filters(self):
@@ -203,9 +195,6 @@ class TestSegmentsRepository:
             self.repo.build_segment_users_query(
                 groups=self.groups[2:], group_conditions=[]
             ).get_sql()
-<<<<<<< HEAD
-            == self.composite_filters_query
-=======
             == (
                 'WITH group0 AS (WITH cte2 AS (SELECT "user_id" FROM "events" WHERE '
                 '"datasource_id"=%(ds_id)s AND "user_id" IN (SELECT DISTINCT "user_id" FROM '
@@ -220,7 +209,6 @@ class TestSegmentsRepository:
                 'UNION ALL SELECT DISTINCT "cte3"."user_id" FROM cte3) SELECT DISTINCT '
                 '"group0"."user_id" FROM group0'
             )
->>>>>>> main
         )
 
     def test_build_valid_column_data_query(self):
