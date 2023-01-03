@@ -99,7 +99,7 @@ class TestSegmentsRepository:
         self.params = {"ds_id": "test-id"}
         self.where_filters_query = (
             'SELECT DISTINCT "user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
-            "\"properties.prop1\" IN ('va1','val2') AND \"properties.prop2\" IN "
+            '"properties.prop1" IN (\'va1\',\'val2\') AND "properties.prop2" IN '
             "('va3','val4')"
         )
         self.who_filters_query = (
@@ -115,15 +115,15 @@ class TestSegmentsRepository:
         self.composite_filters_query = (
             'WITH cte2 AS (SELECT "user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s '
             'AND "user_id" IN (SELECT DISTINCT "user_id" FROM "events" WHERE '
-            "\"datasource_id\"=%(ds_id)s AND \"properties.prop1\" IN ('va1','val2') AND "
-            "\"properties.prop2\" IN ('va3','val4')) AND \"event_name\"='Topic_Click' "
+            '"datasource_id"=%(ds_id)s AND "properties.prop1" IN (\'va1\',\'val2\') AND '
+            '"properties.prop2" IN (\'va3\',\'val4\')) AND "event_name"=\'Topic_Click\' '
             'GROUP BY "user_id" HAVING COUNT("user_id")=\'2\') ,cte3 AS (SELECT "user_id" '
             'FROM "events" WHERE "datasource_id"=%(ds_id)s AND "user_id" IN (SELECT '
             'DISTINCT "user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
-            "\"properties.prop1\" IN ('va1','val2') AND \"properties.prop2\" IN "
-            "('va3','val4')) AND \"event_name\"<>'Video_Open') SELECT DISTINCT "
+            '"properties.prop1" IN (\'va1\',\'val2\') AND "properties.prop2" IN '
+            '(\'va3\',\'val4\')) AND "event_name"<>\'Video_Open\') SELECT DISTINCT '
             '"cte2"."user_id" FROM cte2 UNION ALL SELECT DISTINCT "cte3"."user_id" FROM '
-            "cte3"
+            'cte3'
         )
 
     def test_get_all_unique_users_query(self):
@@ -136,7 +136,7 @@ class TestSegmentsRepository:
     def test_build_where_clause_users_query(self, group_idx, return_idx):
         segment_users = self.repo.get_all_unique_users_query()
         users, idx = self.repo.build_where_clause_users_query(
-            group=self.groups[group_idx], segment_users=segment_users
+            group=self.groups[group_idx], group_users=segment_users
         )
         assert users.get_sql() == self.where_filters_query
         assert idx == return_idx
@@ -145,17 +145,17 @@ class TestSegmentsRepository:
         group = self.groups[2]
         segment_users = self.repo.get_all_unique_users_query()
         segment_users, idx = self.repo.build_where_clause_users_query(
-            group=group, segment_users=segment_users
+            group=group, group_users=segment_users
         )
         segment_users = self.repo.build_who_clause_users_query(
-            group=group, segment_users=segment_users, idx=idx
+            group=group, group_users=segment_users, idx=idx
         )
         assert segment_users.get_sql() == self.composite_filters_query
 
     def test_build_who_clause_users_query_for_who_filters(self):
         segment_users = self.repo.get_all_unique_users_query()
         segment_users = self.repo.build_who_clause_users_query(
-            group=self.groups[1], segment_users=segment_users, idx=0
+            group=self.groups[1], group_users=segment_users, idx=0
         )
         assert segment_users.get_sql() == self.who_filters_query
 
@@ -164,7 +164,16 @@ class TestSegmentsRepository:
             self.repo.build_segment_users_query(
                 groups=self.groups[:1], group_conditions=[]
             ).get_sql()
+<<<<<<< HEAD
             == self.where_filters_query
+=======
+            == (
+                'WITH group0 AS (SELECT DISTINCT "user_id" FROM "events" WHERE '
+                '"datasource_id"=%(ds_id)s AND "properties.prop1" IN (\'va1\',\'val2\') AND '
+                '"properties.prop2" IN (\'va3\',\'val4\')) SELECT DISTINCT "group0"."user_id" '
+                'FROM group0'
+            )
+>>>>>>> main
         )
 
     def test_build_segment_users_query_for_who_filters(self):
@@ -172,7 +181,21 @@ class TestSegmentsRepository:
             self.repo.build_segment_users_query(
                 groups=self.groups[1:2], group_conditions=[]
             ).get_sql()
+<<<<<<< HEAD
             == self.who_filters_query
+=======
+            == (
+                'WITH group0 AS (WITH cte0 AS (SELECT "user_id" FROM "events" WHERE '
+                '"datasource_id"=%(ds_id)s AND "user_id" IN (SELECT DISTINCT "user_id" FROM '
+                '"events" WHERE "datasource_id"=%(ds_id)s) AND "event_name"=\'Topic_Click\' '
+                'GROUP BY "user_id" HAVING COUNT("user_id")=\'2\') ,cte1 AS (SELECT "user_id" '
+                'FROM "events" WHERE "datasource_id"=%(ds_id)s AND "user_id" IN (SELECT '
+                'DISTINCT "user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s) AND '
+                '"event_name"<>\'Video_Open\') SELECT DISTINCT "cte0"."user_id" FROM cte0 '
+                'INTERSECT SELECT DISTINCT "cte1"."user_id" FROM cte1) SELECT DISTINCT '
+                '"group0"."user_id" FROM group0'
+            )
+>>>>>>> main
         )
 
     def test_build_segment_users_query_for_composite_filters(self):
@@ -180,7 +203,24 @@ class TestSegmentsRepository:
             self.repo.build_segment_users_query(
                 groups=self.groups[2:], group_conditions=[]
             ).get_sql()
+<<<<<<< HEAD
             == self.composite_filters_query
+=======
+            == (
+                'WITH group0 AS (WITH cte2 AS (SELECT "user_id" FROM "events" WHERE '
+                '"datasource_id"=%(ds_id)s AND "user_id" IN (SELECT DISTINCT "user_id" FROM '
+                '"events" WHERE "datasource_id"=%(ds_id)s AND "properties.prop1" IN '
+                '(\'va1\',\'val2\') AND "properties.prop2" IN (\'va3\',\'val4\')) AND '
+                '"event_name"=\'Topic_Click\' GROUP BY "user_id" HAVING '
+                'COUNT("user_id")=\'2\') ,cte3 AS (SELECT "user_id" FROM "events" WHERE '
+                '"datasource_id"=%(ds_id)s AND "user_id" IN (SELECT DISTINCT "user_id" FROM '
+                '"events" WHERE "datasource_id"=%(ds_id)s AND "properties.prop1" IN '
+                '(\'va1\',\'val2\') AND "properties.prop2" IN (\'va3\',\'val4\')) AND '
+                '"event_name"<>\'Video_Open\') SELECT DISTINCT "cte2"."user_id" FROM cte2 '
+                'UNION ALL SELECT DISTINCT "cte3"."user_id" FROM cte3) SELECT DISTINCT '
+                '"group0"."user_id" FROM group0'
+            )
+>>>>>>> main
         )
 
     def test_build_valid_column_data_query(self):
@@ -193,16 +233,17 @@ class TestSegmentsRepository:
             (
                 'WITH column_data AS (SELECT "user_id","timestamp","properties.prop1",RANK() '
                 'OVER(PARTITION BY "user_id" ORDER BY "timestamp" DESC) AS "Rank" FROM '
-                '"events" WHERE "datasource_id"=%(ds_id)s AND "user_id" IN (WITH cte0 AS '
-                '(SELECT "user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
-                '"user_id" IN (SELECT DISTINCT "user_id" FROM "events" WHERE '
-                '"datasource_id"=%(ds_id)s) AND "event_name"=\'Topic_Click\' GROUP BY '
-                '"user_id" HAVING COUNT("user_id")=\'2\') ,cte1 AS (SELECT "user_id" FROM '
-                '"events" WHERE "datasource_id"=%(ds_id)s AND "user_id" IN (SELECT DISTINCT '
-                '"user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s) AND '
+                '"events" WHERE "datasource_id"=%(ds_id)s AND '
+                'char_length(toString("properties.prop1"))>0 AND "user_id" IN (WITH group0 AS '
+                '(WITH cte0 AS (SELECT "user_id" FROM "events" WHERE '
+                '"datasource_id"=%(ds_id)s AND "user_id" IN (SELECT DISTINCT "user_id" FROM '
+                '"events" WHERE "datasource_id"=%(ds_id)s) AND "event_name"=\'Topic_Click\' '
+                'GROUP BY "user_id" HAVING COUNT("user_id")=\'2\') ,cte1 AS (SELECT "user_id" '
+                'FROM "events" WHERE "datasource_id"=%(ds_id)s AND "user_id" IN (SELECT '
+                'DISTINCT "user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s) AND '
                 '"event_name"<>\'Video_Open\') SELECT DISTINCT "cte0"."user_id" FROM cte0 '
-                'INTERSECT SELECT DISTINCT "cte1"."user_id" FROM cte1) AND '
-                'char_length(toString("properties.prop1"))>0 ORDER BY "user_id") SELECT '
+                'INTERSECT SELECT DISTINCT "cte1"."user_id" FROM cte1) SELECT DISTINCT '
+                '"group0"."user_id" FROM group0) ORDER BY "user_id") SELECT '
                 '"properties.prop1","user_id" FROM column_data WHERE "Rank"=1 ORDER BY '
                 '"user_id"'
             )
@@ -241,4 +282,4 @@ class TestSegmentsRepository:
             for column in self.columns
         ]
 
-        self.repo.execute_get_query.assert_has_calls(calls, any_order=True)
+        self.repo.execute_get_query.assert_has_calls(calls=calls, any_order=True)
