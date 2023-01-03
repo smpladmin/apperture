@@ -18,6 +18,7 @@ from domain.segments.models import (
     SegmentFilterOperators,
     SegmentFilterConditions,
     SegmentGroup,
+    SegmentGroupConditions,
 )
 from domain.funnels.models import (
     Funnel,
@@ -279,15 +280,20 @@ def segment_service():
             operator=SegmentFilterOperators.EQUALS,
             operand="properties.$city",
             values=["Delhi", "Indore", "Bhopal"],
+            all=False,
+            type=SegmentFilterConditions.WHERE,
+            condition=SegmentFilterConditions.WHERE,
         ),
         WhereSegmentFilter(
             operator=SegmentFilterOperators.EQUALS,
             operand="properties.$app_release",
             values=["5003", "2077", "5002"],
+            all=False,
+            type=SegmentFilterConditions.WHERE,
+            condition=SegmentFilterConditions.AND,
         ),
     ]
-    conditions = [SegmentFilterConditions.WHERE, SegmentFilterConditions.AND]
-    groups = [SegmentGroup(filters=filters, conditions=conditions)]
+    groups = [SegmentGroup(filters=filters, condition=SegmentGroupConditions.AND)]
     columns = ["properties.$app_release", "properties.$city"]
     segment = Segment(
         name="name",
@@ -297,7 +303,6 @@ def segment_service():
         app_id="63771fc960527aba9354399c",
         groups=groups,
         columns=columns,
-        group_conditions=[],
     )
     segment_service.compute_segment.return_value = computed_segment
     segment_service.build_segment.return_value = segment
@@ -502,22 +507,25 @@ def saved_segment_response():
         "createdAt": ANY,
         "datasourceId": "63771fc960527aba9354399c",
         "description": "test",
-        "groupConditions": [],
         "groups": [
             {
-                "conditions": ["where", "and"],
+                "condition": "and",
                 "filters": [
                     {
+                        "all": False,
+                        "condition": "where",
                         "operand": "properties.$city",
                         "operator": "equals",
+                        "type": "where",
                         "values": ["Delhi", "Indore", "Bhopal"],
-                        "type": SegmentFilterConditions.WHERE,
                     },
                     {
+                        "all": False,
+                        "condition": "and",
                         "operand": "properties.$app_release",
                         "operator": "equals",
+                        "type": "where",
                         "values": ["5003", "2077", "5002"],
-                        "type": SegmentFilterConditions.WHERE,
                     },
                 ],
             }
@@ -912,18 +920,23 @@ def transient_segment_data():
                         "operand": "properties.$city",
                         "operator": "equals",
                         "values": ["Delhi", "Indore", "Bhopal"],
+                        "type": SegmentFilterConditions.WHERE,
+                        "condition": SegmentFilterConditions.WHERE,
+                        "all": False,
                     },
                     {
                         "operand": "properties.$app_release",
                         "operator": "equals",
                         "values": ["5003", "2077", "5002"],
+                        "type": SegmentFilterConditions.WHERE,
+                        "condition": SegmentFilterConditions.AND,
+                        "all": False,
                     },
                 ],
-                "conditions": ["where", "and"],
+                "condition": "and",
             }
         ],
         "columns": ["properties.$app_release", "properties.$city"],
-        "groupConditions": [],
     }
 
 
@@ -967,19 +980,22 @@ def segment_data():
                         "operator": "equals",
                         "values": ["Delhi", "Indore", "Bhopal"],
                         "type": SegmentFilterConditions.WHERE,
+                        "condition": SegmentFilterConditions.WHERE,
+                        "all": False,
                     },
                     {
                         "operand": "properties.$app_release",
                         "operator": "equals",
                         "values": ["5003", "2077", "5002"],
                         "type": SegmentFilterConditions.WHERE,
+                        "condition": SegmentFilterConditions.AND,
+                        "all": False,
                     },
                 ],
-                "conditions": ["where", "and"],
+                "condition": "and",
             }
         ],
         "columns": ["properties.$app_release", "properties.$city"],
-        "groupConditions": [],
     }
 
 

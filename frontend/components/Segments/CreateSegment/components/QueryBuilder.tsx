@@ -38,18 +38,9 @@ const QueryBuilder = ({
   // a utility function to update group state
   // should be used across all segment components, so it remains easy to track state update
   const updateGroupsState = useCallback(
-    (
-      filtersToUpdate?: SegmentFilter[],
-      conditionsToUpdate?: SegmentFilterConditions[]
-    ) => {
+    (filtersToUpdate: SegmentFilter[]) => {
       const tempGroup = cloneDeep(groups);
-      if (filtersToUpdate) {
-        tempGroup[groupIndex]['filters'] = filtersToUpdate;
-      }
-      if (conditionsToUpdate) {
-        tempGroup[groupIndex]['conditions'] = conditionsToUpdate;
-      }
-
+      tempGroup[groupIndex]['filters'] = filtersToUpdate;
       setGroups(tempGroup);
     },
     [groups]
@@ -57,33 +48,22 @@ const QueryBuilder = ({
 
   const removeFilter = (filterIndex: number) => {
     const updatedFilters = [...group.filters];
-    updatedFilters.splice(filterIndex, 1);
-
-    const updatedFilterConditions = [...group.conditions];
-    const conditionRemoved = updatedFilterConditions.splice(filterIndex, 1);
+    const conditionRemoved = updatedFilters.splice(filterIndex, 1);
 
     // check if the filterIndex removed is less than updatedFilterConditions length
     // to ensure we don't replace condition on wrong index while solving for where/who conditions
-    if (filterIndex < updatedFilterConditions.length) {
-      if (conditionRemoved[0] === SegmentFilterConditions.WHERE) {
-        updatedFilterConditions[filterIndex] = SegmentFilterConditions.WHERE;
+    if (filterIndex < updatedFilters.length) {
+      if (conditionRemoved[0]?.condition === SegmentFilterConditions.WHERE) {
+        updatedFilters[filterIndex].condition = SegmentFilterConditions.WHERE;
       }
       // if first 'who' filter type condition is removed from list of filter,
       // then make the next who filter type condition 'who'
-      else if (conditionRemoved[0] === SegmentFilterConditions.WHO) {
-        updatedFilterConditions[filterIndex] = SegmentFilterConditions.WHO;
+      else if (conditionRemoved[0]?.condition === SegmentFilterConditions.WHO) {
+        updatedFilters[filterIndex].condition = SegmentFilterConditions.WHO;
       }
     }
 
-    if (updatedFilterConditions[0])
-      // default value of operator for first query should always be
-      // either 'where' or 'who' depending upon the filter type
-      updatedFilterConditions[0] =
-        updatedFilters[0]?.type === FilterType.WHERE
-          ? SegmentFilterConditions.WHERE
-          : SegmentFilterConditions.WHO;
-
-    updateGroupsState(updatedFilters, updatedFilterConditions);
+    updateGroupsState(updatedFilters);
     setRefreshOnDelete(true);
   };
 
@@ -113,7 +93,6 @@ const QueryBuilder = ({
                     <WhereSegmentFilterComponent
                       filter={filter as WhereSegmentFilter}
                       filters={filters}
-                      group={group}
                       updateGroupsState={updateGroupsState}
                       eventProperties={eventProperties}
                       index={i}
@@ -123,7 +102,6 @@ const QueryBuilder = ({
                     <WhoSegmentFilterComponent
                       filter={filter as WhoSegmentFilter}
                       filters={filters}
-                      group={group}
                       updateGroupsState={updateGroupsState}
                       eventProperties={eventProperties}
                       index={i}
@@ -139,7 +117,6 @@ const QueryBuilder = ({
           eventProperties={eventProperties}
           loadingEventProperties={loadingEventProperties}
           filters={group.filters}
-          conditions={group.conditions}
           updateGroupsState={updateGroupsState}
         />
       </Flex>

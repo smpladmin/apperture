@@ -16,7 +16,6 @@ import SelectEventProperty from '../SelectEventProperty';
 type WhoSegmentFilterProps = {
   filter: WhoSegmentFilter;
   filters: SegmentFilter[];
-  group: SegmentGroup;
   updateGroupsState: Function;
   eventProperties: SegmentProperty[];
   index: number;
@@ -26,7 +25,6 @@ type WhoSegmentFilterProps = {
 const WhoSegmentFilter = ({
   filter,
   filters,
-  group,
   updateGroupsState,
   eventProperties,
   index,
@@ -36,8 +34,7 @@ const WhoSegmentFilter = ({
     <Flex gap={'3'} alignItems={'center'}>
       <FilterConditions
         filter={filter}
-        index={index}
-        conditions={group.conditions}
+        filters={filters}
         updateGroupsState={updateGroupsState}
       />
       <Box>

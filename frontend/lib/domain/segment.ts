@@ -1,11 +1,14 @@
 export type WhereSegmentFilter = {
+  condition: SegmentFilterConditions;
   operand: string;
   operator: SegmentFilterOperators;
   values: string[];
+  all: boolean;
   type: FilterType;
 };
 
 export type WhoSegmentFilter = {
+  condition: SegmentFilterConditions;
   triggered: boolean;
   operand: string;
   aggregation: string;
@@ -46,7 +49,7 @@ export enum SegmentFilterConditions {
 
 export type SegmentGroup = {
   filters: SegmentFilter[];
-  conditions: SegmentFilterConditions[];
+  condition: SegmentGroupConditions;
 };
 
 export enum SegmentGroupConditions {

@@ -4,7 +4,6 @@ from beanie import PydanticObjectId
 
 from domain.segments.models import (
     SegmentGroup,
-    SegmentFilterConditions,
     ComputedSegment,
     Segment,
 )
@@ -14,7 +13,6 @@ from rest.dtos.model_response import ModelResponse
 class TransientSegmentDto(BaseModel):
     datasourceId: PydanticObjectId
     groups: List[SegmentGroup]
-    groupConditions: List[SegmentFilterConditions]
     columns: List[str]
 
 
@@ -23,7 +21,6 @@ class CreateSegmentDto(BaseModel):
     description: str
     datasourceId: PydanticObjectId
     groups: List[SegmentGroup]
-    groupConditions: List[SegmentFilterConditions]
     columns: List[str]
 
 

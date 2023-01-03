@@ -29,7 +29,6 @@ async def compute_transient_segment(
         datasource_id=str(dto.datasourceId),
         groups=dto.groups,
         columns=dto.columns,
-        group_conditions=dto.groupConditions,
     )
 
 
@@ -48,7 +47,6 @@ async def save_segment(
         name=dto.name,
         description=dto.description,
         groups=dto.groups,
-        groupConditions=dto.groupConditions,
         columns=dto.columns,
     )
     return await segment_service.add_segment(segment=segment)
