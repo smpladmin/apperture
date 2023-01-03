@@ -88,7 +88,7 @@ class PostFixConverter:
 
 
 class Parser:
-    def function_parser(self, function: str, wrapper_function):
+    def formula_parser(self, function: str, wrapper_function):
         if wrapper_function == None:
             raise ValueError("Wrapper function not defined")
         try:

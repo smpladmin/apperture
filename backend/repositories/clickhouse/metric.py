@@ -21,8 +21,8 @@ from repositories.clickhouse.parser.formula_parser import Parser
 
 
 class Metrics:
-    def __init__(self, parser: Parser = Depends()):
-        self.parser = parser
+    def __init__(self):
+        self.parser = Parser()
         self.table = Table("events")
 
     def build_metric_compute_query(
@@ -53,7 +53,7 @@ class Metrics:
             )
         query = (
             ClickHouseQuery.from_(innerquery.as_("innerquery"))
-            .select(Parameter("date"), self.parser.function_parser(function, fn.Sum))
+            .select(Parameter("date"), self.parser.formula_parser(function, fn.Sum))
             .groupby(Parameter("date"))
         )
         return query.get_sql(), {"ds_id": datasource_id}
