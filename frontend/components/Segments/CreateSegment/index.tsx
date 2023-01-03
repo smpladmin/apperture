@@ -341,6 +341,8 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
         onClose={closeSaveSegmentModal}
         groups={groups}
         user={user}
+        savedSegmentName={savedSegment?.name}
+        savedSegmentDescription={savedSegment?.description}
         columns={selectedColumns}
       />
       <ExitConfirmationModal

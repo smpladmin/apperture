@@ -68,7 +68,6 @@ export type Segment = {
   createdAt: Date;
   datasourceId: string;
   description: string;
-  groupConditions: any[];
   groups: SegmentGroup[];
   name: string;
   updatedAt: Date;
