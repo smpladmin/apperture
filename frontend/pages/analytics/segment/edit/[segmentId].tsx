@@ -58,7 +58,6 @@ const EditSegments = ({ savedSegment }: { savedSegment: Segment }) => {
     groups: transformSavedSegmentGroups,
   };
 
-  console.log(transformSavedSegment);
   return <CreateSegment savedSegment={transformSavedSegment} />;
 };
 
