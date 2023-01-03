@@ -18,12 +18,23 @@ from pypika import (
     Case,
 )
 from repositories.clickhouse.parser.formula_parser import FormulaParser
+from repositories.clickhouse.base import EventsBase
 
 
-class Metrics:
-    def __init__(self):
-        self.parser = FormulaParser()
-        self.table = Table("events")
+class Metrics(EventsBase):
+
+    def compute_query(
+        self,
+        datasource_id: str,
+        aggregates: List[SegmentsAndEvents],
+        breakdown: List[str],
+        function: str,
+    ):
+        return self.execute_get_query(
+            *self.build_metric_compute_query(
+                datasource_id, aggregates, breakdown, function
+            )
+        )
 
     def build_metric_compute_query(
         self,
@@ -32,6 +43,7 @@ class Metrics:
         breakdown: List[str],
         function: str,
     ):
+        parser = FormulaParser()
         innerquery = ClickHouseQuery.from_(self.table)
         for aggregate in aggregates:
             agg_function = aggregate.aggregations.functions
@@ -53,7 +65,7 @@ class Metrics:
             )
         query = (
             ClickHouseQuery.from_(innerquery.as_("innerquery"))
-            .select(Parameter("date"), self.parser.parse(function, fn.Sum))
+            .select(Parameter("date"), parser.parse(function, fn.Sum))
             .groupby(Parameter("date"))
         )
         return query.get_sql(), {"ds_id": datasource_id}

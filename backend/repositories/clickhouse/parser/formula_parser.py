@@ -107,7 +107,7 @@ class FormulaParser:
                     elif c == "-":
                         expression = a - b
                     elif c == "/":
-                        expression = a // b
+                        expression = a / b
                     elif c == "*":
                         expression = a * b
                     stack.append(expression)
