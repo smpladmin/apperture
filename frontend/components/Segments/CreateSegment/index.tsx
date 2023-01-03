@@ -44,12 +44,10 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
       : [
           {
             filters: [],
+            condition: SegmentGroupConditions.AND,
           },
         ]
   );
-  const [groupConditions, setGroupConditions] = useState<
-    SegmentGroupConditions[]
-  >([]);
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
   const [eventProperties, setEventProperties] = useState<SegmentProperty[]>([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
@@ -80,12 +78,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
   const { dsId } = router.query;
 
   const fetchSegmentResponse = async (columns: string[]) => {
-    const data = await computeSegment(
-      dsId as string,
-      groups,
-      columns,
-      groupConditions
-    );
+    const data = await computeSegment(dsId as string, groups, columns);
     setUserTableData(data);
     setIsSegmentDataLoading(false);
   };
@@ -138,7 +131,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
 
       setIsSaveDisabled(check);
     }
-  }, [groups, groupConditions]);
+  }, [groups]);
 
   useEffect(() => {
     const fetchEventProperties = async () => {
@@ -175,29 +168,28 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
     setGroups([
       {
         filters: [],
+        condition: SegmentGroupConditions.AND,
       },
     ]);
-    setGroupConditions([]);
   };
 
   const addNewGroup = () => {
     const newGroup = {
       filters: [],
+      condition: SegmentGroupConditions.AND,
     };
-    const newGroupCondition = SegmentGroupConditions.AND;
     setIsGroupConditionChanged(true);
     setGroups([...groups, newGroup]);
-    setGroupConditions([...groupConditions, newGroupCondition]);
   };
 
   const handleGroupConditionsChange = (index: number) => {
-    const updatedGroupConditions = [...groupConditions];
-    if (updatedGroupConditions[index] === SegmentGroupConditions.AND) {
-      updatedGroupConditions[index] = SegmentGroupConditions.OR;
+    const updatedGroups = [...groups];
+    if (updatedGroups[index]?.condition === SegmentGroupConditions.AND) {
+      updatedGroups[index].condition = SegmentGroupConditions.OR;
     } else {
-      updatedGroupConditions[index] = SegmentGroupConditions.AND;
+      updatedGroups[index].condition = SegmentGroupConditions.AND;
     }
-    setGroupConditions(updatedGroupConditions);
+    setGroups(updatedGroups);
   };
 
   return (
@@ -301,6 +293,14 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
         {groups.map((group, index, groups) => {
           return (
             <Box key={index} data-testid={'segment-group'}>
+              {index > 0 ? (
+                <GroupCondition
+                  index={index}
+                  group={group}
+                  handleGroupConditionsChange={handleGroupConditionsChange}
+                  setIsGroupConditionChanged={setIsGroupConditionChanged}
+                />
+              ) : null}
               <QueryBuilder
                 key={index}
                 eventProperties={eventProperties}
@@ -310,12 +310,6 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
                 group={group}
                 groups={groups}
                 groupIndex={index}
-              />
-              <GroupCondition
-                index={index}
-                groupConditions={groupConditions}
-                handleGroupConditionsChange={handleGroupConditionsChange}
-                setIsGroupConditionChanged={setIsGroupConditionChanged}
               />
             </Box>
           );

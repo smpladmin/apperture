@@ -19,6 +19,7 @@ import {
   FilterType,
   SegmentFilter,
   SegmentFilterConditions,
+  SegmentGroupConditions,
   WhereSegmentFilter,
 } from '@lib/domain/segment';
 import { getUserInfo } from '@lib/services/userService';
@@ -169,10 +170,7 @@ describe('Create Segment', () => {
             type: FilterType.WHERE,
           },
         ] as WhereSegmentFilter[],
-        conditions: [
-          SegmentFilterConditions.WHERE,
-          SegmentFilterConditions.AND,
-        ],
+        condition: SegmentGroupConditions.AND,
       },
     ],
     name: 'Testing edit Segments ',
@@ -1023,6 +1021,7 @@ describe('Create Segment', () => {
               type: FilterType.WHO,
             },
           ] as SegmentFilter[],
+          condition: SegmentGroupConditions.AND,
         },
       ],
       name: 'Testing edit Segments ',

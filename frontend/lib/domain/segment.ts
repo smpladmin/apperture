@@ -3,6 +3,7 @@ export type WhereSegmentFilter = {
   operand: string;
   operator: SegmentFilterOperators;
   values: string[];
+  all: boolean;
   type: FilterType;
 };
 
@@ -48,6 +49,7 @@ export enum SegmentFilterConditions {
 
 export type SegmentGroup = {
   filters: SegmentFilter[];
+  condition: SegmentGroupConditions;
 };
 
 export enum SegmentGroupConditions {

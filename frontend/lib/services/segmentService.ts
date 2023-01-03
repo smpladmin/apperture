@@ -7,14 +7,12 @@ import { SegmentGroup } from '@lib/domain/segment';
 export const computeSegment = async (
   dsId: string,
   groups: SegmentGroup[],
-  columns: string[],
-  groupConditions: SegmentGroupConditions[]
+  columns: string[]
 ) => {
   const res = await ApperturePost('/segments/transient', {
     datasourceId: dsId,
     groups: replaceEmptyStringPlaceholder(cloneDeep(groups)),
     columns,
-    groupConditions,
   });
   return res.data;
 };

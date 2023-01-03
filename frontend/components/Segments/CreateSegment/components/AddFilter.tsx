@@ -72,6 +72,7 @@ const AddFilter = ({
         operand: item.id,
         operator: SegmentFilterOperators.EQUALS,
         values: [],
+        all: false,
         type: FilterType.WHERE,
       });
     } else {
