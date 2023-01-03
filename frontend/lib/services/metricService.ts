@@ -1,9 +1,10 @@
+import { EventOrSegmentComponent } from '@lib/domain/metric';
 import { ApperturePost } from './util';
 
 export const computeMetric = async (
   dsId: string,
   functions: string,
-  aggregates: any[],
+  aggregates: EventOrSegmentComponent[],
   breakdown: string[]
 ) => {
   const res = await ApperturePost('metrics/compute', {

@@ -18,18 +18,23 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
+            data_processor:
               - 'data_processor/**'
+            frontend:
+              - 'frontend/**'
       - name: Testing Backend code
         if: steps.filter.outputs.backend == 'true'
         run: |
           cd backend
           mv .defaults .env
           docker build . --target tests
+
       - name: Testing Data Processor code
         if: steps.filter.outputs.data_processor == 'true'
         run: |
           cd data_processor
           docker build . --target tests
+
       - name: Testing Frontend code
         if: steps.filter.outputs.frontend == 'true'
         run: |
