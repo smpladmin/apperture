@@ -19,6 +19,7 @@ import {
   FilterType,
   SegmentFilter,
   SegmentFilterConditions,
+  SegmentGroupConditions,
   WhereSegmentFilter,
 } from '@lib/domain/segment';
 import { getUserInfo } from '@lib/services/userService';
@@ -155,22 +156,21 @@ describe('Create Segment', () => {
       {
         filters: [
           {
+            condition: SegmentFilterConditions.WHERE,
             operand: 'properties.$city',
             operator: 'equals',
             values: ['Chennai', 'Guwahati', 'Patna'],
             type: FilterType.WHERE,
           },
           {
+            condition: SegmentFilterConditions.AND,
             operand: 'properties.$app_version',
             operator: 'equals',
             values: ['1.5.5', '1.5.6'],
             type: FilterType.WHERE,
           },
         ] as WhereSegmentFilter[],
-        conditions: [
-          SegmentFilterConditions.WHERE,
-          SegmentFilterConditions.AND,
-        ],
+        condition: SegmentGroupConditions.AND,
       },
     ],
     name: 'Testing edit Segments ',
@@ -974,18 +974,21 @@ describe('Create Segment', () => {
         {
           filters: [
             {
+              condition: SegmentFilterConditions.WHERE,
               operand: 'properties.$city',
               operator: 'equals',
               values: ['Chennai', 'Guwahati', 'Patna'],
               type: FilterType.WHERE,
             },
             {
+              condition: SegmentFilterConditions.AND,
               operand: 'properties.$app_version',
               operator: 'equals',
               values: ['1.5.5', '1.5.6'],
               type: FilterType.WHERE,
             },
             {
+              condition: SegmentFilterConditions.WHO,
               triggered: true,
               operand: 'App_Open',
               aggregation: 'total',
@@ -996,6 +999,7 @@ describe('Create Segment', () => {
               type: FilterType.WHO,
             },
             {
+              condition: SegmentFilterConditions.OR,
               triggered: true,
               operand: 'Login',
               aggregation: 'total',
@@ -1006,6 +1010,7 @@ describe('Create Segment', () => {
               type: FilterType.WHO,
             },
             {
+              condition: SegmentFilterConditions.OR,
               triggered: true,
               operand: 'Video_Open',
               aggregation: 'total',
@@ -1016,13 +1021,7 @@ describe('Create Segment', () => {
               type: FilterType.WHO,
             },
           ] as SegmentFilter[],
-          conditions: [
-            SegmentFilterConditions.WHERE,
-            SegmentFilterConditions.AND,
-            SegmentFilterConditions.WHO,
-            SegmentFilterConditions.OR,
-            SegmentFilterConditions.OR,
-          ],
+          condition: SegmentGroupConditions.AND,
         },
       ],
       name: 'Testing edit Segments ',

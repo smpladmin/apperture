@@ -1,28 +1,26 @@
 import { Flex, Text } from '@chakra-ui/react';
-import { SegmentGroupConditions } from '@lib/domain/segment';
+import { SegmentGroup, SegmentGroupConditions } from '@lib/domain/segment';
 import React from 'react';
 
 type GroupConditionsProps = {
   index: number;
-  groupConditions: SegmentGroupConditions[];
+  group: SegmentGroup;
   setIsGroupConditionChanged: Function;
   handleGroupConditionsChange: Function;
 };
 
 const GroupCondition = ({
   index,
-  groupConditions,
+  group,
   handleGroupConditionsChange,
   setIsGroupConditionChanged,
 }: GroupConditionsProps) => {
   return (
     <div>
-      {groupConditions[index] ? (
+      {group?.condition ? (
         <Flex
           justifyContent={'center'}
-          my={
-            groupConditions[index] === SegmentGroupConditions.AND ? '-3' : '2'
-          }
+          my={group?.condition === SegmentGroupConditions.AND ? '-3' : '2'}
         >
           <Text
             px={'2'}
@@ -41,7 +39,7 @@ const GroupCondition = ({
             cursor={'pointer'}
             data-testid={'group-condition'}
           >
-            {groupConditions[index].toLocaleUpperCase()}
+            {group?.condition?.toLocaleUpperCase()}
           </Text>
         </Flex>
       ) : null}
