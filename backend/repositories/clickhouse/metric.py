@@ -17,12 +17,12 @@ from pypika import (
     functions as fn,
     Case,
 )
-from repositories.clickhouse.parser.formula_parser import Parser
+from repositories.clickhouse.parser.formula_parser import FormulaParser
 
 
 class Metrics:
     def __init__(self):
-        self.parser = Parser()
+        self.parser = FormulaParser()
         self.table = Table("events")
 
     def build_metric_compute_query(
@@ -53,7 +53,7 @@ class Metrics:
             )
         query = (
             ClickHouseQuery.from_(innerquery.as_("innerquery"))
-            .select(Parameter("date"), self.parser.formula_parser(function, fn.Sum))
+            .select(Parameter("date"), self.parser.parse(function, fn.Sum))
             .groupby(Parameter("date"))
         )
         return query.get_sql(), {"ds_id": datasource_id}

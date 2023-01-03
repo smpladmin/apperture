@@ -37,11 +37,13 @@ class TestMetricRepository:
                 conditions=["where"],
             )
         ]
-        self.breakdown=[]
-        self.function="A"
-        self.params={'ds_id':self.datasource_id}
+        self.breakdown = []
+        self.function = "A"
+        self.params = {"ds_id": self.datasource_id}
 
-        self.query= 'SELECT date,SUM("A") FROM (SELECT DATE("timestamp") AS "date",CASE WHEN event_name=\'Video_Seen\' AND "properties.properties.$city" IN (\'Bengaluru\') THEN 1 ELSE 0 END AS "A" FROM "events" WHERE "datasource_id"=%(ds_id)s) AS "innerquery" GROUP BY date'
+        self.query = 'SELECT date,SUM("A") FROM (SELECT DATE("timestamp") AS "date",CASE WHEN event_name=\'Video_Seen\' AND "properties.properties.$city" IN (\'Bengaluru\') THEN 1 ELSE 0 END AS "A" FROM "events" WHERE "datasource_id"=%(ds_id)s) AS "innerquery" GROUP BY date'
 
     def test_build_metric_compute_query(self):
-        assert self.repo.build_metric_compute_query(self.datasource_id,self.aggregates,self.breakdown,self.function) == (self.query,self.params)
+        assert self.repo.build_metric_compute_query(
+            self.datasource_id, self.aggregates, self.breakdown, self.function
+        ) == (self.query, self.params)

@@ -87,8 +87,8 @@ class PostFixConverter:
         return "".join(self.output)
 
 
-class Parser:
-    def formula_parser(self, function: str, wrapper_function):
+class FormulaParser:
+    def parse(self, function: str, wrapper_function):
         if wrapper_function == None:
             raise ValueError("Wrapper function not defined")
         try:
@@ -117,5 +117,5 @@ class Parser:
                     stack.append(int(c))
         except:
             logging.error(f"Invalid formula expression:\t{function}")
-            return wrapper_function(Field("A"))
+            raise ValueError("Invalid formula expression")
         return stack[0] if len(stack) == 1 else wrapper_function(Field("A"))

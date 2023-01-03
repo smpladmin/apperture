@@ -11,7 +11,6 @@ from repositories.clickhouse.metric import Metrics
 from repositories.clickhouse.events import Events
 
 
-
 class MetricService:
     def __init__(
         self,

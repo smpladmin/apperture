@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import MetricFilterComponent from './MetricFilterComponent';
 import MetricAddFilterComponent from './MetricAddFilterComponent';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import _ from 'lodash';
 import { MetricComponentVariant, MetricEventFilter } from '@lib/domain/metric';
 type MetricComponentCardProps = {
   variable: string;

@@ -14,7 +14,6 @@ import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
 import { useRouter } from 'next/router';
 import MetricComponentCard from './MetricComponentCard';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
-import _ from 'lodash';
 import { computeMetric } from '@lib/services/metricService';
 import { EventOrSegmentComponent, MetricEventFilter } from '@lib/domain/metric';
 
