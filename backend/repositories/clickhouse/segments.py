@@ -1,6 +1,6 @@
 import copy
 from typing import List, Union
-from repositories.clickhouse.events import Events
+from repositories.clickhouse.base import EventsBase
 from domain.segments.models import (
     SegmentFilterConditions,
     SegmentGroup,
@@ -21,7 +21,7 @@ from pypika import (
 from pypika.dialects import ClickHouseQueryBuilder
 
 
-class Segments(Events):
+class Segments(EventsBase):
     def get_all_unique_users_query(self):
         return (
             ClickHouseQuery.from_(self.table)

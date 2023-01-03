@@ -15,7 +15,7 @@ from pypika import (
 )
 
 from domain.edge.models import SankeyDirection
-from repositories.clickhouse.events import Events
+from repositories.clickhouse.base import EventsBase
 
 
 class Any(an.WindowFrameAnalyticFunction):
@@ -23,7 +23,7 @@ class Any(an.WindowFrameAnalyticFunction):
         super().__init__("any", column)
 
 
-class Edges(Events):
+class Edges(EventsBase):
     @staticmethod
     def get_parameters(ds_id: str, event_name: str, start_date: str, end_date: str):
         return {
