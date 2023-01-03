@@ -19,6 +19,7 @@ jobs:
             backend:
               - 'backend/**'
               - 'data_processor/**'
+              - 'frontend/**'
       - name: Testing Backend code
         if: steps.filter.outputs.backend == 'true'
         run: |
