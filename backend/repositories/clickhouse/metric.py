@@ -25,15 +25,6 @@ class Metrics:
         self.parser = parser
         self.table = Table("events")
 
-    def build_aggregation_function(
-        self,
-        function: SegmentsAndEventsAggregationsFunctions,
-    ):
-        if function == SegmentsAndEventsAggregationsFunctions.SUM:
-            return fn.Sum(self.table.event_name)
-        if function == SegmentsAndEventsAggregationsFunctions.COUNT:
-            return fn.Count(self.table.event_name)
-
     def build_metric_compute_query(
         self,
         datasource_id: str,
