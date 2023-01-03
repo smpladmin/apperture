@@ -1,8 +1,13 @@
 import { Box, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import { SegmentFilter, SegmentProperty } from '@lib/domain/segment';
+import {
+  FilterItemType,
+  FilterType,
+  SegmentFilter,
+  SegmentProperty,
+} from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 type SelectEventPropertyProps = {
   filter: SegmentFilter;
@@ -20,14 +25,34 @@ const SelectEventProperty = ({
   index,
 }: SelectEventPropertyProps) => {
   const [isFiltersListOpen, setOpenFiltersList] = useState(false);
+  const [dropdownItems, setDropDownItems] = useState<SegmentProperty[]>([]);
   const selectFilterRef = useRef(null);
 
   useOnClickOutside(selectFilterRef, () => setOpenFiltersList(false));
 
-  const onSuggestionClick = (val: string) => {
+  useEffect(() => {
+    let items = [];
+    if (filter.type === FilterType.WHERE) {
+      items = eventProperties.filter(
+        (property) => property.type === FilterItemType.PROPERTY
+      );
+    } else {
+      items = eventProperties.filter(
+        (property) => property.type === FilterItemType.EVENT
+      );
+    }
+
+    setDropDownItems(items);
+  }, []);
+
+  const onSuggestionClick = (item: SegmentProperty) => {
     const updatedFilters = [...filters];
-    updatedFilters[index]['operand'] = val;
-    updatedFilters[index]['values'] = [];
+    updatedFilters[index]['operand'] = item.id;
+
+    // reset the value to empty [] in case of where filter and ['1'] in case of who filter
+    // when changing property/event for a query
+    const value = item.type === FilterItemType.PROPERTY ? [] : ['1'];
+    updatedFilters[index]['values'] = value;
     updateGroupsState(updatedFilters);
     setOpenFiltersList(false);
   };
@@ -50,10 +75,11 @@ const SelectEventProperty = ({
 
       <SearchableListDropdown
         isOpen={isFiltersListOpen}
-        data={eventProperties}
+        data={dropdownItems}
         isLoading={false}
         onSubmit={onSuggestionClick}
         listKey={'id'}
+        showBadge={true}
       />
     </Box>
   );

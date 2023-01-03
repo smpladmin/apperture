@@ -1,18 +1,20 @@
-import { Flex, IconButton } from '@chakra-ui/react';
+import { Box, Flex, IconButton, Input, Text } from '@chakra-ui/react';
 import {
   SegmentFilter,
   SegmentGroup,
   SegmentProperty,
-  WhereSegmentFilter,
+  WhoSegmentFilter,
 } from '@lib/domain/segment';
+import { capitalizeFirstLetter } from '@lib/utils/common';
 import React from 'react';
+import DateField from '../DateField';
 import FilterConditions from '../FilterConditions';
 import FilterOperator from '../FilterOperator';
+import InputValue from '../InputValue';
 import SelectEventProperty from '../SelectEventProperty';
-import SelectValue from '../SelectValue';
 
-type WhereSegmentFilterProps = {
-  filter: WhereSegmentFilter;
+type WhoSegmentFilterProps = {
+  filter: WhoSegmentFilter;
   filters: SegmentFilter[];
   group: SegmentGroup;
   updateGroupsState: Function;
@@ -21,7 +23,7 @@ type WhereSegmentFilterProps = {
   removeFilter: Function;
 };
 
-const WhereSegmentFilter = ({
+const WhoSegmentFilter = ({
   filter,
   filters,
   group,
@@ -29,7 +31,7 @@ const WhereSegmentFilter = ({
   eventProperties,
   index,
   removeFilter,
-}: WhereSegmentFilterProps) => {
+}: WhoSegmentFilterProps) => {
   return (
     <Flex gap={'3'} alignItems={'center'}>
       <FilterConditions
@@ -38,6 +40,19 @@ const WhereSegmentFilter = ({
         conditions={group.conditions}
         updateGroupsState={updateGroupsState}
       />
+      <Box>
+        <Text
+          fontSize={'xs-14'}
+          lineHeight={'xs-14'}
+          fontWeight={'600'}
+          px={'2'}
+          py={'2'}
+          bg={'white.100'}
+          cursor={'pointer'}
+        >
+          {'Triggered'}
+        </Text>
+      </Box>
       <SelectEventProperty
         index={index}
         filter={filter}
@@ -45,12 +60,31 @@ const WhereSegmentFilter = ({
         filters={filters}
         updateGroupsState={updateGroupsState}
       />
+      <Box>
+        <Text
+          fontSize={'xs-14'}
+          lineHeight={'xs-14'}
+          fontWeight={'600'}
+          px={'2'}
+          py={'2'}
+          bg={'white.100'}
+          cursor={'pointer'}
+        >
+          {capitalizeFirstLetter(filter.aggregation)}
+        </Text>
+      </Box>
       <FilterOperator filter={filter} />
-      <SelectValue
+      <InputValue
+        index={index}
         filter={filter}
         filters={filters}
         updateGroupsState={updateGroupsState}
+      />
+      <DateField
         index={index}
+        filter={filter}
+        filters={filters}
+        updateGroupsState={updateGroupsState}
       />
       <IconButton
         aria-label="delete"
@@ -65,4 +99,4 @@ const WhereSegmentFilter = ({
   );
 };
 
-export default WhereSegmentFilter;
+export default WhoSegmentFilter;

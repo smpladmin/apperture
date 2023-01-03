@@ -18,6 +18,7 @@ import {
   Box,
   Flex,
   Text,
+  Skeleton,
 } from '@chakra-ui/react';
 import EditColumns from './EditColumns';
 import TableSkeleton from '@components/Skeleton/TableSkeleton';
@@ -100,14 +101,18 @@ const SegmentTable = ({
           >
             Showing:
           </Text>
-          <Text
-            fontSize={'xs-14'}
-            lineHeight={'xs-18'}
-            fontWeight={'500'}
-            data-testid={'users-count'}
-          >
-            {userTableData.count || 0} Users
-          </Text>
+          {isSegmentDataLoading ? (
+            <Skeleton height={'5'} />
+          ) : (
+            <Text
+              fontSize={'xs-14'}
+              lineHeight={'xs-18'}
+              fontWeight={'500'}
+              data-testid={'users-count'}
+            >
+              {userTableData?.count || 0} Users
+            </Text>
+          )}
         </Flex>
         <Flex gap={'1'}>
           <Button
@@ -137,7 +142,7 @@ const SegmentTable = ({
       >
         {isSegmentDataLoading ? (
           <TableSkeleton tableHeader={selectedColumns} />
-        ) : userTableData.data?.length ? (
+        ) : userTableData?.data?.length ? (
           <Table data-testid={'segment-table'}>
             <Thead py={'3'} px={'8'} bg={'white.100'}>
               {getHeaderGroups().map((headerGroup, groupIndex) => (

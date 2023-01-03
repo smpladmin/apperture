@@ -5,7 +5,7 @@ from beanie import PydanticObjectId
 
 from domain.segments.models import (
     SegmentGroup,
-    SegmentFilter,
+    WhereSegmentFilter,
     SegmentFilterOperators,
     SegmentFilterConditions,
 )
@@ -27,12 +27,12 @@ def test_compute_transient_segment(
             "groups": [
                 SegmentGroup(
                     filters=[
-                        SegmentFilter(
+                        WhereSegmentFilter(
                             operator=SegmentFilterOperators.EQUALS,
                             operand="properties.$city",
                             values=["Delhi", "Indore", "Bhopal"],
                         ),
-                        SegmentFilter(
+                        WhereSegmentFilter(
                             operator=SegmentFilterOperators.EQUALS,
                             operand="properties.$app_release",
                             values=["5003", "2077", "5002"],
@@ -64,15 +64,17 @@ def test_save_segment(
             "groups": [
                 SegmentGroup(
                     filters=[
-                        SegmentFilter(
+                        WhereSegmentFilter(
                             operand="properties.$city",
                             operator=SegmentFilterOperators.EQUALS,
                             values=["Delhi", "Indore", "Bhopal"],
+                            type=SegmentFilterConditions.WHERE,
                         ),
-                        SegmentFilter(
+                        WhereSegmentFilter(
                             operand="properties.$app_release",
                             operator=SegmentFilterOperators.EQUALS,
                             values=["5003", "2077", "5002"],
+                            type=SegmentFilterConditions.WHERE,
                         ),
                     ],
                     conditions=[
@@ -103,11 +105,13 @@ def test_save_segment(
                     {
                         "operand": "properties.$city",
                         "operator": SegmentFilterOperators.EQUALS,
+                        "type": SegmentFilterConditions.WHERE,
                         "values": ["Delhi", "Indore", "Bhopal"],
                     },
                     {
                         "operand": "properties.$app_release",
                         "operator": SegmentFilterOperators.EQUALS,
+                        "type": "where",
                         "values": ["5003", "2077", "5002"],
                     },
                 ],
@@ -132,6 +136,6 @@ def test_get_segment(client_init, segment_service):
 def test_get_segments(client_init, segment_service):
     response = client_init.get("/segments?app_id=63761779818ec577b69c21e6")
     assert response.status_code == 200
-    segment_service.get_segment.assert_called_once_with(
-        **{"segment_id": "63761779818ec577b69c21e6"}
+    segment_service.get_segments_for_app.assert_called_once_with(
+        **{"app_id": "63761779818ec577b69c21e6"}
     )

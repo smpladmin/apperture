@@ -13,9 +13,14 @@ import {
   getEventPropertiesValue,
   getNodes,
 } from '@lib/services/datasourceService';
-import { getSearchResult } from '@lib/utils/common';
+import { getSearchResult, capitalizeFirstLetter } from '@lib/utils/common';
 import { computeSegment, saveSegment } from '@lib/services/segmentService';
-import { SegmentFilterConditions } from '@lib/domain/segment';
+import {
+  FilterType,
+  SegmentFilter,
+  SegmentFilterConditions,
+  WhereSegmentFilter,
+} from '@lib/domain/segment';
 import { getUserInfo } from '@lib/services/userService';
 
 jest.mock('@lib/services/datasourceService');
@@ -24,6 +29,76 @@ jest.mock('@lib/services/segmentService');
 jest.mock('@lib/services/userService');
 
 describe('Create Segment', () => {
+  const getWhereElementsText = (queries: HTMLElement[], index: number) =>
+    Array.from(queries[index].getElementsByTagName('p')).map(
+      (el) => el.textContent
+    );
+
+  const addWhereFilter = async () => {
+    const addFilterButton = screen.getByTestId('add-filter');
+
+    fireEvent.click(addFilterButton);
+    const dropdownOptions = screen.getAllByTestId('dropdown-options');
+
+    await act(async () => {
+      fireEvent.click(dropdownOptions[1]);
+    });
+    await waitFor(async () => {
+      const propertyValues = screen.getAllByTestId(
+        'property-value-dropdown-option'
+      );
+      const addPropertyValuesButton = screen.getByTestId(
+        'add-event-property-values'
+      );
+      fireEvent.click(propertyValues[0]);
+      fireEvent.click(propertyValues[1]);
+      fireEvent.click(addPropertyValuesButton);
+    });
+  };
+
+  const addWhoFilter = async (elementIndex: number = 5) => {
+    const addFilterButton = screen.getByTestId('add-filter');
+
+    fireEvent.click(addFilterButton);
+    const dropdownOptions = screen.getAllByTestId('dropdown-options');
+
+    await act(async () => {
+      // 6th element in list is the event, which would result in who filter
+      fireEvent.click(dropdownOptions[elementIndex]);
+    });
+  };
+
+  const assertFilterConditions = (expectedFilterConditions: string[]) => {
+    const filterConditions = screen.getAllByTestId('filter-condition');
+    filterConditions.forEach((condition, i) => {
+      expect(condition).toHaveTextContent(expectedFilterConditions[i]);
+    });
+    expect(filterConditions.length).toEqual(expectedFilterConditions.length);
+  };
+
+  const switchFilterCondition = async (index: number) => {
+    await act(async () => {
+      const filterConditionOptions = screen.getAllByTestId(
+        'filter-conditions-options'
+      );
+      // index 0 - corresponds to 'and'
+      // index 1 - corresponds to 'or'
+      fireEvent.click(filterConditionOptions[index]);
+    });
+  };
+
+  const removeFilter = async (filterIndex: number) => {
+    const removeFilterButton = screen.getAllByTestId('remove-filter');
+    await act(async () => {
+      fireEvent.click(removeFilterButton[filterIndex]);
+    });
+  };
+
+  const getGroupConditionText = () => {
+    const groupConditions = screen.getAllByTestId('group-condition');
+    return groupConditions.map((condition) => condition.textContent);
+  };
+
   let mockedGetEventProperties: jest.Mock;
   let mockedGetNodes: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
@@ -31,6 +106,7 @@ describe('Create Segment', () => {
   let mockedTransientSegment: jest.Mock;
   let mockedGetUserInfo: jest.Mock;
   let mockedSaveSegment: jest.Mock;
+  let mockedCapitalizeLetter: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -82,13 +158,15 @@ describe('Create Segment', () => {
             operand: 'properties.$city',
             operator: 'equals',
             values: ['Chennai', 'Guwahati', 'Patna'],
+            type: FilterType.WHERE,
           },
           {
             operand: 'properties.$app_version',
             operator: 'equals',
             values: ['1.5.5', '1.5.6'],
+            type: FilterType.WHERE,
           },
-        ],
+        ] as WhereSegmentFilter[],
         conditions: [
           SegmentFilterConditions.WHERE,
           SegmentFilterConditions.AND,
@@ -108,6 +186,7 @@ describe('Create Segment', () => {
     mockedTransientSegment = jest.mocked(computeSegment);
     mockedGetUserInfo = jest.mocked(getUserInfo);
     mockedSaveSegment = jest.mocked(saveSegment);
+    mockedCapitalizeLetter = jest.mocked(capitalizeFirstLetter);
 
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetNodes.mockReturnValue(events);
@@ -179,6 +258,69 @@ describe('Create Segment', () => {
         expect(eventPropertyText).toHaveTextContent('device');
         expect(dropDownContainer).not.toBeVisible();
       });
+    });
+
+    it('add multiple filters with mix of eventProperties and event ', async () => {
+      mockedCapitalizeLetter.mockReturnValue('total');
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      await addWhereFilter();
+      await addWhoFilter(5);
+      await addWhereFilter();
+      await addWhereFilter();
+      await addWhoFilter(6);
+
+      const queries = screen.getAllByTestId('query-builder');
+
+      const firstQueryTextElements = getWhereElementsText(queries, 0);
+      const secondQueryTextElements = getWhereElementsText(queries, 1);
+      const thirdQueryTextElements = getWhereElementsText(queries, 2);
+      const fourthQueryTextElements = getWhereElementsText(queries, 3);
+      const fifthQueryTextElements = getWhereElementsText(queries, 4);
+
+      //first three filters should be where filter independent of the fact when where filter is added
+      expect(firstQueryTextElements).toEqual([
+        'where',
+        'device',
+        'equals',
+        'android, ios',
+      ]);
+      expect(secondQueryTextElements).toEqual([
+        'and',
+        'device',
+        'equals',
+        'android, ios',
+      ]);
+      expect(thirdQueryTextElements).toEqual([
+        'and',
+        'device',
+        'equals',
+        'android, ios',
+      ]);
+      expect(fourthQueryTextElements).toEqual([
+        'who',
+        'Triggered',
+        'App_Open',
+        'total',
+        'equals',
+        'Last 30 days',
+      ]);
+      expect(fifthQueryTextElements).toEqual([
+        'and',
+        'Triggered',
+        'Login',
+        'total',
+        'equals',
+        'Last 30 days',
+      ]);
     });
   });
 
@@ -463,7 +605,10 @@ describe('Create Segment', () => {
       });
 
       // again open dropdown by clicking on add filter button
-      fireEvent.click(addFilterButton);
+      await act(async () => {
+        fireEvent.click(addFilterButton);
+      });
+
       const dropdownOptions = screen.getAllByTestId('dropdown-options');
 
       // dropdown options should be the event properties(not the search result)
@@ -550,9 +695,7 @@ describe('Create Segment', () => {
       });
       const queries = screen.getAllByTestId('query-builder');
 
-      const filterOneTextElements = Array.from(
-        queries[0].getElementsByTagName('p')
-      ).map((el) => el.textContent);
+      const filterOneTextElements = getWhereElementsText(queries, 0);
       //first query -  `where properties.$city equals Chennai, Guwahati or 1 more
       expect(filterOneTextElements).toEqual([
         'where',
@@ -561,9 +704,7 @@ describe('Create Segment', () => {
         'Chennai, Guwahati or 1 more',
       ]);
 
-      const filterTwoTextElements = Array.from(
-        queries[1].getElementsByTagName('p')
-      ).map((el) => el.textContent);
+      const filterTwoTextElements = getWhereElementsText(queries, 1);
       //first query -  `and properties.$app_version equals 1.5.5, 1.5.6
       expect(filterTwoTextElements).toEqual([
         'and',
@@ -642,26 +783,24 @@ describe('Create Segment', () => {
         );
       });
 
-      const addFilterButton = screen.getByTestId('add-filter');
+      const selectPropertyDropdownOption = async (optionIndex: number) => {
+        await act(async () => {
+          const dropdownOptions = screen.getAllByTestId('dropdown-options');
+          fireEvent.click(dropdownOptions[optionIndex]);
+        });
+      };
 
+      const addFilterButton = screen.getByTestId('add-filter');
       fireEvent.click(addFilterButton);
-      const dropdownOptions = screen.getAllByTestId('dropdown-options');
-      await act(async () => {
-        fireEvent.click(dropdownOptions[0]);
-      });
+      await selectPropertyDropdownOption(0);
 
       // add another filter, new added condition shpuld be 'and'
       fireEvent.click(addFilterButton);
-      await act(async () => {
-        fireEvent.click(dropdownOptions[1]);
-      });
+      await selectPropertyDropdownOption(1);
 
-      const filterConditions = screen.getAllByTestId('filter-condition');
       await waitFor(() => {
         const expectedFilterConditions = ['where', 'and'];
-        filterConditions.forEach((condition, i) => {
-          expect(condition).toHaveTextContent(expectedFilterConditions[i]);
-        });
+        assertFilterConditions(expectedFilterConditions);
       });
     });
 
@@ -696,34 +835,46 @@ describe('Create Segment', () => {
         expect(option).toHaveTextContent(options[i]);
       });
 
-      await act(async () => {
-        //click on 'or' option to change all filter conditions to `or`
-        fireEvent.click(filterConditionOptions[1]);
-      });
-
+      //click on 'or' option to change all filter conditions to `or`
+      await switchFilterCondition(1);
       await waitFor(() => {
         /// after clicking on 'or' option, all 'and' conditions should be 'or' now
-        const expectedFilterConditions = ['where', 'or', 'or'];
-        filterConditions.forEach((condition, i) => {
-          expect(condition).toHaveTextContent(expectedFilterConditions[i]);
-        });
+        const expectedFilterConditions = ['where', 'or'];
+        assertFilterConditions(expectedFilterConditions);
       });
 
       // add new filter, new added filter condition should be 'or'
-      const addFilterButton = screen.getByTestId('add-filter');
-      fireEvent.click(addFilterButton);
+      await addWhereFilter();
 
-      const eventPropertiesOptions = screen.getAllByTestId('dropdown-options');
-      await act(async () => {
-        fireEvent.click(eventPropertiesOptions[0]);
+      await waitFor(async () => {
+        const expectedNewFilterConditions = ['where', 'or', 'or'];
+        assertFilterConditions(expectedNewFilterConditions);
       });
 
+      // add new who filter
+      await addWhoFilter(5);
+      await addWhoFilter(6);
+      await addWhoFilter(7);
+
+      await waitFor(async () => {
+        assertFilterConditions(['where', 'or', 'or', 'who', 'and', 'and']);
+      });
+
+      const newFilterConditions = screen.getAllByTestId('filter-condition');
+
+      //click the last filterCondition option, which is the 'who' filter and switch all who conditions to 'or'
+      fireEvent.click(newFilterConditions[4]);
+      await switchFilterCondition(1);
       await waitFor(() => {
-        const newFilterConditions = screen.getAllByTestId('filter-condition');
-        const expectedNewFilterConditions = ['where', 'or', 'or', 'or'];
-        newFilterConditions.forEach((condition, i) => {
-          expect(condition).toHaveTextContent(expectedNewFilterConditions[i]);
-        });
+        assertFilterConditions(['where', 'or', 'or', 'who', 'or', 'or']);
+      });
+
+      // click on where's first or condition and change it to 'and'
+      fireEvent.click(newFilterConditions[1]);
+      await switchFilterCondition(0);
+      await waitFor(() => {
+        // all where conditions should have 'and' and who conditions should have 'or
+        assertFilterConditions(['where', 'and', 'and', 'who', 'or', 'or']);
       });
     });
   });
@@ -808,6 +959,274 @@ describe('Create Segment', () => {
           query: { dsId: '654212033222', segmentId: '654212033111' },
         });
       });
+    });
+  });
+
+  describe('remove filter conditons', () => {
+    const savedSegmentProps = {
+      appId: '638f1a928e54760eafc64d6e',
+      columns: ['user_id', 'properties.$city', 'properties.$app_version'],
+      createdAt: new Date('2022-12-19T09:04:44.566000'),
+      datasourceId: '638f1aac8e54760eafc64d70',
+      description: 'Dummy segment to test Edit segment component',
+      groupConditions: [],
+      groups: [
+        {
+          filters: [
+            {
+              operand: 'properties.$city',
+              operator: 'equals',
+              values: ['Chennai', 'Guwahati', 'Patna'],
+              type: FilterType.WHERE,
+            },
+            {
+              operand: 'properties.$app_version',
+              operator: 'equals',
+              values: ['1.5.5', '1.5.6'],
+              type: FilterType.WHERE,
+            },
+            {
+              triggered: true,
+              operand: 'App_Open',
+              aggregation: 'total',
+              operator: 'equals',
+              values: ['15'],
+              startDate: '2022-11-28',
+              endDate: '2022-12-28',
+              type: FilterType.WHO,
+            },
+            {
+              triggered: true,
+              operand: 'Login',
+              aggregation: 'total',
+              operator: 'equals',
+              values: ['50'],
+              startDate: '2022-11-28',
+              endDate: '2022-12-28',
+              type: FilterType.WHO,
+            },
+            {
+              triggered: true,
+              operand: 'Video_Open',
+              aggregation: 'total',
+              operator: 'equals',
+              values: ['10'],
+              startDate: '2022-11-28',
+              endDate: '2022-12-28',
+              type: FilterType.WHO,
+            },
+          ] as SegmentFilter[],
+          conditions: [
+            SegmentFilterConditions.WHERE,
+            SegmentFilterConditions.AND,
+            SegmentFilterConditions.WHO,
+            SegmentFilterConditions.OR,
+            SegmentFilterConditions.OR,
+          ],
+        },
+      ],
+      name: 'Testing edit Segments ',
+      updatedAt: new Date('2022-12-19T09:04:44.567000'),
+      userId: '638f1a128e54760eafc64d6c',
+      _id: '63a0292cd9ae5bf509df9ac7',
+    };
+
+    it('remove filter condition and should be able to replace filter condition with suitable condition', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({
+              query: {
+                segmentId: '639821f7f5903afb0a1b5fa6',
+                dsId: '638f1aac8e54760eafc64d70',
+              },
+            })}
+          >
+            <CreateSegment savedSegment={savedSegmentProps} />
+          </RouterContext.Provider>
+        );
+      });
+
+      // case 1: remove last filter;
+      await removeFilter(4);
+      await waitFor(() => {
+        assertFilterConditions(['where', 'and', 'who', 'or']);
+      });
+
+      // case2: remove the filter with 'who' condition and after this the next 'or' condition should be modified to 'and'
+      await removeFilter(2);
+      await waitFor(() => {
+        assertFilterConditions(['where', 'and', 'who']);
+      });
+
+      // case3: remove the first filter which is 'where', the next where type filter should have the condition now as 'where'
+      await removeFilter(0);
+      await waitFor(() => {
+        assertFilterConditions(['where', 'who']);
+      });
+
+      // case4: remove all the filters, there removeFilter button should not be visible
+      await removeFilter(1);
+      await waitFor(() => {
+        assertFilterConditions(['where']);
+      });
+
+      await removeFilter(0);
+      expect(screen.queryByTestId('remove-filter')).not.toBeInTheDocument();
+    });
+
+    it('remove filter condition after switching the who filter conditions to `and` and then add new filters', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({
+              query: {
+                segmentId: '639821f7f5903afb0a1b5fa6',
+                dsId: '638f1aac8e54760eafc64d70',
+              },
+            })}
+          >
+            <CreateSegment savedSegment={savedSegmentProps} />
+          </RouterContext.Provider>
+        );
+      });
+
+      const filterConditions = screen.getAllByTestId('filter-condition');
+
+      // switch 'who' condition to 'and' from last 'or' condition
+      fireEvent.click(filterConditions[4]);
+      await switchFilterCondition(0);
+
+      await removeFilter(4);
+      await waitFor(() => {
+        assertFilterConditions(['where', 'and', 'who', 'and']);
+      });
+
+      // add new 'who' filter, the condition should be 'and'
+      await addWhoFilter(5);
+      await waitFor(() => {
+        assertFilterConditions(['where', 'and', 'who', 'and', 'and']);
+      });
+
+      const newfilterConditions = screen.getAllByTestId('filter-condition');
+      // switch 'where' conditions to 'or' and then add new where condition
+      fireEvent.click(newfilterConditions[1]);
+      await switchFilterCondition(1);
+      await waitFor(() => {
+        assertFilterConditions(['where', 'or', 'who', 'and', 'and']);
+      });
+      await addWhereFilter();
+      // new added condition should be 'or'
+      await waitFor(() => {
+        assertFilterConditions(['where', 'or', 'or', 'who', 'and', 'and']);
+      });
+
+      // remove first where filter, and remaining where filter condition should not be changed
+      await removeFilter(0);
+      await waitFor(() => {
+        assertFilterConditions(['where', 'or', 'who', 'and', 'and']);
+      });
+    });
+  });
+
+  describe('add multiple groups and clear groups', () => {
+    it('add group', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+      await addWhoFilter();
+
+      // add new group
+      const addGroupButton = screen.getByTestId('add-group');
+      await act(async () => {
+        fireEvent.click(addGroupButton);
+      });
+
+      const groups = screen.getAllByTestId('segment-group');
+
+      expect(groups.length).toEqual(2);
+      expect(getGroupConditionText()).toEqual(['AND']);
+    });
+
+    it('add groups and switch first `and` condition to `or`', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+      await addWhoFilter();
+
+      // add two new group and then change first group condition to 'OR'
+      const addGroupButton = screen.getByTestId('add-group');
+      await act(async () => {
+        fireEvent.click(addGroupButton);
+      });
+      await act(async () => {
+        fireEvent.click(addGroupButton);
+      });
+      const groupConditions = screen.getAllByTestId('group-condition');
+      expect(getGroupConditionText()).toEqual(['AND', 'AND']);
+
+      // switch first 'AND' condition to 'OR'
+      await act(async () => {
+        fireEvent.click(groupConditions[0]);
+      });
+      expect(getGroupConditionText()).toEqual(['OR', 'AND']);
+
+      // again clicking on same condition would change the text back to 'AND' from 'OR'
+      await act(async () => {
+        fireEvent.click(groupConditions[0]);
+      });
+      expect(getGroupConditionText()).toEqual(['AND', 'AND']);
+    });
+
+    it('clear all group ', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+      await addWhoFilter();
+
+      const addGroupButton = screen.getByTestId('add-group');
+      await act(async () => {
+        fireEvent.click(addGroupButton);
+      });
+      await act(async () => {
+        fireEvent.click(addGroupButton);
+      });
+
+      const groups = screen.getAllByTestId('segment-group');
+      expect(groups.length).toEqual(3);
+
+      const clearAllButton = screen.getByTestId('clear-all');
+
+      // after clicking on clear-all only one group should be there with no filters/queries
+      await act(async () => {
+        fireEvent.click(clearAllButton);
+      });
+      const newGroup = screen.getAllByTestId('segment-group');
+      const queries = screen.queryByTestId('query-builder');
+
+      expect(newGroup.length).toEqual(1);
+      expect(queries).not.toBeInTheDocument();
     });
   });
 });

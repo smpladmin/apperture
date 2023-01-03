@@ -50,7 +50,7 @@ const SearchableListDropdown = ({
                   cursor: 'pointer',
                 }}
                 px={'2'}
-                onClick={() => onSubmit(listKey ? segmentPropertyItem : item)}
+                onClick={() => onSubmit(item)}
               >
                 <Box
                   cursor={'pointer'}
