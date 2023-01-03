@@ -1,6 +1,6 @@
 import copy
 from typing import List, Union
-from repositories.clickhouse.events import Events
+from repositories.clickhouse.base import EventsBase
 from domain.segments.models import (
     SegmentFilterConditions,
     SegmentGroup,
@@ -21,7 +21,7 @@ from pypika import (
 from pypika.dialects import ClickHouseQueryBuilder
 
 
-class Segments(Events):
+class Segments(EventsBase):
     def get_all_unique_users_query(self):
         return (
             ClickHouseQuery.from_(self.table)
@@ -36,18 +36,20 @@ class Segments(Events):
         criterion = []
         idx = 0
         for i, filter in enumerate(group.filters):
-            if group.conditions[i] == SegmentFilterConditions.WHO:
+            if filter.condition == SegmentFilterConditions.WHO:
                 idx = i
                 break
             if filter.operator == SegmentFilterOperators.EQUALS:
-                criterion.append(
-                    Field(f"properties.{filter.operand}").isin(filter.values)
-                )
+                if not filter.all:
+                    criterion.append(
+                        Field(f"properties.{filter.operand}").isin(filter.values)
+                    )
 
         where_idx = idx if idx != 0 else len(group.filters)
+        filter_condtions = [filter.condition for filter in group.filters[:where_idx]]
         group_users = (
             group_users.where(Criterion.any(criterion))
-            if SegmentFilterConditions.OR in group.conditions[:where_idx]
+            if SegmentFilterConditions.OR in filter_condtions
             else group_users.where(Criterion.all(criterion))
         )
         return group_users, idx
@@ -56,7 +58,7 @@ class Segments(Events):
         self, group: SegmentGroup, group_users: ClickHouseQueryBuilder, idx: int
     ):
         query = ClickHouseQuery
-        for i in range(idx, len(group.conditions)):
+        for i in range(idx, len(group.filters)):
             filter = group.filters[i]
             sub_query = ClickHouseQuery.from_(self.table).select(self.table.user_id)
             criterion = [
@@ -88,6 +90,7 @@ class Segments(Events):
             .select(AliasedQuery(f"cte{idx}").user_id)
             .distinct()
         )
+        filter_conditions = [filter.condition for filter in group.filters[idx:]]
         for i in range(idx + 1, len(group.filters)):
             filter_users = (
                 ClickHouseQuery.from_(AliasedQuery(f"cte{i}"))
@@ -97,7 +100,7 @@ class Segments(Events):
 
             group_users = (
                 group_users.intersect(filter_users)
-                if SegmentFilterConditions.AND in group.conditions[idx:]
+                if SegmentFilterConditions.AND in filter_conditions
                 else group_users.union_all(filter_users)
             )
 
@@ -106,21 +109,21 @@ class Segments(Events):
     def build_segment_users_query(
         self,
         groups: List[SegmentGroup],
-        group_conditions: List[SegmentFilterConditions],
     ):
         segment_users = self.get_all_unique_users_query()
         query = ClickHouseQuery
 
         for i, group in enumerate(groups):
             idx = 0
+            filter_conditions = [filter.condition for filter in group.filters]
             group_users = copy.deepcopy(segment_users)
 
-            if SegmentFilterConditions.WHERE in group.conditions:
+            if SegmentFilterConditions.WHERE in filter_conditions:
                 group_users, idx = self.build_where_clause_users_query(
                     group=group, group_users=group_users
                 )
 
-            if SegmentFilterConditions.WHO in group.conditions:
+            if SegmentFilterConditions.WHO in filter_conditions:
                 group_users = self.build_who_clause_users_query(
                     group=group, group_users=group_users, idx=idx
                 )
@@ -133,8 +136,8 @@ class Segments(Events):
             .distinct()
         )
 
-        if group_conditions:
-            for i, condition in enumerate(group_conditions):
+        if len(groups) > 1:
+            for i, group in enumerate(groups[1:]):
                 group_users = (
                     ClickHouseQuery.from_(AliasedQuery(f"group{i+1}"))
                     .select(AliasedQuery(f"group{i+1}").user_id)
@@ -143,7 +146,7 @@ class Segments(Events):
 
                 segment_users = (
                     segment_users.intersect(group_users)
-                    if condition == SegmentGroupConditions.AND
+                    if group.condition == SegmentGroupConditions.AND
                     else segment_users.union_all(group_users)
                 )
 
@@ -194,12 +197,10 @@ class Segments(Events):
         datasource_id: str,
         groups: List[SegmentGroup],
         columns: List[str],
-        group_conditions: List[SegmentFilterConditions],
     ):
         params = {"ds_id": datasource_id}
         segment_users_query = self.build_segment_users_query(
             groups=groups,
-            group_conditions=group_conditions,
         )
 
         user_data = self.execute_get_query(

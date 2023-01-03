@@ -12,10 +12,10 @@ from pypika.functions import Extract
 from typing import List, Tuple
 
 from domain.funnels.models import FunnelStep
-from repositories.clickhouse.events import Events
+from repositories.clickhouse.base import EventsBase
 
 
-class Funnels(Events):
+class Funnels(EventsBase):
     def get_conversion_trend(self, ds_id: str, steps: List[FunnelStep]) -> List[Tuple]:
         return self.execute_get_query(*self.build_trends_query(ds_id, steps))
 
