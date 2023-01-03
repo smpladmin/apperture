@@ -120,6 +120,18 @@ describe('Create Metric', () => {
         </RouterContext.Provider>
       );
     });
+    const SelectEvent = screen.getByTestId('select-event-segment');
+    fireEvent.click(SelectEvent);
+    const EventOption = screen.getByTestId('event-option');
+    fireEvent.click(EventOption);
+    const SELECTED_OPTION = 1;
+
+    // Selecting an event from the dropdown
+    const EventNameDropdownList = screen.getAllByTestId('dropdown-options');
+
+    await act(async () => {
+      fireEvent.click(EventNameDropdownList[SELECTED_OPTION]);
+    });
     const addEventsOrSegmentsButton = screen.getByTestId(
       'add-events-or-segments-button'
     );
@@ -151,6 +163,18 @@ describe('Create Metric', () => {
           <CreateMetric />
         </RouterContext.Provider>
       );
+    });
+    const SelectEvent = screen.getByTestId('select-event-segment');
+    fireEvent.click(SelectEvent);
+    const EventOption = screen.getByTestId('event-option');
+    fireEvent.click(EventOption);
+    const SELECTED_OPTION = 1;
+
+    // Selecting an event from the dropdown
+    const EventNameDropdownList = screen.getAllByTestId('dropdown-options');
+
+    await act(async () => {
+      fireEvent.click(EventNameDropdownList[SELECTED_OPTION]);
     });
     const addEventsOrSegmentsButton = screen.getByTestId(
       'add-events-or-segments-button'

@@ -1,6 +1,6 @@
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import MetricFilterComponent from './MetricFilterComponent';
 import MetricAddFilterComponent from './MetricAddFilterComponent';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
@@ -38,7 +38,6 @@ const MetricComponentCard = ({
   const [aggregationFunction, setAggregationFunction] = useState('count');
   const [filters, setFilters] = useState<MetricEventFilter[]>([]);
   const [conditions, setConditions] = useState(['where']);
-  const previousVariant = useRef<any>(null);
 
   const EventOrSegmentBox = useRef(null);
   useOnClickOutside(EventOrSegmentBox, () => {
@@ -75,7 +74,7 @@ const MetricComponentCard = ({
     ]);
   };
 
-  const handleSetFilter = (ref: number, updatedFilter: any) => {
+  const handleSetFilter = (ref: number, updatedFilter: MetricEventFilter) => {
     setFilters(
       filters.map((filter, index) =>
         ref == index ? { ...filter, ...updatedFilter } : filter
@@ -96,15 +95,12 @@ const MetricComponentCard = ({
     setConditions([...updatedConditions]);
   };
 
-  useEffect(() => {
-    if (variant !== previousVariant.current) {
-      updateAggregate(variable, { variant });
-      previousVariant.current = variant;
-      setIsEventOrSegmentListLoading(true);
-      if (variant === MetricComponentVariant.EVENT) {
-        setEventOrSegmentListSearchData(eventList);
-        setIsEventOrSegmentListLoading(false);
-      }
+  useMemo(() => {
+    updateAggregate(variable, { variant });
+    setIsEventOrSegmentListLoading(true);
+    if (variant === MetricComponentVariant.EVENT) {
+      setEventOrSegmentListSearchData(eventList);
+      setIsEventOrSegmentListLoading(false);
     }
   }, [variant]);
 
