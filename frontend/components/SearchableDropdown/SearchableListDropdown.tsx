@@ -50,7 +50,10 @@ const SearchableListDropdown = ({
                   cursor: 'pointer',
                 }}
                 px={'2'}
-                onClick={() => onSubmit(item)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSubmit(item);
+                }}
               >
                 <Box
                   cursor={'pointer'}

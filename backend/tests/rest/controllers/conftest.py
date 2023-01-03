@@ -34,6 +34,10 @@ from domain.notifications.models import (
     NotificationType,
     ThresholdMap,
 )
+
+from domain.metrics.models import (
+    ComputedMetricResult,
+)
 from domain.users.models import User
 from domain.edge.models import Edge, NodeSignificance, NodeTrend, NodeSankey
 
@@ -233,6 +237,23 @@ def properties_service():
     properties_service.refresh_properties.return_value = properties
     properties_service.refresh_properties_for_all_datasources.return_value = None
     return properties_service
+
+
+@pytest.fixture(scope="module")
+def metric_service():
+    metric_service = mock.AsyncMock()
+    computed_metric = ComputedMetricResult(
+        metric=[
+            {"date": "2022-10-07", "value": 4},
+            {"date": "2022-10-08", "value": 26},
+            {"date": "2022-10-09", "value": 11},
+            {"date": "2022-10-10", "value": 14},
+            {"date": "2022-10-11", "value": 22},
+            {"date": "2022-10-12", "value": 33},
+        ]
+    )
+    metric_service.compute_metric.return_value = computed_metric
+    return metric_service
 
 
 @pytest.fixture(scope="module")
@@ -807,6 +828,20 @@ def computed_segment_response():
 
 
 @pytest.fixture(scope="module")
+def computed_metric_response():
+    return {
+        "metric": [
+            {"date": "2022-10-07", "value": 4},
+            {"date": "2022-10-08", "value": 26},
+            {"date": "2022-10-09", "value": 11},
+            {"date": "2022-10-10", "value": 14},
+            {"date": "2022-10-11", "value": 22},
+            {"date": "2022-10-12", "value": 33},
+        ]
+    }
+
+
+@pytest.fixture(scope="module")
 def notification_data():
     return {
         "datasourceId": "635ba034807ab86d8a2aadd9",
@@ -902,6 +937,32 @@ def transient_segment_data():
             }
         ],
         "columns": ["properties.$app_release", "properties.$city"],
+    }
+
+
+@pytest.fixture(scope="module")
+def compute_metric_request():
+    return {
+        "datasourceId": "638f1aac8e54760eafc64d70",
+        "function": "A",
+        "aggregates": [
+            {
+                "variable": "A",
+                "reference_id": "Video_Seen",
+                "function": "count",
+                "variant": "event",
+                "filters": [
+                    {
+                        "operator": "equals",
+                        "operand": "properties.$city",
+                        "values": ["Bengaluru"],
+                    }
+                ],
+                "conditions": ["where"],
+                "aggregations": {"functions": "count", "property": "Video_Seen"},
+            }
+        ],
+        "breakdown": [],
     }
 
 
