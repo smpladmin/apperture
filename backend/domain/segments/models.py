@@ -1,4 +1,3 @@
-from datetime import datetime
 from enum import Enum
 from typing import List, Dict, Union, Optional
 from pydantic import BaseModel
@@ -33,7 +32,7 @@ class WhereSegmentFilter(BaseModel):
     operand: str
     operator: SegmentFilterOperators
     values: List[str]
-    all: bool
+    all: bool = False
     type = SegmentFilterConditions.WHERE
     condition: SegmentFilterConditions
 
