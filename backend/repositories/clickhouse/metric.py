@@ -1,16 +1,11 @@
-import logging
-from repositories.clickhouse.segments import Segments
 from typing import List
-from fastapi import Depends
 from domain.metrics.models import (
-    SegmentsAndEventsType,
     SegmentsAndEvents,
     SegmentsAndEventsAggregationsFunctions,
     SegmentsAndEventsFilterOperator,
 )
 from pypika import (
     ClickHouseQuery,
-    Table,
     Parameter,
     Field,
     Criterion,
@@ -22,7 +17,6 @@ from repositories.clickhouse.base import EventsBase
 
 
 class Metrics(EventsBase):
-
     def compute_query(
         self,
         datasource_id: str,

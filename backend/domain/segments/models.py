@@ -18,6 +18,12 @@ class SegmentGroupConditions(str, Enum):
     OR = "or"
 
 
+class SegmentDateFilterType(str, Enum):
+    FIXED = "fixed"
+    SINCE = "since"
+    LAST = "last"
+
+
 class SegmentFilterOperators(str, Enum):
     EQUALS = "equals"
 
@@ -37,14 +43,29 @@ class WhereSegmentFilter(BaseModel):
     condition: SegmentFilterConditions
 
 
+class SegmentFixedDateFilter(BaseModel):
+    start_date: str
+    end_date: str
+
+
+class SegmentSinceDateFilter(BaseModel):
+    start_date: str
+
+
+class SegmentLastDateFilter(BaseModel):
+    days: int
+
+
 class WhoSegmentFilter(BaseModel):
     operand: str
     operator: SegmentFilterOperators
     values: List[str]
     triggered: bool
     aggregation: SegmentAggregationOperators
-    start_date: Optional[str]
-    end_date: Optional[str]
+    date_filter: Union[
+        SegmentFixedDateFilter, SegmentLastDateFilter, SegmentSinceDateFilter
+    ]
+    date_filter_type: SegmentDateFilterType
     type = SegmentFilterConditions.WHO
     condition: SegmentFilterConditions
 
