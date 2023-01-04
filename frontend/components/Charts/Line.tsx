@@ -10,4 +10,6 @@ const LineChart = forwardRef<HTMLDivElement | null, LineChartProps>(
   }
 );
 
+LineChart.displayName = 'LineChart';
+
 export default LineChart;
