@@ -69,7 +69,6 @@ class SegmentService:
 
     async def update_segment(self, segment_id: str, new_segment: Segment):
         to_update = new_segment.dict()
-        print('updated', to_update)
         to_update.pop("id")
         to_update.pop("created_at")
         to_update["updated_at"] = datetime.utcnow()
