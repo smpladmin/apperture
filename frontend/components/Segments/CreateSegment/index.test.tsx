@@ -14,7 +14,11 @@ import {
   getNodes,
 } from '@lib/services/datasourceService';
 import { getSearchResult, capitalizeFirstLetter } from '@lib/utils/common';
-import { computeSegment, saveSegment } from '@lib/services/segmentService';
+import {
+  computeSegment,
+  saveSegment,
+  updateSegment,
+} from '@lib/services/segmentService';
 import {
   FilterType,
   SegmentDateFilterType,
@@ -109,6 +113,7 @@ describe('Create Segment', () => {
   let mockedGetUserInfo: jest.Mock;
   let mockedSaveSegment: jest.Mock;
   let mockedCapitalizeLetter: jest.Mock;
+  let mockedUpdateSegment: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -188,6 +193,7 @@ describe('Create Segment', () => {
     mockedGetUserInfo = jest.mocked(getUserInfo);
     mockedSaveSegment = jest.mocked(saveSegment);
     mockedCapitalizeLetter = jest.mocked(capitalizeFirstLetter);
+    mockedUpdateSegment = jest.mocked(updateSegment);
 
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetNodes.mockReturnValue(events);
@@ -898,12 +904,13 @@ describe('Create Segment', () => {
             {
               filters: [
                 {
+                  condition: SegmentFilterConditions.WHERE,
                   operand: 'device',
                   operator: 'equals',
                   values: ['android', 'ios', 'mac', 'windows'],
                 },
               ],
-              conditions: [SegmentFilterConditions.WHERE],
+              condition: SegmentGroupConditions.AND,
             },
           ],
         },
@@ -955,6 +962,91 @@ describe('Create Segment', () => {
       });
 
       await waitFor(() => {
+        expect(router.push).toHaveBeenCalledWith({
+          pathname: '/analytics/segment/edit/[segmentId]',
+          query: { dsId: '654212033222', segmentId: '654212033111' },
+        });
+      });
+    });
+
+    it('should be able to edit segment and update the segment once click on save button and then redirect the user to edit segment page', async () => {
+      const router = createMockRouter({
+        pathname: '/analytics/segment/edit',
+        query: { dsId: '654212033222' },
+      });
+
+      mockedUpdateSegment.mockReturnValue({
+        status: 200,
+        data: {
+          _id: '654212033111',
+          name: 'Test Segment Edited',
+          datasourceId: '654212033222',
+          description: 'Dummy segment to test segment component',
+          groups: [
+            {
+              filters: [
+                {
+                  condition: SegmentFilterConditions.WHERE,
+                  operand: 'properties.$city',
+                  operator: 'equals',
+                  values: ['Chennai', 'Guwahati', 'Patna'],
+                  type: FilterType.WHERE,
+                },
+                {
+                  condition: SegmentFilterConditions.AND,
+                  operand: 'properties.$app_version',
+                  operator: 'equals',
+                  values: ['1.5.5', '1.5.6'],
+                  type: FilterType.WHERE,
+                },
+                {
+                  condition: SegmentFilterConditions.WHO,
+                  triggered: true,
+                  operand: 'App_Open',
+                  aggregation: 'total',
+                  operator: 'equals',
+                  values: ['1'],
+                  startDate: '2022-11-28',
+                  endDate: '2022-12-28',
+                  type: FilterType.WHO,
+                },
+              ],
+              condition: SegmentGroupConditions.AND,
+            },
+          ],
+        },
+      });
+
+      await act(async () => {
+        render(
+          <RouterContext.Provider value={router}>
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      // add a filter to enable save button
+      await addWhoFilter();
+
+      // open save modal to save segment
+      const openSaveSegmentModalButton = screen.getByTestId(
+        'open-save-segment-modal'
+      );
+      fireEvent.click(openSaveSegmentModalButton);
+
+      const segmentNameInput = screen.getByTestId('segment-name');
+      const saveSegmentButton = screen.getByTestId('save-segment');
+
+      await act(async () => {
+        // add segment name and description
+        fireEvent.change(segmentNameInput, {
+          target: { value: 'Test Segment' },
+        });
+        fireEvent.click(saveSegmentButton);
+      });
+
+      await waitFor(() => {
+        expect(mockedUpdateSegment).toHaveBeenCalled();
         expect(router.push).toHaveBeenCalledWith({
           pathname: '/analytics/segment/edit/[segmentId]',
           query: { dsId: '654212033222', segmentId: '654212033111' },

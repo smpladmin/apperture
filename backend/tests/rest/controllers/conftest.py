@@ -309,6 +309,7 @@ def segment_service():
     segment_future = asyncio.Future()
     segment_future.set_result(segment)
     segment_service.add_segment.return_value = segment
+    segment_service.update_segment.return_value = segment
     segment_service.get_segment.return_value = segment
     segment_service.get_segments_for_app.return_value = [segment]
     return segment_service

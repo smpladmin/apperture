@@ -37,6 +37,20 @@ export const replaceEmptyStringPlaceholder = (groups: SegmentGroup[]) => {
   });
 };
 
+export const replaceFilterValueWithEmptyStringPlaceholder = (
+  groups: SegmentGroup[]
+) => {
+  return groups.map((group) => {
+    group.filters.map((filter) => {
+      const emptyStringIndex = filter.values.indexOf('');
+      if (emptyStringIndex !== -1)
+        filter.values[emptyStringIndex] = '(empty string)';
+      return filter;
+    });
+    return group;
+  });
+};
+
 export const getDateStringFromDate = (date: Date) => {
   const [dateString] = date.toISOString().split('T');
   return dateString;
