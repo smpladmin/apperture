@@ -6,6 +6,10 @@ from domain.segments.models import (
     SegmentGroup,
     SegmentFilterOperators,
     SegmentGroupConditions,
+    SegmentFixedDateFilter,
+    SegmentLastDateFilter,
+    SegmentSinceDateFilter,
+    SegmentDateFilterType,
 )
 from pypika import (
     ClickHouseQuery,
@@ -19,6 +23,7 @@ from pypika import (
     CustomFunction,
 )
 from pypika.dialects import ClickHouseQueryBuilder
+from datetime import datetime as dt, timedelta
 
 
 class Segments(EventsBase):
@@ -46,13 +51,36 @@ class Segments(EventsBase):
                     )
 
         where_idx = idx if idx != 0 else len(group.filters)
-        filter_condtions = [filter.condition for filter in group.filters[:where_idx]]
+        filter_conditions = [filter.condition for filter in group.filters[:where_idx]]
         group_users = (
             group_users.where(Criterion.any(criterion))
-            if SegmentFilterConditions.OR in filter_condtions
+            if SegmentFilterConditions.OR in filter_conditions
             else group_users.where(Criterion.all(criterion))
         )
         return group_users, idx
+
+    def compute_date_filter(
+        self,
+        date_filter: Union[
+            SegmentFixedDateFilter, SegmentLastDateFilter, SegmentSinceDateFilter
+        ],
+        date_filter_type: SegmentDateFilterType,
+    ):
+        if date_filter_type == SegmentDateFilterType.FIXED:
+            return date_filter.start_date, date_filter.end_date
+
+        date_format = "%Y-%m-%d"
+        today = dt.today()
+        end_date = today.strftime(date_format)
+
+        return (
+            (date_filter.start_date, end_date)
+            if date_filter_type == SegmentDateFilterType.SINCE
+            else (
+                (today - timedelta(days=date_filter.days)).strftime(date_format),
+                end_date,
+            )
+        )
 
     def build_who_clause_users_query(
         self, group: SegmentGroup, group_users: ClickHouseQueryBuilder, idx: int
@@ -65,13 +93,11 @@ class Segments(EventsBase):
                 self.table.datasource_id == Parameter("%(ds_id)s"),
                 self.table.user_id.isin(group_users),
             ]
-            if filter.start_date and filter.end_date:
-                criterion.append(
-                    self.date_func(self.table.timestamp) >= filter.start_date
-                )
-                criterion.append(
-                    self.date_func(self.table.timestamp) <= filter.end_date
-                )
+            start_date, end_date = self.compute_date_filter(
+                date_filter=filter.date_filter, date_filter_type=filter.date_filter_type
+            )
+            criterion.append(self.date_func(self.table.timestamp) >= start_date)
+            criterion.append(self.date_func(self.table.timestamp) <= end_date)
             if not filter.triggered:
                 criterion.append(self.table.event_name != filter.operand)
                 sub_query = sub_query.where(Criterion.all(criterion))
