@@ -14,8 +14,8 @@ export type WhoSegmentFilter = {
   aggregation: string;
   operator: SegmentFilterOperators;
   values: string[];
-  startDate: string;
-  endDate: string;
+  date_filter: DateFilter;
+  date_filter_type: SegmentDateFilterType;
   type: FilterType;
 };
 
@@ -68,10 +68,33 @@ export type Segment = {
   createdAt: Date;
   datasourceId: string;
   description: string;
-  groupConditions: any[];
   groups: SegmentGroup[];
   name: string;
   updatedAt: Date;
   userId: string;
   _id: string;
 };
+
+export type SegmentFixedDateFilter = {
+  start_date: string;
+  end_date: string;
+};
+
+export type SegmentSinceDateFilter = {
+  start_date: string;
+};
+
+export type SegmentLastDateFilter = {
+  days: number;
+};
+
+export type DateFilter =
+  | SegmentFixedDateFilter
+  | SegmentSinceDateFilter
+  | SegmentLastDateFilter;
+
+export enum SegmentDateFilterType {
+  FIXED = 'fixed',
+  SINCE = 'since',
+  LAST = 'last',
+}

@@ -3,7 +3,12 @@ import {
   getDateOfNDaysBack,
   getNumberOfDaysBetweenDates,
 } from '@components/Segments/util';
-import { SegmentFilter, WhoSegmentFilter } from '@lib/domain/segment';
+import {
+  SegmentDateFilterType,
+  SegmentFilter,
+  SegmentLastDateFilter,
+  WhoSegmentFilter,
+} from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 
@@ -23,7 +28,7 @@ const DateField = ({
   const dateFieldRef = useRef(null);
   const [isDateFieldBoxOpen, setisDateFieldBoxOpen] = useState(false);
   const [days, setDays] = useState(
-    getNumberOfDaysBetweenDates(filter.startDate, filter.endDate).toString()
+    (filter?.date_filter as SegmentLastDateFilter)?.days.toString()
   );
 
   const closeDropdown = () => {
@@ -35,35 +40,34 @@ const DateField = ({
     closeDropdown();
 
     const updatedFilters = [...filters];
-    (updatedFilters[index] as WhoSegmentFilter)['startDate'] =
-      getDateOfNDaysBack(Number(days));
+    (updatedFilters[index] as WhoSegmentFilter)['date_filter'] = {
+      days: +days,
+    };
     updateGroupsState(updatedFilters);
   };
 
   const getDateDisplayValue = () => {
-    const diffInDays = getNumberOfDaysBetweenDates(
-      filter.startDate,
-      filter.endDate
-    );
-
-    return (
-      <Flex
-        alignItems={'center'}
-        bg={'white.100'}
-        px={'2'}
-        p={'3'}
-        gap={'2'}
-        onClick={() => {
-          setisDateFieldBoxOpen(true);
-        }}
-        cursor={'pointer'}
-      >
-        <i className="ri-calendar-line"></i>
-        <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'600'}>
-          {`Last ${diffInDays} days`}
-        </Text>
-      </Flex>
-    );
+    if (filter.date_filter_type === SegmentDateFilterType.LAST) {
+      const displayDays = (filter?.date_filter as SegmentLastDateFilter)?.days;
+      return (
+        <Flex
+          alignItems={'center'}
+          bg={'white.100'}
+          px={'2'}
+          p={'3'}
+          gap={'2'}
+          onClick={() => {
+            setisDateFieldBoxOpen(true);
+          }}
+          cursor={'pointer'}
+        >
+          <i className="ri-calendar-line"></i>
+          <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'600'}>
+            {`Last ${displayDays} days`}
+          </Text>
+        </Flex>
+      );
+    }
   };
 
   return (
