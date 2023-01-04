@@ -28,7 +28,7 @@ const DateField = ({
   const dateFieldRef = useRef(null);
   const [isDateFieldBoxOpen, setisDateFieldBoxOpen] = useState(false);
   const [days, setDays] = useState(
-    (filter?.date_filter as SegmentLastDateFilter)?.days.toString()
+    (filter.date_filter as SegmentLastDateFilter).days?.toString()
   );
 
   const closeDropdown = () => {
@@ -48,7 +48,7 @@ const DateField = ({
 
   const getDateDisplayValue = () => {
     if (filter.date_filter_type === SegmentDateFilterType.LAST) {
-      const displayDays = (filter?.date_filter as SegmentLastDateFilter)?.days;
+      const displayDays = (filter.date_filter as SegmentLastDateFilter).days;
       return (
         <Flex
           alignItems={'center'}
