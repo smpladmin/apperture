@@ -8,6 +8,7 @@ import {
 import {
   FilterItemType,
   FilterType,
+  SegmentDateFilterType,
   SegmentFilter,
   SegmentFilterConditions,
   SegmentFilterOperators,
@@ -83,8 +84,10 @@ const AddFilter = ({
         aggregation: 'total',
         operator: SegmentFilterOperators.EQUALS,
         values: ['1'],
-        startDate: getDateOfNDaysBack(30),
-        endDate: getDateStringFromDate(new Date()),
+        date_filter: {
+          days: 30,
+        },
+        date_filter_type: SegmentDateFilterType.LAST,
         type: FilterType.WHO,
       });
     }
