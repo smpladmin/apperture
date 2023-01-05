@@ -1,4 +1,4 @@
-from typing import List,Optional
+from typing import List, Optional
 from mongo import Mongo
 from fastapi import Depends
 from domain.metrics.models import (

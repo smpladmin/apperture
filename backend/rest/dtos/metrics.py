@@ -19,5 +19,5 @@ class MetricsComputeDto(BaseModel):
     function: str
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
-    startDate: Optional[str] 
-    endDate: Optional[str] 
+    startDate: Optional[str]
+    endDate: Optional[str]
