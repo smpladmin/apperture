@@ -10,7 +10,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { DateRangeProps } from 'react-date-range';
 
 type DateFilterProps = {
-  dateRange: DateRangeType;
+  dateRange: DateRangeType | null;
   setDateRange: Function;
 };
 

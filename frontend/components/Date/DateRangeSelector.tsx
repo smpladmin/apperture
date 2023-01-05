@@ -8,7 +8,7 @@ type DateRangeSelectorProps = {
   isOpen: boolean;
   handleCancel: React.MouseEventHandler<HTMLButtonElement>;
   handleSubmit: Function;
-  dateRange: DateRangeType;
+  dateRange: DateRangeType | null;
 };
 
 type DateRangeItem = {
