@@ -38,6 +38,7 @@ const MetricComponentCard = ({
   const [aggregationFunction, setAggregationFunction] = useState('count');
   const [filters, setFilters] = useState<MetricEventFilter[]>([]);
   const [conditions, setConditions] = useState(['where']);
+  const previousVariant = useRef<MetricComponentVariant | null>(null);
 
   const EventOrSegmentBox = useRef(null);
   useOnClickOutside(EventOrSegmentBox, () => {
@@ -95,12 +96,15 @@ const MetricComponentCard = ({
     setConditions([...updatedConditions]);
   };
 
-  useMemo(() => {
-    updateAggregate(variable, { variant });
-    setIsEventOrSegmentListLoading(true);
-    if (variant === MetricComponentVariant.EVENT) {
-      setEventOrSegmentListSearchData(eventList);
-      setIsEventOrSegmentListLoading(false);
+  useEffect(() => {
+    if (variant !== previousVariant.current) {
+      previousVariant.current = variant;
+      updateAggregate(variable, { variant });
+      setIsEventOrSegmentListLoading(true);
+      if (variant === MetricComponentVariant.EVENT) {
+        setEventOrSegmentListSearchData(eventList);
+        setIsEventOrSegmentListLoading(false);
+      }
     }
   }, [variant]);
 
@@ -248,7 +252,7 @@ const MetricComponentCard = ({
               fontSize={'xs-12'}
               lineHeight={'xs-16'}
               marginLeft={4}
-              cursor={'pointer'}
+              cursor={'not-allowed'}
               px={2}
               borderRadius={4}
               _hover={{ color: 'white', background: 'grey.300' }}

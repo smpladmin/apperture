@@ -19,5 +19,7 @@ async def compute_metrics(
         function=dto.function,
         aggregates=dto.aggregates,
         breakdown=dto.breakdown,
+        start_date=dto.startDate,
+        end_date=dto.endDate,
     )
     return result

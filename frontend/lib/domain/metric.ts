@@ -29,3 +29,23 @@ export type Metric = {
   data: { date: string; value: number }[];
   definition: string;
 };
+
+export enum DateFilterType {
+  YESTERDAY = 'yesterday',
+  WEEK = 'week',
+  MONTH = 'month',
+  QUARTER = 'quarter',
+  CUSTOM = 'custom',
+  UNSET = '',
+}
+
+export type DateRangeType = {
+  startDate: Date;
+  endDate: Date;
+};
+
+export type DatePickerRange = {
+  startDate: Date;
+  endDate: Date;
+  key: string;
+};
