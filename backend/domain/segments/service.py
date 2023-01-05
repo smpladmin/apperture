@@ -2,6 +2,9 @@ from typing import List
 
 from beanie import PydanticObjectId
 from fastapi import Depends
+from datetime import datetime
+
+
 from domain.segments.models import (
     SegmentGroup,
     ComputedSegment,
@@ -63,3 +66,13 @@ class SegmentService:
 
     async def get_segments_for_app(self, app_id: str) -> List[Segment]:
         return await Segment.find(Segment.app_id == PydanticObjectId(app_id)).to_list()
+
+    async def update_segment(self, segment_id: str, new_segment: Segment):
+        to_update = new_segment.dict()
+        to_update.pop("id")
+        to_update.pop("created_at")
+        to_update["updated_at"] = datetime.utcnow()
+
+        await Segment.find_one(
+            Segment.id == PydanticObjectId(segment_id),
+        ).update({"$set": to_update})

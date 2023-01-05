@@ -52,6 +52,28 @@ async def save_segment(
     return await segment_service.add_segment(segment=segment)
 
 
+@router.put("/segments/{id}", response_model=SegmentResponse)
+async def update_segment(
+    id: str,
+    dto: CreateSegmentDto,
+    user: User = Depends(get_user),
+    segment_service: SegmentService = Depends(),
+    ds_service: DataSourceService = Depends(),
+):
+    datasource = await ds_service.get_datasource(str(dto.datasourceId))
+    segment = await segment_service.build_segment(
+        datasourceId=dto.datasourceId,
+        appId=datasource.app_id,
+        userId=user.id,
+        name=dto.name,
+        description=dto.description,
+        groups=dto.groups,
+        columns=dto.columns,
+    )
+    await segment_service.update_segment(segment_id=id, new_segment=segment)
+    return segment
+
+
 @router.get("/segments/{segment_id}", response_model=SegmentResponse)
 async def get_segment(
     segment_id: str,
