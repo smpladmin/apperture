@@ -77,7 +77,9 @@ class Segments(EventsBase):
             (date_filter.start_date, end_date)
             if date_filter_type == SegmentDateFilterType.SINCE
             else (
-                (today - datetime.timedelta(days=date_filter.days)).strftime(date_format),
+                (today - datetime.timedelta(days=date_filter.days)).strftime(
+                    date_format
+                ),
                 end_date,
             )
         )
