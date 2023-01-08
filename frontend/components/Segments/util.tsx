@@ -1,9 +1,25 @@
 import {
   FilterType,
+  SegmentDateFilterType,
   SegmentFilter,
   SegmentFilterConditions,
   SegmentGroup,
 } from '@lib/domain/segment';
+
+export const DateFilterTypeOptions = [
+  {
+    id: SegmentDateFilterType.FIXED,
+    label: 'Fixed',
+  },
+  {
+    id: SegmentDateFilterType.SINCE,
+    label: 'Since',
+  },
+  {
+    id: SegmentDateFilterType.LAST,
+    label: 'Last',
+  },
+];
 
 export const getFilteredColumns = (columns: string[]) => {
   return columns.filter((value) => value !== 'user_id');
