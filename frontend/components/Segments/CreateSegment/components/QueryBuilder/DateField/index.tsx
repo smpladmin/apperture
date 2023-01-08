@@ -37,9 +37,10 @@ const DateField = ({
   const [days, setDays] = useState(
     (filter.date_filter as SegmentLastDateFilter)?.days?.toString() || ''
   );
-  const [sinceStartDate, setSinceStartDate] = useState(
-    (filter.date_filter as SegmentSinceDateFilter)?.start_date || ''
-  );
+  const [sinceStartDate, setSinceStartDate] = useState({
+    start_date:
+      (filter.date_filter as SegmentSinceDateFilter)?.start_date || '',
+  });
   const [fixedDateRange, setFixedDateRange] = useState({
     start_date: (filter.date_filter as SegmentFixedDateFilter).start_date || '',
     end_date: (filter.date_filter as SegmentFixedDateFilter).end_date || '',
@@ -62,10 +63,14 @@ const DateField = ({
       label: `Since ${
         (filter.date_filter as SegmentSinceDateFilter).start_date
       }`,
-      value: {
-        start_date: sinceStartDate,
-      },
-      component: <SinceStartDate />,
+      value: sinceStartDate,
+      component: (
+        <SinceStartDate
+          sinceStartDate={sinceStartDate}
+          setSinceStartDate={setSinceStartDate}
+          days={+days}
+        />
+      ),
     },
     [SegmentDateFilterType.FIXED]: {
       label: `${(filter.date_filter as SegmentFixedDateFilter).start_date} - ${

@@ -53,7 +53,6 @@ const FixedDate = ({
       direction={'vertical'}
       maxDate={new Date()}
       scroll={{ enabled: true }}
-      rangeColors={['#EDEDED']}
     />
   );
 };
