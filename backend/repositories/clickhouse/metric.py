@@ -1,4 +1,7 @@
-from typing import List
+import logging
+from repositories.clickhouse.segments import Segments
+from typing import List, Optional
+from fastapi import Depends
 from domain.metrics.models import (
     SegmentsAndEvents,
     SegmentsAndEventsAggregationsFunctions,
@@ -23,10 +26,12 @@ class Metrics(EventsBase):
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
         function: str,
+        start_date: Optional[str],
+        end_date: Optional[str],
     ):
         return self.execute_get_query(
             *self.build_metric_compute_query(
-                datasource_id, aggregates, breakdown, function
+                datasource_id, aggregates, breakdown, function, start_date, end_date
             )
         )
 
@@ -36,6 +41,8 @@ class Metrics(EventsBase):
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
         function: str,
+        start_date: Optional[str],
+        end_date: Optional[str],
     ):
         parser = FormulaParser()
         innerquery = ClickHouseQuery.from_(self.table)
@@ -54,9 +61,14 @@ class Metrics(EventsBase):
                         )
                 subquery = Case().when(Criterion.all(subquery_criterion), 1).else_(0)
                 innerquery = innerquery.select(subquery.as_(variable))
-            innerquery = innerquery.where(
-                self.table.datasource_id == Parameter("%(ds_id)s")
-            )
+                inner_criterion = [self.table.datasource_id == Parameter("%(ds_id)s")]
+                if start_date:
+                    inner_criterion.append(
+                        fn.Date(Field("date")) >= fn.Date(start_date)
+                    )
+                if end_date:
+                    inner_criterion.append(fn.Date(Field("date")) <= fn.Date(end_date))
+            innerquery = innerquery.where(Criterion.all(inner_criterion))
         query = (
             ClickHouseQuery.from_(innerquery.as_("innerquery"))
             .select(Parameter("date"), parser.parse(function, fn.Sum))

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from beanie import PydanticObjectId
 from pydantic import BaseModel
 
@@ -19,3 +19,5 @@ class MetricsComputeDto(BaseModel):
     function: str
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
+    startDate: Optional[str]
+    endDate: Optional[str]
