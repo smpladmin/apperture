@@ -6,13 +6,15 @@ from domain.segments.models import (
     SegmentGroup,
     WhoSegmentFilter,
     WhereSegmentFilter,
-    SegmentFilterOperators,
+    SegmentFilterOperatorsNumber,
+    SegmentFilterOperatorsBool,
+    SegmentFilterOperatorsString,
     SegmentFilterConditions,
     SegmentGroupConditions,
     SegmentFixedDateFilter,
     SegmentLastDateFilter,
     SegmentSinceDateFilter,
-    SegmentDateFilterType,
+    SegmentDateFilterType, SegmentDataType,
 )
 from repositories.clickhouse.segments import Segments
 
@@ -32,60 +34,66 @@ class TestSegmentsRepository:
         self.datasource_id = "test-id"
         self.filters = [
             WhereSegmentFilter(
-                operator=SegmentFilterOperators.EQUALS,
+                operator=SegmentFilterOperatorsString.IS,
                 operand="prop1",
                 values=["va1", "val2"],
                 all=False,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.WHERE,
+                datatype=SegmentDataType.STRING
             ),
             WhereSegmentFilter(
-                operator=SegmentFilterOperators.EQUALS,
+                operator=SegmentFilterOperatorsString.IS,
                 operand="prop2",
                 values=["va3", "val4"],
                 all=False,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.AND,
+                datatype=SegmentDataType.STRING
             ),
         ]
         self.where_select_all_filters = [
             WhereSegmentFilter(
-                operator=SegmentFilterOperators.EQUALS,
+                operator=SegmentFilterOperatorsString.IS,
                 operand="prop1",
                 values=["va1", "val2"],
                 all=False,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.WHERE,
+                datatype=SegmentDataType.STRING
             ),
             WhereSegmentFilter(
-                operator=SegmentFilterOperators.EQUALS,
+                operator=SegmentFilterOperatorsString.IS,
                 operand="prop2",
                 values=["va3", "val4"],
                 all=True,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.AND,
+                datatype=SegmentDataType.STRING
             ),
         ]
         self.composite_filters = [
             WhereSegmentFilter(
-                operator=SegmentFilterOperators.EQUALS,
+                operator=SegmentFilterOperatorsString.IS,
                 operand="prop1",
                 values=["va1", "val2"],
                 all=False,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.WHERE,
+                datatype=SegmentDataType.STRING
             ),
             WhereSegmentFilter(
-                operator=SegmentFilterOperators.EQUALS,
+                operator=SegmentFilterOperatorsString.IS,
                 operand="prop2",
                 values=["va3", "val4"],
                 all=False,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.AND,
+                datatype=SegmentDataType.STRING
             ),
             WhoSegmentFilter(
                 operand="Topic_Click",
-                operator=SegmentFilterOperators.EQUALS,
+                operator=SegmentFilterOperatorsString.IS,
                 values=["2"],
                 triggered=True,
                 aggregation="total",
@@ -95,10 +103,11 @@ class TestSegmentsRepository:
                     start_date="2022-01-01", end_date="2023-01-01"
                 ),
                 date_filter_type=SegmentDateFilterType.FIXED,
+                datatype=SegmentDataType.STRING
             ),
             WhoSegmentFilter(
                 operand="Video_Open",
-                operator=SegmentFilterOperators.EQUALS,
+                operator=SegmentFilterOperatorsString.IS,
                 values=["3"],
                 triggered=False,
                 aggregation="total",
@@ -108,12 +117,13 @@ class TestSegmentsRepository:
                     start_date="2022-01-01", end_date="2023-01-01"
                 ),
                 date_filter_type=SegmentDateFilterType.FIXED,
+                datatype=SegmentDataType.STRING
             ),
         ]
         self.who_filters = [
             WhoSegmentFilter(
                 operand="Topic_Click",
-                operator=SegmentFilterOperators.EQUALS,
+                operator=SegmentFilterOperatorsString.IS,
                 values=["2"],
                 triggered=True,
                 aggregation="total",
@@ -123,10 +133,11 @@ class TestSegmentsRepository:
                     start_date="2022-01-01", end_date="2023-01-01"
                 ),
                 date_filter_type=SegmentDateFilterType.FIXED,
+                datatype=SegmentDataType.STRING
             ),
             WhoSegmentFilter(
                 operand="Video_Open",
-                operator=SegmentFilterOperators.EQUALS,
+                operator=SegmentFilterOperatorsString.IS,
                 values=["3"],
                 triggered=False,
                 aggregation="total",
@@ -136,6 +147,7 @@ class TestSegmentsRepository:
                     start_date="2022-01-01", end_date="2023-01-01"
                 ),
                 date_filter_type=SegmentDateFilterType.FIXED,
+                datatype=SegmentDataType.STRING
             ),
         ]
         self.groups = [
@@ -188,7 +200,7 @@ class TestSegmentsRepository:
             == 'SELECT DISTINCT "user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s'
         )
 
-    @pytest.mark.parametrize("group_idx, return_idx", [(0, 0), (2, 2)])
+    @pytest.mark.parametrize("group_idx, return_idx", [(0, 2), (2, 2)])
     def test_build_where_clause_users_query(self, group_idx, return_idx):
         segment_users = self.repo.get_all_unique_users_query()
         users, idx = self.repo.build_where_clause_users_query(

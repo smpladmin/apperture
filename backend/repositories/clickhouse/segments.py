@@ -1,15 +1,21 @@
 import copy
 from typing import List, Union
+
+
 from repositories.clickhouse.base import EventsBase
 from domain.segments.models import (
     SegmentFilterConditions,
     SegmentGroup,
-    SegmentFilterOperators,
+    SegmentFilterOperatorsNumber,
+    SegmentFilterOperatorsString,
+    SegmentFilterOperatorsBool,
     SegmentGroupConditions,
     SegmentFixedDateFilter,
     SegmentLastDateFilter,
     SegmentSinceDateFilter,
     SegmentDateFilterType,
+    SegmentDataType,
+    WhereSegmentFilter,
 )
 from pypika import (
     ClickHouseQuery,
@@ -21,7 +27,9 @@ from pypika import (
     functions as fn,
     Order,
     CustomFunction,
+    terms,
 )
+from operator import le, ge
 from pypika.dialects import ClickHouseQueryBuilder
 from datetime import datetime as dt, timedelta
 
@@ -35,26 +43,117 @@ class Segments(EventsBase):
             .where(self.table.datasource_id == Parameter("%(ds_id)s"))
         )
 
+    def num_equality_criteria(
+        self, operand: terms.Function, values: List, inverse=False
+    ):
+        return operand.isin(values) if not inverse else operand.notin(values)
+
+    def num_comparative_criteria(
+        self,
+        operand: terms.Function,
+        value: float,
+        operator: SegmentFilterOperatorsNumber,
+    ):
+        return operator.get_pyoperator()(operand, value)
+
+    def num_between_criteria(
+        self, operand: terms.Function, values: List[float], inverse: bool = False
+    ) -> List:
+        return [
+            ge(
+                operand,
+                values[0] if not inverse else values[1],
+            ),
+            le(
+                operand,
+                values[1] if not inverse else values[0],
+            ),
+        ]
+
+    def build_criterion_for_number_filter(self, filter: WhereSegmentFilter):
+        criterion = []
+        operand = self.convert_to_float_func(Field(f"properties.{filter.operand}"))
+
+        if filter.operator in [
+            SegmentFilterOperatorsNumber.EQ,
+            SegmentFilterOperatorsNumber.NE,
+        ]:
+            criterion.append(
+                self.num_equality_criteria(
+                    operand=operand,
+                    values=filter.values,
+                    inverse=(filter.operator == SegmentFilterOperatorsNumber.NE),
+                )
+            )
+
+        elif filter.operator in [
+            SegmentFilterOperatorsNumber.GT,
+            SegmentFilterOperatorsNumber.LT,
+            SegmentFilterOperatorsNumber.GE,
+            SegmentFilterOperatorsNumber.LE,
+        ]:
+            criterion.append(
+                self.num_comparative_criteria(
+                    operand=operand, value=filter.values[0], operator=filter.operator
+                )
+            )
+        elif filter.operator in [
+            SegmentFilterOperatorsNumber.BETWEEN,
+            SegmentFilterOperatorsNumber.NOT_BETWEEN,
+        ]:
+            criterion.extend(
+                self.num_between_criteria(
+                    operand=operand,
+                    values=filter.values[:2],
+                    inverse=(
+                        filter.operator == SegmentFilterOperatorsNumber.NOT_BETWEEN
+                    ),
+                )
+            )
+
+        return criterion
+
+    def build_criterion_for_bool_filter(self, filter: WhereSegmentFilter):
+        criterion = []
+        operand = self.convert_to_bool_func(Field(f"properties.{filter.operand}"))
+        if filter.operator == SegmentFilterOperatorsBool.T:
+            criterion.append(operand == True)
+        else:
+            criterion.append(operand == False)
+        return criterion
+
+    def build_criterion_for_string_filter(self, filter: WhereSegmentFilter):
+        criterion = []
+        operand = Field(f"properties.{filter.operand}")
+        if filter.operator == SegmentFilterOperatorsString.IS:
+            if not filter.all:
+                criterion.append(operand.isin(filter.values))
+        elif filter.operator == SegmentFilterOperatorsString.IS_NOT:
+            criterion.append(operand.notin(filter.values))
+        return criterion
+
     def build_where_clause_users_query(
         self, group: SegmentGroup, group_users: ClickHouseQueryBuilder
     ):
         criterion = []
-        idx = 0
-        for i, filter in enumerate(group.filters):
-            if filter.condition == SegmentFilterConditions.WHO:
-                idx = i
-                break
-            if filter.operator == SegmentFilterOperators.EQUALS:
-                if not filter.all:
-                    criterion.append(
-                        Field(f"properties.{filter.operand}").isin(filter.values)
-                    )
+        conditions = [filter.condition for filter in group.filters]
+        idx = (
+            conditions.index(SegmentFilterConditions.WHO)
+            if SegmentFilterConditions.WHO in conditions
+            else len(conditions)
+        )
 
-        where_idx = idx if idx != 0 else len(group.filters)
-        filter_conditions = [filter.condition for filter in group.filters[:where_idx]]
+        for i, filter in enumerate(group.filters[:idx]):
+            if filter.datatype == SegmentDataType.NUMBER:
+                criterion.extend(self.build_criterion_for_number_filter(filter=filter))
+            elif filter.datatype == SegmentDataType.BOOL:
+                criterion.extend(self.build_criterion_for_bool_filter(filter=filter))
+            else:
+                criterion.extend(self.build_criterion_for_string_filter(filter=filter))
+
         group_users = (
             group_users.where(Criterion.any(criterion))
-            if SegmentFilterConditions.OR in filter_conditions
+            if SegmentFilterConditions.OR in conditions[:idx]
             else group_users.where(Criterion.all(criterion))
         )
         return group_users, idx
