@@ -1,8 +1,9 @@
 import { getDateStringFromDate } from '@components/Segments/util';
 import { SegmentSinceDateFilter } from '@lib/domain/segment';
 import React, { useEffect, useState } from 'react';
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import { Calendar } from 'react-date-range';
+import { Box, Input } from '@chakra-ui/react';
 
 type SinceStartDateProps = {
   sinceStartDate: SegmentSinceDateFilter;
@@ -28,11 +29,18 @@ const SinceStartDate = ({
   }, [startDate]);
 
   return (
-    <Calendar
-      direction="vertical"
-      onChange={(item) => setStartDate(item)}
-      date={startDate}
-    />
+    <Box>
+      <Input
+        value={format(startDate, 'MMM d, yyyy')}
+        readOnly
+        focusBorderColor="black.100"
+      />
+      <Calendar
+        onChange={(item) => setStartDate(item)}
+        date={startDate}
+        maxDate={new Date()}
+      />
+    </Box>
   );
 };
 

@@ -5,6 +5,7 @@ import {
   SegmentFilterConditions,
   SegmentGroup,
 } from '@lib/domain/segment';
+import { format } from 'date-fns';
 
 export const DateFilterTypeOptions = [
   {
@@ -67,9 +68,8 @@ export const replaceFilterValueWithEmptyStringPlaceholder = (
   });
 };
 
-export const getDateStringFromDate = (date: Date) => {
-  const [dateString] = date.toISOString().split('T');
-  return dateString;
+export const getDateStringFromDate = (recievedDate: Date) => {
+  return format(recievedDate, 'yyyy-MM-dd');
 };
 
 export const getDateOfNDaysBack = (days: number) => {

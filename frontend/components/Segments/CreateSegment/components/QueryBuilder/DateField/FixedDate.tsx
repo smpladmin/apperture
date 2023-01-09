@@ -1,9 +1,8 @@
 import { SegmentFixedDateFilter } from '@lib/domain/segment';
 import React, { useEffect, useState } from 'react';
-import { DateRange } from 'react-date-range';
+import { DateRange, RangeKeyDict } from 'react-date-range';
 import { addDays } from 'date-fns';
 import { getDateStringFromDate } from '@components/Segments/util';
-
 type FixedDateProps = {
   fixedDateRange: SegmentFixedDateFilter;
   days: number;
@@ -15,7 +14,13 @@ const FixedDate = ({
   setFixedDateRange,
   days,
 }: FixedDateProps) => {
-  const [dateRange, setDateRange] = useState(
+  const [dateRange, setDateRange] = useState<
+    {
+      startDate?: Date;
+      endDate?: Date;
+      key?: string;
+    }[]
+  >(
     fixedDateRange?.start_date && fixedDateRange?.end_date
       ? [
           {
@@ -33,14 +38,14 @@ const FixedDate = ({
         ]
   );
 
-  const handleChange = (item: any) => {
+  const handleChange = (item: RangeKeyDict) => {
     setDateRange([item.selection]);
   };
 
   useEffect(() => {
     setFixedDateRange({
-      start_date: getDateStringFromDate(dateRange[0].startDate),
-      end_date: getDateStringFromDate(dateRange[0].endDate),
+      start_date: getDateStringFromDate(dateRange[0].startDate!!),
+      end_date: getDateStringFromDate(dateRange[0].endDate!!),
     });
   }, [dateRange]);
 
@@ -49,6 +54,7 @@ const FixedDate = ({
       editableDateInputs={true}
       onChange={handleChange}
       moveRangeOnFirstSelection={false}
+      retainEndDateOnFirstSelection={true}
       ranges={dateRange}
       direction={'vertical'}
       maxDate={new Date()}
