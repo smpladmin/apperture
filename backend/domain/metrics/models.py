@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Dict
+from typing import List, Optional
 from pydantic import BaseModel
 from beanie import PydanticObjectId
 
@@ -60,6 +60,8 @@ class Metric(BaseModel):
     functions: str
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
+    start_date: Optional[str]
+    end_date: Optional[str]
 
 
 class ComputedMetricResult(BaseModel):

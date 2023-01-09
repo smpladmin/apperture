@@ -19,12 +19,6 @@ from domain.segments.models import (
 from repositories.clickhouse.segments import Segments
 
 
-class MockDatetime(dt):
-    @classmethod
-    def today(cls):
-        return cls(2023, 1, 4, 11, 28, 38, 194662)
-
-
 class TestSegmentsRepository:
     def setup_method(self):
         self.clickhouse = MagicMock()
@@ -438,7 +432,7 @@ class TestSegmentsRepository:
         ],
     )
     def test_compute_date_filter(
-        self, date_filter, date_filter_type, start_date, end_date
+        self, date_filter, date_filter_type, start_date, end_date, patch_datetime_today
     ):
         assert self.repo.compute_date_filter(
             date_filter=date_filter, date_filter_type=date_filter_type

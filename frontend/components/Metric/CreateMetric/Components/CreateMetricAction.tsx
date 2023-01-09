@@ -15,19 +15,26 @@ import { useRouter } from 'next/router';
 import MetricComponentCard from './MetricComponentCard';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
 import { computeMetric } from '@lib/services/metricService';
-import { EventOrSegmentComponent, MetricEventFilter } from '@lib/domain/metric';
+import {
+  DateRangeType,
+  EventOrSegmentComponent,
+  MetricEventFilter,
+} from '@lib/domain/metric';
 
 type CreateMetricActionProps = {
   setMetric: Function;
+  dateRange: DateRangeType | null;
 };
 
-const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
+const CreateMetricAction = ({
+  setMetric,
+  dateRange,
+}: CreateMetricActionProps) => {
   const [metricName, setMetricName] = useState('Untitled Metric');
   const [metricDefinition, setmetricDefinition] = useState('A');
   const router = useRouter();
 
   const { dsId } = router.query;
-
   const [eventList, setEventList] = useState<string[]>([]);
   const [eventProperties, setEventProperties] = useState<string[]>([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
@@ -125,7 +132,9 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
         dsId as string,
         metricDefinition as string,
         processedAggregate,
-        []
+        [],
+        dateRange?.startDate,
+        dateRange?.endDate
       );
       if (result) {
         setMetric({
@@ -148,7 +157,7 @@ const CreateMetricAction = ({ setMetric }: CreateMetricActionProps) => {
     ) {
       fetchMetric(aggregates);
     }
-  }, [aggregates, metricDefinition]);
+  }, [aggregates, metricDefinition, dateRange]);
 
   return (
     <>

@@ -31,7 +31,7 @@ from pypika import (
 )
 from operator import le, ge
 from pypika.dialects import ClickHouseQueryBuilder
-from datetime import datetime as dt, timedelta
+import datetime
 
 
 class Segments(EventsBase):
@@ -169,14 +169,16 @@ class Segments(EventsBase):
             return date_filter.start_date, date_filter.end_date
 
         date_format = "%Y-%m-%d"
-        today = dt.today()
+        today = datetime.datetime.today()
         end_date = today.strftime(date_format)
 
         return (
             (date_filter.start_date, end_date)
             if date_filter_type == SegmentDateFilterType.SINCE
             else (
-                (today - timedelta(days=date_filter.days)).strftime(date_format),
+                (today - datetime.timedelta(days=date_filter.days)).strftime(
+                    date_format
+                ),
                 end_date,
             )
         )
