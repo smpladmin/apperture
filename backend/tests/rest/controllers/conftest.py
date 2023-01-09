@@ -931,7 +931,7 @@ def transient_segment_data():
                         "type": SegmentFilterConditions.WHERE,
                         "condition": SegmentFilterConditions.WHERE,
                         "all": False,
-                        "datatype": SegmentDataType.STRING,
+                        "datatype": "String",
                     },
                     {
                         "operand": "properties.$app_release",
@@ -940,7 +940,7 @@ def transient_segment_data():
                         "type": SegmentFilterConditions.WHERE,
                         "condition": SegmentFilterConditions.AND,
                         "all": False,
-                        "datatype": SegmentDataType.NUMBER,
+                        "datatype": "Number",
                     },
                 ],
                 "condition": "and",
