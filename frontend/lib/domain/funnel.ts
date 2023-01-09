@@ -7,6 +7,7 @@ export type FunnelData = {
   event: string;
   users: number;
   conversion: number;
+  drop: number;
 };
 
 export type ComputedFunnel = {
