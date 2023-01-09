@@ -1,4 +1,5 @@
 import '../styles/globals.css';
+import '../styles/daterange.css';
 import { AppContext, AppLayoutProps } from 'next/app';
 import { ReactNode } from 'react';
 import { ChakraProvider } from '@chakra-ui/react';

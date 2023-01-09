@@ -48,7 +48,7 @@ const SearchableDropdown = ({
       block: 'end',
       behavior: 'smooth',
     });
-  });
+  }, [isOpen]);
 
   return (
     <>
