@@ -1,5 +1,6 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import Dropdown from '@components/SearchableDropdown/Dropdown';
+import { getMonthDateYearFormattedString } from '@components/Segments/util';
 import {
   SegmentDateFilterType,
   SegmentFilter,
@@ -61,9 +62,9 @@ const DateField = ({
       component: <LastNDays days={days} setDays={setDays} />,
     },
     [SegmentDateFilterType.SINCE]: {
-      label: `Since ${
+      label: `Since ${getMonthDateYearFormattedString(
         (filter.date_filter as SegmentSinceDateFilter).start_date
-      }`,
+      )}`,
       value: sinceStartDate,
       component: (
         <SinceStartDate
@@ -74,9 +75,11 @@ const DateField = ({
       ),
     },
     [SegmentDateFilterType.FIXED]: {
-      label: `${(filter.date_filter as SegmentFixedDateFilter).start_date} - ${
+      label: `${getMonthDateYearFormattedString(
+        (filter.date_filter as SegmentFixedDateFilter).start_date
+      )} - ${getMonthDateYearFormattedString(
         (filter.date_filter as SegmentFixedDateFilter).end_date
-      }`,
+      )}`,
       value: fixedDateRange,
       component: (
         <FixedDate
@@ -112,6 +115,7 @@ const DateField = ({
         onClick={() => {
           setisDateFieldBoxOpen(true);
         }}
+        data-testid={'date-field'}
         cursor={'pointer'}
       >
         <i className="ri-calendar-line"></i>
@@ -126,21 +130,19 @@ const DateField = ({
     <Box w={'auto'} ref={dateFieldRef} position="relative">
       {getDateDisplayValue()}
       <Dropdown isOpen={isDateFieldBoxOpen} maxHeight={120}>
-        {
-          <Flex direction={'column'} gap={'6'}>
-            <DateFilterType
-              selectedDateFilterType={selectedDateFilterType}
-              setSelectedDateFIlterType={setSelectedDateFilterType}
-            />
-            <Box maxH={'78'} overflow={'scroll'}>
-              {dateFilterObj[selectedDateFilterType]['component']}
-            </Box>
-            <ApplyAndCancel
-              closeDropdown={closeDropdown}
-              handleDateChange={handleDateChange}
-            />
-          </Flex>
-        }
+        <Flex direction={'column'} gap={'6'}>
+          <DateFilterType
+            selectedDateFilterType={selectedDateFilterType}
+            setSelectedDateFIlterType={setSelectedDateFilterType}
+          />
+          <Box maxH={'78'} overflow={'scroll'}>
+            {dateFilterObj[selectedDateFilterType]['component']}
+          </Box>
+          <ApplyAndCancel
+            closeDropdown={closeDropdown}
+            handleDateChange={handleDateChange}
+          />
+        </Flex>
       </Dropdown>
     </Box>
   );

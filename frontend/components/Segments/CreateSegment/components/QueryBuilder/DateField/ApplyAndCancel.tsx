@@ -23,10 +23,12 @@ const ApplyAndCancel = ({
           borderRadius={'8'}
           flexGrow={'1'}
           onClick={() => closeDropdown()}
+          data-testid={'date-dropdown-cancel-button'}
         >
           Cancel
         </Button>
         <Button
+          className="done"
           h={'12'}
           variant={'primary'}
           bg={'black.100'}
@@ -34,6 +36,7 @@ const ApplyAndCancel = ({
           borderRadius={'8'}
           flexGrow={'1'}
           onClick={() => handleDateChange()}
+          data-testid={'date-dropdown-done-button'}
         >
           Done
         </Button>

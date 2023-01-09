@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { DateRange, RangeKeyDict } from 'react-date-range';
 import { addDays } from 'date-fns';
 import { getDateStringFromDate } from '@components/Segments/util';
+import { Box } from '@chakra-ui/react';
 type FixedDateProps = {
   fixedDateRange: SegmentFixedDateFilter;
   days: number;
@@ -50,16 +51,18 @@ const FixedDate = ({
   }, [dateRange]);
 
   return (
-    <DateRange
-      editableDateInputs={true}
-      onChange={handleChange}
-      moveRangeOnFirstSelection={false}
-      retainEndDateOnFirstSelection={true}
-      ranges={dateRange}
-      direction={'vertical'}
-      maxDate={new Date()}
-      scroll={{ enabled: true }}
-    />
+    <Box data-testid={'fixed-date-range'}>
+      <DateRange
+        editableDateInputs={true}
+        onChange={handleChange}
+        moveRangeOnFirstSelection={false}
+        retainEndDateOnFirstSelection={true}
+        ranges={dateRange}
+        direction={'vertical'}
+        maxDate={new Date()}
+        scroll={{ enabled: true }}
+      />
+    </Box>
   );
 };
 

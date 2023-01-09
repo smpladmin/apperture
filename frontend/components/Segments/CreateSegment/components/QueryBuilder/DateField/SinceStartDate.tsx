@@ -29,11 +29,12 @@ const SinceStartDate = ({
   }, [startDate]);
 
   return (
-    <Box>
+    <Box data-testid={'since-start-date'}>
       <Input
         value={format(startDate, 'MMM d, yyyy')}
         readOnly
         focusBorderColor="black.100"
+        data-testid={'since-start-date-input'}
       />
       <Calendar
         onChange={(item) => setStartDate(item)}

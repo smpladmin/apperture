@@ -8,7 +8,7 @@ type LastNDaysProps = {
 
 const LastNDays = ({ days, setDays }: LastNDaysProps) => {
   return (
-    <Box>
+    <Box data-testid={'last-N-days'}>
       <Flex alignItems={'center'} gap={'2'}>
         <Input
           autoFocus

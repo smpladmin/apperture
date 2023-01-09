@@ -32,7 +32,7 @@ const DateFilterType = ({
               px={'3'}
               py={'2'}
               cursor={'pointer'}
-              data-testid={'watchlistitem'}
+              data-testid={'date-filter-item'}
               justifyContent={'center'}
             >
               <Text
