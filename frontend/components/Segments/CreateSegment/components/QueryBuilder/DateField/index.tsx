@@ -135,7 +135,7 @@ const DateField = ({
             selectedDateFilterType={selectedDateFilterType}
             setSelectedDateFIlterType={setSelectedDateFilterType}
           />
-          <Box maxH={'78'} overflow={'scroll'}>
+          <Box maxH={'80'} overflow={'scroll'}>
             {dateFilterObj[selectedDateFilterType]['component']}
           </Box>
           <ApplyAndCancel

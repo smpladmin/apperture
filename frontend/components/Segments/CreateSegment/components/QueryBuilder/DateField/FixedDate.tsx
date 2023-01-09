@@ -4,6 +4,8 @@ import { DateRange, RangeKeyDict } from 'react-date-range';
 import { addDays } from 'date-fns';
 import { getDateStringFromDate } from '@components/Segments/util';
 import { Box } from '@chakra-ui/react';
+import { WHITE_200 } from '@theme/index';
+
 type FixedDateProps = {
   fixedDateRange: SegmentFixedDateFilter;
   days: number;
@@ -61,6 +63,7 @@ const FixedDate = ({
         direction={'vertical'}
         maxDate={new Date()}
         scroll={{ enabled: true }}
+        rangeColors={[WHITE_200]}
       />
     </Box>
   );
