@@ -1,4 +1,5 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
+import Dropdown from '@components/SearchableDropdown/Dropdown';
 import {
   SegmentDateFilterType,
   SegmentFilter,
@@ -124,37 +125,23 @@ const DateField = ({
   return (
     <Box w={'auto'} ref={dateFieldRef} position="relative">
       {getDateDisplayValue()}
-      {isDateFieldBoxOpen ? (
-        <Box
-          position={'absolute'}
-          zIndex={1}
-          px={'3'}
-          py={'4'}
-          borderRadius={'12'}
-          borderWidth={'0.4px'}
-          borderColor={'grey.100'}
-          bg={'white.DEFAULT'}
-          shadow={'0px 0px 4px rgba(0, 0, 0, 0.12)'}
-          maxH={'120'}
-          overflowY={'auto'}
-        >
-          {
-            <Flex direction={'column'} gap={'6'}>
-              <DateFilterType
-                selectedDateFilterType={selectedDateFilterType}
-                setSelectedDateFIlterType={setSelectedDateFilterType}
-              />
-              <Box maxH={'78'} overflow={'scroll'}>
-                {dateFilterObj[selectedDateFilterType]['component']}
-              </Box>
-              <ApplyAndCancel
-                closeDropdown={closeDropdown}
-                handleDateChange={handleDateChange}
-              />
-            </Flex>
-          }
-        </Box>
-      ) : null}
+      <Dropdown isOpen={isDateFieldBoxOpen} maxHeight={120}>
+        {
+          <Flex direction={'column'} gap={'6'}>
+            <DateFilterType
+              selectedDateFilterType={selectedDateFilterType}
+              setSelectedDateFIlterType={setSelectedDateFilterType}
+            />
+            <Box maxH={'78'} overflow={'scroll'}>
+              {dateFilterObj[selectedDateFilterType]['component']}
+            </Box>
+            <ApplyAndCancel
+              closeDropdown={closeDropdown}
+              handleDateChange={handleDateChange}
+            />
+          </Flex>
+        }
+      </Dropdown>
     </Box>
   );
 };
