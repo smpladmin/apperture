@@ -51,6 +51,17 @@ class FunnelTrendsData(BaseModel):
     end_date: datetime.datetime
 
 
+class ConversionStatus(str, Enum):
+    CONVERTED = "converted"
+    DROPPED = "dropped"
+
+
 class FunnelConversionData(BaseModel):
-    user_id: str
-    status: str
+    users: List[str]
+    total_users: int
+    unique_users: int
+
+
+class FunnelConversionResponse(BaseModel):
+    converted: FunnelConversionData
+    dropped: FunnelConversionData

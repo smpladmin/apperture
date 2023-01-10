@@ -7,12 +7,13 @@ from pypika import (
     DatePart,
     Parameter,
     Field,
+    Order,
 )
 from pypika import functions as fn
 from pypika.functions import Extract
 from typing import List, Tuple
 
-from domain.funnels.models import FunnelStep
+from domain.funnels.models import FunnelStep, ConversionStatus
 from repositories.clickhouse.base import EventsBase
 
 
@@ -21,7 +22,22 @@ class Funnels(EventsBase):
         return self.execute_get_query(*self.build_trends_query(ds_id, steps))
 
     def get_conversion_analytics(self, ds_id: str, steps: List[FunnelStep]):
-        return self.execute_get_query(*self.build_analytics_query(ds_id, steps))
+        query, parameter, last, second_last = self.build_analytics_query(ds_id, steps)
+        count_query = (
+            ClickHouseQuery.with_(query, "user_list")
+            .from_(AliasedQuery("user_list"))
+            .select(
+                Field(last),
+                fn.Count(Field(second_last)),
+                fn.Count(Field(second_last)).distinct(),
+            )
+            .groupby(Field(last))
+            .orderby(Field(last), order=Order.desc)
+        )
+
+        return self.execute_get_query(
+            query.get_sql(), parameter
+        ), self.execute_get_query(count_query.get_sql(), parameter)
 
     def get_users_count(self, ds_id: str, steps: List[FunnelStep]) -> List[Tuple]:
         return self.execute_get_query(*self.build_users_query(ds_id, steps))
@@ -173,9 +189,16 @@ class Funnels(EventsBase):
 
         last = len(steps) - 1
         second_last = len(steps) - 2
-        query = query.select(
-            Field(second_last),
-            Case().when(Field(last) != "null", "converted").else_("dropped"),
-        ).where(Field(second_last) != "null")
+        query = (
+            query.select(
+                Field(second_last),
+                Case()
+                .when(Field(last) != "null", ConversionStatus.CONVERTED)
+                .else_(ConversionStatus.DROPPED)
+                .as_(last),
+            )
+            .where(Field(second_last) != "null")
+            .orderby(last)
+        )
 
-        return query.get_sql(), parameters
+        return query, parameters, last, second_last
