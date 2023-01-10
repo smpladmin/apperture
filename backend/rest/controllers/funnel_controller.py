@@ -9,6 +9,7 @@ from rest.dtos.funnels import (
     FunnelResponse,
     ComputedFunnelStepResponse,
     ComputedFunnelResponse,
+    FunnelConversionResponse,
 )
 from rest.dtos.funnels import CreateFunnelDto, TransientFunnelDto, FunnelTrendResponse
 from rest.dtos.saved_items import SavedItemsResponse
@@ -98,6 +99,18 @@ async def get_transient_funnel_trends(
     funnel_service: FunnelsService = Depends(),
 ):
     return await funnel_service.get_funnel_trends(
+        datasource_id=dto.datasourceId, steps=dto.steps
+    )
+
+
+@router.post(
+    "/funnels/analytics/transient", response_model=List[FunnelConversionResponse]
+)
+async def get_transient_funnel_analytics(
+    dto: TransientFunnelDto,
+    funnel_service: FunnelsService = Depends(),
+):
+    return await funnel_service.get_user_conversion(
         datasource_id=dto.datasourceId, steps=dto.steps
     )
 

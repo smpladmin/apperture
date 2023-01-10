@@ -13,6 +13,7 @@ from domain.funnels.models import (
     ComputedFunnelStep,
     ComputedFunnel,
     FunnelTrendsData,
+    FunnelConversionData,
 )
 from repositories.clickhouse.funnels import Funnels
 
@@ -108,6 +109,19 @@ class FunnelsService:
                 start_date=datetime.strptime(f"{data[1]}-{data[0]}-1", "%Y-%W-%w"),
                 end_date=datetime.strptime(f"{data[1]}-{data[0]}-0", "%Y-%W-%w"),
             )
+            for data in conversion_data
+        ]
+
+    async def get_user_conversion(
+        self, datasource_id: str, steps: List[FunnelStep]
+    ) -> List[FunnelConversionData]:
+
+        conversion_data = self.funnels.get_conversion_analytics(
+            ds_id=datasource_id, steps=steps
+        )
+
+        return [
+            FunnelConversionData(status=data[1], user_id=data[0])
             for data in conversion_data
         ]
 

@@ -6,6 +6,7 @@ from pypika import (
     NULL,
     DatePart,
     Parameter,
+    Field,
 )
 from pypika import functions as fn
 from pypika.functions import Extract
@@ -18,6 +19,9 @@ from repositories.clickhouse.base import EventsBase
 class Funnels(EventsBase):
     def get_conversion_trend(self, ds_id: str, steps: List[FunnelStep]) -> List[Tuple]:
         return self.execute_get_query(*self.build_trends_query(ds_id, steps))
+
+    def get_conversion_analytics(self, ds_id: str, steps: List[FunnelStep]):
+        return self.execute_get_query(*self.build_analytics_query(ds_id, steps))
 
     def get_users_count(self, ds_id: str, steps: List[FunnelStep]) -> List[Tuple]:
         return self.execute_get_query(*self.build_users_query(ds_id, steps))
@@ -109,5 +113,69 @@ class Funnels(EventsBase):
             .groupby(1, 2)
             .orderby(2, 1)
         )
+
+        return query.get_sql(), parameters
+
+    def build_analytics_query(self, ds_id: str, steps: List[FunnelStep]):
+        query = ClickHouseQuery
+        parameters = {"ds_id": ds_id, "epoch_year": self.epoch_year}
+
+        for i, step in enumerate(steps):
+            parameters[f"event{i}"] = step.event
+            sub_query = (
+                ClickHouseQuery.from_(self.table)
+                .select(
+                    self.table.user_id,
+                    fn.Min(self.table.timestamp).as_("ts"),
+                )
+                .where(
+                    Criterion.all(
+                        [
+                            self.table.datasource_id == Parameter("%(ds_id)s"),
+                            self.table.event_name == Parameter(f"%(event{i})s"),
+                        ]
+                    )
+                )
+                .groupby(1)
+            )
+            query = query.with_(sub_query, f"table{i + 1}")
+
+        sub_query = ClickHouseQuery
+        sub_query = sub_query.select(AliasedQuery("table1").user_id.as_(0))
+
+        for i in range(1, len(steps)):
+            conditions = [
+                Extract(DatePart.year, AliasedQuery(f"table{i}").ts)
+                > Parameter("%(epoch_year)s")
+            ]
+            for j in range(i, 0, -1):
+                conditions.append(
+                    AliasedQuery(f"table{j + 1}").ts > AliasedQuery(f"table{j}").ts
+                )
+            sub_query = sub_query.select(
+                Case()
+                .when(
+                    Criterion.all(conditions),
+                    AliasedQuery(f"table{i + 1}").user_id,
+                )
+                .else_(NULL)
+                .as_(i)
+            )
+
+        sub_query = sub_query.from_(AliasedQuery("table1"))
+        for i in range(1, len(steps)):
+            sub_query = sub_query.left_join(AliasedQuery(f"table{i + 1}")).on_field(
+                "user_id"
+            )
+
+        query = query.with_(sub_query, "final_table")
+        query = query.from_(AliasedQuery("final_table"))
+
+        last = len(steps) - 1
+        second_last = len(steps) - 2
+        query = query.select(
+            Field(second_last),
+            Case().when(Field(last) != "null", "converted").else_("dropped"),
+        ).where(Field(second_last) != "null")
 
         return query.get_sql(), parameters

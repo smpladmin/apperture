@@ -25,6 +25,7 @@ from domain.funnels.models import (
     ComputedFunnelStep,
     ComputedFunnel,
     FunnelTrendsData,
+    FunnelConversionData,
 )
 from domain.notifications.models import (
     Notification,
@@ -169,12 +170,20 @@ def funnel_service():
             end_date=datetime(2022, 1, 14, 0, 0),
         ),
     ]
+
+    funnel_user_conversion = [
+        FunnelConversionData(user_id="user_id_1", status="converted"),
+        FunnelConversionData(user_id="user_id_2", status="dropped"),
+    ]
+
     computed_transient_funnel_future = asyncio.Future()
     computed_transient_funnel_future.set_result(computed_transient_funnel)
     computed_funnel_future = asyncio.Future()
     computed_funnel_future.set_result(computed_funnel)
     funnel_trends_future = asyncio.Future()
     funnel_trends_future.set_result(funnel_trends)
+    funnel_user_conversion_future = asyncio.Future()
+    funnel_user_conversion_future.set_result(funnel_user_conversion)
 
     funnel_service_mock.build_funnel.return_value = funnel
     funnel_service_mock.add_funnel.return_value = funnel_future
@@ -183,6 +192,7 @@ def funnel_service():
     funnel_service_mock.get_computed_funnel.return_value = computed_funnel_future
     funnel_service_mock.update_funnel = mock.AsyncMock()
     funnel_service_mock.get_funnel_trends.return_value = funnel_trends_future
+    funnel_service_mock.get_user_conversion.return_value = funnel_user_conversion_future
     return funnel_service_mock
 
 
@@ -757,6 +767,34 @@ def saved_notification_response():
                 "notification_active": True,
             },
         }
+    ]
+
+
+@pytest.fixture(scope="module")
+def funnel_steps_data():
+    steps = [
+        {
+            "event": "Login",
+            "filters": [{"property": "mp_country_code", "value": "IN"}],
+        },
+        {"event": "Chapter_Click"},
+        {
+            "event": "Topic_Click",
+            "filters": [{"property": "os", "value": "Android"}],
+        },
+    ]
+    datasource_id = "638f1aac8e54760eafc64d70"
+    return {
+        "datasource_id": datasource_id,
+        "steps": steps,
+    }
+
+
+@pytest.fixture(scope="module")
+def funnel_user_conversion_response():
+    return [
+        {"userId": "user_id_1", "status": "converted"},
+        {"userId": "user_id_2", "status": "dropped"},
     ]
 
 
