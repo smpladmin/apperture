@@ -1,5 +1,4 @@
 import pytest
-from datetime import datetime as dt
 from unittest.mock import MagicMock, call
 
 from pypika import Field, CustomFunction
@@ -91,7 +90,7 @@ class TestSegmentsRepository:
             ),
             WhoSegmentFilter(
                 operand="Topic_Click",
-                operator=SegmentFilterOperatorsString.IS,
+                operator=SegmentFilterOperatorsNumber.EQ,
                 values=["2"],
                 triggered=True,
                 aggregation="total",
@@ -101,11 +100,11 @@ class TestSegmentsRepository:
                     start_date="2022-01-01", end_date="2023-01-01"
                 ),
                 date_filter_type=SegmentDateFilterType.FIXED,
-                datatype=SegmentDataType.STRING,
+                datatype=SegmentDataType.NUMBER,
             ),
             WhoSegmentFilter(
                 operand="Video_Open",
-                operator=SegmentFilterOperatorsString.IS,
+                operator=SegmentFilterOperatorsNumber.EQ,
                 values=["3"],
                 triggered=False,
                 aggregation="total",
@@ -115,13 +114,13 @@ class TestSegmentsRepository:
                     start_date="2022-01-01", end_date="2023-01-01"
                 ),
                 date_filter_type=SegmentDateFilterType.FIXED,
-                datatype=SegmentDataType.STRING,
+                datatype=SegmentDataType.NUMBER,
             ),
         ]
         self.who_filters = [
             WhoSegmentFilter(
                 operand="Topic_Click",
-                operator=SegmentFilterOperatorsString.IS,
+                operator=SegmentFilterOperatorsNumber.EQ,
                 values=["2"],
                 triggered=True,
                 aggregation="total",
@@ -131,11 +130,11 @@ class TestSegmentsRepository:
                     start_date="2022-01-01", end_date="2023-01-01"
                 ),
                 date_filter_type=SegmentDateFilterType.FIXED,
-                datatype=SegmentDataType.STRING,
+                datatype=SegmentDataType.NUMBER,
             ),
             WhoSegmentFilter(
                 operand="Video_Open",
-                operator=SegmentFilterOperatorsString.IS,
+                operator=SegmentFilterOperatorsNumber.EQ,
                 values=["3"],
                 triggered=False,
                 aggregation="total",
@@ -145,7 +144,7 @@ class TestSegmentsRepository:
                     start_date="2022-01-01", end_date="2023-01-01"
                 ),
                 date_filter_type=SegmentDateFilterType.FIXED,
-                datatype=SegmentDataType.STRING,
+                datatype=SegmentDataType.NUMBER,
             ),
         ]
         self.groups = [

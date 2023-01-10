@@ -111,11 +111,7 @@ class SegmentLastDateFilter(BaseModel):
 
 class WhoSegmentFilter(BaseModel):
     operand: str
-    operator: Union[
-        SegmentFilterOperatorsNumber,
-        SegmentFilterOperatorsString,
-        SegmentFilterOperatorsBool,
-    ]
+    operator: SegmentFilterOperatorsNumber
     values: List[str]
     triggered: bool
     aggregation: SegmentAggregationOperators

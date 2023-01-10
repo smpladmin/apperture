@@ -204,10 +204,13 @@ class Segments(EventsBase):
                 sub_query = sub_query.where(Criterion.all(criterion))
             else:
                 criterion.append(self.table.event_name == filter.operand)
-                sub_query = (
-                    sub_query.where(Criterion.all(criterion))
-                    .groupby(self.table.user_id)
-                    .having(fn.Count(self.table.user_id) == filter.values[0])
+                sub_query = sub_query.where(Criterion.all(criterion)).groupby(
+                    self.table.user_id
+                )
+                sub_query = sub_query.having(
+                    filter.operator.get_pyoperator()(
+                        fn.Count(self.table.user_id), filter.values[0]
+                    )
                 )
 
             query = query.with_(sub_query, f"cte{i}")
