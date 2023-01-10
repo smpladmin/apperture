@@ -5,6 +5,7 @@ export type WhereSegmentFilter = {
   values: string[];
   all: boolean;
   type: FilterType;
+  datatype: SegmentFilterDataType;
 };
 
 export type WhoSegmentFilter = {
@@ -22,6 +23,7 @@ export type WhoSegmentFilter = {
 export type SegmentFilter = WhereSegmentFilter | WhoSegmentFilter;
 
 export enum SegmentFilterOperators {
+  IS = 'is',
   EQUALS = 'equals',
 }
 
@@ -98,3 +100,16 @@ export enum SegmentDateFilterType {
   SINCE = 'since',
   LAST = 'last',
 }
+
+export enum SegmentFilterDataType {
+  STRING = 'String',
+  NUMBER = 'Number',
+  DATETIME = 'Date',
+  BOOL = 'True/ False',
+}
+
+export type FilterOptionMenuType = {
+  id: string | number;
+  label: SegmentFilterDataType | string;
+  submenu: FilterOptionMenuType[];
+};

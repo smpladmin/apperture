@@ -1,16 +1,13 @@
 import { Box, Button } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import {
-  getDateOfNDaysBack,
-  getDateStringFromDate,
-  getWhereAndWhoFilters,
-} from '@components/Segments/util';
+import { getWhereAndWhoFilters } from '@components/Segments/util';
 import {
   FilterItemType,
   FilterType,
   SegmentDateFilterType,
   SegmentFilter,
   SegmentFilterConditions,
+  SegmentFilterDataType,
   SegmentFilterOperators,
   SegmentProperty,
 } from '@lib/domain/segment';
@@ -71,10 +68,11 @@ const AddFilter = ({
       whereFilters.push({
         condition: getWhereFilterCondition(whereFilters),
         operand: item.id,
-        operator: SegmentFilterOperators.EQUALS,
+        operator: SegmentFilterOperators.IS,
         values: [],
         all: false,
         type: FilterType.WHERE,
+        datatype: SegmentFilterDataType.STRING,
       });
     } else {
       whoFilters.push({

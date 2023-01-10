@@ -1,13 +1,13 @@
 import { Flex, IconButton } from '@chakra-ui/react';
 import {
   SegmentFilter,
-  SegmentGroup,
   SegmentProperty,
   WhereSegmentFilter,
 } from '@lib/domain/segment';
 import React from 'react';
 import FilterConditions from '../FilterConditions';
 import FilterOperator from '../FilterOperator';
+import FilterOptions from '../FilterOptions';
 import SelectEventProperty from '../SelectEventProperty';
 import SelectValue from '../SelectValue';
 
@@ -48,6 +48,11 @@ const WhereSegmentFilter = ({
         filters={filters}
         updateGroupsState={updateGroupsState}
         index={index}
+      />
+      <FilterOptions
+        index={index}
+        filters={filters}
+        updateGroupsState={updateGroupsState}
       />
       <IconButton
         aria-label="delete"

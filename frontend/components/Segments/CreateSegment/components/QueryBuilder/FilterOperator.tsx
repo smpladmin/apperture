@@ -1,5 +1,6 @@
 import { Box, Text } from '@chakra-ui/react';
 import { SegmentFilter } from '@lib/domain/segment';
+import { capitalizeFirstLetter } from '@lib/utils/common';
 
 const FilterOperator = ({ filter }: { filter: SegmentFilter }) => {
   return (
@@ -13,7 +14,7 @@ const FilterOperator = ({ filter }: { filter: SegmentFilter }) => {
         bg={'white.100'}
         cursor={'pointer'}
       >
-        {filter.operator}
+        {capitalizeFirstLetter(filter.operator)}
       </Text>
     </Box>
   );
