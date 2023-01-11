@@ -25,7 +25,7 @@ const UserConversionDrawer = ({
   onOpen,
   onClose,
   conversionData,
-}: any) => {
+}: UserConversionDrawerProps) => {
   return (
     <>
       <Drawer size={'md'} isOpen={isOpen} placement="right" onClose={onClose}>

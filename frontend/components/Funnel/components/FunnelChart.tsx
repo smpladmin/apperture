@@ -42,7 +42,7 @@ const FunnelChart = ({ data, handleChartClick }: FunnelChartProps) => {
     plot.current.funnel.scale('users', { nice: true, alias: 'Users' });
     plot.current.funnel.tooltip({
       showMarkers: false,
-      customContent: (count: any, data: any) => {
+      customContent: (_: any, data: any) => {
         const stats = data?.length ? data[0] : null;
         if (stats) {
           const { users, drop } = stats.data;
