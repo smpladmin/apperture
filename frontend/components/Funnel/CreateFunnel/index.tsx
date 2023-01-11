@@ -77,6 +77,7 @@ const Funnel = ({
             isLoading={isLoading}
             funnelData={funnelData}
             trendsData={trendsData}
+            funnelSteps={funnelSteps}
           />
         )}
       </ViewPanel>

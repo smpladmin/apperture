@@ -26,6 +26,7 @@ export const transformFunnelData = (funnelData: FunnelData[]) => {
       `${Array(i + 1).join(' ')}` + transformedData['event'];
     transformedData['drop'] =
       i >= 1 ? funnelData[i - 1].users - transformedData.users : 0;
+    transformedData.step = i + 1;
     return transformedData;
   });
 };

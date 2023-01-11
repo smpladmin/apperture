@@ -135,3 +135,16 @@ export const getSavedFunnelsForUser = async () => {
     return [];
   }
 };
+
+export const getConversionData = async (dsId: string, steps: FunnelStep[]) => {
+  try {
+    const res = await AppertureAPI.post('/funnels/analytics/transient', {
+      datasourceId: dsId,
+      steps,
+    });
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};
