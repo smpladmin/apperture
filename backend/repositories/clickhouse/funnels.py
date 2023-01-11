@@ -22,6 +22,35 @@ class Funnels(EventsBase):
         return self.execute_get_query(*self.build_trends_query(ds_id, steps))
 
     def get_conversion_analytics(self, ds_id: str, steps: List[FunnelStep]):
+        if len(steps) == 1:
+            query = ClickHouseQuery.from_(self.table).where(
+                Criterion.all(
+                    [
+                        self.table.datasource_id == Parameter("%(ds_id)s"),
+                        self.table.event_name == Parameter(f"%(event0)s"),
+                    ]
+                )
+            )
+            parameter = {
+                "ds_id": ds_id,
+                "epoch_year": self.epoch_year,
+                "event0": steps[0].event,
+            }
+            result = self.execute_get_query(
+                query.select(self.table.user_id).get_sql(), parameter
+            )
+            count = self.execute_get_query(
+                query.select(
+                    fn.Count(self.table.user_id),
+                    fn.Count(self.table.user_id).distinct(),
+                ).get_sql(),
+                parameter,
+            )
+            print([(data[0], ConversionStatus.CONVERTED) for data in result])
+            return [(data[0], ConversionStatus.CONVERTED) for data in result], [
+                (ConversionStatus.CONVERTED, count[0][0], count[0][1]),
+                (ConversionStatus.DROPPED, 0, 0),
+            ]
         query, parameter, last, second_last = self.build_analytics_query(ds_id, steps)
         count_query = (
             ClickHouseQuery.with_(query, "user_list")

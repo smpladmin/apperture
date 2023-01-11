@@ -5,7 +5,6 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   flexRender,
-  AccessorFn,
 } from '@tanstack/react-table';
 import {
   Flex,

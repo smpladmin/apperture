@@ -17,7 +17,6 @@ import FunnelChart from '../components/FunnelChart';
 import Trend from '../components/Trend';
 import Loader from '@components/LoadingSpinner';
 import UserConversionDrawer from '../components/UserCoversionDrawer';
-import { findLastIndex } from 'lodash';
 import { getConversionData } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 
