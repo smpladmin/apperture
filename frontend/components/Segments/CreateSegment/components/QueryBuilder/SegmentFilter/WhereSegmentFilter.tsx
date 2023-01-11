@@ -42,7 +42,12 @@ const WhereSegmentFilter = ({
         filters={filters}
         updateGroupsState={updateGroupsState}
       />
-      <FilterOperator filter={filter} />
+      <FilterOperator
+        filter={filter}
+        filters={filters}
+        index={index}
+        updateGroupsState={updateGroupsState}
+      />
       <SelectValue
         filter={filter}
         filters={filters}

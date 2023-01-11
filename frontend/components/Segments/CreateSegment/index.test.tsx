@@ -297,19 +297,19 @@ describe('Create Segment', () => {
       expect(firstQueryTextElements).toEqual([
         'where',
         'device',
-        'equals',
+        'is',
         'android, ios',
       ]);
       expect(secondQueryTextElements).toEqual([
         'and',
         'device',
-        'equals',
+        'is',
         'android, ios',
       ]);
       expect(thirdQueryTextElements).toEqual([
         'and',
         'device',
-        'equals',
+        'is',
         'android, ios',
       ]);
       expect(fourthQueryTextElements).toEqual([

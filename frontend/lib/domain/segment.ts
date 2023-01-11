@@ -5,6 +5,7 @@ export type WhereSegmentFilter = {
   values: string[];
   all: boolean;
   type: FilterType;
+  datatype: SegmentFilterDataType;
 };
 
 export type WhoSegmentFilter = {
@@ -12,7 +13,7 @@ export type WhoSegmentFilter = {
   triggered: boolean;
   operand: string;
   aggregation: string;
-  operator: SegmentFilterOperators;
+  operator: SegmentFilterOperatorsNumber;
   values: string[];
   date_filter: DateFilter;
   date_filter_type: SegmentDateFilterType;
@@ -21,10 +22,10 @@ export type WhoSegmentFilter = {
 
 export type SegmentFilter = WhereSegmentFilter | WhoSegmentFilter;
 
-export enum SegmentFilterOperators {
-  EQUALS = 'equals',
-}
-
+export type SegmentFilterOperators =
+  | SegmentFilterOperatorsBool
+  | SegmentFilterOperatorsNumber
+  | SegmentFilterOperatorsString;
 export enum FilterType {
   WHERE = 'where',
   WHO = 'who',
@@ -97,4 +98,29 @@ export enum SegmentDateFilterType {
   FIXED = 'fixed',
   SINCE = 'since',
   LAST = 'last',
+}
+
+export enum SegmentFilterOperatorsString {
+  IS = 'is',
+  IS_NOT = 'is not',
+}
+
+export enum SegmentFilterOperatorsNumber {
+  EQ = 'equals',
+  NE = 'not equal',
+  GT = 'greater than',
+  GE = 'greater than or equal to',
+  LT = 'less than',
+  LE = 'less than or equal to',
+}
+
+export enum SegmentFilterOperatorsBool {
+  T = 'is true',
+  F = 'is false',
+}
+
+export enum SegmentFilterDataType {
+  STRING = 'String',
+  NUMBER = 'Number',
+  BOOL = 'True/ False',
 }
