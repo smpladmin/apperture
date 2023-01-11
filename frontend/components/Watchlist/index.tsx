@@ -3,7 +3,6 @@ import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import React, { useEffect, useState } from 'react';
 import WatchListTable from './Table';
 import LoadingSpinner from '@components/LoadingSpinner';
-import { getSavedNotificationsForUser } from '@lib/services/notificationService';
 import { getSavedFunnelsForUser } from '@lib/services/funnelService';
 import { WatchListItemOptions } from './util';
 import WatchListItemTypeOptions from './WatchListItemOptions';
@@ -15,23 +14,24 @@ const Watchlist = () => {
 
   const getSavedItems = async () => {
     if (selectedItem === WatchListItemType.ALL) {
-      const [savedNotifications, savedFunnels] = await Promise.all([
-        getSavedNotificationsForUser(),
-        getSavedFunnelsForUser(),
-      ]);
-      setSavedItemsData([...savedNotifications, ...savedFunnels]);
-      setIsLoading(false);
-      return;
-    }
-    if (selectedItem === WatchListItemType.NOTIFICATIONS) {
-      const savedNotifications = await getSavedNotificationsForUser();
-      setSavedItemsData(savedNotifications);
+      const [savedFunnels] = await Promise.all([getSavedFunnelsForUser()]);
+      setSavedItemsData([...savedFunnels]);
       setIsLoading(false);
       return;
     }
     if (selectedItem === WatchListItemType.FUNNELS) {
       const savedFunnels = await getSavedFunnelsForUser();
       setSavedItemsData(savedFunnels);
+      setIsLoading(false);
+      return;
+    }
+    if (selectedItem === WatchListItemType.METRICS) {
+      setSavedItemsData([]);
+      setIsLoading(false);
+      return;
+    }
+    if (selectedItem === WatchListItemType.SEGMENTS) {
+      setSavedItemsData([]);
       setIsLoading(false);
       return;
     }
@@ -48,19 +48,6 @@ const Watchlist = () => {
         <Text fontSize={'sh-20'} lineHeight={'sh-20'} fontWeight={'600'}>
           Saved
         </Text>
-        <Button
-          px={{ base: '4', md: '6' }}
-          py={{ base: '2', md: '3' }}
-          bg={'black.100'}
-          variant={'primary'}
-          borderRadius={'100'}
-          color={'white.DEFAULT'}
-          fontSize={'xs-14'}
-          lineHeight={'xs-14'}
-          fontWeight={'500'}
-        >
-          {'+ Add'}
-        </Button>
       </Flex>
 
       <Flex justifyContent={'flex-start'} mt={'6'}>

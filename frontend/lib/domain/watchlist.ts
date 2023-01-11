@@ -3,9 +3,9 @@ import { Notifications } from './notification';
 
 export enum WatchListItemType {
   ALL = 'all',
-  EVENTS = 'events',
-  NOTIFICATIONS = 'notifications',
+  METRICS = 'metrics',
   FUNNELS = 'funnels',
+  SEGMENTS = 'segments',
 }
 
 export type SavedItems = {

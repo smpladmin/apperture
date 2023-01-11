@@ -119,22 +119,8 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
             bg={'white.DEFAULT'}
             color={'black.100'}
           >
-            <IconButton
-              aria-label="Explore"
-              icon={<i className="ri-route-fill" />}
-              rounded={'lg'}
-              h={10}
-              w={10}
-              bg={'black.0'}
-              fontWeight={'500'}
-              color={'grey.100'}
-              _hover={{
-                backgroundColor: 'white.0',
-                color: 'white',
-              }}
-              _active={{
-                backgroundColor: 'transparent',
-              }}
+            <NavIconButton
+              icon={'ri-route-fill'}
               onClick={handleRedirectToExplorePage}
             />
           </Tooltip>
@@ -145,56 +131,11 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
             bg={'white.DEFAULT'}
             color={'black.100'}
           >
-            <IconButton
-              aria-label="close"
-              icon={<i className="ri-bookmark-line" />}
-              rounded={'lg'}
-              h={10}
-              w={10}
-              bg={'black.0'}
-              fontWeight={'500'}
-              color={'grey.100'}
-              _hover={{
-                backgroundColor: 'white.0',
-                color: 'white',
-              }}
-              _active={{
-                backgroundColor: 'transparent',
-              }}
+            <NavIconButton
+              icon={'ri-bookmark-line'}
               onClick={() => router.push('/analytics/saved')}
             />
           </Tooltip>
-
-          <IconButton
-            aria-label="Insights"
-            icon={<i className="ri-lightbulb-line" />}
-            rounded={'lg'}
-            h={10}
-            w={10}
-            bg={'black.0'}
-            fontWeight={'500'}
-            color={'grey.100'}
-            disabled={true}
-            _hover={{
-              backgroundColor: 'white.0',
-              color: 'white',
-            }}
-            _active={{
-              backgroundColor: 'transparent',
-            }}
-          />
-          <Box
-            marginTop={-4}
-            borderRadius={'sm'}
-            backgroundColor={'green'}
-            fontSize={'xs-8'}
-            lineHeight={'xs-8'}
-            fontWeight={'medium'}
-            padding={1}
-            textColor={'white'}
-          >
-            Coming soon
-          </Box>
         </Flex>
       </Box>
       <Box
@@ -256,5 +197,33 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
     </Flex>
   );
 };
+
+type NavIconButtonProps = {
+  icon: string;
+  onClick: () => void;
+};
+
+function NavIconButton({ icon, onClick }: NavIconButtonProps) {
+  return (
+    <IconButton
+      aria-label="Explore"
+      icon={<i className={icon} />}
+      rounded={'lg'}
+      h={10}
+      w={10}
+      bg={'black.0'}
+      fontWeight={'500'}
+      color={'grey.100'}
+      _hover={{
+        backgroundColor: 'white.0',
+        color: 'white',
+      }}
+      _active={{
+        backgroundColor: 'transparent',
+      }}
+      onClick={onClick}
+    />
+  );
+}
 
 export default DesktopSideMenu;
