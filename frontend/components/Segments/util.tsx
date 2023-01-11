@@ -1,7 +1,10 @@
 import {
   FilterType,
   SegmentFilter,
-  SegmentFilterConditions,
+  SegmentFilterDataType,
+  SegmentFilterOperatorsBool,
+  SegmentFilterOperatorsNumber,
+  SegmentFilterOperatorsString,
   SegmentGroup,
 } from '@lib/domain/segment';
 
@@ -9,12 +12,10 @@ export const getFilteredColumns = (columns: string[]) => {
   return columns.filter((value) => value !== 'user_id');
 };
 
-const _getWhereAndWhoConditionIndex = (
-  conditions: SegmentFilterConditions[]
-) => {
-  const whereConditionIndex = conditions.indexOf(SegmentFilterConditions.WHERE);
-  const whoConditionIndex = conditions.indexOf(SegmentFilterConditions.WHO);
-  return { whereConditionIndex, whoConditionIndex };
+export const FilterOperatorsDatatypeMap = {
+  [SegmentFilterDataType.BOOL]: Object.values(SegmentFilterOperatorsBool),
+  [SegmentFilterDataType.NUMBER]: Object.values(SegmentFilterOperatorsNumber),
+  [SegmentFilterDataType.STRING]: Object.values(SegmentFilterOperatorsString),
 };
 
 export const getWhereAndWhoFilters = (filters: SegmentFilter[]) => {

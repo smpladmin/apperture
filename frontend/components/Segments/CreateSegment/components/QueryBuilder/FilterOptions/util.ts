@@ -5,8 +5,8 @@ import {
 
 export const FilterOptionMenu: FilterOptionMenuType[] = [
   {
-    id: 'Add data Type',
-    label: 'Add data Type',
+    id: 'Data Type',
+    label: 'Data Type',
     submenu: [
       {
         id: 'String',
@@ -16,11 +16,6 @@ export const FilterOptionMenu: FilterOptionMenuType[] = [
       {
         id: 'Number',
         label: SegmentFilterDataType.NUMBER,
-        submenu: [],
-      },
-      {
-        id: 'Date',
-        label: SegmentFilterDataType.DATETIME,
         submenu: [],
       },
       {

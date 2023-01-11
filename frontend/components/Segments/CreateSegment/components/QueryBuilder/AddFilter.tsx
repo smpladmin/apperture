@@ -8,7 +8,8 @@ import {
   SegmentFilter,
   SegmentFilterConditions,
   SegmentFilterDataType,
-  SegmentFilterOperators,
+  SegmentFilterOperatorsNumber,
+  SegmentFilterOperatorsString,
   SegmentProperty,
 } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
@@ -68,7 +69,7 @@ const AddFilter = ({
       whereFilters.push({
         condition: getWhereFilterCondition(whereFilters),
         operand: item.id,
-        operator: SegmentFilterOperators.IS,
+        operator: SegmentFilterOperatorsString.IS,
         values: [],
         all: false,
         type: FilterType.WHERE,
@@ -80,7 +81,7 @@ const AddFilter = ({
         triggered: true,
         operand: item.id,
         aggregation: 'total',
-        operator: SegmentFilterOperators.EQUALS,
+        operator: SegmentFilterOperatorsNumber.EQ,
         values: ['1'],
         date_filter: {
           days: 30,

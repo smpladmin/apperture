@@ -3,7 +3,7 @@ import { FilterOptionMenuType } from '@lib/domain/segment';
 import React, { useState } from 'react';
 
 type FilterOptionMenuProps = {
-  menu: any;
+  menu: FilterOptionMenuType;
   onSubmit: Function;
 };
 
@@ -43,7 +43,7 @@ const FilterOptionMenu = ({ menu, onSubmit }: FilterOptionMenuProps) => {
           lineHeight={'xs-14'}
           fontWeight={'600'}
           cursor={'pointer'}
-          width={'32'}
+          minWidth={'20'}
         >
           {menu.label}
         </Text>

@@ -1,4 +1,5 @@
 import { Box, IconButton } from '@chakra-ui/react';
+import { FilterOperatorsDatatypeMap } from '@components/Segments/util';
 import {
   FilterOptionMenuType,
   SegmentFilter,
@@ -12,12 +13,14 @@ import { FilterOptionMenu } from './util';
 
 type FilterOptionsProps = {
   index: number;
+  filter: SegmentFilter;
   filters: SegmentFilter[];
   updateGroupsState: Function;
 };
 
 const FilterOptions = ({
   index,
+  filter,
   filters,
   updateGroupsState,
 }: FilterOptionsProps) => {
@@ -30,10 +33,16 @@ const FilterOptions = ({
 
   const handleFilterTypeUpdate = (menu: FilterOptionMenuType) => {
     setIsFilterOptionsListOpen(false);
+    const selectedDatatype = menu.label as SegmentFilterDataType;
+    if ((filter as WhereSegmentFilter).datatype === selectedDatatype) return;
 
     const updatedFilters = [...filters];
+    updatedFilters[index]['operator'] =
+      FilterOperatorsDatatypeMap[selectedDatatype][0];
+    updatedFilters[index]['values'] = [];
     (updatedFilters[index] as WhereSegmentFilter)['datatype'] =
-      menu.label as SegmentFilterDataType;
+      selectedDatatype;
+
     updateGroupsState(updatedFilters);
   };
 
