@@ -26,6 +26,8 @@ from domain.funnels.models import (
     ComputedFunnel,
     FunnelTrendsData,
     FunnelConversionData,
+    FunnelEventUserData,
+    FunnelConversionResponse,
 )
 from domain.notifications.models import (
     Notification,
@@ -171,10 +173,14 @@ def funnel_service():
         ),
     ]
 
-    funnel_user_conversion = [
-        FunnelConversionData(user_id="user_id_1", status="converted"),
-        FunnelConversionData(user_id="user_id_2", status="dropped"),
-    ]
+    funnel_user_conversion = FunnelConversionResponse(
+        converted=FunnelConversionData(
+            users=[FunnelEventUserData(id="user_1")], total_users=1, unique_users=1
+        ),
+        dropped=FunnelConversionData(
+            users=[FunnelEventUserData(id="user_2")], total_users=1, unique_users=1
+        ),
+    )
 
     computed_transient_funnel_future = asyncio.Future()
     computed_transient_funnel_future.set_result(computed_transient_funnel)
@@ -193,6 +199,7 @@ def funnel_service():
     funnel_service_mock.update_funnel = mock.AsyncMock()
     funnel_service_mock.get_funnel_trends.return_value = funnel_trends_future
     funnel_service_mock.get_user_conversion.return_value = funnel_user_conversion_future
+
     return funnel_service_mock
 
 
@@ -792,10 +799,14 @@ def funnel_steps_data():
 
 @pytest.fixture(scope="module")
 def funnel_user_conversion_response():
-    return [
-        {"userId": "user_id_1", "status": "converted"},
-        {"userId": "user_id_2", "status": "dropped"},
-    ]
+    return FunnelConversionResponse(
+        converted=FunnelConversionData(
+            users=[FunnelEventUserData(id="user_1")], total_users=1, unique_users=1
+        ),
+        dropped=FunnelConversionData(
+            users=[FunnelEventUserData(id="user_2")], total_users=1, unique_users=1
+        ),
+    )
 
 
 @pytest.fixture(scope="module")

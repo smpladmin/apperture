@@ -16,6 +16,7 @@ from domain.funnels.models import (
     FunnelConversionData,
     FunnelConversionResponse,
     ConversionStatus,
+    FunnelEventUserData,
 )
 from repositories.clickhouse.funnels import Funnels
 
@@ -133,17 +134,21 @@ class FunnelsService:
 
         if converted_data != None:
             converted_user_list = [
-                str(data[0]) for data in user_list[: converted_data["total_users"]]
+                FunnelEventUserData(id=data[0])
+                for data in user_list[: converted_data["total_users"]]
             ]
             dropped_user_list = [
-                str(data[0]) for data in user_list[converted_data["total_users"] :]
+                FunnelEventUserData(id=data[0])
+                for data in user_list[converted_data["total_users"] :]
             ]
         elif dropped_data != None:
             converted_user_list = [
-                str(data[0]) for data in user_list[dropped_data["total_users"] :]
+                FunnelEventUserData(id=data[0])
+                for data in user_list[dropped_data["total_users"] :]
             ]
             dropped_user_list = [
-                str(data[0]) for data in user_list[: dropped_data["total_users"]]
+                FunnelEventUserData(id=data[0])
+                for data in user_list[: dropped_data["total_users"]]
             ]
 
         return FunnelConversionResponse(

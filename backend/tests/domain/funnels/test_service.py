@@ -17,6 +17,8 @@ from domain.funnels.models import (
     FunnelTrendsData,
     EventFilters,
     FunnelConversionData,
+    FunnelConversionResponse,
+    FunnelEventUserData,
 )
 
 
@@ -82,12 +84,19 @@ class TestFunnelService:
             for data in self.conversion_data
         ]
 
-        self.user_data = [("user_id_1", "converted"), ("user_id_2", "dropped")]
-
-        self.funnel_conversion_data = [
-            FunnelConversionData(user_id=data[0], status=data[1])
-            for data in self.user_data
+        self.user_data = [("user_1", "converted"), ("user_2", "dropped")], [
+            ("converted", 1, 1),
+            ("dropped", 1, 1),
         ]
+
+        self.funnel_conversion_data = FunnelConversionResponse(
+            converted=FunnelConversionData(
+                users=[FunnelEventUserData(id="user_1")], total_users=1, unique_users=1
+            ),
+            dropped=FunnelConversionData(
+                users=[FunnelEventUserData(id="user_2")], total_users=1, unique_users=1
+            ),
+        )
 
         self.funnels.get_users_count = MagicMock()
         self.funnels.get_users_count.return_value = [(100, 40)]
