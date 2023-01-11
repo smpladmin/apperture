@@ -1,13 +1,22 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import { FilterOptionMenuType } from '@lib/domain/segment';
+import {
+  FilterOptionMenuType,
+  SegmentFilterDataType,
+} from '@lib/domain/segment';
 import React, { useState } from 'react';
 
 type FilterOptionMenuProps = {
   menu: FilterOptionMenuType;
   onSubmit: Function;
+  datatype: SegmentFilterDataType;
 };
 
-const FilterOptionMenu = ({ menu, onSubmit }: FilterOptionMenuProps) => {
+const FilterOptionMenu = ({
+  menu,
+  onSubmit,
+  datatype,
+}: FilterOptionMenuProps) => {
+  const isSelected = datatype === menu.label;
   const [showSubmenu, setShowSubmenu] = useState(false);
 
   const handleSubmit = (item: FilterOptionMenuType) => {
@@ -36,7 +45,7 @@ const FilterOptionMenu = ({ menu, onSubmit }: FilterOptionMenuProps) => {
         _hover={{ bg: 'white.100', cursor: 'pointer' }}
         px={6}
         py={3}
-        bg={showSubmenu ? 'white.100' : ''}
+        bg={showSubmenu || isSelected ? 'white.100' : ''}
       >
         <Text
           fontSize={'xs-14'}
@@ -68,6 +77,7 @@ const FilterOptionMenu = ({ menu, onSubmit }: FilterOptionMenuProps) => {
             <FilterOptionMenu
               menu={submenu}
               key={submenu.id}
+              datatype={datatype}
               onSubmit={onSubmit}
             />
           ))}

@@ -13,7 +13,7 @@ import { FilterOptionMenu } from './util';
 
 type FilterOptionsProps = {
   index: number;
-  filter: SegmentFilter;
+  filter: WhereSegmentFilter;
   filters: SegmentFilter[];
   updateGroupsState: Function;
 };
@@ -77,6 +77,7 @@ const FilterOptions = ({
               menu={menu}
               key={menu.id}
               onSubmit={handleFilterTypeUpdate}
+              datatype={filter.datatype}
             />
           ))}
         </Box>
