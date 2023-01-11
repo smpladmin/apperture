@@ -46,7 +46,6 @@ class Funnels(EventsBase):
                 ).get_sql(),
                 parameter,
             )
-            print([(data[0], ConversionStatus.CONVERTED) for data in result])
             return [(data[0], ConversionStatus.CONVERTED) for data in result], [
                 (ConversionStatus.CONVERTED, count[0][0], count[0][1]),
                 (ConversionStatus.DROPPED, 0, 0),
