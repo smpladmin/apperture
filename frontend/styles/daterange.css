@@ -105,3 +105,9 @@
   line-height: 18px !important;
   font-weight: 500 !important;
 }
+
+.rdrSelected,
+.rdrDayStartPreview,
+.rdrDayEndPreview {
+  color: #0e0e1a !important;
+}
