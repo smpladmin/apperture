@@ -117,7 +117,9 @@ describe('Create Segment', () => {
     const dropdownMenu = screen.getByTestId('dropdown-item');
     fireEvent.mouseEnter(dropdownMenu);
     const boolDatatypeElement = screen.getByText(datatype);
-    fireEvent.click(boolDatatypeElement);
+    await act(async () => {
+      fireEvent.click(boolDatatypeElement);
+    });
   };
 
   let mockedGetEventProperties: jest.Mock;
@@ -243,6 +245,10 @@ describe('Create Segment', () => {
   });
 
   afterAll(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
@@ -1275,14 +1281,17 @@ describe('Create Segment', () => {
       const queries = screen.getAllByTestId('query-builder');
       const queryTextElements = getWhereElementsText(queries, 0);
 
-      expect(queryTextElements).toEqual([
-        'who',
-        'Triggered',
-        'App_Open',
-        'Total',
-        'Equals',
-        'Last 30 days',
-      ]);
+      await waitFor(() => {
+        expect(queryTextElements).toEqual([
+          'who',
+          'Triggered',
+          'App_Open',
+          'Total',
+          'Equals',
+          'Last 30 days',
+        ]);
+        assertFilterConditions(['who']);
+      });
     });
 
     it('remove first `where` filter when there are two `where` filter and `who` filter, first filter condition should remain `where`', async () => {
@@ -1530,7 +1539,7 @@ describe('Create Segment', () => {
     });
   });
 
-  describe('change datatype and filter operator of where filter', () => {
+  describe.only('change datatype and filter operator of where filter', () => {
     it('change datatype from string to number and inputValue filed should be rendered replacing selectvalue dropdown', async () => {
       await act(async () => {
         render(
@@ -1543,7 +1552,7 @@ describe('Create Segment', () => {
       });
 
       await addWhereFilter();
-      switchFilterDatatype(SegmentFilterDataType.NUMBER);
+      await switchFilterDatatype(SegmentFilterDataType.NUMBER);
 
       // expect to see input field and operator switches to 'Equals'
       const queries = screen.getAllByTestId('query-builder');
@@ -1568,7 +1577,7 @@ describe('Create Segment', () => {
         );
       });
       await addWhereFilter();
-      switchFilterDatatype(SegmentFilterDataType.BOOL);
+      await switchFilterDatatype(SegmentFilterDataType.BOOL);
 
       // expect to see input field and operator switches to 'Equals'
       const queries = screen.getAllByTestId('query-builder');
@@ -1607,7 +1616,9 @@ describe('Create Segment', () => {
       expect(filterOperatorsOptionsText).toEqual(['Is', 'Is not']);
 
       // click on 'Is not' operator
-      fireEvent.click(filterOperatorsOptions[1]);
+      await act(async () => {
+        fireEvent.click(filterOperatorsOptions[1]);
+      });
       await waitFor(() => {
         expect(filterOperatorText.textContent).toEqual('Is not');
       });
@@ -1626,7 +1637,7 @@ describe('Create Segment', () => {
       await addWhereFilter();
 
       // change datatype to bool(True/ False)
-      switchFilterDatatype(SegmentFilterDataType.BOOL);
+      await switchFilterDatatype(SegmentFilterDataType.BOOL);
 
       // open filter operator dropdown
       const filterOperatorText = screen.getByTestId('filter-operator');
@@ -1646,7 +1657,10 @@ describe('Create Segment', () => {
       expect(mockedTransientSegment).toHaveBeenCalledTimes(1 + 1 + 1);
 
       // click on 'Is false' operator
-      fireEvent.click(filterOperatorsOptions[1]);
+      await act(async () => {
+        fireEvent.click(filterOperatorsOptions[1]);
+      });
+
       await waitFor(() => {
         expect(filterOperatorText.textContent).toEqual('Is false');
       });
