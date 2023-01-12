@@ -1,5 +1,6 @@
 import {
   FilterType,
+  SegmentDateFilterType,
   SegmentFilter,
   SegmentFilterDataType,
   SegmentFilterOperatorsBool,
@@ -7,6 +8,22 @@ import {
   SegmentFilterOperatorsString,
   SegmentGroup,
 } from '@lib/domain/segment';
+import { format } from 'date-fns';
+
+export const DateFilterTypeOptions = [
+  {
+    id: SegmentDateFilterType.FIXED,
+    label: 'Fixed',
+  },
+  {
+    id: SegmentDateFilterType.SINCE,
+    label: 'Since',
+  },
+  {
+    id: SegmentDateFilterType.LAST,
+    label: 'Last',
+  },
+];
 
 export const getFilteredColumns = (columns: string[]) => {
   return columns.filter((value) => value !== 'user_id');
@@ -52,9 +69,14 @@ export const replaceFilterValueWithEmptyStringPlaceholder = (
   });
 };
 
-export const getDateStringFromDate = (date: Date) => {
-  const [dateString] = date.toISOString().split('T');
-  return dateString;
+export const getDateStringFromDate = (recievedDate: Date) => {
+  if (!recievedDate) return '';
+  return format(recievedDate, 'yyyy-MM-dd');
+};
+
+export const getMonthDateYearFormattedString = (dateString: string) => {
+  if (!dateString) return '';
+  return format(new Date(dateString), 'MMM d, yyyy');
 };
 
 export const getDateOfNDaysBack = (days: number) => {

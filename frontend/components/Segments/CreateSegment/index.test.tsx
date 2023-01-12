@@ -29,6 +29,11 @@ import {
   WhereSegmentFilter,
 } from '@lib/domain/segment';
 import { getUserInfo } from '@lib/services/userService';
+import {
+  getDateStringFromDate,
+  getMonthDateYearFormattedString,
+} from '../util';
+import { addDays } from 'date-fns';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/utils/common');
@@ -1341,6 +1346,127 @@ describe('Create Segment', () => {
 
       expect(newGroup.length).toEqual(1);
       expect(queries).not.toBeInTheDocument();
+    });
+  });
+
+  describe('should be able to switch b/w different datefield options (FIXED, SINCE, LAST)', () => {
+    it('should switch and see respective date filter type component', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      await addWhoFilter();
+      const dateFieldBox = screen.getByTestId('date-field');
+      fireEvent.click(dateFieldBox);
+
+      const dateFilterOptions = screen.getAllByTestId('date-filter-item');
+
+      const dateFilterOptionsText = dateFilterOptions.map(
+        (option) => option.textContent
+      );
+      expect(dateFilterOptionsText).toEqual(['Fixed', 'Since', 'Last']);
+
+      const lastNdaysComponent = screen.queryByTestId('last-N-days');
+      expect(lastNdaysComponent).toBeInTheDocument();
+
+      // switch to fixed date range component
+      await act(async () => {
+        fireEvent.click(dateFilterOptions[0]);
+      });
+
+      await waitFor(() => {
+        const fixedDateRangeComponent =
+          screen.queryByTestId('fixed-date-range');
+
+        expect(fixedDateRangeComponent).toBeInTheDocument();
+      });
+
+      // switch to since date component
+      await act(async () => {
+        fireEvent.click(dateFilterOptions[1]);
+      });
+      await waitFor(() => {
+        const sinceStartDateComponent =
+          screen.queryByTestId('since-start-date');
+
+        expect(sinceStartDateComponent).toBeInTheDocument();
+      });
+    });
+
+    it('should switch to since date filter and be able to save the date and date should start with `Since ...`', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      await addWhoFilter();
+      const dateFieldText = screen.getByTestId('date-field');
+      fireEvent.click(dateFieldText);
+
+      const dateFilterOptions = screen.getAllByTestId('date-filter-item');
+      const doneButton = screen.getByTestId('date-dropdown-done-button');
+
+      // switch to since date component
+      await act(async () => {
+        fireEvent.click(dateFilterOptions[1]);
+      });
+
+      const dateInput: HTMLInputElement = screen.getByTestId(
+        'since-start-date-input'
+      );
+      const dateInputValue = dateInput.value;
+      await act(async () => {
+        fireEvent.click(doneButton);
+      });
+
+      expect(dateFieldText.textContent).toEqual(`Since ${dateInputValue}`);
+    });
+
+    it('should switch to fixed date filter and be able to save the date', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      await addWhoFilter();
+      const dateFieldText = screen.getByTestId('date-field');
+      fireEvent.click(dateFieldText);
+
+      const dateFilterOptions = screen.getAllByTestId('date-filter-item');
+      const doneButton = screen.getByTestId('date-dropdown-done-button');
+      // switch to since date component
+      await act(async () => {
+        fireEvent.click(dateFilterOptions[0]);
+      });
+
+      await act(async () => {
+        fireEvent.click(doneButton);
+      });
+
+      const startDate = getMonthDateYearFormattedString(
+        getDateStringFromDate(addDays(new Date(), -30))
+      );
+
+      const endDate = getMonthDateYearFormattedString(
+        getDateStringFromDate(new Date())
+      );
+      expect(dateFieldText.textContent).toEqual(`${startDate} - ${endDate}`);
     });
   });
 
