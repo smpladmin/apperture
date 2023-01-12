@@ -4,7 +4,7 @@ from authlib.integrations.starlette_client import OAuthError
 from starlette.responses import RedirectResponse
 
 from authorisation.jwt_auth import create_access_token
-from domain.users.service import AppertureUserService
+from domain.apperture_users.service import AppertureUserService
 from authorisation import OAuthClientFactory, OAuthProvider
 from settings import apperture_settings
 

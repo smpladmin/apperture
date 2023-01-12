@@ -2,7 +2,7 @@ from typing import Optional
 
 from fastapi import Cookie, Depends
 from authorisation.jwt_auth import decode
-from domain.users.service import AppertureUserService
+from domain.apperture_users.service import AppertureUserService
 from rest.middlewares.get_token import get_token
 
 
