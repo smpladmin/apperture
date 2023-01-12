@@ -1,9 +1,6 @@
 import { Box, Text, Flex } from '@chakra-ui/react';
 import {
   SegmentFilter,
-  SegmentFilterOperatorsString,
-  SegmentFilterOperatorsNumber,
-  SegmentFilterOperatorsBool,
   SegmentFilterDataType,
   FilterType,
   WhereSegmentFilter,
@@ -12,6 +9,7 @@ import {
 import React, { useState, useRef } from 'react';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { capitalizeFirstLetter } from '@lib/utils/common';
+import { FilterOperatorsDatatypeMap } from '@components/Segments/util';
 
 type FilterOperatorProps = {
   filter: SegmentFilter;
@@ -29,16 +27,10 @@ const FilterOperator = ({
   const [isFilterOperatorsListOpen, setIsFilterOperatorsListOpen] =
     useState(false);
 
-  const filterOperatorsDatatypeMap = {
-    [SegmentFilterDataType.BOOL]: Object.values(SegmentFilterOperatorsBool),
-    [SegmentFilterDataType.NUMBER]: Object.values(SegmentFilterOperatorsNumber),
-    [SegmentFilterDataType.STRING]: Object.values(SegmentFilterOperatorsString),
-  };
-
   const filterOperatorsValues =
     filter.type === FilterType.WHO
-      ? filterOperatorsDatatypeMap[SegmentFilterDataType.NUMBER]
-      : filterOperatorsDatatypeMap[(filter as WhereSegmentFilter).datatype];
+      ? FilterOperatorsDatatypeMap[SegmentFilterDataType.NUMBER]
+      : FilterOperatorsDatatypeMap[(filter as WhereSegmentFilter).datatype];
 
   const filterOperatorsRef = useRef(null);
   useOnClickOutside(filterOperatorsRef, () =>

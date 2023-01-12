@@ -219,8 +219,10 @@ describe('Create Segment', () => {
       const capitalizedFirstLetterMap: { [key: string]: string } = {
         equals: 'Equals',
         is: 'Is',
+        'is not': 'Is not',
         total: 'Total',
         'is true': 'Is true',
+        'is false': 'Is false',
       };
       return capitalizedFirstLetterMap[val];
     });
@@ -1342,7 +1344,7 @@ describe('Create Segment', () => {
     });
   });
 
-  describe('change datatype of where filter', () => {
+  describe('change datatype and filter operator of where filter', () => {
     it('change datatype from string to number and inputValue filed should be rendered replacing selectvalue dropdown', async () => {
       await act(async () => {
         render(
@@ -1377,7 +1379,7 @@ describe('Create Segment', () => {
       expect(queryTextElements).toEqual(['where', 'device', 'Equals']);
     });
 
-    it('change datatype from string to bool, inputvalue filed and select value dropdown shuld ot be rendered', async () => {
+    it('change datatype from string to bool, inputvalue filed and select value dropdown should not be rendered', async () => {
       await act(async () => {
         render(
           <RouterContext.Provider
@@ -1407,6 +1409,77 @@ describe('Create Segment', () => {
       expect(inputValueField).not.toBeInTheDocument();
 
       expect(queryTextElements).toEqual(['where', 'device', 'Is true']);
+    });
+
+    it('change operator for string datatype filter, operators should be `Is/ Is not`', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+
+      const filterOperatorText = screen.getByTestId('filter-operator');
+      fireEvent.click(filterOperatorText);
+
+      const filterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+
+      const filterOperatorsOptionsText = filterOperatorsOptions.map(
+        (filter) => filter.textContent
+      );
+      expect(filterOperatorsOptionsText).toEqual(['Is', 'Is not']);
+
+      // click on 'Is not' operator
+      fireEvent.click(filterOperatorsOptions[1]);
+      await waitFor(() => {
+        expect(filterOperatorText.textContent).toEqual('Is not');
+      });
+    });
+
+    it('change filter datatype from string datatype to bool ,and after that operators should be `Is true/Is false', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+
+      // change datatype to bool(True/ False)
+      const datatypeIcon = screen.getByTestId('change-datatype');
+      fireEvent.click(datatypeIcon);
+      const dropdownMenu = screen.getByTestId('dropdown-item');
+      fireEvent.mouseEnter(dropdownMenu);
+      const boolDatatypeElement = screen.getByText('True/ False');
+      fireEvent.click(boolDatatypeElement);
+
+      // open filter operator dropdown
+      const filterOperatorText = screen.getByTestId('filter-operator');
+      fireEvent.click(filterOperatorText);
+
+      const filterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+
+      const filterOperatorsOptionsText = filterOperatorsOptions.map(
+        (filter) => filter.textContent
+      );
+      expect(filterOperatorsOptionsText).toEqual(['Is true', 'Is false']);
+
+      // click on 'Is false' operator
+      fireEvent.click(filterOperatorsOptions[1]);
+      await waitFor(() => {
+        expect(filterOperatorText.textContent).toEqual('Is false');
+      });
     });
   });
 });
