@@ -18,6 +18,7 @@ export type WhoSegmentFilter = {
   date_filter: DateFilter;
   date_filter_type: SegmentDateFilterType;
   type: FilterType;
+  datatype: SegmentFilterDataType;
 };
 
 export type SegmentFilter = WhereSegmentFilter | WhoSegmentFilter;

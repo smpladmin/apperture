@@ -111,6 +111,15 @@ describe('Create Segment', () => {
     return groupConditions.map((condition) => condition.textContent);
   };
 
+  const switchFilterDatatype = async (datatype: SegmentFilterDataType) => {
+    const datatypeIcon = screen.getByTestId('change-datatype');
+    fireEvent.click(datatypeIcon);
+    const dropdownMenu = screen.getByTestId('dropdown-item');
+    fireEvent.mouseEnter(dropdownMenu);
+    const boolDatatypeElement = screen.getByText(datatype);
+    fireEvent.click(boolDatatypeElement);
+  };
+
   let mockedGetEventProperties: jest.Mock;
   let mockedGetNodes: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
@@ -1246,6 +1255,57 @@ describe('Create Segment', () => {
         assertFilterConditions(['where', 'or', 'who', 'and', 'and']);
       });
     });
+
+    it('remove `where` filter when there is one `where` filter and `who` filter, first filter condition should change to `who`', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+      await addWhoFilter();
+
+      // remove first where filter
+      await removeFilter(0);
+
+      const queries = screen.getAllByTestId('query-builder');
+      const queryTextElements = getWhereElementsText(queries, 0);
+
+      expect(queryTextElements).toEqual([
+        'who',
+        'Triggered',
+        'App_Open',
+        'Total',
+        'Equals',
+        'Last 30 days',
+      ]);
+    });
+
+    it('remove first `where` filter when there are two `where` filter and `who` filter, first filter condition should remain `where`', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+      await addWhereFilter();
+      await addWhoFilter();
+
+      // remove first where filter
+      await removeFilter(0);
+
+      await waitFor(() => {
+        assertFilterConditions(['where', 'who']);
+      });
+    });
   });
 
   describe('add multiple groups and clear groups', () => {
@@ -1483,15 +1543,7 @@ describe('Create Segment', () => {
       });
 
       await addWhereFilter();
-
-      const datatypeIcon = screen.getByTestId('change-datatype');
-
-      fireEvent.click(datatypeIcon);
-      const dropdownMenu = screen.getByTestId('dropdown-item');
-      fireEvent.mouseEnter(dropdownMenu);
-
-      const numberDatatypeElement = screen.getByText('Number');
-      fireEvent.click(numberDatatypeElement);
+      switchFilterDatatype(SegmentFilterDataType.NUMBER);
 
       // expect to see input field and operator switches to 'Equals'
       const queries = screen.getAllByTestId('query-builder');
@@ -1516,14 +1568,7 @@ describe('Create Segment', () => {
         );
       });
       await addWhereFilter();
-
-      const datatypeIcon = screen.getByTestId('change-datatype');
-
-      fireEvent.click(datatypeIcon);
-      const dropdownMenu = screen.getByTestId('dropdown-item');
-      fireEvent.mouseEnter(dropdownMenu);
-      const boolDatatypeElement = screen.getByText('True/ False');
-      fireEvent.click(boolDatatypeElement);
+      switchFilterDatatype(SegmentFilterDataType.BOOL);
 
       // expect to see input field and operator switches to 'Equals'
       const queries = screen.getAllByTestId('query-builder');
@@ -1581,12 +1626,7 @@ describe('Create Segment', () => {
       await addWhereFilter();
 
       // change datatype to bool(True/ False)
-      const datatypeIcon = screen.getByTestId('change-datatype');
-      fireEvent.click(datatypeIcon);
-      const dropdownMenu = screen.getByTestId('dropdown-item');
-      fireEvent.mouseEnter(dropdownMenu);
-      const boolDatatypeElement = screen.getByText('True/ False');
-      fireEvent.click(boolDatatypeElement);
+      switchFilterDatatype(SegmentFilterDataType.BOOL);
 
       // open filter operator dropdown
       const filterOperatorText = screen.getByTestId('filter-operator');
@@ -1600,6 +1640,10 @@ describe('Create Segment', () => {
         (filter) => filter.textContent
       );
       expect(filterOperatorsOptionsText).toEqual(['Is true', 'Is false']);
+
+      // expect transientSegment call to be happen when changing to datatype
+      // 1 call while rendering, 1 call when adding a where filter and 1 call when changing the datatype to bool
+      expect(mockedTransientSegment).toHaveBeenCalledTimes(1 + 1 + 1);
 
       // click on 'Is false' operator
       fireEvent.click(filterOperatorsOptions[1]);

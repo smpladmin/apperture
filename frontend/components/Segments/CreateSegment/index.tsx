@@ -11,6 +11,7 @@ import {
 import {
   FilterItemType,
   Segment,
+  SegmentFilterDataType,
   SegmentGroup,
   SegmentGroupConditions,
   SegmentProperty,
@@ -115,7 +116,11 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
     const validGroupQuery = groups.every(
       (group) =>
         group.filters.length &&
-        group.filters.every((filter) => filter.values.length)
+        group.filters.every(
+          (filter) =>
+            filter.values.length ||
+            filter.datatype === SegmentFilterDataType.BOOL
+        )
     );
     if (validGroupQuery || refreshOnDelete || isGroupConditionChanged) {
       if (refreshOnDelete) setRefreshOnDelete(false);

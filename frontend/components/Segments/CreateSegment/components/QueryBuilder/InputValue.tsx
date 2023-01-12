@@ -16,13 +16,13 @@ const InputValue = ({
   updateGroupsState,
 }: InputValueProps) => {
   const inputSearchRef = useRef<HTMLInputElement>(null);
-  const [inputCount, setInputCount] = useState(filter.values[0]);
+  const [inputCount, setInputCount] = useState(filter.values[0] || '');
 
   useEffect(() => {
     // need to update values whenever filter changes
     // case - when filter gets deleted, input field
     // should have correct value
-    setInputCount(filter.values[0]);
+    setInputCount(filter.values[0] || '');
   }, [filter]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {

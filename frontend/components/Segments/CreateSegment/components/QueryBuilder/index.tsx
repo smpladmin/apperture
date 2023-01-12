@@ -53,7 +53,10 @@ const QueryBuilder = ({
     // check if the filterIndex removed is less than updatedFilterConditions length
     // to ensure we don't replace condition on wrong index while solving for where/who conditions
     if (filterIndex < updatedFilters.length) {
-      if (conditionRemoved[0]?.condition === SegmentFilterConditions.WHERE) {
+      if (
+        conditionRemoved[0]?.condition === SegmentFilterConditions.WHERE &&
+        updatedFilters[filterIndex].type === FilterType.WHERE
+      ) {
         updatedFilters[filterIndex].condition = SegmentFilterConditions.WHERE;
       }
       // if first 'who' filter type condition is removed from list of filter,

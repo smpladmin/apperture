@@ -89,6 +89,7 @@ const AddFilter = ({
         },
         date_filter_type: SegmentDateFilterType.LAST,
         type: FilterType.WHO,
+        datatype: SegmentFilterDataType.NUMBER,
       });
     }
     return [...whereFilters, ...whoFilters];

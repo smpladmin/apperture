@@ -40,8 +40,7 @@ const FilterOptions = ({
     updatedFilters[index]['operator'] =
       FilterOperatorsDatatypeMap[selectedDatatype][0];
     updatedFilters[index]['values'] = [];
-    (updatedFilters[index] as WhereSegmentFilter)['datatype'] =
-      selectedDatatype;
+    updatedFilters[index]['datatype'] = selectedDatatype;
 
     updateGroupsState(updatedFilters);
   };
