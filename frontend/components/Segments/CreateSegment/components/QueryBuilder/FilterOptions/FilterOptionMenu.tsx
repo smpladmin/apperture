@@ -38,6 +38,7 @@ const FilterOptionMenu = ({
         handleSubmit(menu);
       }}
       position={'relative'}
+      data-testid={'dropdown-item'}
     >
       <Flex
         alignItems={'center'}

@@ -24,6 +24,7 @@ import {
   SegmentDateFilterType,
   SegmentFilter,
   SegmentFilterConditions,
+  SegmentFilterDataType,
   SegmentGroupConditions,
   WhereSegmentFilter,
 } from '@lib/domain/segment';
@@ -164,16 +165,18 @@ describe('Create Segment', () => {
           {
             condition: SegmentFilterConditions.WHERE,
             operand: 'properties.$city',
-            operator: 'equals',
+            operator: 'is',
             values: ['Chennai', 'Guwahati', 'Patna'],
             type: FilterType.WHERE,
+            datatype: SegmentFilterDataType.STRING,
           },
           {
             condition: SegmentFilterConditions.AND,
             operand: 'properties.$app_version',
-            operator: 'equals',
+            operator: 'is',
             values: ['1.5.5', '1.5.6'],
             type: FilterType.WHERE,
+            datatype: SegmentFilterDataType.STRING,
           },
         ] as WhereSegmentFilter[],
         condition: SegmentGroupConditions.AND,
@@ -210,6 +213,16 @@ describe('Create Segment', () => {
       lastName: 'Analytics',
       picture: 'https://lh2.googleusercontent.com',
       slackChannel: null,
+    });
+
+    mockedCapitalizeLetter.mockImplementation((val: string) => {
+      const capitalizedFirstLetterMap: { [key: string]: string } = {
+        equals: 'Equals',
+        is: 'Is',
+        total: 'Total',
+        'is true': 'Is true',
+      };
+      return capitalizedFirstLetterMap[val];
     });
   });
 
@@ -268,7 +281,6 @@ describe('Create Segment', () => {
     });
 
     it('add multiple filters with mix of eventProperties and event ', async () => {
-      mockedCapitalizeLetter.mockReturnValue('total');
       await act(async () => {
         render(
           <RouterContext.Provider
@@ -297,35 +309,35 @@ describe('Create Segment', () => {
       expect(firstQueryTextElements).toEqual([
         'where',
         'device',
-        'equals',
+        'Is',
         'android, ios',
       ]);
       expect(secondQueryTextElements).toEqual([
         'and',
         'device',
-        'equals',
+        'Is',
         'android, ios',
       ]);
       expect(thirdQueryTextElements).toEqual([
         'and',
         'device',
-        'equals',
+        'Is',
         'android, ios',
       ]);
       expect(fourthQueryTextElements).toEqual([
         'who',
         'Triggered',
         'App_Open',
-        'total',
-        'equals',
+        'Total',
+        'Equals',
         'Last 30 days',
       ]);
       expect(fifthQueryTextElements).toEqual([
         'and',
         'Triggered',
         'Login',
-        'total',
-        'equals',
+        'Total',
+        'Equals',
         'Last 30 days',
       ]);
     });
@@ -703,20 +715,20 @@ describe('Create Segment', () => {
       const queries = screen.getAllByTestId('query-builder');
 
       const filterOneTextElements = getWhereElementsText(queries, 0);
-      //first query -  `where properties.$city equals Chennai, Guwahati or 1 more
+      //first query -  `where properties.$city Is Chennai, Guwahati or 1 more
       expect(filterOneTextElements).toEqual([
         'where',
         'properties.$city',
-        'equals',
+        'Is',
         'Chennai, Guwahati or 1 more',
       ]);
 
       const filterTwoTextElements = getWhereElementsText(queries, 1);
-      //first query -  `and properties.$app_version equals 1.5.5, 1.5.6
+      //second query -  `and properties.$app_version Is 1.5.5, 1.5.6
       expect(filterTwoTextElements).toEqual([
         'and',
         'properties.$app_version',
-        'equals',
+        'Is',
         '1.5.5, 1.5.6',
       ]);
     });
@@ -1069,16 +1081,18 @@ describe('Create Segment', () => {
             {
               condition: SegmentFilterConditions.WHERE,
               operand: 'properties.$city',
-              operator: 'equals',
+              operator: 'is',
               values: ['Chennai', 'Guwahati', 'Patna'],
               type: FilterType.WHERE,
+              datatype: SegmentFilterDataType.STRING,
             },
             {
               condition: SegmentFilterConditions.AND,
               operand: 'properties.$app_version',
-              operator: 'equals',
+              operator: 'is',
               values: ['1.5.5', '1.5.6'],
               type: FilterType.WHERE,
+              datatype: SegmentFilterDataType.STRING,
             },
             {
               condition: SegmentFilterConditions.WHO,
@@ -1325,6 +1339,74 @@ describe('Create Segment', () => {
 
       expect(newGroup.length).toEqual(1);
       expect(queries).not.toBeInTheDocument();
+    });
+  });
+
+  describe('change datatype of where filter', () => {
+    it('change datatype from string to number and inputValue filed should be rendered replacing selectvalue dropdown', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      await addWhereFilter();
+
+      const datatypeIcon = screen.getByTestId('change-datatype');
+
+      fireEvent.click(datatypeIcon);
+      const dropdownMenu = screen.getByTestId('dropdown-item');
+      fireEvent.mouseEnter(dropdownMenu);
+
+      const numberDatatypeElement = screen.getByText('Number');
+      fireEvent.click(numberDatatypeElement);
+
+      // expect to see input field and operator switches to 'Equals'
+      const queries = screen.getAllByTestId('query-builder');
+      const queryTextElements = getWhereElementsText(queries, 0);
+      const selectValueDropdown = screen.queryByTestId('event-property-value');
+      const inputValueField = screen.queryByTestId('input-value');
+
+      expect(selectValueDropdown).not.toBeInTheDocument();
+      expect(inputValueField).toBeInTheDocument();
+
+      expect(queryTextElements).toEqual(['where', 'device', 'Equals']);
+    });
+
+    it('change datatype from string to bool, inputvalue filed and select value dropdown shuld ot be rendered', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+
+      const datatypeIcon = screen.getByTestId('change-datatype');
+
+      fireEvent.click(datatypeIcon);
+      const dropdownMenu = screen.getByTestId('dropdown-item');
+      fireEvent.mouseEnter(dropdownMenu);
+      const boolDatatypeElement = screen.getByText('True/ False');
+      fireEvent.click(boolDatatypeElement);
+
+      // expect to see input field and operator switches to 'Equals'
+      const queries = screen.getAllByTestId('query-builder');
+      const queryTextElements = getWhereElementsText(queries, 0);
+      const selectValueDropdown = screen.queryByTestId('event-property-value');
+      const inputValueField = screen.queryByTestId('input-value');
+
+      expect(selectValueDropdown).not.toBeInTheDocument();
+      expect(inputValueField).not.toBeInTheDocument();
+
+      expect(queryTextElements).toEqual(['where', 'device', 'Is true']);
     });
   });
 });

@@ -56,7 +56,7 @@ const FilterOptions = ({
           onClick={() => setIsFilterOptionsListOpen(true)}
           bg={'white.DEFAULT'}
           variant={'secondary'}
-          data-testid={'remove-filter'}
+          data-testid={'change-datatype'}
         />
       </Box>
       {isFilterOptionsListOpen ? (

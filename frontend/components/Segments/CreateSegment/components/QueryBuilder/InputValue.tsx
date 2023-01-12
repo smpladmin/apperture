@@ -52,6 +52,7 @@ const InputValue = ({
       onBlur={updateFilterValue}
       onKeyDown={handleKeyDown}
       placeholder={'Value...'}
+      data-testid={'input-value'}
     />
   );
 };
