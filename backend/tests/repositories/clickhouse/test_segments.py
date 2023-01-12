@@ -27,7 +27,7 @@ class TestSegmentsRepository:
         repo = Segments(self.clickhouse)
         repo.execute_get_query = MagicMock()
         self.repo = repo
-        self.convert_to_float_func = CustomFunction("toFloat64OrNull", ["string"])
+        self.convert_to_float_func = CustomFunction("toFloat64OrDefault", ["string"])
         self.datasource_id = "test-id"
         self.filters = [
             WhereSegmentFilter(
@@ -444,8 +444,8 @@ class TestSegmentsRepository:
     @pytest.mark.parametrize(
         "values, inverse, criteria",
         [
-            ([1, 2, 3], True, "toFloat64OrNull(properties.prop1) NOT IN (1,2,3)"),
-            ([2], False, "toFloat64OrNull(properties.prop1) IN (2)"),
+            ([1, 2, 3], True, "toFloat64OrDefault(properties.prop1) NOT IN (1,2,3)"),
+            ([2], False, "toFloat64OrDefault(properties.prop1) IN (2)"),
         ],
     )
     def test_num_equality_criteria(self, values, inverse, criteria):
@@ -464,22 +464,22 @@ class TestSegmentsRepository:
             (
                 5,
                 SegmentFilterOperatorsNumber.GT,
-                'toFloat64OrNull("properties.prop1")>5',
+                'toFloat64OrDefault("properties.prop1")>5',
             ),
             (
                 10.0,
                 SegmentFilterOperatorsNumber.LT,
-                'toFloat64OrNull("properties.prop1")<10.0',
+                'toFloat64OrDefault("properties.prop1")<10.0',
             ),
             (
                 99,
                 SegmentFilterOperatorsNumber.GE,
-                'toFloat64OrNull("properties.prop1")>=99',
+                'toFloat64OrDefault("properties.prop1")>=99',
             ),
             (
                 999,
                 SegmentFilterOperatorsNumber.LE,
-                'toFloat64OrNull("properties.prop1")<=999',
+                'toFloat64OrDefault("properties.prop1")<=999',
             ),
         ],
     )
@@ -498,13 +498,13 @@ class TestSegmentsRepository:
         [
             (
                 True,
-                'toFloat64OrNull("properties.prop1")>=10',
-                'toFloat64OrNull("properties.prop1")<=5',
+                'toFloat64OrDefault("properties.prop1")>=10',
+                'toFloat64OrDefault("properties.prop1")<=5',
             ),
             (
                 False,
-                'toFloat64OrNull("properties.prop1")>=5',
-                'toFloat64OrNull("properties.prop1")<=10',
+                'toFloat64OrDefault("properties.prop1")>=5',
+                'toFloat64OrDefault("properties.prop1")<=10',
             ),
         ],
     )
@@ -561,7 +561,7 @@ class TestSegmentsRepository:
         )
         assert (
             self.repo.build_criterion_for_number_filter(filter=num_filter)[0].get_sql()
-            == "toFloat64OrNull(properties.prop1) NOT IN (10)"
+            == "toFloat64OrDefault(properties.prop1) NOT IN (10)"
         )
 
     def test_build_criterion_for_string_filter(self):

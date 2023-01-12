@@ -31,7 +31,7 @@ class EventsBase(ABC):
             self.date_func(self.table.timestamp) >= Parameter("%(start_date)s"),
             self.date_func(self.table.timestamp) <= Parameter("%(end_date)s"),
         ]
-        self.convert_to_float_func = CustomFunction("toFloat64OrNull", ["string"])
+        self.convert_to_float_func = CustomFunction("toFloat64OrDefault", ["string"])
         self.convert_to_bool_func = CustomFunction("toBool", ["string"])
 
     def execute_get_query(self, query: str, parameters: Dict):
