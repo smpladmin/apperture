@@ -18,6 +18,7 @@ const ViewFunnel = ({
       <RightView
         computedFunnel={computedFunnel}
         computedTrendsData={computedTrendsData}
+        datasourceId={datasourceId}
       />
     </Flex>
   );

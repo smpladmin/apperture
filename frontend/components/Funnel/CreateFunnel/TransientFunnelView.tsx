@@ -162,7 +162,6 @@ const TransientFunnelView = ({
       </Flex>
       <UserConversionDrawer
         isOpen={isDrawerOpen}
-        onOpen={onDrawerOpen}
         onClose={onDrawerClose}
         conversionData={conversionData}
       />

@@ -4,6 +4,7 @@ const mockChart = jest.fn();
 mockChart.mockImplementation(() => {
   return {
     data: jest.fn(),
+    on: jest.fn(),
     scale: jest.fn(),
     tooltip: jest.fn(),
     axis: jest.fn(),

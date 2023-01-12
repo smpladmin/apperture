@@ -15,14 +15,12 @@ import { FunnelEventConversion } from '@lib/domain/funnel';
 
 type UserConversionDrawerProps = {
   isOpen: boolean;
-  onOpen: Function;
-  onClose: Function;
+  onClose: () => void;
   conversionData: FunnelEventConversion | null;
 };
 
 const UserConversionDrawer = ({
   isOpen,
-  onOpen,
   onClose,
   conversionData,
 }: UserConversionDrawerProps) => {
