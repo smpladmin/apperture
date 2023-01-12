@@ -44,7 +44,12 @@ const WhereSegmentFilter = ({
         filters={filters}
         updateGroupsState={updateGroupsState}
       />
-      <FilterOperator filter={filter} />
+      <FilterOperator
+        filter={filter}
+        filters={filters}
+        index={index}
+        updateGroupsState={updateGroupsState}
+      />
       {[SegmentFilterDataType.STRING].includes(filter.datatype) ? (
         <SelectValue
           filter={filter}

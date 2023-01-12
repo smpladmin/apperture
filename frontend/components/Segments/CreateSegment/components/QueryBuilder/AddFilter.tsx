@@ -7,10 +7,11 @@ import {
   SegmentDateFilterType,
   SegmentFilter,
   SegmentFilterConditions,
-  SegmentFilterDataType,
+  SegmentFilterOperators,
   SegmentFilterOperatorsNumber,
   SegmentFilterOperatorsString,
   SegmentProperty,
+  SegmentFilterDataType,
 } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useCallback, useRef, useState } from 'react';
