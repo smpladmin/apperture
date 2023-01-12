@@ -26,6 +26,7 @@ export type SegmentFilterOperators =
   | SegmentFilterOperatorsBool
   | SegmentFilterOperatorsNumber
   | SegmentFilterOperatorsString;
+
 export enum FilterType {
   WHERE = 'where',
   WHO = 'who',
@@ -100,6 +101,18 @@ export enum SegmentDateFilterType {
   LAST = 'last',
 }
 
+export enum SegmentFilterDataType {
+  STRING = 'String',
+  NUMBER = 'Number',
+  BOOL = 'True/ False',
+}
+
+export type FilterOptionMenuType = {
+  id: string | number;
+  label: SegmentFilterDataType | string;
+  submenu: FilterOptionMenuType[];
+};
+
 export enum SegmentFilterOperatorsString {
   IS = 'is',
   IS_NOT = 'is not',
@@ -117,10 +130,4 @@ export enum SegmentFilterOperatorsNumber {
 export enum SegmentFilterOperatorsBool {
   T = 'is true',
   F = 'is false',
-}
-
-export enum SegmentFilterDataType {
-  STRING = 'String',
-  NUMBER = 'Number',
-  BOOL = 'True/ False',
 }

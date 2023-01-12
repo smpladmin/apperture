@@ -1,10 +1,6 @@
 import { Box, Button } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import {
-  getDateOfNDaysBack,
-  getDateStringFromDate,
-  getWhereAndWhoFilters,
-} from '@components/Segments/util';
+import { getWhereAndWhoFilters } from '@components/Segments/util';
 import {
   FilterItemType,
   FilterType,
