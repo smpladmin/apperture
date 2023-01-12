@@ -4,7 +4,7 @@ from typing import Optional
 from repositories import Document
 
 
-class User(Document):
+class AppertureUser(Document):
     first_name: str
     last_name: str
     email: Indexed(str)

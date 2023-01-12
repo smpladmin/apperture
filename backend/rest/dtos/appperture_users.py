@@ -1,15 +1,15 @@
 from typing import Optional
 from beanie import Indexed
 
-from domain.users.models import User
+from domain.apperture_users.models import AppertureUser
 from .model_response import ModelResponse
 
 
-class PrivateUserResponse(User, ModelResponse):
+class PrivateUserResponse(AppertureUser, ModelResponse):
     pass
 
 
-class UserResponse(ModelResponse):
+class AppertureUserResponse(ModelResponse):
     first_name: str
     last_name: str
     email: Indexed(str)

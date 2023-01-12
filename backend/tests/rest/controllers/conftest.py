@@ -41,7 +41,7 @@ from domain.notifications.models import (
 from domain.metrics.models import (
     ComputedMetricResult,
 )
-from domain.users.models import User
+from domain.apperture_users.models import AppertureUser
 from domain.edge.models import Edge, NodeSignificance, NodeTrend, NodeSankey
 
 
@@ -1051,8 +1051,8 @@ def segment_data():
 
 @pytest.fixture(scope="module")
 def mock_find_email_user():
-    User.get_settings = mock.MagicMock()
-    user = User(
+    AppertureUser.get_settings = mock.MagicMock()
+    user = AppertureUser(
         first_name="mock",
         last_name="mock",
         email="test@email.com",

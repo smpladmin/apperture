@@ -27,8 +27,8 @@ import { useRouter } from 'next/router';
 import { computeSegment } from '@lib/services/segmentService';
 import { getFilteredColumns } from '../util';
 import SaveSegmentModal from './components/SaveModal';
-import { User } from '@lib/domain/user';
-import { getUserInfo } from '@lib/services/userService';
+import { AppertureUser } from '@lib/domain/user';
+import { getAppertureUserInfo } from '@lib/services/userService';
 import { cloneDeep, isEqual } from 'lodash';
 import ExitConfirmationModal from './components/ExitConfirmationModal';
 import GroupCondition from './components/GroupConditions';
@@ -61,7 +61,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
   const [isSegmentDataLoading, setIsSegmentDataLoading] = useState(false);
   const [refreshOnDelete, setRefreshOnDelete] = useState(false);
   const [isGroupConditionChanged, setIsGroupConditionChanged] = useState(false);
-  const [user, setUser] = useState<User>();
+  const [user, setUser] = useState<AppertureUser>();
   const {
     isOpen: isSaveSegmentModalOpen,
     onOpen: openSaveSegmentModal,
@@ -95,7 +95,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
 
   useEffect(() => {
     const getUser = async () => {
-      const user = await getUserInfo();
+      const user = await getAppertureUserInfo();
       setUser(user);
     };
     getUser();

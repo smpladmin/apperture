@@ -2,7 +2,7 @@ from typing import Union, List
 
 from fastapi import APIRouter, Depends
 
-from domain.users.models import User
+from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
 from domain.notifications.models import NotificationResponse
 from domain.notifications.service import NotificationService
@@ -22,7 +22,7 @@ router = APIRouter(
 @router.post("/notifications", response_model=NotificationResponse)
 async def add_notification(
     dto: CreateNotificationDto,
-    user: User = Depends(get_user),
+    user: AppertureUser = Depends(get_user),
     notification_service: NotificationService = Depends(),
     ds_service: DataSourceService = Depends(),
 ):
@@ -58,7 +58,7 @@ async def add_notification(
 async def get_notification(
     name: Union[str, None] = None,
     ds_id: Union[str, None] = None,
-    user: User = Depends(get_user),
+    user: AppertureUser = Depends(get_user),
     app_service: AppService = Depends(),
     notification_service: NotificationService = Depends(),
 ):
@@ -77,7 +77,7 @@ async def get_notification(
 async def update_notification(
     notification_id: str,
     dto: CreateNotificationDto,
-    user: User = Depends(get_user),
+    user: AppertureUser = Depends(get_user),
     notification_service: NotificationService = Depends(),
     ds_service: DataSourceService = Depends(),
 ):

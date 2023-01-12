@@ -6,7 +6,7 @@ from data_processor_queue.service import DPQueueService
 from domain.properties.service import PropertiesService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
-from domain.users.service import UserService
+from domain.users.service import AppertureUserService
 from domain.notifications.service import NotificationService
 from domain.notifications.models import NotificationType
 from domain.integrations.service import IntegrationService
@@ -166,7 +166,7 @@ async def compute_notifications(
 @router.get("/users/{user_id}", response_model=PrivateUserResponse)
 async def slack_url(
     user_id: str,
-    user_service: UserService = Depends(),
+    user_service: AppertureUserService = Depends(),
 ):
     return await user_service.get_user(user_id)
 

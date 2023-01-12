@@ -2,9 +2,9 @@ import { ApperturePrivateAPI } from './../apiClient/client.server';
 import { AppertureAPI } from '../apiClient';
 import { AxiosError } from 'axios';
 
-export const _getUserInfo = async (token: string) => {
+export const _getAppertureUserInfo = async (token: string) => {
   try {
-    const user = await ApperturePrivateAPI.get('/users/me', {
+    const user = await ApperturePrivateAPI.get('/apperture-users/me', {
       headers: { Authorization: token },
     });
     return user.data;
@@ -14,9 +14,9 @@ export const _getUserInfo = async (token: string) => {
   }
 };
 
-export const getUserInfo = async () => {
+export const getAppertureUserInfo = async () => {
   try {
-    const user = await AppertureAPI.get('/users/me');
+    const user = await AppertureAPI.get('/apperture-users/me');
     return user.data;
   } catch (e) {
     console.error((e as AxiosError).message);
@@ -26,7 +26,7 @@ export const getUserInfo = async () => {
 
 export const removeSlackCredentials = async () => {
   try {
-    await AppertureAPI.put('/users?delete_slack_credentials=true');
+    await AppertureAPI.put('/apperture-users?delete_slack_credentials=true');
   } catch (e) {
     console.error((e as AxiosError).message);
   }

@@ -11,6 +11,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from rest.controllers import (
     app_controller,
+    apperture_user_controller,
     auth_controller,
     data_processor_controller,
     datasource_controller,
@@ -20,7 +21,6 @@ from rest.controllers import (
     schedule_controller,
     notification_controller,
     segment_controller,
-    user_controller,
     funnel_controller,
     metric_controller,
 )
@@ -67,7 +67,7 @@ app.include_router(data_processor_controller.router)
 app.include_router(datasource_controller.router)
 app.include_router(schedule_controller.router)
 app.include_router(notification_controller.router)
-app.include_router(user_controller.router)
+app.include_router(apperture_user_controller.router)
 app.include_router(funnel_controller.router)
 app.include_router(segment_controller.router)
 app.include_router(metric_controller.router)

@@ -3,7 +3,7 @@ from typing import List
 
 from domain.funnels.service import FunnelsService
 from domain.apps.service import AppService
-from domain.users.models import User
+from domain.apperture_users.models import AppertureUser
 from domain.datasources.service import DataSourceService
 from rest.dtos.funnels import (
     FunnelResponse,
@@ -117,7 +117,7 @@ async def get_transient_funnel_analytics(
 
 @router.get("/funnels", response_model=List[SavedItemsResponse])
 async def get_funnels(
-    user: User = Depends(get_user),
+    user: AppertureUser = Depends(get_user),
     funnel_service: FunnelsService = Depends(),
     app_service: AppService = Depends(),
 ):
