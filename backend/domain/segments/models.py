@@ -121,7 +121,7 @@ class WhoSegmentFilter(BaseModel):
     date_filter_type: SegmentDateFilterType
     type = SegmentFilterConditions.WHO
     condition: SegmentFilterConditions
-    datatype: SegmentDataType
+    datatype = SegmentDataType.NUMBER
 
 
 class SegmentGroup(BaseModel):
