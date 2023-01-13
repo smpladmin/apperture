@@ -1539,7 +1539,7 @@ describe('Create Segment', () => {
     });
   });
 
-  describe.only('change datatype and filter operator of where filter', () => {
+  describe('change datatype and filter operator of where filter', () => {
     it('change datatype from string to number and inputValue filed should be rendered replacing selectvalue dropdown', async () => {
       await act(async () => {
         render(
