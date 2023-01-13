@@ -24,6 +24,7 @@ import {
   SegmentDateFilterType,
   SegmentFilter,
   SegmentFilterConditions,
+  SegmentFilterDataType,
   SegmentGroupConditions,
   WhereSegmentFilter,
 } from '@lib/domain/segment';
@@ -110,6 +111,17 @@ describe('Create Segment', () => {
     return groupConditions.map((condition) => condition.textContent);
   };
 
+  const switchFilterDatatype = async (datatype: SegmentFilterDataType) => {
+    const datatypeIcon = screen.getByTestId('change-datatype');
+    fireEvent.click(datatypeIcon);
+    const dropdownMenu = screen.getByTestId('dropdown-item');
+    fireEvent.mouseEnter(dropdownMenu);
+    const boolDatatypeElement = screen.getByText(datatype);
+    await act(async () => {
+      fireEvent.click(boolDatatypeElement);
+    });
+  };
+
   let mockedGetEventProperties: jest.Mock;
   let mockedGetNodes: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
@@ -169,16 +181,18 @@ describe('Create Segment', () => {
           {
             condition: SegmentFilterConditions.WHERE,
             operand: 'properties.$city',
-            operator: 'equals',
+            operator: 'is',
             values: ['Chennai', 'Guwahati', 'Patna'],
             type: FilterType.WHERE,
+            datatype: SegmentFilterDataType.STRING,
           },
           {
             condition: SegmentFilterConditions.AND,
             operand: 'properties.$app_version',
-            operator: 'equals',
+            operator: 'is',
             values: ['1.5.5', '1.5.6'],
             type: FilterType.WHERE,
+            datatype: SegmentFilterDataType.STRING,
           },
         ] as WhereSegmentFilter[],
         condition: SegmentGroupConditions.AND,
@@ -216,9 +230,25 @@ describe('Create Segment', () => {
       picture: 'https://lh2.googleusercontent.com',
       slackChannel: null,
     });
+
+    mockedCapitalizeLetter.mockImplementation((val: string) => {
+      const capitalizedFirstLetterMap: { [key: string]: string } = {
+        equals: 'Equals',
+        is: 'Is',
+        'is not': 'Is not',
+        total: 'Total',
+        'is true': 'Is true',
+        'is false': 'Is false',
+      };
+      return capitalizedFirstLetterMap[val];
+    });
   });
 
   afterAll(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
@@ -273,7 +303,6 @@ describe('Create Segment', () => {
     });
 
     it('add multiple filters with mix of eventProperties and event ', async () => {
-      mockedCapitalizeLetter.mockReturnValue('total');
       await act(async () => {
         render(
           <RouterContext.Provider
@@ -302,35 +331,35 @@ describe('Create Segment', () => {
       expect(firstQueryTextElements).toEqual([
         'where',
         'device',
-        'equals',
+        'Is',
         'android, ios',
       ]);
       expect(secondQueryTextElements).toEqual([
         'and',
         'device',
-        'equals',
+        'Is',
         'android, ios',
       ]);
       expect(thirdQueryTextElements).toEqual([
         'and',
         'device',
-        'equals',
+        'Is',
         'android, ios',
       ]);
       expect(fourthQueryTextElements).toEqual([
         'who',
         'Triggered',
         'App_Open',
-        'total',
-        'equals',
+        'Total',
+        'Equals',
         'Last 30 days',
       ]);
       expect(fifthQueryTextElements).toEqual([
         'and',
         'Triggered',
         'Login',
-        'total',
-        'equals',
+        'Total',
+        'Equals',
         'Last 30 days',
       ]);
     });
@@ -708,20 +737,20 @@ describe('Create Segment', () => {
       const queries = screen.getAllByTestId('query-builder');
 
       const filterOneTextElements = getWhereElementsText(queries, 0);
-      //first query -  `where properties.$city equals Chennai, Guwahati or 1 more
+      //first query -  `where properties.$city Is Chennai, Guwahati or 1 more
       expect(filterOneTextElements).toEqual([
         'where',
         'properties.$city',
-        'equals',
+        'Is',
         'Chennai, Guwahati or 1 more',
       ]);
 
       const filterTwoTextElements = getWhereElementsText(queries, 1);
-      //first query -  `and properties.$app_version equals 1.5.5, 1.5.6
+      //second query -  `and properties.$app_version Is 1.5.5, 1.5.6
       expect(filterTwoTextElements).toEqual([
         'and',
         'properties.$app_version',
-        'equals',
+        'Is',
         '1.5.5, 1.5.6',
       ]);
     });
@@ -1074,16 +1103,18 @@ describe('Create Segment', () => {
             {
               condition: SegmentFilterConditions.WHERE,
               operand: 'properties.$city',
-              operator: 'equals',
+              operator: 'is',
               values: ['Chennai', 'Guwahati', 'Patna'],
               type: FilterType.WHERE,
+              datatype: SegmentFilterDataType.STRING,
             },
             {
               condition: SegmentFilterConditions.AND,
               operand: 'properties.$app_version',
-              operator: 'equals',
+              operator: 'is',
               values: ['1.5.5', '1.5.6'],
               type: FilterType.WHERE,
+              datatype: SegmentFilterDataType.STRING,
             },
             {
               condition: SegmentFilterConditions.WHO,
@@ -1228,6 +1259,60 @@ describe('Create Segment', () => {
       await removeFilter(0);
       await waitFor(() => {
         assertFilterConditions(['where', 'or', 'who', 'and', 'and']);
+      });
+    });
+
+    it('remove `where` filter when there is one `where` filter and `who` filter, first filter condition should change to `who`', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+      await addWhoFilter();
+
+      // remove first where filter
+      await removeFilter(0);
+
+      const queries = screen.getAllByTestId('query-builder');
+      const queryTextElements = getWhereElementsText(queries, 0);
+
+      await waitFor(() => {
+        expect(queryTextElements).toEqual([
+          'who',
+          'Triggered',
+          'App_Open',
+          'Total',
+          'Equals',
+          'Last 30 days',
+        ]);
+        assertFilterConditions(['who']);
+      });
+    });
+
+    it('remove first `where` filter when there are two `where` filter and `who` filter, first filter condition should remain `where`', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+      await addWhereFilter();
+      await addWhoFilter();
+
+      // remove first where filter
+      await removeFilter(0);
+
+      await waitFor(() => {
+        assertFilterConditions(['where', 'who']);
       });
     });
   });
@@ -1451,6 +1536,134 @@ describe('Create Segment', () => {
         getDateStringFromDate(new Date())
       );
       expect(dateFieldText.textContent).toEqual(`${startDate} - ${endDate}`);
+    });
+  });
+
+  describe('change datatype and filter operator of where filter', () => {
+    it('change datatype from string to number and inputValue filed should be rendered replacing selectvalue dropdown', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      await addWhereFilter();
+      await switchFilterDatatype(SegmentFilterDataType.NUMBER);
+
+      // expect to see input field and operator switches to 'Equals'
+      const queries = screen.getAllByTestId('query-builder');
+      const queryTextElements = getWhereElementsText(queries, 0);
+      const selectValueDropdown = screen.queryByTestId('event-property-value');
+      const inputValueField = screen.queryByTestId('input-value');
+
+      expect(selectValueDropdown).not.toBeInTheDocument();
+      expect(inputValueField).toBeInTheDocument();
+
+      expect(queryTextElements).toEqual(['where', 'device', 'Equals']);
+    });
+
+    it('change datatype from string to bool, inputvalue filed and select value dropdown should not be rendered', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+      await switchFilterDatatype(SegmentFilterDataType.BOOL);
+
+      // expect to see input field and operator switches to 'Equals'
+      const queries = screen.getAllByTestId('query-builder');
+      const queryTextElements = getWhereElementsText(queries, 0);
+      const selectValueDropdown = screen.queryByTestId('event-property-value');
+      const inputValueField = screen.queryByTestId('input-value');
+
+      expect(selectValueDropdown).not.toBeInTheDocument();
+      expect(inputValueField).not.toBeInTheDocument();
+
+      expect(queryTextElements).toEqual(['where', 'device', 'Is true']);
+    });
+
+    it('change operator for string datatype filter, operators should be `Is/ Is not`', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+
+      const filterOperatorText = screen.getByTestId('filter-operator');
+      fireEvent.click(filterOperatorText);
+
+      const filterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+
+      const filterOperatorsOptionsText = filterOperatorsOptions.map(
+        (filter) => filter.textContent
+      );
+      expect(filterOperatorsOptionsText).toEqual(['Is', 'Is not']);
+
+      // click on 'Is not' operator
+      await act(async () => {
+        fireEvent.click(filterOperatorsOptions[1]);
+      });
+      await waitFor(() => {
+        expect(filterOperatorText.textContent).toEqual('Is not');
+      });
+    });
+
+    it('change filter datatype from string datatype to bool ,and after that operators should be `Is true/Is false', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+
+      // change datatype to bool(True/ False)
+      await switchFilterDatatype(SegmentFilterDataType.BOOL);
+
+      // open filter operator dropdown
+      const filterOperatorText = screen.getByTestId('filter-operator');
+      fireEvent.click(filterOperatorText);
+
+      const filterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+
+      const filterOperatorsOptionsText = filterOperatorsOptions.map(
+        (filter) => filter.textContent
+      );
+      expect(filterOperatorsOptionsText).toEqual(['Is true', 'Is false']);
+
+      // expect transientSegment call to be happen when changing to datatype
+      // 1 call while rendering, 1 call when adding a where filter and 1 call when changing the datatype to bool
+      expect(mockedTransientSegment).toHaveBeenCalledTimes(1 + 1 + 1);
+
+      // click on 'Is false' operator
+      await act(async () => {
+        fireEvent.click(filterOperatorsOptions[1]);
+      });
+
+      await waitFor(() => {
+        expect(filterOperatorText.textContent).toEqual('Is false');
+      });
     });
   });
 });
