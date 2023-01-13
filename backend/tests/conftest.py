@@ -1,7 +1,7 @@
 import pytest
 from unittest import mock
 from domain.apps.service import AppService
-from domain.users.service import UserService
+from domain.apperture_users.service import AppertureUserService
 
 from server import app
 from mongo.mongo import Mongo
@@ -43,7 +43,7 @@ def app_init(
     app.dependency_overrides[FunnelsService] = lambda: funnel_service
     app.dependency_overrides[DataSourceService] = lambda: datasource_service
     app.dependency_overrides[EventsService] = lambda: events_service
-    app.dependency_overrides[UserService] = lambda: user_service
+    app.dependency_overrides[AppertureUserService] = lambda: user_service
     app.dependency_overrides[AppService] = lambda: app_service
     app.dependency_overrides[EdgeService] = lambda: edge_service
     app.dependency_overrides[SegmentService] = lambda: segment_service
