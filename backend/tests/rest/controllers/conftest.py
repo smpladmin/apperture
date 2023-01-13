@@ -15,10 +15,13 @@ from domain.segments.models import (
     ComputedSegment,
     Segment,
     WhereSegmentFilter,
-    SegmentFilterOperators,
+    SegmentFilterOperatorsNumber,
+    SegmentFilterOperatorsString,
+    SegmentFilterOperatorsBool,
     SegmentFilterConditions,
     SegmentGroup,
     SegmentGroupConditions,
+    SegmentDataType,
 )
 from domain.funnels.models import (
     Funnel,
@@ -277,20 +280,22 @@ def segment_service():
     )
     filters = [
         WhereSegmentFilter(
-            operator=SegmentFilterOperators.EQUALS,
+            operator=SegmentFilterOperatorsString.IS,
             operand="properties.$city",
             values=["Delhi", "Indore", "Bhopal"],
             all=False,
             type=SegmentFilterConditions.WHERE,
             condition=SegmentFilterConditions.WHERE,
+            datatype=SegmentDataType.STRING,
         ),
         WhereSegmentFilter(
-            operator=SegmentFilterOperators.EQUALS,
+            operator=SegmentFilterOperatorsNumber.EQ,
             operand="properties.$app_release",
-            values=["5003", "2077", "5002"],
+            values=[5003, 2077, 5002],
             all=False,
             type=SegmentFilterConditions.WHERE,
             condition=SegmentFilterConditions.AND,
+            datatype=SegmentDataType.NUMBER,
         ),
     ]
     groups = [SegmentGroup(filters=filters, condition=SegmentGroupConditions.AND)]
@@ -515,18 +520,20 @@ def saved_segment_response():
                     {
                         "all": False,
                         "condition": "where",
+                        "datatype": "String",
                         "operand": "properties.$city",
-                        "operator": "equals",
+                        "operator": "is",
                         "type": "where",
                         "values": ["Delhi", "Indore", "Bhopal"],
                     },
                     {
                         "all": False,
                         "condition": "and",
+                        "datatype": "Number",
                         "operand": "properties.$app_release",
                         "operator": "equals",
                         "type": "where",
-                        "values": ["5003", "2077", "5002"],
+                        "values": [5003, 2077, 5002],
                     },
                 ],
             }
@@ -919,19 +926,21 @@ def transient_segment_data():
                 "filters": [
                     {
                         "operand": "properties.$city",
-                        "operator": "equals",
+                        "operator": "is",
                         "values": ["Delhi", "Indore", "Bhopal"],
                         "type": SegmentFilterConditions.WHERE,
                         "condition": SegmentFilterConditions.WHERE,
                         "all": False,
+                        "datatype": "String",
                     },
                     {
                         "operand": "properties.$app_release",
                         "operator": "equals",
-                        "values": ["5003", "2077", "5002"],
+                        "values": [5003, 2077, 5002],
                         "type": SegmentFilterConditions.WHERE,
                         "condition": SegmentFilterConditions.AND,
                         "all": False,
+                        "datatype": "Number",
                     },
                 ],
                 "condition": "and",
@@ -978,19 +987,21 @@ def segment_data():
                 "filters": [
                     {
                         "operand": "properties.$city",
-                        "operator": "equals",
+                        "operator": SegmentFilterOperatorsString.IS,
                         "values": ["Delhi", "Indore", "Bhopal"],
                         "type": SegmentFilterConditions.WHERE,
                         "condition": SegmentFilterConditions.WHERE,
                         "all": False,
+                        "datatype": "String",
                     },
                     {
                         "operand": "properties.$app_release",
-                        "operator": "equals",
-                        "values": ["5003", "2077", "5002"],
+                        "operator": SegmentFilterOperatorsNumber.EQ,
+                        "values": [5003, 2077, 5002],
                         "type": SegmentFilterConditions.WHERE,
                         "condition": SegmentFilterConditions.AND,
                         "all": False,
+                        "datatype": "Number",
                     },
                 ],
                 "condition": "and",
