@@ -6,7 +6,9 @@ from .models import AppertureUser
 
 class AppertureUserService:
     async def create_user_if_not_exists(self, oauth_user: OAuthUser):
-        existing_user = await AppertureUser.find_one(AppertureUser.email == oauth_user.email)
+        existing_user = await AppertureUser.find_one(
+            AppertureUser.email == oauth_user.email
+        )
         if existing_user:
             return existing_user
         return await self._create_user(oauth_user)

@@ -50,7 +50,9 @@ async def _redirect_with_auth_cookie(redirect_url: str, user_id: str):
     return response
 
 
-async def _authorize_and_save_user(request: Request, user_service: AppertureUserService):
+async def _authorize_and_save_user(
+    request: Request, user_service: AppertureUserService
+):
     try:
         access_token = await oauth.google.authorize_access_token(request)
     except OAuthError:

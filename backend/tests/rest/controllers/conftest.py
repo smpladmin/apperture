@@ -43,6 +43,7 @@ from domain.metrics.models import (
 )
 from domain.apperture_users.models import AppertureUser
 from domain.edge.models import Edge, NodeSignificance, NodeTrend, NodeSankey
+from domain.users.models import UserDetails
 
 
 @pytest.fixture(scope="module")
@@ -233,10 +234,58 @@ def events_service():
 
 
 @pytest.fixture(scope="module")
-def user_service(mock_find_email_user):
+def apperture_user_service(mock_find_email_user):
     service = mock.AsyncMock()
     service.find_user.return_value = mock_find_email_user
     return service
+
+
+@pytest.fixture(scope="module")
+def user_service():
+    service = mock.AsyncMock()
+    user_details=UserDetails(
+        user_id="user_id",
+        datasource_id="datasource_id",
+        property=dict({
+            "$insert_id": "33ba7915-444f-4b91-9541-a49334a5a72e",
+            "$insert_key": "006a3255bb6bfa3e095a499cd0e0807c9a#832",
+            "$schema": 13,
+            "amplitude_id": 502527487487,
+            "app": 281811,
+            "city": "Lapu-Lapu City",
+        })
+    )
+    user_details_future=asyncio.Future()
+    user_details_future.set_result=user_details_future
+
+    service.get_user_properties.set_result=user_details_future
+    
+    return service
+
+
+@pytest.fixture(scope="module")
+def user_data():
+    return {
+        "user_id": "d0b9dd2b-e953-4584-a750-26c4bf906390R",
+        "datasource_id": "638f334e8e54760eafc64e66",
+        "event": "Viewed /register Page",
+    }
+
+
+@pytest.fixture(scope="module")
+def queried_user_property():
+    return {
+        "user_id": "user_id",
+        "datasource_id": "datasource_id",
+        "property": {
+            "$insert_id": "33ba7915-444f-4b91-9541-a49334a5a72e",
+            "$insert_key": "006a3255bb6bfa3e095a499cd0e0807c9a#832",
+            "$schema": 13,
+            "amplitude_id": 502527487487,
+            "app": 281811,
+            "city": "Lapu-Lapu City",
+        },
+    }
 
 
 @pytest.fixture(scope="module")

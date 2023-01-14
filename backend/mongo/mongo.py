@@ -7,7 +7,7 @@ from domain.edge.models import BaseEdge
 from domain.edge.models import Edge
 from domain.edge.models import RichEdge
 from domain.integrations.models import Integration
-from domain.apperture_users.models import AppertureUser 
+from domain.apperture_users.models import AppertureUser
 from domain.runlogs.models import RunLog
 from domain.notifications.models import Notification
 from domain.funnels.models import Funnel
