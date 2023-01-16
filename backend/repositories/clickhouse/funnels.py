@@ -166,7 +166,7 @@ class Funnels(EventsBase):
 
         return query.get_sql(), parameters
 
-    def _subquery_builder(self, steps: List[FunnelStep]):
+    def _build_subquery(self, steps: List[FunnelStep]):
         sub_query = ClickHouseQuery
         sub_query = sub_query.select(AliasedQuery("table1").user_id.as_(0))
 
@@ -199,7 +199,7 @@ class Funnels(EventsBase):
     def build_analytics_query(self, ds_id: str, steps: List[FunnelStep]):
         query, parameters = self._builder(ds_id=ds_id, steps=steps)
 
-        sub_query = self._subquery_builder(steps=steps)
+        sub_query = self._build_subquery(steps=steps)
 
         query = query.with_(sub_query, "final_table")
         query = query.from_(AliasedQuery("final_table"))
