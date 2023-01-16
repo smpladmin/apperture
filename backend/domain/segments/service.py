@@ -63,3 +63,8 @@ class SegmentService:
 
     async def get_segments_for_app(self, app_id: str) -> List[Segment]:
         return await Segment.find(Segment.app_id == PydanticObjectId(app_id)).to_list()
+
+    async def get_segments_for_user(self, user_id: str) -> List[Segment]:
+        return await Segment.find(
+            Segment.user_id == PydanticObjectId(user_id)
+        ).to_list()

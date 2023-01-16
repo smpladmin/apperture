@@ -1,5 +1,6 @@
 import { ComputedFunnel } from './funnel';
-import { Notifications } from './notification';
+import { Metric } from './metric';
+import { Segment } from './segment';
 
 export enum WatchListItemType {
   ALL = 'all',
@@ -10,8 +11,5 @@ export enum WatchListItemType {
 
 export type SavedItems = {
   type: WatchListItemType;
-  details: ComputedFunnel | Notifications;
-  users: number;
-  change: number;
-  actions: any;
+  details: ComputedFunnel | Segment;
 };

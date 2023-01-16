@@ -6,6 +6,7 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import { getSavedFunnelsForUser } from '@lib/services/funnelService';
 import { WatchListItemOptions } from './util';
 import WatchListItemTypeOptions from './WatchListItemOptions';
+import { getSavedSegmentsForUser } from '@lib/services/segmentService';
 
 const Watchlist = () => {
   const [selectedItem, setSelectedItem] = useState(WatchListItemType.ALL);
@@ -15,7 +16,10 @@ const Watchlist = () => {
   const getSavedItems = async () => {
     if (selectedItem === WatchListItemType.ALL) {
       const [savedFunnels] = await Promise.all([getSavedFunnelsForUser()]);
-      setSavedItemsData([...savedFunnels]);
+      const funnels = savedFunnels.map((funnel: any) => {
+        return { type: WatchListItemType.FUNNELS, details: funnel };
+      });
+      setSavedItemsData(funnels);
       setIsLoading(false);
       return;
     }
@@ -31,7 +35,8 @@ const Watchlist = () => {
       return;
     }
     if (selectedItem === WatchListItemType.SEGMENTS) {
-      setSavedItemsData([]);
+      const segments = await getSavedSegmentsForUser();
+      setSavedItemsData(segments);
       setIsLoading(false);
       return;
     }

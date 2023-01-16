@@ -114,11 +114,6 @@ class FunnelsService:
     async def get_funnels_for_apps(
         self, app_ids: List[PydanticObjectId]
     ) -> List[SavedItems]:
-
-        funnels = await Funnel.find(
+        return await Funnel.find(
             In(Funnel.app_id, app_ids),
         ).to_list()
-        return [
-            SavedItems(type=WatchlistItemType.FUNNELS, details=funnel)
-            for funnel in funnels
-        ]

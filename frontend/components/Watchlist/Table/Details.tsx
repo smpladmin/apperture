@@ -2,19 +2,25 @@ import { Box, Flex, Text } from '@chakra-ui/react';
 import Render from '@components/Render';
 import { ComputedFunnel } from '@lib/domain/funnel';
 import { Notifications } from '@lib/domain/notification';
+import { Segment } from '@lib/domain/segment';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { CellContext } from '@tanstack/react-table';
+import { useEffect } from 'react';
 import LabelType from './LabelType';
 
 export const Details = ({
   info,
 }: {
-  info: CellContext<SavedItems, ComputedFunnel | Notifications>;
+  info: CellContext<SavedItems, ComputedFunnel | Segment>;
 }) => {
   const { type, details } = info?.row?.original;
 
-  /*Temporary change - look for a better alternative for such usecase */
-  const { steps } = details as ComputedFunnel;
+  const getSteps = () => {
+    if (type === WatchListItemType.FUNNELS) {
+      const { steps } = details as ComputedFunnel;
+      return steps;
+    }
+  };
 
   return (
     <Flex direction={'column'} gap={'1'}>
@@ -23,7 +29,9 @@ export const Details = ({
       </Text>
       {type === WatchListItemType.FUNNELS ? (
         <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'400'}>
-          {`${steps?.[0]?.event} -> ${steps?.[steps.length - 1]?.event}`}
+          {`${getSteps()?.[0]?.event} -> ${
+            getSteps()?.[(getSteps() || []).length - 1]?.event
+          }`}
         </Text>
       ) : null}
       <Render on={'mobile'}>

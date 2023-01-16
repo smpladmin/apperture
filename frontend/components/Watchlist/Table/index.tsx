@@ -15,6 +15,7 @@ import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { useRouter } from 'next/router';
 import UsersMetric from './UsersMetric';
 import { AppertureContext } from '@lib/contexts/appertureContext';
+import { User } from '@lib/domain/user';
 
 const WatchlistTable = ({
   savedItemsData,
@@ -35,10 +36,6 @@ const WatchlistTable = ({
               header: 'Name',
               cell: (info) => <Details info={info} />,
             }),
-            columnHelper.accessor('users', {
-              cell: (info) => <UsersMetric info={info} />,
-              header: 'Users',
-            }),
           ]
         : [
             columnHelper.accessor('type', {
@@ -49,17 +46,19 @@ const WatchlistTable = ({
               header: 'Name',
               cell: (info) => <Details info={info} />,
             }),
-            columnHelper.accessor('users', {
-              cell: (info) => <UsersMetric info={info} />,
-              header: 'Users',
+            columnHelper.accessor('details.user', {
+              cell: (info) => {
+                const user = info.getValue() as User;
+                return `${user.firstName} ${user.lastName}`;
+              },
+              header: 'Created By',
             }),
-            columnHelper.accessor('change', {
-              cell: (info) => info.getValue(),
-              header: '% Change',
-            }),
-            columnHelper.accessor('actions', {
-              cell: () => <TableActionMenu />,
-              header: '',
+            columnHelper.accessor('details.updatedAt', {
+              cell: (info) => {
+                const updatedAt = info.getValue();
+                return new Date(updatedAt).toLocaleDateString();
+              },
+              header: 'Last Updated',
             }),
           ],
     []

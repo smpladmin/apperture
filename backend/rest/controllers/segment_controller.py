@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends
 
 from domain.datasources.service import DataSourceService
@@ -11,7 +11,7 @@ from rest.dtos.segments import (
     SegmentResponse,
 )
 
-from rest.middlewares import validate_jwt, get_user
+from rest.middlewares import validate_jwt, get_user, get_user_id
 
 router = APIRouter(
     tags=["segments"],
@@ -62,7 +62,10 @@ async def get_segment(
 
 @router.get("/segments", response_model=List[SegmentResponse])
 async def get_segments(
-    app_id: str,
+    app_id: Optional[str] = None,
+    user_id: str = Depends(get_user_id),
     segment_service: SegmentService = Depends(),
 ):
-    return await segment_service.get_segments_for_app(app_id=app_id)
+    if app_id:
+        return await segment_service.get_segments_for_app(app_id=app_id)
+    return await segment_service.get_segments_for_user(user_id=user_id)

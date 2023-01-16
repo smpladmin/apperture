@@ -119,8 +119,22 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
             bg={'white.DEFAULT'}
             color={'black.100'}
           >
-            <NavIconButton
-              icon={'ri-route-fill'}
+            <IconButton
+              aria-label="Explore"
+              icon={<i className={'ri-route-fill'} />}
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
               onClick={handleRedirectToExplorePage}
             />
           </Tooltip>
@@ -131,8 +145,22 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
             bg={'white.DEFAULT'}
             color={'black.100'}
           >
-            <NavIconButton
-              icon={'ri-bookmark-line'}
+            <IconButton
+              aria-label="Explore"
+              icon={<i className={'ri-bookmark-line'} />}
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
               onClick={() => router.push('/analytics/saved')}
             />
           </Tooltip>
@@ -197,33 +225,5 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
     </Flex>
   );
 };
-
-type NavIconButtonProps = {
-  icon: string;
-  onClick: () => void;
-};
-
-function NavIconButton({ icon, onClick }: NavIconButtonProps) {
-  return (
-    <IconButton
-      aria-label="Explore"
-      icon={<i className={icon} />}
-      rounded={'lg'}
-      h={10}
-      w={10}
-      bg={'black.0'}
-      fontWeight={'500'}
-      color={'grey.100'}
-      _hover={{
-        backgroundColor: 'white.0',
-        color: 'white',
-      }}
-      _active={{
-        backgroundColor: 'transparent',
-      }}
-      onClick={onClick}
-    />
-  );
-}
 
 export default DesktopSideMenu;

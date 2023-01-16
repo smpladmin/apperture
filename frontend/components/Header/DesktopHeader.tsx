@@ -1,10 +1,21 @@
-import { Box, Flex } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+} from '@chakra-ui/react';
+import { ChevronDownIcon } from '@chakra-ui/icons';
 import { Provider } from '@lib/domain/provider';
 import 'remixicon/fonts/remixicon.css';
 import filterIcon from '@assets/icons/filter-icon.svg';
 import Search from './Search';
 import Image from 'next/image';
 import { getProviderLogo } from '@lib/utils/common';
+import { BLACK, BLACK_RUSSIAN, WHITE_DEFAULT } from '@theme/index';
+import { useRouter } from 'next/router';
 
 type DesktopHeaderProps = {
   dataSourceType: Provider;
@@ -16,6 +27,15 @@ const DesktopHeader = ({
   dataSourceType,
   openSwitchDataSourceModal,
 }: DesktopHeaderProps) => {
+  const router = useRouter();
+
+  const navigateTo = (path: string) => {
+    router.push({
+      pathname: `/analytics/${path}/create/[dsId]`,
+      query: { dsId: router.query.dsId },
+    });
+  };
+
   return (
     <Flex
       direction={'row'}
@@ -35,6 +55,31 @@ const DesktopHeader = ({
           </Box>
           <Box cursor={'not-allowed'}>
             <Image src={filterIcon} alt="filter-icon" />
+          </Box>
+          <Box>
+            <Menu>
+              <MenuButton
+                as={Button}
+                bgColor={BLACK}
+                color={WHITE_DEFAULT}
+                _hover={{
+                  backgroundColor: 'hover-grey',
+                }}
+                _active={{
+                  backgroundColor: 'hover-grey',
+                }}
+                rightIcon={<ChevronDownIcon />}
+              >
+                Create
+              </MenuButton>
+              <MenuList>
+                <MenuItem onClick={() => navigateTo('metric')}>Metric</MenuItem>
+                <MenuItem onClick={() => navigateTo('funnel')}>Funnel</MenuItem>
+                <MenuItem onClick={() => navigateTo('segment')}>
+                  Segment
+                </MenuItem>
+              </MenuList>
+            </Menu>
           </Box>
           <Box
             flexShrink={0}

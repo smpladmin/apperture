@@ -5,13 +5,16 @@ from domain.funnels.service import FunnelsService
 from domain.apps.service import AppService
 from domain.users.models import User
 from domain.datasources.service import DataSourceService
+from domain.users.service import UserService
 from rest.dtos.funnels import (
     FunnelResponse,
     ComputedFunnelStepResponse,
     ComputedFunnelResponse,
+    FunnelWithUser,
 )
 from rest.dtos.funnels import CreateFunnelDto, TransientFunnelDto, FunnelTrendResponse
 from rest.dtos.saved_items import SavedItemsResponse
+from rest.dtos.users import UserResponse
 from rest.middlewares import validate_jwt, get_user_id, get_user
 
 
@@ -102,11 +105,20 @@ async def get_transient_funnel_trends(
     )
 
 
-@router.get("/funnels", response_model=List[SavedItemsResponse])
+@router.get("/funnels", response_model=List[FunnelWithUser])
 async def get_funnels(
     user: User = Depends(get_user),
     funnel_service: FunnelsService = Depends(),
     app_service: AppService = Depends(),
+    user_service: UserService = Depends(),
 ):
     apps = await app_service.get_apps(user=user)
-    return await funnel_service.get_funnels_for_apps(app_ids=[app.id for app in apps])
+    funnels = await funnel_service.get_funnels_for_apps(
+        app_ids=[app.id for app in apps]
+    )
+    funnels = [FunnelWithUser.from_orm(f) for f in funnels]
+    for funnel in funnels:
+        user = await user_service.get_user(funnel.user_id)
+        funnel.user = UserResponse.from_orm(user)
+
+    return funnels
