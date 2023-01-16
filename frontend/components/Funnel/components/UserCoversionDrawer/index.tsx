@@ -49,14 +49,14 @@ const UserConversionDrawer = ({
         event
       );
       if (response.property) {
-        const property: UserProperty[] = Object.keys(response.property).map(
-          (property) => {
+        const property: UserProperty[] = Object.keys(response.property)
+          .map((property) => {
             return {
               Property: property,
-              Value: response[property] || '',
+              Value: response.property[property],
             };
-          }
-        );
+          })
+          .filter((property) => property.Value);
         setUserProperty(property);
       }
     };
@@ -112,7 +112,7 @@ const UserConversionDrawer = ({
                   />
                 </Box>
                 <Text mt={6} fontWeight={500} fontSize={'18'} lineHeight="22px">
-                  UID
+                  {selectedUser}
                 </Text>
               </Flex>
             )}

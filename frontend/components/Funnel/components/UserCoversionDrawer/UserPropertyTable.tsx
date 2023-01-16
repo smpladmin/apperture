@@ -15,6 +15,7 @@ import {
   Tr,
   Td,
   Box,
+  Text,
 } from '@chakra-ui/react';
 import { UserProperty } from '@lib/domain/funnel';
 
@@ -29,11 +30,15 @@ const UserPropertyTable = ({ properties }: UserPropertyTableProps) => {
       return [
         columnHelper.accessor('Property', {
           header: 'Property',
-          cell: (info) => info.getValue(),
+          cell: (info) => (
+            <Text wordBreak={'break-all'}>{info.getValue()}</Text>
+          ),
         }),
         columnHelper.accessor('Value', {
           header: 'Value',
-          cell: (info) => info.getValue(),
+          cell: (info) => (
+            <Text wordBreak={'break-all'}>{info.getValue()}</Text>
+          ),
         }),
       ];
     };
@@ -47,6 +52,19 @@ const UserPropertyTable = ({ properties }: UserPropertyTableProps) => {
     getSortedRowModel: getSortedRowModel(),
   });
   const { getHeaderGroups, getRowModel } = tableInstance;
+
+  if (properties.length === 0) {
+    return (
+      <Text
+        textAlign={'center'}
+        fontSize={'12px'}
+        fontStyle={'italic'}
+        color={'grey.100'}
+      >
+        No data available
+      </Text>
+    );
+  }
 
   return (
     <Flex flexDirection="column" maxH={'full'} w={'full'} grow={1}>
