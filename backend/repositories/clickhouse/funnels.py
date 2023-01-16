@@ -5,7 +5,7 @@ from pypika import (
     Case,
     NULL,
     DatePart,
-    Parameter,
+    Parameter, Field,
 )
 from pypika import functions as fn
 from pypika.functions import Extract
@@ -27,6 +27,13 @@ class Funnels(EventsBase):
         parameters = {"ds_id": ds_id, "epoch_year": self.epoch_year}
 
         for i, step in enumerate(steps):
+            criterion = [
+                self.table.datasource_id == Parameter("%(ds_id)s"),
+                self.table.event_name == Parameter(f"%(event{i})s"),
+            ]
+            if step.filters:
+                for filter in step.filters:
+                    criterion.append(Field(f"properties.{filter.operand}").isin(filter.values))
             parameters[f"event{i}"] = step.event
             sub_query = (
                 ClickHouseQuery.from_(self.table)
