@@ -15,43 +15,34 @@ import {
   Tr,
   Td,
   Box,
-  Text,
 } from '@chakra-ui/react';
-import { FunnelEventUserData } from '@lib/domain/funnel';
-import { formatDatalabel } from '@lib/utils/common';
-import UserRow from './UserRow';
+import { UserProperty } from '@lib/domain/funnel';
 
-type UserListTableProps = {
-  users: FunnelEventUserData[];
-  total_users: number;
-  unique_users: number;
-  handleRowClick: Function | null;
+type UserPropertyTableProps = {
+  properties: any;
 };
 
-const UserListTable = ({
-  users,
-  total_users,
-  unique_users,
-  handleRowClick,
-}: UserListTableProps) => {
-  const columnHelper = createColumnHelper();
+const UserPropertyTable = ({ properties }: UserPropertyTableProps) => {
+  const columnHelper = createColumnHelper<UserProperty>();
   const columns = useMemo(() => {
     const generateColumnHeader = () => {
-      return ['id'].map((key: any) =>
-        columnHelper.accessor(key, {
-          header: 'Users',
-          cell: (info) => (
-            <UserRow name={info.getValue()} handleRowClick={handleRowClick} />
-          ),
-        })
-      );
+      return [
+        columnHelper.accessor('Property', {
+          header: 'Property',
+          cell: (info) => info.getValue(),
+        }),
+        columnHelper.accessor('Value', {
+          header: 'Value',
+          cell: (info) => info.getValue(),
+        }),
+      ];
     };
     return [...generateColumnHeader()];
-  }, [users]);
+  }, [properties]);
 
   const tableInstance = useReactTable({
     columns,
-    data: users || [],
+    data: properties || [],
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
@@ -59,34 +50,12 @@ const UserListTable = ({
 
   return (
     <Flex flexDirection="column" maxH={'full'} w={'full'} grow={1}>
-      <Flex justifyContent={'space-between'} py={4} maxH={'full'}>
-        <Text
-          flex={1}
-          fontSize={14}
-          lineHeight={'18px'}
-          color={'grey.100'}
-          fontWeight={500}
-        >
-          Showing:{' '}
-          <Text as="span" color={'black.100'}>
-            {total_users.toLocaleString()} Users
-          </Text>
-        </Text>
-        <Text
-          fontSize={12}
-          lineHeight={'16px'}
-          color={'hover-grey'}
-          fontWeight={400}
-          textAlign={'right'}
-        >
-          Includes {formatDatalabel(unique_users)} Unique Users
-        </Text>
-      </Flex>
       <Box
         overflowY={'auto'}
         border={'0.4px solid #b2b2b5'}
         borderRadius={'8px'}
         maxH={'full'}
+        margin={2}
       >
         <Table>
           <Thead position={'sticky'} top={0} py={'3'} px={'8'} bg={'#f5f5f9'}>
@@ -96,7 +65,6 @@ const UserListTable = ({
                   return (
                     <Th
                       key={header.id + index}
-                      data-testid={'segment-table-headers'}
                       borderBottom={'0.4px solid #b2b2b5'}
                     >
                       {flexRender(
@@ -111,17 +79,12 @@ const UserListTable = ({
           </Thead>
           <Tbody overflow={'auto'}>
             {getRowModel().rows.map((row, index) => (
-              <Tr
-                key={row.id + index}
-                _hover={{ bg: 'white.100' }}
-                data-testid={'segment-table-body-rows'}
-              >
+              <Tr key={row.id + index} _hover={{ bg: 'white.100' }}>
                 {row.getVisibleCells().map((cell, cellIndex) => {
                   return (
                     <Td
                       key={cell.id + cellIndex}
                       borderBottom={'0.4px solid #b2b2b5'}
-                      data-testid={'segment-table--body-data'}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -139,4 +102,4 @@ const UserListTable = ({
   );
 };
 
-export default UserListTable;
+export default UserPropertyTable;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Drawer,
   DrawerBody,
@@ -9,21 +9,65 @@ import {
   DrawerCloseButton,
   Button,
   Text,
+  IconButton,
+  Flex,
+  Box,
 } from '@chakra-ui/react';
 import UserTableView from './UserListTableView';
-import { FunnelEventConversion } from '@lib/domain/funnel';
+import { FunnelEventConversion, UserProperty } from '@lib/domain/funnel';
+import { getUserProperty } from '@lib/services/funnelService';
+import UserPropertyTable from './UserPropertyTable';
 
 type UserConversionDrawerProps = {
   isOpen: boolean;
   onClose: () => void;
   conversionData: FunnelEventConversion | null;
+  datasourceId: string;
+  event: string;
 };
+
+export enum TableState {
+  LIST = 'list',
+  PROPERTY = 'property',
+}
 
 const UserConversionDrawer = ({
   isOpen,
   onClose,
   conversionData,
+  datasourceId,
+  event,
 }: UserConversionDrawerProps) => {
+  const [tableState, setTableState] = useState<TableState>(TableState.PROPERTY);
+  const [selectedUser, setSelectedUser] = useState<null | string>(null);
+  const [userProperty, setUserProperty] = useState<UserProperty[] | null>(null);
+  useEffect(() => {
+    const fetchUserProperty = async () => {
+      const response = await getUserProperty(
+        selectedUser as string,
+        datasourceId,
+        event
+      );
+      if (response.property) {
+        const property: UserProperty[] = Object.keys(response.property).map(
+          (property) => {
+            return {
+              Property: property,
+              Value: response[property] || '',
+            };
+          }
+        );
+        setUserProperty(property);
+      }
+    };
+    if (selectedUser) {
+      setTableState(TableState.PROPERTY);
+      fetchUserProperty();
+    } else {
+      setTableState(TableState.LIST);
+    }
+  }, [selectedUser]);
+
   return (
     <>
       <Drawer size={'md'} isOpen={isOpen} placement="right" onClose={onClose}>
@@ -35,18 +79,50 @@ const UserConversionDrawer = ({
         <DrawerContent>
           <DrawerCloseButton />
           <DrawerHeader>
-            {conversionData
-              ? `Step ${conversionData.step} - ${conversionData.event}`
-              : null}
+            {tableState == TableState.LIST ? (
+              conversionData ? (
+                `Step ${conversionData.step} - ${conversionData.event}`
+              ) : null
+            ) : (
+              <Flex direction={'column'}>
+                <Box>
+                  <IconButton
+                    minW={{ base: '8', md: '10' }}
+                    h={{ base: '8', md: '10' }}
+                    fontWeight={'500'}
+                    aria-label="Journey Map"
+                    variant={'iconButton'}
+                    icon={<i className="ri-arrow-left-line"></i>}
+                    rounded={'full'}
+                    color={'black.100'}
+                    border={'1px solid #EDEDED'}
+                    onClick={() => {
+                      setTableState(TableState.LIST);
+                    }}
+                  />
+                </Box>
+                <Text mt={6} fontWeight={500} fontSize={'18'} lineHeight="22px">
+                  UID
+                </Text>
+              </Flex>
+            )}
           </DrawerHeader>
 
           <DrawerBody p={0} overflow={'hidden'} maxH={'full'}>
-            {conversionData?.converted && conversionData?.dropped ? (
-              <UserTableView
-                converted={conversionData.converted}
-                dropped={conversionData.dropped}
-              />
-            ) : null}
+            {tableState == TableState.LIST
+              ? conversionData?.converted &&
+                conversionData?.dropped && (
+                  <UserTableView
+                    converted={conversionData.converted}
+                    dropped={conversionData.dropped}
+                    setSelectedUser={setSelectedUser}
+                  />
+                )
+              : userProperty && (
+                  <UserPropertyTable
+                    properties={userProperty as UserProperty[]}
+                  />
+                )}
           </DrawerBody>
 
           <DrawerFooter>

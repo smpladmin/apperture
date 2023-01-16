@@ -45,3 +45,8 @@ export type FunnelEventConversion = {
   step: number;
   event: string;
 };
+
+export type UserProperty = {
+  Property: string;
+  Value: string;
+};

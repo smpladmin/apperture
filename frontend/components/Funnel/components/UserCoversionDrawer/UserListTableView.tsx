@@ -14,9 +14,17 @@ import UserListTable from './UserListTable';
 type UserTableViewProps = {
   converted: FunnelConversionData;
   dropped: FunnelConversionData;
+  setSelectedUser: Function;
 };
 
-const UserTableView = ({ converted, dropped }: UserTableViewProps) => {
+const UserTableView = ({
+  converted,
+  dropped,
+  setSelectedUser,
+}: UserTableViewProps) => {
+  const handleRowClick = (user: string) => {
+    setSelectedUser(user);
+  };
   return (
     <Flex w={'full'} maxH={'full'}>
       <Tabs w={'full'} display={'flex'} flexDirection={'column'}>
@@ -36,16 +44,26 @@ const UserTableView = ({ converted, dropped }: UserTableViewProps) => {
             marginLeft={8}
             _active={{}}
           >
-            <Text>Dropped</Text>
+            Dropped
           </Tab>
         </TabList>
 
         <TabPanels display={'flex'} maxH={'full'} flex={1} overflow={'hidden'}>
           <TabPanel display={'flex'} overflow={'hidden'} w={'full'}>
-            <UserListTable {...converted} />
+            <UserListTable
+              handleRowClick={handleRowClick}
+              users={converted.users}
+              unique_users={converted.unique_users}
+              total_users={converted.total_users}
+            />
           </TabPanel>
           <TabPanel display={'flex'} overflow={'hidden'} w={'full'}>
-            <UserListTable {...dropped} />
+            <UserListTable
+              handleRowClick={handleRowClick}
+              users={dropped.users}
+              unique_users={dropped.unique_users}
+              total_users={dropped.total_users}
+            />
           </TabPanel>
         </TabPanels>
       </Tabs>

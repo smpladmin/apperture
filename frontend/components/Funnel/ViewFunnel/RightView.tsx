@@ -38,6 +38,8 @@ const RightView = ({
   } = useDisclosure();
   const [conversionData, setConversionData] =
     useState<FunnelEventConversion | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+
   const funnelConversion =
     computedTrendsData?.[computedTrendsData?.length - 1]?.['conversion'];
   const funnelLastStepUsers =
@@ -46,6 +48,8 @@ const RightView = ({
     onDrawerOpen();
     const { data } = properties.data;
     const { step, event } = data;
+    setSelectedEvent(event.trim());
+
     const selectedSteps = computedFunnel
       .slice(0, step)
       .map((step): FunnelStep => {
@@ -142,6 +146,8 @@ const RightView = ({
         isOpen={isDrawerOpen}
         onClose={onDrawerClose}
         conversionData={conversionData}
+        datasourceId={datasourceId}
+        event={selectedEvent as string}
       />
     </ViewPanel>
   );

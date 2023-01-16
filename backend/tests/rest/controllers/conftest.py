@@ -256,9 +256,9 @@ def user_service():
         })
     )
     user_details_future=asyncio.Future()
-    user_details_future.set_result=user_details_future
+    user_details_future.set_result(user_details)
 
-    service.get_user_properties.set_result=user_details_future
+    service.get_user_properties.return_value=user_details
     
     return service
 

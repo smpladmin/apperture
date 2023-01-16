@@ -44,6 +44,8 @@ const TransientFunnelView = ({
   const [conversionData, setConversionData] =
     useState<FunnelEventConversion | null>(null);
 
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+
   const funnelConversion = trendsData?.[trendsData.length - 1]?.['conversion'];
   const funnelLastStepUsers =
     trendsData?.[trendsData.length - 1]?.['lastStepUsers'];
@@ -52,6 +54,7 @@ const TransientFunnelView = ({
     onDrawerOpen();
     const { data } = properties.data;
     const { step, event } = data;
+    setSelectedEvent(event.trim());
     const selectedSteps = funnelSteps.slice(0, step);
     const conversionAnalysisData: FunnelEventConversion =
       await getConversionData(dsId as string, selectedSteps);
@@ -164,6 +167,8 @@ const TransientFunnelView = ({
         isOpen={isDrawerOpen}
         onClose={onDrawerClose}
         conversionData={conversionData}
+        datasourceId={dsId as string}
+        event={selectedEvent as string}
       />
     </Flex>
   );

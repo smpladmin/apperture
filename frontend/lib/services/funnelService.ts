@@ -148,3 +148,23 @@ export const getConversionData = async (dsId: string, steps: FunnelStep[]) => {
     return [];
   }
 };
+
+export const getUserProperty = async (
+  userId: string,
+  dsId: string,
+  event: string
+) => {
+  try {
+    const res = await AppertureAPI.get('/user/property', {
+      params: {
+        user_id: userId,
+        datasource_id: dsId,
+        event,
+      },
+    });
+    return res.data;
+  } catch (e) {
+    console.error((e as AxiosError).message);
+    return [];
+  }
+};
