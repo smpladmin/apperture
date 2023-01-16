@@ -23,33 +23,8 @@ class Funnels(EventsBase):
 
     def get_conversion_analytics(self, ds_id: str, steps: List[FunnelStep]):
         if len(steps) == 1:
-            query = ClickHouseQuery.from_(self.table).where(
-                Criterion.all(
-                    [
-                        self.table.datasource_id == Parameter("%(ds_id)s"),
-                        self.table.event_name == Parameter(f"%(event0)s"),
-                    ]
-                )
-            )
-            parameter = {
-                "ds_id": ds_id,
-                "epoch_year": self.epoch_year,
-                "event0": steps[0].event,
-            }
-            result = self.execute_get_query(
-                query.select(self.table.user_id).get_sql(), parameter
-            )
-            count = self.execute_get_query(
-                query.select(
-                    fn.Count(self.table.user_id),
-                    fn.Count(self.table.user_id).distinct(),
-                ).get_sql(),
-                parameter,
-            )
-            return [(data[0], ConversionStatus.CONVERTED) for data in result], [
-                (ConversionStatus.CONVERTED, count[0][0], count[0][1]),
-                (ConversionStatus.DROPPED, 0, 0),
-            ]
+            return self.get_initial_users(ds_id=ds_id, steps=steps)
+
         query, parameter, last, second_last = self.build_analytics_query(ds_id, steps)
         count_query = (
             ClickHouseQuery.with_(query, "user_list")
@@ -66,6 +41,35 @@ class Funnels(EventsBase):
         return self.execute_get_query(
             query.get_sql(), parameter
         ), self.execute_get_query(count_query.get_sql(), parameter)
+
+    def get_initial_users(self, ds_id: str, steps: List[FunnelStep]) -> List[Tuple]:
+        query = ClickHouseQuery.from_(self.table).where(
+            Criterion.all(
+                [
+                    self.table.datasource_id == Parameter("%(ds_id)s"),
+                    self.table.event_name == Parameter(f"%(event0)s"),
+                ]
+            )
+        )
+        parameter = {
+            "ds_id": ds_id,
+            "epoch_year": self.epoch_year,
+            "event0": steps[0].event,
+        }
+        result = self.execute_get_query(
+            query.select(self.table.user_id).get_sql(), parameter
+        )
+        count = self.execute_get_query(
+            query.select(
+                fn.Count(self.table.user_id),
+                fn.Count(self.table.user_id).distinct(),
+            ).get_sql(),
+            parameter,
+        )
+        return [(data[0], ConversionStatus.CONVERTED) for data in result], [
+            (ConversionStatus.CONVERTED, count[0][0], count[0][1]),
+            (ConversionStatus.DROPPED, 0, 0),
+        ]
 
     def get_users_count(self, ds_id: str, steps: List[FunnelStep]) -> List[Tuple]:
         return self.execute_get_query(*self.build_users_query(ds_id, steps))
@@ -94,11 +98,12 @@ class Funnels(EventsBase):
             )
             query = query.with_(sub_query, f"table{i + 1}")
 
-        query = query.from_(AliasedQuery("table1"))
         return query, parameters
 
     def build_users_query(self, ds_id: str, steps: List[FunnelStep]):
         query, parameters = self._builder(ds_id=ds_id, steps=steps)
+        query = query.from_(AliasedQuery("table1"))
+
         for i in range(1, len(steps)):
             query = query.left_join(AliasedQuery(f"table{i + 1}")).on_field("user_id")
 
@@ -127,6 +132,7 @@ class Funnels(EventsBase):
 
     def build_trends_query(self, ds_id: str, steps: List[FunnelStep]):
         query, parameters = self._builder(ds_id=ds_id, steps=steps)
+        query = query.from_(AliasedQuery("table1"))
         conditions = [
             Extract(DatePart.year, AliasedQuery(f"table{len(steps) - 1}").ts)
             > Parameter("%(epoch_year)s")
@@ -160,30 +166,7 @@ class Funnels(EventsBase):
 
         return query.get_sql(), parameters
 
-    def build_analytics_query(self, ds_id: str, steps: List[FunnelStep]):
-        query = ClickHouseQuery
-        parameters = {"ds_id": ds_id, "epoch_year": self.epoch_year}
-
-        for i, step in enumerate(steps):
-            parameters[f"event{i}"] = step.event
-            sub_query = (
-                ClickHouseQuery.from_(self.table)
-                .select(
-                    self.table.user_id,
-                    fn.Min(self.table.timestamp).as_("ts"),
-                )
-                .where(
-                    Criterion.all(
-                        [
-                            self.table.datasource_id == Parameter("%(ds_id)s"),
-                            self.table.event_name == Parameter(f"%(event{i})s"),
-                        ]
-                    )
-                )
-                .groupby(1)
-            )
-            query = query.with_(sub_query, f"table{i + 1}")
-
+    def _subquery_builder(self, steps: List[FunnelStep]):
         sub_query = ClickHouseQuery
         sub_query = sub_query.select(AliasedQuery("table1").user_id.as_(0))
 
@@ -211,6 +194,12 @@ class Funnels(EventsBase):
             sub_query = sub_query.left_join(AliasedQuery(f"table{i + 1}")).on_field(
                 "user_id"
             )
+        return sub_query
+
+    def build_analytics_query(self, ds_id: str, steps: List[FunnelStep]):
+        query, parameters = self._builder(ds_id=ds_id, steps=steps)
+
+        sub_query = self._subquery_builder(steps=steps)
 
         query = query.with_(sub_query, "final_table")
         query = query.from_(AliasedQuery("final_table"))

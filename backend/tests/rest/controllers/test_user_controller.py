@@ -1,5 +1,3 @@
-
-
 def test_get_user(client_init, user_data):
     response = client_init.get("/user/property", params=user_data)
     print(response.json())

@@ -7,7 +7,7 @@ from domain.funnels.models import (
     ComputedFunnelStep,
     ComputedFunnel,
     FunnelTrendsData,
-    FunnelConversionResponse,
+    FunnelConversion,
 )
 from rest.dtos.model_response import ModelResponse
 
@@ -44,6 +44,6 @@ class FunnelTrendResponse(FunnelTrendsData, ModelResponse):
         allow_population_by_field_name = True
 
 
-class FunnelConversionResponseBody(FunnelConversionResponse, ModelResponse):
+class FunnelConversionResponseBody(FunnelConversion, ModelResponse):
     class Config:
         allow_population_by_field_name = True

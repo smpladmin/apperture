@@ -27,7 +27,7 @@ from domain.funnels.models import (
     FunnelTrendsData,
     FunnelConversionData,
     FunnelEventUserData,
-    FunnelConversionResponse,
+    FunnelConversion,
 )
 from domain.notifications.models import (
     Notification,
@@ -174,7 +174,7 @@ def funnel_service():
         ),
     ]
 
-    funnel_user_conversion = FunnelConversionResponse(
+    funnel_user_conversion = FunnelConversion(
         converted=FunnelConversionData(
             users=[FunnelEventUserData(id="user_1")], total_users=1, unique_users=1
         ),
@@ -243,23 +243,25 @@ def apperture_user_service(mock_find_email_user):
 @pytest.fixture(scope="module")
 def user_service():
     service = mock.AsyncMock()
-    user_details=UserDetails(
+    user_details = UserDetails(
         user_id="user_id",
         datasource_id="datasource_id",
-        property=dict({
-            "$insert_id": "33ba7915-444f-4b91-9541-a49334a5a72e",
-            "$insert_key": "006a3255bb6bfa3e095a499cd0e0807c9a#832",
-            "$schema": 13,
-            "amplitude_id": 502527487487,
-            "app": 281811,
-            "city": "Lapu-Lapu City",
-        })
+        property=dict(
+            {
+                "$insert_id": "33ba7915-444f-4b91-9541-a49334a5a72e",
+                "$insert_key": "006a3255bb6bfa3e095a499cd0e0807c9a#832",
+                "$schema": 13,
+                "amplitude_id": 502527487487,
+                "app": 281811,
+                "city": "Lapu-Lapu City",
+            }
+        ),
     )
-    user_details_future=asyncio.Future()
+    user_details_future = asyncio.Future()
     user_details_future.set_result(user_details)
 
-    service.get_user_properties.return_value=user_details
-    
+    service.get_user_properties.return_value = user_details
+
     return service
 
 
@@ -848,7 +850,7 @@ def funnel_steps_data():
 
 @pytest.fixture(scope="module")
 def funnel_user_conversion_response():
-    return FunnelConversionResponse(
+    return FunnelConversion(
         converted=FunnelConversionData(
             users=[FunnelEventUserData(id="user_1")], total_users=1, unique_users=1
         ),

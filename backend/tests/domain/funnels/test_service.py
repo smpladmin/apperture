@@ -17,7 +17,7 @@ from domain.funnels.models import (
     FunnelTrendsData,
     EventFilters,
     FunnelConversionData,
-    FunnelConversionResponse,
+    FunnelConversion,
     FunnelEventUserData,
 )
 
@@ -89,7 +89,7 @@ class TestFunnelService:
             ("dropped", 1, 1),
         ]
 
-        self.funnel_conversion_data = FunnelConversionResponse(
+        self.funnel_conversion_data = FunnelConversion(
             converted=FunnelConversionData(
                 users=[FunnelEventUserData(id="user_1")], total_users=1, unique_users=1
             ),

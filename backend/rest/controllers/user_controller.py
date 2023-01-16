@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from rest.middlewares import validate_jwt
 from domain.users.service import UserService
-from rest.dtos.users import  UserPropertyResponse
+from rest.dtos.users import UserPropertyResponse
 
 router = APIRouter(
     tags=["user"],
@@ -17,6 +17,4 @@ async def get_user(
     event,
     user_service: UserService = Depends(),
 ):
-    return await user_service.get_user_properties(
-        user_id, datasource_id, event
-    )
+    return await user_service.get_user_properties(user_id, datasource_id, event)

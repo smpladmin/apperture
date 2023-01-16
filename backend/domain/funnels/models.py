@@ -66,6 +66,6 @@ class FunnelConversionData(BaseModel):
     unique_users: int
 
 
-class FunnelConversionResponse(BaseModel):
+class FunnelConversion(BaseModel):
     converted: FunnelConversionData
     dropped: FunnelConversionData
