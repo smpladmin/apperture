@@ -40,9 +40,7 @@ class TestFunnelService:
         )
         Funnel.app_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.funnel_steps = [
-            FunnelStep(
-                event="Login"
-            ),
+            FunnelStep(event="Login"),
             FunnelStep(event="Chapter Click", filters=None),
         ]
         self.funnel = Funnel(

@@ -1,6 +1,12 @@
 from unittest.mock import MagicMock
 
 from domain.funnels.models import FunnelStep
+from domain.segments.models import (
+    WhereSegmentFilter,
+    SegmentFilterOperatorsString,
+    SegmentFilterConditions,
+    SegmentDataType,
+)
 from repositories.clickhouse.funnels import Funnels
 
 
@@ -14,7 +20,20 @@ class TestFunnelsRepository:
         self.steps = [
             FunnelStep(event="Video_Open", filters=[]),
             FunnelStep(event="Video_Seen", filters=[]),
-            FunnelStep(event="Download_Video", filters=[]),
+            FunnelStep(
+                event="Download_Video",
+                filters=[
+                    WhereSegmentFilter(
+                        operator=SegmentFilterOperatorsString.IS,
+                        operand="prop1",
+                        values=[10],
+                        all=False,
+                        type=SegmentFilterConditions.WHERE,
+                        condition=SegmentFilterConditions.WHERE,
+                        datatype=SegmentDataType.STRING,
+                    )
+                ],
+            ),
         ]
         self.parameters = {
             "ds_id": self.datasource_id,
@@ -29,28 +48,31 @@ class TestFunnelsRepository:
             ',table2 AS (SELECT "user_id",MIN("timestamp") AS "ts" FROM "events" WHERE '
             '"datasource_id"=%(ds_id)s AND "event_name"=%(event1)s GROUP BY 1) ,table3 AS '
             '(SELECT "user_id",MIN("timestamp") AS "ts" FROM "events" WHERE '
-            '"datasource_id"=%(ds_id)s AND "event_name"=%(event2)s GROUP BY 1) SELECT '
-            'COUNT(DISTINCT "table1"."user_id"),COUNT(CASE WHEN EXTRACT(YEAR FROM '
-            '"table1"."ts")>%(epoch_year)s AND "table2"."ts">"table1"."ts" THEN '
-            '"table2"."user_id" ELSE NULL END),COUNT(CASE WHEN EXTRACT(YEAR FROM '
-            '"table2"."ts")>%(epoch_year)s AND "table3"."ts">"table2"."ts" AND '
-            '"table2"."ts">"table1"."ts" THEN "table3"."user_id" ELSE NULL END) FROM '
-            'table1 LEFT JOIN table2 ON "table1"."user_id"="table2"."user_id" LEFT JOIN '
-            'table3 ON "table1"."user_id"="table3"."user_id"'
+            '"datasource_id"=%(ds_id)s AND "event_name"=%(event2)s AND "properties.prop1" '
+            'IN (10) GROUP BY 1) SELECT COUNT(DISTINCT "table1"."user_id"),COUNT(CASE '
+            'WHEN EXTRACT(YEAR FROM "table1"."ts")>%(epoch_year)s AND '
+            '"table2"."ts">"table1"."ts" THEN "table2"."user_id" ELSE NULL '
+            'END),COUNT(CASE WHEN EXTRACT(YEAR FROM "table2"."ts")>%(epoch_year)s AND '
+            '"table3"."ts">"table2"."ts" AND "table2"."ts">"table1"."ts" THEN '
+            '"table3"."user_id" ELSE NULL END) FROM table1 LEFT JOIN table2 ON '
+            '"table1"."user_id"="table2"."user_id" LEFT JOIN table3 ON '
+            '"table1"."user_id"="table3"."user_id"'
         )
+
         self.trends_query = (
             'WITH table1 AS (SELECT "user_id",MIN("timestamp") AS "ts" FROM "events" '
             'WHERE "datasource_id"=%(ds_id)s AND "event_name"=%(event0)s GROUP BY 1) '
             ',table2 AS (SELECT "user_id",MIN("timestamp") AS "ts" FROM "events" WHERE '
             '"datasource_id"=%(ds_id)s AND "event_name"=%(event1)s GROUP BY 1) ,table3 AS '
             '(SELECT "user_id",MIN("timestamp") AS "ts" FROM "events" WHERE '
-            '"datasource_id"=%(ds_id)s AND "event_name"=%(event2)s GROUP BY 1) SELECT '
-            'WEEK("table1"."ts"),EXTRACT(YEAR FROM "table1"."ts"),COUNT(CASE WHEN '
-            'EXTRACT(YEAR FROM "table2"."ts")>%(epoch_year)s AND '
-            '"table2"."ts">="table1"."ts" AND "table3"."ts">="table2"."ts" THEN '
-            '"table3"."user_id" ELSE NULL END),COUNT(DISTINCT "table1"."user_id") FROM '
-            'table1 LEFT JOIN table2 ON "table1"."user_id"="table2"."user_id" LEFT JOIN '
-            'table3 ON "table1"."user_id"="table3"."user_id" GROUP BY 1,2 ORDER BY 2,1'
+            '"datasource_id"=%(ds_id)s AND "event_name"=%(event2)s AND "properties.prop1" '
+            'IN (10) GROUP BY 1) SELECT WEEK("table1"."ts"),EXTRACT(YEAR FROM '
+            '"table1"."ts"),COUNT(CASE WHEN EXTRACT(YEAR FROM '
+            '"table2"."ts")>%(epoch_year)s AND "table2"."ts">="table1"."ts" AND '
+            '"table3"."ts">="table2"."ts" THEN "table3"."user_id" ELSE NULL '
+            'END),COUNT(DISTINCT "table1"."user_id") FROM table1 LEFT JOIN table2 ON '
+            '"table1"."user_id"="table2"."user_id" LEFT JOIN table3 ON '
+            '"table1"."user_id"="table3"."user_id" GROUP BY 1,2 ORDER BY 2,1'
         )
 
     def test_get_users_count(self):
