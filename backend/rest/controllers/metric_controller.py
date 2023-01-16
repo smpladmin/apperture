@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
-from rest.middlewares import validate_jwt
-from rest.dtos.metrics import MetricsComputeResponse, MetricsComputeDto
+from domain.apperture_users.models import AppertureUser
+from rest.middlewares import validate_jwt,get_user
+from rest.dtos.metrics import MetricsComputeResponse, MetricsComputeDto,CreateMetricDTO
+from domain.datasources.service import DataSourceService
 from domain.metrics.service import MetricService
-from domain.metrics.models import ComputedMetricResult
 
 router = APIRouter(
     tags=["metrics"], dependencies=[Depends(validate_jwt)], responses={401: {}}
@@ -23,3 +24,51 @@ async def compute_metrics(
         end_date=dto.endDate,
     )
     return result
+
+@router.post("/metrics",)
+async def save_metrics(
+    dto: CreateMetricDTO,
+    user: AppertureUser = Depends(get_user),
+    metric_service: MetricService = Depends(),
+    ds_service: DataSourceService = Depends(),
+):
+    datasource = await ds_service.get_datasource(str(dto.datasourceId))
+    metric = await metric_service.build_metric(
+        datasource_id=dto.datasourceId,
+        app_id=datasource.app_id,
+        user_id=user.id,
+        name=dto.name,
+        function=dto.function,
+        aggregates=dto.aggregates,
+        breakdown=dto.breakdown,
+    )
+    return await metric_service.add_metric(metric=metric)
+
+
+@router.put("/metrics/{id}",)
+async def save_metrics(
+    id:str,
+    dto: CreateMetricDTO,
+    user: AppertureUser = Depends(get_user),
+    metric_service: MetricService = Depends(),
+    ds_service: DataSourceService = Depends(),
+):
+    datasource = await ds_service.get_datasource(str(dto.datasourceId))
+    metric = await metric_service.build_metric(
+        datasource_id=dto.datasourceId,
+        app_id=datasource.app_id,
+        user_id=user.id,
+        name=dto.name,
+        function=dto.function,
+        aggregates=dto.aggregates,
+        breakdown=dto.breakdown,
+    )
+    await metric_service.update_metric(metric_id=id,metric=metric)
+    return metric
+
+@router.get('/metrics/{id}',)
+async def get_metric_by_id(
+    id:str, 
+    metric_service:MetricService=Depends(),
+):
+    return await metric_service.get_metric_by_id(metric_id=id)
