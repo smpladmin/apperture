@@ -68,9 +68,19 @@ const UserConversionDrawer = ({
     }
   }, [selectedUser]);
 
+  const handleClose = () => {
+    onClose();
+    setTableState(TableState.LIST);
+  };
+
   return (
     <>
-      <Drawer size={'md'} isOpen={isOpen} placement="right" onClose={onClose}>
+      <Drawer
+        size={'md'}
+        isOpen={isOpen}
+        placement="right"
+        onClose={handleClose}
+      >
         <DrawerOverlay
           backdropFilter={'blur(10px)'}
           bg={'grey.0'}

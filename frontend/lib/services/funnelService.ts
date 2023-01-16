@@ -1,3 +1,4 @@
+import { AppertureGet } from './util';
 import { ApperturePrivateAPI } from './../apiClient/client.server';
 import { FunnelStep } from '@lib/domain/funnel';
 import { AxiosError } from 'axios';
@@ -154,17 +155,12 @@ export const getUserProperty = async (
   dsId: string,
   event: string
 ) => {
-  try {
-    const res = await AppertureAPI.get('/user/property', {
-      params: {
-        user_id: userId,
-        datasource_id: dsId,
-        event,
-      },
-    });
-    return res.data;
-  } catch (e) {
-    console.error((e as AxiosError).message);
-    return [];
-  }
+  const response = await AppertureGet('/user/property', {
+    params: {
+      user_id: userId,
+      datasource_id: dsId,
+      event,
+    },
+  });
+  return response.data;
 };
