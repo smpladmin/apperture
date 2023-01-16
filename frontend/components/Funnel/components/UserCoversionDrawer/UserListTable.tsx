@@ -96,7 +96,6 @@ const UserListTable = ({
                   return (
                     <Th
                       key={header.id + index}
-                      data-testid={'segment-table-headers'}
                       borderBottom={'0.4px solid #b2b2b5'}
                     >
                       {flexRender(
@@ -111,17 +110,13 @@ const UserListTable = ({
           </Thead>
           <Tbody overflow={'auto'}>
             {getRowModel().rows.map((row, index) => (
-              <Tr
-                key={row.id + index}
-                _hover={{ bg: 'white.100' }}
-                data-testid={'segment-table-body-rows'}
-              >
+              <Tr key={row.id + index} _hover={{ bg: 'white.100' }}>
                 {row.getVisibleCells().map((cell, cellIndex) => {
                   return (
                     <Td
                       key={cell.id + cellIndex}
                       borderBottom={'0.4px solid #b2b2b5'}
-                      data-testid={'segment-table--body-data'}
+                      p={0}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

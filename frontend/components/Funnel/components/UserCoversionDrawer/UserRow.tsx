@@ -12,7 +12,8 @@ const UserRow = ({ name, handleRowClick }: any) => {
       cursor={'pointer'}
       alignContent={'center'}
       alignItems={'center'}
-      p={0}
+      px={2}
+      py={4}
     >
       <Text>{name}</Text>
       <IconButton

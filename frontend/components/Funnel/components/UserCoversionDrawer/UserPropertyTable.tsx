@@ -73,7 +73,7 @@ const UserPropertyTable = ({ properties }: UserPropertyTableProps) => {
         border={'0.4px solid #b2b2b5'}
         borderRadius={'8px'}
         maxH={'full'}
-        margin={2}
+        margin={6}
       >
         <Table>
           <Thead position={'sticky'} top={0} py={'3'} px={'8'} bg={'#f5f5f9'}>
@@ -103,6 +103,8 @@ const UserPropertyTable = ({ properties }: UserPropertyTableProps) => {
                     <Td
                       key={cell.id + cellIndex}
                       borderBottom={'0.4px solid #b2b2b5'}
+                      px={2}
+                      py={4}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
