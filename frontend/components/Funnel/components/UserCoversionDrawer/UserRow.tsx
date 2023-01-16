@@ -12,10 +12,17 @@ const UserRow = ({ name, handleRowClick }: any) => {
       cursor={'pointer'}
       alignContent={'center'}
       alignItems={'center'}
-      px={2}
-      py={4}
+      px={5}
+      py={3}
     >
-      <Text>{name}</Text>
+      <Text
+        fontWeight={400}
+        fontSize={'14px'}
+        lineHeight={'22px'}
+        wordBreak={'break-all'}
+      >
+        {name}
+      </Text>
       <IconButton
         fontWeight={'500'}
         aria-label="Journey Map"

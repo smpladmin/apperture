@@ -31,13 +31,27 @@ const UserPropertyTable = ({ properties }: UserPropertyTableProps) => {
         columnHelper.accessor('Property', {
           header: 'Property',
           cell: (info) => (
-            <Text wordBreak={'break-all'}>{info.getValue()}</Text>
+            <Text
+              fontWeight={400}
+              fontSize={'14px'}
+              lineHeight={'22px'}
+              wordBreak={'break-all'}
+            >
+              {info.getValue()}
+            </Text>
           ),
         }),
         columnHelper.accessor('Value', {
           header: 'Value',
           cell: (info) => (
-            <Text wordBreak={'break-all'}>{info.getValue()}</Text>
+            <Text
+              fontWeight={400}
+              fontSize={'14px'}
+              lineHeight={'22px'}
+              wordBreak={'break-all'}
+            >
+              {info.getValue()}
+            </Text>
           ),
         }),
       ];
@@ -103,8 +117,8 @@ const UserPropertyTable = ({ properties }: UserPropertyTableProps) => {
                     <Td
                       key={cell.id + cellIndex}
                       borderBottom={'0.4px solid #b2b2b5'}
-                      px={2}
-                      py={4}
+                      px={5}
+                      py={3}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
