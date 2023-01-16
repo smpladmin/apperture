@@ -1,4 +1,5 @@
 import '../styles/globals.css';
+import '../styles/funnel-tooltip.css';
 import 'react-date-range/dist/styles.css'; // main css file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import '../styles/daterange.css';

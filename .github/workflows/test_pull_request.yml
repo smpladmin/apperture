@@ -39,4 +39,4 @@ jobs:
         if: steps.filter.outputs.frontend == 'true'
         run: |
           cd frontend
-          docker build . --target tests
+          docker build . --target builder

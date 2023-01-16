@@ -7,8 +7,8 @@ from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
 from domain.integrations.models import Integration
 from domain.integrations.service import IntegrationService
-from domain.users.models import User
-from domain.users.service import UserService
+from domain.apperture_users.models import AppertureUser
+from domain.apperture_users.service import AppertureUserService
 from rest.dtos.apps import AppResponse, AppWithIntegrations, CreateAppDto, UpdateAppDto
 from rest.dtos.datasources import DataSourceResponse
 from rest.dtos.integrations import IntegrationWithDataSources
@@ -25,7 +25,7 @@ router = APIRouter(
 @router.post("/apps", response_model=AppResponse)
 async def create_app(
     app_dto: CreateAppDto,
-    user: User = Depends(get_user),
+    user: AppertureUser = Depends(get_user),
     app_service: AppService = Depends(),
 ):
     return await app_service.create_app(app_dto.name, user)
@@ -33,7 +33,7 @@ async def create_app(
 
 @router.get("/apps", response_model=Union[list[AppWithIntegrations], list[AppResponse]])
 async def get_apps(
-    user: User = Depends(get_user),
+    user: AppertureUser = Depends(get_user),
     with_integrations: bool = Query(False),
     app_service: AppService = Depends(),
     integration_service: IntegrationService = Depends(),
@@ -74,7 +74,7 @@ async def update_app(
     dto: UpdateAppDto,
     user_id: str = Depends(get_user_id),
     app_service: AppService = Depends(),
-    user_service: UserService = Depends(),
+    user_service: AppertureUserService = Depends(),
 ):
     if dto.share_with_email:
         user = await user_service.find_user(email=dto.share_with_email)
@@ -82,7 +82,7 @@ async def update_app(
 
 
 async def build_app_with_integrations(
-    user: User,
+    user: AppertureUser,
     app: App,
     integration_service: IntegrationService,
     ds_service: DataSourceService,

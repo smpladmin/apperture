@@ -1,10 +1,13 @@
 import { AppertureAPI } from '@lib/apiClient';
 import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
-import { AxiosError } from 'axios';
+import { AxiosError, AxiosRequestConfig } from 'axios';
 
-export const AppertureGet = async (path: string) => {
+export const AppertureGet = async (
+  path: string,
+  config?: AxiosRequestConfig
+) => {
   try {
-    return await AppertureAPI.get(path);
+    return await AppertureAPI.get(path, config || {});
   } catch (e) {
     const error = e as AxiosError;
     console.error(error.message);

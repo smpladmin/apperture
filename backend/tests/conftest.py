@@ -1,7 +1,7 @@
 import pytest
 from unittest import mock
 from domain.apps.service import AppService
-from domain.users.service import UserService
+from domain.apperture_users.service import AppertureUserService
 
 from server import app
 from mongo.mongo import Mongo
@@ -15,6 +15,7 @@ from domain.edge.service import EdgeService
 from domain.segments.service import SegmentService
 from domain.properties.service import PropertiesService
 from domain.metrics.service import MetricService
+from domain.users.service import UserService
 
 
 @pytest.fixture(scope="module")
@@ -24,12 +25,13 @@ def app_init(
     funnel_service,
     datasource_service,
     events_service,
-    user_service,
+    apperture_user_service,
     app_service,
     edge_service,
     segment_service,
     properties_service,
     metric_service,
+    user_service,
 ):
 
     print("Setting up App")
@@ -43,12 +45,13 @@ def app_init(
     app.dependency_overrides[FunnelsService] = lambda: funnel_service
     app.dependency_overrides[DataSourceService] = lambda: datasource_service
     app.dependency_overrides[EventsService] = lambda: events_service
-    app.dependency_overrides[UserService] = lambda: user_service
+    app.dependency_overrides[AppertureUserService] = lambda: apperture_user_service
     app.dependency_overrides[AppService] = lambda: app_service
     app.dependency_overrides[EdgeService] = lambda: edge_service
     app.dependency_overrides[SegmentService] = lambda: segment_service
     app.dependency_overrides[PropertiesService] = lambda: properties_service
     app.dependency_overrides[MetricService] = lambda: metric_service
+    app.dependency_overrides[UserService] = lambda: user_service
 
     yield app
 

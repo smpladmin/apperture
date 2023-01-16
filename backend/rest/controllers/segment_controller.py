@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 
 from domain.datasources.service import DataSourceService
 from domain.segments.service import SegmentService
-from domain.users.models import User
+from domain.apperture_users.models import AppertureUser
 from rest.dtos.segments import (
     TransientSegmentDto,
     ComputedSegmentResponse,
@@ -35,7 +35,7 @@ async def compute_transient_segment(
 @router.post("/segments", response_model=SegmentResponse)
 async def save_segment(
     dto: CreateSegmentDto,
-    user: User = Depends(get_user),
+    user: AppertureUser = Depends(get_user),
     segment_service: SegmentService = Depends(),
     ds_service: DataSourceService = Depends(),
 ):
@@ -56,7 +56,7 @@ async def save_segment(
 async def update_segment(
     id: str,
     dto: CreateSegmentDto,
-    user: User = Depends(get_user),
+    user: AppertureUser = Depends(get_user),
     segment_service: SegmentService = Depends(),
     ds_service: DataSourceService = Depends(),
 ):

@@ -1,5 +1,5 @@
 import datetime
-
+from enum import Enum
 from beanie import PydanticObjectId
 from typing import List, Optional
 from pydantic import BaseModel
@@ -49,3 +49,23 @@ class FunnelTrendsData(BaseModel):
     last_step_users: int
     start_date: datetime.datetime
     end_date: datetime.datetime
+
+
+class FunnelEventUserData(BaseModel):
+    id: str
+
+
+class ConversionStatus(str, Enum):
+    CONVERTED = "converted"
+    DROPPED = "dropped"
+
+
+class FunnelConversionData(BaseModel):
+    users: List[FunnelEventUserData]
+    total_users: int
+    unique_users: int
+
+
+class FunnelConversion(BaseModel):
+    converted: FunnelConversionData
+    dropped: FunnelConversionData

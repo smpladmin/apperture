@@ -1,14 +1,14 @@
 from beanie import PydanticObjectId
 from authorisation.models import IntegrationOAuth
 from domain.apps.models import App
-from domain.users.models import User
+from domain.apperture_users.models import AppertureUser
 from .models import Credential, CredentialType, Integration, IntegrationProvider
 
 
 class IntegrationService:
     async def create_oauth_integration(
         self,
-        user: User,
+        user: AppertureUser,
         app: App,
         provider: IntegrationProvider,
         integration_oauth: IntegrationOAuth,
