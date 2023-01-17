@@ -1,5 +1,5 @@
 import { EventOrSegmentComponent } from '@lib/domain/metric';
-import { ApperturePost } from './util';
+import { ApperturePost, ApperturePrivateGet, ApperturePut } from './util';
 
 type MetricRequestBody = {
   dsId: string;
@@ -39,4 +39,44 @@ export const computeMetric = async (
   }
   const res = await ApperturePost('metrics/compute', requestBody);
   return res.data;
+};
+
+export const _getSavedMetric = async (token: string, metricId: string) => {
+  const result = await ApperturePrivateGet('/metrics/' + metricId, token);
+  return result.data;
+};
+
+export const saveMetric = async (
+  name: string,
+  dsId: string,
+  definition: string,
+  aggregates: EventOrSegmentComponent[],
+  breakdown: string[]
+) => {
+  const result = await ApperturePost('/metrics', {
+    datasourceId: dsId,
+    name,
+    function: definition,
+    aggregates,
+    breakdown,
+  });
+  return result.data;
+};
+
+export const updateMetric = async (
+  metricId: string,
+  name: string,
+  dsId: string,
+  definition: string,
+  aggregates: EventOrSegmentComponent[],
+  breakdown: string[]
+) => {
+  const result = await ApperturePut('/metrics/' + metricId, {
+    datasourceId: dsId,
+    name,
+    function: definition,
+    aggregates,
+    breakdown,
+  });
+  return result.data;
 };

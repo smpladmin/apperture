@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from domain.apperture_users.models import AppertureUser
 from rest.middlewares import validate_jwt,get_user
-from rest.dtos.metrics import MetricsComputeResponse, MetricsComputeDto,CreateMetricDTO
+from rest.dtos.metrics import MetricsComputeResponse, MetricsComputeDto,CreateMetricDTO,SavedMetricResponse
 from domain.datasources.service import DataSourceService
 from domain.metrics.service import MetricService
 
@@ -25,7 +25,7 @@ async def compute_metrics(
     )
     return result
 
-@router.post("/metrics",)
+@router.post("/metrics",response_model=SavedMetricResponse)
 async def save_metrics(
     dto: CreateMetricDTO,
     user: AppertureUser = Depends(get_user),
@@ -45,7 +45,7 @@ async def save_metrics(
     return await metric_service.add_metric(metric=metric)
 
 
-@router.put("/metrics/{id}",)
+@router.put("/metrics/{id}",response_model=SavedMetricResponse)
 async def save_metrics(
     id:str,
     dto: CreateMetricDTO,
@@ -66,7 +66,7 @@ async def save_metrics(
     await metric_service.update_metric(metric_id=id,metric=metric)
     return metric
 
-@router.get('/metrics/{id}',)
+@router.get('/metrics/{id}',response_model=SavedMetricResponse)
 async def get_metric_by_id(
     id:str, 
     metric_service:MetricService=Depends(),

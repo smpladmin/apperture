@@ -28,3 +28,7 @@ class CreateMetricDTO(BaseModel):
     function: str
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
+
+class SavedMetricResponse(Metric,ModelResponse):
+    class Config:
+        allow_population_by_field_name = True
