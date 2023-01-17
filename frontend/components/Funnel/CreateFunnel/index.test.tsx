@@ -50,7 +50,12 @@ describe('create funnel', () => {
     'app_version',
     'session_length',
   ];
-  const eventPropertiesValues = [['android'], ['ios'], ['mac'], ['windows']];
+  const eventPropertiesValues = [
+    ['Mumbai'],
+    ['Delhi'],
+    ['Kolkata'],
+    ['Bengaluru'],
+  ];
 
   const renderCreateFunnel = async (
     router = createMockRouter({ query: { dsId: '654212033222' } }),
@@ -78,6 +83,46 @@ describe('create funnel', () => {
           </MapContext.Provider>
         </RouterContext.Provider>
       );
+    });
+  };
+
+  const getEventFilterText = (eventFilters: HTMLElement[], index: number) => {
+    return Array.from(eventFilters[index].getElementsByTagName('p')).map(
+      (el) => el.textContent
+    );
+  };
+
+  const addEventFilter = async (
+    property: string,
+    stepIndex = 0,
+    filterIndex = 0
+  ) => {
+    const addFilterButton = screen.getAllByTestId('add-filter-button');
+    fireEvent.click(addFilterButton[stepIndex]);
+
+    const selectCityProperty = screen.getByText(property);
+    await act(async () => {
+      fireEvent.click(selectCityProperty);
+    });
+
+    const eventPropertyValue = screen.getAllByTestId('event-filter-values');
+    fireEvent.click(eventPropertyValue[filterIndex]);
+
+    const addFilterValueButton = screen.getByTestId(
+      'add-event-property-values'
+    );
+    const selectCityValue = screen.getByText('Select all');
+    fireEvent.click(selectCityValue);
+    await act(async () => {
+      fireEvent.click(addFilterValueButton);
+    });
+  };
+
+  const addEvent = async (eventName: string) => {
+    const selectElementByText = screen.getByText(eventName);
+
+    await act(async () => {
+      fireEvent.click(selectElementByText);
     });
   };
 
@@ -221,16 +266,10 @@ describe('create funnel', () => {
       const eventName = screen.getAllByTestId('event-name');
 
       fireEvent.click(eventName[0]);
-      const selectVideoClick = screen.getByText('Video_Click');
-
-      await act(async () => {
-        fireEvent.click(selectVideoClick);
-      });
+      await addEvent('Video_Click');
 
       fireEvent.click(eventName[1]);
-      await act(async () => {
-        fireEvent.click(selectVideoClick);
-      });
+      await addEvent('Chapter_Click');
 
       fireEvent.click(saveButton);
 
@@ -271,7 +310,7 @@ describe('create funnel', () => {
   });
 
   describe('search ', () => {
-    it('should show suggestion container when input field is focused and suggestions are present and should set the value when clicked on a suggestion', async () => {
+    it('should show searchable dropdown and be able to search and select search result and update the event name for step', async () => {
       const searchResults = [{ id: 'Chapter_Click' }, { id: 'Chapter_Open' }];
       mockedSearchResult.mockReturnValue(searchResults);
       mockedIsEveryNonEmptyStepValid.mockReturnValue(true);
@@ -323,18 +362,10 @@ describe('create funnel', () => {
       const eventName = screen.getAllByTestId('event-name');
 
       fireEvent.click(eventName[0]);
-      const selectVideoClick = screen.getByText('Video_Click');
-
-      await act(async () => {
-        fireEvent.click(selectVideoClick);
-      });
+      await addEvent('Video_Click');
 
       fireEvent.click(eventName[1]);
-      const selectChapterClick = screen.getByText('Chapter_Click');
-
-      await act(async () => {
-        fireEvent.click(selectChapterClick);
-      });
+      await addEvent('Chapter_Click');
 
       await waitFor(() => {
         const chart = screen.getByTestId('funnel-chart');
@@ -369,6 +400,88 @@ describe('create funnel', () => {
 
       expect(funnelName).toHaveDisplayValue('Test Funnel');
       expect(funnelSteps.length).toEqual(props.steps.length);
+    });
+  });
+
+  describe('add filters to funnel step', () => {
+    it('add filter to funnel step', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+      const eventFilters = screen.getAllByTestId('event-filter');
+      const eventFilterText = getEventFilterText(eventFilters, 0);
+      expect(eventFilterText).toEqual([
+        'where',
+        'city',
+        'is',
+        'Mumbai, Delhi or 2 more',
+      ]);
+
+      // add another filter
+      mockedGetEventPropertiesValue.mockReturnValue([
+        ['android'],
+        ['ios'],
+        ['mac'],
+        ['windows'],
+      ]);
+      await addEventFilter('device', 0, 1);
+      const newAddedEventFilters = screen.getAllByTestId('event-filter');
+
+      const secondEventFilterText = getEventFilterText(newAddedEventFilters, 1);
+      expect(secondEventFilterText).toEqual([
+        'and',
+        'device',
+        'is',
+        'android, ios or 2 more',
+      ]);
+    });
+
+    it('should be able to remove filter', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+
+      // add another device filter
+      mockedGetEventPropertiesValue.mockReturnValue([
+        ['android'],
+        ['ios'],
+        ['mac'],
+        ['windows'],
+      ]);
+      await addEventFilter('device', 0, 1);
+
+      const eventFilters = screen.getAllByTestId('event-filter');
+      fireEvent.mouseEnter(eventFilters[0]);
+
+      // remove first city filter
+      const removeFilterIcon = screen.getAllByTestId('remove-filter');
+      await act(async () => {
+        fireEvent.click(removeFilterIcon[0]);
+      });
+
+      const afterRemovingEventFilters = screen.getAllByTestId('event-filter');
+      const afterRemovingEventFiltersText = getEventFilterText(
+        afterRemovingEventFilters,
+        0
+      );
+
+      // after removing filter, next filter should become 'where' from 'and'
+      expect(afterRemovingEventFiltersText).toEqual([
+        'where',
+        'device',
+        'is',
+        'android, ios or 2 more',
+      ]);
     });
   });
 });

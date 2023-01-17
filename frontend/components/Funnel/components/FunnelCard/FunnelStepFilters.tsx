@@ -86,7 +86,7 @@ const FunnelStepFilter = ({
 
   return (
     <Flex
-      data-testid={'event-filter-component'}
+      data-testid={'event-filter'}
       width={'full'}
       _first={{ borderTop: '1px solid rgba(255, 255, 255, 0.2)' }}
       marginTop={2}
@@ -116,7 +116,9 @@ const FunnelStepFilter = ({
           <Box position={'absolute'} left={-6}>
             <Image src={indent} alt={'indent-icon'} />
           </Box>
-          {filter.operand}
+          <Text fontSize={'xs-12'} lineHeight={'xs-14'} color={'grey.100'}>
+            {filter.operand}
+          </Text>
         </Flex>
         <IconButton
           size={'xs'}
@@ -127,6 +129,7 @@ const FunnelStepFilter = ({
           color={'grey.200'}
           opacity={isHovered ? 1 : 0}
           _hover={{ color: 'white', background: 'grey.300' }}
+          data-testid={'remove-filter'}
           onClick={() => handleRemoveFilter(index)}
         />
       </Flex>
