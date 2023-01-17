@@ -15,13 +15,9 @@ from domain.funnels.models import (
     ComputedFunnelStep,
     ComputedFunnel,
     FunnelTrendsData,
-<<<<<<< HEAD
-=======
-    EventFilters,
     FunnelConversionData,
     FunnelConversion,
     FunnelEventUserData,
->>>>>>> main
 )
 
 
