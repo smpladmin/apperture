@@ -11,7 +11,6 @@ import {
 } from '@chakra-ui/react';
 import { FlowType, SankeyData } from '@lib/domain/eventData';
 import { formatDatalabel } from '@lib/utils/common';
-
 import { Fragment } from 'react';
 
 const SankeyNodeStats = ({ data }: { data: SankeyData }) => {
@@ -24,7 +23,7 @@ const SankeyNodeStats = ({ data }: { data: SankeyData }) => {
         fontWeight={'normal'}
         textDecoration={'underline'}
       >
-        {data.node}
+        {data.flow === FlowType.INFLOW ? data.previousEvent : data.currentEvent}
       </Text>
       <Flex direction={'column'} w={'14'}>
         <Text
