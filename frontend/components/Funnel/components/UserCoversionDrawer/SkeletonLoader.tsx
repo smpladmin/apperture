@@ -14,7 +14,7 @@ import { FunnelConversionData } from '@lib/domain/funnel';
 import React from 'react';
 import UserListTable from './UserListTable';
 
-const SkeletonLoadeProps = () => {
+const SkeletonLoader = () => {
   return (
     <Flex w={'full'} maxH={'full'}>
       <Tabs w={'full'} display={'flex'} flexDirection={'column'}>
@@ -66,4 +66,4 @@ const SkeletonLoadeProps = () => {
   );
 };
 
-export default SkeletonLoadeProps;
+export default SkeletonLoader;
