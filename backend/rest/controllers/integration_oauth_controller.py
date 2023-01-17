@@ -8,10 +8,10 @@ from starlette.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuthError
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
-from domain.users.models import User
+from domain.apperture_users.models import AppertureUser
 from rest.dtos.oauth import OAuthState
 from domain.apps.service import AppService
-from domain.users.service import UserService
+from domain.apperture_users.service import AppertureUserService
 from rest.middlewares import get_user, validate_jwt
 from domain.integrations.models import IntegrationProvider
 from domain.integrations.service import IntegrationService
@@ -33,7 +33,7 @@ slack_oauth = OAuthClientFactory().init_client(
 async def oauth_google(
     request: Request,
     app_id: str,
-    user: User = Depends(get_user),
+    user: AppertureUser = Depends(get_user),
     redirect_url: str = os.getenv("FRONTEND_LOGIN_REDIRECT_URL"),
 ):
     redirect_uri = request.url_for("integration_google_authorise")
@@ -52,7 +52,7 @@ async def oauth_google(
 async def integration_google_authorise(
     request: Request,
     state: str,
-    user_service: UserService = Depends(),
+    user_service: AppertureUserService = Depends(),
     app_service: AppService = Depends(),
     integration_service: IntegrationService = Depends(),
 ):
@@ -100,7 +100,7 @@ def _build_redirect_url(url: str, key: str, value: str):
 @router.get("/integrations/oauth/slack")
 async def oauth_slack(
     request: Request,
-    user: User = Depends(get_user),
+    user: AppertureUser = Depends(get_user),
     redirect_url: str = os.getenv("FRONTEND_SLACK_INTEGRATION_REDIRECT_URL"),
 ):
     redirect_uri = request.url_for("integration_slack_authorize").replace(
@@ -118,7 +118,7 @@ async def integration_slack_authorize(
     state: str,
     request: Request,
     error: Union[str, None] = None,
-    user_service: UserService = Depends(),
+    user_service: AppertureUserService = Depends(),
 ):
     state = json.loads(state)
     integration_status = "failed"

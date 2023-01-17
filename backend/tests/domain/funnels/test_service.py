@@ -15,6 +15,13 @@ from domain.funnels.models import (
     ComputedFunnelStep,
     ComputedFunnel,
     FunnelTrendsData,
+<<<<<<< HEAD
+=======
+    EventFilters,
+    FunnelConversionData,
+    FunnelConversion,
+    FunnelEventUserData,
+>>>>>>> main
 )
 
 
@@ -77,10 +84,27 @@ class TestFunnelService:
             )
             for data in self.conversion_data
         ]
+
+        self.user_data = [("user_1", "converted"), ("user_2", "dropped")], [
+            ("converted", 1, 1),
+            ("dropped", 1, 1),
+        ]
+
+        self.funnel_conversion_data = FunnelConversion(
+            converted=FunnelConversionData(
+                users=[FunnelEventUserData(id="user_1")], total_users=1, unique_users=1
+            ),
+            dropped=FunnelConversionData(
+                users=[FunnelEventUserData(id="user_2")], total_users=1, unique_users=1
+            ),
+        )
+
         self.funnels.get_users_count = MagicMock()
         self.funnels.get_users_count.return_value = [(100, 40)]
         self.funnels.get_conversion_trend = MagicMock()
         self.funnels.get_conversion_trend.return_value = self.conversion_data
+        self.funnels.get_conversion_analytics = MagicMock()
+        self.funnels.get_conversion_analytics.return_value = self.user_data
         FindOneMock = namedtuple("FindOneMock", ["update"])
         self.update_mock = AsyncMock()
         Funnel.find_one = MagicMock(return_value=FindOneMock(update=self.update_mock))
@@ -176,3 +200,12 @@ class TestFunnelService:
             app_ids=[PydanticObjectId("6384a65e0a397236d9de236a")]
         )
         Funnel.find.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_get_user_conversion(self):
+        assert (
+            await self.service.get_user_conversion(
+                datasource_id=str(self.funnel.datasource_id), steps=self.funnel_steps
+            )
+            == self.funnel_conversion_data
+        )

@@ -1,24 +1,71 @@
-import { Button, Divider, Flex, Highlight, Text } from '@chakra-ui/react';
-import { FunnelData, FunnelTrendsData } from '@lib/domain/funnel';
-import React from 'react';
+import {
+  Button,
+  Divider,
+  Flex,
+  Highlight,
+  Text,
+  useDisclosure,
+} from '@chakra-ui/react';
+import {
+  FunnelData,
+  FunnelEventConversion,
+  FunnelStep,
+  FunnelTrendsData,
+} from '@lib/domain/funnel';
+import React, { useState } from 'react';
 import FunnelChart from '../components/FunnelChart';
 import Trend from '../components/Trend';
 import Loader from '@components/LoadingSpinner';
+import UserConversionDrawer from '../components/UserCoversionDrawer';
+import { getConversionData } from '@lib/services/funnelService';
+import { useRouter } from 'next/router';
 
 type TransientFunnelViewProps = {
   isLoading: boolean;
   funnelData: FunnelData[];
   trendsData: FunnelTrendsData[];
+  funnelSteps: FunnelStep[];
 };
 
 const TransientFunnelView = ({
   isLoading,
   funnelData,
   trendsData,
+  funnelSteps,
 }: TransientFunnelViewProps) => {
+  const {
+    isOpen: isDrawerOpen,
+    onOpen: onDrawerOpen,
+    onClose: onDrawerClose,
+  } = useDisclosure();
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  const [conversionData, setConversionData] =
+    useState<FunnelEventConversion | null>(null);
+
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+
   const funnelConversion = trendsData?.[trendsData.length - 1]?.['conversion'];
   const funnelLastStepUsers =
     trendsData?.[trendsData.length - 1]?.['lastStepUsers'];
+
+  const handleChartClick = async (properties: any) => {
+    onDrawerOpen();
+    const { data } = properties.data;
+    const { step, event } = data;
+    setSelectedEvent(event.trim());
+    const selectedSteps = funnelSteps.slice(0, step);
+    const conversionAnalysisData: FunnelEventConversion =
+      await getConversionData(dsId as string, selectedSteps);
+    setConversionData({
+      converted: conversionAnalysisData.converted,
+      dropped: conversionAnalysisData.dropped,
+      step,
+      event: event.trim(),
+    });
+  };
+
   return (
     <Flex
       direction={'column'}
@@ -90,7 +137,7 @@ const TransientFunnelView = ({
             <Loader />
           </Flex>
         ) : (
-          <FunnelChart data={funnelData} />
+          <FunnelChart data={funnelData} handleChartClick={handleChartClick} />
         )}
       </Flex>
       <Divider orientation="horizontal" borderColor={'white.200'} opacity={1} />
@@ -116,6 +163,13 @@ const TransientFunnelView = ({
           <Trend data={trendsData} />
         )}
       </Flex>
+      <UserConversionDrawer
+        isOpen={isDrawerOpen}
+        onClose={onDrawerClose}
+        conversionData={conversionData}
+        datasourceId={dsId as string}
+        event={selectedEvent as string}
+      />
     </Flex>
   );
 };

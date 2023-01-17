@@ -1,40 +1,19 @@
-from beanie import PydanticObjectId
-
-from authorisation import OAuthUser
-from .models import User
+from repositories.clickhouse.users import User
+from fastapi import Depends
+from typing import Union
+from domain.users.models import UserDetails
 
 
 class UserService:
-    async def create_user_if_not_exists(self, oauth_user: OAuthUser):
-        existing_user = await User.find_one(User.email == oauth_user.email)
-        if existing_user:
-            return existing_user
-        return await self._create_user(oauth_user)
+    def __init__(self, user=Depends(User)):
+        self.user = user
 
-    async def _create_user(self, oauth_user: OAuthUser):
-        apperture_user = User(
-            first_name=oauth_user.given_name,
-            last_name=oauth_user.family_name,
-            email=oauth_user.email,
-            picture=oauth_user.picture,
+    async def get_user_properties(
+        self, user_id: str, datasource_id: str, event: Union[str, None]
+    ):
+        result = self.user.get_user_properties(user_id, datasource_id, event)
+        return UserDetails(
+            user_id=user_id,
+            datasource_id=datasource_id,
+            property=result[0][0] if result and result[0] else {},
         )
-        await apperture_user.insert()
-        return apperture_user
-
-    async def get_user(self, id: str):
-        return await User.get(id)
-
-    async def save_slack_credentials(self, user_id, slack_url, slack_channel):
-        await User.find_one(
-            User.id == PydanticObjectId(user_id),
-        ).update({"$set": {"slack_url": slack_url, "slack_channel": slack_channel}})
-
-        return
-
-    async def remove_slack_credentials(self, user_id):
-        await User.find_one(
-            User.id == PydanticObjectId(user_id),
-        ).update({"$unset": {"slack_url": 1, "slack_channel": 1}})
-
-    async def find_user(self, email: str):
-        return await User.find_one(User.email == email)

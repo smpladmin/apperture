@@ -173,3 +173,14 @@ def test_get_transient_funnel_trends(
             ],
         }
     )
+
+
+def test_transient_funnel_analytics(
+    client_init, funnel_data, funnel_user_conversion_response
+):
+    response = client_init.post(
+        "/funnels/analytics/transient", data=json.dumps(funnel_data)
+    )
+
+    assert response.status_code == 200
+    assert response.json() == funnel_user_conversion_response

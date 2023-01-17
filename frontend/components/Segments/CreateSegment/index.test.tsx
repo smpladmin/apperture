@@ -28,7 +28,7 @@ import {
   SegmentGroupConditions,
   WhereSegmentFilter,
 } from '@lib/domain/segment';
-import { getUserInfo } from '@lib/services/userService';
+import { getAppertureUserInfo } from '@lib/services/userService';
 import {
   getDateStringFromDate,
   getMonthDateYearFormattedString,
@@ -209,7 +209,7 @@ describe('Create Segment', () => {
     mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
     mockedSearchResult = jest.mocked(getSearchResult);
     mockedTransientSegment = jest.mocked(computeSegment);
-    mockedGetUserInfo = jest.mocked(getUserInfo);
+    mockedGetUserInfo = jest.mocked(getAppertureUserInfo);
     mockedSaveSegment = jest.mocked(saveSegment);
     mockedCapitalizeLetter = jest.mocked(capitalizeFirstLetter);
     mockedUpdateSegment = jest.mocked(updateSegment);

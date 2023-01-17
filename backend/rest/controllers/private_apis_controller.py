@@ -6,7 +6,7 @@ from data_processor_queue.service import DPQueueService
 from domain.properties.service import PropertiesService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
-from domain.users.service import UserService
+from domain.apperture_users.service import AppertureUserService
 from domain.notifications.service import NotificationService
 from domain.notifications.models import NotificationType
 from domain.integrations.service import IntegrationService
@@ -14,7 +14,7 @@ from domain.runlogs.service import RunLogService
 from domain.events.service import EventsService
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.runlogs import UpdateRunLogDto
-from rest.dtos.users import PrivateUserResponse
+from rest.dtos.appperture_users import PrivateUserResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.events import CreateEventDto
 from rest.dtos.properties import PropertiesResponse
@@ -166,7 +166,7 @@ async def compute_notifications(
 @router.get("/users/{user_id}", response_model=PrivateUserResponse)
 async def slack_url(
     user_id: str,
-    user_service: UserService = Depends(),
+    user_service: AppertureUserService = Depends(),
 ):
     return await user_service.get_user(user_id)
 

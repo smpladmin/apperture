@@ -28,6 +28,9 @@ from domain.funnels.models import (
     ComputedFunnelStep,
     ComputedFunnel,
     FunnelTrendsData,
+    FunnelConversionData,
+    FunnelEventUserData,
+    FunnelConversion,
 )
 from domain.notifications.models import (
     Notification,
@@ -41,8 +44,9 @@ from domain.notifications.models import (
 from domain.metrics.models import (
     ComputedMetricResult,
 )
-from domain.users.models import User
+from domain.apperture_users.models import AppertureUser
 from domain.edge.models import Edge, NodeSignificance, NodeTrend, NodeSankey
+from domain.users.models import UserDetails
 
 
 @pytest.fixture(scope="module")
@@ -172,12 +176,24 @@ def funnel_service():
             end_date=datetime(2022, 1, 14, 0, 0),
         ),
     ]
+
+    funnel_user_conversion = FunnelConversion(
+        converted=FunnelConversionData(
+            users=[FunnelEventUserData(id="user_1")], total_users=1, unique_users=1
+        ),
+        dropped=FunnelConversionData(
+            users=[FunnelEventUserData(id="user_2")], total_users=1, unique_users=1
+        ),
+    )
+
     computed_transient_funnel_future = asyncio.Future()
     computed_transient_funnel_future.set_result(computed_transient_funnel)
     computed_funnel_future = asyncio.Future()
     computed_funnel_future.set_result(computed_funnel)
     funnel_trends_future = asyncio.Future()
     funnel_trends_future.set_result(funnel_trends)
+    funnel_user_conversion_future = asyncio.Future()
+    funnel_user_conversion_future.set_result(funnel_user_conversion)
 
     funnel_service_mock.build_funnel.return_value = funnel
     funnel_service_mock.add_funnel.return_value = funnel_future
@@ -186,6 +202,8 @@ def funnel_service():
     funnel_service_mock.get_computed_funnel.return_value = computed_funnel_future
     funnel_service_mock.update_funnel = mock.AsyncMock()
     funnel_service_mock.get_funnel_trends.return_value = funnel_trends_future
+    funnel_service_mock.get_user_conversion.return_value = funnel_user_conversion_future
+
     return funnel_service_mock
 
 
@@ -219,10 +237,60 @@ def events_service():
 
 
 @pytest.fixture(scope="module")
-def user_service(mock_find_email_user):
+def apperture_user_service(mock_find_email_user):
     service = mock.AsyncMock()
     service.find_user.return_value = mock_find_email_user
     return service
+
+
+@pytest.fixture(scope="module")
+def user_service():
+    service = mock.AsyncMock()
+    user_details = UserDetails(
+        user_id="user_id",
+        datasource_id="datasource_id",
+        property=dict(
+            {
+                "$insert_id": "33ba7915-444f-4b91-9541-a49334a5a72e",
+                "$insert_key": "006a3255bb6bfa3e095a499cd0e0807c9a#832",
+                "$schema": 13,
+                "amplitude_id": 502527487487,
+                "app": 281811,
+                "city": "Lapu-Lapu City",
+            }
+        ),
+    )
+    user_details_future = asyncio.Future()
+    user_details_future.set_result(user_details)
+
+    service.get_user_properties.return_value = user_details
+
+    return service
+
+
+@pytest.fixture(scope="module")
+def user_data():
+    return {
+        "user_id": "d0b9dd2b-e953-4584-a750-26c4bf906390R",
+        "datasource_id": "638f334e8e54760eafc64e66",
+        "event": "Viewed /register Page",
+    }
+
+
+@pytest.fixture(scope="module")
+def queried_user_property():
+    return {
+        "user_id": "user_id",
+        "datasource_id": "datasource_id",
+        "property": {
+            "$insert_id": "33ba7915-444f-4b91-9541-a49334a5a72e",
+            "$insert_key": "006a3255bb6bfa3e095a499cd0e0807c9a#832",
+            "$schema": 13,
+            "amplitude_id": 502527487487,
+            "app": 281811,
+            "city": "Lapu-Lapu City",
+        },
+    }
 
 
 @pytest.fixture(scope="module")
@@ -768,6 +836,38 @@ def saved_notification_response():
 
 
 @pytest.fixture(scope="module")
+def funnel_steps_data():
+    steps = [
+        {
+            "event": "Login",
+            "filters": [{"property": "mp_country_code", "value": "IN"}],
+        },
+        {"event": "Chapter_Click"},
+        {
+            "event": "Topic_Click",
+            "filters": [{"property": "os", "value": "Android"}],
+        },
+    ]
+    datasource_id = "638f1aac8e54760eafc64d70"
+    return {
+        "datasource_id": datasource_id,
+        "steps": steps,
+    }
+
+
+@pytest.fixture(scope="module")
+def funnel_user_conversion_response():
+    return FunnelConversion(
+        converted=FunnelConversionData(
+            users=[FunnelEventUserData(id="user_1")], total_users=1, unique_users=1
+        ),
+        dropped=FunnelConversionData(
+            users=[FunnelEventUserData(id="user_2")], total_users=1, unique_users=1
+        ),
+    )
+
+
+@pytest.fixture(scope="module")
 def funnel_response():
     return {
         "_id": "635ba034807ab86d8a2aadd8",
@@ -1013,8 +1113,8 @@ def segment_data():
 
 @pytest.fixture(scope="module")
 def mock_find_email_user():
-    User.get_settings = mock.MagicMock()
-    user = User(
+    AppertureUser.get_settings = mock.MagicMock()
+    user = AppertureUser(
         first_name="mock",
         last_name="mock",
         email="test@email.com",

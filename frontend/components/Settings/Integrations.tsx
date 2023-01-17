@@ -15,7 +15,7 @@ import tickIcon from '@assets/icons/tick-icon.svg';
 import { useRouter } from 'next/router';
 import { FRONTEND_BASE_URL, BACKEND_BASE_URL } from 'config';
 import Link from 'next/link';
-import { User } from '@lib/domain/user';
+import { AppertureUser } from '@lib/domain/user';
 import ConfirmationModal from '@components/ConfirmationModal';
 import { removeSlackCredentials } from '@lib/services/userService';
 import Render from '@components/Render';
@@ -36,7 +36,7 @@ const IntegrationConnectionInfo = () => {
   );
 };
 
-const Integrations = ({ user }: { user: User }) => {
+const Integrations = ({ user }: { user: AppertureUser }) => {
   const router = useRouter();
   const { previousDsId } = router.query;
   const SLACK_OAUTH_LINK = `${BACKEND_BASE_URL}/integrations/oauth/slack?redirect_url=${FRONTEND_BASE_URL}/analytics/settings/integrations?previousDsId=${previousDsId}`;

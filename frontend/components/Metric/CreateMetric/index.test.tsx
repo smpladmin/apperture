@@ -13,7 +13,7 @@ import {
   getNodes,
 } from '@lib/services/datasourceService';
 import { computeMetric } from '@lib/services/metricService';
-import { getUserInfo } from '@lib/services/userService';
+import { getAppertureUserInfo } from '@lib/services/userService';
 import CreateMetric from './index';
 
 jest.mock('@lib/services/datasourceService');
@@ -74,7 +74,7 @@ describe('Create Metric', () => {
     mockedGetNodes = jest.mocked(getNodes);
     mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
     mockedComputedMetric = jest.mocked(computeMetric);
-    // mockedGetUserInfo = jest.mocked(getUserInfo);
+    // mockedGetUserInfo = jest.mocked(getAppertureUserInfo);
 
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetNodes.mockReturnValue(events);

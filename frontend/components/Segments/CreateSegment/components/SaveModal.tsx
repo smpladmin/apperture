@@ -15,7 +15,7 @@ import {
   Highlight,
 } from '@chakra-ui/react';
 import { SegmentGroup } from '@lib/domain/segment';
-import { User } from '@lib/domain/user';
+import { AppertureUser } from '@lib/domain/user';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { convertISODateToReadableDate } from '@lib/utils/common';
@@ -26,7 +26,7 @@ type SaveSegmentModalProps = {
   onClose: () => void;
   groups: SegmentGroup[];
   columns: string[];
-  user?: User;
+  user?: AppertureUser;
   savedSegmentName?: string;
   savedSegmentDescription?: string;
 };
