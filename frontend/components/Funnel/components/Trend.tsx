@@ -52,6 +52,10 @@ const Trend = ({ data }: { data: FunnelTrendsData[] }) => {
       animation: false,
     });
     plot.current.line?.render();
+
+    return () => {
+      plot.current.line?.destroy();
+    };
   }, [data]);
   return <Box ref={ref} h={'88'} data-testid={'funnel-trend'}></Box>;
 };

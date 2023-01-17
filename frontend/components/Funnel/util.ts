@@ -45,3 +45,9 @@ export const isEveryNonEmptyStepValid = (
 ) => {
   return steps.every((step) => isValidNonEmptyStep(step?.['event'], nodes));
 };
+
+export const isEveryFunnelStepFiltersValid = (funnelSteps: FunnelStep[]) => {
+  return funnelSteps.every((funnelStep) => {
+    return funnelStep.filters.every((filter) => filter.values.length);
+  });
+};

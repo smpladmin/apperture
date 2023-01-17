@@ -13,7 +13,7 @@ import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
 import {
   filterFunnelSteps,
   getCountOfValidAddedSteps,
-  isEveryStepValid,
+  isEveryFunnelStepFiltersValid,
 } from '../util';
 import { saveFunnel, updateFunnel } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
@@ -25,8 +25,6 @@ type CreateFunnelActionProps = {
   setFunnelName: Function;
   funnelSteps: FunnelStep[];
   setFunnelSteps: Function;
-  setFunnelData: Function;
-  setTrendsData: Function;
 };
 
 const CreateFunnelAction = ({
@@ -34,8 +32,6 @@ const CreateFunnelAction = ({
   setFunnelName,
   funnelSteps,
   setFunnelSteps,
-  setFunnelData,
-  setTrendsData,
 }: CreateFunnelActionProps) => {
   const {
     state: { nodes },
@@ -63,7 +59,7 @@ const CreateFunnelAction = ({
   useEffect(() => {
     if (
       getCountOfValidAddedSteps(funnelSteps, nodes) >= 2 &&
-      isEveryStepValid(filterFunnelSteps(funnelSteps), nodes)
+      isEveryFunnelStepFiltersValid(funnelSteps)
     ) {
       setSaveButtonDisabled(false);
     } else {
@@ -188,10 +184,8 @@ const CreateFunnelAction = ({
           </Button>
         </Flex>
         <EventFields
-          eventFieldsValue={funnelSteps}
-          setEventFieldsValue={setFunnelSteps}
-          setFunnelData={setFunnelData}
-          setTrendsData={setTrendsData}
+          funnelSteps={funnelSteps}
+          setFunnelSteps={setFunnelSteps}
         />
         <Divider orientation="horizontal" borderColor={BASTILLE} opacity={1} />
         <Flex justifyContent={'space-between'} alignItems={'center'}>

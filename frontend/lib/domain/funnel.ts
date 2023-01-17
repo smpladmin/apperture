@@ -1,7 +1,24 @@
 export type FunnelStep = {
   event: string;
-  filters: Array<any>;
+  filters: FunnelStepFilter[];
 };
+
+export type FunnelStepFilter = {
+  condition: FunnelFilterConditions;
+  operand: string;
+  operator: FunnelFilterOperators;
+  values: string[];
+};
+
+export enum FunnelFilterConditions {
+  WHERE = 'where',
+  AND = 'and',
+  OR = 'or',
+}
+
+export enum FunnelFilterOperators {
+  IS = 'is',
+}
 
 export type FunnelData = {
   step: number;
