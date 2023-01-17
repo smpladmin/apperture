@@ -21,26 +21,12 @@ class Funnels(EventsBase):
     def get_conversion_trend(self, ds_id: str, steps: List[FunnelStep]) -> List[Tuple]:
         return self.execute_get_query(*self.build_trends_query(ds_id, steps))
 
-    def get_conversion_analytics(self, ds_id: str, steps: List[FunnelStep]):
+    def get_conversion_analytics(self, ds_id: str, steps: List[FunnelStep],status:ConversionStatus):
         if len(steps) == 1:
             return self.get_initial_users(ds_id=ds_id, steps=steps)
 
-        query, parameter, last, second_last = self.build_analytics_query(ds_id, steps)
-        count_query = (
-            ClickHouseQuery.with_(query, "user_list")
-            .from_(AliasedQuery("user_list"))
-            .select(
-                Field(last),
-                fn.Count(Field(second_last)),
-                fn.Count(Field(second_last)).distinct(),
-            )
-            .groupby(Field(last))
-            .orderby(Field(last), order=Order.desc)
-        )
-
-        return self.execute_get_query(
-            query.get_sql(), parameter
-        ), self.execute_get_query(count_query.get_sql(), parameter)
+        query, parameter = self.build_analytics_query(ds_id, steps,status)
+        return  self.execute_get_query(query.get_sql(), parameter)
 
     def get_initial_users(self, ds_id: str, steps: List[FunnelStep]) -> List[Tuple]:
         query = ClickHouseQuery.from_(self.table).where(
@@ -196,26 +182,35 @@ class Funnels(EventsBase):
             )
         return sub_query
 
-    def build_analytics_query(self, ds_id: str, steps: List[FunnelStep]):
+    def build_conversion_count_query(self,user_field,condition:List):
+        return  (
+            ClickHouseQuery
+            .from_(AliasedQuery("final_table"))
+            .select(
+                fn.Count(Field(user_field)),
+                fn.Count(Field(user_field)).distinct(),
+            ).where(
+                Criterion.all(condition)
+            )
+        )
+
+    def build_analytics_query(self, ds_id: str, steps: List[FunnelStep],status:ConversionStatus):
         query, parameters = self._builder(ds_id=ds_id, steps=steps)
 
         sub_query = self._build_subquery(steps=steps)
 
         query = query.with_(sub_query, "final_table")
         query = query.from_(AliasedQuery("final_table"))
-
-        last = len(steps) - 1
-        second_last = len(steps) - 2
+        
+        user_field = len(steps) - 2
+        selection_condition=[Field(user_field) == "null" if status==ConversionStatus.DROPPED else Field(user_field) != "null"]
+        count_query=self.build_conversion_count_query(user_field,selection_condition)
         query = (
             query.select(
-                Field(second_last),
-                Case()
-                .when(Field(last) != "null", ConversionStatus.CONVERTED)
-                .else_(ConversionStatus.DROPPED)
-                .as_(last),
+                Field(user_field),
+                count_query
             )
-            .where(Field(second_last) != "null")
-            .orderby(last)
+            .where(Criterion.all(selection_condition))
         )
 
-        return query, parameters, last, second_last
+        return query, parameters

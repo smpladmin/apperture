@@ -154,13 +154,15 @@ class FunnelsService:
 
         return (
             dropped_data,
-            dropped_user_list[:100],
+            dropped_user_list,
             converted_data,
-            converted_user_list[:100],
+            converted_user_list,
         )
 
-    async def get_user_conversion(self, datasource_id: str, steps: List[FunnelStep]):
-
+    async def get_user_conversion(self, datasource_id: str, steps: List[FunnelStep],status: ConversionStatus):
+        return self.funnels.get_conversion_analytics(
+            ds_id=datasource_id, steps=steps,status=status
+        )
         user_list, count_data = self.funnels.get_conversion_analytics(
             ds_id=datasource_id, steps=steps
         )
@@ -172,17 +174,10 @@ class FunnelsService:
             converted_user_list,
         ) = self.format_conversion_data(user_list=user_list, count_data=count_data)
 
-        return FunnelConversion(
-            converted=FunnelConversionData(
+        return FunnelConversionData(
                 users=converted_user_list,
                 total_users=converted_data["total_users"] if converted_data else 0,
                 unique_users=converted_data["unique_users"] if converted_data else 0,
-            ),
-            dropped=FunnelConversionData(
-                users=dropped_user_list,
-                total_users=dropped_data["total_users"] if dropped_data else 0,
-                unique_users=dropped_data["unique_users"] if dropped_data else 0,
-            ),
         )
 
     async def get_funnels_for_apps(
