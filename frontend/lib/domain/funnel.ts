@@ -1,3 +1,5 @@
+import { FilterType } from './segment';
+
 export type FunnelStep = {
   event: string;
   filters: FunnelStepFilter[];
@@ -8,12 +10,21 @@ export type FunnelStepFilter = {
   operand: string;
   operator: FunnelFilterOperators;
   values: string[];
+  all: boolean;
+  type: FilterType;
+  datatype: FunnelFilterDataType;
 };
 
 export enum FunnelFilterConditions {
   WHERE = 'where',
   AND = 'and',
   OR = 'or',
+}
+
+export enum FunnelFilterDataType {
+  STRING = 'String',
+  NUMBER = 'Number',
+  BOOL = 'True/ False',
 }
 
 export enum FunnelFilterOperators {

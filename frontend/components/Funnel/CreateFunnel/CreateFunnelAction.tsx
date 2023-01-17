@@ -25,6 +25,7 @@ type CreateFunnelActionProps = {
   setFunnelName: Function;
   funnelSteps: FunnelStep[];
   setFunnelSteps: Function;
+  setIsStepAdded: Function;
 };
 
 const CreateFunnelAction = ({
@@ -32,6 +33,7 @@ const CreateFunnelAction = ({
   setFunnelName,
   funnelSteps,
   setFunnelSteps,
+  setIsStepAdded,
 }: CreateFunnelActionProps) => {
   const {
     state: { nodes },
@@ -43,9 +45,10 @@ const CreateFunnelAction = ({
   const router = useRouter();
   const { dsId, funnelId } = router.query;
 
-  const addNewInputField = () => {
+  const handleAddNewStep = () => {
     const newField = { event: '', filters: [] };
     setFunnelSteps([...funnelSteps, newField]);
+    setIsStepAdded(true);
   };
 
   useEffect(() => {
@@ -177,7 +180,7 @@ const CreateFunnelAction = ({
             size={'md'}
             bg={'black.20'}
             color={'white.DEFAULT'}
-            onClick={addNewInputField}
+            onClick={handleAddNewStep}
             fontSize={'sh-20'}
           >
             {'+'}

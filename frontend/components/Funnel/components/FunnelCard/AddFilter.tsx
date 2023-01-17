@@ -27,15 +27,21 @@ const MetricAddFilterComponent = ({
 
   useOnClickOutside(ref, () => setOpenDropDown(false));
   return (
-    <Flex position="relative" width={'full'} direction={'column'} ref={ref}>
+    <Flex
+      position="relative"
+      width={'full'}
+      direction={'column'}
+      ref={ref}
+      px={'4'}
+    >
       <Text
         data-testid={'add-filter-button'}
         color={'grey.200'}
         fontSize={'xs-12'}
         lineHeight={'xs-16'}
         cursor={'pointer'}
-        px={5}
         marginTop={2}
+        px={'2'}
         borderRadius={4}
         _hover={{ color: 'white', background: 'grey.300' }}
         onClick={handleClick}

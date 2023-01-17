@@ -1,7 +1,7 @@
 import { Flex } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import CreateFunnelAction from './CreateFunnelAction';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { MapContext } from '@lib/contexts/mapContext';
 import FunnelEmptyState from '../components/FunnelEmptyState';
 import { FunnelData, FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
@@ -17,7 +17,6 @@ import {
   getTransientFunnelData,
   getTransientTrendsData,
 } from '@lib/services/funnelService';
-import isEqual from 'lodash/isEqual';
 import { useRouter } from 'next/router';
 
 type FunnelProps = {
@@ -55,7 +54,7 @@ const Funnel = ({
   );
   const [isEmpty, setIsEmpty] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const previousFunnelState = useRef<FunnelStep[]>([]);
+  const [isStepAdded, setIsStepAdded] = useState(false);
 
   useEffect(() => {
     if (getCountOfValidAddedSteps(funnelSteps, nodes) >= 2) {
@@ -69,9 +68,11 @@ const Funnel = ({
     if (
       getCountOfValidAddedSteps(funnelSteps, nodes) < 2 ||
       !isEveryFunnelStepFiltersValid(funnelSteps) ||
-      isEqual(funnelSteps, previousFunnelState.current)
-    )
+      isStepAdded
+    ) {
+      setIsStepAdded(false);
       return;
+    }
     const getFunnelMetricsData = async () => {
       const [funnelData, trendsData] = await Promise.all([
         getTransientFunnelData(dsId as string, filterFunnelSteps(funnelSteps)),
@@ -83,7 +84,6 @@ const Funnel = ({
     };
     setIsLoading(true);
     getFunnelMetricsData();
-    previousFunnelState.current = funnelSteps;
   }, [funnelSteps]);
 
   return (
@@ -94,6 +94,7 @@ const Funnel = ({
           setFunnelName={setFunnelName}
           funnelSteps={funnelSteps}
           setFunnelSteps={setFunnelSteps}
+          setIsStepAdded={setIsStepAdded}
         />
       </ActionPanel>
       <ViewPanel>

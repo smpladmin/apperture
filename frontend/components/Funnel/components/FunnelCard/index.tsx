@@ -11,6 +11,7 @@ import AddFilter from './AddFilter';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import {
   FunnelFilterConditions,
+  FunnelFilterDataType,
   FunnelFilterOperators,
   FunnelStep,
   FunnelStepFilter,
@@ -21,7 +22,7 @@ import FunnelStepFilterComponent from './FunnelStepFilters';
 import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
 import { cloneDeep } from 'lodash';
-import { SegmentProperty } from '@lib/domain/segment';
+import { FilterType, SegmentProperty } from '@lib/domain/segment';
 import { LOGAN } from '@theme/index';
 
 type FunnelComponentCardProps = {
@@ -113,6 +114,9 @@ const FunnelComponentCard = ({
       operand: value,
       operator: FunnelFilterOperators.IS,
       values: [],
+      type: FilterType.WHERE,
+      all: false,
+      datatype: FunnelFilterDataType.STRING,
     });
 
     updateStepFilters(stepFilters);
@@ -193,20 +197,19 @@ const FunnelComponentCard = ({
           />
         )}
       </Flex>
-      {Boolean(funnelStep.filters.length) && (
-        <>
-          <Divider orientation="horizontal" color={'grey.10'} mt={'3'} />
-          {funnelStep.filters.map((filter, index) => (
-            <FunnelStepFilterComponent
-              filter={filter}
-              key={index}
-              index={index}
-              handleSetFilterValue={handleSetFilterValue}
-              handleRemoveFilter={handleRemoveFilter}
-            />
-          ))}
-        </>
+      {funnelStep.event && (
+        <Divider orientation="horizontal" color={'grey.10'} mt={'3'} />
       )}
+      {Boolean(funnelStep.filters.length) &&
+        funnelStep.filters.map((filter, index) => (
+          <FunnelStepFilterComponent
+            filter={filter}
+            key={index}
+            index={index}
+            handleSetFilterValue={handleSetFilterValue}
+            handleRemoveFilter={handleRemoveFilter}
+          />
+        ))}
       {funnelStep.event ? (
         <AddFilter
           eventProperties={eventProperties}

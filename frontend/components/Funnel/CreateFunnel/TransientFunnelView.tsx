@@ -46,9 +46,10 @@ const TransientFunnelView = ({
 
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
 
-  const funnelConversion = trendsData?.[trendsData.length - 1]?.['conversion'];
+  const funnelConversion =
+    trendsData?.[trendsData.length - 1]?.['conversion'] || 0;
   const funnelLastStepUsers =
-    trendsData?.[trendsData.length - 1]?.['lastStepUsers'];
+    trendsData?.[trendsData.length - 1]?.['lastStepUsers'] || 0;
 
   const handleChartClick = async (properties: any) => {
     onDrawerOpen();
@@ -70,7 +71,7 @@ const TransientFunnelView = ({
     <Flex
       direction={'column'}
       gap={'8'}
-      px={{ base: '0', md: '25' }}
+      px={{ base: '0', md: '15' }}
       py={{ base: '8', md: '12' }}
     >
       <Flex justifyContent={'space-between'}>
