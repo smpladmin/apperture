@@ -151,6 +151,7 @@ const FunnelComponentCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       cursor={'auto'}
+      data-testid={'funnel-step'}
     >
       <Flex
         width={'full'}
@@ -162,7 +163,7 @@ const FunnelComponentCard = ({
           <FilterNumber index={index} />
           <Box position="relative" ref={eventBoxRef}>
             <Text
-              data-testid={'event-or-segment-name'}
+              data-testid={'event-name'}
               color={'white.DEFAULT'}
               fontSize={'xs-14'}
               fontWeight={500}
@@ -184,7 +185,7 @@ const FunnelComponentCard = ({
         </Flex>
         {showCrossIcon && (
           <IconButton
-            data-testid="remove-event-or-segment-component"
+            data-testid={`remove-funnel-step-${index}`}
             size={'xs'}
             fontWeight={'500'}
             aria-label="remove-component"
