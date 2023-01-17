@@ -135,7 +135,6 @@ class FunnelsService:
                 for data in user_list[: dropped_data["total_users"]]
             ]
         return converted_user_list, dropped_user_list
-        
 
     def format_conversion_data(self, user_list, count_data):
         dropped_data = None
