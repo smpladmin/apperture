@@ -148,6 +148,7 @@ const RightView = ({
         conversionData={conversionData}
         datasourceId={datasourceId}
         event={selectedEvent as string}
+        setConversionData={setConversionData}
       />
     </ViewPanel>
   );

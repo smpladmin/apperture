@@ -12,11 +12,14 @@ import {
   IconButton,
   Flex,
   Box,
+  Skeleton,
 } from '@chakra-ui/react';
 import UserTableView from './UserListTableView';
 import { FunnelEventConversion, UserProperty } from '@lib/domain/funnel';
 import { getUserProperty } from '@lib/services/funnelService';
 import UserPropertyTable from './UserPropertyTable';
+import SkeletonLoader from './SkeletonLoader';
+import TableSkeleton from '@components/Skeleton/TableSkeleton';
 
 type UserConversionDrawerProps = {
   isOpen: boolean;
@@ -24,6 +27,7 @@ type UserConversionDrawerProps = {
   conversionData: FunnelEventConversion | null;
   datasourceId: string;
   event: string;
+  setConversionData: (data: FunnelEventConversion | null) => void;
 };
 
 export enum TableState {
@@ -37,6 +41,7 @@ const UserConversionDrawer = ({
   conversionData,
   datasourceId,
   event,
+  setConversionData,
 }: UserConversionDrawerProps) => {
   const [tableState, setTableState] = useState<TableState>(TableState.PROPERTY);
   const [selectedUser, setSelectedUser] = useState<null | string>(null);
@@ -71,6 +76,7 @@ const UserConversionDrawer = ({
   const handleClose = () => {
     onClose();
     setTableState(TableState.LIST);
+    setConversionData(null);
   };
 
   return (
@@ -88,11 +94,13 @@ const UserConversionDrawer = ({
         />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader>
+          <DrawerHeader paddingRight={10}>
             {tableState == TableState.LIST ? (
               conversionData ? (
                 `Step ${conversionData.step} - ${conversionData.event}`
-              ) : null
+              ) : (
+                <Skeleton>Step</Skeleton>
+              )
             ) : (
               <Flex direction={'column'}>
                 <Box>
@@ -108,6 +116,7 @@ const UserConversionDrawer = ({
                     border={'1px solid #EDEDED'}
                     onClick={() => {
                       setTableState(TableState.LIST);
+                      setUserProperty(null);
                     }}
                   />
                 </Box>
@@ -119,20 +128,31 @@ const UserConversionDrawer = ({
           </DrawerHeader>
 
           <DrawerBody p={0} overflow={'hidden'} maxH={'full'}>
-            {tableState == TableState.LIST
-              ? conversionData?.converted &&
-                conversionData?.dropped && (
-                  <UserTableView
-                    converted={conversionData.converted}
-                    dropped={conversionData.dropped}
-                    setSelectedUser={setSelectedUser}
-                  />
-                )
-              : userProperty && (
-                  <UserPropertyTable
-                    properties={userProperty as UserProperty[]}
-                  />
-                )}
+            {tableState == TableState.LIST ? (
+              conversionData?.converted && conversionData?.dropped ? (
+                <UserTableView
+                  converted={conversionData.converted}
+                  dropped={conversionData.dropped}
+                  setSelectedUser={setSelectedUser}
+                />
+              ) : (
+                <SkeletonLoader />
+              )
+            ) : userProperty ? (
+              <UserPropertyTable properties={userProperty as UserProperty[]} />
+            ) : (
+              <Flex flexDirection="column" maxH={'full'} w={'full'} grow={1}>
+                <Box
+                  overflowY={'auto'}
+                  border={'0.4px solid #b2b2b5'}
+                  borderRadius={'8px'}
+                  maxH={'full'}
+                  margin={6}
+                >
+                  <TableSkeleton tableHeader={['', '']} />
+                </Box>
+              </Flex>
+            )}
           </DrawerBody>
 
           <DrawerFooter>

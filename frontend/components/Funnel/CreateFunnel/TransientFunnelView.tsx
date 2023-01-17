@@ -169,6 +169,7 @@ const TransientFunnelView = ({
         conversionData={conversionData}
         datasourceId={dsId as string}
         event={selectedEvent as string}
+        setConversionData={setConversionData}
       />
     </Flex>
   );

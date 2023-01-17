@@ -135,7 +135,6 @@ class FunnelsService:
                 for data in user_list[: dropped_data["total_users"]]
             ]
         return converted_user_list, dropped_user_list
-        
 
     def format_conversion_data(self, user_list, count_data):
         dropped_data = None
@@ -153,7 +152,12 @@ class FunnelsService:
             dropped_data=dropped_data,
         )
 
-        return dropped_data, dropped_user_list, converted_data, converted_user_list
+        return (
+            dropped_data,
+            dropped_user_list[:100],
+            converted_data,
+            converted_user_list[:100],
+        )
 
     async def get_user_conversion(self, datasource_id: str, steps: List[FunnelStep]):
 
