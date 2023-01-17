@@ -104,7 +104,7 @@ async def get_transient_funnel_trends(
 
 
 @router.post(
-    "/funnels/analytics/transient", 
+    "/funnels/analytics/transient", response_model=FunnelConversionResponseBody
 )
 async def get_transient_funnel_analytics(
     status:ConversionStatus,
@@ -112,7 +112,7 @@ async def get_transient_funnel_analytics(
     funnel_service: FunnelsService = Depends(),
 ):
     return await funnel_service.get_user_conversion(
-        datasource_id=dto.datasourceId, steps=dto.steps, status=ConversionStatus
+        datasource_id=dto.datasourceId, steps=dto.steps, status=status
     )
 
 
