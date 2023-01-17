@@ -3,17 +3,17 @@ import SearchableListDropdown from '@components/SearchableDropdown/SearchableLis
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 
-type MetricAddFilterComponentProps = {
+type FunnelAddFilterComponentProps = {
   eventProperties: string[];
   loadingEventProperties: boolean;
   handleAddFilter: Function;
 };
 
-const MetricAddFilterComponent = ({
+const FunnelAddFilterComponent = ({
   eventProperties,
   loadingEventProperties,
   handleAddFilter,
-}: MetricAddFilterComponentProps) => {
+}: FunnelAddFilterComponentProps) => {
   const [openDropDown, setOpenDropDown] = useState(false);
   const ref = useRef(null);
   const handleClick = () => {
@@ -58,4 +58,4 @@ const MetricAddFilterComponent = ({
   );
 };
 
-export default MetricAddFilterComponent;
+export default FunnelAddFilterComponent;
