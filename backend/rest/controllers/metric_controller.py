@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from typing import List
 from domain.apperture_users.models import AppertureUser
 from rest.middlewares import validate_jwt,get_user
 from rest.dtos.metrics import MetricsComputeResponse, MetricsComputeDto,CreateMetricDTO,SavedMetricResponse
@@ -65,6 +66,14 @@ async def save_metrics(
     )
     await metric_service.update_metric(metric_id=id,metric=metric)
     return metric
+
+
+@router.get('/metrics',response_model=List[SavedMetricResponse])
+async def get_all_metrics(
+    app_id:str,
+    metric_service:MetricService=Depends(),
+):
+    return await metric_service.get_metrics_by_app_id(app_id=app_id)
 
 @router.get('/metrics/{id}',response_model=SavedMetricResponse)
 async def get_metric_by_id(
