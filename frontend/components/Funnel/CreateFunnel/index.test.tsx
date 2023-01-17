@@ -270,82 +270,33 @@ describe('create funnel', () => {
     });
   });
 
-  // describe('search ', () => {
-  //   it('should show suggestion container when input field is focused and suggestions are present and should set the value when clicked on a suggestion', async () => {
-  //     mockedSearchResult.mockReturnValue([
-  //       { id: 'Chapter_Click' },
-  //       { id: 'Chapter_Open' },
-  //     ]);
-  //     mockedIsEveryNonEmptyStepValid.mockReturnValue(true);
+  describe('search ', () => {
+    it('should show suggestion container when input field is focused and suggestions are present and should set the value when clicked on a suggestion', async () => {
+      const searchResults = [{ id: 'Chapter_Click' }, { id: 'Chapter_Open' }];
+      mockedSearchResult.mockReturnValue(searchResults);
+      mockedIsEveryNonEmptyStepValid.mockReturnValue(true);
+      await renderCreateFunnel();
 
-  //     render(
-  //       <RouterContext.Provider
-  //         value={createMockRouter({ query: { dsId: '654212033222' } })}
-  //       >
-  //         <Funnel />
-  //       </RouterContext.Provider>
-  //     );
+      const eventName = screen.getAllByTestId('event-name');
 
-  //     const inputFields = screen.getAllByTestId('autocomplete');
-  //     fireEvent.change(inputFields[0], { target: { value: 'Video_Click' } });
-  //     fireEvent.blur(inputFields[0]);
+      fireEvent.click(eventName[0]);
+      const searchInput = screen.getByTestId('dropdown-search-input');
 
-  //     fireEvent.focus(inputFields[1]);
-  //     fireEvent.change(inputFields[1], {
-  //       target: { value: 'Cha' },
-  //     });
+      fireEvent.change(searchInput, { target: { value: 'Chapter' } });
+      const dropdownOptionsAfterSearch =
+        screen.getAllByTestId('dropdown-options');
 
-  //     const suggestionContainer = screen.getByTestId('suggestion-container');
-  //     expect(suggestionContainer).toBeVisible();
-
-  //     const suggestions = screen.getAllByTestId('suggestion');
-  //     await act(async () => {
-  //       fireEvent.click(suggestions[0]);
-  //     });
-  //     await waitFor(() =>
-  //       expect(inputFields[1]).toHaveDisplayValue('Chapter_Click')
-  //     );
-  //   });
-
-  //   it('should be able to navigate with keys inside suggestion container and select suggestion', async () => {
-  //     mockedSearchResult.mockReturnValue([
-  //       { id: 'Chapter_Click' },
-  //       { id: 'Chapter_Open' },
-  //     ]);
-  //     mockedIsEveryNonEmptyStepValid.mockReturnValue(true);
-  //     render(
-  //       <RouterContext.Provider
-  //         value={createMockRouter({ query: { dsId: '654212033222' } })}
-  //       >
-  //         <Funnel />
-  //       </RouterContext.Provider>
-  //     );
-
-  //     const inputFields = screen.getAllByTestId('autocomplete');
-  //     fireEvent.change(inputFields[0], { target: { value: 'Video_Click' } });
-  //     fireEvent.blur(inputFields[0]);
-  //     fireEvent.focus(inputFields[1]);
-  //     fireEvent.change(inputFields[1], {
-  //       target: { value: 'Cha' },
-  //     });
-  //     const suggestionContainer = screen.getByTestId('suggestion-container');
-  //     expect(suggestionContainer).toBeVisible();
-
-  //     // move cursor using Arrow Down key
-  //     fireEvent.keyDown(inputFields[1], {
-  //       key: 'ArrowDown',
-  //     });
-  //     // select suggestion by pressing Enter key
-  //     await act(async () => {
-  //       fireEvent.keyDown(inputFields[1], {
-  //         key: 'Enter',
-  //       });
-  //     });
-  //     await waitFor(() =>
-  //       expect(inputFields[1]).toHaveDisplayValue('Chapter_Click')
-  //     );
-  //   });
-  // });
+      dropdownOptionsAfterSearch.forEach((dropdownOption, i) => {
+        expect(dropdownOption).toHaveTextContent(searchResults[i]['id']);
+      });
+      await act(async () => {
+        fireEvent.click(dropdownOptionsAfterSearch[0]);
+      });
+      await waitFor(() =>
+        expect(eventName[0].textContent).toEqual('Chapter_Click')
+      );
+    });
+  });
 
   describe('view funnel empty state /funnelchart', () => {
     it('should render empty state initially when there are no or less than 2 valid events for creating funnel', async () => {
