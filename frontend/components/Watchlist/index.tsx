@@ -11,40 +11,60 @@ import { getSavedSegmentsForUser } from '@lib/services/segmentService';
 const Watchlist = () => {
   const [selectedItem, setSelectedItem] = useState(WatchListItemType.ALL);
   const [savedItemsData, setSavedItemsData] = useState<SavedItems[]>([]);
+  const [metrics, setMetrics] = useState<SavedItems[]>([]);
+  const [segments, setSegments] = useState<SavedItems[]>([]);
+  const [funnels, setFunnels] = useState<SavedItems[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const getFunnels = async () => {
+    const savedFunnels = await getSavedFunnelsForUser();
+    return savedFunnels.map((funnel: any) => {
+      return { type: WatchListItemType.FUNNELS, details: funnel };
+    });
+  };
+
+  const getSegments = async () => {
+    const savedSegments = await getSavedSegmentsForUser();
+    return savedSegments.map((segment: any) => {
+      return { type: WatchListItemType.SEGMENTS, details: segment };
+    });
+  };
+
+  const getMetrics = async () => {
+    return [];
+  };
+
   const getSavedItems = async () => {
-    if (selectedItem === WatchListItemType.ALL) {
-      const [savedFunnels] = await Promise.all([getSavedFunnelsForUser()]);
-      const funnels = savedFunnels.map((funnel: any) => {
-        return { type: WatchListItemType.FUNNELS, details: funnel };
-      });
-      setSavedItemsData(funnels);
-      setIsLoading(false);
-      return;
-    }
-    if (selectedItem === WatchListItemType.FUNNELS) {
-      const savedFunnels = await getSavedFunnelsForUser();
-      setSavedItemsData(savedFunnels);
-      setIsLoading(false);
-      return;
-    }
-    if (selectedItem === WatchListItemType.METRICS) {
-      setSavedItemsData([]);
-      setIsLoading(false);
-      return;
-    }
-    if (selectedItem === WatchListItemType.SEGMENTS) {
-      const segments = await getSavedSegmentsForUser();
-      setSavedItemsData(segments);
-      setIsLoading(false);
-      return;
-    }
+    const [savedMetrics, savedFunnels, savedSegments] = await Promise.all([
+      getMetrics(),
+      getFunnels(),
+      getSegments(),
+    ]);
+    setMetrics(savedMetrics);
+    setFunnels(savedFunnels);
+    setSegments(savedSegments);
+    setSavedItemsData([...savedMetrics, ...savedFunnels, ...savedSegments]);
+    setIsLoading(false);
   };
 
   useEffect(() => {
     setIsLoading(true);
     getSavedItems();
+  }, []);
+
+  useEffect(() => {
+    if (selectedItem === WatchListItemType.ALL) {
+      setSavedItemsData([...funnels, ...segments]);
+    }
+    if (selectedItem === WatchListItemType.METRICS) {
+      setSavedItemsData([...metrics]);
+    }
+    if (selectedItem === WatchListItemType.FUNNELS) {
+      setSavedItemsData([...funnels]);
+    }
+    if (selectedItem === WatchListItemType.SEGMENTS) {
+      setSavedItemsData([...segments]);
+    }
   }, [selectedItem]);
 
   return (

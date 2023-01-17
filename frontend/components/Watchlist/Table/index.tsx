@@ -9,13 +9,14 @@ import {
 } from '@tanstack/react-table';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 import LabelType from './LabelType';
-import TableActionMenu from './ActionMenu';
 import Details from './Details';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { useRouter } from 'next/router';
-import UsersMetric from './UsersMetric';
 import { AppertureContext } from '@lib/contexts/appertureContext';
 import { User } from '@lib/domain/user';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
 
 const WatchlistTable = ({
   savedItemsData,
@@ -56,7 +57,7 @@ const WatchlistTable = ({
             columnHelper.accessor('details.updatedAt', {
               cell: (info) => {
                 const updatedAt = info.getValue();
-                return new Date(updatedAt).toLocaleDateString();
+                return dayjs.utc(updatedAt).local().format('D MMM YY, h:mmA');
               },
               header: 'Last Updated',
             }),
@@ -105,7 +106,7 @@ const WatchlistTable = ({
           <Tr
             key={row.id}
             onClick={() => onRowClick(row)}
-            _hover={{ bg: 'white.100', cursor: 'pointer' }}
+            _hover={{ bg: 'gray.50', cursor: 'pointer' }}
             data-testid={'table-body-rows'}
           >
             {row.getVisibleCells().map((cell) => {

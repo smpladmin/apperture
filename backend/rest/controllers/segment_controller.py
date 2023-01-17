@@ -5,11 +5,13 @@ from domain.datasources.service import DataSourceService
 from domain.segments.service import SegmentService
 from domain.users.models import User
 from rest.dtos.segments import (
+    SegmentWithUser,
     TransientSegmentDto,
     ComputedSegmentResponse,
     CreateSegmentDto,
     SegmentResponse,
 )
+from rest.dtos.users import UserResponse
 
 from rest.middlewares import validate_jwt, get_user, get_user_id
 
@@ -60,12 +62,17 @@ async def get_segment(
     return await segment_service.get_segment(segment_id=segment_id)
 
 
-@router.get("/segments", response_model=List[SegmentResponse])
+@router.get("/segments", response_model=List[SegmentWithUser])
 async def get_segments(
     app_id: Optional[str] = None,
     user_id: str = Depends(get_user_id),
+    user: User = Depends(get_user),
     segment_service: SegmentService = Depends(),
 ):
     if app_id:
         return await segment_service.get_segments_for_app(app_id=app_id)
-    return await segment_service.get_segments_for_user(user_id=user_id)
+    segments = await segment_service.get_segments_for_user(user_id=user_id)
+    segments = [SegmentWithUser.from_orm(s) for s in segments]
+    for segment in segments:
+        segment.user = UserResponse.from_orm(user)
+    return segments
