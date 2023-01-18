@@ -81,7 +81,7 @@ const SankeyNodesTabs = ({ sankeyData }: { sankeyData: Array<SankeyData> }) => {
             .filter((sd) => sd.flow === FlowType.INFLOW)
             .map((data, i, inflowNode) => {
               return (
-                <Fragment key={data.node}>
+                <Fragment key={data.previousEvent}>
                   <SankeyNodeStats data={data} />
                   {i !== inflowNode.length - 1 && (
                     <Divider
@@ -99,7 +99,7 @@ const SankeyNodesTabs = ({ sankeyData }: { sankeyData: Array<SankeyData> }) => {
             .filter((sd) => sd.flow === FlowType.OUTFLOW)
             .map((data, i, outflowNode) => {
               return (
-                <Fragment key={data.node}>
+                <Fragment key={data.currentEvent}>
                   <SankeyNodeStats data={data} />
                   {i !== outflowNode.length - 1 && (
                     <Divider
