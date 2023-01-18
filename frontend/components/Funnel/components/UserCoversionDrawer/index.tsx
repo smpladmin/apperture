@@ -14,10 +14,7 @@ import {
   Box,
 } from '@chakra-ui/react';
 import UserTableView from './UserListTableView';
-import {
-  FunnelStep,
-  UserProperty,
-} from '@lib/domain/funnel';
+import { FunnelStep, UserProperty } from '@lib/domain/funnel';
 import { getUserProperty } from '@lib/services/funnelService';
 
 type UserConversionDrawerProps = {
@@ -109,6 +106,7 @@ const UserConversionDrawer = ({
                     onClick={() => {
                       setTableState(TableState.LIST);
                       setUserProperty(null);
+                      setSelectedUser(null);
                     }}
                   />
                 </Box>
