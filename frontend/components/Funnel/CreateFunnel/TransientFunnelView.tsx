@@ -7,8 +7,6 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import {
-  ConversionStatus,
-  FunnelConversionData,
   FunnelData,
   FunnelEventConversion,
   FunnelStep,
@@ -19,7 +17,6 @@ import FunnelChart from '../components/FunnelChart';
 import Trend from '../components/Trend';
 import Loader from '@components/LoadingSpinner';
 import UserConversionDrawer from '../components/UserCoversionDrawer';
-import { getConversionData } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 
 type TransientFunnelViewProps = {
@@ -42,10 +39,6 @@ const TransientFunnelView = ({
   } = useDisclosure();
   const router = useRouter();
   const { dsId } = router.query;
-
-  const [conversionData, setConversionData] =
-    useState<FunnelEventConversion | null>(null);
-
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [selectedFunnelSteps, setSelectedFunnelSteps] = useState<FunnelStep[]>(
     []
@@ -61,41 +54,7 @@ const TransientFunnelView = ({
     const { step, event } = data;
     setSelectedEvent(event.trim());
     const selectedSteps = funnelSteps.slice(0, step);
-    setSelectedFunnelSteps(selectedSteps);
-    // if (
-    //   !conversionData ||
-    //   !conversionData.converted ||
-    //   !conversionData.dropped
-    // ) {
-    //   if (!conversionData?.converted) {
-    //     console.log('request conversion');
-    //     const conversionAnalysisData = await getConversionData(
-    //       dsId as string,
-    //       selectedSteps,
-    //       ConversionStatus.CONVERTED
-    //     );
-    //     console.log(conversionAnalysisData);
-    //     setConversionData({
-    //       converted: conversionAnalysisData,
-    //       step,
-    //       event: event.trim(),
-    //     });
-    //   } else if (!conversionData?.dropped) {
-    //     console.log('request dropped');
-
-    //     const conversionAnalysisData = await getConversionData(
-    //       dsId as string,
-    //       selectedSteps,
-    //       ConversionStatus.DROPPED
-    //     );
-    //     setConversionData({
-    //       dropped: conversionAnalysisData,
-    //       step,
-    //       event: event.trim(),
-    //     });
-    //   }
-    //   console.log('here');
-    // }
+    setSelectedFunnelSteps(selectedSteps); 
   };
 
   return (

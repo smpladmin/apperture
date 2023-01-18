@@ -1,12 +1,5 @@
 import {
   Flex,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  Text,
-  Skeleton,
   Box,
 } from '@chakra-ui/react';
 import TableSkeleton from '@components/Skeleton/TableSkeleton';
@@ -22,7 +15,6 @@ const SkeletonLoader = () => {
         border={'0.4px solid #b2b2b5'}
         borderRadius={'8px'}
         maxH={'full'}
-        margin={6}
       >
         <TableSkeleton tableHeader={['', '']} />
       </Box>

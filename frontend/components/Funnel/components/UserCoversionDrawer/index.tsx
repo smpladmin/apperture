@@ -12,18 +12,13 @@ import {
   IconButton,
   Flex,
   Box,
-  Skeleton,
 } from '@chakra-ui/react';
 import UserTableView from './UserListTableView';
 import {
-  FunnelEventConversion,
   FunnelStep,
   UserProperty,
 } from '@lib/domain/funnel';
 import { getUserProperty } from '@lib/services/funnelService';
-import UserPropertyTable from './UserPropertyTable';
-import SkeletonLoader from './SkeletonLoader';
-import TableSkeleton from '@components/Skeleton/TableSkeleton';
 
 type UserConversionDrawerProps = {
   isOpen: boolean;
@@ -125,17 +120,14 @@ const UserConversionDrawer = ({
           </DrawerHeader>
 
           <DrawerBody p={0} overflow={'hidden'} maxH={'full'}>
-            {tableState == TableState.LIST ? (
-              <UserTableView
-                dsId={datasourceId}
-                steps={selectedFunnelSteps}
-                setSelectedUser={setSelectedUser}
-              />
-            ) : userProperty ? (
-              <UserPropertyTable properties={userProperty as UserProperty[]} />
-            ) : (
-              <SkeletonLoader />
-            )}
+            <UserTableView
+              dsId={datasourceId}
+              steps={selectedFunnelSteps}
+              setSelectedUser={setSelectedUser}
+              properties={userProperty as UserProperty[]}
+              tableState={tableState}
+              setTableState={setTableState}
+            />
           </DrawerBody>
 
           <DrawerFooter>

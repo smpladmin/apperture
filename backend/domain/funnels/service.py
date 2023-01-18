@@ -115,16 +115,16 @@ class FunnelsService:
             for data in conversion_data
         ]
 
-    async def get_user_conversion(self, datasource_id: str, steps: List[FunnelStep],status: ConversionStatus):
-        conversion_data =  self.funnels.get_conversion_analytics(
-            ds_id=datasource_id, steps=steps,status=status
+    async def get_user_conversion(
+        self, datasource_id: str, steps: List[FunnelStep], status: ConversionStatus
+    ):
+        conversion_data = self.funnels.get_conversion_analytics(
+            ds_id=datasource_id, steps=steps, status=status
         )
-        user_list = [ FunnelEventUserData(id=data[0]) for data in conversion_data]
-        count_data = conversion_data[0][1] if conversion_data else [0,0]
+        user_list = [FunnelEventUserData(id=data[0]) for data in conversion_data]
+        count_data = conversion_data[0][1] if conversion_data else [0, 0]
         return FunnelConversionData(
-            users=user_list,
-            total_users=count_data[0], 
-            unique_users=count_data[1]
+            users=user_list, total_users=count_data[0], unique_users=count_data[1]
         )
 
     async def get_funnels_for_apps(

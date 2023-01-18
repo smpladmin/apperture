@@ -9,7 +9,10 @@ from rest.dtos.funnels import (
     FunnelResponse,
     ComputedFunnelStepResponse,
     ComputedFunnelResponse,
-    FunnelConversionResponseBody,CreateFunnelDto, TransientFunnelDto, FunnelTrendResponse
+    FunnelConversionResponseBody,
+    CreateFunnelDto,
+    TransientFunnelDto,
+    FunnelTrendResponse,
 )
 from domain.funnels.models import ConversionStatus
 from rest.dtos.saved_items import SavedItemsResponse
@@ -107,7 +110,7 @@ async def get_transient_funnel_trends(
     "/funnels/analytics/transient", response_model=FunnelConversionResponseBody
 )
 async def get_transient_funnel_analytics(
-    status:ConversionStatus,
+    status: ConversionStatus,
     dto: TransientFunnelDto,
     funnel_service: FunnelsService = Depends(),
 ):

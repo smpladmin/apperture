@@ -21,16 +21,20 @@ class Funnels(EventsBase):
     def get_conversion_trend(self, ds_id: str, steps: List[FunnelStep]) -> List[Tuple]:
         return self.execute_get_query(*self.build_trends_query(ds_id, steps))
 
-    def get_conversion_analytics(self, ds_id: str, steps: List[FunnelStep],status:ConversionStatus):
+    def get_conversion_analytics(
+        self, ds_id: str, steps: List[FunnelStep], status: ConversionStatus
+    ):
         if len(steps) == 1:
-            return self.get_initial_users(ds_id=ds_id, steps=steps,status=status)
+            return self.get_initial_users(ds_id=ds_id, steps=steps, status=status)
 
-        query, parameter = self.build_analytics_query(ds_id, steps,status)
-        return  self.execute_get_query(query.get_sql(), parameter)
+        query, parameter = self.build_analytics_query(ds_id, steps, status)
+        return self.execute_get_query(query.get_sql(), parameter)
 
-    def get_initial_users(self, ds_id: str, steps: List[FunnelStep],status:ConversionStatus) -> List[Tuple]:
-        if(status == ConversionStatus.DROPPED):
-             return []
+    def get_initial_users(
+        self, ds_id: str, steps: List[FunnelStep], status: ConversionStatus
+    ) -> List[Tuple]:
+        if status == ConversionStatus.DROPPED:
+            return []
         query = ClickHouseQuery.from_(self.table).where(
             Criterion.all(
                 [
@@ -40,18 +44,17 @@ class Funnels(EventsBase):
             )
         )
         count = query.select(
-                fn.Count(self.table.user_id),
-                fn.Count(self.table.user_id).distinct(),
-            )
-        return  self.execute_get_query(
-            query.select(self.table.user_id,count).limit(100).get_sql(), {
-            "ds_id": ds_id,
-            "epoch_year": self.epoch_year,
-            "event0": steps[0].event,
-        }
+            fn.Count(self.table.user_id),
+            fn.Count(self.table.user_id).distinct(),
         )
-        
-    
+        return self.execute_get_query(
+            query.select(self.table.user_id, count).limit(100).get_sql(),
+            {
+                "ds_id": ds_id,
+                "epoch_year": self.epoch_year,
+                "event0": steps[0].event,
+            },
+        )
 
     def get_users_count(self, ds_id: str, steps: List[FunnelStep]) -> List[Tuple]:
         return self.execute_get_query(*self.build_users_query(ds_id, steps))
@@ -178,37 +181,40 @@ class Funnels(EventsBase):
             )
         return sub_query
 
-    def build_conversion_count_query(self,second_last,condition:List):
-        return  (
-            ClickHouseQuery
-            .from_(AliasedQuery("final_table"))
+    def build_conversion_count_query(self, second_last, condition: List):
+        return (
+            ClickHouseQuery.from_(AliasedQuery("final_table"))
             .select(
                 fn.Count(Field(second_last)),
                 fn.Count(Field(second_last)).distinct(),
-            ).where(
-                Criterion.all(condition)
             )
+            .where(Criterion.all(condition))
         )
 
-    def build_analytics_query(self, ds_id: str, steps: List[FunnelStep],status:ConversionStatus):
+    def build_analytics_query(
+        self, ds_id: str, steps: List[FunnelStep], status: ConversionStatus
+    ):
         query, parameters = self._builder(ds_id=ds_id, steps=steps)
 
         sub_query = self._build_subquery(steps=steps)
 
         query = query.with_(sub_query, "final_table")
         query = query.from_(AliasedQuery("final_table"))
-        
+
         last = len(steps) - 1
         second_last = len(steps) - 2
 
-        selection_condition=[Field(last).isnull() if status==ConversionStatus.DROPPED else Field(second_last).notnull()]
-        count_query=self.build_conversion_count_query(second_last,selection_condition)
+        selection_condition = [
+            Field(last).isnull()
+            if status == ConversionStatus.DROPPED
+            else Field(last).notnull()
+        ]
+        count_query = self.build_conversion_count_query(
+            second_last, selection_condition
+        )
         selection_condition.append(Field(second_last).notnull())
         query = (
-            query.select(
-                Field(second_last),
-                count_query
-            )
+            query.select(Field(second_last), count_query)
             .where(Criterion.all(selection_condition))
             .limit(100)
         )
