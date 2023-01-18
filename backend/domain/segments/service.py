@@ -29,13 +29,12 @@ class SegmentService:
         groups: List[SegmentGroup],
         columns: List[str],
     ) -> ComputedSegment:
-        segment = self.segments.get_segment_data(
+        segment, count = self.segments.get_segment_data(
             datasource_id=datasource_id,
             groups=groups,
             columns=columns,
         )
-        n = 100 if len(segment) > 100 else len(segment)
-        return ComputedSegment(count=len(segment), data=segment[:n])
+        return ComputedSegment(count=count, data=segment)
 
     async def build_segment(
         self,

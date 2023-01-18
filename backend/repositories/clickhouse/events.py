@@ -84,6 +84,7 @@ class Events(EventsBase):
             .select(Field(f"properties.{event_property}"))
             .distinct()
             .where(Criterion.all(self.total_criterion))
+            .limit(100)
         )
         return query.get_sql(), {
             "ds_id": datasource_id,
