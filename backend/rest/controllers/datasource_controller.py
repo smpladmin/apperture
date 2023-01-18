@@ -2,6 +2,8 @@ from datetime import datetime as dt
 from typing import List
 
 from fastapi import APIRouter, Depends
+from fastapi_cache.decorator import cache
+from cache.cache import datasource_edges_key_builder
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.events.service import EventsService
@@ -24,6 +26,7 @@ router = APIRouter(
 
 
 @router.get("/datasources/{ds_id}/edges", response_model=list[AggregatedEdgeResponse])
+@cache(expire=600, key_builder=datasource_edges_key_builder)
 async def get_edges(
     ds_id: str,
     start_date: str = "1970-01-01",
