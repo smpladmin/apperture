@@ -21,10 +21,12 @@ import Trend from '../components/Trend';
 import UserConversionDrawer from '../components/UserCoversionDrawer';
 
 const RightView = ({
+  funnelSteps,
   computedFunnel,
   computedTrendsData,
   datasourceId,
 }: {
+  funnelSteps: FunnelStep[];
   computedFunnel: FunnelData[];
   computedTrendsData: FunnelTrendsData[];
   datasourceId: string;
@@ -50,11 +52,7 @@ const RightView = ({
     const { step, event } = data;
     setSelectedEvent(event.trim());
 
-    const selectedSteps = computedFunnel
-      .slice(0, step)
-      .map((step): FunnelStep => {
-        return { event: step.event, filters: [] };
-      });
+    const selectedSteps = funnelSteps.slice(0, step);
     const conversionAnalysisData: FunnelEventConversion =
       await getConversionData(datasourceId as string, selectedSteps);
     setConversionData({
