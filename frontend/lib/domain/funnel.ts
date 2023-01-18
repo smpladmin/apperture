@@ -1,3 +1,5 @@
+import { AppertureUser as User } from './user';
+
 export type FunnelStep = {
   event: string;
   filters: Array<any>;
@@ -16,6 +18,8 @@ export type ComputedFunnel = {
   datasourceId: string;
   appId: string;
   name: string;
+  updatedAt: Date;
+  user: User;
   steps: FunnelStep[];
   randomSequence: boolean;
   computedFunnel: FunnelData[];

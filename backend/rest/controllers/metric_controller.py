@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends
-from typing import List
+from typing import List, Optional, Union
 from domain.apperture_users.models import AppertureUser
-from rest.middlewares import validate_jwt, get_user
+from rest.dtos.appperture_users import AppertureUserResponse
+from rest.middlewares import validate_jwt, get_user, get_user_id
 from rest.dtos.metrics import (
+    MetricWithUser,
     MetricsComputeResponse,
     MetricsComputeDto,
     CreateMetricDTO,
@@ -73,12 +75,26 @@ async def save_metrics(
     return metric
 
 
-@router.get("/metrics", response_model=List[SavedMetricResponse])
+@router.get(
+    "/metrics",
+    response_model=Union[
+        List[MetricWithUser],
+        List[SavedMetricResponse],
+    ],
+)
 async def get_all_metrics(
-    app_id: str,
+    app_id: Optional[str] = None,
+    user_id: str = Depends(get_user_id),
+    user: AppertureUser = Depends(get_user),
     metric_service: MetricService = Depends(),
 ):
-    return await metric_service.get_metrics_by_app_id(app_id=app_id)
+    if app_id:
+        return await metric_service.get_metrics_by_app_id(app_id=app_id)
+    metrics = await metric_service.get_metrics_by_user_id(user_id=user_id)
+    metrics = [MetricWithUser.from_orm(m) for m in metrics]
+    for metric in metrics:
+        metric.user = AppertureUserResponse.from_orm(user)
+    return metrics
 
 
 @router.get("/metrics/{id}", response_model=SavedMetricResponse)

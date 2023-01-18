@@ -1,5 +1,11 @@
 import { EventOrSegmentComponent } from '@lib/domain/metric';
-import { ApperturePost, ApperturePrivateGet, ApperturePut } from './util';
+import { result } from 'lodash';
+import {
+  AppertureGet,
+  ApperturePost,
+  ApperturePrivateGet,
+  ApperturePut,
+} from './util';
 
 type MetricRequestBody = {
   dsId: string;
@@ -79,4 +85,9 @@ export const updateMetric = async (
     breakdown,
   });
   return result.data;
+};
+
+export const getSavedMetricsForUser = async () => {
+  const res = await AppertureGet('/metrics');
+  return res.data;
 };

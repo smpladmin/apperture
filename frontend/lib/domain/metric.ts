@@ -1,3 +1,5 @@
+import { AppertureUser } from './user';
+
 export type MetricEventFilter = {
   operand: string;
   operator: string;
@@ -54,6 +56,7 @@ export type Metric = {
   _id: string;
   datasourceId: string;
   appId: string;
+  user: AppertureUser;
   userId: string;
   name: string;
   function: string;
