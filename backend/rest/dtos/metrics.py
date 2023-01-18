@@ -3,7 +3,7 @@ from beanie import PydanticObjectId
 from pydantic import BaseModel
 
 from rest.dtos.model_response import ModelResponse
-from domain.metrics.models import ComputedMetricResult, SegmentsAndEvents
+from domain.metrics.models import ComputedMetricResult, SegmentsAndEvents, Metric
 
 
 class MetricsComputeResponse(ComputedMetricResult, ModelResponse):
@@ -21,3 +21,16 @@ class MetricsComputeDto(BaseModel):
     breakdown: List[str]
     startDate: Optional[str]
     endDate: Optional[str]
+
+
+class CreateMetricDTO(BaseModel):
+    datasourceId: PydanticObjectId
+    name: str
+    function: str
+    aggregates: List[SegmentsAndEvents]
+    breakdown: List[str]
+
+
+class SavedMetricResponse(Metric, ModelResponse):
+    class Config:
+        allow_population_by_field_name = True

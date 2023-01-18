@@ -1,14 +1,13 @@
 import Layout from '@components/Layout';
-import { MapContext } from '@lib/contexts/mapContext';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { _getNodes } from '@lib/services/datasourceService';
-import { Actions } from '@lib/types/context';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
-import { ReactElement, useContext, useEffect } from 'react';
-import { Node } from '@lib/domain/node';
+import { ReactElement } from 'react';
 import CreateMetric from '@components/Metric/CreateMetric';
+import { _getSavedMetric } from '@lib/services/metricService';
+import { Metric } from '@lib/domain/metric';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -20,8 +19,9 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
+  const { metricId } = query;
   const apps = await _getAppsWithIntegrations(token);
-  const nodes = await _getNodes(token, query.dsId as string);
+  const savedMetric = await _getSavedMetric(token, metricId as string);
 
   if (!apps.length) {
     return {
@@ -31,25 +31,24 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
+  if (!savedMetric) {
+    return {
+      redirect: {
+        destination: '/404',
+      },
+      props: {},
+    };
+  }
   return {
-    props: { apps, nodes },
+    props: { apps, savedMetric },
   };
 };
 
-const Metric = ({ nodes }: { nodes: Node[] }) => {
-  const { dispatch } = useContext(MapContext);
-
-  useEffect(() => {
-    dispatch({
-      type: Actions.SET_NODES,
-      payload: nodes,
-    });
-  }, []);
-
-  return <CreateMetric />;
+const EditMetric = ({ savedMetric }: { savedMetric: Metric }) => {
+  return <CreateMetric savedMetric={savedMetric} />;
 };
 
-Metric.getLayout = function getLayout(
+EditMetric.getLayout = function getLayout(
   page: ReactElement,
   apps: AppWithIntegrations[]
 ) {
@@ -60,4 +59,4 @@ Metric.getLayout = function getLayout(
   );
 };
 
-export default Metric;
+export default EditMetric;
