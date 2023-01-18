@@ -15,7 +15,11 @@ import {
   Skeleton,
 } from '@chakra-ui/react';
 import UserTableView from './UserListTableView';
-import { FunnelEventConversion, UserProperty } from '@lib/domain/funnel';
+import {
+  FunnelEventConversion,
+  FunnelStep,
+  UserProperty,
+} from '@lib/domain/funnel';
 import { getUserProperty } from '@lib/services/funnelService';
 import UserPropertyTable from './UserPropertyTable';
 import SkeletonLoader from './SkeletonLoader';
@@ -24,10 +28,9 @@ import TableSkeleton from '@components/Skeleton/TableSkeleton';
 type UserConversionDrawerProps = {
   isOpen: boolean;
   onClose: () => void;
-  conversionData: FunnelEventConversion | null;
   datasourceId: string;
   event: string;
-  setConversionData: (data: FunnelEventConversion | null) => void;
+  selectedFunnelSteps: FunnelStep[];
 };
 
 export enum TableState {
@@ -38,10 +41,9 @@ export enum TableState {
 const UserConversionDrawer = ({
   isOpen,
   onClose,
-  conversionData,
   datasourceId,
   event,
-  setConversionData,
+  selectedFunnelSteps,
 }: UserConversionDrawerProps) => {
   const [tableState, setTableState] = useState<TableState>(TableState.PROPERTY);
   const [selectedUser, setSelectedUser] = useState<null | string>(null);
@@ -76,7 +78,6 @@ const UserConversionDrawer = ({
   const handleClose = () => {
     onClose();
     setTableState(TableState.LIST);
-    setConversionData(null);
   };
 
   return (
@@ -96,11 +97,7 @@ const UserConversionDrawer = ({
           <DrawerCloseButton />
           <DrawerHeader paddingRight={10}>
             {tableState == TableState.LIST ? (
-              conversionData ? (
-                `Step ${conversionData.step} - ${conversionData.event}`
-              ) : (
-                <Skeleton>Step</Skeleton>
-              )
+              `Step ${event}`
             ) : (
               <Flex direction={'column'}>
                 <Box>
@@ -129,29 +126,15 @@ const UserConversionDrawer = ({
 
           <DrawerBody p={0} overflow={'hidden'} maxH={'full'}>
             {tableState == TableState.LIST ? (
-              conversionData?.converted && conversionData?.dropped ? (
-                <UserTableView
-                  converted={conversionData.converted}
-                  dropped={conversionData.dropped}
-                  setSelectedUser={setSelectedUser}
-                />
-              ) : (
-                <SkeletonLoader />
-              )
+              <UserTableView
+                dsId={datasourceId}
+                steps={selectedFunnelSteps}
+                setSelectedUser={setSelectedUser}
+              />
             ) : userProperty ? (
               <UserPropertyTable properties={userProperty as UserProperty[]} />
             ) : (
-              <Flex flexDirection="column" maxH={'full'} w={'full'} grow={1}>
-                <Box
-                  overflowY={'auto'}
-                  border={'0.4px solid #b2b2b5'}
-                  borderRadius={'8px'}
-                  maxH={'full'}
-                  margin={6}
-                >
-                  <TableSkeleton tableHeader={['', '']} />
-                </Box>
-              </Flex>
+              <SkeletonLoader />
             )}
           </DrawerBody>
 

@@ -7,6 +7,8 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import {
+  ConversionStatus,
+  FunnelConversionData,
   FunnelData,
   FunnelEventConversion,
   FunnelStep,
@@ -45,6 +47,9 @@ const TransientFunnelView = ({
     useState<FunnelEventConversion | null>(null);
 
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  const [selectedFunnelSteps, setSelectedFunnelSteps] = useState<FunnelStep[]>(
+    []
+  );
 
   const funnelConversion = trendsData?.[trendsData.length - 1]?.['conversion'];
   const funnelLastStepUsers =
@@ -56,14 +61,41 @@ const TransientFunnelView = ({
     const { step, event } = data;
     setSelectedEvent(event.trim());
     const selectedSteps = funnelSteps.slice(0, step);
-    const conversionAnalysisData: FunnelEventConversion =
-      await getConversionData(dsId as string, selectedSteps);
-    setConversionData({
-      converted: conversionAnalysisData.converted,
-      dropped: conversionAnalysisData.dropped,
-      step,
-      event: event.trim(),
-    });
+    setSelectedFunnelSteps(selectedSteps);
+    // if (
+    //   !conversionData ||
+    //   !conversionData.converted ||
+    //   !conversionData.dropped
+    // ) {
+    //   if (!conversionData?.converted) {
+    //     console.log('request conversion');
+    //     const conversionAnalysisData = await getConversionData(
+    //       dsId as string,
+    //       selectedSteps,
+    //       ConversionStatus.CONVERTED
+    //     );
+    //     console.log(conversionAnalysisData);
+    //     setConversionData({
+    //       converted: conversionAnalysisData,
+    //       step,
+    //       event: event.trim(),
+    //     });
+    //   } else if (!conversionData?.dropped) {
+    //     console.log('request dropped');
+
+    //     const conversionAnalysisData = await getConversionData(
+    //       dsId as string,
+    //       selectedSteps,
+    //       ConversionStatus.DROPPED
+    //     );
+    //     setConversionData({
+    //       dropped: conversionAnalysisData,
+    //       step,
+    //       event: event.trim(),
+    //     });
+    //   }
+    //   console.log('here');
+    // }
   };
 
   return (
@@ -166,10 +198,9 @@ const TransientFunnelView = ({
       <UserConversionDrawer
         isOpen={isDrawerOpen}
         onClose={onDrawerClose}
-        conversionData={conversionData}
         datasourceId={dsId as string}
         event={selectedEvent as string}
-        setConversionData={setConversionData}
+        selectedFunnelSteps={selectedFunnelSteps}
       />
     </Flex>
   );

@@ -12,6 +12,7 @@ import {
   FunnelStep,
   FunnelTrendsData,
   FunnelEventConversion,
+  ConversionStatus,
 } from '@lib/domain/funnel';
 import { getConversionData } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
@@ -55,14 +56,38 @@ const RightView = ({
       .map((step): FunnelStep => {
         return { event: step.event, filters: [] };
       });
-    const conversionAnalysisData: FunnelEventConversion =
-      await getConversionData(datasourceId as string, selectedSteps);
-    setConversionData({
-      converted: conversionAnalysisData.converted,
-      dropped: conversionAnalysisData.dropped,
-      step,
-      event: event.trim(),
-    });
+    if (
+      !conversionData ||
+      !conversionData.converted ||
+      !conversionData.converted
+    ) {
+      if (!conversionData?.converted) {
+        const conversionAnalysisData: FunnelEventConversion =
+          await getConversionData(
+            dsId as string,
+            selectedSteps,
+            ConversionStatus.CONVERTED
+          );
+        setConversionData({
+          converted: conversionAnalysisData.converted,
+          step,
+          event: event.trim(),
+        });
+      }
+      if (!conversionData?.dropped) {
+        const conversionAnalysisData: FunnelEventConversion =
+          await getConversionData(
+            dsId as string,
+            selectedSteps,
+            ConversionStatus.DROPPED
+          );
+        setConversionData({
+          dropped: conversionAnalysisData.converted,
+          step,
+          event: event.trim(),
+        });
+      }
+    }
   };
   return (
     <ViewPanel>

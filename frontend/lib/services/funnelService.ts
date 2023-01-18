@@ -1,6 +1,6 @@
 import { AppertureGet } from './util';
 import { ApperturePrivateAPI } from './../apiClient/client.server';
-import { FunnelStep } from '@lib/domain/funnel';
+import { ConversionStatus, FunnelStep } from '@lib/domain/funnel';
 import { AxiosError } from 'axios';
 import { AppertureAPI } from '../apiClient';
 
@@ -137,12 +137,25 @@ export const getSavedFunnelsForUser = async () => {
   }
 };
 
-export const getConversionData = async (dsId: string, steps: FunnelStep[]) => {
+export const getConversionData = async (
+  dsId: string,
+  steps: FunnelStep[],
+  status: ConversionStatus
+) => {
   try {
-    const res = await AppertureAPI.post('/funnels/analytics/transient', {
-      datasourceId: dsId,
-      steps,
-    });
+    const res = await AppertureAPI.post(
+      '/funnels/analytics/transient',
+      {
+        datasourceId: dsId,
+        steps,
+      },
+      {
+        params: {
+          status,
+        },
+      }
+    );
+    console.log(res);
     return res.data;
   } catch (e) {
     console.error((e as AxiosError).message);
