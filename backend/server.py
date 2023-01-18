@@ -2,6 +2,9 @@ import logging
 import os
 from dotenv import load_dotenv
 
+from cache import init_cache
+from settings import apperture_settings
+
 load_dotenv(override=False)
 logging.getLogger().setLevel(logging.INFO)
 
@@ -28,6 +31,8 @@ from rest.controllers import (
 from mongo import Mongo
 from clickhouse import Clickhouse
 
+settings = apperture_settings()
+
 
 async def on_startup():
     mongo = Mongo()
@@ -36,6 +41,7 @@ async def on_startup():
     app.dependency_overrides[Clickhouse] = lambda: clickhouse
     await mongo.init()
     clickhouse.init()
+    init_cache(settings.redis_host, settings.redis_password)
 
 
 async def on_shutdown():
