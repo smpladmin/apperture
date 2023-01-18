@@ -7,7 +7,8 @@ from domain.funnels.models import (
     ComputedFunnelStep,
     ComputedFunnel,
     FunnelTrendsData,
-    FunnelConversionData,ConversionStatus
+    FunnelConversionData,
+    ConversionStatus,
 )
 from rest.dtos.appperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
@@ -19,10 +20,12 @@ class CreateFunnelDto(BaseModel):
     steps: List[FunnelStep]
     randomSequence: bool
 
+
 class TransientFunnelConversionlDto(BaseModel):
     datasourceId: str
     steps: List[FunnelStep]
     status: ConversionStatus
+
 
 class TransientFunnelDto(BaseModel):
     datasourceId: str

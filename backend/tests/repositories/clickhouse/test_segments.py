@@ -158,9 +158,7 @@ class TestSegmentsRepository:
         ]
         self.columns = ["col1", "col2", "col3"]
         self.params = {"ds_id": "test-id"}
-        self.repo.execute_get_query = MagicMock(
-            return_value=(("uid1", "data1"),)
-        )
+        self.repo.execute_get_query = MagicMock(return_value=(("uid1", "data1"),))
         self.where_filters_query = (
             'SELECT DISTINCT "user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
             "\"properties.prop1\" IN ('va1','val2') AND \"properties.prop2\" IN "

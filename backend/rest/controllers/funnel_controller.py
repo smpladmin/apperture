@@ -16,7 +16,12 @@ from rest.dtos.funnels import (
     TransientFunnelDto,
     FunnelTrendResponse,
 )
-from rest.dtos.funnels import CreateFunnelDto, TransientFunnelDto, FunnelTrendResponse, TransientFunnelConversionlDto
+from rest.dtos.funnels import (
+    CreateFunnelDto,
+    TransientFunnelDto,
+    FunnelTrendResponse,
+    TransientFunnelConversionlDto,
+)
 from rest.dtos.appperture_users import AppertureUserResponse
 from rest.middlewares import validate_jwt, get_user_id, get_user
 

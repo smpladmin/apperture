@@ -17,7 +17,8 @@ from domain.funnels.models import (
     FunnelTrendsData,
     FunnelConversionData,
     FunnelConversion,
-    FunnelEventUserData,ConversionStatus
+    FunnelEventUserData,
+    ConversionStatus,
 )
 
 
@@ -81,11 +82,12 @@ class TestFunnelService:
             for data in self.conversion_data
         ]
 
-        self.user_data = [("user_1", [2,2]), ("user_2", [2,2])]
-        
+        self.user_data = [("user_1", [2, 2]), ("user_2", [2, 2])]
 
         self.funnel_conversion_data = FunnelConversionData(
-            users=[FunnelEventUserData(id="user_1"),FunnelEventUserData(id="user_2")], total_users=2, unique_users=2
+            users=[FunnelEventUserData(id="user_1"), FunnelEventUserData(id="user_2")],
+            total_users=2,
+            unique_users=2,
         )
 
         self.funnels.get_users_count = MagicMock()
@@ -194,8 +196,9 @@ class TestFunnelService:
     async def test_get_user_conversion(self):
         assert (
             await self.service.get_user_conversion(
-                datasource_id=str(self.funnel.datasource_id), steps=self.funnel_steps
-                                  ,status=ConversionStatus.CONVERTED
+                datasource_id=str(self.funnel.datasource_id),
+                steps=self.funnel_steps,
+                status=ConversionStatus.CONVERTED,
             )
             == self.funnel_conversion_data
         )

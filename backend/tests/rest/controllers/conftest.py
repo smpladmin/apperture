@@ -31,7 +31,7 @@ from domain.funnels.models import (
     FunnelConversionData,
     FunnelEventUserData,
     FunnelConversion,
-    ConversionStatus
+    ConversionStatus,
 )
 from domain.notifications.models import (
     Notification,
@@ -179,8 +179,10 @@ def funnel_service():
     ]
 
     funnel_user_conversion = FunnelConversionData(
-            users=[FunnelEventUserData(id="user_1"),FunnelEventUserData(id="user_2")], total_users=2, unique_users=2
-        )
+        users=[FunnelEventUserData(id="user_1"), FunnelEventUserData(id="user_2")],
+        total_users=2,
+        unique_users=2,
+    )
 
     computed_transient_funnel_future = asyncio.Future()
     computed_transient_funnel_future.set_result(computed_transient_funnel)
@@ -853,7 +855,11 @@ def funnel_steps_data():
 
 @pytest.fixture(scope="module")
 def funnel_user_conversion_response():
-    return {'users': [{'id': 'user_1'}, {'id': 'user_2'}], 'totalUsers': 2, 'uniqueUsers': 2}
+    return {
+        "users": [{"id": "user_1"}, {"id": "user_2"}],
+        "totalUsers": 2,
+        "uniqueUsers": 2,
+    }
 
 
 @pytest.fixture(scope="module")
@@ -1010,7 +1016,7 @@ def funnel_data():
 def funnel_conversion_request():
     return {
         "datasourceId": "636a1c61d715ca6baae65611",
-        "status":"converted",
+        "status": "converted",
         "steps": [
             {
                 "event": "Login",
@@ -1026,6 +1032,7 @@ def funnel_conversion_request():
             },
         ],
     }
+
 
 @pytest.fixture(scope="module")
 def transient_segment_data():
