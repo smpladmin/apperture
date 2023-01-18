@@ -44,6 +44,26 @@ class MetricService:
         data = [dict(zip(["date", "value"], row)) for row in computed_metric]
         return ComputedMetricResult(metric=data)
 
+    async def build_metric(
+        self,
+        datasource_id: PydanticObjectId,
+        app_id: PydanticObjectId,
+        user_id: PydanticObjectId,
+        name: str,
+        function: str,
+        aggregates: List[SegmentsAndEvents],
+        breakdown: List[str],
+    ):
+        return Metric(
+            datasource_id=datasource_id,
+            app_id=app_id,
+            user_id=user_id,
+            name=name,
+            function=function,
+            aggregates=aggregates,
+            breakdown=breakdown,
+        )
+
     async def add_metric(
         self,
         datasource_id: PydanticObjectId,
@@ -54,7 +74,7 @@ class MetricService:
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
     ):
-        metric = Metric(
+        metric = await self.build_metric(
             datasource_id=datasource_id,
             app_id=app_id,
             user_id=user_id,

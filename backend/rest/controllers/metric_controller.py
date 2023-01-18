@@ -40,7 +40,7 @@ async def save_metrics(
     ds_service: DataSourceService = Depends(),
 ):
     datasource = await ds_service.get_datasource(str(dto.datasourceId))
-    metric = await metric_service.build_metric(
+    return await metric_service.add_metric(
         datasource_id=dto.datasourceId,
         app_id=datasource.app_id,
         user_id=user.id,
@@ -49,7 +49,6 @@ async def save_metrics(
         aggregates=dto.aggregates,
         breakdown=dto.breakdown,
     )
-    return await metric_service.add_metric(metric=metric)
 
 
 @router.put("/metrics/{id}", response_model=SavedMetricResponse)
@@ -61,7 +60,7 @@ async def save_metrics(
     ds_service: DataSourceService = Depends(),
 ):
     datasource = await ds_service.get_datasource(str(dto.datasourceId))
-    return await metric_service.add_metric(
+    metric = await metric_service.build_metric(
         datasource_id=dto.datasourceId,
         app_id=datasource.app_id,
         user_id=user.id,
@@ -70,6 +69,8 @@ async def save_metrics(
         aggregates=dto.aggregates,
         breakdown=dto.breakdown,
     )
+    await metric_service.update_metric(metric_id=id, metric=metric)
+    return metric
 
 
 @router.get("/metrics", response_model=List[SavedMetricResponse])
