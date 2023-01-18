@@ -3,6 +3,8 @@ import { ApperturePrivateAPI } from './../apiClient/client.server';
 import { FunnelStep } from '@lib/domain/funnel';
 import { AxiosError } from 'axios';
 import { AppertureAPI } from '../apiClient';
+import { replaceEmptyStringPlaceholder } from '@components/Funnel/util';
+import cloneDeep from 'lodash/cloneDeep';
 
 export const saveFunnel = async (
   dsId: string,
@@ -14,7 +16,7 @@ export const saveFunnel = async (
     const res = await AppertureAPI.post('/funnels', {
       datasourceId: dsId,
       name: funnelName,
-      steps,
+      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
       randomSequence,
     });
     return res;
@@ -31,7 +33,7 @@ export const getTransientFunnelData = async (
   try {
     const res = await AppertureAPI.post('/funnels/transient', {
       datasourceId: dsId,
-      steps,
+      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
     });
     return res.data;
   } catch (e) {
@@ -76,7 +78,7 @@ export const updateFunnel = async (
     const res = await AppertureAPI.put(`/funnels/${funnelId}`, {
       datasourceId: dsId,
       name: funnelName,
-      steps,
+      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
       randomSequence,
     });
     return res;
@@ -118,7 +120,7 @@ export const getTransientTrendsData = async (
   try {
     const res = await AppertureAPI.post('/funnels/trends/transient', {
       datasourceId: dsId,
-      steps,
+      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
     });
     return res.data;
   } catch (e) {
@@ -141,7 +143,7 @@ export const getConversionData = async (dsId: string, steps: FunnelStep[]) => {
   try {
     const res = await AppertureAPI.post('/funnels/analytics/transient', {
       datasourceId: dsId,
-      steps,
+      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
     });
     return res.data;
   } catch (e) {
