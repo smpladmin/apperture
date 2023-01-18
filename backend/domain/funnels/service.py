@@ -135,7 +135,6 @@ class FunnelsService:
                 for data in user_list[: dropped_data["total_users"]]
             ]
         return converted_user_list, dropped_user_list
-        
 
     def format_conversion_data(self, user_list, count_data):
         dropped_data = None
@@ -184,11 +183,6 @@ class FunnelsService:
     async def get_funnels_for_apps(
         self, app_ids: List[PydanticObjectId]
     ) -> List[SavedItems]:
-
-        funnels = await Funnel.find(
+        return await Funnel.find(
             In(Funnel.app_id, app_ids),
         ).to_list()
-        return [
-            SavedItems(type=WatchlistItemType.FUNNELS, details=funnel)
-            for funnel in funnels
-        ]

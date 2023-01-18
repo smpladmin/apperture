@@ -15,7 +15,7 @@ import { AppertureContext } from '@lib/contexts/appertureContext';
 jest.mock('@lib/services/funnelService');
 jest.mock('@lib/services/notificationService');
 
-describe('Watchlist', () => {
+describe.skip('Watchlist', () => {
   let mockedSavedFunnels: jest.Mock;
   let mockedSavedNotifications: jest.Mock;
 

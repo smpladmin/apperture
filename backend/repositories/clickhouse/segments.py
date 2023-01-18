@@ -337,13 +337,15 @@ class Segments(EventsBase):
             query=segment_users_query.get_sql(), parameters=params
         )
         user_ids = list(set([x[0] for x in user_data]))
+        segment_count = len(user_ids)
+        user_ids = user_ids[:100]
         segment_data = [{"user_id": x} for x in user_ids]
         if not columns:
-            return segment_data
+            return segment_data, segment_count
 
         for column in columns:
             column_data_query = self.build_valid_column_data_query(
-                column=column, segment_users_query=segment_users_query
+                column=column, segment_user_ids=user_ids
             )
             column_data = self.execute_get_query(
                 query=column_data_query, parameters=params
@@ -357,4 +359,4 @@ class Segments(EventsBase):
                 else:
                     row[column] = ""
 
-        return segment_data
+        return segment_data, segment_count

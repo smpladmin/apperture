@@ -51,17 +51,17 @@ class SegmentsAndEvents(BaseModel):
     conditions: List[str]
 
 
-class Metric(BaseModel):
+class Metric(Document):
     datasource_id: PydanticObjectId
     app_id: PydanticObjectId
     user_id: PydanticObjectId
     name: str
-    description: str
-    functions: str
+    function: str
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
-    start_date: Optional[str]
-    end_date: Optional[str]
+
+    class Settings:
+        name = "metric"
 
 
 class ComputedMetricResult(BaseModel):
