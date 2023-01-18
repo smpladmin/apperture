@@ -31,6 +31,7 @@ from domain.funnels.models import (
     FunnelConversionData,
     FunnelEventUserData,
     FunnelConversion,
+    ConversionStatus
 )
 from domain.notifications.models import (
     Notification,
@@ -177,14 +178,9 @@ def funnel_service():
         ),
     ]
 
-    funnel_user_conversion = FunnelConversion(
-        converted=FunnelConversionData(
-            users=[FunnelEventUserData(id="user_1")], total_users=1, unique_users=1
-        ),
-        dropped=FunnelConversionData(
-            users=[FunnelEventUserData(id="user_2")], total_users=1, unique_users=1
-        ),
-    )
+    funnel_user_conversion = FunnelConversionData(
+            users=[FunnelEventUserData(id="user_1"),FunnelEventUserData(id="user_2")], total_users=2, unique_users=2
+        )
 
     computed_transient_funnel_future = asyncio.Future()
     computed_transient_funnel_future.set_result(computed_transient_funnel)
@@ -857,14 +853,7 @@ def funnel_steps_data():
 
 @pytest.fixture(scope="module")
 def funnel_user_conversion_response():
-    return FunnelConversion(
-        converted=FunnelConversionData(
-            users=[FunnelEventUserData(id="user_1")], total_users=1, unique_users=1
-        ),
-        dropped=FunnelConversionData(
-            users=[FunnelEventUserData(id="user_2")], total_users=1, unique_users=1
-        ),
-    )
+    return {'users': [{'id': 'user_1'}, {'id': 'user_2'}], 'totalUsers': 2, 'uniqueUsers': 2}
 
 
 @pytest.fixture(scope="module")
@@ -1016,6 +1005,27 @@ def funnel_data():
         "randomSequence": False,
     }
 
+
+@pytest.fixture(scope="module")
+def funnel_conversion_request():
+    return {
+        "datasourceId": "636a1c61d715ca6baae65611",
+        "status":"converted",
+        "steps": [
+            {
+                "event": "Login",
+                "filters": None,
+            },
+            {
+                "event": "Chapter_Click",
+                "filters": None,
+            },
+            {
+                "event": "Topic_Click",
+                "filters": None,
+            },
+        ],
+    }
 
 @pytest.fixture(scope="module")
 def transient_segment_data():

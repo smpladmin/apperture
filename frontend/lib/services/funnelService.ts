@@ -145,18 +145,11 @@ export const getConversionData = async (
   status: ConversionStatus
 ) => {
   try {
-    const res = await AppertureAPI.post(
-      '/funnels/analytics/transient',
-      {
-        datasourceId: dsId,
-        steps:replaceEmptyStringPlaceholder(cloneDeep(steps)),
-      },
-      {
-        params: {
-          status,
-        },
-      }
-    );
+    const res = await AppertureAPI.post('/funnels/analytics/transient', {
+      datasourceId: dsId,
+      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+      status,
+    });
     console.log(res);
     return res.data;
   } catch (e) {

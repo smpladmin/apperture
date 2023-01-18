@@ -16,7 +16,7 @@ from rest.dtos.funnels import (
     TransientFunnelDto,
     FunnelTrendResponse,
 )
-from rest.dtos.funnels import CreateFunnelDto, TransientFunnelDto, FunnelTrendResponse
+from rest.dtos.funnels import CreateFunnelDto, TransientFunnelDto, FunnelTrendResponse, TransientFunnelConversionlDto
 from rest.dtos.appperture_users import AppertureUserResponse
 from rest.middlewares import validate_jwt, get_user_id, get_user
 
@@ -112,12 +112,11 @@ async def get_transient_funnel_trends(
     "/funnels/analytics/transient", response_model=FunnelConversionResponseBody
 )
 async def get_transient_funnel_analytics(
-    status: ConversionStatus,
-    dto: TransientFunnelDto,
+    dto: TransientFunnelConversionlDto,
     funnel_service: FunnelsService = Depends(),
 ):
     return await funnel_service.get_user_conversion(
-        datasource_id=dto.datasourceId, steps=dto.steps, status=status
+        datasource_id=dto.datasourceId, steps=dto.steps, status=dto.status
     )
 
 
