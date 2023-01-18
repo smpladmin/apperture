@@ -85,7 +85,10 @@ const FunnelChart = ({ data, handleChartClick }: FunnelChartProps) => {
         })
         .text({
           position: [item.event, item.users],
-          content: item.conversion.toFixed(1) + '%',
+          content:
+            Math.floor(item.conversion) === 100
+              ? item.conversion.toFixed(0) + '%'
+              : item.conversion.toFixed(2) + '%',
           style: {
             textAlign: 'left',
             fontSize: LABEL_FONT_SIZE,

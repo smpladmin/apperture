@@ -159,7 +159,7 @@ const FunnelComponentCard = ({
         justifyContent={'space-between'}
         px={'4'}
       >
-        <Flex gap={'2'} alignItems={'center'}>
+        <Flex alignItems={'center'} gap={'1'}>
           <FilterNumber index={index} />
           <Box position="relative" ref={eventBoxRef}>
             <Text
@@ -167,7 +167,7 @@ const FunnelComponentCard = ({
               color={'white.DEFAULT'}
               fontSize={'xs-14'}
               fontWeight={500}
-              px={'2'}
+              px={'1'}
               _hover={{ background: 'grey.300', cursor: 'pointer' }}
               lineHeight={'xs-18'}
               onClick={() => setIsEventListOpen(true)}
