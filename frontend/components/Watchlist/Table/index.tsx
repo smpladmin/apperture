@@ -33,6 +33,10 @@ const WatchlistTable = ({
     () =>
       isMobile
         ? [
+            columnHelper.accessor('type', {
+              header: 'Type',
+              cell: (info) => <LabelType type={info.getValue()} />,
+            }),
             columnHelper.accessor('details', {
               header: 'Name',
               cell: (info) => <Details info={info} />,
@@ -56,7 +60,7 @@ const WatchlistTable = ({
             }),
             columnHelper.accessor('details.updatedAt', {
               cell: (info) => {
-                const updatedAt = info.getValue();
+                const updatedAt = info.getValue() as Date;
                 return dayjs.utc(updatedAt).local().format('D MMM YY, h:mmA');
               },
               header: 'Last Updated',
@@ -74,13 +78,12 @@ const WatchlistTable = ({
   const { getHeaderGroups, getRowModel } = tableInstance;
 
   const onRowClick = (row: Row<SavedItems>) => {
-    if (row?.original?.type === WatchListItemType.FUNNELS) {
-      const { _id } = row?.original?.details;
-      router.push({
-        pathname: '/analytics/funnel/view/[funnelId]',
-        query: { funnelId: _id },
-      });
-    }
+    const { _id, datasourceId } = row?.original?.details;
+    const path = WatchListItemType.toURLPath(row?.original?.type);
+    router.push({
+      pathname: `/analytics/${path}/[id]`,
+      query: { id: _id, dsId: datasourceId },
+    });
   };
 
   return (

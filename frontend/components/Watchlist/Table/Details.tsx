@@ -1,6 +1,7 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import Render from '@components/Render';
 import { ComputedFunnel } from '@lib/domain/funnel';
+import { Metric } from '@lib/domain/metric';
 import { Segment } from '@lib/domain/segment';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { CellContext } from '@tanstack/react-table';
@@ -9,7 +10,7 @@ import LabelType from './LabelType';
 export const Details = ({
   info,
 }: {
-  info: CellContext<SavedItems, ComputedFunnel | Segment>;
+  info: CellContext<SavedItems, ComputedFunnel | Segment | Metric>;
 }) => {
   const { type, details } = info?.row?.original;
 

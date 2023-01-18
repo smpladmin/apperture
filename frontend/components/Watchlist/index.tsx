@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Radio, RadioGroup, Text } from '@chakra-ui/react';
+import { Box, Flex, RadioGroup, Text } from '@chakra-ui/react';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import React, { useEffect, useState } from 'react';
 import WatchListTable from './Table';
@@ -8,6 +8,9 @@ import { WatchListItemOptions } from './util';
 import WatchListItemTypeOptions from './WatchListItemOptions';
 import { getSavedSegmentsForUser } from '@lib/services/segmentService';
 import { getSavedMetricsForUser } from '@lib/services/metricService';
+import { ComputedFunnel } from '@lib/domain/funnel';
+import { Segment } from '@lib/domain/segment';
+import { Metric } from '@lib/domain/metric';
 
 const Watchlist = () => {
   const [selectedItem, setSelectedItem] = useState(WatchListItemType.ALL);
@@ -19,21 +22,21 @@ const Watchlist = () => {
 
   const getFunnels = async () => {
     const savedFunnels = await getSavedFunnelsForUser();
-    return savedFunnels.map((funnel: any) => {
+    return savedFunnels.map((funnel: ComputedFunnel) => {
       return { type: WatchListItemType.FUNNELS, details: funnel };
     });
   };
 
   const getSegments = async () => {
     const savedSegments = await getSavedSegmentsForUser();
-    return savedSegments.map((segment: any) => {
+    return savedSegments.map((segment: Segment) => {
       return { type: WatchListItemType.SEGMENTS, details: segment };
     });
   };
 
   const getMetrics = async () => {
     const savedMetrics = await getSavedMetricsForUser();
-    return savedMetrics.map((metric: any) => {
+    return savedMetrics.map((metric: Metric) => {
       return { type: WatchListItemType.METRICS, details: metric };
     });
   };

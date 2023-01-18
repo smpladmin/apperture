@@ -59,6 +59,7 @@ const DesktopHeader = ({
           <Box>
             <Menu>
               <MenuButton
+                disabled={dataSourceType === Provider.GOOGLE}
                 as={Button}
                 bgColor={BLACK}
                 color={WHITE_DEFAULT}

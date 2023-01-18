@@ -9,7 +9,20 @@ export enum WatchListItemType {
   SEGMENTS = 'segments',
 }
 
+const paths = {
+  [WatchListItemType.ALL]: '',
+  [WatchListItemType.METRICS]: 'metric/edit',
+  [WatchListItemType.FUNNELS]: 'funnel/view',
+  [WatchListItemType.SEGMENTS]: 'segment/edit',
+};
+
+export namespace WatchListItemType {
+  export function toURLPath(type: WatchListItemType): string {
+    return paths[type];
+  }
+}
+
 export type SavedItems = {
   type: WatchListItemType;
-  details: ComputedFunnel | Segment;
+  details: ComputedFunnel | Segment | Metric;
 };
