@@ -36,6 +36,9 @@ const SankeyGraph = ({ sankeyData }: { sankeyData: Array<SankeyData> }) => {
       },
     });
     plot.current.sankey?.render();
+    return () => {
+      plot.current.sankey?.destroy();
+    };
   }, [sankeyData]);
 
   return (
