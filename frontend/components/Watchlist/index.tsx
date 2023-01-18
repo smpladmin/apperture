@@ -1,45 +1,77 @@
-import { Box, Button, Flex, Radio, RadioGroup, Text } from '@chakra-ui/react';
+import { Box, Flex, RadioGroup, Text } from '@chakra-ui/react';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import React, { useEffect, useState } from 'react';
 import WatchListTable from './Table';
 import LoadingSpinner from '@components/LoadingSpinner';
-import { getSavedNotificationsForUser } from '@lib/services/notificationService';
 import { getSavedFunnelsForUser } from '@lib/services/funnelService';
 import { WatchListItemOptions } from './util';
 import WatchListItemTypeOptions from './WatchListItemOptions';
+import { getSavedSegmentsForUser } from '@lib/services/segmentService';
+import { getSavedMetricsForUser } from '@lib/services/metricService';
+import { ComputedFunnel } from '@lib/domain/funnel';
+import { Segment } from '@lib/domain/segment';
+import { Metric } from '@lib/domain/metric';
 
 const Watchlist = () => {
   const [selectedItem, setSelectedItem] = useState(WatchListItemType.ALL);
   const [savedItemsData, setSavedItemsData] = useState<SavedItems[]>([]);
+  const [metrics, setMetrics] = useState<SavedItems[]>([]);
+  const [segments, setSegments] = useState<SavedItems[]>([]);
+  const [funnels, setFunnels] = useState<SavedItems[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const getFunnels = async () => {
+    const savedFunnels = await getSavedFunnelsForUser();
+    return savedFunnels.map((funnel: ComputedFunnel) => {
+      return { type: WatchListItemType.FUNNELS, details: funnel };
+    });
+  };
+
+  const getSegments = async () => {
+    const savedSegments = await getSavedSegmentsForUser();
+    return savedSegments.map((segment: Segment) => {
+      return { type: WatchListItemType.SEGMENTS, details: segment };
+    });
+  };
+
+  const getMetrics = async () => {
+    const savedMetrics = await getSavedMetricsForUser();
+    return savedMetrics.map((metric: Metric) => {
+      return { type: WatchListItemType.METRICS, details: metric };
+    });
+  };
+
   const getSavedItems = async () => {
-    if (selectedItem === WatchListItemType.ALL) {
-      const [savedNotifications, savedFunnels] = await Promise.all([
-        getSavedNotificationsForUser(),
-        getSavedFunnelsForUser(),
-      ]);
-      setSavedItemsData([...savedNotifications, ...savedFunnels]);
-      setIsLoading(false);
-      return;
-    }
-    if (selectedItem === WatchListItemType.NOTIFICATIONS) {
-      const savedNotifications = await getSavedNotificationsForUser();
-      setSavedItemsData(savedNotifications);
-      setIsLoading(false);
-      return;
-    }
-    if (selectedItem === WatchListItemType.FUNNELS) {
-      const savedFunnels = await getSavedFunnelsForUser();
-      setSavedItemsData(savedFunnels);
-      setIsLoading(false);
-      return;
-    }
+    const [savedMetrics, savedFunnels, savedSegments] = await Promise.all([
+      getMetrics(),
+      getFunnels(),
+      getSegments(),
+    ]);
+    setMetrics(savedMetrics);
+    setFunnels(savedFunnels);
+    setSegments(savedSegments);
+    setSavedItemsData([...savedMetrics, ...savedFunnels, ...savedSegments]);
+    setIsLoading(false);
   };
 
   useEffect(() => {
     setIsLoading(true);
     getSavedItems();
+  }, []);
+
+  useEffect(() => {
+    if (selectedItem === WatchListItemType.ALL) {
+      setSavedItemsData([...metrics, ...funnels, ...segments]);
+    }
+    if (selectedItem === WatchListItemType.METRICS) {
+      setSavedItemsData([...metrics]);
+    }
+    if (selectedItem === WatchListItemType.FUNNELS) {
+      setSavedItemsData([...funnels]);
+    }
+    if (selectedItem === WatchListItemType.SEGMENTS) {
+      setSavedItemsData([...segments]);
+    }
   }, [selectedItem]);
 
   return (
@@ -48,19 +80,6 @@ const Watchlist = () => {
         <Text fontSize={'sh-20'} lineHeight={'sh-20'} fontWeight={'600'}>
           Saved
         </Text>
-        <Button
-          px={{ base: '4', md: '6' }}
-          py={{ base: '2', md: '3' }}
-          bg={'black.100'}
-          variant={'primary'}
-          borderRadius={'100'}
-          color={'white.DEFAULT'}
-          fontSize={'xs-14'}
-          lineHeight={'xs-14'}
-          fontWeight={'500'}
-        >
-          {'+ Add'}
-        </Button>
       </Flex>
 
       <Flex justifyContent={'flex-start'} mt={'6'}>

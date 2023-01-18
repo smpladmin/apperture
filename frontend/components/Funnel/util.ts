@@ -45,3 +45,34 @@ export const isEveryNonEmptyStepValid = (
 ) => {
   return steps.every((step) => isValidNonEmptyStep(step?.['event'], nodes));
 };
+
+export const isEveryFunnelStepFiltersValid = (funnelSteps: FunnelStep[]) => {
+  return funnelSteps.every((funnelStep) => {
+    return funnelStep.filters.every((filter) => filter.values.length);
+  });
+};
+
+export const replaceEmptyStringPlaceholder = (funnelSteps: FunnelStep[]) => {
+  return funnelSteps.map((step) => {
+    step.filters.map((filter) => {
+      const emptyStringIndex = filter.values.indexOf('(empty string)');
+      if (emptyStringIndex !== -1) filter.values[emptyStringIndex] = '';
+      return filter;
+    });
+    return step;
+  });
+};
+
+export const replaceFilterValueWithEmptyStringPlaceholder = (
+  funnelSteps: FunnelStep[]
+) => {
+  return funnelSteps.map((step) => {
+    step.filters.map((filter) => {
+      const emptyStringIndex = filter.values.indexOf('');
+      if (emptyStringIndex !== -1)
+        filter.values[emptyStringIndex] = '(empty string)';
+      return filter;
+    });
+    return step;
+  });
+};

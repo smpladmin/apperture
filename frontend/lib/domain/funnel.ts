@@ -1,7 +1,36 @@
+import { FilterType } from './segment';
+import { AppertureUser as User } from './user';
+
 export type FunnelStep = {
   event: string;
-  filters: Array<any>;
+  filters: FunnelStepFilter[];
 };
+
+export type FunnelStepFilter = {
+  condition: FunnelFilterConditions;
+  operand: string;
+  operator: FunnelFilterOperators;
+  values: string[];
+  all: boolean;
+  type: FilterType;
+  datatype: FunnelFilterDataType;
+};
+
+export enum FunnelFilterConditions {
+  WHERE = 'where',
+  AND = 'and',
+  OR = 'or',
+}
+
+export enum FunnelFilterDataType {
+  STRING = 'String',
+  NUMBER = 'Number',
+  BOOL = 'True/ False',
+}
+
+export enum FunnelFilterOperators {
+  IS = 'is',
+}
 
 export type FunnelData = {
   step: number;
@@ -16,6 +45,8 @@ export type ComputedFunnel = {
   datasourceId: string;
   appId: string;
   name: string;
+  updatedAt: Date;
+  user: User;
   steps: FunnelStep[];
   randomSequence: boolean;
   computedFunnel: FunnelData[];

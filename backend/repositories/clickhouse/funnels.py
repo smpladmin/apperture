@@ -64,6 +64,15 @@ class Funnels(EventsBase):
         parameters = {"ds_id": ds_id, "epoch_year": self.epoch_year}
 
         for i, step in enumerate(steps):
+            criterion = [
+                self.table.datasource_id == Parameter("%(ds_id)s"),
+                self.table.event_name == Parameter(f"%(event{i})s"),
+            ]
+            if step.filters:
+                for filter in step.filters:
+                    criterion.append(
+                        Field(f"properties.{filter.operand}").isin(filter.values)
+                    )
             parameters[f"event{i}"] = step.event
             sub_query = (
                 ClickHouseQuery.from_(self.table)
@@ -71,14 +80,7 @@ class Funnels(EventsBase):
                     self.table.user_id,
                     fn.Min(self.table.timestamp).as_("ts"),
                 )
-                .where(
-                    Criterion.all(
-                        [
-                            self.table.datasource_id == Parameter("%(ds_id)s"),
-                            self.table.event_name == Parameter(f"%(event{i})s"),
-                        ]
-                    )
-                )
+                .where(Criterion.all(criterion))
                 .groupby(1)
             )
             query = query.with_(sub_query, f"table{i + 1}")

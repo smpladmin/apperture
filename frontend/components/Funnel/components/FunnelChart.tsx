@@ -24,7 +24,7 @@ const FunnelChart = ({ data, handleChartClick }: FunnelChartProps) => {
   const AXIS_FONT_SIZE = isMobile ? 10 : 14;
 
   const ref = useRef<HTMLDivElement>(null);
-  const plot = useRef<{ funnel: any }>({ funnel: null });
+  const plot = useRef<{ funnel: Chart | null }>({ funnel: null });
   const funnelData = transformFunnelData(data)?.reverse();
   const previousData = usePrevious(funnelData);
 
@@ -66,11 +66,11 @@ const FunnelChart = ({ data, handleChartClick }: FunnelChartProps) => {
       },
       follow: true,
     });
-    plot.current.funnel.interval().position('event*users').color(MEDIUM_BLUE);
+    plot.current.funnel?.interval().position('event*users').color(MEDIUM_BLUE);
 
     funnelData?.forEach((item) => {
       plot.current.funnel
-        .annotation()
+        ?.annotation()
         .text({
           position: [item.event, item.users],
           content: formatDatalabel(item.users),
@@ -85,7 +85,10 @@ const FunnelChart = ({ data, handleChartClick }: FunnelChartProps) => {
         })
         .text({
           position: [item.event, item.users],
-          content: item.conversion.toFixed(1) + '%',
+          content:
+            Math.floor(item.conversion) === 100
+              ? item.conversion.toFixed(0) + '%'
+              : item.conversion.toFixed(2) + '%',
           style: {
             textAlign: 'left',
             fontSize: LABEL_FONT_SIZE,
@@ -97,7 +100,7 @@ const FunnelChart = ({ data, handleChartClick }: FunnelChartProps) => {
         });
     });
 
-    plot.current.funnel.axis('users', {
+    plot.current.funnel?.axis('users', {
       title: {
         offset: 40,
         style: {
@@ -107,7 +110,7 @@ const FunnelChart = ({ data, handleChartClick }: FunnelChartProps) => {
         },
       },
     });
-    plot.current.funnel.axis('event', {
+    plot.current.funnel?.axis('event', {
       label: {
         style: {
           fontSize: AXIS_FONT_SIZE,
@@ -117,8 +120,12 @@ const FunnelChart = ({ data, handleChartClick }: FunnelChartProps) => {
       },
     });
 
-    plot.current.funnel.coordinate().transpose();
-    plot.current.funnel.render();
+    plot.current.funnel?.coordinate().transpose();
+    plot.current.funnel?.render();
+
+    return () => {
+      plot.current.funnel?.destroy();
+    };
   }, [data]);
 
   return (

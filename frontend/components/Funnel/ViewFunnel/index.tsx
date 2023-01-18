@@ -16,6 +16,7 @@ const ViewFunnel = ({
     <Flex direction={{ base: 'column', md: 'row' }} h={'full'} w={'full'}>
       <LeftView datasourceId={datasourceId} name={name} steps={steps} />
       <RightView
+        funnelSteps={steps}
         computedFunnel={computedFunnel}
         computedTrendsData={computedTrendsData}
         datasourceId={datasourceId}

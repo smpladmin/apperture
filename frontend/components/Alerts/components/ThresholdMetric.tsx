@@ -81,6 +81,9 @@ const ThresholdMetric = ({
       animation: false,
     });
     plot.current.line?.render();
+    return () => {
+      plot.current.line?.destroy();
+    };
   }, [data, minHit, maxHit]);
 
   useEffect(() => {

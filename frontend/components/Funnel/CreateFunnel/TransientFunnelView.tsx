@@ -44,9 +44,10 @@ const TransientFunnelView = ({
     []
   );
 
-  const funnelConversion = trendsData?.[trendsData.length - 1]?.['conversion'];
+  const funnelConversion =
+    funnelData?.[funnelData.length - 1]?.['conversion'] || 0;
   const funnelLastStepUsers =
-    trendsData?.[trendsData.length - 1]?.['lastStepUsers'];
+    funnelData?.[funnelData.length - 1]?.['users'] || 0;
 
   const handleChartClick = async (properties: any) => {
     onDrawerOpen();
@@ -61,10 +62,10 @@ const TransientFunnelView = ({
     <Flex
       direction={'column'}
       gap={'8'}
-      px={{ base: '0', md: '25' }}
+      px={{ base: '0', md: '15' }}
       py={{ base: '8', md: '12' }}
     >
-      <Flex justifyContent={'space-between'}>
+      <Flex justifyContent={'space-between'} alignItems={'center'}>
         <Flex direction={'column'} gap={'1'}>
           {isLoading ? (
             <Loader />
@@ -90,9 +91,6 @@ const TransientFunnelView = ({
                 color={'grey.100'}
               >
                 {`${funnelLastStepUsers} users`}
-              </Text>
-              <Text fontSize={'base'} lineHeight={'base'} fontWeight={'500'}>
-                {'last week'}
               </Text>
             </>
           )}

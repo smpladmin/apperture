@@ -11,26 +11,120 @@ import {
   isEveryStepValid,
   isEveryNonEmptyStepValid,
   transformFunnelData,
+  isEveryFunnelStepFiltersValid,
 } from '../util';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import Funnel from './index';
 import { createMockRouter } from 'tests/util';
 import * as APIService from '@lib/services/funnelService';
 import { getSearchResult } from '@lib/utils/common';
+import {
+  getEventProperties,
+  getEventPropertiesValue,
+} from '@lib/services/datasourceService';
+import { MapContext } from '@lib/contexts/mapContext';
+import { NodeType } from '@lib/types/graph';
 
 jest.mock('../util');
 jest.mock('@lib/services/funnelService');
 jest.mock('@lib/utils/common');
+jest.mock('@lib/services/datasourceService');
 
 describe('create funnel', () => {
   let mockedGetCountOfValidAddedSteps: jest.Mock;
   let mockedIsEveryStepValid: jest.Mock;
   let mockedSearchResult: jest.Mock;
   let mockedIsEveryNonEmptyStepValid: jest.Mock;
+  let mockedIsEveryFunnelStepFiltersValid: jest.Mock;
   let mockedTransformFunnelData: jest.Mock;
   let mockedGetTransientFunnelData: jest.Mock;
   let mockedSaveFunnel: jest.Mock;
   let mockUpdateFunnel: jest.Mock;
+  let mockedGetEventProperties: jest.Mock;
+  let mockedGetEventPropertiesValue: jest.Mock;
+
+  const eventProperties = [
+    'city',
+    'device',
+    'country',
+    'app_version',
+    'session_length',
+  ];
+  const eventPropertiesValues = [
+    ['Mumbai'],
+    ['Delhi'],
+    ['Kolkata'],
+    ['Bengaluru'],
+  ];
+
+  const renderCreateFunnel = async (
+    router = createMockRouter({ query: { dsId: '654212033222' } }),
+    props = {}
+  ) => {
+    await act(async () => {
+      render(
+        <RouterContext.Provider value={router}>
+          <MapContext.Provider
+            value={{
+              state: {
+                nodes: [
+                  { id: 'Video_Click', label: 'Video_Click' },
+                  { id: 'Chapter_Click', label: 'Video_Click' },
+                  { id: 'Topic_Click', label: 'Video_Click' },
+                ] as NodeType[],
+                nodesData: [],
+                activeNode: null,
+                isNodeSearched: false,
+              },
+              dispatch: () => {},
+            }}
+          >
+            <Funnel {...props} />
+          </MapContext.Provider>
+        </RouterContext.Provider>
+      );
+    });
+  };
+
+  const getEventFilterText = (eventFilters: HTMLElement[], index: number) => {
+    return Array.from(eventFilters[index].getElementsByTagName('p')).map(
+      (el) => el.textContent
+    );
+  };
+
+  const addEventFilter = async (
+    property: string,
+    stepIndex = 0,
+    filterIndex = 0
+  ) => {
+    const addFilterButton = screen.getAllByTestId('add-filter-button');
+    fireEvent.click(addFilterButton[stepIndex]);
+
+    const selectCityProperty = screen.getByText(property);
+    await act(async () => {
+      fireEvent.click(selectCityProperty);
+    });
+
+    const eventPropertyValue = screen.getAllByTestId('event-filter-values');
+    fireEvent.click(eventPropertyValue[filterIndex]);
+
+    const addFilterValueButton = screen.getByTestId(
+      'add-event-property-values'
+    );
+    const selectCityValue = screen.getByText('Select all');
+    fireEvent.click(selectCityValue);
+    await act(async () => {
+      fireEvent.click(addFilterValueButton);
+    });
+  };
+
+  const addEvent = async (eventName: string) => {
+    const selectElementByText = screen.getByText(eventName);
+
+    await act(async () => {
+      fireEvent.click(selectElementByText);
+    });
+  };
 
   beforeEach(() => {
     mockedGetCountOfValidAddedSteps = jest.mocked(getCountOfValidAddedSteps);
@@ -43,96 +137,88 @@ describe('create funnel', () => {
     );
     mockedSaveFunnel = jest.mocked(APIService.saveFunnel);
     mockUpdateFunnel = jest.mocked(APIService.updateFunnel);
+    mockedGetEventProperties = jest.mocked(getEventProperties);
+    mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
+    mockedIsEveryFunnelStepFiltersValid = jest.mocked(
+      isEveryFunnelStepFiltersValid
+    );
 
     mockedGetCountOfValidAddedSteps.mockReturnValue(2);
     mockedIsEveryStepValid.mockReturnValue(true);
+    mockedIsEveryFunnelStepFiltersValid.mockReturnValue(true);
+    mockedGetEventProperties.mockReturnValue(eventProperties);
+    mockedGetEventPropertiesValue.mockReturnValue(eventPropertiesValues);
   });
 
   afterAll(() => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => jest.clearAllMocks());
+
   describe('create funnel action', () => {
-    it('save button is rendered and disabled when steps are not valid', () => {
+    it('save button is rendered and disabled when steps are not valid', async () => {
       mockedIsEveryStepValid.mockReturnValue(false);
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '654212033222' } })}
-        >
-          <Funnel />
-        </RouterContext.Provider>
-      );
+      mockedIsEveryFunnelStepFiltersValid.mockReturnValue(false);
+      await renderCreateFunnel();
       const saveButton = screen.getByTestId('save');
 
       expect(saveButton).toBeDisabled();
       expect(saveButton).toBeInTheDocument();
     });
 
-    it('save button should get enabled when two valid steps are added', () => {
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '654212033222' } })}
-        >
-          <Funnel />
-        </RouterContext.Provider>
-      );
+    it('save button should get enabled when two valid steps are added', async () => {
+      mockedIsEveryFunnelStepFiltersValid.mockReturnValue(true);
+      await renderCreateFunnel();
 
       const saveButton = screen.getByTestId('save');
       expect(saveButton).toBeEnabled();
       expect(saveButton).toBeInTheDocument();
     });
 
-    it('adds new input field on click of + button', async () => {
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '654212033222' } })}
-        >
-          <Funnel />
-        </RouterContext.Provider>
-      );
+    it('adds new funnel step on click of + button', async () => {
+      await renderCreateFunnel();
 
       const addButton = screen.getByTestId('add-button');
-      const inputFields = screen.getAllByTestId('autocomplete');
-      fireEvent.click(addButton);
+      const funnelSteps = screen.getAllByTestId('funnel-step');
 
-      const newAddedInputFields = screen.getAllByTestId('autocomplete');
-      expect(newAddedInputFields.length).toEqual(inputFields.length + 1);
+      await act(async () => {
+        fireEvent.click(addButton);
+      });
+
+      const newAddedFunnelSteps = screen.getAllByTestId('funnel-step');
+      expect(newAddedFunnelSteps.length).toEqual(funnelSteps.length + 1);
     });
 
-    it('remove button should not be rendered on screen when there are only two input fields', () => {
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '654212033222' } })}
-        >
-          <Funnel />
-        </RouterContext.Provider>
-      );
+    it('remove button should not be rendered on screen when there are only two funnel steps', async () => {
+      await renderCreateFunnel();
 
-      const removeButton = screen.queryByAltText('cross-icon');
+      const funnelSteps = screen.getAllByTestId('funnel-step');
+      fireEvent.mouseEnter(funnelSteps[0]);
+      const removeButton = screen.queryByTestId('remove-funnel-step-0');
       expect(removeButton).not.toBeInTheDocument();
     });
 
     it('removes input field on click of cross button', async () => {
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '654212033222' } })}
-        >
-          <Funnel />
-        </RouterContext.Provider>
-      );
+      await renderCreateFunnel();
 
-      const inputFields = screen.getAllByTestId('autocomplete');
+      const funnelSteps = screen.getAllByTestId('funnel-step');
       const addButton = screen.getByTestId('add-button');
 
       // add input field to render cross icon because
       // cross button would be rendered if there are more than two input
-      fireEvent.click(addButton);
+      await act(async () => {
+        fireEvent.click(addButton);
+      });
+      fireEvent.mouseEnter(funnelSteps[1]);
+      const removeButton = screen.getByTestId('remove-funnel-step-2');
 
-      const removeButton = screen.getByTestId('remove-button 2');
-      fireEvent.click(removeButton);
+      await act(async () => {
+        fireEvent.click(removeButton);
+      });
 
-      const newAddedInputFields = screen.getAllByTestId('autocomplete');
-      expect(newAddedInputFields.length).toEqual(inputFields.length);
+      const newAddedFunnelSteps = screen.getAllByTestId('funnel-step');
+      expect(newAddedFunnelSteps.length).toEqual(funnelSteps.length);
     });
   });
 
@@ -141,8 +227,6 @@ describe('create funnel', () => {
       query: { dsId: '654212033222' },
       pathname: '/analytics/funnel/create',
     });
-
-    afterEach(() => jest.clearAllMocks());
 
     it('should be able to save funnel when atleast two valid events are added', async () => {
       mockedSearchResult.mockReturnValue([{ id: 'Chapter_Click' }]);
@@ -158,11 +242,7 @@ describe('create funnel', () => {
         },
       });
 
-      render(
-        <RouterContext.Provider value={router}>
-          <Funnel />
-        </RouterContext.Provider>
-      );
+      await renderCreateFunnel(router);
       const saveButton = screen.getByTestId('save');
       fireEvent.click(saveButton);
 
@@ -175,29 +255,21 @@ describe('create funnel', () => {
     });
 
     it('should not be redirected to funnel page if save funnel case fails', async () => {
-      mockedSearchResult.mockReturnValue([{ id: 'Chapter_Click' }]);
       mockedSaveFunnel.mockReturnValue({
         status: 500,
         data: {},
       });
 
-      render(
-        <RouterContext.Provider value={router}>
-          <Funnel />
-        </RouterContext.Provider>
-      );
+      await renderCreateFunnel();
 
       const saveButton = screen.getByTestId('save');
-      const inputFields = screen.getAllByTestId('autocomplete');
-      fireEvent.change(inputFields[0], {
-        target: { value: 'Video_Click' },
-      });
-      fireEvent.blur(inputFields[0]);
+      const eventName = screen.getAllByTestId('event-name');
 
-      fireEvent.focus(inputFields[1]);
-      fireEvent.change(inputFields[1], {
-        target: { value: 'Chapter_Click' },
-      });
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
+
+      fireEvent.click(eventName[1]);
+      await addEvent('Chapter_Click');
 
       fireEvent.click(saveButton);
 
@@ -222,11 +294,7 @@ describe('create funnel', () => {
         pathname: '/analytics/funnel/edit',
       });
 
-      render(
-        <RouterContext.Provider value={router}>
-          <Funnel />
-        </RouterContext.Provider>
-      );
+      await renderCreateFunnel(router);
 
       const saveButton = screen.getByTestId('save');
       fireEvent.click(saveButton);
@@ -242,110 +310,39 @@ describe('create funnel', () => {
   });
 
   describe('search ', () => {
-    it('should show suggestion container when input field is focused and suggestions are present and should set the value when clicked on a suggestion', async () => {
-      mockedSearchResult.mockReturnValue([
-        { id: 'Chapter_Click' },
-        { id: 'Chapter_Open' },
-      ]);
+    it('should show searchable dropdown and be able to search and select search result and update the event name for step', async () => {
+      const searchResults = [{ id: 'Chapter_Click' }, { id: 'Chapter_Open' }];
+      mockedSearchResult.mockReturnValue(searchResults);
       mockedIsEveryNonEmptyStepValid.mockReturnValue(true);
+      await renderCreateFunnel();
 
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '654212033222' } })}
-        >
-          <Funnel />
-        </RouterContext.Provider>
-      );
+      const eventName = screen.getAllByTestId('event-name');
 
-      const inputFields = screen.getAllByTestId('autocomplete');
-      fireEvent.change(inputFields[0], { target: { value: 'Video_Click' } });
-      fireEvent.blur(inputFields[0]);
+      fireEvent.click(eventName[0]);
+      const searchInput = screen.getByTestId('dropdown-search-input');
 
-      fireEvent.focus(inputFields[1]);
-      fireEvent.change(inputFields[1], {
-        target: { value: 'Cha' },
+      fireEvent.change(searchInput, { target: { value: 'Chapter' } });
+      const dropdownOptionsAfterSearch =
+        screen.getAllByTestId('dropdown-options');
+
+      dropdownOptionsAfterSearch.forEach((dropdownOption, i) => {
+        expect(dropdownOption).toHaveTextContent(searchResults[i]['id']);
       });
-
-      const suggestionContainer = screen.getByTestId('suggestion-container');
-      expect(suggestionContainer).toBeVisible();
-
-      const suggestions = screen.getAllByTestId('suggestion');
       await act(async () => {
-        fireEvent.click(suggestions[0]);
+        fireEvent.click(dropdownOptionsAfterSearch[0]);
       });
       await waitFor(() =>
-        expect(inputFields[1]).toHaveDisplayValue('Chapter_Click')
-      );
-    });
-
-    it('should be able to navigate with keys inside suggestion container and select suggestion', async () => {
-      mockedSearchResult.mockReturnValue([
-        { id: 'Chapter_Click' },
-        { id: 'Chapter_Open' },
-      ]);
-      mockedIsEveryNonEmptyStepValid.mockReturnValue(true);
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '654212033222' } })}
-        >
-          <Funnel />
-        </RouterContext.Provider>
-      );
-
-      const inputFields = screen.getAllByTestId('autocomplete');
-      fireEvent.change(inputFields[0], { target: { value: 'Video_Click' } });
-      fireEvent.blur(inputFields[0]);
-      fireEvent.focus(inputFields[1]);
-      fireEvent.change(inputFields[1], {
-        target: { value: 'Cha' },
-      });
-      const suggestionContainer = screen.getByTestId('suggestion-container');
-      expect(suggestionContainer).toBeVisible();
-
-      // move cursor using Arrow Down key
-      fireEvent.keyDown(inputFields[1], {
-        key: 'ArrowDown',
-      });
-      // select suggestion by pressing Enter key
-      await act(async () => {
-        fireEvent.keyDown(inputFields[1], {
-          key: 'Enter',
-        });
-      });
-      await waitFor(() =>
-        expect(inputFields[1]).toHaveDisplayValue('Chapter_Click')
+        expect(eventName[0].textContent).toEqual('Chapter_Click')
       );
     });
   });
 
   describe('view funnel empty state /funnelchart', () => {
-    it('should render empty state initially when there are no or less than 2 valid events for creating funnel', () => {
+    it('should render empty state initially when there are no or less than 2 valid events for creating funnel', async () => {
       mockedGetCountOfValidAddedSteps.mockReturnValue(0);
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '654212033222' } })}
-        >
-          <Funnel />
-        </RouterContext.Provider>
-      );
+      await renderCreateFunnel();
       const emptyFunnelState = screen.getByTestId('funnel-empty-state');
       expect(emptyFunnelState).toBeInTheDocument();
-    });
-
-    it('should render loading state when there are 2 or more valid events and data is being fetched', async () => {
-      mockedGetCountOfValidAddedSteps.mockReturnValue(2);
-      mockedGetTransientFunnelData.mockReturnValue([]);
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '654212033222' } })}
-        >
-          <Funnel />
-        </RouterContext.Provider>
-      );
-      const loader = screen.getAllByTestId('funnel-loader');
-      await waitFor(() => {
-        expect(loader[0]).toBeInTheDocument();
-      });
     });
 
     it('should  paint the funnel chart/ trend chart when you select atleast two valid events', async () => {
@@ -360,28 +357,15 @@ describe('create funnel', () => {
         { event: '  Chapter_Click', users: 1000, conversion: 50 },
       ]);
 
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '654212033222' } })}
-        >
-          <Funnel />
-        </RouterContext.Provider>
-      );
+      await renderCreateFunnel();
 
-      const inputFields = screen.getAllByTestId('autocomplete');
+      const eventName = screen.getAllByTestId('event-name');
 
-      fireEvent.change(inputFields[0], { target: { value: 'Video_Click' } });
-      fireEvent.blur(inputFields[0]);
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
 
-      fireEvent.focus(inputFields[1]);
-      fireEvent.change(inputFields[1], {
-        target: { value: 'Chapter_Click' },
-      });
-
-      const suggestionContainer = screen.getByTestId('suggestion-container');
-      const suggestion = screen.getByTestId('suggestion');
-      expect(suggestionContainer).toBeVisible();
-      fireEvent.click(suggestion);
+      fireEvent.click(eventName[1]);
+      await addEvent('Chapter_Click');
 
       await waitFor(() => {
         const chart = screen.getByTestId('funnel-chart');
@@ -405,22 +389,99 @@ describe('create funnel', () => {
       ],
     };
 
-    it('should render prefil funnel name with passed prop name and have input fields equal to steps length passed in props', () => {
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({
-            query: { funnelid: '64349843748', dsId: '654212033222' },
-            pathname: '/analytics/funnel/edit',
-          })}
-        >
-          <Funnel {...props} />
-        </RouterContext.Provider>
-      );
+    it('should render prefil funnel name with passed prop name and have input fields equal to steps length passed in props', async () => {
+      const router = createMockRouter({
+        query: { funnelid: '64349843748', dsId: '654212033222' },
+        pathname: '/analytics/funnel/edit',
+      });
+      await renderCreateFunnel(router, props);
       const funnelName = screen.getByTestId('funnel-name');
-      const inputFields = screen.getAllByTestId('autocomplete');
+      const funnelSteps = screen.getAllByTestId('funnel-step');
 
       expect(funnelName).toHaveDisplayValue('Test Funnel');
-      expect(inputFields.length).toEqual(props.steps.length);
+      expect(funnelSteps.length).toEqual(props.steps.length);
+    });
+  });
+
+  describe('add filters to funnel step', () => {
+    it('add filter to funnel step', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+      const eventFilters = screen.getAllByTestId('event-filter');
+      const eventFilterText = getEventFilterText(eventFilters, 0);
+      expect(eventFilterText).toEqual([
+        'where',
+        'city',
+        'is',
+        'Mumbai, Delhi or 2 more',
+      ]);
+
+      // add another filter
+      mockedGetEventPropertiesValue.mockReturnValue([
+        ['android'],
+        ['ios'],
+        ['mac'],
+        ['windows'],
+      ]);
+      await addEventFilter('device', 0, 1);
+      const newAddedEventFilters = screen.getAllByTestId('event-filter');
+
+      const secondEventFilterText = getEventFilterText(newAddedEventFilters, 1);
+      expect(secondEventFilterText).toEqual([
+        'and',
+        'device',
+        'is',
+        'android, ios or 2 more',
+      ]);
+    });
+
+    it('should be able to remove filter', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+
+      // add another device filter
+      mockedGetEventPropertiesValue.mockReturnValue([
+        ['android'],
+        ['ios'],
+        ['mac'],
+        ['windows'],
+      ]);
+      await addEventFilter('device', 0, 1);
+
+      const eventFilters = screen.getAllByTestId('event-filter');
+      fireEvent.mouseEnter(eventFilters[0]);
+
+      // remove first city filter
+      const removeFilterIcon = screen.getAllByTestId('remove-filter');
+      await act(async () => {
+        fireEvent.click(removeFilterIcon[0]);
+      });
+
+      const afterRemovingEventFilters = screen.getAllByTestId('event-filter');
+      const afterRemovingEventFiltersText = getEventFilterText(
+        afterRemovingEventFilters,
+        0
+      );
+
+      // after removing filter, next filter should become 'where' from 'and'
+      expect(afterRemovingEventFiltersText).toEqual([
+        'where',
+        'device',
+        'is',
+        'android, ios or 2 more',
+      ]);
     });
   });
 });

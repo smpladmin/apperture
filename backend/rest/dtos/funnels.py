@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 
 from domain.funnels.models import (
@@ -9,6 +9,7 @@ from domain.funnels.models import (
     FunnelTrendsData,
     FunnelConversionData,
 )
+from rest.dtos.appperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
 
 
@@ -27,6 +28,14 @@ class TransientFunnelDto(BaseModel):
 class FunnelResponse(Funnel, ModelResponse):
     class Config:
         allow_population_by_field_name = True
+
+
+class FunnelWithUser(Funnel, ModelResponse):
+    user: Optional[AppertureUserResponse]
+
+    class Config:
+        allow_population_by_field_name = True
+        orm_mode = True
 
 
 class ComputedFunnelStepResponse(ComputedFunnelStep, ModelResponse):

@@ -2,13 +2,22 @@ import { Flex } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import CreateFunnelAction from './CreateFunnelAction';
 import { useContext, useEffect, useState } from 'react';
-import { getCountOfValidAddedSteps } from '../util';
 import { MapContext } from '@lib/contexts/mapContext';
 import FunnelEmptyState from '../components/FunnelEmptyState';
 import { FunnelData, FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import TransientFunnelView from './TransientFunnelView';
+import {
+  filterFunnelSteps,
+  getCountOfValidAddedSteps,
+  isEveryFunnelStepFiltersValid,
+} from '../util';
+import {
+  getTransientFunnelData,
+  getTransientTrendsData,
+} from '@lib/services/funnelService';
+import { useRouter } from 'next/router';
 
 type FunnelProps = {
   name?: string;
@@ -27,6 +36,9 @@ const Funnel = ({
     state: { nodes },
   } = useContext(MapContext);
 
+  const router = useRouter();
+  const { dsId } = router.query;
+
   const [funnelName, setFunnelName] = useState(name || 'Untitled Funnel');
   const [funnelSteps, setFunnelSteps] = useState(
     steps || [
@@ -41,7 +53,8 @@ const Funnel = ({
     computedTrendsData || []
   );
   const [isEmpty, setIsEmpty] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isStepAdded, setIsStepAdded] = useState(false);
 
   useEffect(() => {
     if (getCountOfValidAddedSteps(funnelSteps, nodes) >= 2) {
@@ -52,10 +65,26 @@ const Funnel = ({
   }, [funnelSteps, nodes]);
 
   useEffect(() => {
-    if (funnelData?.length) {
+    if (
+      getCountOfValidAddedSteps(funnelSteps, nodes) < 2 ||
+      !isEveryFunnelStepFiltersValid(funnelSteps) ||
+      isStepAdded
+    ) {
+      setIsStepAdded(false);
+      return;
+    }
+    const getFunnelMetricsData = async () => {
+      const [funnelData, trendsData] = await Promise.all([
+        getTransientFunnelData(dsId as string, filterFunnelSteps(funnelSteps)),
+        getTransientTrendsData(dsId as string, filterFunnelSteps(funnelSteps)),
+      ]);
+      setFunnelData(funnelData);
+      setTrendsData(trendsData);
       setIsLoading(false);
-    } else setIsLoading(true);
-  }, [funnelData]);
+    };
+    setIsLoading(true);
+    getFunnelMetricsData();
+  }, [funnelSteps]);
 
   return (
     <Flex direction={{ base: 'column', md: 'row' }} h={'full'}>
@@ -65,8 +94,7 @@ const Funnel = ({
           setFunnelName={setFunnelName}
           funnelSteps={funnelSteps}
           setFunnelSteps={setFunnelSteps}
-          setFunnelData={setFunnelData}
-          setTrendsData={setTrendsData}
+          setIsStepAdded={setIsStepAdded}
         />
       </ActionPanel>
       <ViewPanel>

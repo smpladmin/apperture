@@ -1,7 +1,7 @@
 import { Line } from '@antv/g2plot';
 import { Box, Flex, Tag, TagLabel, usePrevious } from '@chakra-ui/react';
 import LineChart, { LineChartProps } from '@components/Charts/Line';
-import { Metric } from '@lib/domain/metric';
+import { ComputedMetric } from '@lib/domain/metric';
 import { convertISODateToReadableDate } from '@lib/utils/common';
 import { BLUE } from '@theme/index';
 import isEqual from 'lodash/isEqual';
@@ -36,7 +36,7 @@ const config = {
   },
   animation: true,
 };
-const MetricTrend = ({ data, definition }: Metric) => {
+const MetricTrend = ({ data, definition }: ComputedMetric) => {
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ line: Line | null }>({ line: null });
   const previousData = usePrevious(data);

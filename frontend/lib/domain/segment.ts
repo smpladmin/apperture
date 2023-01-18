@@ -1,3 +1,5 @@
+import { AppertureUser } from './user';
+
 export type WhereSegmentFilter = {
   condition: SegmentFilterConditions;
   operand: string;
@@ -75,6 +77,7 @@ export type Segment = {
   name: string;
   updatedAt: Date;
   userId: string;
+  user: AppertureUser;
   _id: string;
 };
 

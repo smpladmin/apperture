@@ -15,7 +15,6 @@ from domain.funnels.models import (
     ComputedFunnelStep,
     ComputedFunnel,
     FunnelTrendsData,
-    EventFilters,
     FunnelConversionData,
     FunnelConversion,
     FunnelEventUserData,
@@ -44,9 +43,7 @@ class TestFunnelService:
         )
         Funnel.app_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.funnel_steps = [
-            FunnelStep(
-                event="Login", filters=[{"property": "mp_country_code", "value": "IN"}]
-            ),
+            FunnelStep(event="Login"),
             FunnelStep(event="Chapter Click", filters=None),
         ]
         self.funnel = Funnel(
@@ -161,7 +158,7 @@ class TestFunnelService:
                     "steps": [
                         {
                             "event": "Login",
-                            "filters": [{"property": "mp_country_code", "value": "IN"}],
+                            "filters": None,
                         },
                         {"event": "Chapter Click", "filters": None},
                     ],
@@ -186,7 +183,7 @@ class TestFunnelService:
                 "steps": [
                     FunnelStep(
                         event="Login",
-                        filters=[EventFilters(property="mp_country_code", value="IN")],
+                        filters=None,
                     ),
                     FunnelStep(event="Chapter Click", filters=None),
                 ],

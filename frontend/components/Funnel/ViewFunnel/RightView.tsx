@@ -20,10 +20,12 @@ import Trend from '../components/Trend';
 import UserConversionDrawer from '../components/UserCoversionDrawer';
 
 const RightView = ({
+  funnelSteps,
   computedFunnel,
   computedTrendsData,
   datasourceId,
 }: {
+  funnelSteps: FunnelStep[];
   computedFunnel: FunnelData[];
   computedTrendsData: FunnelTrendsData[];
   datasourceId: string;
@@ -41,35 +43,29 @@ const RightView = ({
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
 
   const funnelConversion =
-    computedTrendsData?.[computedTrendsData?.length - 1]?.['conversion'];
-  const funnelLastStepUsers =
-    computedTrendsData?.[computedTrendsData?.length - 1]?.['lastStepUsers'];
+    computedFunnel?.[computedFunnel?.length - 1]?.['conversion'];
+  const funnelLastStepUsers = computedFunnel?.[computedFunnel?.length - 1]?.['users'];
   const [selectedFunnelSteps, setSelectedFunnelSteps] = useState<FunnelStep[]>(
       []
   );
+    
   const handleChartClick = async (properties: any) => {
     onDrawerOpen();
     const { data } = properties.data;
     const { step, event } = data;
     setSelectedEvent(event.trim());
-
-    const selectedSteps = computedFunnel
-      .slice(0, step)
-      .map((step): FunnelStep => {
-        return { event: step.event, filters: [] };
-      });
-      setSelectedFunnelSteps(selectedSteps)
-      
+    const selectedSteps = funnelSteps.slice(0, step);
+    setSelectedFunnelSteps(selectedSteps)
   };
   return (
     <ViewPanel>
       <Flex
         direction={'column'}
         gap={'8'}
-        px={{ base: '0', md: '25' }}
+        px={{ base: '0', md: '15' }}
         py={{ base: '8', md: '12' }}
       >
-        <Flex justifyContent={'space-between'}>
+        <Flex justifyContent={'space-between'} alignItems={'center'}>
           <Flex direction={'column'} gap={'1'}>
             <Text fontSize={'sh-18'} lineHeight={'sh-18'} fontWeight={'500'}>
               <Highlight
@@ -86,9 +82,6 @@ const RightView = ({
               color={'grey.100'}
             >
               {`${funnelLastStepUsers} users`}
-            </Text>
-            <Text fontSize={'base'} lineHeight={'base'} fontWeight={'500'}>
-              {'last week'}
             </Text>
           </Flex>
           <Button

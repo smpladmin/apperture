@@ -6,11 +6,15 @@ export const WatchListItemOptions = [
     label: 'All',
   },
   {
-    id: WatchListItemType.NOTIFICATIONS,
-    label: 'Notifications',
+    id: WatchListItemType.METRICS,
+    label: 'Metrics',
   },
   {
     id: WatchListItemType.FUNNELS,
     label: 'Funnels',
+  },
+  {
+    id: WatchListItemType.SEGMENTS,
+    label: 'Segments',
   },
 ];

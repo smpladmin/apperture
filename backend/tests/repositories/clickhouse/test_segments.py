@@ -158,6 +158,9 @@ class TestSegmentsRepository:
         ]
         self.columns = ["col1", "col2", "col3"]
         self.params = {"ds_id": "test-id"}
+        self.repo.execute_get_query = MagicMock(
+            return_value=(("uid1", "data1"),)
+        )
         self.where_filters_query = (
             'SELECT DISTINCT "user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
             "\"properties.prop1\" IN ('va1','val2') AND \"properties.prop2\" IN "
@@ -302,7 +305,6 @@ class TestSegmentsRepository:
         )
 
     def test_get_segment_data_for_single_group(self):
-        self.repo.execute_get_query = MagicMock()
         self.repo.get_segment_data(
             datasource_id=self.datasource_id,
             groups=self.groups[1:2],
@@ -316,20 +318,8 @@ class TestSegmentsRepository:
                     f'"user_id","timestamp","properties.{column}",RANK() OVER(PARTITION BY '
                     '"user_id" ORDER BY "timestamp" DESC) AS "Rank" FROM "events" WHERE '
                     '"datasource_id"=%(ds_id)s AND '
-                    f'char_length(toString("properties.{column}"))>0 AND "user_id" IN (WITH '
-                    'group0 AS (WITH cte0 AS (SELECT "user_id" FROM "events" WHERE '
-                    '"datasource_id"=%(ds_id)s AND "user_id" IN (SELECT DISTINCT '
-                    '"user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s) AND '
-                    "DATE(\"timestamp\")>='2022-01-01' AND "
-                    "DATE(\"timestamp\")<='2023-01-01' AND \"event_name\"='Topic_Click' "
-                    'GROUP BY "user_id" HAVING COUNT("user_id")=\'2\') ,cte1 AS (SELECT '
-                    '"user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
-                    '"user_id" IN (SELECT DISTINCT "user_id" FROM "events" WHERE '
-                    '"datasource_id"=%(ds_id)s) AND DATE("timestamp")>=\'2022-01-01\' '
-                    "AND DATE(\"timestamp\")<='2023-01-01' AND "
-                    '"event_name"<>\'Video_Open\') SELECT DISTINCT "cte0"."user_id" FROM '
-                    'cte0 INTERSECT SELECT DISTINCT "cte1"."user_id" FROM cte1) SELECT '
-                    'DISTINCT "group0"."user_id" FROM group0) ORDER BY "user_id") SELECT '
+                    f'char_length(toString("properties.{column}"))>0 AND "user_id" IN '
+                    "('uid1') ORDER BY \"user_id\") SELECT "
                     f'"properties.{column}","user_id" FROM column_data WHERE "Rank"=1 ORDER '
                     'BY "user_id"'
                 ),
@@ -340,7 +330,6 @@ class TestSegmentsRepository:
         self.repo.execute_get_query.assert_has_calls(calls=calls, any_order=True)
 
     def test_get_segment_data_for_multiple_groups(self):
-        self.repo.execute_get_query = MagicMock()
         self.repo.get_segment_data(
             datasource_id=self.datasource_id,
             groups=self.groups,
@@ -354,40 +343,8 @@ class TestSegmentsRepository:
                     f'"user_id","timestamp","properties.{column}",RANK() OVER(PARTITION BY '
                     '"user_id" ORDER BY "timestamp" DESC) AS "Rank" FROM "events" WHERE '
                     '"datasource_id"=%(ds_id)s AND '
-                    f'char_length(toString("properties.{column}"))>0 AND "user_id" IN (WITH '
-                    'group0 AS (SELECT DISTINCT "user_id" FROM "events" WHERE '
-                    '"datasource_id"=%(ds_id)s AND "properties.prop1" IN '
-                    "('va1','val2') AND \"properties.prop2\" IN ('va3','val4')) "
-                    ',group1 AS (WITH cte0 AS (SELECT "user_id" FROM "events" WHERE '
-                    '"datasource_id"=%(ds_id)s AND "user_id" IN (SELECT DISTINCT '
-                    '"user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s) AND '
-                    "DATE(\"timestamp\")>='2022-01-01' AND "
-                    "DATE(\"timestamp\")<='2023-01-01' AND \"event_name\"='Topic_Click' "
-                    'GROUP BY "user_id" HAVING COUNT("user_id")=\'2\') ,cte1 AS (SELECT '
-                    '"user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
-                    '"user_id" IN (SELECT DISTINCT "user_id" FROM "events" WHERE '
-                    '"datasource_id"=%(ds_id)s) AND DATE("timestamp")>=\'2022-01-01\' '
-                    "AND DATE(\"timestamp\")<='2023-01-01' AND "
-                    '"event_name"<>\'Video_Open\') SELECT DISTINCT "cte0"."user_id" FROM '
-                    'cte0 INTERSECT SELECT DISTINCT "cte1"."user_id" FROM cte1) ,group2 '
-                    'AS (WITH cte2 AS (SELECT "user_id" FROM "events" WHERE '
-                    '"datasource_id"=%(ds_id)s AND "user_id" IN (SELECT DISTINCT '
-                    '"user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
-                    "\"properties.prop1\" IN ('va1','val2') AND \"properties.prop2\" IN "
-                    "('va3','val4')) AND DATE(\"timestamp\")>='2022-01-01' AND "
-                    "DATE(\"timestamp\")<='2023-01-01' AND \"event_name\"='Topic_Click' "
-                    'GROUP BY "user_id" HAVING COUNT("user_id")=\'2\') ,cte3 AS (SELECT '
-                    '"user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
-                    '"user_id" IN (SELECT DISTINCT "user_id" FROM "events" WHERE '
-                    '"datasource_id"=%(ds_id)s AND "properties.prop1" IN '
-                    "('va1','val2') AND \"properties.prop2\" IN ('va3','val4')) "
-                    "AND DATE(\"timestamp\")>='2022-01-01' AND "
-                    "DATE(\"timestamp\")<='2023-01-01' AND \"event_name\"<>'Video_Open') "
-                    'SELECT DISTINCT "cte2"."user_id" FROM cte2 UNION ALL SELECT '
-                    'DISTINCT "cte3"."user_id" FROM cte3) SELECT DISTINCT '
-                    '"group0"."user_id" FROM group0 INTERSECT SELECT DISTINCT '
-                    '"group1"."user_id" FROM group1 INTERSECT SELECT DISTINCT '
-                    '"group2"."user_id" FROM group2) ORDER BY "user_id") SELECT '
+                    f'char_length(toString("properties.{column}"))>0 AND "user_id" IN '
+                    "('uid1') ORDER BY \"user_id\") SELECT "
                     f'"properties.{column}","user_id" FROM column_data WHERE "Rank"=1 ORDER '
                     'BY "user_id"'
                 ),

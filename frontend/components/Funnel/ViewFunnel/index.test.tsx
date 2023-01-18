@@ -15,9 +15,9 @@ describe('View Funnel', () => {
       { event: 'Topic_Click', filters: [] },
     ],
     computedFunnel: [
-      { event: 'Video_Click', users: 2000, conversion: 100 },
-      { event: 'Chapter_Click', users: 1000, conversion: 50 },
-      { event: 'Topic_Click', users: 750, conversion: 75 },
+      { step: 1, event: 'Video_Click', users: 2000, conversion: 100, drop: 0 },
+      { step: 2, event: 'Chapter_Click', users: 950, conversion: 75, drop: 25 },
+      { step: 3, event: 'Topic_Click', users: 750, conversion: 50, drop: 25 },
     ],
     randomSequence: false,
     computedTrendsData: [

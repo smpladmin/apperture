@@ -121,7 +121,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           >
             <IconButton
               aria-label="Explore"
-              icon={<i className="ri-route-fill" />}
+              icon={<i className={'ri-route-fill'} />}
               rounded={'lg'}
               h={10}
               w={10}
@@ -146,8 +146,8 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
             color={'black.100'}
           >
             <IconButton
-              aria-label="close"
-              icon={<i className="ri-bookmark-line" />}
+              aria-label="Explore"
+              icon={<i className={'ri-bookmark-line'} />}
               rounded={'lg'}
               h={10}
               w={10}
@@ -164,37 +164,6 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               onClick={() => router.push('/analytics/saved')}
             />
           </Tooltip>
-
-          <IconButton
-            aria-label="Insights"
-            icon={<i className="ri-lightbulb-line" />}
-            rounded={'lg'}
-            h={10}
-            w={10}
-            bg={'black.0'}
-            fontWeight={'500'}
-            color={'grey.100'}
-            disabled={true}
-            _hover={{
-              backgroundColor: 'white.0',
-              color: 'white',
-            }}
-            _active={{
-              backgroundColor: 'transparent',
-            }}
-          />
-          <Box
-            marginTop={-4}
-            borderRadius={'sm'}
-            backgroundColor={'green'}
-            fontSize={'xs-8'}
-            lineHeight={'xs-8'}
-            fontWeight={'medium'}
-            padding={1}
-            textColor={'white'}
-          >
-            Coming soon
-          </Box>
         </Flex>
       </Box>
       <Box

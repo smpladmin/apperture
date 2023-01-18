@@ -4,17 +4,13 @@ from beanie import PydanticObjectId
 from typing import List, Optional
 from pydantic import BaseModel
 
+from domain.segments.models import WhereSegmentFilter
 from repositories.document import Document
-
-
-class EventFilters(BaseModel):
-    property: str
-    value: str
 
 
 class FunnelStep(BaseModel):
     event: str
-    filters: Optional[List[EventFilters]]
+    filters: Optional[List[WhereSegmentFilter]]
 
 
 class Funnel(Document):

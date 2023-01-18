@@ -80,7 +80,7 @@ class TestSegmentService:
         self.segments.get_segment_data.return_value = [
             {"user_id": "a", "prop1": "b", "prop2": "c", "prop3": "d"},
             {"user_id": "e", "prop1": "f", "prop2": "g", "prop3": "h"},
-        ]
+        ], 2
         assert await self.service.compute_segment(
             datasource_id=self.ds_id,
             columns=self.columns,
