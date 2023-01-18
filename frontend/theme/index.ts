@@ -21,6 +21,7 @@ const BLACK_RUSSIAN = '#181822';
 const BASTILLE = '#282836';
 const GRAY_100 = '#b2b2b5';
 const MEDIUM_BLUE = '#646FD4';
+const LOGAN = '#9999B6';
 
 const colors = {
   black: {
@@ -172,4 +173,5 @@ export {
   GRAY_100,
   MEDIUM_BLUE,
   WHITE_200,
+  LOGAN,
 };

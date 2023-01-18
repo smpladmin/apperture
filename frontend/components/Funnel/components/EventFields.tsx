@@ -1,141 +1,44 @@
 import { Box, Flex } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
-import React, { useContext, useEffect, useState } from 'react';
-import EventsConnectingLine from './EventsConnectingLine';
-import Autocomplete from './Autocomplete';
-import { MapContext } from '@lib/contexts/mapContext';
-import { NodeType } from '@lib/types/graph';
+import React from 'react';
 import { FunnelStep } from '@lib/domain/funnel';
-import {
-  filterFunnelSteps,
-  getCountOfValidAddedSteps,
-  isEveryNonEmptyStepValid,
-} from '../util';
-import {
-  getTransientFunnelData,
-  getTransientTrendsData,
-} from '@lib/services/funnelService';
-import { useRouter } from 'next/router';
 import {
   DragDropContext,
   Draggable,
   Droppable,
   DropResult,
 } from 'react-beautiful-dnd';
-import { getSearchResult } from '@lib/utils/common';
-import usePrevious from '@lib/hooks/usePrevious';
-import isEqual from 'lodash/isEqual';
+import FunnelComponentCard from './FunnelCard';
 
-type EventFieldsValue = {
-  eventFieldsValue: Array<FunnelStep>;
-  setEventFieldsValue: Function;
-  setFunnelData: Function;
-  setTrendsData: Function;
+type funnelSteps = {
+  funnelSteps: Array<FunnelStep>;
+  setFunnelSteps: Function;
 };
 
-const EventFields = ({
-  eventFieldsValue,
-  setEventFieldsValue,
-  setFunnelData,
-  setTrendsData,
-}: EventFieldsValue) => {
-  const {
-    state: { nodes },
-  } = useContext(MapContext);
-  const router = useRouter();
-  const { dsId } = router.query;
-
-  const [stepDragCount, setStepDragCount] = useState(0);
-  const [showCrossIcon, setShowCrossIcon] = useState(false);
-  const [suggestions, setSuggestions] = useState<Array<NodeType>>([]);
-  const [focusedInputIndex, setFocusedInputIndex] = useState(-1);
-  const [stepRemovedCount, setStepRemovedCount] = useState(0);
-  const previousStepsState = usePrevious(eventFieldsValue);
-
-  useEffect(() => {
-    setSuggestions(nodes);
-  }, [focusedInputIndex, nodes]);
-
-  useEffect(() => {
-    if (eventFieldsValue.length <= 2) setShowCrossIcon(false);
-    else setShowCrossIcon(true);
-  }, [eventFieldsValue]);
-
-  useEffect(() => {
-    if (!stepDragCount || isEqual(eventFieldsValue, previousStepsState)) return;
-    getFunnelMetricsData();
-  }, [stepDragCount]);
-
-  useEffect(() => {
-    if (!stepRemovedCount) return;
-    getFunnelMetricsData();
-  }, [stepRemovedCount]);
-
-  const removeInputField = (index: number) => {
-    if (eventFieldsValue.length <= 2) return;
-    let deletedInputValues = [...eventFieldsValue];
-    deletedInputValues.splice(index, 1);
-    setEventFieldsValue(deletedInputValues);
-    setStepRemovedCount((count) => count + 1);
-  };
-
-  const handleInputChangeValue = (eventValue: string, index: number) => {
-    const matches = getSearchResult(nodes, eventValue, {
-      keys: ['id'],
-    }) as NodeType[];
-    setSuggestions(eventValue ? matches : nodes);
-
-    const inputValues = [...eventFieldsValue];
-    inputValues[index]['event'] = eventValue;
-    setEventFieldsValue(inputValues);
-  };
-
-  const getFunnelMetricsData = async () => {
-    if (
-      getCountOfValidAddedSteps(eventFieldsValue, nodes) < 2 ||
-      !isEveryNonEmptyStepValid(eventFieldsValue, nodes)
-    )
-      return;
-
-    setFunnelData([]);
-    setTrendsData([]);
-    const [funnelData, trendsData] = await Promise.all([
-      getTransientFunnelData(
-        dsId as string,
-        filterFunnelSteps(eventFieldsValue)
-      ),
-      getTransientTrendsData(
-        dsId as string,
-        filterFunnelSteps(eventFieldsValue)
-      ),
-    ]);
-    setFunnelData(funnelData);
-    setTrendsData(trendsData);
-  };
-
+const EventFields = ({ funnelSteps, setFunnelSteps }: funnelSteps) => {
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
-    const inputValues = [...eventFieldsValue];
+    const inputValues = [...funnelSteps];
     const [itemToReplace] = inputValues.splice(result.source.index, 1);
     inputValues.splice(result.destination.index, 0, itemToReplace);
-    setEventFieldsValue(inputValues);
-    setStepDragCount((count) => count + 1);
+    setFunnelSteps(inputValues);
   };
 
   return (
     <Flex gap={{ base: '2', md: '4' }}>
-      <EventsConnectingLine eventsLength={eventFieldsValue.length} />
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="droppable">
           {(provided) => (
-            <Box
+            <Flex
               w={'full'}
               {...provided.droppableProps}
               ref={provided.innerRef}
               data-testid={'droppable'}
+              direction={'column'}
+              gap={'4'}
             >
-              {eventFieldsValue.map((inputValue, i) => {
+              {funnelSteps.map((funnelStep, i, funnelSteps) => {
                 return (
                   <Draggable
                     key={`event-${i}`}
@@ -149,17 +52,11 @@ const EventFields = ({
                         {...provided.dragHandleProps}
                         data-testid={'draggable-input'}
                       >
-                        <Autocomplete
-                          data={inputValue}
+                        <FunnelComponentCard
                           index={i}
-                          handleInputChangeValue={handleInputChangeValue}
-                          removeInputField={removeInputField}
-                          showCrossIcon={showCrossIcon}
-                          suggestions={suggestions}
-                          setSuggestions={setSuggestions}
-                          focusedInputIndex={focusedInputIndex}
-                          setFocusedInputIndex={setFocusedInputIndex}
-                          getFunnelData={getFunnelMetricsData}
+                          funnelStep={funnelStep}
+                          funnelSteps={funnelSteps}
+                          setFunnelSteps={setFunnelSteps}
                         />
                       </Box>
                     )}
@@ -167,7 +64,7 @@ const EventFields = ({
                 );
               })}
               {provided.placeholder}
-            </Box>
+            </Flex>
           )}
         </Droppable>
       </DragDropContext>
