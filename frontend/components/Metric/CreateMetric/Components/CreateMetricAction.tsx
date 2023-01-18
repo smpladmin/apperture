@@ -7,49 +7,69 @@ import {
   Switch,
   Text,
 } from '@chakra-ui/react';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
 
 import { useRouter } from 'next/router';
 import MetricComponentCard from './MetricComponentCard';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
-import { computeMetric } from '@lib/services/metricService';
+import {
+  computeMetric,
+  saveMetric,
+  updateMetric,
+} from '@lib/services/metricService';
 import {
   DateRangeType,
   EventOrSegmentComponent,
+  Metric,
+  MetricComponentVariant,
   MetricEventFilter,
 } from '@lib/domain/metric';
+import { isEqual } from 'lodash';
 
 type CreateMetricActionProps = {
   setMetric: Function;
   dateRange: DateRangeType | null;
+  savedMetric: Metric | undefined;
+  canSaveMetric: boolean;
+  setCanSaveMetric: Function;
 };
 
 const CreateMetricAction = ({
   setMetric,
   dateRange,
+  savedMetric,
+  canSaveMetric,
+  setCanSaveMetric,
 }: CreateMetricActionProps) => {
-  const [metricName, setMetricName] = useState('Untitled Metric');
-  const [metricDefinition, setmetricDefinition] = useState('A');
+  const [metricName, setMetricName] = useState(
+    savedMetric?.name || 'Untitled Metric'
+  );
+  const [metricDefinition, setmetricDefinition] = useState(
+    savedMetric?.function || 'A'
+  );
   const router = useRouter();
 
-  const { dsId } = router.query;
+  const { metricId } = router.query;
+  const dsId = savedMetric?.datasourceId || router.query.dsId;
   const [eventList, setEventList] = useState<string[]>([]);
   const [eventProperties, setEventProperties] = useState<string[]>([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
   const [loadingEventsList, setLoadingEventsList] = useState(false);
-  const [aggregates, setAggregates] = useState<EventOrSegmentComponent[]>([
-    {
-      variable: 'A',
-      reference_id: '',
-      function: 'count',
-      variant: '',
-      filters: [],
-      conditions: [],
-      aggregations: { functions: 'count', property: '' },
-    },
-  ]);
+  const [aggregates, setAggregates] = useState<EventOrSegmentComponent[]>(
+    savedMetric?.aggregates || [
+      {
+        variable: 'A',
+        reference_id: '',
+        function: 'count',
+        variant: MetricComponentVariant.UNDEFINED,
+        filters: [],
+        conditions: [],
+        aggregations: { functions: 'count', property: '' },
+      },
+    ]
+  );
   useEffect(() => {
     const fetchEventProperties = async () => {
       const [eventPropertiesResult, events] = await Promise.all([
@@ -89,7 +109,7 @@ const CreateMetricAction = ({
           variable,
           reference_id: '',
           function: 'count',
-          variant: '',
+          variant: MetricComponentVariant.UNDEFINED,
           filters: [],
           conditions: [],
           aggregations: { functions: 'count', property: '' },
@@ -108,6 +128,36 @@ const CreateMetricAction = ({
         return { ...aggregate, variable: String.fromCharCode(65 + index) };
       })
     );
+  };
+
+  const handleSave = async () => {
+    let savedMetric;
+    if (metricId) {
+      // update the metric
+      await updateMetric(
+        metricId as string,
+        metricName,
+        dsId as string,
+        metricDefinition,
+        aggregates,
+        []
+      );
+    } else {
+      // save the metric
+      savedMetric = await saveMetric(
+        metricName,
+        dsId as string,
+        metricDefinition,
+        aggregates,
+        []
+      );
+    }
+    router.push({
+      pathname: '/analytics/metric/edit/[metricId]',
+      query: { metricId: savedMetric?._id || metricId },
+    });
+
+    setCanSaveMetric(false);
   };
 
   useEffect(() => {
@@ -156,6 +206,17 @@ const CreateMetricAction = ({
       )
     ) {
       fetchMetric(aggregates);
+      if (
+        aggregates &&
+        aggregates.length &&
+        (!isEqual(savedMetric?.aggregates, aggregates) ||
+          !isEqual(savedMetric?.function, metricDefinition) ||
+          !isEqual(savedMetric?.name, metricName))
+      ) {
+        setCanSaveMetric(true);
+      } else {
+        setCanSaveMetric(false);
+      }
     }
   }, [aggregates, metricDefinition, dateRange]);
 
@@ -182,7 +243,8 @@ const CreateMetricAction = ({
             pointerEvents: 'none',
           }}
           data-testid={'save'}
-          disabled={true}
+          disabled={!canSaveMetric}
+          onClick={handleSave}
         >
           <Text
             textAlign={'center'}
@@ -255,16 +317,17 @@ const CreateMetricAction = ({
             +
           </Button>
         </Flex>
-        {aggregates.map(({ variable }) => (
+        {aggregates.map((aggregate) => (
           <MetricComponentCard
-            variable={variable}
+            variable={aggregate.variable}
             eventList={eventList}
-            key={variable}
+            key={aggregate.variable}
             eventProperties={eventProperties}
             loadingEventProperties={loadingEventProperties}
             loadingEventsList={loadingEventsList}
             updateAggregate={updateAggregate}
             removeAggregate={removeAggregate}
+            savedAggregate={aggregate}
           />
         ))}
       </Flex>

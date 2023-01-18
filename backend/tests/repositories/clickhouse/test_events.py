@@ -31,7 +31,7 @@ class TestEventsRepository:
         self.values_for_property_query = (
             'SELECT DISTINCT "properties.country" FROM "events" WHERE '
             '"datasource_id"=%(ds_id)s AND DATE("timestamp")>=%(start_date)s AND '
-            'DATE("timestamp")<=%(end_date)s'
+            'DATE("timestamp")<=%(end_date)s LIMIT 100'
         )
 
     def test_build_unique_events_query(self):

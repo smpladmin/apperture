@@ -9,12 +9,14 @@ import {
 } from '@tanstack/react-table';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 import LabelType from './LabelType';
-import TableActionMenu from './ActionMenu';
 import Details from './Details';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { useRouter } from 'next/router';
-import UsersMetric from './UsersMetric';
 import { AppertureContext } from '@lib/contexts/appertureContext';
+import { AppertureUser as User } from '@lib/domain/user';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
 
 const WatchlistTable = ({
   savedItemsData,
@@ -31,13 +33,13 @@ const WatchlistTable = ({
     () =>
       isMobile
         ? [
+            columnHelper.accessor('type', {
+              header: 'Type',
+              cell: (info) => <LabelType type={info.getValue()} />,
+            }),
             columnHelper.accessor('details', {
               header: 'Name',
               cell: (info) => <Details info={info} />,
-            }),
-            columnHelper.accessor('users', {
-              cell: (info) => <UsersMetric info={info} />,
-              header: 'Users',
             }),
           ]
         : [
@@ -49,17 +51,19 @@ const WatchlistTable = ({
               header: 'Name',
               cell: (info) => <Details info={info} />,
             }),
-            columnHelper.accessor('users', {
-              cell: (info) => <UsersMetric info={info} />,
-              header: 'Users',
+            columnHelper.accessor('details.user', {
+              cell: (info) => {
+                const user = info.getValue() as User;
+                return `${user.firstName} ${user.lastName}`;
+              },
+              header: 'Created By',
             }),
-            columnHelper.accessor('change', {
-              cell: (info) => info.getValue(),
-              header: '% Change',
-            }),
-            columnHelper.accessor('actions', {
-              cell: () => <TableActionMenu />,
-              header: '',
+            columnHelper.accessor('details.updatedAt', {
+              cell: (info) => {
+                const updatedAt = info.getValue() as Date;
+                return dayjs.utc(updatedAt).local().format('D MMM YY, h:mmA');
+              },
+              header: 'Last Updated',
             }),
           ],
     []
@@ -74,13 +78,12 @@ const WatchlistTable = ({
   const { getHeaderGroups, getRowModel } = tableInstance;
 
   const onRowClick = (row: Row<SavedItems>) => {
-    if (row?.original?.type === WatchListItemType.FUNNELS) {
-      const { _id } = row?.original?.details;
-      router.push({
-        pathname: '/analytics/funnel/view/[funnelId]',
-        query: { funnelId: _id },
-      });
-    }
+    const { _id, datasourceId } = row?.original?.details;
+    const path = WatchListItemType.toURLPath(row?.original?.type);
+    router.push({
+      pathname: `/analytics/${path}/[id]`,
+      query: { id: _id, dsId: datasourceId },
+    });
   };
 
   return (
@@ -106,7 +109,7 @@ const WatchlistTable = ({
           <Tr
             key={row.id}
             onClick={() => onRowClick(row)}
-            _hover={{ bg: 'white.100', cursor: 'pointer' }}
+            _hover={{ bg: 'gray.50', cursor: 'pointer' }}
             data-testid={'table-body-rows'}
           >
             {row.getVisibleCells().map((cell) => {
