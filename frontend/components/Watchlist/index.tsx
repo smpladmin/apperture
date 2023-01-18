@@ -7,6 +7,7 @@ import { getSavedFunnelsForUser } from '@lib/services/funnelService';
 import { WatchListItemOptions } from './util';
 import WatchListItemTypeOptions from './WatchListItemOptions';
 import { getSavedSegmentsForUser } from '@lib/services/segmentService';
+import { getSavedMetricsForUser } from '@lib/services/metricService';
 
 const Watchlist = () => {
   const [selectedItem, setSelectedItem] = useState(WatchListItemType.ALL);
@@ -31,7 +32,10 @@ const Watchlist = () => {
   };
 
   const getMetrics = async () => {
-    return [];
+    const savedMetrics = await getSavedMetricsForUser();
+    return savedMetrics.map((metric: any) => {
+      return { type: WatchListItemType.METRICS, details: metric };
+    });
   };
 
   const getSavedItems = async () => {
@@ -54,7 +58,7 @@ const Watchlist = () => {
 
   useEffect(() => {
     if (selectedItem === WatchListItemType.ALL) {
-      setSavedItemsData([...funnels, ...segments]);
+      setSavedItemsData([...metrics, ...funnels, ...segments]);
     }
     if (selectedItem === WatchListItemType.METRICS) {
       setSavedItemsData([...metrics]);

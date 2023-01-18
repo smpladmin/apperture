@@ -11,6 +11,8 @@ const getLableTypeIcon = (labelType: WatchListItemType) => {
       return <Image src={FunnelIcon} alt={'funnel-filter-icon'} />;
     case WatchListItemType.SEGMENTS:
       return <i className="ri-scissors-cut-line" />;
+    case WatchListItemType.METRICS:
+      return <i className="ri-funds-box-line" />;
     default:
       return <Image src={JourneyIcon} alt={'journey-icon'} />;
   }
@@ -22,6 +24,8 @@ const getLabelText = (labelType: WatchListItemType) => {
       return 'Funnel';
     case WatchListItemType.SEGMENTS:
       return 'Segment';
+    case WatchListItemType.METRICS:
+      return 'Metric';
     default:
       return '';
   }

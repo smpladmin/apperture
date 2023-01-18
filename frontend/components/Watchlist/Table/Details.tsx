@@ -1,11 +1,9 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import Render from '@components/Render';
 import { ComputedFunnel } from '@lib/domain/funnel';
-import { Notifications } from '@lib/domain/notification';
 import { Segment } from '@lib/domain/segment';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { CellContext } from '@tanstack/react-table';
-import { useEffect } from 'react';
 import LabelType from './LabelType';
 
 export const Details = ({
@@ -29,7 +27,7 @@ export const Details = ({
       </Text>
       {type === WatchListItemType.FUNNELS ? (
         <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'400'}>
-          {`${getSteps()?.[0]?.event} -> ${
+          {`${getSteps()?.[0]?.event} ➝ ${
             getSteps()?.[(getSteps() || []).length - 1]?.event
           }`}
         </Text>

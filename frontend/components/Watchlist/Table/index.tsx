@@ -13,7 +13,7 @@ import Details from './Details';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { useRouter } from 'next/router';
 import { AppertureContext } from '@lib/contexts/appertureContext';
-import { User } from '@lib/domain/user';
+import { AppertureUser as User } from '@lib/domain/user';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);

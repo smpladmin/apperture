@@ -101,3 +101,6 @@ class MetricService:
 
     async def get_metrics_by_app_id(self, app_id: str):
         return await Metric.find(Metric.app_id == PydanticObjectId(app_id)).to_list()
+
+    async def get_metrics_by_user_id(self, user_id: str):
+        return await Metric.find(Metric.user_id == PydanticObjectId(user_id)).to_list()

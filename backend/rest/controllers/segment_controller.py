@@ -12,7 +12,6 @@ from rest.dtos.segments import (
     CreateSegmentDto,
     SegmentResponse,
 )
-from rest.dtos.users import UserResponse
 
 from rest.middlewares import validate_jwt, get_user, get_user_id
 

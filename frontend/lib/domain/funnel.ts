@@ -1,4 +1,4 @@
-import { User } from './user';
+import { AppertureUser as User } from './user';
 
 export type FunnelStep = {
   event: string;
