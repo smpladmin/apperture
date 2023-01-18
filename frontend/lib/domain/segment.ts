@@ -5,6 +5,7 @@ export type WhereSegmentFilter = {
   values: string[];
   all: boolean;
   type: FilterType;
+  datatype: SegmentFilterDataType;
 };
 
 export type WhoSegmentFilter = {
@@ -12,18 +13,20 @@ export type WhoSegmentFilter = {
   triggered: boolean;
   operand: string;
   aggregation: string;
-  operator: SegmentFilterOperators;
+  operator: SegmentFilterOperatorsNumber;
   values: string[];
-  startDate: string;
-  endDate: string;
+  date_filter: DateFilter;
+  date_filter_type: SegmentDateFilterType;
   type: FilterType;
+  datatype: SegmentFilterDataType;
 };
 
 export type SegmentFilter = WhereSegmentFilter | WhoSegmentFilter;
 
-export enum SegmentFilterOperators {
-  EQUALS = 'equals',
-}
+export type SegmentFilterOperators =
+  | SegmentFilterOperatorsBool
+  | SegmentFilterOperatorsNumber
+  | SegmentFilterOperatorsString;
 
 export enum FilterType {
   WHERE = 'where',
@@ -68,10 +71,64 @@ export type Segment = {
   createdAt: Date;
   datasourceId: string;
   description: string;
-  groupConditions: any[];
   groups: SegmentGroup[];
   name: string;
   updatedAt: Date;
   userId: string;
   _id: string;
 };
+
+export type SegmentFixedDateFilter = {
+  start_date: string;
+  end_date: string;
+};
+
+export type SegmentSinceDateFilter = {
+  start_date: string;
+};
+
+export type SegmentLastDateFilter = {
+  days: number;
+};
+
+export type DateFilter =
+  | SegmentFixedDateFilter
+  | SegmentSinceDateFilter
+  | SegmentLastDateFilter;
+
+export enum SegmentDateFilterType {
+  FIXED = 'fixed',
+  SINCE = 'since',
+  LAST = 'last',
+}
+
+export enum SegmentFilterDataType {
+  STRING = 'String',
+  NUMBER = 'Number',
+  BOOL = 'True/ False',
+}
+
+export type FilterOptionMenuType = {
+  id: string | number;
+  label: SegmentFilterDataType | string;
+  submenu: FilterOptionMenuType[];
+};
+
+export enum SegmentFilterOperatorsString {
+  IS = 'is',
+  IS_NOT = 'is not',
+}
+
+export enum SegmentFilterOperatorsNumber {
+  EQ = 'equals',
+  NE = 'not equal',
+  GT = 'greater than',
+  GE = 'greater than or equal to',
+  LT = 'less than',
+  LE = 'less than or equal to',
+}
+
+export enum SegmentFilterOperatorsBool {
+  T = 'is true',
+  F = 'is false',
+}

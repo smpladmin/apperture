@@ -8,12 +8,15 @@ from domain.segments.service import SegmentService
 from domain.segments.models import (
     WhoSegmentFilter,
     WhereSegmentFilter,
-    SegmentFilterOperators,
+    SegmentFilterOperatorsNumber,
+    SegmentFilterOperatorsString,
+    SegmentFilterOperatorsBool,
     SegmentFilterConditions,
     SegmentGroup,
     ComputedSegment,
     Segment,
     SegmentGroupConditions,
+    SegmentDataType,
 )
 
 
@@ -28,20 +31,22 @@ class TestSegmentService:
         Segment.app_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.filters = [
             WhereSegmentFilter(
-                operator=SegmentFilterOperators.EQUALS,
+                operator=SegmentFilterOperatorsString.IS,
                 operand="prop1",
                 values=["va1", "val2"],
                 all=False,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.WHERE,
+                datatype=SegmentDataType.STRING,
             ),
             WhereSegmentFilter(
-                operator=SegmentFilterOperators.EQUALS,
+                operator=SegmentFilterOperatorsString.IS,
                 operand="prop2",
                 values=["va3", "val4"],
                 all=False,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.AND,
+                datatype=SegmentDataType.STRING,
             ),
         ]
         self.groups = [
@@ -57,13 +62,18 @@ class TestSegmentService:
             groups=self.groups,
             columns=self.columns,
         )
+        self.segment_id = "63771fc960527aba93543998"
+        self.update_mock = AsyncMock()
         Segment.get = AsyncMock(return_value=self.segment)
         FindMock = namedtuple("FindMock", ["to_list"])
+        FindOneMock = namedtuple("FindOneMock", ["update"])
         Segment.find = MagicMock(
             return_value=FindMock(
                 to_list=AsyncMock(return_value=[self.segment]),
             ),
         )
+        Segment.find_one = MagicMock(return_value=FindOneMock(update=self.update_mock))
+        Segment.id = MagicMock(return_value=PydanticObjectId(self.segment_id))
 
     @pytest.mark.asyncio
     async def test_compute_segment(self):
@@ -91,19 +101,21 @@ class TestSegmentService:
                         filters=[
                             WhereSegmentFilter(
                                 operand="prop1",
-                                operator=SegmentFilterOperators.EQUALS,
+                                operator=SegmentFilterOperatorsString.IS,
                                 values=["va1", "val2"],
                                 all=False,
                                 condition=SegmentFilterConditions.WHERE,
                                 type=SegmentFilterConditions.WHERE,
+                                datatype=SegmentDataType.STRING,
                             ),
                             WhereSegmentFilter(
                                 operand="prop2",
-                                operator=SegmentFilterOperators.EQUALS,
+                                operator=SegmentFilterOperatorsString.IS,
                                 values=["va3", "val4"],
                                 all=False,
                                 condition=SegmentFilterConditions.AND,
                                 type=SegmentFilterConditions.WHERE,
+                                datatype=SegmentDataType.STRING,
                             ),
                         ],
                         condition=SegmentGroupConditions.AND,
@@ -138,17 +150,19 @@ class TestSegmentService:
                             "all": False,
                             "condition": SegmentFilterConditions.WHERE,
                             "operand": "prop1",
-                            "operator": SegmentFilterOperators.EQUALS,
+                            "operator": SegmentFilterOperatorsString.IS,
                             "values": ["va1", "val2"],
                             "type": SegmentFilterConditions.WHERE,
+                            "datatype": SegmentDataType.STRING,
                         },
                         {
                             "all": False,
                             "condition": SegmentFilterConditions.AND,
                             "operand": "prop2",
-                            "operator": SegmentFilterOperators.EQUALS,
+                            "operator": SegmentFilterOperatorsString.IS,
                             "values": ["va3", "val4"],
                             "type": SegmentFilterConditions.WHERE,
+                            "datatype": SegmentDataType.STRING,
                         },
                     ],
                 }
@@ -177,17 +191,19 @@ class TestSegmentService:
                             "all": False,
                             "condition": SegmentFilterConditions.WHERE,
                             "operand": "prop1",
-                            "operator": SegmentFilterOperators.EQUALS,
+                            "operator": SegmentFilterOperatorsString.IS,
                             "values": ["va1", "val2"],
                             "type": SegmentFilterConditions.WHERE,
+                            "datatype": SegmentDataType.STRING,
                         },
                         {
                             "all": False,
                             "condition": SegmentFilterConditions.AND,
                             "operand": "prop2",
-                            "operator": SegmentFilterOperators.EQUALS,
+                            "operator": SegmentFilterOperatorsString.IS,
                             "values": ["va3", "val4"],
                             "type": SegmentFilterConditions.WHERE,
+                            "datatype": SegmentDataType.STRING,
                         },
                     ],
                 }
@@ -216,4 +232,49 @@ class TestSegmentService:
         ]
         Segment.find.assert_called_once_with(
             False,
+        )
+
+    @pytest.mark.asyncio
+    async def test_update_segment(self):
+        await self.service.update_segment(
+            segment_id=self.segment_id, new_segment=self.segment
+        )
+        self.update_mock.assert_called_once_with(
+            {
+                "$set": {
+                    "app_id": PydanticObjectId("63771fc960527aba9354399c"),
+                    "columns": ["prop1", "prop2", "prop3"],
+                    "datasource_id": PydanticObjectId("63771fc960527aba9354399c"),
+                    "description": "sample",
+                    "groups": [
+                        {
+                            "condition": SegmentGroupConditions.AND,
+                            "filters": [
+                                {
+                                    "all": False,
+                                    "condition": SegmentFilterConditions.WHERE,
+                                    "operand": "prop1",
+                                    "operator": SegmentFilterOperatorsString.IS,
+                                    "values": ["va1", "val2"],
+                                    "type": SegmentFilterConditions.WHERE,
+                                    "datatype": SegmentDataType.STRING,
+                                },
+                                {
+                                    "all": False,
+                                    "condition": SegmentFilterConditions.AND,
+                                    "operand": "prop2",
+                                    "operator": SegmentFilterOperatorsString.IS,
+                                    "values": ["va3", "val4"],
+                                    "type": SegmentFilterConditions.WHERE,
+                                    "datatype": SegmentDataType.STRING,
+                                },
+                            ],
+                        }
+                    ],
+                    "name": "test",
+                    "revision_id": ANY,
+                    "updated_at": ANY,
+                    "user_id": PydanticObjectId("63771fc960527aba9354399c"),
+                }
+            }
         )

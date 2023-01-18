@@ -70,7 +70,12 @@ const WhoSegmentFilter = ({
           {capitalizeFirstLetter(filter.aggregation)}
         </Text>
       </Box>
-      <FilterOperator filter={filter} />
+      <FilterOperator
+        filter={filter}
+        filters={filters}
+        index={index}
+        updateGroupsState={updateGroupsState}
+      />
       <InputValue
         index={index}
         filter={filter}

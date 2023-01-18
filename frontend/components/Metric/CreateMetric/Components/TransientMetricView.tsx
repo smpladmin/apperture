@@ -1,24 +1,21 @@
-import {
-  Button,
-  ButtonGroup,
-  Divider,
-  Flex,
-  Highlight,
-  Text,
-} from '@chakra-ui/react';
-import { FunnelData, FunnelTrendsData } from '@lib/domain/funnel';
-import React, { useContext, useEffect, useState } from 'react';
-import Loader from '@components/LoadingSpinner';
+import { Button, Flex } from '@chakra-ui/react';
+import React from 'react';
 import MetricEmptyState from './MetricEmptyState';
 import DateFilter from './DateFilter';
-import { Metric } from '@lib/domain/metric';
+import { DateRangeType, ComputedMetric, Metric } from '@lib/domain/metric';
 import MetricTrend from './MetricTrend';
 
 type TransientMetricViewProps = {
-  metric: Metric | null;
+  metric: ComputedMetric | null;
+  setDateRange: Function;
+  dateRange: DateRangeType | null;
 };
 
-const TransientMetricView = ({ metric }: TransientMetricViewProps) => {
+const TransientMetricView = ({
+  metric,
+  setDateRange,
+  dateRange,
+}: TransientMetricViewProps) => {
   return (
     <Flex
       direction={'column'}
@@ -28,7 +25,7 @@ const TransientMetricView = ({ metric }: TransientMetricViewProps) => {
     >
       <Flex justifyContent={'space-between'}>
         <Flex>
-          <DateFilter />
+          <DateFilter setDateRange={setDateRange} dateRange={dateRange} />
         </Flex>
 
         <Flex direction={'column'} gap={'1'}>

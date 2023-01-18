@@ -7,9 +7,10 @@ from domain.funnels.models import (
     ComputedFunnelStep,
     ComputedFunnel,
     FunnelTrendsData,
+    FunnelConversion,
 )
+from rest.dtos.appperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
-from rest.dtos.users import UserResponse
 
 
 class CreateFunnelDto(BaseModel):
@@ -30,7 +31,7 @@ class FunnelResponse(Funnel, ModelResponse):
 
 
 class FunnelWithUser(Funnel, ModelResponse):
-    user: Optional[UserResponse]
+    user: Optional[AppertureUserResponse]
 
     class Config:
         allow_population_by_field_name = True
@@ -48,5 +49,10 @@ class ComputedFunnelResponse(ComputedFunnel, ModelResponse):
 
 
 class FunnelTrendResponse(FunnelTrendsData, ModelResponse):
+    class Config:
+        allow_population_by_field_name = True
+
+
+class FunnelConversionResponseBody(FunnelConversion, ModelResponse):
     class Config:
         allow_population_by_field_name = True

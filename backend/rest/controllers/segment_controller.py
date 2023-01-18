@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends
 
 from domain.datasources.service import DataSourceService
 from domain.segments.service import SegmentService
-from domain.users.models import User
+from domain.apperture_users.models import AppertureUser
+from rest.dtos.appperture_users import AppertureUserResponse
 from rest.dtos.segments import (
     SegmentWithUser,
     TransientSegmentDto,
@@ -37,7 +38,7 @@ async def compute_transient_segment(
 @router.post("/segments", response_model=SegmentResponse)
 async def save_segment(
     dto: CreateSegmentDto,
-    user: User = Depends(get_user),
+    user: AppertureUser = Depends(get_user),
     segment_service: SegmentService = Depends(),
     ds_service: DataSourceService = Depends(),
 ):
@@ -54,6 +55,28 @@ async def save_segment(
     return await segment_service.add_segment(segment=segment)
 
 
+@router.put("/segments/{id}", response_model=SegmentResponse)
+async def update_segment(
+    id: str,
+    dto: CreateSegmentDto,
+    user: AppertureUser = Depends(get_user),
+    segment_service: SegmentService = Depends(),
+    ds_service: DataSourceService = Depends(),
+):
+    datasource = await ds_service.get_datasource(str(dto.datasourceId))
+    segment = await segment_service.build_segment(
+        datasourceId=dto.datasourceId,
+        appId=datasource.app_id,
+        userId=user.id,
+        name=dto.name,
+        description=dto.description,
+        groups=dto.groups,
+        columns=dto.columns,
+    )
+    await segment_service.update_segment(segment_id=id, new_segment=segment)
+    return segment
+
+
 @router.get("/segments/{segment_id}", response_model=SegmentResponse)
 async def get_segment(
     segment_id: str,
@@ -66,7 +89,7 @@ async def get_segment(
 async def get_segments(
     app_id: Optional[str] = None,
     user_id: str = Depends(get_user_id),
-    user: User = Depends(get_user),
+    user: AppertureUser = Depends(get_user),
     segment_service: SegmentService = Depends(),
 ):
     if app_id:
@@ -74,5 +97,5 @@ async def get_segments(
     segments = await segment_service.get_segments_for_user(user_id=user_id)
     segments = [SegmentWithUser.from_orm(s) for s in segments]
     for segment in segments:
-        segment.user = UserResponse.from_orm(user)
+        segment.user = AppertureUserResponse.from_orm(user)
     return segments

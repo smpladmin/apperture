@@ -3,16 +3,17 @@ from typing import List
 
 from domain.funnels.service import FunnelsService
 from domain.apps.service import AppService
-from domain.users.models import User
+from domain.apperture_users.models import AppertureUser
 from domain.datasources.service import DataSourceService
 from rest.dtos.funnels import (
     FunnelResponse,
     ComputedFunnelStepResponse,
     ComputedFunnelResponse,
     FunnelWithUser,
+    FunnelConversionResponseBody,
 )
 from rest.dtos.funnels import CreateFunnelDto, TransientFunnelDto, FunnelTrendResponse
-from rest.dtos.users import UserResponse
+from rest.dtos.appperture_users import AppertureUserResponse
 from rest.middlewares import validate_jwt, get_user_id, get_user
 
 
@@ -103,9 +104,21 @@ async def get_transient_funnel_trends(
     )
 
 
+@router.post(
+    "/funnels/analytics/transient", response_model=FunnelConversionResponseBody
+)
+async def get_transient_funnel_analytics(
+    dto: TransientFunnelDto,
+    funnel_service: FunnelsService = Depends(),
+):
+    return await funnel_service.get_user_conversion(
+        datasource_id=dto.datasourceId, steps=dto.steps
+    )
+
+
 @router.get("/funnels", response_model=List[FunnelWithUser])
 async def get_funnels(
-    user: User = Depends(get_user),
+    user: AppertureUser = Depends(get_user),
     funnel_service: FunnelsService = Depends(),
     app_service: AppService = Depends(),
 ):
@@ -115,5 +128,5 @@ async def get_funnels(
     )
     funnels = [FunnelWithUser.from_orm(f) for f in funnels]
     for funnel in funnels:
-        funnel.user = UserResponse.from_orm(user)
+        funnel.user = AppertureUserResponse.from_orm(user)
     return funnels

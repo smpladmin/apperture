@@ -4,14 +4,14 @@ from beanie import PydanticObjectId
 import pytest
 from domain.apps.models import App
 from domain.apps.service import AppService
-from domain.users.models import User
+from domain.apperture_users.models import AppertureUser
 
 
 class TestAppService:
     @pytest.mark.asyncio
     async def test_share_app(self):
         service = AppService()
-        User.get_settings = MagicMock()
+        AppertureUser.get_settings = MagicMock()
         App.get_settings = MagicMock()
         app = AsyncMock()
         old_shared_user_id = str(PydanticObjectId())
@@ -21,7 +21,7 @@ class TestAppService:
         App.user_id = MagicMock()
         app_id = str(PydanticObjectId())
         owner_id = str(PydanticObjectId())
-        user = User(
+        user = AppertureUser(
             id=PydanticObjectId(),
             first_name="mock",
             last_name="mock",

@@ -1,20 +1,38 @@
 import {
   FilterType,
+  SegmentDateFilterType,
   SegmentFilter,
-  SegmentFilterConditions,
+  SegmentFilterDataType,
+  SegmentFilterOperatorsBool,
+  SegmentFilterOperatorsNumber,
+  SegmentFilterOperatorsString,
   SegmentGroup,
 } from '@lib/domain/segment';
+import { format } from 'date-fns';
+
+export const DateFilterTypeOptions = [
+  {
+    id: SegmentDateFilterType.FIXED,
+    label: 'Fixed',
+  },
+  {
+    id: SegmentDateFilterType.SINCE,
+    label: 'Since',
+  },
+  {
+    id: SegmentDateFilterType.LAST,
+    label: 'Last',
+  },
+];
 
 export const getFilteredColumns = (columns: string[]) => {
   return columns.filter((value) => value !== 'user_id');
 };
 
-const _getWhereAndWhoConditionIndex = (
-  conditions: SegmentFilterConditions[]
-) => {
-  const whereConditionIndex = conditions.indexOf(SegmentFilterConditions.WHERE);
-  const whoConditionIndex = conditions.indexOf(SegmentFilterConditions.WHO);
-  return { whereConditionIndex, whoConditionIndex };
+export const FilterOperatorsDatatypeMap = {
+  [SegmentFilterDataType.BOOL]: Object.values(SegmentFilterOperatorsBool),
+  [SegmentFilterDataType.NUMBER]: Object.values(SegmentFilterOperatorsNumber),
+  [SegmentFilterDataType.STRING]: Object.values(SegmentFilterOperatorsString),
 };
 
 export const getWhereAndWhoFilters = (filters: SegmentFilter[]) => {
@@ -37,9 +55,28 @@ export const replaceEmptyStringPlaceholder = (groups: SegmentGroup[]) => {
   });
 };
 
-export const getDateStringFromDate = (date: Date) => {
-  const [dateString] = date.toISOString().split('T');
-  return dateString;
+export const replaceFilterValueWithEmptyStringPlaceholder = (
+  groups: SegmentGroup[]
+) => {
+  return groups.map((group) => {
+    group.filters.map((filter) => {
+      const emptyStringIndex = filter.values.indexOf('');
+      if (emptyStringIndex !== -1)
+        filter.values[emptyStringIndex] = '(empty string)';
+      return filter;
+    });
+    return group;
+  });
+};
+
+export const getDateStringFromDate = (recievedDate: Date) => {
+  if (!recievedDate) return '';
+  return format(recievedDate, 'yyyy-MM-dd');
+};
+
+export const getMonthDateYearFormattedString = (dateString: string) => {
+  if (!dateString) return '';
+  return format(new Date(dateString), 'MMM d, yyyy');
 };
 
 export const getDateOfNDaysBack = (days: number) => {

@@ -1,0 +1,108 @@
+.funnel-chart > div {
+  -webkit-transform: rotate(0deg);
+  -moz-transform: rotate(0deg);
+  -ms-transform: rotate(0deg);
+  -o-transform: rotate(0deg);
+  transform: rotate(0deg);
+}
+
+.funnel-chart > div > .g2-tooltip {
+  background-color: rgba(0, 0, 0, 0) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  font: unset !important;
+  /* top: 0 !important;
+  left: 0 !important; */
+  width: max-content !important;
+  /* position: static !important; */
+}
+
+.tooltip.funnel {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  width: 195px;
+  opacity: 1;
+  color: #0e0e1a;
+  font-family: 'Work Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 10px;
+  line-height: 12px;
+  background: #ffffff;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  position: fixed;
+}
+
+.tooltip.funnel .heading {
+  padding: 12px 12px 8px;
+  font-family: 'Work Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 14px;
+  /* identical to box height */
+
+  /* System/Black */
+
+  color: #0e0e1a;
+
+  /* Inside auto layout */
+
+  flex: none;
+  order: 0;
+  width: 100%;
+}
+
+.tooltip.funnel .stats {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 0.6px solid #ededed;
+  padding: 8px 0;
+}
+
+.tooltip.funnel .stats .row {
+  width: 100%;
+  padding: 2px 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.tooltip.funnel .stats .row span {
+  font-family: 'Work Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 12px;
+}
+
+.tooltip.funnel .stats .row .title {
+  font-weight: 400;
+  padding-left: 18px;
+  position: relative;
+}
+.tooltip.funnel .stats .row .title:after {
+  position: absolute;
+  left: 0%;
+  height: 10px;
+  content: url('../assets/icons/down-right-funnel-tooltip.svg');
+}
+.tooltip.funnel .stats .row:first-child .title:after {
+  content: url('../assets/icons/right-arrow-funnel-tooltip.svg');
+}
+.tooltip.funnel .stats .row .data {
+  font-weight: 600;
+}
+
+.tooltip.funnel .action-button {
+  text-align: center;
+  color: #0e0e1a;
+
+  opacity: 0.78;
+  font-weight: 400;
+  font-size: 8px;
+  line-height: 12px;
+}

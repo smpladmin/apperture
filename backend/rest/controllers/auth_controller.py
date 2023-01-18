@@ -4,7 +4,7 @@ from authlib.integrations.starlette_client import OAuthError
 from starlette.responses import RedirectResponse
 
 from authorisation.jwt_auth import create_access_token
-from domain.users.service import UserService
+from domain.apperture_users.service import AppertureUserService
 from authorisation import OAuthClientFactory, OAuthProvider
 from settings import apperture_settings
 
@@ -29,7 +29,7 @@ async def login(
 @router.get("/authorise")
 async def authorise(
     request: Request,
-    user_service: UserService = Depends(),
+    user_service: AppertureUserService = Depends(),
     state: str = os.getenv("FRONTEND_LOGIN_REDIRECT_URL"),
 ):
     apperture_user = await _authorize_and_save_user(request, user_service)
@@ -50,7 +50,9 @@ async def _redirect_with_auth_cookie(redirect_url: str, user_id: str):
     return response
 
 
-async def _authorize_and_save_user(request: Request, user_service: UserService):
+async def _authorize_and_save_user(
+    request: Request, user_service: AppertureUserService
+):
     try:
         access_token = await oauth.google.authorize_access_token(request)
     except OAuthError:

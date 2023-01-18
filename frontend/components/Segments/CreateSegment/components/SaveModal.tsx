@@ -15,18 +15,20 @@ import {
   Highlight,
 } from '@chakra-ui/react';
 import { SegmentGroup } from '@lib/domain/segment';
-import { User } from '@lib/domain/user';
+import { AppertureUser } from '@lib/domain/user';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { convertISODateToReadableDate } from '@lib/utils/common';
-import { saveSegment } from '@lib/services/segmentService';
+import { saveSegment, updateSegment } from '@lib/services/segmentService';
 
 type SaveSegmentModalProps = {
   isOpen: boolean;
   onClose: () => void;
   groups: SegmentGroup[];
   columns: string[];
-  user?: User;
+  user?: AppertureUser;
+  savedSegmentName?: string;
+  savedSegmentDescription?: string;
 };
 
 const SaveSegmentModal = ({
@@ -35,30 +37,49 @@ const SaveSegmentModal = ({
   groups,
   columns,
   user,
+  savedSegmentName,
+  savedSegmentDescription,
 }: SaveSegmentModalProps) => {
-  const [segmentName, setSegmentName] = useState('');
-  const [segmentDesciption, setSegmentDescription] = useState('');
+  const [segmentName, setSegmentName] = useState(savedSegmentName || '');
+  const [segmentDesciption, setSegmentDescription] = useState(
+    savedSegmentDescription || ''
+  );
+  const [isSegmentBeingEdited, setSegmentBeingEdited] = useState(false);
+
   const router = useRouter();
-  const { dsId } = router.query;
+  const { dsId, segmentId } = router.query;
 
   const currentDateAndTime = convertISODateToReadableDate(
     new Date().toISOString(),
     true
   );
 
+  useEffect(() => {
+    if (router.pathname.includes('edit')) setSegmentBeingEdited(true);
+  }, []);
+
   const handleSave = async () => {
-    const response = await saveSegment(
-      segmentName,
-      segmentDesciption,
-      dsId as string,
-      groups,
-      columns
-    );
+    const response = isSegmentBeingEdited
+      ? await updateSegment(
+          segmentId as string,
+          segmentName,
+          segmentDesciption,
+          dsId as string,
+          groups,
+          columns
+        )
+      : await saveSegment(
+          segmentName,
+          segmentDesciption,
+          dsId as string,
+          groups,
+          columns
+        );
     if (response?.status === 200) {
       const { _id, datasourceId } = response?.data;
       router.push({
         pathname: '/analytics/segment/edit/[segmentId]',
-        query: { segmentId: _id, dsId: datasourceId },
+        query: { segmentId: _id || segmentId, dsId: datasourceId },
       });
     }
     onClose();
@@ -131,6 +152,7 @@ const SaveSegmentModal = ({
               p={'3'}
               focusBorderColor={'black.100'}
               borderRadius={'8'}
+              value={segmentName}
               onChange={(e) => setSegmentName(e.target.value)}
               data-testid={'segment-name'}
             />
@@ -149,6 +171,7 @@ const SaveSegmentModal = ({
               maxLength={120}
               focusBorderColor={'black.100'}
               resize={'none'}
+              value={segmentDesciption}
               onChange={(e) => setSegmentDescription(e.target.value)}
               data-testid={'segment-description'}
             />

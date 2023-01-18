@@ -1,17 +1,17 @@
 import { Box, Button } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import {
-  getDateOfNDaysBack,
-  getDateStringFromDate,
-  getWhereAndWhoFilters,
-} from '@components/Segments/util';
+import { getWhereAndWhoFilters } from '@components/Segments/util';
 import {
   FilterItemType,
   FilterType,
+  SegmentDateFilterType,
   SegmentFilter,
   SegmentFilterConditions,
   SegmentFilterOperators,
+  SegmentFilterOperatorsNumber,
+  SegmentFilterOperatorsString,
   SegmentProperty,
+  SegmentFilterDataType,
 } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useCallback, useRef, useState } from 'react';
@@ -70,10 +70,11 @@ const AddFilter = ({
       whereFilters.push({
         condition: getWhereFilterCondition(whereFilters),
         operand: item.id,
-        operator: SegmentFilterOperators.EQUALS,
+        operator: SegmentFilterOperatorsString.IS,
         values: [],
         all: false,
         type: FilterType.WHERE,
+        datatype: SegmentFilterDataType.STRING,
       });
     } else {
       whoFilters.push({
@@ -81,11 +82,14 @@ const AddFilter = ({
         triggered: true,
         operand: item.id,
         aggregation: 'total',
-        operator: SegmentFilterOperators.EQUALS,
+        operator: SegmentFilterOperatorsNumber.EQ,
         values: ['1'],
-        startDate: getDateOfNDaysBack(30),
-        endDate: getDateStringFromDate(new Date()),
+        date_filter: {
+          days: 30,
+        },
+        date_filter_type: SegmentDateFilterType.LAST,
         type: FilterType.WHO,
+        datatype: SegmentFilterDataType.NUMBER,
       });
     }
     return [...whereFilters, ...whoFilters];

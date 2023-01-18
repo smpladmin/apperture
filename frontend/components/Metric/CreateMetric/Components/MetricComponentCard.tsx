@@ -4,7 +4,11 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import MetricFilterComponent from './MetricFilterComponent';
 import MetricAddFilterComponent from './MetricAddFilterComponent';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import { MetricComponentVariant, MetricEventFilter } from '@lib/domain/metric';
+import {
+  EventOrSegmentComponent,
+  MetricComponentVariant,
+  MetricEventFilter,
+} from '@lib/domain/metric';
 type MetricComponentCardProps = {
   variable: string;
   eventList: string[];
@@ -13,6 +17,7 @@ type MetricComponentCardProps = {
   loadingEventsList: boolean;
   updateAggregate: Function;
   removeAggregate: Function;
+  savedAggregate: EventOrSegmentComponent;
 };
 
 const MetricComponentCard = ({
@@ -23,10 +28,11 @@ const MetricComponentCard = ({
   loadingEventsList,
   updateAggregate,
   removeAggregate,
+  savedAggregate,
 }: MetricComponentCardProps) => {
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [variant, setVariant] = useState<MetricComponentVariant>(
-    MetricComponentVariant.UNDEFINED
+    savedAggregate?.variant || MetricComponentVariant.UNDEFINED
   );
   const [isEventOrSegmentListOpen, setIsEventOrSegmentListOpen] =
     useState<boolean>(false);
@@ -34,10 +40,17 @@ const MetricComponentCard = ({
     useState<boolean>(false);
   const [EventorSegmentListSearchData, setEventOrSegmentListSearchData] =
     useState<string[]>([]);
-  const [reference, setReference] = useState('');
+  const [reference, setReference] = useState(
+    savedAggregate?.reference_id || ''
+  );
   const [aggregationFunction, setAggregationFunction] = useState('count');
-  const [filters, setFilters] = useState<MetricEventFilter[]>([]);
-  const [conditions, setConditions] = useState(['where']);
+  const [filters, setFilters] = useState<MetricEventFilter[]>(
+    savedAggregate?.filters || []
+  );
+  const [conditions, setConditions] = useState(
+    savedAggregate?.conditions || ['where']
+  );
+  const previousVariant = useRef<MetricComponentVariant | null>(null);
 
   const EventOrSegmentBox = useRef(null);
   useOnClickOutside(EventOrSegmentBox, () => {
@@ -95,12 +108,15 @@ const MetricComponentCard = ({
     setConditions([...updatedConditions]);
   };
 
-  useMemo(() => {
-    updateAggregate(variable, { variant });
-    setIsEventOrSegmentListLoading(true);
-    if (variant === MetricComponentVariant.EVENT) {
-      setEventOrSegmentListSearchData(eventList);
-      setIsEventOrSegmentListLoading(false);
+  useEffect(() => {
+    if (variant !== previousVariant.current) {
+      previousVariant.current = variant;
+      updateAggregate(variable, { variant });
+      setIsEventOrSegmentListLoading(true);
+      if (variant === MetricComponentVariant.EVENT) {
+        setEventOrSegmentListSearchData(eventList);
+        setIsEventOrSegmentListLoading(false);
+      }
     }
   }, [variant]);
 
@@ -248,7 +264,7 @@ const MetricComponentCard = ({
               fontSize={'xs-12'}
               lineHeight={'xs-16'}
               marginLeft={4}
-              cursor={'pointer'}
+              cursor={'not-allowed'}
               px={2}
               borderRadius={4}
               _hover={{ color: 'white', background: 'grey.300' }}

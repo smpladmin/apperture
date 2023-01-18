@@ -6,9 +6,11 @@ export type FunnelStep = {
 };
 
 export type FunnelData = {
+  step: number;
   event: string;
   users: number;
   conversion: number;
+  drop: number;
 };
 
 export type ComputedFunnel = {
@@ -29,4 +31,26 @@ export type FunnelTrendsData = {
   endDate: Date;
   firstStepUsers: Number;
   lastStepUsers: Number;
+};
+
+export type FunnelEventUserData = {
+  id: string;
+};
+
+export type FunnelConversionData = {
+  users: FunnelEventUserData[];
+  total_users: number;
+  unique_users: number;
+};
+
+export type FunnelEventConversion = {
+  converted: FunnelConversionData;
+  dropped: FunnelConversionData;
+  step: number;
+  event: string;
+};
+
+export type UserProperty = {
+  Property: string;
+  Value: string;
 };

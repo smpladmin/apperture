@@ -7,8 +7,8 @@ from domain.segments.models import (
     ComputedSegment,
     Segment,
 )
+from rest.dtos.appperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
-from rest.dtos.users import UserResponse
 
 
 class TransientSegmentDto(BaseModel):
@@ -36,7 +36,7 @@ class SegmentResponse(Segment, ModelResponse):
 
 
 class SegmentWithUser(Segment, ModelResponse):
-    user: Optional[UserResponse]
+    user: Optional[AppertureUserResponse]
 
     class Config:
         allow_population_by_field_name = True

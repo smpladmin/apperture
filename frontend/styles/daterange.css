@@ -1,0 +1,113 @@
+.rdrStartEdge,
+.rdrEndEdge {
+  color: black !important;
+}
+
+.rdrInRange ~ .rdrDayNumber span {
+  color: black !important;
+}
+
+.rdrInRange ~ .rdrDayNumber span::after {
+  background: black !important;
+}
+
+.rdrDayHovered {
+  color: black !important;
+}
+
+.rdrDayEndOfWeek .rdrInRange,
+.rdrDayStartOfWeek .rdrInRange {
+  border-radius: 0 !important;
+}
+
+.rdrMonthAndYearWrapper button {
+  background-color: rgba(0, 0, 0, 0) !important;
+
+  position: relative;
+  padding: 0;
+  margin: 0;
+}
+
+.rdrMonthAndYearWrapper button:hover,
+.rdrDateDisplayWrapper {
+  background-color: rgba(0, 0, 0, 0) !important;
+}
+
+.rdrMonthAndYearWrapper button i {
+  background-color: rgba(0, 0, 0, 0) !important;
+  border: none;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+}
+.rdrMonthAndYearWrapper button i:after {
+  position: absolute;
+  object-fit: cover;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  height: 14px;
+  width: 14px;
+}
+
+.rdrMonthAndYearWrapper button:first-child i:after {
+  content: url('../assets/icons/left-arrow.svg');
+  margin-right: -10px;
+  margin-top: 3px;
+}
+.rdrMonthAndYearWrapper button:last-child i:after {
+  content: url('../assets/icons/right-arrow.svg');
+  margin-left: -10px;
+  margin-top: 3px;
+}
+
+.rdrMonthPicker {
+  padding: 0;
+}
+
+.rdrMonthAndYearPickers select {
+  padding: none !important;
+  font-weight: 500;
+  text-decoration: underline;
+  text-indent: 1px;
+  text-overflow: '';
+}
+
+.rdrMonthAndYearWrapper {
+  background-color: #f6f6f6;
+  margin-top: 8px;
+  padding: 0 !important;
+  height: 55px !important;
+  border-radius: 100px;
+}
+
+.rdrDateInput {
+  box-shadow: none !important;
+}
+
+.rdrDateDisplayItem {
+  border: '1px solid #f6f6f6' !important;
+}
+
+.rdrDateDisplayItemActive {
+  border-color: #0e0e1a !important;
+}
+.rdrDateInput input {
+  color: #0e0e1a !important;
+  font-size: 14px !important;
+  line-height: 18px !important;
+  font-weight: 500 !important;
+}
+
+.rdrSelected,
+.rdrDayStartPreview,
+.rdrDayEndPreview {
+  color: #0e0e1a !important;
+}

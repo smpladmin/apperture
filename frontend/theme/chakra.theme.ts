@@ -37,6 +37,10 @@ export const theme = extendTheme({
             bg: 'grey.200',
           },
         },
+        dark: {
+          bg: 'black.200',
+          color: 'white',
+        },
       },
     },
   },

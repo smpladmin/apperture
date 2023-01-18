@@ -1,6 +1,7 @@
 import { Flex, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import React, { useState } from 'react';
+import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
+import React, { useRef, useState } from 'react';
 
 type MetricAddFilterComponentProps = {
   eventProperties: string[];
@@ -14,6 +15,7 @@ const MetricAddFilterComponent = ({
   handleAddFilter,
 }: MetricAddFilterComponentProps) => {
   const [openDropDown, setOpenDropDown] = useState(false);
+  const ref = useRef(null);
   const handleClick = () => {
     setOpenDropDown((prevState) => !prevState);
   };
@@ -21,8 +23,9 @@ const MetricAddFilterComponent = ({
     setOpenDropDown(false);
     handleAddFilter(value);
   };
+  useOnClickOutside(ref, () => setOpenDropDown(false));
   return (
-    <Flex position="relative" width={'full'} direction={'column'}>
+    <Flex position="relative" width={'full'} direction={'column'} ref={ref}>
       <Text
         data-testid={'add-filter-button'}
         color={'grey.200'}

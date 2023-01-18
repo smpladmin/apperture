@@ -14,15 +14,26 @@ import {
   getNodes,
 } from '@lib/services/datasourceService';
 import { getSearchResult, capitalizeFirstLetter } from '@lib/utils/common';
-import { computeSegment, saveSegment } from '@lib/services/segmentService';
+import {
+  computeSegment,
+  saveSegment,
+  updateSegment,
+} from '@lib/services/segmentService';
 import {
   FilterType,
+  SegmentDateFilterType,
   SegmentFilter,
   SegmentFilterConditions,
+  SegmentFilterDataType,
   SegmentGroupConditions,
   WhereSegmentFilter,
 } from '@lib/domain/segment';
-import { getUserInfo } from '@lib/services/userService';
+import { getAppertureUserInfo } from '@lib/services/userService';
+import {
+  getDateStringFromDate,
+  getMonthDateYearFormattedString,
+} from '../util';
+import { addDays } from 'date-fns';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/utils/common');
@@ -100,6 +111,17 @@ describe('Create Segment', () => {
     return groupConditions.map((condition) => condition.textContent);
   };
 
+  const switchFilterDatatype = async (datatype: SegmentFilterDataType) => {
+    const datatypeIcon = screen.getByTestId('change-datatype');
+    fireEvent.click(datatypeIcon);
+    const dropdownMenu = screen.getByTestId('dropdown-item');
+    fireEvent.mouseEnter(dropdownMenu);
+    const boolDatatypeElement = screen.getByText(datatype);
+    await act(async () => {
+      fireEvent.click(boolDatatypeElement);
+    });
+  };
+
   let mockedGetEventProperties: jest.Mock;
   let mockedGetNodes: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
@@ -108,6 +130,7 @@ describe('Create Segment', () => {
   let mockedGetUserInfo: jest.Mock;
   let mockedSaveSegment: jest.Mock;
   let mockedCapitalizeLetter: jest.Mock;
+  let mockedUpdateSegment: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -158,16 +181,18 @@ describe('Create Segment', () => {
           {
             condition: SegmentFilterConditions.WHERE,
             operand: 'properties.$city',
-            operator: 'equals',
+            operator: 'is',
             values: ['Chennai', 'Guwahati', 'Patna'],
             type: FilterType.WHERE,
+            datatype: SegmentFilterDataType.STRING,
           },
           {
             condition: SegmentFilterConditions.AND,
             operand: 'properties.$app_version',
-            operator: 'equals',
+            operator: 'is',
             values: ['1.5.5', '1.5.6'],
             type: FilterType.WHERE,
+            datatype: SegmentFilterDataType.STRING,
           },
         ] as WhereSegmentFilter[],
         condition: SegmentGroupConditions.AND,
@@ -184,9 +209,10 @@ describe('Create Segment', () => {
     mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
     mockedSearchResult = jest.mocked(getSearchResult);
     mockedTransientSegment = jest.mocked(computeSegment);
-    mockedGetUserInfo = jest.mocked(getUserInfo);
+    mockedGetUserInfo = jest.mocked(getAppertureUserInfo);
     mockedSaveSegment = jest.mocked(saveSegment);
     mockedCapitalizeLetter = jest.mocked(capitalizeFirstLetter);
+    mockedUpdateSegment = jest.mocked(updateSegment);
 
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetNodes.mockReturnValue(events);
@@ -204,9 +230,25 @@ describe('Create Segment', () => {
       picture: 'https://lh2.googleusercontent.com',
       slackChannel: null,
     });
+
+    mockedCapitalizeLetter.mockImplementation((val: string) => {
+      const capitalizedFirstLetterMap: { [key: string]: string } = {
+        equals: 'Equals',
+        is: 'Is',
+        'is not': 'Is not',
+        total: 'Total',
+        'is true': 'Is true',
+        'is false': 'Is false',
+      };
+      return capitalizedFirstLetterMap[val];
+    });
   });
 
   afterAll(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
@@ -261,7 +303,6 @@ describe('Create Segment', () => {
     });
 
     it('add multiple filters with mix of eventProperties and event ', async () => {
-      mockedCapitalizeLetter.mockReturnValue('total');
       await act(async () => {
         render(
           <RouterContext.Provider
@@ -290,35 +331,35 @@ describe('Create Segment', () => {
       expect(firstQueryTextElements).toEqual([
         'where',
         'device',
-        'equals',
+        'Is',
         'android, ios',
       ]);
       expect(secondQueryTextElements).toEqual([
         'and',
         'device',
-        'equals',
+        'Is',
         'android, ios',
       ]);
       expect(thirdQueryTextElements).toEqual([
         'and',
         'device',
-        'equals',
+        'Is',
         'android, ios',
       ]);
       expect(fourthQueryTextElements).toEqual([
         'who',
         'Triggered',
         'App_Open',
-        'total',
-        'equals',
+        'Total',
+        'Equals',
         'Last 30 days',
       ]);
       expect(fifthQueryTextElements).toEqual([
         'and',
         'Triggered',
         'Login',
-        'total',
-        'equals',
+        'Total',
+        'Equals',
         'Last 30 days',
       ]);
     });
@@ -696,20 +737,20 @@ describe('Create Segment', () => {
       const queries = screen.getAllByTestId('query-builder');
 
       const filterOneTextElements = getWhereElementsText(queries, 0);
-      //first query -  `where properties.$city equals Chennai, Guwahati or 1 more
+      //first query -  `where properties.$city Is Chennai, Guwahati or 1 more
       expect(filterOneTextElements).toEqual([
         'where',
         'properties.$city',
-        'equals',
+        'Is',
         'Chennai, Guwahati or 1 more',
       ]);
 
       const filterTwoTextElements = getWhereElementsText(queries, 1);
-      //first query -  `and properties.$app_version equals 1.5.5, 1.5.6
+      //second query -  `and properties.$app_version Is 1.5.5, 1.5.6
       expect(filterTwoTextElements).toEqual([
         'and',
         'properties.$app_version',
-        'equals',
+        'Is',
         '1.5.5, 1.5.6',
       ]);
     });
@@ -897,12 +938,13 @@ describe('Create Segment', () => {
             {
               filters: [
                 {
+                  condition: SegmentFilterConditions.WHERE,
                   operand: 'device',
                   operator: 'equals',
                   values: ['android', 'ios', 'mac', 'windows'],
                 },
               ],
-              conditions: [SegmentFilterConditions.WHERE],
+              condition: SegmentGroupConditions.AND,
             },
           ],
         },
@@ -960,6 +1002,91 @@ describe('Create Segment', () => {
         });
       });
     });
+
+    it('should be able to edit segment and update the segment once click on save button and then redirect the user to edit segment page', async () => {
+      const router = createMockRouter({
+        pathname: '/analytics/segment/edit',
+        query: { dsId: '654212033222' },
+      });
+
+      mockedUpdateSegment.mockReturnValue({
+        status: 200,
+        data: {
+          _id: '654212033111',
+          name: 'Test Segment Edited',
+          datasourceId: '654212033222',
+          description: 'Dummy segment to test segment component',
+          groups: [
+            {
+              filters: [
+                {
+                  condition: SegmentFilterConditions.WHERE,
+                  operand: 'properties.$city',
+                  operator: 'equals',
+                  values: ['Chennai', 'Guwahati', 'Patna'],
+                  type: FilterType.WHERE,
+                },
+                {
+                  condition: SegmentFilterConditions.AND,
+                  operand: 'properties.$app_version',
+                  operator: 'equals',
+                  values: ['1.5.5', '1.5.6'],
+                  type: FilterType.WHERE,
+                },
+                {
+                  condition: SegmentFilterConditions.WHO,
+                  triggered: true,
+                  operand: 'App_Open',
+                  aggregation: 'total',
+                  operator: 'equals',
+                  values: ['1'],
+                  startDate: '2022-11-28',
+                  endDate: '2022-12-28',
+                  type: FilterType.WHO,
+                },
+              ],
+              condition: SegmentGroupConditions.AND,
+            },
+          ],
+        },
+      });
+
+      await act(async () => {
+        render(
+          <RouterContext.Provider value={router}>
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      // add a filter to enable save button
+      await addWhoFilter();
+
+      // open save modal to save segment
+      const openSaveSegmentModalButton = screen.getByTestId(
+        'open-save-segment-modal'
+      );
+      fireEvent.click(openSaveSegmentModalButton);
+
+      const segmentNameInput = screen.getByTestId('segment-name');
+      const saveSegmentButton = screen.getByTestId('save-segment');
+
+      await act(async () => {
+        // add segment name and description
+        fireEvent.change(segmentNameInput, {
+          target: { value: 'Test Segment' },
+        });
+        fireEvent.click(saveSegmentButton);
+      });
+
+      await waitFor(() => {
+        expect(mockedUpdateSegment).toHaveBeenCalled();
+        expect(router.push).toHaveBeenCalledWith({
+          pathname: '/analytics/segment/edit/[segmentId]',
+          query: { dsId: '654212033222', segmentId: '654212033111' },
+        });
+      });
+    });
   });
 
   describe('remove filter conditons', () => {
@@ -976,16 +1103,18 @@ describe('Create Segment', () => {
             {
               condition: SegmentFilterConditions.WHERE,
               operand: 'properties.$city',
-              operator: 'equals',
+              operator: 'is',
               values: ['Chennai', 'Guwahati', 'Patna'],
               type: FilterType.WHERE,
+              datatype: SegmentFilterDataType.STRING,
             },
             {
               condition: SegmentFilterConditions.AND,
               operand: 'properties.$app_version',
-              operator: 'equals',
+              operator: 'is',
               values: ['1.5.5', '1.5.6'],
               type: FilterType.WHERE,
+              datatype: SegmentFilterDataType.STRING,
             },
             {
               condition: SegmentFilterConditions.WHO,
@@ -994,8 +1123,10 @@ describe('Create Segment', () => {
               aggregation: 'total',
               operator: 'equals',
               values: ['15'],
-              startDate: '2022-11-28',
-              endDate: '2022-12-28',
+              date_filter: {
+                days: 30,
+              },
+              date_filter_type: SegmentDateFilterType.LAST,
               type: FilterType.WHO,
             },
             {
@@ -1005,8 +1136,10 @@ describe('Create Segment', () => {
               aggregation: 'total',
               operator: 'equals',
               values: ['50'],
-              startDate: '2022-11-28',
-              endDate: '2022-12-28',
+              date_filter: {
+                days: 30,
+              },
+              date_filter_type: SegmentDateFilterType.LAST,
               type: FilterType.WHO,
             },
             {
@@ -1016,8 +1149,10 @@ describe('Create Segment', () => {
               aggregation: 'total',
               operator: 'equals',
               values: ['10'],
-              startDate: '2022-11-28',
-              endDate: '2022-12-28',
+              date_filter: {
+                days: 30,
+              },
+              date_filter_type: SegmentDateFilterType.LAST,
               type: FilterType.WHO,
             },
           ] as SegmentFilter[],
@@ -1126,6 +1261,60 @@ describe('Create Segment', () => {
         assertFilterConditions(['where', 'or', 'who', 'and', 'and']);
       });
     });
+
+    it('remove `where` filter when there is one `where` filter and `who` filter, first filter condition should change to `who`', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+      await addWhoFilter();
+
+      // remove first where filter
+      await removeFilter(0);
+
+      const queries = screen.getAllByTestId('query-builder');
+      const queryTextElements = getWhereElementsText(queries, 0);
+
+      await waitFor(() => {
+        expect(queryTextElements).toEqual([
+          'who',
+          'Triggered',
+          'App_Open',
+          'Total',
+          'Equals',
+          'Last 30 days',
+        ]);
+        assertFilterConditions(['who']);
+      });
+    });
+
+    it('remove first `where` filter when there are two `where` filter and `who` filter, first filter condition should remain `where`', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+      await addWhereFilter();
+      await addWhoFilter();
+
+      // remove first where filter
+      await removeFilter(0);
+
+      await waitFor(() => {
+        assertFilterConditions(['where', 'who']);
+      });
+    });
   });
 
   describe('add multiple groups and clear groups', () => {
@@ -1226,6 +1415,255 @@ describe('Create Segment', () => {
 
       expect(newGroup.length).toEqual(1);
       expect(queries).not.toBeInTheDocument();
+    });
+  });
+
+  describe('should be able to switch b/w different datefield options (FIXED, SINCE, LAST)', () => {
+    it('should switch and see respective date filter type component', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      await addWhoFilter();
+      const dateFieldBox = screen.getByTestId('date-field');
+      fireEvent.click(dateFieldBox);
+
+      const dateFilterOptions = screen.getAllByTestId('date-filter-item');
+
+      const dateFilterOptionsText = dateFilterOptions.map(
+        (option) => option.textContent
+      );
+      expect(dateFilterOptionsText).toEqual(['Fixed', 'Since', 'Last']);
+
+      const lastNdaysComponent = screen.queryByTestId('last-N-days');
+      expect(lastNdaysComponent).toBeInTheDocument();
+
+      // switch to fixed date range component
+      await act(async () => {
+        fireEvent.click(dateFilterOptions[0]);
+      });
+
+      await waitFor(() => {
+        const fixedDateRangeComponent =
+          screen.queryByTestId('fixed-date-range');
+
+        expect(fixedDateRangeComponent).toBeInTheDocument();
+      });
+
+      // switch to since date component
+      await act(async () => {
+        fireEvent.click(dateFilterOptions[1]);
+      });
+      await waitFor(() => {
+        const sinceStartDateComponent =
+          screen.queryByTestId('since-start-date');
+
+        expect(sinceStartDateComponent).toBeInTheDocument();
+      });
+    });
+
+    it('should switch to since date filter and be able to save the date and date should start with `Since ...`', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      await addWhoFilter();
+      const dateFieldText = screen.getByTestId('date-field');
+      fireEvent.click(dateFieldText);
+
+      const dateFilterOptions = screen.getAllByTestId('date-filter-item');
+      const doneButton = screen.getByTestId('date-dropdown-done-button');
+
+      // switch to since date component
+      await act(async () => {
+        fireEvent.click(dateFilterOptions[1]);
+      });
+
+      const dateInput: HTMLInputElement = screen.getByTestId(
+        'since-start-date-input'
+      );
+      const dateInputValue = dateInput.value;
+      await act(async () => {
+        fireEvent.click(doneButton);
+      });
+
+      expect(dateFieldText.textContent).toEqual(`Since ${dateInputValue}`);
+    });
+
+    it('should switch to fixed date filter and be able to save the date', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      await addWhoFilter();
+      const dateFieldText = screen.getByTestId('date-field');
+      fireEvent.click(dateFieldText);
+
+      const dateFilterOptions = screen.getAllByTestId('date-filter-item');
+      const doneButton = screen.getByTestId('date-dropdown-done-button');
+      // switch to since date component
+      await act(async () => {
+        fireEvent.click(dateFilterOptions[0]);
+      });
+
+      await act(async () => {
+        fireEvent.click(doneButton);
+      });
+
+      const startDate = getMonthDateYearFormattedString(
+        getDateStringFromDate(addDays(new Date(), -30))
+      );
+
+      const endDate = getMonthDateYearFormattedString(
+        getDateStringFromDate(new Date())
+      );
+      expect(dateFieldText.textContent).toEqual(`${startDate} - ${endDate}`);
+    });
+  });
+
+  describe('change datatype and filter operator of where filter', () => {
+    it('change datatype from string to number and inputValue filed should be rendered replacing selectvalue dropdown', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+
+      await addWhereFilter();
+      await switchFilterDatatype(SegmentFilterDataType.NUMBER);
+
+      // expect to see input field and operator switches to 'Equals'
+      const queries = screen.getAllByTestId('query-builder');
+      const queryTextElements = getWhereElementsText(queries, 0);
+      const selectValueDropdown = screen.queryByTestId('event-property-value');
+      const inputValueField = screen.queryByTestId('input-value');
+
+      expect(selectValueDropdown).not.toBeInTheDocument();
+      expect(inputValueField).toBeInTheDocument();
+
+      expect(queryTextElements).toEqual(['where', 'device', 'Equals']);
+    });
+
+    it('change datatype from string to bool, inputvalue filed and select value dropdown should not be rendered', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+      await switchFilterDatatype(SegmentFilterDataType.BOOL);
+
+      // expect to see input field and operator switches to 'Equals'
+      const queries = screen.getAllByTestId('query-builder');
+      const queryTextElements = getWhereElementsText(queries, 0);
+      const selectValueDropdown = screen.queryByTestId('event-property-value');
+      const inputValueField = screen.queryByTestId('input-value');
+
+      expect(selectValueDropdown).not.toBeInTheDocument();
+      expect(inputValueField).not.toBeInTheDocument();
+
+      expect(queryTextElements).toEqual(['where', 'device', 'Is true']);
+    });
+
+    it('change operator for string datatype filter, operators should be `Is/ Is not`', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+
+      const filterOperatorText = screen.getByTestId('filter-operator');
+      fireEvent.click(filterOperatorText);
+
+      const filterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+
+      const filterOperatorsOptionsText = filterOperatorsOptions.map(
+        (filter) => filter.textContent
+      );
+      expect(filterOperatorsOptionsText).toEqual(['Is', 'Is not']);
+
+      // click on 'Is not' operator
+      await act(async () => {
+        fireEvent.click(filterOperatorsOptions[1]);
+      });
+      await waitFor(() => {
+        expect(filterOperatorText.textContent).toEqual('Is not');
+      });
+    });
+
+    it('change filter datatype from string datatype to bool ,and after that operators should be `Is true/Is false', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '654212033222' } })}
+          >
+            <CreateSegment />
+          </RouterContext.Provider>
+        );
+      });
+      await addWhereFilter();
+
+      // change datatype to bool(True/ False)
+      await switchFilterDatatype(SegmentFilterDataType.BOOL);
+
+      // open filter operator dropdown
+      const filterOperatorText = screen.getByTestId('filter-operator');
+      fireEvent.click(filterOperatorText);
+
+      const filterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+
+      const filterOperatorsOptionsText = filterOperatorsOptions.map(
+        (filter) => filter.textContent
+      );
+      expect(filterOperatorsOptionsText).toEqual(['Is true', 'Is false']);
+
+      // expect transientSegment call to be happen when changing to datatype
+      // 1 call while rendering, 1 call when adding a where filter and 1 call when changing the datatype to bool
+      expect(mockedTransientSegment).toHaveBeenCalledTimes(1 + 1 + 1);
+
+      // click on 'Is false' operator
+      await act(async () => {
+        fireEvent.click(filterOperatorsOptions[1]);
+      });
+
+      await waitFor(() => {
+        expect(filterOperatorText.textContent).toEqual('Is false');
+      });
     });
   });
 });

@@ -19,13 +19,44 @@ export type EventOrSegmentComponent = {
   variable: string;
   reference_id: string;
   function: string;
-  variant: string;
+  variant: MetricComponentVariant;
   filters: MetricEventFilter[];
   conditions: string[];
   aggregations: MetricComponentAggregation;
 };
 
-export type Metric = {
+export type ComputedMetric = {
   data: { date: string; value: number }[];
   definition: string;
+};
+
+export enum DateFilterType {
+  YESTERDAY = 'yesterday',
+  WEEK = 'week',
+  MONTH = 'month',
+  QUARTER = 'quarter',
+  CUSTOM = 'custom',
+  UNSET = '',
+}
+
+export type DateRangeType = {
+  startDate: Date;
+  endDate: Date;
+};
+
+export type DatePickerRange = {
+  startDate: Date;
+  endDate: Date;
+  key: string;
+};
+
+export type Metric = {
+  _id: string;
+  datasourceId: string;
+  appId: string;
+  userId: string;
+  name: string;
+  function: string;
+  aggregates: EventOrSegmentComponent[];
+  breakdown: string[];
 };

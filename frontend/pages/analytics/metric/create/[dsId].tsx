@@ -36,7 +36,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   };
 };
 
-const CreateFunnel = ({ nodes }: { nodes: Node[] }) => {
+const Metric = ({ nodes }: { nodes: Node[] }) => {
   const { dispatch } = useContext(MapContext);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ const CreateFunnel = ({ nodes }: { nodes: Node[] }) => {
   return <CreateMetric />;
 };
 
-CreateFunnel.getLayout = function getLayout(
+Metric.getLayout = function getLayout(
   page: ReactElement,
   apps: AppWithIntegrations[]
 ) {
@@ -60,4 +60,4 @@ CreateFunnel.getLayout = function getLayout(
   );
 };
 
-export default CreateFunnel;
+export default Metric;

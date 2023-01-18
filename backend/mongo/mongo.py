@@ -7,12 +7,13 @@ from domain.edge.models import BaseEdge
 from domain.edge.models import Edge
 from domain.edge.models import RichEdge
 from domain.integrations.models import Integration
-from domain.users.models import User
+from domain.apperture_users.models import AppertureUser
 from domain.runlogs.models import RunLog
 from domain.notifications.models import Notification
 from domain.funnels.models import Funnel
 from domain.segments.models import Segment
 from domain.properties.models import Properties
+from domain.metrics.models import Metric
 
 
 class Mongo:
@@ -21,7 +22,7 @@ class Mongo:
         await init_beanie(
             database=self.client[os.environ.get("DB_NAME")],
             document_models=[
-                User,
+                AppertureUser,
                 App,
                 Integration,
                 DataSource,
@@ -33,6 +34,7 @@ class Mongo:
                 Funnel,
                 Segment,
                 Properties,
+                Metric,
             ],
         )
 

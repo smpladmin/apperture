@@ -1,5 +1,4 @@
-import { SegmentGroupConditions } from './../domain/segment';
-import { ApperturePrivateGet, ApperturePost, AppertureGet } from './util';
+import { ApperturePrivateGet, ApperturePost, AppertureGet, ApperturePut } from './util';
 import { cloneDeep } from 'lodash';
 import { replaceEmptyStringPlaceholder } from './../../components/Segments/util';
 import { SegmentGroup } from '@lib/domain/segment';
@@ -30,7 +29,23 @@ export const saveSegment = async (
     datasourceId: dsId,
     groups: replaceEmptyStringPlaceholder(cloneDeep(groups)),
     columns,
-    groupConditions: [],
+  });
+};
+
+export const updateSegment = async (
+  segmentId: string,
+  name: string,
+  description: string,
+  dsId: string,
+  groups: SegmentGroup[],
+  columns: string[]
+) => {
+  return await ApperturePut(`/segments/${segmentId}`, {
+    name,
+    description,
+    datasourceId: dsId,
+    groups: replaceEmptyStringPlaceholder(cloneDeep(groups)),
+    columns,
   });
 };
 

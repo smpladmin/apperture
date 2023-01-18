@@ -13,6 +13,10 @@ from domain.funnels.models import (
     ComputedFunnelStep,
     ComputedFunnel,
     FunnelTrendsData,
+    FunnelConversionData,
+    FunnelConversion,
+    ConversionStatus,
+    FunnelEventUserData,
 )
 from repositories.clickhouse.funnels import Funnels
 
@@ -110,6 +114,71 @@ class FunnelsService:
             )
             for data in conversion_data
         ]
+
+    def get_converted_userlist(self, user_list, converted_data, dropped_data):
+        if converted_data != None:
+            converted_user_list = [
+                FunnelEventUserData(id=data[0])
+                for data in user_list[: converted_data["total_users"]]
+            ]
+            dropped_user_list = [
+                FunnelEventUserData(id=data[0])
+                for data in user_list[converted_data["total_users"] :]
+            ]
+        elif dropped_data != None:
+            converted_user_list = [
+                FunnelEventUserData(id=data[0])
+                for data in user_list[dropped_data["total_users"] :]
+            ]
+            dropped_user_list = [
+                FunnelEventUserData(id=data[0])
+                for data in user_list[: dropped_data["total_users"]]
+            ]
+        return converted_user_list, dropped_user_list
+
+    def format_conversion_data(self, user_list, count_data):
+        dropped_data = None
+        converted_data = None
+
+        for data in count_data:
+            if data[0] == ConversionStatus.CONVERTED:
+                converted_data = {"total_users": data[1], "unique_users": data[2]}
+            if data[0] == ConversionStatus.DROPPED:
+                dropped_data = {"total_users": data[1], "unique_users": data[2]}
+
+        converted_user_list, dropped_user_list = self.get_converted_userlist(
+            user_list=user_list,
+            converted_data=converted_data,
+            dropped_data=dropped_data,
+        )
+
+        return dropped_data, dropped_user_list, converted_data, converted_user_list
+
+    async def get_user_conversion(self, datasource_id: str, steps: List[FunnelStep]):
+
+        user_list, count_data = self.funnels.get_conversion_analytics(
+            ds_id=datasource_id, steps=steps
+        )
+
+        (
+            dropped_data,
+            dropped_user_list,
+            converted_data,
+            converted_user_list,
+        ) = self.format_conversion_data(user_list=user_list, count_data=count_data)
+
+        return FunnelConversion(
+            converted=FunnelConversionData(
+                users=converted_user_list,
+                total_users=converted_data["total_users"] if converted_data else 0,
+                unique_users=converted_data["unique_users"] if converted_data else 0,
+            ),
+            dropped=FunnelConversionData(
+                users=dropped_user_list,
+                total_users=dropped_data["total_users"] if dropped_data else 0,
+                unique_users=dropped_data["unique_users"] if dropped_data else 0,
+            ),
+        )
 
     async def get_funnels_for_apps(
         self, app_ids: List[PydanticObjectId]

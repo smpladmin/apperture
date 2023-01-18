@@ -7,8 +7,15 @@ import amplitudeLogo from '@assets/images/amplitude-icon.svg';
 
 import { StaticImageData } from 'next/image';
 
-export const formatDatalabel = (datalabel: number) => {
-  if (datalabel > 999999) {
+export const formatDatalabel = (datalabel: number): string => {
+  if (datalabel > 999999999999) {
+    if (Math.round(datalabel / 10000000000) / 10 > 1000) {
+      return formatDatalabel(datalabel / 10000000000) + 'Tn';
+    }
+    return Math.round(datalabel / 10000000000) / 10 + 'Tn';
+  } else if (datalabel > 999999999) {
+    return Math.round(datalabel / 100000000) / 10 + 'Bn';
+  } else if (datalabel > 999999) {
     return Math.round(datalabel / 100000) / 10 + 'Mn';
   } else if (datalabel > 999) {
     return Math.round(datalabel / 100) / 10 + 'K';
