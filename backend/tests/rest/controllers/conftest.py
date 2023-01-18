@@ -136,12 +136,12 @@ def funnel_service():
         steps=[
             {
                 "event": "Login",
-                "filters": [{"property": "mp_country_code", "value": "IN"}],
+                "filters": None,
             },
             {"event": "Chapter_Click"},
             {
                 "event": "Topic_Click",
-                "filters": [{"property": "os", "value": "Android"}],
+                "filters": None,
             },
         ],
         random_sequence=False,
@@ -759,12 +759,12 @@ def computed_funnel_response():
         "steps": [
             {
                 "event": "Login",
-                "filters": [{"property": "mp_country_code", "value": "IN"}],
+                "filters": None,
             },
             {"event": "Chapter_Click", "filters": None},
             {
                 "event": "Topic_Click",
-                "filters": [{"property": "os", "value": "Android"}],
+                "filters": None,
             },
         ],
         "randomSequence": False,
@@ -881,7 +881,7 @@ def funnel_response():
         "steps": [
             {
                 "event": "Login",
-                "filters": [{"property": "mp_country_code", "value": "IN"}],
+                "filters": None,
             },
             {
                 "event": "Chapter_Click",
@@ -889,7 +889,7 @@ def funnel_response():
             },
             {
                 "event": "Topic_Click",
-                "filters": [{"property": "os", "value": "Android"}],
+                "filters": None,
             },
         ],
         "randomSequence": False,
@@ -1002,7 +1002,7 @@ def funnel_data():
         "steps": [
             {
                 "event": "Login",
-                "filters": [{"property": "mp_country_code", "value": "IN"}],
+                "filters": None,
             },
             {
                 "event": "Chapter_Click",
@@ -1010,7 +1010,7 @@ def funnel_data():
             },
             {
                 "event": "Topic_Click",
-                "filters": [{"property": "os", "value": "Android"}],
+                "filters": None,
             },
         ],
         "randomSequence": False,

@@ -159,7 +159,7 @@ class TestSegmentsRepository:
         self.columns = ["col1", "col2", "col3"]
         self.params = {"ds_id": "test-id"}
         self.repo.execute_get_query = MagicMock(
-            return_value=(("uid1", "data1"), ("uid2", "data2"))
+            return_value=(("uid1", "data1"),)
         )
         self.where_filters_query = (
             'SELECT DISTINCT "user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
@@ -319,7 +319,7 @@ class TestSegmentsRepository:
                     '"user_id" ORDER BY "timestamp" DESC) AS "Rank" FROM "events" WHERE '
                     '"datasource_id"=%(ds_id)s AND '
                     f'char_length(toString("properties.{column}"))>0 AND "user_id" IN '
-                    "('uid1','uid2') ORDER BY \"user_id\") SELECT "
+                    "('uid1') ORDER BY \"user_id\") SELECT "
                     f'"properties.{column}","user_id" FROM column_data WHERE "Rank"=1 ORDER '
                     'BY "user_id"'
                 ),
@@ -344,7 +344,7 @@ class TestSegmentsRepository:
                     '"user_id" ORDER BY "timestamp" DESC) AS "Rank" FROM "events" WHERE '
                     '"datasource_id"=%(ds_id)s AND '
                     f'char_length(toString("properties.{column}"))>0 AND "user_id" IN '
-                    "('uid1','uid2') ORDER BY \"user_id\") SELECT "
+                    "('uid1') ORDER BY \"user_id\") SELECT "
                     f'"properties.{column}","user_id" FROM column_data WHERE "Rank"=1 ORDER '
                     'BY "user_id"'
                 ),

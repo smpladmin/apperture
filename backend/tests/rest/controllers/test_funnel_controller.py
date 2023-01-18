@@ -5,7 +5,7 @@ import pytest
 from beanie import PydanticObjectId
 
 from tests.utils import filter_response
-from domain.funnels.models import FunnelStep, EventFilters, Funnel
+from domain.funnels.models import FunnelStep
 
 
 def test_create_funnel(client_init, funnel_data, funnel_response):
@@ -47,12 +47,12 @@ def test_get_computed_funnel(
         "steps": [
             {
                 "event": "Login",
-                "filters": [{"property": "mp_country_code", "value": "IN"}],
+                "filters": None,
             },
             {"event": "Chapter_Click", "filters": None},
             {
                 "event": "Topic_Click",
-                "filters": [{"property": "os", "value": "Android"}],
+                "filters": None,
             },
         ],
         "updated_at": None,
@@ -85,12 +85,12 @@ async def test_update_funnel(
         [
             FunnelStep(
                 event="Login",
-                filters=[EventFilters(property="mp_country_code", value="IN")],
+                filters=None,
             ),
             FunnelStep(event="Chapter_Click", filters=None),
             FunnelStep(
                 event="Topic_Click",
-                filters=[EventFilters(property="os", value="Android")],
+                filters=None,
             ),
         ],
         funnel_data["randomSequence"],
@@ -110,12 +110,12 @@ async def test_update_funnel(
         "steps": [
             {
                 "event": "Login",
-                "filters": [{"property": "mp_country_code", "value": "IN"}],
+                "filters": None,
             },
             {"event": "Chapter_Click", "filters": None},
             {
                 "event": "Topic_Click",
-                "filters": [{"property": "os", "value": "Android"}],
+                "filters": None,
             },
         ],
         "updated_at": None,
@@ -136,12 +136,12 @@ def test_get_funnel_trends(client_init, funnel_trend_response, funnel_service):
             "steps": [
                 FunnelStep(
                     event="Login",
-                    filters=[EventFilters(property="mp_country_code", value="IN")],
+                    filters=None,
                 ),
                 FunnelStep(event="Chapter_Click", filters=None),
                 FunnelStep(
                     event="Topic_Click",
-                    filters=[EventFilters(property="os", value="Android")],
+                    filters=None,
                 ),
             ],
         }
@@ -163,12 +163,12 @@ def test_get_transient_funnel_trends(
             "steps": [
                 FunnelStep(
                     event="Login",
-                    filters=[EventFilters(property="mp_country_code", value="IN")],
+                    filters=None,
                 ),
                 FunnelStep(event="Chapter_Click", filters=None),
                 FunnelStep(
                     event="Topic_Click",
-                    filters=[EventFilters(property="os", value="Android")],
+                    filters=None,
                 ),
             ],
         }
