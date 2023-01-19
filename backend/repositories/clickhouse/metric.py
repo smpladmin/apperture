@@ -72,7 +72,8 @@ class Metrics(EventsBase):
         select_expression, denominators = parser.parse(function, fn.Sum)
         having_clause = []
         for denominator in denominators:
-            having_clause.append(denominator != 0)
+            if(type(denominator)!=int and type(denominator)!=float):
+                having_clause.append(denominator != 0)
         query = (
             ClickHouseQuery.from_(innerquery.as_("innerquery"))
             .select(Parameter("date"), select_expression)
