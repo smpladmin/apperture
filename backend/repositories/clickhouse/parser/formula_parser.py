@@ -98,6 +98,7 @@ class FormulaParser:
             postfix_expression = obj.infixToPostfix(function)
             expression = None
             stack = []
+            denominators = []
             for c in postfix_expression:
                 if c == "+" or c == "-" or c == "/" or c == "*":
                     b = stack.pop()
@@ -107,6 +108,7 @@ class FormulaParser:
                     elif c == "-":
                         expression = a - b
                     elif c == "/":
+                        denominators.append(b)
                         expression = a / b
                     elif c == "*":
                         expression = a * b
@@ -118,4 +120,8 @@ class FormulaParser:
         except:
             logging.error(f"Invalid formula expression:\t{function}")
             raise ValueError("Invalid formula expression")
-        return stack[0] if len(stack) == 1 else wrapper_function(Field("A"))
+        return (
+            (stack[0], denominators)
+            if len(stack) == 1
+            else (wrapper_function(Field("A")), denominators)
+        )

@@ -69,9 +69,14 @@ class Metrics(EventsBase):
                 if end_date:
                     inner_criterion.append(fn.Date(Field("date")) <= fn.Date(end_date))
             innerquery = innerquery.where(Criterion.all(inner_criterion))
+        select_expression, denominators = parser.parse(function, fn.Sum)
+        having_clause = []
+        for denominator in denominators:
+            having_clause.append(denominator != 0)
         query = (
             ClickHouseQuery.from_(innerquery.as_("innerquery"))
-            .select(Parameter("date"), parser.parse(function, fn.Sum))
+            .select(Parameter("date"), select_expression)
             .groupby(Parameter("date"))
+            .having(Criterion.all(having_clause))
         )
         return query.get_sql(), {"ds_id": datasource_id}
