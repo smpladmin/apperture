@@ -53,13 +53,13 @@ async def compute_transient_funnel(
     return await funnel_service.compute_funnel(ds_id=dto.datasourceId, steps=dto.steps)
 
 
-@router.get("/funnels/{id}", response_model=ComputedFunnelResponse)
+@router.get("/funnels/{id}", response_model=FunnelResponse)
 async def get_computed_funnel(
     id: str,
     funnel_service: FunnelsService = Depends(),
 ):
     funnel = await funnel_service.get_funnel(id)
-    return await funnel_service.get_computed_funnel(funnel=funnel)
+    return funnel
 
 
 @router.put("/funnels/{id}", response_model=FunnelResponse)

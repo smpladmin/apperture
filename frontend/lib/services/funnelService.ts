@@ -42,24 +42,11 @@ export const getTransientFunnelData = async (
   }
 };
 
-export const _getComputedFunnelData = async (
-  token: string,
-  funnelId: string
-) => {
+export const _getSavedFunnel = async (token: string, funnelId: string) => {
   try {
     const res = await ApperturePrivateAPI.get(`/funnels/${funnelId}`, {
       headers: { Authorization: token },
     });
-    return res.data;
-  } catch (e) {
-    console.error((e as AxiosError).message);
-    return [];
-  }
-};
-
-export const getComputedFunnelData = async (funnelId: string) => {
-  try {
-    const res = await AppertureAPI.get(`/funnels/${funnelId}`);
     return res.data;
   } catch (e) {
     console.error((e as AxiosError).message);
@@ -85,31 +72,6 @@ export const updateFunnel = async (
   } catch (e) {
     console.error((e as AxiosError).message);
     return {} as any;
-  }
-};
-
-export const _getComputedTrendsData = async (
-  token: string,
-  funnelId: string
-) => {
-  try {
-    const res = await ApperturePrivateAPI.get(`/funnels/${funnelId}/trends`, {
-      headers: { Authorization: token },
-    });
-    return res.data;
-  } catch (e) {
-    console.error((e as AxiosError).message);
-    return [];
-  }
-};
-
-export const getComputedTrendsData = async (funnelId: string) => {
-  try {
-    const res = await AppertureAPI.get(`/funnels/${funnelId}/trends`);
-    return res.data;
-  } catch (e) {
-    console.error((e as AxiosError).message);
-    return [];
   }
 };
 

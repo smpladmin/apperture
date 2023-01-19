@@ -46,9 +46,11 @@ const RightView = ({
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
 
   const funnelConversion =
-    computedFunnel?.[computedFunnel?.length - 1]?.['conversion'];
+    computedFunnel?.[computedFunnel?.length - 1]?.['conversion'] || 0;
+
   const funnelLastStepUsers =
-    computedFunnel?.[computedFunnel?.length - 1]?.['users'];
+    computedFunnel?.[computedFunnel?.length - 1]?.['users'] || 0;
+
   const handleChartClick = async (properties: any) => {
     onDrawerOpen();
     const { data } = properties.data;
@@ -65,6 +67,7 @@ const RightView = ({
       event: event.trim(),
     });
   };
+
   return (
     <ViewPanel>
       <Flex
