@@ -12,6 +12,7 @@ import {
   isEveryNonEmptyStepValid,
   transformFunnelData,
   isEveryFunnelStepFiltersValid,
+  replaceFilterValueWithEmptyStringPlaceholder,
 } from '../util';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import Funnel from './index';
@@ -42,6 +43,9 @@ describe('create funnel', () => {
   let mockUpdateFunnel: jest.Mock;
   let mockedGetEventProperties: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
+  let mockedComputedFunnel: jest.Mock;
+  let mockedComputedTrendsData: jest.Mock;
+  let mockedReplaceFilterValueWithEmptyStringPlaceholder: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -57,34 +61,33 @@ describe('create funnel', () => {
     ['Bengaluru'],
   ];
 
-  const renderCreateFunnel = async (
-    router = createMockRouter({ query: { dsId: '654212033222' } }),
-    props = {}
-  ) => {
-    await act(async () => {
-      render(
-        <RouterContext.Provider value={router}>
-          <MapContext.Provider
-            value={{
-              state: {
-                nodes: [
-                  { id: 'Video_Click', label: 'Video_Click' },
-                  { id: 'Chapter_Click', label: 'Video_Click' },
-                  { id: 'Topic_Click', label: 'Video_Click' },
-                ] as NodeType[],
-                nodesData: [],
-                activeNode: null,
-                isNodeSearched: false,
-              },
-              dispatch: () => {},
-            }}
-          >
-            <Funnel {...props} />
-          </MapContext.Provider>
-        </RouterContext.Provider>
-      );
-    });
+  const computedFunnel = {
+    _id: '64834034092324',
+    appId: '645439584475',
+    datasourceId: '654212033222',
+    name: 'Test Funnel',
+    steps: [
+      { event: 'Video_Click', filters: [] },
+      { event: 'Chapter_Click', filters: [] },
+      { event: 'Topic_Click', filters: [] },
+    ],
+    computedFunnel: [
+      { step: 1, event: 'Video_Click', users: 2000, conversion: 100, drop: 0 },
+      { step: 2, event: 'Chapter_Click', users: 950, conversion: 75, drop: 25 },
+      { step: 3, event: 'Topic_Click', users: 750, conversion: 50, drop: 25 },
+    ],
+    randomSequence: false,
   };
+
+  const computedTrendsData = [
+    {
+      conversion: 23.1,
+      startDate: new Date('2022-10-11'),
+      endDate: new Date('2022-10-17'),
+      firstStepUsers: 49,
+      lastStepUsers: 8,
+    },
+  ];
 
   const getEventFilterText = (eventFilters: HTMLElement[], index: number) => {
     return Array.from(eventFilters[index].getElementsByTagName('p')).map(
@@ -126,6 +129,37 @@ describe('create funnel', () => {
     });
   };
 
+  const renderCreateFunnel = async (
+    router = createMockRouter({
+      pathname: '/analytics/funnel/create',
+      query: { dsId: '654212033222' },
+    })
+  ) => {
+    await act(async () => {
+      render(
+        <RouterContext.Provider value={router}>
+          <MapContext.Provider
+            value={{
+              state: {
+                nodes: [
+                  { id: 'Video_Click', label: 'Video_Click' },
+                  { id: 'Chapter_Click', label: 'Video_Click' },
+                  { id: 'Topic_Click', label: 'Video_Click' },
+                ] as NodeType[],
+                nodesData: [],
+                activeNode: null,
+                isNodeSearched: false,
+              },
+              dispatch: () => {},
+            }}
+          >
+            <Funnel />
+          </MapContext.Provider>
+        </RouterContext.Provider>
+      );
+    });
+  };
+
   beforeEach(() => {
     mockedGetCountOfValidAddedSteps = jest.mocked(getCountOfValidAddedSteps);
     mockedIsEveryStepValid = jest.mocked(isEveryStepValid);
@@ -141,6 +175,11 @@ describe('create funnel', () => {
     mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
     mockedIsEveryFunnelStepFiltersValid = jest.mocked(
       isEveryFunnelStepFiltersValid
+    );
+    mockedComputedFunnel = jest.mocked(APIService.getComputedFunnelData);
+    mockedComputedTrendsData = jest.mocked(APIService.getComputedTrendsData);
+    mockedReplaceFilterValueWithEmptyStringPlaceholder = jest.mocked(
+      replaceFilterValueWithEmptyStringPlaceholder
     );
 
     mockedGetCountOfValidAddedSteps.mockReturnValue(2);
@@ -280,6 +319,12 @@ describe('create funnel', () => {
 
     it('should update the funnel when click on save button on edit page', async () => {
       mockedSearchResult.mockReturnValue([{ id: 'Chapter_Click' }]);
+      mockedComputedFunnel.mockReturnValue(computedFunnel);
+      mockedComputedTrendsData.mockReturnValue(computedTrendsData);
+      mockedReplaceFilterValueWithEmptyStringPlaceholder.mockReturnValue(
+        computedFunnel.steps
+      );
+
       mockUpdateFunnel.mockReturnValue({
         status: 200,
         datasourceId: '654212033222',
@@ -380,26 +425,22 @@ describe('create funnel', () => {
   });
 
   describe('edit funnel flow - when props are passed to component', () => {
-    const props = {
-      name: 'Test Funnel',
-      steps: [
-        { event: 'Video_Open', filters: [] },
-        { event: 'Video_Seen', filters: [] },
-        { event: 'Video_Download', filters: [] },
-      ],
-    };
-
     it('should render prefil funnel name with passed prop name and have input fields equal to steps length passed in props', async () => {
+      mockedComputedFunnel.mockReturnValue(computedFunnel);
+      mockedComputedTrendsData.mockReturnValue(computedTrendsData);
+      mockedReplaceFilterValueWithEmptyStringPlaceholder.mockReturnValue(
+        computedFunnel.steps
+      );
       const router = createMockRouter({
         query: { funnelid: '64349843748', dsId: '654212033222' },
         pathname: '/analytics/funnel/edit',
       });
-      await renderCreateFunnel(router, props);
+      await renderCreateFunnel(router);
       const funnelName = screen.getByTestId('funnel-name');
       const funnelSteps = screen.getAllByTestId('funnel-step');
 
       expect(funnelName).toHaveDisplayValue('Test Funnel');
-      expect(funnelSteps.length).toEqual(props.steps.length);
+      expect(funnelSteps.length).toEqual(computedFunnel.steps.length);
     });
   });
 

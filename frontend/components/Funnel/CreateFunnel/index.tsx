@@ -48,7 +48,6 @@ const Funnel = () => {
 
   useEffect(() => {
     if (pathname.includes('/analytics/funnel/create')) return;
-    console.log('fetch');
 
     const fetchComputedData = async () => {
       const [computedFunnelData, computedTrendsData] = await Promise.all([
@@ -68,9 +67,7 @@ const Funnel = () => {
     setIsStepsLoadingOnEdit(true);
 
     fetchComputedData();
-  }, []);
-
-  useEffect(() => {});
+  }, [funnelId]);
 
   useEffect(() => {
     if (getCountOfValidAddedSteps(funnelSteps, nodes) >= 2) {
