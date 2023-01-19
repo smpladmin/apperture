@@ -8,7 +8,7 @@ from domain.segments.models import (
 )
 from pypika import Table
 from domain.funnels.models import FunnelStep
-from repositories.clickhouse.funnels import Funnels
+from repositories.clickhouse.funnels import Funnels, ConversionStatus
 
 
 class TestFunnelsRepository:
@@ -77,24 +77,7 @@ class TestFunnelsRepository:
         )
         self.table = Table("events")
 
-        self.analytics_query = (
-            'WITH table1 AS (SELECT "user_id",MIN("timestamp") AS "ts" FROM "events" '
-            'WHERE "datasource_id"=%(ds_id)s AND "event_name"=%(event0)s GROUP BY 1) '
-            ',table2 AS (SELECT "user_id",MIN("timestamp") AS "ts" FROM "events" WHERE '
-            '"datasource_id"=%(ds_id)s AND "event_name"=%(event1)s GROUP BY 1) ,table3 AS '
-            '(SELECT "user_id",MIN("timestamp") AS "ts" FROM "events" WHERE '
-            '"datasource_id"=%(ds_id)s AND "event_name"=%(event2)s AND "properties.prop1" '
-            'IN (10) GROUP BY 1) ,final_table AS (SELECT "table1"."user_id" AS "0",CASE '
-            'WHEN EXTRACT(YEAR FROM "table1"."ts")>%(epoch_year)s AND '
-            '"table2"."ts">"table1"."ts" THEN "table2"."user_id" ELSE NULL END AS '
-            '"1",CASE WHEN EXTRACT(YEAR FROM "table2"."ts")>%(epoch_year)s AND '
-            '"table3"."ts">"table2"."ts" AND "table2"."ts">"table1"."ts" THEN '
-            '"table3"."user_id" ELSE NULL END AS "2" FROM table1 LEFT JOIN table2 ON '
-            '"table1"."user_id"="table2"."user_id" LEFT JOIN table3 ON '
-            '"table1"."user_id"="table3"."user_id") SELECT "1",CASE WHEN "2"<>\'null\' '
-            "THEN 'converted' ELSE 'dropped' END AS \"2\" FROM final_table WHERE "
-            "\"1\"<>'null' ORDER BY 2"
-        )
+        self.analytics_query = 'WITH table1 AS (SELECT "user_id",MIN("timestamp") AS "ts" FROM "events" WHERE "datasource_id"=%(ds_id)s AND "event_name"=%(event0)s GROUP BY 1) ,table2 AS (SELECT "user_id",MIN("timestamp") AS "ts" FROM "events" WHERE "datasource_id"=%(ds_id)s AND "event_name"=%(event1)s GROUP BY 1) ,table3 AS (SELECT "user_id",MIN("timestamp") AS "ts" FROM "events" WHERE "datasource_id"=%(ds_id)s AND "event_name"=%(event2)s AND "properties.prop1" IN (10) GROUP BY 1) ,final_table AS (SELECT "table1"."user_id" AS "0",CASE WHEN EXTRACT(YEAR FROM "table1"."ts")>%(epoch_year)s AND "table2"."ts">"table1"."ts" THEN "table2"."user_id" ELSE NULL END AS "1",CASE WHEN EXTRACT(YEAR FROM "table2"."ts")>%(epoch_year)s AND "table3"."ts">"table2"."ts" AND "table2"."ts">"table1"."ts" THEN "table3"."user_id" ELSE NULL END AS "2" FROM table1 LEFT JOIN table2 ON "table1"."user_id"="table2"."user_id" LEFT JOIN table3 ON "table1"."user_id"="table3"."user_id") SELECT "1",(SELECT COUNT("1"),COUNT(DISTINCT "1") FROM final_table WHERE NOT "2" IS NULL) FROM final_table WHERE NOT "2" IS NULL AND NOT "1" IS NULL LIMIT 100'
 
     def test_get_users_count(self):
         self.repo.get_users_count(ds_id=self.datasource_id, steps=self.steps)
@@ -125,10 +108,10 @@ class TestFunnelsRepository:
         )
 
     def test_build_analytics_query(self):
-        query, parameter, last, second_last = self.repo.build_analytics_query(
-            ds_id=self.datasource_id, steps=self.steps
+        query, parameter = self.repo.build_analytics_query(
+            ds_id=self.datasource_id,
+            steps=self.steps,
+            status=ConversionStatus.CONVERTED,
         )
-        assert query.get_sql() == self.analytics_query
         assert parameter == self.parameters
-        assert last == 2
-        assert second_last == 1
+        assert query.get_sql() == self.analytics_query

@@ -17,7 +17,6 @@ import FunnelChart from '../components/FunnelChart';
 import Trend from '../components/Trend';
 import Loader from '@components/LoadingSpinner';
 import UserConversionDrawer from '../components/UserCoversionDrawer';
-import { getConversionData } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 
 type TransientFunnelViewProps = {
@@ -40,11 +39,10 @@ const TransientFunnelView = ({
   } = useDisclosure();
   const router = useRouter();
   const { dsId } = router.query;
-
-  const [conversionData, setConversionData] =
-    useState<FunnelEventConversion | null>(null);
-
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  const [selectedFunnelSteps, setSelectedFunnelSteps] = useState<FunnelStep[]>(
+    []
+  );
 
   const funnelConversion =
     funnelData?.[funnelData.length - 1]?.['conversion'] || 0;
@@ -57,14 +55,7 @@ const TransientFunnelView = ({
     const { step, event } = data;
     setSelectedEvent(event.trim());
     const selectedSteps = funnelSteps.slice(0, step);
-    const conversionAnalysisData: FunnelEventConversion =
-      await getConversionData(dsId as string, selectedSteps);
-    setConversionData({
-      converted: conversionAnalysisData.converted,
-      dropped: conversionAnalysisData.dropped,
-      step,
-      event: event.trim(),
-    });
+    setSelectedFunnelSteps(selectedSteps); 
   };
 
   return (
@@ -164,9 +155,9 @@ const TransientFunnelView = ({
       <UserConversionDrawer
         isOpen={isDrawerOpen}
         onClose={onDrawerClose}
-        conversionData={conversionData}
         datasourceId={dsId as string}
         event={selectedEvent as string}
+        selectedFunnelSteps={selectedFunnelSteps}
       />
     </Flex>
   );

@@ -66,13 +66,13 @@ export type FunnelEventUserData = {
 
 export type FunnelConversionData = {
   users: FunnelEventUserData[];
-  total_users: number;
-  unique_users: number;
+  totalUsers: number;
+  uniqueUsers: number;
 };
 
 export type FunnelEventConversion = {
-  converted: FunnelConversionData;
-  dropped: FunnelConversionData;
+  converted?: FunnelConversionData;
+  dropped?: FunnelConversionData;
   step: number;
   event: string;
 };
@@ -81,3 +81,8 @@ export type UserProperty = {
   Property: string;
   Value: string;
 };
+
+export enum ConversionStatus {
+  CONVERTED = 'converted',
+  DROPPED = 'dropped',
+}

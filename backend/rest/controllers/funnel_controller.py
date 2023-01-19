@@ -4,6 +4,7 @@ from typing import List
 from domain.funnels.service import FunnelsService
 from domain.apps.service import AppService
 from domain.apperture_users.models import AppertureUser
+from domain.funnels.models import ConversionStatus
 from domain.datasources.service import DataSourceService
 from rest.dtos.funnels import (
     FunnelResponse,
@@ -11,8 +12,16 @@ from rest.dtos.funnels import (
     ComputedFunnelResponse,
     FunnelWithUser,
     FunnelConversionResponseBody,
+    CreateFunnelDto,
+    TransientFunnelDto,
+    FunnelTrendResponse,
 )
-from rest.dtos.funnels import CreateFunnelDto, TransientFunnelDto, FunnelTrendResponse
+from rest.dtos.funnels import (
+    CreateFunnelDto,
+    TransientFunnelDto,
+    FunnelTrendResponse,
+    TransientFunnelConversionlDto,
+)
 from rest.dtos.appperture_users import AppertureUserResponse
 from rest.middlewares import validate_jwt, get_user_id, get_user
 
@@ -108,11 +117,11 @@ async def get_transient_funnel_trends(
     "/funnels/analytics/transient", response_model=FunnelConversionResponseBody
 )
 async def get_transient_funnel_analytics(
-    dto: TransientFunnelDto,
+    dto: TransientFunnelConversionlDto,
     funnel_service: FunnelsService = Depends(),
 ):
     return await funnel_service.get_user_conversion(
-        datasource_id=dto.datasourceId, steps=dto.steps
+        datasource_id=dto.datasourceId, steps=dto.steps, status=dto.status
     )
 
 
