@@ -14,16 +14,15 @@ import {
   Box,
 } from '@chakra-ui/react';
 import UserTableView from './UserListTableView';
-import { FunnelEventConversion, UserProperty } from '@lib/domain/funnel';
+import { FunnelStep, UserProperty } from '@lib/domain/funnel';
 import { getUserProperty } from '@lib/services/funnelService';
-import UserPropertyTable from './UserPropertyTable';
 
 type UserConversionDrawerProps = {
   isOpen: boolean;
   onClose: () => void;
-  conversionData: FunnelEventConversion | null;
   datasourceId: string;
   event: string;
+  selectedFunnelSteps: FunnelStep[];
 };
 
 export enum TableState {
@@ -34,9 +33,9 @@ export enum TableState {
 const UserConversionDrawer = ({
   isOpen,
   onClose,
-  conversionData,
   datasourceId,
   event,
+  selectedFunnelSteps,
 }: UserConversionDrawerProps) => {
   const [tableState, setTableState] = useState<TableState>(TableState.PROPERTY);
   const [selectedUser, setSelectedUser] = useState<null | string>(null);
@@ -88,11 +87,9 @@ const UserConversionDrawer = ({
         />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader>
+          <DrawerHeader paddingRight={10}>
             {tableState == TableState.LIST ? (
-              conversionData ? (
-                `Step ${conversionData.step} - ${conversionData.event}`
-              ) : null
+              `Step ${event}`
             ) : (
               <Flex direction={'column'}>
                 <Box>
@@ -108,6 +105,8 @@ const UserConversionDrawer = ({
                     border={'1px solid #EDEDED'}
                     onClick={() => {
                       setTableState(TableState.LIST);
+                      setUserProperty(null);
+                      setSelectedUser(null);
                     }}
                   />
                 </Box>
@@ -119,20 +118,14 @@ const UserConversionDrawer = ({
           </DrawerHeader>
 
           <DrawerBody p={0} overflow={'hidden'} maxH={'full'}>
-            {tableState == TableState.LIST
-              ? conversionData?.converted &&
-                conversionData?.dropped && (
-                  <UserTableView
-                    converted={conversionData.converted}
-                    dropped={conversionData.dropped}
-                    setSelectedUser={setSelectedUser}
-                  />
-                )
-              : userProperty && (
-                  <UserPropertyTable
-                    properties={userProperty as UserProperty[]}
-                  />
-                )}
+            <UserTableView
+              dsId={datasourceId}
+              steps={selectedFunnelSteps}
+              setSelectedUser={setSelectedUser}
+              properties={userProperty as UserProperty[]}
+              tableState={tableState}
+              setTableState={setTableState}
+            />
           </DrawerBody>
 
           <DrawerFooter>

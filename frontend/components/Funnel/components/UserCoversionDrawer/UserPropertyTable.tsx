@@ -74,6 +74,7 @@ const UserPropertyTable = ({ properties }: UserPropertyTableProps) => {
         fontSize={'12px'}
         fontStyle={'italic'}
         color={'grey.100'}
+        w="full"
       >
         No data available
       </Text>
@@ -87,7 +88,6 @@ const UserPropertyTable = ({ properties }: UserPropertyTableProps) => {
         border={'0.4px solid #b2b2b5'}
         borderRadius={'8px'}
         maxH={'full'}
-        margin={6}
       >
         <Table>
           <Thead position={'sticky'} top={0} py={'3'} px={'8'} bg={'#f5f5f9'}>

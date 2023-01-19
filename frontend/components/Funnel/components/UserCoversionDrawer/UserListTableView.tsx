@@ -7,64 +7,140 @@ import {
   TabPanel,
   Text,
 } from '@chakra-ui/react';
-import { FunnelConversionData } from '@lib/domain/funnel';
-import React from 'react';
+import {
+  ConversionStatus,
+  FunnelConversionData,
+  FunnelStep,
+  UserProperty,
+} from '@lib/domain/funnel';
+import { getConversionData } from '@lib/services/funnelService';
+import React, { useEffect, useState } from 'react';
+import { TableState } from '.';
+import SkeletonLoader from './SkeletonLoader';
 import UserListTable from './UserListTable';
+import UserPropertyTable from './UserPropertyTable';
 
 type UserTableViewProps = {
-  converted: FunnelConversionData;
-  dropped: FunnelConversionData;
   setSelectedUser: Function;
+  dsId: string;
+  steps: FunnelStep[];
+  tableState: TableState;
+  properties?: UserProperty[] | null;
+  setTableState: Function;
+};
+type FunnelEventConversion = {
+  converted?: FunnelConversionData;
+  dropped?: FunnelConversionData;
 };
 
 const UserTableView = ({
-  converted,
-  dropped,
+  dsId,
+  steps,
   setSelectedUser,
+  properties,
+  tableState,
+  setTableState,
 }: UserTableViewProps) => {
+  const [tabIndex, setTabIndex] = useState(0);
+  const [userData, setUserData] = useState<FunnelEventConversion>();
+  const [status, setStatus] = useState<ConversionStatus>(
+    ConversionStatus.CONVERTED
+  );
+
+  const handleTabChange = (tabIndex: number) => {
+    setTabIndex(tabIndex);
+  };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!userData?.dropped && status === ConversionStatus.DROPPED) {
+        const data = await getConversionData(dsId, steps, status);
+        setUserData({ ...userData, dropped: data });
+      } else if (
+        !userData?.converted &&
+        status === ConversionStatus.CONVERTED
+      ) {
+        const data = await getConversionData(dsId, steps, status);
+        setUserData({ ...userData, converted: data });
+      }
+    };
+    if (!userData?.converted || !userData?.dropped) {
+      fetchUserData();
+    }
+  }, [status]);
   const handleRowClick = (user: string) => {
+    setTabIndex(0);
     setSelectedUser(user);
   };
+
   return (
     <Flex w={'full'} maxH={'full'}>
-      <Tabs w={'full'} display={'flex'} flexDirection={'column'}>
+      <Tabs
+        index={tabIndex}
+        onChange={handleTabChange}
+        w={'full'}
+        display={'flex'}
+        flexDirection={'column'}
+      >
         <TabList>
           <Tab
             _selected={{ fontWeight: 600, borderBottom: '2px solid black' }}
             px={0}
             marginLeft={8}
             _active={{}}
+            onClick={() => setStatus(ConversionStatus.CONVERTED)}
           >
-            <Text>Converted</Text>
+            <Text>
+              {tableState == TableState.LIST ? 'Converted' : 'Property'}
+            </Text>
           </Tab>
 
-          <Tab
-            _selected={{ fontWeight: 600, borderBottom: '2px solid black' }}
-            px={0}
-            marginLeft={8}
-            _active={{}}
-          >
-            Dropped
-          </Tab>
+          {tableState == TableState.LIST ? (
+            <Tab
+              _selected={{ fontWeight: 600, borderBottom: '2px solid black' }}
+              px={0}
+              marginLeft={8}
+              _active={{}}
+              onClick={() => setStatus(ConversionStatus.DROPPED)}
+            >
+              Dropped
+            </Tab>
+          ) : null}
         </TabList>
 
         <TabPanels display={'flex'} maxH={'full'} flex={1} overflow={'hidden'}>
           <TabPanel display={'flex'} overflow={'hidden'} w={'full'}>
-            <UserListTable
-              handleRowClick={handleRowClick}
-              users={converted.users}
-              unique_users={converted.unique_users}
-              total_users={converted.total_users}
-            />
+            {tableState == TableState.LIST ? (
+              userData?.converted ? (
+                <UserListTable
+                  handleRowClick={handleRowClick}
+                  users={userData.converted.users}
+                  unique_users={userData.converted.uniqueUsers}
+                  total_users={userData.converted.totalUsers}
+                />
+              ) : (
+                <SkeletonLoader />
+              )
+            ) : properties ? (
+              <UserPropertyTable properties={properties as UserProperty[]} />
+            ) : (
+              <SkeletonLoader />
+            )}
           </TabPanel>
-          <TabPanel display={'flex'} overflow={'hidden'} w={'full'}>
-            <UserListTable
-              handleRowClick={handleRowClick}
-              users={dropped.users}
-              unique_users={dropped.unique_users}
-              total_users={dropped.total_users}
-            />
-          </TabPanel>
+          {tableState == TableState.LIST ? (
+            <TabPanel display={'flex'} overflow={'hidden'} w={'full'}>
+              {userData?.dropped ? (
+                <UserListTable
+                  handleRowClick={handleRowClick}
+                  users={userData.dropped.users}
+                  unique_users={userData.dropped.uniqueUsers}
+                  total_users={userData.dropped.totalUsers}
+                />
+              ) : (
+                <SkeletonLoader />
+              )}
+            </TabPanel>
+          ) : null}
         </TabPanels>
       </Tabs>
     </Flex>

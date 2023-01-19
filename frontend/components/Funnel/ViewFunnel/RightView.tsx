@@ -14,7 +14,6 @@ import {
   FunnelTrendsData,
   FunnelEventConversion,
 } from '@lib/domain/funnel';
-import { getConversionData } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import FunnelChart from '../components/FunnelChart';
@@ -41,6 +40,7 @@ const RightView = ({
     onOpen: onDrawerOpen,
     onClose: onDrawerClose,
   } = useDisclosure();
+  const [dataSource, setDataSource] = useState(dsId || datasourceId);
   const [conversionData, setConversionData] =
     useState<FunnelEventConversion | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
@@ -51,21 +51,17 @@ const RightView = ({
   const funnelLastStepUsers =
     computedFunnel?.[computedFunnel?.length - 1]?.['users'] || 0;
 
+  const [selectedFunnelSteps, setSelectedFunnelSteps] = useState<FunnelStep[]>(
+    []
+  );
+
   const handleChartClick = async (properties: any) => {
     onDrawerOpen();
     const { data } = properties.data;
     const { step, event } = data;
     setSelectedEvent(event.trim());
-
     const selectedSteps = funnelSteps.slice(0, step);
-    const conversionAnalysisData: FunnelEventConversion =
-      await getConversionData(datasourceId as string, selectedSteps);
-    setConversionData({
-      converted: conversionAnalysisData.converted,
-      dropped: conversionAnalysisData.dropped,
-      step,
-      event: event.trim(),
-    });
+    setSelectedFunnelSteps(selectedSteps);
   };
 
   return (
@@ -177,9 +173,9 @@ const RightView = ({
       <UserConversionDrawer
         isOpen={isDrawerOpen}
         onClose={onDrawerClose}
-        conversionData={conversionData}
-        datasourceId={datasourceId}
+        datasourceId={dataSource as string}
         event={selectedEvent as string}
+        selectedFunnelSteps={selectedFunnelSteps}
       />
     </ViewPanel>
   );
