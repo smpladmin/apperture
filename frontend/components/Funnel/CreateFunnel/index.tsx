@@ -14,47 +14,60 @@ import {
   isEveryFunnelStepFiltersValid,
 } from '../util';
 import {
+  getComputedFunnelData,
+  getComputedTrendsData,
   getTransientFunnelData,
   getTransientTrendsData,
 } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
+import LoadingSpinner from '@components/LoadingSpinner';
+import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel/util';
 
-type FunnelProps = {
-  name?: string;
-  steps?: FunnelStep[];
-  computedFunnel?: FunnelData[];
-  computedTrendsData?: FunnelTrendsData[];
-};
-
-const Funnel = ({
-  name,
-  steps,
-  computedFunnel,
-  computedTrendsData,
-}: FunnelProps) => {
+const Funnel = () => {
   const {
     state: { nodes },
   } = useContext(MapContext);
 
   const router = useRouter();
-  const { dsId } = router.query;
+  const {
+    query: { dsId, funnelId },
+    pathname,
+  } = router;
 
-  const [funnelName, setFunnelName] = useState(name || 'Untitled Funnel');
-  const [funnelSteps, setFunnelSteps] = useState(
-    steps || [
-      { event: '', filters: [] },
-      { event: '', filters: [] },
-    ]
-  );
-  const [funnelData, setFunnelData] = useState<FunnelData[]>(
-    computedFunnel || []
-  );
-  const [trendsData, setTrendsData] = useState<FunnelTrendsData[]>(
-    computedTrendsData || []
-  );
+  const [funnelName, setFunnelName] = useState<string>('Untitled Funnel');
+  const [funnelSteps, setFunnelSteps] = useState<FunnelStep[]>([
+    { event: '', filters: [] },
+    { event: '', filters: [] },
+  ]);
+  const [funnelData, setFunnelData] = useState<FunnelData[]>([]);
+  const [trendsData, setTrendsData] = useState<FunnelTrendsData[]>([]);
   const [isEmpty, setIsEmpty] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isStepAdded, setIsStepAdded] = useState(false);
+  const [isStepsLoadingOnEdit, setIsStepsLoadingOnEdit] = useState(false);
+
+  useEffect(() => {
+    if (pathname.includes('/analytics/funnel/create')) return;
+
+    const fetchComputedData = async () => {
+      const [computedFunnelData, computedTrendsData] = await Promise.all([
+        getComputedFunnelData(funnelId as string),
+        getComputedTrendsData(funnelId as string),
+      ]);
+      setFunnelName(computedFunnelData.name);
+      setFunnelSteps(
+        replaceFilterValueWithEmptyStringPlaceholder(computedFunnelData.steps)
+      );
+      setFunnelData(computedFunnelData.computedFunnel);
+      setTrendsData(computedTrendsData);
+      setIsLoading(false);
+      setIsStepsLoadingOnEdit(false);
+    };
+    setIsLoading(true);
+    setIsStepsLoadingOnEdit(true);
+
+    fetchComputedData();
+  }, [funnelId]);
 
   useEffect(() => {
     if (getCountOfValidAddedSteps(funnelSteps, nodes) >= 2) {
@@ -89,13 +102,19 @@ const Funnel = ({
   return (
     <Flex direction={{ base: 'column', md: 'row' }} h={'full'}>
       <ActionPanel>
-        <CreateFunnelAction
-          funnelName={funnelName}
-          setFunnelName={setFunnelName}
-          funnelSteps={funnelSteps}
-          setFunnelSteps={setFunnelSteps}
-          setIsStepAdded={setIsStepAdded}
-        />
+        {isStepsLoadingOnEdit ? (
+          <Flex h={'80'} justifyContent={'center'} alignItems={'center'}>
+            <LoadingSpinner />
+          </Flex>
+        ) : (
+          <CreateFunnelAction
+            funnelName={funnelName}
+            setFunnelName={setFunnelName}
+            funnelSteps={funnelSteps}
+            setFunnelSteps={setFunnelSteps}
+            setIsStepAdded={setIsStepAdded}
+          />
+        )}
       </ActionPanel>
       <ViewPanel>
         {isEmpty ? (

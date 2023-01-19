@@ -2,22 +2,15 @@ import Funnel from '@components/Funnel/CreateFunnel';
 import Layout from '@components/Layout';
 import { MapContext } from '@lib/contexts/mapContext';
 import { AppWithIntegrations } from '@lib/domain/app';
-import {
-  ComputedFunnel,
-  FunnelStep,
-  FunnelTrendsData,
-} from '@lib/domain/funnel';
 import { Node } from '@lib/domain/node';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
-import { _getEdges, _getNodes } from '@lib/services/datasourceService';
+import { _getNodes } from '@lib/services/datasourceService';
 import {
   _getComputedFunnelData,
   _getComputedTrendsData,
 } from '@lib/services/funnelService';
 import { Actions } from '@lib/types/context';
-import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel/util';
 import { getAuthToken } from '@lib/utils/request';
-import { cloneDeep } from 'lodash';
 import { GetServerSideProps } from 'next';
 import { ReactElement, useContext, useEffect } from 'react';
 
@@ -31,14 +24,9 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
-  const { funnelId } = query;
+
   const apps = await _getAppsWithIntegrations(token);
   const nodes = await _getNodes(token, query.dsId as string);
-
-  const [computedFunnelData, computedTrendsData] = await Promise.all([
-    _getComputedFunnelData(token, funnelId as string),
-    _getComputedTrendsData(token, funnelId as string),
-  ]);
 
   if (!apps.length) {
     return {
@@ -49,19 +37,11 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
   return {
-    props: { nodes, apps, computedFunnelData, computedTrendsData },
+    props: { apps, nodes },
   };
 };
 
-const EditFunnel = ({
-  nodes,
-  computedFunnelData,
-  computedTrendsData,
-}: {
-  nodes: Node[];
-  computedFunnelData: ComputedFunnel;
-  computedTrendsData: FunnelTrendsData[];
-}) => {
+const EditFunnel = ({ nodes }: { nodes: Node[] }) => {
   const { dispatch } = useContext(MapContext);
 
   useEffect(() => {
@@ -71,16 +51,7 @@ const EditFunnel = ({
     });
   }, []);
 
-  const transformSavedFunnelSteps =
-    replaceFilterValueWithEmptyStringPlaceholder(
-      cloneDeep(computedFunnelData.steps as FunnelStep[])
-    );
-
-  const transformedComputedFunnel = {
-    ...computedFunnelData,
-    steps: transformSavedFunnelSteps,
-  };
-  return <Funnel {...{ ...transformedComputedFunnel, computedTrendsData }} />;
+  return <Funnel />;
 };
 
 EditFunnel.getLayout = function getLayout(

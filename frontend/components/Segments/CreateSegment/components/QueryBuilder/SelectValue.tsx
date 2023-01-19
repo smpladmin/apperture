@@ -116,6 +116,7 @@ const SelectValue = ({
         cursor={'pointer'}
         onClick={() => setIsFilterValuesListOpen(true)}
         data-testid={'event-property-value'}
+        maxW={'150'}
       >
         {getValuesText(filter?.values)}
       </Text>
