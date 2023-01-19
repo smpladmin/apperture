@@ -150,7 +150,6 @@ export const getConversionData = async (
       steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
       status,
     });
-    console.log(res);
     return res.data;
   } catch (e) {
     console.error((e as AxiosError).message);
