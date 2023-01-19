@@ -1,4 +1,4 @@
-import { ComputedFunnel } from './funnel';
+import { Funnel } from './funnel';
 import { Metric } from './metric';
 import { Segment } from './segment';
 
@@ -24,5 +24,5 @@ export namespace WatchListItemType {
 
 export type SavedItems = {
   type: WatchListItemType;
-  details: ComputedFunnel | Segment | Metric;
+  details: Funnel | Segment | Metric;
 };
