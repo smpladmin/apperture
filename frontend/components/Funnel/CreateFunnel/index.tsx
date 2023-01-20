@@ -49,17 +49,22 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   );
   const [funnelData, setFunnelData] = useState<FunnelData[]>([]);
   const [trendsData, setTrendsData] = useState<FunnelTrendsData[]>([]);
-  const [isEmpty, setIsEmpty] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isEmpty, setIsEmpty] = useState(
+    savedFunnel?.steps?.length ? false : true
+  );
+  const [isLoading, setIsLoading] = useState(
+    Boolean(savedFunnel?.steps?.length)
+  );
   const [isStepAdded, setIsStepAdded] = useState(false);
 
   useEffect(() => {
+    console.log(funnelSteps, isLoading);
     if (getCountOfValidAddedSteps(funnelSteps) >= 2) {
       setIsEmpty(false);
     } else {
       setIsEmpty(true);
     }
-  }, [funnelSteps, nodes]);
+  }, [funnelSteps]);
 
   useEffect(() => {
     if (

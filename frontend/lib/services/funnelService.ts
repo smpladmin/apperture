@@ -1,8 +1,10 @@
-import { AppertureGet } from './util';
-import { ApperturePrivateAPI } from './../apiClient/client.server';
+import {
+  AppertureGet,
+  ApperturePrivateGet,
+  ApperturePost,
+  ApperturePut,
+} from './util';
 import { ConversionStatus, FunnelStep } from '@lib/domain/funnel';
-import { AxiosError } from 'axios';
-import { AppertureAPI } from '../apiClient';
 import { replaceEmptyStringPlaceholder } from '@components/Funnel/util';
 import cloneDeep from 'lodash/cloneDeep';
 
@@ -12,46 +14,13 @@ export const saveFunnel = async (
   steps: FunnelStep[],
   randomSequence: boolean
 ) => {
-  try {
-    const res = await AppertureAPI.post('/funnels', {
-      datasourceId: dsId,
-      name: funnelName,
-      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
-      randomSequence,
-    });
-    return res;
-  } catch (e) {
-    console.error((e as AxiosError).message);
-    return {} as any;
-  }
-};
-
-export const getTransientFunnelData = async (
-  dsId: string,
-  steps: FunnelStep[]
-) => {
-  try {
-    const res = await AppertureAPI.post('/funnels/transient', {
-      datasourceId: dsId,
-      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
-    });
-    return res.data;
-  } catch (e) {
-    console.error((e as AxiosError).message);
-    return [];
-  }
-};
-
-export const _getSavedFunnel = async (token: string, funnelId: string) => {
-  try {
-    const res = await ApperturePrivateAPI.get(`/funnels/${funnelId}`, {
-      headers: { Authorization: token },
-    });
-    return res.data;
-  } catch (e) {
-    console.error((e as AxiosError).message);
-    return [];
-  }
+  const res = await ApperturePost('/funnels', {
+    datasourceId: dsId,
+    name: funnelName,
+    steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+    randomSequence,
+  });
+  return res;
 };
 
 export const updateFunnel = async (
@@ -61,44 +30,45 @@ export const updateFunnel = async (
   steps: FunnelStep[],
   randomSequence: boolean
 ) => {
-  try {
-    const res = await AppertureAPI.put(`/funnels/${funnelId}`, {
-      datasourceId: dsId,
-      name: funnelName,
-      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
-      randomSequence,
-    });
-    return res;
-  } catch (e) {
-    console.error((e as AxiosError).message);
-    return {} as any;
-  }
+  const res = await ApperturePut(`/funnels/${funnelId}`, {
+    datasourceId: dsId,
+    name: funnelName,
+    steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+    randomSequence,
+  });
+  return res;
+};
+
+export const _getSavedFunnel = async (token: string, funnelId: string) => {
+  const res = await ApperturePrivateGet(`/funnels/${funnelId}`, token);
+  return res.data;
+};
+
+export const getTransientFunnelData = async (
+  dsId: string,
+  steps: FunnelStep[]
+) => {
+  const res = await ApperturePost('/funnels/transient', {
+    datasourceId: dsId,
+    steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+  });
+  return res.data || [];
 };
 
 export const getTransientTrendsData = async (
   dsId: string,
   steps: FunnelStep[]
 ) => {
-  try {
-    const res = await AppertureAPI.post('/funnels/trends/transient', {
-      datasourceId: dsId,
-      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
-    });
-    return res.data;
-  } catch (e) {
-    console.error((e as AxiosError).message);
-    return [];
-  }
+  const res = await ApperturePost('/funnels/trends/transient', {
+    datasourceId: dsId,
+    steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+  });
+  return res.data || [];
 };
 
 export const getSavedFunnelsForUser = async () => {
-  try {
-    const res = await AppertureAPI.get(`/funnels`);
-    return res.data;
-  } catch (e) {
-    console.error((e as AxiosError).message);
-    return [];
-  }
+  const res = await AppertureGet(`/funnels`);
+  return res.data;
 };
 
 export const getConversionData = async (
@@ -106,17 +76,12 @@ export const getConversionData = async (
   steps: FunnelStep[],
   status: ConversionStatus
 ) => {
-  try {
-    const res = await AppertureAPI.post('/funnels/analytics/transient', {
-      datasourceId: dsId,
-      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
-      status,
-    });
-    return res.data;
-  } catch (e) {
-    console.error((e as AxiosError).message);
-    return [];
-  }
+  const res = await ApperturePost('/funnels/analytics/transient', {
+    datasourceId: dsId,
+    steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+    status,
+  });
+  return res.data || [];
 };
 
 export const getUserProperty = async (

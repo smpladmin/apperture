@@ -37,6 +37,16 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
+
+  if (!savedFunnel) {
+    return {
+      redirect: {
+        destination: '/404',
+      },
+      props: {},
+    };
+  }
+
   return {
     props: { apps, nodes, savedFunnel },
   };

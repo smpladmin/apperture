@@ -14,7 +14,7 @@ const ViewFunnel = ({ savedFunnel }: { savedFunnel: Funnel }) => {
   const { dsId } = router.query;
 
   const datasourceId = (dsId as string) || savedFunnel.datasourceId;
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(Boolean(savedFunnel.steps.length));
   const [computedFunnelData, setComputedFunnelData] = useState<FunnelData[]>(
     []
   );
