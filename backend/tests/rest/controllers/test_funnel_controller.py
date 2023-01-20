@@ -23,8 +23,8 @@ def test_compute_transient_funnel(
     assert response.json() == computed_transient_funnel_response
 
 
-def test_get_computed_funnel(
-    client_init, computed_funnel_response, funnel_service, datasource_service, funnel_response
+def test_get_saved_funnel(
+    client_init, funnel_service, funnel_response
 ):
     response = client_init.get("/funnels/635ba034807ab86d8a2aadd8")
     assert response.status_code == 200
@@ -33,32 +33,6 @@ def test_get_computed_funnel(
     funnel_service.get_funnel.assert_called_once_with(
         "635ba034807ab86d8a2aadd8",
     )
-    # get_computed_funnel_kwargs = funnel_service.get_computed_funnel.call_args.kwargs
-    # funnel_service.get_computed_funnel.assert_called_once()
-
-    # assert {
-    #     "created_at": ANY,
-    #     "datasource_id": PydanticObjectId("635ba034807ab86d8a2aadd9"),
-    #     "id": PydanticObjectId("635ba034807ab86d8a2aadd8"),
-    #     "app_id": PydanticObjectId("635ba034807ab86d8a2aadd7"),
-    #     "name": "name",
-    #     "random_sequence": False,
-    #     "revision_id": ANY,
-    #     "steps": [
-    #         {
-    #             "event": "Login",
-    #             "filters": None,
-    #         },
-    #         {"event": "Chapter_Click", "filters": None},
-    #         {
-    #             "event": "Topic_Click",
-    #             "filters": None,
-    #         },
-    #     ],
-    #     "updated_at": None,
-    #     "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
-    # } == get_computed_funnel_kwargs["funnel"].dict()
-
 
 @pytest.mark.asyncio
 async def test_update_funnel(

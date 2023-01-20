@@ -63,12 +63,12 @@ async def compute_transient_funnel(
 
 
 @router.get("/funnels/{id}", response_model=FunnelResponse)
-async def get_computed_funnel(
+async def get_saved_funnel(
     id: str,
     funnel_service: FunnelsService = Depends(),
 ):
-    funnel = await funnel_service.get_funnel(id)
-    return funnel
+    return await funnel_service.get_funnel(id)
+    
 
 
 @router.put("/funnels/{id}", response_model=FunnelResponse)

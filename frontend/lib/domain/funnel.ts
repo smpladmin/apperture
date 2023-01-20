@@ -46,7 +46,7 @@ export type Funnel = {
   appId: string;
   name: string;
   updatedAt: Date;
-  user: User;
+  user?: User;
   steps: FunnelStep[];
   randomSequence: boolean;
 };
