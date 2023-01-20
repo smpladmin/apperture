@@ -28,14 +28,14 @@ const Watchlist = () => {
   };
 
   const getSegments = async () => {
-    const savedSegments = (await getSavedSegmentsForUser()) || [];
+    const savedSegments = await getSavedSegmentsForUser();
     return savedSegments.map((segment: Segment) => {
       return { type: WatchListItemType.SEGMENTS, details: segment };
     });
   };
 
   const getMetrics = async () => {
-    const savedMetrics = (await getSavedMetricsForUser()) || [];
+    const savedMetrics = await getSavedMetricsForUser();
     return savedMetrics.map((metric: Metric) => {
       return { type: WatchListItemType.METRICS, details: metric };
     });
