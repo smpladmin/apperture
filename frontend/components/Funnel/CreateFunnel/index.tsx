@@ -58,7 +58,6 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const [isStepAdded, setIsStepAdded] = useState(false);
 
   useEffect(() => {
-    console.log(funnelSteps, isLoading);
     if (getCountOfValidAddedSteps(funnelSteps) >= 2) {
       setIsEmpty(false);
     } else {
