@@ -2,7 +2,6 @@ import {
   fireEvent,
   render,
   screen,
-  waitFor,
   act,
 } from '@testing-library/react';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
@@ -13,7 +12,6 @@ import {
   getNodes,
 } from '@lib/services/datasourceService';
 import { computeMetric } from '@lib/services/metricService';
-import { getAppertureUserInfo } from '@lib/services/userService';
 import CreateMetric from './index';
 
 jest.mock('@lib/services/datasourceService');

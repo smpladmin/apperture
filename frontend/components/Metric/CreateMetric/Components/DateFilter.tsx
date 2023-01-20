@@ -6,8 +6,7 @@ import {
   DateRangeType,
 } from '@lib/domain/metric';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import React, { useEffect, useRef, useState } from 'react';
-import { DateRangeProps } from 'react-date-range';
+import React, { useRef, useState } from 'react';
 
 type DateFilterProps = {
   dateRange: DateRangeType | null;

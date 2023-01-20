@@ -1,6 +1,6 @@
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import MetricFilterComponent from './MetricFilterComponent';
 import MetricAddFilterComponent from './MetricAddFilterComponent';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';

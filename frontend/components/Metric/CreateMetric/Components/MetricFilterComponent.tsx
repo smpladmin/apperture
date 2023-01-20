@@ -4,7 +4,6 @@ import indent from '@assets/icons/indent.svg';
 import Image from 'next/image';
 import { getEventPropertiesValue } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
-import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import SearchableCheckboxDropdown from '@components/SearchableDropdown/SearchableCheckboxDropdown';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 

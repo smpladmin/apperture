@@ -2,7 +2,7 @@ import { Button, Flex } from '@chakra-ui/react';
 import React from 'react';
 import MetricEmptyState from './MetricEmptyState';
 import DateFilter from './DateFilter';
-import { DateRangeType, ComputedMetric, Metric } from '@lib/domain/metric';
+import { DateRangeType, ComputedMetric } from '@lib/domain/metric';
 import MetricTrend from './MetricTrend';
 
 type TransientMetricViewProps = {

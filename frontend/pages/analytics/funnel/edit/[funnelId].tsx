@@ -5,10 +5,8 @@ import { AppWithIntegrations } from '@lib/domain/app';
 import { Node } from '@lib/domain/node';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { _getNodes } from '@lib/services/datasourceService';
-import {
-  _getComputedFunnelData,
-  _getComputedTrendsData,
-} from '@lib/services/funnelService';
+
+
 import { Actions } from '@lib/types/context';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';

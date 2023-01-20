@@ -1,6 +1,5 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import Image from 'next/image';
-import EventIcon from '@assets/icons/arrow-left-up.svg';
 import FunnelIcon from '@assets/icons/funnel-filter.svg';
 import JourneyIcon from '@assets/icons/journey.svg';
 import { WatchListItemType } from '@lib/domain/watchlist';

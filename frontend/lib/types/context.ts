@@ -1,4 +1,4 @@
-import { INode, Item } from '@antv/g6';
+import { INode } from '@antv/g6';
 import { NodeType } from './graph';
 
 export type InitialStateType = {
