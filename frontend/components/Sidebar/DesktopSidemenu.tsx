@@ -100,7 +100,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           </Flex>
         </Flex>
       </Box>
-      <Text
+      {/* <Text
         fontSize={'xs-10'}
         lineHeight={'xs-10'}
         textColor={'white'}
@@ -109,10 +109,10 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
         paddingBottom={{ base: '4', md: 'auto' }}
       >
         EXPLORE
-      </Text>
+      </Text>  */}
 
       <Box>
-        <Flex direction={'column'} alignItems={'center'} gap={5} paddingTop={5}>
+        <Flex direction={'column'} alignItems={'center'} gap={5}>
           <Tooltip
             label={'Explore'}
             aria-label={'Explore'}

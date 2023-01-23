@@ -50,12 +50,12 @@ const DesktopHeader = ({
       <Flex w={'full'} alignItems={'center'} justifyContent={'space-between'}>
         <Search dataSourceType={dataSourceType!!} />
         <Flex alignItems={'center'} justifyContent={'space-between'} gap={6}>
-          <Box cursor={'not-allowed'}>
+          {/* <Box cursor={'not-allowed'}>
             <i className="ri-calendar-fill"></i>
           </Box>
           <Box cursor={'not-allowed'}>
             <Image src={filterIcon} alt="filter-icon" />
-          </Box>
+          </Box> */}
           <Box>
             <Menu>
               <MenuButton
