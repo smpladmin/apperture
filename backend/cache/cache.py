@@ -1,8 +1,12 @@
+import logging
 from typing import Optional
 from fastapi import Request, Response
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
+
+
+CACHE_EXPIRY_24_HOURS = 60 * 60 * 24
 
 
 def init_cache(redis_host: str, redis_password: str):
@@ -14,7 +18,7 @@ def init_cache(redis_host: str, redis_password: str):
     FastAPICache.init(RedisBackend(redis), prefix="apperture-cache")
 
 
-def datasource_edges_key_builder(
+def datasource_key_builder(
     func,
     namespace: Optional[str] = "",
     request: Request = None,
@@ -23,5 +27,7 @@ def datasource_edges_key_builder(
     **kwargs,
 ):
     prefix = FastAPICache.get_prefix()
-    cache_key = f"{prefix}:{namespace}:edges:{request.path_params['ds_id']}"
+    path_params = ":".join(request.path_params.values())
+    query_params = ":".join(request.query_params.values())
+    cache_key = f"{prefix}:{namespace}:{func.__name__}:{path_params}:{query_params}"
     return cache_key

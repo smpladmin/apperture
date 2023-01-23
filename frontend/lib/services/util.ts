@@ -4,10 +4,12 @@ import { AxiosError, AxiosRequestConfig } from 'axios';
 
 export const AppertureGet = async (
   path: string,
-  config?: AxiosRequestConfig
+  config: AxiosRequestConfig = {
+    headers: { 'cache-control': 'max-age', Pragma: 1 },
+  }
 ) => {
   try {
-    return await AppertureAPI.get(path, config || {});
+    return await AppertureAPI.get(path, config);
   } catch (e) {
     const error = e as AxiosError;
     console.error(error.message);
