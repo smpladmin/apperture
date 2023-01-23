@@ -1,3 +1,5 @@
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
 import pytest
 from unittest import mock
 from domain.apps.service import AppService
@@ -52,10 +54,11 @@ def app_init(
     app.dependency_overrides[PropertiesService] = lambda: properties_service
     app.dependency_overrides[MetricService] = lambda: metric_service
     app.dependency_overrides[UserService] = lambda: user_service
-
+    FastAPICache.init(backend=InMemoryBackend(), prefix="apperture-cache")
     yield app
 
     print("Tearing down app")
+    FastAPICache.reset()
     app.dependency_overrides = {}
 
 
