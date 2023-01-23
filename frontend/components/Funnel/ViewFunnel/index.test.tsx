@@ -9,14 +9,15 @@ import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from 'tests/util';
 import ViewFunnel from './index';
 import * as APIService from '@lib/services/funnelService';
+import { Funnel } from '@lib/domain/funnel';
 
 jest.mock('@lib/services/funnelService');
 
 describe('View Funnel', () => {
-  let mockedComputedFunnel: jest.Mock;
-  let mockedComputedTrendsData: jest.Mock;
+  let mockedTransientFunnel: jest.Mock;
+  let mockedTransientTrendsData: jest.Mock;
 
-  const computedFunnel = {
+  const props: Funnel = {
     _id: '64834034092324',
     appId: '645439584475',
     datasourceId: '654212033222',
@@ -26,52 +27,57 @@ describe('View Funnel', () => {
       { event: 'Chapter_Click', filters: [] },
       { event: 'Topic_Click', filters: [] },
     ],
-    computedFunnel: [
-      {
-        step: 1,
-        event: 'Video_Click',
-        users: 2000,
-        conversion: 100,
-        drop: 0,
-      },
-      {
-        step: 2,
-        event: 'Chapter_Click',
-        users: 950,
-        conversion: 75,
-        drop: 25,
-      },
-      { step: 3, event: 'Topic_Click', users: 750, conversion: 50, drop: 25 },
-    ],
+    updatedAt: new Date(),
     randomSequence: false,
   };
 
+  const funnelData = [
+    {
+      step: 1,
+      event: 'Video_Click',
+      users: 2000,
+      conversion: 100,
+      drop: 0,
+    },
+    {
+      step: 2,
+      event: 'Chapter_Click',
+      users: 950,
+      conversion: 75,
+      drop: 25,
+    },
+    { step: 3, event: 'Topic_Click', users: 750, conversion: 50, drop: 25 },
+  ];
+
+  const trendsData = [
+    {
+      conversion: 23.1,
+      startDate: new Date('2022-10-11'),
+      endDate: new Date('2022-10-17'),
+      firstStepUsers: 49,
+      lastStepUsers: 8,
+    },
+  ];
+
   const renderViewFunnel = async (
-    router = createMockRouter({ query: { funnelId: '64349843748' } })
+    router = createMockRouter({ query: { funnelId: '64349843748' } }),
+    savedFunnel = props
   ) => {
     await act(async () => {
       render(
         <RouterContext.Provider value={router}>
-          <ViewFunnel />
+          <ViewFunnel savedFunnel={savedFunnel} />
         </RouterContext.Provider>
       );
     });
   };
 
   beforeEach(() => {
-    mockedComputedFunnel = jest.mocked(APIService.getComputedFunnelData);
-    mockedComputedTrendsData = jest.mocked(APIService.getComputedTrendsData);
+    mockedTransientFunnel = jest.mocked(APIService.getTransientFunnelData);
+    mockedTransientTrendsData = jest.mocked(APIService.getTransientTrendsData);
 
-    mockedComputedFunnel.mockReturnValue(computedFunnel);
-    mockedComputedTrendsData.mockReturnValue([
-      {
-        conversion: 23.1,
-        startDate: new Date('2022-10-11'),
-        endDate: new Date('2022-10-17'),
-        firstStepUsers: 49,
-        lastStepUsers: 8,
-      },
-    ]);
+    mockedTransientFunnel.mockReturnValue(funnelData);
+    mockedTransientTrendsData.mockReturnValue(trendsData);
   });
 
   afterEach(() => {
@@ -89,20 +95,27 @@ describe('View Funnel', () => {
     expect(firstStepName.textContent).toEqual('Video_Click');
     expect(lastStepName.textContent).toEqual('Topic_Click');
     expect(intermediateSteps.textContent).toEqual(
-      `+${computedFunnel.steps.length - 2} Steps`
+      `+${props.steps.length - 2} Steps`
     );
   });
 
   it('should not render intermediate steps count text if steps count is 2', async () => {
-    mockedComputedFunnel.mockReturnValue({
-      ...computedFunnel,
+    const savedFunnel = {
+      _id: '64834034092324',
+      appId: '645439584475',
+      datasourceId: '654212033222',
+      name: 'Test Funnel',
       steps: [
         { event: 'Video_Click', filters: [] },
         { event: 'Chapter_Click', filters: [] },
       ],
-    });
-
-    await renderViewFunnel();
+      updatedAt: new Date(),
+      randomSequence: false,
+    };
+    await renderViewFunnel(
+      createMockRouter({ query: { funnelId: '64349843748' } }),
+      savedFunnel
+    );
     const intermediateSteps = screen.getByTestId('intermediate-steps');
     expect(intermediateSteps.textContent).toEqual('');
   });

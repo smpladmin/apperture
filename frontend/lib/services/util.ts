@@ -44,7 +44,9 @@ export const ApperturePost = async (
 
 export const ApperturePut = async (
   path: string,
-  payload: { [key: string]: string | number | Array<any> | object | null }
+  payload: {
+    [key: string]: string | number | boolean | Array<any> | object | null;
+  }
 ) => {
   try {
     return await AppertureAPI.put(path, payload);

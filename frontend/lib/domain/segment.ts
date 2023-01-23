@@ -77,7 +77,7 @@ export type Segment = {
   name: string;
   updatedAt: Date;
   userId: string;
-  user: AppertureUser;
+  user?: AppertureUser;
   _id: string;
 };
 

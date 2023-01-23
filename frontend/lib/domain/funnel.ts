@@ -40,16 +40,15 @@ export type FunnelData = {
   drop: number;
 };
 
-export type ComputedFunnel = {
+export type Funnel = {
   _id: string;
   datasourceId: string;
   appId: string;
   name: string;
   updatedAt: Date;
-  user: User;
+  user?: User;
   steps: FunnelStep[];
   randomSequence: boolean;
-  computedFunnel: FunnelData[];
 };
 
 export type FunnelTrendsData = {

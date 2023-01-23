@@ -61,7 +61,7 @@ const CreateFunnelAction = ({
 
   useEffect(() => {
     if (
-      getCountOfValidAddedSteps(funnelSteps, nodes) >= 2 &&
+      getCountOfValidAddedSteps(funnelSteps) >= 2 &&
       isEveryFunnelStepFiltersValid(funnelSteps)
     ) {
       setSaveButtonDisabled(false);

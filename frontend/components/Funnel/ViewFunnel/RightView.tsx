@@ -40,26 +40,30 @@ const RightView = ({
     onOpen: onDrawerOpen,
     onClose: onDrawerClose,
   } = useDisclosure();
-  const [dataSource, setDataSource] = useState(dsId||datasourceId)
+  const [dataSource, setDataSource] = useState(dsId || datasourceId);
   const [conversionData, setConversionData] =
     useState<FunnelEventConversion | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
 
   const funnelConversion =
-    computedFunnel?.[computedFunnel?.length - 1]?.['conversion'];
-  const funnelLastStepUsers = computedFunnel?.[computedFunnel?.length - 1]?.['users'];
+    computedFunnel?.[computedFunnel?.length - 1]?.['conversion'] || 0;
+
+  const funnelLastStepUsers =
+    computedFunnel?.[computedFunnel?.length - 1]?.['users'] || 0;
+
   const [selectedFunnelSteps, setSelectedFunnelSteps] = useState<FunnelStep[]>(
-      []
+    []
   );
-    
+
   const handleChartClick = async (properties: any) => {
     onDrawerOpen();
     const { data } = properties.data;
     const { step, event } = data;
     setSelectedEvent(event.trim());
     const selectedSteps = funnelSteps.slice(0, step);
-    setSelectedFunnelSteps(selectedSteps)
+    setSelectedFunnelSteps(selectedSteps);
   };
+
   return (
     <ViewPanel>
       <Flex
