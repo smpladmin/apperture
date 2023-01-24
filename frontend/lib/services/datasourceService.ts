@@ -126,3 +126,8 @@ export const getEventPropertiesValue = async (
     return [];
   }
 };
+
+export const getEvents = async (dsId: string) => {
+  const result = await AppertureGet(`/datasources/${dsId}/events`);
+  return result.data;
+};

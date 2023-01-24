@@ -40,6 +40,15 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
     });
   };
 
+  const handleRedirectToDataPage = () => {
+    if (path.includes('events')) return;
+
+    router.push({
+      pathname: '/analytics/data/[dsId]',
+      query: { dsId: dsId || previousDsId },
+    });
+  };
+
   return (
     <Flex
       height={'full'}
@@ -136,6 +145,31 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
                 backgroundColor: 'transparent',
               }}
               onClick={handleRedirectToExplorePage}
+            />
+          </Tooltip>
+          <Tooltip
+            label={'Data'}
+            aria-label={'Data'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Data"
+              icon={<i className={'ri-database-line'} />}
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={handleRedirectToDataPage}
             />
           </Tooltip>
 

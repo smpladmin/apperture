@@ -127,20 +127,23 @@ def test_get_event_properties(client_init, properties_service):
 def test_get_events(client_init, events_service):
     response = client_init.get("/datasources/637739d383ea7fda83e72a2d/events")
     assert response.status_code == 200
-    assert response.json() == [
-        {
-            "name": "Content_Like",
-            "provider": "mixpanel",
-            "timestamp": "2023-01-13T15:23:38",
-            "userId": "mthdas8@gmail.com",
-        },
-        {
-            "name": "WebView_Open",
-            "provider": "mixpanel",
-            "timestamp": "2023-01-13T15:23:41",
-            "userId": "mthdas8@gmail.com",
-        },
-    ]
+    assert response.json() == {
+        "count": 2,
+        "data": [
+            {
+                "name": "Content_Like",
+                "provider": "mixpanel",
+                "timestamp": "2023-01-13T15:23:38",
+                "user_id": "mthdas8@gmail.com",
+            },
+            {
+                "name": "WebView_Open",
+                "provider": "mixpanel",
+                "timestamp": "2023-01-13T15:23:41",
+                "user_id": "mthdas8@gmail.com",
+            },
+        ],
+    }
 
     events_service.get_events.assert_called_once_with(
         **{"datasource_id": "637739d383ea7fda83e72a2d"}

@@ -37,3 +37,9 @@ export type EventData = {
   sankeyData: SankeyData[];
   nodeSignificanceData: NodeSignificanceData[];
 };
+
+export enum SanityDataSource {
+  ALL = 'all',
+  BACKEND = 'backendCRM',
+  USERS = 'usersGoogleSheet',
+}

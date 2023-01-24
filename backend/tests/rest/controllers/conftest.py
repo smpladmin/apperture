@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 from domain.apps.models import App
 from domain.common.models import IntegrationProvider, SavedItems, WatchlistItemType
 from domain.datasources.models import DataSource, DataSourceVersion
-from domain.events.models import Event
+from domain.events.models import Event, EventsData
 from domain.properties.models import Properties, Property, PropertyDataType
 from domain.segments.models import (
     ComputedSegment,
@@ -233,20 +233,23 @@ def events_service():
         return_value=[["Philippines"], ["Hong Kong"]]
     )
     events_service_mock.get_events = mock.MagicMock(
-        return_value=[
-            Event(
-                name="Content_Like",
-                timestamp=datetime(2023, 1, 13, 15, 23, 38),
-                user_id="mthdas8@gmail.com",
-                provider="mixpanel",
-            ),
-            Event(
-                name="WebView_Open",
-                timestamp=datetime(2023, 1, 13, 15, 23, 41),
-                user_id="mthdas8@gmail.com",
-                provider="mixpanel",
-            ),
-        ]
+        return_value=EventsData(
+            count=2,
+            data=[
+                Event(
+                    name="Content_Like",
+                    timestamp=datetime(2023, 1, 13, 15, 23, 38),
+                    user_id="mthdas8@gmail.com",
+                    provider="mixpanel",
+                ),
+                Event(
+                    name="WebView_Open",
+                    timestamp=datetime(2023, 1, 13, 15, 23, 41),
+                    user_id="mthdas8@gmail.com",
+                    provider="mixpanel",
+                ),
+            ],
+        )
     )
     return events_service_mock
 

@@ -28,7 +28,6 @@ class Events(EventsBase):
                 self.table.provider,
             )
             .where(self.table.datasource_id == Parameter("%(ds_id)s"))
-            .limit(100)
         )
         return query.get_sql(), {"ds_id": datasource_id}
 
