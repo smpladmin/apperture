@@ -220,7 +220,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
             gap={'1'}
           >
             <Text
-
+              fontSize={'sh-20'}
               lineHeight={'sh-20'}
               fontWeight={'600'}
               color={'black'}
