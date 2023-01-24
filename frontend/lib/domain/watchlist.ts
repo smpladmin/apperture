@@ -11,7 +11,7 @@ export enum WatchListItemType {
 
 const paths = {
   [WatchListItemType.ALL]: '',
-  [WatchListItemType.METRICS]: 'metric/edit',
+  [WatchListItemType.METRICS]: 'metric/view',
   [WatchListItemType.FUNNELS]: 'funnel/view',
   [WatchListItemType.SEGMENTS]: 'segment/edit',
 };
