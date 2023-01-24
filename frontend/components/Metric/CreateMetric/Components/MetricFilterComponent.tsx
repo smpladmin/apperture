@@ -17,6 +17,8 @@ type MetricFilterComponentProps = {
   handleSetCondition: Function;
   handleSetFilter: Function;
   removeFilter: Function;
+  eventProperties: string[];
+  loadingEventProperties: boolean;
 };
 
 const MetricFilterComponent = ({
@@ -28,6 +30,8 @@ const MetricFilterComponent = ({
   handleSetCondition,
   handleSetFilter,
   removeFilter,
+  eventProperties,
+  loadingEventProperties,
 }: MetricFilterComponentProps) => {
   const router = useRouter();
   const { dsId } = router.query;
@@ -38,8 +42,10 @@ const MetricFilterComponent = ({
   const [isValueDropDownOpen, setIsValueDropDownOpen] = useState(false);
   const [areAllValuesSelected, setAreAllValuesSelected] =
     useState<boolean>(false);
+  const [openEventDropdown, setOpenEventDropdown] = useState(false);
 
   const eventValueRef = useRef(null);
+  const eventRef = useRef(null);
 
   useEffect(() => {
     const fetchEventPropertiesValue = async () => {
@@ -58,10 +64,16 @@ const MetricFilterComponent = ({
   }, [operand]);
 
   useOnClickOutside(eventValueRef, () => setIsValueDropDownOpen(false));
+  useOnClickOutside(eventRef, () => setOpenEventDropdown(false));
 
   const handleSubmitValues = () => {
     handleSetFilter(index, { values: selectedValues });
     setIsValueDropDownOpen(false);
+  };
+  const handleSubmitEvent = (value: string) => {
+    handleSetFilter(index, { operand: value });
+    console.log(index, value);
+    setOpenEventDropdown(false);
   };
 
   const handleValueSelection = (value: string[]) => {
@@ -104,7 +116,12 @@ const MetricFilterComponent = ({
       <Text fontSize={'xs-12'} lineHeight={'xs-14'} color={'grey.100'}>
         {condition}
       </Text>
-      <Flex width={'full'} justifyContent={'space-between'}>
+      <Flex
+        width={'full'}
+        justifyContent={'space-between'}
+        position="relative"
+        ref={eventRef}
+      >
         <Flex
           fontSize={'xs-12'}
           lineHeight={'xs-14'}
@@ -117,12 +134,20 @@ const MetricFilterComponent = ({
           borderRadius={4}
           _hover={{ color: 'white', background: 'grey.300' }}
           width={'max-content'}
+          onClick={() => setOpenEventDropdown(true)}
+          // ref={eventRef}
         >
           <Box position={'absolute'} left={-6}>
             <Image src={indent} />
           </Box>
           {operand}
         </Flex>
+        <SearchableListDropdown
+          isOpen={openEventDropdown}
+          isLoading={loadingEventProperties}
+          data={eventProperties}
+          onSubmit={handleSubmitEvent}
+        />
         <IconButton
           size={'xs'}
           fontWeight={'500'}
