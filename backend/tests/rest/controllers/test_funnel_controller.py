@@ -23,9 +23,7 @@ def test_compute_transient_funnel(
     assert response.json() == computed_transient_funnel_response
 
 
-def test_get_saved_funnel(
-    client_init, funnel_service, funnel_response
-):
+def test_get_saved_funnel(client_init, funnel_service, funnel_response):
     response = client_init.get("/funnels/635ba034807ab86d8a2aadd8")
     assert response.status_code == 200
     assert filter_response(response.json()) == filter_response(funnel_response)
@@ -33,6 +31,7 @@ def test_get_saved_funnel(
     funnel_service.get_funnel.assert_called_once_with(
         "635ba034807ab86d8a2aadd8",
     )
+
 
 @pytest.mark.asyncio
 async def test_update_funnel(

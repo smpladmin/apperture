@@ -68,7 +68,6 @@ async def get_saved_funnel(
     funnel_service: FunnelsService = Depends(),
 ):
     return await funnel_service.get_funnel(id)
-    
 
 
 @router.put("/funnels/{id}", response_model=FunnelResponse)

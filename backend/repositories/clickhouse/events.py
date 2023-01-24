@@ -15,6 +15,23 @@ class Events(EventsBase):
         query, params = self.build_unique_events_query(datasource_id)
         return self.execute_get_query(query, params)
 
+    def get_events(self, datasource_id: str):
+        return self.execute_get_query(*self.build_events_query(datasource_id))
+
+    def build_events_query(self, datasource_id: str):
+        query = (
+            ClickHouseQuery.from_(self.table)
+            .select(
+                self.table.event_name,
+                self.table.timestamp,
+                self.table.user_id,
+                self.table.provider,
+            )
+            .where(self.table.datasource_id == Parameter("%(ds_id)s"))
+            .limit(100)
+        )
+        return query.get_sql(), {"ds_id": datasource_id}
+
     def build_unique_events_query(self, datasource_id: str):
         params = {"ds_id": datasource_id}
         query = (

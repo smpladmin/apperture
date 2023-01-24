@@ -1,7 +1,9 @@
+from datetime import datetime
 from unittest.mock import MagicMock
 
 import pytest
 from domain.edge.models import Node
+from domain.events.models import Event
 from domain.events.service import EventsService
 
 
@@ -92,4 +94,39 @@ class TestEventsService:
                 "event_property": "country",
                 "start_date": "1970-01-01",
             }
+        )
+
+    def test_get_events(self):
+        self.events_repo.get_events.return_value = [
+            (
+                "Content_Like",
+                datetime(2023, 1, 13, 15, 23, 38),
+                "mthdas8@gmail.com",
+                "mixpanel",
+            ),
+            (
+                "WebView_Open",
+                datetime(2023, 1, 13, 15, 23, 41),
+                "mthdas8@gmail.com",
+                "mixpanel",
+            ),
+        ]
+
+        assert self.events_service.get_events(datasource_id=self.ds_id) == [
+            Event(
+                name="Content_Like",
+                timestamp=datetime(2023, 1, 13, 15, 23, 38),
+                user_id="mthdas8@gmail.com",
+                provider="mixpanel",
+            ),
+            Event(
+                name="WebView_Open",
+                timestamp=datetime(2023, 1, 13, 15, 23, 41),
+                user_id="mthdas8@gmail.com",
+                provider="mixpanel",
+            ),
+        ]
+
+        self.events_repo.get_events.assert_called_once_with(
+            **{"datasource_id": "test-id"}
         )

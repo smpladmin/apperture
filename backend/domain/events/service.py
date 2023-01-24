@@ -4,6 +4,7 @@ from fastapi import Depends
 from clickhouse.clickhouse import Clickhouse
 from domain.edge.models import Node
 from repositories.clickhouse.events import Events
+from domain.events.models import Event
 
 
 class EventsService:
@@ -44,3 +45,10 @@ class EventsService:
             start_date=start_date,
             end_date=end_date,
         )
+
+    def get_events(self, datasource_id: str) -> List[Event]:
+        events = self.events.get_events(datasource_id=datasource_id)
+        return [
+            Event(name=name, timestamp=timestamp, user_id=user_id, provider=provider)
+            for (name, timestamp, user_id, provider) in events
+        ]

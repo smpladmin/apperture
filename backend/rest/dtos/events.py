@@ -1,8 +1,10 @@
 import datetime
 from typing import NamedTuple
+from domain.events.models import Event
 
 
 from domain.common.models import IntegrationProvider
+from rest.dtos.model_response import ModelResponse
 
 
 class CreateEventDto(NamedTuple):
@@ -12,3 +14,8 @@ class CreateEventDto(NamedTuple):
     userId: str
     eventName: str
     properties: dict
+
+
+class EventResponse(Event, ModelResponse):
+    class Config:
+        allow_population_by_field_name = True

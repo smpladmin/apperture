@@ -15,6 +15,7 @@ from rest.dtos.edges import (
 )
 from domain.edge.models import TrendType
 from domain.properties.service import PropertiesService
+from rest.dtos.events import EventResponse
 from rest.middlewares import validate_jwt
 
 
@@ -123,3 +124,11 @@ async def get_event_property_values(
         start_date=start_date,
         end_date=end_date,
     )
+
+
+@router.get("/datasources/{ds_id}/events", response_model=List[EventResponse])
+async def get_events(
+    ds_id: str,
+    events_service: EventsService = Depends(),
+):
+    return events_service.get_events(datasource_id=ds_id)
