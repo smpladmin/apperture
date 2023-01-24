@@ -72,7 +72,6 @@ const MetricFilterComponent = ({
   };
   const handleSubmitEvent = (value: string) => {
     handleSetFilter(index, { operand: value });
-    console.log(index, value);
     setOpenEventDropdown(false);
   };
 
