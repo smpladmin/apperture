@@ -208,9 +208,8 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
         px={'4'}
       >
         <Flex alignItems={'center'} gap={'1'}>
-          <Box 
-          cursor={'pointer'} 
-          onClick={showExitConfirmationModal}>            <i className="ri-arrow-left-line"></i>
+          <Box cursor={'pointer'} onClick={showExitConfirmationModal}>
+            <i className="ri-arrow-left-line"></i>
           </Box>
           <Flex
             alignItems={'center'}
