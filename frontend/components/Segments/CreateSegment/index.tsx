@@ -206,11 +206,13 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
         color={'black'}
         py={'2'}
         px={'4'}
+        borderBottom={'1px'}
+        borderColor={'white.200'}
       >
-        <Flex alignItems={'center'} gap={'1'}>
-          <Box cursor={'pointer'} onClick={showExitConfirmationModal}>
+        <Flex alignItems={'center'} justifyContent={'center'} gap={'2'}>
+          <Flex cursor={'pointer'} onClick={showExitConfirmationModal}>
             <i className="ri-arrow-left-line"></i>
-          </Box>
+          </Flex>
           <Flex
             alignItems={'center'}
             alignContent={'center'}
