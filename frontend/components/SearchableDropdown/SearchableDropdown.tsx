@@ -4,12 +4,13 @@ import { getSearchResult } from '@lib/utils/common';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { SegmentProperty } from '@lib/domain/segment';
 import Dropdown from './Dropdown';
+import { Node } from '@lib/domain/node';
 
 type SearchableDropdownProps = {
   isOpen: boolean;
   isLoading: boolean;
   children: ReactNode;
-  data: Array<string | SegmentProperty>;
+  data: Array<string | SegmentProperty | Node>;
   setSearchData?: Function;
   dropdownPosition?: string;
   searchKey?: string;

@@ -27,6 +27,7 @@ import {
   MetricEventFilter,
 } from '@lib/domain/metric';
 import { isEqual } from 'lodash';
+import { Node } from '@lib/domain/node';
 
 type CreateMetricActionProps = {
   setMetric: Function;
@@ -55,7 +56,7 @@ const CreateMetricAction = ({
 
   const { metricId } = router.query;
   const dsId = savedMetric?.datasourceId || router.query.dsId;
-  const [eventList, setEventList] = useState<string[]>([]);
+  const [eventList, setEventList] = useState<Node[]>([]);
   const [eventProperties, setEventProperties] = useState<string[]>([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
   const [loadingEventsList, setLoadingEventsList] = useState(false);
@@ -79,7 +80,7 @@ const CreateMetricAction = ({
         getNodes(dsId as string),
       ]);
 
-      setEventList(events.map((i) => i.id));
+      setEventList(events);
       setEventProperties([...eventPropertiesResult]);
       setLoadingEventProperties(false);
       setLoadingEventsList(false);

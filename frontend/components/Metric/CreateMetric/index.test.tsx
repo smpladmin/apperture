@@ -34,10 +34,10 @@ describe('Create Metric', () => {
   ];
 
   const events = [
-    { id: 'App_Open' },
-    { id: 'Login' },
-    { id: 'Video_Open' },
-    { id: 'Video_Seen' },
+    { id: 'App_Open', source: 'Mixpanel' },
+    { id: 'Login', source: 'Mixpanel' },
+    { id: 'Video_Open', source: 'Mixpanel' },
+    { id: 'Video_Seen', source: 'Mixpanel' },
   ];
 
   const computedMetricResponse = {
