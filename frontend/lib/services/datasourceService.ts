@@ -126,3 +126,14 @@ export const getEventPropertiesValue = async (
     return [];
   }
 };
+
+export const getEvents = async (
+  dsId: string,
+  isAux: boolean,
+  tableName: string
+) => {
+  const result = await AppertureGet(
+    `/datasources/${dsId}/events?is_aux=${isAux}&table_name=${tableName}`
+  );
+  return result.data;
+};

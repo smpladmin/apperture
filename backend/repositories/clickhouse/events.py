@@ -15,6 +15,22 @@ class Events(EventsBase):
         query, params = self.build_unique_events_query(datasource_id)
         return self.execute_get_query(query, params)
 
+    def get_events(self, datasource_id: str):
+        return self.execute_get_query(*self.build_events_query(datasource_id))
+
+    def build_events_query(self, datasource_id: str):
+        query = (
+            ClickHouseQuery.from_(self.table)
+            .select(
+                self.table.event_name,
+                self.table.timestamp,
+                self.table.user_id,
+                Field(f"properties.properties.$city"),
+            )
+            .where(self.table.datasource_id == Parameter("%(ds_id)s"))
+        )
+        return query.get_sql(), {"ds_id": datasource_id}
+
     def build_unique_events_query(self, datasource_id: str):
         params = {"ds_id": datasource_id}
         query = (
@@ -103,3 +119,32 @@ class Events(EventsBase):
             .distinct()
         )
         return query.get_sql(), {}
+
+    def get_aux_events(self, datasource_id: str, table_name: str):
+        return self.execute_get_query(
+            *self.build_aux_events_query(datasource_id, table_name)
+        )
+
+    def build_aux_events_query(self, datasource_id: str, table_name: str):
+        query = ClickHouseQuery.from_(self.table).select(self.table.user_id)
+        query = (
+            query.select(self.table.event_name, self.table.timestamp)
+            if table_name == "Backend CRM"
+            else query.select(fn.Max(Field("properties.properties.salary_basic")))
+        )
+        query = query.where(self.table.datasource_id == Parameter("%(ds_id)s"))
+        query = (
+            query.where(
+                self.table.event_name.isin(
+                    [
+                        "documents_verified",
+                        "eligibility_invalid",
+                        "insurance_processed",
+                        "offer_confirmed",
+                    ]
+                )
+            )
+            if table_name == "Backend CRM"
+            else query.groupby(self.table.user_id).having(Field("properties.properties.salary_basic")>0)
+        )
+        return query.get_sql(), {"ds_id": datasource_id}

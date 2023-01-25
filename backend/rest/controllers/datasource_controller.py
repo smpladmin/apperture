@@ -1,5 +1,5 @@
 from datetime import datetime as dt
-from typing import List
+from typing import List, Optional, Union
 
 from fastapi import APIRouter, Depends
 from fastapi_cache.decorator import cache
@@ -15,6 +15,7 @@ from rest.dtos.edges import (
 )
 from domain.edge.models import TrendType
 from domain.properties.service import PropertiesService
+from rest.dtos.events import EventsResponse
 from rest.middlewares import validate_jwt
 
 
@@ -128,4 +129,16 @@ async def get_event_property_values(
         event_property=event_property,
         start_date=start_date,
         end_date=end_date,
+    )
+
+
+@router.get("/datasources/{ds_id}/events", response_model=EventsResponse)
+async def get_events(
+    ds_id: str,
+    table_name: str,
+    is_aux: bool = False,
+    events_service: EventsService = Depends(),
+):
+    return events_service.get_events(
+        datasource_id=ds_id, is_aux=is_aux, table_name=table_name
     )
