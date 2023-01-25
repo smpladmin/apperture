@@ -153,32 +153,36 @@ const MobileSidemenu = ({
           <Flex justifyContent={'space-between'} pr={'4'}>
             <MobileSidemenuOption
               menuOption={{
-                label: 'Insights',
-                icon: <i className="ri-lightbulb-line" />,
+                label: 'Metrics',
+                icon: <i className="ri-funds-box-line" />,
+              }}
+              onMenuClick={() => {
+                closeDrawer();
+                router.push(`/analytics/metric/list/${dsId}`);
               }}
             />
-            <Box
-              my={'4'}
-              borderRadius={'sm'}
-              backgroundColor={'green'}
-              fontSize={'xs-10'}
-              lineHeight={'xs-10'}
-              fontWeight={'medium'}
-              padding={1}
-              textColor={'white'}
-            >
-              Coming soon
-            </Box>
           </Flex>
           <Flex justifyContent={'space-between'} pr={'4'}>
             <MobileSidemenuOption
               menuOption={{
-                label: 'Saved',
-                icon: <i className="ri-bookmark-line" />,
+                label: 'Funnels',
+                icon: <i className="ri-filter-line" />,
               }}
               onMenuClick={() => {
                 closeDrawer();
-                router.push('/analytics/saved');
+                router.push(`/analytics/funnel/list/${dsId}`);
+              }}
+            />
+          </Flex>
+          <Flex justifyContent={'space-between'} pr={'4'} >
+            <MobileSidemenuOption
+              menuOption={{
+                label: 'Segments',
+                icon: <i className="ri-scissors-cut-line" />,
+              }}
+              onMenuClick={() => {
+                closeDrawer();
+                router.push(`/analytics/segments/list/${dsId}`);
               }}
             />
           </Flex>

@@ -129,31 +129,6 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           </Tooltip>
 
           <Tooltip
-            label={'Saved'}
-            aria-label={'Saved'}
-            bg={'white.DEFAULT'}
-            color={'black.100'}
-          >
-            <IconButton
-              aria-label="Explore"
-              icon={<i className={'ri-bookmark-line'} />}
-              rounded={'lg'}
-              h={10}
-              w={10}
-              bg={'black.0'}
-              fontWeight={'500'}
-              color={'grey.100'}
-              _hover={{
-                backgroundColor: 'white.0',
-                color: 'white',
-              }}
-              _active={{
-                backgroundColor: 'transparent',
-              }}
-              onClick={() => router.push('/analytics/saved')}
-            />
-          </Tooltip>
-          <Tooltip
             label={'Metrics'}
             aria-label={'Metrics'}
             bg={'white.DEFAULT'}

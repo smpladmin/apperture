@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Flex,
+  IconButton,
   Menu,
   MenuButton,
   MenuItem,
@@ -74,10 +75,83 @@ const DesktopHeader = ({
                 Create
               </MenuButton>
               <MenuList>
-                <MenuItem onClick={() => navigateTo('metric')}>Metric</MenuItem>
-                <MenuItem onClick={() => navigateTo('funnel')}>Funnel</MenuItem>
-                <MenuItem onClick={() => navigateTo('segment')}>
-                  Segment
+                <MenuItem
+                  onClick={() => navigateTo('metric')}
+                  _hover={{
+                    backgroundColor: 'white.100',
+                  }}
+                >
+                  <Flex
+                    justifyContent={'space-between'}
+                    gap={'2'}
+                    alignItems={'center'}
+                  >
+                    <IconButton
+                      aria-label="Segment"
+                      h={'4'}
+                      w={'4'}
+                      icon={<i className={'ri-funds-box-line'} />}
+                      rounded={'lg'}
+                      bg={'transparent'}
+                      color={'grey.200'}
+                      _hover={{
+                        backgroundColor: 'transparent',
+                      }}
+                    />
+                    Metric
+                  </Flex>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => navigateTo('funnel')}
+                  _hover={{
+                    backgroundColor: 'white.100',
+                  }}
+                >
+                  <Flex
+                    justifyContent={'space-between'}
+                    gap={'2'}
+                    alignItems={'center'}
+                  >
+                    <IconButton
+                      aria-label="Funnel"
+                      h={'4'}
+                      w={'4'}
+                      icon={<i className={'ri-filter-line'} />}
+                      rounded={'lg'}
+                      bg={'transparent'}
+                      color={'grey.200'}
+                      _hover={{
+                        backgroundColor: 'transparent',
+                      }}
+                    />
+                    Funnel
+                  </Flex>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => navigateTo('segment')}
+                  _hover={{
+                    backgroundColor: 'white.100',
+                  }}
+                >
+                  <Flex
+                    justifyContent={'space-between'}
+                    gap={'2'}
+                    alignItems={'center'}
+                  >
+                    <IconButton
+                      aria-label="Segment"
+                      h={'4'}
+                      w={'4'}
+                      icon={<i className={'ri-scissors-cut-line'} />}
+                      rounded={'lg'}
+                      bg={'transparent'}
+                      color={'grey.200'}
+                      _hover={{
+                        backgroundColor: 'transparent',
+                      }}
+                    />
+                    Segment
+                  </Flex>
                 </MenuItem>
               </MenuList>
             </Menu>
