@@ -34,6 +34,7 @@ type CreateMetricActionProps = {
   savedMetric: Metric | undefined;
   canSaveMetric: boolean;
   setCanSaveMetric: Function;
+  setIsLoading: Function;
 };
 
 const CreateMetricAction = ({
@@ -42,6 +43,7 @@ const CreateMetricAction = ({
   savedMetric,
   canSaveMetric,
   setCanSaveMetric,
+  setIsLoading,
 }: CreateMetricActionProps) => {
   const [metricName, setMetricName] = useState(
     savedMetric?.name || 'Untitled Metric'
@@ -191,6 +193,7 @@ const CreateMetricAction = ({
           data: result.metric,
           definition: metricDefinition,
         });
+        setIsLoading(false);
       } else {
         setMetric(null);
       }
@@ -210,8 +213,7 @@ const CreateMetricAction = ({
         aggregates &&
         aggregates.length &&
         (!isEqual(savedMetric?.aggregates, aggregates) ||
-          !isEqual(savedMetric?.function, metricDefinition) ||
-          !isEqual(savedMetric?.name, metricName))
+          savedMetric?.function != metricDefinition)
       ) {
         setCanSaveMetric(true);
       } else {
@@ -219,6 +221,12 @@ const CreateMetricAction = ({
       }
     }
   }, [aggregates, metricDefinition, dateRange]);
+
+  useEffect(() => {
+    if (!canSaveMetric && savedMetric && metricName != savedMetric?.name) {
+      setCanSaveMetric(true);
+    }
+  }, [metricName]);
 
   return (
     <>
@@ -231,7 +239,9 @@ const CreateMetricAction = ({
           color={'white.DEFAULT'}
           bg={'black.20'}
           onClick={() => {
-            router.back();
+            router.push({
+              pathname: '/analytics/saved',
+            });
           }}
           data-testid="back-button"
         />

@@ -27,6 +27,7 @@ def test_get_node_significance(client_init, edge_service, node_significance_resp
         "updated_at": None,
         "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "version": DataSourceVersion.DEFAULT,
+        "enabled": True,
     } == kwargs["datasource"].dict()
 
     kwargs.pop("datasource")
@@ -57,6 +58,7 @@ def test_get_node_trends(client_init, edge_service, node_trends_response):
         "updated_at": None,
         "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "version": DataSourceVersion.DEFAULT,
+        "enabled": True,
     } == kwargs["datasource"].dict()
 
     kwargs.pop("datasource")
@@ -89,6 +91,7 @@ def test_get_sankey_nodes(client_init, edge_service, node_sankey_response):
         "updated_at": None,
         "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "version": DataSourceVersion.DEFAULT,
+        "enabled": True,
     } == kwargs["datasource"].dict()
 
     kwargs.pop("datasource")
