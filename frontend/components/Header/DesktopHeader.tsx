@@ -86,18 +86,7 @@ const DesktopHeader = ({
                     gap={'2'}
                     alignItems={'center'}
                   >
-                    <IconButton
-                      aria-label="Segment"
-                      h={'4'}
-                      w={'4'}
-                      icon={<i className={'ri-funds-box-line'} />}
-                      rounded={'lg'}
-                      bg={'transparent'}
-                      color={'grey.200'}
-                      _hover={{
-                        backgroundColor: 'transparent',
-                      }}
-                    />
+                    <i className={'ri-funds-box-line'} />
                     Metric
                   </Flex>
                 </MenuItem>
@@ -112,18 +101,7 @@ const DesktopHeader = ({
                     gap={'2'}
                     alignItems={'center'}
                   >
-                    <IconButton
-                      aria-label="Funnel"
-                      h={'4'}
-                      w={'4'}
-                      icon={<i className={'ri-filter-line'} />}
-                      rounded={'lg'}
-                      bg={'transparent'}
-                      color={'grey.200'}
-                      _hover={{
-                        backgroundColor: 'transparent',
-                      }}
-                    />
+                    <i className={'ri-filter-line'} />
                     Funnel
                   </Flex>
                 </MenuItem>
@@ -138,18 +116,7 @@ const DesktopHeader = ({
                     gap={'2'}
                     alignItems={'center'}
                   >
-                    <IconButton
-                      aria-label="Segment"
-                      h={'4'}
-                      w={'4'}
-                      icon={<i className={'ri-scissors-cut-line'} />}
-                      rounded={'lg'}
-                      bg={'transparent'}
-                      color={'grey.200'}
-                      _hover={{
-                        backgroundColor: 'transparent',
-                      }}
-                    />
+                    <i className={'ri-funds-box-line'} />
                     Segment
                   </Flex>
                 </MenuItem>
