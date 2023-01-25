@@ -130,7 +130,7 @@ class Events(EventsBase):
         query = (
             query.select(self.table.event_name, self.table.timestamp)
             if table_name == "Backend CRM"
-            else query.select(fn.Max(Field("properties.properties.$city")))
+            else query.select(fn.Max(Field("properties.properties.salary_basic")))
         )
         query = query.where(self.table.datasource_id == Parameter("%(ds_id)s"))
         query = (
@@ -141,7 +141,6 @@ class Events(EventsBase):
                         "eligibility_invalid",
                         "insurance_processed",
                         "offer_confirmed",
-                        "Login",
                     ]
                 )
             )
