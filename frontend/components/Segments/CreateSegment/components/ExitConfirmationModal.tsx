@@ -19,6 +19,7 @@ const ExitConfirmationModal = ({
   openSaveSegmentModal,
 }: any) => {
   const router = useRouter();
+  const { dsId } = router.query;
 
   const handleSaveAsNewSegment = () => {
     onClose();
@@ -31,7 +32,8 @@ const ExitConfirmationModal = ({
 
   const discard = () => {
     router.push({
-      pathname: '/analytics/saved',
+      pathname: '/analytics/segment/list/[dsId]',
+      query: { dsId },
     });
   };
 

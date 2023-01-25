@@ -27,7 +27,10 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
   };
 
   const handleGoBack = () => {
-    router.push('/analytics/saved');
+    router.push({
+      pathname: '/analytics/funnel/list/[dsId]',
+      query: { dsId: datasourceId },
+    });
   };
 
   return (

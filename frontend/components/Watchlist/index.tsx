@@ -115,7 +115,10 @@ const Watchlist = () => {
             <LoadingSpinner />
           </Flex>
         ) : (
-          <WatchListTable savedItemsData={savedItemsData} />
+          <WatchListTable
+            savedItemsData={savedItemsData}
+            onRowClick={() => {}}
+          />
         )}
       </Box>
     </Box>

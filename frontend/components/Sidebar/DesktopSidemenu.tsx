@@ -129,14 +129,14 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           </Tooltip>
 
           <Tooltip
-            label={'Saved'}
-            aria-label={'Saved'}
+            label={'Metrics'}
+            aria-label={'Metrics'}
             bg={'white.DEFAULT'}
             color={'black.100'}
           >
             <IconButton
-              aria-label="Explore"
-              icon={<i className={'ri-bookmark-line'} />}
+              aria-label="Metrics"
+              icon={<i className={'ri-funds-box-line'} />}
               rounded={'lg'}
               h={10}
               w={10}
@@ -150,7 +150,57 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={() => router.push('/analytics/saved')}
+              onClick={() => router.push(`/analytics/metric/list/${dsId}`)}
+            />
+          </Tooltip>
+          <Tooltip
+            label={'Funnels'}
+            aria-label={'Funnels'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Funnels"
+              icon={<i className={'ri-filter-line'} />}
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={() => router.push(`/analytics/funnel/list/${dsId}`)}
+            />
+          </Tooltip>
+          <Tooltip
+            label={'Segments'}
+            aria-label={'Segments'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Segments"
+              icon={<i className={'ri-scissors-cut-line'} />}
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={() => router.push(`/analytics/segment/list/${dsId}`)}
             />
           </Tooltip>
         </Flex>

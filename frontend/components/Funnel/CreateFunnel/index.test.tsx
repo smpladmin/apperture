@@ -136,6 +136,13 @@ describe('create funnel', () => {
     ],
     updatedAt: new Date(),
     randomSequence: false,
+    user: {
+      email: 'apperture@parallelhq.com',
+      firstName: 'Apperture',
+      lastName: 'Analytics',
+      picture: 'https://lh2.googleusercontent.com',
+      slackChannel: null,
+    },
   };
 
   const renderCreateFunnel = async (
