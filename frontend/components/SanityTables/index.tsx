@@ -2,44 +2,40 @@ import { Box, Flex, Radio, RadioGroup, Text } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import EventsTables from './components/EventsTable';
 import { getEvents } from '@lib/services/datasourceService';
-import { Provider } from '@lib/domain/provider';
-import { SanityDataSource } from '@lib/domain/eventData';
+import { SanityData, SanityDataSource } from '@lib/domain/eventData';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { useRouter } from 'next/router';
+import { sanityDatasources } from './config';
 
 const Sanity = () => {
-  const sanityDatasources = [
-    { id: SanityDataSource.ALL, label: 'ALL' },
-    { id: Provider.MIXPANEL, label: 'Mixpanel' },
-    { id: SanityDataSource.BACKEND, label: 'Backend CRM' },
-    { id: SanityDataSource.USERS, label: 'Users (Google Sheet)' },
-  ];
   const router = useRouter();
   const { dsId } = router.query;
-  const [selectedTab, setSelectedTab] = useState<Provider | SanityDataSource>(
+
+  const [selectedTab, setSelectedTab] = useState<SanityDataSource>(
     SanityDataSource.ALL
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [eventData, setEventData] = useState<any>([]);
+  const [eventData, setEventData] = useState<SanityData>({
+    count: 0,
+    data: [],
+  });
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+
   useEffect(() => {
-    const fetchEventDetails = async (
-      selectedTab: SanityDataSource | Provider
-    ) => {
+    const fetchEventDetails = async (selectedTab: SanityDataSource) => {
       const isAux =
         selectedTab === SanityDataSource.BACKEND ||
-        selectedTab === SanityDataSource.USERS
-          ? true
-          : false;
+        selectedTab === SanityDataSource.USERS;
+
       const result = await getEvents(dsId as string, isAux, selectedTab);
-      if (result && result.data.length)
-        setSelectedColumns(Object.keys(result.data[0]));
+      if (result?.data.length) setSelectedColumns(Object.keys(result.data[0]));
       setEventData(result);
       setIsLoading(false);
     };
     setIsLoading(true);
     fetchEventDetails(selectedTab);
   }, [selectedTab]);
+
   return (
     <Box px={{ base: '4', md: '30' }} py={'9'} overflowY={'auto'}>
       <Flex justifyContent={'space-between'}>
@@ -49,11 +45,17 @@ const Sanity = () => {
       </Flex>
 
       <Flex justifyContent={'flex-start'} mt={'6'}>
-        <RadioGroup value={selectedTab}>
+        <RadioGroup
+          value={selectedTab}
+          onChange={(value: SanityDataSource) => {
+            setSelectedTab(value);
+          }}
+        >
           <Flex gap={'3'} direction={'row'}>
             {sanityDatasources.map((sanityDatasource) => {
               return (
                 <Flex
+                  key={sanityDatasource.id}
                   as={'label'}
                   borderRadius={'100'}
                   bg={'white.DEFAULT'}
@@ -66,10 +68,6 @@ const Sanity = () => {
                       : 'white.200'
                   }
                   cursor={'pointer'}
-                  data-testid={'sanityDatasource'}
-                  onClick={() => {
-                    setSelectedTab(sanityDatasource.id);
-                  }}
                 >
                   <Text
                     fontSize={{ base: 'xs-12', md: 'xs-14' }}

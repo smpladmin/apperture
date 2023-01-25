@@ -11,6 +11,7 @@ import {
   Tr,
 } from '@chakra-ui/react';
 import TableSkeleton from '@components/Skeleton/TableSkeleton';
+import { SanityData } from '@lib/domain/eventData';
 import {
   createColumnHelper,
   flexRender,
@@ -20,10 +21,10 @@ import {
 } from '@tanstack/react-table';
 import { useMemo } from 'react';
 
-const EventsTables = ({ eventData, selectedColumns }: any) => {
+type EventsTablesProps = { eventData: SanityData; selectedColumns: string[] };
+
+const EventsTables = ({ eventData, selectedColumns }: EventsTablesProps) => {
   const columnHelper = createColumnHelper();
-  console.log(eventData);
-  console.log(selectedColumns);
 
   const columns = useMemo(() => {
     const generateColumnHeader = () => {
@@ -70,12 +71,7 @@ const EventsTables = ({ eventData, selectedColumns }: any) => {
             Showing:
           </Text>
 
-          <Text
-            fontSize={'xs-14'}
-            lineHeight={'xs-18'}
-            fontWeight={'500'}
-            data-testid={'users-count'}
-          >
+          <Text fontSize={'xs-14'} lineHeight={'xs-18'} fontWeight={'500'}>
             {eventData.count || 0} Records
           </Text>
         </Flex>
@@ -99,19 +95,14 @@ const EventsTables = ({ eventData, selectedColumns }: any) => {
         justifyContent={'space-between'}
         overflow={'auto'}
       >
-        {false ? (
-          <TableSkeleton tableHeader={['abc']} />
-        ) : eventData.data ? (
-          <Table data-testid={'segment-table'}>
+        {eventData?.data?.length ? (
+          <Table>
             <Thead py={'3'} px={'8'} bg={'white.100'}>
               {getHeaderGroups().map((headerGroup, groupIndex) => (
                 <Tr key={headerGroup.id + groupIndex}>
                   {headerGroup.headers.map((header, index) => {
                     return (
-                      <Th
-                        key={header.id + index}
-                        data-testid={'segment-table-headers'}
-                      >
+                      <Th key={header.id + index}>
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
@@ -127,14 +118,10 @@ const EventsTables = ({ eventData, selectedColumns }: any) => {
                 <Tr
                   key={row.id + index}
                   _hover={{ bg: 'white.100', cursorTo: 'pointer' }}
-                  data-testid={'segment-table-body-rows'}
                 >
                   {row.getVisibleCells().map((cell, cellIndex) => {
                     return (
-                      <Td
-                        key={cell.id + cellIndex}
-                        data-testid={'segment-table--body-data'}
-                      >
+                      <Td key={cell.id + cellIndex}>
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -147,7 +134,11 @@ const EventsTables = ({ eventData, selectedColumns }: any) => {
             </Tbody>
           </Table>
         ) : (
-          <Flex w={'full'} justifyContent={'center'} py={'2'}></Flex>
+          <Flex w={'full'} justifyContent={'center'} py={'2'}>
+            <Text fontSize={'xs-14'} lineHeight={'xs-18'} fontWeight={'500'}>
+              No data found
+            </Text>
+          </Flex>
         )}
       </Flex>
     </Box>

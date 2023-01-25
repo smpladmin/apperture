@@ -32,7 +32,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
   const { dsId, previousDsId } = router.query;
 
   const handleRedirectToExplorePage = () => {
-    if (path.includes('explore')) return;
+    if (path.includes('/analytics/explore')) return;
 
     router.push({
       pathname: '/analytics/explore/[dsId]',
@@ -41,7 +41,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
   };
 
   const handleRedirectToDataPage = () => {
-    if (path.includes('events')) return;
+    if (path.includes('/analytics/data')) return;
 
     router.push({
       pathname: '/analytics/data/[dsId]',

@@ -1,10 +1,9 @@
-import EventsTables from '@components/SanityTables/components/EventsTable';
 import Layout from '@components/Layout';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
-import { ReactElement, useContext, useEffect } from 'react';
+import { ReactElement } from 'react';
 import Sanity from '@components/SanityTables';
 
 export const getServerSideProps: GetServerSideProps = async ({

@@ -135,6 +135,5 @@ export const getEvents = async (
   const result = await AppertureGet(
     `/datasources/${dsId}/events?is_aux=${isAux}&table_name=${tableName}`
   );
-  console.log(result.data);
   return result.data;
 };
