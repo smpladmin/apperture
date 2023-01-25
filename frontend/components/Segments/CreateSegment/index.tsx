@@ -89,7 +89,8 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
       openExitConfirmModal();
     } else {
       router.push({
-        pathname: '/analytics/saved',
+        pathname: '/analytics/segment/list/[dsId]',
+        query: { dsId },
       });
     }
   };

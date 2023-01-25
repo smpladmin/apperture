@@ -240,7 +240,8 @@ const CreateMetricAction = ({
           bg={'black.20'}
           onClick={() => {
             router.push({
-              pathname: '/analytics/saved',
+              pathname: '/analytics/metric/list/[dsId]',
+              query: { dsId },
             });
           }}
           data-testid="back-button"

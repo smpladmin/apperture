@@ -18,12 +18,15 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
 
+type WatchlistTableProps = {
+  savedItemsData: SavedItems[];
+  onRowClick: Function;
+};
+
 const WatchlistTable = ({
   savedItemsData,
-}: {
-  savedItemsData: SavedItems[];
-}) => {
-  const router = useRouter();
+  onRowClick,
+}: WatchlistTableProps) => {
   const {
     device: { isMobile },
   } = useContext(AppertureContext);
@@ -33,20 +36,19 @@ const WatchlistTable = ({
     () =>
       isMobile
         ? [
-            columnHelper.accessor('type', {
-              header: 'Type',
-              cell: (info) => <LabelType type={info.getValue()} />,
-            }),
             columnHelper.accessor('details', {
               header: 'Name',
               cell: (info) => <Details info={info} />,
             }),
+            columnHelper.accessor('details.user', {
+              cell: (info) => {
+                const user = info.getValue() as User;
+                return `${user.firstName} ${user.lastName}`;
+              },
+              header: 'Created By',
+            }),
           ]
         : [
-            columnHelper.accessor('type', {
-              header: 'Type',
-              cell: (info) => <LabelType type={info.getValue()} />,
-            }),
             columnHelper.accessor('details', {
               header: 'Name',
               cell: (info) => <Details info={info} />,
@@ -76,15 +78,6 @@ const WatchlistTable = ({
     getSortedRowModel: getSortedRowModel(),
   });
   const { getHeaderGroups, getRowModel } = tableInstance;
-
-  const onRowClick = (row: Row<SavedItems>) => {
-    const { _id, datasourceId } = row?.original?.details;
-    const path = WatchListItemType.toURLPath(row?.original?.type);
-    router.push({
-      pathname: `/analytics/${path}/[id]`,
-      query: { id: _id, dsId: datasourceId },
-    });
-  };
 
   return (
     <Table data-testid={'watchlist-table'}>

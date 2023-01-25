@@ -1,6 +1,5 @@
 import Layout from '@components/Layout';
-import FunnelsComponent from '@components/Watchlist/Funnels';
-import MetricsComponent from '@components/Watchlist/Metrics';
+import SavedFunnels from '@components/Watchlist/Funnels';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { getAuthToken } from '@lib/utils/request';
@@ -29,7 +28,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 };
 
 const ListFunnels = () => {
-  return <FunnelsComponent />;
+  return <SavedFunnels />;
 };
 
 ListFunnels.getLayout = function getLayout(
