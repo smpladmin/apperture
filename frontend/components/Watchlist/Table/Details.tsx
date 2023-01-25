@@ -23,7 +23,7 @@ export const Details = ({
 
   return (
     <Flex direction={'column'} gap={'1'}>
-      <Text fontSize={'base'} lineHeight={'base'} fontWeight={'600'}>
+      <Text fontSize={'base'} lineHeight={'base'} fontWeight={'500'}>
         {details?.name}
       </Text>
       {type === WatchListItemType.FUNNELS ? (
@@ -33,11 +33,6 @@ export const Details = ({
           }`}
         </Text>
       ) : null}
-      <Render on={'mobile'}>
-        <Box mt={'4'}>
-          <LabelType type={type} />
-        </Box>
-      </Render>
     </Flex>
   );
 };

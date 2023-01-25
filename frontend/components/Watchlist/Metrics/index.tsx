@@ -32,7 +32,7 @@ const SavedMetrics = () => {
   const onRowClick = (row: Row<SavedItems>) => {
     const { _id, datasourceId } = row?.original?.details;
     router.push({
-      pathname: `/analytics/metric/edit/[id]`,
+      pathname: `/analytics/metric/view/[id]`,
       query: { id: _id, dsId: datasourceId },
     });
   };

@@ -8,14 +8,13 @@ import {
   Row,
 } from '@tanstack/react-table';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
-import LabelType from './LabelType';
 import Details from './Details';
-import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
-import { useRouter } from 'next/router';
+import { SavedItems } from '@lib/domain/watchlist';
 import { AppertureContext } from '@lib/contexts/appertureContext';
 import { AppertureUser as User } from '@lib/domain/user';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import UserInfo from './UserInfo';
 dayjs.extend(utc);
 
 type WatchlistTableProps = {
@@ -54,10 +53,7 @@ const WatchlistTable = ({
               cell: (info) => <Details info={info} />,
             }),
             columnHelper.accessor('details.user', {
-              cell: (info) => {
-                const user = info.getValue() as User;
-                return `${user.firstName} ${user.lastName}`;
-              },
+              cell: (info) => <UserInfo info={info} />,
               header: 'Created By',
             }),
             columnHelper.accessor('details.updatedAt', {
@@ -102,7 +98,7 @@ const WatchlistTable = ({
           <Tr
             key={row.id}
             onClick={() => onRowClick(row)}
-            _hover={{ bg: 'gray.50', cursor: 'pointer' }}
+            _hover={{ bg: 'white.100', cursor: 'pointer' }}
             data-testid={'table-body-rows'}
           >
             {row.getVisibleCells().map((cell) => {

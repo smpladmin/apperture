@@ -174,7 +174,7 @@ const MobileSidemenu = ({
               }}
             />
           </Flex>
-          <Flex justifyContent={'space-between'} pr={'4'} >
+          <Flex justifyContent={'space-between'} pr={'4'}>
             <MobileSidemenuOption
               menuOption={{
                 label: 'Segments',
@@ -182,7 +182,7 @@ const MobileSidemenu = ({
               }}
               onMenuClick={() => {
                 closeDrawer();
-                router.push(`/analytics/segments/list/${dsId}`);
+                router.push(`/analytics/segment/list/${dsId}`);
               }}
             />
           </Flex>
