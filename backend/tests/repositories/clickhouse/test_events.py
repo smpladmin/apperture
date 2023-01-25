@@ -106,14 +106,14 @@ class TestEventsRepository:
     def test_get_events(self):
         self.repo.get_events(datasource_id=self.datasource_id)
         self.repo.execute_get_query.assert_called_once_with(
-            'SELECT "event_name","timestamp","user_id","provider" FROM "events" WHERE '
-            '"datasource_id"=%(ds_id)s',
+            'SELECT "event_name","timestamp","user_id","properties.properties.$city" FROM '
+            '"events" WHERE "datasource_id"=%(ds_id)s',
             {"ds_id": "test-id"},
         )
 
     def test_build_events_query(self):
         assert self.repo.build_events_query(datasource_id=self.datasource_id) == (
-            'SELECT "event_name","timestamp","user_id","provider" FROM "events" WHERE '
-            '"datasource_id"=%(ds_id)s',
+            'SELECT "event_name","timestamp","user_id","properties.properties.$city" FROM '
+            '"events" WHERE "datasource_id"=%(ds_id)s',
             {"ds_id": "test-id"},
         )

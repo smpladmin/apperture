@@ -125,20 +125,20 @@ def test_get_event_properties(client_init, properties_service):
 
 
 def test_get_events(client_init, events_service):
-    response = client_init.get("/datasources/637739d383ea7fda83e72a2d/events")
+    response = client_init.get("/datasources/637739d383ea7fda83e72a2d/events?is_aux=False&table_name=All")
     assert response.status_code == 200
     assert response.json() == {
         "count": 2,
         "data": [
             {
                 "name": "Content_Like",
-                "provider": "mixpanel",
+                "city": "Delhi",
                 "timestamp": "2023-01-13T15:23:38",
                 "user_id": "mthdas8@gmail.com",
             },
             {
                 "name": "WebView_Open",
-                "provider": "mixpanel",
+                "city": "Delhi",
                 "timestamp": "2023-01-13T15:23:41",
                 "user_id": "mthdas8@gmail.com",
             },
@@ -146,5 +146,9 @@ def test_get_events(client_init, events_service):
     }
 
     events_service.get_events.assert_called_once_with(
-        **{"datasource_id": "637739d383ea7fda83e72a2d"}
+        **{
+            "datasource_id": "637739d383ea7fda83e72a2d",
+            "is_aux": False,
+            "table_name": "All",
+        }
     )

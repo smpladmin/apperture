@@ -39,7 +39,7 @@ export type EventData = {
 };
 
 export enum SanityDataSource {
-  ALL = 'all',
-  BACKEND = 'backendCRM',
-  USERS = 'usersGoogleSheet',
+  ALL = 'All',
+  BACKEND = 'Backend CRM',
+  USERS = 'Users (Google Sheet)',
 }

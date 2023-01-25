@@ -240,13 +240,13 @@ def events_service():
                     name="Content_Like",
                     timestamp=datetime(2023, 1, 13, 15, 23, 38),
                     user_id="mthdas8@gmail.com",
-                    provider="mixpanel",
+                    city="Delhi",
                 ),
                 Event(
                     name="WebView_Open",
                     timestamp=datetime(2023, 1, 13, 15, 23, 41),
                     user_id="mthdas8@gmail.com",
-                    provider="mixpanel",
+                    city="Delhi",
                 ),
             ],
         )

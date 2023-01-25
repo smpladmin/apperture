@@ -102,30 +102,32 @@ class TestEventsService:
                 "Content_Like",
                 datetime(2023, 1, 13, 15, 23, 38),
                 "mthdas8@gmail.com",
-                "mixpanel",
+                "Delhi",
             ),
             (
                 "WebView_Open",
                 datetime(2023, 1, 13, 15, 23, 41),
                 "mthdas8@gmail.com",
-                "mixpanel",
+                "Delhi",
             ),
         ]
 
-        assert self.events_service.get_events(datasource_id=self.ds_id) == EventsData(
+        assert self.events_service.get_events(
+            datasource_id=self.ds_id, is_aux=False, table_name='All'
+        ) == EventsData(
             count=2,
             data=[
                 Event(
                     name="Content_Like",
                     timestamp=datetime(2023, 1, 13, 15, 23, 38),
                     user_id="mthdas8@gmail.com",
-                    provider="mixpanel",
+                    city="Delhi",
                 ),
                 Event(
                     name="WebView_Open",
                     timestamp=datetime(2023, 1, 13, 15, 23, 41),
                     user_id="mthdas8@gmail.com",
-                    provider="mixpanel",
+                    city="Delhi",
                 ),
             ],
         )

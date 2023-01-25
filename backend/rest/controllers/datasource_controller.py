@@ -1,5 +1,5 @@
 from datetime import datetime as dt
-from typing import List
+from typing import List, Optional, Union
 
 from fastapi import APIRouter, Depends
 from fastapi_cache.decorator import cache
@@ -129,6 +129,10 @@ async def get_event_property_values(
 @router.get("/datasources/{ds_id}/events", response_model=EventsResponse)
 async def get_events(
     ds_id: str,
+    table_name: str,
+    is_aux: bool = False,
     events_service: EventsService = Depends(),
 ):
-    return events_service.get_events(datasource_id=ds_id)
+    return events_service.get_events(
+        datasource_id=ds_id, is_aux=is_aux, table_name=table_name
+    )

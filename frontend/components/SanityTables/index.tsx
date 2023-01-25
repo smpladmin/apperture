@@ -23,15 +23,22 @@ const Sanity = () => {
   const [eventData, setEventData] = useState<any>([]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   useEffect(() => {
-    const fetchEventDetails = async () => {
-      const result = await getEvents(dsId as string);
+    const fetchEventDetails = async (
+      selectedTab: SanityDataSource | Provider
+    ) => {
+      const isAux =
+        selectedTab === SanityDataSource.BACKEND ||
+        selectedTab === SanityDataSource.USERS
+          ? true
+          : false;
+      const result = await getEvents(dsId as string, isAux, selectedTab);
       if (result && result.data.length)
         setSelectedColumns(Object.keys(result.data[0]));
       setEventData(result);
       setIsLoading(false);
     };
     setIsLoading(true);
-    fetchEventDetails();
+    fetchEventDetails(selectedTab);
   }, [selectedTab]);
   return (
     <Box px={{ base: '4', md: '30' }} py={'9'} overflowY={'auto'}>
@@ -42,7 +49,7 @@ const Sanity = () => {
       </Flex>
 
       <Flex justifyContent={'flex-start'} mt={'6'}>
-        <RadioGroup value="Abc">
+        <RadioGroup value={selectedTab}>
           <Flex gap={'3'} direction={'row'}>
             {sanityDatasources.map((sanityDatasource) => {
               return (
