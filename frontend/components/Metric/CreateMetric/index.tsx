@@ -10,6 +10,7 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric | undefined }) => {
   const [metric, setMetric] = useState<ComputedMetric | null>(null);
   const [dateRange, setDateRange] = useState<DateRangeType | null>(null);
   const [canSaveMetric, setCanSaveMetric] = useState(false);
+  const [isLoading, setIsLoading] = useState(Boolean(savedMetric));
   return (
     <Flex direction={{ base: 'column', md: 'row' }} h={'full'}>
       <ActionPanel>
@@ -19,6 +20,7 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric | undefined }) => {
           savedMetric={savedMetric}
           canSaveMetric={canSaveMetric}
           setCanSaveMetric={setCanSaveMetric}
+          setIsLoading={setIsLoading}
         />
       </ActionPanel>
       <ViewPanel>
@@ -26,6 +28,7 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric | undefined }) => {
           metric={metric}
           setDateRange={setDateRange}
           dateRange={dateRange}
+          isLoading={isLoading}
         />
       </ViewPanel>
     </Flex>

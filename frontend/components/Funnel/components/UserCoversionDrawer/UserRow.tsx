@@ -32,6 +32,7 @@ const UserRow = ({ name, handleRowClick }: any) => {
         color={'grey.100'}
         _hover={{}}
         h={'min-content'}
+        zIndex={-1}
       />
     </Flex>
   );

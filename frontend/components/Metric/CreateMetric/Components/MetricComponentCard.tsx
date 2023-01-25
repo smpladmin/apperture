@@ -284,6 +284,8 @@ const MetricComponentCard = ({
                 handleSetCondition={handleSetCondition}
                 handleSetFilter={handleSetFilter}
                 removeFilter={removeFilter}
+                eventProperties={eventProperties}
+                loadingEventProperties={loadingEventProperties}
               />
             ))}
           <MetricAddFilterComponent

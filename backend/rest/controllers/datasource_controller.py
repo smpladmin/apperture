@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 
 from fastapi import APIRouter, Depends
 from fastapi_cache.decorator import cache
-from cache.cache import datasource_edges_key_builder
+from cache.cache import CACHE_EXPIRY_24_HOURS, datasource_key_builder
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.events.service import EventsService
@@ -27,7 +27,7 @@ router = APIRouter(
 
 
 @router.get("/datasources/{ds_id}/edges", response_model=list[AggregatedEdgeResponse])
-@cache(expire=600, key_builder=datasource_edges_key_builder)
+@cache(expire=CACHE_EXPIRY_24_HOURS, key_builder=datasource_key_builder)
 async def get_edges(
     ds_id: str,
     start_date: str = "1970-01-01",
@@ -40,7 +40,8 @@ async def get_edges(
 
 
 @router.get("/datasources/{ds_id}/nodes")
-async def get_edges(
+@cache(expire=CACHE_EXPIRY_24_HOURS, key_builder=datasource_key_builder)
+async def get_nodes(
     ds_id: str,
     event_service: EventsService = Depends(),
 ):
@@ -48,6 +49,7 @@ async def get_edges(
 
 
 @router.get("/datasources/{ds_id}/trends", response_model=list[NodeTrendResponse])
+@cache(expire=CACHE_EXPIRY_24_HOURS, key_builder=datasource_key_builder)
 async def get_trend_nodes(
     ds_id: str,
     node: str,
@@ -70,6 +72,7 @@ async def get_trend_nodes(
 
 
 @router.get("/datasources/{ds_id}/sankey", response_model=list[NodeSankeyResponse])
+@cache(expire=CACHE_EXPIRY_24_HOURS, key_builder=datasource_key_builder)
 async def get_sankey_nodes(
     ds_id: str,
     node: str,
@@ -88,6 +91,7 @@ async def get_sankey_nodes(
     "/datasources/{ds_id}/node_significance",
     response_model=list[NodeSignificanceResponse],
 )
+@cache(expire=CACHE_EXPIRY_24_HOURS, key_builder=datasource_key_builder)
 async def get_node_significance(
     ds_id: str,
     node: str,
