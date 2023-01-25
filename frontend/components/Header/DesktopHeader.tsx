@@ -75,7 +75,12 @@ const DesktopHeader = ({
                 Create
               </MenuButton>
               <MenuList>
-                <MenuItem onClick={() => navigateTo('metric')}>
+                <MenuItem
+                  onClick={() => navigateTo('metric')}
+                  _hover={{
+                    backgroundColor: 'white.100',
+                  }}
+                >
                   <Flex
                     justifyContent={'space-between'}
                     gap={'2'}
@@ -96,7 +101,12 @@ const DesktopHeader = ({
                     Metric
                   </Flex>
                 </MenuItem>
-                <MenuItem onClick={() => navigateTo('funnel')}>
+                <MenuItem
+                  onClick={() => navigateTo('funnel')}
+                  _hover={{
+                    backgroundColor: 'white.100',
+                  }}
+                >
                   <Flex
                     justifyContent={'space-between'}
                     gap={'2'}
@@ -117,7 +127,12 @@ const DesktopHeader = ({
                     Funnel
                   </Flex>
                 </MenuItem>
-                <MenuItem onClick={() => navigateTo('segment')}>
+                <MenuItem
+                  onClick={() => navigateTo('segment')}
+                  _hover={{
+                    backgroundColor: 'white.100',
+                  }}
+                >
                   <Flex
                     justifyContent={'space-between'}
                     gap={'2'}
