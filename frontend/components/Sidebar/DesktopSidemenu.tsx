@@ -175,7 +175,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={() => router.push('/analytics/metric/list')}
+              onClick={() => router.push(`/analytics/metric/list/${dsId}`)}
             />
           </Tooltip>
           <Tooltip
@@ -200,7 +200,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={() => router.push('/analytics/funnel/list')}
+              onClick={() => router.push(`/analytics/funnel/list/${dsId}`)}
             />
           </Tooltip>
           <Tooltip
@@ -225,7 +225,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={() => router.push('/analytics/segment/list')}
+              onClick={() => router.push(`/analytics/segment/list/${dsId}`)}
             />
           </Tooltip>
         </Flex>

@@ -1,5 +1,5 @@
 import Layout from '@components/Layout';
-import SegementsComponent from '@components/List/Segments';
+import SegementsComponent from '@components/Watchlist/Segments';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { getAuthToken } from '@lib/utils/request';

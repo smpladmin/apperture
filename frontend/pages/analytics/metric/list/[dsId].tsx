@@ -1,5 +1,5 @@
 import Layout from '@components/Layout';
-import MetricsComponent from '@components/List/Metrics';
+import SegementsComponent from '@components/Watchlist/Segments';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { getAuthToken } from '@lib/utils/request';
@@ -28,7 +28,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
 };
 
 const ListMetrics = () => {
-  return <MetricsComponent />;
+  return <SegementsComponent />;
 };
 
 ListMetrics.getLayout = function getLayout(

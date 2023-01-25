@@ -1,6 +1,6 @@
 import Layout from '@components/Layout';
-import FunnelsComponent from '@components/List/Funnels';
-import MetricsComponent from '@components/List/Metrics';
+import FunnelsComponent from '@components/Watchlist/Funnels';
+import MetricsComponent from '@components/Watchlist/Metrics';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { getAuthToken } from '@lib/utils/request';
