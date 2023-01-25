@@ -111,6 +111,7 @@ class TestEventsService:
                 "Delhi",
             ),
         ]
+        self.events_repo.get_events_count.return_value = ((2,),)
 
         assert self.events_service.get_events(
             datasource_id=self.ds_id, is_aux=False, table_name="All"

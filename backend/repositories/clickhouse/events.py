@@ -154,6 +154,8 @@ class Events(EventsBase):
                 )
             )
             if table_name == "Backend CRM"
-            else query.groupby(self.table.user_id).having(Field("properties.properties.salary_basic")>0)
+            else query.groupby(self.table.user_id).having(
+                Field("properties.properties.salary_basic") > 0
+            )
         )
         return query.get_sql(), {"ds_id": datasource_id}
