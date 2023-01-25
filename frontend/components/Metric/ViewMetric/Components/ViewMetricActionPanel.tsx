@@ -43,6 +43,12 @@ const ViewMetricActionPanel = ({
           color={'white'}
           variant={'primary'}
           data-testid={'edit-funnel'}
+          onClick={() =>
+            router.push({
+              pathname: '/analytics/metric/edit/[id]',
+              query: { id: router.query.metricId, dsId: router.query.dsId },
+            })
+          }
         >
           <Flex alignItems={'center'} gap={'1'}>
             <i className="ri-edit-fill"></i>

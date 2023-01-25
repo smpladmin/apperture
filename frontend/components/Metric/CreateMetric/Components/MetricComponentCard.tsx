@@ -9,9 +9,11 @@ import {
   MetricComponentVariant,
   MetricEventFilter,
 } from '@lib/domain/metric';
+import { Node } from '@lib/domain/node';
+
 type MetricComponentCardProps = {
   variable: string;
-  eventList: string[];
+  eventList: Node[];
   eventProperties: string[];
   loadingEventProperties: boolean;
   loadingEventsList: boolean;
@@ -39,7 +41,7 @@ const MetricComponentCard = ({
   const [isEventOrSegmentListLoading, setIsEventOrSegmentListLoading] =
     useState<boolean>(false);
   const [EventorSegmentListSearchData, setEventOrSegmentListSearchData] =
-    useState<string[]>([]);
+    useState<Node[]>([]);
   const [reference, setReference] = useState(
     savedAggregate?.reference_id || ''
   );
@@ -60,13 +62,13 @@ const MetricComponentCard = ({
     setIsEventOrSegmentListOpen(false);
   });
 
-  const handleEventOrSegmentSelection = (selection: string) => {
+  const handleEventOrSegmentSelection = (selection: Node) => {
     setIsEventOrSegmentListOpen(false);
     updateAggregate(variable, {
-      reference_id: selection,
-      aggregations: { property: selection, functions: 'count' },
+      reference_id: selection.id,
+      aggregations: { property: selection.id, functions: 'count' },
     });
-    setReference(selection);
+    setReference(selection.id);
   };
 
   const handleSetCondition = (ref: number, value: string) => {
@@ -231,6 +233,8 @@ const MetricComponentCard = ({
                   isLoading={isEventOrSegmentListLoading}
                   data={EventorSegmentListSearchData}
                   onSubmit={handleEventOrSegmentSelection}
+                  listKey={'id'}
+                  isNode
                 />
               ) : (
                 <SearchableListDropdown
