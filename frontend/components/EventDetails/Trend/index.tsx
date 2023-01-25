@@ -12,14 +12,13 @@ const Trend = ({ trendsData }: { trendsData: Array<TrendData> }) => {
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ trend: Mix | null }>({ trend: null });
 
+  const sortedTrendsData = [...trendsData].sort(
+    (a, b) => new Date(a.startDate).valueOf() - new Date(b.startDate).valueOf()
+  );
+
   useEffect(() => {
     plot.current.trend = new Mix(ref.current!!, {
       autoFit: true,
-    });
-  }, []);
-
-  useEffect(() => {
-    plot.current.trend?.update({
       plots: [
         {
           type: 'area',
@@ -29,7 +28,7 @@ const Trend = ({ trendsData }: { trendsData: Array<TrendData> }) => {
           },
 
           options: {
-            data: trendsData,
+            data: sortedTrendsData,
             xField: 'startDate',
             yField: 'hits',
             seriesField: 'node',
@@ -73,6 +72,10 @@ const Trend = ({ trendsData }: { trendsData: Array<TrendData> }) => {
       ],
     });
     plot.current.trend?.render();
+
+    return () => {
+      plot.current.trend?.destroy();
+    };
   }, [trendsData]);
 
   return (
