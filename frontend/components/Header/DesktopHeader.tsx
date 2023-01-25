@@ -77,7 +77,7 @@ const DesktopHeader = ({
               <MenuList>
                 <MenuItem
                   onClick={() => navigateTo('metric')}
-                  _hover={{
+                  _focus={{
                     backgroundColor: 'white.100',
                   }}
                 >
@@ -92,7 +92,7 @@ const DesktopHeader = ({
                 </MenuItem>
                 <MenuItem
                   onClick={() => navigateTo('funnel')}
-                  _hover={{
+                  _focus={{
                     backgroundColor: 'white.100',
                   }}
                 >
@@ -107,7 +107,7 @@ const DesktopHeader = ({
                 </MenuItem>
                 <MenuItem
                   onClick={() => navigateTo('segment')}
-                  _hover={{
+                  _focus={{
                     backgroundColor: 'white.100',
                   }}
                 >
