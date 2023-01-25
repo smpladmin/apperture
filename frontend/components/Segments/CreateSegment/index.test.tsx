@@ -202,6 +202,13 @@ describe('Create Segment', () => {
     updatedAt: new Date('2022-12-19T09:04:44.567000'),
     userId: '638f1a128e54760eafc64d6c',
     _id: '63a0292cd9ae5bf509df9ac7',
+    user: {
+      email: 'apperture@parallelhq.com',
+      firstName: 'Apperture',
+      lastName: 'Analytics',
+      picture: 'https://lh2.googleusercontent.com',
+      slackChannel: null,
+    },
   };
   beforeEach(() => {
     mockedGetEventProperties = jest.mocked(getEventProperties);
@@ -1163,6 +1170,13 @@ describe('Create Segment', () => {
       updatedAt: new Date('2022-12-19T09:04:44.567000'),
       userId: '638f1a128e54760eafc64d6c',
       _id: '63a0292cd9ae5bf509df9ac7',
+      user: {
+        email: 'apperture@parallelhq.com',
+        firstName: 'Apperture',
+        lastName: 'Analytics',
+        picture: 'https://lh2.googleusercontent.com',
+        slackChannel: null,
+      },
     };
 
     it('remove filter condition and should be able to replace filter condition with suitable condition', async () => {

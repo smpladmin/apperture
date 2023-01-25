@@ -29,6 +29,13 @@ describe('View Funnel', () => {
     ],
     updatedAt: new Date(),
     randomSequence: false,
+    user: {
+      email: 'apperture@parallelhq.com',
+      firstName: 'Apperture',
+      lastName: 'Analytics',
+      picture: 'https://lh2.googleusercontent.com',
+      slackChannel: null,
+    },
   };
 
   const funnelData = [
@@ -101,16 +108,11 @@ describe('View Funnel', () => {
 
   it('should not render intermediate steps count text if steps count is 2', async () => {
     const savedFunnel = {
-      _id: '64834034092324',
-      appId: '645439584475',
-      datasourceId: '654212033222',
-      name: 'Test Funnel',
+      ...props,
       steps: [
         { event: 'Video_Click', filters: [] },
         { event: 'Chapter_Click', filters: [] },
       ],
-      updatedAt: new Date(),
-      randomSequence: false,
     };
     await renderViewFunnel(
       createMockRouter({ query: { funnelId: '64349843748' } }),
