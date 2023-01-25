@@ -1,6 +1,7 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { Metric } from '@lib/domain/metric';
+import { Provider } from '@lib/domain/provider';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { getSavedMetricsForUser } from '@lib/services/metricService';
 import { Row } from '@tanstack/react-table';
@@ -8,7 +9,7 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import WatchlistTable from '../Table';
 
-const SavedMetrics = () => {
+const SavedMetrics = ({ provider }: { provider: Provider }) => {
   const [funnels, setFunnels] = useState<SavedItems[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -51,6 +52,7 @@ const SavedMetrics = () => {
           Metrics
         </Text>
         <Button
+          disabled={provider === Provider.GOOGLE}
           variant={'primary'}
           bg={'black.100'}
           px={'6'}

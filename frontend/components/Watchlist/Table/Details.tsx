@@ -1,11 +1,9 @@
-import { Box, Flex, Text } from '@chakra-ui/react';
-import Render from '@components/Render';
+import { Flex, Text } from '@chakra-ui/react';
 import { Funnel } from '@lib/domain/funnel';
 import { Metric } from '@lib/domain/metric';
 import { Segment } from '@lib/domain/segment';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { CellContext } from '@tanstack/react-table';
-import LabelType from './LabelType';
 
 export const Details = ({
   info,

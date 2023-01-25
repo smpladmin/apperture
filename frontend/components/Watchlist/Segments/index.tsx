@@ -1,16 +1,15 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import LoadingSpinner from '@components/LoadingSpinner';
-import { Funnel } from '@lib/domain/funnel';
+import { Provider } from '@lib/domain/provider';
 import { Segment } from '@lib/domain/segment';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
-import { getSavedFunnelsForUser } from '@lib/services/funnelService';
 import { getSavedSegmentsForUser } from '@lib/services/segmentService';
 import { Row } from '@tanstack/react-table';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import WatchlistTable from '../Table';
 
-const SavedSegments = () => {
+const SavedSegments = ({ provider }: { provider: Provider }) => {
   const [segments, setSegments] = useState<SavedItems[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -53,6 +52,7 @@ const SavedSegments = () => {
           Segments
         </Text>
         <Button
+          disabled={provider === Provider.GOOGLE}
           variant={'primary'}
           bg={'black.100'}
           px={'6'}

@@ -1,19 +1,28 @@
 import Layout from '@components/Layout';
 import SavedMetrics from '@components/Watchlist/Metrics';
 import { AppWithIntegrations } from '@lib/domain/app';
+import { Provider } from '@lib/domain/provider';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
+import { getDatasourceById } from '@lib/utils/common';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
 import React, { ReactNode } from 'react';
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  query,
+}) => {
   const token = getAuthToken(req);
   if (!token) {
     return {
       props: {},
     };
   }
+
   const apps = await _getAppsWithIntegrations(token);
+  const datasourceId = query.dsId;
+  const provider = getDatasourceById(apps, datasourceId as string)?.provider;
+
   if (!apps.length) {
     return {
       redirect: {
@@ -23,12 +32,12 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     };
   }
   return {
-    props: { apps },
+    props: { apps, provider },
   };
 };
 
-const ListMetrics = () => {
-  return <SavedMetrics />;
+const ListMetrics = ({ provider }: { provider: Provider }) => {
+  return <SavedMetrics provider={provider} />;
 };
 
 ListMetrics.getLayout = function getLayout(
