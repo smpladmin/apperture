@@ -53,12 +53,8 @@ class EventsService:
             events = self.events.get_aux_events(
                 datasource_id=datasource_id, table_name=table_name
             )
-        else:
-            events = self.events.get_events(datasource_id=datasource_id)
-        count = len(events)
-        events = events[:100] if len(events) > 100 else events
-
-        if is_aux:
+            count = len(events)
+            events = events[:100] if len(events) > 100 else events
             data = (
                 [
                     AuxTable1Event(name=name, timestamp=timestamp, user_id=user_id)
@@ -71,6 +67,8 @@ class EventsService:
                 ]
             )
         else:
+            events = self.events.get_events(datasource_id=datasource_id)
+            count = self.events.get_events_count(datasource_id=datasource_id)[0][0]
             data = [
                 Event(name=name, timestamp=timestamp, user_id=user_id, city=city)
                 for (name, timestamp, user_id, city) in events

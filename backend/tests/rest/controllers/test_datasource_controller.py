@@ -128,7 +128,9 @@ def test_get_event_properties(client_init, properties_service):
 
 
 def test_get_events(client_init, events_service):
-    response = client_init.get("/datasources/637739d383ea7fda83e72a2d/events?is_aux=False&table_name=All")
+    response = client_init.get(
+        "/datasources/637739d383ea7fda83e72a2d/events?is_aux=False&table_name=All"
+    )
     assert response.status_code == 200
     assert response.json() == {
         "count": 2,

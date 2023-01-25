@@ -18,6 +18,14 @@ class Events(EventsBase):
     def get_events(self, datasource_id: str):
         return self.execute_get_query(*self.build_events_query(datasource_id))
 
+    def get_events_count(self, datasource_id: str):
+        query = (
+            ClickHouseQuery.from_(self.table)
+            .select(fn.Count("*"))
+            .where(self.table.datasource_id == Parameter("%(ds_id)s"))
+        )
+        return self.execute_get_query(query.get_sql(), {"ds_id": datasource_id})
+
     def build_events_query(self, datasource_id: str):
         query = (
             ClickHouseQuery.from_(self.table)
@@ -28,6 +36,7 @@ class Events(EventsBase):
                 Field(f"properties.properties.$city"),
             )
             .where(self.table.datasource_id == Parameter("%(ds_id)s"))
+            .limit(100)
         )
         return query.get_sql(), {"ds_id": datasource_id}
 
