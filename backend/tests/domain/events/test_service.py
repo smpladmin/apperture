@@ -1,6 +1,8 @@
 from unittest.mock import MagicMock
 
 import pytest
+from domain.common.models import IntegrationProvider
+from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Node
 from domain.events.service import EventsService
 
@@ -15,6 +17,14 @@ class TestEventsService:
         self.props = ["prop1", "prop2", "prop3", "prop4"]
         self.date = "2022-01-01"
         self.ds_id = "test-id"
+        self.datasource = DataSource(
+            integration_id="636a1c61d715ca6baae65611",
+            app_id="636a1c61d715ca6baae65611",
+            user_id="636a1c61d715ca6baae65611",
+            provider=IntegrationProvider.MIXPANEL,
+            external_source_id="123",
+            version=DataSourceVersion.DEFAULT,
+        )
 
     @pytest.mark.asyncio
     async def test_update_events(self):
@@ -60,18 +70,34 @@ class TestEventsService:
         events = [
             ["otp_sent"],
             ["otp_received"],
-            ["otp_entered"],
+            ["documents_verified"],
         ]
-        ds_id = "mock-ds-id"
         self.events_repo.get_unique_events.return_value = events
 
-        nodes = await self.events_service.get_unique_nodes(ds_id)
+        nodes = await self.events_service.get_unique_nodes(self.datasource)
 
-        self.events_repo.get_unique_events.assert_called_once_with(ds_id)
+        self.events_repo.get_unique_events.assert_called_once_with(
+            str(self.datasource.id)
+        )
         assert nodes == [
-            Node(id="otp_sent", name="otp_sent"),
-            Node(id="otp_received", name="otp_received"),
-            Node(id="otp_entered", name="otp_entered"),
+            Node(
+                id="otp_sent",
+                name="otp_sent",
+                provider=IntegrationProvider.MIXPANEL,
+                source=IntegrationProvider.MIXPANEL,
+            ),
+            Node(
+                id="otp_received",
+                name="otp_received",
+                provider=IntegrationProvider.MIXPANEL,
+                source=IntegrationProvider.MIXPANEL,
+            ),
+            Node(
+                id="documents_verified",
+                name="documents_verified",
+                provider=IntegrationProvider.MIXPANEL,
+                source="Backend CRM",
+            ),
         ]
 
     def test_get_values_for_property(self):

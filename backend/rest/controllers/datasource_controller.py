@@ -43,8 +43,10 @@ async def get_edges(
 async def get_nodes(
     ds_id: str,
     event_service: EventsService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
-    return await event_service.get_unique_nodes(ds_id)
+    datasource = await ds_service.get_datasource(ds_id)
+    return await event_service.get_unique_nodes(datasource)
 
 
 @router.get("/datasources/{ds_id}/trends", response_model=list[NodeTrendResponse])
