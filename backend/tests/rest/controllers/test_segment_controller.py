@@ -238,7 +238,7 @@ def test_update_segment(
     )
 
 
-def test_get_segments(client_init, segment_service, saved_segment_with_user):
+def test_get_segments(client_init, segment_service):
     response = client_init.get("/segments?datasource_id=63761779818ec577b69c21e6")
     assert response.status_code == 200
     segment_service.get_segments_for_datasource_id.assert_called_once_with(

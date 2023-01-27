@@ -407,7 +407,7 @@ def metric_service(apperture_user_response):
 
 @pytest.fixture(scope="module")
 def segment_service(apperture_user_response):
-    segment_service = mock.MagicMock()
+    segment_service = mock.AsyncMock()
     Segment.get_settings = mock.MagicMock()
     computed_segment = ComputedSegment(
         count=2,
