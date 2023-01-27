@@ -10,7 +10,6 @@ import {
   Text,
   Tr,
 } from '@chakra-ui/react';
-import TableSkeleton from '@components/Skeleton/TableSkeleton';
 import { SanityData } from '@lib/domain/eventData';
 import {
   createColumnHelper,
@@ -71,7 +70,12 @@ const EventsTables = ({ eventData, selectedColumns }: EventsTablesProps) => {
             Showing:
           </Text>
 
-          <Text fontSize={'xs-14'} lineHeight={'xs-18'} fontWeight={'500'}>
+          <Text
+            fontSize={'xs-14'}
+            lineHeight={'xs-18'}
+            fontWeight={'500'}
+            data-testid="sanity-table-count"
+          >
             {eventData.count || 0} Records
           </Text>
         </Flex>
@@ -118,6 +122,7 @@ const EventsTables = ({ eventData, selectedColumns }: EventsTablesProps) => {
                 <Tr
                   key={row.id + index}
                   _hover={{ bg: 'white.100', cursorTo: 'pointer' }}
+                  data-testid="sanity-table-body-rows"
                 >
                   {row.getVisibleCells().map((cell, cellIndex) => {
                     return (

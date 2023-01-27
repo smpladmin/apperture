@@ -338,6 +338,10 @@ class Segments(EventsBase):
         )
         user_ids = list(set([x[0] for x in user_data]))
         segment_count = len(user_ids)
+
+        if segment_count == 0:
+            return [], segment_count
+
         user_ids = user_ids[:100]
         segment_data = [{"user_id": x} for x in user_ids]
         if not columns:
