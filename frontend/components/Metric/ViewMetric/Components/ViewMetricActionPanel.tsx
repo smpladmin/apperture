@@ -29,7 +29,7 @@ const ViewMetricActionPanel = ({
   eventData: MetricTrend[];
 }) => {
   const router = useRouter();
-  const { funnelId } = router?.query;
+  const { metricId } = router?.query;
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
 
   const handleNotificationClick = () => {
@@ -136,7 +136,7 @@ const ViewMetricActionPanel = ({
           isAlertsSheetOpen={isAlertsSheetOpen}
           closeAlertsSheet={onClose}
           variant={NotificationVariant.METRIC}
-          reference={funnelId as string}
+          reference={metricId as string}
           eventData={eventData}
           datasourceId={datasourceId}
         />
