@@ -1,11 +1,11 @@
-import { INode, Item } from '@antv/g6';
-import { NodeType } from './graph';
+import { INode } from '@antv/g6';
+import { Node } from '@lib/domain/node';
 
 export type InitialStateType = {
   nodesData: Array<INode>;
   activeNode: INode | null;
   isNodeSearched: boolean;
-  nodes: NodeType[];
+  nodes: Node[];
 };
 
 export interface ContextType {
@@ -35,5 +35,5 @@ export type LayoutActions =
     }
   | {
       type: Actions.SET_NODES;
-      payload: NodeType[];
+      payload: Node[];
     };

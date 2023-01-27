@@ -17,13 +17,13 @@ import {
   FunnelStepFilter,
 } from '@lib/domain/funnel';
 import { MapContext } from '@lib/contexts/mapContext';
-import { NodeType } from '@lib/types/graph';
 import FunnelStepFilterComponent from './FunnelStepFilters';
 import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
 import { cloneDeep } from 'lodash';
 import { FilterType, SegmentProperty } from '@lib/domain/segment';
 import { LOGAN } from '@theme/index';
+import { Node } from '@lib/domain/node';
 
 type FunnelComponentCardProps = {
   index: number;
@@ -48,7 +48,7 @@ const FunnelComponentCard = ({
 
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [isEventListOpen, setIsEventListOpen] = useState<boolean>(false);
-  const [eventsList, setEventsList] = useState<Array<NodeType>>([]);
+  const [eventsList, setEventsList] = useState<Array<Node>>([]);
   const [eventProperties, setEventProperties] = useState<string[]>([]);
   const [loadingEventProperties, setLoadingEventProperties] =
     useState<boolean>(false);
@@ -78,7 +78,7 @@ const FunnelComponentCard = ({
     fetchEventProperties();
   }, []);
 
-  const handleEventSelection = (selection: SegmentProperty) => {
+  const handleEventSelection = (selection: Node) => {
     setIsEventListOpen(false);
     const tempFunnelSteps = cloneDeep(funnelSteps);
     tempFunnelSteps[index]['event'] = selection.id;
@@ -180,6 +180,7 @@ const FunnelComponentCard = ({
               data={eventsList}
               onSubmit={handleEventSelection}
               listKey={'id'}
+              isNode
             />
           </Box>
         </Flex>

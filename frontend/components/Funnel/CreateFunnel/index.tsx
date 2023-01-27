@@ -4,7 +4,12 @@ import CreateFunnelAction from './CreateFunnelAction';
 import { useContext, useEffect, useState } from 'react';
 import { MapContext } from '@lib/contexts/mapContext';
 import FunnelEmptyState from '../components/FunnelEmptyState';
-import { FunnelData, FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
+import {
+  Funnel,
+  FunnelData,
+  FunnelStep,
+  FunnelTrendsData,
+} from '@lib/domain/funnel';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import TransientFunnelView from './TransientFunnelView';
@@ -18,70 +23,68 @@ import {
   getTransientTrendsData,
 } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
+import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel/util';
 
-type FunnelProps = {
-  name?: string;
-  steps?: FunnelStep[];
-  computedFunnel?: FunnelData[];
-  computedTrendsData?: FunnelTrendsData[];
-};
-
-const Funnel = ({
-  name,
-  steps,
-  computedFunnel,
-  computedTrendsData,
-}: FunnelProps) => {
+const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const {
     state: { nodes },
   } = useContext(MapContext);
 
   const router = useRouter();
-  const { dsId } = router.query;
+  const {
+    query: { dsId },
+  } = router;
 
-  const [funnelName, setFunnelName] = useState(name || 'Untitled Funnel');
-  const [funnelSteps, setFunnelSteps] = useState(
-    steps || [
-      { event: '', filters: [] },
-      { event: '', filters: [] },
-    ]
+  const datasourceId = (dsId as string) || savedFunnel?.datasourceId;
+  const [funnelName, setFunnelName] = useState<string>(
+    savedFunnel?.name || 'Untitled Funnel'
   );
-  const [funnelData, setFunnelData] = useState<FunnelData[]>(
-    computedFunnel || []
+  const [funnelSteps, setFunnelSteps] = useState<FunnelStep[]>(
+    savedFunnel?.steps
+      ? replaceFilterValueWithEmptyStringPlaceholder(savedFunnel.steps)
+      : [
+          { event: '', filters: [] },
+          { event: '', filters: [] },
+        ]
   );
-  const [trendsData, setTrendsData] = useState<FunnelTrendsData[]>(
-    computedTrendsData || []
+  const [funnelData, setFunnelData] = useState<FunnelData[]>([]);
+  const [trendsData, setTrendsData] = useState<FunnelTrendsData[]>([]);
+  const [isEmpty, setIsEmpty] = useState(
+    savedFunnel?.steps?.length ? false : true
   );
-  const [isEmpty, setIsEmpty] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(
+    Boolean(savedFunnel?.steps?.length)
+  );
   const [isStepAdded, setIsStepAdded] = useState(false);
 
   useEffect(() => {
-    if (getCountOfValidAddedSteps(funnelSteps, nodes) >= 2) {
+    if (getCountOfValidAddedSteps(funnelSteps) >= 2) {
       setIsEmpty(false);
     } else {
       setIsEmpty(true);
     }
-  }, [funnelSteps, nodes]);
+  }, [funnelSteps]);
 
   useEffect(() => {
     if (
-      getCountOfValidAddedSteps(funnelSteps, nodes) < 2 ||
+      getCountOfValidAddedSteps(funnelSteps) < 2 ||
       !isEveryFunnelStepFiltersValid(funnelSteps) ||
       isStepAdded
     ) {
       setIsStepAdded(false);
       return;
     }
+
     const getFunnelMetricsData = async () => {
       const [funnelData, trendsData] = await Promise.all([
-        getTransientFunnelData(dsId as string, filterFunnelSteps(funnelSteps)),
-        getTransientTrendsData(dsId as string, filterFunnelSteps(funnelSteps)),
+        getTransientFunnelData(datasourceId!!, filterFunnelSteps(funnelSteps)),
+        getTransientTrendsData(datasourceId!!, filterFunnelSteps(funnelSteps)),
       ]);
       setFunnelData(funnelData);
       setTrendsData(trendsData);
       setIsLoading(false);
     };
+
     setIsLoading(true);
     getFunnelMetricsData();
   }, [funnelSteps]);
@@ -113,4 +116,4 @@ const Funnel = ({
   );
 };
 
-export default Funnel;
+export default CreateFunnel;

@@ -1,8 +1,6 @@
 import { Button, Divider, Flex, IconButton, Text } from '@chakra-ui/react';
 import React from 'react';
-
 import { BASTILLE } from '@theme/index';
-
 import MetricViewComponentCard from './MetricViewComponentCard';
 import ActionMenu from '@components/ActionMenu';
 import { EventOrSegmentComponent } from '@lib/domain/metric';
@@ -12,10 +10,12 @@ const ViewMetricActionPanel = ({
   metricName,
   metricDefinition,
   aggregates,
+  datasourceId,
 }: {
   metricName: string;
   metricDefinition: string;
   aggregates: EventOrSegmentComponent[];
+  datasourceId: string;
 }) => {
   const router = useRouter();
   return (
@@ -30,7 +30,8 @@ const ViewMetricActionPanel = ({
           bg={'black.20'}
           onClick={() => {
             router.push({
-              pathname: '/analytics/saved',
+              pathname: '/analytics/metric/list/[dsId]',
+              query: { dsId: datasourceId },
             });
           }}
         />
@@ -42,6 +43,12 @@ const ViewMetricActionPanel = ({
           color={'white'}
           variant={'primary'}
           data-testid={'edit-funnel'}
+          onClick={() =>
+            router.push({
+              pathname: '/analytics/metric/edit/[id]',
+              query: { id: router.query.metricId, dsId: router.query.dsId },
+            })
+          }
         >
           <Flex alignItems={'center'} gap={'1'}>
             <i className="ri-edit-fill"></i>

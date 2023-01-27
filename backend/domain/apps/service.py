@@ -17,7 +17,8 @@ class AppService:
             Or(
                 App.user_id == user.id,
                 In(App.shared_with, [user.id]),
-            )
+            ),
+            App.enabled == True,
         ).to_list()
 
     async def get_app(self, id: str) -> App:

@@ -40,7 +40,10 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
   };
 
   const handleGoBack = () => {
-    router.push('/analytics/saved');
+    router.push({
+      pathname: '/analytics/funnel/list/[dsId]',
+      query: { dsId: datasourceId },
+    });
   };
 
   const handleNotificationClick = () => {
@@ -59,7 +62,7 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
       <Flex justifyContent={'space-between'} alignItems={'center'}>
         <IconButton
           aria-label="close"
-          variant={'secondary'}
+          variant={'primary'}
           icon={<i className="ri-arrow-left-line"></i>}
           rounded={'full'}
           color={'white.DEFAULT'}

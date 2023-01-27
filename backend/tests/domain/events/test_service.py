@@ -1,7 +1,11 @@
+from datetime import datetime
 from unittest.mock import MagicMock
 
 import pytest
+from domain.common.models import IntegrationProvider
+from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Node
+from domain.events.models import Event, EventsData
 from domain.events.service import EventsService
 
 
@@ -15,6 +19,14 @@ class TestEventsService:
         self.props = ["prop1", "prop2", "prop3", "prop4"]
         self.date = "2022-01-01"
         self.ds_id = "test-id"
+        self.datasource = DataSource(
+            integration_id="636a1c61d715ca6baae65611",
+            app_id="636a1c61d715ca6baae65611",
+            user_id="636a1c61d715ca6baae65611",
+            provider=IntegrationProvider.MIXPANEL,
+            external_source_id="123",
+            version=DataSourceVersion.DEFAULT,
+        )
 
     @pytest.mark.asyncio
     async def test_update_events(self):
@@ -60,18 +72,34 @@ class TestEventsService:
         events = [
             ["otp_sent"],
             ["otp_received"],
-            ["otp_entered"],
+            ["documents_verified"],
         ]
-        ds_id = "mock-ds-id"
         self.events_repo.get_unique_events.return_value = events
 
-        nodes = await self.events_service.get_unique_nodes(ds_id)
+        nodes = await self.events_service.get_unique_nodes(self.datasource)
 
-        self.events_repo.get_unique_events.assert_called_once_with(ds_id)
+        self.events_repo.get_unique_events.assert_called_once_with(
+            str(self.datasource.id)
+        )
         assert nodes == [
-            Node(id="otp_sent", name="otp_sent"),
-            Node(id="otp_received", name="otp_received"),
-            Node(id="otp_entered", name="otp_entered"),
+            Node(
+                id="otp_sent",
+                name="otp_sent",
+                provider=IntegrationProvider.MIXPANEL,
+                source=IntegrationProvider.MIXPANEL,
+            ),
+            Node(
+                id="otp_received",
+                name="otp_received",
+                provider=IntegrationProvider.MIXPANEL,
+                source=IntegrationProvider.MIXPANEL,
+            ),
+            Node(
+                id="documents_verified",
+                name="documents_verified",
+                provider=IntegrationProvider.MIXPANEL,
+                source="Backend CRM",
+            ),
         ]
 
     def test_get_values_for_property(self):
@@ -92,4 +120,45 @@ class TestEventsService:
                 "event_property": "country",
                 "start_date": "1970-01-01",
             }
+        )
+
+    def test_get_events(self):
+        self.events_repo.get_events.return_value = [
+            (
+                "Content_Like",
+                datetime(2023, 1, 13, 15, 23, 38),
+                "mthdas8@gmail.com",
+                "Delhi",
+            ),
+            (
+                "WebView_Open",
+                datetime(2023, 1, 13, 15, 23, 41),
+                "mthdas8@gmail.com",
+                "Delhi",
+            ),
+        ]
+        self.events_repo.get_events_count.return_value = ((2,),)
+
+        assert self.events_service.get_events(
+            datasource_id=self.ds_id, is_aux=False, table_name="All"
+        ) == EventsData(
+            count=2,
+            data=[
+                Event(
+                    name="Content_Like",
+                    timestamp=datetime(2023, 1, 13, 15, 23, 38),
+                    user_id="mthdas8@gmail.com",
+                    city="Delhi",
+                ),
+                Event(
+                    name="WebView_Open",
+                    timestamp=datetime(2023, 1, 13, 15, 23, 41),
+                    user_id="mthdas8@gmail.com",
+                    city="Delhi",
+                ),
+            ],
+        )
+
+        self.events_repo.get_events.assert_called_once_with(
+            **{"datasource_id": "test-id"}
         )

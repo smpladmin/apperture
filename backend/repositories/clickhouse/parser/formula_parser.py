@@ -38,7 +38,7 @@ class PostFixConverter:
     # A utility function to check is the given character
     # is operand
     def isOperand(self, ch):
-        return ch.isalnum() or ch=='.'
+        return ch.isalnum() or ch == "."
 
     # Check if the precedence of operator is strictly
     # less than top of stack or not
@@ -88,14 +88,13 @@ class PostFixConverter:
 
 
 class FormulaParser:
-
     def __init__(self):
-        self.operators=['*', '+', '/', '-']
+        self.operators = ["*", "+", "/", "-"]
 
-    def isOperator(self,character):
-        return self.operators.count(character)>0
-    
-    def operate(self,character,operand1,operand2,denominators,expression):
+    def isOperator(self, character):
+        return self.operators.count(character) > 0
+
+    def operate(self, character, operand1, operand2, denominators, expression):
         if character == "+":
             expression = operand1 + operand2
         elif character == "-":
@@ -105,18 +104,20 @@ class FormulaParser:
             expression = operand1 / operand2
         elif character == "*":
             expression = operand1 * operand2
-        return expression,denominators
-    
-    def parseDigits(self,postfix_expression,start_index,character):
+        return expression, denominators
+
+    def parseDigits(self, postfix_expression, start_index, character):
         isDecimal = False
-        end_index=start_index+1
-        candidate_character=postfix_expression[end_index]
-        while (candidate_character.isdigit() or candidate_character=='.') and end_index<len(postfix_expression):
-            if(candidate_character=='.'):
-                isDecimal=True
-            character+=candidate_character
-            end_index+=1
-            candidate_character=postfix_expression[end_index]
+        end_index = start_index + 1
+        candidate_character = postfix_expression[end_index]
+        while (
+            candidate_character.isdigit() or candidate_character == "."
+        ) and end_index < len(postfix_expression):
+            if candidate_character == ".":
+                isDecimal = True
+            character += candidate_character
+            end_index += 1
+            candidate_character = postfix_expression[end_index]
         return end_index, float(character) if isDecimal else int(character)
 
     def parse(self, function: str, wrapper_function):
@@ -130,32 +131,36 @@ class FormulaParser:
             expression = None
             stack = []
             denominators = []
-            start_index=0
+            start_index = 0
             while start_index < len(postfix_expression):
-                character=postfix_expression[start_index].upper()
+                character = postfix_expression[start_index].upper()
                 if self.isOperator(character):
                     operand2 = stack.pop()
                     operand1 = stack.pop()
-                    expression,denominators = self.operate(
+                    expression, denominators = self.operate(
                         character=character,
                         operand1=operand1,
                         operand2=operand2,
                         denominators=denominators,
-                        expression=expression
+                        expression=expression,
                     )
                     stack.append(expression)
-                    start_index+=1
+                    start_index += 1
                 elif character.isalpha():
                     stack.append(wrapper_function(Field(character)))
-                    start_index+=1
+                    start_index += 1
                 elif character.isnumeric():
-                    start_index,number =self.parseDigits(postfix_expression=postfix_expression,start_index=start_index,character=character)
-                    stack.append(number)  
+                    start_index, number = self.parseDigits(
+                        postfix_expression=postfix_expression,
+                        start_index=start_index,
+                        character=character,
+                    )
+                    stack.append(number)
         except:
             logging.error(f"Invalid formula expression:\t{function}")
             raise ValueError("Invalid formula expression")
         if len(stack) == 1:
-            return  stack[0], denominators
+            return stack[0], denominators
         else:
             logging.error(f"Invalid formula expression:\t{function}")
             raise ValueError("Invalid formula expression:\t{function}")

@@ -1,10 +1,23 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from 'tests/util';
 import ViewFunnel from './index';
+import * as APIService from '@lib/services/funnelService';
+import { Funnel } from '@lib/domain/funnel';
+
+jest.mock('@lib/services/funnelService');
 
 describe('View Funnel', () => {
-  const props = {
+  let mockedTransientFunnel: jest.Mock;
+  let mockedTransientTrendsData: jest.Mock;
+
+  const props: Funnel = {
     _id: '64834034092324',
     appId: '645439584475',
     datasourceId: '654212033222',
@@ -14,35 +27,72 @@ describe('View Funnel', () => {
       { event: 'Chapter_Click', filters: [] },
       { event: 'Topic_Click', filters: [] },
     ],
-    computedFunnel: [
-      { step: 1, event: 'Video_Click', users: 2000, conversion: 100, drop: 0 },
-      { step: 2, event: 'Chapter_Click', users: 950, conversion: 75, drop: 25 },
-      { step: 3, event: 'Topic_Click', users: 750, conversion: 50, drop: 25 },
-    ],
+    updatedAt: new Date(),
     randomSequence: false,
-    computedTrendsData: [
-      {
-        conversion: 23.1,
-        startDate: new Date('2022-10-11'),
-        endDate: new Date('2022-10-17'),
-        firstStepUsers: 49,
-        lastStepUsers: 8,
-      },
-    ],
+    user: {
+      email: 'apperture@parallelhq.com',
+      firstName: 'Apperture',
+      lastName: 'Analytics',
+      picture: 'https://lh2.googleusercontent.com',
+      slackChannel: null,
+    },
   };
 
-  it('renders funnel name, first step and last step name and (n-2) steps count', () => {
-    render(
-      <RouterContext.Provider
-        value={createMockRouter({ query: { funnelId: '64349843748' } })}
-      >
-        <ViewFunnel
-          computedFunnelData={{ ...props }}
-          computedTrendsData={props.computedTrendsData}
-        />
-      </RouterContext.Provider>
-    );
+  const funnelData = [
+    {
+      step: 1,
+      event: 'Video_Click',
+      users: 2000,
+      conversion: 100,
+      drop: 0,
+    },
+    {
+      step: 2,
+      event: 'Chapter_Click',
+      users: 950,
+      conversion: 75,
+      drop: 25,
+    },
+    { step: 3, event: 'Topic_Click', users: 750, conversion: 50, drop: 25 },
+  ];
 
+  const trendsData = [
+    {
+      conversion: 23.1,
+      startDate: new Date('2022-10-11'),
+      endDate: new Date('2022-10-17'),
+      firstStepUsers: 49,
+      lastStepUsers: 8,
+    },
+  ];
+
+  const renderViewFunnel = async (
+    router = createMockRouter({ query: { funnelId: '64349843748' } }),
+    savedFunnel = props
+  ) => {
+    await act(async () => {
+      render(
+        <RouterContext.Provider value={router}>
+          <ViewFunnel savedFunnel={savedFunnel} />
+        </RouterContext.Provider>
+      );
+    });
+  };
+
+  beforeEach(() => {
+    mockedTransientFunnel = jest.mocked(APIService.getTransientFunnelData);
+    mockedTransientTrendsData = jest.mocked(APIService.getTransientTrendsData);
+
+    mockedTransientFunnel.mockReturnValue(funnelData);
+    mockedTransientTrendsData.mockReturnValue(trendsData);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders funnel name, first step and last step name and (n-2) steps count', async () => {
+    await renderViewFunnel();
     const funnelName = screen.getByTestId('funnel-name');
     const firstStepName = screen.getByTestId('first-step');
     const lastStepName = screen.getByTestId('last-step');
@@ -56,26 +106,18 @@ describe('View Funnel', () => {
     );
   });
 
-  it('should not render intermediate steps count text if steps count is 2', () => {
-    render(
-      <RouterContext.Provider
-        value={createMockRouter({ query: { funnelId: '64349843748' } })}
-      >
-        <ViewFunnel
-          computedFunnelData={{
-            ...{
-              ...props,
-              steps: [
-                { event: 'Video_Click', filters: [] },
-                { event: 'Chapter_Click', filters: [] },
-              ],
-            },
-          }}
-          computedTrendsData={props.computedTrendsData}
-        />
-      </RouterContext.Provider>
+  it('should not render intermediate steps count text if steps count is 2', async () => {
+    const savedFunnel = {
+      ...props,
+      steps: [
+        { event: 'Video_Click', filters: [] },
+        { event: 'Chapter_Click', filters: [] },
+      ],
+    };
+    await renderViewFunnel(
+      createMockRouter({ query: { funnelId: '64349843748' } }),
+      savedFunnel
     );
-
     const intermediateSteps = screen.getByTestId('intermediate-steps');
     expect(intermediateSteps.textContent).toEqual('');
   });
@@ -85,14 +127,7 @@ describe('View Funnel', () => {
       query: { funnelId: '64349843748' },
       pathname: '/analytics/funnel/view',
     });
-    render(
-      <RouterContext.Provider value={router}>
-        <ViewFunnel
-          computedFunnelData={{ ...props }}
-          computedTrendsData={props.computedTrendsData}
-        />
-      </RouterContext.Provider>
-    );
+    await renderViewFunnel(router);
 
     const editFunnelButton = screen.getByTestId('edit-funnel');
     fireEvent.click(editFunnelButton);
@@ -109,14 +144,7 @@ describe('View Funnel', () => {
       query: { funnelId: '64349843748' },
       pathname: '/analytics/funnel/view',
     });
-    render(
-      <RouterContext.Provider value={router}>
-        <ViewFunnel
-          computedFunnelData={{ ...props }}
-          computedTrendsData={props.computedTrendsData}
-        />
-      </RouterContext.Provider>
-    );
+    await renderViewFunnel(router);
 
     const editFunnelButton = screen.getByTestId('edit-funnel');
     fireEvent.click(editFunnelButton);

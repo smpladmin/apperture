@@ -14,6 +14,7 @@ const MobileSidemenuOption = ({
 }: MobileSidemenuOptionProps) => {
   return (
     <Flex
+      width={'full'}
       height={'13'}
       borderRadius={'3'}
       justifyContent={'flex-start'}

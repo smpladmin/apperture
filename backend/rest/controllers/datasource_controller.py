@@ -1,7 +1,9 @@
 from datetime import datetime as dt
-from typing import List
+from typing import List, Optional, Union
 
 from fastapi import APIRouter, Depends
+from fastapi_cache.decorator import cache
+from cache.cache import CACHE_EXPIRY_24_HOURS, datasource_key_builder
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.events.service import EventsService
@@ -13,6 +15,7 @@ from rest.dtos.edges import (
 )
 from domain.edge.models import TrendType
 from domain.properties.service import PropertiesService
+from rest.dtos.events import EventsResponse
 from rest.middlewares import validate_jwt
 
 
@@ -24,6 +27,7 @@ router = APIRouter(
 
 
 @router.get("/datasources/{ds_id}/edges", response_model=list[AggregatedEdgeResponse])
+@cache(expire=CACHE_EXPIRY_24_HOURS, key_builder=datasource_key_builder)
 async def get_edges(
     ds_id: str,
     start_date: str = "1970-01-01",
@@ -36,14 +40,18 @@ async def get_edges(
 
 
 @router.get("/datasources/{ds_id}/nodes")
-async def get_edges(
+@cache(expire=CACHE_EXPIRY_24_HOURS, key_builder=datasource_key_builder)
+async def get_nodes(
     ds_id: str,
     event_service: EventsService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
-    return await event_service.get_unique_nodes(ds_id)
+    datasource = await ds_service.get_datasource(ds_id)
+    return await event_service.get_unique_nodes(datasource)
 
 
 @router.get("/datasources/{ds_id}/trends", response_model=list[NodeTrendResponse])
+@cache(expire=CACHE_EXPIRY_24_HOURS, key_builder=datasource_key_builder)
 async def get_trend_nodes(
     ds_id: str,
     node: str,
@@ -66,6 +74,7 @@ async def get_trend_nodes(
 
 
 @router.get("/datasources/{ds_id}/sankey", response_model=list[NodeSankeyResponse])
+@cache(expire=CACHE_EXPIRY_24_HOURS, key_builder=datasource_key_builder)
 async def get_sankey_nodes(
     ds_id: str,
     node: str,
@@ -84,6 +93,7 @@ async def get_sankey_nodes(
     "/datasources/{ds_id}/node_significance",
     response_model=list[NodeSignificanceResponse],
 )
+@cache(expire=CACHE_EXPIRY_24_HOURS, key_builder=datasource_key_builder)
 async def get_node_significance(
     ds_id: str,
     node: str,
@@ -119,4 +129,16 @@ async def get_event_property_values(
         event_property=event_property,
         start_date=start_date,
         end_date=end_date,
+    )
+
+
+@router.get("/datasources/{ds_id}/events", response_model=EventsResponse)
+async def get_events(
+    ds_id: str,
+    table_name: str,
+    is_aux: bool = False,
+    events_service: EventsService = Depends(),
+):
+    return events_service.get_events(
+        datasource_id=ds_id, is_aux=is_aux, table_name=table_name
     )

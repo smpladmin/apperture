@@ -65,7 +65,6 @@ const MetricTrend = ({ data, definition }: ComputedMetric) => {
         </Tag>
       </Flex>
       <LineChart {...config} data={data} />
-      <Box width={'full'} ref={ref} h={'88'} data-testid={'funnel-trend'}></Box>
     </Flex>
   );
 };

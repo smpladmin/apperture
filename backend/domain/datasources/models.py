@@ -21,6 +21,7 @@ class DataSource(Document):
     name: Optional[str]
     external_source_id: str
     version: DataSourceVersion
+    enabled: bool = True
 
     class Settings:
         name = "datasources"

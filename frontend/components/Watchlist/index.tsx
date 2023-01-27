@@ -8,7 +8,7 @@ import { WatchListItemOptions } from './util';
 import WatchListItemTypeOptions from './WatchListItemOptions';
 import { getSavedSegmentsForUser } from '@lib/services/segmentService';
 import { getSavedMetricsForUser } from '@lib/services/metricService';
-import { ComputedFunnel } from '@lib/domain/funnel';
+import { Funnel } from '@lib/domain/funnel';
 import { Segment } from '@lib/domain/segment';
 import { Metric } from '@lib/domain/metric';
 
@@ -22,7 +22,7 @@ const Watchlist = () => {
 
   const getFunnels = async () => {
     const savedFunnels = await getSavedFunnelsForUser();
-    return savedFunnels.map((funnel: ComputedFunnel) => {
+    return savedFunnels.map((funnel: Funnel) => {
       return { type: WatchListItemType.FUNNELS, details: funnel };
     });
   };
@@ -115,7 +115,10 @@ const Watchlist = () => {
             <LoadingSpinner />
           </Flex>
         ) : (
-          <WatchListTable savedItemsData={savedItemsData} />
+          <WatchListTable
+            savedItemsData={savedItemsData}
+            onRowClick={() => {}}
+          />
         )}
       </Box>
     </Box>

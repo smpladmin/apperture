@@ -7,6 +7,7 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
+import LoadingSpinner from '@components/LoadingSpinner';
 import {
   FunnelData,
   FunnelStep,
@@ -24,11 +25,13 @@ const RightView = ({
   computedFunnel,
   computedTrendsData,
   datasourceId,
+  isLoading,
 }: {
   funnelSteps: FunnelStep[];
   computedFunnel: FunnelData[];
   computedTrendsData: FunnelTrendsData[];
   datasourceId: string;
+  isLoading: boolean;
 }) => {
   const router = useRouter();
   const { dsId } = router.query;
@@ -37,26 +40,30 @@ const RightView = ({
     onOpen: onDrawerOpen,
     onClose: onDrawerClose,
   } = useDisclosure();
-  const [dataSource, setDataSource] = useState(dsId||datasourceId)
+  const [dataSource, setDataSource] = useState(dsId || datasourceId);
   const [conversionData, setConversionData] =
     useState<FunnelEventConversion | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
 
   const funnelConversion =
-    computedFunnel?.[computedFunnel?.length - 1]?.['conversion'];
-  const funnelLastStepUsers = computedFunnel?.[computedFunnel?.length - 1]?.['users'];
+    computedFunnel?.[computedFunnel?.length - 1]?.['conversion'] || 0;
+
+  const funnelLastStepUsers =
+    computedFunnel?.[computedFunnel?.length - 1]?.['users'] || 0;
+
   const [selectedFunnelSteps, setSelectedFunnelSteps] = useState<FunnelStep[]>(
-      []
+    []
   );
-    
+
   const handleChartClick = async (properties: any) => {
     onDrawerOpen();
     const { data } = properties.data;
     const { step, event } = data;
     setSelectedEvent(event.trim());
     const selectedSteps = funnelSteps.slice(0, step);
-    setSelectedFunnelSteps(selectedSteps)
+    setSelectedFunnelSteps(selectedSteps);
   };
+
   return (
     <ViewPanel>
       <Flex
@@ -67,22 +74,32 @@ const RightView = ({
       >
         <Flex justifyContent={'space-between'} alignItems={'center'}>
           <Flex direction={'column'} gap={'1'}>
-            <Text fontSize={'sh-18'} lineHeight={'sh-18'} fontWeight={'500'}>
-              <Highlight
-                query={`${funnelConversion}%`}
-                styles={{ fontSize: 'sh-28', fontWeight: 700 }}
-              >
-                {`${funnelConversion}% Conversion`}
-              </Highlight>
-            </Text>
-            <Text
-              fontSize={'base'}
-              lineHeight={'base'}
-              fontWeight={'400'}
-              color={'grey.100'}
-            >
-              {`${funnelLastStepUsers} users`}
-            </Text>
+            {isLoading ? (
+              <LoadingSpinner />
+            ) : (
+              <>
+                <Text
+                  fontSize={'sh-18'}
+                  lineHeight={'sh-18'}
+                  fontWeight={'500'}
+                >
+                  <Highlight
+                    query={`${funnelConversion}%`}
+                    styles={{ fontSize: 'sh-28', fontWeight: 700 }}
+                  >
+                    {`${funnelConversion}% Conversion`}
+                  </Highlight>
+                </Text>
+                <Text
+                  fontSize={'base'}
+                  lineHeight={'base'}
+                  fontWeight={'400'}
+                  color={'grey.100'}
+                >
+                  {`${funnelLastStepUsers} users`}
+                </Text>
+              </>
+            )}
           </Flex>
           <Button
             h={'15'}
@@ -107,7 +124,18 @@ const RightView = ({
           >
             Funnel
           </Text>
-          {computedFunnel?.length ? (
+
+          {isLoading ? (
+            <Flex
+              w="full"
+              h="full"
+              justifyContent={'center'}
+              alignItems={'center'}
+              minH={'50'}
+            >
+              <LoadingSpinner />
+            </Flex>
+          ) : computedFunnel?.length ? (
             <FunnelChart
               data={computedFunnel}
               handleChartClick={handleChartClick}
@@ -127,7 +155,17 @@ const RightView = ({
           >
             Trend
           </Text>
-          {computedTrendsData?.length ? (
+          {isLoading ? (
+            <Flex
+              w="full"
+              h="full"
+              justifyContent={'center'}
+              alignItems={'center'}
+              minH={'50'}
+            >
+              <LoadingSpinner />
+            </Flex>
+          ) : computedTrendsData?.length ? (
             <Trend data={computedTrendsData} />
           ) : null}
         </Flex>

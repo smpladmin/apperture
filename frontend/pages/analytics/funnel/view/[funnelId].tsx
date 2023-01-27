@@ -1,13 +1,10 @@
-import Funnel from '@components/Funnel/ViewFunnel';
+import ViewFunnelComponent from '@components/Funnel/ViewFunnel';
 import Layout from '@components/Layout';
 import { AppWithIntegrations } from '@lib/domain/app';
-import { ComputedFunnel, FunnelTrendsData } from '@lib/domain/funnel';
+import { Funnel } from '@lib/domain/funnel';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { _getEdges } from '@lib/services/datasourceService';
-import {
-  _getComputedFunnelData,
-  _getComputedTrendsData,
-} from '@lib/services/funnelService';
+import { _getSavedFunnel } from '@lib/services/funnelService';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
 import { ReactElement } from 'react';
@@ -22,12 +19,8 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
-  const { funnelId } = query;
   const apps = await _getAppsWithIntegrations(token);
-  const [computedFunnelData, computedTrendsData] = await Promise.all([
-    _getComputedFunnelData(token, funnelId as string),
-    _getComputedTrendsData(token, funnelId as string),
-  ]);
+  const savedFunnel = await _getSavedFunnel(token, query.funnelId as string);
 
   if (!apps.length) {
     return {
@@ -37,19 +30,23 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
+
+  if (!savedFunnel) {
+    return {
+      redirect: {
+        destination: '/404',
+      },
+      props: {},
+    };
+  }
+
   return {
-    props: { apps, computedFunnelData, computedTrendsData },
+    props: { apps, savedFunnel },
   };
 };
 
-const ViewFunnel = ({
-  computedFunnelData,
-  computedTrendsData,
-}: {
-  computedFunnelData: ComputedFunnel;
-  computedTrendsData: FunnelTrendsData[];
-}) => {
-  return <Funnel {...{ computedFunnelData, computedTrendsData }} />;
+const ViewFunnel = ({ savedFunnel }: { savedFunnel: Funnel }) => {
+  return <ViewFunnelComponent savedFunnel={savedFunnel} />;
 };
 
 ViewFunnel.getLayout = function getLayout(

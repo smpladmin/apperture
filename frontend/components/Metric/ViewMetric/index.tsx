@@ -38,6 +38,7 @@ const ViewMetric = ({ savedMetric }: { savedMetric: Metric }) => {
           metricDefinition={savedMetric.function}
           metricName={savedMetric.name}
           aggregates={savedMetric.aggregates}
+          datasourceId={savedMetric.datasourceId}
         />
       </ActionPanel>
       <ViewPanel>

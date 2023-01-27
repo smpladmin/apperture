@@ -8,13 +8,12 @@ import {
 import React from 'react';
 import {
   getCountOfValidAddedSteps,
-  isEveryStepValid,
-  isEveryNonEmptyStepValid,
   transformFunnelData,
   isEveryFunnelStepFiltersValid,
+  replaceFilterValueWithEmptyStringPlaceholder,
 } from '../util';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
-import Funnel from './index';
+import CreateFunnel from './index';
 import { createMockRouter } from 'tests/util';
 import * as APIService from '@lib/services/funnelService';
 import { getSearchResult } from '@lib/utils/common';
@@ -24,6 +23,7 @@ import {
 } from '@lib/services/datasourceService';
 import { MapContext } from '@lib/contexts/mapContext';
 import { NodeType } from '@lib/types/graph';
+import { Funnel } from '@lib/domain/funnel';
 
 jest.mock('../util');
 jest.mock('@lib/services/funnelService');
@@ -32,9 +32,7 @@ jest.mock('@lib/services/datasourceService');
 
 describe('create funnel', () => {
   let mockedGetCountOfValidAddedSteps: jest.Mock;
-  let mockedIsEveryStepValid: jest.Mock;
   let mockedSearchResult: jest.Mock;
-  let mockedIsEveryNonEmptyStepValid: jest.Mock;
   let mockedIsEveryFunnelStepFiltersValid: jest.Mock;
   let mockedTransformFunnelData: jest.Mock;
   let mockedGetTransientFunnelData: jest.Mock;
@@ -42,6 +40,7 @@ describe('create funnel', () => {
   let mockUpdateFunnel: jest.Mock;
   let mockedGetEventProperties: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
+  let mockedReplaceFilterValueWithEmptyStringPlaceholder: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -57,34 +56,33 @@ describe('create funnel', () => {
     ['Bengaluru'],
   ];
 
-  const renderCreateFunnel = async (
-    router = createMockRouter({ query: { dsId: '654212033222' } }),
-    props = {}
-  ) => {
-    await act(async () => {
-      render(
-        <RouterContext.Provider value={router}>
-          <MapContext.Provider
-            value={{
-              state: {
-                nodes: [
-                  { id: 'Video_Click', label: 'Video_Click' },
-                  { id: 'Chapter_Click', label: 'Video_Click' },
-                  { id: 'Topic_Click', label: 'Video_Click' },
-                ] as NodeType[],
-                nodesData: [],
-                activeNode: null,
-                isNodeSearched: false,
-              },
-              dispatch: () => {},
-            }}
-          >
-            <Funnel {...props} />
-          </MapContext.Provider>
-        </RouterContext.Provider>
-      );
-    });
+  const computedFunnel = {
+    _id: '64834034092324',
+    appId: '645439584475',
+    datasourceId: '654212033222',
+    name: 'Test Funnel',
+    steps: [
+      { event: 'Video_Click', filters: [] },
+      { event: 'Chapter_Click', filters: [] },
+      { event: 'Topic_Click', filters: [] },
+    ],
+    computedFunnel: [
+      { step: 1, event: 'Video_Click', users: 2000, conversion: 100, drop: 0 },
+      { step: 2, event: 'Chapter_Click', users: 950, conversion: 75, drop: 25 },
+      { step: 3, event: 'Topic_Click', users: 750, conversion: 50, drop: 25 },
+    ],
+    randomSequence: false,
   };
+
+  const computedTrendsData = [
+    {
+      conversion: 23.1,
+      startDate: new Date('2022-10-11'),
+      endDate: new Date('2022-10-17'),
+      firstStepUsers: 49,
+      lastStepUsers: 8,
+    },
+  ];
 
   const getEventFilterText = (eventFilters: HTMLElement[], index: number) => {
     return Array.from(eventFilters[index].getElementsByTagName('p')).map(
@@ -126,11 +124,67 @@ describe('create funnel', () => {
     });
   };
 
+  const props: Funnel = {
+    _id: '64834034092324',
+    appId: '645439584475',
+    datasourceId: '654212033222',
+    name: 'Test Funnel',
+    steps: [
+      { event: 'Video_Click', filters: [] },
+      { event: 'Chapter_Click', filters: [] },
+      { event: 'Topic_Click', filters: [] },
+    ],
+    updatedAt: new Date(),
+    randomSequence: false,
+    user: {
+      email: 'apperture@parallelhq.com',
+      firstName: 'Apperture',
+      lastName: 'Analytics',
+      picture: 'https://lh2.googleusercontent.com',
+      slackChannel: null,
+    },
+  };
+
+  const renderCreateFunnel = async (
+    router = createMockRouter({
+      pathname: '/analytics/funnel/create',
+      query: { dsId: '654212033222' },
+    }),
+    renderWithProps = false,
+    savedFunnel = props
+  ) => {
+    await act(async () => {
+      render(
+        <RouterContext.Provider value={router}>
+          <MapContext.Provider
+            value={{
+              state: {
+                nodes: [
+                  { id: 'Video_Click', label: 'Video_Click' },
+                  { id: 'Chapter_Click', label: 'Video_Click' },
+                  { id: 'Topic_Click', label: 'Video_Click' },
+                ] as NodeType[],
+                nodesData: [],
+                activeNode: null,
+                isNodeSearched: false,
+              },
+              dispatch: () => {},
+            }}
+          >
+            {renderWithProps ? (
+              <CreateFunnel savedFunnel={savedFunnel} />
+            ) : (
+              <CreateFunnel />
+            )}
+          </MapContext.Provider>
+        </RouterContext.Provider>
+      );
+    });
+  };
+
   beforeEach(() => {
     mockedGetCountOfValidAddedSteps = jest.mocked(getCountOfValidAddedSteps);
-    mockedIsEveryStepValid = jest.mocked(isEveryStepValid);
     mockedSearchResult = jest.mocked(getSearchResult);
-    mockedIsEveryNonEmptyStepValid = jest.mocked(isEveryNonEmptyStepValid);
     mockedTransformFunnelData = jest.mocked(transformFunnelData);
     mockedGetTransientFunnelData = jest.mocked(
       APIService.getTransientFunnelData
@@ -142,9 +196,11 @@ describe('create funnel', () => {
     mockedIsEveryFunnelStepFiltersValid = jest.mocked(
       isEveryFunnelStepFiltersValid
     );
+    mockedReplaceFilterValueWithEmptyStringPlaceholder = jest.mocked(
+      replaceFilterValueWithEmptyStringPlaceholder
+    );
 
     mockedGetCountOfValidAddedSteps.mockReturnValue(2);
-    mockedIsEveryStepValid.mockReturnValue(true);
     mockedIsEveryFunnelStepFiltersValid.mockReturnValue(true);
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetEventPropertiesValue.mockReturnValue(eventPropertiesValues);
@@ -158,7 +214,6 @@ describe('create funnel', () => {
 
   describe('create funnel action', () => {
     it('save button is rendered and disabled when steps are not valid', async () => {
-      mockedIsEveryStepValid.mockReturnValue(false);
       mockedIsEveryFunnelStepFiltersValid.mockReturnValue(false);
       await renderCreateFunnel();
       const saveButton = screen.getByTestId('save');
@@ -280,6 +335,10 @@ describe('create funnel', () => {
 
     it('should update the funnel when click on save button on edit page', async () => {
       mockedSearchResult.mockReturnValue([{ id: 'Chapter_Click' }]);
+      mockedReplaceFilterValueWithEmptyStringPlaceholder.mockReturnValue(
+        computedFunnel.steps
+      );
+
       mockUpdateFunnel.mockReturnValue({
         status: 200,
         datasourceId: '654212033222',
@@ -313,7 +372,6 @@ describe('create funnel', () => {
     it('should show searchable dropdown and be able to search and select search result and update the event name for step', async () => {
       const searchResults = [{ id: 'Chapter_Click' }, { id: 'Chapter_Open' }];
       mockedSearchResult.mockReturnValue(searchResults);
-      mockedIsEveryNonEmptyStepValid.mockReturnValue(true);
       await renderCreateFunnel();
 
       const eventName = screen.getAllByTestId('event-name');
@@ -351,7 +409,6 @@ describe('create funnel', () => {
         { event: 'Chapter_Click', users: 1000, conversion: 50 },
       ]);
       mockedSearchResult.mockReturnValue([{ id: 'Chapter_Click' }]);
-      mockedIsEveryNonEmptyStepValid.mockReturnValue(true);
       mockedTransformFunnelData.mockReturnValue([
         { event: ' Video_Click', users: 2000, conversion: 100 },
         { event: '  Chapter_Click', users: 1000, conversion: 50 },
@@ -380,21 +437,15 @@ describe('create funnel', () => {
   });
 
   describe('edit funnel flow - when props are passed to component', () => {
-    const props = {
-      name: 'Test Funnel',
-      steps: [
-        { event: 'Video_Open', filters: [] },
-        { event: 'Video_Seen', filters: [] },
-        { event: 'Video_Download', filters: [] },
-      ],
-    };
-
     it('should render prefil funnel name with passed prop name and have input fields equal to steps length passed in props', async () => {
+      mockedReplaceFilterValueWithEmptyStringPlaceholder.mockReturnValue(
+        computedFunnel.steps
+      );
       const router = createMockRouter({
         query: { funnelid: '64349843748', dsId: '654212033222' },
         pathname: '/analytics/funnel/edit',
       });
-      await renderCreateFunnel(router, props);
+      await renderCreateFunnel(router, true);
       const funnelName = screen.getByTestId('funnel-name');
       const funnelSteps = screen.getAllByTestId('funnel-step');
 
