@@ -399,7 +399,6 @@ def metric_service(apperture_user_response):
     computed_metric_future = asyncio.Future()
     computed_metric_future.set_result(computed_metric)
 
-    print("metrics future", metrics_future)
     metric_service.compute_metric.return_value = computed_metric_future
     metric_service.get_metrics_for_datasource_id.return_value = metrics_future
     return metric_service
@@ -460,14 +459,16 @@ def segment_service(apperture_user_response):
     segment_future = asyncio.Future()
     segment_future.set_result(segment)
 
-    segments_future = asyncio.Future()
-    segments_future.set_result([SegmentWithUser.from_orm(segment)])
+    # segments_future = asyncio.Future()
+    # segments_future.set_result([SegmentWithUser.from_orm(segment)])
 
     segment_service.add_segment.return_value = segment
     segment_service.update_segment.return_value = segment
     segment_service.get_segment.return_value = segment
     segment_service.get_segments_for_app.return_value = [segment]
-    segment_service.get_segments_for_datasource_id.return_value = segments_future
+    segment_service.get_segments_for_datasource_id.return_value = [
+        SegmentWithUser.from_orm(segment)
+    ]
     return segment_service
 
 
@@ -694,6 +695,56 @@ def saved_segment_response():
         "updatedAt": None,
         "userId": "63771fc960527aba9354399c",
     }
+
+
+@pytest.fixture(scope="module")
+def saved_segment_with_user():
+    return [
+        {
+            "_id": None,
+            "appId": "63771fc960527aba9354399c",
+            "columns": ["properties.$app_release", "properties.$city"],
+            "createdAt": ANY,
+            "datasourceId": "63771fc960527aba9354399c",
+            "description": "test",
+            "groups": [
+                {
+                    "condition": "and",
+                    "filters": [
+                        {
+                            "all": False,
+                            "condition": "where",
+                            "datatype": "String",
+                            "operand": "properties.$city",
+                            "operator": "is",
+                            "type": "where",
+                            "values": ["Delhi", "Indore", "Bhopal"],
+                        },
+                        {
+                            "all": False,
+                            "condition": "and",
+                            "datatype": "Number",
+                            "operand": "properties.$app_release",
+                            "operator": "equals",
+                            "type": "where",
+                            "values": [5003, 2077, 5002],
+                        },
+                    ],
+                }
+            ],
+            "name": "name",
+            "revisionId": ANY,
+            "updatedAt": None,
+            "userId": "63771fc960527aba9354399c",
+            "user": {
+                "firstName": "Test",
+                "lastName": "User",
+                "email": "test@email.com",
+                "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
+                "slackChannel": "#alerts",
+            },
+        }
+    ]
 
 
 @pytest.fixture(scope="module")

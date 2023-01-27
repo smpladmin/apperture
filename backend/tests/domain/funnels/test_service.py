@@ -43,6 +43,7 @@ class TestFunnelService:
             ),
         )
         Funnel.app_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
+        Funnel.datasource_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.funnel_steps = [
             FunnelStep(event="Login"),
             FunnelStep(event="Chapter Click", filters=None),
@@ -202,3 +203,10 @@ class TestFunnelService:
             )
             == self.funnel_conversion_data
         )
+
+    @pytest.mark.asyncio
+    async def test_get_funnels_for_datasource_id(self):
+        await self.service.get_funnels_for_datasource_id(
+            datasource_id="6384a65e0a397236d9de236a"
+        )
+        Funnel.find.assert_called_once()
