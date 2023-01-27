@@ -1,31 +1,25 @@
-from fastapi import APIRouter, Depends
 from typing import List, Union
-from beanie import PydanticObjectId
 
-from domain.funnels.service import FunnelsService
-from domain.apps.service import AppService
+from fastapi import APIRouter, Depends
+
 from domain.apperture_users.models import AppertureUser
-from domain.funnels.models import ConversionStatus
+from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
-from rest.dtos.funnels import (
-    FunnelResponse,
-    ComputedFunnelStepResponse,
-    ComputedFunnelResponse,
-    FunnelWithUser,
-    FunnelConversionResponseBody,
-    CreateFunnelDto,
-    TransientFunnelDto,
-    FunnelTrendResponse,
-)
+from domain.funnels.service import FunnelsService
+from rest.dtos.appperture_users import AppertureUserResponse
 from rest.dtos.funnels import (
     CreateFunnelDto,
     TransientFunnelDto,
     FunnelTrendResponse,
     TransientFunnelConversionlDto,
 )
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.funnels import (
+    FunnelResponse,
+    ComputedFunnelStepResponse,
+    FunnelWithUser,
+    FunnelConversionResponseBody,
+)
 from rest.middlewares import validate_jwt, get_user_id, get_user
-
 
 router = APIRouter(
     tags=["funnels"],
