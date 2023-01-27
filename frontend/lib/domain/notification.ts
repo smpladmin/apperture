@@ -1,6 +1,7 @@
 import { type } from 'os';
 import { TrendData } from './eventData';
 import { FunnelTrendsData } from './funnel';
+import { MetricTrend } from './metric';
 
 export enum ThresholdMetricType {
   Range = 'range',
@@ -29,7 +30,10 @@ export enum NotificationVariant {
   SEGMENT = 'segment',
 }
 
-export type NotificationEventsData = TrendData[] | FunnelTrendsData[];
+export type NotificationEventsData =
+  | TrendData[]
+  | FunnelTrendsData[]
+  | MetricTrend[];
 
 export type Notifications = {
   _id: string;

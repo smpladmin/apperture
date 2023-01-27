@@ -78,6 +78,22 @@ export const NotificationFactory = (variant: NotificationVariant) => {
         yField: 'conversion',
         metric: notificationMetricOptions[0],
       };
+    case NotificationVariant.METRIC:
+      return {
+        getMin: (data: any[]) =>
+          data.reduce(
+            (result, value) => (result < value.value ? result : value.value),
+            data[0].value
+          ),
+        getMax: (data: any[]) =>
+          data.reduce(
+            (result, value) => (result > value.value ? result : value.value),
+            data[0].value
+          ),
+        xField: 'date',
+        yField: 'value',
+        metric: notificationMetricOptions[0],
+      };
     default:
       return {
         getMin: () => -1,
