@@ -104,3 +104,8 @@ class MetricService:
 
     async def get_metrics_by_user_id(self, user_id: str):
         return await Metric.find(Metric.user_id == PydanticObjectId(user_id)).to_list()
+
+    async def get_metrics_for_datasource_id(self, datasource_id: str) -> List[Metric]:
+        return await Metric.find(
+            PydanticObjectId(datasource_id) == Metric.datasource_id
+        ).to_list()

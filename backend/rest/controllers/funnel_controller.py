@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
-from typing import List
+from typing import List, Union
+from beanie import PydanticObjectId
 
 from domain.funnels.service import FunnelsService
 from domain.apps.service import AppService
@@ -126,13 +127,16 @@ async def get_transient_funnel_analytics(
 
 @router.get("/funnels", response_model=List[FunnelWithUser])
 async def get_funnels(
+    datasource_id: Union[str, None] = None,
     user: AppertureUser = Depends(get_user),
     funnel_service: FunnelsService = Depends(),
     app_service: AppService = Depends(),
 ):
     apps = await app_service.get_apps(user=user)
-    funnels = await funnel_service.get_funnels_for_apps(
-        app_ids=[app.id for app in apps]
+    funnels = (
+        await funnel_service.get_funnels_for_datasource_id(datasource_id)
+        if datasource_id
+        else await funnel_service.get_funnels_for_apps(app_ids=[app.id for app in apps])
     )
     funnels = [FunnelWithUser.from_orm(f) for f in funnels]
     for funnel in funnels:

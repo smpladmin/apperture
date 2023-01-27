@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from fastapi import APIRouter, Depends
 
 from domain.datasources.service import DataSourceService
@@ -86,6 +86,7 @@ async def get_segment(
 
 @router.get("/segments", response_model=List[SegmentWithUser])
 async def get_segments(
+    datasource_id: Union[str, None] = None,
     app_id: Optional[str] = None,
     user_id: str = Depends(get_user_id),
     user: AppertureUser = Depends(get_user),
@@ -93,7 +94,11 @@ async def get_segments(
 ):
     if app_id:
         return await segment_service.get_segments_for_app(app_id=app_id)
-    segments = await segment_service.get_segments_for_user(user_id=user_id)
+    segments = (
+        await segment_service.get_segments_for_datasource_id(datasource_id)
+        if datasource_id
+        else await segment_service.get_segments_for_user(user_id=user_id)
+    )
     segments = [SegmentWithUser.from_orm(s) for s in segments]
     for segment in segments:
         segment.user = AppertureUserResponse.from_orm(user)

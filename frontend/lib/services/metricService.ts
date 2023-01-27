@@ -87,7 +87,7 @@ export const updateMetric = async (
   return result.data;
 };
 
-export const getSavedMetricsForUser = async () => {
-  const res = await AppertureGet('/metrics');
+export const getSavedMetricsForDatasourceId = async (dsId: string) => {
+  const res = await AppertureGet(`/metrics?datasource_id=${dsId}`);
   return res.data;
 };
