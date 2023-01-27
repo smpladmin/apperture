@@ -43,7 +43,7 @@ const SelectEventProperty = ({
     }
 
     setDropDownItems(items);
-  }, []);
+  }, [eventProperties]);
 
   const onSuggestionClick = (item: SegmentProperty) => {
     const updatedFilters = [...filters];

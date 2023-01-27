@@ -46,7 +46,7 @@ const ViewMetricActionPanel = ({
           onClick={() =>
             router.push({
               pathname: '/analytics/metric/edit/[id]',
-              query: { id: router.query.metricId, dsId: router.query.dsId },
+              query: { id: router.query.metricId, dsId: datasourceId },
             })
           }
         >
