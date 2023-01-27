@@ -30,6 +30,11 @@ class NotificationMetric(str, Enum):
     HITS = "hits"
     USERS = "users"
 
+class NotificationVariant(str,Enum):
+    NODE='node'
+    FUNNEL='funnel'
+    METRIC='metric'
+    SEGMENT='segment'
 
 class ThresholdMap(BaseModel):
     min: float
@@ -55,7 +60,8 @@ class Notification(Document):
     frequency: NotificationFrequency
     preferred_channels: List[NotificationChannel]
     notification_active: bool
-
+    variant: NotificationVariant
+    reference: str
     class Settings:
         name = "notifications"
 

@@ -6,18 +6,27 @@ import { TrendData } from '@lib/domain/eventData';
 import AlertsInfo from '../components/AlertsInfo';
 import { useEffect, useState } from 'react';
 import Loading from '../components/Loading';
+import { FunnelTrendsData } from '@lib/domain/funnel';
+import {
+  NotificationEventsData,
+  NotificationVariant,
+} from '@lib/domain/notification';
 
 type MobileAlertsProps = {
   nodeName: string;
-  eventData: TrendData[];
+  eventData: NotificationEventsData;
   isAlertsSheetOpen: boolean;
   closeAlertsSheet: () => void;
+  variant: NotificationVariant;
+  reference: string;
 };
 const MobileAlerts = ({
   nodeName,
   eventData,
   isAlertsSheetOpen,
   closeAlertsSheet,
+  variant,
+  reference,
 }: MobileAlertsProps) => {
   const [isLoading, setIsLoading] = useState<Boolean>(true);
 
@@ -46,6 +55,8 @@ const MobileAlerts = ({
               nodeName={nodeName}
               eventData={eventData}
               closeAlertsSheet={closeAlertsSheet}
+              variant={variant}
+              reference={reference}
             />
           )}
         </Sheet.Content>

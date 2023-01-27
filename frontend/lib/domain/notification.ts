@@ -1,3 +1,7 @@
+import { type } from 'os';
+import { TrendData } from './eventData';
+import { FunnelTrendsData } from './funnel';
+
 export enum ThresholdMetricType {
   Range = 'range',
   Percentage = 'percentage',
@@ -17,6 +21,15 @@ export enum NotificationChannel {
   SLACK = 'slack',
   EMAIL = 'email',
 }
+
+export enum NotificationVariant {
+  NODE = 'node',
+  FUNNEL = 'funnel',
+  METRIC = 'metric',
+  SEGMENT = 'segment',
+}
+
+export type NotificationEventsData = TrendData[] | FunnelTrendsData[];
 
 export type Notifications = {
   _id: string;

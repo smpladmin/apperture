@@ -1,12 +1,17 @@
 import { ApperturePost, AppertureGet } from './util';
-import { ThresholdMetricType } from '../domain/notification';
+import {
+  NotificationVariant,
+  ThresholdMetricType,
+} from '../domain/notification';
 
 export const setAlert = async (
   dsId: string,
   nodeName: string,
   notificationMetric: string,
   thresholdMetric: string,
-  values: number[]
+  values: number[],
+  variant: NotificationVariant,
+  reference: string
 ) => {
   return await ApperturePost('/notifications', {
     datasourceId: dsId,
@@ -33,6 +38,8 @@ export const setAlert = async (
     preferredHourGMT: 5,
     preferredChannels: ['slack'],
     notificationActive: true,
+    variant,
+    reference,
   });
 };
 

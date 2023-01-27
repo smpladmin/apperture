@@ -1,7 +1,9 @@
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import React from 'react';
-
-function ActionMenu() {
+type ActionMenuProps = {
+  onNotificationClick?: React.FormEventHandler<HTMLButtonElement> | undefined;
+};
+function ActionMenu({ onNotificationClick }: ActionMenuProps) {
   return (
     <Box>
       <Flex mt={'8'} w={'full'} justifyContent={'space-between'}>
@@ -16,6 +18,7 @@ function ActionMenu() {
             rounded={'full'}
             color={'white.DEFAULT'}
             bg={'grey.300'}
+            onClick={onNotificationClick}
           />
           <Text
             mt={2}

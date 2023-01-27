@@ -7,10 +7,14 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { formatDatalabel, getPercentageOfHits } from '@lib/utils/common';
-import { NodeSignificanceData } from '@lib/domain/eventData';
+import { NodeSignificanceData, TrendData } from '@lib/domain/eventData';
 import Alert from '@components/Alerts';
 import BellIcon from '@assets/icons/bell-icon.svg';
 import Image from 'next/image';
+import { NotificationVariant } from '@lib/domain/notification';
+import { useEffect, useState } from 'react';
+import { getTrendsData } from '@lib/services/datasourceService';
+import { useRouter } from 'next/router';
 
 type NodeSignificanceProps = {
   nodeSignificanceData: Array<NodeSignificanceData>;
@@ -21,7 +25,12 @@ const NodeSignificance = ({
   nodeSignificanceData,
   setClickOutsideEnabled,
 }: NodeSignificanceProps) => {
+  const router = useRouter();
+
+  const { dsId } = router.query;
+
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
+  const [dailyTrendData, setDailyTrendData] = useState<TrendData[]>([]);
 
   const openAlertsSheet = () => {
     setClickOutsideEnabled?.(false);
@@ -32,6 +41,19 @@ const NodeSignificance = ({
     setClickOutsideEnabled?.(true);
     onClose();
   };
+
+  useEffect(() => {
+    const fetchTrendsData = async () => {
+      setDailyTrendData(
+        await getTrendsData(
+          dsId as string,
+          nodeSignificanceData?.[0]?.['node'],
+          'date'
+        )
+      );
+    };
+    fetchTrendsData();
+  }, [nodeSignificanceData, dsId]);
 
   return (
     <>
@@ -95,6 +117,9 @@ const NodeSignificance = ({
         nodeName={nodeSignificanceData?.[0]?.['node']}
         isAlertsSheetOpen={isAlertsSheetOpen}
         closeAlertsSheet={closeAlertsSheet}
+        variant={NotificationVariant.NODE}
+        reference={nodeSignificanceData?.[0]?.['node']}
+        eventData={dailyTrendData}
       />
     </>
   );

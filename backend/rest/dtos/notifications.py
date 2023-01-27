@@ -9,6 +9,7 @@ from domain.notifications.models import (
     NotificationType,
     NotificationFrequency,
     NotificationMetric,
+    NotificationVariant
 )
 
 
@@ -29,6 +30,8 @@ class CreateNotificationDto(BaseModel):
     preferredHourGMT: int
     preferredChannels: List[NotificationChannel]
     notificationActive: bool
+    variant: NotificationVariant
+    reference:str
 
 
 class NotificationResponse(Notification, ModelResponse):
