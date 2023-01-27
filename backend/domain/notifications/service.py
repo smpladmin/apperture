@@ -15,7 +15,7 @@ from domain.notifications.models import (
     ComputedNotification,
     NotificationThresholdType,
     NotificationMetric,
-    NotificationVariant
+    NotificationVariant,
 )
 from domain.edge.models import AggregatedEdge, NotificationNodeData
 
@@ -47,7 +47,7 @@ class NotificationService:
         preferredChannels: List[NotificationChannel],
         notificationActive: bool,
         variant: NotificationVariant,
-        reference:str
+        reference: str,
     ):
         return Notification(
             datasource_id=datasourceId,
@@ -69,7 +69,7 @@ class NotificationService:
             preferred_channels=preferredChannels,
             notification_active=notificationActive,
             variant=variant,
-            reference=reference
+            reference=reference,
         )
 
     async def add_notification(self, notification: Notification):

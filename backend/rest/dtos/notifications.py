@@ -9,7 +9,7 @@ from domain.notifications.models import (
     NotificationType,
     NotificationFrequency,
     NotificationMetric,
-    NotificationVariant
+    NotificationVariant,
 )
 
 
@@ -31,7 +31,7 @@ class CreateNotificationDto(BaseModel):
     preferredChannels: List[NotificationChannel]
     notificationActive: bool
     variant: NotificationVariant
-    reference:str
+    reference: str
 
 
 class NotificationResponse(Notification, ModelResponse):

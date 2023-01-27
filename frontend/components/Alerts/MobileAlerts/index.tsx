@@ -19,6 +19,7 @@ type MobileAlertsProps = {
   closeAlertsSheet: () => void;
   variant: NotificationVariant;
   reference: string;
+  datasourceId: string;
 };
 const MobileAlerts = ({
   nodeName,
@@ -27,6 +28,7 @@ const MobileAlerts = ({
   closeAlertsSheet,
   variant,
   reference,
+  datasourceId,
 }: MobileAlertsProps) => {
   const [isLoading, setIsLoading] = useState<Boolean>(true);
 
@@ -57,6 +59,7 @@ const MobileAlerts = ({
               closeAlertsSheet={closeAlertsSheet}
               variant={variant}
               reference={reference}
+              datasourceId={datasourceId}
             />
           )}
         </Sheet.Content>

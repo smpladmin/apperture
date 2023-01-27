@@ -35,6 +35,7 @@ const Alert = ({
           closeAlertsSheet={closeAlertsSheet}
           variant={variant}
           reference={reference}
+          datasourceId={datasourceId}
         />
       </Render>
       <Render on={'desktop'}>
