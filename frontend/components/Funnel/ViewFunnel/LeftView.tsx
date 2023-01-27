@@ -17,20 +17,18 @@ import { FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
 import { useRouter } from 'next/router';
 import Alert from '@components/Alerts';
 import { NotificationVariant } from '@lib/domain/notification';
-import { getComputedTrendsData } from '@lib/services/funnelService';
 
 type LeftViewProps = {
   datasourceId: string;
   name: string;
   steps: FunnelStep[];
+  eventData: FunnelTrendsData[];
 };
 
-const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
+const LeftView = ({ datasourceId, name, steps, eventData }: LeftViewProps) => {
   const router = useRouter();
   const { funnelId } = router?.query;
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
-
-  const [dailyTrendData, setDailyTrendData] = useState<FunnelTrendsData[]>([]);
 
   const handleEditFunnel = () => {
     router.push({
@@ -49,13 +47,6 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
   const handleNotificationClick = () => {
     onOpen();
   };
-
-  useEffect(() => {
-    const fetchTrendsData = async () => {
-      setDailyTrendData(await getComputedTrendsData(funnelId as string));
-    };
-    fetchTrendsData();
-  }, []);
 
   return (
     <ActionPanel>
@@ -153,7 +144,7 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
         closeAlertsSheet={onClose}
         variant={NotificationVariant.FUNNEL}
         reference={funnelId as string}
-        eventData={dailyTrendData}
+        eventData={eventData}
       />
     </ActionPanel>
   );
