@@ -134,7 +134,7 @@ async def get_funnels(
 ):
     apps = await app_service.get_apps(user=user)
     funnels = (
-        await funnel_service.get_funnels_for_datasource_id(datasource_id)
+        await funnel_service.get_funnels_for_datasource_id(datasource_id=datasource_id)
         if datasource_id
         else await funnel_service.get_funnels_for_apps(app_ids=[app.id for app in apps])
     )

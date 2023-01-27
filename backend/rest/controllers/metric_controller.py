@@ -92,7 +92,7 @@ async def get_all_metrics(
     if app_id:
         return await metric_service.get_metrics_by_app_id(app_id=app_id)
     metrics = (
-        await metric_service.get_metrics_for_datasource_id(datasource_id)
+        await metric_service.get_metrics_for_datasource_id(datasource_id=datasource_id)
         if datasource_id
         else await metric_service.get_metrics_by_user_id(user_id=user_id)
     )

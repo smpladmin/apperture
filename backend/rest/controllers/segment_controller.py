@@ -95,7 +95,9 @@ async def get_segments(
     if app_id:
         return await segment_service.get_segments_for_app(app_id=app_id)
     segments = (
-        await segment_service.get_segments_for_datasource_id(datasource_id)
+        await segment_service.get_segments_for_datasource_id(
+            datasource_id=datasource_id
+        )
         if datasource_id
         else await segment_service.get_segments_for_user(user_id=user_id)
     )

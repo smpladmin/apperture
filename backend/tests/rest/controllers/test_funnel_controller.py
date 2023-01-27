@@ -157,3 +157,37 @@ def test_transient_funnel_analytics(
 
     assert response.status_code == 200
     assert response.json() == funnel_user_conversion_response
+
+
+def test_get_funnels(client_init, funnel_service):
+    response = client_init.get("/funnels?datasource_id=635ba034807ab86d8a2aadd9")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "_id": "635ba034807ab86d8a2aadd8",
+            "appId": "635ba034807ab86d8a2aadd7",
+            "createdAt": ANY,
+            "datasourceId": "635ba034807ab86d8a2aadd9",
+            "name": "name",
+            "randomSequence": False,
+            "revisionId": ANY,
+            "steps": [
+                {"event": "Login", "filters": None},
+                {"event": "Chapter_Click", "filters": None},
+                {"event": "Topic_Click", "filters": None},
+            ],
+            "updatedAt": ANY,
+            "user": {
+                "email": "test@email.com",
+                "firstName": "Test",
+                "lastName": "User",
+                "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
+                "slackChannel": "#alerts",
+            },
+            "userId": "635ba034807ab86d8a2aadda",
+        }
+    ]
+    funnel_service.get_funnels_for_datasource_id.assert_called_once_with(
+        **{"datasource_id": "635ba034807ab86d8a2aadd9"}
+    )
