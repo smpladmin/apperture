@@ -83,6 +83,7 @@ async def save_metrics(
     ],
 )
 async def get_all_metrics(
+    datasource_id: Union[str, None] = None,
     app_id: Optional[str] = None,
     user_id: str = Depends(get_user_id),
     user: AppertureUser = Depends(get_user),
@@ -90,7 +91,11 @@ async def get_all_metrics(
 ):
     if app_id:
         return await metric_service.get_metrics_by_app_id(app_id=app_id)
-    metrics = await metric_service.get_metrics_by_user_id(user_id=user_id)
+    metrics = (
+        await metric_service.get_metrics_for_datasource_id(datasource_id=datasource_id)
+        if datasource_id
+        else await metric_service.get_metrics_by_user_id(user_id=user_id)
+    )
     metrics = [MetricWithUser.from_orm(m) for m in metrics]
     for metric in metrics:
         metric.user = AppertureUserResponse.from_orm(user)

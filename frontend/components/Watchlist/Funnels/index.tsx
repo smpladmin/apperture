@@ -3,7 +3,7 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import { Funnel } from '@lib/domain/funnel';
 import { Provider } from '@lib/domain/provider';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
-import { getSavedFunnelsForUser } from '@lib/services/funnelService';
+import { getSavedFunnelsForDatasourceId } from '@lib/services/funnelService';
 import { Row } from '@tanstack/react-table';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -18,7 +18,8 @@ const SavedFunnels = ({ provider }: { provider: Provider }) => {
 
   useEffect(() => {
     const getFunnels = async () => {
-      let savedFunnels = (await getSavedFunnelsForUser()) || [];
+      let savedFunnels =
+        (await getSavedFunnelsForDatasourceId(dsId as string)) || [];
       savedFunnels = savedFunnels.map((funnel: Funnel) => {
         return { type: WatchListItemType.FUNNELS, details: funnel };
       });

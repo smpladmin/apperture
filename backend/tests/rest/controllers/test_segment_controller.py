@@ -236,3 +236,12 @@ def test_update_segment(
         "635ba034807ab86d8a2d8"
         == segment_service.update_segment.call_args.kwargs["segment_id"]
     )
+
+
+def test_get_segments(client_init, segment_service, saved_segment_with_user):
+    response = client_init.get("/segments?datasource_id=63761779818ec577b69c21e6")
+    assert response.status_code == 200
+    assert response.json() == saved_segment_with_user
+    segment_service.get_segments_for_datasource_id.assert_called_once_with(
+        **{"datasource_id": "63761779818ec577b69c21e6"}
+    )

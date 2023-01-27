@@ -1,4 +1,5 @@
 import json
+from unittest.mock import ANY
 
 
 def test_compute_metric(
@@ -13,3 +14,51 @@ def test_compute_metric(
     )
     assert response.status_code == 200
     assert response.json() == computed_metric_response
+
+
+def test_get_metrics(client_init, metric_service):
+    response = client_init.get("/metrics?datasource_id=635ba034807ab86d8a2aadd9")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "_id": "63d0df1ea1040a6388a4a34c",
+            "aggregates": [
+                {
+                    "aggregations": {"functions": "count", "property": "Video_Seen"},
+                    "conditions": [],
+                    "filters": [],
+                    "reference_id": "Video_Seen",
+                    "variable": "A",
+                    "variant": "event",
+                },
+                {
+                    "aggregations": {"functions": "count", "property": "Video_Open"},
+                    "conditions": [],
+                    "filters": [],
+                    "reference_id": "Video_Open",
+                    "variable": "B",
+                    "variant": "event",
+                },
+            ],
+            "appId": "63ca46feee94e38b81cda37a",
+            "breakdown": [],
+            "createdAt": ANY,
+            "datasourceId": "63d0a7bfc636cee15d81f579",
+            "function": "A/B",
+            "name": "Video Metric",
+            "revisionId": ANY,
+            "updatedAt": ANY,
+            "user": {
+                "email": "test@email.com",
+                "firstName": "Test",
+                "lastName": "User",
+                "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
+                "slackChannel": "#alerts",
+            },
+            "userId": "6374b74e9b36ecf7e0b4f9e4",
+        }
+    ]
+    metric_service.get_metrics_for_datasource_id.assert_called_once_with(
+        **{"datasource_id": "635ba034807ab86d8a2aadd9"}
+    )

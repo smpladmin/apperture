@@ -3,7 +3,7 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import { Provider } from '@lib/domain/provider';
 import { Segment } from '@lib/domain/segment';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
-import { getSavedSegmentsForUser } from '@lib/services/segmentService';
+import { getSavedSegmentsForDatasourceId } from '@lib/services/segmentService';
 import { Row } from '@tanstack/react-table';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -18,7 +18,8 @@ const SavedSegments = ({ provider }: { provider: Provider }) => {
 
   useEffect(() => {
     const getSegments = async () => {
-      let savedSegments = (await getSavedSegmentsForUser()) || [];
+      let savedSegments =
+        (await getSavedSegmentsForDatasourceId(dsId as string)) || [];
       savedSegments = savedSegments.map((segment: Segment) => {
         return { type: WatchListItemType.SEGMENTS, details: segment };
       });

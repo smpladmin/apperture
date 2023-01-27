@@ -29,6 +29,7 @@ class TestSegmentService:
         self.service = SegmentService(segments=self.segments, mongo=self.mongo)
         self.ds_id = "63771fc960527aba9354399c"
         Segment.app_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
+        Segment.datasource_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.filters = [
             WhereSegmentFilter(
                 operator=SegmentFilterOperatorsString.IS,
@@ -278,3 +279,10 @@ class TestSegmentService:
                 }
             }
         )
+
+    @pytest.mark.asyncio
+    async def test_get_funnels_for_datasource_id(self):
+        await self.service.get_segments_for_datasource_id(
+            datasource_id="6384a65e0a397236d9de236a"
+        )
+        Segment.find.assert_called_once()
