@@ -8,7 +8,7 @@ import {
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from 'tests/util';
 import Watchlist from './index';
-import { getSavedFunnelsForUser } from '@lib/services/funnelService';
+import { getSavedFunnelsForDatasourceId } from '@lib/services/funnelService';
 import { getSavedNotificationsForUser } from '@lib/services/notificationService';
 import { AppertureContext } from '@lib/contexts/appertureContext';
 
@@ -20,7 +20,7 @@ describe.skip('Watchlist', () => {
   let mockedSavedNotifications: jest.Mock;
 
   beforeEach(() => {
-    mockedSavedFunnels = jest.mocked(getSavedFunnelsForUser);
+    mockedSavedFunnels = jest.mocked(getSavedFunnelsForDatasourceId);
     mockedSavedNotifications = jest.mocked(getSavedNotificationsForUser);
     mockedSavedFunnels.mockReturnValue([
       {
