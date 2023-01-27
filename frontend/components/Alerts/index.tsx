@@ -14,6 +14,7 @@ type AlertsProps = {
   variant: NotificationVariant;
   reference: string;
   eventData: NotificationEventsData;
+  datasourceId: string;
 };
 const Alert = ({
   nodeName,
@@ -22,6 +23,7 @@ const Alert = ({
   variant,
   reference,
   eventData,
+  datasourceId,
 }: AlertsProps) => {
   return (
     <>
@@ -43,6 +45,7 @@ const Alert = ({
           closeAlertsSheet={closeAlertsSheet}
           variant={variant}
           reference={reference}
+          datasourceId={datasourceId}
         />
       </Render>
     </>

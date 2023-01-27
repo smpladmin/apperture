@@ -20,6 +20,7 @@ type AlertsProps = {
   closeAlertsSheet: () => void;
   variant: NotificationVariant;
   reference: string;
+  datasourceId: string;
 };
 
 const AlertsInfo = ({
@@ -28,12 +29,12 @@ const AlertsInfo = ({
   closeAlertsSheet,
   variant,
   reference,
+  datasourceId,
 }: AlertsProps) => {
   const toast = useToast();
   const toastRef = useRef<ToastId>();
 
   const router = useRouter();
-  const { dsId } = router.query;
 
   const [minHit, setMinHit] = useState(
     NotificationFactory(variant).getMin(eventData, NotificationMetricType.Hits)
@@ -94,7 +95,7 @@ const AlertsInfo = ({
 
   const setEventAlert = async () => {
     const response = await setAlert(
-      dsId as string,
+      datasourceId,
       nodeName,
       notificationMetric,
       thresholdMetric,

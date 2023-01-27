@@ -23,6 +23,7 @@ type DesktopAlertsProps = {
   closeAlertsSheet: () => void;
   variant: NotificationVariant;
   reference: string;
+  datasourceId: string;
 };
 
 const DesktopAlerts = ({
@@ -32,6 +33,7 @@ const DesktopAlerts = ({
   closeAlertsSheet,
   variant,
   reference,
+  datasourceId,
 }: DesktopAlertsProps) => {
   const [isLoading, setIsLoading] = useState<Boolean>(true);
 
@@ -89,6 +91,7 @@ const DesktopAlerts = ({
               closeAlertsSheet={closeAlertsSheet}
               variant={variant}
               reference={reference}
+              datasourceId={datasourceId}
             />
           )}
         </ModalBody>

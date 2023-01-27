@@ -120,6 +120,7 @@ const NodeSignificance = ({
         variant={NotificationVariant.NODE}
         reference={nodeSignificanceData?.[0]?.['node']}
         eventData={dailyTrendData}
+        datasourceId={dsId as string}
       />
     </>
   );

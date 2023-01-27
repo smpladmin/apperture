@@ -145,6 +145,7 @@ const LeftView = ({ datasourceId, name, steps, eventData }: LeftViewProps) => {
         variant={NotificationVariant.FUNNEL}
         reference={funnelId as string}
         eventData={eventData}
+        datasourceId={datasourceId}
       />
     </ActionPanel>
   );
