@@ -20,6 +20,7 @@ type WhoSegmentFilterProps = {
   eventProperties: SegmentProperty[];
   index: number;
   removeFilter: Function;
+  loadingEventProperties: boolean;
 };
 
 const WhoSegmentFilter = ({
@@ -29,6 +30,7 @@ const WhoSegmentFilter = ({
   eventProperties,
   index,
   removeFilter,
+  loadingEventProperties,
 }: WhoSegmentFilterProps) => {
   return (
     <Flex gap={'3'} alignItems={'center'}>
@@ -56,6 +58,7 @@ const WhoSegmentFilter = ({
         eventProperties={eventProperties}
         filters={filters}
         updateGroupsState={updateGroupsState}
+        loadingEventProperties={loadingEventProperties}
       />
       <Box>
         <Text
