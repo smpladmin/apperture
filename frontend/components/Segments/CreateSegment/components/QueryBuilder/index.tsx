@@ -100,6 +100,7 @@ const QueryBuilder = ({
                       eventProperties={eventProperties}
                       index={i}
                       removeFilter={removeFilter}
+                      loadingEventProperties={loadingEventProperties}
                     />
                   ) : (
                     <WhoSegmentFilterComponent
@@ -109,6 +110,7 @@ const QueryBuilder = ({
                       eventProperties={eventProperties}
                       index={i}
                       removeFilter={removeFilter}
+                      loadingEventProperties={loadingEventProperties}
                     />
                   )}
                 </Flex>
