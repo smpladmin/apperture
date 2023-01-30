@@ -134,10 +134,9 @@ const MetricFilterComponent = ({
           _hover={{ color: 'white', background: 'grey.300' }}
           width={'max-content'}
           onClick={() => setOpenEventDropdown(true)}
-          // ref={eventRef}
         >
           <Box position={'absolute'} left={-6}>
-            <Image src={indent} />
+            <Image src={indent} alt={'indent'} />
           </Box>
           {operand}
         </Flex>
@@ -167,6 +166,7 @@ const MetricFilterComponent = ({
           cursor={'not-allowed'}
           borderRadius={4}
           color={'grey.100'}
+          height={'max-content'}
           _hover={{ color: 'white', background: 'grey.300' }}
         >
           {operator}
@@ -184,6 +184,7 @@ const MetricFilterComponent = ({
             onClick={() => {
               setIsValueDropDownOpen((prevState) => !prevState);
             }}
+            wordBreak={'break-all'}
           >
             {getValuesText(values)}
           </Text>
