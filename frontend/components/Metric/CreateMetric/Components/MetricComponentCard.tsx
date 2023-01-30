@@ -174,6 +174,7 @@ const MetricComponentCard = ({
               fontSize={'xs-14'}
               fontWeight={500}
               lineHeight={'xs-18'}
+              wordBreak={'break-all'}
             >
               {reference === '' ? 'Add Event / Segment' : reference}
             </Text>
