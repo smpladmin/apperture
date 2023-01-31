@@ -32,10 +32,19 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
   const { dsId, previousDsId } = router.query;
 
   const handleRedirectToExplorePage = () => {
-    if (path.includes('explore')) return;
+    if (path.includes('/analytics/explore')) return;
 
     router.push({
       pathname: '/analytics/explore/[dsId]',
+      query: { dsId: dsId || previousDsId },
+    });
+  };
+
+  const handleRedirectToDataPage = () => {
+    if (path.includes('/analytics/data')) return;
+
+    router.push({
+      pathname: '/analytics/data/[dsId]',
       query: { dsId: dsId || previousDsId },
     });
   };
@@ -100,19 +109,8 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           </Flex>
         </Flex>
       </Box>
-      <Text
-        fontSize={'xs-10'}
-        lineHeight={'xs-10'}
-        textColor={'white'}
-        opacity={'0.3'}
-        paddingX={{ base: '4', md: 'auto' }}
-        paddingBottom={{ base: '4', md: 'auto' }}
-      >
-        EXPLORE
-      </Text>
-
       <Box>
-        <Flex direction={'column'} alignItems={'center'} gap={5} paddingTop={5}>
+        <Flex direction={'column'} alignItems={'center'} gap={5}>
           <Tooltip
             label={'Explore'}
             aria-label={'Explore'}
@@ -138,16 +136,15 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               onClick={handleRedirectToExplorePage}
             />
           </Tooltip>
-
           <Tooltip
-            label={'Saved'}
-            aria-label={'Saved'}
+            label={'Data'}
+            aria-label={'Data'}
             bg={'white.DEFAULT'}
             color={'black.100'}
           >
             <IconButton
-              aria-label="Explore"
-              icon={<i className={'ri-bookmark-line'} />}
+              aria-label="Data"
+              icon={<i className={'ri-database-line'} />}
               rounded={'lg'}
               h={10}
               w={10}
@@ -161,7 +158,83 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={() => router.push('/analytics/saved')}
+              onClick={handleRedirectToDataPage}
+            />
+          </Tooltip>
+
+          <Tooltip
+            label={'Metrics'}
+            aria-label={'Metrics'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Metrics"
+              icon={<i className={'ri-funds-box-line'} />}
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={() => router.push(`/analytics/metric/list/${dsId}`)}
+            />
+          </Tooltip>
+          <Tooltip
+            label={'Funnels'}
+            aria-label={'Funnels'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Funnels"
+              icon={<i className={'ri-filter-line'} />}
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={() => router.push(`/analytics/funnel/list/${dsId}`)}
+            />
+          </Tooltip>
+          <Tooltip
+            label={'Segments'}
+            aria-label={'Segments'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Segments"
+              icon={<i className={'ri-scissors-cut-line'} />}
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={() => router.push(`/analytics/segment/list/${dsId}`)}
             />
           </Tooltip>
         </Flex>

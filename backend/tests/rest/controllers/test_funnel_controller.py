@@ -23,41 +23,14 @@ def test_compute_transient_funnel(
     assert response.json() == computed_transient_funnel_response
 
 
-def test_get_computed_funnel(
-    client_init, computed_funnel_response, funnel_service, datasource_service
-):
+def test_get_saved_funnel(client_init, funnel_service, funnel_response):
     response = client_init.get("/funnels/635ba034807ab86d8a2aadd8")
     assert response.status_code == 200
-    assert filter_response(response.json()) == filter_response(computed_funnel_response)
+    assert filter_response(response.json()) == filter_response(funnel_response)
 
     funnel_service.get_funnel.assert_called_once_with(
         "635ba034807ab86d8a2aadd8",
     )
-    get_computed_funnel_kwargs = funnel_service.get_computed_funnel.call_args.kwargs
-    funnel_service.get_computed_funnel.assert_called_once()
-
-    assert {
-        "created_at": ANY,
-        "datasource_id": PydanticObjectId("635ba034807ab86d8a2aadd9"),
-        "id": PydanticObjectId("635ba034807ab86d8a2aadd8"),
-        "app_id": PydanticObjectId("635ba034807ab86d8a2aadd7"),
-        "name": "name",
-        "random_sequence": False,
-        "revision_id": ANY,
-        "steps": [
-            {
-                "event": "Login",
-                "filters": None,
-            },
-            {"event": "Chapter_Click", "filters": None},
-            {
-                "event": "Topic_Click",
-                "filters": None,
-            },
-        ],
-        "updated_at": None,
-        "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
-    } == get_computed_funnel_kwargs["funnel"].dict()
 
 
 @pytest.mark.asyncio
@@ -184,3 +157,37 @@ def test_transient_funnel_analytics(
 
     assert response.status_code == 200
     assert response.json() == funnel_user_conversion_response
+
+
+def test_get_funnels(client_init, funnel_service):
+    response = client_init.get("/funnels?datasource_id=635ba034807ab86d8a2aadd9")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "_id": "635ba034807ab86d8a2aadd8",
+            "appId": "635ba034807ab86d8a2aadd7",
+            "createdAt": ANY,
+            "datasourceId": "635ba034807ab86d8a2aadd9",
+            "name": "name",
+            "randomSequence": False,
+            "revisionId": ANY,
+            "steps": [
+                {"event": "Login", "filters": None},
+                {"event": "Chapter_Click", "filters": None},
+                {"event": "Topic_Click", "filters": None},
+            ],
+            "updatedAt": ANY,
+            "user": {
+                "email": "test@email.com",
+                "firstName": "Test",
+                "lastName": "User",
+                "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
+                "slackChannel": "#alerts",
+            },
+            "userId": "635ba034807ab86d8a2aadda",
+        }
+    ]
+    funnel_service.get_funnels_for_datasource_id.assert_called_once_with(
+        **{"datasource_id": "635ba034807ab86d8a2aadd9"}
+    )

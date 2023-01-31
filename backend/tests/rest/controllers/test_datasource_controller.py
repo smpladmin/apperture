@@ -27,6 +27,7 @@ def test_get_node_significance(client_init, edge_service, node_significance_resp
         "updated_at": None,
         "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "version": DataSourceVersion.DEFAULT,
+        "enabled": True,
     } == kwargs["datasource"].dict()
 
     kwargs.pop("datasource")
@@ -57,6 +58,7 @@ def test_get_node_trends(client_init, edge_service, node_trends_response):
         "updated_at": None,
         "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "version": DataSourceVersion.DEFAULT,
+        "enabled": True,
     } == kwargs["datasource"].dict()
 
     kwargs.pop("datasource")
@@ -89,6 +91,7 @@ def test_get_sankey_nodes(client_init, edge_service, node_sankey_response):
         "updated_at": None,
         "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "version": DataSourceVersion.DEFAULT,
+        "enabled": True,
     } == kwargs["datasource"].dict()
 
     kwargs.pop("datasource")
@@ -121,4 +124,36 @@ def test_get_event_properties(client_init, properties_service):
     assert response.json() == ["prop1", "prop2"]
     properties_service.fetch_properties.assert_called_once_with(
         **{"ds_id": "637739d383ea7fda83e72a2d"}
+    )
+
+
+def test_get_events(client_init, events_service):
+    response = client_init.get(
+        "/datasources/637739d383ea7fda83e72a2d/events?is_aux=False&table_name=All"
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "count": 2,
+        "data": [
+            {
+                "name": "Content_Like",
+                "city": "Delhi",
+                "timestamp": "2023-01-13T15:23:38",
+                "user_id": "mthdas8@gmail.com",
+            },
+            {
+                "name": "WebView_Open",
+                "city": "Delhi",
+                "timestamp": "2023-01-13T15:23:41",
+                "user_id": "mthdas8@gmail.com",
+            },
+        ],
+    }
+
+    events_service.get_events.assert_called_once_with(
+        **{
+            "datasource_id": "637739d383ea7fda83e72a2d",
+            "is_aux": False,
+            "table_name": "All",
+        }
     )

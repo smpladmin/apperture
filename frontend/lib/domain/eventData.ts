@@ -37,3 +37,15 @@ export type EventData = {
   sankeyData: SankeyData[];
   nodeSignificanceData: NodeSignificanceData[];
 };
+
+export enum SanityDataSource {
+  ALL = 'All',
+  MIXPANEL = 'Mixpanel',
+  BACKEND = 'Backend CRM',
+  USERS = 'Users (Google Sheet)',
+}
+
+export type SanityData = {
+  count: number;
+  data: any[];
+};

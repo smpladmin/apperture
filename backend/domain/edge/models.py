@@ -1,7 +1,7 @@
 import datetime
 from enum import Enum
 from typing import List, Optional, Union
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 from beanie import PydanticObjectId, UnionDoc
 from domain.common.models import IntegrationProvider
@@ -64,9 +64,26 @@ class TrendType(str, Enum):
     DATE = "date"
 
 
+backend_crm_nodes = [
+    "documents_verified",
+    "eligibility_invalid",
+    "insurance_processed",
+    "offer_confirmed",
+]
+
+
 class Node(BaseModel):
     id: str
     name: str
+    provider: str
+    source: str = None
+
+    @validator("source", always=True)
+    def composite_name(cls, v, values, **kwargs):
+        if values["name"] in backend_crm_nodes:
+            return "Backend CRM"
+        else:
+            return values["provider"]
 
 
 class NodeTrend(BaseModel):

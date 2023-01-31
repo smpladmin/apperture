@@ -8,22 +8,24 @@ import {
   Row,
 } from '@tanstack/react-table';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
-import LabelType from './LabelType';
 import Details from './Details';
-import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
-import { useRouter } from 'next/router';
+import { SavedItems } from '@lib/domain/watchlist';
 import { AppertureContext } from '@lib/contexts/appertureContext';
 import { AppertureUser as User } from '@lib/domain/user';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import UserInfo from './UserInfo';
 dayjs.extend(utc);
+
+type WatchlistTableProps = {
+  savedItemsData: SavedItems[];
+  onRowClick: Function;
+};
 
 const WatchlistTable = ({
   savedItemsData,
-}: {
-  savedItemsData: SavedItems[];
-}) => {
-  const router = useRouter();
+  onRowClick,
+}: WatchlistTableProps) => {
   const {
     device: { isMobile },
   } = useContext(AppertureContext);
@@ -33,20 +35,6 @@ const WatchlistTable = ({
     () =>
       isMobile
         ? [
-            columnHelper.accessor('type', {
-              header: 'Type',
-              cell: (info) => <LabelType type={info.getValue()} />,
-            }),
-            columnHelper.accessor('details', {
-              header: 'Name',
-              cell: (info) => <Details info={info} />,
-            }),
-          ]
-        : [
-            columnHelper.accessor('type', {
-              header: 'Type',
-              cell: (info) => <LabelType type={info.getValue()} />,
-            }),
             columnHelper.accessor('details', {
               header: 'Name',
               cell: (info) => <Details info={info} />,
@@ -56,6 +44,16 @@ const WatchlistTable = ({
                 const user = info.getValue() as User;
                 return `${user.firstName} ${user.lastName}`;
               },
+              header: 'Created By',
+            }),
+          ]
+        : [
+            columnHelper.accessor('details', {
+              header: 'Name',
+              cell: (info) => <Details info={info} />,
+            }),
+            columnHelper.accessor('details.user', {
+              cell: (info) => <UserInfo info={info} />,
               header: 'Created By',
             }),
             columnHelper.accessor('details.updatedAt', {
@@ -76,15 +74,6 @@ const WatchlistTable = ({
     getSortedRowModel: getSortedRowModel(),
   });
   const { getHeaderGroups, getRowModel } = tableInstance;
-
-  const onRowClick = (row: Row<SavedItems>) => {
-    const { _id, datasourceId } = row?.original?.details;
-    const path = WatchListItemType.toURLPath(row?.original?.type);
-    router.push({
-      pathname: `/analytics/${path}/[id]`,
-      query: { id: _id, dsId: datasourceId },
-    });
-  };
 
   return (
     <Table data-testid={'watchlist-table'}>
@@ -109,7 +98,7 @@ const WatchlistTable = ({
           <Tr
             key={row.id}
             onClick={() => onRowClick(row)}
-            _hover={{ bg: 'gray.50', cursor: 'pointer' }}
+            _hover={{ bg: 'white.100', cursor: 'pointer' }}
             data-testid={'table-body-rows'}
           >
             {row.getVisibleCells().map((cell) => {

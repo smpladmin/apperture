@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Flex,
+  IconButton,
   Menu,
   MenuButton,
   MenuItem,
@@ -50,12 +51,12 @@ const DesktopHeader = ({
       <Flex w={'full'} alignItems={'center'} justifyContent={'space-between'}>
         <Search dataSourceType={dataSourceType!!} />
         <Flex alignItems={'center'} justifyContent={'space-between'} gap={6}>
-          <Box cursor={'not-allowed'}>
+          {/* <Box cursor={'not-allowed'}>
             <i className="ri-calendar-fill"></i>
           </Box>
           <Box cursor={'not-allowed'}>
             <Image src={filterIcon} alt="filter-icon" />
-          </Box>
+          </Box> */}
           <Box>
             <Menu>
               <MenuButton
@@ -74,10 +75,50 @@ const DesktopHeader = ({
                 Create
               </MenuButton>
               <MenuList>
-                <MenuItem onClick={() => navigateTo('metric')}>Metric</MenuItem>
-                <MenuItem onClick={() => navigateTo('funnel')}>Funnel</MenuItem>
-                <MenuItem onClick={() => navigateTo('segment')}>
-                  Segment
+                <MenuItem
+                  onClick={() => navigateTo('metric')}
+                  _focus={{
+                    backgroundColor: 'white.100',
+                  }}
+                >
+                  <Flex
+                    justifyContent={'space-between'}
+                    gap={'2'}
+                    alignItems={'center'}
+                  >
+                    <i className={'ri-funds-box-line'} />
+                    Metric
+                  </Flex>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => navigateTo('funnel')}
+                  _focus={{
+                    backgroundColor: 'white.100',
+                  }}
+                >
+                  <Flex
+                    justifyContent={'space-between'}
+                    gap={'2'}
+                    alignItems={'center'}
+                  >
+                    <i className={'ri-filter-line'} />
+                    Funnel
+                  </Flex>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => navigateTo('segment')}
+                  _focus={{
+                    backgroundColor: 'white.100',
+                  }}
+                >
+                  <Flex
+                    justifyContent={'space-between'}
+                    gap={'2'}
+                    alignItems={'center'}
+                  >
+                    <i className={'ri-funds-box-line'} />
+                    Segment
+                  </Flex>
                 </MenuItem>
               </MenuList>
             </Menu>

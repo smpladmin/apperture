@@ -1,30 +1,25 @@
-from fastapi import APIRouter, Depends
-from typing import List
+from typing import List, Union
 
-from domain.funnels.service import FunnelsService
-from domain.apps.service import AppService
+from fastapi import APIRouter, Depends
+
 from domain.apperture_users.models import AppertureUser
-from domain.funnels.models import ConversionStatus
+from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
-from rest.dtos.funnels import (
-    FunnelResponse,
-    ComputedFunnelStepResponse,
-    ComputedFunnelResponse,
-    FunnelWithUser,
-    FunnelConversionResponseBody,
-    CreateFunnelDto,
-    TransientFunnelDto,
-    FunnelTrendResponse,
-)
+from domain.funnels.service import FunnelsService
+from rest.dtos.appperture_users import AppertureUserResponse
 from rest.dtos.funnels import (
     CreateFunnelDto,
     TransientFunnelDto,
     FunnelTrendResponse,
     TransientFunnelConversionlDto,
 )
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.funnels import (
+    FunnelResponse,
+    ComputedFunnelStepResponse,
+    FunnelWithUser,
+    FunnelConversionResponseBody,
+)
 from rest.middlewares import validate_jwt, get_user_id, get_user
-
 
 router = APIRouter(
     tags=["funnels"],
@@ -62,13 +57,12 @@ async def compute_transient_funnel(
     return await funnel_service.compute_funnel(ds_id=dto.datasourceId, steps=dto.steps)
 
 
-@router.get("/funnels/{id}", response_model=ComputedFunnelResponse)
-async def get_computed_funnel(
+@router.get("/funnels/{id}", response_model=FunnelResponse)
+async def get_saved_funnel(
     id: str,
     funnel_service: FunnelsService = Depends(),
 ):
-    funnel = await funnel_service.get_funnel(id)
-    return await funnel_service.get_computed_funnel(funnel=funnel)
+    return await funnel_service.get_funnel(id)
 
 
 @router.put("/funnels/{id}", response_model=FunnelResponse)
@@ -127,13 +121,16 @@ async def get_transient_funnel_analytics(
 
 @router.get("/funnels", response_model=List[FunnelWithUser])
 async def get_funnels(
+    datasource_id: Union[str, None] = None,
     user: AppertureUser = Depends(get_user),
     funnel_service: FunnelsService = Depends(),
     app_service: AppService = Depends(),
 ):
     apps = await app_service.get_apps(user=user)
-    funnels = await funnel_service.get_funnels_for_apps(
-        app_ids=[app.id for app in apps]
+    funnels = (
+        await funnel_service.get_funnels_for_datasource_id(datasource_id=datasource_id)
+        if datasource_id
+        else await funnel_service.get_funnels_for_apps(app_ids=[app.id for app in apps])
     )
     funnels = [FunnelWithUser.from_orm(f) for f in funnels]
     for funnel in funnels:

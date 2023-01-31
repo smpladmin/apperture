@@ -54,7 +54,7 @@ const TransientFunnelView = ({
     const { step, event } = data;
     setSelectedEvent(event.trim());
     const selectedSteps = funnelSteps.slice(0, step);
-    setSelectedFunnelSteps(selectedSteps); 
+    setSelectedFunnelSteps(selectedSteps);
   };
 
   return (

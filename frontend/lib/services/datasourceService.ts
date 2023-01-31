@@ -1,3 +1,4 @@
+import { SanityData } from './../domain/eventData';
 import { AppertureGet, ApperturePrivateGet } from './util';
 import { AppertureAPI } from '@lib/apiClient';
 import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
@@ -125,4 +126,15 @@ export const getEventPropertiesValue = async (
     console.error((e as AxiosError).message);
     return [];
   }
+};
+
+export const getEvents = async (
+  dsId: string,
+  isAux: boolean,
+  tableName: string
+): Promise<SanityData> => {
+  const result = await AppertureGet(
+    `/datasources/${dsId}/events?is_aux=${isAux}&table_name=${tableName}`
+  );
+  return result.data;
 };

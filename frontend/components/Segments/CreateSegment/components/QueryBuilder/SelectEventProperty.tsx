@@ -15,6 +15,7 @@ type SelectEventPropertyProps = {
   filters: SegmentFilter[];
   updateGroupsState: Function;
   index: number;
+  loadingEventProperties: boolean;
 };
 
 const SelectEventProperty = ({
@@ -23,6 +24,7 @@ const SelectEventProperty = ({
   filters,
   updateGroupsState,
   index,
+  loadingEventProperties,
 }: SelectEventPropertyProps) => {
   const [isFiltersListOpen, setOpenFiltersList] = useState(false);
   const [dropdownItems, setDropDownItems] = useState<SegmentProperty[]>([]);
@@ -43,7 +45,7 @@ const SelectEventProperty = ({
     }
 
     setDropDownItems(items);
-  }, []);
+  }, [eventProperties]);
 
   const onSuggestionClick = (item: SegmentProperty) => {
     const updatedFilters = [...filters];
@@ -76,7 +78,7 @@ const SelectEventProperty = ({
       <SearchableListDropdown
         isOpen={isFiltersListOpen}
         data={dropdownItems}
-        isLoading={false}
+        isLoading={loadingEventProperties}
         onSubmit={onSuggestionClick}
         listKey={'id'}
         showBadge={true}

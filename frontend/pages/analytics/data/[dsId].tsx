@@ -1,12 +1,15 @@
 import Layout from '@components/Layout';
-import Watchlist from '@components/Watchlist';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
-import React, { ReactNode } from 'react';
+import { ReactElement } from 'react';
+import Sanity from '@components/SanityTables';
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  query,
+}) => {
   const token = getAuthToken(req);
   if (!token) {
     return {
@@ -14,6 +17,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     };
   }
   const apps = await _getAppsWithIntegrations(token);
+
   if (!apps.length) {
     return {
       redirect: {
@@ -27,12 +31,12 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   };
 };
 
-const Saved = () => {
-  return <Watchlist />;
+const SanityTables = () => {
+  return <Sanity />;
 };
 
-Saved.getLayout = function getLayout(
-  page: ReactNode,
+SanityTables.getLayout = function getLayout(
+  page: ReactElement,
   apps: AppWithIntegrations[]
 ) {
   return (
@@ -41,4 +45,4 @@ Saved.getLayout = function getLayout(
     </Layout>
   );
 };
-export default Saved;
+export default SanityTables;

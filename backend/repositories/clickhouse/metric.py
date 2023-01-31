@@ -69,14 +69,20 @@ class Metrics(EventsBase):
                 if end_date:
                     inner_criterion.append(fn.Date(Field("date")) <= fn.Date(end_date))
             innerquery = innerquery.where(Criterion.all(inner_criterion))
-        select_expression, denominators = parser.parse(function, fn.Sum)
+        select_expressions,denominators_list = zip(*[parser.parse(definition, fn.Sum) for definition in function.split(',')])
         having_clause = []
-        for denominator in denominators:
-            having_clause.append(denominator != 0)
+        for denominators in denominators_list:
+            for denominator in denominators:
+                if type(denominator) != int and type(denominator) != float:
+                    having_clause.append(denominator != 0)
+
         query = (
             ClickHouseQuery.from_(innerquery.as_("innerquery"))
-            .select(Parameter("date"), select_expression)
+            .select(Parameter("date"))
             .groupby(Parameter("date"))
             .having(Criterion.all(having_clause))
         )
+        for select_expression in select_expressions:
+            query = query.select(select_expression)
+            
         return query.get_sql(), {"ds_id": datasource_id}

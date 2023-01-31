@@ -88,7 +88,8 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
       openExitConfirmModal();
     } else {
       router.push({
-        pathname: '/analytics/saved',
+        pathname: '/analytics/segment/list/[dsId]',
+        query: { dsId },
       });
     }
   };
@@ -201,18 +202,17 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
       <Flex
         alignItems={'center'}
         justifyContent={'space-between'}
-        bg={'black.50'}
+        bg={'white.DEFAULT'}
+        color={'black'}
         py={'2'}
         px={'4'}
+        borderBottom={'1px'}
+        borderColor={'white.200'}
       >
-        <Flex alignItems={'center'} gap={'1'}>
-          <Box
-            color={'white.DEFAULT'}
-            cursor={'pointer'}
-            onClick={showExitConfirmationModal}
-          >
+        <Flex alignItems={'center'} justifyContent={'center'} gap={'2'}>
+          <Flex cursor={'pointer'} onClick={showExitConfirmationModal}>
             <i className="ri-arrow-left-line"></i>
-          </Box>
+          </Flex>
           <Flex
             alignItems={'center'}
             alignContent={'center'}
@@ -223,7 +223,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
               fontSize={'sh-20'}
               lineHeight={'sh-20'}
               fontWeight={'600'}
-              color={'white.DEFAULT'}
+              color={'black'}
             >
               {savedSegment?.name || 'New Segment'}
             </Text>
@@ -257,16 +257,16 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
           fontSize={'base'}
           lineHeight={'base'}
           fontWeight={'600'}
-          bg={'white.DEFAULT'}
+          bg={'black.DEFAULT'}
+          color={'white.DEFAULT'}
           onClick={openSaveSegmentModal}
           _hover={{
-            color: 'white.DEFAULT',
-            bg: 'black.100',
+            bg: 'grey.200',
           }}
           disabled={isSaveDisabled}
           data-testid={'open-save-segment-modal'}
         >
-          Save Segment
+          Save
         </Button>
       </Flex>
       <Box py={'7'} px={'10'}>

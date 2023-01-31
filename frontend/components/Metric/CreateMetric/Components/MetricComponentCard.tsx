@@ -9,9 +9,11 @@ import {
   MetricComponentVariant,
   MetricEventFilter,
 } from '@lib/domain/metric';
+import { Node } from '@lib/domain/node';
+
 type MetricComponentCardProps = {
   variable: string;
-  eventList: string[];
+  eventList: Node[];
   eventProperties: string[];
   loadingEventProperties: boolean;
   loadingEventsList: boolean;
@@ -38,8 +40,8 @@ const MetricComponentCard = ({
     useState<boolean>(false);
   const [isEventOrSegmentListLoading, setIsEventOrSegmentListLoading] =
     useState<boolean>(false);
-  const [EventorSegmentListSearchData, setEventOrSegmentListSearchData] =
-    useState<string[]>([]);
+  const [eventOrSegmentListSearchData, setEventOrSegmentListSearchData] =
+    useState<Node[]>([]);
   const [reference, setReference] = useState(
     savedAggregate?.reference_id || ''
   );
@@ -60,13 +62,13 @@ const MetricComponentCard = ({
     setIsEventOrSegmentListOpen(false);
   });
 
-  const handleEventOrSegmentSelection = (selection: string) => {
+  const handleEventOrSegmentSelection = (selection: Node) => {
     setIsEventOrSegmentListOpen(false);
     updateAggregate(variable, {
-      reference_id: selection,
-      aggregations: { property: selection, functions: 'count' },
+      reference_id: selection.id,
+      aggregations: { property: selection.id, functions: 'count' },
     });
-    setReference(selection);
+    setReference(selection.id);
   };
 
   const handleSetCondition = (ref: number, value: string) => {
@@ -113,12 +115,12 @@ const MetricComponentCard = ({
       previousVariant.current = variant;
       updateAggregate(variable, { variant });
       setIsEventOrSegmentListLoading(true);
-      if (variant === MetricComponentVariant.EVENT) {
-        setEventOrSegmentListSearchData(eventList);
-        setIsEventOrSegmentListLoading(false);
-      }
     }
-  }, [variant]);
+    if (variant === MetricComponentVariant.EVENT) {
+      setEventOrSegmentListSearchData(eventList);
+      setIsEventOrSegmentListLoading(false);
+    }
+  }, [variant, eventList]);
 
   useEffect(() => {
     if (filters.every((filter) => filter.values.length)) {
@@ -172,6 +174,7 @@ const MetricComponentCard = ({
               fontSize={'xs-14'}
               fontWeight={500}
               lineHeight={'xs-18'}
+              wordBreak={'break-all'}
             >
               {reference === '' ? 'Add Event / Segment' : reference}
             </Text>
@@ -220,6 +223,7 @@ const MetricComponentCard = ({
                       e.stopPropagation();
                       setVariant(MetricComponentVariant.EVENT);
                     }}
+                    pointerEvents={'none'}
                   >
                     <i className="ri-group-fill"></i>
                     <Text marginLeft={2}>Segments</Text>
@@ -229,17 +233,12 @@ const MetricComponentCard = ({
                 <SearchableListDropdown
                   isOpen={isEventOrSegmentListOpen}
                   isLoading={isEventOrSegmentListLoading}
-                  data={EventorSegmentListSearchData}
+                  data={eventOrSegmentListSearchData}
                   onSubmit={handleEventOrSegmentSelection}
+                  listKey={'id'}
+                  isNode
                 />
-              ) : (
-                <SearchableListDropdown
-                  isOpen={isEventOrSegmentListOpen}
-                  isLoading={isEventOrSegmentListLoading}
-                  data={EventorSegmentListSearchData}
-                  onSubmit={handleEventOrSegmentSelection}
-                />
-              )
+              ) : null
             ) : null}
           </Box>
         </Flex>
@@ -284,6 +283,8 @@ const MetricComponentCard = ({
                 handleSetCondition={handleSetCondition}
                 handleSetFilter={handleSetFilter}
                 removeFilter={removeFilter}
+                eventProperties={eventProperties}
+                loadingEventProperties={loadingEventProperties}
               />
             ))}
           <MetricAddFilterComponent

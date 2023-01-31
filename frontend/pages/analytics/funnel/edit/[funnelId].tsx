@@ -1,12 +1,12 @@
-import Funnel from '@components/Funnel/CreateFunnel';
+import CreateFunnel from '@components/Funnel/CreateFunnel';
 import Layout from '@components/Layout';
 import { MapContext } from '@lib/contexts/mapContext';
 import { AppWithIntegrations } from '@lib/domain/app';
+import { Funnel } from '@lib/domain/funnel';
 import { Node } from '@lib/domain/node';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { _getNodes } from '@lib/services/datasourceService';
-
-
+import { _getSavedFunnel } from '@lib/services/funnelService';
 import { Actions } from '@lib/types/context';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
@@ -24,7 +24,10 @@ export const getServerSideProps: GetServerSideProps = async ({
   }
 
   const apps = await _getAppsWithIntegrations(token);
-  const nodes = await _getNodes(token, query.dsId as string);
+  const [nodes, savedFunnel] = await Promise.all([
+    _getNodes(token, query.dsId as string),
+    _getSavedFunnel(token, query.funnelId as string),
+  ]);
 
   if (!apps.length) {
     return {
@@ -34,12 +37,28 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
+
+  if (!savedFunnel) {
+    return {
+      redirect: {
+        destination: '/404',
+      },
+      props: {},
+    };
+  }
+
   return {
-    props: { apps, nodes },
+    props: { apps, nodes, savedFunnel },
   };
 };
 
-const EditFunnel = ({ nodes }: { nodes: Node[] }) => {
+const EditFunnel = ({
+  nodes,
+  savedFunnel,
+}: {
+  nodes: Node[];
+  savedFunnel: Funnel;
+}) => {
   const { dispatch } = useContext(MapContext);
 
   useEffect(() => {
@@ -49,7 +68,7 @@ const EditFunnel = ({ nodes }: { nodes: Node[] }) => {
     });
   }, []);
 
-  return <Funnel />;
+  return <CreateFunnel savedFunnel={savedFunnel} />;
 };
 
 EditFunnel.getLayout = function getLayout(

@@ -11,6 +11,7 @@ const config = {
   autoFit: true,
   xField: 'date',
   yField: 'value',
+  seriesField: 'series',
   xAxis: {
     label: {
       formatter: (text: string) => {
@@ -18,7 +19,21 @@ const config = {
       },
     },
   },
-  legend: { position: 'top' },
+  legend: {
+    position: 'top',
+    autofit: false,
+    marker: (name: string, index: number, option: any) => {
+      return option?.style?.stroke
+        ? {
+            symbol: 'circle',
+            style: {
+              r: 4,
+              fill: option?.style?.stroke,
+            },
+          }
+        : undefined;
+    },
+  },
   tooltip: {
     showMarkers: true,
     shared: true,
@@ -29,9 +44,6 @@ const config = {
         value: value,
       };
     },
-  },
-  lineStyle: {
-    stroke: BLUE,
   },
   animation: true,
 };
@@ -44,27 +56,10 @@ const MetricTrend = ({ data, definition }: ComputedMetric) => {
     <Flex
       height={'full'}
       width={'full'}
-      alignItems="center"
-      alignContent="center"
       justifyContent={'center'}
       direction={'column'}
     >
-      <Flex py={10}>
-        <Tag cursor={'pointer'}>
-          <Box
-            height={2}
-            width={2}
-            background={BLUE}
-            borderRadius={'full'}
-            marginRight={2}
-          ></Box>
-          <TagLabel fontSize={'xs-12'} lineHeight={'xs-16'}>
-            {definition}
-          </TagLabel>
-        </Tag>
-      </Flex>
       <LineChart {...config} data={data} />
-      <Box width={'full'} ref={ref} h={'88'} data-testid={'funnel-trend'}></Box>
     </Flex>
   );
 };

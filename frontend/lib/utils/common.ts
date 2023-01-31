@@ -4,8 +4,8 @@ import mixPanelLogo from '@assets/images/mixpanel-icon.svg';
 import gaLogo from '@assets/images/ga-logo-small.svg';
 import clevertapLogo from '@assets/images/clevertap-icon.png';
 import amplitudeLogo from '@assets/images/amplitude-icon.svg';
-
 import { StaticImageData } from 'next/image';
+import { AppWithIntegrations } from '@lib/domain/app';
 
 export const formatDatalabel = (datalabel: number): string => {
   if (datalabel > 999999999999) {
@@ -82,4 +82,14 @@ export const getSearchResult = (
 export const capitalizeFirstLetter = (text: string): string => {
   const capitalized = text?.charAt(0)?.toUpperCase() + text?.slice(1);
   return capitalized;
+};
+
+export const getDatasourceById = (
+  apps: AppWithIntegrations[],
+  datasourceId: string
+) => {
+  return apps
+    .flatMap((app) => app.integrations)
+    .flatMap((integration) => integration.datasources)
+    .find((datasource) => datasource._id === datasourceId);
 };

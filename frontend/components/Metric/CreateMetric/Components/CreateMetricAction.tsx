@@ -26,6 +26,7 @@ import {
   MetricEventFilter,
 } from '@lib/domain/metric';
 import { isEqual } from 'lodash';
+import { Node } from '@lib/domain/node';
 
 type CreateMetricActionProps = {
   setMetric: Function;
@@ -33,6 +34,7 @@ type CreateMetricActionProps = {
   savedMetric: Metric | undefined;
   canSaveMetric: boolean;
   setCanSaveMetric: Function;
+  setIsLoading: Function;
 };
 
 const CreateMetricAction = ({
@@ -41,18 +43,19 @@ const CreateMetricAction = ({
   savedMetric,
   canSaveMetric,
   setCanSaveMetric,
+  setIsLoading,
 }: CreateMetricActionProps) => {
   const [metricName, setMetricName] = useState(
     savedMetric?.name || 'Untitled Metric'
   );
   const [metricDefinition, setmetricDefinition] = useState(
-    savedMetric?.function || 'A'
+    savedMetric?.function || ''
   );
   const router = useRouter();
 
   const { metricId } = router.query;
   const dsId = savedMetric?.datasourceId || router.query.dsId;
-  const [eventList, setEventList] = useState<string[]>([]);
+  const [eventList, setEventList] = useState<Node[]>([]);
   const [eventProperties, setEventProperties] = useState<string[]>([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
   const [loadingEventsList, setLoadingEventsList] = useState(false);
@@ -76,7 +79,7 @@ const CreateMetricAction = ({
         getNodes(dsId as string),
       ]);
 
-      setEventList(events.map((i) => i.id));
+      setEventList(events);
       setEventProperties([...eventPropertiesResult]);
       setLoadingEventProperties(false);
       setLoadingEventsList(false);
@@ -179,7 +182,9 @@ const CreateMetricAction = ({
       );
       const result = await computeMetric(
         dsId as string,
-        metricDefinition as string,
+        metricDefinition && metricDefinition.length
+          ? metricDefinition
+          : aggregates.map((aggregate) => aggregate.variable).join(','),
         processedAggregate,
         [],
         dateRange?.startDate,
@@ -190,6 +195,7 @@ const CreateMetricAction = ({
           data: result.metric,
           definition: metricDefinition,
         });
+        setIsLoading(false);
       } else {
         setMetric(null);
       }
@@ -209,8 +215,7 @@ const CreateMetricAction = ({
         aggregates &&
         aggregates.length &&
         (!isEqual(savedMetric?.aggregates, aggregates) ||
-          !isEqual(savedMetric?.function, metricDefinition) ||
-          !isEqual(savedMetric?.name, metricName))
+          savedMetric?.function != metricDefinition)
       ) {
         setCanSaveMetric(true);
       } else {
@@ -218,6 +223,12 @@ const CreateMetricAction = ({
       }
     }
   }, [aggregates, metricDefinition, dateRange]);
+
+  useEffect(() => {
+    if (!canSaveMetric && savedMetric && metricName != savedMetric?.name) {
+      setCanSaveMetric(true);
+    }
+  }, [metricName]);
 
   return (
     <>
@@ -230,7 +241,10 @@ const CreateMetricAction = ({
           color={'white.DEFAULT'}
           bg={'black.20'}
           onClick={() => {
-            router.back();
+            router.push({
+              pathname: '/analytics/metric/list/[dsId]',
+              query: { dsId },
+            });
           }}
           data-testid="back-button"
         />

@@ -6,13 +6,14 @@ class TestFormulaParser:
     def setup_method(self):
         self.parser = FormulaParser()
         self.sum_wrapper = fn.Sum
-        self.test_cases = ["A+B", "A-B", "A/B", "A*B", "A*2"]
+        self.test_cases = ["A+B", "A-B", "A/B", "A*B", "A*2", "(A+B)/213.11*10"]
         self.test_sum_aggregation_results = [
             fn.Sum(Field("A")) + fn.Sum(Field("B")),
             fn.Sum(Field("A")) - fn.Sum(Field("B")),
             fn.Sum(Field("A")) / fn.Sum(Field("B")),
             fn.Sum(Field("A")) * fn.Sum(Field("B")),
             fn.Sum(Field("A")) * 2,
+            fn.Sum(Field("A")) + fn.Sum(Field("B")) / 213.11 * 10,
         ]
 
     def test_parser_for_summation_aggregation(self):

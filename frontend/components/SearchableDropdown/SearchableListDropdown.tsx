@@ -1,4 +1,5 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
+import { Node } from '@lib/domain/node';
 import { SegmentProperty } from '@lib/domain/segment';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 import React, { useEffect, useState } from 'react';
@@ -7,10 +8,11 @@ import SearchableDropdown from './SearchableDropdown';
 type SearchableListDropdownProps = {
   isOpen: boolean;
   isLoading: boolean;
-  data: Array<string | SegmentProperty>;
+  data: Array<string | SegmentProperty | Node>;
   onSubmit: Function;
   listKey?: keyof SegmentProperty;
   showBadge?: boolean;
+  isNode?: boolean;
 };
 
 const SearchableListDropdown = ({
@@ -20,8 +22,11 @@ const SearchableListDropdown = ({
   onSubmit,
   listKey,
   showBadge,
+  isNode = false,
 }: SearchableListDropdownProps) => {
-  const [listData, setListData] = useState<Array<string | SegmentProperty>>([]);
+  const [listData, setListData] = useState<
+    Array<string | SegmentProperty | Node>
+  >([]);
 
   useEffect(() => {
     if (!listData.length) setListData(data);
@@ -81,6 +86,23 @@ const SearchableListDropdown = ({
                       fontWeight={'400'}
                     >
                       {capitalizeFirstLetter((item as SegmentProperty)?.type)}
+                    </Text>
+                  </Box>
+                ) : null}
+                {isNode ? (
+                  <Box
+                    h={'6'}
+                    px={'2'}
+                    py={'1'}
+                    bg={'grey.DEFAULT'}
+                    borderRadius={'4'}
+                  >
+                    <Text
+                      fontSize={'xs-12'}
+                      lineHeight={'xs-12'}
+                      fontWeight={'400'}
+                    >
+                      {capitalizeFirstLetter((item as Node)?.source)}
                     </Text>
                   </Box>
                 ) : null}

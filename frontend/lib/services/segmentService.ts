@@ -1,4 +1,9 @@
-import { ApperturePrivateGet, ApperturePost, AppertureGet, ApperturePut } from './util';
+import {
+  ApperturePrivateGet,
+  ApperturePost,
+  AppertureGet,
+  ApperturePut,
+} from './util';
 import { cloneDeep } from 'lodash';
 import { replaceEmptyStringPlaceholder } from './../../components/Segments/util';
 import { SegmentGroup } from '@lib/domain/segment';
@@ -54,7 +59,7 @@ export const _getSavedSegment = async (token: string, segementId: string) => {
   return res.data;
 };
 
-export const getSavedSegmentsForUser = async () => {
-  const res = await AppertureGet('/segments');
+export const getSavedSegmentsForDatasourceId = async (dsId: string) => {
+  const res = await AppertureGet(`/segments?datasource_id=${dsId}`);
   return res.data;
 };
