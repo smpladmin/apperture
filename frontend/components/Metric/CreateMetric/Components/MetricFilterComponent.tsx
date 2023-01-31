@@ -6,6 +6,7 @@ import { getEventPropertiesValue } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
 import SearchableCheckboxDropdown from '@components/SearchableDropdown/SearchableCheckboxDropdown';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
+import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 
 type MetricFilterComponentProps = {
   condition: string;
