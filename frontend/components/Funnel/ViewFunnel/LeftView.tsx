@@ -139,7 +139,7 @@ const LeftView = ({ datasourceId, name, steps, eventData }: LeftViewProps) => {
         />
       </Flex>
       <Alert
-        nodeName={'Video_Open'}
+        name={name}
         isAlertsSheetOpen={isAlertsSheetOpen}
         closeAlertsSheet={onClose}
         variant={NotificationVariant.FUNNEL}

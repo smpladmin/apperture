@@ -15,7 +15,7 @@ import AlertToast from './Toast';
 import { NotificationFactory, thresholdMetricOptions } from '../util';
 
 type AlertsProps = {
-  nodeName: string;
+  name: string;
   eventData: NotificationEventsData;
   closeAlertsSheet: () => void;
   variant: NotificationVariant;
@@ -24,7 +24,7 @@ type AlertsProps = {
 };
 
 const AlertsInfo = ({
-  nodeName,
+  name,
   eventData,
   closeAlertsSheet,
   variant,
@@ -96,7 +96,7 @@ const AlertsInfo = ({
   const setEventAlert = async () => {
     const response = await setAlert(
       datasourceId,
-      nodeName,
+      name,
       notificationMetric,
       thresholdMetric,
       thresholdMetric === ThresholdMetricType.Percentage

@@ -17,7 +17,7 @@ import {
 } from '@lib/domain/notification';
 
 type DesktopAlertsProps = {
-  nodeName: string;
+  name: string;
   eventData: NotificationEventsData;
   isAlertsSheetOpen: boolean;
   closeAlertsSheet: () => void;
@@ -27,7 +27,7 @@ type DesktopAlertsProps = {
 };
 
 const DesktopAlerts = ({
-  nodeName,
+  name,
   eventData,
   isAlertsSheetOpen,
   closeAlertsSheet,
@@ -86,7 +86,7 @@ const DesktopAlerts = ({
             <Loading />
           ) : (
             <AlertsInfo
-              nodeName={nodeName}
+              name={name}
               eventData={eventData}
               closeAlertsSheet={closeAlertsSheet}
               variant={variant}

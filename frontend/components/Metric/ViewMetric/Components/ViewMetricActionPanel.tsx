@@ -63,7 +63,7 @@ const ViewMetricActionPanel = ({
           onClick={() =>
             router.push({
               pathname: '/analytics/metric/edit/[id]',
-              query: { id: router.query.metricId, dsId: router.query.dsId },
+              query: { id: router.query.metricId, dsId: datasourceId },
             })
           }
         >
@@ -113,8 +113,6 @@ const ViewMetricActionPanel = ({
             EVENTS & SEGMENT
           </Text>
         </Flex>
-        {/* <Divider orientation="horizontal" borderColor={BASTILLE} opacity={1} /> */}
-
         {aggregates.map((aggregate) => (
           <MetricViewComponentCard
             variable={aggregate.variable}
@@ -132,7 +130,7 @@ const ViewMetricActionPanel = ({
           opacity={1}
         />
         <Alert
-          nodeName={'Video_Open'}
+          name={metricName}
           isAlertsSheetOpen={isAlertsSheetOpen}
           closeAlertsSheet={onClose}
           variant={NotificationVariant.METRIC}

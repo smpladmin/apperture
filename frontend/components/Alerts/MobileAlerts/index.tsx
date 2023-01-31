@@ -13,7 +13,7 @@ import {
 } from '@lib/domain/notification';
 
 type MobileAlertsProps = {
-  nodeName: string;
+  name: string;
   eventData: NotificationEventsData;
   isAlertsSheetOpen: boolean;
   closeAlertsSheet: () => void;
@@ -22,7 +22,7 @@ type MobileAlertsProps = {
   datasourceId: string;
 };
 const MobileAlerts = ({
-  nodeName,
+  name,
   eventData,
   isAlertsSheetOpen,
   closeAlertsSheet,
@@ -54,7 +54,7 @@ const MobileAlerts = ({
             <Loading />
           ) : (
             <AlertsInfo
-              nodeName={nodeName}
+              name={name}
               eventData={eventData}
               closeAlertsSheet={closeAlertsSheet}
               variant={variant}

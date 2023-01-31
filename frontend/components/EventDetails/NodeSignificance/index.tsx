@@ -114,7 +114,7 @@ const NodeSignificance = ({
         </Box>
       </Box>
       <Alert
-        nodeName={nodeSignificanceData?.[0]?.['node']}
+        name={nodeSignificanceData?.[0]?.['node']}
         isAlertsSheetOpen={isAlertsSheetOpen}
         closeAlertsSheet={closeAlertsSheet}
         variant={NotificationVariant.NODE}

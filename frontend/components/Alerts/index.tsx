@@ -8,7 +8,7 @@ import {
 } from '@lib/domain/notification';
 
 type AlertsProps = {
-  nodeName: string;
+  name: string;
   isAlertsSheetOpen: boolean;
   closeAlertsSheet: () => void;
   variant: NotificationVariant;
@@ -17,7 +17,7 @@ type AlertsProps = {
   datasourceId: string;
 };
 const Alert = ({
-  nodeName,
+  name,
   isAlertsSheetOpen,
   closeAlertsSheet,
   variant,
@@ -29,7 +29,7 @@ const Alert = ({
     <>
       <Render on={'mobile'}>
         <MobileAlerts
-          nodeName={nodeName}
+          name={name}
           eventData={eventData}
           isAlertsSheetOpen={isAlertsSheetOpen}
           closeAlertsSheet={closeAlertsSheet}
@@ -40,7 +40,7 @@ const Alert = ({
       </Render>
       <Render on={'desktop'}>
         <DesktopAlerts
-          nodeName={nodeName}
+          name={name}
           eventData={eventData}
           isAlertsSheetOpen={isAlertsSheetOpen}
           closeAlertsSheet={closeAlertsSheet}
