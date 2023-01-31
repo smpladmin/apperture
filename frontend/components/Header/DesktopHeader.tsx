@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Flex,
-  IconButton,
   Menu,
   MenuButton,
   MenuItem,
@@ -11,11 +10,10 @@ import {
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { Provider } from '@lib/domain/provider';
 import 'remixicon/fonts/remixicon.css';
-import filterIcon from '@assets/icons/filter-icon.svg';
 import Search from './Search';
 import Image from 'next/image';
 import { getProviderLogo } from '@lib/utils/common';
-import { BLACK, BLACK_RUSSIAN, WHITE_DEFAULT } from '@theme/index';
+import { BLACK, WHITE_DEFAULT } from '@theme/index';
 import { useRouter } from 'next/router';
 
 type DesktopHeaderProps = {

@@ -4,7 +4,6 @@ import {
   Flex,
   IconButton,
   Input,
-  Switch,
   Text,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';

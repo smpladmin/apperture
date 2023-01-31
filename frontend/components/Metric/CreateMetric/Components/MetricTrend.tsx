@@ -1,11 +1,9 @@
 import { Line } from '@antv/g2plot';
-import { Box, Flex, Tag, TagLabel, usePrevious } from '@chakra-ui/react';
-import LineChart, { LineChartProps } from '@components/Charts/Line';
+import { Flex, usePrevious } from '@chakra-ui/react';
+import LineChart from '@components/Charts/Line';
 import { ComputedMetric } from '@lib/domain/metric';
 import { convertISODateToReadableDate } from '@lib/utils/common';
-import { BLUE } from '@theme/index';
-import isEqual from 'lodash/isEqual';
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 
 const config = {
   padding: 'auto',

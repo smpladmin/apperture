@@ -3,9 +3,7 @@ import {
   Box,
 } from '@chakra-ui/react';
 import TableSkeleton from '@components/Skeleton/TableSkeleton';
-import { FunnelConversionData } from '@lib/domain/funnel';
 import React from 'react';
-import UserListTable from './UserListTable';
 
 const SkeletonLoader = () => {
   return (

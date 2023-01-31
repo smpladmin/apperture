@@ -1,5 +1,4 @@
 import { EventOrSegmentComponent } from '@lib/domain/metric';
-import { result } from 'lodash';
 import {
   AppertureGet,
   ApperturePost,

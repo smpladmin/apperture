@@ -1,5 +1,5 @@
-import { Box, useDisclosure } from '@chakra-ui/react';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { Box } from '@chakra-ui/react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { Chart } from '@antv/g2';
 import { transformFunnelData } from '../util';
 import { BLACK_200, MEDIUM_BLUE } from '@theme/index';

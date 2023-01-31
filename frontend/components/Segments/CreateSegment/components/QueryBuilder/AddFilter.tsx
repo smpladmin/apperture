@@ -7,7 +7,6 @@ import {
   SegmentDateFilterType,
   SegmentFilter,
   SegmentFilterConditions,
-  SegmentFilterOperators,
   SegmentFilterOperatorsNumber,
   SegmentFilterOperatorsString,
   SegmentProperty,

@@ -1,4 +1,3 @@
-import { NodeType } from '@lib/types/graph';
 import { FunnelStep, FunnelData } from '@lib/domain/funnel';
 
 export const getCountOfValidAddedSteps = (steps: FunnelStep[]) => {
