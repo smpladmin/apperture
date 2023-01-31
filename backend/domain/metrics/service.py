@@ -40,9 +40,11 @@ class MetricService:
             start_date=start_date,
             end_date=end_date,
         )
-
-        data = [dict(zip(["date", "value"], row)) for row in computed_metric]
-        return ComputedMetricResult(metric=data)
+        
+        keys=["date", *function.split(",")]
+        data = [dict(zip(keys, row)) for row in computed_metric]
+        result = [{'date': d['date'], 'series': k, 'value': v} for d in data for k, v in d.items() if k != 'date']
+        return ComputedMetricResult(metric=result)
 
     async def build_metric(
         self,
@@ -104,3 +106,8 @@ class MetricService:
 
     async def get_metrics_by_user_id(self, user_id: str):
         return await Metric.find(Metric.user_id == PydanticObjectId(user_id)).to_list()
+
+    async def get_metrics_for_datasource_id(self, datasource_id: str) -> List[Metric]:
+        return await Metric.find(
+            PydanticObjectId(datasource_id) == Metric.datasource_id
+        ).to_list()

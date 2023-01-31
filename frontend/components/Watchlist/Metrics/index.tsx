@@ -3,7 +3,7 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import { Metric } from '@lib/domain/metric';
 import { Provider } from '@lib/domain/provider';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
-import { getSavedMetricsForUser } from '@lib/services/metricService';
+import { getSavedMetricsForDatasourceId } from '@lib/services/metricService';
 import { Row } from '@tanstack/react-table';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -18,7 +18,8 @@ const SavedMetrics = ({ provider }: { provider: Provider }) => {
 
   useEffect(() => {
     const getMetrics = async () => {
-      let savedMetrics = (await getSavedMetricsForUser()) || [];
+      let savedMetrics =
+        (await getSavedMetricsForDatasourceId(dsId as string)) || [];
       savedMetrics = savedMetrics.map((metric: Metric) => {
         return { type: WatchListItemType.METRICS, details: metric };
       });

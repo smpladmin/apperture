@@ -66,8 +66,8 @@ export const getTransientTrendsData = async (
   return res.data || [];
 };
 
-export const getSavedFunnelsForUser = async () => {
-  const res = await AppertureGet(`/funnels`);
+export const getSavedFunnelsForDatasourceId = async (dsId: string) => {
+  const res = await AppertureGet(`/funnels?datasource_id=${dsId}`);
   return res.data;
 };
 

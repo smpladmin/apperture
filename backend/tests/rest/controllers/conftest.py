@@ -45,10 +45,15 @@ from domain.notifications.models import (
 
 from domain.metrics.models import (
     ComputedMetricResult,
+    Metric,
 )
 from domain.apperture_users.models import AppertureUser
 from domain.edge.models import Edge, NodeSignificance, NodeTrend, NodeSankey
 from domain.users.models import UserDetails
+from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.funnels import FunnelWithUser
+from rest.dtos.metrics import MetricWithUser
+from rest.dtos.segments import SegmentWithUser
 
 
 @pytest.fixture(scope="module")
@@ -56,6 +61,19 @@ def client_init(app_init):
     print("Running tests for controllers")
     test_client = TestClient(app_init)
     yield test_client
+
+
+@pytest.fixture(scope="module")
+def apperture_user_response():
+    AppertureUserResponse.from_orm = mock.MagicMock(
+        return_value=AppertureUserResponse(
+            firstName="Test",
+            lastName="User",
+            email="test@email.com",
+            picture="https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
+            slackChannel="#alerts",
+        )
+    )
 
 
 @pytest.fixture(scope="module")
@@ -126,7 +144,7 @@ def notification_service():
 
 
 @pytest.fixture(scope="module")
-def funnel_service():
+def funnel_service(apperture_user_response):
     funnel_service_mock = mock.MagicMock()
     Funnel.get_settings = mock.MagicMock()
     funnel = Funnel(
@@ -150,6 +168,9 @@ def funnel_service():
     )
     funnel_future = asyncio.Future()
     funnel_future.set_result(funnel)
+
+    funnels_future = asyncio.Future()
+    funnels_future.set_result([FunnelWithUser.from_orm(funnel)])
 
     computed_transient_funnel = [
         ComputedFunnelStep(event="Login", users=956, conversion=100.0),
@@ -202,6 +223,8 @@ def funnel_service():
     funnel_service_mock.update_funnel = mock.AsyncMock()
     funnel_service_mock.get_funnel_trends.return_value = funnel_trends_future
     funnel_service_mock.get_user_conversion.return_value = funnel_user_conversion_future
+    funnel_service_mock.get_funnels_for_datasource_id.return_value = funnels_future
+    funnel_service_mock.get_funnels_for_apps.return_value = funnels_future
 
     return funnel_service_mock
 
@@ -329,8 +352,40 @@ def properties_service():
 
 
 @pytest.fixture(scope="module")
-def metric_service():
-    metric_service = mock.AsyncMock()
+def metric_service(apperture_user_response):
+    metric_service = mock.MagicMock()
+    Metric.get_settings = mock.MagicMock()
+    metric = Metric(
+        id=PydanticObjectId("63d0df1ea1040a6388a4a34c"),
+        datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
+        app_id=PydanticObjectId("63ca46feee94e38b81cda37a"),
+        user_id=PydanticObjectId("6374b74e9b36ecf7e0b4f9e4"),
+        name="Video Metric",
+        function="A/B",
+        aggregates=[
+            {
+                "variable": "A",
+                "variant": "event",
+                "aggregations": {"functions": "count", "property": "Video_Seen"},
+                "reference_id": "Video_Seen",
+                "filters": [],
+                "conditions": [],
+            },
+            {
+                "variable": "B",
+                "variant": "event",
+                "aggregations": {"functions": "count", "property": "Video_Open"},
+                "reference_id": "Video_Open",
+                "filters": [],
+                "conditions": [],
+            },
+        ],
+        breakdown=[],
+    )
+
+    metrics_future = asyncio.Future()
+    metrics_future.set_result([MetricWithUser.from_orm(metric)])
+
     computed_metric = ComputedMetricResult(
         metric=[
             {"date": "2022-10-07", "value": 4},
@@ -341,12 +396,16 @@ def metric_service():
             {"date": "2022-10-12", "value": 33},
         ]
     )
-    metric_service.compute_metric.return_value = computed_metric
+    computed_metric_future = asyncio.Future()
+    computed_metric_future.set_result(computed_metric)
+
+    metric_service.compute_metric.return_value = computed_metric_future
+    metric_service.get_metrics_for_datasource_id.return_value = metrics_future
     return metric_service
 
 
 @pytest.fixture(scope="module")
-def segment_service():
+def segment_service(apperture_user_response):
     segment_service = mock.AsyncMock()
     Segment.get_settings = mock.MagicMock()
     computed_segment = ComputedSegment(
@@ -399,10 +458,17 @@ def segment_service():
     segment_service.build_segment.return_value = segment
     segment_future = asyncio.Future()
     segment_future.set_result(segment)
+
+    # segments_future = asyncio.Future()
+    # segments_future.set_result([SegmentWithUser.from_orm(segment)])
+
     segment_service.add_segment.return_value = segment
     segment_service.update_segment.return_value = segment
     segment_service.get_segment.return_value = segment
     segment_service.get_segments_for_app.return_value = [segment]
+    segment_service.get_segments_for_datasource_id.return_value = [
+        SegmentWithUser.from_orm(segment)
+    ]
     return segment_service
 
 
@@ -629,6 +695,56 @@ def saved_segment_response():
         "updatedAt": None,
         "userId": "63771fc960527aba9354399c",
     }
+
+
+@pytest.fixture(scope="module")
+def saved_segment_with_user():
+    return [
+        {
+            "_id": None,
+            "appId": "63771fc960527aba9354399c",
+            "columns": ["properties.$app_release", "properties.$city"],
+            "createdAt": ANY,
+            "datasourceId": "63771fc960527aba9354399c",
+            "description": "test",
+            "groups": [
+                {
+                    "condition": "and",
+                    "filters": [
+                        {
+                            "all": False,
+                            "condition": "where",
+                            "datatype": "String",
+                            "operand": "properties.$city",
+                            "operator": "is",
+                            "type": "where",
+                            "values": ["Delhi", "Indore", "Bhopal"],
+                        },
+                        {
+                            "all": False,
+                            "condition": "and",
+                            "datatype": "Number",
+                            "operand": "properties.$app_release",
+                            "operator": "equals",
+                            "type": "where",
+                            "values": [5003, 2077, 5002],
+                        },
+                    ],
+                }
+            ],
+            "name": "name",
+            "revisionId": ANY,
+            "updatedAt": None,
+            "userId": "63771fc960527aba9354399c",
+            "user": {
+                "firstName": "Test",
+                "lastName": "User",
+                "email": "test@email.com",
+                "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
+                "slackChannel": "#alerts",
+            },
+        }
+    ]
 
 
 @pytest.fixture(scope="module")

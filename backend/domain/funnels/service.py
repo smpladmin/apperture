@@ -133,3 +133,8 @@ class FunnelsService:
         return await Funnel.find(
             In(Funnel.app_id, app_ids),
         ).to_list()
+
+    async def get_funnels_for_datasource_id(self, datasource_id: str) -> List[Funnel]:
+        return await Funnel.find(
+            PydanticObjectId(datasource_id) == Funnel.datasource_id
+        ).to_list()

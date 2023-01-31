@@ -20,6 +20,7 @@ type WhereSegmentFilterProps = {
   eventProperties: SegmentProperty[];
   index: number;
   removeFilter: Function;
+  loadingEventProperties: boolean;
 };
 
 const WhereSegmentFilter = ({
@@ -29,6 +30,7 @@ const WhereSegmentFilter = ({
   eventProperties,
   index,
   removeFilter,
+  loadingEventProperties,
 }: WhereSegmentFilterProps) => {
   return (
     <Flex gap={'3'} alignItems={'center'}>
@@ -43,6 +45,7 @@ const WhereSegmentFilter = ({
         eventProperties={eventProperties}
         filters={filters}
         updateGroupsState={updateGroupsState}
+        loadingEventProperties={loadingEventProperties}
       />
       <FilterOperator
         filter={filter}

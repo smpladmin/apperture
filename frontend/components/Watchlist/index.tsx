@@ -3,14 +3,15 @@ import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import React, { useEffect, useState } from 'react';
 import WatchListTable from './Table';
 import LoadingSpinner from '@components/LoadingSpinner';
-import { getSavedFunnelsForUser } from '@lib/services/funnelService';
+import { getSavedFunnelsForDatasourceId } from '@lib/services/funnelService';
 import { WatchListItemOptions } from './util';
 import WatchListItemTypeOptions from './WatchListItemOptions';
-import { getSavedSegmentsForUser } from '@lib/services/segmentService';
-import { getSavedMetricsForUser } from '@lib/services/metricService';
+import { getSavedSegmentsForDatasourceId } from '@lib/services/segmentService';
+import { getSavedMetricsForDatasourceId } from '@lib/services/metricService';
 import { Funnel } from '@lib/domain/funnel';
 import { Segment } from '@lib/domain/segment';
 import { Metric } from '@lib/domain/metric';
+import { useRouter } from 'next/router';
 
 const Watchlist = () => {
   const [selectedItem, setSelectedItem] = useState(WatchListItemType.ALL);
@@ -19,23 +20,25 @@ const Watchlist = () => {
   const [segments, setSegments] = useState<SavedItems[]>([]);
   const [funnels, setFunnels] = useState<SavedItems[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { dsId } = router.query;
 
   const getFunnels = async () => {
-    const savedFunnels = await getSavedFunnelsForUser();
+    const savedFunnels = await getSavedFunnelsForDatasourceId(dsId as string);
     return savedFunnels.map((funnel: Funnel) => {
       return { type: WatchListItemType.FUNNELS, details: funnel };
     });
   };
 
   const getSegments = async () => {
-    const savedSegments = await getSavedSegmentsForUser();
+    const savedSegments = await getSavedSegmentsForDatasourceId(dsId as string);
     return savedSegments.map((segment: Segment) => {
       return { type: WatchListItemType.SEGMENTS, details: segment };
     });
   };
 
   const getMetrics = async () => {
-    const savedMetrics = await getSavedMetricsForUser();
+    const savedMetrics = await getSavedMetricsForDatasourceId(dsId as string);
     return savedMetrics.map((metric: Metric) => {
       return { type: WatchListItemType.METRICS, details: metric };
     });
