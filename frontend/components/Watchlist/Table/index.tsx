@@ -5,7 +5,6 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   flexRender,
-  Row,
 } from '@tanstack/react-table';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 import Details from './Details';
