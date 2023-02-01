@@ -27,8 +27,12 @@ type LeftViewProps = {
 
 const LeftView = ({ datasourceId, name, steps, eventData }: LeftViewProps) => {
   const router = useRouter();
-  const { funnelId } = router?.query;
+  const { funnelId, showAlert } = router?.query;
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
+
+  useEffect(() => {
+    if (showAlert) onOpen();
+  }, []);
 
   const handleEditFunnel = () => {
     router.push({

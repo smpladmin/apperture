@@ -9,6 +9,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import {
+  capitalizeFirstLetter,
   convertISODateToReadableDate,
   formatDatalabel,
 } from '@lib/utils/common';
@@ -16,7 +17,10 @@ import { BLUE, YELLOW_100, YELLOW_200 } from '@theme/index';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import ParallelLineIcon from '@assets/icons/parallel-line.svg';
-import { NotificationEventsData } from '@lib/domain/notification';
+import {
+  NotificationEventsData,
+  NotificationMetricType,
+} from '@lib/domain/notification';
 
 const ParallelLine = () => {
   return <Image src={ParallelLineIcon} alt={'parallel-line-icon'} />;
@@ -30,6 +34,7 @@ type ThresholdMetricProps = {
   maxHit: number;
   xField: string;
   yField: string;
+  metricName: NotificationMetricType;
 };
 
 const ThresholdMetric = ({
@@ -40,6 +45,7 @@ const ThresholdMetric = ({
   maxHit,
   xField,
   yField,
+  metricName,
 }: ThresholdMetricProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ line: Line | null }>({ line: null });
@@ -65,11 +71,11 @@ const ThresholdMetric = ({
         showMarkers: true,
         showCrosshairs: true,
         shared: true,
-        formatter: ({ startDate, hits }) => {
+        formatter: (options) => {
           return {
-            title: convertISODateToReadableDate(startDate),
-            name: 'Hits',
-            value: hits,
+            title: convertISODateToReadableDate(options[xField]),
+            name: capitalizeFirstLetter(metricName),
+            value: options[yField],
           };
         },
       },

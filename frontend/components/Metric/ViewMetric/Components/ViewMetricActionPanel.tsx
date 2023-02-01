@@ -6,7 +6,7 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BASTILLE } from '@theme/index';
 import MetricViewComponentCard from './MetricViewComponentCard';
 import ActionMenu from '@components/ActionMenu';
@@ -29,12 +29,17 @@ const ViewMetricActionPanel = ({
   eventData: MetricTrend[];
 }) => {
   const router = useRouter();
-  const { metricId } = router?.query;
+  const { metricId, showAlert } = router?.query;
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
 
   const handleNotificationClick = () => {
     onOpen();
   };
+
+  useEffect(() => {
+    if (showAlert) onOpen();
+  }, []);
+
   return (
     <>
       <Flex justifyContent={'space-between'} alignItems={'center'}>

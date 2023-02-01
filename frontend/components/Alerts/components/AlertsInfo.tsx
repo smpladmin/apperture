@@ -128,6 +128,7 @@ const AlertsInfo = ({
           maxHit={maxHit}
           xField={NotificationFactory(variant).xField}
           yField={NotificationFactory(variant).yField}
+          metricName={NotificationFactory(variant).metric.name}
         />
       ) : null}
       {thresholdMetric === ThresholdMetricType.Percentage ? (
