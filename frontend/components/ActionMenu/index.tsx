@@ -1,57 +1,71 @@
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import React from 'react';
 type ActionMenuProps = {
-  onNotificationClick?: React.FormEventHandler<HTMLButtonElement> | undefined;
+  onNotificationClick?: Function;
 };
 function ActionMenu({ onNotificationClick }: ActionMenuProps) {
   return (
     <Box>
-      <Flex mt={'8'} w={'full'} justifyContent={'space-between'}>
-        <Box w={20} textAlign={'center'}>
+      <Flex mt={'8'} gap={'4'}>
+        <Flex
+          py={'3'}
+          pl={'1'}
+          pr={'3'}
+          borderRadius={'100'}
+          bg={'black.50'}
+          alignItems={'center'}
+          onClick={() => onNotificationClick?.()}
+          cursor={'pointer'}
+        >
           <IconButton
-            minW={{ base: '8', md: '10' }}
-            h={{ base: '8', md: '10' }}
-            fontWeight={'500'}
             aria-label="set alerts"
             variant={'iconButton'}
             icon={<i className="ri-notification-4-line"></i>}
-            rounded={'full'}
             color={'white.DEFAULT'}
-            bg={'grey.300'}
-            onClick={onNotificationClick}
+            size={'sm'}
+            _hover={{
+              bg: 'none',
+            }}
           />
           <Text
-            mt={2}
             textAlign={'center'}
-            fontSize={{ base: 'xs-10', md: 'xs-12' }}
-            lineHeight={{ base: 'xs-10', md: 'xs-12' }}
-            color={'grey.DEFAULT'}
+            fontSize={{ base: 'xs-10', md: 'xs-14' }}
+            lineHeight={{ base: 'xs-10', md: 'base' }}
+            fontWeight={'400'}
+            color={'white.DEFAULT'}
           >
-            Set Alerts
+            Set Alert
           </Text>
-        </Box>
-        <Box w={20} textAlign={'center'}>
+        </Flex>
+        <Flex
+          py={'3'}
+          pl={'1'}
+          pr={'3'}
+          borderRadius={'100'}
+          bg={'black.50'}
+          alignItems={'center'}
+        >
           <IconButton
-            minW={{ base: '8', md: '10' }}
-            h={{ base: '8', md: '10' }}
-            fontWeight={'500'}
-            aria-label="Share Button"
+            pl={'0'}
+            aria-label="share"
             variant={'iconButton'}
-            icon={<i className="ri-share-forward-2-line"></i>}
-            rounded={'full'}
+            icon={<i className="ri-upload-2-line"></i>}
             color={'white.DEFAULT'}
-            bg={'grey.300'}
+            size={'sm'}
+            _hover={{
+              bg: 'none',
+            }}
           />
           <Text
-            mt={2}
             textAlign={'center'}
-            fontSize={{ base: 'xs-10', md: 'xs-12' }}
-            lineHeight={{ base: 'xs-10', md: 'xs-12' }}
-            color={'grey.DEFAULT'}
+            fontSize={{ base: 'xs-10', md: 'xs-14' }}
+            lineHeight={{ base: 'xs-10', md: 'base' }}
+            fontWeight={'400'}
+            color={'white.DEFAULT'}
           >
             Share
           </Text>
-        </Box>
+        </Flex>
       </Flex>
     </Box>
   );
