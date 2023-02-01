@@ -18,7 +18,6 @@ from domain.segments.models import (
     WhereSegmentFilter,
     SegmentFilterOperatorsNumber,
     SegmentFilterOperatorsString,
-    SegmentFilterOperatorsBool,
     SegmentFilterConditions,
     SegmentGroup,
     SegmentGroupConditions,
@@ -31,8 +30,6 @@ from domain.funnels.models import (
     FunnelTrendsData,
     FunnelConversionData,
     FunnelEventUserData,
-    FunnelConversion,
-    ConversionStatus,
 )
 from domain.notifications.models import (
     Notification,
@@ -40,7 +37,7 @@ from domain.notifications.models import (
     NotificationFrequency,
     NotificationMetric,
     NotificationType,
-    ThresholdMap,
+    NotificationVariant,
 )
 
 from domain.metrics.models import (
@@ -54,6 +51,7 @@ from rest.dtos.appperture_users import AppertureUserResponse
 from rest.dtos.funnels import FunnelWithUser
 from rest.dtos.metrics import MetricWithUser
 from rest.dtos.segments import SegmentWithUser
+from rest.dtos.notifications import NotificationWithUser
 
 
 @pytest.fixture(scope="module")
@@ -77,37 +75,9 @@ def apperture_user_response():
 
 
 @pytest.fixture(scope="module")
-def notification_service():
+def notification_service(apperture_user_response):
     notification_service_mock = mock.MagicMock()
     Notification.get_settings = mock.MagicMock()
-    saved_notif = [
-        SavedItems(
-            type=WatchlistItemType.NOTIFICATIONS,
-            details=Notification(
-                id=PydanticObjectId("635ba034807ab86d8a2aadd8"),
-                created_at=datetime(2022, 12, 1, 7, 4, 59, 390000),
-                updated_at=datetime(2022, 12, 1, 7, 4, 59, 390000),
-                datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
-                user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
-                app_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
-                name="/p/partner/job",
-                notification_type=NotificationType.ALERT,
-                metric=NotificationMetric.HITS,
-                multi_node=False,
-                apperture_managed=False,
-                pct_threshold_active=False,
-                pct_threshold_values=None,
-                absolute_threshold_active=True,
-                absolute_threshold_values=ThresholdMap(min=26.0, max=381.0),
-                formula="a",
-                variable_map={"a": ["/p/partner/job"]},
-                preferred_hour_gmt=5,
-                frequency=NotificationFrequency.DAILY,
-                preferred_channels=[NotificationChannel.SLACK],
-                notification_active=True,
-            ),
-        )
-    ]
     notif = Notification(
         id=PydanticObjectId("635ba034807ab86d8a2aadd8"),
         datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
@@ -126,19 +96,21 @@ def notification_service():
         preferred_hour_gmt=5,
         preferred_channels=[NotificationChannel.SLACK],
         notification_active=False,
+        variant=NotificationVariant.NODE,
+        reference="name",
     )
     notif_future = asyncio.Future()
     notif_future.set_result(notif)
 
-    saved_notif_future = asyncio.Future()
-    saved_notif_future.set_result(saved_notif)
+    notifications_future = asyncio.Future()
+    notifications_future.set_result([NotificationWithUser.from_orm(notif)])
 
     notification_service_mock.build_notification.return_value = notif
     notification_service_mock.add_notification.return_value = notif_future
     notification_service_mock.update_notification.return_value = notif_future
     notification_service_mock.get_notification_for_node.return_value = notif_future
-    notification_service_mock.get_notifications_for_apps.return_value = (
-        saved_notif_future
+    notification_service_mock.get_notifications_for_datasource_id.return_value = (
+        notifications_future
     )
     return notification_service_mock
 

@@ -16,6 +16,7 @@ from domain.notifications.models import (
     NotificationMetric,
     NotificationFrequency,
     NotificationChannel,
+    NotificationVariant,
 )
 
 
@@ -188,6 +189,8 @@ class TestNotificationService:
             frequency=NotificationFrequency.DAILY,
             preferred_channels=[NotificationChannel.SLACK],
             notification_active=True,
+            variant=NotificationVariant.NODE,
+            reference="user_login",
         )
         notif_future = asyncio.Future()
         notif_future.set_result(self.notification)
@@ -263,4 +266,10 @@ class TestNotificationService:
             app_ids=[PydanticObjectId("6384a65e0a397236d9de236a")]
         )
         Notification.find.assert_called_once()
-        print(Notification.find.call_args.args[0])
+
+    @pytest.mark.asyncio
+    async def test_get_notifications_for_apps(self):
+        await self.service.get_notifications_for_datasource_id(
+            datasource_id="6384a65e0a397236d9de236a"
+        )
+        Notification.find.assert_called_once()
