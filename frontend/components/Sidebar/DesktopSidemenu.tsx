@@ -136,6 +136,34 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               onClick={handleRedirectToExplorePage}
             />
           </Tooltip>
+
+          <Tooltip
+            label={'Alerts'}
+            aria-label={'Explore'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Explore"
+              icon={<i className="ri-notification-fill"></i>}
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={() =>
+                router.push(`/analytics/notifications/list/${dsId}`)
+              }
+            />
+          </Tooltip>
           <Tooltip
             label={'Data'}
             aria-label={'Data'}

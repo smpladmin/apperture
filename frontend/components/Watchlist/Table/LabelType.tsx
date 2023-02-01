@@ -1,11 +1,11 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import Image from 'next/image';
-import EventIcon from '@assets/icons/arrow-left-up.svg';
 import FunnelIcon from '@assets/icons/funnel-filter.svg';
 import JourneyIcon from '@assets/icons/journey.svg';
 import { WatchListItemType } from '@lib/domain/watchlist';
+import { NotificationType } from '@lib/domain/notification';
 
-const getLableTypeIcon = (labelType: WatchListItemType) => {
+const getLableTypeIcon = (labelType: WatchListItemType | NotificationType) => {
   switch (labelType) {
     case WatchListItemType.FUNNELS:
       return <Image src={FunnelIcon} alt={'funnel-filter-icon'} />;
@@ -13,12 +13,16 @@ const getLableTypeIcon = (labelType: WatchListItemType) => {
       return <i className="ri-scissors-cut-line" />;
     case WatchListItemType.METRICS:
       return <i className="ri-funds-box-line" />;
+    case NotificationType.ALERT:
+      return <i className="ri-alarm-fill" />;
+    case NotificationType.UPDATE:
+      return <i className="ri-notification-fill" />;
     default:
       return <Image src={JourneyIcon} alt={'journey-icon'} />;
   }
 };
 
-const getLabelText = (labelType: WatchListItemType) => {
+const getLabelText = (labelType: WatchListItemType | NotificationType) => {
   switch (labelType) {
     case WatchListItemType.FUNNELS:
       return 'Funnel';
@@ -26,12 +30,20 @@ const getLabelText = (labelType: WatchListItemType) => {
       return 'Segment';
     case WatchListItemType.METRICS:
       return 'Metric';
+    case NotificationType.ALERT:
+      return 'Alert';
+    case NotificationType.UPDATE:
+      return 'Update';
     default:
       return '';
   }
 };
 
-const LabelType = ({ type }: { type: WatchListItemType }) => {
+const LabelType = ({
+  type,
+}: {
+  type: WatchListItemType | NotificationType;
+}) => {
   return (
     <Box bg={'white.100'} borderRadius={'100'} py={'2'} px={'2'} w={'30'}>
       <Flex gap={'1'} justifyContent={'center'} alignItems={'center'}>

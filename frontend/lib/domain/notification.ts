@@ -1,7 +1,8 @@
-import { type } from 'os';
+import { Node } from '@lib/domain/node';
 import { TrendData } from './eventData';
 import { FunnelTrendsData } from './funnel';
 import { MetricTrend } from './metric';
+import { AppertureUser } from './user';
 
 export enum ThresholdMetricType {
   Range = 'range',
@@ -30,6 +31,19 @@ export enum NotificationVariant {
   SEGMENT = 'segment',
 }
 
+const paths = {
+  [NotificationVariant.NODE]: 'explore',
+  [NotificationVariant.FUNNEL]: 'funnel/view',
+  [NotificationVariant.SEGMENT]: 'segment/edit',
+  [NotificationVariant.METRIC]: 'metric/view',
+};
+
+export namespace NotificationVariant {
+  export function toURLPath(type: NotificationVariant): string {
+    return paths[type];
+  }
+}
+
 export type NotificationEventsData =
   | TrendData[]
   | FunnelTrendsData[]
@@ -52,5 +66,13 @@ export type Notifications = {
   formula: string;
   variableMap: { a: string[] };
   preferredChannels: NotificationChannel[];
+  preferredHourGmt: number;
   notificationActive: boolean;
+  variant: NotificationVariant;
+  reference: string;
+  createdAt: Date;
+};
+
+export type NotificationWithUser = Notifications & {
+  user: AppertureUser;
 };

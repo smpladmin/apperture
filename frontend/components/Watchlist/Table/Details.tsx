@@ -1,20 +1,24 @@
 import { Flex, Text } from '@chakra-ui/react';
-import { Funnel } from '@lib/domain/funnel';
-import { Metric } from '@lib/domain/metric';
-import { Segment } from '@lib/domain/segment';
+import { Funnel, FunnelWithUser } from '@lib/domain/funnel';
+import { MetricWithUser } from '@lib/domain/metric';
+import { NotificationWithUser } from '@lib/domain/notification';
+import { SegmentWithUser } from '@lib/domain/segment';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { CellContext } from '@tanstack/react-table';
 
 export const Details = ({
   info,
 }: {
-  info: CellContext<SavedItems, Funnel | Segment | Metric>;
+  info: CellContext<
+    SavedItems,
+    FunnelWithUser | SegmentWithUser | MetricWithUser | NotificationWithUser
+  >;
 }) => {
   const { type, details } = info?.row?.original;
 
   const getSteps = () => {
     if (type === WatchListItemType.FUNNELS) {
-      const { steps } = details as Funnel;
+      const { steps } = details as FunnelWithUser;
       return steps;
     }
   };

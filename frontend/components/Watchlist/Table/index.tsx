@@ -5,7 +5,7 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   flexRender,
-  Row,
+  ColumnDef,
 } from '@tanstack/react-table';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 import Details from './Details';
@@ -20,52 +20,59 @@ dayjs.extend(utc);
 type WatchlistTableProps = {
   savedItemsData: SavedItems[];
   onRowClick: Function;
+  tableColumns?: ColumnDef<SavedItems, any>[];
 };
 
 const WatchlistTable = ({
   savedItemsData,
   onRowClick,
+  tableColumns,
 }: WatchlistTableProps) => {
   const {
     device: { isMobile },
   } = useContext(AppertureContext);
 
   const columnHelper = createColumnHelper<SavedItems>();
-  const columns = useMemo(
-    () =>
-      isMobile
-        ? [
-            columnHelper.accessor('details', {
-              header: 'Name',
-              cell: (info) => <Details info={info} />,
-            }),
-            columnHelper.accessor('details.user', {
-              cell: (info) => {
-                const user = info.getValue() as User;
-                return `${user.firstName} ${user.lastName}`;
-              },
-              header: 'Created By',
-            }),
-          ]
-        : [
-            columnHelper.accessor('details', {
-              header: 'Name',
-              cell: (info) => <Details info={info} />,
-            }),
-            columnHelper.accessor('details.user', {
-              cell: (info) => <UserInfo info={info} />,
-              header: 'Created By',
-            }),
-            columnHelper.accessor('details.updatedAt', {
-              cell: (info) => {
-                const updatedAt = info.getValue() as Date;
-                return dayjs.utc(updatedAt).local().format('D MMM YY, h:mmA');
-              },
-              header: 'Last Updated',
-            }),
-          ],
-    []
-  );
+  const columns = tableColumns
+    ? tableColumns
+    : useMemo(
+        () =>
+          isMobile
+            ? [
+                columnHelper.accessor('details', {
+                  header: 'Name',
+                  cell: (info) => <Details info={info} />,
+                }),
+                columnHelper.accessor('details.user', {
+                  cell: (info) => {
+                    const user = info.getValue() as User;
+                    return `${user.firstName} ${user.lastName}`;
+                  },
+                  header: 'Created By',
+                }),
+              ]
+            : [
+                columnHelper.accessor('details', {
+                  header: 'Name',
+                  cell: (info) => <Details info={info} />,
+                }),
+                columnHelper.accessor('details.user', {
+                  cell: (info) => <UserInfo info={info} />,
+                  header: 'Created By',
+                }),
+                columnHelper.accessor('details.updatedAt', {
+                  cell: (info) => {
+                    const updatedAt = info.getValue() as Date;
+                    return dayjs
+                      .utc(updatedAt)
+                      .local()
+                      .format('D MMM YY, h:mmA');
+                  },
+                  header: 'Last Updated',
+                }),
+              ],
+        []
+      );
 
   const tableInstance = useReactTable({
     columns,
