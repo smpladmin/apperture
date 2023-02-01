@@ -29,7 +29,10 @@ const ViewMetricActionPanel = ({
   eventData: MetricTrend[];
 }) => {
   const router = useRouter();
-  const { metricId, showAlert } = router?.query;
+  const {
+    pathname,
+    query: { metricId, showAlert },
+  } = router;
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
 
   const handleNotificationClick = () => {
@@ -40,12 +43,23 @@ const ViewMetricActionPanel = ({
     if (showAlert) onOpen();
   }, []);
 
+  const handleCloseAlertsModal = () => {
+    if (showAlert) {
+      delete router.query.showAlert;
+      router.replace({
+        pathname,
+        query: { ...router.query },
+      });
+    }
+    onClose();
+  };
+
   return (
     <>
       <Flex justifyContent={'space-between'} alignItems={'center'}>
         <IconButton
           aria-label="close"
-          variant={'secondary'}
+          variant={'primary'}
           icon={<i className="ri-arrow-left-line"></i>}
           rounded={'full'}
           color={'white.DEFAULT'}
@@ -137,7 +151,7 @@ const ViewMetricActionPanel = ({
         <Alert
           name={metricName}
           isAlertsSheetOpen={isAlertsSheetOpen}
-          closeAlertsSheet={onClose}
+          closeAlertsSheet={handleCloseAlertsModal}
           variant={NotificationVariant.METRIC}
           reference={metricId as string}
           eventData={eventData}
