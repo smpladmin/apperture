@@ -16,6 +16,7 @@ from domain.notifications.models import (
     NotificationThresholdType,
     NotificationMetric,
     NotificationVariant,
+    NotificationResponse,
 )
 from domain.edge.models import AggregatedEdge, NotificationNodeData
 
@@ -227,3 +228,10 @@ class NotificationService:
             SavedItems(type=WatchlistItemType.NOTIFICATIONS, details=notification)
             for notification in notifications
         ]
+
+    async def get_notifications_for_datasource_id(
+        self, datasource_id: str
+    ) -> List[NotificationResponse]:
+        return await Notification.find(
+            PydanticObjectId(datasource_id) == Notification.datasource_id
+        ).to_list()

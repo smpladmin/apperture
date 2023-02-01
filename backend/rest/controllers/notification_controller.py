@@ -9,8 +9,9 @@ from domain.notifications.service import NotificationService
 from domain.datasources.service import DataSourceService
 
 from rest.middlewares import validate_jwt, get_user
-from rest.dtos.saved_items import SavedItemsResponse
-from rest.dtos.notifications import CreateNotificationDto
+from rest.dtos.notifications import CreateNotificationDto, NotificationWithUser
+from rest.dtos.appperture_users import AppertureUserResponse
+
 
 router = APIRouter(
     tags=["notification"],
@@ -55,24 +56,27 @@ async def add_notification(
 
 @router.get(
     "/notifications",
-    response_model=Union[NotificationResponse, List[SavedItemsResponse]],
+    response_model=List[NotificationWithUser],
 )
 async def get_notification(
     name: Union[str, None] = None,
-    ds_id: Union[str, None] = None,
+    datasource_id: Union[str, None] = None,
     user: AppertureUser = Depends(get_user),
     app_service: AppService = Depends(),
     notification_service: NotificationService = Depends(),
 ):
     if name:
         return await notification_service.get_notification_for_node(
-            name=name, ds_id=ds_id
+            name=name, ds_id=datasource_id
         )
     else:
-        apps = await app_service.get_apps(user=user)
-        return await notification_service.get_notifications_for_apps(
-            app_ids=[app.id for app in apps]
+        notifications = await notification_service.get_notifications_for_datasource_id(
+            datasource_id=datasource_id
         )
+        notifications = [NotificationWithUser.from_orm(f) for f in notifications]
+        for notification in notifications:
+            notification.user = AppertureUserResponse.from_orm(user)
+        return notifications
 
 
 @router.put("/notifications/{notification_id}", response_model=NotificationResponse)
@@ -89,6 +93,8 @@ async def update_notification(
         appId=datasource.app_id,
         name=dto.name,
         userId=user.id,
+        metric=dto.metric,
+        multiNode=dto.multiNode,
         notificationType=dto.notificationType,
         appertureManaged=dto.appertureManaged,
         pctThresholdActive=dto.pctThresholdActive,
@@ -101,6 +107,8 @@ async def update_notification(
         preferredHourGMT=dto.preferredHourGMT,
         preferredChannels=dto.preferredChannels,
         notificationActive=dto.notificationActive,
+        variant=dto.variant,
+        reference=dto.reference,
     )
     notification = await notification_service.update_notification(
         notification_id=notification_id, new_notification=new_notification
