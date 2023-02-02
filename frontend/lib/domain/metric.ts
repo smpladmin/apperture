@@ -26,10 +26,15 @@ export type EventOrSegmentComponent = {
   conditions: string[];
   aggregations: MetricComponentAggregation;
 };
-
+export type ComputedMetricData = {
+  date: string;
+  value: number;
+  series: string;
+};
 export type ComputedMetric = {
-  data: { date: string; value: number }[];
+  data: ComputedMetricData[];
   definition: string;
+  average: any;
 };
 
 export enum DateFilterType {

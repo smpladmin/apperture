@@ -81,6 +81,7 @@ class Metrics(EventsBase):
             .select(Parameter("date"))
             .groupby(Parameter("date"))
             .having(Criterion.all(having_clause))
+            .limit(100)
         )
         for select_expression in select_expressions:
             query = query.select(select_expression)

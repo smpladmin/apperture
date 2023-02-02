@@ -1,3 +1,4 @@
+import '../styles/metric-tooltip.css';
 import '../styles/globals.css';
 import '../styles/funnel-tooltip.css';
 import 'react-date-range/dist/styles.css'; // main css file
