@@ -7,10 +7,8 @@ import {
   DrawerBody,
   DrawerContent,
   DrawerOverlay,
-  Text,
 } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
-import filterMobile from '@assets/images/filterIconMobile.svg';
 import MobileSidemenu from './MobileSideMenu';
 import Search from './Search';
 import { Provider } from '@lib/domain/provider';

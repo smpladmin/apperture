@@ -4,9 +4,9 @@ import indent from '@assets/icons/indent.svg';
 import Image from 'next/image';
 import { getEventPropertiesValue } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
-import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import SearchableCheckboxDropdown from '@components/SearchableDropdown/SearchableCheckboxDropdown';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
+import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 
 type MetricFilterComponentProps = {
   condition: string;
@@ -134,10 +134,9 @@ const MetricFilterComponent = ({
           _hover={{ color: 'white', background: 'grey.300' }}
           width={'max-content'}
           onClick={() => setOpenEventDropdown(true)}
-          // ref={eventRef}
         >
           <Box position={'absolute'} left={-6}>
-            <Image src={indent} />
+            <Image src={indent} alt={'indent'} />
           </Box>
           {operand}
         </Flex>
@@ -167,6 +166,7 @@ const MetricFilterComponent = ({
           cursor={'not-allowed'}
           borderRadius={4}
           color={'grey.100'}
+          height={'max-content'}
           _hover={{ color: 'white', background: 'grey.300' }}
         >
           {operator}
@@ -184,6 +184,7 @@ const MetricFilterComponent = ({
             onClick={() => {
               setIsValueDropDownOpen((prevState) => !prevState);
             }}
+            wordBreak={'break-all'}
           >
             {getValuesText(values)}
           </Text>

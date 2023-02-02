@@ -21,7 +21,7 @@ import FunnelStepFilterComponent from './FunnelStepFilters';
 import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
 import { cloneDeep } from 'lodash';
-import { FilterType, SegmentProperty } from '@lib/domain/segment';
+import { FilterType } from '@lib/domain/segment';
 import { LOGAN } from '@theme/index';
 import { Node } from '@lib/domain/node';
 

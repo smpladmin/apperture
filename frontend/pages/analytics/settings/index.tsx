@@ -3,7 +3,6 @@ import SettingsOptions from '@components/Settings/SettingsOptions';
 import React from 'react';
 import { getAuthToken } from '@lib/utils/request';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
-import { _getEdges } from '@lib/services/datasourceService';
 import { GetServerSideProps } from 'next';
 import { ReactElement } from 'react';
 import { AppWithIntegrations } from '@lib/domain/app';
