@@ -56,11 +56,11 @@ const config = {
       };
     },
     customContent: (_: any, data: any) => {
-      const data_list = data.map((i: any) => i.data);
+      const data_list = data.map((i: any): ComputedMetricData => i.data);
       return `<div id='metric-tooltip'>
              ${data_list
                .map(
-                 (item: any) =>
+                 (item: ComputedMetricData) =>
                    `<span class='metric-tooltip series'>${item.series}</span>
                  <span class='metric-tooltip value'>${formatDatalabel(
                    item.value
@@ -82,7 +82,10 @@ const config = {
   animation: true,
 };
 
-const convertToTableData = (data: ComputedMetricData[], average: any) => {
+const convertToTableData = (
+  data: ComputedMetricData[],
+  average: { [keys: string]: number }
+) => {
   const tableData: any = {};
   data.forEach((item: ComputedMetricData) => {
     tableData[item.series] =
