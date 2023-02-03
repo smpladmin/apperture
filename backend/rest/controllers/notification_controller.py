@@ -10,7 +10,7 @@ from domain.datasources.service import DataSourceService
 
 from rest.middlewares import validate_jwt, get_user
 from rest.dtos.notifications import CreateNotificationDto, NotificationWithUser
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.appperture_users import AppertureUserResponse as apperture_users
 
 
 router = APIRouter(
@@ -75,7 +75,7 @@ async def get_notification(
         )
         notifications = [NotificationWithUser.from_orm(f) for f in notifications]
         for notification in notifications:
-            notification.user = AppertureUserResponse.from_orm(user)
+            notification.user = apperture_users.from_orm(user)
         return notifications
 
 
