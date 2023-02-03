@@ -36,7 +36,10 @@ const AlertMetrics = ({
               return (
                 <AlertMetricOption
                   key={option.name}
-                  option={option}
+                  option={{
+                    ...option,
+                    isDisabled: !Boolean(option.name === notificationMetric),
+                  }}
                   isChecked={option.name === notificationMetric}
                 />
               );

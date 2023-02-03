@@ -17,6 +17,7 @@ mockChart.mockImplementation(() => {
     coordinate: jest.fn(() => ({ transpose: jest.fn() })),
     render: jest.fn(),
     destroy: jest.fn(),
+    update: jest.fn(),
   };
 });
 jest.mock('@antv/g2', () => ({
@@ -28,6 +29,7 @@ jest.mock('@antv/g2plot', () => ({
     return {
       render: jest.fn(),
       destroy: jest.fn(),
+      update: jest.fn(),
     };
   }),
 }));

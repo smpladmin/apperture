@@ -79,15 +79,25 @@ describe('View Funnel', () => {
     });
   };
 
+  const { ResizeObserver } = window;
+
   beforeEach(() => {
     mockedTransientFunnel = jest.mocked(APIService.getTransientFunnelData);
     mockedTransientTrendsData = jest.mocked(APIService.getTransientTrendsData);
 
     mockedTransientFunnel.mockReturnValue(funnelData);
     mockedTransientTrendsData.mockReturnValue(trendsData);
+
+    delete window.ResizeObserver;
+    window.ResizeObserver = jest.fn().mockImplementation(() => ({
+      observe: jest.fn(),
+      unobserve: jest.fn(),
+      disconnect: jest.fn(),
+    }));
   });
 
   afterEach(() => {
+    window.ResizeObserver = ResizeObserver;
     jest.clearAllMocks();
   });
 
@@ -152,5 +162,22 @@ describe('View Funnel', () => {
     const trendsChart = screen.getByTestId('funnel-trend');
     expect(chart).toBeInTheDocument();
     expect(trendsChart).toBeInTheDocument();
+  });
+
+  describe('show the alert modal on set alert button click', () => {
+    it('show the alert modal on set alert button click', async () => {
+      const router = createMockRouter({
+        query: { funnelId: '64349843748' },
+        pathname: '/analytics/funnel/view',
+      });
+      await renderViewFunnel(router);
+      const setAlertButton = screen.getByTestId('set-alert-button');
+      expect(setAlertButton).toBeInTheDocument();
+      fireEvent.click(setAlertButton);
+      await waitFor(() => {
+        const alertModal = screen.getByTestId('alerts-container');
+        expect(alertModal).toBeInTheDocument();
+      });
+    });
   });
 });
