@@ -27,7 +27,7 @@ export namespace WatchListItemType {
 }
 
 export type SavedItems = {
-  type: WatchListItemType | NotificationType;
+  type: WatchListItemType | NotificationType[];
   details:
     | FunnelWithUser
     | SegmentWithUser

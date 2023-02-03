@@ -19,6 +19,10 @@ export enum NotificationType {
   UPDATE = 'update',
 }
 
+export enum AlertAndUpdate {
+  ALERTANDUPDATE = 'alert,update',
+}
+
 export enum NotificationChannel {
   SLACK = 'slack',
   EMAIL = 'email',
@@ -55,7 +59,7 @@ export type Notifications = {
   userId: string;
   appId: string;
   name: string;
-  notificationType: NotificationType;
+  notificationType: NotificationType[];
   metric: NotificationMetricType;
   multiNode: boolean;
   appertureManaged: boolean;

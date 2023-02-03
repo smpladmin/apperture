@@ -2,7 +2,13 @@ import { Flex, IconButton, Text } from '@chakra-ui/react';
 import Image from 'next/image';
 import checkIcon from '@assets/icons/check-icon.svg';
 
-const AlertToast = ({ closeToast }: { closeToast: () => void }) => {
+const AlertToast = ({
+  closeToast,
+  toastMessage,
+}: {
+  closeToast: () => void;
+  toastMessage: string;
+}) => {
   return (
     <Flex
       bg={'black.100'}
@@ -21,7 +27,7 @@ const AlertToast = ({ closeToast }: { closeToast: () => void }) => {
           color={'white.DEFAULT'}
           fontWeight={'normal'}
         >
-          Alert Created
+          {toastMessage}
         </Text>
       </Flex>
       <IconButton

@@ -2,16 +2,25 @@ import { Flex } from '@chakra-ui/react';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import { ComputedMetric, Metric } from '@lib/domain/metric';
+import { Notifications } from '@lib/domain/notification';
 import { computeMetric } from '@lib/services/metricService';
 import React, { useEffect, useState } from 'react';
 import SavedMetricView from './Components/SavedMetricView';
 import ViewMetricActionPanel from './Components/ViewMetricActionPanel';
 
-const ViewMetric = ({ savedMetric }: { savedMetric: Metric }) => {
+const ViewMetric = ({
+  savedMetric,
+  savedNotification,
+}: {
+  savedMetric: Metric;
+  savedNotification: Notifications;
+}) => {
   const [computedMetric, setComputedMetric] = useState<ComputedMetric | null>(
     null
   );
   const [isLoading, setIsLoading] = useState(true);
+
+  console.log(savedNotification);
   useEffect(() => {
     const fetchMetric = async () => {
       const result = await computeMetric(
@@ -42,6 +51,7 @@ const ViewMetric = ({ savedMetric }: { savedMetric: Metric }) => {
           aggregates={savedMetric.aggregates}
           datasourceId={savedMetric.datasourceId}
           eventData={computedMetric?.data || []}
+          savedNotification={savedNotification}
         />
       </ActionPanel>
       <ViewPanel>

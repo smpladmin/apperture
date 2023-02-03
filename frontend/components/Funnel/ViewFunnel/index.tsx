@@ -1,5 +1,6 @@
 import { Flex } from '@chakra-ui/react';
 import { Funnel, FunnelData, FunnelTrendsData } from '@lib/domain/funnel';
+import { Notifications } from '@lib/domain/notification';
 import {
   getTransientFunnelData,
   getTransientTrendsData,
@@ -9,7 +10,13 @@ import { useEffect, useState } from 'react';
 import LeftView from './LeftView';
 import RightView from './RightView';
 
-const ViewFunnel = ({ savedFunnel }: { savedFunnel: Funnel }) => {
+const ViewFunnel = ({
+  savedFunnel,
+  savedNotification,
+}: {
+  savedFunnel: Funnel;
+  savedNotification: Notifications;
+}) => {
   const router = useRouter();
   const { dsId } = router.query;
 
@@ -43,6 +50,7 @@ const ViewFunnel = ({ savedFunnel }: { savedFunnel: Funnel }) => {
         name={savedFunnel.name}
         steps={savedFunnel.steps}
         eventData={computedTrendsData}
+        savedNotification={savedNotification}
       />
       <RightView
         funnelSteps={savedFunnel.steps}

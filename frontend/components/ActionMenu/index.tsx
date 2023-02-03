@@ -2,8 +2,12 @@ import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import React from 'react';
 type ActionMenuProps = {
   onNotificationClick: Function;
+  hasSavedNotification: boolean;
 };
-function ActionMenu({ onNotificationClick }: ActionMenuProps) {
+function ActionMenu({
+  onNotificationClick,
+  hasSavedNotification,
+}: ActionMenuProps) {
   return (
     <Box>
       <Flex mt={'8'} gap={'4'}>
@@ -35,7 +39,7 @@ function ActionMenu({ onNotificationClick }: ActionMenuProps) {
             fontWeight={'400'}
             color={'white.DEFAULT'}
           >
-            Set Alert
+            {hasSavedNotification ? 'Manage Alert' : 'Set Alert'}
           </Text>
         </Flex>
         <Flex

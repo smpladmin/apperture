@@ -1,4 +1,4 @@
-import { Divider, Flex, RadioGroup, Text } from '@chakra-ui/react';
+import { Flex, RadioGroup, Text } from '@chakra-ui/react';
 import React from 'react';
 import AlertMetricOption from './AlertMetricOption';
 import { notificationMetricOptions, thresholdMetricOptions } from '../util';
@@ -17,8 +17,8 @@ const AlertMetrics = ({
   setThresholdMetric,
 }: AlertMetricsProps) => {
   return (
-    <>
-      <Flex direction={'column'} gap={{ base: '2', md: '6' }}>
+    <Flex direction={'column'} gap={{ base: '4', md: '5' }}>
+      <Flex direction={'column'} gap={{ base: '2', md: '4' }}>
         <Text
           fontSize={{ base: 'xs-14', md: 'sh-18' }}
           lineHeight={{ base: 'xs-14', md: 'sh-18' }}
@@ -47,13 +47,7 @@ const AlertMetrics = ({
           </Flex>
         </RadioGroup>
       </Flex>
-      <Divider
-        orientation="horizontal"
-        borderColor={'white.200'}
-        opacity={1}
-        my={{ base: '4', md: '8' }}
-      />
-      <Flex direction={'column'} gap={{ base: '2', md: '6' }}>
+      <Flex direction={'column'} gap={{ base: '2', md: '4' }}>
         <Text
           fontSize={{ base: 'xs-14', md: 'sh-18' }}
           lineHeight={{ base: 'xs-14', md: 'sh-18' }}
@@ -78,13 +72,7 @@ const AlertMetrics = ({
           </Flex>
         </RadioGroup>
       </Flex>
-      <Divider
-        orientation="horizontal"
-        borderColor={'white.200'}
-        opacity={1}
-        my={{ base: '4', md: '8' }}
-      />
-    </>
+    </Flex>
   );
 };
 

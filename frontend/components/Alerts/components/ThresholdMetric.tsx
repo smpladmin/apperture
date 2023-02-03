@@ -131,7 +131,7 @@ const ThresholdMetric = ({
   }, [thresholdRange]);
 
   return (
-    <Box>
+    <Box mt={{ base: '4', md: '4' }}>
       <Flex justifyContent={'space-between'}>
         <Flex direction={'column'} gap={'1'}>
           <Text

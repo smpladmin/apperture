@@ -1,5 +1,4 @@
 import {
-  Divider,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -8,11 +7,11 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react';
 import Loading from '../components/Loading';
-import { TrendData } from '@lib/domain/eventData';
 import { useEffect, useState } from 'react';
 import AlertsInfo from '../components/AlertsInfo';
 import {
   NotificationEventsData,
+  Notifications,
   NotificationVariant,
 } from '@lib/domain/notification';
 
@@ -24,6 +23,7 @@ type DesktopAlertsProps = {
   variant: NotificationVariant;
   reference: string;
   datasourceId: string;
+  savedAlert?: Notifications;
 };
 
 const DesktopAlerts = ({
@@ -34,6 +34,7 @@ const DesktopAlerts = ({
   variant,
   reference,
   datasourceId,
+  savedAlert,
 }: DesktopAlertsProps) => {
   const [isLoading, setIsLoading] = useState<Boolean>(true);
 
@@ -64,8 +65,8 @@ const DesktopAlerts = ({
           fontSize={'sh-24'}
           lineHeight={'sh-24'}
           pt={'7'}
-          pb={'5'}
-          px={'9'}
+          pb={'2'}
+          px={'6'}
         >
           Alert Me
           <ModalCloseButton
@@ -77,12 +78,7 @@ const DesktopAlerts = ({
             rounded={'full'}
           />
         </ModalHeader>
-        <Divider
-          orientation="horizontal"
-          borderColor={'white.200'}
-          opacity={1}
-        />
-        <ModalBody px={'9'} pt={'4'} pb={'4'} overflowY={'auto'}>
+        <ModalBody px={'2'} pt={'4'} pb={'4'} overflowY={'auto'}>
           {isLoading ? (
             <Loading />
           ) : (
@@ -93,6 +89,7 @@ const DesktopAlerts = ({
               variant={variant}
               reference={reference}
               datasourceId={datasourceId}
+              savedAlert={savedAlert}
             />
           )}
         </ModalBody>
