@@ -21,6 +21,8 @@ const getLableTypeIcon = (
       return <i className="ri-notification-fill" />;
     case AlertAndUpdate.ALERTANDUPDATE:
       return <i className="ri-notification-fill" />;
+    case AlertAndUpdate.UPDATEANDALERT:
+      return <i className="ri-notification-fill" />;
     default:
       return <Image src={JourneyIcon} alt={'journey-icon'} />;
   }
@@ -41,6 +43,8 @@ const getLabelText = (
     case NotificationType.UPDATE:
       return 'Update';
     case AlertAndUpdate.ALERTANDUPDATE:
+      return 'Alert / Update';
+    case AlertAndUpdate.UPDATEANDALERT:
       return 'Alert / Update';
     default:
       return '';

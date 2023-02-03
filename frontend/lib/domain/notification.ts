@@ -21,6 +21,7 @@ export enum NotificationType {
 
 export enum AlertAndUpdate {
   ALERTANDUPDATE = 'alert,update',
+  UPDATEANDALERT = 'update,alert',
 }
 
 export enum NotificationChannel {
