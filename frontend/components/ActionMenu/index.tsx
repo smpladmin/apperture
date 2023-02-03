@@ -1,7 +1,7 @@
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import React from 'react';
 type ActionMenuProps = {
-  onNotificationClick?: React.FormEventHandler<HTMLButtonElement> | undefined;
+  onNotificationClick: Function;
 };
 function ActionMenu({ onNotificationClick }: ActionMenuProps) {
   return (
@@ -18,7 +18,8 @@ function ActionMenu({ onNotificationClick }: ActionMenuProps) {
             rounded={'full'}
             color={'white.DEFAULT'}
             bg={'grey.300'}
-            onClick={onNotificationClick}
+            onClick={() => onNotificationClick()}
+            data-testid={'set-alert-button'}
           />
           <Text
             mt={2}

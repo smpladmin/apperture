@@ -44,6 +44,7 @@ const MobileAlerts = ({
       onClose={closeAlertsSheet}
       disableDrag={true}
       detent="content-height"
+      data-testid="alerts-container"
     >
       <Sheet.Container style={{ borderRadius: '1rem 1rem 0 0' }}>
         <Sheet.Header>
