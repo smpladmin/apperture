@@ -1,7 +1,8 @@
 import { Box, Button, ToastId, useToast } from '@chakra-ui/react';
-import { TrendData } from '@lib/domain/eventData';
 import {
+  NotificationEventsData,
   NotificationMetricType,
+  NotificationVariant,
   ThresholdMetricType,
 } from '@lib/domain/notification';
 import { setAlert } from '@lib/services/notificationService';
@@ -11,35 +12,39 @@ import AlertMetrics from './AlertMetrics';
 import PercentageMetric from './PercentageMetric';
 import ThresholdMetric from './ThresholdMetric';
 import AlertToast from './Toast';
-import {
-  getMaximumValue,
-  getMinimumValue,
-  notificationMetricOptions,
-  thresholdMetricOptions,
-} from '../util';
+import { NotificationFactory, thresholdMetricOptions } from '../util';
 
 type AlertsProps = {
-  nodeName: string;
-  eventData: TrendData[];
+  name: string;
+  eventData: NotificationEventsData;
   closeAlertsSheet: () => void;
+  variant: NotificationVariant;
+  reference: string;
+  datasourceId: string;
 };
 
-const AlertsInfo = ({ nodeName, eventData, closeAlertsSheet }: AlertsProps) => {
+const AlertsInfo = ({
+  name,
+  eventData,
+  closeAlertsSheet,
+  variant,
+  reference,
+  datasourceId,
+}: AlertsProps) => {
   const toast = useToast();
   const toastRef = useRef<ToastId>();
 
   const router = useRouter();
-  const { dsId } = router.query;
 
   const [minHit, setMinHit] = useState(
-    getMinimumValue(eventData, NotificationMetricType.Hits)
+    NotificationFactory(variant).getMin(eventData, NotificationMetricType.Hits)
   );
   const [maxHit, setMaxHit] = useState(
-    getMaximumValue(eventData, NotificationMetricType.Hits)
+    NotificationFactory(variant).getMax(eventData, NotificationMetricType.Hits)
   );
 
   const [notificationMetric, setNotificationMetric] = useState(
-    notificationMetricOptions[1].name
+    NotificationFactory(variant).metric.name
   );
   const [thresholdMetric, setThresholdMetric] = useState(
     thresholdMetricOptions[0].name
@@ -51,11 +56,27 @@ const AlertsInfo = ({ nodeName, eventData, closeAlertsSheet }: AlertsProps) => {
   const [percentageValue, setPercentageValue] = useState<number | string>('');
 
   useEffect(() => {
-    setMinHit(getMinimumValue(eventData, NotificationMetricType.Hits));
-    setMaxHit(getMaximumValue(eventData, NotificationMetricType.Hits));
+    setMinHit(
+      NotificationFactory(variant).getMin(
+        eventData,
+        NotificationMetricType.Hits
+      )
+    );
+    setMaxHit(
+      NotificationFactory(variant).getMax(
+        eventData,
+        NotificationMetricType.Hits
+      )
+    );
     setHitsThresholdRange([
-      getMinimumValue(eventData, NotificationMetricType.Hits),
-      getMaximumValue(eventData, NotificationMetricType.Hits),
+      NotificationFactory(variant).getMin(
+        eventData,
+        NotificationMetricType.Hits
+      ),
+      NotificationFactory(variant).getMax(
+        eventData,
+        NotificationMetricType.Hits
+      ),
     ]);
   }, [eventData]);
 
@@ -74,13 +95,15 @@ const AlertsInfo = ({ nodeName, eventData, closeAlertsSheet }: AlertsProps) => {
 
   const setEventAlert = async () => {
     const response = await setAlert(
-      dsId as string,
-      nodeName,
+      datasourceId,
+      name,
       notificationMetric,
       thresholdMetric,
       thresholdMetric === ThresholdMetricType.Percentage
         ? [-percentageValue, +percentageValue]
-        : hitsThresholdRange
+        : hitsThresholdRange,
+      variant,
+      reference
     );
 
     if (response?.status === 200) {
@@ -103,6 +126,8 @@ const AlertsInfo = ({ nodeName, eventData, closeAlertsSheet }: AlertsProps) => {
           setThresholdRange={setHitsThresholdRange}
           minHit={minHit}
           maxHit={maxHit}
+          xField={NotificationFactory(variant).xField}
+          yField={NotificationFactory(variant).yField}
         />
       ) : null}
       {thresholdMetric === ThresholdMetricType.Percentage ? (

@@ -42,6 +42,7 @@ const ViewFunnel = ({ savedFunnel }: { savedFunnel: Funnel }) => {
         datasourceId={datasourceId}
         name={savedFunnel.name}
         steps={savedFunnel.steps}
+        eventData={computedTrendsData}
       />
       <RightView
         funnelSteps={savedFunnel.steps}

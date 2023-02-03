@@ -46,6 +46,8 @@ async def add_notification(
         preferredHourGMT=dto.preferredHourGMT,
         preferredChannels=dto.preferredChannels,
         notificationActive=dto.notificationActive,
+        variant=dto.variant,
+        reference=dto.reference,
     )
     await notification_service.add_notification(notification=notification)
     return notification

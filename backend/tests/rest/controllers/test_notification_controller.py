@@ -7,6 +7,7 @@ from domain.notifications.models import (
     NotificationMetric,
     NotificationFrequency,
     NotificationChannel,
+    NotificationVariant,
 )
 from tests.utils import filter_response
 
@@ -72,6 +73,8 @@ def test_add_notification(
         "preferredHourGMT": 5,
         "userId": ANY,
         "variableMap": {},
+        "reference": "/p/partner/job",
+        "variant": NotificationVariant.NODE,
     }
     assert notification_service.add_notification.call_args.kwargs[
         "notification"
@@ -98,6 +101,8 @@ def test_add_notification(
         "updated_at": None,
         "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
         "variable_map": {},
+        "reference": "/p/partner/job",
+        "variant": NotificationVariant.NODE,
     }
 
 
@@ -156,6 +161,8 @@ def test_update_notification(
         "updated_at": None,
         "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
         "variable_map": {},
+        "reference": "/p/partner/job",
+        "variant": NotificationVariant.NODE,
     }
     assert (
         notification_service.update_notification.call_args.kwargs["notification_id"]

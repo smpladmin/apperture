@@ -1,23 +1,40 @@
-import { Button, Divider, Flex, IconButton, Text } from '@chakra-ui/react';
+import {
+  Button,
+  Divider,
+  Flex,
+  IconButton,
+  Text,
+  useDisclosure,
+} from '@chakra-ui/react';
 import React from 'react';
 import { BASTILLE } from '@theme/index';
 import MetricViewComponentCard from './MetricViewComponentCard';
 import ActionMenu from '@components/ActionMenu';
-import { EventOrSegmentComponent } from '@lib/domain/metric';
+import { EventOrSegmentComponent, MetricTrend } from '@lib/domain/metric';
 import { useRouter } from 'next/router';
+import Alert from '@components/Alerts';
+import { NotificationVariant } from '@lib/domain/notification';
 
 const ViewMetricActionPanel = ({
   metricName,
   metricDefinition,
   aggregates,
   datasourceId,
+  eventData,
 }: {
   metricName: string;
   metricDefinition: string;
   aggregates: EventOrSegmentComponent[];
   datasourceId: string;
+  eventData: MetricTrend[];
 }) => {
   const router = useRouter();
+  const { metricId } = router?.query;
+  const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
+
+  const handleNotificationClick = () => {
+    onOpen();
+  };
   return (
     <>
       <Flex justifyContent={'space-between'} alignItems={'center'}>
@@ -96,8 +113,6 @@ const ViewMetricActionPanel = ({
             EVENTS & SEGMENT
           </Text>
         </Flex>
-        {/* <Divider orientation="horizontal" borderColor={BASTILLE} opacity={1} /> */}
-
         {aggregates.map((aggregate) => (
           <MetricViewComponentCard
             variable={aggregate.variable}
@@ -107,12 +122,21 @@ const ViewMetricActionPanel = ({
             conditions={aggregate.conditions}
           />
         ))}
-        <ActionMenu />
+        <ActionMenu onNotificationClick={handleNotificationClick} />
         <Divider
           mt={'4'}
           orientation="horizontal"
           borderColor={BASTILLE}
           opacity={1}
+        />
+        <Alert
+          name={metricName}
+          isAlertsSheetOpen={isAlertsSheetOpen}
+          closeAlertsSheet={onClose}
+          variant={NotificationVariant.METRIC}
+          reference={metricId as string}
+          eventData={eventData}
+          datasourceId={datasourceId}
         />
       </Flex>
     </>

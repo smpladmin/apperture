@@ -27,8 +27,10 @@ export type EventOrSegmentComponent = {
   aggregations: MetricComponentAggregation;
 };
 
+export type MetricTrend = { date: string; value: number };
+
 export type ComputedMetric = {
-  data: { date: string; value: number }[];
+  data: MetricTrend[];
   definition: string;
 };
 

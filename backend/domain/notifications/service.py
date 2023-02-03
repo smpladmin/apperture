@@ -15,6 +15,7 @@ from domain.notifications.models import (
     ComputedNotification,
     NotificationThresholdType,
     NotificationMetric,
+    NotificationVariant,
 )
 from domain.edge.models import AggregatedEdge, NotificationNodeData
 
@@ -45,6 +46,8 @@ class NotificationService:
         preferredHourGMT: int,
         preferredChannels: List[NotificationChannel],
         notificationActive: bool,
+        variant: NotificationVariant,
+        reference: str,
     ):
         return Notification(
             datasource_id=datasourceId,
@@ -65,6 +68,8 @@ class NotificationService:
             preferred_hour_gmt=preferredHourGMT,
             preferred_channels=preferredChannels,
             notification_active=notificationActive,
+            variant=variant,
+            reference=reference,
         )
 
     async def add_notification(self, notification: Notification):

@@ -11,19 +11,29 @@ import Loading from '../components/Loading';
 import { TrendData } from '@lib/domain/eventData';
 import { useEffect, useState } from 'react';
 import AlertsInfo from '../components/AlertsInfo';
+import {
+  NotificationEventsData,
+  NotificationVariant,
+} from '@lib/domain/notification';
 
 type DesktopAlertsProps = {
-  nodeName: string;
-  eventData: TrendData[];
+  name: string;
+  eventData: NotificationEventsData;
   isAlertsSheetOpen: boolean;
   closeAlertsSheet: () => void;
+  variant: NotificationVariant;
+  reference: string;
+  datasourceId: string;
 };
 
 const DesktopAlerts = ({
-  nodeName,
+  name,
   eventData,
   isAlertsSheetOpen,
   closeAlertsSheet,
+  variant,
+  reference,
+  datasourceId,
 }: DesktopAlertsProps) => {
   const [isLoading, setIsLoading] = useState<Boolean>(true);
 
@@ -45,6 +55,7 @@ const DesktopAlerts = ({
         maxWidth="168"
         maxHeight={'calc(100% - 50px)'}
         borderRadius={'20px'}
+        data-testid="alerts-container"
       >
         <ModalHeader
           display={'flex'}
@@ -76,9 +87,12 @@ const DesktopAlerts = ({
             <Loading />
           ) : (
             <AlertsInfo
-              nodeName={nodeName}
+              name={name}
               eventData={eventData}
               closeAlertsSheet={closeAlertsSheet}
+              variant={variant}
+              reference={reference}
+              datasourceId={datasourceId}
             />
           )}
         </ModalBody>

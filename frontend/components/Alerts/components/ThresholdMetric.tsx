@@ -8,7 +8,6 @@ import {
   RangeSliderTrack,
   Text,
 } from '@chakra-ui/react';
-import { TrendData } from '@lib/domain/eventData';
 import {
   convertISODateToReadableDate,
   formatDatalabel,
@@ -17,17 +16,20 @@ import { BLUE, YELLOW_100, YELLOW_200 } from '@theme/index';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import ParallelLineIcon from '@assets/icons/parallel-line.svg';
+import { NotificationEventsData } from '@lib/domain/notification';
 
 const ParallelLine = () => {
   return <Image src={ParallelLineIcon} alt={'parallel-line-icon'} />;
 };
 
 type ThresholdMetricProps = {
-  data: TrendData[];
+  data: NotificationEventsData;
   thresholdRange: number[];
   setThresholdRange: Function;
   minHit: number;
   maxHit: number;
+  xField: string;
+  yField: string;
 };
 
 const ThresholdMetric = ({
@@ -36,6 +38,8 @@ const ThresholdMetric = ({
   setThresholdRange,
   minHit,
   maxHit,
+  xField,
+  yField,
 }: ThresholdMetricProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ line: Line | null }>({ line: null });
@@ -44,8 +48,8 @@ const ThresholdMetric = ({
     plot.current.line = new Line(ref.current!!, {
       data,
       padding: 'auto',
-      xField: 'startDate',
-      yField: 'hits',
+      xField,
+      yField,
       yAxis: {
         tickCount: 5,
       },
