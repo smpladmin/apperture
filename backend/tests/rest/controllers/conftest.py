@@ -41,6 +41,7 @@ from domain.notifications.models import (
     NotificationMetric,
     NotificationType,
     ThresholdMap,
+    NotificationVariant,
 )
 
 from domain.metrics.models import (
@@ -87,6 +88,8 @@ def notification_service():
                 frequency=NotificationFrequency.DAILY,
                 preferred_channels=[NotificationChannel.SLACK],
                 notification_active=True,
+                variant=NotificationVariant.NODE,
+                reference="/p/partner/job"
             ),
         )
     ]
@@ -108,6 +111,8 @@ def notification_service():
         preferred_hour_gmt=5,
         preferred_channels=[NotificationChannel.SLACK],
         notification_active=False,
+        variant=NotificationVariant.NODE,
+        reference="/p/partner/job"
     )
     notif_future = asyncio.Future()
     notif_future.set_result(notif)
@@ -818,6 +823,8 @@ def notification_response():
         "frequency": NotificationFrequency.DAILY,
         "preferredChannels": [NotificationChannel.SLACK],
         "notificationActive": False,
+        "variant":NotificationVariant.NODE,
+        "reference":"/p/partner/job"
     }
 
 
@@ -848,6 +855,8 @@ def saved_notification_response():
                 "frequency": "daily",
                 "preferred_channels": ["slack"],
                 "notification_active": True,
+        "variant":NotificationVariant.NODE,
+        "reference":"/p/partner/job"
             },
         }
     ]
@@ -983,6 +992,8 @@ def notification_data():
         "frequency": NotificationFrequency.DAILY,
         "preferredChannels": [NotificationChannel.SLACK],
         "notificationActive": False,
+        "variant":NotificationVariant.NODE,
+        "reference":"/p/partner/job"
     }
 
 
