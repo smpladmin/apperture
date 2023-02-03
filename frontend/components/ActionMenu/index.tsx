@@ -1,7 +1,7 @@
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import React from 'react';
 type ActionMenuProps = {
-  onNotificationClick?: Function;
+  onNotificationClick: Function;
 };
 function ActionMenu({ onNotificationClick }: ActionMenuProps) {
   return (
@@ -14,8 +14,9 @@ function ActionMenu({ onNotificationClick }: ActionMenuProps) {
           borderRadius={'100'}
           bg={'black.50'}
           alignItems={'center'}
-          onClick={() => onNotificationClick?.()}
+          onClick={() => onNotificationClick()}
           cursor={'pointer'}
+          data-testid={'set-alert-button'}
         >
           <IconButton
             aria-label="set alerts"

@@ -1,7 +1,6 @@
-import { Box, Flex, IconButton, Input, Text } from '@chakra-ui/react';
+import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import {
   SegmentFilter,
-  SegmentGroup,
   SegmentProperty,
   WhoSegmentFilter,
 } from '@lib/domain/segment';

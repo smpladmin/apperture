@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { Line, LineOptions } from '@antv/g2plot';
-import BaseChart, { BaseChartProps } from './Base';
+import BaseChart from './Base';
 
 export type LineChartProps = Omit<any, 'chart' | 'data'> & LineOptions;
 

@@ -13,7 +13,6 @@ import React, {
 import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
-import { Plot as BasePlot } from '@antv/g2plot';
 import { Box } from '@chakra-ui/react';
 
 type PickedAttrs = 'className' | 'style';

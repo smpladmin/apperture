@@ -1,6 +1,6 @@
 import { AppWithIntegrations } from '@lib/domain/app';
 import { Provider } from '@lib/domain/provider';
-import { _getApps, _getAppsWithIntegrations } from '@lib/services/appService';
+import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
 

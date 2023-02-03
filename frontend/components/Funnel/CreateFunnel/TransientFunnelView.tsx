@@ -8,7 +8,6 @@ import {
 } from '@chakra-ui/react';
 import {
   FunnelData,
-  FunnelEventConversion,
   FunnelStep,
   FunnelTrendsData,
 } from '@lib/domain/funnel';

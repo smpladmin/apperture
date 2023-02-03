@@ -2,7 +2,7 @@ import { Button, Flex } from '@chakra-ui/react';
 import React from 'react';
 import MetricEmptyState from './MetricEmptyState';
 import DateFilter from './DateFilter';
-import { DateRangeType, ComputedMetric, Metric } from '@lib/domain/metric';
+import { DateRangeType, ComputedMetric } from '@lib/domain/metric';
 import MetricTrend from './MetricTrend';
 import Loader from '@components/LoadingSpinner';
 
@@ -59,7 +59,11 @@ const TransientMetricView = ({
             </Flex>
           </Flex>
           {metric && metric.data.length > 0 ? (
-            <MetricTrend data={metric.data} definition={metric.definition} />
+            <MetricTrend
+              data={metric.data}
+              definition={metric.definition}
+              average={metric.average}
+            />
           ) : (
             <MetricEmptyState />
           )}

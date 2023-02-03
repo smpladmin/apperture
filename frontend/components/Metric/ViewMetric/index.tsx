@@ -16,7 +16,8 @@ const ViewMetric = ({ savedMetric }: { savedMetric: Metric }) => {
     const fetchMetric = async () => {
       const result = await computeMetric(
         savedMetric.datasourceId,
-        savedMetric.function,
+        savedMetric.function ||
+          savedMetric.aggregates.map((item) => item.variable).join(','),
         savedMetric.aggregates,
         savedMetric.breakdown,
         undefined,
@@ -25,6 +26,7 @@ const ViewMetric = ({ savedMetric }: { savedMetric: Metric }) => {
       setComputedMetric({
         data: result.metric,
         definition: savedMetric.function,
+        average: result.average,
       });
       setIsLoading(false);
     };

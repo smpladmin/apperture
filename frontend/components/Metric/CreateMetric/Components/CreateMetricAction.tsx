@@ -4,7 +4,6 @@ import {
   Flex,
   IconButton,
   Input,
-  Switch,
   Text,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
@@ -52,6 +51,9 @@ const CreateMetricAction = ({
   const [metricDefinition, setmetricDefinition] = useState(
     savedMetric?.function || ''
   );
+  const [debouncedDefinition, setDebouncedDefinition] = useState(
+    savedMetric?.function || ''
+  );
   const router = useRouter();
 
   const { metricId } = router.query;
@@ -89,6 +91,20 @@ const CreateMetricAction = ({
     setLoadingEventsList(true);
     fetchEventProperties();
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setmetricDefinition(debouncedDefinition);
+    }, 600);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [debouncedDefinition]);
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDebouncedDefinition(e.target.value);
+  };
 
   const updateAggregate = (
     variable: string,
@@ -195,6 +211,7 @@ const CreateMetricAction = ({
         setMetric({
           data: result.metric,
           definition: metricDefinition,
+          average: result.average,
         });
         setIsLoading(false);
       } else {
@@ -299,8 +316,8 @@ const CreateMetricAction = ({
           lineHeight={{ base: 'sh-20', md: 'sh-32' }}
           fontWeight={'semibold'}
           textColor={'white.DEFAULT'}
-          value={metricDefinition}
-          onChange={(e) => setmetricDefinition(e.target.value)}
+          value={debouncedDefinition}
+          onChange={handleTextChange}
           borderColor={'grey.10'}
           height="10"
           borderRadius={'25'}

@@ -1,4 +1,4 @@
-import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
+import { Flex, Text } from '@chakra-ui/react';
 import React from 'react';
 import { MetricEventFilter } from '@lib/domain/metric';
 import MetricViewFilterComponent from './MetricViewFilterCard';

@@ -69,7 +69,9 @@ class Metrics(EventsBase):
                 if end_date:
                     inner_criterion.append(fn.Date(Field("date")) <= fn.Date(end_date))
             innerquery = innerquery.where(Criterion.all(inner_criterion))
-        select_expressions,denominators_list = zip(*[parser.parse(definition, fn.Sum) for definition in function.split(',')])
+        select_expressions, denominators_list = zip(
+            *[parser.parse(definition, fn.Sum) for definition in function.split(",")]
+        )
         having_clause = []
         for denominators in denominators_list:
             for denominator in denominators:
@@ -81,8 +83,9 @@ class Metrics(EventsBase):
             .select(Parameter("date"))
             .groupby(Parameter("date"))
             .having(Criterion.all(having_clause))
+            .limit(100)
         )
         for select_expression in select_expressions:
             query = query.select(select_expression)
-            
+
         return query.get_sql(), {"ds_id": datasource_id}

@@ -37,6 +37,7 @@ from domain.notifications.models import (
     NotificationFrequency,
     NotificationMetric,
     NotificationType,
+    ThresholdMap,
     NotificationVariant,
 )
 
@@ -97,7 +98,7 @@ def notification_service(apperture_user_response):
         preferred_channels=[NotificationChannel.SLACK],
         notification_active=False,
         variant=NotificationVariant.NODE,
-        reference="name",
+        reference="/p/partner/job",
     )
     notif_future = asyncio.Future()
     notif_future.set_result(notif)
@@ -360,13 +361,16 @@ def metric_service(apperture_user_response):
 
     computed_metric = ComputedMetricResult(
         metric=[
-            {"date": "2022-10-07", "value": 4},
-            {"date": "2022-10-08", "value": 26},
-            {"date": "2022-10-09", "value": 11},
-            {"date": "2022-10-10", "value": 14},
-            {"date": "2022-10-11", "value": 22},
-            {"date": "2022-10-12", "value": 33},
-        ]
+            {"date": "2022-10-07", "value": 4, "series": "A/B"},
+            {"date": "2022-10-08", "value": 26, "series": "A/B"},
+            {"date": "2022-10-09", "value": 11, "series": "A/B"},
+            {"date": "2022-10-10", "value": 14, "series": "A/B"},
+            {"date": "2022-10-11", "value": 22, "series": "A/B"},
+            {"date": "2022-10-12", "value": 33, "series": "A/B"},
+        ],
+        average={
+            "A/B": 18.333333333333332,
+        },
     )
     computed_metric_future = asyncio.Future()
     computed_metric_future.set_result(computed_metric)
@@ -906,6 +910,8 @@ def notification_response():
         "frequency": NotificationFrequency.DAILY,
         "preferredChannels": [NotificationChannel.SLACK],
         "notificationActive": False,
+        "variant": NotificationVariant.NODE,
+        "reference": "/p/partner/job",
     }
 
 
@@ -936,6 +942,8 @@ def saved_notification_response():
                 "frequency": "daily",
                 "preferred_channels": ["slack"],
                 "notification_active": True,
+                "variant": NotificationVariant.NODE,
+                "reference": "/p/partner/job",
             },
         }
     ]
@@ -1042,13 +1050,14 @@ def computed_segment_response():
 def computed_metric_response():
     return {
         "metric": [
-            {"date": "2022-10-07", "value": 4},
-            {"date": "2022-10-08", "value": 26},
-            {"date": "2022-10-09", "value": 11},
-            {"date": "2022-10-10", "value": 14},
-            {"date": "2022-10-11", "value": 22},
-            {"date": "2022-10-12", "value": 33},
-        ]
+            {"date": "2022-10-07", "value": 4, "series": "A/B"},
+            {"date": "2022-10-08", "value": 26, "series": "A/B"},
+            {"date": "2022-10-09", "value": 11, "series": "A/B"},
+            {"date": "2022-10-10", "value": 14, "series": "A/B"},
+            {"date": "2022-10-11", "value": 22, "series": "A/B"},
+            {"date": "2022-10-12", "value": 33, "series": "A/B"},
+        ],
+        "average": {"A/B": 18.333333333333332},
     }
 
 
@@ -1071,6 +1080,8 @@ def notification_data():
         "frequency": NotificationFrequency.DAILY,
         "preferredChannels": [NotificationChannel.SLACK],
         "notificationActive": False,
+        "variant": NotificationVariant.NODE,
+        "reference": "/p/partner/job",
     }
 
 

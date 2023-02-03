@@ -55,6 +55,7 @@ const DesktopAlerts = ({
         maxWidth="168"
         maxHeight={'calc(100% - 50px)'}
         borderRadius={'20px'}
+        data-testid="alerts-container"
       >
         <ModalHeader
           display={'flex'}

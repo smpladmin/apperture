@@ -22,7 +22,6 @@ import SegmentTable from './components/Table/SegmentTable';
 import {
   getEventProperties,
   getNodes,
-  _getNodes,
 } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
 import { computeSegment } from '@lib/services/segmentService';

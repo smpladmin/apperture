@@ -1,7 +1,7 @@
 import { ReactNode, useContext, useEffect, useState } from 'react';
 import Layout from '@components/Layout';
 import { GetServerSideProps } from 'next';
-import { _getApps, _getAppsWithIntegrations } from '@lib/services/appService';
+import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { App, AppWithIntegrations } from '@lib/domain/app';
 import Loading from '@components/Loading';
 import Graph from '@components/Graph';
