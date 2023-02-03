@@ -13,18 +13,17 @@ from domain.notifications.models import (
 from tests.utils import filter_response
 
 
-def test_get_notification_for_node(
+def test_get_notification_by_reference(
     client_init, notification_service, notification_response
 ):
     response = client_init.get(
-        "/notifications?name=name&datasource_id=635ba034807ab86d8a2aadd9"
+        "/notifications?reference=/p/partner/job&datasource_id=635ba034807ab86d8a2aadd9"
     )
     assert response.status_code == 200
-    assert response.json().keys() == notification_response.keys()
-    assert filter_response(response.json()) == filter_response(notification_response)
+    assert response.json() == notification_response
 
-    notification_service.get_notification_for_node.assert_called_once_with(
-        **{"datasource_id": "635ba034807ab86d8a2aadd9", "name": "name"}
+    notification_service.get_notification_by_reference.assert_called_once_with(
+        **{"datasource_id": "635ba034807ab86d8a2aadd9", "reference": "/p/partner/job"}
     )
 
 
@@ -49,7 +48,7 @@ def test_add_notification(
         "multiNode": True,
         "name": "name",
         "notificationActive": False,
-        "notificationType": NotificationType.UPDATE,
+        "notificationType": {NotificationType.UPDATE},
         "pctThresholdActive": False,
         "pctThresholdValues": None,
         "preferredChannels": [NotificationChannel.SLACK],
@@ -75,7 +74,7 @@ def test_add_notification(
         "multi_node": True,
         "name": "name",
         "notification_active": False,
-        "notification_type": NotificationType.UPDATE,
+        "notification_type": {NotificationType.UPDATE},
         "pct_threshold_active": False,
         "pct_threshold_values": None,
         "preferred_channels": [NotificationChannel.SLACK],
@@ -112,7 +111,7 @@ def test_update_notification(
         "frequency": NotificationFrequency.DAILY,
         "name": "name",
         "notificationActive": False,
-        "notificationType": NotificationType.UPDATE,
+        "notificationType": {NotificationType.UPDATE},
         "pctThresholdActive": False,
         "pctThresholdValues": None,
         "preferredChannels": [NotificationChannel.SLACK],
@@ -139,7 +138,7 @@ def test_update_notification(
         "multi_node": True,
         "name": "name",
         "notification_active": False,
-        "notification_type": NotificationType.UPDATE,
+        "notification_type": {NotificationType.UPDATE},
         "pct_threshold_active": False,
         "pct_threshold_values": None,
         "preferred_channels": [NotificationChannel.SLACK],
@@ -176,7 +175,7 @@ def test_get_funnels(client_init, notification_service):
             "multiNode": True,
             "name": "name",
             "notificationActive": False,
-            "notificationType": "update",
+            "notificationType": [NotificationType.UPDATE],
             "pctThresholdActive": False,
             "pctThresholdValues": None,
             "preferredChannels": ["slack"],

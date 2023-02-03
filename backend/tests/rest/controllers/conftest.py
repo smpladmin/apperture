@@ -85,7 +85,7 @@ def notification_service(apperture_user_response):
         app_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
         name="name",
         user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
-        notification_type=NotificationType.UPDATE,
+        notification_type=[NotificationType.UPDATE],
         metric=NotificationMetric.HITS,
         multi_node=True,
         apperture_managed=True,
@@ -109,7 +109,7 @@ def notification_service(apperture_user_response):
     notification_service_mock.build_notification.return_value = notif
     notification_service_mock.add_notification.return_value = notif_future
     notification_service_mock.update_notification.return_value = notif_future
-    notification_service_mock.get_notification_for_node.return_value = notif_future
+    notification_service_mock.get_notification_by_reference.return_value = notif_future
     notification_service_mock.get_notifications_for_datasource_id.return_value = (
         notifications_future
     )
@@ -889,14 +889,14 @@ def computed_funnel_response():
 def notification_response():
     return {
         "_id": "635ba034807ab86d8a2aadd8",
-        "revisionId": "8fc1083c-0e63-4358-9139-785b77b6236a",
-        "createdAt": "2022-10-28T09:26:12.682829",
+        "revisionId": ANY,
+        "createdAt": ANY,
         "updatedAt": None,
         "datasourceId": "635ba034807ab86d8a2aadd9",
         "appId": "635ba034807ab86d8a2aadd9",
         "userId": "635ba034807ab86d8a2aadda",
         "name": "name",
-        "notificationType": NotificationType.UPDATE,
+        "notificationType": [NotificationType.UPDATE],
         "metric": NotificationMetric.HITS,
         "multiNode": True,
         "appertureManaged": True,
@@ -1066,7 +1066,7 @@ def notification_data():
     return {
         "datasourceId": "635ba034807ab86d8a2aadd9",
         "name": "name",
-        "notificationType": NotificationType.UPDATE,
+        "notificationType": [NotificationType.UPDATE],
         "metric": NotificationMetric.HITS,
         "multiNode": True,
         "appertureManaged": True,
