@@ -16,6 +16,12 @@ import {
 import { computeMetric } from '@lib/services/metricService';
 import ViewMetric from './index';
 import { MetricComponentVariant } from '@lib/domain/metric';
+import {
+  NotificationChannel,
+  NotificationMetricType,
+  NotificationType,
+  NotificationVariant,
+} from '@lib/domain/notification';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/services/metricService');
@@ -25,7 +31,6 @@ describe('View Metric', () => {
   let mockedGetNodes: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
   let mockedComputedMetric: jest.Mock;
-  //   let mockedGetUserInfo: jest.Mock;
   const eventProperties = [
     'city',
     'device',
@@ -93,6 +98,44 @@ describe('View Metric', () => {
     breakdown: [],
   };
 
+  const savedNotifications = {
+    _id: '63dbc1e62effb8f88f60e240',
+    createdAt: new Date('2023-02-02T14:00:06.464000'),
+    datasourceId: '63d0a7bfc636cee15d81f579',
+    userId: '6374b74e9b36ecf7e0b4f9e4',
+    appId: '63ca46feee94e38b81cda37a',
+    name: 'Funnel',
+    notificationType: [NotificationType.ALERT],
+    metric: NotificationMetricType.Users,
+    multiNode: false,
+    appertureManaged: false,
+    pctThresholdActive: false,
+    pctThresholdValues: null,
+    absoluteThresholdActive: true,
+    absoluteThresholdValues: {
+      min: 75.52,
+      max: 77.61,
+    },
+    formula: 'a',
+    variableMap: {
+      a: ['Funnel'],
+    },
+    preferredHourGmt: 5,
+    frequency: 'daily',
+    preferredChannels: [NotificationChannel.SLACK],
+    notificationActive: true,
+    variant: NotificationVariant.FUNNEL,
+    reference: '63d36d10eb1e7db6cd4db69a',
+    user: {
+      firstName: 'Anish',
+      lastName: 'Kaushal',
+      email: 'anish@parallelhq.com',
+      picture:
+        'https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c',
+      slackChannel: null,
+    },
+  };
+
   beforeEach(() => {
     mockedGetEventProperties = jest.mocked(getEventProperties);
     mockedGetNodes = jest.mocked(getNodes);
@@ -122,7 +165,10 @@ describe('View Metric', () => {
           <RouterContext.Provider
             value={createMockRouter({ query: { dsId: '' } })}
           >
-            <ViewMetric savedMetric={savedMetric} />
+            <ViewMetric
+              savedMetric={savedMetric}
+              savedNotification={savedNotifications}
+            />
           </RouterContext.Provider>
         );
       });

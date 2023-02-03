@@ -17,7 +17,6 @@ import { FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
 import { useRouter } from 'next/router';
 import Alert from '@components/Alerts';
 import { Notifications, NotificationVariant } from '@lib/domain/notification';
-import { getNotificationByReference } from '@lib/services/notificationService';
 
 type LeftViewProps = {
   datasourceId: string;
@@ -25,6 +24,7 @@ type LeftViewProps = {
   steps: FunnelStep[];
   eventData: FunnelTrendsData[];
   savedNotification: Notifications;
+  setIsModalClosed: Function;
 };
 
 const LeftView = ({
@@ -33,6 +33,7 @@ const LeftView = ({
   steps,
   eventData,
   savedNotification,
+  setIsModalClosed,
 }: LeftViewProps) => {
   const router = useRouter();
 
@@ -62,6 +63,11 @@ const LeftView = ({
 
   const handleNotificationClick = () => {
     onOpen();
+    router.replace({
+      pathname,
+      query: { ...router.query, showAlert: true },
+    });
+    setIsModalClosed(false);
   };
 
   const handleCloseAlertsModal = () => {
@@ -73,6 +79,7 @@ const LeftView = ({
       });
     }
     onClose();
+    setIsModalClosed(true);
   };
 
   return (

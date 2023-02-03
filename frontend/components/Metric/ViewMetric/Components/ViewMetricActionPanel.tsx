@@ -22,6 +22,7 @@ const ViewMetricActionPanel = ({
   datasourceId,
   eventData,
   savedNotification,
+  setIsModalClosed,
 }: {
   metricName: string;
   metricDefinition: string;
@@ -29,6 +30,7 @@ const ViewMetricActionPanel = ({
   datasourceId: string;
   eventData: MetricTrend[];
   savedNotification: Notifications;
+  setIsModalClosed: Function;
 }) => {
   const router = useRouter();
   const {
@@ -39,6 +41,11 @@ const ViewMetricActionPanel = ({
 
   const handleNotificationClick = () => {
     onOpen();
+    router.replace({
+      pathname,
+      query: { ...router.query, showAlert: true },
+    });
+    setIsModalClosed(false);
   };
 
   useEffect(() => {
@@ -54,6 +61,7 @@ const ViewMetricActionPanel = ({
       });
     }
     onClose();
+    setIsModalClosed(true);
   };
 
   return (

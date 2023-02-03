@@ -64,10 +64,10 @@ export type Notifications = {
   metric: NotificationMetricType;
   multiNode: boolean;
   appertureManaged: boolean;
-  pcTThresholdActive: boolean;
-  pctThresholdValues?: { min: number; max: number };
+  pctThresholdActive: boolean;
+  pctThresholdValues?: { min: number; max: number } | null;
   absoluteThresholdActive: boolean;
-  absoluteThresholdValues?: { min: number; max: number };
+  absoluteThresholdValues?: { min: number; max: number } | null;
   formula: string;
   variableMap: { a: string[] };
   preferredChannels: NotificationChannel[];

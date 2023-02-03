@@ -11,10 +11,11 @@ import { NodeSignificanceData, TrendData } from '@lib/domain/eventData';
 import Alert from '@components/Alerts';
 import BellIcon from '@assets/icons/bell-icon.svg';
 import Image from 'next/image';
-import { NotificationVariant } from '@lib/domain/notification';
+import { Notifications, NotificationVariant } from '@lib/domain/notification';
 import { useEffect, useState } from 'react';
 import { getTrendsData } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
+import { getNotificationByReference } from '@lib/services/notificationService';
 
 type NodeSignificanceProps = {
   nodeSignificanceData: Array<NodeSignificanceData>;
@@ -32,17 +33,26 @@ const NodeSignificance = ({
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
   const [dailyTrendData, setDailyTrendData] = useState<TrendData[]>([]);
 
+  const [notification, setNotification] = useState<Notifications | {}>({});
+
+  const [isModalClosed, setIsModalClosed] = useState(true);
+  const nodeName = nodeSignificanceData?.[0]?.['node'];
+
   const openAlertsSheet = () => {
     setClickOutsideEnabled?.(false);
     onOpen();
+    setIsModalClosed(false);
   };
 
   const closeAlertsSheet = () => {
     setClickOutsideEnabled?.(true);
     onClose();
+    setIsModalClosed(true);
   };
 
   useEffect(() => {
+    if (!isModalClosed) return;
+
     const fetchTrendsData = async () => {
       setDailyTrendData(
         await getTrendsData(
@@ -55,11 +65,20 @@ const NodeSignificance = ({
     fetchTrendsData();
   }, [nodeSignificanceData, dsId]);
 
+  useEffect(() => {
+    const getNotificationForMetric = async () => {
+      const res =
+        (await getNotificationByReference(nodeName, dsId as string)) || {};
+      setNotification(res);
+    };
+    getNotificationForMetric();
+  }, [isModalClosed]);
+
   return (
     <>
       <Box h={'auto'} minHeight={'18'} pt={'6'} pb={'7'}>
         <Text fontWeight={'medium'} fontSize={'base'} lineHeight={'base'}>
-          {nodeSignificanceData?.[0]?.['node']}
+          {nodeName}
         </Text>
       </Box>
       <Divider orientation="horizontal" borderColor={'white.200'} opacity={1} />
@@ -107,7 +126,9 @@ const NodeSignificance = ({
                 lineHeight={'xs-12'}
                 fontWeight={'medium'}
               >
-                {'Set Alert'}
+                {Boolean(Object.keys(notification).length)
+                  ? 'Manage Alert'
+                  : 'Set Alert'}
               </Text>
             </Flex>
           </Button>
@@ -121,6 +142,7 @@ const NodeSignificance = ({
         reference={nodeSignificanceData?.[0]?.['node']}
         eventData={dailyTrendData}
         datasourceId={dsId as string}
+        savedAlert={notification as Notifications}
       />
     </>
   );

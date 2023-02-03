@@ -5,6 +5,7 @@ import {
   getTransientFunnelData,
   getTransientTrendsData,
 } from '@lib/services/funnelService';
+import { getNotificationByReference } from '@lib/services/notificationService';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import LeftView from './LeftView';
@@ -28,6 +29,8 @@ const ViewFunnel = ({
   const [computedTrendsData, setComputedTrendsData] = useState<
     FunnelTrendsData[]
   >([]);
+  const [notification, setNotification] = useState(savedNotification);
+  const [isModalClosed, setIsModalClosed] = useState(false);
 
   useEffect(() => {
     const fetchComputeData = async () => {
@@ -43,6 +46,20 @@ const ViewFunnel = ({
     fetchComputeData();
   }, []);
 
+  useEffect(() => {
+    if (!isModalClosed) return;
+
+    const getNotificationForMetric = async () => {
+      const res =
+        (await getNotificationByReference(
+          savedFunnel._id,
+          savedFunnel.datasourceId
+        )) || {};
+      setNotification(res);
+    };
+    getNotificationForMetric();
+  }, [isModalClosed]);
+
   return (
     <Flex direction={{ base: 'column', md: 'row' }} h={'full'} w={'full'}>
       <LeftView
@@ -50,7 +67,8 @@ const ViewFunnel = ({
         name={savedFunnel.name}
         steps={savedFunnel.steps}
         eventData={computedTrendsData}
-        savedNotification={savedNotification}
+        savedNotification={notification}
+        setIsModalClosed={setIsModalClosed}
       />
       <RightView
         funnelSteps={savedFunnel.steps}
