@@ -36,6 +36,7 @@ export type ComputedMetric = {
   definition: string;
   average: any;
 };
+export type MetricTrend = { date: string; value: number };
 
 export enum DateFilterType {
   YESTERDAY = 'yesterday',
