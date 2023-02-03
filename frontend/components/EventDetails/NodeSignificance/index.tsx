@@ -51,8 +51,6 @@ const NodeSignificance = ({
   };
 
   useEffect(() => {
-    if (!isModalClosed) return;
-
     const fetchTrendsData = async () => {
       setDailyTrendData(
         await getTrendsData(
@@ -66,6 +64,8 @@ const NodeSignificance = ({
   }, [nodeSignificanceData, dsId]);
 
   useEffect(() => {
+    if (!isModalClosed) return;
+
     const getNotificationForMetric = async () => {
       const res =
         (await getNotificationByReference(nodeName, dsId as string)) || {};
