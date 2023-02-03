@@ -40,10 +40,15 @@ class MetricService:
             start_date=start_date,
             end_date=end_date,
         )
-        
-        keys=["date", *function.split(",")]
+
+        keys = ["date", *function.split(",")]
         data = [dict(zip(keys, row)) for row in computed_metric]
-        result = [{'date': d['date'], 'series': k, 'value': v} for d in data for k, v in d.items() if k != 'date']
+        result = [
+            {"date": d["date"], "series": k, "value": v}
+            for d in data
+            for k, v in d.items()
+            if k != "date"
+        ]
         return ComputedMetricResult(metric=result)
 
     async def build_metric(
