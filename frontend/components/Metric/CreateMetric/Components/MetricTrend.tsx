@@ -1,9 +1,16 @@
-import { Line } from '@antv/g2plot';
-import { Flex, usePrevious } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import LineChart from '@components/Charts/Line';
-import { ComputedMetric } from '@lib/domain/metric';
-import { convertISODateToReadableDate } from '@lib/utils/common';
-import React, { useRef } from 'react';
+import { ComputedMetric, ComputedMetricData } from '@lib/domain/metric';
+import {
+  convertISODateToReadableDate,
+  formatDatalabel,
+} from '@lib/utils/common';
+import React from 'react';
+import MetricTable from './MetricTable';
+
+const formatDate = (date: string): string => {
+  return convertISODateToReadableDate(date).split('-').reverse().join(' ');
+};
 
 const config = {
   padding: 'auto',
@@ -14,7 +21,14 @@ const config = {
   xAxis: {
     label: {
       formatter: (text: string) => {
-        return convertISODateToReadableDate(text);
+        return formatDate(text);
+      },
+    },
+  },
+  yAxis: {
+    label: {
+      formatter: (value: number) => {
+        return formatDatalabel(value);
       },
     },
   },
@@ -34,8 +48,6 @@ const config = {
     },
   },
   tooltip: {
-    showMarkers: true,
-    shared: true,
     formatter: ({ date, value }: { date: string; value: string }) => {
       return {
         title: convertISODateToReadableDate(date),
@@ -43,22 +55,66 @@ const config = {
         value: value,
       };
     },
+    customContent: (_: any, data: any) => {
+      const data_list = data.map((i: any): ComputedMetricData => i.data);
+      return `<div id='metric-tooltip'>
+             ${data_list
+               .map(
+                 (item: ComputedMetricData) =>
+                   `<span class='metric-tooltip series'>${item.series}</span>
+                 <span class='metric-tooltip value'>${formatDatalabel(
+                   item.value
+                 )} Events</span>
+                   `
+               )
+               .join('')}
+               <span class='metric-tooltip date'>${
+                 data_list.length &&
+                 String(new Date(data_list[0].date))
+                   .split(' ')
+                   .slice(0, 5)
+                   .join(' ')
+               }
+                   </span>
+         </div>`;
+    },
   },
   animation: true,
 };
-const MetricTrend = ({ data, definition }: ComputedMetric) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const plot = useRef<{ line: Line | null }>({ line: null });
-  const previousData = usePrevious(data);
 
+const convertToTableData = (
+  data: ComputedMetricData[],
+  average: { [keys: string]: number }
+) => {
+  const tableData: any = {};
+  data.forEach((item: ComputedMetricData) => {
+    tableData[item.series] =
+      tableData[item.series] === undefined
+        ? {
+            series: item.series,
+            average: average ? formatDatalabel(average[item.series]) : 0,
+            [formatDate(item.date)]: formatDatalabel(item.value),
+          }
+        : {
+            ...tableData[item.series],
+            [formatDate(item.date)]: formatDatalabel(item.value),
+          };
+  });
+  return Object.values(tableData);
+};
+
+const MetricTrend = ({ data, definition, average }: ComputedMetric) => {
+  // convertToTableData(data);
   return (
     <Flex
       height={'full'}
       width={'full'}
       justifyContent={'center'}
       direction={'column'}
+      className="metric-chart"
     >
       <LineChart {...config} data={data} />
+      <MetricTable data={convertToTableData(data, average)} />
     </Flex>
   );
 };

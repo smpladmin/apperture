@@ -1,3 +1,4 @@
+import pandas as pd
 from typing import List, Optional, Union
 
 from beanie import PydanticObjectId
@@ -40,7 +41,6 @@ class MetricService:
             start_date=start_date,
             end_date=end_date,
         )
-
         keys = ["date", *function.split(",")]
         data = [dict(zip(keys, row)) for row in computed_metric]
         result = [
@@ -49,7 +49,9 @@ class MetricService:
             for k, v in d.items()
             if k != "date"
         ]
-        return ComputedMetricResult(metric=result)
+        df = pd.DataFrame(data)
+        average = df[function.split(",")].mean().to_dict()
+        return ComputedMetricResult(metric=result, average=average)
 
     async def build_metric(
         self,

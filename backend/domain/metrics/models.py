@@ -66,3 +66,4 @@ class Metric(Document):
 
 class ComputedMetricResult(BaseModel):
     metric: List[dict]
+    average: dict

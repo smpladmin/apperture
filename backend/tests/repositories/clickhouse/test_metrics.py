@@ -43,8 +43,8 @@ class TestMetricRepository:
         self.start_date = "2022-10-8"
         self.end_date = "2022-10-20"
 
-        self.query = 'SELECT date,SUM("A") FROM (SELECT DATE("timestamp") AS "date",CASE WHEN event_name=\'Video_Seen\' AND "properties.properties.$city" IN (\'Bengaluru\') THEN 1 ELSE 0 END AS "A" FROM "events" WHERE "datasource_id"=%(ds_id)s) AS "innerquery" GROUP BY date'
-        self.date_filter_query = 'SELECT date,SUM("A") FROM (SELECT DATE("timestamp") AS "date",CASE WHEN event_name=\'Video_Seen\' AND "properties.properties.$city" IN (\'Bengaluru\') THEN 1 ELSE 0 END AS "A" FROM "events" WHERE "datasource_id"=%(ds_id)s AND DATE("date")>=DATE(\'2022-10-8\') AND DATE("date")<=DATE(\'2022-10-20\')) AS "innerquery" GROUP BY date'
+        self.query = 'SELECT date,SUM("A") FROM (SELECT DATE("timestamp") AS "date",CASE WHEN event_name=\'Video_Seen\' AND "properties.properties.$city" IN (\'Bengaluru\') THEN 1 ELSE 0 END AS "A" FROM "events" WHERE "datasource_id"=%(ds_id)s) AS "innerquery" GROUP BY date LIMIT 100'
+        self.date_filter_query = 'SELECT date,SUM("A") FROM (SELECT DATE("timestamp") AS "date",CASE WHEN event_name=\'Video_Seen\' AND "properties.properties.$city" IN (\'Bengaluru\') THEN 1 ELSE 0 END AS "A" FROM "events" WHERE "datasource_id"=%(ds_id)s AND DATE("date")>=DATE(\'2022-10-8\') AND DATE("date")<=DATE(\'2022-10-20\')) AS "innerquery" GROUP BY date LIMIT 100'
 
     def test_build_metric_compute_query(self):
         assert self.repo.build_metric_compute_query(
