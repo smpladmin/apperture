@@ -17,14 +17,14 @@ def test_get_notification_for_node(
     client_init, notification_service, notification_response
 ):
     response = client_init.get(
-        "/notifications/?name=name&ds_id=635ba034807ab86d8a2aadd9"
+        "/notifications?name=name&datasource_id=635ba034807ab86d8a2aadd9"
     )
     assert response.status_code == 200
     assert response.json().keys() == notification_response.keys()
     assert filter_response(response.json()) == filter_response(notification_response)
 
     notification_service.get_notification_for_node.assert_called_once_with(
-        **{"ds_id": "635ba034807ab86d8a2aadd9", "name": "name"}
+        **{"datasource_id": "635ba034807ab86d8a2aadd9", "name": "name"}
     )
 
 
@@ -105,6 +105,8 @@ def test_update_notification(
         "absoluteThresholdValues": None,
         "appId": PydanticObjectId("636a1c61d715ca6baae65611"),
         "appertureManaged": True,
+        "metric": "hits",
+        "multiNode": True,
         "datasourceId": PydanticObjectId("636a1c61d715ca6baae65611"),
         "formula": "",
         "frequency": NotificationFrequency.DAILY,
@@ -117,6 +119,8 @@ def test_update_notification(
         "preferredHourGMT": 5,
         "userId": ANY,
         "variableMap": {},
+        "reference": "/p/partner/job",
+        "variant": "node",
     }
 
     assert notification_service.update_notification.call_args.kwargs[
@@ -177,7 +181,7 @@ def test_get_funnels(client_init, notification_service):
             "pctThresholdValues": None,
             "preferredChannels": ["slack"],
             "preferredHourGmt": 5,
-            "reference": "name",
+            "reference": "/p/partner/job",
             "revisionId": ANY,
             "updatedAt": ANY,
             "user": {

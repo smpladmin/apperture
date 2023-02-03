@@ -56,7 +56,7 @@ async def add_notification(
 
 @router.get(
     "/notifications",
-    response_model=List[NotificationWithUser],
+    response_model=Union[NotificationResponse, List[NotificationWithUser]],
 )
 async def get_notification(
     name: Union[str, None] = None,
@@ -67,7 +67,7 @@ async def get_notification(
 ):
     if name:
         return await notification_service.get_notification_for_node(
-            name=name, ds_id=datasource_id
+            name=name, datasource_id=datasource_id
         )
     else:
         notifications = await notification_service.get_notifications_for_datasource_id(
