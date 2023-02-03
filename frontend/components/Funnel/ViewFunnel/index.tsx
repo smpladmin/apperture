@@ -49,7 +49,7 @@ const ViewFunnel = ({
   useEffect(() => {
     if (!isModalClosed) return;
 
-    const getNotificationForMetric = async () => {
+    const getNotificationForFunnel = async () => {
       const res =
         (await getNotificationByReference(
           savedFunnel._id,
@@ -57,7 +57,7 @@ const ViewFunnel = ({
         )) || {};
       setNotification(res);
     };
-    getNotificationForMetric();
+    getNotificationForFunnel();
   }, [isModalClosed]);
 
   return (

@@ -66,12 +66,12 @@ const NodeSignificance = ({
   useEffect(() => {
     if (!isModalClosed) return;
 
-    const getNotificationForMetric = async () => {
+    const getNotificationForNode = async () => {
       const res =
         (await getNotificationByReference(nodeName, dsId as string)) || {};
       setNotification(res);
     };
-    getNotificationForMetric();
+    getNotificationForNode();
   }, [isModalClosed]);
 
   return (
