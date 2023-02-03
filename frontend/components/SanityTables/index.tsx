@@ -55,6 +55,11 @@ const Sanity = () => {
             {sanityDatasources.map((sanityDatasource) => {
               return (
                 <Flex
+                  className={
+                    sanityDatasource.id === selectedTab
+                      ? `active-${sanityDatasource.id}`
+                      : ''
+                  }
                   key={sanityDatasource.id}
                   as={'label'}
                   borderRadius={'100'}
@@ -68,6 +73,7 @@ const Sanity = () => {
                       : 'white.200'
                   }
                   cursor={'pointer'}
+                  data-testid={sanityDatasource.id}
                 >
                   <Text
                     fontSize={{ base: 'xs-12', md: 'xs-14' }}

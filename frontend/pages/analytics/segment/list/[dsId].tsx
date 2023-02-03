@@ -21,7 +21,8 @@ export const getServerSideProps: GetServerSideProps = async ({
 
   const apps = await _getAppsWithIntegrations(token);
   const datasourceId = query.dsId;
-  const provider = getDatasourceById(apps, datasourceId as string)?.provider;
+  const provider =
+    getDatasourceById(apps, datasourceId as string)?.provider || '';
 
   if (!apps.length) {
     return {

@@ -1,6 +1,6 @@
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import MetricFilterComponent from './MetricFilterComponent';
 import MetricAddFilterComponent from './MetricAddFilterComponent';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
@@ -40,7 +40,7 @@ const MetricComponentCard = ({
     useState<boolean>(false);
   const [isEventOrSegmentListLoading, setIsEventOrSegmentListLoading] =
     useState<boolean>(false);
-  const [EventorSegmentListSearchData, setEventOrSegmentListSearchData] =
+  const [eventOrSegmentListSearchData, setEventOrSegmentListSearchData] =
     useState<Node[]>([]);
   const [reference, setReference] = useState(
     savedAggregate?.reference_id || ''
@@ -115,12 +115,12 @@ const MetricComponentCard = ({
       previousVariant.current = variant;
       updateAggregate(variable, { variant });
       setIsEventOrSegmentListLoading(true);
-      if (variant === MetricComponentVariant.EVENT) {
-        setEventOrSegmentListSearchData(eventList);
-        setIsEventOrSegmentListLoading(false);
-      }
     }
-  }, [variant]);
+    if (variant === MetricComponentVariant.EVENT) {
+      setEventOrSegmentListSearchData(eventList);
+      setIsEventOrSegmentListLoading(false);
+    }
+  }, [variant, eventList]);
 
   useEffect(() => {
     if (filters.every((filter) => filter.values.length)) {
@@ -174,6 +174,7 @@ const MetricComponentCard = ({
               fontSize={'xs-14'}
               fontWeight={500}
               lineHeight={'xs-18'}
+              wordBreak={'break-all'}
             >
               {reference === '' ? 'Add Event / Segment' : reference}
             </Text>
@@ -222,6 +223,7 @@ const MetricComponentCard = ({
                       e.stopPropagation();
                       setVariant(MetricComponentVariant.EVENT);
                     }}
+                    pointerEvents={'none'}
                   >
                     <i className="ri-group-fill"></i>
                     <Text marginLeft={2}>Segments</Text>
@@ -231,19 +233,12 @@ const MetricComponentCard = ({
                 <SearchableListDropdown
                   isOpen={isEventOrSegmentListOpen}
                   isLoading={isEventOrSegmentListLoading}
-                  data={EventorSegmentListSearchData}
+                  data={eventOrSegmentListSearchData}
                   onSubmit={handleEventOrSegmentSelection}
                   listKey={'id'}
                   isNode
                 />
-              ) : (
-                <SearchableListDropdown
-                  isOpen={isEventOrSegmentListOpen}
-                  isLoading={isEventOrSegmentListLoading}
-                  data={EventorSegmentListSearchData}
-                  onSubmit={handleEventOrSegmentSelection}
-                />
-              )
+              ) : null
             ) : null}
           </Box>
         </Flex>

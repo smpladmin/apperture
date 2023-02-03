@@ -1,17 +1,16 @@
 import { Line } from '@antv/g2plot';
-import { Box, Flex, Tag, TagLabel, usePrevious } from '@chakra-ui/react';
-import LineChart, { LineChartProps } from '@components/Charts/Line';
+import { Flex, usePrevious } from '@chakra-ui/react';
+import LineChart from '@components/Charts/Line';
 import { ComputedMetric } from '@lib/domain/metric';
 import { convertISODateToReadableDate } from '@lib/utils/common';
-import { BLUE } from '@theme/index';
-import isEqual from 'lodash/isEqual';
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 
 const config = {
   padding: 'auto',
   autoFit: true,
   xField: 'date',
   yField: 'value',
+  seriesField: 'series',
   xAxis: {
     label: {
       formatter: (text: string) => {
@@ -19,7 +18,21 @@ const config = {
       },
     },
   },
-  legend: { position: 'top' },
+  legend: {
+    position: 'top',
+    autofit: false,
+    marker: (name: string, index: number, option: any) => {
+      return option?.style?.stroke
+        ? {
+            symbol: 'circle',
+            style: {
+              r: 4,
+              fill: option?.style?.stroke,
+            },
+          }
+        : undefined;
+    },
+  },
   tooltip: {
     showMarkers: true,
     shared: true,
@@ -30,9 +43,6 @@ const config = {
         value: value,
       };
     },
-  },
-  lineStyle: {
-    stroke: BLUE,
   },
   animation: true,
 };
@@ -45,25 +55,9 @@ const MetricTrend = ({ data, definition }: ComputedMetric) => {
     <Flex
       height={'full'}
       width={'full'}
-      alignItems="center"
-      alignContent="center"
       justifyContent={'center'}
       direction={'column'}
     >
-      <Flex py={10}>
-        <Tag cursor={'pointer'}>
-          <Box
-            height={2}
-            width={2}
-            background={BLUE}
-            borderRadius={'full'}
-            marginRight={2}
-          ></Box>
-          <TagLabel fontSize={'xs-12'} lineHeight={'xs-16'}>
-            {definition}
-          </TagLabel>
-        </Tag>
-      </Flex>
       <LineChart {...config} data={data} />
     </Flex>
   );

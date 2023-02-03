@@ -1,7 +1,6 @@
-import { Box, Flex, IconButton, Input, Text } from '@chakra-ui/react';
+import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import {
   SegmentFilter,
-  SegmentGroup,
   SegmentProperty,
   WhoSegmentFilter,
 } from '@lib/domain/segment';
@@ -20,6 +19,7 @@ type WhoSegmentFilterProps = {
   eventProperties: SegmentProperty[];
   index: number;
   removeFilter: Function;
+  loadingEventProperties: boolean;
 };
 
 const WhoSegmentFilter = ({
@@ -29,6 +29,7 @@ const WhoSegmentFilter = ({
   eventProperties,
   index,
   removeFilter,
+  loadingEventProperties,
 }: WhoSegmentFilterProps) => {
   return (
     <Flex gap={'3'} alignItems={'center'}>
@@ -56,6 +57,7 @@ const WhoSegmentFilter = ({
         eventProperties={eventProperties}
         filters={filters}
         updateGroupsState={updateGroupsState}
+        loadingEventProperties={loadingEventProperties}
       />
       <Box>
         <Text

@@ -1,9 +1,6 @@
-import { Avatar, Box, Flex, Text } from '@chakra-ui/react';
-import { Funnel } from '@lib/domain/funnel';
-import { Metric } from '@lib/domain/metric';
-import { Segment } from '@lib/domain/segment';
+import { Avatar, Flex, Text } from '@chakra-ui/react';
 import { AppertureUser } from '@lib/domain/user';
-import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
+import { SavedItems } from '@lib/domain/watchlist';
 import { CellContext } from '@tanstack/react-table';
 
 export const UserInfo = ({

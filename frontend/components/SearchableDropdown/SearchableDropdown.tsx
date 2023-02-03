@@ -1,5 +1,5 @@
 import { Flex, Input } from '@chakra-ui/react';
-import { ChangeEvent, ReactNode, useEffect, useRef } from 'react';
+import { ChangeEvent, ReactNode, useEffect } from 'react';
 import { getSearchResult } from '@lib/utils/common';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { SegmentProperty } from '@lib/domain/segment';

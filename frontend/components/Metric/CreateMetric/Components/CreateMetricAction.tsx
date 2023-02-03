@@ -4,7 +4,6 @@ import {
   Flex,
   IconButton,
   Input,
-  Switch,
   Text,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
@@ -50,7 +49,7 @@ const CreateMetricAction = ({
     savedMetric?.name || 'Untitled Metric'
   );
   const [metricDefinition, setmetricDefinition] = useState(
-    savedMetric?.function || 'A'
+    savedMetric?.function || ''
   );
   const router = useRouter();
 
@@ -183,7 +182,9 @@ const CreateMetricAction = ({
       );
       const result = await computeMetric(
         dsId as string,
-        metricDefinition as string,
+        metricDefinition && metricDefinition.length
+          ? metricDefinition
+          : aggregates.map((aggregate) => aggregate.variable).join(','),
         processedAggregate,
         [],
         dateRange?.startDate,

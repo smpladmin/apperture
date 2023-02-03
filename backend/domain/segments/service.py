@@ -80,3 +80,8 @@ class SegmentService:
         await Segment.find_one(
             Segment.id == PydanticObjectId(segment_id),
         ).update({"$set": to_update})
+
+    async def get_segments_for_datasource_id(self, datasource_id: str) -> List[Segment]:
+        return await Segment.find(
+            Segment.datasource_id == PydanticObjectId(datasource_id)
+        ).to_list()
