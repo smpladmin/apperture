@@ -59,15 +59,14 @@ async def add_notification(
     response_model=Union[NotificationResponse, List[NotificationWithUser]],
 )
 async def get_notification(
-    name: Union[str, None] = None,
+    reference: Union[str, None] = None,
     datasource_id: Union[str, None] = None,
     user: AppertureUser = Depends(get_user),
-    app_service: AppService = Depends(),
     notification_service: NotificationService = Depends(),
 ):
-    if name:
-        return await notification_service.get_notification_for_node(
-            name=name, datasource_id=datasource_id
+    if reference:
+        return await notification_service.get_notification_by_reference(
+            reference=reference, datasource_id=datasource_id
         )
     else:
         notifications = await notification_service.get_notifications_for_datasource_id(

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Dict
+from typing import List, Dict, Set
 
 from beanie.operators import In
 from beanie import PydanticObjectId
@@ -33,7 +33,7 @@ class NotificationService:
         appId: PydanticObjectId,
         name: str,
         userId: PydanticObjectId,
-        notificationType: NotificationType,
+        notificationType: Set[NotificationType],
         metric: NotificationMetric,
         multiNode: bool,
         appertureManaged: bool,
@@ -237,3 +237,11 @@ class NotificationService:
         return await Notification.find(
             PydanticObjectId(datasource_id) == Notification.datasource_id
         ).to_list()
+
+    async def get_notification_by_reference(
+        self, reference: str, datasource_id: str
+    ) -> NotificationResponse:
+        return await Notification.find_one(
+            Notification.reference == reference,
+            Notification.datasource_id == PydanticObjectId(datasource_id),
+        )

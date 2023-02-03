@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Set
 from pydantic import BaseModel
 from rest.dtos.model_response import ModelResponse
 from domain.notifications.models import (
@@ -17,7 +17,7 @@ from rest.dtos.appperture_users import AppertureUserResponse
 class CreateNotificationDto(BaseModel):
     datasourceId: str
     name: str
-    notificationType: NotificationType
+    notificationType: Set[NotificationType]
     metric: NotificationMetric
     multiNode: bool
     appertureManaged: bool
