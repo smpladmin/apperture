@@ -190,7 +190,7 @@ class TestNotificationService:
             preferred_channels=[NotificationChannel.SLACK],
             notification_active=True,
             variant=NotificationVariant.NODE,
-                reference="/p/partner/job"
+            reference="/p/partner/job",
         )
         notif_future = asyncio.Future()
         notif_future.set_result(self.notification)
@@ -258,8 +258,8 @@ class TestNotificationService:
             "updated_at": None,
             "user_id": PydanticObjectId("636a0be89684fdc9a380dfd6"),
             "variable_map": {"a": ["user_login"]},
-            "variant":NotificationVariant.NODE,
-            "reference":"/p/partner/job"
+            "variant": NotificationVariant.NODE,
+            "reference": "/p/partner/job",
         } == notif.dict()
 
     @pytest.mark.asyncio
