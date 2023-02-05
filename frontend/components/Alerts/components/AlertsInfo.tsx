@@ -18,7 +18,7 @@ import {
   NotificationType,
 } from '@lib/domain/notification';
 import { setAlert, updateAlert } from '@lib/services/notificationService';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import AlertMetrics from './AlertMetrics';
 import PercentageMetric from './PercentageMetric';
 import ThresholdMetric from './ThresholdMetric';
@@ -58,14 +58,14 @@ const AlertsInfo = ({
     savedAlert?.notificationType || [NotificationType.UPDATE]
   );
 
-  const [minHit, setMinHit] = useState(
+  const [minHit] = useState(
     savedAlert?.absoluteThresholdValues?.min ||
       NotificationFactory(variant).getMin(
         eventData,
         NotificationMetricType.Hits
       )
   );
-  const [maxHit, setMaxHit] = useState(
+  const [maxHit] = useState(
     savedAlert?.absoluteThresholdValues?.max ||
       NotificationFactory(variant).getMax(
         eventData,
@@ -86,31 +86,6 @@ const AlertsInfo = ({
   const [percentageValue, setPercentageValue] = useState<number | string>(
     savedAlert?.pctThresholdValues?.max || ''
   );
-
-  useEffect(() => {
-    setMinHit(
-      NotificationFactory(variant).getMin(
-        eventData,
-        NotificationMetricType.Hits
-      )
-    );
-    setMaxHit(
-      NotificationFactory(variant).getMax(
-        eventData,
-        NotificationMetricType.Hits
-      )
-    );
-    setHitsThresholdRange([
-      NotificationFactory(variant).getMin(
-        eventData,
-        NotificationMetricType.Hits
-      ),
-      NotificationFactory(variant).getMax(
-        eventData,
-        NotificationMetricType.Hits
-      ),
-    ]);
-  }, [eventData]);
 
   const closeToast = () => {
     if (toastRef.current) {
