@@ -251,7 +251,9 @@ const AlertsInfo = ({
         w={'full'}
         mt={'4'}
         disabled={
-          thresholdMetric === ThresholdMetricType.Percentage && !percentageValue
+          !Boolean(notificationType.length) ||
+          (thresholdMetric === ThresholdMetricType.Percentage &&
+            !percentageValue)
         }
         onClick={setEventAlert}
       >
