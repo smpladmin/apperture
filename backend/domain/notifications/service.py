@@ -16,6 +16,7 @@ from domain.notifications.models import (
     NotificationThresholdType,
     NotificationMetric,
     NotificationVariant,
+    NotificationResponse,
 )
 from domain.edge.models import AggregatedEdge, NotificationNodeData
 
@@ -195,10 +196,12 @@ class NotificationService:
     ) -> List[ComputedNotification]:
         return [self.compute_alert(data) for data in node_data_for_alerts]
 
-    async def get_notification_for_node(self, name: str, ds_id: str) -> Notification:
+    async def get_notification_for_node(
+        self, name: str, datasource_id: str
+    ) -> Notification:
         return await Notification.find_one(
             Notification.name == name,
-            Notification.datasource_id == PydanticObjectId(ds_id),
+            Notification.datasource_id == PydanticObjectId(datasource_id),
             Notification.notification_active == True,
         )
 
@@ -227,3 +230,10 @@ class NotificationService:
             SavedItems(type=WatchlistItemType.NOTIFICATIONS, details=notification)
             for notification in notifications
         ]
+
+    async def get_notifications_for_datasource_id(
+        self, datasource_id: str
+    ) -> List[NotificationResponse]:
+        return await Notification.find(
+            PydanticObjectId(datasource_id) == Notification.datasource_id
+        ).to_list()

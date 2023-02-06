@@ -1,5 +1,6 @@
 import json
 from unittest.mock import ANY
+
 from beanie import PydanticObjectId
 
 from domain.notifications.models import (
@@ -16,32 +17,14 @@ def test_get_notification_for_node(
     client_init, notification_service, notification_response
 ):
     response = client_init.get(
-        "/notifications/?name=name&ds_id=635ba034807ab86d8a2aadd9"
+        "/notifications?name=name&datasource_id=635ba034807ab86d8a2aadd9"
     )
     assert response.status_code == 200
     assert response.json().keys() == notification_response.keys()
     assert filter_response(response.json()) == filter_response(notification_response)
 
     notification_service.get_notification_for_node.assert_called_once_with(
-        **{"ds_id": "635ba034807ab86d8a2aadd9", "name": "name"}
-    )
-
-
-def test_get_notification_for_user(
-    client_init, notification_service, saved_notification_response
-):
-    response = client_init.get("/notifications")
-    assert response.status_code == 200
-    response = response.json()
-    assert [filter_response(res["details"]) for res in response] == [
-        filter_response(res["details"]) for res in saved_notification_response
-    ]
-    assert [res["type"] for res in response] == [
-        res["type"] for res in saved_notification_response
-    ]
-
-    notification_service.get_notifications_for_apps.assert_called_once_with(
-        **{"app_ids": [PydanticObjectId("635ba034807ab86d8a2aadd9")]}
+        **{"datasource_id": "635ba034807ab86d8a2aadd9", "name": "name"}
     )
 
 
@@ -122,6 +105,8 @@ def test_update_notification(
         "absoluteThresholdValues": None,
         "appId": PydanticObjectId("636a1c61d715ca6baae65611"),
         "appertureManaged": True,
+        "metric": "hits",
+        "multiNode": True,
         "datasourceId": PydanticObjectId("636a1c61d715ca6baae65611"),
         "formula": "",
         "frequency": NotificationFrequency.DAILY,
@@ -134,6 +119,8 @@ def test_update_notification(
         "preferredHourGMT": 5,
         "userId": ANY,
         "variableMap": {},
+        "reference": "/p/partner/job",
+        "variant": "node",
     }
 
     assert notification_service.update_notification.call_args.kwargs[
@@ -167,4 +154,48 @@ def test_update_notification(
     assert (
         notification_service.update_notification.call_args.kwargs["notification_id"]
         == "635ba034807ab86d8a2aadd8"
+    )
+
+
+def test_get_funnels(client_init, notification_service):
+    response = client_init.get("/notifications?datasource_id=635ba034807ab86d8a2aadd9")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "_id": "635ba034807ab86d8a2aadd8",
+            "absoluteThresholdActive": False,
+            "absoluteThresholdValues": None,
+            "appId": "635ba034807ab86d8a2aadd9",
+            "appertureManaged": True,
+            "createdAt": ANY,
+            "datasourceId": "635ba034807ab86d8a2aadd9",
+            "formula": "",
+            "frequency": "daily",
+            "metric": "hits",
+            "multiNode": True,
+            "name": "name",
+            "notificationActive": False,
+            "notificationType": "update",
+            "pctThresholdActive": False,
+            "pctThresholdValues": None,
+            "preferredChannels": ["slack"],
+            "preferredHourGmt": 5,
+            "reference": "/p/partner/job",
+            "revisionId": ANY,
+            "updatedAt": ANY,
+            "user": {
+                "email": "test@email.com",
+                "firstName": "Test",
+                "lastName": "User",
+                "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
+                "slackChannel": "#alerts",
+            },
+            "userId": "635ba034807ab86d8a2aadda",
+            "variableMap": {},
+            "variant": "node",
+        }
+    ]
+    notification_service.get_notifications_for_datasource_id.assert_called_once_with(
+        **{"datasource_id": "635ba034807ab86d8a2aadd9"}
     )

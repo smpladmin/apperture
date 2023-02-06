@@ -5,6 +5,7 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   flexRender,
+  ColumnDef,
 } from '@tanstack/react-table';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 import Details from './Details';
@@ -19,11 +20,13 @@ dayjs.extend(utc);
 type WatchlistTableProps = {
   savedItemsData: SavedItems[];
   onRowClick: Function;
+  tableColumns?: ColumnDef<SavedItems, any>[];
 };
 
 const WatchlistTable = ({
   savedItemsData,
   onRowClick,
+  tableColumns,
 }: WatchlistTableProps) => {
   const {
     device: { isMobile },
@@ -32,7 +35,9 @@ const WatchlistTable = ({
   const columnHelper = createColumnHelper<SavedItems>();
   const columns = useMemo(
     () =>
-      isMobile
+      tableColumns
+        ? tableColumns
+        : isMobile
         ? [
             columnHelper.accessor('details', {
               header: 'Name',

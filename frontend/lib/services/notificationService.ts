@@ -1,5 +1,6 @@
-import { ApperturePost, AppertureGet } from './util';
+import { ApperturePost, AppertureGet, ApperturePut } from './util';
 import {
+  Notifications,
   NotificationVariant,
   ThresholdMetricType,
 } from '../domain/notification';
@@ -43,7 +44,20 @@ export const setAlert = async (
   });
 };
 
-export const getSavedNotificationsForUser = async () => {
-  const res = await AppertureGet(`/notifications`);
+export const getSavedNotificationsForDatasourceId = async (dsId: string) => {
+  const res = await AppertureGet(`/notifications?datasource_id=${dsId}`);
+  return res.data;
+};
+
+export const updateNotificationActiveState = async (
+  id: string,
+  notification: Notifications,
+  notificationActive: boolean
+) => {
+  const res = await ApperturePut(`/notifications/${id}`, {
+    ...notification,
+    notificationActive,
+    preferredHourGMT: notification.preferredHourGmt,
+  });
   return res.data;
 };

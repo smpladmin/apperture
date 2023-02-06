@@ -11,6 +11,7 @@ from domain.notifications.models import (
     NotificationMetric,
     NotificationVariant,
 )
+from rest.dtos.appperture_users import AppertureUserResponse
 
 
 class CreateNotificationDto(BaseModel):
@@ -47,3 +48,11 @@ class ComputedNotificationResponse(ComputedNotification, ModelResponse):
 class TriggerNotificationsDto(BaseModel):
     notification_type: str
     frequency: str
+
+
+class NotificationWithUser(Notification, ModelResponse):
+    user: Optional[AppertureUserResponse]
+
+    class Config:
+        allow_population_by_field_name = True
+        orm_mode = True

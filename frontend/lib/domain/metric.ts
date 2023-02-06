@@ -62,10 +62,13 @@ export type Metric = {
   _id: string;
   datasourceId: string;
   appId: string;
-  user: AppertureUser;
   userId: string;
   name: string;
   function: string;
   aggregates: EventOrSegmentComponent[];
   breakdown: string[];
+};
+
+export type MetricWithUser = Metric & {
+  user: AppertureUser;
 };

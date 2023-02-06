@@ -27,8 +27,16 @@ type LeftViewProps = {
 
 const LeftView = ({ datasourceId, name, steps, eventData }: LeftViewProps) => {
   const router = useRouter();
-  const { funnelId } = router?.query;
+
+  const {
+    pathname,
+    query: { funnelId, showAlert },
+  } = router;
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
+
+  useEffect(() => {
+    if (showAlert) onOpen();
+  }, []);
 
   const handleEditFunnel = () => {
     router.push({
@@ -46,6 +54,17 @@ const LeftView = ({ datasourceId, name, steps, eventData }: LeftViewProps) => {
 
   const handleNotificationClick = () => {
     onOpen();
+  };
+
+  const handleCloseAlertsModal = () => {
+    if (showAlert) {
+      delete router.query.showAlert;
+      router.replace({
+        pathname: pathname,
+        query: { ...router.query },
+      });
+    }
+    onClose();
   };
 
   return (
@@ -141,7 +160,7 @@ const LeftView = ({ datasourceId, name, steps, eventData }: LeftViewProps) => {
       <Alert
         name={name}
         isAlertsSheetOpen={isAlertsSheetOpen}
-        closeAlertsSheet={onClose}
+        closeAlertsSheet={handleCloseAlertsModal}
         variant={NotificationVariant.FUNNEL}
         reference={funnelId as string}
         eventData={eventData}

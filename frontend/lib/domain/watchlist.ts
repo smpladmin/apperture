@@ -1,6 +1,10 @@
-import { Funnel } from './funnel';
-import { Metric } from './metric';
-import { Segment } from './segment';
+import {
+  NotificationType,
+  NotificationWithUser,
+} from '@lib/domain/notification';
+import { FunnelWithUser } from './funnel';
+import { MetricWithUser } from './metric';
+import { SegmentWithUser } from './segment';
 
 export enum WatchListItemType {
   ALL = 'all',
@@ -23,6 +27,10 @@ export namespace WatchListItemType {
 }
 
 export type SavedItems = {
-  type: WatchListItemType;
-  details: Funnel | Segment | Metric;
+  type: WatchListItemType | NotificationType;
+  details:
+    | FunnelWithUser
+    | SegmentWithUser
+    | MetricWithUser
+    | NotificationWithUser;
 };

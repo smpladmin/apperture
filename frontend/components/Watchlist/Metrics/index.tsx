@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import LoadingSpinner from '@components/LoadingSpinner';
-import { Metric } from '@lib/domain/metric';
+import { MetricWithUser } from '@lib/domain/metric';
 import { Provider } from '@lib/domain/provider';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { getSavedMetricsForDatasourceId } from '@lib/services/metricService';
@@ -20,7 +20,7 @@ const SavedMetrics = ({ provider }: { provider: Provider }) => {
     const getMetrics = async () => {
       let savedMetrics =
         (await getSavedMetricsForDatasourceId(dsId as string)) || [];
-      savedMetrics = savedMetrics.map((metric: Metric) => {
+      savedMetrics = savedMetrics.map((metric: MetricWithUser) => {
         return { type: WatchListItemType.METRICS, details: metric };
       });
       setFunnels(savedMetrics);

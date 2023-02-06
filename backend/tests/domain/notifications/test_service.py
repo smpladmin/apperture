@@ -233,7 +233,7 @@ class TestNotificationService:
     @pytest.mark.asyncio
     async def test_get_notification_for_node(self):
         notif = await self.service.get_notification_for_node(
-            name=self.name, ds_id=self.ds_id
+            name=self.name, datasource_id=self.ds_id
         )
         assert {
             "absolute_threshold_active": True,
@@ -268,4 +268,10 @@ class TestNotificationService:
             app_ids=[PydanticObjectId("6384a65e0a397236d9de236a")]
         )
         Notification.find.assert_called_once()
-        print(Notification.find.call_args.args[0])
+
+    @pytest.mark.asyncio
+    async def test_get_notifications_for_datasource_id(self):
+        await self.service.get_notifications_for_datasource_id(
+            datasource_id="6384a65e0a397236d9de236a"
+        )
+        Notification.find.assert_called_once()

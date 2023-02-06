@@ -92,7 +92,7 @@ export const NotificationFactory = (variant: NotificationVariant) => {
           ),
         xField: 'date',
         yField: 'value',
-        metric: notificationMetricOptions[0],
+        metric: notificationMetricOptions[1],
       };
     default:
       return {
