@@ -7,6 +7,8 @@ import WatchlistTable from '../Table';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { getSavedNotificationsForDatasourceId } from '@lib/services/notificationService';
 import {
+  AlertAndUpdate,
+  NotificationType,
   NotificationVariant,
   NotificationWithUser,
 } from '@lib/domain/notification';
@@ -46,7 +48,12 @@ const SavedNotifications = () => {
     return [
       columnHelper.accessor('type', {
         header: 'Type',
-        cell: (info) => <LabelType type={info.getValue()} />,
+        cell: (info: CellContext<SavedItems, NotificationType[]>) => {
+          const type = info.getValue().join(',') as
+            | NotificationType
+            | AlertAndUpdate;
+          return <LabelType type={type} />;
+        },
       }),
       columnHelper.accessor('details.name', {
         cell: (info) => <EntityType info={info} />,
@@ -69,8 +76,8 @@ const SavedNotifications = () => {
   }, []);
 
   const onRowClick = (row: Row<SavedItems>) => {
-    const { reference, datasourceId, variant } = row?.original
-      ?.details as NotificationWithUser;
+    const { reference, datasourceId, variant } = row.original
+      .details as NotificationWithUser;
 
     if (variant === NotificationVariant.NODE) return;
 

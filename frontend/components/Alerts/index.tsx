@@ -4,6 +4,7 @@ import DesktopAlerts from './DesktopAlert';
 import Render from '@components/Render';
 import {
   NotificationEventsData,
+  Notifications,
   NotificationVariant,
 } from '@lib/domain/notification';
 
@@ -15,6 +16,7 @@ type AlertsProps = {
   reference: string;
   eventData: NotificationEventsData;
   datasourceId: string;
+  savedAlert?: Notifications;
 };
 const Alert = ({
   name,
@@ -24,6 +26,7 @@ const Alert = ({
   reference,
   eventData,
   datasourceId,
+  savedAlert,
 }: AlertsProps) => {
   return (
     <>
@@ -36,6 +39,7 @@ const Alert = ({
           variant={variant}
           reference={reference}
           datasourceId={datasourceId}
+          savedAlert={savedAlert}
         />
       </Render>
       <Render on={'desktop'}>
@@ -47,6 +51,7 @@ const Alert = ({
           variant={variant}
           reference={reference}
           datasourceId={datasourceId}
+          savedAlert={savedAlert}
         />
       </Render>
     </>

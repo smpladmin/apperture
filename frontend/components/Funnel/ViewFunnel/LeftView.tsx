@@ -8,7 +8,7 @@ import {
 } from '@chakra-ui/react';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import Render from '@components/Render';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import ViewFunnelSteps from '../components/ViewFunnelSteps';
 import ActionMenu from '../../ActionMenu';
 import 'remixicon/fonts/remixicon.css';
@@ -16,16 +16,26 @@ import { BASTILLE } from '@theme/index';
 import { FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
 import { useRouter } from 'next/router';
 import Alert from '@components/Alerts';
-import { NotificationVariant } from '@lib/domain/notification';
+import { Notifications, NotificationVariant } from '@lib/domain/notification';
+import { hasSavedAlert } from '@components/Alerts/util';
 
 type LeftViewProps = {
   datasourceId: string;
   name: string;
   steps: FunnelStep[];
   eventData: FunnelTrendsData[];
+  savedNotification: Notifications;
+  setIsModalClosed: Function;
 };
 
-const LeftView = ({ datasourceId, name, steps, eventData }: LeftViewProps) => {
+const LeftView = ({
+  datasourceId,
+  name,
+  steps,
+  eventData,
+  savedNotification,
+  setIsModalClosed,
+}: LeftViewProps) => {
   const router = useRouter();
 
   const {
@@ -54,6 +64,11 @@ const LeftView = ({ datasourceId, name, steps, eventData }: LeftViewProps) => {
 
   const handleNotificationClick = () => {
     onOpen();
+    router.replace({
+      pathname,
+      query: { ...router.query, showAlert: true },
+    });
+    setIsModalClosed(false);
   };
 
   const handleCloseAlertsModal = () => {
@@ -65,6 +80,7 @@ const LeftView = ({ datasourceId, name, steps, eventData }: LeftViewProps) => {
       });
     }
     onClose();
+    setIsModalClosed(true);
   };
 
   return (
@@ -149,7 +165,10 @@ const LeftView = ({ datasourceId, name, steps, eventData }: LeftViewProps) => {
       </Flex>
       <Flex direction={'column'} mt={{ base: '1', md: '4' }}>
         <ViewFunnelSteps steps={steps} />
-        <ActionMenu onNotificationClick={handleNotificationClick} />
+        <ActionMenu
+          onNotificationClick={handleNotificationClick}
+          hasSavedNotification={hasSavedAlert(savedNotification)}
+        />
         <Divider
           mt={'4'}
           orientation="horizontal"
@@ -165,6 +184,7 @@ const LeftView = ({ datasourceId, name, steps, eventData }: LeftViewProps) => {
         reference={funnelId as string}
         eventData={eventData}
         datasourceId={datasourceId}
+        savedAlert={savedNotification}
       />
     </ActionPanel>
   );

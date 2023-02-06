@@ -19,6 +19,11 @@ export enum NotificationType {
   UPDATE = 'update',
 }
 
+export enum AlertAndUpdate {
+  ALERTANDUPDATE = 'alert,update',
+  UPDATEANDALERT = 'update,alert',
+}
+
 export enum NotificationChannel {
   SLACK = 'slack',
   EMAIL = 'email',
@@ -55,14 +60,14 @@ export type Notifications = {
   userId: string;
   appId: string;
   name: string;
-  notificationType: NotificationType;
+  notificationType: NotificationType[];
   metric: NotificationMetricType;
   multiNode: boolean;
   appertureManaged: boolean;
-  pcTThresholdActive: boolean;
-  pctThresholdValues?: { min: number; max: number };
+  pctThresholdActive: boolean;
+  pctThresholdValues?: { min: number; max: number } | null;
   absoluteThresholdActive: boolean;
-  absoluteThresholdValues?: { min: number; max: number };
+  absoluteThresholdValues?: { min: number; max: number } | null;
   formula: string;
   variableMap: { a: string[] };
   preferredChannels: NotificationChannel[];

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Dict
+from typing import List, Dict, Set
 
 from beanie.operators import In
 from beanie import PydanticObjectId
@@ -33,7 +33,7 @@ class NotificationService:
         appId: PydanticObjectId,
         name: str,
         userId: PydanticObjectId,
-        notificationType: NotificationType,
+        notificationType: Set[NotificationType],
         metric: NotificationMetric,
         multiNode: bool,
         appertureManaged: bool,
@@ -137,13 +137,13 @@ class NotificationService:
         return val
 
     def compute_notification_values(
-        self, data: NotificationNodeData, notification_type: NotificationType
+        self, data: NotificationNodeData, notification_type: Set[NotificationType]
     ):
         triggered = False
 
         val = self.compute_value(node_data=data.node_data)
 
-        if notification_type == NotificationType.ALERT:
+        if NotificationType.ALERT in notification_type:
             triggered = self.alert_criteria(data, val)
 
         return val, triggered
@@ -158,11 +158,11 @@ class NotificationService:
                 ComputedNotification(
                     name=data.name,
                     notification_id=data.notification_id,
-                    notification_type=NotificationType.UPDATE,
+                    notification_type={NotificationType.UPDATE},
                     value=float(
                         "{:.2f}".format(
                             self.compute_notification_values(
-                                data=data, notification_type=NotificationType.UPDATE
+                                data=data, notification_type={NotificationType.UPDATE}
                             )[0]
                         )
                     ),
@@ -177,12 +177,12 @@ class NotificationService:
 
     def compute_alert(self, data: NotificationNodeData):
         value, triggered = self.compute_notification_values(
-            data=data, notification_type=NotificationType.ALERT
+            data=data, notification_type={NotificationType.ALERT}
         )
         computed_alert = ComputedNotification(
             name=data.name,
             notification_id=data.notification_id,
-            notification_type=NotificationType.ALERT,
+            notification_type={NotificationType.ALERT},
             value=float("{:.2f}".format(value)),
             threshold_type=data.threshold_type,
             user_threshold=data.threshold_value,
@@ -237,3 +237,11 @@ class NotificationService:
         return await Notification.find(
             PydanticObjectId(datasource_id) == Notification.datasource_id
         ).to_list()
+
+    async def get_notification_by_reference(
+        self, reference: str, datasource_id: str
+    ) -> NotificationResponse:
+        return await Notification.find_one(
+            Notification.reference == reference,
+            Notification.datasource_id == PydanticObjectId(datasource_id),
+        )

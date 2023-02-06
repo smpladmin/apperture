@@ -10,6 +10,12 @@ import { createMockRouter } from 'tests/util';
 import ViewFunnel from './index';
 import * as APIService from '@lib/services/funnelService';
 import { Funnel } from '@lib/domain/funnel';
+import {
+  NotificationChannel,
+  NotificationMetricType,
+  NotificationType,
+  NotificationVariant,
+} from '@lib/domain/notification';
 
 jest.mock('@lib/services/funnelService');
 
@@ -59,6 +65,44 @@ describe('View Funnel', () => {
     },
   ];
 
+  const savedNotifications = {
+    _id: '63dbc1e62effb8f88f60e240',
+    createdAt: new Date('2023-02-02T14:00:06.464000'),
+    datasourceId: '63d0a7bfc636cee15d81f579',
+    userId: '6374b74e9b36ecf7e0b4f9e4',
+    appId: '63ca46feee94e38b81cda37a',
+    name: 'Funnel',
+    notificationType: [NotificationType.ALERT],
+    metric: NotificationMetricType.Users,
+    multiNode: false,
+    appertureManaged: false,
+    pctThresholdActive: false,
+    pctThresholdValues: null,
+    absoluteThresholdActive: true,
+    absoluteThresholdValues: {
+      min: 75.52,
+      max: 77.61,
+    },
+    formula: 'a',
+    variableMap: {
+      a: ['Funnel'],
+    },
+    preferredHourGmt: 5,
+    frequency: 'daily',
+    preferredChannels: [NotificationChannel.SLACK],
+    notificationActive: true,
+    variant: NotificationVariant.FUNNEL,
+    reference: '63d36d10eb1e7db6cd4db69a',
+    user: {
+      firstName: 'Test',
+      lastName: 'Yuse',
+      email: 'test@parallelhq.com',
+      picture:
+        'https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c',
+      slackChannel: null,
+    },
+  };
+
   const renderViewFunnel = async (
     router = createMockRouter({ query: { funnelId: '64349843748' } }),
     savedFunnel = props
@@ -66,7 +110,10 @@ describe('View Funnel', () => {
     await act(async () => {
       render(
         <RouterContext.Provider value={router}>
-          <ViewFunnel savedFunnel={savedFunnel} />
+          <ViewFunnel
+            savedFunnel={savedFunnel}
+            savedNotification={savedNotifications}
+          />
         </RouterContext.Provider>
       );
     });

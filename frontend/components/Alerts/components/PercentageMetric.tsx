@@ -16,7 +16,7 @@ const PercentageMetric = ({
   setPercentageValue,
 }: PercentageMetricProps) => {
   return (
-    <Flex direction={'column'} gap={'1'}>
+    <Flex direction={'column'} gap={'1'} mt={{ base: '4', md: '5' }}>
       <Text
         fontSize={{ base: 'xs-10', md: 'xs-14' }}
         lineHeight={{ base: 'xs-10', md: 'xs-14' }}

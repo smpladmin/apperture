@@ -9,6 +9,7 @@ import Loading from '../components/Loading';
 import { FunnelTrendsData } from '@lib/domain/funnel';
 import {
   NotificationEventsData,
+  Notifications,
   NotificationVariant,
 } from '@lib/domain/notification';
 
@@ -20,6 +21,7 @@ type MobileAlertsProps = {
   variant: NotificationVariant;
   reference: string;
   datasourceId: string;
+  savedAlert?: Notifications;
 };
 const MobileAlerts = ({
   name,
@@ -29,6 +31,7 @@ const MobileAlerts = ({
   variant,
   reference,
   datasourceId,
+  savedAlert,
 }: MobileAlertsProps) => {
   const [isLoading, setIsLoading] = useState<Boolean>(true);
 
@@ -61,6 +64,7 @@ const MobileAlerts = ({
               variant={variant}
               reference={reference}
               datasourceId={datasourceId}
+              savedAlert={savedAlert}
             />
           )}
         </Sheet.Content>

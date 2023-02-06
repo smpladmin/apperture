@@ -13,7 +13,8 @@ import ActionMenu from '@components/ActionMenu';
 import { EventOrSegmentComponent, MetricTrend } from '@lib/domain/metric';
 import { useRouter } from 'next/router';
 import Alert from '@components/Alerts';
-import { NotificationVariant } from '@lib/domain/notification';
+import { Notifications, NotificationVariant } from '@lib/domain/notification';
+import { hasSavedAlert } from '@components/Alerts/util';
 
 const ViewMetricActionPanel = ({
   metricName,
@@ -21,12 +22,16 @@ const ViewMetricActionPanel = ({
   aggregates,
   datasourceId,
   eventData,
+  savedNotification,
+  setIsModalClosed,
 }: {
   metricName: string;
   metricDefinition: string;
   aggregates: EventOrSegmentComponent[];
   datasourceId: string;
   eventData: MetricTrend[];
+  savedNotification: Notifications;
+  setIsModalClosed: Function;
 }) => {
   const router = useRouter();
   const {
@@ -37,6 +42,11 @@ const ViewMetricActionPanel = ({
 
   const handleNotificationClick = () => {
     onOpen();
+    router.replace({
+      pathname,
+      query: { ...router.query, showAlert: true },
+    });
+    setIsModalClosed(false);
   };
 
   useEffect(() => {
@@ -52,6 +62,7 @@ const ViewMetricActionPanel = ({
       });
     }
     onClose();
+    setIsModalClosed(true);
   };
 
   return (
@@ -141,7 +152,10 @@ const ViewMetricActionPanel = ({
             conditions={aggregate.conditions}
           />
         ))}
-        <ActionMenu onNotificationClick={handleNotificationClick} />
+        <ActionMenu
+          onNotificationClick={handleNotificationClick}
+          hasSavedNotification={hasSavedAlert(savedNotification)}
+        />
         <Divider
           mt={'4'}
           orientation="horizontal"
@@ -156,6 +170,7 @@ const ViewMetricActionPanel = ({
           reference={metricId as string}
           eventData={eventData}
           datasourceId={datasourceId}
+          savedAlert={savedNotification}
         />
       </Flex>
     </>
