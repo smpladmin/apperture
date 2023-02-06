@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { getTrendsData } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
 import { getNotificationByReference } from '@lib/services/notificationService';
+import { hasSavedAlert } from '@components/Alerts/util';
 
 type NodeSignificanceProps = {
   nodeSignificanceData: Array<NodeSignificanceData>;
@@ -126,7 +127,7 @@ const NodeSignificance = ({
                 lineHeight={'xs-12'}
                 fontWeight={'medium'}
               >
-                {Boolean(Object.keys(notification).length)
+                {hasSavedAlert(notification as Notifications)
                   ? 'Manage Alert'
                   : 'Set Alert'}
               </Text>

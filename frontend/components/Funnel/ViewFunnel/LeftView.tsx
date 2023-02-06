@@ -17,6 +17,7 @@ import { FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
 import { useRouter } from 'next/router';
 import Alert from '@components/Alerts';
 import { Notifications, NotificationVariant } from '@lib/domain/notification';
+import { hasSavedAlert } from '@components/Alerts/util';
 
 type LeftViewProps = {
   datasourceId: string;
@@ -166,7 +167,7 @@ const LeftView = ({
         <ViewFunnelSteps steps={steps} />
         <ActionMenu
           onNotificationClick={handleNotificationClick}
-          hasSavedNotification={Boolean(Object.keys(savedNotification).length)}
+          hasSavedNotification={hasSavedAlert(savedNotification)}
         />
         <Divider
           mt={'4'}

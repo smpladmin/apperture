@@ -23,7 +23,11 @@ import AlertMetrics from './AlertMetrics';
 import PercentageMetric from './PercentageMetric';
 import ThresholdMetric from './ThresholdMetric';
 import AlertToast from './Toast';
-import { NotificationFactory, thresholdMetricOptions } from '../util';
+import {
+  NotificationFactory,
+  thresholdMetricOptions,
+  hasSavedAlert,
+} from '../util';
 import AlertsGif from '@assets/images/alerts-gif.svg';
 import Image from 'next/image';
 
@@ -93,20 +97,29 @@ const AlertsInfo = ({
     }
   };
 
-  const showToast = () => {
-    const hasSavedAlert = savedAlert && Boolean(Object.keys(savedAlert).length);
-    const toastMessage = hasSavedAlert ? 'Alert updated' : 'Alert created';
+  const showToast = (hasError = false) => {
+    const hasAlert = savedAlert && hasSavedAlert(savedAlert);
+    const toastMessage = hasError
+      ? 'Something went wrong.'
+      : hasAlert
+      ? 'Alert updated'
+      : 'Alert created';
+
     toastRef.current = toast({
       position: 'bottom',
       render: () => (
-        <AlertToast closeToast={closeToast} toastMessage={toastMessage} />
+        <AlertToast
+          closeToast={closeToast}
+          toastMessage={toastMessage}
+          error={hasError || false}
+        />
       ),
     });
   };
 
   const setEventAlert = async () => {
-    const hasSavedAlert = savedAlert && Boolean(Object.keys(savedAlert).length);
-    const response = hasSavedAlert
+    const hasAlert = savedAlert && hasSavedAlert(savedAlert);
+    const response = hasAlert
       ? await updateAlert(
           savedAlert._id,
           datasourceId,
@@ -134,9 +147,11 @@ const AlertsInfo = ({
         );
 
     if (response?.status === 200) {
-      closeAlertsSheet();
       showToast();
+    } else {
+      showToast(true);
     }
+    closeAlertsSheet();
   };
 
   return (

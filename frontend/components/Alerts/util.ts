@@ -1,6 +1,7 @@
 import { TrendData } from '@lib/domain/eventData';
 import {
   NotificationMetricType,
+  Notifications,
   NotificationVariant,
   ThresholdMetricType,
 } from '@lib/domain/notification';
@@ -104,3 +105,6 @@ export const NotificationFactory = (variant: NotificationVariant) => {
       };
   }
 };
+
+export const hasSavedAlert = (savedAlert: Notifications) =>
+  Boolean(Object.keys(savedAlert).length);

@@ -14,6 +14,7 @@ import { EventOrSegmentComponent, MetricTrend } from '@lib/domain/metric';
 import { useRouter } from 'next/router';
 import Alert from '@components/Alerts';
 import { Notifications, NotificationVariant } from '@lib/domain/notification';
+import { hasSavedAlert } from '@components/Alerts/util';
 
 const ViewMetricActionPanel = ({
   metricName,
@@ -153,7 +154,7 @@ const ViewMetricActionPanel = ({
         ))}
         <ActionMenu
           onNotificationClick={handleNotificationClick}
-          hasSavedNotification={Boolean(Object.keys(savedNotification).length)}
+          hasSavedNotification={hasSavedAlert(savedNotification)}
         />
         <Divider
           mt={'4'}
