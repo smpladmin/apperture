@@ -29,6 +29,31 @@ class ClickstreamService:
             "properties",
         ]
 
+    def build_element_chain(self, elements, event):
+        return self.elements_service.elements_to_string(elements=elements)
+
+    def build_clickstream_data(
+        self,
+        datasource_id: str,
+        timestamp: str,
+        user_id: str,
+        event: str,
+        properties: Dict,
+    ):
+        element_chain = (
+            self.build_element_chain(properties["$elements"], event)
+            if event == CaptureEvent.AUTOCAPTURE
+            else ""
+        )
+        return ClickstreamData(
+            datasourceId=datasource_id,
+            timestamp=datetime.fromtimestamp(timestamp),
+            userId=user_id,
+            element_chain=element_chain,
+            event=event,
+            properties=properties,
+        )
+
     async def update_events(
         self,
         datasource_id: str,
@@ -37,25 +62,16 @@ class ClickstreamService:
         event: str,
         properties: Dict,
     ):
-        element_chain = ""
-        if event == CaptureEvent.AUTOCAPTURE:
-            element_chain = self.elements_service.elements_to_string(
-                elements=properties["$elements"]
-            )
-        logging.info(
-            f" {event} clickstream registered for {datasource_id}, {element_chain}"
+        clickstream_data = self.build_clickstream_data(
+            datasource_id=datasource_id,
+            timestamp=timestamp,
+            user_id=user_id,
+            event=event,
+            properties=properties,
         )
+
         self.clickhouse.insert(
             self.table,
-            [
-                ClickstreamData(
-                    datasourceId=datasource_id,
-                    timestamp=datetime.fromtimestamp(timestamp),
-                    userId=user_id,
-                    element_chain=element_chain,
-                    event=event,
-                    properties=properties,
-                )
-            ],
+            [clickstream_data],
             column_names=self.columns,
         )
