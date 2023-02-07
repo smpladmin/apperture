@@ -9,3 +9,15 @@ CREATE TABLE events
     )
     ENGINE = MergeTree
     ORDER BY timestamp;
+
+CREATE TABLE clickstream
+    (
+        datasource_id String,
+        timestamp DateTime,
+        user_id String,
+        element_chain String,
+        event String,
+        properties JSON,
+    )
+    ENGINE = MergeTree
+    ORDER BY timestamp;
