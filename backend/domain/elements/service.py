@@ -6,13 +6,13 @@ class ElementsService:
     def _escape(self, input: str) -> str:
         return input.replace('"', r"\"")
 
-    def elements_to_string(self, elements:List[Element]) -> str:
+    def elements_to_string(self, elements: List[Element]) -> str:
         ret = []
         for element in elements:
             el_string = ""
             if "tag_name" in element:
                 el_string += element["tag_name"]
-            if "attr__class" in element:
+            if "classes" in element:
                 for single_class in sorted(element["classes"]):
                     el_string += ".{}".format(single_class.replace('"', ""))
             attributes = {

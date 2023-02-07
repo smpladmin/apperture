@@ -255,6 +255,13 @@ def datasource_service():
 
 
 @pytest.fixture(scope="module")
+def clickstream_service():
+    clickstream_service_mock = mock.AsyncMock()
+    clickstream_service_mock.update_events = mock.AsyncMock()
+    return clickstream_service_mock
+
+
+@pytest.fixture(scope="module")
 def events_service():
     events_service_mock = mock.AsyncMock()
     events_service_mock.get_values_for_property = mock.MagicMock(

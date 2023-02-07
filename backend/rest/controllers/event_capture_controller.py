@@ -12,20 +12,20 @@ router = APIRouter()
 
 
 @router.post("/events/capture/decide/")
-async def test(
-    v: Union[None, Any],
-    ip: Union[None, Any],
-    _: Union[None, Any],
-    ver: Union[None, Any],
+async def analyse_decide_call(
+    v: str,
+    ip: str,
+    _: str,
+    ver: str,
 ):
     return {"config": {"enable_collect_everything": True}, "sessionRecording": False}
 
 
 @router.post("/events/capture/e/")
-async def test(
-    ip: Union[None, Any],
-    _: Union[None, Any],
-    ver: Union[None, Any],
+async def capture_click_stream(
+    ip: str,
+    _: str,
+    ver: str,
     data: Union[str, None] = Form(...),
     clickstream_service: ClickstreamService = Depends(),
     ds_service: DataSourceService = Depends(),

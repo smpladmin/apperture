@@ -37,7 +37,7 @@ class ClickstreamService:
         event: str,
         properties: Dict,
     ):
-        element_chain = "-"
+        element_chain = ""
         if event == CaptureEvent.AUTOCAPTURE:
             element_chain = self.elements_service.elements_to_string(
                 elements=properties["$elements"]
