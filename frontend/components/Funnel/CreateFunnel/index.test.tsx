@@ -297,7 +297,7 @@ describe('create funnel', () => {
       await waitFor(() => {
         expect(router.push).toHaveBeenCalledWith({
           pathname: '/analytics/funnel/view/[funnelId]',
-          query: { funnelId: '64349843748' },
+          query: { funnelId: '64349843748', dsId: '654212033222' },
         });
       });
     });
@@ -355,7 +355,7 @@ describe('create funnel', () => {
         expect(mockUpdateFunnel).toHaveBeenCalled();
         expect(router.push).toHaveBeenCalledWith({
           pathname: '/analytics/funnel/view/[funnelId]',
-          query: { funnelId: '64349843748' },
+          query: { funnelId: '64349843748', dsId: '654212033222' },
         });
       });
     });

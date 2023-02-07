@@ -172,7 +172,7 @@ const CreateMetricAction = ({
       );
     }
     router.push({
-      pathname: '/analytics/metric/edit/[metricId]',
+      pathname: '/analytics/metric/view/[metricId]',
       query: { metricId: savedMetric?._id || metricId, dsId },
     });
 
