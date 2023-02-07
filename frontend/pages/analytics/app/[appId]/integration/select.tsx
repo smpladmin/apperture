@@ -14,9 +14,11 @@ import gaLogo from '@assets/images/ga-logo-small.svg';
 import mixpanelLogo from '@assets/images/mixPanel-icon.png';
 import amplitudeLogo from '@assets/images/amplitude-icon.png';
 import clevertapLogo from '@assets/images/clevertap-icon.png';
+import appertureLogo from '@assets/images/apperture-logo.svg';
 import FormButton from '@components/FormButton';
 import IntegrationSource from '@components/IntegrationSource';
 import { Provider } from '@lib/domain/provider';
+import { createIntegrationWithDataSource } from '@lib/services/integrationService';
 
 const SelectProvider = () => {
   const [provider, setProvider] = useState<string>('');
@@ -31,8 +33,28 @@ const SelectProvider = () => {
       query: { dsId: previousDsId, apps: 1 },
     });
 
-  const handleNextClick = () => {
+  const handleNextClick = async () => {
     const queryParams = { appId, provider, ...router.query };
+
+    if (provider === Provider.APPERTURE) {
+      const integration = await createIntegrationWithDataSource(
+        appId as string,
+        provider,
+        '',
+        '',
+        '',
+        { params: { create_datasource: true, trigger_data_processor: false } }
+      );
+      router.push({
+        pathname: '/analytics/app/[appId]/integration/[provider]/complete',
+        query: {
+          appId,
+          provider,
+          dsId: integration.datasource._id,
+        },
+      });
+      return;
+    }
     router.push({
       pathname: `/analytics/app/[appId]/integration/[provider]/create`,
       query: queryParams,
@@ -103,6 +125,12 @@ const SelectProvider = () => {
                   value={Provider.CLEVERTAP}
                   imgSrc={clevertapLogo}
                   selected={provider === Provider.CLEVERTAP}
+                />
+                <IntegrationSource
+                  sourceName="Apperture"
+                  value={Provider.APPERTURE}
+                  imgSrc={appertureLogo}
+                  selected={provider === Provider.APPERTURE}
                 />
               </Stack>
             </RadioGroup>

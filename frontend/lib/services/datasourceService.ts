@@ -2,44 +2,8 @@ import { SanityData } from './../domain/eventData';
 import { AppertureGet, ApperturePrivateGet } from './util';
 import { AppertureAPI } from '@lib/apiClient';
 import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
-import { ProviderDataSource } from '@lib/domain/datasource';
 import { Node } from '@lib/domain/node';
 import { AxiosError } from 'axios';
-
-export const _getProviderDatasources = async (
-  token: string,
-  integrationId: string | undefined
-) => {
-  const res = await ApperturePrivateAPI.get(
-    `/integrations/${integrationId}/datasources`,
-    {
-      headers: { Authorization: token },
-      params: { from_provider: true },
-    }
-  );
-  return res.data;
-};
-
-export const saveDataSources = async (
-  selectedDataSources: Array<ProviderDataSource>,
-  integrationId: string
-) => {
-  const datasources = selectedDataSources.map((ds) => {
-    return {
-      externalSourceId: ds._id,
-      name: ds.name,
-      version: ds.version,
-    };
-  });
-  const res = await AppertureAPI.post(
-    `/integrations/${integrationId}/datasources`,
-    datasources,
-    {
-      params: { trigger_data_processor: true },
-    }
-  );
-  return res.data;
-};
 
 export const _getEdges = async (token: string, dsId: string) => {
   try {
