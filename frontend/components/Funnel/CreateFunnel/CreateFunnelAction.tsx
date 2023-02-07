@@ -89,7 +89,7 @@ const CreateFunnelAction = ({
     if (status === 200)
       router.push({
         pathname: '/analytics/funnel/view/[funnelId]',
-        query: { funnelId: data._id || funnelId, dsId },
+        query: { funnelId: data?._id || funnelId, dsId },
       });
   };
 
