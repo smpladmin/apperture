@@ -63,8 +63,8 @@ class EventsService:
                 ]
                 if table_name == "Backend CRM"
                 else [
-                    AuxTable2Event(user_id=user_id, income=income)
-                    for (user_id, income) in events
+                    AuxTable2Event(user_id=user_id, salary_basic=salary_basic)
+                    for (user_id, salary_basic) in events
                 ]
             )
         else:
