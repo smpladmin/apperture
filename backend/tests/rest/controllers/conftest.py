@@ -8,7 +8,7 @@ from beanie import PydanticObjectId
 from fastapi.testclient import TestClient
 
 from domain.apps.models import App
-from domain.common.models import IntegrationProvider, SavedItems, WatchlistItemType
+from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.events.models import Event, EventsData
 from domain.properties.models import Properties, Property, PropertyDataType
