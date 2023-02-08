@@ -20,7 +20,7 @@ class AuxTable1Event(BaseModel):
 
 class AuxTable2Event(BaseModel):
     user_id: str
-    income: str
+    salary_basic: str
 
 
 class EventsData(BaseModel):

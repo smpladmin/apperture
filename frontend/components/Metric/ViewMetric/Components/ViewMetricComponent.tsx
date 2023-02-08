@@ -52,7 +52,11 @@ const ViewMetricComponent = ({
         </Flex>
       </Flex>
       {metric && metric.data.length > 0 ? (
-        <MetricTrend data={metric.data} definition={metric.definition} />
+        <MetricTrend
+          data={metric.data}
+          definition={metric.definition}
+          average={metric.average}
+        />
       ) : (
         <MetricEmptyState />
       )}

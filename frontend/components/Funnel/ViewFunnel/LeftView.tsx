@@ -1,23 +1,52 @@
-import { Button, Divider, Flex, IconButton, Text } from '@chakra-ui/react';
+import {
+  Button,
+  Divider,
+  Flex,
+  IconButton,
+  Text,
+  useDisclosure,
+} from '@chakra-ui/react';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import Render from '@components/Render';
-import React from 'react';
+import React, { useEffect } from 'react';
 import ViewFunnelSteps from '../components/ViewFunnelSteps';
 import ActionMenu from '../../ActionMenu';
 import 'remixicon/fonts/remixicon.css';
 import { BASTILLE } from '@theme/index';
-import { FunnelStep } from '@lib/domain/funnel';
+import { FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
 import { useRouter } from 'next/router';
+import Alert from '@components/Alerts';
+import { Notifications, NotificationVariant } from '@lib/domain/notification';
+import { hasSavedAlert } from '@components/Alerts/util';
 
 type LeftViewProps = {
   datasourceId: string;
   name: string;
   steps: FunnelStep[];
+  eventData: FunnelTrendsData[];
+  savedNotification: Notifications;
+  setIsModalClosed: Function;
 };
 
-const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
+const LeftView = ({
+  datasourceId,
+  name,
+  steps,
+  eventData,
+  savedNotification,
+  setIsModalClosed,
+}: LeftViewProps) => {
   const router = useRouter();
-  const { funnelId } = router?.query;
+
+  const {
+    pathname,
+    query: { funnelId, showAlert },
+  } = router;
+  const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
+
+  useEffect(() => {
+    if (showAlert) onOpen();
+  }, []);
 
   const handleEditFunnel = () => {
     router.push({
@@ -31,6 +60,27 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
       pathname: '/analytics/funnel/list/[dsId]',
       query: { dsId: datasourceId },
     });
+  };
+
+  const handleNotificationClick = () => {
+    onOpen();
+    router.replace({
+      pathname,
+      query: { ...router.query, showAlert: true },
+    });
+    setIsModalClosed(false);
+  };
+
+  const handleCloseAlertsModal = () => {
+    if (showAlert) {
+      delete router.query.showAlert;
+      router.replace({
+        pathname: pathname,
+        query: { ...router.query },
+      });
+    }
+    onClose();
+    setIsModalClosed(true);
   };
 
   return (
@@ -115,7 +165,10 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
       </Flex>
       <Flex direction={'column'} mt={{ base: '1', md: '4' }}>
         <ViewFunnelSteps steps={steps} />
-        <ActionMenu />
+        <ActionMenu
+          onNotificationClick={handleNotificationClick}
+          hasSavedNotification={hasSavedAlert(savedNotification)}
+        />
         <Divider
           mt={'4'}
           orientation="horizontal"
@@ -123,6 +176,16 @@ const LeftView = ({ datasourceId, name, steps }: LeftViewProps) => {
           opacity={1}
         />
       </Flex>
+      <Alert
+        name={name}
+        isAlertsSheetOpen={isAlertsSheetOpen}
+        closeAlertsSheet={handleCloseAlertsModal}
+        variant={NotificationVariant.FUNNEL}
+        reference={funnelId as string}
+        eventData={eventData}
+        datasourceId={datasourceId}
+        savedAlert={savedNotification}
+      />
     </ActionPanel>
   );
 };

@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Set
 from pydantic import BaseModel
 from rest.dtos.model_response import ModelResponse
 from domain.notifications.models import (
@@ -9,13 +9,15 @@ from domain.notifications.models import (
     NotificationType,
     NotificationFrequency,
     NotificationMetric,
+    NotificationVariant,
 )
+from rest.dtos.appperture_users import AppertureUserResponse
 
 
 class CreateNotificationDto(BaseModel):
     datasourceId: str
     name: str
-    notificationType: NotificationType
+    notificationType: Set[NotificationType]
     metric: NotificationMetric
     multiNode: bool
     appertureManaged: bool
@@ -29,6 +31,8 @@ class CreateNotificationDto(BaseModel):
     preferredHourGMT: int
     preferredChannels: List[NotificationChannel]
     notificationActive: bool
+    variant: NotificationVariant
+    reference: str
 
 
 class NotificationResponse(Notification, ModelResponse):
@@ -44,3 +48,11 @@ class ComputedNotificationResponse(ComputedNotification, ModelResponse):
 class TriggerNotificationsDto(BaseModel):
     notification_type: str
     frequency: str
+
+
+class NotificationWithUser(Notification, ModelResponse):
+    user: Optional[AppertureUserResponse]
+
+    class Config:
+        allow_population_by_field_name = True
+        orm_mode = True

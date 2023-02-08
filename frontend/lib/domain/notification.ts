@@ -1,3 +1,9 @@
+import { Node } from '@lib/domain/node';
+import { TrendData } from './eventData';
+import { FunnelTrendsData } from './funnel';
+import { MetricTrend } from './metric';
+import { AppertureUser } from './user';
+
 export enum ThresholdMetricType {
   Range = 'range',
   Percentage = 'percentage',
@@ -13,10 +19,40 @@ export enum NotificationType {
   UPDATE = 'update',
 }
 
+export enum AlertAndUpdate {
+  ALERTANDUPDATE = 'alert,update',
+  UPDATEANDALERT = 'update,alert',
+}
+
 export enum NotificationChannel {
   SLACK = 'slack',
   EMAIL = 'email',
 }
+
+export enum NotificationVariant {
+  NODE = 'node',
+  FUNNEL = 'funnel',
+  METRIC = 'metric',
+  SEGMENT = 'segment',
+}
+
+const paths = {
+  [NotificationVariant.NODE]: 'explore',
+  [NotificationVariant.FUNNEL]: 'funnel/view',
+  [NotificationVariant.SEGMENT]: 'segment/edit',
+  [NotificationVariant.METRIC]: 'metric/view',
+};
+
+export namespace NotificationVariant {
+  export function toURLPath(type: NotificationVariant): string {
+    return paths[type];
+  }
+}
+
+export type NotificationEventsData =
+  | TrendData[]
+  | FunnelTrendsData[]
+  | MetricTrend[];
 
 export type Notifications = {
   _id: string;
@@ -24,16 +60,24 @@ export type Notifications = {
   userId: string;
   appId: string;
   name: string;
-  notificationType: NotificationType;
+  notificationType: NotificationType[];
   metric: NotificationMetricType;
   multiNode: boolean;
   appertureManaged: boolean;
-  pcTThresholdActive: boolean;
-  pctThresholdValues?: { min: number; max: number };
+  pctThresholdActive: boolean;
+  pctThresholdValues?: { min: number; max: number } | null;
   absoluteThresholdActive: boolean;
-  absoluteThresholdValues?: { min: number; max: number };
+  absoluteThresholdValues?: { min: number; max: number } | null;
   formula: string;
   variableMap: { a: string[] };
   preferredChannels: NotificationChannel[];
+  preferredHourGmt: number;
   notificationActive: boolean;
+  variant: NotificationVariant;
+  reference: string;
+  createdAt: Date;
+};
+
+export type NotificationWithUser = Notifications & {
+  user: AppertureUser;
 };

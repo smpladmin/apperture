@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Set
 from pydantic import BaseModel
 from beanie import PydanticObjectId
 from repositories.document import Document
@@ -31,6 +31,13 @@ class NotificationMetric(str, Enum):
     USERS = "users"
 
 
+class NotificationVariant(str, Enum):
+    NODE = "node"
+    FUNNEL = "funnel"
+    METRIC = "metric"
+    SEGMENT = "segment"
+
+
 class ThresholdMap(BaseModel):
     min: float
     max: float
@@ -41,7 +48,7 @@ class Notification(Document):
     user_id: PydanticObjectId
     app_id: PydanticObjectId
     name: str
-    notification_type: NotificationType
+    notification_type: Set[NotificationType]
     metric: NotificationMetric
     multi_node: bool
     apperture_managed: bool
@@ -55,6 +62,8 @@ class Notification(Document):
     frequency: NotificationFrequency
     preferred_channels: List[NotificationChannel]
     notification_active: bool
+    variant: NotificationVariant
+    reference: str
 
     class Settings:
         name = "notifications"
@@ -63,7 +72,7 @@ class Notification(Document):
 class ComputedNotification(BaseModel):
     name: str
     notification_id: PydanticObjectId
-    notification_type: NotificationType
+    notification_type: Set[NotificationType]
     value: float
     threshold_type: Optional[NotificationThresholdType]
     user_threshold: Optional[ThresholdMap]

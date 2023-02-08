@@ -22,8 +22,8 @@ import {
   getEventPropertiesValue,
 } from '@lib/services/datasourceService';
 import { MapContext } from '@lib/contexts/mapContext';
-import { NodeType } from '@lib/types/graph';
 import { Funnel } from '@lib/domain/funnel';
+import { Node } from '@lib/domain/node';
 
 jest.mock('../util');
 jest.mock('@lib/services/funnelService');
@@ -136,13 +136,6 @@ describe('create funnel', () => {
     ],
     updatedAt: new Date(),
     randomSequence: false,
-    user: {
-      email: 'apperture@parallelhq.com',
-      firstName: 'Apperture',
-      lastName: 'Analytics',
-      picture: 'https://lh2.googleusercontent.com',
-      slackChannel: null,
-    },
   };
 
   const renderCreateFunnel = async (
@@ -160,10 +153,10 @@ describe('create funnel', () => {
             value={{
               state: {
                 nodes: [
-                  { id: 'Video_Click', label: 'Video_Click' },
-                  { id: 'Chapter_Click', label: 'Video_Click' },
-                  { id: 'Topic_Click', label: 'Video_Click' },
-                ] as NodeType[],
+                  { id: 'Video_Click', name: 'Video_Click' },
+                  { id: 'Chapter_Click', name: 'Video_Click' },
+                  { id: 'Topic_Click', name: 'Video_Click' },
+                ] as Node[],
                 nodesData: [],
                 activeNode: null,
                 isNodeSearched: false,
@@ -304,7 +297,7 @@ describe('create funnel', () => {
       await waitFor(() => {
         expect(router.push).toHaveBeenCalledWith({
           pathname: '/analytics/funnel/view/[funnelId]',
-          query: { funnelId: '64349843748' },
+          query: { funnelId: '64349843748', dsId: '654212033222' },
         });
       });
     });
@@ -362,7 +355,7 @@ describe('create funnel', () => {
         expect(mockUpdateFunnel).toHaveBeenCalled();
         expect(router.push).toHaveBeenCalledWith({
           pathname: '/analytics/funnel/view/[funnelId]',
-          query: { funnelId: '64349843748' },
+          query: { funnelId: '64349843748', dsId: '654212033222' },
         });
       });
     });

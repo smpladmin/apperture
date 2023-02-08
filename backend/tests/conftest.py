@@ -18,6 +18,7 @@ from domain.segments.service import SegmentService
 from domain.properties.service import PropertiesService
 from domain.metrics.service import MetricService
 from domain.users.service import UserService
+from domain.clickstream.service import ClickstreamService
 
 
 @pytest.fixture(scope="module")
@@ -34,6 +35,7 @@ def app_init(
     properties_service,
     metric_service,
     user_service,
+    clickstream_service,
 ):
 
     print("Setting up App")
@@ -54,6 +56,7 @@ def app_init(
     app.dependency_overrides[PropertiesService] = lambda: properties_service
     app.dependency_overrides[MetricService] = lambda: metric_service
     app.dependency_overrides[UserService] = lambda: user_service
+    app.dependency_overrides[ClickstreamService] = lambda: clickstream_service
     FastAPICache.init(backend=InMemoryBackend(), prefix="apperture-cache")
     yield app
 

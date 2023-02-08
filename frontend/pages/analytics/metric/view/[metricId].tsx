@@ -7,6 +7,8 @@ import { ReactElement } from 'react';
 import ViewMetric from '@components/Metric/ViewMetric';
 import { _getSavedMetric } from '@lib/services/metricService';
 import { Metric } from '@lib/domain/metric';
+import { _getNotificationByReference } from '@lib/services/notificationService';
+import { Notifications } from '@lib/domain/notification';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -18,9 +20,18 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
-  const { metricId } = query;
+  const { metricId, dsId } = query;
   const apps = await _getAppsWithIntegrations(token);
-  const savedMetric = await _getSavedMetric(token, metricId as string);
+  const savedMetric: Metric = await _getSavedMetric(token, metricId as string);
+
+  const datasourceId = dsId || savedMetric.datasourceId;
+  const savedNotification =
+    (await _getNotificationByReference(
+      token,
+      metricId as string,
+      datasourceId as string
+    )) || {};
+
   if (!apps.length) {
     return {
       redirect: {
@@ -38,12 +49,23 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
   return {
-    props: { apps, savedMetric },
+    props: { apps, savedMetric, savedNotification },
   };
 };
 
-const MetricView = ({ savedMetric }: { savedMetric: Metric }) => {
-  return <ViewMetric savedMetric={savedMetric} />;
+const MetricView = ({
+  savedMetric,
+  savedNotification,
+}: {
+  savedMetric: Metric;
+  savedNotification: Notifications;
+}) => {
+  return (
+    <ViewMetric
+      savedMetric={savedMetric}
+      savedNotification={savedNotification}
+    />
+  );
 };
 
 MetricView.getLayout = function getLayout(

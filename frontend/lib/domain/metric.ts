@@ -26,11 +26,17 @@ export type EventOrSegmentComponent = {
   conditions: string[];
   aggregations: MetricComponentAggregation;
 };
-
-export type ComputedMetric = {
-  data: { date: string; value: number }[];
-  definition: string;
+export type ComputedMetricData = {
+  date: string;
+  value: number;
+  series: string;
 };
+export type ComputedMetric = {
+  data: ComputedMetricData[];
+  definition: string;
+  average: any;
+};
+export type MetricTrend = { date: string; value: number };
 
 export enum DateFilterType {
   YESTERDAY = 'yesterday',
@@ -56,10 +62,13 @@ export type Metric = {
   _id: string;
   datasourceId: string;
   appId: string;
-  user: AppertureUser;
   userId: string;
   name: string;
   function: string;
   aggregates: EventOrSegmentComponent[];
   breakdown: string[];
+};
+
+export type MetricWithUser = Metric & {
+  user: AppertureUser;
 };

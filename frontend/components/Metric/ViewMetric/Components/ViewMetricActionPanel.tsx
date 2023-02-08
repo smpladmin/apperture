@@ -1,29 +1,76 @@
-import { Button, Divider, Flex, IconButton, Text } from '@chakra-ui/react';
-import React from 'react';
+import {
+  Button,
+  Divider,
+  Flex,
+  IconButton,
+  Text,
+  useDisclosure,
+} from '@chakra-ui/react';
+import React, { useEffect } from 'react';
 import { BASTILLE } from '@theme/index';
 import MetricViewComponentCard from './MetricViewComponentCard';
 import ActionMenu from '@components/ActionMenu';
-import { EventOrSegmentComponent } from '@lib/domain/metric';
+import { EventOrSegmentComponent, MetricTrend } from '@lib/domain/metric';
 import { useRouter } from 'next/router';
+import Alert from '@components/Alerts';
+import { Notifications, NotificationVariant } from '@lib/domain/notification';
+import { hasSavedAlert } from '@components/Alerts/util';
 
 const ViewMetricActionPanel = ({
   metricName,
   metricDefinition,
   aggregates,
   datasourceId,
+  eventData,
+  savedNotification,
+  setIsModalClosed,
 }: {
   metricName: string;
   metricDefinition: string;
   aggregates: EventOrSegmentComponent[];
   datasourceId: string;
+  eventData: MetricTrend[];
+  savedNotification: Notifications;
+  setIsModalClosed: Function;
 }) => {
   const router = useRouter();
+  const {
+    pathname,
+    query: { metricId, showAlert },
+  } = router;
+  const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
+
+  const handleNotificationClick = () => {
+    onOpen();
+    router.replace({
+      pathname,
+      query: { ...router.query, showAlert: true },
+    });
+    setIsModalClosed(false);
+  };
+
+  useEffect(() => {
+    if (showAlert) onOpen();
+  }, []);
+
+  const handleCloseAlertsModal = () => {
+    if (showAlert) {
+      delete router.query.showAlert;
+      router.replace({
+        pathname,
+        query: { ...router.query },
+      });
+    }
+    onClose();
+    setIsModalClosed(true);
+  };
+
   return (
     <>
       <Flex justifyContent={'space-between'} alignItems={'center'}>
         <IconButton
           aria-label="close"
-          variant={'secondary'}
+          variant={'primary'}
           icon={<i className="ri-arrow-left-line"></i>}
           rounded={'full'}
           color={'white.DEFAULT'}
@@ -96,8 +143,6 @@ const ViewMetricActionPanel = ({
             EVENTS & SEGMENT
           </Text>
         </Flex>
-        {/* <Divider orientation="horizontal" borderColor={BASTILLE} opacity={1} /> */}
-
         {aggregates.map((aggregate) => (
           <MetricViewComponentCard
             variable={aggregate.variable}
@@ -107,12 +152,25 @@ const ViewMetricActionPanel = ({
             conditions={aggregate.conditions}
           />
         ))}
-        <ActionMenu />
+        <ActionMenu
+          onNotificationClick={handleNotificationClick}
+          hasSavedNotification={hasSavedAlert(savedNotification)}
+        />
         <Divider
           mt={'4'}
           orientation="horizontal"
           borderColor={BASTILLE}
           opacity={1}
+        />
+        <Alert
+          name={metricName}
+          isAlertsSheetOpen={isAlertsSheetOpen}
+          closeAlertsSheet={handleCloseAlertsModal}
+          variant={NotificationVariant.METRIC}
+          reference={metricId as string}
+          eventData={eventData}
+          datasourceId={datasourceId}
+          savedAlert={savedNotification}
         />
       </Flex>
     </>

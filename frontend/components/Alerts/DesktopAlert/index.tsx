@@ -1,5 +1,4 @@
 import {
-  Divider,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -8,22 +7,34 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react';
 import Loading from '../components/Loading';
-import { TrendData } from '@lib/domain/eventData';
 import { useEffect, useState } from 'react';
 import AlertsInfo from '../components/AlertsInfo';
+import {
+  NotificationEventsData,
+  Notifications,
+  NotificationVariant,
+} from '@lib/domain/notification';
 
 type DesktopAlertsProps = {
-  nodeName: string;
-  eventData: TrendData[];
+  name: string;
+  eventData: NotificationEventsData;
   isAlertsSheetOpen: boolean;
   closeAlertsSheet: () => void;
+  variant: NotificationVariant;
+  reference: string;
+  datasourceId: string;
+  savedAlert?: Notifications;
 };
 
 const DesktopAlerts = ({
-  nodeName,
+  name,
   eventData,
   isAlertsSheetOpen,
   closeAlertsSheet,
+  variant,
+  reference,
+  datasourceId,
+  savedAlert,
 }: DesktopAlertsProps) => {
   const [isLoading, setIsLoading] = useState<Boolean>(true);
 
@@ -45,6 +56,7 @@ const DesktopAlerts = ({
         maxWidth="168"
         maxHeight={'calc(100% - 50px)'}
         borderRadius={'20px'}
+        data-testid="alerts-container"
       >
         <ModalHeader
           display={'flex'}
@@ -53,8 +65,8 @@ const DesktopAlerts = ({
           fontSize={'sh-24'}
           lineHeight={'sh-24'}
           pt={'7'}
-          pb={'5'}
-          px={'9'}
+          pb={'2'}
+          px={'6'}
         >
           Alert Me
           <ModalCloseButton
@@ -66,19 +78,18 @@ const DesktopAlerts = ({
             rounded={'full'}
           />
         </ModalHeader>
-        <Divider
-          orientation="horizontal"
-          borderColor={'white.200'}
-          opacity={1}
-        />
-        <ModalBody px={'9'} pt={'4'} pb={'4'} overflowY={'auto'}>
+        <ModalBody px={'2'} pt={'4'} pb={'4'} overflowY={'auto'}>
           {isLoading ? (
             <Loading />
           ) : (
             <AlertsInfo
-              nodeName={nodeName}
+              name={name}
               eventData={eventData}
               closeAlertsSheet={closeAlertsSheet}
+              variant={variant}
+              reference={reference}
+              datasourceId={datasourceId}
+              savedAlert={savedAlert}
             />
           )}
         </ModalBody>

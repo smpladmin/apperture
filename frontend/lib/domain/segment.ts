@@ -77,8 +77,11 @@ export type Segment = {
   name: string;
   updatedAt: Date;
   userId: string;
-  user: AppertureUser;
   _id: string;
+};
+
+export type SegmentWithUser = Segment & {
+  user: AppertureUser;
 };
 
 export type SegmentFixedDateFilter = {

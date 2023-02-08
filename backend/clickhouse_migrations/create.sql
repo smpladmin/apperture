@@ -10,16 +10,14 @@ CREATE TABLE events
     ENGINE = MergeTree
     ORDER BY timestamp;
 
-
-CREATE TABLE click_stream
+CREATE TABLE clickstream
     (
         datasource_id String,
         timestamp DateTime,
-        event String,
         user_id String,
-        properties JSON,
-        elements JSON,
-        elements_chain String
+        element_chain String,
+        event String,
+        properties JSON
     )
     ENGINE = MergeTree
     ORDER BY timestamp;

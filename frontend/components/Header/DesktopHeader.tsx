@@ -114,7 +114,7 @@ const DesktopHeader = ({
                     gap={'2'}
                     alignItems={'center'}
                   >
-                    <i className={'ri-funds-box-line'} />
+                    <i className={'ri-scissors-cut-line'} />
                     Segment
                   </Flex>
                 </MenuItem>

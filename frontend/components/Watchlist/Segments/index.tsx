@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { Provider } from '@lib/domain/provider';
-import { Segment } from '@lib/domain/segment';
+import { SegmentWithUser } from '@lib/domain/segment';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { getSavedSegmentsForDatasourceId } from '@lib/services/segmentService';
 import { Row } from '@tanstack/react-table';
@@ -20,7 +20,7 @@ const SavedSegments = ({ provider }: { provider: Provider }) => {
     const getSegments = async () => {
       let savedSegments =
         (await getSavedSegmentsForDatasourceId(dsId as string)) || [];
-      savedSegments = savedSegments.map((segment: Segment) => {
+      savedSegments = savedSegments.map((segment: SegmentWithUser) => {
         return { type: WatchListItemType.SEGMENTS, details: segment };
       });
       setSegments(savedSegments);

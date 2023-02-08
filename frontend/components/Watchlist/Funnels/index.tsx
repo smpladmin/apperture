@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import LoadingSpinner from '@components/LoadingSpinner';
-import { Funnel } from '@lib/domain/funnel';
+import { FunnelWithUser } from '@lib/domain/funnel';
 import { Provider } from '@lib/domain/provider';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { getSavedFunnelsForDatasourceId } from '@lib/services/funnelService';
@@ -20,7 +20,7 @@ const SavedFunnels = ({ provider }: { provider: Provider }) => {
     const getFunnels = async () => {
       let savedFunnels =
         (await getSavedFunnelsForDatasourceId(dsId as string)) || [];
-      savedFunnels = savedFunnels.map((funnel: Funnel) => {
+      savedFunnels = savedFunnels.map((funnel: FunnelWithUser) => {
         return { type: WatchListItemType.FUNNELS, details: funnel };
       });
       setFunnels(savedFunnels);

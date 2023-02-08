@@ -46,17 +46,20 @@ export type Funnel = {
   appId: string;
   name: string;
   updatedAt: Date;
-  user: User;
   steps: FunnelStep[];
   randomSequence: boolean;
 };
 
+export type FunnelWithUser = Funnel & {
+  user: User;
+};
+
 export type FunnelTrendsData = {
-  conversion: Number;
+  conversion: number;
   startDate: Date;
   endDate: Date;
-  firstStepUsers: Number;
-  lastStepUsers: Number;
+  firstStepUsers: number;
+  lastStepUsers: number;
 };
 
 export type FunnelEventUserData = {

@@ -8,8 +8,8 @@ import {
   RangeSliderTrack,
   Text,
 } from '@chakra-ui/react';
-import { TrendData } from '@lib/domain/eventData';
 import {
+  capitalizeFirstLetter,
   convertISODateToReadableDate,
   formatDatalabel,
 } from '@lib/utils/common';
@@ -17,17 +17,24 @@ import { BLUE, YELLOW_100, YELLOW_200 } from '@theme/index';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import ParallelLineIcon from '@assets/icons/parallel-line.svg';
+import {
+  NotificationEventsData,
+  NotificationMetricType,
+} from '@lib/domain/notification';
 
 const ParallelLine = () => {
   return <Image src={ParallelLineIcon} alt={'parallel-line-icon'} />;
 };
 
 type ThresholdMetricProps = {
-  data: TrendData[];
+  data: NotificationEventsData;
   thresholdRange: number[];
   setThresholdRange: Function;
   minHit: number;
   maxHit: number;
+  xField: string;
+  yField: string;
+  metricName: NotificationMetricType;
 };
 
 const ThresholdMetric = ({
@@ -36,6 +43,9 @@ const ThresholdMetric = ({
   setThresholdRange,
   minHit,
   maxHit,
+  xField,
+  yField,
+  metricName,
 }: ThresholdMetricProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ line: Line | null }>({ line: null });
@@ -44,8 +54,8 @@ const ThresholdMetric = ({
     plot.current.line = new Line(ref.current!!, {
       data,
       padding: 'auto',
-      xField: 'startDate',
-      yField: 'hits',
+      xField,
+      yField,
       yAxis: {
         tickCount: 5,
       },
@@ -61,16 +71,16 @@ const ThresholdMetric = ({
         showMarkers: true,
         showCrosshairs: true,
         shared: true,
-        formatter: ({ startDate, hits }) => {
+        formatter: (options) => {
           return {
-            title: convertISODateToReadableDate(startDate),
-            name: 'Hits',
-            value: hits,
+            title: convertISODateToReadableDate(options[xField]),
+            name: capitalizeFirstLetter(metricName),
+            value: options[yField],
           };
         },
       },
       meta: {
-        hits: {
+        [yField]: {
           min: Math.floor(0.8 * minHit),
           max: Math.ceil(1.2 * maxHit),
         },
@@ -121,7 +131,7 @@ const ThresholdMetric = ({
   }, [thresholdRange]);
 
   return (
-    <Box>
+    <Box mt={{ base: '4', md: '4' }}>
       <Flex justifyContent={'space-between'}>
         <Flex direction={'column'} gap={'1'}>
           <Text

@@ -16,6 +16,7 @@ from domain.notifications.models import (
     NotificationMetric,
     NotificationFrequency,
     NotificationChannel,
+    NotificationVariant,
 )
 
 
@@ -133,7 +134,7 @@ class TestNotificationService:
             ComputedNotification(
                 name="update1",
                 notification_id=PydanticObjectId("633fb91c01ce2d17cae2142d"),
-                notification_type=NotificationType.UPDATE,
+                notification_type={NotificationType.UPDATE},
                 value=3.8,
                 threshold_type=None,
                 user_threshold=None,
@@ -142,7 +143,7 @@ class TestNotificationService:
             ComputedNotification(
                 name="update2",
                 notification_id=PydanticObjectId("633fb92a01ce2d17cae2142e"),
-                notification_type=NotificationType.UPDATE,
+                notification_type={NotificationType.UPDATE},
                 value=5.0,
                 threshold_type=None,
                 user_threshold=None,
@@ -152,7 +153,7 @@ class TestNotificationService:
         self.computed_alert = ComputedNotification(
             name="test",
             notification_id=PydanticObjectId("633fb88bbbc29934eeb39ece"),
-            notification_type=NotificationType.ALERT,
+            notification_type={NotificationType.ALERT},
             value=1.36,
             threshold_type=NotificationThresholdType.PCT,
             user_threshold=ThresholdMap(min=0.15, max=0.15),
@@ -174,7 +175,7 @@ class TestNotificationService:
             user_id=PydanticObjectId("636a0be89684fdc9a380dfd6"),
             app_id=PydanticObjectId("6384a65e0a397236d9de236a"),
             name="user_login",
-            notification_type=NotificationType.ALERT,
+            notification_type={NotificationType.ALERT},
             metric=NotificationMetric.HITS,
             multi_node=False,
             apperture_managed=False,
@@ -188,6 +189,8 @@ class TestNotificationService:
             frequency=NotificationFrequency.DAILY,
             preferred_channels=[NotificationChannel.SLACK],
             notification_active=True,
+            variant=NotificationVariant.NODE,
+            reference="/p/partner/job",
         )
         notif_future = asyncio.Future()
         notif_future.set_result(self.notification)
@@ -230,7 +233,7 @@ class TestNotificationService:
     @pytest.mark.asyncio
     async def test_get_notification_for_node(self):
         notif = await self.service.get_notification_for_node(
-            name=self.name, ds_id=self.ds_id
+            name=self.name, datasource_id=self.ds_id
         )
         assert {
             "absolute_threshold_active": True,
@@ -246,7 +249,7 @@ class TestNotificationService:
             "multi_node": False,
             "name": "user_login",
             "notification_active": True,
-            "notification_type": NotificationType.ALERT,
+            "notification_type": {NotificationType.ALERT},
             "pct_threshold_active": False,
             "pct_threshold_values": None,
             "preferred_channels": [NotificationChannel.SLACK],
@@ -255,6 +258,8 @@ class TestNotificationService:
             "updated_at": None,
             "user_id": PydanticObjectId("636a0be89684fdc9a380dfd6"),
             "variable_map": {"a": ["user_login"]},
+            "variant": NotificationVariant.NODE,
+            "reference": "/p/partner/job",
         } == notif.dict()
 
     @pytest.mark.asyncio
@@ -263,4 +268,10 @@ class TestNotificationService:
             app_ids=[PydanticObjectId("6384a65e0a397236d9de236a")]
         )
         Notification.find.assert_called_once()
-        print(Notification.find.call_args.args[0])
+
+    @pytest.mark.asyncio
+    async def test_get_notifications_for_datasource_id(self):
+        await self.service.get_notifications_for_datasource_id(
+            datasource_id="6384a65e0a397236d9de236a"
+        )
+        Notification.find.assert_called_once()
