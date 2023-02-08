@@ -45,3 +45,6 @@ class EventsBase(ABC):
         except Exception as e:
             logging.info(e)
             return []
+
+    def set_table(self, table: str):
+        self.table = Table(table)
