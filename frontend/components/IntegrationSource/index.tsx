@@ -33,6 +33,7 @@ const IntegrationSource = ({
         alignItems={'center'}
         justifyContent={'center'}
         gap={'3'}
+        data-testid={'integration-provider'}
       >
         <Flex
           border={'1px'}

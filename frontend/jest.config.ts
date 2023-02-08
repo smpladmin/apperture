@@ -10,6 +10,7 @@ const customJestConfig = {
     '^@lib/(.*)$': '<rootDir>/lib/$1',
     '^@assets/(.*)$': '<rootDir>/assets/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
+    '^@pages/(.*)$': '<rootDir>/pages/$1',
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleDirectories: ['node_modules', '<rootDir>/'],
