@@ -12,6 +12,7 @@ class TestUserService:
         self.last_name = "Doe"
         self.email = "johndoe@gmail.com"
         self.password = "argon2"
+        self.new_password = "argon3"
         AppertureUser.get_settings = MagicMock()
         AppertureUser.insert = AsyncMock()
 

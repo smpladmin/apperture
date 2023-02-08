@@ -28,17 +28,6 @@ async def login(
     )
 
 
-@router.post("/register")
-async def register(
-    dto: CreateUserDto,
-    user_service: AppertureUserService = Depends(),
-    auth_service: AuthService = Depends(),
-):
-    hash = auth_service.hash_password(dto.password)
-    return await user_service.create_user_with_password(
-        dto.first_name, dto.last_name, dto.email, hash
-    )
-
 
 @router.get("/login/password")
 async def login_with_password(

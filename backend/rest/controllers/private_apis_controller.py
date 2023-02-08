@@ -1,28 +1,28 @@
 import asyncio
 import logging
 from typing import List, Union
+
 from fastapi import APIRouter, Depends
+
+from authorisation.service import AuthService
 from data_processor_queue.service import DPQueueService
-from domain.properties.service import PropertiesService
+from domain.apperture_users.service import AppertureUserService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
-from domain.apperture_users.service import AppertureUserService
-from domain.notifications.service import NotificationService
-from domain.notifications.models import NotificationType
-from domain.integrations.service import IntegrationService
-from domain.runlogs.service import RunLogService
 from domain.events.service import EventsService
+from domain.integrations.service import IntegrationService
+from domain.notifications.models import NotificationType
+from domain.notifications.service import NotificationService
+from domain.properties.service import PropertiesService
+from domain.runlogs.service import RunLogService
+from rest.dtos.apperture_users import CreateUserDto, PrivateUserResponse,ResetPasswordDto
 from rest.dtos.datasources import PrivateDataSourceResponse
-from rest.dtos.runlogs import UpdateRunLogDto
-from rest.dtos.apperture_users import PrivateUserResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.events import CreateEventDto
+from rest.dtos.notifications import (ComputedNotificationResponse,
+                                     TriggerNotificationsDto)
 from rest.dtos.properties import PropertiesResponse
-from rest.dtos.notifications import (
-    ComputedNotificationResponse,
-    TriggerNotificationsDto,
-)
-
+from rest.dtos.runlogs import UpdateRunLogDto
 from rest.middlewares import validate_api_key
 
 router = APIRouter(
@@ -31,6 +31,28 @@ router = APIRouter(
     responses={401: {}},
     prefix="/private",
 )
+
+@router.post("/register")
+async def register(
+    dto: CreateUserDto,
+    user_service: AppertureUserService = Depends(),
+    auth_service: AuthService = Depends(),
+):
+    hash = auth_service.hash_password(dto.password)
+    return await user_service.create_user_with_password(
+        dto.first_name, dto.last_name, dto.email, hash
+    )
+
+@router.post("/password/reset")
+async def register(
+    dto: ResetPasswordDto,
+    user_service: AppertureUserService = Depends(),
+    auth_service: AuthService = Depends(),
+):
+    hash = auth_service.hash_password(dto.password)
+    return await user_service.reset_user_password(
+       dto.email, hash
+    )
 
 
 @router.get("/datasources/{id}")

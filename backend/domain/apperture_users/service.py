@@ -28,6 +28,13 @@ class AppertureUserService:
         )
         await apperture_user.insert()
         return apperture_user
+    
+    async def reset_user_password(self, email:str,hashed_password:str):
+        await AppertureUser.find_one(AppertureUser.email == email).update({
+            "$set":{"password":hashed_password}
+        });
+        return await AppertureUser.find_one(AppertureUser.email == email)
+
 
     async def save_password(self, user: AppertureUser, password_hash: str):
         user.password = password_hash
