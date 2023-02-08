@@ -2,9 +2,13 @@ from beanie import PydanticObjectId
 
 from authorisation import OAuthUser
 from .models import AppertureUser
+from argon2 import PasswordHasher
 
 
 class AppertureUserService:
+    def __init__(self):
+        self.hasher = PasswordHasher(time_cost=2, parallelism=1)
+
     async def create_user_if_not_exists(self, oauth_user: OAuthUser):
         existing_user = await AppertureUser.find_one(
             AppertureUser.email == oauth_user.email
@@ -12,6 +16,22 @@ class AppertureUserService:
         if existing_user:
             return existing_user
         return await self._create_user(oauth_user)
+
+    async def create_user_with_password(
+        self, first_name: str, last_name: str, email: str, password: str
+    ):
+        existing_user = await AppertureUser.find_one(AppertureUser.email == email)
+        if existing_user:
+            return existing_user
+
+        apperture_user = AppertureUser(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=self.hasher.hash(password),
+        )
+        await apperture_user.insert()
+        return apperture_user
 
     async def _create_user(self, oauth_user: OAuthUser):
         apperture_user = AppertureUser(
