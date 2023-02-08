@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from 'tests/util';
-import SelectProvider from './select';
+import SelectProvider from './index';
 import { createIntegrationWithDataSource } from '@lib/services/integrationService';
 import { Provider } from '@lib/domain/provider';
 
