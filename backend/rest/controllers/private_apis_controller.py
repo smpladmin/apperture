@@ -15,12 +15,18 @@ from domain.notifications.models import NotificationType
 from domain.notifications.service import NotificationService
 from domain.properties.service import PropertiesService
 from domain.runlogs.service import RunLogService
-from rest.dtos.apperture_users import CreateUserDto, PrivateUserResponse,ResetPasswordDto
+from rest.dtos.apperture_users import (
+    CreateUserDto,
+    PrivateUserResponse,
+    ResetPasswordDto,
+)
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.events import CreateEventDto
-from rest.dtos.notifications import (ComputedNotificationResponse,
-                                     TriggerNotificationsDto)
+from rest.dtos.notifications import (
+    ComputedNotificationResponse,
+    TriggerNotificationsDto,
+)
 from rest.dtos.properties import PropertiesResponse
 from rest.dtos.runlogs import UpdateRunLogDto
 from rest.middlewares import validate_api_key
@@ -31,6 +37,7 @@ router = APIRouter(
     responses={401: {}},
     prefix="/private",
 )
+
 
 @router.post("/register")
 async def register(
@@ -43,6 +50,7 @@ async def register(
         dto.first_name, dto.last_name, dto.email, hash
     )
 
+
 @router.post("/password/reset")
 async def register(
     dto: ResetPasswordDto,
@@ -50,9 +58,7 @@ async def register(
     auth_service: AuthService = Depends(),
 ):
     hash = auth_service.hash_password(dto.password)
-    return await user_service.reset_user_password(
-       dto.email, hash
-    )
+    return await user_service.reset_user_password(dto.email, hash)
 
 
 @router.get("/datasources/{id}")

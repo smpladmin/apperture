@@ -28,7 +28,6 @@ async def login(
     )
 
 
-
 @router.get("/login/password")
 async def login_with_password(
     email: str,
