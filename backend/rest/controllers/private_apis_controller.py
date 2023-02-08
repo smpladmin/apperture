@@ -14,7 +14,7 @@ from domain.runlogs.service import RunLogService
 from domain.events.service import EventsService
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.runlogs import UpdateRunLogDto
-from rest.dtos.appperture_users import PrivateUserResponse
+from rest.dtos.apperture_users import PrivateUserResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.events import CreateEventDto
 from rest.dtos.properties import PropertiesResponse

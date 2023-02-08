@@ -48,7 +48,7 @@ from domain.metrics.models import (
 from domain.apperture_users.models import AppertureUser
 from domain.edge.models import Edge, NodeSignificance, NodeTrend, NodeSankey
 from domain.users.models import UserDetails
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.funnels import FunnelWithUser
 from rest.dtos.metrics import MetricWithUser
 from rest.dtos.segments import SegmentWithUser

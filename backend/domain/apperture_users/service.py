@@ -2,13 +2,9 @@ from beanie import PydanticObjectId
 
 from authorisation import OAuthUser
 from .models import AppertureUser
-from argon2 import PasswordHasher
 
 
 class AppertureUserService:
-    def __init__(self):
-        self.hasher = PasswordHasher(time_cost=2, parallelism=1)
-
     async def create_user_if_not_exists(self, oauth_user: OAuthUser):
         existing_user = await AppertureUser.find_one(
             AppertureUser.email == oauth_user.email
@@ -18,7 +14,7 @@ class AppertureUserService:
         return await self._create_user(oauth_user)
 
     async def create_user_with_password(
-        self, first_name: str, last_name: str, email: str, password: str
+        self, first_name: str, last_name: str, email: str, password_hash: str
     ):
         existing_user = await AppertureUser.find_one(AppertureUser.email == email)
         if existing_user:
@@ -28,10 +24,14 @@ class AppertureUserService:
             first_name=first_name,
             last_name=last_name,
             email=email,
-            password=self.hasher.hash(password),
+            password=password_hash,
         )
         await apperture_user.insert()
         return apperture_user
+
+    async def save_password(self, user: AppertureUser, password_hash: str):
+        user.password = password_hash
+        return await user.save()
 
     async def _create_user(self, oauth_user: OAuthUser):
         apperture_user = AppertureUser(
@@ -45,6 +45,9 @@ class AppertureUserService:
 
     async def get_user(self, id: str):
         return await AppertureUser.get(id)
+
+    async def get_user_by_email(self, email: str):
+        return await AppertureUser.find_one(AppertureUser.email == email)
 
     async def save_slack_credentials(self, user_id, slack_url, slack_channel):
         await AppertureUser.find_one(

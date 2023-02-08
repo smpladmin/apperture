@@ -1,5 +1,5 @@
 from typing import Optional
-from beanie import Indexed
+from pydantic import BaseModel
 
 from domain.apperture_users.models import AppertureUser
 from .model_response import ModelResponse
@@ -12,10 +12,17 @@ class PrivateUserResponse(AppertureUser, ModelResponse):
 class AppertureUserResponse(ModelResponse):
     first_name: str
     last_name: str
-    email: Indexed(str)
+    email: str
     picture: str
     slack_channel: Optional[str]
 
     class Config:
         allow_population_by_field_name = True
         orm_mode = True
+
+
+class CreateUserDto(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    password: str

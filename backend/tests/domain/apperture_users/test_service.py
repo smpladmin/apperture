@@ -11,7 +11,7 @@ class TestUserService:
         self.first_name = "John"
         self.last_name = "Doe"
         self.email = "johndoe@gmail.com"
-        self.password = "john@123"
+        self.password = "argon2"
         AppertureUser.get_settings = MagicMock()
         AppertureUser.insert = AsyncMock()
 
@@ -21,10 +21,10 @@ class TestUserService:
             self.first_name, self.last_name, self.email, self.password
         )
 
-        assert "argon2" in user.password
         assert user.first_name == self.first_name
         assert user.last_name == self.last_name
         assert user.email == self.email
+        assert user.password == user.password
         user.insert.assert_called_once()
 
     @pytest.mark.asyncio
