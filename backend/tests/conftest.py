@@ -18,6 +18,9 @@ from domain.segments.service import SegmentService
 from domain.properties.service import PropertiesService
 from domain.metrics.service import MetricService
 from domain.users.service import UserService
+from domain.integrations.service import IntegrationService
+from domain.runlogs.service import RunLogService
+from data_processor_queue.service import DPQueueService
 
 
 @pytest.fixture(scope="module")
@@ -34,6 +37,9 @@ def app_init(
     properties_service,
     metric_service,
     user_service,
+    integration_service,
+    runlog_service,
+    dpq_service,
 ):
 
     print("Setting up App")
@@ -54,6 +60,9 @@ def app_init(
     app.dependency_overrides[PropertiesService] = lambda: properties_service
     app.dependency_overrides[MetricService] = lambda: metric_service
     app.dependency_overrides[UserService] = lambda: user_service
+    app.dependency_overrides[IntegrationService] = lambda: integration_service
+    app.dependency_overrides[RunLogService] = lambda: runlog_service
+    app.dependency_overrides[DPQueueService] = lambda: dpq_service
     FastAPICache.init(backend=InMemoryBackend(), prefix="apperture-cache")
     yield app
 
