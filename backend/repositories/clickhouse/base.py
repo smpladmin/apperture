@@ -15,7 +15,7 @@ class EventsBase(ABC):
     def __init__(self, clickhouse: Clickhouse = Depends()):
         self.clickhouse = clickhouse
         self.table = Table("events")
-        self.click_stream_table = Table("click_stream")
+        self.click_stream_table = Table("clickstream")
         self.epoch_year = 1970
         self.week_func = CustomFunction("WEEK", ["timestamp"])
         self.date_func = CustomFunction("DATE", ["timestamp"])

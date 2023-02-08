@@ -48,7 +48,7 @@ class Actions(EventsBase):
                 params[key] = self.build_selector_regex(selector)
                 conditions.append(
                     self.ch_match_func(
-                        self.click_stream_table.elements_chain, Parameter(f"%({key})s")
+                        self.click_stream_table.element_chain, Parameter(f"%({key})s")
                     )
                 )
 
