@@ -25,14 +25,14 @@ async def create_action(
 ):
     datasource = await ds_service.get_datasource(dto.datasourceId)
     action = action_service.build_action(
-        datasource.id,
-        datasource.app_id,
-        user_id,
-        dto.name,
-        dto.groups,
+        datasourceId=datasource.id,
+        appId=datasource.app_id,
+        userId=user_id,
+        name=dto.name,
+        groups=dto.groups,
     )
 
-    await action_service.add_action(action)
+    await action_service.add_action(action=action)
     return action
 
 

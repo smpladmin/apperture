@@ -187,13 +187,13 @@ async def refresh_properties(
 
 @router.post("/click_stream")
 async def update_events_from_clickstream(
-    ds_id: Union[str, None] = None,
+    datasource_id: Union[str, None] = None,
     action_service: ActionService = Depends(),
     datasource_service: DataSourceService = Depends(),
 ):
-    if ds_id:
-        await action_service.update_events_from_clickstream(datasource_id=ds_id)
-        return {"updated": ds_id}
+    if datasource_id:
+        await action_service.update_events_from_clickstream(datasource_id=datasource_id)
+        return {"updated": datasource_id}
 
     else:
         apperture_datasources = await datasource_service.get_datasources_for_provider(

@@ -7,6 +7,7 @@ from datetime import datetime
 from beanie import PydanticObjectId
 from fastapi.testclient import TestClient
 
+from domain.actions.models import Action, ActionGroup
 from domain.apps.models import App
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
@@ -232,6 +233,32 @@ def clickstream_service():
 
 
 @pytest.fixture(scope="module")
+def action_service():
+    action_service_mock = mock.MagicMock()
+    Action.get_settings = mock.MagicMock()
+    action = Action(
+        datasource_id="63e4da53370789982002e57d",
+        app_id="63e4da53370789982002e57d",
+        user_id="63e4da53370789982002e57d",
+        name="clicked on settings",
+        groups=[
+            ActionGroup(
+                selector="#__next > div > div.css-3h169z > div.css-8xl60i > button"
+            )
+        ],
+    )
+    action_future = asyncio.Future()
+    action_future.set_result(action)
+    actions_future = asyncio.Future()
+    actions_future.set_result([action])
+    action_service_mock.build_action.return_value = action
+    action_service_mock.add_action.return_value = action_future
+    action_service_mock.get_actions_for_datasource_id.return_value = actions_future
+    action_service_mock.update_events_from_clickstream.return_value = action_future
+    return action_service_mock
+
+
+@pytest.fixture(scope="module")
 def events_service():
     events_service_mock = mock.AsyncMock()
     events_service_mock.get_values_for_property = mock.MagicMock(
@@ -297,6 +324,17 @@ def user_data():
         "user_id": "d0b9dd2b-e953-4584-a750-26c4bf906390R",
         "datasource_id": "638f334e8e54760eafc64e66",
         "event": "Viewed /register Page",
+    }
+
+
+@pytest.fixture(scope="module")
+def action_data():
+    return {
+        "datasourceId": "63e4da53370789982002e57d",
+        "name": "clicked on settings",
+        "groups": [
+            {"selector": "#__next > div > div.css-3h169z > div.css-8xl60i > button"}
+        ],
     }
 
 

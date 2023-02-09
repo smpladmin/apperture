@@ -53,3 +53,14 @@ def test_refresh_properties(client_init, properties_service):
     response1 = client_init.put("/private/properties")
     assert response1.status_code == 200
     properties_service.refresh_properties_for_all_datasources.assert_called_once()
+
+
+def test_update_events_from_clickstream(client_init, action_service):
+    response = client_init.post(
+        "/private/click_stream?datasource_id=63e4da53370789982002e57d"
+    )
+    assert response.status_code == 200
+    assert response.json() == {"updated": "63e4da53370789982002e57d"}
+    action_service.update_events_from_clickstream.assert_called_once_with(
+        **{"datasource_id": "63e4da53370789982002e57d"}
+    )
