@@ -4,7 +4,8 @@ export enum Provider {
   GOOGLE = 'google',
   MIXPANEL = 'mixpanel',
   AMPLITUDE = 'amplitude',
-  CLEVERTAP='clevertap'
+  CLEVERTAP = 'clevertap',
+  APPERTURE = 'apperture',
 }
 export namespace Provider {
   export function getDisplayName(provider: Provider): string {
