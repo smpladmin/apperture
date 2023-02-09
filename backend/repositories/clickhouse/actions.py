@@ -1,4 +1,5 @@
 import datetime
+import logging
 from typing import Dict, List, Tuple
 from pypika import ClickHouseQuery, Parameter, terms, Criterion
 
@@ -86,6 +87,7 @@ class Actions(EventsBase):
 
         now = datetime.datetime.now()
         await update_action_func(action_id=action.id, processed_till=now)
+        logging.info(f"{action.name} processed till: {now}")
         query = query.where(
             self.click_stream_table.timestamp <= self.parse_datetime_best_effort(now)
         )

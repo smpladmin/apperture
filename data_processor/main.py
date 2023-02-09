@@ -91,3 +91,13 @@ def trigger_notifications_processing(
 def send_notification(user_id: str):
     strategy = NotificationStrategyBuilder.build(user_id)
     strategy.execute()
+
+
+def update_events_from_clickstream():
+    response = post("/private/click_stream", {})
+    logging.info(
+        "{x}: {y}".format(
+            x="Triggered data migration from click stream to events stream, status",
+            y=response.status_code,
+        )
+    )
