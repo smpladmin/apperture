@@ -36,6 +36,10 @@ class SelectorPart:
                 self._unescape_class(p) if escape_slashes else p for p in parts[1:]
             ]
             tag = parts[0]
+        if "#" in tag:
+            self.data["attr_id"] = tag.split("#")[1]
+            self.ch_attributes["attr_id"] = tag.split("#")[1]
+            tag = tag.split("#")[0]
         if tag:
             self.data["tag_name"] = tag
 

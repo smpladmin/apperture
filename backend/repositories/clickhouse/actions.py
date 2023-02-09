@@ -56,10 +56,14 @@ class Actions(EventsBase):
 
     async def update_events_from_clickstream(self, action: Action, update_action_func):
         return self.execute_get_query(
-            *await self.build_update_events_from_clickstream_query(action, update_action_func)
+            *await self.build_update_events_from_clickstream_query(
+                action, update_action_func
+            )
         )
 
-    async def build_update_events_from_clickstream_query(self, action: Action, update_action_func):
+    async def build_update_events_from_clickstream_query(
+        self, action: Action, update_action_func
+    ):
         conditions, params = self.filter_click_event(filter=action.groups[0])
         query = (
             ClickHouseQuery.into(self.table)

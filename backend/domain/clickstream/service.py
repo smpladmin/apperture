@@ -40,8 +40,21 @@ class ClickstreamService:
         event: str,
         properties: Dict,
     ):
+        elements = [
+            Element(
+                text=element_dict.get("$el_text"),
+                tag_name=element_dict.get("tag_name"),
+                href=element_dict.get("href"),
+                attr_id=element_dict.get("attr__id"),
+                attr_class=element_dict.get("classes"),
+                nth_child=element_dict.get("nth_child"),
+                nth_of_type=element_dict.get("nth_of_type"),
+                attributes=element_dict.get("attributes", {}),
+            )
+            for element_dict in properties["$elements"]
+        ]
         element_chain = (
-            self.build_element_chain(properties["$elements"], event)
+            self.build_element_chain(elements, event)
             if event == CaptureEvent.AUTOCAPTURE
             else ""
         )
