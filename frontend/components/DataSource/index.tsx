@@ -51,7 +51,7 @@ const DataSource = ({ dataSource, hasRadio, isSelected }: DataSourceProps) => {
             lineHeight={{ base: 'base', md: 'xs-14' }}
             fontWeight={'medium'}
           >
-            {name || externalSourceId}
+            {name || externalSourceId || provider}
           </Text>
         </Flex>
         <Flex pl={'9'} gap={'5'}>
