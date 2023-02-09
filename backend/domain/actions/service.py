@@ -43,7 +43,9 @@ class ActionService:
             PydanticObjectId(datasource_id) == Action.datasource_id
         ).to_list()
 
-    async def update_action_processed_till(self, action_id: PydanticObjectId, processed_till: datetime.datetime):
+    async def update_action_processed_till(
+        self, action_id: PydanticObjectId, processed_till: datetime.datetime
+    ):
         await Action.find_one(
             Action.id == action_id,
         ).update({"$set": {"processed_till": processed_till}})
@@ -52,4 +54,6 @@ class ActionService:
     async def update_events_from_clickstream(self, datasource_id: str):
         actions = await self.get_actions_for_datasource_id(datasource_id=datasource_id)
         for action in actions:
-            await self.actions.update_events_from_clickstream(action=action, update_action_func=self.update_action_processed_till)
+            await self.actions.update_events_from_clickstream(
+                action=action, update_action_func=self.update_action_processed_till
+            )
