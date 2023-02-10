@@ -63,7 +63,7 @@ async def get_saved_action(
     id: str,
     action_service: ActionService = Depends(),
 ):
-    return await action_service.get_action(id)
+    return await action_service.get_action(id=id)
 
 
 @router.put("/actions/{id}", response_model=ActionResponse)

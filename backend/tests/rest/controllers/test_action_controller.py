@@ -4,6 +4,7 @@ from beanie import PydanticObjectId
 
 from domain.actions.models import ActionGroup, ActionGroupCondition
 from tests.utils import filter_response
+from tests.rest.controllers.conftest import transient_action_data
 
 
 def test_create_action(client_init, action_data, action_service):
@@ -116,4 +117,127 @@ def test_get_actions(client_init, action_service):
     ]
     action_service.get_actions_for_datasource_id.assert_called_once_with(
         **{"datasource_id": "63e4da53370789982002e57d"}
+    )
+
+
+def test_update_action(client_init, action_data, action_service):
+    response = client_init.put(
+        "/actions/63e236e89343884e21e0a07c", data=json.dumps(action_data)
+    )
+    assert response.status_code == 200
+    assert filter_response(response.json()) == {
+        "_id": None,
+        "appId": "63e4da53370789982002e57d",
+        "datasourceId": "63e4da53370789982002e57d",
+        "groups": [
+            {
+                "condition": "or",
+                "event": None,
+                "href": None,
+                "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
+                "button",
+                "tag_name": None,
+                "text": None,
+                "url": None,
+                "url_matching": None,
+            }
+        ],
+        "name": "clicked on settings",
+        "processedTill": None,
+        "userId": "63e4da53370789982002e57d",
+    }
+    action_service.update_action.assert_called_once()
+    assert action_service.update_action.call_args.kwargs["action"].dict() == {
+        "app_id": PydanticObjectId("63e4da53370789982002e57d"),
+        "created_at": ANY,
+        "datasource_id": PydanticObjectId("63e4da53370789982002e57d"),
+        "groups": [
+            {
+                "condition": ActionGroupCondition.OR,
+                "event": None,
+                "href": None,
+                "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
+                "button",
+                "tag_name": None,
+                "text": None,
+                "url": None,
+                "url_matching": None,
+            }
+        ],
+        "id": None,
+        "name": "clicked on settings",
+        "processed_till": None,
+        "revision_id": ANY,
+        "updated_at": None,
+        "user_id": PydanticObjectId("63e4da53370789982002e57d"),
+    }
+
+
+def test_get_actions_by_id(client_init, action_service):
+    response = client_init.get("/actions/63e5f57c593ed2017c0722c9")
+    assert response.status_code == 200
+    assert response.json() == {
+        "_id": None,
+        "appId": "63e4da53370789982002e57d",
+        "createdAt": ANY,
+        "datasourceId": "63e4da53370789982002e57d",
+        "groups": [
+            {
+                "condition": "or",
+                "event": None,
+                "href": None,
+                "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
+                "button",
+                "tag_name": None,
+                "text": None,
+                "url": None,
+                "url_matching": None,
+            }
+        ],
+        "name": "clicked on settings",
+        "processedTill": None,
+        "revisionId": ANY,
+        "updatedAt": None,
+        "userId": "63e4da53370789982002e57d",
+    }
+    action_service.get_action.assert_called_once_with(
+        **{"id": "63e5f57c593ed2017c0722c9"}
+    )
+
+
+def test_transient_action(client_init, action_service, transient_action_data):
+    response = client_init.post(
+        "/actions/transient", data=json.dumps(transient_action_data)
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "count": 1,
+        "data": [
+            {
+                "event": "$autocapture",
+                "source": "web",
+                "timestamp": "2023-02-09T10:26:22",
+                "uid": "18635b641091067-0b29b2c45f4c5d-16525635-16a7f0-18635b6410a285c",
+                "url": "http://localhost:3000/analytics/explore/63e236e89343884e21e0a07c",
+            }
+        ],
+    }
+    action_service.compute_action.assert_called_once_with(
+        **{
+            "datasource_id": "63e4da53370789982002e57d",
+            "groups": [
+                {
+                    "condition": "or",
+                    "event": None,
+                    "href": None,
+                    "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
+                    "button",
+                    "tag_name": None,
+                    "text": None,
+                    "url": None,
+                    "url_matching": None,
+                }
+            ],
+            "event": "$autocapture",
+        }
     )
