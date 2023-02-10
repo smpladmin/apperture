@@ -1,6 +1,44 @@
 from repositories.clickhouse.base import EventsBase
+from typing import List
+from pypika import ClickHouseQuery, Parameter, functions as fn
 
 
 class Clickstream(EventsBase):
-    def __init__(self):
-        self.set_table("clickstream")
+    """
+    @param dsId:dataSource ID
+    Takes in a datasource id of an apperture provider
+    @returns list of events
+    """
+
+    async def get_all_data_by_dsId(self, dsId: str) -> List[any]:
+        query, parameters = self.build_get_all_events_query(dsId)
+        return self.execute_get_query(query, parameters)
+
+    async def get_stream_count_by_dsId(self, dsId: str):
+        query, parameters = self.build_count_all_events_query(dsId)
+        return self.execute_get_query(query, parameters)
+
+    def build_get_all_events_query(self, dsId: str):
+        parameters = {"dsId": dsId}
+        query = (
+            ClickHouseQuery.from_(self.click_stream_table)
+            .select(
+                self.click_stream_table.event,
+                self.click_stream_table.timestamp,
+                self.click_stream_table.user_id,
+                self.click_stream_table.properties,
+            )
+            .where(self.click_stream_table.datasource_id == Parameter("%(dsId)s"))
+        ).limit(100)
+
+        return query.get_sql(), parameters
+
+    def build_count_all_events_query(self, dsId: str):
+        parameters = {"dsId": dsId}
+        query = (
+            ClickHouseQuery.from_(self.click_stream_table)
+            .select(fn.Count("*"))
+            .where(self.click_stream_table.datasource_id == Parameter("%(dsId)s"))
+        )
+
+        return query.get_sql(), parameters
