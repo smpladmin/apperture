@@ -23,5 +23,7 @@ class TestDataSourceService:
 
     @pytest.mark.asyncio
     async def test_get_datasources_for_provider(self):
-        await self.service.get_datasources_for_provider(provider=IntegrationProvider.APPERTURE)
+        await self.service.get_datasources_for_provider(
+            provider=IntegrationProvider.APPERTURE
+        )
         DataSource.find.assert_called_once()
