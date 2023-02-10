@@ -99,9 +99,10 @@ class ActionService:
                 for event in matching_events
             ]
 
-            count = await self.actions.get_count_of_matching_event_from_clickstream(
-                datasource_id=datasource_id, groups=groups, event=event
-            )
-            count = count[0][0]
+            count = (
+                await self.actions.get_count_of_matching_event_from_clickstream(
+                    datasource_id=datasource_id, groups=groups, event=event
+                )
+            )[0][0]
 
         return ComputedActionResponse(count=count, data=matching_events)

@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, AsyncMock
 import pytest
 from beanie import PydanticObjectId
 
-from domain.actions.models import Action, ActionGroup
+from domain.actions.models import Action, ActionGroup, CaptureEvent
 from repositories.clickhouse.actions import Actions
 
 
@@ -15,6 +15,7 @@ class TestActionsRepository:
         repo.execute_get_query = MagicMock()
         self.repo = repo
         self.datasource_id = PydanticObjectId("636a1c61d715ca6baae65611")
+        self.event = CaptureEvent.AUTOCAPTURE
         self.action = Action(
             datasource_id=self.datasource_id,
             app_id=self.datasource_id,
@@ -43,6 +44,17 @@ class TestActionsRepository:
             "ds_id": "636a1c61d715ca6baae65611",
         }
 
+        self.matching_events_query = (
+            'SELECT "event","user_id","properties","timestamp" FROM "clickstream" WHERE '
+            '"datasource_id"=%(ds_id)s AND match("element_chain",%(0_selector_regex)s) '
+            "AND \"event\"='$autocapture' LIMIT 100"
+        )
+
+        self.count_matching_events_query = (
+            'SELECT COUNT(*) FROM "clickstream" WHERE "datasource_id"=%(ds_id)s AND '
+            'match("element_chain",%(0_selector_regex)s) AND "event"=\'$autocapture\''
+        )
+
     @pytest.mark.asyncio
     async def test_update_events_from_clickstream(self, patch_datetime_today):
         await self.repo.update_events_from_clickstream(
@@ -59,3 +71,19 @@ class TestActionsRepository:
         assert await self.repo.build_update_events_from_clickstream_query(
             action=self.action, update_action_func=AsyncMock()
         ) == (self.migration_query, self.parameters)
+
+    @pytest.mark.asyncio
+    async def test_build_matching_events_from_clickstream_query(self):
+        assert await self.repo.build_matching_events_from_clickstream_query(
+            datasource_id="636a1c61d715ca6baae65611",
+            groups=self.action.groups,
+            event=self.event,
+        ) == (self.matching_events_query, self.parameters)
+
+    @pytest.mark.asyncio
+    async def test_build_count_matching_events_from_clickstream_query(self):
+        assert await self.repo.build_count_matching_events_from_clickstream_query(
+            datasource_id="636a1c61d715ca6baae65611",
+            groups=self.action.groups,
+            event=self.event,
+        ) == (self.count_matching_events_query, self.parameters)

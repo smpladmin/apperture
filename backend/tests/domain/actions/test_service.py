@@ -168,7 +168,7 @@ class TestActionService:
                         "event": None,
                         "href": None,
                         "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
-                                    "button",
+                        "button",
                         "tag_name": None,
                         "text": None,
                         "url": None,
