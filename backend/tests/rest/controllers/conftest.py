@@ -220,8 +220,13 @@ def datasource_service():
 
     datasource_future = asyncio.Future()
     datasource_future.set_result(datasource)
+    datasources_future = asyncio.Future()
+    datasources_future.set_result([datasource])
     datasource_service_mock.get_datasource.return_value = datasource_future
     datasource_service_mock.create_datasource.return_value = datasource_future
+    datasource_service_mock.get_datasources_for_provider.return_value = (
+        datasources_future
+    )
     return datasource_service_mock
 
 
