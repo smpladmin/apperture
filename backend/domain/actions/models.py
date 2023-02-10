@@ -41,3 +41,21 @@ class Action(Document):
 
     class Settings:
         name = "actions"
+
+
+class CaptureEvent(str, Enum):
+    AUTOCAPTURE = "$autocapture"
+    PAGEVIEW = "$pageview"
+
+
+class ComputedEventStreamResult(BaseModel):
+    event: str
+    timestamp: datetime.datetime
+    uid: str
+    url: Optional[str]
+    source: Optional[str]
+
+
+class ComputedAction(BaseModel):
+    count: int
+    data: List[ComputedEventStreamResult]

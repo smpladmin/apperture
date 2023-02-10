@@ -5,7 +5,13 @@ from fastapi import APIRouter, Depends
 from domain.actions.service import ActionService
 from domain.apperture_users.models import AppertureUser
 from domain.datasources.service import DataSourceService
-from rest.dtos.actions import CreateActionDto, ActionResponse, ActionWithUser
+from rest.dtos.actions import (
+    ActionResponse,
+    ActionWithUser,
+    ComputedActionResponse,
+    CreateActionDto,
+    TransientActionDto,
+)
 from rest.dtos.appperture_users import AppertureUserResponse
 from rest.middlewares import validate_jwt, get_user_id, get_user
 
@@ -50,3 +56,42 @@ async def get_actions(
         action.user = AppertureUserResponse.from_orm(user)
 
     return actions
+
+
+@router.get("/actions/{id}", response_model=ActionResponse)
+async def get_saved_action(
+    id: str,
+    action_service: ActionService = Depends(),
+):
+    return await action_service.get_action(id)
+
+
+@router.put("/actions/{id}", response_model=ActionResponse)
+async def update_action(
+    id: str,
+    dto: CreateActionDto,
+    user_id: str = Depends(get_user_id),
+    action_service: ActionService = Depends(),
+    ds_service: DataSourceService = Depends(),
+):
+    datasource = await ds_service.get_datasource(dto.datasourceId)
+    action = action_service.build_action(
+        datasourceId=datasource.id,
+        appId=datasource.app_id,
+        userId=user_id,
+        name=dto.name,
+        groups=dto.groups,
+    )
+
+    await action_service.update_action(action_id=id, action=action)
+    return action
+
+
+@router.post("/actions/transient", response_model=ComputedActionResponse)
+async def compute_transient_actions(
+    dto: TransientActionDto,
+    action_service: ActionService = Depends(),
+):
+    return await action_service.compute_action(
+        datasource_id=dto.datasourceId, groups=dto.groups, event=dto.event
+    )

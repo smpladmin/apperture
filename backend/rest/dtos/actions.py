@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from domain.actions.models import ActionGroup, Action
+from domain.actions.models import Action, ActionGroup, CaptureEvent, ComputedAction
 from rest.dtos.appperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
 
@@ -24,3 +24,14 @@ class ActionWithUser(Action, ModelResponse):
     class Config:
         allow_population_by_field_name = True
         orm_mode = True
+
+
+class TransientActionDto(BaseModel):
+    datasourceId: str
+    groups: List[ActionGroup]
+    event: CaptureEvent = CaptureEvent.AUTOCAPTURE
+
+
+class ComputedActionResponse(ComputedAction):
+    class Config:
+        allow_population_by_field_name = True
