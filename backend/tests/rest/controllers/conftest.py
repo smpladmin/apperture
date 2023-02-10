@@ -1,58 +1,39 @@
+import asyncio
+from datetime import datetime
+from unittest import mock
 from unittest.mock import ANY
 
 import pytest
-import asyncio
-from unittest import mock
-from datetime import datetime
 from beanie import PydanticObjectId
 from fastapi.testclient import TestClient
 
-from domain.apps.models import App
-from domain.common.models import IntegrationProvider, SavedItems, WatchlistItemType
-from domain.datasources.models import DataSource, DataSourceVersion
-from domain.events.models import Event, EventsData
-from domain.properties.models import Properties, Property, PropertyDataType
-from domain.segments.models import (
-    ComputedSegment,
-    Segment,
-    WhereSegmentFilter,
-    SegmentFilterOperatorsNumber,
-    SegmentFilterOperatorsString,
-    SegmentFilterConditions,
-    SegmentGroup,
-    SegmentGroupConditions,
-    SegmentDataType,
-)
-from domain.funnels.models import (
-    Funnel,
-    ComputedFunnelStep,
-    ComputedFunnel,
-    FunnelTrendsData,
-    FunnelConversionData,
-    FunnelEventUserData,
-)
-from domain.notifications.models import (
-    Notification,
-    NotificationChannel,
-    NotificationFrequency,
-    NotificationMetric,
-    NotificationType,
-    ThresholdMap,
-    NotificationVariant,
-)
-
-from domain.metrics.models import (
-    ComputedMetricResult,
-    Metric,
-)
 from domain.apperture_users.models import AppertureUser
-from domain.edge.models import Edge, NodeSignificance, NodeTrend, NodeSankey
+from domain.apps.models import App
+from domain.common.models import (IntegrationProvider, SavedItems,
+                                  WatchlistItemType)
+from domain.datasources.models import DataSource, DataSourceVersion
+from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
+from domain.events.models import Event, EventsData
+from domain.funnels.models import (ComputedFunnel, ComputedFunnelStep, Funnel,
+                                   FunnelConversionData, FunnelEventUserData,
+                                   FunnelTrendsData)
+from domain.metrics.models import ComputedMetricResult, Metric
+from domain.notifications.models import (Notification, NotificationChannel,
+                                         NotificationFrequency,
+                                         NotificationMetric, NotificationType,
+                                         NotificationVariant, ThresholdMap)
+from domain.properties.models import Properties, Property, PropertyDataType
+from domain.segments.models import (ComputedSegment, Segment, SegmentDataType,
+                                    SegmentFilterConditions,
+                                    SegmentFilterOperatorsNumber,
+                                    SegmentFilterOperatorsString, SegmentGroup,
+                                    SegmentGroupConditions, WhereSegmentFilter)
 from domain.users.models import UserDetails
 from rest.dtos.appperture_users import AppertureUserResponse
 from rest.dtos.funnels import FunnelWithUser
 from rest.dtos.metrics import MetricWithUser
-from rest.dtos.segments import SegmentWithUser
 from rest.dtos.notifications import NotificationWithUser
+from rest.dtos.segments import SegmentWithUser
 
 
 @pytest.fixture(scope="module")
@@ -226,6 +207,27 @@ def datasource_service():
 def clickstream_service():
     clickstream_service_mock = mock.AsyncMock()
     clickstream_service_mock.update_events = mock.AsyncMock()
+    clickstream_service_mock.get_data_by_id = mock.MagicMock(
+        return_value={
+            "count": 2,
+            "data": [
+                {
+                    "event": "$pageview",
+                    "timestamp": "2023-02-09T04:50:47",
+                    "uid": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
+                    "url": "http://localhost:3000/analytics/app/create",
+                    "source": "web",
+                },
+                {
+                    "event": "$pageview",
+                    "timestamp": "2023-02-07T08:45:13",
+                    "uid": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
+                    "url": "http://localhost:3000/analytics/funnel/list/63d8ef5a7b02dbd1dcf20dcc",
+                    "source": "web",
+                },
+            ],
+        }
+    )
     return clickstream_service_mock
 
 

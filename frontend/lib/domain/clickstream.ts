@@ -1,7 +1,7 @@
 export type Clickstream = {
   event: string;
   timestamp: Date;
-  user: string;
+  uid: string;
   url: string | null;
   source: string | null;
 };

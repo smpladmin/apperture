@@ -1,6 +1,9 @@
-from repositories.clickhouse.base import EventsBase
 from typing import List
-from pypika import ClickHouseQuery, Parameter, functions as fn
+
+from pypika import ClickHouseQuery, Parameter
+from pypika import functions as fn
+
+from repositories.clickhouse.base import EventsBase
 
 
 class Clickstream(EventsBase):
@@ -10,11 +13,11 @@ class Clickstream(EventsBase):
     @returns list of events
     """
 
-    async def get_all_data_by_dsId(self, dsId: str) -> List[any]:
+    def get_all_data_by_dsId(self, dsId: str) -> List[any]:
         query, parameters = self.build_get_all_events_query(dsId)
         return self.execute_get_query(query, parameters)
 
-    async def get_stream_count_by_dsId(self, dsId: str):
+    def get_stream_count_by_dsId(self, dsId: str):
         query, parameters = self.build_count_all_events_query(dsId)
         return self.execute_get_query(query, parameters)
 

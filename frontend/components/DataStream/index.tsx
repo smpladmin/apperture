@@ -2,7 +2,8 @@ import { Flex, Heading, Text } from '@chakra-ui/react';
 import { Clickstream } from '@lib/domain/clickstream';
 import { getClickStreamData } from '@lib/services/clickStreamService';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import StreamDataTable from './Components/StreamDataTable';
 
 enum Source {
   STREAM = 'stream',
@@ -12,9 +13,11 @@ enum Source {
 const ViewStreamData = () => {
   const router = useRouter();
   const { dsId } = router.query;
+  console.log({ dsId });
   const [source, setSource] = useState<Source>(Source.STREAM);
   const [tableData, setTableData] = useState<Clickstream[]>([]);
   const [count, setCount] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchTableData = async () => {
       if (source == Source.STREAM) {
@@ -23,8 +26,10 @@ const ViewStreamData = () => {
           setTableData(data.data);
           setCount(data.count);
         }
+        setLoading(false);
       }
     };
+    setLoading(true);
     fetchTableData();
   }, [source]);
 
@@ -72,6 +77,11 @@ const ViewStreamData = () => {
             Actions
           </Text>
         </Flex>
+        <StreamDataTable
+          tableData={tableData}
+          count={count}
+          isLoading={loading}
+        />
       </Flex>
     </Flex>
   );
