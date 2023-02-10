@@ -1,7 +1,7 @@
 import { Flex, IconButton, Text } from '@chakra-ui/react';
 import { useState } from 'react';
 
-const formatlabel = (label: string) => {
+export const formateventLabel = (label: string) => {
   if (label == '$pageview') return ['ri-eye-fill', 'Pageview'];
   if (label == '$pageleave') return ['ri-delete-back-2-fill', 'Pageleave'];
   if (label == '$autocapture') return ['ri-cursor-fill', 'Autocapture'];
@@ -9,7 +9,7 @@ const formatlabel = (label: string) => {
 };
 
 const EventLabel = ({ event }: { event: string }) => {
-  const [data, setData] = useState(formatlabel(event));
+  const [data, setData] = useState(formateventLabel(event));
   return (
     <Flex alignContent={'center'} alignItems={'center'}>
       <IconButton
@@ -21,7 +21,12 @@ const EventLabel = ({ event }: { event: string }) => {
         _hover={{}}
         icon={<i style={{ fontSize: 'xs-8' }} className={data[0]}></i>}
       />
-      <Text fontWeight={500} fontSize={'xs-12'} lineHeight={'xs-16'}>
+      <Text
+        data-testid="event-cell"
+        fontWeight={500}
+        fontSize={'xs-12'}
+        lineHeight={'xs-16'}
+      >
         {data[1]}
       </Text>
     </Flex>

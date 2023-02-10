@@ -51,6 +51,7 @@ const ListingTable = ({
       mt={'4'}
       borderWidth={'0.4px'}
       borderColor={'grey.100'}
+      data-test-id={'listing-table'}
     >
       <Flex
         minH={'15'}
