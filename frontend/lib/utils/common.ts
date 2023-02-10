@@ -4,6 +4,7 @@ import mixPanelLogo from '@assets/images/mixpanel-icon.svg';
 import gaLogo from '@assets/images/ga-logo-small.svg';
 import clevertapLogo from '@assets/images/clevertap-icon.png';
 import amplitudeLogo from '@assets/images/amplitude-icon.svg';
+import appertureLogo from '@assets/images/apperture-logo.svg';
 import { StaticImageData } from 'next/image';
 import { AppWithIntegrations } from '@lib/domain/app';
 
@@ -57,14 +58,14 @@ export const getProviderLogo = (provider: Provider): StaticImageData => {
   switch (provider) {
     case Provider.GOOGLE:
       return gaLogo;
-
     case Provider.MIXPANEL:
       return mixPanelLogo;
-
     case Provider.AMPLITUDE:
       return amplitudeLogo;
     case Provider.CLEVERTAP:
       return clevertapLogo;
+    case Provider.APPERTURE:
+      return appertureLogo;
     default:
       return gaLogo;
   }

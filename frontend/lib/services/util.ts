@@ -17,10 +17,15 @@ export const AppertureGet = async (
   }
 };
 
-export const ApperturePrivateGet = async (path: string, token: string) => {
+export const ApperturePrivateGet = async (
+  path: string,
+  token: string,
+  config: AxiosRequestConfig = {}
+) => {
   try {
     return await ApperturePrivateAPI.get(path, {
       headers: { Authorization: token },
+      ...config,
     });
   } catch (e) {
     const error = e as AxiosError;
@@ -31,12 +36,15 @@ export const ApperturePrivateGet = async (path: string, token: string) => {
 
 export const ApperturePost = async (
   path: string,
-  payload: {
-    [key: string]: string | number | boolean | Array<any> | object | null;
-  }
+  payload:
+    | {
+        [key: string]: string | number | boolean | Array<any> | object | null;
+      }
+    | any[],
+  config: AxiosRequestConfig = {}
 ) => {
   try {
-    return await AppertureAPI.post(path, payload);
+    return await AppertureAPI.post(path, payload, config);
   } catch (e) {
     const error = e as AxiosError;
     console.error(error.message);

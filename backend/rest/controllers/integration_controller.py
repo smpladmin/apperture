@@ -74,6 +74,7 @@ async def create_datasources(
 async def create_integration(
     dto: CreateIntegrationDto,
     create_datasource: bool = False,
+    trigger_data_processor: bool = False,
     user_id: str = Depends(get_user_id),
     app_service: AppService = Depends(),
     ds_service: DataSourceService = Depends(),
@@ -98,9 +99,10 @@ async def create_integration(
             integration,
         )
 
-        runlogs = await runlog_service.create_runlogs(datasource.id)
-        jobs = dpq_service.enqueue_from_runlogs(runlogs)
-        logging.info(f"Scheduled {len(jobs)} for data processing")
+        if trigger_data_processor:
+            runlogs = await runlog_service.create_runlogs(datasource.id)
+            jobs = dpq_service.enqueue_from_runlogs(runlogs)
+            logging.info(f"Scheduled {len(jobs)} for data processing")
 
         response = IntegrationResponse.from_orm(integration)
         response.datasource = datasource
