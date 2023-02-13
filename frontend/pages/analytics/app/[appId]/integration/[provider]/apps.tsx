@@ -14,7 +14,7 @@ import { GetServerSideProps } from 'next';
 import {
   saveDataSources,
   _getProviderDatasources,
-} from '@lib/services/datasourceService';
+} from '@lib/services/integrationService';
 import { ProviderDataSource as DataSource } from '@lib/domain/datasource';
 import { ProviderDataSource } from '@components/ProviderDataSource';
 import { useRouter } from 'next/router';
@@ -26,10 +26,12 @@ export const getServerSideProps: GetServerSideProps = async ({
   req,
   query,
 }) => {
-  const datasources = await _getProviderDatasources(
-    getAuthToken(req) as string,
-    query.integration_id as string
-  );
+  const datasources =
+    (await _getProviderDatasources(
+      getAuthToken(req) as string,
+      query.integration_id as string
+    )) || [];
+
   return {
     props: {
       datasources,

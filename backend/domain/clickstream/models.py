@@ -1,6 +1,7 @@
 from enum import Enum
 import datetime
-from typing import NamedTuple
+from typing import NamedTuple, Optional
+from pydantic import BaseModel
 
 
 class CaptureEvent(str, Enum):
@@ -16,3 +17,11 @@ class ClickstreamData(NamedTuple):
     element_chain: str
     event: str
     properties: dict
+
+
+class ClickstreamResult(BaseModel):
+    event: str
+    timestamp: datetime.datetime
+    uid: str
+    url: Optional[str]
+    source: Optional[str]

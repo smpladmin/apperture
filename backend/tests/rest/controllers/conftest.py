@@ -1,58 +1,56 @@
+import asyncio
+from datetime import datetime
+from unittest import mock
 from unittest.mock import ANY
 
 import pytest
-import asyncio
-from unittest import mock
-from datetime import datetime
 from beanie import PydanticObjectId
 from fastapi.testclient import TestClient
 
+from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App
 from domain.common.models import IntegrationProvider, SavedItems, WatchlistItemType
 from domain.datasources.models import DataSource, DataSourceVersion
+from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
 from domain.events.models import Event, EventsData
-from domain.properties.models import Properties, Property, PropertyDataType
-from domain.segments.models import (
-    ComputedSegment,
-    Segment,
-    WhereSegmentFilter,
-    SegmentFilterOperatorsNumber,
-    SegmentFilterOperatorsString,
-    SegmentFilterConditions,
-    SegmentGroup,
-    SegmentGroupConditions,
-    SegmentDataType,
-)
 from domain.funnels.models import (
-    Funnel,
-    ComputedFunnelStep,
     ComputedFunnel,
-    FunnelTrendsData,
+    ComputedFunnelStep,
+    Funnel,
     FunnelConversionData,
     FunnelEventUserData,
+    FunnelTrendsData,
 )
+from domain.integrations.models import Credential, CredentialType, Integration
+from domain.metrics.models import ComputedMetricResult, Metric
 from domain.notifications.models import (
     Notification,
     NotificationChannel,
     NotificationFrequency,
     NotificationMetric,
     NotificationType,
-    ThresholdMap,
     NotificationVariant,
+    ThresholdMap,
 )
-
-from domain.metrics.models import (
-    ComputedMetricResult,
-    Metric,
+from domain.properties.models import Properties, Property, PropertyDataType
+from domain.runlogs.models import RunLog
+from domain.segments.models import (
+    ComputedSegment,
+    Segment,
+    SegmentDataType,
+    SegmentFilterConditions,
+    SegmentFilterOperatorsNumber,
+    SegmentFilterOperatorsString,
+    SegmentGroup,
+    SegmentGroupConditions,
+    WhereSegmentFilter,
 )
-from domain.apperture_users.models import AppertureUser
-from domain.edge.models import Edge, NodeSignificance, NodeTrend, NodeSankey
 from domain.users.models import UserDetails
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.funnels import FunnelWithUser
 from rest.dtos.metrics import MetricWithUser
-from rest.dtos.segments import SegmentWithUser
 from rest.dtos.notifications import NotificationWithUser
+from rest.dtos.segments import SegmentWithUser
 
 
 @pytest.fixture(scope="module")
@@ -219,6 +217,7 @@ def datasource_service():
     datasource_future = asyncio.Future()
     datasource_future.set_result(datasource)
     datasource_service_mock.get_datasource.return_value = datasource_future
+    datasource_service_mock.create_datasource.return_value = datasource_future
     return datasource_service_mock
 
 
@@ -226,6 +225,27 @@ def datasource_service():
 def clickstream_service():
     clickstream_service_mock = mock.AsyncMock()
     clickstream_service_mock.update_events = mock.AsyncMock()
+    clickstream_service_mock.get_data_by_id = mock.MagicMock(
+        return_value={
+            "count": 2,
+            "data": [
+                {
+                    "event": "$pageview",
+                    "timestamp": "2023-02-09T04:50:47",
+                    "uid": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
+                    "url": "http://localhost:3000/analytics/app/create",
+                    "source": "web",
+                },
+                {
+                    "event": "$pageview",
+                    "timestamp": "2023-02-07T08:45:13",
+                    "uid": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
+                    "url": "http://localhost:3000/analytics/funnel/list/63d8ef5a7b02dbd1dcf20dcc",
+                    "source": "web",
+                },
+            ],
+        }
+    )
     return clickstream_service_mock
 
 
@@ -470,12 +490,26 @@ def app_service():
             shared_with=set(),
         )
     ]
+    app = App(
+        id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        revision_id=None,
+        created_at=datetime(2022, 11, 8, 7, 57, 35, 691000),
+        updated_at=datetime(2022, 11, 8, 7, 57, 35, 691000),
+        name="mixpanel1",
+        user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+        shared_with=set(),
+    )
     user_future = asyncio.Future()
     app_service_mock.find_user.return_value = user_future
     app_service_mock.share_app = mock.AsyncMock()
     apps_future = asyncio.Future()
     apps_future.set_result(apps)
+
+    app_future = asyncio.Future()
+    app_future.set_result(app)
+
     app_service_mock.get_apps.return_value = apps_future
+    app_service_mock.get_user_app.return_value = app_future
     return app_service_mock
 
 
@@ -1266,3 +1300,85 @@ def mock_find_email_user():
     future = asyncio.Future()
     future.set_result(user)
     return future
+
+
+@pytest.fixture(scope="module")
+def integration_service():
+    integration_service_mock = mock.MagicMock()
+    Integration.get_settings = mock.MagicMock()
+    integration = Integration(
+        app_id="636a1c61d715ca6baae65611",
+        user_id="636a1c61d715ca6baae65611",
+        provider=IntegrationProvider.MIXPANEL,
+        credential=Credential(
+            type=CredentialType.API_KEY,
+            api_key="apperture_911",
+            account_id="120232",
+            secret="6ddqwjeaa",
+        ),
+    )
+
+    integration_future = asyncio.Future()
+    integration_future.set_result(integration)
+    integration_service_mock.create_integration.return_value = integration_future
+    return integration_service_mock
+
+
+@pytest.fixture(scope="module")
+def integration_data():
+    return {
+        "appId": "636a1c61d715ca6baae65611",
+        "accountId": "120232",
+        "apiKey": "apperture_911",
+        "apiSecret": "6ddqwjeaa",
+        "provider": IntegrationProvider.MIXPANEL,
+    }
+
+
+@pytest.fixture(scope="module")
+def integration_response():
+    return {
+        "_id": None,
+        "appId": "636a1c61d715ca6baae65611",
+        "createdAt": ANY,
+        "credential": {
+            "account_id": "120232",
+            "api_key": "apperture_911",
+            "refresh_token": None,
+            "secret": "6ddqwjeaa",
+            "type": "API_KEY",
+        },
+        "datasource": {
+            "_id": "636a1c61d715ca6baae65611",
+            "appId": "636a1c61d715ca6baae65611",
+            "createdAt": ANY,
+            "enabled": True,
+            "externalSourceId": "123",
+            "integrationId": "636a1c61d715ca6baae65611",
+            "name": None,
+            "provider": "mixpanel",
+            "revisionId": ANY,
+            "updatedAt": None,
+            "userId": "636a1c61d715ca6baae65611",
+            "version": "DEFAULT",
+        },
+        "provider": "mixpanel",
+        "revisionId": ANY,
+        "updatedAt": None,
+        "userId": "636a1c61d715ca6baae65611",
+    }
+
+
+@pytest.fixture(scope="module")
+def runlog_service():
+    runlog_service_mock = mock.MagicMock()
+    RunLog.get_settings = mock.MagicMock()
+    runlog_service_mock.create_runlogs = mock.AsyncMock()
+    return runlog_service_mock
+
+
+@pytest.fixture(scope="module")
+def dpq_service():
+    dpq_service_mock = mock.MagicMock()
+    dpq_service_mock.enqueue_from_runlogs = mock.MagicMock(return_value=["test"])
+    return dpq_service_mock

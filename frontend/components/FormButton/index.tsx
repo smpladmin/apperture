@@ -40,6 +40,7 @@ const FormButton = ({
             textColor={'white.100'}
             width={{ base: 'full', md: '72' }}
             disabled={disabled}
+            data-testid={'next-button'}
           >
             {nextButtonName}
           </Button>
@@ -57,6 +58,7 @@ const FormButton = ({
           width={{ base: 'full', md: '72' }}
           disabled={disabled}
           onClick={() => handleNextClick?.()}
+          data-testid={'next-button'}
         >
           {nextButtonName}
         </Button>

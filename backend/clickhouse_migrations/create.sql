@@ -5,7 +5,7 @@ CREATE TABLE events
         user_id String,
         provider String,
         event_name String,
-        properties JSON,
+        properties JSON
     )
     ENGINE = MergeTree
     ORDER BY timestamp;
@@ -17,7 +17,7 @@ CREATE TABLE clickstream
         user_id String,
         element_chain String,
         event String,
-        properties JSON,
+        properties JSON
     )
     ENGINE = MergeTree
     ORDER BY timestamp;

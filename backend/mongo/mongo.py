@@ -14,6 +14,7 @@ from domain.funnels.models import Funnel
 from domain.segments.models import Segment
 from domain.properties.models import Properties
 from domain.metrics.models import Metric
+from domain.actions.models import Action
 
 
 class Mongo:
@@ -35,6 +36,7 @@ class Mongo:
                 Segment,
                 Properties,
                 Metric,
+                Action,
             ],
         )
 

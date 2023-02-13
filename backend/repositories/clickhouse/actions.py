@@ -1,0 +1,95 @@
+import datetime
+from typing import Dict, List, Tuple
+from pypika import ClickHouseQuery, Parameter, terms, Criterion
+
+from domain.actions.models import Action, ActionGroup
+from repositories.clickhouse.base import EventsBase
+from repositories.clickhouse.parser.action_parser_utils import Selector
+
+
+class Actions(EventsBase):
+    def build_selector_regex(self, selector: Selector) -> str:
+        regex = r""
+        for tag in selector.parts:
+            if tag.data.get("tag_name") and isinstance(tag.data["tag_name"], str):
+                if tag.data["tag_name"] == "*":
+                    regex += ".+"
+                else:
+                    regex += tag.data["tag_name"]
+            if tag.data.get("attr_class__contains"):
+                regex += r".*?\.{}".format(
+                    r"\..*?".join(sorted(tag.data["attr_class__contains"]))
+                )
+            if tag.ch_attributes:
+                regex += ".*?"
+                for key, value in sorted(tag.ch_attributes.items()):
+                    regex += '{}="{}".*?'.format(key, value)
+            regex += r'([-_a-zA-Z0-9\.:"= ]*?)?($|;|:([^;^\s]*(;|$|\s)))'
+            if tag.direct_descendant:
+                regex += ".*"
+        return regex
+
+    def filter_click_event(self, filter: ActionGroup) -> Tuple[List, Dict]:
+        params = {}
+        conditions = []
+
+        if filter.selector is not None:
+            selectors = (
+                filter.selector
+                if isinstance(filter.selector, list)
+                else [filter.selector]
+            )
+
+            for idx, query in enumerate(selectors):
+                if not query:  # Skip empty selectors
+                    continue
+                selector = Selector(query, escape_slashes=False)
+                key = f"{idx}_selector_regex"
+                params[key] = self.build_selector_regex(selector)
+                conditions.append(
+                    self.ch_match_func(
+                        self.click_stream_table.element_chain, Parameter(f"%({key})s")
+                    )
+                )
+
+        return conditions, params
+
+    async def update_events_from_clickstream(self, action: Action, update_action_func):
+        return self.execute_get_query(
+            *await self.build_update_events_from_clickstream_query(
+                action, update_action_func
+            )
+        )
+
+    async def build_update_events_from_clickstream_query(
+        self, action: Action, update_action_func
+    ):
+        conditions, params = self.filter_click_event(filter=action.groups[0])
+        query = (
+            ClickHouseQuery.into(self.table)
+            .from_(self.click_stream_table)
+            .select(
+                self.click_stream_table.datasource_id,
+                self.click_stream_table.timestamp,
+                self.click_stream_table.user_id,
+                terms.Term.wrap_constant("apperture"),
+                terms.Term.wrap_constant(action.name),
+                self.click_stream_table.properties,
+            )
+            .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
+        )
+        if action.processed_till:
+            query = query.where(
+                self.click_stream_table.timestamp
+                > self.parse_datetime_best_effort(action.processed_till)
+            )
+
+        now = datetime.datetime.now()
+        await update_action_func(action_id=action.id, processed_till=now)
+        query = query.where(
+            self.click_stream_table.timestamp <= self.parse_datetime_best_effort(now)
+        )
+
+        query = query.where(Criterion.all(conditions))
+        params["ds_id"] = str(action.datasource_id)
+        return query.get_sql(), params

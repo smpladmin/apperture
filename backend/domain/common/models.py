@@ -10,6 +10,7 @@ class IntegrationProvider(str, Enum):
     MIXPANEL = "mixpanel"
     AMPLITUDE = "amplitude"
     CLEVERTAP = "clevertap"
+    APPERTURE = "apperture"
 
     def supports_runlogs(self):
         return self in [self.MIXPANEL, self.AMPLITUDE, self.CLEVERTAP]

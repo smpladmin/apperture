@@ -27,7 +27,9 @@ from rest.controllers import (
     funnel_controller,
     metric_controller,
     user_controller,
+    action_controller,
     event_capture_controller,
+    clickstream_controller,
 )
 from mongo import Mongo
 from clickhouse import Clickhouse
@@ -55,11 +57,9 @@ async def on_shutdown():
 app = FastAPI(on_startup=[on_startup], on_shutdown=[on_shutdown])
 
 
-# TODO: allow only specific origins
-origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -80,4 +80,6 @@ app.include_router(funnel_controller.router)
 app.include_router(segment_controller.router)
 app.include_router(metric_controller.router)
 app.include_router(user_controller.router)
+app.include_router(action_controller.router)
 app.include_router(event_capture_controller.router)
+app.include_router(clickstream_controller.router)
