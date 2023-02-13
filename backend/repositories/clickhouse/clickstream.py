@@ -1,6 +1,6 @@
 from typing import List
 
-from pypika import ClickHouseQuery, Parameter
+from pypika import ClickHouseQuery, Parameter, Order
 from pypika import functions as fn
 
 from repositories.clickhouse.base import EventsBase
@@ -32,6 +32,7 @@ class Clickstream(EventsBase):
                 self.click_stream_table.properties,
             )
             .where(self.click_stream_table.datasource_id == Parameter("%(dsId)s"))
+            .orderby(self.click_stream_table.timestamp, order=Order.desc)
         ).limit(100)
 
         return query.get_sql(), parameters

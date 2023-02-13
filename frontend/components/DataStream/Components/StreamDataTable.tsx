@@ -2,10 +2,12 @@ import { Text } from '@chakra-ui/react';
 import ListingTable from '@components/ListingTable';
 import { Clickstream } from '@lib/domain/clickstream';
 import { createColumnHelper } from '@tanstack/react-table';
-import { format } from 'date-fns';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { useMemo } from 'react';
 import EventLabel from './EventLabel';
 import TableCell from './TableCell';
+dayjs.extend(utc);
 
 export const trimLabel = (label: string, size = 15) => {
   return label.length > size + 3 ? label.slice(0, size) + '...' : label;
@@ -56,7 +58,7 @@ const StreamDataTable = ({
           cell: (info) => (
             <Text data-testid="timestamp-cell" whiteSpace={'nowrap'}>
               <TableCell>
-                {format(new Date(info.getValue()), 'MMM d, yyyy')}
+                {dayjs.utc(info.getValue()).local().format('D MMM YY, h:mmA')}
               </TableCell>
             </Text>
           ),

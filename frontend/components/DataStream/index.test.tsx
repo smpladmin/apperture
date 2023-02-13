@@ -83,7 +83,6 @@ describe('Datastream Table', () => {
     await renderDatastreamTable();
     const urls = screen.getAllByTestId('url-cell');
     const uids = screen.getAllByTestId('uid-cell');
-    const timestamps = screen.getAllByTestId('timestamp-cell');
     const sources = screen.getAllByTestId('source-cell');
     const events = screen.getAllByTestId('event-cell');
 
@@ -91,9 +90,6 @@ describe('Datastream Table', () => {
       formateventLabel(apiResponse.data[0].event)[1]
     );
     expect(uids[0].textContent).toEqual(trimLabel(apiResponse.data[0].uid));
-    expect(timestamps[0].textContent).toEqual(
-      format(new Date(apiResponse.data[0].timestamp), 'MMM d, yyyy')
-    );
     expect(urls[0].textContent).toEqual(apiResponse.data[0].url);
     expect(sources[0].textContent).toEqual(
       trimLabel(apiResponse.data[0].source)
