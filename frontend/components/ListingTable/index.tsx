@@ -1,7 +1,6 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import 'remixicon/fonts/remixicon.css';
 import {
-  createColumnHelper,
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
@@ -77,7 +76,7 @@ const ListingTable = ({
               fontWeight={'500'}
               data-testid={'users-count'}
             >
-              {count || 0} Users
+              {count || 0} Events
             </Text>
           )}
         </Flex>
@@ -91,7 +90,7 @@ const ListingTable = ({
         {isLoading ? (
           <TableSkeleton tableHeader={columnHeaders} />
         ) : tableData?.length ? (
-          <Table data-testid={'segment-table'}>
+          <Table data-testid={'listing-table'}>
             <Thead py={'3'} px={'8'} bg={'white.100'}>
               {getHeaderGroups().map((headerGroup, groupIndex) => (
                 <Tr key={headerGroup.id + groupIndex}>
@@ -99,7 +98,7 @@ const ListingTable = ({
                     return (
                       <Th
                         key={header.id + index}
-                        data-testid={'segment-table-headers'}
+                        data-testid={'listing-table-headers'}
                       >
                         {flexRender(
                           header.column.columnDef.header,
@@ -116,13 +115,13 @@ const ListingTable = ({
                 <Tr
                   key={row.id + index}
                   _hover={{ bg: 'white.100' }}
-                  data-testid={'segment-table-body-rows'}
+                  data-testid={'listing-table-body-rows'}
                 >
                   {row.getVisibleCells().map((cell, cellIndex) => {
                     return (
                       <Td
                         key={cell.id + cellIndex}
-                        data-testid={'segment-table--body-data'}
+                        data-testid={'listing-table--body-data'}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

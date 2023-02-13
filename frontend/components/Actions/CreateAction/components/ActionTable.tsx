@@ -3,6 +3,8 @@ import { createColumnHelper } from '@tanstack/react-table';
 import React, { useMemo } from 'react';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import EllipsisCell from '@components/ListingTable/EllipsisCell';
+import { capitalizeFirstLetter } from '@lib/utils/common';
 dayjs.extend(utc);
 
 type ActionTableProps = {
@@ -17,26 +19,32 @@ const ActionTable = ({ isLoading, tableData }: ActionTableProps) => {
     return [
       columnHelper.accessor('event', {
         header: 'Event',
-        cell: (info) => info.getValue(),
+        cell: (info) => <EllipsisCell value={info.getValue()} />,
       }),
       columnHelper.accessor('uid', {
         header: 'UI-ID',
-        cell: (info) => info.getValue(),
+        cell: (info) => <EllipsisCell value={info.getValue()} />,
       }),
       columnHelper.accessor('url', {
         header: 'URL/Screen',
-        cell: (info) => info.getValue(),
+        cell: (info) => <EllipsisCell value={info.getValue()} />,
       }),
       columnHelper.accessor('source', {
         header: 'Source',
-        cell: (info) => info.getValue(),
+        cell: (info) => (
+          <EllipsisCell value={capitalizeFirstLetter(info.getValue())} />
+        ),
       }),
 
       columnHelper.accessor('timestamp', {
         header: 'Time',
         cell: (info) => {
           const time = info.getValue() as Date;
-          return dayjs.utc(time).local().format('D MMM YY, h:mmA');
+          return (
+            <EllipsisCell
+              value={dayjs.utc(time).local().format('D MMM YY, h:mmA')}
+            />
+          );
         },
       }),
     ];
