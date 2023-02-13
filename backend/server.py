@@ -55,11 +55,9 @@ async def on_shutdown():
 app = FastAPI(on_startup=[on_startup], on_shutdown=[on_shutdown])
 
 
-# TODO: allow only specific origins
-origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
