@@ -1,11 +1,11 @@
 import { Box, Text } from '@chakra-ui/react';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
-const ElipsisCell = ({ value }: { value: string }) => {
+const ElipsisCell = ({ children }: { children: ReactNode }) => {
   return (
     <Box maxWidth={'55'}>
       <Text fontSize={'xs-14'} lineHeight={'base'} fontWeight={'400'}>
-        {value}
+        {children}
       </Text>
     </Box>
   );
