@@ -1,19 +1,7 @@
 import { Flex, Radio, RadioGroup, Text } from '@chakra-ui/react';
+import { CaptureEventOptions } from '../../utils';
+import React from 'react';
 import { CaptureEvent } from '@lib/domain/action';
-import React, { useState } from 'react';
-
-const CaptureEventOptions = [
-  {
-    label: 'Autocapture',
-    value: CaptureEvent.AUTOCAPTURE,
-    isDisabled: false,
-  },
-  {
-    label: 'Pageview',
-    value: CaptureEvent.PAGEVIEW,
-    isDisabled: true,
-  },
-];
 
 type EventOptionsProps = {
   captureEvent: CaptureEvent;

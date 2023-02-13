@@ -1,8 +1,16 @@
 import ListingTable from '@components/ListingTable';
 import { createColumnHelper } from '@tanstack/react-table';
 import React, { useMemo } from 'react';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
 
-const ActionTable = () => {
+type ActionTableProps = {
+  isLoading: boolean;
+  tableData: { count: number; data: any[] };
+};
+
+const ActionTable = ({ isLoading, tableData }: ActionTableProps) => {
   const columnHelper = createColumnHelper<any>();
 
   const columns = useMemo(() => {
@@ -11,37 +19,34 @@ const ActionTable = () => {
         header: 'Event',
         cell: (info) => info.getValue(),
       }),
-      columnHelper.accessor('user_id', {
+      columnHelper.accessor('uid', {
         header: 'UI-ID',
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor('url', {
+        header: 'URL/Screen',
         cell: (info) => info.getValue(),
       }),
       columnHelper.accessor('source', {
         header: 'Source',
         cell: (info) => info.getValue(),
       }),
+
       columnHelper.accessor('timestamp', {
         header: 'Time',
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor('timestamp', {
-        header: 'Time',
-        cell: (info) => info.getValue(),
+        cell: (info) => {
+          const time = info.getValue() as Date;
+          return dayjs.utc(time).local().format('D MMM YY, h:mmA');
+        },
       }),
     ];
   }, []);
 
   return (
     <ListingTable
-      isLoading={false}
-      count={1}
-      tableData={[
-        {
-          event: 'Autocapture',
-          user_id: '232e23rfjsdf',
-          source: 'apperture',
-          timestamp: '20221212',
-        },
-      ]}
+      isLoading={isLoading}
+      count={tableData.count}
+      tableData={tableData.data}
       columns={columns}
     />
   );
