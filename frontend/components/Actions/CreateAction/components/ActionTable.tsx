@@ -3,8 +3,9 @@ import { createColumnHelper } from '@tanstack/react-table';
 import React, { useMemo } from 'react';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import EllipsisCell from '@components/ListingTable/EllipsisCell';
+import EllipsisCell from '@components/EllipsisCell';
 import { capitalizeFirstLetter } from '@lib/utils/common';
+import EventType from './EventType';
 dayjs.extend(utc);
 
 type ActionTableProps = {
@@ -19,7 +20,7 @@ const ActionTable = ({ isLoading, tableData }: ActionTableProps) => {
     return [
       columnHelper.accessor('event', {
         header: 'Event',
-        cell: (info) => <EllipsisCell value={info.getValue()} />,
+        cell: (info) => <EventType value={info.getValue()} />,
       }),
       columnHelper.accessor('uid', {
         header: 'UI-ID',

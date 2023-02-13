@@ -143,7 +143,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
         </Box>
         <Box w={'full'} overflow={'auto'} pt={'4'} px={'8'}>
           {isEmpty ? (
-            <Flex alignItems={'center'} justifyContent={'center'} h={'full'}>
+            <Flex justifyContent={'center'} mt={'50'}>
               <Image src={emptyAction} alt={'empty-action-image'} />
             </Flex>
           ) : (
