@@ -12,7 +12,7 @@ class TestClickStreamRepository:
         )
         assert (
             query
-            == 'SELECT "event","timestamp","user_id","properties" FROM "clickstream" WHERE "datasource_id"=%(dsId)s LIMIT 100'
+            == 'SELECT "event","timestamp","user_id","properties" FROM "clickstream" WHERE "datasource_id"=%(dsId)s ORDER BY "timestamp" DESC LIMIT 100'
         )
         assert parameters == {"dsId": self.datasource_id}
 
