@@ -27,7 +27,9 @@ from rest.controllers import (
     funnel_controller,
     metric_controller,
     user_controller,
+    action_controller,
     event_capture_controller,
+    clickstream_controller,
 )
 from mongo import Mongo
 from clickhouse import Clickhouse
@@ -78,4 +80,6 @@ app.include_router(funnel_controller.router)
 app.include_router(segment_controller.router)
 app.include_router(metric_controller.router)
 app.include_router(user_controller.router)
+app.include_router(action_controller.router)
 app.include_router(event_capture_controller.router)
+app.include_router(clickstream_controller.router)

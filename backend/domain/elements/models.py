@@ -1,14 +1,14 @@
-from typing import List, Union
+from typing import List, Optional, Dict
 
 from pydantic import BaseModel
 
 
 class Element(BaseModel):
-    text: str
-    tag_name: str
-    href: str
-    attr_id: str
-    attr_class: List[str]
-    nth_child: int
-    nth_of_type: int
-    attributes: int
+    text: Optional[str]
+    tag_name: Optional[str]
+    href: Optional[str]
+    attr_id: Optional[str]
+    attr_class: Optional[List[str]]
+    nth_child: Optional[int]
+    nth_of_type: Optional[int]
+    attributes: Dict

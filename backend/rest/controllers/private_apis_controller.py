@@ -3,6 +3,7 @@ import logging
 from typing import List, Union
 from fastapi import APIRouter, Depends
 from data_processor_queue.service import DPQueueService
+from domain.actions.service import ActionService
 from domain.properties.service import PropertiesService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
@@ -181,3 +182,11 @@ async def refresh_properties(
         if ds_id
         else await properties_service.refresh_properties_for_all_datasources()
     )
+
+
+@router.get("/click_stream")
+async def update_events_from_clickstream(
+    ds_id: str,
+    action_service: ActionService = Depends(),
+):
+    await action_service.update_events_from_clickstream(datasource_id=ds_id)
