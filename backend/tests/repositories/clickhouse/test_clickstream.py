@@ -21,5 +21,6 @@ class TestClickStreamRepository:
             dsId=self.datasource_id
         )
         assert (
-            query == 'SELECT COUNT(*) FROM "clickstream" WHERE "datasource_id"=%(dsId)s'
+            query
+            == 'SELECT COUNT(DISTINCT "user_id") FROM "clickstream" WHERE "datasource_id"=%(dsId)s'
         )
