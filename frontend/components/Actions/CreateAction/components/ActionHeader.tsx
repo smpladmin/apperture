@@ -1,4 +1,5 @@
 import { Button, Flex, IconButton, Input, Text } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 
 type ActionHeaderProps = {
@@ -16,6 +17,9 @@ const ActionHeader = ({
 }: ActionHeaderProps) => {
   const [showNameInput, setShowNameInput] = useState(false);
 
+  const router = useRouter();
+  const { dsId } = router.query;
+
   return (
     <Flex
       py={'4'}
@@ -26,7 +30,12 @@ const ActionHeader = ({
       borderColor={'white.200'}
     >
       <Flex alignItems={'baseline'} gap={'3'}>
-        <Flex cursor={'pointer'} onClick={() => {}}>
+        <Flex
+          cursor={'pointer'}
+          onClick={() => {
+            router.push(`/analytics/action/list/${dsId}`);
+          }}
+        >
           <i className="ri-arrow-left-line"></i>
         </Flex>
         <Flex direction={'column'} gap={'1'}>
