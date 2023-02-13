@@ -43,7 +43,7 @@ const SelectorsForm = ({
         captureEvent={captureEvent}
         setCaptureEvent={setCaptureEvent}
       />
-      <Flex direction={'column'} gap={'2'}>
+      <Flex direction={'column'} gap={'2'} data-testid={'action-form'}>
         <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
           {'Link target (href tag)'}
         </Text>
@@ -58,6 +58,7 @@ const SelectorsForm = ({
             fontWeight: '400',
             color: 'grey.100',
           }}
+          data-testid={'href-selector-input'}
           defaultValue={groups[0].href}
           onChange={(e) => handleUpdateActionGroup(e.target.value, 'href')}
         />
@@ -80,6 +81,7 @@ const SelectorsForm = ({
             fontWeight: '400',
             color: 'grey.100',
           }}
+          data-testid={'css-selector-input'}
           defaultValue={groups[0].selector}
           onChange={(e) => handleUpdateActionGroup(e.target.value, 'selector')}
         />
@@ -103,6 +105,7 @@ const SelectorsForm = ({
             fontWeight: '400',
             color: 'grey.100',
           }}
+          data-testid={'text-selector-input'}
           defaultValue={groups[0].text}
           onChange={(e) => handleUpdateActionGroup(e.target.value, 'text')}
         />
@@ -125,6 +128,7 @@ const SelectorsForm = ({
             fontWeight: '400',
             color: 'grey.100',
           }}
+          data-testid={'url-selector-input'}
           defaultValue={groups[0].url}
           onChange={(e) => handleUpdateActionGroup(e.target.value, 'url')}
         />

@@ -39,7 +39,7 @@ export const updateAction = async (
   });
 };
 
-export const getTransientActions = async (
+export const getTransientActionEvents = async (
   dsId: string,
   groups: ActionGroup[],
   event: CaptureEvent

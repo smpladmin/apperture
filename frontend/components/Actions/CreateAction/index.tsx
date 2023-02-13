@@ -10,7 +10,7 @@ import isEqual from 'lodash/isEqual';
 import { isValidAction } from '../utils';
 import { useRouter } from 'next/router';
 import {
-  getTransientActions,
+  getTransientActionEvents,
   saveAction,
   updateAction,
 } from '@lib/services/actionService';
@@ -27,6 +27,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
         selector: '',
         text: '',
         url: '',
+        url_matching: '',
       },
     ]
   );
@@ -76,7 +77,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
     if (!isValidAction(groups)) return;
 
     const fetchTransientEvents = async () => {
-      const res = await getTransientActions(
+      const res = await getTransientActionEvents(
         datasourceId as string,
         groups,
         captureEvent

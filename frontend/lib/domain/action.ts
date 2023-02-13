@@ -14,6 +14,7 @@ export type ActionGroup = {
   href: string;
   selector: string;
   url: string;
+  url_matching: string;
 };
 
 export type ActionWithUser = Action & {

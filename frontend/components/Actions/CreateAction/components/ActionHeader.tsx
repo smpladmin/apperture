@@ -48,13 +48,19 @@ const ActionHeader = ({
               value={actionName}
               onChange={(e) => setActionName(e.target.value)}
               onBlur={() => setShowNameInput(false)}
+              data-testid={'action-name-input'}
               onKeyDown={(e) =>
                 e.key === 'Enter' ? setShowNameInput(false) : () => {}
               }
             />
           ) : (
             <Flex alignItems={'center'}>
-              <Text fontSize={'sh-20'} lineHeight={'sh-20'} fontWeight={'600'}>
+              <Text
+                fontSize={'sh-20'}
+                lineHeight={'sh-20'}
+                fontWeight={'600'}
+                data-testid={'action-name'}
+              >
                 {actionName}
               </Text>
               <IconButton
@@ -72,6 +78,7 @@ const ActionHeader = ({
                   backgroundColor: 'transparent',
                 }}
                 onClick={() => setShowNameInput(true)}
+                data-testid={'action-name-edit-button'}
               />
             </Flex>
           )}
@@ -98,6 +105,7 @@ const ActionHeader = ({
         }}
         disabled={isSaveDisabled}
         onClick={() => saveOrUpdateAction()}
+        data-testid={'save-button'}
       >
         Save
       </Button>

@@ -128,6 +128,7 @@ describe('View Funnel', () => {
     mockedTransientFunnel.mockReturnValue(funnelData);
     mockedTransientTrendsData.mockReturnValue(trendsData);
 
+    // @ts-ignore
     delete window.ResizeObserver;
     window.ResizeObserver = jest.fn().mockImplementation(() => ({
       observe: jest.fn(),
