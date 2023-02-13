@@ -1,12 +1,32 @@
 import { Flex, Input, Text, Divider } from '@chakra-ui/react';
-import { CaptureEvent } from '@lib/domain/action';
-import React, { useState } from 'react';
+import { ActionGroup, CaptureEvent } from '@lib/domain/action';
+import { DEBOUNCED_WAIT_TIME } from '@lib/utils/common';
+import { debounce, cloneDeep } from 'lodash';
+import React from 'react';
 import EventOptions from './EventOptions';
 
-const SelectorsForm = () => {
-  const [captureEvent, setCaptureEvent] = useState<CaptureEvent>(
-    CaptureEvent.AUTOCAPTURE
+type SelectorsFormType = {
+  captureEvent: CaptureEvent;
+  setCaptureEvent: Function;
+  groups: ActionGroup[];
+  updateGroupAction: Function;
+};
+
+const SelectorsForm = ({
+  captureEvent,
+  setCaptureEvent,
+  groups,
+  updateGroupAction,
+}: SelectorsFormType) => {
+  const handleUpdateActionGroup = debounce(
+    (value: string, key: keyof ActionGroup) => {
+      const tempActionGroup = cloneDeep(groups);
+      tempActionGroup[0][key] = value;
+      updateGroupAction(tempActionGroup);
+    },
+    DEBOUNCED_WAIT_TIME
   );
+
   return (
     <Flex
       direction={'column'}
@@ -38,6 +58,8 @@ const SelectorsForm = () => {
             fontWeight: '400',
             color: 'grey.100',
           }}
+          defaultValue={groups[0].href}
+          onChange={(e) => handleUpdateActionGroup(e.target.value, 'href')}
         />
       </Flex>
 
@@ -58,6 +80,8 @@ const SelectorsForm = () => {
             fontWeight: '400',
             color: 'grey.100',
           }}
+          defaultValue={groups[0].selector}
+          onChange={(e) => handleUpdateActionGroup(e.target.value, 'selector')}
         />
       </Flex>
 
@@ -79,6 +103,8 @@ const SelectorsForm = () => {
             fontWeight: '400',
             color: 'grey.100',
           }}
+          defaultValue={groups[0].text}
+          onChange={(e) => handleUpdateActionGroup(e.target.value, 'text')}
         />
       </Flex>
 
@@ -86,7 +112,7 @@ const SelectorsForm = () => {
 
       <Flex direction={'column'} gap={'2'}>
         <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
-          {'Page URL'}
+          {'Page URL (contains)'}
         </Text>
         <Input
           px={'3'}
@@ -99,6 +125,8 @@ const SelectorsForm = () => {
             fontWeight: '400',
             color: 'grey.100',
           }}
+          defaultValue={groups[0].url}
+          onChange={(e) => handleUpdateActionGroup(e.target.value, 'url')}
         />
       </Flex>
     </Flex>

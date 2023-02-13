@@ -5,12 +5,14 @@ type ActionHeaderProps = {
   actionName: string;
   setActionName: Function;
   isSaveDisabled: boolean;
+  saveOrUpdateAction: Function;
 };
 
 const ActionHeader = ({
   actionName,
   setActionName,
   isSaveDisabled,
+  saveOrUpdateAction,
 }: ActionHeaderProps) => {
   const [showNameInput, setShowNameInput] = useState(false);
 
@@ -82,11 +84,11 @@ const ActionHeader = ({
         fontWeight={'500'}
         bg={'black.100'}
         color={'white.DEFAULT'}
-        onClick={() => {}}
         _hover={{
           bg: 'grey.200',
         }}
         disabled={isSaveDisabled}
+        onClick={() => saveOrUpdateAction()}
       >
         Save
       </Button>

@@ -21,6 +21,6 @@ export type ActionWithUser = Action & {
 };
 
 export enum CaptureEvent {
-  AUTOCAPTURE = 'autocapture',
-  PAGEVIEW = 'pageview',
+  AUTOCAPTURE = '$autocapture',
+  PAGEVIEW = '$pageview',
 }
