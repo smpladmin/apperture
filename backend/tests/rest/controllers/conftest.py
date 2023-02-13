@@ -46,7 +46,7 @@ from domain.segments.models import (
     WhereSegmentFilter,
 )
 from domain.users.models import UserDetails
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.funnels import FunnelWithUser
 from rest.dtos.metrics import MetricWithUser
 from rest.dtos.notifications import NotificationWithUser

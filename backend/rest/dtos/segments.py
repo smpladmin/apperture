@@ -7,7 +7,7 @@ from domain.segments.models import (
     ComputedSegment,
     Segment,
 )
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
 
 

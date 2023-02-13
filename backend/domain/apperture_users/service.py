@@ -13,6 +13,32 @@ class AppertureUserService:
             return existing_user
         return await self._create_user(oauth_user)
 
+    async def create_user_with_password(
+        self, first_name: str, last_name: str, email: str, password_hash: str
+    ):
+        existing_user = await AppertureUser.find_one(AppertureUser.email == email)
+        if existing_user:
+            return existing_user
+
+        apperture_user = AppertureUser(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=password_hash,
+        )
+        await apperture_user.insert()
+        return apperture_user
+
+    async def reset_user_password(self, email: str, hashed_password: str):
+        await AppertureUser.find_one(AppertureUser.email == email).update(
+            {"$set": {"password": hashed_password}}
+        )
+        return await AppertureUser.find_one(AppertureUser.email == email)
+
+    async def save_password(self, user: AppertureUser, password_hash: str):
+        user.password = password_hash
+        return await user.save()
+
     async def _create_user(self, oauth_user: OAuthUser):
         apperture_user = AppertureUser(
             first_name=oauth_user.given_name,
@@ -25,6 +51,9 @@ class AppertureUserService:
 
     async def get_user(self, id: str):
         return await AppertureUser.get(id)
+
+    async def get_user_by_email(self, email: str):
+        return await AppertureUser.find_one(AppertureUser.email == email)
 
     async def save_slack_credentials(self, user_id, slack_url, slack_channel):
         await AppertureUser.find_one(

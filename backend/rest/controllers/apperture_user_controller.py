@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from domain.apperture_users.service import AppertureUserService
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.apperture_users import AppertureUserResponse
 from rest.middlewares import get_user_id, validate_jwt
 
 
