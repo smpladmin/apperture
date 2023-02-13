@@ -1,10 +1,12 @@
 import React, { ReactNode } from 'react';
-import Action from '@components/Actions/CreateAction';
+import ActionComponent from '@components/Actions/CreateAction';
 import { GetServerSideProps } from 'next';
 import { getAuthToken } from '@lib/utils/request';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { AppWithIntegrations } from '@lib/domain/app';
 import Layout from '@components/Layout';
+import { _getSavedAction } from '@lib/services/actionService';
+import { Action } from '@lib/domain/action';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -16,8 +18,10 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
+  const { actionId } = query;
 
   const apps = await _getAppsWithIntegrations(token);
+  const savedAction = await _getSavedAction(actionId as string, token);
 
   if (!apps.length) {
     return {
@@ -27,13 +31,22 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
+
+  if (!savedAction) {
+    return {
+      redirect: {
+        destination: '/404',
+      },
+      props: {},
+    };
+  }
   return {
-    props: { apps },
+    props: { apps, savedAction },
   };
 };
 
-const EditAction = () => {
-  return <Action />;
+const EditAction = ({ savedAction }: { savedAction: Action }) => {
+  return <ActionComponent savedAction={savedAction} />;
 };
 
 EditAction.getLayout = function getLayout(

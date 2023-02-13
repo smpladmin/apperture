@@ -19,7 +19,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
   const [actionName, setActionName] = useState(
     savedAction?.name || 'Untitled Action'
   );
-  const [isEmpty, setIsEmpty] = useState(false);
+  const [isEmpty, setIsEmpty] = useState(savedAction ? false : true);
   const [groups, setGroups] = useState<ActionGroup[]>(
     savedAction?.groups || [
       {
