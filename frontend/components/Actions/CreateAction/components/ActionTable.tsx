@@ -6,11 +6,12 @@ import utc from 'dayjs/plugin/utc';
 import EllipsisCell from './EllipsisCell';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 import EventType from './EventType';
+import { ActionEventData } from '@lib/domain/action';
 dayjs.extend(utc);
 
 type ActionTableProps = {
   isLoading: boolean;
-  tableData: { count: number; data: any[] };
+  tableData: ActionEventData;
 };
 
 const ActionTable = ({ isLoading, tableData }: ActionTableProps) => {

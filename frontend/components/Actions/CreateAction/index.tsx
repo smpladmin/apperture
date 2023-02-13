@@ -4,7 +4,12 @@ import emptyAction from '@assets/images/empty-action.svg';
 import Image from 'next/image';
 import ActionHeader from './components/ActionHeader';
 import SelectorsForm from './components/SelectorsForm';
-import { Action, ActionGroup, CaptureEvent } from '@lib/domain/action';
+import {
+  Action,
+  ActionEventData,
+  ActionGroup,
+  CaptureEvent,
+} from '@lib/domain/action';
 import ActionTable from './components/ActionTable';
 import isEqual from 'lodash/isEqual';
 import { isValidAction } from '../utils';
@@ -36,10 +41,11 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
   );
   const [isSaveDisabled, setIsSavedDisabled] = useState(true);
   const [isActionBeingEdited, setIsActionBeingEdited] = useState(false);
-  const [transientActionEvents, setTransientActionEvents] = useState({
-    count: 0,
-    data: [],
-  });
+  const [transientActionEvents, setTransientActionEvents] =
+    useState<ActionEventData>({
+      count: 0,
+      data: [],
+    });
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();

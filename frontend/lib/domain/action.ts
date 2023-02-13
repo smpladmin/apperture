@@ -21,6 +21,17 @@ export type ActionWithUser = Action & {
   user: User;
 };
 
+export type ActionEventData = {
+  count: number;
+  data: {
+    event: string;
+    uid: string;
+    url: string;
+    source: string;
+    timestamp: Date;
+  }[];
+};
+
 export enum CaptureEvent {
   AUTOCAPTURE = '$autocapture',
   PAGEVIEW = '$pageview',
