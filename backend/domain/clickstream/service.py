@@ -31,17 +31,7 @@ class ClickstreamService:
             "properties",
         ]
 
-    def build_element_chain(self, elements, event):
-        return self.elements_service.elements_to_string(elements=elements)
-
-    def build_clickstream_data(
-        self,
-        datasource_id: str,
-        timestamp: str,
-        user_id: str,
-        event: str,
-        properties: Dict,
-    ):
+    def build_element_chain(self, properties_elements, event):
         elements = [
             Element(
                 text=element_dict.get("$el_text"),
@@ -53,10 +43,20 @@ class ClickstreamService:
                 nth_of_type=element_dict.get("nth_of_type"),
                 attributes=element_dict.get("attributes", {}),
             )
-            for element_dict in properties["$elements"]
+            for element_dict in properties_elements
         ]
+        return self.elements_service.elements_to_string(elements=elements)
+
+    def build_clickstream_data(
+        self,
+        datasource_id: str,
+        timestamp: str,
+        user_id: str,
+        event: str,
+        properties: Dict,
+    ):
         element_chain = (
-            self.build_element_chain(elements, event)
+            self.build_element_chain(properties["$elements"], event)
             if event == CaptureEvent.AUTOCAPTURE
             else ""
         )
