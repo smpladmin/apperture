@@ -10,18 +10,18 @@ class ElementsService:
         ret = []
         for element in elements:
             el_string = ""
-            if "tag_name" in element:
-                el_string += element["tag_name"]
-            if "classes" in element:
-                for single_class in sorted(element["classes"]):
+            if element.tag_name:
+                el_string += element.tag_name
+            if element.attr_class:
+                for single_class in sorted(element.attr_class):
                     el_string += ".{}".format(single_class.replace('"', ""))
             attributes = {
-                **({"text": element["text"]} if "text" in element else {}),
-                "nth-child": element["nth_child"] or 0,
-                "nth-of-type": element["nth_of_type"] or 0,
-                **({"href": element["href"]} if "href" in element else {}),
-                **({"attr__id": element["attr__id"]} if "attr__id" in element else {}),
-                **(element["attributes"] if "attributes" in element else {}),
+                **({"text": element.text} if element.text else {}),
+                "nth-child": element.nth_child or 0,
+                "nth-of-type": element.nth_of_type or 0,
+                **({"href": element.href} if element.href else {}),
+                **({"attr_id": element.attr_id} if element.attr_id else {}),
+                **element.attributes,
             }
             attributes = {
                 self._escape(key): self._escape(str(value))
