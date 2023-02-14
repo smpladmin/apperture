@@ -72,8 +72,8 @@ class Actions(EventsBase):
             .select(
                 self.click_stream_table.datasource_id,
                 self.click_stream_table.timestamp,
-                self.click_stream_table.user_id,
                 terms.Term.wrap_constant("apperture"),
+                self.click_stream_table.user_id,
                 terms.Term.wrap_constant(action.name),
                 self.click_stream_table.properties,
             )
