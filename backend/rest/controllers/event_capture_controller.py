@@ -2,8 +2,10 @@ import logging
 import json
 from typing import Any, Union
 
-from fastapi import APIRouter, Form, Depends
+from fastapi import APIRouter, Form, Depends, Response
 from base64 import b64decode
+
+import requests
 
 from domain.datasources.service import DataSourceService
 from domain.clickstream.service import ClickstreamService
@@ -43,6 +45,18 @@ async def capture_click_stream(
         )
         return {"success": True}
     return {"success": False}
+
+
+@router.get("/events/capture/static/array.js")
+async def get_js_sdk():
+    res = requests.get("https://app-static.posthog.com/static/array.js")
+    return Response(res.content, media_type="application/javascript; charset=UTF-8")
+
+
+@router.get("/events/capture/static/array.js.map")
+async def get_js_sdk_map():
+    res = requests.get("https://app-static.posthog.com/static/array.js.map")
+    return Response(res.content)
 
 
 @router.get("/events/clickstream")
