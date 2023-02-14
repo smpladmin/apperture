@@ -11,8 +11,13 @@ def patch_datetime_today(monkeypatch):
         def today(cls):
             return FAKE_TIME
 
+        @classmethod
+        def now(cls):
+            return FAKE_TIME
+
     monkeypatch.setattr(datetime, "datetime", MockDatetime)
 
 
 def test_patch_datetime(patch_datetime_today):
     assert datetime.datetime.today() == FAKE_TIME
+    assert datetime.datetime.now() == FAKE_TIME

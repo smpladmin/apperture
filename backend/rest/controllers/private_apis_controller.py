@@ -8,6 +8,7 @@ from authorisation.service import AuthService
 from data_processor_queue.service import DPQueueService
 from domain.apperture_users.service import AppertureUserService
 from domain.actions.service import ActionService
+from domain.common.models import IntegrationProvider
 from domain.properties.service import PropertiesService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
@@ -213,9 +214,22 @@ async def refresh_properties(
     )
 
 
-@router.get("/click_stream")
+@router.post("/click_stream")
 async def update_events_from_clickstream(
-    ds_id: str,
+    datasource_id: Union[str, None] = None,
     action_service: ActionService = Depends(),
+    datasource_service: DataSourceService = Depends(),
 ):
-    await action_service.update_events_from_clickstream(datasource_id=ds_id)
+    if datasource_id:
+        await action_service.update_events_from_clickstream(datasource_id=datasource_id)
+        return {"updated": datasource_id}
+
+    else:
+        apperture_datasources = await datasource_service.get_datasources_for_provider(
+            provider=IntegrationProvider.APPERTURE
+        )
+        for datasource in apperture_datasources:
+            await action_service.update_events_from_clickstream(
+                datasource_id=str(datasource.id)
+            )
+        return {"updated": [str(datasource.id) for datasource in apperture_datasources]}

@@ -38,6 +38,9 @@ class DataSourceService:
     async def get_datasource(self, id: str):
         return await DataSource.get(id)
 
+    async def get_datasources_for_provider(self, provider: IntegrationProvider):
+        return await DataSource.find(DataSource.provider == provider).to_list()
+
     async def create_datasource(
         self,
         external_source_id: str,

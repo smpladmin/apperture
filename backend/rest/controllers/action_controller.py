@@ -3,9 +3,11 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from domain.actions.service import ActionService
+from domain.apperture_users.models import AppertureUser
 from domain.datasources.service import DataSourceService
-from rest.dtos.actions import CreateActionDto, ActionResponse
-from rest.middlewares import validate_jwt, get_user_id
+from rest.dtos.actions import CreateActionDto, ActionResponse, ActionWithUser
+from rest.dtos.apperture_users import AppertureUserResponse
+from rest.middlewares import validate_jwt, get_user_id, get_user
 
 router = APIRouter(
     tags=["actions"],
@@ -23,20 +25,28 @@ async def create_action(
 ):
     datasource = await ds_service.get_datasource(dto.datasourceId)
     action = action_service.build_action(
-        datasource.id,
-        datasource.app_id,
-        user_id,
-        dto.name,
-        dto.groups,
+        datasourceId=datasource.id,
+        appId=datasource.app_id,
+        userId=user_id,
+        name=dto.name,
+        groups=dto.groups,
     )
 
-    await action_service.add_action(action)
+    await action_service.add_action(action=action)
     return action
 
 
-@router.get("/actions", response_model=List[ActionResponse])
+@router.get("/actions", response_model=List[ActionWithUser])
 async def get_actions(
-    ds_id: str,
+    datasource_id: str,
     action_service: ActionService = Depends(),
+    user: AppertureUser = Depends(get_user),
 ):
-    return await action_service.get_actions_for_datasource_id(datasource_id=ds_id)
+    actions = await action_service.get_actions_for_datasource_id(
+        datasource_id=datasource_id
+    )
+    actions = [ActionWithUser.from_orm(s) for s in actions]
+    for action in actions:
+        action.user = AppertureUserResponse.from_orm(user)
+
+    return actions
