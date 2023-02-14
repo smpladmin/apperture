@@ -26,6 +26,7 @@ class TestActionsRepository:
                     selector="#__next > div > div.css-3h169z > div.css-8xl60i > button"
                 )
             ],
+            event_type="$autocapture",
         )
         self.migration_query = (
             'INSERT INTO "events" SELECT '
@@ -77,7 +78,7 @@ class TestActionsRepository:
         assert await self.repo.build_matching_events_from_clickstream_query(
             datasource_id="636a1c61d715ca6baae65611",
             groups=self.action.groups,
-            event=self.event,
+            event_type=self.event,
         ) == (self.matching_events_query, self.parameters)
 
     @pytest.mark.asyncio
@@ -85,5 +86,5 @@ class TestActionsRepository:
         assert await self.repo.build_count_matching_events_from_clickstream_query(
             datasource_id="636a1c61d715ca6baae65611",
             groups=self.action.groups,
-            event=self.event,
+            event_type=self.event,
         ) == (self.count_matching_events_query, self.parameters)

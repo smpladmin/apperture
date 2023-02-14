@@ -42,6 +42,7 @@ class TestActionService:
                     selector="#__next > div > div.css-3h169z > div.css-8xl60i > button"
                 )
             ],
+            event_type="$autocapture",
         )
         Action.datasource_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         Action.id = MagicMock(return_value=PydanticObjectId(self.ds_id))
@@ -70,6 +71,7 @@ class TestActionService:
                 }
             ],
             "id": None,
+            "event_type": "$autocapture",
             "name": "clicked on settings",
             "processed_till": None,
             "revision_id": ANY,
@@ -119,6 +121,7 @@ class TestActionService:
             ],
             "id": None,
             "name": "clicked on settings",
+            "event_type": "$autocapture",
             "processed_till": None,
             "revision_id": ANY,
             "updated_at": None,
@@ -138,7 +141,9 @@ class TestActionService:
     @pytest.mark.asyncio
     async def test_compute_action(self):
         await self.service.compute_action(
-            datasource_id=self.ds_id, groups=self.action.groups, event="$autocapture"
+            datasource_id=self.ds_id,
+            groups=self.action.groups,
+            event_type="$autocapture",
         )
         self.actions.get_matching_events_from_clickstream.assert_called_once_with(
             **{
@@ -156,7 +161,7 @@ class TestActionService:
                         "url_matching": None,
                     }
                 ],
-                "event": "$autocapture",
+                "event_type": "$autocapture",
             }
         )
         self.actions.get_count_of_matching_event_from_clickstream.assert_called_once_with(
@@ -175,6 +180,6 @@ class TestActionService:
                         "url_matching": None,
                     }
                 ],
-                "event": "$autocapture",
+                "event_type": "$autocapture",
             }
         )

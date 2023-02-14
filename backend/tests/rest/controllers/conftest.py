@@ -7,10 +7,15 @@ import pytest
 from beanie import PydanticObjectId
 from fastapi.testclient import TestClient
 
-from domain.actions.models import Action, ActionGroup
+from domain.actions.models import (
+    Action,
+    ActionGroup,
+    CaptureEvent,
+    ComputedEventStreamResult,
+)
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App
-from domain.common.models import IntegrationProvider, SavedItems, WatchlistItemType
+from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
 from domain.events.models import Event, EventsData
@@ -270,6 +275,7 @@ def action_service():
                 selector="#__next > div > div.css-3h169z > div.css-8xl60i > button"
             )
         ],
+        event_type=CaptureEvent.AUTOCAPTURE,
     )
     computed_action_response = ComputedActionResponse(
         count=1,

@@ -97,16 +97,16 @@ class Actions(EventsBase):
         return query.get_sql(), params
 
     async def get_matching_events_from_clickstream(
-        self, datasource_id: str, groups: List[ActionGroup], event: CaptureEvent
+        self, datasource_id: str, groups: List[ActionGroup], event_type: CaptureEvent
     ):
         return self.execute_get_query(
             *await self.build_matching_events_from_clickstream_query(
-                datasource_id=datasource_id, groups=groups, event=event
+                datasource_id=datasource_id, groups=groups, event_type=event_type
             )
         )
 
     async def build_matching_events_from_clickstream_query(
-        self, datasource_id: str, groups: ActionGroup, event: CaptureEvent
+        self, datasource_id: str, groups: ActionGroup, event_type: CaptureEvent
     ):
         conditions, params = self.filter_click_event(filter=groups[0])
         query = (
@@ -119,22 +119,22 @@ class Actions(EventsBase):
             )
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
         )
-        conditions.append(self.click_stream_table.event == event)
+        conditions.append(self.click_stream_table.event == event_type)
         query = query.where(Criterion.all(conditions)).limit(100)
         params["ds_id"] = str(datasource_id)
         return query.get_sql(), params
 
     async def get_count_of_matching_event_from_clickstream(
-        self, datasource_id: str, groups: List[ActionGroup], event: CaptureEvent
+        self, datasource_id: str, groups: List[ActionGroup], event_type: CaptureEvent
     ):
         return self.execute_get_query(
             *await self.build_count_matching_events_from_clickstream_query(
-                datasource_id=datasource_id, groups=groups, event=event
+                datasource_id=datasource_id, groups=groups, event_type=event_type
             )
         )
 
     async def build_count_matching_events_from_clickstream_query(
-        self, datasource_id: str, groups: ActionGroup, event: CaptureEvent
+        self, datasource_id: str, groups: ActionGroup, event_type: CaptureEvent
     ):
         conditions, params = self.filter_click_event(filter=groups[0])
         query = (
@@ -142,7 +142,7 @@ class Actions(EventsBase):
             .select(fn.Count("*"))
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
         )
-        conditions.append(self.click_stream_table.event == event)
+        conditions.append(self.click_stream_table.event == event_type)
         query = query.where(Criterion.all(conditions))
         params["ds_id"] = str(datasource_id)
         return query.get_sql(), params

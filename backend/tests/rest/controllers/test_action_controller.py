@@ -2,9 +2,8 @@ import json
 from unittest.mock import ANY
 from beanie import PydanticObjectId
 
-from domain.actions.models import ActionGroup, ActionGroupCondition
+from domain.actions.models import ActionGroup, ActionGroupCondition, CaptureEvent
 from tests.utils import filter_response
-from tests.rest.controllers.conftest import transient_action_data
 
 
 def test_create_action(client_init, action_data, action_service):
@@ -27,6 +26,7 @@ def test_create_action(client_init, action_data, action_service):
                 "url_matching": None,
             }
         ],
+        "eventType": CaptureEvent.AUTOCAPTURE,
         "name": "clicked on settings",
         "processedTill": None,
         "userId": "63e4da53370789982002e57d",
@@ -50,6 +50,7 @@ def test_create_action(client_init, action_data, action_service):
             ],
             "name": "clicked on settings",
             "userId": "mock-user-id",
+            "eventType": CaptureEvent.AUTOCAPTURE,
         }
     )
     action_service.add_action.assert_called_once()
@@ -72,6 +73,7 @@ def test_create_action(client_init, action_data, action_service):
         ],
         "id": None,
         "name": "clicked on settings",
+        "event_type": CaptureEvent.AUTOCAPTURE,
         "processed_till": None,
         "revision_id": ANY,
         "updated_at": None,
@@ -102,6 +104,7 @@ def test_get_actions(client_init, action_service):
                 }
             ],
             "name": "clicked on settings",
+            "eventType": CaptureEvent.AUTOCAPTURE,
             "processedTill": None,
             "revisionId": ANY,
             "updatedAt": None,
@@ -143,6 +146,7 @@ def test_update_action(client_init, action_data, action_service):
             }
         ],
         "name": "clicked on settings",
+        "eventType": CaptureEvent.AUTOCAPTURE,
         "processedTill": None,
         "userId": "63e4da53370789982002e57d",
     }
@@ -166,6 +170,7 @@ def test_update_action(client_init, action_data, action_service):
         ],
         "id": None,
         "name": "clicked on settings",
+        "event_type": CaptureEvent.AUTOCAPTURE,
         "processed_till": None,
         "revision_id": ANY,
         "updated_at": None,
@@ -195,6 +200,7 @@ def test_get_actions_by_id(client_init, action_service):
             }
         ],
         "name": "clicked on settings",
+        "eventType": CaptureEvent.AUTOCAPTURE,
         "processedTill": None,
         "revisionId": ANY,
         "updatedAt": None,
@@ -238,6 +244,6 @@ def test_transient_action(client_init, action_service, transient_action_data):
                     "url_matching": None,
                 }
             ],
-            "event": "$autocapture",
+            "event_type": "$autocapture",
         }
     )
