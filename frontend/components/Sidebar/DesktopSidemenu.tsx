@@ -5,7 +5,6 @@ import {
   Flex,
   Box,
   Image,
-  Text,
   Avatar,
   IconButton,
   useDisclosure,
@@ -89,15 +88,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
         />
       </Box>
       <Box>
-        <Text
-          fontSize={'xs-10'}
-          lineHeight={'xs-10'}
-          textColor={'white'}
-          opacity={'0.3'}
-        >
-          APP
-        </Text>
-        <Flex marginTop={4} gap={2}>
+        <Flex gap={2}>
           <Flex
             marginBottom={10}
             justifyContent={'center'}
@@ -122,8 +113,8 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           </Flex>
         </Flex>
       </Box>
-      <Box>
-        <Flex direction={'column'} alignItems={'center'} gap={5}>
+      <Flex direction={'column'} justifyContent={'space-between'} h={'full'}>
+        <Flex direction={'column'} alignItems={'center'} gap={2}>
           <Tooltip
             label={'Explore'}
             aria-label={'Explore'}
@@ -333,62 +324,62 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
             />
           </Tooltip>
         </Flex>
-      </Box>
-      <Box
-        marginTop={'auto'}
-        onClick={() => router.push(`/analytics/settings?previousDsId=${dsId}`)}
-      >
-        <Tooltip
-          label={'Settings'}
-          aria-label={'Settings'}
-          bg={'white.DEFAULT'}
-          color={'black.100'}
-        >
-          <IconButton
-            aria-label="settings"
-            icon={<i className="ri-settings-3-line"></i>}
-            rounded={'lg'}
-            h={10}
-            w={10}
-            bg={'black.0'}
-            fontWeight={'500'}
-            color={'grey.100'}
-            _hover={{
-              backgroundColor: 'white.0',
-              color: 'white',
-            }}
-            _active={{
-              backgroundColor: 'transparent',
-            }}
-          />
-        </Tooltip>
-      </Box>
-      <Box marginTop={'4'} onClick={openLogoutModal}>
-        <Tooltip
-          label={'Logout'}
-          aria-label={'Logout'}
-          bg={'white.DEFAULT'}
-          color={'black.100'}
-        >
-          <IconButton
-            aria-label="close"
-            icon={<i className="ri-logout-box-r-line" />}
-            rounded={'lg'}
-            h={10}
-            w={10}
-            bg={'black.0'}
-            fontWeight={'500'}
-            color={'grey.100'}
-            _hover={{
-              backgroundColor: 'white.0',
-              color: 'white',
-            }}
-            _active={{
-              backgroundColor: 'transparent',
-            }}
-          />
-        </Tooltip>
-      </Box>
+
+        <Flex gap={'2'} direction={'column'}>
+          <Tooltip
+            label={'Settings'}
+            aria-label={'Settings'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="settings"
+              icon={<i className="ri-settings-3-line"></i>}
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={() =>
+                router.push(`/analytics/settings?previousDsId=${dsId}`)
+              }
+            />
+          </Tooltip>
+          <Tooltip
+            label={'Logout'}
+            aria-label={'Logout'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="close"
+              icon={<i className="ri-logout-box-r-line" />}
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={openLogoutModal}
+            />
+          </Tooltip>
+        </Flex>
+      </Flex>
       <LogoutModal isOpen={isLogoutModalOpen} onClose={closeLogoutModal} />
     </Flex>
   );
