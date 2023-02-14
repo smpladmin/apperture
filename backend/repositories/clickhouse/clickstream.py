@@ -41,7 +41,7 @@ class Clickstream(EventsBase):
         parameters = {"dsId": dsId}
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
-            .select(fn.Count(self.click_stream_table.user_id).distinct())
+            .select(fn.Count("*"))
             .where(self.click_stream_table.datasource_id == Parameter("%(dsId)s"))
         )
 

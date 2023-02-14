@@ -1,9 +1,9 @@
 import datetime
 import logging
 from typing import Dict, List, Tuple
-from pypika import ClickHouseQuery, Parameter, terms, Criterion
+from pypika import ClickHouseQuery, Parameter, terms, Criterion, functions as fn
 
-from domain.actions.models import Action, ActionGroup
+from domain.actions.models import Action, ActionGroup, CaptureEvent
 from repositories.clickhouse.base import EventsBase
 from repositories.clickhouse.parser.action_parser_utils import Selector
 
@@ -94,4 +94,55 @@ class Actions(EventsBase):
 
         query = query.where(Criterion.all(conditions))
         params["ds_id"] = str(action.datasource_id)
+        return query.get_sql(), params
+
+    async def get_matching_events_from_clickstream(
+        self, datasource_id: str, groups: List[ActionGroup], event_type: CaptureEvent
+    ):
+        return self.execute_get_query(
+            *await self.build_matching_events_from_clickstream_query(
+                datasource_id=datasource_id, groups=groups, event_type=event_type
+            )
+        )
+
+    async def build_matching_events_from_clickstream_query(
+        self, datasource_id: str, groups: ActionGroup, event_type: CaptureEvent
+    ):
+        conditions, params = self.filter_click_event(filter=groups[0])
+        query = (
+            ClickHouseQuery.from_(self.click_stream_table)
+            .select(
+                self.click_stream_table.event,
+                self.click_stream_table.user_id,
+                self.click_stream_table.properties,
+                self.click_stream_table.timestamp,
+            )
+            .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
+        )
+        conditions.append(self.click_stream_table.event == event_type)
+        query = query.where(Criterion.all(conditions)).limit(100)
+        params["ds_id"] = str(datasource_id)
+        return query.get_sql(), params
+
+    async def get_count_of_matching_event_from_clickstream(
+        self, datasource_id: str, groups: List[ActionGroup], event_type: CaptureEvent
+    ):
+        return self.execute_get_query(
+            *await self.build_count_matching_events_from_clickstream_query(
+                datasource_id=datasource_id, groups=groups, event_type=event_type
+            )
+        )
+
+    async def build_count_matching_events_from_clickstream_query(
+        self, datasource_id: str, groups: ActionGroup, event_type: CaptureEvent
+    ):
+        conditions, params = self.filter_click_event(filter=groups[0])
+        query = (
+            ClickHouseQuery.from_(self.click_stream_table)
+            .select(fn.Count("*"))
+            .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
+        )
+        conditions.append(self.click_stream_table.event == event_type)
+        query = query.where(Criterion.all(conditions))
+        params["ds_id"] = str(datasource_id)
         return query.get_sql(), params

@@ -1,12 +1,18 @@
-import datetime
 from typing import List
 
-from domain.actions.models import ActionGroup, Action
+from domain.actions.models import (
+    Action,
+    ActionGroup,
+    ComputedEventStreamResult,
+)
 from mongo import Mongo
 from fastapi import Depends
 from beanie import PydanticObjectId
+from datetime import datetime
 
 from repositories.clickhouse.actions import Actions
+from domain.clickstream.models import CaptureEvent
+from rest.dtos.actions import ComputedActionResponse
 
 
 class ActionService:
@@ -25,6 +31,7 @@ class ActionService:
         userId: str,
         name: str,
         groups: List[ActionGroup],
+        eventType: CaptureEvent,
     ) -> Action:
         return Action(
             datasource_id=datasourceId,
@@ -32,6 +39,7 @@ class ActionService:
             user_id=userId,
             name=name,
             groups=groups,
+            event_type=eventType,
         )
 
     async def add_action(self, action: Action):
@@ -44,7 +52,7 @@ class ActionService:
         ).to_list()
 
     async def update_action_processed_till(
-        self, action_id: PydanticObjectId, processed_till: datetime.datetime
+        self, action_id: PydanticObjectId, processed_till: datetime
     ):
         await Action.find_one(
             Action.id == action_id,
@@ -54,6 +62,49 @@ class ActionService:
     async def update_events_from_clickstream(self, datasource_id: str):
         actions = await self.get_actions_for_datasource_id(datasource_id=datasource_id)
         for action in actions:
-            await self.actions.update_events_from_clickstream(
-                action=action, update_action_func=self.update_action_processed_till
+            if action.groups[0].selector:
+                await self.actions.update_events_from_clickstream(
+                    action=action, update_action_func=self.update_action_processed_till
+                )
+
+    async def get_action(self, id: str) -> Action:
+        return await Action.get(id)
+
+    async def update_action(self, action_id: str, action: Action):
+        to_update = action.dict()
+        to_update.pop("id")
+        to_update.pop("created_at")
+        to_update["updated_at"] = datetime.utcnow()
+        to_update.pop("processed_till")
+
+        await Action.find_one(
+            Action.id == PydanticObjectId(action_id),
+        ).update({"$set": to_update})
+
+    async def compute_action(
+        self, datasource_id: str, groups: List[ActionGroup], event_type: CaptureEvent
+    ) -> List[ComputedActionResponse]:
+        matching_events = []
+        count = 0
+        if groups[0].selector:
+            matching_events = await self.actions.get_matching_events_from_clickstream(
+                datasource_id=datasource_id, groups=groups, event_type=event_type
             )
+            matching_events = [
+                ComputedEventStreamResult(
+                    event=event[0],
+                    uid=event[1],
+                    url=event[2].get("$current_url", None),
+                    source=event[2].get("$lib", None),
+                    timestamp=event[3],
+                )
+                for event in matching_events
+            ]
+
+            count = (
+                await self.actions.get_count_of_matching_event_from_clickstream(
+                    datasource_id=datasource_id, groups=groups, event_type=event_type
+                )
+            )[0][0]
+
+        return ComputedActionResponse(count=count, data=matching_events)

@@ -15,6 +15,7 @@ class TestActionService:
     def setup_method(self):
         Action.get_settings = MagicMock()
         Action.insert = AsyncMock()
+        Action.get = AsyncMock()
         DataSource.get_settings = MagicMock()
         self.mongo = MagicMock()
         self.actions = AsyncMock()
@@ -24,6 +25,7 @@ class TestActionService:
         self.provider = IntegrationProvider.MIXPANEL
         self.user_id = "636a1c61d715ca6baae65611"
         self.name = "name"
+        self.id = "636a1c61d715ca6baae65611"
         FindMock = namedtuple("FindMock", ["to_list"])
         Action.find = MagicMock(
             return_value=FindMock(
@@ -40,6 +42,7 @@ class TestActionService:
                     selector="#__next > div > div.css-3h169z > div.css-8xl60i > button"
                 )
             ],
+            event_type="$autocapture",
         )
         Action.datasource_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         Action.id = MagicMock(return_value=PydanticObjectId(self.ds_id))
@@ -68,6 +71,7 @@ class TestActionService:
                 }
             ],
             "id": None,
+            "event_type": "$autocapture",
             "name": "clicked on settings",
             "processed_till": None,
             "revision_id": ANY,
@@ -117,8 +121,65 @@ class TestActionService:
             ],
             "id": None,
             "name": "clicked on settings",
+            "event_type": "$autocapture",
             "processed_till": None,
             "revision_id": ANY,
             "updated_at": None,
             "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         }
+
+    @pytest.mark.asyncio
+    async def test_get_actions_by_id(self):
+        await self.service.get_action(id=self.id)
+        Action.get.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_update_action(self):
+        await self.service.update_action(action_id=self.id, action=self.action)
+        Action.find_one.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_compute_action(self):
+        await self.service.compute_action(
+            datasource_id=self.ds_id,
+            groups=self.action.groups,
+            event_type="$autocapture",
+        )
+        self.actions.get_matching_events_from_clickstream.assert_called_once_with(
+            **{
+                "datasource_id": "636a1c61d715ca6baae65611",
+                "groups": [
+                    {
+                        "condition": ActionGroupCondition.OR,
+                        "event": None,
+                        "href": None,
+                        "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
+                        "button",
+                        "tag_name": None,
+                        "text": None,
+                        "url": None,
+                        "url_matching": None,
+                    }
+                ],
+                "event_type": "$autocapture",
+            }
+        )
+        self.actions.get_count_of_matching_event_from_clickstream.assert_called_once_with(
+            **{
+                "datasource_id": "636a1c61d715ca6baae65611",
+                "groups": [
+                    {
+                        "condition": ActionGroupCondition.OR,
+                        "event": None,
+                        "href": None,
+                        "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
+                        "button",
+                        "tag_name": None,
+                        "text": None,
+                        "url": None,
+                        "url_matching": None,
+                    }
+                ],
+                "event_type": "$autocapture",
+            }
+        )

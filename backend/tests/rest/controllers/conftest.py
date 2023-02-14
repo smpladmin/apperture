@@ -7,10 +7,15 @@ import pytest
 from beanie import PydanticObjectId
 from fastapi.testclient import TestClient
 
-from domain.actions.models import Action, ActionGroup
+from domain.actions.models import (
+    Action,
+    ActionGroup,
+    CaptureEvent,
+    ComputedEventStreamResult,
+)
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App
-from domain.common.models import IntegrationProvider, SavedItems, WatchlistItemType
+from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
 from domain.events.models import Event, EventsData
@@ -51,6 +56,7 @@ from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.funnels import FunnelWithUser
 from rest.dtos.metrics import MetricWithUser
 from rest.dtos.notifications import NotificationWithUser
+from rest.dtos.actions import ComputedActionResponse
 from rest.dtos.segments import SegmentWithUser
 
 
@@ -269,15 +275,34 @@ def action_service():
                 selector="#__next > div > div.css-3h169z > div.css-8xl60i > button"
             )
         ],
+        event_type=CaptureEvent.AUTOCAPTURE,
+    )
+    computed_action_response = ComputedActionResponse(
+        count=1,
+        data=[
+            ComputedEventStreamResult(
+                event="$autocapture",
+                timestamp="2023-02-09T10:26:22",
+                uid="18635b641091067-0b29b2c45f4c5d-16525635-16a7f0-18635b6410a285c",
+                url="http://localhost:3000/analytics/explore/63e236e89343884e21e0a07c",
+                source="web",
+            )
+        ],
     )
     action_future = asyncio.Future()
     action_future.set_result(action)
     actions_future = asyncio.Future()
     actions_future.set_result([action])
+    computed_action_future = asyncio.Future()
+    computed_action_future.set_result(computed_action_response)
+
     action_service_mock.build_action.return_value = action
     action_service_mock.add_action.return_value = action_future
     action_service_mock.get_actions_for_datasource_id.return_value = actions_future
     action_service_mock.update_events_from_clickstream.return_value = action_future
+    action_service_mock.update_action.return_value = action_future
+    action_service_mock.get_action.return_value = action_future
+    action_service_mock.compute_action.return_value = computed_action_future
     return action_service_mock
 
 
@@ -358,6 +383,18 @@ def action_data():
         "groups": [
             {"selector": "#__next > div > div.css-3h169z > div.css-8xl60i > button"}
         ],
+        "eventType": "$autocapture"
+    }
+
+
+@pytest.fixture(scope="module")
+def transient_action_data():
+    return {
+        "datasourceId": "63e4da53370789982002e57d",
+        "groups": [
+            {"selector": "#__next > div > div.css-3h169z > div.css-8xl60i > button"}
+        ],
+        "eventType": "$autocapture",
     }
 
 
