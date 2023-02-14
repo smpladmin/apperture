@@ -4,8 +4,10 @@ from authlib.integrations.starlette_client import OAuthError
 from starlette.responses import RedirectResponse
 
 from authorisation.jwt_auth import create_access_token
+from authorisation.service import AuthService
 from domain.apperture_users.service import AppertureUserService
 from authorisation import OAuthClientFactory, OAuthProvider
+from rest.dtos.apperture_users import CreateUserDto
 from settings import apperture_settings
 
 router = APIRouter(tags=["auth"])
@@ -23,6 +25,27 @@ async def login(
         redirect_uri = redirect_uri.replace("http", "https")
     return await oauth.google.authorize_redirect(
         request, redirect_uri, state=redirect_url
+    )
+
+
+@router.get("/login/password")
+async def login_with_password(
+    email: str,
+    password: str,
+    user_service: AppertureUserService = Depends(),
+    auth_service: AuthService = Depends(),
+):
+    apperture_user = await user_service.get_user_by_email(email)
+    new_hash = auth_service.verify_password(apperture_user.password, password)
+    if not new_hash:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    await user_service.save_password(apperture_user, new_hash)
+    return await _redirect_with_auth_cookie(
+        os.getenv("FRONTEND_LOGIN_REDIRECT_URL"), str(apperture_user.id)
     )
 
 

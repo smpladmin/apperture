@@ -6,7 +6,7 @@ from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
 from domain.funnels.service import FunnelsService
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.funnels import (
     CreateFunnelDto,
     TransientFunnelDto,

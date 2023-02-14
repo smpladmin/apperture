@@ -8,7 +8,8 @@ class AppertureUser(Document):
     first_name: str
     last_name: str
     email: Indexed(str)
-    picture: str
+    password: Optional[str]
+    picture: Optional[str]
     slack_channel: Optional[str]
     slack_url: Optional[str]
 

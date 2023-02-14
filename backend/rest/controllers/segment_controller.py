@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from domain.datasources.service import DataSourceService
 from domain.segments.service import SegmentService
 from domain.apperture_users.models import AppertureUser
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.segments import (
     SegmentWithUser,
     TransientSegmentDto,

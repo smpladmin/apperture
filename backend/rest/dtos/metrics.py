@@ -1,7 +1,7 @@
 from typing import List, Optional
 from beanie import PydanticObjectId
 from pydantic import BaseModel
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.apperture_users import AppertureUserResponse
 
 from rest.dtos.model_response import ModelResponse
 from domain.metrics.models import ComputedMetricResult, SegmentsAndEvents, Metric
