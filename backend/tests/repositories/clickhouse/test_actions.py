@@ -30,7 +30,7 @@ class TestActionsRepository:
         )
         self.migration_query = (
             'INSERT INTO "events" SELECT '
-            '"datasource_id","timestamp","user_id",\'apperture\',\'clicked on '
+            '"datasource_id","timestamp",\'apperture\',"user_id",\'clicked on '
             'settings\',"properties" FROM "clickstream" WHERE "datasource_id"=%(ds_id)s '
             "AND \"timestamp\"<=parseDateTimeBestEffort('2023-01-04T11:28:38.194662') AND "
             'match("element_chain",%(0_selector_regex)s)'
