@@ -34,14 +34,14 @@ const MobileSidemenu = ({
 
   const router = useRouter();
   const path = router.pathname;
-  const { dsId, previousDsId } = router.query;
+  const { dsId } = router.query;
 
   const handleRedirectToExplorePage = () => {
     if (path.includes('explore')) return;
 
     router.push({
       pathname: '/analytics/explore/[dsId]',
-      query: { dsId: dsId || previousDsId },
+      query: { dsId: dsId },
     });
   };
 
@@ -199,9 +199,7 @@ const MobileSidemenu = ({
               label: 'Settings',
               icon: <i className="ri-settings-3-line" />,
             }}
-            onMenuClick={() =>
-              router.push(`/analytics/settings?previousDsId=${dsId}`)
-            }
+            onMenuClick={() => router.push(`/analytics/settings?dsId=${dsId}`)}
           />
           <MobileSidemenuOption
             menuOption={{

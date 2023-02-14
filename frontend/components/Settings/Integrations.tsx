@@ -38,8 +38,8 @@ const IntegrationConnectionInfo = () => {
 
 const Integrations = ({ user }: { user: AppertureUser }) => {
   const router = useRouter();
-  const { previousDsId } = router.query;
-  const SLACK_OAUTH_LINK = `${BACKEND_BASE_URL}/integrations/oauth/slack?redirect_url=${FRONTEND_BASE_URL}/analytics/settings/integrations?previousDsId=${previousDsId}`;
+  const { dsId } = router.query;
+  const SLACK_OAUTH_LINK = `${BACKEND_BASE_URL}/integrations/oauth/slack?redirect_url=${FRONTEND_BASE_URL}/analytics/settings/integrations?dsId=${dsId}`;
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const openConfirmationModal = () => {
@@ -93,11 +93,7 @@ const Integrations = ({ user }: { user: AppertureUser }) => {
                 border={'1px'}
                 size={'sm'}
                 borderColor={'white.200'}
-                onClick={() =>
-                  router.push(
-                    `/analytics/settings?previousDsId=${previousDsId}`
-                  )
-                }
+                onClick={() => router.push(`/analytics/settings?dsId=${dsId}`)}
               />
             </Box>
           </Box>

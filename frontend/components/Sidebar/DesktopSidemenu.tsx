@@ -9,6 +9,8 @@ import {
   IconButton,
   useDisclosure,
   Tooltip,
+  Text,
+  Divider,
 } from '@chakra-ui/react';
 import { AppWithIntegrations } from '@lib/domain/app';
 import LogoutModal from '@components/Logout';
@@ -28,27 +30,31 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
 
   const router = useRouter();
   const path = router.pathname;
-  const { dsId, previousDsId } = router.query;
+  const { dsId } = router.query;
+
+  const isPageActive = (pagePath: string) => {
+    return path.includes(pagePath);
+  };
 
   const handleRedirectToExplorePage = () => {
     if (path.includes('/analytics/explore')) return;
 
     router.push({
       pathname: '/analytics/explore/[dsId]',
-      query: { dsId: dsId || previousDsId },
+      query: { dsId: dsId },
     });
   };
 
   const handleRedirectToDataPage = () => {
     if (
-      path.includes('/analytics/data') &&
+      path.includes('/analytics/data/source') &&
       !path.includes('/analytics/data/stream')
     )
       return;
 
     router.push({
-      pathname: '/analytics/data/[dsId]',
-      query: { dsId: dsId || previousDsId },
+      pathname: '/analytics/data/source/[dsId]',
+      query: { dsId: dsId },
     });
   };
 
@@ -57,7 +63,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
 
     router.push({
       pathname: '/analytics/data/stream/[dsId]',
-      query: { dsId: dsId || previousDsId },
+      query: { dsId: dsId },
     });
   };
 
@@ -123,11 +129,17 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           >
             <IconButton
               aria-label="Explore"
-              icon={<i className={'ri-route-fill'} />}
+              icon={
+                <i
+                  className={
+                    isPageActive('explore') ? 'ri-route-fill' : 'ri-route-line'
+                  }
+                />
+              }
               rounded={'lg'}
               h={10}
               w={10}
-              bg={'black.0'}
+              bg={isPageActive('explore') ? 'black.50' : 'black.0'}
               fontWeight={'500'}
               color={'grey.100'}
               _hover={{
@@ -149,11 +161,19 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           >
             <IconButton
               aria-label="Explore"
-              icon={<i className="ri-notification-fill"></i>}
+              icon={
+                <i
+                  className={
+                    isPageActive('notification')
+                      ? 'ri-notification-fill'
+                      : 'ri-notification-line'
+                  }
+                />
+              }
               rounded={'lg'}
               h={10}
               w={10}
-              bg={'black.0'}
+              bg={isPageActive('notification') ? 'black.50' : 'black.0'}
               fontWeight={'500'}
               color={'grey.100'}
               _hover={{
@@ -164,23 +184,149 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
                 backgroundColor: 'transparent',
               }}
               onClick={() =>
-                router.push(`/analytics/notifications/list/${dsId}`)
+                router.push(`/analytics/notification/list/${dsId}`)
               }
             />
           </Tooltip>
+
+          <Divider borderColor={'black.50'} opacity={'0.3'} />
+          <Text
+            color={'grey.200'}
+            fontSize={'xs-10'}
+            lineHeight={'xs-10'}
+            fontWeight={'500'}
+          >
+            {'LIBRARY'}
+          </Text>
+
           <Tooltip
-            label={'Data'}
-            aria-label={'Data'}
+            label={'Metrics'}
+            aria-label={'Metrics'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Metrics"
+              icon={
+                <i
+                  className={
+                    isPageActive('metric')
+                      ? 'ri-funds-box-fill'
+                      : 'ri-funds-box-line'
+                  }
+                />
+              }
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={isPageActive('metric') ? 'black.50' : 'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={() => router.push(`/analytics/metric/list/${dsId}`)}
+            />
+          </Tooltip>
+          <Tooltip
+            label={'Funnels'}
+            aria-label={'Funnels'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Funnels"
+              icon={
+                <i
+                  className={
+                    isPageActive('funnel') ? 'ri-filter-fill' : 'ri-filter-line'
+                  }
+                />
+              }
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={isPageActive('funnel') ? 'black.50' : 'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={() => router.push(`/analytics/funnel/list/${dsId}`)}
+            />
+          </Tooltip>
+          <Tooltip
+            label={'Segments'}
+            aria-label={'Segments'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Segments"
+              icon={
+                <i
+                  className={
+                    isPageActive('segment')
+                      ? 'ri-scissors-cut-fill'
+                      : 'ri-scissors-cut-line'
+                  }
+                />
+              }
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={isPageActive('segment') ? 'black.50' : 'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={() => router.push(`/analytics/segment/list/${dsId}`)}
+            />
+          </Tooltip>
+
+          <Divider borderColor={'black.50'} opacity={'0.3'} />
+          <Text
+            color={'grey.200'}
+            fontSize={'xs-10'}
+            lineHeight={'xs-10'}
+            fontWeight={'500'}
+          >
+            {'DATA'}
+          </Text>
+          <Tooltip
+            label={'Source'}
+            aria-label={'Source'}
             bg={'white.DEFAULT'}
             color={'black.100'}
           >
             <IconButton
               aria-label="Data"
-              icon={<i className={'ri-database-line'} />}
+              icon={
+                <i
+                  className={
+                    isPageActive('data/source')
+                      ? 'ri-database-fill'
+                      : 'ri-database-line'
+                  }
+                />
+              }
               rounded={'lg'}
               h={10}
               w={10}
-              bg={'black.0'}
+              bg={isPageActive('data/source') ? 'black.50' : 'black.0'}
               fontWeight={'500'}
               color={'grey.100'}
               _hover={{
@@ -202,11 +348,19 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           >
             <IconButton
               aria-label="Data Stream"
-              icon={<i className={'ri-newspaper-line'} />}
+              icon={
+                <i
+                  className={
+                    isPageActive('data/stream')
+                      ? 'ri-newspaper-fill'
+                      : 'ri-newspaper-line'
+                  }
+                />
+              }
               rounded={'lg'}
               h={10}
               w={10}
-              bg={'black.0'}
+              bg={isPageActive('data/stream') ? 'black.50' : 'black.0'}
               fontWeight={'500'}
               color={'grey.100'}
               _hover={{
@@ -228,11 +382,19 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           >
             <IconButton
               aria-label="Data Management"
-              icon={<i className="ri-newspaper-fill"></i>}
+              icon={
+                <i
+                  className={
+                    isPageActive('action')
+                      ? 'ri-file-edit-fill'
+                      : 'ri-file-edit-line'
+                  }
+                />
+              }
               rounded={'lg'}
               h={10}
               w={10}
-              bg={'black.0'}
+              bg={isPageActive('action') ? 'black.50' : 'black.0'}
               fontWeight={'500'}
               color={'grey.100'}
               _hover={{
@@ -247,82 +409,6 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               }}
             />
           </Tooltip>
-
-          <Tooltip
-            label={'Metrics'}
-            aria-label={'Metrics'}
-            bg={'white.DEFAULT'}
-            color={'black.100'}
-          >
-            <IconButton
-              aria-label="Metrics"
-              icon={<i className={'ri-funds-box-line'} />}
-              rounded={'lg'}
-              h={10}
-              w={10}
-              bg={'black.0'}
-              fontWeight={'500'}
-              color={'grey.100'}
-              _hover={{
-                backgroundColor: 'white.0',
-                color: 'white',
-              }}
-              _active={{
-                backgroundColor: 'transparent',
-              }}
-              onClick={() => router.push(`/analytics/metric/list/${dsId}`)}
-            />
-          </Tooltip>
-          <Tooltip
-            label={'Funnels'}
-            aria-label={'Funnels'}
-            bg={'white.DEFAULT'}
-            color={'black.100'}
-          >
-            <IconButton
-              aria-label="Funnels"
-              icon={<i className={'ri-filter-line'} />}
-              rounded={'lg'}
-              h={10}
-              w={10}
-              bg={'black.0'}
-              fontWeight={'500'}
-              color={'grey.100'}
-              _hover={{
-                backgroundColor: 'white.0',
-                color: 'white',
-              }}
-              _active={{
-                backgroundColor: 'transparent',
-              }}
-              onClick={() => router.push(`/analytics/funnel/list/${dsId}`)}
-            />
-          </Tooltip>
-          <Tooltip
-            label={'Segments'}
-            aria-label={'Segments'}
-            bg={'white.DEFAULT'}
-            color={'black.100'}
-          >
-            <IconButton
-              aria-label="Segments"
-              icon={<i className={'ri-scissors-cut-line'} />}
-              rounded={'lg'}
-              h={10}
-              w={10}
-              bg={'black.0'}
-              fontWeight={'500'}
-              color={'grey.100'}
-              _hover={{
-                backgroundColor: 'white.0',
-                color: 'white',
-              }}
-              _active={{
-                backgroundColor: 'transparent',
-              }}
-              onClick={() => router.push(`/analytics/segment/list/${dsId}`)}
-            />
-          </Tooltip>
         </Flex>
 
         <Flex gap={'2'} direction={'column'}>
@@ -334,11 +420,19 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           >
             <IconButton
               aria-label="settings"
-              icon={<i className="ri-settings-3-line"></i>}
+              icon={
+                <i
+                  className={
+                    isPageActive('settings')
+                      ? 'ri-settings-3-fill'
+                      : 'ri-settings-3-line'
+                  }
+                />
+              }
               rounded={'lg'}
               h={10}
               w={10}
-              bg={'black.0'}
+              bg={isPageActive('settings') ? 'black.50' : 'black.0'}
               fontWeight={'500'}
               color={'grey.100'}
               _hover={{
@@ -348,9 +442,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={() =>
-                router.push(`/analytics/settings?previousDsId=${dsId}`)
-              }
+              onClick={() => router.push(`/analytics/settings?dsId=${dsId}`)}
             />
           </Tooltip>
           <Tooltip
