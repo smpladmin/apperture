@@ -3,7 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from domain.actions.models import ActionGroup, Action
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
 
 

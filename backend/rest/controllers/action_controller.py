@@ -6,7 +6,7 @@ from domain.actions.service import ActionService
 from domain.apperture_users.models import AppertureUser
 from domain.datasources.service import DataSourceService
 from rest.dtos.actions import CreateActionDto, ActionResponse, ActionWithUser
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.apperture_users import AppertureUserResponse
 from rest.middlewares import validate_jwt, get_user_id, get_user
 
 router = APIRouter(

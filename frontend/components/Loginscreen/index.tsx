@@ -1,10 +1,20 @@
 import logo from '@assets/images/Logo_login.svg';
 import glogo from '@assets/images/Google_login.svg';
 import Link from 'next/link';
-import { Box, Button, Flex, Heading, Text, Image } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Text,
+  Image,
+  useDisclosure,
+} from '@chakra-ui/react';
 import { BACKEND_BASE_URL } from 'config';
+import LoginWithPasswordModal from './Components/LoginWithPasswordModal';
 
 const Loginscreen = () => {
+  const { onOpen, onClose, isOpen } = useDisclosure();
   return (
     <Box
       p={8}
@@ -86,6 +96,20 @@ const Loginscreen = () => {
               </Text>
             </Link>
           </Text>
+          <Text
+            fontSize={{ base: 'xs-14', md: 'sh-20' }}
+            lineHeight={{ base: 'xs-14', md: 'sh-20' }}
+            as={'span'}
+            cursor={'pointer'}
+            fontWeight={'light'}
+            textColor={'white.DEFAULT'}
+            decoration={'underline'}
+            marginLeft={3}
+            onClick={onOpen}
+          >
+            Login with password
+          </Text>
+          <LoginWithPasswordModal isOpen={isOpen} onClose={onClose} />
         </Flex>
       </Flex>
     </Box>
