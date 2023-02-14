@@ -383,6 +383,7 @@ def action_data():
         "groups": [
             {"selector": "#__next > div > div.css-3h169z > div.css-8xl60i > button"}
         ],
+        "eventType": "$autocapture"
     }
 
 
@@ -393,7 +394,7 @@ def transient_action_data():
         "groups": [
             {"selector": "#__next > div > div.css-3h169z > div.css-8xl60i > button"}
         ],
-        "event": "$autocapture",
+        "eventType": "$autocapture",
     }
 
 

@@ -11,7 +11,7 @@ class CreateActionDto(BaseModel):
     datasourceId: str
     name: str
     groups: List[ActionGroup]
-    eventType: CaptureEvent = CaptureEvent.AUTOCAPTURE
+    eventType: CaptureEvent
 
 
 class ActionResponse(Action, ModelResponse):
@@ -30,7 +30,7 @@ class ActionWithUser(Action, ModelResponse):
 class TransientActionDto(BaseModel):
     datasourceId: str
     groups: List[ActionGroup]
-    eventType: CaptureEvent = CaptureEvent.AUTOCAPTURE
+    eventType: CaptureEvent
 
 
 class ComputedActionResponse(ComputedAction):
