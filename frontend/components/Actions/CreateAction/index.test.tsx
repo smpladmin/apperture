@@ -14,6 +14,7 @@ import {
 } from '@lib/services/actionService';
 import { isValidAction } from '../utils';
 import Action from './index';
+import { CaptureEvent } from '@lib/domain/action';
 
 jest.mock('@lib/services/actionService');
 jest.mock('../utils');
@@ -71,6 +72,7 @@ describe('Actions', () => {
         url_matching: '',
       },
     ],
+    eventType: CaptureEvent.AUTOCAPTURE,
     updateAt: new Date('2023-02-02T14:00:06.464000'),
   };
 

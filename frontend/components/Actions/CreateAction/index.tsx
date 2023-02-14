@@ -37,7 +37,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
     ]
   );
   const [captureEvent, setCaptureEvent] = useState<CaptureEvent>(
-    CaptureEvent.AUTOCAPTURE
+    savedAction?.eventType || CaptureEvent.AUTOCAPTURE
   );
   const [isSaveDisabled, setIsSavedDisabled] = useState(true);
   const [isActionBeingEdited, setIsActionBeingEdited] = useState(false);
@@ -109,9 +109,15 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
           actionId as string,
           datasourceId as string,
           actionName,
-          groups
+          groups,
+          captureEvent
         )
-      : await saveAction(datasourceId as string, actionName, groups);
+      : await saveAction(
+          datasourceId as string,
+          actionName,
+          groups,
+          captureEvent
+        );
 
     if (response?.status === 200) {
       const { _id, datasourceId } = response?.data;

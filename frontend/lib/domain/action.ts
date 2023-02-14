@@ -6,6 +6,7 @@ export type Action = {
   appId: string;
   name: string;
   groups: ActionGroup[];
+  eventType: CaptureEvent;
   updateAt: Date;
 };
 

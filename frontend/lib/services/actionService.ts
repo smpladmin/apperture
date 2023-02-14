@@ -17,12 +17,14 @@ export const getSavedActionsForDatasourceId = async (dsId: string) => {
 export const saveAction = async (
   dsId: string,
   name: string,
-  groups: ActionGroup[]
+  groups: ActionGroup[],
+  eventType: CaptureEvent
 ) => {
   return await ApperturePost('/actions', {
     name,
     datasourceId: dsId,
     groups: filterEmptyActionSelectors(cloneDeep(groups)),
+    eventType,
   });
 };
 
@@ -30,24 +32,26 @@ export const updateAction = async (
   id: string,
   dsId: string,
   name: string,
-  groups: ActionGroup[]
+  groups: ActionGroup[],
+  eventType: CaptureEvent
 ) => {
   return await ApperturePut(`/actions/${id}`, {
     name,
     datasourceId: dsId,
     groups: filterEmptyActionSelectors(cloneDeep(groups)),
+    eventType: CaptureEvent,
   });
 };
 
 export const getTransientActionEvents = async (
   dsId: string,
   groups: ActionGroup[],
-  event: CaptureEvent
+  eventType: CaptureEvent
 ) => {
   const res = await ApperturePost('/actions/transient', {
     datasourceId: dsId,
     groups: filterEmptyActionSelectors(cloneDeep(groups)),
-    event,
+    eventType,
   });
   return res.data || [];
 };
