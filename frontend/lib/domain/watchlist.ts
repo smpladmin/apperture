@@ -2,6 +2,7 @@ import {
   NotificationType,
   NotificationWithUser,
 } from '@lib/domain/notification';
+import { ActionWithUser } from './action';
 import { FunnelWithUser } from './funnel';
 import { MetricWithUser } from './metric';
 import { SegmentWithUser } from './segment';
@@ -11,6 +12,7 @@ export enum WatchListItemType {
   METRICS = 'metrics',
   FUNNELS = 'funnels',
   SEGMENTS = 'segments',
+  ACTIONS = 'actions',
 }
 
 const paths = {
@@ -18,6 +20,7 @@ const paths = {
   [WatchListItemType.METRICS]: 'metric/view',
   [WatchListItemType.FUNNELS]: 'funnel/view',
   [WatchListItemType.SEGMENTS]: 'segment/edit',
+  [WatchListItemType.ACTIONS]: 'action/edit',
 };
 
 export namespace WatchListItemType {
@@ -32,5 +35,6 @@ export type SavedItems = {
     | FunnelWithUser
     | SegmentWithUser
     | MetricWithUser
-    | NotificationWithUser;
+    | NotificationWithUser
+    | ActionWithUser;
 };

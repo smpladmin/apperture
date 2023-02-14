@@ -8,6 +8,8 @@ import appertureLogo from '@assets/images/apperture-logo.svg';
 import { StaticImageData } from 'next/image';
 import { AppWithIntegrations } from '@lib/domain/app';
 
+export const DEBOUNCED_WAIT_TIME = 500;
+
 export const formatDatalabel = (datalabel: number): string => {
   if (datalabel > 999999999999) {
     if (Math.round(datalabel / 10000000000) / 10 > 1000) {

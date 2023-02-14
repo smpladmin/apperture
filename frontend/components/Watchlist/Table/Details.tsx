@@ -1,4 +1,5 @@
 import { Flex, Text } from '@chakra-ui/react';
+import { ActionWithUser } from '@lib/domain/action';
 import { Funnel, FunnelWithUser } from '@lib/domain/funnel';
 import { MetricWithUser } from '@lib/domain/metric';
 import { NotificationWithUser } from '@lib/domain/notification';
@@ -11,7 +12,11 @@ export const Details = ({
 }: {
   info: CellContext<
     SavedItems,
-    FunnelWithUser | SegmentWithUser | MetricWithUser | NotificationWithUser
+    | FunnelWithUser
+    | SegmentWithUser
+    | MetricWithUser
+    | NotificationWithUser
+    | ActionWithUser
   >;
 }) => {
   const { type, details } = info?.row?.original;
