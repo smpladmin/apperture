@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from typing import List, Optional, Union
 from domain.apperture_users.models import AppertureUser
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.apperture_users import AppertureUserResponse
 from rest.middlewares import validate_jwt, get_user, get_user_id
 from rest.dtos.metrics import (
     MetricWithUser,

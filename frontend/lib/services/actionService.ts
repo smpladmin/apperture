@@ -39,7 +39,7 @@ export const updateAction = async (
     name,
     datasourceId: dsId,
     groups: filterEmptyActionSelectors(cloneDeep(groups)),
-    eventType: CaptureEvent,
+    eventType: eventType,
   });
 };
 

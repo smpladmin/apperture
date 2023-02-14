@@ -12,7 +12,7 @@ from rest.dtos.actions import (
     CreateActionDto,
     TransientActionDto,
 )
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.apperture_users import AppertureUserResponse
 from rest.middlewares import validate_jwt, get_user_id, get_user
 
 router = APIRouter(
@@ -36,6 +36,7 @@ async def create_action(
         userId=user_id,
         name=dto.name,
         groups=dto.groups,
+        eventType=dto.eventType,
     )
 
     await action_service.add_action(action=action)
@@ -81,6 +82,7 @@ async def update_action(
         userId=user_id,
         name=dto.name,
         groups=dto.groups,
+        eventType=dto.eventType,
     )
 
     await action_service.update_action(action_id=id, action=action)
@@ -93,5 +95,5 @@ async def compute_transient_actions(
     action_service: ActionService = Depends(),
 ):
     return await action_service.compute_action(
-        datasource_id=dto.datasourceId, groups=dto.groups, event=dto.event
+        datasource_id=dto.datasourceId, groups=dto.groups, event_type=dto.eventType
     )

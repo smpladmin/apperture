@@ -1,6 +1,7 @@
 import os
 import httpx
 from domain.common.models import IntegrationProvider
+from argon2 import PasswordHasher
 
 
 class AuthService:
@@ -9,6 +10,7 @@ class AuthService:
         self.access_token_methods[
             IntegrationProvider.GOOGLE
         ] = self._get_google_access_token
+        self.hasher = PasswordHasher(time_cost=2, parallelism=1)
 
     async def get_access_token(
         self, refresh_token: str, provider: IntegrationProvider
@@ -33,3 +35,19 @@ class AuthService:
             )
             data = res.json()
             return data["access_token"]
+
+    def hash_password(self, password: str) -> str:
+        return self.hasher.hash(password)
+
+    def verify_password(self, hash: str, password: str):
+        try:
+            self.hasher.verify(hash, password)
+            return self.rehash_password(hash, password)
+        except:
+            return None
+
+    def rehash_password(self, hash: str, password: str) -> str:
+        if self.hasher.check_needs_rehash(hash):
+            return self.hasher.hash(password)
+        else:
+            return hash

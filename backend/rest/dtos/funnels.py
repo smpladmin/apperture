@@ -10,7 +10,7 @@ from domain.funnels.models import (
     FunnelConversionData,
     ConversionStatus,
 )
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
 
 

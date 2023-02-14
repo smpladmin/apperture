@@ -11,7 +11,7 @@ from domain.notifications.models import (
     NotificationMetric,
     NotificationVariant,
 )
-from rest.dtos.appperture_users import AppertureUserResponse
+from rest.dtos.apperture_users import AppertureUserResponse
 
 
 class CreateNotificationDto(BaseModel):

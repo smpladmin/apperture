@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import List
 from pydantic import BaseSettings
 
 
@@ -17,6 +18,7 @@ class AppertureSettings(BaseSettings):
     redis_password: str
     apperture_api_key: str
     fastapi_env: str = "test"
+    cors_origins: List[str] = ["*"]
 
     class Config:
         env_file = ".env"

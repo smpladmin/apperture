@@ -10,7 +10,7 @@ from domain.datasources.service import DataSourceService
 
 from rest.middlewares import validate_jwt, get_user
 from rest.dtos.notifications import CreateNotificationDto, NotificationWithUser
-from rest.dtos.appperture_users import AppertureUserResponse as apperture_users
+from rest.dtos.apperture_users import AppertureUserResponse as apperture_users
 
 
 router = APIRouter(

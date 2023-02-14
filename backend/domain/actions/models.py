@@ -31,8 +31,14 @@ class ActionGroup(BaseModel):
     condition: ActionGroupCondition = ActionGroupCondition.OR
 
 
+class CaptureEvent(str, Enum):
+    AUTOCAPTURE = "$autocapture"
+    PAGEVIEW = "$pageview"
+
+
 class Action(Document):
     name: str
+    event_type: CaptureEvent
     datasource_id: PydanticObjectId
     app_id: PydanticObjectId
     user_id: PydanticObjectId
@@ -41,11 +47,6 @@ class Action(Document):
 
     class Settings:
         name = "actions"
-
-
-class CaptureEvent(str, Enum):
-    AUTOCAPTURE = "$autocapture"
-    PAGEVIEW = "$pageview"
 
 
 class ComputedEventStreamResult(BaseModel):

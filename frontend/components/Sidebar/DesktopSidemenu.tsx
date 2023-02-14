@@ -41,10 +41,23 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
   };
 
   const handleRedirectToDataPage = () => {
-    if (path.includes('/analytics/data')) return;
+    if (
+      path.includes('/analytics/data') &&
+      !path.includes('/analytics/data/stream')
+    )
+      return;
 
     router.push({
       pathname: '/analytics/data/[dsId]',
+      query: { dsId: dsId || previousDsId },
+    });
+  };
+
+  const handleRedirectToDataStreamPage = () => {
+    if (path.includes('/analytics/data/stream')) return;
+
+    router.push({
+      pathname: '/analytics/data/stream/[dsId]',
       query: { dsId: dsId || previousDsId },
     });
   };
@@ -191,13 +204,39 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
           </Tooltip>
 
           <Tooltip
-            label={'Data Management'}
-            aria-label={'Explore'}
+            label={'Data Stream'}
+            aria-label={'Data Stream'}
             bg={'white.DEFAULT'}
             color={'black.100'}
           >
             <IconButton
-              aria-label="Explore"
+              aria-label="Data Stream"
+              icon={<i className={'ri-newspaper-line'} />}
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={handleRedirectToDataStreamPage}
+            />
+          </Tooltip>
+
+          <Tooltip
+            label={'Data Management'}
+            aria-label={'Data Management'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Data Management"
               icon={<i className="ri-newspaper-fill"></i>}
               rounded={'lg'}
               h={10}
@@ -212,7 +251,9 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={() => router.push(`/analytics/action/list/${dsId}`)}
+              onClick={() => {
+                router.push(`/analytics/action/list/${dsId}`);
+              }}
             />
           </Tooltip>
 

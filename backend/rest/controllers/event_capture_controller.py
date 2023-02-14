@@ -43,3 +43,27 @@ async def capture_click_stream(
         )
         return {"success": True}
     return {"success": False}
+
+
+@router.get("/events/clickstream")
+async def get_clickstream_events(
+    dsId: str,
+    clickstream_service: ClickstreamService = Depends(),
+    ds_service: DataSourceService = Depends(),
+):
+    datasource = await ds_service.get_datasource(dsId)
+    if datasource:
+        return await clickstream_service.get_data_by_id(dsId=dsId)
+    return {"count": 0, "data": []}
+
+
+@router.get("/events/eventstream")
+async def get_clickstream_events(
+    dsId: str,
+    clickstream_service: ClickstreamService = Depends(),
+    ds_service: DataSourceService = Depends(),
+):
+    datasource = await ds_service.get_datasource(dsId)
+    if datasource:
+        return await clickstream_service.get_action_by_id(dsId=dsId)
+    return {"count": 0, "data": []}
