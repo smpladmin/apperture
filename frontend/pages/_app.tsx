@@ -5,7 +5,7 @@ import 'react-date-range/dist/styles.css'; // main css file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import '../styles/daterange.css';
 import { AppContext, AppLayoutProps } from 'next/app';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
 import { theme } from '../theme/chakra.theme';
 import { AppertureContext } from '@lib/contexts/appertureContext';
@@ -18,9 +18,21 @@ import isValidProp from '@emotion/is-prop-valid';
 import { resetServerContext } from 'react-beautiful-dnd';
 import NextNProgress from 'nextjs-progressbar';
 import { BLACK_200 } from '@theme/index';
+import { useRouter } from 'next/router';
+import { posthog } from 'posthog-js';
+import { APPERTURE_PH_KEY, BACKEND_BASE_URL } from 'config';
 type CustomAppProps = {
   device: Device;
 };
+
+if (typeof window !== 'undefined') {
+  posthog.init(APPERTURE_PH_KEY, {
+    api_host: `${BACKEND_BASE_URL}/events/capture`,
+    debug: process.env.NODE_ENV === 'development',
+    capture_pageview: false,
+    capture_pageleave: false,
+  });
+}
 
 function AppertureApp({
   Component,
@@ -28,6 +40,19 @@ function AppertureApp({
   device,
 }: AppLayoutProps & CustomAppProps) {
   const getLayout = Component.getLayout || ((page: ReactNode) => page);
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleRouteChange = () => posthog.capture('$pageview');
+    const handleRouteChangeStart = () => posthog.capture('$pageleave');
+    router.events.on('routeChangeComplete', handleRouteChange);
+    router.events.on('routeChangeStart', handleRouteChangeStart);
+
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange);
+      router.events.off('routeChangeStart', handleRouteChangeStart);
+    };
+  }, []);
 
   return (
     <AppertureContext.Provider value={{ device }}>

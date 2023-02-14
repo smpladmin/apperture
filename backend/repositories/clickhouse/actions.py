@@ -1,7 +1,7 @@
 import datetime
 import logging
 from typing import Dict, List, Tuple
-from pypika import ClickHouseQuery, Parameter, terms, Criterion, functions as fn
+from pypika import ClickHouseQuery, Parameter, terms, Criterion, Field, functions as fn
 
 from domain.actions.models import Action, ActionGroup, CaptureEvent
 from repositories.clickhouse.base import EventsBase
@@ -52,6 +52,12 @@ class Actions(EventsBase):
                         self.click_stream_table.element_chain, Parameter(f"%({key})s")
                     )
                 )
+
+        if filter.url:
+            params["url"] = f"%{filter.url}%"
+            conditions.append(
+                Field(f"properties.$current_url").like(Parameter("%(url)s"))
+            )
 
         return conditions, params
 

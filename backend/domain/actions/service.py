@@ -86,7 +86,7 @@ class ActionService:
     ) -> List[ComputedActionResponse]:
         matching_events = []
         count = 0
-        if groups[0].selector:
+        if groups[0].selector or groups[0].url:
             matching_events = await self.actions.get_matching_events_from_clickstream(
                 datasource_id=datasource_id, groups=groups, event_type=event_type
             )
