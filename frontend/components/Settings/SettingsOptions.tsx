@@ -33,7 +33,12 @@ const SettingsOptions = () => {
             border={'1px'}
             size={'sm'}
             borderColor={'white.200'}
-            onClick={() => router.push(`/analytics/explore/${dsId}`)}
+            onClick={() =>
+              router.push({
+                pathname: `/analytics/explore/[dsId]`,
+                query: { dsId },
+              })
+            }
           />
         </Flex>
 
@@ -60,7 +65,10 @@ const SettingsOptions = () => {
           justifyContent={'space-between'}
           cursor={'pointer'}
           onClick={() =>
-            router.push(`/analytics/settings/integrations?dsId=${dsId}`)
+            router.push({
+              pathname: `/analytics/settings/integrations`,
+              query: { dsId },
+            })
           }
         >
           <Flex mt={{ md: '8' }} py={'2'} direction={'column'} gap={'2'}>

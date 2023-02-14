@@ -93,7 +93,12 @@ const Integrations = ({ user }: { user: AppertureUser }) => {
                 border={'1px'}
                 size={'sm'}
                 borderColor={'white.200'}
-                onClick={() => router.push(`/analytics/settings?dsId=${dsId}`)}
+                onClick={() =>
+                  router.push({
+                    pathname: `/analytics/settings`,
+                    query: { dsId },
+                  })
+                }
               />
             </Box>
           </Box>

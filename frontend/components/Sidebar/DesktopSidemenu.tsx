@@ -36,33 +36,11 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
     return path.includes(pagePath);
   };
 
-  const handleRedirectToExplorePage = () => {
-    if (path.includes('/analytics/explore')) return;
+  const handleRedirect = (pathname: string) => {
+    if (path.includes(pathname)) return;
 
     router.push({
-      pathname: '/analytics/explore/[dsId]',
-      query: { dsId: dsId },
-    });
-  };
-
-  const handleRedirectToDataPage = () => {
-    if (
-      path.includes('/analytics/data/source') &&
-      !path.includes('/analytics/data/stream')
-    )
-      return;
-
-    router.push({
-      pathname: '/analytics/data/source/[dsId]',
-      query: { dsId: dsId },
-    });
-  };
-
-  const handleRedirectToDataStreamPage = () => {
-    if (path.includes('/analytics/data/stream')) return;
-
-    router.push({
-      pathname: '/analytics/data/stream/[dsId]',
+      pathname,
       query: { dsId: dsId },
     });
   };
@@ -149,7 +127,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={handleRedirectToExplorePage}
+              onClick={() => handleRedirect('/analytics/explore/[dsId]')}
             />
           </Tooltip>
 
@@ -184,7 +162,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
                 backgroundColor: 'transparent',
               }}
               onClick={() =>
-                router.push(`/analytics/notification/list/${dsId}`)
+                handleRedirect('/analytics/notification/list/[dsId]')
               }
             />
           </Tooltip>
@@ -229,7 +207,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={() => router.push(`/analytics/metric/list/${dsId}`)}
+              onClick={() => handleRedirect('/analytics/metric/list/[dsId]')}
             />
           </Tooltip>
           <Tooltip
@@ -260,7 +238,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={() => router.push(`/analytics/funnel/list/${dsId}`)}
+              onClick={() => handleRedirect('/analytics/funnel/list/[dsId]')}
             />
           </Tooltip>
           <Tooltip
@@ -293,7 +271,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={() => router.push(`/analytics/segment/list/${dsId}`)}
+              onClick={() => handleRedirect('/analytics/segment/list/[dsId]')}
             />
           </Tooltip>
 
@@ -336,7 +314,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={handleRedirectToDataPage}
+              onClick={() => handleRedirect('/analytics/data/source/[dsId]')}
             />
           </Tooltip>
 
@@ -370,7 +348,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={handleRedirectToDataStreamPage}
+              onClick={() => handleRedirect('/analytics/data/stream/[dsId]')}
             />
           </Tooltip>
 
@@ -404,9 +382,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={() => {
-                router.push(`/analytics/action/list/${dsId}`);
-              }}
+              onClick={() => handleRedirect('/analytics/action/list/[dsId]')}
             />
           </Tooltip>
         </Flex>
@@ -442,7 +418,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={() => router.push(`/analytics/settings?dsId=${dsId}`)}
+              onClick={() => handleRedirect('/analytics/settings')}
             />
           </Tooltip>
           <Tooltip
