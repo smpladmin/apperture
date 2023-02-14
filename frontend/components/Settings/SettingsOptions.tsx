@@ -8,7 +8,7 @@ import Render from '@components/Render';
 
 const SettingsOptions = () => {
   const router = useRouter();
-  const { previousDsId } = router.query;
+  const { dsId } = router.query;
 
   return (
     <Flex
@@ -33,7 +33,12 @@ const SettingsOptions = () => {
             border={'1px'}
             size={'sm'}
             borderColor={'white.200'}
-            onClick={() => router.push(`/analytics/explore/${previousDsId}`)}
+            onClick={() =>
+              router.push({
+                pathname: `/analytics/explore/[dsId]`,
+                query: { dsId },
+              })
+            }
           />
         </Flex>
 
@@ -60,9 +65,10 @@ const SettingsOptions = () => {
           justifyContent={'space-between'}
           cursor={'pointer'}
           onClick={() =>
-            router.push(
-              `/analytics/settings/integrations?previousDsId=${previousDsId}`
-            )
+            router.push({
+              pathname: `/analytics/settings/integrations`,
+              query: { dsId },
+            })
           }
         >
           <Flex mt={{ md: '8' }} py={'2'} direction={'column'} gap={'2'}>

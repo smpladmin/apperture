@@ -34,14 +34,14 @@ const MobileSidemenu = ({
 
   const router = useRouter();
   const path = router.pathname;
-  const { dsId, previousDsId } = router.query;
+  const { dsId } = router.query;
 
-  const handleRedirectToExplorePage = () => {
-    if (path.includes('explore')) return;
+  const handleRedirect = (pathname: string) => {
+    if (path.includes(pathname)) return;
 
     router.push({
-      pathname: '/analytics/explore/[dsId]',
-      query: { dsId: dsId || previousDsId },
+      pathname,
+      query: { dsId: dsId },
     });
   };
 
@@ -147,7 +147,7 @@ const MobileSidemenu = ({
             }}
             onMenuClick={() => {
               closeDrawer();
-              handleRedirectToExplorePage();
+              handleRedirect('/analytics/explore/[dsId]');
             }}
           />
           <Flex justifyContent={'space-between'} pr={'4'}>
@@ -158,7 +158,7 @@ const MobileSidemenu = ({
               }}
               onMenuClick={() => {
                 closeDrawer();
-                router.push(`/analytics/metric/list/${dsId}`);
+                handleRedirect('/analytics/metric/list/[dsId]');
               }}
             />
           </Flex>
@@ -170,7 +170,7 @@ const MobileSidemenu = ({
               }}
               onMenuClick={() => {
                 closeDrawer();
-                router.push(`/analytics/funnel/list/${dsId}`);
+                handleRedirect('/analytics/funnel/list/[dsId]');
               }}
             />
           </Flex>
@@ -182,7 +182,7 @@ const MobileSidemenu = ({
               }}
               onMenuClick={() => {
                 closeDrawer();
-                router.push(`/analytics/segment/list/${dsId}`);
+                handleRedirect('/analytics/segment/list/[dsId]');
               }}
             />
           </Flex>
@@ -199,9 +199,7 @@ const MobileSidemenu = ({
               label: 'Settings',
               icon: <i className="ri-settings-3-line" />,
             }}
-            onMenuClick={() =>
-              router.push(`/analytics/settings?previousDsId=${dsId}`)
-            }
+            onMenuClick={() => handleRedirect('/analytics/settings')}
           />
           <MobileSidemenuOption
             menuOption={{
