@@ -1,7 +1,9 @@
 import asyncio
+
+import httpx
 from beanie import PydanticObjectId
 from fastapi import Depends
-import httpx
+
 from authorisation.service import AuthService
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion, ProviderDataSource
@@ -37,6 +39,14 @@ class DataSourceService:
 
     async def get_datasource(self, id: str):
         return await DataSource.get(id)
+
+    async def get_datasources_for_apperture(self, id: str):
+        return await DataSource.find(
+            {
+                DataSource.id: PydanticObjectId(id),
+                DataSource.provider: IntegrationProvider.APPERTURE,
+            }
+        ).to_list()
 
     async def get_datasources_for_provider(self, provider: IntegrationProvider):
         return await DataSource.find(DataSource.provider == provider).to_list()
