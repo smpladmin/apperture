@@ -1,14 +1,13 @@
-import logging
 import json
+import logging
+from base64 import b64decode
 from typing import Any, Union
 
-from fastapi import APIRouter, Form, Depends, Response
-from base64 import b64decode
-
 import requests
+from fastapi import APIRouter, Depends, Form, Response
 
-from domain.datasources.service import DataSourceService
 from domain.clickstream.service import ClickstreamService
+from domain.datasources.service import DataSourceService
 
 router = APIRouter()
 
@@ -33,16 +32,17 @@ async def capture_click_stream(
     ds_service: DataSourceService = Depends(),
 ):
     decoded = json.loads(b64decode(data))
-    payload = decoded[0] if type(decoded) == list else decoded
+    payloads = decoded if type(decoded) == list else list(decoded)
     datasource = await ds_service.get_datasource(payload["properties"]["token"])
     if datasource:
-        await clickstream_service.update_events(
-            datasource_id=payload["properties"]["token"],
-            timestamp=payload["properties"]["$time"],
-            user_id=payload["properties"]["$device_id"],
-            event=payload["event"],
-            properties=payload["properties"],
-        )
+        for payload in payloads:
+            await clickstream_service.update_events(
+                datasource_id=payload["properties"]["token"],
+                timestamp=payload["properties"]["$time"],
+                user_id=payload["properties"]["$device_id"],
+                event=payload["event"],
+                properties=payload["properties"],
+            )
         return {"success": True}
     return {"success": False}
 
