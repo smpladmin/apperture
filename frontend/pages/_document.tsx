@@ -18,7 +18,6 @@ class MyDocument extends Document {
             rel="stylesheet"
           />
           <Script strategy="beforeInteractive" src="/__ENV.js" />
-          {/* <Script strategy="afterInteractive" src="/apperture-sdk.js" /> */}
         </Head>
         <body>
           <Main />
