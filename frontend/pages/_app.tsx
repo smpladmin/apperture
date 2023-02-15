@@ -25,7 +25,7 @@ type CustomAppProps = {
   device: Device;
 };
 
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && APPERTURE_PH_KEY) {
   posthog.init(APPERTURE_PH_KEY, {
     api_host: `${BACKEND_BASE_URL}/events/capture`,
     debug: process.env.NODE_ENV === 'development',

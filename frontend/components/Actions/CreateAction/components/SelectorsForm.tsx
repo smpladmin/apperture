@@ -43,7 +43,12 @@ const SelectorsForm = ({
         captureEvent={captureEvent}
         setCaptureEvent={setCaptureEvent}
       />
-      <Flex direction={'column'} gap={'2'} data-testid={'action-form'}>
+      <Flex
+        direction={'column'}
+        gap={'2'}
+        data-testid={'action-form'}
+        hidden={captureEvent === CaptureEvent.PAGEVIEW}
+      >
         <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
           {'Link target (href tag)'}
         </Text>
@@ -64,9 +69,17 @@ const SelectorsForm = ({
         />
       </Flex>
 
-      <Divider opacity={'1'} borderColor={'white.200'} />
+      <Divider
+        opacity={'1'}
+        borderColor={'white.200'}
+        hidden={captureEvent === CaptureEvent.PAGEVIEW}
+      />
 
-      <Flex direction={'column'} gap={'2'}>
+      <Flex
+        direction={'column'}
+        gap={'2'}
+        hidden={captureEvent === CaptureEvent.PAGEVIEW}
+      >
         <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
           {'CSS Selector / HTML attribute'}
         </Text>
@@ -87,9 +100,17 @@ const SelectorsForm = ({
         />
       </Flex>
 
-      <Divider opacity={'1'} borderColor={'white.200'} />
+      <Divider
+        opacity={'1'}
+        borderColor={'white.200'}
+        hidden={captureEvent === CaptureEvent.PAGEVIEW}
+      />
 
-      <Flex direction={'column'} gap={'2'}>
+      <Flex
+        direction={'column'}
+        gap={'2'}
+        hidden={captureEvent === CaptureEvent.PAGEVIEW}
+      >
         <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
           {'Text'}
         </Text>
@@ -111,7 +132,12 @@ const SelectorsForm = ({
         />
       </Flex>
 
-      <Divider opacity={'1'} borderColor={'white.200'} gap={'2'} />
+      <Divider
+        opacity={'1'}
+        borderColor={'white.200'}
+        gap={'2'}
+        hidden={captureEvent === CaptureEvent.PAGEVIEW}
+      />
 
       <Flex direction={'column'} gap={'2'}>
         <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
