@@ -52,11 +52,11 @@ from domain.segments.models import (
     WhereSegmentFilter,
 )
 from domain.users.models import UserDetails
+from rest.dtos.actions import ComputedActionResponse
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.funnels import FunnelWithUser
 from rest.dtos.metrics import MetricWithUser
 from rest.dtos.notifications import NotificationWithUser
-from rest.dtos.actions import ComputedActionResponse
 from rest.dtos.segments import SegmentWithUser
 
 
@@ -227,6 +227,9 @@ def datasource_service():
     datasources_future.set_result([datasource])
     datasource_service_mock.get_datasource.return_value = datasource_future
     datasource_service_mock.create_datasource.return_value = datasource_future
+    datasource_service_mock.get_datasources_for_apperture.return_value = (
+        datasource_future
+    )
     datasource_service_mock.get_datasources_for_provider.return_value = (
         datasources_future
     )
@@ -383,7 +386,7 @@ def action_data():
         "groups": [
             {"selector": "#__next > div > div.css-3h169z > div.css-8xl60i > button"}
         ],
-        "eventType": "$autocapture"
+        "eventType": "$autocapture",
     }
 
 
