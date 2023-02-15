@@ -72,22 +72,22 @@ class ClickstreamService:
     async def update_events(
         self,
         datasource_id: str,
-        timestamp: str,
-        user_id: str,
-        event: str,
-        properties: Dict,
+        events: List[Dict],
     ):
-        clickstream_data = self.build_clickstream_data(
-            datasource_id=datasource_id,
-            timestamp=timestamp,
-            user_id=user_id,
-            event=event,
-            properties=properties,
-        )
+        clickstream_data = [
+            self.build_clickstream_data(
+                datasource_id=datasource_id,
+                timestamp=event["properties"]["$time"],
+                user_id=event["properties"]["$device_id"],
+                event=event["event"],
+                properties=event["properties"],
+            )
+            for event in events
+        ]
 
         self.clickhouse.insert(
             self.table,
-            [clickstream_data],
+            clickstream_data,
             column_names=self.columns,
         )
 

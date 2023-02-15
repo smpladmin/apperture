@@ -33,18 +33,15 @@ async def capture_click_stream(
 ):
     decoded = json.loads(b64decode(data))
     payloads = decoded if type(decoded) == list else [decoded]
-    for payload in payloads:
-        datasource = await ds_service.get_datasource(payload["properties"]["token"])
-        if datasource:
-            await clickstream_service.update_events(
-                datasource_id=payload["properties"]["token"],
-                timestamp=payload["properties"]["$time"],
-                user_id=payload["properties"]["$device_id"],
-                event=payload["event"],
-                properties=payload["properties"],
-            )
-        else:
-            return {"success": False}
+    datasource = await ds_service.get_datasources_for_apperture(
+        payloads[0]["properties"]["token"]
+    )
+    if datasource:
+        await clickstream_service.update_events(
+            datasource_id=payloads[0]["properties"]["token"], events=payloads
+        )
+    else:
+        return {"success": False}
     return {"success": True}
 
 

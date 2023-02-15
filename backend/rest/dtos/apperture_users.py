@@ -1,7 +1,9 @@
 from typing import Optional
+
 from pydantic import BaseModel
 
 from domain.apperture_users.models import AppertureUser
+
 from .model_response import ModelResponse
 
 
@@ -13,7 +15,7 @@ class AppertureUserResponse(ModelResponse):
     first_name: str
     last_name: str
     email: str
-    picture: str
+    picture: Optional[str]
     slack_channel: Optional[str]
 
     class Config:
