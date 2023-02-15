@@ -32,10 +32,11 @@ async def capture_click_stream(
     ds_service: DataSourceService = Depends(),
 ):
     decoded = json.loads(b64decode(data))
-    payloads = decoded if type(decoded) == list else list(decoded)
-    datasource = await ds_service.get_datasource(payload["properties"]["token"])
-    if datasource:
-        for payload in payloads:
+    payloads = decoded if type(decoded) == list else [decoded]
+    for payload in payloads:
+        datasource = await ds_service.get_datasource(payload["properties"]["token"])
+        print(payload)
+        if datasource:
             await clickstream_service.update_events(
                 datasource_id=payload["properties"]["token"],
                 timestamp=payload["properties"]["$time"],
@@ -43,8 +44,9 @@ async def capture_click_stream(
                 event=payload["event"],
                 properties=payload["properties"],
             )
-        return {"success": True}
-    return {"success": False}
+        else:
+            return {"success": False}
+    return {"success": True}
 
 
 @router.get("/events/capture/static/array.js")
