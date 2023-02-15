@@ -25,6 +25,6 @@ export const CaptureEventOptions = [
   {
     label: 'Pageview',
     value: CaptureEvent.PAGEVIEW,
-    isDisabled: true,
+    isDisabled: false,
   },
 ];
