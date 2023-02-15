@@ -35,7 +35,6 @@ async def capture_click_stream(
     payloads = decoded if type(decoded) == list else [decoded]
     for payload in payloads:
         datasource = await ds_service.get_datasource(payload["properties"]["token"])
-        print(payload)
         if datasource:
             await clickstream_service.update_events(
                 datasource_id=payload["properties"]["token"],
