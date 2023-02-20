@@ -24,6 +24,8 @@ import { cloneDeep } from 'lodash';
 import { FilterType } from '@lib/domain/segment';
 import { LOGAN } from '@theme/index';
 import { Node } from '@lib/domain/node';
+import ParallelLineIcon from '@assets/icons/horizontal-parallel-line.svg';
+import Image from 'next/image';
 
 type FunnelComponentCardProps = {
   index: number;
@@ -150,54 +152,61 @@ const FunnelComponentCard = ({
       direction={'column'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      cursor={'auto'}
+      cursor={'grab'}
       data-testid={'funnel-step'}
     >
-      <Flex
-        width={'full'}
-        alignItems={'center'}
-        justifyContent={'space-between'}
-        px={'4'}
-      >
-        <Flex alignItems={'center'} gap={'1'}>
-          <FilterNumber index={index} />
-          <Box position="relative" ref={eventBoxRef}>
-            <Text
-              data-testid={'event-name'}
-              color={'white.DEFAULT'}
-              fontSize={'xs-14'}
-              fontWeight={500}
-              px={'1'}
-              _hover={{ background: 'grey.300', cursor: 'pointer' }}
-              lineHeight={'xs-18'}
-              onClick={() => setIsEventListOpen(true)}
-            >
-              {funnelStep?.event || 'Select an Event'}
-            </Text>
-            <SearchableListDropdown
-              isOpen={isEventListOpen}
-              isLoading={false}
-              data={eventsList}
-              onSubmit={handleEventSelection}
-              listKey={'id'}
-              isNode
-            />
-          </Box>
-        </Flex>
-        {showCrossIcon && (
-          <IconButton
-            data-testid={`remove-funnel-step-${index}`}
-            size={'xs'}
-            fontWeight={'500'}
-            aria-label="remove-component"
-            variant={'iconButton'}
-            icon={<i className="ri-close-fill"></i>}
-            color={'grey.200'}
-            opacity={isHovered ? 1 : 0}
-            _hover={{ color: 'white', background: 'grey.300' }}
-            onClick={() => handleRemoveFunnelStep(index)}
-          />
+      <Flex width={'full'} px={'1'}>
+        {isHovered ? (
+          <Image src={ParallelLineIcon} alt={'parallel-line-icon'} />
+        ) : (
+          <Box w={'2'} />
         )}
+        <Flex
+          width={'full'}
+          alignItems={'center'}
+          justifyContent={'space-between'}
+          px={'2'}
+        >
+          <Flex alignItems={'center'} gap={'1'}>
+            <FilterNumber index={index} />
+            <Box position="relative" ref={eventBoxRef}>
+              <Text
+                data-testid={'event-name'}
+                color={'white.DEFAULT'}
+                fontSize={'xs-14'}
+                fontWeight={500}
+                px={'1'}
+                _hover={{ background: 'grey.300', cursor: 'pointer' }}
+                lineHeight={'xs-18'}
+                onClick={() => setIsEventListOpen(true)}
+              >
+                {funnelStep?.event || 'Select an Event'}
+              </Text>
+              <SearchableListDropdown
+                isOpen={isEventListOpen}
+                isLoading={false}
+                data={eventsList}
+                onSubmit={handleEventSelection}
+                listKey={'id'}
+                isNode
+              />
+            </Box>
+          </Flex>
+          {showCrossIcon && (
+            <IconButton
+              data-testid={`remove-funnel-step-${index}`}
+              size={'xs'}
+              fontWeight={'500'}
+              aria-label="remove-component"
+              variant={'iconButton'}
+              icon={<i className="ri-close-fill"></i>}
+              color={'grey.200'}
+              opacity={isHovered ? 1 : 0}
+              _hover={{ color: 'white', background: 'grey.300' }}
+              onClick={() => handleRemoveFunnelStep(index)}
+            />
+          )}
+        </Flex>
       </Flex>
       {funnelStep.event && (
         <Divider orientation="horizontal" color={'grey.10'} mt={'3'} />
