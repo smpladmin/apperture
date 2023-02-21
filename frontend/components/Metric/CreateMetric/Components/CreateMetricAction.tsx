@@ -7,9 +7,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-
 import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
-
 import { useRouter } from 'next/router';
 import MetricComponentCard from './MetricComponentCard';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';

@@ -124,9 +124,16 @@ const MetricComponentCard = ({
 
   useEffect(() => {
     if (filters.every((filter) => filter.values.length)) {
-      updateAggregate(variable, { filters });
+      updateAggregate(variable, { filters, conditions });
     }
-  }, [filters]);
+  }, [filters, conditions]);
+
+  useEffect(() => {
+    setReference(savedAggregate?.reference_id);
+    setFilters(savedAggregate?.filters);
+    setConditions(savedAggregate?.conditions);
+    setVariant(savedAggregate?.variant);
+  }, [savedAggregate]);
 
   return (
     <Flex
