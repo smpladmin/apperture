@@ -1,4 +1,6 @@
 import logging
+from typing import List
+
 from pypika import Field
 
 
@@ -89,10 +91,57 @@ class PostFixConverter:
 
 class FormulaParser:
     def __init__(self):
-        self.operators = ["*", "+", "/", "-"]
+        self.operators = set(["*", "+", "/", "-"])
 
-    def isOperator(self, character):
-        return self.operators.count(character) > 0
+    def validate_formula(self, expression: str, variable_list: List[str]) -> bool:
+        stack = []
+        variables = set(variable_list)
+        is_variable_present = False
+        try:
+            for i, char in enumerate(expression):
+                if char in variables:
+                    is_variable_present = True
+                    if i > 0 and (
+                        expression[i - 1] in variables or expression[i - 1].isdigit()
+                    ):
+                        return False
+                elif char.isdigit():
+                    if i > 0 and (expression[i - 1] in variables):
+                        return False
+                elif char in self.operators:
+                    if (
+                        i == 0
+                        or expression[i - 1] in self.operators
+                        or expression[i - 1] == "("
+                    ):
+                        return False
+                elif char == ".":
+                    if (
+                        i == 0
+                        or not expression[i - 1].isdigit()
+                        or i + 1 >= len(expression)
+                        or not expression[i + 1].isdigit()
+                    ):
+                        return False
+                elif char == "(":
+                    if i > 0 and (
+                        expression[i - 1].isdigit()
+                        or expression[i - 1] in variables
+                        or expression[i - 1] == ")"
+                    ):
+                        return False
+                    stack.append("(")
+                elif char == ")":
+                    if not stack or stack[-1] != "(":
+                        return False
+                    stack.pop()
+                else:
+                    return False
+            if stack:
+                return False
+            return is_variable_present
+        except Exception as e:
+            return False
 
     def operate(self, character, operand1, operand2, denominators, expression):
         if character == "+":
@@ -122,7 +171,9 @@ class FormulaParser:
 
     def parse(self, function: str, wrapper_function):
         if wrapper_function == None:
-            raise ValueError("Wrapper function not defined")
+            logging.error("Wrapper function not defined")
+            # raise ValueError("Wrapper function not defined")
+            return None, []
         try:
             # Parses only variables and single digit numbers to expressions for now
             obj = PostFixConverter(len(function))
@@ -134,7 +185,7 @@ class FormulaParser:
             start_index = 0
             while start_index < len(postfix_expression):
                 character = postfix_expression[start_index].upper()
-                if self.isOperator(character):
+                if character in self.operators:
                     operand2 = stack.pop()
                     operand1 = stack.pop()
                     expression, denominators = self.operate(
@@ -159,9 +210,12 @@ class FormulaParser:
         except:
             # Backend uses 100% memory on raising this error
             logging.error(f"Invalid formula expression:\t{function}")
+            return None, []
             # raise ValueError("Invalid formula expression")
         if len(stack) == 1:
             return stack[0], denominators
         else:
             logging.error(f"Invalid formula expression:\t{function}")
+            return None, []
+
             # raise ValueError("Invalid formula expression:\t{function}")

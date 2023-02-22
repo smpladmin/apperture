@@ -1,18 +1,15 @@
-import pandas as pd
+from datetime import datetime
 from typing import List, Optional, Union
 
+import pandas as pd
 from beanie import PydanticObjectId
-from mongo import Mongo
-from datetime import datetime
 from fastapi import Depends
 
-from domain.metrics.models import (
-    Metric,
-    SegmentsAndEventsType,
-    SegmentsAndEvents,
-    ComputedMetricResult,
-)
+from domain.metrics.models import (ComputedMetricResult, Metric,
+                                   SegmentsAndEvents, SegmentsAndEventsType)
+from mongo import Mongo
 from repositories.clickhouse.metric import Metrics
+from repositories.clickhouse.parser.formula_parser import FormulaParser
 
 
 class MetricService:
@@ -23,6 +20,13 @@ class MetricService:
     ):
         self.metric = metric
         self.mongo = mongo
+
+    def validate_formula(self, formula,variable_list):
+        parser = FormulaParser()
+        for expression in formula.split(","):
+            if not parser.validate_formula(expression=expression,variable_list=variable_list):
+                return False
+        return True
 
     async def compute_metric(
         self,

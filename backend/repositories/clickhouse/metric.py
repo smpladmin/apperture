@@ -1,22 +1,18 @@
 import logging
-from repositories.clickhouse.segments import Segments
 from typing import List, Optional
+
 from fastapi import Depends
+from pypika import Case, ClickHouseQuery, Criterion, Field, Parameter
+from pypika import functions as fn
+
 from domain.metrics.models import (
     SegmentsAndEvents,
     SegmentsAndEventsAggregationsFunctions,
     SegmentsAndEventsFilterOperator,
 )
-from pypika import (
-    ClickHouseQuery,
-    Parameter,
-    Field,
-    Criterion,
-    functions as fn,
-    Case,
-)
-from repositories.clickhouse.parser.formula_parser import FormulaParser
 from repositories.clickhouse.base import EventsBase
+from repositories.clickhouse.parser.formula_parser import FormulaParser
+from repositories.clickhouse.segments import Segments
 
 
 class Metrics(EventsBase):
