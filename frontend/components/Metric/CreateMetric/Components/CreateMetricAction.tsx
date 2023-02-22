@@ -23,7 +23,7 @@ import {
   MetricComponentVariant,
   MetricEventFilter,
 } from '@lib/domain/metric';
-import { isEqual } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { Node } from '@lib/domain/node';
 
 type CreateMetricActionProps = {
@@ -135,16 +135,14 @@ const CreateMetricAction = ({
     }
   };
 
-  const removeAggregate = (variable: string) => {
-    const updatedAggregates = aggregates.filter(
-      (aggregate) => aggregate.variable !== variable
-    );
+  const removeAggregate = (index: number) => {
+    let toUpdateAggregates = cloneDeep(aggregates);
+    toUpdateAggregates.splice(index, 1);
 
-    setAggregates(
-      updatedAggregates.map((aggregate, index) => {
-        return { ...aggregate, variable: String.fromCharCode(65 + index) };
-      })
-    );
+    toUpdateAggregates = toUpdateAggregates.map((aggregate, index) => {
+      return { ...aggregate, variable: String.fromCharCode(65 + index) };
+    });
+    setAggregates(toUpdateAggregates);
   };
 
   const handleSave = async () => {
@@ -346,8 +344,9 @@ const CreateMetricAction = ({
             +
           </Button>
         </Flex>
-        {aggregates.map((aggregate) => (
+        {aggregates.map((aggregate, index) => (
           <MetricComponentCard
+            index={index}
             variable={aggregate.variable}
             eventList={eventList}
             key={aggregate.variable}

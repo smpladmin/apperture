@@ -12,6 +12,7 @@ import {
 import { Node } from '@lib/domain/node';
 
 type MetricComponentCardProps = {
+  index: number;
   variable: string;
   eventList: Node[];
   eventProperties: string[];
@@ -23,6 +24,7 @@ type MetricComponentCardProps = {
 };
 
 const MetricComponentCard = ({
+  index,
   variable,
   eventList,
   eventProperties,
@@ -98,7 +100,7 @@ const MetricComponentCard = ({
   };
 
   const handleRemoveComponent = () => {
-    removeAggregate(variable);
+    removeAggregate(index);
   };
 
   const removeFilter = (reference: number) => {
