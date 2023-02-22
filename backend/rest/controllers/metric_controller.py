@@ -5,10 +5,10 @@ from rest.dtos.apperture_users import AppertureUserResponse
 from rest.middlewares import validate_jwt, get_user, get_user_id
 from rest.dtos.metrics import (
     MetricWithUser,
-    MetricsComputeResponse,
     MetricsComputeDto,
     CreateMetricDTO,
     SavedMetricResponse,
+    ComputedMetricStepResponse,
 )
 from domain.datasources.service import DataSourceService
 from domain.metrics.service import MetricService
@@ -18,7 +18,7 @@ router = APIRouter(
 )
 
 
-@router.post("/metrics/compute", response_model=MetricsComputeResponse)
+@router.post("/metrics/compute", response_model=List[ComputedMetricStepResponse])
 async def compute_metrics(
     dto: MetricsComputeDto,
     metric_service: MetricService = Depends(),

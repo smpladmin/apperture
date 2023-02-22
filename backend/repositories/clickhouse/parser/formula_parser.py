@@ -158,9 +158,9 @@ class FormulaParser:
                     stack.append(number)
         except:
             logging.error(f"Invalid formula expression:\t{function}")
-            raise ValueError("Invalid formula expression")
+            # raise ValueError("Invalid formula expression")
         if len(stack) == 1:
             return stack[0], denominators
         else:
             logging.error(f"Invalid formula expression:\t{function}")
-            raise ValueError("Invalid formula expression:\t{function}")
+            # raise ValueError("Invalid formula expression:\t{function}")

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional
+from typing import List
 from pydantic import BaseModel
 from beanie import PydanticObjectId
 
@@ -67,3 +67,23 @@ class Metric(Document):
 class ComputedMetricResult(BaseModel):
     metric: List[dict]
     average: dict
+
+
+class MetricBreakdown(BaseModel):
+    property: str
+    value: str
+
+
+class MetricValue(BaseModel):
+    date: str
+    value: float
+
+
+class ComputedMetricData(BaseModel):
+    breakdown: List[MetricBreakdown]
+    data: List[MetricValue]
+
+
+class ComputedMetricStep(BaseModel):
+    name: str
+    series: List[ComputedMetricData]
