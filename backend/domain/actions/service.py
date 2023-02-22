@@ -1,17 +1,13 @@
+from datetime import datetime
 from typing import List
 
-from domain.actions.models import (
-    Action,
-    ActionGroup,
-    ComputedEventStreamResult,
-)
-from mongo import Mongo
-from fastapi import Depends
 from beanie import PydanticObjectId
-from datetime import datetime
+from fastapi import Depends
 
-from repositories.clickhouse.actions import Actions
+from domain.actions.models import Action, ActionGroup, ComputedEventStreamResult
 from domain.clickstream.models import CaptureEvent
+from mongo import Mongo
+from repositories.clickhouse.actions import Actions
 from rest.dtos.actions import ComputedActionResponse
 
 
@@ -60,9 +56,14 @@ class ActionService:
         return
 
     async def update_events_from_clickstream(self, datasource_id: str):
+        print("==Update events from clickstream==")
         actions = await self.get_actions_for_datasource_id(datasource_id=datasource_id)
         for action in actions:
-            if action.groups[0].selector or action.groups[0].url:
+            if (
+                action.groups[0].selector
+                or action.groups[0].url
+                or action.groups[0].text
+            ):
                 await self.actions.update_events_from_clickstream(
                     action=action, update_action_func=self.update_action_processed_till
                 )
