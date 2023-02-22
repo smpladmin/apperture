@@ -1,16 +1,22 @@
-import { Button, Flex } from '@chakra-ui/react';
-import React from 'react';
+import { Box, Button, Flex, Highlight, Text } from '@chakra-ui/react';
+import React, { useRef, useState } from 'react';
 import MetricEmptyState from './MetricEmptyState';
 import DateFilter from './DateFilter';
 import { DateRangeType, ComputedMetric } from '@lib/domain/metric';
 import MetricTrend from './MetricTrend';
 import Loader from '@components/LoadingSpinner';
+import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
+import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 
 type TransientMetricViewProps = {
   metric: ComputedMetric | null;
   setDateRange: Function;
   dateRange: DateRangeType | null;
   isLoading: boolean;
+  eventProperties: string[];
+  loadingEventsAndProperties: boolean;
+  breakdown: string[];
+  setBreakdown: Function;
 };
 
 const TransientMetricView = ({
@@ -18,7 +24,21 @@ const TransientMetricView = ({
   setDateRange,
   dateRange,
   isLoading,
+  eventProperties,
+  loadingEventsAndProperties,
+  breakdown,
+  setBreakdown,
 }: TransientMetricViewProps) => {
+  const breakdownRef = useRef(null);
+  const [isPropertiesListOpen, setIsPropertiesListOpen] = useState(false);
+
+  useOnClickOutside(breakdownRef, () => setIsPropertiesListOpen(false));
+
+  const handlePropertySelected = (value: string) => {
+    setIsPropertiesListOpen(false);
+    setBreakdown([value]);
+  };
+
   return (
     <Flex
       direction={'column'}
@@ -35,7 +55,7 @@ const TransientMetricView = ({
           <Flex w="full" justifyContent={'space-between'}>
             <DateFilter setDateRange={setDateRange} dateRange={dateRange} />
 
-            <Flex direction={'column'} gap={'1'}>
+            <Flex gap={'1'}>
               <Button
                 _focus={{ bg: 'grey.50', color: 'black', fontWeight: 500 }}
                 border="1px solid #EDEDED"
@@ -50,12 +70,51 @@ const TransientMetricView = ({
                   style={{
                     marginRight: '10px',
                     transform: 'rotate(90deg)',
-                    fontSize: '12px',
                   }}
                   className="ri-sound-module-line"
-                ></i>{' '}
+                ></i>
                 Filters
               </Button>
+              <Box position={'relative'} ref={breakdownRef}>
+                <Button
+                  _focus={{ bg: 'grey.50', color: 'black', fontWeight: 500 }}
+                  border="1px solid #EDEDED"
+                  id="yesterday"
+                  variant={'outline'}
+                  height={8}
+                  onClick={() => setIsPropertiesListOpen(true)}
+                >
+                  <Flex gap={'2'} color={'grey.200'}>
+                    <i
+                      style={{ fontSize: '12px' }}
+                      className="ri-pie-chart-line"
+                    />
+                    <Text
+                      fontSize={'xs-12'}
+                      fontWeight={400}
+                      color={'grey.200'}
+                    >
+                      <Highlight
+                        query={`${breakdown}`}
+                        styles={{
+                          fontSize: 'xs-12',
+                          fontWeight: 500,
+                          color: 'black.100',
+                        }}
+                      >
+                        {`Breakdown ${breakdown.join('')}`}
+                      </Highlight>
+                    </Text>
+                  </Flex>
+                </Button>
+                <SearchableListDropdown
+                  isOpen={isPropertiesListOpen}
+                  isLoading={loadingEventsAndProperties}
+                  data={eventProperties}
+                  onSubmit={handlePropertySelected}
+                  dropdownPosition={'right'}
+                />
+              </Box>
             </Flex>
           </Flex>
           {metric && metric.data.length > 0 ? (

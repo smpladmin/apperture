@@ -17,7 +17,7 @@ export type MetricComponentAggregation = {
   property: string;
 };
 
-export type EventOrSegmentComponent = {
+export type MetricAggregate = {
   variable: string;
   reference_id: string;
   function: string;
@@ -65,7 +65,7 @@ export type Metric = {
   userId: string;
   name: string;
   function: string;
-  aggregates: EventOrSegmentComponent[];
+  aggregates: MetricAggregate[];
   breakdown: string[];
 };
 

@@ -5,7 +5,7 @@ import MetricFilterComponent from './MetricFilterComponent';
 import MetricAddFilterComponent from './MetricAddFilterComponent';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import {
-  EventOrSegmentComponent,
+  MetricAggregate,
   MetricComponentVariant,
   MetricEventFilter,
 } from '@lib/domain/metric';
@@ -16,11 +16,10 @@ type MetricComponentCardProps = {
   variable: string;
   eventList: Node[];
   eventProperties: string[];
-  loadingEventProperties: boolean;
-  loadingEventsList: boolean;
   updateAggregate: Function;
   removeAggregate: Function;
-  savedAggregate: EventOrSegmentComponent;
+  savedAggregate: MetricAggregate;
+  loadingEventsAndProperties: boolean;
 };
 
 const MetricComponentCard = ({
@@ -28,8 +27,7 @@ const MetricComponentCard = ({
   variable,
   eventList,
   eventProperties,
-  loadingEventProperties,
-  loadingEventsList,
+  loadingEventsAndProperties,
   updateAggregate,
   removeAggregate,
   savedAggregate,
@@ -293,12 +291,12 @@ const MetricComponentCard = ({
                 handleSetFilter={handleSetFilter}
                 removeFilter={removeFilter}
                 eventProperties={eventProperties}
-                loadingEventProperties={loadingEventProperties}
+                loadingEventsAndProperties={loadingEventsAndProperties}
               />
             ))}
           <MetricAddFilterComponent
             eventProperties={eventProperties}
-            loadingEventProperties={loadingEventProperties}
+            loadingEventsAndProperties={loadingEventsAndProperties}
             handleAddFilter={handleAddFilter}
           />
         </>

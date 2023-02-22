@@ -5,7 +5,6 @@ import {
   DatePickerRange,
   DateRangeType,
 } from '@lib/domain/metric';
-import { SegmentDateFilterType } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useEffect, useRef, useState } from 'react';
 

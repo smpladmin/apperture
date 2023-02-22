@@ -5,13 +5,13 @@ import React, { useRef, useState } from 'react';
 
 type MetricAddFilterComponentProps = {
   eventProperties: string[];
-  loadingEventProperties: boolean;
+  loadingEventsAndProperties: boolean;
   handleAddFilter: Function;
 };
 
 const MetricAddFilterComponent = ({
   eventProperties,
-  loadingEventProperties,
+  loadingEventsAndProperties,
   handleAddFilter,
 }: MetricAddFilterComponentProps) => {
   const [openDropDown, setOpenDropDown] = useState(false);
@@ -43,7 +43,7 @@ const MetricAddFilterComponent = ({
       </Text>
       <SearchableListDropdown
         isOpen={openDropDown}
-        isLoading={loadingEventProperties}
+        isLoading={loadingEventsAndProperties}
         data={eventProperties}
         onSubmit={handleSubmit}
       />

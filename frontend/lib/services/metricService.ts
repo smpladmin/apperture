@@ -1,4 +1,4 @@
-import { EventOrSegmentComponent } from '@lib/domain/metric';
+import { MetricAggregate } from '@lib/domain/metric';
 import {
   AppertureGet,
   ApperturePost,
@@ -7,12 +7,12 @@ import {
 } from './util';
 
 type MetricRequestBody = {
-  dsId: string;
-  functions: string;
-  aggregates: EventOrSegmentComponent[];
+  datasourceId: string;
+  function: string;
+  aggregates: MetricAggregate[];
   breakdown: string[];
-  startDate: Date | undefined;
-  endDate: Date | undefined;
+  startDate?: string;
+  endDate?: string;
 };
 
 const formatDatalabel = (date: Date) => {
@@ -25,12 +25,12 @@ const formatDatalabel = (date: Date) => {
 export const computeMetric = async (
   dsId: string,
   functions: string,
-  aggregates: EventOrSegmentComponent[],
+  aggregates: MetricAggregate[],
   breakdown: string[],
   startDate: Date | undefined,
   endDate: Date | undefined
 ) => {
-  const requestBody: any = {
+  const requestBody: MetricRequestBody = {
     datasourceId: dsId,
     function: functions,
     aggregates,
@@ -55,7 +55,7 @@ export const saveMetric = async (
   name: string,
   dsId: string,
   definition: string,
-  aggregates: EventOrSegmentComponent[],
+  aggregates: MetricAggregate[],
   breakdown: string[]
 ) => {
   const result = await ApperturePost('/metrics', {
@@ -73,7 +73,7 @@ export const updateMetric = async (
   name: string,
   dsId: string,
   definition: string,
-  aggregates: EventOrSegmentComponent[],
+  aggregates: MetricAggregate[],
   breakdown: string[]
 ) => {
   const result = await ApperturePut('/metrics/' + metricId, {

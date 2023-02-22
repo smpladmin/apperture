@@ -6,11 +6,10 @@ import {
   Input,
   Text,
 } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
 import { useRouter } from 'next/router';
 import MetricComponentCard from './MetricComponentCard';
-import { getEventProperties, getNodes } from '@lib/services/datasourceService';
 import {
   computeMetric,
   saveMetric,
@@ -18,13 +17,17 @@ import {
 } from '@lib/services/metricService';
 import {
   DateRangeType,
-  EventOrSegmentComponent,
+  MetricAggregate,
   Metric,
   MetricComponentVariant,
   MetricEventFilter,
 } from '@lib/domain/metric';
 import { cloneDeep, isEqual } from 'lodash';
 import { Node } from '@lib/domain/node';
+import {
+  isValidAggregates,
+  replaceEmptyStringPlaceholder,
+} from '@components/Metric/util';
 
 type CreateMetricActionProps = {
   setMetric: Function;
@@ -33,6 +36,10 @@ type CreateMetricActionProps = {
   canSaveMetric: boolean;
   setCanSaveMetric: Function;
   setIsLoading: Function;
+  loadingEventsAndProperties: boolean;
+  eventProperties: string[];
+  eventList: Node[];
+  breakdown: string[];
 };
 
 const CreateMetricAction = ({
@@ -42,6 +49,10 @@ const CreateMetricAction = ({
   canSaveMetric,
   setCanSaveMetric,
   setIsLoading,
+  loadingEventsAndProperties,
+  eventProperties,
+  eventList,
+  breakdown,
 }: CreateMetricActionProps) => {
   const [metricName, setMetricName] = useState(
     savedMetric?.name || 'Untitled Metric'
@@ -56,11 +67,8 @@ const CreateMetricAction = ({
 
   const { metricId } = router.query;
   const dsId = savedMetric?.datasourceId || router.query.dsId;
-  const [eventList, setEventList] = useState<Node[]>([]);
-  const [eventProperties, setEventProperties] = useState<string[]>([]);
-  const [loadingEventProperties, setLoadingEventProperties] = useState(false);
-  const [loadingEventsList, setLoadingEventsList] = useState(false);
-  const [aggregates, setAggregates] = useState<EventOrSegmentComponent[]>(
+
+  const [aggregates, setAggregates] = useState<MetricAggregate[]>(
     savedMetric?.aggregates || [
       {
         variable: 'A',
@@ -73,22 +81,6 @@ const CreateMetricAction = ({
       },
     ]
   );
-  useEffect(() => {
-    const fetchEventProperties = async () => {
-      const [eventPropertiesResult, events] = await Promise.all([
-        getEventProperties(dsId as string),
-        getNodes(dsId as string),
-      ]);
-
-      setEventList(events);
-      setEventProperties([...eventPropertiesResult]);
-      setLoadingEventProperties(false);
-      setLoadingEventsList(false);
-    };
-    setLoadingEventProperties(true);
-    setLoadingEventsList(true);
-    fetchEventProperties();
-  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -104,18 +96,18 @@ const CreateMetricAction = ({
     setDebouncedDefinition(e.target.value);
   };
 
-  const updateAggregate = (
-    variable: string,
-    updatedValue: MetricEventFilter
-  ) => {
-    setAggregates(
-      aggregates.map((aggregate) =>
-        aggregate.variable == variable
-          ? { ...aggregate, ...updatedValue }
-          : aggregate
-      )
-    );
-  };
+  const updateAggregate = useCallback(
+    (variable: string, updatedValue: MetricEventFilter) => {
+      setAggregates(
+        aggregates.map((aggregate) =>
+          aggregate.variable == variable
+            ? { ...aggregate, ...updatedValue }
+            : aggregate
+        )
+      );
+    },
+    [aggregates]
+  );
 
   const addAggregate = () => {
     if (aggregates.every((aggregate) => aggregate.variant)) {
@@ -155,7 +147,7 @@ const CreateMetricAction = ({
         dsId as string,
         metricDefinition,
         aggregates,
-        []
+        breakdown
       );
     } else {
       // save the metric
@@ -164,7 +156,7 @@ const CreateMetricAction = ({
         dsId as string,
         metricDefinition,
         aggregates,
-        []
+        breakdown
       );
     }
     router.push({
@@ -176,22 +168,11 @@ const CreateMetricAction = ({
   };
 
   useEffect(() => {
-    const fetchMetric = async (aggregates: EventOrSegmentComponent[]) => {
-      const processedAggregate = aggregates.map(
-        (aggregate: EventOrSegmentComponent) => {
-          const processedFilter = aggregate?.filters.map(
-            (filter: MetricEventFilter) => {
-              const processedValues = filter.values.map((value: string) =>
-                value === '(empty string)' ? '' : value
-              );
-              return { ...filter, values: processedValues };
-            }
-          );
-          return {
-            ...aggregate,
-            filters: processedFilter,
-          };
-        }
+    if (!isValidAggregates(aggregates)) return;
+
+    const fetchMetric = async (aggregates: MetricAggregate[]) => {
+      const processedAggregate = replaceEmptyStringPlaceholder(
+        cloneDeep(aggregates)
       );
       const result = await computeMetric(
         dsId as string,
@@ -199,7 +180,7 @@ const CreateMetricAction = ({
           ? metricDefinition
           : aggregates.map((aggregate) => aggregate.variable).join(','),
         processedAggregate,
-        [],
+        breakdown,
         dateRange?.startDate,
         dateRange?.endDate
       );
@@ -209,40 +190,28 @@ const CreateMetricAction = ({
           definition: metricDefinition,
           average: result.average,
         });
-        setIsLoading(false);
       } else {
         setMetric(null);
       }
+      setIsLoading(false);
     };
-    if (
-      aggregates.every(
-        (aggregate) =>
-          aggregate.reference_id &&
-          aggregate.variable &&
-          aggregate.filters.every(
-            (filter: MetricEventFilter) => filter.values.length
-          )
-      )
-    ) {
-      fetchMetric(aggregates);
-      if (
-        aggregates &&
-        aggregates.length &&
-        (!isEqual(savedMetric?.aggregates, aggregates) ||
-          savedMetric?.function != metricDefinition)
-      ) {
-        setCanSaveMetric(true);
-      } else {
-        setCanSaveMetric(false);
-      }
-    }
-  }, [aggregates, metricDefinition, dateRange]);
+
+    fetchMetric(aggregates);
+  }, [aggregates, metricDefinition, dateRange, breakdown]);
 
   useEffect(() => {
-    if (!canSaveMetric && savedMetric && metricName != savedMetric?.name) {
+    // enable save metric button when aggregate, metric name or definition changes
+    if (
+      isValidAggregates(aggregates) &&
+      (!isEqual(savedMetric?.aggregates, aggregates) ||
+        savedMetric?.function != metricDefinition ||
+        saveMetric?.name !== metricName)
+    ) {
       setCanSaveMetric(true);
+    } else {
+      setCanSaveMetric(false);
     }
-  }, [metricName]);
+  }, [aggregates, metricDefinition, metricName]);
 
   return (
     <>
@@ -351,8 +320,7 @@ const CreateMetricAction = ({
             eventList={eventList}
             key={aggregate.variable}
             eventProperties={eventProperties}
-            loadingEventProperties={loadingEventProperties}
-            loadingEventsList={loadingEventsList}
+            loadingEventsAndProperties={loadingEventsAndProperties}
             updateAggregate={updateAggregate}
             removeAggregate={removeAggregate}
             savedAggregate={aggregate}
