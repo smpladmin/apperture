@@ -64,11 +64,6 @@ class Metric(Document):
         name = "metric"
 
 
-class ComputedMetricResult(BaseModel):
-    metric: List[dict]
-    average: dict
-
-
 class MetricBreakdown(BaseModel):
     property: str
     value: str

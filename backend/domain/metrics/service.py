@@ -45,7 +45,9 @@ class MetricService:
         keys.extend(breakdown + function.split(","))
 
         breakdown_combinations = (
-            list(set([row[1 : len(breakdown) + 1] for row in computed_metric]))
+            list(
+                dict.fromkeys([row[1 : len(breakdown) + 1] for row in computed_metric])
+            )
             if breakdown
             else []
         )
