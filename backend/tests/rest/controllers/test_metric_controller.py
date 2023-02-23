@@ -1,6 +1,15 @@
 import json
 from unittest.mock import ANY
 
+from domain.metrics.models import (
+    SegmentsAndEvents,
+    SegmentsAndEventsType,
+    SegmentsAndEventsAggregations,
+    SegmentsAndEventsAggregationsFunctions,
+    SegmentsAndEventsFilter,
+    SegmentsAndEventsFilterOperator,
+)
+
 
 def test_compute_metric(
     client_init, compute_metric_request, computed_metric_response, metric_service
@@ -14,6 +23,34 @@ def test_compute_metric(
     )
     assert response.status_code == 200
     assert response.json() == computed_metric_response
+    metric_service.compute_metric.assert_called_once_with(
+        **{
+            "aggregates": [
+                SegmentsAndEvents(
+                    variable="A",
+                    variant=SegmentsAndEventsType.EVENT,
+                    aggregations=SegmentsAndEventsAggregations(
+                        functions=SegmentsAndEventsAggregationsFunctions.COUNT,
+                        property="Video_Seen",
+                    ),
+                    reference_id="Video_Seen",
+                    filters=[
+                        SegmentsAndEventsFilter(
+                            operator=SegmentsAndEventsFilterOperator.EQUALS,
+                            operand="properties.$city",
+                            values=["Bengaluru"],
+                        )
+                    ],
+                    conditions=["where"],
+                )
+            ],
+            "breakdown": [],
+            "datasource_id": "638f1aac8e54760eafc64d70",
+            "end_date": None,
+            "function": "A",
+            "start_date": None,
+        }
+    )
 
 
 def test_get_metrics(client_init, metric_service):

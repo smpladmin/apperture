@@ -1,37 +1,46 @@
-from fastapi import APIRouter, Depends
 from typing import List, Optional, Union
+
+from fastapi import APIRouter, Depends
+
 from domain.apperture_users.models import AppertureUser
-from rest.dtos.apperture_users import AppertureUserResponse
-from rest.middlewares import validate_jwt, get_user, get_user_id
-from rest.dtos.metrics import (
-    MetricWithUser,
-    MetricsComputeResponse,
-    MetricsComputeDto,
-    CreateMetricDTO,
-    SavedMetricResponse,
-)
 from domain.datasources.service import DataSourceService
 from domain.metrics.service import MetricService
+from rest.dtos.apperture_users import AppertureUserResponse
+from rest.dtos.metrics import (
+    CreateMetricDTO,
+    MetricsComputeDto,
+    MetricWithUser,
+    SavedMetricResponse,
+    ComputedMetricStepResponse,
+)
+from rest.middlewares import get_user, get_user_id, validate_jwt
 
 router = APIRouter(
     tags=["metrics"], dependencies=[Depends(validate_jwt)], responses={401: {}}
 )
 
 
-@router.post("/metrics/compute", response_model=MetricsComputeResponse)
+@router.post("/metrics/compute", response_model=List[ComputedMetricStepResponse])
 async def compute_metrics(
     dto: MetricsComputeDto,
     metric_service: MetricService = Depends(),
 ):
-    result = await metric_service.compute_metric(
-        datasource_id=str(dto.datasourceId),
-        function=dto.function,
-        aggregates=dto.aggregates,
-        breakdown=dto.breakdown,
-        start_date=dto.startDate,
-        end_date=dto.endDate,
-    )
-    return result
+    if metric_service.validate_formula(
+        dto.function, [aggregate.variable for aggregate in dto.aggregates]
+    ):
+        result = await metric_service.compute_metric(
+            datasource_id=str(dto.datasourceId),
+            function=dto.function,
+            aggregates=dto.aggregates,
+            breakdown=dto.breakdown,
+            start_date=dto.startDate,
+            end_date=dto.endDate,
+        )
+        return result
+    return [
+        ComputedMetricStepResponse(name=func, series=[])
+        for func in dto.function.split(",")
+    ]
 
 
 @router.post("/metrics", response_model=SavedMetricResponse)

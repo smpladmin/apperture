@@ -1,18 +1,19 @@
-import pandas as pd
-from typing import List, Optional, Union
-
-from beanie import PydanticObjectId
-from mongo import Mongo
 from datetime import datetime
+from typing import List, Optional
+from beanie import PydanticObjectId
 from fastapi import Depends
 
 from domain.metrics.models import (
-    Metric,
-    SegmentsAndEventsType,
     SegmentsAndEvents,
-    ComputedMetricResult,
+    ComputedMetricStep,
+    MetricBreakdown,
+    MetricValue,
+    ComputedMetricData,
+    Metric,
 )
+from mongo import Mongo
 from repositories.clickhouse.metric import Metrics
+from repositories.clickhouse.parser.formula_parser import FormulaParser
 
 
 class MetricService:
@@ -24,6 +25,15 @@ class MetricService:
         self.metric = metric
         self.mongo = mongo
 
+    def validate_formula(self, formula, variable_list):
+        parser = FormulaParser()
+        for expression in formula.split(","):
+            if not parser.validate_formula(
+                expression=expression, variable_list=variable_list
+            ):
+                return False
+        return True
+
     async def compute_metric(
         self,
         datasource_id: str,
@@ -32,7 +42,7 @@ class MetricService:
         breakdown: List[str],
         start_date: Optional[str],
         end_date: Optional[str],
-    ) -> ComputedMetricResult:
+    ) -> [ComputedMetricStep]:
         computed_metric = self.metric.compute_query(
             datasource_id=datasource_id,
             aggregates=aggregates,
@@ -41,17 +51,61 @@ class MetricService:
             start_date=start_date,
             end_date=end_date,
         )
-        keys = ["date", *function.split(",")]
-        data = [dict(zip(keys, row)) for row in computed_metric]
-        result = [
-            {"date": d["date"], "series": k, "value": v}
-            for d in data
-            for k, v in d.items()
-            if k != "date"
+        keys = ["date"]
+        keys.extend(breakdown + function.split(","))
+
+        breakdown_combinations = (
+            list(
+                dict.fromkeys([row[1 : len(breakdown) + 1] for row in computed_metric])
+            )
+            if breakdown
+            else []
+        )
+
+        breakdown_combinations = [
+            dict(zip(breakdown, combination)) for combination in breakdown_combinations
         ]
-        df = pd.DataFrame(data)
-        average = df[function.split(",")].mean().to_dict()
-        return ComputedMetricResult(metric=result, average=average)
+
+        computed_metric_steps = []
+        for func in function.split(","):
+            series = []
+            if not breakdown_combinations:
+                metric_data = [dict(zip(keys, row)) for row in computed_metric]
+                metric_values = [
+                    MetricValue(
+                        date=data["date"].strftime("%Y-%m-%d"), value=data[func]
+                    )
+                    for data in metric_data
+                ]
+                series.append(ComputedMetricData(breakdown=[], data=metric_values))
+
+            else:
+                for combination in breakdown_combinations:
+                    metric_breakdown = [
+                        MetricBreakdown(property=k, value=v)
+                        for k, v in combination.items()
+                    ]
+                    metric_data = [
+                        data
+                        for data in computed_metric
+                        if all(x in data for x in combination.values())
+                    ]
+                    metric_data = [dict(zip(keys, row)) for row in metric_data]
+                    metric_values = [
+                        MetricValue(
+                            date=data["date"].strftime("%Y-%m-%d"), value=data[func]
+                        )
+                        for data in metric_data
+                    ]
+                    series.append(
+                        ComputedMetricData(
+                            breakdown=metric_breakdown, data=metric_values
+                        )
+                    )
+
+            computed_metric_steps.append(ComputedMetricStep(name=func, series=series))
+
+        return computed_metric_steps
 
     async def build_metric(
         self,

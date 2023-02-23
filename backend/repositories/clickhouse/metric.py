@@ -1,22 +1,13 @@
-import logging
-from repositories.clickhouse.segments import Segments
 from typing import List, Optional
-from fastapi import Depends
+from pypika import Case, ClickHouseQuery, Criterion, Field, Parameter, functions as fn
+
 from domain.metrics.models import (
     SegmentsAndEvents,
     SegmentsAndEventsAggregationsFunctions,
     SegmentsAndEventsFilterOperator,
 )
-from pypika import (
-    ClickHouseQuery,
-    Parameter,
-    Field,
-    Criterion,
-    functions as fn,
-    Case,
-)
-from repositories.clickhouse.parser.formula_parser import FormulaParser
 from repositories.clickhouse.base import EventsBase
+from repositories.clickhouse.parser.formula_parser import FormulaParser
 
 
 class Metrics(EventsBase):
@@ -45,33 +36,51 @@ class Metrics(EventsBase):
         end_date: Optional[str],
     ):
         parser = FormulaParser()
-        innerquery = ClickHouseQuery.from_(self.table)
-        for aggregate in aggregates:
-            agg_function = aggregate.aggregations.functions
-            property = aggregate.aggregations.property
-            variable = aggregate.variable
+        params = {"ds_id": datasource_id}
+        subquery = ClickHouseQuery.from_(self.table).select(
+            fn.Date(self.table.timestamp).as_("date")
+        )
 
-            if agg_function == SegmentsAndEventsAggregationsFunctions.COUNT:
-                innerquery = innerquery.select(fn.Date(Field("timestamp")).as_("date"))
-                subquery_criterion = [Parameter("event_name") == property]
+        if breakdown:
+            for property in breakdown:
+                subquery = subquery.select(Field(f"properties.{property}"))
+
+        criterion = [self.table.datasource_id == Parameter("%(ds_id)s")]
+
+        if start_date:
+            criterion.append(fn.Date(self.table.timestamp) >= start_date)
+        if end_date:
+            criterion.append(fn.Date(self.table.timestamp) <= end_date)
+
+        subquery = subquery.where(Criterion.all(criterion))
+
+        for i, aggregate in enumerate(aggregates):
+            if (
+                aggregate.aggregations.functions
+                == SegmentsAndEventsAggregationsFunctions.COUNT
+            ):
+                subquery_criterion = [
+                    self.table.event_name == Parameter(f"%(property_{i})s")
+                ]
+                params[f"property_{i}"] = aggregate.aggregations.property
+
                 for filter in aggregate.filters:
                     if filter.operator == SegmentsAndEventsFilterOperator.EQUALS:
                         subquery_criterion.append(
                             Field(f"properties.{filter.operand}").isin(filter.values)
                         )
-                subquery = Case().when(Criterion.all(subquery_criterion), 1).else_(0)
-                innerquery = innerquery.select(subquery.as_(variable))
-                inner_criterion = [self.table.datasource_id == Parameter("%(ds_id)s")]
-                if start_date:
-                    inner_criterion.append(
-                        fn.Date(Field("date")) >= fn.Date(start_date)
-                    )
-                if end_date:
-                    inner_criterion.append(fn.Date(Field("date")) <= fn.Date(end_date))
-            innerquery = innerquery.where(Criterion.all(inner_criterion))
+
+                subquery = subquery.select(
+                    Case()
+                    .when(Criterion.all(subquery_criterion), 1)
+                    .else_(0)
+                    .as_(aggregate.variable)
+                )
+
         select_expressions, denominators_list = zip(
             *[parser.parse(definition, fn.Sum) for definition in function.split(",")]
         )
+
         having_clause = []
         for denominators in denominators_list:
             for denominator in denominators:
@@ -79,13 +88,23 @@ class Metrics(EventsBase):
                     having_clause.append(denominator != 0)
 
         query = (
-            ClickHouseQuery.from_(innerquery.as_("innerquery"))
+            ClickHouseQuery.from_(subquery.as_("subquery"))
             .select(Parameter("date"))
             .groupby(Parameter("date"))
-            .having(Criterion.all(having_clause))
-            .limit(100)
         )
+
+        if breakdown:
+            for property in breakdown:
+                query = query.select(Field(f"properties.{property}")).groupby(
+                    Field(f"properties.{property}")
+                )
+
+        query = query.having(Criterion.all(having_clause)).orderby(1)
+        if breakdown:
+            for i in range(len(breakdown)):
+                query = query.orderby(i + 2)
+        query = query.limit(1000)
         for select_expression in select_expressions:
             query = query.select(select_expression)
 
-        return query.get_sql(), {"ds_id": datasource_id}
+        return query.get_sql(), params
