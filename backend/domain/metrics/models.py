@@ -1,7 +1,8 @@
 from enum import Enum
 from typing import List, Optional
-from pydantic import BaseModel
+
 from beanie import PydanticObjectId
+from pydantic import BaseModel
 
 from repositories import Document
 

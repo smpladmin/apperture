@@ -200,7 +200,7 @@ const CreateMetricAction = ({
       const result = await computeMetric(
         dsId as string,
         metricDefinition && metricDefinition.length
-          ? metricDefinition
+          ? metricDefinition.replace(/\s*/g, '')
           : aggregates.map((aggregate) => aggregate.variable).join(','),
         processedAggregate,
         [],
