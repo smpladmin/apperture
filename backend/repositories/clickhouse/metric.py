@@ -25,10 +25,14 @@ class Metrics(EventsBase):
         start_date: Optional[str],
         end_date: Optional[str],
     ):
-        return self.execute_get_query(
-            *self.build_metric_compute_query(
-                datasource_id, aggregates, breakdown, function, start_date, end_date
-            )
+        query, parameters = self.build_metric_compute_query(
+            datasource_id, aggregates, breakdown, function, start_date, end_date
+        )
+
+        return (
+            None
+            if query is None
+            else self.execute_get_query(query=query, parameters=parameters)
         )
 
     def build_metric_compute_query(
@@ -68,6 +72,9 @@ class Metrics(EventsBase):
         select_expressions, denominators_list = zip(
             *[parser.parse(definition, fn.Sum) for definition in function.split(",")]
         )
+        print(select_expressions)
+        if None in select_expressions:
+            return None, None
         having_clause = []
         for denominators in denominators_list:
             for denominator in denominators:
