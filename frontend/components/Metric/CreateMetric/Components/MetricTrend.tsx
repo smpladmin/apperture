@@ -104,7 +104,6 @@ const convertToTableData = (
 };
 
 const MetricTrend = ({ data, definition, average }: ComputedMetric) => {
-  // convertToTableData(data);
   return (
     <Flex
       height={'full'}

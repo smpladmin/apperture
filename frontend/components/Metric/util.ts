@@ -20,15 +20,12 @@ export const replaceEmptyStringPlaceholder = (
 };
 
 export const isValidAggregates = (aggregates: MetricAggregate[]) => {
-  return (
-    aggregates.length &&
-    aggregates.every(
-      (aggregate) =>
-        aggregate.reference_id &&
-        aggregate.variable &&
-        aggregate.filters.every(
-          (filter: MetricEventFilter) => filter.values.length
-        )
-    )
+  return aggregates.every(
+    (aggregate) =>
+      aggregate.reference_id &&
+      aggregate.variable &&
+      aggregate.filters.every(
+        (filter: MetricEventFilter) => filter.values.length
+      )
   );
 };

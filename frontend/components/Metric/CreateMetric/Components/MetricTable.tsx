@@ -30,6 +30,7 @@ const MetricTable = ({ data }: any) => {
     };
     return [...generateColumnHeader()];
   }, []);
+
   const tableInstance = useReactTable({
     columns,
     data: data || [],
