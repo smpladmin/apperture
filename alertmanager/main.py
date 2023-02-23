@@ -44,6 +44,7 @@ def get_running_tasks():
             task
             for task in tasks
             if task["state"] == "running"
+            and task["stats"]
             and (
                 task["stats"]["cpuPercentage"] > CPU_THRESHOLD
                 or task["stats"]["memoryPercentage"] > MEMORY_THRESHOLD
