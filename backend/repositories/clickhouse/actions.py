@@ -38,7 +38,7 @@ class Actions(EventsBase):
         params = {}
         conditions = []
         operator = "exact"
-        print(filter)
+
         if filter.selector is not None:
             selectors = (
                 filter.selector
@@ -65,14 +65,10 @@ class Actions(EventsBase):
             )
 
         attributes: Dict[str, List] = {}
-        for key in ["href", "text"]:
-            print(filter.href, " ================================ ", filter.text)
-            if filter.href is not None:
-                attributes["href"] = self.process_ok_values(filter.href, operator)
-            if filter.text is not None:
-                attributes["text"] = self.process_ok_values(filter.text, operator)
-
-            print(attributes)
+        if filter.href:
+            attributes["href"] = self.process_ok_values(filter.href, operator)
+        if filter.text:
+            attributes["text"] = self.process_ok_values(filter.text, operator)
 
         if attributes:
             for key, ok_values in attributes.items():
@@ -83,9 +79,6 @@ class Actions(EventsBase):
                         params[
                             f"{key}_{idx}_attributes_regex"
                         ] = f'{optional_flag}({key}="{value}")'
-                        # combination_conditions.append(
-                        #     f"match(elements_chain, %({key}_{idx}_attributes_regex)s)"
-                        # )
                         conditions.append(
                             self.ch_match_func(
                                 self.click_stream_table.element_chain,
@@ -94,7 +87,6 @@ class Actions(EventsBase):
                         )
                     # conditions.append(f"({' OR '.join(combination_conditions)})")
 
-        print(f"conditions:{conditions}, {params}")
         return conditions, params
 
     def process_ok_values(self, ok_values: Any, operator: OperatorType) -> List[str]:
@@ -114,6 +106,7 @@ class Actions(EventsBase):
             return [re.escape(text).replace("\\ ", " ") for text in ok_values]
 
     async def update_events_from_clickstream(self, action: Action, update_action_func):
+
         return self.execute_get_query(
             *await self.build_update_events_from_clickstream_query(
                 action, update_action_func
@@ -123,8 +116,9 @@ class Actions(EventsBase):
     async def build_update_events_from_clickstream_query(
         self, action: Action, update_action_func
     ):
+
         conditions, params = self.filter_click_event(filter=action.groups[0])
-        print("-======-", conditions, params)
+
         query = (
             ClickHouseQuery.into(self.table)
             .from_(self.click_stream_table)
@@ -150,9 +144,6 @@ class Actions(EventsBase):
         query = query.where(
             self.click_stream_table.timestamp <= self.parse_datetime_best_effort(now)
         )
-
-        for condition in conditions:
-            print(f"## condition: {condition}")
 
         query = query.where(Criterion.all(conditions))
         params["ds_id"] = str(action.datasource_id)

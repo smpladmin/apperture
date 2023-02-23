@@ -59,10 +59,12 @@ class ActionService:
         print("==Update events from clickstream==")
         actions = await self.get_actions_for_datasource_id(datasource_id=datasource_id)
         for action in actions:
+            print(action)
             if (
                 action.groups[0].selector
                 or action.groups[0].url
                 or action.groups[0].text
+                or action.groups[0].href
             ):
                 await self.actions.update_events_from_clickstream(
                     action=action, update_action_func=self.update_action_processed_till
