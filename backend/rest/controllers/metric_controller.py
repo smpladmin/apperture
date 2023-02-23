@@ -37,7 +37,10 @@ async def compute_metrics(
             end_date=dto.endDate,
         )
         return result
-    return [ComputedMetricStepResponse(name=func, series=[]) for func in dto.function.split(',')]
+    return [
+        ComputedMetricStepResponse(name=func, series=[])
+        for func in dto.function.split(",")
+    ]
 
 
 @router.post("/metrics", response_model=SavedMetricResponse)
