@@ -24,7 +24,6 @@ class ElementsService:
                 **({"attr_id": element.attr_id} if element.attr_id else {}),
                 **element.attributes,
             }
-            print("---------", attributes)
             attributes = {
                 self._escape(key): self._escape(str(value))
                 for key, value in sorted(attributes.items())

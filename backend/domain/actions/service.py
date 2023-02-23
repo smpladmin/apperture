@@ -56,10 +56,8 @@ class ActionService:
         return
 
     async def update_events_from_clickstream(self, datasource_id: str):
-        print("==Update events from clickstream==")
         actions = await self.get_actions_for_datasource_id(datasource_id=datasource_id)
         for action in actions:
-            print(action)
             if (
                 action.groups[0].selector
                 or action.groups[0].url
