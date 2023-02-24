@@ -12,6 +12,8 @@ const formatDate = (date: string): string => {
   return convertISODateToReadableDate(date).split('-').reverse().join(' ');
 };
 
+const COLOR_PLATE_5 = ['#5B8FF9', '#5AD8A6', '#5D7092', '#F6BD16', '#E8684A'];
+
 const config = {
   padding: 'auto',
   autoFit: true,
@@ -80,30 +82,44 @@ const config = {
     },
   },
   animation: true,
+  color: COLOR_PLATE_5,
 };
 
-const convertToTableData = (
-  data: ComputedMetricData[],
-  average: { [keys: string]: number }
-) => {
-  const tableData: any = {};
-  data.forEach((item: ComputedMetricData) => {
-    tableData[item.series] =
-      tableData[item.series] === undefined
-        ? {
-            series: item.series,
-            average: average ? formatDatalabel(average[item.series]) : 0,
-            [formatDate(item.date)]: formatDatalabel(item.value),
-          }
-        : {
-            ...tableData[item.series],
-            [formatDate(item.date)]: formatDatalabel(item.value),
-          };
+const convertToTableData = (result: any[]) => {
+  const x = result?.map((res) => {
+    const name = res.name;
+    let properties: any = [];
+    let values: any = [];
+    res.series.forEach((series: any) => {
+      if (series.breakdown.length) properties.push(series.breakdown[0]);
+      let x = {};
+      series.data.forEach((d: any) => {
+        //@ts-ignore
+        x[formatDate(d['date'])] = formatDatalabel(d['value']);
+      });
+      values.push(x);
+    });
+    return { name, properties, values };
   });
-  return Object.values(tableData);
+  return x;
 };
 
-const MetricTrend = ({ data, definition, average }: ComputedMetric) => {
+const convertToTrendData = (result: any[]) => {
+  return result?.flatMap((res: any) => {
+    const name = res.name;
+    return res.series.flatMap((series: any) => {
+      let seriesName = name;
+      if (series.breakdown.length)
+        seriesName = `${seriesName}/${series.breakdown[0].value}`;
+      return series.data.map((d: any) => {
+        return { ...d, series: seriesName };
+      });
+    });
+  });
+};
+
+const MetricTrend = ({ data }: any) => {
+  console.log('table data', convertToTableData(data));
   return (
     <Flex
       height={'full'}
@@ -112,10 +128,27 @@ const MetricTrend = ({ data, definition, average }: ComputedMetric) => {
       direction={'column'}
       className="metric-chart"
     >
-      <LineChart {...config} data={data} />
-      <MetricTable data={convertToTableData(data, average)} />
+      <LineChart {...config} data={convertToTrendData(data)} />
+
+      {/* <MetricTable data={convertToTableData(data)} /> */}
     </Flex>
   );
 };
 
 export default MetricTrend;
+
+// const tableData: any = {};
+// data.forEach((item: ComputedMetricData) => {
+//   tableData[item.series] =
+//     tableData[item.series] === undefined
+//       ? {
+//           series: item.series,
+//           average: average ? formatDatalabel(average[item.series]) : 0,
+//           [formatDate(item.date)]: formatDatalabel(item.value),
+//         }
+//       : {
+//           ...tableData[item.series],
+//           [formatDate(item.date)]: formatDatalabel(item.value),
+//         };
+// });
+// return Object.values(tableData);

@@ -17,6 +17,7 @@ type TransientMetricViewProps = {
   loadingEventsAndProperties: boolean;
   breakdown: string[];
   setBreakdown: Function;
+  showEmptyState: boolean;
 };
 
 const TransientMetricView = ({
@@ -28,6 +29,7 @@ const TransientMetricView = ({
   loadingEventsAndProperties,
   breakdown,
   setBreakdown,
+  showEmptyState,
 }: TransientMetricViewProps) => {
   const breakdownRef = useRef(null);
   const [isPropertiesListOpen, setIsPropertiesListOpen] = useState(false);
@@ -117,14 +119,10 @@ const TransientMetricView = ({
               </Box>
             </Flex>
           </Flex>
-          {metric && metric.data.length > 0 ? (
-            <MetricTrend
-              data={metric.data}
-              definition={metric.definition}
-              average={metric.average}
-            />
-          ) : (
+          {showEmptyState ? (
             <MetricEmptyState />
+          ) : (
+            <MetricTrend data={metric} />
           )}
         </>
       )}

@@ -40,6 +40,8 @@ type CreateMetricActionProps = {
   eventProperties: string[];
   eventList: Node[];
   breakdown: string[];
+  aggregates: MetricAggregate[];
+  setAggregates: Function;
 };
 
 const CreateMetricAction = ({
@@ -53,6 +55,8 @@ const CreateMetricAction = ({
   eventProperties,
   eventList,
   breakdown,
+  aggregates,
+  setAggregates,
 }: CreateMetricActionProps) => {
   const [metricName, setMetricName] = useState(
     savedMetric?.name || 'Untitled Metric'
@@ -67,20 +71,6 @@ const CreateMetricAction = ({
 
   const { metricId } = router.query;
   const dsId = savedMetric?.datasourceId || router.query.dsId;
-
-  const [aggregates, setAggregates] = useState<MetricAggregate[]>(
-    savedMetric?.aggregates || [
-      {
-        variable: 'A',
-        reference_id: '',
-        function: 'count',
-        variant: MetricComponentVariant.UNDEFINED,
-        filters: [],
-        conditions: [],
-        aggregations: { functions: 'count', property: '' },
-      },
-    ]
-  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -174,7 +164,7 @@ const CreateMetricAction = ({
       const processedAggregate = replaceEmptyStringPlaceholder(
         cloneDeep(aggregates)
       );
-      const result = await computeMetric(
+      const result: any[] = await computeMetric(
         dsId as string,
         metricDefinition && metricDefinition.length
           ? metricDefinition.replace(/\s*/g, '')
@@ -184,15 +174,9 @@ const CreateMetricAction = ({
         dateRange?.startDate,
         dateRange?.endDate
       );
-      if (result) {
-        setMetric({
-          data: result.metric,
-          definition: metricDefinition,
-          average: result.average,
-        });
-      } else {
-        setMetric(null);
-      }
+
+      console.log('result', result);
+      setMetric(result);
       setIsLoading(false);
     };
 

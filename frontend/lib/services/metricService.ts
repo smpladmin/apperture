@@ -1,3 +1,4 @@
+import { replaceEmptyStringPlaceholder } from '@components/Metric/util';
 import { MetricAggregate } from '@lib/domain/metric';
 import {
   AppertureGet,
@@ -62,7 +63,7 @@ export const saveMetric = async (
     datasourceId: dsId,
     name,
     function: definition,
-    aggregates,
+    aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
   });
   return result.data;
@@ -80,7 +81,7 @@ export const updateMetric = async (
     datasourceId: dsId,
     name,
     function: definition,
-    aggregates,
+    aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
   });
   return result.data;
