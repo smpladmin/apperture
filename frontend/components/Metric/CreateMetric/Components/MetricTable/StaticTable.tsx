@@ -28,11 +28,23 @@ const StaticTable = ({ data }: any) => {
         cell: (info) => info.getValue(),
         enableRowSpan: true,
       }),
-      columnHelper.accessor('propertyValue', {
-        header: 'Breakdown',
-        cell: (info) => info.getValue(),
-      }),
     ];
+
+    data[0].propertyValue
+      ? staticColumns.push(
+          columnHelper.accessor('propertyValue', {
+            header: 'Breakdown',
+            cell: (info) => info.getValue(),
+          })
+        )
+      : null;
+
+    staticColumns.push(
+      columnHelper.accessor('average', {
+        header: 'Average',
+        cell: (info) => info.getValue(),
+      })
+    );
 
     return [...staticColumns];
   }, []);

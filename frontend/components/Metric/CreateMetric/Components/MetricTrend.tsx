@@ -123,12 +123,20 @@ const convertToTableData = (result: any[]) => {
       ser.breakdown.forEach((breakdown: any) => {
         propertyValue = breakdown['value'];
       });
+      let sum = 0;
+      let count = ser.data?.length || 1;
       ser.data.forEach((d: any) => {
         //@ts-ignore
         x[d.date] = d.value;
+        sum += d.value;
       });
 
-      data.push({ name, propertyValue, values: x });
+      data.push({
+        name,
+        propertyValue,
+        values: x,
+        average: sum / count,
+      });
     });
     return data;
   });

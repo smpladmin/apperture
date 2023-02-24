@@ -23,7 +23,7 @@ const DynamicTable = ({ data }: any) => {
     return [...dynamicColumns];
   }, [data]);
 
-  const tableData = data.map((d: any) => d.values);
+  const tableData = useMemo(() => data.map((d: any) => d.values), [data]);
 
   const tableInstance = useReactTable({
     columns,
