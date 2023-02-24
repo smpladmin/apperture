@@ -213,7 +213,7 @@ class FormulaParser:
                     stack.append(number)
         except Exception as e:
             # Backend uses 100% memory on raising this error
-            logging.error(f"Invalid formula expression:\t{function}", e)
+            logging.error(f"Invalid formula expression:\t{function}")
             return None, []
             # raise ValueError("Invalid formula expression")
         if len(stack) == 1:
