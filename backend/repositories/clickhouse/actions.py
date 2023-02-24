@@ -84,6 +84,7 @@ class Actions(EventsBase):
                 self.click_stream_table.properties,
             )
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
+            .where(self.click_stream_table.event == action.event_type)
         )
         if action.processed_till:
             query = query.where(
