@@ -49,6 +49,7 @@ const TransientMetricView = ({
       height={'full'}
       justifyContent={'center'}
       alignItems={'center'}
+      overflowY={'scroll'}
     >
       {isLoading ? (
         <Loader />

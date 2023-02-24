@@ -85,23 +85,54 @@ const config = {
   color: COLOR_PLATE_5,
 };
 
+// const convertToTableData = (result: any[]) => {
+//   const x = result?.map((res) => {
+//     const name = res.name;
+//     let properties: any = [];
+//     let values: any = [];
+//     res.series.forEach((series: any) => {
+//       if (series.breakdown.length) properties.push(series.breakdown[0]);
+//       let x = {};
+//       series.data.forEach((d: any) => {
+//         //@ts-ignore
+//         x[formatDate(d['date'])] = formatDatalabel(d['value']);
+//       });
+//       values.push(x);
+//     });
+//     return { name, properties, values };
+//   });
+//   return x;
+// };
+
+// [
+//   {
+//     series,
+//     average,
+//     2022-12,
+//     2022
+//   }
+// ]
+
 const convertToTableData = (result: any[]) => {
-  const x = result?.map((res) => {
+  const res = result?.flatMap((res) => {
     const name = res.name;
-    let properties: any = [];
-    let values: any = [];
-    res.series.forEach((series: any) => {
-      if (series.breakdown.length) properties.push(series.breakdown[0]);
-      let x = {};
-      series.data.forEach((d: any) => {
-        //@ts-ignore
-        x[formatDate(d['date'])] = formatDatalabel(d['value']);
+    const data: any = [];
+    res.series.forEach((ser: any) => {
+      let x: any = {};
+      let propertyValue;
+      ser.breakdown.forEach((breakdown: any) => {
+        propertyValue = breakdown['value'];
       });
-      values.push(x);
+      ser.data.forEach((d: any) => {
+        //@ts-ignore
+        x[d.date] = d.value;
+      });
+
+      data.push({ name, propertyValue, values: x });
     });
-    return { name, properties, values };
+    return data;
   });
-  return x;
+  return res;
 };
 
 const convertToTrendData = (result: any[]) => {
@@ -130,7 +161,7 @@ const MetricTrend = ({ data }: any) => {
     >
       <LineChart {...config} data={convertToTrendData(data)} />
 
-      {/* <MetricTable data={convertToTableData(data)} /> */}
+      {!!data?.length && <MetricTable data={convertToTableData(data)} />}
     </Flex>
   );
 };
