@@ -39,7 +39,7 @@ const DynamicTable = ({ data }: any) => {
         <Thead position={'sticky'} top={0} py={'3'} px={'8'} bg={'#f5f5f9'}>
           {getHeaderGroups().map((headerGroup, groupIndex) => (
             <Tr key={headerGroup.id + groupIndex} bg={'white.100'}>
-              {headerGroup.headers.slice(2).map((header, index) => {
+              {headerGroup.headers.map((header, index) => {
                 return (
                   <Th
                     key={header.id + index}
@@ -66,26 +66,20 @@ const DynamicTable = ({ data }: any) => {
         <Tbody overflow={'auto'}>
           {getRowModel().rows.map((row, index) => (
             <Tr key={row.id + index} _hover={{ bg: 'white.100' }}>
-              {row
-                .getVisibleCells()
-                .slice(2)
-                .map((cell, cellIndex) => {
-                  return (
-                    <Td
-                      key={cell.id + cellIndex}
-                      borderBottom={'0.4px solid #b2b2b5'}
-                      py={3}
-                      paddingLeft={8}
-                      fontSize={'xs-14'}
-                      fontWeight={500}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </Td>
-                  );
-                })}
+              {row.getVisibleCells().map((cell, cellIndex) => {
+                return (
+                  <Td
+                    key={cell.id + cellIndex}
+                    borderBottom={'0.4px solid #b2b2b5'}
+                    py={3}
+                    paddingLeft={8}
+                    fontSize={'xs-14'}
+                    fontWeight={500}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </Td>
+                );
+              })}
             </Tr>
           ))}
         </Tbody>

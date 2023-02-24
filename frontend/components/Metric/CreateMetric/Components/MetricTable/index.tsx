@@ -7,7 +7,7 @@ const MetricTable = ({ data }: any) => {
   return (
     <Flex paddingTop={10} alignItems={'flex-start'} alignContent={'flex-start'}>
       <StaticTable data={data} />
-      <DynamicTable data={data} />
+      {/* <DynamicTable data={data} /> */}
     </Flex>
   );
 };

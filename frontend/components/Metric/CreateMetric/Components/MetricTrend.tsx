@@ -82,7 +82,7 @@ const config = {
     },
   },
   animation: true,
-  color: COLOR_PLATE_5,
+  // color: COLOR_PLATE_5,
 };
 
 // const convertToTableData = (result: any[]) => {
@@ -158,7 +158,6 @@ const convertToTrendData = (result: any[]) => {
 };
 
 const MetricTrend = ({ data }: any) => {
-  console.log('table data', convertToTableData(data));
   return (
     <Flex
       height={'full'}
@@ -166,6 +165,7 @@ const MetricTrend = ({ data }: any) => {
       justifyContent={'center'}
       direction={'column'}
       className="metric-chart"
+      mt={'10'}
     >
       <LineChart {...config} data={convertToTrendData(data)} />
 
