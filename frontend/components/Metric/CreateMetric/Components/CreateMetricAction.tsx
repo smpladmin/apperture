@@ -181,28 +181,12 @@ const CreateMetricAction = ({
 
   useEffect(() => {
     const fetchMetric = async (aggregates: EventOrSegmentComponent[]) => {
-      const processedAggregate = aggregates.map(
-        (aggregate: EventOrSegmentComponent) => {
-          const processedFilter = aggregate?.filters.map(
-            (filter: MetricEventFilter) => {
-              const processedValues = filter.values.map((value: string) =>
-                value === '(empty string)' ? '' : value
-              );
-              return { ...filter, values: processedValues };
-            }
-          );
-          return {
-            ...aggregate,
-            filters: processedFilter,
-          };
-        }
-      );
       const result = await computeMetric(
         dsId as string,
         metricDefinition && metricDefinition.length
           ? metricDefinition.replace(/\s*/g, '')
           : aggregates.map((aggregate) => aggregate.variable).join(','),
-        processedAggregate,
+        aggregates,
         [],
         dateRange?.startDate,
         dateRange?.endDate

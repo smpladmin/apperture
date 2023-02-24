@@ -9,6 +9,8 @@ import { _getSavedMetric } from '@lib/services/metricService';
 import { Metric } from '@lib/domain/metric';
 import { _getNotificationByReference } from '@lib/services/notificationService';
 import { Notifications } from '@lib/domain/notification';
+import { cloneDeep } from 'lodash';
+import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Metric/util';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -60,9 +62,14 @@ const MetricView = ({
   savedMetric: Metric;
   savedNotification: Notifications;
 }) => {
+  const tranformedMetric = cloneDeep(savedMetric);
+  const aggregates = replaceFilterValueWithEmptyStringPlaceholder(
+    tranformedMetric.aggregates
+  );
+  const updatedSavedMetric = { ...savedMetric, aggregates };
   return (
     <ViewMetric
-      savedMetric={savedMetric}
+      savedMetric={updatedSavedMetric}
       savedNotification={savedNotification}
     />
   );

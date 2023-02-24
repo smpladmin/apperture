@@ -7,6 +7,8 @@ import { ReactElement } from 'react';
 import CreateMetric from '@components/Metric/CreateMetric';
 import { _getSavedMetric } from '@lib/services/metricService';
 import { Metric } from '@lib/domain/metric';
+import { cloneDeep } from 'lodash';
+import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Metric/util';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -44,7 +46,13 @@ export const getServerSideProps: GetServerSideProps = async ({
 };
 
 const EditMetric = ({ savedMetric }: { savedMetric: Metric }) => {
-  return <CreateMetric savedMetric={savedMetric} />;
+  const tranformedMetric = cloneDeep(savedMetric);
+  const aggregates = replaceFilterValueWithEmptyStringPlaceholder(
+    tranformedMetric.aggregates
+  );
+  const updatedSavedMetric = { ...savedMetric, aggregates };
+
+  return <CreateMetric savedMetric={updatedSavedMetric} />;
 };
 
 EditMetric.getLayout = function getLayout(
