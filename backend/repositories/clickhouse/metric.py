@@ -72,8 +72,7 @@ class Metrics(EventsBase):
         select_expressions, denominators_list = zip(
             *[parser.parse(definition, fn.Sum) for definition in function.split(",")]
         )
-        print(select_expressions)
-        if None in select_expressions:
+        if select_expressions[0] is None:
             return None, None
         having_clause = []
         for denominators in denominators_list:
