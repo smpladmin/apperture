@@ -79,7 +79,10 @@ const MetricFilterComponent = ({
     setAreAllValuesSelected(false);
     setSelectedValues(value);
   };
-  const getValuesText = (values: string[]) => {
+  const getValuesText = (input: string[]) => {
+    const values = input.map((value) =>
+      value == '' ? '(empty string' : value
+    );
     if (!values.length) return 'Select value';
     if (values.length <= 2) return values.join(', ');
     return `${values[0]}, ${values[1]} or ${values.length - 2} more`;
