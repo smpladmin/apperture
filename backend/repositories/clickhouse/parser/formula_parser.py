@@ -14,6 +14,7 @@ class PostFixConverter:
         self.array = []
         # Precedence setting
         self.output = []
+        self.operators = set(["*", "+", "/", "-"])
         self.precedence = {"+": 1, "-": 1, "*": 2, "/": 2, "^": 3}
 
     # check if the stack is empty
@@ -77,10 +78,13 @@ class PostFixConverter:
                     self.pop()
 
             # An operator is encountered
-            else:
+            elif i in self.operators:
                 while not self.isEmpty() and self.notGreater(i):
                     self.output.append(self.pop())
                 self.push(i)
+
+            else:
+                raise ValueError("Invalid character encountered")
 
         # pop all the operator from the stack
         while not self.isEmpty():
@@ -207,7 +211,7 @@ class FormulaParser:
                         character=character,
                     )
                     stack.append(number)
-        except:
+        except Exception as e:
             # Backend uses 100% memory on raising this error
             logging.error(f"Invalid formula expression:\t{function}")
             return None, []

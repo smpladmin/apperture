@@ -5,8 +5,12 @@ import pandas as pd
 from beanie import PydanticObjectId
 from fastapi import Depends
 
-from domain.metrics.models import (ComputedMetricResult, Metric,
-                                   SegmentsAndEvents, SegmentsAndEventsType)
+from domain.metrics.models import (
+    ComputedMetricResult,
+    Metric,
+    SegmentsAndEvents,
+    SegmentsAndEventsType,
+)
 from mongo import Mongo
 from repositories.clickhouse.metric import Metrics
 from repositories.clickhouse.parser.formula_parser import FormulaParser
@@ -21,10 +25,12 @@ class MetricService:
         self.metric = metric
         self.mongo = mongo
 
-    def validate_formula(self, formula,variable_list):
+    def validate_formula(self, formula, variable_list):
         parser = FormulaParser()
         for expression in formula.split(","):
-            if not parser.validate_formula(expression=expression,variable_list=variable_list):
+            if not parser.validate_formula(
+                expression=expression, variable_list=variable_list
+            ):
                 return False
         return True
 
@@ -45,6 +51,8 @@ class MetricService:
             start_date=start_date,
             end_date=end_date,
         )
+        if computed_metric is None:
+            return ComputedMetricResult(metric=[], average={})
         keys = ["date", *function.split(",")]
         data = [dict(zip(keys, row)) for row in computed_metric]
         result = [
