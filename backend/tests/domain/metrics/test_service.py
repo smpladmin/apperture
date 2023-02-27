@@ -92,7 +92,11 @@ class TestMetricService:
                                 breakdown=[
                                     MetricBreakdown(property="property1", value="1.5.9")
                                 ],
-                                data=[MetricValue(date="2023-01-22", value=327.0)],
+                                data=[
+                                    MetricValue(date="2023-01-22", value=327.0),
+                                    MetricValue(date="2023-01-23", value=0.0),
+                                    MetricValue(date="2023-01-24", value=0.0),
+                                ],
                             ),
                             ComputedMetricData(
                                 breakdown=[
@@ -100,7 +104,11 @@ class TestMetricService:
                                         property="property1", value="1.5.13"
                                     )
                                 ],
-                                data=[MetricValue(date="2023-01-23", value=227.0)],
+                                data=[
+                                    MetricValue(date="2023-01-22", value=0.0),
+                                    MetricValue(date="2023-01-23", value=227.0),
+                                    MetricValue(date="2023-01-24", value=0.0),
+                                ],
                             ),
                             ComputedMetricData(
                                 breakdown=[
@@ -108,7 +116,11 @@ class TestMetricService:
                                         property="property1", value="1.5.16"
                                     )
                                 ],
-                                data=[MetricValue(date="2023-01-24", value=127.0)],
+                                data=[
+                                    MetricValue(date="2023-01-22", value=0.0),
+                                    MetricValue(date="2023-01-23", value=0.0),
+                                    MetricValue(date="2023-01-24", value=127.0),
+                                ],
                             ),
                         ],
                     ),
@@ -119,7 +131,11 @@ class TestMetricService:
                                 breakdown=[
                                     MetricBreakdown(property="property1", value="1.5.9")
                                 ],
-                                data=[MetricValue(date="2023-01-22", value=518.0)],
+                                data=[
+                                    MetricValue(date="2023-01-22", value=518.0),
+                                    MetricValue(date="2023-01-23", value=0.0),
+                                    MetricValue(date="2023-01-24", value=0.0),
+                                ],
                             ),
                             ComputedMetricData(
                                 breakdown=[
@@ -127,7 +143,11 @@ class TestMetricService:
                                         property="property1", value="1.5.13"
                                     )
                                 ],
-                                data=[MetricValue(date="2023-01-23", value=318.0)],
+                                data=[
+                                    MetricValue(date="2023-01-22", value=0.0),
+                                    MetricValue(date="2023-01-23", value=318.0),
+                                    MetricValue(date="2023-01-24", value=0.0),
+                                ],
                             ),
                             ComputedMetricData(
                                 breakdown=[
@@ -135,7 +155,11 @@ class TestMetricService:
                                         property="property1", value="1.5.16"
                                     )
                                 ],
-                                data=[MetricValue(date="2023-01-24", value=418.0)],
+                                data=[
+                                    MetricValue(date="2023-01-22", value=0.0),
+                                    MetricValue(date="2023-01-23", value=0.0),
+                                    MetricValue(date="2023-01-24", value=418.0),
+                                ],
                             ),
                         ],
                     ),
@@ -221,8 +245,8 @@ class TestMetricService:
                 aggregates=self.aggregates,
                 function=function,
                 breakdown=breakdown,
-                start_date="2022-01-01",
-                end_date="2023-01-01",
+                start_date=None,
+                end_date=None,
             )
             == result
         )

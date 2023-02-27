@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import List, Optional
+from datetime import datetime, timedelta
+from typing import List, Union
 from beanie import PydanticObjectId
 from fastapi import Depends
 
@@ -34,14 +34,18 @@ class MetricService:
                 return False
         return True
 
+    def date_range(self, start_date, end_date):
+        for n in range(int((end_date - start_date).days + 1)):
+            yield start_date + timedelta(n)
+
     async def compute_metric(
         self,
         datasource_id: str,
         function: str,
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
-        start_date: Optional[str],
-        end_date: Optional[str],
+        start_date: Union[str, None],
+        end_date: Union[str, None],
     ) -> [ComputedMetricStep]:
         computed_metric = self.metric.compute_query(
             datasource_id=datasource_id,
@@ -53,6 +57,21 @@ class MetricService:
         )
         keys = ["date"]
         keys.extend(breakdown + function.split(","))
+
+        if start_date and end_date:
+            start_date = datetime.strptime(start_date, "%Y-%m-%d")
+            end_date = datetime.strptime(end_date, "%Y-%m-%d")
+        else:
+            dates = list(set(row[0] for row in computed_metric))
+            if start_date:
+                start_date = datetime.strptime(start_date, "%Y-%m-%d")
+                end_date = max(dates)
+            elif start_date:
+                start_date = min(dates)
+                end_date = datetime.strptime(end_date, "%Y-%m-%d")
+            else:
+                start_date = min(dates)
+                end_date = max(dates)
 
         breakdown_combinations = (
             list(
@@ -71,12 +90,24 @@ class MetricService:
             series = []
             if not breakdown_combinations:
                 metric_data = [dict(zip(keys, row)) for row in computed_metric]
-                metric_values = [
-                    MetricValue(
-                        date=data["date"].strftime("%Y-%m-%d"), value=data[func]
-                    )
-                    for data in metric_data
-                ]
+                metric_values = []
+
+                dates_present = [row["date"] for row in metric_data]
+                for single_date in self.date_range(start_date, end_date):
+                    if single_date in dates_present:
+                        metric_values.append(
+                            MetricValue(
+                                date=single_date.strftime("%Y-%m-%d"),
+                                value=metric_data[dates_present.index(single_date)][
+                                    func
+                                ],
+                            )
+                        )
+                    else:
+                        metric_values.append(
+                            MetricValue(date=single_date.strftime("%Y-%m-%d"), value=0)
+                        )
+
                 series.append(ComputedMetricData(breakdown=[], data=metric_values))
 
             else:
@@ -91,12 +122,26 @@ class MetricService:
                         if all(x in data for x in combination.values())
                     ]
                     metric_data = [dict(zip(keys, row)) for row in metric_data]
-                    metric_values = [
-                        MetricValue(
-                            date=data["date"].strftime("%Y-%m-%d"), value=data[func]
-                        )
-                        for data in metric_data
-                    ]
+
+                    metric_values = []
+                    dates_present = [row["date"] for row in metric_data]
+                    for single_date in self.date_range(start_date, end_date):
+                        if single_date in dates_present:
+                            metric_values.append(
+                                MetricValue(
+                                    date=single_date.strftime("%Y-%m-%d"),
+                                    value=metric_data[dates_present.index(single_date)][
+                                        func
+                                    ],
+                                )
+                            )
+                        else:
+                            metric_values.append(
+                                MetricValue(
+                                    date=single_date.strftime("%Y-%m-%d"), value=0
+                                )
+                            )
+
                     series.append(
                         ComputedMetricData(
                             breakdown=metric_breakdown, data=metric_values
