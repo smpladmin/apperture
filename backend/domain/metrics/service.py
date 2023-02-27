@@ -58,20 +58,11 @@ class MetricService:
         keys = ["date"]
         keys.extend(breakdown + function.split(","))
 
-        if start_date and end_date:
-            start_date = datetime.strptime(start_date, "%Y-%m-%d")
-            end_date = datetime.strptime(end_date, "%Y-%m-%d")
-        else:
-            dates = list(set(row[0] for row in computed_metric))
-            if start_date:
-                start_date = datetime.strptime(start_date, "%Y-%m-%d")
-                end_date = max(dates)
-            elif start_date:
-                start_date = min(dates)
-                end_date = datetime.strptime(end_date, "%Y-%m-%d")
-            else:
-                start_date = min(dates)
-                end_date = max(dates)
+        dates = list(set(row[0] for row in computed_metric))
+        start_date = (
+            datetime.strptime(start_date, "%Y-%m-%d") if start_date else min(dates)
+        )
+        end_date = datetime.strptime(end_date, "%Y-%m-%d") if end_date else max(dates)
 
         breakdown_combinations = (
             list(
