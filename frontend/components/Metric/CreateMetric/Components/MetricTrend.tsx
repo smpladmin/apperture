@@ -1,11 +1,11 @@
 import { Flex } from '@chakra-ui/react';
 import LineChart from '@components/Charts/Line';
-import { ComputedMetric, ComputedMetricData } from '@lib/domain/metric';
+import { ComputedMetricData } from '@lib/domain/metric';
 import {
   convertISODateToReadableDate,
   formatDatalabel,
 } from '@lib/utils/common';
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import MetricTable from './MetricTable';
 
 const formatDate = (date: string): string => {
@@ -13,7 +13,6 @@ const formatDate = (date: string): string => {
 };
 
 const COLOR_PLATE_5 = ['#5B8FF9', '#5AD8A6', '#5D7092', '#F6BD16', '#E8684A'];
-
 const config = {
   padding: 'auto',
   autoFit: true,
@@ -85,6 +84,121 @@ const config = {
   // color: COLOR_PLATE_5,
 };
 
+const convertToTableData = (result: any[]) => {
+  const res = result?.flatMap((res) => {
+    const name = res.name;
+    const data: any = [];
+    res.series.forEach((series: any) => {
+      let x: any = {};
+      let propertyValue;
+      series.breakdown.forEach((breakdown: any) => {
+        propertyValue = breakdown['value'] || '(empty string)';
+      });
+      let sum = 0;
+      let count = series.data?.length || 1;
+      series.data.forEach((d: any) => {
+        //@ts-ignore
+        x[d.date] = d.value;
+        sum += d.value;
+      });
+
+      data.push({
+        name,
+        propertyValue,
+        values: x,
+        average: sum / count,
+      });
+    });
+    return data;
+  });
+  return res;
+};
+
+const convertToTrendData = (result: any[]) => {
+  return result?.flatMap((res: any) => {
+    const name = res.name;
+    return res.series.flatMap((series: any) => {
+      let seriesName = name;
+      if (series.breakdown.length)
+        seriesName = `${seriesName}/${
+          series.breakdown[0].value || '(empty string)'
+        }`;
+      return series.data.map((d: any) => {
+        return { ...d, series: seriesName };
+      });
+    });
+  });
+};
+
+const MetricTrend = ({ data, breakdown }: any) => {
+  const [selectedBreakdowns, setSelectedBreakdowns] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!breakdown.length) return;
+
+    let breakdownValues: string[] = [];
+    convertToTableData(data).forEach((d) => {
+      breakdownValues.push(`${d.name}/${d.propertyValue}`);
+    });
+    setSelectedBreakdowns(breakdownValues.slice(0, 5));
+  }, [data, breakdown]);
+
+  const trendData = useMemo(() => {
+    if (!breakdown.length) return convertToTrendData(data);
+
+    return convertToTrendData(data).filter((d) =>
+      selectedBreakdowns.includes(d.series)
+    );
+  }, [data, selectedBreakdowns]);
+
+  const metricTableData = useMemo(() => {
+    return convertToTableData(data).slice(0, 100);
+  }, [data, breakdown]);
+
+  console.log('metric trend breakdowns', selectedBreakdowns);
+
+  return (
+    <Flex
+      height={'full'}
+      width={'full'}
+      justifyContent={'center'}
+      direction={'column'}
+      className="metric-chart"
+      gap={'10'}
+      mt={'10'}
+    >
+      <LineChart {...config} data={trendData} />
+
+      {!!metricTableData?.length && (
+        <MetricTable
+          data={metricTableData}
+          breakdown={breakdown}
+          selectedBreakdowns={selectedBreakdowns}
+          setSelectedBreakdowns={setSelectedBreakdowns}
+        />
+      )}
+    </Flex>
+  );
+};
+
+export default MetricTrend;
+
+// const tableData: any = {};
+// data.forEach((item: ComputedMetricData) => {
+//   tableData[item.series] =
+//     tableData[item.series] === undefined
+//       ? {
+//           series: item.series,
+//           average: average ? formatDatalabel(average[item.series]) : 0,
+//           [formatDate(item.date)]: formatDatalabel(item.value),
+//         }
+//       : {
+//           ...tableData[item.series],
+//           [formatDate(item.date)]: formatDatalabel(item.value),
+//         };
+// });
+// return Object.values(tableData);
+
 // const convertToTableData = (result: any[]) => {
 //   const x = result?.map((res) => {
 //     const name = res.name;
@@ -112,82 +226,3 @@ const config = {
 //     2022
 //   }
 // ]
-
-const convertToTableData = (result: any[]) => {
-  const res = result?.flatMap((res) => {
-    const name = res.name;
-    const data: any = [];
-    res.series.forEach((ser: any) => {
-      let x: any = {};
-      let propertyValue;
-      ser.breakdown.forEach((breakdown: any) => {
-        propertyValue = breakdown['value'];
-      });
-      let sum = 0;
-      let count = ser.data?.length || 1;
-      ser.data.forEach((d: any) => {
-        //@ts-ignore
-        x[d.date] = d.value;
-        sum += d.value;
-      });
-
-      data.push({
-        name,
-        propertyValue,
-        values: x,
-        average: sum / count,
-      });
-    });
-    return data;
-  });
-  return res;
-};
-
-const convertToTrendData = (result: any[]) => {
-  return result?.flatMap((res: any) => {
-    const name = res.name;
-    return res.series.flatMap((series: any) => {
-      let seriesName = name;
-      if (series.breakdown.length)
-        seriesName = `${seriesName}/${series.breakdown[0].value}`;
-      return series.data.map((d: any) => {
-        return { ...d, series: seriesName };
-      });
-    });
-  });
-};
-
-const MetricTrend = ({ data }: any) => {
-  return (
-    <Flex
-      height={'full'}
-      width={'full'}
-      justifyContent={'center'}
-      direction={'column'}
-      className="metric-chart"
-      mt={'10'}
-    >
-      <LineChart {...config} data={convertToTrendData(data)} />
-
-      {!!data?.length && <MetricTable data={convertToTableData(data)} />}
-    </Flex>
-  );
-};
-
-export default MetricTrend;
-
-// const tableData: any = {};
-// data.forEach((item: ComputedMetricData) => {
-//   tableData[item.series] =
-//     tableData[item.series] === undefined
-//       ? {
-//           series: item.series,
-//           average: average ? formatDatalabel(average[item.series]) : 0,
-//           [formatDate(item.date)]: formatDatalabel(item.value),
-//         }
-//       : {
-//           ...tableData[item.series],
-//           [formatDate(item.date)]: formatDatalabel(item.value),
-//         };
-// });
-// return Object.values(tableData);

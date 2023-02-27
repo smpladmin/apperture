@@ -179,7 +179,7 @@ const CreateMetricAction = ({
       setMetric(result);
       setIsLoading(false);
     };
-
+    setIsLoading(true);
     fetchMetric(aggregates);
   }, [aggregates, metricDefinition, dateRange, breakdown]);
 

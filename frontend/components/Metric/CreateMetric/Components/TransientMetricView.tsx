@@ -44,7 +44,7 @@ const TransientMetricView = ({
   return (
     <Flex
       direction={'column'}
-      py={{ base: '8', md: '12' }}
+      py={{ base: '8', md: '10' }}
       width={'full'}
       minHeight={'full'}
       justifyContent={'center'}
@@ -123,7 +123,7 @@ const TransientMetricView = ({
           {showEmptyState ? (
             <MetricEmptyState />
           ) : (
-            <MetricTrend data={metric} />
+            <MetricTrend data={metric} breakdown={breakdown} />
           )}
         </>
       )}
