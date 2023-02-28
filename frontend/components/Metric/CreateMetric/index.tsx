@@ -25,7 +25,9 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric | undefined }) => {
   const [eventProperties, setEventProperties] = useState<string[]>([]);
   const [loadingEventsAndProperties, setLoadingEventsAndProperties] =
     useState(false);
-  const [breakdown, setBreakdown] = useState<string[]>([]);
+  const [breakdown, setBreakdown] = useState<string[]>(
+    savedMetric?.breakdown || []
+  );
   const [showEmptyState, setShowEmptyState] = useState(true);
   const [aggregates, setAggregates] = useState<MetricAggregate[]>(
     savedMetric?.aggregates || [

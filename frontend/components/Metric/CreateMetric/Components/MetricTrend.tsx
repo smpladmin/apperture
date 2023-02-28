@@ -174,18 +174,18 @@ const MetricTrend = ({ data, breakdown }: MetricTrendProps) => {
   }, [data, breakdown]);
 
   useEffect(() => {
-    const rowIndexes = selectedBreakdowns.map(({ rowIndex }) => rowIndex % 5);
-
-    const graphColors = COLOR_PALLETE_5.filter((_, index) =>
-      rowIndexes.includes(index)
-    ).map(({ hexaValue }) => hexaValue);
+    let uniqueSeries: string[] = [];
 
     setGraphConfig({
       ...graphConfig,
       color: ({ series }: { series: string }) => {
+        if (!uniqueSeries.includes(series)) {
+          uniqueSeries.push(series);
+        }
+
         const colorIndex =
           selectedBreakdowns.find(({ value }) => value === series)?.rowIndex ||
-          0;
+          uniqueSeries.indexOf(series);
 
         return graphColors[colorIndex % 5];
       },
