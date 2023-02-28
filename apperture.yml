@@ -193,11 +193,11 @@ services:
         swarmpit.service.deployment.autoredeploy: 'true'
       resources:
         reservations:
-          cpus: '0.3'
-          memory: 124M
+          cpus: '0.1'
+          memory: 50M
         limits:
-          cpus: '0.5'
-          memory: 256M
+          cpus: '0.2'
+          memory: 100M
 networks:
   net:
     driver: overlay
@@ -212,6 +212,10 @@ secrets:
   data_processor.env:
     external: true
   frontend.env:
+    external: true
+  scheduler.env:
+    external: true
+  alertmanager.env:
     external: true
 
 volumes:

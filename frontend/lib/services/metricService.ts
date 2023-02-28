@@ -1,3 +1,4 @@
+import { replaceEmptyStringPlaceholder } from '@components/Metric/util';
 import { EventOrSegmentComponent } from '@lib/domain/metric';
 import {
   AppertureGet,
@@ -33,7 +34,7 @@ export const computeMetric = async (
   const requestBody: any = {
     datasourceId: dsId,
     function: functions,
-    aggregates,
+    aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
   };
   if (startDate) {
@@ -62,7 +63,7 @@ export const saveMetric = async (
     datasourceId: dsId,
     name,
     function: definition,
-    aggregates,
+    aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
   });
   return result.data;
@@ -80,7 +81,7 @@ export const updateMetric = async (
     datasourceId: dsId,
     name,
     function: definition,
-    aggregates,
+    aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
   });
   return result.data;

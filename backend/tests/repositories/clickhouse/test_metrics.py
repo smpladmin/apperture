@@ -1,14 +1,14 @@
 from unittest.mock import MagicMock
-from repositories.clickhouse.metric import Metrics
 
 from domain.metrics.models import (
-    SegmentsAndEventsFilterOperator,
-    SegmentsAndEventsFilter,
     SegmentsAndEvents,
-    SegmentsAndEventsAggregationsFunctions,
-    SegmentsAndEventsType,
     SegmentsAndEventsAggregations,
+    SegmentsAndEventsAggregationsFunctions,
+    SegmentsAndEventsFilter,
+    SegmentsAndEventsFilterOperator,
+    SegmentsAndEventsType,
 )
+from repositories.clickhouse.metric import Metrics
 
 
 class TestMetricRepository:
@@ -126,3 +126,41 @@ class TestMetricRepository:
                 "property_1": "Video_Open",
             },
         )
+
+    def test_build_metric_compute_query_with_failure(self):
+        assert self.repo.build_metric_compute_query(
+            self.datasource_id,
+            self.aggregates,
+            self.breakdown,
+            "AB",
+            self.start_date,
+            self.end_date,
+        ) == (None, None)
+
+        assert self.repo.build_metric_compute_query(
+            self.datasource_id,
+            self.aggregates,
+            self.breakdown,
+            "A*123/B+C",
+            self.start_date,
+            self.end_date,
+        ) == (
+            (
+                'SELECT date,SUM("A")*123/SUM("B")+SUM("C") FROM (SELECT DATE("timestamp") AS '
+                '"date",CASE WHEN "event_name"=%(property_0)s AND '
+                '"properties.properties.$city" IN (\'Bengaluru\') THEN 1 ELSE 0 END AS "A" '
+                'FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
+                "DATE(\"timestamp\")>='2022-10-8' AND DATE(\"timestamp\")<='2022-10-20') AS "
+                '"subquery" GROUP BY date HAVING SUM("B")<>0 ORDER BY 1 LIMIT 1000'
+            ),
+            {"ds_id": "638f1aac8e54760eafc64d70", "property_0": "Video_Seen"},
+        )
+
+        assert self.repo.build_metric_compute_query(
+            self.datasource_id,
+            self.aggregates,
+            self.breakdown,
+            "A*123@+C",
+            self.start_date,
+            self.end_date,
+        ) == (None, None)

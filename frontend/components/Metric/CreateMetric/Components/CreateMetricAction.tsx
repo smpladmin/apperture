@@ -7,9 +7,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-
 import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
-
 import { useRouter } from 'next/router';
 import MetricComponentCard from './MetricComponentCard';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
@@ -25,7 +23,7 @@ import {
   MetricComponentVariant,
   MetricEventFilter,
 } from '@lib/domain/metric';
-import { isEqual } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { Node } from '@lib/domain/node';
 
 type CreateMetricActionProps = {
@@ -137,16 +135,14 @@ const CreateMetricAction = ({
     }
   };
 
-  const removeAggregate = (variable: string) => {
-    const updatedAggregates = aggregates.filter(
-      (aggregate) => aggregate.variable !== variable
-    );
+  const removeAggregate = (index: number) => {
+    let toUpdateAggregates = cloneDeep(aggregates);
+    toUpdateAggregates.splice(index, 1);
 
-    setAggregates(
-      updatedAggregates.map((aggregate, index) => {
-        return { ...aggregate, variable: String.fromCharCode(65 + index) };
-      })
-    );
+    toUpdateAggregates = toUpdateAggregates.map((aggregate, index) => {
+      return { ...aggregate, variable: String.fromCharCode(65 + index) };
+    });
+    setAggregates(toUpdateAggregates);
   };
 
   const handleSave = async () => {
@@ -181,28 +177,12 @@ const CreateMetricAction = ({
 
   useEffect(() => {
     const fetchMetric = async (aggregates: EventOrSegmentComponent[]) => {
-      const processedAggregate = aggregates.map(
-        (aggregate: EventOrSegmentComponent) => {
-          const processedFilter = aggregate?.filters.map(
-            (filter: MetricEventFilter) => {
-              const processedValues = filter.values.map((value: string) =>
-                value === '(empty string)' ? '' : value
-              );
-              return { ...filter, values: processedValues };
-            }
-          );
-          return {
-            ...aggregate,
-            filters: processedFilter,
-          };
-        }
-      );
       const result = await computeMetric(
         dsId as string,
         metricDefinition && metricDefinition.length
           ? metricDefinition.replace(/\s*/g, '')
           : aggregates.map((aggregate) => aggregate.variable).join(','),
-        processedAggregate,
+        aggregates,
         [],
         dateRange?.startDate,
         dateRange?.endDate
@@ -348,8 +328,9 @@ const CreateMetricAction = ({
             +
           </Button>
         </Flex>
-        {aggregates.map((aggregate) => (
+        {aggregates.map((aggregate, index) => (
           <MetricComponentCard
+            index={index}
             variable={aggregate.variable}
             eventList={eventList}
             key={aggregate.variable}

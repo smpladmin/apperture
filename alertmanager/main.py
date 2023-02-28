@@ -59,7 +59,8 @@ def get_running_tasks():
                 alert_status[task["id"]] = {"status": "alert", "count": 1}
 
         # Check if any previously flagged tasks have low utilization now
-        for task_id in alert_status:
+        task_ids = list(alert_status.keys())
+        for task_id in task_ids:
             if task_id not in [task["id"] for task in running_tasks]:
                 alert_status.pop(task_id, None)
             elif (
