@@ -80,7 +80,7 @@ const MetricTable = ({
   return (
     <Box overflowX={'auto'}>
       <Table w="min-content">
-        <Thead position={'sticky'} top={0} py={'3'} px={'8'} bg={'#f5f5f9'}>
+        <Thead py={'3'} px={'8'} bg={'#f5f5f9'}>
           {getHeaderGroups().map((headerGroup, groupIndex) => (
             <Tr key={headerGroup.id + groupIndex} bg={'white.100'}>
               {headerGroup.headers.map((header, index) => {

@@ -1,7 +1,7 @@
 import { Checkbox, Flex, Text } from '@chakra-ui/react';
+import { COLOR_PALLETE_5 } from '@components/Metric/util';
 import { Breakdown } from '@lib/domain/metric';
 import React, { ChangeEvent } from 'react';
-import { COLOR_PALLETE_5 } from '../MetricTrend';
 
 type SelectBreakdownProps = {
   info: any;

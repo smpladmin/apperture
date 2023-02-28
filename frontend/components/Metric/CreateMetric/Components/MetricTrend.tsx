@@ -1,31 +1,24 @@
 import { Flex } from '@chakra-ui/react';
 import LineChart from '@components/Charts/Line';
 import {
+  COLOR_PALLETE_5,
+  convertToTableData,
+  convertToTrendData,
+  formatDate,
+} from '@components/Metric/util';
+import {
   Breakdown,
   ComputedMetric,
   ComputedMetricData,
-  MetricTableData,
   MetricTrendData,
 } from '@lib/domain/metric';
 import {
   convertISODateToReadableDate,
   formatDatalabel,
 } from '@lib/utils/common';
-import { setConfig } from 'next/config';
+
 import React, { useEffect, useMemo, useState } from 'react';
 import MetricTable from './MetricTable';
-
-const formatDate = (date: string): string => {
-  return convertISODateToReadableDate(date).split('-').reverse().join(' ');
-};
-
-export const COLOR_PALLETE_5 = [
-  { colorName: 'messenger', hexaValue: '#0078FF' },
-  { colorName: 'yellow', hexaValue: '#fac213' },
-  { colorName: 'cyan', hexaValue: '#00B5D8' },
-  { colorName: 'whatsapp', hexaValue: '#22c35e' },
-  { colorName: 'red', hexaValue: '#E53E3E' },
-];
 
 const graphColors = COLOR_PALLETE_5.map((color) => color.hexaValue);
 
@@ -98,57 +91,6 @@ const config = {
   },
   animation: true,
   color: ({ series }: { series: string }) => graphColors[0],
-};
-
-const convertToTableData = (result: ComputedMetric[]): MetricTableData[] => {
-  const res = result?.flatMap((res) => {
-    const name = res.name;
-    const data: MetricTableData[] = [];
-    res.series.forEach((series) => {
-      let dateValue: { [key in string]: string } = {};
-      let propertyValue;
-
-      // set property value if breakdown is set
-      if (series.breakdown.length)
-        propertyValue = series.breakdown[0].value || '(empty string)';
-
-      let sum = 0;
-      let count = series.data?.length || 1;
-      series.data.forEach((d) => {
-        dateValue[formatDate(d.date)] = formatDatalabel(d.value);
-        sum += d.value;
-      });
-
-      data.push({
-        name,
-        propertyValue,
-        values: dateValue,
-        average: (sum / count).toFixed(2),
-      });
-    });
-    return data
-      .filter((d) => d.average)
-      .sort((a, b) => +b.average - +a.average);
-  });
-  return res;
-};
-
-export const convertToTrendData = (
-  result: ComputedMetric[]
-): MetricTrendData[] => {
-  return result?.flatMap((res) => {
-    const name = res.name;
-    return res.series.flatMap((series) => {
-      let seriesName = name;
-      if (series.breakdown.length)
-        seriesName = `${seriesName}/${
-          series.breakdown[0].value || '(empty string)'
-        }`;
-      return series.data.map((d) => {
-        return { ...d, series: seriesName };
-      });
-    });
-  });
 };
 
 type MetricTrendProps = {

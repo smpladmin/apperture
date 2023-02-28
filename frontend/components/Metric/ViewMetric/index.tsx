@@ -6,7 +6,7 @@ import { Notifications } from '@lib/domain/notification';
 import { computeMetric } from '@lib/services/metricService';
 import { getNotificationByReference } from '@lib/services/notificationService';
 import React, { useEffect, useState } from 'react';
-import { convertToTrendData } from '../CreateMetric/Components/MetricTrend';
+import { convertToTrendData } from '../util';
 import SavedMetricView from './Components/SavedMetricView';
 import ViewMetricActionPanel from './Components/ViewMetricActionPanel';
 
