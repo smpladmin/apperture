@@ -205,7 +205,7 @@ const MetricTrend = ({ data, breakdown }: MetricTrendProps) => {
   }, [data, selectedBreakdowns]);
 
   const metricTableData = useMemo(() => {
-    return convertToTableData(data).slice(0, 200);
+    return convertToTableData(data).slice(0, 100);
   }, [data, breakdown]);
 
   return (

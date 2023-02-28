@@ -48,7 +48,7 @@ const MetricTable = ({
 
     staticColumns.push(
       columnHelper.accessor('average', {
-        header: 'average',
+        header: 'Average',
         cell: (info) => info.getValue(),
       })
     );

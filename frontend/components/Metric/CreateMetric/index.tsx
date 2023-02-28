@@ -16,7 +16,7 @@ import { Node } from '@lib/domain/node';
 import { useRouter } from 'next/router';
 import { getCountOfAggregates } from '../util';
 
-const Metric = ({ savedMetric }: { savedMetric?: Metric | undefined }) => {
+const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
   const [metric, setMetric] = useState<ComputedMetric[]>([]);
   const [dateRange, setDateRange] = useState<DateRangeType | null>(null);
   const [canSaveMetric, setCanSaveMetric] = useState(false);
@@ -25,7 +25,9 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric | undefined }) => {
   const [eventProperties, setEventProperties] = useState<string[]>([]);
   const [loadingEventsAndProperties, setLoadingEventsAndProperties] =
     useState(false);
-  const [breakdown, setBreakdown] = useState<string[]>([]);
+  const [breakdown, setBreakdown] = useState<string[]>(
+    savedMetric?.breakdown || []
+  );
   const [showEmptyState, setShowEmptyState] = useState(true);
   const [aggregates, setAggregates] = useState<MetricAggregate[]>(
     savedMetric?.aggregates || [
