@@ -36,7 +36,7 @@ class ClickstreamService:
             Element(
                 text=element_dict.get("$el_text"),
                 tag_name=element_dict.get("tag_name"),
-                href=element_dict.get("href"),
+                href=element_dict.get("attr__href"),
                 attr_id=element_dict.get("attr__id"),
                 attr_class=element_dict.get("classes"),
                 nth_child=element_dict.get("nth_child"),

@@ -1,9 +1,8 @@
 import datetime
 from enum import Enum
+from typing import List, Literal, Optional
 
 from beanie import PydanticObjectId
-from typing import List, Optional
-
 from pydantic import BaseModel
 
 from repositories import Document
@@ -60,3 +59,22 @@ class ComputedEventStreamResult(BaseModel):
 class ComputedAction(BaseModel):
     count: int
     data: List[ComputedEventStreamResult]
+
+
+OperatorType = Literal[
+    "exact",
+    "is_not",
+    "icontains",
+    "not_icontains",
+    "regex",
+    "not_regex",
+    "gt",
+    "lt",
+    "gte",
+    "lte",
+    "is_set",
+    "is_not_set",
+    "is_date_exact",
+    "is_date_after",
+    "is_date_before",
+]

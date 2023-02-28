@@ -13,7 +13,7 @@ from rest.dtos.actions import (
     TransientActionDto,
 )
 from rest.dtos.apperture_users import AppertureUserResponse
-from rest.middlewares import validate_jwt, get_user_id, get_user
+from rest.middlewares import get_user, get_user_id, validate_jwt
 
 router = APIRouter(
     tags=["actions"],
@@ -38,7 +38,6 @@ async def create_action(
         groups=dto.groups,
         eventType=dto.eventType,
     )
-
     await action_service.add_action(action=action)
     await action_service.update_events_from_clickstream(datasource_id=dto.datasourceId)
     return action
