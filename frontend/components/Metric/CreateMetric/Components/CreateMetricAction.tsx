@@ -14,6 +14,7 @@ import {
   computeMetric,
   saveMetric,
   updateMetric,
+  validateMetricFormula,
 } from '@lib/services/metricService';
 import {
   DateRangeType,
@@ -72,6 +73,8 @@ const CreateMetricAction = ({
 
   const { metricId } = router.query;
   const dsId = savedMetric?.datasourceId || router.query.dsId;
+
+  const [isValidDefinition, setIsValidDefinition] = useState<boolean>(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -185,11 +188,26 @@ const CreateMetricAction = ({
 
   useEffect(() => {
     // enable save metric button when aggregate, metric name or definition changes
+    let variableList = aggregates.map((aggregate) => aggregate.variable);
+    const handleValidDefinition = async (
+      metricDefinition: string,
+      variableList: string[]
+    ) => {
+      let isValidFormula: boolean = await validateMetricFormula(
+        metricDefinition,
+        variableList
+      );
+      setIsValidDefinition(isValidFormula);
+    };
+
+    handleValidDefinition(metricDefinition, variableList);
+
     if (
       isValidAggregates(aggregates) &&
       (!isEqual(savedMetric?.aggregates, aggregates) ||
         savedMetric?.function != metricDefinition ||
-        saveMetric?.name !== metricName)
+        saveMetric?.name !== metricName) &&
+      isValidDefinition
     ) {
       setCanSaveMetric(true);
     } else {
