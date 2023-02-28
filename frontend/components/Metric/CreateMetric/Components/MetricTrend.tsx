@@ -12,7 +12,16 @@ const formatDate = (date: string): string => {
   return convertISODateToReadableDate(date).split('-').reverse().join(' ');
 };
 
-const COLOR_PLATE_5 = ['#5B8FF9', '#5AD8A6', '#5D7092', '#F6BD16', '#E8684A'];
+export const COLOR_PALLETE_5 = [
+  { colorName: 'messenger', hexaValue: '#0078FF' },
+  { colorName: 'yellow', hexaValue: '#fac213' },
+  { colorName: 'cyan', hexaValue: '#00B5D8' },
+  { colorName: 'whatsapp', hexaValue: '#22c35e' },
+  { colorName: 'red', hexaValue: '#E53E3E' },
+];
+
+const graphColors = COLOR_PALLETE_5.map((color) => color.hexaValue);
+
 const config = {
   padding: 'auto',
   autoFit: true,
@@ -81,7 +90,7 @@ const config = {
     },
   },
   animation: true,
-  // color: COLOR_PLATE_5,
+  color: graphColors,
 };
 
 const convertToTableData = (result: any[]) => {
@@ -109,7 +118,9 @@ const convertToTableData = (result: any[]) => {
         average: sum / count,
       });
     });
-    return data;
+    return data
+      .filter((d: any) => d.average)
+      .sort((a: any, b: any) => b.average - a.average);
   });
   return res;
 };
@@ -137,7 +148,7 @@ const MetricTrend = ({ data, breakdown }: any) => {
     if (!breakdown.length) return;
 
     let breakdownValues: string[] = [];
-    convertToTableData(data).forEach((d) => {
+    convertToTableData(data)?.forEach((d) => {
       breakdownValues.push(`${d.name}/${d.propertyValue}`);
     });
     setSelectedBreakdowns(breakdownValues.slice(0, 5));
@@ -146,7 +157,7 @@ const MetricTrend = ({ data, breakdown }: any) => {
   const trendData = useMemo(() => {
     if (!breakdown.length) return convertToTrendData(data);
 
-    return convertToTrendData(data).filter((d) =>
+    return convertToTrendData(data)?.filter((d) =>
       selectedBreakdowns.includes(d.series)
     );
   }, [data, selectedBreakdowns]);
@@ -155,7 +166,10 @@ const MetricTrend = ({ data, breakdown }: any) => {
     return convertToTableData(data).slice(0, 100);
   }, [data, breakdown]);
 
-  console.log('metric trend breakdowns', selectedBreakdowns);
+  console.log('trend Data', trendData);
+
+  console.log('metric table data', metricTableData);
+  console.log('selected breakdowns', selectedBreakdowns);
 
   return (
     <Flex

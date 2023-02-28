@@ -29,8 +29,6 @@ const MetricTable = ({
   selectedBreakdowns,
   setSelectedBreakdowns,
 }: MetricTableProps) => {
-  console.log('metric table breakdowns', selectedBreakdowns);
-
   const columnHelper = createColumnHelper<MetricTableData>();
   const columns = useMemo(() => {
     const staticColumns = [
