@@ -12,6 +12,7 @@ from rest.dtos.metrics import (
     MetricWithUser,
     SavedMetricResponse,
     ComputedMetricStepResponse,
+    MetricFormulaDto,
 )
 from rest.middlewares import get_user, get_user_id, validate_jwt
 
@@ -117,3 +118,13 @@ async def get_metric_by_id(
     metric_service: MetricService = Depends(),
 ):
     return await metric_service.get_metric_by_id(metric_id=id)
+
+
+@router.post("/metrics/validate_formula")
+async def validate_metric_formula(
+    dto: MetricFormulaDto,
+    metric_service: MetricService = Depends(),
+):
+    return metric_service.validate_formula(
+        formula=dto.formula, variable_list=dto.variableList
+    )

@@ -99,3 +99,15 @@ def test_get_metrics(client_init, metric_service):
     metric_service.get_metrics_for_datasource_id.assert_called_once_with(
         **{"datasource_id": "635ba034807ab86d8a2aadd9"}
     )
+
+
+def test_validate_metric_formula(client_init, metric_service):
+    response = client_init.post(
+        "/metrics/validate_formula",
+        data=json.dumps({"formula": "A,  B", "variableList": ["A", "B"]}),
+    )
+    assert response.status_code == 200
+    assert response.json() == True
+    metric_service.validate_formula.assert_called_with(
+        **{"formula": "A,  B", "variable_list": ["A", "B"]}
+    )

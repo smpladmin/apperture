@@ -29,7 +29,7 @@ class MetricService:
         parser = FormulaParser()
         for expression in formula.split(","):
             if not parser.validate_formula(
-                expression=expression, variable_list=variable_list
+                expression=expression.strip(), variable_list=variable_list
             ):
                 return False
         return True
