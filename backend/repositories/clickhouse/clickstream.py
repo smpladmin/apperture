@@ -32,6 +32,7 @@ class Clickstream(EventsBase):
                 self.click_stream_table.properties,
             )
             .where(self.click_stream_table.datasource_id == Parameter("%(dsId)s"))
+            .where(self.click_stream_table.timestamp <= fn.Now())
             .orderby(self.click_stream_table.timestamp, order=Order.desc)
         ).limit(100)
 
