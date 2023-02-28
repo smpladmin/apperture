@@ -6,6 +6,7 @@ import { Notifications } from '@lib/domain/notification';
 import { computeMetric } from '@lib/services/metricService';
 import { getNotificationByReference } from '@lib/services/notificationService';
 import React, { useEffect, useState } from 'react';
+import { convertToTrendData } from '../CreateMetric/Components/MetricTrend';
 import SavedMetricView from './Components/SavedMetricView';
 import ViewMetricActionPanel from './Components/ViewMetricActionPanel';
 
@@ -16,9 +17,7 @@ const ViewMetric = ({
   savedMetric: Metric;
   savedNotification: Notifications;
 }) => {
-  const [computedMetric, setComputedMetric] = useState<ComputedMetric | null>(
-    null
-  );
+  const [computedMetric, setComputedMetric] = useState<ComputedMetric[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [notification, setNotification] = useState(savedNotification);
   const [isModalClosed, setIsModalClosed] = useState(false);
@@ -34,11 +33,7 @@ const ViewMetric = ({
         undefined,
         undefined
       );
-      setComputedMetric({
-        data: result.metric,
-        definition: savedMetric.function,
-        average: result.average,
-      });
+      setComputedMetric(result);
       setIsLoading(false);
     };
     fetchMetric();
@@ -66,13 +61,17 @@ const ViewMetric = ({
           metricName={savedMetric.name}
           aggregates={savedMetric.aggregates}
           datasourceId={savedMetric.datasourceId}
-          eventData={computedMetric?.data || []}
+          eventData={convertToTrendData(computedMetric) || []}
           savedNotification={notification}
           setIsModalClosed={setIsModalClosed}
         />
       </ActionPanel>
       <ViewPanel>
-        <SavedMetricView metric={computedMetric} isLoading={isLoading} />
+        <SavedMetricView
+          metric={computedMetric}
+          isLoading={isLoading}
+          breakdown={savedMetric?.breakdown}
+        />
       </ViewPanel>
     </Flex>
   );

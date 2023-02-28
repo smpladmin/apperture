@@ -8,18 +8,12 @@ import {
 } from '@tanstack/react-table';
 import { Box, Flex, Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import SelectBreakdown from './SelectBreakdown';
-
-type MetricTableData = {
-  name: string;
-  propertyValue: string | undefined;
-  average: string;
-  values: { [key in string]: string };
-};
+import { MetricTableData, Breakdown } from '@lib/domain/metric';
 
 type MetricTableProps = {
   data: MetricTableData[];
   breakdown: string[];
-  selectedBreakdowns: string[];
+  selectedBreakdowns: Breakdown[];
   setSelectedBreakdowns: Function;
 };
 
@@ -67,7 +61,7 @@ const MetricTable = ({
           },
           {
             header: key,
-            cell: (info) => info.getValue() || '',
+            cell: (info) => info.getValue(),
           }
         )
       ) || [];

@@ -21,6 +21,7 @@ import {
   Metric,
   MetricComponentVariant,
   MetricEventFilter,
+  ComputedMetric,
 } from '@lib/domain/metric';
 import { cloneDeep, isEqual } from 'lodash';
 import { Node } from '@lib/domain/node';
@@ -164,7 +165,7 @@ const CreateMetricAction = ({
       const processedAggregate = replaceEmptyStringPlaceholder(
         cloneDeep(aggregates)
       );
-      const result: any[] = await computeMetric(
+      const result: ComputedMetric[] = await computeMetric(
         dsId as string,
         metricDefinition && metricDefinition.length
           ? metricDefinition.replace(/\s*/g, '')
@@ -175,7 +176,6 @@ const CreateMetricAction = ({
         dateRange?.endDate
       );
 
-      console.log('result', result);
       setMetric(result);
       setIsLoading(false);
     };

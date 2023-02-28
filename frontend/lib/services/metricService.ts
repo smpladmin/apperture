@@ -44,7 +44,7 @@ export const computeMetric = async (
     requestBody.endDate = formatDatalabel(endDate);
   }
   const res = await ApperturePost('metrics/compute', requestBody);
-  return res.data;
+  return res.data || [];
 };
 
 export const _getSavedMetric = async (token: string, metricId: string) => {

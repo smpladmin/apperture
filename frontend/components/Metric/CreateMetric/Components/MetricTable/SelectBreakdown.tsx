@@ -1,10 +1,11 @@
 import { Checkbox, Flex, Text } from '@chakra-ui/react';
+import { Breakdown } from '@lib/domain/metric';
 import React, { ChangeEvent } from 'react';
 import { COLOR_PALLETE_5 } from '../MetricTrend';
 
 type SelectBreakdownProps = {
   info: any;
-  selectedBreakdowns: string[];
+  selectedBreakdowns: Breakdown[];
   setSelectedBreakdowns: Function;
 };
 
@@ -13,28 +14,37 @@ const SelectBreakdown = ({
   selectedBreakdowns,
   setSelectedBreakdowns,
 }: SelectBreakdownProps) => {
-  const { name, propertyValue } = info?.row?.original;
+  const {
+    index,
+    original: { name, propertyValue },
+  } = info?.row;
+
+  // console.log('info', info.row);
   const value = `${name}/${propertyValue}`;
 
   const handleChangeBreakdown = (e: ChangeEvent<HTMLInputElement>) => {
     let toUpdateBreakdowns = [...selectedBreakdowns];
 
     if (e.target.checked) {
-      // if (selectedBreakdowns.length >= 10) return;
-      toUpdateBreakdowns.push(e.target.value);
+      if (selectedBreakdowns.length >= 10) return;
+
+      toUpdateBreakdowns.push({ value: e.target.value, rowIndex: index });
       setSelectedBreakdowns(toUpdateBreakdowns);
     } else {
       toUpdateBreakdowns = toUpdateBreakdowns.filter(
-        (breakdown) => breakdown !== e.target.value
+        (breakdown) => breakdown.value !== e.target.value
       );
       setSelectedBreakdowns(toUpdateBreakdowns);
     }
   };
 
   const getCheckBoxColorScheme = () => {
-    let selectionIndex = selectedBreakdowns.indexOf(value);
+    // console.log('selected', selectedBreakdowns);
+    let selectionIndex = selectedBreakdowns.find(
+      (breakdown) => breakdown.rowIndex == index
+    )?.rowIndex;
 
-    if (selectionIndex != -1) {
+    if (selectionIndex) {
       selectionIndex = selectionIndex % 5;
       return COLOR_PALLETE_5[selectionIndex]?.colorName;
     }
@@ -44,7 +54,7 @@ const SelectBreakdown = ({
     <Flex as={'label'} gap={'2'} alignItems={'baseline'} cursor={'pointer'}>
       <Checkbox
         value={value}
-        isChecked={selectedBreakdowns.includes(value)}
+        isChecked={selectedBreakdowns.map(({ value }) => value).includes(value)}
         onChange={handleChangeBreakdown}
         colorScheme={getCheckBoxColorScheme()}
       />

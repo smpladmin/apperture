@@ -9,7 +9,7 @@ import SearchableListDropdown from '@components/SearchableDropdown/SearchableLis
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 
 type TransientMetricViewProps = {
-  metric: ComputedMetric | null;
+  metric: ComputedMetric[];
   setDateRange: Function;
   dateRange: DateRangeType | null;
   isLoading: boolean;

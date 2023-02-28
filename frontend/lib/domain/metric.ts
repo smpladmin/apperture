@@ -26,17 +26,41 @@ export type MetricAggregate = {
   conditions: string[];
   aggregations: MetricComponentAggregation;
 };
-export type ComputedMetricData = {
+export type MetricTrendData = {
   date: string;
   value: number;
   series: string;
 };
+
+export type MetricBreakdown = {
+  property: string;
+  value: string;
+};
+
+export type MetricValue = { date: string; value: number };
+
+export type ComputedMetricData = {
+  breakdown: MetricBreakdown[];
+  data: MetricValue[];
+};
+
 export type ComputedMetric = {
-  data: ComputedMetricData[];
-  definition: string;
-  average: any;
+  name: string;
+  series: ComputedMetricData[];
 };
 export type MetricTrend = { date: string; value: number };
+
+export type MetricTableData = {
+  name: string;
+  propertyValue: string | undefined;
+  average: string;
+  values: { [key in string]: string };
+};
+
+export type Breakdown = {
+  value: string;
+  rowIndex: number;
+};
 
 export enum DateFilterType {
   YESTERDAY = 'yesterday',

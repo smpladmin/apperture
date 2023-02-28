@@ -17,7 +17,7 @@ import { useRouter } from 'next/router';
 import { getCountOfAggregates } from '../util';
 
 const Metric = ({ savedMetric }: { savedMetric?: Metric | undefined }) => {
-  const [metric, setMetric] = useState<ComputedMetric | null | any>(null);
+  const [metric, setMetric] = useState<ComputedMetric[]>([]);
   const [dateRange, setDateRange] = useState<DateRangeType | null>(null);
   const [canSaveMetric, setCanSaveMetric] = useState(false);
   const [isLoading, setIsLoading] = useState(Boolean(savedMetric));
@@ -40,7 +40,6 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric | undefined }) => {
       },
     ]
   );
-
   const router = useRouter();
   const dsId = savedMetric?.datasourceId || router.query.dsId;
 
