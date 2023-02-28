@@ -163,11 +163,10 @@ const MetricTrend = ({ data, breakdown }: any) => {
   }, [data, selectedBreakdowns]);
 
   const metricTableData = useMemo(() => {
-    return convertToTableData(data).slice(0, 100);
+    return convertToTableData(data).slice(0, 200);
   }, [data, breakdown]);
 
   console.log('trend Data', trendData);
-
   console.log('metric table data', metricTableData);
   console.log('selected breakdowns', selectedBreakdowns);
 

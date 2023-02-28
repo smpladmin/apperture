@@ -83,11 +83,11 @@ const TransientMetricView = ({
                   _focus={{ bg: 'grey.50', color: 'black', fontWeight: 500 }}
                   border="1px solid #EDEDED"
                   id="yesterday"
-                  variant={'outline'}
+                  variant={'secondary'}
                   height={8}
                   onClick={() => setIsPropertiesListOpen(true)}
                 >
-                  <Flex gap={'2'} color={'grey.200'}>
+                  <Flex gap={'2'} color={'grey.200'} alignItems={'center'}>
                     <i
                       style={{ fontSize: '12px' }}
                       className="ri-pie-chart-line"
@@ -108,6 +108,19 @@ const TransientMetricView = ({
                         {`Breakdown ${breakdown.join('')}`}
                       </Highlight>
                     </Text>
+                    {!!breakdown.length && (
+                      <Box
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setBreakdown([]);
+                        }}
+                      >
+                        <i
+                          className="ri-close-line"
+                          style={{ fontSize: '12px' }}
+                        />
+                      </Box>
+                    )}
                   </Flex>
                 </Button>
                 <SearchableListDropdown
