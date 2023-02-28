@@ -496,6 +496,7 @@ def metric_service(apperture_user_response):
 
     metric_service.compute_metric.return_value = computed_metric_future
     metric_service.get_metrics_for_datasource_id.return_value = metrics_future
+    metric_service.validate_formula.return_value = True
     return metric_service
 
 
