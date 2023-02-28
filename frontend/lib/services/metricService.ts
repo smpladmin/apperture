@@ -91,3 +91,14 @@ export const getSavedMetricsForDatasourceId = async (dsId: string) => {
   const res = await AppertureGet(`/metrics?datasource_id=${dsId}`);
   return res.data;
 };
+
+export const validateMetricFormula = async (
+  formula: string,
+  variableList: string[]
+) => {
+  const res = await ApperturePost(`/metrics/validate_formula`, {
+    formula: formula,
+    variableList: variableList,
+  });
+  return res.data;
+};
