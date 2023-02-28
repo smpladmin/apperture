@@ -4,8 +4,7 @@ from typing import List
 from beanie import PydanticObjectId
 from fastapi import Depends
 
-from domain.actions.models import (Action, ActionGroup,
-                                   ComputedEventStreamResult)
+from domain.actions.models import Action, ActionGroup, ComputedEventStreamResult
 from domain.clickstream.models import CaptureEvent
 from mongo import Mongo
 from repositories.clickhouse.actions import Actions
