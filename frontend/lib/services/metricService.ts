@@ -16,7 +16,7 @@ type MetricRequestBody = {
   endDate?: string;
 };
 
-const formatDatalabel = (date: Date) => {
+const formatDatelabel = (date: Date) => {
   const day = date.getDate();
   const month = date.getMonth() + 1;
   const year = date.getFullYear();
@@ -38,10 +38,10 @@ export const computeMetric = async (
     breakdown,
   };
   if (startDate) {
-    requestBody.startDate = formatDatalabel(startDate);
+    requestBody.startDate = formatDatelabel(startDate);
   }
   if (endDate) {
-    requestBody.endDate = formatDatalabel(endDate);
+    requestBody.endDate = formatDatelabel(endDate);
   }
   const res = await ApperturePost('metrics/compute', requestBody);
   return res.data || [];
