@@ -1,5 +1,6 @@
-from .models import Element
 from typing import List
+
+from .models import Element
 
 
 class ElementsService:

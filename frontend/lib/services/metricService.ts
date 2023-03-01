@@ -34,7 +34,7 @@ export const computeMetric = async (
   const requestBody: MetricRequestBody = {
     datasourceId: dsId,
     function: functions,
-    aggregates,
+    aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
   };
   if (startDate) {

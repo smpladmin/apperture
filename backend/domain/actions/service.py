@@ -1,17 +1,13 @@
+from datetime import datetime
 from typing import List
 
-from domain.actions.models import (
-    Action,
-    ActionGroup,
-    ComputedEventStreamResult,
-)
-from mongo import Mongo
-from fastapi import Depends
 from beanie import PydanticObjectId
-from datetime import datetime
+from fastapi import Depends
 
-from repositories.clickhouse.actions import Actions
+from domain.actions.models import Action, ActionGroup, ComputedEventStreamResult
 from domain.clickstream.models import CaptureEvent
+from mongo import Mongo
+from repositories.clickhouse.actions import Actions
 from rest.dtos.actions import ComputedActionResponse
 
 
@@ -62,10 +58,9 @@ class ActionService:
     async def update_events_from_clickstream(self, datasource_id: str):
         actions = await self.get_actions_for_datasource_id(datasource_id=datasource_id)
         for action in actions:
-            if action.groups[0].selector or action.groups[0].url:
-                await self.actions.update_events_from_clickstream(
-                    action=action, update_action_func=self.update_action_processed_till
-                )
+            await self.actions.update_events_from_clickstream(
+                action=action, update_action_func=self.update_action_processed_till
+            )
 
     async def get_action(self, id: str) -> Action:
         return await Action.get(id)
@@ -84,27 +79,24 @@ class ActionService:
     async def compute_action(
         self, datasource_id: str, groups: List[ActionGroup], event_type: CaptureEvent
     ) -> List[ComputedActionResponse]:
-        matching_events = []
-        count = 0
-        if groups[0].selector or groups[0].url:
-            matching_events = await self.actions.get_matching_events_from_clickstream(
+        matching_events = await self.actions.get_matching_events_from_clickstream(
+            datasource_id=datasource_id, groups=groups, event_type=event_type
+        )
+        matching_events = [
+            ComputedEventStreamResult(
+                event=event[0],
+                uid=event[1],
+                url=event[2].get("$current_url", None),
+                source=event[2].get("$lib", None),
+                timestamp=event[3],
+            )
+            for event in matching_events
+        ]
+
+        count = (
+            await self.actions.get_count_of_matching_event_from_clickstream(
                 datasource_id=datasource_id, groups=groups, event_type=event_type
             )
-            matching_events = [
-                ComputedEventStreamResult(
-                    event=event[0],
-                    uid=event[1],
-                    url=event[2].get("$current_url", None),
-                    source=event[2].get("$lib", None),
-                    timestamp=event[3],
-                )
-                for event in matching_events
-            ]
-
-            count = (
-                await self.actions.get_count_of_matching_event_from_clickstream(
-                    datasource_id=datasource_id, groups=groups, event_type=event_type
-                )
-            )[0][0]
+        )[0][0]
 
         return ComputedActionResponse(count=count, data=matching_events)

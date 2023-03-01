@@ -1,9 +1,13 @@
 import datetime
 import logging
-from typing import Dict, List, Tuple
-from pypika import ClickHouseQuery, Parameter, terms, Criterion, Field, functions as fn
+import re
+from typing import Any, Dict, List, Tuple, cast
 
-from domain.actions.models import Action, ActionGroup, CaptureEvent
+from pypika import ClickHouseQuery, Criterion, Field, Parameter
+from pypika import functions as fn
+from pypika import terms
+
+from domain.actions.models import Action, ActionGroup, CaptureEvent, OperatorType
 from repositories.clickhouse.base import EventsBase
 from repositories.clickhouse.parser.action_parser_utils import Selector
 
@@ -33,6 +37,7 @@ class Actions(EventsBase):
     def filter_click_event(self, filter: ActionGroup) -> Tuple[List, Dict]:
         params = {}
         conditions = []
+        operator = "exact"
 
         if filter.selector is not None:
             selectors = (
@@ -59,9 +64,49 @@ class Actions(EventsBase):
                 Field(f"properties.$current_url").like(Parameter("%(url)s"))
             )
 
+        attributes: Dict[str, List] = {}
+        if filter.href:
+            attributes["href"] = self.process_ok_values(filter.href, operator)
+        if filter.text:
+            attributes["text"] = self.process_ok_values(filter.text, operator)
+
+        if attributes:
+            for key, ok_values in attributes.items():
+                if ok_values:
+                    combination_conditions = []
+                    for idx, value in enumerate(ok_values):
+                        optional_flag = "(?i)" if operator.endswith("icontains") else ""
+                        params[
+                            f"{key}_{idx}_attributes_regex"
+                        ] = f'{optional_flag}({key}="{value}")'
+                        conditions.append(
+                            self.ch_match_func(
+                                self.click_stream_table.element_chain,
+                                Parameter(f"%({key}_{idx}_attributes_regex)s"),
+                            )
+                        )
+                    # conditions.append(f"({' OR '.join(combination_conditions)})")
+
         return conditions, params
 
+    def process_ok_values(self, ok_values: Any, operator: OperatorType) -> List[str]:
+        if operator.endswith("_set"):
+            return [r'[^"]+']
+        else:
+            ok_values = (
+                cast(List[str], [str(val) for val in ok_values])
+                if isinstance(ok_values, list)
+                else [ok_values]
+            )
+            ok_values = [text.replace('"', r"\"") for text in ok_values]
+            if operator.endswith("icontains"):
+                return [rf'[^"]*{re.escape(text)}[^"]*' for text in ok_values]
+            if operator.endswith("regex"):
+                return ok_values
+            return [re.escape(text).replace("\\ ", " ") for text in ok_values]
+
     async def update_events_from_clickstream(self, action: Action, update_action_func):
+
         return self.execute_get_query(
             *await self.build_update_events_from_clickstream_query(
                 action, update_action_func
@@ -71,7 +116,9 @@ class Actions(EventsBase):
     async def build_update_events_from_clickstream_query(
         self, action: Action, update_action_func
     ):
+
         conditions, params = self.filter_click_event(filter=action.groups[0])
+
         query = (
             ClickHouseQuery.into(self.table)
             .from_(self.click_stream_table)
@@ -84,6 +131,7 @@ class Actions(EventsBase):
                 self.click_stream_table.properties,
             )
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
+            .where(self.click_stream_table.event == action.event_type)
         )
         if action.processed_till:
             query = query.where(

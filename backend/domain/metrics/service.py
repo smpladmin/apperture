@@ -26,6 +26,8 @@ class MetricService:
         self.mongo = mongo
 
     def validate_formula(self, formula, variable_list):
+        if not formula:
+            return True
         parser = FormulaParser()
         for expression in formula.split(","):
             if not parser.validate_formula(
@@ -46,7 +48,7 @@ class MetricService:
         breakdown: List[str],
         start_date: Union[str, None],
         end_date: Union[str, None],
-    ) -> [ComputedMetricStep]:
+    ) -> List[ComputedMetricStep]:
         computed_metric = self.metric.compute_query(
             datasource_id=datasource_id,
             aggregates=aggregates,
