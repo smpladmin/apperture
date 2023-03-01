@@ -44,7 +44,7 @@ const TransientMetricView = ({
   return (
     <Flex
       direction={'column'}
-      py={{ base: '8', md: '10' }}
+      py={{ base: '8', md: '12' }}
       width={'full'}
       minHeight={'full'}
       justifyContent={'center'}
