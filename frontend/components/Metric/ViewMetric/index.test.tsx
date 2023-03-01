@@ -22,15 +22,19 @@ import {
   NotificationType,
   NotificationVariant,
 } from '@lib/domain/notification';
+import { convertToTrendData } from '../util';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/services/metricService');
+jest.mock('../util');
 
 describe('View Metric', () => {
   let mockedGetEventProperties: jest.Mock;
   let mockedGetNodes: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
   let mockedComputedMetric: jest.Mock;
+  let mockedConvertToTrendData: jest.Mock;
+
   const eventProperties = [
     'city',
     'device',
@@ -49,6 +53,59 @@ describe('View Metric', () => {
   const computedMetricResponse = {
     metric: [],
   };
+
+  const trendData = [
+    {
+      date: '2022-11-24',
+      series: 'A/B/0',
+      value: 0.3619631901840491,
+    },
+    {
+      date: '2022-11-25',
+      series: 'A/B/0',
+      value: 0.3337531486146096,
+    },
+    {
+      date: '2022-11-26',
+      series: 'A/B/0',
+      value: 0.38153310104529614,
+    },
+    {
+      date: '2022-11-27',
+      series: 'A/B/0',
+      value: 0.354251012145749,
+    },
+    {
+      date: '2022-11-28',
+      series: 'A/B/0',
+      value: 0.4017543859649123,
+    },
+    {
+      date: '2022-11-24',
+      series: 'A/B/1',
+      value: 0.23163841807909605,
+    },
+    {
+      date: '2022-11-25',
+      series: 'A/B/1',
+      value: 0.21395348837209302,
+    },
+    {
+      date: '2022-11-26',
+      series: 'A/B/1',
+      value: 0.38073394495412843,
+    },
+    {
+      date: '2022-11-27',
+      series: 'A/B/1',
+      value: 0.43636363636363634,
+    },
+    {
+      date: '2022-11-28',
+      series: 'A/B/1',
+      value: 0.8166666666666667,
+    },
+  ];
 
   const savedMetric = {
     _id: '63db5e23ef0cac7d5da46c79',
@@ -141,7 +198,7 @@ describe('View Metric', () => {
     mockedGetNodes = jest.mocked(getNodes);
     mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
     mockedComputedMetric = jest.mocked(computeMetric);
-    // mockedGetUserInfo = jest.mocked(getAppertureUserInfo);
+    mockedConvertToTrendData = jest.mocked(convertToTrendData);
 
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetNodes.mockReturnValue(events);
@@ -152,9 +209,20 @@ describe('View Metric', () => {
       ['windows'],
     ]);
     mockedComputedMetric.mockReturnValue(computedMetricResponse);
+    mockedConvertToTrendData.mockReturnValue(trendData);
+
+    const { ResizeObserver } = window;
+    // @ts-ignore
+    delete window.ResizeObserver;
+    window.ResizeObserver = jest.fn().mockImplementation(() => ({
+      observe: jest.fn(),
+      unobserve: jest.fn(),
+      disconnect: jest.fn(),
+    }));
   });
 
   afterEach(() => {
+    window.ResizeObserver = ResizeObserver;
     jest.clearAllMocks();
   });
 

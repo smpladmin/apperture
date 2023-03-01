@@ -6,15 +6,17 @@ import { DateRangeType, ComputedMetric } from '@lib/domain/metric';
 import MetricTrend from '../../CreateMetric/Components/MetricTrend';
 
 type ViewMetricComponentProps = {
-  metric: ComputedMetric | null;
+  metric: ComputedMetric[];
   setDateRange: Function;
   dateRange: DateRangeType | null;
+  breakdown: string[];
 };
 
 const ViewMetricComponent = ({
   metric,
   setDateRange,
   dateRange,
+  breakdown,
 }: ViewMetricComponentProps) => {
   return (
     <Flex
@@ -51,12 +53,8 @@ const ViewMetricComponent = ({
           </Button>
         </Flex>
       </Flex>
-      {metric && metric.data.length > 0 ? (
-        <MetricTrend
-          data={metric.data}
-          definition={metric.definition}
-          average={metric.average}
-        />
+      {!!metric?.length ? (
+        <MetricTrend data={metric} breakdown={breakdown} />
       ) : (
         <MetricEmptyState />
       )}
