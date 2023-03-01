@@ -57,6 +57,10 @@ class MetricService:
             start_date=start_date,
             end_date=end_date,
         )
+        if computed_metric is None:
+            return [
+                ComputedMetricStep(name=func, series=[]) for func in function.split(",")
+            ]
         keys = ["date"]
         keys.extend(breakdown + function.split(","))
 

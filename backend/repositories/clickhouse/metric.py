@@ -45,6 +45,14 @@ class Metrics(EventsBase):
             fn.Date(self.table.timestamp).as_("date")
         )
 
+        select_expressions, denominators_list = zip(
+            *[parser.parse(definition, fn.Sum) for definition in function.split(",")]
+        )
+
+        for expression in select_expressions:
+            if not expression:
+                return None, None
+
         if breakdown:
             for property in breakdown:
                 subquery = subquery.select(Field(f"properties.{property}"))
@@ -80,14 +88,6 @@ class Metrics(EventsBase):
                     .else_(0)
                     .as_(aggregate.variable)
                 )
-
-        select_expressions, denominators_list = zip(
-            *[parser.parse(definition, fn.Sum) for definition in function.split(",")]
-        )
-
-        for expression in select_expressions:
-            if expression is None:
-                return None, None
 
         having_clause = []
         for denominators in denominators_list:

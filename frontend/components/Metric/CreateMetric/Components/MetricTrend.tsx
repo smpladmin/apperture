@@ -5,7 +5,7 @@ import {
   convertToTableData,
   convertToTrendData,
   formatDate,
-} from '@components/Metric/util';
+} from '../../util';
 import {
   Breakdown,
   ComputedMetric,
