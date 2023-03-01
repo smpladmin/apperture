@@ -40,8 +40,10 @@ function AppertureApp({
   const router = useRouter();
 
   useEffect(() => {
-    const handleRouteChange = () => window.posthog.capture('$pageview');
-    const handleRouteChangeStart = () => window.posthog.capture('$pageleave');
+    const handleRouteChange = () =>
+      window.posthog.capture && window.posthog.capture('$pageview');
+    const handleRouteChangeStart = () =>
+      window.posthog.capture && window.posthog.capture('$pageleave');
 
     router.events.on('routeChangeComplete', handleRouteChange);
     router.events.on('routeChangeStart', handleRouteChangeStart);
