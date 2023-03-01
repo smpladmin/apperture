@@ -19,7 +19,6 @@ const SelectBreakdown = ({
     original: { name, propertyValue },
   } = info?.row;
 
-  // console.log('info', info.row);
   const value = `${name}/${propertyValue}`;
 
   const handleChangeBreakdown = (e: ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +38,6 @@ const SelectBreakdown = ({
   };
 
   const getCheckBoxColorScheme = () => {
-    // console.log('selected', selectedBreakdowns);
     let selectionIndex = selectedBreakdowns.find(
       (breakdown) => breakdown.rowIndex == index
     )?.rowIndex;

@@ -187,13 +187,13 @@ const CreateMetricAction = ({
   }, [aggregates, metricDefinition, dateRange, breakdown]);
 
   useEffect(() => {
-    // enable save metric button when aggregate, metric name or definition changes
-    let variableList = aggregates.map((aggregate) => aggregate.variable);
+    // check for valid metric definition
+    const variableList = aggregates.map((aggregate) => aggregate.variable);
     const handleValidDefinition = async (
       metricDefinition: string,
       variableList: string[]
     ) => {
-      let isValidFormula: boolean = await validateMetricFormula(
+      const isValidFormula: boolean = await validateMetricFormula(
         metricDefinition,
         variableList
       );
@@ -201,19 +201,22 @@ const CreateMetricAction = ({
     };
 
     handleValidDefinition(metricDefinition, variableList);
+  }, [aggregates, metricDefinition]);
 
+  useEffect(() => {
+    // enable save metric button when aggregate, metric name or definition changes
     if (
       isValidAggregates(aggregates) &&
+      isValidDefinition &&
       (!isEqual(savedMetric?.aggregates, aggregates) ||
         savedMetric?.function != metricDefinition ||
-        saveMetric?.name !== metricName) &&
-      isValidDefinition
+        saveMetric?.name !== metricName)
     ) {
       setCanSaveMetric(true);
     } else {
       setCanSaveMetric(false);
     }
-  }, [aggregates, metricDefinition, metricName]);
+  }, [aggregates, metricDefinition, metricName, isValidDefinition]);
 
   return (
     <>

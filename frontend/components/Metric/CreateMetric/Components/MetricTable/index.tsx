@@ -88,6 +88,7 @@ const MetricTable = ({
                   <Th
                     key={header.id + index}
                     borderBottom={'0.4px solid #b2b2b5'}
+                    data-testid={'metric-table-headers'}
                     py={3}
                     paddingLeft={8}
                     onClick={

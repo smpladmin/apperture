@@ -16,7 +16,6 @@ import {
   convertISODateToReadableDate,
   formatDatalabel,
 } from '@lib/utils/common';
-
 import React, { useEffect, useMemo, useState } from 'react';
 import MetricTable from './MetricTable';
 
@@ -137,6 +136,7 @@ const MetricTrend = ({ data, breakdown }: MetricTrendProps) => {
   const trendData = useMemo(() => {
     if (!breakdown.length) return convertToTrendData(data);
 
+    // sort on basis of row index to get consistent coloring across legends on metric chart
     return selectedBreakdowns
       .sort((a, b) => a.rowIndex - b.rowIndex)
       .flatMap((breakdown) => {
