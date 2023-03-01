@@ -1,10 +1,11 @@
 import { Checkbox, Flex, Text } from '@chakra-ui/react';
 import { COLOR_PALLETE_5 } from '@components/Metric/util';
-import { Breakdown } from '@lib/domain/metric';
+import { Breakdown, MetricTableData } from '@lib/domain/metric';
+import { CellContext } from '@tanstack/react-table';
 import React, { ChangeEvent } from 'react';
 
 type SelectBreakdownProps = {
-  info: any;
+  info: CellContext<MetricTableData, string>;
   selectedBreakdowns: Breakdown[];
   setSelectedBreakdowns: Function;
 };
