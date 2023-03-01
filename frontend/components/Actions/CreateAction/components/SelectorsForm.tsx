@@ -1,162 +1,168 @@
-import { Flex, Input, Text, Divider } from '@chakra-ui/react';
-import { ActionGroup, CaptureEvent } from '@lib/domain/action';
+import { Flex, Input, Text, Divider, Box } from '@chakra-ui/react';
+import { ActionGroup, CaptureEvent, ConditionType } from '@lib/domain/action';
 import { DEBOUNCED_WAIT_TIME } from '@lib/utils/common';
 import { debounce, cloneDeep } from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import EventOptions from './EventOptions';
+import ConditionChip from './ConditionChip';
+import ConditionInput from './ConditionInput';
+import AddConditionDropdown from './AddConditionDropdown';
 
 type SelectorsFormType = {
   captureEvent: CaptureEvent;
-  setCaptureEvent: Function;
+  captureEvents: CaptureEvent[];
+  setCaptureEvents: Function;
   groups: ActionGroup[];
+  group: ActionGroup;
   updateGroupAction: Function;
+  index: number;
 };
 
 const SelectorsForm = ({
   captureEvent,
-  setCaptureEvent,
+  captureEvents,
+  setCaptureEvents,
   groups,
+  group,
   updateGroupAction,
+  index,
 }: SelectorsFormType) => {
-  const handleUpdateActionGroup = debounce(
-    (value: string, key: keyof ActionGroup) => {
+  const [selectedConditions, setSelectedConditions] = useState<ConditionType[]>(
+    []
+  );
+  const [unSelectedConditions, setUnSelectedConditions] = useState<
+    ConditionType[]
+  >([
+    ConditionType.href,
+    ConditionType.text,
+    ConditionType.url,
+    ConditionType.css,
+  ]);
+
+  const addToSelected = (selectedCondition: ConditionType) => {
+    setSelectedConditions([...selectedConditions, selectedCondition]);
+    setUnSelectedConditions(
+      unSelectedConditions.filter(
+        (condition) => condition !== selectedCondition
+      )
+    );
+  };
+  const removeFromSelected = (selectedCondition: ConditionType) => {
+    setUnSelectedConditions([...unSelectedConditions, selectedCondition]);
+    setSelectedConditions(
+      selectedConditions.filter((condition) => condition !== selectedCondition)
+    );
+  };
+  const handleUpdateCaptureEvent = (value: CaptureEvent) => {
+    const tempCaptureEvents = cloneDeep(captureEvents);
+    tempCaptureEvents[index] = value;
+    setCaptureEvents(tempCaptureEvents);
+  };
+  const debouncedHandleUpdateActionGroup = debounce(
+    (value: string, key: Exclude<keyof ActionGroup, 'event'>) => {
       const tempActionGroup = cloneDeep(groups);
-      tempActionGroup[0][key] = value;
+      tempActionGroup[index][key] = value;
       updateGroupAction(tempActionGroup);
     },
     DEBOUNCED_WAIT_TIME
   );
 
   return (
-    <Flex
-      direction={'column'}
-      gap={'6'}
-      mt={'3'}
-      pt={'5'}
-      pb={'6'}
-      px={'5'}
-      borderWidth={'0.4px'}
-      borderRadius={'12'}
-      borderColor={'grey.100'}
-    >
+    <Flex direction={'column'} mt={'3'} pt={'2'} pb={'6'} px={'5'} w="full">
+      <Text pb={'4'} fontSize={'xs-16'} lineHeight={'xs-22'} fontWeight={500}>
+        GROUP {index + 1}
+      </Text>
       <EventOptions
         captureEvent={captureEvent}
-        setCaptureEvent={setCaptureEvent}
+        updateHandler={handleUpdateCaptureEvent}
       />
+      {selectedConditions.length > 0 && (
+        <Flex
+          direction={'column'}
+          gap={'2'}
+          data-testid={'action-form'}
+          hidden={captureEvent === CaptureEvent.PAGEVIEW}
+        >
+          {selectedConditions.includes(ConditionType.href) && (
+            <ConditionInput
+              updateHandler={debouncedHandleUpdateActionGroup}
+              title="Link target (href tag)"
+              type={'href'}
+              defaultValue={group.href || ''}
+              placeholder={'Enter Link'}
+            />
+          )}
+          {selectedConditions.includes(ConditionType.css) && (
+            <ConditionInput
+              updateHandler={debouncedHandleUpdateActionGroup}
+              title="CSS Selector / HTML attribute"
+              type={'selector'}
+              defaultValue={group.selector || ''}
+              placeholder={'eg. button[data-attr=”my-id”]'}
+            />
+          )}
+          {selectedConditions.includes(ConditionType.text) && (
+            <ConditionInput
+              updateHandler={debouncedHandleUpdateActionGroup}
+              title="Text"
+              type={'text'}
+              defaultValue={group.text || ''}
+              placeholder={'Enter Text Content'}
+            />
+          )}
+
+          {selectedConditions.includes(ConditionType.url) && (
+            <ConditionInput
+              updateHandler={debouncedHandleUpdateActionGroup}
+              title="Page URL (contains)"
+              type={'url'}
+              defaultValue={group.url || ''}
+              placeholder={'Enter URL'}
+            />
+          )}
+        </Flex>
+      )}
+      {captureEvent === CaptureEvent.AUTOCAPTURE &&
+        (selectedConditions.length === 0 ? (
+          <Flex direction={'column'}>
+            <Text
+              fontSize={'xs-12'}
+              lineHeight={'xs-16'}
+              fontWeight={500}
+              color="black.200"
+            >
+              Select Conditions
+            </Text>
+            <Flex flexWrap={'wrap'}>
+              {unSelectedConditions.map((selector: ConditionType) => (
+                <ConditionChip
+                  key={`chip-${selector}`}
+                  condition={selector}
+                  addCondition={addToSelected}
+                />
+              ))}
+            </Flex>
+          </Flex>
+        ) : (
+          unSelectedConditions.length > 0 && (
+            <AddConditionDropdown
+              conditionList={unSelectedConditions}
+              onClickHandler={addToSelected}
+            />
+          )
+        ))}
       <Flex
         direction={'column'}
         gap={'2'}
         data-testid={'action-form'}
-        hidden={captureEvent === CaptureEvent.PAGEVIEW}
+        hidden={captureEvent === CaptureEvent.AUTOCAPTURE}
       >
-        <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
-          {'Link target (href tag)'}
-        </Text>
-        <Input
-          px={'3'}
-          py={'2'}
-          placeholder="Enter Link"
-          focusBorderColor="black.100"
-          _placeholder={{
-            fontSize: 'base',
-            lineHeight: 'base',
-            fontWeight: '400',
-            color: 'grey.100',
-          }}
-          data-testid={'href-selector-input'}
-          defaultValue={groups[0].href}
-          onChange={(e) => handleUpdateActionGroup(e.target.value, 'href')}
-        />
-      </Flex>
-
-      <Divider
-        opacity={'1'}
-        borderColor={'white.200'}
-        hidden={captureEvent === CaptureEvent.PAGEVIEW}
-      />
-
-      <Flex
-        direction={'column'}
-        gap={'2'}
-        hidden={captureEvent === CaptureEvent.PAGEVIEW}
-      >
-        <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
-          {'CSS Selector / HTML attribute'}
-        </Text>
-        <Input
-          px={'3'}
-          py={'2'}
-          placeholder="eg. button[data-attr=”my-id”]"
-          focusBorderColor="black.100"
-          _placeholder={{
-            fontSize: 'base',
-            lineHeight: 'base',
-            fontWeight: '400',
-            color: 'grey.100',
-          }}
-          data-testid={'css-selector-input'}
-          defaultValue={groups[0].selector}
-          onChange={(e) => handleUpdateActionGroup(e.target.value, 'selector')}
-        />
-      </Flex>
-
-      <Divider
-        opacity={'1'}
-        borderColor={'white.200'}
-        hidden={captureEvent === CaptureEvent.PAGEVIEW}
-      />
-
-      <Flex
-        direction={'column'}
-        gap={'2'}
-        hidden={captureEvent === CaptureEvent.PAGEVIEW}
-      >
-        <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
-          {'Text'}
-        </Text>
-        <Input
-          px={'3'}
-          py={'2'}
-          fontSize={'base'}
-          focusBorderColor="black.100"
-          placeholder="Enter Text Content"
-          _placeholder={{
-            fontSize: 'base',
-            lineHeight: 'base',
-            fontWeight: '400',
-            color: 'grey.100',
-          }}
-          data-testid={'text-selector-input'}
-          defaultValue={groups[0].text}
-          onChange={(e) => handleUpdateActionGroup(e.target.value, 'text')}
-        />
-      </Flex>
-
-      <Divider
-        opacity={'1'}
-        borderColor={'white.200'}
-        gap={'2'}
-        hidden={captureEvent === CaptureEvent.PAGEVIEW}
-      />
-
-      <Flex direction={'column'} gap={'2'}>
-        <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
-          {'Page URL (contains)'}
-        </Text>
-        <Input
-          px={'3'}
-          py={'2'}
-          focusBorderColor="black.100"
-          placeholder="Enter URL"
-          _placeholder={{
-            fontSize: 'base',
-            lineHeight: 'base',
-            fontWeight: '400',
-            color: 'grey.100',
-          }}
-          data-testid={'url-selector-input'}
-          defaultValue={groups[0].url}
-          onChange={(e) => handleUpdateActionGroup(e.target.value, 'url')}
+        <ConditionInput
+          updateHandler={debouncedHandleUpdateActionGroup}
+          title="Page URL (contains)"
+          type={'url'}
+          defaultValue={group.url || ''}
+          placeholder={'Enter URL'}
         />
       </Flex>
     </Flex>

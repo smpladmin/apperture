@@ -1,4 +1,4 @@
-import { Box, Flex, Text } from '@chakra-ui/react';
+import { Box, Button, Divider, Flex, Text } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import emptyAction from '@assets/images/empty-action.svg';
 import Image from 'next/image';
@@ -19,6 +19,7 @@ import {
   saveAction,
   updateAction,
 } from '@lib/services/actionService';
+import DividerWithItem from '@components/Divider/DividerWithItem';
 
 const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
   const [actionName, setActionName] = useState(
@@ -33,11 +34,12 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
         text: '',
         url: '',
         url_matching: '',
+        event: CaptureEvent.AUTOCAPTURE,
       },
     ]
   );
-  const [captureEvent, setCaptureEvent] = useState<CaptureEvent>(
-    savedAction?.eventType || CaptureEvent.AUTOCAPTURE
+  const [captureEvents, setCaptureEvents] = useState<CaptureEvent[]>(
+    groups.map((group) => group.event)
   );
   const [isSaveDisabled, setIsSavedDisabled] = useState(true);
   const [isActionBeingEdited, setIsActionBeingEdited] = useState(false);
@@ -85,8 +87,9 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
     const fetchTransientEvents = async () => {
       const res = await getTransientActionEvents(
         datasourceId as string,
-        groups,
-        captureEvent
+        groups.map((group, index: number) => {
+          return { ...group, event: captureEvents[index] };
+        })
       );
       setTransientActionEvents(res);
       setIsLoading(false);
@@ -103,21 +106,30 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
     [groups]
   );
 
+  const addNewGroup = () => {
+    setGroups([
+      ...groups,
+      {
+        href: '',
+        selector: '',
+        text: '',
+        url: '',
+        url_matching: '',
+        event: CaptureEvent.AUTOCAPTURE,
+      },
+    ]);
+    setCaptureEvents([...captureEvents, CaptureEvent.AUTOCAPTURE]);
+  };
+
   const saveOrUpdateAction = async () => {
     const response = isActionBeingEdited
       ? await updateAction(
           actionId as string,
           datasourceId as string,
           actionName,
-          groups,
-          captureEvent
+          groups
         )
-      : await saveAction(
-          datasourceId as string,
-          actionName,
-          groups,
-          captureEvent
-        );
+      : await saveAction(datasourceId as string, actionName, groups);
 
     if (response?.status === 200) {
       const { _id, datasourceId } = response?.data;
@@ -129,30 +141,81 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
   };
 
   return (
-    <Box h={'full'} overflow={'auto'} overflowY={'hidden'}>
+    <Box minH={'full'} overflow={'auto'} overflowY={'hidden'}>
       <ActionHeader
         actionName={actionName}
         setActionName={setActionName}
         isSaveDisabled={isSaveDisabled}
         saveOrUpdateAction={saveOrUpdateAction}
       />
-      <Flex h={'full'}>
+      <Flex h={'full'} w="full">
         <Box
           pt={'4'}
           px={'5'}
           minW={'106'}
           borderRight={'1px'}
           borderColor={'white.200'}
+          pb={4}
         >
-          <Text fontSize={'sh-18'} lineHeight={'sh-18'} fontWeight={'500'}>
-            Define Actions
-          </Text>
-          <SelectorsForm
-            captureEvent={captureEvent}
-            setCaptureEvent={setCaptureEvent}
-            groups={groups}
-            updateGroupAction={updateGroupAction}
-          />
+          <Flex justifyContent={'space-between'} alignItems="center">
+            <Text
+              fontSize={'sh-18'}
+              lineHeight={'sh-22'}
+              fontWeight={'500'}
+              py={5}
+            >
+              Match Groups
+            </Text>
+            <Button
+              fontSize={'xs-12'}
+              lineHeight={'xs-16'}
+              fontWeight={500}
+              p={1}
+              mt={2}
+              h={'min-content'}
+              bg="none"
+              onClick={addNewGroup}
+            >
+              <i className="ri-add-fill"></i>
+              <Text ml={1}>Groups</Text>
+            </Button>
+          </Flex>
+          <Flex
+            borderWidth={'0.4px'}
+            borderRadius={'12'}
+            borderColor={'grey.100'}
+            direction="column"
+          >
+            {groups.map((group, index) => (
+              <>
+                {index > 0 && (
+                  <DividerWithItem color={'grey.100'}>
+                    <Text
+                      fontSize={'xs-12'}
+                      lineHeight={'xs-16'}
+                      fontWeight={600}
+                      px={2}
+                      py={1}
+                      bg={'white.100'}
+                      borderRadius={4}
+                    >
+                      OR
+                    </Text>
+                  </DividerWithItem>
+                )}
+                <SelectorsForm
+                  key={index}
+                  index={index}
+                  captureEvent={captureEvents[index]}
+                  captureEvents={captureEvents}
+                  setCaptureEvents={setCaptureEvents}
+                  group={group}
+                  groups={groups}
+                  updateGroupAction={updateGroupAction}
+                />
+              </>
+            ))}
+          </Flex>
         </Box>
         <Box w={'full'} overflow={'auto'} pt={'4'} px={'8'}>
           {isEmpty ? (

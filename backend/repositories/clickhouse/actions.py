@@ -34,11 +34,13 @@ class Actions(EventsBase):
                 regex += ".*"
         return regex
 
-    def filter_click_event(self, filter: ActionGroup) -> Tuple[List, Dict]:
+    def filter_click_event(
+        self, filter: ActionGroup, prepend: str = ""
+    ) -> Tuple[List, Dict]:
         params = {}
         conditions = []
         operator = "exact"
-
+        print("####", filter)
         if filter.selector is not None:
             selectors = (
                 filter.selector
@@ -50,7 +52,7 @@ class Actions(EventsBase):
                 if not query:  # Skip empty selectors
                     continue
                 selector = Selector(query, escape_slashes=False)
-                key = f"{idx}_selector_regex"
+                key = f"{prepend}_{idx}_selector_regex"
                 params[key] = self.build_selector_regex(selector)
                 conditions.append(
                     self.ch_match_func(
@@ -66,6 +68,7 @@ class Actions(EventsBase):
 
         attributes: Dict[str, List] = {}
         if filter.href:
+            print("Inside HREF filter: %s" % filter.href)
             attributes["href"] = self.process_ok_values(filter.href, operator)
         if filter.text:
             attributes["text"] = self.process_ok_values(filter.text, operator)
@@ -77,16 +80,18 @@ class Actions(EventsBase):
                     for idx, value in enumerate(ok_values):
                         optional_flag = "(?i)" if operator.endswith("icontains") else ""
                         params[
-                            f"{key}_{idx}_attributes_regex"
+                            f"{prepend}_{key}_{idx}_attributes_regex"
                         ] = f'{optional_flag}({key}="{value}")'
                         conditions.append(
                             self.ch_match_func(
                                 self.click_stream_table.element_chain,
-                                Parameter(f"%({key}_{idx}_attributes_regex)s"),
+                                Parameter(
+                                    f"%({prepend}_{key}_{idx}_attributes_regex)s"
+                                ),
                             )
                         )
                     # conditions.append(f"({' OR '.join(combination_conditions)})")
-
+        print("conditions", conditions)
         return conditions, params
 
     def process_ok_values(self, ok_values: Any, operator: OperatorType) -> List[str]:
@@ -117,7 +122,14 @@ class Actions(EventsBase):
         self, action: Action, update_action_func
     ):
 
-        conditions, params = self.filter_click_event(filter=action.groups[0])
+        conditions, params = [], {}
+        for index, group in enumerate(action.groups):
+            group_condition, group_params = self.filter_click_event(
+                filter=group, prepend=f"group_{index}_prepend"
+            )
+            params = {**params, **group_params}
+            if len(group_condition) > 0:
+                conditions.append(Criterion.all(group_condition))
 
         query = (
             ClickHouseQuery.into(self.table)
@@ -145,23 +157,35 @@ class Actions(EventsBase):
             self.click_stream_table.timestamp <= self.parse_datetime_best_effort(now)
         )
 
-        query = query.where(Criterion.all(conditions))
+        query = query.where(Criterion.any(conditions))
         params["ds_id"] = str(action.datasource_id)
         return query.get_sql(), params
 
     async def get_matching_events_from_clickstream(
-        self, datasource_id: str, groups: List[ActionGroup], event_type: CaptureEvent
+        self, datasource_id: str, groups: List[ActionGroup]
     ):
         return self.execute_get_query(
             *await self.build_matching_events_from_clickstream_query(
-                datasource_id=datasource_id, groups=groups, event_type=event_type
+                datasource_id=datasource_id, groups=groups
             )
         )
 
     async def build_matching_events_from_clickstream_query(
-        self, datasource_id: str, groups: ActionGroup, event_type: CaptureEvent
+        self, datasource_id: str, groups: List[ActionGroup]
     ):
-        conditions, params = self.filter_click_event(filter=groups[0])
+        conditions, params = [], {}
+        print("build_matching_events_from_clickstream----", groups)
+        for index, group in enumerate(groups):
+            group_condition, group_params = self.filter_click_event(
+                filter=group, prepend=f"group_{index}_prepend"
+            )
+            print(group.event)
+            group_condition.append(self.click_stream_table.event == group.event)
+            print("#####", group_condition)
+            params = {**params, **group_params}
+            if len(group_condition) > 0:
+                conditions.append(Criterion.all(group_condition))
+
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
             .select(
@@ -172,30 +196,40 @@ class Actions(EventsBase):
             )
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
         )
-        conditions.append(self.click_stream_table.event == event_type)
-        query = query.where(Criterion.all(conditions)).limit(100)
+        query = query.where(Criterion.any(conditions)).limit(100)
         params["ds_id"] = str(datasource_id)
+        print(query.get_sql())
         return query.get_sql(), params
 
     async def get_count_of_matching_event_from_clickstream(
-        self, datasource_id: str, groups: List[ActionGroup], event_type: CaptureEvent
+        self,
+        datasource_id: str,
+        groups: List[ActionGroup],
     ):
         return self.execute_get_query(
             *await self.build_count_matching_events_from_clickstream_query(
-                datasource_id=datasource_id, groups=groups, event_type=event_type
+                datasource_id=datasource_id, groups=groups
             )
         )
 
     async def build_count_matching_events_from_clickstream_query(
-        self, datasource_id: str, groups: ActionGroup, event_type: CaptureEvent
+        self, datasource_id: str, groups: List[ActionGroup]
     ):
-        conditions, params = self.filter_click_event(filter=groups[0])
+        conditions, params = [], {}
+        for index, group in enumerate(groups):
+            group_condition, group_params = self.filter_click_event(
+                filter=group, prepend=f"group_{index}_prepend"
+            )
+            group_condition.append(self.click_stream_table.event == group.event)
+            params = {**params, **group_params}
+            if len(group_condition) > 0:
+                conditions.append(Criterion.all(group_condition))
+
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
             .select(fn.Count("*"))
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
         )
-        conditions.append(self.click_stream_table.event == event_type)
-        query = query.where(Criterion.all(conditions))
+        query = query.where(Criterion.any(conditions))
         params["ds_id"] = str(datasource_id)
         return query.get_sql(), params

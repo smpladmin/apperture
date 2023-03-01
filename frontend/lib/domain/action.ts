@@ -16,6 +16,7 @@ export type ActionGroup = {
   selector: string;
   url: string;
   url_matching: string;
+  event: CaptureEvent;
 };
 
 export type ActionWithUser = Action & {
@@ -36,4 +37,11 @@ export type ActionEventData = {
 export enum CaptureEvent {
   AUTOCAPTURE = '$autocapture',
   PAGEVIEW = '$pageview',
+}
+
+export enum ConditionType {
+  href = 'Link target (href tag)',
+  css = 'CSS Selector / HTML attribute',
+  text = 'Text',
+  url = 'Page URL',
 }

@@ -4,8 +4,7 @@ from typing import List
 from beanie import PydanticObjectId
 from fastapi import Depends
 
-from domain.actions.models import (Action, ActionGroup,
-                                   ComputedEventStreamResult)
+from domain.actions.models import Action, ActionGroup, ComputedEventStreamResult
 from domain.clickstream.models import CaptureEvent
 from mongo import Mongo
 from repositories.clickhouse.actions import Actions
@@ -28,7 +27,6 @@ class ActionService:
         userId: str,
         name: str,
         groups: List[ActionGroup],
-        eventType: CaptureEvent,
     ) -> Action:
         return Action(
             datasource_id=datasourceId,
@@ -36,7 +34,6 @@ class ActionService:
             user_id=userId,
             name=name,
             groups=groups,
-            event_type=eventType,
         )
 
     async def add_action(self, action: Action):
@@ -78,10 +75,10 @@ class ActionService:
         ).update({"$set": to_update})
 
     async def compute_action(
-        self, datasource_id: str, groups: List[ActionGroup], event_type: CaptureEvent
+        self, datasource_id: str, groups: List[ActionGroup]
     ) -> List[ComputedActionResponse]:
         matching_events = await self.actions.get_matching_events_from_clickstream(
-            datasource_id=datasource_id, groups=groups, event_type=event_type
+            datasource_id=datasource_id, groups=groups
         )
         matching_events = [
             ComputedEventStreamResult(
@@ -96,7 +93,7 @@ class ActionService:
 
         count = (
             await self.actions.get_count_of_matching_event_from_clickstream(
-                datasource_id=datasource_id, groups=groups, event_type=event_type
+                datasource_id=datasource_id, groups=groups
             )
         )[0][0]
 
