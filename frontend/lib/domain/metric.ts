@@ -48,6 +48,7 @@ export type ComputedMetric = {
   name: string;
   series: ComputedMetricData[];
 };
+
 export type MetricTrend = { date: string; value: number };
 
 export type MetricTableData = {

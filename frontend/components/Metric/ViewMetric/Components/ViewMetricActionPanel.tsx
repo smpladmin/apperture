@@ -6,7 +6,7 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BASTILLE } from '@theme/index';
 import MetricViewComponentCard from './MetricViewComponentCard';
 import ActionMenu from '@components/ActionMenu';
@@ -20,6 +20,7 @@ const ViewMetricActionPanel = ({
   metricName,
   metricDefinition,
   aggregates,
+  breakdown,
   datasourceId,
   eventData,
   savedNotification,
@@ -28,6 +29,7 @@ const ViewMetricActionPanel = ({
   metricName: string;
   metricDefinition: string;
   aggregates: MetricAggregate[];
+  breakdown: string[];
   datasourceId: string;
   eventData: MetricTrend[];
   savedNotification: Notifications;
@@ -39,6 +41,19 @@ const ViewMetricActionPanel = ({
     query: { metricId, showAlert },
   } = router;
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
+
+  const [disableAlert, setDisableAlert] = useState(false);
+
+  useEffect(() => {
+    /* 
+    - disable alerts if: 
+    1. Breakdown is present
+    2. Multiple aggregates are there and metric definition is not present
+    */
+    if (breakdown.length || (!metricDefinition && aggregates.length > 1)) {
+      setDisableAlert(true);
+    }
+  }, []);
 
   const handleNotificationClick = () => {
     onOpen();
@@ -155,6 +170,7 @@ const ViewMetricActionPanel = ({
         <ActionMenu
           onNotificationClick={handleNotificationClick}
           hasSavedNotification={hasSavedAlert(savedNotification)}
+          disableAlert={disableAlert}
         />
         <Divider
           mt={'4'}
