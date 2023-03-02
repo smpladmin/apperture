@@ -1,16 +1,26 @@
 import { Flex } from '@chakra-ui/react';
 import LineChart from '@components/Charts/Line';
-import { ComputedMetric, ComputedMetricData } from '@lib/domain/metric';
+import {
+  COLOR_PALLETE_5,
+  convertToTableData,
+  convertToTrendData,
+  formatDate,
+} from '../../util';
+import {
+  Breakdown,
+  ComputedMetric,
+  ComputedMetricData,
+  MetricTrendData,
+} from '@lib/domain/metric';
 import {
   convertISODateToReadableDate,
   formatDatalabel,
 } from '@lib/utils/common';
-import React from 'react';
+
+import React, { useEffect, useMemo, useState } from 'react';
 import MetricTable from './MetricTable';
 
-const formatDate = (date: string): string => {
-  return convertISODateToReadableDate(date).split('-').reverse().join(' ');
-};
+const graphColors = COLOR_PALLETE_5.map((color) => color.hexaValue);
 
 const config = {
   padding: 'auto',
@@ -60,7 +70,7 @@ const config = {
       return `<div id='metric-tooltip'>
              ${data_list
                .map(
-                 (item: ComputedMetricData) =>
+                 (item: MetricTrendData) =>
                    `<span class='metric-tooltip series'>${item.series}</span>
                  <span class='metric-tooltip value'>${formatDatalabel(
                    item.value
@@ -80,31 +90,66 @@ const config = {
     },
   },
   animation: true,
+  color: ({ series }: { series: string }) => graphColors[0],
 };
 
-const convertToTableData = (
-  data: ComputedMetricData[],
-  average: { [keys: string]: number }
-) => {
-  const tableData: any = {};
-  data.forEach((item: ComputedMetricData) => {
-    tableData[item.series] =
-      tableData[item.series] === undefined
-        ? {
-            series: item.series,
-            average: average ? formatDatalabel(average[item.series]) : 0,
-            [formatDate(item.date)]: formatDatalabel(item.value),
-          }
-        : {
-            ...tableData[item.series],
-            [formatDate(item.date)]: formatDatalabel(item.value),
-          };
-  });
-  return Object.values(tableData);
+type MetricTrendProps = {
+  data: ComputedMetric[];
+  breakdown: string[];
 };
 
-const MetricTrend = ({ data, definition, average }: ComputedMetric) => {
-  // convertToTableData(data);
+const MetricTrend = ({ data, breakdown }: MetricTrendProps) => {
+  const [selectedBreakdowns, setSelectedBreakdowns] = useState<Breakdown[]>([]);
+  const [graphConfig, setGraphConfig] = useState(config);
+
+  useEffect(() => {
+    if (!breakdown.length) return;
+
+    let breakdownValues: any[] = [];
+    convertToTableData(data)?.forEach((d, i) => {
+      breakdownValues.push({
+        value: `${d.name}/${d.propertyValue}`,
+        rowIndex: i,
+      });
+    });
+    setSelectedBreakdowns(breakdownValues.slice(0, 5));
+  }, [data, breakdown]);
+
+  useEffect(() => {
+    let uniqueSeries: string[] = [];
+
+    setGraphConfig({
+      ...graphConfig,
+      color: ({ series }: { series: string }) => {
+        if (!uniqueSeries.includes(series)) {
+          uniqueSeries.push(series);
+        }
+
+        const colorIndex =
+          selectedBreakdowns.find(({ value }) => value === series)?.rowIndex ||
+          uniqueSeries.indexOf(series);
+
+        return graphColors[colorIndex % 5];
+      },
+    });
+  }, [selectedBreakdowns]);
+
+  const trendData = useMemo(() => {
+    if (!breakdown.length) return convertToTrendData(data);
+
+    return selectedBreakdowns
+      .sort((a, b) => a.rowIndex - b.rowIndex)
+      .flatMap((breakdown) => {
+        return convertToTrendData(data)?.filter(
+          (d) => d.series === breakdown.value
+        );
+      });
+  }, [data, selectedBreakdowns]);
+
+  const metricTableData = useMemo(() => {
+    return convertToTableData(data).slice(0, 100);
+  }, [data, breakdown]);
+
   return (
     <Flex
       height={'full'}
@@ -112,9 +157,19 @@ const MetricTrend = ({ data, definition, average }: ComputedMetric) => {
       justifyContent={'center'}
       direction={'column'}
       className="metric-chart"
+      gap={'10'}
+      mt={'10'}
     >
-      <LineChart {...config} data={data} />
-      <MetricTable data={convertToTableData(data, average)} />
+      <LineChart {...graphConfig} data={trendData} />
+
+      {!!metricTableData?.length && (
+        <MetricTable
+          data={metricTableData}
+          breakdown={breakdown}
+          selectedBreakdowns={selectedBreakdowns}
+          setSelectedBreakdowns={setSelectedBreakdowns}
+        />
+      )}
     </Flex>
   );
 };

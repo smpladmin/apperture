@@ -28,7 +28,12 @@ from domain.funnels.models import (
     FunnelTrendsData,
 )
 from domain.integrations.models import Credential, CredentialType, Integration
-from domain.metrics.models import ComputedMetricResult, Metric
+from domain.metrics.models import (
+    Metric,
+    ComputedMetricStep,
+    ComputedMetricData,
+    MetricValue,
+)
 from domain.notifications.models import (
     Notification,
     NotificationChannel,
@@ -36,7 +41,6 @@ from domain.notifications.models import (
     NotificationMetric,
     NotificationType,
     NotificationVariant,
-    ThresholdMap,
 )
 from domain.properties.models import Properties, Property, PropertyDataType
 from domain.runlogs.models import RunLog
@@ -468,25 +472,31 @@ def metric_service(apperture_user_response):
 
     metrics_future = asyncio.Future()
     metrics_future.set_result([MetricWithUser.from_orm(metric)])
+    computed_metric = [
+        ComputedMetricStep(
+            name="A/B",
+            series=[
+                ComputedMetricData(
+                    breakdown=[],
+                    data=[
+                        MetricValue(date="2022-10-07", value=4),
+                        MetricValue(date="2022-10-08", value=26),
+                        MetricValue(date="2022-10-09", value=11),
+                        MetricValue(date="2022-10-10", value=14),
+                        MetricValue(date="2022-10-11", value=22),
+                        MetricValue(date="2022-10-12", value=33),
+                    ],
+                )
+            ],
+        )
+    ]
 
-    computed_metric = ComputedMetricResult(
-        metric=[
-            {"date": "2022-10-07", "value": 4, "series": "A/B"},
-            {"date": "2022-10-08", "value": 26, "series": "A/B"},
-            {"date": "2022-10-09", "value": 11, "series": "A/B"},
-            {"date": "2022-10-10", "value": 14, "series": "A/B"},
-            {"date": "2022-10-11", "value": 22, "series": "A/B"},
-            {"date": "2022-10-12", "value": 33, "series": "A/B"},
-        ],
-        average={
-            "A/B": 18.333333333333332,
-        },
-    )
     computed_metric_future = asyncio.Future()
     computed_metric_future.set_result(computed_metric)
 
     metric_service.compute_metric.return_value = computed_metric_future
     metric_service.get_metrics_for_datasource_id.return_value = metrics_future
+    metric_service.validate_formula.return_value = True
     return metric_service
 
 
@@ -1172,17 +1182,24 @@ def computed_segment_response():
 
 @pytest.fixture(scope="module")
 def computed_metric_response():
-    return {
-        "metric": [
-            {"date": "2022-10-07", "value": 4, "series": "A/B"},
-            {"date": "2022-10-08", "value": 26, "series": "A/B"},
-            {"date": "2022-10-09", "value": 11, "series": "A/B"},
-            {"date": "2022-10-10", "value": 14, "series": "A/B"},
-            {"date": "2022-10-11", "value": 22, "series": "A/B"},
-            {"date": "2022-10-12", "value": 33, "series": "A/B"},
-        ],
-        "average": {"A/B": 18.333333333333332},
-    }
+    return [
+        {
+            "name": "A/B",
+            "series": [
+                {
+                    "breakdown": [],
+                    "data": [
+                        {"date": "2022-10-07", "value": 4.0},
+                        {"date": "2022-10-08", "value": 26.0},
+                        {"date": "2022-10-09", "value": 11.0},
+                        {"date": "2022-10-10", "value": 14.0},
+                        {"date": "2022-10-11", "value": 22.0},
+                        {"date": "2022-10-12", "value": 33.0},
+                    ],
+                }
+            ],
+        }
+    ]
 
 
 @pytest.fixture(scope="module")

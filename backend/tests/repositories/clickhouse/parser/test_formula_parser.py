@@ -54,7 +54,7 @@ class TestFormulaParser:
         ):
             assert self.parser.parse(test_case, self.sum_wrapper) == result
 
-    def test_parser_for_summation_aggregation(self):
+    def test_parser_for_formula_validation(self):
         for test_case, result in zip(self.test_cases, self.validation_results):
             assert (
                 self.parser.validate_formula(test_case, self.allowed_variables)

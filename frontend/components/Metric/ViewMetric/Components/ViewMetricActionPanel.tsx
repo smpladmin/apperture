@@ -10,7 +10,7 @@ import React, { useEffect } from 'react';
 import { BASTILLE } from '@theme/index';
 import MetricViewComponentCard from './MetricViewComponentCard';
 import ActionMenu from '@components/ActionMenu';
-import { EventOrSegmentComponent, MetricTrend } from '@lib/domain/metric';
+import { MetricAggregate, MetricTrend } from '@lib/domain/metric';
 import { useRouter } from 'next/router';
 import Alert from '@components/Alerts';
 import { Notifications, NotificationVariant } from '@lib/domain/notification';
@@ -27,7 +27,7 @@ const ViewMetricActionPanel = ({
 }: {
   metricName: string;
   metricDefinition: string;
-  aggregates: EventOrSegmentComponent[];
+  aggregates: MetricAggregate[];
   datasourceId: string;
   eventData: MetricTrend[];
   savedNotification: Notifications;
