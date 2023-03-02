@@ -66,7 +66,7 @@ export const saveMetric = async (
     aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
   });
-  return result.data;
+  return result;
 };
 
 export const updateMetric = async (
@@ -84,7 +84,7 @@ export const updateMetric = async (
     aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
   });
-  return result.data;
+  return result;
 };
 
 export const getSavedMetricsForDatasourceId = async (dsId: string) => {

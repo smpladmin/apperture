@@ -25,6 +25,10 @@ import {
 } from '@lib/domain/metric';
 import { cloneDeep, isEqual } from 'lodash';
 import { Node } from '@lib/domain/node';
+import {
+  deleteNotification,
+  getNotificationByReference,
+} from '@lib/services/notificationService';
 
 type CreateMetricActionProps = {
   setMetric: Function;
@@ -56,6 +60,7 @@ const CreateMetricAction = ({
 
   const { metricId } = router.query;
   const dsId = savedMetric?.datasourceId || router.query.dsId;
+  const [isMetricBeingEdited, setIsMetricBeingEdited] = useState(false);
   const [eventList, setEventList] = useState<Node[]>([]);
   const [eventProperties, setEventProperties] = useState<string[]>([]);
   const [loadingEventProperties, setLoadingEventProperties] = useState(false);
@@ -73,6 +78,11 @@ const CreateMetricAction = ({
       },
     ]
   );
+
+  useEffect(() => {
+    if (router.pathname.includes('/metric/edit')) setIsMetricBeingEdited(true);
+  }, []);
+
   useEffect(() => {
     const fetchEventProperties = async () => {
       const [eventPropertiesResult, events] = await Promise.all([
@@ -146,33 +156,39 @@ const CreateMetricAction = ({
   };
 
   const handleSave = async () => {
-    let savedMetric;
-    if (metricId) {
-      // update the metric
-      await updateMetric(
-        metricId as string,
-        metricName,
-        dsId as string,
-        metricDefinition,
-        aggregates,
-        []
-      );
-    } else {
-      // save the metric
-      savedMetric = await saveMetric(
-        metricName,
-        dsId as string,
-        metricDefinition,
-        aggregates,
-        []
-      );
-    }
-    router.push({
-      pathname: '/analytics/metric/view/[metricId]',
-      query: { metricId: savedMetric?._id || metricId, dsId },
-    });
+    const { data, status } = isMetricBeingEdited
+      ? await updateMetric(
+          metricId as string,
+          metricName,
+          dsId as string,
+          metricDefinition,
+          aggregates,
+          []
+        )
+      : await saveMetric(
+          metricName,
+          dsId as string,
+          metricDefinition,
+          aggregates,
+          []
+        );
+
+    if (status === 200)
+      router.push({
+        pathname: '/analytics/metric/view/[metricId]',
+        query: { metricId: data?._id || metricId, dsId },
+      });
 
     setCanSaveMetric(false);
+
+    // deleted associated notification with metric whenever metric gets updated
+    if (isMetricBeingEdited) {
+      const notifcation = await getNotificationByReference(
+        metricId as string,
+        dsId as string
+      );
+      if (notifcation) await deleteNotification(notifcation._id);
+    }
   };
 
   useEffect(() => {

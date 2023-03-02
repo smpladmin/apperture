@@ -19,6 +19,10 @@ import { saveFunnel, updateFunnel } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { MapContext } from '@lib/contexts/mapContext';
 import { FunnelStep } from '@lib/domain/funnel';
+import {
+  deleteNotification,
+  getNotificationByReference,
+} from '@lib/services/notificationService';
 
 type CreateFunnelActionProps = {
   funnelName: string;
@@ -91,6 +95,15 @@ const CreateFunnelAction = ({
         pathname: '/analytics/funnel/view/[funnelId]',
         query: { funnelId: data?._id || funnelId, dsId },
       });
+
+    // deleted associated notification with funnel whenever funnel gets updated
+    if (isFunnelBeingEdited) {
+      const notifcation = await getNotificationByReference(
+        funnelId as string,
+        dsId as string
+      );
+      if (notifcation) await deleteNotification(notifcation._id);
+    }
   };
 
   return (
