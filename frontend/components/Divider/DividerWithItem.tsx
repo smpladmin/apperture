@@ -1,6 +1,6 @@
 import { Flex } from '@chakra-ui/react';
 
-const DividerWithItem = ({ children, color }: any) => {
+const DividerWithItem = ({ children, color, ...rest }: any) => {
   return (
     <Flex
       justify={'center'}
@@ -8,6 +8,7 @@ const DividerWithItem = ({ children, color }: any) => {
       w="full"
       h={'1px'}
       bg={color || 'black'}
+      {...rest}
     >
       {children}
     </Flex>

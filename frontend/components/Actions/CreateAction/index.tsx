@@ -20,6 +20,7 @@ import {
   updateAction,
 } from '@lib/services/actionService';
 import DividerWithItem from '@components/Divider/DividerWithItem';
+import { cloneDeep } from 'lodash';
 
 const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
   const [actionName, setActionName] = useState(
@@ -29,17 +30,14 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
   const [groups, setGroups] = useState<ActionGroup[]>(
     savedAction?.groups || [
       {
-        href: '',
-        selector: '',
-        text: '',
-        url: '',
+        href: null,
+        selector: null,
+        text: null,
+        url: null,
         url_matching: '',
         event: CaptureEvent.AUTOCAPTURE,
       },
     ]
-  );
-  const [captureEvents, setCaptureEvents] = useState<CaptureEvent[]>(
-    groups.map((group) => group.event)
   );
   const [isSaveDisabled, setIsSavedDisabled] = useState(true);
   const [isActionBeingEdited, setIsActionBeingEdited] = useState(false);
@@ -87,9 +85,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
     const fetchTransientEvents = async () => {
       const res = await getTransientActionEvents(
         datasourceId as string,
-        groups.map((group, index: number) => {
-          return { ...group, event: captureEvents[index] };
-        })
+        groups
       );
       setTransientActionEvents(res);
       setIsLoading(false);
@@ -110,15 +106,20 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
     setGroups([
       ...groups,
       {
-        href: '',
-        selector: '',
-        text: '',
-        url: '',
+        href: null,
+        selector: null,
+        text: null,
+        url: null,
         url_matching: '',
         event: CaptureEvent.AUTOCAPTURE,
       },
     ]);
-    setCaptureEvents([...captureEvents, CaptureEvent.AUTOCAPTURE]);
+  };
+
+  const removeGroup = (index: number) => {
+    const tempGroups = cloneDeep(groups);
+    tempGroups.splice(index, 1);
+    setGroups(tempGroups);
   };
 
   const saveOrUpdateAction = async () => {
@@ -141,21 +142,22 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
   };
 
   return (
-    <Box minH={'full'} overflow={'auto'} overflowY={'hidden'}>
+    <Box h={'full'} overflow={'auto'} overflowY={'hidden'}>
       <ActionHeader
         actionName={actionName}
         setActionName={setActionName}
         isSaveDisabled={isSaveDisabled}
         saveOrUpdateAction={saveOrUpdateAction}
       />
-      <Flex h={'full'} w="full">
+      <Flex h={'full'} w={'full'}>
         <Box
           pt={'4'}
           px={'5'}
           minW={'106'}
           borderRight={'1px'}
           borderColor={'white.200'}
-          pb={4}
+          pb={24}
+          overflow="auto"
         >
           <Flex justifyContent={'space-between'} alignItems="center">
             <Text
@@ -206,12 +208,10 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
                 <SelectorsForm
                   key={index}
                   index={index}
-                  captureEvent={captureEvents[index]}
-                  captureEvents={captureEvents}
-                  setCaptureEvents={setCaptureEvents}
                   group={group}
                   groups={groups}
                   updateGroupAction={updateGroupAction}
+                  handleClose={removeGroup}
                 />
               </>
             ))}

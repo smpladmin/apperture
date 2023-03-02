@@ -20,6 +20,7 @@ const EventOptions = ({ captureEvent, updateHandler }: EventOptionsProps) => {
         gap={'2'}
         alignItems={'center'}
         border={'1px'}
+        borderColor={'white.200'}
         w={'min-content'}
         p={1}
         borderRadius={'4'}
@@ -31,13 +32,7 @@ const EventOptions = ({ captureEvent, updateHandler }: EventOptionsProps) => {
               key={option.value}
               as={'label'}
               borderRadius={'4'}
-              bg={
-                isSelected
-                  ? 'white.200'
-                  : option.isDisabled
-                  ? 'grey.100'
-                  : 'white.DEFAULT'
-              }
+              bg={isSelected ? 'white.200' : 'white.DEFAULT'}
               px={2}
               py={1}
               data-testid={'watchlistitem'}

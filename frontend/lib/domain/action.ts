@@ -11,10 +11,10 @@ export type Action = {
 };
 
 export type ActionGroup = {
-  text: string;
-  href: string;
-  selector: string;
-  url: string;
+  text: string | null;
+  href: string | null;
+  selector: string | null;
+  url: string | null;
   url_matching: string;
   event: CaptureEvent;
 };
@@ -40,8 +40,8 @@ export enum CaptureEvent {
 }
 
 export enum ConditionType {
-  href = 'Link target (href tag)',
-  css = 'CSS Selector / HTML attribute',
-  text = 'Text',
-  url = 'Page URL',
+  href = 'href',
+  selector = 'selector',
+  text = 'text',
+  url = 'url',
 }

@@ -1,8 +1,13 @@
-import { ActionGroup, CaptureEvent } from '@lib/domain/action';
+import { ActionGroup, CaptureEvent, ConditionType } from '@lib/domain/action';
 
 export const isValidAction = (groups: ActionGroup[]) =>
   groups.every((group) => {
-    return (Object.keys(group) as (keyof ActionGroup)[]).some((groupKey) =>
+    return [
+      ConditionType.href,
+      ConditionType.selector,
+      ConditionType.text,
+      ConditionType.url,
+    ].some((groupKey: Exclude<keyof ActionGroup, ['event', 'url_matching']>) =>
       Boolean(group[groupKey])
     );
   });
