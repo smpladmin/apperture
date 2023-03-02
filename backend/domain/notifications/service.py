@@ -81,7 +81,7 @@ class NotificationService:
 
     async def get_notifications(
         self, notification_type: NotificationType, frequency: NotificationFrequency
-    ) -> list[Notification]:
+    ) -> List[Notification]:
         return await Notification.find(
             Notification.frequency == frequency,
             Notification.notification_type == notification_type,
@@ -245,3 +245,10 @@ class NotificationService:
             Notification.reference == reference,
             Notification.datasource_id == PydanticObjectId(datasource_id),
         )
+
+    async def delete_notification(self, notification_id: str):
+        x = await Notification.find_one(
+            Notification.id == PydanticObjectId(notification_id),
+        ).delete()
+        print('find x---',x)
+        return
