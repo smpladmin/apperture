@@ -250,5 +250,4 @@ class NotificationService:
         x = await Notification.find_one(
             Notification.id == PydanticObjectId(notification_id),
         ).delete()
-        print('find x---',x)
         return

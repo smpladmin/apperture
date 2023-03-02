@@ -281,5 +281,7 @@ class TestNotificationService:
 
     @pytest.mark.asyncio
     async def test_delete_notification(self):
-        await self.service.delete_notification(notification_id="6384a65e0a397236d9de236a")
+        await self.service.delete_notification(
+            notification_id="6384a65e0a397236d9de236a"
+        )
         Notification.find_one.assert_called_once()
