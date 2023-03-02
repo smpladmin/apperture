@@ -1,5 +1,6 @@
 from enum import Enum
-from typing import List
+from typing import Union, List
+
 from beanie import PydanticObjectId
 from pydantic import BaseModel
 from repositories import Document
@@ -22,16 +23,28 @@ class SegmentsAndEventsFilterOperator(str, Enum):
     BETWEEN = "between"
 
 
-class SegmentsAndEventsAggregationsFunctions(str, Enum):
-    SUM = "sum"
-    AVG = "avg"
-    MIN = "min"
-    MAX = "max"
-    COUNT = "count"
+class MetricBasicAggregation(str, Enum):
+    TOTAL = "total"
+    UNIQUE = "unique"
+    TOTAL_PER_USER = "total_per_user"
+    COUNT_SESSIONS = "count_sessions"
+
+
+class MetricAggregatePropertiesAggregation(str, Enum):
+    SUM = "ap_sum"
+    AVERAGE = "ap_average"
+    MEDIAN = "ap_median"
+    DISTINCT_COUNT = "ap_distinct_count"
+    MIN = "ap_min"
+    MAX = "ap_max"
+    P25 = "ap_p25"
+    P75 = "ap_p75"
+    P90 = "ap_p90"
+    P99 = "ap_p99"
 
 
 class SegmentsAndEventsAggregations(BaseModel):
-    functions: SegmentsAndEventsAggregationsFunctions
+    function: Union[MetricBasicAggregation, MetricAggregatePropertiesAggregation]
     property: str
 
 
