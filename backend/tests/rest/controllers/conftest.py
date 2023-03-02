@@ -111,6 +111,8 @@ def notification_service(apperture_user_response):
     notifications_future = asyncio.Future()
     notifications_future.set_result([NotificationWithUser.from_orm(notif)])
 
+    notification_service_mock.delete_notification = mock.AsyncMock()
+
     notification_service_mock.build_notification.return_value = notif
     notification_service_mock.add_notification.return_value = notif_future
     notification_service_mock.update_notification.return_value = notif_future

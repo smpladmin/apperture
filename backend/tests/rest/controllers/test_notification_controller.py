@@ -198,3 +198,17 @@ def test_get_funnels(client_init, notification_service):
     notification_service.get_notifications_for_datasource_id.assert_called_once_with(
         **{"datasource_id": "635ba034807ab86d8a2aadd9"}
     )
+
+
+def test_delete_notification(
+    client_init,
+    notification_service,
+):
+    response = client_init.delete("/notifications/6384a65e0a397236d9de236a")
+    assert response.status_code == 200
+
+    notification_service.delete_notification.assert_called_once_with(
+        **{
+            "notification_id": "6384a65e0a397236d9de236a",
+        }
+    )

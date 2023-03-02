@@ -161,6 +161,7 @@ class TestNotificationService:
         )
         self.name = "test"
         self.ds_id = "6384a66e0a397236d9de236c"
+        self.id = PydanticObjectId("6384a66e0a397236d9de236c")
         Notification.get_settings = MagicMock()
         Notification.find_one = MagicMock()
         Notification.name = MagicMock(return_value=self.name)
@@ -169,6 +170,7 @@ class TestNotificationService:
         )
         Notification.app_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         Notification.notification_active = MagicMock(return_value=True)
+        Notification.id = MagicMock(return_value=self.id)
         self.notification = Notification(
             id=PydanticObjectId("6384a66e0a397236d9de236c"),
             datasource_id=PydanticObjectId("6384a66e0a397236d9de236c"),
@@ -193,6 +195,7 @@ class TestNotificationService:
             reference="/p/partner/job",
         )
         notif_future = asyncio.Future()
+        notif_future.delete = AsyncMock()
         notif_future.set_result(self.notification)
         Notification.find_one.return_value = notif_future
         self.mongo = MagicMock()
@@ -275,3 +278,8 @@ class TestNotificationService:
             datasource_id="6384a65e0a397236d9de236a"
         )
         Notification.find.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_delete_notification(self):
+        await self.service.delete_notification(notification_id="6384a65e0a397236d9de236a")
+        Notification.find_one.assert_called_once()
