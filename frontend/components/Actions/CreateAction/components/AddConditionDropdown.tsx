@@ -1,10 +1,11 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import { ConditionType } from '@lib/domain/action';
+import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 
 const Description = {
   [ConditionType.text]: 'Text Content inside element',
-  [ConditionType.css]:
+  [ConditionType.selector]:
     'CSS Selector / HTML attribute that uniquely identifies your element.',
   [ConditionType.url]: 'Elements will match only when triggered from the URL.',
   [ConditionType.href]: 'HREF value of hyperlinks',
@@ -25,6 +26,7 @@ const AddConditionDropdown = ({
   const closeDropdown = () => {
     setIsOpen(false);
   };
+  useOnClickOutside(dropDownRef, closeDropdown);
   const handleClick = (selectedCondition: ConditionType) => {
     closeDropdown();
     onClickHandler(selectedCondition);

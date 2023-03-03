@@ -1,6 +1,6 @@
 import datetime
 from collections import namedtuple
-from unittest.mock import MagicMock, AsyncMock, ANY
+from unittest.mock import ANY, AsyncMock, MagicMock
 
 import pytest
 from beanie import PydanticObjectId
@@ -143,7 +143,6 @@ class TestActionService:
         await self.service.compute_action(
             datasource_id=self.ds_id,
             groups=self.action.groups,
-            event_type="$autocapture",
         )
         self.actions.get_matching_events_from_clickstream.assert_called_once_with(
             **{
@@ -161,7 +160,6 @@ class TestActionService:
                         "url_matching": None,
                     }
                 ],
-                "event_type": "$autocapture",
             }
         )
         self.actions.get_count_of_matching_event_from_clickstream.assert_called_once_with(
@@ -180,6 +178,5 @@ class TestActionService:
                         "url_matching": None,
                     }
                 ],
-                "event_type": "$autocapture",
             }
         )

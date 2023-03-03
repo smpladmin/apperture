@@ -7,7 +7,13 @@ from pypika import ClickHouseQuery, Criterion, Field, Parameter
 from pypika import functions as fn
 from pypika import terms
 
-from domain.actions.models import Action, ActionGroup, CaptureEvent, OperatorType
+from domain.actions.models import (
+    Action,
+    ActionGroup,
+    CaptureEvent,
+    OperatorType,
+    UrlMatching,
+)
 from repositories.clickhouse.base import EventsBase
 from repositories.clickhouse.parser.action_parser_utils import Selector
 
@@ -40,7 +46,6 @@ class Actions(EventsBase):
         params = {}
         conditions = []
         operator = "exact"
-        print("####", filter)
         if filter.selector is not None:
             selectors = (
                 filter.selector
@@ -61,14 +66,28 @@ class Actions(EventsBase):
                 )
 
         if filter.url:
-            params["url"] = f"%{filter.url}%"
-            conditions.append(
-                Field(f"properties.$current_url").like(Parameter("%(url)s"))
-            )
+            params[f"{prepend}_url"] = f"{filter.url}"
+            if filter.url_matching is UrlMatching.CONTAINS:
+                params[f"{prepend}_url"] = f"%{filter.url}%"
+                conditions.append(
+                    Field(f"properties.$current_url").like(
+                        Parameter(f"%({prepend}_url)s")
+                    )
+                )
+            elif filter.url_matching is UrlMatching.EXACT:
+                conditions.append(
+                    Field(f"properties.$current_url") == Parameter(f"%({prepend}_url)s")
+                )
+            elif filter.url_matching is UrlMatching.REGEX:
+                conditions.append(
+                    self.ch_match_func(
+                        Field(f"properties.$current_url"),
+                        Parameter(f"%({prepend}_url)s"),
+                    )
+                )
 
         attributes: Dict[str, List] = {}
         if filter.href:
-            print("Inside HREF filter: %s" % filter.href)
             attributes["href"] = self.process_ok_values(filter.href, operator)
         if filter.text:
             attributes["text"] = self.process_ok_values(filter.text, operator)
@@ -91,7 +110,6 @@ class Actions(EventsBase):
                             )
                         )
                     # conditions.append(f"({' OR '.join(combination_conditions)})")
-        print("conditions", conditions)
         return conditions, params
 
     def process_ok_values(self, ok_values: Any, operator: OperatorType) -> List[str]:
@@ -174,16 +192,13 @@ class Actions(EventsBase):
         self, datasource_id: str, groups: List[ActionGroup]
     ):
         conditions, params = [], {}
-        print("build_matching_events_from_clickstream----", groups)
         for index, group in enumerate(groups):
             group_condition, group_params = self.filter_click_event(
                 filter=group, prepend=f"group_{index}_prepend"
             )
-            print(group.event)
-            group_condition.append(self.click_stream_table.event == group.event)
-            print("#####", group_condition)
             params = {**params, **group_params}
             if len(group_condition) > 0:
+                group_condition.append(self.click_stream_table.event == group.event)
                 conditions.append(Criterion.all(group_condition))
 
         query = (
@@ -198,7 +213,6 @@ class Actions(EventsBase):
         )
         query = query.where(Criterion.any(conditions)).limit(100)
         params["ds_id"] = str(datasource_id)
-        print(query.get_sql())
         return query.get_sql(), params
 
     async def get_count_of_matching_event_from_clickstream(
@@ -220,9 +234,9 @@ class Actions(EventsBase):
             group_condition, group_params = self.filter_click_event(
                 filter=group, prepend=f"group_{index}_prepend"
             )
-            group_condition.append(self.click_stream_table.event == group.event)
             params = {**params, **group_params}
             if len(group_condition) > 0:
+                group_condition.append(self.click_stream_table.event == group.event)
                 conditions.append(Criterion.all(group_condition))
 
         query = (

@@ -10,12 +10,18 @@ export type Action = {
   updateAt: Date;
 };
 
+export enum UrlMatching {
+  CONTAINS = 'contains',
+  REGEX = 'regex',
+  EXACT = 'exact',
+}
+
 export type ActionGroup = {
   text: string | null;
   href: string | null;
   selector: string | null;
   url: string | null;
-  url_matching: string;
+  url_matching: UrlMatching;
   event: CaptureEvent;
 };
 

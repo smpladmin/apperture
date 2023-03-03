@@ -275,7 +275,8 @@ def action_service():
         name="clicked on settings",
         groups=[
             ActionGroup(
-                selector="#__next > div > div.css-3h169z > div.css-8xl60i > button"
+                selector="#__next > div > div.css-3h169z > div.css-8xl60i > button",
+                event=CaptureEvent.AUTOCAPTURE,
             )
         ],
         event_type=CaptureEvent.AUTOCAPTURE,
@@ -384,9 +385,11 @@ def action_data():
         "datasourceId": "63e4da53370789982002e57d",
         "name": "clicked on settings",
         "groups": [
-            {"selector": "#__next > div > div.css-3h169z > div.css-8xl60i > button"}
+            {
+                "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > button",
+                "event": "$autocapture",
+            }
         ],
-        "eventType": "$autocapture",
     }
 
 
@@ -395,9 +398,11 @@ def transient_action_data():
     return {
         "datasourceId": "63e4da53370789982002e57d",
         "groups": [
-            {"selector": "#__next > div > div.css-3h169z > div.css-8xl60i > button"}
+            {
+                "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > button",
+                "event": "$autocapture",
+            }
         ],
-        "eventType": "$autocapture",
     }
 
 

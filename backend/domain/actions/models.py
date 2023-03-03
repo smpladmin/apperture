@@ -31,7 +31,7 @@ class ActionGroup(BaseModel):
     selector: Optional[str]
     url: Optional[str]
     url_matching: Optional[UrlMatching]
-    event: CaptureEvent
+    event: Optional[CaptureEvent]
     condition: ActionGroupCondition = ActionGroupCondition.OR
 
 
@@ -46,6 +46,7 @@ class Action(Document):
 
     class Settings:
         name = "actions"
+        database_name = "apperture_db"
 
 
 class ComputedEventStreamResult(BaseModel):

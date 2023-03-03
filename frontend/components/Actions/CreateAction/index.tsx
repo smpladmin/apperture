@@ -9,6 +9,7 @@ import {
   ActionEventData,
   ActionGroup,
   CaptureEvent,
+  UrlMatching,
 } from '@lib/domain/action';
 import ActionTable from './components/ActionTable';
 import isEqual from 'lodash/isEqual';
@@ -28,13 +29,15 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
   );
   const [isEmpty, setIsEmpty] = useState(savedAction ? false : true);
   const [groups, setGroups] = useState<ActionGroup[]>(
-    savedAction?.groups || [
+    savedAction?.groups.map((group) =>
+      group.event ? group : { ...group, event: savedAction.eventType }
+    ) || [
       {
         href: null,
         selector: null,
         text: null,
         url: null,
-        url_matching: '',
+        url_matching: UrlMatching.CONTAINS,
         event: CaptureEvent.AUTOCAPTURE,
       },
     ]
@@ -110,7 +113,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
         selector: null,
         text: null,
         url: null,
-        url_matching: '',
+        url_matching: UrlMatching.CONTAINS,
         event: CaptureEvent.AUTOCAPTURE,
       },
     ]);

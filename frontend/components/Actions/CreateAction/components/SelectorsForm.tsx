@@ -1,5 +1,10 @@
 import { Flex, Input, Text, Divider, Box } from '@chakra-ui/react';
-import { ActionGroup, CaptureEvent, ConditionType } from '@lib/domain/action';
+import {
+  ActionGroup,
+  CaptureEvent,
+  ConditionType,
+  UrlMatching,
+} from '@lib/domain/action';
 import { DEBOUNCED_WAIT_TIME } from '@lib/utils/common';
 import { debounce, cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -28,7 +33,7 @@ const conditionMeta = {
     placeholder: 'Enter Text Content',
   },
   url: {
-    title: 'Page URL (contains)',
+    title: 'Page URL',
     placeholder: 'Enter URL',
   },
 };
@@ -77,7 +82,7 @@ const SelectorsForm = ({
   };
   const handleUpdateGroupAction = (
     value: string,
-    key: Exclude<keyof ActionGroup, 'event'>
+    key: Exclude<keyof ActionGroup, 'event' | 'url_matching'>
   ) => {
     const tempActionGroup = cloneDeep(groups);
     tempActionGroup[index][key] = value;
@@ -87,6 +92,12 @@ const SelectorsForm = ({
     handleUpdateGroupAction,
     DEBOUNCED_WAIT_TIME
   );
+
+  const dropDownHandler = (value: UrlMatching) => {
+    const tempActionGroup = cloneDeep(groups);
+    tempActionGroup[index].url_matching = value;
+    updateGroupAction(tempActionGroup);
+  };
 
   useEffect(() => {
     setSelectedConditions(
@@ -154,16 +165,37 @@ const SelectorsForm = ({
                   </Text>
                 </DividerWithItem>
               )}
-              <ConditionInput
-                key={condition}
-                updateHandler={debouncedHandleUpdateActionGroup}
-                closeHandler={removeFromSelected}
-                title={conditionMeta[condition].title}
-                type={condition}
-                condition={condition}
-                defaultValue={group[condition]}
-                placeholder={conditionMeta[condition].placeholder}
-              />
+              {condition === ConditionType.url ? (
+                <ConditionInput
+                  key={condition}
+                  updateHandler={debouncedHandleUpdateActionGroup}
+                  closeHandler={removeFromSelected}
+                  title={conditionMeta[condition].title}
+                  type={condition}
+                  condition={condition}
+                  defaultValue={group[condition]}
+                  placeholder={conditionMeta[condition].placeholder}
+                  criteriaDropdownList={[
+                    UrlMatching.CONTAINS,
+                    UrlMatching.EXACT,
+                    UrlMatching.REGEX,
+                  ]}
+                  showCriteriaDropdown={true}
+                  currentCriteria={group.url_matching || UrlMatching.CONTAINS}
+                  dropDownHandler={dropDownHandler}
+                />
+              ) : (
+                <ConditionInput
+                  key={condition}
+                  updateHandler={debouncedHandleUpdateActionGroup}
+                  closeHandler={removeFromSelected}
+                  title={conditionMeta[condition].title}
+                  type={condition}
+                  condition={condition}
+                  defaultValue={group[condition]}
+                  placeholder={conditionMeta[condition].placeholder}
+                />
+              )}
             </>
           ))}
         </Flex>
@@ -212,12 +244,20 @@ const SelectorsForm = ({
         <ConditionInput
           updateHandler={debouncedHandleUpdateActionGroup}
           closeHandler={removeFromSelected}
-          title="Page URL (contains)"
+          title="Page URL"
           type={'url'}
           condition={ConditionType.url}
           defaultValue={group.url}
           placeholder={'Enter URL'}
           hideCloseButton={true}
+          criteriaDropdownList={[
+            UrlMatching.CONTAINS,
+            UrlMatching.EXACT,
+            UrlMatching.REGEX,
+          ]}
+          showCriteriaDropdown={true}
+          currentCriteria={group.url_matching || UrlMatching.CONTAINS}
+          dropDownHandler={dropDownHandler}
         />
       </Flex>
     </Flex>
