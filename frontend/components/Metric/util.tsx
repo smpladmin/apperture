@@ -88,7 +88,7 @@ export const convertToTableData = (
     const name = res.name;
     const data: MetricTableData[] = [];
     res.series.forEach((series) => {
-      let dateValue: { [key in string]: string } = {};
+      let dateValue: { [key in string]: number } = {};
       let propertyValue;
 
       // set property value if breakdown is set
@@ -98,7 +98,7 @@ export const convertToTableData = (
       let sum = 0;
       let count = series.data?.length || 1;
       series.data.forEach((d) => {
-        dateValue[formatDate(d.date)] = formatDatalabel(d.value);
+        dateValue[formatDate(d.date)] = d.value;
         sum += d.value;
       });
 
