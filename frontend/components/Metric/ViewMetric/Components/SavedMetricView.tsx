@@ -19,7 +19,8 @@ const SavedMetricView = ({
   return (
     <Flex
       direction={'column'}
-      py={{ base: '8', md: '12' }}
+      pt={{ base: '8', md: '12' }}
+      pb={{ base: '4', md: '4' }}
       width={'full'}
       height={'full'}
       justifyContent={'center'}

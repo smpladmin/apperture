@@ -17,7 +17,7 @@ const ViewMetric = ({
   savedMetric: Metric;
   savedNotification: Notifications;
 }) => {
-  const [metric, setMetric] = useState<ComputedMetric[]>([]);
+  const [computedMetric, setComputedMetric] = useState<ComputedMetric[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [notification, setNotification] = useState(savedNotification);
   const [isModalClosed, setIsModalClosed] = useState(false);
@@ -33,7 +33,7 @@ const ViewMetric = ({
         undefined,
         undefined
       );
-      setMetric(result);
+      setComputedMetric(result);
       setIsLoading(false);
     };
     fetchMetric();
@@ -60,18 +60,19 @@ const ViewMetric = ({
           metricDefinition={savedMetric.function}
           metricName={savedMetric.name}
           aggregates={savedMetric.aggregates}
-          breakdown={savedMetric?.breakdown}
+          breakdown={savedMetric.breakdown}
           datasourceId={savedMetric.datasourceId}
-          eventData={convertToTrendData(metric) || []}
+          eventData={convertToTrendData(computedMetric) || []}
           savedNotification={notification}
           setIsModalClosed={setIsModalClosed}
+          computedMetric={computedMetric}
         />
       </ActionPanel>
       <ViewPanel>
         <SavedMetricView
-          metric={metric}
+          metric={computedMetric}
           isLoading={isLoading}
-          breakdown={savedMetric?.breakdown}
+          breakdown={savedMetric.breakdown}
         />
       </ViewPanel>
     </Flex>

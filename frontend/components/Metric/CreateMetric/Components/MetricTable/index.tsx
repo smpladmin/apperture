@@ -32,7 +32,9 @@ const MetricTable = ({
       }),
     ];
 
-    data[0]?.propertyValue !== undefined &&
+    const hasBreakdown = data[0]?.propertyValue !== undefined;
+
+    hasBreakdown &&
       staticColumns.push(
         columnHelper.accessor('propertyValue', {
           header: breakdown[0],

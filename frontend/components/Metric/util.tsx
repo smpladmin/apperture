@@ -133,3 +133,17 @@ export const convertToTrendData = (
     });
   });
 };
+
+export const getCountOfSeries = (metricData: ComputedMetric[]) => {
+  const uniqueSeries = metricData?.flatMap((res) => {
+    const name = res.name;
+    return res.series.flatMap((series) => {
+      let seriesName = name;
+      series.breakdown.forEach((breakdown) => {
+        seriesName += `/${breakdown.value || '(empty string)'}`;
+      });
+      return seriesName;
+    });
+  });
+  return uniqueSeries.length;
+};

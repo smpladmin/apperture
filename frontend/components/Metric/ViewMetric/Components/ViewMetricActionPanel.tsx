@@ -10,11 +10,16 @@ import React, { useEffect, useState } from 'react';
 import { BASTILLE } from '@theme/index';
 import MetricViewComponentCard from './MetricViewComponentCard';
 import ActionMenu from '@components/ActionMenu';
-import { MetricAggregate, MetricTrend } from '@lib/domain/metric';
+import {
+  ComputedMetric,
+  MetricAggregate,
+  MetricTrend,
+} from '@lib/domain/metric';
 import { useRouter } from 'next/router';
 import Alert from '@components/Alerts';
 import { Notifications, NotificationVariant } from '@lib/domain/notification';
 import { hasSavedAlert } from '@components/Alerts/util';
+import { getCountOfSeries } from '@components/Metric/util';
 
 const ViewMetricActionPanel = ({
   metricName,
@@ -25,6 +30,7 @@ const ViewMetricActionPanel = ({
   eventData,
   savedNotification,
   setIsModalClosed,
+  computedMetric,
 }: {
   metricName: string;
   metricDefinition: string;
@@ -34,6 +40,7 @@ const ViewMetricActionPanel = ({
   eventData: MetricTrend[];
   savedNotification: Notifications;
   setIsModalClosed: Function;
+  computedMetric: ComputedMetric[];
 }) => {
   const router = useRouter();
   const {
@@ -46,14 +53,11 @@ const ViewMetricActionPanel = ({
 
   useEffect(() => {
     /* 
-    - disable alerts if: 
-    1. Breakdown is present
-    2. Multiple aggregates are there and metric definition is not present
+    - disable alerts if multiple series are present,
+     in case of breakdown or multiple aggregates
     */
-    if (breakdown.length || (!metricDefinition && aggregates.length > 1)) {
-      setDisableAlert(true);
-    }
-  }, []);
+    if (getCountOfSeries(computedMetric) > 1) setDisableAlert(true);
+  }, [computedMetric]);
 
   const handleNotificationClick = () => {
     onOpen();
