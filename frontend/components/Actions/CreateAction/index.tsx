@@ -1,5 +1,5 @@
 import { Box, Button, Divider, Flex, Text } from '@chakra-ui/react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import emptyAction from '@assets/images/empty-action.svg';
 import Image from 'next/image';
 import ActionHeader from './components/ActionHeader';
@@ -192,7 +192,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
             direction="column"
           >
             {groups.map((group, index) => (
-              <>
+              <Fragment key={'divider-' + index}>
                 {index > 0 && (
                   <DividerWithItem color={'grey.100'}>
                     <Text
@@ -216,7 +216,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
                   updateGroupAction={updateGroupAction}
                   handleClose={removeGroup}
                 />
-              </>
+              </Fragment>
             ))}
           </Flex>
         </Box>

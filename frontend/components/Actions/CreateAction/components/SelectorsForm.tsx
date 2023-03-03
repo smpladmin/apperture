@@ -7,7 +7,7 @@ import {
 } from '@lib/domain/action';
 import { DEBOUNCED_WAIT_TIME } from '@lib/utils/common';
 import { debounce, cloneDeep } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import EventOptions from './EventOptions';
 import ConditionChip from './ConditionChip';
 import ConditionInput from './ConditionInput';
@@ -149,9 +149,13 @@ const SelectorsForm = ({
           hidden={group.event === CaptureEvent.PAGEVIEW}
         >
           {selectedConditions.map((condition, index) => (
-            <>
+            <Fragment key={'divider-' + condition}>
               {index > 0 && (
-                <DividerWithItem color={'grey.100'} mt={3}>
+                <DividerWithItem
+                  key={'divider-' + condition}
+                  color={'grey.100'}
+                  mt={3}
+                >
                   <Text
                     fontSize={'xs-10'}
                     lineHeight={'xs-12'}
@@ -196,7 +200,7 @@ const SelectorsForm = ({
                   placeholder={conditionMeta[condition].placeholder}
                 />
               )}
-            </>
+            </Fragment>
           ))}
         </Flex>
       )}

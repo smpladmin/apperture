@@ -38,7 +38,6 @@ const ConditionInput = ({
     setIsOpen((state) => !state);
   };
   const closeDropdown = () => {
-    console.log('closeDropdown');
     setIsOpen(false);
   };
   useOnClickOutside(dropDownRef, closeDropdown);
@@ -102,7 +101,10 @@ const ConditionInput = ({
                       fontSize={'xs-12'}
                       lineHeight={'xs-16'}
                       fontWeight={400}
-                      onClick={() => onClickHandler(value)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onClickHandler(value);
+                      }}
                       _hover={{ bg: 'white.100' }}
                       pr={3}
                       pl={1}

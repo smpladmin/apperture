@@ -21,6 +21,7 @@ const ConditionChip = ({
       onClick={() => {
         addCondition(condition);
       }}
+      data-testid={'condition-chip'}
     >
       <i style={{ fontWeight: 200 }} className="ri-add-fill"></i>{' '}
       <Text ml={1} fontSize={'xs-12'} lineHeight={'xs-16'} fontWeight={500}>
