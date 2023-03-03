@@ -4,14 +4,15 @@ from fastapi import APIRouter, Depends
 
 from domain.apperture_users.models import AppertureUser
 from domain.datasources.service import DataSourceService
-from domain.metrics.service import ComputedMetricResult, MetricService
+from domain.metrics.service import MetricService
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.metrics import (
     CreateMetricDTO,
     MetricsComputeDto,
-    MetricsComputeResponse,
     MetricWithUser,
     SavedMetricResponse,
+    ComputedMetricStepResponse,
+    MetricFormulaDto,
 )
 from rest.middlewares import get_user, get_user_id, validate_jwt
 
@@ -20,7 +21,7 @@ router = APIRouter(
 )
 
 
-@router.post("/metrics/compute", response_model=MetricsComputeResponse)
+@router.post("/metrics/compute", response_model=List[ComputedMetricStepResponse])
 async def compute_metrics(
     dto: MetricsComputeDto,
     metric_service: MetricService = Depends(),
@@ -37,7 +38,10 @@ async def compute_metrics(
             end_date=dto.endDate,
         )
         return result
-    return ComputedMetricResult(metric=[], average={})
+    return [
+        ComputedMetricStepResponse(name=func, series=[])
+        for func in dto.function.split(",")
+    ]
 
 
 @router.post("/metrics", response_model=SavedMetricResponse)
@@ -114,3 +118,13 @@ async def get_metric_by_id(
     metric_service: MetricService = Depends(),
 ):
     return await metric_service.get_metric_by_id(metric_id=id)
+
+
+@router.post("/metrics/validate_formula")
+async def validate_metric_formula(
+    dto: MetricFormulaDto,
+    metric_service: MetricService = Depends(),
+):
+    return metric_service.validate_formula(
+        formula=dto.formula, variable_list=dto.variableList
+    )

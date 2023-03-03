@@ -17,7 +17,7 @@ export type MetricComponentAggregation = {
   property: string;
 };
 
-export type EventOrSegmentComponent = {
+export type MetricAggregate = {
   variable: string;
   reference_id: string;
   function: string;
@@ -26,17 +26,42 @@ export type EventOrSegmentComponent = {
   conditions: string[];
   aggregations: MetricComponentAggregation;
 };
-export type ComputedMetricData = {
+export type MetricTrendData = {
   date: string;
   value: number;
   series: string;
 };
-export type ComputedMetric = {
-  data: ComputedMetricData[];
-  definition: string;
-  average: any;
+
+export type MetricBreakdown = {
+  property: string;
+  value: string;
 };
+
+export type MetricValue = { date: string; value: number };
+
+export type ComputedMetricData = {
+  breakdown: MetricBreakdown[];
+  data: MetricValue[];
+};
+
+export type ComputedMetric = {
+  name: string;
+  series: ComputedMetricData[];
+};
+
 export type MetricTrend = { date: string; value: number };
+
+export type MetricTableData = {
+  name: string;
+  propertyValue: string | undefined;
+  average: string;
+  values: { [key in string]: string };
+};
+
+export type Breakdown = {
+  value: string;
+  rowIndex: number;
+};
 
 export enum DateFilterType {
   YESTERDAY = 'yesterday',
@@ -65,7 +90,7 @@ export type Metric = {
   userId: string;
   name: string;
   function: string;
-  aggregates: EventOrSegmentComponent[];
+  aggregates: MetricAggregate[];
   breakdown: string[];
 };
 

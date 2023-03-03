@@ -13,6 +13,7 @@ type SearchableListDropdownProps = {
   listKey?: keyof SegmentProperty;
   showBadge?: boolean;
   isNode?: boolean;
+  dropdownPosition?: string;
 };
 
 const SearchableListDropdown = ({
@@ -22,6 +23,7 @@ const SearchableListDropdown = ({
   onSubmit,
   listKey,
   showBadge,
+  dropdownPosition,
   isNode = false,
 }: SearchableListDropdownProps) => {
   const [listData, setListData] = useState<
@@ -39,6 +41,7 @@ const SearchableListDropdown = ({
       data={data}
       setSearchData={setListData}
       searchKey={listKey}
+      dropdownPosition={dropdownPosition}
     >
       {listData.length ? (
         <Box data-testid={'event-property-dropdown-container'}>

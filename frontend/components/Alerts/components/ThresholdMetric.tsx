@@ -168,7 +168,7 @@ const ThresholdMetric = ({
           </Text>
         </Flex>
       </Flex>
-      <Flex mt={'2'} py={'4'} px={'2'}>
+      <Flex mt={'2'} py={'4'} px={'2'} ml={'2'}>
         <RangeSlider
           defaultValue={thresholdRange}
           min={Math.floor(0.8 * minHit)}

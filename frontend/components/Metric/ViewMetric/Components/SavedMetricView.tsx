@@ -6,28 +6,31 @@ import { ComputedMetric } from '@lib/domain/metric';
 import MetricTrend from '../../CreateMetric/Components/MetricTrend';
 
 type SavedMetricViewProps = {
-  metric: ComputedMetric | null;
+  metric: ComputedMetric[];
   isLoading: boolean;
+  breakdown: string[];
 };
 
-const SavedMetricView = ({ metric, isLoading }: SavedMetricViewProps) => {
+const SavedMetricView = ({
+  metric,
+  isLoading,
+  breakdown,
+}: SavedMetricViewProps) => {
   return (
     <Flex
       direction={'column'}
-      py={{ base: '8', md: '12' }}
+      pt={{ base: '8', md: '12' }}
+      pb={{ base: '4', md: '4' }}
       width={'full'}
       height={'full'}
       justifyContent={'center'}
       alignItems={'center'}
+      overflowY={'scroll'}
     >
       {isLoading ? (
         <Loader />
-      ) : metric && metric.data.length > 0 ? (
-        <MetricTrend
-          data={metric.data}
-          definition={metric.definition}
-          average={metric.average}
-        />
+      ) : metric && metric.length > 0 ? (
+        <MetricTrend data={metric} breakdown={breakdown} />
       ) : (
         <MetricEmptyState />
       )}
