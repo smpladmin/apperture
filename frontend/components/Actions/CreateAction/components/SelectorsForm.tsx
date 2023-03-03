@@ -67,6 +67,15 @@ const SelectorsForm = ({
     setSelectedConditions(
       selectedConditions.filter((condition) => condition !== selectedCondition)
     );
+    handleUpdateGroupAction(null, selectedCondition);
+  };
+  const handleUpdateGroupAction = (
+    value: string | null,
+    key: Exclude<keyof ActionGroup, 'event' | 'url_matching'>
+  ) => {
+    const tempActionGroup = cloneDeep(groups);
+    tempActionGroup[index][key] = value;
+    updateGroupAction(tempActionGroup);
   };
   const handleUpdateCaptureEvent = (value: CaptureEvent) => {
     const tempActionGroup = cloneDeep(groups);
@@ -80,14 +89,7 @@ const SelectorsForm = ({
     };
     updateGroupAction(tempActionGroup);
   };
-  const handleUpdateGroupAction = (
-    value: string,
-    key: Exclude<keyof ActionGroup, 'event' | 'url_matching'>
-  ) => {
-    const tempActionGroup = cloneDeep(groups);
-    tempActionGroup[index][key] = value;
-    updateGroupAction(tempActionGroup);
-  };
+
   const debouncedHandleUpdateActionGroup = debounce(
     handleUpdateGroupAction,
     DEBOUNCED_WAIT_TIME
