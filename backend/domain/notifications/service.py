@@ -247,7 +247,7 @@ class NotificationService:
         )
 
     async def delete_notification(self, notification_id: str):
-        x = await Notification.find_one(
+        await Notification.find_one(
             Notification.id == PydanticObjectId(notification_id),
         ).delete()
         return
