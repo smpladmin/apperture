@@ -178,6 +178,7 @@ class Actions(EventsBase):
             )
             params = {**params, **group_params}
             if len(group_condition) > 0:
+                group_condition.append(self.click_stream_table.event == group.event)
                 conditions.append(Criterion.all(group_condition))
 
         query = (
@@ -192,7 +193,6 @@ class Actions(EventsBase):
                 self.click_stream_table.properties,
             )
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
-            .where(self.click_stream_table.event == action.event_type)
         )
         if action.processed_till:
             query = query.where(
