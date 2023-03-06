@@ -20,6 +20,8 @@ from rest.dtos.funnels import (
     FunnelConversionResponseBody,
 )
 from rest.middlewares import validate_jwt, get_user_id, get_user
+from tests.rest.controllers.conftest import notification_service
+from domain.notifications.service import NotificationService
 
 router = APIRouter(
     tags=["funnels"],
@@ -72,6 +74,7 @@ async def update_funnel(
     user_id: str = Depends(get_user_id),
     funnel_service: FunnelsService = Depends(),
     ds_service: DataSourceService = Depends(),
+    notification_service: NotificationService = Depends(),
 ):
     datasource = await ds_service.get_datasource(dto.datasourceId)
     new_funnel = funnel_service.build_funnel(
@@ -83,6 +86,11 @@ async def update_funnel(
         dto.randomSequence,
     )
     await funnel_service.update_funnel(funnel_id=id, new_funnel=new_funnel)
+    notification = await notification_service.get_notification_by_reference(
+        reference=id, datasource_id=datasource.id
+    )
+    if notification:
+        await notification_service.delete_notification(notification_id=notification.id)
     return new_funnel
 
 

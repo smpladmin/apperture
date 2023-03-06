@@ -64,6 +64,7 @@ class Notification(Document):
     notification_active: bool
     variant: NotificationVariant
     reference: str
+    enabled: bool = True
 
     class Settings:
         name = "notifications"
