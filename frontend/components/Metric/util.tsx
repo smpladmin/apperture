@@ -29,6 +29,25 @@ export const replaceEmptyStringPlaceholder = (
   });
 };
 
+export const replaceFilterValueWithEmptyStringPlaceholder = (
+  aggregates: MetricAggregate[]
+) => {
+  return aggregates.map((aggregate: MetricAggregate) => {
+    const processedFilter = aggregate?.filters.map(
+      (filter: MetricEventFilter) => {
+        const processedValues = filter.values.map((value: string) =>
+          value === '' ? '(empty string)' : value
+        );
+        return { ...filter, values: processedValues };
+      }
+    );
+    return {
+      ...aggregate,
+      filters: processedFilter,
+    };
+  });
+};
+
 export const getCountOfAggregates = (aggregates: MetricAggregate[]) => {
   const validAggregatesWithReferenceId = aggregates.filter(
     (aggregate) => aggregate.reference_id
@@ -69,7 +88,7 @@ export const convertToTableData = (
     const name = res.name;
     const data: MetricTableData[] = [];
     res.series.forEach((series) => {
-      let dateValue: { [key in string]: string } = {};
+      let dateValue: { [key in string]: number } = {};
       let propertyValue;
 
       // set property value if breakdown is set
@@ -79,7 +98,7 @@ export const convertToTableData = (
       let sum = 0;
       let count = series.data?.length || 1;
       series.data.forEach((d) => {
-        dateValue[formatDate(d.date)] = formatDatalabel(d.value);
+        dateValue[formatDate(d.date)] = d.value;
         sum += d.value;
       });
 
@@ -113,4 +132,18 @@ export const convertToTrendData = (
       });
     });
   });
+};
+
+export const getCountOfSeries = (metricData: ComputedMetric[]) => {
+  const uniqueSeries = metricData?.flatMap((res) => {
+    const name = res.name;
+    return res.series.flatMap((series) => {
+      let seriesName = name;
+      series.breakdown.forEach((breakdown) => {
+        seriesName += `/${breakdown.value || '(empty string)'}`;
+      });
+      return seriesName;
+    });
+  });
+  return uniqueSeries.length;
 };

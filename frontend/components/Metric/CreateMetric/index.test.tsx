@@ -1,9 +1,4 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  act,
-} from '@testing-library/react';
+import { fireEvent, render, screen, act } from '@testing-library/react';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from 'tests/util';
 import {
@@ -11,24 +6,40 @@ import {
   getEventPropertiesValue,
   getNodes,
 } from '@lib/services/datasourceService';
-import { computeMetric } from '@lib/services/metricService';
+import {
+  computeMetric,
+  validateMetricFormula,
+} from '@lib/services/metricService';
 import CreateMetric from './index';
+import {
+  isValidAggregates,
+  convertToTableData,
+  convertToTrendData,
+  getCountOfAggregates,
+} from '../util';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/services/metricService');
+jest.mock('../util');
 
 describe('Create Metric', () => {
   let mockedGetEventProperties: jest.Mock;
   let mockedGetNodes: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
   let mockedComputedMetric: jest.Mock;
-  //   let mockedGetUserInfo: jest.Mock;
+  let mockedIsValidAggregates: jest.Mock;
+  let mockedGetCountOfAggregates: jest.Mock;
+  let mockedValidateMetricFormula: jest.Mock;
+  let mockedConvertToTableData: jest.Mock;
+  let mockedConvertToTrendData: jest.Mock;
+
   const eventProperties = [
     'city',
     'device',
     'country',
     'app_version',
     'session_length',
+    'bluetooth_enabled',
   ];
 
   const events = [
@@ -67,12 +78,124 @@ describe('Create Metric', () => {
     ],
   };
 
+  const tableData = [
+    {
+      average: '0.42',
+      name: 'A/B',
+      propertyValue: '1',
+      values: {
+        'Nov 24': '0.23163841807909605',
+        'Nov 25': '0.21395348837209302',
+        'Nov 26': '0.38073394495412843',
+        'Nov 27': '0.43636363636363634',
+        'Nov 28': '0.8166666666666667',
+      },
+    },
+    {
+      average: '0.37',
+      name: 'A/B',
+      propertyValue: '0',
+      values: {
+        'Nov 24': '0.3619631901840491',
+        'Nov 25': '0.3337531486146096',
+        'Nov 26': '0.38153310104529614',
+        'Nov 27': '0.354251012145749',
+        'Nov 28': '0.4017543859649123',
+      },
+    },
+  ];
+
+  const trendData = [
+    {
+      date: '2022-11-24',
+      series: 'A/B/0',
+      value: 0.3619631901840491,
+    },
+    {
+      date: '2022-11-25',
+      series: 'A/B/0',
+      value: 0.3337531486146096,
+    },
+    {
+      date: '2022-11-26',
+      series: 'A/B/0',
+      value: 0.38153310104529614,
+    },
+    {
+      date: '2022-11-27',
+      series: 'A/B/0',
+      value: 0.354251012145749,
+    },
+    {
+      date: '2022-11-28',
+      series: 'A/B/0',
+      value: 0.4017543859649123,
+    },
+    {
+      date: '2022-11-24',
+      series: 'A/B/1',
+      value: 0.23163841807909605,
+    },
+    {
+      date: '2022-11-25',
+      series: 'A/B/1',
+      value: 0.21395348837209302,
+    },
+    {
+      date: '2022-11-26',
+      series: 'A/B/1',
+      value: 0.38073394495412843,
+    },
+    {
+      date: '2022-11-27',
+      series: 'A/B/1',
+      value: 0.43636363636363634,
+    },
+    {
+      date: '2022-11-28',
+      series: 'A/B/1',
+      value: 0.8166666666666667,
+    },
+  ];
+
+  const renderMetricComponent = async () => {
+    await act(async () => {
+      render(
+        <RouterContext.Provider
+          value={createMockRouter({ query: { dsId: '' } })}
+        >
+          <CreateMetric />
+        </RouterContext.Provider>
+      );
+    });
+  };
+
+  const addNewEvent = async () => {
+    const selectEvent = screen.getByTestId('select-event-segment');
+    fireEvent.click(selectEvent);
+
+    const eventOption = screen.getByTestId('event-option');
+    fireEvent.click(eventOption);
+
+    const SELECTED_OPTION = 1;
+    // Selecting an event from the dropdown
+    const eventNameDropdownList = screen.getAllByTestId('dropdown-options');
+
+    await act(async () => {
+      fireEvent.click(eventNameDropdownList[SELECTED_OPTION]);
+    });
+  };
+
   beforeEach(() => {
     mockedGetEventProperties = jest.mocked(getEventProperties);
     mockedGetNodes = jest.mocked(getNodes);
     mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
     mockedComputedMetric = jest.mocked(computeMetric);
-    // mockedGetUserInfo = jest.mocked(getAppertureUserInfo);
+    mockedIsValidAggregates = jest.mocked(isValidAggregates);
+    mockedGetCountOfAggregates = jest.mocked(getCountOfAggregates);
+    mockedValidateMetricFormula = jest.mocked(validateMetricFormula);
+    mockedConvertToTableData = jest.mocked(convertToTableData);
+    mockedConvertToTrendData = jest.mocked(convertToTrendData);
 
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetNodes.mockReturnValue(events);
@@ -83,6 +206,11 @@ describe('Create Metric', () => {
       ['windows'],
     ]);
     mockedComputedMetric.mockReturnValue(computedMetricResponse);
+    mockedIsValidAggregates.mockReturnValue(true);
+    mockedValidateMetricFormula.mockReturnValue(true);
+    mockedGetCountOfAggregates.mockReturnValue(2);
+    mockedConvertToTableData.mockReturnValue(tableData);
+    mockedConvertToTrendData.mockReturnValue(trendData);
   });
 
   afterEach(() => {
@@ -91,6 +219,8 @@ describe('Create Metric', () => {
 
   describe('render create metric component', () => {
     it('should render the metric component', async () => {
+      mockedIsValidAggregates.mockReturnValue(false);
+
       await act(async () => {
         render(
           <RouterContext.Provider
@@ -136,7 +266,10 @@ describe('Create Metric', () => {
     const EventsOrSegmentsList = screen.getAllByTestId(
       'event-or-segment-component'
     );
-    fireEvent.click(addEventsOrSegmentsButton);
+
+    await act(async () => {
+      fireEvent.click(addEventsOrSegmentsButton);
+    });
     const newEventsOrSegmentsList = screen.getAllByTestId(
       'event-or-segment-component'
     );
@@ -183,8 +316,14 @@ describe('Create Metric', () => {
     const EventsOrSegmentsList = screen.getAllByTestId(
       'event-or-segment-component'
     );
-    fireEvent.click(addEventsOrSegmentsButton);
-    fireEvent.click(removeEventsOrSegmentsButton);
+    await act(async () => {
+      fireEvent.click(addEventsOrSegmentsButton);
+    });
+
+    await act(async () => {
+      fireEvent.click(removeEventsOrSegmentsButton);
+    });
+
     const newEventsOrSegmentsList = screen.getAllByTestId(
       'event-or-segment-component'
     );
@@ -312,5 +451,115 @@ describe('Create Metric', () => {
     expect(EventFilterValue.textContent).toEqual(
       EventPropertyValueDropdownList[SELECTED_OPTION].textContent
     );
+  });
+
+  describe('enable/disable save button', () => {
+    it('save button shoule be disabled if aggregates are not valid', async () => {
+      mockedIsValidAggregates.mockReturnValue(false);
+      await renderMetricComponent();
+
+      const saveButton = screen.getByTestId('save');
+      expect(saveButton).toBeDisabled();
+    });
+
+    it('save button shoule be disabled if aggregates are valid, but formula is not valid', async () => {
+      mockedIsValidAggregates.mockReturnValue(true);
+      mockedValidateMetricFormula.mockReturnValue(false);
+      await renderMetricComponent();
+
+      const saveButton = screen.getByTestId('save');
+      expect(saveButton).toBeDisabled();
+    });
+
+    it('save button shoule be enabled if aggregates and formula are valid', async () => {
+      mockedIsValidAggregates.mockReturnValue(true);
+      mockedValidateMetricFormula.mockReturnValue(true);
+      await renderMetricComponent();
+
+      const saveButton = screen.getByTestId('save');
+      expect(saveButton).not.toBeDisabled();
+    });
+  });
+
+  describe('metric breakdown', () => {
+    it('should be able to add metric breakdown', async () => {
+      await renderMetricComponent();
+
+      const selectBreakdownButton = screen.getByTestId('select-breakdown');
+      fireEvent.click(selectBreakdownButton);
+
+      const SELECTED_OPTION = 0; // city
+      const dropdownOptions = screen.getAllByTestId('dropdown-options');
+      await act(async () => {
+        fireEvent.click(dropdownOptions[SELECTED_OPTION]);
+      });
+
+      const breakdownName = screen.getByTestId('breakdown-name');
+      expect(breakdownName.textContent).toEqual('Breakdown city');
+    });
+
+    it('should be able to remove metric breakdown', async () => {
+      await renderMetricComponent();
+
+      const selectBreakdownButton = screen.getByTestId('select-breakdown');
+      fireEvent.click(selectBreakdownButton);
+
+      const SELECTED_OPTION = 0; // city
+      const dropdownOptions = screen.getAllByTestId('dropdown-options');
+      await act(async () => {
+        fireEvent.click(dropdownOptions[SELECTED_OPTION]);
+      });
+
+      const breakdownName = screen.getByTestId('breakdown-name');
+      expect(breakdownName.textContent).toEqual('Breakdown city');
+
+      const removeMetricBreakdown = screen.getByTestId('remove-breakdown');
+      await act(async () => {
+        fireEvent.click(removeMetricBreakdown);
+      });
+      expect(breakdownName.textContent).toEqual('Breakdown ');
+    });
+  });
+
+  describe('metric table', () => {
+    it('should render table with breakdown columns', async () => {
+      mockedConvertToTableData.mockReturnValue(tableData);
+      await renderMetricComponent();
+
+      await addNewEvent();
+
+      const metricFormulaInput = screen.getByTestId('metric-definition');
+
+      await act(async () => {
+        fireEvent.change(metricFormulaInput, { target: { value: 'A/B' } });
+      });
+
+      // add breakdown
+      const selectBreakdownButton = screen.getByTestId('select-breakdown');
+      fireEvent.click(selectBreakdownButton);
+
+      const SELECTED_OPTION = 5; // bluetooth_enabled
+      const dropdownOptions = screen.getAllByTestId('dropdown-options');
+      await act(async () => {
+        fireEvent.click(dropdownOptions[SELECTED_OPTION]);
+      });
+
+      const tableHeaders = screen.getAllByTestId('metric-table-headers');
+
+      const tableHeadersText = [
+        'Metric',
+        'bluetooth_enabled',
+        'Average',
+        'Nov 24',
+        'Nov 25',
+        'Nov 26',
+        'Nov 27',
+        'Nov 28',
+      ];
+
+      tableHeaders.forEach((header, i) => {
+        expect(header.textContent).toEqual(tableHeadersText[i]);
+      });
+    });
   });
 });

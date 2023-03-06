@@ -48,13 +48,14 @@ export type ComputedMetric = {
   name: string;
   series: ComputedMetricData[];
 };
+
 export type MetricTrend = { date: string; value: number };
 
 export type MetricTableData = {
   name: string;
   propertyValue: string | undefined;
   average: string;
-  values: { [key in string]: string };
+  values: { [key in string]: number };
 };
 
 export type Breakdown = {

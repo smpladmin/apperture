@@ -10,12 +10,19 @@ export type Action = {
   updateAt: Date;
 };
 
+export enum UrlMatching {
+  CONTAINS = 'contains',
+  REGEX = 'regex',
+  EXACT = 'exact',
+}
+
 export type ActionGroup = {
-  text: string;
-  href: string;
-  selector: string;
-  url: string;
-  url_matching: string;
+  text: string | null;
+  href: string | null;
+  selector: string | null;
+  url: string | null;
+  url_matching: UrlMatching;
+  event: CaptureEvent;
 };
 
 export type ActionWithUser = Action & {
@@ -36,4 +43,11 @@ export type ActionEventData = {
 export enum CaptureEvent {
   AUTOCAPTURE = '$autocapture',
   PAGEVIEW = '$pageview',
+}
+
+export enum ConditionType {
+  href = 'href',
+  selector = 'selector',
+  text = 'text',
+  url = 'url',
 }

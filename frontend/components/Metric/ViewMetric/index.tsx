@@ -60,17 +60,19 @@ const ViewMetric = ({
           metricDefinition={savedMetric.function}
           metricName={savedMetric.name}
           aggregates={savedMetric.aggregates}
+          breakdown={savedMetric.breakdown}
           datasourceId={savedMetric.datasourceId}
           eventData={convertToTrendData(computedMetric) || []}
           savedNotification={notification}
           setIsModalClosed={setIsModalClosed}
+          computedMetric={computedMetric}
         />
       </ActionPanel>
       <ViewPanel>
         <SavedMetricView
           metric={computedMetric}
           isLoading={isLoading}
-          breakdown={savedMetric?.breakdown}
+          breakdown={savedMetric.breakdown}
         />
       </ViewPanel>
     </Flex>

@@ -16,7 +16,6 @@ import {
   convertISODateToReadableDate,
   formatDatalabel,
 } from '@lib/utils/common';
-
 import React, { useEffect, useMemo, useState } from 'react';
 import MetricTable from './MetricTable';
 
@@ -105,18 +104,19 @@ const MetricTrend = ({ data, breakdown }: MetricTrendProps) => {
   useEffect(() => {
     if (!breakdown.length) return;
 
-    let breakdownValues: any[] = [];
-    convertToTableData(data)?.forEach((d, i) => {
-      breakdownValues.push({
-        value: `${d.name}/${d.propertyValue}`,
-        rowIndex: i,
-      });
-    });
+    const breakdownValues: Breakdown[] = convertToTableData(data)?.map(
+      (d, i) => {
+        return {
+          value: `${d.name}/${d.propertyValue}`,
+          rowIndex: i,
+        };
+      }
+    );
     setSelectedBreakdowns(breakdownValues.slice(0, 5));
   }, [data, breakdown]);
 
   useEffect(() => {
-    let uniqueSeries: string[] = [];
+    const uniqueSeries: string[] = [];
 
     setGraphConfig({
       ...graphConfig,
@@ -137,6 +137,7 @@ const MetricTrend = ({ data, breakdown }: MetricTrendProps) => {
   const trendData = useMemo(() => {
     if (!breakdown.length) return convertToTrendData(data);
 
+    // sort on basis of row index to get consistent coloring across legends on metric chart
     return selectedBreakdowns
       .sort((a, b) => a.rowIndex - b.rowIndex)
       .flatMap((breakdown) => {

@@ -1,10 +1,11 @@
 import { Checkbox, Flex, Text } from '@chakra-ui/react';
 import { COLOR_PALLETE_5 } from '@components/Metric/util';
-import { Breakdown } from '@lib/domain/metric';
+import { Breakdown, MetricTableData } from '@lib/domain/metric';
+import { CellContext } from '@tanstack/react-table';
 import React, { ChangeEvent } from 'react';
 
 type SelectBreakdownProps = {
-  info: any;
+  info: CellContext<MetricTableData, string>;
   selectedBreakdowns: Breakdown[];
   setSelectedBreakdowns: Function;
 };
@@ -19,7 +20,6 @@ const SelectBreakdown = ({
     original: { name, propertyValue },
   } = info?.row;
 
-  // console.log('info', info.row);
   const value = `${name}/${propertyValue}`;
 
   const handleChangeBreakdown = (e: ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +39,6 @@ const SelectBreakdown = ({
   };
 
   const getCheckBoxColorScheme = () => {
-    // console.log('selected', selectedBreakdowns);
     let selectionIndex = selectedBreakdowns.find(
       (breakdown) => breakdown.rowIndex == index
     )?.rowIndex;

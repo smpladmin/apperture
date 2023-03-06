@@ -19,6 +19,11 @@ class ActionGroupCondition(str, Enum):
     OR = "or"
 
 
+class CaptureEvent(str, Enum):
+    AUTOCAPTURE = "$autocapture"
+    PAGEVIEW = "$pageview"
+
+
 class ActionGroup(BaseModel):
     tag_name: Optional[str]
     text: Optional[str]
@@ -26,18 +31,13 @@ class ActionGroup(BaseModel):
     selector: Optional[str]
     url: Optional[str]
     url_matching: Optional[UrlMatching]
-    event: Optional[str]
+    event: Optional[CaptureEvent]
     condition: ActionGroupCondition = ActionGroupCondition.OR
-
-
-class CaptureEvent(str, Enum):
-    AUTOCAPTURE = "$autocapture"
-    PAGEVIEW = "$pageview"
 
 
 class Action(Document):
     name: str
-    event_type: CaptureEvent
+    event_type: Optional[CaptureEvent]
     datasource_id: PydanticObjectId
     app_id: PydanticObjectId
     user_id: PydanticObjectId
@@ -46,6 +46,7 @@ class Action(Document):
 
     class Settings:
         name = "actions"
+        database_name = "apperture_db"
 
 
 class ComputedEventStreamResult(BaseModel):

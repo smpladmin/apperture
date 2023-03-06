@@ -32,7 +32,9 @@ const MetricTable = ({
       }),
     ];
 
-    data[0]?.propertyValue !== undefined &&
+    const hasBreakdown = data[0]?.propertyValue !== undefined;
+
+    hasBreakdown &&
       staticColumns.push(
         columnHelper.accessor('propertyValue', {
           header: breakdown[0],
@@ -56,12 +58,16 @@ const MetricTable = ({
     const dynamicColumns =
       Object.keys(data?.[0]?.values).map((key: string) =>
         columnHelper.accessor(
-          (row: any) => {
+          (row) => {
             return row.values[key];
           },
           {
             header: key,
-            cell: (info) => info.getValue(),
+            cell: (info) => {
+              const value = +info.getValue();
+              const roundedValue = Math.round(value * 100) / 100;
+              return roundedValue;
+            },
           }
         )
       ) || [];
@@ -79,7 +85,7 @@ const MetricTable = ({
 
   return (
     <Box overflowX={'auto'}>
-      <Table w="min-content">
+      <Table>
         <Thead py={'3'} px={'8'} bg={'#f5f5f9'}>
           {getHeaderGroups().map((headerGroup, groupIndex) => (
             <Tr key={headerGroup.id + groupIndex} bg={'white.100'}>
@@ -88,6 +94,7 @@ const MetricTable = ({
                   <Th
                     key={header.id + index}
                     borderBottom={'0.4px solid #b2b2b5'}
+                    data-testid={'metric-table-headers'}
                     py={3}
                     paddingLeft={8}
                     onClick={
