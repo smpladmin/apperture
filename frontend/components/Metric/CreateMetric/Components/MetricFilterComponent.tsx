@@ -18,7 +18,7 @@ type MetricFilterComponentProps = {
   handleSetFilter: Function;
   removeFilter: Function;
   eventProperties: string[];
-  loadingEventProperties: boolean;
+  loadingEventsAndProperties: boolean;
 };
 
 const MetricFilterComponent = ({
@@ -31,7 +31,7 @@ const MetricFilterComponent = ({
   handleSetFilter,
   removeFilter,
   eventProperties,
-  loadingEventProperties,
+  loadingEventsAndProperties,
 }: MetricFilterComponentProps) => {
   const router = useRouter();
   const { dsId } = router.query;
@@ -142,7 +142,7 @@ const MetricFilterComponent = ({
         </Flex>
         <SearchableListDropdown
           isOpen={openEventDropdown}
-          isLoading={loadingEventProperties}
+          isLoading={loadingEventsAndProperties}
           data={eventProperties}
           onSubmit={handleSubmitEvent}
         />

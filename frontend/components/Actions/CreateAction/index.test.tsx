@@ -13,8 +13,8 @@ import {
   getTransientActionEvents,
 } from '@lib/services/actionService';
 import { isValidAction } from '../utils';
-import Action from './index';
-import { CaptureEvent } from '@lib/domain/action';
+import ActionComponent from './index';
+import { CaptureEvent, UrlMatching } from '@lib/domain/action';
 
 jest.mock('@lib/services/actionService');
 jest.mock('../utils');
@@ -53,6 +53,7 @@ describe('Actions', () => {
           text: '',
           url: '',
           url_matching: '',
+          event: '$autocapture',
         },
       ],
     },
@@ -69,7 +70,8 @@ describe('Actions', () => {
         selector: '__next>div',
         text: '',
         url: '',
-        url_matching: '',
+        url_matching: UrlMatching.CONTAINS,
+        event: CaptureEvent.AUTOCAPTURE,
       },
     ],
     eventType: CaptureEvent.AUTOCAPTURE,
@@ -85,7 +87,7 @@ describe('Actions', () => {
     await act(async () => {
       render(
         <RouterContext.Provider value={router}>
-          <Action />
+          <ActionComponent />
         </RouterContext.Provider>
       );
     });
@@ -150,7 +152,9 @@ describe('Actions', () => {
       });
 
       await renderActionComponent(router);
-      const cssSelectorInput = screen.getByTestId('css-selector-input');
+      const conditionChips = screen.getAllByTestId('condition-chip');
+      fireEvent.click(conditionChips[3]);
+      const cssSelectorInput = screen.getByTestId('selector-selector-input');
       fireEvent.change(cssSelectorInput, { target: { value: '__next>div' } });
       const saveButton = screen.getByTestId('save-button');
       fireEvent.click(saveButton);
@@ -174,7 +178,9 @@ describe('Actions', () => {
       });
 
       await renderActionComponent(router);
-      const cssSelectorInput = screen.getByTestId('css-selector-input');
+      const conditionChips = screen.getAllByTestId('condition-chip');
+      fireEvent.click(conditionChips[3]);
+      const cssSelectorInput = screen.getByTestId('selector-selector-input');
       fireEvent.change(cssSelectorInput, { target: { value: '__next>div' } });
       const saveButton = screen.getByTestId('save-button');
       fireEvent.click(saveButton);
@@ -195,7 +201,9 @@ describe('Actions', () => {
   describe('show transient event table ', () => {
     it('shows table tranient event data', async () => {
       await renderActionComponent();
-      const cssSelectorInput = screen.getByTestId('css-selector-input');
+      const conditionChips = screen.getAllByTestId('condition-chip');
+      fireEvent.click(conditionChips[3]);
+      const cssSelectorInput = screen.getByTestId('selector-selector-input');
       fireEvent.change(cssSelectorInput, {
         target: { value: '__next>div' },
       });
@@ -205,14 +213,14 @@ describe('Actions', () => {
           '63d8ef5a7b02dbd1dcf20dc3',
           [
             {
-              href: '',
+              href: null,
               selector: '__next>div',
-              text: '',
-              url: '',
-              url_matching: '',
+              text: null,
+              url: null,
+              url_matching: 'contains',
+              event: '$autocapture',
             },
-          ],
-          '$autocapture'
+          ]
         );
         const eventsTable = screen.getByTestId('listing-table');
         const eventTableBodyRows = screen.getAllByTestId(
@@ -233,12 +241,12 @@ describe('Actions', () => {
               query: { actionId: '63d8ef5a7b02dbd1dcf20dc2' },
             })}
           >
-            <Action savedAction={props} />
+            <ActionComponent savedAction={props} />
           </RouterContext.Provider>
         );
       });
       const actionName = screen.getByTestId('action-name');
-      const cssSelectorInput = screen.getByTestId('css-selector-input');
+      const cssSelectorInput = screen.getByTestId('selector-selector-input');
 
       expect(actionName.textContent).toEqual('Test Action');
       expect(cssSelectorInput).toHaveDisplayValue('__next>div');

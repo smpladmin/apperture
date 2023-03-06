@@ -4,10 +4,14 @@ from pydantic import BaseModel
 from rest.dtos.apperture_users import AppertureUserResponse
 
 from rest.dtos.model_response import ModelResponse
-from domain.metrics.models import ComputedMetricResult, SegmentsAndEvents, Metric
+from domain.metrics.models import (
+    SegmentsAndEvents,
+    Metric,
+    ComputedMetricStep,
+)
 
 
-class MetricsComputeResponse(ComputedMetricResult, ModelResponse):
+class ComputedMetricStepResponse(ComputedMetricStep, ModelResponse):
     class Config:
         allow_population_by_field_name = True
 
@@ -30,6 +34,11 @@ class CreateMetricDTO(BaseModel):
     function: str
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
+
+
+class MetricFormulaDto(BaseModel):
+    formula: str
+    variableList: List[str]
 
 
 class SavedMetricResponse(Metric, ModelResponse):

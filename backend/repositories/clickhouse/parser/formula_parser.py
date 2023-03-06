@@ -117,6 +117,7 @@ class FormulaParser:
                         i == 0
                         or expression[i - 1] in self.operators
                         or expression[i - 1] == "("
+                        or i + 1 == len(expression)
                     ):
                         return False
                 elif char == ".":

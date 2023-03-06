@@ -1,9 +1,9 @@
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from beanie import PydanticObjectId
 
-from domain.actions.models import Action, ActionGroup, CaptureEvent
+from domain.actions.models import Action, ActionGroup, CaptureEvent, UrlMatching
 from repositories.clickhouse.actions import Actions
 
 
@@ -23,7 +23,8 @@ class TestActionsRepository:
             name="clicked on settings",
             groups=[
                 ActionGroup(
-                    selector="#__next > div > div.css-3h169z > div.css-8xl60i > button"
+                    event=CaptureEvent.AUTOCAPTURE,
+                    selector="#__next > div > div.css-3h169z > div.css-8xl60i > button",
                 )
             ],
             event_type="$autocapture",
@@ -31,12 +32,12 @@ class TestActionsRepository:
         self.migration_query = (
             'INSERT INTO "events" SELECT '
             '"datasource_id","timestamp",\'apperture\',"user_id",\'clicked on '
-            'settings\',"properties" FROM "clickstream" WHERE "datasource_id"=%(ds_id)s AND "event"=\'$autocapture\' '
+            'settings\',"properties" FROM "clickstream" WHERE "datasource_id"=%(ds_id)s '
             "AND \"timestamp\"<=parseDateTimeBestEffort('2023-01-04T11:28:38.194662') AND "
-            'match("element_chain",%(0_selector_regex)s)'
+            'match("element_chain",%(group_0_prepend_0_selector_regex)s) AND "event"=\'$autocapture\''
         )
         self.parameters = {
-            "0_selector_regex": 'button([-_a-zA-Z0-9\\.:"= '
+            "group_0_prepend_0_selector_regex": 'button([-_a-zA-Z0-9\\.:"= '
             ']*?)?($|;|:([^;^\\s]*(;|$|\\s)))div.*?\\.css-8xl60i([-_a-zA-Z0-9\\.:"= '
             ']*?)?($|;|:([^;^\\s]*(;|$|\\s))).*div.*?\\.css-3h169z([-_a-zA-Z0-9\\.:"= '
             ']*?)?($|;|:([^;^\\s]*(;|$|\\s))).*div([-_a-zA-Z0-9\\.:"= '
@@ -47,24 +48,24 @@ class TestActionsRepository:
 
         self.parameters_with_url_matching = {
             "ds_id": "636a1c61d715ca6baae65611",
-            "url": "%/analytics/%/list%",
+            "group_0_prepend_url": "%/analytics/%/list%",
         }
 
         self.matching_events_query = (
             'SELECT "event","user_id","properties","timestamp" FROM "clickstream" WHERE '
-            '"datasource_id"=%(ds_id)s AND match("element_chain",%(0_selector_regex)s) '
+            '"datasource_id"=%(ds_id)s AND match("element_chain",%(group_0_prepend_0_selector_regex)s) '
             "AND \"event\"='$autocapture' LIMIT 100"
         )
 
         self.matching_events_query_with_url = (
             'SELECT "event","user_id","properties","timestamp" FROM "clickstream" WHERE '
-            '"datasource_id"=%(ds_id)s AND "properties.$current_url" LIKE %(url)s '
+            '"datasource_id"=%(ds_id)s AND "properties.$current_url" LIKE %(group_0_prepend_url)s '
             "AND \"event\"='$autocapture' LIMIT 100"
         )
 
         self.count_matching_events_query = (
             'SELECT COUNT(*) FROM "clickstream" WHERE "datasource_id"=%(ds_id)s AND '
-            'match("element_chain",%(0_selector_regex)s) AND "event"=\'$autocapture\''
+            'match("element_chain",%(group_0_prepend_0_selector_regex)s) AND "event"=\'$autocapture\''
         )
 
     @pytest.mark.asyncio
@@ -89,16 +90,20 @@ class TestActionsRepository:
         assert await self.repo.build_matching_events_from_clickstream_query(
             datasource_id="636a1c61d715ca6baae65611",
             groups=self.action.groups,
-            event_type=self.event,
         ) == (self.matching_events_query, self.parameters)
 
     @pytest.mark.asyncio
     async def test_build_matching_events_query_with_url(self):
-        groups = [ActionGroup(url="/analytics/%/list")]
+        groups = [
+            ActionGroup(
+                event=CaptureEvent.AUTOCAPTURE,
+                url="/analytics/%/list",
+                url_matching=UrlMatching.CONTAINS,
+            )
+        ]
         assert await self.repo.build_matching_events_from_clickstream_query(
             datasource_id="636a1c61d715ca6baae65611",
             groups=groups,
-            event_type=self.event,
         ) == (self.matching_events_query_with_url, self.parameters_with_url_matching)
 
     @pytest.mark.asyncio
@@ -106,5 +111,4 @@ class TestActionsRepository:
         assert await self.repo.build_count_matching_events_from_clickstream_query(
             datasource_id="636a1c61d715ca6baae65611",
             groups=self.action.groups,
-            event_type=self.event,
         ) == (self.count_matching_events_query, self.parameters)

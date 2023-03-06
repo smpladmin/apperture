@@ -6,32 +6,41 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BASTILLE } from '@theme/index';
 import MetricViewComponentCard from './MetricViewComponentCard';
 import ActionMenu from '@components/ActionMenu';
-import { EventOrSegmentComponent, MetricTrend } from '@lib/domain/metric';
+import {
+  ComputedMetric,
+  MetricAggregate,
+  MetricTrend,
+} from '@lib/domain/metric';
 import { useRouter } from 'next/router';
 import Alert from '@components/Alerts';
 import { Notifications, NotificationVariant } from '@lib/domain/notification';
 import { hasSavedAlert } from '@components/Alerts/util';
+import { getCountOfSeries } from '@components/Metric/util';
 
 const ViewMetricActionPanel = ({
   metricName,
   metricDefinition,
   aggregates,
+  breakdown,
   datasourceId,
   eventData,
   savedNotification,
   setIsModalClosed,
+  computedMetric,
 }: {
   metricName: string;
   metricDefinition: string;
-  aggregates: EventOrSegmentComponent[];
+  aggregates: MetricAggregate[];
+  breakdown: string[];
   datasourceId: string;
   eventData: MetricTrend[];
   savedNotification: Notifications;
   setIsModalClosed: Function;
+  computedMetric: ComputedMetric[];
 }) => {
   const router = useRouter();
   const {
@@ -39,6 +48,16 @@ const ViewMetricActionPanel = ({
     query: { metricId, showAlert },
   } = router;
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
+
+  const [disableAlert, setDisableAlert] = useState(false);
+
+  useEffect(() => {
+    /* 
+    - disable alerts if multiple series are present,
+     in case of breakdown or multiple aggregates
+    */
+    if (getCountOfSeries(computedMetric) > 1) setDisableAlert(true);
+  }, [computedMetric]);
 
   const handleNotificationClick = () => {
     onOpen();
@@ -155,6 +174,7 @@ const ViewMetricActionPanel = ({
         <ActionMenu
           onNotificationClick={handleNotificationClick}
           hasSavedNotification={hasSavedAlert(savedNotification)}
+          disableAlert={disableAlert}
         />
         <Divider
           mt={'4'}

@@ -1,5 +1,6 @@
 import json
 from unittest.mock import ANY
+
 from beanie import PydanticObjectId
 
 from domain.actions.models import ActionGroup, ActionGroupCondition, CaptureEvent
@@ -16,7 +17,7 @@ def test_create_action(client_init, action_data, action_service):
         "groups": [
             {
                 "condition": "or",
-                "event": None,
+                "event": "$autocapture",
                 "href": None,
                 "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
                 "button",
@@ -44,13 +45,12 @@ def test_create_action(client_init, action_data, action_service):
                     selector="#__next > div > div.css-3h169z > div.css-8xl60i > button",
                     url=None,
                     url_matching=None,
-                    event=None,
+                    event="$autocapture",
                     condition=ActionGroupCondition.OR,
                 )
             ],
             "name": "clicked on settings",
             "userId": "mock-user-id",
-            "eventType": CaptureEvent.AUTOCAPTURE,
         }
     )
     action_service.add_action.assert_called_once()
@@ -61,7 +61,7 @@ def test_create_action(client_init, action_data, action_service):
         "groups": [
             {
                 "condition": ActionGroupCondition.OR,
-                "event": None,
+                "event": CaptureEvent.AUTOCAPTURE,
                 "href": None,
                 "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
                 "button",
@@ -93,7 +93,7 @@ def test_get_actions(client_init, action_service):
             "groups": [
                 {
                     "condition": "or",
-                    "event": None,
+                    "event": "$autocapture",
                     "href": None,
                     "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
                     "button",
@@ -104,7 +104,7 @@ def test_get_actions(client_init, action_service):
                 }
             ],
             "name": "clicked on settings",
-            "eventType": CaptureEvent.AUTOCAPTURE,
+            "eventType": "$autocapture",
             "processedTill": None,
             "revisionId": ANY,
             "updatedAt": None,
@@ -135,7 +135,7 @@ def test_update_action(client_init, action_data, action_service):
         "groups": [
             {
                 "condition": "or",
-                "event": None,
+                "event": "$autocapture",
                 "href": None,
                 "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
                 "button",
@@ -158,7 +158,7 @@ def test_update_action(client_init, action_data, action_service):
         "groups": [
             {
                 "condition": ActionGroupCondition.OR,
-                "event": None,
+                "event": "$autocapture",
                 "href": None,
                 "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
                 "button",
@@ -189,7 +189,7 @@ def test_get_actions_by_id(client_init, action_service):
         "groups": [
             {
                 "condition": "or",
-                "event": None,
+                "event": CaptureEvent.AUTOCAPTURE,
                 "href": None,
                 "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
                 "button",
@@ -234,7 +234,7 @@ def test_transient_action(client_init, action_service, transient_action_data):
             "groups": [
                 {
                     "condition": "or",
-                    "event": None,
+                    "event": "$autocapture",
                     "href": None,
                     "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
                     "button",
@@ -244,6 +244,5 @@ def test_transient_action(client_init, action_service, transient_action_data):
                     "url_matching": None,
                 }
             ],
-            "event_type": "$autocapture",
         }
     )
