@@ -85,10 +85,12 @@ async def save_metrics(
     )
     await metric_service.update_metric(metric_id=id, metric=metric)
     notification = await notification_service.get_notification_by_reference(
-        reference=id, datasource_id=datasource.id
+        reference=id, datasource_id=str(datasource.id)
     )
     if notification:
-        await notification_service.delete_notification(notification_id=notification.id)
+        await notification_service.delete_notification(
+            notification_id=str(notification.id)
+        )
     return metric
 
 

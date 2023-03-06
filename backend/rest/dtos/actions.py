@@ -2,8 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from domain.actions.models import (Action, ActionGroup, CaptureEvent,
-                                   ComputedAction)
+from domain.actions.models import Action, ActionGroup, CaptureEvent, ComputedAction
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
 
