@@ -1,4 +1,5 @@
-import { EventOrSegmentComponent } from '@lib/domain/metric';
+import { replaceEmptyStringPlaceholder } from '@components/Metric/util';
+import { MetricAggregate } from '@lib/domain/metric';
 import {
   AppertureGet,
   ApperturePost,
@@ -7,15 +8,15 @@ import {
 } from './util';
 
 type MetricRequestBody = {
-  dsId: string;
-  functions: string;
-  aggregates: EventOrSegmentComponent[];
+  datasourceId: string;
+  function: string;
+  aggregates: MetricAggregate[];
   breakdown: string[];
-  startDate: Date | undefined;
-  endDate: Date | undefined;
+  startDate?: string;
+  endDate?: string;
 };
 
-const formatDatalabel = (date: Date) => {
+const formatDatelabel = (date: Date) => {
   const day = date.getDate();
   const month = date.getMonth() + 1;
   const year = date.getFullYear();
@@ -25,25 +26,25 @@ const formatDatalabel = (date: Date) => {
 export const computeMetric = async (
   dsId: string,
   functions: string,
-  aggregates: EventOrSegmentComponent[],
+  aggregates: MetricAggregate[],
   breakdown: string[],
   startDate: Date | undefined,
   endDate: Date | undefined
 ) => {
-  const requestBody: any = {
+  const requestBody: MetricRequestBody = {
     datasourceId: dsId,
     function: functions,
-    aggregates,
+    aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
   };
   if (startDate) {
-    requestBody.startDate = formatDatalabel(startDate);
+    requestBody.startDate = formatDatelabel(startDate);
   }
   if (endDate) {
-    requestBody.endDate = formatDatalabel(endDate);
+    requestBody.endDate = formatDatelabel(endDate);
   }
   const res = await ApperturePost('metrics/compute', requestBody);
-  return res.data;
+  return res.data || [];
 };
 
 export const _getSavedMetric = async (token: string, metricId: string) => {
@@ -55,14 +56,14 @@ export const saveMetric = async (
   name: string,
   dsId: string,
   definition: string,
-  aggregates: EventOrSegmentComponent[],
+  aggregates: MetricAggregate[],
   breakdown: string[]
 ) => {
   const result = await ApperturePost('/metrics', {
     datasourceId: dsId,
     name,
     function: definition,
-    aggregates,
+    aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
   });
   return result.data;
@@ -73,14 +74,14 @@ export const updateMetric = async (
   name: string,
   dsId: string,
   definition: string,
-  aggregates: EventOrSegmentComponent[],
+  aggregates: MetricAggregate[],
   breakdown: string[]
 ) => {
   const result = await ApperturePut('/metrics/' + metricId, {
     datasourceId: dsId,
     name,
     function: definition,
-    aggregates,
+    aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
   });
   return result.data;
@@ -88,5 +89,16 @@ export const updateMetric = async (
 
 export const getSavedMetricsForDatasourceId = async (dsId: string) => {
   const res = await AppertureGet(`/metrics?datasource_id=${dsId}`);
+  return res.data;
+};
+
+export const validateMetricFormula = async (
+  formula: string,
+  variableList: string[]
+) => {
+  const res = await ApperturePost(`/metrics/validate_formula`, {
+    formula: formula,
+    variableList: variableList,
+  });
   return res.data;
 };

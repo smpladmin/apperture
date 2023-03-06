@@ -21,3 +21,9 @@ declare module 'next/app' {
     Component: NextLayoutComponentType;
   };
 }
+
+declare global {
+  interface Window {
+    posthog: any;
+  }
+}

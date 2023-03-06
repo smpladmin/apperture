@@ -52,7 +52,7 @@ const colors = {
     200: ARROW_GRAY,
     300: '#3E3E47',
   },
-  yellow: '#fac213',
+  yellow: { 500: '#fac213' },
   green: GREEN,
   'hover-grey': '#78787e',
   teal: {

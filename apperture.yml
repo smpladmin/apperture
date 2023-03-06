@@ -177,10 +177,33 @@ services:
         limits:
           cpus: '0.4'
           memory: 256M
+  alertmanager:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/alertmanager:latest
+    networks:
+     - net
+     - swarmpit_net
+    secrets:
+     -
+      source: alertmanager.env
+      target: /code/.env
+    logging:
+      driver: json-file
+    deploy:
+      labels:
+        swarmpit.service.deployment.autoredeploy: 'true'
+      resources:
+        reservations:
+          cpus: '0.1'
+          memory: 50M
+        limits:
+          cpus: '0.2'
+          memory: 100M
 networks:
   net:
     driver: overlay
   traefik-public:
+    external: true
+  swarmpit_net:
     external: true
 
 secrets:
@@ -189,6 +212,10 @@ secrets:
   data_processor.env:
     external: true
   frontend.env:
+    external: true
+  scheduler.env:
+    external: true
+  alertmanager.env:
     external: true
 
 volumes:

@@ -61,6 +61,8 @@ const DateRangeSelector = ({
           editableDateInputs={true}
           onChange={handleChange}
           moveRangeOnFirstSelection={false}
+          retainEndDateOnFirstSelection={true}
+          maxDate={new Date()}
           ranges={state}
           rangeColors={['#EDEDED']}
         />

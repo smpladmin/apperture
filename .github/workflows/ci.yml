@@ -25,6 +25,8 @@ jobs:
               - 'data_processor/**'
             scheduler:
               - 'scheduler/**'
+            alertmanager:
+              - 'alertmanager/**'
 
       - name: Set short commit-sha
         id: commit
@@ -88,6 +90,18 @@ jobs:
           IMAGE_TAG: latest
         run: |
           cd scheduler
+          docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+      
+      - name: Build and Push AlertManager
+        if: steps.filter.outputs.alertmanager == 'true'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: alertmanager
+          IMAGE_TAG: latest
+        run: |
+          cd alertmanager
           docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags

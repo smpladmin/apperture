@@ -5,29 +5,29 @@ import MetricFilterComponent from './MetricFilterComponent';
 import MetricAddFilterComponent from './MetricAddFilterComponent';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import {
-  EventOrSegmentComponent,
+  MetricAggregate,
   MetricComponentVariant,
   MetricEventFilter,
 } from '@lib/domain/metric';
 import { Node } from '@lib/domain/node';
 
 type MetricComponentCardProps = {
+  index: number;
   variable: string;
   eventList: Node[];
   eventProperties: string[];
-  loadingEventProperties: boolean;
-  loadingEventsList: boolean;
   updateAggregate: Function;
   removeAggregate: Function;
-  savedAggregate: EventOrSegmentComponent;
+  savedAggregate: MetricAggregate;
+  loadingEventsAndProperties: boolean;
 };
 
 const MetricComponentCard = ({
+  index,
   variable,
   eventList,
   eventProperties,
-  loadingEventProperties,
-  loadingEventsList,
+  loadingEventsAndProperties,
   updateAggregate,
   removeAggregate,
   savedAggregate,
@@ -98,7 +98,7 @@ const MetricComponentCard = ({
   };
 
   const handleRemoveComponent = () => {
-    removeAggregate(variable);
+    removeAggregate(index);
   };
 
   const removeFilter = (reference: number) => {
@@ -124,9 +124,16 @@ const MetricComponentCard = ({
 
   useEffect(() => {
     if (filters.every((filter) => filter.values.length)) {
-      updateAggregate(variable, { filters });
+      updateAggregate(variable, { filters, conditions });
     }
-  }, [filters]);
+  }, [filters, conditions]);
+
+  useEffect(() => {
+    setReference(savedAggregate?.reference_id);
+    setFilters(savedAggregate?.filters);
+    setConditions(savedAggregate?.conditions);
+    setVariant(savedAggregate?.variant);
+  }, [savedAggregate]);
 
   return (
     <Flex
@@ -284,12 +291,12 @@ const MetricComponentCard = ({
                 handleSetFilter={handleSetFilter}
                 removeFilter={removeFilter}
                 eventProperties={eventProperties}
-                loadingEventProperties={loadingEventProperties}
+                loadingEventsAndProperties={loadingEventsAndProperties}
               />
             ))}
           <MetricAddFilterComponent
             eventProperties={eventProperties}
-            loadingEventProperties={loadingEventProperties}
+            loadingEventsAndProperties={loadingEventsAndProperties}
             handleAddFilter={handleAddFilter}
           />
         </>

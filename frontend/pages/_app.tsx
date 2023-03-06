@@ -19,18 +19,15 @@ import { resetServerContext } from 'react-beautiful-dnd';
 import NextNProgress from 'nextjs-progressbar';
 import { BLACK_200 } from '@theme/index';
 import { useRouter } from 'next/router';
-import { posthog } from 'posthog-js';
 import { APPERTURE_PH_KEY, BACKEND_BASE_URL } from 'config';
 type CustomAppProps = {
   device: Device;
 };
 
-if (typeof window !== 'undefined' && APPERTURE_PH_KEY) {
-  posthog.init(APPERTURE_PH_KEY, {
+if (typeof window !== 'undefined' && window.posthog && APPERTURE_PH_KEY) {
+  window.posthog.init(APPERTURE_PH_KEY, {
     api_host: `${BACKEND_BASE_URL}/events/capture`,
     debug: process.env.NODE_ENV === 'development',
-    capture_pageview: false,
-    capture_pageleave: false,
   });
 }
 
@@ -43,8 +40,11 @@ function AppertureApp({
   const router = useRouter();
 
   useEffect(() => {
-    const handleRouteChange = () => posthog.capture('$pageview');
-    const handleRouteChangeStart = () => posthog.capture('$pageleave');
+    const handleRouteChange = () =>
+      window.posthog.capture && window.posthog.capture('$pageview');
+    const handleRouteChangeStart = () =>
+      window.posthog.capture && window.posthog.capture('$pageleave');
+
     router.events.on('routeChangeComplete', handleRouteChange);
     router.events.on('routeChangeStart', handleRouteChangeStart);
 
@@ -52,7 +52,7 @@ function AppertureApp({
       router.events.off('routeChangeComplete', handleRouteChange);
       router.events.off('routeChangeStart', handleRouteChangeStart);
     };
-  }, []);
+  }, [router.events]);
 
   return (
     <AppertureContext.Provider value={{ device }}>
