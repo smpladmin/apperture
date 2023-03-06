@@ -180,15 +180,6 @@ const CreateMetricAction = ({
       });
 
     setCanSaveMetric(false);
-
-    // deleted associated notification with metric whenever metric gets updated
-    if (isMetricBeingEdited) {
-      const notifcation = await getNotificationByReference(
-        metricId as string,
-        dsId as string
-      );
-      if (notifcation) await deleteNotification(notifcation._id);
-    }
   };
 
   useEffect(() => {

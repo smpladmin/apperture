@@ -95,15 +95,6 @@ const CreateFunnelAction = ({
         pathname: '/analytics/funnel/view/[funnelId]',
         query: { funnelId: data?._id || funnelId, dsId },
       });
-
-    // deleted associated notification with funnel whenever funnel gets updated
-    if (isFunnelBeingEdited) {
-      const notifcation = await getNotificationByReference(
-        funnelId as string,
-        dsId as string
-      );
-      if (notifcation) await deleteNotification(notifcation._id);
-    }
   };
 
   return (
