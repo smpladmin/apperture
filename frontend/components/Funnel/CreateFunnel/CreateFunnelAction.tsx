@@ -19,10 +19,6 @@ import { saveFunnel, updateFunnel } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { MapContext } from '@lib/contexts/mapContext';
 import { FunnelStep } from '@lib/domain/funnel';
-import {
-  deleteNotification,
-  getNotificationByReference,
-} from '@lib/services/notificationService';
 
 type CreateFunnelActionProps = {
   funnelName: string;
