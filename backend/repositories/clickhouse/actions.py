@@ -178,6 +178,7 @@ class Actions(EventsBase):
             )
             params = {**params, **group_params}
             if len(group_condition) > 0:
+                group_condition.append(self.click_stream_table.event == group.event)
                 conditions.append(Criterion.all(group_condition))
 
         query = (
