@@ -1,9 +1,11 @@
+import functools
 from enum import Enum
 from typing import Union, List
 
 from beanie import PydanticObjectId
 from pydantic import BaseModel
 from repositories import Document
+from pypika import analytics as an, functions as fn
 
 
 class SegmentsAndEventsType(str, Enum):
@@ -41,6 +43,21 @@ class MetricAggregatePropertiesAggregation(str, Enum):
     P75 = "ap_p75"
     P90 = "ap_p90"
     P99 = "ap_p99"
+
+    def get_pypika_function(self):
+        type_dict = {
+            self.SUM: an.Sum,
+            self.AVERAGE: an.Avg,
+            self.MEDIAN: an.Median,
+            self.DISTINCT_COUNT: fn.Count,
+            self.MIN: an.Min,
+            self.MAX: an.Max,
+            self.P25: fn.ApproximatePercentile,
+            self.P75: fn.ApproximatePercentile,
+            self.P90: fn.ApproximatePercentile,
+            self.P99: fn.ApproximatePercentile,
+        }
+        return type_dict.get(self, an.Sum)
 
 
 class SegmentsAndEventsAggregations(BaseModel):
