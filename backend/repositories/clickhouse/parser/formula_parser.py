@@ -205,14 +205,10 @@ class FormulaParser:
                 elif character.isalpha():
                     if wrapper_functions[character] == fn.Count:
                         stack.append(
-                            wrapper_functions[character](
-                                Field(character)
-                            ).distinct()
+                            wrapper_functions[character](Field(character)).distinct()
                         )
                     else:
-                        stack.append(
-                            wrapper_functions[character](Field(character))
-                        )
+                        stack.append(wrapper_functions[character](Field(character)))
                     start_index += 1
                 elif character.isnumeric():
                     start_index, number = self.parseDigits(

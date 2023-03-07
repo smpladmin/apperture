@@ -8,11 +8,11 @@ from domain.metrics.models import (
     SegmentsAndEvents,
     SegmentsAndEventsType,
     SegmentsAndEventsAggregations,
-    SegmentsAndEventsAggregationsFunctions,
     ComputedMetricStep,
     ComputedMetricData,
     MetricValue,
     MetricBreakdown,
+    MetricBasicAggregation,
 )
 from domain.metrics.service import MetricService
 
@@ -29,7 +29,7 @@ class TestMetricService:
                 variable="A",
                 variant=SegmentsAndEventsType.EVENT,
                 aggregations=SegmentsAndEventsAggregations(
-                    functions=SegmentsAndEventsAggregationsFunctions.COUNT,
+                    functions=MetricBasicAggregation.COUNT,
                     property="Video_Seen",
                 ),
                 reference_id="Video_Seen",
@@ -40,7 +40,7 @@ class TestMetricService:
                 variable="B",
                 variant=SegmentsAndEventsType.EVENT,
                 aggregations=SegmentsAndEventsAggregations(
-                    functions=SegmentsAndEventsAggregationsFunctions.COUNT,
+                    functions=MetricBasicAggregation.COUNT,
                     property="Video_Open",
                 ),
                 reference_id="Video_Open",

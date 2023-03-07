@@ -1,11 +1,10 @@
-import functools
 from enum import Enum
 from typing import Union, List
 
 from beanie import PydanticObjectId
 from pydantic import BaseModel
 from repositories import Document
-from pypika import analytics as an, functions as fn
+from pypika import analytics as an, functions as fn, CustomFunction
 
 
 class SegmentsAndEventsType(str, Enum):
@@ -26,7 +25,7 @@ class SegmentsAndEventsFilterOperator(str, Enum):
 
 
 class MetricBasicAggregation(str, Enum):
-    TOTAL = "total"
+    COUNT = "count"
     UNIQUE = "unique"
     TOTAL_PER_USER = "total_per_user"
     COUNT_SESSIONS = "count_sessions"
@@ -45,23 +44,24 @@ class MetricAggregatePropertiesAggregation(str, Enum):
     P99 = "ap_p99"
 
     def get_pypika_function(self):
+        quantile_func = CustomFunction("quantile", ["number"])
         type_dict = {
             self.SUM: an.Sum,
             self.AVERAGE: an.Avg,
-            self.MEDIAN: an.Median,
+            self.MEDIAN: CustomFunction(str(quantile_func(0.5)), ["variable"]),
             self.DISTINCT_COUNT: fn.Count,
             self.MIN: an.Min,
             self.MAX: an.Max,
-            self.P25: fn.ApproximatePercentile,
-            self.P75: fn.ApproximatePercentile,
-            self.P90: fn.ApproximatePercentile,
-            self.P99: fn.ApproximatePercentile,
+            self.P25: CustomFunction(str(quantile_func(0.25)), ["variable"]),
+            self.P75: CustomFunction(str(quantile_func(0.75)), ["variable"]),
+            self.P90: CustomFunction(str(quantile_func(0.9)), ["variable"]),
+            self.P99: CustomFunction(str(quantile_func(0.99)), ["variable"]),
         }
         return type_dict.get(self, an.Sum)
 
 
 class SegmentsAndEventsAggregations(BaseModel):
-    function: Union[MetricBasicAggregation, MetricAggregatePropertiesAggregation]
+    functions: Union[MetricBasicAggregation, MetricAggregatePropertiesAggregation]
     property: str
 
 

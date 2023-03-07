@@ -9,7 +9,6 @@ from pypika import (
     Field,
     Parameter,
     functions as fn,
-    analytics as an,
 )
 
 from domain.metrics.models import (
@@ -86,21 +85,26 @@ class Metrics(EventsBase):
 
             params[f"reference_id_{i}"] = aggregate.reference_id
 
-            if aggregate.aggregations.function in MetricAggregatePropertiesAggregation:
-                agg_funcs[aggregate.variable] = aggregate.aggregations.function.get_pypika_function()
+            if aggregate.aggregations.functions in MetricAggregatePropertiesAggregation:
+                agg_funcs[
+                    aggregate.variable
+                ] = aggregate.aggregations.functions.get_pypika_function()
                 func = (
                     self.convert_to_string_func
-                    if aggregate.aggregations.function
+                    if aggregate.aggregations.functions
                     == MetricAggregatePropertiesAggregation.DISTINCT_COUNT
                     else self.convert_to_numeric_func
                 )
 
                 agg_property = Field(f"properties.{aggregate.aggregations.property}")
-                if aggregate.aggregations.function != MetricAggregatePropertiesAggregation.DISTINCT_COUNT:
+                if (
+                    aggregate.aggregations.functions
+                    != MetricAggregatePropertiesAggregation.DISTINCT_COUNT
+                ):
                     agg_property = self.convert_to_string_func(agg_property)
                 alt_value = NullValue()
 
-            elif aggregate.aggregations.function == MetricBasicAggregation.UNIQUE:
+            elif aggregate.aggregations.functions == MetricBasicAggregation.UNIQUE:
                 agg_funcs[aggregate.variable] = fn.Count
                 agg_property = self.table.user_id
                 alt_value = NullValue()
@@ -122,7 +126,10 @@ class Metrics(EventsBase):
             )
 
         select_expressions, denominators_list = zip(
-            *[parser.parse(function=definition, wrapper_functions=agg_funcs) for definition in function.split(",")]
+            *[
+                parser.parse(function=definition, wrapper_functions=agg_funcs)
+                for definition in function.split(",")
+            ]
         )
 
         for expression in select_expressions:

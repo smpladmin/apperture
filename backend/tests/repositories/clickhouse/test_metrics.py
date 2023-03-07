@@ -3,10 +3,10 @@ from unittest.mock import MagicMock
 from domain.metrics.models import (
     SegmentsAndEvents,
     SegmentsAndEventsAggregations,
-    SegmentsAndEventsAggregationsFunctions,
     SegmentsAndEventsFilter,
     SegmentsAndEventsFilterOperator,
     SegmentsAndEventsType,
+    MetricBasicAggregation,
 )
 from repositories.clickhouse.metric import Metrics
 
@@ -23,7 +23,7 @@ class TestMetricRepository:
                 variable="A",
                 variant=SegmentsAndEventsType.EVENT,
                 aggregations=SegmentsAndEventsAggregations(
-                    functions=SegmentsAndEventsAggregationsFunctions.COUNT,
+                    functions=MetricBasicAggregation.COUNT,
                     property="Video_Seen",
                 ),
                 reference_id="Video_Seen",
@@ -42,7 +42,7 @@ class TestMetricRepository:
                 variable="A",
                 variant=SegmentsAndEventsType.EVENT,
                 aggregations=SegmentsAndEventsAggregations(
-                    functions=SegmentsAndEventsAggregationsFunctions.COUNT,
+                    functions=MetricBasicAggregation.COUNT,
                     property="Video_Seen",
                 ),
                 reference_id="Video_Seen",
@@ -53,7 +53,7 @@ class TestMetricRepository:
                 variable="B",
                 variant=SegmentsAndEventsType.EVENT,
                 aggregations=SegmentsAndEventsAggregations(
-                    functions=SegmentsAndEventsAggregationsFunctions.COUNT,
+                    functions=MetricBasicAggregation.COUNT,
                     property="Video_Open",
                 ),
                 reference_id="Video_Open",
