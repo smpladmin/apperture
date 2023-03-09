@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from mongo import Mongo
 from fastapi import Depends
 from datetime import datetime
@@ -6,7 +6,7 @@ from beanie import PydanticObjectId
 from beanie.operators import In
 
 
-from domain.common.models import SavedItems, WatchlistItemType
+from domain.common.models import SavedItems
 from domain.funnels.models import (
     Funnel,
     FunnelStep,
@@ -14,9 +14,11 @@ from domain.funnels.models import (
     ComputedFunnel,
     FunnelTrendsData,
     FunnelConversionData,
-    FunnelConversion,
     ConversionStatus,
     FunnelEventUserData,
+    DateFilterType,
+    FixedDateFilter,
+    LastDateFilter,
 )
 from repositories.clickhouse.funnels import Funnels
 
@@ -38,6 +40,8 @@ class FunnelsService:
         name: str,
         steps: List[FunnelStep],
         randomSequence: bool,
+        date_filter: Union[LastDateFilter, FixedDateFilter, None],
+        date_filter_type: Union[DateFilterType, None],
     ) -> Funnel:
         return Funnel(
             datasource_id=datasourceId,
@@ -46,6 +50,8 @@ class FunnelsService:
             name=name,
             steps=steps,
             random_sequence=randomSequence,
+            date_filter=date_filter,
+            date_filter_type=date_filter_type,
         )
 
     async def add_funnel(self, funnel: Funnel):
@@ -56,10 +62,24 @@ class FunnelsService:
         return data[n] * 100 / data[0] if data[0] != 0 else 0
 
     async def compute_funnel(
-        self, ds_id: str, steps: List[FunnelStep]
+        self,
+        ds_id: str,
+        steps: List[FunnelStep],
+        date_filter: Union[LastDateFilter, FixedDateFilter, None],
+        date_filter_type: Union[DateFilterType, None],
     ) -> List[ComputedFunnelStep]:
 
-        users_data = self.funnels.get_users_count(ds_id, steps)
+        start_date, end_date = (
+            self.funnels.compute_date_filter(
+                date_filter=date_filter, date_filter_type=date_filter_type
+            )
+            if date_filter and date_filter_type
+            else (None, None)
+        )
+
+        users_data = self.funnels.get_users_count(
+            ds_id=ds_id, steps=steps, start_date=start_date, end_date=end_date
+        )
         computed_funnel = [
             ComputedFunnelStep(
                 event=step.event,
@@ -78,7 +98,8 @@ class FunnelsService:
 
     async def get_computed_funnel(self, funnel: Funnel) -> ComputedFunnel:
         computed_funnel = await self.compute_funnel(
-            ds_id=str(funnel.datasource_id), steps=funnel.steps
+            ds_id=str(funnel.datasource_id),
+            steps=funnel.steps,
         )
         return ComputedFunnel(
             datasource_id=funnel.datasource_id,
@@ -99,10 +120,23 @@ class FunnelsService:
         ).update({"$set": to_update})
 
     async def get_funnel_trends(
-        self, datasource_id: str, steps: List[FunnelStep]
+        self,
+        datasource_id: str,
+        steps: List[FunnelStep],
+        date_filter: Union[LastDateFilter, FixedDateFilter, None],
+        date_filter_type: Union[DateFilterType, None],
     ) -> List[FunnelTrendsData]:
+
+        start_date, end_date = (
+            self.funnels.compute_date_filter(
+                date_filter=date_filter, date_filter_type=date_filter_type
+            )
+            if date_filter and date_filter_type
+            else (None, None)
+        )
+
         conversion_data = self.funnels.get_conversion_trend(
-            ds_id=datasource_id, steps=steps
+            ds_id=datasource_id, steps=steps, start_date=start_date, end_date=end_date
         )
         return [
             FunnelTrendsData(
@@ -116,10 +150,26 @@ class FunnelsService:
         ]
 
     async def get_user_conversion(
-        self, datasource_id: str, steps: List[FunnelStep], status: ConversionStatus
+        self,
+        datasource_id: str,
+        steps: List[FunnelStep],
+        status: ConversionStatus,
+        date_filter: Union[LastDateFilter, FixedDateFilter, None],
+        date_filter_type: Union[DateFilterType, None],
     ):
+        start_date, end_date = (
+            self.funnels.compute_date_filter(
+                date_filter=date_filter, date_filter_type=date_filter_type
+            )
+            if date_filter and date_filter_type
+            else (None, None)
+        )
         conversion_data = self.funnels.get_conversion_analytics(
-            ds_id=datasource_id, steps=steps, status=status
+            ds_id=datasource_id,
+            steps=steps,
+            status=status,
+            start_date=start_date,
+            end_date=end_date,
         )
         user_list = [FunnelEventUserData(id=data[0]) for data in conversion_data]
         count_data = conversion_data[0][1] if conversion_data else [0, 0]
