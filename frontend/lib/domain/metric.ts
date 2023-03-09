@@ -13,7 +13,7 @@ export enum MetricComponentVariant {
 }
 
 export type MetricComponentAggregation = {
-  functions: string;
+  functions: MetricBasicAggregation | MetricAggregatePropertiesAggregation;
   property: string;
 };
 
@@ -97,3 +97,21 @@ export type Metric = {
 export type MetricWithUser = Metric & {
   user: AppertureUser;
 };
+
+export enum MetricBasicAggregation {
+  TOTAL = 'count',
+  UNIQUE = 'unique',
+}
+
+export enum MetricAggregatePropertiesAggregation {
+  SUM = 'ap_sum',
+  AVERAGE = 'ap_average',
+  MEDIAN = 'ap_median',
+  'DISTINCT COUNT' = 'ap_distinct_count',
+  MIN = 'ap_min',
+  MAX = 'ap_max',
+  '25th Percentile' = 'ap_p25',
+  '75th Percentile' = 'ap_p75',
+  '90th Percentile' = 'ap_p90',
+  '99th Percentile' = 'ap_p99',
+}

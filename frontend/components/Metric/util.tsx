@@ -1,6 +1,7 @@
 import {
   ComputedMetric,
   MetricAggregate,
+  MetricBasicAggregation,
   MetricEventFilter,
   MetricTableData,
   MetricTrendData,
@@ -55,6 +56,17 @@ export const getCountOfAggregates = (aggregates: MetricAggregate[]) => {
   return validAggregatesWithReferenceId.length;
 };
 
+const _isValidAggregation = (aggregation: any) => {
+  if (
+    [MetricBasicAggregation.TOTAL, MetricBasicAggregation.UNIQUE].includes(
+      aggregation.functions
+    )
+  )
+    return true;
+
+  return Boolean(aggregation.property);
+};
+
 export const isValidAggregates = (aggregates: MetricAggregate[]) => {
   return (
     aggregates.length &&
@@ -64,7 +76,8 @@ export const isValidAggregates = (aggregates: MetricAggregate[]) => {
         aggregate.variable &&
         aggregate.filters.every(
           (filter: MetricEventFilter) => filter.values.length
-        )
+        ) &&
+        _isValidAggregation(aggregate.aggregations)
     )
   );
 };
@@ -146,4 +159,19 @@ export const getCountOfSeries = (metricData: ComputedMetric[]) => {
     });
   });
   return uniqueSeries.length;
+};
+
+export const metricAggregationDisplayText: { [key: string]: string } = {
+  count: 'Total Count',
+  unique: 'Unique Count',
+  ap_sum: 'Sum',
+  ap_median: 'Median',
+  ap_average: 'Average',
+  ap_distinct_count: 'Distinct Count',
+  ap_min: 'Minimum',
+  ap_max: 'Maximum',
+  ap_p25: '25th Percentile',
+  ap_p75: '75th Percentile',
+  ap_p90: '90th Percentile',
+  ap_p99: '99th Percentile',
 };
