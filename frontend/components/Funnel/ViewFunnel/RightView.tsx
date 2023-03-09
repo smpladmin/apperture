@@ -13,6 +13,8 @@ import {
   FunnelStep,
   FunnelTrendsData,
   FunnelEventConversion,
+  DateFilter,
+  DateFilterType,
 } from '@lib/domain/funnel';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
@@ -26,12 +28,16 @@ const RightView = ({
   computedTrendsData,
   datasourceId,
   isLoading,
+  dateFilter,
+  dateFilterType,
 }: {
   funnelSteps: FunnelStep[];
   computedFunnel: FunnelData[];
   computedTrendsData: FunnelTrendsData[];
   datasourceId: string;
   isLoading: boolean;
+  dateFilter: DateFilter | null;
+  dateFilterType: DateFilterType | null;
 }) => {
   const router = useRouter();
   const { dsId } = router.query;
@@ -176,6 +182,8 @@ const RightView = ({
         datasourceId={dataSource as string}
         event={selectedEvent as string}
         selectedFunnelSteps={selectedFunnelSteps}
+        dateFilter={dateFilter}
+        dateFilterType={dateFilterType}
       />
     </ViewPanel>
   );
