@@ -10,6 +10,7 @@ import { DatePickerRange } from '@lib/domain/metric';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 import { formatDateIntoString } from '@lib/utils/common';
+import isEqual from 'lodash/isEqual';
 
 type DateFilterProps = {
   dateFilter: DateFilter | null;
@@ -38,13 +39,17 @@ const DateFilter = ({
   const [openCustom, setOpenCustom] = useState<boolean>(false);
   useOnClickOutside(datePickerRef, () => setOpenCustom(false));
 
-  const toggleFilterState = (filterType: DateFilterType, dateFilter: any) => {
-    if (filterType === dateFilterType) {
+  const toggleFilterState = (
+    filterType: DateFilterType,
+    filterValue: DateFilter
+  ) => {
+    // unselect date filter if applied filter is clicked
+    if (isEqual(filterValue, dateFilter)) {
       setDateFilterType(null);
       setDateFilter(null);
     } else {
       setDateFilterType(filterType);
-      setDateFilter(dateFilter);
+      setDateFilter(filterValue);
     }
   };
 
