@@ -1,12 +1,18 @@
 import { Flex, Text } from '@chakra-ui/react';
 import React from 'react';
-import { MetricEventFilter } from '@lib/domain/metric';
+import {
+  MetricAggregatePropertiesAggregation,
+  MetricComponentAggregation,
+  MetricEventFilter,
+} from '@lib/domain/metric';
 import MetricViewFilterComponent from './MetricViewFilterCard';
+import { getDisplayAggregationFunctionText } from '@components/Metric/util';
 type MetricViewComponentCardProps = {
   variable: string;
   reference: string;
   filters: MetricEventFilter[];
   conditions: string[];
+  aggregation: MetricComponentAggregation;
 };
 
 const MetricViewComponentCard = ({
@@ -14,6 +20,7 @@ const MetricViewComponentCard = ({
   reference,
   filters,
   conditions,
+  aggregation,
 }: MetricViewComponentCardProps) => {
   return (
     <Flex
@@ -47,22 +54,45 @@ const MetricViewComponentCard = ({
           fontSize={'xs-14'}
           fontWeight={500}
           lineHeight={'xs-18'}
-          marginLeft={5}
+          marginLeft={2}
         >
           {reference}
         </Text>
       </Flex>
-      <Flex width={'full'} alignItems={'center'}>
+      <Flex width={'full'} alignItems={'center'} gap={'2'}>
         <Text
-          color={'white'}
+          color={'white.DEFAULT'}
           fontSize={'xs-12'}
           lineHeight={'xs-16'}
-          marginLeft={4}
-          px={5}
+          fontWeight={'400'}
+          marginLeft={6}
           borderRadius={4}
         >
-          Total Count
+          {getDisplayAggregationFunctionText(aggregation.functions)}
         </Text>
+        {Object.values(MetricAggregatePropertiesAggregation).includes(
+          aggregation.functions as any
+        ) ? (
+          <>
+            <Text
+              fontSize={'xs-12'}
+              lineHeight={'xs-16'}
+              fontWeight={'400'}
+              color={'white.DEFAULT'}
+            >
+              {'of'}
+            </Text>
+            <Text
+              fontSize={'xs-12'}
+              lineHeight={'xs-16'}
+              fontWeight={'400'}
+              color={'white.DEFAULT'}
+              wordBreak={'break-word'}
+            >
+              {aggregation.property}
+            </Text>
+          </>
+        ) : null}
       </Flex>
       {Boolean(filters.length) &&
         filters.map((filter: MetricEventFilter, index: number) => (

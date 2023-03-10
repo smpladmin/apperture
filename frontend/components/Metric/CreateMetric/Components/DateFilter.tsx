@@ -90,7 +90,6 @@ const DateFilter = ({ setDateRange, dateRange }: DateFilterProps) => {
     setDateRange(null);
     setselectedFilter(DateFilterType.UNSET);
   };
-  console.log('date range-->', dateRange);
 
   return (
     <ButtonGroup size="sm" isAttached variant="outline">

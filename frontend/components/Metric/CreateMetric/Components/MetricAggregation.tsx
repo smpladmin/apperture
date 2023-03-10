@@ -1,5 +1,8 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import { metricAggregationDisplayText } from '@components/Metric/util';
+import {
+  getDisplayAggregationFunctionText,
+  metricAggregationDisplayText,
+} from '@components/Metric/util';
 import Dropdown from '@components/SearchableDropdown/Dropdown';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import {
@@ -67,10 +70,6 @@ const MetricAggregation = ({
     updateAggregate(aggregate.variable, {
       aggregations: aggregationObj,
     });
-  };
-
-  const getDisplayAggregationFunctionText = (value: string) => {
-    return metricAggregationDisplayText[value];
   };
 
   return (
