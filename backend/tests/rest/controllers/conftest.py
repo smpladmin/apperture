@@ -1343,7 +1343,7 @@ def compute_metric_request():
             {
                 "variable": "A",
                 "reference_id": "Video_Seen",
-                "function": "count",
+                "function": "A",
                 "variant": "event",
                 "filters": [
                     {

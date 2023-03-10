@@ -562,4 +562,43 @@ describe('Create Metric', () => {
       });
     });
   });
+
+  describe('metric aggregations', () => {
+    it('Opens up the list of metric aggregations and select Unique Count', async () => {
+      await renderMetricComponent();
+      await addNewEvent();
+      const aggregationFunctions = screen.getByTestId(
+        'metric-aggregation-function'
+      );
+      fireEvent.click(aggregationFunctions);
+      const uniqueFunc = screen.getByText('Unique Count');
+      await act(async () => {
+        fireEvent.click(uniqueFunc);
+      });
+      expect(aggregationFunctions.textContent).toEqual('Unique Count');
+    });
+
+    it('Opens up the list of metric aggregations and select Median Function which should give an option to select a property', async () => {
+      await renderMetricComponent();
+      await addNewEvent();
+      const aggregationFunctions = screen.getByTestId(
+        'metric-aggregation-function'
+      );
+      fireEvent.click(aggregationFunctions);
+      const medianFunc = screen.getByText('Median');
+      await act(async () => {
+        fireEvent.click(medianFunc);
+      });
+      expect(aggregationFunctions.textContent).toEqual('Median');
+      const eventProperty = screen.getByText('city');
+
+      await act(async () => {
+        fireEvent.click(eventProperty);
+      });
+      const metricAggEventProperties = screen.getByTestId(
+        'metric-aggregation-event-property'
+      );
+      expect(metricAggEventProperties.textContent).toEqual('city');
+    });
+  });
 });

@@ -6,6 +6,7 @@ from redis import asyncio as aioredis
 
 
 CACHE_EXPIRY_24_HOURS = 60 * 60 * 24
+CACHE_EXPIRY_10_MINUTES = 60 * 10
 
 
 def init_cache(redis_host: str, redis_password: str):

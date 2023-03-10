@@ -6,10 +6,12 @@ import MetricAddFilterComponent from './MetricAddFilterComponent';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import {
   MetricAggregate,
+  MetricBasicAggregation,
   MetricComponentVariant,
   MetricEventFilter,
 } from '@lib/domain/metric';
 import { Node } from '@lib/domain/node';
+import MetricAggregation from './MetricAggregation';
 
 type MetricComponentCardProps = {
   index: number;
@@ -45,7 +47,6 @@ const MetricComponentCard = ({
   const [reference, setReference] = useState(
     savedAggregate?.reference_id || ''
   );
-  const [aggregationFunction, setAggregationFunction] = useState('count');
   const [filters, setFilters] = useState<MetricEventFilter[]>(
     savedAggregate?.filters || []
   );
@@ -66,7 +67,10 @@ const MetricComponentCard = ({
     setIsEventOrSegmentListOpen(false);
     updateAggregate(variable, {
       reference_id: selection.id,
-      aggregations: { property: selection.id, functions: 'count' },
+      aggregations: {
+        property: '',
+        functions: MetricBasicAggregation.TOTAL,
+      },
     });
     setReference(selection.id);
   };
@@ -194,6 +198,7 @@ const MetricComponentCard = ({
                   position="absolute"
                   p={2}
                   borderRadius={12}
+                  zIndex={'10'}
                 >
                   <Flex
                     data-testid={'event-option'}
@@ -262,22 +267,15 @@ const MetricComponentCard = ({
           onClick={handleRemoveComponent}
         />
       </Flex>
+
       {reference && (
         <>
-          <Flex width={'full'} alignItems={'center'}>
-            <Text
-              color={'white'}
-              fontSize={'xs-12'}
-              lineHeight={'xs-16'}
-              marginLeft={4}
-              cursor={'not-allowed'}
-              px={2}
-              borderRadius={4}
-              _hover={{ color: 'white', background: 'grey.300' }}
-            >
-              Total Count
-            </Text>
-          </Flex>
+          <MetricAggregation
+            aggregate={savedAggregate}
+            updateAggregate={updateAggregate}
+            eventProperties={eventProperties}
+            loadingEventsAndProperties={loadingEventsAndProperties}
+          />
           {Boolean(filters.length) &&
             filters.map((filter, index) => (
               <MetricFilterComponent

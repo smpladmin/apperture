@@ -5,9 +5,9 @@ from domain.metrics.models import (
     SegmentsAndEvents,
     SegmentsAndEventsType,
     SegmentsAndEventsAggregations,
-    SegmentsAndEventsAggregationsFunctions,
     SegmentsAndEventsFilter,
     SegmentsAndEventsFilterOperator,
+    MetricBasicAggregation,
 )
 
 
@@ -30,7 +30,7 @@ def test_compute_metric(
                     variable="A",
                     variant=SegmentsAndEventsType.EVENT,
                     aggregations=SegmentsAndEventsAggregations(
-                        functions=SegmentsAndEventsAggregationsFunctions.COUNT,
+                        functions=MetricBasicAggregation.COUNT,
                         property="Video_Seen",
                     ),
                     reference_id="Video_Seen",
