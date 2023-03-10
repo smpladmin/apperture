@@ -13,6 +13,15 @@ import {
 import { replaceEmptyStringPlaceholder } from '@components/Funnel/util';
 import cloneDeep from 'lodash/cloneDeep';
 
+type FunnelRequestBody = {
+  datasourceId: string;
+  name: string;
+  steps: FunnelStep[];
+  randomSequence: boolean;
+  dateFilter?: DateFilter | null;
+  dateFilterType?: DateFilterType | null;
+};
+
 export const saveFunnel = async (
   dsId: string,
   funnelName: string,
@@ -21,14 +30,19 @@ export const saveFunnel = async (
   dateFilter: DateFilter | null,
   dateFilterType: DateFilterType | null
 ) => {
-  const res = await ApperturePost('/funnels', {
+  const funnelRequestBody: FunnelRequestBody = {
     datasourceId: dsId,
     name: funnelName,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
     randomSequence,
-    dateFilter,
-    dateFilterType,
-  });
+  };
+
+  if (dateFilter && dateFilterType) {
+    funnelRequestBody.dateFilter = dateFilter;
+    funnelRequestBody.dateFilterType = dateFilterType;
+  }
+
+  const res = await ApperturePost('/funnels', funnelRequestBody);
   return res;
 };
 
@@ -41,14 +55,19 @@ export const updateFunnel = async (
   dateFilter: DateFilter | null,
   dateFilterType: DateFilterType | null
 ) => {
-  const res = await ApperturePut(`/funnels/${funnelId}`, {
+  const funnelRequestBody: FunnelRequestBody = {
     datasourceId: dsId,
     name: funnelName,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
     randomSequence,
-    dateFilter,
-    dateFilterType,
-  });
+  };
+
+  if (dateFilter && dateFilterType) {
+    funnelRequestBody.dateFilter = dateFilter;
+    funnelRequestBody.dateFilterType = dateFilterType;
+  }
+
+  const res = await ApperturePut(`/funnels/${funnelId}`, funnelRequestBody);
   return res;
 };
 
