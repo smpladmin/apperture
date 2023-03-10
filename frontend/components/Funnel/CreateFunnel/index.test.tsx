@@ -528,4 +528,27 @@ describe('create funnel', () => {
       ]);
     });
   });
+
+  describe('date filters on funnels', () => {
+    it('should call transient call when date filter is selected', async () => {
+      mockedGetTransientFunnelData.mockReturnValue([
+        { event: 'Video_Click', users: 2000, conversion: 100 },
+        { event: 'Chapter_Click', users: 1000, conversion: 50 },
+      ]);
+      await renderCreateFunnel();
+      const eventName = screen.getAllByTestId('event-name');
+
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
+
+      fireEvent.click(eventName[1]);
+      await addEvent('Chapter_Click');
+
+      const oneMonthFilter = screen.getByTestId('month');
+      await act(async () => {
+        fireEvent.click(oneMonthFilter);
+      });
+      expect(mockedGetTransientFunnelData).toHaveBeenCalled();
+    });
+  });
 });

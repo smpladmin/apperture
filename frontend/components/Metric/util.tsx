@@ -175,3 +175,7 @@ export const metricAggregationDisplayText: { [key: string]: string } = {
   ap_p90: '90th Percentile',
   ap_p99: '99th Percentile',
 };
+
+export const getDisplayAggregationFunctionText = (value: string) => {
+  return metricAggregationDisplayText[value];
+};

@@ -16,6 +16,7 @@ import {
   convertToTableData,
   convertToTrendData,
   getCountOfAggregates,
+  getDisplayAggregationFunctionText,
 } from '../util';
 
 jest.mock('@lib/services/datasourceService');
@@ -32,6 +33,7 @@ describe('Create Metric', () => {
   let mockedValidateMetricFormula: jest.Mock;
   let mockedConvertToTableData: jest.Mock;
   let mockedConvertToTrendData: jest.Mock;
+  let mockedGetDisplayAggregationFunctionText: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -196,6 +198,9 @@ describe('Create Metric', () => {
     mockedValidateMetricFormula = jest.mocked(validateMetricFormula);
     mockedConvertToTableData = jest.mocked(convertToTableData);
     mockedConvertToTrendData = jest.mocked(convertToTrendData);
+    mockedGetDisplayAggregationFunctionText = jest.mocked(
+      getDisplayAggregationFunctionText
+    );
 
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetNodes.mockReturnValue(events);
@@ -211,6 +216,25 @@ describe('Create Metric', () => {
     mockedGetCountOfAggregates.mockReturnValue(2);
     mockedConvertToTableData.mockReturnValue(tableData);
     mockedConvertToTrendData.mockReturnValue(trendData);
+    mockedGetDisplayAggregationFunctionText.mockImplementation(
+      (value: string) => {
+        const metricAggregationDisplayText: { [key: string]: string } = {
+          count: 'Total Count',
+          unique: 'Unique Count',
+          ap_sum: 'Sum',
+          ap_median: 'Median',
+          ap_average: 'Average',
+          ap_distinct_count: 'Distinct Count',
+          ap_min: 'Minimum',
+          ap_max: 'Maximum',
+          ap_p25: '25th Percentile',
+          ap_p75: '75th Percentile',
+          ap_p90: '90th Percentile',
+          ap_p99: '99th Percentile',
+        };
+        return metricAggregationDisplayText[value];
+      }
+    );
   });
 
   afterEach(() => {

@@ -1,5 +1,6 @@
 import { replaceEmptyStringPlaceholder } from '@components/Metric/util';
 import { MetricAggregate } from '@lib/domain/metric';
+import { formatDateIntoString } from '@lib/utils/common';
 import {
   AppertureGet,
   ApperturePost,
@@ -14,13 +15,6 @@ type MetricRequestBody = {
   breakdown: string[];
   startDate?: string;
   endDate?: string;
-};
-
-const formatDatelabel = (date: Date) => {
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-  return `${year}-${month}-${day}`;
 };
 
 export const computeMetric = async (
@@ -38,10 +32,10 @@ export const computeMetric = async (
     breakdown,
   };
   if (startDate) {
-    requestBody.startDate = formatDatelabel(startDate);
+    requestBody.startDate = formatDateIntoString(startDate);
   }
   if (endDate) {
-    requestBody.endDate = formatDatelabel(endDate);
+    requestBody.endDate = formatDateIntoString(endDate);
   }
   const res = await ApperturePost('metrics/compute', requestBody);
   return res.data || [];

@@ -6,7 +6,7 @@ import {
   DateRangeType,
 } from '@lib/domain/metric';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 type DateFilterProps = {
   dateRange: DateRangeType | null;
@@ -19,70 +19,61 @@ const DateFilter = ({ setDateRange, dateRange }: DateFilterProps) => {
     DateFilterType.UNSET
   );
 
-  useEffect(() => {
-    const today = new Date();
-    switch (selectedFilter) {
-      case DateFilterType.YESTERDAY:
-        const yesterday = new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          today.getDate() - 1
-        );
-        setDateRange({ startDate: yesterday, endDate: today });
-        break;
-      case DateFilterType.WEEK:
-        const lastWeek = new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          today.getDate() - 7
-        );
-        setDateRange({ startDate: lastWeek, endDate: today });
-        break;
-      case DateFilterType.MONTH:
-        const lastMonth = new Date(
-          today.getFullYear(),
-          today.getMonth() - 1,
-          today.getDate()
-        );
-        setDateRange({ startDate: lastMonth, endDate: today });
-        break;
-      case DateFilterType.QUARTER:
-        const lastQuarter = new Date(
-          today.getFullYear(),
-          today.getMonth() - 3,
-          today.getDate()
-        );
-        setDateRange({ startDate: lastQuarter, endDate: today });
-      default:
-        setDateRange(null);
-        break;
-    }
-  }, [selectedFilter]);
+  const today = new Date();
 
   const [openCustom, setOpenCustom] = useState<boolean>(false);
-
   useOnClickOutside(datePickerRef, () => setOpenCustom(false));
 
-  const toggleFilterState = (newState: DateFilterType) => {
-    setselectedFilter((prevState) =>
-      prevState === newState ? DateFilterType.UNSET : newState
-    );
+  const toggleFilterState = (
+    filterType: DateFilterType,
+    startDate: Date,
+    endDate: Date
+  ) => {
+    if (filterType === selectedFilter) {
+      setselectedFilter(DateFilterType.UNSET);
+      setDateRange(null);
+    } else {
+      setselectedFilter(filterType);
+      setDateRange({ startDate, endDate });
+    }
   };
 
   const handleClickYesterday = () => {
-    toggleFilterState(DateFilterType.YESTERDAY);
+    const yesterday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - 1
+    );
+    toggleFilterState(DateFilterType.YESTERDAY, yesterday, today);
   };
+
   const handleClickWeek = () => {
-    toggleFilterState(DateFilterType.WEEK);
+    const lastWeek = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - 7
+    );
+    toggleFilterState(DateFilterType.WEEK, lastWeek, today);
   };
 
   const handleClickMonth = () => {
-    toggleFilterState(DateFilterType.MONTH);
+    const lastMonth = new Date(
+      today.getFullYear(),
+      today.getMonth() - 1,
+      today.getDate()
+    );
+    toggleFilterState(DateFilterType.MONTH, lastMonth, today);
   };
 
   const handleClickQuarter = () => {
-    toggleFilterState(DateFilterType.QUARTER);
+    const lastQuarter = new Date(
+      today.getFullYear(),
+      today.getMonth() - 3,
+      today.getDate()
+    );
+    toggleFilterState(DateFilterType.QUARTER, lastQuarter, today);
   };
+
   const handleClickCustom = () => {
     setOpenCustom((prevState) => !prevState);
   };
@@ -93,6 +84,7 @@ const DateFilter = ({ setDateRange, dateRange }: DateFilterProps) => {
     setOpenCustom((prevState) => !prevState);
     setselectedFilter(DateFilterType.CUSTOM);
   };
+
   const handleCustomCancel = () => {
     setOpenCustom((prevState) => !prevState);
     setDateRange(null);

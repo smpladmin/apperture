@@ -169,6 +169,7 @@ const ViewMetricActionPanel = ({
             reference={aggregate.reference_id}
             filters={aggregate.filters}
             conditions={aggregate.conditions}
+            aggregation={aggregate.aggregations}
           />
         ))}
         <ActionMenu
