@@ -111,6 +111,7 @@ const DateFilter = ({
         height={8}
         fontSize={'xs-12'}
         onClick={handleClickYesterday}
+        data-testid={'yesterday'}
       >
         Yesterday
       </Button>
@@ -126,6 +127,7 @@ const DateFilter = ({
         height={8}
         fontSize={'xs-12'}
         onClick={handleClickWeek}
+        data-testid={'week'}
       >
         1W
       </Button>
@@ -141,6 +143,7 @@ const DateFilter = ({
         height={8}
         fontSize={'xs-12'}
         onClick={handleClickMonth}
+        data-testid={'month'}
       >
         1M
       </Button>
@@ -157,6 +160,7 @@ const DateFilter = ({
         fontSize={'xs-12'}
         onClick={handleClickQuarter}
         borderRadius={0}
+        data-testid={'three-months'}
       >
         3M
       </Button>
@@ -178,6 +182,7 @@ const DateFilter = ({
           borderLeftRadius={0}
           borderLeft={'none'}
           onClick={handleClickCustom}
+          data-testid={'custom'}
         >
           <i style={{ marginRight: '4px' }} className="ri-calendar-line" />{' '}
           {dateFilterType === DateFilterType.FIXED

@@ -72,8 +72,6 @@ class EventsBase(ABC):
         today = datetime.datetime.today()
         end_date = today.strftime(date_format)
 
-        print("compute_date_filter", today)
-
         return (
             (date_filter.start_date, end_date)
             if date_filter_type == DateFilterType.SINCE
