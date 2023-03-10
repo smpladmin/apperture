@@ -86,6 +86,7 @@ const MetricAggregation = ({
           py={'1'}
           borderRadius={4}
           _hover={{ color: 'white', background: 'grey.300' }}
+          data-testid={'metric-aggregation-function'}
           onClick={() => setIsAggregationListOpen(true)}
         >
           {getDisplayAggregationFunctionText(aggregation.functions)}
@@ -100,15 +101,12 @@ const MetricAggregation = ({
                 cursor={'pointer'}
                 _hover={{ background: 'white.100' }}
                 key={aggregation}
+                onClick={() => {
+                  handleUpdateAggregationFunction(aggregation);
+                }}
+                data-testid={'metric-aggregation-options'}
               >
-                <Text
-                  onClick={() => {
-                    handleUpdateAggregationFunction(aggregation);
-                  }}
-                  fontWeight={500}
-                  fontSize={'xs-14'}
-                  lineHeight={'xs-14'}
-                >
+                <Text fontWeight={500} fontSize={'xs-14'} lineHeight={'xs-14'}>
                   {getDisplayAggregationFunctionText(aggregation)}
                 </Text>
               </Box>
@@ -149,7 +147,7 @@ const MetricAggregation = ({
               _hover={{ color: 'white', background: 'grey.300' }}
               cursor={'pointer'}
               onClick={() => setIsPropertiesListOpen(true)}
-              data-testid={'event-property'}
+              data-testid={'metric-aggregation-event-property'}
               wordBreak={'break-word'}
             >
               {aggregation.property || 'Select Property'}
