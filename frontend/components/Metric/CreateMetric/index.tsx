@@ -7,6 +7,7 @@ import {
   Metric,
   MetricAggregate,
   MetricComponentVariant,
+  MetricBasicAggregation,
 } from '@lib/domain/metric';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
 import React, { useEffect, useState } from 'react';
@@ -38,7 +39,7 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
         variant: MetricComponentVariant.UNDEFINED,
         filters: [],
         conditions: [],
-        aggregations: { functions: 'count', property: '' },
+        aggregations: { functions: MetricBasicAggregation.TOTAL, property: '' },
       },
     ]
   );

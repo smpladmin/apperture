@@ -1,4 +1,4 @@
-import { Box } from '@chakra-ui/react';
+import { Box, PropsOf } from '@chakra-ui/react';
 import React, { ReactNode, useEffect, useRef } from 'react';
 
 type DropdownProps = {
@@ -6,6 +6,7 @@ type DropdownProps = {
   dropdownPosition?: string;
   maxHeight?: number;
   children: ReactNode;
+  minWidth?: string;
 };
 
 const Dropdown = ({
@@ -13,6 +14,7 @@ const Dropdown = ({
   dropdownPosition,
   maxHeight = 102,
   children,
+  minWidth,
 }: DropdownProps) => {
   const dropDownRef = useRef<HTMLDivElement>(null);
 
@@ -43,6 +45,7 @@ const Dropdown = ({
           maxWidth={'102'}
           overflowY={'auto'}
           right={dropdownPosition === 'right' ? 0 : ''}
+          minWidth={minWidth || 'auto'}
         >
           {children}
         </Box>

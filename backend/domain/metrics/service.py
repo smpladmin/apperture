@@ -91,7 +91,9 @@ class MetricService:
 
                 dates_present = [row["date"] for row in metric_data]
                 for single_date in self.date_range(start_date, end_date):
-                    if single_date in dates_present:
+                    if (single_date in dates_present) and metric_data[
+                        dates_present.index(single_date)
+                    ][func]:
                         metric_values.append(
                             MetricValue(
                                 date=single_date.strftime("%Y-%m-%d"),
@@ -123,7 +125,9 @@ class MetricService:
                     metric_values = []
                     dates_present = [row["date"] for row in metric_data]
                     for single_date in self.date_range(start_date, end_date):
-                        if single_date in dates_present:
+                        if (single_date in dates_present) and metric_data[
+                            dates_present.index(single_date)
+                        ][func]:
                             metric_values.append(
                                 MetricValue(
                                     date=single_date.strftime("%Y-%m-%d"),

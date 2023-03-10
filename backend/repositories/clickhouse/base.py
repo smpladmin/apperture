@@ -33,6 +33,8 @@ class EventsBase(ABC):
             self.date_func(self.table.timestamp) <= Parameter("%(end_date)s"),
         ]
         self.convert_to_float_func = CustomFunction("toFloat64OrDefault", ["string"])
+        self.convert_to_numeric_func = CustomFunction("toFloat64OrNull", ["string"])
+        self.convert_to_string_func = CustomFunction("toString", ["string"])
         self.convert_to_bool_func = CustomFunction("toBool", ["string"])
         self.ch_match_func = CustomFunction("match", ["column", "term"])
         self.parse_datetime_best_effort = CustomFunction(
