@@ -16,7 +16,7 @@ type DateFilterProps = {
 const DateFilter = ({ setDateRange, dateRange }: DateFilterProps) => {
   const datePickerRef = useRef(null);
   const [selectedFilter, setselectedFilter] = useState<DateFilterType>(
-    dateRange ? DateFilterType.CUSTOM : DateFilterType.UNSET
+    DateFilterType.UNSET
   );
 
   const today = new Date();
@@ -84,11 +84,13 @@ const DateFilter = ({ setDateRange, dateRange }: DateFilterProps) => {
     setOpenCustom((prevState) => !prevState);
     setselectedFilter(DateFilterType.CUSTOM);
   };
+
   const handleCustomCancel = () => {
     setOpenCustom((prevState) => !prevState);
     setDateRange(null);
     setselectedFilter(DateFilterType.UNSET);
   };
+  console.log('date range-->', dateRange);
 
   return (
     <ButtonGroup size="sm" isAttached variant="outline">
