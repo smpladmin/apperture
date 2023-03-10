@@ -40,8 +40,8 @@ class FunnelsService:
         name: str,
         steps: List[FunnelStep],
         randomSequence: bool,
-        date_filter: Union[LastDateFilter, FixedDateFilter, None],
-        date_filter_type: Union[DateFilterType, None],
+        dateFilter: Union[LastDateFilter, FixedDateFilter, None],
+        dateFilterType: Union[DateFilterType, None],
     ) -> Funnel:
         return Funnel(
             datasource_id=datasourceId,
@@ -50,8 +50,8 @@ class FunnelsService:
             name=name,
             steps=steps,
             random_sequence=randomSequence,
-            date_filter=date_filter,
-            date_filter_type=date_filter_type,
+            date_filter=dateFilter,
+            date_filter_type=dateFilterType,
         )
 
     async def add_funnel(self, funnel: Funnel):

@@ -66,10 +66,13 @@ class MetricService:
 
         dates = list(set(row[0] for row in computed_metric))
         start_date = (
-            datetime.strptime(start_date, "%Y-%m-%d") if start_date else min(dates)
+            datetime.strptime(start_date, "%Y-%m-%d").date()
+            if start_date
+            else min(dates)
         )
-        end_date = datetime.strptime(end_date, "%Y-%m-%d") if end_date else max(dates)
-
+        end_date = (
+            datetime.strptime(end_date, "%Y-%m-%d").date() if end_date else max(dates)
+        )
         breakdown_combinations = (
             list(
                 dict.fromkeys([row[1 : len(breakdown) + 1] for row in computed_metric])
