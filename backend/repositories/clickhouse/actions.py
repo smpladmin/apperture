@@ -291,4 +291,3 @@ class Actions(EventsBase):
         self.delete_processed_events(
             ds_id=selected_action.datasource_id, event=selected_action.name
         )
-        print(selected_action)
