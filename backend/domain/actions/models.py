@@ -43,10 +43,10 @@ class Action(Document):
     user_id: PydanticObjectId
     groups: List[ActionGroup]
     processed_till: Optional[datetime.datetime]
+    is_deleted: bool = False
 
     class Settings:
         name = "actions"
-        database_name = "apperture_db"
 
 
 class ComputedEventStreamResult(BaseModel):

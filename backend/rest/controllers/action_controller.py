@@ -1,5 +1,6 @@
 from typing import List
 
+from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends
 
 from domain.actions.service import ActionService
@@ -95,3 +96,10 @@ async def compute_transient_actions(
     return await action_service.compute_action(
         datasource_id=dto.datasourceId, groups=dto.groups
     )
+
+
+@router.delete("/actions/{id}", response_model=ActionResponse)
+async def delete_action(
+    id: PydanticObjectId, action_service: ActionService = Depends()
+):
+    await action_service.delete_action(id=id)
