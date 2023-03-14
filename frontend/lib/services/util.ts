@@ -66,3 +66,18 @@ export const ApperturePut = async (
     return { status: error.response?.status, data: undefined };
   }
 };
+
+export const AppertureDelete = async (
+  path: string,
+  config: {
+    [key: string]: string | number | boolean | Array<any> | object | null;
+  } = {}
+) => {
+  try {
+    return await AppertureAPI.delete(path, config);
+  } catch (e) {
+    const error = e as AxiosError;
+    console.error(error.message);
+    return { status: error.response?.status, data: undefined };
+  }
+};

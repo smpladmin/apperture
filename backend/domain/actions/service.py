@@ -43,6 +43,7 @@ class ActionService:
     async def get_actions_for_datasource_id(self, datasource_id: str) -> List[Action]:
         return await Action.find(
             PydanticObjectId(datasource_id) == Action.datasource_id
+            and Action.enabled != False
         ).to_list()
 
     async def update_action_processed_till(
@@ -98,3 +99,10 @@ class ActionService:
         )[0][0]
 
         return ComputedActionResponse(count=count, data=matching_events)
+
+    async def delete_action(self, id=PydanticObjectId):
+        selected_action = await Action.find_one(Action.id == id)
+        await selected_action.update({"$set": {"enabled": False}})
+        await self.actions.delete_processed_events(
+            ds_id=selected_action.datasource_id, event=selected_action.name
+        )

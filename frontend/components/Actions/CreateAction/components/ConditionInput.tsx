@@ -16,6 +16,7 @@ const ConditionInput = ({
   criteriaDropdownList = [],
   currentCriteria,
   dropDownHandler,
+  isDisabled = false,
 }: {
   updateHandler: Function;
   type: string;
@@ -29,6 +30,7 @@ const ConditionInput = ({
   criteriaDropdownList?: string[];
   currentCriteria?: string;
   dropDownHandler?: Function;
+  isDisabled: Boolean;
 }) => {
   const [showCloseButton, setShowCloseButton] = useState(false);
 
@@ -49,8 +51,8 @@ const ConditionInput = ({
 
   return (
     <Box
-      onMouseEnter={() => setShowCloseButton(true)}
-      onMouseLeave={() => setShowCloseButton(false)}
+      onMouseEnter={() => !isDisabled && setShowCloseButton(true)}
+      onMouseLeave={() => !isDisabled && setShowCloseButton(false)}
     >
       <Flex
         position={'relative'}
@@ -74,7 +76,7 @@ const ConditionInput = ({
           zIndex={1}
           position="relative"
         >
-          {showCriteriaDropdown && (
+          {showCriteriaDropdown && !isDisabled && (
             <>
               <Text fontSize={'xs-12'} lineHeight={'xs-16'} fontWeight={600}>
                 {currentCriteria}
@@ -129,6 +131,18 @@ const ConditionInput = ({
               onClick={() => closeHandler(condition)}
             />
           )}
+          {isDisabled && (
+            <Text
+              as="span"
+              fontSize={'xs-12'}
+              lineHeight={'xs-16'}
+              fontWeight={400}
+              pr={3}
+              pl={1}
+            >
+              {currentCriteria}
+            </Text>
+          )}
         </Flex>
       </Flex>
       <Input
@@ -151,6 +165,7 @@ const ConditionInput = ({
         fontSize={'xs-12'}
         lineHeight={'xs-16'}
         defaultValue={defaultValue || ''}
+        disabled={Boolean(isDisabled)}
       />
     </Box>
   );

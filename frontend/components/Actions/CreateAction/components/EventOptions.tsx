@@ -6,9 +6,25 @@ import { CaptureEvent } from '@lib/domain/action';
 type EventOptionsProps = {
   captureEvent: CaptureEvent;
   updateHandler: Function;
+  isDisabled: Boolean;
 };
 
-const EventOptions = ({ captureEvent, updateHandler }: EventOptionsProps) => {
+const EventOptions = ({
+  captureEvent,
+  updateHandler,
+  isDisabled,
+}: EventOptionsProps) => {
+  if (isDisabled) {
+    return (
+      <Text
+        fontSize={{ base: 'xs-12', md: 'xs-14' }}
+        lineHeight={{ base: 'xs-16', md: 'xs-18' }}
+        fontWeight={'500'}
+      >
+        {captureEvent == '$autocapture' ? 'Autocapture' : 'Pageleave'}
+      </Text>
+    );
+  }
   return (
     <RadioGroup
       value={captureEvent}
