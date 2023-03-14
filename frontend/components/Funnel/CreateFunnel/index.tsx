@@ -8,8 +8,6 @@ import {
   FunnelData,
   FunnelStep,
   FunnelTrendsData,
-  DateFilter,
-  DateFilterType,
 } from '@lib/domain/funnel';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
@@ -25,6 +23,7 @@ import {
 } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel/util';
+import { DateFilter, DateFilterType } from '@lib/domain/common';
 
 const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const router = useRouter();

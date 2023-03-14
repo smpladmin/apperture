@@ -7,10 +7,9 @@ import {
   TabPanel,
   Text,
 } from '@chakra-ui/react';
+import { DateFilter, DateFilterType } from '@lib/domain/common';
 import {
   ConversionStatus,
-  DateFilter,
-  DateFilterType,
   FunnelConversionData,
   FunnelStep,
   UserProperty,
@@ -43,7 +42,6 @@ const UserTableView = ({
   setSelectedUser,
   properties,
   tableState,
-  setTableState,
   dateFilter,
   dateFilterType,
 }: UserTableViewProps) => {

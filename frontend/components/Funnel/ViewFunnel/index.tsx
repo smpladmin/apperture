@@ -1,10 +1,6 @@
 import { Flex } from '@chakra-ui/react';
 import { DateFilter, DateFilterType } from '@lib/domain/common';
-import {
-  Funnel,
-  FunnelData,
-  FunnelTrendsData,
-} from '@lib/domain/funnel';
+import { Funnel, FunnelData, FunnelTrendsData } from '@lib/domain/funnel';
 import { Notifications } from '@lib/domain/notification';
 import {
   getTransientFunnelData,
@@ -95,7 +91,6 @@ const ViewFunnel = ({
         funnelSteps={savedFunnel.steps}
         computedFunnel={computedFunnelData}
         computedTrendsData={computedTrendsData}
-        datasourceId={datasourceId}
         isLoading={isLoading}
         dateFilter={dateFilter}
         dateFilterType={dateFilterType}
