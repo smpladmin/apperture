@@ -60,14 +60,14 @@ async def save_metrics(
         function=dto.function,
         aggregates=dto.aggregates,
         breakdown=dto.breakdown,
-        date_filter=dto.dateFilter,
-        date_filter_type=dto.dateFilterType,
+        dateFilter=dto.dateFilter,
+        dateFilterType=dto.dateFilterType,
     )
     return await metric_service.add_metric(metric=metric)
 
 
 @router.put("/metrics/{id}", response_model=SavedMetricResponse)
-async def save_metrics(
+async def update_metric(
     id: str,
     dto: CreateMetricDTO,
     user: AppertureUser = Depends(get_user),
@@ -83,8 +83,8 @@ async def save_metrics(
         function=dto.function,
         aggregates=dto.aggregates,
         breakdown=dto.breakdown,
-        date_filter=dto.dateFilter,
-        date_filter_type=dto.dateFilterType,
+        dateFilter=dto.dateFilter,
+        dateFilterType=dto.dateFilterType,
     )
     await metric_service.update_metric(metric_id=id, metric=metric)
     return metric
