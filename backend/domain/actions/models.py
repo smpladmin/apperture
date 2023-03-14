@@ -43,7 +43,7 @@ class Action(Document):
     user_id: PydanticObjectId
     groups: List[ActionGroup]
     processed_till: Optional[datetime.datetime]
-    enabled: bool = False
+    enabled: bool = True
 
     class Settings:
         name = "actions"

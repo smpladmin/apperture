@@ -282,7 +282,7 @@ class Actions(EventsBase):
         return query.get_sql(), params
 
     def delete_processed_events(self, ds_id: PydanticObjectId, event: str):
-        query = f"ALTER TABLE {self.table} UPDATE \"properties._row_exists\"=0 where event_name='{event}' AND datasource_id='{ds_id}'"
+        query = f"DELETE FROM {self.table} WHERE event_name='{event}' AND datasource_id='{ds_id}'"
         self.execute_get_query(query, {})
 
     async def delete_action(self, id: PydanticObjectId):
