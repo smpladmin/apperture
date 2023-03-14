@@ -28,6 +28,7 @@ const SavedMetricView = ({
       py={{ base: '8', md: '12' }}
       width={'full'}
       height={'full'}
+      minHeight={'full'}
       overflowY={'scroll'}
     >
       <Flex w="full" justifyContent={'space-between'}>
@@ -93,7 +94,9 @@ const SavedMetricView = ({
         </Flex>
       </Flex>
       {isLoading ? (
-        <Loader />
+        <Flex alignItems={'center'} justifyContent={'center'} h={'full'}>
+          <Loader />
+        </Flex>
       ) : metric && metric.length > 0 ? (
         <MetricTrend data={metric} breakdown={breakdown} />
       ) : (

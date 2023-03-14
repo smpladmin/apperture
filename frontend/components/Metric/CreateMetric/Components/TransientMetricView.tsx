@@ -51,6 +51,7 @@ const TransientMetricView = ({
       direction={'column'}
       py={{ base: '8', md: '12' }}
       width={'full'}
+      height={'full'}
       minHeight={'full'}
       overflowY={'scroll'}
     >
@@ -137,7 +138,9 @@ const TransientMetricView = ({
       {showEmptyState ? (
         <MetricEmptyState />
       ) : isLoading ? (
-        <Loader />
+        <Flex alignItems={'center'} justifyContent={'center'} h={'full'}>
+          <Loader />
+        </Flex>
       ) : (
         <MetricTrend data={metric} breakdown={breakdown} />
       )}
