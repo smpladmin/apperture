@@ -1,35 +1,40 @@
 import { Box, Button, Flex, Highlight, Text } from '@chakra-ui/react';
 import React, { useRef, useState } from 'react';
 import MetricEmptyState from './MetricEmptyState';
-import DateFilter from './DateFilter';
-import { DateRangeType, ComputedMetric } from '@lib/domain/metric';
+import DateFilterComponent from '@components/Date/DateFilter';
+import { ComputedMetric } from '@lib/domain/metric';
 import MetricTrend from './MetricTrend';
 import Loader from '@components/LoadingSpinner';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
+import { DateFilter, DateFilterType } from '@lib/domain/common';
 
 type TransientMetricViewProps = {
   metric: ComputedMetric[];
-  setDateRange: Function;
-  dateRange: DateRangeType | null;
   isLoading: boolean;
   eventProperties: string[];
   loadingEventsAndProperties: boolean;
   breakdown: string[];
   setBreakdown: Function;
   showEmptyState: boolean;
+  dateFilter: DateFilter | null;
+  setDateFilter: Function;
+  dateFilterType: DateFilterType | null;
+  setDateFilterType: Function;
 };
 
 const TransientMetricView = ({
   metric,
-  setDateRange,
-  dateRange,
   isLoading,
   eventProperties,
   loadingEventsAndProperties,
   breakdown,
   setBreakdown,
   showEmptyState,
+  dateFilter,
+  setDateFilter,
+  dateFilterType,
+  setDateFilterType,
 }: TransientMetricViewProps) => {
   const breakdownRef = useRef(null);
   const [isPropertiesListOpen, setIsPropertiesListOpen] = useState(false);
@@ -47,12 +52,15 @@ const TransientMetricView = ({
       py={{ base: '8', md: '12' }}
       width={'full'}
       minHeight={'full'}
-      justifyContent={'center'}
-      alignItems={'center'}
       overflowY={'scroll'}
     >
       <Flex w="full" justifyContent={'space-between'}>
-        <DateFilter setDateRange={setDateRange} dateRange={dateRange} />
+        <DateFilterComponent
+          dateFilter={dateFilter}
+          setDateFilter={setDateFilter}
+          dateFilterType={dateFilterType}
+          setDateFilterType={setDateFilterType}
+        />
 
         <Flex gap={'1'}>
           <Button

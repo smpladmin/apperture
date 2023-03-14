@@ -17,12 +17,12 @@ import {
   validateMetricFormula,
 } from '@lib/services/metricService';
 import {
-  DateRangeType,
   MetricAggregate,
   Metric,
   MetricComponentVariant,
   MetricEventFilter,
   ComputedMetric,
+  MetricBasicAggregation,
 } from '@lib/domain/metric';
 import { cloneDeep, isEqual } from 'lodash';
 import { Node } from '@lib/domain/node';
@@ -30,10 +30,10 @@ import {
   isValidAggregates,
   replaceEmptyStringPlaceholder,
 } from '@components/Metric/util';
+import { DateFilter, DateFilterType } from '@lib/domain/common';
 
 type CreateMetricActionProps = {
   setMetric: Function;
-  dateRange: DateRangeType | null;
   savedMetric: Metric | undefined;
   canSaveMetric: boolean;
   setCanSaveMetric: Function;
@@ -44,11 +44,12 @@ type CreateMetricActionProps = {
   breakdown: string[];
   aggregates: MetricAggregate[];
   setAggregates: Function;
+  dateFilter: DateFilter | null;
+  dateFilterType: DateFilterType | null;
 };
 
 const CreateMetricAction = ({
   setMetric,
-  dateRange,
   savedMetric,
   canSaveMetric,
   setCanSaveMetric,
@@ -59,6 +60,8 @@ const CreateMetricAction = ({
   breakdown,
   aggregates,
   setAggregates,
+  dateFilter,
+  dateFilterType,
 }: CreateMetricActionProps) => {
   const [metricName, setMetricName] = useState(
     savedMetric?.name || 'Untitled Metric'
@@ -115,7 +118,10 @@ const CreateMetricAction = ({
           variant: MetricComponentVariant.UNDEFINED,
           filters: [],
           conditions: [],
-          aggregations: { functions: 'count', property: '' },
+          aggregations: {
+            functions: MetricBasicAggregation.TOTAL,
+            property: '',
+          },
         },
       ]);
     }
@@ -141,7 +147,9 @@ const CreateMetricAction = ({
         dsId as string,
         metricDefinition,
         aggregates,
-        breakdown
+        breakdown,
+        dateFilter,
+        dateFilterType
       );
     } else {
       // save the metric
@@ -150,7 +158,9 @@ const CreateMetricAction = ({
         dsId as string,
         metricDefinition,
         aggregates,
-        breakdown
+        breakdown,
+        dateFilter,
+        dateFilterType
       );
     }
     router.push({
@@ -175,8 +185,8 @@ const CreateMetricAction = ({
           : aggregates.map((aggregate) => aggregate.variable).join(','),
         processedAggregate,
         breakdown,
-        dateRange?.startDate,
-        dateRange?.endDate
+        dateFilter,
+        dateFilterType
       );
 
       setMetric(result);
@@ -184,7 +194,7 @@ const CreateMetricAction = ({
     };
     setIsLoading(true);
     fetchMetric(aggregates);
-  }, [aggregates, metricDefinition, dateRange, breakdown]);
+  }, [aggregates, metricDefinition, breakdown, dateFilter]);
 
   useEffect(() => {
     // check for valid metric definition

@@ -5,7 +5,7 @@ import {
   FixedDateFilter,
   DateFilterType,
   LastDateFilter,
-} from '@lib/domain/funnel';
+} from '@lib/domain/common';
 import { DatePickerRange } from '@lib/domain/metric';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';

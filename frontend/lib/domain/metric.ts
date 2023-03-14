@@ -1,3 +1,4 @@
+import { DateFilter, DateFilterType } from './common';
 import { AppertureUser } from './user';
 
 export type MetricEventFilter = {
@@ -63,15 +64,6 @@ export type Breakdown = {
   rowIndex: number;
 };
 
-export enum DateFilterType {
-  YESTERDAY = 'yesterday',
-  WEEK = 'week',
-  MONTH = 'month',
-  QUARTER = 'quarter',
-  CUSTOM = 'custom',
-  UNSET = '',
-}
-
 export type DateRangeType = {
   startDate: Date;
   endDate: Date;
@@ -92,6 +84,8 @@ export type Metric = {
   function: string;
   aggregates: MetricAggregate[];
   breakdown: string[];
+  dateFilter?: DateFilter | null;
+  dateFilterType?: DateFilterType | null;
 };
 
 export type MetricWithUser = Metric & {
