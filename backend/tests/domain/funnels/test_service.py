@@ -21,6 +21,8 @@ from domain.funnels.models import (
     ConversionStatus,
     DateFilterType,
     LastDateFilter,
+    ConversionWindow,
+    ConversionWindowType,
 )
 
 
@@ -61,6 +63,9 @@ class TestFunnelService:
             random_sequence=False,
             date_filter=LastDateFilter(days=7),
             date_filter_type=DateFilterType.LAST,
+            conversion_window=ConversionWindow(
+                type=ConversionWindowType.MINUTES, value=10
+            ),
         )
         self.computed_steps = [
             ComputedFunnelStep(event="Login", users=100, conversion=100.0),
@@ -112,14 +117,17 @@ class TestFunnelService:
     def test_build_funnel(self):
 
         funnel = self.service.build_funnel(
-            datasourceId=self.ds_id,
-            appId=self.app_id,
+            datasourceId=PydanticObjectId(self.ds_id),
+            appId=PydanticObjectId(self.app_id),
             userId=self.user_id,
             name=self.name,
             steps=self.funnel_steps,
             randomSequence=False,
             dateFilter=LastDateFilter(days=7),
             dateFilterType=DateFilterType.LAST,
+            conversionWindow=ConversionWindow(
+                type=ConversionWindowType.MINUTES, value=10
+            ),
         )
 
         assert filter_response(funnel.dict()) == filter_response(self.funnel.dict())
@@ -143,6 +151,9 @@ class TestFunnelService:
             steps=self.funnel_steps,
             date_filter=self.date_filter,
             date_filter_type=self.date_filter_type,
+            conversion_window=ConversionWindow(
+                type=ConversionWindowType.MINUTES, value=10
+            ),
         )
 
     @pytest.mark.asyncio
@@ -154,6 +165,10 @@ class TestFunnelService:
                 "$set": {
                     "datasource_id": PydanticObjectId("636a1c61d715ca6baae65611"),
                     "app_id": PydanticObjectId("636a1c61d715ca6baae65612"),
+                    "conversion_window": {
+                        "type": ConversionWindowType.MINUTES,
+                        "value": 10,
+                    },
                     "name": "name",
                     "random_sequence": False,
                     "revision_id": ANY,
@@ -180,6 +195,9 @@ class TestFunnelService:
                 steps=self.funnel.steps,
                 date_filter=self.date_filter,
                 date_filter_type=self.date_filter_type,
+                conversion_window=ConversionWindow(
+                    type=ConversionWindowType.MINUTES, value=10
+                ),
             )
             == self.funnel_trends_data
         )
@@ -215,6 +233,9 @@ class TestFunnelService:
                 status=ConversionStatus.CONVERTED,
                 date_filter=self.date_filter,
                 date_filter_type=self.date_filter_type,
+                conversion_window=ConversionWindow(
+                    type=ConversionWindowType.MINUTES, value=10
+                ),
             )
             == self.funnel_conversion_data
         )

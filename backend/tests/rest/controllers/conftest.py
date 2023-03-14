@@ -1146,6 +1146,7 @@ def funnel_response():
         "randomSequence": False,
         "dateFilter": None,
         "dateFilterType": None,
+        "conversionWindow": None,
     }
 
 

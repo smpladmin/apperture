@@ -12,6 +12,7 @@ from domain.funnels.models import (
     DateFilterType,
     FixedDateFilter,
     LastDateFilter,
+    ConversionWindow,
 )
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
@@ -24,6 +25,7 @@ class CreateFunnelDto(BaseModel):
     randomSequence: bool
     dateFilter: Optional[Union[LastDateFilter, FixedDateFilter]]
     dateFilterType: Optional[DateFilterType]
+    conversionWindow: Optional[ConversionWindow]
 
 
 class TransientFunnelConversionlDto(BaseModel):
@@ -32,6 +34,7 @@ class TransientFunnelConversionlDto(BaseModel):
     status: ConversionStatus
     dateFilter: Optional[Union[LastDateFilter, FixedDateFilter]]
     dateFilterType: Optional[DateFilterType]
+    conversionWindow: Optional[ConversionWindow]
 
 
 class TransientFunnelDto(BaseModel):
@@ -39,6 +42,7 @@ class TransientFunnelDto(BaseModel):
     steps: List[FunnelStep]
     dateFilter: Optional[Union[LastDateFilter, FixedDateFilter]]
     dateFilterType: Optional[DateFilterType]
+    conversionWindow: Optional[ConversionWindow]
 
 
 class FunnelResponse(Funnel, ModelResponse):

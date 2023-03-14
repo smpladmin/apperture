@@ -3,7 +3,11 @@ from typing import List
 
 from fastapi import APIRouter, Depends
 from fastapi_cache.decorator import cache
-from cache.cache import CACHE_EXPIRY_24_HOURS, datasource_key_builder, CACHE_EXPIRY_10_MINUTES
+from cache.cache import (
+    CACHE_EXPIRY_24_HOURS,
+    datasource_key_builder,
+    CACHE_EXPIRY_10_MINUTES,
+)
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.events.service import EventsService

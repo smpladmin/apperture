@@ -19,6 +19,7 @@ from domain.funnels.models import (
     DateFilterType,
     FixedDateFilter,
     LastDateFilter,
+    ConversionWindow,
 )
 from repositories.clickhouse.funnels import Funnels
 
@@ -42,6 +43,7 @@ class FunnelsService:
         randomSequence: bool,
         dateFilter: Union[LastDateFilter, FixedDateFilter, None],
         dateFilterType: Union[DateFilterType, None],
+        conversionWindow: Union[ConversionWindow, None],
     ) -> Funnel:
         return Funnel(
             datasource_id=datasourceId,
@@ -52,6 +54,7 @@ class FunnelsService:
             random_sequence=randomSequence,
             date_filter=dateFilter,
             date_filter_type=dateFilterType,
+            conversion_window=conversionWindow,
         )
 
     async def add_funnel(self, funnel: Funnel):
@@ -67,6 +70,7 @@ class FunnelsService:
         steps: List[FunnelStep],
         date_filter: Union[LastDateFilter, FixedDateFilter, None],
         date_filter_type: Union[DateFilterType, None],
+        conversion_window: Union[ConversionWindow, None],
     ) -> List[ComputedFunnelStep]:
 
         start_date, end_date = (
@@ -125,6 +129,7 @@ class FunnelsService:
         steps: List[FunnelStep],
         date_filter: Union[LastDateFilter, FixedDateFilter, None],
         date_filter_type: Union[DateFilterType, None],
+        conversion_window: Union[ConversionWindow, None],
     ) -> List[FunnelTrendsData]:
 
         start_date, end_date = (
@@ -156,6 +161,7 @@ class FunnelsService:
         status: ConversionStatus,
         date_filter: Union[LastDateFilter, FixedDateFilter, None],
         date_filter_type: Union[DateFilterType, None],
+        conversion_window: Union[ConversionWindow, None],
     ):
         start_date, end_date = (
             self.funnels.compute_date_filter(
