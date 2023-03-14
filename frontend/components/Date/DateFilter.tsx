@@ -17,6 +17,7 @@ type DateFilterProps = {
   setDateFilter: Function;
   dateFilterType: DateFilterType | null;
   setDateFilterType: Function;
+  isDisabled?: boolean;
 };
 
 const DateFilter = ({
@@ -24,6 +25,7 @@ const DateFilter = ({
   setDateFilter,
   dateFilterType,
   setDateFilterType,
+  isDisabled,
 }: DateFilterProps) => {
   const datePickerRef = useRef(null);
 
@@ -98,7 +100,7 @@ const DateFilter = ({
   };
 
   return (
-    <ButtonGroup size="sm" isAttached variant="outline">
+    <ButtonGroup size="sm" isAttached variant="outline" isDisabled={isDisabled}>
       <Button
         border="1px solid #EDEDED"
         id="yesterday"
@@ -186,9 +188,10 @@ const DateFilter = ({
         >
           <i style={{ marginRight: '4px' }} className="ri-calendar-line" />{' '}
           {dateFilterType === DateFilterType.FIXED
-            ? `${startDate.toLocaleString().split(',')[0]} to ${
-                endDate.toLocaleString().split(',')[0]
-              }`
+            ? `${formatDateIntoString(
+                startDate,
+                'DD/MM/YYYY'
+              )} to ${formatDateIntoString(endDate, 'DD/MM/YYYY')}`
             : 'Custom'}
         </Button>
         <DateRangeSelector
