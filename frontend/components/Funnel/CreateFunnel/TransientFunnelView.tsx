@@ -30,6 +30,7 @@ type TransientFunnelViewProps = {
   setDateFilter: Function;
   dateFilterType: DateFilterType | null;
   setDateFilterType: Function;
+  isDateFilterDisabled?: boolean;
 };
 
 const TransientFunnelView = ({
@@ -41,6 +42,7 @@ const TransientFunnelView = ({
   setDateFilter,
   dateFilterType,
   setDateFilterType,
+  isDateFilterDisabled = false,
 }: TransientFunnelViewProps) => {
   const {
     isOpen: isDrawerOpen,
@@ -81,6 +83,7 @@ const TransientFunnelView = ({
         setDateFilter={setDateFilter}
         dateFilterType={dateFilterType}
         setDateFilterType={setDateFilterType}
+        isDisabled={isDateFilterDisabled}
       />
 
       {isLoading ? (
