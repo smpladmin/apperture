@@ -6,13 +6,9 @@ from fastapi import APIRouter, Depends
 from domain.actions.service import ActionService
 from domain.apperture_users.models import AppertureUser
 from domain.datasources.service import DataSourceService
-from rest.dtos.actions import (
-    ActionResponse,
-    ActionWithUser,
-    ComputedActionResponse,
-    CreateActionDto,
-    TransientActionDto,
-)
+from rest.dtos.actions import (ActionResponse, ActionWithUser,
+                               ComputedActionResponse, CreateActionDto,
+                               TransientActionDto)
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.middlewares import get_user, get_user_id, validate_jwt
 
@@ -98,7 +94,7 @@ async def compute_transient_actions(
     )
 
 
-@router.delete("/actions/{id}", response_model=ActionResponse)
+@router.delete("/actions/{id}")
 async def delete_action(
     id: PydanticObjectId, action_service: ActionService = Depends()
 ):

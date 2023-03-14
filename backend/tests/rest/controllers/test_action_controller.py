@@ -252,3 +252,11 @@ def test_transient_action(client_init, action_service, transient_action_data):
             ],
         }
     )
+
+
+def test_delete_action(client_init, action_service):
+    response = client_init.delete("/actions/640eb512d7365a722ee65400")
+    assert response.status_code == 200
+    action_service.delete_action.assert_called_once_with(
+        id=PydanticObjectId("640eb512d7365a722ee65400")
+    )

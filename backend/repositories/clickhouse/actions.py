@@ -282,12 +282,5 @@ class Actions(EventsBase):
         return query.get_sql(), params
 
     def delete_processed_events(self, ds_id: PydanticObjectId, event: str):
-        query = f"DELETE FROM {self.table} WHERE event_name='{event}' AND datasource_id='{ds_id}'"
+        query = f"DELETE FROM {self.table} WHERE event_name='{event}' AND datasource_id='{ds_id} SETTINGS allow_experimental_lightweight_delete=1'"
         self.execute_get_query(query, {})
-
-    async def delete_action(self, id: PydanticObjectId):
-        selected_action = await Action.find_one(Action.id == id)
-        await selected_action.update({"$set": {"enabled": False}})
-        self.delete_processed_events(
-            ds_id=selected_action.datasource_id, event=selected_action.name
-        )

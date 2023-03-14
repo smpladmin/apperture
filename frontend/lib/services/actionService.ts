@@ -2,6 +2,7 @@ import { filterEmptyActionSelectors } from './../../components/Actions/utils';
 import { CaptureEvent } from '@lib/domain/action';
 import { ActionGroup } from './../domain/action';
 import {
+  AppertureDelete,
   AppertureGet,
   ApperturePost,
   ApperturePrivateGet,
@@ -53,4 +54,9 @@ export const getTransientActionEvents = async (
 export const _getSavedAction = async (id: string, token: string) => {
   const res = await ApperturePrivateGet(`/actions/${id}`, token);
   return res.data;
+};
+
+export const deleteAction = async (id: string) => {
+  const res = await AppertureDelete(`/actions/${id}`);
+  return res.data || undefined;
 };

@@ -101,4 +101,8 @@ class ActionService:
         return ComputedActionResponse(count=count, data=matching_events)
 
     async def delete_action(self, id=PydanticObjectId):
-        await self.actions.delete_action(id=id)
+        selected_action = await Action.find_one(Action.id == id)
+        await selected_action.update({"$set": {"enabled": False}})
+        await self.actions.delete_processed_events(
+            ds_id=selected_action.datasource_id, event=selected_action.name
+        )

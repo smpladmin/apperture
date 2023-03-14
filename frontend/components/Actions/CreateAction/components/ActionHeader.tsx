@@ -1,12 +1,15 @@
 import { Button, Flex, IconButton, Input, Text } from '@chakra-ui/react';
+import { deleteAction } from '@lib/services/actionService';
 import { useRouter } from 'next/router';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import DeleteAction from './DeleteAction';
 
 type ActionHeaderProps = {
   actionName: string;
   setActionName: Function;
   isSaveDisabled: boolean;
   saveOrUpdateAction: Function;
+  isDisabled: Boolean;
 };
 
 const ActionHeader = ({
@@ -14,11 +17,21 @@ const ActionHeader = ({
   setActionName,
   isSaveDisabled,
   saveOrUpdateAction,
+  isDisabled,
 }: ActionHeaderProps) => {
   const [showNameInput, setShowNameInput] = useState(false);
 
   const router = useRouter();
   const { dsId } = router.query;
+  const { actionId } = router.query;
+
+  const handleDelete = () => {
+    deleteAction((actionId as string) || '');
+    router.push({
+      pathname: '/analytics/action/list/[dsId]',
+      query: { dsId },
+    });
+  };
 
   return (
     <Flex
@@ -63,23 +76,25 @@ const ActionHeader = ({
               >
                 {actionName}
               </Text>
-              <IconButton
-                aria-label="Edit"
-                icon={<i className="ri-pencil-fill" />}
-                h={'5'}
-                w={'5'}
-                color={'white.200'}
-                bg={'transparent'}
-                _hover={{
-                  backgroundColor: 'white.0',
-                  color: 'grey.100',
-                }}
-                _active={{
-                  backgroundColor: 'transparent',
-                }}
-                onClick={() => setShowNameInput(true)}
-                data-testid={'action-name-edit-button'}
-              />
+              {!isDisabled && (
+                <IconButton
+                  aria-label="Edit"
+                  icon={<i className="ri-pencil-fill" />}
+                  h={'5'}
+                  w={'5'}
+                  color={'white.200'}
+                  bg={'transparent'}
+                  _hover={{
+                    backgroundColor: 'white.0',
+                    color: 'grey.100',
+                  }}
+                  _active={{
+                    backgroundColor: 'transparent',
+                  }}
+                  onClick={() => setShowNameInput(true)}
+                  data-testid={'action-name-edit-button'}
+                />
+              )}
             </Flex>
           )}
           <Text
@@ -92,23 +107,27 @@ const ActionHeader = ({
           </Text>
         </Flex>
       </Flex>
-      <Button
-        px={'4'}
-        py={'2'}
-        fontSize={'xs-14'}
-        lineHeight={'xs-14'}
-        fontWeight={'500'}
-        bg={'black.100'}
-        color={'white.DEFAULT'}
-        _hover={{
-          bg: 'grey.200',
-        }}
-        disabled={isSaveDisabled}
-        onClick={() => saveOrUpdateAction()}
-        data-testid={'save-button'}
-      >
-        Save
-      </Button>
+      {actionId ? (
+        <DeleteAction handleDelete={handleDelete} />
+      ) : (
+        <Button
+          px={'4'}
+          py={'2'}
+          fontSize={'xs-14'}
+          lineHeight={'xs-14'}
+          fontWeight={'500'}
+          bg={'black.100'}
+          color={'white.DEFAULT'}
+          _hover={{
+            bg: 'grey.200',
+          }}
+          disabled={isSaveDisabled}
+          onClick={() => saveOrUpdateAction()}
+          data-testid={'save-button'}
+        >
+          Save
+        </Button>
+      )}
     </Flex>
   );
 };
