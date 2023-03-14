@@ -16,10 +16,10 @@ import TransientMetricView from './Components/TransientMetricView';
 import { Node } from '@lib/domain/node';
 import { useRouter } from 'next/router';
 import { getCountOfAggregates } from '../util';
+import { DateFilter, DateFilterType } from '@lib/domain/common';
 
 const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
   const [metric, setMetric] = useState<ComputedMetric[]>([]);
-  const [dateRange, setDateRange] = useState<DateRangeType | null>(null);
   const [canSaveMetric, setCanSaveMetric] = useState(false);
   const [isLoading, setIsLoading] = useState(Boolean(savedMetric));
   const [eventList, setEventList] = useState<Node[]>([]);
@@ -42,6 +42,12 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
         aggregations: { functions: MetricBasicAggregation.TOTAL, property: '' },
       },
     ]
+  );
+  const [dateFilter, setDateFilter] = useState<DateFilter | null>(
+    savedMetric?.dateFilter || null
+  );
+  const [dateFilterType, setDateFilterType] = useState<DateFilterType | null>(
+    savedMetric?.dateFilterType || null
   );
   const router = useRouter();
   const dsId = savedMetric?.datasourceId || router.query.dsId;
@@ -74,7 +80,6 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
       <ActionPanel>
         <CreateMetricAction
           setMetric={setMetric}
-          dateRange={dateRange}
           savedMetric={savedMetric}
           canSaveMetric={canSaveMetric}
           setCanSaveMetric={setCanSaveMetric}
@@ -85,19 +90,23 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
           breakdown={breakdown}
           aggregates={aggregates}
           setAggregates={setAggregates}
+          dateFilter={dateFilter}
+          dateFilterType={dateFilterType}
         />
       </ActionPanel>
       <ViewPanel>
         <TransientMetricView
           metric={metric}
-          setDateRange={setDateRange}
-          dateRange={dateRange}
           isLoading={isLoading}
           eventProperties={eventProperties}
           loadingEventsAndProperties={loadingEventsAndProperties}
           breakdown={breakdown}
           setBreakdown={setBreakdown}
           showEmptyState={showEmptyState}
+          dateFilter={dateFilter}
+          setDateFilter={setDateFilter}
+          dateFilterType={dateFilterType}
+          setDateFilterType={setDateFilterType}
         />
       </ViewPanel>
     </Flex>

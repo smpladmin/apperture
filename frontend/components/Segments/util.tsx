@@ -1,6 +1,6 @@
+import { DateFilterType } from '@lib/domain/common';
 import {
   FilterType,
-  SegmentDateFilterType,
   SegmentFilter,
   SegmentFilterDataType,
   SegmentFilterOperatorsBool,
@@ -12,15 +12,15 @@ import { format } from 'date-fns';
 
 export const DateFilterTypeOptions = [
   {
-    id: SegmentDateFilterType.FIXED,
+    id: DateFilterType.FIXED,
     label: 'Fixed',
   },
   {
-    id: SegmentDateFilterType.SINCE,
+    id: DateFilterType.SINCE,
     label: 'Since',
   },
   {
-    id: SegmentDateFilterType.LAST,
+    id: DateFilterType.LAST,
     label: 'Last',
   },
 ];

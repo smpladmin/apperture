@@ -1,7 +1,6 @@
 import { Flex } from '@chakra-ui/react';
+import { DateFilter, DateFilterType } from '@lib/domain/common';
 import {
-  DateFilter,
-  DateFilterType,
   Funnel,
   FunnelData,
   FunnelTrendsData,

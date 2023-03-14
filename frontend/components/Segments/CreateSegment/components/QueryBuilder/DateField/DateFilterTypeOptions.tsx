@@ -1,21 +1,21 @@
 import { Flex, Radio, RadioGroup, Text } from '@chakra-ui/react';
 import { DateFilterTypeOptions } from '@components/Segments/util';
-import { SegmentDateFilterType } from '@lib/domain/segment';
+import { DateFilterType } from '@lib/domain/common';
 import React from 'react';
 
 type DateFilterTypeProps = {
-  selectedDateFilterType: SegmentDateFilterType;
+  selectedDateFilterType: DateFilterType;
   setSelectedDateFIlterType: Function;
 };
 
-const DateFilterType = ({
+const DateFilterTypeOption = ({
   selectedDateFilterType,
   setSelectedDateFIlterType,
 }: DateFilterTypeProps) => {
   return (
     <RadioGroup
       value={selectedDateFilterType}
-      onChange={(value: SegmentDateFilterType) => {
+      onChange={(value: DateFilterType) => {
         setSelectedDateFIlterType(value);
       }}
     >
@@ -52,4 +52,4 @@ const DateFilterType = ({
   );
 };
 
-export default DateFilterType;
+export default DateFilterTypeOption;

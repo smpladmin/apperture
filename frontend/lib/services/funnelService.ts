@@ -4,14 +4,10 @@ import {
   ApperturePost,
   ApperturePut,
 } from './util';
-import {
-  ConversionStatus,
-  DateFilter,
-  DateFilterType,
-  FunnelStep,
-} from '@lib/domain/funnel';
+import { ConversionStatus, FunnelStep } from '@lib/domain/funnel';
 import { replaceEmptyStringPlaceholder } from '@components/Funnel/util';
 import cloneDeep from 'lodash/cloneDeep';
+import { DateFilter, DateFilterType } from '@lib/domain/common';
 
 type FunnelRequestBody = {
   datasourceId: string;
