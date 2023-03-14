@@ -31,6 +31,7 @@ def test_create_action(client_init, action_data, action_service):
         "name": "clicked on settings",
         "processedTill": None,
         "userId": "63e4da53370789982002e57d",
+        "enabled": True,
     }
 
     action_service.build_action.assert_called_once_with(
@@ -78,6 +79,7 @@ def test_create_action(client_init, action_data, action_service):
         "revision_id": ANY,
         "updated_at": None,
         "user_id": PydanticObjectId("63e4da53370789982002e57d"),
+        "enabled": True,
     }
 
 
@@ -116,6 +118,7 @@ def test_get_actions(client_init, action_service):
                 "slackChannel": "#alerts",
             },
             "userId": "63e4da53370789982002e57d",
+            "enabled": True,
         }
     ]
     action_service.get_actions_for_datasource_id.assert_called_once_with(
@@ -149,6 +152,7 @@ def test_update_action(client_init, action_data, action_service):
         "eventType": CaptureEvent.AUTOCAPTURE,
         "processedTill": None,
         "userId": "63e4da53370789982002e57d",
+        "enabled": True,
     }
     action_service.update_action.assert_called_once()
     assert action_service.update_action.call_args.kwargs["action"].dict() == {
@@ -175,6 +179,7 @@ def test_update_action(client_init, action_data, action_service):
         "revision_id": ANY,
         "updated_at": None,
         "user_id": PydanticObjectId("63e4da53370789982002e57d"),
+        "enabled": True,
     }
 
 
@@ -205,6 +210,7 @@ def test_get_actions_by_id(client_init, action_service):
         "revisionId": ANY,
         "updatedAt": None,
         "userId": "63e4da53370789982002e57d",
+        "enabled": True,
     }
     action_service.get_action.assert_called_once_with(
         **{"id": "63e5f57c593ed2017c0722c9"}

@@ -43,7 +43,7 @@ class ActionService:
     async def get_actions_for_datasource_id(self, datasource_id: str) -> List[Action]:
         return await Action.find(
             PydanticObjectId(datasource_id) == Action.datasource_id
-            and Action.is_deleted != True
+            and Action.enabled != False
         ).to_list()
 
     async def update_action_processed_till(
@@ -62,7 +62,7 @@ class ActionService:
             )
 
     async def get_action(self, id: str) -> Action:
-        return await Action.find_one(Action.id == id and Action.is_deleted != True)
+        return await Action.get(id)
 
     async def update_action(self, action_id: str, action: Action):
         to_update = action.dict()

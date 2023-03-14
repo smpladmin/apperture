@@ -77,6 +77,7 @@ class TestActionService:
             "revision_id": ANY,
             "updated_at": ANY,
             "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+            "enabled": True,
         }
 
     @pytest.mark.asyncio
@@ -126,6 +127,7 @@ class TestActionService:
             "revision_id": ANY,
             "updated_at": None,
             "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+            "enabled": True,
         }
 
     @pytest.mark.asyncio
