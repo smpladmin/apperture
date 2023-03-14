@@ -1,6 +1,7 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from beanie import PydanticObjectId
 from pydantic import BaseModel
+from domain.common.date_models import DateFilterType, FixedDateFilter, LastDateFilter
 from rest.dtos.apperture_users import AppertureUserResponse
 
 from rest.dtos.model_response import ModelResponse
@@ -24,8 +25,8 @@ class MetricsComputeDto(BaseModel):
     function: str
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
-    startDate: Optional[str]
-    endDate: Optional[str]
+    dateFilter: Optional[Union[LastDateFilter, FixedDateFilter]]
+    dateFilterType: Optional[DateFilterType]
 
 
 class CreateMetricDTO(BaseModel):
@@ -34,6 +35,8 @@ class CreateMetricDTO(BaseModel):
     function: str
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
+    dateFilter: Optional[Union[LastDateFilter, FixedDateFilter]]
+    dateFilterType: Optional[DateFilterType]
 
 
 class MetricFormulaDto(BaseModel):
