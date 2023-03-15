@@ -5,7 +5,7 @@ from collections import namedtuple
 from beanie import PydanticObjectId
 from unittest.mock import MagicMock, AsyncMock
 
-from domain.common.date_models import DateFilter
+from domain.common.date_models import DateFilter, LastDateFilter, DateFilterType
 from tests.utils import filter_response
 from domain.datasources.models import DataSource
 from domain.funnels.service import FunnelsService
@@ -20,8 +20,6 @@ from domain.funnels.models import (
     FunnelConversion,
     FunnelEventUserData,
     ConversionStatus,
-    DateFilterType,
-    LastDateFilter,
 )
 
 

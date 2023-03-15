@@ -93,7 +93,7 @@ def test_get_metrics(client_init, metric_service):
                 "slackChannel": "#alerts",
             },
             "userId": "6374b74e9b36ecf7e0b4f9e4",
-            'dateFilter': None,
+            "dateFilter": None,
         }
     ]
     metric_service.get_metrics_for_datasource_id.assert_called_once_with(
