@@ -11,7 +11,6 @@ from domain.funnels.models import (
     Funnel,
     FunnelStep,
     ComputedFunnelStep,
-    ComputedFunnel,
     FunnelTrendsData,
     FunnelConversionData,
     ConversionStatus,
@@ -32,6 +31,7 @@ class FunnelsService:
     ):
         self.mongo = mongo
         self.funnels = funnels
+        self.default_conversion_time = 30 * 24 * 60 * 60
 
     def build_funnel(
         self,
@@ -64,6 +64,13 @@ class FunnelsService:
     def compute_conversion(self, n, data) -> float:
         return data[n] * 100 / data[0] if data[0] != 0 else 0
 
+    def compute_conversion_time(self, conversion_window):
+        return (
+            conversion_window.type.get_multiplier() * conversion_window.value
+            if conversion_window
+            else self.default_conversion_time
+        )
+
     async def compute_funnel(
         self,
         ds_id: str,
@@ -81,8 +88,15 @@ class FunnelsService:
             else (None, None)
         )
 
+        conversion_time = self.compute_conversion_time(
+            conversion_window=conversion_window
+        )
         users_data = self.funnels.get_users_count(
-            ds_id=ds_id, steps=steps, start_date=start_date, end_date=end_date
+            ds_id=ds_id,
+            steps=steps,
+            start_date=start_date,
+            end_date=end_date,
+            conversion_time=conversion_time,
         )
         computed_funnel = [
             ComputedFunnelStep(
@@ -99,19 +113,6 @@ class FunnelsService:
 
     async def get_funnel(self, id: str) -> Funnel:
         return await Funnel.get(id)
-
-    async def get_computed_funnel(self, funnel: Funnel) -> ComputedFunnel:
-        computed_funnel = await self.compute_funnel(
-            ds_id=str(funnel.datasource_id),
-            steps=funnel.steps,
-        )
-        return ComputedFunnel(
-            datasource_id=funnel.datasource_id,
-            steps=funnel.steps,
-            name=funnel.name,
-            random_sequence=funnel.random_sequence,
-            computed_funnel=computed_funnel,
-        )
 
     async def update_funnel(self, funnel_id: str, new_funnel: Funnel):
         to_update = new_funnel.dict()
@@ -132,6 +133,9 @@ class FunnelsService:
         conversion_window: Union[ConversionWindow, None],
     ) -> List[FunnelTrendsData]:
 
+        conversion_time = self.compute_conversion_time(
+            conversion_window=conversion_window
+        )
         start_date, end_date = (
             self.funnels.compute_date_filter(
                 date_filter=date_filter, date_filter_type=date_filter_type
@@ -141,7 +145,11 @@ class FunnelsService:
         )
 
         conversion_data = self.funnels.get_conversion_trend(
-            ds_id=datasource_id, steps=steps, start_date=start_date, end_date=end_date
+            ds_id=datasource_id,
+            steps=steps,
+            start_date=start_date,
+            end_date=end_date,
+            conversion_time=conversion_time,
         )
         return [
             FunnelTrendsData(
@@ -163,6 +171,9 @@ class FunnelsService:
         date_filter_type: Union[DateFilterType, None],
         conversion_window: Union[ConversionWindow, None],
     ):
+        conversion_time = self.compute_conversion_time(
+            conversion_window=conversion_window
+        )
         start_date, end_date = (
             self.funnels.compute_date_filter(
                 date_filter=date_filter, date_filter_type=date_filter_type
@@ -176,6 +187,7 @@ class FunnelsService:
             status=status,
             start_date=start_date,
             end_date=end_date,
+            conversion_time=conversion_time,
         )
         user_list = [FunnelEventUserData(id=data[0]) for data in conversion_data]
         count_data = conversion_data[0][1] if conversion_data else [0, 0]
