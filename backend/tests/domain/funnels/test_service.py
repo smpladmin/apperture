@@ -5,6 +5,7 @@ from collections import namedtuple
 from beanie import PydanticObjectId
 from unittest.mock import MagicMock, AsyncMock
 
+from domain.common.date_models import DateFilter
 from tests.utils import filter_response
 from domain.datasources.models import DataSource
 from domain.funnels.service import FunnelsService
@@ -38,8 +39,10 @@ class TestFunnelService:
         self.provider = IntegrationProvider.MIXPANEL
         self.user_id = "636a1c61d715ca6baae65611"
         self.name = "name"
-        self.date_filter = LastDateFilter(days=7)
-        self.date_filter_type = DateFilterType.LAST
+        self.date_filter = DateFilter(
+            filter=LastDateFilter(days=7), type=DateFilterType.LAST
+        )
+
         FindMock = namedtuple("FindMock", ["to_list"])
         Funnel.find = MagicMock(
             return_value=FindMock(
@@ -59,8 +62,9 @@ class TestFunnelService:
             name=self.name,
             steps=self.funnel_steps,
             random_sequence=False,
-            date_filter=LastDateFilter(days=7),
-            date_filter_type=DateFilterType.LAST,
+            date_filter=DateFilter(
+                filter=LastDateFilter(days=7), type=DateFilterType.LAST
+            ),
         )
         self.computed_steps = [
             ComputedFunnelStep(event="Login", users=100, conversion=100.0),
@@ -118,8 +122,9 @@ class TestFunnelService:
             name=self.name,
             steps=self.funnel_steps,
             randomSequence=False,
-            dateFilter=LastDateFilter(days=7),
-            dateFilterType=DateFilterType.LAST,
+            dateFilter=DateFilter(
+                filter=LastDateFilter(days=7), type=DateFilterType.LAST
+            ),
         )
 
         assert filter_response(funnel.dict()) == filter_response(self.funnel.dict())
@@ -142,7 +147,6 @@ class TestFunnelService:
             ds_id=self.ds_id,
             steps=self.funnel_steps,
             date_filter=self.date_filter,
-            date_filter_type=self.date_filter_type,
         )
 
     @pytest.mark.asyncio
@@ -166,8 +170,9 @@ class TestFunnelService:
                     ],
                     "updated_at": ANY,
                     "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
-                    "date_filter": {"days": 7},
-                    "date_filter_type": DateFilterType.LAST,
+                    "date_filter": DateFilter(
+                        filter=LastDateFilter(days=7), type=DateFilterType.LAST
+                    ),
                 }
             },
         )
@@ -179,7 +184,6 @@ class TestFunnelService:
                 datasource_id=str(self.funnel.datasource_id),
                 steps=self.funnel.steps,
                 date_filter=self.date_filter,
-                date_filter_type=self.date_filter_type,
             )
             == self.funnel_trends_data
         )
@@ -214,7 +218,6 @@ class TestFunnelService:
                 steps=self.funnel_steps,
                 status=ConversionStatus.CONVERTED,
                 date_filter=self.date_filter,
-                date_filter_type=self.date_filter_type,
             )
             == self.funnel_conversion_data
         )

@@ -9,6 +9,7 @@ from domain.metrics.models import (
     SegmentsAndEvents,
     Metric,
     ComputedMetricStep,
+    DateFilter,
 )
 
 
@@ -25,8 +26,7 @@ class MetricsComputeDto(BaseModel):
     function: str
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
-    dateFilter: Optional[Union[LastDateFilter, FixedDateFilter]]
-    dateFilterType: Optional[DateFilterType]
+    dateFilter: Optional[DateFilter]
 
 
 class CreateMetricDTO(BaseModel):
@@ -35,8 +35,7 @@ class CreateMetricDTO(BaseModel):
     function: str
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
-    dateFilter: Optional[Union[LastDateFilter, FixedDateFilter]]
-    dateFilterType: Optional[DateFilterType]
+    dateFilter: Optional[DateFilter]
 
 
 class MetricFormulaDto(BaseModel):

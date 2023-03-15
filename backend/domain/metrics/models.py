@@ -3,7 +3,7 @@ from typing import Optional, Union, List
 
 from beanie import PydanticObjectId
 from pydantic import BaseModel
-from domain.common.date_models import DateFilterType, FixedDateFilter, LastDateFilter
+from domain.common.date_models import DateFilter
 from repositories import Document
 from pypika import analytics as an, functions as fn, CustomFunction
 
@@ -89,8 +89,7 @@ class Metric(Document):
     function: str
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
-    date_filter: Optional[Union[LastDateFilter, FixedDateFilter]]
-    date_filter_type: Optional[DateFilterType]
+    date_filter: Optional[DateFilter]
 
     class Settings:
         name = "metric"

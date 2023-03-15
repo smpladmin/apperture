@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 from typing import List, Union
 from beanie import PydanticObjectId
 from fastapi import Depends
-from domain.common.date_models import DateFilterType, FixedDateFilter, LastDateFilter
 
+from domain.common.date_models import DateFilter
 from domain.metrics.models import (
     SegmentsAndEvents,
     ComputedMetricStep,
@@ -47,15 +47,14 @@ class MetricService:
         function: str,
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
-        date_filter: Union[LastDateFilter, FixedDateFilter, None],
-        date_filter_type: Union[DateFilterType, None],
+        date_filter: Union[DateFilter, None],
     ) -> List[ComputedMetricStep]:
 
         start_date, end_date = (
             self.metric.compute_date_filter(
-                date_filter=date_filter, date_filter_type=date_filter_type
+                date_filter=date_filter.filter, date_filter_type=date_filter.type
             )
-            if date_filter and date_filter_type
+            if date_filter and date_filter.filter and date_filter.type
             else (None, None)
         )
 
@@ -175,8 +174,7 @@ class MetricService:
         function: str,
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
-        dateFilter: Union[LastDateFilter, FixedDateFilter, None],
-        dateFilterType: Union[DateFilterType, None],
+        dateFilter: Union[DateFilter, None],
     ):
         return Metric(
             datasource_id=datasource_id,
@@ -187,7 +185,6 @@ class MetricService:
             aggregates=aggregates,
             breakdown=breakdown,
             date_filter=dateFilter,
-            date_filter_type=dateFilterType,
         )
 
     async def add_metric(self, metric: Metric):

@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional, Union
 
 from pydantic import BaseModel
 
@@ -20,3 +21,8 @@ class SinceDateFilter(BaseModel):
 
 class LastDateFilter(BaseModel):
     days: int
+
+
+class DateFilter(BaseModel):
+    filter: Optional[Union[LastDateFilter, FixedDateFilter]]
+    type: Optional[DateFilterType]

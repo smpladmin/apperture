@@ -35,7 +35,6 @@ async def compute_metrics(
             aggregates=dto.aggregates,
             breakdown=dto.breakdown,
             date_filter=dto.dateFilter,
-            date_filter_type=dto.dateFilterType,
         )
         return result
     return [
@@ -61,7 +60,6 @@ async def save_metrics(
         aggregates=dto.aggregates,
         breakdown=dto.breakdown,
         dateFilter=dto.dateFilter,
-        dateFilterType=dto.dateFilterType,
     )
     return await metric_service.add_metric(metric=metric)
 
@@ -84,7 +82,6 @@ async def update_metric(
         aggregates=dto.aggregates,
         breakdown=dto.breakdown,
         dateFilter=dto.dateFilter,
-        dateFilterType=dto.dateFilterType,
     )
     await metric_service.update_metric(metric_id=id, metric=metric)
     return metric

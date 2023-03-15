@@ -3,7 +3,7 @@ from enum import Enum
 from beanie import PydanticObjectId
 from typing import List, Optional, Union
 from pydantic import BaseModel
-from domain.common.date_models import DateFilterType, FixedDateFilter, LastDateFilter
+from domain.common.date_models import DateFilter
 
 from domain.segments.models import WhereSegmentFilter
 from repositories.document import Document
@@ -21,8 +21,7 @@ class Funnel(Document):
     name: str
     steps: List[FunnelStep]
     random_sequence: bool
-    date_filter: Optional[Union[LastDateFilter, FixedDateFilter]]
-    date_filter_type: Optional[DateFilterType]
+    date_filter: Optional[DateFilter]
 
     class Settings:
         name = "funnels"
