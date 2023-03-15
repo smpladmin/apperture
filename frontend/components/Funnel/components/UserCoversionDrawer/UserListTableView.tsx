@@ -11,6 +11,7 @@ import { DateFilter, DateFilterType } from '@lib/domain/common';
 import {
   ConversionStatus,
   FunnelConversionData,
+  FunnelDateFilter,
   FunnelStep,
   UserProperty,
 } from '@lib/domain/funnel';
@@ -28,8 +29,7 @@ type UserTableViewProps = {
   tableState: TableState;
   properties?: UserProperty[] | null;
   setTableState: Function;
-  dateFilter: DateFilter | null;
-  dateFilterType: DateFilterType | null;
+  dateFilter: FunnelDateFilter;
 };
 type FunnelEventConversion = {
   converted?: FunnelConversionData;
@@ -43,7 +43,6 @@ const UserTableView = ({
   properties,
   tableState,
   dateFilter,
-  dateFilterType,
 }: UserTableViewProps) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [userData, setUserData] = useState<FunnelEventConversion>();
@@ -58,25 +57,13 @@ const UserTableView = ({
   useEffect(() => {
     const fetchUserData = async () => {
       if (!userData?.dropped && status === ConversionStatus.DROPPED) {
-        const data = await getConversionData(
-          dsId,
-          steps,
-          status,
-          dateFilter,
-          dateFilterType
-        );
+        const data = await getConversionData(dsId, steps, status, dateFilter);
         setUserData({ ...userData, dropped: data });
       } else if (
         !userData?.converted &&
         status === ConversionStatus.CONVERTED
       ) {
-        const data = await getConversionData(
-          dsId,
-          steps,
-          status,
-          dateFilter,
-          dateFilterType
-        );
+        const data = await getConversionData(dsId, steps, status, dateFilter);
         setUserData({ ...userData, converted: data });
       }
     };

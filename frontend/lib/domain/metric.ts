@@ -1,3 +1,4 @@
+import { FunnelDateFilter } from './funnel';
 import { DateFilter, DateFilterType } from './common';
 import { AppertureUser } from './user';
 
@@ -84,8 +85,7 @@ export type Metric = {
   function: string;
   aggregates: MetricAggregate[];
   breakdown: string[];
-  dateFilter?: DateFilter | null;
-  dateFilterType?: DateFilterType | null;
+  dateFilter?: FunnelDateFilter;
 };
 
 export type MetricWithUser = Metric & {

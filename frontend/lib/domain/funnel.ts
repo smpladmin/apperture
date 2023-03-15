@@ -41,6 +41,11 @@ export type FunnelData = {
   drop: number;
 };
 
+export type FunnelDateFilter = {
+  filter: DateFilter | null;
+  type: DateFilterType | null;
+};
+
 export type Funnel = {
   _id: string;
   datasourceId: string;
@@ -49,8 +54,7 @@ export type Funnel = {
   updatedAt: Date;
   steps: FunnelStep[];
   randomSequence: boolean;
-  dateFilter?: DateFilter | null;
-  dateFilterType?: DateFilterType | null;
+  dateFilter?: FunnelDateFilter;
 };
 
 export type FunnelWithUser = Funnel & {

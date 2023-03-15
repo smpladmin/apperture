@@ -30,7 +30,11 @@ import {
   isValidAggregates,
   replaceEmptyStringPlaceholder,
 } from '@components/Metric/util';
-import { DateFilter, DateFilterType } from '@lib/domain/common';
+import {
+  DateFilter,
+  DateFilterType,
+  FunnelDateFilter,
+} from '@lib/domain/common';
 
 type CreateMetricActionProps = {
   setMetric: Function;
@@ -44,8 +48,7 @@ type CreateMetricActionProps = {
   breakdown: string[];
   aggregates: MetricAggregate[];
   setAggregates: Function;
-  dateFilter: DateFilter | null;
-  dateFilterType: DateFilterType | null;
+  dateFilter: FunnelDateFilter;
 };
 
 const CreateMetricAction = ({
@@ -61,7 +64,6 @@ const CreateMetricAction = ({
   aggregates,
   setAggregates,
   dateFilter,
-  dateFilterType,
 }: CreateMetricActionProps) => {
   const [metricName, setMetricName] = useState(
     savedMetric?.name || 'Untitled Metric'
@@ -148,8 +150,7 @@ const CreateMetricAction = ({
         metricDefinition,
         aggregates,
         breakdown,
-        dateFilter,
-        dateFilterType
+        dateFilter
       );
     } else {
       // save the metric
@@ -159,8 +160,7 @@ const CreateMetricAction = ({
         metricDefinition,
         aggregates,
         breakdown,
-        dateFilter,
-        dateFilterType
+        dateFilter
       );
     }
     router.push({
@@ -185,8 +185,7 @@ const CreateMetricAction = ({
           : aggregates.map((aggregate) => aggregate.variable).join(','),
         processedAggregate,
         breakdown,
-        dateFilter,
-        dateFilterType
+        dateFilter
       );
 
       setMetric(result);

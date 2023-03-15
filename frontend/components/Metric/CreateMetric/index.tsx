@@ -16,7 +16,11 @@ import TransientMetricView from './Components/TransientMetricView';
 import { Node } from '@lib/domain/node';
 import { useRouter } from 'next/router';
 import { getCountOfAggregates } from '../util';
-import { DateFilter, DateFilterType } from '@lib/domain/common';
+import {
+  DateFilter,
+  DateFilterType,
+  FunnelDateFilter,
+} from '@lib/domain/common';
 
 const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
   const [metric, setMetric] = useState<ComputedMetric[]>([]);
@@ -43,12 +47,10 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
       },
     ]
   );
-  const [dateFilter, setDateFilter] = useState<DateFilter | null>(
-    savedMetric?.dateFilter || null
-  );
-  const [dateFilterType, setDateFilterType] = useState<DateFilterType | null>(
-    savedMetric?.dateFilterType || null
-  );
+  const [dateFilter, setDateFilter] = useState<FunnelDateFilter>({
+    filter: savedMetric?.dateFilter?.filter || null,
+    type: savedMetric?.dateFilter?.type || null,
+  });
   const router = useRouter();
   const dsId = savedMetric?.datasourceId || router.query.dsId;
 
@@ -91,7 +93,6 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
           aggregates={aggregates}
           setAggregates={setAggregates}
           dateFilter={dateFilter}
-          dateFilterType={dateFilterType}
         />
       </ActionPanel>
       <ViewPanel>
@@ -105,8 +106,6 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
           showEmptyState={showEmptyState}
           dateFilter={dateFilter}
           setDateFilter={setDateFilter}
-          dateFilterType={dateFilterType}
-          setDateFilterType={setDateFilterType}
         />
       </ViewPanel>
     </Flex>

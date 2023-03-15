@@ -1,6 +1,11 @@
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import { DateFilter, DateFilterType } from '@lib/domain/common';
-import { FunnelData, FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
+import {
+  FunnelData,
+  FunnelDateFilter,
+  FunnelStep,
+  FunnelTrendsData,
+} from '@lib/domain/funnel';
 import React from 'react';
 import TransientFunnelView from '../CreateFunnel/TransientFunnelView';
 
@@ -10,14 +15,12 @@ const RightView = ({
   computedTrendsData,
   isLoading,
   dateFilter,
-  dateFilterType,
 }: {
   funnelSteps: FunnelStep[];
   computedFunnel: FunnelData[];
   computedTrendsData: FunnelTrendsData[];
   isLoading: boolean;
-  dateFilter: DateFilter | null;
-  dateFilterType: DateFilterType | null;
+  dateFilter: FunnelDateFilter;
 }) => {
   return (
     <ViewPanel>
@@ -28,8 +31,6 @@ const RightView = ({
         funnelSteps={funnelSteps}
         dateFilter={dateFilter}
         setDateFilter={() => {}}
-        dateFilterType={dateFilterType}
-        setDateFilterType={() => {}}
         isDateFilterDisabled={true}
       />
     </ViewPanel>

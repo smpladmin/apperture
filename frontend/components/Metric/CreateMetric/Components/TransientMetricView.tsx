@@ -7,7 +7,7 @@ import MetricTrend from './MetricTrend';
 import Loader from '@components/LoadingSpinner';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import { DateFilter, DateFilterType } from '@lib/domain/common';
+import { FunnelDateFilter } from '@lib/domain/common';
 
 type TransientMetricViewProps = {
   metric: ComputedMetric[];
@@ -17,10 +17,8 @@ type TransientMetricViewProps = {
   breakdown: string[];
   setBreakdown: Function;
   showEmptyState: boolean;
-  dateFilter: DateFilter | null;
+  dateFilter: FunnelDateFilter;
   setDateFilter: Function;
-  dateFilterType: DateFilterType | null;
-  setDateFilterType: Function;
 };
 
 const TransientMetricView = ({
@@ -33,8 +31,6 @@ const TransientMetricView = ({
   showEmptyState,
   dateFilter,
   setDateFilter,
-  dateFilterType,
-  setDateFilterType,
 }: TransientMetricViewProps) => {
   const breakdownRef = useRef(null);
   const [isPropertiesListOpen, setIsPropertiesListOpen] = useState(false);
@@ -51,7 +47,6 @@ const TransientMetricView = ({
       direction={'column'}
       py={{ base: '8', md: '12' }}
       width={'full'}
-      height={'full'}
       minHeight={'full'}
       overflowY={'scroll'}
     >
@@ -59,8 +54,6 @@ const TransientMetricView = ({
         <DateFilterComponent
           dateFilter={dateFilter}
           setDateFilter={setDateFilter}
-          dateFilterType={dateFilterType}
-          setDateFilterType={setDateFilterType}
         />
 
         <Flex gap={'1'}>
@@ -138,7 +131,7 @@ const TransientMetricView = ({
       {showEmptyState ? (
         <MetricEmptyState />
       ) : isLoading ? (
-        <Flex alignItems={'center'} justifyContent={'center'} h={'full'}>
+        <Flex alignItems={'center'} justifyContent={'center'} height={'120'}>
           <Loader />
         </Flex>
       ) : (

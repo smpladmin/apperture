@@ -1,7 +1,6 @@
 import { replaceEmptyStringPlaceholder } from '@components/Metric/util';
-import { DateFilter, DateFilterType } from '@lib/domain/common';
+import { FunnelDateFilter } from '@lib/domain/common';
 import { MetricAggregate } from '@lib/domain/metric';
-import { formatDateIntoString } from '@lib/utils/common';
 import {
   AppertureGet,
   ApperturePost,
@@ -14,8 +13,7 @@ type MetricRequestBody = {
   function: string;
   aggregates: MetricAggregate[];
   breakdown: string[];
-  dateFilter?: DateFilter | null;
-  dateFilterType?: DateFilterType | null;
+  dateFilter?: FunnelDateFilter;
 };
 
 export const computeMetric = async (
@@ -23,20 +21,15 @@ export const computeMetric = async (
   functions: string,
   aggregates: MetricAggregate[],
   breakdown: string[],
-  dateFilter: DateFilter | null,
-  dateFilterType: DateFilterType | null
+  dateFilter: FunnelDateFilter
 ) => {
   const requestBody: MetricRequestBody = {
     datasourceId: dsId,
     function: functions,
     aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
+    dateFilter,
   };
-
-  if (dateFilter && dateFilterType) {
-    requestBody.dateFilter = dateFilter;
-    requestBody.dateFilterType = dateFilterType;
-  }
 
   const res = await ApperturePost('metrics/compute', requestBody);
   return res.data || [];
@@ -53,8 +46,7 @@ export const saveMetric = async (
   definition: string,
   aggregates: MetricAggregate[],
   breakdown: string[],
-  dateFilter: DateFilter | null,
-  dateFilterType: DateFilterType | null
+  dateFilter: FunnelDateFilter
 ) => {
   const result = await ApperturePost('/metrics', {
     datasourceId: dsId,
@@ -63,7 +55,6 @@ export const saveMetric = async (
     aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
     dateFilter,
-    dateFilterType,
   });
   return result.data;
 };
@@ -75,8 +66,7 @@ export const updateMetric = async (
   definition: string,
   aggregates: MetricAggregate[],
   breakdown: string[],
-  dateFilter: DateFilter | null,
-  dateFilterType: DateFilterType | null
+  dateFilter: FunnelDateFilter
 ) => {
   const result = await ApperturePut('/metrics/' + metricId, {
     datasourceId: dsId,
@@ -85,7 +75,6 @@ export const updateMetric = async (
     aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
     dateFilter,
-    dateFilterType,
   });
   return result.data;
 };

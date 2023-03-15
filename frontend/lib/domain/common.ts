@@ -18,3 +18,8 @@ export enum DateFilterType {
   SINCE = 'since',
   LAST = 'last',
 }
+
+export type FunnelDateFilter = {
+  filter: DateFilter | null;
+  type: DateFilterType | null;
+};

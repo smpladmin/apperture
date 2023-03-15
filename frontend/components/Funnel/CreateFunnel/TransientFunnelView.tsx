@@ -6,7 +6,12 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import { FunnelData, FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
+import {
+  FunnelData,
+  FunnelDateFilter,
+  FunnelStep,
+  FunnelTrendsData,
+} from '@lib/domain/funnel';
 import React, { useState } from 'react';
 import FunnelChart from '../components/FunnelChart';
 import Trend from '../components/Trend';
@@ -21,10 +26,9 @@ type TransientFunnelViewProps = {
   funnelData: FunnelData[];
   trendsData: FunnelTrendsData[];
   funnelSteps: FunnelStep[];
-  dateFilter: DateFilter | null;
+  dateFilter: FunnelDateFilter;
   setDateFilter: Function;
-  dateFilterType: DateFilterType | null;
-  setDateFilterType: Function;
+
   isDateFilterDisabled?: boolean;
 };
 
@@ -35,8 +39,6 @@ const TransientFunnelView = ({
   funnelSteps,
   dateFilter,
   setDateFilter,
-  dateFilterType,
-  setDateFilterType,
   isDateFilterDisabled = false,
 }: TransientFunnelViewProps) => {
   const {
@@ -76,8 +78,6 @@ const TransientFunnelView = ({
       <DateFilterComponent
         dateFilter={dateFilter}
         setDateFilter={setDateFilter}
-        dateFilterType={dateFilterType}
-        setDateFilterType={setDateFilterType}
         isDisabled={isDateFilterDisabled}
       />
 
@@ -166,7 +166,6 @@ const TransientFunnelView = ({
         event={selectedEvent as string}
         selectedFunnelSteps={selectedFunnelSteps}
         dateFilter={dateFilter}
-        dateFilterType={dateFilterType}
       />
     </Flex>
   );

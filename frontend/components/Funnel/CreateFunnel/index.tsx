@@ -6,6 +6,7 @@ import FunnelEmptyState from '../components/FunnelEmptyState';
 import {
   Funnel,
   FunnelData,
+  FunnelDateFilter,
   FunnelStep,
   FunnelTrendsData,
 } from '@lib/domain/funnel';
@@ -23,7 +24,6 @@ import {
 } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel/util';
-import { DateFilter, DateFilterType } from '@lib/domain/common';
 
 const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const router = useRouter();
@@ -43,12 +43,10 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           { event: '', filters: [] },
         ]
   );
-  const [dateFilter, setDateFilter] = useState<DateFilter | null>(
-    savedFunnel?.dateFilter || null
-  );
-  const [dateFilterType, setDateFilterType] = useState<DateFilterType | null>(
-    savedFunnel?.dateFilterType || null
-  );
+  const [dateFilter, setDateFilter] = useState<FunnelDateFilter>({
+    filter: savedFunnel?.dateFilter?.filter || null,
+    type: savedFunnel?.dateFilter?.type || null,
+  });
 
   const [funnelData, setFunnelData] = useState<FunnelData[]>([]);
   const [trendsData, setTrendsData] = useState<FunnelTrendsData[]>([]);
@@ -83,14 +81,12 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
         getTransientFunnelData(
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
-          dateFilter,
-          dateFilterType
+          dateFilter
         ),
         getTransientTrendsData(
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
-          dateFilter,
-          dateFilterType
+          dateFilter
         ),
       ]);
       setFunnelData(funnelData);
@@ -112,7 +108,6 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           setFunnelSteps={setFunnelSteps}
           setIsStepAdded={setIsStepAdded}
           dateFilter={dateFilter}
-          dateFilterType={dateFilterType}
         />
       </ActionPanel>
       <ViewPanel>
@@ -126,8 +121,6 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
             funnelSteps={funnelSteps}
             dateFilter={dateFilter}
             setDateFilter={setDateFilter}
-            dateFilterType={dateFilterType}
-            setDateFilterType={setDateFilterType}
           />
         )}
       </ViewPanel>

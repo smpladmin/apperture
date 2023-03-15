@@ -1,18 +1,17 @@
-import { Box, Button, Flex, Highlight, Text } from '@chakra-ui/react';
+import { Button, Flex, Highlight, Text } from '@chakra-ui/react';
 import React from 'react';
 import { ComputedMetric } from '@lib/domain/metric';
 import MetricTrend from '../../CreateMetric/Components/MetricTrend';
 import DateFilterComponent from '@components/Date/DateFilter';
 import Loader from '@components/LoadingSpinner';
-import { DateFilter, DateFilterType } from '@lib/domain/common';
+import { FunnelDateFilter } from '@lib/domain/common';
 import MetricEmptyState from '@components/Metric/CreateMetric/Components/MetricEmptyState';
 
 type SavedMetricViewProps = {
   isLoading: boolean;
   metric: ComputedMetric[];
   breakdown: string[];
-  dateFilter: DateFilter | null;
-  dateFilterType: DateFilterType | null;
+  dateFilter: FunnelDateFilter;
 };
 
 const SavedMetricView = ({
@@ -20,14 +19,12 @@ const SavedMetricView = ({
   metric,
   breakdown,
   dateFilter,
-  dateFilterType,
 }: SavedMetricViewProps) => {
   return (
     <Flex
       direction={'column'}
       py={{ base: '8', md: '12' }}
       width={'full'}
-      height={'full'}
       minHeight={'full'}
       overflowY={'scroll'}
     >
@@ -35,8 +32,6 @@ const SavedMetricView = ({
         <DateFilterComponent
           dateFilter={dateFilter}
           setDateFilter={() => {}}
-          dateFilterType={dateFilterType}
-          setDateFilterType={() => {}}
           isDisabled={true}
         />
 
@@ -94,7 +89,7 @@ const SavedMetricView = ({
         </Flex>
       </Flex>
       {isLoading ? (
-        <Flex alignItems={'center'} justifyContent={'center'} h={'full'}>
+        <Flex alignItems={'center'} justifyContent={'center'} h={'120'}>
           <Loader />
         </Flex>
       ) : metric && metric.length > 0 ? (
