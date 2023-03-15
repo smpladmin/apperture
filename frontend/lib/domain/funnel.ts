@@ -1,4 +1,4 @@
-import { DateFilter, DateFilterType } from './common';
+import { DateFilter, DateFilterObj, DateFilterType } from './common';
 import { FilterType } from './segment';
 import { AppertureUser as User } from './user';
 
@@ -41,11 +41,6 @@ export type FunnelData = {
   drop: number;
 };
 
-export type FunnelDateFilter = {
-  filter: DateFilter | null;
-  type: DateFilterType | null;
-};
-
 export type Funnel = {
   _id: string;
   datasourceId: string;
@@ -54,7 +49,7 @@ export type Funnel = {
   updatedAt: Date;
   steps: FunnelStep[];
   randomSequence: boolean;
-  dateFilter?: FunnelDateFilter;
+  dateFilter?: DateFilterObj;
 };
 
 export type FunnelWithUser = Funnel & {

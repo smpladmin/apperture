@@ -30,11 +30,7 @@ import {
   isValidAggregates,
   replaceEmptyStringPlaceholder,
 } from '@components/Metric/util';
-import {
-  DateFilter,
-  DateFilterType,
-  FunnelDateFilter,
-} from '@lib/domain/common';
+import { DateFilter, DateFilterType, DateFilterObj } from '@lib/domain/common';
 
 type CreateMetricActionProps = {
   setMetric: Function;
@@ -48,7 +44,7 @@ type CreateMetricActionProps = {
   breakdown: string[];
   aggregates: MetricAggregate[];
   setAggregates: Function;
-  dateFilter: FunnelDateFilter;
+  dateFilter: DateFilterObj;
 };
 
 const CreateMetricAction = ({

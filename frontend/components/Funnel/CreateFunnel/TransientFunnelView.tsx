@@ -6,12 +6,7 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import {
-  FunnelData,
-  FunnelDateFilter,
-  FunnelStep,
-  FunnelTrendsData,
-} from '@lib/domain/funnel';
+import { FunnelData, FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
 import React, { useState } from 'react';
 import FunnelChart from '../components/FunnelChart';
 import Trend from '../components/Trend';
@@ -19,14 +14,14 @@ import Loader from '@components/LoadingSpinner';
 import UserConversionDrawer from '../components/UserCoversionDrawer';
 import { useRouter } from 'next/router';
 import DateFilterComponent from '@components/Date/DateFilter';
-import { DateFilter, DateFilterType } from '@lib/domain/common';
+import { DateFilterObj } from '@lib/domain/common';
 
 type TransientFunnelViewProps = {
   isLoading: boolean;
   funnelData: FunnelData[];
   trendsData: FunnelTrendsData[];
   funnelSteps: FunnelStep[];
-  dateFilter: FunnelDateFilter;
+  dateFilter: DateFilterObj;
   setDateFilter: Function;
 
   isDateFilterDisabled?: boolean;

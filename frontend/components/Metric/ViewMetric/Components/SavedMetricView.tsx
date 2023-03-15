@@ -4,14 +4,14 @@ import { ComputedMetric } from '@lib/domain/metric';
 import MetricTrend from '../../CreateMetric/Components/MetricTrend';
 import DateFilterComponent from '@components/Date/DateFilter';
 import Loader from '@components/LoadingSpinner';
-import { FunnelDateFilter } from '@lib/domain/common';
+import { DateFilterObj } from '@lib/domain/common';
 import MetricEmptyState from '@components/Metric/CreateMetric/Components/MetricEmptyState';
 
 type SavedMetricViewProps = {
   isLoading: boolean;
   metric: ComputedMetric[];
   breakdown: string[];
-  dateFilter: FunnelDateFilter;
+  dateFilter: DateFilterObj;
 };
 
 const SavedMetricView = ({

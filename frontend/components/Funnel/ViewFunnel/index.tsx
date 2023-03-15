@@ -1,11 +1,6 @@
 import { Flex } from '@chakra-ui/react';
-import { DateFilter, DateFilterType } from '@lib/domain/common';
-import {
-  Funnel,
-  FunnelData,
-  FunnelDateFilter,
-  FunnelTrendsData,
-} from '@lib/domain/funnel';
+import { DateFilterObj } from '@lib/domain/common';
+import { Funnel, FunnelData, FunnelTrendsData } from '@lib/domain/funnel';
 import { Notifications } from '@lib/domain/notification';
 import {
   getTransientFunnelData,
@@ -37,7 +32,7 @@ const ViewFunnel = ({
   >([]);
   const [notification, setNotification] = useState(savedNotification);
   const [isModalClosed, setIsModalClosed] = useState(false);
-  const [dateFilter] = useState<FunnelDateFilter>({
+  const [dateFilter] = useState<DateFilterObj>({
     filter: savedFunnel?.dateFilter?.filter || null,
     type: savedFunnel?.dateFilter?.type || null,
   });

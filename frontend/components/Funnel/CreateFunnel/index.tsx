@@ -6,7 +6,6 @@ import FunnelEmptyState from '../components/FunnelEmptyState';
 import {
   Funnel,
   FunnelData,
-  FunnelDateFilter,
   FunnelStep,
   FunnelTrendsData,
 } from '@lib/domain/funnel';
@@ -24,6 +23,7 @@ import {
 } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel/util';
+import { DateFilterObj } from '@lib/domain/common';
 
 const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const router = useRouter();
@@ -43,7 +43,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           { event: '', filters: [] },
         ]
   );
-  const [dateFilter, setDateFilter] = useState<FunnelDateFilter>({
+  const [dateFilter, setDateFilter] = useState<DateFilterObj>({
     filter: savedFunnel?.dateFilter?.filter || null,
     type: savedFunnel?.dateFilter?.type || null,
   });

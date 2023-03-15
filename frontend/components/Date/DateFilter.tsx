@@ -5,16 +5,16 @@ import {
   FixedDateFilter,
   DateFilterType,
   LastDateFilter,
+  DateFilterObj,
 } from '@lib/domain/common';
 import { DatePickerRange } from '@lib/domain/metric';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 import { formatDateIntoString } from '@lib/utils/common';
 import isEqual from 'lodash/isEqual';
-import { FunnelDateFilter } from '@lib/domain/funnel';
 
 type DateFilterProps = {
-  dateFilter: FunnelDateFilter;
+  dateFilter: DateFilterObj;
   setDateFilter: Function;
   isDisabled?: boolean;
 };

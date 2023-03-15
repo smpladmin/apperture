@@ -1,11 +1,7 @@
 import { Flex } from '@chakra-ui/react';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
-import {
-  DateFilter,
-  DateFilterType,
-  FunnelDateFilter,
-} from '@lib/domain/common';
+import { DateFilter, DateFilterType, DateFilterObj } from '@lib/domain/common';
 import { ComputedMetric, Metric } from '@lib/domain/metric';
 import { Notifications } from '@lib/domain/notification';
 import { computeMetric } from '@lib/services/metricService';
@@ -26,7 +22,7 @@ const ViewMetric = ({
   const [isLoading, setIsLoading] = useState(true);
   const [notification, setNotification] = useState(savedNotification);
   const [isModalClosed, setIsModalClosed] = useState(false);
-  const [dateFilter] = useState<FunnelDateFilter>({
+  const [dateFilter] = useState<DateFilterObj>({
     filter: savedMetric?.dateFilter?.filter || null,
     type: savedMetric?.dateFilter?.type || null,
   });

@@ -18,7 +18,8 @@ import {
 import { saveFunnel, updateFunnel } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { MapContext } from '@lib/contexts/mapContext';
-import { FunnelDateFilter, FunnelStep } from '@lib/domain/funnel';
+import { FunnelStep } from '@lib/domain/funnel';
+import { DateFilterObj } from '@lib/domain/common';
 
 type CreateFunnelActionProps = {
   funnelName: string;
@@ -26,7 +27,7 @@ type CreateFunnelActionProps = {
   funnelSteps: FunnelStep[];
   setFunnelSteps: Function;
   setIsStepAdded: Function;
-  dateFilter: FunnelDateFilter;
+  dateFilter: DateFilterObj;
 };
 
 const CreateFunnelAction = ({

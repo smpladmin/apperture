@@ -16,11 +16,7 @@ import TransientMetricView from './Components/TransientMetricView';
 import { Node } from '@lib/domain/node';
 import { useRouter } from 'next/router';
 import { getCountOfAggregates } from '../util';
-import {
-  DateFilter,
-  DateFilterType,
-  FunnelDateFilter,
-} from '@lib/domain/common';
+import { DateFilter, DateFilterType, DateFilterObj } from '@lib/domain/common';
 
 const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
   const [metric, setMetric] = useState<ComputedMetric[]>([]);
@@ -47,7 +43,7 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
       },
     ]
   );
-  const [dateFilter, setDateFilter] = useState<FunnelDateFilter>({
+  const [dateFilter, setDateFilter] = useState<DateFilterObj>({
     filter: savedMetric?.dateFilter?.filter || null,
     type: savedMetric?.dateFilter?.type || null,
   });

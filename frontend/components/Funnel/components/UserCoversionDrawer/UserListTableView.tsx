@@ -7,11 +7,10 @@ import {
   TabPanel,
   Text,
 } from '@chakra-ui/react';
-import { DateFilter, DateFilterType } from '@lib/domain/common';
+import { DateFilterObj } from '@lib/domain/common';
 import {
   ConversionStatus,
   FunnelConversionData,
-  FunnelDateFilter,
   FunnelStep,
   UserProperty,
 } from '@lib/domain/funnel';
@@ -29,7 +28,7 @@ type UserTableViewProps = {
   tableState: TableState;
   properties?: UserProperty[] | null;
   setTableState: Function;
-  dateFilter: FunnelDateFilter;
+  dateFilter: DateFilterObj;
 };
 type FunnelEventConversion = {
   converted?: FunnelConversionData;

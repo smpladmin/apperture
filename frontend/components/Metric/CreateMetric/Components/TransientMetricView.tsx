@@ -7,7 +7,7 @@ import MetricTrend from './MetricTrend';
 import Loader from '@components/LoadingSpinner';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import { FunnelDateFilter } from '@lib/domain/common';
+import { DateFilterObj } from '@lib/domain/common';
 
 type TransientMetricViewProps = {
   metric: ComputedMetric[];
@@ -17,7 +17,7 @@ type TransientMetricViewProps = {
   breakdown: string[];
   setBreakdown: Function;
   showEmptyState: boolean;
-  dateFilter: FunnelDateFilter;
+  dateFilter: DateFilterObj;
   setDateFilter: Function;
 };
 

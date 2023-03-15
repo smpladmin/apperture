@@ -19,7 +19,7 @@ export enum DateFilterType {
   LAST = 'last',
 }
 
-export type FunnelDateFilter = {
+export type DateFilterObj = {
   filter: DateFilter | null;
   type: DateFilterType | null;
 };

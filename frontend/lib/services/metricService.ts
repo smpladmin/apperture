@@ -1,5 +1,5 @@
 import { replaceEmptyStringPlaceholder } from '@components/Metric/util';
-import { FunnelDateFilter } from '@lib/domain/common';
+import { DateFilterObj } from '@lib/domain/common';
 import { MetricAggregate } from '@lib/domain/metric';
 import {
   AppertureGet,
@@ -13,7 +13,7 @@ type MetricRequestBody = {
   function: string;
   aggregates: MetricAggregate[];
   breakdown: string[];
-  dateFilter?: FunnelDateFilter;
+  dateFilter?: DateFilterObj;
 };
 
 export const computeMetric = async (
@@ -21,7 +21,7 @@ export const computeMetric = async (
   functions: string,
   aggregates: MetricAggregate[],
   breakdown: string[],
-  dateFilter: FunnelDateFilter
+  dateFilter: DateFilterObj
 ) => {
   const requestBody: MetricRequestBody = {
     datasourceId: dsId,
@@ -46,7 +46,7 @@ export const saveMetric = async (
   definition: string,
   aggregates: MetricAggregate[],
   breakdown: string[],
-  dateFilter: FunnelDateFilter
+  dateFilter: DateFilterObj
 ) => {
   const result = await ApperturePost('/metrics', {
     datasourceId: dsId,
@@ -66,7 +66,7 @@ export const updateMetric = async (
   definition: string,
   aggregates: MetricAggregate[],
   breakdown: string[],
-  dateFilter: FunnelDateFilter
+  dateFilter: DateFilterObj
 ) => {
   const result = await ApperturePut('/metrics/' + metricId, {
     datasourceId: dsId,
