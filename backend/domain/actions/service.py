@@ -4,7 +4,8 @@ from typing import List
 from beanie import PydanticObjectId
 from fastapi import Depends
 
-from domain.actions.models import Action, ActionGroup, ComputedEventStreamResult
+from domain.actions.models import (Action, ActionGroup,
+                                   ComputedEventStreamResult)
 from domain.clickstream.models import CaptureEvent
 from mongo import Mongo
 from repositories.clickhouse.actions import Actions
@@ -42,8 +43,8 @@ class ActionService:
 
     async def get_actions_for_datasource_id(self, datasource_id: str) -> List[Action]:
         return await Action.find(
-            PydanticObjectId(datasource_id) == Action.datasource_id
-            and Action.enabled != False
+            PydanticObjectId(datasource_id) == Action.datasource_id,
+            Action.enabled != False,
         ).to_list()
 
     async def update_action_processed_till(
@@ -62,7 +63,9 @@ class ActionService:
             )
 
     async def get_action(self, id: str) -> Action:
-        return await Action.get(id)
+        return await Action.find_one(
+            Action.id == PydanticObjectId(id), Action.enabled != False
+        )
 
     async def update_action(self, action_id: str, action: Action):
         to_update = action.dict()
@@ -103,6 +106,6 @@ class ActionService:
     async def delete_action(self, id=PydanticObjectId):
         selected_action = await Action.find_one(Action.id == id)
         await selected_action.update({"$set": {"enabled": False}})
-        await self.actions.delete_processed_events(
+        self.actions.delete_processed_events(
             ds_id=selected_action.datasource_id, event=selected_action.name
         )
