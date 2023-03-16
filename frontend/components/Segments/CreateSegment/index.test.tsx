@@ -21,7 +21,6 @@ import {
 } from '@lib/services/segmentService';
 import {
   FilterType,
-  SegmentDateFilterType,
   SegmentFilter,
   SegmentFilterConditions,
   SegmentFilterDataType,
@@ -34,6 +33,7 @@ import {
   getMonthDateYearFormattedString,
 } from '../util';
 import { addDays } from 'date-fns';
+import { DateFilterType } from '@lib/domain/common';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/utils/common');
@@ -1133,7 +1133,7 @@ describe('Create Segment', () => {
               date_filter: {
                 days: 30,
               },
-              date_filter_type: SegmentDateFilterType.LAST,
+              date_filter_type: DateFilterType.LAST,
               type: FilterType.WHO,
             },
             {
@@ -1146,7 +1146,7 @@ describe('Create Segment', () => {
               date_filter: {
                 days: 30,
               },
-              date_filter_type: SegmentDateFilterType.LAST,
+              date_filter_type: DateFilterType.LAST,
               type: FilterType.WHO,
             },
             {
@@ -1159,7 +1159,7 @@ describe('Create Segment', () => {
               date_filter: {
                 days: 30,
               },
-              date_filter_type: SegmentDateFilterType.LAST,
+              date_filter_type: DateFilterType.LAST,
               type: FilterType.WHO,
             },
           ] as SegmentFilter[],

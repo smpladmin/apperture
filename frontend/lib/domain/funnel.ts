@@ -1,3 +1,4 @@
+import { DateFilter, DateFilterObj, DateFilterType } from './common';
 import { FilterType } from './segment';
 import { AppertureUser as User } from './user';
 
@@ -48,8 +49,7 @@ export type Funnel = {
   updatedAt: Date;
   steps: FunnelStep[];
   randomSequence: boolean;
-  dateFilter?: DateFilter | null;
-  dateFilterType?: DateFilterType | null;
+  dateFilter?: DateFilterObj;
 };
 
 export type FunnelWithUser = Funnel & {
@@ -89,25 +89,4 @@ export type UserProperty = {
 export enum ConversionStatus {
   CONVERTED = 'converted',
   DROPPED = 'dropped',
-}
-
-export type FixedDateFilter = {
-  start_date: string;
-  end_date: string;
-};
-
-export type SinceDateFilter = {
-  start_date: string;
-};
-
-export type LastDateFilter = {
-  days: number;
-};
-
-export type DateFilter = FixedDateFilter | SinceDateFilter | LastDateFilter;
-
-export enum DateFilterType {
-  FIXED = 'fixed',
-  SINCE = 'since',
-  LAST = 'last',
 }

@@ -3,6 +3,7 @@ from typing import List, Union
 from beanie import PydanticObjectId
 from fastapi import Depends
 
+from domain.common.date_models import DateFilter
 from domain.metrics.models import (
     SegmentsAndEvents,
     ComputedMetricStep,
@@ -46,9 +47,17 @@ class MetricService:
         function: str,
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
-        start_date: Union[str, None],
-        end_date: Union[str, None],
+        date_filter: Union[DateFilter, None],
     ) -> List[ComputedMetricStep]:
+
+        start_date, end_date = (
+            self.metric.compute_date_filter(
+                date_filter=date_filter.filter, date_filter_type=date_filter.type
+            )
+            if date_filter and date_filter.filter and date_filter.type
+            else (None, None)
+        )
+
         computed_metric = self.metric.compute_query(
             datasource_id=datasource_id,
             aggregates=aggregates,
@@ -165,6 +174,7 @@ class MetricService:
         function: str,
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
+        dateFilter: Union[DateFilter, None],
     ):
         return Metric(
             datasource_id=datasource_id,
@@ -174,27 +184,10 @@ class MetricService:
             function=function,
             aggregates=aggregates,
             breakdown=breakdown,
+            date_filter=dateFilter,
         )
 
-    async def add_metric(
-        self,
-        datasource_id: PydanticObjectId,
-        app_id: PydanticObjectId,
-        user_id: PydanticObjectId,
-        name: str,
-        function: str,
-        aggregates: List[SegmentsAndEvents],
-        breakdown: List[str],
-    ):
-        metric = await self.build_metric(
-            datasource_id=datasource_id,
-            app_id=app_id,
-            user_id=user_id,
-            name=name,
-            function=function,
-            aggregates=aggregates,
-            breakdown=breakdown,
-        )
+    async def add_metric(self, metric: Metric):
         metric.updated_at = metric.created_at
         return await Metric.insert(metric)
 

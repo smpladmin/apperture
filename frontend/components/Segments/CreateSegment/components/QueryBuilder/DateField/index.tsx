@@ -2,17 +2,16 @@ import { Box, Flex, Text } from '@chakra-ui/react';
 import Dropdown from '@components/SearchableDropdown/Dropdown';
 import { getMonthDateYearFormattedString } from '@components/Segments/util';
 import {
-  SegmentDateFilterType,
-  SegmentFilter,
-  SegmentFixedDateFilter,
-  SegmentLastDateFilter,
-  SegmentSinceDateFilter,
-  WhoSegmentFilter,
-} from '@lib/domain/segment';
+  FixedDateFilter,
+  LastDateFilter,
+  SinceDateFilter,
+  DateFilterType,
+} from '@lib/domain/common';
+import { SegmentFilter, WhoSegmentFilter } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 import ApplyAndCancel from './ApplyAndCancel';
-import DateFilterType from './DateFilterTypeOptions';
+import DateFilterTypeOption from './DateFilterTypeOptions';
 import FixedDate from './FixedDate';
 import LastNDays from './LastNDays';
 import SinceStartDate from './SinceStartDate';
@@ -37,15 +36,14 @@ const DateField = ({
   );
 
   const [days, setDays] = useState(
-    (filter.date_filter as SegmentLastDateFilter)?.days?.toString() || ''
+    (filter.date_filter as LastDateFilter)?.days?.toString() || ''
   );
   const [sinceStartDate, setSinceStartDate] = useState({
-    start_date:
-      (filter.date_filter as SegmentSinceDateFilter)?.start_date || '',
+    start_date: (filter.date_filter as SinceDateFilter)?.start_date || '',
   });
   const [fixedDateRange, setFixedDateRange] = useState({
-    start_date: (filter.date_filter as SegmentFixedDateFilter).start_date || '',
-    end_date: (filter.date_filter as SegmentFixedDateFilter).end_date || '',
+    start_date: (filter.date_filter as FixedDateFilter).start_date || '',
+    end_date: (filter.date_filter as FixedDateFilter).end_date || '',
   });
 
   const closeDropdown = () => {
@@ -56,14 +54,14 @@ const DateField = ({
   useOnClickOutside(dateFieldRef, closeDropdown);
 
   const dateFilterObj = {
-    [SegmentDateFilterType.LAST]: {
-      label: `Last ${(filter.date_filter as SegmentLastDateFilter).days} days`,
+    [DateFilterType.LAST]: {
+      label: `Last ${(filter.date_filter as LastDateFilter).days} days`,
       value: { days: +days },
       component: <LastNDays days={days} setDays={setDays} />,
     },
-    [SegmentDateFilterType.SINCE]: {
+    [DateFilterType.SINCE]: {
       label: `Since ${getMonthDateYearFormattedString(
-        (filter.date_filter as SegmentSinceDateFilter).start_date
+        (filter.date_filter as SinceDateFilter).start_date
       )}`,
       value: sinceStartDate,
       component: (
@@ -74,11 +72,11 @@ const DateField = ({
         />
       ),
     },
-    [SegmentDateFilterType.FIXED]: {
+    [DateFilterType.FIXED]: {
       label: `${getMonthDateYearFormattedString(
-        (filter.date_filter as SegmentFixedDateFilter).start_date
+        (filter.date_filter as FixedDateFilter).start_date
       )} - ${getMonthDateYearFormattedString(
-        (filter.date_filter as SegmentFixedDateFilter).end_date
+        (filter.date_filter as FixedDateFilter).end_date
       )}`,
       value: fixedDateRange,
       component: (
@@ -131,7 +129,7 @@ const DateField = ({
       {getDateDisplayValue()}
       <Dropdown isOpen={isDateFieldBoxOpen} maxHeight={120}>
         <Flex direction={'column'} gap={'6'}>
-          <DateFilterType
+          <DateFilterTypeOption
             selectedDateFilterType={selectedDateFilterType}
             setSelectedDateFIlterType={setSelectedDateFilterType}
           />

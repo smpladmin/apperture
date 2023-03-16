@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from domain.common.date_models import LastDateFilter, DateFilter, DateFilterType
 from domain.metrics.models import (
     Metric,
     SegmentsAndEvents,
@@ -24,6 +25,10 @@ class TestMetricService:
         self.metric = MagicMock()
         self.service = MetricService(mongo=self.mongo, metric=self.metric)
         self.ds_id = "636a1c61d715ca6baae65611"
+        self.date_filter = DateFilter(
+            filter=LastDateFilter(days=3), type=DateFilterType.LAST
+        )
+        self.metric.compute_date_filter.return_value = ("2023-01-22", "2023-01-24")
         self.aggregates = [
             SegmentsAndEvents(
                 variable="A",
@@ -54,9 +59,9 @@ class TestMetricService:
         [
             (
                 [
-                    (datetime(2023, 1, 22), 518),
-                    (datetime(2023, 1, 23), 418),
-                    (datetime(2023, 1, 24), 318),
+                    (datetime(2023, 1, 22).date(), 518),
+                    (datetime(2023, 1, 23).date(), 418),
+                    (datetime(2023, 1, 24).date(), 318),
                 ],
                 "A",
                 [],
@@ -78,9 +83,9 @@ class TestMetricService:
             ),
             (
                 [
-                    (datetime(2023, 1, 22), "1.5.9", 327, 518),
-                    (datetime(2023, 1, 23), "1.5.13", 227, 318),
-                    (datetime(2023, 1, 24), "1.5.16", 127, 418),
+                    (datetime(2023, 1, 22).date(), "1.5.9", 327, 518),
+                    (datetime(2023, 1, 23).date(), "1.5.13", 227, 318),
+                    (datetime(2023, 1, 24).date(), "1.5.16", 127, 418),
                 ],
                 "A,B",
                 ["property1"],
@@ -167,14 +172,14 @@ class TestMetricService:
             ),
             (
                 [
-                    (datetime(2023, 1, 22), "1.5.9", "5009", 1.1),
-                    (datetime(2023, 1, 22), "1.5.8", "5009", 1.4),
-                    (datetime(2023, 1, 22), "1.5.8", "5007", 1.9),
-                    (datetime(2023, 1, 22), "1.5.9", "5007", 0.9),
-                    (datetime(2023, 1, 23), "1.5.9", "5009", 1.1),
-                    (datetime(2023, 1, 23), "1.5.8", "5009", 1.4),
-                    (datetime(2023, 1, 23), "1.5.8", "5007", 1.9),
-                    (datetime(2023, 1, 23), "1.5.9", "5007", 0.9),
+                    (datetime(2023, 1, 22).date(), "1.5.9", "5009", 1.1),
+                    (datetime(2023, 1, 22).date(), "1.5.8", "5009", 1.4),
+                    (datetime(2023, 1, 22).date(), "1.5.8", "5007", 1.9),
+                    (datetime(2023, 1, 22).date(), "1.5.9", "5007", 0.9),
+                    (datetime(2023, 1, 23).date(), "1.5.9", "5009", 1.1),
+                    (datetime(2023, 1, 23).date(), "1.5.8", "5009", 1.4),
+                    (datetime(2023, 1, 23).date(), "1.5.8", "5007", 1.9),
+                    (datetime(2023, 1, 23).date(), "1.5.9", "5007", 0.9),
                 ],
                 "A/B",
                 ["property1", "property2"],
@@ -192,6 +197,7 @@ class TestMetricService:
                                 data=[
                                     MetricValue(date="2023-01-22", value=1.1),
                                     MetricValue(date="2023-01-23", value=1.1),
+                                    MetricValue(date="2023-01-24", value=0.0),
                                 ],
                             ),
                             ComputedMetricData(
@@ -204,6 +210,7 @@ class TestMetricService:
                                 data=[
                                     MetricValue(date="2023-01-22", value=1.4),
                                     MetricValue(date="2023-01-23", value=1.4),
+                                    MetricValue(date="2023-01-24", value=0.0),
                                 ],
                             ),
                             ComputedMetricData(
@@ -216,6 +223,7 @@ class TestMetricService:
                                 data=[
                                     MetricValue(date="2023-01-22", value=1.9),
                                     MetricValue(date="2023-01-23", value=1.9),
+                                    MetricValue(date="2023-01-24", value=0.0),
                                 ],
                             ),
                             ComputedMetricData(
@@ -228,6 +236,7 @@ class TestMetricService:
                                 data=[
                                     MetricValue(date="2023-01-22", value=0.9),
                                     MetricValue(date="2023-01-23", value=0.9),
+                                    MetricValue(date="2023-01-24", value=0.0),
                                 ],
                             ),
                         ],
@@ -245,8 +254,7 @@ class TestMetricService:
                 aggregates=self.aggregates,
                 function=function,
                 breakdown=breakdown,
-                start_date=None,
-                end_date=None,
+                date_filter=self.date_filter,
             )
             == result
         )

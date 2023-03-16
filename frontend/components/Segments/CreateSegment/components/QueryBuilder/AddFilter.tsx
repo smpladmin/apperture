@@ -1,10 +1,10 @@
 import { Box, Button } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { getWhereAndWhoFilters } from '@components/Segments/util';
+import { DateFilterType } from '@lib/domain/common';
 import {
   FilterItemType,
   FilterType,
-  SegmentDateFilterType,
   SegmentFilter,
   SegmentFilterConditions,
   SegmentFilterOperatorsNumber,
@@ -86,7 +86,7 @@ const AddFilter = ({
         date_filter: {
           days: 30,
         },
-        date_filter_type: SegmentDateFilterType.LAST,
+        date_filter_type: DateFilterType.LAST,
         type: FilterType.WHO,
         datatype: SegmentFilterDataType.NUMBER,
       });

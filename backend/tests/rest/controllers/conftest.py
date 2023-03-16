@@ -15,6 +15,7 @@ from domain.actions.models import (
 )
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App
+from domain.common.date_models import DateFilter, LastDateFilter, DateFilterType
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
@@ -1145,7 +1146,6 @@ def funnel_response():
         ],
         "randomSequence": False,
         "dateFilter": None,
-        "dateFilterType": None,
     }
 
 

@@ -7,6 +7,7 @@ from beanie.operators import In
 
 
 from domain.common.models import SavedItems
+from domain.common.date_models import DateFilter
 from domain.funnels.models import (
     Funnel,
     FunnelStep,
@@ -16,9 +17,6 @@ from domain.funnels.models import (
     FunnelConversionData,
     ConversionStatus,
     FunnelEventUserData,
-    DateFilterType,
-    FixedDateFilter,
-    LastDateFilter,
 )
 from repositories.clickhouse.funnels import Funnels
 
@@ -40,8 +38,7 @@ class FunnelsService:
         name: str,
         steps: List[FunnelStep],
         randomSequence: bool,
-        dateFilter: Union[LastDateFilter, FixedDateFilter, None],
-        dateFilterType: Union[DateFilterType, None],
+        dateFilter: Union[DateFilter, None],
     ) -> Funnel:
         return Funnel(
             datasource_id=datasourceId,
@@ -51,7 +48,6 @@ class FunnelsService:
             steps=steps,
             random_sequence=randomSequence,
             date_filter=dateFilter,
-            date_filter_type=dateFilterType,
         )
 
     async def add_funnel(self, funnel: Funnel):
@@ -61,21 +57,23 @@ class FunnelsService:
     def compute_conversion(self, n, data) -> float:
         return data[n] * 100 / data[0] if data[0] != 0 else 0
 
+    def extract_date_range(self, date_filter: Union[DateFilter, None]):
+        return (
+            self.funnels.compute_date_filter(
+                date_filter=date_filter.filter, date_filter_type=date_filter.type
+            )
+            if date_filter and date_filter.filter and date_filter.type
+            else (None, None)
+        )
+
     async def compute_funnel(
         self,
         ds_id: str,
         steps: List[FunnelStep],
-        date_filter: Union[LastDateFilter, FixedDateFilter, None],
-        date_filter_type: Union[DateFilterType, None],
+        date_filter: Union[DateFilter, None],
     ) -> List[ComputedFunnelStep]:
 
-        start_date, end_date = (
-            self.funnels.compute_date_filter(
-                date_filter=date_filter, date_filter_type=date_filter_type
-            )
-            if date_filter and date_filter_type
-            else (None, None)
-        )
+        start_date, end_date = self.extract_date_range(date_filter=date_filter)
 
         users_data = self.funnels.get_users_count(
             ds_id=ds_id, steps=steps, start_date=start_date, end_date=end_date
@@ -123,17 +121,10 @@ class FunnelsService:
         self,
         datasource_id: str,
         steps: List[FunnelStep],
-        date_filter: Union[LastDateFilter, FixedDateFilter, None],
-        date_filter_type: Union[DateFilterType, None],
+        date_filter: Union[DateFilter, None],
     ) -> List[FunnelTrendsData]:
 
-        start_date, end_date = (
-            self.funnels.compute_date_filter(
-                date_filter=date_filter, date_filter_type=date_filter_type
-            )
-            if date_filter and date_filter_type
-            else (None, None)
-        )
+        start_date, end_date = self.extract_date_range(date_filter=date_filter)
 
         conversion_data = self.funnels.get_conversion_trend(
             ds_id=datasource_id, steps=steps, start_date=start_date, end_date=end_date
@@ -154,16 +145,10 @@ class FunnelsService:
         datasource_id: str,
         steps: List[FunnelStep],
         status: ConversionStatus,
-        date_filter: Union[LastDateFilter, FixedDateFilter, None],
-        date_filter_type: Union[DateFilterType, None],
+        date_filter: Union[DateFilter, None],
     ):
-        start_date, end_date = (
-            self.funnels.compute_date_filter(
-                date_filter=date_filter, date_filter_type=date_filter_type
-            )
-            if date_filter and date_filter_type
-            else (None, None)
-        )
+        start_date, end_date = self.extract_date_range(date_filter=date_filter)
+
         conversion_data = self.funnels.get_conversion_analytics(
             ds_id=datasource_id,
             steps=steps,

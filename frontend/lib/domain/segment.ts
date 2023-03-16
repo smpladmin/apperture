@@ -1,3 +1,4 @@
+import { DateFilter, DateFilterType } from './common';
 import { AppertureUser } from './user';
 
 export type WhereSegmentFilter = {
@@ -18,7 +19,7 @@ export type WhoSegmentFilter = {
   operator: SegmentFilterOperatorsNumber;
   values: string[];
   date_filter: DateFilter;
-  date_filter_type: SegmentDateFilterType;
+  date_filter_type: DateFilterType;
   type: FilterType;
   datatype: SegmentFilterDataType;
 };
@@ -83,30 +84,6 @@ export type Segment = {
 export type SegmentWithUser = Segment & {
   user: AppertureUser;
 };
-
-export type SegmentFixedDateFilter = {
-  start_date: string;
-  end_date: string;
-};
-
-export type SegmentSinceDateFilter = {
-  start_date: string;
-};
-
-export type SegmentLastDateFilter = {
-  days: number;
-};
-
-export type DateFilter =
-  | SegmentFixedDateFilter
-  | SegmentSinceDateFilter
-  | SegmentLastDateFilter;
-
-export enum SegmentDateFilterType {
-  FIXED = 'fixed',
-  SINCE = 'since',
-  LAST = 'last',
-}
 
 export enum SegmentFilterDataType {
   STRING = 'String',
