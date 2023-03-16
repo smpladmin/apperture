@@ -44,7 +44,6 @@ async def create_funnel(
         dto.steps,
         dto.randomSequence,
         dto.dateFilter,
-        dto.dateFilterType,
         dto.conversionWindow,
     )
 
@@ -61,7 +60,6 @@ async def compute_transient_funnel(
         ds_id=dto.datasourceId,
         steps=dto.steps,
         date_filter=dto.dateFilter,
-        date_filter_type=dto.dateFilterType,
         conversion_window=dto.conversionWindow,
     )
 
@@ -91,7 +89,6 @@ async def update_funnel(
         dto.steps,
         dto.randomSequence,
         dto.dateFilter,
-        dto.dateFilterType,
         dto.conversionWindow,
     )
     await funnel_service.update_funnel(funnel_id=id, new_funnel=new_funnel)
@@ -121,7 +118,6 @@ async def get_transient_funnel_trends(
         datasource_id=dto.datasourceId,
         steps=dto.steps,
         date_filter=dto.dateFilter,
-        date_filter_type=dto.dateFilterType,
         conversion_window=dto.conversionWindow,
     )
 
@@ -138,7 +134,6 @@ async def get_transient_funnel_analytics(
         steps=dto.steps,
         status=dto.status,
         date_filter=dto.dateFilter,
-        date_filter_type=dto.dateFilterType,
         conversion_window=dto.conversionWindow,
     )
 

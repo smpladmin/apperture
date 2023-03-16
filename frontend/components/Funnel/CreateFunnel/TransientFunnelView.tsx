@@ -6,13 +6,7 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import {
-  DateFilter,
-  DateFilterType,
-  FunnelData,
-  FunnelStep,
-  FunnelTrendsData,
-} from '@lib/domain/funnel';
+import { FunnelData, FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
 import React, { useState } from 'react';
 import FunnelChart from '../components/FunnelChart';
 import Trend from '../components/Trend';
@@ -20,16 +14,16 @@ import Loader from '@components/LoadingSpinner';
 import UserConversionDrawer from '../components/UserCoversionDrawer';
 import { useRouter } from 'next/router';
 import DateFilterComponent from '@components/Date/DateFilter';
+import { DateFilterObj } from '@lib/domain/common';
 
 type TransientFunnelViewProps = {
   isLoading: boolean;
   funnelData: FunnelData[];
   trendsData: FunnelTrendsData[];
   funnelSteps: FunnelStep[];
-  dateFilter: DateFilter | null;
+  dateFilter: DateFilterObj;
   setDateFilter: Function;
-  dateFilterType: DateFilterType | null;
-  setDateFilterType: Function;
+
   isDateFilterDisabled?: boolean;
 };
 
@@ -40,8 +34,6 @@ const TransientFunnelView = ({
   funnelSteps,
   dateFilter,
   setDateFilter,
-  dateFilterType,
-  setDateFilterType,
   isDateFilterDisabled = false,
 }: TransientFunnelViewProps) => {
   const {
@@ -81,8 +73,6 @@ const TransientFunnelView = ({
       <DateFilterComponent
         dateFilter={dateFilter}
         setDateFilter={setDateFilter}
-        dateFilterType={dateFilterType}
-        setDateFilterType={setDateFilterType}
         isDisabled={isDateFilterDisabled}
       />
 
@@ -151,7 +141,7 @@ const TransientFunnelView = ({
             borderColor={'white.200'}
             opacity={1}
           />
-          <Flex direction={'column'} gap={'8'}>
+          <Flex direction={'column'} gap={'8'} pb={'8'}>
             <Text
               fontSize={{ base: 'sh-18', md: 'sh-20' }}
               lineHeight={{ base: 'sh-18', md: 'sh-20' }}
@@ -171,7 +161,6 @@ const TransientFunnelView = ({
         event={selectedEvent as string}
         selectedFunnelSteps={selectedFunnelSteps}
         dateFilter={dateFilter}
-        dateFilterType={dateFilterType}
       />
     </Flex>
   );

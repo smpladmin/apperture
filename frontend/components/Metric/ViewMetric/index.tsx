@@ -1,6 +1,7 @@
 import { Flex } from '@chakra-ui/react';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
+import { DateFilter, DateFilterType, DateFilterObj } from '@lib/domain/common';
 import { ComputedMetric, Metric } from '@lib/domain/metric';
 import { Notifications } from '@lib/domain/notification';
 import { computeMetric } from '@lib/services/metricService';
@@ -21,6 +22,10 @@ const ViewMetric = ({
   const [isLoading, setIsLoading] = useState(true);
   const [notification, setNotification] = useState(savedNotification);
   const [isModalClosed, setIsModalClosed] = useState(false);
+  const [dateFilter] = useState<DateFilterObj>({
+    filter: savedMetric?.dateFilter?.filter || null,
+    type: savedMetric?.dateFilter?.type || null,
+  });
 
   useEffect(() => {
     const fetchMetric = async () => {
@@ -30,8 +35,7 @@ const ViewMetric = ({
           savedMetric.aggregates.map((item) => item.variable).join(','),
         savedMetric.aggregates,
         savedMetric.breakdown,
-        undefined,
-        undefined
+        dateFilter
       );
       setComputedMetric(result);
       setIsLoading(false);
@@ -73,6 +77,7 @@ const ViewMetric = ({
           metric={computedMetric}
           isLoading={isLoading}
           breakdown={savedMetric.breakdown}
+          dateFilter={dateFilter}
         />
       </ViewPanel>
     </Flex>

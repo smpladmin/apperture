@@ -1,8 +1,9 @@
 from enum import Enum
-from typing import Union, List
+from typing import Optional, Union, List
 
 from beanie import PydanticObjectId
 from pydantic import BaseModel
+from domain.common.date_models import DateFilter
 from repositories import Document
 from pypika import analytics as an, functions as fn, CustomFunction
 
@@ -88,6 +89,7 @@ class Metric(Document):
     function: str
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
+    date_filter: Optional[DateFilter]
 
     class Settings:
         name = "metric"

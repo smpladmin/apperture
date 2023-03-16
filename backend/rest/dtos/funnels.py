@@ -2,6 +2,7 @@ from typing import List, Optional, Union
 from pydantic import BaseModel
 
 from domain.funnels.models import (
+    DateFilter,
     FunnelStep,
     Funnel,
     ComputedFunnelStep,
@@ -9,9 +10,6 @@ from domain.funnels.models import (
     FunnelTrendsData,
     FunnelConversionData,
     ConversionStatus,
-    DateFilterType,
-    FixedDateFilter,
-    LastDateFilter,
     ConversionWindow,
 )
 from rest.dtos.apperture_users import AppertureUserResponse
@@ -23,8 +21,7 @@ class CreateFunnelDto(BaseModel):
     name: str
     steps: List[FunnelStep]
     randomSequence: bool
-    dateFilter: Optional[Union[LastDateFilter, FixedDateFilter]]
-    dateFilterType: Optional[DateFilterType]
+    dateFilter: Optional[DateFilter]
     conversionWindow: Optional[ConversionWindow]
 
 
@@ -32,16 +29,14 @@ class TransientFunnelConversionlDto(BaseModel):
     datasourceId: str
     steps: List[FunnelStep]
     status: ConversionStatus
-    dateFilter: Optional[Union[LastDateFilter, FixedDateFilter]]
-    dateFilterType: Optional[DateFilterType]
+    dateFilter: Optional[DateFilter]
     conversionWindow: Optional[ConversionWindow]
 
 
 class TransientFunnelDto(BaseModel):
     datasourceId: str
     steps: List[FunnelStep]
-    dateFilter: Optional[Union[LastDateFilter, FixedDateFilter]]
-    dateFilterType: Optional[DateFilterType]
+    dateFilter: Optional[DateFilter]
     conversionWindow: Optional[ConversionWindow]
 
 

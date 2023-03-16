@@ -5,7 +5,8 @@ import {
   FixedDateFilter,
   DateFilterType,
   LastDateFilter,
-} from '@lib/domain/funnel';
+  DateFilterObj,
+} from '@lib/domain/common';
 import { DatePickerRange } from '@lib/domain/metric';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
@@ -13,29 +14,27 @@ import { formatDateIntoString } from '@lib/utils/common';
 import isEqual from 'lodash/isEqual';
 
 type DateFilterProps = {
-  dateFilter: DateFilter | null;
+  dateFilter: DateFilterObj;
   setDateFilter: Function;
-  dateFilterType: DateFilterType | null;
-  setDateFilterType: Function;
   isDisabled?: boolean;
 };
 
 const DateFilter = ({
   dateFilter,
   setDateFilter,
-  dateFilterType,
-  setDateFilterType,
   isDisabled,
 }: DateFilterProps) => {
   const datePickerRef = useRef(null);
 
-  const startDate = (dateFilter as FixedDateFilter)?.start_date
-    ? new Date((dateFilter as FixedDateFilter)?.start_date)
+  const startDate = (dateFilter.filter as FixedDateFilter)?.start_date
+    ? new Date((dateFilter.filter as FixedDateFilter)?.start_date)
     : new Date();
 
-  const endDate = (dateFilter as FixedDateFilter)?.end_date
-    ? new Date((dateFilter as FixedDateFilter)?.end_date)
+  const endDate = (dateFilter.filter as FixedDateFilter)?.end_date
+    ? new Date((dateFilter.filter as FixedDateFilter)?.end_date)
     : new Date();
+
+  const dateFilterType = dateFilter?.type;
 
   const [dateRange] = useState({ startDate, endDate });
   const [openCustom, setOpenCustom] = useState<boolean>(false);
@@ -46,12 +45,10 @@ const DateFilter = ({
     filterValue: DateFilter
   ) => {
     // unselect date filter if applied filter is clicked
-    if (isEqual(filterValue, dateFilter)) {
-      setDateFilterType(null);
-      setDateFilter(null);
+    if (isEqual(filterValue, dateFilter.filter)) {
+      setDateFilter({ filter: null, type: null });
     } else {
-      setDateFilterType(filterType);
-      setDateFilter(filterValue);
+      setDateFilter({ filter: filterValue, type: filterType });
     }
   };
 
@@ -79,24 +76,25 @@ const DateFilter = ({
     const { startDate, endDate } = dateRange;
 
     setDateFilter({
-      start_date: formatDateIntoString(startDate),
-      end_date: formatDateIntoString(endDate),
+      filter: {
+        start_date: formatDateIntoString(startDate),
+        end_date: formatDateIntoString(endDate),
+      },
+      type: DateFilterType.FIXED,
     });
     setOpenCustom((prevState) => !prevState);
-    setDateFilterType(DateFilterType.FIXED);
   };
 
   const handleCustomCancel = () => {
     setOpenCustom((prevState) => !prevState);
-    setDateFilter(null);
-    setDateFilterType(null);
+    setDateFilter({ filter: null, type: null });
   };
 
   const isLastDateFilterSelected = {
-    '1D': !!((dateFilter as LastDateFilter)?.days === 1),
-    '1W': !!((dateFilter as LastDateFilter)?.days === 7),
-    '1M': !!((dateFilter as LastDateFilter)?.days === 30),
-    '3M': !!((dateFilter as LastDateFilter)?.days === 90),
+    '1D': !!((dateFilter.filter as LastDateFilter)?.days === 1),
+    '1W': !!((dateFilter.filter as LastDateFilter)?.days === 7),
+    '1M': !!((dateFilter.filter as LastDateFilter)?.days === 30),
+    '3M': !!((dateFilter.filter as LastDateFilter)?.days === 90),
   };
 
   return (

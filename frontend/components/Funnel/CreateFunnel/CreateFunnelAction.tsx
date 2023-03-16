@@ -18,7 +18,8 @@ import {
 import { saveFunnel, updateFunnel } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { MapContext } from '@lib/contexts/mapContext';
-import { DateFilter, DateFilterType, FunnelStep } from '@lib/domain/funnel';
+import { FunnelStep } from '@lib/domain/funnel';
+import { DateFilterObj } from '@lib/domain/common';
 
 type CreateFunnelActionProps = {
   funnelName: string;
@@ -26,8 +27,7 @@ type CreateFunnelActionProps = {
   funnelSteps: FunnelStep[];
   setFunnelSteps: Function;
   setIsStepAdded: Function;
-  dateFilter: DateFilter | null;
-  dateFilterType: DateFilterType | null;
+  dateFilter: DateFilterObj;
 };
 
 const CreateFunnelAction = ({
@@ -37,7 +37,6 @@ const CreateFunnelAction = ({
   setFunnelSteps,
   setIsStepAdded,
   dateFilter,
-  dateFilterType,
 }: CreateFunnelActionProps) => {
   const {
     state: { nodes },
@@ -82,16 +81,14 @@ const CreateFunnelAction = ({
           funnelName,
           filterFunnelSteps(funnelSteps),
           false,
-          dateFilter,
-          dateFilterType
+          dateFilter
         )
       : await saveFunnel(
           dsId as string,
           funnelName,
           filterFunnelSteps(funnelSteps),
           false,
-          dateFilter,
-          dateFilterType
+          dateFilter
         );
 
     if (status === 200)

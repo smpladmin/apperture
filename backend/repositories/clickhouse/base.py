@@ -10,7 +10,7 @@ from pypika import (
 )
 
 from clickhouse import Clickhouse
-from domain.funnels.models import (
+from domain.common.date_models import (
     DateFilterType,
     FixedDateFilter,
     LastDateFilter,
