@@ -5,8 +5,6 @@ from datetime import datetime
 from beanie import PydanticObjectId
 from beanie.operators import In
 
-
-from domain.common.models import SavedItems
 from domain.common.date_models import DateFilter
 from domain.funnels.models import (
     Funnel,
@@ -60,7 +58,7 @@ class FunnelsService:
     def compute_conversion(self, n, data) -> float:
         return data[n] * 100 / data[0] if data[0] != 0 else 0
 
-    def compute_conversion_time(self, conversion_window):
+    def compute_conversion_time(self, conversion_window: Union[ConversionWindow, None]):
         return (
             conversion_window.type.get_multiplier() * conversion_window.value
             if conversion_window
@@ -110,7 +108,7 @@ class FunnelsService:
         return computed_funnel
 
     async def get_funnel(self, id: str) -> Funnel:
-        return await Funnel.get(id)
+        return await Funnel.get(PydanticObjectId(id))
 
     async def update_funnel(self, funnel_id: str, new_funnel: Funnel):
         to_update = new_funnel.dict()
@@ -182,7 +180,7 @@ class FunnelsService:
 
     async def get_funnels_for_apps(
         self, app_ids: List[PydanticObjectId]
-    ) -> List[SavedItems]:
+    ) -> List[Funnel]:
         return await Funnel.find(
             In(Funnel.app_id, app_ids),
         ).to_list()

@@ -5,7 +5,12 @@ from collections import namedtuple
 from beanie import PydanticObjectId
 from unittest.mock import MagicMock, AsyncMock
 
-from domain.common.date_models import DateFilter, LastDateFilter, DateFilterType
+from domain.common.date_models import (
+    DateFilter,
+    LastDateFilter,
+    DateFilterType,
+    FixedDateFilter,
+)
 from tests.utils import filter_response
 from domain.datasources.models import DataSource
 from domain.funnels.service import FunnelsService
@@ -17,7 +22,6 @@ from domain.funnels.models import (
     ComputedFunnel,
     FunnelTrendsData,
     FunnelConversionData,
-    FunnelConversion,
     FunnelEventUserData,
     ConversionStatus,
     ConversionWindow,
@@ -248,3 +252,34 @@ class TestFunnelService:
             datasource_id="6384a65e0a397236d9de236a"
         )
         Funnel.find.assert_called_once()
+
+    @pytest.mark.parametrize(
+        "conversion_window, result",
+        [
+            (None, 30 * 24 * 60 * 60),
+            (ConversionWindow(type=ConversionWindowType.MINUTES, value=10), 10 * 60),
+        ],
+    )
+    def test_compute_conversion_time(self, conversion_window, result):
+        assert (
+            self.service.compute_conversion_time(conversion_window=conversion_window)
+            == result
+        )
+
+    @pytest.mark.parametrize(
+        "date_filter, result",
+        [
+            (None, (None, None)),
+            (
+                DateFilter(
+                    type=DateFilterType.FIXED,
+                    filter=FixedDateFilter(
+                        start_date="2022-01-01", end_date="2023-01-01"
+                    ),
+                ),
+                ("2022-12-01", "2022-12-31"),
+            ),
+        ],
+    )
+    def test_extract_date_range(self, date_filter, result):
+        assert self.service.extract_date_range(date_filter=date_filter) == result

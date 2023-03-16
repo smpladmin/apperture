@@ -1,6 +1,6 @@
-from unittest.mock import MagicMock
-
 import pytest
+from pypika import Table
+from unittest.mock import MagicMock
 
 from domain.segments.models import (
     WhereSegmentFilter,
@@ -8,7 +8,6 @@ from domain.segments.models import (
     SegmentFilterConditions,
     SegmentDataType,
 )
-from pypika import Table
 from domain.funnels.models import FunnelStep
 from repositories.clickhouse.funnels import Funnels, ConversionStatus
 
