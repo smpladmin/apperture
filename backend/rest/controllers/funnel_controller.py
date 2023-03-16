@@ -105,7 +105,7 @@ async def get_funnel_trends(
         datasource_id=str(funnel.datasource_id),
         steps=funnel.steps,
         date_filter=funnel.date_filter,
-        date_filter_type=funnel.date_filter_type,
+        conversion_window=funnel.conversion_window,
     )
 
 

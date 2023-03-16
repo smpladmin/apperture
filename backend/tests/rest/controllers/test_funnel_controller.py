@@ -122,7 +122,7 @@ def test_get_funnel_trends(client_init, funnel_trend_response, funnel_service):
                 ),
             ],
             "date_filter": None,
-            "date_filter_type": None,
+            "conversion_window": None,
         }
     )
 

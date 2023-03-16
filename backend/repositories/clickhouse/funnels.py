@@ -61,7 +61,7 @@ class Funnels(EventsBase):
             end_date=end_date,
             conversion_time=conversion_time,
         )
-        return self.execute_get_query(query.get_sql(), parameter)
+        return self.execute_get_query(query, parameter)
 
     def get_initial_users(
         self,
@@ -344,4 +344,4 @@ class Funnels(EventsBase):
             .limit(100)
         )
 
-        return query, parameters
+        return query.get_sql(), parameters

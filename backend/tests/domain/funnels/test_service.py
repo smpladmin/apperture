@@ -216,6 +216,7 @@ class TestFunnelService:
                 ],
                 "end_date": "2022-12-31",
                 "start_date": "2022-12-01",
+                "conversion_time": 600,
             }
         )
 
