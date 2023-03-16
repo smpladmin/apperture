@@ -6,23 +6,25 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import {
-  FunnelData,
-  FunnelStep,
-  FunnelTrendsData,
-} from '@lib/domain/funnel';
+import { FunnelData, FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
 import React, { useState } from 'react';
 import FunnelChart from '../components/FunnelChart';
 import Trend from '../components/Trend';
 import Loader from '@components/LoadingSpinner';
 import UserConversionDrawer from '../components/UserCoversionDrawer';
 import { useRouter } from 'next/router';
+import DateFilterComponent from '@components/Date/DateFilter';
+import { DateFilterObj } from '@lib/domain/common';
 
 type TransientFunnelViewProps = {
   isLoading: boolean;
   funnelData: FunnelData[];
   trendsData: FunnelTrendsData[];
   funnelSteps: FunnelStep[];
+  dateFilter: DateFilterObj;
+  setDateFilter: Function;
+
+  isDateFilterDisabled?: boolean;
 };
 
 const TransientFunnelView = ({
@@ -30,6 +32,9 @@ const TransientFunnelView = ({
   funnelData,
   trendsData,
   funnelSteps,
+  dateFilter,
+  setDateFilter,
+  isDateFilterDisabled = false,
 }: TransientFunnelViewProps) => {
   const {
     isOpen: isDrawerOpen,
@@ -62,14 +67,23 @@ const TransientFunnelView = ({
       direction={'column'}
       gap={'8'}
       px={{ base: '0', md: '15' }}
-      py={{ base: '8', md: '12' }}
+      py={{ base: '8', md: '8' }}
+      h={'full'}
     >
-      <Flex justifyContent={'space-between'} alignItems={'center'}>
-        <Flex direction={'column'} gap={'1'}>
-          {isLoading ? (
-            <Loader />
-          ) : (
-            <>
+      <DateFilterComponent
+        dateFilter={dateFilter}
+        setDateFilter={setDateFilter}
+        isDisabled={isDateFilterDisabled}
+      />
+
+      {isLoading ? (
+        <Flex justifyContent={'center'} alignItems={'center'} h={'full'}>
+          <Loader />
+        </Flex>
+      ) : (
+        <>
+          <Flex justifyContent={'space-between'}>
+            <Flex direction={'column'} gap={'1'}>
               <Text
                 fontSize={'sh-18'}
                 lineHeight={'sh-18'}
@@ -91,72 +105,62 @@ const TransientFunnelView = ({
               >
                 {`${funnelLastStepUsers} users`}
               </Text>
-            </>
-          )}
-        </Flex>
+            </Flex>
 
-        <Button
-          h={'15'}
-          fontSize={'xs-14'}
-          lineHeight={'xs-14'}
-          fontWeight={'600'}
-          bg={'white.200'}
-        >
-          {'Analyse Factors'}
-        </Button>
-      </Flex>
-      <Divider orientation="horizontal" borderColor={'white.200'} opacity={1} />
-      <Flex direction={'column'} gap={'8'}>
-        <Text
-          fontSize={{ base: 'sh-18', md: 'sh-20' }}
-          lineHeight={{ base: 'sh-18', md: 'sh-20' }}
-          fontWeight={'semibold'}
-        >
-          Funnel
-        </Text>
-        {isLoading ? (
-          <Flex
-            w="full"
-            h="full"
-            justifyContent={'center'}
-            alignItems={'center'}
-            minH={'50'}
-          >
-            <Loader />
+            <Button
+              h={'15'}
+              fontSize={'xs-14'}
+              lineHeight={'xs-14'}
+              fontWeight={'600'}
+              bg={'white.200'}
+            >
+              {'Analyse Factors'}
+            </Button>
           </Flex>
-        ) : (
-          <FunnelChart data={funnelData} handleChartClick={handleChartClick} />
-        )}
-      </Flex>
-      <Divider orientation="horizontal" borderColor={'white.200'} opacity={1} />
-      <Flex direction={'column'} gap={'8'}>
-        <Text
-          fontSize={{ base: 'sh-18', md: 'sh-20' }}
-          lineHeight={{ base: 'sh-18', md: 'sh-20' }}
-          fontWeight={'semibold'}
-        >
-          Trend
-        </Text>
-        {isLoading ? (
-          <Flex
-            w="full"
-            h="full"
-            justifyContent={'center'}
-            alignItems={'center'}
-            minH={'50'}
-          >
-            <Loader />
+          <Divider
+            orientation="horizontal"
+            borderColor={'white.200'}
+            opacity={1}
+          />
+          <Flex direction={'column'} gap={'8'}>
+            <Text
+              fontSize={{ base: 'sh-18', md: 'sh-20' }}
+              lineHeight={{ base: 'sh-18', md: 'sh-20' }}
+              fontWeight={'semibold'}
+            >
+              Funnel
+            </Text>
+
+            <FunnelChart
+              data={funnelData}
+              handleChartClick={handleChartClick}
+            />
           </Flex>
-        ) : (
-          <Trend data={trendsData} />
-        )}
-      </Flex>
+          <Divider
+            orientation="horizontal"
+            borderColor={'white.200'}
+            opacity={1}
+          />
+          <Flex direction={'column'} gap={'8'} pb={'8'}>
+            <Text
+              fontSize={{ base: 'sh-18', md: 'sh-20' }}
+              lineHeight={{ base: 'sh-18', md: 'sh-20' }}
+              fontWeight={'semibold'}
+            >
+              Trend
+            </Text>
+
+            <Trend data={trendsData} />
+          </Flex>
+        </>
+      )}
       <UserConversionDrawer
         isOpen={isDrawerOpen}
         onClose={onDrawerClose}
         datasourceId={dsId as string}
         event={selectedEvent as string}
         selectedFunnelSteps={selectedFunnelSteps}
+        dateFilter={dateFilter}
       />
     </Flex>
   );

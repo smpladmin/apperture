@@ -1,7 +1,8 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import BaseModel
 
 from domain.funnels.models import (
+    DateFilter,
     FunnelStep,
     Funnel,
     ComputedFunnelStep,
@@ -19,17 +20,20 @@ class CreateFunnelDto(BaseModel):
     name: str
     steps: List[FunnelStep]
     randomSequence: bool
+    dateFilter: Optional[DateFilter]
 
 
 class TransientFunnelConversionlDto(BaseModel):
     datasourceId: str
     steps: List[FunnelStep]
     status: ConversionStatus
+    dateFilter: Optional[DateFilter]
 
 
 class TransientFunnelDto(BaseModel):
     datasourceId: str
     steps: List[FunnelStep]
+    dateFilter: Optional[DateFilter]
 
 
 class FunnelResponse(Funnel, ModelResponse):

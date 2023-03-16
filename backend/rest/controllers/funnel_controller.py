@@ -45,6 +45,7 @@ async def create_funnel(
         dto.name,
         dto.steps,
         dto.randomSequence,
+        dto.dateFilter,
     )
 
     await funnel_service.add_funnel(funnel)
@@ -56,7 +57,11 @@ async def compute_transient_funnel(
     dto: TransientFunnelDto,
     funnel_service: FunnelsService = Depends(),
 ):
-    return await funnel_service.compute_funnel(ds_id=dto.datasourceId, steps=dto.steps)
+    return await funnel_service.compute_funnel(
+        ds_id=dto.datasourceId,
+        steps=dto.steps,
+        date_filter=dto.dateFilter,
+    )
 
 
 @router.get("/funnels/{id}", response_model=FunnelResponse)
@@ -84,6 +89,7 @@ async def update_funnel(
         dto.name,
         dto.steps,
         dto.randomSequence,
+        dto.dateFilter,
     )
     await funnel_service.update_funnel(funnel_id=id, new_funnel=new_funnel)
     notification = await notification_service.get_notification_by_reference(
@@ -113,7 +119,9 @@ async def get_transient_funnel_trends(
     funnel_service: FunnelsService = Depends(),
 ):
     return await funnel_service.get_funnel_trends(
-        datasource_id=dto.datasourceId, steps=dto.steps
+        datasource_id=dto.datasourceId,
+        steps=dto.steps,
+        date_filter=dto.dateFilter,
     )
 
 
@@ -125,7 +133,10 @@ async def get_transient_funnel_analytics(
     funnel_service: FunnelsService = Depends(),
 ):
     return await funnel_service.get_user_conversion(
-        datasource_id=dto.datasourceId, steps=dto.steps, status=dto.status
+        datasource_id=dto.datasourceId,
+        steps=dto.steps,
+        status=dto.status,
+        date_filter=dto.dateFilter,
     )
 
 

@@ -5,9 +5,9 @@ from domain.metrics.models import (
     SegmentsAndEvents,
     SegmentsAndEventsType,
     SegmentsAndEventsAggregations,
-    SegmentsAndEventsAggregationsFunctions,
     SegmentsAndEventsFilter,
     SegmentsAndEventsFilterOperator,
+    MetricBasicAggregation,
 )
 from tests.rest.controllers.conftest import metric_service
 
@@ -31,7 +31,7 @@ def test_compute_metric(
                     variable="A",
                     variant=SegmentsAndEventsType.EVENT,
                     aggregations=SegmentsAndEventsAggregations(
-                        functions=SegmentsAndEventsAggregationsFunctions.COUNT,
+                        functions=MetricBasicAggregation.COUNT,
                         property="Video_Seen",
                     ),
                     reference_id="Video_Seen",
@@ -47,9 +47,8 @@ def test_compute_metric(
             ],
             "breakdown": [],
             "datasource_id": "638f1aac8e54760eafc64d70",
-            "end_date": None,
+            "date_filter": None,
             "function": "A",
-            "start_date": None,
         }
     )
 
@@ -95,6 +94,7 @@ def test_get_metrics(client_init, metric_service):
                 "slackChannel": "#alerts",
             },
             "userId": "6374b74e9b36ecf7e0b4f9e4",
+            "dateFilter": None,
         }
     ]
     metric_service.get_metrics_for_datasource_id.assert_called_once_with(

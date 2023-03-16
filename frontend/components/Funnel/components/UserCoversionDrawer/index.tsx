@@ -16,6 +16,7 @@ import {
 import UserTableView from './UserListTableView';
 import { FunnelStep, UserProperty } from '@lib/domain/funnel';
 import { getUserProperty } from '@lib/services/funnelService';
+import { DateFilterObj } from '@lib/domain/common';
 
 type UserConversionDrawerProps = {
   isOpen: boolean;
@@ -23,6 +24,7 @@ type UserConversionDrawerProps = {
   datasourceId: string;
   event: string;
   selectedFunnelSteps: FunnelStep[];
+  dateFilter: DateFilterObj;
 };
 
 export enum TableState {
@@ -36,6 +38,7 @@ const UserConversionDrawer = ({
   datasourceId,
   event,
   selectedFunnelSteps,
+  dateFilter,
 }: UserConversionDrawerProps) => {
   const [tableState, setTableState] = useState<TableState>(TableState.PROPERTY);
   const [selectedUser, setSelectedUser] = useState<null | string>(null);
@@ -125,6 +128,7 @@ const UserConversionDrawer = ({
               properties={userProperty as UserProperty[]}
               tableState={tableState}
               setTableState={setTableState}
+              dateFilter={dateFilter}
             />
           </DrawerBody>
 

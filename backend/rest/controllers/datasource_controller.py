@@ -1,9 +1,13 @@
 from datetime import datetime as dt
-from typing import List, Optional, Union
+from typing import List
 
 from fastapi import APIRouter, Depends
 from fastapi_cache.decorator import cache
-from cache.cache import CACHE_EXPIRY_24_HOURS, datasource_key_builder
+from cache.cache import (
+    CACHE_EXPIRY_24_HOURS,
+    datasource_key_builder,
+    CACHE_EXPIRY_10_MINUTES,
+)
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.events.service import EventsService
@@ -40,7 +44,7 @@ async def get_edges(
 
 
 @router.get("/datasources/{ds_id}/nodes")
-@cache(expire=CACHE_EXPIRY_24_HOURS, key_builder=datasource_key_builder)
+@cache(expire=CACHE_EXPIRY_10_MINUTES, key_builder=datasource_key_builder)
 async def get_nodes(
     ds_id: str,
     event_service: EventsService = Depends(),

@@ -69,7 +69,7 @@ const UserListTable = ({
         >
           Showing:{' '}
           <Text as="span" color={'black.100'}>
-            {total_users.toLocaleString()} Users
+            {total_users?.toLocaleString()} Users
           </Text>
         </Text>
         <Text

@@ -1,7 +1,7 @@
 import logging
-from typing import List
+from typing import List, Dict
 
-from pypika import Field
+from pypika import Field, functions as fn
 
 
 class PostFixConverter:
@@ -174,9 +174,9 @@ class FormulaParser:
             candidate_character = postfix_expression[end_index]
         return end_index, float(character) if isDecimal else int(character)
 
-    def parse(self, function: str, wrapper_function):
-        if wrapper_function == None:
-            logging.error("Wrapper function not defined")
+    def parse(self, function: str, wrapper_functions: Dict):
+        if not wrapper_functions:
+            logging.error("Wrapper functions not defined")
             # raise ValueError("Wrapper function not defined")
             return None, []
         try:
@@ -203,7 +203,12 @@ class FormulaParser:
                     stack.append(expression)
                     start_index += 1
                 elif character.isalpha():
-                    stack.append(wrapper_function(Field(character)))
+                    if wrapper_functions[character] == fn.Count:
+                        stack.append(
+                            wrapper_functions[character](Field(character)).distinct()
+                        )
+                    else:
+                        stack.append(wrapper_functions[character](Field(character)))
                     start_index += 1
                 elif character.isnumeric():
                     start_index, number = self.parseDigits(

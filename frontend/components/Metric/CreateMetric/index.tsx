@@ -7,6 +7,7 @@ import {
   Metric,
   MetricAggregate,
   MetricComponentVariant,
+  MetricBasicAggregation,
 } from '@lib/domain/metric';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
 import React, { useEffect, useState } from 'react';
@@ -15,10 +16,10 @@ import TransientMetricView from './Components/TransientMetricView';
 import { Node } from '@lib/domain/node';
 import { useRouter } from 'next/router';
 import { getCountOfAggregates } from '../util';
+import { DateFilter, DateFilterType, DateFilterObj } from '@lib/domain/common';
 
 const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
   const [metric, setMetric] = useState<ComputedMetric[]>([]);
-  const [dateRange, setDateRange] = useState<DateRangeType | null>(null);
   const [canSaveMetric, setCanSaveMetric] = useState(false);
   const [isLoading, setIsLoading] = useState(Boolean(savedMetric));
   const [eventList, setEventList] = useState<Node[]>([]);
@@ -38,10 +39,14 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
         variant: MetricComponentVariant.UNDEFINED,
         filters: [],
         conditions: [],
-        aggregations: { functions: 'count', property: '' },
+        aggregations: { functions: MetricBasicAggregation.TOTAL, property: '' },
       },
     ]
   );
+  const [dateFilter, setDateFilter] = useState<DateFilterObj>({
+    filter: savedMetric?.dateFilter?.filter || null,
+    type: savedMetric?.dateFilter?.type || null,
+  });
   const router = useRouter();
   const dsId = savedMetric?.datasourceId || router.query.dsId;
 
@@ -73,7 +78,6 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
       <ActionPanel>
         <CreateMetricAction
           setMetric={setMetric}
-          dateRange={dateRange}
           savedMetric={savedMetric}
           canSaveMetric={canSaveMetric}
           setCanSaveMetric={setCanSaveMetric}
@@ -84,19 +88,20 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
           breakdown={breakdown}
           aggregates={aggregates}
           setAggregates={setAggregates}
+          dateFilter={dateFilter}
         />
       </ActionPanel>
       <ViewPanel>
         <TransientMetricView
           metric={metric}
-          setDateRange={setDateRange}
-          dateRange={dateRange}
           isLoading={isLoading}
           eventProperties={eventProperties}
           loadingEventsAndProperties={loadingEventsAndProperties}
           breakdown={breakdown}
           setBreakdown={setBreakdown}
           showEmptyState={showEmptyState}
+          dateFilter={dateFilter}
+          setDateFilter={setDateFilter}
         />
       </ViewPanel>
     </Flex>

@@ -1,6 +1,7 @@
 from abc import ABC
+import datetime
 import logging
-from typing import Dict
+from typing import Union, Dict
 from fastapi import Depends
 from pypika import (
     Table,
@@ -9,6 +10,12 @@ from pypika import (
 )
 
 from clickhouse import Clickhouse
+from domain.common.date_models import (
+    DateFilterType,
+    FixedDateFilter,
+    LastDateFilter,
+    SinceDateFilter,
+)
 
 
 class EventsBase(ABC):
@@ -33,6 +40,8 @@ class EventsBase(ABC):
             self.date_func(self.table.timestamp) <= Parameter("%(end_date)s"),
         ]
         self.convert_to_float_func = CustomFunction("toFloat64OrDefault", ["string"])
+        self.convert_to_numeric_func = CustomFunction("toFloat64OrNull", ["string"])
+        self.convert_to_string_func = CustomFunction("toString", ["string"])
         self.convert_to_bool_func = CustomFunction("toBool", ["string"])
         self.ch_match_func = CustomFunction("match", ["column", "term"])
         self.parse_datetime_best_effort = CustomFunction(
@@ -50,3 +59,26 @@ class EventsBase(ABC):
         except Exception as e:
             logging.info(e)
             return []
+
+    def compute_date_filter(
+        self,
+        date_filter: Union[FixedDateFilter, LastDateFilter, SinceDateFilter],
+        date_filter_type: DateFilterType,
+    ):
+        if date_filter_type == DateFilterType.FIXED:
+            return date_filter.start_date, date_filter.end_date
+
+        date_format = "%Y-%m-%d"
+        today = datetime.datetime.today()
+        end_date = today.strftime(date_format)
+
+        return (
+            (date_filter.start_date, end_date)
+            if date_filter_type == DateFilterType.SINCE
+            else (
+                (today - datetime.timedelta(days=date_filter.days)).strftime(
+                    date_format
+                ),
+                end_date,
+            )
+        )

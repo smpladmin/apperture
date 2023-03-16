@@ -1,4 +1,5 @@
 import { Flex } from '@chakra-ui/react';
+import { DateFilterObj } from '@lib/domain/common';
 import { Funnel, FunnelData, FunnelTrendsData } from '@lib/domain/funnel';
 import { Notifications } from '@lib/domain/notification';
 import {
@@ -31,12 +32,16 @@ const ViewFunnel = ({
   >([]);
   const [notification, setNotification] = useState(savedNotification);
   const [isModalClosed, setIsModalClosed] = useState(false);
+  const [dateFilter] = useState<DateFilterObj>({
+    filter: savedFunnel?.dateFilter?.filter || null,
+    type: savedFunnel?.dateFilter?.type || null,
+  });
 
   useEffect(() => {
     const fetchComputeData = async () => {
       const [computedFunnelData, computedTrendsData] = await Promise.all([
-        getTransientFunnelData(datasourceId, savedFunnel.steps),
-        getTransientTrendsData(datasourceId, savedFunnel.steps),
+        getTransientFunnelData(datasourceId, savedFunnel.steps, dateFilter),
+        getTransientTrendsData(datasourceId, savedFunnel.steps, dateFilter),
       ]);
       setComputedFunnelData(computedFunnelData);
       setComputedTrendsData(computedTrendsData);
@@ -74,8 +79,8 @@ const ViewFunnel = ({
         funnelSteps={savedFunnel.steps}
         computedFunnel={computedFunnelData}
         computedTrendsData={computedTrendsData}
-        datasourceId={datasourceId}
         isLoading={isLoading}
+        dateFilter={dateFilter}
       />
     </Flex>
   );

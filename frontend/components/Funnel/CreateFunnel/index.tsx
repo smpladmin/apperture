@@ -1,8 +1,7 @@
 import { Flex } from '@chakra-ui/react';
 import 'remixicon/fonts/remixicon.css';
 import CreateFunnelAction from './CreateFunnelAction';
-import { useContext, useEffect, useState } from 'react';
-import { MapContext } from '@lib/contexts/mapContext';
+import { useEffect, useState } from 'react';
 import FunnelEmptyState from '../components/FunnelEmptyState';
 import {
   Funnel,
@@ -24,12 +23,9 @@ import {
 } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel/util';
+import { DateFilterObj } from '@lib/domain/common';
 
 const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
-  const {
-    state: { nodes },
-  } = useContext(MapContext);
-
   const router = useRouter();
   const {
     query: { dsId },
@@ -47,6 +43,11 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           { event: '', filters: [] },
         ]
   );
+  const [dateFilter, setDateFilter] = useState<DateFilterObj>({
+    filter: savedFunnel?.dateFilter?.filter || null,
+    type: savedFunnel?.dateFilter?.type || null,
+  });
+
   const [funnelData, setFunnelData] = useState<FunnelData[]>([]);
   const [trendsData, setTrendsData] = useState<FunnelTrendsData[]>([]);
   const [isEmpty, setIsEmpty] = useState(
@@ -77,8 +78,16 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
 
     const getFunnelMetricsData = async () => {
       const [funnelData, trendsData] = await Promise.all([
-        getTransientFunnelData(datasourceId!!, filterFunnelSteps(funnelSteps)),
-        getTransientTrendsData(datasourceId!!, filterFunnelSteps(funnelSteps)),
+        getTransientFunnelData(
+          datasourceId!!,
+          filterFunnelSteps(funnelSteps),
+          dateFilter
+        ),
+        getTransientTrendsData(
+          datasourceId!!,
+          filterFunnelSteps(funnelSteps),
+          dateFilter
+        ),
       ]);
       setFunnelData(funnelData);
       setTrendsData(trendsData);
@@ -87,7 +96,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
 
     setIsLoading(true);
     getFunnelMetricsData();
-  }, [funnelSteps]);
+  }, [funnelSteps, dateFilter]);
 
   return (
     <Flex direction={{ base: 'column', md: 'row' }} h={'full'}>
@@ -98,6 +107,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           funnelSteps={funnelSteps}
           setFunnelSteps={setFunnelSteps}
           setIsStepAdded={setIsStepAdded}
+          dateFilter={dateFilter}
         />
       </ActionPanel>
       <ViewPanel>
@@ -109,6 +119,8 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
             funnelData={funnelData}
             trendsData={trendsData}
             funnelSteps={funnelSteps}
+            dateFilter={dateFilter}
+            setDateFilter={setDateFilter}
           />
         )}
       </ViewPanel>

@@ -7,6 +7,7 @@ import amplitudeLogo from '@assets/images/amplitude-icon.svg';
 import appertureLogo from '@assets/images/apperture-logo.svg';
 import { StaticImageData } from 'next/image';
 import { AppWithIntegrations } from '@lib/domain/app';
+import dayjs from 'dayjs';
 
 export const DEBOUNCED_WAIT_TIME = 500;
 
@@ -95,4 +96,9 @@ export const getDatasourceById = (
     .flatMap((app) => app.integrations)
     .flatMap((integration) => integration.datasources)
     .find((datasource) => datasource._id === datasourceId);
+};
+
+export const formatDateIntoString = (date: Date, format = 'YYYY-MM-DD') => {
+  if (!date) return;
+  return dayjs(date).format(format);
 };

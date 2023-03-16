@@ -1,17 +1,14 @@
 from typing import List
 
+from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends
 
 from domain.actions.service import ActionService
 from domain.apperture_users.models import AppertureUser
 from domain.datasources.service import DataSourceService
-from rest.dtos.actions import (
-    ActionResponse,
-    ActionWithUser,
-    ComputedActionResponse,
-    CreateActionDto,
-    TransientActionDto,
-)
+from rest.dtos.actions import (ActionResponse, ActionWithUser,
+                               ComputedActionResponse, CreateActionDto,
+                               TransientActionDto)
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.middlewares import get_user, get_user_id, validate_jwt
 
@@ -95,3 +92,10 @@ async def compute_transient_actions(
     return await action_service.compute_action(
         datasource_id=dto.datasourceId, groups=dto.groups
     )
+
+
+@router.delete("/actions/{id}")
+async def delete_action(
+    id: PydanticObjectId, action_service: ActionService = Depends()
+):
+    await action_service.delete_action(id=id)

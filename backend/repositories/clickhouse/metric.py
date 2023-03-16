@@ -1,9 +1,20 @@
+import itertools
 from typing import List, Optional
-from pypika import Case, ClickHouseQuery, Criterion, Field, Parameter, functions as fn
+
+from pypika.terms import NullValue
+from pypika import (
+    Case,
+    ClickHouseQuery,
+    Criterion,
+    Field,
+    Parameter,
+    functions as fn,
+)
 
 from domain.metrics.models import (
     SegmentsAndEvents,
-    SegmentsAndEventsAggregationsFunctions,
+    MetricBasicAggregation,
+    MetricAggregatePropertiesAggregation,
     SegmentsAndEventsFilterOperator,
 )
 from repositories.clickhouse.base import EventsBase
@@ -40,23 +51,15 @@ class Metrics(EventsBase):
         end_date: Optional[str],
     ):
         parser = FormulaParser()
-        params = {"ds_id": datasource_id}
         subquery = ClickHouseQuery.from_(self.table).select(
             fn.Date(self.table.timestamp).as_("date")
         )
 
-        select_expressions, denominators_list = zip(
-            *[parser.parse(definition, fn.Sum) for definition in function.split(",")]
-        )
-
-        for expression in select_expressions:
-            if not expression:
-                return None, None
-
+        breakdown_columns = [Field(f"properties.{prop}") for prop in breakdown]
         if breakdown:
-            for property in breakdown:
-                subquery = subquery.select(Field(f"properties.{property}"))
+            subquery = subquery.select(*breakdown_columns)
 
+        params = {"ds_id": datasource_id}
         criterion = [self.table.datasource_id == Parameter("%(ds_id)s")]
 
         if start_date:
@@ -66,34 +69,78 @@ class Metrics(EventsBase):
 
         subquery = subquery.where(Criterion.all(criterion))
 
+        agg_funcs = {}
         for i, aggregate in enumerate(aggregates):
-            if (
-                aggregate.aggregations.functions
-                == SegmentsAndEventsAggregationsFunctions.COUNT
-            ):
-                subquery_criterion = [
-                    self.table.event_name == Parameter(f"%(property_{i})s")
+
+            subquery_criterion = [
+                self.table.event_name == Parameter(f"%(reference_id_{i})s")
+            ]
+            subquery_criterion.extend(
+                [
+                    Field(f"properties.{filter.operand}").isin(filter.values)
+                    for filter in aggregate.filters
+                    if filter.operator == SegmentsAndEventsFilterOperator.EQUALS
                 ]
-                params[f"property_{i}"] = aggregate.aggregations.property
+            )
 
-                for filter in aggregate.filters:
-                    if filter.operator == SegmentsAndEventsFilterOperator.EQUALS:
-                        subquery_criterion.append(
-                            Field(f"properties.{filter.operand}").isin(filter.values)
-                        )
+            params[f"reference_id_{i}"] = aggregate.reference_id
 
-                subquery = subquery.select(
-                    Case()
-                    .when(Criterion.all(subquery_criterion), 1)
-                    .else_(0)
-                    .as_(aggregate.variable)
+            if aggregate.aggregations.functions in MetricAggregatePropertiesAggregation:
+                agg_funcs[
+                    aggregate.variable
+                ] = aggregate.aggregations.functions.get_pypika_function()
+                func = (
+                    self.convert_to_string_func
+                    if aggregate.aggregations.functions
+                    == MetricAggregatePropertiesAggregation.DISTINCT_COUNT
+                    else self.convert_to_numeric_func
                 )
 
-        having_clause = []
-        for denominators in denominators_list:
-            for denominator in denominators:
-                if type(denominator) != int and type(denominator) != float:
-                    having_clause.append(denominator != 0)
+                agg_property = Field(f"properties.{aggregate.aggregations.property}")
+                if (
+                    aggregate.aggregations.functions
+                    != MetricAggregatePropertiesAggregation.DISTINCT_COUNT
+                ):
+                    agg_property = self.convert_to_string_func(agg_property)
+                alt_value = NullValue()
+
+            elif aggregate.aggregations.functions == MetricBasicAggregation.UNIQUE:
+                agg_funcs[aggregate.variable] = fn.Count
+                agg_property = self.table.user_id
+                alt_value = NullValue()
+                func = self.convert_to_string_func
+            else:
+                agg_funcs[aggregate.variable] = fn.Sum
+                agg_property = "1"
+                alt_value = 0
+                func = self.convert_to_numeric_func
+
+            subquery = subquery.select(
+                Case()
+                .when(
+                    Criterion.all(subquery_criterion),
+                    func(agg_property),
+                )
+                .else_(alt_value)
+                .as_(aggregate.variable)
+            )
+
+        select_expressions, denominators_list = zip(
+            *[
+                parser.parse(function=definition, wrapper_functions=agg_funcs)
+                for definition in function.split(",")
+            ]
+        )
+
+        for expression in select_expressions:
+            if not expression:
+                return None, None
+
+        having_clause = [
+            denominator != 0
+            for denominator in list(itertools.chain.from_iterable(denominators_list))
+            if type(denominator) != int and type(denominator) != float
+        ]
 
         query = (
             ClickHouseQuery.from_(subquery.as_("subquery"))
@@ -102,17 +149,14 @@ class Metrics(EventsBase):
         )
 
         if breakdown:
-            for property in breakdown:
-                query = query.select(Field(f"properties.{property}")).groupby(
-                    Field(f"properties.{property}")
-                )
+            query = query.select(*breakdown_columns).groupby(*breakdown_columns)
 
         query = query.having(Criterion.all(having_clause)).orderby(1)
         if breakdown:
             for i in range(len(breakdown)):
                 query = query.orderby(i + 2)
-        query = query.limit(1000)
-        for select_expression in select_expressions:
-            query = query.select(select_expression)
+        query = query.select(
+            *[select_expression for select_expression in select_expressions]
+        ).limit(1000)
 
         return query.get_sql(), params

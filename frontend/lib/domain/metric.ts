@@ -1,3 +1,4 @@
+import { DateFilterObj } from './common';
 import { AppertureUser } from './user';
 
 export type MetricEventFilter = {
@@ -13,7 +14,7 @@ export enum MetricComponentVariant {
 }
 
 export type MetricComponentAggregation = {
-  functions: string;
+  functions: MetricBasicAggregation | MetricAggregatePropertiesAggregation;
   property: string;
 };
 
@@ -63,15 +64,6 @@ export type Breakdown = {
   rowIndex: number;
 };
 
-export enum DateFilterType {
-  YESTERDAY = 'yesterday',
-  WEEK = 'week',
-  MONTH = 'month',
-  QUARTER = 'quarter',
-  CUSTOM = 'custom',
-  UNSET = '',
-}
-
 export type DateRangeType = {
   startDate: Date;
   endDate: Date;
@@ -92,8 +84,27 @@ export type Metric = {
   function: string;
   aggregates: MetricAggregate[];
   breakdown: string[];
+  dateFilter?: DateFilterObj;
 };
 
 export type MetricWithUser = Metric & {
   user: AppertureUser;
 };
+
+export enum MetricBasicAggregation {
+  TOTAL = 'count',
+  UNIQUE = 'unique',
+}
+
+export enum MetricAggregatePropertiesAggregation {
+  SUM = 'ap_sum',
+  AVERAGE = 'ap_average',
+  MEDIAN = 'ap_median',
+  'DISTINCT COUNT' = 'ap_distinct_count',
+  MIN = 'ap_min',
+  MAX = 'ap_max',
+  '25th Percentile' = 'ap_p25',
+  '75th Percentile' = 'ap_p75',
+  '90th Percentile' = 'ap_p90',
+  '99th Percentile' = 'ap_p99',
+}

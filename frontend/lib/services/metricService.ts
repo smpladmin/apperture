@@ -1,4 +1,5 @@
 import { replaceEmptyStringPlaceholder } from '@components/Metric/util';
+import { DateFilterObj } from '@lib/domain/common';
 import { MetricAggregate } from '@lib/domain/metric';
 import {
   AppertureGet,
@@ -12,15 +13,7 @@ type MetricRequestBody = {
   function: string;
   aggregates: MetricAggregate[];
   breakdown: string[];
-  startDate?: string;
-  endDate?: string;
-};
-
-const formatDatelabel = (date: Date) => {
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-  return `${year}-${month}-${day}`;
+  dateFilter?: DateFilterObj;
 };
 
 export const computeMetric = async (
@@ -28,21 +21,16 @@ export const computeMetric = async (
   functions: string,
   aggregates: MetricAggregate[],
   breakdown: string[],
-  startDate: Date | undefined,
-  endDate: Date | undefined
+  dateFilter: DateFilterObj
 ) => {
   const requestBody: MetricRequestBody = {
     datasourceId: dsId,
     function: functions,
     aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
+    dateFilter,
   };
-  if (startDate) {
-    requestBody.startDate = formatDatelabel(startDate);
-  }
-  if (endDate) {
-    requestBody.endDate = formatDatelabel(endDate);
-  }
+
   const res = await ApperturePost('metrics/compute', requestBody);
   return res.data || [];
 };
@@ -57,7 +45,8 @@ export const saveMetric = async (
   dsId: string,
   definition: string,
   aggregates: MetricAggregate[],
-  breakdown: string[]
+  breakdown: string[],
+  dateFilter: DateFilterObj
 ) => {
   const result = await ApperturePost('/metrics', {
     datasourceId: dsId,
@@ -65,6 +54,7 @@ export const saveMetric = async (
     function: definition,
     aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
+    dateFilter,
   });
   return result;
 };
@@ -75,7 +65,8 @@ export const updateMetric = async (
   dsId: string,
   definition: string,
   aggregates: MetricAggregate[],
-  breakdown: string[]
+  breakdown: string[],
+  dateFilter: DateFilterObj
 ) => {
   const result = await ApperturePut('/metrics/' + metricId, {
     datasourceId: dsId,
@@ -83,6 +74,7 @@ export const updateMetric = async (
     function: definition,
     aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
+    dateFilter,
   });
   return result;
 };

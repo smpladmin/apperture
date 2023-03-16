@@ -20,6 +20,7 @@ type SelectorsFormType = {
   updateGroupAction: Function;
   index: number;
   handleClose: Function;
+  isDisabled: Boolean;
 };
 
 const conditionMeta = {
@@ -51,6 +52,7 @@ const SelectorsForm = ({
   updateGroupAction,
   index,
   handleClose,
+  isDisabled,
 }: SelectorsFormType) => {
   const [showCloseButton, setShowCloseButton] = useState(false);
   const [selectedConditions, setSelectedConditions] = useState<ConditionType[]>(
@@ -140,6 +142,7 @@ const SelectorsForm = ({
         )}
       </Flex>
       <EventOptions
+        isDisabled={isDisabled}
         captureEvent={group.event}
         updateHandler={handleUpdateCaptureEvent}
       />
@@ -189,6 +192,7 @@ const SelectorsForm = ({
                   showCriteriaDropdown={true}
                   currentCriteria={group.url_matching || UrlMatching.CONTAINS}
                   dropDownHandler={dropDownHandler}
+                  isDisabled={isDisabled}
                 />
               ) : (
                 <ConditionInput
@@ -200,6 +204,7 @@ const SelectorsForm = ({
                   condition={condition}
                   defaultValue={group[condition]}
                   placeholder={conditionMeta[condition].placeholder}
+                  isDisabled={isDisabled}
                 />
               )}
             </Fragment>
@@ -232,7 +237,8 @@ const SelectorsForm = ({
         ) : (
           allConditions.filter(
             (condition) => !selectedConditions.includes(condition)
-          ).length > 0 && (
+          ).length > 0 &&
+          !isDisabled && (
             <AddConditionDropdown
               conditionList={allConditions.filter(
                 (condition) => !selectedConditions.includes(condition)
@@ -264,6 +270,7 @@ const SelectorsForm = ({
           showCriteriaDropdown={true}
           currentCriteria={group.url_matching || UrlMatching.CONTAINS}
           dropDownHandler={dropDownHandler}
+          isDisabled={isDisabled}
         />
       </Flex>
     </Flex>

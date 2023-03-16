@@ -1,13 +1,13 @@
-import { SegmentFixedDateFilter } from '@lib/domain/segment';
 import React, { useEffect, useState } from 'react';
 import { DateRange, RangeKeyDict } from 'react-date-range';
 import { addDays } from 'date-fns';
 import { getDateStringFromDate } from '@components/Segments/util';
 import { Box } from '@chakra-ui/react';
 import { WHITE_200 } from '@theme/index';
+import { FixedDateFilter } from '@lib/domain/common';
 
 type FixedDateProps = {
-  fixedDateRange: SegmentFixedDateFilter;
+  fixedDateRange: FixedDateFilter;
   days: number;
   setFixedDateRange: Function;
 };

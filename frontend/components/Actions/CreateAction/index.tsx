@@ -147,6 +147,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
   return (
     <Box h={'full'} overflow={'auto'} overflowY={'hidden'}>
       <ActionHeader
+        isDisabled={!isEmpty}
         actionName={actionName}
         setActionName={setActionName}
         isSaveDisabled={isSaveDisabled}
@@ -171,19 +172,21 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
             >
               Match Groups
             </Text>
-            <Button
-              fontSize={'xs-12'}
-              lineHeight={'xs-16'}
-              fontWeight={500}
-              p={1}
-              mt={2}
-              h={'min-content'}
-              bg="none"
-              onClick={addNewGroup}
-            >
-              <i className="ri-add-fill"></i>
-              <Text ml={1}>Groups</Text>
-            </Button>
+            {isEmpty && (
+              <Button
+                fontSize={'xs-12'}
+                lineHeight={'xs-16'}
+                fontWeight={500}
+                p={1}
+                mt={2}
+                h={'min-content'}
+                bg="none"
+                onClick={addNewGroup}
+              >
+                <i className="ri-add-fill"></i>
+                <Text ml={1}>Groups</Text>
+              </Button>
+            )}
           </Flex>
           <Flex
             borderWidth={'0.4px'}
@@ -215,6 +218,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
                   groups={groups}
                   updateGroupAction={updateGroupAction}
                   handleClose={removeGroup}
+                  isDisabled={!isEmpty}
                 />
               </Fragment>
             ))}

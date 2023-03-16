@@ -7,19 +7,24 @@ import {
 import { ConversionStatus, FunnelStep } from '@lib/domain/funnel';
 import { replaceEmptyStringPlaceholder } from '@components/Funnel/util';
 import cloneDeep from 'lodash/cloneDeep';
+import { DateFilterObj } from '@lib/domain/common';
 
 export const saveFunnel = async (
   dsId: string,
   funnelName: string,
   steps: FunnelStep[],
-  randomSequence: boolean
+  randomSequence: boolean,
+  dateFilter: DateFilterObj
 ) => {
-  const res = await ApperturePost('/funnels', {
+  const funnelRequestBody = {
     datasourceId: dsId,
     name: funnelName,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
     randomSequence,
-  });
+    dateFilter,
+  };
+
+  const res = await ApperturePost('/funnels', funnelRequestBody);
   return res;
 };
 
@@ -28,14 +33,18 @@ export const updateFunnel = async (
   dsId: string,
   funnelName: string,
   steps: FunnelStep[],
-  randomSequence: boolean
+  randomSequence: boolean,
+  dateFilter: DateFilterObj
 ) => {
-  const res = await ApperturePut(`/funnels/${funnelId}`, {
+  const funnelRequestBody = {
     datasourceId: dsId,
     name: funnelName,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
     randomSequence,
-  });
+    dateFilter,
+  };
+
+  const res = await ApperturePut(`/funnels/${funnelId}`, funnelRequestBody);
   return res;
 };
 
@@ -46,22 +55,26 @@ export const _getSavedFunnel = async (token: string, funnelId: string) => {
 
 export const getTransientFunnelData = async (
   dsId: string,
-  steps: FunnelStep[]
+  steps: FunnelStep[],
+  dateFilter: DateFilterObj
 ) => {
   const res = await ApperturePost('/funnels/transient', {
     datasourceId: dsId,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+    dateFilter,
   });
   return res.data || [];
 };
 
 export const getTransientTrendsData = async (
   dsId: string,
-  steps: FunnelStep[]
+  steps: FunnelStep[],
+  dateFilter: DateFilterObj
 ) => {
   const res = await ApperturePost('/funnels/trends/transient', {
     datasourceId: dsId,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+    dateFilter,
   });
   return res.data || [];
 };
@@ -74,12 +87,14 @@ export const getSavedFunnelsForDatasourceId = async (dsId: string) => {
 export const getConversionData = async (
   dsId: string,
   steps: FunnelStep[],
-  status: ConversionStatus
+  status: ConversionStatus,
+  dateFilter: DateFilterObj
 ) => {
   const res = await ApperturePost('/funnels/analytics/transient', {
     datasourceId: dsId,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
     status,
+    dateFilter,
   });
   return res.data || [];
 };

@@ -15,7 +15,8 @@ class TestActionService:
     def setup_method(self):
         Action.get_settings = MagicMock()
         Action.insert = AsyncMock()
-        Action.get = AsyncMock()
+        Action.enabled = MagicMock(return_value=True)
+
         DataSource.get_settings = MagicMock()
         self.mongo = MagicMock()
         self.actions = AsyncMock()
@@ -77,13 +78,14 @@ class TestActionService:
             "revision_id": ANY,
             "updated_at": ANY,
             "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+            "enabled": True,
         }
 
     @pytest.mark.asyncio
     async def test_get_actions_for_datasource_id(self):
         await self.service.get_actions_for_datasource_id(datasource_id=self.ds_id)
         Action.find.assert_called_once()
-        assert Action.find.call_args.args == (False,)
+        assert Action.find.call_args.args == (False, True)
 
     @pytest.mark.asyncio
     async def test_update_action_processed_till(self):
@@ -126,12 +128,14 @@ class TestActionService:
             "revision_id": ANY,
             "updated_at": None,
             "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+            "enabled": True,
         }
 
     @pytest.mark.asyncio
     async def test_get_actions_by_id(self):
+        Action.find_one = AsyncMock()
         await self.service.get_action(id=self.id)
-        Action.get.assert_called_once()
+        Action.find_one.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_update_action(self):

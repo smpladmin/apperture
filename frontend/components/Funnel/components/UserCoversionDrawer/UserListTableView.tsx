@@ -7,6 +7,7 @@ import {
   TabPanel,
   Text,
 } from '@chakra-ui/react';
+import { DateFilterObj } from '@lib/domain/common';
 import {
   ConversionStatus,
   FunnelConversionData,
@@ -27,6 +28,7 @@ type UserTableViewProps = {
   tableState: TableState;
   properties?: UserProperty[] | null;
   setTableState: Function;
+  dateFilter: DateFilterObj;
 };
 type FunnelEventConversion = {
   converted?: FunnelConversionData;
@@ -39,7 +41,7 @@ const UserTableView = ({
   setSelectedUser,
   properties,
   tableState,
-  setTableState,
+  dateFilter,
 }: UserTableViewProps) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [userData, setUserData] = useState<FunnelEventConversion>();
@@ -54,13 +56,13 @@ const UserTableView = ({
   useEffect(() => {
     const fetchUserData = async () => {
       if (!userData?.dropped && status === ConversionStatus.DROPPED) {
-        const data = await getConversionData(dsId, steps, status);
+        const data = await getConversionData(dsId, steps, status, dateFilter);
         setUserData({ ...userData, dropped: data });
       } else if (
         !userData?.converted &&
         status === ConversionStatus.CONVERTED
       ) {
-        const data = await getConversionData(dsId, steps, status);
+        const data = await getConversionData(dsId, steps, status, dateFilter);
         setUserData({ ...userData, converted: data });
       }
     };

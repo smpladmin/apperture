@@ -16,6 +16,7 @@ import {
   convertToTableData,
   convertToTrendData,
   getCountOfAggregates,
+  getDisplayAggregationFunctionText,
 } from '../util';
 
 jest.mock('@lib/services/datasourceService');
@@ -32,6 +33,7 @@ describe('Create Metric', () => {
   let mockedValidateMetricFormula: jest.Mock;
   let mockedConvertToTableData: jest.Mock;
   let mockedConvertToTrendData: jest.Mock;
+  let mockedGetDisplayAggregationFunctionText: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -196,6 +198,9 @@ describe('Create Metric', () => {
     mockedValidateMetricFormula = jest.mocked(validateMetricFormula);
     mockedConvertToTableData = jest.mocked(convertToTableData);
     mockedConvertToTrendData = jest.mocked(convertToTrendData);
+    mockedGetDisplayAggregationFunctionText = jest.mocked(
+      getDisplayAggregationFunctionText
+    );
 
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetNodes.mockReturnValue(events);
@@ -211,6 +216,25 @@ describe('Create Metric', () => {
     mockedGetCountOfAggregates.mockReturnValue(2);
     mockedConvertToTableData.mockReturnValue(tableData);
     mockedConvertToTrendData.mockReturnValue(trendData);
+    mockedGetDisplayAggregationFunctionText.mockImplementation(
+      (value: string) => {
+        const metricAggregationDisplayText: { [key: string]: string } = {
+          count: 'Total Count',
+          unique: 'Unique Count',
+          ap_sum: 'Sum',
+          ap_median: 'Median',
+          ap_average: 'Average',
+          ap_distinct_count: 'Distinct Count',
+          ap_min: 'Minimum',
+          ap_max: 'Maximum',
+          ap_p25: '25th Percentile',
+          ap_p75: '75th Percentile',
+          ap_p90: '90th Percentile',
+          ap_p99: '99th Percentile',
+        };
+        return metricAggregationDisplayText[value];
+      }
+    );
   });
 
   afterEach(() => {
@@ -560,6 +584,45 @@ describe('Create Metric', () => {
       tableHeaders.forEach((header, i) => {
         expect(header.textContent).toEqual(tableHeadersText[i]);
       });
+    });
+  });
+
+  describe('metric aggregations', () => {
+    it('Opens up the list of metric aggregations and select Unique Count', async () => {
+      await renderMetricComponent();
+      await addNewEvent();
+      const aggregationFunctions = screen.getByTestId(
+        'metric-aggregation-function'
+      );
+      fireEvent.click(aggregationFunctions);
+      const uniqueFunc = screen.getByText('Unique Count');
+      await act(async () => {
+        fireEvent.click(uniqueFunc);
+      });
+      expect(aggregationFunctions.textContent).toEqual('Unique Count');
+    });
+
+    it('Opens up the list of metric aggregations and select Median Function which should give an option to select a property', async () => {
+      await renderMetricComponent();
+      await addNewEvent();
+      const aggregationFunctions = screen.getByTestId(
+        'metric-aggregation-function'
+      );
+      fireEvent.click(aggregationFunctions);
+      const medianFunc = screen.getByText('Median');
+      await act(async () => {
+        fireEvent.click(medianFunc);
+      });
+      expect(aggregationFunctions.textContent).toEqual('Median');
+      const eventProperty = screen.getByText('city');
+
+      await act(async () => {
+        fireEvent.click(eventProperty);
+      });
+      const metricAggEventProperties = screen.getByTestId(
+        'metric-aggregation-event-property'
+      );
+      expect(metricAggEventProperties.textContent).toEqual('city');
     });
   });
 });

@@ -3,6 +3,7 @@ import logging
 import re
 from typing import Any, Dict, List, Tuple, cast
 
+from beanie import PydanticObjectId
 from pypika import ClickHouseQuery, Criterion, Field, Parameter
 from pypika import functions as fn
 from pypika import terms
@@ -279,3 +280,7 @@ class Actions(EventsBase):
         query = query.where(Criterion.any(conditions))
         params["ds_id"] = str(datasource_id)
         return query.get_sql(), params
+
+    def delete_processed_events(self, ds_id: PydanticObjectId, event: str):
+        query = f"DELETE FROM {self.table} WHERE event_name='{event}' AND datasource_id='{ds_id}' SETTINGS allow_experimental_lightweight_delete=1"
+        self.execute_get_query(query, {})

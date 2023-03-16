@@ -1,12 +1,12 @@
 import { getDateStringFromDate } from '@components/Segments/util';
-import { SegmentSinceDateFilter } from '@lib/domain/segment';
 import React, { useEffect, useState } from 'react';
 import { addDays, format } from 'date-fns';
 import { Calendar } from 'react-date-range';
 import { Box, Input } from '@chakra-ui/react';
+import { SinceDateFilter } from '@lib/domain/common';
 
 type SinceStartDateProps = {
-  sinceStartDate: SegmentSinceDateFilter;
+  sinceStartDate: SinceDateFilter;
   setSinceStartDate: Function;
   days: number;
 };
