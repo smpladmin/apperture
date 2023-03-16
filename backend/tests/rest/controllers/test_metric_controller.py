@@ -150,6 +150,7 @@ def test_update_metric(
         "revisionId": ANY,
         "updatedAt": None,
         "userId": "6374b74e9b36ecf7e0b4f9e4",
+        "dateFilter": None,
     }
 
     datasource_service.get_datasource.assert_called_with(
