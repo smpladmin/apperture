@@ -22,6 +22,7 @@ class Funnel(Document):
     steps: List[FunnelStep]
     random_sequence: bool
     date_filter: Optional[DateFilter]
+    enabled: bool = True
 
     class Settings:
         name = "funnels"

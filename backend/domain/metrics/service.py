@@ -205,12 +205,25 @@ class MetricService:
         return await Metric.find_one(Metric.id == PydanticObjectId(metric_id))
 
     async def get_metrics_by_app_id(self, app_id: str):
-        return await Metric.find(Metric.app_id == PydanticObjectId(app_id)).to_list()
+        return await Metric.find(
+            Metric.app_id == PydanticObjectId(app_id),
+            Metric.enabled != False,
+        ).to_list()
 
     async def get_metrics_by_user_id(self, user_id: str):
-        return await Metric.find(Metric.user_id == PydanticObjectId(user_id)).to_list()
+        return await Metric.find(
+            Metric.user_id == PydanticObjectId(user_id),
+            Metric.enabled != False,
+        ).to_list()
 
     async def get_metrics_for_datasource_id(self, datasource_id: str) -> List[Metric]:
         return await Metric.find(
-            PydanticObjectId(datasource_id) == Metric.datasource_id
+            Metric.datasource_id == PydanticObjectId(datasource_id),
+            Metric.enabled != False,
         ).to_list()
+
+    async def delete_metric(self, metric_id: str):
+        await Metric.find_one(
+            Metric.id == PydanticObjectId(metric_id),
+        ).update({"$set": {"enabled": False}})
+        return

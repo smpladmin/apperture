@@ -147,3 +147,11 @@ async def get_funnels(
     for funnel in funnels:
         funnel.user = AppertureUserResponse.from_orm(user)
     return funnels
+
+
+@router.delete("/funnels/{funnel_id}")
+async def delete_funnel(
+    funnel_id: str,
+    funnel_service: FunnelsService = Depends(),
+):
+    await funnel_service.delete_funnel(funnel_id=funnel_id)
