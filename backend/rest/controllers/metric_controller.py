@@ -15,6 +15,7 @@ from rest.dtos.metrics import (
     MetricFormulaDto,
 )
 from rest.middlewares import get_user, get_user_id, validate_jwt
+from domain.notifications.service import NotificationService
 
 router = APIRouter(
     tags=["metrics"], dependencies=[Depends(validate_jwt)], responses={401: {}}
@@ -71,6 +72,7 @@ async def update_metric(
     user: AppertureUser = Depends(get_user),
     metric_service: MetricService = Depends(),
     ds_service: DataSourceService = Depends(),
+    notification_service: NotificationService = Depends(),
 ):
     datasource = await ds_service.get_datasource(str(dto.datasourceId))
     metric = await metric_service.build_metric(
@@ -84,6 +86,13 @@ async def update_metric(
         dateFilter=dto.dateFilter,
     )
     await metric_service.update_metric(metric_id=id, metric=metric)
+    notification = await notification_service.get_notification_by_reference(
+        reference=id, datasource_id=str(datasource.id)
+    )
+    if notification:
+        await notification_service.delete_notification(
+            notification_id=str(notification.id)
+        )
     return metric
 
 

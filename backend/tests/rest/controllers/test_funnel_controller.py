@@ -41,6 +41,7 @@ async def test_update_funnel(
     funnel_response,
     funnel_service,
     mock_user_id,
+    notification_service,
 ):
     response = client_init.put(
         "/funnels/635ba034807ab86d8a2aadd8", data=json.dumps(funnel_data)
@@ -98,6 +99,15 @@ async def test_update_funnel(
     } == update_funnel_kwargs["new_funnel"].dict()
 
     assert "635ba034807ab86d8a2aadd8" == update_funnel_kwargs["funnel_id"]
+    notification_service.get_notification_by_reference.assert_called_once_with(
+        **{
+            "datasource_id": "636a1c61d715ca6baae65611",
+            "reference": "635ba034807ab86d8a2aadd8",
+        }
+    )
+    notification_service.delete_notification.assert_called_once_with(
+        **{"notification_id": "635ba034807ab86d8a2aadd8"}
+    )
 
 
 def test_get_funnel_trends(client_init, funnel_trend_response, funnel_service):
