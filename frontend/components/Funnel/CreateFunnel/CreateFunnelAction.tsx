@@ -18,8 +18,9 @@ import {
 import { saveFunnel, updateFunnel } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { MapContext } from '@lib/contexts/mapContext';
-import { FunnelStep } from '@lib/domain/funnel';
+import { ConversionWindowObj, FunnelStep } from '@lib/domain/funnel';
 import { DateFilterObj } from '@lib/domain/common';
+import ConversionCriteria from '../components/ConversionCriteria';
 
 type CreateFunnelActionProps = {
   funnelName: string;
@@ -28,6 +29,8 @@ type CreateFunnelActionProps = {
   setFunnelSteps: Function;
   setIsStepAdded: Function;
   dateFilter: DateFilterObj;
+  conversionWindow: ConversionWindowObj;
+  setConversionWindow: Function;
 };
 
 const CreateFunnelAction = ({
@@ -37,6 +40,8 @@ const CreateFunnelAction = ({
   setFunnelSteps,
   setIsStepAdded,
   dateFilter,
+  conversionWindow,
+  setConversionWindow,
 }: CreateFunnelActionProps) => {
   const {
     state: { nodes },
@@ -81,14 +86,16 @@ const CreateFunnelAction = ({
           funnelName,
           filterFunnelSteps(funnelSteps),
           false,
-          dateFilter
+          dateFilter,
+          conversionWindow
         )
       : await saveFunnel(
           dsId as string,
           funnelName,
           filterFunnelSteps(funnelSteps),
           false,
-          dateFilter
+          dateFilter,
+          conversionWindow
         );
 
     if (status === 200)
@@ -207,6 +214,16 @@ const CreateFunnelAction = ({
           </Text>
           <Switch background={'black'} size={'sm'} isDisabled />
         </Flex>
+        <Divider
+          orientation="horizontal"
+          borderColor={BASTILLE}
+          opacity={1}
+          mb={3}
+        />
+        <ConversionCriteria
+          conversionWindow={conversionWindow}
+          setConversionWindow={setConversionWindow}
+        />
       </Flex>
     </>
   );

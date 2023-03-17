@@ -4,6 +4,8 @@ import CreateFunnelAction from './CreateFunnelAction';
 import { useEffect, useState } from 'react';
 import FunnelEmptyState from '../components/FunnelEmptyState';
 import {
+  ConversionWindowList,
+  ConversionWindowObj,
   Funnel,
   FunnelData,
   FunnelStep,
@@ -48,6 +50,13 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
     type: savedFunnel?.dateFilter?.type || null,
   });
 
+  const [conversionWindow, setConversionWindow] = useState<ConversionWindowObj>(
+    {
+      type: savedFunnel?.conversionWindow?.type || ConversionWindowList.DAYS,
+      value: savedFunnel?.conversionWindow?.value || 30,
+    }
+  );
+
   const [funnelData, setFunnelData] = useState<FunnelData[]>([]);
   const [trendsData, setTrendsData] = useState<FunnelTrendsData[]>([]);
   const [isEmpty, setIsEmpty] = useState(
@@ -81,12 +90,14 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
         getTransientFunnelData(
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
-          dateFilter
+          dateFilter,
+          conversionWindow
         ),
         getTransientTrendsData(
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
-          dateFilter
+          dateFilter,
+          conversionWindow
         ),
       ]);
       setFunnelData(funnelData);
@@ -96,7 +107,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
 
     setIsLoading(true);
     getFunnelMetricsData();
-  }, [funnelSteps, dateFilter]);
+  }, [funnelSteps, dateFilter, conversionWindow]);
 
   return (
     <Flex direction={{ base: 'column', md: 'row' }} h={'full'}>
@@ -108,6 +119,8 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           setFunnelSteps={setFunnelSteps}
           setIsStepAdded={setIsStepAdded}
           dateFilter={dateFilter}
+          conversionWindow={conversionWindow}
+          setConversionWindow={setConversionWindow}
         />
       </ActionPanel>
       <ViewPanel>
@@ -121,6 +134,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
             funnelSteps={funnelSteps}
             dateFilter={dateFilter}
             setDateFilter={setDateFilter}
+            conversionWindow={conversionWindow}
           />
         )}
       </ViewPanel>

@@ -1,7 +1,7 @@
 import datetime
 from enum import Enum
 from beanie import PydanticObjectId
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import BaseModel
 from domain.common.date_models import DateFilter
 
@@ -36,7 +36,7 @@ class ConversionWindowType(Enum):
 
 class ConversionWindow(BaseModel):
     type: ConversionWindowType
-    value: int
+    value: Union[int, None]
 
 
 class Funnel(Document):

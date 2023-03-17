@@ -61,7 +61,7 @@ class FunnelsService:
     def compute_conversion_time(self, conversion_window: Union[ConversionWindow, None]):
         return (
             conversion_window.type.get_multiplier() * conversion_window.value
-            if conversion_window
+            if conversion_window and conversion_window.value
             else self.default_conversion_time
         )
 

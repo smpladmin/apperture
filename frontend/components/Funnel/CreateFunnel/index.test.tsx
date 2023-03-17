@@ -41,6 +41,7 @@ describe('create funnel', () => {
   let mockedGetEventProperties: jest.Mock;
   let mockedGetEventPropertiesValue: jest.Mock;
   let mockedReplaceFilterValueWithEmptyStringPlaceholder: jest.Mock;
+  let mockedGetTransientFunnelTrendsData: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -175,12 +176,31 @@ describe('create funnel', () => {
     });
   };
 
+  const funnelTrendsData = [
+    {
+      conversion: 5.19,
+      firstStepUsers: 578,
+      lastStepUsers: 30,
+      startDate: '2022-11-21T00:00:00',
+      endDate: '2022-11-27T00:00:00',
+    },
+    {
+      conversion: 5.11,
+      firstStepUsers: 978,
+      lastStepUsers: 50,
+      startDate: '2022-11-28T00:00:00',
+      endDate: '2022-12-04T00:00:00',
+    },
+  ];
   beforeEach(() => {
     mockedGetCountOfValidAddedSteps = jest.mocked(getCountOfValidAddedSteps);
     mockedSearchResult = jest.mocked(getSearchResult);
     mockedTransformFunnelData = jest.mocked(transformFunnelData);
     mockedGetTransientFunnelData = jest.mocked(
       APIService.getTransientFunnelData
+    );
+    mockedGetTransientFunnelTrendsData = jest.mocked(
+      APIService.getTransientTrendsData
     );
     mockedSaveFunnel = jest.mocked(APIService.saveFunnel);
     mockUpdateFunnel = jest.mocked(APIService.updateFunnel);
@@ -193,6 +213,7 @@ describe('create funnel', () => {
       replaceFilterValueWithEmptyStringPlaceholder
     );
 
+    mockedGetTransientFunnelTrendsData.mockReturnValue(funnelTrendsData);
     mockedGetCountOfValidAddedSteps.mockReturnValue(2);
     mockedIsEveryFunnelStepFiltersValid.mockReturnValue(true);
     mockedGetEventProperties.mockReturnValue(eventProperties);
@@ -549,6 +570,31 @@ describe('create funnel', () => {
         fireEvent.click(oneMonthFilter);
       });
       expect(mockedGetTransientFunnelData).toHaveBeenCalled();
+    });
+  });
+
+  describe('Conversion Criteria', () => {
+    it('Opens up the list of conversion criteria and select minutes', async () => {
+      await renderCreateFunnel();
+      const conversionTypeList = screen.getByTestId('conversion-type-list');
+      fireEvent.click(conversionTypeList);
+      const minutesFunc = screen.getByText('minutes');
+      await act(async () => {
+        fireEvent.click(minutesFunc);
+      });
+      const conversionType = screen.getByTestId('conversion-type');
+      expect(conversionType.textContent).toEqual('minutes');
+    });
+
+    it('On changing input it should trigger an endpoint', async () => {
+      await renderCreateFunnel();
+      const conversionInput = screen.getByTestId('conversion-time-input');
+      await act(async () => {
+        fireEvent.change(conversionInput, { target: { value: 10 } });
+      });
+      expect(conversionInput).toHaveDisplayValue('10');
+      expect(mockedGetTransientFunnelData).toHaveBeenCalled();
+      expect(mockedGetTransientFunnelTrendsData).toHaveBeenCalled();
     });
   });
 });
