@@ -11,7 +11,6 @@ from domain.datasources.service import DataSourceService
 from rest.middlewares import validate_jwt, get_user
 from rest.dtos.notifications import CreateNotificationDto, NotificationWithUser
 from rest.dtos.apperture_users import AppertureUserResponse as apperture_users
-from tests.rest.controllers.conftest import notification_service
 
 
 router = APIRouter(
