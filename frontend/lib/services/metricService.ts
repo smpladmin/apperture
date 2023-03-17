@@ -2,6 +2,7 @@ import { replaceEmptyStringPlaceholder } from '@components/Metric/util';
 import { DateFilterObj } from '@lib/domain/common';
 import { MetricAggregate } from '@lib/domain/metric';
 import {
+  AppertureDelete,
   AppertureGet,
   ApperturePost,
   ApperturePrivateGet,
@@ -93,4 +94,9 @@ export const validateMetricFormula = async (
     variableList: variableList,
   });
   return res.data;
+};
+
+export const deleteMetric = async (id: string) => {
+  const res = await AppertureDelete(`/metrics/${id}`);
+  return res;
 };

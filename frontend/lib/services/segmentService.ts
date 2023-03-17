@@ -3,6 +3,7 @@ import {
   ApperturePost,
   AppertureGet,
   ApperturePut,
+  AppertureDelete,
 } from './util';
 import { cloneDeep } from 'lodash';
 import { replaceEmptyStringPlaceholder } from './../../components/Segments/util';
@@ -62,4 +63,9 @@ export const _getSavedSegment = async (token: string, segementId: string) => {
 export const getSavedSegmentsForDatasourceId = async (dsId: string) => {
   const res = await AppertureGet(`/segments?datasource_id=${dsId}`);
   return res.data;
+};
+
+export const deleteSegment = async (id: string) => {
+  const res = await AppertureDelete(`/segments/${id}`);
+  return res;
 };

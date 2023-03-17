@@ -96,7 +96,11 @@ const SavedActions = ({ provider }: { provider: Provider }) => {
             <LoadingSpinner />
           </Flex>
         ) : (
-          <WatchlistTable savedItemsData={actions} onRowClick={onRowClick} />
+          <WatchlistTable
+            savedItemsData={actions}
+            onRowClick={onRowClick}
+            handleDelete={() => {}}
+          />
         )}
       </Box>
     </Box>
