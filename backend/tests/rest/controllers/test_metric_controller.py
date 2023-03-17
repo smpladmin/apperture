@@ -9,6 +9,7 @@ from domain.metrics.models import (
     SegmentsAndEventsFilterOperator,
     MetricBasicAggregation,
 )
+from tests.rest.controllers.conftest import metric_service
 
 
 def test_compute_metric(
@@ -110,4 +111,57 @@ def test_validate_metric_formula(client_init, metric_service):
     assert response.json() == True
     metric_service.validate_formula.assert_called_with(
         **{"formula": "A,  B", "variable_list": ["A", "B"]}
+    )
+
+
+def test_update_metric(
+    client_init, metric_data, metric_service, datasource_service, notification_service
+):
+    response = client_init.put(
+        "/metrics/635ba034807ab86d8a2aadd8", data=json.dumps(metric_data)
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "_id": "63d0df1ea1040a6388a4a34c",
+        "aggregates": [
+            {
+                "aggregations": {"functions": "count", "property": "Video_Seen"},
+                "conditions": [],
+                "filters": [],
+                "reference_id": "Video_Seen",
+                "variable": "A",
+                "variant": "event",
+            },
+            {
+                "aggregations": {"functions": "count", "property": "Video_Open"},
+                "conditions": [],
+                "filters": [],
+                "reference_id": "Video_Open",
+                "variable": "B",
+                "variant": "event",
+            },
+        ],
+        "appId": "63ca46feee94e38b81cda37a",
+        "breakdown": [],
+        "createdAt": ANY,
+        "datasourceId": "63d0a7bfc636cee15d81f579",
+        "function": "A/B",
+        "name": "Video Metric",
+        "revisionId": ANY,
+        "updatedAt": None,
+        "userId": "6374b74e9b36ecf7e0b4f9e4",
+        "dateFilter": None,
+    }
+
+    datasource_service.get_datasource.assert_called_with(
+        "636a1c61d715ca6baae65611",
+    )
+    notification_service.get_notification_by_reference.assert_called_once_with(
+        **{
+            "datasource_id": "636a1c61d715ca6baae65611",
+            "reference": "635ba034807ab86d8a2aadd8",
+        }
+    )
+    notification_service.delete_notification.assert_called_once_with(
+        **{"notification_id": "635ba034807ab86d8a2aadd8"}
     )

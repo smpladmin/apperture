@@ -67,14 +67,9 @@ export const ApperturePut = async (
   }
 };
 
-export const AppertureDelete = async (
-  path: string,
-  config: {
-    [key: string]: string | number | boolean | Array<any> | object | null;
-  } = {}
-) => {
+export const AppertureDelete = async (path: string) => {
   try {
-    return await AppertureAPI.delete(path, config);
+    return await AppertureAPI.delete(path);
   } catch (e) {
     const error = e as AxiosError;
     console.error(error.message);

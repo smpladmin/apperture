@@ -30,7 +30,7 @@ import {
   isValidAggregates,
   replaceEmptyStringPlaceholder,
 } from '@components/Metric/util';
-import { DateFilter, DateFilterType, DateFilterObj } from '@lib/domain/common';
+import { DateFilterObj } from '@lib/domain/common';
 
 type CreateMetricActionProps = {
   setMetric: Function;
@@ -76,6 +76,11 @@ const CreateMetricAction = ({
   const dsId = savedMetric?.datasourceId || router.query.dsId;
 
   const [isValidDefinition, setIsValidDefinition] = useState<boolean>(true);
+  const [isMetricBeingEdited, setIsMetricBeingEdited] = useState(false);
+
+  useEffect(() => {
+    if (router.pathname.includes('/metric/edit')) setIsMetricBeingEdited(true);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -136,33 +141,30 @@ const CreateMetricAction = ({
   };
 
   const handleSave = async () => {
-    let savedMetric;
-    if (metricId) {
-      // update the metric
-      await updateMetric(
-        metricId as string,
-        metricName,
-        dsId as string,
-        metricDefinition,
-        aggregates,
-        breakdown,
-        dateFilter
-      );
-    } else {
-      // save the metric
-      savedMetric = await saveMetric(
-        metricName,
-        dsId as string,
-        metricDefinition,
-        aggregates,
-        breakdown,
-        dateFilter
-      );
-    }
-    router.push({
-      pathname: '/analytics/metric/view/[metricId]',
-      query: { metricId: savedMetric?._id || metricId, dsId },
-    });
+    const { data, status } = isMetricBeingEdited
+      ? await updateMetric(
+          metricId as string,
+          metricName,
+          dsId as string,
+          metricDefinition,
+          aggregates,
+          breakdown,
+          dateFilter
+        )
+      : await saveMetric(
+          metricName,
+          dsId as string,
+          metricDefinition,
+          aggregates,
+          breakdown,
+          dateFilter
+        );
+
+    if (status === 200)
+      router.push({
+        pathname: '/analytics/metric/view/[metricId]',
+        query: { metricId: data?._id || metricId, dsId },
+      });
 
     setCanSaveMetric(false);
   };
