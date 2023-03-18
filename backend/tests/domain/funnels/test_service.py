@@ -63,6 +63,7 @@ class TestFunnelService:
             date_filter=DateFilter(
                 filter=LastDateFilter(days=7), type=DateFilterType.LAST
             ),
+            enabled=True,
         )
         self.computed_steps = [
             ComputedFunnelStep(event="Login", users=100, conversion=100.0),
@@ -110,6 +111,7 @@ class TestFunnelService:
         Funnel.find_one = MagicMock(return_value=FindOneMock(update=self.update_mock))
         Funnel.id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.funnels.compute_date_filter.return_value = ("2022-12-01", "2022-12-31")
+        Funnel.enabled = True
 
     def test_build_funnel(self):
 
@@ -171,6 +173,7 @@ class TestFunnelService:
                     "date_filter": DateFilter(
                         filter=LastDateFilter(days=7), type=DateFilterType.LAST
                     ),
+                    "enabled": True,
                 }
             },
         )
@@ -226,3 +229,9 @@ class TestFunnelService:
             datasource_id="6384a65e0a397236d9de236a"
         )
         Funnel.find.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_delete_funnel(self):
+        await self.service.delete_funnel(funnel_id="6384a65e0a397236d9de236a")
+        Funnel.find_one.assert_called_once()
+        self.update_mock.assert_called_once_with({"$set": {"enabled": False}})

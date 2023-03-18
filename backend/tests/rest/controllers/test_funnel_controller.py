@@ -96,6 +96,7 @@ async def test_update_funnel(
         "updated_at": None,
         "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
         "date_filter": None,
+        "enabled": True,
     } == update_funnel_kwargs["new_funnel"].dict()
 
     assert "635ba034807ab86d8a2aadd8" == update_funnel_kwargs["funnel_id"]
@@ -200,8 +201,23 @@ def test_get_funnels(client_init, funnel_service):
             },
             "userId": "635ba034807ab86d8a2aadda",
             "dateFilter": None,
+            "enabled": True,
         }
     ]
     funnel_service.get_funnels_for_datasource_id.assert_called_once_with(
         **{"datasource_id": "635ba034807ab86d8a2aadd9"}
+    )
+
+
+def test_delete_funnel(
+    client_init,
+    funnel_service,
+):
+    response = client_init.delete("/funnels/6384a65e0a397236d9de236a")
+    assert response.status_code == 200
+
+    funnel_service.delete_funnel.assert_called_once_with(
+        **{
+            "funnel_id": "6384a65e0a397236d9de236a",
+        }
     )
