@@ -10,6 +10,7 @@ from domain.funnels.models import (
     FunnelTrendsData,
     FunnelConversionData,
     ConversionStatus,
+    ConversionWindow,
 )
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
@@ -21,6 +22,7 @@ class CreateFunnelDto(BaseModel):
     steps: List[FunnelStep]
     randomSequence: bool
     dateFilter: Optional[DateFilter]
+    conversionWindow: Optional[ConversionWindow]
 
 
 class TransientFunnelConversionlDto(BaseModel):
@@ -28,12 +30,14 @@ class TransientFunnelConversionlDto(BaseModel):
     steps: List[FunnelStep]
     status: ConversionStatus
     dateFilter: Optional[DateFilter]
+    conversionWindow: Optional[ConversionWindow]
 
 
 class TransientFunnelDto(BaseModel):
     datasourceId: str
     steps: List[FunnelStep]
     dateFilter: Optional[DateFilter]
+    conversionWindow: Optional[ConversionWindow]
 
 
 class FunnelResponse(Funnel, ModelResponse):

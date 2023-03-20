@@ -50,6 +50,7 @@ export type Funnel = {
   steps: FunnelStep[];
   randomSequence: boolean;
   dateFilter?: DateFilterObj;
+  conversionWindow?: ConversionWindowObj;
 };
 
 export type FunnelWithUser = Funnel & {
@@ -90,3 +91,17 @@ export enum ConversionStatus {
   CONVERTED = 'converted',
   DROPPED = 'dropped',
 }
+
+export enum ConversionWindowList {
+  SECONDS = 'seconds',
+  MINUTES = 'minutes',
+  HOURS = 'hours',
+  DAYS = 'days',
+  WEEKS = 'weeks',
+  MONTHS = 'months',
+}
+
+export type ConversionWindowObj = {
+  type: ConversionWindowList;
+  value: number;
+};
