@@ -13,7 +13,11 @@ import ViewFunnelSteps from '../components/ViewFunnelSteps';
 import ActionMenu from '../../ActionMenu';
 import 'remixicon/fonts/remixicon.css';
 import { BASTILLE } from '@theme/index';
-import { FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
+import {
+  ConversionWindowObj,
+  FunnelStep,
+  FunnelTrendsData,
+} from '@lib/domain/funnel';
 import { useRouter } from 'next/router';
 import Alert from '@components/Alerts';
 import { Notifications, NotificationVariant } from '@lib/domain/notification';
@@ -26,6 +30,7 @@ type LeftViewProps = {
   eventData: FunnelTrendsData[];
   savedNotification: Notifications;
   setIsModalClosed: Function;
+  conversionWindow: ConversionWindowObj;
 };
 
 const LeftView = ({
@@ -35,6 +40,7 @@ const LeftView = ({
   eventData,
   savedNotification,
   setIsModalClosed,
+  conversionWindow,
 }: LeftViewProps) => {
   const router = useRouter();
 
@@ -165,6 +171,12 @@ const LeftView = ({
       </Flex>
       <Flex direction={'column'} mt={{ base: '1', md: '4' }}>
         <ViewFunnelSteps steps={steps} />
+        <Text
+          fontSize={'xs-14'}
+          lineHeight={'xs-14'}
+          color={'white'}
+          marginTop={'4'}
+        >{`Conversion Time: ${conversionWindow.value} ${conversionWindow.type}`}</Text>
         <ActionMenu
           onNotificationClick={handleNotificationClick}
           hasSavedNotification={hasSavedAlert(savedNotification)}

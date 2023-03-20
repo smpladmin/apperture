@@ -14,6 +14,31 @@ class FunnelStep(BaseModel):
     filters: Optional[List[WhereSegmentFilter]]
 
 
+class ConversionWindowType(Enum):
+    SECONDS = "seconds"
+    MINUTES = "minutes"
+    HOURS = "hours"
+    DAYS = "days"
+    WEEKS = "weeks"
+    MONTHS = "months"
+    SESSIONS = "sessions"
+
+    def get_multiplier(self):
+        return {
+            self.SECONDS: 1,
+            self.MINUTES: 60,
+            self.HOURS: 60 * 60,
+            self.DAYS: 24 * 60 * 60,
+            self.WEEKS: 7 * 24 * 60 * 60,
+            self.MONTHS: 30 * 24 * 60 * 60,
+        }.get(self, 1)
+
+
+class ConversionWindow(BaseModel):
+    type: ConversionWindowType
+    value: Union[int, None]
+
+
 class Funnel(Document):
     datasource_id: PydanticObjectId
     app_id: PydanticObjectId
@@ -22,6 +47,7 @@ class Funnel(Document):
     steps: List[FunnelStep]
     random_sequence: bool
     date_filter: Optional[DateFilter]
+    conversion_window: Optional[ConversionWindow]
 
     class Settings:
         name = "funnels"

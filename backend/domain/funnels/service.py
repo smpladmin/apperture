@@ -5,18 +5,17 @@ from datetime import datetime
 from beanie import PydanticObjectId
 from beanie.operators import In
 
-
-from domain.common.models import SavedItems
 from domain.common.date_models import DateFilter
 from domain.funnels.models import (
     Funnel,
     FunnelStep,
     ComputedFunnelStep,
-    ComputedFunnel,
     FunnelTrendsData,
     FunnelConversionData,
     ConversionStatus,
     FunnelEventUserData,
+    ConversionWindow,
+    ConversionWindowType,
 )
 from repositories.clickhouse.funnels import Funnels
 
@@ -29,25 +28,28 @@ class FunnelsService:
     ):
         self.mongo = mongo
         self.funnels = funnels
+        self.default_conversion_time = ConversionWindowType.DAYS.get_multiplier() * 30
 
     def build_funnel(
         self,
-        datasourceId: PydanticObjectId,
-        appId: PydanticObjectId,
-        userId: str,
+        datasource_id: PydanticObjectId,
+        app_id: PydanticObjectId,
+        user_id: str,
         name: str,
         steps: List[FunnelStep],
-        randomSequence: bool,
-        dateFilter: Union[DateFilter, None],
+        random_sequence: bool,
+        date_filter: Union[DateFilter, None],
+        conversion_window: Union[ConversionWindow, None],
     ) -> Funnel:
         return Funnel(
-            datasource_id=datasourceId,
-            app_id=appId,
-            user_id=userId,
+            datasource_id=datasource_id,
+            app_id=app_id,
+            user_id=user_id,
             name=name,
             steps=steps,
-            random_sequence=randomSequence,
-            date_filter=dateFilter,
+            random_sequence=random_sequence,
+            date_filter=date_filter,
+            conversion_window=conversion_window,
         )
 
     async def add_funnel(self, funnel: Funnel):
@@ -56,6 +58,13 @@ class FunnelsService:
 
     def compute_conversion(self, n, data) -> float:
         return data[n] * 100 / data[0] if data[0] != 0 else 0
+
+    def compute_conversion_time(self, conversion_window: Union[ConversionWindow, None]):
+        return (
+            conversion_window.type.get_multiplier() * conversion_window.value
+            if conversion_window and conversion_window.value
+            else self.default_conversion_time
+        )
 
     def extract_date_range(self, date_filter: Union[DateFilter, None]):
         return (
@@ -71,12 +80,20 @@ class FunnelsService:
         ds_id: str,
         steps: List[FunnelStep],
         date_filter: Union[DateFilter, None],
+        conversion_window: Union[ConversionWindow, None],
     ) -> List[ComputedFunnelStep]:
 
         start_date, end_date = self.extract_date_range(date_filter=date_filter)
 
+        conversion_time = self.compute_conversion_time(
+            conversion_window=conversion_window
+        )
         users_data = self.funnels.get_users_count(
-            ds_id=ds_id, steps=steps, start_date=start_date, end_date=end_date
+            ds_id=ds_id,
+            steps=steps,
+            start_date=start_date,
+            end_date=end_date,
+            conversion_time=conversion_time,
         )
         computed_funnel = [
             ComputedFunnelStep(
@@ -92,20 +109,7 @@ class FunnelsService:
         return computed_funnel
 
     async def get_funnel(self, id: str) -> Funnel:
-        return await Funnel.get(id)
-
-    async def get_computed_funnel(self, funnel: Funnel) -> ComputedFunnel:
-        computed_funnel = await self.compute_funnel(
-            ds_id=str(funnel.datasource_id),
-            steps=funnel.steps,
-        )
-        return ComputedFunnel(
-            datasource_id=funnel.datasource_id,
-            steps=funnel.steps,
-            name=funnel.name,
-            random_sequence=funnel.random_sequence,
-            computed_funnel=computed_funnel,
-        )
+        return await Funnel.get(PydanticObjectId(id))
 
     async def update_funnel(self, funnel_id: str, new_funnel: Funnel):
         to_update = new_funnel.dict()
@@ -122,12 +126,20 @@ class FunnelsService:
         datasource_id: str,
         steps: List[FunnelStep],
         date_filter: Union[DateFilter, None],
+        conversion_window: Union[ConversionWindow, None],
     ) -> List[FunnelTrendsData]:
 
+        conversion_time = self.compute_conversion_time(
+            conversion_window=conversion_window
+        )
         start_date, end_date = self.extract_date_range(date_filter=date_filter)
 
         conversion_data = self.funnels.get_conversion_trend(
-            ds_id=datasource_id, steps=steps, start_date=start_date, end_date=end_date
+            ds_id=datasource_id,
+            steps=steps,
+            start_date=start_date,
+            end_date=end_date,
+            conversion_time=conversion_time,
         )
         return [
             FunnelTrendsData(
@@ -146,7 +158,11 @@ class FunnelsService:
         steps: List[FunnelStep],
         status: ConversionStatus,
         date_filter: Union[DateFilter, None],
+        conversion_window: Union[ConversionWindow, None],
     ):
+        conversion_time = self.compute_conversion_time(
+            conversion_window=conversion_window
+        )
         start_date, end_date = self.extract_date_range(date_filter=date_filter)
 
         conversion_data = self.funnels.get_conversion_analytics(
@@ -155,6 +171,7 @@ class FunnelsService:
             status=status,
             start_date=start_date,
             end_date=end_date,
+            conversion_time=conversion_time,
         )
         user_list = [FunnelEventUserData(id=data[0]) for data in conversion_data]
         count_data = conversion_data[0][1] if conversion_data else [0, 0]
@@ -164,7 +181,7 @@ class FunnelsService:
 
     async def get_funnels_for_apps(
         self, app_ids: List[PydanticObjectId]
-    ) -> List[SavedItems]:
+    ) -> List[Funnel]:
         return await Funnel.find(
             In(Funnel.app_id, app_ids),
         ).to_list()

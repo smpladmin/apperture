@@ -69,6 +69,7 @@ async def test_update_funnel(
         ],
         funnel_data["randomSequence"],
         None,
+        None,
     )
 
     update_funnel_kwargs = funnel_service.update_funnel.call_args.kwargs
@@ -96,6 +97,7 @@ async def test_update_funnel(
         "updated_at": None,
         "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
         "date_filter": None,
+        "conversion_window": None,
     } == update_funnel_kwargs["new_funnel"].dict()
 
     assert "635ba034807ab86d8a2aadd8" == update_funnel_kwargs["funnel_id"]
@@ -129,6 +131,8 @@ def test_get_funnel_trends(client_init, funnel_trend_response, funnel_service):
                     filters=None,
                 ),
             ],
+            "date_filter": None,
+            "conversion_window": None,
         }
     )
 
@@ -157,6 +161,7 @@ def test_get_transient_funnel_trends(
                 ),
             ],
             "date_filter": None,
+            "conversion_window": None,
         }
     )
 
@@ -200,6 +205,7 @@ def test_get_funnels(client_init, funnel_service):
             },
             "userId": "635ba034807ab86d8a2aadda",
             "dateFilter": None,
+            "conversionWindow": None,
         }
     ]
     funnel_service.get_funnels_for_datasource_id.assert_called_once_with(
