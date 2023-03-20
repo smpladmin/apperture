@@ -116,6 +116,8 @@ def notification_service(apperture_user_response):
     notifications_future = asyncio.Future()
     notifications_future.set_result([NotificationWithUser.from_orm(notif)])
 
+    notification_service_mock.delete_notification = mock.AsyncMock()
+
     notification_service_mock.build_notification.return_value = notif
     notification_service_mock.add_notification.return_value = notif_future
     notification_service_mock.update_notification.return_value = notif_future
@@ -507,6 +509,9 @@ def metric_service(apperture_user_response):
     computed_metric_future = asyncio.Future()
     computed_metric_future.set_result(computed_metric)
 
+    metric_service.build_metric = mock.AsyncMock()
+    metric_service.build_metric.return_value = metric
+    metric_service.update_metric = mock.AsyncMock()
     metric_service.compute_metric.return_value = computed_metric_future
     metric_service.get_metrics_for_datasource_id.return_value = metrics_future
     metric_service.validate_formula.return_value = True
@@ -1059,6 +1064,7 @@ def notification_response():
         "notificationActive": False,
         "variant": NotificationVariant.NODE,
         "reference": "/p/partner/job",
+        "enabled": True,
     }
 
 
@@ -1214,6 +1220,34 @@ def computed_metric_response():
             ],
         }
     ]
+
+
+@pytest.fixture(scope="module")
+def metric_data():
+    return {
+        "datasourceId": "636a1c61d715ca6baae65611",
+        "name": "Video Metric",
+        "function": "A/B",
+        "breakdown": [],
+        "aggregates": [
+            {
+                "aggregations": {"functions": "count", "property": "Video_Seen"},
+                "conditions": [],
+                "filters": [],
+                "reference_id": "Video_Seen",
+                "variable": "A",
+                "variant": "event",
+            },
+            {
+                "aggregations": {"functions": "count", "property": "Video_Open"},
+                "conditions": [],
+                "filters": [],
+                "reference_id": "Video_Open",
+                "variable": "B",
+                "variant": "event",
+            },
+        ],
+    }
 
 
 @pytest.fixture(scope="module")

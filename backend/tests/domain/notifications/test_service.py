@@ -161,14 +161,16 @@ class TestNotificationService:
         )
         self.name = "test"
         self.ds_id = "6384a66e0a397236d9de236c"
+        self.id = PydanticObjectId("6384a66e0a397236d9de236c")
         Notification.get_settings = MagicMock()
-        Notification.find_one = MagicMock()
         Notification.name = MagicMock(return_value=self.name)
         Notification.datasource_id = MagicMock(
             return_value=PydanticObjectId(self.ds_id)
         )
         Notification.app_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         Notification.notification_active = MagicMock(return_value=True)
+        Notification.id = MagicMock(return_value=self.id)
+        Notification.enabled = True
         self.notification = Notification(
             id=PydanticObjectId("6384a66e0a397236d9de236c"),
             datasource_id=PydanticObjectId("6384a66e0a397236d9de236c"),
@@ -193,11 +195,12 @@ class TestNotificationService:
             reference="/p/partner/job",
         )
         notif_future = asyncio.Future()
+        notif_future.update = AsyncMock()
+        self.update_mock = notif_future.update
         notif_future.set_result(self.notification)
-        Notification.find_one.return_value = notif_future
         self.mongo = MagicMock()
         self.service = NotificationService(mongo=self.mongo)
-
+        Notification.find_one = MagicMock(return_value=notif_future)
         FindMock = namedtuple("FindMock", ["to_list"])
         Notification.find = MagicMock(
             return_value=FindMock(
@@ -260,6 +263,7 @@ class TestNotificationService:
             "variable_map": {"a": ["user_login"]},
             "variant": NotificationVariant.NODE,
             "reference": "/p/partner/job",
+            "enabled": True,
         } == notif.dict()
 
     @pytest.mark.asyncio
@@ -275,3 +279,12 @@ class TestNotificationService:
             datasource_id="6384a65e0a397236d9de236a"
         )
         Notification.find.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_delete_notification(self):
+
+        await self.service.delete_notification(
+            notification_id="6384a65e0a397236d9de236a"
+        )
+        Notification.find_one.assert_called_once()
+        self.update_mock.assert_called_once_with({"$set": {"enabled": False}})

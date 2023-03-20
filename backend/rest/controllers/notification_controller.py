@@ -113,3 +113,11 @@ async def update_notification(
         notification_id=notification_id, new_notification=new_notification
     )
     return notification
+
+
+@router.delete("/notifications/{notification_id}")
+async def delete_notification(
+    notification_id: str,
+    notification_service: NotificationService = Depends(),
+):
+    await notification_service.delete_notification(notification_id=notification_id)

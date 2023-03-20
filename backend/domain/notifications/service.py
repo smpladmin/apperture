@@ -81,7 +81,7 @@ class NotificationService:
 
     async def get_notifications(
         self, notification_type: NotificationType, frequency: NotificationFrequency
-    ) -> list[Notification]:
+    ) -> List[Notification]:
         return await Notification.find(
             Notification.frequency == frequency,
             Notification.notification_type == notification_type,
@@ -225,6 +225,7 @@ class NotificationService:
 
         notifications = await Notification.find(
             In(Notification.app_id, app_ids),
+            Notification.enabled != False,
         ).to_list()
         return [
             SavedItems(type=WatchlistItemType.NOTIFICATIONS, details=notification)
@@ -235,7 +236,8 @@ class NotificationService:
         self, datasource_id: str
     ) -> List[NotificationResponse]:
         return await Notification.find(
-            PydanticObjectId(datasource_id) == Notification.datasource_id
+            PydanticObjectId(datasource_id) == Notification.datasource_id,
+            Notification.enabled != False,
         ).to_list()
 
     async def get_notification_by_reference(
@@ -244,4 +246,11 @@ class NotificationService:
         return await Notification.find_one(
             Notification.reference == reference,
             Notification.datasource_id == PydanticObjectId(datasource_id),
+            Notification.enabled != False,
         )
+
+    async def delete_notification(self, notification_id: str):
+        await Notification.find_one(
+            Notification.id == PydanticObjectId(notification_id),
+        ).update({"$set": {"enabled": False}})
+        return

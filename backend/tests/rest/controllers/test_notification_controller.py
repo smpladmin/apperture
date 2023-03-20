@@ -85,6 +85,7 @@ def test_add_notification(
         "variable_map": {},
         "reference": "/p/partner/job",
         "variant": NotificationVariant.NODE,
+        "enabled": True,
     }
 
 
@@ -149,6 +150,7 @@ def test_update_notification(
         "variable_map": {},
         "reference": "/p/partner/job",
         "variant": NotificationVariant.NODE,
+        "enabled": True,
     }
     assert (
         notification_service.update_notification.call_args.kwargs["notification_id"]
@@ -156,7 +158,7 @@ def test_update_notification(
     )
 
 
-def test_get_funnels(client_init, notification_service):
+def test_get_notifications(client_init, notification_service):
     response = client_init.get("/notifications?datasource_id=635ba034807ab86d8a2aadd9")
 
     assert response.status_code == 200
@@ -193,8 +195,23 @@ def test_get_funnels(client_init, notification_service):
             "userId": "635ba034807ab86d8a2aadda",
             "variableMap": {},
             "variant": "node",
+            "enabled": True,
         }
     ]
     notification_service.get_notifications_for_datasource_id.assert_called_once_with(
         **{"datasource_id": "635ba034807ab86d8a2aadd9"}
+    )
+
+
+def test_delete_notification(
+    client_init,
+    notification_service,
+):
+    response = client_init.delete("/notifications/6384a65e0a397236d9de236a")
+    assert response.status_code == 200
+
+    notification_service.delete_notification.assert_called_once_with(
+        **{
+            "notification_id": "6384a65e0a397236d9de236a",
+        }
     )

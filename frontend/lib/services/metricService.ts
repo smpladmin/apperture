@@ -56,7 +56,7 @@ export const saveMetric = async (
     breakdown,
     dateFilter,
   });
-  return result.data;
+  return result;
 };
 
 export const updateMetric = async (
@@ -76,7 +76,7 @@ export const updateMetric = async (
     breakdown,
     dateFilter,
   });
-  return result.data;
+  return result;
 };
 
 export const getSavedMetricsForDatasourceId = async (dsId: string) => {
