@@ -1,16 +1,10 @@
-import {
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  useDisclosure,
-} from '@chakra-ui/react';
+import { Box, Flex, IconButton, Text, useDisclosure } from '@chakra-ui/react';
 import ConfirmationModal from '@components/ConfirmationModal';
-import { AppertureUser } from '@lib/domain/user';
+import Dropdown from '@components/SearchableDropdown/Dropdown';
 import { SavedItems } from '@lib/domain/watchlist';
+import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { CellContext } from '@tanstack/react-table';
-import React from 'react';
+import React, { useRef, useState } from 'react';
 
 const Actions = ({
   info,
@@ -20,39 +14,52 @@ const Actions = ({
   handleDelete: Function;
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const id = info?.row?.original?.details?._id;
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const id = info?.getValue();
+  const dropdownRef = useRef(null);
+  useOnClickOutside(dropdownRef, () => setIsDropdownOpen(false));
+
   return (
-    <>
-      <Menu>
-        <MenuButton onClick={(e) => e.stopPropagation()}>
-          <IconButton
-            aria-label="more"
-            variant={'secondary'}
-            icon={<i className="ri-more-fill"></i>}
-            rounded={'full'}
-            bg={'white.DEFAULT'}
-            border={'1px'}
-            borderColor={'white.200'}
-            onClick={(e) => e.stopPropagation()}
-          />
-        </MenuButton>
-        <MenuList
+    <Box>
+      <Box position={'relative'} ref={dropdownRef} w={'fit-content'}>
+        <IconButton
+          aria-label="more"
+          variant={'secondary'}
+          icon={<i className="ri-more-fill"></i>}
+          rounded={'full'}
+          bg={'white.DEFAULT'}
+          border={'1px'}
+          borderColor={'white.200'}
           onClick={(e) => {
             e.stopPropagation();
+            setIsDropdownOpen(true);
           }}
+          data-testid={'action-more-icon'}
+        />
+        <Dropdown
+          isOpen={isDropdownOpen}
+          dropdownPosition={'right'}
+          minWidth={'30'}
         >
-          <MenuItem
+          <Flex
+            gap={'2'}
+            _hover={{ bg: 'white.100' }}
+            p={'2'}
+            borderRadius={'4'}
             onClick={(e) => {
+              e.stopPropagation();
               onOpen();
             }}
-            _focus={{
-              backgroundColor: 'white.100',
-            }}
+            data-testid={'table-action-delete'}
           >
-            Delete
-          </MenuItem>
-        </MenuList>
-      </Menu>
+            <i className="ri-delete-bin-line"></i>
+            <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'400'}>
+              Delete
+            </Text>
+          </Flex>
+        </Dropdown>
+      </Box>
       <ConfirmationModal
         isOpen={isOpen}
         onClose={onClose}
@@ -64,7 +71,7 @@ const Actions = ({
           onClose();
         }}
       />
-    </>
+    </Box>
   );
 };
 
