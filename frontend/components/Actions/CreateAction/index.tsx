@@ -58,7 +58,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
   } = router;
 
   const datasourceId = dsId || savedAction?.datasourceId;
-
+  const readOnly = Boolean(savedAction?.datasourceId);
   useEffect(() => {
     if (pathname.includes('/analytics/action/edit'))
       setIsActionBeingEdited(true);
@@ -135,19 +135,22 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
         )
       : await saveAction(datasourceId as string, actionName, groups);
 
-    if (response?.status === 200) {
+    if (response?.status === 200 && response.data) {
       const { _id, datasourceId } = response?.data;
       router.push({
         pathname: '/analytics/action/edit/[actionId]',
         query: { actionId: _id || actionId, dsId: datasourceId },
       });
     }
+    if (!response.data) {
+      alert('Name should be unique');
+    }
   };
 
   return (
     <Box h={'full'} overflow={'auto'} overflowY={'hidden'}>
       <ActionHeader
-        isDisabled={!isEmpty}
+        isDisabled={readOnly}
         actionName={actionName}
         setActionName={setActionName}
         isSaveDisabled={isSaveDisabled}
@@ -172,7 +175,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
             >
               Match Groups
             </Text>
-            {isEmpty && (
+            {!readOnly && (
               <Button
                 fontSize={'xs-12'}
                 lineHeight={'xs-16'}
@@ -218,7 +221,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
                   groups={groups}
                   updateGroupAction={updateGroupAction}
                   handleClose={removeGroup}
-                  isDisabled={!isEmpty}
+                  isDisabled={readOnly}
                 />
               </Fragment>
             ))}

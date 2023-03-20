@@ -4,8 +4,7 @@ from typing import List
 from beanie import PydanticObjectId
 from fastapi import Depends
 
-from domain.actions.models import (Action, ActionGroup,
-                                   ComputedEventStreamResult)
+from domain.actions.models import Action, ActionGroup, ComputedEventStreamResult
 from domain.clickstream.models import CaptureEvent
 from mongo import Mongo
 from repositories.clickhouse.actions import Actions
@@ -36,6 +35,9 @@ class ActionService:
             name=name,
             groups=groups,
         )
+
+    async def get_action_by_name(self, name: str):
+        return await Action.find(Action.name == name).to_list()
 
     async def add_action(self, action: Action):
         action.updated_at = action.created_at

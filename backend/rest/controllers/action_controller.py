@@ -27,6 +27,9 @@ async def create_action(
     ds_service: DataSourceService = Depends(),
 ):
     datasource = await ds_service.get_datasource(dto.datasourceId)
+    existing_action = await action_service.get_action_by_name(dto.name)
+    if existing_action:
+        return
     action = action_service.build_action(
         datasourceId=datasource.id,
         appId=datasource.app_id,

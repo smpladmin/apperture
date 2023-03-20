@@ -15,7 +15,7 @@ from domain.actions.models import (
 )
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App
-from domain.common.date_models import DateFilter, LastDateFilter, DateFilterType
+from domain.common.date_models import DateFilter, DateFilterType, LastDateFilter
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
@@ -300,6 +300,8 @@ def action_service():
     )
     action_future = asyncio.Future()
     action_future.set_result(action)
+    blank_action_future = asyncio.Future()
+    blank_action_future.set_result([])
     actions_future = asyncio.Future()
     actions_future.set_result([action])
     computed_action_future = asyncio.Future()
@@ -313,6 +315,10 @@ def action_service():
     action_service_mock.get_action.return_value = action_future
     action_service_mock.compute_action.return_value = computed_action_future
     action_service_mock.delete_action.return_value = action_future
+    action_service_mock.get_action_by_name.side_effect = [
+        blank_action_future,
+        action_future,
+    ]
     return action_service_mock
 
 
