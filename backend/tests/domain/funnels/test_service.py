@@ -123,16 +123,16 @@ class TestFunnelService:
     def test_build_funnel(self):
 
         funnel = self.service.build_funnel(
-            datasourceId=PydanticObjectId(self.ds_id),
-            appId=PydanticObjectId(self.app_id),
-            userId=self.user_id,
+            datasource_id=PydanticObjectId(self.ds_id),
+            app_id=PydanticObjectId(self.app_id),
+            user_id=self.user_id,
             name=self.name,
             steps=self.funnel_steps,
-            randomSequence=False,
-            dateFilter=DateFilter(
+            random_sequence=False,
+            date_filter=DateFilter(
                 filter=LastDateFilter(days=7), type=DateFilterType.LAST
             ),
-            conversionWindow=ConversionWindow(
+            conversion_window=ConversionWindow(
                 type=ConversionWindowType.MINUTES, value=10
             ),
         )

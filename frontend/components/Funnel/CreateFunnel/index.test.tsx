@@ -574,7 +574,7 @@ describe('create funnel', () => {
   });
 
   describe('Conversion Criteria', () => {
-    it('Opens up the list of conversion criteria and select minutes', async () => {
+    it('should open up the list of conversion criteria and select minutes', async () => {
       await renderCreateFunnel();
       const conversionTypeList = screen.getByTestId('conversion-type-list');
       fireEvent.click(conversionTypeList);
@@ -586,7 +586,7 @@ describe('create funnel', () => {
       expect(conversionType.textContent).toEqual('minutes');
     });
 
-    it('On changing input it should trigger an endpoint', async () => {
+    it('should trigger an endpoint on changing input', async () => {
       await renderCreateFunnel();
       const conversionInput = screen.getByTestId('conversion-time-input');
       await act(async () => {

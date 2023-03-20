@@ -15,6 +15,7 @@ from domain.funnels.models import (
     ConversionStatus,
     FunnelEventUserData,
     ConversionWindow,
+    ConversionWindowType,
 )
 from repositories.clickhouse.funnels import Funnels
 
@@ -27,28 +28,28 @@ class FunnelsService:
     ):
         self.mongo = mongo
         self.funnels = funnels
-        self.default_conversion_time = 30 * 24 * 60 * 60
+        self.default_conversion_time = ConversionWindowType.DAYS.get_multiplier() * 30
 
     def build_funnel(
         self,
-        datasourceId: PydanticObjectId,
-        appId: PydanticObjectId,
-        userId: str,
+        datasource_id: PydanticObjectId,
+        app_id: PydanticObjectId,
+        user_id: str,
         name: str,
         steps: List[FunnelStep],
-        randomSequence: bool,
-        dateFilter: Union[DateFilter, None],
-        conversionWindow: Union[ConversionWindow, None],
+        random_sequence: bool,
+        date_filter: Union[DateFilter, None],
+        conversion_window: Union[ConversionWindow, None],
     ) -> Funnel:
         return Funnel(
-            datasource_id=datasourceId,
-            app_id=appId,
-            user_id=userId,
+            datasource_id=datasource_id,
+            app_id=app_id,
+            user_id=user_id,
             name=name,
             steps=steps,
-            random_sequence=randomSequence,
-            date_filter=dateFilter,
-            conversion_window=conversionWindow,
+            random_sequence=random_sequence,
+            date_filter=date_filter,
+            conversion_window=conversion_window,
         )
 
     async def add_funnel(self, funnel: Funnel):
