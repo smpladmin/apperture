@@ -66,7 +66,6 @@ def test_get_metrics(client_init, metric_service):
             "aggregates": [
                 {
                     "aggregations": {"functions": "count", "property": "Video_Seen"},
-                    "conditions": [],
                     "filters": [],
                     "reference_id": "Video_Seen",
                     "variable": "A",
@@ -74,7 +73,6 @@ def test_get_metrics(client_init, metric_service):
                 },
                 {
                     "aggregations": {"functions": "count", "property": "Video_Open"},
-                    "conditions": [],
                     "filters": [],
                     "reference_id": "Video_Open",
                     "variable": "B",
@@ -129,7 +127,6 @@ def test_update_metric(
         "aggregates": [
             {
                 "aggregations": {"functions": "count", "property": "Video_Seen"},
-                "conditions": [],
                 "filters": [],
                 "reference_id": "Video_Seen",
                 "variable": "A",
@@ -137,7 +134,6 @@ def test_update_metric(
             },
             {
                 "aggregations": {"functions": "count", "property": "Video_Open"},
-                "conditions": [],
                 "filters": [],
                 "reference_id": "Video_Open",
                 "variable": "B",

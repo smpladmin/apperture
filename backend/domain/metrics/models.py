@@ -61,7 +61,6 @@ class SegmentsAndEvents(BaseModel):
     aggregations: SegmentsAndEventsAggregations
     reference_id: str
     filters: List[WhereSegmentFilter]
-    conditions: List[str]
 
 
 class Metric(Document):
