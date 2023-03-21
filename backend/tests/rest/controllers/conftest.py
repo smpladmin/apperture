@@ -1384,9 +1384,11 @@ def compute_metric_request():
                 "variant": "event",
                 "filters": [
                     {
-                        "operator": "equals",
+                        "operator": "is",
                         "operand": "properties.$city",
                         "values": ["Bengaluru"],
+                        "condition": "where",
+                        "datatype": "String",
                     }
                 ],
                 "conditions": ["where"],

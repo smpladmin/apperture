@@ -140,10 +140,10 @@ class Funnels(EventsBase):
                 self.table.event_name == Parameter(f"%(event{i})s"),
             ]
             if step.filters:
-                for filter in step.filters:
-                    criterion.append(
-                        Field(f"properties.{filter.operand}").isin(filter.values)
-                    )
+                filter_criterion = self.get_criterion_for_where_filters(
+                    filters=step.filters
+                )
+                criterion.extend(filter_criterion)
             parameters[f"event{i}"] = step.event
 
             sub_query = (

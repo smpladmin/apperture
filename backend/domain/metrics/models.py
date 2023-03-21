@@ -4,6 +4,7 @@ from typing import Optional, Union, List
 from beanie import PydanticObjectId
 from pydantic import BaseModel
 from domain.common.date_models import DateFilter
+from domain.segments.models import WhereSegmentFilter
 from repositories import Document
 from pypika import analytics as an, functions as fn, CustomFunction
 
@@ -11,18 +12,6 @@ from pypika import analytics as an, functions as fn, CustomFunction
 class SegmentsAndEventsType(str, Enum):
     EVENT = "event"
     SEGMENT = "segment"
-
-
-class SegmentsAndEventsFilterOperator(str, Enum):
-    IN = "in"
-    NOT_IN = "not_in"
-    EQUALS = "equals"
-    NOT_EQUAL = "not_equal"
-    GREATER = "greater"
-    GREATER_OR_EQUAL = "greater_or_equal"
-    LESS = "less"
-    LESS_OR_EQUAL = "less_or_equal"
-    BETWEEN = "between"
 
 
 class MetricBasicAggregation(str, Enum):
@@ -66,18 +55,12 @@ class SegmentsAndEventsAggregations(BaseModel):
     property: str
 
 
-class SegmentsAndEventsFilter(BaseModel):
-    operator: SegmentsAndEventsFilterOperator
-    operand: str
-    values: List[str]
-
-
 class SegmentsAndEvents(BaseModel):
     variable: str
     variant: SegmentsAndEventsType
     aggregations: SegmentsAndEventsAggregations
     reference_id: str
-    filters: List[SegmentsAndEventsFilter]
+    filters: List[WhereSegmentFilter]
     conditions: List[str]
 
 

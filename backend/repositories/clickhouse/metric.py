@@ -15,7 +15,6 @@ from domain.metrics.models import (
     SegmentsAndEvents,
     MetricBasicAggregation,
     MetricAggregatePropertiesAggregation,
-    SegmentsAndEventsFilterOperator,
 )
 from repositories.clickhouse.base import EventsBase
 from repositories.clickhouse.parser.formula_parser import FormulaParser
@@ -75,13 +74,10 @@ class Metrics(EventsBase):
             subquery_criterion = [
                 self.table.event_name == Parameter(f"%(reference_id_{i})s")
             ]
-            subquery_criterion.extend(
-                [
-                    Field(f"properties.{filter.operand}").isin(filter.values)
-                    for filter in aggregate.filters
-                    if filter.operator == SegmentsAndEventsFilterOperator.EQUALS
-                ]
+            filter_criterion = self.get_criterion_for_where_filters(
+                filters=aggregate.filters
             )
+            subquery_criterion.extend(filter_criterion)
 
             params[f"reference_id_{i}"] = aggregate.reference_id
 

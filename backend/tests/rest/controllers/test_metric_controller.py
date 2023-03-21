@@ -1,15 +1,14 @@
 import json
 from unittest.mock import ANY
 
+from domain.common.filter_models import FilterOperatorsString, FilterDataType
 from domain.metrics.models import (
     SegmentsAndEvents,
     SegmentsAndEventsType,
     SegmentsAndEventsAggregations,
-    SegmentsAndEventsFilter,
-    SegmentsAndEventsFilterOperator,
     MetricBasicAggregation,
 )
-from tests.rest.controllers.conftest import metric_service
+from domain.segments.models import WhereSegmentFilter, SegmentFilterConditions
 
 
 def test_compute_metric(
@@ -36,10 +35,14 @@ def test_compute_metric(
                     ),
                     reference_id="Video_Seen",
                     filters=[
-                        SegmentsAndEventsFilter(
-                            operator=SegmentsAndEventsFilterOperator.EQUALS,
+                        WhereSegmentFilter(
+                            operator=FilterOperatorsString.IS,
                             operand="properties.$city",
                             values=["Bengaluru"],
+                            all=False,
+                            type=SegmentFilterConditions.WHERE,
+                            condition=SegmentFilterConditions.WHERE,
+                            datatype=FilterDataType.STRING,
                         )
                     ],
                     conditions=["where"],
