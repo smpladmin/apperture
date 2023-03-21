@@ -3,7 +3,10 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import { Provider } from '@lib/domain/provider';
 import { SegmentWithUser } from '@lib/domain/segment';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
-import { getSavedSegmentsForDatasourceId } from '@lib/services/segmentService';
+import {
+  deleteSegment,
+  getSavedSegmentsForDatasourceId,
+} from '@lib/services/segmentService';
 import { Row } from '@tanstack/react-table';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -12,11 +15,13 @@ import WatchlistTable from '../Table';
 const SavedSegments = ({ provider }: { provider: Provider }) => {
   const [segments, setSegments] = useState<SavedItems[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [renderSegment, setRenderSegment] = useState(true);
   const router = useRouter();
 
   const { dsId } = router.query;
 
   useEffect(() => {
+    if (!renderSegment) return;
     const getSegments = async () => {
       let savedSegments =
         (await getSavedSegmentsForDatasourceId(dsId as string)) || [];
@@ -29,7 +34,8 @@ const SavedSegments = ({ provider }: { provider: Provider }) => {
 
     setIsLoading(true);
     getSegments();
-  }, []);
+    setRenderSegment(false);
+  }, [renderSegment]);
 
   const onRowClick = (row: Row<SavedItems>) => {
     const { _id, datasourceId } = row?.original?.details;
@@ -44,6 +50,11 @@ const SavedSegments = ({ provider }: { provider: Provider }) => {
       pathname: '/analytics/segment/create/[dsId]',
       query: { dsId },
     });
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteSegment(id);
+    setRenderSegment(true);
   };
 
   return (
@@ -83,7 +94,11 @@ const SavedSegments = ({ provider }: { provider: Provider }) => {
             <LoadingSpinner />
           </Flex>
         ) : (
-          <WatchlistTable savedItemsData={segments} onRowClick={onRowClick} />
+          <WatchlistTable
+            savedItemsData={segments}
+            onRowClick={onRowClick}
+            handleDelete={handleDelete}
+          />
         )}
       </Box>
     </Box>

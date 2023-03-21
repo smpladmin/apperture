@@ -62,6 +62,7 @@ class TestSegmentService:
             app_id=PydanticObjectId(self.ds_id),
             groups=self.groups,
             columns=self.columns,
+            enabled=True,
         )
         self.segment_id = "63771fc960527aba93543998"
         self.update_mock = AsyncMock()
@@ -75,6 +76,7 @@ class TestSegmentService:
         )
         Segment.find_one = MagicMock(return_value=FindOneMock(update=self.update_mock))
         Segment.id = MagicMock(return_value=PydanticObjectId(self.segment_id))
+        Segment.enabled = True
 
     @pytest.mark.asyncio
     async def test_compute_segment(self):
@@ -173,6 +175,7 @@ class TestSegmentService:
             "revision_id": ANY,
             "updated_at": None,
             "user_id": PydanticObjectId("63771fc960527aba9354399c"),
+            "enabled": True,
         }
 
     @pytest.mark.asyncio
@@ -214,6 +217,7 @@ class TestSegmentService:
             "revision_id": ANY,
             "updated_at": ANY,
             "user_id": PydanticObjectId("63771fc960527aba9354399c"),
+            "enabled": True,
         }
 
     @pytest.mark.asyncio
@@ -231,9 +235,7 @@ class TestSegmentService:
         assert await self.service.get_segments_for_app(app_id=self.ds_id) == [
             self.segment
         ]
-        Segment.find.assert_called_once_with(
-            False,
-        )
+        Segment.find.assert_called_once_with(False, True)
 
     @pytest.mark.asyncio
     async def test_update_segment(self):
@@ -276,6 +278,7 @@ class TestSegmentService:
                     "revision_id": ANY,
                     "updated_at": ANY,
                     "user_id": PydanticObjectId("63771fc960527aba9354399c"),
+                    "enabled": True,
                 }
             }
         )
@@ -286,3 +289,9 @@ class TestSegmentService:
             datasource_id="6384a65e0a397236d9de236a"
         )
         Segment.find.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_delete_segment(self):
+        await self.service.delete_segment(segment_id="6384a65e0a397236d9de236a")
+        Segment.find_one.assert_called_once()
+        self.update_mock.assert_called_once_with({"$set": {"enabled": False}})

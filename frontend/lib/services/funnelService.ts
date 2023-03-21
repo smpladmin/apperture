@@ -4,6 +4,7 @@ import {
   ApperturePrivateGet,
   ApperturePost,
   ApperturePut,
+  AppertureDelete,
 } from './util';
 import { ConversionStatus, FunnelStep } from '@lib/domain/funnel';
 import { replaceEmptyStringPlaceholder } from '@components/Funnel/util';
@@ -123,4 +124,9 @@ export const getUserProperty = async (
     },
   });
   return response.data;
+};
+
+export const deleteFunnel = async (id: string) => {
+  const res = await AppertureDelete(`/funnels/${id}`);
+  return res;
 };

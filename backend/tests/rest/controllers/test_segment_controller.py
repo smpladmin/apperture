@@ -132,6 +132,7 @@ def test_save_segment(
         "revision_id": ANY,
         "updated_at": None,
         "user_id": PydanticObjectId("63771fc960527aba9354399c"),
+        "enabled": True,
     }
 
 
@@ -231,6 +232,7 @@ def test_update_segment(
         "revision_id": ANY,
         "updated_at": None,
         "user_id": PydanticObjectId("63771fc960527aba9354399c"),
+        "enabled": True,
     }
     assert (
         "635ba034807ab86d8a2d8"
@@ -244,4 +246,18 @@ def test_get_segments(client_init, segment_service, saved_segment_with_user):
     assert response.json() == saved_segment_with_user
     segment_service.get_segments_for_datasource_id.assert_called_once_with(
         **{"datasource_id": "63761779818ec577b69c21e6"}
+    )
+
+
+def test_delete_segment(
+    client_init,
+    segment_service,
+):
+    response = client_init.delete("/segments/6384a65e0a397236d9de236a")
+    assert response.status_code == 200
+
+    segment_service.delete_segment.assert_called_once_with(
+        **{
+            "segment_id": "6384a65e0a397236d9de236a",
+        }
     )

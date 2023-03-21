@@ -90,6 +90,7 @@ class Metric(Document):
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
     date_filter: Optional[DateFilter]
+    enabled: bool = True
 
     class Settings:
         name = "metric"

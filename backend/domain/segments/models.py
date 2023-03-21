@@ -142,6 +142,7 @@ class Segment(Document):
     description: str
     groups: List[SegmentGroup]
     columns: List[str]
+    enabled: bool = True
 
     class Settings:
         name = "segments"
