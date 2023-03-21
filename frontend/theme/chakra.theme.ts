@@ -6,8 +6,8 @@ export const theme = extendTheme({
   space: { ...spacing },
   sizes: { ...spacing },
   fonts: {
-    body: `'Work Sans', sans-serif`,
-    heading: `'Work Sans', sans-serif`,
+    body: `'Inter', sans-serif`,
+    heading: `'Inter', sans-serif`,
   },
   fontSizes: {
     ...fontSizes,

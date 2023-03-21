@@ -9,14 +9,10 @@ class MyDocument extends Document {
           <link rel="icon" href="/favicon/favicon.png" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link
-            rel="preconnect"
-            href="https://fonts.gstatic.com"
-            crossOrigin="true"
-          />
-          <link
-            href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@100;200;300;400;500;600;700&display=swap"
+            href="https://fonts.googleapis.com/css?family=Inter:wght@100;200;300;400;500;600;700&display=swap"
             rel="stylesheet"
           />
+
           <Script strategy="beforeInteractive" src="/__ENV.js" />
         </Head>
         <body>
