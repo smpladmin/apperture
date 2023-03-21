@@ -77,7 +77,7 @@ const ClevertapIntegration = ({
           onClick={() => handleClose()}
         />
         <Box height={{ base: 12, md: 18 }} width={{ base: 12, md: 18 }} mb={2}>
-          <Image src={clevertapLogo} alt="clevertap" layout="responsive"  />
+          <Image src={clevertapLogo} alt="clevertap" layout="responsive" />
         </Box>
         <Text
           textColor={'grey.200'}
@@ -118,7 +118,7 @@ const ClevertapIntegration = ({
               rounded={'0.25rem'}
               fontSize={'base'}
               lineHeight={'base'}
-              textColor={'black.DEFAULT'}
+              textColor={'black.400'}
               placeholder="Enter 7 Digit Project ID"
               py={4}
               px={3.5}
@@ -153,7 +153,7 @@ const ClevertapIntegration = ({
               rounded={'0.25rem'}
               fontSize={'base'}
               lineHeight={'base'}
-              textColor={'black.DEFAULT'}
+              textColor={'black.400'}
               placeholder="Enter 6 Digit API Key"
               py={4}
               px={3.5}
@@ -188,7 +188,7 @@ const ClevertapIntegration = ({
               rounded={'0.25rem'}
               fontSize={'base'}
               lineHeight={'base'}
-              textColor={'black.DEFAULT'}
+              textColor={'black.400'}
               placeholder="Enter API Secret"
               py={4}
               px={3.5}

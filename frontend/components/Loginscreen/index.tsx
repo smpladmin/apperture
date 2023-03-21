@@ -19,7 +19,7 @@ const Loginscreen = () => {
     <Box
       p={8}
       pt={{ base: 33, md: 40 }}
-      bg="black.DEFAULT"
+      bg="black.400"
       textColor="white.DEFAULT"
       height={'100%'}
       overflowY={'auto'}

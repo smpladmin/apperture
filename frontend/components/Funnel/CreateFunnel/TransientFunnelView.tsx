@@ -63,13 +63,7 @@ const TransientFunnelView = ({
   };
 
   return (
-    <Flex
-      direction={'column'}
-      gap={'8'}
-      px={{ base: '0', md: '15' }}
-      py={{ base: '8', md: '8' }}
-      h={'full'}
-    >
+    <Flex direction={'column'} gap={'8'} h={'full'}>
       <DateFilterComponent
         dateFilter={dateFilter}
         setDateFilter={setDateFilter}

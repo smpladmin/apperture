@@ -9,8 +9,7 @@ const ActionPanel = ({ children }: { children: ReactNode }) => {
       minWidth={'82'}
       bg={BLACK_RUSSIAN}
       overflowY={{ md: 'auto' }}
-      py={'6'}
-      px={{ base: '4', md: '6' }}
+      pt={'5'}
     >
       {children}
     </Box>

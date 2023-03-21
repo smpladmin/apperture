@@ -25,7 +25,8 @@ const LOGAN = '#9999B6';
 
 const colors = {
   black: {
-    DEFAULT: '#07070d',
+    // Aman to replace black.400 with black.400 except in events header
+    DEFAULT: '#000000',
     0: 'rgba(14,14,26,0)',
     10: 'rgba(255, 255, 255, 0.04)',
     20: 'rgba(255, 255, 255, 0.05)',
@@ -35,6 +36,7 @@ const colors = {
     150: '#0E0E19',
     200: BLACK_200,
     300: BLACK_RUSSIAN,
+    400: '#07070d',
   },
   white: {
     DEFAULT: WHITE_DEFAULT,
@@ -42,6 +44,7 @@ const colors = {
     100: WHITE_100,
     200: WHITE_200,
     300: WHITE_300,
+    400: '#f5f5f5',
   },
   grey: {
     DEFAULT: '#d9d9da',
@@ -51,6 +54,7 @@ const colors = {
     100: GRAY_100,
     200: ARROW_GRAY,
     300: '#3E3E47',
+    400: '#DFDFDF',
   },
   yellow: { 500: '#fac213' },
   green: GREEN,

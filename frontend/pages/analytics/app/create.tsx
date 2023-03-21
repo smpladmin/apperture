@@ -86,7 +86,7 @@ const Create = () => {
             fontWeight={{ base: '400', md: '500' }}
             lineHeight={'base'}
             height={{ base: '12', md: '15' }}
-            textColor={'black.DEFAULT'}
+            textColor={'black.400'}
             placeholder="Ex- Food Web App"
             py={4}
             px={3.5}
