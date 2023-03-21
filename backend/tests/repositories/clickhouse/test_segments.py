@@ -3,20 +3,22 @@ from unittest.mock import MagicMock, call
 
 from pypika import Field, CustomFunction
 
+from domain.common.filter_models import (
+    FilterOperatorsString,
+    FilterDataType,
+    FilterOperatorsNumber,
+    LogicalOperators,
+    FilterOperatorsBool,
+)
 from domain.segments.models import (
     SegmentGroup,
     WhoSegmentFilter,
     WhereSegmentFilter,
-    SegmentFilterOperatorsNumber,
-    SegmentFilterOperatorsBool,
-    SegmentFilterOperatorsString,
     SegmentFilterConditions,
-    SegmentGroupConditions,
     SegmentFixedDateFilter,
     SegmentLastDateFilter,
     SegmentSinceDateFilter,
     SegmentDateFilterType,
-    SegmentDataType,
 )
 from repositories.clickhouse.segments import Segments
 
@@ -31,66 +33,66 @@ class TestSegmentsRepository:
         self.datasource_id = "test-id"
         self.filters = [
             WhereSegmentFilter(
-                operator=SegmentFilterOperatorsString.IS,
+                operator=FilterOperatorsString.IS,
                 operand="prop1",
                 values=["va1", "val2"],
                 all=False,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.WHERE,
-                datatype=SegmentDataType.STRING,
+                datatype=FilterDataType.STRING,
             ),
             WhereSegmentFilter(
-                operator=SegmentFilterOperatorsString.IS,
+                operator=FilterOperatorsString.IS,
                 operand="prop2",
                 values=["va3", "val4"],
                 all=False,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.AND,
-                datatype=SegmentDataType.STRING,
+                datatype=FilterDataType.STRING,
             ),
         ]
         self.where_select_all_filters = [
             WhereSegmentFilter(
-                operator=SegmentFilterOperatorsString.IS,
+                operator=FilterOperatorsString.IS,
                 operand="prop1",
                 values=["va1", "val2"],
                 all=False,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.WHERE,
-                datatype=SegmentDataType.STRING,
+                datatype=FilterDataType.STRING,
             ),
             WhereSegmentFilter(
-                operator=SegmentFilterOperatorsString.IS,
+                operator=FilterOperatorsString.IS,
                 operand="prop2",
                 values=["va3", "val4"],
                 all=True,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.AND,
-                datatype=SegmentDataType.STRING,
+                datatype=FilterDataType.STRING,
             ),
         ]
         self.composite_filters = [
             WhereSegmentFilter(
-                operator=SegmentFilterOperatorsString.IS,
+                operator=FilterOperatorsString.IS,
                 operand="prop1",
                 values=["va1", "val2"],
                 all=False,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.WHERE,
-                datatype=SegmentDataType.STRING,
+                datatype=FilterDataType.STRING,
             ),
             WhereSegmentFilter(
-                operator=SegmentFilterOperatorsString.IS,
+                operator=FilterOperatorsString.IS,
                 operand="prop2",
                 values=["va3", "val4"],
                 all=False,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.AND,
-                datatype=SegmentDataType.STRING,
+                datatype=FilterDataType.STRING,
             ),
             WhoSegmentFilter(
                 operand="Topic_Click",
-                operator=SegmentFilterOperatorsNumber.EQ,
+                operator=FilterOperatorsNumber.EQ,
                 values=["2"],
                 triggered=True,
                 aggregation="total",
@@ -100,11 +102,11 @@ class TestSegmentsRepository:
                     start_date="2022-01-01", end_date="2023-01-01"
                 ),
                 date_filter_type=SegmentDateFilterType.FIXED,
-                datatype=SegmentDataType.NUMBER,
+                datatype=FilterDataType.NUMBER,
             ),
             WhoSegmentFilter(
                 operand="Video_Open",
-                operator=SegmentFilterOperatorsNumber.EQ,
+                operator=FilterOperatorsNumber.EQ,
                 values=["3"],
                 triggered=False,
                 aggregation="total",
@@ -114,13 +116,13 @@ class TestSegmentsRepository:
                     start_date="2022-01-01", end_date="2023-01-01"
                 ),
                 date_filter_type=SegmentDateFilterType.FIXED,
-                datatype=SegmentDataType.NUMBER,
+                datatype=FilterDataType.NUMBER,
             ),
         ]
         self.who_filters = [
             WhoSegmentFilter(
                 operand="Topic_Click",
-                operator=SegmentFilterOperatorsNumber.EQ,
+                operator=FilterOperatorsNumber.EQ,
                 values=["2"],
                 triggered=True,
                 aggregation="total",
@@ -130,11 +132,11 @@ class TestSegmentsRepository:
                     start_date="2022-01-01", end_date="2023-01-01"
                 ),
                 date_filter_type=SegmentDateFilterType.FIXED,
-                datatype=SegmentDataType.NUMBER,
+                datatype=FilterDataType.NUMBER,
             ),
             WhoSegmentFilter(
                 operand="Video_Open",
-                operator=SegmentFilterOperatorsNumber.EQ,
+                operator=FilterOperatorsNumber.EQ,
                 values=["3"],
                 triggered=False,
                 aggregation="total",
@@ -144,16 +146,14 @@ class TestSegmentsRepository:
                     start_date="2022-01-01", end_date="2023-01-01"
                 ),
                 date_filter_type=SegmentDateFilterType.FIXED,
-                datatype=SegmentDataType.NUMBER,
+                datatype=FilterDataType.NUMBER,
             ),
         ]
         self.groups = [
-            SegmentGroup(filters=self.filters, condition=SegmentGroupConditions.AND),
+            SegmentGroup(filters=self.filters, condition=LogicalOperators.AND),
+            SegmentGroup(filters=self.who_filters, condition=LogicalOperators.AND),
             SegmentGroup(
-                filters=self.who_filters, condition=SegmentGroupConditions.AND
-            ),
-            SegmentGroup(
-                filters=self.composite_filters, condition=SegmentGroupConditions.AND
+                filters=self.composite_filters, condition=LogicalOperators.AND
             ),
         ]
         self.columns = ["col1", "col2", "col3"]
@@ -357,7 +357,7 @@ class TestSegmentsRepository:
             groups=[
                 SegmentGroup(
                     filters=self.where_select_all_filters,
-                    condition=SegmentGroupConditions.AND,
+                    condition=LogicalOperators.AND,
                 )
             ]
         ).get_sql() == (
@@ -418,22 +418,22 @@ class TestSegmentsRepository:
         [
             (
                 5,
-                SegmentFilterOperatorsNumber.GT,
+                FilterOperatorsNumber.GT,
                 'toFloat64OrDefault("properties.prop1")>5',
             ),
             (
                 10.0,
-                SegmentFilterOperatorsNumber.LT,
+                FilterOperatorsNumber.LT,
                 'toFloat64OrDefault("properties.prop1")<10.0',
             ),
             (
                 99,
-                SegmentFilterOperatorsNumber.GE,
+                FilterOperatorsNumber.GE,
                 'toFloat64OrDefault("properties.prop1")>=99',
             ),
             (
                 999,
-                SegmentFilterOperatorsNumber.LE,
+                FilterOperatorsNumber.LE,
                 'toFloat64OrDefault("properties.prop1")<=999',
             ),
         ],
@@ -484,8 +484,8 @@ class TestSegmentsRepository:
     @pytest.mark.parametrize(
         "operator, criteria",
         [
-            (SegmentFilterOperatorsBool.T, 'toBool("properties.prop1")=true'),
-            (SegmentFilterOperatorsBool.F, 'toBool("properties.prop1")=false'),
+            (FilterOperatorsBool.T, 'toBool("properties.prop1")=true'),
+            (FilterOperatorsBool.F, 'toBool("properties.prop1")=false'),
         ],
     )
     def test_build_criterion_for_bool_filter(self, operator, criteria):
@@ -496,7 +496,7 @@ class TestSegmentsRepository:
             all=False,
             type=SegmentFilterConditions.WHERE,
             condition=SegmentFilterConditions.WHERE,
-            datatype=SegmentDataType.BOOL,
+            datatype=FilterDataType.BOOL,
         )
         assert (
             self.repo.build_criterion_for_bool_filter(filter=bool_filter)[0].get_sql()
@@ -506,13 +506,13 @@ class TestSegmentsRepository:
 
     def test_build_criterion_for_number_filter(self):
         num_filter = WhereSegmentFilter(
-            operator=SegmentFilterOperatorsNumber.NE,
+            operator=FilterOperatorsNumber.NE,
             operand="prop1",
             values=[10],
             all=False,
             type=SegmentFilterConditions.WHERE,
             condition=SegmentFilterConditions.WHERE,
-            datatype=SegmentDataType.NUMBER,
+            datatype=FilterDataType.NUMBER,
         )
         assert (
             self.repo.build_criterion_for_number_filter(filter=num_filter)[0].get_sql()

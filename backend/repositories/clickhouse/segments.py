@@ -1,20 +1,21 @@
 import copy
 from typing import List, Union
 
-
+from domain.common.filter_models import (
+    FilterOperatorsNumber,
+    FilterOperatorsBool,
+    FilterOperatorsString,
+    FilterDataType,
+    LogicalOperators,
+)
 from repositories.clickhouse.base import EventsBase
 from domain.segments.models import (
     SegmentFilterConditions,
     SegmentGroup,
-    SegmentFilterOperatorsNumber,
-    SegmentFilterOperatorsString,
-    SegmentFilterOperatorsBool,
-    SegmentGroupConditions,
     SegmentFixedDateFilter,
     SegmentLastDateFilter,
     SegmentSinceDateFilter,
     SegmentDateFilterType,
-    SegmentDataType,
     WhereSegmentFilter,
 )
 from pypika import (
@@ -52,7 +53,7 @@ class Segments(EventsBase):
         self,
         operand: terms.Function,
         value: float,
-        operator: SegmentFilterOperatorsNumber,
+        operator: FilterOperatorsNumber,
     ):
         return operator.get_pyoperator()(operand, value)
 
@@ -75,22 +76,22 @@ class Segments(EventsBase):
         operand = self.convert_to_float_func(Field(f"properties.{filter.operand}"))
 
         if filter.operator in [
-            SegmentFilterOperatorsNumber.EQ,
-            SegmentFilterOperatorsNumber.NE,
+            FilterOperatorsNumber.EQ,
+            FilterOperatorsNumber.NE,
         ]:
             criterion.append(
                 self.num_equality_criteria(
                     operand=operand,
                     values=filter.values,
-                    inverse=(filter.operator == SegmentFilterOperatorsNumber.NE),
+                    inverse=(filter.operator == FilterOperatorsNumber.NE),
                 )
             )
 
         elif filter.operator in [
-            SegmentFilterOperatorsNumber.GT,
-            SegmentFilterOperatorsNumber.LT,
-            SegmentFilterOperatorsNumber.GE,
-            SegmentFilterOperatorsNumber.LE,
+            FilterOperatorsNumber.GT,
+            FilterOperatorsNumber.LT,
+            FilterOperatorsNumber.GE,
+            FilterOperatorsNumber.LE,
         ]:
             criterion.append(
                 self.num_comparative_criteria(
@@ -98,16 +99,14 @@ class Segments(EventsBase):
                 )
             )
         elif filter.operator in [
-            SegmentFilterOperatorsNumber.BETWEEN,
-            SegmentFilterOperatorsNumber.NOT_BETWEEN,
+            FilterOperatorsNumber.BETWEEN,
+            FilterOperatorsNumber.NOT_BETWEEN,
         ]:
             criterion.extend(
                 self.num_between_criteria(
                     operand=operand,
                     values=filter.values[:2],
-                    inverse=(
-                        filter.operator == SegmentFilterOperatorsNumber.NOT_BETWEEN
-                    ),
+                    inverse=(filter.operator == FilterOperatorsNumber.NOT_BETWEEN),
                 )
             )
 
@@ -116,7 +115,7 @@ class Segments(EventsBase):
     def build_criterion_for_bool_filter(self, filter: WhereSegmentFilter):
         criterion = []
         operand = self.convert_to_bool_func(Field(f"properties.{filter.operand}"))
-        if filter.operator == SegmentFilterOperatorsBool.T:
+        if filter.operator == FilterOperatorsBool.T:
             criterion.append(operand == True)
         else:
             criterion.append(operand == False)
@@ -125,10 +124,10 @@ class Segments(EventsBase):
     def build_criterion_for_string_filter(self, filter: WhereSegmentFilter):
         criterion = []
         operand = Field(f"properties.{filter.operand}")
-        if filter.operator == SegmentFilterOperatorsString.IS:
+        if filter.operator == FilterOperatorsString.IS:
             if not filter.all:
                 criterion.append(operand.isin(filter.values))
-        elif filter.operator == SegmentFilterOperatorsString.IS_NOT:
+        elif filter.operator == FilterOperatorsString.IS_NOT:
             criterion.append(operand.notin(filter.values))
         return criterion
 
@@ -144,9 +143,9 @@ class Segments(EventsBase):
         )
 
         for i, filter in enumerate(group.filters[:idx]):
-            if filter.datatype == SegmentDataType.NUMBER:
+            if filter.datatype == FilterDataType.NUMBER:
                 criterion.extend(self.build_criterion_for_number_filter(filter=filter))
-            elif filter.datatype == SegmentDataType.BOOL:
+            elif filter.datatype == FilterDataType.BOOL:
                 criterion.extend(self.build_criterion_for_bool_filter(filter=filter))
             else:
                 criterion.extend(self.build_criterion_for_string_filter(filter=filter))
@@ -276,7 +275,7 @@ class Segments(EventsBase):
 
                 segment_users = (
                     segment_users.intersect(group_users)
-                    if group.condition == SegmentGroupConditions.AND
+                    if group.condition == LogicalOperators.AND
                     else segment_users.union_all(group_users)
                 )
 
