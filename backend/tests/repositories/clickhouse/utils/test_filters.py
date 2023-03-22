@@ -192,3 +192,32 @@ class TestFiltersUtil:
             ].get_sql()
             == "properties.prop1 IN ('va1','val2')"
         )
+
+    def test_get_criterion_for_where_filters(self):
+        filters = [
+            WhereSegmentFilter(
+                operator=FilterOperatorsString.IS,
+                operand="prop1",
+                values=["va1", "val2"],
+                all=False,
+                type=SegmentFilterConditions.WHERE,
+                condition=SegmentFilterConditions.WHERE,
+                datatype=FilterDataType.STRING,
+            ),
+            WhereSegmentFilter(
+                operator=FilterOperatorsNumber.BETWEEN,
+                operand="prop2",
+                values=["va3", "val4"],
+                all=False,
+                type=SegmentFilterConditions.WHERE,
+                condition=SegmentFilterConditions.AND,
+                datatype=FilterDataType.NUMBER,
+            ),
+        ]
+        criterion = self.repo.get_criterion_for_where_filters(filters=filters)
+        criterion = [criteria.get_sql() for criteria in criterion]
+        assert criterion == [
+            "properties.prop1 IN ('va1','val2')",
+            "toFloat64OrDefault(\"properties.prop2\")>='va3'",
+            "toFloat64OrDefault(\"properties.prop2\")<='val4'",
+        ]
