@@ -14,7 +14,11 @@ import {
   Box,
 } from '@chakra-ui/react';
 import UserTableView from './UserListTableView';
-import { FunnelStep, UserProperty } from '@lib/domain/funnel';
+import {
+  ConversionWindowObj,
+  FunnelStep,
+  UserProperty,
+} from '@lib/domain/funnel';
 import { getUserProperty } from '@lib/services/funnelService';
 import { DateFilterObj } from '@lib/domain/common';
 
@@ -25,6 +29,7 @@ type UserConversionDrawerProps = {
   event: string;
   selectedFunnelSteps: FunnelStep[];
   dateFilter: DateFilterObj;
+  conversionWindow: ConversionWindowObj;
 };
 
 export enum TableState {
@@ -39,6 +44,7 @@ const UserConversionDrawer = ({
   event,
   selectedFunnelSteps,
   dateFilter,
+  conversionWindow,
 }: UserConversionDrawerProps) => {
   const [tableState, setTableState] = useState<TableState>(TableState.PROPERTY);
   const [selectedUser, setSelectedUser] = useState<null | string>(null);
@@ -129,6 +135,7 @@ const UserConversionDrawer = ({
               tableState={tableState}
               setTableState={setTableState}
               dateFilter={dateFilter}
+              conversionWindow={conversionWindow}
             />
           </DrawerBody>
 

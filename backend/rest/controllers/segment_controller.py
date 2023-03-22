@@ -105,3 +105,11 @@ async def get_segments(
     for segment in segments:
         segment.user = AppertureUserResponse.from_orm(user)
     return segments
+
+
+@router.delete("/segments/{segment_id}")
+async def delete_metrics(
+    segment_id: str,
+    segment_service: SegmentService = Depends(),
+):
+    await segment_service.delete_segment(segment_id=segment_id)

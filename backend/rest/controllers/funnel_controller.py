@@ -46,6 +46,7 @@ async def create_funnel(
         dto.steps,
         dto.randomSequence,
         dto.dateFilter,
+        dto.conversionWindow,
     )
 
     await funnel_service.add_funnel(funnel)
@@ -61,6 +62,7 @@ async def compute_transient_funnel(
         ds_id=dto.datasourceId,
         steps=dto.steps,
         date_filter=dto.dateFilter,
+        conversion_window=dto.conversionWindow,
     )
 
 
@@ -90,6 +92,7 @@ async def update_funnel(
         dto.steps,
         dto.randomSequence,
         dto.dateFilter,
+        dto.conversionWindow,
     )
     await funnel_service.update_funnel(funnel_id=id, new_funnel=new_funnel)
     notification = await notification_service.get_notification_by_reference(
@@ -109,7 +112,10 @@ async def get_funnel_trends(
 ):
     funnel = await funnel_service.get_funnel(id)
     return await funnel_service.get_funnel_trends(
-        datasource_id=str(funnel.datasource_id), steps=funnel.steps
+        datasource_id=str(funnel.datasource_id),
+        steps=funnel.steps,
+        date_filter=funnel.date_filter,
+        conversion_window=funnel.conversion_window,
     )
 
 
@@ -122,6 +128,7 @@ async def get_transient_funnel_trends(
         datasource_id=dto.datasourceId,
         steps=dto.steps,
         date_filter=dto.dateFilter,
+        conversion_window=dto.conversionWindow,
     )
 
 
@@ -137,6 +144,7 @@ async def get_transient_funnel_analytics(
         steps=dto.steps,
         status=dto.status,
         date_filter=dto.dateFilter,
+        conversion_window=dto.conversionWindow,
     )
 
 
@@ -157,3 +165,11 @@ async def get_funnels(
     for funnel in funnels:
         funnel.user = AppertureUserResponse.from_orm(user)
     return funnels
+
+
+@router.delete("/funnels/{funnel_id}")
+async def delete_funnel(
+    funnel_id: str,
+    funnel_service: FunnelsService = Depends(),
+):
+    await funnel_service.delete_funnel(funnel_id=funnel_id)

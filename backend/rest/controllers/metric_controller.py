@@ -139,3 +139,11 @@ async def validate_metric_formula(
     return metric_service.validate_formula(
         formula=dto.formula, variable_list=dto.variableList
     )
+
+
+@router.delete("/metrics/{metric_id}")
+async def delete_metrics(
+    metric_id: str,
+    metric_service: MetricService = Depends(),
+):
+    await metric_service.delete_metric(metric_id=metric_id)

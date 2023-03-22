@@ -5,7 +5,12 @@ from collections import namedtuple
 from beanie import PydanticObjectId
 from unittest.mock import MagicMock, AsyncMock
 
-from domain.common.date_models import DateFilter, LastDateFilter, DateFilterType
+from domain.common.date_models import (
+    DateFilter,
+    LastDateFilter,
+    DateFilterType,
+    FixedDateFilter,
+)
 from tests.utils import filter_response
 from domain.datasources.models import DataSource
 from domain.funnels.service import FunnelsService
@@ -17,9 +22,10 @@ from domain.funnels.models import (
     ComputedFunnel,
     FunnelTrendsData,
     FunnelConversionData,
-    FunnelConversion,
     FunnelEventUserData,
     ConversionStatus,
+    ConversionWindow,
+    ConversionWindowType,
 )
 
 
@@ -62,6 +68,10 @@ class TestFunnelService:
             random_sequence=False,
             date_filter=DateFilter(
                 filter=LastDateFilter(days=7), type=DateFilterType.LAST
+            ),
+            enabled=True,
+            conversion_window=ConversionWindow(
+                type=ConversionWindowType.MINUTES, value=10
             ),
         )
         self.computed_steps = [
@@ -110,18 +120,22 @@ class TestFunnelService:
         Funnel.find_one = MagicMock(return_value=FindOneMock(update=self.update_mock))
         Funnel.id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.funnels.compute_date_filter.return_value = ("2022-12-01", "2022-12-31")
+        Funnel.enabled = True
 
     def test_build_funnel(self):
 
         funnel = self.service.build_funnel(
-            datasourceId=self.ds_id,
-            appId=self.app_id,
-            userId=self.user_id,
+            datasource_id=PydanticObjectId(self.ds_id),
+            app_id=PydanticObjectId(self.app_id),
+            user_id=self.user_id,
             name=self.name,
             steps=self.funnel_steps,
-            randomSequence=False,
-            dateFilter=DateFilter(
+            random_sequence=False,
+            date_filter=DateFilter(
                 filter=LastDateFilter(days=7), type=DateFilterType.LAST
+            ),
+            conversion_window=ConversionWindow(
+                type=ConversionWindowType.MINUTES, value=10
             ),
         )
 
@@ -145,6 +159,9 @@ class TestFunnelService:
             ds_id=self.ds_id,
             steps=self.funnel_steps,
             date_filter=self.date_filter,
+            conversion_window=ConversionWindow(
+                type=ConversionWindowType.MINUTES, value=10
+            ),
         )
 
     @pytest.mark.asyncio
@@ -156,6 +173,10 @@ class TestFunnelService:
                 "$set": {
                     "datasource_id": PydanticObjectId("636a1c61d715ca6baae65611"),
                     "app_id": PydanticObjectId("636a1c61d715ca6baae65612"),
+                    "conversion_window": {
+                        "type": ConversionWindowType.MINUTES,
+                        "value": 10,
+                    },
                     "name": "name",
                     "random_sequence": False,
                     "revision_id": ANY,
@@ -171,6 +192,7 @@ class TestFunnelService:
                     "date_filter": DateFilter(
                         filter=LastDateFilter(days=7), type=DateFilterType.LAST
                     ),
+                    "enabled": True,
                 }
             },
         )
@@ -182,6 +204,9 @@ class TestFunnelService:
                 datasource_id=str(self.funnel.datasource_id),
                 steps=self.funnel.steps,
                 date_filter=self.date_filter,
+                conversion_window=ConversionWindow(
+                    type=ConversionWindowType.MINUTES, value=10
+                ),
             )
             == self.funnel_trends_data
         )
@@ -198,6 +223,7 @@ class TestFunnelService:
                 ],
                 "end_date": "2022-12-31",
                 "start_date": "2022-12-01",
+                "conversion_time": 600,
             }
         )
 
@@ -216,6 +242,9 @@ class TestFunnelService:
                 steps=self.funnel_steps,
                 status=ConversionStatus.CONVERTED,
                 date_filter=self.date_filter,
+                conversion_window=ConversionWindow(
+                    type=ConversionWindowType.MINUTES, value=10
+                ),
             )
             == self.funnel_conversion_data
         )
@@ -226,3 +255,40 @@ class TestFunnelService:
             datasource_id="6384a65e0a397236d9de236a"
         )
         Funnel.find.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_delete_funnel(self):
+        await self.service.delete_funnel(funnel_id="6384a65e0a397236d9de236a")
+        Funnel.find_one.assert_called_once()
+        self.update_mock.assert_called_once_with({"$set": {"enabled": False}})
+
+    @pytest.mark.parametrize(
+        "conversion_window, result",
+        [
+            (None, 30 * 24 * 60 * 60),
+            (ConversionWindow(type=ConversionWindowType.MINUTES, value=10), 10 * 60),
+        ],
+    )
+    def test_compute_conversion_time(self, conversion_window, result):
+        assert (
+            self.service.compute_conversion_time(conversion_window=conversion_window)
+            == result
+        )
+
+    @pytest.mark.parametrize(
+        "date_filter, result",
+        [
+            (None, (None, None)),
+            (
+                DateFilter(
+                    type=DateFilterType.FIXED,
+                    filter=FixedDateFilter(
+                        start_date="2022-01-01", end_date="2023-01-01"
+                    ),
+                ),
+                ("2022-12-01", "2022-12-31"),
+            ),
+        ],
+    )
+    def test_extract_date_range(self, date_filter, result):
+        assert self.service.extract_date_range(date_filter=date_filter) == result

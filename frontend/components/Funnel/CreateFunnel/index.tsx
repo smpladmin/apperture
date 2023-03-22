@@ -4,6 +4,8 @@ import CreateFunnelAction from './CreateFunnelAction';
 import { useEffect, useState } from 'react';
 import FunnelEmptyState from '../components/FunnelEmptyState';
 import {
+  ConversionWindowList,
+  ConversionWindowObj,
   Funnel,
   FunnelData,
   FunnelStep,
@@ -51,6 +53,13 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
     filter: savedFunnel?.dateFilter?.filter || null,
     type: savedFunnel?.dateFilter?.type || null,
   });
+
+  const [conversionWindow, setConversionWindow] = useState<ConversionWindowObj>(
+    {
+      type: savedFunnel?.conversionWindow?.type || ConversionWindowList.DAYS,
+      value: savedFunnel?.conversionWindow?.value || 30,
+    }
+  );
 
   const [funnelData, setFunnelData] = useState<FunnelData[]>([]);
   const [trendsData, setTrendsData] = useState<FunnelTrendsData[]>([]);
@@ -102,12 +111,14 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
         getTransientFunnelData(
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
-          dateFilter
+          dateFilter,
+          conversionWindow
         ),
         getTransientTrendsData(
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
-          dateFilter
+          dateFilter,
+          conversionWindow
         ),
       ]);
       setFunnelData(funnelData);
@@ -117,7 +128,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
 
     setIsLoading(true);
     getFunnelMetricsData();
-  }, [funnelSteps, dateFilter]);
+  }, [funnelSteps, dateFilter, conversionWindow]);
 
   const handleSaveFunnel = async () => {
     const { data, status } = isFunnelBeingEdited
@@ -127,14 +138,16 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           funnelName,
           filterFunnelSteps(funnelSteps),
           false,
-          dateFilter
+          dateFilter,
+          conversionWindow
         )
       : await saveFunnel(
           dsId as string,
           funnelName,
           filterFunnelSteps(funnelSteps),
           false,
-          dateFilter
+          dateFilter,
+          conversionWindow
         );
 
     if (status === 200)

@@ -47,6 +47,9 @@ class EventsBase(ABC):
         self.parse_datetime_best_effort = CustomFunction(
             "parseDateTimeBestEffort", ["string"]
         )
+        self.convert_to_unix_timestamp_func = CustomFunction(
+            "toUnixTimestamp", ["datetime"]
+        )
 
     def execute_get_query(self, query: str, parameters: Dict):
         logging.info(f"Executing query: {query}")

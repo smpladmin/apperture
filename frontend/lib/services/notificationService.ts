@@ -3,6 +3,7 @@ import {
   AppertureGet,
   ApperturePut,
   ApperturePrivateGet,
+  AppertureDelete,
 } from './util';
 import {
   Notifications,
@@ -130,4 +131,9 @@ export const _getNotificationByReference = async (
     token
   );
   return res.data;
+};
+
+export const deleteNotification = async (id: string) => {
+  const res = await AppertureDelete(`/notifications/${id}`);
+  return res;
 };

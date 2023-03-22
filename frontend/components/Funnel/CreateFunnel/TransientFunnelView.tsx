@@ -6,7 +6,12 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import { FunnelData, FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
+import {
+  ConversionWindowObj,
+  FunnelData,
+  FunnelStep,
+  FunnelTrendsData,
+} from '@lib/domain/funnel';
 import React, { useState } from 'react';
 import FunnelChart from '../components/FunnelChart';
 import Trend from '../components/Trend';
@@ -23,8 +28,8 @@ type TransientFunnelViewProps = {
   funnelSteps: FunnelStep[];
   dateFilter: DateFilterObj;
   setDateFilter: Function;
-
   isDateFilterDisabled?: boolean;
+  conversionWindow: ConversionWindowObj;
 };
 
 const TransientFunnelView = ({
@@ -35,6 +40,7 @@ const TransientFunnelView = ({
   dateFilter,
   setDateFilter,
   isDateFilterDisabled = false,
+  conversionWindow,
 }: TransientFunnelViewProps) => {
   const {
     isOpen: isDrawerOpen,
@@ -155,6 +161,7 @@ const TransientFunnelView = ({
         event={selectedEvent as string}
         selectedFunnelSteps={selectedFunnelSteps}
         dateFilter={dateFilter}
+        conversionWindow={conversionWindow}
       />
     </Flex>
   );
