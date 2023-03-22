@@ -189,6 +189,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
               funnelSteps={funnelSteps}
               dateFilter={dateFilter}
               setDateFilter={setDateFilter}
+              conversionWindow={conversionWindow}
             />
           )}
         </ViewPanel>
