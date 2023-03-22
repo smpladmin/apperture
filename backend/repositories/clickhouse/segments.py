@@ -1,6 +1,9 @@
 import copy
 from typing import List, Union
 
+from fastapi import Depends
+
+from clickhouse import Clickhouse
 from domain.common.filter_models import (
     LogicalOperators,
 )
@@ -27,8 +30,14 @@ from pypika import (
 from pypika.dialects import ClickHouseQueryBuilder
 import datetime
 
+from repositories.clickhouse.utils.filters import Filters
+
 
 class Segments(EventsBase):
+    def __init__(self, clickhouse: Clickhouse = Depends()):
+        super().__init__(clickhouse=clickhouse)
+        self.filter_utils = Filters()
+
     def get_all_unique_users_query(self):
         return (
             ClickHouseQuery.from_(self.table)
@@ -46,7 +55,9 @@ class Segments(EventsBase):
             if SegmentFilterConditions.WHO in conditions
             else len(conditions)
         )
-        criterion = self.get_criterion_for_where_filters(filters=group.filters[:idx])
+        criterion = self.filter_utils.get_criterion_for_where_filters(
+            filters=group.filters[:idx]
+        )
 
         group_users = (
             group_users.where(Criterion.any(criterion))

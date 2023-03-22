@@ -121,9 +121,11 @@ class SegmentsAndEventsAggregations(BaseModel):
     functions: Union[MetricBasicAggregation, MetricAggregatePropertiesAggregation]
     property: str
 
+
 class SegmentsAndEventsType(str, Enum):
     EVENT = "event"
     SEGMENT = "segment"
+
 
 class DateFilterType(str, Enum):
     FIXED = "fixed"
@@ -223,8 +225,13 @@ class Forward:
                 reference_id=aggregate.reference_id,
                 filters=[
                     WhereSegmentFilter(
-                        operator="is", operand=filter.operand, values=filter.values, all=False, type="where", datatype="String",
-                        condition=aggregate.conditions[i]
+                        operator="is",
+                        operand=filter.operand,
+                        values=filter.values,
+                        all=False,
+                        type="where",
+                        datatype="String",
+                        condition=aggregate.conditions[i],
                     )
                     for i, filter in enumerate(aggregate.filters)
                 ],
@@ -245,11 +252,13 @@ class Backward:
                 reference_id=aggregate.reference_id,
                 filters=[
                     SegmentsAndEventsFilter(
-                        operator="equals", operand=filter.operand, values=filter.values,
+                        operator="equals",
+                        operand=filter.operand,
+                        values=filter.values,
                     )
                     for filter in aggregate.filters
                 ],
-                conditions=[filter.condition for filter in aggregate.filters]
+                conditions=[filter.condition for filter in aggregate.filters],
             )
             for aggregate in input_document.aggregates
         ]
