@@ -22,10 +22,11 @@ import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
 import { cloneDeep } from 'lodash';
 import { FilterType } from '@lib/domain/segment';
-import { LOGAN } from '@theme/index';
+import { LOGAN, WHITE_100, WHITE_DEFAULT } from '@theme/index';
 import { Node } from '@lib/domain/node';
 import ParallelLineIcon from '@assets/icons/horizontal-parallel-line.svg';
 import Image from 'next/image';
+import { DotsSixVertical } from '@phosphor-icons/react';
 
 type FunnelComponentCardProps = {
   index: number;
@@ -143,41 +144,59 @@ const FunnelComponentCard = ({
 
   return (
     <Flex
-      py={'5'}
-      borderRadius={'12'}
+      p={'3'}
+      borderRadius={'8px'}
       border={'1px'}
-      borderColor={'grey.10'}
+      borderColor={'white.200'}
       justifyContent={'space-between'}
       alignItems={'center'}
       direction={'column'}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       cursor={'grab'}
       data-testid={'funnel-step'}
+      backgroundColor={'white.DEFAULT'}
     >
-      <Flex width={'full'} px={'1'}>
-        {isHovered ? (
-          <Image src={ParallelLineIcon} alt={'parallel-line-icon'} />
-        ) : (
-          <Box w={'2'} />
-        )}
+      <Flex width={'full'}>
         <Flex
           width={'full'}
           alignItems={'center'}
           justifyContent={'space-between'}
-          px={'2'}
         >
           <Flex alignItems={'center'} gap={'1'}>
-            <FilterNumber index={index} />
+            <Box
+              position={'relative'}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
+              {isHovered ? (
+                <Flex
+                  borderRadius={'4px'}
+                  position={'absolute'}
+                  width={'full'}
+                  h={'full'}
+                  alignItems={'center'}
+                  justifyContent={'center'}
+                  backgroundColor={'blue.500'}
+                >
+                  <DotsSixVertical
+                    size={16}
+                    weight="bold"
+                    color={WHITE_DEFAULT}
+                  />
+                </Flex>
+              ) : (
+                <Box w={'2'} />
+              )}
+              <FilterNumber index={index} />
+            </Box>
             <Box position="relative" ref={eventBoxRef}>
               <Text
                 data-testid={'event-name'}
-                color={'white.DEFAULT'}
+                color={'grey.600'}
                 fontSize={'xs-14'}
-                fontWeight={500}
+                fontWeight={400}
                 px={'1'}
-                _hover={{ background: 'grey.300', cursor: 'pointer' }}
-                lineHeight={'xs-18'}
+                _hover={{ background: 'white.300', cursor: 'pointer' }}
+                lineHeight={'xs-14'}
                 onClick={() => setIsEventListOpen(true)}
               >
                 {funnelStep?.event || 'Select an Event'}
@@ -237,17 +256,17 @@ export const FilterNumber = ({ index }: { index: number }) => {
   return (
     <Flex
       data-testid="event-or-segment-component-index"
-      background={LOGAN}
-      borderRadius={'2px'}
+      background={'blue.500'}
+      borderRadius={'4px'}
       textAlign="center"
-      fontWeight={500}
-      color={'black.100'}
+      fontWeight={600}
+      color={'white'}
       fontSize={'xs-10'}
-      lineHeight={'12px'}
+      lineHeight={'xs-10'}
       justifyContent={'center'}
       alignItems={'center'}
-      height={'16px'}
-      width={'16px'}
+      height={'5'}
+      width={'5'}
       cursor={'grab'}
     >
       {index + 1}

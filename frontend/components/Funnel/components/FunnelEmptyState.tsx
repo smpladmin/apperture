@@ -5,20 +5,15 @@ import FunnelImage from '@assets/images/funnel.svg';
 
 const FunnelEmptyState = () => {
   return (
-    <Flex h={'full'} justifyContent={'center'} px={'6'}>
-      <Flex
-        direction={'column'}
-        justifyContent={'center'}
-        gap={'6'}
-        data-testid={'funnel-empty-state'}
-      >
+    <Flex justifyContent={'center'} width={'full'} pt={'10'}>
+      <Flex direction={'column'} gap={'6'} data-testid={'funnel-empty-state'}>
         <Image src={FunnelImage} priority={true} alt={'funnel-empty-state'} />
         <Flex direction={'column'} gap={'1'}>
           <Text
             textAlign={'center'}
             fontSize={'base'}
             lineHeight={'base'}
-            fontWeight={'semibold'}
+            fontWeight={'bold'}
           >
             Select two events to get started.
           </Text>
@@ -27,7 +22,8 @@ const FunnelEmptyState = () => {
             fontSize={'xs-14'}
             lineHeight={'xs-14'}
             fontWeight={'normal'}
-            color={'grey.200'}
+            color={'grey.500'}
+            maxW={'100'}
           >
             Explore how users navigate between any two events on your product
           </Text>

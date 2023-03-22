@@ -27,6 +27,7 @@ import { useRouter } from 'next/router';
 import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel/util';
 import { DateFilterObj } from '@lib/domain/common';
 import Header from '@components/EventsLayout/Header';
+import Card from '@components/Card';
 
 const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const router = useRouter();
@@ -154,15 +155,19 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
       />
       <Flex direction={{ base: 'column', md: 'row' }} gap={'5'} h={'full'}>
         <ActionPanel>
-          <CreateFunnelAction
-            funnelSteps={funnelSteps}
-            setFunnelSteps={setFunnelSteps}
-            setIsStepAdded={setIsStepAdded}
-          />
+          <Card>
+            <CreateFunnelAction
+              funnelSteps={funnelSteps}
+              setFunnelSteps={setFunnelSteps}
+              setIsStepAdded={setIsStepAdded}
+            />
+          </Card>
         </ActionPanel>
         <ViewPanel>
           {isEmpty ? (
-            <FunnelEmptyState />
+            <Card minHeight="120">
+              <FunnelEmptyState />
+            </Card>
           ) : (
             <TransientFunnelView
               isLoading={isLoading}

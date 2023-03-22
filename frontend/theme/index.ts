@@ -55,6 +55,8 @@ const colors = {
     200: ARROW_GRAY,
     300: '#3E3E47',
     400: '#DFDFDF',
+    500: '#747474',
+    600: '#9E9E9E',
   },
   yellow: { 500: '#fac213' },
   green: GREEN,
@@ -68,10 +70,14 @@ const colors = {
   red: {
     DEFAULT: '#F96B6B',
   },
+  blue: {
+    500: '#5093EC',
+  },
 };
 
 const spacing = {
   0.15: '0.0375rem',
+  5.5: '1.137rem',
   11: '2.75rem',
   13: '3.25rem',
   15: '3.75rem',
@@ -131,9 +137,9 @@ const fontSizes = {
 const lineHeights = {
   'xs-8': '0.75rem', // lh-12px,
   'xs-10': '0.75rem', // lh-12px,
-  'xs-12': '1rem', // lh-16px,
-  'xs-14': '1.125rem', // lh-18px,
-  base: '1.375rem', // lh-22px,
+  'xs-12': '135%', // lh-16px,
+  'xs-14': '135%', // lh-18px,
+  base: '120%', // lh-22px,
   'sh-18': '1.375rem', //lh-22px,
   'sh-20': '1.5rem', //lh-24px,
   'sh-24': '1.75rem', //lh-28px,

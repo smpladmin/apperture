@@ -26,7 +26,7 @@ const EventFields = ({ funnelSteps, setFunnelSteps }: funnelSteps) => {
   };
 
   return (
-    <Flex gap={{ base: '2', md: '4' }}>
+    <Flex gap={{ base: '2', md: '3' }}>
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="droppable">
           {(provided) => (
