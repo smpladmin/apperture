@@ -151,6 +151,7 @@ def funnel_service(apperture_user_response):
             },
         ],
         random_sequence=False,
+        enabled=True,
     )
     funnel_future = asyncio.Future()
     funnel_future.set_result(funnel)
@@ -211,6 +212,7 @@ def funnel_service(apperture_user_response):
     funnel_service_mock.get_user_conversion.return_value = funnel_user_conversion_future
     funnel_service_mock.get_funnels_for_datasource_id.return_value = funnels_future
     funnel_service_mock.get_funnels_for_apps.return_value = funnels_future
+    funnel_service_mock.delete_funnel = mock.AsyncMock()
 
     return funnel_service_mock
 
@@ -478,6 +480,7 @@ def metric_service(apperture_user_response):
             },
         ],
         breakdown=[],
+        enabled=True,
     )
 
     metrics_future = asyncio.Future()
@@ -510,6 +513,7 @@ def metric_service(apperture_user_response):
     metric_service.compute_metric.return_value = computed_metric_future
     metric_service.get_metrics_for_datasource_id.return_value = metrics_future
     metric_service.validate_formula.return_value = True
+    metric_service.delete_metric = mock.AsyncMock()
     return metric_service
 
 
@@ -562,6 +566,7 @@ def segment_service(apperture_user_response):
         app_id="63771fc960527aba9354399c",
         groups=groups,
         columns=columns,
+        enabled=True,
     )
     segment_service.compute_segment.return_value = computed_segment
     segment_service.build_segment.return_value = segment
@@ -578,6 +583,7 @@ def segment_service(apperture_user_response):
     segment_service.get_segments_for_datasource_id.return_value = [
         SegmentWithUser.from_orm(segment)
     ]
+    segment_service.delete_segment = mock.AsyncMock()
     return segment_service
 
 
@@ -817,6 +823,7 @@ def saved_segment_response():
         "revisionId": ANY,
         "updatedAt": None,
         "userId": "63771fc960527aba9354399c",
+        "enabled": True,
     }
 
 
@@ -859,6 +866,7 @@ def saved_segment_with_user():
             "revisionId": ANY,
             "updatedAt": None,
             "userId": "63771fc960527aba9354399c",
+            "enabled": True,
             "user": {
                 "firstName": "Test",
                 "lastName": "User",
@@ -1153,6 +1161,7 @@ def funnel_response():
         ],
         "randomSequence": False,
         "dateFilter": None,
+        "enabled": True,
         "conversionWindow": None,
     }
 

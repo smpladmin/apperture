@@ -21,6 +21,7 @@ class ClickstreamService:
         self.clickhouse = clickhouse.client
         self.repository = clickstream
         self.table = "clickstream"
+        self.error_table = "errorstream"
         self.elements_service = elements_service
         self.columns = [
             "datasource_id",
@@ -84,12 +85,30 @@ class ClickstreamService:
             )
             for event in events
         ]
-
-        self.clickhouse.insert(
-            self.table,
-            clickstream_data,
-            column_names=self.columns,
-        )
+        for data in clickstream_data:
+            try:
+                self.clickhouse.insert(
+                    self.table,
+                    [data],
+                    column_names=self.columns,
+                )
+            except Exception as e:
+                logging.error(e)
+                logging.info("Error inserting")
+                logging.info(data)
+                self.clickhouse.insert(
+                    self.error_table,
+                    [
+                        (
+                            data.datasourceId,
+                            data.timestamp,
+                            data.userId,
+                            data.event,
+                            str(data.properties),
+                        )
+                    ],
+                    column_names=self.columns,
+                )
 
     def get_data_by_id(self, dsId: str):
         data_list = self.repository.get_all_data_by_dsId(dsId)

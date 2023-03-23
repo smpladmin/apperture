@@ -48,6 +48,7 @@ class Funnel(Document):
     random_sequence: bool
     date_filter: Optional[DateFilter]
     conversion_window: Optional[ConversionWindow]
+    enabled: bool = True
 
     class Settings:
         name = "funnels"

@@ -96,6 +96,7 @@ def test_get_metrics(client_init, metric_service):
             },
             "userId": "6374b74e9b36ecf7e0b4f9e4",
             "dateFilter": None,
+            "enabled": True,
         }
     ]
     metric_service.get_metrics_for_datasource_id.assert_called_once_with(
@@ -150,6 +151,7 @@ def test_update_metric(
         "updatedAt": None,
         "userId": "6374b74e9b36ecf7e0b4f9e4",
         "dateFilter": None,
+        "enabled": True,
     }
 
     datasource_service.get_datasource.assert_called_with(
@@ -163,4 +165,18 @@ def test_update_metric(
     )
     notification_service.delete_notification.assert_called_once_with(
         **{"notification_id": "635ba034807ab86d8a2aadd8"}
+    )
+
+
+def test_delete_metric(
+    client_init,
+    metric_service,
+):
+    response = client_init.delete("/metrics/6384a65e0a397236d9de236a")
+    assert response.status_code == 200
+
+    metric_service.delete_metric.assert_called_once_with(
+        **{
+            "metric_id": "6384a65e0a397236d9de236a",
+        }
     )

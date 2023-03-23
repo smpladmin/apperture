@@ -216,7 +216,9 @@ class Metric(Document):
 
 class Forward:
     @iterative_migration()
-    async def roll_to_newer_version(self, input_document: OldMetric, output_document: Metric):
+    async def roll_to_newer_version(
+        self, input_document: OldMetric, output_document: Metric
+    ):
         aggregates = [
             NewSegmentsAndEvents(
                 variable=aggregate.variable,
@@ -243,7 +245,9 @@ class Forward:
 
 class Backward:
     @iterative_migration()
-    async def roll_to_previous_version(self, input_document: Metric, output_document: OldMetric):
+    async def roll_to_previous_version(
+        self, input_document: Metric, output_document: OldMetric
+    ):
         aggregates = [
             OldSegmentsAndEvents(
                 variable=aggregate.variable,

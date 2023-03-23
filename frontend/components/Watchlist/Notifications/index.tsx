@@ -5,7 +5,10 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 import WatchlistTable from '../Table';
 import LoadingSpinner from '@components/LoadingSpinner';
-import { getSavedNotificationsForDatasourceId } from '@lib/services/notificationService';
+import {
+  deleteNotification,
+  getSavedNotificationsForDatasourceId,
+} from '@lib/services/notificationService';
 import {
   AlertAndUpdate,
   NotificationType,
@@ -17,16 +20,19 @@ import utc from 'dayjs/plugin/utc';
 import NotificationActive from '../Table/NotificationActive';
 import LabelType from '../Table/LabelType';
 import EntityType from '../Table/EntityType';
+import Actions from '../Table/Actions';
 dayjs.extend(utc);
 
 const SavedNotifications = () => {
   const [notifications, setNotifications] = useState<SavedItems[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [renderNotifications, setRenderNotifications] = useState(true);
   const router = useRouter();
 
   const { dsId } = router.query;
 
   useEffect(() => {
+    if (!renderNotifications) return;
     const getNotifications = async () => {
       let savedNotifications =
         (await getSavedNotificationsForDatasourceId(dsId as string)) || [];
@@ -41,7 +47,8 @@ const SavedNotifications = () => {
 
     setIsLoading(true);
     getNotifications();
-  }, []);
+    setRenderNotifications(false);
+  }, [renderNotifications]);
 
   const columnHelper = createColumnHelper<SavedItems>();
   const columns = useMemo(() => {
@@ -72,6 +79,10 @@ const SavedNotifications = () => {
           <NotificationActive info={info} />
         ),
       }),
+      columnHelper.accessor('details._id', {
+        cell: (info) => <Actions info={info} handleDelete={handleDelete} />,
+        header: '',
+      }),
     ];
   }, []);
 
@@ -86,6 +97,11 @@ const SavedNotifications = () => {
       pathname: `/analytics/${path}/[id]`,
       query: { id: reference, dsId: datasourceId, showAlert: true },
     });
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteNotification(id);
+    setRenderNotifications(true);
   };
 
   return (
@@ -122,6 +138,7 @@ const SavedNotifications = () => {
             savedItemsData={notifications}
             onRowClick={onRowClick}
             tableColumns={columns}
+            handleDelete={handleDelete}
           />
         )}
       </Box>
