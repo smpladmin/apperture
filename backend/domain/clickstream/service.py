@@ -93,6 +93,7 @@ class ClickstreamService:
                     column_names=self.columns,
                 )
             except Exception as e:
+                logging.error(e)
                 logging.info("Error inserting")
                 logging.info(data)
                 self.clickhouse.insert(
