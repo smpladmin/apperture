@@ -21,3 +21,16 @@ CREATE TABLE clickstream
     )
     ENGINE = MergeTree
     ORDER BY timestamp;
+
+
+CREATE TABLE errorstream
+    (
+        datasource_id String,
+        timestamp DateTime,
+        user_id String,
+        element_chain String,
+        event String,
+        properties String
+    )
+    ENGINE = MergeTree
+    ORDER BY timestamp;

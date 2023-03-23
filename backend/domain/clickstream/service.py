@@ -21,6 +21,7 @@ class ClickstreamService:
         self.clickhouse = clickhouse.client
         self.repository = clickstream
         self.table = "clickstream"
+        self.error_table = "errorstream"
         self.elements_service = elements_service
         self.columns = [
             "datasource_id",
@@ -95,7 +96,7 @@ class ClickstreamService:
                 logging.info("Error inserting")
                 logging.info(data)
                 self.clickhouse.insert(
-                    "errorstream",
+                    self.error_table,
                     [
                         (
                             data.datasourceId,
