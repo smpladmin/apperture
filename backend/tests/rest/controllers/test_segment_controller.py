@@ -3,16 +3,15 @@ from unittest.mock import ANY
 
 from beanie import PydanticObjectId
 
-from domain.common.filter_models import (
-    FilterOperatorsString,
-    FilterDataType,
-    FilterOperatorsNumber,
-    LogicalOperators,
-)
 from domain.segments.models import (
     SegmentGroup,
     WhereSegmentFilter,
+    SegmentFilterOperatorsNumber,
+    SegmentFilterOperatorsString,
+    SegmentFilterOperatorsBool,
     SegmentFilterConditions,
+    SegmentGroupConditions,
+    SegmentDataType,
 )
 
 
@@ -32,23 +31,23 @@ def test_compute_transient_segment(
                 SegmentGroup(
                     filters=[
                         WhereSegmentFilter(
-                            operator=FilterOperatorsString.IS,
+                            operator=SegmentFilterOperatorsString.IS,
                             operand="properties.$city",
                             values=["Delhi", "Indore", "Bhopal"],
                             all=False,
                             condition=SegmentFilterConditions.WHERE,
-                            datatype=FilterDataType.STRING,
+                            datatype=SegmentDataType.STRING,
                         ),
                         WhereSegmentFilter(
-                            operator=FilterOperatorsNumber.EQ,
+                            operator=SegmentFilterOperatorsNumber.EQ,
                             operand="properties.$app_release",
                             values=[5003, 2077, 5002],
                             all=False,
                             condition=SegmentFilterConditions.AND,
-                            datatype=FilterDataType.NUMBER,
+                            datatype=SegmentDataType.NUMBER,
                         ),
                     ],
-                    condition=LogicalOperators.AND,
+                    condition=SegmentGroupConditions.AND,
                 )
             ],
         }
@@ -72,24 +71,24 @@ def test_save_segment(
                     filters=[
                         WhereSegmentFilter(
                             operand="properties.$city",
-                            operator=FilterOperatorsString.IS,
+                            operator=SegmentFilterOperatorsString.IS,
                             values=["Delhi", "Indore", "Bhopal"],
                             type=SegmentFilterConditions.WHERE,
                             all=False,
                             condition=SegmentFilterConditions.WHERE,
-                            datatype=FilterDataType.STRING,
+                            datatype=SegmentDataType.STRING,
                         ),
                         WhereSegmentFilter(
                             operand="properties.$app_release",
-                            operator=FilterOperatorsNumber.EQ,
+                            operator=SegmentFilterOperatorsNumber.EQ,
                             values=[5003, 2077, 5002],
                             type=SegmentFilterConditions.WHERE,
                             all=False,
                             condition=SegmentFilterConditions.AND,
-                            datatype=FilterDataType.NUMBER,
+                            datatype=SegmentDataType.NUMBER,
                         ),
                     ],
-                    condition=LogicalOperators.AND,
+                    condition=SegmentGroupConditions.AND,
                 )
             ],
             "name": "name",
@@ -105,25 +104,25 @@ def test_save_segment(
         "description": "test",
         "groups": [
             {
-                "condition": LogicalOperators.AND,
+                "condition": SegmentGroupConditions.AND,
                 "filters": [
                     {
                         "all": False,
                         "condition": SegmentFilterConditions.WHERE,
                         "operand": "properties.$city",
-                        "operator": FilterOperatorsString.IS,
+                        "operator": SegmentFilterOperatorsString.IS,
                         "type": SegmentFilterConditions.WHERE,
                         "values": ["Delhi", "Indore", "Bhopal"],
-                        "datatype": FilterDataType.STRING,
+                        "datatype": SegmentDataType.STRING,
                     },
                     {
                         "all": False,
                         "condition": SegmentFilterConditions.AND,
                         "operand": "properties.$app_release",
-                        "operator": FilterOperatorsNumber.EQ,
+                        "operator": SegmentFilterOperatorsNumber.EQ,
                         "type": "where",
                         "values": [5003, 2077, 5002],
-                        "datatype": FilterDataType.NUMBER,
+                        "datatype": SegmentDataType.NUMBER,
                     },
                 ],
             }
@@ -172,24 +171,24 @@ def test_update_segment(
                     filters=[
                         WhereSegmentFilter(
                             operand="properties.$city",
-                            operator=FilterOperatorsString.IS,
+                            operator=SegmentFilterOperatorsString.IS,
                             values=["Delhi", "Indore", "Bhopal"],
                             type=SegmentFilterConditions.WHERE,
                             all=False,
                             condition=SegmentFilterConditions.WHERE,
-                            datatype=FilterDataType.STRING,
+                            datatype=SegmentDataType.STRING,
                         ),
                         WhereSegmentFilter(
                             operand="properties.$app_release",
-                            operator=FilterOperatorsNumber.EQ,
+                            operator=SegmentFilterOperatorsNumber.EQ,
                             values=[5003, 2077, 5002],
                             type=SegmentFilterConditions.WHERE,
                             all=False,
                             condition=SegmentFilterConditions.AND,
-                            datatype=FilterDataType.NUMBER,
+                            datatype=SegmentDataType.NUMBER,
                         ),
                     ],
-                    condition=LogicalOperators.AND,
+                    condition=SegmentGroupConditions.AND,
                 )
             ],
             "name": "name",
@@ -205,25 +204,25 @@ def test_update_segment(
         "description": "test",
         "groups": [
             {
-                "condition": LogicalOperators.AND,
+                "condition": SegmentGroupConditions.AND,
                 "filters": [
                     {
                         "all": False,
                         "condition": SegmentFilterConditions.WHERE,
                         "operand": "properties.$city",
-                        "operator": FilterOperatorsString.IS,
+                        "operator": SegmentFilterOperatorsString.IS,
                         "type": SegmentFilterConditions.WHERE,
                         "values": ["Delhi", "Indore", "Bhopal"],
-                        "datatype": FilterDataType.STRING,
+                        "datatype": SegmentDataType.STRING,
                     },
                     {
                         "all": False,
                         "condition": SegmentFilterConditions.AND,
                         "operand": "properties.$app_release",
-                        "operator": FilterOperatorsNumber.EQ,
+                        "operator": SegmentFilterOperatorsNumber.EQ,
                         "type": "where",
                         "values": [5003, 2077, 5002],
-                        "datatype": FilterDataType.NUMBER,
+                        "datatype": SegmentDataType.NUMBER,
                     },
                 ],
             }

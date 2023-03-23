@@ -3,14 +3,14 @@ import React from 'react';
 import {
   MetricAggregatePropertiesAggregation,
   MetricComponentAggregation,
+  MetricEventFilter,
 } from '@lib/domain/metric';
 import MetricViewFilterComponent from './MetricViewFilterCard';
 import { getDisplayAggregationFunctionText } from '@components/Metric/util';
-import { WhereFilter } from '@lib/domain/common';
 type MetricViewComponentCardProps = {
   variable: string;
   reference: string;
-  filters: WhereFilter[];
+  filters: MetricEventFilter[];
   conditions: string[];
   aggregation: MetricComponentAggregation;
 };
@@ -95,9 +95,9 @@ const MetricViewComponentCard = ({
         ) : null}
       </Flex>
       {Boolean(filters.length) &&
-        filters.map((filter: WhereFilter, index: number) => (
+        filters.map((filter: MetricEventFilter, index: number) => (
           <MetricViewFilterComponent
-            condition={filter.condition}
+            condition={conditions[index]}
             operand={filter.operand}
             key={index}
             operator={filter.operator}

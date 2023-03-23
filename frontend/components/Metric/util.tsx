@@ -1,8 +1,8 @@
-import { WhereFilter } from '@lib/domain/common';
 import {
   ComputedMetric,
   MetricAggregate,
   MetricBasicAggregation,
+  MetricEventFilter,
   MetricTableData,
   MetricTrendData,
 } from '@lib/domain/metric';
@@ -15,12 +15,14 @@ export const replaceEmptyStringPlaceholder = (
   aggregates: MetricAggregate[]
 ) => {
   return aggregates.map((aggregate: MetricAggregate) => {
-    const processedFilter = aggregate?.filters.map((filter: WhereFilter) => {
-      const processedValues = filter.values.map((value: string) =>
-        value === '(empty string)' ? '' : value
-      );
-      return { ...filter, values: processedValues };
-    });
+    const processedFilter = aggregate?.filters.map(
+      (filter: MetricEventFilter) => {
+        const processedValues = filter.values.map((value: string) =>
+          value === '(empty string)' ? '' : value
+        );
+        return { ...filter, values: processedValues };
+      }
+    );
     return {
       ...aggregate,
       filters: processedFilter,
@@ -32,12 +34,14 @@ export const replaceFilterValueWithEmptyStringPlaceholder = (
   aggregates: MetricAggregate[]
 ) => {
   return aggregates.map((aggregate: MetricAggregate) => {
-    const processedFilter = aggregate?.filters.map((filter: WhereFilter) => {
-      const processedValues = filter.values.map((value: string) =>
-        value === '' ? '(empty string)' : value
-      );
-      return { ...filter, values: processedValues };
-    });
+    const processedFilter = aggregate?.filters.map(
+      (filter: MetricEventFilter) => {
+        const processedValues = filter.values.map((value: string) =>
+          value === '' ? '(empty string)' : value
+        );
+        return { ...filter, values: processedValues };
+      }
+    );
     return {
       ...aggregate,
       filters: processedFilter,
@@ -71,7 +75,7 @@ export const isValidAggregates = (aggregates: MetricAggregate[]) => {
         aggregate.reference_id &&
         aggregate.variable &&
         aggregate.filters.every(
-          (filter: WhereFilter) => filter.values.length
+          (filter: MetricEventFilter) => filter.values.length
         ) &&
         _isValidAggregation(aggregate.aggregations)
     )

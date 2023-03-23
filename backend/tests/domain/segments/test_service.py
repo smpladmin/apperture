@@ -4,18 +4,19 @@ from unittest.mock import MagicMock, ANY, AsyncMock
 import pytest
 from beanie import PydanticObjectId
 
-from domain.common.filter_models import (
-    FilterOperatorsString,
-    FilterDataType,
-    LogicalOperators,
-)
 from domain.segments.service import SegmentService
 from domain.segments.models import (
+    WhoSegmentFilter,
     WhereSegmentFilter,
+    SegmentFilterOperatorsNumber,
+    SegmentFilterOperatorsString,
+    SegmentFilterOperatorsBool,
     SegmentFilterConditions,
     SegmentGroup,
     ComputedSegment,
     Segment,
+    SegmentGroupConditions,
+    SegmentDataType,
 )
 
 
@@ -31,26 +32,26 @@ class TestSegmentService:
         Segment.datasource_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.filters = [
             WhereSegmentFilter(
-                operator=FilterOperatorsString.IS,
+                operator=SegmentFilterOperatorsString.IS,
                 operand="prop1",
                 values=["va1", "val2"],
                 all=False,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.WHERE,
-                datatype=FilterDataType.STRING,
+                datatype=SegmentDataType.STRING,
             ),
             WhereSegmentFilter(
-                operator=FilterOperatorsString.IS,
+                operator=SegmentFilterOperatorsString.IS,
                 operand="prop2",
                 values=["va3", "val4"],
                 all=False,
                 type=SegmentFilterConditions.WHERE,
                 condition=SegmentFilterConditions.AND,
-                datatype=FilterDataType.STRING,
+                datatype=SegmentDataType.STRING,
             ),
         ]
         self.groups = [
-            SegmentGroup(filters=self.filters, condition=LogicalOperators.AND)
+            SegmentGroup(filters=self.filters, condition=SegmentGroupConditions.AND)
         ]
         self.columns = ["prop1", "prop2", "prop3"]
         self.segment = Segment(
@@ -103,24 +104,24 @@ class TestSegmentService:
                         filters=[
                             WhereSegmentFilter(
                                 operand="prop1",
-                                operator=FilterOperatorsString.IS,
+                                operator=SegmentFilterOperatorsString.IS,
                                 values=["va1", "val2"],
                                 all=False,
                                 condition=SegmentFilterConditions.WHERE,
                                 type=SegmentFilterConditions.WHERE,
-                                datatype=FilterDataType.STRING,
+                                datatype=SegmentDataType.STRING,
                             ),
                             WhereSegmentFilter(
                                 operand="prop2",
-                                operator=FilterOperatorsString.IS,
+                                operator=SegmentFilterOperatorsString.IS,
                                 values=["va3", "val4"],
                                 all=False,
                                 condition=SegmentFilterConditions.AND,
                                 type=SegmentFilterConditions.WHERE,
-                                datatype=FilterDataType.STRING,
+                                datatype=SegmentDataType.STRING,
                             ),
                         ],
-                        condition=LogicalOperators.AND,
+                        condition=SegmentGroupConditions.AND,
                     )
                 ],
             }
@@ -146,25 +147,25 @@ class TestSegmentService:
             "description": "sample",
             "groups": [
                 {
-                    "condition": LogicalOperators.AND,
+                    "condition": SegmentGroupConditions.AND,
                     "filters": [
                         {
                             "all": False,
                             "condition": SegmentFilterConditions.WHERE,
                             "operand": "prop1",
-                            "operator": FilterOperatorsString.IS,
+                            "operator": SegmentFilterOperatorsString.IS,
                             "values": ["va1", "val2"],
                             "type": SegmentFilterConditions.WHERE,
-                            "datatype": FilterDataType.STRING,
+                            "datatype": SegmentDataType.STRING,
                         },
                         {
                             "all": False,
                             "condition": SegmentFilterConditions.AND,
                             "operand": "prop2",
-                            "operator": FilterOperatorsString.IS,
+                            "operator": SegmentFilterOperatorsString.IS,
                             "values": ["va3", "val4"],
                             "type": SegmentFilterConditions.WHERE,
-                            "datatype": FilterDataType.STRING,
+                            "datatype": SegmentDataType.STRING,
                         },
                     ],
                 }
@@ -188,25 +189,25 @@ class TestSegmentService:
             "description": "sample",
             "groups": [
                 {
-                    "condition": LogicalOperators.AND,
+                    "condition": SegmentGroupConditions.AND,
                     "filters": [
                         {
                             "all": False,
                             "condition": SegmentFilterConditions.WHERE,
                             "operand": "prop1",
-                            "operator": FilterOperatorsString.IS,
+                            "operator": SegmentFilterOperatorsString.IS,
                             "values": ["va1", "val2"],
                             "type": SegmentFilterConditions.WHERE,
-                            "datatype": FilterDataType.STRING,
+                            "datatype": SegmentDataType.STRING,
                         },
                         {
                             "all": False,
                             "condition": SegmentFilterConditions.AND,
                             "operand": "prop2",
-                            "operator": FilterOperatorsString.IS,
+                            "operator": SegmentFilterOperatorsString.IS,
                             "values": ["va3", "val4"],
                             "type": SegmentFilterConditions.WHERE,
-                            "datatype": FilterDataType.STRING,
+                            "datatype": SegmentDataType.STRING,
                         },
                     ],
                 }
@@ -250,25 +251,25 @@ class TestSegmentService:
                     "description": "sample",
                     "groups": [
                         {
-                            "condition": LogicalOperators.AND,
+                            "condition": SegmentGroupConditions.AND,
                             "filters": [
                                 {
                                     "all": False,
                                     "condition": SegmentFilterConditions.WHERE,
                                     "operand": "prop1",
-                                    "operator": FilterOperatorsString.IS,
+                                    "operator": SegmentFilterOperatorsString.IS,
                                     "values": ["va1", "val2"],
                                     "type": SegmentFilterConditions.WHERE,
-                                    "datatype": FilterDataType.STRING,
+                                    "datatype": SegmentDataType.STRING,
                                 },
                                 {
                                     "all": False,
                                     "condition": SegmentFilterConditions.AND,
                                     "operand": "prop2",
-                                    "operator": FilterOperatorsString.IS,
+                                    "operator": SegmentFilterOperatorsString.IS,
                                     "values": ["va3", "val4"],
                                     "type": SegmentFilterConditions.WHERE,
-                                    "datatype": FilterDataType.STRING,
+                                    "datatype": SegmentDataType.STRING,
                                 },
                             ],
                         }

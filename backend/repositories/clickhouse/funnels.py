@@ -1,4 +1,3 @@
-from fastapi import Depends
 from pypika import (
     ClickHouseQuery,
     Criterion,
@@ -13,17 +12,11 @@ from pypika import functions as fn
 from pypika.functions import Extract
 from typing import List, Tuple, Union
 
-from clickhouse import Clickhouse
 from domain.funnels.models import FunnelStep, ConversionStatus
 from repositories.clickhouse.base import EventsBase
-from repositories.clickhouse.utils.filters import Filters
 
 
 class Funnels(EventsBase):
-    def __init__(self, clickhouse: Clickhouse = Depends()):
-        super().__init__(clickhouse=clickhouse)
-        self.filter_utils = Filters()
-
     def get_conversion_trend(
         self,
         ds_id: str,
@@ -147,10 +140,10 @@ class Funnels(EventsBase):
                 self.table.event_name == Parameter(f"%(event{i})s"),
             ]
             if step.filters:
-                filter_criterion = self.filter_utils.get_criterion_for_where_filters(
-                    filters=step.filters
-                )
-                criterion.extend(filter_criterion)
+                for filter in step.filters:
+                    criterion.append(
+                        Field(f"properties.{filter.operand}").isin(filter.values)
+                    )
             parameters[f"event{i}"] = step.event
 
             sub_query = (
