@@ -142,7 +142,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
         query: { actionId: _id || actionId, dsId: datasourceId },
       });
     }
-    if (!response.data) {
+    if (response?.status === 400 && !response.data) {
       alert('Name should be unique');
     }
   };
