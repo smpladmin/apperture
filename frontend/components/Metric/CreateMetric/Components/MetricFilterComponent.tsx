@@ -14,6 +14,7 @@ type MetricFilterComponentProps = {
   operand: string;
   values: string[];
   index: number;
+  handleSetCondition: Function;
   handleSetFilter: Function;
   removeFilter: Function;
   eventProperties: string[];
@@ -26,6 +27,7 @@ const MetricFilterComponent = ({
   operand,
   values,
   index,
+  handleSetCondition,
   handleSetFilter,
   removeFilter,
   eventProperties,

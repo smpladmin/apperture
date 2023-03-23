@@ -8,17 +8,10 @@ import {
   MetricAggregate,
   MetricBasicAggregation,
   MetricComponentVariant,
+  MetricEventFilter,
 } from '@lib/domain/metric';
 import { Node } from '@lib/domain/node';
 import MetricAggregation from './MetricAggregation';
-import {
-  FilterConditions,
-  FilterDataType,
-  FilterOperatorsString,
-  FilterType,
-  WhereFilter,
-} from '@lib/domain/common';
-import FilterOperator from '@components/Segments/CreateSegment/components/QueryBuilder/FilterOperator';
 
 type MetricComponentCardProps = {
   index: number;
@@ -54,8 +47,11 @@ const MetricComponentCard = ({
   const [reference, setReference] = useState(
     savedAggregate?.reference_id || ''
   );
-  const [filters, setFilters] = useState<WhereFilter[]>(
+  const [filters, setFilters] = useState<MetricEventFilter[]>(
     savedAggregate?.filters || []
+  );
+  const [conditions, setConditions] = useState(
+    savedAggregate?.conditions || ['where']
   );
   const previousVariant = useRef<MetricComponentVariant | null>(null);
 
@@ -79,25 +75,25 @@ const MetricComponentCard = ({
     setReference(selection.id);
   };
 
+  const handleSetCondition = (ref: number, value: string) => {
+    const newConditions = conditions.map((condition, index) =>
+      index === ref ? value : condition
+    );
+
+    setConditions(newConditions);
+  };
   const handleAddFilter = (value: string) => {
-    const getFilterCondition = (filters: WhereFilter[]) => {
-      return !filters.length ? FilterConditions.WHERE : FilterConditions.AND;
-    };
-
-    const newFilter = {
-      condition: getFilterCondition(filters),
-      operand: value,
-      operator: FilterOperatorsString.IS,
-      values: [],
-      type: FilterType.WHERE,
-      all: false,
-      datatype: FilterDataType.STRING,
-    };
-
-    setFilters([...filters, newFilter]);
+    setFilters([
+      ...filters,
+      { operand: value, operator: 'equals', values: [] },
+    ]);
+    setConditions((prevState) => [
+      ...prevState,
+      prevState.length ? 'and' : 'where',
+    ]);
   };
 
-  const handleSetFilter = (ref: number, updatedFilter: WhereFilter) => {
+  const handleSetFilter = (ref: number, updatedFilter: MetricEventFilter) => {
     setFilters(
       filters.map((filter, index) =>
         ref == index ? { ...filter, ...updatedFilter } : filter
@@ -109,14 +105,13 @@ const MetricComponentCard = ({
     removeAggregate(index);
   };
 
-  const removeFilter = (filterIndex: number) => {
-    let tempFilters = [...filters];
-    tempFilters.splice(filterIndex, 1);
-
-    if (filterIndex === 0 && tempFilters.length)
-      tempFilters[0]['condition'] = FilterConditions.WHERE;
-
-    setFilters(tempFilters);
+  const removeFilter = (reference: number) => {
+    setFilters(filters.filter((_, index) => index != reference));
+    const updatedConditions = conditions.filter(
+      (_, index) => index != reference
+    );
+    if (updatedConditions.length) updatedConditions[0] = 'where';
+    setConditions([...updatedConditions]);
   };
 
   useEffect(() => {
@@ -133,13 +128,14 @@ const MetricComponentCard = ({
 
   useEffect(() => {
     if (filters.every((filter) => filter.values.length)) {
-      updateAggregate(variable, { filters });
+      updateAggregate(variable, { filters, conditions });
     }
-  }, [filters]);
+  }, [filters, conditions]);
 
   useEffect(() => {
     setReference(savedAggregate?.reference_id);
     setFilters(savedAggregate?.filters);
+    setConditions(savedAggregate?.conditions);
     setVariant(savedAggregate?.variant);
   }, [savedAggregate]);
 
@@ -283,12 +279,13 @@ const MetricComponentCard = ({
           {Boolean(filters.length) &&
             filters.map((filter, index) => (
               <MetricFilterComponent
-                condition={filter.condition}
+                condition={conditions[index]}
                 operand={filter.operand}
                 key={index}
                 operator={filter.operator}
                 values={filter.values}
                 index={index}
+                handleSetCondition={handleSetCondition}
                 handleSetFilter={handleSetFilter}
                 removeFilter={removeFilter}
                 eventProperties={eventProperties}
