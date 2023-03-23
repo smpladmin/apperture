@@ -1,6 +1,7 @@
 import itertools
 from typing import List, Optional
 
+from pypika.dialects import ClickHouseQueryBuilder
 from pypika.terms import NullValue
 from pypika import (
     Case,
@@ -9,6 +10,8 @@ from pypika import (
     Field,
     Parameter,
     functions as fn,
+    Order,
+    AliasedQuery,
 )
 
 from domain.metrics.models import (
@@ -40,6 +43,35 @@ class Metrics(EventsBase):
             if query is None
             else self.execute_get_query(query=query, parameters=parameters)
         )
+
+    def limit_compute_query(
+        self,
+        query: ClickHouseQueryBuilder,
+        breakdown: List[str],
+        breakdown_columns: List,
+    ) -> ClickHouseQueryBuilder:
+        if breakdown:
+            limit_query = (
+                ClickHouseQuery.from_(self.table)
+                .select(*breakdown_columns)
+                .groupby(*breakdown_columns)
+                .orderby(fn.Count("*"), order=Order.desc)
+                .limit(50)
+            )
+            query = ClickHouseQuery.with_(limit_query, "limit_query").with_(
+                query, "compute_query"
+            )
+            query = (
+                query.from_(AliasedQuery("limit_query"))
+                .inner_join(AliasedQuery("compute_query"))
+                .on_field(*[f"properties.{prop}" for prop in breakdown])
+            )
+            query = query.select(AliasedQuery("compute_query").star)
+
+        else:
+            query = query.limit(1000)
+
+        return query
 
     def build_metric_compute_query(
         self,
@@ -157,6 +189,10 @@ class Metrics(EventsBase):
                 query = query.orderby(i + 2)
         query = query.select(
             *[select_expression for select_expression in select_expressions]
-        ).limit(1000)
+        )
+
+        query = self.limit_compute_query(
+            query=query, breakdown=breakdown, breakdown_columns=breakdown_columns
+        )
 
         return query.get_sql(), params

@@ -1,4 +1,6 @@
+import pytest
 from unittest.mock import MagicMock
+from pypika import Field, ClickHouseQuery
 
 from domain.metrics.models import (
     SegmentsAndEvents,
@@ -117,13 +119,17 @@ class TestMetricRepository:
             self.end_date,
         ) == (
             (
-                'SELECT date,"properties.property1",SUM("A"),SUM("B") FROM (SELECT '
+                'WITH limit_query AS (SELECT "properties.property1" FROM "events" GROUP BY '
+                '"properties.property1" ORDER BY COUNT(*) DESC LIMIT 50) ,compute_query AS '
+                '(SELECT date,"properties.property1",SUM("A"),SUM("B") FROM (SELECT '
                 'DATE("timestamp") AS "date","properties.property1",CASE WHEN '
                 "\"event_name\"=%(reference_id_0)s THEN toFloat64OrNull('1') ELSE 0 END AS "
                 '"A",CASE WHEN "event_name"=%(reference_id_1)s THEN toFloat64OrNull(\'1\') '
                 'ELSE 0 END AS "B" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
                 "DATE(\"timestamp\")>='2022-10-8' AND DATE(\"timestamp\")<='2022-10-20') AS "
-                '"subquery" GROUP BY date,"properties.property1" ORDER BY 1,2 LIMIT 1000'
+                '"subquery" GROUP BY date,"properties.property1" ORDER BY 1,2) SELECT '
+                '"compute_query".* FROM limit_query JOIN compute_query ON '
+                '"limit_query"."properties.property1"="compute_query"."properties.property1"'
             ),
             {
                 "ds_id": "638f1aac8e54760eafc64d70",
@@ -208,7 +214,9 @@ class TestMetricRepository:
             self.end_date,
         ) == (
             (
-                'SELECT date,"properties.property1",COUNT(DISTINCT '
+                'WITH limit_query AS (SELECT "properties.property1" FROM "events" GROUP BY '
+                '"properties.property1" ORDER BY COUNT(*) DESC LIMIT 50) ,compute_query AS '
+                '(SELECT date,"properties.property1",COUNT(DISTINCT '
                 '"A"),SUM("B"),COUNT(DISTINCT "A")/SUM("B") FROM (SELECT DATE("timestamp") AS '
                 '"date","properties.property1",CASE WHEN "event_name"=%(reference_id_0)s THEN '
                 'toString("user_id") ELSE NULL END AS "A",CASE WHEN '
@@ -216,7 +224,8 @@ class TestMetricRepository:
                 '"B" FROM "events" WHERE "datasource_id"=%(ds_id)s AND '
                 "DATE(\"timestamp\")>='2022-10-8' AND DATE(\"timestamp\")<='2022-10-20') AS "
                 '"subquery" GROUP BY date,"properties.property1" HAVING SUM("B")<>0 ORDER BY '
-                "1,2 LIMIT 1000"
+                '1,2) SELECT "compute_query".* FROM limit_query JOIN compute_query ON '
+                '"limit_query"."properties.property1"="compute_query"."properties.property1"'
             ),
             {
                 "ds_id": "638f1aac8e54760eafc64d70",
@@ -260,7 +269,9 @@ class TestMetricRepository:
             self.end_date,
         ) == (
             (
-                "SELECT "
+                'WITH limit_query AS (SELECT "properties.property1" FROM "events" GROUP BY '
+                '"properties.property1" ORDER BY COUNT(*) DESC LIMIT 50) ,compute_query AS '
+                "(SELECT "
                 'date,"properties.property1",AVG("A"),quantile(0.5)("B"),AVG("A")/quantile(0.5)("B") '
                 'FROM (SELECT DATE("timestamp") AS "date","properties.property1",CASE WHEN '
                 '"event_name"=%(reference_id_0)s THEN '
@@ -270,7 +281,9 @@ class TestMetricRepository:
                 '"events" WHERE "datasource_id"=%(ds_id)s AND '
                 "DATE(\"timestamp\")>='2022-10-8' AND DATE(\"timestamp\")<='2022-10-20') AS "
                 '"subquery" GROUP BY date,"properties.property1" HAVING quantile(0.5)("B")<>0 '
-                "ORDER BY 1,2 LIMIT 1000"
+                'ORDER BY 1,2) SELECT "compute_query".* FROM limit_query JOIN compute_query '
+                "ON "
+                '"limit_query"."properties.property1"="compute_query"."properties.property1"'
             ),
             {
                 "ds_id": "638f1aac8e54760eafc64d70",
@@ -314,7 +327,9 @@ class TestMetricRepository:
             self.end_date,
         ) == (
             (
-                'SELECT date,"properties.property1",COUNT(DISTINCT '
+                'WITH limit_query AS (SELECT "properties.property1" FROM "events" GROUP BY '
+                '"properties.property1" ORDER BY COUNT(*) DESC LIMIT 50) ,compute_query AS '
+                '(SELECT date,"properties.property1",COUNT(DISTINCT '
                 '"A"),quantile(0.99)("B"),COUNT(DISTINCT "A")/quantile(0.99)("B") FROM '
                 '(SELECT DATE("timestamp") AS "date","properties.property1",CASE WHEN '
                 '"event_name"=%(reference_id_0)s THEN toString("properties.agg_prop1") ELSE '
@@ -323,11 +338,41 @@ class TestMetricRepository:
                 '"events" WHERE "datasource_id"=%(ds_id)s AND '
                 "DATE(\"timestamp\")>='2022-10-8' AND DATE(\"timestamp\")<='2022-10-20') AS "
                 '"subquery" GROUP BY date,"properties.property1" HAVING '
-                'quantile(0.99)("B")<>0 ORDER BY 1,2 LIMIT 1000'
+                'quantile(0.99)("B")<>0 ORDER BY 1,2) SELECT "compute_query".* FROM '
+                "limit_query JOIN compute_query ON "
+                '"limit_query"."properties.property1"="compute_query"."properties.property1"'
             ),
             {
                 "ds_id": "638f1aac8e54760eafc64d70",
                 "reference_id_0": "Video_Seen",
                 "reference_id_1": "Video_Open",
             },
+        )
+
+    @pytest.mark.parametrize(
+        "query, breakdown, result",
+        [
+            (
+                ClickHouseQuery.from_("table").select("*"),
+                [],
+                'SELECT * FROM "table" LIMIT 1000',
+            ),
+            (
+                ClickHouseQuery.from_("table").select("*"),
+                ["property1"],
+                'WITH limit_query AS (SELECT "properties.property1" FROM "events" GROUP BY '
+                '"properties.property1" ORDER BY COUNT(*) DESC LIMIT 50) ,compute_query AS '
+                '(SELECT * FROM "table") SELECT "compute_query".* FROM limit_query JOIN '
+                "compute_query ON "
+                '"limit_query"."properties.property1"="compute_query"."properties.property1"',
+            ),
+        ],
+    )
+    def test_limit_compute_query(self, query, breakdown, result):
+        breakdown_columns = [Field(f"properties.{prop}") for prop in breakdown]
+        assert (
+            self.repo.limit_compute_query(
+                query=query, breakdown=breakdown, breakdown_columns=breakdown_columns
+            ).get_sql()
+            == result
         )
