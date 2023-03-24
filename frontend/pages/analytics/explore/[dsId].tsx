@@ -21,6 +21,7 @@ import { getAuthToken } from '@lib/utils/request';
 import { EventData } from '@lib/domain/eventData';
 import { getAppertureUserInfo } from '@lib/services/userService';
 import { AppertureUser } from '@lib/domain/user';
+import { APPERTURE_PH_KEY } from 'config';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -91,7 +92,7 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   useEffect(() => {
     const getUserInfo = async () => {
       const user: AppertureUser = await getAppertureUserInfo();
-      if (typeof window !== 'undefined' && window.posthog) {
+      if (typeof window !== 'undefined' && window.posthog && APPERTURE_PH_KEY) {
         window.posthog.identify(user.id);
       }
     };
