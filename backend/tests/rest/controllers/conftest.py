@@ -76,6 +76,7 @@ def client_init(app_init):
 def apperture_user_response():
     AppertureUserResponse.from_orm = mock.MagicMock(
         return_value=AppertureUserResponse(
+            id="635ba034807ab86d8a2aadd8",
             firstName="Test",
             lastName="User",
             email="test@email.com",
@@ -867,6 +868,7 @@ def saved_segment_with_user():
             "userId": "63771fc960527aba9354399c",
             "enabled": True,
             "user": {
+                "id": "635ba034807ab86d8a2aadd8",
                 "firstName": "Test",
                 "lastName": "User",
                 "email": "test@email.com",

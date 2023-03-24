@@ -186,6 +186,7 @@ def test_get_notifications(client_init, notification_service):
             "revisionId": ANY,
             "updatedAt": ANY,
             "user": {
+                "id": "635ba034807ab86d8a2aadd8",
                 "email": "test@email.com",
                 "firstName": "Test",
                 "lastName": "User",

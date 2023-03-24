@@ -111,6 +111,7 @@ def test_get_actions(client_init, action_service):
             "revisionId": ANY,
             "updatedAt": None,
             "user": {
+                "id": "635ba034807ab86d8a2aadd8",
                 "email": "test@email.com",
                 "firstName": "Test",
                 "lastName": "User",
