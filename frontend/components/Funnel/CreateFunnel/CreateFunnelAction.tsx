@@ -62,6 +62,9 @@ const CreateFunnelAction = ({
               onClick={() => {
                 setIsDropdownOpen(true);
               }}
+              cursor={'pointer'}
+              bg={isDropdownOpen ? 'white.400' : 'white.DEFAULT'}
+              _hover={{ bg: 'white.400' }}
             >
               <Text
                 color={'grey.500'}
