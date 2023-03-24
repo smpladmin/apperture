@@ -12,9 +12,17 @@ import {
 } from '@chakra-ui/react';
 import { BACKEND_BASE_URL } from 'config';
 import LoginWithPasswordModal from './Components/LoginWithPasswordModal';
+import { useEffect } from 'react';
 
 const Loginscreen = () => {
   const { onOpen, onClose, isOpen } = useDisclosure();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.posthog) {
+      window.posthog.reset(true);
+    }
+  }, []);
+
   return (
     <Box
       p={8}

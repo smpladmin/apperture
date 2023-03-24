@@ -1,4 +1,5 @@
 from typing import Optional
+from beanie import PydanticObjectId
 
 from pydantic import BaseModel
 
@@ -12,6 +13,7 @@ class PrivateUserResponse(AppertureUser, ModelResponse):
 
 
 class AppertureUserResponse(ModelResponse):
+    id: PydanticObjectId
     first_name: str
     last_name: str
     email: str
