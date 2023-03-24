@@ -50,3 +50,8 @@ export const replaceFilterValueWithEmptyStringPlaceholder = (
     return step;
   });
 };
+
+export const stepsSequence = [
+  { label: 'In sequence', value: false },
+  { label: 'Any order', value: true }, // random sequence
+];

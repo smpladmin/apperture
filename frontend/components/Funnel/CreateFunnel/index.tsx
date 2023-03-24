@@ -72,6 +72,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const [isStepAdded, setIsStepAdded] = useState(false);
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
   const [isFunnelBeingEdited, setFunnelBeingEdited] = useState(false);
+  const [randomSequence, setRandomSequence] = useState(false);
 
   useEffect(() => {
     if (getCountOfValidAddedSteps(funnelSteps) >= 2) {
@@ -112,13 +113,15 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
           dateFilter,
-          conversionWindow
+          conversionWindow,
+          randomSequence
         ),
         getTransientTrendsData(
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
           dateFilter,
-          conversionWindow
+          conversionWindow,
+          randomSequence
         ),
       ]);
       setFunnelData(funnelData);
@@ -137,7 +140,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           dsId as string,
           funnelName,
           filterFunnelSteps(funnelSteps),
-          false,
+          randomSequence,
           dateFilter,
           conversionWindow
         )
@@ -145,7 +148,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           dsId as string,
           funnelName,
           filterFunnelSteps(funnelSteps),
-          false,
+          randomSequence,
           dateFilter,
           conversionWindow
         );
@@ -186,6 +189,8 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
               setIsStepAdded={setIsStepAdded}
               conversionWindow={conversionWindow}
               setConversionWindow={setConversionWindow}
+              randomSequence={randomSequence}
+              setRandomSequence={setRandomSequence}
             />
           </Card>
         </ActionPanel>

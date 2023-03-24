@@ -63,13 +63,15 @@ export const getTransientFunnelData = async (
   dsId: string,
   steps: FunnelStep[],
   dateFilter: DateFilterObj,
-  conversionWindow: ConversionWindowObj
+  conversionWindow: ConversionWindowObj,
+  randomSequence: boolean
 ) => {
   const res = await ApperturePost('/funnels/transient', {
     datasourceId: dsId,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
     dateFilter,
     conversionWindow,
+    randomSequence,
   });
   return res.data || [];
 };
@@ -78,13 +80,15 @@ export const getTransientTrendsData = async (
   dsId: string,
   steps: FunnelStep[],
   dateFilter: DateFilterObj,
-  conversionWindow: ConversionWindowObj
+  conversionWindow: ConversionWindowObj,
+  randomSequence: boolean
 ) => {
   const res = await ApperturePost('/funnels/trends/transient', {
     datasourceId: dsId,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
     dateFilter,
     conversionWindow,
+    randomSequence,
   });
   return res.data || [];
 };

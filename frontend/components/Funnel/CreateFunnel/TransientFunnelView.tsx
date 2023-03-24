@@ -1,12 +1,4 @@
-import {
-  Box,
-  Button,
-  Divider,
-  Flex,
-  Highlight,
-  Text,
-  useDisclosure,
-} from '@chakra-ui/react';
+import { Box, Flex, Highlight, Text, useDisclosure } from '@chakra-ui/react';
 import {
   ConversionWindowObj,
   FunnelData,
@@ -72,7 +64,7 @@ const TransientFunnelView = ({
   };
 
   return (
-    <Flex direction={'column'} gap={'8'} h={'full'}>
+    <Flex direction={'column'} gap={'5'} h={'full'}>
       <DateFilterComponent
         dateFilter={dateFilter}
         setDateFilter={setDateFilter}
@@ -120,7 +112,7 @@ const TransientFunnelView = ({
                         color={'grey.600'}
                         fontWeight={'400'}
                       >
-                        Conversions
+                        Conversion
                       </Text>
                     </Text>
                   </Flex>

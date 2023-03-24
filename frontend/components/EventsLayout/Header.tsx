@@ -52,11 +52,18 @@ const EventLayoutHeader = ({
           fontWeight={'600'}
           color={'black.DEFAULT'}
         >
-          <EditablePreview cursor={'pointer'} />
+          <EditablePreview
+            cursor={'pointer'}
+            p={'2'}
+            _hover={{ bg: 'white.200' }}
+            borderRadius={'12'}
+          />
           <EditableInput
-            borderBottom={'1px'}
+            border={'1px'}
             borderColor={'grey.400'}
-            borderRadius={'0'}
+            borderRadius={'12'}
+            bg={'white.DEFAULT'}
+            p={'2'}
           />
         </Editable>
       </Flex>
