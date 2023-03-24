@@ -22,7 +22,11 @@ const BASTILLE = '#282836';
 const GRAY_100 = '#b2b2b5';
 const MEDIUM_BLUE = '#646FD4';
 const LOGAN = '#9999B6';
-
+const GREY_500 = '#747474';
+const GREY_600 = '#9E9E9E';
+const GREY_700 = '#BDBDBD';
+const GREY_800 = '#606060';
+const BLACK_500 = '#424242';
 const colors = {
   black: {
     // Aman to replace black.400 with black.400 except in events header
@@ -37,6 +41,7 @@ const colors = {
     200: BLACK_200,
     300: BLACK_RUSSIAN,
     400: '#07070d',
+    500: 'BLACK_500',
   },
   white: {
     DEFAULT: WHITE_DEFAULT,
@@ -45,6 +50,7 @@ const colors = {
     200: WHITE_200,
     300: WHITE_300,
     400: '#f5f5f5',
+    500: '#fafafa',
   },
   grey: {
     DEFAULT: '#d9d9da',
@@ -55,8 +61,10 @@ const colors = {
     200: ARROW_GRAY,
     300: '#3E3E47',
     400: '#DFDFDF',
-    500: '#747474',
-    600: '#9E9E9E',
+    500: GREY_500,
+    600: GREY_600,
+    700: GREY_700,
+    800: GREY_800,
   },
   yellow: { 500: '#fac213' },
   green: GREEN,
@@ -148,6 +156,9 @@ const lineHeights = {
   'sh-34': '2.625rem', //lh-42px
   'sh-44': '3.25rem', //lh-52px
   'sh-56': '4.125rem', //lh-66px
+  'lh-120': '120%,', //lh-120%
+  'lh-130': '130%,', //lh-130%
+  'lh-135': '135%,', //lh-130%
 };
 
 const boxShadow = {
@@ -185,4 +196,8 @@ export {
   MEDIUM_BLUE,
   WHITE_200,
   LOGAN,
+  GREY_500,
+  GREY_600,
+  GREY_700,
+  BLACK_500,
 };

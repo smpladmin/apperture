@@ -22,11 +22,9 @@ import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
 import { cloneDeep } from 'lodash';
 import { FilterType } from '@lib/domain/segment';
-import { LOGAN, WHITE_100, WHITE_DEFAULT } from '@theme/index';
+import { GREY_500, WHITE_DEFAULT } from '@theme/index';
 import { Node } from '@lib/domain/node';
-import ParallelLineIcon from '@assets/icons/horizontal-parallel-line.svg';
-import Image from 'next/image';
-import { DotsSixVertical } from '@phosphor-icons/react';
+import { DotsSixVertical, Trash } from '@phosphor-icons/react';
 
 type FunnelComponentCardProps = {
   index: number;
@@ -154,6 +152,8 @@ const FunnelComponentCard = ({
       cursor={'grab'}
       data-testid={'funnel-step'}
       backgroundColor={'white.DEFAULT'}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <Flex width={'full'}>
         <Flex
@@ -162,30 +162,24 @@ const FunnelComponentCard = ({
           justifyContent={'space-between'}
         >
           <Flex alignItems={'center'} gap={'1'}>
-            <Box
-              position={'relative'}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-            >
-              {isHovered ? (
-                <Flex
-                  borderRadius={'4px'}
-                  position={'absolute'}
-                  width={'full'}
-                  h={'full'}
-                  alignItems={'center'}
-                  justifyContent={'center'}
-                  backgroundColor={'blue.500'}
-                >
-                  <DotsSixVertical
-                    size={16}
-                    weight="bold"
-                    color={WHITE_DEFAULT}
-                  />
-                </Flex>
-              ) : (
-                <Box w={'2'} />
-              )}
+            <Box position={'relative'}>
+              <Flex
+                borderRadius={'4px'}
+                position={'absolute'}
+                width={'full'}
+                h={'full'}
+                alignItems={'center'}
+                justifyContent={'center'}
+                backgroundColor={'blue.500'}
+                opacity={0}
+                _hover={{ opacity: 1 }}
+              >
+                <DotsSixVertical
+                  size={16}
+                  weight="bold"
+                  color={WHITE_DEFAULT}
+                />
+              </Flex>
               <FilterNumber index={index} />
             </Box>
             <Box position="relative" ref={eventBoxRef}>
@@ -212,24 +206,19 @@ const FunnelComponentCard = ({
             </Box>
           </Flex>
           {showCrossIcon && (
-            <IconButton
+            <Flex
               data-testid={`remove-funnel-step-${index}`}
-              size={'xs'}
               fontWeight={'500'}
-              aria-label="remove-component"
-              variant={'iconButton'}
-              icon={<i className="ri-close-fill"></i>}
               color={'grey.200'}
+              cursor={'pointer'}
               opacity={isHovered ? 1 : 0}
-              _hover={{ color: 'white', background: 'grey.300' }}
               onClick={() => handleRemoveFunnelStep(index)}
-            />
+            >
+              <Trash size={14} color={GREY_500} />
+            </Flex>
           )}
         </Flex>
       </Flex>
-      {funnelStep.event && (
-        <Divider orientation="horizontal" color={'grey.10'} mt={'3'} />
-      )}
       {Boolean(funnelStep.filters.length) &&
         funnelStep.filters.map((filter, index) => (
           <FunnelStepFilterComponent
@@ -242,6 +231,7 @@ const FunnelComponentCard = ({
         ))}
       {funnelStep.event ? (
         <AddFilter
+          filters={funnelStep.filters}
           eventProperties={eventProperties}
           loadingEventProperties={loadingEventProperties}
           handleAddFilter={handleAddFilter}

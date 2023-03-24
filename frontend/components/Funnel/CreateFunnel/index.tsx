@@ -158,7 +158,13 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   };
 
   return (
-    <Flex px={'5'} direction={'column'} h={'full'} bg={'white.400'}>
+    <Flex
+      px={'5'}
+      direction={'column'}
+      h={'full'}
+      bg={'white.400'}
+      overflow={'hidden'}
+    >
       <Header
         handleGoBack={() => router.back()}
         name={funnelName}
@@ -166,13 +172,20 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
         handleSave={handleSaveFunnel}
         isSaveButtonDisabled={isSaveButtonDisabled}
       />
-      <Flex direction={{ base: 'column', md: 'row' }} gap={'5'} h={'full'}>
+      <Flex
+        direction={{ base: 'column', md: 'row' }}
+        gap={'5'}
+        flexGrow={1}
+        height={1}
+      >
         <ActionPanel>
           <Card>
             <CreateFunnelAction
               funnelSteps={funnelSteps}
               setFunnelSteps={setFunnelSteps}
               setIsStepAdded={setIsStepAdded}
+              conversionWindow={conversionWindow}
+              setConversionWindow={setConversionWindow}
             />
           </Card>
         </ActionPanel>

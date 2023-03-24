@@ -3,7 +3,7 @@ import React, { ReactNode } from 'react';
 
 const ViewPanel = ({ children }: { children: ReactNode }) => {
   return (
-    <Box w={'full'} pt={'5'} overflowY={{ md: 'auto' }}>
+    <Box w={'full'} py={5} overflowY={{ md: 'auto' }}>
       {children}
     </Box>
   );

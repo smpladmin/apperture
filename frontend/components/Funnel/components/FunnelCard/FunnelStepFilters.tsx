@@ -7,6 +7,8 @@ import { useRouter } from 'next/router';
 import SearchableCheckboxDropdown from '@components/SearchableDropdown/SearchableCheckboxDropdown';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { FunnelStepFilter } from '@lib/domain/funnel';
+import { GREY_500, GREY_700 } from '@theme/index';
+import { ArrowElbowDownRight, Trash } from '@phosphor-icons/react';
 
 type FilterComponentProps = {
   filter: FunnelStepFilter;
@@ -89,16 +91,65 @@ const FunnelStepFilter = ({
       data-testid={'event-filter'}
       width={'full'}
       _first={{ borderTop: '1px solid rgba(255, 255, 255, 0.2)' }}
-      marginTop={2}
-      px={5}
+      mt={2}
       direction={'column'}
       gap={1}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Text fontSize={'xs-12'} lineHeight={'xs-14'} color={'grey.100'}>
-        {filter.condition}
-      </Text>
+      <Flex
+        p={1}
+        alignItems={'center'}
+        gap={2}
+        h={6}
+        mt={2}
+        px={1}
+        justifyContent={'space-between'}
+      >
+        <Flex alignItems={'center'}>
+          <ArrowElbowDownRight size={12} color={GREY_700} weight={'bold'} />
+          <Flex
+            alignItems={'center'}
+            justifyContent={'center'}
+            color={'grey.600'}
+            p={1}
+            height={6}
+            data-testid={'add-filter-button'}
+            cursor={'pointer'}
+            borderRadius={'4px'}
+            _hover={{ color: 'grey.800', background: 'white.400' }}
+          >
+            <Text
+              color={'inherit'}
+              fontSize={'xs-12'}
+              lineHeight={'lh-120'}
+              fontWeight={'400'}
+            >
+              {filter.condition}
+            </Text>
+          </Flex>
+          <Box
+            p={1}
+            borderBottom={'1px'}
+            borderStyle={'dashed'}
+            borderColor={'black.500'}
+          >
+            <Text fontSize={'xs-12'} lineHeight={'xs-14'} color={'black.500'}>
+              {filter.operand}
+            </Text>
+          </Box>
+        </Flex>
+        <Flex
+          data-testid={'remove-filter'}
+          fontWeight={'500'}
+          color={'grey.200'}
+          cursor={'pointer'}
+          opacity={isHovered ? 1 : 0}
+          onClick={() => handleRemoveFilter(index)}
+        >
+          <Trash size={14} color={GREY_500} />
+        </Flex>
+      </Flex>
       <Flex width={'full'} justifyContent={'space-between'}>
         <Flex
           fontSize={'xs-12'}
@@ -112,55 +163,49 @@ const FunnelStepFilter = ({
           borderRadius={4}
           _hover={{ color: 'white', background: 'grey.300' }}
           width={'max-content'}
-        >
-          <Box position={'absolute'} left={-6}>
-            <Image src={indent} alt={'indent-icon'} />
-          </Box>
-          <Text fontSize={'xs-12'} lineHeight={'xs-14'} color={'grey.100'}>
-            {filter.operand}
-          </Text>
-        </Flex>
-        <IconButton
-          size={'xs'}
-          fontWeight={'500'}
-          aria-label="set alerts"
-          variant={'iconButton'}
-          icon={<i className="ri-close-fill"></i>}
-          color={'grey.200'}
-          opacity={isHovered ? 1 : 0}
-          _hover={{ color: 'white', background: 'grey.300' }}
-          data-testid={'remove-filter'}
-          onClick={() => handleRemoveFilter(index)}
-        />
+        ></Flex>
       </Flex>
       <Flex marginLeft={6} gap={2}>
-        <Text
-          fontSize={'xs-12'}
+        <Flex
+          alignItems={'center'}
+          justifyContent={'center'}
+          color={'grey.600'}
           p={1}
-          lineHeight={'xs-14'}
+          height={6}
+          data-testid={'add-filter-button'}
           cursor={'not-allowed'}
-          borderRadius={4}
-          color={'grey.100'}
-          _hover={{ color: 'white', background: 'grey.300' }}
+          borderRadius={'4px'}
+          _hover={{ color: 'grey.800', background: 'white.400' }}
         >
-          {filter.operator}
-        </Text>
-        <Box position={'relative'} ref={eventValueRef}>
           <Text
-            data-testid={'event-filter-values'}
-            p={1}
+            color={'inherit'}
             fontSize={'xs-12'}
-            borderRadius={4}
-            lineHeight={'xs-14'}
-            cursor={'pointer'}
-            color={'white'}
-            _hover={{ color: 'white', background: 'grey.300' }}
-            onClick={() => {
-              setIsValueDropDownOpen(true);
-            }}
+            lineHeight={'lh-120'}
+            fontWeight={'400'}
           >
-            {getValuesText(filter.values)}
+            {filter.operator}
           </Text>
+        </Flex>
+        <Box position={'relative'} ref={eventValueRef}>
+          <Box
+            p={1}
+            borderBottom={'1px'}
+            borderStyle={'dashed'}
+            borderColor={'black.500'}
+          >
+            <Text
+              data-testid={'event-filter-values'}
+              cursor={'pointer'}
+              fontSize={'xs-12'}
+              lineHeight={'xs-14'}
+              color={'black.500'}
+              onClick={() => {
+                setIsValueDropDownOpen(true);
+              }}
+            >
+              {getValuesText(filter.values)}
+            </Text>
+          </Box>
           <SearchableCheckboxDropdown
             isOpen={isValueDropDownOpen}
             isLoading={loadingPropertyValues}
