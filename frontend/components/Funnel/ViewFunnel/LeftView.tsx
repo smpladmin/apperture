@@ -1,16 +1,8 @@
-import {
-  Button,
-  Divider,
-  Flex,
-  IconButton,
-  Text,
-  useDisclosure,
-} from '@chakra-ui/react';
+import { Box, Flex, Text, useDisclosure } from '@chakra-ui/react';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import Render from '@components/Render';
 import React, { useEffect } from 'react';
 import ViewFunnelSteps from '../components/ViewFunnelSteps';
-import ActionMenu from '../../ActionMenu';
 import 'remixicon/fonts/remixicon.css';
 import { BASTILLE } from '@theme/index';
 import {
@@ -22,6 +14,8 @@ import { useRouter } from 'next/router';
 import Alert from '@components/Alerts';
 import { Notifications, NotificationVariant } from '@lib/domain/notification';
 import { hasSavedAlert } from '@components/Alerts/util';
+import Card from '@components/Card';
+import { Clock } from '@phosphor-icons/react';
 
 type LeftViewProps = {
   datasourceId: string;
@@ -91,113 +85,45 @@ const LeftView = ({
 
   return (
     <ActionPanel>
-      <Flex justifyContent={'space-between'} alignItems={'center'}>
-        <IconButton
-          aria-label="close"
-          variant={'primary'}
-          icon={<i className="ri-arrow-left-line"></i>}
-          rounded={'full'}
-          color={'white.DEFAULT'}
-          bg={'black.20'}
-          onClick={handleGoBack}
-        />
-        <Render on="desktop">
-          <Button
-            borderRadius={'50'}
-            bg={'black.300'}
-            borderColor={'grey.300'}
-            borderWidth={'1px'}
-            color={'white'}
-            variant={'primary'}
-            onClick={handleEditFunnel}
-            data-testid={'edit-funnel'}
-          >
-            <Flex alignItems={'center'} gap={'1'}>
-              <i className="ri-edit-fill"></i>
-              <Text
-                fontSize={'xs-14'}
-                lineHeight={'xs-14'}
-                fontWeight={'medium'}
-                color={'white'}
-              >
-                Edit
-              </Text>
-            </Flex>
-          </Button>
-        </Render>
-      </Flex>
+      <Card>
+        <Flex direction={'column'} gap={'6'} w={'full'}>
+          <Flex direction={'column'} gap={'3'} w={'full'}>
+            <Text
+              color={'grey.500'}
+              fontSize={{ base: 'xs-10', md: 'xs-12' }}
+              lineHeight={{ base: 'xs-10', md: 'xs-12' }}
+              fontWeight={'400'}
+            >
+              Steps (sequential)
+            </Text>
+            <Box>
+              <ViewFunnelSteps steps={steps} />
+            </Box>
+          </Flex>
+          <Flex direction={'column'} gap={'3'} w={'full'}>
+            <Text
+              color={'grey.500'}
+              fontSize={{ base: 'xs-10', md: 'xs-12' }}
+              lineHeight={{ base: 'xs-10', md: 'xs-12' }}
+              fontWeight={'400'}
+            >
+              Conversion Time
+            </Text>
 
-      <Flex
-        direction={'row'}
-        mt={'8'}
-        gap={'2'}
-        justifyContent={'space-between'}
-        alignItems={'center'}
-      >
-        <Text
-          fontSize={{ base: 'sh-20', md: 'sh-32' }}
-          lineHeight={{ base: 'sh-20', md: 'sh-32' }}
-          fontWeight={'semibold'}
-          textColor={'white.DEFAULT'}
-          borderColor={'grey.10'}
-          px={0}
-          data-testid={'funnel-name'}
-        >
-          {name}
-        </Text>
-        <Render on="mobile">
-          <Button
-            borderRadius={'50'}
-            bg={'black.300'}
-            borderColor={'grey.300'}
-            borderWidth={'1px'}
-            color={'white'}
-            variant={'primary'}
-            onClick={handleEditFunnel}
-          >
-            <Flex alignItems={'center'} gap={'1'}>
-              <i className="ri-edit-fill"></i>
-              <Text
-                fontSize={'xs-14'}
-                lineHeight={'xs-14'}
-                fontWeight={'medium'}
-                color={'white'}
-              >
-                Edit
-              </Text>
-            </Flex>
-          </Button>
-        </Render>
-      </Flex>
-      <Flex direction={'column'} mt={{ base: '1', md: '4' }}>
-        <ViewFunnelSteps steps={steps} />
-        <Text
-          fontSize={'xs-14'}
-          lineHeight={'xs-14'}
-          color={'white'}
-          marginTop={'4'}
-        >{`Conversion Time: ${conversionWindow.value} ${conversionWindow.type}`}</Text>
-        <ActionMenu
-          onNotificationClick={handleNotificationClick}
-          hasSavedNotification={hasSavedAlert(savedNotification)}
-        />
-        <Divider
-          mt={'4'}
-          orientation="horizontal"
-          borderColor={BASTILLE}
-          opacity={1}
-        />
-      </Flex>
-      <Alert
-        name={name}
-        isAlertsSheetOpen={isAlertsSheetOpen}
-        closeAlertsSheet={handleCloseAlertsModal}
-        variant={NotificationVariant.FUNNEL}
-        reference={funnelId as string}
-        eventData={eventData}
-        datasourceId={datasourceId}
-        savedAlert={savedNotification}
-      />
+            <Card>
+              <Flex dir={'column'} alignItems={'center'} gap={2}>
+                <Clock size={20} color={'#9E9E9E'} />
+                <Text
+                  fontSize={'xs-14'}
+                  lineHeight={'xs-14'}
+                  fontWeight={'medium'}
+                  color={'black'}
+                >{` ${conversionWindow.value} ${conversionWindow.type}`}</Text>
+              </Flex>
+            </Card>
+          </Flex>
+        </Flex>
+      </Card>
     </ActionPanel>
   );
 };

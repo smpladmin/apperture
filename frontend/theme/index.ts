@@ -21,6 +21,7 @@ const BLACK_RUSSIAN = '#181822';
 const BASTILLE = '#282836';
 const GRAY_100 = '#b2b2b5';
 const MEDIUM_BLUE = '#646FD4';
+const BLUE_MAIN = '#5093EC';
 const LOGAN = '#9999B6';
 const GREY_500 = '#747474';
 const GREY_600 = '#9E9E9E';
@@ -29,7 +30,6 @@ const GREY_800 = '#606060';
 const BLACK_500 = '#424242';
 const colors = {
   black: {
-    // Aman to replace black.400 with black.400 except in events header
     DEFAULT: '#000000',
     0: 'rgba(14,14,26,0)',
     10: 'rgba(255, 255, 255, 0.04)',
@@ -200,4 +200,5 @@ export {
   GREY_600,
   GREY_700,
   BLACK_500,
+  BLUE_MAIN,
 };

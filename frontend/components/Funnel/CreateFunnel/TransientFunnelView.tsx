@@ -1,12 +1,4 @@
-import {
-  Box,
-  Button,
-  Divider,
-  Flex,
-  Highlight,
-  Text,
-  useDisclosure,
-} from '@chakra-ui/react';
+import { Box, Flex, Highlight, Text, useDisclosure } from '@chakra-ui/react';
 import {
   ConversionWindowObj,
   FunnelData,

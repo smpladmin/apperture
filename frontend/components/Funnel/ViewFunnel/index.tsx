@@ -86,25 +86,32 @@ const ViewFunnel = ({
   }, [isModalClosed]);
 
   return (
-    <Flex direction={{ base: 'column', md: 'row' }} h={'full'} w={'full'}>
-      <LeftView
-        datasourceId={datasourceId}
-        name={savedFunnel.name}
-        steps={savedFunnel.steps}
-        eventData={computedTrendsData}
-        savedNotification={notification}
-        setIsModalClosed={setIsModalClosed}
-        conversionWindow={conversionWindow}
-      />
-      <RightView
-        funnelSteps={savedFunnel.steps}
-        computedFunnel={computedFunnelData}
-        computedTrendsData={computedTrendsData}
-        isLoading={isLoading}
-        dateFilter={dateFilter}
-        conversionWindow={conversionWindow}
-      />
-    </Flex>
+    <>
+      <Flex
+        direction={{ base: 'column', md: 'row' }}
+        h={'full'}
+        w={'full'}
+        pl={5}
+      >
+        <LeftView
+          datasourceId={datasourceId}
+          name={savedFunnel.name}
+          steps={savedFunnel.steps}
+          eventData={computedTrendsData}
+          savedNotification={notification}
+          setIsModalClosed={setIsModalClosed}
+          conversionWindow={conversionWindow}
+        />
+        <RightView
+          funnelSteps={savedFunnel.steps}
+          computedFunnel={computedFunnelData}
+          computedTrendsData={computedTrendsData}
+          isLoading={isLoading}
+          dateFilter={dateFilter}
+          conversionWindow={conversionWindow}
+        />
+      </Flex>
+    </>
   );
 };
 
