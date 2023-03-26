@@ -166,9 +166,9 @@ const FunnelComponentCard = ({
             <Box position="relative" ref={eventBoxRef}>
               <Text
                 data-testid={'event-name'}
-                color={'grey.600'}
+                color={funnelStep?.event ? 'black.DEFAULT' : 'grey.600'}
                 fontSize={'xs-14'}
-                fontWeight={400}
+                fontWeight={funnelStep?.event ? 500 : 400}
                 px={'1'}
                 _hover={{ background: 'white.300', cursor: 'pointer' }}
                 lineHeight={'xs-14'}
