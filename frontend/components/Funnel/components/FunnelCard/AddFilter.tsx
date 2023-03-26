@@ -62,7 +62,7 @@ const FunnelAddFilterComponent = ({
         data={eventProperties}
         onSubmit={handleSubmit}
         placeholderText={'Search for properties...'}
-        width={'76'}
+        width={'96'}
       />
     </Flex>
   );

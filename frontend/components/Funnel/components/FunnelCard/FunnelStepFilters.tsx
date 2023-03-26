@@ -215,6 +215,8 @@ const FunnelStepFilter = ({
             onSelect={handleValueSelection}
             isSelectAllChecked={areAllValuesSelected}
             selectedValues={selectedValues}
+            width={'96'}
+            placeholderText={'Search for properties...'}
           />
         </Box>
       </Flex>

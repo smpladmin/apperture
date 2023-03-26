@@ -74,13 +74,13 @@ const SearchableListDropdown = ({
                 py={'3'}
                 px={'2'}
               >
-                <Flex maxW={'60'} gap={'2'}>
+                <Flex maxW={showBadge ? '60' : 'full'} gap={'2'}>
                   <CursorClick size={'18'} color={'#9E9E9E'} />
                   <Text
                     fontSize={'xs-14'}
                     lineHeight={'xs-14'}
                     fontWeight={'500'}
-                    maxW={'52'}
+                    wordBreak={'break-word'}
                   >
                     {listKey ? segmentPropertyItem : (item as string)}
                   </Text>
