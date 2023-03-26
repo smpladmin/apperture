@@ -1,14 +1,12 @@
-import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
-import indent from '@assets/icons/indent.svg';
-import Image from 'next/image';
 import { getEventPropertiesValue } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
 import SearchableCheckboxDropdown from '@components/SearchableDropdown/SearchableCheckboxDropdown';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { FunnelStepFilter } from '@lib/domain/funnel';
 import { GREY_500, GREY_700 } from '@theme/index';
-import { ArrowElbowDownRight, Trash } from '@phosphor-icons/react';
+import { ArrowElbowDownRight, Trash } from 'phosphor-react';
 
 type FilterComponentProps = {
   filter: FunnelStepFilter;
@@ -32,7 +30,9 @@ const FunnelStepFilter = ({
     filter.values || []
   );
   const [loadingPropertyValues, setLoadingPropertyValues] = useState(false);
-  const [isValueDropDownOpen, setIsValueDropDownOpen] = useState(false);
+  const [isValueDropDownOpen, setIsValueDropDownOpen] = useState(
+    filter.values.length ? false : true
+  );
   const [areAllValuesSelected, setAreAllValuesSelected] =
     useState<boolean>(false);
 
@@ -72,7 +72,7 @@ const FunnelStepFilter = ({
   const getValuesText = (values: string[]) => {
     if (!values.length) return 'Select value';
     if (values.length <= 2) return values.join(', ');
-    return `${values[0]}, ${values[1]} or ${values.length - 2} more`;
+    return `${values[0]}, ${values[1]}, +${values.length - 2} more`;
   };
 
   const handleAllSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -90,7 +90,6 @@ const FunnelStepFilter = ({
     <Flex
       data-testid={'event-filter'}
       width={'full'}
-      _first={{ borderTop: '1px solid rgba(255, 255, 255, 0.2)' }}
       mt={2}
       direction={'column'}
       gap={1}
@@ -114,7 +113,7 @@ const FunnelStepFilter = ({
             color={'grey.600'}
             p={1}
             height={6}
-            data-testid={'add-filter-button'}
+            data-testid={'filter-condition'}
             cursor={'pointer'}
             borderRadius={'4px'}
             _hover={{ color: 'grey.800', background: 'white.400' }}
@@ -172,7 +171,7 @@ const FunnelStepFilter = ({
           color={'grey.600'}
           p={1}
           height={6}
-          data-testid={'add-filter-button'}
+          data-testid={'filter-operator'}
           cursor={'not-allowed'}
           borderRadius={'4px'}
           _hover={{ color: 'grey.800', background: 'white.400' }}
@@ -192,6 +191,9 @@ const FunnelStepFilter = ({
             borderBottom={'1px'}
             borderStyle={'dashed'}
             borderColor={'black.500'}
+            onClick={() => {
+              setIsValueDropDownOpen(true);
+            }}
           >
             <Text
               data-testid={'event-filter-values'}
@@ -199,9 +201,7 @@ const FunnelStepFilter = ({
               fontSize={'xs-12'}
               lineHeight={'xs-14'}
               color={'black.500'}
-              onClick={() => {
-                setIsValueDropDownOpen(true);
-              }}
+              wordBreak={'break-word'}
             >
               {getValuesText(filter.values)}
             </Text>

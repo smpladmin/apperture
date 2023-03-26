@@ -16,7 +16,7 @@ import { RouterContext } from 'next/dist/shared/lib/router-context';
 import CreateFunnel from './index';
 import { createMockRouter } from 'tests/util';
 import * as APIService from '@lib/services/funnelService';
-import { getSearchResult } from '@lib/utils/common';
+import { capitalizeFirstLetter, getSearchResult } from '@lib/utils/common';
 import {
   getEventProperties,
   getEventPropertiesValue,
@@ -42,6 +42,7 @@ describe('create funnel', () => {
   let mockedGetEventPropertiesValue: jest.Mock;
   let mockedReplaceFilterValueWithEmptyStringPlaceholder: jest.Mock;
   let mockedGetTransientFunnelTrendsData: jest.Mock;
+  let mockedCapitalizeLetter: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -91,11 +92,7 @@ describe('create funnel', () => {
     );
   };
 
-  const addEventFilter = async (
-    property: string,
-    stepIndex = 0,
-    filterIndex = 0
-  ) => {
+  const addEventFilter = async (property: string, stepIndex = 0) => {
     const addFilterButton = screen.getAllByTestId('add-filter-button');
     fireEvent.click(addFilterButton[stepIndex]);
 
@@ -103,9 +100,6 @@ describe('create funnel', () => {
     await act(async () => {
       fireEvent.click(selectCityProperty);
     });
-
-    const eventPropertyValue = screen.getAllByTestId('event-filter-values');
-    fireEvent.click(eventPropertyValue[filterIndex]);
 
     const addFilterValueButton = screen.getByTestId(
       'add-event-property-values'
@@ -212,12 +206,20 @@ describe('create funnel', () => {
     mockedReplaceFilterValueWithEmptyStringPlaceholder = jest.mocked(
       replaceFilterValueWithEmptyStringPlaceholder
     );
+    mockedCapitalizeLetter = jest.mocked(capitalizeFirstLetter);
 
     mockedGetTransientFunnelTrendsData.mockReturnValue(funnelTrendsData);
     mockedGetCountOfValidAddedSteps.mockReturnValue(2);
     mockedIsEveryFunnelStepFiltersValid.mockReturnValue(true);
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetEventPropertiesValue.mockReturnValue(eventPropertiesValues);
+    mockedCapitalizeLetter.mockImplementation((val: string) => {
+      const capitalizedFirstLetterMap: { [key: string]: string } = {
+        days: 'Days',
+        minutes: 'Minutes',
+      };
+      return capitalizedFirstLetterMap[val];
+    });
   });
 
   afterAll(() => {
@@ -460,7 +462,7 @@ describe('create funnel', () => {
         pathname: '/analytics/funnel/edit',
       });
       await renderCreateFunnel(router, true);
-      const funnelName = screen.getByTestId('funnel-name');
+      const funnelName = screen.getByTestId('entity-name');
       const funnelSteps = screen.getAllByTestId('funnel-step');
 
       expect(funnelName).toHaveDisplayValue('Test Funnel');
@@ -484,7 +486,7 @@ describe('create funnel', () => {
         'where',
         'city',
         'is',
-        'Mumbai, Delhi or 2 more',
+        'Mumbai, Delhi, +2 more',
       ]);
 
       // add another filter
@@ -494,7 +496,7 @@ describe('create funnel', () => {
         ['mac'],
         ['windows'],
       ]);
-      await addEventFilter('device', 0, 1);
+      await addEventFilter('device');
       const newAddedEventFilters = screen.getAllByTestId('event-filter');
 
       const secondEventFilterText = getEventFilterText(newAddedEventFilters, 1);
@@ -502,7 +504,7 @@ describe('create funnel', () => {
         'and',
         'device',
         'is',
-        'android, ios or 2 more',
+        'android, ios, +2 more',
       ]);
     });
 
@@ -523,7 +525,7 @@ describe('create funnel', () => {
         ['mac'],
         ['windows'],
       ]);
-      await addEventFilter('device', 0, 1);
+      await addEventFilter('device');
 
       const eventFilters = screen.getAllByTestId('event-filter');
       fireEvent.mouseEnter(eventFilters[0]);
@@ -545,7 +547,7 @@ describe('create funnel', () => {
         'where',
         'device',
         'is',
-        'android, ios or 2 more',
+        'android, ios, +2 more',
       ]);
     });
   });
@@ -578,12 +580,12 @@ describe('create funnel', () => {
       await renderCreateFunnel();
       const conversionTypeList = screen.getByTestId('conversion-type-list');
       fireEvent.click(conversionTypeList);
-      const minutesFunc = screen.getByText('minutes');
+      const minutesFunc = screen.getByText('Minutes');
       await act(async () => {
         fireEvent.click(minutesFunc);
       });
       const conversionType = screen.getByTestId('conversion-type');
-      expect(conversionType.textContent).toEqual('minutes');
+      expect(conversionType.textContent).toEqual('Minutes');
     });
 
     it('should trigger an endpoint on changing input', async () => {

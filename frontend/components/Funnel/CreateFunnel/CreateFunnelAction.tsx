@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import EventFields from '../components/EventFields';
 import { ConversionWindowObj, FunnelStep } from '@lib/domain/funnel';
-import { CaretDown, Plus } from '@phosphor-icons/react';
+import { CaretDown, Plus } from 'phosphor-react';
 import ConversionCriteria from '../components/ConversionCriteria';
 import { stepsSequence } from '../util';
 import Dropdown from '@components/SearchableDropdown/Dropdown';
@@ -76,10 +76,10 @@ const CreateFunnelAction = ({
               </Text>
               <CaretDown size={14} color={'#747474'} />
             </Flex>
-            <Dropdown isOpen={isDropdownOpen} minWidth={'70'}>
+            <Dropdown isOpen={isDropdownOpen} width={'76'}>
               {stepsSequence.map((seq) => {
                 return (
-                  <Flex direction={'column'}>
+                  <Flex direction={'column'} key={seq.label}>
                     <Flex
                       p={'2'}
                       _hover={{ bg: 'white.400' }}

@@ -144,7 +144,7 @@ describe('View Funnel', () => {
 
   it('renders funnel name, first step and last step name and (n-2) steps count', async () => {
     await renderViewFunnel();
-    const funnelName = screen.getByTestId('funnel-name');
+    const funnelName = screen.getByTestId('entity-name');
     const firstStepName = screen.getByTestId('first-step');
     const lastStepName = screen.getByTestId('last-step');
     const intermediateSteps = screen.getByTestId('intermediate-steps');
@@ -180,7 +180,7 @@ describe('View Funnel', () => {
     });
     await renderViewFunnel(router);
 
-    const editFunnelButton = screen.getByTestId('edit-funnel');
+    const editFunnelButton = screen.getByTestId('edit');
     fireEvent.click(editFunnelButton);
     await waitFor(() => {
       expect(router.push).toBeCalledWith({
@@ -197,8 +197,6 @@ describe('View Funnel', () => {
     });
     await renderViewFunnel(router);
 
-    const editFunnelButton = screen.getByTestId('edit-funnel');
-    fireEvent.click(editFunnelButton);
     const chart = screen.getByTestId('funnel-chart');
     const trendsChart = screen.getByTestId('funnel-trend');
     expect(chart).toBeInTheDocument();

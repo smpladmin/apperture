@@ -28,7 +28,7 @@ import {
 import { useRouter } from 'next/router';
 import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel/util';
 import { DateFilterObj } from '@lib/domain/common';
-import Header from '@components/EventsLayout/Header';
+import Header from '@components/EventsLayout/ActionHeader';
 import Card from '@components/Card';
 
 const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
@@ -131,7 +131,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
 
     setIsLoading(true);
     getFunnelMetricsData();
-  }, [funnelSteps, dateFilter, conversionWindow]);
+  }, [funnelSteps, dateFilter, conversionWindow, randomSequence]);
 
   const handleSaveFunnel = async () => {
     const { data, status } = isFunnelBeingEdited
@@ -166,7 +166,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
       direction={'column'}
       h={'full'}
       bg={'white.400'}
-      overflow={'hidden'}
+      overflow={'auto'}
     >
       <Header
         handleGoBack={() => router.back()}
@@ -179,7 +179,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
         direction={{ base: 'column', md: 'row' }}
         gap={'5'}
         flexGrow={1}
-        height={1}
+        bg={'white.400'}
       >
         <ActionPanel>
           <Card>
@@ -196,7 +196,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
         </ActionPanel>
         <ViewPanel>
           {isEmpty ? (
-            <Card minHeight="120">
+            <Card minHeight={'120'} borderRadius={'16'}>
               <FunnelEmptyState />
             </Card>
           ) : (

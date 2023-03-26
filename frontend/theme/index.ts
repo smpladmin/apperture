@@ -29,7 +29,6 @@ const GREY_800 = '#606060';
 const BLACK_500 = '#424242';
 const colors = {
   black: {
-    // Aman to replace black.400 with black.400 except in events header
     DEFAULT: '#000000',
     0: 'rgba(14,14,26,0)',
     10: 'rgba(255, 255, 255, 0.04)',
@@ -99,14 +98,17 @@ const spacing = {
   39: '9.75rem',
   45: '11.25rem',
   50: '12.5rem',
+  52: '13rem',
   55: '13.75rem',
   62: '15.5rem',
   70: '17.5rem',
   75: '18.75rem',
+  76: '19rem',
   78: '19.5rem',
   82: '20.5rem',
   88: '22rem',
   90: '22.5rem',
+  96: '24rem',
   100: '25rem',
   102: '25.5rem',
   106: '26.5rem',

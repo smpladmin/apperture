@@ -12,7 +12,7 @@ import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 import { formatDateIntoString } from '@lib/utils/common';
 import isEqual from 'lodash/isEqual';
-import { CalendarBlank } from '@phosphor-icons/react';
+import { CalendarBlank } from 'phosphor-react';
 import { GREY_600 } from '@theme/index';
 
 type DateFilterProps = {
