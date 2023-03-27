@@ -49,7 +49,7 @@ export const replaceFilterValueWithEmptyStringPlaceholder = (
   });
 };
 
-export const getCountOfAggregates = (aggregates: MetricAggregate[]) => {
+export const getCountOfValidAggregates = (aggregates: MetricAggregate[]) => {
   const validAggregatesWithReferenceId = aggregates.filter(
     (aggregate) => aggregate.reference_id
   );

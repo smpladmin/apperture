@@ -1,19 +1,10 @@
-import {
-  Button,
-  Divider,
-  Flex,
-  IconButton,
-  Input,
-  Text,
-} from '@chakra-ui/react';
+import { Button, Divider, Flex, Input, Text } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
+import { BASTILLE } from '@theme/index';
 import { useRouter } from 'next/router';
 import MetricComponentCard from './MetricComponentCard';
 import {
   computeMetric,
-  saveMetric,
-  updateMetric,
   validateMetricFormula,
 } from '@lib/services/metricService';
 import {
@@ -35,7 +26,7 @@ import { DateFilterObj } from '@lib/domain/common';
 type CreateMetricActionProps = {
   setMetric: Function;
   savedMetric: Metric | undefined;
-  canSaveMetric: boolean;
+  metricName: string;
   setCanSaveMetric: Function;
   setIsLoading: Function;
   loadingEventsAndProperties: boolean;
@@ -45,12 +36,14 @@ type CreateMetricActionProps = {
   aggregates: MetricAggregate[];
   setAggregates: Function;
   dateFilter: DateFilterObj;
+  metricDefinition: string;
+  setMetricDefinition: Function;
 };
 
 const CreateMetricAction = ({
   setMetric,
   savedMetric,
-  canSaveMetric,
+  metricName,
   setCanSaveMetric,
   setIsLoading,
   loadingEventsAndProperties,
@@ -60,31 +53,21 @@ const CreateMetricAction = ({
   aggregates,
   setAggregates,
   dateFilter,
+  metricDefinition,
+  setMetricDefinition,
 }: CreateMetricActionProps) => {
-  const [metricName, setMetricName] = useState(
-    savedMetric?.name || 'Untitled Metric'
-  );
-  const [metricDefinition, setmetricDefinition] = useState(
-    savedMetric?.function || ''
-  );
   const [debouncedDefinition, setDebouncedDefinition] = useState(
     savedMetric?.function || ''
   );
   const router = useRouter();
 
-  const { metricId } = router.query;
   const dsId = savedMetric?.datasourceId || router.query.dsId;
 
   const [isValidDefinition, setIsValidDefinition] = useState<boolean>(true);
-  const [isMetricBeingEdited, setIsMetricBeingEdited] = useState(false);
-
-  useEffect(() => {
-    if (router.pathname.includes('/metric/edit')) setIsMetricBeingEdited(true);
-  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setmetricDefinition(debouncedDefinition);
+      setMetricDefinition(debouncedDefinition);
     }, 600);
 
     return () => {
@@ -140,35 +123,6 @@ const CreateMetricAction = ({
     setAggregates(toUpdateAggregates);
   };
 
-  const handleSave = async () => {
-    const { data, status } = isMetricBeingEdited
-      ? await updateMetric(
-          metricId as string,
-          metricName,
-          dsId as string,
-          metricDefinition,
-          aggregates,
-          breakdown,
-          dateFilter
-        )
-      : await saveMetric(
-          metricName,
-          dsId as string,
-          metricDefinition,
-          aggregates,
-          breakdown,
-          dateFilter
-        );
-
-    if (status === 200)
-      router.push({
-        pathname: '/analytics/metric/view/[metricId]',
-        query: { metricId: data?._id || metricId, dsId },
-      });
-
-    setCanSaveMetric(false);
-  };
-
   useEffect(() => {
     if (!isValidAggregates(aggregates)) return;
 
@@ -217,7 +171,7 @@ const CreateMetricAction = ({
       isValidDefinition &&
       (!isEqual(savedMetric?.aggregates, aggregates) ||
         savedMetric?.function != metricDefinition ||
-        saveMetric?.name !== metricName)
+        savedMetric?.name !== metricName)
     ) {
       setCanSaveMetric(true);
     } else {
@@ -227,61 +181,7 @@ const CreateMetricAction = ({
 
   return (
     <>
-      <Flex justifyContent={'space-between'} alignItems={'center'}>
-        <IconButton
-          aria-label="close"
-          variant={'primary'}
-          icon={<i className="ri-arrow-left-line"></i>}
-          rounded={'full'}
-          color={'white.DEFAULT'}
-          bg={'black.20'}
-          onClick={() => {
-            router.push({
-              pathname: '/analytics/metric/list/[dsId]',
-              query: { dsId },
-            });
-          }}
-          data-testid="back-button"
-        />
-
-        <Button
-          borderRadius={'50'}
-          _disabled={{
-            bg: 'black.30',
-            pointerEvents: 'none',
-          }}
-          data-testid={'save'}
-          disabled={!canSaveMetric}
-          onClick={handleSave}
-        >
-          <Text
-            textAlign={'center'}
-            color={BLACK_RUSSIAN}
-            fontSize={'xs-14'}
-            lineHeight={'xs-14'}
-            fontWeight={'medium'}
-          >
-            Save
-          </Text>
-        </Button>
-      </Flex>
-
       <Flex direction={'column'} mt={'8'}>
-        <Input
-          pr={'4'}
-          type={'text'}
-          variant="flushed"
-          fontSize={{ base: 'sh-20', md: 'sh-32' }}
-          lineHeight={{ base: 'sh-20', md: 'sh-32' }}
-          fontWeight={'semibold'}
-          textColor={'white.DEFAULT'}
-          value={metricName}
-          focusBorderColor={'white.DEFAULT'}
-          onChange={(e) => setMetricName(e.target.value)}
-          borderColor={'grey.10'}
-          px={0}
-          data-testid={'metric-name'}
-        />
         <Text fontSize={'xs-12'} color={'grey.200'} py="4">
           METRIC DEFINITION
         </Text>

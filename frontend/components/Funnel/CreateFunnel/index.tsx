@@ -133,7 +133,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
     getFunnelMetricsData();
   }, [funnelSteps, dateFilter, conversionWindow, randomSequence]);
 
-  const handleSaveFunnel = async () => {
+  const handleSaveOrUpdateFunnel = async () => {
     const { data, status } = isFunnelBeingEdited
       ? await updateFunnel(
           funnelId as string,
@@ -172,7 +172,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
         handleGoBack={() => router.back()}
         name={funnelName}
         setName={setFunnelName}
-        handleSave={handleSaveFunnel}
+        handleSave={handleSaveOrUpdateFunnel}
         isSaveButtonDisabled={isSaveButtonDisabled}
       />
       <Flex

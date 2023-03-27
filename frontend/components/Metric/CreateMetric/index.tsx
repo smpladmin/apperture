@@ -2,7 +2,6 @@ import { Flex } from '@chakra-ui/react';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import {
-  DateRangeType,
   ComputedMetric,
   Metric,
   MetricAggregate,
@@ -15,8 +14,10 @@ import CreateMetricAction from './Components/CreateMetricAction';
 import TransientMetricView from './Components/TransientMetricView';
 import { Node } from '@lib/domain/node';
 import { useRouter } from 'next/router';
-import { getCountOfAggregates } from '../util';
-import { DateFilter, DateFilterType, DateFilterObj } from '@lib/domain/common';
+import { getCountOfValidAggregates } from '../util';
+import { DateFilterObj } from '@lib/domain/common';
+import ActionHeader from '@components/EventsLayout/ActionHeader';
+import { saveMetric, updateMetric } from '@lib/services/metricService';
 
 const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
   const [metric, setMetric] = useState<ComputedMetric[]>([]);
@@ -43,15 +44,28 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
       },
     ]
   );
+  const [metricName, setMetricName] = useState(
+    savedMetric?.name || 'Untitled Metric'
+  );
+  const [metricDefinition, setMetricDefinition] = useState(
+    savedMetric?.function || ''
+  );
   const [dateFilter, setDateFilter] = useState<DateFilterObj>({
     filter: savedMetric?.dateFilter?.filter || null,
     type: savedMetric?.dateFilter?.type || null,
   });
+  const [isMetricBeingEdited, setIsMetricBeingEdited] = useState(false);
+
   const router = useRouter();
   const dsId = savedMetric?.datasourceId || router.query.dsId;
+  const { metricId } = router.query;
 
   useEffect(() => {
-    if (getCountOfAggregates(aggregates) >= 1) {
+    if (router.pathname.includes('/metric/edit')) setIsMetricBeingEdited(true);
+  }, []);
+
+  useEffect(() => {
+    if (getCountOfValidAggregates(aggregates) >= 1) {
       setShowEmptyState(false);
     } else {
       setShowEmptyState(true);
@@ -73,37 +87,88 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
     fetchEventProperties();
   }, []);
 
+  const handleSaveOrUpdateMetric = async () => {
+    const { data, status } = isMetricBeingEdited
+      ? await updateMetric(
+          metricId as string,
+          metricName,
+          dsId as string,
+          metricDefinition,
+          aggregates,
+          breakdown,
+          dateFilter
+        )
+      : await saveMetric(
+          metricName,
+          dsId as string,
+          metricDefinition,
+          aggregates,
+          breakdown,
+          dateFilter
+        );
+
+    if (status === 200)
+      router.push({
+        pathname: '/analytics/metric/view/[metricId]',
+        query: { metricId: data?._id || metricId, dsId },
+      });
+
+    setCanSaveMetric(false);
+  };
+
   return (
-    <Flex direction={{ base: 'column', md: 'row' }} h={'full'}>
-      <ActionPanel>
-        <CreateMetricAction
-          setMetric={setMetric}
-          savedMetric={savedMetric}
-          canSaveMetric={canSaveMetric}
-          setCanSaveMetric={setCanSaveMetric}
-          setIsLoading={setIsLoading}
-          loadingEventsAndProperties={loadingEventsAndProperties}
-          eventList={eventList}
-          eventProperties={eventProperties}
-          breakdown={breakdown}
-          aggregates={aggregates}
-          setAggregates={setAggregates}
-          dateFilter={dateFilter}
-        />
-      </ActionPanel>
-      <ViewPanel>
-        <TransientMetricView
-          metric={metric}
-          isLoading={isLoading}
-          eventProperties={eventProperties}
-          loadingEventsAndProperties={loadingEventsAndProperties}
-          breakdown={breakdown}
-          setBreakdown={setBreakdown}
-          showEmptyState={showEmptyState}
-          dateFilter={dateFilter}
-          setDateFilter={setDateFilter}
-        />
-      </ViewPanel>
+    <Flex
+      px={'5'}
+      direction={'column'}
+      h={'full'}
+      bg={'white.400'}
+      overflow={'auto'}
+    >
+      <ActionHeader
+        handleGoBack={() => router.back()}
+        name={metricName}
+        setName={setMetricName}
+        handleSave={handleSaveOrUpdateMetric}
+        isSaveButtonDisabled={!canSaveMetric}
+      />
+      <Flex
+        direction={{ base: 'column', md: 'row' }}
+        gap={'5'}
+        flexGrow={1}
+        bg={'white.400'}
+      >
+        <ActionPanel>
+          <CreateMetricAction
+            setMetric={setMetric}
+            savedMetric={savedMetric}
+            metricName={metricName}
+            setCanSaveMetric={setCanSaveMetric}
+            setIsLoading={setIsLoading}
+            loadingEventsAndProperties={loadingEventsAndProperties}
+            eventList={eventList}
+            eventProperties={eventProperties}
+            breakdown={breakdown}
+            aggregates={aggregates}
+            setAggregates={setAggregates}
+            dateFilter={dateFilter}
+            metricDefinition={metricDefinition}
+            setMetricDefinition={setMetricDefinition}
+          />
+        </ActionPanel>
+        <ViewPanel>
+          <TransientMetricView
+            metric={metric}
+            isLoading={isLoading}
+            eventProperties={eventProperties}
+            loadingEventsAndProperties={loadingEventsAndProperties}
+            breakdown={breakdown}
+            setBreakdown={setBreakdown}
+            showEmptyState={showEmptyState}
+            dateFilter={dateFilter}
+            setDateFilter={setDateFilter}
+          />
+        </ViewPanel>
+      </Flex>
     </Flex>
   );
 };

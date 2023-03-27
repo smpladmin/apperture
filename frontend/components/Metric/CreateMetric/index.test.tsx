@@ -15,7 +15,7 @@ import {
   isValidAggregates,
   convertToTableData,
   convertToTrendData,
-  getCountOfAggregates,
+  getCountOfValidAggregates,
   getDisplayAggregationFunctionText,
 } from '../util';
 
@@ -194,7 +194,7 @@ describe('Create Metric', () => {
     mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
     mockedComputedMetric = jest.mocked(computeMetric);
     mockedIsValidAggregates = jest.mocked(isValidAggregates);
-    mockedGetCountOfAggregates = jest.mocked(getCountOfAggregates);
+    mockedGetCountOfAggregates = jest.mocked(getCountOfValidAggregates);
     mockedValidateMetricFormula = jest.mocked(validateMetricFormula);
     mockedConvertToTableData = jest.mocked(convertToTableData);
     mockedConvertToTrendData = jest.mocked(convertToTrendData);
