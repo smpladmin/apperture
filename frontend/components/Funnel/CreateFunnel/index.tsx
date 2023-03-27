@@ -11,8 +11,6 @@ import {
   FunnelStep,
   FunnelTrendsData,
 } from '@lib/domain/funnel';
-import ActionPanel from '@components/EventsLayout/ActionPanel';
-import ViewPanel from '@components/EventsLayout/ViewPanel';
 import TransientFunnelView from './TransientFunnelView';
 import {
   filterFunnelSteps,
@@ -22,15 +20,21 @@ import {
 import {
   getTransientFunnelData,
   getTransientTrendsData,
+  saveFunnel,
+  updateFunnel,
 } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel/util';
 import { DateFilterObj } from '@lib/domain/common';
+import Header from '@components/EventsLayout/ActionHeader';
+import Card from '@components/Card';
+import ActionPanelTemp from '@components/EventsLayout/ActionPanelTemp';
+import ViewPanelTemp from '@components/EventsLayout/ViewPanelTemp';
 
 const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const router = useRouter();
   const {
-    query: { dsId },
+    query: { dsId, funnelId },
   } = router;
 
   const datasourceId = (dsId as string) || savedFunnel?.datasourceId;
@@ -66,6 +70,9 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
     Boolean(savedFunnel?.steps?.length)
   );
   const [isStepAdded, setIsStepAdded] = useState(false);
+  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
+  const [isFunnelBeingEdited, setFunnelBeingEdited] = useState(false);
+  const [randomSequence, setRandomSequence] = useState(false);
 
   useEffect(() => {
     if (getCountOfValidAddedSteps(funnelSteps) >= 2) {
@@ -74,6 +81,21 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
       setIsEmpty(true);
     }
   }, [funnelSteps]);
+
+  useEffect(() => {
+    if (
+      getCountOfValidAddedSteps(funnelSteps) >= 2 &&
+      isEveryFunnelStepFiltersValid(funnelSteps)
+    ) {
+      setSaveButtonDisabled(false);
+    } else {
+      setSaveButtonDisabled(true);
+    }
+  }, [funnelSteps]);
+
+  useEffect(() => {
+    if (router.pathname.includes('edit')) setFunnelBeingEdited(true);
+  }, []);
 
   useEffect(() => {
     if (
@@ -91,13 +113,15 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
           dateFilter,
-          conversionWindow
+          conversionWindow,
+          randomSequence
         ),
         getTransientTrendsData(
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
           dateFilter,
-          conversionWindow
+          conversionWindow,
+          randomSequence
         ),
       ]);
       setFunnelData(funnelData);
@@ -107,37 +131,87 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
 
     setIsLoading(true);
     getFunnelMetricsData();
-  }, [funnelSteps, dateFilter, conversionWindow]);
+  }, [funnelSteps, dateFilter, conversionWindow, randomSequence]);
+
+  const handleSaveFunnel = async () => {
+    const { data, status } = isFunnelBeingEdited
+      ? await updateFunnel(
+          funnelId as string,
+          dsId as string,
+          funnelName,
+          filterFunnelSteps(funnelSteps),
+          randomSequence,
+          dateFilter,
+          conversionWindow
+        )
+      : await saveFunnel(
+          dsId as string,
+          funnelName,
+          filterFunnelSteps(funnelSteps),
+          randomSequence,
+          dateFilter,
+          conversionWindow
+        );
+
+    if (status === 200)
+      router.push({
+        pathname: '/analytics/funnel/view/[funnelId]',
+        query: { funnelId: data?._id || funnelId, dsId },
+      });
+  };
 
   return (
-    <Flex direction={{ base: 'column', md: 'row' }} h={'full'}>
-      <ActionPanel>
-        <CreateFunnelAction
-          funnelName={funnelName}
-          setFunnelName={setFunnelName}
-          funnelSteps={funnelSteps}
-          setFunnelSteps={setFunnelSteps}
-          setIsStepAdded={setIsStepAdded}
-          dateFilter={dateFilter}
-          conversionWindow={conversionWindow}
-          setConversionWindow={setConversionWindow}
-        />
-      </ActionPanel>
-      <ViewPanel>
-        {isEmpty ? (
-          <FunnelEmptyState />
-        ) : (
-          <TransientFunnelView
-            isLoading={isLoading}
-            funnelData={funnelData}
-            trendsData={trendsData}
-            funnelSteps={funnelSteps}
-            dateFilter={dateFilter}
-            setDateFilter={setDateFilter}
-            conversionWindow={conversionWindow}
-          />
-        )}
-      </ViewPanel>
+    <Flex
+      px={'5'}
+      direction={'column'}
+      h={'full'}
+      bg={'white.400'}
+      overflow={'auto'}
+    >
+      <Header
+        handleGoBack={() => router.back()}
+        name={funnelName}
+        setName={setFunnelName}
+        handleSave={handleSaveFunnel}
+        isSaveButtonDisabled={isSaveButtonDisabled}
+      />
+      <Flex
+        direction={{ base: 'column', md: 'row' }}
+        gap={'5'}
+        flexGrow={1}
+        bg={'white.400'}
+      >
+        <ActionPanelTemp>
+          <Card>
+            <CreateFunnelAction
+              funnelSteps={funnelSteps}
+              setFunnelSteps={setFunnelSteps}
+              setIsStepAdded={setIsStepAdded}
+              conversionWindow={conversionWindow}
+              setConversionWindow={setConversionWindow}
+              randomSequence={randomSequence}
+              setRandomSequence={setRandomSequence}
+            />
+          </Card>
+        </ActionPanelTemp>
+        <ViewPanelTemp>
+          {isEmpty ? (
+            <Card minHeight={'120'} borderRadius={'16'}>
+              <FunnelEmptyState />
+            </Card>
+          ) : (
+            <TransientFunnelView
+              isLoading={isLoading}
+              funnelData={funnelData}
+              trendsData={trendsData}
+              funnelSteps={funnelSteps}
+              dateFilter={dateFilter}
+              setDateFilter={setDateFilter}
+              conversionWindow={conversionWindow}
+            />
+          )}
+        </ViewPanelTemp>
+      </Flex>
     </Flex>
   );
 };

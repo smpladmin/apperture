@@ -2,7 +2,7 @@ import { Line } from '@antv/g2plot';
 import { Box, usePrevious } from '@chakra-ui/react';
 import { FunnelTrendsData } from '@lib/domain/funnel';
 import { convertISODateToReadableDate } from '@lib/utils/common';
-import { BLUE } from '@theme/index';
+import { BLUE_MAIN } from '@theme/index';
 import isEqual from 'lodash/isEqual';
 import React, { useEffect, useRef } from 'react';
 
@@ -47,7 +47,7 @@ const Trend = ({ data }: { data: FunnelTrendsData[] }) => {
         },
       },
       lineStyle: {
-        stroke: BLUE,
+        stroke: BLUE_MAIN,
       },
       animation: false,
     });

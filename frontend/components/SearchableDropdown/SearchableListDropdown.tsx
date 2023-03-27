@@ -14,6 +14,8 @@ type SearchableListDropdownProps = {
   showBadge?: boolean;
   isNode?: boolean;
   dropdownPosition?: string;
+  placeholderText?: string;
+  width?: string;
 };
 
 const SearchableListDropdown = ({
@@ -25,6 +27,8 @@ const SearchableListDropdown = ({
   showBadge,
   dropdownPosition,
   isNode = false,
+  placeholderText,
+  width,
 }: SearchableListDropdownProps) => {
   const [listData, setListData] = useState<
     Array<string | SegmentProperty | Node>
@@ -42,6 +46,8 @@ const SearchableListDropdown = ({
       setSearchData={setListData}
       searchKey={listKey}
       dropdownPosition={dropdownPosition}
+      placeholderText={placeholderText}
+      width={width}
     >
       {listData.length ? (
         <Box data-testid={'event-property-dropdown-container'}>
@@ -57,31 +63,36 @@ const SearchableListDropdown = ({
                   bg: 'white.100',
                   cursor: 'pointer',
                 }}
-                px={'2'}
                 onClick={(e) => {
                   e.stopPropagation();
                   onSubmit(item);
                 }}
+                borderRadius={'4'}
+                py={'3'}
+                px={'2'}
               >
-                <Box
-                  cursor={'pointer'}
-                  px={'2'}
-                  py={'3'}
-                  fontSize={'xs-14'}
-                  lineHeight={'xs-14'}
-                  fontWeight={'500'}
+                <Flex
+                  maxW={showBadge ? '60' : 'full'}
+                  gap={'2'}
                   data-testid={'dropdown-options'}
-                  maxW={'75'}
                 >
-                  {listKey ? segmentPropertyItem : (item as string)}
-                </Box>
+                  {/* <CursorClick size={'18'} color={'#9E9E9E'} /> */}
+                  <Text
+                    fontSize={'xs-14'}
+                    lineHeight={'xs-14'}
+                    fontWeight={'500'}
+                    wordBreak={'break-word'}
+                  >
+                    {listKey ? segmentPropertyItem : (item as string)}
+                  </Text>
+                </Flex>
                 {showBadge ? (
                   <Box
                     h={'6'}
-                    px={'2'}
-                    py={'1'}
-                    bg={'grey.DEFAULT'}
+                    p={'1'}
                     borderRadius={'4'}
+                    border={'1px'}
+                    borderColor={'grey.400'}
                   >
                     <Text
                       fontSize={'xs-12'}
@@ -95,10 +106,10 @@ const SearchableListDropdown = ({
                 {isNode ? (
                   <Box
                     h={'6'}
-                    px={'2'}
-                    py={'1'}
-                    bg={'grey.DEFAULT'}
+                    p={'1'}
                     borderRadius={'4'}
+                    border={'1px'}
+                    borderColor={'grey.400'}
                   >
                     <Text
                       fontSize={'xs-12'}

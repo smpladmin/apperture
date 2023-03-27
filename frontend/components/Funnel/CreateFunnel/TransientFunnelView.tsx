@@ -1,11 +1,4 @@
-import {
-  Button,
-  Divider,
-  Flex,
-  Highlight,
-  Text,
-  useDisclosure,
-} from '@chakra-ui/react';
+import { Box, Flex, Highlight, Text, useDisclosure } from '@chakra-ui/react';
 import {
   ConversionWindowObj,
   FunnelData,
@@ -20,6 +13,8 @@ import UserConversionDrawer from '../components/UserCoversionDrawer';
 import { useRouter } from 'next/router';
 import DateFilterComponent from '@components/Date/DateFilter';
 import { DateFilterObj } from '@lib/domain/common';
+import Card from '@components/Card';
+import { ArrowRight } from 'phosphor-react';
 
 type TransientFunnelViewProps = {
   isLoading: boolean;
@@ -69,13 +64,7 @@ const TransientFunnelView = ({
   };
 
   return (
-    <Flex
-      direction={'column'}
-      gap={'8'}
-      px={{ base: '0', md: '15' }}
-      py={{ base: '8', md: '8' }}
-      h={'full'}
-    >
+    <Flex direction={'column'} gap={'5'} h={'full'}>
       <DateFilterComponent
         dateFilter={dateFilter}
         setDateFilter={setDateFilter}
@@ -88,76 +77,102 @@ const TransientFunnelView = ({
         </Flex>
       ) : (
         <>
-          <Flex justifyContent={'space-between'}>
-            <Flex direction={'column'} gap={'1'}>
-              <Text
-                fontSize={'sh-18'}
-                lineHeight={'sh-18'}
-                fontWeight={'500'}
-                data-testid={'funnel-conversion'}
+          <Card borderRadius={'16'}>
+            <Flex w={'full'} direction={'column'} gap={15}>
+              <Flex
+                w={'full'}
+                pt={4}
+                justifyContent={'space-between'}
+                direction={'column'}
+                alignItems={'center'}
+                gap={4}
               >
-                <Highlight
-                  query={`${funnelConversion}%`}
-                  styles={{ fontSize: 'sh-28', fontWeight: 700 }}
+                <Flex gap={15}>
+                  <Flex direction={'column'} gap={'1'}>
+                    <Text
+                      fontSize={'sh-18'}
+                      lineHeight={'sh-18'}
+                      fontWeight={'500'}
+                      color={'black.DEFAULT'}
+                      data-testid={'funnel-conversion'}
+                    >
+                      <Highlight
+                        query={`${funnelConversion}%`}
+                        styles={{
+                          fontSize: 'sh-28',
+                          lineHeight: 'lh-120',
+                          fontWeight: 400,
+                        }}
+                      >
+                        {`${funnelConversion}% `}
+                      </Highlight>
+                    </Text>
+                    <Text
+                      fontSize={'xs-12'}
+                      lineHeight={'lh-130'}
+                      color={'grey.600'}
+                      fontWeight={'400'}
+                    >
+                      Conversion
+                    </Text>
+                  </Flex>
+                  <Flex direction={'column'} gap={'1'}>
+                    <Text
+                      fontSize={'sh-18'}
+                      lineHeight={'sh-18'}
+                      fontWeight={'500'}
+                      data-testid={'funnel-conversion-users'}
+                      color={'black.DEFAULT'}
+                    >
+                      <Highlight
+                        query={`${funnelLastStepUsers}`}
+                        styles={{
+                          fontSize: 'sh-28',
+                          lineHeight: 'lh-120',
+                          fontWeight: 400,
+                        }}
+                      >
+                        {`${funnelLastStepUsers}`}
+                      </Highlight>
+                    </Text>
+                    <Text
+                      fontSize={'xs-12'}
+                      lineHeight={'lh-130'}
+                      color={'grey.600'}
+                      fontWeight={'400'}
+                    >
+                      #Users
+                    </Text>
+                  </Flex>
+                </Flex>
+                <Flex
+                  cursor={'pointer'}
+                  borderRadius={'8px'}
+                  p={2}
+                  justifyContent={'center'}
+                  alignItems={'center'}
+                  gap={2}
+                  fontSize={'xs-12'}
+                  lineHeight={'lh-130'}
+                  fontWeight={'400'}
+                  bg={'white.400'}
                 >
-                  {`${funnelConversion}% Conversion`}
-                </Highlight>
-              </Text>
-              <Text
-                fontSize={'base'}
-                lineHeight={'base'}
-                fontWeight={'400'}
-                color={'grey.100'}
-              >
-                {`${funnelLastStepUsers} users`}
-              </Text>
+                  Analyse Factors
+                  <ArrowRight size={14} />
+                </Flex>
+              </Flex>
+              <FunnelChart
+                data={funnelData}
+                handleChartClick={handleChartClick}
+              />
             </Flex>
+          </Card>
 
-            <Button
-              h={'15'}
-              fontSize={'xs-14'}
-              lineHeight={'xs-14'}
-              fontWeight={'600'}
-              bg={'white.200'}
-            >
-              {'Analyse Factors'}
-            </Button>
-          </Flex>
-          <Divider
-            orientation="horizontal"
-            borderColor={'white.200'}
-            opacity={1}
-          />
-          <Flex direction={'column'} gap={'8'}>
-            <Text
-              fontSize={{ base: 'sh-18', md: 'sh-20' }}
-              lineHeight={{ base: 'sh-18', md: 'sh-20' }}
-              fontWeight={'semibold'}
-            >
-              Funnel
-            </Text>
-
-            <FunnelChart
-              data={funnelData}
-              handleChartClick={handleChartClick}
-            />
-          </Flex>
-          <Divider
-            orientation="horizontal"
-            borderColor={'white.200'}
-            opacity={1}
-          />
-          <Flex direction={'column'} gap={'8'} pb={'8'}>
-            <Text
-              fontSize={{ base: 'sh-18', md: 'sh-20' }}
-              lineHeight={{ base: 'sh-18', md: 'sh-20' }}
-              fontWeight={'semibold'}
-            >
-              Trend
-            </Text>
-
-            <Trend data={trendsData} />
-          </Flex>
+          <Card borderRadius={'16'}>
+            <Box w={'full'}>
+              <Trend data={trendsData} />
+            </Box>
+          </Card>
         </>
       )}
       <UserConversionDrawer

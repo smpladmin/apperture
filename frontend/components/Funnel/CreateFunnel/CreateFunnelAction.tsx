@@ -1,57 +1,35 @@
-import {
-  Button,
-  Divider,
-  Flex,
-  IconButton,
-  Input,
-  Switch,
-  Text,
-} from '@chakra-ui/react';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import EventFields from '../components/EventFields';
-import { BASTILLE, BLACK_RUSSIAN } from '@theme/index';
-import {
-  filterFunnelSteps,
-  getCountOfValidAddedSteps,
-  isEveryFunnelStepFiltersValid,
-} from '../util';
-import { saveFunnel, updateFunnel } from '@lib/services/funnelService';
-import { useRouter } from 'next/router';
-import { MapContext } from '@lib/contexts/mapContext';
 import { ConversionWindowObj, FunnelStep } from '@lib/domain/funnel';
-import { DateFilterObj } from '@lib/domain/common';
+import { CaretDown, Plus } from 'phosphor-react';
 import ConversionCriteria from '../components/ConversionCriteria';
+import { stepsSequence } from '../util';
+import Dropdown from '@components/SearchableDropdown/Dropdown';
+import { useRef, useState } from 'react';
+import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
+import { BLACK_DEFAULT, GREY_500 } from '@theme/index';
 
 type CreateFunnelActionProps = {
-  funnelName: string;
-  setFunnelName: Function;
   funnelSteps: FunnelStep[];
   setFunnelSteps: Function;
   setIsStepAdded: Function;
-  dateFilter: DateFilterObj;
   conversionWindow: ConversionWindowObj;
   setConversionWindow: Function;
+  randomSequence: boolean;
+  setRandomSequence: Function;
 };
 
 const CreateFunnelAction = ({
-  funnelName,
-  setFunnelName,
   funnelSteps,
   setFunnelSteps,
   setIsStepAdded,
-  dateFilter,
   conversionWindow,
   setConversionWindow,
+  randomSequence,
+  setRandomSequence,
 }: CreateFunnelActionProps) => {
-  const {
-    state: { nodes },
-  } = useContext(MapContext);
-  const funnelInputRef = useRef<HTMLInputElement>(null);
-  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
-  const [isFunnelBeingEdited, setFunnelBeingEdited] = useState(false);
-
-  const router = useRouter();
-  const { dsId, funnelId } = router.query;
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const sequenceRef = useRef(null);
 
   const handleAddNewStep = () => {
     const newField = { event: '', filters: [] };
@@ -59,173 +37,93 @@ const CreateFunnelAction = ({
     setIsStepAdded(true);
   };
 
-  useEffect(() => {
-    if (router.pathname.includes('edit')) setFunnelBeingEdited(true);
-  }, []);
-
-  useEffect(() => {
-    funnelInputRef?.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    if (
-      getCountOfValidAddedSteps(funnelSteps) >= 2 &&
-      isEveryFunnelStepFiltersValid(funnelSteps)
-    ) {
-      setSaveButtonDisabled(false);
-    } else {
-      setSaveButtonDisabled(true);
-    }
-  }, [funnelSteps, nodes]);
-
-  const handleSaveFunnel = async () => {
-    const { data, status } = isFunnelBeingEdited
-      ? await updateFunnel(
-          funnelId as string,
-          dsId as string,
-          funnelName,
-          filterFunnelSteps(funnelSteps),
-          false,
-          dateFilter,
-          conversionWindow
-        )
-      : await saveFunnel(
-          dsId as string,
-          funnelName,
-          filterFunnelSteps(funnelSteps),
-          false,
-          dateFilter,
-          conversionWindow
-        );
-
-    if (status === 200)
-      router.push({
-        pathname: '/analytics/funnel/view/[funnelId]',
-        query: { funnelId: data?._id || funnelId, dsId },
-      });
-  };
+  useOnClickOutside(sequenceRef, () => setIsDropdownOpen(false));
 
   return (
-    <>
-      <Flex justifyContent={'space-between'} alignItems={'center'}>
-        <IconButton
-          aria-label="close"
-          variant={'primary'}
-          icon={<i className="ri-arrow-left-line"></i>}
-          rounded={'full'}
-          color={'white.DEFAULT'}
-          bg={'black.20'}
-          onClick={() => {
-            router.back();
-          }}
-        />
-
-        <Button
-          disabled={isSaveButtonDisabled}
-          borderRadius={'50'}
-          _disabled={{
-            bg: 'black.30',
-            pointerEvents: 'none',
-          }}
-          onClick={handleSaveFunnel}
-          data-testid={'save'}
-        >
+    <Flex direction={'column'} gap={'3'} w={'full'}>
+      <Flex px={2} justifyContent={'space-between'} alignItems={'center'}>
+        <Flex gap={2} alignItems={'center'}>
           <Text
-            textAlign={'center'}
-            color={BLACK_RUSSIAN}
-            fontSize={'xs-14'}
-            lineHeight={'xs-14'}
-            fontWeight={'medium'}
-          >
-            Save
-          </Text>
-        </Button>
-      </Flex>
-
-      <Flex direction={'column'} mt={'8'} gap={'2'}>
-        <Text
-          fontSize={'xs-14'}
-          lineHeight={'xs-14'}
-          fontWeight={'normal'}
-          color={'grey.DEFAULT'}
-        >
-          Alias
-        </Text>
-        <Input
-          pr={'4'}
-          type={'text'}
-          variant="flushed"
-          fontSize={{ base: 'sh-20', md: 'sh-32' }}
-          lineHeight={{ base: 'sh-20', md: 'sh-32' }}
-          fontWeight={'semibold'}
-          textColor={'white.DEFAULT'}
-          ref={funnelInputRef}
-          onFocus={(e) =>
-            e.currentTarget.setSelectionRange(
-              e.currentTarget.value.length,
-              e.currentTarget.value.length
-            )
-          }
-          value={funnelName}
-          focusBorderColor={'white.DEFAULT'}
-          onChange={(e) => setFunnelName(e.target.value)}
-          borderColor={'grey.10'}
-          px={0}
-          data-testid={'funnel-name'}
-        />
-      </Flex>
-
-      <Flex direction={'column'} gap={'4'} mt={{ base: '6', md: '8' }}>
-        <Flex justifyContent={'space-between'} alignItems={'center'}>
-          <Text
-            fontSize={{ base: 'sh-18', md: 'sh-24' }}
-            lineHeight={{ base: 'sh-18', md: 'sh-24' }}
-            fontWeight={{ base: '500', md: '400' }}
-            color={'white.DEFAULT'}
+            color={'grey.500'}
+            fontSize={{ base: 'xs-10', md: 'xs-12' }}
+            lineHeight={{ base: 'xs-10', md: 'xs-12' }}
+            fontWeight={'400'}
           >
             Steps
           </Text>
-          <Button
-            data-testid={'add-button'}
-            rounded={'full'}
-            variant={'primary'}
-            size={'md'}
-            bg={'black.20'}
-            color={'white.DEFAULT'}
-            onClick={handleAddNewStep}
-            fontSize={'sh-20'}
-          >
-            {'+'}
-          </Button>
+          <Box position={'relative'} ref={sequenceRef}>
+            <Flex
+              alignItems={'center'}
+              py={'1'}
+              px={'3'}
+              border={'1px'}
+              borderColor={'white.200'}
+              borderRadius={'100'}
+              gap={'1'}
+              onClick={() => {
+                setIsDropdownOpen(true);
+              }}
+              cursor={'pointer'}
+              bg={isDropdownOpen ? 'white.400' : 'white.DEFAULT'}
+              _hover={{ bg: 'white.400' }}
+            >
+              <Text
+                color={'grey.500'}
+                fontSize={{ base: 'xs-10', md: 'xs-12' }}
+                lineHeight={{ base: 'xs-10', md: 'xs-12' }}
+                fontWeight={'400'}
+              >
+                {randomSequence ? 'Any order' : 'In sequence'}
+              </Text>
+              <CaretDown size={14} color={GREY_500} />
+            </Flex>
+            <Dropdown isOpen={isDropdownOpen} width={'76'}>
+              {stepsSequence.map((seq) => {
+                return (
+                  <Flex direction={'column'} key={seq.label}>
+                    <Flex
+                      p={'2'}
+                      _hover={{ bg: 'white.400' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setRandomSequence(seq.value);
+                        setIsDropdownOpen(false);
+                      }}
+                      borderRadius={'4'}
+                    >
+                      <Text
+                        fontSize={'xs-14'}
+                        lineHeight={'lh-135'}
+                        fontWeight={'500'}
+                      >
+                        {seq.label}
+                      </Text>
+                    </Flex>
+                  </Flex>
+                );
+              })}
+            </Dropdown>
+          </Box>
         </Flex>
-        <EventFields
-          funnelSteps={funnelSteps}
-          setFunnelSteps={setFunnelSteps}
-        />
-        <Divider orientation="horizontal" borderColor={BASTILLE} opacity={1} />
-        <Flex justifyContent={'space-between'} alignItems={'center'}>
-          <Text
-            fontSize={{ base: 'xs-14', md: 'base' }}
-            lineHeight={{ base: 'xs-14', md: 'base' }}
-            fontWeight={'normal'}
-            color={'white.DEFAULT'}
-          >
-            In any sequence
-          </Text>
-          <Switch background={'black'} size={'sm'} isDisabled />
-        </Flex>
-        <Divider
-          orientation="horizontal"
-          borderColor={BASTILLE}
-          opacity={1}
-          mb={3}
-        />
-        <ConversionCriteria
-          conversionWindow={conversionWindow}
-          setConversionWindow={setConversionWindow}
-        />
+        <Button
+          h={5.5}
+          minW={5.5}
+          w={5.5}
+          p={0}
+          data-testid={'add-button'}
+          onClick={handleAddNewStep}
+          cursor={'pointer'}
+          variant={'secondary'}
+        >
+          <Plus size={14} color={BLACK_DEFAULT} weight={'bold'} />
+        </Button>
       </Flex>
-    </>
+      <EventFields funnelSteps={funnelSteps} setFunnelSteps={setFunnelSteps} />
+      <ConversionCriteria
+        conversionWindow={conversionWindow}
+        setConversionWindow={setConversionWindow}
+      />
+    </Flex>
   );
 };
 

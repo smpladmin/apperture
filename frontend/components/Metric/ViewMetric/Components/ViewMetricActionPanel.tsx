@@ -9,7 +9,6 @@ import {
 import React, { useEffect, useState } from 'react';
 import { BASTILLE } from '@theme/index';
 import MetricViewComponentCard from './MetricViewComponentCard';
-import ActionMenu from '@components/ActionMenu';
 import {
   ComputedMetric,
   MetricAggregate,
@@ -20,6 +19,7 @@ import Alert from '@components/Alerts';
 import { Notifications, NotificationVariant } from '@lib/domain/notification';
 import { hasSavedAlert } from '@components/Alerts/util';
 import { getCountOfSeries } from '@components/Metric/util';
+import ActionMenuTemp from '@components/ActionMenu/ActionMenuTemp';
 
 const ViewMetricActionPanel = ({
   metricName,
@@ -172,7 +172,7 @@ const ViewMetricActionPanel = ({
             aggregation={aggregate.aggregations}
           />
         ))}
-        <ActionMenu
+        <ActionMenuTemp
           onNotificationClick={handleNotificationClick}
           hasSavedNotification={hasSavedAlert(savedNotification)}
           disableAlert={disableAlert}

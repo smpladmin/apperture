@@ -22,10 +22,9 @@ import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
 import { cloneDeep } from 'lodash';
 import { FilterType } from '@lib/domain/segment';
-import { LOGAN } from '@theme/index';
+import { GREY_500, WHITE_DEFAULT } from '@theme/index';
 import { Node } from '@lib/domain/node';
-import ParallelLineIcon from '@assets/icons/horizontal-parallel-line.svg';
-import Image from 'next/image';
+import { DotsSixVertical, Trash } from 'phosphor-react';
 
 type FunnelComponentCardProps = {
   index: number;
@@ -143,41 +142,36 @@ const FunnelComponentCard = ({
 
   return (
     <Flex
-      py={'5'}
-      borderRadius={'12'}
+      p={'3'}
+      borderRadius={'8px'}
       border={'1px'}
-      borderColor={'grey.10'}
+      borderColor={'white.200'}
       justifyContent={'space-between'}
       alignItems={'center'}
       direction={'column'}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       cursor={'grab'}
       data-testid={'funnel-step'}
+      backgroundColor={'white.DEFAULT'}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <Flex width={'full'} px={'1'}>
-        {isHovered ? (
-          <Image src={ParallelLineIcon} alt={'parallel-line-icon'} />
-        ) : (
-          <Box w={'2'} />
-        )}
+      <Flex width={'full'}>
         <Flex
           width={'full'}
           alignItems={'center'}
           justifyContent={'space-between'}
-          px={'2'}
         >
           <Flex alignItems={'center'} gap={'1'}>
-            <FilterNumber index={index} />
+            <FilterNumber index={index} isHovered={isHovered} />
             <Box position="relative" ref={eventBoxRef}>
               <Text
                 data-testid={'event-name'}
-                color={'white.DEFAULT'}
+                color={funnelStep?.event ? 'black.DEFAULT' : 'grey.600'}
                 fontSize={'xs-14'}
-                fontWeight={500}
+                fontWeight={funnelStep?.event ? 500 : 400}
                 px={'1'}
-                _hover={{ background: 'grey.300', cursor: 'pointer' }}
-                lineHeight={'xs-18'}
+                _hover={{ background: 'white.300', cursor: 'pointer' }}
+                lineHeight={'xs-14'}
                 onClick={() => setIsEventListOpen(true)}
               >
                 {funnelStep?.event || 'Select an Event'}
@@ -189,28 +183,25 @@ const FunnelComponentCard = ({
                 onSubmit={handleEventSelection}
                 listKey={'id'}
                 isNode
+                placeholderText={'Search for events...'}
+                width={'96'}
               />
             </Box>
           </Flex>
           {showCrossIcon && (
-            <IconButton
+            <Flex
               data-testid={`remove-funnel-step-${index}`}
-              size={'xs'}
               fontWeight={'500'}
-              aria-label="remove-component"
-              variant={'iconButton'}
-              icon={<i className="ri-close-fill"></i>}
               color={'grey.200'}
+              cursor={'pointer'}
               opacity={isHovered ? 1 : 0}
-              _hover={{ color: 'white', background: 'grey.300' }}
               onClick={() => handleRemoveFunnelStep(index)}
-            />
+            >
+              <Trash size={14} color={GREY_500} />
+            </Flex>
           )}
         </Flex>
       </Flex>
-      {funnelStep.event && (
-        <Divider orientation="horizontal" color={'grey.10'} mt={'3'} />
-      )}
       {Boolean(funnelStep.filters.length) &&
         funnelStep.filters.map((filter, index) => (
           <FunnelStepFilterComponent
@@ -223,6 +214,7 @@ const FunnelComponentCard = ({
         ))}
       {funnelStep.event ? (
         <AddFilter
+          filters={funnelStep.filters}
           eventProperties={eventProperties}
           loadingEventProperties={loadingEventProperties}
           handleAddFilter={handleAddFilter}
@@ -233,24 +225,34 @@ const FunnelComponentCard = ({
 };
 export default FunnelComponentCard;
 
-export const FilterNumber = ({ index }: { index: number }) => {
+export const FilterNumber = ({
+  index,
+  isHovered,
+}: {
+  index: number;
+  isHovered: boolean;
+}) => {
   return (
     <Flex
       data-testid="event-or-segment-component-index"
-      background={LOGAN}
-      borderRadius={'2px'}
+      background={'blue.500'}
+      borderRadius={'4px'}
       textAlign="center"
-      fontWeight={500}
-      color={'black.100'}
+      fontWeight={600}
+      color={'white'}
       fontSize={'xs-10'}
-      lineHeight={'12px'}
+      lineHeight={'xs-10'}
       justifyContent={'center'}
       alignItems={'center'}
-      height={'16px'}
-      width={'16px'}
+      height={'5'}
+      width={'5'}
       cursor={'grab'}
     >
-      {index + 1}
+      {isHovered ? (
+        <DotsSixVertical size={16} weight="bold" color={WHITE_DEFAULT} />
+      ) : (
+        index + 1
+      )}
     </Flex>
   );
 };

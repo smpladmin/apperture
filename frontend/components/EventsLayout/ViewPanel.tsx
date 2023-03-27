@@ -8,7 +8,6 @@ const ViewPanel = ({ children }: { children: ReactNode }) => {
       py={'4'}
       px={{ base: '4', md: '8' }}
       overflowY={{ md: 'auto' }}
-      position="static"
     >
       {children}
     </Box>

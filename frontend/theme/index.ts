@@ -1,4 +1,5 @@
 const WHITE_DEFAULT = '#ffffff';
+const BLACK_DEFAULT = '#000000';
 const PURPLE = '#7A4AA4';
 const WHITE_100 = '#f6f6f6';
 const WHITE_200 = '#ededed';
@@ -21,11 +22,17 @@ const BLACK_RUSSIAN = '#181822';
 const BASTILLE = '#282836';
 const GRAY_100 = '#b2b2b5';
 const MEDIUM_BLUE = '#646FD4';
+const BLUE_MAIN = '#5093EC';
 const LOGAN = '#9999B6';
+const GREY_500 = '#747474';
+const GREY_600 = '#9E9E9E';
+const GREY_700 = '#BDBDBD';
+const GREY_800 = '#606060';
+const BLACK_500 = '#424242';
 
 const colors = {
   black: {
-    DEFAULT: '#07070d',
+    DEFAULT: BLACK_DEFAULT,
     0: 'rgba(14,14,26,0)',
     10: 'rgba(255, 255, 255, 0.04)',
     20: 'rgba(255, 255, 255, 0.05)',
@@ -35,6 +42,8 @@ const colors = {
     150: '#0E0E19',
     200: BLACK_200,
     300: BLACK_RUSSIAN,
+    400: '#07070d',
+    500: 'BLACK_500',
   },
   white: {
     DEFAULT: WHITE_DEFAULT,
@@ -42,6 +51,8 @@ const colors = {
     100: WHITE_100,
     200: WHITE_200,
     300: WHITE_300,
+    400: '#f5f5f5',
+    500: '#fafafa',
   },
   grey: {
     DEFAULT: '#d9d9da',
@@ -51,6 +62,11 @@ const colors = {
     100: GRAY_100,
     200: ARROW_GRAY,
     300: '#3E3E47',
+    400: '#DFDFDF',
+    500: GREY_500,
+    600: GREY_600,
+    700: GREY_700,
+    800: GREY_800,
   },
   yellow: { 500: '#fac213' },
   green: GREEN,
@@ -64,10 +80,14 @@ const colors = {
   red: {
     DEFAULT: '#F96B6B',
   },
+  blue: {
+    500: '#5093EC',
+  },
 };
 
 const spacing = {
   0.15: '0.0375rem',
+  5.5: '1.137rem',
   11: '2.75rem',
   13: '3.25rem',
   15: '3.75rem',
@@ -81,14 +101,17 @@ const spacing = {
   39: '9.75rem',
   45: '11.25rem',
   50: '12.5rem',
+  52: '13rem',
   55: '13.75rem',
   62: '15.5rem',
   70: '17.5rem',
   75: '18.75rem',
+  76: '19rem',
   78: '19.5rem',
   82: '20.5rem',
   88: '22rem',
   90: '22.5rem',
+  96: '24rem',
   100: '25rem',
   102: '25.5rem',
   106: '26.5rem',
@@ -127,9 +150,9 @@ const fontSizes = {
 const lineHeights = {
   'xs-8': '0.75rem', // lh-12px,
   'xs-10': '0.75rem', // lh-12px,
-  'xs-12': '1rem', // lh-16px,
-  'xs-14': '1.125rem', // lh-18px,
-  base: '1.375rem', // lh-22px,
+  'xs-12': '135%', // lh-16px,
+  'xs-14': '135%', // lh-18px,
+  base: '120%', // lh-22px,
   'sh-18': '1.375rem', //lh-22px,
   'sh-20': '1.5rem', //lh-24px,
   'sh-24': '1.75rem', //lh-28px,
@@ -138,6 +161,9 @@ const lineHeights = {
   'sh-34': '2.625rem', //lh-42px
   'sh-44': '3.25rem', //lh-52px
   'sh-56': '4.125rem', //lh-66px
+  'lh-120': '120%,', //lh-120%
+  'lh-130': '130%,', //lh-130%
+  'lh-135': '135%,', //lh-130%
 };
 
 const boxShadow = {
@@ -175,4 +201,10 @@ export {
   MEDIUM_BLUE,
   WHITE_200,
   LOGAN,
+  GREY_500,
+  GREY_600,
+  GREY_700,
+  BLACK_500,
+  BLUE_MAIN,
+  BLACK_DEFAULT,
 };

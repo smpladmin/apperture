@@ -1,4 +1,4 @@
-import ViewPanel from '@components/EventsLayout/ViewPanel';
+import ViewPanelTemp from '@components/EventsLayout/ViewPanelTemp';
 import { DateFilterObj } from '@lib/domain/common';
 import {
   ConversionWindowObj,
@@ -25,7 +25,7 @@ const RightView = ({
   conversionWindow: ConversionWindowObj;
 }) => {
   return (
-    <ViewPanel>
+    <ViewPanelTemp>
       <TransientFunnelView
         isLoading={isLoading}
         funnelData={computedFunnel}
@@ -36,7 +36,7 @@ const RightView = ({
         isDateFilterDisabled={true}
         conversionWindow={conversionWindow}
       />
-    </ViewPanel>
+    </ViewPanelTemp>
   );
 };
 

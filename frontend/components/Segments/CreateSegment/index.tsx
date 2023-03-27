@@ -19,10 +19,7 @@ import {
 } from '@lib/domain/segment';
 import QueryBuilder from './components/QueryBuilder';
 import SegmentTable from './components/Table/SegmentTable';
-import {
-  getEventProperties,
-  getNodes,
-} from '@lib/services/datasourceService';
+import { getEventProperties, getNodes } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
 import { computeSegment } from '@lib/services/segmentService';
 import { getFilteredColumns } from '../util';
@@ -257,7 +254,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
           fontSize={'base'}
           lineHeight={'base'}
           fontWeight={'600'}
-          bg={'black.DEFAULT'}
+          bg={'black.400'}
           color={'white.DEFAULT'}
           onClick={openSaveSegmentModal}
           _hover={{

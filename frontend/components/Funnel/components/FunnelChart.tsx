@@ -2,7 +2,7 @@ import { Box } from '@chakra-ui/react';
 import React, { useContext, useEffect, useRef } from 'react';
 import { Chart } from '@antv/g2';
 import { transformFunnelData } from '../util';
-import { BLACK_200, MEDIUM_BLUE } from '@theme/index';
+import { BLACK_200, BLUE_MAIN } from '@theme/index';
 import { FunnelData } from '@lib/domain/funnel';
 import { formatDatalabel } from '@lib/utils/common';
 import { AppertureContext } from '@lib/contexts/appertureContext';
@@ -66,7 +66,7 @@ const FunnelChart = ({ data, handleChartClick }: FunnelChartProps) => {
       },
       follow: true,
     });
-    plot.current.funnel?.interval().position('event*users').color(MEDIUM_BLUE);
+    plot.current.funnel?.interval().position('event*users').color(BLUE_MAIN);
 
     funnelData?.forEach((item) => {
       plot.current.funnel

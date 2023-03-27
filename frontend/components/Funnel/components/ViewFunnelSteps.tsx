@@ -3,41 +3,78 @@ import { FunnelStep } from '@lib/domain/funnel';
 import React, { useState } from 'react';
 
 function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
-  const [stepsLength] = useState(steps?.length);
   return (
-    <Flex gap={'4'} alignItems={'center'}>
-      <Flex flexDir={'column'} alignItems={'center'}>
-        <Box bg={'grey.200'} w={'7px'} h={'7px'} borderRadius={'full'}></Box>
-        <Box my={'1'} minH={10} w={'1px'} bg={'grey.200'}></Box>
-        <Box bg={'grey.200'} w={'7px'} h={'7px'} borderRadius={'full'}></Box>
-      </Flex>
-      <Flex gap={'1'} direction={'column'}>
-        <Text
-          color={'white'}
-          fontSize={'xs-14'}
-          lineHeight={'sh-20'}
-          data-testid={'first-step'}
-        >
-          {steps?.[0]?.['event']}
-        </Text>
-        <Text
-          color={'grey.200'}
-          fontSize={'xs-14'}
-          lineHeight={'sh-20'}
-          minH={'6'}
-          data-testid={'intermediate-steps'}
-        >
-          {stepsLength > 2 ? `+${stepsLength - 2} Steps` : null}
-        </Text>
-        <Text
-          color={'white'}
-          fontSize={'xs-14'}
-          lineHeight={'sh-20'}
-          data-testid={'last-step'}
-        >
-          {steps?.[stepsLength - 1]?.['event']}
-        </Text>
-      </Flex>
+    <Flex
+      direction={'column'}
+      borderWidth={'1px'}
+      borderRadius={'8px'}
+      borderColor={'white.200'}
+      borderBottom={'0px'}
+      overflow={'hidden'}
+    >
+      {steps.map((step: FunnelStep, index) => {
+        return (
+          <Box
+            key={index}
+            borderBottom={'1px'}
+            borderColor={'white.200'}
+            padding={3}
+          >
+            <Flex>
+              <Flex alignItems={'center'} justifyContent={'flex-start'}>
+                <Box paddingRight={1}>
+                  <Flex
+                    background={'blue.500'}
+                    p={2}
+                    height={2}
+                    width={2}
+                    borderRadius={'4px'}
+                    justifyContent={'center'}
+                    alignItems={'center'}
+                  >
+                    <Text
+                      fontSize={'xs-10'}
+                      lineHeight={'lh-130'}
+                      color={'white.DEFAULT'}
+                    >
+                      {String.fromCharCode(65 + index)}
+                    </Text>
+                  </Flex>
+                </Box>
+                <Text
+                  p={1}
+                  fontSize={'xs-14'}
+                  fontWeight={'500'}
+                  lineHeight={'lh-135'}
+                >
+                  {step.event}
+                </Text>
+              </Flex>
+            </Flex>
+
+            {step.filters.map((filter, index) => {
+              return (
+                <Flex gap={'1'} key={index}>
+                  <Flex paddingLeft={'6'} direction={'column'} key={index}>
+                    <Text
+                      fontSize={'xs-12'}
+                      lineHeight={'lh-135'}
+                      color={'grey.500'}
+                    >{`${filter.condition} ${filter.operand}`}</Text>
+                    <Text
+                      color={'grey.500'}
+                      fontSize={'xs-12'}
+                      lineHeight={'lh-135'}
+                    >
+                      {`${filter.operator} ${filter.values}`}
+                    </Text>
+                  </Flex>
+                </Flex>
+              );
+            })}
+          </Box>
+        );
+      })}
     </Flex>
   );
 }

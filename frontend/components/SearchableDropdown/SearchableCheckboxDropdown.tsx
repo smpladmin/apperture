@@ -21,6 +21,8 @@ type SearchableCheckboxDropdownProps = {
   selectedValues: string[];
   dropdownPosition?: string;
   listKey?: keyof SegmentProperty;
+  width?: string;
+  placeholderText?: string;
 };
 
 const SearchableCheckboxDropdown = ({
@@ -34,6 +36,8 @@ const SearchableCheckboxDropdown = ({
   selectedValues,
   dropdownPosition,
   listKey,
+  width,
+  placeholderText,
 }: SearchableCheckboxDropdownProps) => {
   const [listData, setListData] = useState<Array<string | SegmentProperty>>([]);
 
@@ -49,6 +53,8 @@ const SearchableCheckboxDropdown = ({
       setSearchData={setListData}
       dropdownPosition={dropdownPosition}
       searchKey={listKey}
+      width={width}
+      placeholderText={placeholderText}
     >
       <Flex
         direction={'column'}
@@ -90,7 +96,7 @@ const SearchableCheckboxDropdown = ({
               return (
                 <Flex
                   as={'label'}
-                  gap={'3'}
+                  gap={'2'}
                   px={'2'}
                   py={'3'}
                   key={listKey ? segmentPropertyItem : (value as string)}
@@ -98,6 +104,7 @@ const SearchableCheckboxDropdown = ({
                     bg: 'white.100',
                   }}
                   data-testid={'property-value-dropdown-option'}
+                  borderRadius={'4'}
                 >
                   <Checkbox
                     colorScheme={'radioBlack'}
@@ -108,6 +115,7 @@ const SearchableCheckboxDropdown = ({
                       lineHeight={'xs-14'}
                       fontWeight={'medium'}
                       cursor={'pointer'}
+                      wordBreak={'break-word'}
                     >
                       {listKey ? segmentPropertyItem : (value as string)}
                     </Text>

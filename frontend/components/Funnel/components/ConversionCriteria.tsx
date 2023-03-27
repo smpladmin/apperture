@@ -2,7 +2,9 @@ import { Box, Flex, Input, Text } from '@chakra-ui/react';
 import Dropdown from '@components/SearchableDropdown/Dropdown';
 import { ConversionWindowList, ConversionWindowObj } from '@lib/domain/funnel';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import { BASTILLE, GRAY_100, WHITE_DEFAULT } from '@theme/index';
+import { capitalizeFirstLetter } from '@lib/utils/common';
+import { GREY_500, GREY_600 } from '@theme/index';
+import { CaretDown, Clock } from 'phosphor-react';
 import React, { useRef, useState } from 'react';
 
 type ConversionCriteriaProps = {
@@ -35,108 +37,124 @@ const ConversionCriteria = ({
   return (
     <>
       <Text
-        fontSize={{ base: 'xs-16', md: 'sh-20' }}
-        lineHeight={{ base: 'xs-16', md: 'sh-20' }}
-        fontWeight={{ base: '500', md: '400' }}
-        color={'white.DEFAULT'}
+        pl={2}
+        mt={'3'}
+        color={'grey.500'}
+        fontSize={{ base: 'xs-10', md: 'xs-12' }}
+        lineHeight={{ base: 'xs-10', md: 'xs-12' }}
+        fontWeight={'400'}
       >
         Conversion Time
       </Text>
       <Flex
-        alignItems={'center'}
-        w={'full'}
-        gap={'4'}
+        p={'3'}
+        borderRadius={'8px'}
         border={'1px'}
-        borderColor={'grey.10'}
-        borderRadius={12}
-        px={4}
-        py={5}
+        borderColor={'white.200'}
+        justifyContent={'flex-start'}
+        alignItems={'center'}
+        direction={'column'}
+        backgroundColor={'white.DEFAULT'}
+        w={'full'}
+        gap={1}
+        flexDirection={'row'}
       >
-        <i
-          className="ri-time-line"
-          style={{ color: GRAY_100, fontSize: 24 }}
-        ></i>
-        <Input
-          h={10}
-          w={'20'}
-          border={'1px'}
-          borderColor={'grey.10'}
-          borderRadius={'4'}
-          type={'number'}
-          focusBorderColor={'white'}
-          value={conversionWindow.value}
-          background={'grey.100'}
-          _focus={{ background: 'white' }}
+        <Clock size={20} color={GREY_600} />
+        <Flex
+          justifyContent={'space-between'}
+          alignItems={'center'}
+          gap={2}
           flexGrow={1}
-          disabled={isDisabled}
-          data-testid={'conversion-time-input'}
-          onChange={(e) => {
-            setConversionWindow({
-              value: e.target.value || null,
-              type: conversionWindow.type,
-            });
-          }}
-        />
-        <Box ref={conversionCriteriaRef} position="relative" flexGrow={1}>
-          <Flex
-            h={10}
-            px={'3'}
-            py={2}
-            onClick={() => !isDisabled && setIsConversionWindowListOpen(true)}
-            alignItems={'center'}
-            gap={'2'}
+        >
+          <Input
+            w={'50%'}
+            h={9}
+            p={2}
+            color={'black.DEFAULT'}
+            fontWeight={500}
+            fontSize={'xs-14'}
+            lineHeight={'xs-14'}
+            borderRadius={'4px'}
             border={'1px'}
-            data-testid={'conversion-type-list'}
-            borderColor={'grey.10'}
-            borderRadius={4}
-            _hover={{ color: 'white', background: 'grey.300' }}
-            cursor={'pointer'}
-            justifyContent={'space-between'}
-          >
-            <Text
-              color={'white.DEFAULT'}
-              fontSize={{ base: 'xs-14', md: 'base' }}
-              lineHeight={{ base: 'xs-16', md: 'base' }}
-              fontWeight={'normal'}
-              textAlign={'center'}
-              data-testid={'conversion-type'}
+            borderColor={'white.200'}
+            type={'number'}
+            focusBorderColor={'white'}
+            value={conversionWindow.value}
+            background={'white.DEFAULT'}
+            _focus={{ background: 'white' }}
+            flexGrow={1}
+            disabled={isDisabled}
+            data-testid={'conversion-time-input'}
+            onChange={(e) => {
+              setConversionWindow({
+                value: e.target.value || null,
+                type: conversionWindow.type,
+              });
+            }}
+          />
+          <Box ref={conversionCriteriaRef} position="relative" w={'50%'}>
+            <Flex
+              w={'100%'}
+              color={'black.DEFAULT'}
+              fontSize={'xs-14'}
+              lineHeight={'xs-14'}
+              fontWeight={500}
+              h={9}
+              p={2}
+              onClick={() => !isDisabled && setIsConversionWindowListOpen(true)}
+              alignItems={'center'}
+              gap={'2'}
+              borderRadius={'4px'}
+              border={'1px'}
+              borderColor={'white.200'}
+              data-testid={'conversion-type-list'}
+              _hover={{ bg: 'white.400' }}
+              cursor={'pointer'}
+              justifyContent={'space-between'}
             >
-              {conversionWindow.type}
-            </Text>
-            <i
-              className="ri-arrow-down-s-line"
-              style={{ color: WHITE_DEFAULT }}
-            ></i>
-          </Flex>
-          <Dropdown isOpen={isConversionWindowListOpen} minWidth={'40'}>
-            <Flex direction={'column'} minW={'10'}>
-              {Object.values(ConversionWindowList).map((value) => {
-                return (
-                  <Flex
-                    p={'1.5'}
-                    key={value}
-                    _hover={{
-                      bg: 'white.100',
-                    }}
-                    data-testid={'conversion-time-type'}
-                    onClick={() => {
-                      handleUpdateConversionWindow(value);
-                    }}
-                    cursor={'pointer'}
-                  >
-                    <Text
-                      fontSize={{ base: 'xs-14', md: 'base' }}
-                      lineHeight={{ base: 'xs-14', md: 'base' }}
-                      fontWeight={'normal'}
-                    >
-                      {value}
-                    </Text>
-                  </Flex>
-                );
-              })}
+              <Text
+                fontSize={{ base: 'xs-14', md: 'base' }}
+                lineHeight={{ base: 'xs-16', md: 'base' }}
+                fontWeight={'normal'}
+                textAlign={'center'}
+                data-testid={'conversion-type'}
+              >
+                {capitalizeFirstLetter(conversionWindow.type)}
+              </Text>
+              <CaretDown size={14} color={GREY_500} />
             </Flex>
-          </Dropdown>
-        </Box>
+            <Dropdown isOpen={isConversionWindowListOpen} width={'76'}>
+              <Flex direction={'column'} minW={'10'}>
+                {Object.values(ConversionWindowList).map((value) => {
+                  return (
+                    <Flex
+                      px={'2'}
+                      py={'3'}
+                      key={value}
+                      _hover={{
+                        bg: 'white.400',
+                      }}
+                      data-testid={'conversion-time-type'}
+                      onClick={() => {
+                        handleUpdateConversionWindow(value);
+                      }}
+                      cursor={'pointer'}
+                      borderRadius={'4'}
+                    >
+                      <Text
+                        fontSize={'xs-14'}
+                        lineHeight={'lh-135'}
+                        fontWeight={'500'}
+                      >
+                        {capitalizeFirstLetter(value)}
+                      </Text>
+                    </Flex>
+                  );
+                })}
+              </Flex>
+            </Dropdown>
+          </Box>
+        </Flex>
       </Flex>
     </>
   );

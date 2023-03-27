@@ -12,6 +12,8 @@ import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 import { formatDateIntoString } from '@lib/utils/common';
 import isEqual from 'lodash/isEqual';
+import { CalendarBlank } from 'phosphor-react';
+import { GREY_600 } from '@theme/index';
 
 type DateFilterProps = {
   dateFilter: DateFilterObj;
@@ -100,13 +102,15 @@ const DateFilter = ({
   return (
     <ButtonGroup size="sm" isAttached variant="outline" isDisabled={isDisabled}>
       <Button
-        border="1px solid #EDEDED"
+        borderWidth={'1px'}
+        borderStyle={'solid'}
+        borderColor={'grey.400'}
         id="yesterday"
-        background={isLastDateFilterSelected['1D'] ? 'grey.50' : 'none'}
-        color={isLastDateFilterSelected['1D'] ? 'black' : 'grey.200'}
+        background={isLastDateFilterSelected['1D'] ? 'white.500' : 'white'}
+        color={isLastDateFilterSelected['1D'] ? 'black' : 'grey.600'}
         fontWeight={isLastDateFilterSelected['1D'] ? 500 : 400}
         _hover={{
-          background: 'white.100',
+          background: 'white.500',
         }}
         height={8}
         fontSize={'xs-12'}
@@ -116,13 +120,15 @@ const DateFilter = ({
         Yesterday
       </Button>
       <Button
-        border="1px solid #EDEDED"
+        borderWidth={'1px'}
+        borderStyle={'solid'}
+        borderColor={'grey.400'}
         id="yesterday"
-        background={isLastDateFilterSelected['1W'] ? 'grey.50' : 'none'}
-        color={isLastDateFilterSelected['1W'] ? 'black' : 'grey.200'}
+        background={isLastDateFilterSelected['1W'] ? 'white.500' : 'white'}
+        color={isLastDateFilterSelected['1W'] ? 'black' : 'grey.600'}
         fontWeight={isLastDateFilterSelected['1W'] ? 500 : 400}
         _hover={{
-          background: 'white.100',
+          background: 'white.500',
         }}
         height={8}
         fontSize={'xs-12'}
@@ -132,13 +138,15 @@ const DateFilter = ({
         1W
       </Button>
       <Button
-        border="1px solid #EDEDED"
+        borderWidth={'1px'}
+        borderStyle={'solid'}
+        borderColor={'grey.400'}
         id="yesterday"
-        background={isLastDateFilterSelected['1M'] ? 'grey.50' : 'none'}
-        color={isLastDateFilterSelected['1M'] ? 'black' : 'grey.200'}
+        background={isLastDateFilterSelected['1M'] ? 'white.500' : 'white'}
+        color={isLastDateFilterSelected['1M'] ? 'black' : 'grey.600'}
         fontWeight={isLastDateFilterSelected['1M'] ? 500 : 400}
         _hover={{
-          background: 'white.100',
+          background: 'white.500',
         }}
         height={8}
         fontSize={'xs-12'}
@@ -148,13 +156,15 @@ const DateFilter = ({
         1M
       </Button>
       <Button
-        border="1px solid #EDEDED"
+        borderWidth={'1px'}
+        borderStyle={'solid'}
+        borderColor={'grey.400'}
         id="yesterday"
-        background={isLastDateFilterSelected['3M'] ? 'grey.50' : 'none'}
-        color={isLastDateFilterSelected['3M'] ? 'black' : 'grey.200'}
+        background={isLastDateFilterSelected['3M'] ? 'white.500' : 'white'}
+        color={isLastDateFilterSelected['3M'] ? 'black' : 'grey.600'}
         fontWeight={isLastDateFilterSelected['3M'] ? 500 : 400}
         _hover={{
-          background: 'white.100',
+          background: 'white.500',
         }}
         height={8}
         fontSize={'xs-12'}
@@ -167,12 +177,14 @@ const DateFilter = ({
 
       <Box position="relative" ref={datePickerRef}>
         <Button
-          border="1px solid #EDEDED"
+          borderWidth={'1px'}
+          borderStyle={'solid'}
+          borderColor={'grey.400'}
           id="yesterday"
           background={
-            dateFilterType === DateFilterType.FIXED ? 'grey.50' : 'none'
+            dateFilterType === DateFilterType.FIXED ? 'white.500' : 'white'
           }
-          color={dateFilterType === DateFilterType.FIXED ? 'black' : 'grey.200'}
+          color={dateFilterType === DateFilterType.FIXED ? 'black' : 'grey.600'}
           fontWeight={dateFilterType === DateFilterType.FIXED ? 500 : 400}
           _hover={{
             background: 'white.100',
@@ -184,7 +196,11 @@ const DateFilter = ({
           onClick={handleClickCustom}
           data-testid={'custom'}
         >
-          <i style={{ marginRight: '4px' }} className="ri-calendar-line" />{' '}
+          <CalendarBlank
+            size={16}
+            color={GREY_600}
+            style={{ marginRight: '4px' }}
+          />
           {dateFilterType === DateFilterType.FIXED
             ? `${formatDateIntoString(
                 startDate,
