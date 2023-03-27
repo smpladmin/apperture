@@ -54,7 +54,7 @@ function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
 
             {step.filters.map((filter, index) => {
               return (
-                <Flex gap={'1'}>
+                <Flex gap={'1'} key={index}>
                   <Flex paddingLeft={'6'} direction={'column'} key={index}>
                     <Text
                       fontSize={'xs-12'}

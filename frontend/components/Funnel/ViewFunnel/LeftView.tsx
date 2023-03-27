@@ -4,7 +4,7 @@ import ViewFunnelSteps from '../components/ViewFunnelSteps';
 import 'remixicon/fonts/remixicon.css';
 import { ConversionWindowObj, FunnelStep } from '@lib/domain/funnel';
 import Card from '@components/Card';
-import { Clock } from '@phosphor-icons/react';
+import { Clock } from 'phosphor-react';
 import ActionPanelTemp from '@components/EventsLayout/ActionPanelTemp';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 

@@ -56,7 +56,9 @@ const SearchableDropdown = ({
       ) : (
         <Flex direction={'column'} gap={'3'}>
           <InputGroup>
-            <InputLeftElement children={<MagnifyingGlass size={'18'} />} />
+            <InputLeftElement>
+              <MagnifyingGlass size={'18'} />
+            </InputLeftElement>
             <Input
               autoFocus
               type="text"
