@@ -143,16 +143,16 @@ describe('View Funnel', () => {
   });
 
   //TODO:  Add new test for funnel render on new screen
-  // it('renders funnel name, first step and last step name and (n-2) steps count', async () => {
-  //   await renderViewFunnel();
-  //   const funnelName = screen.getByTestId('entity-name');
-  //   const firstStepName = screen.getByTestId('first-step');
-  //   const lastStepName = screen.getByTestId('last-step');
+  it.skip('renders funnel name, first step and last step name and (n-2) steps count', async () => {
+    await renderViewFunnel();
+    const funnelName = screen.getByTestId('entity-name');
+    const firstStepName = screen.getByTestId('first-step');
+    const lastStepName = screen.getByTestId('last-step');
 
-  //   expect(funnelName.textContent).toEqual('Test Funnel');
-  //   expect(firstStepName.textContent).toEqual('Video_Click');
-  //   expect(lastStepName.textContent).toEqual('Topic_Click');
-  // });
+    expect(funnelName.textContent).toEqual('Test Funnel');
+    expect(firstStepName.textContent).toEqual('Video_Click');
+    expect(lastStepName.textContent).toEqual('Topic_Click');
+  });
 
   it('should redirect user to edit page on click of edit funnel button', async () => {
     const router = createMockRouter({
