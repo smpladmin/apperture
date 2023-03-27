@@ -156,6 +156,7 @@ const ViewFunnel = ({
         <LeftView
           steps={savedFunnel.steps}
           conversionWindow={conversionWindow}
+          randomSequence={randomSequence}
         />
         <RightView
           funnelSteps={savedFunnel.steps}

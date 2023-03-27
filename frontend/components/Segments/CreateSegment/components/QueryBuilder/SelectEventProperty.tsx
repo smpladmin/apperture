@@ -82,6 +82,7 @@ const SelectEventProperty = ({
         onSubmit={onSuggestionClick}
         listKey={'id'}
         showBadge={true}
+        width={'96'}
       />
     </Box>
   );

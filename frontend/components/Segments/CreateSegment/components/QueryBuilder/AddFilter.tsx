@@ -125,6 +125,7 @@ const AddFilter = ({
         onSubmit={onAddFilter}
         listKey={'id'}
         showBadge={true}
+        width={'96'}
       />
     </Box>
   );

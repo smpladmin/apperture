@@ -1,20 +1,26 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import ActionPanel from '@components/EventsLayout/ActionPanel';
 import React from 'react';
 import ViewFunnelSteps from '../components/ViewFunnelSteps';
 import 'remixicon/fonts/remixicon.css';
 import { ConversionWindowObj, FunnelStep } from '@lib/domain/funnel';
 import Card from '@components/Card';
 import { Clock } from '@phosphor-icons/react';
+import ActionPanelTemp from '@components/EventsLayout/ActionPanelTemp';
 
 type LeftViewProps = {
   steps: FunnelStep[];
   conversionWindow: ConversionWindowObj;
+  randomSequence: boolean;
 };
 
-const LeftView = ({ steps, conversionWindow }: LeftViewProps) => {
+const LeftView = ({
+  steps,
+  conversionWindow,
+  randomSequence,
+}: LeftViewProps) => {
+  const sequenceText = randomSequence ? 'Any order' : 'In sequence';
   return (
-    <ActionPanel>
+    <ActionPanelTemp>
       <Card>
         <Flex direction={'column'} gap={'6'} w={'full'}>
           <Flex direction={'column'} gap={'3'} w={'full'}>
@@ -24,7 +30,7 @@ const LeftView = ({ steps, conversionWindow }: LeftViewProps) => {
               lineHeight={{ base: 'xs-10', md: 'xs-12' }}
               fontWeight={'400'}
             >
-              Steps (sequential)
+              {`Steps (${sequenceText})`}
             </Text>
             <Box>
               <ViewFunnelSteps steps={steps} />
@@ -54,7 +60,7 @@ const LeftView = ({ steps, conversionWindow }: LeftViewProps) => {
           </Flex>
         </Flex>
       </Card>
-    </ActionPanel>
+    </ActionPanelTemp>
   );
 };
 

@@ -90,10 +90,10 @@ const SearchableListDropdown = ({
                 {showBadge ? (
                   <Box
                     h={'6'}
-                    px={'2'}
-                    py={'1'}
-                    bg={'grey.DEFAULT'}
+                    p={'1'}
                     borderRadius={'4'}
+                    border={'1px'}
+                    borderColor={'grey.400'}
                   >
                     <Text
                       fontSize={'xs-12'}

@@ -11,8 +11,6 @@ import {
   FunnelStep,
   FunnelTrendsData,
 } from '@lib/domain/funnel';
-import ActionPanel from '@components/EventsLayout/ActionPanel';
-import ViewPanel from '@components/EventsLayout/ViewPanel';
 import TransientFunnelView from './TransientFunnelView';
 import {
   filterFunnelSteps,
@@ -30,6 +28,8 @@ import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel
 import { DateFilterObj } from '@lib/domain/common';
 import Header from '@components/EventsLayout/ActionHeader';
 import Card from '@components/Card';
+import ActionPanelTemp from '@components/EventsLayout/ActionPanelTemp';
+import ViewPanelTemp from '@components/EventsLayout/ViewPanelTemp';
 
 const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const router = useRouter();
@@ -181,7 +181,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
         flexGrow={1}
         bg={'white.400'}
       >
-        <ActionPanel>
+        <ActionPanelTemp>
           <Card>
             <CreateFunnelAction
               funnelSteps={funnelSteps}
@@ -193,8 +193,8 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
               setRandomSequence={setRandomSequence}
             />
           </Card>
-        </ActionPanel>
-        <ViewPanel>
+        </ActionPanelTemp>
+        <ViewPanelTemp>
           {isEmpty ? (
             <Card minHeight={'120'} borderRadius={'16'}>
               <FunnelEmptyState />
@@ -210,7 +210,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
               conversionWindow={conversionWindow}
             />
           )}
-        </ViewPanel>
+        </ViewPanelTemp>
       </Flex>
     </Flex>
   );
