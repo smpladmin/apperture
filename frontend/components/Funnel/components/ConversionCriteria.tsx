@@ -3,6 +3,7 @@ import Dropdown from '@components/SearchableDropdown/Dropdown';
 import { ConversionWindowList, ConversionWindowObj } from '@lib/domain/funnel';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { capitalizeFirstLetter } from '@lib/utils/common';
+import { GREY_500, GREY_600 } from '@theme/index';
 import { CaretDown, Clock } from 'phosphor-react';
 import React, { useRef, useState } from 'react';
 
@@ -58,7 +59,7 @@ const ConversionCriteria = ({
         gap={1}
         flexDirection={'row'}
       >
-        <Clock size={20} color={'#9E9E9E'} />
+        <Clock size={20} color={GREY_600} />
         <Flex
           justifyContent={'space-between'}
           alignItems={'center'}
@@ -120,7 +121,7 @@ const ConversionCriteria = ({
               >
                 {capitalizeFirstLetter(conversionWindow.type)}
               </Text>
-              <CaretDown size={14} color={'#747474'} />
+              <CaretDown size={14} color={GREY_500} />
             </Flex>
             <Dropdown isOpen={isConversionWindowListOpen} width={'76'}>
               <Flex direction={'column'} minW={'10'}>

@@ -7,6 +7,7 @@ import Card from '@components/Card';
 import { Clock } from 'phosphor-react';
 import ActionPanelTemp from '@components/EventsLayout/ActionPanelTemp';
 import { capitalizeFirstLetter } from '@lib/utils/common';
+import { GREY_600 } from '@theme/index';
 
 type LeftViewProps = {
   steps: FunnelStep[];
@@ -49,7 +50,7 @@ const LeftView = ({
 
             <Card>
               <Flex dir={'column'} alignItems={'center'} gap={2}>
-                <Clock size={20} color={'#9E9E9E'} />
+                <Clock size={20} color={GREY_600} />
                 <Text
                   fontSize={'xs-14'}
                   lineHeight={'xs-14'}

@@ -1,4 +1,5 @@
 const WHITE_DEFAULT = '#ffffff';
+const BLACK_DEFAULT = '#000000';
 const PURPLE = '#7A4AA4';
 const WHITE_100 = '#f6f6f6';
 const WHITE_200 = '#ededed';
@@ -28,9 +29,10 @@ const GREY_600 = '#9E9E9E';
 const GREY_700 = '#BDBDBD';
 const GREY_800 = '#606060';
 const BLACK_500 = '#424242';
+
 const colors = {
   black: {
-    DEFAULT: '#000000',
+    DEFAULT: BLACK_DEFAULT,
     0: 'rgba(14,14,26,0)',
     10: 'rgba(255, 255, 255, 0.04)',
     20: 'rgba(255, 255, 255, 0.05)',
@@ -204,4 +206,5 @@ export {
   GREY_700,
   BLACK_500,
   BLUE_MAIN,
+  BLACK_DEFAULT,
 };
