@@ -233,7 +233,7 @@ class Forward:
                         all=False,
                         type="where",
                         datatype="String",
-                        condition=aggregate.conditions[i],
+                        condition=SegmentFilterConditions.WHERE if i==0 else SegmentFilterConditions.AND,
                     )
                     for i, filter in enumerate(aggregate.filters)
                 ],
