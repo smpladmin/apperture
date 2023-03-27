@@ -5,7 +5,6 @@ import { capitalizeFirstLetter } from '@lib/utils/common';
 import React, { useEffect, useState } from 'react';
 import SearchableDropdown from './SearchableDropdown';
 import { CursorText } from 'phosphor-react';
-import { CursorClick } from '@phosphor-icons/react';
 
 type SearchableListDropdownProps = {
   isOpen: boolean;
@@ -65,7 +64,6 @@ const SearchableListDropdown = ({
                   bg: 'white.100',
                   cursor: 'pointer',
                 }}
-                data-testid={'dropdown-options'}
                 onClick={(e) => {
                   e.stopPropagation();
                   onSubmit(item);
@@ -74,8 +72,12 @@ const SearchableListDropdown = ({
                 py={'3'}
                 px={'2'}
               >
-                <Flex maxW={showBadge ? '60' : 'full'} gap={'2'}>
-                  <CursorClick size={'18'} color={'#9E9E9E'} />
+                <Flex
+                  maxW={showBadge ? '60' : 'full'}
+                  gap={'2'}
+                  data-testid={'dropdown-options'}
+                >
+                  {/* <CursorClick size={'18'} color={'#9E9E9E'} /> */}
                   <Text
                     fontSize={'xs-14'}
                     lineHeight={'xs-14'}
