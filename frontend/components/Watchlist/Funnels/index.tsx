@@ -3,7 +3,10 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import { FunnelWithUser } from '@lib/domain/funnel';
 import { Provider } from '@lib/domain/provider';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
-import { getSavedFunnelsForDatasourceId } from '@lib/services/funnelService';
+import {
+  deleteFunnel,
+  getSavedFunnelsForDatasourceId,
+} from '@lib/services/funnelService';
 import { Row } from '@tanstack/react-table';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -12,11 +15,13 @@ import WatchlistTable from '../Table';
 const SavedFunnels = ({ provider }: { provider: Provider }) => {
   const [funnels, setFunnels] = useState<SavedItems[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [renderFunnel, setRenderFunnel] = useState(true);
   const router = useRouter();
 
   const { dsId } = router.query;
 
   useEffect(() => {
+    if (!renderFunnel) return;
     const getFunnels = async () => {
       let savedFunnels =
         (await getSavedFunnelsForDatasourceId(dsId as string)) || [];
@@ -29,7 +34,8 @@ const SavedFunnels = ({ provider }: { provider: Provider }) => {
 
     setIsLoading(true);
     getFunnels();
-  }, []);
+    setRenderFunnel(false);
+  }, [renderFunnel]);
 
   const onRowClick = (row: Row<SavedItems>) => {
     const { _id, datasourceId } = row?.original?.details;
@@ -44,6 +50,11 @@ const SavedFunnels = ({ provider }: { provider: Provider }) => {
       pathname: '/analytics/funnel/create/[dsId]',
       query: { dsId },
     });
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteFunnel(id);
+    setRenderFunnel(true);
   };
 
   return (
@@ -83,7 +94,11 @@ const SavedFunnels = ({ provider }: { provider: Provider }) => {
             <LoadingSpinner />
           </Flex>
         ) : (
-          <WatchlistTable savedItemsData={funnels} onRowClick={onRowClick} />
+          <WatchlistTable
+            savedItemsData={funnels}
+            onRowClick={onRowClick}
+            handleDelete={handleDelete}
+          />
         )}
       </Box>
     </Box>

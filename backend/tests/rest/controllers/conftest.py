@@ -15,7 +15,12 @@ from domain.actions.models import (
 )
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App
-from domain.common.date_models import DateFilter, DateFilterType, LastDateFilter
+from domain.common.filter_models import (
+    FilterDataType,
+    FilterOperatorsNumber,
+    FilterOperatorsString,
+    LogicalOperators,
+)
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
@@ -48,12 +53,8 @@ from domain.runlogs.models import RunLog
 from domain.segments.models import (
     ComputedSegment,
     Segment,
-    SegmentDataType,
     SegmentFilterConditions,
-    SegmentFilterOperatorsNumber,
-    SegmentFilterOperatorsString,
     SegmentGroup,
-    SegmentGroupConditions,
     WhereSegmentFilter,
 )
 from domain.users.models import UserDetails
@@ -150,6 +151,7 @@ def funnel_service(apperture_user_response):
             },
         ],
         random_sequence=False,
+        enabled=True,
     )
     funnel_future = asyncio.Future()
     funnel_future.set_result(funnel)
@@ -210,6 +212,7 @@ def funnel_service(apperture_user_response):
     funnel_service_mock.get_user_conversion.return_value = funnel_user_conversion_future
     funnel_service_mock.get_funnels_for_datasource_id.return_value = funnels_future
     funnel_service_mock.get_funnels_for_apps.return_value = funnels_future
+    funnel_service_mock.delete_funnel = mock.AsyncMock()
 
     return funnel_service_mock
 
@@ -394,6 +397,15 @@ def user_data():
 
 
 @pytest.fixture(scope="module")
+def dropped_user_data():
+    return {
+        "user_id": "d0b9dd2b-e953-4584-a750-26c4bf906390R",
+        "datasource_id": "638f334e8e54760eafc64e66",
+        "event": "",
+    }
+
+
+@pytest.fixture(scope="module")
 def action_data():
     return {
         "datasourceId": "63e4da53370789982002e57d",
@@ -483,6 +495,7 @@ def metric_service(apperture_user_response):
             },
         ],
         breakdown=[],
+        enabled=True,
     )
 
     metrics_future = asyncio.Future()
@@ -515,6 +528,7 @@ def metric_service(apperture_user_response):
     metric_service.compute_metric.return_value = computed_metric_future
     metric_service.get_metrics_for_datasource_id.return_value = metrics_future
     metric_service.validate_formula.return_value = True
+    metric_service.delete_metric = mock.AsyncMock()
     return metric_service
 
 
@@ -539,25 +553,25 @@ def segment_service(apperture_user_response):
     )
     filters = [
         WhereSegmentFilter(
-            operator=SegmentFilterOperatorsString.IS,
+            operator=FilterOperatorsString.IS,
             operand="properties.$city",
             values=["Delhi", "Indore", "Bhopal"],
             all=False,
             type=SegmentFilterConditions.WHERE,
             condition=SegmentFilterConditions.WHERE,
-            datatype=SegmentDataType.STRING,
+            datatype=FilterDataType.STRING,
         ),
         WhereSegmentFilter(
-            operator=SegmentFilterOperatorsNumber.EQ,
+            operator=FilterOperatorsNumber.EQ,
             operand="properties.$app_release",
             values=[5003, 2077, 5002],
             all=False,
             type=SegmentFilterConditions.WHERE,
             condition=SegmentFilterConditions.AND,
-            datatype=SegmentDataType.NUMBER,
+            datatype=FilterDataType.NUMBER,
         ),
     ]
-    groups = [SegmentGroup(filters=filters, condition=SegmentGroupConditions.AND)]
+    groups = [SegmentGroup(filters=filters, condition=LogicalOperators.AND)]
     columns = ["properties.$app_release", "properties.$city"]
     segment = Segment(
         name="name",
@@ -567,6 +581,7 @@ def segment_service(apperture_user_response):
         app_id="63771fc960527aba9354399c",
         groups=groups,
         columns=columns,
+        enabled=True,
     )
     segment_service.compute_segment.return_value = computed_segment
     segment_service.build_segment.return_value = segment
@@ -583,6 +598,7 @@ def segment_service(apperture_user_response):
     segment_service.get_segments_for_datasource_id.return_value = [
         SegmentWithUser.from_orm(segment)
     ]
+    segment_service.delete_segment = mock.AsyncMock()
     return segment_service
 
 
@@ -822,6 +838,7 @@ def saved_segment_response():
         "revisionId": ANY,
         "updatedAt": None,
         "userId": "63771fc960527aba9354399c",
+        "enabled": True,
     }
 
 
@@ -864,6 +881,7 @@ def saved_segment_with_user():
             "revisionId": ANY,
             "updatedAt": None,
             "userId": "63771fc960527aba9354399c",
+            "enabled": True,
             "user": {
                 "firstName": "Test",
                 "lastName": "User",
@@ -1158,6 +1176,8 @@ def funnel_response():
         ],
         "randomSequence": False,
         "dateFilter": None,
+        "enabled": True,
+        "conversionWindow": None,
     }
 
 
@@ -1388,9 +1408,11 @@ def compute_metric_request():
                 "variant": "event",
                 "filters": [
                     {
-                        "operator": "equals",
+                        "operator": "is",
                         "operand": "properties.$city",
                         "values": ["Bengaluru"],
+                        "condition": "where",
+                        "datatype": "String",
                     }
                 ],
                 "conditions": ["where"],
@@ -1412,7 +1434,7 @@ def segment_data():
                 "filters": [
                     {
                         "operand": "properties.$city",
-                        "operator": SegmentFilterOperatorsString.IS,
+                        "operator": FilterOperatorsString.IS,
                         "values": ["Delhi", "Indore", "Bhopal"],
                         "type": SegmentFilterConditions.WHERE,
                         "condition": SegmentFilterConditions.WHERE,
@@ -1421,7 +1443,7 @@ def segment_data():
                     },
                     {
                         "operand": "properties.$app_release",
-                        "operator": SegmentFilterOperatorsNumber.EQ,
+                        "operator": FilterOperatorsNumber.EQ,
                         "values": [5003, 2077, 5002],
                         "type": SegmentFilterConditions.WHERE,
                         "condition": SegmentFilterConditions.AND,

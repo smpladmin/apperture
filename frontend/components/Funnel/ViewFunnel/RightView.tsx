@@ -1,6 +1,11 @@
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import { DateFilterObj } from '@lib/domain/common';
-import { FunnelData, FunnelStep, FunnelTrendsData } from '@lib/domain/funnel';
+import {
+  ConversionWindowObj,
+  FunnelData,
+  FunnelStep,
+  FunnelTrendsData,
+} from '@lib/domain/funnel';
 import React from 'react';
 import TransientFunnelView from '../CreateFunnel/TransientFunnelView';
 
@@ -10,12 +15,14 @@ const RightView = ({
   computedTrendsData,
   isLoading,
   dateFilter,
+  conversionWindow,
 }: {
   funnelSteps: FunnelStep[];
   computedFunnel: FunnelData[];
   computedTrendsData: FunnelTrendsData[];
   isLoading: boolean;
   dateFilter: DateFilterObj;
+  conversionWindow: ConversionWindowObj;
 }) => {
   return (
     <ViewPanel>
@@ -27,6 +34,7 @@ const RightView = ({
         dateFilter={dateFilter}
         setDateFilter={() => {}}
         isDateFilterDisabled={true}
+        conversionWindow={conversionWindow}
       />
     </ViewPanel>
   );

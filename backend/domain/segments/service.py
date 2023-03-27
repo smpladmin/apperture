@@ -64,11 +64,15 @@ class SegmentService:
         return await Segment.get(PydanticObjectId(segment_id))
 
     async def get_segments_for_app(self, app_id: str) -> List[Segment]:
-        return await Segment.find(Segment.app_id == PydanticObjectId(app_id)).to_list()
+        return await Segment.find(
+            Segment.app_id == PydanticObjectId(app_id),
+            Segment.enabled != False,
+        ).to_list()
 
     async def get_segments_for_user(self, user_id: str) -> List[Segment]:
         return await Segment.find(
-            Segment.user_id == PydanticObjectId(user_id)
+            Segment.user_id == PydanticObjectId(user_id),
+            Segment.enabled != False,
         ).to_list()
 
     async def update_segment(self, segment_id: str, new_segment: Segment):
@@ -83,5 +87,12 @@ class SegmentService:
 
     async def get_segments_for_datasource_id(self, datasource_id: str) -> List[Segment]:
         return await Segment.find(
-            Segment.datasource_id == PydanticObjectId(datasource_id)
+            Segment.datasource_id == PydanticObjectId(datasource_id),
+            Segment.enabled != False,
         ).to_list()
+
+    async def delete_segment(self, segment_id: str):
+        await Segment.find_one(
+            Segment.id == PydanticObjectId(segment_id),
+        ).update({"$set": {"enabled": False}})
+        return

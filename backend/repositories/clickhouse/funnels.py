@@ -1,3 +1,4 @@
+from fastapi import Depends
 from pypika import (
     ClickHouseQuery,
     Criterion,
@@ -7,27 +8,37 @@ from pypika import (
     DatePart,
     Parameter,
     Field,
-    Order,
 )
 from pypika import functions as fn
 from pypika.functions import Extract
 from typing import List, Tuple, Union
 
+from clickhouse import Clickhouse
 from domain.funnels.models import FunnelStep, ConversionStatus
 from repositories.clickhouse.base import EventsBase
+from repositories.clickhouse.utils.filters import Filters
 
 
 class Funnels(EventsBase):
+    def __init__(self, clickhouse: Clickhouse = Depends()):
+        super().__init__(clickhouse=clickhouse)
+        self.filter_utils = Filters()
+
     def get_conversion_trend(
         self,
         ds_id: str,
         steps: List[FunnelStep],
         start_date: Union[str, None],
         end_date: Union[str, None],
+        conversion_time: int,
     ) -> List[Tuple]:
         return self.execute_get_query(
             *self.build_trends_query(
-                ds_id=ds_id, steps=steps, start_date=start_date, end_date=end_date
+                ds_id=ds_id,
+                steps=steps,
+                start_date=start_date,
+                end_date=end_date,
+                conversion_time=conversion_time,
             )
         )
 
@@ -38,6 +49,7 @@ class Funnels(EventsBase):
         status: ConversionStatus,
         start_date: Union[str, None],
         end_date: Union[str, None],
+        conversion_time: int,
     ):
         if len(steps) == 1:
             return self.get_initial_users(
@@ -49,9 +61,14 @@ class Funnels(EventsBase):
             )
 
         query, parameter = self.build_analytics_query(
-            ds_id, steps, status, start_date=start_date, end_date=end_date
+            ds_id,
+            steps,
+            status,
+            start_date=start_date,
+            end_date=end_date,
+            conversion_time=conversion_time,
         )
-        return self.execute_get_query(query.get_sql(), parameter)
+        return self.execute_get_query(query, parameter)
 
     def get_initial_users(
         self,
@@ -95,10 +112,15 @@ class Funnels(EventsBase):
         steps: List[FunnelStep],
         start_date: Union[str, None],
         end_date: Union[str, None],
+        conversion_time: int,
     ) -> List[Tuple]:
         return self.execute_get_query(
             *self.build_users_query(
-                ds_id=ds_id, steps=steps, start_date=start_date, end_date=end_date
+                ds_id=ds_id,
+                steps=steps,
+                start_date=start_date,
+                end_date=end_date,
+                conversion_time=conversion_time,
             )
         )
 
@@ -125,10 +147,10 @@ class Funnels(EventsBase):
                 self.table.event_name == Parameter(f"%(event{i})s"),
             ]
             if step.filters:
-                for filter in step.filters:
-                    criterion.append(
-                        Field(f"properties.{filter.operand}").isin(filter.values)
-                    )
+                filter_criterion = self.filter_utils.get_criterion_for_where_filters(
+                    filters=step.filters
+                )
+                criterion.extend(filter_criterion)
             parameters[f"event{i}"] = step.event
 
             sub_query = (
@@ -151,6 +173,7 @@ class Funnels(EventsBase):
         steps: List[FunnelStep],
         start_date: Union[str, None],
         end_date: Union[str, None],
+        conversion_time: int,
     ):
         query, parameters = self._builder(
             ds_id=ds_id, steps=steps, start_date=start_date, end_date=end_date
@@ -161,10 +184,18 @@ class Funnels(EventsBase):
             query = query.left_join(AliasedQuery(f"table{i + 1}")).on_field("user_id")
 
         query = query.select(fn.Count(AliasedQuery("table1").user_id).distinct())
+        parameters["conversion_time"] = conversion_time
         for i in range(1, len(steps)):
             conditions = [
                 Extract(DatePart.year, AliasedQuery(f"table{i}").ts)
-                > Parameter("%(epoch_year)s")
+                > Parameter("%(epoch_year)s"),
+                (
+                    self.convert_to_unix_timestamp_func(
+                        AliasedQuery(f"table{i + 1}").ts
+                    )
+                    - self.convert_to_unix_timestamp_func(AliasedQuery("table1").ts)
+                )
+                <= Parameter("%(conversion_time)s"),
             ]
             for j in range(i, 0, -1):
                 conditions.append(
@@ -189,14 +220,23 @@ class Funnels(EventsBase):
         steps: List[FunnelStep],
         start_date: Union[str, None],
         end_date: Union[str, None],
+        conversion_time: int,
     ):
         query, parameters = self._builder(
             ds_id=ds_id, steps=steps, start_date=start_date, end_date=end_date
         )
         query = query.from_(AliasedQuery("table1"))
+        parameters["conversion_time"] = conversion_time
         conditions = [
             Extract(DatePart.year, AliasedQuery(f"table{len(steps) - 1}").ts)
-            > Parameter("%(epoch_year)s")
+            > Parameter("%(epoch_year)s"),
+            (
+                self.convert_to_unix_timestamp_func(
+                    AliasedQuery(f"table{len(steps)}").ts
+                )
+                - self.convert_to_unix_timestamp_func(AliasedQuery("table1").ts)
+            )
+            <= Parameter("%(conversion_time)s"),
         ]
 
         for i in range(1, len(steps)):
@@ -234,7 +274,14 @@ class Funnels(EventsBase):
         for i in range(1, len(steps)):
             conditions = [
                 Extract(DatePart.year, AliasedQuery(f"table{i}").ts)
-                > Parameter("%(epoch_year)s")
+                > Parameter("%(epoch_year)s"),
+                (
+                    self.convert_to_unix_timestamp_func(
+                        AliasedQuery(f"table{i + 1}").ts
+                    )
+                    - self.convert_to_unix_timestamp_func(AliasedQuery("table1").ts)
+                )
+                <= Parameter("%(conversion_time)s"),
             ]
             for j in range(i, 0, -1):
                 conditions.append(
@@ -274,11 +321,13 @@ class Funnels(EventsBase):
         status: ConversionStatus,
         start_date: Union[str, None],
         end_date: Union[str, None],
+        conversion_time: int,
     ):
         query, parameters = self._builder(
             ds_id=ds_id, steps=steps, start_date=start_date, end_date=end_date
         )
 
+        parameters["conversion_time"] = conversion_time
         sub_query = self._build_subquery(steps=steps)
 
         query = query.with_(sub_query, "final_table")
@@ -302,4 +351,4 @@ class Funnels(EventsBase):
             .limit(100)
         )
 
-        return query, parameters
+        return query.get_sql(), parameters

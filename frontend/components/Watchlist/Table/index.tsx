@@ -15,18 +15,21 @@ import { AppertureUser as User } from '@lib/domain/user';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import UserInfo from './UserInfo';
+import Actions from './Actions';
 dayjs.extend(utc);
 
 type WatchlistTableProps = {
   savedItemsData: SavedItems[];
   onRowClick: Function;
   tableColumns?: ColumnDef<SavedItems, any>[];
+  handleDelete: Function;
 };
 
 const WatchlistTable = ({
   savedItemsData,
   onRowClick,
   tableColumns,
+  handleDelete,
 }: WatchlistTableProps) => {
   const {
     device: { isMobile },
@@ -66,6 +69,12 @@ const WatchlistTable = ({
                 return dayjs.utc(updatedAt).local().format('D MMM YY, h:mmA');
               },
               header: 'Last Updated',
+            }),
+            columnHelper.accessor('details._id', {
+              cell: (info) => (
+                <Actions info={info} handleDelete={handleDelete} />
+              ),
+              header: '',
             }),
           ],
     []

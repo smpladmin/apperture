@@ -1,6 +1,7 @@
 import json
 import logging
 from base64 import b64decode
+import os
 from typing import Any, Union
 
 import requests
@@ -10,6 +11,10 @@ from domain.clickstream.service import ClickstreamService
 from domain.datasources.service import DataSourceService
 
 router = APIRouter()
+
+ROOT_DIR = os.path.abspath(os.curdir)
+array = open(f"{ROOT_DIR}/static/array.js", "r").read()
+array_map = open(f"{ROOT_DIR}/static/array.js.map", "r").read()
 
 
 @router.post("/events/capture/decide/")
@@ -47,14 +52,12 @@ async def capture_click_stream(
 
 @router.get("/events/capture/static/array.js")
 async def get_js_sdk():
-    res = requests.get("https://app-static.posthog.com/static/array.js")
-    return Response(res.content, media_type="application/javascript; charset=UTF-8")
+    return Response(array, media_type="application/javascript; charset=UTF-8")
 
 
 @router.get("/events/capture/static/array.js.map")
 async def get_js_sdk_map():
-    res = requests.get("https://app-static.posthog.com/static/array.js.map")
-    return Response(res.content)
+    return Response(array_map)
 
 
 @router.get("/events/clickstream")

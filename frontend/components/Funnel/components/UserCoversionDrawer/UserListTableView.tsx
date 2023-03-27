@@ -10,6 +10,7 @@ import {
 import { DateFilterObj } from '@lib/domain/common';
 import {
   ConversionStatus,
+  ConversionWindowObj,
   FunnelConversionData,
   FunnelStep,
   UserProperty,
@@ -29,6 +30,9 @@ type UserTableViewProps = {
   properties?: UserProperty[] | null;
   setTableState: Function;
   dateFilter: DateFilterObj;
+  conversionWindow: ConversionWindowObj;
+  status: ConversionStatus;
+  setStatus: Function;
 };
 type FunnelEventConversion = {
   converted?: FunnelConversionData;
@@ -42,12 +46,12 @@ const UserTableView = ({
   properties,
   tableState,
   dateFilter,
+  conversionWindow,
+  status,
+  setStatus,
 }: UserTableViewProps) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [userData, setUserData] = useState<FunnelEventConversion>();
-  const [status, setStatus] = useState<ConversionStatus>(
-    ConversionStatus.CONVERTED
-  );
 
   const handleTabChange = (tabIndex: number) => {
     setTabIndex(tabIndex);
@@ -56,13 +60,25 @@ const UserTableView = ({
   useEffect(() => {
     const fetchUserData = async () => {
       if (!userData?.dropped && status === ConversionStatus.DROPPED) {
-        const data = await getConversionData(dsId, steps, status, dateFilter);
+        const data = await getConversionData(
+          dsId,
+          steps,
+          status,
+          dateFilter,
+          conversionWindow
+        );
         setUserData({ ...userData, dropped: data });
       } else if (
         !userData?.converted &&
         status === ConversionStatus.CONVERTED
       ) {
-        const data = await getConversionData(dsId, steps, status, dateFilter);
+        const data = await getConversionData(
+          dsId,
+          steps,
+          status,
+          dateFilter,
+          conversionWindow
+        );
         setUserData({ ...userData, converted: data });
       }
     };

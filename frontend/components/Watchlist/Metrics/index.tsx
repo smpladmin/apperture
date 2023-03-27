@@ -3,7 +3,10 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import { MetricWithUser } from '@lib/domain/metric';
 import { Provider } from '@lib/domain/provider';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
-import { getSavedMetricsForDatasourceId } from '@lib/services/metricService';
+import {
+  deleteMetric,
+  getSavedMetricsForDatasourceId,
+} from '@lib/services/metricService';
 import { Row } from '@tanstack/react-table';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -12,11 +15,14 @@ import WatchlistTable from '../Table';
 const SavedMetrics = ({ provider }: { provider: Provider }) => {
   const [funnels, setFunnels] = useState<SavedItems[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [renderMetric, setRenderMetric] = useState(true);
+
   const router = useRouter();
 
   const { dsId } = router.query;
 
   useEffect(() => {
+    if (!renderMetric) return;
     const getMetrics = async () => {
       let savedMetrics =
         (await getSavedMetricsForDatasourceId(dsId as string)) || [];
@@ -29,7 +35,8 @@ const SavedMetrics = ({ provider }: { provider: Provider }) => {
 
     setIsLoading(true);
     getMetrics();
-  }, []);
+    setRenderMetric(false);
+  }, [renderMetric]);
 
   const onRowClick = (row: Row<SavedItems>) => {
     const { _id, datasourceId } = row?.original?.details;
@@ -44,6 +51,11 @@ const SavedMetrics = ({ provider }: { provider: Provider }) => {
       pathname: '/analytics/metric/create/[dsId]',
       query: { dsId },
     });
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteMetric(id);
+    setRenderMetric(true);
   };
 
   return (
@@ -83,7 +95,11 @@ const SavedMetrics = ({ provider }: { provider: Provider }) => {
             <LoadingSpinner />
           </Flex>
         ) : (
-          <WatchlistTable savedItemsData={funnels} onRowClick={onRowClick} />
+          <WatchlistTable
+            savedItemsData={funnels}
+            onRowClick={onRowClick}
+            handleDelete={handleDelete}
+          />
         )}
       </Box>
     </Box>

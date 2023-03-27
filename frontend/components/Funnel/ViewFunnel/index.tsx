@@ -1,6 +1,12 @@
 import { Flex } from '@chakra-ui/react';
 import { DateFilterObj } from '@lib/domain/common';
-import { Funnel, FunnelData, FunnelTrendsData } from '@lib/domain/funnel';
+import {
+  ConversionWindowList,
+  ConversionWindowObj,
+  Funnel,
+  FunnelData,
+  FunnelTrendsData,
+} from '@lib/domain/funnel';
 import { Notifications } from '@lib/domain/notification';
 import {
   getTransientFunnelData,
@@ -36,12 +42,26 @@ const ViewFunnel = ({
     filter: savedFunnel?.dateFilter?.filter || null,
     type: savedFunnel?.dateFilter?.type || null,
   });
+  const [conversionWindow] = useState<ConversionWindowObj>({
+    value: savedFunnel?.conversionWindow?.value || 30,
+    type: savedFunnel?.conversionWindow?.type || ConversionWindowList.DAYS,
+  });
 
   useEffect(() => {
     const fetchComputeData = async () => {
       const [computedFunnelData, computedTrendsData] = await Promise.all([
-        getTransientFunnelData(datasourceId, savedFunnel.steps, dateFilter),
-        getTransientTrendsData(datasourceId, savedFunnel.steps, dateFilter),
+        getTransientFunnelData(
+          datasourceId,
+          savedFunnel.steps,
+          dateFilter,
+          conversionWindow
+        ),
+        getTransientTrendsData(
+          datasourceId,
+          savedFunnel.steps,
+          dateFilter,
+          conversionWindow
+        ),
       ]);
       setComputedFunnelData(computedFunnelData);
       setComputedTrendsData(computedTrendsData);
@@ -74,6 +94,7 @@ const ViewFunnel = ({
         eventData={computedTrendsData}
         savedNotification={notification}
         setIsModalClosed={setIsModalClosed}
+        conversionWindow={conversionWindow}
       />
       <RightView
         funnelSteps={savedFunnel.steps}
@@ -81,6 +102,7 @@ const ViewFunnel = ({
         computedTrendsData={computedTrendsData}
         isLoading={isLoading}
         dateFilter={dateFilter}
+        conversionWindow={conversionWindow}
       />
     </Flex>
   );

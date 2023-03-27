@@ -49,6 +49,7 @@ const ConfirmationModal = ({
         maxWidth="168"
         maxHeight={'calc(100% - 100px)'}
         borderRadius={{ base: '16px', md: '20px' }}
+        data-testid={'confirmation-modal'}
       >
         <ModalHeader
           p={'0'}
@@ -102,6 +103,7 @@ const ConfirmationModal = ({
                 lineHeight={{ base: 'xs-14', md: 'base' }}
                 fontWeight={'semibold'}
                 textColor={'white.100'}
+                data-testid={'primary-action'}
               >
                 {primaryButtonText}
               </Button>
@@ -118,6 +120,7 @@ const ConfirmationModal = ({
               fontWeight={'semibold'}
               textColor={'white.100'}
               onClick={() => primaryAction?.()}
+              data-testid={'primary-action'}
             >
               {primaryButtonText}
             </Button>

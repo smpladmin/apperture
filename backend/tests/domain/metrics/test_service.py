@@ -1,5 +1,6 @@
 from datetime import datetime
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, AsyncMock
+import asyncio
 
 import pytest
 
@@ -28,6 +29,14 @@ class TestMetricService:
         self.date_filter = DateFilter(
             filter=LastDateFilter(days=3), type=DateFilterType.LAST
         )
+        self.id = "6384a65e0a397236d9de236a"
+        Metric.id = MagicMock(return_value=self.id)
+        Metric.enabled = True
+        metric_future = asyncio.Future()
+        metric_future.update = AsyncMock()
+        self.update_mock = metric_future.update
+        Metric.find_one = MagicMock(return_value=metric_future)
+
         self.metric.compute_date_filter.return_value = ("2023-01-22", "2023-01-24")
         self.aggregates = [
             SegmentsAndEvents(
@@ -258,3 +267,9 @@ class TestMetricService:
             )
             == result
         )
+
+    @pytest.mark.asyncio
+    async def test_delete_metric(self):
+        await self.service.delete_metric(metric_id="6384a65e0a397236d9de236a")
+        Metric.find_one.assert_called_once()
+        self.update_mock.assert_called_once_with({"$set": {"enabled": False}})
