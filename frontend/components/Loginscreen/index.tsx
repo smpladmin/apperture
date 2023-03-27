@@ -18,7 +18,7 @@ const Loginscreen = () => {
   const { onOpen, onClose, isOpen } = useDisclosure();
 
   useEffect(() => {
-    window.posthog.reset && window.posthog.reset(true);
+    window?.posthog?.reset?.(true);
   }, []);
 
   return (

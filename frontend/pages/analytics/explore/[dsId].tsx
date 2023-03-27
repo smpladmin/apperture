@@ -92,7 +92,8 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   useEffect(() => {
     const identifyUser = async () => {
       const user: AppertureUser = await getAppertureUserInfo();
-      window.posthog.identify && window.posthog.identify(user.id);
+
+      window?.posthog?.identify?.(user.id);
     };
     identifyUser();
   }, []);
