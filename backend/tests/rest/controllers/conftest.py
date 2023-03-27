@@ -15,7 +15,7 @@ from domain.actions.models import (
 )
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App
-from domain.common.date_models import DateFilter, LastDateFilter, DateFilterType
+from domain.common.date_models import DateFilter, DateFilterType, LastDateFilter
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
@@ -386,6 +386,15 @@ def user_data():
         "user_id": "d0b9dd2b-e953-4584-a750-26c4bf906390R",
         "datasource_id": "638f334e8e54760eafc64e66",
         "event": "Viewed /register Page",
+    }
+
+
+@pytest.fixture(scope="module")
+def dropped_user_data():
+    return {
+        "user_id": "d0b9dd2b-e953-4584-a750-26c4bf906390R",
+        "datasource_id": "638f334e8e54760eafc64e66",
+        "event": "",
     }
 
 

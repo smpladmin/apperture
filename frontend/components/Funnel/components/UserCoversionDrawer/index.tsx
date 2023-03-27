@@ -15,6 +15,7 @@ import {
 } from '@chakra-ui/react';
 import UserTableView from './UserListTableView';
 import {
+  ConversionStatus,
   ConversionWindowObj,
   FunnelStep,
   UserProperty,
@@ -49,19 +50,25 @@ const UserConversionDrawer = ({
   const [tableState, setTableState] = useState<TableState>(TableState.PROPERTY);
   const [selectedUser, setSelectedUser] = useState<null | string>(null);
   const [userProperty, setUserProperty] = useState<UserProperty[] | null>(null);
+  const [status, setStatus] = useState<ConversionStatus>(
+    ConversionStatus.CONVERTED
+  );
   useEffect(() => {
     const fetchUserProperty = async () => {
       const response = await getUserProperty(
         selectedUser as string,
         datasourceId,
-        event
+        status == ConversionStatus.CONVERTED ? event : ''
       );
       if (response.property) {
         const property: UserProperty[] = Object.keys(response.property)
           .map((property) => {
             return {
               Property: property,
-              Value: response.property[property],
+              Value:
+                typeof response.property[property] == 'object'
+                  ? JSON.stringify(response.property[property])
+                  : response.property[property],
             };
           })
           .filter((property) => property.Value);
@@ -136,6 +143,8 @@ const UserConversionDrawer = ({
               setTableState={setTableState}
               dateFilter={dateFilter}
               conversionWindow={conversionWindow}
+              status={status}
+              setStatus={setStatus}
             />
           </DrawerBody>
 
