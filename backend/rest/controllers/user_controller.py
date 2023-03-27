@@ -1,5 +1,3 @@
-from typing import Union, str
-
 from fastapi import APIRouter, Depends
 
 from domain.users.service import UserService
