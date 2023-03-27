@@ -10,7 +10,7 @@ import {
   Image,
   useDisclosure,
 } from '@chakra-ui/react';
-import { BACKEND_BASE_URL, APPERTURE_PH_KEY } from 'config';
+import { BACKEND_BASE_URL } from 'config';
 import LoginWithPasswordModal from './Components/LoginWithPasswordModal';
 import { useEffect } from 'react';
 
@@ -18,9 +18,7 @@ const Loginscreen = () => {
   const { onOpen, onClose, isOpen } = useDisclosure();
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.posthog && APPERTURE_PH_KEY) {
-      window.posthog.reset(true);
-    }
+    window.posthog.reset && window.posthog.reset(true);
   }, []);
 
   return (

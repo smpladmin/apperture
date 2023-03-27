@@ -90,13 +90,11 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
   }, [activeNode]);
 
   useEffect(() => {
-    const getUserInfo = async () => {
+    const identifyUser = async () => {
       const user: AppertureUser = await getAppertureUserInfo();
-      if (typeof window !== 'undefined' && window.posthog && APPERTURE_PH_KEY) {
-        window.posthog.identify(user.id);
-      }
+      window.posthog.identify && window.posthog.identify(user.id);
     };
-    getUserInfo();
+    identifyUser();
   }, []);
 
   useEffect(() => {
