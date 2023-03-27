@@ -6,6 +6,7 @@ import { ConversionWindowObj, FunnelStep } from '@lib/domain/funnel';
 import Card from '@components/Card';
 import { Clock } from '@phosphor-icons/react';
 import ActionPanelTemp from '@components/EventsLayout/ActionPanelTemp';
+import { capitalizeFirstLetter } from '@lib/utils/common';
 
 type LeftViewProps = {
   steps: FunnelStep[];
@@ -54,7 +55,9 @@ const LeftView = ({
                   lineHeight={'xs-14'}
                   fontWeight={'medium'}
                   color={'black'}
-                >{` ${conversionWindow.value} ${conversionWindow.type}`}</Text>
+                >{` ${conversionWindow.value} ${capitalizeFirstLetter(
+                  conversionWindow.type
+                )}`}</Text>
               </Flex>
             </Card>
           </Flex>
