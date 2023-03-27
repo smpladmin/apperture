@@ -391,6 +391,15 @@ def user_data():
 
 
 @pytest.fixture(scope="module")
+def dropped_user_data():
+    return {
+        "user_id": "d0b9dd2b-e953-4584-a750-26c4bf906390R",
+        "datasource_id": "638f334e8e54760eafc64e66",
+        "event": "",
+    }
+
+
+@pytest.fixture(scope="module")
 def action_data():
     return {
         "datasourceId": "63e4da53370789982002e57d",

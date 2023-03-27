@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
-from rest.middlewares import validate_jwt
+
 from domain.users.service import UserService
 from rest.dtos.users import UserPropertyResponse
+from rest.middlewares import validate_jwt
 
 router = APIRouter(
     tags=["user"],

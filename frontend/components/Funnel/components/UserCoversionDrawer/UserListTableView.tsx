@@ -31,6 +31,8 @@ type UserTableViewProps = {
   setTableState: Function;
   dateFilter: DateFilterObj;
   conversionWindow: ConversionWindowObj;
+  status: ConversionStatus;
+  setStatus: Function;
 };
 type FunnelEventConversion = {
   converted?: FunnelConversionData;
@@ -45,12 +47,11 @@ const UserTableView = ({
   tableState,
   dateFilter,
   conversionWindow,
+  status,
+  setStatus,
 }: UserTableViewProps) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [userData, setUserData] = useState<FunnelEventConversion>();
-  const [status, setStatus] = useState<ConversionStatus>(
-    ConversionStatus.CONVERTED
-  );
 
   const handleTabChange = (tabIndex: number) => {
     setTabIndex(tabIndex);
