@@ -15,7 +15,12 @@ from domain.actions.models import (
 )
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App
-from domain.common.date_models import DateFilter, DateFilterType, LastDateFilter
+from domain.common.filter_models import (
+    FilterOperatorsString,
+    FilterDataType,
+    FilterOperatorsNumber,
+    LogicalOperators,
+)
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
@@ -48,12 +53,8 @@ from domain.runlogs.models import RunLog
 from domain.segments.models import (
     ComputedSegment,
     Segment,
-    SegmentDataType,
     SegmentFilterConditions,
-    SegmentFilterOperatorsNumber,
-    SegmentFilterOperatorsString,
     SegmentGroup,
-    SegmentGroupConditions,
     WhereSegmentFilter,
 )
 from domain.users.models import UserDetails
@@ -546,25 +547,25 @@ def segment_service(apperture_user_response):
     )
     filters = [
         WhereSegmentFilter(
-            operator=SegmentFilterOperatorsString.IS,
+            operator=FilterOperatorsString.IS,
             operand="properties.$city",
             values=["Delhi", "Indore", "Bhopal"],
             all=False,
             type=SegmentFilterConditions.WHERE,
             condition=SegmentFilterConditions.WHERE,
-            datatype=SegmentDataType.STRING,
+            datatype=FilterDataType.STRING,
         ),
         WhereSegmentFilter(
-            operator=SegmentFilterOperatorsNumber.EQ,
+            operator=FilterOperatorsNumber.EQ,
             operand="properties.$app_release",
             values=[5003, 2077, 5002],
             all=False,
             type=SegmentFilterConditions.WHERE,
             condition=SegmentFilterConditions.AND,
-            datatype=SegmentDataType.NUMBER,
+            datatype=FilterDataType.NUMBER,
         ),
     ]
-    groups = [SegmentGroup(filters=filters, condition=SegmentGroupConditions.AND)]
+    groups = [SegmentGroup(filters=filters, condition=LogicalOperators.AND)]
     columns = ["properties.$app_release", "properties.$city"]
     segment = Segment(
         name="name",
@@ -1401,9 +1402,11 @@ def compute_metric_request():
                 "variant": "event",
                 "filters": [
                     {
-                        "operator": "equals",
+                        "operator": "is",
                         "operand": "properties.$city",
                         "values": ["Bengaluru"],
+                        "condition": "where",
+                        "datatype": "String",
                     }
                 ],
                 "conditions": ["where"],
@@ -1425,7 +1428,7 @@ def segment_data():
                 "filters": [
                     {
                         "operand": "properties.$city",
-                        "operator": SegmentFilterOperatorsString.IS,
+                        "operator": FilterOperatorsString.IS,
                         "values": ["Delhi", "Indore", "Bhopal"],
                         "type": SegmentFilterConditions.WHERE,
                         "condition": SegmentFilterConditions.WHERE,
@@ -1434,7 +1437,7 @@ def segment_data():
                     },
                     {
                         "operand": "properties.$app_release",
-                        "operator": SegmentFilterOperatorsNumber.EQ,
+                        "operator": FilterOperatorsNumber.EQ,
                         "values": [5003, 2077, 5002],
                         "type": SegmentFilterConditions.WHERE,
                         "condition": SegmentFilterConditions.AND,

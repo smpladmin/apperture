@@ -2,15 +2,15 @@ import pytest
 from unittest.mock import MagicMock
 from pypika import Field, ClickHouseQuery
 
+from domain.common.filter_models import FilterOperatorsString, FilterDataType
 from domain.metrics.models import (
     SegmentsAndEvents,
     SegmentsAndEventsAggregations,
-    SegmentsAndEventsFilter,
-    SegmentsAndEventsFilterOperator,
     SegmentsAndEventsType,
     MetricBasicAggregation,
     MetricAggregatePropertiesAggregation,
 )
+from domain.segments.models import WhereSegmentFilter, SegmentFilterConditions
 from repositories.clickhouse.metric import Metrics
 
 
@@ -31,10 +31,14 @@ class TestMetricRepository:
                 ),
                 reference_id="Video_Seen",
                 filters=[
-                    SegmentsAndEventsFilter(
-                        operator=SegmentsAndEventsFilterOperator.EQUALS,
+                    WhereSegmentFilter(
+                        operator=FilterOperatorsString.IS,
                         operand="properties.$city",
                         values=["Bengaluru"],
+                        all=False,
+                        type=SegmentFilterConditions.WHERE,
+                        condition=SegmentFilterConditions.WHERE,
+                        datatype=FilterDataType.STRING,
                     )
                 ],
                 conditions=["where"],
