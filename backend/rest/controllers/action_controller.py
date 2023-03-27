@@ -1,7 +1,7 @@
 from typing import List
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from domain.actions.service import ActionService
 from domain.apperture_users.models import AppertureUser
@@ -31,6 +31,12 @@ async def create_action(
     ds_service: DataSourceService = Depends(),
 ):
     datasource = await ds_service.get_datasource(dto.datasourceId)
+    existing_action = await action_service.get_action_by_name(dto.name)
+    if existing_action:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Action name should be unique",
+        )
     action = action_service.build_action(
         datasourceId=datasource.id,
         appId=datasource.app_id,
