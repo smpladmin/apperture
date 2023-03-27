@@ -1,88 +1,18 @@
-import { Box, Flex, Text, useDisclosure } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
-import Render from '@components/Render';
-import React, { useEffect } from 'react';
+import React from 'react';
 import ViewFunnelSteps from '../components/ViewFunnelSteps';
 import 'remixicon/fonts/remixicon.css';
-import { BASTILLE } from '@theme/index';
-import {
-  ConversionWindowObj,
-  FunnelStep,
-  FunnelTrendsData,
-} from '@lib/domain/funnel';
-import { useRouter } from 'next/router';
-import Alert from '@components/Alerts';
-import { Notifications, NotificationVariant } from '@lib/domain/notification';
-import { hasSavedAlert } from '@components/Alerts/util';
+import { ConversionWindowObj, FunnelStep } from '@lib/domain/funnel';
 import Card from '@components/Card';
 import { Clock } from '@phosphor-icons/react';
 
 type LeftViewProps = {
-  datasourceId: string;
-  name: string;
   steps: FunnelStep[];
-  eventData: FunnelTrendsData[];
-  savedNotification: Notifications;
-  setIsModalClosed: Function;
   conversionWindow: ConversionWindowObj;
 };
 
-const LeftView = ({
-  datasourceId,
-  name,
-  steps,
-  eventData,
-  savedNotification,
-  setIsModalClosed,
-  conversionWindow,
-}: LeftViewProps) => {
-  const router = useRouter();
-
-  const {
-    pathname,
-    query: { funnelId, showAlert },
-  } = router;
-  const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
-
-  useEffect(() => {
-    if (showAlert) onOpen();
-  }, []);
-
-  const handleEditFunnel = () => {
-    router.push({
-      pathname: '/analytics/funnel/edit/[funnelId]',
-      query: { funnelId, dsId: datasourceId },
-    });
-  };
-
-  const handleGoBack = () => {
-    router.push({
-      pathname: '/analytics/funnel/list/[dsId]',
-      query: { dsId: datasourceId },
-    });
-  };
-
-  const handleNotificationClick = () => {
-    onOpen();
-    router.replace({
-      pathname,
-      query: { ...router.query, showAlert: true },
-    });
-    setIsModalClosed(false);
-  };
-
-  const handleCloseAlertsModal = () => {
-    if (showAlert) {
-      delete router.query.showAlert;
-      router.replace({
-        pathname: pathname,
-        query: { ...router.query },
-      });
-    }
-    onClose();
-    setIsModalClosed(true);
-  };
-
+const LeftView = ({ steps, conversionWindow }: LeftViewProps) => {
   return (
     <ActionPanel>
       <Card>

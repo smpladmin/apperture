@@ -24,7 +24,7 @@ import { cloneDeep } from 'lodash';
 import { FilterType } from '@lib/domain/segment';
 import { GREY_500, WHITE_DEFAULT } from '@theme/index';
 import { Node } from '@lib/domain/node';
-import { DotsSixVertical, Trash } from '@phosphor-icons/react';
+import { DotsSixVertical, Trash } from 'phosphor-react';
 
 type FunnelComponentCardProps = {
   index: number;
@@ -162,32 +162,13 @@ const FunnelComponentCard = ({
           justifyContent={'space-between'}
         >
           <Flex alignItems={'center'} gap={'1'}>
-            <Box position={'relative'}>
-              <Flex
-                borderRadius={'4px'}
-                position={'absolute'}
-                width={'full'}
-                h={'full'}
-                alignItems={'center'}
-                justifyContent={'center'}
-                backgroundColor={'blue.500'}
-                opacity={0}
-                _hover={{ opacity: 1 }}
-              >
-                <DotsSixVertical
-                  size={16}
-                  weight="bold"
-                  color={WHITE_DEFAULT}
-                />
-              </Flex>
-              <FilterNumber index={index} />
-            </Box>
+            <FilterNumber index={index} isHovered={isHovered} />
             <Box position="relative" ref={eventBoxRef}>
               <Text
                 data-testid={'event-name'}
-                color={'grey.600'}
+                color={funnelStep?.event ? 'black.DEFAULT' : 'grey.600'}
                 fontSize={'xs-14'}
-                fontWeight={400}
+                fontWeight={funnelStep?.event ? 500 : 400}
                 px={'1'}
                 _hover={{ background: 'white.300', cursor: 'pointer' }}
                 lineHeight={'xs-14'}
@@ -202,6 +183,8 @@ const FunnelComponentCard = ({
                 onSubmit={handleEventSelection}
                 listKey={'id'}
                 isNode
+                placeholderText={'Search for events...'}
+                width={'96'}
               />
             </Box>
           </Flex>
@@ -242,7 +225,13 @@ const FunnelComponentCard = ({
 };
 export default FunnelComponentCard;
 
-export const FilterNumber = ({ index }: { index: number }) => {
+export const FilterNumber = ({
+  index,
+  isHovered,
+}: {
+  index: number;
+  isHovered: boolean;
+}) => {
   return (
     <Flex
       data-testid="event-or-segment-component-index"
@@ -259,7 +248,11 @@ export const FilterNumber = ({ index }: { index: number }) => {
       width={'5'}
       cursor={'grab'}
     >
-      {index + 1}
+      {isHovered ? (
+        <DotsSixVertical size={16} weight="bold" color={WHITE_DEFAULT} />
+      ) : (
+        index + 1
+      )}
     </Flex>
   );
 };

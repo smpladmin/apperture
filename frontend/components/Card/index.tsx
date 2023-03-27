@@ -1,13 +1,7 @@
-import { Flex } from '@chakra-ui/react';
-import React, { ReactNode } from 'react';
+import { Flex, StyleProps } from '@chakra-ui/react';
+import React, { PropsWithChildren } from 'react';
 
-const Card = ({
-  children,
-  minHeight = 'auto',
-}: {
-  children: ReactNode;
-  minHeight?: string;
-}) => {
+const Card = ({ children, ...styleProps }: PropsWithChildren<StyleProps>) => {
   return (
     <Flex
       p={'4'}
@@ -16,7 +10,7 @@ const Card = ({
       borderWidth={'1px'}
       borderStyle={'solid'}
       borderRadius={'12'}
-      minHeight={minHeight}
+      {...styleProps}
     >
       {children}
     </Flex>

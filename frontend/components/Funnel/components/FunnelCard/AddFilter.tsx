@@ -2,7 +2,7 @@ import { Box, Flex, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { FunnelStepFilter } from '@lib/domain/funnel';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import { ArrowElbowDownRight } from '@phosphor-icons/react';
+import { ArrowElbowDownRight } from 'phosphor-react';
 import { GREY_700 } from '@theme/index';
 import React, { useRef, useState } from 'react';
 
@@ -21,9 +21,6 @@ const FunnelAddFilterComponent = ({
 }: FunnelAddFilterComponentProps) => {
   const [openDropDown, setOpenDropDown] = useState(false);
   const ref = useRef(null);
-  const handleClick = () => {
-    setOpenDropDown((prevState) => !prevState);
-  };
 
   const handleSubmit = (value: string) => {
     setOpenDropDown(false);
@@ -32,7 +29,7 @@ const FunnelAddFilterComponent = ({
 
   useOnClickOutside(ref, () => setOpenDropDown(false));
   return (
-    <Flex position="relative" width={'full'} direction={'column'} ref={ref}>
+    <Flex width={'full'} direction={'column'} ref={ref}>
       <Flex p={1} alignItems={'center'} gap={2} h={6} mt={2} px={1}>
         <Box opacity={filters.length ? 0 : 1}>
           <ArrowElbowDownRight size={12} color={GREY_700} weight={'bold'} />
@@ -47,7 +44,7 @@ const FunnelAddFilterComponent = ({
           cursor={'pointer'}
           borderRadius={'4px'}
           _hover={{ color: 'grey.800', background: 'white.400' }}
-          onClick={handleClick}
+          onClick={() => setOpenDropDown(true)}
         >
           <Text
             color={'inherit'}
@@ -64,6 +61,8 @@ const FunnelAddFilterComponent = ({
         isLoading={loadingEventProperties}
         data={eventProperties}
         onSubmit={handleSubmit}
+        placeholderText={'Search for properties...'}
+        width={'96'}
       />
     </Flex>
   );

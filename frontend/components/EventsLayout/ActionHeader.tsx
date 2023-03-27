@@ -8,7 +8,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import React from 'react';
-import { ArrowLeft } from '@phosphor-icons/react';
+import { ArrowLeft } from 'phosphor-react';
 
 type EventLayoutHeaderProps = {
   handleGoBack: Function;
@@ -35,28 +35,39 @@ const EventLayoutHeader = ({
     >
       <Flex gap={'2'}>
         <IconButton
-          aria-label="close"
+          aria-label="back"
           size={'sm'}
           icon={<ArrowLeft />}
           rounded={'full'}
           border={'1px'}
           borderColor={'grey.400'}
           bg={'white.DEFAULT'}
+          _hover={{
+            bg: 'white.400',
+          }}
           onClick={() => handleGoBack()}
         />
         <Editable
           onChange={(nextValue) => setName(nextValue)}
           defaultValue={name}
-          fontSize={'sh-18'}
-          lineHeight={'sh-18'}
-          fontWeight={'600'}
+          fontSize={'xs-16'}
+          lineHeight={'xs-16'}
+          fontWeight={'700'}
           color={'black.DEFAULT'}
         >
-          <EditablePreview cursor={'pointer'} />
+          <EditablePreview
+            cursor={'pointer'}
+            p={'2'}
+            _hover={{ bg: 'white.200' }}
+            borderRadius={'12'}
+          />
           <EditableInput
-            borderBottom={'1px'}
+            border={'1px'}
             borderColor={'grey.400'}
-            borderRadius={'0'}
+            borderRadius={'12'}
+            bg={'white.DEFAULT'}
+            p={'2'}
+            data-testid={'entity-name'}
           />
         </Editable>
       </Flex>

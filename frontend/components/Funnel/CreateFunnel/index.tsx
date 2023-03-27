@@ -28,7 +28,7 @@ import {
 import { useRouter } from 'next/router';
 import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel/util';
 import { DateFilterObj } from '@lib/domain/common';
-import Header from '@components/EventsLayout/Header';
+import Header from '@components/EventsLayout/ActionHeader';
 import Card from '@components/Card';
 
 const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
@@ -72,6 +72,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const [isStepAdded, setIsStepAdded] = useState(false);
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
   const [isFunnelBeingEdited, setFunnelBeingEdited] = useState(false);
+  const [randomSequence, setRandomSequence] = useState(false);
 
   useEffect(() => {
     if (getCountOfValidAddedSteps(funnelSteps) >= 2) {
@@ -112,13 +113,15 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
           dateFilter,
-          conversionWindow
+          conversionWindow,
+          randomSequence
         ),
         getTransientTrendsData(
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
           dateFilter,
-          conversionWindow
+          conversionWindow,
+          randomSequence
         ),
       ]);
       setFunnelData(funnelData);
@@ -128,7 +131,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
 
     setIsLoading(true);
     getFunnelMetricsData();
-  }, [funnelSteps, dateFilter, conversionWindow]);
+  }, [funnelSteps, dateFilter, conversionWindow, randomSequence]);
 
   const handleSaveFunnel = async () => {
     const { data, status } = isFunnelBeingEdited
@@ -137,7 +140,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           dsId as string,
           funnelName,
           filterFunnelSteps(funnelSteps),
-          false,
+          randomSequence,
           dateFilter,
           conversionWindow
         )
@@ -145,7 +148,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           dsId as string,
           funnelName,
           filterFunnelSteps(funnelSteps),
-          false,
+          randomSequence,
           dateFilter,
           conversionWindow
         );
@@ -163,7 +166,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
       direction={'column'}
       h={'full'}
       bg={'white.400'}
-      overflow={'hidden'}
+      overflow={'auto'}
     >
       <Header
         handleGoBack={() => router.back()}
@@ -176,7 +179,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
         direction={{ base: 'column', md: 'row' }}
         gap={'5'}
         flexGrow={1}
-        height={1}
+        bg={'white.400'}
       >
         <ActionPanel>
           <Card>
@@ -186,12 +189,14 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
               setIsStepAdded={setIsStepAdded}
               conversionWindow={conversionWindow}
               setConversionWindow={setConversionWindow}
+              randomSequence={randomSequence}
+              setRandomSequence={setRandomSequence}
             />
           </Card>
         </ActionPanel>
         <ViewPanel>
           {isEmpty ? (
-            <Card minHeight="120">
+            <Card minHeight={'120'} borderRadius={'16'}>
               <FunnelEmptyState />
             </Card>
           ) : (

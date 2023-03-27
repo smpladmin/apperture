@@ -14,7 +14,7 @@ import { useRouter } from 'next/router';
 import DateFilterComponent from '@components/Date/DateFilter';
 import { DateFilterObj } from '@lib/domain/common';
 import Card from '@components/Card';
-import { ArrowRight } from '@phosphor-icons/react';
+import { ArrowRight } from 'phosphor-react';
 
 type TransientFunnelViewProps = {
   isLoading: boolean;
@@ -64,7 +64,7 @@ const TransientFunnelView = ({
   };
 
   return (
-    <Flex direction={'column'} gap={'8'} h={'full'}>
+    <Flex direction={'column'} gap={'5'} h={'full'}>
       <DateFilterComponent
         dateFilter={dateFilter}
         setDateFilter={setDateFilter}
@@ -77,7 +77,7 @@ const TransientFunnelView = ({
         </Flex>
       ) : (
         <>
-          <Card>
+          <Card borderRadius={'16'}>
             <Flex w={'full'} direction={'column'} gap={15}>
               <Flex
                 w={'full'}
@@ -106,14 +106,14 @@ const TransientFunnelView = ({
                       >
                         {`${funnelConversion}% `}
                       </Highlight>
-                      <Text
-                        fontSize={'xs-12'}
-                        lineHeight={'lh-130'}
-                        color={'grey.600'}
-                        fontWeight={'400'}
-                      >
-                        Conversions
-                      </Text>
+                    </Text>
+                    <Text
+                      fontSize={'xs-12'}
+                      lineHeight={'lh-130'}
+                      color={'grey.600'}
+                      fontWeight={'400'}
+                    >
+                      Conversion
                     </Text>
                   </Flex>
                   <Flex direction={'column'} gap={'1'}>
@@ -121,7 +121,7 @@ const TransientFunnelView = ({
                       fontSize={'sh-18'}
                       lineHeight={'sh-18'}
                       fontWeight={'500'}
-                      data-testid={'funnel-conversion'}
+                      data-testid={'funnel-conversion-users'}
                       color={'black.DEFAULT'}
                     >
                       <Highlight
@@ -134,14 +134,14 @@ const TransientFunnelView = ({
                       >
                         {`${funnelLastStepUsers}`}
                       </Highlight>
-                      <Text
-                        fontSize={'xs-12'}
-                        lineHeight={'lh-130'}
-                        color={'grey.600'}
-                        fontWeight={'400'}
-                      >
-                        Users
-                      </Text>
+                    </Text>
+                    <Text
+                      fontSize={'xs-12'}
+                      lineHeight={'lh-130'}
+                      color={'grey.600'}
+                      fontWeight={'400'}
+                    >
+                      #Users
                     </Text>
                   </Flex>
                 </Flex>
@@ -168,7 +168,7 @@ const TransientFunnelView = ({
             </Flex>
           </Card>
 
-          <Card>
+          <Card borderRadius={'16'}>
             <Box w={'full'}>
               <Trend data={trendsData} />
             </Box>

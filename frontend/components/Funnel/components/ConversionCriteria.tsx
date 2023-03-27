@@ -3,7 +3,7 @@ import Dropdown from '@components/SearchableDropdown/Dropdown';
 import { ConversionWindowList, ConversionWindowObj } from '@lib/domain/funnel';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { capitalizeFirstLetter } from '@lib/utils/common';
-import { CaretDown, Clock } from '@phosphor-icons/react';
+import { CaretDown, Clock } from 'phosphor-react';
 import React, { useRef, useState } from 'react';
 
 type ConversionCriteriaProps = {
@@ -107,12 +107,11 @@ const ConversionCriteria = ({
               border={'1px'}
               borderColor={'white.200'}
               data-testid={'conversion-type-list'}
-              _hover={{ background: 'white.200' }}
+              _hover={{ bg: 'white.400' }}
               cursor={'pointer'}
               justifyContent={'space-between'}
             >
               <Text
-                // color={'white.DEFAULT'}
                 fontSize={{ base: 'xs-14', md: 'base' }}
                 lineHeight={{ base: 'xs-16', md: 'base' }}
                 fontWeight={'normal'}
@@ -123,26 +122,28 @@ const ConversionCriteria = ({
               </Text>
               <CaretDown size={14} color={'#747474'} />
             </Flex>
-            <Dropdown isOpen={isConversionWindowListOpen} minWidth={'40'}>
+            <Dropdown isOpen={isConversionWindowListOpen} width={'76'}>
               <Flex direction={'column'} minW={'10'}>
                 {Object.values(ConversionWindowList).map((value) => {
                   return (
                     <Flex
-                      p={'1.5'}
+                      px={'2'}
+                      py={'3'}
                       key={value}
                       _hover={{
-                        bg: 'white.100',
+                        bg: 'white.400',
                       }}
                       data-testid={'conversion-time-type'}
                       onClick={() => {
                         handleUpdateConversionWindow(value);
                       }}
                       cursor={'pointer'}
+                      borderRadius={'4'}
                     >
                       <Text
-                        fontSize={{ base: 'xs-14', md: 'base' }}
-                        lineHeight={{ base: 'xs-14', md: 'base' }}
-                        fontWeight={'normal'}
+                        fontSize={'xs-14'}
+                        lineHeight={'lh-135'}
+                        fontWeight={'500'}
                       >
                         {capitalizeFirstLetter(value)}
                       </Text>

@@ -1,10 +1,11 @@
-import { Flex, Input } from '@chakra-ui/react';
+import { Flex, Input, InputGroup, InputLeftElement } from '@chakra-ui/react';
 import { ChangeEvent, ReactNode, useEffect } from 'react';
 import { getSearchResult } from '@lib/utils/common';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { SegmentProperty } from '@lib/domain/segment';
 import Dropdown from './Dropdown';
 import { Node } from '@lib/domain/node';
+import { MagnifyingGlass } from 'phosphor-react';
 
 type SearchableDropdownProps = {
   isOpen: boolean;
@@ -14,6 +15,8 @@ type SearchableDropdownProps = {
   setSearchData?: Function;
   dropdownPosition?: string;
   searchKey?: string;
+  placeholderText?: string;
+  width?: string;
 };
 
 const SearchableDropdown = ({
@@ -24,6 +27,8 @@ const SearchableDropdown = ({
   setSearchData,
   dropdownPosition,
   searchKey,
+  placeholderText = 'Search event or properties...',
+  width,
 }: SearchableDropdownProps) => {
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
@@ -43,28 +48,32 @@ const SearchableDropdown = ({
   }, [isOpen]);
 
   return (
-    <Dropdown isOpen={isOpen} dropdownPosition={dropdownPosition}>
+    <Dropdown isOpen={isOpen} dropdownPosition={dropdownPosition} width={width}>
       {isLoading ? (
-        <Flex w={'80'} h={'80'} alignItems={'center'} justifyContent={'center'}>
+        <Flex w={'76'} h={'80'} alignItems={'center'} justifyContent={'center'}>
           <LoadingSpinner />
         </Flex>
       ) : (
         <Flex direction={'column'} gap={'3'}>
-          <Input
-            autoFocus
-            type="text"
-            h={'11'}
-            focusBorderColor="black.100"
-            onChange={handleSearch}
-            placeholder="Search for events or properties..."
-            _placeholder={{
-              fontSize: 'xs-14',
-              lineHeight: 'xs-14',
-              fontWeight: '400',
-              textColor: 'grey.200',
-            }}
-            data-testid={'dropdown-search-input'}
-          />
+          <InputGroup>
+            <InputLeftElement children={<MagnifyingGlass size={'18'} />} />
+            <Input
+              autoFocus
+              type="text"
+              h={'10'}
+              focusBorderColor="black.100"
+              onChange={handleSearch}
+              placeholder={placeholderText}
+              _placeholder={{
+                fontSize: 'xs-14',
+                lineHeight: 'lh-135',
+                fontWeight: '400',
+                textColor: 'grey.600',
+              }}
+              data-testid={'dropdown-search-input'}
+              bg={'white.DEFAULT'}
+            />
+          </InputGroup>
           {children}
         </Flex>
       )}

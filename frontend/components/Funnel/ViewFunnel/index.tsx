@@ -1,4 +1,6 @@
-import { Flex } from '@chakra-ui/react';
+import { Flex, useDisclosure } from '@chakra-ui/react';
+import Alert from '@components/Alerts';
+import ViewHeader from '@components/EventsLayout/ViewHeader';
 import { DateFilterObj } from '@lib/domain/common';
 import {
   ConversionWindowList,
@@ -7,7 +9,7 @@ import {
   FunnelData,
   FunnelTrendsData,
 } from '@lib/domain/funnel';
-import { Notifications } from '@lib/domain/notification';
+import { Notifications, NotificationVariant } from '@lib/domain/notification';
 import {
   getTransientFunnelData,
   getTransientTrendsData,
@@ -26,7 +28,10 @@ const ViewFunnel = ({
   savedNotification: Notifications;
 }) => {
   const router = useRouter();
-  const { dsId } = router.query;
+  const {
+    pathname,
+    query: { funnelId, dsId, showAlert },
+  } = router;
 
   const datasourceId = (dsId as string) || savedFunnel.datasourceId;
   const [isLoading, setIsLoading] = useState(Boolean(savedFunnel.steps.length));
@@ -46,6 +51,8 @@ const ViewFunnel = ({
     value: savedFunnel?.conversionWindow?.value || 30,
     type: savedFunnel?.conversionWindow?.type || ConversionWindowList.DAYS,
   });
+  const [randomSequence] = useState(savedFunnel.randomSequence);
+  const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
     const fetchComputeData = async () => {
@@ -54,13 +61,15 @@ const ViewFunnel = ({
           datasourceId,
           savedFunnel.steps,
           dateFilter,
-          conversionWindow
+          conversionWindow,
+          randomSequence
         ),
         getTransientTrendsData(
           datasourceId,
           savedFunnel.steps,
           dateFilter,
-          conversionWindow
+          conversionWindow,
+          randomSequence
         ),
       ]);
       setComputedFunnelData(computedFunnelData);
@@ -85,21 +94,67 @@ const ViewFunnel = ({
     getNotificationForFunnel();
   }, [isModalClosed]);
 
+  useEffect(() => {
+    if (showAlert) onOpen();
+  }, []);
+
+  const handleEditFunnel = () => {
+    router.push({
+      pathname: '/analytics/funnel/edit/[funnelId]',
+      query: { funnelId, dsId: datasourceId },
+    });
+  };
+
+  const handleGoBack = () => {
+    router.push({
+      pathname: '/analytics/funnel/list/[dsId]',
+      query: { dsId: datasourceId },
+    });
+  };
+
+  const handleNotificationClick = () => {
+    onOpen();
+    router.replace({
+      pathname,
+      query: { ...router.query, showAlert: true },
+    });
+    setIsModalClosed(false);
+  };
+
+  const handleCloseAlertsModal = () => {
+    if (showAlert) {
+      delete router.query.showAlert;
+      router.replace({
+        pathname: pathname,
+        query: { ...router.query },
+      });
+    }
+    onClose();
+    setIsModalClosed(true);
+  };
+
   return (
-    <>
+    <Flex
+      px={'5'}
+      direction={'column'}
+      h={'full'}
+      bg={'white.400'}
+      overflow={'auto'}
+    >
+      <ViewHeader
+        name={savedFunnel?.name}
+        handleGoBack={handleGoBack}
+        handleEditClick={handleEditFunnel}
+        handleNotificationClick={handleNotificationClick}
+      />
       <Flex
         direction={{ base: 'column', md: 'row' }}
-        h={'full'}
-        w={'full'}
-        pl={5}
+        gap={'5'}
+        flexGrow={1}
+        bg={'white.400'}
       >
         <LeftView
-          datasourceId={datasourceId}
-          name={savedFunnel.name}
           steps={savedFunnel.steps}
-          eventData={computedTrendsData}
-          savedNotification={notification}
-          setIsModalClosed={setIsModalClosed}
           conversionWindow={conversionWindow}
         />
         <RightView
@@ -110,8 +165,18 @@ const ViewFunnel = ({
           dateFilter={dateFilter}
           conversionWindow={conversionWindow}
         />
+        <Alert
+          name={savedFunnel.name}
+          isAlertsSheetOpen={isAlertsSheetOpen}
+          closeAlertsSheet={handleCloseAlertsModal}
+          variant={NotificationVariant.FUNNEL}
+          reference={funnelId as string}
+          eventData={computedTrendsData}
+          datasourceId={datasourceId}
+          savedAlert={savedNotification}
+        />
       </Flex>
-    </>
+    </Flex>
   );
 };
 
