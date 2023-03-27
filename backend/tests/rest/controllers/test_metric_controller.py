@@ -88,6 +88,7 @@ def test_get_metrics(client_init, metric_service):
             "revisionId": ANY,
             "updatedAt": ANY,
             "user": {
+                "id": "635ba034807ab86d8a2aadd8",
                 "email": "test@email.com",
                 "firstName": "Test",
                 "lastName": "User",

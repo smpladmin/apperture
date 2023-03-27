@@ -19,6 +19,9 @@ import { useRouter } from 'next/router';
 import { MapContext } from '@lib/contexts/mapContext';
 import { getAuthToken } from '@lib/utils/request';
 import { EventData } from '@lib/domain/eventData';
+import { getAppertureUserInfo } from '@lib/services/userService';
+import { AppertureUser } from '@lib/domain/user';
+import { APPERTURE_PH_KEY } from 'config';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -85,6 +88,15 @@ const ExploreDataSource = ({ edges }: ExploreDataSourceProps) => {
       closeMobileEventDetailFloater();
     }
   }, [activeNode]);
+
+  useEffect(() => {
+    const identifyUser = async () => {
+      const user: AppertureUser = await getAppertureUserInfo();
+
+      window?.posthog?.identify?.(user.id);
+    };
+    identifyUser();
+  }, []);
 
   useEffect(() => {
     if (!activeNode) return;
