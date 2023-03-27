@@ -145,7 +145,7 @@ const FunnelComponentCard = ({
       p={'3'}
       borderRadius={'8px'}
       border={'1px'}
-      borderColor={'white.200'}
+      borderColor={isHovered ? 'white500 ' : 'white.200'}
       justifyContent={'space-between'}
       alignItems={'center'}
       direction={'column'}
@@ -155,7 +155,7 @@ const FunnelComponentCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Flex width={'full'}>
+      <Flex width={'full'} >
         <Flex
           width={'full'}
           alignItems={'center'}

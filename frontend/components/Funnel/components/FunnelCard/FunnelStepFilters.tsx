@@ -90,9 +90,8 @@ const FunnelStepFilter = ({
     <Flex
       data-testid={'event-filter'}
       width={'full'}
-      mt={2}
+      mt={1}
       direction={'column'}
-      gap={1}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -102,41 +101,43 @@ const FunnelStepFilter = ({
         gap={2}
         h={6}
         mt={2}
-        px={1}
+        pr={0}
         justifyContent={'space-between'}
       >
         <Flex alignItems={'center'}>
           <ArrowElbowDownRight size={12} color={GREY_700} weight={'bold'} />
-          <Flex
-            alignItems={'center'}
-            justifyContent={'center'}
-            color={'grey.600'}
-            p={1}
-            height={6}
-            data-testid={'filter-condition'}
-            cursor={'pointer'}
-            borderRadius={'4px'}
-            _hover={{ color: 'grey.800', background: 'white.400' }}
-          >
-            <Text
-              color={'inherit'}
-              fontSize={'xs-12'}
-              lineHeight={'lh-120'}
-              fontWeight={'400'}
+          <Flex>
+            <Flex
+              alignItems={'center'}
+              justifyContent={'center'}
+              color={'grey.600'}
+              p={1}
+              height={6}
+              data-testid={'filter-condition'}
+              cursor={'pointer'}
+              borderRadius={'4px'}
+              _hover={{ color: 'grey.800', background: 'white.400' }}
             >
-              {filter.condition}
-            </Text>
+              <Text
+                color={'inherit'}
+                fontSize={'xs-12'}
+                lineHeight={'lh-120'}
+                fontWeight={'400'}
+              >
+                {filter.condition}
+              </Text>
+            </Flex>
+            <Box
+              p={1}
+              borderBottom={'1px'}
+              borderStyle={'dashed'}
+              borderColor={'black.500'}
+            >
+              <Text fontSize={'xs-12'} lineHeight={'xs-14'} color={'black.500'}>
+                {filter.operand}
+              </Text>
+            </Box>
           </Flex>
-          <Box
-            p={1}
-            borderBottom={'1px'}
-            borderStyle={'dashed'}
-            borderColor={'black.500'}
-          >
-            <Text fontSize={'xs-12'} lineHeight={'xs-14'} color={'black.500'}>
-              {filter.operand}
-            </Text>
-          </Box>
         </Flex>
         <Flex
           data-testid={'remove-filter'}

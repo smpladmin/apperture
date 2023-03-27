@@ -18,6 +18,10 @@ const ViewHeader = ({
 }: ViewHeaderProps) => {
   return (
     <Flex
+      position={'sticky'}
+      top={'0'}
+      width={'full'}
+      background={'white.400'}
       py={'3'}
       justifyContent={'space-between'}
       alignItems={'center'}

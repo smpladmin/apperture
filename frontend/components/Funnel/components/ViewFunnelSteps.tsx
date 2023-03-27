@@ -55,19 +55,56 @@ function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
             {step.filters.map((filter, index) => {
               return (
                 <Flex gap={'1'}>
-                  <Flex paddingLeft={'6'} direction={'column'} key={index}>
-                    <Text
+                  <Flex
+                    w={'full'}
+                    paddingLeft={'6'}
+                    direction={'column'}
+                    key={index}
+                    flexWrap={'wrap'}
+                  >
+                    <Flex
+                      gap={'1'}
+                      alignItems={'center'}
+                      direction={'row'}
                       fontSize={'xs-12'}
                       lineHeight={'lh-135'}
                       color={'grey.500'}
-                    >{`${filter.condition} ${filter.operand}`}</Text>
-                    <Text
-                      color={'grey.500'}
-                      fontSize={'xs-12'}
-                      lineHeight={'lh-135'}
+                      flexWrap={'wrap'}
+                      justifyContent={'flex-start'}
                     >
-                      {`${filter.operator} ${filter.values}`}
-                    </Text>
+                      <Text
+                        maxWidth={'full'}
+                        flexShrink={0}
+                        fontSize={'inherit'}
+                        lineHeight={'inherit'}
+                        color={'inherit'}
+                        wordBreak={'break-all'}
+                      >{`${filter.condition} `}</Text>
+                      <Text
+                        maxWidth={'full'}
+                        flexShrink={0}
+                        fontSize={'inherit'}
+                        lineHeight={'inherit'}
+                        color={'inherit'}
+                        wordBreak={'break-all'}
+                      >{` ${filter.operand}`}</Text>
+                      <Text
+                        maxWidth={'full'}
+                        flexShrink={0}
+                        fontSize={'inherit'}
+                        lineHeight={'inherit'}
+                        color={'inherit'}
+                        wordBreak={'break-all'}
+                      >{` ${filter.operator}`}</Text>
+                      <Text
+                        maxWidth={'full'}
+                        flexShrink={0}
+                        fontSize={'inherit'}
+                        lineHeight={'inherit'}
+                        color={'inherit'}
+                        wordBreak={'break-all'}
+                      >{` ${filter.values}`}</Text>
+                    </Flex>
                   </Flex>
                 </Flex>
               );
