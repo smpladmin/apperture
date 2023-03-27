@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Flex, Text } from '@chakra-ui/react';
+import { Box, Button, Divider, Flex, Text, useToast } from '@chakra-ui/react';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import emptyAction from '@assets/images/empty-action.svg';
 import Image from 'next/image';
@@ -24,6 +24,7 @@ import DividerWithItem from '@components/Divider/DividerWithItem';
 import { cloneDeep } from 'lodash';
 
 const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
+  const toast = useToast();
   const [actionName, setActionName] = useState(
     savedAction?.name || 'Untitled Action'
   );
@@ -143,7 +144,12 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
       });
     }
     if (response?.status === 400 && !response.data) {
-      alert('Name should be unique');
+      toast({
+        title: 'Action name already exists',
+        status: 'error',
+        variant: 'subtle',
+        isClosable: true,
+      });
     }
   };
 
