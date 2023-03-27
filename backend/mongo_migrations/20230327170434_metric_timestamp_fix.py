@@ -1,13 +1,29 @@
 from enum import Enum
-from typing import List, Optional, Union
-import datetime
+from typing import List, Union
 from operator import eq, ge, gt, le, lt, ne
 
 from beanie import iterative_migration, PydanticObjectId
 from pydantic import BaseModel
 from pypika import analytics as an, functions as fn, CustomFunction
 
-from beanie import Document
+from datetime import datetime
+from typing import Optional
+from beanie import (
+    Document as BeanieDocument,
+    Insert,
+    Replace,
+    SaveChanges,
+    before_event,
+)
+
+
+class Document(BeanieDocument):
+    created_at: datetime
+    updated_at: datetime
+
+    @before_event([Insert, Replace, SaveChanges])
+    def set_updated_at(self):
+        self.updated_at = datetime.utcnow()
 
 
 class FilterOperatorsString(str, Enum):
@@ -55,7 +71,7 @@ class FilterDataType(Enum):
             self.STRING: str,
             self.NUMBER: float,
             self.BOOL: bool,
-            self.DATETIME: datetime.datetime,
+            self.DATETIME: datetime,
         }
         return type_dict[self]
 
@@ -241,6 +257,8 @@ class Forward:
             for aggregate in input_document.aggregates
         ]
         output_document.aggregates = aggregates
+        output_document.created_at = input_document.created_at
+        output_document.updated_at = output_document.updated_at
 
 
 class Backward:
@@ -267,3 +285,5 @@ class Backward:
             for aggregate in input_document.aggregates
         ]
         output_document.aggregates = aggregates
+        output_document.created_at = input_document.created_at
+        output_document.updated_at = output_document.updated_at
