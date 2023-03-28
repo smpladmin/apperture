@@ -1,7 +1,7 @@
 import { Box } from '@chakra-ui/react';
 import React, { ReactNode } from 'react';
 
-const ViewPanelTemp = ({ children }: { children: ReactNode }) => {
+const ViewPanel = ({ children }: { children: ReactNode }) => {
   return (
     <Box w={'full'} overflowY={{ md: 'auto' }} py={'5'}>
       {children}
@@ -9,4 +9,4 @@ const ViewPanelTemp = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export default ViewPanelTemp;
+export default ViewPanel;

@@ -27,6 +27,7 @@ const ViewHeader = ({
       alignItems={'center'}
       borderBottom={'1px'}
       borderColor={'grey.DEFAULT'}
+      zIndex={'99'}
     >
       <Flex gap={'2'}>
         <IconButton

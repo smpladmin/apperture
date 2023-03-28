@@ -1,6 +1,7 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import React, {
+  Fragment,
   useCallback,
   useContext,
   useEffect,
@@ -140,6 +141,13 @@ const FunnelComponentCard = ({
     updateStepFilters(stepFilters);
   };
 
+  const handleSetFilterProperty = (filterIndex: number, property: string) => {
+    let stepFilters = [...funnelStep.filters];
+    stepFilters[filterIndex]['operand'] = property;
+
+    updateStepFilters(stepFilters);
+  };
+
   return (
     <Flex
       p={'3'}
@@ -204,13 +212,17 @@ const FunnelComponentCard = ({
       </Flex>
       {Boolean(funnelStep.filters.length) &&
         funnelStep.filters.map((filter, index) => (
-          <FunnelStepFilterComponent
-            filter={filter}
-            key={index}
-            index={index}
-            handleSetFilterValue={handleSetFilterValue}
-            handleRemoveFilter={handleRemoveFilter}
-          />
+          <Fragment key={index}>
+            <FunnelStepFilterComponent
+              index={index}
+              filter={filter}
+              eventProperties={eventProperties}
+              loadingEventProperties={loadingEventProperties}
+              handleSetFilterProperty={handleSetFilterProperty}
+              handleSetFilterValue={handleSetFilterValue}
+              handleRemoveFilter={handleRemoveFilter}
+            />
+          </Fragment>
         ))}
       {funnelStep.event ? (
         <AddFilter

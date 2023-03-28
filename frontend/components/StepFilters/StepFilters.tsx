@@ -7,17 +7,25 @@ import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { GREY_500, GREY_700 } from '@theme/index';
 import { ArrowElbowDownRight, Trash } from 'phosphor-react';
 import { WhereFilter } from '@lib/domain/common';
+import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
+import { getFilterValuesText } from '@lib/utils/common';
 
 type FilterComponentProps = {
   filter: WhereFilter;
   index: number;
+  eventProperties: any;
+  loadingEventProperties: boolean;
   handleRemoveFilter: Function;
   handleSetFilterValue: Function;
+  handleSetFilterProperty: Function;
 };
 
 const StepFilter = ({
   index,
   filter,
+  eventProperties,
+  loadingEventProperties,
+  handleSetFilterProperty,
   handleSetFilterValue,
   handleRemoveFilter,
 }: FilterComponentProps) => {
@@ -33,10 +41,21 @@ const StepFilter = ({
   const [isValueDropDownOpen, setIsValueDropDownOpen] = useState(
     filter.values.length ? false : true
   );
+  const [isPropertyDropdownOpen, setIsPropertyDropdownOpen] = useState(false);
   const [areAllValuesSelected, setAreAllValuesSelected] =
     useState<boolean>(false);
 
   const eventValueRef = useRef(null);
+  const eventPropertyRef = useRef(null);
+
+  useEffect(() => {
+    // check 'Select all' checkbox if all the options are selected
+    if (selectedValues.length === valueList.length && !loadingPropertyValues) {
+      setAreAllValuesSelected(true);
+    } else {
+      setAreAllValuesSelected(false);
+    }
+  }, [valueList, selectedValues]);
 
   useEffect(() => {
     const fetchEventPropertiesValue = async () => {
@@ -58,6 +77,7 @@ const StepFilter = ({
   }, [filter.operand]);
 
   useOnClickOutside(eventValueRef, () => setIsValueDropDownOpen(false));
+  useOnClickOutside(eventPropertyRef, () => setIsPropertyDropdownOpen(false));
 
   const handleSubmitValues = () => {
     handleSetFilterValue(index, selectedValues);
@@ -69,12 +89,6 @@ const StepFilter = ({
     setSelectedValues(value);
   };
 
-  const getValuesText = (values: string[]) => {
-    if (!values.length) return 'Select value';
-    if (values.length <= 2) return values.join(', ');
-    return `${values[0]}, ${values[1]}, +${values.length - 2} more`;
-  };
-
   const handleAllSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     if (checked) {
@@ -84,6 +98,17 @@ const StepFilter = ({
       setAreAllValuesSelected(false);
       setSelectedValues([]);
     }
+  };
+
+  const handlePropertySelection = (property: string) => {
+    handleSetFilterProperty(index, property);
+    setIsPropertyDropdownOpen(false);
+
+    // reset filter values when operand is changed and open the values dropdown
+    handleSetFilterValue(index, []);
+    setSelectedValues([]);
+    setValueList([]);
+    setIsValueDropDownOpen(true);
   };
 
   return (
@@ -127,15 +152,33 @@ const StepFilter = ({
                 {filter.condition}
               </Text>
             </Flex>
-            <Box
-              p={1}
-              borderBottom={'1px'}
-              borderStyle={'dashed'}
-              borderColor={'black.500'}
-            >
-              <Text fontSize={'xs-12'} lineHeight={'xs-14'} color={'black.500'}>
-                {filter.operand}
-              </Text>
+            <Box position={'relative'} ref={eventPropertyRef}>
+              <Box
+                p={1}
+                borderBottom={'1px'}
+                borderStyle={'dashed'}
+                borderColor={'black.500'}
+                onClick={() => {
+                  setIsPropertyDropdownOpen(true);
+                }}
+                cursor={'pointer'}
+              >
+                <Text
+                  fontSize={'xs-12'}
+                  lineHeight={'xs-14'}
+                  color={'black.500'}
+                >
+                  {filter.operand}
+                </Text>
+              </Box>
+              <SearchableListDropdown
+                isOpen={isPropertyDropdownOpen}
+                isLoading={loadingEventProperties}
+                data={eventProperties}
+                onSubmit={handlePropertySelection}
+                placeholderText={'Search for properties...'}
+                width={'96'}
+              />
             </Box>
           </Flex>
         </Flex>
@@ -204,7 +247,7 @@ const StepFilter = ({
               color={'black.500'}
               wordBreak={'break-word'}
             >
-              {getValuesText(filter.values)}
+              {getFilterValuesText(filter.values)}
             </Text>
           </Box>
           <SearchableCheckboxDropdown

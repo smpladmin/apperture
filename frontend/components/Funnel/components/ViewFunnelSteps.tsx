@@ -1,5 +1,6 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { FunnelStep } from '@lib/domain/funnel';
+import { getFilterValuesText } from '@lib/utils/common';
 import React from 'react';
 
 function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
@@ -102,7 +103,7 @@ function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
                         lineHeight={'inherit'}
                         color={'inherit'}
                         wordBreak={'break-all'}
-                      >{`${filter.values}`}</Text>
+                      >{`${getFilterValuesText(filter.values)}`}</Text>
                     </Flex>
                   </Flex>
                 </Flex>

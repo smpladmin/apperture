@@ -98,17 +98,19 @@ const MetricComponentCard = ({
     setFilters([...filters, newFilter]);
   };
 
-  const handleSetFilter = (ref: number, updatedFilter: WhereFilter) => {
-    setFilters(
-      filters.map((filter, index) =>
-        ref == index ? { ...filter, ...updatedFilter } : filter
-      )
-    );
-  };
-
   const handleSetFilterValue = (filterIndex: number, values: string[]) => {
     let stepFilters = [...filters];
     stepFilters[filterIndex]['values'] = values;
+
+    setFilters(stepFilters);
+  };
+
+  const handleSetFilterPropertyValue = (
+    filterIndex: number,
+    property: string
+  ) => {
+    let stepFilters = [...filters];
+    stepFilters[filterIndex]['operand'] = property;
 
     setFilters(stepFilters);
   };
@@ -289,6 +291,9 @@ const MetricComponentCard = ({
                 <StepFilter
                   index={index}
                   filter={filter}
+                  eventProperties={eventProperties}
+                  loadingEventProperties={loadingEventsAndProperties}
+                  handleSetFilterProperty={handleSetFilterPropertyValue}
                   handleSetFilterValue={handleSetFilterValue}
                   handleRemoveFilter={removeFilter}
                 />

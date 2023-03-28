@@ -102,3 +102,9 @@ export const formatDateIntoString = (date: Date, format = 'YYYY-MM-DD') => {
   if (!date) return;
   return dayjs(date).format(format);
 };
+
+export const getFilterValuesText = (values: string[]) => {
+  if (!values.length) return 'Select value';
+  if (values.length <= 2) return values.join(', ');
+  return `${values[0]}, ${values[1]}, +${values.length - 2} more`;
+};
