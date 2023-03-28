@@ -51,6 +51,7 @@ def test_compute_metric(
             "breakdown": [],
             "datasource_id": "638f1aac8e54760eafc64d70",
             "date_filter": None,
+            "segment_filter": None,
             "function": "A",
         }
     )
@@ -98,6 +99,7 @@ def test_get_metrics(client_init, metric_service):
             "userId": "6374b74e9b36ecf7e0b4f9e4",
             "dateFilter": None,
             "enabled": True,
+            "segmentFilter": None,
         }
     ]
     metric_service.get_metrics_for_datasource_id.assert_called_once_with(
@@ -152,6 +154,7 @@ def test_update_metric(
         "updatedAt": None,
         "userId": "6374b74e9b36ecf7e0b4f9e4",
         "dateFilter": None,
+        "segmentFilter": None,
         "enabled": True,
     }
 

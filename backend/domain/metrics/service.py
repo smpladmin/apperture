@@ -11,19 +11,23 @@ from domain.metrics.models import (
     MetricValue,
     ComputedMetricData,
     Metric,
+    SegmentFilter,
 )
 from mongo import Mongo
 from repositories.clickhouse.metric import Metrics
 from repositories.clickhouse.parser.formula_parser import FormulaParser
+from repositories.clickhouse.segments import Segments
 
 
 class MetricService:
     def __init__(
         self,
         metric: Metrics = Depends(),
+        segment: Segments = Depends(),
         mongo: Mongo = Depends(),
     ):
         self.metric = metric
+        self.segment = segment
         self.mongo = mongo
 
     def validate_formula(self, formula, variable_list):
@@ -48,6 +52,7 @@ class MetricService:
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
         date_filter: Union[DateFilter, None],
+        segment_filter: Union[SegmentFilter, None],
     ) -> List[ComputedMetricStep]:
 
         start_date, end_date = (
@@ -58,6 +63,14 @@ class MetricService:
             else (None, None)
         )
 
+        segment_filter_criterion = (
+            self.segment.build_segment_filter_on_metric_criterion(
+                segment_filter=segment_filter
+            )
+            if segment_filter
+            else None
+        )
+
         computed_metric = self.metric.compute_query(
             datasource_id=datasource_id,
             aggregates=aggregates,
@@ -65,6 +78,7 @@ class MetricService:
             function=function,
             start_date=start_date,
             end_date=end_date,
+            segment_filter_criterion=segment_filter_criterion,
         )
         if computed_metric is None:
             return [
@@ -174,7 +188,8 @@ class MetricService:
         function: str,
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
-        dateFilter: Union[DateFilter, None],
+        date_filter: Union[DateFilter, None],
+        segment_filter: Union[SegmentFilter, None],
     ):
         return Metric(
             datasource_id=datasource_id,
@@ -184,7 +199,8 @@ class MetricService:
             function=function,
             aggregates=aggregates,
             breakdown=breakdown,
-            date_filter=dateFilter,
+            date_filter=date_filter,
+            segment_filter=segment_filter,
         )
 
     async def add_metric(self, metric: Metric):
