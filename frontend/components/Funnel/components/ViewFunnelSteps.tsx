@@ -54,12 +54,11 @@ function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
 
             {step.filters.map((filter, index) => {
               return (
-                <Flex gap={'1'}>
+                <Flex gap={'1'} key={index}>
                   <Flex
                     w={'full'}
                     paddingLeft={'6'}
                     direction={'column'}
-                    key={index}
                     flexWrap={'wrap'}
                   >
                     <Flex
@@ -87,7 +86,7 @@ function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
                         lineHeight={'inherit'}
                         color={'inherit'}
                         wordBreak={'break-all'}
-                      >{` ${filter.operand}`}</Text>
+                      >{`${filter.operand}`}</Text>
                       <Text
                         maxWidth={'full'}
                         flexShrink={0}
@@ -95,7 +94,7 @@ function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
                         lineHeight={'inherit'}
                         color={'inherit'}
                         wordBreak={'break-all'}
-                      >{` ${filter.operator}`}</Text>
+                      >{`${filter.operator}`}</Text>
                       <Text
                         maxWidth={'full'}
                         flexShrink={0}
@@ -103,7 +102,7 @@ function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
                         lineHeight={'inherit'}
                         color={'inherit'}
                         wordBreak={'break-all'}
-                      >{` ${filter.values}`}</Text>
+                      >{`${filter.values}`}</Text>
                     </Flex>
                   </Flex>
                 </Flex>

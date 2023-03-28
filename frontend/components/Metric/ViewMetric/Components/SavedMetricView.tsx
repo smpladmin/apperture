@@ -1,11 +1,11 @@
 import { Button, Flex, Highlight, Text } from '@chakra-ui/react';
 import React from 'react';
 import { ComputedMetric } from '@lib/domain/metric';
-import MetricTrend from '../../CreateMetric/Components/MetricTrend';
+import MetricTrend from '../../CreateMetric/components/MetricTrend';
 import DateFilterComponent from '@components/Date/DateFilter';
 import Loader from '@components/LoadingSpinner';
 import { DateFilterObj } from '@lib/domain/common';
-import MetricEmptyState from '@components/Metric/CreateMetric/Components/MetricEmptyState';
+import MetricEmptyState from '@components/Metric/CreateMetric/components/MetricEmptyState';
 
 type SavedMetricViewProps = {
   isLoading: boolean;

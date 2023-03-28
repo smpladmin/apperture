@@ -1,8 +1,6 @@
 import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import React, { useEffect, useRef, useState } from 'react';
-import MetricFilterComponent from './MetricFilterComponent';
-import MetricAddFilterComponent from './MetricAddFilterComponent';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import {
   MetricAggregate,
@@ -10,7 +8,7 @@ import {
   MetricComponentVariant,
 } from '@lib/domain/metric';
 import { Node } from '@lib/domain/node';
-import MetricAggregation from './MetricAggregation';
+
 import {
   FilterConditions,
   FilterDataType,
@@ -18,6 +16,9 @@ import {
   FilterType,
   WhereFilter,
 } from '@lib/domain/common';
+import MetricAggregation from './MetricAggregation';
+import StepFilter from '@components/StepFilters/StepFilters';
+import AddFilterComponent from '@components/StepFilters/AddFilter';
 import { Trash } from 'phosphor-react';
 
 type MetricComponentCardProps = {
@@ -103,6 +104,13 @@ const MetricComponentCard = ({
         ref == index ? { ...filter, ...updatedFilter } : filter
       )
     );
+  };
+
+  const handleSetFilterValue = (filterIndex: number, values: string[]) => {
+    let stepFilters = [...filters];
+    stepFilters[filterIndex]['values'] = values;
+
+    setFilters(stepFilters);
   };
 
   const handleRemoveComponent = () => {
@@ -258,21 +266,13 @@ const MetricComponentCard = ({
             ) : null}
           </Box>
         </Flex>
-        <Box onClick={handleRemoveComponent} opacity={isHovered ? 1 : 0} cursor={'pointer'}>
+        <Box
+          onClick={handleRemoveComponent}
+          opacity={isHovered ? 1 : 0}
+          cursor={'pointer'}
+        >
           <Trash size={24} weight="bold" />
         </Box>
-        {/* <IconButton
-          data-testid="remove-event-or-segment-component"
-          size={'xs'}
-          fontWeight={'500'}
-          aria-label="remove-component"
-          variant={'iconButton'}
-          icon={<i className="ri-close-fill"></i>}
-          color={'grey.200'}
-          opacity={isHovered ? 1 : 0}
-          _hover={{ color: 'white', background: 'grey.300' }}
-          onClick={handleRemoveComponent}
-        /> */}
       </Flex>
 
       {reference && (
@@ -285,23 +285,20 @@ const MetricComponentCard = ({
           />
           {Boolean(filters.length) &&
             filters.map((filter, index) => (
-              <MetricFilterComponent
-                condition={filter.condition}
-                operand={filter.operand}
-                key={index}
-                operator={filter.operator}
-                values={filter.values}
-                index={index}
-                handleSetFilter={handleSetFilter}
-                removeFilter={removeFilter}
-                eventProperties={eventProperties}
-                loadingEventsAndProperties={loadingEventsAndProperties}
-              />
+              <Fragment key={index}>
+                <StepFilter
+                  index={index}
+                  filter={filter}
+                  handleSetFilterValue={handleSetFilterValue}
+                  handleRemoveFilter={removeFilter}
+                />
+              </Fragment>
             ))}
-          <MetricAddFilterComponent
+          <AddFilterComponent
+            filters={filters}
             eventProperties={eventProperties}
-            loadingEventsAndProperties={loadingEventsAndProperties}
             handleAddFilter={handleAddFilter}
+            loadingEventProperties={loadingEventsAndProperties}
           />
         </>
       )}
