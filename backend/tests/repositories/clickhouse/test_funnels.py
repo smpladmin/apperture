@@ -2,11 +2,10 @@ import pytest
 from pypika import Table
 from unittest.mock import MagicMock
 
+from domain.common.filter_models import FilterOperatorsString, FilterDataType
 from domain.segments.models import (
     WhereSegmentFilter,
-    SegmentFilterOperatorsString,
     SegmentFilterConditions,
-    SegmentDataType,
 )
 from domain.funnels.models import FunnelStep
 from repositories.clickhouse.funnels import Funnels, ConversionStatus
@@ -26,13 +25,13 @@ class TestFunnelsRepository:
                 event="Download_Video",
                 filters=[
                     WhereSegmentFilter(
-                        operator=SegmentFilterOperatorsString.IS,
+                        operator=FilterOperatorsString.IS,
                         operand="prop1",
                         values=[10],
                         all=False,
                         type=SegmentFilterConditions.WHERE,
                         condition=SegmentFilterConditions.WHERE,
-                        datatype=SegmentDataType.STRING,
+                        datatype=FilterDataType.STRING,
                     )
                 ],
             ),

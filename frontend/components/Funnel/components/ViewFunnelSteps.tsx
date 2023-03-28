@@ -1,6 +1,6 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { FunnelStep } from '@lib/domain/funnel';
-import React, { useState } from 'react';
+import React from 'react';
 
 function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
   return (

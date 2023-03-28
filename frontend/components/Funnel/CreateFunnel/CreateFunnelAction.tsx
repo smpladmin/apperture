@@ -7,6 +7,7 @@ import { stepsSequence } from '../util';
 import Dropdown from '@components/SearchableDropdown/Dropdown';
 import { useRef, useState } from 'react';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
+import { BLACK_DEFAULT, GREY_500 } from '@theme/index';
 
 type CreateFunnelActionProps = {
   funnelSteps: FunnelStep[];
@@ -74,7 +75,7 @@ const CreateFunnelAction = ({
               >
                 {randomSequence ? 'Any order' : 'In sequence'}
               </Text>
-              <CaretDown size={14} color={'#747474'} />
+              <CaretDown size={14} color={GREY_500} />
             </Flex>
             <Dropdown isOpen={isDropdownOpen} width={'76'}>
               {stepsSequence.map((seq) => {
@@ -114,7 +115,7 @@ const CreateFunnelAction = ({
           cursor={'pointer'}
           variant={'secondary'}
         >
-          <Plus size={14} color={'#000000'} weight={'bold'} />
+          <Plus size={14} color={BLACK_DEFAULT} weight={'bold'} />
         </Button>
       </Flex>
       <EventFields funnelSteps={funnelSteps} setFunnelSteps={setFunnelSteps} />

@@ -1,15 +1,14 @@
 import json
 from unittest.mock import ANY
 
+from domain.common.filter_models import FilterOperatorsString, FilterDataType
 from domain.metrics.models import (
     SegmentsAndEvents,
     SegmentsAndEventsType,
     SegmentsAndEventsAggregations,
-    SegmentsAndEventsFilter,
-    SegmentsAndEventsFilterOperator,
     MetricBasicAggregation,
 )
-from tests.rest.controllers.conftest import metric_service
+from domain.segments.models import WhereSegmentFilter, SegmentFilterConditions
 
 
 def test_compute_metric(
@@ -36,10 +35,14 @@ def test_compute_metric(
                     ),
                     reference_id="Video_Seen",
                     filters=[
-                        SegmentsAndEventsFilter(
-                            operator=SegmentsAndEventsFilterOperator.EQUALS,
+                        WhereSegmentFilter(
+                            operator=FilterOperatorsString.IS,
                             operand="properties.$city",
                             values=["Bengaluru"],
+                            all=False,
+                            type=SegmentFilterConditions.WHERE,
+                            condition=SegmentFilterConditions.WHERE,
+                            datatype=FilterDataType.STRING,
                         )
                     ],
                     conditions=["where"],
@@ -63,7 +66,6 @@ def test_get_metrics(client_init, metric_service):
             "aggregates": [
                 {
                     "aggregations": {"functions": "count", "property": "Video_Seen"},
-                    "conditions": [],
                     "filters": [],
                     "reference_id": "Video_Seen",
                     "variable": "A",
@@ -71,7 +73,6 @@ def test_get_metrics(client_init, metric_service):
                 },
                 {
                     "aggregations": {"functions": "count", "property": "Video_Open"},
-                    "conditions": [],
                     "filters": [],
                     "reference_id": "Video_Open",
                     "variable": "B",
@@ -87,6 +88,7 @@ def test_get_metrics(client_init, metric_service):
             "revisionId": ANY,
             "updatedAt": ANY,
             "user": {
+                "id": "635ba034807ab86d8a2aadd8",
                 "email": "test@email.com",
                 "firstName": "Test",
                 "lastName": "User",
@@ -127,7 +129,6 @@ def test_update_metric(
         "aggregates": [
             {
                 "aggregations": {"functions": "count", "property": "Video_Seen"},
-                "conditions": [],
                 "filters": [],
                 "reference_id": "Video_Seen",
                 "variable": "A",
@@ -135,7 +136,6 @@ def test_update_metric(
             },
             {
                 "aggregations": {"functions": "count", "property": "Video_Open"},
-                "conditions": [],
                 "filters": [],
                 "reference_id": "Video_Open",
                 "variable": "B",

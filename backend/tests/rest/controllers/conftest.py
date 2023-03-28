@@ -15,7 +15,12 @@ from domain.actions.models import (
 )
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App
-from domain.common.date_models import DateFilter, LastDateFilter, DateFilterType
+from domain.common.filter_models import (
+    FilterDataType,
+    FilterOperatorsNumber,
+    FilterOperatorsString,
+    LogicalOperators,
+)
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
@@ -48,12 +53,8 @@ from domain.runlogs.models import RunLog
 from domain.segments.models import (
     ComputedSegment,
     Segment,
-    SegmentDataType,
     SegmentFilterConditions,
-    SegmentFilterOperatorsNumber,
-    SegmentFilterOperatorsString,
     SegmentGroup,
-    SegmentGroupConditions,
     WhereSegmentFilter,
 )
 from domain.users.models import UserDetails
@@ -76,6 +77,7 @@ def client_init(app_init):
 def apperture_user_response():
     AppertureUserResponse.from_orm = mock.MagicMock(
         return_value=AppertureUserResponse(
+            id="635ba034807ab86d8a2aadd8",
             firstName="Test",
             lastName="User",
             email="test@email.com",
@@ -304,6 +306,8 @@ def action_service():
     )
     action_future = asyncio.Future()
     action_future.set_result(action)
+    blank_action_future = asyncio.Future()
+    blank_action_future.set_result([])
     actions_future = asyncio.Future()
     actions_future.set_result([action])
     computed_action_future = asyncio.Future()
@@ -317,6 +321,10 @@ def action_service():
     action_service_mock.get_action.return_value = action_future
     action_service_mock.compute_action.return_value = computed_action_future
     action_service_mock.delete_action.return_value = action_future
+    action_service_mock.get_action_by_name.side_effect = [
+        blank_action_future,
+        action_future,
+    ]
     return action_service_mock
 
 
@@ -386,6 +394,15 @@ def user_data():
         "user_id": "d0b9dd2b-e953-4584-a750-26c4bf906390R",
         "datasource_id": "638f334e8e54760eafc64e66",
         "event": "Viewed /register Page",
+    }
+
+
+@pytest.fixture(scope="module")
+def dropped_user_data():
+    return {
+        "user_id": "d0b9dd2b-e953-4584-a750-26c4bf906390R",
+        "datasource_id": "638f334e8e54760eafc64e66",
+        "event": "",
     }
 
 
@@ -537,25 +554,25 @@ def segment_service(apperture_user_response):
     )
     filters = [
         WhereSegmentFilter(
-            operator=SegmentFilterOperatorsString.IS,
+            operator=FilterOperatorsString.IS,
             operand="properties.$city",
             values=["Delhi", "Indore", "Bhopal"],
             all=False,
             type=SegmentFilterConditions.WHERE,
             condition=SegmentFilterConditions.WHERE,
-            datatype=SegmentDataType.STRING,
+            datatype=FilterDataType.STRING,
         ),
         WhereSegmentFilter(
-            operator=SegmentFilterOperatorsNumber.EQ,
+            operator=FilterOperatorsNumber.EQ,
             operand="properties.$app_release",
             values=[5003, 2077, 5002],
             all=False,
             type=SegmentFilterConditions.WHERE,
             condition=SegmentFilterConditions.AND,
-            datatype=SegmentDataType.NUMBER,
+            datatype=FilterDataType.NUMBER,
         ),
     ]
-    groups = [SegmentGroup(filters=filters, condition=SegmentGroupConditions.AND)]
+    groups = [SegmentGroup(filters=filters, condition=LogicalOperators.AND)]
     columns = ["properties.$app_release", "properties.$city"]
     segment = Segment(
         name="name",
@@ -867,6 +884,7 @@ def saved_segment_with_user():
             "userId": "63771fc960527aba9354399c",
             "enabled": True,
             "user": {
+                "id": "635ba034807ab86d8a2aadd8",
                 "firstName": "Test",
                 "lastName": "User",
                 "email": "test@email.com",
@@ -1392,9 +1410,11 @@ def compute_metric_request():
                 "variant": "event",
                 "filters": [
                     {
-                        "operator": "equals",
+                        "operator": "is",
                         "operand": "properties.$city",
                         "values": ["Bengaluru"],
+                        "condition": "where",
+                        "datatype": "String",
                     }
                 ],
                 "conditions": ["where"],
@@ -1416,7 +1436,7 @@ def segment_data():
                 "filters": [
                     {
                         "operand": "properties.$city",
-                        "operator": SegmentFilterOperatorsString.IS,
+                        "operator": FilterOperatorsString.IS,
                         "values": ["Delhi", "Indore", "Bhopal"],
                         "type": SegmentFilterConditions.WHERE,
                         "condition": SegmentFilterConditions.WHERE,
@@ -1425,7 +1445,7 @@ def segment_data():
                     },
                     {
                         "operand": "properties.$app_release",
-                        "operator": SegmentFilterOperatorsNumber.EQ,
+                        "operator": FilterOperatorsNumber.EQ,
                         "values": [5003, 2077, 5002],
                         "type": SegmentFilterConditions.WHERE,
                         "condition": SegmentFilterConditions.AND,

@@ -4,7 +4,6 @@ import { SegmentProperty } from '@lib/domain/segment';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 import React, { useEffect, useState } from 'react';
 import SearchableDropdown from './SearchableDropdown';
-import { CursorText } from 'phosphor-react';
 
 type SearchableListDropdownProps = {
   isOpen: boolean;

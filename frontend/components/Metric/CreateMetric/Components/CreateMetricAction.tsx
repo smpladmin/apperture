@@ -11,7 +11,6 @@ import {
   MetricAggregate,
   Metric,
   MetricComponentVariant,
-  MetricEventFilter,
   ComputedMetric,
   MetricBasicAggregation,
 } from '@lib/domain/metric';
@@ -21,7 +20,7 @@ import {
   isValidAggregates,
   replaceEmptyStringPlaceholder,
 } from '@components/Metric/util';
-import { DateFilterObj } from '@lib/domain/common';
+import { DateFilterObj, WhereFilter } from '@lib/domain/common';
 
 type CreateMetricActionProps = {
   setMetric: Function;
@@ -80,7 +79,7 @@ const CreateMetricAction = ({
   };
 
   const updateAggregate = useCallback(
-    (variable: string, updatedValue: MetricEventFilter) => {
+    (variable: string, updatedValue: WhereFilter) => {
       setAggregates(
         aggregates.map((aggregate) =>
           aggregate.variable == variable

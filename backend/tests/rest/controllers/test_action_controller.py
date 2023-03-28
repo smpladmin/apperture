@@ -83,6 +83,12 @@ def test_create_action(client_init, action_data, action_service):
     }
 
 
+def test_create_action_with_error(client_init, action_data, action_service):
+    response = client_init.post("/actions", data=json.dumps(action_data))
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Action name should be unique"}
+
+
 def test_get_actions(client_init, action_service):
     response = client_init.get("/actions?datasource_id=63e4da53370789982002e57d")
     assert response.status_code == 200
@@ -111,6 +117,7 @@ def test_get_actions(client_init, action_service):
             "revisionId": ANY,
             "updatedAt": None,
             "user": {
+                "id": "635ba034807ab86d8a2aadd8",
                 "email": "test@email.com",
                 "firstName": "Test",
                 "lastName": "User",

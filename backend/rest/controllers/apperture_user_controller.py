@@ -17,7 +17,15 @@ async def get_current_user(
     user_id: str = Depends(get_user_id),
     user_service: AppertureUserService = Depends(),
 ):
-    return await user_service.get_user(user_id)
+    user = await user_service.get_user(user_id)
+    return AppertureUserResponse(
+        id=user_id,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        email=user.email,
+        picture=user.picture,
+        slack_channel=user.slack_channel,
+    )
 
 
 @router.put("/apperture-users")

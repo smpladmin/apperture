@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Flex, Text } from '@chakra-ui/react';
+import { Box, Button, Divider, Flex, Text, useToast } from '@chakra-ui/react';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import emptyAction from '@assets/images/empty-action.svg';
 import Image from 'next/image';
@@ -24,6 +24,7 @@ import DividerWithItem from '@components/Divider/DividerWithItem';
 import { cloneDeep } from 'lodash';
 
 const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
+  const toast = useToast();
   const [actionName, setActionName] = useState(
     savedAction?.name || 'Untitled Action'
   );
@@ -58,7 +59,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
   } = router;
 
   const datasourceId = dsId || savedAction?.datasourceId;
-
+  const readOnly = Boolean(savedAction?.datasourceId);
   useEffect(() => {
     if (pathname.includes('/analytics/action/edit'))
       setIsActionBeingEdited(true);
@@ -135,11 +136,19 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
         )
       : await saveAction(datasourceId as string, actionName, groups);
 
-    if (response?.status === 200) {
+    if (response?.status === 200 && response.data) {
       const { _id, datasourceId } = response?.data;
       router.push({
         pathname: '/analytics/action/edit/[actionId]',
         query: { actionId: _id || actionId, dsId: datasourceId },
+      });
+    }
+    if (response?.status === 400 && !response.data) {
+      toast({
+        title: 'Action name already exists',
+        status: 'error',
+        variant: 'subtle',
+        isClosable: true,
       });
     }
   };
@@ -147,7 +156,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
   return (
     <Box h={'full'} overflow={'auto'} overflowY={'hidden'}>
       <ActionHeader
-        isDisabled={!isEmpty}
+        isDisabled={readOnly}
         actionName={actionName}
         setActionName={setActionName}
         isSaveDisabled={isSaveDisabled}
@@ -172,7 +181,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
             >
               Match Groups
             </Text>
-            {isEmpty && (
+            {!readOnly && (
               <Button
                 fontSize={'xs-12'}
                 lineHeight={'xs-16'}
@@ -218,7 +227,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
                   groups={groups}
                   updateGroupAction={updateGroupAction}
                   handleClose={removeGroup}
-                  isDisabled={!isEmpty}
+                  isDisabled={readOnly}
                 />
               </Fragment>
             ))}
