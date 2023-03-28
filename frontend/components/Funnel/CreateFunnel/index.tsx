@@ -1,5 +1,4 @@
 import { Flex } from '@chakra-ui/react';
-import 'remixicon/fonts/remixicon.css';
 import CreateFunnelAction from './CreateFunnelAction';
 import { useEffect, useState } from 'react';
 import FunnelEmptyState from '../components/FunnelEmptyState';
