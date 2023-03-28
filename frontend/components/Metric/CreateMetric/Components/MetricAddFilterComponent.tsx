@@ -39,7 +39,7 @@ const MetricAddFilterComponent = ({
         width={'full'}
         onClick={handleClick}
       >
-        +Add Filter
+        +Filter
       </Text>
       <SearchableListDropdown
         isOpen={openDropDown}

@@ -28,8 +28,8 @@ import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel
 import { DateFilterObj } from '@lib/domain/common';
 import Header from '@components/EventsLayout/ActionHeader';
 import Card from '@components/Card';
-import ActionPanelTemp from '@components/EventsLayout/ActionPanelTemp';
-import ViewPanelTemp from '@components/EventsLayout/ViewPanelTemp';
+import ActionPanel from '@components/EventsLayout/ActionPanel';
+import ViewPanel from '@components/EventsLayout/ViewPanel';
 
 const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const router = useRouter();
@@ -181,7 +181,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
         flexGrow={1}
         bg={'white.400'}
       >
-        <ActionPanelTemp>
+        <ActionPanel>
           <Card>
             <CreateFunnelAction
               funnelSteps={funnelSteps}
@@ -193,8 +193,8 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
               setRandomSequence={setRandomSequence}
             />
           </Card>
-        </ActionPanelTemp>
-        <ViewPanelTemp>
+        </ActionPanel>
+        <ViewPanel>
           {isEmpty ? (
             <Card minHeight={'120'} borderRadius={'16'}>
               <FunnelEmptyState />
@@ -210,7 +210,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
               conversionWindow={conversionWindow}
             />
           )}
-        </ViewPanelTemp>
+        </ViewPanel>
       </Flex>
     </Flex>
   );

@@ -5,7 +5,7 @@ import 'remixicon/fonts/remixicon.css';
 import { ConversionWindowObj, FunnelStep } from '@lib/domain/funnel';
 import Card from '@components/Card';
 import { Clock } from 'phosphor-react';
-import ActionPanelTemp from '@components/EventsLayout/ActionPanelTemp';
+import ActionPanel from '@components/EventsLayout/ActionPanel';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 import { GREY_600 } from '@theme/index';
 
@@ -22,7 +22,7 @@ const LeftView = ({
 }: LeftViewProps) => {
   const sequenceText = randomSequence ? 'Any order' : 'In sequence';
   return (
-    <ActionPanelTemp>
+    <ActionPanel>
       <Card>
         <Flex direction={'column'} gap={'6'} w={'full'}>
           <Flex direction={'column'} gap={'3'} w={'full'}>
@@ -64,7 +64,7 @@ const LeftView = ({
           </Flex>
         </Flex>
       </Card>
-    </ActionPanelTemp>
+    </ActionPanel>
   );
 };
 

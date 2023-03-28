@@ -18,7 +18,7 @@ import {
   FilterType,
   WhereFilter,
 } from '@lib/domain/common';
-import FilterOperator from '@components/Segments/CreateSegment/components/QueryBuilder/FilterOperator';
+import { Trash } from 'phosphor-react';
 
 type MetricComponentCardProps = {
   index: number;
@@ -149,43 +149,44 @@ const MetricComponentCard = ({
       justifyContent={'space-between'}
       alignItems={'center'}
       direction={'column'}
-      borderRadius={'12px'}
-      border={'1px solid rgba(255, 255, 255, 0.2)'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      py={5}
+      borderColor={'white.200'}
+      borderRadius={'8'}
+      borderStyle={'solid'}
+      borderWidth={'1px'}
+      mb={3}
     >
-      <Flex px={5} width={'full'} alignItems={'center'}>
+      <Flex p={3} gap={'2'} width={'full'} alignItems={'center'}>
         <Flex
           data-testid="event-or-segment-component-variable"
-          background={'#9999B6'}
-          borderRadius={'2px'}
+          background={'white.200'}
+          borderRadius={'4'}
           textAlign="center"
           fontWeight={500}
-          color={'black.100'}
+          color={'grey.500'}
           fontSize={'xs-10'}
           lineHeight={'12px'}
           justifyContent={'center'}
           alignItems={'center'}
-          height={'16px'}
-          width={'16px'}
+          height={'5'}
+          width={'5'}
         >
           {variable}
         </Flex>
         <Flex
           grow={1}
-          paddingLeft={1}
           mx={1}
           cursor={'pointer'}
-          borderRadius={4}
-          _hover={{ background: 'grey.300' }}
+          color={'black'}
+          _hover={{ background: 'white.200' }}
           data-testid="select-event-segment"
           onClick={() => setIsEventOrSegmentListOpen((prevState) => !prevState)}
         >
           <Box position="relative" ref={EventOrSegmentBox}>
             <Text
               data-testid={'event-or-segment-name'}
-              color={'white'}
+              color={'black'}
               fontSize={'xs-14'}
               fontWeight={500}
               lineHeight={'xs-18'}
@@ -221,7 +222,6 @@ const MetricComponentCard = ({
                       setVariant(MetricComponentVariant.EVENT);
                     }}
                   >
-                    <i className="ri-cursor-fill"></i>
                     <Text marginLeft={2}>Events</Text>
                   </Flex>
                   <Flex
@@ -258,7 +258,10 @@ const MetricComponentCard = ({
             ) : null}
           </Box>
         </Flex>
-        <IconButton
+        <Box onClick={handleRemoveComponent} opacity={isHovered ? 1 : 0} cursor={'pointer'}>
+          <Trash size={24} weight="bold" />
+        </Box>
+        {/* <IconButton
           data-testid="remove-event-or-segment-component"
           size={'xs'}
           fontWeight={'500'}
@@ -269,7 +272,7 @@ const MetricComponentCard = ({
           opacity={isHovered ? 1 : 0}
           _hover={{ color: 'white', background: 'grey.300' }}
           onClick={handleRemoveComponent}
-        />
+        /> */}
       </Flex>
 
       {reference && (

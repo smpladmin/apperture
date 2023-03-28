@@ -11,7 +11,8 @@ import {
   MetricBasicAggregation,
 } from '@lib/domain/metric';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import { ARROW_GRAY, WHITE_100 } from '@theme/index';
+import { ARROW_GRAY, GREY_700, WHITE_100 } from '@theme/index';
+import { ArrowElbowDownRight } from 'phosphor-react';
 import React, { useRef, useState } from 'react';
 
 type MetricAggregationProps = {
@@ -74,16 +75,20 @@ const MetricAggregation = ({
 
   return (
     <Flex width={'full'} alignItems={'center'}>
-      <Box position={'relative'} ref={aggregationRef}>
+      <Flex
+        position={'relative'}
+        ref={aggregationRef}
+        direction={'row'}
+        alignItems={'center'}
+        pl={4}
+      >
+        <ArrowElbowDownRight size={12} weight="bold" color={GREY_700} />
         <Text
-          color={'white'}
+          color={'black'}
           fontSize={'xs-12'}
           lineHeight={'xs-16'}
           marginLeft={4}
           cursor={'pointer'}
-          px={'2'}
-          py={'1'}
-          borderRadius={4}
           _hover={{ color: 'white', background: 'grey.300' }}
           data-testid={'metric-aggregation-function'}
           onClick={() => setIsAggregationListOpen(true)}
@@ -112,7 +117,7 @@ const MetricAggregation = ({
             );
           })}
         </Dropdown>
-      </Box>
+      </Flex>
       {Object.values(MetricAggregatePropertiesAggregation).includes(
         aggregation.functions as any
       ) ? (

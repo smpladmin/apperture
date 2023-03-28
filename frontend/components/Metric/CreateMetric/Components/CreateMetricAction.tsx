@@ -1,6 +1,16 @@
-import { Button, Divider, Flex, Input, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Text,
+  useColorModeValue,
+} from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { BASTILLE } from '@theme/index';
+
 import { useRouter } from 'next/router';
 import MetricComponentCard from './MetricComponentCard';
 import {
@@ -21,6 +31,8 @@ import {
   replaceEmptyStringPlaceholder,
 } from '@components/Metric/util';
 import { DateFilterObj, WhereFilter } from '@lib/domain/common';
+import Card from '@components/Card';
+import { Function } from 'phosphor-react';
 
 type CreateMetricActionProps = {
   setMetric: Function;
@@ -178,66 +190,111 @@ const CreateMetricAction = ({
     }
   }, [aggregates, metricDefinition, metricName, isValidDefinition]);
 
+  const boxColor = debouncedDefinition ? 'blue.500' : 'gray.400';
+
   return (
     <>
-      <Flex direction={'column'} mt={'8'}>
-        <Text fontSize={'xs-12'} color={'grey.200'} py="4">
-          METRIC DEFINITION
-        </Text>
-        <Input
-          pr={'4'}
-          type={'text'}
-          fontSize={'xs-14'}
-          variant="unstyled"
-          lineHeight={{ base: 'sh-20', md: 'sh-32' }}
-          fontWeight={'semibold'}
-          textColor={'white.DEFAULT'}
-          value={debouncedDefinition}
-          onChange={handleTextChange}
-          borderColor={'grey.10'}
-          height="10"
-          borderRadius={'25'}
-          border={'1px solid grey.10'}
-          px={4}
-          marginBottom={4}
-          data-testid={'metric-definition'}
-          background="grey.10"
-          _focus={{ border: '1px solid white' }}
-          _active={{ border: '1px solid white' }}
-        />
-        <Divider orientation="horizontal" borderColor={BASTILLE} opacity={1} />
-      </Flex>
+      <Card>
+        <Flex direction={'column'} width={'full'}>
+          <Flex direction={'column'}>
+            <Text
+              fontSize={'xs-12'}
+              lineHeight={'lh-135'}
+              color={'grey.500'}
+              pb={'3'}
+              px={'3'}
+            >
+              Metric Definition
+            </Text>
+            <InputGroup>
+              <InputLeftElement
+                pointerEvents="none"
+                children={
+                  <Flex>
+                    <Box
+                      mt={'2px'}
+                      bg={boxColor}
+                      height={'18px'}
+                      width={'18px'}
+                      borderRadius={'4'}
+                      padding={'2px'}
+                    >
+                      <Function color="white" size={'14'} weight="bold" />
+                    </Box>
+                  </Flex>
+                }
+              />
+              <Input
+                pr={'4'}
+                type={'text'}
+                placeholder={'example A/B'}
+                fontSize={'xs-14'}
+                variant="unstyled"
+                lineHeight={{ base: 'sh-20', md: 'sh-32' }}
+                textColor={'black.DEFAULT'}
+                value={debouncedDefinition}
+                onChange={handleTextChange}
+                borderColor={'white.200'}
+                borderRadius={'8'}
+                borderStyle={'solid'}
+                borderWidth={'1px'}
+                fontWeight={'medium'}
+                height="11"
+                px={4}
+                marginBottom={4}
+                data-testid={'metric-definition'}
+                background="grey.10"
+                _focus={{
+                  border: '1px solid black',
 
-      <Flex direction={'column'} gap={3} mt={{ base: '2', md: '4' }}>
-        <Flex justifyContent={'space-between'} alignItems={'center'}>
-          <Text fontSize={'xs-12'} color={'grey.200'}>
-            EVENTS & SEGMENT
-          </Text>
-          <Button
-            data-testid={'add-events-or-segments-button'}
-            size={'xs'}
-            color={'white.DEFAULT'}
-            onClick={addAggregate}
-            background={'none'}
-            _hover={{ color: 'white', background: 'grey.300' }}
-          >
-            +
-          </Button>
+                  color: 'black.DEFAULT',
+                }}
+                _active={{
+                  border: '1px solid black',
+                  fontWeight: 'medium',
+                  color: 'black.DEFAULT',
+                }}
+              />
+            </InputGroup>
+          </Flex>
+          <Flex direction={'column'}>
+            <Flex justifyContent={'space-between'} alignItems={'center'}>
+              <Text
+                fontSize={'xs-12'}
+                lineHeight={'lh-135'}
+                color={'grey.500'}
+                pb={'3'}
+                px={'3'}
+              >
+                Events & Segments
+              </Text>
+              <Button
+                data-testid={'add-events-or-segments-button'}
+                size={'xs'}
+                color={'white.DEFAULT'}
+                onClick={addAggregate}
+                background={'none'}
+                _hover={{ color: 'white', background: 'grey.300' }}
+              >
+                +
+              </Button>
+            </Flex>
+            {aggregates.map((aggregate, index) => (
+              <MetricComponentCard
+                index={index}
+                variable={aggregate.variable}
+                eventList={eventList}
+                key={aggregate.variable}
+                eventProperties={eventProperties}
+                loadingEventsAndProperties={loadingEventsAndProperties}
+                updateAggregate={updateAggregate}
+                removeAggregate={removeAggregate}
+                savedAggregate={aggregate}
+              />
+            ))}
+          </Flex>
         </Flex>
-        {aggregates.map((aggregate, index) => (
-          <MetricComponentCard
-            index={index}
-            variable={aggregate.variable}
-            eventList={eventList}
-            key={aggregate.variable}
-            eventProperties={eventProperties}
-            loadingEventsAndProperties={loadingEventsAndProperties}
-            updateAggregate={updateAggregate}
-            removeAggregate={removeAggregate}
-            savedAggregate={aggregate}
-          />
-        ))}
-      </Flex>
+      </Card>
     </>
   );
 };

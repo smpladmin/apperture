@@ -100,7 +100,13 @@ const DateFilter = ({
   };
 
   return (
-    <ButtonGroup size="sm" isAttached variant="outline" isDisabled={isDisabled}>
+    <ButtonGroup
+      size="sm"
+      isAttached
+      variant="outline"
+      isDisabled={isDisabled}
+      borderRadius={'8'}
+    >
       <Button
         borderWidth={'1px'}
         borderStyle={'solid'}
