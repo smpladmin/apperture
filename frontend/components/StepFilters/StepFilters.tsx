@@ -4,18 +4,18 @@ import { getEventPropertiesValue } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
 import SearchableCheckboxDropdown from '@components/SearchableDropdown/SearchableCheckboxDropdown';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import { FunnelStepFilter } from '@lib/domain/funnel';
 import { GREY_500, GREY_700 } from '@theme/index';
 import { ArrowElbowDownRight, Trash } from 'phosphor-react';
+import { WhereFilter } from '@lib/domain/common';
 
 type FilterComponentProps = {
-  filter: FunnelStepFilter;
+  filter: WhereFilter;
   index: number;
   handleRemoveFilter: Function;
   handleSetFilterValue: Function;
 };
 
-const FunnelStepFilter = ({
+const StepFilter = ({
   index,
   filter,
   handleSetFilterValue,
@@ -225,4 +225,4 @@ const FunnelStepFilter = ({
   );
 };
 
-export default FunnelStepFilter;
+export default StepFilter;

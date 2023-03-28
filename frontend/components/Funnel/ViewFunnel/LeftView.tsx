@@ -5,7 +5,7 @@ import 'remixicon/fonts/remixicon.css';
 import { ConversionWindowObj, FunnelStep } from '@lib/domain/funnel';
 import Card from '@components/Card';
 import { Clock } from 'phosphor-react';
-import ActionPanelTemp from '@components/EventsLayout/ActionPanelTemp';
+import ActionPanelTemp from '@components/EventsLayout/ActionPanel';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 import { GREY_600 } from '@theme/index';
 

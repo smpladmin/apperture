@@ -1,5 +1,4 @@
 import { Flex } from '@chakra-ui/react';
-import 'remixicon/fonts/remixicon.css';
 import CreateFunnelAction from './CreateFunnelAction';
 import { useEffect, useState } from 'react';
 import FunnelEmptyState from '../components/FunnelEmptyState';
@@ -28,8 +27,8 @@ import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel
 import { DateFilterObj } from '@lib/domain/common';
 import Header from '@components/EventsLayout/ActionHeader';
 import Card from '@components/Card';
-import ActionPanelTemp from '@components/EventsLayout/ActionPanelTemp';
-import ViewPanelTemp from '@components/EventsLayout/ViewPanelTemp';
+import ActionPanelTemp from '@components/EventsLayout/ActionPanel';
+import ViewPanelTemp from '@components/EventsLayout/ViewPanel';
 
 const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const router = useRouter();

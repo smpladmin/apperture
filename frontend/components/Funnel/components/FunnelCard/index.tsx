@@ -1,4 +1,4 @@
-import { Box, Divider, Flex, IconButton, Text } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import React, {
   useCallback,
@@ -7,17 +7,11 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import AddFilter from './AddFilter';
+import AddFilter from '../../../StepFilters/AddFilter';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import {
-  FunnelFilterConditions,
-  FunnelFilterDataType,
-  FunnelFilterOperators,
-  FunnelStep,
-  FunnelStepFilter,
-} from '@lib/domain/funnel';
+import { FunnelStep } from '@lib/domain/funnel';
 import { MapContext } from '@lib/contexts/mapContext';
-import FunnelStepFilterComponent from './FunnelStepFilters';
+import FunnelStepFilterComponent from '../../../StepFilters/StepFilters';
 import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
 import { cloneDeep } from 'lodash';
@@ -25,6 +19,12 @@ import { FilterType } from '@lib/domain/segment';
 import { GREY_500, WHITE_DEFAULT } from '@theme/index';
 import { Node } from '@lib/domain/node';
 import { DotsSixVertical, Trash } from 'phosphor-react';
+import {
+  WhereFilter,
+  FilterConditions,
+  FilterOperatorsString,
+  FilterDataType,
+} from '@lib/domain/common';
 
 type FunnelComponentCardProps = {
   index: number;
@@ -94,7 +94,7 @@ const FunnelComponentCard = ({
   };
 
   const updateStepFilters = useCallback(
-    (stepFilters: FunnelStepFilter[]) => {
+    (stepFilters: WhereFilter[]) => {
       const tempFunnelSteps = cloneDeep(funnelSteps);
       tempFunnelSteps[index]['filters'] = stepFilters;
       setFunnelSteps(tempFunnelSteps);
@@ -103,21 +103,21 @@ const FunnelComponentCard = ({
   );
 
   const handleAddFilter = (value: string) => {
-    const getFunnelFilterCondition = (stepFilters: FunnelStepFilter[]) => {
+    const getFunnelFilterCondition = (stepFilters: WhereFilter[]) => {
       return !stepFilters.length
-        ? FunnelFilterConditions.WHERE
-        : FunnelFilterConditions.AND;
+        ? FilterConditions.WHERE
+        : FilterConditions.AND;
     };
 
     const stepFilters = [...funnelStep.filters];
     stepFilters.push({
       condition: getFunnelFilterCondition(stepFilters),
       operand: value,
-      operator: FunnelFilterOperators.IS,
+      operator: FilterOperatorsString.IS,
       values: [],
       type: FilterType.WHERE,
       all: false,
-      datatype: FunnelFilterDataType.STRING,
+      datatype: FilterDataType.STRING,
     });
 
     updateStepFilters(stepFilters);
@@ -135,7 +135,7 @@ const FunnelComponentCard = ({
     stepFilters.splice(filterIndex, 1);
 
     if (filterIndex === 0 && stepFilters.length)
-      stepFilters[0]['condition'] = FunnelFilterConditions.WHERE;
+      stepFilters[0]['condition'] = FilterConditions.WHERE;
 
     updateStepFilters(stepFilters);
   };
@@ -155,7 +155,7 @@ const FunnelComponentCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Flex width={'full'} >
+      <Flex width={'full'}>
         <Flex
           width={'full'}
           alignItems={'center'}

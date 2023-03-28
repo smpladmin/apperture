@@ -1,4 +1,4 @@
-import ViewPanelTemp from '@components/EventsLayout/ViewPanelTemp';
+import ViewPanelTemp from '@components/EventsLayout/ViewPanel';
 import { DateFilterObj } from '@lib/domain/common';
 import {
   ConversionWindowObj,
