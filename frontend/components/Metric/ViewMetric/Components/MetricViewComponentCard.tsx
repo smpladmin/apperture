@@ -4,69 +4,73 @@ import {
   MetricAggregatePropertiesAggregation,
   MetricComponentAggregation,
 } from '@lib/domain/metric';
-import MetricViewFilterComponent from './MetricViewFilterCard';
 import { getDisplayAggregationFunctionText } from '@components/Metric/util';
 import { WhereFilter } from '@lib/domain/common';
+import ViewFilter from '@components/StepFilters/ViewFilter';
+
 type MetricViewComponentCardProps = {
+  definition: string;
   variable: string;
   reference: string;
   filters: WhereFilter[];
-  conditions: string[];
   aggregation: MetricComponentAggregation;
 };
 
 const MetricViewComponentCard = ({
+  definition,
   variable,
   reference,
   filters,
-  conditions,
   aggregation,
 }: MetricViewComponentCardProps) => {
   return (
-    <Flex
-      data-testid="event-or-segment-component"
-      justifyContent={'space-between'}
-      alignItems={'center'}
-      direction={'column'}
-      borderRadius={'12px'}
-      py={2}
-    >
-      <Flex width={'full'} alignItems={'center'}>
+    <Flex data-testid="event-or-segment-component" direction={'column'} p={'3'}>
+      <Flex gap={'2'} alignItems={'center'}>
         <Flex
           data-testid="event-or-segment-component-variable"
-          background={'#9999B6'}
-          borderRadius={'2px'}
-          textAlign="center"
-          fontWeight={500}
-          color={'black.100'}
-          fontSize={'xs-10'}
-          lineHeight={'12px'}
+          background={definition ? 'gray.400' : 'blue.500'}
+          p={2}
+          height={2}
+          width={2}
+          borderRadius={'4px'}
           justifyContent={'center'}
           alignItems={'center'}
-          height={'16px'}
-          width={'16px'}
         >
-          {variable}
+          <Text
+            fontSize={'xs-10'}
+            lineHeight={'lh-130'}
+            color={'white.DEFAULT'}
+          >
+            {variable}
+          </Text>
         </Flex>
-        <Text
-          data-testid={'event-or-segment-name'}
-          color={'white'}
-          fontSize={'xs-14'}
-          fontWeight={500}
-          lineHeight={'xs-18'}
-          marginLeft={2}
-        >
+
+        <Text fontSize={'xs-14'} fontWeight={'500'} lineHeight={'lh-135'}>
           {reference}
         </Text>
       </Flex>
-      <Flex width={'full'} alignItems={'center'} gap={'2'}>
+
+      <Flex
+        width={'full'}
+        alignItems={'center'}
+        gap={'1'}
+        data-testid={'aggregation-function'}
+        pl={'6'}
+        py={'1'}
+      >
         <Text
-          color={'white.DEFAULT'}
           fontSize={'xs-12'}
-          lineHeight={'xs-16'}
+          lineHeight={'lh-135'}
           fontWeight={'400'}
-          marginLeft={6}
-          borderRadius={4}
+          color={'grey.500'}
+        >
+          {'in'}
+        </Text>
+        <Text
+          fontSize={'xs-12'}
+          lineHeight={'lh-135'}
+          fontWeight={'400'}
+          color={'grey.500'}
         >
           {getDisplayAggregationFunctionText(aggregation.functions)}
         </Text>
@@ -76,17 +80,17 @@ const MetricViewComponentCard = ({
           <>
             <Text
               fontSize={'xs-12'}
-              lineHeight={'xs-16'}
+              lineHeight={'lh-135'}
               fontWeight={'400'}
-              color={'white.DEFAULT'}
+              color={'grey.500'}
             >
               {'of'}
             </Text>
             <Text
               fontSize={'xs-12'}
-              lineHeight={'xs-16'}
+              lineHeight={'lh-135'}
               fontWeight={'400'}
-              color={'white.DEFAULT'}
+              color={'grey.500'}
               wordBreak={'break-word'}
             >
               {aggregation.property}
@@ -96,13 +100,7 @@ const MetricViewComponentCard = ({
       </Flex>
       {Boolean(filters.length) &&
         filters.map((filter: WhereFilter, index: number) => (
-          <MetricViewFilterComponent
-            condition={filter.condition}
-            operand={filter.operand}
-            key={index}
-            operator={filter.operator}
-            values={filter.values}
-          />
+          <ViewFilter key={index} filter={filter} />
         ))}
     </Flex>
   );

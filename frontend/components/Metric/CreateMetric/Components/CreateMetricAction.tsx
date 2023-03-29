@@ -1,13 +1,11 @@
 import {
   Box,
   Button,
-  Divider,
   Flex,
   Input,
   InputGroup,
   InputLeftElement,
   Text,
-  useColorModeValue,
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -207,23 +205,20 @@ const CreateMetricAction = ({
               Metric Definition
             </Text>
             <InputGroup>
-              <InputLeftElement
-                pointerEvents="none"
-                children={
-                  <Flex>
-                    <Box
-                      mt={'2px'}
-                      bg={boxColor}
-                      height={'18px'}
-                      width={'18px'}
-                      borderRadius={'4'}
-                      padding={'2px'}
-                    >
-                      <Function color="white" size={'14'} weight="bold" />
-                    </Box>
-                  </Flex>
-                }
-              />
+              <InputLeftElement>
+                <Flex>
+                  <Box
+                    mt={'2px'}
+                    bg={boxColor}
+                    height={'18px'}
+                    width={'18px'}
+                    borderRadius={'4'}
+                    padding={'2px'}
+                  >
+                    <Function color="white" size={'14'} weight="bold" />
+                  </Box>
+                </Flex>
+              </InputLeftElement>
               <Input
                 pr={'4'}
                 type={'text'}

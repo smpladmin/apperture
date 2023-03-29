@@ -1,6 +1,6 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
+import ViewFilter from '@components/StepFilters/ViewFilter';
 import { FunnelStep } from '@lib/domain/funnel';
-import { getFilterValuesText } from '@lib/utils/common';
 import React from 'react';
 
 function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
@@ -54,60 +54,7 @@ function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
             </Flex>
 
             {step.filters.map((filter, index) => {
-              return (
-                <Flex gap={'1'} key={index}>
-                  <Flex
-                    w={'full'}
-                    paddingLeft={'6'}
-                    direction={'column'}
-                    flexWrap={'wrap'}
-                  >
-                    <Flex
-                      gap={'1'}
-                      alignItems={'center'}
-                      direction={'row'}
-                      fontSize={'xs-12'}
-                      lineHeight={'lh-135'}
-                      color={'grey.500'}
-                      flexWrap={'wrap'}
-                      justifyContent={'flex-start'}
-                    >
-                      <Text
-                        maxWidth={'full'}
-                        flexShrink={0}
-                        fontSize={'inherit'}
-                        lineHeight={'inherit'}
-                        color={'inherit'}
-                        wordBreak={'break-all'}
-                      >{`${filter.condition} `}</Text>
-                      <Text
-                        maxWidth={'full'}
-                        flexShrink={0}
-                        fontSize={'inherit'}
-                        lineHeight={'inherit'}
-                        color={'inherit'}
-                        wordBreak={'break-all'}
-                      >{`${filter.operand}`}</Text>
-                      <Text
-                        maxWidth={'full'}
-                        flexShrink={0}
-                        fontSize={'inherit'}
-                        lineHeight={'inherit'}
-                        color={'inherit'}
-                        wordBreak={'break-all'}
-                      >{`${filter.operator}`}</Text>
-                      <Text
-                        maxWidth={'full'}
-                        flexShrink={0}
-                        fontSize={'inherit'}
-                        lineHeight={'inherit'}
-                        color={'inherit'}
-                        wordBreak={'break-all'}
-                      >{`${getFilterValuesText(filter.values)}`}</Text>
-                    </Flex>
-                  </Flex>
-                </Flex>
-              );
+              return <ViewFilter key={index} filter={filter} />;
             })}
           </Box>
         );

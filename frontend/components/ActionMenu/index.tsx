@@ -4,13 +4,11 @@ import React from 'react';
 
 type ActionMenuProps = {
   onNotificationClick: Function;
-  hasSavedNotification?: boolean;
   disableAlert?: boolean;
 };
 
 export const ActionMenu = ({
   onNotificationClick,
-  hasSavedNotification,
   disableAlert = false,
 }: ActionMenuProps) => {
   return (

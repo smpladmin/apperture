@@ -8,6 +8,7 @@ type ViewHeaderProps = {
   name: string;
   handleEditClick: Function;
   handleNotificationClick: Function;
+  disableAlert?: boolean;
 };
 
 const ViewHeader = ({
@@ -15,6 +16,7 @@ const ViewHeader = ({
   name,
   handleEditClick,
   handleNotificationClick,
+  disableAlert,
 }: ViewHeaderProps) => {
   return (
     <Flex
@@ -55,7 +57,10 @@ const ViewHeader = ({
         </Text>
       </Flex>
       <Flex alignItems={'center'} gap={'6'}>
-        <ActionMenu onNotificationClick={handleNotificationClick} />
+        <ActionMenu
+          onNotificationClick={handleNotificationClick}
+          disableAlert={disableAlert}
+        />
         <Button
           py={'2'}
           px={'4'}

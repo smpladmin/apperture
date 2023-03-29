@@ -23,79 +23,22 @@ const SavedMetricView = ({
   return (
     <Flex
       direction={'column'}
-      py={{ base: '8', md: '12' }}
       width={'full'}
       minHeight={'full'}
       overflowY={'scroll'}
+      gap={'5'}
     >
-      <Flex w="full" justifyContent={'space-between'}>
-        <DateFilterComponent
-          dateFilter={dateFilter}
-          setDateFilter={() => {}}
-          isDisabled={true}
-        />
-
-        <Flex gap={'1'}>
-          <Button
-            _focus={{ bg: 'grey.50', color: 'black', fontWeight: 500 }}
-            border="1px solid #EDEDED"
-            id="yesterday"
-            color={'grey.200'}
-            fontWeight={400}
-            variant={'outline'}
-            height={8}
-            fontSize={'xs-12'}
-            disabled={true}
-          >
-            <i
-              style={{
-                marginRight: '10px',
-                transform: 'rotate(90deg)',
-              }}
-              className="ri-sound-module-line"
-            ></i>
-            Filters
-          </Button>
-          <Button
-            _focus={{ bg: 'grey.50', color: 'black', fontWeight: 500 }}
-            border="1px solid #EDEDED"
-            id="yesterday"
-            variant={'secondary'}
-            height={8}
-            data-testid={'select-breakdown'}
-            disabled={true}
-          >
-            <Flex gap={'2'} color={'grey.200'} alignItems={'center'}>
-              <i style={{ fontSize: '12px' }} className="ri-pie-chart-line" />
-              <Text
-                fontSize={'xs-12'}
-                fontWeight={400}
-                color={'grey.200'}
-                data-testid={'breakdown-name'}
-              >
-                <Highlight
-                  query={`${breakdown}`}
-                  styles={{
-                    fontSize: 'xs-12',
-                    fontWeight: 500,
-                    color: 'black.100',
-                  }}
-                >
-                  {`Breakdown ${breakdown.join('')}`}
-                </Highlight>
-              </Text>
-            </Flex>
-          </Button>
-        </Flex>
-      </Flex>
+      <DateFilterComponent
+        dateFilter={dateFilter}
+        setDateFilter={() => {}}
+        isDisabled={true}
+      />
       {isLoading ? (
         <Flex alignItems={'center'} justifyContent={'center'} h={'120'}>
           <Loader />
         </Flex>
-      ) : metric && metric.length > 0 ? (
-        <MetricTrend data={metric} breakdown={breakdown} />
       ) : (
-        <MetricEmptyState />
+        <MetricTrend data={metric} breakdown={breakdown} />
       )}
     </Flex>
   );

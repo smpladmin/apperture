@@ -84,16 +84,20 @@ const MetricTable = ({
   const { getHeaderGroups, getRowModel } = tableInstance;
 
   return (
-    <Box overflowX={'auto'}>
-      <Table>
-        <Thead py={'3'} px={'8'} bg={'#f5f5f9'}>
+    <Box
+      overflowX={'auto'}
+      border={'1px'}
+      borderRadius={'12'}
+      borderColor={'grey.400'}
+    >
+      <Table bg={'white.DEFAULT'}>
+        <Thead py={'3'} px={'8'} bg={'white.500'}>
           {getHeaderGroups().map((headerGroup, groupIndex) => (
             <Tr key={headerGroup.id + groupIndex} bg={'white.100'}>
               {headerGroup.headers.map((header, index) => {
                 return (
                   <Th
                     key={header.id + index}
-                    borderBottom={'0.4px solid #b2b2b5'}
                     data-testid={'metric-table-headers'}
                     py={3}
                     paddingLeft={8}
