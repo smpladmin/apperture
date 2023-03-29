@@ -1,11 +1,15 @@
-from typing import List, Union
-import numpy as np
+from typing import Union
 from fastapi import Depends
 from clickhouse.clickhouse import Clickhouse
 from domain.datasources.models import DataSource
 from domain.edge.models import Node
 from repositories.clickhouse.events import Events
-from domain.events.models import EventsData, Event, AuxTable1Event, AuxTable2Event
+from domain.events.models import (
+    EventsData,
+    Event,
+    AuxTable1Event,
+    AuxTable2Event,
+)
 
 
 class EventsService:
@@ -48,7 +52,13 @@ class EventsService:
         )
 
     def get_events(
-        self, datasource_id: str, is_aux: bool, table_name: str
+        self,
+        datasource_id: str,
+        is_aux: bool,
+        table_name: str,
+        user_id: Union[str, None],
+        offset: int,
+        page_size: int,
     ) -> EventsData:
         if is_aux:
             events = self.events.get_aux_events(
@@ -68,14 +78,23 @@ class EventsService:
                 ]
             )
         else:
-            events = self.events.get_events(datasource_id=datasource_id)
-            count = self.events.get_events_count(datasource_id=datasource_id)[0][0]
-            data = [
-                Event(name=name, timestamp=timestamp, user_id=user_id, city=city)
-                for (name, timestamp, user_id, city) in events
-            ]
+            events = self.events.get_events(
+                datasource_id=datasource_id,
+                user_id=user_id,
+                offset=offset,
+                page_size=page_size,
+            )
+            count = self.events.get_events_count(
+                datasource_id=datasource_id, user_id=user_id
+            )[0][0]
+            data = (
+                [Event(name=name, timestamp=timestamp) for (name, timestamp) in events]
+                if user_id
+                else [
+                    Event(name=name, timestamp=timestamp, user_id=user_id, city=city)
+                    for (name, timestamp, user_id, city) in events
+                ]
+            )
+            offset = offset + page_size if user_id else 0
 
-        return EventsData(
-            count=count,
-            data=data,
-        )
+        return EventsData(count=count, data=data, offset=offset)

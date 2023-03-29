@@ -337,6 +337,7 @@ def events_service():
     events_service_mock.get_events = mock.MagicMock(
         return_value=EventsData(
             count=2,
+            offset=0,
             data=[
                 Event(
                     name="Content_Like",

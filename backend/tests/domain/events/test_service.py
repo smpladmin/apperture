@@ -15,6 +15,7 @@ class TestEventsService:
         self.clickhouse.client = MagicMock()
         self.clickhouse.client.insert = MagicMock()
         self.events_repo = MagicMock()
+        DataSource.get_settings = MagicMock()
         self.events_service = EventsService(self.clickhouse, self.events_repo)
         self.props = ["prop1", "prop2", "prop3", "prop4"]
         self.date = "2022-01-01"
@@ -140,9 +141,15 @@ class TestEventsService:
         self.events_repo.get_events_count.return_value = ((2,),)
 
         assert self.events_service.get_events(
-            datasource_id=self.ds_id, is_aux=False, table_name="All"
+            datasource_id=self.ds_id,
+            is_aux=False,
+            table_name="All",
+            user_id=None,
+            offset=0,
+            page_size=100,
         ) == EventsData(
             count=2,
+            offset=0,
             data=[
                 Event(
                     name="Content_Like",
@@ -160,5 +167,58 @@ class TestEventsService:
         )
 
         self.events_repo.get_events.assert_called_once_with(
-            **{"datasource_id": "test-id"}
+            **{
+                "datasource_id": "test-id",
+                "offset": 0,
+                "page_size": 100,
+                "user_id": None,
+            }
+        )
+
+    def test_get_events_for_user_id(self):
+        self.events_repo.get_events.return_value = [
+            (
+                "Content_Like",
+                datetime(2023, 1, 13, 15, 23, 38),
+            ),
+            (
+                "WebView_Open",
+                datetime(2023, 1, 13, 15, 23, 41),
+            ),
+        ]
+        self.events_repo.get_events_count.return_value = ((2,),)
+
+        assert self.events_service.get_events(
+            datasource_id=self.ds_id,
+            user_id="test-user",
+            offset=300,
+            page_size=100,
+            table_name="events",
+            is_aux=False,
+        ) == EventsData(
+            count=2,
+            offset=400,
+            data=[
+                Event(
+                    name="Content_Like",
+                    timestamp=datetime(2023, 1, 13, 15, 23, 38),
+                    user_id=None,
+                    city=None,
+                ),
+                Event(
+                    name="WebView_Open",
+                    timestamp=datetime(2023, 1, 13, 15, 23, 41),
+                    user_id=None,
+                    city=None,
+                ),
+            ],
+        )
+
+        self.events_repo.get_events.assert_called_once_with(
+            **{
+                "datasource_id": "test-id",
+                "offset": 300,
+                "page_size": 100,
+                "user_id": "test-user",
+            }
         )
