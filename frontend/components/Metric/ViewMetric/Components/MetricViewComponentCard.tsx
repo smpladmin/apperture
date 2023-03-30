@@ -45,7 +45,12 @@ const MetricViewComponentCard = ({
           </Text>
         </Flex>
 
-        <Text fontSize={'xs-14'} fontWeight={'500'} lineHeight={'lh-135'}>
+        <Text
+          fontSize={'xs-14'}
+          fontWeight={'500'}
+          lineHeight={'lh-135'}
+          data-testid={'metric-event'}
+        >
           {reference}
         </Text>
       </Flex>

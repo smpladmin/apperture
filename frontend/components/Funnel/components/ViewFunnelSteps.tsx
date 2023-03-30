@@ -47,6 +47,7 @@ function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
                   fontSize={'xs-14'}
                   fontWeight={'500'}
                   lineHeight={'lh-135'}
+                  data-testid={'funnel-event'}
                 >
                   {step.event}
                 </Text>

@@ -20,6 +20,7 @@ const ViewFilter = ({ filter }: ViewFilterProps) => {
           color={'grey.500'}
           flexWrap={'wrap'}
           justifyContent={'flex-start'}
+          data-testid={'event-filter'}
         >
           <Text
             maxWidth={'full'}
@@ -28,6 +29,7 @@ const ViewFilter = ({ filter }: ViewFilterProps) => {
             lineHeight={'inherit'}
             color={'inherit'}
             wordBreak={'break-all'}
+            data-testid={'filter-condition'}
           >{`${filter.condition} `}</Text>
           <Text
             maxWidth={'full'}
@@ -36,6 +38,7 @@ const ViewFilter = ({ filter }: ViewFilterProps) => {
             lineHeight={'inherit'}
             color={'inherit'}
             wordBreak={'break-all'}
+            data-testid={'filter-operand'}
           >{`${filter.operand}`}</Text>
           <Text
             maxWidth={'full'}
@@ -44,6 +47,7 @@ const ViewFilter = ({ filter }: ViewFilterProps) => {
             lineHeight={'inherit'}
             color={'inherit'}
             wordBreak={'break-all'}
+            data-testid={'filter-operator'}
           >{`${filter.operator}`}</Text>
           <Text
             maxWidth={'full'}
@@ -52,6 +56,7 @@ const ViewFilter = ({ filter }: ViewFilterProps) => {
             lineHeight={'inherit'}
             color={'inherit'}
             wordBreak={'break-all'}
+            data-testid={'filter-values'}
           >{`${getFilterValuesText(filter.values)}`}</Text>
         </Flex>
       </Flex>

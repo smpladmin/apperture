@@ -1,4 +1,4 @@
-import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
@@ -272,6 +272,7 @@ const MetricComponentCard = ({
           onClick={handleRemoveComponent}
           opacity={isHovered ? 1 : 0}
           cursor={'pointer'}
+          data-testid={'remove-aggregate'}
         >
           <Trash size={24} weight="bold" />
         </Box>

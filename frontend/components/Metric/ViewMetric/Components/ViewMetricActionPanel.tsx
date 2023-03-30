@@ -27,7 +27,7 @@ const ViewMetricActionPanel = ({
             >
               Metric Definition
             </Text>
-            <Card borderRadius={'8'}>
+            <Card borderRadius={'8'} borderColor={'white.200'}>
               <Flex alignItems={'center'} gap={'2'}>
                 <Box
                   bg={'blue.500'}
@@ -42,6 +42,7 @@ const ViewMetricActionPanel = ({
                   fontSize={'xs-14'}
                   lineHeight={'xs-14'}
                   fontWeight={'500'}
+                  data-testid={'metric-definition'}
                 >
                   {metricDefinition}
                 </Text>
@@ -59,7 +60,7 @@ const ViewMetricActionPanel = ({
           >
             Events / Segments
           </Text>
-          <Card p={'0'} borderRadius={'8px'}>
+          <Card p={'0'} borderRadius={'8px'} borderColor={'white.200'}>
             <Flex direction={'column'}>
               {aggregates.map((aggregate, index) => {
                 const lastAggegate = index === aggregates.length - 1;
@@ -72,7 +73,7 @@ const ViewMetricActionPanel = ({
                       filters={aggregate.filters}
                       aggregation={aggregate.aggregations}
                     />
-                    {!lastAggegate && <Divider borderColor={'grey.400'} />}
+                    {!lastAggegate && <Divider borderColor={'white.200'} />}
                   </Fragment>
                 );
               })}
@@ -90,7 +91,7 @@ const ViewMetricActionPanel = ({
             >
               Breakdown
             </Text>
-            <Card borderRadius={'8'}>
+            <Card borderRadius={'8'} borderColor={'white.200'}>
               {
                 <Text
                   fontSize={'xs-14'}

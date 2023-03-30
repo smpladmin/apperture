@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, act } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  act,
+  waitFor,
+} from '@testing-library/react';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from 'tests/util';
 import {
@@ -334,9 +340,8 @@ describe('Create Metric', () => {
       const addEventsOrSegmentsButton = screen.getByTestId(
         'add-events-or-segments-button'
       );
-      const removeEventsOrSegmentsButton = screen.getByTestId(
-        'remove-event-or-segment-component'
-      );
+      const removeAggregate = screen.getByTestId('remove-aggregate');
+
       const EventsOrSegmentsList = screen.getAllByTestId(
         'event-or-segment-component'
       );
@@ -345,7 +350,7 @@ describe('Create Metric', () => {
       });
 
       await act(async () => {
-        fireEvent.click(removeEventsOrSegmentsButton);
+        fireEvent.click(removeAggregate);
       });
 
       const newEventsOrSegmentsList = screen.getAllByTestId(
@@ -425,7 +430,7 @@ describe('Create Metric', () => {
       await act(async () => {
         fireEvent.click(EventPropertyDropdownList[SELECTED_OPTION]);
       });
-      const EventFilterComponent = screen.getByTestId('event-filter-component');
+      const EventFilterComponent = screen.getByTestId('event-filter');
       expect(EventFilterComponent).toBeInTheDocument();
     });
 
@@ -514,7 +519,7 @@ describe('Create Metric', () => {
     it('should be able to add metric breakdown', async () => {
       await renderMetricComponent();
 
-      const selectBreakdownButton = screen.getByTestId('select-breakdown');
+      const selectBreakdownButton = screen.getByTestId('add-breakdown');
       fireEvent.click(selectBreakdownButton);
 
       const SELECTED_OPTION = 0; // city
@@ -524,13 +529,13 @@ describe('Create Metric', () => {
       });
 
       const breakdownName = screen.getByTestId('breakdown-name');
-      expect(breakdownName.textContent).toEqual('Breakdown city');
+      expect(breakdownName.textContent).toEqual('city');
     });
 
     it('should be able to remove metric breakdown', async () => {
       await renderMetricComponent();
 
-      const selectBreakdownButton = screen.getByTestId('select-breakdown');
+      const selectBreakdownButton = screen.getByTestId('add-breakdown');
       fireEvent.click(selectBreakdownButton);
 
       const SELECTED_OPTION = 0; // city
@@ -540,13 +545,18 @@ describe('Create Metric', () => {
       });
 
       const breakdownName = screen.getByTestId('breakdown-name');
-      expect(breakdownName.textContent).toEqual('Breakdown city');
+      expect(breakdownName.textContent).toEqual('city');
+
+      fireEvent.mouseEnter(breakdownName);
 
       const removeMetricBreakdown = screen.getByTestId('remove-breakdown');
       await act(async () => {
         fireEvent.click(removeMetricBreakdown);
       });
-      expect(breakdownName.textContent).toEqual('Breakdown ');
+      await waitFor(() => {
+        const breakdownName = screen.queryByTestId('breakdown-name');
+        expect(breakdownName).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -564,7 +574,7 @@ describe('Create Metric', () => {
       });
 
       // add breakdown
-      const selectBreakdownButton = screen.getByTestId('select-breakdown');
+      const selectBreakdownButton = screen.getByTestId('add-breakdown');
       fireEvent.click(selectBreakdownButton);
 
       const SELECTED_OPTION = 5; // bluetooth_enabled

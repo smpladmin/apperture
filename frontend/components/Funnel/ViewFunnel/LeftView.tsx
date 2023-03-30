@@ -48,7 +48,7 @@ const LeftView = ({
               Conversion Time
             </Text>
 
-            <Card>
+            <Card borderColor={'white.200'}>
               <Flex dir={'column'} alignItems={'center'} gap={2}>
                 <Clock size={20} color={GREY_600} />
                 <Text
@@ -56,7 +56,8 @@ const LeftView = ({
                   lineHeight={'xs-14'}
                   fontWeight={'medium'}
                   color={'black'}
-                >{` ${conversionWindow.value} ${capitalizeFirstLetter(
+                  data-testid={'conversion-criteria'}
+                >{`${conversionWindow.value} ${capitalizeFirstLetter(
                   conversionWindow.type
                 )}`}</Text>
               </Flex>
