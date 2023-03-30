@@ -20,6 +20,7 @@ import MetricAggregation from './MetricAggregation';
 import StepFilter from '@components/StepFilters/StepFilters';
 import AddFilterComponent from '@components/StepFilters/AddFilter';
 import { Trash } from 'phosphor-react';
+import { COLOR_PALLETE_5, useColorFromPallete } from '@components/Metric/util';
 
 type MetricComponentCardProps = {
   index: number;
@@ -28,8 +29,11 @@ type MetricComponentCardProps = {
   eventProperties: string[];
   updateAggregate: Function;
   removeAggregate: Function;
-  savedAggregate: MetricAggregate;
+  aggregate: MetricAggregate;
   loadingEventsAndProperties: boolean;
+  aggregates: MetricAggregate[];
+  metricDefinition: string;
+  breakdown: string[];
 };
 
 const MetricComponentCard = ({
@@ -40,11 +44,14 @@ const MetricComponentCard = ({
   loadingEventsAndProperties,
   updateAggregate,
   removeAggregate,
-  savedAggregate,
+  aggregate,
+  aggregates,
+  metricDefinition,
+  breakdown,
 }: MetricComponentCardProps) => {
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [variant, setVariant] = useState<MetricComponentVariant>(
-    savedAggregate?.variant || MetricComponentVariant.UNDEFINED
+    aggregate?.variant || MetricComponentVariant.UNDEFINED
   );
   const [isEventOrSegmentListOpen, setIsEventOrSegmentListOpen] =
     useState<boolean>(false);
@@ -52,11 +59,9 @@ const MetricComponentCard = ({
     useState<boolean>(false);
   const [eventOrSegmentListSearchData, setEventOrSegmentListSearchData] =
     useState<Node[]>([]);
-  const [reference, setReference] = useState(
-    savedAggregate?.reference_id || ''
-  );
+  const [reference, setReference] = useState(aggregate?.reference_id || '');
   const [filters, setFilters] = useState<WhereFilter[]>(
-    savedAggregate?.filters || []
+    aggregate?.filters || []
   );
   const previousVariant = useRef<MetricComponentVariant | null>(null);
 
@@ -148,10 +153,16 @@ const MetricComponentCard = ({
   }, [filters]);
 
   useEffect(() => {
-    setReference(savedAggregate?.reference_id);
-    setFilters(savedAggregate?.filters);
-    setVariant(savedAggregate?.variant);
-  }, [savedAggregate]);
+    setReference(aggregate?.reference_id);
+    setFilters(aggregate?.filters);
+    setVariant(aggregate?.variant);
+  }, [aggregate]);
+
+  console.log(
+    'sdshdjhsd',
+    useColorFromPallete(aggregates, metricDefinition, breakdown),
+    COLOR_PALLETE_5[index]
+  );
 
   return (
     <Flex
@@ -170,11 +181,19 @@ const MetricComponentCard = ({
       <Flex p={3} gap={'2'} width={'full'} alignItems={'center'}>
         <Flex
           data-testid="event-or-segment-component-variable"
-          background={'white.200'}
+          background={
+            useColorFromPallete(aggregates, metricDefinition, breakdown)
+              ? COLOR_PALLETE_5[index].hexaValue
+              : 'white.200'
+          }
           borderRadius={'4'}
           textAlign="center"
           fontWeight={500}
-          color={'grey.500'}
+          color={
+            useColorFromPallete(aggregates, metricDefinition, breakdown)
+              ? 'white.DEFAULT'
+              : 'grey.500'
+          }
           fontSize={'xs-10'}
           lineHeight={'12px'}
           justifyContent={'center'}
@@ -281,7 +300,7 @@ const MetricComponentCard = ({
       {reference && (
         <>
           <MetricAggregation
-            aggregate={savedAggregate}
+            aggregate={aggregate}
             updateAggregate={updateAggregate}
             eventProperties={eventProperties}
             loadingEventsAndProperties={loadingEventsAndProperties}

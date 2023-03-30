@@ -5,7 +5,6 @@ import MetricTrend from '../../CreateMetric/components/MetricTrend';
 import DateFilterComponent from '@components/Date/DateFilter';
 import Loader from '@components/LoadingSpinner';
 import { DateFilterObj } from '@lib/domain/common';
-import MetricEmptyState from '@components/Metric/CreateMetric/components/MetricEmptyState';
 
 type SavedMetricViewProps = {
   isLoading: boolean;

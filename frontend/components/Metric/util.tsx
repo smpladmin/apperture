@@ -10,6 +10,13 @@ import {
   convertISODateToReadableDate,
   formatDatalabel,
 } from '@lib/utils/common';
+import {
+  BLUE_500,
+  GREEN_500,
+  PURPLE_500,
+  RED_500,
+  YELLOW_500,
+} from '@theme/index';
 
 export const replaceEmptyStringPlaceholder = (
   aggregates: MetricAggregate[]
@@ -83,12 +90,48 @@ export const formatDate = (date: string): string => {
 };
 
 export const COLOR_PALLETE_5 = [
-  { colorName: 'messenger', hexaValue: '#0078FF' },
-  { colorName: 'yellow', hexaValue: '#fac213' },
-  { colorName: 'cyan', hexaValue: '#00B5D8' },
-  { colorName: 'whatsapp', hexaValue: '#22c35e' },
-  { colorName: 'red', hexaValue: '#E53E3E' },
+  { colorName: 'blue', hexaValue: BLUE_500 },
+  { colorName: 'red', hexaValue: RED_500 },
+  { colorName: 'purple', hexaValue: PURPLE_500 },
+  { colorName: 'yellow', hexaValue: YELLOW_500 },
+  { colorName: 'green', hexaValue: GREEN_500 },
 ];
+
+export const useColorFromPallete = (
+  aggregates: MetricAggregate[],
+  metricDefinition: string,
+  breakdown: string[]
+) => {
+  /* 
+    use color from pallete for aggregate variable if any of the following true conditons satisfies :
+    a. has metric definition  
+        1. has one Aggregate // true
+        2. has multiple aggregates // false
+        3. has breakdown with one aggregate // false
+
+
+    b. has no metric definition
+        1. has only one aggregate  // true
+        2. has multiple aggregates // true
+        3. has breakdown with one aggregate // false
+    c. 
+  */
+
+  if (breakdown.length) return false;
+
+  if (metricDefinition && aggregates.length > 1) return false;
+
+  return true;
+};
+
+export const enableBreakdown = (
+  aggregates: MetricAggregate[],
+  metricDefinition: string
+) => {
+  if (!metricDefinition && aggregates.length > 1) return false;
+
+  return true;
+};
 
 export const convertToTableData = (
   result: ComputedMetric[]

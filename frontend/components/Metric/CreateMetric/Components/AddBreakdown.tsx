@@ -1,12 +1,16 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import Card from '@components/Card';
+import { enableBreakdown } from '@components/Metric/util';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
+import { MetricAggregate } from '@lib/domain/metric';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { BLACK_DEFAULT } from '@theme/index';
 import { Plus, Trash } from 'phosphor-react';
 import React, { useRef, useState } from 'react';
 
 type AddBreakdownProps = {
+  aggregates: MetricAggregate[];
+  metricDefinition: string;
   breakdown: string[];
   setBreakdown: Function;
   loadingEventProperties: boolean;
@@ -14,6 +18,8 @@ type AddBreakdownProps = {
 };
 
 const AddBreakdown = ({
+  aggregates,
+  metricDefinition,
   breakdown,
   setBreakdown,
   loadingEventProperties,
@@ -34,6 +40,19 @@ const AddBreakdown = ({
     setBreakdown([]);
   };
 
+  const showAddBreakdownButton = () => {
+    /*
+      show breakdown button if 
+        1. no breakdown is present
+        2. and satisfies condition to enable breakdown
+     */
+
+    if (!breakdown.length && enableBreakdown(aggregates, metricDefinition))
+      return true;
+
+    return false;
+  };
+
   return (
     <Flex direction={'column'} gap={'3'}>
       <Flex justifyContent={'space-between'}>
@@ -45,7 +64,7 @@ const AddBreakdown = ({
         >
           Breakdown
         </Text>
-        {!breakdown.length && (
+        {showAddBreakdownButton() && (
           <Box position={'relative'} ref={breakdownRef}>
             <Button
               h={5.5}

@@ -1,34 +1,49 @@
 import { Flex, Text } from '@chakra-ui/react';
 import React from 'react';
 import {
+  MetricAggregate,
   MetricAggregatePropertiesAggregation,
   MetricComponentAggregation,
 } from '@lib/domain/metric';
-import { getDisplayAggregationFunctionText } from '@components/Metric/util';
+import {
+  COLOR_PALLETE_5,
+  getDisplayAggregationFunctionText,
+  useColorFromPallete,
+} from '@components/Metric/util';
 import { WhereFilter } from '@lib/domain/common';
 import ViewFilter from '@components/StepFilters/ViewFilter';
 
 type MetricViewComponentCardProps = {
+  index: number;
   definition: string;
   variable: string;
   reference: string;
   filters: WhereFilter[];
   aggregation: MetricComponentAggregation;
+  aggregates: MetricAggregate[];
+  breakdown: string[];
 };
 
 const MetricViewComponentCard = ({
+  index,
   definition,
   variable,
   reference,
   filters,
   aggregation,
+  aggregates,
+  breakdown,
 }: MetricViewComponentCardProps) => {
   return (
     <Flex data-testid="event-or-segment-component" direction={'column'} p={'3'}>
       <Flex gap={'2'} alignItems={'center'}>
         <Flex
           data-testid="event-or-segment-component-variable"
-          background={definition ? 'gray.400' : 'blue.500'}
+          background={
+            useColorFromPallete(aggregates, definition, breakdown)
+              ? COLOR_PALLETE_5[index].hexaValue
+              : 'grey.400'
+          }
           p={2}
           height={2}
           width={2}
@@ -39,7 +54,12 @@ const MetricViewComponentCard = ({
           <Text
             fontSize={'xs-10'}
             lineHeight={'lh-130'}
-            color={'white.DEFAULT'}
+            fontWeight={'500'}
+            color={
+              useColorFromPallete(aggregates, definition, breakdown)
+                ? 'white.DEFAULT'
+                : 'grey.500'
+            }
           >
             {variable}
           </Text>

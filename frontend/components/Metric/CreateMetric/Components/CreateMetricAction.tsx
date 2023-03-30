@@ -22,9 +22,10 @@ import {
   ComputedMetric,
   MetricBasicAggregation,
 } from '@lib/domain/metric';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep, debounce, isEqual } from 'lodash';
 import { Node } from '@lib/domain/node';
 import {
+  enableBreakdown,
   isValidAggregates,
   replaceEmptyStringPlaceholder,
 } from '@components/Metric/util';
@@ -32,6 +33,8 @@ import { DateFilterObj, WhereFilter } from '@lib/domain/common';
 import Card from '@components/Card';
 import { Function } from 'phosphor-react';
 import AddBreakdown from './AddBreakdown';
+
+const DEBOUNCE_WAIT_TIME = 800;
 
 type CreateMetricActionProps = {
   setMetric: Function;
@@ -68,28 +71,17 @@ const CreateMetricAction = ({
   metricDefinition,
   setMetricDefinition,
 }: CreateMetricActionProps) => {
-  const [debouncedDefinition, setDebouncedDefinition] = useState(
-    savedMetric?.function || ''
-  );
   const router = useRouter();
-
   const dsId = savedMetric?.datasourceId || router.query.dsId;
 
   const [isValidDefinition, setIsValidDefinition] = useState<boolean>(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMetricDefinition(debouncedDefinition);
-    }, 600);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [debouncedDefinition]);
-
-  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDebouncedDefinition(e.target.value);
-  };
+  const handleDefinitionChange = debounce(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setMetricDefinition(e.target.value);
+    },
+    DEBOUNCE_WAIT_TIME
+  );
 
   const updateAggregate = useCallback(
     (variable: string, updatedValue: WhereFilter) => {
@@ -192,7 +184,12 @@ const CreateMetricAction = ({
     }
   }, [aggregates, metricDefinition, metricName, isValidDefinition, breakdown]);
 
-  const boxColor = debouncedDefinition ? 'blue.500' : 'gray.400';
+  useEffect(() => {
+    // remove breakdown if multiple aggregates are present without metric definition
+    if (!enableBreakdown(aggregates, metricDefinition)) setBreakdown([]);
+  }, [aggregates, metricDefinition]);
+
+  const functionBoxColor = metricDefinition ? 'blue.500' : 'grey.400';
 
   return (
     <>
@@ -213,7 +210,7 @@ const CreateMetricAction = ({
                 <Flex>
                   <Box
                     mt={'2px'}
-                    bg={boxColor}
+                    bg={functionBoxColor}
                     height={'18px'}
                     width={'18px'}
                     borderRadius={'4'}
@@ -231,8 +228,8 @@ const CreateMetricAction = ({
                 variant="unstyled"
                 lineHeight={{ base: 'sh-20', md: 'sh-32' }}
                 textColor={'black.DEFAULT'}
-                value={debouncedDefinition}
-                onChange={handleTextChange}
+                defaultValue={metricDefinition}
+                onChange={handleDefinitionChange}
                 borderColor={'white.200'}
                 borderRadius={'8'}
                 borderStyle={'solid'}
@@ -288,10 +285,15 @@ const CreateMetricAction = ({
                 loadingEventsAndProperties={loadingEventsAndProperties}
                 updateAggregate={updateAggregate}
                 removeAggregate={removeAggregate}
-                savedAggregate={aggregate}
+                aggregate={aggregate}
+                aggregates={aggregates}
+                metricDefinition={metricDefinition}
+                breakdown={breakdown}
               />
             ))}
             <AddBreakdown
+              metricDefinition={metricDefinition}
+              aggregates={aggregates}
               breakdown={breakdown}
               setBreakdown={setBreakdown}
               eventProperties={eventProperties}

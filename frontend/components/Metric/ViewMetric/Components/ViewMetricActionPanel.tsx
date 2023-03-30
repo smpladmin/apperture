@@ -58,7 +58,7 @@ const ViewMetricActionPanel = ({
             fontWeight={'400'}
             color={'grey.500'}
           >
-            Events / Segments
+            {'Events / Segments'}
           </Text>
           <Card p={'0'} borderRadius={'8px'} borderColor={'white.200'}>
             <Flex direction={'column'}>
@@ -67,11 +67,14 @@ const ViewMetricActionPanel = ({
                 return (
                   <Fragment key={aggregate.variable}>
                     <MetricViewComponentCard
+                      index={index}
                       definition={metricDefinition}
                       variable={aggregate.variable}
                       reference={aggregate.reference_id}
                       filters={aggregate.filters}
                       aggregation={aggregate.aggregations}
+                      aggregates={aggregates}
+                      breakdown={breakdown}
                     />
                     {!lastAggegate && <Divider borderColor={'white.200'} />}
                   </Fragment>
