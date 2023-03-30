@@ -31,6 +31,7 @@ import {
 import { DateFilterObj, WhereFilter } from '@lib/domain/common';
 import Card from '@components/Card';
 import { Function } from 'phosphor-react';
+import AddBreakdown from './AddBreakdown';
 
 type CreateMetricActionProps = {
   setMetric: Function;
@@ -42,6 +43,7 @@ type CreateMetricActionProps = {
   eventProperties: string[];
   eventList: Node[];
   breakdown: string[];
+  setBreakdown: Function;
   aggregates: MetricAggregate[];
   setAggregates: Function;
   dateFilter: DateFilterObj;
@@ -59,6 +61,7 @@ const CreateMetricAction = ({
   eventProperties,
   eventList,
   breakdown,
+  setBreakdown,
   aggregates,
   setAggregates,
   dateFilter,
@@ -179,6 +182,7 @@ const CreateMetricAction = ({
       isValidAggregates(aggregates) &&
       isValidDefinition &&
       (!isEqual(savedMetric?.aggregates, aggregates) ||
+        !isEqual(savedMetric?.breakdown, breakdown) ||
         savedMetric?.function != metricDefinition ||
         savedMetric?.name !== metricName)
     ) {
@@ -186,7 +190,7 @@ const CreateMetricAction = ({
     } else {
       setCanSaveMetric(false);
     }
-  }, [aggregates, metricDefinition, metricName, isValidDefinition]);
+  }, [aggregates, metricDefinition, metricName, isValidDefinition, breakdown]);
 
   const boxColor = debouncedDefinition ? 'blue.500' : 'gray.400';
 
@@ -287,6 +291,12 @@ const CreateMetricAction = ({
                 savedAggregate={aggregate}
               />
             ))}
+            <AddBreakdown
+              breakdown={breakdown}
+              setBreakdown={setBreakdown}
+              eventProperties={eventProperties}
+              loadingEventProperties={loadingEventsAndProperties}
+            />
           </Flex>
         </Flex>
       </Card>

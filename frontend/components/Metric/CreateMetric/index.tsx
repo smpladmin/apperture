@@ -148,6 +148,7 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
             eventList={eventList}
             eventProperties={eventProperties}
             breakdown={breakdown}
+            setBreakdown={setBreakdown}
             aggregates={aggregates}
             setAggregates={setAggregates}
             dateFilter={dateFilter}
@@ -159,10 +160,7 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
           <TransientMetricView
             metric={metric}
             isLoading={isLoading}
-            eventProperties={eventProperties}
-            loadingEventsAndProperties={loadingEventsAndProperties}
             breakdown={breakdown}
-            setBreakdown={setBreakdown}
             showEmptyState={showEmptyState}
             dateFilter={dateFilter}
             setDateFilter={setDateFilter}
