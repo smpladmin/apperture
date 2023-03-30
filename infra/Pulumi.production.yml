@@ -22,4 +22,4 @@ config:
     ec2_clickhouse_name: apperture-production-chdb
     ec2_clickhouse_type: m5.2xlarge
     ec2_jupyter_name: apperture-production-jupyter
-    ec2_jupyter_type: m5.xlarge
+    ec2_jupyter_type: t3.medium

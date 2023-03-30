@@ -236,18 +236,19 @@ aws.ec2.VolumeAttachment(
 )
 
 # jupyter instance
-ch_instance = aws.ec2.Instance(
-    data.get("ec2_jupyter_name"),
-    instance_type=data.get("ec2_jupyter_type"),
-    vpc_security_group_ids=[sg.id],
-    ami=ami.id,
-    key_name=keypair.key_name,
-    subnet_id=publicsubnet.id,
-    associate_public_ip_address=True,
-    root_block_device={"volume_size": 200},
-    tags={
-        "Name": data.get("ec2_jupyter_name"),
-        "Swarm": "jupyter-worker",
-    },
-    iam_instance_profile="DockerSwarmManager",
-)
+if data.get("ec2_jupyter_name"):
+    jpy_instance = aws.ec2.Instance(
+        data.get("ec2_jupyter_name"),
+        instance_type=data.get("ec2_jupyter_type"),
+        vpc_security_group_ids=[sg.id],
+        ami=ami.id,
+        key_name=keypair.key_name,
+        subnet_id=publicsubnet.id,
+        associate_public_ip_address=True,
+        root_block_device={"volume_size": 200},
+        tags={
+            "Name": data.get("ec2_jupyter_name"),
+            "Swarm": "jupyter-worker",
+        },
+        iam_instance_profile="DockerSwarmManager",
+    )
