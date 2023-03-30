@@ -23,6 +23,7 @@ import {
   convertToTrendData,
   getCountOfValidAggregates,
   getDisplayAggregationFunctionText,
+  enableBreakdown,
 } from '../util';
 
 jest.mock('@lib/services/datasourceService');
@@ -40,6 +41,7 @@ describe('Create Metric', () => {
   let mockedConvertToTableData: jest.Mock;
   let mockedConvertToTrendData: jest.Mock;
   let mockedGetDisplayAggregationFunctionText: jest.Mock;
+  let mockedEnableBreakdown: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -207,6 +209,7 @@ describe('Create Metric', () => {
     mockedGetDisplayAggregationFunctionText = jest.mocked(
       getDisplayAggregationFunctionText
     );
+    mockedEnableBreakdown = jest.mocked(enableBreakdown);
 
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetNodes.mockReturnValue(events);
@@ -517,6 +520,7 @@ describe('Create Metric', () => {
 
   describe('metric breakdown', () => {
     it('should be able to add metric breakdown', async () => {
+      mockedEnableBreakdown.mockReturnValue(true);
       await renderMetricComponent();
 
       const selectBreakdownButton = screen.getByTestId('add-breakdown');
@@ -533,6 +537,7 @@ describe('Create Metric', () => {
     });
 
     it('should be able to remove metric breakdown', async () => {
+      mockedEnableBreakdown.mockReturnValue(true);
       await renderMetricComponent();
 
       const selectBreakdownButton = screen.getByTestId('add-breakdown');

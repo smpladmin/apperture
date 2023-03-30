@@ -158,12 +158,6 @@ const MetricComponentCard = ({
     setVariant(aggregate?.variant);
   }, [aggregate]);
 
-  console.log(
-    'sdshdjhsd',
-    useColorFromPallete(aggregates, metricDefinition, breakdown),
-    COLOR_PALLETE_5[index]
-  );
-
   return (
     <Flex
       data-testid="event-or-segment-component"
