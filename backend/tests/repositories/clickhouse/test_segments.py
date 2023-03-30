@@ -9,6 +9,7 @@ from domain.common.filter_models import (
     FilterOperatorsNumber,
     LogicalOperators,
 )
+from domain.metrics.models import SegmentFilter
 from domain.segments.models import (
     SegmentGroup,
     WhoSegmentFilter,
@@ -394,3 +395,29 @@ class TestSegmentsRepository:
         assert self.repo.compute_date_filter(
             date_filter=date_filter, date_filter_type=date_filter_type
         ) == (start_date, end_date)
+
+    def test_build_segment_filter_on_metric_criterion(self):
+        segment_filter = SegmentFilter(
+            includes=True,
+            groups=[
+                SegmentGroup(
+                    filters=[
+                        WhereSegmentFilter(
+                            operand="test",
+                            operator=FilterOperatorsNumber.EQ,
+                            values=["1"],
+                            condition=SegmentFilterConditions.WHERE,
+                            datatype=FilterDataType.NUMBER,
+                        )
+                    ],
+                    condition=LogicalOperators.AND,
+                )
+            ],
+        )
+        assert self.repo.build_segment_filter_on_metric_criterion(
+            segment_filter=segment_filter
+        ).__str__() == (
+            '"user_id" IN (WITH group0 AS (SELECT DISTINCT "user_id" FROM "events" WHERE '
+            '"datasource_id"=%(ds_id)s AND toFloat64OrDefault("properties.test") IN '
+            '(\'1\')) SELECT DISTINCT "group0"."user_id" FROM group0)'
+        )

@@ -36,6 +36,7 @@ async def compute_metrics(
             aggregates=dto.aggregates,
             breakdown=dto.breakdown,
             date_filter=dto.dateFilter,
+            segment_filter=dto.segmentFilter,
         )
         return result
     return [
@@ -47,7 +48,7 @@ async def compute_metrics(
 @router.post("/metrics", response_model=SavedMetricResponse)
 async def save_metrics(
     dto: CreateMetricDTO,
-    user_id: str = Depends(get_user_id),
+    user: AppertureUser = Depends(get_user),
     metric_service: MetricService = Depends(),
     ds_service: DataSourceService = Depends(),
 ):
@@ -55,12 +56,13 @@ async def save_metrics(
     metric = await metric_service.build_metric(
         datasource_id=datasource.id,
         app_id=datasource.app_id,
-        user_id=user_id,
+        user_id=user.id,
         name=dto.name,
         function=dto.function,
         aggregates=dto.aggregates,
         breakdown=dto.breakdown,
-        dateFilter=dto.dateFilter,
+        date_filter=dto.dateFilter,
+        segment_filter=dto.segmentFilter,
     )
     return await metric_service.add_metric(metric=metric)
 
@@ -83,7 +85,8 @@ async def update_metric(
         function=dto.function,
         aggregates=dto.aggregates,
         breakdown=dto.breakdown,
-        dateFilter=dto.dateFilter,
+        date_filter=dto.dateFilter,
+        segment_filter=dto.segmentFilter,
     )
     await metric_service.update_metric(metric_id=id, metric=metric)
     notification = await notification_service.get_notification_by_reference(

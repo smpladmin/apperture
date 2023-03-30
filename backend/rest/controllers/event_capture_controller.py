@@ -1,10 +1,8 @@
 import json
-import logging
 from base64 import b64decode
 import os
-from typing import Any, Union
+from typing import Union
 
-import requests
 from fastapi import APIRouter, Depends, Form, Response
 
 from domain.clickstream.service import ClickstreamService

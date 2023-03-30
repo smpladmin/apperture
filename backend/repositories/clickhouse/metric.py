@@ -1,8 +1,8 @@
 import itertools
-from typing import List, Optional
+from typing import List, Optional, Union
 from fastapi import Depends
 from pypika.dialects import ClickHouseQueryBuilder
-from pypika.terms import NullValue
+from pypika.terms import NullValue, ContainsCriterion
 from pypika import (
     Case,
     ClickHouseQuery,
@@ -38,9 +38,16 @@ class Metrics(EventsBase):
         function: str,
         start_date: Optional[str],
         end_date: Optional[str],
+        segment_filter_criterion: Union[ContainsCriterion, None],
     ):
         query, parameters = self.build_metric_compute_query(
-            datasource_id, aggregates, breakdown, function, start_date, end_date
+            datasource_id,
+            aggregates,
+            breakdown,
+            function,
+            start_date,
+            end_date,
+            segment_filter_criterion,
         )
 
         return (
@@ -86,6 +93,7 @@ class Metrics(EventsBase):
         function: str,
         start_date: Optional[str],
         end_date: Optional[str],
+        segment_filter_criterion: Union[ContainsCriterion, None],
     ):
         parser = FormulaParser()
         subquery = ClickHouseQuery.from_(self.table).select(
@@ -98,6 +106,9 @@ class Metrics(EventsBase):
 
         params = {"ds_id": datasource_id}
         criterion = [self.table.datasource_id == Parameter("%(ds_id)s")]
+
+        if segment_filter_criterion:
+            criterion.append(segment_filter_criterion)
 
         if start_date:
             criterion.append(fn.Date(self.table.timestamp) >= start_date)
