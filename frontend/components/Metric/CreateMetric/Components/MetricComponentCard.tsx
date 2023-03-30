@@ -21,6 +21,7 @@ import StepFilter from '@components/StepFilters/StepFilters';
 import AddFilterComponent from '@components/StepFilters/AddFilter';
 import { Trash } from 'phosphor-react';
 import { COLOR_PALLETE_5, useColorFromPallete } from '@components/Metric/util';
+import { GREY_500 } from '@theme/index';
 
 type MetricComponentCardProps = {
   index: number;
@@ -287,7 +288,7 @@ const MetricComponentCard = ({
           cursor={'pointer'}
           data-testid={'remove-aggregate'}
         >
-          <Trash size={24} weight="bold" />
+          <Trash size={14} color={GREY_500} />
         </Box>
       </Flex>
 

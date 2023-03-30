@@ -10,8 +10,8 @@ import {
 } from '@lib/domain/metric';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
 import React, { useEffect, useState } from 'react';
-import CreateMetricAction from './components/CreateMetricAction';
-import TransientMetricView from './components/TransientMetricView';
+import CreateMetricAction from './Components/CreateMetricAction';
+import TransientMetricView from './Components/TransientMetricView';
 import { Node } from '@lib/domain/node';
 import { useRouter } from 'next/router';
 import { getCountOfValidAggregates } from '../util';

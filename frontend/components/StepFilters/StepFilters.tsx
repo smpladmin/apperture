@@ -112,56 +112,52 @@ const StepFilter = ({
   };
 
   return (
-    <Flex
-      data-testid={'event-filter'}
-      width={'full'}
-      mt={1}
-      direction={'column'}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <>
       <Flex
-        p={1}
-        alignItems={'center'}
-        gap={2}
-        h={6}
-        mt={2}
-        pr={0}
-        justifyContent={'space-between'}
+        data-testid={'event-filter'}
+        width={'full'}
+        mt={1}
+        direction={'column'}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        <Flex alignItems={'center'}>
-          <ArrowElbowDownRight size={12} color={GREY_700} weight={'bold'} />
-          <Flex>
-            <Flex
-              alignItems={'center'}
-              justifyContent={'center'}
-              color={'grey.600'}
-              p={1}
-              height={6}
-              data-testid={'filter-condition'}
-              cursor={'pointer'}
-              borderRadius={'4px'}
-              _hover={{ color: 'grey.800', background: 'white.400' }}
-            >
-              <Text
-                color={'inherit'}
-                fontSize={'xs-12'}
-                lineHeight={'lh-120'}
-                fontWeight={'400'}
+        <Flex w={'full'} mt={'2'} pl={'1'}>
+          <Flex flexShrink={1} pt={'1'}>
+            <ArrowElbowDownRight size={12} color={GREY_700} weight={'bold'} />
+          </Flex>
+          <Flex flexGrow={1} flexWrap={'wrap'} px={2}>
+            <Flex>
+              <Flex
+                alignItems={'center'}
+                justifyContent={'center'}
+                color={'grey.600'}
+                p={1}
+                height={6}
+                data-testid={'filter-condition'}
+                cursor={'pointer'}
+                borderRadius={'4px'}
+                _hover={{ color: 'grey.800', background: 'white.400' }}
               >
-                {filter.condition}
-              </Text>
-            </Flex>
-            <Box position={'relative'} ref={eventPropertyRef}>
-              <Box
+                <Text
+                  color={'inherit'}
+                  fontSize={'xs-12'}
+                  lineHeight={'lh-120'}
+                  fontWeight={'400'}
+                >
+                  {filter.condition}
+                </Text>
+              </Flex>
+              <Flex
+                alignItems={'center'}
+                justifyContent={'flex-end'}
+                height={6}
+                maxW={'37'}
+                w={'full'}
+                overflow={'hidden'}
                 p={1}
                 borderBottom={'1px'}
                 borderStyle={'dashed'}
                 borderColor={'black.500'}
-                onClick={() => {
-                  setIsPropertyDropdownOpen(true);
-                }}
-                cursor={'pointer'}
               >
                 <Text
                   fontSize={'xs-12'}
@@ -170,101 +166,84 @@ const StepFilter = ({
                 >
                   {filter.operand}
                 </Text>
-              </Box>
-              <SearchableListDropdown
-                isOpen={isPropertyDropdownOpen}
-                isLoading={loadingEventProperties}
-                data={eventProperties}
-                onSubmit={handlePropertySelection}
-                placeholderText={'Search for properties...'}
+              </Flex>
+              <Flex
+                alignItems={'center'}
+                justifyContent={'center'}
+                color={'grey.600'}
+                p={1}
+                height={6}
+                data-testid={'filter-operator'}
+                cursor={'not-allowed'}
+                borderRadius={'4px'}
+                _hover={{ color: 'grey.800', background: 'white.400' }}
+              >
+                <Text
+                  color={'inherit'}
+                  fontSize={'xs-12'}
+                  lineHeight={'lh-120'}
+                  fontWeight={'400'}
+                >
+                  {filter.operator}
+                </Text>
+              </Flex>
+            </Flex>
+            <Box position={'relative'} ref={eventValueRef}>
+              <Flex
+                alignItems={'center'}
+                justifyContent={'flex-end'}
+                p={1}
+                height={6}
+                maxW={'37'}
+                w={'full'}
+                overflow={'hidden'}
+                borderBottom={'1px'}
+                borderStyle={'dashed'}
+                borderColor={'black.500'}
+                onClick={() => {
+                  setIsValueDropDownOpen(true);
+                }}
+              >
+                <Text
+                  data-testid={'event-filter-values'}
+                  cursor={'pointer'}
+                  fontSize={'xs-12'}
+                  lineHeight={'xs-14'}
+                  color={'black.500'}
+                  wordBreak={'break-word'}
+                >
+                  {getFilterValuesText(filter.values)}
+                </Text>
+              </Flex>
+              <SearchableCheckboxDropdown
+                isOpen={isValueDropDownOpen}
+                isLoading={loadingPropertyValues}
+                data={valueList}
+                onSubmit={handleSubmitValues}
+                onAllSelect={handleAllSelect}
+                onSelect={handleValueSelection}
+                isSelectAllChecked={areAllValuesSelected}
+                selectedValues={selectedValues}
                 width={'96'}
+                placeholderText={'Search for properties...'}
               />
             </Box>
           </Flex>
-        </Flex>
-        <Flex
-          data-testid={'remove-filter'}
-          fontWeight={'500'}
-          color={'grey.200'}
-          cursor={'pointer'}
-          opacity={isHovered ? 1 : 0}
-          onClick={() => handleRemoveFilter(index)}
-        >
-          <Trash size={14} color={GREY_500} />
-        </Flex>
-      </Flex>
-      <Flex width={'full'} justifyContent={'space-between'}>
-        <Flex
-          fontSize={'xs-12'}
-          lineHeight={'xs-14'}
-          color={'white'}
-          fontWeight={500}
-          marginLeft={6}
-          position="relative"
-          cursor={'pointer'}
-          p={1}
-          borderRadius={4}
-          _hover={{ color: 'white', background: 'grey.300' }}
-          width={'max-content'}
-        ></Flex>
-      </Flex>
-      <Flex marginLeft={6} gap={2}>
-        <Flex
-          alignItems={'center'}
-          justifyContent={'center'}
-          color={'grey.600'}
-          p={1}
-          height={6}
-          data-testid={'filter-operator'}
-          cursor={'not-allowed'}
-          borderRadius={'4px'}
-          _hover={{ color: 'grey.800', background: 'white.400' }}
-        >
-          <Text
-            color={'inherit'}
-            fontSize={'xs-12'}
-            lineHeight={'lh-120'}
-            fontWeight={'400'}
-          >
-            {filter.operator}
-          </Text>
-        </Flex>
-        <Box position={'relative'} ref={eventValueRef}>
-          <Box
-            p={1}
-            borderBottom={'1px'}
-            borderStyle={'dashed'}
-            borderColor={'black.500'}
-            onClick={() => {
-              setIsValueDropDownOpen(true);
-            }}
-          >
-            <Text
-              data-testid={'event-filter-values'}
+          <Flex flexShrink={1} pl={1} pt={'0.375rem'}>
+            <Box
+              data-testid={'remove-filter'}
+              fontWeight={'500'}
+              color={'grey.200'}
               cursor={'pointer'}
-              fontSize={'xs-12'}
-              lineHeight={'xs-14'}
-              color={'black.500'}
-              wordBreak={'break-word'}
+              opacity={isHovered ? 1 : 0}
+              onClick={() => handleRemoveFilter(index)}
             >
-              {getFilterValuesText(filter.values)}
-            </Text>
-          </Box>
-          <SearchableCheckboxDropdown
-            isOpen={isValueDropDownOpen}
-            isLoading={loadingPropertyValues}
-            data={valueList}
-            onSubmit={handleSubmitValues}
-            onAllSelect={handleAllSelect}
-            onSelect={handleValueSelection}
-            isSelectAllChecked={areAllValuesSelected}
-            selectedValues={selectedValues}
-            width={'96'}
-            placeholderText={'Search for properties...'}
-          />
-        </Box>
+              <Trash size={14} color={GREY_500} />
+            </Box>
+          </Flex>
+        </Flex>
       </Flex>
-    </Flex>
+    </>
   );
 };
 
