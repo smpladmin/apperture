@@ -31,6 +31,7 @@ type UserConversionDrawerProps = {
   selectedFunnelSteps: FunnelStep[];
   dateFilter: DateFilterObj;
   conversionWindow: ConversionWindowObj;
+  randomSequence: boolean;
 };
 
 export enum TableState {
@@ -46,6 +47,7 @@ const UserConversionDrawer = ({
   selectedFunnelSteps,
   dateFilter,
   conversionWindow,
+  randomSequence,
 }: UserConversionDrawerProps) => {
   const [tableState, setTableState] = useState<TableState>(TableState.PROPERTY);
   const [selectedUser, setSelectedUser] = useState<null | string>(null);
@@ -145,6 +147,7 @@ const UserConversionDrawer = ({
               conversionWindow={conversionWindow}
               status={status}
               setStatus={setStatus}
+              randomSequence={randomSequence}
             />
           </DrawerBody>
 

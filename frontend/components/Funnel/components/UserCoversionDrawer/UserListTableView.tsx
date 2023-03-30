@@ -33,6 +33,7 @@ type UserTableViewProps = {
   conversionWindow: ConversionWindowObj;
   status: ConversionStatus;
   setStatus: Function;
+  randomSequence: boolean;
 };
 type FunnelEventConversion = {
   converted?: FunnelConversionData;
@@ -49,6 +50,7 @@ const UserTableView = ({
   conversionWindow,
   status,
   setStatus,
+  randomSequence,
 }: UserTableViewProps) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [userData, setUserData] = useState<FunnelEventConversion>();
@@ -65,7 +67,8 @@ const UserTableView = ({
           steps,
           status,
           dateFilter,
-          conversionWindow
+          conversionWindow,
+          randomSequence
         );
         setUserData({ ...userData, dropped: data });
       } else if (
@@ -77,7 +80,8 @@ const UserTableView = ({
           steps,
           status,
           dateFilter,
-          conversionWindow
+          conversionWindow,
+          randomSequence
         );
         setUserData({ ...userData, converted: data });
       }

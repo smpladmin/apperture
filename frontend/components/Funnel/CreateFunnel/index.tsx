@@ -208,6 +208,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
               dateFilter={dateFilter}
               setDateFilter={setDateFilter}
               conversionWindow={conversionWindow}
+              randomSequence={randomSequence}
             />
           )}
         </ViewPanelTemp>
