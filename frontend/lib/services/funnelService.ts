@@ -103,7 +103,8 @@ export const getConversionData = async (
   steps: FunnelStep[],
   status: ConversionStatus,
   dateFilter: DateFilterObj,
-  conversionWindow: ConversionWindowObj
+  conversionWindow: ConversionWindowObj,
+  randomSequence: boolean
 ) => {
   const res = await ApperturePost('/funnels/analytics/transient', {
     datasourceId: dsId,
@@ -111,6 +112,7 @@ export const getConversionData = async (
     status,
     dateFilter,
     conversionWindow,
+    randomSequence,
   });
   return res.data || [];
 };
