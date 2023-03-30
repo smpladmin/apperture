@@ -51,6 +51,7 @@ const EventLayoutHeader = ({
             bg: 'white.400',
           }}
           onClick={() => handleGoBack()}
+          data-testid={'back-button'}
         />
         <Editable
           onChange={(nextValue) => setName(nextValue)}

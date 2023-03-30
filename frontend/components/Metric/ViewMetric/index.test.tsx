@@ -15,7 +15,10 @@ import {
 } from '@lib/services/datasourceService';
 import { computeMetric } from '@lib/services/metricService';
 import ViewMetric from './index';
-import { MetricComponentVariant } from '@lib/domain/metric';
+import {
+  MetricBasicAggregation,
+  MetricComponentVariant,
+} from '@lib/domain/metric';
 import {
   NotificationChannel,
   NotificationMetricType,
@@ -114,13 +117,6 @@ describe('View Metric', () => {
     datasourceId: '63d8ef5a7b02dbd1dcf20dcc',
     appId: '63d8ef4f7b02dbd1dcf20dca',
     userId: '63d38ec3071bbcb1c8b04ab8',
-    user: {
-      firstName: 'Aditya',
-      lastName: 'Priyam',
-      email: 'aditya@parallel.com',
-      picture: 'string',
-      slackChannel: null,
-    },
     name: 'Test Metric',
     function: 'A+B/C',
     aggregates: [
@@ -128,7 +124,10 @@ describe('View Metric', () => {
         variable: 'A',
         function: 'count',
         variant: MetricComponentVariant.EVENT,
-        aggregations: { functions: 'count', property: 'Name_Added' },
+        aggregations: {
+          functions: MetricBasicAggregation.TOTAL,
+          property: 'Name_Added',
+        },
         reference_id: 'Name_Added',
         filters: [],
         conditions: [],
@@ -137,7 +136,10 @@ describe('View Metric', () => {
         variable: 'B',
         function: 'count',
         variant: MetricComponentVariant.EVENT,
-        aggregations: { functions: 'count', property: 'Opened_Popular' },
+        aggregations: {
+          functions: MetricBasicAggregation.TOTAL,
+          property: 'Opened_Popular',
+        },
         reference_id: 'Opened_Popular',
         filters: [],
         conditions: [],
@@ -146,7 +148,10 @@ describe('View Metric', () => {
         variable: 'C',
         function: 'count',
         variant: MetricComponentVariant.EVENT,
-        aggregations: { functions: 'count', property: 'Topic_Click' },
+        aggregations: {
+          functions: MetricBasicAggregation.TOTAL,
+          property: 'Topic_Click',
+        },
         reference_id: 'Topic_Click',
         filters: [],
         conditions: [],
