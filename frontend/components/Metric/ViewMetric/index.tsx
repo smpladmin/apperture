@@ -9,10 +9,10 @@ import { getNotificationByReference } from '@lib/services/notificationService';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { convertToTrendData, getCountOfSeries } from '../util';
-import SavedMetricView from './components/SavedMetricView';
-import ViewMetricActionPanel from './components/ViewMetricActionPanel';
 import Alert from '@components/Alerts';
 import ViewHeader from '@components/EventsLayout/ViewHeader';
+import ViewMetricActionPanel from './components/ViewMetricActionPanel';
+import SavedMetricView from './components/SavedMetricView';
 
 const ViewMetric = ({
   savedMetric,

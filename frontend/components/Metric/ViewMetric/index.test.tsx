@@ -5,7 +5,6 @@ import {
   act,
   waitFor,
 } from '@testing-library/react';
-
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from 'tests/util';
 import {

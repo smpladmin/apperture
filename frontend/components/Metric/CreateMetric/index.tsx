@@ -10,14 +10,14 @@ import {
 } from '@lib/domain/metric';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
 import React, { useEffect, useState } from 'react';
-import CreateMetricAction from './components/CreateMetricAction';
-import TransientMetricView from './components/TransientMetricView';
 import { Node } from '@lib/domain/node';
 import { useRouter } from 'next/router';
 import { getCountOfValidAggregates } from '../util';
 import { DateFilterObj } from '@lib/domain/common';
 import ActionHeader from '@components/EventsLayout/ActionHeader';
 import { saveMetric, updateMetric } from '@lib/services/metricService';
+import CreateMetricAction from './components/CreateMetricAction';
+import TransientMetricView from './components/TransientMetricView';
 
 const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
   const [metric, setMetric] = useState<ComputedMetric[]>([]);
