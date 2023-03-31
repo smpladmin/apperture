@@ -1,8 +1,5 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import {
-  getDisplayAggregationFunctionText,
-  metricAggregationDisplayText,
-} from '@components/Metric/util';
+import { getDisplayAggregationFunctionText } from '@components/Metric/util';
 import Dropdown from '@components/SearchableDropdown/Dropdown';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import {
@@ -75,28 +72,28 @@ const MetricAggregation = ({
 
   return (
     <Flex width={'full'} alignItems={'center'}>
-      <Flex
-        position={'relative'}
-        ref={aggregationRef}
-        direction={'row'}
-        alignItems={'center'}
-        pl={4}
-      >
-        <ArrowElbowDownRight size={12} weight="bold" color={GREY_700} />
+      <ArrowElbowDownRight size={12} weight="bold" color={GREY_700} />
+
+      <Box position={'relative'} ref={aggregationRef}>
         <Text
-          color={'black'}
+          color={'grey.600'}
           fontSize={'xs-12'}
           lineHeight={'xs-16'}
           marginLeft={4}
           cursor={'pointer'}
-          _hover={{ color: 'white', background: 'grey.300' }}
           data-testid={'metric-aggregation-function'}
           onClick={() => setIsAggregationListOpen(true)}
+          alignItems={'center'}
+          justifyContent={'center'}
+          p={1}
+          height={6}
+          borderRadius={'4px'}
+          _hover={{ color: 'grey.800', background: 'white.400' }}
         >
           {getDisplayAggregationFunctionText(aggregation.functions)}
         </Text>
 
-        <Dropdown isOpen={isAggregationListOpen} minWidth={'40'}>
+        <Dropdown isOpen={isAggregationListOpen} width={'76'}>
           {metricAggregations.map((aggregation) => {
             return (
               <Box
@@ -117,7 +114,7 @@ const MetricAggregation = ({
             );
           })}
         </Dropdown>
-      </Flex>
+      </Box>
       {Object.values(MetricAggregatePropertiesAggregation).includes(
         aggregation.functions as any
       ) ? (
@@ -162,6 +159,7 @@ const MetricAggregation = ({
               data={eventProperties}
               isLoading={loadingEventsAndProperties}
               onSubmit={onSuggestionClick}
+              width={'76'}
             />
           </Box>
         </>

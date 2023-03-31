@@ -30,7 +30,7 @@ const AddFilterComponent = ({
   useOnClickOutside(ref, () => setOpenDropDown(false));
   return (
     <Flex width={'full'} direction={'column'} ref={ref}>
-      <Flex p={1} alignItems={'center'} gap={2} h={6} mt={2} px={1}>
+      <Flex py={1} alignItems={'center'} gap={2} h={6} mt={2}>
         <Box opacity={filters.length ? 0 : 1}>
           <ArrowElbowDownRight size={12} color={GREY_700} weight={'bold'} />
         </Box>
