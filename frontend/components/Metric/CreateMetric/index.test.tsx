@@ -181,9 +181,6 @@ describe('Create Metric', () => {
   };
 
   const addNewEvent = async () => {
-    const selectEvent = screen.getByTestId('select-event-segment');
-    fireEvent.click(selectEvent);
-
     const eventOption = screen.getByTestId('event-option');
     fireEvent.click(eventOption);
 
@@ -282,21 +279,9 @@ describe('Create Metric', () => {
           </RouterContext.Provider>
         );
       });
-      const SelectEvent = screen.getByTestId('select-event-segment');
-      fireEvent.click(SelectEvent);
-      const EventOption = screen.getByTestId('event-option');
-      fireEvent.click(EventOption);
-      const SELECTED_OPTION = 1;
+      await addNewEvent();
 
-      // Selecting an event from the dropdown
-      const EventNameDropdownList = screen.getAllByTestId('dropdown-options');
-
-      await act(async () => {
-        fireEvent.click(EventNameDropdownList[SELECTED_OPTION]);
-      });
-      const addEventsOrSegmentsButton = screen.getByTestId(
-        'add-events-or-segments-button'
-      );
+      const addEventsOrSegmentsButton = screen.getByTestId('add-event-button');
       const EventsOrSegmentsList = screen.getAllByTestId(
         'event-or-segment-component'
       );
@@ -328,21 +313,9 @@ describe('Create Metric', () => {
           </RouterContext.Provider>
         );
       });
-      const SelectEvent = screen.getByTestId('select-event-segment');
-      fireEvent.click(SelectEvent);
-      const EventOption = screen.getByTestId('event-option');
-      fireEvent.click(EventOption);
-      const SELECTED_OPTION = 1;
+      await addNewEvent();
 
-      // Selecting an event from the dropdown
-      const EventNameDropdownList = screen.getAllByTestId('dropdown-options');
-
-      await act(async () => {
-        fireEvent.click(EventNameDropdownList[SELECTED_OPTION]);
-      });
-      const addEventsOrSegmentsButton = screen.getByTestId(
-        'add-events-or-segments-button'
-      );
+      const addEventsOrSegmentsButton = screen.getByTestId('add-event-button');
       const removeAggregate = screen.getByTestId('remove-aggregate');
 
       const EventsOrSegmentsList = screen.getAllByTestId(
@@ -380,10 +353,9 @@ describe('Create Metric', () => {
           </RouterContext.Provider>
         );
       });
-      const SelectEvent = screen.getByTestId('select-event-segment');
-      fireEvent.click(SelectEvent);
-      const EventOption = screen.getByTestId('event-option');
-      fireEvent.click(EventOption);
+
+      const eventOption = screen.getByTestId('event-option');
+      fireEvent.click(eventOption);
       const EventDropDown = screen.getByTestId(
         'event-property-dropdown-container'
       );
@@ -412,19 +384,8 @@ describe('Create Metric', () => {
           </RouterContext.Provider>
         );
       });
-      const SelectEvent = screen.getByTestId('select-event-segment');
-      fireEvent.click(SelectEvent);
-      const EventOption = screen.getByTestId('event-option');
-      fireEvent.click(EventOption);
+      await addNewEvent();
       const SELECTED_OPTION = 1;
-
-      // Selecting an event from the dropdown
-      const EventNameDropdownList = screen.getAllByTestId('dropdown-options');
-
-      await act(async () => {
-        fireEvent.click(EventNameDropdownList[SELECTED_OPTION]);
-      });
-
       //Adding a filter to the "Event or Segment" Component
       const AddFilterButton = screen.getByTestId('add-filter-button');
       fireEvent.click(AddFilterButton);
@@ -447,18 +408,8 @@ describe('Create Metric', () => {
           </RouterContext.Provider>
         );
       });
-      const SelectEvent = screen.getByTestId('select-event-segment');
-      fireEvent.click(SelectEvent);
-      const EventOption = screen.getByTestId('event-option');
-      fireEvent.click(EventOption);
+      await addNewEvent();
       const SELECTED_OPTION = 1;
-
-      // Selecting an event from the dropdown
-      const EventNameDropdownList = screen.getAllByTestId('dropdown-options');
-
-      await act(async () => {
-        fireEvent.click(EventNameDropdownList[SELECTED_OPTION]);
-      });
 
       //Adding a filter to the "Event or Segment" Component
       const AddFilterButton = screen.getByTestId('add-filter-button');
