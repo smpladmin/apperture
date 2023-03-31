@@ -30,8 +30,9 @@ import {
 } from '@components/Metric/util';
 import { DateFilterObj, WhereFilter } from '@lib/domain/common';
 import Card from '@components/Card';
-import { Function } from 'phosphor-react';
+import { Function, Plus } from 'phosphor-react';
 import AddBreakdown from './AddBreakdown';
+import { BLACK_DEFAULT } from '@theme/index';
 
 const DEBOUNCE_WAIT_TIME = 800;
 
@@ -191,117 +192,118 @@ const CreateMetricAction = ({
   const functionBoxColor = metricDefinition ? 'blue.500' : 'grey.400';
 
   return (
-    <>
-      <Card>
-        <Flex direction={'column'} width={'full'}>
-          <Flex direction={'column'}>
+    <Card>
+      <Flex direction={'column'} width={'full'} gap={'6'}>
+        <Flex direction={'column'} gap={3}>
+          <Text
+            fontSize={'xs-12'}
+            lineHeight={'lh-135'}
+            color={'grey.500'}
+            px={'2'}
+            py={'1'}
+          >
+            Metric Definition
+          </Text>
+          <InputGroup>
+            <InputLeftElement>
+              <Flex>
+                <Box
+                  mt={'2px'}
+                  bg={functionBoxColor}
+                  height={'18px'}
+                  width={'18px'}
+                  borderRadius={'4'}
+                  padding={'2px'}
+                >
+                  <Function color="white" size={'14'} weight="bold" />
+                </Box>
+              </Flex>
+            </InputLeftElement>
+            <Input
+              pr={'4'}
+              type={'text'}
+              placeholder={'example A/B'}
+              fontSize={'xs-14'}
+              variant="unstyled"
+              lineHeight={{ base: 'sh-20', md: 'sh-32' }}
+              textColor={'black.DEFAULT'}
+              defaultValue={metricDefinition}
+              onChange={handleDefinitionChange}
+              borderColor={'white.200'}
+              borderRadius={'8'}
+              borderStyle={'solid'}
+              borderWidth={'1px'}
+              fontWeight={'medium'}
+              height="11"
+              px={4}
+              data-testid={'metric-definition'}
+              background="grey.10"
+              _focus={{
+                border: '1px solid black',
+
+                color: 'black.DEFAULT',
+              }}
+              _active={{
+                border: '1px solid black',
+                fontWeight: 'medium',
+                color: 'black.DEFAULT',
+              }}
+            />
+          </InputGroup>
+        </Flex>
+
+        <Flex direction={'column'} gap={'3'}>
+          <Flex justifyContent={'space-between'} alignItems={'center'}>
             <Text
               fontSize={'xs-12'}
               lineHeight={'lh-135'}
               color={'grey.500'}
-              pb={'3'}
-              px={'3'}
+              px={'2'}
+              py={'1'}
             >
-              Metric Definition
+              Events & Segments
             </Text>
-            <InputGroup>
-              <InputLeftElement>
-                <Flex>
-                  <Box
-                    mt={'2px'}
-                    bg={functionBoxColor}
-                    height={'18px'}
-                    width={'18px'}
-                    borderRadius={'4'}
-                    padding={'2px'}
-                  >
-                    <Function color="white" size={'14'} weight="bold" />
-                  </Box>
-                </Flex>
-              </InputLeftElement>
-              <Input
-                pr={'4'}
-                type={'text'}
-                placeholder={'example A/B'}
-                fontSize={'xs-14'}
-                variant="unstyled"
-                lineHeight={{ base: 'sh-20', md: 'sh-32' }}
-                textColor={'black.DEFAULT'}
-                defaultValue={metricDefinition}
-                onChange={handleDefinitionChange}
-                borderColor={'white.200'}
-                borderRadius={'8'}
-                borderStyle={'solid'}
-                borderWidth={'1px'}
-                fontWeight={'medium'}
-                height="11"
-                px={4}
-                marginBottom={4}
-                data-testid={'metric-definition'}
-                background="grey.10"
-                _focus={{
-                  border: '1px solid black',
+            <Button
+              h={5.5}
+              minW={5.5}
+              w={5.5}
+              p={0}
+              data-testid={'add-button'}
+              onClick={addAggregate}
+              cursor={'pointer'}
+              variant={'secondary'}
+            >
+              <Plus size={14} color={BLACK_DEFAULT} weight={'bold'} />
+            </Button>
+          </Flex>
 
-                  color: 'black.DEFAULT',
-                }}
-                _active={{
-                  border: '1px solid black',
-                  fontWeight: 'medium',
-                  color: 'black.DEFAULT',
-                }}
-              />
-            </InputGroup>
-          </Flex>
-          <Flex direction={'column'}>
-            <Flex justifyContent={'space-between'} alignItems={'center'}>
-              <Text
-                fontSize={'xs-12'}
-                lineHeight={'lh-135'}
-                color={'grey.500'}
-                pb={'3'}
-                px={'3'}
-              >
-                Events & Segments
-              </Text>
-              <Button
-                data-testid={'add-events-or-segments-button'}
-                size={'xs'}
-                color={'white.DEFAULT'}
-                onClick={addAggregate}
-                background={'none'}
-                _hover={{ color: 'white', background: 'grey.300' }}
-              >
-                +
-              </Button>
-            </Flex>
-            {aggregates.map((aggregate, index) => (
-              <MetricComponentCard
-                index={index}
-                variable={aggregate.variable}
-                eventList={eventList}
-                key={aggregate.variable}
-                eventProperties={eventProperties}
-                loadingEventsAndProperties={loadingEventsAndProperties}
-                updateAggregate={updateAggregate}
-                removeAggregate={removeAggregate}
-                aggregate={aggregate}
-                aggregates={aggregates}
-                metricDefinition={metricDefinition}
-                breakdown={breakdown}
-              />
-            ))}
-            <AddBreakdown
-              metricDefinition={metricDefinition}
-              aggregates={aggregates}
-              breakdown={breakdown}
-              setBreakdown={setBreakdown}
+          {aggregates.map((aggregate, index) => (
+            <MetricComponentCard
+              index={index}
+              variable={aggregate.variable}
+              eventList={eventList}
+              key={aggregate.variable}
               eventProperties={eventProperties}
-              loadingEventProperties={loadingEventsAndProperties}
+              loadingEventsAndProperties={loadingEventsAndProperties}
+              updateAggregate={updateAggregate}
+              removeAggregate={removeAggregate}
+              aggregate={aggregate}
+              aggregates={aggregates}
+              metricDefinition={metricDefinition}
+              breakdown={breakdown}
             />
-          </Flex>
+          ))}
         </Flex>
-      </Card>
-    </>
+        <AddBreakdown
+          metricDefinition={metricDefinition}
+          aggregates={aggregates}
+          breakdown={breakdown}
+          setBreakdown={setBreakdown}
+          eventProperties={eventProperties}
+          loadingEventProperties={loadingEventsAndProperties}
+        />
+      </Flex>
+    </Card>
   );
 };
 

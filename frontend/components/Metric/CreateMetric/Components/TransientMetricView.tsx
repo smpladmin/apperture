@@ -45,8 +45,8 @@ const TransientMetricView = ({
           <Flex
             alignItems={'center'}
             justifyContent={'center'}
-            height={'120'}
-            mt={'5'}
+            height={'100'}
+            w={'full'}
           >
             <Loader />
           </Flex>

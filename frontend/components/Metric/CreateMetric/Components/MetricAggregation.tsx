@@ -8,7 +8,7 @@ import {
   MetricBasicAggregation,
 } from '@lib/domain/metric';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import { ARROW_GRAY, GREY_700, WHITE_100 } from '@theme/index';
+import { GREY_700 } from '@theme/index';
 import { ArrowElbowDownRight } from 'phosphor-react';
 import React, { useRef, useState } from 'react';
 
@@ -71,99 +71,111 @@ const MetricAggregation = ({
   };
 
   return (
-    <Flex width={'full'} alignItems={'center'}>
+    <Flex width={'full'} alignItems={'center'} gap={'3'}>
       <ArrowElbowDownRight size={12} weight="bold" color={GREY_700} />
-
-      <Box position={'relative'} ref={aggregationRef}>
+      <Flex alignItems={'center'} gap={'1'}>
         <Text
-          color={'grey.600'}
           fontSize={'xs-12'}
-          lineHeight={'xs-16'}
-          marginLeft={4}
-          cursor={'pointer'}
-          data-testid={'metric-aggregation-function'}
-          onClick={() => setIsAggregationListOpen(true)}
-          alignItems={'center'}
-          justifyContent={'center'}
-          p={1}
-          height={6}
-          borderRadius={'4px'}
-          _hover={{ color: 'grey.800', background: 'white.400' }}
+          lineHeight={'lh-120'}
+          fontWeight={'400'}
+          color={'grey.600'}
         >
-          {getDisplayAggregationFunctionText(aggregation.functions)}
+          {'in'}
         </Text>
-
-        <Dropdown isOpen={isAggregationListOpen} width={'76'}>
-          {metricAggregations.map((aggregation) => {
-            return (
-              <Box
-                px={'2'}
-                py={'3'}
-                cursor={'pointer'}
-                _hover={{ background: 'white.100' }}
-                key={aggregation}
-                onClick={() => {
-                  handleUpdateAggregationFunction(aggregation);
-                }}
-                data-testid={'metric-aggregation-options'}
-              >
-                <Text fontWeight={500} fontSize={'xs-14'} lineHeight={'xs-14'}>
-                  {getDisplayAggregationFunctionText(aggregation)}
-                </Text>
-              </Box>
-            );
-          })}
-        </Dropdown>
-      </Box>
-      {Object.values(MetricAggregatePropertiesAggregation).includes(
-        aggregation.functions as any
-      ) ? (
-        <>
-          <Box>
-            <Text
-              fontSize={'xs-12'}
-              lineHeight={'xs-16'}
-              fontWeight={'400'}
-              color={ARROW_GRAY}
-              cursor={'pointer'}
-              px={'2'}
-              py={'1'}
-            >
-              {'of'}
-            </Text>
-          </Box>
-
+        <Box position={'relative'} ref={aggregationRef}>
           <Box
-            position={'relative'}
-            ref={selectFilterRef}
-            borderColor={'grey.100'}
+            p={'1'}
+            _hover={{ color: 'grey.800', background: 'white.400' }}
+            borderBottom={'1px dashed'}
+            borderColor={'grey.800'}
           >
             <Text
+              color={'black.500'}
               fontSize={'xs-12'}
-              lineHeight={'xs-16'}
-              fontWeight={'400'}
-              px={'2'}
-              py={'1'}
-              color={WHITE_100}
-              _hover={{ color: 'white', background: 'grey.300' }}
+              lineHeight={'lh-120'}
               cursor={'pointer'}
-              onClick={() => setIsPropertiesListOpen(true)}
-              data-testid={'metric-aggregation-event-property'}
-              wordBreak={'break-word'}
+              data-testid={'metric-aggregation-function'}
+              onClick={() => setIsAggregationListOpen(true)}
+              _hover={{ color: 'grey.800' }}
             >
-              {aggregation.property || 'Select Property'}
+              {getDisplayAggregationFunctionText(aggregation.functions)}
             </Text>
-
-            <SearchableListDropdown
-              isOpen={isPropertiesListOpen}
-              data={eventProperties}
-              isLoading={loadingEventsAndProperties}
-              onSubmit={onSuggestionClick}
-              width={'76'}
-            />
           </Box>
-        </>
-      ) : null}
+
+          <Dropdown isOpen={isAggregationListOpen} width={'76'}>
+            {metricAggregations.map((aggregation) => {
+              return (
+                <Box
+                  px={'2'}
+                  py={'3'}
+                  cursor={'pointer'}
+                  _hover={{ background: 'white.100' }}
+                  key={aggregation}
+                  onClick={() => {
+                    handleUpdateAggregationFunction(aggregation);
+                  }}
+                  data-testid={'metric-aggregation-options'}
+                >
+                  <Text
+                    fontWeight={500}
+                    fontSize={'xs-14'}
+                    lineHeight={'xs-14'}
+                  >
+                    {getDisplayAggregationFunctionText(aggregation)}
+                  </Text>
+                </Box>
+              );
+            })}
+          </Dropdown>
+        </Box>
+        {Object.values(MetricAggregatePropertiesAggregation).includes(
+          aggregation.functions as any
+        ) ? (
+          <>
+            <Box p={'1'}>
+              <Text
+                fontSize={'xs-12'}
+                lineHeight={'lh-120'}
+                fontWeight={'400'}
+                color={'grey.600'}
+              >
+                {'of'}
+              </Text>
+            </Box>
+
+            <Box position={'relative'} ref={selectFilterRef}>
+              <Box
+                p={'1'}
+                _hover={{ color: 'grey.800', background: 'white.400' }}
+                borderBottom={'dashed'}
+                borderColor={'grey.800'}
+              >
+                <Text
+                  color={'black.500'}
+                  fontSize={'xs-12'}
+                  lineHeight={'lh-120'}
+                  fontWeight={'400'}
+                  _hover={{ color: 'grey.800', background: 'white.400' }}
+                  cursor={'pointer'}
+                  onClick={() => setIsPropertiesListOpen(true)}
+                  data-testid={'metric-aggregation-event-property'}
+                  wordBreak={'break-word'}
+                >
+                  {aggregation.property || 'Select Property'}
+                </Text>
+              </Box>
+
+              <SearchableListDropdown
+                isOpen={isPropertiesListOpen}
+                data={eventProperties}
+                isLoading={loadingEventsAndProperties}
+                onSubmit={onSuggestionClick}
+                width={'76'}
+              />
+            </Box>
+          </>
+        ) : null}
+      </Flex>
     </Flex>
   );
 };

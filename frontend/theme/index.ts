@@ -49,7 +49,7 @@ const colors = {
     200: BLACK_200,
     300: BLACK_RUSSIAN,
     400: '#07070d',
-    500: 'BLACK_500',
+    500: BLACK_500,
   },
   white: {
     DEFAULT: WHITE_DEFAULT,

@@ -56,7 +56,8 @@ const MetricComponentCard = ({
     aggregate?.variant || MetricComponentVariant.UNDEFINED
   );
   const [isEventOrSegmentListOpen, setIsEventOrSegmentListOpen] =
-    useState<boolean>(false);
+    useState<boolean>(aggregate?.reference_id ? false : true);
+
   const [isEventOrSegmentListLoading, setIsEventOrSegmentListLoading] =
     useState<boolean>(false);
   const [eventOrSegmentListSearchData, setEventOrSegmentListSearchData] =
@@ -163,8 +164,6 @@ const MetricComponentCard = ({
   return (
     <Flex
       data-testid="event-or-segment-component"
-      // justifyContent={'space-between'}
-      // alignItems={'center'}
       direction={'column'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -173,9 +172,9 @@ const MetricComponentCard = ({
       borderStyle={'solid'}
       borderWidth={'1px'}
       p={3}
-      // mb={3}
+      gap={'2'}
     >
-      <Flex gap={'2'} width={'full'} alignItems={'center'}>
+      <Flex gap={'2'} width={'full'} alignItems={'center'} py={'1'}>
         <Flex
           data-testid="event-or-segment-component-variable"
           background={
@@ -202,7 +201,6 @@ const MetricComponentCard = ({
         </Flex>
         <Flex
           grow={1}
-          mx={1}
           cursor={'pointer'}
           color={'black'}
           _hover={{ background: 'white.200' }}
@@ -220,60 +218,69 @@ const MetricComponentCard = ({
             >
               {reference === '' ? 'Add Event / Segment' : reference}
             </Text>
-            {isEventOrSegmentListOpen ? (
-              variant === MetricComponentVariant.UNDEFINED ? (
-                <Dropdown isOpen={isEventOrSegmentListLoading} width={'76'}>
-                  <Flex
-                    data-testid={'event-option'}
-                    lineHeight={'xs-18'}
-                    color={'black'}
-                    fontSize={'xs-14'}
-                    fontWeight={500}
-                    width={'full'}
-                    p={2}
-                    borderRadius={8}
-                    _hover={{
-                      background: 'white.100',
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setVariant(MetricComponentVariant.EVENT);
-                    }}
+            {variant === MetricComponentVariant.UNDEFINED ? (
+              <Dropdown isOpen={isEventOrSegmentListOpen} width={'76'}>
+                <Flex
+                  data-testid={'event-option'}
+                  lineHeight={'xs-18'}
+                  color={'black'}
+                  fontSize={'xs-14'}
+                  fontWeight={500}
+                  width={'full'}
+                  p={2}
+                  borderRadius={8}
+                  _hover={{
+                    background: 'white.100',
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setVariant(MetricComponentVariant.EVENT);
+                  }}
+                >
+                  <Text
+                    fontSize={'xs-12'}
+                    lineHeight={'lh-130'}
+                    fontWeight={'500'}
                   >
-                    <Text marginLeft={2}>Events</Text>
-                  </Flex>
-                  <Flex
-                    lineHeight={'xs-18'}
-                    color={'black'}
-                    fontSize={'xs-14'}
-                    fontWeight={500}
-                    width={'full'}
-                    p={2}
-                    borderRadius={8}
-                    _hover={{
-                      background: 'white.100',
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setVariant(MetricComponentVariant.EVENT);
-                    }}
-                    pointerEvents={'none'}
+                    Events
+                  </Text>
+                </Flex>
+                <Flex
+                  lineHeight={'xs-18'}
+                  color={'black'}
+                  fontSize={'xs-14'}
+                  fontWeight={500}
+                  width={'full'}
+                  p={2}
+                  borderRadius={8}
+                  _hover={{
+                    background: 'white.100',
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setVariant(MetricComponentVariant.EVENT);
+                  }}
+                  pointerEvents={'none'}
+                >
+                  <Text
+                    fontSize={'xs-12'}
+                    lineHeight={'lh-130'}
+                    fontWeight={'500'}
                   >
-                    <i className="ri-group-fill"></i>
-                    <Text marginLeft={2}>Segments</Text>
-                  </Flex>
-                </Dropdown>
-              ) : variant === 'event' ? (
-                <SearchableListDropdown
-                  isOpen={isEventOrSegmentListOpen}
-                  isLoading={isEventOrSegmentListLoading}
-                  data={eventOrSegmentListSearchData}
-                  onSubmit={handleEventOrSegmentSelection}
-                  listKey={'id'}
-                  isNode
-                  width={'96'}
-                />
-              ) : null
+                    Segments
+                  </Text>
+                </Flex>
+              </Dropdown>
+            ) : variant === 'event' ? (
+              <SearchableListDropdown
+                isOpen={isEventOrSegmentListOpen}
+                isLoading={isEventOrSegmentListLoading}
+                data={eventOrSegmentListSearchData}
+                onSubmit={handleEventOrSegmentSelection}
+                listKey={'id'}
+                isNode
+                width={'96'}
+              />
             ) : null}
           </Box>
         </Flex>
@@ -314,6 +321,7 @@ const MetricComponentCard = ({
             eventProperties={eventProperties}
             handleAddFilter={handleAddFilter}
             loadingEventProperties={loadingEventsAndProperties}
+            hideIndentIcon
           />
         </>
       )}

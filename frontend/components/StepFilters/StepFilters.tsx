@@ -116,12 +116,11 @@ const StepFilter = ({
       <Flex
         data-testid={'event-filter'}
         width={'full'}
-        mt={1}
         direction={'column'}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <Flex w={'full'} mt={'2'} pl={'1'}>
+        <Flex w={'full'} mt={'2'}>
           <Flex flexShrink={1} pt={'1'}>
             <ArrowElbowDownRight size={12} color={GREY_700} weight={'bold'} />
           </Flex>
@@ -147,26 +146,41 @@ const StepFilter = ({
                   {filter.condition}
                 </Text>
               </Flex>
-              <Flex
-                alignItems={'center'}
-                justifyContent={'flex-end'}
-                height={6}
-                maxW={'37'}
-                w={'full'}
-                overflow={'hidden'}
-                p={1}
-                borderBottom={'1px'}
-                borderStyle={'dashed'}
-                borderColor={'black.500'}
-              >
-                <Text
-                  fontSize={'xs-12'}
-                  lineHeight={'xs-14'}
-                  color={'black.500'}
+
+              <Box position={'relative'} ref={eventPropertyRef}>
+                <Flex
+                  alignItems={'center'}
+                  justifyContent={'flex-end'}
+                  height={6}
+                  maxW={'37'}
+                  w={'full'}
+                  overflow={'hidden'}
+                  p={1}
+                  borderBottom={'1px'}
+                  borderStyle={'dashed'}
+                  borderColor={'black.500'}
+                  onClick={() => {
+                    setIsPropertyDropdownOpen(true);
+                  }}
+                  cursor={'pointer'}
                 >
-                  {filter.operand}
-                </Text>
-              </Flex>
+                  <Text
+                    fontSize={'xs-12'}
+                    lineHeight={'xs-14'}
+                    color={'black.500'}
+                  >
+                    {filter.operand}
+                  </Text>
+                </Flex>
+                <SearchableListDropdown
+                  isOpen={isPropertyDropdownOpen}
+                  isLoading={loadingEventProperties}
+                  data={eventProperties}
+                  onSubmit={handlePropertySelection}
+                  placeholderText={'Search for properties...'}
+                  width={'96'}
+                />
+              </Box>
               <Flex
                 alignItems={'center'}
                 justifyContent={'center'}
@@ -193,13 +207,11 @@ const StepFilter = ({
                 alignItems={'center'}
                 justifyContent={'flex-end'}
                 p={1}
-                height={6}
-                maxW={'37'}
                 w={'full'}
                 overflow={'hidden'}
                 borderBottom={'1px'}
                 borderStyle={'dashed'}
-                borderColor={'black.500'}
+                borderColor={'grey.800'}
                 onClick={() => {
                   setIsValueDropDownOpen(true);
                 }}

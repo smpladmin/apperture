@@ -55,12 +55,14 @@ const AddBreakdown = ({
 
   return (
     <Flex direction={'column'} gap={'3'}>
-      <Flex justifyContent={'space-between'}>
+      <Flex justifyContent={'space-between'} alignItems={'center'}>
         <Text
           fontSize={'xs-12'}
           lineHeight={'xs-12'}
           fontWeight={'400'}
           color={'grey.500'}
+          px={'2'}
+          py={'1'}
         >
           Breakdown
         </Text>
