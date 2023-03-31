@@ -32,7 +32,7 @@ const TransientMetricView = ({
       minHeight={'full'}
       overflowY={'scroll'}
     >
-      <Flex w="full" justifyContent={'space-between'}>
+      <Flex w="full" justifyContent={'space-between'} pb={5}>
         <DateFilterComponent
           dateFilter={dateFilter}
           setDateFilter={setDateFilter}

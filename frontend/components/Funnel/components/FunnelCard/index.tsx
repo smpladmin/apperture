@@ -169,7 +169,7 @@ const FunnelComponentCard = ({
           alignItems={'center'}
           justifyContent={'space-between'}
         >
-          <Flex alignItems={'center'} gap={'1'}>
+          <Flex alignItems={'center'} gap={'1'} flexGrow={'1'}>
             <FilterNumber index={index} isHovered={isHovered} />
             <Box position="relative" ref={eventBoxRef}>
               <Text

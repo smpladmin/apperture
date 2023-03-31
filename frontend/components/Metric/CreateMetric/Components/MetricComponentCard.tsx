@@ -22,6 +22,7 @@ import AddFilterComponent from '@components/StepFilters/AddFilter';
 import { Trash } from 'phosphor-react';
 import { COLOR_PALLETE_5, useColorFromPallete } from '@components/Metric/util';
 import { GREY_500 } from '@theme/index';
+import Dropdown from '@components/SearchableDropdown/Dropdown';
 
 type MetricComponentCardProps = {
   index: number;
@@ -162,8 +163,8 @@ const MetricComponentCard = ({
   return (
     <Flex
       data-testid="event-or-segment-component"
-      justifyContent={'space-between'}
-      alignItems={'center'}
+      // justifyContent={'space-between'}
+      // alignItems={'center'}
       direction={'column'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -171,9 +172,10 @@ const MetricComponentCard = ({
       borderRadius={'8'}
       borderStyle={'solid'}
       borderWidth={'1px'}
-      mb={3}
+      p={3}
+      // mb={3}
     >
-      <Flex p={3} gap={'2'} width={'full'} alignItems={'center'}>
+      <Flex gap={'2'} width={'full'} alignItems={'center'}>
         <Flex
           data-testid="event-or-segment-component-variable"
           background={
@@ -220,15 +222,7 @@ const MetricComponentCard = ({
             </Text>
             {isEventOrSegmentListOpen ? (
               variant === MetricComponentVariant.UNDEFINED ? (
-                <Flex
-                  background={'white'}
-                  direction={'column'}
-                  gap={1}
-                  position="absolute"
-                  p={2}
-                  borderRadius={12}
-                  zIndex={'10'}
-                >
+                <Dropdown isOpen={isEventOrSegmentListLoading} width={'76'}>
                   <Flex
                     data-testid={'event-option'}
                     lineHeight={'xs-18'}
@@ -268,7 +262,7 @@ const MetricComponentCard = ({
                     <i className="ri-group-fill"></i>
                     <Text marginLeft={2}>Segments</Text>
                   </Flex>
-                </Flex>
+                </Dropdown>
               ) : variant === 'event' ? (
                 <SearchableListDropdown
                   isOpen={isEventOrSegmentListOpen}
@@ -277,6 +271,7 @@ const MetricComponentCard = ({
                   onSubmit={handleEventOrSegmentSelection}
                   listKey={'id'}
                   isNode
+                  width={'96'}
                 />
               ) : null
             ) : null}
