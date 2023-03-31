@@ -57,7 +57,7 @@ class EventsService:
         is_aux: bool,
         table_name: str,
         user_id: Union[str, None],
-        offset: int,
+        page_number: int,
         page_size: int,
     ) -> EventsData:
         if is_aux:
@@ -81,7 +81,7 @@ class EventsService:
             events = self.events.get_events(
                 datasource_id=datasource_id,
                 user_id=user_id,
-                offset=offset,
+                page_number=page_number,
                 page_size=page_size,
             )
             count = self.events.get_events_count(
@@ -95,6 +95,6 @@ class EventsService:
                     for (name, timestamp, user_id, city) in events
                 ]
             )
-            offset = offset + page_size if user_id else 0
+            page_number = page_number + 1 if user_id else 0
 
-        return EventsData(count=count, data=data, offset=offset)
+        return EventsData(count=count, data=data, page_number=page_number)

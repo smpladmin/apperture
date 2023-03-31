@@ -21,12 +21,14 @@ import {
   Skeleton,
 } from '@chakra-ui/react';
 import TableSkeleton from '@components/Skeleton/TableSkeleton';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 type ListingTableProps = {
   columns: ColumnDef<any, any>[];
   tableData: any[];
   count: number;
   isLoading: boolean;
+  showTableCountHeader?: boolean;
 };
 
 const ListingTable = ({
@@ -34,6 +36,7 @@ const ListingTable = ({
   tableData,
   isLoading,
   count,
+  showTableCountHeader = true,
 }: ListingTableProps) => {
   const tableInstance = useReactTable({
     columns,
@@ -52,42 +55,39 @@ const ListingTable = ({
       borderWidth={'0.4px'}
       borderColor={'grey.100'}
     >
-      <Flex
-        minH={'15'}
-        p={'4'}
-        justifyContent={'space-between'}
-        alignItems={'center'}
-        width={'100%'}
-      >
-        <Flex gap={'1'}>
-          <Text
-            fontSize={'xs-14'}
-            lineHeight={'xs-18'}
-            fontWeight={'500'}
-            color={'grey.100'}
-          >
-            Showing:
-          </Text>
-          {isLoading ? (
-            <Skeleton height={'5'} />
-          ) : (
+      {showTableCountHeader && (
+        <Flex
+          minH={'15'}
+          p={'4'}
+          justifyContent={'space-between'}
+          alignItems={'center'}
+          width={'100%'}
+        >
+          <Flex gap={'1'}>
             <Text
               fontSize={'xs-14'}
               lineHeight={'xs-18'}
               fontWeight={'500'}
-              data-testid={'users-count'}
+              color={'grey.100'}
             >
-              {count || 0} Events
+              Showing:
             </Text>
-          )}
+            {isLoading ? (
+              <Skeleton height={'5'} />
+            ) : (
+              <Text
+                fontSize={'xs-14'}
+                lineHeight={'xs-18'}
+                fontWeight={'500'}
+                data-testid={'users-count'}
+              >
+                {count || 0} Events
+              </Text>
+            )}
+          </Flex>
         </Flex>
-      </Flex>
-
-      <Flex
-        alignItems={'center'}
-        justifyContent={'space-between'}
-        overflow={'auto'}
-      >
+      )}
+      <Flex alignItems={'center'} justifyContent={'space-between'}>
         {isLoading ? (
           <TableSkeleton tableHeader={columnHeaders} />
         ) : tableData?.length ? (

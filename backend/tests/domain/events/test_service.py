@@ -145,11 +145,11 @@ class TestEventsService:
             is_aux=False,
             table_name="All",
             user_id=None,
-            offset=0,
+            page_number=0,
             page_size=100,
         ) == EventsData(
             count=2,
-            offset=0,
+            page_number=0,
             data=[
                 Event(
                     name="Content_Like",
@@ -169,7 +169,7 @@ class TestEventsService:
         self.events_repo.get_events.assert_called_once_with(
             **{
                 "datasource_id": "test-id",
-                "offset": 0,
+                "page_number": 0,
                 "page_size": 100,
                 "user_id": None,
             }
@@ -191,13 +191,13 @@ class TestEventsService:
         assert self.events_service.get_events(
             datasource_id=self.ds_id,
             user_id="test-user",
-            offset=300,
+            page_number=3,
             page_size=100,
             table_name="events",
             is_aux=False,
         ) == EventsData(
             count=2,
-            offset=400,
+            page_number=4,
             data=[
                 Event(
                     name="Content_Like",
@@ -217,7 +217,7 @@ class TestEventsService:
         self.events_repo.get_events.assert_called_once_with(
             **{
                 "datasource_id": "test-id",
-                "offset": 300,
+                "page_number": 3,
                 "page_size": 100,
                 "user_id": "test-user",
             }

@@ -1,4 +1,4 @@
-import { DateFilter, DateFilterObj, DateFilterType } from './common';
+import { DateFilterObj } from './common';
 import { FilterType } from './segment';
 import { AppertureUser as User } from './user';
 
@@ -85,6 +85,16 @@ export type FunnelEventConversion = {
 export type UserProperty = {
   Property: string;
   Value: string;
+};
+
+export type UserActivity = {
+  name: string;
+  timestamp: Date;
+};
+
+export type UserActivityResponse = {
+  count: number;
+  data: UserActivity[];
 };
 
 export enum ConversionStatus {

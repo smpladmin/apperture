@@ -25,5 +25,5 @@ class AuxTable2Event(BaseModel):
 
 class EventsData(BaseModel):
     count: int
-    offset: Optional[int]
+    page_number: Optional[int]
     data: Union[List[Event], List[AuxTable1Event], List[AuxTable2Event]]

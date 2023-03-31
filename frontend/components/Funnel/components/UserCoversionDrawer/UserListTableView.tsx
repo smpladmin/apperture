@@ -13,6 +13,7 @@ import {
   ConversionWindowObj,
   FunnelConversionData,
   FunnelStep,
+  UserActivityResponse,
   UserProperty,
 } from '@lib/domain/funnel';
 import { getConversionData } from '@lib/services/funnelService';
@@ -21,6 +22,8 @@ import { TableState } from '.';
 import SkeletonLoader from './SkeletonLoader';
 import UserListTable from './UserListTable';
 import UserPropertyTable from './UserPropertyTable';
+import UserActivityTable from './UserActivityTable';
+import { getUserActivity } from '@lib/services/datasourceService';
 
 type UserTableViewProps = {
   setSelectedUser: Function;
@@ -33,6 +36,9 @@ type UserTableViewProps = {
   conversionWindow: ConversionWindowObj;
   status: ConversionStatus;
   setStatus: Function;
+  userActivity: UserActivityResponse;
+  selectedUser: any;
+  setUserActivity: Function;
 };
 type FunnelEventConversion = {
   converted?: FunnelConversionData;
@@ -49,6 +55,9 @@ const UserTableView = ({
   conversionWindow,
   status,
   setStatus,
+  userActivity,
+  selectedUser,
+  setUserActivity,
 }: UserTableViewProps) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [userData, setUserData] = useState<FunnelEventConversion>();
@@ -113,20 +122,18 @@ const UserTableView = ({
             </Text>
           </Tab>
 
-          {tableState == TableState.LIST ? (
-            <Tab
-              _selected={{ fontWeight: 600, borderBottom: '2px solid black' }}
-              px={0}
-              marginLeft={8}
-              _active={{}}
-              onClick={() => setStatus(ConversionStatus.DROPPED)}
-            >
-              Dropped
-            </Tab>
-          ) : null}
+          <Tab
+            _selected={{ fontWeight: 600, borderBottom: '2px solid black' }}
+            px={0}
+            marginLeft={8}
+            _active={{}}
+            onClick={() => setStatus(ConversionStatus.DROPPED)}
+          >
+            {tableState == TableState.LIST ? 'Dropped' : 'Events'}
+          </Tab>
         </TabList>
 
-        <TabPanels display={'flex'} maxH={'full'} flex={1} overflow={'hidden'}>
+        <TabPanels display={'flex'} maxH={'full'} flex={1} overflow={'scroll'}>
           <TabPanel display={'flex'} overflow={'hidden'} w={'full'}>
             {tableState == TableState.LIST ? (
               userData?.converted ? (
@@ -145,9 +152,9 @@ const UserTableView = ({
               <SkeletonLoader />
             )}
           </TabPanel>
-          {tableState == TableState.LIST ? (
-            <TabPanel display={'flex'} overflow={'hidden'} w={'full'}>
-              {userData?.dropped ? (
+          <TabPanel display={'flex'} overflow={'scroll'} w={'full'}>
+            {tableState == TableState.LIST ? (
+              userData?.dropped ? (
                 <UserListTable
                   handleRowClick={handleRowClick}
                   users={userData.dropped.users}
@@ -156,9 +163,20 @@ const UserTableView = ({
                 />
               ) : (
                 <SkeletonLoader />
-              )}
-            </TabPanel>
-          ) : null}
+              )
+            ) : userActivity ? (
+              <UserActivityTable
+                tableData={userActivity.data}
+                count={userActivity.count}
+                isLoading={false}
+                selectedUser={selectedUser}
+                userActivity={userActivity}
+                setUserActivity={setUserActivity}
+              />
+            ) : (
+              <SkeletonLoader />
+            )}
+          </TabPanel>
         </TabPanels>
       </Tabs>
     </Flex>

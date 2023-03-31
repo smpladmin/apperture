@@ -105,7 +105,7 @@ class TestEventsRepository:
 
     def test_get_events(self):
         self.repo.get_events(
-            datasource_id=self.datasource_id, user_id=None, offset=0, page_size=100
+            datasource_id=self.datasource_id, user_id=None, page_number=0, page_size=100
         )
         self.repo.execute_get_query.assert_called_once_with(
             'SELECT "event_name","timestamp","user_id","properties.properties.$city" FROM '
@@ -115,7 +115,7 @@ class TestEventsRepository:
 
     def test_build_events_query(self):
         assert self.repo.build_events_query(
-            datasource_id=self.datasource_id, user_id=None, offset=0, page_size=100
+            datasource_id=self.datasource_id, user_id=None, page_number=0, page_size=100
         ) == (
             'SELECT "event_name","timestamp","user_id","properties.properties.$city" FROM '
             '"events" WHERE "datasource_id"=%(ds_id)s LIMIT 100',
@@ -126,7 +126,7 @@ class TestEventsRepository:
         assert self.repo.build_events_query(
             datasource_id=self.datasource_id,
             user_id="test-user",
-            offset=400,
+            page_number=4,
             page_size=100,
         ) == (
             'SELECT "event_name","timestamp" FROM "events" WHERE '

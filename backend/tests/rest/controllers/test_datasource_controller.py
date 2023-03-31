@@ -134,7 +134,7 @@ def test_get_events_for_demo_table(client_init, events_service):
     assert response.status_code == 200
     assert response.json() == {
         "count": 2,
-        "offset": 0,
+        "pageNumber": 0,
         "data": [
             {
                 "name": "Content_Like",
@@ -156,7 +156,7 @@ def test_get_events_for_demo_table(client_init, events_service):
             "datasource_id": "637739d383ea7fda83e72a2d",
             "is_aux": False,
             "table_name": "All",
-            "offset": 0,
+            "page_number": 0,
             "page_size": 100,
             "user_id": None,
         }
@@ -165,12 +165,12 @@ def test_get_events_for_demo_table(client_init, events_service):
 
 def test_get_events_for_user_id(client_init, events_service):
     response = client_init.get(
-        "/datasources/637739d383ea7fda83e72a2d/events?user_id=123&offset=0"
+        "/datasources/637739d383ea7fda83e72a2d/events?user_id=123&page_number=0"
     )
     assert response.status_code == 200
     assert response.json() == {
         "count": 2,
-        "offset": 0,
+        "pageNumber": 0,
         "data": [
             {
                 "name": "Content_Like",
@@ -191,7 +191,7 @@ def test_get_events_for_user_id(client_init, events_service):
         **{
             "datasource_id": "637739d383ea7fda83e72a2d",
             "is_aux": False,
-            "offset": 0,
+            "page_number": 0,
             "page_size": 100,
             "table_name": "events",
             "user_id": "123",

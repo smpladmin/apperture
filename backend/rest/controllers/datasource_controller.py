@@ -140,7 +140,7 @@ async def get_event_property_values(
 async def get_events(
     ds_id: str,
     table_name: str = "events",
-    offset: int = 0,
+    page_number: int = 0,
     page_size: int = 100,
     user_id: Union[str, None] = None,
     is_aux: bool = False,
@@ -151,6 +151,6 @@ async def get_events(
         is_aux=is_aux,
         table_name=table_name,
         user_id=user_id,
-        offset=offset,
+        page_number=page_number,
         page_size=page_size,
     )
