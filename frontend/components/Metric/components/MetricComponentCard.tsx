@@ -210,13 +210,14 @@ const MetricComponentCard = ({
           <Box position="relative" ref={EventOrSegmentBox}>
             <Text
               data-testid={'event-or-segment-name'}
-              color={'black'}
+              color={reference ? 'black.DEFAULT' : 'grey.600'}
               fontSize={'xs-14'}
               fontWeight={500}
               lineHeight={'xs-18'}
+              px={'1'}
               wordBreak={'break-all'}
             >
-              {reference === '' ? 'Add Event / Segment' : reference}
+              {reference === '' ? 'Select Event' : reference}
             </Text>
             {variant === MetricComponentVariant.UNDEFINED ? (
               <Dropdown isOpen={isEventOrSegmentListOpen} width={'76'}>
