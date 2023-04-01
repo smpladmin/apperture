@@ -91,32 +91,35 @@ const AddBreakdown = ({
         )}
       </Flex>
       {!!breakdown.length && (
-        <Card borderColor={'white.200'} borderRadius={'8'}>
-          <Flex
-            w={'full'}
-            onMouseEnter={() => setBreakdownCardHovered(true)}
-            onMouseLeave={() => setBreakdownCardHovered(false)}
-            justifyContent={'space-between'}
+        <Flex
+          w={'full'}
+          p={'4'}
+          borderWidth={'1px'}
+          borderColor={'white.200'}
+          borderRadius={'8'}
+          background={'white.DEFAULT'}
+          onMouseEnter={() => setBreakdownCardHovered(true)}
+          onMouseLeave={() => setBreakdownCardHovered(false)}
+          justifyContent={'space-between'}
+        >
+          <Text
+            fontSize={'xs-14'}
+            lineHeight={'xs-14'}
+            fontWeight={'500'}
+            data-testid={'breakdown-name'}
           >
-            <Text
-              fontSize={'xs-14'}
-              lineHeight={'xs-14'}
-              fontWeight={'500'}
-              data-testid={'breakdown-name'}
+            {breakdown.join()}
+          </Text>
+          {breakdownCardHovered && (
+            <Box
+              onClick={handleRemoveBreakdown}
+              data-testid={'remove-breakdown'}
+              cursor={'pointer'}
             >
-              {breakdown.join()}
-            </Text>
-            {breakdownCardHovered && (
-              <Box
-                onClick={handleRemoveBreakdown}
-                data-testid={'remove-breakdown'}
-                cursor={'pointer'}
-              >
-                <Trash size={14} />
-              </Box>
-            )}
-          </Flex>
-        </Card>
+              <Trash size={14} />
+            </Box>
+          )}
+        </Flex>
       )}
     </Flex>
   );

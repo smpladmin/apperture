@@ -9,7 +9,7 @@ import {
 } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import MetricComponentCard from './MetricComponentCard';
+import MetricComponentCard from '../components/MetricComponentCard';
 import {
   computeMetric,
   validateMetricFormula,
@@ -31,7 +31,7 @@ import {
 import { DateFilterObj, WhereFilter } from '@lib/domain/common';
 import Card from '@components/Card';
 import { Function, Plus } from 'phosphor-react';
-import AddBreakdown from './AddBreakdown';
+import AddBreakdown from '../components/AddBreakdown';
 import { BLACK_DEFAULT } from '@theme/index';
 
 const DEBOUNCE_WAIT_TIME = 800;
@@ -128,6 +128,14 @@ const CreateMetricAction = ({
   };
 
   useEffect(() => {
+    // remove breakdown if multiple aggregates are present without metric definition
+    // or if no aggregate is present
+    const isNoAggregatePresent = aggregates.length === 0;
+    if (!enableBreakdown(aggregates, metricDefinition) || isNoAggregatePresent)
+      setBreakdown([]);
+  }, [aggregates, metricDefinition]);
+
+  useEffect(() => {
     if (!isValidAggregates(aggregates)) return;
 
     const fetchMetric = async (aggregates: MetricAggregate[]) => {
@@ -183,11 +191,6 @@ const CreateMetricAction = ({
       setCanSaveMetric(false);
     }
   }, [aggregates, metricDefinition, metricName, isValidDefinition, breakdown]);
-
-  useEffect(() => {
-    // remove breakdown if multiple aggregates are present without metric definition
-    if (!enableBreakdown(aggregates, metricDefinition)) setBreakdown([]);
-  }, [aggregates, metricDefinition]);
 
   const functionBoxColor = metricDefinition ? 'blue.500' : 'grey.400';
 

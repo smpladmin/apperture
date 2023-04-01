@@ -1,7 +1,7 @@
 import { Button, Flex, Highlight, Text } from '@chakra-ui/react';
 import React from 'react';
 import { ComputedMetric } from '@lib/domain/metric';
-import MetricTrend from '../../CreateMetric/components/MetricTrend';
+import MetricTrend from './MetricTrend';
 import DateFilterComponent from '@components/Date/DateFilter';
 import Loader from '@components/LoadingSpinner';
 import { DateFilterObj } from '@lib/domain/common';

@@ -8,7 +8,7 @@ import { GREY_500, GREY_700 } from '@theme/index';
 import { ArrowElbowDownRight, Trash } from 'phosphor-react';
 import { WhereFilter } from '@lib/domain/common';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import { getFilterValuesText } from '@lib/utils/common';
+import { getFilterValuesText, trimLabel } from '@lib/utils/common';
 
 type FilterComponentProps = {
   filter: WhereFilter;
@@ -169,7 +169,7 @@ const StepFilter = ({
                     lineHeight={'xs-14'}
                     color={'black.500'}
                   >
-                    {filter.operand}
+                    {trimLabel(filter.operand, 20)}
                   </Text>
                 </Flex>
                 <SearchableListDropdown

@@ -6,10 +6,7 @@ import {
   MetricTableData,
   MetricTrendData,
 } from '@lib/domain/metric';
-import {
-  convertISODateToReadableDate,
-  formatDatalabel,
-} from '@lib/utils/common';
+import { convertISODateToReadableDate } from '@lib/utils/common';
 import {
   BLUE_500,
   GREEN_500,
@@ -119,7 +116,8 @@ export const useColorFromPallete = (
 
   if (breakdown.length) return false;
 
-  if (metricDefinition && aggregates.length > 1) return false;
+  if (metricDefinition && getCountOfValidAggregates(aggregates) > 1)
+    return false;
 
   return true;
 };
@@ -128,7 +126,16 @@ export const enableBreakdown = (
   aggregates: MetricAggregate[],
   metricDefinition: string
 ) => {
-  if (!metricDefinition && aggregates.length > 1) return false;
+  /* 
+    disable breakdown for following cases:
+      - if metric definition is not present with multiple aggregates
+      - if no valid aggregate is present
+  */
+
+  if (getCountOfValidAggregates(aggregates) === 0) return false;
+
+  if (!metricDefinition && getCountOfValidAggregates(aggregates) > 1)
+    return false;
 
   return true;
 };

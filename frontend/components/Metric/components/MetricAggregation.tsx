@@ -8,6 +8,7 @@ import {
   MetricBasicAggregation,
 } from '@lib/domain/metric';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
+import { trimLabel } from '@lib/utils/common';
 import { GREY_700 } from '@theme/index';
 import { ArrowElbowDownRight } from 'phosphor-react';
 import React, { useRef, useState } from 'react';
@@ -161,7 +162,7 @@ const MetricAggregation = ({
                   data-testid={'metric-aggregation-event-property'}
                   wordBreak={'break-word'}
                 >
-                  {aggregation.property || 'Select Property'}
+                  {trimLabel(aggregation.property, 25) || 'Select Property'}
                 </Text>
               </Box>
 

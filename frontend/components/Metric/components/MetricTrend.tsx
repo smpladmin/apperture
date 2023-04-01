@@ -5,7 +5,7 @@ import {
   convertToTableData,
   convertToTrendData,
   formatDate,
-} from '../../util';
+} from '../util';
 import {
   Breakdown,
   ComputedMetric,

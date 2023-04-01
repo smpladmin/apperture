@@ -11,8 +11,8 @@ import React, { useEffect, useState } from 'react';
 import { convertToTrendData, getCountOfSeries } from '../util';
 import Alert from '@components/Alerts';
 import ViewHeader from '@components/EventsLayout/ViewHeader';
-import ViewMetricActionPanel from '../ViewMetric/components/ViewMetricActionPanel';
-import SavedMetricView from '../ViewMetric/components/SavedMetricView';
+import ViewMetricActionPanel from '../components/ViewMetricActionPanel';
+import SavedMetricView from '../components/SavedMetricView';
 
 const ViewMetric = ({
   savedMetric,

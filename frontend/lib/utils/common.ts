@@ -108,3 +108,7 @@ export const getFilterValuesText = (values: string[]) => {
   if (values.length <= 2) return values.join(', ');
   return `${values[0]}, ${values[1]}, +${values.length - 2} more`;
 };
+
+export const trimLabel = (label: string, size = 15) => {
+  return label.length > size + 3 ? label.slice(0, size) + '...' : label;
+};

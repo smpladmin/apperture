@@ -16,8 +16,8 @@ import { getCountOfValidAggregates } from '../util';
 import { DateFilterObj } from '@lib/domain/common';
 import ActionHeader from '@components/EventsLayout/ActionHeader';
 import { saveMetric, updateMetric } from '@lib/services/metricService';
-import CreateMetricAction from '../CreateMetric/components/CreateMetricAction';
-import TransientMetricView from '../CreateMetric/components/TransientMetricView';
+import TransientMetricView from '../components/TransientMetricView';
+import CreateMetricAction from './CreateMetricAction';
 
 const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
   const [metric, setMetric] = useState<ComputedMetric[]>([]);

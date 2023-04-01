@@ -1,17 +1,10 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  act,
-} from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import DataStreamView from './index';
 import { createMockRouter } from 'tests/util';
 import { getClickstreamData } from '@lib/services/clickStreamService';
-import { format } from 'date-fns';
 import { formateventLabel } from './Components/EventLabel';
-import { trimLabel } from './Components/StreamDataTable';
+import { trimLabel } from '@lib/utils/common';
 
 jest.mock('@lib/services/clickStreamService');
 
