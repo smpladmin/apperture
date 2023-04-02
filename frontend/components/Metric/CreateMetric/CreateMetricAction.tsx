@@ -17,7 +17,7 @@ import {
 import {
   MetricAggregate,
   Metric,
-  MetricComponentVariant,
+  MetricVariant,
   ComputedMetric,
   MetricBasicAggregation,
 } from '@lib/domain/metric';
@@ -105,7 +105,7 @@ const CreateMetricAction = ({
           variable,
           reference_id: '',
           function: 'count',
-          variant: MetricComponentVariant.UNDEFINED,
+          variant: MetricVariant.UNDEFINED,
           filters: [],
           conditions: [],
           aggregations: {

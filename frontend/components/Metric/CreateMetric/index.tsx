@@ -5,7 +5,7 @@ import {
   ComputedMetric,
   Metric,
   MetricAggregate,
-  MetricComponentVariant,
+  MetricVariant,
   MetricBasicAggregation,
 } from '@lib/domain/metric';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
@@ -37,7 +37,7 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
         variable: 'A',
         reference_id: '',
         function: 'count',
-        variant: MetricComponentVariant.UNDEFINED,
+        variant: MetricVariant.UNDEFINED,
         filters: [],
         conditions: [],
         aggregations: { functions: MetricBasicAggregation.TOTAL, property: '' },

@@ -5,7 +5,7 @@ import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import {
   MetricAggregate,
   MetricBasicAggregation,
-  MetricComponentVariant,
+  MetricVariant,
 } from '@lib/domain/metric';
 import { Node } from '@lib/domain/node';
 
@@ -22,7 +22,7 @@ import AddFilterComponent from '@components/StepFilters/AddFilter';
 import { Trash } from 'phosphor-react';
 import { COLOR_PALLETE_5, useColorFromPallete } from '@components/Metric/util';
 import { GREY_500 } from '@theme/index';
-import Dropdown from '@components/SearchableDropdown/Dropdown';
+import SelectEventOrSegmentDropdown from './SelectEventOrSegmentDropdown';
 
 type MetricComponentCardProps = {
   index: number;
@@ -52,8 +52,8 @@ const MetricComponentCard = ({
   breakdown,
 }: MetricComponentCardProps) => {
   const [isHovered, setIsHovered] = useState<boolean>(false);
-  const [variant, setVariant] = useState<MetricComponentVariant>(
-    aggregate?.variant || MetricComponentVariant.UNDEFINED
+  const [variant, setVariant] = useState<MetricVariant>(
+    aggregate?.variant || MetricVariant.UNDEFINED
   );
   const [isEventOrSegmentListOpen, setIsEventOrSegmentListOpen] =
     useState<boolean>(aggregate?.reference_id ? false : true);
@@ -66,12 +66,12 @@ const MetricComponentCard = ({
   const [filters, setFilters] = useState<WhereFilter[]>(
     aggregate?.filters || []
   );
-  const previousVariant = useRef<MetricComponentVariant | null>(null);
+  const previousVariant = useRef<MetricVariant | null>(null);
 
   const EventOrSegmentBox = useRef(null);
   useOnClickOutside(EventOrSegmentBox, () => {
     if (reference == '') {
-      setVariant(MetricComponentVariant.UNDEFINED);
+      setVariant(MetricVariant.UNDEFINED);
     }
     setIsEventOrSegmentListOpen(false);
   });
@@ -137,13 +137,17 @@ const MetricComponentCard = ({
     setFilters(tempFilters);
   };
 
+  const handleVariantSelection = (variant: MetricVariant) => {
+    setVariant(variant);
+  };
+
   useEffect(() => {
     if (variant !== previousVariant.current) {
       previousVariant.current = variant;
       updateAggregate(variable, { variant });
       setIsEventOrSegmentListLoading(true);
     }
-    if (variant === MetricComponentVariant.EVENT) {
+    if (variant === MetricVariant.EVENT) {
       setEventOrSegmentListSearchData(eventList);
       setIsEventOrSegmentListLoading(false);
     }
@@ -167,7 +171,7 @@ const MetricComponentCard = ({
       direction={'column'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      borderColor={'white.200'}
+      borderColor={isHovered ? 'grey.700' : 'white.200'}
       borderRadius={'8'}
       borderStyle={'solid'}
       borderWidth={'1px'}
@@ -205,9 +209,9 @@ const MetricComponentCard = ({
           color={'black'}
           _hover={{ background: 'white.200' }}
           data-testid="select-event-segment"
-          onClick={() => setIsEventOrSegmentListOpen((prevState) => !prevState)}
+          onClick={() => setIsEventOrSegmentListOpen(true)}
         >
-          <Box position="relative" ref={EventOrSegmentBox}>
+          <Box position="relative" ref={EventOrSegmentBox} borderRadius={'4'}>
             <Text
               data-testid={'event-or-segment-name'}
               color={reference ? 'black.DEFAULT' : 'grey.600'}
@@ -219,59 +223,11 @@ const MetricComponentCard = ({
             >
               {reference === '' ? 'Select Event' : reference}
             </Text>
-            {variant === MetricComponentVariant.UNDEFINED ? (
-              <Dropdown isOpen={isEventOrSegmentListOpen} width={'76'}>
-                <Flex
-                  data-testid={'event-option'}
-                  lineHeight={'xs-18'}
-                  color={'black'}
-                  fontSize={'xs-14'}
-                  fontWeight={500}
-                  width={'full'}
-                  p={2}
-                  borderRadius={8}
-                  _hover={{
-                    background: 'white.100',
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setVariant(MetricComponentVariant.EVENT);
-                  }}
-                >
-                  <Text
-                    fontSize={'xs-12'}
-                    lineHeight={'lh-130'}
-                    fontWeight={'500'}
-                  >
-                    Events
-                  </Text>
-                </Flex>
-                <Flex
-                  lineHeight={'xs-18'}
-                  color={'black'}
-                  fontSize={'xs-14'}
-                  fontWeight={500}
-                  width={'full'}
-                  p={2}
-                  borderRadius={8}
-                  _hover={{
-                    background: 'white.100',
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setVariant(MetricComponentVariant.EVENT);
-                  }}
-                  pointerEvents={'none'}
-                >
-                  <Text
-                    fontSize={'xs-12'}
-                    lineHeight={'lh-130'}
-                    fontWeight={'500'}
-                  >
-                    Segments
-                  </Text>
-                </Flex>
-              </Dropdown>
+            {variant === MetricVariant.UNDEFINED ? (
+              <SelectEventOrSegmentDropdown
+                isOpen={isEventOrSegmentListOpen}
+                onSelect={handleVariantSelection}
+              />
             ) : variant === 'event' ? (
               <SearchableListDropdown
                 isOpen={isEventOrSegmentListOpen}

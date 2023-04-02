@@ -153,7 +153,7 @@ const FunnelComponentCard = ({
       p={'3'}
       borderRadius={'8px'}
       border={'1px'}
-      borderColor={isHovered ? 'white.500 ' : 'white.200'}
+      borderColor={isHovered ? 'grey.700 ' : 'white.200'}
       justifyContent={'space-between'}
       alignItems={'center'}
       direction={'column'}
@@ -171,14 +171,19 @@ const FunnelComponentCard = ({
         >
           <Flex alignItems={'center'} gap={'1'} flexGrow={'1'}>
             <FilterNumber index={index} isHovered={isHovered} />
-            <Box position="relative" ref={eventBoxRef}>
+            <Box
+              position="relative"
+              ref={eventBoxRef}
+              w={'full'}
+              borderRadius={'4'}
+            >
               <Text
                 data-testid={'event-name'}
                 color={funnelStep?.event ? 'black.DEFAULT' : 'grey.600'}
                 fontSize={'xs-14'}
                 fontWeight={funnelStep?.event ? 500 : 400}
-                px={'1'}
-                _hover={{ background: 'white.300', cursor: 'pointer' }}
+                p={'1'}
+                _hover={{ background: 'white.400', cursor: 'pointer' }}
                 lineHeight={'xs-14'}
                 onClick={() => setIsEventListOpen(true)}
               >

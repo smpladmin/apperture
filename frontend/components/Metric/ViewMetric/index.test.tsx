@@ -14,10 +14,7 @@ import {
 } from '@lib/services/datasourceService';
 import { computeMetric } from '@lib/services/metricService';
 import ViewMetric from './index';
-import {
-  MetricBasicAggregation,
-  MetricComponentVariant,
-} from '@lib/domain/metric';
+import { MetricBasicAggregation, MetricVariant } from '@lib/domain/metric';
 import {
   NotificationChannel,
   NotificationMetricType,
@@ -128,7 +125,7 @@ describe('View Metric', () => {
       {
         variable: 'A',
         function: 'count',
-        variant: MetricComponentVariant.EVENT,
+        variant: MetricVariant.EVENT,
         aggregations: {
           functions: MetricBasicAggregation.TOTAL,
           property: 'Name_Added',
@@ -150,7 +147,7 @@ describe('View Metric', () => {
       {
         variable: 'B',
         function: 'count',
-        variant: MetricComponentVariant.EVENT,
+        variant: MetricVariant.EVENT,
         aggregations: {
           functions: MetricBasicAggregation.TOTAL,
           property: 'Opened_Popular',
@@ -162,7 +159,7 @@ describe('View Metric', () => {
       {
         variable: 'C',
         function: 'count',
-        variant: MetricComponentVariant.EVENT,
+        variant: MetricVariant.EVENT,
         aggregations: {
           functions: MetricBasicAggregation.TOTAL,
           property: 'Topic_Click',
