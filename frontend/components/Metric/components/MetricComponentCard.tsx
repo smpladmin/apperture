@@ -208,17 +208,18 @@ const MetricComponentCard = ({
           cursor={'pointer'}
           color={'black'}
           _hover={{ background: 'white.200' }}
+          borderRadius={'4'}
           data-testid="select-event-segment"
           onClick={() => setIsEventOrSegmentListOpen(true)}
         >
-          <Box position="relative" ref={EventOrSegmentBox} borderRadius={'4'}>
+          <Box position="relative" ref={EventOrSegmentBox}>
             <Text
               data-testid={'event-or-segment-name'}
               color={reference ? 'black.DEFAULT' : 'grey.600'}
               fontSize={'xs-14'}
               fontWeight={500}
               lineHeight={'xs-18'}
-              px={'1'}
+              p={'1'}
               wordBreak={'break-all'}
             >
               {reference === '' ? 'Select Event' : reference}
