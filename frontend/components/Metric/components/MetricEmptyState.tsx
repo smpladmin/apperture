@@ -2,16 +2,11 @@ import { Flex, Text } from '@chakra-ui/react';
 import Image from 'next/image';
 import React from 'react';
 import MetricImage from '@assets/images/metric.svg';
+import Card from '@components/Card';
 
 const MetricEmptyState = () => {
   return (
-    <Flex
-      grow={1}
-      h={'full'}
-      justifyContent={'center'}
-      alignContent={'center'}
-      px={'6'}
-    >
+    <Card justifyContent={'center'} pt={'15'} pb={'50'} borderRadius={'16'}>
       <Flex
         direction={'column'}
         justifyContent={'center'}
@@ -39,7 +34,7 @@ const MetricEmptyState = () => {
           </Text>
         </Flex>
       </Flex>
-    </Flex>
+    </Card>
   );
 };
 
