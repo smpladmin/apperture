@@ -2,8 +2,9 @@ import { Box, Flex, Input, Text } from '@chakra-ui/react';
 import Dropdown from '@components/SearchableDropdown/Dropdown';
 import { ConversionWindowList, ConversionWindowObj } from '@lib/domain/funnel';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import { capitalizeFirstLetter } from '@lib/utils/common';
+import { DEBOUNCED_WAIT_TIME, capitalizeFirstLetter } from '@lib/utils/common';
 import { GREY_500, GREY_600 } from '@theme/index';
+import { debounce } from 'lodash';
 import { CaretDown, Clock } from 'phosphor-react';
 import React, { useRef, useState } from 'react';
 
@@ -34,6 +35,14 @@ const ConversionCriteria = ({
       value: conversionWindow.value,
     });
   };
+
+  const handleChangeConversionValue = debounce((e) => {
+    setConversionWindow({
+      value: e.target.value || null,
+      type: conversionWindow.type,
+    });
+  }, DEBOUNCED_WAIT_TIME);
+
   return (
     <>
       <Text
@@ -79,18 +88,13 @@ const ConversionCriteria = ({
             borderColor={'white.200'}
             type={'number'}
             focusBorderColor={'white'}
-            value={conversionWindow.value}
+            defaultValue={conversionWindow.value}
             background={'white.DEFAULT'}
             _focus={{ background: 'white' }}
             flexGrow={1}
             disabled={isDisabled}
             data-testid={'conversion-time-input'}
-            onChange={(e) => {
-              setConversionWindow({
-                value: e.target.value || null,
-                type: conversionWindow.type,
-              });
-            }}
+            onChange={handleChangeConversionValue}
           />
           <Box ref={conversionCriteriaRef} position="relative" w={'50%'}>
             <Flex
