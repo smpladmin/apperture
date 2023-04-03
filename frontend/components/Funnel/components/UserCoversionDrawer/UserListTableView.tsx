@@ -38,6 +38,7 @@ type UserTableViewProps = {
   userActivity: UserActivityResponse;
   selectedUser: any;
   setUserActivity: Function;
+  isTableDataLoading: boolean;
 };
 type FunnelEventConversion = {
   converted?: FunnelConversionData;
@@ -57,6 +58,7 @@ const UserTableView = ({
   userActivity,
   selectedUser,
   setUserActivity,
+  isTableDataLoading,
 }: UserTableViewProps) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [userData, setUserData] = useState<FunnelEventConversion>();
@@ -94,6 +96,7 @@ const UserTableView = ({
       fetchUserData();
     }
   }, [status]);
+
   const handleRowClick = (user: string) => {
     setTabIndex(0);
     setSelectedUser(user);
@@ -165,7 +168,7 @@ const UserTableView = ({
               )
             ) : userActivity ? (
               <UserActivityTable
-                isLoading={false}
+                isLoading={isTableDataLoading}
                 selectedUser={selectedUser}
                 userActivity={userActivity}
                 setUserActivity={setUserActivity}

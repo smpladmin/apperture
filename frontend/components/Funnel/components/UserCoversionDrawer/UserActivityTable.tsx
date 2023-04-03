@@ -7,7 +7,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { useRouter } from 'next/router';
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 dayjs.extend(utc);
 
 type UserActivityTableProps = {
@@ -59,6 +59,7 @@ const UserActivityTable = ({
     return [...generateColumnHeader()];
   }, [userActivity]);
 
+  const [isMoreDataLoading, setIsMoreDataLoading] = useState(false);
   const page = useRef(1);
   const fetchMoreData = async () => {
     const res = await getUserActivity(
@@ -66,6 +67,7 @@ const UserActivityTable = ({
       dsId as string,
       page.current
     );
+    setIsMoreDataLoading(false);
     setUserActivity({
       ...userActivity,
       data: [...userActivity.data, ...res.data],
@@ -94,6 +96,8 @@ const UserActivityTable = ({
         isLoading={isLoading}
         showTableCountHeader={false}
         fetchMoreData={fetchMoreData}
+        isMoreDataLoading={isMoreDataLoading}
+        setIsMoreDataLoading={setIsMoreDataLoading}
       />
     </Flex>
   );

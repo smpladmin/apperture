@@ -59,6 +59,7 @@ const UserConversionDrawer = ({
   const [status, setStatus] = useState<ConversionStatus>(
     ConversionStatus.CONVERTED
   );
+  const [isTableDataLoading, setIsTableDataLoading] = useState(false);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -86,10 +87,12 @@ const UserConversionDrawer = ({
         setUserProperty(property);
       }
       setUserActivity(activityResponse);
+      setIsTableDataLoading(false);
     };
 
     if (selectedUser) {
       setTableState(TableState.PROPERTY);
+      setIsTableDataLoading(true);
       fetchUserDetails();
     } else {
       setTableState(TableState.LIST);
@@ -136,6 +139,10 @@ const UserConversionDrawer = ({
                       setTableState(TableState.LIST);
                       setUserProperty(null);
                       setSelectedUser(null);
+                      setUserActivity({
+                        count: 0,
+                        data: [],
+                      });
                     }}
                   />
                 </Box>
@@ -161,6 +168,7 @@ const UserConversionDrawer = ({
               setStatus={setStatus}
               selectedUser={selectedUser}
               setUserActivity={setUserActivity}
+              isTableDataLoading={isTableDataLoading}
             />
           </DrawerBody>
 

@@ -21,6 +21,7 @@ import {
   Skeleton,
 } from '@chakra-ui/react';
 import TableSkeleton from '@components/Skeleton/TableSkeleton';
+import LoadingSpinner from '@components/LoadingSpinner';
 
 type ListingTableProps = {
   columns: ColumnDef<any, any>[];
@@ -29,6 +30,8 @@ type ListingTableProps = {
   isLoading: boolean;
   showTableCountHeader?: boolean;
   fetchMoreData?: Function;
+  isMoreDataLoading?: boolean;
+  setIsMoreDataLoading?: Function;
 };
 
 const ListingTable = ({
@@ -38,6 +41,8 @@ const ListingTable = ({
   count,
   showTableCountHeader = true,
   fetchMoreData,
+  isMoreDataLoading,
+  setIsMoreDataLoading,
 }: ListingTableProps) => {
   const tableInstance = useReactTable({
     columns,
@@ -122,6 +127,7 @@ const ListingTable = ({
                     isLast={index === tableData.length - 1}
                     fetchMoreData={fetchMoreData}
                     hasMore={tableData.length < count}
+                    setIsMoreDataLoading={setIsMoreDataLoading}
                   ></TableRow>
                 ) : (
                   <Tr
@@ -145,6 +151,15 @@ const ListingTable = ({
                   </Tr>
                 )
               )}
+              {isMoreDataLoading && (
+                <Tr>
+                  <Td>
+                    <Flex w={'full'} justifyContent={'right'}>
+                      <LoadingSpinner />
+                    </Flex>
+                  </Td>
+                </Tr>
+              )}
             </Tbody>
           </Table>
         ) : (
@@ -165,6 +180,7 @@ type TableRowProps = {
   isLast: boolean;
   fetchMoreData: Function;
   hasMore: boolean;
+  setIsMoreDataLoading?: Function;
 };
 
 const TableRow = (props: TableRowProps) => {
@@ -174,6 +190,7 @@ const TableRow = (props: TableRowProps) => {
 
     const observer = new IntersectionObserver(([entry]) => {
       if (props.isLast && entry.isIntersecting && props.hasMore) {
+        props.setIsMoreDataLoading?.(true);
         props.fetchMoreData();
 
         observer.unobserve(entry.target);
