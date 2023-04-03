@@ -154,14 +154,13 @@ const FunnelComponentCard = ({
       borderRadius={'8px'}
       border={'1px'}
       borderColor={isHovered ? 'grey.700 ' : 'white.200'}
-      justifyContent={'space-between'}
-      alignItems={'center'}
       direction={'column'}
       cursor={'grab'}
       data-testid={'funnel-step'}
       backgroundColor={'white.DEFAULT'}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      gap={'2'}
     >
       <Flex width={'full'}>
         <Flex
@@ -215,20 +214,24 @@ const FunnelComponentCard = ({
           )}
         </Flex>
       </Flex>
-      {Boolean(funnelStep.filters.length) &&
-        funnelStep.filters.map((filter, index) => (
-          <Fragment key={index}>
-            <FunnelStepFilterComponent
-              index={index}
-              filter={filter}
-              eventProperties={eventProperties}
-              loadingEventProperties={loadingEventProperties}
-              handleSetFilterProperty={handleSetFilterProperty}
-              handleSetFilterValue={handleSetFilterValue}
-              handleRemoveFilter={handleRemoveFilter}
-            />
-          </Fragment>
-        ))}
+
+      {Boolean(funnelStep.filters.length) && (
+        <Flex direction={'column'} gap={'2'}>
+          {funnelStep.filters.map((filter, index) => (
+            <Fragment key={index}>
+              <FunnelStepFilterComponent
+                index={index}
+                filter={filter}
+                eventProperties={eventProperties}
+                loadingEventProperties={loadingEventProperties}
+                handleSetFilterProperty={handleSetFilterProperty}
+                handleSetFilterValue={handleSetFilterValue}
+                handleRemoveFilter={handleRemoveFilter}
+              />
+            </Fragment>
+          ))}
+        </Flex>
+      )}
       {funnelStep.event ? (
         <AddFilter
           filters={funnelStep.filters}

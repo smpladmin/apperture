@@ -260,20 +260,24 @@ const MetricComponentCard = ({
             eventProperties={eventProperties}
             loadingEventsAndProperties={loadingEventsAndProperties}
           />
-          {Boolean(filters.length) &&
-            filters.map((filter, index) => (
-              <Fragment key={index}>
-                <StepFilter
-                  index={index}
-                  filter={filter}
-                  eventProperties={eventProperties}
-                  loadingEventProperties={loadingEventsAndProperties}
-                  handleSetFilterProperty={handleSetFilterPropertyValue}
-                  handleSetFilterValue={handleSetFilterValue}
-                  handleRemoveFilter={removeFilter}
-                />
-              </Fragment>
-            ))}
+
+          {Boolean(filters.length) && (
+            <Flex direction={'column'} gap={'2'}>
+              {filters.map((filter, index) => (
+                <Flex key={index} direction={'column'} gap={'2'}>
+                  <StepFilter
+                    index={index}
+                    filter={filter}
+                    eventProperties={eventProperties}
+                    loadingEventProperties={loadingEventsAndProperties}
+                    handleSetFilterProperty={handleSetFilterPropertyValue}
+                    handleSetFilterValue={handleSetFilterValue}
+                    handleRemoveFilter={removeFilter}
+                  />
+                </Flex>
+              ))}
+            </Flex>
+          )}
           <AddFilterComponent
             filters={filters}
             eventProperties={eventProperties}

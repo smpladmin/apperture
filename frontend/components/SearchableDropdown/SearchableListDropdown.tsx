@@ -3,7 +3,9 @@ import { Node } from '@lib/domain/node';
 import { SegmentProperty } from '@lib/domain/segment';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 import React, { useEffect, useState } from 'react';
+import cursorIcon from '@assets/icons/cursor-icon.svg';
 import SearchableDropdown from './SearchableDropdown';
+import Image from 'next/image';
 
 type SearchableListDropdownProps = {
   isOpen: boolean;
@@ -76,7 +78,7 @@ const SearchableListDropdown = ({
                   gap={'2'}
                   data-testid={'dropdown-options'}
                 >
-                  {/* <CursorClick size={'18'} color={'#9E9E9E'} /> */}
+                  <Image src={cursorIcon} alt={'cursor-icon'} />
                   <Text
                     fontSize={'xs-14'}
                     lineHeight={'xs-14'}

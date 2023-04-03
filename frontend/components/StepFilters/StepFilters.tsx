@@ -120,7 +120,7 @@ const StepFilter = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <Flex w={'full'} mt={'2'}>
+        <Flex w={'full'}>
           <Flex flexShrink={1} pt={'1'}>
             <ArrowElbowDownRight size={12} color={GREY_700} weight={'bold'} />
           </Flex>

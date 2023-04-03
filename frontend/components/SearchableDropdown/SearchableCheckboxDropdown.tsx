@@ -58,7 +58,6 @@ const SearchableCheckboxDropdown = ({
     >
       <Flex
         direction={'column'}
-        minW={'80'}
         gap={'3'}
         data-testid={'property-values-dropdown-container'}
       >
