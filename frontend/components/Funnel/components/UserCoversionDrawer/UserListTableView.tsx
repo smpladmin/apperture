@@ -18,12 +18,11 @@ import {
 } from '@lib/domain/funnel';
 import { getConversionData } from '@lib/services/funnelService';
 import React, { useEffect, useState } from 'react';
-import { TableState } from '.';
 import SkeletonLoader from './SkeletonLoader';
 import UserListTable from './UserListTable';
 import UserPropertyTable from './UserPropertyTable';
 import UserActivityTable from './UserActivityTable';
-import { getUserActivity } from '@lib/services/datasourceService';
+import { TableState } from './index';
 
 type UserTableViewProps = {
   setSelectedUser: Function;
@@ -166,8 +165,6 @@ const UserTableView = ({
               )
             ) : userActivity ? (
               <UserActivityTable
-                tableData={userActivity.data}
-                count={userActivity.count}
                 isLoading={false}
                 selectedUser={selectedUser}
                 userActivity={userActivity}

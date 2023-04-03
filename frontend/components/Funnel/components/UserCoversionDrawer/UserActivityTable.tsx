@@ -8,12 +8,9 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { useRouter } from 'next/router';
 import React, { useMemo, useRef } from 'react';
-import InfiniteScroll from 'react-infinite-scroll-component';
 dayjs.extend(utc);
 
 type UserActivityTableProps = {
-  tableData: UserActivity[];
-  count: number;
   isLoading: boolean;
   userActivity: UserActivityResponse;
   selectedUser: any;
@@ -21,8 +18,6 @@ type UserActivityTableProps = {
 };
 
 const UserActivityTable = ({
-  tableData,
-  count,
   isLoading,
   userActivity,
   selectedUser,
@@ -62,18 +57,15 @@ const UserActivityTable = ({
       ];
     };
     return [...generateColumnHeader()];
-  }, [tableData]);
+  }, [userActivity]);
 
   const page = useRef(1);
   const fetchMoreData = async () => {
-    console.log('fetching more data');
     const res = await getUserActivity(
       selectedUser as string,
       dsId as string,
       page.current
     );
-
-    console.log('lengths', userActivity.data.length, res.data.length);
     setUserActivity({
       ...userActivity,
       data: [...userActivity.data, ...res.data],
@@ -92,26 +84,17 @@ const UserActivityTable = ({
       >
         Showing:{' '}
         <Text as="span" color={'black.100'}>
-          {count} Events
+          {userActivity.count} Events
         </Text>
       </Text>
-      <InfiniteScroll
-        dataLength={tableData.length}
-        next={() => {
-          console.log('called');
-          fetchMoreData;
-        }}
-        hasMore={tableData.length < count}
-        loader={<h4>Loading...</h4>}
-      >
-        <ListingTable
-          columns={columns}
-          tableData={tableData}
-          count={count}
-          isLoading={isLoading}
-          showTableCountHeader={false}
-        />
-      </InfiniteScroll>
+      <ListingTable
+        columns={columns}
+        tableData={userActivity.data}
+        count={userActivity.count}
+        isLoading={isLoading}
+        showTableCountHeader={false}
+        fetchMoreData={fetchMoreData}
+      />
     </Flex>
   );
 };

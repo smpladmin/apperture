@@ -37,7 +37,6 @@
     "react-beautiful-dnd": "^13.1.1",
     "react-date-range": "^1.4.0",
     "react-dom": "18.2.0",
-    "react-infinite-scroll-component": "^6.1.0",
     "react-modal-sheet": "^1.7.0",
     "remixicon": "^2.5.0"
   },

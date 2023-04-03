@@ -1,5 +1,5 @@
 import 'remixicon/fonts/remixicon.css';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import 'remixicon/fonts/remixicon.css';
 import {
   useReactTable,
@@ -21,7 +21,6 @@ import {
   Skeleton,
 } from '@chakra-ui/react';
 import TableSkeleton from '@components/Skeleton/TableSkeleton';
-import InfiniteScroll from 'react-infinite-scroll-component';
 
 type ListingTableProps = {
   columns: ColumnDef<any, any>[];
@@ -29,6 +28,7 @@ type ListingTableProps = {
   count: number;
   isLoading: boolean;
   showTableCountHeader?: boolean;
+  fetchMoreData?: Function;
 };
 
 const ListingTable = ({
@@ -37,6 +37,7 @@ const ListingTable = ({
   isLoading,
   count,
   showTableCountHeader = true,
+  fetchMoreData,
 }: ListingTableProps) => {
   const tableInstance = useReactTable({
     columns,
@@ -112,27 +113,38 @@ const ListingTable = ({
               ))}
             </Thead>
             <Tbody>
-              {getRowModel().rows.map((row, index) => (
-                <Tr
-                  key={row.id + index}
-                  _hover={{ bg: 'white.100' }}
-                  data-testid={'listing-table-body-rows'}
-                >
-                  {row.getVisibleCells().map((cell, cellIndex) => {
-                    return (
-                      <Td
-                        key={cell.id + cellIndex}
-                        data-testid={'listing-table--body-data'}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </Td>
-                    );
-                  })}
-                </Tr>
-              ))}
+              {getRowModel().rows.map((row, index) =>
+                fetchMoreData ? (
+                  <TableRow
+                    row={row}
+                    key={row.id + index}
+                    index={index}
+                    isLast={index === tableData.length - 1}
+                    fetchMoreData={fetchMoreData}
+                    hasMore={tableData.length < count}
+                  ></TableRow>
+                ) : (
+                  <Tr
+                    key={row.id + index}
+                    _hover={{ bg: 'white.100' }}
+                    data-testid={'listing-table-body-rows'}
+                  >
+                    {row.getVisibleCells().map((cell, cellIndex) => {
+                      return (
+                        <Td
+                          key={cell.id + cellIndex}
+                          data-testid={'listing-table--body-data'}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </Td>
+                      );
+                    })}
+                  </Tr>
+                )
+              )}
             </Tbody>
           </Table>
         ) : (
@@ -144,6 +156,51 @@ const ListingTable = ({
         )}
       </Flex>
     </Box>
+  );
+};
+
+type TableRowProps = {
+  row: any;
+  index: number;
+  isLast: boolean;
+  fetchMoreData: Function;
+  hasMore: boolean;
+};
+
+const TableRow = (props: TableRowProps) => {
+  const cardRef = useRef(null);
+  useEffect(() => {
+    if (!cardRef?.current) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (props.isLast && entry.isIntersecting && props.hasMore) {
+        props.fetchMoreData();
+
+        observer.unobserve(entry.target);
+      }
+    });
+
+    observer.observe(cardRef.current);
+  }, [props.isLast]);
+
+  return (
+    <Tr
+      ref={cardRef}
+      key={props.row.id + props.index}
+      _hover={{ bg: 'white.100' }}
+      data-testid={'listing-table-body-rows'}
+    >
+      {props.row.getVisibleCells().map((cell: any, cellIndex: number) => {
+        return (
+          <Td
+            key={cell.id + cellIndex}
+            data-testid={'listing-table--body-data'}
+          >
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </Td>
+        );
+      })}
+    </Tr>
   );
 };
 
