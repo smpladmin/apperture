@@ -50,7 +50,12 @@ const SearchableDropdown = ({
   return (
     <Dropdown isOpen={isOpen} dropdownPosition={dropdownPosition} width={width}>
       {isLoading ? (
-        <Flex w={'76'} h={'80'} alignItems={'center'} justifyContent={'center'}>
+        <Flex
+          w={width || '76'}
+          h={'80'}
+          alignItems={'center'}
+          justifyContent={'center'}
+        >
           <LoadingSpinner />
         </Flex>
       ) : (
