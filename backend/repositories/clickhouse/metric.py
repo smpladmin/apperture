@@ -61,11 +61,13 @@ class Metrics(EventsBase):
         query: ClickHouseQueryBuilder,
         breakdown: List[str],
         breakdown_columns: List,
+        events: List[str],
     ) -> ClickHouseQueryBuilder:
         if breakdown:
             limit_query = (
                 ClickHouseQuery.from_(self.table)
                 .select(*breakdown_columns)
+                .where(self.table.event_name.isin(events))
                 .groupby(*breakdown_columns)
                 .orderby(fn.Count("*"), order=Order.desc)
                 .limit(50)
@@ -204,8 +206,12 @@ class Metrics(EventsBase):
             *[select_expression for select_expression in select_expressions]
         )
 
+        events = [aggregate.reference_id for aggregate in aggregates]
         query = self.limit_compute_query(
-            query=query, breakdown=breakdown, breakdown_columns=breakdown_columns
+            query=query,
+            breakdown=breakdown,
+            breakdown_columns=breakdown_columns,
+            events=events,
         )
 
         return query.get_sql(), params
