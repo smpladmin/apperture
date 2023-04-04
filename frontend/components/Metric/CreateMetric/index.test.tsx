@@ -459,13 +459,46 @@ describe('Create Metric', () => {
       expect(saveButton).toBeDisabled();
     });
 
-    it('save button shoule be enabled if aggregates and formula are valid', async () => {
+    it('save button should be enabled if it has one aggregate and formula is valid', async () => {
       mockedIsValidAggregates.mockReturnValue(true);
       mockedValidateMetricFormula.mockReturnValue(true);
+      mockedGetCountOfAggregates.mockReturnValue(1);
       await renderMetricComponent();
 
       const saveButton = screen.getByTestId('save');
       expect(saveButton).not.toBeDisabled();
+    });
+
+    it('save button should be disabled if it has multiple aggregates and no metric definition', async () => {
+      mockedIsValidAggregates.mockReturnValue(true);
+      mockedValidateMetricFormula.mockReturnValue(true);
+      mockedGetCountOfAggregates.mockReturnValue(2);
+      await renderMetricComponent();
+
+      const saveButton = screen.getByTestId('save');
+      expect(saveButton).toBeDisabled();
+    });
+
+    it('save button should be enabled if it has multiple aggregates and metric definition', async () => {
+      mockedIsValidAggregates.mockReturnValue(true);
+      mockedValidateMetricFormula.mockReturnValue(true);
+      mockedGetCountOfAggregates.mockReturnValue(2);
+      await renderMetricComponent();
+      await addNewEvent();
+
+      const addEventsOrSegmentsButton = screen.getByTestId('add-event-button');
+      await act(async () => {
+        fireEvent.click(addEventsOrSegmentsButton);
+      });
+
+      const metricFormulaInput = screen.getByTestId('metric-definition');
+      await act(async () => {
+        fireEvent.change(metricFormulaInput, { target: { value: 'A/B' } });
+      });
+      await waitFor(() => {
+        const saveButton = screen.getByTestId('save');
+        expect(saveButton).not.toBeDisabled();
+      });
     });
   });
 
