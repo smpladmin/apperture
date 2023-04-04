@@ -1,23 +1,25 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import { FunnelStepFilter } from '@lib/domain/funnel';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { ArrowElbowDownRight } from 'phosphor-react';
 import { GREY_700 } from '@theme/index';
 import React, { useRef, useState } from 'react';
+import { WhereFilter } from '@lib/domain/common';
 
 type FunnelAddFilterComponentProps = {
   eventProperties: string[];
   loadingEventProperties: boolean;
   handleAddFilter: Function;
-  filters: FunnelStepFilter[];
+  filters: WhereFilter[];
+  hideIndentIcon?: boolean;
 };
 
-const FunnelAddFilterComponent = ({
+const AddFilterComponent = ({
   eventProperties,
   loadingEventProperties,
   handleAddFilter,
   filters,
+  hideIndentIcon = false,
 }: FunnelAddFilterComponentProps) => {
   const [openDropDown, setOpenDropDown] = useState(false);
   const ref = useRef(null);
@@ -30,8 +32,8 @@ const FunnelAddFilterComponent = ({
   useOnClickOutside(ref, () => setOpenDropDown(false));
   return (
     <Flex width={'full'} direction={'column'}>
-      <Flex p={1} alignItems={'center'} gap={2} h={6} mt={2} px={1}>
-        <Box opacity={filters.length ? 0 : 1}>
+      <Flex py={1} alignItems={'center'} gap={2} h={6}>
+        <Box opacity={filters.length || hideIndentIcon ? 0 : 1} pl={'1'}>
           <ArrowElbowDownRight size={12} color={GREY_700} weight={'bold'} />
         </Box>
         <Box position={'relative'} ref={ref}>
@@ -70,4 +72,4 @@ const FunnelAddFilterComponent = ({
   );
 };
 
-export default FunnelAddFilterComponent;
+export default AddFilterComponent;

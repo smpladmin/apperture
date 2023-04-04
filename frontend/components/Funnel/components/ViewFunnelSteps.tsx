@@ -1,6 +1,7 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
+import ViewFilter from '@components/StepFilters/ViewFilter';
 import { FunnelStep } from '@lib/domain/funnel';
-import React, { useState } from 'react';
+import React from 'react';
 
 function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
   return (
@@ -46,6 +47,7 @@ function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
                   fontSize={'xs-14'}
                   fontWeight={'500'}
                   lineHeight={'lh-135'}
+                  data-testid={'funnel-event'}
                 >
                   {step.event}
                 </Text>
@@ -53,24 +55,7 @@ function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
             </Flex>
 
             {step.filters.map((filter, index) => {
-              return (
-                <Flex gap={'1'} key={index}>
-                  <Flex paddingLeft={'6'} direction={'column'} key={index}>
-                    <Text
-                      fontSize={'xs-12'}
-                      lineHeight={'lh-135'}
-                      color={'grey.500'}
-                    >{`${filter.condition} ${filter.operand}`}</Text>
-                    <Text
-                      color={'grey.500'}
-                      fontSize={'xs-12'}
-                      lineHeight={'lh-135'}
-                    >
-                      {`${filter.operator} ${filter.values}`}
-                    </Text>
-                  </Flex>
-                </Flex>
-              );
+              return <ViewFilter key={index} filter={filter} />;
             })}
           </Box>
         );

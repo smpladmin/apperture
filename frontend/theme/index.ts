@@ -29,6 +29,12 @@ const GREY_600 = '#9E9E9E';
 const GREY_700 = '#BDBDBD';
 const GREY_800 = '#606060';
 const BLACK_500 = '#424242';
+const BLUE_500 = '#5093EC';
+const RED_500 = '#DD6054';
+const PURPLE_500 = '#9131AA';
+const YELLOW_500 = '#F6DA53';
+const ORANGE_500 = '#F09E33';
+const GREEN_500 = '#65AC5A';
 
 const colors = {
   black: {
@@ -43,7 +49,7 @@ const colors = {
     200: BLACK_200,
     300: BLACK_RUSSIAN,
     400: '#07070d',
-    500: 'BLACK_500',
+    500: BLACK_500,
   },
   white: {
     DEFAULT: WHITE_DEFAULT,
@@ -68,8 +74,11 @@ const colors = {
     700: GREY_700,
     800: GREY_800,
   },
-  yellow: { 500: '#fac213' },
-  green: GREEN,
+  yellow: { 500: YELLOW_500, 600: '#fac213' },
+  green: {
+    DEFAULT: GREEN,
+    500: GREEN_500,
+  },
   'hover-grey': '#78787e',
   teal: {
     100: TEAL_100,
@@ -79,9 +88,16 @@ const colors = {
   },
   red: {
     DEFAULT: '#F96B6B',
+    500: RED_500,
   },
   blue: {
-    500: '#5093EC',
+    500: BLUE_500,
+  },
+  purple: {
+    500: PURPLE_500,
+  },
+  orange: {
+    500: ORANGE_500,
   },
 };
 
@@ -207,4 +223,10 @@ export {
   BLACK_500,
   BLUE_MAIN,
   BLACK_DEFAULT,
+  BLUE_500,
+  YELLOW_500,
+  PURPLE_500,
+  GREEN_500,
+  ORANGE_500,
+  RED_500,
 };

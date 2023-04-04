@@ -5,7 +5,6 @@ import {
   act,
   waitFor,
 } from '@testing-library/react';
-
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from 'tests/util';
 import {
@@ -15,7 +14,7 @@ import {
 } from '@lib/services/datasourceService';
 import { computeMetric } from '@lib/services/metricService';
 import ViewMetric from './index';
-import { MetricComponentVariant } from '@lib/domain/metric';
+import { MetricBasicAggregation, MetricVariant } from '@lib/domain/metric';
 import {
   NotificationChannel,
   NotificationMetricType,
@@ -23,6 +22,12 @@ import {
   NotificationVariant,
 } from '@lib/domain/notification';
 import { convertToTrendData } from '../util';
+import {
+  FilterConditions,
+  FilterDataType,
+  FilterOperatorsString,
+  FilterType,
+} from '@lib/domain/common';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/services/metricService');
@@ -114,30 +119,39 @@ describe('View Metric', () => {
     datasourceId: '63d8ef5a7b02dbd1dcf20dcc',
     appId: '63d8ef4f7b02dbd1dcf20dca',
     userId: '63d38ec3071bbcb1c8b04ab8',
-    user: {
-      firstName: 'Aditya',
-      lastName: 'Priyam',
-      email: 'aditya@parallel.com',
-      picture: 'string',
-      slackChannel: null,
-    },
     name: 'Test Metric',
     function: 'A+B/C',
     aggregates: [
       {
         variable: 'A',
         function: 'count',
-        variant: MetricComponentVariant.EVENT,
-        aggregations: { functions: 'count', property: 'Name_Added' },
+        variant: MetricVariant.EVENT,
+        aggregations: {
+          functions: MetricBasicAggregation.TOTAL,
+          property: 'Name_Added',
+        },
         reference_id: 'Name_Added',
-        filters: [],
+        filters: [
+          {
+            condition: FilterConditions.WHERE,
+            operand: 'city',
+            operator: FilterOperatorsString.IS,
+            values: ['Mumbai', 'Bengaluru'],
+            type: FilterType.WHERE,
+            datatype: FilterDataType.STRING,
+            all: false,
+          },
+        ],
         conditions: [],
       },
       {
         variable: 'B',
         function: 'count',
-        variant: MetricComponentVariant.EVENT,
-        aggregations: { functions: 'count', property: 'Opened_Popular' },
+        variant: MetricVariant.EVENT,
+        aggregations: {
+          functions: MetricBasicAggregation.TOTAL,
+          property: 'Opened_Popular',
+        },
         reference_id: 'Opened_Popular',
         filters: [],
         conditions: [],
@@ -145,8 +159,11 @@ describe('View Metric', () => {
       {
         variable: 'C',
         function: 'count',
-        variant: MetricComponentVariant.EVENT,
-        aggregations: { functions: 'count', property: 'Topic_Click' },
+        variant: MetricVariant.EVENT,
+        aggregations: {
+          functions: MetricBasicAggregation.TOTAL,
+          property: 'Topic_Click',
+        },
         reference_id: 'Topic_Click',
         filters: [],
         conditions: [],
@@ -226,20 +243,51 @@ describe('View Metric', () => {
     jest.clearAllMocks();
   });
 
+  const renderMetric = async () => {
+    await act(async () => {
+      render(
+        <RouterContext.Provider
+          value={createMockRouter({ query: { dsId: '' } })}
+        >
+          <ViewMetric
+            savedMetric={savedMetric}
+            savedNotification={savedNotifications}
+          />
+        </RouterContext.Provider>
+      );
+    });
+  };
+
+  describe('render metric definition, events, filter, breakdown', () => {
+    it('should render metric definition if present', async () => {
+      await renderMetric();
+      const metricDefinition = screen.getByTestId('metric-definition');
+      expect(metricDefinition.textContent).toEqual('A+B/C');
+    });
+
+    it('renders metric event and filter', async () => {
+      await renderMetric();
+      const metricEvents = screen.getAllByTestId('metric-event');
+
+      const eventNames = metricEvents.map((ev) => ev.textContent);
+
+      const firstEventFilter = screen.getAllByTestId('event-filter');
+      const filterText = Array.from(
+        firstEventFilter[0].getElementsByTagName('p')
+      ).map((el) => el.textContent);
+
+      expect(eventNames).toEqual([
+        'Name_Added',
+        'Opened_Popular',
+        'Topic_Click',
+      ]);
+      expect(filterText).toEqual(['where ', 'city', 'is', 'Mumbai, Bengaluru']);
+    });
+  });
+
   describe('show the alert modal on set alert button click', () => {
     it('show the alert modal on set alert button click', async () => {
-      await act(async () => {
-        render(
-          <RouterContext.Provider
-            value={createMockRouter({ query: { dsId: '' } })}
-          >
-            <ViewMetric
-              savedMetric={savedMetric}
-              savedNotification={savedNotifications}
-            />
-          </RouterContext.Provider>
-        );
-      });
+      await renderMetric();
       const setAlertButton = screen.getByTestId('set-alert-button');
       expect(setAlertButton).toBeInTheDocument();
       fireEvent.click(setAlertButton);

@@ -9,19 +9,29 @@ import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from 'tests/util';
 import ViewFunnel from './index';
 import * as APIService from '@lib/services/funnelService';
-import { Funnel } from '@lib/domain/funnel';
+import { Funnel, ConversionWindowList } from '@lib/domain/funnel';
 import {
   NotificationChannel,
   NotificationMetricType,
   NotificationType,
   NotificationVariant,
 } from '@lib/domain/notification';
+import {
+  FilterConditions,
+  FilterDataType,
+  FilterOperatorsString,
+  FilterType,
+} from '@lib/domain/common';
+import { capitalizeFirstLetter, getFilterValuesText } from '@lib/utils/common';
 
 jest.mock('@lib/services/funnelService');
+jest.mock('@lib/utils/common');
 
 describe('View Funnel', () => {
   let mockedTransientFunnel: jest.Mock;
   let mockedTransientTrendsData: jest.Mock;
+  let mockedCapitalizeLetter: jest.Mock;
+  let mockedGetFilterValueText: jest.Mock;
 
   const props: Funnel = {
     _id: '64834034092324',
@@ -29,10 +39,27 @@ describe('View Funnel', () => {
     datasourceId: '654212033222',
     name: 'Test Funnel',
     steps: [
-      { event: 'Video_Click', filters: [] },
+      {
+        event: 'Video_Click',
+        filters: [
+          {
+            condition: FilterConditions.WHERE,
+            operand: 'city',
+            operator: FilterOperatorsString.IS,
+            values: ['Mumbai', 'Bengaluru'],
+            type: FilterType.WHERE,
+            datatype: FilterDataType.STRING,
+            all: false,
+          },
+        ],
+      },
       { event: 'Chapter_Click', filters: [] },
       { event: 'Topic_Click', filters: [] },
     ],
+    conversionWindow: {
+      type: ConversionWindowList.DAYS,
+      value: 30,
+    },
     updatedAt: new Date(),
     randomSequence: false,
   };
@@ -124,9 +151,23 @@ describe('View Funnel', () => {
   beforeEach(() => {
     mockedTransientFunnel = jest.mocked(APIService.getTransientFunnelData);
     mockedTransientTrendsData = jest.mocked(APIService.getTransientTrendsData);
+    mockedCapitalizeLetter = jest.mocked(capitalizeFirstLetter);
+    mockedGetFilterValueText = jest.mocked(getFilterValuesText);
 
     mockedTransientFunnel.mockReturnValue(funnelData);
     mockedTransientTrendsData.mockReturnValue(trendsData);
+    mockedCapitalizeLetter.mockImplementation((val: string) => {
+      const capitalizedFirstLetterMap: { [key: string]: string } = {
+        days: 'Days',
+        minutes: 'Minutes',
+      };
+      return capitalizedFirstLetterMap[val];
+    });
+    mockedGetFilterValueText.mockImplementation((values: string[]) => {
+      if (!values.length) return 'Select value';
+      if (values.length <= 2) return values.join(', ');
+      return `${values[0]}, ${values[1]}, +${values.length - 2} more`;
+    });
 
     // @ts-ignore
     delete window.ResizeObserver;
@@ -142,16 +183,28 @@ describe('View Funnel', () => {
     jest.clearAllMocks();
   });
 
-  //TODO:  Add new test for funnel render on new screen
-  it.skip('renders funnel name, first step and last step name and (n-2) steps count', async () => {
+  it('renders funnel name, steps and filter', async () => {
     await renderViewFunnel();
     const funnelName = screen.getByTestId('entity-name');
-    const firstStepName = screen.getByTestId('first-step');
-    const lastStepName = screen.getByTestId('last-step');
+    const funnelEvent = screen.getAllByTestId('funnel-event');
+
+    const eventNames = funnelEvent.map((ev) => ev.textContent);
+
+    const firstStepFilter = screen.getAllByTestId('event-filter');
+    const filterText = Array.from(
+      firstStepFilter[0].getElementsByTagName('p')
+    ).map((el) => el.textContent);
 
     expect(funnelName.textContent).toEqual('Test Funnel');
-    expect(firstStepName.textContent).toEqual('Video_Click');
-    expect(lastStepName.textContent).toEqual('Topic_Click');
+    expect(eventNames).toEqual(['Video_Click', 'Chapter_Click', 'Topic_Click']);
+    expect(filterText).toEqual(['where ', 'city', 'is', 'Mumbai, Bengaluru']);
+  });
+
+  it('renders conversion criteria text', async () => {
+    await renderViewFunnel();
+
+    const conversionCriteria = screen.getByTestId('conversion-criteria');
+    expect(conversionCriteria.textContent).toEqual('30 Days');
   });
 
   it('should redirect user to edit page on click of edit funnel button', async () => {

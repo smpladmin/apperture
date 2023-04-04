@@ -100,14 +100,22 @@ const DateFilter = ({
   };
 
   return (
-    <ButtonGroup size="sm" isAttached variant="outline" isDisabled={isDisabled}>
+    <ButtonGroup
+      size="sm"
+      isAttached
+      variant="outline"
+      isDisabled={isDisabled}
+      borderRadius={'8'}
+    >
       <Button
         borderWidth={'1px'}
         borderStyle={'solid'}
         borderColor={'grey.400'}
         id="yesterday"
-        background={isLastDateFilterSelected['1D'] ? 'white.500' : 'white'}
-        color={isLastDateFilterSelected['1D'] ? 'black' : 'grey.600'}
+        background={
+          isLastDateFilterSelected['1D'] ? 'white.500' : 'white.DEFAULT'
+        }
+        color={isLastDateFilterSelected['1D'] ? 'black.DEFAULT' : 'grey.600'}
         fontWeight={isLastDateFilterSelected['1D'] ? 500 : 400}
         _hover={{
           background: 'white.500',
@@ -124,8 +132,10 @@ const DateFilter = ({
         borderStyle={'solid'}
         borderColor={'grey.400'}
         id="yesterday"
-        background={isLastDateFilterSelected['1W'] ? 'white.500' : 'white'}
-        color={isLastDateFilterSelected['1W'] ? 'black' : 'grey.600'}
+        background={
+          isLastDateFilterSelected['1W'] ? 'white.500' : 'white.DEFAULT'
+        }
+        color={isLastDateFilterSelected['1W'] ? 'black.DEFAULT' : 'grey.600'}
         fontWeight={isLastDateFilterSelected['1W'] ? 500 : 400}
         _hover={{
           background: 'white.500',
@@ -142,8 +152,10 @@ const DateFilter = ({
         borderStyle={'solid'}
         borderColor={'grey.400'}
         id="yesterday"
-        background={isLastDateFilterSelected['1M'] ? 'white.500' : 'white'}
-        color={isLastDateFilterSelected['1M'] ? 'black' : 'grey.600'}
+        background={
+          isLastDateFilterSelected['1M'] ? 'white.500' : 'white.DEFAULT'
+        }
+        color={isLastDateFilterSelected['1M'] ? 'black.DEFAULT' : 'grey.600'}
         fontWeight={isLastDateFilterSelected['1M'] ? 500 : 400}
         _hover={{
           background: 'white.500',
@@ -160,8 +172,10 @@ const DateFilter = ({
         borderStyle={'solid'}
         borderColor={'grey.400'}
         id="yesterday"
-        background={isLastDateFilterSelected['3M'] ? 'white.500' : 'white'}
-        color={isLastDateFilterSelected['3M'] ? 'black' : 'grey.600'}
+        background={
+          isLastDateFilterSelected['3M'] ? 'white.500' : 'white.DEFAULT'
+        }
+        color={isLastDateFilterSelected['3M'] ? 'black.DEFAULT' : 'grey.600'}
         fontWeight={isLastDateFilterSelected['3M'] ? 500 : 400}
         _hover={{
           background: 'white.500',
@@ -182,9 +196,15 @@ const DateFilter = ({
           borderColor={'grey.400'}
           id="yesterday"
           background={
-            dateFilterType === DateFilterType.FIXED ? 'white.500' : 'white'
+            dateFilterType === DateFilterType.FIXED
+              ? 'white.500'
+              : 'white.DEFAULT'
           }
-          color={dateFilterType === DateFilterType.FIXED ? 'black' : 'grey.600'}
+          color={
+            dateFilterType === DateFilterType.FIXED
+              ? 'black.DEFAULT'
+              : 'grey.600'
+          }
           fontWeight={dateFilterType === DateFilterType.FIXED ? 500 : 400}
           _hover={{
             background: 'white.100',

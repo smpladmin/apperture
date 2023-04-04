@@ -7,11 +7,8 @@ import utc from 'dayjs/plugin/utc';
 import { useMemo } from 'react';
 import EventLabel from './EventLabel';
 import TableCell from './TableCell';
+import { trimLabel } from '@lib/utils/common';
 dayjs.extend(utc);
-
-export const trimLabel = (label: string, size = 15) => {
-  return label.length > size + 3 ? label.slice(0, size) + '...' : label;
-};
 
 const StreamDataTable = ({
   count,

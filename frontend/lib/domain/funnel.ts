@@ -1,33 +1,10 @@
-import { DateFilter, DateFilterObj, DateFilterType } from './common';
-import { FilterType } from './segment';
+import { DateFilterObj, WhereFilter } from './common';
 import { AppertureUser as User } from './user';
 
 export type FunnelStep = {
   event: string;
-  filters: FunnelStepFilter[];
+  filters: WhereFilter[];
 };
-
-export type FunnelStepFilter = {
-  condition: FunnelFilterConditions;
-  operand: string;
-  operator: FunnelFilterOperators;
-  values: string[];
-  all: boolean;
-  type: FilterType;
-  datatype: FunnelFilterDataType;
-};
-
-export enum FunnelFilterConditions {
-  WHERE = 'where',
-  AND = 'and',
-  OR = 'or',
-}
-
-export enum FunnelFilterDataType {
-  STRING = 'String',
-  NUMBER = 'Number',
-  BOOL = 'True/ False',
-}
 
 export enum FunnelFilterOperators {
   IS = 'is',

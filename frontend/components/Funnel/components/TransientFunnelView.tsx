@@ -6,10 +6,10 @@ import {
   FunnelTrendsData,
 } from '@lib/domain/funnel';
 import React, { useState } from 'react';
-import FunnelChart from '../components/FunnelChart';
-import Trend from '../components/Trend';
+import FunnelChart from './FunnelChart';
+import Trend from './Trend';
 import Loader from '@components/LoadingSpinner';
-import UserConversionDrawer from '../components/UserCoversionDrawer';
+import UserConversionDrawer from './UserCoversionDrawer';
 import { useRouter } from 'next/router';
 import DateFilterComponent from '@components/Date/DateFilter';
 import { DateFilterObj } from '@lib/domain/common';
@@ -156,6 +156,7 @@ const TransientFunnelView = ({
                   lineHeight={'lh-130'}
                   fontWeight={'400'}
                   bg={'white.400'}
+                  hidden={true} // enable once Analyse factors is implemented
                 >
                   Analyse Factors
                   <ArrowRight size={14} />

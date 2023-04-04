@@ -27,11 +27,16 @@ const EventLayoutHeader = ({
 }: EventLayoutHeaderProps) => {
   return (
     <Flex
+      position={'sticky'}
+      top={'0'}
+      width={'full'}
+      background={'white.400'}
       py={'3'}
       justifyContent={'space-between'}
       alignItems={'center'}
       borderBottom={'1px'}
       borderColor={'grey.DEFAULT'}
+      zIndex={'99'}
     >
       <Flex gap={'2'}>
         <IconButton
@@ -46,6 +51,7 @@ const EventLayoutHeader = ({
             bg: 'white.400',
           }}
           onClick={() => handleGoBack()}
+          data-testid={'back-button'}
         />
         <Editable
           onChange={(nextValue) => setName(nextValue)}

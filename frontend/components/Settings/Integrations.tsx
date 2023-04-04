@@ -28,7 +28,7 @@ const IntegrationConnectionInfo = () => {
         fontSize={'xs-12'}
         lineHeight={'xs-12'}
         fontWeight={'medium'}
-        color={'green'}
+        color={'green.DEFAULT'}
       >
         Connected
       </Text>

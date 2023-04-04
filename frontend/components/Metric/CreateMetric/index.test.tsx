@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, act } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  act,
+  waitFor,
+} from '@testing-library/react';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from 'tests/util';
 import {
@@ -15,8 +21,9 @@ import {
   isValidAggregates,
   convertToTableData,
   convertToTrendData,
-  getCountOfAggregates,
+  getCountOfValidAggregates,
   getDisplayAggregationFunctionText,
+  enableBreakdown,
 } from '../util';
 
 jest.mock('@lib/services/datasourceService');
@@ -34,6 +41,7 @@ describe('Create Metric', () => {
   let mockedConvertToTableData: jest.Mock;
   let mockedConvertToTrendData: jest.Mock;
   let mockedGetDisplayAggregationFunctionText: jest.Mock;
+  let mockedEnableBreakdown: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -173,9 +181,6 @@ describe('Create Metric', () => {
   };
 
   const addNewEvent = async () => {
-    const selectEvent = screen.getByTestId('select-event-segment');
-    fireEvent.click(selectEvent);
-
     const eventOption = screen.getByTestId('event-option');
     fireEvent.click(eventOption);
 
@@ -194,13 +199,14 @@ describe('Create Metric', () => {
     mockedGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
     mockedComputedMetric = jest.mocked(computeMetric);
     mockedIsValidAggregates = jest.mocked(isValidAggregates);
-    mockedGetCountOfAggregates = jest.mocked(getCountOfAggregates);
+    mockedGetCountOfAggregates = jest.mocked(getCountOfValidAggregates);
     mockedValidateMetricFormula = jest.mocked(validateMetricFormula);
     mockedConvertToTableData = jest.mocked(convertToTableData);
     mockedConvertToTrendData = jest.mocked(convertToTrendData);
     mockedGetDisplayAggregationFunctionText = jest.mocked(
       getDisplayAggregationFunctionText
     );
+    mockedEnableBreakdown = jest.mocked(enableBreakdown);
 
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetNodes.mockReturnValue(events);
@@ -262,219 +268,177 @@ describe('Create Metric', () => {
     });
   });
 
-  it('should add new EventsOrSegment Components on the click of + button', async () => {
-    await act(async () => {
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '' } })}
-        >
-          <CreateMetric />
-        </RouterContext.Provider>
+  describe('add/remove events and filter', () => {
+    it('should add new EventsOrSegment Components on the click of + button', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '' } })}
+          >
+            <CreateMetric />
+          </RouterContext.Provider>
+        );
+      });
+      await addNewEvent();
+
+      const addEventsOrSegmentsButton = screen.getByTestId('add-event-button');
+      const EventsOrSegmentsList = screen.getAllByTestId(
+        'event-or-segment-component'
+      );
+
+      await act(async () => {
+        fireEvent.click(addEventsOrSegmentsButton);
+      });
+      const newEventsOrSegmentsList = screen.getAllByTestId(
+        'event-or-segment-component'
+      );
+      expect(EventsOrSegmentsList.length + 1).toEqual(
+        newEventsOrSegmentsList.length
+      );
+      const EventsOrSegmentsVariablesList = screen.getAllByTestId(
+        'event-or-segment-component-variable'
+      );
+      expect(EventsOrSegmentsVariablesList.map((el) => el.textContent)).toEqual(
+        ['A', 'B']
       );
     });
-    const SelectEvent = screen.getByTestId('select-event-segment');
-    fireEvent.click(SelectEvent);
-    const EventOption = screen.getByTestId('event-option');
-    fireEvent.click(EventOption);
-    const SELECTED_OPTION = 1;
 
-    // Selecting an event from the dropdown
-    const EventNameDropdownList = screen.getAllByTestId('dropdown-options');
+    it('should remove EventsOrSegment Components on the click of x button', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '' } })}
+          >
+            <CreateMetric />
+          </RouterContext.Provider>
+        );
+      });
+      await addNewEvent();
 
-    await act(async () => {
-      fireEvent.click(EventNameDropdownList[SELECTED_OPTION]);
-    });
-    const addEventsOrSegmentsButton = screen.getByTestId(
-      'add-events-or-segments-button'
-    );
-    const EventsOrSegmentsList = screen.getAllByTestId(
-      'event-or-segment-component'
-    );
+      const addEventsOrSegmentsButton = screen.getByTestId('add-event-button');
+      const removeAggregate = screen.getByTestId('remove-aggregate');
 
-    await act(async () => {
-      fireEvent.click(addEventsOrSegmentsButton);
-    });
-    const newEventsOrSegmentsList = screen.getAllByTestId(
-      'event-or-segment-component'
-    );
-    expect(EventsOrSegmentsList.length + 1).toEqual(
-      newEventsOrSegmentsList.length
-    );
-    const EventsOrSegmentsVariablesList = screen.getAllByTestId(
-      'event-or-segment-component-variable'
-    );
-    expect(EventsOrSegmentsVariablesList.map((el) => el.textContent)).toEqual([
-      'A',
-      'B',
-    ]);
-  });
+      const EventsOrSegmentsList = screen.getAllByTestId(
+        'event-or-segment-component'
+      );
+      await act(async () => {
+        fireEvent.click(addEventsOrSegmentsButton);
+      });
 
-  it('should remove EventsOrSegment Components on the click of x button', async () => {
-    await act(async () => {
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '' } })}
-        >
-          <CreateMetric />
-        </RouterContext.Provider>
+      await act(async () => {
+        fireEvent.click(removeAggregate);
+      });
+
+      const newEventsOrSegmentsList = screen.getAllByTestId(
+        'event-or-segment-component'
+      );
+      const EventsOrSegmentsVariablesList = screen.getAllByTestId(
+        'event-or-segment-component-variable'
+      );
+      expect(EventsOrSegmentsList.length).toEqual(
+        newEventsOrSegmentsList.length
+      );
+      expect(EventsOrSegmentsVariablesList.map((el) => el.textContent)).toEqual(
+        ['A']
       );
     });
-    const SelectEvent = screen.getByTestId('select-event-segment');
-    fireEvent.click(SelectEvent);
-    const EventOption = screen.getByTestId('event-option');
-    fireEvent.click(EventOption);
-    const SELECTED_OPTION = 1;
 
-    // Selecting an event from the dropdown
-    const EventNameDropdownList = screen.getAllByTestId('dropdown-options');
+    it('should show event name, after selecting it from the dropdown list', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '' } })}
+          >
+            <CreateMetric />
+          </RouterContext.Provider>
+        );
+      });
 
-    await act(async () => {
-      fireEvent.click(EventNameDropdownList[SELECTED_OPTION]);
-    });
-    const addEventsOrSegmentsButton = screen.getByTestId(
-      'add-events-or-segments-button'
-    );
-    const removeEventsOrSegmentsButton = screen.getByTestId(
-      'remove-event-or-segment-component'
-    );
-    const EventsOrSegmentsList = screen.getAllByTestId(
-      'event-or-segment-component'
-    );
-    await act(async () => {
-      fireEvent.click(addEventsOrSegmentsButton);
-    });
-
-    await act(async () => {
-      fireEvent.click(removeEventsOrSegmentsButton);
-    });
-
-    const newEventsOrSegmentsList = screen.getAllByTestId(
-      'event-or-segment-component'
-    );
-    const EventsOrSegmentsVariablesList = screen.getAllByTestId(
-      'event-or-segment-component-variable'
-    );
-    expect(EventsOrSegmentsList.length).toEqual(newEventsOrSegmentsList.length);
-    expect(EventsOrSegmentsVariablesList.map((el) => el.textContent)).toEqual([
-      'A',
-    ]);
-  });
-
-  it('should show event name, after selecting it from the dropdown list', async () => {
-    await act(async () => {
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '' } })}
-        >
-          <CreateMetric />
-        </RouterContext.Provider>
+      const eventOption = screen.getByTestId('event-option');
+      fireEvent.click(eventOption);
+      const EventDropDown = screen.getByTestId(
+        'event-property-dropdown-container'
+      );
+      const SELECTED_OPTION = 1;
+      const EventNameDropdownList = screen.getAllByTestId('dropdown-options');
+      expect(EventNameDropdownList.map((el) => el.textContent)).toEqual(
+        events.map((event) => event.id)
+      );
+      expect(EventDropDown).toBeInTheDocument();
+      await act(async () => {
+        fireEvent.click(EventNameDropdownList[SELECTED_OPTION]);
+      });
+      const eventName = screen.getByTestId('event-or-segment-name');
+      expect(eventName.textContent).toEqual(
+        EventNameDropdownList[SELECTED_OPTION].textContent
       );
     });
-    const SelectEvent = screen.getByTestId('select-event-segment');
-    fireEvent.click(SelectEvent);
-    const EventOption = screen.getByTestId('event-option');
-    fireEvent.click(EventOption);
-    const EventDropDown = screen.getByTestId(
-      'event-property-dropdown-container'
-    );
-    const SELECTED_OPTION = 1;
-    const EventNameDropdownList = screen.getAllByTestId('dropdown-options');
-    expect(EventNameDropdownList.map((el) => el.textContent)).toEqual(
-      events.map((event) => event.id)
-    );
-    expect(EventDropDown).toBeInTheDocument();
-    await act(async () => {
-      fireEvent.click(EventNameDropdownList[SELECTED_OPTION]);
-    });
-    const eventName = screen.getByTestId('event-or-segment-name');
-    expect(eventName.textContent).toEqual(
-      EventNameDropdownList[SELECTED_OPTION].textContent
-    );
-  });
 
-  it('should add filter section after clicking on add filter button', async () => {
-    await act(async () => {
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '' } })}
-        >
-          <CreateMetric />
-        </RouterContext.Provider>
+    it('should add filter section after clicking on add filter button', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '' } })}
+          >
+            <CreateMetric />
+          </RouterContext.Provider>
+        );
+      });
+      await addNewEvent();
+      const SELECTED_OPTION = 1;
+      //Adding a filter to the "Event or Segment" Component
+      const AddFilterButton = screen.getByTestId('add-filter-button');
+      fireEvent.click(AddFilterButton);
+      const EventPropertyDropdownList =
+        screen.getAllByTestId('dropdown-options');
+      await act(async () => {
+        fireEvent.click(EventPropertyDropdownList[SELECTED_OPTION]);
+      });
+      const EventFilterComponent = screen.getByTestId('event-filter');
+      expect(EventFilterComponent).toBeInTheDocument();
+    });
+
+    it('should be able to select value for the filter', async () => {
+      await act(async () => {
+        render(
+          <RouterContext.Provider
+            value={createMockRouter({ query: { dsId: '' } })}
+          >
+            <CreateMetric />
+          </RouterContext.Provider>
+        );
+      });
+      await addNewEvent();
+      const SELECTED_OPTION = 1;
+
+      //Adding a filter to the "Event or Segment" Component
+      const AddFilterButton = screen.getByTestId('add-filter-button');
+      fireEvent.click(AddFilterButton);
+      const EventPropertyDropdownList =
+        screen.getAllByTestId('dropdown-options');
+      await act(async () => {
+        fireEvent.click(EventPropertyDropdownList[SELECTED_OPTION]);
+      });
+
+      const EventFilterValue = screen.getByTestId('event-filter-values');
+
+      expect(EventFilterValue.textContent).toEqual('Select value');
+      fireEvent.click(EventFilterValue);
+
+      const EventPropertyValueDropdownList = screen.getAllByTestId(
+        'property-value-dropdown-option'
+      );
+      const AddPropertyValueButton = screen.getByTestId(
+        'add-event-property-values'
+      );
+      await act(async () => {
+        fireEvent.click(EventPropertyValueDropdownList[SELECTED_OPTION]);
+        fireEvent.click(AddPropertyValueButton);
+      });
+      expect(EventFilterValue.textContent).toEqual(
+        EventPropertyValueDropdownList[SELECTED_OPTION].textContent
       );
     });
-    const SelectEvent = screen.getByTestId('select-event-segment');
-    fireEvent.click(SelectEvent);
-    const EventOption = screen.getByTestId('event-option');
-    fireEvent.click(EventOption);
-    const SELECTED_OPTION = 1;
-
-    // Selecting an event from the dropdown
-    const EventNameDropdownList = screen.getAllByTestId('dropdown-options');
-
-    await act(async () => {
-      fireEvent.click(EventNameDropdownList[SELECTED_OPTION]);
-    });
-
-    //Adding a filter to the "Event or Segment" Component
-    const AddFilterButton = screen.getByTestId('add-filter-button');
-    fireEvent.click(AddFilterButton);
-    const EventPropertyDropdownList = screen.getAllByTestId('dropdown-options');
-    await act(async () => {
-      fireEvent.click(EventPropertyDropdownList[SELECTED_OPTION]);
-    });
-    const EventFilterComponent = screen.getByTestId('event-filter-component');
-    expect(EventFilterComponent).toBeInTheDocument();
-  });
-
-  it('should be able to select value for the filter', async () => {
-    await act(async () => {
-      render(
-        <RouterContext.Provider
-          value={createMockRouter({ query: { dsId: '' } })}
-        >
-          <CreateMetric />
-        </RouterContext.Provider>
-      );
-    });
-    const SelectEvent = screen.getByTestId('select-event-segment');
-    fireEvent.click(SelectEvent);
-    const EventOption = screen.getByTestId('event-option');
-    fireEvent.click(EventOption);
-    const SELECTED_OPTION = 1;
-
-    // Selecting an event from the dropdown
-    const EventNameDropdownList = screen.getAllByTestId('dropdown-options');
-
-    await act(async () => {
-      fireEvent.click(EventNameDropdownList[SELECTED_OPTION]);
-    });
-
-    //Adding a filter to the "Event or Segment" Component
-    const AddFilterButton = screen.getByTestId('add-filter-button');
-    fireEvent.click(AddFilterButton);
-    const EventPropertyDropdownList = screen.getAllByTestId('dropdown-options');
-    await act(async () => {
-      fireEvent.click(EventPropertyDropdownList[SELECTED_OPTION]);
-    });
-
-    const EventFilterValue = screen.getByTestId('event-filter-values');
-
-    expect(EventFilterValue.textContent).toEqual('Select value');
-    fireEvent.click(EventFilterValue);
-
-    const EventPropertyValueDropdownList = screen.getAllByTestId(
-      'property-value-dropdown-option'
-    );
-    const AddPropertyValueButton = screen.getByTestId(
-      'add-event-property-values'
-    );
-    await act(async () => {
-      fireEvent.click(EventPropertyValueDropdownList[SELECTED_OPTION]);
-      fireEvent.click(AddPropertyValueButton);
-    });
-    expect(EventFilterValue.textContent).toEqual(
-      EventPropertyValueDropdownList[SELECTED_OPTION].textContent
-    );
   });
 
   describe('enable/disable save button', () => {
@@ -495,21 +459,55 @@ describe('Create Metric', () => {
       expect(saveButton).toBeDisabled();
     });
 
-    it('save button shoule be enabled if aggregates and formula are valid', async () => {
+    it('save button should be enabled if it has one aggregate and formula is valid', async () => {
       mockedIsValidAggregates.mockReturnValue(true);
       mockedValidateMetricFormula.mockReturnValue(true);
+      mockedGetCountOfAggregates.mockReturnValue(1);
       await renderMetricComponent();
 
       const saveButton = screen.getByTestId('save');
       expect(saveButton).not.toBeDisabled();
     });
+
+    it('save button should be disabled if it has multiple aggregates and no metric definition', async () => {
+      mockedIsValidAggregates.mockReturnValue(true);
+      mockedValidateMetricFormula.mockReturnValue(true);
+      mockedGetCountOfAggregates.mockReturnValue(2);
+      await renderMetricComponent();
+
+      const saveButton = screen.getByTestId('save');
+      expect(saveButton).toBeDisabled();
+    });
+
+    it('save button should be enabled if it has multiple aggregates and metric definition', async () => {
+      mockedIsValidAggregates.mockReturnValue(true);
+      mockedValidateMetricFormula.mockReturnValue(true);
+      mockedGetCountOfAggregates.mockReturnValue(2);
+      await renderMetricComponent();
+      await addNewEvent();
+
+      const addEventsOrSegmentsButton = screen.getByTestId('add-event-button');
+      await act(async () => {
+        fireEvent.click(addEventsOrSegmentsButton);
+      });
+
+      const metricFormulaInput = screen.getByTestId('metric-definition');
+      await act(async () => {
+        fireEvent.change(metricFormulaInput, { target: { value: 'A/B' } });
+      });
+      await waitFor(() => {
+        const saveButton = screen.getByTestId('save');
+        expect(saveButton).not.toBeDisabled();
+      });
+    });
   });
 
   describe('metric breakdown', () => {
     it('should be able to add metric breakdown', async () => {
+      mockedEnableBreakdown.mockReturnValue(true);
       await renderMetricComponent();
 
-      const selectBreakdownButton = screen.getByTestId('select-breakdown');
+      const selectBreakdownButton = screen.getByTestId('add-breakdown');
       fireEvent.click(selectBreakdownButton);
 
       const SELECTED_OPTION = 0; // city
@@ -519,13 +517,14 @@ describe('Create Metric', () => {
       });
 
       const breakdownName = screen.getByTestId('breakdown-name');
-      expect(breakdownName.textContent).toEqual('Breakdown city');
+      expect(breakdownName.textContent).toEqual('city');
     });
 
     it('should be able to remove metric breakdown', async () => {
+      mockedEnableBreakdown.mockReturnValue(true);
       await renderMetricComponent();
 
-      const selectBreakdownButton = screen.getByTestId('select-breakdown');
+      const selectBreakdownButton = screen.getByTestId('add-breakdown');
       fireEvent.click(selectBreakdownButton);
 
       const SELECTED_OPTION = 0; // city
@@ -535,13 +534,18 @@ describe('Create Metric', () => {
       });
 
       const breakdownName = screen.getByTestId('breakdown-name');
-      expect(breakdownName.textContent).toEqual('Breakdown city');
+      expect(breakdownName.textContent).toEqual('city');
+
+      fireEvent.mouseEnter(breakdownName);
 
       const removeMetricBreakdown = screen.getByTestId('remove-breakdown');
       await act(async () => {
         fireEvent.click(removeMetricBreakdown);
       });
-      expect(breakdownName.textContent).toEqual('Breakdown ');
+      await waitFor(() => {
+        const breakdownName = screen.queryByTestId('breakdown-name');
+        expect(breakdownName).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -559,7 +563,7 @@ describe('Create Metric', () => {
       });
 
       // add breakdown
-      const selectBreakdownButton = screen.getByTestId('select-breakdown');
+      const selectBreakdownButton = screen.getByTestId('add-breakdown');
       fireEvent.click(selectBreakdownButton);
 
       const SELECTED_OPTION = 5; // bluetooth_enabled
