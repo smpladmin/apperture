@@ -127,6 +127,7 @@ def notification_service(apperture_user_response):
     notification_service_mock.get_notifications_for_datasource_id.return_value = (
         notifications_future
     )
+    notification_service_mock.fetch_and_delete_notification = mock.AsyncMock()
     return notification_service_mock
 
 
