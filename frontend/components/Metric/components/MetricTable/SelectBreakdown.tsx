@@ -59,7 +59,7 @@ const SelectBreakdown = ({
         onChange={handleChangeBreakdown}
         colorScheme={getCheckBoxColorScheme()}
       />
-      <Text wordBreak={'break-word'}>{info.getValue()}</Text>
+      <Text width={'25'}>{info.getValue()}</Text>
     </Flex>
   );
 };

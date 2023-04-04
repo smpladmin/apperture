@@ -129,6 +129,7 @@ const SelectValue = ({
         onSelect={handleCheckboxChange}
         isSelectAllChecked={areAllValuesSelected}
         selectedValues={filterValues}
+        width={'76'}
       />
     </Box>
   );
