@@ -254,3 +254,13 @@ class NotificationService:
             Notification.id == PydanticObjectId(notification_id),
         ).update({"$set": {"enabled": False}})
         return
+
+    async def fetch_and_delete_notification(
+        self, reference_id: str, datasource_id: str
+    ):
+        notification = await self.get_notification_by_reference(
+            reference=reference_id, datasource_id=datasource_id
+        )
+
+        if notification:
+            await self.delete_notification(notification_id=str(notification.id))

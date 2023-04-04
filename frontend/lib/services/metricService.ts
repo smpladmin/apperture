@@ -96,7 +96,6 @@ export const validateMetricFormula = async (
   return res.data;
 };
 
-export const deleteMetric = async (id: string) => {
-  const res = await AppertureDelete(`/metrics/${id}`);
-  return res;
+export const deleteMetric = async (id: string, dsId: string) => {
+  return await AppertureDelete(`/metrics/${id}?datasource_id=${dsId}`);
 };

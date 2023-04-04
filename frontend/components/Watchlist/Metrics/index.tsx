@@ -54,7 +54,7 @@ const SavedMetrics = ({ provider }: { provider: Provider }) => {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteMetric(id);
+    await deleteMetric(id, dsId as string);
     setRenderMetric(true);
   };
 
