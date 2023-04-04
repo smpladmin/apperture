@@ -5,7 +5,7 @@ import 'remixicon/fonts/remixicon.css';
 import { ConversionWindowObj, FunnelStep } from '@lib/domain/funnel';
 import Card from '@components/Card';
 import { Clock } from 'phosphor-react';
-import ActionPanelTemp from '@components/EventsLayout/ActionPanelTemp';
+import ActionPanel from '@components/EventsLayout/ActionPanel';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 import { GREY_600 } from '@theme/index';
 
@@ -22,7 +22,7 @@ const LeftView = ({
 }: LeftViewProps) => {
   const sequenceText = randomSequence ? 'Any order' : 'In sequence';
   return (
-    <ActionPanelTemp>
+    <ActionPanel>
       <Card>
         <Flex direction={'column'} gap={'6'} w={'full'}>
           <Flex direction={'column'} gap={'3'} w={'full'}>
@@ -48,7 +48,7 @@ const LeftView = ({
               Conversion Time
             </Text>
 
-            <Card>
+            <Card borderColor={'white.200'}>
               <Flex dir={'column'} alignItems={'center'} gap={2}>
                 <Clock size={20} color={GREY_600} />
                 <Text
@@ -56,7 +56,8 @@ const LeftView = ({
                   lineHeight={'xs-14'}
                   fontWeight={'medium'}
                   color={'black'}
-                >{` ${conversionWindow.value} ${capitalizeFirstLetter(
+                  data-testid={'conversion-criteria'}
+                >{`${conversionWindow.value} ${capitalizeFirstLetter(
                   conversionWindow.type
                 )}`}</Text>
               </Flex>
@@ -64,7 +65,7 @@ const LeftView = ({
           </Flex>
         </Flex>
       </Card>
-    </ActionPanelTemp>
+    </ActionPanel>
   );
 };
 

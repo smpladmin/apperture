@@ -21,7 +21,7 @@ const EventOptions = ({
         lineHeight={{ base: 'xs-16', md: 'xs-18' }}
         fontWeight={'500'}
       >
-        {captureEvent == '$autocapture' ? 'Autocapture' : 'Pageleave'}
+        {captureEvent == '$autocapture' ? 'Autocapture' : 'Pageview'}
       </Text>
     );
   }

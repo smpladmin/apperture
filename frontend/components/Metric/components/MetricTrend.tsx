@@ -5,7 +5,7 @@ import {
   convertToTableData,
   convertToTrendData,
   formatDate,
-} from '../../util';
+} from '../util';
 import {
   Breakdown,
   ComputedMetric,
@@ -18,6 +18,7 @@ import {
 } from '@lib/utils/common';
 import React, { useEffect, useMemo, useState } from 'react';
 import MetricTable from './MetricTable';
+import Card from '@components/Card';
 
 const graphColors = COLOR_PALLETE_5.map((color) => color.hexaValue);
 
@@ -148,20 +149,14 @@ const MetricTrend = ({ data, breakdown }: MetricTrendProps) => {
   }, [data, selectedBreakdowns]);
 
   const metricTableData = useMemo(() => {
-    return convertToTableData(data).slice(0, 100);
+    return convertToTableData(data)?.slice(0, 100);
   }, [data, breakdown]);
 
   return (
-    <Flex
-      height={'full'}
-      width={'full'}
-      justifyContent={'center'}
-      direction={'column'}
-      className="metric-chart"
-      gap={'10'}
-      mt={'10'}
-    >
-      <LineChart {...graphConfig} data={trendData} />
+    <Flex direction={'column'} gap={'5'}>
+      <Card borderRadius={'16'}>
+        <LineChart {...graphConfig} data={trendData} />
+      </Card>
 
       {!!metricTableData?.length && (
         <MetricTable

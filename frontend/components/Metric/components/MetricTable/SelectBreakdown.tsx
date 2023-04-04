@@ -4,6 +4,8 @@ import { Breakdown, MetricTableData } from '@lib/domain/metric';
 import { CellContext } from '@tanstack/react-table';
 import React, { ChangeEvent } from 'react';
 
+const BREAKDOWN_SELECTION_LIMIT = 5;
+
 type SelectBreakdownProps = {
   info: CellContext<MetricTableData, string>;
   selectedBreakdowns: Breakdown[];
@@ -26,7 +28,7 @@ const SelectBreakdown = ({
     let toUpdateBreakdowns = [...selectedBreakdowns];
 
     if (e.target.checked) {
-      if (selectedBreakdowns.length >= 10) return;
+      if (selectedBreakdowns.length >= BREAKDOWN_SELECTION_LIMIT) return;
 
       toUpdateBreakdowns.push({ value: e.target.value, rowIndex: index });
       setSelectedBreakdowns(toUpdateBreakdowns);
@@ -57,7 +59,7 @@ const SelectBreakdown = ({
         onChange={handleChangeBreakdown}
         colorScheme={getCheckBoxColorScheme()}
       />
-      <Text wordBreak={'break-word'}>{info.getValue()}</Text>
+      <Text width={'25'}>{info.getValue()}</Text>
     </Flex>
   );
 };

@@ -174,7 +174,7 @@ const ViewFunnel = ({
           reference={funnelId as string}
           eventData={computedTrendsData}
           datasourceId={datasourceId}
-          savedAlert={savedNotification}
+          savedAlert={notification}
         />
       </Flex>
     </Flex>

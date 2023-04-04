@@ -78,6 +78,7 @@ const EditColumns = ({
           isSelectAllChecked={allValuesSelected}
           selectedValues={checkedValues}
           listKey={'id'}
+          width={'96'}
         />
       </Box>
     </>

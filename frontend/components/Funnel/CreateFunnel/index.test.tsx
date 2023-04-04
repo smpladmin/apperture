@@ -16,7 +16,12 @@ import { RouterContext } from 'next/dist/shared/lib/router-context';
 import CreateFunnel from './index';
 import { createMockRouter } from 'tests/util';
 import * as APIService from '@lib/services/funnelService';
-import { capitalizeFirstLetter, getSearchResult } from '@lib/utils/common';
+import {
+  capitalizeFirstLetter,
+  getSearchResult,
+  getFilterValuesText,
+  trimLabel,
+} from '@lib/utils/common';
 import {
   getEventProperties,
   getEventPropertiesValue,
@@ -43,6 +48,8 @@ describe('create funnel', () => {
   let mockedReplaceFilterValueWithEmptyStringPlaceholder: jest.Mock;
   let mockedGetTransientFunnelTrendsData: jest.Mock;
   let mockedCapitalizeLetter: jest.Mock;
+  let mockedGetFilterValueText: jest.Mock;
+  let mockedTrimLabel: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -207,6 +214,8 @@ describe('create funnel', () => {
       replaceFilterValueWithEmptyStringPlaceholder
     );
     mockedCapitalizeLetter = jest.mocked(capitalizeFirstLetter);
+    mockedGetFilterValueText = jest.mocked(getFilterValuesText);
+    mockedTrimLabel = jest.mocked(trimLabel);
 
     mockedGetTransientFunnelTrendsData.mockReturnValue(funnelTrendsData);
     mockedGetCountOfValidAddedSteps.mockReturnValue(2);
@@ -219,6 +228,14 @@ describe('create funnel', () => {
         minutes: 'Minutes',
       };
       return capitalizedFirstLetterMap[val];
+    });
+    mockedGetFilterValueText.mockImplementation((values: string[]) => {
+      if (!values.length) return 'Select value';
+      if (values.length <= 2) return values.join(', ');
+      return `${values[0]}, ${values[1]}, +${values.length - 2} more`;
+    });
+    mockedTrimLabel.mockImplementation((label: string, size = 15) => {
+      return label.length > size + 3 ? label.slice(0, size) + '...' : label;
     });
   });
 
