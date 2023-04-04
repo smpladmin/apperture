@@ -14,9 +14,10 @@ config:
     key_name: apperture-staging-key
     public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCzh69tzOebPrNLyPyKorbzLzTEDUyuDP6V8g0qsHOimAu5g2FC+LQNip8C3kLyMX2Em7sh50a3E7/TL4s+R/OnDrVB2i4rYsDwrru6ZffPtd3bX8MG92KtJlsAH+Qs7bRwQNJYsFZXNL5GGPBWbUHVyQtG86hvRawAox6WeSH2dShkd3JwlbrV+9GGzEzdhAA06zXUm2ZZPrxDXxzDoewZHSiox85D9xlE2+6ZX0A+SlwhVCuwWxlBelSvWoFiAVfB92U52xlbagtpUexM1lGihFJgMQAhShkITGsuKFfKqfJqF3s5keZjg3icWcnqJFvdYJtqqxvNjjwbWBuXG2atr8O3Wb1ftVDMqVwf7PZw3fPWGYYVmBWn8BK47y0w0+9d2mW6zHMa5uzmwekR7XYbHpKPsuPY4lRQNpeMYMu2oqtgypS/VCw6CNEso90BdiPAD0qWJJ/pa+n6Zk4/4jonyToaikscMz1mhmCAhGuYhuT/17uHv8mdRCEvz/iK6ak= roopak@parallelhq.com
     ec2_public_name: apperture-staging-public-instance
-    ec2_public_type: t3.small
+    ec2_public_type: t3.medium
     ec2_private_name: apperture-staging-private-instance
-    ec2_private_type: t3.small
+    ec2_private_type: t3.medium
+    ec2_private_b_type: t3.medium
     ec2_private_count: 2
     ec2_clickhouse_name: apperture-staging-chdb
     ec2_clickhouse_type: t3.medium
