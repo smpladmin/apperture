@@ -67,7 +67,7 @@ const UserPropertyTable = ({ properties }: UserPropertyTableProps) => {
   });
   const { getHeaderGroups, getRowModel } = tableInstance;
 
-  if (properties.length === 0) {
+  if (properties?.length === 0) {
     return (
       <Text
         textAlign={'center'}

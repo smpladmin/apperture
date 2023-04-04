@@ -24,7 +24,7 @@ from domain.common.filter_models import (
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
-from domain.events.models import Event, EventsData
+from domain.events.models import Event, PaginatedEventsData
 from domain.funnels.models import (
     ComputedFunnel,
     ComputedFunnelStep,
@@ -335,8 +335,9 @@ def events_service():
         return_value=[["Philippines"], ["Hong Kong"]]
     )
     events_service_mock.get_events = mock.MagicMock(
-        return_value=EventsData(
+        return_value=PaginatedEventsData(
             count=2,
+            page_number=0,
             data=[
                 Event(
                     name="Content_Like",

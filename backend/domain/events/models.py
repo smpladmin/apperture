@@ -1,5 +1,5 @@
 import datetime
-from typing import List, Union
+from typing import List, Union, Optional
 
 from pydantic import BaseModel
 
@@ -7,8 +7,8 @@ from pydantic import BaseModel
 class Event(BaseModel):
     name: str
     timestamp: datetime.datetime
-    user_id: str
-    city: str
+    user_id: Optional[str]
+    city: Optional[str]
 
 
 class AuxTable1Event(BaseModel):
@@ -23,6 +23,7 @@ class AuxTable2Event(BaseModel):
     salary_basic: str
 
 
-class EventsData(BaseModel):
+class PaginatedEventsData(BaseModel):
     count: int
+    page_number: int
     data: Union[List[Event], List[AuxTable1Event], List[AuxTable2Event]]

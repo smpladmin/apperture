@@ -64,6 +64,16 @@ export type UserProperty = {
   Value: string;
 };
 
+export type UserActivity = {
+  name: string;
+  timestamp: Date;
+};
+
+export type UserActivityResponse = {
+  count: number;
+  data: UserActivity[];
+};
+
 export enum ConversionStatus {
   CONVERTED = 'converted',
   DROPPED = 'dropped',

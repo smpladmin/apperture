@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Drawer,
   DrawerBody,
@@ -19,9 +19,11 @@ import {
   ConversionWindowObj,
   FunnelStep,
   UserProperty,
+  UserActivityResponse,
 } from '@lib/domain/funnel';
 import { getUserProperty } from '@lib/services/funnelService';
 import { DateFilterObj } from '@lib/domain/common';
+import { getUserActivity } from '@lib/services/datasourceService';
 
 type UserConversionDrawerProps = {
   isOpen: boolean;
@@ -50,34 +52,48 @@ const UserConversionDrawer = ({
   const [tableState, setTableState] = useState<TableState>(TableState.PROPERTY);
   const [selectedUser, setSelectedUser] = useState<null | string>(null);
   const [userProperty, setUserProperty] = useState<UserProperty[] | null>(null);
+  const [userActivity, setUserActivity] = useState<UserActivityResponse>({
+    count: 0,
+    data: [],
+  });
   const [status, setStatus] = useState<ConversionStatus>(
     ConversionStatus.CONVERTED
   );
+  const [isTableDataLoading, setIsTableDataLoading] = useState(false);
+
   useEffect(() => {
-    const fetchUserProperty = async () => {
-      const response = await getUserProperty(
-        selectedUser as string,
-        datasourceId,
-        status == ConversionStatus.CONVERTED ? event : ''
-      );
-      if (response.property) {
-        const property: UserProperty[] = Object.keys(response.property)
+    const fetchUserDetails = async () => {
+      const [propertyResponse, activityResponse] = await Promise.all([
+        getUserProperty(
+          selectedUser as string,
+          datasourceId,
+          status == ConversionStatus.CONVERTED ? event : ''
+        ),
+        getUserActivity(selectedUser as string, datasourceId),
+      ]);
+
+      if (propertyResponse.property) {
+        const property: UserProperty[] = Object.keys(propertyResponse.property)
           .map((property) => {
             return {
               Property: property,
               Value:
-                typeof response.property[property] == 'object'
-                  ? JSON.stringify(response.property[property])
-                  : response.property[property],
+                typeof propertyResponse.property[property] == 'object'
+                  ? JSON.stringify(propertyResponse.property[property])
+                  : propertyResponse.property[property],
             };
           })
           .filter((property) => property.Value);
         setUserProperty(property);
       }
+      setUserActivity(activityResponse);
+      setIsTableDataLoading(false);
     };
+
     if (selectedUser) {
       setTableState(TableState.PROPERTY);
-      fetchUserProperty();
+      setIsTableDataLoading(true);
+      fetchUserDetails();
     } else {
       setTableState(TableState.LIST);
     }
@@ -123,6 +139,10 @@ const UserConversionDrawer = ({
                       setTableState(TableState.LIST);
                       setUserProperty(null);
                       setSelectedUser(null);
+                      setUserActivity({
+                        count: 0,
+                        data: [],
+                      });
                     }}
                   />
                 </Box>
@@ -139,12 +159,16 @@ const UserConversionDrawer = ({
               steps={selectedFunnelSteps}
               setSelectedUser={setSelectedUser}
               properties={userProperty as UserProperty[]}
+              userActivity={userActivity}
               tableState={tableState}
               setTableState={setTableState}
               dateFilter={dateFilter}
               conversionWindow={conversionWindow}
               status={status}
               setStatus={setStatus}
+              selectedUser={selectedUser}
+              setUserActivity={setUserActivity}
+              isTableDataLoading={isTableDataLoading}
             />
           </DrawerBody>
 
