@@ -130,7 +130,6 @@ export const getUserProperty = async (
   return response.data;
 };
 
-export const deleteFunnel = async (id: string) => {
-  const res = await AppertureDelete(`/funnels/${id}`);
-  return res;
+export const deleteFunnel = async (id: string, dsId: string) => {
+  return await AppertureDelete(`/funnels/${id}?datasource_id=${dsId}`);
 };

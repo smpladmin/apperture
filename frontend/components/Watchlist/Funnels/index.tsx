@@ -53,7 +53,7 @@ const SavedFunnels = ({ provider }: { provider: Provider }) => {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteFunnel(id);
+    await deleteFunnel(id, dsId as string);
     setRenderFunnel(true);
   };
 

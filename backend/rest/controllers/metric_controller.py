@@ -89,13 +89,11 @@ async def update_metric(
         segment_filter=dto.segmentFilter,
     )
     await metric_service.update_metric(metric_id=id, metric=metric)
-    notification = await notification_service.get_notification_by_reference(
-        reference=id, datasource_id=str(datasource.id)
+
+    ## delete any notification associated with the metric upon updating it
+    await notification_service.fetch_and_delete_notification(
+        reference_id=id, datasource_id=str(datasource.id)
     )
-    if notification:
-        await notification_service.delete_notification(
-            notification_id=str(notification.id)
-        )
     return metric
 
 
@@ -147,6 +145,12 @@ async def validate_metric_formula(
 @router.delete("/metrics/{metric_id}")
 async def delete_metrics(
     metric_id: str,
+    datasource_id: str,
     metric_service: MetricService = Depends(),
+    notification_service: NotificationService = Depends(),
 ):
     await metric_service.delete_metric(metric_id=metric_id)
+
+    await notification_service.fetch_and_delete_notification(
+        reference_id=metric_id, datasource_id=datasource_id
+    )
