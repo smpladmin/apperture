@@ -20,15 +20,12 @@ const SelectEventOrSegmentDropdown = ({
     <Dropdown isOpen={isOpen} width={'76'}>
       <Flex
         data-testid={'event-option'}
-        lineHeight={'xs-18'}
-        color={'black'}
-        fontSize={'xs-14'}
-        fontWeight={500}
         width={'full'}
-        p={2}
-        borderRadius={8}
+        px={'2'}
+        py={'3'}
+        borderRadius={'4'}
         _hover={{
-          background: 'white.100',
+          background: 'white.400',
         }}
         onClick={(e) => {
           e.stopPropagation();
@@ -37,20 +34,22 @@ const SelectEventOrSegmentDropdown = ({
         gap={'2'}
       >
         <Image src={cursorIcon} alt={'cursor-icon'} />
-        <Text fontSize={'xs-12'} lineHeight={'lh-130'} fontWeight={'500'}>
+        <Text
+          fontSize={'xs-14'}
+          lineHeight={'lh-130'}
+          fontWeight={'500'}
+          color={'black.500'}
+        >
           Events
         </Text>
       </Flex>
       <Flex
-        lineHeight={'xs-18'}
-        color={'black'}
-        fontSize={'xs-14'}
-        fontWeight={500}
         width={'full'}
-        p={2}
-        borderRadius={8}
+        px={'2'}
+        py={'3'}
+        borderRadius={'4'}
         _hover={{
-          background: 'white.100',
+          background: 'white.400',
         }}
         onClick={(e) => {
           e.stopPropagation();
@@ -58,9 +57,10 @@ const SelectEventOrSegmentDropdown = ({
         }}
         pointerEvents={'none'}
         gap={'2'}
+        hidden={true} // enable once selecting segment is enabled
       >
         <UsersFour size={18} color={GREY_600} />
-        <Text fontSize={'xs-12'} lineHeight={'lh-130'} fontWeight={'500'}>
+        <Text fontSize={'xs-14'} lineHeight={'lh-130'} fontWeight={'500'}>
           Segments
         </Text>
       </Flex>

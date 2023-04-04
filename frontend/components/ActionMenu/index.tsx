@@ -13,7 +13,10 @@ export const ActionMenu = ({
 }: ActionMenuProps) => {
   return (
     <Flex gap={'6'}>
-      <Box cursor={'not-allowed'}>
+      <Box
+        cursor={'not-allowed'}
+        hidden={true} //enable once share is functional
+      >
         <Share />
       </Box>
       <Box
@@ -23,7 +26,10 @@ export const ActionMenu = ({
       >
         <Bell />
       </Box>
-      <Box cursor={'not-allowed'}>
+      <Box
+        cursor={'not-allowed'}
+        hidden={true} //enable once bookmark is functional
+      >
         <BookmarkSimple />
       </Box>
     </Flex>

@@ -77,8 +77,9 @@ const SearchableCheckboxDropdown = ({
             <Text
               fontSize={'xs-14'}
               lineHeight={'xs-14'}
-              fontWeight={'medium'}
+              fontWeight={'500'}
               cursor={'pointer'}
+              color={'black.500'}
             >
               {'Select all'}
             </Text>
@@ -112,8 +113,9 @@ const SearchableCheckboxDropdown = ({
                     <Text
                       fontSize={'xs-14'}
                       lineHeight={'xs-14'}
-                      fontWeight={'medium'}
+                      fontWeight={'500'}
                       cursor={'pointer'}
+                      color={'black.500'}
                       wordBreak={'break-word'}
                     >
                       {listKey ? segmentPropertyItem : (value as string)}

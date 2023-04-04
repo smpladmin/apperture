@@ -1,7 +1,6 @@
 import { Flex, Text } from '@chakra-ui/react';
 import React from 'react';
 import {
-  MetricAggregate,
   MetricAggregatePropertiesAggregation,
   MetricComponentAggregation,
 } from '@lib/domain/metric';
@@ -20,7 +19,6 @@ type MetricViewComponentCardProps = {
   reference: string;
   filters: WhereFilter[];
   aggregation: MetricComponentAggregation;
-  aggregates: MetricAggregate[];
   breakdown: string[];
 };
 
@@ -31,7 +29,6 @@ const MetricViewComponentCard = ({
   reference,
   filters,
   aggregation,
-  aggregates,
   breakdown,
 }: MetricViewComponentCardProps) => {
   return (
@@ -40,7 +37,7 @@ const MetricViewComponentCard = ({
         <Flex
           data-testid="event-or-segment-component-variable"
           background={
-            useColorFromPallete(aggregates, definition, breakdown)
+            useColorFromPallete(definition, breakdown)
               ? COLOR_PALLETE_5[index].hexaValue
               : 'grey.400'
           }
@@ -56,7 +53,7 @@ const MetricViewComponentCard = ({
             lineHeight={'lh-130'}
             fontWeight={'500'}
             color={
-              useColorFromPallete(aggregates, definition, breakdown)
+              useColorFromPallete(definition, breakdown)
                 ? 'white.DEFAULT'
                 : 'grey.500'
             }

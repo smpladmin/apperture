@@ -84,6 +84,7 @@ const SearchableListDropdown = ({
                     lineHeight={'xs-14'}
                     fontWeight={'500'}
                     wordBreak={'break-word'}
+                    color={'black.500'}
                   >
                     {listKey ? segmentPropertyItem : (item as string)}
                   </Text>

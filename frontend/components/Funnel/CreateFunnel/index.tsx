@@ -10,7 +10,7 @@ import {
   FunnelStep,
   FunnelTrendsData,
 } from '@lib/domain/funnel';
-import TransientFunnelView from './TransientFunnelView';
+import TransientFunnelView from '../components/TransientFunnelView';
 import {
   filterFunnelSteps,
   getCountOfValidAddedSteps,

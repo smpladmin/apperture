@@ -73,7 +73,6 @@ const ViewMetricActionPanel = ({
                       reference={aggregate.reference_id}
                       filters={aggregate.filters}
                       aggregation={aggregate.aggregations}
-                      aggregates={aggregates}
                       breakdown={breakdown}
                     />
                     {!lastAggegate && <Divider borderColor={'white.200'} />}

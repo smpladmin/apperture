@@ -120,7 +120,7 @@ const StepFilter = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <Flex w={'full'}>
+        <Flex w={'full'} pl={'1'}>
           <Flex flexShrink={1} pt={'1'}>
             <ArrowElbowDownRight size={12} color={GREY_700} weight={'bold'} />
           </Flex>
@@ -152,9 +152,7 @@ const StepFilter = ({
                   alignItems={'center'}
                   justifyContent={'flex-end'}
                   height={6}
-                  maxW={'37'}
                   w={'full'}
-                  overflow={'hidden'}
                   p={1}
                   borderBottom={'1px'}
                   borderStyle={'dashed'}
@@ -169,7 +167,7 @@ const StepFilter = ({
                     lineHeight={'xs-14'}
                     color={'black.500'}
                   >
-                    {trimLabel(filter.operand, 20)}
+                    {trimLabel(filter.operand, 25)}
                   </Text>
                 </Flex>
                 <SearchableListDropdown
@@ -188,7 +186,6 @@ const StepFilter = ({
                 p={1}
                 height={6}
                 data-testid={'filter-operator'}
-                cursor={'not-allowed'}
                 borderRadius={'4px'}
                 _hover={{ color: 'grey.800', background: 'white.400' }}
               >

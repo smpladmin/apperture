@@ -25,6 +25,7 @@ import { cloneDeep, debounce, isEqual } from 'lodash';
 import { Node } from '@lib/domain/node';
 import {
   enableBreakdown,
+  getCountOfValidAggregates,
   isValidAggregates,
   replaceEmptyStringPlaceholder,
 } from '@components/Metric/util';
@@ -178,14 +179,40 @@ const CreateMetricAction = ({
 
   useEffect(() => {
     // enable save metric button when aggregate, metric name or definition changes
-    if (
+
+    const checkMetricDefinitionAndAggregateCount = (
+      metricDefinition: string,
+      aggregates: MetricAggregate[]
+    ) => {
+      /*
+        enable save metric if either of condition satisfies-
+        a. has metric definition
+          1. single aggregate - True
+          2. multiple aggregate - True
+
+        b. has no metric definition
+          1. single aggregate - True
+          2. multiple aggregate - False
+
+      */
+      if (metricDefinition) return true;
+
+      if (!metricDefinition && getCountOfValidAggregates(aggregates) === 1)
+        return true;
+
+      return false;
+    };
+
+    const enableSaveMetricButton =
       isValidAggregates(aggregates) &&
+      checkMetricDefinitionAndAggregateCount(metricDefinition, aggregates) &&
       isValidDefinition &&
       (!isEqual(savedMetric?.aggregates, aggregates) ||
         !isEqual(savedMetric?.breakdown, breakdown) ||
         savedMetric?.function != metricDefinition ||
-        savedMetric?.name !== metricName)
-    ) {
+        savedMetric?.name !== metricName);
+
+    if (enableSaveMetricButton) {
       setCanSaveMetric(true);
     } else {
       setCanSaveMetric(false);
@@ -291,7 +318,6 @@ const CreateMetricAction = ({
               updateAggregate={updateAggregate}
               removeAggregate={removeAggregate}
               aggregate={aggregate}
-              aggregates={aggregates}
               metricDefinition={metricDefinition}
               breakdown={breakdown}
             />

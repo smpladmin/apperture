@@ -7,7 +7,7 @@ import {
   FunnelTrendsData,
 } from '@lib/domain/funnel';
 import React from 'react';
-import TransientFunnelView from '../CreateFunnel/TransientFunnelView';
+import TransientFunnelView from '../components/TransientFunnelView';
 
 const RightView = ({
   funnelSteps,

@@ -72,7 +72,7 @@ const MetricAggregation = ({
   };
 
   return (
-    <Flex width={'full'} alignItems={'center'} gap={'3'}>
+    <Flex width={'full'} alignItems={'center'} gap={'3'} pl={'1'}>
       <ArrowElbowDownRight size={12} weight="bold" color={GREY_700} />
       <Flex alignItems={'center'} gap={'1'}>
         <Text
@@ -116,11 +116,13 @@ const MetricAggregation = ({
                     handleUpdateAggregationFunction(aggregation);
                   }}
                   data-testid={'metric-aggregation-options'}
+                  borderRadius={'4'}
                 >
                   <Text
                     fontWeight={500}
                     fontSize={'xs-14'}
-                    lineHeight={'xs-14'}
+                    lineHeight={'lh-130'}
+                    color={'black.500'}
                   >
                     {getDisplayAggregationFunctionText(aggregation)}
                   </Text>
@@ -171,7 +173,7 @@ const MetricAggregation = ({
                 data={eventProperties}
                 isLoading={loadingEventsAndProperties}
                 onSubmit={onSuggestionClick}
-                width={'76'}
+                width={'96'}
               />
             </Box>
           </>

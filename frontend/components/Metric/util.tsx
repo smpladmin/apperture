@@ -95,14 +95,13 @@ export const COLOR_PALLETE_5 = [
 ];
 
 export const useColorFromPallete = (
-  aggregates: MetricAggregate[],
   metricDefinition: string,
   breakdown: string[]
 ) => {
   /* 
     use color from pallete for aggregate variable if any of the following true conditons satisfies :
     a. has metric definition  
-        1. has one Aggregate // true
+        1. has one Aggregate // false
         2. has multiple aggregates // false
         3. has breakdown with one aggregate // false
 
@@ -111,13 +110,12 @@ export const useColorFromPallete = (
         1. has only one aggregate  // true
         2. has multiple aggregates // true
         3. has breakdown with one aggregate // false
-    c. 
+    
   */
 
   if (breakdown.length) return false;
 
-  if (metricDefinition && getCountOfValidAggregates(aggregates) > 1)
-    return false;
+  if (metricDefinition) return false;
 
   return true;
 };

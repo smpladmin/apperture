@@ -1,6 +1,6 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import React, { Fragment, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import {
   MetricAggregate,
@@ -33,7 +33,6 @@ type MetricComponentCardProps = {
   removeAggregate: Function;
   aggregate: MetricAggregate;
   loadingEventsAndProperties: boolean;
-  aggregates: MetricAggregate[];
   metricDefinition: string;
   breakdown: string[];
 };
@@ -47,7 +46,6 @@ const MetricComponentCard = ({
   updateAggregate,
   removeAggregate,
   aggregate,
-  aggregates,
   metricDefinition,
   breakdown,
 }: MetricComponentCardProps) => {
@@ -178,11 +176,11 @@ const MetricComponentCard = ({
       p={3}
       gap={'2'}
     >
-      <Flex gap={'2'} width={'full'} alignItems={'center'} py={'1'}>
+      <Flex gap={'2'} width={'full'} alignItems={'center'}>
         <Flex
           data-testid="event-or-segment-component-variable"
           background={
-            useColorFromPallete(aggregates, metricDefinition, breakdown)
+            useColorFromPallete(metricDefinition, breakdown)
               ? COLOR_PALLETE_5[index].hexaValue
               : 'white.200'
           }
@@ -190,7 +188,7 @@ const MetricComponentCard = ({
           textAlign="center"
           fontWeight={500}
           color={
-            useColorFromPallete(aggregates, metricDefinition, breakdown)
+            useColorFromPallete(metricDefinition, breakdown)
               ? 'white.DEFAULT'
               : 'grey.500'
           }
@@ -207,7 +205,7 @@ const MetricComponentCard = ({
           grow={1}
           cursor={'pointer'}
           color={'black'}
-          _hover={{ background: 'white.200' }}
+          _hover={{ background: 'white.400' }}
           borderRadius={'4'}
           data-testid="select-event-segment"
           onClick={() => setIsEventOrSegmentListOpen(true)}
