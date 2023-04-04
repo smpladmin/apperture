@@ -23,7 +23,7 @@ class AuxTable2Event(BaseModel):
     salary_basic: str
 
 
-class EventsData(BaseModel):
+class PaginatedEventsData(BaseModel):
     count: int
-    page_number: Optional[int]
+    page_number: int
     data: Union[List[Event], List[AuxTable1Event], List[AuxTable2Event]]

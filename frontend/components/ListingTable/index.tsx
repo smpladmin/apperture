@@ -120,7 +120,7 @@ const ListingTable = ({
             <Tbody>
               {getRowModel().rows.map((row, index) =>
                 fetchMoreData ? (
-                  <TableRow
+                  <PaginatedTableRow
                     row={row}
                     key={row.id + index}
                     index={index}
@@ -128,7 +128,7 @@ const ListingTable = ({
                     fetchMoreData={fetchMoreData}
                     hasMore={tableData.length < count}
                     setIsMoreDataLoading={setIsMoreDataLoading}
-                  ></TableRow>
+                  ></PaginatedTableRow>
                 ) : (
                   <Tr
                     key={row.id + index}
@@ -174,7 +174,7 @@ const ListingTable = ({
   );
 };
 
-type TableRowProps = {
+type PaginatedTableRowProps = {
   row: any;
   index: number;
   isLast: boolean;
@@ -183,7 +183,7 @@ type TableRowProps = {
   setIsMoreDataLoading?: Function;
 };
 
-const TableRow = (props: TableRowProps) => {
+const PaginatedTableRow = (props: PaginatedTableRowProps) => {
   const cardRef = useRef(null);
   useEffect(() => {
     if (!cardRef?.current) return;

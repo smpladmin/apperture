@@ -5,7 +5,7 @@ from domain.datasources.models import DataSource
 from domain.edge.models import Node
 from repositories.clickhouse.events import Events
 from domain.events.models import (
-    EventsData,
+    PaginatedEventsData,
     Event,
     AuxTable1Event,
     AuxTable2Event,
@@ -59,7 +59,7 @@ class EventsService:
         user_id: Union[str, None],
         page_number: int,
         page_size: int,
-    ) -> EventsData:
+    ) -> PaginatedEventsData:
         if is_aux:
             events = self.events.get_aux_events(
                 datasource_id=datasource_id, table_name=table_name
@@ -84,9 +84,9 @@ class EventsService:
                 page_number=page_number,
                 page_size=page_size,
             )
-            count = self.events.get_events_count(
+            ((count,),) = self.events.get_events_count(
                 datasource_id=datasource_id, user_id=user_id
-            )[0][0]
+            )
             data = (
                 [Event(name=name, timestamp=timestamp) for (name, timestamp) in events]
                 if user_id
@@ -97,4 +97,4 @@ class EventsService:
             )
             page_number = page_number + 1 if user_id else 0
 
-        return EventsData(count=count, data=data, page_number=page_number)
+        return PaginatedEventsData(count=count, data=data, page_number=page_number)

@@ -64,12 +64,12 @@ const UserConversionDrawer = ({
   useEffect(() => {
     const fetchUserDetails = async () => {
       const [propertyResponse, activityResponse] = await Promise.all([
-        await getUserProperty(
+        getUserProperty(
           selectedUser as string,
           datasourceId,
           status == ConversionStatus.CONVERTED ? event : ''
         ),
-        await getUserActivity(selectedUser as string, datasourceId),
+        getUserActivity(selectedUser as string, datasourceId),
       ]);
 
       if (propertyResponse.property) {

@@ -5,7 +5,7 @@ import pytest
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Node
-from domain.events.models import Event, EventsData
+from domain.events.models import Event, PaginatedEventsData
 from domain.events.service import EventsService
 
 
@@ -147,7 +147,7 @@ class TestEventsService:
             user_id=None,
             page_number=0,
             page_size=100,
-        ) == EventsData(
+        ) == PaginatedEventsData(
             count=2,
             page_number=0,
             data=[
@@ -195,7 +195,7 @@ class TestEventsService:
             page_size=100,
             table_name="events",
             is_aux=False,
-        ) == EventsData(
+        ) == PaginatedEventsData(
             count=2,
             page_number=4,
             data=[
