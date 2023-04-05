@@ -57,6 +57,7 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
     type: savedMetric?.dateFilter?.type || null,
   });
   const [isMetricBeingEdited, setIsMetricBeingEdited] = useState(false);
+  const [segmentFilter, setSegmentFilter] = useState(null);
 
   const router = useRouter();
   const dsId = savedMetric?.datasourceId || router.query.dsId;

@@ -328,6 +328,37 @@ const CreateMetricAction = ({
             />
           ))}
         </Flex>
+
+        <Flex direction={'column'} gap={'3'}>
+          <Flex justifyContent={'space-between'} alignItems={'center'}>
+            <Text
+              fontSize={'xs-12'}
+              lineHeight={'lh-135'}
+              color={'grey.500'}
+              px={'2'}
+              py={'1'}
+            >
+              Filter
+            </Text>
+            <Button
+              h={5.5}
+              minW={5.5}
+              w={5.5}
+              p={0}
+              data-testid={'add-event-button'}
+              onClick={addAggregate}
+              cursor={'pointer'}
+              variant={'secondary'}
+            >
+              <Plus size={14} color={BLACK_DEFAULT} weight={'bold'} />
+            </Button>
+          </Flex>
+
+          <Card p={'3'} borderRadius={'8'}>
+            <Flex></Flex>
+          </Card>
+        </Flex>
+
         <AddBreakdown
           metricDefinition={metricDefinition}
           aggregates={aggregates}
