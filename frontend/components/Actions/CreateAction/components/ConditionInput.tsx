@@ -158,8 +158,10 @@ const ConditionInput = ({
         }}
         bg={'white.100'}
         data-testid={`${type}-selector-input`}
-        onChange={(e) => {
-          updateHandler(e.target.value, type);
+        onKeyDown={(e) => {
+          if (e.key == 'Enter') {
+            updateHandler((e.target as HTMLInputElement).value, type);
+          }
         }}
         border={'none'}
         fontSize={'xs-12'}
