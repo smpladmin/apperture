@@ -45,10 +45,10 @@ const FunnelChart = ({ data, handleChartClick }: FunnelChartProps) => {
       customContent: (_: any, data: any) => {
         const stats = data?.length ? data[0] : null;
         if (stats) {
-          const { users, drop, conversionWrtPrevious } = stats.data;
+          const { users, drop, conversionWrtPrevious, event } = stats.data;
           return `<div id='funnel-tooltip' class='tooltip funnel'
           >
-            <span class='heading'>Checkout</span>
+            <span class='heading'>${event}</span>
             <div class='stats'>
               <div class='row'>
                 <span class='title'> Converted from previous step </span>
