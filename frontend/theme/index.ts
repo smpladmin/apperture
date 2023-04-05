@@ -73,6 +73,7 @@ const colors = {
     600: GREY_600,
     700: GREY_700,
     800: GREY_800,
+    900: ' #212121',
   },
   yellow: { 500: YELLOW_500, 600: '#fac213' },
   green: {
