@@ -58,6 +58,7 @@ class ComputedFunnelStep(BaseModel):
     event: str
     users: int
     conversion: float
+    conversion_wrt_previous: float
 
 
 class ComputedFunnel(BaseModel):

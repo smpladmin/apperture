@@ -56,8 +56,9 @@ class FunnelsService:
         funnel.updated_at = funnel.created_at
         await Funnel.insert(funnel)
 
-    def compute_conversion(self, n, data) -> float:
-        return data[n] * 100 / data[0] if data[0] != 0 else 0
+    def compute_conversion(self, n, data, wrt_previous=False) -> float:
+        denominator = (data[n-1] if n>0 else data[n]) if wrt_previous else data[0]
+        return data[n] * 100 / denominator if denominator != 0 else 0
 
     def compute_conversion_time(self, conversion_window: Union[ConversionWindow, None]):
         return (
@@ -101,6 +102,9 @@ class FunnelsService:
                 users=users_data[0][i],
                 conversion=float(
                     "{:.2f}".format(self.compute_conversion(i, users_data[0]))
+                ),
+                conversion_wrt_previous=float(
+                    "{:.2f}".format(self.compute_conversion(i, users_data[0], wrt_previous=True))
                 ),
             )
             for i, step in enumerate(steps)

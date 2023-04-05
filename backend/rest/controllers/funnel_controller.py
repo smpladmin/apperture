@@ -20,7 +20,6 @@ from rest.dtos.funnels import (
     FunnelConversionResponseBody,
 )
 from rest.middlewares import validate_jwt, get_user_id, get_user
-from tests.rest.controllers.conftest import notification_service
 from domain.notifications.service import NotificationService
 
 router = APIRouter(
