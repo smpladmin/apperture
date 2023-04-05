@@ -11,20 +11,18 @@
   box-shadow: none !important;
   opacity: 1 !important;
   font: unset !important;
-  /* top: 0 !important;
-  left: 0 !important; */
   width: max-content !important;
-  /* position: static !important; */
 }
 
 .tooltip.funnel {
   background-color: white;
   display: flex;
   flex-direction: column;
-  width: 195px;
+  width: 22rem;
+  padding: 0.75rem;
   opacity: 1;
   color: #0e0e1a;
-  font-family: 'Work Sans';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 500;
   font-size: 10px;
@@ -36,20 +34,12 @@
 }
 
 .tooltip.funnel .heading {
-  padding: 12px 12px 8px;
-  font-family: 'Work Sans';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 500;
-  font-size: 12px;
-  line-height: 14px;
-  /* identical to box height */
-
-  /* System/Black */
-
+  font-size: 14px;
+  line-height: 18px;
   color: #0e0e1a;
-
-  /* Inside auto layout */
-
   flex: none;
   order: 0;
   width: 100%;
@@ -59,9 +49,10 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.75rem;
   border-top: 0.6px solid #ededed;
-  padding: 8px 0;
+  margin-top: 0.75rem;
+  padding: 0.75rem 0;
 }
 
 .tooltip.funnel .stats .row {
@@ -72,7 +63,7 @@
 }
 
 .tooltip.funnel .stats .row span {
-  font-family: 'Work Sans';
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 500;
   font-size: 11px;
@@ -81,6 +72,8 @@
 
 .tooltip.funnel .stats .row .title {
   font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
   padding-left: 18px;
   position: relative;
 }
@@ -94,9 +87,16 @@
   content: url('../assets/icons/right-arrow-funnel-tooltip.svg');
 }
 .tooltip.funnel .stats .row .data {
-  font-weight: 600;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
 }
-
+.tooltip.funnel .stats .row .conversion-percentage {
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 12px;
+  color: #78787e;
+}
 .tooltip.funnel .action-button {
   text-align: center;
   color: #0e0e1a;
@@ -105,4 +105,10 @@
   font-weight: 400;
   font-size: 8px;
   line-height: 12px;
+}
+
+.tooltip.funnel .stats .row .previous-conversion {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }

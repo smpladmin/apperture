@@ -15,6 +15,7 @@ export type FunnelData = {
   event: string;
   users: number;
   conversion: number;
+  conversionWrtPrevious: number;
   drop: number;
 };
 
