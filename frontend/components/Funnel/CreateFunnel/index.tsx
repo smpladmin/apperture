@@ -1,4 +1,4 @@
-import { Flex } from '@chakra-ui/react';
+import { Flex, useToast } from '@chakra-ui/react';
 import CreateFunnelAction from './CreateFunnelAction';
 import { useEffect, useState } from 'react';
 import FunnelEmptyState from '../components/FunnelEmptyState';
@@ -35,6 +35,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const {
     query: { dsId, funnelId },
   } = router;
+  const toast = useToast();
 
   const datasourceId = (dsId as string) || savedFunnel?.datasourceId;
   const [funnelName, setFunnelName] = useState<string>(
@@ -152,11 +153,22 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           conversionWindow
         );
 
-    if (status === 200)
+    setSaveButtonDisabled(true);
+
+    if (status === 200) {
       router.push({
         pathname: '/analytics/funnel/view/[funnelId]',
         query: { funnelId: data?._id || funnelId, dsId },
       });
+    } else {
+      setSaveButtonDisabled(false);
+      toast({
+        title: 'Something went wrong!',
+        status: 'error',
+        variant: 'subtle',
+        isClosable: true,
+      });
+    }
   };
 
   return (

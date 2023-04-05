@@ -138,6 +138,8 @@ const CreateMetricAction = ({
 
   useEffect(() => {
     if (!isValidAggregates(aggregates)) return;
+    const abortController = new AbortController();
+    const signal = abortController.signal;
 
     const fetchMetric = async (aggregates: MetricAggregate[]) => {
       const processedAggregate = replaceEmptyStringPlaceholder(
@@ -150,7 +152,8 @@ const CreateMetricAction = ({
           : aggregates.map((aggregate) => aggregate.variable).join(','),
         processedAggregate,
         breakdown,
-        dateFilter
+        dateFilter,
+        signal
       );
 
       setMetric(result);
@@ -158,6 +161,8 @@ const CreateMetricAction = ({
     };
     setIsLoading(true);
     fetchMetric(aggregates);
+
+    return () => abortController.abort();
   }, [aggregates, metricDefinition, breakdown, dateFilter]);
 
   useEffect(() => {
