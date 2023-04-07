@@ -54,6 +54,8 @@ type CreateMetricActionProps = {
   dateFilter: DateFilterObj;
   metricDefinition: string;
   setMetricDefinition: Function;
+  segmentFilter: any;
+  setSegmentFilter: Function;
 };
 
 const CreateMetricAction = ({
@@ -72,6 +74,8 @@ const CreateMetricAction = ({
   dateFilter,
   metricDefinition,
   setMetricDefinition,
+  segmentFilter,
+  setSegmentFilter,
 }: CreateMetricActionProps) => {
   const router = useRouter();
   const dsId = savedMetric?.datasourceId || router.query.dsId;
@@ -330,7 +334,12 @@ const CreateMetricAction = ({
           ))}
         </Flex>
 
-        <SegmentFilter />
+        <SegmentFilter
+          segmentFilter={segmentFilter}
+          setSegmentFilter={setSegmentFilter}
+          eventProperties={eventProperties}
+          loadingEventProperties={loadingEventsAndProperties}
+        />
 
         <AddBreakdown
           metricDefinition={metricDefinition}

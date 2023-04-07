@@ -8,11 +8,8 @@ import {
   Text,
 } from '@chakra-ui/react';
 import SearchableDropdown from '@components/SearchableDropdown/SearchableDropdown';
-import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import { getSavedSegmentsForDatasourceId } from '@lib/services/segmentService';
-import { useRouter } from 'next/router';
 import { Check } from 'phosphor-react';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 
 const userOptions = [
   { label: 'Include Users', value: 1 },
@@ -21,10 +18,14 @@ const userOptions = [
 
 const SelectSegmentsDropdown = ({
   isSegmentListOpen,
+  setIsSegmentListOpen,
   isSegmentListLoading,
   segmentsList,
+  segmentFilter,
+  setSegmentFilter,
 }: any) => {
-  const [selectedValues, setSelectedValues] = useState([]);
+  const [includes, setIncludes] = useState<boolean>(segmentFilter.includes);
+  const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [areAllValuesSelected, setAreAllValuesSelected] = useState(false);
 
   useEffect(() => {
@@ -50,7 +51,21 @@ const SelectSegmentsDropdown = ({
     }
   };
 
-  console.log('segment id', segmentsList);
+  const handleOnSubmit = () => {
+    const groups = segmentsList
+      .filter((segment: any) => selectedValues.includes(segment._id))
+      .map((segment: any) => {
+        return {
+          _id: segment._id,
+          name: segment.name,
+          groups: segment.groups,
+        };
+      });
+
+    setSegmentFilter({ includes, groups });
+    setIsSegmentListOpen(false);
+  };
+
   return (
     <SearchableDropdown
       isOpen={isSegmentListOpen}
@@ -61,19 +76,28 @@ const SelectSegmentsDropdown = ({
     >
       {
         <>
-          <RadioGroup onChange={() => {}} value={1}>
+          <RadioGroup
+            value={+includes}
+            onChange={(value) => {
+              setIncludes(Boolean(+value));
+            }}
+          >
             <Flex gap={2}>
               {userOptions.map((option) => {
-                const isSelected = true === Boolean(option.value);
+                const isSelected = includes === Boolean(option.value);
+
                 return (
                   <Flex
+                    as={'label'}
                     padding={1}
                     gap={1}
                     alignItems={'center'}
-                    borderWidth={'.6px'}
+                    borderWidth={'0.6px'}
                     borderRadius={'4'}
                     borderColor={isSelected ? 'black.DEFAULT' : 'grey.400'}
                     background={isSelected ? 'white.400' : 'white.DEFAULT'}
+                    cursor={'pointer'}
+                    key={option.value}
                   >
                     {isSelected ? <Check size={12} /> : null}
                     <Text
@@ -97,7 +121,18 @@ const SelectSegmentsDropdown = ({
             overflowY={'scroll'}
           >
             <Flex direction={'column'}>
-              <Flex px={2} py={3} gap={3} alignItems={'center'} as={'label'}>
+              <Flex
+                px={2}
+                py={3}
+                gap={3}
+                alignItems={'center'}
+                as={'label'}
+                cursor={'pointer'}
+                _hover={{
+                  bg: 'white.100',
+                }}
+                borderRadius={'4'}
+              >
                 <Checkbox
                   colorScheme={'radioBlack'}
                   isChecked={areAllValuesSelected}
@@ -123,11 +158,17 @@ const SelectSegmentsDropdown = ({
                 {segmentsList.map((segment: any) => {
                   return (
                     <Flex
+                      key={segment._id}
                       px={2}
                       py={3}
                       gap={3}
                       alignItems={'center'}
                       as={'label'}
+                      cursor={'pointer'}
+                      _hover={{
+                        bg: 'white.100',
+                      }}
+                      borderRadius={'4'}
                     >
                       <Checkbox
                         colorScheme={'radioBlack'}
@@ -152,6 +193,7 @@ const SelectSegmentsDropdown = ({
             colorScheme={'radioBlack'}
             fontSize={'xs-14'}
             lineHeight={'lh-130'}
+            onClick={handleOnSubmit}
           >
             +Add
           </Button>

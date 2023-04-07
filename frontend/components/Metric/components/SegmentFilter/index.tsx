@@ -7,8 +7,14 @@ import { useRouter } from 'next/router';
 import { UsersFour } from 'phosphor-react';
 import React, { useEffect, useRef, useState } from 'react';
 import SelectSegmentsDropdown from './SelectSegmentsDropdown';
+import AddFilterComponent from '@components/StepFilters/AddFilter';
 
-const SegmentFilter = () => {
+const SegmentFilter = ({
+  segmentFilter,
+  setSegmentFilter,
+  loadingEventProperties,
+  eventProperties,
+}: any) => {
   const [isSegmentListOpen, setIsSegmentListOpen] = useState(false);
   const [isSegmentListLoading, setIsSegmentListLoading] = useState(false);
   const [segmentsList, setSegmentsList] = useState([]);
@@ -29,6 +35,7 @@ const SegmentFilter = () => {
     setIsSegmentListLoading(true);
     fetchSegments();
   }, []);
+
   return (
     <Flex direction={'column'} gap={'3'}>
       <Flex justifyContent={'space-between'} alignItems={'center'}>
@@ -44,26 +51,45 @@ const SegmentFilter = () => {
       </Flex>
 
       <Card p={'3'} borderRadius={'8'}>
-        <Flex gap={1} alignItems={'center'}>
-          <UsersFour size={20} color={GREY_600} />
+        <Flex direction={'column'} w={'full'}>
+          <Flex gap={1} alignItems={'center'}>
+            <UsersFour size={20} color={GREY_600} />
 
-          <Box position={'relative'} ref={segmentFilterRef}>
-            <Text
-              p={1}
-              fontSize={'xs-14'}
-              lineHeight={'lh-130'}
-              fontWeight={'500'}
-              onClick={() => setIsSegmentListOpen(true)}
-              cursor={'pointer'}
-            >
-              Include all users
-            </Text>
-            <SelectSegmentsDropdown
-              isSegmentListOpen={isSegmentListOpen}
-              isSegmentListLoading={isSegmentListLoading}
-              segmentsList={segmentsList}
+            <Box position={'relative'} ref={segmentFilterRef} w={'full'}>
+              <Text
+                p={'1'}
+                fontSize={'xs-14'}
+                lineHeight={'lh-130'}
+                fontWeight={'500'}
+                onClick={() => setIsSegmentListOpen(true)}
+                cursor={'pointer'}
+                _hover={{
+                  bg: 'white.400',
+                }}
+                borderRadius={'4'}
+                bg={isSegmentListOpen ? 'white.400' : ''}
+              >
+                Include all users
+              </Text>
+
+              <SelectSegmentsDropdown
+                isSegmentListOpen={isSegmentListOpen}
+                setIsSegmentListOpen={setIsSegmentListOpen}
+                isSegmentListLoading={isSegmentListLoading}
+                segmentsList={segmentsList}
+                segmentFilter={segmentFilter}
+                setSegmentFilter={setSegmentFilter}
+              />
+            </Box>
+          </Flex>
+          <Flex ml={'-1'}>
+            <AddFilterComponent
+              eventProperties={eventProperties}
+              loadingEventProperties={loadingEventProperties}
+              handleAddFilter={() => {}}
+              hideIndentIcon={true}
             />
-          </Box>
+          </Flex>
         </Flex>
       </Card>
     </Flex>
