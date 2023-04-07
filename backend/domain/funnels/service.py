@@ -56,9 +56,26 @@ class FunnelsService:
         funnel.updated_at = funnel.created_at
         await Funnel.insert(funnel)
 
-    def compute_conversion(self, n, data, wrt_previous=False) -> float:
-        denominator = (data[n-1] if n>0 else data[n]) if wrt_previous else data[0]
-        return data[n] * 100 / denominator if denominator != 0 else 0
+    def compute_conversion(
+        self,
+        step_number: int,
+        funnel_stepwise_users: List[int],
+        wrt_previous: bool = False,
+    ) -> float:
+        denominator = (
+            (
+                funnel_stepwise_users[step_number - 1]
+                if step_number > 0
+                else funnel_stepwise_users[step_number]
+            )
+            if wrt_previous
+            else funnel_stepwise_users[0]
+        )
+        return (
+            funnel_stepwise_users[step_number] * 100 / denominator
+            if denominator != 0
+            else 0
+        )
 
     def compute_conversion_time(self, conversion_window: Union[ConversionWindow, None]):
         return (
@@ -101,10 +118,20 @@ class FunnelsService:
                 event=step.event,
                 users=users_data[0][i],
                 conversion=float(
-                    "{:.2f}".format(self.compute_conversion(i, users_data[0]))
+                    "{:.2f}".format(
+                        self.compute_conversion(
+                            step_number=i, funnel_stepwise_users=list(users_data[0])
+                        )
+                    )
                 ),
                 conversion_wrt_previous=float(
-                    "{:.2f}".format(self.compute_conversion(i, users_data[0], wrt_previous=True))
+                    "{:.2f}".format(
+                        self.compute_conversion(
+                            step_number=i,
+                            funnel_stepwise_users=list(users_data[0]),
+                            wrt_previous=True,
+                        )
+                    )
                 ),
             )
             for i, step in enumerate(steps)

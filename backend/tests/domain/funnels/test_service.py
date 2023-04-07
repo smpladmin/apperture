@@ -75,8 +75,18 @@ class TestFunnelService:
             ),
         )
         self.computed_steps = [
-            ComputedFunnelStep(event="Login", users=100, conversion=100.0, conversion_wrt_previous=100.0),
-            ComputedFunnelStep(event="Chapter Click", users=40, conversion=40.0, conversion_wrt_previous=40.0),
+            ComputedFunnelStep(
+                event="Login",
+                users=100,
+                conversion=100.0,
+                conversion_wrt_previous=100.0,
+            ),
+            ComputedFunnelStep(
+                event="Chapter Click",
+                users=40,
+                conversion=40.0,
+                conversion_wrt_previous=40.0,
+            ),
         ]
         self.computed_funnel = ComputedFunnel(
             datasource_id=self.ds_id,
@@ -144,12 +154,12 @@ class TestFunnelService:
     @pytest.mark.parametrize(
         "n, data, conversion, wrt_previous",
         [
-            (1, (100, 40, 10), 40, False),
-            (0, (100, 40, 10), 100, False),
-            (1, (0, 40, 10), 0, False),
-            (2, (100, 40, 10), 10, False),
-            (2, (100, 40, 10), 25, True),
-            (0, (100, 40, 10), 100, True),
+            (1, [100, 40, 10], 40, False),
+            (0, [100, 40, 10], 100, False),
+            (1, [0, 40, 10], 0, False),
+            (2, [100, 40, 10], 10, False),
+            (2, [100, 40, 10], 25, True),
+            (0, [100, 40, 10], 100, True),
         ],
     )
     def test_compute_conversion(self, n, data, conversion, wrt_previous):
