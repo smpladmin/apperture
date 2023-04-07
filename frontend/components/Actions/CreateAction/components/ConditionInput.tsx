@@ -48,6 +48,7 @@ const ConditionInput = ({
     dropDownHandler && dropDownHandler(value);
     closeDropdown();
   };
+  const inputRef = useRef<HTMLInputElement>(null);
 
   return (
     <Box
@@ -146,6 +147,7 @@ const ConditionInput = ({
         </Flex>
       </Flex>
       <Input
+        ref={inputRef}
         px={'3'}
         py={'2'}
         placeholder={placeholder}
@@ -161,7 +163,11 @@ const ConditionInput = ({
         onKeyDown={(e) => {
           if (e.key == 'Enter') {
             updateHandler((e.target as HTMLInputElement).value, type);
+            inputRef.current?.blur();
           }
+        }}
+        onBlur={(e) => {
+          updateHandler(e.target.value, type);
         }}
         border={'none'}
         fontSize={'xs-12'}
