@@ -101,6 +101,10 @@ class Filters(EventsBase):
                 criterion.append(operand.isin(filter.values))
         elif filter.operator == FilterOperatorsString.IS_NOT:
             criterion.append(operand.notin(filter.values))
+        elif filter.operator == FilterOperatorsString.CONTAINS:
+            criterion.append(operand.ilike(f"%%{filter.values[0]}%%"))
+        elif filter.operator == FilterOperatorsString.DOES_NOT_CONTAIN:
+            criterion.append(operand.not_ilike(f"%%{filter.values[0]}%%"))
         return criterion
 
     def get_criterion_for_where_filters(self, filters: List[WhereSegmentFilter]):
