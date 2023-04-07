@@ -2,6 +2,7 @@ import { Flex, IconButton } from '@chakra-ui/react';
 import {
   SegmentFilter,
   SegmentFilterDataType,
+  SegmentFilterOperatorsString,
   SegmentProperty,
   WhereSegmentFilter,
 } from '@lib/domain/segment';
@@ -9,7 +10,7 @@ import React from 'react';
 import FilterConditions from '../FilterConditions';
 import FilterOperator from '../FilterOperator';
 import FilterOptions from '../FilterOptions';
-import InputValue from '../InputValue';
+import InputValue, { InputValueType } from '../InputValue';
 import SelectEventProperty from '../SelectEventProperty';
 import SelectValue from '../SelectValue';
 
@@ -54,12 +55,25 @@ const WhereSegmentFilter = ({
         updateGroupsState={updateGroupsState}
       />
       {[SegmentFilterDataType.STRING].includes(filter.datatype) ? (
-        <SelectValue
-          filter={filter}
-          filters={filters}
-          updateGroupsState={updateGroupsState}
-          index={index}
-        />
+        [
+          SegmentFilterOperatorsString.IS,
+          SegmentFilterOperatorsString.IS_NOT,
+        ].includes(filter.operator as SegmentFilterOperatorsString) ? (
+          <SelectValue
+            filter={filter}
+            filters={filters}
+            updateGroupsState={updateGroupsState}
+            index={index}
+          />
+        ) : (
+          <InputValue
+            index={index}
+            filter={filter}
+            filters={filters}
+            updateGroupsState={updateGroupsState}
+            type={InputValueType.TEXT}
+          />
+        )
       ) : null}
       {[SegmentFilterDataType.NUMBER].includes(filter.datatype) ? (
         <InputValue
@@ -67,6 +81,7 @@ const WhereSegmentFilter = ({
           filter={filter}
           filters={filters}
           updateGroupsState={updateGroupsState}
+          type={InputValueType.NUMBER}
         />
       ) : null}
       <FilterOptions
