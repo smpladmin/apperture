@@ -158,6 +158,7 @@ const ViewMetric = ({
             metricDefinition={savedMetric.function}
             aggregates={savedMetric.aggregates}
             breakdown={savedMetric.breakdown}
+            segmentFilters={segmentFilters}
           />
         </ActionPanel>
         <ViewPanel>

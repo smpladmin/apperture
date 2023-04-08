@@ -15,7 +15,8 @@ import {
   SegmentFilterOperatorsString,
   WhereSegmentFilter,
 } from '@lib/domain/segment';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import { getSelectedSegmentsText } from '@components/Metric/util';
 
 type SegmentFilterProps = {
   index: number;
@@ -125,8 +126,14 @@ const SegmentFilter = ({
                 }}
                 borderRadius={'4'}
                 bg={isSegmentListOpen ? 'white.400' : ''}
+                maxWidth={'70'}
+                overflow={'clip'}
+                wordBreak={'keep-all'}
               >
-                Include all users
+                {getSelectedSegmentsText(
+                  segmentFilter.includes,
+                  segmentFilter.segments
+                )}
               </Text>
 
               <SelectSegmentsDropdown

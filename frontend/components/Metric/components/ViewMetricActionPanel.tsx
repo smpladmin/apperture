@@ -1,18 +1,24 @@
 import { Box, Divider, Flex, Text } from '@chakra-ui/react';
 import MetricViewComponentCard from './MetricViewComponentCard';
-import { MetricAggregate } from '@lib/domain/metric';
+import { MetricAggregate, MetricSegmentFilter } from '@lib/domain/metric';
 import Card from '@components/Card';
-import { Function } from 'phosphor-react';
+import { Function, UsersFour } from 'phosphor-react';
 import { Fragment } from 'react';
+import ViewFilter from '@components/StepFilters/ViewFilter';
+import { WhereSegmentFilter } from '@lib/domain/segment';
+import { getSelectedSegmentsText } from '../util';
+import { GREY_600 } from '@theme/index';
 
 const ViewMetricActionPanel = ({
   metricDefinition,
   aggregates,
   breakdown,
+  segmentFilters,
 }: {
   metricDefinition: string;
   aggregates: MetricAggregate[];
   breakdown: string[];
+  segmentFilters: MetricSegmentFilter[] | null;
 }) => {
   return (
     <Card>
@@ -83,6 +89,47 @@ const ViewMetricActionPanel = ({
           </Card>
         </Flex>
 
+        {segmentFilters &&
+          segmentFilters.map((segmentFilter) => {
+            const customSegmentFilters = segmentFilter.custom
+              .filters as WhereSegmentFilter[];
+            return (
+              <Flex direction={'column'} gap={'3'}>
+                <Text
+                  fontSize={'xs-12'}
+                  lineHeight={'xs-12'}
+                  fontWeight={'400'}
+                  color={'grey.500'}
+                >
+                  Filter
+                </Text>
+                <Card borderRadius={'8'} borderColor={'white.200'} p={'3'}>
+                  <Flex direction={'column'} gap={'1'}>
+                    <Flex gap={'2'} alignItems={'center'}>
+                      <UsersFour size={20} color={GREY_600} />
+                      <Text
+                        fontSize={'xs-14'}
+                        lineHeight={'xs-14'}
+                        fontWeight={'500'}
+                      >
+                        {getSelectedSegmentsText(
+                          segmentFilter.includes,
+                          segmentFilter.segments
+                        )}
+                      </Text>
+                    </Flex>
+                    {Boolean(customSegmentFilters.length) &&
+                      customSegmentFilters.map((filter, index: number) => (
+                        <Box px={'1'}>
+                          <ViewFilter key={index} filter={filter} />
+                        </Box>
+                      ))}
+                  </Flex>
+                </Card>
+              </Flex>
+            );
+          })}
+
         {!!breakdown?.length && (
           <Flex direction={'column'} gap={'3'}>
             <Text
@@ -93,7 +140,7 @@ const ViewMetricActionPanel = ({
             >
               Breakdown
             </Text>
-            <Card borderRadius={'8'} borderColor={'white.200'}>
+            <Card borderRadius={'8'} borderColor={'white.200'} p={'3'}>
               {
                 <Text
                   fontSize={'xs-14'}
