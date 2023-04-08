@@ -47,9 +47,6 @@ const ViewMetric = ({
   const [disableAlert, setDisableAlert] = useState(false);
 
   useEffect(() => {
-    const abortController = new AbortController();
-    const signal = abortController.signal;
-
     const fetchMetric = async () => {
       const result = await computeMetric(
         savedMetric.datasourceId,
@@ -58,15 +55,12 @@ const ViewMetric = ({
         savedMetric.aggregates,
         savedMetric.breakdown,
         dateFilter,
-        segmentFilters,
-        signal
+        segmentFilters
       );
       setComputedMetric(result);
       setIsLoading(false);
     };
     fetchMetric();
-
-    return () => abortController.abort();
   }, []);
 
   useEffect(() => {
