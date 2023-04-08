@@ -7,7 +7,7 @@ import {
   MetricTableData,
   MetricTrendData,
 } from '@lib/domain/metric';
-import { convertISODateToReadableDate } from '@lib/utils/common';
+import { convertISODateToReadableDate, trimLabel } from '@lib/utils/common';
 import {
   BLUE_500,
   GREEN_500,
@@ -15,7 +15,7 @@ import {
   RED_500,
   YELLOW_500,
 } from '@theme/index';
-import { WhereSegmentFilter } from '@lib/domain/segment';
+import { SegmentGroup, WhereSegmentFilter } from '@lib/domain/segment';
 
 export const replaceEmptyStringPlaceholder = (
   aggregates: MetricAggregate[]
@@ -104,6 +104,29 @@ export const isValidAggregates = (
       segmentFilters[0].custom.filters as WhereSegmentFilter[]
     )
   );
+};
+
+export const checkMetricDefinitionAndAggregateCount = (
+  metricDefinition: string,
+  aggregates: MetricAggregate[]
+) => {
+  /*
+        enable save metric if either of condition satisfies-
+        a. has metric definition
+          1. single aggregate - True
+          2. multiple aggregate - True
+
+        b. has no metric definition
+          1. single aggregate - True
+          2. multiple aggregate - False
+
+      */
+  if (metricDefinition) return true;
+
+  if (!metricDefinition && getCountOfValidAggregates(aggregates) === 1)
+    return true;
+
+  return false;
 };
 
 export const formatDate = (date: string): string => {
@@ -246,4 +269,22 @@ export const metricAggregationDisplayText: { [key: string]: string } = {
 
 export const getDisplayAggregationFunctionText = (value: string) => {
   return metricAggregationDisplayText[value];
+};
+
+export const getSelectedSegmentsText = (
+  includes: boolean,
+  selectedSegments: {
+    id: string;
+    name: string;
+    groups: SegmentGroup[];
+  }[]
+) => {
+  if (!selectedSegments.length) {
+    return 'Include all users';
+  }
+
+  const isIncludedOrExcludedText = includes ? 'Includes' : 'Excludes';
+  const selectedSegmentsName = selectedSegments.map((seg) => seg.name);
+
+  return trimLabel(`${isIncludedOrExcludedText} ${selectedSegmentsName}`, 35);
 };

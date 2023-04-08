@@ -40,9 +40,15 @@ const SelectSegmentsDropdown = ({
   const [segmentsList, setSegmentsList] = useState([]);
   const [isSegmentListLoading, setIsSegmentListLoading] = useState(false);
 
-  const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [areAllValuesSelected, setAreAllValuesSelected] = useState(false);
   const [includes, setIncludes] = useState<boolean>(segmentFilter.includes);
+
+  const selectedSegmentFilterIds = segmentFilter.segments.map(
+    (segment) => segment.id
+  );
+  const [selectedValues, setSelectedValues] = useState<string[]>(
+    selectedSegmentFilterIds
+  );
 
   const router = useRouter();
   const { dsId } = router.query;
