@@ -33,7 +33,7 @@ const ViewMetricActionPanel = ({
             >
               Metric Definition
             </Text>
-            <Card borderRadius={'8'} borderColor={'white.200'}>
+            <Card borderRadius={'8'} borderColor={'white.200'} p={'3'}>
               <Flex alignItems={'center'} gap={'2'}>
                 <Box
                   bg={'blue.500'}
