@@ -49,12 +49,16 @@ class Segments(EventsBase):
         )
 
     def build_segment_filter_on_metric_criterion(
-        self, segment_filter: SegmentFilter
+        self, segment_filter: List[SegmentFilter]
     ) -> ContainsCriterion:
-        query = self.build_segment_users_query(groups=segment_filter.groups)
+        segment_groups = [segment.groups for segment in segment_filter[0].segments]
+        groups = [group for groups in segment_groups for group in groups]
+        groups.append(segment_filter[0].custom)
+
+        query = self.build_segment_users_query(groups=groups)
         return (
             self.table.user_id.isin(query)
-            if segment_filter.includes
+            if segment_filter[0].includes
             else self.table.user_id.notin(query)
         )
 

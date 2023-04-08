@@ -52,7 +52,7 @@ class MetricService:
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
         date_filter: Union[DateFilter, None],
-        segment_filter: Union[SegmentFilter, None],
+        segment_filter: Union[List[SegmentFilter], None],
     ) -> List[ComputedMetricStep]:
 
         start_date, end_date = (
@@ -189,7 +189,7 @@ class MetricService:
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
         date_filter: Union[DateFilter, None],
-        segment_filter: Union[SegmentFilter, None],
+        segment_filter: Union[List[SegmentFilter], None],
     ):
         return Metric(
             datasource_id=datasource_id,
