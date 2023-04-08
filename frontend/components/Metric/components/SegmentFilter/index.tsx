@@ -126,9 +126,6 @@ const SegmentFilter = ({
                 }}
                 borderRadius={'4'}
                 bg={isSegmentListOpen ? 'white.400' : ''}
-                maxWidth={'70'}
-                overflow={'clip'}
-                wordBreak={'keep-all'}
               >
                 {getSelectedSegmentsText(
                   segmentFilter.includes,
