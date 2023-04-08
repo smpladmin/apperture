@@ -8,6 +8,10 @@ import {
   Text,
 } from '@chakra-ui/react';
 import SearchableDropdown from '@components/SearchableDropdown/SearchableDropdown';
+import { MetricSegmentFilter } from '@lib/domain/metric';
+import { getSavedSegmentsForDatasourceId } from '@lib/services/segmentService';
+import cloneDeep from 'lodash/cloneDeep';
+import { useRouter } from 'next/router';
 import { Check } from 'phosphor-react';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 
@@ -16,17 +20,43 @@ const userOptions = [
   { label: 'Exclude Users', value: 0 },
 ];
 
+type SelectSegmentsDropdownProps = {
+  index: number;
+  isSegmentListOpen: boolean;
+  setIsSegmentListOpen: Function;
+  segmentFilter: MetricSegmentFilter;
+  updateSegmentFilter: Function;
+  segmentFilters: MetricSegmentFilter[];
+};
+
 const SelectSegmentsDropdown = ({
+  index,
   isSegmentListOpen,
   setIsSegmentListOpen,
-  isSegmentListLoading,
-  segmentsList,
   segmentFilter,
-  setSegmentFilter,
-}: any) => {
-  const [includes, setIncludes] = useState<boolean>(segmentFilter.includes);
+  updateSegmentFilter,
+  segmentFilters,
+}: SelectSegmentsDropdownProps) => {
+  const [segmentsList, setSegmentsList] = useState([]);
+  const [isSegmentListLoading, setIsSegmentListLoading] = useState(false);
+
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [areAllValuesSelected, setAreAllValuesSelected] = useState(false);
+  const [includes, setIncludes] = useState<boolean>(segmentFilter.includes);
+
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  useEffect(() => {
+    const fetchSegments = async () => {
+      const res = await getSavedSegmentsForDatasourceId(dsId as string);
+      setSegmentsList(res);
+      setIsSegmentListLoading(false);
+    };
+
+    setIsSegmentListLoading(true);
+    fetchSegments();
+  }, []);
 
   useEffect(() => {
     // check 'Select all' checkbox if all the options are selected
@@ -52,17 +82,21 @@ const SelectSegmentsDropdown = ({
   };
 
   const handleOnSubmit = () => {
-    const groups = segmentsList
+    const seletedSegments = segmentsList
       .filter((segment: any) => selectedValues.includes(segment._id))
       .map((segment: any) => {
         return {
-          _id: segment._id,
+          id: segment._id,
           name: segment.name,
           groups: segment.groups,
         };
       });
 
-    setSegmentFilter({ includes, groups });
+    const tempSegmentFilters = cloneDeep(segmentFilters);
+    tempSegmentFilters[index].includes = includes;
+    tempSegmentFilters[index].segments = seletedSegments;
+    updateSegmentFilter(tempSegmentFilters);
+
     setIsSegmentListOpen(false);
   };
 

@@ -1,5 +1,6 @@
 import { Flex, Text } from '@chakra-ui/react';
-import { SegmentGroup, SegmentGroupConditions } from '@lib/domain/segment';
+import { GroupConditions } from '@lib/domain/common';
+import { SegmentGroup } from '@lib/domain/segment';
 import React from 'react';
 
 type GroupConditionsProps = {
@@ -20,7 +21,7 @@ const GroupCondition = ({
       {group?.condition ? (
         <Flex
           justifyContent={'center'}
-          my={group?.condition === SegmentGroupConditions.AND ? '-3' : '2'}
+          my={group?.condition === GroupConditions.AND ? '-3' : '2'}
         >
           <Text
             px={'2'}

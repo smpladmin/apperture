@@ -1,4 +1,4 @@
-import { DateFilter, DateFilterType } from './common';
+import { DateFilter, DateFilterType, GroupConditions } from './common';
 import { AppertureUser } from './user';
 
 export type WhereSegmentFilter = {
@@ -55,13 +55,8 @@ export enum SegmentFilterConditions {
 
 export type SegmentGroup = {
   filters: SegmentFilter[];
-  condition: SegmentGroupConditions;
+  condition: GroupConditions;
 };
-
-export enum SegmentGroupConditions {
-  AND = 'and',
-  OR = 'or',
-}
 
 export type SegmentTableData = {
   count: number;

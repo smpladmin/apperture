@@ -24,7 +24,6 @@ import {
   SegmentFilter,
   SegmentFilterConditions,
   SegmentFilterDataType,
-  SegmentGroupConditions,
   WhereSegmentFilter,
 } from '@lib/domain/segment';
 import { getAppertureUserInfo } from '@lib/services/userService';
@@ -33,7 +32,7 @@ import {
   getMonthDateYearFormattedString,
 } from '../util';
 import { addDays } from 'date-fns';
-import { DateFilterType } from '@lib/domain/common';
+import { DateFilterType, GroupConditions } from '@lib/domain/common';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/utils/common');
@@ -195,7 +194,7 @@ describe('Create Segment', () => {
             datatype: SegmentFilterDataType.STRING,
           },
         ] as WhereSegmentFilter[],
-        condition: SegmentGroupConditions.AND,
+        condition: GroupConditions.AND,
       },
     ],
     name: 'Testing edit Segments ',
@@ -951,7 +950,7 @@ describe('Create Segment', () => {
                   values: ['android', 'ios', 'mac', 'windows'],
                 },
               ],
-              condition: SegmentGroupConditions.AND,
+              condition: GroupConditions.AND,
             },
           ],
         },
@@ -1052,7 +1051,7 @@ describe('Create Segment', () => {
                   type: FilterType.WHO,
                 },
               ],
-              condition: SegmentGroupConditions.AND,
+              condition: GroupConditions.AND,
             },
           ],
         },
@@ -1163,7 +1162,7 @@ describe('Create Segment', () => {
               type: FilterType.WHO,
             },
           ] as SegmentFilter[],
-          condition: SegmentGroupConditions.AND,
+          condition: GroupConditions.AND,
         },
       ],
       name: 'Testing edit Segments ',

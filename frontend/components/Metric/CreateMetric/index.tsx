@@ -7,13 +7,14 @@ import {
   MetricAggregate,
   MetricVariant,
   MetricBasicAggregation,
+  MetricSegmentFilter,
 } from '@lib/domain/metric';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Node } from '@lib/domain/node';
 import { useRouter } from 'next/router';
 import { getCountOfValidAggregates } from '../util';
-import { DateFilterObj } from '@lib/domain/common';
+import { DateFilterObj, GroupConditions } from '@lib/domain/common';
 import ActionHeader from '@components/EventsLayout/ActionHeader';
 import { saveMetric, updateMetric } from '@lib/services/metricService';
 import TransientMetricView from '../components/TransientMetricView';
@@ -56,11 +57,20 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
     filter: savedMetric?.dateFilter?.filter || null,
     type: savedMetric?.dateFilter?.type || null,
   });
+  const [segmentFilters, setSegmentFilters] = useState<MetricSegmentFilter[]>(
+    savedMetric?.segmentFilter || [
+      {
+        condition: GroupConditions.OR,
+        includes: true,
+        custom: {
+          condition: GroupConditions.AND,
+          filters: [],
+        },
+        segments: [],
+      },
+    ]
+  );
   const [isMetricBeingEdited, setIsMetricBeingEdited] = useState(false);
-  const [segmentFilter, setSegmentFilter] = useState({
-    includes: true,
-    groups: [],
-  });
 
   const router = useRouter();
   const dsId = savedMetric?.datasourceId || router.query.dsId;
@@ -102,7 +112,8 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
           metricDefinition,
           aggregates,
           breakdown,
-          dateFilter
+          dateFilter,
+          segmentFilters
         )
       : await saveMetric(
           metricName,
@@ -110,7 +121,8 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
           metricDefinition,
           aggregates,
           breakdown,
-          dateFilter
+          dateFilter,
+          segmentFilters
         );
 
     setCanSaveMetric(false);
@@ -130,6 +142,13 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
       });
     }
   };
+
+  const updateSegmentFilter = useCallback(
+    (metricSegmentFilter: MetricSegmentFilter[]) => {
+      setSegmentFilters(metricSegmentFilter);
+    },
+    [segmentFilters]
+  );
 
   return (
     <Flex
@@ -169,8 +188,8 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
             dateFilter={dateFilter}
             metricDefinition={metricDefinition}
             setMetricDefinition={setMetricDefinition}
-            segmentFilter={segmentFilter}
-            setSegmentFilter={setSegmentFilter}
+            segmentFilters={segmentFilters}
+            updateSegmentFilter={updateSegmentFilter}
           />
         </ActionPanel>
         <ViewPanel>

@@ -1,40 +1,97 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import Card from '@components/Card';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import { getSavedSegmentsForDatasourceId } from '@lib/services/segmentService';
 import { GREY_600 } from '@theme/index';
-import { useRouter } from 'next/router';
 import { UsersFour } from 'phosphor-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import SelectSegmentsDropdown from './SelectSegmentsDropdown';
 import AddFilterComponent from '@components/StepFilters/AddFilter';
+import { MetricSegmentFilter } from '@lib/domain/metric';
+import StepFilter from '@components/StepFilters/StepFilters';
+import { FilterType } from '@lib/domain/common';
+import {
+  SegmentFilterConditions,
+  SegmentFilterDataType,
+  SegmentFilterOperatorsString,
+  WhereSegmentFilter,
+} from '@lib/domain/segment';
+import { cloneDeep } from 'lodash';
+
+type SegmentFilterProps = {
+  index: number;
+  segmentFilter: MetricSegmentFilter;
+  updateSegmentFilter: Function;
+  loadingEventProperties: boolean;
+  eventProperties: string[];
+  segmentFilters: MetricSegmentFilter[];
+};
 
 const SegmentFilter = ({
+  index,
   segmentFilter,
-  setSegmentFilter,
+  updateSegmentFilter,
   loadingEventProperties,
   eventProperties,
-}: any) => {
+  segmentFilters,
+}: SegmentFilterProps) => {
   const [isSegmentListOpen, setIsSegmentListOpen] = useState(false);
-  const [isSegmentListLoading, setIsSegmentListLoading] = useState(false);
-  const [segmentsList, setSegmentsList] = useState([]);
-
-  const router = useRouter();
-  const { dsId } = router.query;
 
   const segmentFilterRef = useRef(null);
   useOnClickOutside(segmentFilterRef, () => setIsSegmentListOpen(false));
 
-  useEffect(() => {
-    const fetchSegments = async () => {
-      const res = await getSavedSegmentsForDatasourceId(dsId as string);
-      setSegmentsList(res);
-      setIsSegmentListLoading(false);
+  const customFilters = segmentFilter.custom.filters as WhereSegmentFilter[];
+
+  const handleAddFilter = (value: string) => {
+    const getFilterCondition = (filters: WhereSegmentFilter[]) => {
+      return !filters.length
+        ? SegmentFilterConditions.WHERE
+        : SegmentFilterConditions.AND;
     };
 
-    setIsSegmentListLoading(true);
-    fetchSegments();
-  }, []);
+    const newFilter: WhereSegmentFilter = {
+      condition: getFilterCondition(customFilters),
+      operand: value,
+      operator: SegmentFilterOperatorsString.IS,
+      values: [],
+      type: FilterType.WHERE,
+      all: false,
+      datatype: SegmentFilterDataType.STRING,
+    };
+
+    const tempFilters = cloneDeep(segmentFilters);
+    tempFilters[index].custom.filters.push(newFilter);
+    updateSegmentFilter(tempFilters);
+  };
+
+  const handleSetFilterValue = (filterIndex: number, values: string[]) => {
+    let stepFilters = [...customFilters];
+    stepFilters[filterIndex]['values'] = values;
+
+    const tempFilters = cloneDeep(segmentFilters);
+    tempFilters[index].custom.filters = stepFilters;
+    updateSegmentFilter(tempFilters);
+  };
+
+  const handleSetFilterProperty = (filterIndex: number, property: string) => {
+    let stepFilters = [...customFilters];
+    stepFilters[filterIndex]['operand'] = property;
+
+    const tempFilters = cloneDeep(segmentFilters);
+    tempFilters[index].custom.filters = stepFilters;
+    updateSegmentFilter(tempFilters);
+  };
+
+  const handleRemoveFilter = (filterIndex: number) => {
+    let stepFilters = [...customFilters];
+    stepFilters.splice(filterIndex, 1);
+
+    if (filterIndex === 0 && stepFilters.length)
+      stepFilters[0]['condition'] = SegmentFilterConditions.WHERE;
+
+    const tempFilters = cloneDeep(segmentFilters);
+    tempFilters[index].custom.filters = stepFilters;
+    updateSegmentFilter(tempFilters);
+  };
 
   return (
     <Flex direction={'column'} gap={'3'}>
@@ -50,7 +107,7 @@ const SegmentFilter = ({
         </Text>
       </Flex>
 
-      <Card p={'3'} borderRadius={'8'}>
+      <Card p={'3'} borderRadius={'8'} borderColor={'white.200'}>
         <Flex direction={'column'} w={'full'}>
           <Flex gap={1} alignItems={'center'}>
             <UsersFour size={20} color={GREY_600} />
@@ -73,20 +130,40 @@ const SegmentFilter = ({
               </Text>
 
               <SelectSegmentsDropdown
+                index={index}
                 isSegmentListOpen={isSegmentListOpen}
                 setIsSegmentListOpen={setIsSegmentListOpen}
-                isSegmentListLoading={isSegmentListLoading}
-                segmentsList={segmentsList}
                 segmentFilter={segmentFilter}
-                setSegmentFilter={setSegmentFilter}
+                updateSegmentFilter={updateSegmentFilter}
+                segmentFilters={segmentFilters}
               />
             </Box>
           </Flex>
-          <Flex ml={'-1'}>
+
+          {Boolean(customFilters.length) && (
+            <Flex direction={'column'} gap={'2'} mt={'2'}>
+              {customFilters.map((filter, index) => {
+                return (
+                  <StepFilter
+                    key={index}
+                    index={index}
+                    filter={filter}
+                    eventProperties={eventProperties}
+                    loadingEventProperties={loadingEventProperties}
+                    handleSetFilterProperty={handleSetFilterProperty}
+                    handleSetFilterValue={handleSetFilterValue}
+                    handleRemoveFilter={handleRemoveFilter}
+                  />
+                );
+              })}
+            </Flex>
+          )}
+
+          <Flex ml={'-1'} mt={'2'}>
             <AddFilterComponent
               eventProperties={eventProperties}
               loadingEventProperties={loadingEventProperties}
-              handleAddFilter={() => {}}
+              handleAddFilter={handleAddFilter}
               hideIndentIcon={true}
             />
           </Flex>
@@ -97,49 +174,3 @@ const SegmentFilter = ({
 };
 
 export default SegmentFilter;
-
-{
-  /* <Flex
-padding={1}
-gap={1}
-alignItems={'center'}
-borderWidth={'.6px'}
-borderRadius={'4'}
-borderColor={'black.DEFAULT'}
->
-<Check size={12} />
-<Text fontSize={'xs-12'} lineHeight={'lh-135'}>
-  Includes Users
-</Text>
-<Radio value={1} hidden />
-</Flex>
-<Flex
-padding={1}
-gap={1}
-alignItems={'center'}
-borderWidth={'.6px'}
-borderRadius={'4'}
-borderColor={'black.DEFAULT'}
->
-<Check size={12} />
-<Text fontSize={'xs-12'} lineHeight={'lh-135'}>
-  Excludes Users
-</Text>
-<Radio value={0} hidden />
-</Flex> */
-}
-
-{
-  /* <Button
-          h={5.5}
-          minW={5.5}
-          w={5.5}
-          p={0}
-          data-testid={'add-event-button'}
-        //   onClick={addAggregate}
-          cursor={'pointer'}
-          variant={'secondary'}
-        >
-          <Plus size={14} color={BLACK_DEFAULT} weight={'bold'} />
-        </Button> */
-}

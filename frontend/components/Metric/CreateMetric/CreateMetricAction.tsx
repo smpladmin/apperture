@@ -20,6 +20,7 @@ import {
   MetricVariant,
   ComputedMetric,
   MetricBasicAggregation,
+  MetricSegmentFilter,
 } from '@lib/domain/metric';
 import { cloneDeep, debounce, isEqual } from 'lodash';
 import { Node } from '@lib/domain/node';
@@ -31,9 +32,9 @@ import {
 } from '@components/Metric/util';
 import { DateFilterObj, WhereFilter } from '@lib/domain/common';
 import Card from '@components/Card';
-import { Function, Plus, UsersFour } from 'phosphor-react';
+import { Function, Plus } from 'phosphor-react';
 import AddBreakdown from '../components/AddBreakdown';
-import { BLACK_DEFAULT, GREY_600 } from '@theme/index';
+import { BLACK_DEFAULT } from '@theme/index';
 import SegmentFilter from '../components/SegmentFilter';
 
 const DEBOUNCE_WAIT_TIME = 800;
@@ -54,8 +55,8 @@ type CreateMetricActionProps = {
   dateFilter: DateFilterObj;
   metricDefinition: string;
   setMetricDefinition: Function;
-  segmentFilter: any;
-  setSegmentFilter: Function;
+  segmentFilters: MetricSegmentFilter[];
+  updateSegmentFilter: Function;
 };
 
 const CreateMetricAction = ({
@@ -74,8 +75,8 @@ const CreateMetricAction = ({
   dateFilter,
   metricDefinition,
   setMetricDefinition,
-  segmentFilter,
-  setSegmentFilter,
+  segmentFilters,
+  updateSegmentFilter,
 }: CreateMetricActionProps) => {
   const router = useRouter();
   const dsId = savedMetric?.datasourceId || router.query.dsId;
@@ -142,7 +143,8 @@ const CreateMetricAction = ({
   }, [aggregates, metricDefinition]);
 
   useEffect(() => {
-    if (!isValidAggregates(aggregates)) return;
+    if (!isValidAggregates(aggregates, segmentFilters)) return;
+
     const abortController = new AbortController();
     const signal = abortController.signal;
 
@@ -158,6 +160,7 @@ const CreateMetricAction = ({
         processedAggregate,
         breakdown,
         dateFilter,
+        segmentFilters,
         signal
       );
 
@@ -168,7 +171,7 @@ const CreateMetricAction = ({
     fetchMetric(aggregates);
 
     return () => abortController.abort();
-  }, [aggregates, metricDefinition, breakdown, dateFilter]);
+  }, [aggregates, metricDefinition, breakdown, dateFilter, segmentFilters]);
 
   useEffect(() => {
     // check for valid metric definition
@@ -214,7 +217,7 @@ const CreateMetricAction = ({
     };
 
     const enableSaveMetricButton =
-      isValidAggregates(aggregates) &&
+      isValidAggregates(aggregates, segmentFilters) &&
       checkMetricDefinitionAndAggregateCount(metricDefinition, aggregates) &&
       isValidDefinition &&
       (!isEqual(savedMetric?.aggregates, aggregates) ||
@@ -334,12 +337,17 @@ const CreateMetricAction = ({
           ))}
         </Flex>
 
-        <SegmentFilter
-          segmentFilter={segmentFilter}
-          setSegmentFilter={setSegmentFilter}
-          eventProperties={eventProperties}
-          loadingEventProperties={loadingEventsAndProperties}
-        />
+        {segmentFilters.map((segmentFilter, index) => (
+          <SegmentFilter
+            key={index}
+            index={index}
+            segmentFilter={segmentFilter}
+            updateSegmentFilter={updateSegmentFilter}
+            segmentFilters={segmentFilters}
+            eventProperties={eventProperties}
+            loadingEventProperties={loadingEventsAndProperties}
+          />
+        ))}
 
         <AddBreakdown
           metricDefinition={metricDefinition}

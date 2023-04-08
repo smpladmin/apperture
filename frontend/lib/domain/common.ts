@@ -81,3 +81,8 @@ export type FilterOptionMenuType = {
   label: FilterDataType | string;
   submenu: FilterOptionMenuType[];
 };
+
+export enum GroupConditions {
+  AND = 'and',
+  OR = 'or',
+}

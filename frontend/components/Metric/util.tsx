@@ -3,6 +3,7 @@ import {
   ComputedMetric,
   MetricAggregate,
   MetricBasicAggregation,
+  MetricSegmentFilter,
   MetricTableData,
   MetricTrendData,
 } from '@lib/domain/metric';
@@ -14,6 +15,7 @@ import {
   RED_500,
   YELLOW_500,
 } from '@theme/index';
+import { WhereSegmentFilter } from '@lib/domain/segment';
 
 export const replaceEmptyStringPlaceholder = (
   aggregates: MetricAggregate[]
@@ -56,6 +58,22 @@ export const getCountOfValidAggregates = (aggregates: MetricAggregate[]) => {
   return validAggregatesWithReferenceId.length;
 };
 
+const _isEveryCustomSegmentFilterValid = (filters: WhereSegmentFilter[]) => {
+  return filters?.every((filter) => filter.values.length);
+};
+
+export const isValidMetricSegmentFilter = (
+  segmentFilters: MetricSegmentFilter[]
+) => {
+  return segmentFilters.every(
+    (filter) =>
+      (filter.custom.filters.length || filter.segments.length) &&
+      _isEveryCustomSegmentFilterValid(
+        filter.custom.filters as WhereSegmentFilter[]
+      )
+  );
+};
+
 const _isValidAggregation = (aggregation: any) => {
   if (
     [MetricBasicAggregation.TOTAL, MetricBasicAggregation.UNIQUE].includes(
@@ -67,7 +85,10 @@ const _isValidAggregation = (aggregation: any) => {
   return Boolean(aggregation.property);
 };
 
-export const isValidAggregates = (aggregates: MetricAggregate[]) => {
+export const isValidAggregates = (
+  aggregates: MetricAggregate[],
+  segmentFilters: MetricSegmentFilter[]
+) => {
   return (
     aggregates.length &&
     aggregates.every(
@@ -78,6 +99,9 @@ export const isValidAggregates = (aggregates: MetricAggregate[]) => {
           (filter: WhereFilter) => filter.values.length
         ) &&
         _isValidAggregation(aggregate.aggregations)
+    ) &&
+    _isEveryCustomSegmentFilterValid(
+      segmentFilters[0].custom.filters as WhereSegmentFilter[]
     )
   );
 };
