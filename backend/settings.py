@@ -20,6 +20,10 @@ class AppertureSettings(BaseSettings):
     apperture_api_key: str
     fastapi_env: str = "test"
     cors_origins: List[str] = ["*"]
+    traces_sample_rate: float = 0.5
+    profiles_sample_rate: float = 0.5
+    sentry_dsn: str = ""
+    sentry_environment: str = "test"
 
     class Config:
         env_file = ".env"

@@ -32,6 +32,7 @@ pypika = "^0.48.9"
 fastapi-cache2 = {extras = ["redis"], version = "^0.2.0"}
 python-multipart = "^0.0.5"
 argon2-cffi = "^21.3.0"
+sentry-sdk = {extras = ["fastapi"], version = "^1.19.1"}
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
