@@ -48,6 +48,7 @@ const FunnelChart = ({ data, handleChartClick }: FunnelChartProps) => {
           const { users, drop, conversionWrtPrevious, event } = stats.data;
           return `<div id='funnel-tooltip' class='tooltip funnel'
           >
+          <i class="ph ph-arrow-down-right"></i>
             <span class='heading'>${event}</span>
             <div class='stats'>
               <div class='row'>
@@ -64,7 +65,7 @@ const FunnelChart = ({ data, handleChartClick }: FunnelChartProps) => {
                 <div class='previous-conversion'>
                   <span class='data'> ${formatDatalabel(drop)} </span>
                   <span class='conversion-percentage'> ${
-                    100 - conversionWrtPrevious + '%'
+                    (100 - conversionWrtPrevious).toFixed(2) + '%'
                   } </span>
                 </div>
               </div>

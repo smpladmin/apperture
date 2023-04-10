@@ -106,7 +106,7 @@ class FunnelsService:
         conversion_time = self.compute_conversion_time(
             conversion_window=conversion_window
         )
-        users_data = self.funnels.get_users_count(
+        [funnel_stepwise_users_data] = self.funnels.get_users_count(
             ds_id=ds_id,
             steps=steps,
             start_date=start_date,
@@ -116,11 +116,11 @@ class FunnelsService:
         computed_funnel = [
             ComputedFunnelStep(
                 event=step.event,
-                users=users_data[0][i],
+                users=funnel_stepwise_users_data[i],
                 conversion=float(
                     "{:.2f}".format(
                         self.compute_conversion(
-                            step_number=i, funnel_stepwise_users=list(users_data[0])
+                            step_number=i, funnel_stepwise_users=list(funnel_stepwise_users_data)
                         )
                     )
                 ),
@@ -128,7 +128,7 @@ class FunnelsService:
                     "{:.2f}".format(
                         self.compute_conversion(
                             step_number=i,
-                            funnel_stepwise_users=list(users_data[0]),
+                            funnel_stepwise_users=list(funnel_stepwise_users_data),
                             wrt_previous=True,
                         )
                     )
