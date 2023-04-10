@@ -1607,7 +1607,7 @@ describe('Create Segment', () => {
       expect(queryTextElements).toEqual(['where', 'device', 'Is true']);
     });
 
-    it('change operator for string datatype filter, operators should be `Is/ Is not/ Contains/ Does not Contain`', async () => {
+    it('should change operators to string datatype filter operators, operators should be `Is/ Is not/ Contains/ Does not Contain`', async () => {
       await act(async () => {
         render(
           <RouterContext.Provider
