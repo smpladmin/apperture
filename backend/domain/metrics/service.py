@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import logging
 from typing import List, Union
 from beanie import PydanticObjectId
 from fastapi import Depends
@@ -233,10 +234,13 @@ class MetricService:
         ).to_list()
 
     async def get_metrics_for_datasource_id(self, datasource_id: str) -> List[Metric]:
-        return await Metric.find(
+        logging.info(f"Getting metrics for datasource {datasource_id}")
+        metrics = await Metric.find(
             Metric.datasource_id == PydanticObjectId(datasource_id),
             Metric.enabled != False,
         ).to_list()
+        logging.info(f"Found metrics: {metrics}")
+        return metrics
 
     async def delete_metric(self, metric_id: str):
         await Metric.find_one(
