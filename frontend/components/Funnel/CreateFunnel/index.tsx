@@ -35,7 +35,6 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const {
     query: { dsId, funnelId },
   } = router;
-  const toast = useToast();
 
   const datasourceId = (dsId as string) || savedFunnel?.datasourceId;
   const [funnelName, setFunnelName] = useState<string>(
@@ -162,12 +161,6 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
       });
     } else {
       setSaveButtonDisabled(false);
-      toast({
-        title: 'Something went wrong!',
-        status: 'error',
-        variant: 'subtle',
-        isClosable: true,
-      });
     }
   };
 
