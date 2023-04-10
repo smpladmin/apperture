@@ -560,7 +560,7 @@ describe('Create Metric', () => {
   });
 
   describe('enable/disable save button', () => {
-    it('save button shoule be disabled if aggregates are not valid', async () => {
+    it('save button should be disabled if aggregates are not valid', async () => {
       mockedIsValidAggregates.mockReturnValue(false);
       await renderMetricComponent();
 
@@ -568,7 +568,7 @@ describe('Create Metric', () => {
       expect(saveButton).toBeDisabled();
     });
 
-    it('save button shoule be disabled if aggregates are valid, but formula is not valid', async () => {
+    it('save button should be disabled if aggregates are valid, but formula is not valid', async () => {
       mockedIsValidAggregates.mockReturnValue(true);
       mockedValidateMetricFormula.mockReturnValue(false);
       await renderMetricComponent();
@@ -750,7 +750,7 @@ describe('Create Metric', () => {
   });
 
   describe('segment filter', () => {
-    it('add a segment filter with includes option', async () => {
+    it('should add a segment filter with includes option', async () => {
       mockedGetSelectedSegmentsText.mockReturnValue(
         'Includes Segment1, Segment2'
       );
@@ -788,7 +788,7 @@ describe('Create Metric', () => {
       );
     });
 
-    it('add a segment filter with excludes option', async () => {
+    it('should add a segment filter with excludes option', async () => {
       mockedGetSelectedSegmentsText.mockReturnValue(
         'Excludes Segment1, Segment2'
       );
@@ -819,7 +819,7 @@ describe('Create Metric', () => {
       );
     });
 
-    it('add a new custom filter in segment group', async () => {
+    it('should add a new custom filter in segment group', async () => {
       await renderMetricComponent();
       await addNewEvent();
 

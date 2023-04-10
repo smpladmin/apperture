@@ -152,11 +152,15 @@ const CreateMetricAction = ({
       const processedAggregate = replaceEmptyStringPlaceholder(
         cloneDeep(aggregates)
       );
-      const result: ComputedMetric[] = await computeMetric(
-        dsId as string,
+
+      const definition =
         metricDefinition && metricDefinition.length
           ? metricDefinition.replace(/\s*/g, '')
-          : aggregates.map((aggregate) => aggregate.variable).join(','),
+          : aggregates.map((aggregate) => aggregate.variable).join(',');
+
+      const result: ComputedMetric[] = await computeMetric(
+        dsId as string,
+        definition,
         processedAggregate,
         breakdown,
         dateFilter,
@@ -192,15 +196,34 @@ const CreateMetricAction = ({
 
   useEffect(() => {
     // enable save metric button when aggregate, metric name or definition changes
+
+    const currentMetricState = {
+      name: metricName,
+      function: metricDefinition,
+      aggregates,
+      breakdown,
+      dateFilter,
+      segmentFilter: segmentFilters,
+    };
+    const savedMetricState = {
+      name: savedMetric?.name,
+      function: savedMetric?.function,
+      aggregates: savedMetric?.aggregates,
+      breakdown: savedMetric?.breakdown,
+      dateFilter: savedMetric?.dateFilter,
+      segmentFilter: savedMetric?.segmentFilter,
+    };
+
+    const isCurrentMetricStateEqualsSavedMetricState = isEqual(
+      currentMetricState,
+      savedMetricState
+    );
+
     const enableSaveMetricButton =
       isValidAggregates(aggregates, segmentFilters) &&
       checkMetricDefinitionAndAggregateCount(metricDefinition, aggregates) &&
       isValidDefinition &&
-      (!isEqual(savedMetric?.aggregates, aggregates) ||
-        !isEqual(savedMetric?.breakdown, breakdown) ||
-        !isEqual(savedMetric?.segmentFilter, segmentFilters) ||
-        savedMetric?.function != metricDefinition ||
-        savedMetric?.name !== metricName);
+      !isCurrentMetricStateEqualsSavedMetricState;
 
     if (enableSaveMetricButton) {
       setCanSaveMetric(true);
@@ -214,6 +237,7 @@ const CreateMetricAction = ({
     isValidDefinition,
     breakdown,
     segmentFilters,
+    dateFilter,
   ]);
 
   const functionBoxColor = metricDefinition ? 'blue.500' : 'grey.400';
