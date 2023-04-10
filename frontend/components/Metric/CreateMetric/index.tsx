@@ -1,4 +1,4 @@
-import { Flex } from '@chakra-ui/react';
+import { Flex, useToast } from '@chakra-ui/react';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import {
@@ -107,13 +107,16 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
           dateFilter
         );
 
-    if (status === 200)
+    setCanSaveMetric(false);
+
+    if (status === 200) {
       router.push({
         pathname: '/analytics/metric/view/[metricId]',
         query: { metricId: data?._id || metricId, dsId },
       });
-
-    setCanSaveMetric(false);
+    } else {
+      setCanSaveMetric(true);
+    }
   };
 
   return (

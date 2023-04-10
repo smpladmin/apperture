@@ -1,4 +1,4 @@
-import { Flex } from '@chakra-ui/react';
+import { Flex, useToast } from '@chakra-ui/react';
 import CreateFunnelAction from './CreateFunnelAction';
 import { useEffect, useState } from 'react';
 import FunnelEmptyState from '../components/FunnelEmptyState';
@@ -152,11 +152,16 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           conversionWindow
         );
 
-    if (status === 200)
+    setSaveButtonDisabled(true);
+
+    if (status === 200) {
       router.push({
         pathname: '/analytics/funnel/view/[funnelId]',
         query: { funnelId: data?._id || funnelId, dsId },
       });
+    } else {
+      setSaveButtonDisabled(false);
+    }
   };
 
   return (
