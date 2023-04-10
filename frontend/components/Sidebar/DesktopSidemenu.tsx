@@ -274,7 +274,41 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               onClick={() => handleRedirect('/analytics/segment/list/[dsId]')}
             />
           </Tooltip>
-
+          <Tooltip
+            label={'Retention'}
+            aria-label={'Retention'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Retention"
+              icon={
+                <i
+                  className={
+                    isPageActive('retention')
+                      ? 'ri-bar-chart-horizontal-fill'
+                      : 'ri-bar-chart-horizontal-fill'
+                  }
+                />
+              }
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={isPageActive('retention') ? 'black.50' : 'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={() =>
+                handleRedirect('/analytics/retention/create/[dsId]')
+              }
+            />
+          </Tooltip>
           <Divider borderColor={'black.50'} opacity={'0.3'} />
           <Text
             color={'grey.200'}
