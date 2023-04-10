@@ -246,6 +246,8 @@ describe('Create Segment', () => {
         total: 'Total',
         'is true': 'Is true',
         'is false': 'Is false',
+        contains: 'Contains',
+        'does not contain': 'Does not contain',
       };
       return capitalizedFirstLetterMap[val];
     });
@@ -1605,7 +1607,7 @@ describe('Create Segment', () => {
       expect(queryTextElements).toEqual(['where', 'device', 'Is true']);
     });
 
-    it('change operator for string datatype filter, operators should be `Is/ Is not`', async () => {
+    it('should change operators to string datatype filter operators, operators should be `Is/ Is not/ Contains/ Does not Contain`', async () => {
       await act(async () => {
         render(
           <RouterContext.Provider
@@ -1627,7 +1629,12 @@ describe('Create Segment', () => {
       const filterOperatorsOptionsText = filterOperatorsOptions.map(
         (filter) => filter.textContent
       );
-      expect(filterOperatorsOptionsText).toEqual(['Is', 'Is not']);
+      expect(filterOperatorsOptionsText).toEqual([
+        'Is',
+        'Is not',
+        'Contains',
+        'Does not contain',
+      ]);
 
       // click on 'Is not' operator
       await act(async () => {
@@ -1635,6 +1642,22 @@ describe('Create Segment', () => {
       });
       await waitFor(() => {
         expect(filterOperatorText.textContent).toEqual('Is not');
+      });
+
+      fireEvent.click(filterOperatorText);
+      const newFilterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+      // click on 'Contains' operator and check if Input Field is visible
+      await act(async () => {
+        fireEvent.click(newFilterOperatorsOptions[2]);
+      });
+
+      await waitFor(() => {
+        const filterOperatorText = screen.getByTestId('filter-operator');
+        expect(filterOperatorText.textContent).toEqual('Contains');
+        const inputField = screen.getByTestId('input-value');
+        expect(inputField).toBeVisible();
       });
     });
 

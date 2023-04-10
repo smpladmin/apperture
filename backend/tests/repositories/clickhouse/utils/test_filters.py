@@ -185,12 +185,42 @@ class TestFiltersUtil:
             == "toFloat64OrDefault(properties.prop1) NOT IN (10)"
         )
 
-    def test_build_criterion_for_string_filter(self):
+    def test_build_criterion_for_string_filter_in(self):
         assert (
             self.repo.build_criterion_for_string_filter(filter=self.filters[0])[
                 0
             ].get_sql()
             == "properties.prop1 IN ('va1','val2')"
+        )
+
+    def test_build_criterion_for_string_filter_contains(self):
+        filters = WhereSegmentFilter(
+            operator=FilterOperatorsString.CONTAINS,
+            operand="prop1",
+            values=["va1"],
+            all=False,
+            type=SegmentFilterConditions.WHERE,
+            condition=SegmentFilterConditions.WHERE,
+            datatype=FilterDataType.STRING,
+        )
+        assert (
+            self.repo.build_criterion_for_string_filter(filter=filters)[0].get_sql()
+            == """"properties.prop1" ILIKE '%%va1%%'"""
+        )
+
+    def test_build_criterion_for_string_filter_does_not_contain(self):
+        filters = WhereSegmentFilter(
+            operator=FilterOperatorsString.DOES_NOT_CONTAIN,
+            operand="prop1",
+            values=["va1"],
+            all=False,
+            type=SegmentFilterConditions.WHERE,
+            condition=SegmentFilterConditions.WHERE,
+            datatype=FilterDataType.STRING,
+        )
+        assert (
+            self.repo.build_criterion_for_string_filter(filter=filters)[0].get_sql()
+            == """"properties.prop1" NOT ILIKE '%%va1%%'"""
         )
 
     def test_get_criterion_for_where_filters(self):
