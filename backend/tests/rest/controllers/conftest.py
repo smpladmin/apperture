@@ -464,7 +464,7 @@ def properties_service():
     )
     properties_service.fetch_properties.return_value = ["prop1", "prop2"]
     properties_service.refresh_properties.return_value = properties
-    properties_service.refresh_properties_for_all_datasources.return_value = None
+    properties_service.refresh_properties_for_all_datasources.return_value = properties
     return properties_service
 
 

@@ -37,5 +37,5 @@ ENV FASTAPI_ENV=production
 COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . .
-CMD bash run_mongo_migrations.sh && uvicorn server:app --host 0.0.0.0 --port 8001
+CMD uvicorn server:app --host 0.0.0.0 --port 8001
 
