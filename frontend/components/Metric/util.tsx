@@ -58,7 +58,9 @@ export const getCountOfValidAggregates = (aggregates: MetricAggregate[]) => {
   return validAggregatesWithReferenceId.length;
 };
 
-const _isEveryCustomSegmentFilterValid = (filters: WhereSegmentFilter[]) => {
+export const isEveryCustomSegmentFilterValid = (
+  filters: WhereSegmentFilter[]
+) => {
   return filters?.every((filter) => filter.values.length);
 };
 
@@ -68,7 +70,7 @@ export const isValidMetricSegmentFilter = (
   return segmentFilters.every(
     (filter) =>
       (filter.custom.filters.length || filter.segments.length) &&
-      _isEveryCustomSegmentFilterValid(
+      isEveryCustomSegmentFilterValid(
         filter.custom.filters as WhereSegmentFilter[]
       )
   );
@@ -100,7 +102,7 @@ export const isValidAggregates = (
         ) &&
         _isValidAggregation(aggregate.aggregations)
     ) &&
-    _isEveryCustomSegmentFilterValid(
+    isEveryCustomSegmentFilterValid(
       segmentFilters[0].custom.filters as WhereSegmentFilter[]
     )
   );

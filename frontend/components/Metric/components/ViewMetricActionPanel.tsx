@@ -90,11 +90,11 @@ const ViewMetricActionPanel = ({
         </Flex>
 
         {segmentFilters &&
-          segmentFilters.map((segmentFilter) => {
+          segmentFilters.map((segmentFilter, i) => {
             const customSegmentFilters = segmentFilter.custom
               .filters as WhereSegmentFilter[];
             return (
-              <Flex direction={'column'} gap={'3'}>
+              <Flex direction={'column'} gap={'3'} key={i}>
                 <Text
                   fontSize={'xs-12'}
                   lineHeight={'xs-12'}
@@ -120,8 +120,8 @@ const ViewMetricActionPanel = ({
                     </Flex>
                     {Boolean(customSegmentFilters.length) &&
                       customSegmentFilters.map((filter, index: number) => (
-                        <Box px={'1'}>
-                          <ViewFilter key={index} filter={filter} />
+                        <Box px={'1'} key={index}>
+                          <ViewFilter filter={filter} />
                         </Box>
                       ))}
                   </Flex>

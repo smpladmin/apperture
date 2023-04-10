@@ -9,6 +9,7 @@ import {
 } from '@chakra-ui/react';
 import SearchableDropdown from '@components/SearchableDropdown/SearchableDropdown';
 import { MetricSegmentFilter } from '@lib/domain/metric';
+import { SegmentWithUser } from '@lib/domain/segment';
 import { getSavedSegmentsForDatasourceId } from '@lib/services/segmentService';
 import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
@@ -37,7 +38,7 @@ const SelectSegmentsDropdown = ({
   updateSegmentFilter,
   segmentFilters,
 }: SelectSegmentsDropdownProps) => {
-  const [segmentsList, setSegmentsList] = useState([]);
+  const [segmentsList, setSegmentsList] = useState<SegmentWithUser[]>([]);
   const [isSegmentListLoading, setIsSegmentListLoading] = useState(false);
 
   const [areAllValuesSelected, setAreAllValuesSelected] = useState(false);
@@ -67,7 +68,7 @@ const SelectSegmentsDropdown = ({
   useEffect(() => {
     // check 'Select all' checkbox if all the options are selected
     if (
-      selectedValues.length === segmentsList.length &&
+      selectedValues.length === segmentsList?.length &&
       !isSegmentListLoading
     ) {
       setAreAllValuesSelected(true);
@@ -80,7 +81,7 @@ const SelectSegmentsDropdown = ({
     const checked = e.target.checked;
     if (checked) {
       setAreAllValuesSelected(true);
-      setSelectedValues(segmentsList.map((seg: any) => seg._id));
+      setSelectedValues(segmentsList.map((seg) => seg._id));
     } else {
       setAreAllValuesSelected(false);
       setSelectedValues([]);
@@ -89,8 +90,8 @@ const SelectSegmentsDropdown = ({
 
   const handleOnSubmit = () => {
     const seletedSegments = segmentsList
-      .filter((segment: any) => selectedValues.includes(segment._id))
-      .map((segment: any) => {
+      .filter((segment) => selectedValues.includes(segment._id))
+      .map((segment) => {
         return {
           id: segment._id,
           name: segment.name,
@@ -138,6 +139,7 @@ const SelectSegmentsDropdown = ({
                     background={isSelected ? 'white.400' : 'white.DEFAULT'}
                     cursor={'pointer'}
                     key={option.value}
+                    data-testid={'include-exclude-users'}
                   >
                     {isSelected ? <Check size={12} /> : null}
                     <Text
@@ -172,6 +174,7 @@ const SelectSegmentsDropdown = ({
                   bg: 'white.100',
                 }}
                 borderRadius={'4'}
+                data-testid={'select-all-checkbox'}
               >
                 <Checkbox
                   colorScheme={'radioBlack'}
@@ -191,11 +194,11 @@ const SelectSegmentsDropdown = ({
               </Flex>
               <CheckboxGroup
                 value={selectedValues}
-                onChange={(values: any) => {
+                onChange={(values: string[]) => {
                   setSelectedValues(values);
                 }}
               >
-                {segmentsList.map((segment: any) => {
+                {segmentsList?.map((segment) => {
                   return (
                     <Flex
                       key={segment._id}
@@ -209,6 +212,7 @@ const SelectSegmentsDropdown = ({
                         bg: 'white.100',
                       }}
                       borderRadius={'4'}
+                      data-testid={'saved-segment-options'}
                     >
                       <Checkbox
                         colorScheme={'radioBlack'}
@@ -234,6 +238,7 @@ const SelectSegmentsDropdown = ({
             fontSize={'xs-14'}
             lineHeight={'lh-130'}
             onClick={handleOnSubmit}
+            data-testid={'select-segments'}
           >
             +Add
           </Button>

@@ -126,6 +126,7 @@ const SegmentFilter = ({
                 }}
                 borderRadius={'4'}
                 bg={isSegmentListOpen ? 'white.400' : ''}
+                data-testid={'segment-filter-text'}
               >
                 {getSelectedSegmentsText(
                   segmentFilter.includes,

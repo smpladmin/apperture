@@ -2,7 +2,7 @@ import { Flex, Input, InputGroup, InputLeftElement } from '@chakra-ui/react';
 import { ChangeEvent, ReactNode, useEffect } from 'react';
 import { getSearchResult } from '@lib/utils/common';
 import LoadingSpinner from '@components/LoadingSpinner';
-import { SegmentProperty } from '@lib/domain/segment';
+import { SegmentProperty, SegmentWithUser } from '@lib/domain/segment';
 import Dropdown from './Dropdown';
 import { Node } from '@lib/domain/node';
 import { MagnifyingGlass } from 'phosphor-react';
@@ -11,7 +11,7 @@ type SearchableDropdownProps = {
   isOpen: boolean;
   isLoading: boolean;
   children: ReactNode;
-  data: Array<string | SegmentProperty | Node>;
+  data: Array<string | SegmentProperty | Node | SegmentWithUser>;
   setSearchData?: Function;
   dropdownPosition?: string;
   searchKey?: string;
