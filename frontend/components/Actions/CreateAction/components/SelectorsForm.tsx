@@ -92,11 +92,6 @@ const SelectorsForm = ({
     updateGroupAction(tempActionGroup);
   };
 
-  const debouncedHandleUpdateActionGroup = debounce(
-    handleUpdateGroupAction,
-    DEBOUNCED_WAIT_TIME
-  );
-
   const dropDownHandler = (value: UrlMatching) => {
     const tempActionGroup = cloneDeep(groups);
     tempActionGroup[index].url_matching = value;
@@ -177,7 +172,7 @@ const SelectorsForm = ({
               {condition === ConditionType.url ? (
                 <ConditionInput
                   key={condition}
-                  updateHandler={debouncedHandleUpdateActionGroup}
+                  updateHandler={handleUpdateGroupAction}
                   closeHandler={removeFromSelected}
                   title={conditionMeta[condition].title}
                   type={condition}
@@ -197,7 +192,7 @@ const SelectorsForm = ({
               ) : (
                 <ConditionInput
                   key={condition}
-                  updateHandler={debouncedHandleUpdateActionGroup}
+                  updateHandler={handleUpdateGroupAction}
                   closeHandler={removeFromSelected}
                   title={conditionMeta[condition].title}
                   type={condition}
@@ -254,7 +249,7 @@ const SelectorsForm = ({
         hidden={group.event === CaptureEvent.AUTOCAPTURE}
       >
         <ConditionInput
-          updateHandler={debouncedHandleUpdateActionGroup}
+          updateHandler={handleUpdateGroupAction}
           closeHandler={removeFromSelected}
           title="Page URL"
           type={'url'}
