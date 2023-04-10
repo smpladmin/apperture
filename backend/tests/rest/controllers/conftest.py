@@ -162,8 +162,15 @@ def funnel_service(apperture_user_response):
     funnels_future.set_result([FunnelWithUser.from_orm(funnel)])
 
     computed_transient_funnel = [
-        ComputedFunnelStep(event="Login", users=956, conversion=100.0),
-        ComputedFunnelStep(event="Chapter_Click", users=547, conversion=57.22),
+        ComputedFunnelStep(
+            event="Login", users=956, conversion=100.0, conversion_wrt_previous=100.0
+        ),
+        ComputedFunnelStep(
+            event="Chapter_Click",
+            users=547,
+            conversion=57.22,
+            conversion_wrt_previous=57.22,
+        ),
     ]
     computed_funnel = ComputedFunnel(
         datasource_id=funnel.datasource_id,
@@ -1030,8 +1037,18 @@ def node_trends_response():
 @pytest.fixture(scope="module")
 def computed_transient_funnel_response():
     return [
-        {"event": "Login", "users": 956, "conversion": 100.0},
-        {"event": "Chapter_Click", "users": 547, "conversion": 57.22},
+        {
+            "event": "Login",
+            "users": 956,
+            "conversion": 100.0,
+            "conversionWrtPrevious": 100.0,
+        },
+        {
+            "event": "Chapter_Click",
+            "users": 547,
+            "conversion": 57.22,
+            "conversionWrtPrevious": 57.22,
+        },
     ]
 
 
