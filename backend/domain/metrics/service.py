@@ -86,8 +86,12 @@ class MetricService:
             ]
         keys = ["date"]
         keys.extend(breakdown + function.split(","))
+        computed_metric_steps = []
 
         dates = list(set(row[0] for row in computed_metric))
+        if not dates:
+            return computed_metric_steps
+
         start_date = (
             datetime.strptime(start_date, "%Y-%m-%d").date()
             if start_date
@@ -108,7 +112,6 @@ class MetricService:
             dict(zip(breakdown, combination)) for combination in breakdown_combinations
         ]
 
-        computed_metric_steps = []
         for func in function.split(","):
             series = []
             if not breakdown_combinations:
