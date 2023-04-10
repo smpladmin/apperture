@@ -195,35 +195,31 @@ class TestFiltersUtil:
 
     def test_build_criterion_for_string_filter_contains(self):
         filters = WhereSegmentFilter(
-                operator=FilterOperatorsString.CONTAINS,
-                operand="prop1",
-                values=["va1"],
-                all=False,
-                type=SegmentFilterConditions.WHERE,
-                condition=SegmentFilterConditions.WHERE,
-                datatype=FilterDataType.STRING,
-            )
+            operator=FilterOperatorsString.CONTAINS,
+            operand="prop1",
+            values=["va1"],
+            all=False,
+            type=SegmentFilterConditions.WHERE,
+            condition=SegmentFilterConditions.WHERE,
+            datatype=FilterDataType.STRING,
+        )
         assert (
-            self.repo.build_criterion_for_string_filter(filter=filters)[
-                0
-            ].get_sql()
+            self.repo.build_criterion_for_string_filter(filter=filters)[0].get_sql()
             == """"properties.prop1" ILIKE '%%va1%%'"""
         )
 
     def test_build_criterion_for_string_filter_does_not_contain(self):
         filters = WhereSegmentFilter(
-                operator=FilterOperatorsString.DOES_NOT_CONTAIN,
-                operand="prop1",
-                values=["va1"],
-                all=False,
-                type=SegmentFilterConditions.WHERE,
-                condition=SegmentFilterConditions.WHERE,
-                datatype=FilterDataType.STRING,
-            )
+            operator=FilterOperatorsString.DOES_NOT_CONTAIN,
+            operand="prop1",
+            values=["va1"],
+            all=False,
+            type=SegmentFilterConditions.WHERE,
+            condition=SegmentFilterConditions.WHERE,
+            datatype=FilterDataType.STRING,
+        )
         assert (
-            self.repo.build_criterion_for_string_filter(filter=filters)[
-                0
-            ].get_sql()
+            self.repo.build_criterion_for_string_filter(filter=filters)[0].get_sql()
             == """"properties.prop1" NOT ILIKE '%%va1%%'"""
         )
 
