@@ -111,6 +111,10 @@ const ViewMetricActionPanel = ({
                         fontSize={'xs-14'}
                         lineHeight={'xs-14'}
                         fontWeight={'500'}
+                        maxWidth={'65'}
+                        textOverflow={'ellipsis'}
+                        overflow={'hidden'}
+                        whiteSpace={'nowrap'}
                       >
                         {getSelectedSegmentsText(
                           segmentFilter.includes,

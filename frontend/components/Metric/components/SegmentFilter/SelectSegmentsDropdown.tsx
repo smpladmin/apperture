@@ -47,9 +47,12 @@ const SelectSegmentsDropdown = ({
   const selectedSegmentFilterIds = segmentFilter.segments.map(
     (segment) => segment.id
   );
-  const [selectedValues, setSelectedValues] = useState<string[]>(
-    selectedSegmentFilterIds
-  );
+  const [selectedValues, setSelectedValues] = useState<string[]>([]);
+
+  useEffect(() => {
+    // preselect segment filters in dropdown
+    setSelectedValues(selectedSegmentFilterIds);
+  }, [segmentFilter]);
 
   const router = useRouter();
   const { dsId } = router.query;

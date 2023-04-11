@@ -7,7 +7,7 @@ import {
   MetricTableData,
   MetricTrendData,
 } from '@lib/domain/metric';
-import { convertISODateToReadableDate, trimLabel } from '@lib/utils/common';
+import { convertISODateToReadableDate } from '@lib/utils/common';
 import {
   BLUE_500,
   GREEN_500,
@@ -288,5 +288,5 @@ export const getSelectedSegmentsText = (
   const isIncludedOrExcludedText = includes ? 'Includes' : 'Excludes';
   const selectedSegmentsName = selectedSegments.map((seg) => seg.name);
 
-  return trimLabel(`${isIncludedOrExcludedText} ${selectedSegmentsName}`, 35);
+  return `${isIncludedOrExcludedText} ${selectedSegmentsName}`;
 };
