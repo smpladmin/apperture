@@ -14,35 +14,35 @@ class ClevertapEventsFetcher:
         }
         self.params = (("batch_size", "50000"),)
         self.date = date.replace("-", "")
-        self.request_data = (
-            f'"event_name":"UTM Visited","from":{self.date},"to":{self.date} '
-        )
-        self.request_data = "{" + self.request_data + "}"
-        self.url = "https://api.clevertap.com"
-        self.data_url = f"{self.url}/1/events.json"
+        self.request_data = {"from": int(self.date), "to": int(self.date)}
 
-    def get_start_cursor(self):
+        self.data_url = "https://in1.api.clevertap.com/1/events.json"
+
+    def get_start_cursor(self, event: str):
 
         logging.info(
-            f"Beginning to fetch events data from start={self.date} & end={self.date}"
+            f"Beginning to fetch event {event} data from start={self.date} & end={self.date}"
         )
+        json_data = json.dumps({**self.request_data, "event_name": event})
+        logging.info(json_data)
         request_cursor = requests.post(
             self.data_url,
             headers=self.headers,
             params=self.params,
-            data=self.request_data,
+            data=json_data,
         )
+        logging.info(request_cursor.content)
         return json.loads(request_cursor.content)["cursor"]
 
     def open(self):
         events_data_response = requests.post(
-            "https://api.clevertap.com/1/events.json?cursor=" + self.cursor,
+            f"{self.data_url}?cursor={self.cursor}",
             headers=self.headers,
         )
         return json.loads(events_data_response.content)
 
-    def fetch(self):
-        self.cursor = self.get_start_cursor()
+    def fetch(self, event: str):
+        self.cursor = self.get_start_cursor(event)
 
         while self.cursor:
             response = self.open()
