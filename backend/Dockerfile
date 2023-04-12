@@ -37,4 +37,4 @@ ENV FASTAPI_ENV=production
 COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . .
-CMD gunicorn server:app --worker-class uvicorn.workers.UvicornWorker --workers=2 --bind=0.0.0.0:8001 --timeout=600 --access-logfile - --error-logfile -
+CMD gunicorn server:app --worker-class uvicorn.workers.UvicornWorker --workers=1 --bind=0.0.0.0:8001 --timeout=600 --access-logfile - --error-logfile -
