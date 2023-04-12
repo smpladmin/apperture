@@ -32,7 +32,7 @@ class ClevertapEventsFetcher:
             data=json_data,
         )
         logging.info(request_cursor.content)
-        return json.loads(request_cursor.content)["cursor"]
+        return json.loads(request_cursor.content).get("cursor")
 
     def open(self):
         events_data_response = requests.post(
