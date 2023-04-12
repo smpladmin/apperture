@@ -40,7 +40,7 @@ async def capture_click_stream(
         payloads[0]["properties"]["token"]
     )
     if datasource:
-        clickstream_service.update_events(
+        await clickstream_service.update_events(
             datasource_id=payloads[0]["properties"]["token"], events=payloads
         )
     else:
