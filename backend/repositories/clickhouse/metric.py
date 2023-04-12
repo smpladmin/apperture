@@ -70,7 +70,7 @@ class Metrics(EventsBase):
                 .where(self.table.event_name.isin(events))
                 .groupby(*breakdown_columns)
                 .orderby(fn.Count("*"), order=Order.desc)
-                .limit(50)
+                .limit(100)
             )
             query = ClickHouseQuery.with_(limit_query, "limit_query").with_(
                 query, "compute_query"
