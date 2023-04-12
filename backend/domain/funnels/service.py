@@ -56,8 +56,26 @@ class FunnelsService:
         funnel.updated_at = funnel.created_at
         await Funnel.insert(funnel)
 
-    def compute_conversion(self, n, data) -> float:
-        return data[n] * 100 / data[0] if data[0] != 0 else 0
+    def compute_conversion(
+        self,
+        step_number: int,
+        funnel_stepwise_users: List[int],
+        wrt_previous: bool = False,
+    ) -> float:
+        denominator = (
+            (
+                funnel_stepwise_users[step_number - 1]
+                if step_number > 0
+                else funnel_stepwise_users[step_number]
+            )
+            if wrt_previous
+            else funnel_stepwise_users[0]
+        )
+        return (
+            funnel_stepwise_users[step_number] * 100 / denominator
+            if denominator != 0
+            else 0
+        )
 
     def compute_conversion_time(self, conversion_window: Union[ConversionWindow, None]):
         return (
@@ -88,7 +106,7 @@ class FunnelsService:
         conversion_time = self.compute_conversion_time(
             conversion_window=conversion_window
         )
-        users_data = self.funnels.get_users_count(
+        [funnel_stepwise_users_data] = self.funnels.get_users_count(
             ds_id=ds_id,
             steps=steps,
             start_date=start_date,
@@ -98,9 +116,22 @@ class FunnelsService:
         computed_funnel = [
             ComputedFunnelStep(
                 event=step.event,
-                users=users_data[0][i],
+                users=funnel_stepwise_users_data[i],
                 conversion=float(
-                    "{:.2f}".format(self.compute_conversion(i, users_data[0]))
+                    "{:.2f}".format(
+                        self.compute_conversion(
+                            step_number=i, funnel_stepwise_users=list(funnel_stepwise_users_data)
+                        )
+                    )
+                ),
+                conversion_wrt_previous=float(
+                    "{:.2f}".format(
+                        self.compute_conversion(
+                            step_number=i,
+                            funnel_stepwise_users=list(funnel_stepwise_users_data),
+                            wrt_previous=True,
+                        )
+                    )
                 ),
             )
             for i, step in enumerate(steps)

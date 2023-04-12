@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional, Union
 
 from fastapi import APIRouter, Depends
@@ -111,16 +112,21 @@ async def get_all_metrics(
     user: AppertureUser = Depends(get_user),
     metric_service: MetricService = Depends(),
 ):
+    logging.info("PROD DEBUG GETTING ALL METRICS")
     if app_id:
+        logging.info(f"PROD DEBUG GETTING ALL METRICS BY APP_ID {app_id}")
         return await metric_service.get_metrics_by_app_id(app_id=app_id)
     metrics = (
         await metric_service.get_metrics_for_datasource_id(datasource_id=datasource_id)
         if datasource_id
         else await metric_service.get_metrics_by_user_id(user_id=user_id)
     )
+    logging.info(f"Got metrics {metrics} from service")
     metrics = [MetricWithUser.from_orm(m) for m in metrics]
+    logging.info(f"ORM metrics: {metrics}")
     for metric in metrics:
         metric.user = AppertureUserResponse.from_orm(user)
+    logging.info(f"Final metrics: {metrics}")
     return metrics
 
 

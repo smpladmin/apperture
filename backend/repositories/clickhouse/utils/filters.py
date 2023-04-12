@@ -94,14 +94,22 @@ class Filters(EventsBase):
         return criterion
 
     def build_criterion_for_string_filter(self, filter: WhereSegmentFilter):
-        criterion = []
+        operator_mapping = {
+            FilterOperatorsString.IS: lambda o, v: [o.isin(v)],
+            FilterOperatorsString.IS_NOT: lambda o, v: [o.notin(v)],
+            FilterOperatorsString.CONTAINS: lambda o, v: [o.ilike(f"%%{v[0]}%%")],
+            FilterOperatorsString.DOES_NOT_CONTAIN: lambda o, v: [
+                o.not_ilike(f"%%{v[0]}%%")
+            ],
+        }
         operand = Field(f"properties.{filter.operand}")
-        if filter.operator == FilterOperatorsString.IS:
-            if not filter.all:
-                criterion.append(operand.isin(filter.values))
-        elif filter.operator == FilterOperatorsString.IS_NOT:
-            criterion.append(operand.notin(filter.values))
-        return criterion
+        default_func = lambda o, v: []
+        operator_func = (
+            operator_mapping.get(filter.operator, default_func)
+            if not filter.all
+            else default_func
+        )
+        return operator_func(operand, filter.values)
 
     def get_criterion_for_where_filters(self, filters: List[WhereSegmentFilter]):
         criterion = []

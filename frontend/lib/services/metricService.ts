@@ -22,7 +22,8 @@ export const computeMetric = async (
   functions: string,
   aggregates: MetricAggregate[],
   breakdown: string[],
-  dateFilter: DateFilterObj
+  dateFilter: DateFilterObj,
+  signal?: AbortSignal
 ) => {
   const requestBody: MetricRequestBody = {
     datasourceId: dsId,
@@ -32,7 +33,7 @@ export const computeMetric = async (
     dateFilter,
   };
 
-  const res = await ApperturePost('metrics/compute', requestBody);
+  const res = await ApperturePost('metrics/compute', requestBody, { signal });
   return res.data || [];
 };
 
