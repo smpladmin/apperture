@@ -91,6 +91,7 @@ class ClickstreamService:
                     self.table,
                     [data],
                     column_names=self.columns,
+                    settings={"async_insert": True, "wait_for_async_insert": False},
                 )
             except Exception as e:
                 logging.error(e)
