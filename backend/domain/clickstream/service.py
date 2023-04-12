@@ -86,32 +86,30 @@ class ClickstreamService:
             )
             for event in events
         ]
-        for data in clickstream_data:
-            try:
-                await run_in_threadpool(
-                    lambda: self.clickhouse.insert(
-                        self.table,
-                        [data],
-                        column_names=self.columns,
+        try:
+            self.clickhouse.insert(
+                self.table,
+                clickstream_data,
+                column_names=self.columns,
+            )
+        except Exception as e:
+            logging.error(e)
+            logging.info("Error inserting")
+            logging.info(clickstream_data)
+            self.clickhouse.insert(
+                self.error_table,
+                [
+                    (
+                        data.datasourceId,
+                        data.timestamp,
+                        data.userId,
+                        data.event,
+                        str(data.properties),
                     )
-                )
-            except Exception as e:
-                logging.error(e)
-                logging.info("Error inserting")
-                logging.info(data)
-                self.clickhouse.insert(
-                    self.error_table,
-                    [
-                        (
-                            data.datasourceId,
-                            data.timestamp,
-                            data.userId,
-                            data.event,
-                            str(data.properties),
-                        )
-                    ],
-                    column_names=self.columns,
-                )
+                    for data in clickstream_data
+                ],
+                column_names=self.columns,
+            )
 
     def get_data_by_id(self, dsId: str):
         data_list = self.repository.get_all_data_by_dsId(dsId)
