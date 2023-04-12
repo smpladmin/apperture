@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Dict, List
 
 from fastapi import Depends
+from starlette.concurrency import run_in_threadpool
 
 from clickhouse.clickhouse import Clickhouse
 from domain.clickstream.models import CaptureEvent, ClickstreamData, ClickstreamResult
@@ -70,7 +71,7 @@ class ClickstreamService:
             properties=properties,
         )
 
-    def update_events(
+    async def update_events(
         self,
         datasource_id: str,
         events: List[Dict],
@@ -87,11 +88,13 @@ class ClickstreamService:
         ]
         for data in clickstream_data:
             try:
-                self.clickhouse.insert(
-                    self.table,
-                    [data],
-                    column_names=self.columns,
-                    settings={"async_insert": True, "wait_for_async_insert": False},
+                await run_in_threadpool(
+                    lambda: self.clickhouse.insert(
+                        self.table,
+                        [data],
+                        column_names=self.columns,
+                        settings={"async_insert": True, "wait_for_async_insert": False},
+                    )
                 )
             except Exception as e:
                 logging.error(e)

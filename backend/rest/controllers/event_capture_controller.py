@@ -26,7 +26,7 @@ async def analyse_decide_call(
 
 
 @router.post("/events/capture/e/")
-def capture_click_stream(
+async def capture_click_stream(
     ip: str,
     _: str,
     ver: str,
@@ -36,16 +36,15 @@ def capture_click_stream(
 ):
     decoded = json.loads(b64decode(data))
     payloads = decoded if type(decoded) == list else [decoded]
-    # disabling this to test without async performance
-    # datasource = await ds_service.get_datasources_for_apperture(
-    #     payloads[0]["properties"]["token"]
-    # )
-    # if datasource:
-    clickstream_service.update_events(
-        datasource_id=payloads[0]["properties"]["token"], events=payloads
+    datasource = await ds_service.get_datasources_for_apperture(
+        payloads[0]["properties"]["token"]
     )
-    # else:
-    #     return {"success": False}
+    if datasource:
+        clickstream_service.update_events(
+            datasource_id=payloads[0]["properties"]["token"], events=payloads
+        )
+    else:
+        return {"success": False}
     return {"success": True}
 
 
