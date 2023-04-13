@@ -1,7 +1,10 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
+import Card from '@components/Card';
 import { BLACK_DEFAULT, GREY_500 } from '@theme/index';
 import { CaretDown, Plus } from 'phosphor-react';
 import React from 'react';
+import GranularityCriteria from '@components/Retention/components/GranularityCriteria';
+import SelectEventsRetention from './components/SelectEventsRetention';
 
 export const CreateRetentionAction = () => {
   return (
@@ -18,7 +21,7 @@ export const CreateRetentionAction = () => {
           </Text>
         </Flex>
       </Flex>
-      <Box w={'full'} h={10} bg={'grey.100'} borderRadius={'8'}></Box>
+      <SelectEventsRetention />
       <Flex
         px={2}
         justifyContent={'space-between'}
@@ -36,7 +39,9 @@ export const CreateRetentionAction = () => {
           </Text>
         </Flex>
       </Flex>
-      <Box w={'full'} h={10} bg={'grey.100'} borderRadius={'8'}></Box>
+      <Card padding={3}>
+        <GranularityCriteria />
+      </Card>
     </Flex>
   );
 };
