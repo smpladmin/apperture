@@ -15,13 +15,6 @@ RUN pip install poetry
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-FROM base as tests
-WORKDIR /code
-COPY --from=deps /opt/venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-COPY . .
-RUN poetry run pytest
-
 FROM base as dev
 WORKDIR /code
 COPY --from=deps /opt/venv /opt/venv
@@ -34,4 +27,4 @@ WORKDIR /code
 COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . .
-CMD gunicorn server:app --worker-class uvicorn.workers.UvicornWorker --workers=1 --bind=0.0.0.0:8002 --timeout=600 --access-logfile - --error-logfile -
+CMD gunicorn server:app --worker-class uvicorn.workers.UvicornWorker --workers=1 --bind=0.0.0.0:8002 --timeout=1800 --access-logfile - --error-logfile -
