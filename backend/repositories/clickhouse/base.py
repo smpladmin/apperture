@@ -27,6 +27,7 @@ class EventsBase(ABC):
         self.week_func = CustomFunction("WEEK", ["timestamp"])
         self.date_func = CustomFunction("DATE", ["timestamp"])
         self.json_extract_keys_func = CustomFunction("JSONExtractKeys", ["string"])
+        self.json_extract_raw_func = CustomFunction("JSONExtractRaw", ["string"])
         self.to_json_string_func = CustomFunction("toJSONString", ["json"])
         self.event_criterion = [
             self.table.datasource_id == Parameter("%(ds_id)s"),

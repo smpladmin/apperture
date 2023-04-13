@@ -1,10 +1,11 @@
 import logging
 
-from domain.common.models import DataFormat, IntegrationProvider
+from domain.common.models import IntegrationProvider
 from domain.datasource.models import Credential, DataSource
 from domain.runlog.service import RunLogService
 from fetch.clevertap_events_fetcher import ClevertapEventsFetcher
 from store.events_saver import EventsSaver
+from .default_events import default_events
 
 from event_processors.clevertap_event_processor import ClevertapEventProcessor
 
@@ -26,15 +27,18 @@ class ClevertapEventsStrategy:
         try:
             self.runlog_service.update_started(self.runlog_id)
             logging.info(f"Fetching events data for date - {self.date}")
-            for events_data in self.fetcher.fetch():
-                logging.info(f"Processing events data for date - {self.date}")
-                df = self.event_processor.process(events_data)
-                logging.info(f"Saving events data for date - {self.date}")
-                self.saver.save(
-                    self.datasource.id,
-                    IntegrationProvider.CLEVERTAP,
-                    df,
-                )
+            for event in default_events:
+                for events_data in self.fetcher.fetch(event):
+                    logging.info(
+                        f"Processing event {event} data for date - {self.date}"
+                    )
+                    df = self.event_processor.process(events_data, event)
+                    logging.info(f"Saving event {event} data for date - {self.date}")
+                    self.saver.save(
+                        self.datasource.id,
+                        IntegrationProvider.CLEVERTAP,
+                        df,
+                    )
 
             self.runlog_service.update_completed(self.runlog_id)
         except Exception as e:
