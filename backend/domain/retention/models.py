@@ -11,10 +11,10 @@ from domain.segments.models import WhereSegmentFilter
 from repositories import Document
 
 
-
 class EventSelection(BaseModel):
     event: str
     filters: Optional[List[WhereSegmentFilter]]
+
 
 class TrendScale(str, Enum):
     ABSOLUTE = "absolute"
@@ -22,9 +22,9 @@ class TrendScale(str, Enum):
 
 
 class Granularity(str, Enum):
-    DAY = "day"
-    WEEK = "week"
-    MONTH = "month"
+    DAY = "days"
+    WEEK = "weeks"
+    MONTH = "months"
 
 
 class Retention(Document):
@@ -36,8 +36,11 @@ class Retention(Document):
     goal_event: EventSelection
     date_filter: DateFilter
     segment_filter: Optional[SegmentFilter]
-    trend_scale: TrendScale
     granularity: Granularity
+    enabled: bool = True
+
+    class Settings:
+        name = "retention"
 
 
 class ComputedRetentionTrend(BaseModel):

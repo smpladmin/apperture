@@ -50,6 +50,9 @@ class EventsBase(ABC):
         self.convert_to_unix_timestamp_func = CustomFunction(
             "toUnixTimestamp", ["datetime"]
         )
+        self.to_start_of_interval_func = CustomFunction(
+            "toStartOfInterval", ["timestamp", "interval"]
+        )
 
     def execute_get_query(self, query: str, parameters: Dict):
         logging.info(f"Executing query: {query}")
