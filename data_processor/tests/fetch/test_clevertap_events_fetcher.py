@@ -13,16 +13,17 @@ class TestClevertapEventsFetcher:
             accountId="3R1-AB2-XD1Z",
             secret="12312cacac1212312ca",
         )
+        self.event = "UTM Visited"
 
     def test_daily_data(self):
-        self.fetcher = ClevertapEventsFetcher(self.credential, "22-11-2022")
+        self.fetcher = ClevertapEventsFetcher(self.credential, "20221122")
 
         self.fetcher.get_start_cursor = MagicMock(
             return_value=self.mock_cursor_response
         )
         self.fetcher.open = MagicMock(return_value=self.mock_response)
 
-        for result in self.fetcher.fetch():
+        for result in self.fetcher.fetch(self.event):
             if result:
                 assert set(["profile", "session_props", "ts", "event_props"]).issubset(
                     set(result[0].keys())

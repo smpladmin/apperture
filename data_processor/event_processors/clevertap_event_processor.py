@@ -1,19 +1,15 @@
-import io
-import zipfile
-import zlib
 import pandas as pd
 from datetime import datetime
-import re
 
 from .event_processor import EventProcessor
 
 
 class ClevertapEventProcessor(EventProcessor):
-    def process(self, events_data):
+    def process(self, events_data, event):
         df = events_data
-        return self.process_dataframe(df)
+        return self.process_dataframe(df, event)
 
-    def process_dataframe(self, events_data):
+    def process_dataframe(self, events_data, event):
         df = pd.json_normalize(events_data)
         cleaned_df = pd.DataFrame()
         cleaned_df["userId"] = df["profile.objectId"]
@@ -22,9 +18,6 @@ class ClevertapEventProcessor(EventProcessor):
                 "%Y-%m-%d %H:%M:%S"
             )
         )
-        df["eventsName"] = df.filter(regex="profile\.events\..*\.count").idxmax(axis=1)
-        cleaned_df["eventName"] = df["eventsName"].apply(
-            lambda event: re.search("profile\.events\.(.*)\.count", event).group(1)
-        )
+        cleaned_df["eventName"] = event
         cleaned_df["properties"] = df.to_dict(orient="records")
         return cleaned_df
