@@ -13,7 +13,7 @@ array_map = open(f"{ROOT_DIR}/static/array.js.map", "r").read()
 
 # Kafka configuration
 KAFKA_BOOTSTRAP_SERVERS = "kafka:9092"
-KAFKA_TOPIC = "events"
+KAFKA_TOPIC = "clickstream"
 
 
 producer = AIOKafkaProducer(

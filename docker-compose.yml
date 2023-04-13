@@ -33,6 +33,15 @@ services:
       - ./events_producer:/code
     depends_on:
       - kafka
+  events_consumer:
+    restart: on-failure
+    build:
+      context: ./events_consumer
+      target: dev
+    volumes:
+      - ./events_consumer:/code
+    depends_on:
+      - kafka
   data_processor:
     build:
       context: ./data_processor
