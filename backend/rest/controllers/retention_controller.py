@@ -7,8 +7,14 @@ from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
 from domain.retention.service import RetentionService
 from rest.dtos.apperture_users import AppertureUserResponse
-from rest.dtos.retention import TransientRetentionDto, ComputedRetentionTrendResponse, RetentionResponse, \
-    CreateRetentionDto, RetentionWithUser, TransientRetentionTrendDto
+from rest.dtos.retention import (
+    TransientRetentionDto,
+    ComputedRetentionTrendResponse,
+    RetentionResponse,
+    CreateRetentionDto,
+    RetentionWithUser,
+    TransientRetentionTrendDto,
+)
 
 from rest.middlewares import validate_jwt, get_user_id, get_user
 
@@ -19,7 +25,9 @@ router = APIRouter(
 )
 
 
-@router.post("/retention/transient/trend", response_model=List[ComputedRetentionTrendResponse])
+@router.post(
+    "/retention/trends/transient", response_model=List[ComputedRetentionTrendResponse]
+)
 async def compute_transient_retention_trend(
     dto: TransientRetentionTrendDto,
     retention_service: RetentionService = Depends(),
@@ -29,15 +37,16 @@ async def compute_transient_retention_trend(
         start_event=dto.startEvent,
         goal_event=dto.goalEvent,
         granularity=dto.granularity,
-        trend_scale=dto.trendScale,
         segment_filter=dto.segmentFilter,
         date_filter=dto.dateFilter,
         interval=dto.interval,
     )
 
 
-@router.post("/retention/transient", response_model=List[ComputedRetentionTrendResponse])
-async def compute_transient_retention_trend(
+@router.post(
+    "/retention/transient", response_model=List[ComputedRetentionTrendResponse]
+)
+async def compute_transient_retention(
     dto: TransientRetentionDto,
     retention_service: RetentionService = Depends(),
 ):
@@ -46,7 +55,6 @@ async def compute_transient_retention_trend(
         start_event=dto.startEvent,
         goal_event=dto.goalEvent,
         granularity=dto.granularity,
-        trend_scale=dto.trendScale,
         segment_filter=dto.segmentFilter,
         date_filter=dto.dateFilter,
     )
@@ -61,15 +69,15 @@ async def create_retention(
 ):
     datasource = await ds_service.get_datasource(str(dto.datasourceId))
     retention = retention_service.build_retention(
-        datasource.id,
-        datasource.app_id,
-        user_id,
-        dto.name,
-        dto.startEvent,
-        dto.goalEvent,
-        dto.granularity,
-        dto.dateFilter,
-        dto.segmentFilter
+        datasource_id=datasource.id,
+        app_id=datasource.app_id,
+        user_id=user_id,
+        name=dto.name,
+        start_event=dto.startEvent,
+        goal_event=dto.goalEvent,
+        granularity=dto.granularity,
+        date_filter=dto.dateFilter,
+        segment_filter=dto.segmentFilter,
     )
 
     await retention_service.add_retention(retention)
@@ -94,22 +102,24 @@ async def update_retention(
 ):
     datasource = await ds_service.get_datasource(str(dto.datasourceId))
     new_retention = retention_service.build_retention(
-        datasource.id,
-        datasource.app_id,
-        user_id,
-        dto.name,
-        dto.startEvent,
-        dto.goalEvent,
-        dto.granularity,
-        dto.dateFilter,
-        dto.segmentFilter
+        datasource_id=datasource.id,
+        app_id=datasource.app_id,
+        user_id=user_id,
+        name=dto.name,
+        start_event=dto.startEvent,
+        goal_event=dto.goalEvent,
+        granularity=dto.granularity,
+        date_filter=dto.dateFilter,
+        segment_filter=dto.segmentFilter,
     )
-    await retention_service.update_retention(retention_id=id, new_retention=new_retention)
+    await retention_service.update_retention(
+        retention_id=id, new_retention=new_retention
+    )
     return new_retention
 
 
 @router.get("/retention", response_model=List[RetentionWithUser])
-async def get_retentions(
+async def get_retention_list(
     datasource_id: Union[str, None] = None,
     user: AppertureUser = Depends(get_user),
     retention_service: RetentionService = Depends(),
@@ -117,9 +127,13 @@ async def get_retentions(
 ):
     apps = await app_service.get_apps(user=user)
     retentions = (
-        await retention_service.get_retentions_for_datasource_id(datasource_id=datasource_id)
+        await retention_service.get_retentions_for_datasource_id(
+            datasource_id=datasource_id
+        )
         if datasource_id
-        else await retention_service.get_retentions_for_apps(app_ids=[app.id for app in apps])
+        else await retention_service.get_retentions_for_apps(
+            app_ids=[app.id for app in apps]
+        )
     )
     retentions = [RetentionWithUser.from_orm(f) for f in retentions]
     for retention in retentions:

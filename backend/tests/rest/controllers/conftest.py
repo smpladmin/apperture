@@ -15,6 +15,7 @@ from domain.actions.models import (
 )
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App
+from domain.common.date_models import DateFilter, DateFilterType, LastDateFilter
 from domain.common.filter_models import (
     FilterDataType,
     FilterOperatorsNumber,
@@ -49,6 +50,12 @@ from domain.notifications.models import (
     NotificationVariant,
 )
 from domain.properties.models import Properties, Property, PropertyDataType
+from domain.retention.models import (
+    Retention,
+    EventSelection,
+    Granularity,
+    ComputedRetentionTrend,
+)
 from domain.runlogs.models import RunLog
 from domain.segments.models import (
     ComputedSegment,
@@ -63,6 +70,7 @@ from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.funnels import FunnelWithUser
 from rest.dtos.metrics import MetricWithUser
 from rest.dtos.notifications import NotificationWithUser
+from rest.dtos.retention import RetentionWithUser
 from rest.dtos.segments import SegmentWithUser
 
 
@@ -129,6 +137,68 @@ def notification_service(apperture_user_response):
     )
     notification_service_mock.fetch_and_delete_notification = mock.AsyncMock()
     return notification_service_mock
+
+
+@pytest.fixture(scope="module")
+def retention_service(apperture_user_response):
+    retention_service_mock = mock.MagicMock()
+    Retention.get_settings = mock.MagicMock()
+    retention = Retention(
+        id=PydanticObjectId("635ba034807ab86d8a2aadd8"),
+        app_id=PydanticObjectId("635ba034807ab86d8a2aadd7"),
+        datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        name="name",
+        user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+        start_event=EventSelection(event="start_event", filters=None),
+        goal_event=EventSelection(event="goal_event", filters=None),
+        date_filter=DateFilter(type=DateFilterType.LAST, filter=LastDateFilter(days=4)),
+        segment_filter=None,
+        granularity=Granularity.DAYS,
+        enabled=True,
+    )
+
+    retention_trends = [
+        ComputedRetentionTrend(
+            granularity=datetime(2022, 11, 24, 0, 0),
+            retention_rate=55.94,
+            retained_users=113,
+        ),
+        ComputedRetentionTrend(
+            granularity=datetime(2022, 11, 25, 0, 0),
+            retention_rate=48.7,
+            retained_users=112,
+        ),
+        ComputedRetentionTrend(
+            granularity=datetime(2022, 11, 26, 0, 0),
+            retention_rate=52.43,
+            retained_users=108,
+        ),
+        ComputedRetentionTrend(
+            granularity=datetime(2022, 11, 27, 0, 0),
+            retention_rate=51.98,
+            retained_users=105,
+        ),
+    ]
+    retention_future = asyncio.Future()
+    retention_future.set_result(retention)
+    retentions_future = asyncio.Future()
+    retentions_future.set_result([RetentionWithUser.from_orm(retention)])
+    retention_trends_future = asyncio.Future()
+    retention_trends_future.set_result(retention_trends)
+
+    retention_service_mock.build_retention.return_value = retention
+    retention_service_mock.add_retention.return_value = retention_future
+    retention_service_mock.get_retention.return_value = retention_future
+    retention_service_mock.update_retention = mock.AsyncMock()
+    retention_service_mock.delete_retention = mock.AsyncMock()
+    retention_service_mock.get_retentions_for_datasource_id.return_value = (
+        retentions_future
+    )
+    retention_service_mock.get_retentions_for_apps.return_value = retentions_future
+    retention_service_mock.compute_retention_trend.return_value = (
+        retention_trends_future
+    )
+    return retention_service_mock
 
 
 @pytest.fixture(scope="module")
@@ -1171,6 +1241,25 @@ def funnel_user_conversion_response():
 
 
 @pytest.fixture(scope="module")
+def retention_response():
+    return {
+        "_id": "635ba034807ab86d8a2aadd8",
+        "createdAt": "2023-04-13T10:10:36.869000",
+        "updatedAt": "2023-04-13T10:11:10.266000",
+        "datasourceId": "635ba034807ab86d8a2aadd9",
+        "appId": "635ba034807ab86d8a2aadd7",
+        "userId": "635ba034807ab86d8a2aadda",
+        "name": "name",
+        "startEvent": {"event": "start_event", "filters": None},
+        "goalEvent": {"event": "goal_event", "filters": None},
+        "dateFilter": {"filter": {"days": 4}, "type": "last"},
+        "segmentFilter": None,
+        "granularity": "days",
+        "enabled": True,
+    }
+
+
+@pytest.fixture(scope="module")
 def funnel_response():
     return {
         "_id": "635ba034807ab86d8a2aadd8",
@@ -1200,6 +1289,32 @@ def funnel_response():
         "enabled": True,
         "conversionWindow": None,
     }
+
+
+@pytest.fixture(scope="module")
+def retention_trend_response():
+    return [
+        {
+            "granularity": "2022-11-24T00:00:00",
+            "retentionRate": 55.94,
+            "retainedUsers": 113,
+        },
+        {
+            "granularity": "2022-11-25T00:00:00",
+            "retentionRate": 48.7,
+            "retainedUsers": 112,
+        },
+        {
+            "granularity": "2022-11-26T00:00:00",
+            "retentionRate": 52.43,
+            "retainedUsers": 108,
+        },
+        {
+            "granularity": "2022-11-27T00:00:00",
+            "retentionRate": 51.98,
+            "retainedUsers": 105,
+        },
+    ]
 
 
 @pytest.fixture(scope="module")
@@ -1358,6 +1473,30 @@ def funnel_data():
             },
         ],
         "randomSequence": False,
+    }
+
+
+@pytest.fixture(scope="module")
+def retention_data():
+    return {
+        "datasourceId": "635ba034807ab86d8a2aadd9",
+        "startEvent": {"event": "start_event"},
+        "goalEvent": {"event": "goal_event"},
+        "dateFilter": {"type": "last", "filter": {"days": 4}},
+        "granularity": "days",
+        "name": "test",
+    }
+
+
+@pytest.fixture(scope="module")
+def retention_trend_data():
+    return {
+        "datasourceId": "635ba034807ab86d8a2aadd9",
+        "startEvent": {"event": "start_event"},
+        "goalEvent": {"event": "goal_event"},
+        "dateFilter": {"type": "last", "filter": {"days": 4}},
+        "granularity": "days",
+        "interval": 1,
     }
 
 

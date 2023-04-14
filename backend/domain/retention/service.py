@@ -8,10 +8,10 @@ from fastapi import Depends
 from domain.common.date_models import DateFilter
 from domain.metrics.models import SegmentFilter
 from domain.retention.models import (
-    TrendScale,
     Granularity,
     EventSelection,
-    ComputedRetentionTrend, Retention,
+    ComputedRetentionTrend,
+    Retention,
 )
 from mongo import Mongo
 from repositories.clickhouse.retention import Retention as RetentionRepository
@@ -36,7 +36,6 @@ class RetentionService:
         goal_event: EventSelection,
         date_filter: DateFilter,
         segment_filter: Union[SegmentFilter, None],
-        trend_scale: TrendScale,
         granularity: Granularity,
         interval: int,
     ) -> [ComputedRetentionTrend]:
@@ -64,14 +63,17 @@ class RetentionService:
         )
         return [
             ComputedRetentionTrend(
-                granularity=granularity,
-                retention_rate=retention_rate * 100
-                if trend_scale == TrendScale.PERCENTAGE
-                else retention_rate,
+                granularity=datetime.combine(granularity, datetime.min.time()),
+                retention_rate="{:.2f}".format(retention_rate * 100),
+                retained_users=retained_users,
             )
-            for (granularity, retention_rate) in retention_trend_query_response
+            for (
+                granularity,
+                retention_rate,
+                retained_users,
+            ) in retention_trend_query_response
         ]
-    
+
     async def compute_retention(
         self,
         datasource_id: str,
@@ -79,7 +81,6 @@ class RetentionService:
         goal_event: EventSelection,
         date_filter: DateFilter,
         segment_filter: Union[SegmentFilter, None],
-        trend_scale: TrendScale,
         granularity: Granularity,
     ) -> [ComputedRetentionTrend]:
         start_date, end_date = self.retention.compute_date_filter(
@@ -115,16 +116,16 @@ class RetentionService:
             goal_event=goal_event,
             granularity=granularity,
             date_filter=date_filter,
-            segment_filter=segment_filter
+            segment_filter=segment_filter,
         )
 
     async def add_retention(self, retention: Retention):
         retention.updated_at = retention.created_at
         await Retention.insert(retention)
-    
+
     async def get_retention(self, id: str) -> Retention:
         return await Retention.get(PydanticObjectId(id))
-    
+
     async def update_retention(self, retention_id: str, new_retention: Retention):
         to_update = new_retention.dict()
         to_update.pop("id")
@@ -134,7 +135,7 @@ class RetentionService:
         await Retention.find_one(
             Retention.id == PydanticObjectId(retention_id),
         ).update({"$set": to_update})
-    
+
     async def get_retentions_for_apps(
         self, app_ids: List[PydanticObjectId]
     ) -> List[Retention]:
@@ -143,7 +144,9 @@ class RetentionService:
             Retention.enabled != False,
         ).to_list()
 
-    async def get_retentions_for_datasource_id(self, datasource_id: str) -> List[Retention]:
+    async def get_retentions_for_datasource_id(
+        self, datasource_id: str
+    ) -> List[Retention]:
         return await Retention.find(
             Retention.datasource_id == PydanticObjectId(datasource_id),
             Retention.enabled != False,

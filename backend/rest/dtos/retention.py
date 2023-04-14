@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from domain.common.date_models import DateFilter
 from domain.retention.models import EventSelection, Retention
 from domain.metrics.models import SegmentFilter
-from domain.retention.models import TrendScale, Granularity, ComputedRetentionTrend
+from domain.retention.models import Granularity, ComputedRetentionTrend
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
 
@@ -17,7 +17,6 @@ class TransientRetentionTrendDto(BaseModel):
     goalEvent: EventSelection
     dateFilter: DateFilter
     segmentFilter: Optional[SegmentFilter]
-    trendScale: TrendScale
     granularity: Granularity
     interval: int
 
@@ -28,7 +27,6 @@ class TransientRetentionDto(BaseModel):
     goalEvent: EventSelection
     dateFilter: DateFilter
     segmentFilter: Optional[SegmentFilter]
-    trendScale: TrendScale
     granularity: Granularity
 
 

@@ -63,9 +63,14 @@ class Retention(EventsBase):
         events2 = Table("events")
 
         retention_count_conditions = [
+            events2.timestamp > self.table.timestamp,
             (
                 events2.timestamp.between(
-                    self.table.timestamp,
+                    self.to_start_of_interval_func(
+                        self.table.timestamp
+                        + Interval(**{granularity.value: interval - 1}),
+                        Interval(**{granularity.value: 1}),
+                    ),
                     self.to_start_of_interval_func(
                         self.table.timestamp
                         + Interval(**{granularity.value: interval}),
@@ -132,6 +137,7 @@ class Retention(EventsBase):
                 AliasedQuery("initial_count").granularity,
                 AliasedQuery("retention_count").count
                 / AliasedQuery("initial_count").count,
+                AliasedQuery("retention_count").count,
             )
             .orderby(Field("granularity"))
         )

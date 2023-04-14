@@ -16,15 +16,10 @@ class EventSelection(BaseModel):
     filters: Optional[List[WhereSegmentFilter]]
 
 
-class TrendScale(str, Enum):
-    ABSOLUTE = "absolute"
-    PERCENTAGE = "percentage"
-
-
 class Granularity(str, Enum):
-    DAY = "days"
-    WEEK = "weeks"
-    MONTH = "months"
+    DAYS = "days"
+    WEEKS = "weeks"
+    MONTHS = "months"
 
 
 class Retention(Document):
@@ -46,3 +41,4 @@ class Retention(Document):
 class ComputedRetentionTrend(BaseModel):
     granularity: datetime.datetime
     retention_rate: float
+    retained_users: int
