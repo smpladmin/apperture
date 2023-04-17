@@ -4,7 +4,7 @@ import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import Header from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DateFilterComponent from '@components/Date/DateFilter';
 import RetentionEmptyState from './components/RetentionEmptyState';
 import { Hash, Percent } from 'phosphor-react';
@@ -13,9 +13,11 @@ import { CreateRetentionAction } from './CreateRetentionAction';
 import {
   Granularity,
   RetentionEvents,
+  RetentionTrendsData,
   TrendScale,
 } from '@lib/domain/retention';
 import { DateFilterObj, DateFilterType } from '@lib/domain/common';
+import { getTransientTrendsData } from '@lib/services/retentionService';
 
 const Retention = () => {
   const router = useRouter();
@@ -43,7 +45,37 @@ const Retention = () => {
     TrendScale.PERCENTAGE
   );
 
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [trendsData, setTrendsData] = useState<RetentionTrendsData[]>([]);
+
+  const [interval, setInterval] = useState(0);
+
   const [isEmpty, setIsEmpty] = useState(true);
+
+  useEffect(() => {
+    if (
+      !(retentionEvents.startEvent.event && retentionEvents.goalEvent.event)
+    ) {
+      return;
+    }
+    const transientTrendsData = async () => {
+      const trendsData = await getTransientTrendsData(
+        datasourceId!!,
+        retentionEvents.startEvent,
+        retentionEvents.goalEvent,
+        dateFilter,
+        granularity,
+        interval
+      );
+      setTrendsData(trendsData);
+      setIsLoading(false);
+    };
+    setIsLoading(true);
+    transientTrendsData();
+  }, [interval, retentionEvents, granularity, dateFilter]);
+
+  console.log(trendsData);
 
   return (
     <Flex

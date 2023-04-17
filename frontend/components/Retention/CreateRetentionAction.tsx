@@ -36,6 +36,7 @@ export const CreateRetentionAction = ({
         const [eventKey, event] = retentionEvent;
         return (
           <SelectEventsRetention
+            key={eventKey}
             index={index}
             retentionEvent={event}
             eventKey={eventKey as keyof RetentionEvents}

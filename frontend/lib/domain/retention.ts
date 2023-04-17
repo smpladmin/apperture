@@ -15,3 +15,9 @@ export enum TrendScale {
   ABSOLUTE = 'absolute',
   PERCENTAGE = 'percentage',
 }
+
+export type RetentionTrendsData = {
+  granularity: Date;
+  retentionRate: number;
+  retainedUsers: number;
+};

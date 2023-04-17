@@ -68,12 +68,12 @@ class Retention(EventsBase):
                 events2.timestamp.between(
                     self.to_start_of_interval_func(
                         self.table.timestamp
-                        + Interval(**{granularity.value: interval - 1}),
+                        + Interval(**{granularity.value: interval}),
                         Interval(**{granularity.value: 1}),
                     ),
                     self.to_start_of_interval_func(
                         self.table.timestamp
-                        + Interval(**{granularity.value: interval}),
+                        + Interval(**{granularity.value: interval + 1}),
                         Interval(**{granularity.value: 1}),
                     )
                     - Interval(seconds=1),
