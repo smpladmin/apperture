@@ -16,9 +16,7 @@ KAFKA_BOOTSTRAP_SERVERS = "kafka:9092"
 KAFKA_TOPIC = "clickstream"
 
 
-producer = AIOKafkaProducer(
-    bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
-)
+producer = None
 
 app = FastAPI()
 
@@ -33,6 +31,10 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup_event():
+    global producer
+    producer = AIOKafkaProducer(
+        bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+    )
     await producer.start()
 
 
