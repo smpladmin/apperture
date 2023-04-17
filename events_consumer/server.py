@@ -14,8 +14,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TIMEOUT_MS = os.getenv("TIMEOUT_MS", 60000)
-MAX_RECORDS = os.getenv("MAX_RECORDS", 1000)
+TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
+MAX_RECORDS = int(os.getenv("MAX_RECORDS", "1000"))
 
 logging.getLogger().setLevel(logging.INFO)
 
