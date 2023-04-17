@@ -177,7 +177,7 @@ class TestServer:
             [
                 ClickStream(
                     datasourceId="63eb4eea19c763c212bc444d",
-                    timestamp=datetime(2023, 4, 17, 12, 22, 13, 385000),
+                    timestamp=datetime.fromtimestamp(1681714333.385),
                     userId="1876b24aecbe52-0fd97ea66a2cdf-1e525634-16a7f0-1876b24aecc171f",
                     element_chain='i.ri-newspaper-line:nth-child="1"nth-of-type="1";button.chakra-button.css-vyn3p3:nth-child="11"nth-of-type="7";div.css-g1rznr:nth-child="1"nth-of-type="1";div.css-87dp0f:nth-child="3"nth-of-type="3";div.css-3h169z:nth-child="1"nth-of-type="1";div.css-1xhj18k:nth-child="2"nth-of-type="1";div:attr_id="__next"nth-child="1"nth-of-type="1";body.chakra-ui-light:nth-child="2"nth-of-type="1"',
                     event="$autocapture",
@@ -277,7 +277,7 @@ class TestServer:
                 ),
                 ClickStream(
                     datasourceId="63eb4eea19c763c212bc444d",
-                    timestamp=datetime(2023, 4, 17, 12, 22, 13, 388000),
+                    timestamp=datetime.fromtimestamp(1681714333.388),
                     userId="1876b24aecbe52-0fd97ea66a2cdf-1e525634-16a7f0-1876b24aecc171f",
                     element_chain="",
                     event="$pageleave",
@@ -311,7 +311,7 @@ class TestServer:
                 ),
                 ClickStream(
                     datasourceId="63eb4eea19c763c212bc444d",
-                    timestamp=datetime(2023, 4, 17, 12, 22, 13, 495000),
+                    timestamp=datetime.fromtimestamp(1681714333.495),
                     userId="1876b24aecbe52-0fd97ea66a2cdf-1e525634-16a7f0-1876b24aecc171f",
                     element_chain="",
                     event="$pageview",
