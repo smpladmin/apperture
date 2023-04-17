@@ -1,12 +1,23 @@
-import { Box, Button, Flex, Text } from '@chakra-ui/react';
+import { Flex, Text } from '@chakra-ui/react';
 import Card from '@components/Card';
-import { BLACK_DEFAULT, GREY_500 } from '@theme/index';
-import { CaretDown, Plus } from 'phosphor-react';
 import React from 'react';
 import GranularityCriteria from '@components/Retention/components/GranularityCriteria';
 import SelectEventsRetention from './components/SelectEventsRetention';
+import { Granularity, RetentionEvents } from '@lib/domain/retention';
 
-export const CreateRetentionAction = () => {
+type CreateRetentionActionProps = {
+  retentionEvents: RetentionEvents;
+  setRetentionEvents: Function;
+  granularity: Granularity;
+  setGranularity: Function;
+};
+
+export const CreateRetentionAction = ({
+  retentionEvents,
+  setRetentionEvents,
+  granularity,
+  setGranularity,
+}: CreateRetentionActionProps) => {
   return (
     <Flex direction={'column'} gap={'3'} w={'full'}>
       <Flex px={2} justifyContent={'space-between'} alignItems={'center'}>
@@ -21,7 +32,18 @@ export const CreateRetentionAction = () => {
           </Text>
         </Flex>
       </Flex>
-      <SelectEventsRetention />
+      {Object.entries(retentionEvents).map((retentionEvent, index) => {
+        const [eventKey, event] = retentionEvent;
+        return (
+          <SelectEventsRetention
+            index={index}
+            retentionEvent={event}
+            eventKey={eventKey as keyof RetentionEvents}
+            retentionEvents={retentionEvents}
+            setRetentionEvents={setRetentionEvents}
+          />
+        );
+      })}
       <Flex
         px={2}
         justifyContent={'space-between'}
@@ -40,7 +62,10 @@ export const CreateRetentionAction = () => {
         </Flex>
       </Flex>
       <Card padding={3}>
-        <GranularityCriteria />
+        <GranularityCriteria
+          granularity={granularity}
+          setGranularity={setGranularity}
+        />
       </Card>
     </Flex>
   );

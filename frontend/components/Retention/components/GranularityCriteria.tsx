@@ -1,6 +1,7 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import Dropdown from '@components/SearchableDropdown/Dropdown';
 import { ConversionWindowList, ConversionWindowObj } from '@lib/domain/funnel';
+import { Granularity } from '@lib/domain/retention';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 import { GREY_500, GREY_600 } from '@theme/index';
@@ -8,24 +9,29 @@ import { CaretDown, Clock } from 'phosphor-react';
 import React, { useRef, useState } from 'react';
 
 type GranularityCriteriaProps = {
-  // conversionWindow: ConversionWindowObj;
-  // setConversionWindow: Function;
   isDisabled?: boolean;
+  granularity: Granularity;
+  setGranularity: Function;
 };
 
 const GranularityCriteria = ({
-  // conversionWindow,
-  // setConversionWindow,
   isDisabled = false,
+  granularity,
+  setGranularity,
 }: GranularityCriteriaProps) => {
-  const [isGranularCriterionListOpen, setisGranularCriterionListOpen] =
+  const [isGranularCriterionListOpen, setIsGranularCriterionListOpen] =
     useState(false);
 
   const granularityCriteriaRef = useRef(null);
 
   useOnClickOutside(granularityCriteriaRef, () =>
-    setisGranularCriterionListOpen(false)
+    setIsGranularCriterionListOpen(false)
   );
+
+  const handleUpdateGranularity = (selectedGranularity: string) => {
+    setIsGranularCriterionListOpen(false);
+    setGranularity(selectedGranularity);
+  };
 
   return (
     <>
@@ -43,7 +49,7 @@ const GranularityCriteria = ({
               h={9}
               p={2}
               onClick={() => {
-                !isDisabled && setisGranularCriterionListOpen(true);
+                !isDisabled && setIsGranularCriterionListOpen(true);
               }}
               alignItems={'center'}
               borderRadius={'4px'}
@@ -59,13 +65,13 @@ const GranularityCriteria = ({
                 fontWeight={500}
                 textAlign={'center'}
               >
-                {/* {capitalizeFirstLetter(conversionWindow.type)} */} Day
+                {capitalizeFirstLetter(granularity)}
               </Text>
               <CaretDown size={14} color={GREY_500} />
             </Flex>
             <Dropdown isOpen={isGranularCriterionListOpen} width={'76'}>
               <Flex direction={'column'} minW={'10'}>
-                {Object.values(ConversionWindowList).map((value) => {
+                {Object.values(Granularity).map((value) => {
                   return (
                     <Flex
                       px={'2'}
@@ -75,7 +81,9 @@ const GranularityCriteria = ({
                         bg: 'white.400',
                       }}
                       data-testid={'conversion-time-type'}
-                      onClick={() => {}}
+                      onClick={() => {
+                        handleUpdateGranularity(value);
+                      }}
                       cursor={'pointer'}
                       borderRadius={'4'}
                     >

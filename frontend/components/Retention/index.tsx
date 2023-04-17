@@ -2,19 +2,48 @@ import { Box, Button, ButtonGroup, Flex } from '@chakra-ui/react';
 import Card from '@components/Card';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
-import CreateFunnelAction from '@components/Funnel/CreateFunnel/CreateFunnelAction';
-import TransientFunnelView from '@components/Funnel/components/TransientFunnelView';
 import Header from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useState } from 'react';
 import DateFilterComponent from '@components/Date/DateFilter';
-import RetentionEmptyState from './RetentionEmptyState';
+import RetentionEmptyState from './components/RetentionEmptyState';
 import { Hash, Percent } from 'phosphor-react';
-import { GREY_600 } from '@theme/index';
+import { BLACK, BLACK_DEFAULT, GREY_500, GREY_600 } from '@theme/index';
 import { CreateRetentionAction } from './CreateRetentionAction';
+import {
+  Granularity,
+  RetentionEvents,
+  TrendScale,
+} from '@lib/domain/retention';
+import { DateFilterObj, DateFilterType } from '@lib/domain/common';
 
 const Retention = () => {
   const router = useRouter();
+  const {
+    query: { dsId, funnelId },
+  } = router;
+
+  const datasourceId = dsId as string;
+  const [retentionName, setRetentionName] =
+    useState<string>('Untitled Retention');
+
+  const [retentionEvents, setRetentionEvents] = useState<RetentionEvents>({
+    startEvent: { event: '', filters: [] },
+    goalEvent: { event: '', filters: [] },
+  });
+
+  const [dateFilter, setDateFilter] = useState<DateFilterObj>({
+    filter: { days: 90 },
+    type: DateFilterType.LAST,
+  });
+
+  const [granularity, setGranularity] = useState<Granularity>(Granularity.DAYS);
+
+  const [trendScale, setTrendScale] = useState<TrendScale>(
+    TrendScale.PERCENTAGE
+  );
+
+  const [isEmpty, setIsEmpty] = useState(true);
 
   return (
     <Flex
@@ -26,7 +55,7 @@ const Retention = () => {
     >
       <Header
         handleGoBack={() => router.back()}
-        name={'funnelName'}
+        name={retentionName}
         setName={() => {}}
         handleSave={() => {}}
         isSaveButtonDisabled={true}
@@ -39,18 +68,20 @@ const Retention = () => {
       >
         <ActionPanel>
           <Card>
-            <CreateRetentionAction />
+            <CreateRetentionAction
+              retentionEvents={retentionEvents}
+              setRetentionEvents={setRetentionEvents}
+              granularity={granularity}
+              setGranularity={setGranularity}
+            />
           </Card>
         </ActionPanel>
         <ViewPanel>
           <Flex direction={'column'} gap={'5'}>
             <Flex justifyContent={'space-between'}>
               <DateFilterComponent
-                dateFilter={{
-                  filter: null,
-                  type: null,
-                }}
-                setDateFilter={() => {}}
+                dateFilter={dateFilter}
+                setDateFilter={setDateFilter}
                 isDisabled={false}
               />
               <ButtonGroup
@@ -73,8 +104,18 @@ const Retention = () => {
                   }}
                   height={8}
                   fontSize={'xs-12'}
+                  onClick={() => {
+                    setTrendScale(TrendScale.ABSOLUTE);
+                  }}
                 >
-                  <Hash size={16} color={GREY_600} />
+                  <Hash
+                    size={16}
+                    color={
+                      trendScale == TrendScale.ABSOLUTE
+                        ? BLACK_DEFAULT
+                        : GREY_500
+                    }
+                  />
                 </Button>
                 <Button
                   borderWidth={'1px'}
@@ -89,8 +130,18 @@ const Retention = () => {
                   }}
                   height={8}
                   fontSize={'xs-12'}
+                  onClick={() => {
+                    setTrendScale(TrendScale.PERCENTAGE);
+                  }}
                 >
-                  <Percent size={16} color={GREY_600} />
+                  <Percent
+                    size={16}
+                    color={
+                      trendScale == TrendScale.PERCENTAGE
+                        ? BLACK_DEFAULT
+                        : GREY_500
+                    }
+                  />
                 </Button>
               </ButtonGroup>
             </Flex>
