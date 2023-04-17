@@ -80,12 +80,8 @@ class NotificationService:
             async with s.start_transaction():
                 await Notification.insert(notification)
 
-    async def get_notifications(
-        self, notification_type: NotificationType, frequency: NotificationFrequency
-    ) -> List[Notification]:
+    async def get_notifications(self) -> List[Notification]:
         return await Notification.find(
-            Notification.frequency == frequency,
-            Notification.notification_type == notification_type,
             Notification.notification_active == True,
             Notification.enabled != False,
         ).to_list()

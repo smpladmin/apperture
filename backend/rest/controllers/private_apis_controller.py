@@ -146,9 +146,7 @@ async def get_notifications(
     notification_service: NotificationService = Depends(),
     dpq_service: DPQueueService = Depends(),
 ):
-    notifications = await notification_service.get_notifications(
-        dto.notification_type, dto.frequency
-    )
+    notifications = await notification_service.get_notifications()
     user_ids = set([str(n.user_id) for n in notifications])
     jobs = [dpq_service.enqueue_user_notification(user_id) for user_id in user_ids]
     jobs = [{"user_id": user_id, "job": job} for user_id, job in zip(user_ids, jobs)]
@@ -218,25 +216,6 @@ async def compute_notifications(
     computed_updates = notification_service.compute_updates(
         funnel_data_for_updates + metric_data_for_updates
     )
-
-    # logging.info(f"computed alerts:{computed_alerts}")
-
-    # print("funnel updates", funnel_updates)
-    # print("funnel alerts", funnel_alerts)
-    # print("metric updates", metric_updates)
-    # print("metric alerts", metric_alerts)
-
-    # node_data_for_updates = await edge_service.get_node_data_for_notifications(
-    #     notifications=updates
-    # )
-
-    # node_data_for_alerts = await edge_service.get_node_data_for_notifications(
-    #     notifications=alerts
-    # )
-
-    # computed_updates = notification_service.compute_updates(node_data_for_updates)
-    # computed_alerts = notification_service.compute_alerts(node_data_for_alerts)
-
     return computed_alerts + computed_updates
 
 

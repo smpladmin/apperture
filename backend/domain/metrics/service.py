@@ -292,9 +292,9 @@ class MetricService:
                 NotificationData(
                     name=notification.name,
                     notification_id=notification.id,
-                    value=await self.get_notification_data(notification, days_ago=90),
+                    value=await self.get_notification_data(notification, days_ago=1),
                     prev_day_value=await self.get_notification_data(
-                        notification, days_ago=91
+                        notification, days_ago=2
                     ),
                     variant=NotificationVariant.METRIC,
                     threshold_type=NotificationThresholdType.PCT

@@ -128,7 +128,8 @@ class FunnelsService:
                 conversion=float(
                     "{:.2f}".format(
                         self.compute_conversion(
-                            step_number=i, funnel_stepwise_users=list(funnel_stepwise_users_data)
+                            step_number=i,
+                            funnel_stepwise_users=list(funnel_stepwise_users_data),
                         )
                     )
                 ),
@@ -271,9 +272,9 @@ class FunnelsService:
                     name=notification.name,
                     notification_id=notification.id,
                     variant=NotificationVariant.FUNNEL,
-                    value=await self.get_notification_data(notification, days_ago=83),
+                    value=await self.get_notification_data(notification, days_ago=1),
                     prev_day_value=await self.get_notification_data(
-                        notification, days_ago=91
+                        notification, days_ago=2
                     ),
                     threshold_type=NotificationThresholdType.PCT
                     if notification.pct_threshold_active
