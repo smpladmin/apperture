@@ -67,7 +67,7 @@ const ViewMetricActionPanel = ({
             {'Events / Segments'}
           </Text>
           <Card p={'0'} borderRadius={'8px'} borderColor={'white.200'}>
-            <Flex direction={'column'}>
+            <Flex direction={'column'} w={'full'}>
               {aggregates.map((aggregate, index) => {
                 const lastAggegate = index === aggregates.length - 1;
                 return (
