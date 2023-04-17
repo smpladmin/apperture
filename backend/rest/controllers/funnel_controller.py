@@ -6,22 +6,20 @@ from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
 from domain.funnels.service import FunnelsService
+from domain.notifications.service import NotificationService
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.funnels import (
-    CreateFunnelDto,
-    TransientFunnelDto,
-    FunnelTrendResponse,
-    TransientFunnelConversionlDto,
-)
-from rest.dtos.funnels import (
-    FunnelResponse,
     ComputedFunnelStepResponse,
-    FunnelWithUser,
+    CreateFunnelDto,
     FunnelConversionResponseBody,
+    FunnelResponse,
+    FunnelTrendResponse,
+    FunnelWithUser,
+    TransientFunnelConversionlDto,
+    TransientFunnelDto,
 )
-from rest.middlewares import validate_jwt, get_user_id, get_user
+from rest.middlewares import get_user, get_user_id, validate_jwt
 from tests.rest.controllers.conftest import notification_service
-from domain.notifications.service import NotificationService
 
 router = APIRouter(
     tags=["funnels"],
@@ -63,6 +61,7 @@ async def compute_transient_funnel(
         steps=dto.steps,
         date_filter=dto.dateFilter,
         conversion_window=dto.conversionWindow,
+        random_sequence=dto.randomSequence,
     )
 
 
@@ -129,6 +128,7 @@ async def get_transient_funnel_trends(
         steps=dto.steps,
         date_filter=dto.dateFilter,
         conversion_window=dto.conversionWindow,
+        random_sequence=dto.randomSequence,
     )
 
 
@@ -145,6 +145,7 @@ async def get_transient_funnel_analytics(
         status=dto.status,
         date_filter=dto.dateFilter,
         conversion_window=dto.conversionWindow,
+        random_sequence=dto.randomSequence,
     )
 
 

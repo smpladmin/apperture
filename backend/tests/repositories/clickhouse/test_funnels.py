@@ -1,14 +1,12 @@
-import pytest
-from pypika import Table
 from unittest.mock import MagicMock
 
-from domain.common.filter_models import FilterOperatorsString, FilterDataType
-from domain.segments.models import (
-    WhereSegmentFilter,
-    SegmentFilterConditions,
-)
+import pytest
+from pypika import Table
+
+from domain.common.filter_models import FilterDataType, FilterOperatorsString
 from domain.funnels.models import FunnelStep
-from repositories.clickhouse.funnels import Funnels, ConversionStatus
+from domain.segments.models import SegmentFilterConditions, WhereSegmentFilter
+from repositories.clickhouse.funnels import ConversionStatus, Funnels
 
 
 class TestFunnelsRepository:
@@ -189,6 +187,7 @@ class TestFunnelsRepository:
             start_date=start_date,
             end_date=end_date,
             conversion_time=600,
+            random_sequence=False,
         )
         self.repo.execute_get_query.assert_called_once_with(result, self.parameters)
 
@@ -199,6 +198,7 @@ class TestFunnelsRepository:
             start_date=self.start_date,
             end_date=self.end_date,
             conversion_time=600,
+            random_sequence=False,
         )
         self.repo.execute_get_query.assert_called_once_with(
             self.trends_query_with_date_filter, self.parameters
@@ -211,6 +211,7 @@ class TestFunnelsRepository:
             start_date=None,
             end_date=None,
             conversion_time=600,
+            random_sequence=False,
         ) == (
             self.users_query,
             self.parameters,
@@ -223,6 +224,7 @@ class TestFunnelsRepository:
             start_date=self.start_date,
             end_date=self.end_date,
             conversion_time=600,
+            random_sequence=False,
         ) == (
             self.trends_query_with_date_filter,
             self.parameters,
@@ -236,4 +238,5 @@ class TestFunnelsRepository:
             start_date=None,
             end_date=None,
             conversion_time=600,
+            random_sequence=False,
         ) == (self.analytics_query, self.parameters)
