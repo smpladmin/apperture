@@ -12,9 +12,11 @@ from domain.common.models import IntegrationProvider
 from domain.properties.service import PropertiesService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
+from domain.funnels.service import FunnelsService
+from domain.metrics.service import MetricService
 from domain.events.service import EventsService
 from domain.integrations.service import IntegrationService
-from domain.notifications.models import NotificationType
+from domain.notifications.models import NotificationType, NotificationVariant
 from domain.notifications.service import NotificationService
 from domain.properties.service import PropertiesService
 from domain.runlogs.service import RunLogService
@@ -155,41 +157,85 @@ async def get_notifications(
     return jobs
 
 
-@router.get(
-    "/notifications",
-    response_model=List[ComputedNotificationResponse],
-)
+@router.get("/notifications")
 async def compute_notifications(
     user_id: str,
     compute: bool = True,
     notification_service: NotificationService = Depends(),
-    edge_service: EdgeService = Depends(),
+    funnel_service: FunnelsService = Depends(),
+    metric_service: MetricService = Depends(),
 ):
+
     notifications = await notification_service.get_notifications_to_compute(
         user_id=user_id
     )
-    updates = [
+
+    metric_updates = [
         notif
         for notif in notifications
-        if notif.notification_type.value == NotificationType.UPDATE
+        if NotificationType.UPDATE in notif.notification_type
+        and notif.variant == NotificationVariant.METRIC
     ]
 
-    alerts = [
+    metric_alerts = [
         notif
         for notif in notifications
-        if notif.notification_type.value == NotificationType.ALERT
+        if NotificationType.ALERT in notif.notification_type
+        and notif.variant == NotificationVariant.METRIC
     ]
 
-    node_data_for_updates = await edge_service.get_node_data_for_notifications(
-        notifications=updates
+    funnel_updates = [
+        notif
+        for notif in notifications
+        if NotificationType.UPDATE in notif.notification_type
+        and notif.variant == NotificationVariant.FUNNEL
+    ]
+
+    funnel_alerts = [
+        notif
+        for notif in notifications
+        if NotificationType.ALERT in notif.notification_type
+        and notif.variant == NotificationVariant.FUNNEL
+    ]
+
+    funnel_data_for_alerts = await funnel_service.get_funnel_data_for_notifications(
+        notifications=funnel_alerts
+    )
+    funnel_data_for_updates = await funnel_service.get_funnel_data_for_notifications(
+        notifications=funnel_updates
+    )
+    metric_data_for_alerts = await metric_service.get_metric_data_for_notifications(
+        notifications=metric_alerts
+    )
+    metric_data_for_updates = await metric_service.get_metric_data_for_notifications(
+        notifications=metric_updates
     )
 
-    node_data_for_alerts = await edge_service.get_node_data_for_notifications(
-        notifications=alerts
+    computed_alerts = notification_service.compute_alerts(
+        funnel_data_for_alerts + metric_data_for_alerts
     )
 
-    computed_updates = notification_service.compute_updates(node_data_for_updates)
-    computed_alerts = notification_service.compute_alerts(node_data_for_alerts)
+    computed_updates = notification_service.compute_updates(
+        funnel_data_for_updates + metric_data_for_updates
+    )
+
+    # logging.info(f"computed alerts:{computed_alerts}")
+
+    # print("funnel updates", funnel_updates)
+    # print("funnel alerts", funnel_alerts)
+    # print("metric updates", metric_updates)
+    # print("metric alerts", metric_alerts)
+
+    # node_data_for_updates = await edge_service.get_node_data_for_notifications(
+    #     notifications=updates
+    # )
+
+    # node_data_for_alerts = await edge_service.get_node_data_for_notifications(
+    #     notifications=alerts
+    # )
+
+    # computed_updates = notification_service.compute_updates(node_data_for_updates)
+    # computed_alerts = notification_service.compute_alerts(node_data_for_alerts)
 
     return computed_alerts + computed_updates
 

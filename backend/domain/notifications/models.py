@@ -73,8 +73,10 @@ class Notification(Document):
 class ComputedNotification(BaseModel):
     name: str
     notification_id: PydanticObjectId
-    notification_type: Set[NotificationType]
+    notification_type: NotificationType
+    variant: NotificationVariant
     value: float
+    original_value: float
     threshold_type: Optional[NotificationThresholdType]
     user_threshold: Optional[ThresholdMap]
     triggered: Optional[bool]
@@ -83,3 +85,13 @@ class ComputedNotification(BaseModel):
 class NotificationResponse(Notification, ModelResponse):
     class Config:
         allow_population_by_field_name = True
+
+
+class NotificationData(BaseModel):
+    name: str
+    notification_id: PydanticObjectId
+    variant: NotificationVariant
+    value: float
+    prev_day_value: float
+    threshold_type: Optional[str]
+    threshold_value: Optional[ThresholdMap]

@@ -4,6 +4,7 @@ from typing import List, Dict, Set
 from beanie.operators import In
 from beanie import PydanticObjectId
 from fastapi import Depends
+from domain.notifications.models import NotificationData
 
 from domain.common.models import SavedItems, WatchlistItemType
 from domain.notifications.models import (
@@ -86,20 +87,22 @@ class NotificationService:
             Notification.frequency == frequency,
             Notification.notification_type == notification_type,
             Notification.notification_active == True,
+            Notification.enabled != False,
         ).to_list()
 
     async def get_notifications_to_compute(self, user_id: str) -> List[Notification]:
         return await Notification.find(
             Notification.user_id == PydanticObjectId(user_id),
             Notification.notification_active == True,
+            Notification.enabled != False,
         ).to_list()
 
-    def alert_criteria(self, data: NotificationNodeData, value: float):
+    def alert_criteria(self, data: NotificationData, value: float):
         if data.threshold_type == NotificationThresholdType.ABSOLUTE:
             if (value > data.threshold_value.max) or (value < data.threshold_value.min):
                 return True
         if data.threshold_type == NotificationThresholdType.PCT:
-            prev_value = self.compute_value(data.prev_day_node_data)
+            prev_value = data.prev_day_value
             pct_change = (
                 (value - prev_value) * 100 / prev_value if prev_value != 0 else 0
             )
@@ -137,53 +140,57 @@ class NotificationService:
         return val
 
     def compute_notification_values(
-        self, data: NotificationNodeData, notification_type: Set[NotificationType]
+        self, data: NotificationData, notification_type: Set[NotificationType]
     ):
         triggered = False
-
-        val = self.compute_value(node_data=data.node_data)
+        val = data.value
 
         if NotificationType.ALERT in notification_type:
             triggered = self.alert_criteria(data, val)
 
         return val, triggered
 
-    def compute_updates(
+    def compute_update(
         self,
-        node_data_for_updates: List[NotificationNodeData],
+        data: NotificationData,
     ) -> List[ComputedNotification]:
 
-        computed_updates = (
-            [
-                ComputedNotification(
-                    name=data.name,
-                    notification_id=data.notification_id,
-                    notification_type={NotificationType.UPDATE},
-                    value=float(
-                        "{:.2f}".format(
-                            self.compute_notification_values(
-                                data=data, notification_type={NotificationType.UPDATE}
-                            )[0]
-                        )
-                    ),
-                )
-                for data in node_data_for_updates
-            ]
-            if node_data_for_updates
-            else []
+        value = data.value
+        prev_value = data.prev_day_value
+
+        percentage_difference = (
+            (value - prev_value) * 100 / prev_value if prev_value != 0 else 0
+        )
+
+        computed_updates = ComputedNotification(
+            name=data.name,
+            notification_id=data.notification_id,
+            notification_type=NotificationType.UPDATE,
+            variant=data.variant,
+            value=float("{:.2f}".format(percentage_difference)),
+            original_value=float("{:.2f}".format(data.value)),
         )
 
         return computed_updates
 
-    def compute_alert(self, data: NotificationNodeData):
+    def compute_updates(
+        self,
+        data_for_updates: List[NotificationData],
+    ) -> List[ComputedNotification]:
+        return [self.compute_update(data) for data in data_for_updates]
+
+    def compute_alert(self, data: NotificationData):
         value, triggered = self.compute_notification_values(
             data=data, notification_type={NotificationType.ALERT}
         )
+
         computed_alert = ComputedNotification(
             name=data.name,
             notification_id=data.notification_id,
-            notification_type={NotificationType.ALERT},
+            notification_type=NotificationType.ALERT,
+            variant=data.variant,
             value=float("{:.2f}".format(value)),
+            original_value=float("{:.2f}".format(data.value)),
             threshold_type=data.threshold_type,
             user_threshold=data.threshold_value,
             triggered=triggered,
@@ -192,9 +199,9 @@ class NotificationService:
 
     def compute_alerts(
         self,
-        node_data_for_alerts: List[NotificationNodeData],
+        data_for_alerts: List[NotificationData],
     ) -> List[ComputedNotification]:
-        return [self.compute_alert(data) for data in node_data_for_alerts]
+        return [self.compute_alert(data) for data in data_for_alerts]
 
     async def get_notification_for_node(
         self, name: str, datasource_id: str

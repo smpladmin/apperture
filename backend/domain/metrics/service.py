@@ -3,8 +3,10 @@ import logging
 from typing import List, Union
 from beanie import PydanticObjectId
 from fastapi import Depends
+from domain.notifications.models import NotificationVariant
 
 from domain.common.date_models import DateFilter
+from domain.edge.models import NotificationNodeData
 from domain.metrics.models import (
     SegmentsAndEvents,
     ComputedMetricStep,
@@ -13,6 +15,11 @@ from domain.metrics.models import (
     ComputedMetricData,
     Metric,
     SegmentFilter,
+)
+from domain.notifications.models import (
+    Notification,
+    NotificationData,
+    NotificationThresholdType,
 )
 from mongo import Mongo
 from repositories.clickhouse.metric import Metrics
@@ -247,3 +254,59 @@ class MetricService:
             Metric.id == PydanticObjectId(metric_id),
         ).update({"$set": {"enabled": False}})
         return
+
+    async def get_notification_data(self, notification: Notification, days_ago: int):
+        metric = await self.get_metric_by_id(notification.reference)
+
+        segment_filter_criterion = (
+            self.segment.build_segment_filter_on_metric_criterion(
+                segment_filter=metric.segment_filter
+            )
+            if metric.segment_filter
+            else None
+        )
+
+        date_format = "%Y-%m-%d"
+        today = datetime.today()
+        date = (today - timedelta(days=days_ago)).strftime(date_format)
+
+        data = self.metric.compute_query(
+            datasource_id=str(metric.datasource_id),
+            aggregates=metric.aggregates,
+            breakdown=metric.breakdown,
+            function=metric.function,
+            start_date=date,
+            end_date=date,
+            segment_filter_criterion=segment_filter_criterion,
+        )
+
+        users_count = data[0][1]
+        logging.info(f"metric data - {metric.name} :{data[0][1]}")
+        return float("{:.2f}".format(users_count))
+
+    async def get_metric_data_for_notifications(
+        self, notifications: List[Notification]
+    ):
+        node_data_for_notifications = (
+            [
+                NotificationData(
+                    name=notification.name,
+                    notification_id=notification.id,
+                    value=await self.get_notification_data(notification, days_ago=90),
+                    prev_day_value=await self.get_notification_data(
+                        notification, days_ago=91
+                    ),
+                    variant=NotificationVariant.METRIC,
+                    threshold_type=NotificationThresholdType.PCT
+                    if notification.pct_threshold_active
+                    else NotificationThresholdType.ABSOLUTE,
+                    threshold_value=notification.pct_threshold_values
+                    if notification.pct_threshold_active
+                    else notification.absolute_threshold_values,
+                )
+                for notification in notifications
+            ]
+            if notifications
+            else []
+        )
+        return node_data_for_notifications

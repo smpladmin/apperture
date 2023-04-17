@@ -1,7 +1,15 @@
+import logging
 from typing import List, Union
+from domain.edge.models import NotificationNodeData
+from domain.notifications.models import (
+    Notification,
+    NotificationData,
+    NotificationThresholdType,
+    NotificationVariant,
+)
 from mongo import Mongo
 from fastapi import Depends
-from datetime import datetime
+from datetime import datetime, timedelta
 from beanie import PydanticObjectId
 from beanie.operators import In
 
@@ -229,3 +237,54 @@ class FunnelsService:
             Funnel.id == PydanticObjectId(funnel_id),
         ).update({"$set": {"enabled": False}})
         return
+
+    async def get_notification_data(self, notification: Notification, days_ago: int):
+        funnel = await self.get_funnel(notification.reference)
+        conversion_time = self.compute_conversion_time(
+            conversion_window=funnel.conversion_window
+        )
+
+        date_format = "%Y-%m-%d"
+        today = datetime.today()
+        date = (today - timedelta(days=days_ago)).strftime(date_format)
+
+        data = self.funnels.get_users_count(
+            ds_id=str(funnel.datasource_id),
+            steps=funnel.steps,
+            conversion_time=conversion_time,
+            start_date=date,
+            end_date=date,
+        )
+
+        first_step_users = data[0][0]
+        last_step_users = data[0][len(data[0]) - 1]
+        conversion = last_step_users / first_step_users if first_step_users else 0
+        logging.info(f"funnel data:{data }:{conversion}")
+        return float("{:.2f}".format(conversion))
+
+    async def get_funnel_data_for_notifications(
+        self, notifications: List[Notification]
+    ):
+        node_data_for_notifications = (
+            [
+                NotificationData(
+                    name=notification.name,
+                    notification_id=notification.id,
+                    variant=NotificationVariant.FUNNEL,
+                    value=await self.get_notification_data(notification, days_ago=83),
+                    prev_day_value=await self.get_notification_data(
+                        notification, days_ago=91
+                    ),
+                    threshold_type=NotificationThresholdType.PCT
+                    if notification.pct_threshold_active
+                    else NotificationThresholdType.ABSOLUTE,
+                    threshold_value=notification.pct_threshold_values
+                    if notification.pct_threshold_active
+                    else notification.absolute_threshold_values,
+                )
+                for notification in notifications
+            ]
+            if notifications
+            else []
+        )
+        return node_data_for_notifications
