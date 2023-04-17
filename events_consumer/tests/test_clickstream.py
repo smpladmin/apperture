@@ -107,7 +107,7 @@ class TestClickStream:
         )
         assert result == ClickStream(
             "test_ds_id",
-            datetime(2021, 8, 10, 20, 20, 47, 370000),
+            datetime.fromtimestamp(1628607047.37),
             "test_user_id",
             "",
             "$pageview",

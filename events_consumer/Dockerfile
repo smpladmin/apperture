@@ -17,10 +17,12 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 FROM base as tests
 WORKDIR /code
+COPY . .
 COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-COPY . .
-RUN poetry run pytest
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes --only dev
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN pytest
 
 FROM base as dev
 WORKDIR /code
