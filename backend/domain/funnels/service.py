@@ -1,6 +1,5 @@
 import logging
 from typing import List, Union
-from domain.edge.models import NotificationNodeData
 from domain.notifications.models import (
     Notification,
     NotificationData,

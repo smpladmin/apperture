@@ -142,7 +142,6 @@ async def trigger_fetch_for_all_datasources(
 
 @router.post("/notifications")
 async def get_notifications(
-    dto: TriggerNotificationsDto,
     notification_service: NotificationService = Depends(),
     dpq_service: DPQueueService = Depends(),
 ):
