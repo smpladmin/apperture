@@ -280,21 +280,23 @@ class MetricService:
             segment_filter_criterion=segment_filter_criterion,
         )
 
-        users_count = data[0][1]
-        logging.info(f"metric data - {metric.name} :{data[0][1]}")
+        [(date, users_count)] = data or [(0, 0)]
+        logging.info(f"metric {metric.name} users count on {date}: {users_count}")
         return float("{:.2f}".format(users_count))
 
     async def get_metric_data_for_notifications(
         self, notifications: List[Notification]
     ):
-        node_data_for_notifications = (
+        notifications_data_for_metric = (
             [
                 NotificationData(
                     name=notification.name,
                     notification_id=notification.id,
-                    value=await self.get_notification_data(notification, days_ago=1),
+                    value=await self.get_notification_data(
+                        notification=notification, days_ago=1
+                    ),
                     prev_day_value=await self.get_notification_data(
-                        notification, days_ago=2
+                        notification=notification, days_ago=2
                     ),
                     variant=NotificationVariant.METRIC,
                     threshold_type=NotificationThresholdType.PCT
@@ -309,4 +311,4 @@ class MetricService:
             if notifications
             else []
         )
-        return node_data_for_notifications
+        return notifications_data_for_metric

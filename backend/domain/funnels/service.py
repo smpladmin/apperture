@@ -257,24 +257,25 @@ class FunnelsService:
             end_date=date,
         )
 
-        first_step_users = data[0][0]
-        last_step_users = data[0][len(data[0]) - 1]
-        conversion = last_step_users / first_step_users if first_step_users else 0
-        logging.info(f"funnel data:{data }:{conversion}")
+        first_step_users, *_, last_step_users = data[0]
+        conversion = last_step_users * 100 / first_step_users if first_step_users else 0
+        logging.info(f"funnel {funnel.name} conversion:{conversion}")
         return float("{:.2f}".format(conversion))
 
     async def get_funnel_data_for_notifications(
         self, notifications: List[Notification]
     ):
-        node_data_for_notifications = (
+        notifications_data_for_funnels = (
             [
                 NotificationData(
                     name=notification.name,
                     notification_id=notification.id,
                     variant=NotificationVariant.FUNNEL,
-                    value=await self.get_notification_data(notification, days_ago=1),
+                    value=await self.get_notification_data(
+                        notification=notification, days_ago=1
+                    ),
                     prev_day_value=await self.get_notification_data(
-                        notification, days_ago=2
+                        notification=notification, days_ago=2
                     ),
                     threshold_type=NotificationThresholdType.PCT
                     if notification.pct_threshold_active
@@ -288,4 +289,4 @@ class FunnelsService:
             if notifications
             else []
         )
-        return node_data_for_notifications
+        return notifications_data_for_funnels
