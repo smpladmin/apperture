@@ -10,6 +10,7 @@ from pypika import (
     DatePart,
     Field,
     Parameter,
+    Table,
 )
 from pypika import functions as fn
 from pypika.functions import Extract
@@ -131,6 +132,56 @@ class Funnels(EventsBase):
             )
         )
 
+    def _anyorder_builder(
+        self,
+        ds_id: str,
+        steps: List[FunnelStep],
+        start_date: Union[str, None],
+        end_date: Union[str, None],
+    ):
+        innerQuery = ClickHouseQuery
+        parameters = {"ds_id": ds_id, "epoch_year": self.epoch_year}
+        date_criterion = []
+        if start_date and end_date:
+            date_criterion.extend(
+                [
+                    self.date_func(self.table.timestamp) >= start_date,
+                    self.date_func(self.table.timestamp) <= end_date,
+                ]
+            )
+        for i, step in enumerate(steps):
+            criterion = [
+                self.table.datasource_id == Parameter("%(ds_id)s"),
+                self.table.event_name == Parameter(f"%(event{i})s"),
+            ]
+            if step.filters:
+                filter_criterion = self.filter_utils.get_criterion_for_where_filters(
+                    filters=step.filters
+                )
+                criterion.extend(filter_criterion)
+            parameters[f"event{i}"] = step.event
+            stepQuery = (
+                ClickHouseQuery.from_(self.table)
+                .select(self.table.user_id)
+                .where(Criterion.all(criterion))
+                .groupby(1)
+                .having(Criterion.all(date_criterion))
+            )
+            stepQuery = stepQuery.select(
+                fn.Min(self.table.timestamp) if i == 0 else fn.Max(self.table.timestamp)
+            )
+        if i > 0:
+            stepQuery = (
+                ClickHouseQuery.from_(stepQuery.as_("A"))
+                .select("*")
+                .join(AliasedQuery(f"table{i}"))
+                .on_field(AliasedQuery(f"table{i}").user_id, Table("A").user_id)
+            )
+
+        innerQuery = innerQuery.with_(stepQuery, f"table{i+1}")
+        innerQuery = innerQuery.from_(AliasedQuery("table1")).select("*")
+        return innerQuery, parameters
+
     def _builder(
         self,
         ds_id: str,
@@ -139,6 +190,8 @@ class Funnels(EventsBase):
         end_date: Union[str, None],
         random_sequence: Union[bool, None],
     ):
+        if random_sequence:
+            return self._anyorder_builder(ds_id, steps, start_date, end_date)
         query = ClickHouseQuery
         parameters = {"ds_id": ds_id, "epoch_year": self.epoch_year}
         date_criterion = []
