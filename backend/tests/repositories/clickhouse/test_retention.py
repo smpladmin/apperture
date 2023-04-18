@@ -53,7 +53,7 @@ class TestRetentionRepository:
             start_event=self.start_event,
             goal_event=self.goal_event,
             granularity=self.granularity,
-            interval=1,
+            interval=0,
             segment_filter_criterion=None,
         )
         self.repo.execute_get_query.assert_called_once_with(
@@ -68,7 +68,7 @@ class TestRetentionRepository:
             start_event=self.start_event,
             goal_event=self.goal_event,
             granularity=self.granularity,
-            interval=1,
+            interval=0,
             segment_filter_criterion=None,
         ) == (self.retention_trend_query, self.parameters)
 
@@ -85,7 +85,7 @@ class TestRetentionRepository:
 
     def test_build_retention_count_query(self):
         assert self.repo.build_retention_count_query(
-            granularity=Granularity.WEEKS, interval=9
+            granularity=Granularity.WEEKS, interval=8
         ).get_sql() == (
             'SELECT toStartOfInterval("events"."timestamp",INTERVAL \'1 WEEK\') AS '
             '"granularity",COUNT(DISTINCT "events"."user_id") AS "count" FROM "events" '

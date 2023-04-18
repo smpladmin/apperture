@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import DateFilterComponent from '@components/Date/DateFilter';
 import RetentionEmptyState from './components/RetentionEmptyState';
 import { Hash, Percent } from 'phosphor-react';
-import { BLACK, BLACK_DEFAULT, GREY_500, GREY_600 } from '@theme/index';
+import { BLACK_DEFAULT, GREY_500 } from '@theme/index';
 import { CreateRetentionAction } from './CreateRetentionAction';
 import {
   Granularity,
@@ -18,6 +18,8 @@ import {
 } from '@lib/domain/retention';
 import { DateFilterObj, DateFilterType } from '@lib/domain/common';
 import { getTransientTrendsData } from '@lib/services/retentionService';
+import RetentionTrend from './components/RetentionTrend';
+import IntervalTab from './components/IntervalTab';
 
 const Retention = () => {
   const router = useRouter();
@@ -59,6 +61,7 @@ const Retention = () => {
     ) {
       return;
     }
+    setIsEmpty(false);
     const transientTrendsData = async () => {
       const trendsData = await getTransientTrendsData(
         datasourceId!!,
@@ -74,8 +77,6 @@ const Retention = () => {
     setIsLoading(true);
     transientTrendsData();
   }, [interval, retentionEvents, granularity, dateFilter]);
-
-  console.log(trendsData);
 
   return (
     <Flex
@@ -177,12 +178,22 @@ const Retention = () => {
                 </Button>
               </ButtonGroup>
             </Flex>
-            {true ? (
+            {isEmpty ? (
               <Card minHeight={'120'} borderRadius={'16'}>
                 <RetentionEmptyState />
               </Card>
             ) : (
-              <Box h={30} width={30} bg={'black'}></Box>
+              <Card p={'0'} borderRadius={'12'} overflow={'hidden'}>
+                <Flex w={'full'} direction={'column'}>
+                  <IntervalTab
+                    interval={interval}
+                    setInterval={setInterval}
+                    dateFilter={dateFilter}
+                    granularity={granularity}
+                  />
+                  <RetentionTrend data={trendsData} trendScale={trendScale} />
+                </Flex>
+              </Card>
             )}
           </Flex>
         </ViewPanel>
