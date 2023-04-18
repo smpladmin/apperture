@@ -1,6 +1,6 @@
 import datetime
 from typing import NamedTuple
-from domain.events.models import EventsData
+from domain.events.models import PaginatedEventsData
 
 
 from domain.common.models import IntegrationProvider
@@ -16,6 +16,6 @@ class CreateEventDto(NamedTuple):
     properties: dict
 
 
-class EventsResponse(EventsData, ModelResponse):
+class EventsResponse(PaginatedEventsData, ModelResponse):
     class Config:
         allow_population_by_field_name = True

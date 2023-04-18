@@ -23,7 +23,7 @@ class DPQueueService:
             if self.settings.fastapi_env == "development"
             else Retry(max=3, interval=300)
         )
-        self.job_timeout = 1800  # 30 mins
+        self.job_timeout = 60 * 60 * 10  # 10 hours
 
     def enqueue(self, datasource_id) -> str:
         job = dpq.enqueue(

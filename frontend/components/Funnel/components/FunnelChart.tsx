@@ -45,20 +45,31 @@ const FunnelChart = ({ data, handleChartClick }: FunnelChartProps) => {
       customContent: (_: any, data: any) => {
         const stats = data?.length ? data[0] : null;
         if (stats) {
-          const { users, drop } = stats.data;
-          return `<div id='funnel-tooltip' class='tooltip funnel' 
+          const { users, drop, conversionWrtPrevious, event } = stats.data;
+          return `<div id='funnel-tooltip' class='tooltip funnel'
           >
-            <span class='heading'>Checkout</span>
+          <i class="ph ph-arrow-down-right"></i>
+            <span class='heading'>${event}</span>
             <div class='stats'>
               <div class='row'>
-              <span class='title'> Converted </span>
-              <span class='data'> ${formatDatalabel(users)} </span>
+                <span class='title'> Converted from previous step </span>
+                <div class='previous-conversion'>
+                  <span class='data'> ${formatDatalabel(users)} </span>
+                  <span class='conversion-percentage'> ${
+                    conversionWrtPrevious + '%'
+                  } </span>
+                </div>
               </div>
               <div class='row'>
-              <span class='title'> Dropped </span>
-              <span class='data'> ${formatDatalabel(drop)} </span>
+                <span class='title'> Dropped from previous step </span>
+                <div class='previous-conversion'>
+                  <span class='data'> ${formatDatalabel(drop)} </span>
+                  <span class='conversion-percentage'> ${
+                    (100 - conversionWrtPrevious).toFixed(2) + '%'
+                  } </span>
+                </div>
               </div>
-              <span class='action-button'> click here to view list</span>
+              
             </div>
          </div>`;
         }

@@ -22,7 +22,8 @@ export const computeMetric = async (
   functions: string,
   aggregates: MetricAggregate[],
   breakdown: string[],
-  dateFilter: DateFilterObj
+  dateFilter: DateFilterObj,
+  signal?: AbortSignal
 ) => {
   const requestBody: MetricRequestBody = {
     datasourceId: dsId,
@@ -32,7 +33,7 @@ export const computeMetric = async (
     dateFilter,
   };
 
-  const res = await ApperturePost('metrics/compute', requestBody);
+  const res = await ApperturePost('metrics/compute', requestBody, { signal });
   return res.data || [];
 };
 
@@ -96,7 +97,6 @@ export const validateMetricFormula = async (
   return res.data;
 };
 
-export const deleteMetric = async (id: string) => {
-  const res = await AppertureDelete(`/metrics/${id}`);
-  return res;
+export const deleteMetric = async (id: string, dsId: string) => {
+  return await AppertureDelete(`/metrics/${id}?datasource_id=${dsId}`);
 };

@@ -19,7 +19,6 @@ from rest.dtos.funnels import (
     TransientFunnelDto,
 )
 from rest.middlewares import get_user, get_user_id, validate_jwt
-from tests.rest.controllers.conftest import notification_service
 
 router = APIRouter(
     tags=["funnels"],
@@ -94,13 +93,11 @@ async def update_funnel(
         dto.conversionWindow,
     )
     await funnel_service.update_funnel(funnel_id=id, new_funnel=new_funnel)
-    notification = await notification_service.get_notification_by_reference(
-        reference=id, datasource_id=str(datasource.id)
+
+    await notification_service.fetch_and_delete_notification(
+        reference_id=id, datasource_id=str(datasource.id)
     )
-    if notification:
-        await notification_service.delete_notification(
-            notification_id=str(notification.id)
-        )
+
     return new_funnel
 
 
@@ -171,6 +168,12 @@ async def get_funnels(
 @router.delete("/funnels/{funnel_id}")
 async def delete_funnel(
     funnel_id: str,
+    datasource_id: str,
     funnel_service: FunnelsService = Depends(),
+    notification_service: NotificationService = Depends(),
 ):
     await funnel_service.delete_funnel(funnel_id=funnel_id)
+
+    await notification_service.fetch_and_delete_notification(
+        reference_id=funnel_id, datasource_id=datasource_id
+    )

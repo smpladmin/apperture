@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional, Union
 
 from fastapi import APIRouter, Depends
@@ -36,6 +37,7 @@ async def compute_metrics(
             aggregates=dto.aggregates,
             breakdown=dto.breakdown,
             date_filter=dto.dateFilter,
+            segment_filter=dto.segmentFilter,
         )
         return result
     return [
@@ -47,7 +49,7 @@ async def compute_metrics(
 @router.post("/metrics", response_model=SavedMetricResponse)
 async def save_metrics(
     dto: CreateMetricDTO,
-    user_id: str = Depends(get_user_id),
+    user: AppertureUser = Depends(get_user),
     metric_service: MetricService = Depends(),
     ds_service: DataSourceService = Depends(),
 ):
@@ -55,12 +57,13 @@ async def save_metrics(
     metric = await metric_service.build_metric(
         datasource_id=datasource.id,
         app_id=datasource.app_id,
-        user_id=user_id,
+        user_id=user.id,
         name=dto.name,
         function=dto.function,
         aggregates=dto.aggregates,
         breakdown=dto.breakdown,
-        dateFilter=dto.dateFilter,
+        date_filter=dto.dateFilter,
+        segment_filter=dto.segmentFilter,
     )
     return await metric_service.add_metric(metric=metric)
 
@@ -83,16 +86,15 @@ async def update_metric(
         function=dto.function,
         aggregates=dto.aggregates,
         breakdown=dto.breakdown,
-        dateFilter=dto.dateFilter,
+        date_filter=dto.dateFilter,
+        segment_filter=dto.segmentFilter,
     )
     await metric_service.update_metric(metric_id=id, metric=metric)
-    notification = await notification_service.get_notification_by_reference(
-        reference=id, datasource_id=str(datasource.id)
+
+    ## delete any notification associated with the metric upon updating it
+    await notification_service.fetch_and_delete_notification(
+        reference_id=id, datasource_id=str(datasource.id)
     )
-    if notification:
-        await notification_service.delete_notification(
-            notification_id=str(notification.id)
-        )
     return metric
 
 
@@ -110,16 +112,21 @@ async def get_all_metrics(
     user: AppertureUser = Depends(get_user),
     metric_service: MetricService = Depends(),
 ):
+    logging.info("PROD DEBUG GETTING ALL METRICS")
     if app_id:
+        logging.info(f"PROD DEBUG GETTING ALL METRICS BY APP_ID {app_id}")
         return await metric_service.get_metrics_by_app_id(app_id=app_id)
     metrics = (
         await metric_service.get_metrics_for_datasource_id(datasource_id=datasource_id)
         if datasource_id
         else await metric_service.get_metrics_by_user_id(user_id=user_id)
     )
+    logging.info(f"Got metrics {metrics} from service")
     metrics = [MetricWithUser.from_orm(m) for m in metrics]
+    logging.info(f"ORM metrics: {metrics}")
     for metric in metrics:
         metric.user = AppertureUserResponse.from_orm(user)
+    logging.info(f"Final metrics: {metrics}")
     return metrics
 
 
@@ -144,6 +151,12 @@ async def validate_metric_formula(
 @router.delete("/metrics/{metric_id}")
 async def delete_metrics(
     metric_id: str,
+    datasource_id: str,
     metric_service: MetricService = Depends(),
+    notification_service: NotificationService = Depends(),
 ):
     await metric_service.delete_metric(metric_id=metric_id)
+
+    await notification_service.fetch_and_delete_notification(
+        reference_id=metric_id, datasource_id=datasource_id
+    )

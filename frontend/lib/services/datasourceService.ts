@@ -102,3 +102,14 @@ export const getEvents = async (
   );
   return result.data;
 };
+
+export const getUserActivity = async (
+  userId: string,
+  dsId: string,
+  page: number = 0
+) => {
+  const response = await AppertureGet(
+    `/datasources/${dsId}/events?user_id=${userId}&page_number=${page}`
+  );
+  return response.data;
+};

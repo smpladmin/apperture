@@ -136,6 +136,8 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
         )
       : await saveAction(datasourceId as string, actionName, groups);
 
+    setIsSavedDisabled(true);
+
     if (response?.status === 200 && response.data) {
       const { _id, datasourceId } = response?.data;
       router.push({
@@ -144,6 +146,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
       });
     }
     if (response?.status === 400 && !response.data) {
+      setIsSavedDisabled(false);
       toast({
         title: 'Action name already exists',
         status: 'error',

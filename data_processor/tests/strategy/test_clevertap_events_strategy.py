@@ -30,9 +30,9 @@ class TestClevertapEventsStrategy:
             secret="12312cacac1212312ca",
         )
         self.strategy = ClevertapEventsStrategy(
-            self.datasource, self.credential, "637d27c6bda58637558ac30c", "22-11-2022"
+            self.datasource, self.credential, "637d27c6bda58637558ac30c", "20221122"
         )
-        self.strategy.fetcher = ClevertapEventsFetcher(self.credential, "XXX")
+        self.strategy.fetcher = ClevertapEventsFetcher(self.credential, "20221122")
         self.strategy.fetcher.get_start_cursor = MagicMock(
             return_value=fetch_mock_cursor_response
         )

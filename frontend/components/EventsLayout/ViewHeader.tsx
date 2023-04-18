@@ -8,6 +8,7 @@ type ViewHeaderProps = {
   name: string;
   handleEditClick: Function;
   handleNotificationClick: Function;
+  disableAlert?: boolean;
 };
 
 const ViewHeader = ({
@@ -15,14 +16,20 @@ const ViewHeader = ({
   name,
   handleEditClick,
   handleNotificationClick,
+  disableAlert,
 }: ViewHeaderProps) => {
   return (
     <Flex
+      position={'sticky'}
+      top={'0'}
+      width={'full'}
+      background={'white.400'}
       py={'3'}
       justifyContent={'space-between'}
       alignItems={'center'}
       borderBottom={'1px'}
       borderColor={'grey.DEFAULT'}
+      zIndex={'99'}
     >
       <Flex gap={'2'}>
         <IconButton
@@ -50,7 +57,10 @@ const ViewHeader = ({
         </Text>
       </Flex>
       <Flex alignItems={'center'} gap={'6'}>
-        <ActionMenu onNotificationClick={handleNotificationClick} />
+        <ActionMenu
+          onNotificationClick={handleNotificationClick}
+          disableAlert={disableAlert}
+        />
         <Button
           py={'2'}
           px={'4'}

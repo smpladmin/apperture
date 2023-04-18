@@ -1,7 +1,7 @@
 import { DateFilterObj, WhereFilter } from './common';
 import { AppertureUser } from './user';
 
-export enum MetricComponentVariant {
+export enum MetricVariant {
   EVENT = 'event',
   SEGMENT = 'segment',
   UNDEFINED = '',
@@ -16,7 +16,7 @@ export type MetricAggregate = {
   variable: string;
   reference_id: string;
   function: string;
-  variant: MetricComponentVariant;
+  variant: MetricVariant;
   filters: WhereFilter[];
   conditions: string[];
   aggregations: MetricComponentAggregation;

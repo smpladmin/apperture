@@ -92,3 +92,8 @@ export const getNumberOfDaysBetweenDates = (
   const diff = new Date(endDate)?.valueOf() - new Date(startDate)?.valueOf();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 };
+
+export const ISFilterOperators = [
+  SegmentFilterOperatorsString.IS,
+  SegmentFilterOperatorsString.IS_NOT,
+];

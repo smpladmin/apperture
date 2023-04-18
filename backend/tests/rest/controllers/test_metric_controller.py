@@ -51,6 +51,7 @@ def test_compute_metric(
             "breakdown": [],
             "datasource_id": "638f1aac8e54760eafc64d70",
             "date_filter": None,
+            "segment_filter": None,
             "function": "A",
         }
     )
@@ -98,6 +99,7 @@ def test_get_metrics(client_init, metric_service):
             "userId": "6374b74e9b36ecf7e0b4f9e4",
             "dateFilter": None,
             "enabled": True,
+            "segmentFilter": None,
         }
     ]
     metric_service.get_metrics_for_datasource_id.assert_called_once_with(
@@ -152,32 +154,36 @@ def test_update_metric(
         "updatedAt": None,
         "userId": "6374b74e9b36ecf7e0b4f9e4",
         "dateFilter": None,
+        "segmentFilter": None,
         "enabled": True,
     }
 
     datasource_service.get_datasource.assert_called_with(
         "636a1c61d715ca6baae65611",
     )
-    notification_service.get_notification_by_reference.assert_called_once_with(
+
+    notification_service.fetch_and_delete_notification.assert_called_once_with(
         **{
+            "reference_id": "635ba034807ab86d8a2aadd8",
             "datasource_id": "636a1c61d715ca6baae65611",
-            "reference": "635ba034807ab86d8a2aadd8",
         }
     )
-    notification_service.delete_notification.assert_called_once_with(
-        **{"notification_id": "635ba034807ab86d8a2aadd8"}
+
+
+def test_delete_metric(client_init, metric_service, notification_service):
+    response = client_init.delete(
+        "/metrics/6384a65e0a397236d9de236a?datasource_id=6384a65e0a397236d9de236a"
     )
-
-
-def test_delete_metric(
-    client_init,
-    metric_service,
-):
-    response = client_init.delete("/metrics/6384a65e0a397236d9de236a")
     assert response.status_code == 200
 
     metric_service.delete_metric.assert_called_once_with(
         **{
             "metric_id": "6384a65e0a397236d9de236a",
+        }
+    )
+    notification_service.fetch_and_delete_notification.assert_called_with(
+        **{
+            "reference_id": "6384a65e0a397236d9de236a",
+            "datasource_id": "6384a65e0a397236d9de236a",
         }
     )

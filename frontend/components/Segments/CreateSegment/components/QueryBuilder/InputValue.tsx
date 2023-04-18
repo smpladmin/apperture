@@ -2,11 +2,17 @@ import { Input } from '@chakra-ui/react';
 import { SegmentFilter } from '@lib/domain/segment';
 import React, { KeyboardEvent, useEffect, useRef, useState } from 'react';
 
+export enum InputValueType {
+  NUMBER = 'number',
+  TEXT = 'text',
+}
+
 type InputValueProps = {
   index: number;
   filter: SegmentFilter;
   filters: SegmentFilter[];
   updateGroupsState: Function;
+  type?: InputValueType;
 };
 
 const InputValue = ({
@@ -14,6 +20,7 @@ const InputValue = ({
   filter,
   filters,
   updateGroupsState,
+  type = InputValueType.NUMBER,
 }: InputValueProps) => {
   const inputSearchRef = useRef<HTMLInputElement>(null);
   const [inputCount, setInputCount] = useState(filter.values[0] || '');
@@ -41,7 +48,7 @@ const InputValue = ({
   return (
     <Input
       ref={inputSearchRef}
-      type={'number'}
+      type={type}
       size={'sm'}
       w={'20'}
       bg={'white.100'}

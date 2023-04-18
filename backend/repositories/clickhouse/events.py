@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from pypika import (
     ClickHouseQuery,
     Parameter,
@@ -15,30 +15,59 @@ class Events(EventsBase):
         query, params = self.build_unique_events_query(datasource_id)
         return self.execute_get_query(query, params)
 
-    def get_events(self, datasource_id: str):
-        return self.execute_get_query(*self.build_events_query(datasource_id))
+    def get_events(
+        self,
+        datasource_id: str,
+        user_id: Union[str, None],
+        page_number: int,
+        page_size: int,
+    ):
+        return self.execute_get_query(
+            *self.build_events_query(datasource_id, user_id, page_number, page_size)
+        )
 
-    def get_events_count(self, datasource_id: str):
+    def get_events_count(self, datasource_id: str, user_id: Union[str, None]):
+        params = {"ds_id": datasource_id}
         query = (
             ClickHouseQuery.from_(self.table)
             .select(fn.Count("*"))
             .where(self.table.datasource_id == Parameter("%(ds_id)s"))
         )
-        return self.execute_get_query(query.get_sql(), {"ds_id": datasource_id})
+        if user_id:
+            params["user_id"] = user_id
+            query = query.where(self.table.user_id == Parameter("%(user_id)s"))
+        return self.execute_get_query(query.get_sql(), params)
 
-    def build_events_query(self, datasource_id: str):
+    def build_events_query(
+        self,
+        datasource_id: str,
+        user_id: Union[str, None],
+        page_number: int,
+        page_size: int,
+    ):
+        params = {"ds_id": datasource_id}
         query = (
             ClickHouseQuery.from_(self.table)
             .select(
                 self.table.event_name,
                 self.table.timestamp,
-                self.table.user_id,
-                Field(f"properties.properties.$city"),
             )
             .where(self.table.datasource_id == Parameter("%(ds_id)s"))
-            .limit(100)
         )
-        return query.get_sql(), {"ds_id": datasource_id}
+
+        if user_id:
+            params["user_id"] = user_id
+            query = query.where(self.table.user_id == Parameter("%(user_id)s")).orderby(
+                self.table.timestamp
+            )
+            query = query.limit(page_size).offset(page_number * page_size)
+        else:
+            query = query.select(
+                self.table.user_id, Field(f"properties.properties.$city")
+            )
+            query = query.limit(100)
+
+        return query.get_sql(), params
 
     def build_unique_events_query(self, datasource_id: str):
         params = {"ds_id": datasource_id}

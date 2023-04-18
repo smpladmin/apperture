@@ -1,10 +1,16 @@
 from datetime import datetime
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import MagicMock, AsyncMock, ANY
 import asyncio
 
 import pytest
+from pypika import ClickHouseQuery, Table
 
 from domain.common.date_models import LastDateFilter, DateFilter, DateFilterType
+from domain.common.filter_models import (
+    FilterOperatorsNumber,
+    FilterDataType,
+    LogicalOperators,
+)
 from domain.metrics.models import (
     Metric,
     SegmentsAndEvents,
@@ -15,8 +21,14 @@ from domain.metrics.models import (
     MetricValue,
     MetricBreakdown,
     MetricBasicAggregation,
+    SegmentFilter,
 )
 from domain.metrics.service import MetricService
+from domain.segments.models import (
+    SegmentGroup,
+    WhereSegmentFilter,
+    SegmentFilterConditions,
+)
 
 
 class TestMetricService:
@@ -24,7 +36,10 @@ class TestMetricService:
         Metric.get_settings = MagicMock()
         self.mongo = MagicMock()
         self.metric = MagicMock()
-        self.service = MetricService(mongo=self.mongo, metric=self.metric)
+        self.segment = MagicMock()
+        self.service = MetricService(
+            mongo=self.mongo, metric=self.metric, segment=self.segment
+        )
         self.ds_id = "636a1c61d715ca6baae65611"
         self.date_filter = DateFilter(
             filter=LastDateFilter(days=3), type=DateFilterType.LAST
@@ -264,8 +279,120 @@ class TestMetricService:
                 function=function,
                 breakdown=breakdown,
                 date_filter=self.date_filter,
+                segment_filter=None,
             )
             == result
+        )
+
+    @pytest.mark.asyncio
+    async def test_compute_metric_with_segment_filter(self):
+        self.metric.compute_query.return_value = [
+            (datetime(2023, 1, 22).date(), 518),
+            (datetime(2023, 1, 23).date(), 418),
+            (datetime(2023, 1, 24).date(), 318),
+        ]
+
+        self.segment.build_segment_filter_on_metric_criterion = MagicMock(
+            return_value=(
+                Table("test")
+                .user_id.isin(ClickHouseQuery.from_(Table("test")).select("*"))
+                .__str__()
+            )
+        )
+        segment_filter = SegmentFilter(
+            includes=True,
+            groups=[
+                SegmentGroup(
+                    filters=[
+                        WhereSegmentFilter(
+                            operand="test",
+                            operator=FilterOperatorsNumber.EQ,
+                            values=["1"],
+                            condition=SegmentFilterConditions.WHERE,
+                            datatype=FilterDataType.NUMBER,
+                        )
+                    ],
+                    condition=LogicalOperators.AND,
+                )
+            ],
+        )
+
+        assert await self.service.compute_metric(
+            datasource_id=self.ds_id,
+            aggregates=self.aggregates,
+            function="A",
+            breakdown=[],
+            date_filter=self.date_filter,
+            segment_filter=segment_filter,
+        ) == [
+            ComputedMetricStep(
+                name="A",
+                series=[
+                    ComputedMetricData(
+                        breakdown=[],
+                        data=[
+                            MetricValue(date="2023-01-22", value=518.0),
+                            MetricValue(date="2023-01-23", value=418.0),
+                            MetricValue(date="2023-01-24", value=318.0),
+                        ],
+                    )
+                ],
+            )
+        ]
+        self.segment.build_segment_filter_on_metric_criterion.assert_called_once_with(
+            **{
+                "segment_filter": SegmentFilter(
+                    includes=True,
+                    groups=[
+                        SegmentGroup(
+                            filters=[
+                                WhereSegmentFilter(
+                                    operand="test",
+                                    operator=FilterOperatorsNumber.EQ,
+                                    values=["1"],
+                                    all=False,
+                                    condition=SegmentFilterConditions.WHERE,
+                                    datatype=FilterDataType.NUMBER,
+                                    type=SegmentFilterConditions.WHERE,
+                                )
+                            ],
+                            condition=LogicalOperators.AND,
+                        )
+                    ],
+                )
+            }
+        )
+        self.metric.compute_query.assert_called_once_with(
+            **{
+                "aggregates": [
+                    SegmentsAndEvents(
+                        variable="A",
+                        variant=SegmentsAndEventsType.EVENT,
+                        aggregations=SegmentsAndEventsAggregations(
+                            functions=MetricBasicAggregation.COUNT,
+                            property="Video_Seen",
+                        ),
+                        reference_id="Video_Seen",
+                        filters=[],
+                    ),
+                    SegmentsAndEvents(
+                        variable="B",
+                        variant=SegmentsAndEventsType.EVENT,
+                        aggregations=SegmentsAndEventsAggregations(
+                            functions=MetricBasicAggregation.COUNT,
+                            property="Video_Open",
+                        ),
+                        reference_id="Video_Open",
+                        filters=[],
+                    ),
+                ],
+                "breakdown": [],
+                "datasource_id": "636a1c61d715ca6baae65611",
+                "end_date": "2023-01-24",
+                "function": "A",
+                "segment_filter_criterion": '"user_id" IN (SELECT * FROM "test")',
+                "start_date": "2023-01-22",
+            }
         )
 
     @pytest.mark.asyncio

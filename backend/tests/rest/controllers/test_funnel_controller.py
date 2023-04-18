@@ -102,14 +102,12 @@ async def test_update_funnel(
     } == update_funnel_kwargs["new_funnel"].dict()
 
     assert "635ba034807ab86d8a2aadd8" == update_funnel_kwargs["funnel_id"]
-    notification_service.get_notification_by_reference.assert_called_once_with(
+
+    notification_service.fetch_and_delete_notification.assert_called_once_with(
         **{
+            "reference_id": "635ba034807ab86d8a2aadd8",
             "datasource_id": "636a1c61d715ca6baae65611",
-            "reference": "635ba034807ab86d8a2aadd8",
         }
-    )
-    notification_service.delete_notification.assert_called_once_with(
-        **{"notification_id": "635ba034807ab86d8a2aadd8"}
     )
 
 
@@ -216,15 +214,21 @@ def test_get_funnels(client_init, funnel_service):
     )
 
 
-def test_delete_funnel(
-    client_init,
-    funnel_service,
-):
-    response = client_init.delete("/funnels/6384a65e0a397236d9de236a")
+def test_delete_funnel(client_init, funnel_service, notification_service):
+    response = client_init.delete(
+        "/funnels/6384a65e0a397236d9de236a?datasource_id=6384a65e0a397236d9de236a"
+    )
     assert response.status_code == 200
 
     funnel_service.delete_funnel.assert_called_once_with(
         **{
             "funnel_id": "6384a65e0a397236d9de236a",
+        }
+    )
+
+    notification_service.fetch_and_delete_notification.assert_called_with(
+        **{
+            "reference_id": "6384a65e0a397236d9de236a",
+            "datasource_id": "6384a65e0a397236d9de236a",
         }
     )

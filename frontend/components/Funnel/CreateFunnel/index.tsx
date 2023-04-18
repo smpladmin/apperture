@@ -1,5 +1,4 @@
-import { Flex } from '@chakra-ui/react';
-import 'remixicon/fonts/remixicon.css';
+import { Flex, useToast } from '@chakra-ui/react';
 import CreateFunnelAction from './CreateFunnelAction';
 import { useEffect, useState } from 'react';
 import FunnelEmptyState from '../components/FunnelEmptyState';
@@ -11,7 +10,7 @@ import {
   FunnelStep,
   FunnelTrendsData,
 } from '@lib/domain/funnel';
-import TransientFunnelView from './TransientFunnelView';
+import TransientFunnelView from '../components/TransientFunnelView';
 import {
   filterFunnelSteps,
   getCountOfValidAddedSteps,
@@ -28,8 +27,8 @@ import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel
 import { DateFilterObj } from '@lib/domain/common';
 import Header from '@components/EventsLayout/ActionHeader';
 import Card from '@components/Card';
-import ActionPanelTemp from '@components/EventsLayout/ActionPanelTemp';
-import ViewPanelTemp from '@components/EventsLayout/ViewPanelTemp';
+import ActionPanel from '@components/EventsLayout/ActionPanel';
+import ViewPanel from '@components/EventsLayout/ViewPanel';
 
 const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const router = useRouter();
@@ -133,7 +132,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
     getFunnelMetricsData();
   }, [funnelSteps, dateFilter, conversionWindow, randomSequence]);
 
-  const handleSaveFunnel = async () => {
+  const handleSaveOrUpdateFunnel = async () => {
     const { data, status } = isFunnelBeingEdited
       ? await updateFunnel(
           funnelId as string,
@@ -153,11 +152,16 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           conversionWindow
         );
 
-    if (status === 200)
+    setSaveButtonDisabled(true);
+
+    if (status === 200) {
       router.push({
         pathname: '/analytics/funnel/view/[funnelId]',
         query: { funnelId: data?._id || funnelId, dsId },
       });
+    } else {
+      setSaveButtonDisabled(false);
+    }
   };
 
   return (
@@ -172,7 +176,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
         handleGoBack={() => router.back()}
         name={funnelName}
         setName={setFunnelName}
-        handleSave={handleSaveFunnel}
+        handleSave={handleSaveOrUpdateFunnel}
         isSaveButtonDisabled={isSaveButtonDisabled}
       />
       <Flex
@@ -181,7 +185,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
         flexGrow={1}
         bg={'white.400'}
       >
-        <ActionPanelTemp>
+        <ActionPanel>
           <Card>
             <CreateFunnelAction
               funnelSteps={funnelSteps}
@@ -193,8 +197,8 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
               setRandomSequence={setRandomSequence}
             />
           </Card>
-        </ActionPanelTemp>
-        <ViewPanelTemp>
+        </ActionPanel>
+        <ViewPanel>
           {isEmpty ? (
             <Card minHeight={'120'} borderRadius={'16'}>
               <FunnelEmptyState />
@@ -211,7 +215,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
               randomSequence={randomSequence}
             />
           )}
-        </ViewPanelTemp>
+        </ViewPanel>
       </Flex>
     </Flex>
   );

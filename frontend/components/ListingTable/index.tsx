@@ -1,5 +1,5 @@
 import 'remixicon/fonts/remixicon.css';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import 'remixicon/fonts/remixicon.css';
 import {
   useReactTable,
@@ -21,12 +21,17 @@ import {
   Skeleton,
 } from '@chakra-ui/react';
 import TableSkeleton from '@components/Skeleton/TableSkeleton';
+import LoadingSpinner from '@components/LoadingSpinner';
 
 type ListingTableProps = {
   columns: ColumnDef<any, any>[];
   tableData: any[];
   count: number;
   isLoading: boolean;
+  showTableCountHeader?: boolean;
+  fetchMoreData?: Function;
+  isMoreDataLoading?: boolean;
+  setIsMoreDataLoading?: Function;
 };
 
 const ListingTable = ({
@@ -34,6 +39,10 @@ const ListingTable = ({
   tableData,
   isLoading,
   count,
+  showTableCountHeader = true,
+  fetchMoreData,
+  isMoreDataLoading,
+  setIsMoreDataLoading,
 }: ListingTableProps) => {
   const tableInstance = useReactTable({
     columns,
@@ -52,42 +61,39 @@ const ListingTable = ({
       borderWidth={'0.4px'}
       borderColor={'grey.100'}
     >
-      <Flex
-        minH={'15'}
-        p={'4'}
-        justifyContent={'space-between'}
-        alignItems={'center'}
-        width={'100%'}
-      >
-        <Flex gap={'1'}>
-          <Text
-            fontSize={'xs-14'}
-            lineHeight={'xs-18'}
-            fontWeight={'500'}
-            color={'grey.100'}
-          >
-            Showing:
-          </Text>
-          {isLoading ? (
-            <Skeleton height={'5'} />
-          ) : (
+      {showTableCountHeader && (
+        <Flex
+          minH={'15'}
+          p={'4'}
+          justifyContent={'space-between'}
+          alignItems={'center'}
+          width={'100%'}
+        >
+          <Flex gap={'1'}>
             <Text
               fontSize={'xs-14'}
               lineHeight={'xs-18'}
               fontWeight={'500'}
-              data-testid={'users-count'}
+              color={'grey.100'}
             >
-              {count || 0} Events
+              Showing:
             </Text>
-          )}
+            {isLoading ? (
+              <Skeleton height={'5'} />
+            ) : (
+              <Text
+                fontSize={'xs-14'}
+                lineHeight={'xs-18'}
+                fontWeight={'500'}
+                data-testid={'users-count'}
+              >
+                {count || 0} Events
+              </Text>
+            )}
+          </Flex>
         </Flex>
-      </Flex>
-
-      <Flex
-        alignItems={'center'}
-        justifyContent={'space-between'}
-        overflow={'auto'}
-      >
+      )}
+      <Flex alignItems={'center'} justifyContent={'space-between'}>
         {isLoading ? (
           <TableSkeleton tableHeader={columnHeaders} />
         ) : tableData?.length ? (
@@ -112,27 +118,48 @@ const ListingTable = ({
               ))}
             </Thead>
             <Tbody>
-              {getRowModel().rows.map((row, index) => (
-                <Tr
-                  key={row.id + index}
-                  _hover={{ bg: 'white.100' }}
-                  data-testid={'listing-table-body-rows'}
-                >
-                  {row.getVisibleCells().map((cell, cellIndex) => {
-                    return (
-                      <Td
-                        key={cell.id + cellIndex}
-                        data-testid={'listing-table--body-data'}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </Td>
-                    );
-                  })}
+              {getRowModel().rows.map((row, index) =>
+                fetchMoreData ? (
+                  <PaginatedTableRow
+                    row={row}
+                    key={row.id + index}
+                    index={index}
+                    isLast={index === tableData.length - 1}
+                    fetchMoreData={fetchMoreData}
+                    hasMore={tableData.length < count}
+                    setIsMoreDataLoading={setIsMoreDataLoading}
+                  ></PaginatedTableRow>
+                ) : (
+                  <Tr
+                    key={row.id + index}
+                    _hover={{ bg: 'white.100' }}
+                    data-testid={'listing-table-body-rows'}
+                  >
+                    {row.getVisibleCells().map((cell, cellIndex) => {
+                      return (
+                        <Td
+                          key={cell.id + cellIndex}
+                          data-testid={'listing-table--body-data'}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </Td>
+                      );
+                    })}
+                  </Tr>
+                )
+              )}
+              {isMoreDataLoading && (
+                <Tr>
+                  <Td>
+                    <Flex w={'full'} justifyContent={'right'}>
+                      <LoadingSpinner />
+                    </Flex>
+                  </Td>
                 </Tr>
-              ))}
+              )}
             </Tbody>
           </Table>
         ) : (
@@ -144,6 +171,53 @@ const ListingTable = ({
         )}
       </Flex>
     </Box>
+  );
+};
+
+type PaginatedTableRowProps = {
+  row: any;
+  index: number;
+  isLast: boolean;
+  fetchMoreData: Function;
+  hasMore: boolean;
+  setIsMoreDataLoading?: Function;
+};
+
+const PaginatedTableRow = (props: PaginatedTableRowProps) => {
+  const cardRef = useRef(null);
+  useEffect(() => {
+    if (!cardRef?.current) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (props.isLast && entry.isIntersecting && props.hasMore) {
+        props.setIsMoreDataLoading?.(true);
+        props.fetchMoreData();
+
+        observer.unobserve(entry.target);
+      }
+    });
+
+    observer.observe(cardRef.current);
+  }, [props.isLast]);
+
+  return (
+    <Tr
+      ref={cardRef}
+      key={props.row.id + props.index}
+      _hover={{ bg: 'white.100' }}
+      data-testid={'listing-table-body-rows'}
+    >
+      {props.row.getVisibleCells().map((cell: any, cellIndex: number) => {
+        return (
+          <Td
+            key={cell.id + cellIndex}
+            data-testid={'listing-table--body-data'}
+          >
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </Td>
+        );
+      })}
+    </Tr>
   );
 };
 

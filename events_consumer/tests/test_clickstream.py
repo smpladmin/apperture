@@ -1,0 +1,152 @@
+from datetime import datetime
+from models.models import ClickStream, Element
+
+
+class TestClickStream:
+    def setup_method(self):
+        self.elements_list = [
+            Element(
+                tag_name="i",
+                attr_class=["ri-route-fill"],
+                nth_child=1,
+                nth_of_type=1,
+                text="",
+                attributes={},
+            ),
+            Element(
+                tag_name="button",
+                text="",
+                attr_class=["chakra-button", "css-vyn3p3"],
+                nth_child=1,
+                nth_of_type=1,
+                attributes={},
+            ),
+            Element(
+                tag_name="div",
+                attr_class=["css-1cd4go2"],
+                nth_child=1,
+                nth_of_type=1,
+                attributes={},
+            ),
+            Element(
+                tag_name="div",
+                attr_class=["css-0"],
+                nth_child=3,
+                nth_of_type=3,
+                attributes={},
+            ),
+            Element(
+                tag_name="div",
+                attr_class=["css-3h169z"],
+                nth_child=1,
+                nth_of_type=1,
+                attributes={},
+            ),
+            Element(
+                tag_name="div",
+                attr_class=["css-1xhj18k"],
+                nth_child=2,
+                nth_of_type=1,
+                attributes={},
+            ),
+            Element(
+                tag_name="div",
+                attr_id="__next",
+                nth_child=1,
+                nth_of_type=1,
+                attributes={},
+            ),
+            Element(
+                tag_name="body",
+                attr_class=["chakra-ui-light"],
+                nth_child=2,
+                nth_of_type=1,
+                attributes={},
+            ),
+        ]
+
+    def test_build(self):
+        """ """
+
+        result = ClickStream.build(
+            datasource_id="test_ds_id",
+            timestamp=1628607047.37,
+            user_id="test_user_id",
+            event="$pageview",
+            properties={
+                "$browser": "Chrome",
+                "$browser_language": "en-GB",
+                "$browser_version": 109,
+                "$ce_version": 0,
+                "$current_url": "http://localhost:3000/analytics/app/create",
+                "$device_id": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
+                "$device_type": "Desktop",
+                "$elements": [],
+                "$event_type": "",
+                "$host": "localhost:3000",
+                "$insert_id": "uyvllc1rseh4gdym",
+                "$lib": "web",
+                "$lib_version": "1.43.1",
+                "$os": "Mac OS X",
+                "$pageview_id": "186348305ce2227-082e406114e4e3-16525635-16a7f0-186348305cf2c5f",
+                "$pathname": "/analytics/app/create",
+                "$referrer": "http://localhost:3000/analytics/segment/create/638f1aac8e54760eafc64d70",
+                "$referring_domain": "localhost:3000",
+                "$screen_height": 982,
+                "$screen_width": 1512,
+                "$session_id": "186348305ca99b-05bdb409c347f-16525635-16a7f0-186348305cb2335",
+                "$time": 1675918247.37,
+                "$viewport_height": 780,
+                "$viewport_width": 1512,
+                "$window_id": "186348305cc2af1-0d198248776bf4-16525635-16a7f0-186348305cd2d7c",
+                "currency": "",
+                "distinct_id": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
+                "price": 0,
+                "token": "63d8ef5a7b02dbd1dcf20dcc",
+            },
+        )
+        assert result == ClickStream(
+            "test_ds_id",
+            datetime.fromtimestamp(1628607047.37),
+            "test_user_id",
+            "",
+            "$pageview",
+            {
+                "$browser": "Chrome",
+                "$browser_language": "en-GB",
+                "$browser_version": 109,
+                "$ce_version": 0,
+                "$current_url": "http://localhost:3000/analytics/app/create",
+                "$device_id": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
+                "$device_type": "Desktop",
+                "$elements": [],
+                "$event_type": "",
+                "$host": "localhost:3000",
+                "$insert_id": "uyvllc1rseh4gdym",
+                "$lib": "web",
+                "$lib_version": "1.43.1",
+                "$os": "Mac OS X",
+                "$pageview_id": "186348305ce2227-082e406114e4e3-16525635-16a7f0-186348305cf2c5f",
+                "$pathname": "/analytics/app/create",
+                "$referrer": "http://localhost:3000/analytics/segment/create/638f1aac8e54760eafc64d70",
+                "$referring_domain": "localhost:3000",
+                "$screen_height": 982,
+                "$screen_width": 1512,
+                "$session_id": "186348305ca99b-05bdb409c347f-16525635-16a7f0-186348305cb2335",
+                "$time": 1675918247.37,
+                "$viewport_height": 780,
+                "$viewport_width": 1512,
+                "$window_id": "186348305cc2af1-0d198248776bf4-16525635-16a7f0-186348305cd2d7c",
+                "currency": "",
+                "distinct_id": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
+                "price": 0,
+                "token": "63d8ef5a7b02dbd1dcf20dcc",
+            },
+        )
+
+    def test_elements_to_string(self):
+        result = ClickStream.elements_to_string(self.elements_list)
+        assert (
+            result
+            == 'i.ri-route-fill:nth-child="1"nth-of-type="1";button.chakra-button.css-vyn3p3:nth-child="1"nth-of-type="1";div.css-1cd4go2:nth-child="1"nth-of-type="1";div.css-0:nth-child="3"nth-of-type="3";div.css-3h169z:nth-child="1"nth-of-type="1";div.css-1xhj18k:nth-child="2"nth-of-type="1";div:attr_id="__next"nth-child="1"nth-of-type="1";body.chakra-ui-light:nth-child="2"nth-of-type="1"'
+        )

@@ -127,13 +127,14 @@ def test_get_event_properties(client_init, properties_service):
     )
 
 
-def test_get_events(client_init, events_service):
+def test_get_events_for_demo_table(client_init, events_service):
     response = client_init.get(
         "/datasources/637739d383ea7fda83e72a2d/events?is_aux=False&table_name=All"
     )
     assert response.status_code == 200
     assert response.json() == {
         "count": 2,
+        "pageNumber": 0,
         "data": [
             {
                 "name": "Content_Like",
@@ -155,5 +156,44 @@ def test_get_events(client_init, events_service):
             "datasource_id": "637739d383ea7fda83e72a2d",
             "is_aux": False,
             "table_name": "All",
+            "page_number": 0,
+            "page_size": 100,
+            "user_id": None,
+        }
+    )
+
+
+def test_get_events_for_user_id(client_init, events_service):
+    response = client_init.get(
+        "/datasources/637739d383ea7fda83e72a2d/events?user_id=123&page_number=0"
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "count": 2,
+        "pageNumber": 0,
+        "data": [
+            {
+                "name": "Content_Like",
+                "city": "Delhi",
+                "timestamp": "2023-01-13T15:23:38",
+                "user_id": "mthdas8@gmail.com",
+            },
+            {
+                "name": "WebView_Open",
+                "city": "Delhi",
+                "timestamp": "2023-01-13T15:23:41",
+                "user_id": "mthdas8@gmail.com",
+            },
+        ],
+    }
+
+    events_service.get_events.assert_called_with(
+        **{
+            "datasource_id": "637739d383ea7fda83e72a2d",
+            "is_aux": False,
+            "page_number": 0,
+            "page_size": 100,
+            "table_name": "events",
+            "user_id": "123",
         }
     )

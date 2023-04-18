@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Dict, List
 
 from fastapi import Depends
+from starlette.concurrency import run_in_threadpool
 
 from clickhouse.clickhouse import Clickhouse
 from domain.clickstream.models import CaptureEvent, ClickstreamData, ClickstreamResult
@@ -85,30 +86,31 @@ class ClickstreamService:
             )
             for event in events
         ]
-        for data in clickstream_data:
-            try:
-                self.clickhouse.insert(
-                    self.table,
-                    [data],
-                    column_names=self.columns,
-                )
-            except Exception as e:
-                logging.error(e)
-                logging.info("Error inserting")
-                logging.info(data)
-                self.clickhouse.insert(
-                    self.error_table,
-                    [
-                        (
-                            data.datasourceId,
-                            data.timestamp,
-                            data.userId,
-                            data.event,
-                            str(data.properties),
-                        )
-                    ],
-                    column_names=self.columns,
-                )
+        try:
+            self.clickhouse.insert(
+                self.table,
+                clickstream_data,
+                column_names=self.columns,
+                settings={"insert_async": True, "wait_for_async_insert": False},
+            )
+        except Exception as e:
+            logging.error(e)
+            logging.info("Error inserting")
+            logging.info(clickstream_data)
+            self.clickhouse.insert(
+                self.error_table,
+                [
+                    (
+                        data.datasourceId,
+                        data.timestamp,
+                        data.userId,
+                        data.event,
+                        str(data.properties),
+                    )
+                    for data in clickstream_data
+                ],
+                column_names=self.columns,
+            )
 
     def get_data_by_id(self, dsId: str):
         data_list = self.repository.get_all_data_by_dsId(dsId)

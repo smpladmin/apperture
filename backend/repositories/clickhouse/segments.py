@@ -2,11 +2,13 @@ import copy
 from typing import List, Union
 
 from fastapi import Depends
+from pypika.terms import ContainsCriterion
 
 from clickhouse import Clickhouse
 from domain.common.filter_models import (
     LogicalOperators,
 )
+from domain.metrics.models import SegmentFilter
 from repositories.clickhouse.base import EventsBase
 from domain.segments.models import (
     SegmentFilterConditions,
@@ -44,6 +46,16 @@ class Segments(EventsBase):
             .select(self.table.user_id)
             .distinct()
             .where(self.table.datasource_id == Parameter("%(ds_id)s"))
+        )
+
+    def build_segment_filter_on_metric_criterion(
+        self, segment_filter: SegmentFilter
+    ) -> ContainsCriterion:
+        query = self.build_segment_users_query(groups=segment_filter.groups)
+        return (
+            self.table.user_id.isin(query)
+            if segment_filter.includes
+            else self.table.user_id.notin(query)
         )
 
     def build_where_clause_users_query(

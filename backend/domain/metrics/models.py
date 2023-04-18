@@ -4,7 +4,7 @@ from typing import Optional, Union, List
 from beanie import PydanticObjectId
 from pydantic import BaseModel
 from domain.common.date_models import DateFilter
-from domain.segments.models import WhereSegmentFilter
+from domain.segments.models import WhereSegmentFilter, SegmentGroup
 from repositories import Document
 from pypika import analytics as an, functions as fn, CustomFunction
 
@@ -63,6 +63,11 @@ class SegmentsAndEvents(BaseModel):
     filters: List[WhereSegmentFilter]
 
 
+class SegmentFilter(BaseModel):
+    includes: bool
+    groups: List[SegmentGroup]
+
+
 class Metric(Document):
     datasource_id: PydanticObjectId
     app_id: PydanticObjectId
@@ -72,6 +77,7 @@ class Metric(Document):
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
     date_filter: Optional[DateFilter]
+    segment_filter: Optional[SegmentFilter]
     enabled: bool = True
 
     class Settings:

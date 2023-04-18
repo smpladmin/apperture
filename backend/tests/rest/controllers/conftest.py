@@ -24,7 +24,7 @@ from domain.common.filter_models import (
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
-from domain.events.models import Event, EventsData
+from domain.events.models import Event, PaginatedEventsData
 from domain.funnels.models import (
     ComputedFunnel,
     ComputedFunnelStep,
@@ -127,6 +127,7 @@ def notification_service(apperture_user_response):
     notification_service_mock.get_notifications_for_datasource_id.return_value = (
         notifications_future
     )
+    notification_service_mock.fetch_and_delete_notification = mock.AsyncMock()
     return notification_service_mock
 
 
@@ -161,8 +162,15 @@ def funnel_service(apperture_user_response):
     funnels_future.set_result([FunnelWithUser.from_orm(funnel)])
 
     computed_transient_funnel = [
-        ComputedFunnelStep(event="Login", users=956, conversion=100.0),
-        ComputedFunnelStep(event="Chapter_Click", users=547, conversion=57.22),
+        ComputedFunnelStep(
+            event="Login", users=956, conversion=100.0, conversion_wrt_previous=100.0
+        ),
+        ComputedFunnelStep(
+            event="Chapter_Click",
+            users=547,
+            conversion=57.22,
+            conversion_wrt_previous=57.22,
+        ),
     ]
     computed_funnel = ComputedFunnel(
         datasource_id=funnel.datasource_id,
@@ -335,8 +343,9 @@ def events_service():
         return_value=[["Philippines"], ["Hong Kong"]]
     )
     events_service_mock.get_events = mock.MagicMock(
-        return_value=EventsData(
+        return_value=PaginatedEventsData(
             count=2,
+            page_number=0,
             data=[
                 Event(
                     name="Content_Like",
@@ -462,7 +471,7 @@ def properties_service():
     )
     properties_service.fetch_properties.return_value = ["prop1", "prop2"]
     properties_service.refresh_properties.return_value = properties
-    properties_service.refresh_properties_for_all_datasources.return_value = None
+    properties_service.refresh_properties_for_all_datasources.return_value = properties
     return properties_service
 
 
@@ -1028,8 +1037,18 @@ def node_trends_response():
 @pytest.fixture(scope="module")
 def computed_transient_funnel_response():
     return [
-        {"event": "Login", "users": 956, "conversion": 100.0},
-        {"event": "Chapter_Click", "users": 547, "conversion": 57.22},
+        {
+            "event": "Login",
+            "users": 956,
+            "conversion": 100.0,
+            "conversionWrtPrevious": 100.0,
+        },
+        {
+            "event": "Chapter_Click",
+            "users": 547,
+            "conversion": 57.22,
+            "conversionWrtPrevious": 57.22,
+        },
     ]
 
 

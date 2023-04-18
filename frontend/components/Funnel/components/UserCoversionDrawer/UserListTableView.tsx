@@ -1,10 +1,10 @@
 import {
   Flex,
-  Tabs,
-  TabList,
-  TabPanels,
   Tab,
+  TabList,
   TabPanel,
+  TabPanels,
+  Tabs,
   Text,
 } from '@chakra-ui/react';
 import { DateFilterObj } from '@lib/domain/common';
@@ -13,14 +13,16 @@ import {
   ConversionWindowObj,
   FunnelConversionData,
   FunnelStep,
-  UserProperty,
+  UserActivityResponse,
+  UserProperty
 } from '@lib/domain/funnel';
 import { getConversionData } from '@lib/services/funnelService';
-import React, { useEffect, useState } from 'react';
-import { TableState } from '.';
+import { useEffect, useState } from 'react';
 import SkeletonLoader from './SkeletonLoader';
+import UserActivityTable from './UserActivityTable';
 import UserListTable from './UserListTable';
 import UserPropertyTable from './UserPropertyTable';
+import { TableState } from './index';
 
 type UserTableViewProps = {
   setSelectedUser: Function;
@@ -34,6 +36,10 @@ type UserTableViewProps = {
   status: ConversionStatus;
   setStatus: Function;
   randomSequence: boolean;
+  userActivity: UserActivityResponse;
+  selectedUser: any;
+  setUserActivity: Function;
+  isTableDataLoading: boolean;
 };
 type FunnelEventConversion = {
   converted?: FunnelConversionData;
@@ -51,6 +57,10 @@ const UserTableView = ({
   status,
   setStatus,
   randomSequence,
+  userActivity,
+  selectedUser,
+  setUserActivity,
+  isTableDataLoading,
 }: UserTableViewProps) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [userData, setUserData] = useState<FunnelEventConversion>();
@@ -90,6 +100,7 @@ const UserTableView = ({
       fetchUserData();
     }
   }, [status]);
+
   const handleRowClick = (user: string) => {
     setTabIndex(0);
     setSelectedUser(user);
@@ -117,20 +128,18 @@ const UserTableView = ({
             </Text>
           </Tab>
 
-          {tableState == TableState.LIST ? (
-            <Tab
-              _selected={{ fontWeight: 600, borderBottom: '2px solid black' }}
-              px={0}
-              marginLeft={8}
-              _active={{}}
-              onClick={() => setStatus(ConversionStatus.DROPPED)}
-            >
-              Dropped
-            </Tab>
-          ) : null}
+          <Tab
+            _selected={{ fontWeight: 600, borderBottom: '2px solid black' }}
+            px={0}
+            marginLeft={8}
+            _active={{}}
+            onClick={() => setStatus(ConversionStatus.DROPPED)}
+          >
+            {tableState == TableState.LIST ? 'Dropped' : 'Events'}
+          </Tab>
         </TabList>
 
-        <TabPanels display={'flex'} maxH={'full'} flex={1} overflow={'hidden'}>
+        <TabPanels display={'flex'} maxH={'full'} flex={1} overflow={'scroll'}>
           <TabPanel display={'flex'} overflow={'hidden'} w={'full'}>
             {tableState == TableState.LIST ? (
               userData?.converted ? (
@@ -149,9 +158,9 @@ const UserTableView = ({
               <SkeletonLoader />
             )}
           </TabPanel>
-          {tableState == TableState.LIST ? (
-            <TabPanel display={'flex'} overflow={'hidden'} w={'full'}>
-              {userData?.dropped ? (
+          <TabPanel display={'flex'} overflow={'scroll'} w={'full'}>
+            {tableState == TableState.LIST ? (
+              userData?.dropped ? (
                 <UserListTable
                   handleRowClick={handleRowClick}
                   users={userData.dropped.users}
@@ -160,9 +169,18 @@ const UserTableView = ({
                 />
               ) : (
                 <SkeletonLoader />
-              )}
-            </TabPanel>
-          ) : null}
+              )
+            ) : userActivity ? (
+              <UserActivityTable
+                isLoading={isTableDataLoading}
+                selectedUser={selectedUser}
+                userActivity={userActivity}
+                setUserActivity={setUserActivity}
+              />
+            ) : (
+              <SkeletonLoader />
+            )}
+          </TabPanel>
         </TabPanels>
       </Tabs>
     </Flex>
