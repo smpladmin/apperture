@@ -23,3 +23,25 @@ export const getTransientTrendsData = async (
   );
   return res.data || [];
 };
+
+export const getTransientRetentionData = async (
+  dsId: string,
+  startEvent: FunnelStep,
+  goalEvent: FunnelStep,
+  dateFilter: DateFilterObj,
+  granularity: Granularity,
+  page_number: number,
+  page_size: number = 10
+) => {
+  const res = await ApperturePost(
+    `/retention/transient?page_number=${page_number}&page_size=${page_size}`,
+    {
+      datasourceId: dsId,
+      startEvent,
+      goalEvent,
+      dateFilter,
+      granularity,
+    }
+  );
+  return res.data || [];
+};

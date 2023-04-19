@@ -1,37 +1,24 @@
-import { Box, Flex, Text } from '@chakra-ui/react';
-import DateFilter from '@components/Date/DateFilter';
-import { DateFilterType } from '@lib/domain/common';
-import dayjs from 'dayjs';
+import { Flex, Text } from '@chakra-ui/react';
+import { IntervalTabData } from '@lib/domain/retention';
+import { capitalizeFirstLetter } from '@lib/utils/common';
 import { CaretLeft, CaretRight } from 'phosphor-react';
-import React, { useState } from 'react';
-import { start } from 'repl';
+
+type IntervalTabProps = {
+  interval: number;
+  setInterval: Function;
+  intervalTabData: IntervalTabData[];
+  setPageNumber: Function;
+};
 
 export const IntervalTab = ({
   interval,
   setInterval,
-  dateFilter,
-  granularity,
-}: any) => {
-  const handleClick = (index: any) => {
+  intervalTabData,
+  setPageNumber,
+}: IntervalTabProps) => {
+  const handleClick = (index: number) => {
     setInterval(index);
   };
-  const computeIntervalLength = () => {
-    if (dateFilter.type == DateFilterType.LAST) {
-      return dateFilter.filter.days;
-    } else {
-      return dayjs(dateFilter.filter.end_date).diff(
-        dayjs(dateFilter.filter.start_date),
-        'days'
-      );
-    }
-  };
-  console.log(computeIntervalLength());
-  const data = [
-    { text: 'Day 0' },
-    { text: 'Day 1' },
-    { text: 'Day 2' },
-    { text: 'Day 3' },
-  ];
   return (
     <Flex flexDirection={'column'} width={'full'}>
       <Flex
@@ -47,14 +34,21 @@ export const IntervalTab = ({
           borderWidth={'0 1px 0 0'}
           borderColor={'grey.400'}
           borderStyle={'solid'}
+          onClick={() => {
+            setPageNumber((prevPageNumber: number) =>
+              prevPageNumber === 0 ? prevPageNumber : prevPageNumber - 1
+            );
+          }}
         >
           <CaretLeft size={16} />
         </Flex>
-        <Flex flexGrow={'1'}>
-          {data.map((d, index) => {
+        <Flex w={'full'}>
+          {intervalTabData.map((d, index) => {
+            const intervalNumber = +d.name.split(' ')[1];
             return (
               <Flex
-                key={index}
+                flexGrow={'1'}
+                key={intervalNumber}
                 w={24}
                 h={16}
                 px={4}
@@ -64,18 +58,22 @@ export const IntervalTab = ({
                 borderWidth={'0 1px 0 0'}
                 borderColor={'grey.400'}
                 borderStyle={'solid'}
-                backgroundColor={interval === index ? 'white' : 'white.500'}
-                onClick={() => handleClick(index)}
+                backgroundColor={
+                  interval === intervalNumber ? 'white' : 'white.500'
+                }
+                onClick={() => handleClick(intervalNumber)}
                 cursor={'pointer'}
-                borderBottom={interval === index ? 'black 3px solid' : 'none'}
+                borderBottom={
+                  interval === intervalNumber ? 'black 3px solid' : 'none'
+                }
               >
                 <Text
                   fontSize={'xs-14'}
                   lineHeight={'lh-135'}
                   fontWeight={'500'}
-                  color={interval === index ? 'black' : 'grey.500'}
+                  color={interval === intervalNumber ? 'black' : 'grey.500'}
                 >
-                  {d.text}
+                  {capitalizeFirstLetter(d.name)}
                 </Text>
                 <Text
                   lineHeight={'lh-135'}
@@ -83,19 +81,22 @@ export const IntervalTab = ({
                   fontWeight={'500'}
                   color={interval === index ? 'grey.800' : 'grey.600'}
                 >
-                  100%
+                  {d.value + '%'}
                 </Text>
               </Flex>
             );
           })}
         </Flex>
         <Flex
-          alignItems={'center'}
+          alignItems={'center '}
           justifyContent={'center'}
           px={2}
           borderWidth={'0 0 0 1px'}
           borderColor={'grey.400'}
           borderStyle={'solid'}
+          onClick={() => {
+            setPageNumber((prevPageNumber: number) => prevPageNumber + 1);
+          }}
         >
           <CaretRight size={16} />
         </Flex>

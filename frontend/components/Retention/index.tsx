@@ -1,4 +1,4 @@
-import { Box, Button, ButtonGroup, Flex } from '@chakra-ui/react';
+import { Button, ButtonGroup, Flex, Text } from '@chakra-ui/react';
 import Card from '@components/Card';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
@@ -12,14 +12,20 @@ import { BLACK_DEFAULT, GREY_500 } from '@theme/index';
 import { CreateRetentionAction } from './CreateRetentionAction';
 import {
   Granularity,
+  IntervalTabData,
   RetentionEvents,
   RetentionTrendsData,
   TrendScale,
 } from '@lib/domain/retention';
 import { DateFilterObj, DateFilterType } from '@lib/domain/common';
-import { getTransientTrendsData } from '@lib/services/retentionService';
+import {
+  getTransientRetentionData,
+  getTransientTrendsData,
+} from '@lib/services/retentionService';
 import RetentionTrend from './components/RetentionTrend';
 import IntervalTab from './components/IntervalTab';
+import { hasValidEvents } from './utils';
+import LoadingSpinner from '@components/LoadingSpinner';
 
 const Retention = () => {
   const router = useRouter();
@@ -46,23 +52,25 @@ const Retention = () => {
   const [trendScale, setTrendScale] = useState<TrendScale>(
     TrendScale.PERCENTAGE
   );
-
-  const [isLoading, setIsLoading] = useState(true);
-
+  const [isTrendsDataLoading, setIsTrendsDataLoading] = useState(true);
+  const [isIntervalDataLoading, setIsIntervalDataLoading] = useState(true);
   const [trendsData, setTrendsData] = useState<RetentionTrendsData[]>([]);
-
+  const [intervalTabData, setIntervalTabData] = useState<IntervalTabData[]>([]);
+  const [pageNumber, setPageNumber] = useState(0);
   const [interval, setInterval] = useState(0);
-
   const [isEmpty, setIsEmpty] = useState(true);
 
   useEffect(() => {
-    if (
-      !(retentionEvents.startEvent.event && retentionEvents.goalEvent.event)
-    ) {
+    if (hasValidEvents(retentionEvents)) {
+      setIsEmpty(false);
+    } else setIsEmpty(true);
+  }, [retentionEvents]);
+
+  useEffect(() => {
+    if (!hasValidEvents(retentionEvents)) {
       return;
     }
-    setIsEmpty(false);
-    const transientTrendsData = async () => {
+    const getTrendsData = async () => {
       const trendsData = await getTransientTrendsData(
         datasourceId!!,
         retentionEvents.startEvent,
@@ -72,11 +80,33 @@ const Retention = () => {
         interval
       );
       setTrendsData(trendsData);
-      setIsLoading(false);
+      setIsTrendsDataLoading(false);
     };
-    setIsLoading(true);
-    transientTrendsData();
+
+    setIsTrendsDataLoading(true);
+    getTrendsData();
   }, [interval, retentionEvents, granularity, dateFilter]);
+
+  useEffect(() => {
+    if (!hasValidEvents(retentionEvents)) {
+      return;
+    }
+    const getTransientData = async () => {
+      const intervalTabData = await getTransientRetentionData(
+        datasourceId!!,
+        retentionEvents.startEvent,
+        retentionEvents.goalEvent,
+        dateFilter,
+        granularity,
+        pageNumber
+      );
+      setIntervalTabData(intervalTabData);
+      setIsIntervalDataLoading(false);
+    };
+
+    setIsIntervalDataLoading(true);
+    getTransientData();
+  }, [retentionEvents, granularity, dateFilter, pageNumber]);
 
   return (
     <Flex
@@ -185,13 +215,37 @@ const Retention = () => {
             ) : (
               <Card p={'0'} borderRadius={'12'} overflow={'hidden'}>
                 <Flex w={'full'} direction={'column'}>
-                  <IntervalTab
-                    interval={interval}
-                    setInterval={setInterval}
-                    dateFilter={dateFilter}
-                    granularity={granularity}
-                  />
-                  <RetentionTrend data={trendsData} trendScale={trendScale} />
+                  {isIntervalDataLoading ? (
+                    <Flex
+                      h={'16'}
+                      w={'full'}
+                      alignItems={'center'}
+                      justifyContent={'center'}
+                      borderBottom={'1px'}
+                      borderColor={'grey.400'}
+                    >
+                      <LoadingSpinner />
+                    </Flex>
+                  ) : (
+                    <IntervalTab
+                      interval={interval}
+                      setInterval={setInterval}
+                      intervalTabData={intervalTabData}
+                      setPageNumber={setPageNumber}
+                    />
+                  )}
+                  {isTrendsDataLoading ? (
+                    <Flex
+                      h={'110'}
+                      w={'full'}
+                      alignItems={'center'}
+                      justifyContent={'center'}
+                    >
+                      <LoadingSpinner />
+                    </Flex>
+                  ) : (
+                    <RetentionTrend data={trendsData} trendScale={trendScale} />
+                  )}
                 </Flex>
               </Card>
             )}

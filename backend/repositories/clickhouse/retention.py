@@ -1,3 +1,4 @@
+import math
 from typing import Union, List, Tuple
 
 from fastapi import Depends
@@ -168,13 +169,10 @@ class Retention(EventsBase):
         for interval in range(start_index, end_index):
             parameters["interval0"] = Interval(**{granularity.value: interval})
             parameters["interval1"] = Interval(**{granularity.value: interval + 1})
+            result = self.execute_get_query(query=retention_query, parameters=parameters)[0][0]
+            result = 0 if math.isnan(result) else result
             results.append(
-                "{:.2f}".format(
-                    self.execute_get_query(
-                        query=retention_query, parameters=parameters
-                    )[0][0]
-                    * 100
-                )
+                "{:.2f}".format(result*100)
             )
         return results
 

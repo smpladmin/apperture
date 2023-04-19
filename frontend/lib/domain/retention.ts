@@ -21,3 +21,8 @@ export type RetentionTrendsData = {
   retentionRate: number;
   retainedUsers: number;
 };
+
+export type IntervalTabData = {
+  name: string;
+  value: number;
+};
