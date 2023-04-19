@@ -122,7 +122,7 @@ async def trigger_fetch_for_all_datasources(
     runlog_service: RunLogService = Depends(),
     dpq_service: DPQueueService = Depends(),
 ):
-    datasources = await ds_service.get_enabled_datasources()
+    datasources = await ds_service.get_non_apperture_datasources()
     runlog_promises = [runlog_service.create_pending_runlogs(ds) for ds in datasources]
     runlogs = await asyncio.gather(*runlog_promises)
     jobs = [
