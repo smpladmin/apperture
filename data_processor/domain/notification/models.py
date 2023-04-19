@@ -8,6 +8,11 @@ class NotificationType(str, Enum):
     UPDATE = "update"
 
 
+class NotificationChannel(str, Enum):
+    SLACK = "slack"
+    EMAIL = "email"
+
+
 class NotificationFrequency(str, Enum):
     DAILY = "daily"
     WEEKLY = "weekly"

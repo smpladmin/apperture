@@ -178,7 +178,7 @@ def notification_service(apperture_user_response):
         ComputedNotification(
             name="Video Funnel",
             notification_id=PydanticObjectId("633fb88bbbc29934eeb39ece"),
-            notification_type=NotificationType.UPDATE,
+            notification_type=NotificationType.ALERT,
             variant=NotificationVariant.FUNNEL,
             value=-16.67,
             original_value=0.1,
@@ -189,7 +189,7 @@ def notification_service(apperture_user_response):
         ComputedNotification(
             name="Alert Metric -Updated",
             notification_id=PydanticObjectId("633fb88bbbc29934eeb39ece"),
-            notification_type=NotificationType.UPDATE,
+            notification_type=NotificationType.ALERT,
             variant=NotificationVariant.METRIC,
             value=-16.67,
             original_value=0.1,

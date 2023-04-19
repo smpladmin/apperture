@@ -7,6 +7,7 @@ from domain.notifications.models import (
     NotificationData,
     NotificationVariant,
     ThresholdMap,
+    NotificationType,
 )
 
 from rest.dtos.events import CreateEventDto
@@ -92,7 +93,7 @@ def test_get_notifications(
         {
             "name": "Video Funnel",
             "notification_id": "633fb88bbbc29934eeb39ece",
-            "notification_type": "update",
+            "notification_type": NotificationType.ALERT,
             "original_value": 0.1,
             "threshold_type": "pct",
             "triggered": True,
@@ -103,7 +104,7 @@ def test_get_notifications(
         {
             "name": "Alert Metric -Updated",
             "notification_id": "633fb88bbbc29934eeb39ece",
-            "notification_type": "update",
+            "notification_type": NotificationType.ALERT,
             "original_value": 0.1,
             "threshold_type": "pct",
             "triggered": False,
@@ -114,7 +115,7 @@ def test_get_notifications(
         {
             "name": "Video Funnel",
             "notification_id": "633fb88bbbc29934eeb39ece",
-            "notification_type": "update",
+            "notification_type": NotificationType.UPDATE,
             "original_value": 0.1,
             "threshold_type": None,
             "triggered": None,
@@ -125,7 +126,7 @@ def test_get_notifications(
         {
             "name": "Alert Metric -Updated",
             "notification_id": "633fb88bbbc29934eeb39ece",
-            "notification_type": "update",
+            "notification_type": NotificationType.UPDATE,
             "original_value": 0.1,
             "threshold_type": None,
             "triggered": None,
@@ -182,5 +183,7 @@ def test_get_notifications(
 
 def test_post_notifications(client_init, notification_service, dpq_service):
     response = client_init.post("/private/notifications")
-    assert response.json() == [{'job': 'a98a10b4-d26e-46fa-aa6f', 'user_id': '6374b74e9b36ecf7e0b4f9e4'}]
-    dpq_service.enqueue_user_notification.assert_called_with('6374b74e9b36ecf7e0b4f9e4')
+    assert response.json() == [
+        {"job": "a98a10b4-d26e-46fa-aa6f", "user_id": "6374b74e9b36ecf7e0b4f9e4"}
+    ]
+    dpq_service.enqueue_user_notification.assert_called_with("6374b74e9b36ecf7e0b4f9e4")
