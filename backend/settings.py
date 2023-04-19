@@ -18,6 +18,7 @@ class AppertureSettings(BaseSettings):
     redis_host: str
     redis_password: str
     apperture_api_key: str
+    frontend_api_key: str
     fastapi_env: str = "test"
     cors_origins: List[str] = ["*"]
     traces_sample_rate: float = 0.5

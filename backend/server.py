@@ -1,5 +1,6 @@
 import logging
 import os
+
 from dotenv import load_dotenv
 
 from cache import init_cache
@@ -8,32 +9,23 @@ from settings import apperture_settings
 load_dotenv(override=False)
 logging.getLogger().setLevel(logging.INFO)
 
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-import sentry_sdk
 
-from rest.controllers import (
-    app_controller,
-    apperture_user_controller,
-    auth_controller,
-    data_processor_controller,
-    datasource_controller,
-    integration_controller,
-    integration_oauth_controller,
-    private_apis_controller,
-    schedule_controller,
-    notification_controller,
-    segment_controller,
-    funnel_controller,
-    metric_controller,
-    user_controller,
-    action_controller,
-    event_capture_controller,
-    clickstream_controller,
-)
-from mongo import Mongo
 from clickhouse import Clickhouse
+from mongo import Mongo
+from rest.controllers import (action_controller, app_controller,
+                              apperture_user_controller, auth_controller,
+                              clickstream_controller,
+                              data_processor_controller, datasource_controller,
+                              event_capture_controller, funnel_controller,
+                              integration_controller,
+                              integration_oauth_controller, metric_controller,
+                              notification_controller, private_apis_controller,
+                              protected_controllers, schedule_controller,
+                              segment_controller, user_controller)
 
 settings = apperture_settings()
 
@@ -94,6 +86,7 @@ app.include_router(user_controller.router)
 app.include_router(action_controller.router)
 app.include_router(event_capture_controller.router)
 app.include_router(clickstream_controller.router)
+app.include_router(protected_controllers.router)
 
 
 @app.get("/sentry-debug")
