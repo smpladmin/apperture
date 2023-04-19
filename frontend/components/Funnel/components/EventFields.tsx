@@ -13,9 +13,14 @@ import FunnelComponentCard from './FunnelCard';
 type funnelSteps = {
   funnelSteps: Array<FunnelStep>;
   setFunnelSteps: Function;
+  randomSequence: boolean;
 };
 
-const EventFields = ({ funnelSteps, setFunnelSteps }: funnelSteps) => {
+const EventFields = ({
+  funnelSteps,
+  setFunnelSteps,
+  randomSequence,
+}: funnelSteps) => {
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
@@ -57,6 +62,7 @@ const EventFields = ({ funnelSteps, setFunnelSteps }: funnelSteps) => {
                           funnelStep={funnelStep}
                           funnelSteps={funnelSteps}
                           setFunnelSteps={setFunnelSteps}
+                          hideNumbers={i != 0 && randomSequence}
                         />
                       </Box>
                     )}
