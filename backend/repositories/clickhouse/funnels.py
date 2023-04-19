@@ -168,18 +168,19 @@ class Funnels(EventsBase):
                 .having(Criterion.all(date_criterion))
             )
             stepQuery = stepQuery.select(
-                fn.Min(self.table.timestamp) if i == 0 else fn.Max(self.table.timestamp)
+                fn.Min(self.table.timestamp).as_("ts")
+                if i == 0
+                else fn.Max(self.table.timestamp).as_("ts")
             )
-        if i > 0:
-            stepQuery = (
-                ClickHouseQuery.from_(stepQuery.as_("A"))
-                .select("*")
-                .join(AliasedQuery(f"table{i}"))
-                .on_field(AliasedQuery(f"table{i}").user_id, Table("A").user_id)
-            )
+            if i > 0:
+                stepQuery = (
+                    ClickHouseQuery.from_(stepQuery)
+                    .select("*")
+                    .join(AliasedQuery(f"table{i}"))
+                    .on_field("user_id")
+                )
 
-        innerQuery = innerQuery.with_(stepQuery, f"table{i+1}")
-        innerQuery = innerQuery.from_(AliasedQuery("table1")).select("*")
+            innerQuery = innerQuery.with_(stepQuery, f"table{i+1}")
         return innerQuery, parameters
 
     def _builder(
@@ -346,7 +347,9 @@ class Funnels(EventsBase):
 
         return query.get_sql(), parameters
 
-    def _build_subquery(self, steps: List[FunnelStep]):
+    def _build_subquery(
+        self, steps: List[FunnelStep], random_sequence: Union[bool, None]
+    ):
         sub_query = ClickHouseQuery
         sub_query = sub_query.select(AliasedQuery("table1").user_id.as_(0))
 
@@ -362,10 +365,15 @@ class Funnels(EventsBase):
                 )
                 <= Parameter("%(conversion_time)s"),
             ]
-            for j in range(i, 0, -1):
+            if random_sequence:
                 conditions.append(
-                    AliasedQuery(f"table{j + 1}").ts > AliasedQuery(f"table{j}").ts
+                    AliasedQuery(f"table{i+1}").ts > AliasedQuery(f"table1").ts
                 )
+            else:
+                for j in range(i, 0, -1):
+                    conditions.append(
+                        AliasedQuery(f"table{j + 1}").ts > AliasedQuery(f"table{j}").ts
+                    )
             sub_query = sub_query.select(
                 Case()
                 .when(
