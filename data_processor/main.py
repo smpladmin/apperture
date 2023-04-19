@@ -75,6 +75,15 @@ def trigger_data_processing():
     )
 
 
+def trigger_data_processing_for_datasource(ds_id: str):
+    logging.info("{x}: {y}".format(x="Triggering data processing for ds_id", y=ds_id))
+
+    response = post(f"{os.getenv('BACKEND_BASE_URL')}/private/runlogs?ds_id={ds_id}")
+    logging.info(
+        "{x}: {y}".format(x="Triggered data processing, status", y=response.status_code)
+    )
+
+
 def trigger_notifications_processing(
     notification_type: NotificationType, frequency: NotificationFrequency
 ):
