@@ -55,6 +55,7 @@ from domain.retention.models import (
     EventSelection,
     Granularity,
     ComputedRetentionTrend,
+    ComputedRetention,
 )
 from domain.runlogs.models import RunLog
 from domain.segments.models import (
@@ -179,12 +180,20 @@ def retention_service(apperture_user_response):
             retained_users=105,
         ),
     ]
+    transient_retention = [
+        ComputedRetention(name="day 0", value=55.16),
+        ComputedRetention(name="day 1", value=10.98),
+        ComputedRetention(name="day 2", value=7.43),
+        ComputedRetention(name="day 3", value=6.13),
+    ]
     retention_future = asyncio.Future()
     retention_future.set_result(retention)
     retentions_future = asyncio.Future()
     retentions_future.set_result([RetentionWithUser.from_orm(retention)])
     retention_trends_future = asyncio.Future()
     retention_trends_future.set_result(retention_trends)
+    transient_retention_future = asyncio.Future()
+    transient_retention_future.set_result(transient_retention)
 
     retention_service_mock.build_retention.return_value = retention
     retention_service_mock.add_retention.return_value = retention_future
@@ -194,6 +203,7 @@ def retention_service(apperture_user_response):
     retention_service_mock.get_retentions_for_datasource_id.return_value = (
         retentions_future
     )
+    retention_service_mock.compute_retention.return_value = transient_retention_future
     retention_service_mock.get_retentions_for_apps.return_value = retentions_future
     retention_service_mock.compute_retention_trend.return_value = (
         retention_trends_future
@@ -1318,6 +1328,16 @@ def retention_trend_response():
 
 
 @pytest.fixture(scope="module")
+def retention_transient_response():
+    return [
+        {"name": "day 0", "value": 55.16},
+        {"name": "day 1", "value": 10.98},
+        {"name": "day 2", "value": 7.43},
+        {"name": "day 3", "value": 6.13},
+    ]
+
+
+@pytest.fixture(scope="module")
 def funnel_trend_response():
     return [
         {
@@ -1489,14 +1509,13 @@ def retention_data():
 
 
 @pytest.fixture(scope="module")
-def retention_trend_data():
+def retention_transient_data():
     return {
         "datasourceId": "635ba034807ab86d8a2aadd9",
         "startEvent": {"event": "start_event"},
         "goalEvent": {"event": "goal_event"},
         "dateFilter": {"type": "last", "filter": {"days": 4}},
         "granularity": "days",
-        "interval": 1,
     }
 
 

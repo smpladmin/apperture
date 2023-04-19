@@ -24,6 +24,7 @@ class EventsBase(ABC):
         self.table = Table("events")
         self.click_stream_table = Table("clickstream")
         self.epoch_year = 1970
+        self.date_format = "%Y-%m-%d"
         self.week_func = CustomFunction("WEEK", ["timestamp"])
         self.date_func = CustomFunction("DATE", ["timestamp"])
         self.json_extract_keys_func = CustomFunction("JSONExtractKeys", ["string"])
@@ -75,17 +76,22 @@ class EventsBase(ABC):
         if date_filter_type == DateFilterType.FIXED:
             return date_filter.start_date, date_filter.end_date
 
-        date_format = "%Y-%m-%d"
         today = datetime.datetime.today()
-        end_date = today.strftime(date_format)
+        end_date = today.strftime(self.date_format)
 
         return (
             (date_filter.start_date, end_date)
             if date_filter_type == DateFilterType.SINCE
             else (
                 (today - datetime.timedelta(days=date_filter.days)).strftime(
-                    date_format
+                    self.date_format
                 ),
                 end_date,
             )
         )
+
+    def compute_days_in_date_range(self, start_date: str, end_date: str) -> int:
+        return (
+            datetime.datetime.strptime(end_date, self.date_format)
+            - datetime.datetime.strptime(start_date, self.date_format)
+        ).days

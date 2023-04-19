@@ -13,7 +13,7 @@ from rest.dtos.retention import (
     RetentionResponse,
     CreateRetentionDto,
     RetentionWithUser,
-    TransientRetentionTrendDto,
+    ComputedRetentionResponse,
 )
 
 from rest.middlewares import validate_jwt, get_user_id, get_user
@@ -29,7 +29,8 @@ router = APIRouter(
     "/retention/trends/transient", response_model=List[ComputedRetentionTrendResponse]
 )
 async def compute_transient_retention_trend(
-    dto: TransientRetentionTrendDto,
+    interval: int,
+    dto: TransientRetentionDto,
     retention_service: RetentionService = Depends(),
 ):
     return await retention_service.compute_retention_trend(
@@ -39,14 +40,14 @@ async def compute_transient_retention_trend(
         granularity=dto.granularity,
         segment_filter=dto.segmentFilter,
         date_filter=dto.dateFilter,
-        interval=dto.interval,
+        interval=interval,
     )
 
 
-@router.post(
-    "/retention/transient", response_model=List[ComputedRetentionTrendResponse]
-)
+@router.post("/retention/transient", response_model=List[ComputedRetentionResponse])
 async def compute_transient_retention(
+    page_number: int,
+    page_size: int,
     dto: TransientRetentionDto,
     retention_service: RetentionService = Depends(),
 ):
@@ -57,6 +58,8 @@ async def compute_transient_retention(
         granularity=dto.granularity,
         segment_filter=dto.segmentFilter,
         date_filter=dto.dateFilter,
+        page_number=page_number,
+        page_size=page_size,
     )
 
 

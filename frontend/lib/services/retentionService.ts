@@ -11,13 +11,15 @@ export const getTransientTrendsData = async (
   granularity: Granularity,
   interval: number
 ) => {
-  const res = await ApperturePost('/retention/trends/transient', {
-    datasourceId: dsId,
-    startEvent,
-    goalEvent,
-    dateFilter,
-    granularity,
-    interval,
-  });
+  const res = await ApperturePost(
+    `/retention/trends/transient?interval=${interval}`,
+    {
+      datasourceId: dsId,
+      startEvent,
+      goalEvent,
+      dateFilter,
+      granularity,
+    }
+  );
   return res.data || [];
 };

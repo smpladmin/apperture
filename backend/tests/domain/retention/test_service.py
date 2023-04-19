@@ -17,6 +17,7 @@ from domain.retention.models import (
     EventSelection,
     Granularity,
     ComputedRetentionTrend,
+    ComputedRetention,
 )
 from domain.retention.service import RetentionService
 from tests.utils import filter_response
@@ -79,7 +80,9 @@ class TestRetentionervice:
             (datetime(2022, 1, 2, 0, 0), 0.52396, 108),
             (datetime(2022, 1, 3, 0, 0), 0.497648, 115),
         ]
+        self.retention.compute_retention.return_value = [55.16, 10.98, 7.43, 6.13]
         self.retention.compute_date_filter.return_value = ("2022-12-01", "2022-12-31")
+        self.retention.compute_days_in_date_range.return_value = 4
         Retention.enabled = True
 
     def test_build_retention(self):
@@ -200,3 +203,40 @@ class TestRetentionervice:
     async def test_add_retention(self):
         await self.service.add_retention(retention=self.retention_obj)
         Retention.insert.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_compute_retention(self):
+        assert await self.service.compute_retention(
+            datasource_id=self.ds_id,
+            start_event=self.start_event,
+            goal_event=self.goal_event,
+            granularity=Granularity.DAYS,
+            segment_filter=None,
+            date_filter=self.date_filter,
+            page_size=10,
+            page_number=0,
+        ) == [
+            ComputedRetention(name="day 0", value=55.16),
+            ComputedRetention(name="day 1", value=10.98),
+            ComputedRetention(name="day 2", value=7.43),
+            ComputedRetention(name="day 3", value=6.13),
+        ]
+        self.retention.compute_retention.assert_called_once_with(
+            **{
+                "datasource_id": "636a1c61d715ca6baae65611",
+                "end_date": "2022-12-31",
+                "goal_event": EventSelection(event="goal_event", filters=None),
+                "granularity": Granularity.DAYS,
+                "start_index": 0,
+                "end_index": 4,
+                "segment_filter_criterion": None,
+                "start_date": "2022-12-01",
+                "start_event": EventSelection(event="start_event", filters=None),
+            }
+        )
+        self.retention.compute_date_filter.assert_called_once_with(
+            **{
+                "date_filter": LastDateFilter(days=7),
+                "date_filter_type": DateFilterType.LAST,
+            }
+        )

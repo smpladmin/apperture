@@ -21,6 +21,13 @@ class Granularity(str, Enum):
     WEEKS = "weeks"
     MONTHS = "months"
 
+    def get_days(self):
+        return {
+            self.DAYS: 1,
+            self.WEEKS: 7,
+            self.MONTHS: 30,
+        }.get(self, 1)
+
 
 class Retention(Document):
     datasource_id: PydanticObjectId
@@ -42,3 +49,8 @@ class ComputedRetentionTrend(BaseModel):
     granularity: datetime.datetime
     retention_rate: float
     retained_users: int
+
+
+class ComputedRetention(BaseModel):
+    name: str
+    value: float

@@ -58,7 +58,7 @@ class Retention(EventsBase):
 
         return initial_count_query
 
-    def build_retention_count_query(self, granularity: Granularity, interval: int):
+    def build_retention_count_query(self, granularity: Granularity):
         events1 = Table("events")
         events2 = Table("events")
 
@@ -67,13 +67,11 @@ class Retention(EventsBase):
             (
                 events2.timestamp.between(
                     self.to_start_of_interval_func(
-                        self.table.timestamp
-                        + Interval(**{granularity.value: interval}),
+                        self.table.timestamp + Parameter(f"%(interval0)s"),
                         Interval(**{granularity.value: 1}),
                     ),
                     self.to_start_of_interval_func(
-                        self.table.timestamp
-                        + Interval(**{granularity.value: interval + 1}),
+                        self.table.timestamp + Parameter(f"%(interval1)s"),
                         Interval(**{granularity.value: 1}),
                     )
                     - Interval(seconds=1),
@@ -119,11 +117,13 @@ class Retention(EventsBase):
             "goal_event": goal_event.event,
             "start_date": start_date,
             "end_date": end_date,
+            "interval0": Interval(**{granularity.value: interval}),
+            "interval1": Interval(**{granularity.value: interval + 1}),
         }
 
         initial_count_query = self.build_initial_count_query(granularity=granularity)
         retention_count_query = self.build_retention_count_query(
-            granularity=granularity, interval=interval
+            granularity=granularity
         )
 
         query = ClickHouseQuery.with_(initial_count_query, "initial_count").with_(
@@ -143,3 +143,62 @@ class Retention(EventsBase):
         )
 
         return query.get_sql(), parameters
+
+    def compute_retention(
+        self,
+        datasource_id: str,
+        start_event: EventSelection,
+        goal_event: EventSelection,
+        start_date: str,
+        end_date: str,
+        segment_filter_criterion: Union[ContainsCriterion, None],
+        granularity: Granularity,
+        start_index: int,
+        end_index: int,
+    ):
+        retention_query = self.build_retention_query(granularity=granularity)
+        parameters = {
+            "ds_id": datasource_id,
+            "start_event": start_event.event,
+            "goal_event": goal_event.event,
+            "start_date": start_date,
+            "end_date": end_date,
+        }
+        results = []
+        for interval in range(start_index, end_index):
+            parameters["interval0"] = Interval(**{granularity.value: interval})
+            parameters["interval1"] = Interval(**{granularity.value: interval + 1})
+            results.append(
+                "{:.2f}".format(
+                    self.execute_get_query(
+                        query=retention_query, parameters=parameters
+                    )[0][0]
+                    * 100
+                )
+            )
+        return results
+
+    def build_retention_query(
+        self,
+        granularity: Granularity,
+    ):
+
+        initial_count_query = self.build_initial_count_query(granularity=granularity)
+        retention_count_query = self.build_retention_count_query(
+            granularity=granularity
+        )
+
+        query = ClickHouseQuery.with_(initial_count_query, "initial_count").with_(
+            retention_count_query, "retention_count"
+        )
+        query = (
+            query.from_(AliasedQuery("initial_count"))
+            .inner_join(AliasedQuery("retention_count"))
+            .on_field("granularity")
+            .select(
+                fn.Sum(AliasedQuery("retention_count").count)
+                / fn.Sum(AliasedQuery("initial_count").count),
+            )
+        )
+
+        return query.get_sql()

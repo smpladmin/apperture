@@ -12,6 +12,7 @@ from domain.retention.models import (
     EventSelection,
     ComputedRetentionTrend,
     Retention,
+    ComputedRetention,
 )
 from mongo import Mongo
 from repositories.clickhouse.retention import Retention as RetentionRepository
@@ -38,7 +39,7 @@ class RetentionService:
         segment_filter: Union[SegmentFilter, None],
         granularity: Granularity,
         interval: int,
-    ) -> [ComputedRetentionTrend]:
+    ) -> List[ComputedRetentionTrend]:
         start_date, end_date = self.retention.compute_date_filter(
             date_filter=date_filter.filter, date_filter_type=date_filter.type
         )
@@ -82,7 +83,9 @@ class RetentionService:
         date_filter: DateFilter,
         segment_filter: Union[SegmentFilter, None],
         granularity: Granularity,
-    ) -> [ComputedRetentionTrend]:
+        page_number: int,
+        page_size: int,
+    ) -> List[ComputedRetention]:
         start_date, end_date = self.retention.compute_date_filter(
             date_filter=date_filter.filter, date_filter_type=date_filter.type
         )
@@ -94,6 +97,32 @@ class RetentionService:
             if segment_filter
             else None
         )
+        days_in_date_range = self.retention.compute_days_in_date_range(
+            start_date=start_date, end_date=end_date
+        )
+        total_pages = days_in_date_range // granularity.get_days()
+        start_index = min(page_number * page_size, total_pages)
+        end_index = min((page_number + 1) * page_size, total_pages)
+        retention = []
+        if end_index > start_index:
+            retention = self.retention.compute_retention(
+                datasource_id=datasource_id,
+                start_event=start_event,
+                goal_event=goal_event,
+                start_date=start_date,
+                end_date=end_date,
+                segment_filter_criterion=segment_filter_criterion,
+                granularity=granularity,
+                start_index=start_index,
+                end_index=end_index,
+            )
+            retention = [
+                ComputedRetention(
+                    name=f"{granularity[:-1]} {start_index+i}", value=value
+                )
+                for i, value in enumerate(retention)
+            ]
+        return retention
 
     def build_retention(
         self,

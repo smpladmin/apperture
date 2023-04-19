@@ -4,21 +4,11 @@ from beanie import PydanticObjectId
 from pydantic import BaseModel
 
 from domain.common.date_models import DateFilter
-from domain.retention.models import EventSelection, Retention
+from domain.retention.models import EventSelection, Retention, ComputedRetention
 from domain.metrics.models import SegmentFilter
 from domain.retention.models import Granularity, ComputedRetentionTrend
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
-
-
-class TransientRetentionTrendDto(BaseModel):
-    datasourceId: PydanticObjectId
-    startEvent: EventSelection
-    goalEvent: EventSelection
-    dateFilter: DateFilter
-    segmentFilter: Optional[SegmentFilter]
-    granularity: Granularity
-    interval: int
 
 
 class TransientRetentionDto(BaseModel):
@@ -41,6 +31,11 @@ class CreateRetentionDto(BaseModel):
 
 
 class ComputedRetentionTrendResponse(ComputedRetentionTrend, ModelResponse):
+    class Config:
+        allow_population_by_field_name = True
+
+
+class ComputedRetentionResponse(ComputedRetention, ModelResponse):
     class Config:
         allow_population_by_field_name = True
 
