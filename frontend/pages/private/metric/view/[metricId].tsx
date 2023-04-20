@@ -15,7 +15,6 @@ export const getServerSideProps: GetServerSideProps = async ({
   query,
 }) => {
   const { metricId } = query;
-  console.log('query', query);
   const apiKey = process.env.APPERTURE_API_KEY;
 
   const savedMetric: Metric = await _getSavedMetricPrivate(
@@ -40,28 +39,25 @@ export const getServerSideProps: GetServerSideProps = async ({
     dateFilter,
   } = savedMetric;
 
+  const formattedMetricDefinition = metricDefinition?.length
+    ? metricDefinition.replace(/\s*/g, '')
+    : aggregates.map((aggregate) => aggregate.variable).join(',');
+
   const trendsData = await _getTransientTrendsDataPrivate(
     apiKey!!,
     datasourceId,
-    metricDefinition,
+    formattedMetricDefinition,
     aggregates,
     breakdown,
     dateFilter || null
   );
 
-  console.log('trends data', trendsData);
   return {
     props: { trendsData, breakdown },
   };
 };
 
-const Metric = ({
-  trendsData,
-  breakdown,
-}: {
-  trendsData: ComputedMetric[];
-  breakdown: string[];
-}) => {
+const Metric = ({ trendsData }: { trendsData: ComputedMetric[] }) => {
   return (
     <Flex justifyContent={'center'} alignItems={'center'}>
       <Box w={'200'} h={'80'}>

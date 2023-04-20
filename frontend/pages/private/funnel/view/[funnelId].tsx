@@ -13,7 +13,6 @@ export const getServerSideProps: GetServerSideProps = async ({
   query,
 }) => {
   const { funnelId } = query;
-  console.log('query', query);
   const apiKey = process.env.APPERTURE_API_KEY;
 
   const savedFunnel: Funnel = await _getSavedFunnelPrivate(
