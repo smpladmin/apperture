@@ -51,6 +51,11 @@ class ComputedRetentionTrend(BaseModel):
     retained_users: int
 
 
-class ComputedRetention(BaseModel):
+class ComputedRetentionForInterval(BaseModel):
     name: str
     value: float
+
+
+class ComputedRetention(BaseModel):
+    count: int
+    data: List[ComputedRetentionForInterval]

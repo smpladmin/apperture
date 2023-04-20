@@ -55,6 +55,7 @@ from domain.retention.models import (
     EventSelection,
     Granularity,
     ComputedRetentionTrend,
+    ComputedRetentionForInterval,
     ComputedRetention,
 )
 from domain.runlogs.models import RunLog
@@ -180,12 +181,15 @@ def retention_service(apperture_user_response):
             retained_users=105,
         ),
     ]
-    transient_retention = [
-        ComputedRetention(name="day 0", value=55.16),
-        ComputedRetention(name="day 1", value=10.98),
-        ComputedRetention(name="day 2", value=7.43),
-        ComputedRetention(name="day 3", value=6.13),
-    ]
+    transient_retention = ComputedRetention(
+        count=4,
+        data=[
+            ComputedRetentionForInterval(name="day 0", value=55.16),
+            ComputedRetentionForInterval(name="day 1", value=10.98),
+            ComputedRetentionForInterval(name="day 2", value=7.43),
+            ComputedRetentionForInterval(name="day 3", value=6.13),
+        ],
+    )
     retention_future = asyncio.Future()
     retention_future.set_result(retention)
     retentions_future = asyncio.Future()
@@ -1329,12 +1333,15 @@ def retention_trend_response():
 
 @pytest.fixture(scope="module")
 def retention_transient_response():
-    return [
-        {"name": "day 0", "value": 55.16},
-        {"name": "day 1", "value": 10.98},
-        {"name": "day 2", "value": 7.43},
-        {"name": "day 3", "value": 6.13},
-    ]
+    return {
+        "count": 4,
+        "data": [
+            {"name": "day 0", "value": 55.16},
+            {"name": "day 1", "value": 10.98},
+            {"name": "day 2", "value": 7.43},
+            {"name": "day 3", "value": 6.13},
+        ],
+    }
 
 
 @pytest.fixture(scope="module")

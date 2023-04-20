@@ -12,9 +12,9 @@ import { BLACK_DEFAULT, GREY_500 } from '@theme/index';
 import { CreateRetentionAction } from './CreateRetentionAction';
 import {
   Granularity,
-  IntervalTabData,
   RetentionEvents,
   RetentionTrendsData,
+  RetentionData,
   TrendScale,
 } from '@lib/domain/retention';
 import { DateFilterObj, DateFilterType } from '@lib/domain/common';
@@ -30,7 +30,7 @@ import LoadingSpinner from '@components/LoadingSpinner';
 const Retention = () => {
   const router = useRouter();
   const {
-    query: { dsId, funnelId },
+    query: { dsId, retentionId },
   } = router;
 
   const datasourceId = dsId as string;
@@ -55,10 +55,15 @@ const Retention = () => {
   const [isTrendsDataLoading, setIsTrendsDataLoading] = useState(true);
   const [isIntervalDataLoading, setIsIntervalDataLoading] = useState(true);
   const [trendsData, setTrendsData] = useState<RetentionTrendsData[]>([]);
-  const [intervalTabData, setIntervalTabData] = useState<IntervalTabData[]>([]);
+  const [retentionData, setRetentionData] = useState<RetentionData>({
+    count: 0,
+    data: [],
+  });
   const [pageNumber, setPageNumber] = useState(0);
   const [interval, setInterval] = useState(0);
   const [isEmpty, setIsEmpty] = useState(true);
+  const [defaultState, setDefaultState] = useState(false);
+  const pageSize = 10;
 
   useEffect(() => {
     if (hasValidEvents(retentionEvents)) {
@@ -67,9 +72,16 @@ const Retention = () => {
   }, [retentionEvents]);
 
   useEffect(() => {
-    if (!hasValidEvents(retentionEvents)) {
+    setDefaultState(true);
+    setInterval(0);
+    setPageNumber(0);
+  }, [retentionEvents, granularity, dateFilter]);
+
+  useEffect(() => {
+    if (!hasValidEvents(retentionEvents) || defaultState) {
       return;
     }
+
     const getTrendsData = async () => {
       const trendsData = await getTransientTrendsData(
         datasourceId!!,
@@ -85,28 +97,67 @@ const Retention = () => {
 
     setIsTrendsDataLoading(true);
     getTrendsData();
-  }, [interval, retentionEvents, granularity, dateFilter]);
+  }, [interval, retentionEvents, dateFilter]);
 
   useEffect(() => {
-    if (!hasValidEvents(retentionEvents)) {
+    if (!hasValidEvents(retentionEvents) || defaultState) {
       return;
     }
+
     const getTransientData = async () => {
-      const intervalTabData = await getTransientRetentionData(
+      const retentionData = await getTransientRetentionData(
         datasourceId!!,
         retentionEvents.startEvent,
         retentionEvents.goalEvent,
         dateFilter,
         granularity,
-        pageNumber
+        pageNumber,
+        pageSize
       );
-      setIntervalTabData(intervalTabData);
+      setRetentionData(retentionData);
       setIsIntervalDataLoading(false);
     };
 
     setIsIntervalDataLoading(true);
     getTransientData();
-  }, [retentionEvents, granularity, dateFilter, pageNumber]);
+  }, [retentionEvents, dateFilter, pageNumber]);
+
+  useEffect(() => {
+    if (defaultState) {
+      setIsTrendsDataLoading(true);
+      setIsIntervalDataLoading(true);
+      const getTrendsData = async () => {
+        const trendsData = await getTransientTrendsData(
+          datasourceId!!,
+          retentionEvents.startEvent,
+          retentionEvents.goalEvent,
+          dateFilter,
+          granularity,
+          interval
+        );
+        setTrendsData(trendsData);
+        setIsTrendsDataLoading(false);
+      };
+
+      getTrendsData();
+      const getTransientData = async () => {
+        const retentionData = await getTransientRetentionData(
+          datasourceId!!,
+          retentionEvents.startEvent,
+          retentionEvents.goalEvent,
+          dateFilter,
+          granularity,
+          pageNumber,
+          pageSize
+        );
+        setRetentionData(retentionData);
+        setIsIntervalDataLoading(false);
+      };
+
+      getTransientData();
+      setDefaultState(false);
+    }
+  }, [defaultState]);
 
   return (
     <Flex
@@ -230,8 +281,9 @@ const Retention = () => {
                     <IntervalTab
                       interval={interval}
                       setInterval={setInterval}
-                      intervalTabData={intervalTabData}
+                      retentionData={retentionData}
                       setPageNumber={setPageNumber}
+                      pageSize={pageSize}
                     />
                   )}
                   {isTrendsDataLoading ? (

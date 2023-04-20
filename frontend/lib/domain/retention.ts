@@ -26,3 +26,8 @@ export type IntervalTabData = {
   name: string;
   value: number;
 };
+
+export type RetentionData = {
+  count: number;
+  data: IntervalTabData[];
+};

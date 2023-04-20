@@ -169,11 +169,11 @@ class Retention(EventsBase):
         for interval in range(start_index, end_index):
             parameters["interval0"] = Interval(**{granularity.value: interval})
             parameters["interval1"] = Interval(**{granularity.value: interval + 1})
-            result = self.execute_get_query(query=retention_query, parameters=parameters)[0][0]
+            result = self.execute_get_query(
+                query=retention_query, parameters=parameters
+            )[0][0]
             result = 0 if math.isnan(result) else result
-            results.append(
-                "{:.2f}".format(result*100)
-            )
+            results.append("{:.2f}".format(result * 100))
         return results
 
     def build_retention_query(

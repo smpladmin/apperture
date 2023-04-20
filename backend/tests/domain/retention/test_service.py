@@ -17,6 +17,7 @@ from domain.retention.models import (
     EventSelection,
     Granularity,
     ComputedRetentionTrend,
+    ComputedRetentionForInterval,
     ComputedRetention,
 )
 from domain.retention.service import RetentionService
@@ -215,12 +216,15 @@ class TestRetentionervice:
             date_filter=self.date_filter,
             page_size=10,
             page_number=0,
-        ) == [
-            ComputedRetention(name="day 0", value=55.16),
-            ComputedRetention(name="day 1", value=10.98),
-            ComputedRetention(name="day 2", value=7.43),
-            ComputedRetention(name="day 3", value=6.13),
-        ]
+        ) == ComputedRetention(
+            count=4,
+            data=[
+                ComputedRetentionForInterval(name="day 0", value=55.16),
+                ComputedRetentionForInterval(name="day 1", value=10.98),
+                ComputedRetentionForInterval(name="day 2", value=7.43),
+                ComputedRetentionForInterval(name="day 3", value=6.13),
+            ],
+        )
         self.retention.compute_retention.assert_called_once_with(
             **{
                 "datasource_id": "636a1c61d715ca6baae65611",

@@ -13,6 +13,7 @@ from domain.retention.models import (
     ComputedRetentionTrend,
     Retention,
     ComputedRetention,
+    ComputedRetentionForInterval,
 )
 from mongo import Mongo
 from repositories.clickhouse.retention import Retention as RetentionRepository
@@ -85,7 +86,7 @@ class RetentionService:
         granularity: Granularity,
         page_number: int,
         page_size: int,
-    ) -> List[ComputedRetention]:
+    ) -> ComputedRetention:
         start_date, end_date = self.retention.compute_date_filter(
             date_filter=date_filter.filter, date_filter_type=date_filter.type
         )
@@ -117,12 +118,12 @@ class RetentionService:
                 end_index=end_index,
             )
             retention = [
-                ComputedRetention(
+                ComputedRetentionForInterval(
                     name=f"{granularity[:-1]} {start_index+i}", value=value
                 )
                 for i, value in enumerate(retention)
             ]
-        return retention
+        return ComputedRetention(count=total_pages, data=retention)
 
     def build_retention(
         self,

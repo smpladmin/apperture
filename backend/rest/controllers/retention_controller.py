@@ -44,7 +44,7 @@ async def compute_transient_retention_trend(
     )
 
 
-@router.post("/retention/transient", response_model=List[ComputedRetentionResponse])
+@router.post("/retention/transient", response_model=ComputedRetentionResponse)
 async def compute_transient_retention(
     page_number: int,
     page_size: int,
