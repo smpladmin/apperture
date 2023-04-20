@@ -75,13 +75,10 @@ def trigger_data_processing():
     )
 
 
-def trigger_notifications_processing(
-    notification_type: NotificationType, frequency: NotificationFrequency
-):
+def trigger_notifications_processing():
     logging.info("{x}: {y}".format(x="Triggering notifications processing", y=""))
     response = post(
         "/private/notifications",
-        {"notification_type": notification_type, "frequency": frequency},
     )
     logging.info(
         "{x}: {y}".format(x="Triggered data processing, status", y=response.status_code)

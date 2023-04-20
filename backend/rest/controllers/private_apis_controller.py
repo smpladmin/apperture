@@ -15,7 +15,7 @@ from domain.events.service import EventsService
 from domain.funnels.service import FunnelsService
 from domain.integrations.service import IntegrationService
 from domain.metrics.service import MetricService
-from domain.notifications.models import NotificationType
+from domain.notifications.models import NotificationType, NotificationVariant
 from domain.notifications.service import NotificationService
 from domain.properties.service import PropertiesService
 from domain.runlogs.service import RunLogService
@@ -147,13 +147,10 @@ async def trigger_fetch_for_all_datasources(
 
 @router.post("/notifications")
 async def get_notifications(
-    dto: TriggerNotificationsDto,
     notification_service: NotificationService = Depends(),
     dpq_service: DPQueueService = Depends(),
 ):
-    notifications = await notification_service.get_notifications(
-        dto.notification_type, dto.frequency
-    )
+    notifications = await notification_service.get_notifications()
     user_ids = set([str(n.user_id) for n in notifications])
     jobs = [dpq_service.enqueue_user_notification(user_id) for user_id in user_ids]
     jobs = [{"user_id": user_id, "job": job} for user_id, job in zip(user_ids, jobs)]
@@ -162,42 +159,67 @@ async def get_notifications(
     return jobs
 
 
-@router.get(
-    "/notifications",
-    response_model=List[ComputedNotificationResponse],
-)
+@router.get("/notifications")
 async def compute_notifications(
     user_id: str,
     compute: bool = True,
     notification_service: NotificationService = Depends(),
-    edge_service: EdgeService = Depends(),
+    funnel_service: FunnelsService = Depends(),
+    metric_service: MetricService = Depends(),
 ):
+
     notifications = await notification_service.get_notifications_to_compute(
         user_id=user_id
     )
-    updates = [
+
+    metric_updates = [
         notif
         for notif in notifications
-        if notif.notification_type.value == NotificationType.UPDATE
+        if NotificationType.UPDATE in notif.notification_type
+        and notif.variant == NotificationVariant.METRIC
     ]
 
-    alerts = [
+    metric_alerts = [
         notif
         for notif in notifications
-        if notif.notification_type.value == NotificationType.ALERT
+        if NotificationType.ALERT in notif.notification_type
+        and notif.variant == NotificationVariant.METRIC
     ]
 
-    node_data_for_updates = await edge_service.get_node_data_for_notifications(
-        notifications=updates
+    funnel_updates = [
+        notif
+        for notif in notifications
+        if NotificationType.UPDATE in notif.notification_type
+        and notif.variant == NotificationVariant.FUNNEL
+    ]
+
+    funnel_alerts = [
+        notif
+        for notif in notifications
+        if NotificationType.ALERT in notif.notification_type
+        and notif.variant == NotificationVariant.FUNNEL
+    ]
+
+    funnel_data_for_alerts = await funnel_service.get_funnel_data_for_notifications(
+        notifications=funnel_alerts
+    )
+    funnel_data_for_updates = await funnel_service.get_funnel_data_for_notifications(
+        notifications=funnel_updates
+    )
+    metric_data_for_alerts = await metric_service.get_metric_data_for_notifications(
+        notifications=metric_alerts
+    )
+    metric_data_for_updates = await metric_service.get_metric_data_for_notifications(
+        notifications=metric_updates
     )
 
-    node_data_for_alerts = await edge_service.get_node_data_for_notifications(
-        notifications=alerts
+    computed_alerts = notification_service.compute_alerts(
+        funnel_data_for_alerts + metric_data_for_alerts
     )
 
-    computed_updates = notification_service.compute_updates(node_data_for_updates)
-    computed_alerts = notification_service.compute_alerts(node_data_for_alerts)
-
+    computed_updates = notification_service.compute_updates(
+        funnel_data_for_updates + metric_data_for_updates
+    )
     return computed_alerts + computed_updates
 
 
