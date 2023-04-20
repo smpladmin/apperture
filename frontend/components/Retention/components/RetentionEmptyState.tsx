@@ -23,7 +23,7 @@ const RetentionEmptyState = () => {
             lineHeight={'base'}
             fontWeight={'500'}
           >
-            Add two events to get started{' '}
+            Add two events to get started
           </Text>
           <Text
             textAlign={'center'}

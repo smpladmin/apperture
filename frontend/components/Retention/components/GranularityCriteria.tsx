@@ -1,6 +1,5 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import Dropdown from '@components/SearchableDropdown/Dropdown';
-import { ConversionWindowList, ConversionWindowObj } from '@lib/domain/funnel';
 import { Granularity } from '@lib/domain/retention';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { capitalizeFirstLetter } from '@lib/utils/common';
@@ -48,6 +47,7 @@ const GranularityCriteria = ({
               w={'100%'}
               h={9}
               p={2}
+              data-testid={'granularity-list'}
               onClick={() => {
                 !isDisabled && setIsGranularCriterionListOpen(true);
               }}
@@ -80,7 +80,7 @@ const GranularityCriteria = ({
                       _hover={{
                         bg: 'white.400',
                       }}
-                      data-testid={'conversion-time-type'}
+                      data-testid={'granularity-type'}
                       onClick={() => {
                         handleUpdateGranularity(value);
                       }}

@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Flex, Text } from '@chakra-ui/react';
+import { Button, ButtonGroup, Flex } from '@chakra-ui/react';
 import Card from '@components/Card';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
@@ -170,7 +170,7 @@ const Retention = () => {
       <Header
         handleGoBack={() => router.back()}
         name={retentionName}
-        setName={() => {}}
+        setName={setRetentionName}
         handleSave={() => {}}
         isSaveButtonDisabled={true}
       />

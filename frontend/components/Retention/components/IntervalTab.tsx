@@ -64,6 +64,7 @@ export const IntervalTab = ({
                   interval === intervalNumber ? 'white' : 'white.500'
                 }
                 onClick={() => handleClick(intervalNumber)}
+                data-testid={'interval-tab'}
                 cursor={'pointer'}
                 borderBottom={
                   interval === intervalNumber ? 'black 3px solid' : 'none'

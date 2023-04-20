@@ -87,6 +87,7 @@ const SelectEventsRetention = ({
                   onClick={() => {
                     setIsDropdownOpen(true);
                   }}
+                  data-testid={'event-selection'}
                 >
                   {retentionEvent.event || 'Select  Event'}
                 </Text>
