@@ -62,7 +62,7 @@ const Retention = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [interval, setInterval] = useState(0);
   const [isEmpty, setIsEmpty] = useState(true);
-  const [defaultState, setDefaultState] = useState(false);
+  const [trigger, setTrigger] = useState(false);
   const pageSize = 10;
 
   useEffect(() => {
@@ -72,13 +72,16 @@ const Retention = () => {
   }, [retentionEvents]);
 
   useEffect(() => {
-    setDefaultState(true);
+    if (!hasValidEvents(retentionEvents)) {
+      return;
+    }
     setInterval(0);
     setPageNumber(0);
+    setTrigger((prevState: Boolean) => !prevState);
   }, [retentionEvents, granularity, dateFilter]);
 
   useEffect(() => {
-    if (!hasValidEvents(retentionEvents) || defaultState) {
+    if (!hasValidEvents(retentionEvents)) {
       return;
     }
 
@@ -97,10 +100,10 @@ const Retention = () => {
 
     setIsTrendsDataLoading(true);
     getTrendsData();
-  }, [interval, retentionEvents, dateFilter]);
+  }, [interval, trigger]);
 
   useEffect(() => {
-    if (!hasValidEvents(retentionEvents) || defaultState) {
+    if (!hasValidEvents(retentionEvents)) {
       return;
     }
 
@@ -120,44 +123,7 @@ const Retention = () => {
 
     setIsIntervalDataLoading(true);
     getTransientData();
-  }, [retentionEvents, dateFilter, pageNumber]);
-
-  useEffect(() => {
-    if (defaultState) {
-      setIsTrendsDataLoading(true);
-      setIsIntervalDataLoading(true);
-      const getTrendsData = async () => {
-        const trendsData = await getTransientTrendsData(
-          datasourceId!!,
-          retentionEvents.startEvent,
-          retentionEvents.goalEvent,
-          dateFilter,
-          granularity,
-          interval
-        );
-        setTrendsData(trendsData);
-        setIsTrendsDataLoading(false);
-      };
-
-      getTrendsData();
-      const getTransientData = async () => {
-        const retentionData = await getTransientRetentionData(
-          datasourceId!!,
-          retentionEvents.startEvent,
-          retentionEvents.goalEvent,
-          dateFilter,
-          granularity,
-          pageNumber,
-          pageSize
-        );
-        setRetentionData(retentionData);
-        setIsIntervalDataLoading(false);
-      };
-
-      getTransientData();
-      setDefaultState(false);
-    }
-  }, [defaultState]);
+  }, [pageNumber, trigger]);
 
   return (
     <Flex

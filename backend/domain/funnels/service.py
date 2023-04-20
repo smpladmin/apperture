@@ -119,9 +119,7 @@ class FunnelsService:
                 users=funnel_stepwise_users_data[i],
                 conversion=float(
                     "{:.2f}".format(
-                        self.compute_conversion(
-                            step_number=i,
-                            funnel_stepwise_users=list(funnel_stepwise_users_data),
+                        self.compute_conversion(step_number=i, funnel_stepwise_users=list(funnel_stepwise_users_data),
                         )
                     )
                 ),
