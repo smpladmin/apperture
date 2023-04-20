@@ -22,7 +22,7 @@ import Card from '@components/Card';
 
 const graphColors = COLOR_PALLETE_5.map((color) => color.hexaValue);
 
-const config = {
+export const metricChartConfig = {
   padding: 'auto',
   autoFit: true,
   xField: 'date',
@@ -100,7 +100,7 @@ type MetricTrendProps = {
 
 const MetricTrend = ({ data, breakdown }: MetricTrendProps) => {
   const [selectedBreakdowns, setSelectedBreakdowns] = useState<Breakdown[]>([]);
-  const [graphConfig, setGraphConfig] = useState(config);
+  const [graphConfig, setGraphConfig] = useState(metricChartConfig);
 
   useEffect(() => {
     if (!breakdown.length) return;

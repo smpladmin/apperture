@@ -8,6 +8,7 @@ import {
   ApperturePrivateGet,
   ApperturePut,
 } from './util';
+import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
 
 type MetricRequestBody = {
   datasourceId: string;
@@ -99,4 +100,38 @@ export const validateMetricFormula = async (
 
 export const deleteMetric = async (id: string, dsId: string) => {
   return await AppertureDelete(`/metrics/${id}?datasource_id=${dsId}`);
+};
+
+export const _getSavedMetricPrivate = async (
+  apiKey: string,
+  metricId: string
+) => {
+  const res = await ApperturePrivateAPI.get(`/private/metrics/${metricId}`, {
+    headers: { 'apperture-api-key': apiKey },
+  });
+  return res.data;
+};
+
+export const _getTransientTrendsDataPrivate = async (
+  apiKey: string,
+  dsId: string,
+  functions: string,
+  aggregates: MetricAggregate[],
+  breakdown: string[],
+  dateFilter: DateFilterObj | null
+) => {
+  const res = await ApperturePrivateAPI.post(
+    `/private/metrics/compute`,
+    {
+      datasourceId: dsId,
+      function: functions,
+      aggregates: replaceEmptyStringPlaceholder(aggregates),
+      breakdown,
+      dateFilter,
+    },
+    {
+      headers: { 'apperture-api-key': apiKey },
+    }
+  );
+  return res.data || [];
 };
