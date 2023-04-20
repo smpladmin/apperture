@@ -1,7 +1,14 @@
+import logging
 from typing import List, Union
+from domain.notifications.models import (
+    Notification,
+    NotificationData,
+    NotificationThresholdType,
+    NotificationVariant,
+)
 from mongo import Mongo
 from fastapi import Depends
-from datetime import datetime
+from datetime import datetime, timedelta
 from beanie import PydanticObjectId
 from beanie.operators import In
 
@@ -18,6 +25,7 @@ from domain.funnels.models import (
     ConversionWindowType,
 )
 from repositories.clickhouse.funnels import Funnels
+from domain.common.date_models import DateFilterType
 
 
 class FunnelsService:
@@ -120,7 +128,8 @@ class FunnelsService:
                 conversion=float(
                     "{:.2f}".format(
                         self.compute_conversion(
-                            step_number=i, funnel_stepwise_users=list(funnel_stepwise_users_data)
+                            step_number=i,
+                            funnel_stepwise_users=list(funnel_stepwise_users_data),
                         )
                     )
                 ),
@@ -229,3 +238,76 @@ class FunnelsService:
             Funnel.id == PydanticObjectId(funnel_id),
         ).update({"$set": {"enabled": False}})
         return
+
+    def compare_dates(self, end_date: str, date: str, date_format="%Y-%m-%d"):
+
+        end_date_obj = datetime.strptime(end_date, date_format)
+        date_obj = datetime.strptime(date, date_format)
+
+        return date_obj > end_date_obj
+
+    async def get_notification_data(self, notification: Notification, days_ago: int):
+        funnel = await self.get_funnel(notification.reference)
+
+        date_format = "%Y-%m-%d"
+        today = datetime.today()
+        date = (today - timedelta(days=days_ago)).strftime(date_format)
+
+        if (
+            funnel.date_filter
+            and funnel.date_filter.type == DateFilterType.FIXED
+            and self.compare_dates(
+                end_date=funnel.date_filter.filter.end_date, date=date
+            )
+        ):
+            return -1
+
+        conversion_time = self.compute_conversion_time(
+            conversion_window=funnel.conversion_window
+        )
+
+        data = self.funnels.get_users_count(
+            ds_id=str(funnel.datasource_id),
+            steps=funnel.steps,
+            conversion_time=conversion_time,
+            start_date=date,
+            end_date=date,
+        )
+
+        first_step_users, *_, last_step_users = data[0]
+        conversion = last_step_users * 100 / first_step_users if first_step_users else 0
+        logging.info(f"funnel {funnel.name} conversion:{conversion}")
+        return float("{:.2f}".format(conversion))
+
+    async def get_funnel_data_for_notifications(
+        self, notifications: List[Notification]
+    ):
+        notifications_data_for_funnels = list(
+            filter(
+                lambda notification: notification.value != -1,
+                [
+                    NotificationData(
+                        name=notification.name,
+                        notification_id=notification.id,
+                        variant=NotificationVariant.FUNNEL,
+                        value=await self.get_notification_data(
+                            notification=notification, days_ago=1
+                        ),
+                        prev_day_value=await self.get_notification_data(
+                            notification=notification, days_ago=2
+                        ),
+                        threshold_type=NotificationThresholdType.PCT
+                        if notification.pct_threshold_active
+                        else NotificationThresholdType.ABSOLUTE,
+                        threshold_value=notification.pct_threshold_values
+                        if notification.pct_threshold_active
+                        else notification.absolute_threshold_values,
+                    )
+                    for notification in notifications
+                ]
+                if notifications
+                else [],
+            )
+        )
+
+        return notifications_data_for_funnels

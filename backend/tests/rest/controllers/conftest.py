@@ -47,6 +47,10 @@ from domain.notifications.models import (
     NotificationMetric,
     NotificationType,
     NotificationVariant,
+    ThresholdMap,
+    NotificationData,
+    NotificationThresholdType,
+    ComputedNotification,
 )
 from domain.properties.models import Properties, Property, PropertyDataType
 from domain.runlogs.models import RunLog
@@ -112,11 +116,122 @@ def notification_service(apperture_user_response):
         variant=NotificationVariant.NODE,
         reference="/p/partner/job",
     )
+
+    notification_to_compute = [
+        Notification(
+            id=PydanticObjectId("6437a278a2fdd9488bef5253"),
+            revision_id=None,
+            created_at=datetime(2023, 4, 13, 6, 34, 32, 876000),
+            updated_at=datetime(2023, 4, 13, 8, 16, 16, 593000),
+            datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
+            user_id=PydanticObjectId("6374b74e9b36ecf7e0b4f9e4"),
+            app_id=PydanticObjectId("63ca46feee94e38b81cda37a"),
+            name="Video Funnel",
+            notification_type={"alert", "update"},
+            metric="hits",
+            multi_node=False,
+            apperture_managed=False,
+            pct_threshold_active=False,
+            pct_threshold_values=None,
+            absolute_threshold_active=True,
+            absolute_threshold_values=ThresholdMap(min=12.0, max=18.0),
+            formula="a",
+            variable_map={"a": ["Video Funnel"]},
+            preferred_hour_gmt=5,
+            frequency="daily",
+            preferred_channels=["slack"],
+            notification_active=True,
+            variant=NotificationVariant.FUNNEL,
+            reference="63dcfe6a21a93919c672d5bb",
+            enabled=True,
+        ),
+        Notification(
+            id=PydanticObjectId("6437a278a2fdd9488bef5253"),
+            revision_id=None,
+            created_at=datetime(2023, 4, 13, 6, 34, 32, 876000),
+            updated_at=datetime(2023, 4, 13, 8, 16, 16, 593000),
+            datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
+            user_id=PydanticObjectId("6374b74e9b36ecf7e0b4f9e4"),
+            app_id=PydanticObjectId("63ca46feee94e38b81cda37a"),
+            name="Alert Metric -Updated",
+            notification_type={"alert", "update"},
+            metric="hits",
+            multi_node=False,
+            apperture_managed=False,
+            pct_threshold_active=False,
+            pct_threshold_values=None,
+            absolute_threshold_active=True,
+            absolute_threshold_values=ThresholdMap(min=1212.0, max=3236.0),
+            formula="a",
+            variable_map={"a": ["Alert Metric -Updated"]},
+            preferred_hour_gmt=5,
+            frequency="daily",
+            preferred_channels=["slack"],
+            notification_active=True,
+            variant=NotificationVariant.METRIC,
+            reference="63dcfe6a21a93919c672d5bb",
+            enabled=True,
+        ),
+    ]
+
+    computed_alerts = [
+        ComputedNotification(
+            name="Video Funnel",
+            notification_id=PydanticObjectId("633fb88bbbc29934eeb39ece"),
+            notification_type=NotificationType.ALERT,
+            variant=NotificationVariant.FUNNEL,
+            value=-16.67,
+            original_value=0.1,
+            threshold_type=NotificationThresholdType.PCT,
+            user_threshold=ThresholdMap(min=12.0, max=18.0),
+            triggered=True,
+        ),
+        ComputedNotification(
+            name="Alert Metric -Updated",
+            notification_id=PydanticObjectId("633fb88bbbc29934eeb39ece"),
+            notification_type=NotificationType.ALERT,
+            variant=NotificationVariant.METRIC,
+            value=-16.67,
+            original_value=0.1,
+            threshold_type=NotificationThresholdType.PCT,
+            user_threshold=ThresholdMap(min=1212.0, max=3236.0),
+            triggered=False,
+        ),
+    ]
+
+    computed_updates = [
+        ComputedNotification(
+            name="Video Funnel",
+            notification_id=PydanticObjectId("633fb88bbbc29934eeb39ece"),
+            notification_type=NotificationType.UPDATE,
+            variant=NotificationVariant.FUNNEL,
+            value=-16.67,
+            original_value=0.1,
+            threshold_type=None,
+            user_threshold=None,
+            triggered=None,
+        ),
+        ComputedNotification(
+            name="Alert Metric -Updated",
+            notification_id=PydanticObjectId("633fb88bbbc29934eeb39ece"),
+            notification_type=NotificationType.UPDATE,
+            variant=NotificationVariant.METRIC,
+            value=-16.67,
+            original_value=0.1,
+            threshold_type=None,
+            user_threshold=None,
+            triggered=None,
+        ),
+    ]
+
     notif_future = asyncio.Future()
     notif_future.set_result(notif)
 
     notifications_future = asyncio.Future()
     notifications_future.set_result([NotificationWithUser.from_orm(notif)])
+
+    notification_compute_future = asyncio.Future()
+    notification_compute_future.set_result(notification_to_compute)
 
     notification_service_mock.delete_notification = mock.AsyncMock()
 
@@ -128,6 +243,15 @@ def notification_service(apperture_user_response):
         notifications_future
     )
     notification_service_mock.fetch_and_delete_notification = mock.AsyncMock()
+    notification_service_mock.get_notifications_to_compute.return_value = (
+        notification_compute_future
+    )
+    notification_service_mock.compute_alerts.return_value = computed_alerts
+    notification_service_mock.compute_updates.return_value = computed_updates
+    notification_service_mock.get_notifications.return_value = (
+        notification_compute_future
+    )
+
     return notification_service_mock
 
 
@@ -211,6 +335,21 @@ def funnel_service(apperture_user_response):
     funnel_user_conversion_future = asyncio.Future()
     funnel_user_conversion_future.set_result(funnel_user_conversion)
 
+    funnel_notification_data_future = asyncio.Future()
+    funnel_notification_data_future.set_result(
+        [
+            NotificationData(
+                name="Video Funnel",
+                notification_id=PydanticObjectId("6437a278a2fdd9488bef5253"),
+                variant=NotificationVariant.FUNNEL,
+                value=0.2,
+                prev_day_value=0.2,
+                threshold_type="absolute",
+                threshold_value=ThresholdMap(min=12.0, max=18.0),
+            )
+        ]
+    )
+
     funnel_service_mock.build_funnel.return_value = funnel
     funnel_service_mock.add_funnel.return_value = funnel_future
     funnel_service_mock.get_funnel.return_value = funnel_future
@@ -222,6 +361,9 @@ def funnel_service(apperture_user_response):
     funnel_service_mock.get_funnels_for_datasource_id.return_value = funnels_future
     funnel_service_mock.get_funnels_for_apps.return_value = funnels_future
     funnel_service_mock.delete_funnel = mock.AsyncMock()
+    funnel_service_mock.get_funnel_data_for_notifications.return_value = (
+        funnel_notification_data_future
+    )
 
     return funnel_service_mock
 
@@ -532,6 +674,21 @@ def metric_service(apperture_user_response):
     computed_metric_future = asyncio.Future()
     computed_metric_future.set_result(computed_metric)
 
+    metric_notification_data_future = asyncio.Future()
+    metric_notification_data_future.set_result(
+        [
+            NotificationData(
+                name="Alert Metric -Updated",
+                notification_id=PydanticObjectId("6437a278a2fdd9488bef5253"),
+                variant=NotificationVariant.METRIC,
+                value=0.2,
+                prev_day_value=0.2,
+                threshold_type="absolute",
+                threshold_value=ThresholdMap(min=1212.0, max=3236.0),
+            )
+        ]
+    )
+
     metric_service.build_metric = mock.AsyncMock()
     metric_service.build_metric.return_value = metric
     metric_service.update_metric = mock.AsyncMock()
@@ -539,6 +696,9 @@ def metric_service(apperture_user_response):
     metric_service.get_metrics_for_datasource_id.return_value = metrics_future
     metric_service.validate_formula.return_value = True
     metric_service.delete_metric = mock.AsyncMock()
+    metric_service.get_metric_data_for_notifications.return_value = (
+        metric_notification_data_future
+    )
     return metric_service
 
 
@@ -1572,4 +1732,7 @@ def runlog_service():
 def dpq_service():
     dpq_service_mock = mock.MagicMock()
     dpq_service_mock.enqueue_from_runlogs = mock.MagicMock(return_value=["test"])
+    dpq_service_mock.enqueue_user_notification = mock.MagicMock(
+        return_value="a98a10b4-d26e-46fa-aa6f"
+    )
     return dpq_service_mock
