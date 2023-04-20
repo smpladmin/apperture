@@ -14,6 +14,7 @@ import {
   RED_500,
   YELLOW_500,
 } from '@theme/index';
+export const BREAKDOWN_SELECTION_LIMIT = 5;
 
 export const replaceEmptyStringPlaceholder = (
   aggregates: MetricAggregate[]

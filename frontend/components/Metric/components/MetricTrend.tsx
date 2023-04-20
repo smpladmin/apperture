@@ -1,6 +1,7 @@
 import { Flex } from '@chakra-ui/react';
 import LineChart from '@components/Charts/Line';
 import {
+  BREAKDOWN_SELECTION_LIMIT,
   COLOR_PALLETE_5,
   convertToTableData,
   convertToTrendData,
@@ -113,7 +114,7 @@ const MetricTrend = ({ data, breakdown }: MetricTrendProps) => {
         };
       }
     );
-    setSelectedBreakdowns(breakdownValues.slice(0, 5));
+    setSelectedBreakdowns(breakdownValues.slice(0, BREAKDOWN_SELECTION_LIMIT));
   }, [data, breakdown]);
 
   useEffect(() => {
