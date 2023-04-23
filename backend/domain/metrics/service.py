@@ -255,24 +255,15 @@ class MetricService:
         ).update({"$set": {"enabled": False}})
         return
 
-    def compare_dates(self, end_date: str, date: str, date_format="%Y-%m-%d"):
-
-        end_date_obj = datetime.strptime(end_date, date_format)
-        date_obj = datetime.strptime(date, date_format)
-
-        return date_obj > end_date_obj
-
     async def get_notification_data(self, notification: Notification, days_ago: int):
         metric = await self.get_metric_by_id(notification.reference)
 
-        date_format = "%Y-%m-%d"
-        today = datetime.today()
-        date = (today - timedelta(days=days_ago)).strftime(date_format)
+        date = self.metric.compute_n_days_ago_date(days_ago=days_ago)
 
         if (
             metric.date_filter
             and metric.date_filter.type == DateFilterType.FIXED
-            and self.compare_dates(
+            and self.metric.compare_dates(
                 end_date=metric.date_filter.filter.end_date, date=date
             )
         ):
