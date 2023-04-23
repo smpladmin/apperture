@@ -12,6 +12,8 @@ from aiokafka import AIOKafkaConsumer
 from clickhouse import ClickHouse
 from dotenv import load_dotenv
 
+from models.models import ClickStream
+
 load_dotenv()
 
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
@@ -22,6 +24,23 @@ logging.getLogger().setLevel(logging.INFO)
 # Kafka configuration
 KAFKA_BOOTSTRAP_SERVERS = "kafka:9092"
 KAFKA_TOPIC = "clickstream"
+
+
+def save_events(events):
+    """Saves events to ClickHouse."""
+    logging.info(f"Saving {len(events)} events")
+    cs_events = [
+        ClickStream.build(
+            datasource_id=event["properties"]["token"],
+            timestamp=event["properties"]["$time"],
+            user_id=event["properties"]["$device_id"],
+            event=event["event"],
+            properties=event["properties"],
+        )
+        for event in events
+    ]
+    app.clickhouse.save_events(cs_events)
+    logging.info("Saved events")
 
 
 async def process_kafka_messages() -> None:
@@ -60,7 +79,7 @@ async def process_kafka_messages() -> None:
 
         # Save events to ClickHouse
         if len(events) >= MAX_RECORDS:
-            app.clickhouse.save_events(events)
+            save_events(events)
             events = []
             await consumer.commit()
 
