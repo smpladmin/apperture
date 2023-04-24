@@ -77,6 +77,7 @@ class ComputedNotification(BaseModel):
     variant: NotificationVariant
     value: float
     original_value: float
+    reference = str
     threshold_type: Optional[NotificationThresholdType]
     user_threshold: Optional[ThresholdMap]
     triggered: Optional[bool]
@@ -91,6 +92,7 @@ class NotificationData(BaseModel):
     name: str
     notification_id: PydanticObjectId
     variant: NotificationVariant
+    reference: str
     value: float
     prev_day_value: float
     threshold_type: Optional[str]

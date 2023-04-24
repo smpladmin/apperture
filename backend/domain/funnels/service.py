@@ -290,6 +290,7 @@ class FunnelsService:
                         name=notification.name,
                         notification_id=notification.id,
                         variant=NotificationVariant.FUNNEL,
+                        reference=notification.reference,
                         value=await self.get_notification_data(
                             notification=notification, days_ago=1
                         ),

@@ -165,6 +165,7 @@ class NotificationService:
             variant=data.variant,
             value=float("{:.2f}".format(percentage_difference)),
             original_value=float("{:.2f}".format(data.value)),
+            reference=data.reference,
         )
 
         return computed_updates
@@ -187,6 +188,7 @@ class NotificationService:
             variant=data.variant,
             value=float("{:.2f}".format(value)),
             original_value=float("{:.2f}".format(data.value)),
+            reference=data.reference,
             threshold_type=data.threshold_type,
             user_threshold=data.threshold_value,
             triggered=triggered,

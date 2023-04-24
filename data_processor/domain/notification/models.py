@@ -46,6 +46,7 @@ class Notification(BaseModel):
     variant: NotificationVariant
     value: float
     original_value: float
+    reference: str
     threshold_type: Optional[NotificationThresholdType]
     user_threshold: Optional[ThresholdMap]
     triggered: Optional[bool]
