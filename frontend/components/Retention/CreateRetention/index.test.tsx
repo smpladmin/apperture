@@ -10,9 +10,9 @@ import {
   getTransientRetentionData,
   getTransientTrendsData,
 } from '@lib/services/retentionService';
-import { hasValidEvents } from './utils';
+import { hasValidEvents } from '../utils';
 
-jest.mock('./utils');
+jest.mock('../utils');
 jest.mock('@lib/utils/common');
 jest.mock('@lib/services/retentionService');
 jest.mock('@lib/services/datasourceService');

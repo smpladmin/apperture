@@ -6,7 +6,7 @@ import Header from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import DateFilterComponent from '@components/Date/DateFilter';
-import RetentionEmptyState from './components/RetentionEmptyState';
+import RetentionEmptyState from '../components/RetentionEmptyState';
 import { Hash, Percent } from 'phosphor-react';
 import { BLACK_DEFAULT, GREY_500 } from '@theme/index';
 import { CreateRetentionAction } from './CreateRetentionAction';
@@ -22,9 +22,9 @@ import {
   getTransientRetentionData,
   getTransientTrendsData,
 } from '@lib/services/retentionService';
-import RetentionTrend from './components/RetentionTrend';
-import IntervalTab from './components/IntervalTab';
-import { hasValidEvents } from './utils';
+import RetentionTrend from '../components/RetentionTrend';
+import IntervalTab from '../components/IntervalTab';
+import { hasValidEvents } from '../utils';
 import LoadingSpinner from '@components/LoadingSpinner';
 
 const Retention = () => {

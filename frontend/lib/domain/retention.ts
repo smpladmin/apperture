@@ -1,4 +1,6 @@
+import { AppertureUser as User } from './user';
 import { FunnelStep } from '@lib/domain/funnel';
+import { DateFilterObj } from './common';
 
 export type RetentionEvents = {
   startEvent: FunnelStep;
@@ -30,4 +32,21 @@ export type IntervalTabData = {
 export type RetentionData = {
   count: number;
   data: IntervalTabData[];
+};
+
+export type Retention = {
+  _id: string;
+  datasourceId: string;
+  appId: string;
+  name: string;
+  updatedAt: Date;
+  startEvent: FunnelStep;
+  goalEvent: FunnelStep;
+  dateFilter: DateFilterObj;
+  segment_filter?: any;
+  granularity: Granularity;
+};
+
+export type RetentionWithUser = Retention & {
+  user: User;
 };

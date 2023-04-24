@@ -2,7 +2,7 @@ import { Flex, Text } from '@chakra-ui/react';
 import Card from '@components/Card';
 import React from 'react';
 import GranularityCriteria from '@components/Retention/components/GranularityCriteria';
-import SelectEventsRetention from './components/SelectEventsRetention';
+import SelectEventsRetention from '../components/SelectEventsRetention';
 import { Granularity, RetentionEvents } from '@lib/domain/retention';
 import { Plus } from 'phosphor-react';
 

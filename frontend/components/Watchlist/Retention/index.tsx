@@ -1,51 +1,51 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import LoadingSpinner from '@components/LoadingSpinner';
-import { FunnelWithUser } from '@lib/domain/funnel';
 import { Provider } from '@lib/domain/provider';
+import { RetentionWithUser } from '@lib/domain/retention';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import {
-  deleteFunnel,
-  getSavedFunnelsForDatasourceId,
-} from '@lib/services/funnelService';
+  deleteRetention,
+  getSavedRetentionsForDatasourceId,
+} from '@lib/services/retentionService';
 import { Row } from '@tanstack/react-table';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import WatchlistTable from '../Table';
 
 const SavedRetentions = ({ provider }: { provider: Provider }) => {
-  const [funnels, setFunnels] = useState<SavedItems[]>([]);
+  const [retentions, setRetentions] = useState<SavedItems[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [renderFunnel, setRenderFunnel] = useState(true);
+  const [renderRetention, setRenderRetention] = useState(true);
   const router = useRouter();
 
   const { dsId } = router.query;
 
   useEffect(() => {
-    if (!renderFunnel) return;
-    const getFunnels = async () => {
-      let savedFunnels =
-        (await getSavedFunnelsForDatasourceId(dsId as string)) || [];
-      savedFunnels = savedFunnels.map((funnel: FunnelWithUser) => {
-        return { type: WatchListItemType.FUNNELS, details: funnel };
+    if (!renderRetention) return;
+    const getRetentions = async () => {
+      let savedRetentions =
+        (await getSavedRetentionsForDatasourceId(dsId as string)) || [];
+      savedRetentions = savedRetentions.map((retention: RetentionWithUser) => {
+        return { type: WatchListItemType.RETENTIONS, details: retention };
       });
-      setFunnels(savedFunnels);
+      setRetentions(savedRetentions);
       setIsLoading(false);
     };
 
     setIsLoading(true);
-    getFunnels();
-    setRenderFunnel(false);
-  }, [renderFunnel]);
+    getRetentions();
+    setRenderRetention(false);
+  }, [renderRetention]);
 
   const onRowClick = (row: Row<SavedItems>) => {
     const { _id, datasourceId } = row?.original?.details;
     router.push({
-      pathname: `/analytics/funnel/view/[id]`,
+      pathname: `/analytics/retention/view/[id]`,
       query: { id: _id, dsId: datasourceId },
     });
   };
 
-  const handleRedirectToCreateFunnel = () => {
+  const handleRedirectToCreateRetention = () => {
     router.push({
       pathname: '/analytics/retention/create/[dsId]',
       query: { dsId },
@@ -53,8 +53,8 @@ const SavedRetentions = ({ provider }: { provider: Provider }) => {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteFunnel(id, dsId as string);
-    setRenderFunnel(true);
+    await deleteRetention(id, dsId as string);
+    setRenderRetention(true);
   };
 
   return (
@@ -69,7 +69,7 @@ const SavedRetentions = ({ provider }: { provider: Provider }) => {
           bg={'black.100'}
           px={'6'}
           py={'4'}
-          onClick={handleRedirectToCreateFunnel}
+          onClick={handleRedirectToCreateRetention}
         >
           <Text
             color={'white.DEFAULT'}
@@ -95,7 +95,7 @@ const SavedRetentions = ({ provider }: { provider: Provider }) => {
           </Flex>
         ) : (
           <WatchlistTable
-            savedItemsData={funnels}
+            savedItemsData={retentions}
             onRowClick={onRowClick}
             handleDelete={handleDelete}
           />
