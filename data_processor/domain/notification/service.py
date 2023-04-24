@@ -12,9 +12,35 @@ from domain.notification.models import (
     NotificationVariant,
     NotificationThresholdType,
 )
+from fetch.notification_screenshot_fetcher import NotificationScreenshotFetcher
+from store.notification_screenshot_saver import NotificationScreenshotSaver
 
 
 class NotificationService:
+    def __init__(self):
+        self.fetcher = NotificationScreenshotFetcher()
+        self.saver = NotificationScreenshotSaver()
+
+    def build_notification_body(self, alert: Notification):
+        url = self.fetch_screenshot_url(
+            id=alert.reference, variant=alert.variant)
+        text = (
+            f'Alert! "{alert.name}" {self.get_alert_threshold_text(alert=alert)}'
+            if alert.notification_type == NotificationType.ALERT
+            else f'"{alert.name}" {alert.variant} was {self.get_original_value_text(alert.original_value, alert.variant)} yesterday. This was {self.get_value_change_text(alert.value)} compared to previous day.'
+        )
+
+        if url is not None:
+            return {"type": "section", "text": {"type": "mrkdwn", "text": text}}, {"type": "image", "image_url": url, "alt_text": "A beautiful image", }
+        else:
+            {"type": "section", "text": {"type": "mrkdwn", "text": text}}
+
+    def fetch_screenshot_url(self, id: str, variant: str):
+        file, filename = self.fetcher.fetch_screenshot(id=id, variant=variant)
+        if filename is not None:
+            return self.saver(filename=filename, file=file)
+        return None
+
     def fetch_notifications(self, user_id: str):
         response = get(f"/private/notifications?user_id={user_id}")
 
@@ -39,27 +65,28 @@ class NotificationService:
         return f"{value}%" if variant == NotificationVariant.FUNNEL else f"{value}"
 
     def send_updates(self, updates: List[Notification], slack_url: str):
-        text = "\n".join(
+        payload = [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Here is an update :zap:",
+                    "emoji": True,
+                },
+            }
+        ]
+
+        payload.extend(
             [
-                f'"{u.name}" {u.variant} was {self.get_original_value_text(u.original_value, u.variant)} yesterday. This was {self.get_value_change_text(u.value)} compared to previous day.'
-                for u in updates
+                item
+                for items in [self.build_notification_body(update) for update in updates]
+                for item in items
             ]
         )
         response = requests.post(
             slack_url,
             json={
-                "attachments": [
-                    {
-                        "color": "#9733EE",
-                        "fields": [
-                            {
-                                "title": "Here is an update! :zap:",
-                                "value": text,
-                                "short": "false",
-                            }
-                        ],
-                    }
-                ],
+                "blocks": payload,
             },
         )
         logging.info(f"Sent updates with status {response.status_code}")
@@ -87,27 +114,34 @@ class NotificationService:
             )
 
     def send_alerts(self, alerts: List[Notification], slack_url: str):
-        text = text = "\n".join(
+        payload = [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Here is an update :zap:",
+                    "emoji": True,
+                },
+            }
+        ]
+
+        payload.extend(
             [
-                f'Alert! "{alert.name}" {self.get_alert_threshold_text(alert=alert)}'
-                for alert in alerts
+                item
+                for items in [
+                    self.build_notification_body(
+                        alert,
+                    )
+                    for alert in alerts
+                ]
+                for item in items
             ]
         )
+
         response = requests.post(
             slack_url,
             json={
-                "attachments": [
-                    {
-                        "color": "#9733EE",
-                        "fields": [
-                            {
-                                "title": "Here is your alert! :zap:",
-                                "value": text,
-                                "short": "false",
-                            }
-                        ],
-                    }
-                ],
+                "blocks": payload,
             },
         )
         logging.info(
