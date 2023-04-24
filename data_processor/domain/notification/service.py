@@ -22,8 +22,7 @@ class NotificationService:
         self.saver = NotificationScreenshotSaver()
 
     def build_notification_body(self, alert: Notification):
-        url = self.fetch_screenshot_url(
-            id=alert.reference, variant=alert.variant)
+        url = self.fetch_screenshot_url(id=alert.reference, variant=alert.variant)
         text = (
             f'Alert! "{alert.name}" {self.get_alert_threshold_text(alert=alert)}'
             if alert.notification_type == NotificationType.ALERT
@@ -31,12 +30,16 @@ class NotificationService:
         )
 
         if url is not None:
-            return {"type": "section", "text": {"type": "mrkdwn", "text": text}}, {"type": "image", "image_url": url, "alt_text": "A beautiful image", }
+            return {"type": "section", "text": {"type": "mrkdwn", "text": text}}, {
+                "type": "image",
+                "image_url": url,
+                "alt_text": "A beautiful image",
+            }
         else:
             {"type": "section", "text": {"type": "mrkdwn", "text": text}}
 
     def fetch_screenshot_url(self, id: str, variant: str):
-        file, filename = self.fetcher.fetch_screenshot(id=id, variant=variant)
+        file, filename = self.fetcher.fetch_screenshot(id=id, entityType=variant)
         if filename is not None:
             return self.saver(filename=filename, file=file)
         return None
@@ -79,7 +82,9 @@ class NotificationService:
         payload.extend(
             [
                 item
-                for items in [self.build_notification_body(update) for update in updates]
+                for items in [
+                    self.build_notification_body(update) for update in updates
+                ]
                 for item in items
             ]
         )
