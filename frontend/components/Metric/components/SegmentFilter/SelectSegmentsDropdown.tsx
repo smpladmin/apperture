@@ -41,6 +41,8 @@ const SelectSegmentsDropdown = ({
   const [segmentsList, setSegmentsList] = useState<SegmentWithUser[]>([]);
   const [isSegmentListLoading, setIsSegmentListLoading] = useState(false);
 
+  const [segmentsData, setSegmentsData] = useState([]);
+
   const [areAllValuesSelected, setAreAllValuesSelected] = useState(false);
   const [includes, setIncludes] = useState<boolean>(segmentFilter.includes);
 
@@ -52,6 +54,7 @@ const SelectSegmentsDropdown = ({
   useEffect(() => {
     // preselect segment filters in dropdown
     setSelectedValues(selectedSegmentFilterIds);
+    setIncludes(segmentFilter.includes);
   }, [segmentFilter]);
 
   const router = useRouter();
@@ -61,6 +64,7 @@ const SelectSegmentsDropdown = ({
     const fetchSegments = async () => {
       const res = await getSavedSegmentsForDatasourceId(dsId as string);
       setSegmentsList(res);
+      setSegmentsData(res);
       setIsSegmentListLoading(false);
     };
 
@@ -71,7 +75,7 @@ const SelectSegmentsDropdown = ({
   useEffect(() => {
     // check 'Select all' checkbox if all the options are selected
     if (
-      selectedValues.length === segmentsList?.length &&
+      selectedValues.length === segmentsData?.length &&
       !isSegmentListLoading
     ) {
       setAreAllValuesSelected(true);
@@ -114,7 +118,8 @@ const SelectSegmentsDropdown = ({
     <SearchableDropdown
       isOpen={isSegmentListOpen}
       isLoading={isSegmentListLoading}
-      data={segmentsList}
+      data={segmentsData}
+      setSearchData={setSegmentsList}
       width="76"
       searchKey={'name'}
     >
