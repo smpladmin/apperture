@@ -4,6 +4,7 @@ import React from 'react';
 import GranularityCriteria from '@components/Retention/components/GranularityCriteria';
 import SelectEventsRetention from './components/SelectEventsRetention';
 import { Granularity, RetentionEvents } from '@lib/domain/retention';
+import { Plus } from 'phosphor-react';
 
 type CreateRetentionActionProps = {
   retentionEvents: RetentionEvents;
@@ -68,6 +69,19 @@ export const CreateRetentionAction = ({
           setGranularity={setGranularity}
         />
       </Card>
+      <Flex paddingX={2} pt={'6'} justifyContent={'space-between'}>
+        <Text
+          color={'grey.500'}
+          fontSize={{ base: 'xs-10', md: 'xs-12' }}
+          lineHeight={{ base: 'xs-10', md: 'xs-12' }}
+          fontWeight={'400'}
+        >
+          Filter
+        </Text>
+        <Flex alignItems={'center'} justifyContent={'center'}>
+          <Plus width={'14'} />
+        </Flex>
+      </Flex>
     </Flex>
   );
 };

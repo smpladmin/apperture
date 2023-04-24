@@ -82,7 +82,11 @@ const SelectEventsRetention = ({
                   fontSize={'xs-14'}
                   fontWeight={retentionEvent.event ? 500 : 400}
                   p={'1'}
-                  _hover={{ background: 'white.400', cursor: 'pointer' }}
+                  _hover={{
+                    background: 'white.400',
+                    cursor: 'pointer',
+                    borderRadius: '2px',
+                  }}
                   lineHeight={'xs-14'}
                   onClick={() => {
                     setIsDropdownOpen(true);
