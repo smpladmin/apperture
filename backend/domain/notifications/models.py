@@ -77,7 +77,7 @@ class ComputedNotification(BaseModel):
     variant: NotificationVariant
     value: float
     original_value: float
-    reference = str
+    reference: str
     threshold_type: Optional[NotificationThresholdType]
     user_threshold: Optional[ThresholdMap]
     triggered: Optional[bool]
