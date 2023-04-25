@@ -260,12 +260,12 @@ class MetricService:
     async def get_notification_data(self, notification: Notification, days_ago: int):
         metric = await self.get_metric_by_id(notification.reference)
 
-        date = self.metric.compute_n_days_ago_date(days_ago=days_ago)
+        date = self.date_utils.compute_n_days_ago_date(days_ago=days_ago)
 
         if (
             metric.date_filter
             and metric.date_filter.type == DateFilterType.FIXED
-            and self.metric.compare_dates(
+            and self.date_utils.compare_dates(
                 end_date=metric.date_filter.filter.end_date, date=date
             )
         ):

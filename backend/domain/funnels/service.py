@@ -246,12 +246,12 @@ class FunnelsService:
     async def get_notification_data(self, notification: Notification, days_ago: int):
         funnel = await self.get_funnel(notification.reference)
 
-        date = self.funnels.compute_n_days_ago_date(days_ago=days_ago)
+        date = self.date_utils.compute_n_days_ago_date(days_ago=days_ago)
 
         if (
             funnel.date_filter
             and funnel.date_filter.type == DateFilterType.FIXED
-            and self.funnels.compare_dates(
+            and self.date_utils.compare_dates(
                 end_date=funnel.date_filter.filter.end_date, date=date
             )
         ):
