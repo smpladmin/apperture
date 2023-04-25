@@ -6,7 +6,7 @@ from fastapi import Depends
 from domain.notifications.models import NotificationVariant
 
 from domain.common.date_models import DateFilter, DateFilterType
-from domain.edge.models import NotificationNodeData
+from domain.common.date_utils import DateUtils
 from domain.metrics.models import (
     SegmentsAndEvents,
     ComputedMetricStep,
@@ -33,10 +33,12 @@ class MetricService:
         metric: Metrics = Depends(),
         segment: Segments = Depends(),
         mongo: Mongo = Depends(),
+        date_utils: DateUtils = Depends(),
     ):
         self.metric = metric
         self.segment = segment
         self.mongo = mongo
+        self.date_utils = date_utils
 
     def validate_formula(self, formula, variable_list):
         if not formula:
@@ -64,7 +66,7 @@ class MetricService:
     ) -> List[ComputedMetricStep]:
 
         start_date, end_date = (
-            self.metric.compute_date_filter(
+            self.date_utils.compute_date_filter(
                 date_filter=date_filter.filter, date_filter_type=date_filter.type
             )
             if date_filter and date_filter.filter and date_filter.type

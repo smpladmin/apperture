@@ -6,6 +6,8 @@ from domain.notifications.models import (
     NotificationThresholdType,
     NotificationVariant,
 )
+
+from domain.common.date_utils import DateUtils
 from mongo import Mongo
 from fastapi import Depends
 from datetime import datetime, timedelta
@@ -33,9 +35,11 @@ class FunnelsService:
         self,
         mongo: Mongo = Depends(),
         funnels: Funnels = Depends(),
+        date_utils: DateUtils = Depends(),
     ):
         self.mongo = mongo
         self.funnels = funnels
+        self.date_utils = date_utils
         self.default_conversion_time = ConversionWindowType.DAYS.get_multiplier() * 30
 
     def build_funnel(
@@ -94,7 +98,7 @@ class FunnelsService:
 
     def extract_date_range(self, date_filter: Union[DateFilter, None]):
         return (
-            self.funnels.compute_date_filter(
+            self.date_utils.compute_date_filter(
                 date_filter=date_filter.filter, date_filter_type=date_filter.type
             )
             if date_filter and date_filter.filter and date_filter.type
