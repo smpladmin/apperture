@@ -3,9 +3,9 @@ from repositories.clickhouse.users import User
 
 class TestUserRepository:
     def setup_method(self):
-        self.query_property_with_events = 'SELECT "properties" FROM "events" WHERE "datasource_id"=%(ds_id)s AND "user_id"=%(user_id)s AND "event_name"=%(event)s ORDER BY "timestamp" DESC LIMIT 1'
-        self.query_property_without_events = 'SELECT "properties" FROM "events" WHERE "datasource_id"=%(ds_id)s AND "user_id"=%(user_id)s ORDER BY "timestamp" DESC LIMIT 1'
-        self.query_property_dropped_user = 'SELECT "properties" FROM "events" WHERE "datasource_id"=%(ds_id)s AND "user_id"=%(user_id)s ORDER BY "timestamp" DESC LIMIT 1'
+        self.query_property_with_events = 'SELECT JSONExtractRaw(toJSONString("properties")) FROM "events" WHERE "datasource_id"=%(ds_id)s AND "user_id"=%(user_id)s AND "event_name"=%(event)s ORDER BY "timestamp" DESC LIMIT 1'
+        self.query_property_without_events = 'SELECT JSONExtractRaw(toJSONString("properties")) FROM "events" WHERE "datasource_id"=%(ds_id)s AND "user_id"=%(user_id)s ORDER BY "timestamp" DESC LIMIT 1'
+        self.query_property_dropped_user = 'SELECT JSONExtractRaw(toJSONString("properties")) FROM "events" WHERE "datasource_id"=%(ds_id)s AND "user_id"=%(user_id)s ORDER BY "timestamp" DESC LIMIT 1'
         self.paramaeters = [
             {
                 "ds_id": "datasource_id",

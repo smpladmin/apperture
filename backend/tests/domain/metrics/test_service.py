@@ -38,8 +38,9 @@ class TestMetricService:
         self.mongo = MagicMock()
         self.metric = MagicMock()
         self.segment = MagicMock()
+        self.date_utils = MagicMock()
         self.service = MetricService(
-            mongo=self.mongo, metric=self.metric, segment=self.segment
+            mongo=self.mongo, metric=self.metric, segment=self.segment, date_utils=self.date_utils
         )
         self.ds_id = "636a1c61d715ca6baae65611"
         self.date_filter = DateFilter(
@@ -53,7 +54,7 @@ class TestMetricService:
         self.update_mock = metric_future.update
         Metric.find_one = MagicMock(return_value=metric_future)
 
-        self.metric.compute_date_filter.return_value = ("2023-01-22", "2023-01-24")
+        self.date_utils.compute_date_filter.return_value = ("2023-01-22", "2023-01-24")
         self.aggregates = [
             SegmentsAndEvents(
                 variable="A",

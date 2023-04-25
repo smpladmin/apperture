@@ -5,11 +5,15 @@ import {
   FilterType,
   WhereSegmentFilter,
   SegmentFilterOperators,
+  SegmentFilterOperatorsString,
 } from '@lib/domain/segment';
 import React, { useState, useRef } from 'react';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { capitalizeFirstLetter } from '@lib/utils/common';
-import { FilterOperatorsDatatypeMap } from '@components/Segments/util';
+import {
+  FilterOperatorsDatatypeMap,
+  ISFilterOperators,
+} from '@components/Segments/util';
 
 type FilterOperatorProps = {
   filter: SegmentFilter;
@@ -39,9 +43,24 @@ const FilterOperator = ({
 
   const handleSwitchFilterOperators = (value: SegmentFilterOperators) => {
     setIsFilterOperatorsListOpen(false);
-
     const newFilters = [...filters];
+    /*
+    While changing operator from `is/is_not` to `contains/does_not_contain`
+    the input field changes from a Selectable Dropdown to an Input Field,
+    hence the selected value needs a reset.
+    */
+    if (filter.datatype === SegmentFilterDataType.STRING) {
+      const isMatchingFilter =
+        ISFilterOperators.includes(
+          filter.operator as SegmentFilterOperatorsString
+        ) === ISFilterOperators.includes(value as SegmentFilterOperatorsString);
+
+      if (!isMatchingFilter) {
+        newFilters[index].values = [];
+      }
+    }
     newFilters[index].operator = value;
+
     updateGroupsState(newFilters);
   };
 

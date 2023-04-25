@@ -11,6 +11,7 @@ logging.getLogger().setLevel(logging.INFO)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+import sentry_sdk
 
 from rest.controllers import (
     app_controller,
@@ -30,11 +31,22 @@ from rest.controllers import (
     action_controller,
     event_capture_controller,
     clickstream_controller,
+    retention_controller,
 )
 from mongo import Mongo
 from clickhouse import Clickhouse
 
 settings = apperture_settings()
+
+if settings.sentry_dsn:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        traces_sample_rate=settings.traces_sample_rate,
+        _experiments={
+            "profiles_sample_rate": settings.profiles_sample_rate,
+        },
+        environment=settings.sentry_environment,
+    )
 
 
 async def on_startup():
@@ -83,3 +95,9 @@ app.include_router(user_controller.router)
 app.include_router(action_controller.router)
 app.include_router(event_capture_controller.router)
 app.include_router(clickstream_controller.router)
+app.include_router(retention_controller.router)
+
+
+@app.get("/sentry-debug")
+async def trigger_error():
+    division_by_zero = 1 / 0

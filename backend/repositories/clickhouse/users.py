@@ -16,7 +16,11 @@ class User(EventsBase):
     ):
         query = (
             ClickHouseQuery.from_(self.table)
-            .select(self.table.properties)
+            .select(
+                self.json_extract_raw_func(
+                    self.to_json_string_func(self.table.properties)
+                )
+            )
             .orderby(self.table.timestamp, order=Order.desc)
         )
         parameter = {"ds_id": datasource_id, "user_id": user_id}

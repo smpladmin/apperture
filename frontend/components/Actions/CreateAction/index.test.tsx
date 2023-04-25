@@ -141,6 +141,7 @@ describe('Actions', () => {
       fireEvent.change(cssSelectorInput, {
         target: { value: '__next>div' },
       });
+      fireEvent.keyDown(cssSelectorInput, { key: 'Enter', code: 'Enter' });
 
       await waitFor(() => {
         expect(mockedGetTransientActionEvents).toHaveBeenCalledWith(

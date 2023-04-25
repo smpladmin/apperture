@@ -24,6 +24,7 @@ from domain.integrations.service import IntegrationService
 from domain.runlogs.service import RunLogService
 from data_processor_queue.service import DPQueueService
 from domain.clickstream.service import ClickstreamService
+from domain.retention.service import RetentionService
 
 
 @pytest.fixture(scope="module")
@@ -45,6 +46,7 @@ def app_init(
     dpq_service,
     clickstream_service,
     action_service,
+    retention_service,
 ):
 
     print("Setting up App")
@@ -70,6 +72,7 @@ def app_init(
     app.dependency_overrides[DPQueueService] = lambda: dpq_service
     app.dependency_overrides[ClickstreamService] = lambda: clickstream_service
     app.dependency_overrides[ActionService] = lambda: action_service
+    app.dependency_overrides[RetentionService] = lambda: retention_service
     FastAPICache.init(backend=InMemoryBackend(), prefix="apperture-cache")
     yield app
 

@@ -21,8 +21,6 @@ import TransientMetricView from '../components/TransientMetricView';
 import CreateMetricAction from './CreateMetricAction';
 
 const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
-  const toast = useToast();
-
   const [metric, setMetric] = useState<ComputedMetric[]>([]);
   const [canSaveMetric, setCanSaveMetric] = useState(false);
   const [isLoading, setIsLoading] = useState(Boolean(savedMetric));
@@ -134,12 +132,6 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
       });
     } else {
       setCanSaveMetric(true);
-      toast({
-        title: 'Something went wrong!',
-        status: 'error',
-        variant: 'subtle',
-        isClosable: true,
-      });
     }
   };
 

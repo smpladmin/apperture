@@ -1,10 +1,12 @@
 import asyncio
+from fastapi_cache.decorator import cache
 
 import httpx
 from beanie import PydanticObjectId
 from fastapi import Depends
 
 from authorisation.service import AuthService
+from cache.cache import CACHE_EXPIRY_24_HOURS, service_datasource_key_builder
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion, ProviderDataSource
 from domain.integrations.models import Credential, Integration
@@ -40,6 +42,7 @@ class DataSourceService:
     async def get_datasource(self, id: str):
         return await DataSource.get(id)
 
+    @cache(expire=CACHE_EXPIRY_24_HOURS, key_builder=service_datasource_key_builder)
     async def get_datasources_for_apperture(self, id: str):
         return await DataSource.find(
             {
@@ -72,6 +75,12 @@ class DataSourceService:
 
     async def get_enabled_datasources(self):
         return await DataSource.find(DataSource.enabled == True).to_list()
+
+    async def get_non_apperture_datasources(self):
+        return await DataSource.find(
+            DataSource.provider != IntegrationProvider.APPERTURE,
+            DataSource.enabled == True,
+        ).to_list()
 
     async def get_ga_datasources(self, credential: Credential):
         access_token = await self.auth_service.get_access_token(

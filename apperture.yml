@@ -1,5 +1,26 @@
-version: '3.3'
+version: '3.7'
 services:
+  alertmanager:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/alertmanager:latest
+    networks:
+     - net
+     - swarmpit_net
+    secrets:
+     -
+      source: alertmanager.env
+      target: /code/.env
+    logging:
+      driver: json-file
+    deploy:
+      labels:
+        swarmpit.service.deployment.autoredeploy: 'true'
+      resources:
+        reservations:
+          cpus: '0.3'
+          memory: 124M
+        limits:
+          cpus: '0.5'
+          memory: 256M
   backend:
     image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/backend:latest
     networks:
@@ -10,17 +31,22 @@ services:
       source: backend.env
       target: /code/.env
     logging:
-      driver: json-file
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: backend
     deploy:
       labels:
         traefik.http.routers.backend-https.service: backend
-        traefik.http.routers.backend-docs.rule: Host(`api.apperture.io`) &&
+        traefik.http.routers.backend-docs.rule: Host(`api.staging.apperture.io`) &&
           PathPrefix(`/docs`, `/openapi.json`, `/redoc`)
         traefik.http.routers.backend-http.service: backend
         traefik.http.routers.backend-docs.tls: 'true'
-        traefik.http.routers.backend-http.rule: Host(`api.apperture.io`)
+        traefik.http.routers.backend-http.rule: Host(`api.staging.apperture.io`)
         traefik.http.middlewares.docs-auth.basicauth.users: <username>:<aprhashedpassword>
         traefik.http.routers.backend-https.tls.certresolver: le
+        swarmpit.service.deployment.autoredeploy: 'true'
         traefik.http.routers.backend-http.entrypoints: http
         traefik.http.routers.backend-https.entrypoints: https
         traefik.constraint-label: traefik-public
@@ -32,49 +58,38 @@ services:
         traefik.http.routers.backend-https.tls: 'true'
         traefik.docker.network: traefik-public
         traefik.enable: 'true'
-        traefik.http.routers.backend-https.rule: Host(`api.apperture.io`)
+        traefik.http.routers.backend-https.rule: Host(`api.staging.apperture.io`)
         traefik.http.routers.backend-http.middlewares: https-redirect
         traefik.http.routers.backend-docs.middlewares: docs-auth
+      update_config:
+        delay: 5s
+        order: start-first
       placement:
         constraints:
-         - node.hostname == worker1
+         - node.role != manager
       resources:
         reservations:
-          cpus: '0.25'
-          memory: 256M
-        limits:
           cpus: '0.5'
           memory: 512M
+        limits:
+          cpus: '1.0'
+          memory: 2048M
   clickhouse:
     image: clickhouse/clickhouse-server:latest
-    environment:
-      CLICKHOUSE_PASSWORD: <clickhouse-password>
     ports:
      - 8123:8123
      - 9000:9000
     volumes:
      - /ch/data:/var/lib/clickhouse/
      - /ch/logs:/var/log/clickhouse-server/
+     - /ch/config.d:/etc/clickhouse-server/config.d/
+     - /ch/backups:/backups
     networks:
      - net
      - traefik-public
     logging:
       driver: json-file
     deploy:
-      labels:
-        traefik.http.routers.clickhouse-https.tls: 'true'
-        traefik.http.routers.clickhouse-http.middlewares: https-redirect
-        traefik.http.routers.clickhouse-https.rule: Host(`clickhouse.apperture.io`)
-        traefik.http.routers.clickhouse-https.tls.certresolver: le
-        traefik.http.routers.clickhouse-http.service: clickhouse
-        traefik.http.services.clickhouse.loadbalancer.server.port: '8123'
-        traefik.http.routers.clickhouse-https.entrypoints: https
-        traefik.constraint-label: traefik-public
-        traefik.http.routers.clickhouse-https.service: clickhouse
-        traefik.docker.network: traefik-public
-        traefik.enable: 'true'
-        traefik.http.routers.clickhouse-http.entrypoints: http
-        traefik.http.routers.clickhouse-http.rule: Host(`clickhouse.apperture.io`)
       placement:
         constraints:
          - node.hostname == worker3ch
@@ -84,24 +99,71 @@ services:
      - net
     secrets:
      -
-      source: data_processor.env
+      source: data_processor1.env
       target: /code/.env
     logging:
-      driver: json-file
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: dataprocessor
     deploy:
-      replicas: 2
+      labels:
+        swarmpit.service.deployment.autoredeploy: 'true'
       placement:
         constraints:
          - node.hostname == worker2
       resources:
         reservations:
-          cpus: '0.2'
-          memory: 256M
-        limits:
-          cpus: '0.9'
           memory: 1000M
+        limits:
+          memory: 7800M
+  events_producer:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/events_producer:latest
+    networks:
+     - net
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: events_producer
+    deploy:
+      labels:
+        swarmpit.service.deployment.autoredeploy: 'true'
+      resources:
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+        limits:
+          cpus: '1.0'
+          memory: 2048M
+  events_consumer:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/events_consumer:latest
+    secrets:
+     -
+      source: events_consumer.env
+      target: /code/.env
+    networks:
+     - net
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: events_consumer
+    deploy:
+      labels:
+        swarmpit.service.deployment.autoredeploy: 'true'
+      resources:
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+        limits:
+          cpus: '1.0'
+          memory: 2048M
   frontend:
-    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/frontend:latest
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/frontend:88358f6
     networks:
      - net
      - traefik-public
@@ -110,15 +172,20 @@ services:
       source: frontend.env
       target: /code/.env
     logging:
-      driver: json-file
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: frontend
     deploy:
       labels:
-        traefik.http.routers.frontend-https.rule: Host(`app.apperture.io`)
+        traefik.http.routers.frontend-https.rule: Host(`app.staging.apperture.io`)
         traefik.http.routers.frontend-https.entrypoints: https
         traefik.http.routers.frontend-https.tls.certresolver: le
         traefik.http.routers.frontend-http.middlewares: https-redirect
+        swarmpit.service.deployment.autoredeploy: 'true'
         traefik.constraint-label: traefik-public
-        traefik.http.routers.frontend-http.rule: Host(`app.apperture.io`)
+        traefik.http.routers.frontend-http.rule: Host(`app.staging.apperture.io`)
         traefik.http.routers.frontend-https.tls: 'true'
         traefik.http.services.frontend.loadbalancer.server.port: '3000'
         traefik.docker.network: traefik-public
@@ -134,6 +201,31 @@ services:
         limits:
           cpus: '0.5'
           memory: 512M
+  kafka:
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9092:9092'
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_KRAFT_CLUSTER_ID=OTMwNzFhYTY1ODNiNGE5OT
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - ALLOW_PLAINTEXT_LISTENER=yes # FIXME: kafka gives warning for this
+    deploy:
+      placement:
+        constraints:
+         - node.hostname == worker3
+    volumes:
+      - kafka_data:/bitnami/kafka
+    networks:
+     - net
+    logging:
+      driver: json-file
   redis:
     image: bitnami/redis:latest
     environment:
@@ -141,7 +233,7 @@ services:
     ports:
      - 6379:6379
     volumes:
-     - apperture_redisdata:/data/db
+     - apperture_redisdata:/bitnami/redis/data
     networks:
      - net
     logging:
@@ -166,7 +258,11 @@ services:
       source: scheduler.env
       target: /code/.env
     logging:
-      driver: json-file
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: scheduler
     deploy:
       labels:
         swarmpit.service.deployment.autoredeploy: 'true'
@@ -177,47 +273,24 @@ services:
         limits:
           cpus: '0.4'
           memory: 256M
-  alertmanager:
-    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/alertmanager:latest
-    networks:
-     - net
-     - swarmpit_net
-    secrets:
-     -
-      source: alertmanager.env
-      target: /code/.env
-    logging:
-      driver: json-file
-    deploy:
-      labels:
-        swarmpit.service.deployment.autoredeploy: 'true'
-      resources:
-        reservations:
-          cpus: '0.1'
-          memory: 50M
-        limits:
-          cpus: '0.2'
-          memory: 100M
 networks:
   net:
     driver: overlay
-  traefik-public:
-    external: true
   swarmpit_net:
     external: true
-
+  traefik-public:
+    external: true
+volumes:
+  apperture_redisdata:
+    external: true
 secrets:
+  alertmanager.env:
+    external: true
   backend.env:
     external: true
-  data_processor.env:
+  data_processor1.env:
     external: true
   frontend.env:
     external: true
   scheduler.env:
-    external: true
-  alertmanager.env:
-    external: true
-
-volumes:
-  apperture_redisdata:
     external: true

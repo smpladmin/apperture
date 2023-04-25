@@ -89,13 +89,14 @@ class RunLogService:
             for r in failed_runlogs
         ]
 
-        runlogs.append(
-            RunLog(
-                datasource_id=datasource.id,
-                date=yesterday,
-                status=RunLogStatus.SCHEDULED,
+        if not yesterday in [r.date for r in runlogs]:
+            runlogs.append(
+                RunLog(
+                    datasource_id=datasource.id,
+                    date=yesterday,
+                    status=RunLogStatus.SCHEDULED,
+                )
             )
-        )
 
         for runlog in runlogs:
             runlog.updated_at = runlog.created_at

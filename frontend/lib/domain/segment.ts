@@ -95,6 +95,8 @@ export type FilterOptionMenuType = {
 export enum SegmentFilterOperatorsString {
   IS = 'is',
   IS_NOT = 'is not',
+  CONTAINS = 'contains',
+  DOES_NOT_CONTAIN = 'does not contain',
 }
 
 export enum SegmentFilterOperatorsNumber {

@@ -20,6 +20,8 @@ jobs:
               - 'backend/**'
             data_processor:
               - 'data_processor/**'
+            events_consumer:
+              - 'events_consumer/**'
             frontend:
               - 'frontend/**'
       - name: Testing Backend code
@@ -33,6 +35,12 @@ jobs:
         if: steps.filter.outputs.data_processor == 'true'
         run: |
           cd data_processor
+          docker build . --target tests
+      
+      - name: Testing Events Consumer code
+        if: steps.filter.outputs.events_consumer == 'true'
+        run: |
+          cd events_consumer
           docker build . --target tests
 
       - name: Testing Frontend code

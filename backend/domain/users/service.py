@@ -1,3 +1,4 @@
+import json
 from repositories.clickhouse.users import User
 from fastapi import Depends
 from typing import Union
@@ -15,5 +16,5 @@ class UserService:
         return UserDetails(
             user_id=user_id,
             datasource_id=datasource_id,
-            property=result[0][0] if result and result[0] else {},
+            property=json.loads(result[0][0]) if result and result[0] else {},
         )

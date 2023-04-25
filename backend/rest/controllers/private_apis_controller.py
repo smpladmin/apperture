@@ -122,7 +122,7 @@ async def trigger_fetch_for_all_datasources(
     runlog_service: RunLogService = Depends(),
     dpq_service: DPQueueService = Depends(),
 ):
-    datasources = await ds_service.get_enabled_datasources()
+    datasources = await ds_service.get_non_apperture_datasources()
     runlog_promises = [runlog_service.create_pending_runlogs(ds) for ds in datasources]
     runlogs = await asyncio.gather(*runlog_promises)
     jobs = [
@@ -233,3 +233,16 @@ async def update_events_from_clickstream(
                 datasource_id=str(datasource.id)
             )
         return {"updated": [str(datasource.id) for datasource in apperture_datasources]}
+
+
+@router.post("/runlogs")
+async def create_pending_runlogs(
+    ds_id: str,
+    ds_service: DataSourceService = Depends(),
+    runlog_service: RunLogService = Depends(),
+    dpq_service: DPQueueService = Depends(),
+):
+    datasource = await ds_service.get_datasource(ds_id)
+    runlogs = await runlog_service.create_pending_runlogs(datasource)
+    jobs = dpq_service.enqueue_from_runlogs(runlogs)
+    return jobs

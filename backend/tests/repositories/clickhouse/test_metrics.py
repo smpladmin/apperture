@@ -149,7 +149,7 @@ class TestMetricRepository:
             (
                 'WITH limit_query AS (SELECT "properties.property1" FROM "events" WHERE '
                 "\"event_name\" IN ('Video_Seen','Video_Open') GROUP BY "
-                '"properties.property1" ORDER BY COUNT(*) DESC LIMIT 50) ,compute_query AS '
+                '"properties.property1" ORDER BY COUNT(*) DESC LIMIT 100) ,compute_query AS '
                 '(SELECT date,"properties.property1",SUM("A"),SUM("B") FROM (SELECT '
                 'DATE("timestamp") AS "date","properties.property1",CASE WHEN '
                 "\"event_name\"=%(reference_id_0)s THEN toFloat64OrNull('1') ELSE 0 END AS "
@@ -249,7 +249,7 @@ class TestMetricRepository:
             (
                 'WITH limit_query AS (SELECT "properties.property1" FROM "events" WHERE '
                 "\"event_name\" IN ('Video_Seen','Video_Open') GROUP BY "
-                '"properties.property1" ORDER BY COUNT(*) DESC LIMIT 50) ,compute_query AS '
+                '"properties.property1" ORDER BY COUNT(*) DESC LIMIT 100) ,compute_query AS '
                 '(SELECT date,"properties.property1",COUNT(DISTINCT '
                 '"A"),SUM("B"),COUNT(DISTINCT "A")/SUM("B") FROM (SELECT DATE("timestamp") AS '
                 '"date","properties.property1",CASE WHEN "event_name"=%(reference_id_0)s THEN '
@@ -306,7 +306,7 @@ class TestMetricRepository:
             (
                 'WITH limit_query AS (SELECT "properties.property1" FROM "events" WHERE '
                 "\"event_name\" IN ('Video_Seen','Video_Open') GROUP BY "
-                '"properties.property1" ORDER BY COUNT(*) DESC LIMIT 50) ,compute_query AS '
+                '"properties.property1" ORDER BY COUNT(*) DESC LIMIT 100) ,compute_query AS '
                 "(SELECT "
                 'date,"properties.property1",AVG("A"),quantile(0.5)("B"),AVG("A")/quantile(0.5)("B") '
                 'FROM (SELECT DATE("timestamp") AS "date","properties.property1",CASE WHEN '
@@ -366,7 +366,7 @@ class TestMetricRepository:
             (
                 'WITH limit_query AS (SELECT "properties.property1" FROM "events" WHERE '
                 "\"event_name\" IN ('Video_Seen','Video_Open') GROUP BY "
-                '"properties.property1" ORDER BY COUNT(*) DESC LIMIT 50) ,compute_query AS '
+                '"properties.property1" ORDER BY COUNT(*) DESC LIMIT 100) ,compute_query AS '
                 '(SELECT date,"properties.property1",COUNT(DISTINCT '
                 '"A"),quantile(0.99)("B"),COUNT(DISTINCT "A")/quantile(0.99)("B") FROM '
                 '(SELECT DATE("timestamp") AS "date","properties.property1",CASE WHEN '
@@ -400,7 +400,7 @@ class TestMetricRepository:
                 ["property1"],
                 'WITH limit_query AS (SELECT "properties.property1" FROM "events" WHERE '
                 '"event_name" IN (\'Event1\') GROUP BY "properties.property1" ORDER BY '
-                'COUNT(*) DESC LIMIT 50) ,compute_query AS (SELECT * FROM "table") SELECT '
+                'COUNT(*) DESC LIMIT 100) ,compute_query AS (SELECT * FROM "table") SELECT '
                 '"compute_query".* FROM limit_query JOIN compute_query ON '
                 '"limit_query"."properties.property1"="compute_query"."properties.property1"',
             ),
