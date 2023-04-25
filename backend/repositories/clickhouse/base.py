@@ -1,7 +1,6 @@
 from abc import ABC
-import datetime
 import logging
-from typing import Union, Dict
+from typing import Dict
 from fastapi import Depends
 from pypika import (
     Table,
@@ -10,12 +9,6 @@ from pypika import (
 )
 
 from clickhouse import Clickhouse
-from domain.common.date_models import (
-    DateFilterType,
-    FixedDateFilter,
-    LastDateFilter,
-    SinceDateFilter,
-)
 
 
 class EventsBase(ABC):
@@ -67,31 +60,3 @@ class EventsBase(ABC):
         except Exception as e:
             logging.info(e)
             return []
-
-    def compute_date_filter(
-        self,
-        date_filter: Union[FixedDateFilter, LastDateFilter, SinceDateFilter],
-        date_filter_type: DateFilterType,
-    ):
-        if date_filter_type == DateFilterType.FIXED:
-            return date_filter.start_date, date_filter.end_date
-
-        today = datetime.datetime.today()
-        end_date = today.strftime(self.date_format)
-
-        return (
-            (date_filter.start_date, end_date)
-            if date_filter_type == DateFilterType.SINCE
-            else (
-                (today - datetime.timedelta(days=date_filter.days)).strftime(
-                    self.date_format
-                ),
-                end_date,
-            )
-        )
-
-    def compute_days_in_date_range(self, start_date: str, end_date: str) -> int:
-        return (
-            datetime.datetime.strptime(end_date, self.date_format)
-            - datetime.datetime.strptime(start_date, self.date_format)
-        ).days

@@ -6,6 +6,7 @@ from beanie.odm.operators.find.comparison import In
 from fastapi import Depends
 
 from domain.common.date_models import DateFilter
+from domain.common.date_utils import DateUtils
 from domain.metrics.models import SegmentFilter
 from domain.retention.models import (
     Granularity,
@@ -26,10 +27,12 @@ class RetentionService:
         retention: RetentionRepository = Depends(),
         mongo: Mongo = Depends(),
         segment: Segments = Depends(),
+        date_utils: DateUtils = Depends(),
     ):
         self.retention = retention
         self.mongo = mongo
         self.segment = segment
+        self.date_utils = date_utils
 
     async def compute_retention_trend(
         self,
@@ -41,7 +44,7 @@ class RetentionService:
         granularity: Granularity,
         interval: int,
     ) -> List[ComputedRetentionTrend]:
-        start_date, end_date = self.retention.compute_date_filter(
+        start_date, end_date = self.date_utils.compute_date_filter(
             date_filter=date_filter.filter, date_filter_type=date_filter.type
         )
 
@@ -87,7 +90,7 @@ class RetentionService:
         page_number: int,
         page_size: int,
     ) -> ComputedRetention:
-        start_date, end_date = self.retention.compute_date_filter(
+        start_date, end_date = self.date_utils.compute_date_filter(
             date_filter=date_filter.filter, date_filter_type=date_filter.type
         )
 
@@ -98,7 +101,7 @@ class RetentionService:
             if segment_filter
             else None
         )
-        days_in_date_range = self.retention.compute_days_in_date_range(
+        days_in_date_range = self.date_utils.compute_days_in_date_range(
             start_date=start_date, end_date=end_date
         )
         total_pages = days_in_date_range // granularity.get_days()
