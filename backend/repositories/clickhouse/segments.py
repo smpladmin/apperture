@@ -48,12 +48,22 @@ class Segments(EventsBase):
             .where(self.table.datasource_id == Parameter("%(ds_id)s"))
         )
 
+    def build_groups(self, segment_filter: List[SegmentFilter]):
+        segment_groups = [segment.groups for segment in segment_filter[0].segments]
+
+        groups = []
+        for group_list in segment_groups:
+            for group in group_list:
+                groups.append(group)
+
+        # append custom filters added as a group to groups extracted from segment groups
+        groups.append(segment_filter[0].custom)
+        return groups
+
     def build_segment_filter_on_metric_criterion(
         self, segment_filter: List[SegmentFilter]
     ) -> ContainsCriterion:
-        segment_groups = [segment.groups for segment in segment_filter[0].segments]
-        groups = [group for groups in segment_groups for group in groups]
-        groups.append(segment_filter[0].custom)
+        groups = self.build_groups(segment_filter=segment_filter)
 
         query = self.build_segment_users_query(groups=groups)
         return (
