@@ -37,7 +37,8 @@ class TestFunnelService:
         DataSource.get_settings = MagicMock()
         self.mongo = MagicMock()
         self.funnels = MagicMock()
-        self.service = FunnelsService(mongo=self.mongo, funnels=self.funnels)
+        self.date_utils = MagicMock()
+        self.service = FunnelsService(mongo=self.mongo, funnels=self.funnels, date_utils=self.date_utils)
         self.ds_id = "636a1c61d715ca6baae65611"
         self.app_id = "636a1c61d715ca6baae65612"
         self.provider = IntegrationProvider.MIXPANEL
@@ -129,7 +130,7 @@ class TestFunnelService:
         self.update_mock = AsyncMock()
         Funnel.find_one = MagicMock(return_value=FindOneMock(update=self.update_mock))
         Funnel.id = MagicMock(return_value=PydanticObjectId(self.ds_id))
-        self.funnels.compute_date_filter.return_value = ("2022-12-01", "2022-12-31")
+        self.date_utils.compute_date_filter.return_value = ("2022-12-01", "2022-12-31")
         Funnel.enabled = True
 
     def test_build_funnel(self):

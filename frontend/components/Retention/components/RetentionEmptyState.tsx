@@ -1,21 +1,29 @@
 import { Flex, Text } from '@chakra-ui/react';
 import Image from 'next/image';
 import React from 'react';
-import FunnelImage from '@assets/images/funnel.svg';
+import RetentionEmpty from '@assets/images/retention-empty.svg';
 
-const FunnelEmptyState = () => {
+const RetentionEmptyState = () => {
   return (
     <Flex justifyContent={'center'} width={'full'} pt={'10'}>
-      <Flex direction={'column'} gap={'6'} data-testid={'funnel-empty-state'}>
-        <Image src={FunnelImage} priority={true} alt={'funnel-empty-state'} />
+      <Flex
+        direction={'column'}
+        gap={'6'}
+        data-testid={'retention-empty-state'}
+      >
+        <Image
+          src={RetentionEmpty}
+          priority={true}
+          alt={'funnel-empty-state'}
+        />
         <Flex direction={'column'} gap={'1'}>
           <Text
             textAlign={'center'}
             fontSize={'base'}
             lineHeight={'base'}
-            fontWeight={'bold'}
+            fontWeight={'500'}
           >
-            Select two events to get started.
+            Add two events to get started
           </Text>
           <Text
             textAlign={'center'}
@@ -25,7 +33,7 @@ const FunnelEmptyState = () => {
             color={'grey.500'}
             maxW={'120'}
           >
-            Explore how users navigate between any two events on your product
+            Explore retention of users and cohorts across different events
           </Text>
         </Flex>
       </Flex>
@@ -33,4 +41,4 @@ const FunnelEmptyState = () => {
   );
 };
 
-export default FunnelEmptyState;
+export default RetentionEmptyState;
