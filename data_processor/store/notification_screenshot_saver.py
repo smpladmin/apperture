@@ -4,7 +4,7 @@ import logging
 
 
 class NotificationScreenshotSaver:
-    def save_screenshot_to_s3(filename: str, file: bytes) -> str:
+    def save_screenshot_to_s3(self, filename: str, file: bytes) -> str:
         s3 = boto3.client(
             "s3",
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),

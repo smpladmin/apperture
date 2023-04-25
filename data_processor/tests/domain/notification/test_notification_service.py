@@ -28,7 +28,9 @@ class TestNotificationService:
 
         # create a mocked instance of the saver class and set its return value
         self.saver_mock = MagicMock()
-        self.saver_mock.return_value = "http://example.com/screenshot.png"
+        self.saver_mock.save_screenshot_to_s3.return_value = (
+            "http://example.com/screenshot.png"
+        )
 
         # create a mocked instance of the service class and set its fetcher and saver attributes
 
@@ -281,7 +283,7 @@ class TestNotificationService:
                             "type": "header",
                             "text": {
                                 "type": "plain_text",
-                                "text": "Here is an update :zap:",
+                                "text": "Here is an alert :zap:",
                                 "emoji": True,
                             },
                         },
