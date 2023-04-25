@@ -12,7 +12,7 @@ def get(path: str):
     return response
 
 
-def post(path: str, json: Dict):
+def post(path: str, json: Dict = {}):
     headers = {
         f"{os.getenv('BACKEND_API_KEY_NAME')}": os.getenv("BACKEND_API_KEY_SECRET")
     }

@@ -25,7 +25,7 @@ from tests.utils import filter_response
 from domain.datasources.models import DataSource
 
 
-class TestRetentionervice:
+class TestRetentionService:
     def setup_method(self):
         Retention.get_settings = MagicMock()
         Retention.find_one = AsyncMock()
@@ -33,7 +33,8 @@ class TestRetentionervice:
         DataSource.get_settings = MagicMock()
         self.mongo = MagicMock()
         self.retention = MagicMock()
-        self.service = RetentionService(mongo=self.mongo, retention=self.retention)
+        self.date_utils = MagicMock()
+        self.service = RetentionService(mongo=self.mongo, retention=self.retention, date_utils=self.date_utils)
         self.ds_id = "636a1c61d715ca6baae65611"
         self.app_id = "636a1c61d715ca6baae65612"
         self.provider = IntegrationProvider.MIXPANEL
@@ -82,8 +83,8 @@ class TestRetentionervice:
             (datetime(2022, 1, 3, 0, 0), 0.497648, 115),
         ]
         self.retention.compute_retention.return_value = [55.16, 10.98, 7.43, 6.13]
-        self.retention.compute_date_filter.return_value = ("2022-12-01", "2022-12-31")
-        self.retention.compute_days_in_date_range.return_value = 4
+        self.date_utils.compute_date_filter.return_value = ("2022-12-01", "2022-12-31")
+        self.date_utils.compute_days_in_date_range.return_value = 4
         Retention.enabled = True
 
     def test_build_retention(self):
@@ -144,7 +145,7 @@ class TestRetentionervice:
                 "start_event": EventSelection(event="start_event", filters=None),
             }
         )
-        self.retention.compute_date_filter.assert_called_once_with(
+        self.date_utils.compute_date_filter.assert_called_once_with(
             **{
                 "date_filter": LastDateFilter(days=7),
                 "date_filter_type": DateFilterType.LAST,
@@ -238,7 +239,7 @@ class TestRetentionervice:
                 "start_event": EventSelection(event="start_event", filters=None),
             }
         )
-        self.retention.compute_date_filter.assert_called_once_with(
+        self.date_utils.compute_date_filter.assert_called_once_with(
             **{
                 "date_filter": LastDateFilter(days=7),
                 "date_filter_type": DateFilterType.LAST,

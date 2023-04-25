@@ -27,6 +27,10 @@ jobs:
               - 'scheduler/**'
             alertmanager:
               - 'alertmanager/**'
+            events_producer:
+              - 'events_producer/**'
+            events_consumer:
+              - 'events_consumer/**'
 
       - name: Set short commit-sha
         id: commit
@@ -102,6 +106,30 @@ jobs:
           IMAGE_TAG: latest
         run: |
           cd alertmanager
+          docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+
+      - name: Build and Push Events Producer
+        if: steps.filter.outputs.events_producer == 'true'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: events_producer
+          IMAGE_TAG: latest
+        run: |
+          cd events_producer
+          docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+      
+      - name: Build and Push Events Consumer
+        if: steps.filter.outputs.events_consumer == 'true'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: events_consumer
+          IMAGE_TAG: latest
+        run: |
+          cd events_consumer
           docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags

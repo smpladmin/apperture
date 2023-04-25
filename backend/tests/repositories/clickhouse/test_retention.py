@@ -162,11 +162,3 @@ class TestRetentionRepository:
                 ),
             }
         )
-
-    def test_compute_days_in_date_range(self):
-        assert (
-            self.repo.compute_days_in_date_range(
-                start_date="2022-01-01", end_date="2022-02-01"
-            )
-            == 31
-        )
