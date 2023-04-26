@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, ANY, patch
+from unittest.mock import AsyncMock, MagicMock, ANY, patch
 
 from domain.notification.service import NotificationService
 from domain.notification.models import (
@@ -11,8 +11,6 @@ from domain.notification.models import (
     NotificationChannel,
 )
 from apperture.backend_action import get
-from fetch.notification_screenshot_fetcher import NotificationScreenshotFetcher
-from store.notification_screenshot_saver import NotificationScreenshotSaver
 
 
 class TestNotificationService:
@@ -20,7 +18,7 @@ class TestNotificationService:
 
         self.service = NotificationService()
         # create a mocked instance of the fetcher class and set its return value
-        self.fetcher_mock = MagicMock()
+        self.fetcher_mock = AsyncMock()
         self.fetcher_mock.fetch_screenshot.return_value = (
             "http://example.com/screenshot.png",
             "screenshot.png",
