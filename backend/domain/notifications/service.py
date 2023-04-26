@@ -93,14 +93,17 @@ class NotificationService:
             Notification.enabled != False,
         ).to_list()
 
+    def calculate_percentage_difference(self, value: float, prev_value: float):
+        return (value - prev_value) * 100 / prev_value if prev_value != 0 else 0
+
     def alert_criteria(self, data: NotificationData, value: float):
         if data.threshold_type == NotificationThresholdType.ABSOLUTE:
             if (value > data.threshold_value.max) or (value < data.threshold_value.min):
                 return True
         if data.threshold_type == NotificationThresholdType.PCT:
             prev_value = data.prev_day_value
-            pct_change = (
-                (value - prev_value) * 100 / prev_value if prev_value != 0 else 0
+            pct_change = self.calculate_percentage_difference(
+                value=value, prev_value=prev_value
             )
             if (pct_change > data.threshold_value.max) or (
                 pct_change < data.threshold_value.min
@@ -154,8 +157,8 @@ class NotificationService:
         value = data.value
         prev_value = data.prev_day_value
 
-        percentage_difference = (
-            (value - prev_value) * 100 / prev_value if prev_value != 0 else 0
+        percentage_difference = self.calculate_percentage_difference(
+            value=value, prev_value=prev_value
         )
 
         computed_updates = ComputedNotification(

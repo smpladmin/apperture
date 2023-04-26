@@ -23,7 +23,7 @@ const FunnelEmptyState = () => {
             lineHeight={'xs-14'}
             fontWeight={'normal'}
             color={'grey.500'}
-            maxW={'100'}
+            maxW={'120'}
           >
             Explore how users navigate between any two events on your product
           </Text>

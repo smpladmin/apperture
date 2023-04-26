@@ -2,7 +2,11 @@ import { Flex, useDisclosure } from '@chakra-ui/react';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import { DateFilterObj } from '@lib/domain/common';
-import { ComputedMetric, Metric } from '@lib/domain/metric';
+import {
+  ComputedMetric,
+  Metric,
+  MetricSegmentFilter,
+} from '@lib/domain/metric';
 import { Notifications, NotificationVariant } from '@lib/domain/notification';
 import { computeMetric } from '@lib/services/metricService';
 import { getNotificationByReference } from '@lib/services/notificationService';
@@ -35,6 +39,9 @@ const ViewMetric = ({
     filter: savedMetric?.dateFilter?.filter || null,
     type: savedMetric?.dateFilter?.type || null,
   });
+  const [segmentFilters] = useState<MetricSegmentFilter[] | null>(
+    savedMetric?.segmentFilter || null
+  );
 
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
   const [disableAlert, setDisableAlert] = useState(false);
@@ -47,7 +54,8 @@ const ViewMetric = ({
           savedMetric.aggregates.map((item) => item.variable).join(','),
         savedMetric.aggregates,
         savedMetric.breakdown,
-        dateFilter
+        dateFilter,
+        segmentFilters
       );
       setComputedMetric(result);
       setIsLoading(false);
@@ -144,6 +152,7 @@ const ViewMetric = ({
             metricDefinition={savedMetric.function}
             aggregates={savedMetric.aggregates}
             breakdown={savedMetric.breakdown}
+            segmentFilters={segmentFilters}
           />
         </ActionPanel>
         <ViewPanel>

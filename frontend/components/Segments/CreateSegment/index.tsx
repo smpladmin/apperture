@@ -13,7 +13,6 @@ import {
   Segment,
   SegmentFilterDataType,
   SegmentGroup,
-  SegmentGroupConditions,
   SegmentProperty,
   SegmentTableData,
 } from '@lib/domain/segment';
@@ -29,6 +28,7 @@ import { getAppertureUserInfo } from '@lib/services/userService';
 import { cloneDeep, isEqual } from 'lodash';
 import ExitConfirmationModal from './components/ExitConfirmationModal';
 import GroupCondition from './components/GroupConditions';
+import { GroupConditions } from '@lib/domain/common';
 
 type CreateSegmentProp = {
   savedSegment?: Segment;
@@ -41,7 +41,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
       : [
           {
             filters: [],
-            condition: SegmentGroupConditions.AND,
+            condition: GroupConditions.AND,
           },
         ]
   );
@@ -170,7 +170,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
     setGroups([
       {
         filters: [],
-        condition: SegmentGroupConditions.AND,
+        condition: GroupConditions.AND,
       },
     ]);
   };
@@ -178,7 +178,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
   const addNewGroup = () => {
     const newGroup = {
       filters: [],
-      condition: SegmentGroupConditions.AND,
+      condition: GroupConditions.AND,
     };
     setIsGroupConditionChanged(true);
     setGroups([...groups, newGroup]);
@@ -186,10 +186,10 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
 
   const handleGroupConditionsChange = (index: number) => {
     const updatedGroups = [...groups];
-    if (updatedGroups[index]?.condition === SegmentGroupConditions.AND) {
-      updatedGroups[index].condition = SegmentGroupConditions.OR;
+    if (updatedGroups[index]?.condition === GroupConditions.AND) {
+      updatedGroups[index].condition = GroupConditions.OR;
     } else {
-      updatedGroups[index].condition = SegmentGroupConditions.AND;
+      updatedGroups[index].condition = GroupConditions.AND;
     }
     setGroups(updatedGroups);
   };

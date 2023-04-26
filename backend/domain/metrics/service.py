@@ -6,7 +6,7 @@ from fastapi import Depends
 from domain.notifications.models import NotificationVariant
 
 from domain.common.date_models import DateFilter, DateFilterType
-from domain.edge.models import NotificationNodeData
+from domain.common.date_utils import DateUtils
 from domain.metrics.models import (
     SegmentsAndEvents,
     ComputedMetricStep,
@@ -33,10 +33,12 @@ class MetricService:
         metric: Metrics = Depends(),
         segment: Segments = Depends(),
         mongo: Mongo = Depends(),
+        date_utils: DateUtils = Depends(),
     ):
         self.metric = metric
         self.segment = segment
         self.mongo = mongo
+        self.date_utils = date_utils
 
     def validate_formula(self, formula, variable_list):
         if not formula:
@@ -60,11 +62,11 @@ class MetricService:
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
         date_filter: Union[DateFilter, None],
-        segment_filter: Union[SegmentFilter, None],
+        segment_filter: Union[List[SegmentFilter], None],
     ) -> List[ComputedMetricStep]:
 
         start_date, end_date = (
-            self.metric.compute_date_filter(
+            self.date_utils.compute_date_filter(
                 date_filter=date_filter.filter, date_filter_type=date_filter.type
             )
             if date_filter and date_filter.filter and date_filter.type
@@ -94,8 +96,12 @@ class MetricService:
             ]
         keys = ["date"]
         keys.extend(breakdown + function.split(","))
+        computed_metric_steps = []
 
         dates = list(set(row[0] for row in computed_metric))
+        if not dates:
+            return computed_metric_steps
+
         start_date = (
             datetime.strptime(start_date, "%Y-%m-%d").date()
             if start_date
@@ -116,7 +122,6 @@ class MetricService:
             dict(zip(breakdown, combination)) for combination in breakdown_combinations
         ]
 
-        computed_metric_steps = []
         for func in function.split(","):
             series = []
             if not breakdown_combinations:
@@ -197,7 +202,7 @@ class MetricService:
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
         date_filter: Union[DateFilter, None],
-        segment_filter: Union[SegmentFilter, None],
+        segment_filter: Union[List[SegmentFilter], None],
     ):
         return Metric(
             datasource_id=datasource_id,
@@ -255,24 +260,15 @@ class MetricService:
         ).update({"$set": {"enabled": False}})
         return
 
-    def compare_dates(self, end_date: str, date: str, date_format="%Y-%m-%d"):
-
-        end_date_obj = datetime.strptime(end_date, date_format)
-        date_obj = datetime.strptime(date, date_format)
-
-        return date_obj > end_date_obj
-
     async def get_notification_data(self, notification: Notification, days_ago: int):
         metric = await self.get_metric_by_id(notification.reference)
 
-        date_format = "%Y-%m-%d"
-        today = datetime.today()
-        date = (today - timedelta(days=days_ago)).strftime(date_format)
+        date = self.date_utils.compute_n_days_ago_date(days_ago=days_ago)
 
         if (
             metric.date_filter
             and metric.date_filter.type == DateFilterType.FIXED
-            and self.compare_dates(
+            and self.date_utils.compare_dates(
                 end_date=metric.date_filter.filter.end_date, date=date
             )
         ):
@@ -300,35 +296,35 @@ class MetricService:
         logging.info(f"metric {metric.name} users count on {date}: {users_count}")
         return float("{:.2f}".format(users_count))
 
+    async def build_notification_data(self, notification: Notification):
+        return NotificationData(
+            name=notification.name,
+            notification_id=notification.id,
+            value=await self.get_notification_data(
+                notification=notification, days_ago=1
+            ),
+            prev_day_value=await self.get_notification_data(
+                notification=notification, days_ago=2
+            ),
+            variant=NotificationVariant.METRIC,
+            threshold_type=NotificationThresholdType.PCT
+            if notification.pct_threshold_active
+            else NotificationThresholdType.ABSOLUTE,
+            threshold_value=notification.pct_threshold_values
+            if notification.pct_threshold_active
+            else notification.absolute_threshold_values,
+        )
+
     async def get_metric_data_for_notifications(
         self, notifications: List[Notification]
     ):
-        notifications_data_for_metric = list(
-            filter(
-                lambda notification: notification.value != -1,
-                [
-                    NotificationData(
-                        name=notification.name,
-                        notification_id=notification.id,
-                        value=await self.get_notification_data(
-                            notification=notification, days_ago=1
-                        ),
-                        prev_day_value=await self.get_notification_data(
-                            notification=notification, days_ago=2
-                        ),
-                        variant=NotificationVariant.METRIC,
-                        reference=notification.reference,
-                        threshold_type=NotificationThresholdType.PCT
-                        if notification.pct_threshold_active
-                        else NotificationThresholdType.ABSOLUTE,
-                        threshold_value=notification.pct_threshold_values
-                        if notification.pct_threshold_active
-                        else notification.absolute_threshold_values,
-                    )
-                    for notification in notifications
-                ]
-                if notifications
-                else [],
-            )
-        )
-        return notifications_data_for_metric
+        notifications_data_for_metric = [
+            await self.build_notification_data(notification=notification)
+            for notification in notifications
+        ]
+        filtered_notifications_data_for_metric = [
+            notification
+            for notification in notifications_data_for_metric
+            if notification.value != -1
+        ]
+        return filtered_notifications_data_for_metric

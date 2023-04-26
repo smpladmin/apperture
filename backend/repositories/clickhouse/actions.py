@@ -162,14 +162,19 @@ class Actions(EventsBase):
 
     async def update_events_from_clickstream(self, action: Action, update_action_func):
 
-        return self.execute_get_query(
-            *await self.build_update_events_from_clickstream_query(
-                action, update_action_func
+        try:
+            query, params, now = await self.build_update_events_from_clickstream_query(action)
+            self.execute_get_query(
+                query=query, parameters=params
             )
-        )
+            await update_action_func(action_id=action.id, processed_till=now)
+            logging.info(f"{action.name} processed till: {now}")
+        except Exception as e:
+            logging.info(f"Failed executing query for {action.name} with exception {e}")
+        return
 
     async def build_update_events_from_clickstream_query(
-        self, action: Action, update_action_func
+        self, action: Action
     ):
 
         conditions, params = [], {}
@@ -202,15 +207,13 @@ class Actions(EventsBase):
             )
 
         now = datetime.datetime.now()
-        await update_action_func(action_id=action.id, processed_till=now)
-        logging.info(f"{action.name} processed till: {now}")
         query = query.where(
             self.click_stream_table.timestamp <= self.parse_datetime_best_effort(now)
         )
 
         query = query.where(Criterion.any(conditions))
         params["ds_id"] = str(action.datasource_id)
-        return query.get_sql(), params
+        return query.get_sql(), params, now
 
     async def get_matching_events_from_clickstream(
         self, datasource_id: str, groups: List[ActionGroup]

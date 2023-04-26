@@ -3,6 +3,7 @@ import {
   ComputedMetric,
   MetricAggregate,
   MetricBasicAggregation,
+  MetricSegmentFilter,
   MetricTableData,
   MetricTrendData,
 } from '@lib/domain/metric';
@@ -14,6 +15,9 @@ import {
   RED_500,
   YELLOW_500,
 } from '@theme/index';
+import { SegmentGroup, WhereSegmentFilter } from '@lib/domain/segment';
+
+
 export const BREAKDOWN_SELECTION_LIMIT = 5;
 
 export const replaceEmptyStringPlaceholder = (
@@ -57,6 +61,24 @@ export const getCountOfValidAggregates = (aggregates: MetricAggregate[]) => {
   return validAggregatesWithReferenceId.length;
 };
 
+export const isEveryCustomSegmentFilterValid = (
+  filters: WhereSegmentFilter[]
+) => {
+  return filters?.every((filter) => filter.values.length);
+};
+
+export const isValidMetricSegmentFilter = (
+  segmentFilters: MetricSegmentFilter[]
+) => {
+  return segmentFilters.every(
+    (filter) =>
+      (filter.custom.filters.length || filter.segments.length) &&
+      isEveryCustomSegmentFilterValid(
+        filter.custom.filters as WhereSegmentFilter[]
+      )
+  );
+};
+
 const _isValidAggregation = (aggregation: any) => {
   if (
     [MetricBasicAggregation.TOTAL, MetricBasicAggregation.UNIQUE].includes(
@@ -68,7 +90,10 @@ const _isValidAggregation = (aggregation: any) => {
   return Boolean(aggregation.property);
 };
 
-export const isValidAggregates = (aggregates: MetricAggregate[]) => {
+export const isValidAggregates = (
+  aggregates: MetricAggregate[],
+  segmentFilters: MetricSegmentFilter[]
+) => {
   return (
     aggregates.length &&
     aggregates.every(
@@ -79,8 +104,34 @@ export const isValidAggregates = (aggregates: MetricAggregate[]) => {
           (filter: WhereFilter) => filter.values.length
         ) &&
         _isValidAggregation(aggregate.aggregations)
+    ) &&
+    isEveryCustomSegmentFilterValid(
+      segmentFilters[0].custom.filters as WhereSegmentFilter[]
     )
   );
+};
+
+export const checkMetricDefinitionAndAggregateCount = (
+  metricDefinition: string,
+  aggregates: MetricAggregate[]
+) => {
+  /*
+        enable save metric if either of condition satisfies-
+        a. has metric definition
+          1. single aggregate - True
+          2. multiple aggregate - True
+
+        b. has no metric definition
+          1. single aggregate - True
+          2. multiple aggregate - False
+
+      */
+  if (metricDefinition) return true;
+
+  if (!metricDefinition && getCountOfValidAggregates(aggregates) === 1)
+    return true;
+
+  return false;
 };
 
 export const formatDate = (date: string): string => {
@@ -223,4 +274,22 @@ export const metricAggregationDisplayText: { [key: string]: string } = {
 
 export const getDisplayAggregationFunctionText = (value: string) => {
   return metricAggregationDisplayText[value];
+};
+
+export const getSelectedSegmentsText = (
+  includes: boolean,
+  selectedSegments: {
+    id: string;
+    name: string;
+    groups: SegmentGroup[];
+  }[]
+) => {
+  if (!selectedSegments.length) {
+    return 'Include all users';
+  }
+
+  const isIncludedOrExcludedText = includes ? 'Includes' : 'Excludes';
+  const selectedSegmentsName = selectedSegments.map((seg) => seg.name);
+
+  return `${isIncludedOrExcludedText} ${selectedSegmentsName}`;
 };

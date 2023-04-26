@@ -1,7 +1,6 @@
 from abc import ABC
-import datetime
 import logging
-from typing import Union, Dict
+from typing import Dict
 from fastapi import Depends
 from pypika import (
     Table,
@@ -10,12 +9,6 @@ from pypika import (
 )
 
 from clickhouse import Clickhouse
-from domain.common.date_models import (
-    DateFilterType,
-    FixedDateFilter,
-    LastDateFilter,
-    SinceDateFilter,
-)
 
 
 class EventsBase(ABC):
@@ -24,6 +17,7 @@ class EventsBase(ABC):
         self.table = Table("events")
         self.click_stream_table = Table("clickstream")
         self.epoch_year = 1970
+        self.date_format = "%Y-%m-%d"
         self.week_func = CustomFunction("WEEK", ["timestamp"])
         self.date_func = CustomFunction("DATE", ["timestamp"])
         self.json_extract_keys_func = CustomFunction("JSONExtractKeys", ["string"])
@@ -51,6 +45,9 @@ class EventsBase(ABC):
         self.convert_to_unix_timestamp_func = CustomFunction(
             "toUnixTimestamp", ["datetime"]
         )
+        self.to_start_of_interval_func = CustomFunction(
+            "toStartOfInterval", ["timestamp", "interval"]
+        )
 
     def execute_get_query(self, query: str, parameters: Dict):
         logging.info(f"Executing query: {query}")
@@ -63,26 +60,3 @@ class EventsBase(ABC):
         except Exception as e:
             logging.info(e)
             return []
-
-    def compute_date_filter(
-        self,
-        date_filter: Union[FixedDateFilter, LastDateFilter, SinceDateFilter],
-        date_filter_type: DateFilterType,
-    ):
-        if date_filter_type == DateFilterType.FIXED:
-            return date_filter.start_date, date_filter.end_date
-
-        date_format = "%Y-%m-%d"
-        today = datetime.datetime.today()
-        end_date = today.strftime(date_format)
-
-        return (
-            (date_filter.start_date, end_date)
-            if date_filter_type == DateFilterType.SINCE
-            else (
-                (today - datetime.timedelta(days=date_filter.days)).strftime(
-                    date_format
-                ),
-                end_date,
-            )
-        )

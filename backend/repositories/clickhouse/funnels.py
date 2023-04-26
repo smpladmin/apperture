@@ -1,20 +1,22 @@
+from typing import List, Tuple, Union
+
 from fastapi import Depends
 from pypika import (
-    ClickHouseQuery,
-    Criterion,
+    NULL,
     AliasedQuery,
     Case,
-    NULL,
+    ClickHouseQuery,
+    Criterion,
     DatePart,
-    Parameter,
     Field,
+    Parameter,
+    Table,
 )
 from pypika import functions as fn
 from pypika.functions import Extract
-from typing import List, Tuple, Union
 
 from clickhouse import Clickhouse
-from domain.funnels.models import FunnelStep, ConversionStatus
+from domain.funnels.models import ConversionStatus, FunnelStep
 from repositories.clickhouse.base import EventsBase
 from repositories.clickhouse.utils.filters import Filters
 
@@ -31,6 +33,7 @@ class Funnels(EventsBase):
         start_date: Union[str, None],
         end_date: Union[str, None],
         conversion_time: int,
+        random_sequence: Union[bool, None],
     ) -> List[Tuple]:
         return self.execute_get_query(
             *self.build_trends_query(
@@ -39,6 +42,7 @@ class Funnels(EventsBase):
                 start_date=start_date,
                 end_date=end_date,
                 conversion_time=conversion_time,
+                random_sequence=random_sequence,
             )
         )
 
@@ -50,6 +54,7 @@ class Funnels(EventsBase):
         start_date: Union[str, None],
         end_date: Union[str, None],
         conversion_time: int,
+        random_sequence: Union[bool, None],
     ):
         if len(steps) == 1:
             return self.get_initial_users(
@@ -67,6 +72,7 @@ class Funnels(EventsBase):
             start_date=start_date,
             end_date=end_date,
             conversion_time=conversion_time,
+            random_sequence=random_sequence,
         )
         return self.execute_get_query(query, parameter)
 
@@ -113,6 +119,7 @@ class Funnels(EventsBase):
         start_date: Union[str, None],
         end_date: Union[str, None],
         conversion_time: int,
+        random_sequence: Union[bool, None],
     ) -> List[Tuple]:
         return self.execute_get_query(
             *self.build_users_query(
@@ -121,8 +128,60 @@ class Funnels(EventsBase):
                 start_date=start_date,
                 end_date=end_date,
                 conversion_time=conversion_time,
+                random_sequence=random_sequence,
             )
         )
+
+    def _anyorder_builder(
+        self,
+        ds_id: str,
+        steps: List[FunnelStep],
+        start_date: Union[str, None],
+        end_date: Union[str, None],
+    ):
+        innerQuery = ClickHouseQuery
+        parameters = {"ds_id": ds_id, "epoch_year": self.epoch_year}
+        date_criterion = []
+        if start_date and end_date:
+            date_criterion.extend(
+                [
+                    self.date_func(self.table.timestamp) >= start_date,
+                    self.date_func(self.table.timestamp) <= end_date,
+                ]
+            )
+        for i, step in enumerate(steps):
+            criterion = [
+                self.table.datasource_id == Parameter("%(ds_id)s"),
+                self.table.event_name == Parameter(f"%(event{i})s"),
+            ]
+            if step.filters:
+                filter_criterion = self.filter_utils.get_criterion_for_where_filters(
+                    filters=step.filters
+                )
+                criterion.extend(filter_criterion)
+            parameters[f"event{i}"] = step.event
+            stepQuery = (
+                ClickHouseQuery.from_(self.table)
+                .select(self.table.user_id)
+                .where(Criterion.all(criterion))
+                .groupby(1)
+                .having(Criterion.all(date_criterion))
+            )
+            stepQuery = stepQuery.select(
+                fn.Min(self.table.timestamp).as_("ts")
+                if i == 0
+                else fn.Max(self.table.timestamp).as_("ts")
+            )
+            if i > 0:
+                stepQuery = (
+                    ClickHouseQuery.from_(stepQuery)
+                    .select("*")
+                    .join(AliasedQuery(f"table{i}"))
+                    .on_field("user_id")
+                )
+
+            innerQuery = innerQuery.with_(stepQuery, f"table{i+1}")
+        return innerQuery, parameters
 
     def _builder(
         self,
@@ -130,7 +189,10 @@ class Funnels(EventsBase):
         steps: List[FunnelStep],
         start_date: Union[str, None],
         end_date: Union[str, None],
+        random_sequence: Union[bool, None],
     ):
+        if random_sequence:
+            return self._anyorder_builder(ds_id, steps, start_date, end_date)
         query = ClickHouseQuery
         parameters = {"ds_id": ds_id, "epoch_year": self.epoch_year}
         date_criterion = []
@@ -163,6 +225,7 @@ class Funnels(EventsBase):
                 .groupby(1)
                 .having(Criterion.all(date_criterion))
             )
+
             query = query.with_(sub_query, f"table{i + 1}")
 
         return query, parameters
@@ -174,20 +237,27 @@ class Funnels(EventsBase):
         start_date: Union[str, None],
         end_date: Union[str, None],
         conversion_time: int,
+        random_sequence: Union[bool, None],
     ):
         query, parameters = self._builder(
-            ds_id=ds_id, steps=steps, start_date=start_date, end_date=end_date
+            ds_id=ds_id,
+            steps=steps,
+            start_date=start_date,
+            end_date=end_date,
+            random_sequence=random_sequence,
         )
         query = query.from_(AliasedQuery("table1"))
 
         for i in range(1, len(steps)):
-            query = query.left_join(AliasedQuery(f"table{i + 1}")).on_field("user_id")
+            query = query.left_join(AliasedQuery(f"table{i + 1}")).on(
+                AliasedQuery(f"table{i}").user_id == AliasedQuery(f"table{i+1}").user_id
+            )
 
         query = query.select(fn.Count(AliasedQuery("table1").user_id).distinct())
         parameters["conversion_time"] = conversion_time
         for i in range(1, len(steps)):
             conditions = [
-                Extract(DatePart.year, AliasedQuery(f"table{i}").ts)
+                Extract(DatePart.year, AliasedQuery(f"table{i+1}").ts)
                 > Parameter("%(epoch_year)s"),
                 (
                     self.convert_to_unix_timestamp_func(
@@ -197,10 +267,15 @@ class Funnels(EventsBase):
                 )
                 <= Parameter("%(conversion_time)s"),
             ]
-            for j in range(i, 0, -1):
+            if random_sequence:
                 conditions.append(
-                    AliasedQuery(f"table{j + 1}").ts > AliasedQuery(f"table{j}").ts
+                    AliasedQuery(f"table{i+1}").ts > AliasedQuery(f"table1").ts
                 )
+            else:
+                for j in range(i, 0, -1):
+                    conditions.append(
+                        AliasedQuery(f"table{j + 1}").ts > AliasedQuery(f"table{j}").ts
+                    )
             query = query.select(
                 fn.Count(
                     Case()
@@ -221,9 +296,14 @@ class Funnels(EventsBase):
         start_date: Union[str, None],
         end_date: Union[str, None],
         conversion_time: int,
+        random_sequence: Union[bool, None],
     ):
         query, parameters = self._builder(
-            ds_id=ds_id, steps=steps, start_date=start_date, end_date=end_date
+            ds_id=ds_id,
+            steps=steps,
+            start_date=start_date,
+            end_date=end_date,
+            random_sequence=random_sequence,
         )
         query = query.from_(AliasedQuery("table1"))
         parameters["conversion_time"] = conversion_time
@@ -267,13 +347,15 @@ class Funnels(EventsBase):
 
         return query.get_sql(), parameters
 
-    def _build_subquery(self, steps: List[FunnelStep]):
+    def _build_subquery(
+        self, steps: List[FunnelStep], random_sequence: Union[bool, None]
+    ):
         sub_query = ClickHouseQuery
         sub_query = sub_query.select(AliasedQuery("table1").user_id.as_(0))
 
         for i in range(1, len(steps)):
             conditions = [
-                Extract(DatePart.year, AliasedQuery(f"table{i}").ts)
+                Extract(DatePart.year, AliasedQuery(f"table{i+1}").ts)
                 > Parameter("%(epoch_year)s"),
                 (
                     self.convert_to_unix_timestamp_func(
@@ -283,10 +365,15 @@ class Funnels(EventsBase):
                 )
                 <= Parameter("%(conversion_time)s"),
             ]
-            for j in range(i, 0, -1):
+            if random_sequence:
                 conditions.append(
-                    AliasedQuery(f"table{j + 1}").ts > AliasedQuery(f"table{j}").ts
+                    AliasedQuery(f"table{i+1}").ts > AliasedQuery(f"table1").ts
                 )
+            else:
+                for j in range(i, 0, -1):
+                    conditions.append(
+                        AliasedQuery(f"table{j + 1}").ts > AliasedQuery(f"table{j}").ts
+                    )
             sub_query = sub_query.select(
                 Case()
                 .when(
@@ -322,13 +409,18 @@ class Funnels(EventsBase):
         start_date: Union[str, None],
         end_date: Union[str, None],
         conversion_time: int,
+        random_sequence: Union[bool, None],
     ):
         query, parameters = self._builder(
-            ds_id=ds_id, steps=steps, start_date=start_date, end_date=end_date
+            ds_id=ds_id,
+            steps=steps,
+            start_date=start_date,
+            end_date=end_date,
+            random_sequence=random_sequence,
         )
 
         parameters["conversion_time"] = conversion_time
-        sub_query = self._build_subquery(steps=steps)
+        sub_query = self._build_subquery(steps=steps, random_sequence=random_sequence)
 
         query = query.with_(sub_query, "final_table")
         query = query.from_(AliasedQuery("final_table"))

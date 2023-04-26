@@ -1,10 +1,10 @@
 import {
   Flex,
-  Tabs,
-  TabList,
-  TabPanels,
   Tab,
+  TabList,
   TabPanel,
+  TabPanels,
+  Tabs,
   Text,
 } from '@chakra-ui/react';
 import { DateFilterObj } from '@lib/domain/common';
@@ -14,14 +14,14 @@ import {
   FunnelConversionData,
   FunnelStep,
   UserActivityResponse,
-  UserProperty,
+  UserProperty
 } from '@lib/domain/funnel';
 import { getConversionData } from '@lib/services/funnelService';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import SkeletonLoader from './SkeletonLoader';
+import UserActivityTable from './UserActivityTable';
 import UserListTable from './UserListTable';
 import UserPropertyTable from './UserPropertyTable';
-import UserActivityTable from './UserActivityTable';
 import { TableState } from './index';
 
 type UserTableViewProps = {
@@ -35,6 +35,7 @@ type UserTableViewProps = {
   conversionWindow: ConversionWindowObj;
   status: ConversionStatus;
   setStatus: Function;
+  randomSequence: boolean;
   userActivity: UserActivityResponse;
   selectedUser: any;
   setUserActivity: Function;
@@ -55,6 +56,7 @@ const UserTableView = ({
   conversionWindow,
   status,
   setStatus,
+  randomSequence,
   userActivity,
   selectedUser,
   setUserActivity,
@@ -75,7 +77,8 @@ const UserTableView = ({
           steps,
           status,
           dateFilter,
-          conversionWindow
+          conversionWindow,
+          randomSequence
         );
         setUserData({ ...userData, dropped: data });
       } else if (
@@ -87,7 +90,8 @@ const UserTableView = ({
           steps,
           status,
           dateFilter,
-          conversionWindow
+          conversionWindow,
+          randomSequence
         );
         setUserData({ ...userData, converted: data });
       }

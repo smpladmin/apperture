@@ -34,6 +34,10 @@ from rest.controllers import (
     schedule_controller,
     segment_controller,
     user_controller,
+    action_controller,
+    event_capture_controller,
+    clickstream_controller,
+    retention_controller,
 )
 
 settings = apperture_settings()
@@ -95,6 +99,7 @@ app.include_router(user_controller.router)
 app.include_router(action_controller.router)
 app.include_router(event_capture_controller.router)
 app.include_router(clickstream_controller.router)
+app.include_router(retention_controller.router)
 
 
 @app.get("/sentry-debug")

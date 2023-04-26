@@ -9,11 +9,12 @@ import { ArrowElbowDownRight, Trash } from 'phosphor-react';
 import { WhereFilter } from '@lib/domain/common';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { getFilterValuesText, trimLabel } from '@lib/utils/common';
+import { WhereSegmentFilter } from '@lib/domain/segment';
 
 type FilterComponentProps = {
-  filter: WhereFilter;
+  filter: WhereFilter | WhereSegmentFilter;
   index: number;
-  eventProperties: any;
+  eventProperties: string[];
   loadingEventProperties: boolean;
   handleRemoveFilter: Function;
   handleSetFilterValue: Function;

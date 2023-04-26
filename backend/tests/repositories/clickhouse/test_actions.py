@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -74,7 +75,7 @@ class TestActionsRepository:
             action=self.action, update_action_func=AsyncMock()
         )
         self.repo.execute_get_query.assert_called_once_with(
-            self.migration_query, self.parameters
+            **{"query":self.migration_query, "parameters":self.parameters}
         )
 
     @pytest.mark.asyncio
@@ -82,8 +83,8 @@ class TestActionsRepository:
         self, patch_datetime_today
     ):
         assert await self.repo.build_update_events_from_clickstream_query(
-            action=self.action, update_action_func=AsyncMock()
-        ) == (self.migration_query, self.parameters)
+            action=self.action
+        ) == (self.migration_query, self.parameters, datetime(2023, 1, 4, 11, 28, 38, 194662))
 
     @pytest.mark.asyncio
     async def test_build_matching_events_from_clickstream_query(self):

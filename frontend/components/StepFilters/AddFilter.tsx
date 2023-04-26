@@ -10,7 +10,7 @@ type FunnelAddFilterComponentProps = {
   eventProperties: string[];
   loadingEventProperties: boolean;
   handleAddFilter: Function;
-  filters: WhereFilter[];
+  filters?: WhereFilter[];
   hideIndentIcon?: boolean;
 };
 
@@ -33,7 +33,7 @@ const AddFilterComponent = ({
   return (
     <Flex width={'full'} direction={'column'}>
       <Flex py={1} alignItems={'center'} gap={2} h={6}>
-        <Box opacity={filters.length || hideIndentIcon ? 0 : 1} pl={'1'}>
+        <Box opacity={filters?.length || hideIndentIcon ? 0 : 1} pl={'1'}>
           <ArrowElbowDownRight size={12} color={GREY_700} weight={'bold'} />
         </Box>
         <Box position={'relative'} ref={ref}>
