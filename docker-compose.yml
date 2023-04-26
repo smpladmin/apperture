@@ -58,6 +58,11 @@ services:
     depends_on:
       - backend
       - redis
+  chrome:
+    image: browserless/chrome
+    container_name: 'chrome'
+    ports:
+      - '3001:3000'
   db:
     image: 'mongo'
     container_name: 'mongodb'
