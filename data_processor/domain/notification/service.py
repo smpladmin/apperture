@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from typing import List
@@ -22,6 +23,7 @@ class NotificationService:
         self.saver = NotificationScreenshotSaver()
 
     def build_notification_body(self, alert: Notification):
+        logging.info("fetching notification screenshot")
         url = self.fetch_screenshot_url(id=alert.reference, variant=alert.variant)
         text = (
             f'Alert! "{alert.name}" {self.get_alert_threshold_text(alert=alert)}'
@@ -39,7 +41,11 @@ class NotificationService:
             {"type": "section", "text": {"type": "mrkdwn", "text": text}}
 
     def fetch_screenshot_url(self, id: str, variant: str):
-        file, filename = self.fetcher.fetch_screenshot(id=id, entityType=variant)
+        logging.info("saving to s3")
+        file, filename = asyncio.get_event_loop().run_until_complete(
+            self.fetcher.fetch_screenshot(id=id, entityType=variant)
+        )
+        logging.info(f"Fetched screenshot {filename}")
         if filename is not None:
             return self.saver.save_screenshot_to_s3(filename=filename, file=file)
         return None
@@ -78,6 +84,8 @@ class NotificationService:
                 },
             }
         ]
+
+        logging.info("building notification payload")
 
         payload.extend(
             [
@@ -161,16 +169,23 @@ class NotificationService:
         channel: NotificationChannel,
         slack_url: str,
     ):
-        logging.info(f"Sending {notifications} to {channel}")
+        logging.info("Ordering updates ")
         updates = [
             n for n in notifications if n.notification_type == NotificationType.UPDATE
         ]
+
+        logging.info("Ordering alerts ")
         alerts = [
             n
             for n in notifications
             if n.notification_type == NotificationType.ALERT and n.triggered
         ]
+
+        logging.info(f"Sending updates {updates} to {channel}, {slack_url}")
+
         self.send_updates(updates, slack_url)
+        logging.info(f"Sending alerts {alerts} to {channel}, {slack_url}")
+
         self.send_alerts(alerts, slack_url)
 
         logging.info("Sent notifications")

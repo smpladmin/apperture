@@ -11,9 +11,7 @@ class NotificationScreenshotSaver:
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
         )
 
-        s3.put_object(
-            Body=file, Bucket=os.getenv("APPERTURE_ASSET_BUCKET"), Key=filename
-        )
+        s3.put_object(Body=file, Bucket="apperture-assets", Key=filename)
         object_url = f"https://cdn.apperture.io/{filename}"
-        logging.info("Uploaded to: ", object_url)
+        logging.info(f"Uploaded to:  {object_url}")
         return object_url
