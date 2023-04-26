@@ -30,6 +30,7 @@ import ViewHeader from '@components/EventsLayout/ViewHeader';
 import { CreateRetentionAction } from '../CreateRetention/CreateRetentionAction';
 import LeftView from './LeftView';
 import RightView from './RightView';
+import { FunnelStep } from '@lib/domain/funnel';
 
 const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
   const router = useRouter();
@@ -44,7 +45,12 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
     type: savedRetention?.dateFilter?.type || DateFilterType.LAST,
   });
 
-  const [granularity, setGranularity] = useState<Granularity>(
+  const [retentionEvents] = useState<FunnelStep[]>([
+    savedRetention?.startEvent,
+    savedRetention?.goalEvent,
+  ]);
+
+  const [granularity] = useState<Granularity>(
     savedRetention?.granularity || Granularity.DAYS
   );
 
@@ -135,12 +141,8 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
         flexGrow={1}
         bg={'white.400'}
       >
-        {/* <LeftView
-          steps={savedFunnel.steps}
-          conversionWindow={conversionWindow}
-          randomSequence={randomSequence}
-        />
-        <RightView
+        <LeftView retentionEvents={retentionEvents} granularity={granularity} />
+        {/* <RightView
           funnelSteps={savedFunnel.steps}
           computedFunnel={computedFunnelData}
           computedTrendsData={computedTrendsData}
