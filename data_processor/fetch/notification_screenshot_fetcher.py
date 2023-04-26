@@ -1,32 +1,27 @@
 import os
 from datetime import datetime
 import logging
-from selenium.webdriver.chrome.options import Options
-from selenium import webdriver
+import pyppeteer
 from time import sleep
 
 
 class NotificationScreenshotFetcher:
-    def fetch_screenshot(self, id: str, entityType: str):
-        url = (
-            os.getenv("FRONTEND_BASE_URL")
-            + f"/private/{entityType}/view/{id}?key={os.getenv('FRONTEND_API_KEY')}"
-        )
-        redirect_url = os.getenv("FRONTEND_BASE_URL") + "/404"
-
+    async def fetch_screenshot(self, id: str, entityType: str):
+        url = f"{os.getenv('FRONTEND_BASE_URL')}/private/{entityType}/view/{id}?key={os.getenv('FRONTEND_API_KEY')}"
         timestamp = datetime.now().strftime("%d%m%Y%H%M%S")
         filename = f"{entityType}_{id}_{timestamp}.png"
+        logging.debug(f"Fetching image from  {url}")
+        browser = await pyppeteer.connect(
+            {"browserWSEndpoint": os.getenv("BROWSERLESS_BASE_URL")}
+        )
+        page = await browser.newPage()
 
-        options = Options()
-        options.add_argument("--headless")
-        options.add_argument("window-size=850,500")
-
-        driver = webdriver.Chrome(options=options)
-        logging.info("Fetching image from ", url)
-        driver.get(url)
-        sleep(5)
-
-        if driver.current_url == redirect_url:
+        await page.goto(url, {"waitUntil": "networkidle0"})
+        await page.setViewport({"width": 850, "height": 500})
+        try:
+            await page.waitForSelector('[data-chart-source-type="G2Plot"]')
+            screenshot = await page.screenshot()
+            return screenshot, filename
+        except:
+            logging.info("Chart not rendered")
             return None, None
-        else:
-            return driver.get_screenshot_as_png(), filename
