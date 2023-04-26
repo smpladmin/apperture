@@ -16,6 +16,7 @@ import {
   computeMetric,
   validateMetricFormula,
 } from '@lib/services/metricService';
+import { getSavedSegmentsForDatasourceId } from '@lib/services/segmentService';
 import CreateMetric from './index';
 import {
   isValidAggregates,
@@ -24,10 +25,14 @@ import {
   getCountOfValidAggregates,
   getDisplayAggregationFunctionText,
   enableBreakdown,
+  checkMetricDefinitionAndAggregateCount,
+  isEveryCustomSegmentFilterValid,
+  getSelectedSegmentsText,
 } from '../util';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/services/metricService');
+jest.mock('@lib/services/segmentService');
 jest.mock('../util');
 
 describe('Create Metric', () => {
@@ -42,6 +47,10 @@ describe('Create Metric', () => {
   let mockedConvertToTrendData: jest.Mock;
   let mockedGetDisplayAggregationFunctionText: jest.Mock;
   let mockedEnableBreakdown: jest.Mock;
+  let mockedCheckMetricDefinitionAndAggregateCount: jest.Mock;
+  let mockedIsEveryCustomSegmentFilterValid: jest.Mock;
+  let mockedGetSavedSegmentsForDatasourceId: jest.Mock;
+  let mockedGetSelectedSegmentsText: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -168,6 +177,95 @@ describe('Create Metric', () => {
     },
   ];
 
+  const savedSegments = [
+    {
+      _id: '63d0feda2f4dd4305186cdfa',
+      createdAt: '2023-01-25T10:05:14.446000',
+      updatedAt: '2023-01-25T10:05:14.446000',
+      datasourceId: '63d0a7bfc636cee15d81f579',
+      appId: '63ca46feee94e38b81cda37a',
+      userId: '6374b74e9b36ecf7e0b4f9e4',
+      name: 'Segment 1',
+      description: '',
+      groups: [
+        {
+          filters: [
+            {
+              operand: 'properties.$city',
+              operator: 'is',
+              values: ['Hyderabad', 'Delhi', 'Mumbai', 'Jaipur'],
+              all: false,
+              condition: 'where',
+              datatype: 'String',
+              type: 'where',
+            },
+            {
+              operand: 'Mobile_Number_Added',
+              operator: 'equals',
+              values: ['1'],
+              triggered: true,
+              aggregation: 'total',
+              date_filter: {
+                days: 30,
+              },
+              date_filter_type: 'last',
+              condition: 'who',
+              type: 'who',
+              datatype: 'Number',
+            },
+          ],
+          condition: 'and',
+        },
+      ],
+      columns: ['user_id', 'properties.$city'],
+      enabled: true,
+      user: {
+        firstName: 'Anish',
+        lastName: 'Kaushal',
+        email: 'anish@parallelhq.com',
+        picture:
+          'https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c',
+        slackChannel: null,
+      },
+    },
+    {
+      _id: '63d0feda2f4dd4305186cdfb',
+      createdAt: '2023-01-25T10:05:14.446000',
+      updatedAt: '2023-01-25T10:05:14.446000',
+      datasourceId: '63d0a7bfc636cee15d81f579',
+      appId: '63ca46feee94e38b81cda37a',
+      userId: '6374b74e9b36ecf7e0b4f9e4',
+      name: 'Segment 2',
+      description: '',
+      groups: [
+        {
+          filters: [
+            {
+              operand: 'properties.$city',
+              operator: 'is',
+              values: ['Hyderabad', 'Delhi', 'Mumbai', 'Jaipur'],
+              all: false,
+              condition: 'where',
+              datatype: 'String',
+              type: 'where',
+            },
+          ],
+          condition: 'and',
+        },
+      ],
+      columns: ['user_id', 'properties.$city'],
+      enabled: true,
+      user: {
+        firstName: 'Anish',
+        lastName: 'Kaushal',
+        email: 'anish@parallelhq.com',
+        picture:
+          'https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c',
+        slackChannel: null,
+      },
+    },
+  ];
+
   const renderMetricComponent = async () => {
     await act(async () => {
       render(
@@ -193,6 +291,28 @@ describe('Create Metric', () => {
     });
   };
 
+  const addFilter = async (option = 1) => {
+    const eventPropertyDropdownList = screen.getAllByTestId('dropdown-options');
+    await act(async () => {
+      fireEvent.click(eventPropertyDropdownList[option]);
+    });
+
+    const eventFilterValue = screen.getByTestId('event-filter-values');
+
+    expect(eventFilterValue.textContent).toEqual('Select value');
+
+    const eventPropertyValueDropdownList = screen.getAllByTestId(
+      'property-value-dropdown-option'
+    );
+    const addPropertyValueButton = screen.getByTestId(
+      'add-event-property-values'
+    );
+    await act(async () => {
+      fireEvent.click(eventPropertyValueDropdownList[option]);
+      fireEvent.click(addPropertyValueButton);
+    });
+  };
+
   beforeEach(() => {
     mockedGetEventProperties = jest.mocked(getEventProperties);
     mockedGetNodes = jest.mocked(getNodes);
@@ -207,6 +327,16 @@ describe('Create Metric', () => {
       getDisplayAggregationFunctionText
     );
     mockedEnableBreakdown = jest.mocked(enableBreakdown);
+    mockedGetSavedSegmentsForDatasourceId = jest.mocked(
+      getSavedSegmentsForDatasourceId
+    );
+    mockedIsEveryCustomSegmentFilterValid = jest.mocked(
+      isEveryCustomSegmentFilterValid
+    );
+    mockedCheckMetricDefinitionAndAggregateCount = jest.mocked(
+      checkMetricDefinitionAndAggregateCount
+    );
+    mockedGetSelectedSegmentsText = jest.mocked(getSelectedSegmentsText);
 
     mockedGetEventProperties.mockReturnValue(eventProperties);
     mockedGetNodes.mockReturnValue(events);
@@ -222,6 +352,8 @@ describe('Create Metric', () => {
     mockedGetCountOfAggregates.mockReturnValue(2);
     mockedConvertToTableData.mockReturnValue(tableData);
     mockedConvertToTrendData.mockReturnValue(trendData);
+    mockedIsEveryCustomSegmentFilterValid.mockReturnValue(true);
+    mockedCheckMetricDefinitionAndAggregateCount.mockReturnValue(true);
     mockedGetDisplayAggregationFunctionText.mockImplementation(
       (value: string) => {
         const metricAggregationDisplayText: { [key: string]: string } = {
@@ -241,6 +373,7 @@ describe('Create Metric', () => {
         return metricAggregationDisplayText[value];
       }
     );
+    mockedGetSavedSegmentsForDatasourceId.mockReturnValue(savedSegments);
   });
 
   afterEach(() => {
@@ -387,15 +520,17 @@ describe('Create Metric', () => {
       await addNewEvent();
       const SELECTED_OPTION = 1;
       //Adding a filter to the "Event or Segment" Component
-      const AddFilterButton = screen.getByTestId('add-filter-button');
-      fireEvent.click(AddFilterButton);
-      const EventPropertyDropdownList =
+      const addFilterButton = screen.getAllByTestId('add-filter-button');
+      fireEvent.click(addFilterButton[0]); // step add filter button
+      const eventPropertyDropdownList =
         screen.getAllByTestId('dropdown-options');
+
       await act(async () => {
-        fireEvent.click(EventPropertyDropdownList[SELECTED_OPTION]);
+        fireEvent.click(eventPropertyDropdownList[SELECTED_OPTION]);
       });
-      const EventFilterComponent = screen.getByTestId('event-filter');
-      expect(EventFilterComponent).toBeInTheDocument();
+
+      const eventFilterComponent = screen.getByTestId('event-filter');
+      expect(eventFilterComponent).toBeInTheDocument();
     });
 
     it('should be able to select value for the filter', async () => {
@@ -412,37 +547,20 @@ describe('Create Metric', () => {
       const SELECTED_OPTION = 1;
 
       //Adding a filter to the "Event or Segment" Component
-      const AddFilterButton = screen.getByTestId('add-filter-button');
-      fireEvent.click(AddFilterButton);
-      const EventPropertyDropdownList =
-        screen.getAllByTestId('dropdown-options');
-      await act(async () => {
-        fireEvent.click(EventPropertyDropdownList[SELECTED_OPTION]);
-      });
+      const addFilterButton = screen.getAllByTestId('add-filter-button');
+      fireEvent.click(addFilterButton[0]); // step add filter button
 
-      const EventFilterValue = screen.getByTestId('event-filter-values');
+      await addFilter(SELECTED_OPTION);
 
-      expect(EventFilterValue.textContent).toEqual('Select value');
-      fireEvent.click(EventFilterValue);
+      const eventFilterValue = screen.getByTestId('event-filter-values');
 
-      const EventPropertyValueDropdownList = screen.getAllByTestId(
-        'property-value-dropdown-option'
-      );
-      const AddPropertyValueButton = screen.getByTestId(
-        'add-event-property-values'
-      );
-      await act(async () => {
-        fireEvent.click(EventPropertyValueDropdownList[SELECTED_OPTION]);
-        fireEvent.click(AddPropertyValueButton);
-      });
-      expect(EventFilterValue.textContent).toEqual(
-        EventPropertyValueDropdownList[SELECTED_OPTION].textContent
-      );
+      // option 1 is ios
+      expect(eventFilterValue.textContent).toEqual('ios');
     });
   });
 
   describe('enable/disable save button', () => {
-    it('save button shoule be disabled if aggregates are not valid', async () => {
+    it('save button should be disabled if aggregates are not valid', async () => {
       mockedIsValidAggregates.mockReturnValue(false);
       await renderMetricComponent();
 
@@ -450,7 +568,7 @@ describe('Create Metric', () => {
       expect(saveButton).toBeDisabled();
     });
 
-    it('save button shoule be disabled if aggregates are valid, but formula is not valid', async () => {
+    it('save button should be disabled if aggregates are valid, but formula is not valid', async () => {
       mockedIsValidAggregates.mockReturnValue(true);
       mockedValidateMetricFormula.mockReturnValue(false);
       await renderMetricComponent();
@@ -470,6 +588,7 @@ describe('Create Metric', () => {
     });
 
     it('save button should be disabled if it has multiple aggregates and no metric definition', async () => {
+      mockedCheckMetricDefinitionAndAggregateCount.mockReturnValue(false);
       mockedIsValidAggregates.mockReturnValue(true);
       mockedValidateMetricFormula.mockReturnValue(true);
       mockedGetCountOfAggregates.mockReturnValue(2);
@@ -627,6 +746,93 @@ describe('Create Metric', () => {
         'metric-aggregation-event-property'
       );
       expect(metricAggEventProperties.textContent).toEqual('city');
+    });
+  });
+
+  describe('segment filter', () => {
+    it('should add a segment filter with includes option', async () => {
+      mockedGetSelectedSegmentsText.mockReturnValue(
+        'Includes Segment1, Segment2'
+      );
+
+      await renderMetricComponent();
+      await addNewEvent();
+
+      const segmentFilterText = screen.getByTestId('segment-filter-text');
+      fireEvent.click(segmentFilterText);
+
+      const segmentDrodpdownOptions = screen.getAllByTestId(
+        'saved-segment-options'
+      );
+
+      const segmentOptionsText = Array.from(segmentDrodpdownOptions).map(
+        (option) => option.textContent
+      );
+
+      expect(segmentOptionsText).toEqual(['Segment 1', 'Segment 2']);
+
+      const selectAllCheckBox = screen.getByTestId('select-all-checkbox');
+      fireEvent.click(selectAllCheckBox);
+
+      await act(async () => {
+        const addSelectedSegments = screen.getByTestId('select-segments');
+        fireEvent.click(addSelectedSegments);
+      });
+
+      const segmentFilterTextAfterSelectingSegments = screen.getByTestId(
+        'segment-filter-text'
+      );
+
+      expect(segmentFilterTextAfterSelectingSegments.textContent).toEqual(
+        'Includes Segment1, Segment2'
+      );
+    });
+
+    it('should add a segment filter with excludes option', async () => {
+      mockedGetSelectedSegmentsText.mockReturnValue(
+        'Excludes Segment1, Segment2'
+      );
+
+      await renderMetricComponent();
+      await addNewEvent();
+
+      const segmentFilterText = screen.getByTestId('segment-filter-text');
+      fireEvent.click(segmentFilterText);
+
+      const excludeUserOption = screen.getByText('Exclude Users');
+      fireEvent.click(excludeUserOption);
+
+      const selectAllCheckBox = screen.getByTestId('select-all-checkbox');
+      fireEvent.click(selectAllCheckBox);
+
+      await act(async () => {
+        const addSelectedSegments = screen.getByTestId('select-segments');
+        fireEvent.click(addSelectedSegments);
+      });
+
+      const segmentFilterTextAfterSelectingSegments = screen.getByTestId(
+        'segment-filter-text'
+      );
+
+      expect(segmentFilterTextAfterSelectingSegments.textContent).toEqual(
+        'Excludes Segment1, Segment2'
+      );
+    });
+
+    it('should add a new custom filter in segment group', async () => {
+      await renderMetricComponent();
+      await addNewEvent();
+
+      const addFilterButton = screen.getAllByTestId('add-filter-button');
+      fireEvent.click(addFilterButton[1]); // segment filter add filter button
+
+      const SELECT_OPTION = 1;
+
+      await addFilter(SELECT_OPTION);
+      const eventFilterValue = screen.getByTestId('event-filter-values');
+
+      // option 1 is ios
+      expect(eventFilterValue.textContent).toEqual('ios');
     });
   });
 });

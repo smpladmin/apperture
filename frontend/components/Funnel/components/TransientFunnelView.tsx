@@ -25,6 +25,7 @@ type TransientFunnelViewProps = {
   setDateFilter: Function;
   isDateFilterDisabled?: boolean;
   conversionWindow: ConversionWindowObj;
+  randomSequence: boolean;
 };
 
 const TransientFunnelView = ({
@@ -36,6 +37,7 @@ const TransientFunnelView = ({
   setDateFilter,
   isDateFilterDisabled = false,
   conversionWindow,
+  randomSequence,
 }: TransientFunnelViewProps) => {
   const {
     isOpen: isDrawerOpen,
@@ -184,6 +186,7 @@ const TransientFunnelView = ({
         selectedFunnelSteps={selectedFunnelSteps}
         dateFilter={dateFilter}
         conversionWindow={conversionWindow}
+        randomSequence={randomSequence}
       />
     </Flex>
   );

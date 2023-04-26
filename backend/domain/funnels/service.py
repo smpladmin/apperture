@@ -1,33 +1,34 @@
 import logging
+from datetime import datetime
 from typing import List, Union
+
+
+from mongo import Mongo
+from fastapi import Depends
+from beanie import PydanticObjectId
+from beanie.operators import In
+from fastapi import Depends
+
+from domain.common.date_models import DateFilter, DateFilterType
+from domain.common.date_utils import DateUtils
+from domain.funnels.models import (
+    ComputedFunnelStep,
+    ConversionStatus,
+    ConversionWindow,
+    ConversionWindowType,
+    Funnel,
+    FunnelConversionData,
+    FunnelEventUserData,
+    FunnelStep,
+    FunnelTrendsData,
+)
+from repositories.clickhouse.funnels import Funnels
 from domain.notifications.models import (
     Notification,
     NotificationData,
     NotificationThresholdType,
     NotificationVariant,
 )
-
-from domain.common.date_utils import DateUtils
-from mongo import Mongo
-from fastapi import Depends
-from datetime import datetime, timedelta
-from beanie import PydanticObjectId
-from beanie.operators import In
-
-from domain.common.date_models import DateFilter
-from domain.funnels.models import (
-    Funnel,
-    FunnelStep,
-    ComputedFunnelStep,
-    FunnelTrendsData,
-    FunnelConversionData,
-    ConversionStatus,
-    FunnelEventUserData,
-    ConversionWindow,
-    ConversionWindowType,
-)
-from repositories.clickhouse.funnels import Funnels
-from domain.common.date_models import DateFilterType
 
 
 class FunnelsService:
@@ -111,6 +112,7 @@ class FunnelsService:
         steps: List[FunnelStep],
         date_filter: Union[DateFilter, None],
         conversion_window: Union[ConversionWindow, None],
+        random_sequence: Union[bool, None],
     ) -> List[ComputedFunnelStep]:
 
         start_date, end_date = self.extract_date_range(date_filter=date_filter)
@@ -124,6 +126,7 @@ class FunnelsService:
             start_date=start_date,
             end_date=end_date,
             conversion_time=conversion_time,
+            random_sequence=random_sequence,
         )
         computed_funnel = [
             ComputedFunnelStep(
@@ -171,6 +174,7 @@ class FunnelsService:
         steps: List[FunnelStep],
         date_filter: Union[DateFilter, None],
         conversion_window: Union[ConversionWindow, None],
+        random_sequence: Union[bool, None],
     ) -> List[FunnelTrendsData]:
 
         conversion_time = self.compute_conversion_time(
@@ -184,6 +188,7 @@ class FunnelsService:
             start_date=start_date,
             end_date=end_date,
             conversion_time=conversion_time,
+            random_sequence=random_sequence,
         )
         return [
             FunnelTrendsData(
@@ -203,6 +208,7 @@ class FunnelsService:
         status: ConversionStatus,
         date_filter: Union[DateFilter, None],
         conversion_window: Union[ConversionWindow, None],
+        random_sequence: Union[bool, None],
     ):
         conversion_time = self.compute_conversion_time(
             conversion_window=conversion_window
@@ -216,6 +222,7 @@ class FunnelsService:
             start_date=start_date,
             end_date=end_date,
             conversion_time=conversion_time,
+            random_sequence=random_sequence,
         )
         user_list = [FunnelEventUserData(id=data[0]) for data in conversion_data]
         count_data = conversion_data[0][1] if conversion_data else [0, 0]
@@ -267,6 +274,7 @@ class FunnelsService:
             conversion_time=conversion_time,
             start_date=date,
             end_date=date,
+            random_sequence=funnel.random_sequence,
         )
 
         first_step_users, *_, last_step_users = data[0]

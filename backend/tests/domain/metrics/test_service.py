@@ -29,6 +29,7 @@ from domain.metrics.models import (
     MetricBreakdown,
     MetricBasicAggregation,
     SegmentFilter,
+    SelectedSegments,
 )
 from domain.metrics.service import MetricService
 from domain.segments.models import (
@@ -47,7 +48,10 @@ class TestMetricService:
         self.segment = MagicMock()
         self.date_utils = MagicMock()
         self.service = MetricService(
-            mongo=self.mongo, metric=self.metric, segment=self.segment, date_utils=self.date_utils
+            mongo=self.mongo,
+            metric=self.metric,
+            segment=self.segment,
+            date_utils=self.date_utils,
         )
         self.ds_id = "636a1c61d715ca6baae65611"
         self.date_filter = DateFilter(
@@ -91,23 +95,36 @@ class TestMetricService:
                 ],
                 breakdown=[],
                 date_filter=DateFilter(filter=None, type=None),
-                segment_filter=SegmentFilter(
-                    includes=True,
-                    groups=[
-                        SegmentGroup(
-                            filters=[
-                                WhereSegmentFilter(
-                                    operand="test",
-                                    operator=FilterOperatorsNumber.EQ,
-                                    values=["1"],
-                                    condition=SegmentFilterConditions.WHERE,
-                                    datatype=FilterDataType.NUMBER,
-                                )
-                            ],
+                segment_filter=[
+                    SegmentFilter(
+                        condition="and",
+                        includes=True,
+                        custom=SegmentGroup(
+                            filters=[],
                             condition=LogicalOperators.AND,
-                        )
-                    ],
-                ),
+                        ),
+                        segments=[
+                            SelectedSegments(
+                                id="48392000212",
+                                name="Segment1",
+                                groups=[
+                                    SegmentGroup(
+                                        filters=[
+                                            WhereSegmentFilter(
+                                                operand="test",
+                                                operator=FilterOperatorsNumber.EQ,
+                                                values=["1"],
+                                                condition=SegmentFilterConditions.WHERE,
+                                                datatype=FilterDataType.NUMBER,
+                                            )
+                                        ],
+                                        condition=LogicalOperators.AND,
+                                    )
+                                ],
+                            )
+                        ],
+                    )
+                ],
                 enabled=True,
             )
         )
@@ -391,23 +408,36 @@ class TestMetricService:
                 .__str__()
             )
         )
-        segment_filter = SegmentFilter(
-            includes=True,
-            groups=[
-                SegmentGroup(
-                    filters=[
-                        WhereSegmentFilter(
-                            operand="test",
-                            operator=FilterOperatorsNumber.EQ,
-                            values=["1"],
-                            condition=SegmentFilterConditions.WHERE,
-                            datatype=FilterDataType.NUMBER,
-                        )
-                    ],
+        segment_filter = [
+            SegmentFilter(
+                condition="and",
+                includes=True,
+                custom=SegmentGroup(
+                    filters=[],
                     condition=LogicalOperators.AND,
-                )
-            ],
-        )
+                ),
+                segments=[
+                    SelectedSegments(
+                        id="48392000212",
+                        name="Segment1",
+                        groups=[
+                            SegmentGroup(
+                                filters=[
+                                    WhereSegmentFilter(
+                                        operand="test",
+                                        operator=FilterOperatorsNumber.EQ,
+                                        values=["1"],
+                                        condition=SegmentFilterConditions.WHERE,
+                                        datatype=FilterDataType.NUMBER,
+                                    )
+                                ],
+                                condition=LogicalOperators.AND,
+                            )
+                        ],
+                    )
+                ],
+            )
+        ]
 
         assert await self.service.compute_metric(
             datasource_id=self.ds_id,
@@ -433,25 +463,36 @@ class TestMetricService:
         ]
         self.segment.build_segment_filter_on_metric_criterion.assert_called_once_with(
             **{
-                "segment_filter": SegmentFilter(
-                    includes=True,
-                    groups=[
-                        SegmentGroup(
-                            filters=[
-                                WhereSegmentFilter(
-                                    operand="test",
-                                    operator=FilterOperatorsNumber.EQ,
-                                    values=["1"],
-                                    all=False,
-                                    condition=SegmentFilterConditions.WHERE,
-                                    datatype=FilterDataType.NUMBER,
-                                    type=SegmentFilterConditions.WHERE,
-                                )
-                            ],
+                "segment_filter": [
+                    SegmentFilter(
+                        condition="and",
+                        includes=True,
+                        custom=SegmentGroup(
+                            filters=[],
                             condition=LogicalOperators.AND,
-                        )
-                    ],
-                )
+                        ),
+                        segments=[
+                            SelectedSegments(
+                                id="48392000212",
+                                name="Segment1",
+                                groups=[
+                                    SegmentGroup(
+                                        filters=[
+                                            WhereSegmentFilter(
+                                                operand="test",
+                                                operator=FilterOperatorsNumber.EQ,
+                                                values=["1"],
+                                                condition=SegmentFilterConditions.WHERE,
+                                                datatype=FilterDataType.NUMBER,
+                                            )
+                                        ],
+                                        condition=LogicalOperators.AND,
+                                    )
+                                ],
+                            )
+                        ],
+                    )
+                ]
             }
         )
         self.metric.compute_query.assert_called_once_with(

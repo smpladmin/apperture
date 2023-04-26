@@ -4,8 +4,8 @@ from unittest.mock import ANY
 import pytest
 from beanie import PydanticObjectId
 
-from tests.utils import filter_response
 from domain.funnels.models import FunnelStep
+from tests.utils import filter_response
 
 
 def test_create_funnel(client_init, funnel_data, funnel_response):
@@ -161,6 +161,7 @@ def test_get_transient_funnel_trends(
             ],
             "date_filter": None,
             "conversion_window": None,
+            "random_sequence": False,
         }
     )
 

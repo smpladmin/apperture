@@ -118,7 +118,11 @@ const CreateFunnelAction = ({
           <Plus size={14} color={BLACK_DEFAULT} weight={'bold'} />
         </Button>
       </Flex>
-      <EventFields funnelSteps={funnelSteps} setFunnelSteps={setFunnelSteps} />
+      <EventFields
+        funnelSteps={funnelSteps}
+        setFunnelSteps={setFunnelSteps}
+        randomSequence={randomSequence}
+      />
       <ConversionCriteria
         conversionWindow={conversionWindow}
         setConversionWindow={setConversionWindow}
