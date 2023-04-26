@@ -22,11 +22,14 @@ import { DateFilterObj, DateFilterType } from '@lib/domain/common';
 import {
   getTransientRetentionData,
   getTransientTrendsData,
+  saveRetention,
+  updateRetention,
 } from '@lib/services/retentionService';
 import RetentionTrend from '../components/RetentionTrend';
 import IntervalTab from '../components/IntervalTab';
 import { hasValidEvents } from '../utils';
 import LoadingSpinner from '@components/LoadingSpinner';
+import TransientRetentionView from '../components/TransientRetentionView';
 
 const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   const router = useRouter();
@@ -42,8 +45,8 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   const [retentionEvents, setRetentionEvents] = useState<RetentionEvents>(
     savedRetention?.startEvent && savedRetention?.goalEvent
       ? {
-          startEvent: { event: savedRetention.startEvent.event, filters: [] },
-          goalEvent: { event: savedRetention.goalEvent.event, filters: [] },
+          startEvent: savedRetention.startEvent,
+          goalEvent: savedRetention.goalEvent,
         }
       : {
           startEvent: { event: '', filters: [] },
@@ -75,6 +78,16 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   const [isEmpty, setIsEmpty] = useState(savedRetention ? false : true);
   const [trigger, setTrigger] = useState(false);
   const pageSize = 10;
+  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
+  const [isRetentionBeingEdited, setRetentionBeingEdited] = useState(false);
+
+  useEffect(() => {
+    if (hasValidEvents(retentionEvents)) {
+      setSaveButtonDisabled(false);
+    } else {
+      setSaveButtonDisabled(true);
+    }
+  }, [retentionEvents]);
 
   useEffect(() => {
     if (hasValidEvents(retentionEvents)) {
@@ -114,6 +127,10 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   }, [interval, trigger]);
 
   useEffect(() => {
+    if (router.pathname.includes('edit')) setRetentionBeingEdited(true);
+  }, []);
+
+  useEffect(() => {
     if (!hasValidEvents(retentionEvents)) {
       return;
     }
@@ -136,6 +153,38 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
     getTransientData();
   }, [pageNumber, trigger]);
 
+  const handleSaveOrUpdateRetention = async () => {
+    const { data, status } = isRetentionBeingEdited
+      ? await updateRetention(
+          retentionId as string,
+          dsId as string,
+          retentionName,
+          retentionEvents.startEvent,
+          retentionEvents.goalEvent,
+          dateFilter,
+          granularity
+        )
+      : await saveRetention(
+          dsId as string,
+          retentionName,
+          retentionEvents.startEvent,
+          retentionEvents.goalEvent,
+          dateFilter,
+          granularity
+        );
+
+    setSaveButtonDisabled(true);
+
+    if (status === 200) {
+      router.push({
+        pathname: '/analytics/retention/view/[retentionId]',
+        query: { retentionId: data?._id || retentionId, dsId },
+      });
+    } else {
+      setSaveButtonDisabled(false);
+    }
+  };
+
   return (
     <Flex
       px={'5'}
@@ -148,8 +197,8 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
         handleGoBack={() => router.back()}
         name={retentionName}
         setName={setRetentionName}
-        handleSave={() => {}}
-        isSaveButtonDisabled={true}
+        handleSave={handleSaveOrUpdateRetention}
+        isSaveButtonDisabled={isSaveButtonDisabled}
       />
       <Flex
         direction={{ base: 'column', md: 'row' }}
@@ -168,117 +217,21 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
           </Card>
         </ActionPanel>
         <ViewPanel>
-          <Flex direction={'column'} gap={'5'}>
-            <Flex justifyContent={'space-between'}>
-              <DateFilterComponent
-                dateFilter={dateFilter}
-                setDateFilter={setDateFilter}
-                isDisabled={false}
-              />
-              <ButtonGroup
-                size="sm"
-                isAttached
-                variant="outline"
-                isDisabled={false}
-                borderRadius={'8'}
-              >
-                <Button
-                  borderWidth={'1px'}
-                  borderStyle={'solid'}
-                  borderColor={'grey.400'}
-                  id="yesterday"
-                  background={'white.DEFAULT'}
-                  color={'black.DEFAULT'}
-                  fontWeight={500}
-                  _hover={{
-                    background: 'white.500',
-                  }}
-                  height={8}
-                  fontSize={'xs-12'}
-                  onClick={() => {
-                    setTrendScale(TrendScale.ABSOLUTE);
-                  }}
-                >
-                  <Hash
-                    size={16}
-                    color={
-                      trendScale == TrendScale.ABSOLUTE
-                        ? BLACK_DEFAULT
-                        : GREY_500
-                    }
-                  />
-                </Button>
-                <Button
-                  borderWidth={'1px'}
-                  borderStyle={'solid'}
-                  borderColor={'grey.400'}
-                  id="yesterday"
-                  background={'white.DEFAULT'}
-                  color={'black.DEFAULT'}
-                  fontWeight={500}
-                  _hover={{
-                    background: 'white.500',
-                  }}
-                  height={8}
-                  fontSize={'xs-12'}
-                  onClick={() => {
-                    setTrendScale(TrendScale.PERCENTAGE);
-                  }}
-                >
-                  <Percent
-                    size={16}
-                    color={
-                      trendScale == TrendScale.PERCENTAGE
-                        ? BLACK_DEFAULT
-                        : GREY_500
-                    }
-                  />
-                </Button>
-              </ButtonGroup>
-            </Flex>
-            {isEmpty ? (
-              <Card minHeight={'120'} borderRadius={'16'}>
-                <RetentionEmptyState />
-              </Card>
-            ) : (
-              <Card p={'0'} borderRadius={'12'} overflow={'hidden'}>
-                <Flex w={'full'} direction={'column'}>
-                  {isIntervalDataLoading ? (
-                    <Flex
-                      h={'16'}
-                      w={'full'}
-                      alignItems={'center'}
-                      justifyContent={'center'}
-                      borderBottom={'1px'}
-                      borderColor={'grey.400'}
-                    >
-                      <LoadingSpinner />
-                    </Flex>
-                  ) : (
-                    <IntervalTab
-                      interval={interval}
-                      setInterval={setInterval}
-                      retentionData={retentionData}
-                      setPageNumber={setPageNumber}
-                      pageSize={pageSize}
-                    />
-                  )}
-                  {isTrendsDataLoading ? (
-                    <Flex
-                      h={'110'}
-                      w={'full'}
-                      alignItems={'center'}
-                      justifyContent={'center'}
-                    >
-                      <LoadingSpinner />
-                    </Flex>
-                  ) : (
-                    <RetentionTrend data={trendsData} trendScale={trendScale} />
-                  )}
-                </Flex>
-              </Card>
-            )}
-          </Flex>
+          <TransientRetentionView
+            isEmpty={isEmpty}
+            dateFilter={dateFilter}
+            setDateFilter={setDateFilter}
+            trendScale={trendScale}
+            setTrendScale={setTrendScale}
+            isIntervalDataLoading={isIntervalDataLoading}
+            isTrendsDataLoading={isTrendsDataLoading}
+            interval={interval}
+            setInterval={setInterval}
+            retentionData={retentionData}
+            setPageNumber={setPageNumber}
+            pageSize={pageSize}
+            trendsData={trendsData}
+          />
         </ViewPanel>
       </Flex>
     </Flex>

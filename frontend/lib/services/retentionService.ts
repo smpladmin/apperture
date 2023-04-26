@@ -4,6 +4,7 @@ import {
   AppertureGet,
   ApperturePost,
   ApperturePrivateGet,
+  ApperturePut,
 } from './util';
 import { DateFilterObj } from '@lib/domain/common';
 import { FunnelStep } from '@lib/domain/funnel';
@@ -66,4 +67,50 @@ export const _getSavedRetention = async (
 ) => {
   const res = await ApperturePrivateGet(`/retention/${retentionId}`, token);
   return res.data;
+};
+
+export const saveRetention = async (
+  dsId: string,
+  retentionName: string,
+  startEvent: FunnelStep,
+  goalEvent: FunnelStep,
+  dateFilter: DateFilterObj,
+  granularity: Granularity
+) => {
+  const retentionRequestBody = {
+    datasourceId: dsId,
+    name: retentionName,
+    startEvent,
+    goalEvent,
+    dateFilter,
+    granularity,
+  };
+
+  const res = await ApperturePost('/retention', retentionRequestBody);
+  return res;
+};
+
+export const updateRetention = async (
+  retentionId: string,
+  dsId: string,
+  retentionName: string,
+  startEvent: FunnelStep,
+  goalEvent: FunnelStep,
+  dateFilter: DateFilterObj,
+  granularity: Granularity
+) => {
+  const retentionRequestBody = {
+    datasourceId: dsId,
+    name: retentionName,
+    startEvent,
+    goalEvent,
+    dateFilter,
+    granularity,
+  };
+
+  const res = await ApperturePut(
+    `/retention/${retentionId}`,
+    retentionRequestBody
+  );
+  return res;
 };

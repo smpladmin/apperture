@@ -1,17 +1,8 @@
-import { Button, ButtonGroup, Flex } from '@chakra-ui/react';
-import Card from '@components/Card';
-import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
-import Header from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import DateFilterComponent from '@components/Date/DateFilter';
-import RetentionEmptyState from '../components/RetentionEmptyState';
-import { Hash, Percent } from 'phosphor-react';
-import { BLACK_DEFAULT, GREY_500 } from '@theme/index';
 import {
   Granularity,
-  RetentionEvents,
   RetentionTrendsData,
   RetentionData,
   TrendScale,
@@ -22,15 +13,11 @@ import {
   getTransientRetentionData,
   getTransientTrendsData,
 } from '@lib/services/retentionService';
-import RetentionTrend from '../components/RetentionTrend';
-import IntervalTab from '../components/IntervalTab';
-import { hasValidEvents } from '../utils';
-import LoadingSpinner from '@components/LoadingSpinner';
 import ViewHeader from '@components/EventsLayout/ViewHeader';
-import { CreateRetentionAction } from '../CreateRetention/CreateRetentionAction';
 import LeftView from './LeftView';
-import RightView from './RightView';
 import { FunnelStep } from '@lib/domain/funnel';
+import TransientRetentionView from '../components/TransientRetentionView';
+import { Flex } from '@chakra-ui/react';
 
 const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
   const router = useRouter();
@@ -109,7 +96,7 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
 
   const handleEditRetention = () => {
     router.push({
-      pathname: '/analytics/funnel/edit/[funnelId]',
+      pathname: '/analytics/retention/edit/[retentionId]',
       query: { retentionId, dsId: datasourceId },
     });
   };
@@ -142,14 +129,24 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
         bg={'white.400'}
       >
         <LeftView retentionEvents={retentionEvents} granularity={granularity} />
-        {/* <RightView
-          funnelSteps={savedFunnel.steps}
-          computedFunnel={computedFunnelData}
-          computedTrendsData={computedTrendsData}
-          isLoading={isLoading}
-          dateFilter={dateFilter}
-          conversionWindow={conversionWindow}
-        /> */}
+        <ViewPanel>
+          <TransientRetentionView
+            isEmpty={isEmpty}
+            dateFilter={dateFilter}
+            setDateFilter={setDateFilter}
+            isDateFilterDisabled={true}
+            trendScale={trendScale}
+            setTrendScale={setTrendScale}
+            isIntervalDataLoading={isIntervalDataLoading}
+            isTrendsDataLoading={isTrendsDataLoading}
+            interval={interval}
+            setInterval={setInterval}
+            retentionData={retentionData}
+            setPageNumber={setPageNumber}
+            pageSize={pageSize}
+            trendsData={trendsData}
+          />
+        </ViewPanel>
       </Flex>
     </Flex>
   );
