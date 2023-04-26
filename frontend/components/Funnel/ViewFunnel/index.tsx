@@ -165,6 +165,7 @@ const ViewFunnel = ({
           isLoading={isLoading}
           dateFilter={dateFilter}
           conversionWindow={conversionWindow}
+          randomSequence={randomSequence}
         />
         <Alert
           name={savedFunnel.name}

@@ -1545,6 +1545,7 @@ def funnel_conversion_request():
                 "filters": None,
             },
         ],
+        "randomSequence": False,
     }
 
 

@@ -16,6 +16,7 @@ const RightView = ({
   isLoading,
   dateFilter,
   conversionWindow,
+  randomSequence,
 }: {
   funnelSteps: FunnelStep[];
   computedFunnel: FunnelData[];
@@ -23,6 +24,7 @@ const RightView = ({
   isLoading: boolean;
   dateFilter: DateFilterObj;
   conversionWindow: ConversionWindowObj;
+  randomSequence: boolean;
 }) => {
   return (
     <ViewPanel>
@@ -35,6 +37,7 @@ const RightView = ({
         setDateFilter={() => {}}
         isDateFilterDisabled={true}
         conversionWindow={conversionWindow}
+        randomSequence={randomSequence}
       />
     </ViewPanel>
   );

@@ -1,32 +1,32 @@
-import pytest
-from datetime import datetime
-from unittest.mock import ANY
 from collections import namedtuple
+from datetime import datetime
+from unittest.mock import ANY, AsyncMock, MagicMock
+
+import pytest
 from beanie import PydanticObjectId
-from unittest.mock import MagicMock, AsyncMock
 
 from domain.common.date_models import (
     DateFilter,
-    LastDateFilter,
     DateFilterType,
     FixedDateFilter,
+    LastDateFilter,
 )
-from tests.utils import filter_response
-from domain.datasources.models import DataSource
-from domain.funnels.service import FunnelsService
 from domain.common.models import IntegrationProvider
+from domain.datasources.models import DataSource
 from domain.funnels.models import (
-    FunnelStep,
-    Funnel,
-    ComputedFunnelStep,
     ComputedFunnel,
-    FunnelTrendsData,
-    FunnelConversionData,
-    FunnelEventUserData,
+    ComputedFunnelStep,
     ConversionStatus,
     ConversionWindow,
     ConversionWindowType,
+    Funnel,
+    FunnelConversionData,
+    FunnelEventUserData,
+    FunnelStep,
+    FunnelTrendsData,
 )
+from domain.funnels.service import FunnelsService
+from tests.utils import filter_response
 
 
 class TestFunnelService:
@@ -175,6 +175,7 @@ class TestFunnelService:
             conversion_window=ConversionWindow(
                 type=ConversionWindowType.MINUTES, value=10
             ),
+            random_sequence=False,
         )
 
     @pytest.mark.asyncio
@@ -220,6 +221,7 @@ class TestFunnelService:
                 conversion_window=ConversionWindow(
                     type=ConversionWindowType.MINUTES, value=10
                 ),
+                random_sequence=False,
             )
             == self.funnel_trends_data
         )
@@ -237,6 +239,7 @@ class TestFunnelService:
                 "end_date": "2022-12-31",
                 "start_date": "2022-12-01",
                 "conversion_time": 600,
+                "random_sequence": False,
             }
         )
 
@@ -258,6 +261,7 @@ class TestFunnelService:
                 conversion_window=ConversionWindow(
                     type=ConversionWindowType.MINUTES, value=10
                 ),
+                random_sequence=False,
             )
             == self.funnel_conversion_data
         )
