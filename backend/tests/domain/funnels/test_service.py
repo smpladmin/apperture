@@ -426,5 +426,6 @@ class TestFunnelService:
                     FunnelStep(event="Login", filters=None),
                     FunnelStep(event="Chapter Click", filters=None),
                 ],
+                "random_sequence": False,
             }
         )
