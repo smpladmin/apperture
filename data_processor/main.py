@@ -5,7 +5,6 @@ import requests
 
 from apperture.backend_action import post
 from domain.datasource.service import DataSourceService
-from domain.notification.models import NotificationFrequency, NotificationType
 from strategies.strategy_builder import (
     EventsStrategyBuilder,
     NotificationStrategyBuilder,
@@ -84,13 +83,10 @@ def trigger_data_processing_for_datasource(ds_id: str):
     )
 
 
-def trigger_notifications_processing(
-    notification_type: NotificationType, frequency: NotificationFrequency
-):
+def trigger_notifications_processing():
     logging.info("{x}: {y}".format(x="Triggering notifications processing", y=""))
     response = post(
         "/private/notifications",
-        {"notification_type": notification_type, "frequency": frequency},
     )
     logging.info(
         "{x}: {y}".format(x="Triggered data processing, status", y=response.status_code)

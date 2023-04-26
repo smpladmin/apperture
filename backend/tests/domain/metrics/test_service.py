@@ -1,10 +1,17 @@
 from datetime import datetime
+from unittest import mock
 from unittest.mock import MagicMock, AsyncMock, ANY
+from beanie import PydanticObjectId
 import asyncio
 
 import pytest
 from pypika import ClickHouseQuery, Table
-
+from domain.notifications.models import (
+    Notification,
+    ThresholdMap,
+    NotificationData,
+    NotificationVariant,
+)
 from domain.common.date_models import LastDateFilter, DateFilter, DateFilterType
 from domain.common.filter_models import (
     FilterOperatorsNumber,
@@ -35,12 +42,16 @@ from domain.segments.models import (
 class TestMetricService:
     def setup_method(self):
         Metric.get_settings = MagicMock()
+        Notification.get_settings = MagicMock()
         self.mongo = MagicMock()
         self.metric = MagicMock()
         self.segment = MagicMock()
         self.date_utils = MagicMock()
         self.service = MetricService(
-            mongo=self.mongo, metric=self.metric, segment=self.segment, date_utils=self.date_utils
+            mongo=self.mongo,
+            metric=self.metric,
+            segment=self.segment,
+            date_utils=self.date_utils,
         )
         self.ds_id = "636a1c61d715ca6baae65611"
         self.date_filter = DateFilter(
@@ -49,10 +60,77 @@ class TestMetricService:
         self.id = "6384a65e0a397236d9de236a"
         Metric.id = MagicMock(return_value=self.id)
         Metric.enabled = True
-        metric_future = asyncio.Future()
-        metric_future.update = AsyncMock()
-        self.update_mock = metric_future.update
-        Metric.find_one = MagicMock(return_value=metric_future)
+        self.metric_future = asyncio.Future()
+        self.metric_future.set_result(
+            Metric(
+                id=PydanticObjectId("63dcfe6a21a93919c672d5bb"),
+                revision_id=None,
+                created_at=datetime(2023, 2, 3, 12, 30, 34, 757000),
+                updated_at=datetime(2023, 4, 3, 12, 56, 1, 71000),
+                datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
+                app_id=PydanticObjectId("63ca46feee94e38b81cda37a"),
+                user_id=PydanticObjectId("6374b74e9b36ecf7e0b4f9e4"),
+                name="Alert Metric -Updated",
+                function="A*2",
+                aggregates=[
+                    SegmentsAndEvents(
+                        variable="A",
+                        variant=SegmentsAndEventsType.EVENT,
+                        aggregations=SegmentsAndEventsAggregations(
+                            functions=MetricBasicAggregation.COUNT,
+                            property="Video_Open",
+                        ),
+                        reference_id="Video_Open",
+                        filters=[],
+                    ),
+                    SegmentsAndEvents(
+                        variable="B",
+                        variant=SegmentsAndEventsType.EVENT,
+                        aggregations=SegmentsAndEventsAggregations(
+                            functions=MetricBasicAggregation.COUNT, property=""
+                        ),
+                        reference_id="WebView_Open",
+                        filters=[],
+                    ),
+                ],
+                breakdown=[],
+                date_filter=DateFilter(filter=None, type=None),
+                segment_filter=[
+                    SegmentFilter(
+                        condition="and",
+                        includes=True,
+                        custom=SegmentGroup(
+                            filters=[],
+                            condition=LogicalOperators.AND,
+                        ),
+                        segments=[
+                            SelectedSegments(
+                                id="48392000212",
+                                name="Segment1",
+                                groups=[
+                                    SegmentGroup(
+                                        filters=[
+                                            WhereSegmentFilter(
+                                                operand="test",
+                                                operator=FilterOperatorsNumber.EQ,
+                                                values=["1"],
+                                                condition=SegmentFilterConditions.WHERE,
+                                                datatype=FilterDataType.NUMBER,
+                                            )
+                                        ],
+                                        condition=LogicalOperators.AND,
+                                    )
+                                ],
+                            )
+                        ],
+                    )
+                ],
+                enabled=True,
+            )
+        )
+        self.metric_future.update = AsyncMock()
+        self.update_mock = self.metric_future.update
+        Metric.find_one = MagicMock(return_value=self.metric_future)
 
         self.date_utils.compute_date_filter.return_value = ("2023-01-22", "2023-01-24")
         self.aggregates = [
@@ -78,6 +156,35 @@ class TestMetricService:
                 filters=[],
                 conditions=[],
             ),
+        ]
+        self.metric_notifications = [
+            Notification(
+                id=PydanticObjectId("6437a278a2fdd9488bef5253"),
+                revision_id=None,
+                created_at=datetime(2023, 4, 13, 6, 34, 32, 876000),
+                updated_at=datetime(2023, 4, 13, 8, 16, 16, 593000),
+                datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
+                user_id=PydanticObjectId("6374b74e9b36ecf7e0b4f9e4"),
+                app_id=PydanticObjectId("63ca46feee94e38b81cda37a"),
+                name="Alert Metric -Updated",
+                notification_type={"alert", "update"},
+                metric="hits",
+                multi_node=False,
+                apperture_managed=False,
+                pct_threshold_active=False,
+                pct_threshold_values=None,
+                absolute_threshold_active=True,
+                absolute_threshold_values=ThresholdMap(min=1212.0, max=3236.0),
+                formula="a",
+                variable_map={"a": ["Alert Metric -Updated"]},
+                preferred_hour_gmt=5,
+                frequency="daily",
+                preferred_channels=["slack"],
+                notification_active=True,
+                variant="metric",
+                reference="63dcfe6a21a93919c672d5bb",
+                enabled=True,
+            )
         ]
 
     @pytest.mark.parametrize(
@@ -426,3 +533,103 @@ class TestMetricService:
         await self.service.delete_metric(metric_id="6384a65e0a397236d9de236a")
         Metric.find_one.assert_called_once()
         self.update_mock.assert_called_once_with({"$set": {"enabled": False}})
+
+    @pytest.mark.asyncio
+    async def test_get_metric_data_for_notification(self):
+        notification_data_future = asyncio.Future()
+        notification_data_future.set_result(0.2)
+        self.service.get_notification_data = MagicMock(
+            return_value=notification_data_future
+        )
+        assert await self.service.get_metric_data_for_notifications(
+            notifications=self.metric_notifications
+        ) == [
+            NotificationData(
+                name="Alert Metric -Updated",
+                notification_id=PydanticObjectId("6437a278a2fdd9488bef5253"),
+                variant=NotificationVariant.METRIC,
+                value=0.2,
+                prev_day_value=0.2,
+                threshold_type="absolute",
+                threshold_value=ThresholdMap(min=1212.0, max=3236.0),
+            )
+        ]
+        self.service.get_notification_data.assert_called_with(
+            days_ago=2,
+            notification=Notification(
+                id=PydanticObjectId("6437a278a2fdd9488bef5253"),
+                revision_id=None,
+                created_at=datetime(2023, 4, 13, 6, 34, 32, 876000),
+                updated_at=datetime(2023, 4, 13, 8, 16, 16, 593000),
+                datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
+                user_id=PydanticObjectId("6374b74e9b36ecf7e0b4f9e4"),
+                app_id=PydanticObjectId("63ca46feee94e38b81cda37a"),
+                name="Alert Metric -Updated",
+                notification_type={"alert", "update"},
+                metric="hits",
+                multi_node=False,
+                apperture_managed=False,
+                pct_threshold_active=False,
+                pct_threshold_values=None,
+                absolute_threshold_active=True,
+                absolute_threshold_values=ThresholdMap(min=1212.0, max=3236.0),
+                formula="a",
+                variable_map={"a": ["Alert Metric -Updated"]},
+                preferred_hour_gmt=5,
+                frequency="daily",
+                preferred_channels=["slack"],
+                notification_active=True,
+                variant="metric",
+                reference="63dcfe6a21a93919c672d5bb",
+                enabled=True,
+            ),
+        ),
+
+    @pytest.mark.asyncio
+    async def test_get_notification_data(self):
+        self.service.get_metric_by_id = MagicMock(return_value=self.metric_future)
+        self.segment.build_segment_filter_on_metric_criterion = MagicMock(
+            return_value='"user_id" IN (SELECT * FROM "test")'
+        )
+
+        self.metric.compute_query = MagicMock(
+            return_value=[(datetime(2023, 4, 13, 6, 34, 32, 876000), 1500.0)]
+        )
+        assert (
+            await self.service.get_notification_data(
+                notification=self.metric_notifications[0], days_ago=2
+            )
+            == 1500.0
+        )
+
+        self.metric.compute_query.assert_called_with(
+            **{
+                "aggregates": [
+                    SegmentsAndEvents(
+                        variable="A",
+                        variant=SegmentsAndEventsType.EVENT,
+                        aggregations=SegmentsAndEventsAggregations(
+                            functions=MetricBasicAggregation.COUNT,
+                            property="Video_Open",
+                        ),
+                        reference_id="Video_Open",
+                        filters=[],
+                    ),
+                    SegmentsAndEvents(
+                        variable="B",
+                        variant=SegmentsAndEventsType.EVENT,
+                        aggregations=SegmentsAndEventsAggregations(
+                            functions=MetricBasicAggregation.COUNT, property=""
+                        ),
+                        reference_id="WebView_Open",
+                        filters=[],
+                    ),
+                ],
+                "breakdown": [],
+                "datasource_id": "63d0a7bfc636cee15d81f579",
+                "end_date": ANY,
+                "function": "A*2",
+                "segment_filter_criterion": '"user_id" IN (SELECT * FROM "test")',
+                "start_date": ANY,
+            }
+        )
