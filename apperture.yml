@@ -74,6 +74,18 @@ services:
         limits:
           cpus: '1.0'
           memory: 2048M
+  chrome:
+    image: browserless/chrome
+    networks:
+     - net
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+        limits:
+          cpus: '0.5'
+          memory: 256M
   clickhouse:
     image: clickhouse/clickhouse-server:latest
     ports:

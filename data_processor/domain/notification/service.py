@@ -41,7 +41,7 @@ class NotificationService:
     def fetch_screenshot_url(self, id: str, variant: str):
         file, filename = self.fetcher.fetch_screenshot(id=id, entityType=variant)
         if filename is not None:
-            return self.saver(filename=filename, file=file)
+            return self.saver.save_screenshot_to_s3(filename=filename, file=file)
         return None
 
     def fetch_notifications(self, user_id: str):
@@ -124,7 +124,7 @@ class NotificationService:
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": "Here is an update :zap:",
+                    "text": "Here is an alert :zap:",
                     "emoji": True,
                 },
             }
