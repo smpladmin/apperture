@@ -8,19 +8,14 @@ import { Clock } from 'phosphor-react';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 import { GREY_600 } from '@theme/index';
+import { Granularity, RetentionEvents } from '@lib/domain/retention';
 
 type LeftViewProps = {
-  steps: FunnelStep[];
-  conversionWindow: ConversionWindowObj;
-  randomSequence: boolean;
+  retentionEvents: RetentionEvents;
+  granularity: Granularity;
 };
 
-const LeftView = ({
-  steps,
-  conversionWindow,
-  randomSequence,
-}: LeftViewProps) => {
-  const sequenceText = randomSequence ? 'Any order' : 'In sequence';
+const LeftView = ({ retentionEvents, granularity }: LeftViewProps) => {
   return (
     <ActionPanel>
       <Card>
@@ -32,7 +27,7 @@ const LeftView = ({
               lineHeight={{ base: 'xs-10', md: 'xs-12' }}
               fontWeight={'400'}
             >
-              {`Steps (${sequenceText})`}
+              {/* {`Steps (${sequenceText})`} */}
             </Text>
             <Box>{/* <ViewFunnelSteps steps={steps} /> */}</Box>
           </Flex>
@@ -49,7 +44,7 @@ const LeftView = ({
             <Card borderColor={'white.200'}>
               <Flex dir={'column'} alignItems={'center'} gap={2}>
                 <Clock size={20} color={GREY_600} />
-                <Text
+                {/* <Text
                   fontSize={'xs-14'}
                   lineHeight={'xs-14'}
                   fontWeight={'medium'}
@@ -57,7 +52,7 @@ const LeftView = ({
                   data-testid={'conversion-criteria'}
                 >{`${conversionWindow.value} ${capitalizeFirstLetter(
                   conversionWindow.type
-                )}`}</Text>
+                )}`}</Text> */}
               </Flex>
             </Card>
           </Flex>

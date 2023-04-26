@@ -16,6 +16,7 @@ import {
   RetentionTrendsData,
   RetentionData,
   TrendScale,
+  Retention,
 } from '@lib/domain/retention';
 import { DateFilterObj, DateFilterType } from '@lib/domain/common';
 import {
@@ -27,27 +28,37 @@ import IntervalTab from '../components/IntervalTab';
 import { hasValidEvents } from '../utils';
 import LoadingSpinner from '@components/LoadingSpinner';
 
-const Retention = () => {
+const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   const router = useRouter();
   const {
     query: { dsId, retentionId },
   } = router;
 
-  const datasourceId = dsId as string;
-  const [retentionName, setRetentionName] =
-    useState<string>('Untitled Retention');
+  const datasourceId = (dsId as string) || savedRetention?.datasourceId;
+  const [retentionName, setRetentionName] = useState<string>(
+    savedRetention?.name || 'Untitled Retention'
+  );
 
-  const [retentionEvents, setRetentionEvents] = useState<RetentionEvents>({
-    startEvent: { event: '', filters: [] },
-    goalEvent: { event: '', filters: [] },
-  });
+  const [retentionEvents, setRetentionEvents] = useState<RetentionEvents>(
+    savedRetention?.startEvent && savedRetention?.goalEvent
+      ? {
+          startEvent: { event: savedRetention.startEvent.event, filters: [] },
+          goalEvent: { event: savedRetention.goalEvent.event, filters: [] },
+        }
+      : {
+          startEvent: { event: '', filters: [] },
+          goalEvent: { event: '', filters: [] },
+        }
+  );
 
   const [dateFilter, setDateFilter] = useState<DateFilterObj>({
-    filter: { days: 90 },
-    type: DateFilterType.LAST,
+    filter: savedRetention?.dateFilter?.filter || { days: 90 },
+    type: savedRetention?.dateFilter?.type || DateFilterType.LAST,
   });
 
-  const [granularity, setGranularity] = useState<Granularity>(Granularity.DAYS);
+  const [granularity, setGranularity] = useState<Granularity>(
+    savedRetention?.granularity || Granularity.DAYS
+  );
 
   const [trendScale, setTrendScale] = useState<TrendScale>(
     TrendScale.PERCENTAGE
@@ -61,7 +72,7 @@ const Retention = () => {
   });
   const [pageNumber, setPageNumber] = useState(0);
   const [interval, setInterval] = useState(0);
-  const [isEmpty, setIsEmpty] = useState(true);
+  const [isEmpty, setIsEmpty] = useState(savedRetention ? false : true);
   const [trigger, setTrigger] = useState(false);
   const pageSize = 10;
 

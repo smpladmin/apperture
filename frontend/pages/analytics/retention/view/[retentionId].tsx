@@ -1,10 +1,9 @@
-import ViewFunnelComponent from '@components/Funnel/ViewFunnel';
+import ViewRetentionComponent from '@components/Retention/ViewRetention';
 import Layout from '@components/Layout';
 import { AppWithIntegrations } from '@lib/domain/app';
-import { Funnel } from '@lib/domain/funnel';
-import { Notifications } from '@lib/domain/notification';
+import { Retention } from '@lib/domain/retention';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
-import { _getSavedFunnel } from '@lib/services/funnelService';
+import { _getSavedRetention } from '@lib/services/retentionService';
 import { _getNotificationByReference } from '@lib/services/notificationService';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
@@ -21,17 +20,11 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
 
-  const { funnelId, dsId } = query;
+  const { retentionId, dsId } = query;
   const apps = await _getAppsWithIntegrations(token);
-  const savedFunnel = await _getSavedFunnel(token, funnelId as string);
+  const savedRetention = await _getSavedRetention(token, retentionId as string);
 
-  const datasourceId = dsId || savedFunnel.datasourceId;
-  const savedNotification =
-    (await _getNotificationByReference(
-      token,
-      funnelId as string,
-      datasourceId as string
-    )) || {};
+  const datasourceId = dsId || savedRetention.datasourceId;
 
   if (!apps.length) {
     return {
@@ -42,7 +35,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
 
-  if (!savedFunnel) {
+  if (!savedRetention) {
     return {
       redirect: {
         destination: '/404',
@@ -52,23 +45,12 @@ export const getServerSideProps: GetServerSideProps = async ({
   }
 
   return {
-    props: { apps, savedFunnel, savedNotification },
+    props: { apps, savedRetention },
   };
 };
 
-const ViewRetention = ({
-  savedFunnel,
-  savedNotification,
-}: {
-  savedFunnel: Funnel;
-  savedNotification: Notifications;
-}) => {
-  return (
-    <ViewFunnelComponent
-      savedFunnel={savedFunnel}
-      savedNotification={savedNotification}
-    />
-  );
+const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
+  return <ViewRetentionComponent savedRetention={savedRetention} />;
 };
 
 ViewRetention.getLayout = function getLayout(

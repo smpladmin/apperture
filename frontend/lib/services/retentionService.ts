@@ -1,5 +1,10 @@
 import { Granularity } from '@lib/domain/retention';
-import { AppertureDelete, AppertureGet, ApperturePost } from './util';
+import {
+  AppertureDelete,
+  AppertureGet,
+  ApperturePost,
+  ApperturePrivateGet,
+} from './util';
 import { DateFilterObj } from '@lib/domain/common';
 import { FunnelStep } from '@lib/domain/funnel';
 
@@ -53,4 +58,12 @@ export const getSavedRetentionsForDatasourceId = async (dsId: string) => {
 
 export const deleteRetention = async (id: string, dsId: string) => {
   return await AppertureDelete(`/retention/${id}`);
+};
+
+export const _getSavedRetention = async (
+  token: string,
+  retentionId: string
+) => {
+  const res = await ApperturePrivateGet(`/retention/${retentionId}`, token);
+  return res.data;
 };

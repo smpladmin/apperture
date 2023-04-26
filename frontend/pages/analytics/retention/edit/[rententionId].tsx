@@ -1,12 +1,12 @@
-import CreateFunnel from '@components/Funnel/CreateFunnel';
+import CreateRetention from '@components/Retention/CreateRetention';
 import Layout from '@components/Layout';
 import { MapContext } from '@lib/contexts/mapContext';
 import { AppWithIntegrations } from '@lib/domain/app';
-import { Funnel } from '@lib/domain/funnel';
+import { Retention } from '@lib/domain/retention';
 import { Node } from '@lib/domain/node';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { _getNodes } from '@lib/services/datasourceService';
-import { _getSavedFunnel } from '@lib/services/funnelService';
+import { _getSavedRetention } from '@lib/services/retentionService';
 import { Actions } from '@lib/types/context';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
@@ -24,9 +24,9 @@ export const getServerSideProps: GetServerSideProps = async ({
   }
 
   const apps = await _getAppsWithIntegrations(token);
-  const [nodes, savedFunnel] = await Promise.all([
+  const [nodes, savedRetention] = await Promise.all([
     _getNodes(token, query.dsId as string),
-    _getSavedFunnel(token, query.funnelId as string),
+    _getSavedRetention(token, query.retentionId as string),
   ]);
 
   if (!apps.length) {
@@ -38,7 +38,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
 
-  if (!savedFunnel) {
+  if (!savedRetention) {
     return {
       redirect: {
         destination: '/404',
@@ -48,16 +48,16 @@ export const getServerSideProps: GetServerSideProps = async ({
   }
 
   return {
-    props: { apps, nodes, savedFunnel },
+    props: { apps, nodes, savedRetention },
   };
 };
 
 const EditRetention = ({
   nodes,
-  savedFunnel,
+  savedRetention,
 }: {
   nodes: Node[];
-  savedFunnel: Funnel;
+  savedRetention: Retention;
 }) => {
   const { dispatch } = useContext(MapContext);
 
@@ -68,7 +68,7 @@ const EditRetention = ({
     });
   }, []);
 
-  return <CreateFunnel savedFunnel={savedFunnel} />;
+  return <CreateRetention savedRetention={savedRetention} />;
 };
 
 EditRetention.getLayout = function getLayout(
