@@ -293,34 +293,35 @@ class MetricService:
         logging.info(f"metric {metric.name} users count on {date}: {users_count}")
         return float("{:.2f}".format(users_count))
 
+    async def build_notification_data(self, notification: Notification):
+        return NotificationData(
+            name=notification.name,
+            notification_id=notification.id,
+            value=await self.get_notification_data(
+                notification=notification, days_ago=1
+            ),
+            prev_day_value=await self.get_notification_data(
+                notification=notification, days_ago=2
+            ),
+            variant=NotificationVariant.METRIC,
+            threshold_type=NotificationThresholdType.PCT
+            if notification.pct_threshold_active
+            else NotificationThresholdType.ABSOLUTE,
+            threshold_value=notification.pct_threshold_values
+            if notification.pct_threshold_active
+            else notification.absolute_threshold_values,
+        )
+
     async def get_metric_data_for_notifications(
         self, notifications: List[Notification]
     ):
-        notifications_data_for_metric = list(
-            filter(
-                lambda notification: notification.value != -1,
-                [
-                    NotificationData(
-                        name=notification.name,
-                        notification_id=notification.id,
-                        value=await self.get_notification_data(
-                            notification=notification, days_ago=1
-                        ),
-                        prev_day_value=await self.get_notification_data(
-                            notification=notification, days_ago=2
-                        ),
-                        variant=NotificationVariant.METRIC,
-                        threshold_type=NotificationThresholdType.PCT
-                        if notification.pct_threshold_active
-                        else NotificationThresholdType.ABSOLUTE,
-                        threshold_value=notification.pct_threshold_values
-                        if notification.pct_threshold_active
-                        else notification.absolute_threshold_values,
-                    )
-                    for notification in notifications
-                ]
-                if notifications
-                else [],
-            )
-        )
-        return notifications_data_for_metric
+        notifications_data_for_metric = [
+            await self.build_notification_data(notification=notification)
+            for notification in notifications
+        ]
+        filtered_notifications_data_for_metric = [
+            notification
+            for notification in notifications_data_for_metric
+            if notification.value != -1
+        ]
+        return filtered_notifications_data_for_metric

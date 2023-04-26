@@ -274,35 +274,35 @@ class FunnelsService:
         logging.info(f"funnel {funnel.name} conversion:{conversion}")
         return float("{:.2f}".format(conversion))
 
+    async def build_notification_data(self, notification: Notification):
+        return NotificationData(
+            name=notification.name,
+            notification_id=notification.id,
+            variant=NotificationVariant.FUNNEL,
+            value=await self.get_notification_data(
+                notification=notification, days_ago=1
+            ),
+            prev_day_value=await self.get_notification_data(
+                notification=notification, days_ago=2
+            ),
+            threshold_type=NotificationThresholdType.PCT
+            if notification.pct_threshold_active
+            else NotificationThresholdType.ABSOLUTE,
+            threshold_value=notification.pct_threshold_values
+            if notification.pct_threshold_active
+            else notification.absolute_threshold_values,
+        )
+
     async def get_funnel_data_for_notifications(
         self, notifications: List[Notification]
     ):
-        notifications_data_for_funnels = list(
-            filter(
-                lambda notification: notification.value != -1,
-                [
-                    NotificationData(
-                        name=notification.name,
-                        notification_id=notification.id,
-                        variant=NotificationVariant.FUNNEL,
-                        value=await self.get_notification_data(
-                            notification=notification, days_ago=1
-                        ),
-                        prev_day_value=await self.get_notification_data(
-                            notification=notification, days_ago=2
-                        ),
-                        threshold_type=NotificationThresholdType.PCT
-                        if notification.pct_threshold_active
-                        else NotificationThresholdType.ABSOLUTE,
-                        threshold_value=notification.pct_threshold_values
-                        if notification.pct_threshold_active
-                        else notification.absolute_threshold_values,
-                    )
-                    for notification in notifications
-                ]
-                if notifications
-                else [],
-            )
-        )
-
-        return notifications_data_for_funnels
+        notifications_data_for_funnels = [
+            await self.build_notification_data(notification=notification)
+            for notification in notifications
+        ]
+        filtered_notifications_data_for_funnels = [
+            notification
+            for notification in notifications_data_for_funnels
+            if notification.value != -1
+        ]
+        return filtered_notifications_data_for_funnels
