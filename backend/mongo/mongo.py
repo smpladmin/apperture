@@ -15,6 +15,7 @@ from domain.segments.models import Segment
 from domain.properties.models import Properties
 from domain.metrics.models import Metric
 from domain.actions.models import Action
+from domain.retention.models import Retention
 
 
 class Mongo:
@@ -37,6 +38,7 @@ class Mongo:
                 Properties,
                 Metric,
                 Action,
+                Retention,
             ],
         )
 

@@ -6,6 +6,7 @@ from beanie.operators import In
 from fastapi import Depends
 
 from domain.common.date_models import DateFilter
+from domain.common.date_utils import DateUtils
 from domain.funnels.models import (
     ComputedFunnelStep,
     ConversionStatus,
@@ -26,9 +27,11 @@ class FunnelsService:
         self,
         mongo: Mongo = Depends(),
         funnels: Funnels = Depends(),
+        date_utils: DateUtils = Depends(),
     ):
         self.mongo = mongo
         self.funnels = funnels
+        self.date_utils = date_utils
         self.default_conversion_time = ConversionWindowType.DAYS.get_multiplier() * 30
 
     def build_funnel(
@@ -87,7 +90,7 @@ class FunnelsService:
 
     def extract_date_range(self, date_filter: Union[DateFilter, None]):
         return (
-            self.funnels.compute_date_filter(
+            self.date_utils.compute_date_filter(
                 date_filter=date_filter.filter, date_filter_type=date_filter.type
             )
             if date_filter and date_filter.filter and date_filter.type
@@ -123,7 +126,8 @@ class FunnelsService:
                 conversion=float(
                     "{:.2f}".format(
                         self.compute_conversion(
-                            step_number=i, funnel_stepwise_users=list(funnel_stepwise_users_data)
+                            step_number=i,
+                            funnel_stepwise_users=list(funnel_stepwise_users_data),
                         )
                     )
                 ),
