@@ -27,7 +27,7 @@ class MetricsComputeDto(BaseModel):
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
     dateFilter: Optional[DateFilter]
-    segmentFilter: Optional[SegmentFilter]
+    segmentFilter: Optional[List[SegmentFilter]]
 
 
 class CreateMetricDTO(BaseModel):
@@ -37,7 +37,7 @@ class CreateMetricDTO(BaseModel):
     aggregates: List[SegmentsAndEvents]
     breakdown: List[str]
     dateFilter: Optional[DateFilter]
-    segmentFilter: Optional[SegmentFilter]
+    segmentFilter: Optional[List[SegmentFilter]]
 
 
 class MetricFormulaDto(BaseModel):

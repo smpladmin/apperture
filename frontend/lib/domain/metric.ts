@@ -1,4 +1,5 @@
-import { DateFilterObj, WhereFilter } from './common';
+import { DateFilterObj, GroupConditions, WhereFilter } from './common';
+import { SegmentGroup } from './segment';
 import { AppertureUser } from './user';
 
 export enum MetricVariant {
@@ -79,6 +80,7 @@ export type Metric = {
   aggregates: MetricAggregate[];
   breakdown: string[];
   dateFilter?: DateFilterObj;
+  segmentFilter?: MetricSegmentFilter[];
 };
 
 export type MetricWithUser = Metric & {
@@ -102,3 +104,14 @@ export enum MetricAggregatePropertiesAggregation {
   '90th Percentile' = 'ap_p90',
   '99th Percentile' = 'ap_p99',
 }
+
+export type MetricSegmentFilter = {
+  condition: GroupConditions.OR;
+  includes: boolean;
+  custom: SegmentGroup;
+  segments: {
+    id: string;
+    name: string;
+    groups: SegmentGroup[];
+  }[];
+};
