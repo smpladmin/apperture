@@ -1,6 +1,9 @@
-import { replaceEmptyStringPlaceholder } from '@components/Metric/util';
+import {
+  isValidMetricSegmentFilter,
+  replaceEmptyStringPlaceholder,
+} from '@components/Metric/util';
 import { DateFilterObj } from '@lib/domain/common';
-import { MetricAggregate } from '@lib/domain/metric';
+import { MetricAggregate, MetricSegmentFilter } from '@lib/domain/metric';
 import {
   AppertureDelete,
   AppertureGet,
@@ -10,11 +13,13 @@ import {
 } from './util';
 
 type MetricRequestBody = {
+  name?: string;
   datasourceId: string;
   function: string;
   aggregates: MetricAggregate[];
   breakdown: string[];
   dateFilter?: DateFilterObj;
+  segmentFilter?: MetricSegmentFilter[];
 };
 
 export const computeMetric = async (
@@ -23,6 +28,7 @@ export const computeMetric = async (
   aggregates: MetricAggregate[],
   breakdown: string[],
   dateFilter: DateFilterObj,
+  segmentFilters: MetricSegmentFilter[] | null,
   signal?: AbortSignal
 ) => {
   const requestBody: MetricRequestBody = {
@@ -32,6 +38,10 @@ export const computeMetric = async (
     breakdown,
     dateFilter,
   };
+
+  if (segmentFilters && isValidMetricSegmentFilter(segmentFilters)) {
+    requestBody.segmentFilter = segmentFilters;
+  }
 
   const res = await ApperturePost('metrics/compute', requestBody, { signal });
   return res.data || [];
@@ -48,16 +58,23 @@ export const saveMetric = async (
   definition: string,
   aggregates: MetricAggregate[],
   breakdown: string[],
-  dateFilter: DateFilterObj
+  dateFilter: DateFilterObj,
+  segmentFilters: MetricSegmentFilter[]
 ) => {
-  const result = await ApperturePost('/metrics', {
-    datasourceId: dsId,
+  const requestBody: MetricRequestBody = {
     name,
+    datasourceId: dsId,
     function: definition,
     aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
     dateFilter,
-  });
+  };
+
+  if (segmentFilters && isValidMetricSegmentFilter(segmentFilters)) {
+    requestBody.segmentFilter = segmentFilters;
+  }
+
+  const result = await ApperturePost('/metrics', requestBody);
   return result;
 };
 
@@ -68,16 +85,23 @@ export const updateMetric = async (
   definition: string,
   aggregates: MetricAggregate[],
   breakdown: string[],
-  dateFilter: DateFilterObj
+  dateFilter: DateFilterObj,
+  segmentFilters: MetricSegmentFilter[]
 ) => {
-  const result = await ApperturePut('/metrics/' + metricId, {
-    datasourceId: dsId,
+  const requestBody: MetricRequestBody = {
     name,
+    datasourceId: dsId,
     function: definition,
     aggregates: replaceEmptyStringPlaceholder(aggregates),
     breakdown,
     dateFilter,
-  });
+  };
+
+  if (segmentFilters && isValidMetricSegmentFilter(segmentFilters)) {
+    requestBody.segmentFilter = segmentFilters;
+  }
+
+  const result = await ApperturePut('/metrics/' + metricId, requestBody);
   return result;
 };
 

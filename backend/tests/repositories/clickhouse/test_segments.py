@@ -9,7 +9,7 @@ from domain.common.filter_models import (
     FilterOperatorsNumber,
     LogicalOperators,
 )
-from domain.metrics.models import SegmentFilter
+from domain.metrics.models import SegmentFilter, SelectedSegments
 from domain.segments.models import (
     SegmentGroup,
     WhoSegmentFilter,
@@ -397,27 +397,41 @@ class TestSegmentsRepository:
         ) == (start_date, end_date)
 
     def test_build_segment_filter_on_metric_criterion(self):
-        segment_filter = SegmentFilter(
-            includes=True,
-            groups=[
-                SegmentGroup(
-                    filters=[
-                        WhereSegmentFilter(
-                            operand="test",
-                            operator=FilterOperatorsNumber.EQ,
-                            values=["1"],
-                            condition=SegmentFilterConditions.WHERE,
-                            datatype=FilterDataType.NUMBER,
-                        )
-                    ],
+        segment_filter = [
+            SegmentFilter(
+                condition="and",
+                includes=True,
+                custom=SegmentGroup(
+                    filters=[],
                     condition=LogicalOperators.AND,
-                )
-            ],
-        )
+                ),
+                segments=[
+                    SelectedSegments(
+                        id="48392000212",
+                        name="Segment1",
+                        groups=[
+                            SegmentGroup(
+                                filters=[
+                                    WhereSegmentFilter(
+                                        operand="test",
+                                        operator=FilterOperatorsNumber.EQ,
+                                        values=["1"],
+                                        condition=SegmentFilterConditions.WHERE,
+                                        datatype=FilterDataType.NUMBER,
+                                    )
+                                ],
+                                condition=LogicalOperators.AND,
+                            )
+                        ],
+                    )
+                ],
+            )
+        ]
         assert self.repo.build_segment_filter_on_metric_criterion(
             segment_filter=segment_filter
         ).__str__() == (
-            '"user_id" IN (WITH group0 AS (SELECT DISTINCT "user_id" FROM "events" WHERE '
-            '"datasource_id"=%(ds_id)s AND toFloat64OrDefault("properties.test") IN '
-            '(\'1\')) SELECT DISTINCT "group0"."user_id" FROM group0)'
+            '"user_id" IN (WITH group0 AS (SELECT DISTINCT "user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s '
+            'AND toFloat64OrDefault("properties.test") IN (\'1\')) '
+            ',group1 AS (SELECT DISTINCT "user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s) '
+            'SELECT DISTINCT "group0"."user_id" FROM group0 INTERSECT SELECT DISTINCT "group1"."user_id" FROM group1)'
         )

@@ -1,29 +1,29 @@
-import React, { useEffect, useRef, useState } from 'react';
 import {
+  Box,
+  Button,
   Drawer,
   DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
   DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
-  Button,
-  Text,
-  IconButton,
   Flex,
-  Box,
+  IconButton,
+  Text,
 } from '@chakra-ui/react';
-import UserTableView from './UserListTableView';
+import { DateFilterObj } from '@lib/domain/common';
 import {
   ConversionStatus,
   ConversionWindowObj,
   FunnelStep,
-  UserProperty,
   UserActivityResponse,
+  UserProperty,
 } from '@lib/domain/funnel';
-import { getUserProperty } from '@lib/services/funnelService';
-import { DateFilterObj } from '@lib/domain/common';
 import { getUserActivity } from '@lib/services/datasourceService';
+import { getUserProperty } from '@lib/services/funnelService';
+import { useEffect, useState } from 'react';
+import UserTableView from './UserListTableView';
 
 type UserConversionDrawerProps = {
   isOpen: boolean;
@@ -33,6 +33,7 @@ type UserConversionDrawerProps = {
   selectedFunnelSteps: FunnelStep[];
   dateFilter: DateFilterObj;
   conversionWindow: ConversionWindowObj;
+  randomSequence: boolean;
 };
 
 export enum TableState {
@@ -48,6 +49,7 @@ const UserConversionDrawer = ({
   selectedFunnelSteps,
   dateFilter,
   conversionWindow,
+  randomSequence,
 }: UserConversionDrawerProps) => {
   const [tableState, setTableState] = useState<TableState>(TableState.PROPERTY);
   const [selectedUser, setSelectedUser] = useState<null | string>(null);
@@ -166,6 +168,7 @@ const UserConversionDrawer = ({
               conversionWindow={conversionWindow}
               status={status}
               setStatus={setStatus}
+              randomSequence={randomSequence}
               selectedUser={selectedUser}
               setUserActivity={setUserActivity}
               isTableDataLoading={isTableDataLoading}

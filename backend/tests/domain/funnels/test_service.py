@@ -1,44 +1,54 @@
-import pytest
-from datetime import datetime
-from unittest.mock import ANY
+import asyncio
 from collections import namedtuple
+from datetime import datetime
+from unittest.mock import ANY, AsyncMock, MagicMock
+
+import pytest
 from beanie import PydanticObjectId
-from unittest.mock import MagicMock, AsyncMock
 
 from domain.common.date_models import (
     DateFilter,
-    LastDateFilter,
     DateFilterType,
     FixedDateFilter,
+    LastDateFilter,
 )
-from tests.utils import filter_response
-from domain.datasources.models import DataSource
-from domain.funnels.service import FunnelsService
 from domain.common.models import IntegrationProvider
+from domain.datasources.models import DataSource
 from domain.funnels.models import (
-    FunnelStep,
-    Funnel,
-    ComputedFunnelStep,
     ComputedFunnel,
-    FunnelTrendsData,
-    FunnelConversionData,
-    FunnelEventUserData,
+    ComputedFunnelStep,
     ConversionStatus,
     ConversionWindow,
     ConversionWindowType,
+    Funnel,
+    FunnelConversionData,
+    FunnelEventUserData,
+    FunnelStep,
+    FunnelTrendsData,
 )
+from domain.funnels.service import FunnelsService
+from domain.notifications.models import (
+    Notification,
+    NotificationData,
+    NotificationVariant,
+    ThresholdMap,
+)
+from tests.utils import filter_response
 
 
 class TestFunnelService:
     def setup_method(self):
         Funnel.get_settings = MagicMock()
+        Notification.get_settings = MagicMock()
         Funnel.find_one = AsyncMock()
         Funnel.update = AsyncMock()
         DataSource.get_settings = MagicMock()
         self.mongo = MagicMock()
         self.funnels = MagicMock()
         self.date_utils = MagicMock()
-        self.service = FunnelsService(mongo=self.mongo, funnels=self.funnels, date_utils=self.date_utils)
+        self.service = FunnelsService(
+            mongo=self.mongo, funnels=self.funnels, date_utils=self.date_utils
+        )
         self.ds_id = "636a1c61d715ca6baae65611"
         self.app_id = "636a1c61d715ca6baae65612"
         self.provider = IntegrationProvider.MIXPANEL
@@ -132,6 +142,35 @@ class TestFunnelService:
         Funnel.id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.date_utils.compute_date_filter.return_value = ("2022-12-01", "2022-12-31")
         Funnel.enabled = True
+        self.funnel_notifications = [
+            Notification(
+                id=PydanticObjectId("6437a278a2fdd9488bef5253"),
+                revision_id=None,
+                created_at=datetime(2023, 4, 13, 6, 34, 32, 876000),
+                updated_at=datetime(2023, 4, 13, 8, 16, 16, 593000),
+                datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
+                user_id=PydanticObjectId("6374b74e9b36ecf7e0b4f9e4"),
+                app_id=PydanticObjectId("63ca46feee94e38b81cda37a"),
+                name="Video Funnel",
+                notification_type={"alert", "update"},
+                metric="hits",
+                multi_node=False,
+                apperture_managed=False,
+                pct_threshold_active=False,
+                pct_threshold_values=None,
+                absolute_threshold_active=True,
+                absolute_threshold_values=ThresholdMap(min=1212.0, max=3236.0),
+                formula="a",
+                variable_map={"a": ["Video Funnel"]},
+                preferred_hour_gmt=5,
+                frequency="daily",
+                preferred_channels=["slack"],
+                notification_active=True,
+                variant="metric",
+                reference="63dcfe6a21a93919c672d5bb",
+                enabled=True,
+            )
+        ]
 
     def test_build_funnel(self):
 
@@ -175,6 +214,7 @@ class TestFunnelService:
             conversion_window=ConversionWindow(
                 type=ConversionWindowType.MINUTES, value=10
             ),
+            random_sequence=False,
         )
 
     @pytest.mark.asyncio
@@ -220,6 +260,7 @@ class TestFunnelService:
                 conversion_window=ConversionWindow(
                     type=ConversionWindowType.MINUTES, value=10
                 ),
+                random_sequence=False,
             )
             == self.funnel_trends_data
         )
@@ -237,6 +278,7 @@ class TestFunnelService:
                 "end_date": "2022-12-31",
                 "start_date": "2022-12-01",
                 "conversion_time": 600,
+                "random_sequence": False,
             }
         )
 
@@ -258,6 +300,7 @@ class TestFunnelService:
                 conversion_window=ConversionWindow(
                     type=ConversionWindowType.MINUTES, value=10
                 ),
+                random_sequence=False,
             )
             == self.funnel_conversion_data
         )
@@ -305,3 +348,84 @@ class TestFunnelService:
     )
     def test_extract_date_range(self, date_filter, result):
         assert self.service.extract_date_range(date_filter=date_filter) == result
+
+    @pytest.mark.asyncio
+    async def test_get_funnel_data_for_notification(self):
+        notification_data_future = asyncio.Future()
+        notification_data_future.set_result(0.2)
+        self.service.get_notification_data = MagicMock(
+            return_value=notification_data_future
+        )
+        assert await self.service.get_funnel_data_for_notifications(
+            notifications=self.funnel_notifications
+        ) == [
+            NotificationData(
+                name="Video Funnel",
+                notification_id=PydanticObjectId("6437a278a2fdd9488bef5253"),
+                variant=NotificationVariant.FUNNEL,
+                value=0.2,
+                prev_day_value=0.2,
+                threshold_type="absolute",
+                threshold_value=ThresholdMap(min=1212.0, max=3236.0),
+            )
+        ]
+        self.service.get_notification_data.assert_called_with(
+            days_ago=2,
+            notification=Notification(
+                id=PydanticObjectId("6437a278a2fdd9488bef5253"),
+                revision_id=None,
+                created_at=datetime(2023, 4, 13, 6, 34, 32, 876000),
+                updated_at=datetime(2023, 4, 13, 8, 16, 16, 593000),
+                datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
+                user_id=PydanticObjectId("6374b74e9b36ecf7e0b4f9e4"),
+                app_id=PydanticObjectId("63ca46feee94e38b81cda37a"),
+                name="Video Funnel",
+                notification_type={"alert", "update"},
+                metric="hits",
+                multi_node=False,
+                apperture_managed=False,
+                pct_threshold_active=False,
+                pct_threshold_values=None,
+                absolute_threshold_active=True,
+                absolute_threshold_values=ThresholdMap(min=1212.0, max=3236.0),
+                formula="a",
+                variable_map={"a": ["Video Funnel"]},
+                preferred_hour_gmt=5,
+                frequency="daily",
+                preferred_channels=["slack"],
+                notification_active=True,
+                variant="metric",
+                reference="63dcfe6a21a93919c672d5bb",
+                enabled=True,
+            ),
+        ),
+
+    @pytest.mark.asyncio
+    async def test_get_notification_data(self):
+        funnel_future = asyncio.Future()
+        funnel_future.set_result(self.funnel)
+
+        self.service.get_funnel = MagicMock(return_value=funnel_future)
+        self.service.compute_conversion_time = MagicMock(return_value=9600000)
+
+        self.funnels.get_users_count = MagicMock(return_value=[(200, 10, 40)])
+        assert (
+            await self.service.get_notification_data(
+                notification=self.funnel_notifications[0], days_ago=2
+            )
+            == 20.0
+        )
+
+        self.funnels.get_users_count.assert_called_with(
+            **{
+                "conversion_time": 9600000,
+                "ds_id": "636a1c61d715ca6baae65611",
+                "end_date": ANY,
+                "start_date": ANY,
+                "steps": [
+                    FunnelStep(event="Login", filters=None),
+                    FunnelStep(event="Chapter Click", filters=None),
+                ],
+                "random_sequence": False,
+            }
+        )

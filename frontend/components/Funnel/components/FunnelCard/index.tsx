@@ -32,6 +32,7 @@ type FunnelComponentCardProps = {
   funnelStep: FunnelStep;
   funnelSteps: FunnelStep[];
   setFunnelSteps: Function;
+  hideNumbers: boolean;
 };
 
 const FunnelComponentCard = ({
@@ -39,6 +40,7 @@ const FunnelComponentCard = ({
   funnelStep,
   funnelSteps,
   setFunnelSteps,
+  hideNumbers,
 }: FunnelComponentCardProps) => {
   const {
     state: { nodes },
@@ -169,7 +171,7 @@ const FunnelComponentCard = ({
           justifyContent={'space-between'}
         >
           <Flex alignItems={'center'} gap={'1'} flexGrow={'1'}>
-            <FilterNumber index={index} isHovered={isHovered} />
+            <FilterNumber index={index} isHovered={isHovered || hideNumbers} />
             <Box
               position="relative"
               ref={eventBoxRef}

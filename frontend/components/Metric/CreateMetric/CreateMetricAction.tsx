@@ -20,12 +20,13 @@ import {
   MetricVariant,
   ComputedMetric,
   MetricBasicAggregation,
+  MetricSegmentFilter,
 } from '@lib/domain/metric';
 import { cloneDeep, debounce, isEqual } from 'lodash';
 import { Node } from '@lib/domain/node';
 import {
+  checkMetricDefinitionAndAggregateCount,
   enableBreakdown,
-  getCountOfValidAggregates,
   isValidAggregates,
   replaceEmptyStringPlaceholder,
 } from '@components/Metric/util';
@@ -34,6 +35,7 @@ import Card from '@components/Card';
 import { Function, Plus } from 'phosphor-react';
 import AddBreakdown from '../components/AddBreakdown';
 import { BLACK_DEFAULT } from '@theme/index';
+import SegmentFilter from '../components/SegmentFilter';
 
 const DEBOUNCE_WAIT_TIME = 800;
 
@@ -53,6 +55,8 @@ type CreateMetricActionProps = {
   dateFilter: DateFilterObj;
   metricDefinition: string;
   setMetricDefinition: Function;
+  segmentFilters: MetricSegmentFilter[];
+  updateSegmentFilter: Function;
 };
 
 const CreateMetricAction = ({
@@ -71,6 +75,8 @@ const CreateMetricAction = ({
   dateFilter,
   metricDefinition,
   setMetricDefinition,
+  segmentFilters,
+  updateSegmentFilter,
 }: CreateMetricActionProps) => {
   const router = useRouter();
   const dsId = savedMetric?.datasourceId || router.query.dsId;
@@ -137,7 +143,8 @@ const CreateMetricAction = ({
   }, [aggregates, metricDefinition]);
 
   useEffect(() => {
-    if (!isValidAggregates(aggregates)) return;
+    if (!isValidAggregates(aggregates, segmentFilters)) return;
+
     const abortController = new AbortController();
     const signal = abortController.signal;
 
@@ -145,14 +152,19 @@ const CreateMetricAction = ({
       const processedAggregate = replaceEmptyStringPlaceholder(
         cloneDeep(aggregates)
       );
-      const result: ComputedMetric[] = await computeMetric(
-        dsId as string,
+
+      const definition =
         metricDefinition && metricDefinition.length
           ? metricDefinition.replace(/\s*/g, '')
-          : aggregates.map((aggregate) => aggregate.variable).join(','),
+          : aggregates.map((aggregate) => aggregate.variable).join(',');
+
+      const result: ComputedMetric[] = await computeMetric(
+        dsId as string,
+        definition,
         processedAggregate,
         breakdown,
         dateFilter,
+        segmentFilters,
         signal
       );
 
@@ -163,7 +175,7 @@ const CreateMetricAction = ({
     fetchMetric(aggregates);
 
     return () => abortController.abort();
-  }, [aggregates, metricDefinition, breakdown, dateFilter]);
+  }, [aggregates, metricDefinition, breakdown, dateFilter, segmentFilters]);
 
   useEffect(() => {
     // check for valid metric definition
@@ -185,44 +197,48 @@ const CreateMetricAction = ({
   useEffect(() => {
     // enable save metric button when aggregate, metric name or definition changes
 
-    const checkMetricDefinitionAndAggregateCount = (
-      metricDefinition: string,
-      aggregates: MetricAggregate[]
-    ) => {
-      /*
-        enable save metric if either of condition satisfies-
-        a. has metric definition
-          1. single aggregate - True
-          2. multiple aggregate - True
-
-        b. has no metric definition
-          1. single aggregate - True
-          2. multiple aggregate - False
-
-      */
-      if (metricDefinition) return true;
-
-      if (!metricDefinition && getCountOfValidAggregates(aggregates) === 1)
-        return true;
-
-      return false;
+    const currentMetricState = {
+      name: metricName,
+      function: metricDefinition,
+      aggregates,
+      breakdown,
+      dateFilter,
+      segmentFilter: segmentFilters,
+    };
+    const savedMetricState = {
+      name: savedMetric?.name,
+      function: savedMetric?.function,
+      aggregates: savedMetric?.aggregates,
+      breakdown: savedMetric?.breakdown,
+      dateFilter: savedMetric?.dateFilter,
+      segmentFilter: savedMetric?.segmentFilter,
     };
 
+    const isCurrentMetricStateEqualsSavedMetricState = isEqual(
+      currentMetricState,
+      savedMetricState
+    );
+
     const enableSaveMetricButton =
-      isValidAggregates(aggregates) &&
+      isValidAggregates(aggregates, segmentFilters) &&
       checkMetricDefinitionAndAggregateCount(metricDefinition, aggregates) &&
       isValidDefinition &&
-      (!isEqual(savedMetric?.aggregates, aggregates) ||
-        !isEqual(savedMetric?.breakdown, breakdown) ||
-        savedMetric?.function != metricDefinition ||
-        savedMetric?.name !== metricName);
+      !isCurrentMetricStateEqualsSavedMetricState;
 
     if (enableSaveMetricButton) {
       setCanSaveMetric(true);
     } else {
       setCanSaveMetric(false);
     }
-  }, [aggregates, metricDefinition, metricName, isValidDefinition, breakdown]);
+  }, [
+    aggregates,
+    metricDefinition,
+    metricName,
+    isValidDefinition,
+    breakdown,
+    segmentFilters,
+    dateFilter,
+  ]);
 
   const functionBoxColor = metricDefinition ? 'blue.500' : 'grey.400';
 
@@ -328,6 +344,19 @@ const CreateMetricAction = ({
             />
           ))}
         </Flex>
+
+        {segmentFilters.map((segmentFilter, index) => (
+          <SegmentFilter
+            key={index}
+            index={index}
+            segmentFilter={segmentFilter}
+            updateSegmentFilter={updateSegmentFilter}
+            segmentFilters={segmentFilters}
+            eventProperties={eventProperties}
+            loadingEventProperties={loadingEventsAndProperties}
+          />
+        ))}
+
         <AddBreakdown
           metricDefinition={metricDefinition}
           aggregates={aggregates}

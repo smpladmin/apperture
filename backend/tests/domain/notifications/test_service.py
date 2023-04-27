@@ -6,7 +6,7 @@ from beanie import PydanticObjectId
 from unittest.mock import MagicMock, AsyncMock, ANY
 
 from domain.notifications.service import NotificationService
-from domain.notifications.models import Notification
+from domain.notifications.models import Notification, NotificationData
 from domain.edge.models import NotificationNodeData, AggregatedEdge
 from domain.notifications.models import (
     ThresholdMap,
@@ -130,33 +130,82 @@ class TestNotificationService:
                 threshold_value=None,
             ),
         ]
+
+        self.notification_data_for_updates = [
+            NotificationData(
+                name="update1",
+                notification_id=PydanticObjectId("633fb88bbbc29934eeb39ece"),
+                variant=NotificationVariant.FUNNEL,
+                value=0.10,
+                prev_day_value=0.12,
+                threshold_type=NotificationThresholdType.PCT,
+                threshold_value=ThresholdMap(min=0.15, max=0.25),
+            ),
+            NotificationData(
+                name="update2",
+                notification_id=PydanticObjectId("633fb88bbbc29934eeb39ece"),
+                variant=NotificationVariant.FUNNEL,
+                value=0.10,
+                prev_day_value=0.12,
+                threshold_type=NotificationThresholdType.ABSOLUTE,
+                threshold_value=ThresholdMap(min=0.15, max=0.25),
+            ),
+        ]
+
+        self.notification_data_with_threshold_percentage = NotificationData(
+            name="test",
+            notification_id=PydanticObjectId("633fb88bbbc29934eeb39ece"),
+            variant=NotificationVariant.FUNNEL,
+            value=0.10,
+            prev_day_value=0.12,
+            threshold_type=NotificationThresholdType.PCT,
+            threshold_value=ThresholdMap(min=0.15, max=0.25),
+        )
+
+        self.notification_data_with_threshold_absolute = NotificationData(
+            name="test",
+            notification_id=PydanticObjectId("633fb88bbbc29934eeb39ece"),
+            variant=NotificationVariant.FUNNEL,
+            value=0.10,
+            prev_day_value=0.12,
+            threshold_type=NotificationThresholdType.ABSOLUTE,
+            threshold_value=ThresholdMap(min=0.15, max=0.25),
+        )
+
         self.computed_updates = [
             ComputedNotification(
                 name="update1",
-                notification_id=PydanticObjectId("633fb91c01ce2d17cae2142d"),
-                notification_type={NotificationType.UPDATE},
-                value=3.8,
+                notification_id=PydanticObjectId("633fb88bbbc29934eeb39ece"),
+                notification_type=NotificationType.UPDATE,
+                variant=NotificationVariant.FUNNEL,
+                value=-16.67,
+                original_value=0.1,
                 threshold_type=None,
                 user_threshold=None,
                 triggered=None,
             ),
             ComputedNotification(
                 name="update2",
-                notification_id=PydanticObjectId("633fb92a01ce2d17cae2142e"),
-                notification_type={NotificationType.UPDATE},
-                value=5.0,
+                notification_id=PydanticObjectId("633fb88bbbc29934eeb39ece"),
+                notification_type=NotificationType.UPDATE,
+                variant=NotificationVariant.FUNNEL,
+                value=-16.67,
+                original_value=0.1,
                 threshold_type=None,
                 user_threshold=None,
                 triggered=None,
             ),
         ]
+
         self.computed_alert = ComputedNotification(
             name="test",
             notification_id=PydanticObjectId("633fb88bbbc29934eeb39ece"),
-            notification_type={NotificationType.ALERT},
-            value=1.36,
+            notification_type=NotificationType.ALERT,
+            variant=NotificationVariant.FUNNEL,
+            value=0.1,
+            original_value=0.1,
             threshold_type=NotificationThresholdType.PCT,
-            user_threshold=ThresholdMap(min=0.15, max=0.15),
+            user_threshold=ThresholdMap(min=0.15, max=0.25),
             triggered=True,
         )
         self.name = "test"
@@ -209,8 +258,19 @@ class TestNotificationService:
         )
 
     def test_alert_criteria(self):
-        assert self.service.alert_criteria(
-            data=self.notification_node_data, value=self.value
+        assert (
+            self.service.alert_criteria(
+                data=self.notification_data_with_threshold_percentage, value=self.value
+            )
+            == True
+        )
+
+    def test_alert_criteria(self):
+        assert (
+            self.service.alert_criteria(
+                data=self.notification_data_with_threshold_absolute, value=0.20
+            )
+            == False
         )
 
     def test_compute_value(self):
@@ -222,14 +282,16 @@ class TestNotificationService:
     def test_compute_updates(self):
         assert (
             self.service.compute_updates(
-                node_data_for_updates=self.node_data_for_updates
+                data_for_updates=self.notification_data_for_updates
             )
             == self.computed_updates
         )
 
     def test_compute_alert(self):
         assert (
-            self.service.compute_alert(data=self.notification_node_data)
+            self.service.compute_alert(
+                data=self.notification_data_with_threshold_percentage
+            )
             == self.computed_alert
         )
 

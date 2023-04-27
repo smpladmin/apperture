@@ -8,9 +8,21 @@ class NotificationType(str, Enum):
     UPDATE = "update"
 
 
+class NotificationChannel(str, Enum):
+    SLACK = "slack"
+    EMAIL = "email"
+
+
 class NotificationFrequency(str, Enum):
     DAILY = "daily"
     WEEKLY = "weekly"
+
+
+class NotificationVariant(str, Enum):
+    NODE = "node"
+    FUNNEL = "funnel"
+    METRIC = "metric"
+    SEGMENT = "segment"
 
 
 class NotificationChannel(str, Enum):
@@ -30,8 +42,10 @@ class NotificationThresholdType(str, Enum):
 
 class Notification(BaseModel):
     name: str
-    notificationType: NotificationType
+    notification_type: NotificationType
+    variant: NotificationVariant
     value: float
-    thresholdType: Optional[NotificationThresholdType]
-    userThreshold: Optional[ThresholdMap]
+    original_value: float
+    threshold_type: Optional[NotificationThresholdType]
+    user_threshold: Optional[ThresholdMap]
     triggered: Optional[bool]

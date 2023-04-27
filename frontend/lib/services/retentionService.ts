@@ -49,7 +49,7 @@ export const getTransientRetentionData = async (
       granularity,
     }
   );
-  return res.data || [];
+  return res.data || { count: 0, data: [] };
 };
 
 export const getSavedRetentionsForDatasourceId = async (dsId: string) => {

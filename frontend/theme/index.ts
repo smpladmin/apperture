@@ -73,6 +73,7 @@ const colors = {
     600: GREY_600,
     700: GREY_700,
     800: GREY_800,
+    900: ' #212121',
   },
   yellow: { 500: YELLOW_500, 600: '#fac213' },
   green: {
@@ -121,6 +122,7 @@ const spacing = {
   55: '13.75rem',
   62: '15.5rem',
   64: '16rem',
+  65: '16.25rem',
   70: '17.5rem',
   75: '18.75rem',
   76: '19rem',
