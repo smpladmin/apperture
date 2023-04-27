@@ -86,6 +86,7 @@ async def process_kafka_messages() -> None:
             logging.info(f"Saving events: {events} with offsets: {offsets}")
             save_events(events)
             events = []
+            offsets = []
             await consumer.commit()
 
 
