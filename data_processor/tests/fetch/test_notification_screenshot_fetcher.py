@@ -4,9 +4,6 @@ from datetime import datetime
 from time import sleep
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-
 from fetch.notification_screenshot_fetcher import NotificationScreenshotFetcher
 
 
