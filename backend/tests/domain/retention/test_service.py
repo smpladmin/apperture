@@ -34,7 +34,9 @@ class TestRetentionService:
         self.mongo = MagicMock()
         self.retention = MagicMock()
         self.date_utils = MagicMock()
-        self.service = RetentionService(mongo=self.mongo, retention=self.retention, date_utils=self.date_utils)
+        self.service = RetentionService(
+            mongo=self.mongo, retention=self.retention, date_utils=self.date_utils
+        )
         self.ds_id = "636a1c61d715ca6baae65611"
         self.app_id = "636a1c61d715ca6baae65612"
         self.provider = IntegrationProvider.MIXPANEL
@@ -78,9 +80,9 @@ class TestRetentionService:
         Retention.insert = AsyncMock()
         Retention.id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.retention.compute_retention_trend.return_value = [
-            (datetime(2022, 1, 1, 0, 0), 0.51108, 110),
-            (datetime(2022, 1, 2, 0, 0), 0.52396, 108),
-            (datetime(2022, 1, 3, 0, 0), 0.497648, 115),
+            (datetime(2022, 1, 1, 0, 0), 215, 110),
+            (datetime(2022, 1, 2, 0, 0), 206, 108),
+            (datetime(2022, 1, 3, 0, 0), 230, 115),
         ]
         self.retention.compute_retention.return_value = [55.16, 10.98, 7.43, 6.13]
         self.date_utils.compute_date_filter.return_value = ("2022-12-01", "2022-12-31")
@@ -119,17 +121,17 @@ class TestRetentionService:
         ) == [
             ComputedRetentionTrend(
                 granularity=datetime(2022, 1, 1, 0, 0),
-                retention_rate=51.11,
+                retention_rate=51.16,
                 retained_users=110,
             ),
             ComputedRetentionTrend(
                 granularity=datetime(2022, 1, 2, 0, 0),
-                retention_rate=52.4,
+                retention_rate=52.43,
                 retained_users=108,
             ),
             ComputedRetentionTrend(
                 granularity=datetime(2022, 1, 3, 0, 0),
-                retention_rate=49.76,
+                retention_rate=50.0,
                 retained_users=115,
             ),
         ]
