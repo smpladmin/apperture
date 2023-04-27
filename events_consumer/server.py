@@ -54,6 +54,7 @@ async def process_kafka_messages() -> None:
     )
     await consumer.start()
     events = []
+    offsets = []
     while True:
         # Get messages from Kafka
         data = await consumer.getmany(
@@ -70,15 +71,19 @@ async def process_kafka_messages() -> None:
             for record in records
         ]
 
+        _offsets = [record.offset for _, records in data.items() for record in records]
+
         # Convert any non-list events to a list
         _events = [e if type(e) == list else [e] for e in _events]
 
         # Flatten the list of lists
         events.extend(list(reduce(lambda a, b: a + b, _events)))
+        offsets.extend(_offsets)
         logging.info(f"Collected {len(events)} events")
 
         # Save events to ClickHouse
         if len(events) >= MAX_RECORDS:
+            logging.info(f"Saving events: {events} with offsets: {offsets}")
             save_events(events)
             events = []
             await consumer.commit()
