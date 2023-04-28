@@ -3,19 +3,28 @@ import React from 'react';
 import 'remixicon/fonts/remixicon.css';
 import { FunnelStep } from '@lib/domain/funnel';
 import Card from '@components/Card';
-import { Clock } from 'phosphor-react';
+import { Clock, UsersFour } from 'phosphor-react';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 import { GREY_600 } from '@theme/index';
-import { Granularity, RetentionEvents } from '@lib/domain/retention';
+import { Granularity } from '@lib/domain/retention';
 import ViewFunnelSteps from '@components/Funnel/components/ViewFunnelSteps';
+import { ExternalSegmentFilter } from '@lib/domain/common';
+import ViewFilter from '@components/StepFilters/ViewFilter';
+import { getSelectedSegmentsText } from '@components/Metric/util';
+import { WhereSegmentFilter } from '@lib/domain/segment';
 
 type LeftViewProps = {
   retentionEvents: FunnelStep[];
   granularity: Granularity;
+  segmentFilters: ExternalSegmentFilter[] | null;
 };
 
-const LeftView = ({ retentionEvents, granularity }: LeftViewProps) => {
+const LeftView = ({
+  retentionEvents,
+  granularity,
+  segmentFilters,
+}: LeftViewProps) => {
   return (
     <ActionPanel>
       <Card>
@@ -58,6 +67,50 @@ const LeftView = ({ retentionEvents, granularity }: LeftViewProps) => {
               </Flex>
             </Card>
           </Flex>
+          {segmentFilters &&
+            segmentFilters.map((segmentFilter, i) => {
+              const customSegmentFilters = segmentFilter.custom
+                .filters as WhereSegmentFilter[];
+              return (
+                <Flex direction={'column'} gap={'3'} key={i}>
+                  <Text
+                    fontSize={'xs-12'}
+                    lineHeight={'xs-12'}
+                    fontWeight={'400'}
+                    color={'grey.500'}
+                  >
+                    Filter
+                  </Text>
+                  <Card borderRadius={'8'} borderColor={'white.200'} p={'3'}>
+                    <Flex direction={'column'} gap={'1'}>
+                      <Flex gap={'2'} alignItems={'center'}>
+                        <UsersFour size={20} color={GREY_600} />
+                        <Text
+                          fontSize={'xs-14'}
+                          lineHeight={'xs-14'}
+                          fontWeight={'500'}
+                          maxWidth={'65'}
+                          textOverflow={'ellipsis'}
+                          overflow={'hidden'}
+                          whiteSpace={'nowrap'}
+                        >
+                          {getSelectedSegmentsText(
+                            segmentFilter.includes,
+                            segmentFilter.segments
+                          )}
+                        </Text>
+                      </Flex>
+                      {Boolean(customSegmentFilters.length) &&
+                        customSegmentFilters.map((filter, index: number) => (
+                          <Box px={'1'} key={index}>
+                            <ViewFilter filter={filter} />
+                          </Box>
+                        ))}
+                    </Flex>
+                  </Card>
+                </Flex>
+              );
+            })}
         </Flex>
       </Card>
     </ActionPanel>

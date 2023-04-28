@@ -1,3 +1,5 @@
+import { replacePlaceholderWithEmptyStringInExternalSegmentFilter } from './../utils/common';
+import { replacePlaceholderWithEmptyString } from './../../components/Retention/utils';
 import { Granularity } from '@lib/domain/retention';
 import {
   AppertureDelete,
@@ -8,6 +10,18 @@ import {
 } from './util';
 import { DateFilterObj, ExternalSegmentFilter } from '@lib/domain/common';
 import { FunnelStep } from '@lib/domain/funnel';
+import { isValidSegmentFilter } from '@lib/utils/common';
+import { cloneDeep } from 'lodash';
+
+type RetentionRequestBody = {
+  datasourceId: string;
+  name?: string;
+  startEvent: FunnelStep;
+  goalEvent: FunnelStep;
+  dateFilter: DateFilterObj;
+  granularity: Granularity;
+  segmentFilter?: ExternalSegmentFilter[];
+};
 
 export const getTransientTrendsData = async (
   dsId: string,
@@ -15,17 +29,28 @@ export const getTransientTrendsData = async (
   goalEvent: FunnelStep,
   dateFilter: DateFilterObj,
   granularity: Granularity,
-  interval: number
+  interval: number,
+  segmentFilters: ExternalSegmentFilter[] | null
 ) => {
+  const retentionRequestBody: RetentionRequestBody = {
+    datasourceId: dsId,
+    startEvent: replacePlaceholderWithEmptyString(cloneDeep(startEvent)),
+    goalEvent: replacePlaceholderWithEmptyString(cloneDeep(goalEvent)),
+    dateFilter,
+    granularity,
+  };
+
+  if (segmentFilters && isValidSegmentFilter(segmentFilters)) {
+    const updatedSegmentFilters =
+      replacePlaceholderWithEmptyStringInExternalSegmentFilter(
+        cloneDeep(segmentFilters)
+      );
+
+    retentionRequestBody.segmentFilter = updatedSegmentFilters;
+  }
   const res = await ApperturePost(
     `/retention/trends/transient?interval=${interval}`,
-    {
-      datasourceId: dsId,
-      startEvent,
-      goalEvent,
-      dateFilter,
-      granularity,
-    }
+    retentionRequestBody
   );
   return res.data || [];
 };
@@ -37,17 +62,28 @@ export const getTransientRetentionData = async (
   dateFilter: DateFilterObj,
   granularity: Granularity,
   page_number: number,
-  page_size: number = 10
+  page_size: number = 10,
+  segmentFilters: ExternalSegmentFilter[] | null
 ) => {
+  const retentionRequestBody: RetentionRequestBody = {
+    datasourceId: dsId,
+    startEvent: replacePlaceholderWithEmptyString(cloneDeep(startEvent)),
+    goalEvent: replacePlaceholderWithEmptyString(cloneDeep(goalEvent)),
+    dateFilter,
+    granularity,
+  };
+
+  if (segmentFilters && isValidSegmentFilter(segmentFilters)) {
+    const updatedSegmentFilters =
+      replacePlaceholderWithEmptyStringInExternalSegmentFilter(
+        cloneDeep(segmentFilters)
+      );
+
+    retentionRequestBody.segmentFilter = updatedSegmentFilters;
+  }
   const res = await ApperturePost(
     `/retention/transient?page_number=${page_number}&page_size=${page_size}`,
-    {
-      datasourceId: dsId,
-      startEvent,
-      goalEvent,
-      dateFilter,
-      granularity,
-    }
+    retentionRequestBody
   );
   return res.data || { count: 0, data: [] };
 };
@@ -78,14 +114,23 @@ export const saveRetention = async (
   granularity: Granularity,
   segmentFilters: ExternalSegmentFilter[]
 ) => {
-  const retentionRequestBody = {
+  const retentionRequestBody: RetentionRequestBody = {
     datasourceId: dsId,
     name: retentionName,
-    startEvent,
-    goalEvent,
+    startEvent: replacePlaceholderWithEmptyString(cloneDeep(startEvent)),
+    goalEvent: replacePlaceholderWithEmptyString(cloneDeep(goalEvent)),
     dateFilter,
     granularity,
   };
+
+  if (segmentFilters && isValidSegmentFilter(segmentFilters)) {
+    const updatedSegmentFilters =
+      replacePlaceholderWithEmptyStringInExternalSegmentFilter(
+        cloneDeep(segmentFilters)
+      );
+
+    retentionRequestBody.segmentFilter = updatedSegmentFilters;
+  }
 
   const res = await ApperturePost('/retention', retentionRequestBody);
   return res;
@@ -101,14 +146,23 @@ export const updateRetention = async (
   granularity: Granularity,
   segmentFilters: ExternalSegmentFilter[]
 ) => {
-  const retentionRequestBody = {
+  const retentionRequestBody: RetentionRequestBody = {
     datasourceId: dsId,
     name: retentionName,
-    startEvent,
-    goalEvent,
+    startEvent: replacePlaceholderWithEmptyString(cloneDeep(startEvent)),
+    goalEvent: replacePlaceholderWithEmptyString(cloneDeep(goalEvent)),
     dateFilter,
     granularity,
   };
+
+  if (segmentFilters && isValidSegmentFilter(segmentFilters)) {
+    const updatedSegmentFilters =
+      replacePlaceholderWithEmptyStringInExternalSegmentFilter(
+        cloneDeep(segmentFilters)
+      );
+
+    retentionRequestBody.segmentFilter = updatedSegmentFilters;
+  }
 
   const res = await ApperturePut(
     `/retention/${retentionId}`,

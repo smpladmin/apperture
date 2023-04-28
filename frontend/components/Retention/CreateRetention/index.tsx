@@ -26,10 +26,19 @@ import {
   saveRetention,
   updateRetention,
 } from '@lib/services/retentionService';
-import { hasValidEvents } from '../utils';
+import {
+  hasValidEvents,
+  hasValidFilterValuesForAllEvents,
+  hasValidRetentionEventAndFilters,
+  replaceEmptyStringWithPlaceholder,
+} from '../utils';
 import TransientRetentionView from '../components/TransientRetentionView';
 import { Node } from '@lib/domain/node';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
+import {
+  isValidSegmentFilter,
+  replaceEmptyStringWithPlaceholderInExternalSegmentFilter,
+} from '@lib/utils/common';
 
 const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   const router = useRouter();
@@ -45,8 +54,12 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   const [retentionEvents, setRetentionEvents] = useState<RetentionEvents>(
     savedRetention?.startEvent && savedRetention?.goalEvent
       ? {
-          startEvent: savedRetention.startEvent,
-          goalEvent: savedRetention.goalEvent,
+          startEvent: replaceEmptyStringWithPlaceholder(
+            savedRetention.startEvent
+          ),
+          goalEvent: replaceEmptyStringWithPlaceholder(
+            savedRetention.goalEvent
+          ),
         }
       : {
           startEvent: { event: '', filters: [] },
@@ -87,21 +100,28 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   const [isRetentionBeingEdited, setRetentionBeingEdited] = useState(false);
 
   const [segmentFilters, setSegmentFilters] = useState<ExternalSegmentFilter[]>(
-    savedRetention?.segmentFilter || [
-      {
-        condition: GroupConditions.OR,
-        includes: true,
-        custom: {
-          condition: GroupConditions.AND,
-          filters: [],
-        },
-        segments: [],
-      },
-    ]
+    savedRetention?.segmentFilter
+      ? replaceEmptyStringWithPlaceholderInExternalSegmentFilter(
+          savedRetention.segmentFilter
+        )
+      : [
+          {
+            condition: GroupConditions.OR,
+            includes: true,
+            custom: {
+              condition: GroupConditions.AND,
+              filters: [],
+            },
+            segments: [],
+          },
+        ]
   );
 
   useEffect(() => {
-    if (hasValidEvents(retentionEvents)) {
+    if (
+      hasValidEvents(retentionEvents) &&
+      hasValidFilterValuesForAllEvents(retentionEvents)
+    ) {
       setSaveButtonDisabled(false);
     } else {
       setSaveButtonDisabled(true);
@@ -130,7 +150,7 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   }, []);
 
   useEffect(() => {
-    if (!hasValidEvents(retentionEvents)) {
+    if (!hasValidRetentionEventAndFilters(retentionEvents, segmentFilters)) {
       return;
     }
     setInterval(0);
@@ -139,7 +159,7 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   }, [retentionEvents, granularity, dateFilter, segmentFilters]);
 
   useEffect(() => {
-    if (!hasValidEvents(retentionEvents)) {
+    if (!hasValidRetentionEventAndFilters(retentionEvents, segmentFilters)) {
       return;
     }
 
@@ -150,7 +170,8 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
         retentionEvents.goalEvent,
         dateFilter,
         granularity,
-        interval
+        interval,
+        segmentFilters
       );
       setTrendsData(trendsData);
       setIsTrendsDataLoading(false);
@@ -165,7 +186,7 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   }, []);
 
   useEffect(() => {
-    if (!hasValidEvents(retentionEvents)) {
+    if (!hasValidRetentionEventAndFilters(retentionEvents, segmentFilters)) {
       return;
     }
 
@@ -177,7 +198,8 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
         dateFilter,
         granularity,
         pageNumber,
-        pageSize
+        pageSize,
+        segmentFilters
       );
       setRetentionData(retentionData);
       setIsIntervalDataLoading(false);

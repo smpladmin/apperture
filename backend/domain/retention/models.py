@@ -37,7 +37,7 @@ class Retention(Document):
     start_event: EventSelection
     goal_event: EventSelection
     date_filter: DateFilter
-    segment_filter: Optional[SegmentFilter]
+    segment_filter: Optional[List[SegmentFilter]]
     granularity: Granularity
     enabled: bool = True
 

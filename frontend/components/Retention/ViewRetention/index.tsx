@@ -8,7 +8,11 @@ import {
   TrendScale,
   Retention,
 } from '@lib/domain/retention';
-import { DateFilterObj, DateFilterType } from '@lib/domain/common';
+import {
+  DateFilterObj,
+  DateFilterType,
+  ExternalSegmentFilter,
+} from '@lib/domain/common';
 import {
   getTransientRetentionData,
   getTransientTrendsData,
@@ -18,6 +22,8 @@ import LeftView from './LeftView';
 import { FunnelStep } from '@lib/domain/funnel';
 import TransientRetentionView from '../components/TransientRetentionView';
 import { Flex } from '@chakra-ui/react';
+import { replaceEmptyStringWithPlaceholder } from '../utils';
+import { replaceEmptyStringWithPlaceholderInExternalSegmentFilter } from '@lib/utils/common';
 
 const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
   const router = useRouter();
@@ -33,8 +39,8 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
   });
 
   const [retentionEvents] = useState<FunnelStep[]>([
-    savedRetention?.startEvent,
-    savedRetention?.goalEvent,
+    replaceEmptyStringWithPlaceholder(savedRetention?.startEvent),
+    replaceEmptyStringWithPlaceholder(savedRetention?.goalEvent),
   ]);
 
   const [granularity] = useState<Granularity>(
@@ -54,8 +60,14 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [interval, setInterval] = useState(0);
   const [isEmpty, setIsEmpty] = useState(savedRetention ? false : true);
-  const [trigger, setTrigger] = useState(false);
   const pageSize = 10;
+  const [segmentFilters] = useState<ExternalSegmentFilter[] | null>(
+    savedRetention?.segmentFilter
+      ? replaceEmptyStringWithPlaceholderInExternalSegmentFilter(
+          savedRetention.segmentFilter
+        )
+      : null
+  );
 
   useEffect(() => {
     const getTrendsData = async () => {
@@ -65,7 +77,8 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
         savedRetention.goalEvent,
         savedRetention.dateFilter,
         savedRetention.granularity,
-        interval
+        interval,
+        segmentFilters
       );
       setTrendsData(trendsData);
       setIsTrendsDataLoading(false);
@@ -84,7 +97,8 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
         savedRetention.dateFilter,
         savedRetention.granularity,
         pageNumber,
-        pageSize
+        pageSize,
+        segmentFilters
       );
       setRetentionData(retentionData);
       setIsIntervalDataLoading(false);
@@ -128,7 +142,11 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
         flexGrow={1}
         bg={'white.400'}
       >
-        <LeftView retentionEvents={retentionEvents} granularity={granularity} />
+        <LeftView
+          retentionEvents={retentionEvents}
+          granularity={granularity}
+          segmentFilters={segmentFilters}
+        />
         <ViewPanel>
           <TransientRetentionView
             isEmpty={isEmpty}

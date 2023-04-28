@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from beanie import PydanticObjectId
 from pydantic import BaseModel
@@ -16,7 +16,7 @@ class TransientRetentionDto(BaseModel):
     startEvent: EventSelection
     goalEvent: EventSelection
     dateFilter: DateFilter
-    segmentFilter: Optional[SegmentFilter]
+    segmentFilter: Optional[List[SegmentFilter]]
     granularity: Granularity
 
 
@@ -26,7 +26,7 @@ class CreateRetentionDto(BaseModel):
     goalEvent: EventSelection
     name: str
     dateFilter: DateFilter
-    segmentFilter: Optional[SegmentFilter]
+    segmentFilter: Optional[List[SegmentFilter]]
     granularity: Granularity
 
 

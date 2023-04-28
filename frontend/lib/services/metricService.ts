@@ -1,9 +1,11 @@
+import { replaceEmptyStringPlaceholder } from '@components/Metric/util';
+import { DateFilterObj, ExternalSegmentFilter } from '@lib/domain/common';
+import { MetricAggregate } from '@lib/domain/metric';
 import {
-  isValidMetricSegmentFilter,
-  replaceEmptyStringPlaceholder,
-} from '@components/Metric/util';
-import { DateFilterObj } from '@lib/domain/common';
-import { MetricAggregate, MetricSegmentFilter } from '@lib/domain/metric';
+  isValidSegmentFilter,
+  replacePlaceholderWithEmptyStringInExternalSegmentFilter,
+} from '@lib/utils/common';
+import { cloneDeep } from 'lodash';
 import {
   AppertureDelete,
   AppertureGet,
@@ -19,7 +21,7 @@ type MetricRequestBody = {
   aggregates: MetricAggregate[];
   breakdown: string[];
   dateFilter?: DateFilterObj;
-  segmentFilter?: MetricSegmentFilter[];
+  segmentFilter?: ExternalSegmentFilter[];
 };
 
 export const computeMetric = async (
@@ -28,7 +30,7 @@ export const computeMetric = async (
   aggregates: MetricAggregate[],
   breakdown: string[],
   dateFilter: DateFilterObj,
-  segmentFilters: MetricSegmentFilter[] | null,
+  segmentFilters: ExternalSegmentFilter[] | null,
   signal?: AbortSignal
 ) => {
   const requestBody: MetricRequestBody = {
@@ -39,8 +41,13 @@ export const computeMetric = async (
     dateFilter,
   };
 
-  if (segmentFilters && isValidMetricSegmentFilter(segmentFilters)) {
-    requestBody.segmentFilter = segmentFilters;
+  if (segmentFilters && isValidSegmentFilter(segmentFilters)) {
+    const updatedSegmentFilters =
+      replacePlaceholderWithEmptyStringInExternalSegmentFilter(
+        cloneDeep(segmentFilters)
+      );
+
+    requestBody.segmentFilter = updatedSegmentFilters;
   }
 
   const res = await ApperturePost('metrics/compute', requestBody, { signal });
@@ -59,7 +66,7 @@ export const saveMetric = async (
   aggregates: MetricAggregate[],
   breakdown: string[],
   dateFilter: DateFilterObj,
-  segmentFilters: MetricSegmentFilter[]
+  segmentFilters: ExternalSegmentFilter[]
 ) => {
   const requestBody: MetricRequestBody = {
     name,
@@ -70,8 +77,13 @@ export const saveMetric = async (
     dateFilter,
   };
 
-  if (segmentFilters && isValidMetricSegmentFilter(segmentFilters)) {
-    requestBody.segmentFilter = segmentFilters;
+  if (segmentFilters && isValidSegmentFilter(segmentFilters)) {
+    const updatedSegmentFilters =
+      replacePlaceholderWithEmptyStringInExternalSegmentFilter(
+        cloneDeep(segmentFilters)
+      );
+
+    requestBody.segmentFilter = updatedSegmentFilters;
   }
 
   const result = await ApperturePost('/metrics', requestBody);
@@ -86,7 +98,7 @@ export const updateMetric = async (
   aggregates: MetricAggregate[],
   breakdown: string[],
   dateFilter: DateFilterObj,
-  segmentFilters: MetricSegmentFilter[]
+  segmentFilters: ExternalSegmentFilter[]
 ) => {
   const requestBody: MetricRequestBody = {
     name,
@@ -97,8 +109,13 @@ export const updateMetric = async (
     dateFilter,
   };
 
-  if (segmentFilters && isValidMetricSegmentFilter(segmentFilters)) {
-    requestBody.segmentFilter = segmentFilters;
+  if (segmentFilters && isValidSegmentFilter(segmentFilters)) {
+    const updatedSegmentFilters =
+      replacePlaceholderWithEmptyStringInExternalSegmentFilter(
+        cloneDeep(segmentFilters)
+      );
+
+    requestBody.segmentFilter = updatedSegmentFilters;
   }
 
   const result = await ApperturePut('/metrics/' + metricId, requestBody);
