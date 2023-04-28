@@ -6,7 +6,7 @@ import {
   ApperturePrivateGet,
   ApperturePut,
 } from './util';
-import { DateFilterObj } from '@lib/domain/common';
+import { DateFilterObj, ExternalSegmentFilter } from '@lib/domain/common';
 import { FunnelStep } from '@lib/domain/funnel';
 
 export const getTransientTrendsData = async (
@@ -75,7 +75,8 @@ export const saveRetention = async (
   startEvent: FunnelStep,
   goalEvent: FunnelStep,
   dateFilter: DateFilterObj,
-  granularity: Granularity
+  granularity: Granularity,
+  segmentFilters: ExternalSegmentFilter[]
 ) => {
   const retentionRequestBody = {
     datasourceId: dsId,
@@ -97,7 +98,8 @@ export const updateRetention = async (
   startEvent: FunnelStep,
   goalEvent: FunnelStep,
   dateFilter: DateFilterObj,
-  granularity: Granularity
+  granularity: Granularity,
+  segmentFilters: ExternalSegmentFilter[]
 ) => {
   const retentionRequestBody = {
     datasourceId: dsId,

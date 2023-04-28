@@ -1,6 +1,6 @@
 import { AppertureUser as User } from './user';
 import { FunnelStep } from '@lib/domain/funnel';
-import { DateFilterObj } from './common';
+import { DateFilterObj, ExternalSegmentFilter } from './common';
 
 export type RetentionEvents = {
   startEvent: FunnelStep;
@@ -43,7 +43,7 @@ export type Retention = {
   startEvent: FunnelStep;
   goalEvent: FunnelStep;
   dateFilter: DateFilterObj;
-  segment_filter?: any;
+  segmentFilter?: ExternalSegmentFilter[];
   granularity: Granularity;
 };
 

@@ -4,7 +4,7 @@ import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import Header from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { CreateRetentionAction } from './CreateRetentionAction';
 import {
   Granularity,
@@ -14,7 +14,12 @@ import {
   TrendScale,
   Retention,
 } from '@lib/domain/retention';
-import { DateFilterObj, DateFilterType } from '@lib/domain/common';
+import {
+  DateFilterObj,
+  DateFilterType,
+  ExternalSegmentFilter,
+  GroupConditions,
+} from '@lib/domain/common';
 import {
   getTransientRetentionData,
   getTransientTrendsData,
@@ -23,6 +28,8 @@ import {
 } from '@lib/services/retentionService';
 import { hasValidEvents } from '../utils';
 import TransientRetentionView from '../components/TransientRetentionView';
+import { Node } from '@lib/domain/node';
+import { getEventProperties, getNodes } from '@lib/services/datasourceService';
 
 const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   const router = useRouter();
@@ -59,6 +66,11 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   const [trendScale, setTrendScale] = useState<TrendScale>(
     TrendScale.PERCENTAGE
   );
+
+  const [loadingEventsAndProperties, setLoadingEventsAndProperties] =
+    useState(false);
+  const [eventList, setEventList] = useState<Node[]>([]);
+  const [eventProperties, setEventProperties] = useState<string[]>([]);
   const [isTrendsDataLoading, setIsTrendsDataLoading] = useState(true);
   const [isIntervalDataLoading, setIsIntervalDataLoading] = useState(true);
   const [trendsData, setTrendsData] = useState<RetentionTrendsData[]>([]);
@@ -73,6 +85,20 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   const pageSize = 10;
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
   const [isRetentionBeingEdited, setRetentionBeingEdited] = useState(false);
+
+  const [segmentFilters, setSegmentFilters] = useState<ExternalSegmentFilter[]>(
+    savedRetention?.segmentFilter || [
+      {
+        condition: GroupConditions.OR,
+        includes: true,
+        custom: {
+          condition: GroupConditions.AND,
+          filters: [],
+        },
+        segments: [],
+      },
+    ]
+  );
 
   useEffect(() => {
     if (hasValidEvents(retentionEvents)) {
@@ -89,13 +115,28 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   }, [retentionEvents]);
 
   useEffect(() => {
+    const fetchEventProperties = async () => {
+      const [eventPropertiesResult, events] = await Promise.all([
+        getEventProperties(dsId as string),
+        getNodes(dsId as string),
+      ]);
+
+      setEventList(events);
+      setEventProperties(eventPropertiesResult);
+      setLoadingEventsAndProperties(false);
+    };
+    setLoadingEventsAndProperties(true);
+    fetchEventProperties();
+  }, []);
+
+  useEffect(() => {
     if (!hasValidEvents(retentionEvents)) {
       return;
     }
     setInterval(0);
     setPageNumber(0);
     setTrigger((prevState: Boolean) => !prevState);
-  }, [retentionEvents, granularity, dateFilter]);
+  }, [retentionEvents, granularity, dateFilter, segmentFilters]);
 
   useEffect(() => {
     if (!hasValidEvents(retentionEvents)) {
@@ -155,7 +196,8 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
           retentionEvents.startEvent,
           retentionEvents.goalEvent,
           dateFilter,
-          granularity
+          granularity,
+          segmentFilters
         )
       : await saveRetention(
           dsId as string,
@@ -163,7 +205,8 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
           retentionEvents.startEvent,
           retentionEvents.goalEvent,
           dateFilter,
-          granularity
+          granularity,
+          segmentFilters
         );
 
     setSaveButtonDisabled(true);
@@ -177,6 +220,13 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
       setSaveButtonDisabled(false);
     }
   };
+
+  const updateSegmentFilter = useCallback(
+    (retentionSegmentFilter: ExternalSegmentFilter[]) => {
+      setSegmentFilters(retentionSegmentFilter);
+    },
+    [segmentFilters]
+  );
 
   return (
     <Flex
@@ -206,6 +256,11 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
               setRetentionEvents={setRetentionEvents}
               granularity={granularity}
               setGranularity={setGranularity}
+              segmentFilters={segmentFilters}
+              updateSegmentFilter={updateSegmentFilter}
+              loadingEventsAndProperties={loadingEventsAndProperties}
+              eventList={eventList}
+              eventProperties={eventProperties}
             />
           </Card>
         </ActionPanel>
