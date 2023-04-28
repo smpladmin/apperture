@@ -212,7 +212,7 @@ const SelectEventsRetention = ({
             </Flex>
           </Flex>
         </Flex>
-        {Boolean(retentionEvent.filters.length) && (
+        {Boolean(retentionEvent.filters?.length) && (
           <Flex direction={'column'} gap={'2'}>
             {retentionEvent.filters.map((filter, index) => (
               <Fragment key={index}>

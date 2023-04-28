@@ -1,14 +1,10 @@
-import { Button, ButtonGroup, Flex } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import Card from '@components/Card';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import Header from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import DateFilterComponent from '@components/Date/DateFilter';
-import RetentionEmptyState from '../components/RetentionEmptyState';
-import { Hash, Percent } from 'phosphor-react';
-import { BLACK_DEFAULT, GREY_500 } from '@theme/index';
 import { CreateRetentionAction } from './CreateRetentionAction';
 import {
   Granularity,
@@ -25,10 +21,7 @@ import {
   saveRetention,
   updateRetention,
 } from '@lib/services/retentionService';
-import RetentionTrend from '../components/RetentionTrend';
-import IntervalTab from '../components/IntervalTab';
 import { hasValidEvents } from '../utils';
-import LoadingSpinner from '@components/LoadingSpinner';
 import TransientRetentionView from '../components/TransientRetentionView';
 
 const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {

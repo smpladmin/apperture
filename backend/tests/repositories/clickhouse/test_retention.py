@@ -1,7 +1,5 @@
 from unittest.mock import MagicMock, ANY
 
-from pypika import Interval
-
 from domain.retention.models import EventSelection, Granularity
 from repositories.clickhouse.retention import Retention
 
