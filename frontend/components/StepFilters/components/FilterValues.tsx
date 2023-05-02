@@ -95,6 +95,7 @@ const FilterValues = ({
               inputRef.current?.blur();
             }
           }}
+          data-testid={'filter-value-input'}
         />
       ) : (
         <>
@@ -112,6 +113,7 @@ const FilterValues = ({
                 onClick={() => {
                   setIsValueDropDownOpen(true);
                 }}
+                data-testid={'filter-values'}
               >
                 <Text
                   data-testid={'event-filter-values'}

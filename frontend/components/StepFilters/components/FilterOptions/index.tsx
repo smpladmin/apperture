@@ -5,7 +5,11 @@ import { GREY_500 } from '@theme/index';
 import { DotsThreeVertical } from 'phosphor-react';
 import React, { useRef, useState } from 'react';
 import FilterOptionsMenu from './FilterOptionsMenu';
-import { FilterDataType, WhereFilter } from '@lib/domain/common';
+import {
+  FilterDataType,
+  FilterOptionMenuType,
+  WhereFilter,
+} from '@lib/domain/common';
 import { WhereSegmentFilter } from '@lib/domain/segment';
 
 type FilterOptionsProp = {
@@ -35,7 +39,7 @@ const FilterOptions = ({
   return (
     <Box position={'relative'} ref={selectFilterOptions}>
       <Box
-        data-testid={'change-datatype'}
+        data-testid={'filter-datatype-option'}
         p={'1'}
         fontWeight={'500'}
         color={'grey.200'}
