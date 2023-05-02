@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import AddFilter from '../../../StepFilters/AddFilter';
+import AddFilter from '../../../StepFilters/components/AddFilter';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { FunnelStep } from '@lib/domain/funnel';
 import { MapContext } from '@lib/contexts/mapContext';
@@ -162,6 +162,13 @@ const FunnelComponentCard = ({
     updateStepFilters(stepFilters);
   };
 
+  const handleOperatorChange = (filterIndex: number, selectedOperator: any) => {
+    let stepFilters = [...funnelStep.filters];
+    stepFilters[filterIndex].operator = selectedOperator;
+
+    updateStepFilters(stepFilters);
+  };
+
   return (
     <Flex
       p={'3'}
@@ -242,6 +249,7 @@ const FunnelComponentCard = ({
                 handleSetFilterValue={handleSetFilterValue}
                 handleRemoveFilter={handleRemoveFilter}
                 handleFilterDatatypeChange={handleFilterDatatypeChange}
+                handleOperatorChange={handleOperatorChange}
               />
             </Fragment>
           ))}

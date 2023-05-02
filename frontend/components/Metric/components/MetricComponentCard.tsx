@@ -18,7 +18,7 @@ import {
 } from '@lib/domain/common';
 import MetricAggregation from './MetricAggregation';
 import StepFilter from '@components/StepFilters/StepFilters';
-import AddFilterComponent from '@components/StepFilters/AddFilter';
+import AddFilterComponent from '@components/StepFilters/components/AddFilter';
 import { Trash } from 'phosphor-react';
 import { COLOR_PALLETE_5, useColorFromPallete } from '@components/Metric/util';
 import { GREY_500 } from '@theme/index';
@@ -146,6 +146,13 @@ const MetricComponentCard = ({
       FilterOperatorsDatatypeMap[selectedDatatype][0];
     stepFilters[filterIndex]['values'] = [];
     stepFilters[filterIndex]['datatype'] = selectedDatatype;
+
+    setFilters(stepFilters);
+  };
+
+  const handleOperatorChange = (filterIndex: number, selectedOperator: any) => {
+    let stepFilters = [...filters];
+    stepFilters[filterIndex].operator = selectedOperator;
 
     setFilters(stepFilters);
   };
@@ -287,6 +294,7 @@ const MetricComponentCard = ({
                     handleSetFilterValue={handleSetFilterValue}
                     handleRemoveFilter={removeFilter}
                     handleFilterDatatypeChange={handleFilterDatatypeChange}
+                    handleOperatorChange={handleOperatorChange}
                   />
                 </Flex>
               ))}

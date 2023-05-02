@@ -5,7 +5,7 @@ import { GREY_500, GREY_600 } from '@theme/index';
 import { Trash, UsersFour } from 'phosphor-react';
 import React, { useRef, useState } from 'react';
 import SelectSegmentsDropdown from './SelectSegmentsDropdown';
-import AddFilterComponent from '@components/StepFilters/AddFilter';
+import AddFilterComponent from '@components/StepFilters/components/AddFilter';
 import { MetricSegmentFilter } from '@lib/domain/metric';
 import StepFilter from '@components/StepFilters/StepFilters';
 import { FilterType, GroupConditions } from '@lib/domain/common';

@@ -88,3 +88,9 @@ export enum GroupConditions {
   AND = 'and',
   OR = 'or',
 }
+
+export const FilterOperatorsDatatypeMap = {
+  [FilterDataType.BOOL]: Object.values(FilterOperatorsBool),
+  [FilterDataType.NUMBER]: Object.values(FilterOperatorsNumber),
+  [FilterDataType.STRING]: Object.values(FilterOperatorsString),
+};
