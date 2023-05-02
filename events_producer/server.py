@@ -20,9 +20,24 @@ producer = None
 
 app = FastAPI()
 
+allowed_origins = [
+    "https://app.apperture.io",
+    "http://app.apperture.io",
+    "https://api.apperture.io",
+    "http://api.apperture.io",
+    "https://www.parallelhq.com",
+    "https://www.sangeethamobiles.com",
+    "https://sangeethamobiles.com",
+    "https://urbanmonkey.com",
+    "https://www.urbanmonkey.com",
+    "https://www.gotoexperts.co",
+    "https://sangeetha.bangalore2.com",
+    "http://localhost:3000",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=os.get("ALLOWED_ORIGIN", allowed_origins),
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS", "HEAD"],
     allow_headers=["*"],
