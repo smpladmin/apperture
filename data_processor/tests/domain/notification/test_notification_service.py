@@ -46,7 +46,7 @@ class TestNotificationService:
                 reference="639237437483490",
                 threshold_type=NotificationThresholdType.PCT,
                 user_threshold=ThresholdMap(min=12.0, max=18.0),
-                triggered=True,
+                trigger=True,
             ),
             Notification(
                 name="Alert Metric",
@@ -57,7 +57,7 @@ class TestNotificationService:
                 reference="6777439823920337",
                 threshold_type=NotificationThresholdType.PCT,
                 user_threshold=ThresholdMap(min=1212.0, max=3236.0),
-                triggered=False,
+                trigger=False,
             ),
         ]
 
@@ -71,7 +71,7 @@ class TestNotificationService:
                 reference="639237437483490",
                 threshold_type=None,
                 user_threshold=None,
-                triggered=None,
+                trigger=None,
             ),
             Notification(
                 name="Alert Metric",
@@ -82,7 +82,7 @@ class TestNotificationService:
                 reference="6777439823920337",
                 threshold_type=None,
                 user_threshold=None,
-                triggered=None,
+                trigger=None,
             ),
         ]
 
@@ -96,7 +96,7 @@ class TestNotificationService:
                 reference="639237437483490",
                 threshold_type=NotificationThresholdType.PCT,
                 user_threshold=ThresholdMap(min=12.0, max=18.0),
-                triggered=True,
+                trigger=True,
             ),
             Notification(
                 name="Alert Metric",
@@ -107,7 +107,7 @@ class TestNotificationService:
                 reference="6777439823920337",
                 threshold_type=NotificationThresholdType.PCT,
                 user_threshold=ThresholdMap(min=1212.0, max=3236.0),
-                triggered=False,
+                trigger=False,
             ),
             Notification(
                 name="Video Funnel",
@@ -118,7 +118,7 @@ class TestNotificationService:
                 reference="639237437483490",
                 threshold_type=None,
                 user_threshold=None,
-                triggered=None,
+                trigger=None,
             ),
             Notification(
                 name="Alert Metric",
@@ -129,7 +129,7 @@ class TestNotificationService:
                 reference="6777439823920337",
                 threshold_type=None,
                 user_threshold=None,
-                triggered=None,
+                trigger=None,
             ),
         ]
 
@@ -190,7 +190,7 @@ class TestNotificationService:
                     reference="639237437483490",
                     threshold_type=NotificationThresholdType.PCT,
                     user_threshold=ThresholdMap(min=12.0, max=18.0),
-                    triggered=True,
+                    trigger=True,
                 ),
                 "reduced by more than 16.67% yesterday",
             ),
@@ -204,7 +204,7 @@ class TestNotificationService:
                     reference="6777439823920337",
                     threshold_type=NotificationThresholdType.ABSOLUTE,
                     user_threshold=ThresholdMap(min=-3, max=3),
-                    triggered=False,
+                    trigger=False,
                 ),
                 "dropped below -3.0 yesterday",
             ),
@@ -334,7 +334,7 @@ class TestNotificationService:
                     reference="639237437483490",
                     threshold_type=None,
                     user_threshold=None,
-                    triggered=None,
+                    trigger=None,
                 ),
                 Notification(
                     name="Alert Metric",
@@ -345,7 +345,7 @@ class TestNotificationService:
                     reference="6777439823920337",
                     threshold_type=None,
                     user_threshold=None,
-                    triggered=None,
+                    trigger=None,
                 ),
             ],
             "https://hooks.slack.com/services/T0MUGH/B052MN3/hot22Qj1",
@@ -362,7 +362,7 @@ class TestNotificationService:
                     reference="639237437483490",
                     threshold_type=NotificationThresholdType.PCT,
                     user_threshold=ThresholdMap(min=12.0, max=18.0),
-                    triggered=True,
+                    trigger=True,
                 )
             ],
             "https://hooks.slack.com/services/T0MUGH/B052MN3/hot22Qj1",

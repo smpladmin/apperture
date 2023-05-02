@@ -96,13 +96,20 @@ class NotificationService:
                 for item in items
             ]
         )
-        response = requests.post(
-            slack_url,
-            json={
-                "blocks": payload,
-            },
-        )
-        logging.info(f"Sent updates with status {response.status_code}")
+        if len(payload) > 1:
+            response = requests.post(
+                slack_url,
+                json={
+                    "blocks": payload,
+                },
+            )
+            logging.info(
+                f"Sent update with status {response.status_code}"
+            ) if response.ok else logging.info(
+                f"Failed to send update with status {response.status_code}"
+            )
+        else:
+            logging.info("No updates sent")
 
     def get_alert_threshold_text(self, alert: Notification):
         # Set the message and threshold based on the type of threshold set for the notification alert
@@ -150,18 +157,20 @@ class NotificationService:
                 for item in items
             ]
         )
-
-        response = requests.post(
-            slack_url,
-            json={
-                "blocks": payload,
-            },
-        )
-        logging.info(
-            f"Sent alert with status {response.status_code}"
-        ) if response.ok else logging.info(
-            f"Failed to send alert with status {response.status_code}"
-        )
+        if len(payload) > 1:
+            response = requests.post(
+                slack_url,
+                json={
+                    "blocks": payload,
+                },
+            )
+            logging.info(
+                f"Sent alert with status {response.status_code}"
+            ) if response.ok else logging.info(
+                f"Failed to send alert with status {response.status_code}"
+            )
+        else:
+            logging.info("No alerts sent")
 
     def send_notification(
         self,
@@ -178,7 +187,7 @@ class NotificationService:
         alerts = [
             n
             for n in notifications
-            if n.notification_type == NotificationType.ALERT and n.triggered
+            if n.notification_type == NotificationType.ALERT and n.trigger
         ]
 
         logging.info(f"Sending updates {updates} to {channel}, {slack_url}")

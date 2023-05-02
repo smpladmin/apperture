@@ -49,4 +49,4 @@ class Notification(BaseModel):
     reference: str
     threshold_type: Optional[NotificationThresholdType]
     user_threshold: Optional[ThresholdMap]
-    triggered: Optional[bool]
+    trigger: Optional[bool]

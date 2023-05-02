@@ -326,4 +326,5 @@ async def get_transient_funnel_trends(
         steps=dto.steps,
         date_filter=dto.dateFilter,
         conversion_window=dto.conversionWindow,
+        random_sequence=dto.randomSequence,
     )
