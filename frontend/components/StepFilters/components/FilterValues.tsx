@@ -114,6 +114,8 @@ const FilterValues = ({
                   setIsValueDropDownOpen(true);
                 }}
                 data-testid={'filter-values'}
+                bg={isValueDropDownOpen ? 'white.400' : ''}
+                _hover={{ background: 'white.400' }}
               >
                 <Text
                   data-testid={'event-filter-values'}

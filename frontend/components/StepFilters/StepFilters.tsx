@@ -139,7 +139,6 @@ const StepFilter = ({
               data-testid={'filter-condition'}
               cursor={'pointer'}
               borderRadius={'4px'}
-              _hover={{ color: 'grey.800', background: 'white.400' }}
             >
               <Text
                 color={'inherit'}
@@ -165,6 +164,8 @@ const StepFilter = ({
                   setIsPropertyDropdownOpen(true);
                 }}
                 cursor={'pointer'}
+                bg={isPropertyDropdownOpen ? 'white.400' : ''}
+                _hover={{ background: 'white.400' }}
               >
                 <Text
                   fontSize={'xs-12'}

@@ -39,9 +39,11 @@ const FilterOperators = ({
         p={1}
         height={6}
         data-testid={'filter-operator'}
-        borderRadius={'4px'}
+        borderRadius={'4'}
         cursor={'pointer'}
         onClick={() => setIsFilterOperatorsListOpen(true)}
+        bg={isFilterOperatorsListOpen ? 'white.400' : ''}
+        _hover={{ background: 'white.400' }}
       >
         <Text
           color={'inherit'}
