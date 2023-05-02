@@ -1,4 +1,4 @@
-import { WhereFilter } from '@lib/domain/common';
+import { FilterDataType, WhereFilter } from '@lib/domain/common';
 import {
   ComputedMetric,
   MetricAggregate,
@@ -61,7 +61,9 @@ export const getCountOfValidAggregates = (aggregates: MetricAggregate[]) => {
 export const isEveryCustomSegmentFilterValid = (
   filters: WhereSegmentFilter[]
 ) => {
-  return filters?.every((filter) => filter.values.length);
+  return filters?.every(
+    (filter) => filter.values.length || filter.datatype === FilterDataType.BOOL
+  );
 };
 
 export const isValidMetricSegmentFilter = (
@@ -98,7 +100,8 @@ export const isValidAggregates = (
         aggregate.reference_id &&
         aggregate.variable &&
         aggregate.filters.every(
-          (filter: WhereFilter) => filter.values.length
+          (filter: WhereFilter) =>
+            filter.values.length || filter.datatype === FilterDataType.BOOL
         ) &&
         _isValidAggregation(aggregate.aggregations)
     ) &&

@@ -15,7 +15,7 @@ import { MapContext } from '@lib/contexts/mapContext';
 import FunnelStepFilterComponent from '../../../StepFilters/StepFilters';
 import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
-import { cloneDeep, filter } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { FilterType } from '@lib/domain/segment';
 import { GREY_500, WHITE_DEFAULT } from '@theme/index';
 import { Node } from '@lib/domain/node';
@@ -25,8 +25,10 @@ import {
   FilterConditions,
   FilterOperatorsString,
   FilterDataType,
+  ISFilterOperators,
+  FilterOperators,
+  FilterOperatorsDatatypeMap,
 } from '@lib/domain/common';
-import { FilterOperatorsDatatypeMap } from '@components/Segments/util';
 
 type FunnelComponentCardProps = {
   index: number;
@@ -162,8 +164,27 @@ const FunnelComponentCard = ({
     updateStepFilters(stepFilters);
   };
 
-  const handleOperatorChange = (filterIndex: number, selectedOperator: any) => {
+  const handleOperatorChange = (
+    filterIndex: number,
+    selectedOperator: FilterOperators
+  ) => {
     let stepFilters = [...funnelStep.filters];
+    /*
+    While changing operator from `is/is_not` to `contains/does_not_contain`
+    the input field changes from a Selectable Dropdown to an Input Field,
+    hence the selected value needs a reset.
+    */
+    if (stepFilters[filterIndex].datatype === FilterDataType.STRING) {
+      const isMatchingFilter =
+        ISFilterOperators.includes(
+          stepFilters[filterIndex].operator as FilterOperatorsString
+        ) ===
+        ISFilterOperators.includes(selectedOperator as FilterOperatorsString);
+
+      if (!isMatchingFilter) {
+        stepFilters[index].values = [];
+      }
+    }
     stepFilters[filterIndex].operator = selectedOperator;
 
     updateStepFilters(stepFilters);

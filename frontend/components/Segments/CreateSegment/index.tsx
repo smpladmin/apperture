@@ -11,7 +11,6 @@ import {
 import {
   FilterItemType,
   Segment,
-  SegmentFilterDataType,
   SegmentGroup,
   SegmentProperty,
   SegmentTableData,
@@ -28,7 +27,7 @@ import { getAppertureUserInfo } from '@lib/services/userService';
 import { cloneDeep, isEqual } from 'lodash';
 import ExitConfirmationModal from './components/ExitConfirmationModal';
 import GroupCondition from './components/GroupConditions';
-import { GroupConditions } from '@lib/domain/common';
+import { FilterDataType, GroupConditions } from '@lib/domain/common';
 
 type CreateSegmentProp = {
   savedSegment?: Segment;
@@ -115,8 +114,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
         group.filters.length &&
         group.filters.every(
           (filter) =>
-            filter.values.length ||
-            filter.datatype === SegmentFilterDataType.BOOL
+            filter.values.length || filter.datatype === FilterDataType.BOOL
         )
     );
     if (validGroupQuery || refreshOnDelete || isGroupConditionChanged) {

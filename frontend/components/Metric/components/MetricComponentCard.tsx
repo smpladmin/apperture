@@ -12,8 +12,10 @@ import { Node } from '@lib/domain/node';
 import {
   FilterConditions,
   FilterDataType,
+  FilterOperatorsDatatypeMap,
   FilterOperatorsString,
   FilterType,
+  ISFilterOperators,
   WhereFilter,
 } from '@lib/domain/common';
 import MetricAggregation from './MetricAggregation';
@@ -23,7 +25,6 @@ import { Trash } from 'phosphor-react';
 import { COLOR_PALLETE_5, useColorFromPallete } from '@components/Metric/util';
 import { GREY_500 } from '@theme/index';
 import SelectEventOrSegmentDropdown from './SelectEventOrSegmentDropdown';
-import { FilterOperatorsDatatypeMap } from '@components/Segments/util';
 
 type MetricComponentCardProps = {
   index: number;
@@ -152,8 +153,24 @@ const MetricComponentCard = ({
 
   const handleOperatorChange = (filterIndex: number, selectedOperator: any) => {
     let stepFilters = [...filters];
-    stepFilters[filterIndex].operator = selectedOperator;
+    /*
+    While changing operator from `is/is_not` to `contains/does_not_contain`
+    the input field changes from a Selectable Dropdown to an Input Field,
+    hence the selected value needs a reset.
+    */
+    if (stepFilters[filterIndex].datatype === FilterDataType.STRING) {
+      const isMatchingFilter =
+        ISFilterOperators.includes(
+          stepFilters[filterIndex].operator as FilterOperatorsString
+        ) ===
+        ISFilterOperators.includes(selectedOperator as FilterOperatorsString);
 
+      if (!isMatchingFilter) {
+        stepFilters[index].values = [];
+      }
+    }
+
+    stepFilters[filterIndex].operator = selectedOperator;
     setFilters(stepFilters);
   };
 

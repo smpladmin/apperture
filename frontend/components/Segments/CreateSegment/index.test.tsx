@@ -23,7 +23,6 @@ import {
   FilterType,
   SegmentFilter,
   SegmentFilterConditions,
-  SegmentFilterDataType,
   WhereSegmentFilter,
 } from '@lib/domain/segment';
 import { getAppertureUserInfo } from '@lib/services/userService';
@@ -32,7 +31,11 @@ import {
   getMonthDateYearFormattedString,
 } from '../util';
 import { addDays } from 'date-fns';
-import { DateFilterType, GroupConditions } from '@lib/domain/common';
+import {
+  DateFilterType,
+  FilterDataType,
+  GroupConditions,
+} from '@lib/domain/common';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/utils/common');
@@ -110,7 +113,7 @@ describe('Create Segment', () => {
     return groupConditions.map((condition) => condition.textContent);
   };
 
-  const switchFilterDatatype = async (datatype: SegmentFilterDataType) => {
+  const switchFilterDatatype = async (datatype: FilterDataType) => {
     const datatypeIcon = screen.getByTestId('change-datatype');
     fireEvent.click(datatypeIcon);
     const dropdownMenu = screen.getByTestId('dropdown-item');
@@ -183,7 +186,7 @@ describe('Create Segment', () => {
             operator: 'is',
             values: ['Chennai', 'Guwahati', 'Patna'],
             type: FilterType.WHERE,
-            datatype: SegmentFilterDataType.STRING,
+            datatype: FilterDataType.STRING,
           },
           {
             condition: SegmentFilterConditions.AND,
@@ -191,7 +194,7 @@ describe('Create Segment', () => {
             operator: 'is',
             values: ['1.5.5', '1.5.6'],
             type: FilterType.WHERE,
-            datatype: SegmentFilterDataType.STRING,
+            datatype: FilterDataType.STRING,
           },
         ] as WhereSegmentFilter[],
         condition: GroupConditions.AND,
@@ -1114,7 +1117,7 @@ describe('Create Segment', () => {
               operator: 'is',
               values: ['Chennai', 'Guwahati', 'Patna'],
               type: FilterType.WHERE,
-              datatype: SegmentFilterDataType.STRING,
+              datatype: FilterDataType.STRING,
             },
             {
               condition: SegmentFilterConditions.AND,
@@ -1122,7 +1125,7 @@ describe('Create Segment', () => {
               operator: 'is',
               values: ['1.5.5', '1.5.6'],
               type: FilterType.WHERE,
-              datatype: SegmentFilterDataType.STRING,
+              datatype: FilterDataType.STRING,
             },
             {
               condition: SegmentFilterConditions.WHO,
@@ -1567,7 +1570,7 @@ describe('Create Segment', () => {
       });
 
       await addWhereFilter();
-      await switchFilterDatatype(SegmentFilterDataType.NUMBER);
+      await switchFilterDatatype(FilterDataType.NUMBER);
 
       // expect to see input field and operator switches to 'Equals'
       const queries = screen.getAllByTestId('query-builder');
@@ -1592,7 +1595,7 @@ describe('Create Segment', () => {
         );
       });
       await addWhereFilter();
-      await switchFilterDatatype(SegmentFilterDataType.BOOL);
+      await switchFilterDatatype(FilterDataType.BOOL);
 
       // expect to see input field and operator switches to 'Equals'
       const queries = screen.getAllByTestId('query-builder');
@@ -1673,7 +1676,7 @@ describe('Create Segment', () => {
       await addWhereFilter();
 
       // change datatype to bool(True/ False)
-      await switchFilterDatatype(SegmentFilterDataType.BOOL);
+      await switchFilterDatatype(FilterDataType.BOOL);
 
       // open filter operator dropdown
       const filterOperatorText = screen.getByTestId('filter-operator');

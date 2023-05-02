@@ -1,17 +1,17 @@
-import { Box, Flex, Input, Text } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { getEventPropertiesValue } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
-import SearchableCheckboxDropdown from '@components/SearchableDropdown/SearchableCheckboxDropdown';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { GREY_500, GREY_700 } from '@theme/index';
 import { ArrowElbowDownRight, Trash } from 'phosphor-react';
-import { FilterDataType, WhereFilter } from '@lib/domain/common';
+import { WhereFilter } from '@lib/domain/common';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
-import { getFilterValuesText, trimLabel } from '@lib/utils/common';
+import { trimLabel } from '@lib/utils/common';
 import { WhereSegmentFilter } from '@lib/domain/segment';
 import FilterOptions from './components/FilterOptions';
 import FilterOperators from './components/FilterOperators';
+import FilterValues from './components/FilterValues';
 
 type FilterComponentProps = {
   filter: WhereFilter | WhereSegmentFilter;
@@ -38,7 +38,6 @@ const StepFilter = ({
 }: FilterComponentProps) => {
   const router = useRouter();
   const { dsId } = router.query;
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const [isHovered, setIsHovered] = useState(false);
   const [valueList, setValueList] = useState<string[]>([]);
@@ -53,7 +52,6 @@ const StepFilter = ({
   const [areAllValuesSelected, setAreAllValuesSelected] =
     useState<boolean>(false);
 
-  const eventValueRef = useRef(null);
   const eventPropertyRef = useRef(null);
 
   useEffect(() => {
@@ -84,7 +82,6 @@ const StepFilter = ({
     fetchEventPropertiesValue();
   }, [filter.operand]);
 
-  useOnClickOutside(eventValueRef, () => setIsValueDropDownOpen(false));
   useOnClickOutside(eventPropertyRef, () => setIsPropertyDropdownOpen(false));
 
   const handleSubmitValues = () => {
@@ -186,25 +183,6 @@ const StepFilter = ({
                 width={'96'}
               />
             </Box>
-            {/* <Flex
-                alignItems={'center'}
-                justifyContent={'center'}
-                color={'grey.600'}
-                p={1}
-                height={6}
-                data-testid={'filter-operator'}
-                borderRadius={'4px'}
-              >
-                <Text
-                  color={'inherit'}
-                  fontSize={'xs-12'}
-                  lineHeight={'lh-120'}
-                  fontWeight={'400'}
-                  whiteSpace={'nowrap'}
-                >
-                  {filter.operator}
-                </Text>
-              </Flex> */}
 
             <FilterOperators
               index={index}
@@ -212,79 +190,20 @@ const StepFilter = ({
               handleOperatorChange={handleOperatorChange}
             />
 
-            {filter.datatype === FilterDataType.NUMBER ? (
-              <Input
-                ref={inputRef}
-                variant={'unstyled'}
-                p={'0.5'}
-                w={'18'}
-                h={'6'}
-                type={'number'}
-                borderBottom={'1px'}
-                borderStyle={'dashed'}
-                borderRadius={'4px 4px 0 0'}
-                borderColor={'grey.800'}
-                fontSize={'xs-12'}
-                placeholder={'Enter value'}
-                bg={'white.400'}
-                defaultValue={filter.values[0]}
-                onBlur={(e) => {
-                  handleSetFilterValue(index, [e.target.value]);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key == 'Enter') {
-                    handleSetFilterValue(
-                      index,
-                      (e.target as HTMLInputElement).value
-                    );
-                    inputRef.current?.blur();
-                  }
-                }}
-              />
-            ) : (
-              <>
-                {filter.datatype === FilterDataType.STRING && (
-                  <Box position={'relative'} ref={eventValueRef}>
-                    <Flex
-                      alignItems={'center'}
-                      justifyContent={'flex-end'}
-                      p={1}
-                      w={'full'}
-                      overflow={'hidden'}
-                      borderBottom={'1px'}
-                      borderStyle={'dashed'}
-                      borderColor={'grey.800'}
-                      onClick={() => {
-                        setIsValueDropDownOpen(true);
-                      }}
-                    >
-                      <Text
-                        data-testid={'event-filter-values'}
-                        cursor={'pointer'}
-                        fontSize={'xs-12'}
-                        lineHeight={'xs-14'}
-                        color={'black.500'}
-                        wordBreak={'break-word'}
-                      >
-                        {getFilterValuesText(filter.values)}
-                      </Text>
-                    </Flex>
-                    <SearchableCheckboxDropdown
-                      isOpen={isValueDropDownOpen}
-                      isLoading={loadingPropertyValues}
-                      data={valueList}
-                      onSubmit={handleSubmitValues}
-                      onAllSelect={handleAllSelect}
-                      onSelect={handleValueSelection}
-                      isSelectAllChecked={areAllValuesSelected}
-                      selectedValues={selectedValues}
-                      width={'96'}
-                      placeholderText={'Search for properties...'}
-                    />
-                  </Box>
-                )}
-              </>
-            )}
+            <FilterValues
+              index={index}
+              filter={filter}
+              valueList={valueList}
+              selectedValues={selectedValues}
+              areAllValuesSelected={areAllValuesSelected}
+              loadingPropertyValues={loadingPropertyValues}
+              isValueDropDownOpen={isValueDropDownOpen}
+              setIsValueDropDownOpen={setIsValueDropDownOpen}
+              handleSetFilterValue={handleSetFilterValue}
+              handleAllSelect={handleAllSelect}
+              handleSubmitValues={handleSubmitValues}
+              handleValueSelection={handleValueSelection}
+            />
           </Flex>
           <Flex h={'fit-content'}>
             <Box

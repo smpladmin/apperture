@@ -1,15 +1,12 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { FilterDataType } from '@lib/domain/common';
-import {
-  FilterOptionMenuType,
-  SegmentFilterDataType,
-} from '@lib/domain/segment';
+import { FilterOptionMenuType } from '@lib/domain/segment';
 import React, { useState } from 'react';
 
 type FilterOptionMenuProps = {
   menu: FilterOptionMenuType;
   onSubmit: Function;
-  datatype: FilterDataType | SegmentFilterDataType;
+  datatype: FilterDataType;
   filterIndex: number;
 };
 
@@ -27,7 +24,6 @@ const FilterOptiosMenu = ({
     setShowSubmenu(false);
     onSubmit(filterIndex, item.label);
   };
-
 
   return (
     <Box

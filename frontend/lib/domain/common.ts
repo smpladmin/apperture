@@ -94,3 +94,8 @@ export const FilterOperatorsDatatypeMap = {
   [FilterDataType.NUMBER]: Object.values(FilterOperatorsNumber),
   [FilterDataType.STRING]: Object.values(FilterOperatorsString),
 };
+
+export const ISFilterOperators = [
+  FilterOperatorsString.IS,
+  FilterOperatorsString.IS_NOT,
+];

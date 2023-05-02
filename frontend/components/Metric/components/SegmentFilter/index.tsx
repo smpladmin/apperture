@@ -8,11 +8,17 @@ import SelectSegmentsDropdown from './SelectSegmentsDropdown';
 import AddFilterComponent from '@components/StepFilters/components/AddFilter';
 import { MetricSegmentFilter } from '@lib/domain/metric';
 import StepFilter from '@components/StepFilters/StepFilters';
-import { FilterType, GroupConditions } from '@lib/domain/common';
+import {
+  FilterDataType,
+  FilterOperators,
+  FilterOperatorsDatatypeMap,
+  FilterOperatorsString,
+  FilterType,
+  GroupConditions,
+  ISFilterOperators,
+} from '@lib/domain/common';
 import {
   SegmentFilterConditions,
-  SegmentFilterDataType,
-  SegmentFilterOperatorsString,
   WhereSegmentFilter,
 } from '@lib/domain/segment';
 import cloneDeep from 'lodash/cloneDeep';
@@ -53,11 +59,11 @@ const SegmentFilter = ({
     const newFilter: WhereSegmentFilter = {
       condition: getFilterCondition(customFilters),
       operand: value,
-      operator: SegmentFilterOperatorsString.IS,
+      operator: FilterOperatorsString.IS,
       values: [],
       type: FilterType.WHERE,
       all: false,
-      datatype: SegmentFilterDataType.STRING,
+      datatype: FilterDataType.STRING,
     };
 
     const tempFilters = cloneDeep(segmentFilters);
@@ -90,9 +96,56 @@ const SegmentFilter = ({
     if (filterIndex === 0 && stepFilters.length)
       stepFilters[0]['condition'] = SegmentFilterConditions.WHERE;
 
-    const tempFilters = cloneDeep(segmentFilters);
-    tempFilters[index].custom.filters = stepFilters;
-    updateSegmentFilter(tempFilters);
+    const updatedFilters = cloneDeep(segmentFilters);
+    updatedFilters[index].custom.filters = stepFilters;
+    updateSegmentFilter(updatedFilters);
+  };
+
+  const handleFilterDatatypeChange = (
+    filterIndex: number,
+    selectedDatatype: FilterDataType
+  ) => {
+    let stepFilters = [...customFilters];
+    // @ts-ignore
+    stepFilters[filterIndex]['operator'] =
+      FilterOperatorsDatatypeMap[selectedDatatype][0];
+    stepFilters[filterIndex]['values'] = [];
+    stepFilters[filterIndex]['datatype'] = selectedDatatype;
+
+    const updatedFilters = cloneDeep(segmentFilters);
+    updatedFilters[index].custom.filters = stepFilters;
+
+    updateSegmentFilter(updatedFilters);
+  };
+
+  const handleOperatorChange = (
+    filterIndex: number,
+    selectedOperator: FilterOperators
+  ) => {
+    let stepFilters = [...customFilters];
+    /*
+    While changing operator from `is/is_not` to `contains/does_not_contain`
+    the input field changes from a Selectable Dropdown to an Input Field,
+    hence the selected value needs a reset.
+    */
+    if (stepFilters[filterIndex].datatype === FilterDataType.STRING) {
+      const isMatchingFilter =
+        ISFilterOperators.includes(
+          stepFilters[filterIndex].operator as FilterOperatorsString
+        ) ===
+        ISFilterOperators.includes(selectedOperator as FilterOperatorsString);
+
+      if (!isMatchingFilter) {
+        stepFilters[index].values = [];
+      }
+    }
+
+    stepFilters[filterIndex].operator = selectedOperator;
+
+    const updatedFilters = cloneDeep(segmentFilters);
+    updatedFilters[index].custom.filters = stepFilters;
+
+    updateSegmentFilter(updatedFilters);
   };
 
   const handleRemoveSegmentFilter = (index: number) => {
@@ -198,6 +251,8 @@ const SegmentFilter = ({
                     handleSetFilterProperty={handleSetFilterProperty}
                     handleSetFilterValue={handleSetFilterValue}
                     handleRemoveFilter={handleRemoveFilter}
+                    handleFilterDatatypeChange={handleFilterDatatypeChange}
+                    handleOperatorChange={handleOperatorChange}
                   />
                 );
               })}

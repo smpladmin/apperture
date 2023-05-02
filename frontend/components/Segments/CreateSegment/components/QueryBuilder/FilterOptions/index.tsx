@@ -1,15 +1,14 @@
 import { Box, IconButton } from '@chakra-ui/react';
-import { FilterOperatorsDatatypeMap } from '@components/Segments/util';
 import {
   FilterOptionMenuType,
   SegmentFilter,
-  SegmentFilterDataType,
   WhereSegmentFilter,
 } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useRef, useState } from 'react';
 import FilterOptionsMenu from './FilterOptionMenu';
 import { FilterOptionMenu } from './util';
+import { FilterDataType, FilterOperatorsDatatypeMap } from '@lib/domain/common';
 
 type FilterOptionsProps = {
   index: number;
@@ -33,7 +32,7 @@ const FilterOptions = ({
 
   const handleFilterTypeUpdate = (menu: FilterOptionMenuType) => {
     setIsFilterOptionsListOpen(false);
-    const selectedDatatype = menu.label as SegmentFilterDataType;
+    const selectedDatatype = menu.label as FilterDataType;
     if ((filter as WhereSegmentFilter).datatype === selectedDatatype) return;
 
     const updatedFilters = [...filters];
