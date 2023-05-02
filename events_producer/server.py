@@ -37,7 +37,7 @@ allowed_origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.get("ALLOWED_ORIGIN", allowed_origins),
+    allow_origins=os.getenv("ALLOWED_ORIGIN", allowed_origins),
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS", "HEAD"],
     allow_headers=["*"],
