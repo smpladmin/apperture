@@ -123,11 +123,7 @@ const SegmentFilter = ({
     selectedOperator: FilterOperators
   ) => {
     let stepFilters = [...customFilters];
-    /*
-    While changing operator from `is/is_not` to `contains/does_not_contain`
-    the input field changes from a Selectable Dropdown to an Input Field,
-    hence the selected value needs a reset.
-    */
+
     if (stepFilters[filterIndex].datatype === FilterDataType.STRING) {
       const isMatchingFilter =
         ISFilterOperators.includes(

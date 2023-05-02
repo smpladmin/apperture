@@ -22,7 +22,11 @@ import MetricAggregation from './MetricAggregation';
 import StepFilter from '@components/StepFilters/StepFilters';
 import AddFilterComponent from '@components/StepFilters/components/AddFilter';
 import { Trash } from 'phosphor-react';
-import { COLOR_PALLETE_5, useColorFromPallete } from '@components/Metric/util';
+import {
+  COLOR_PALLETE_5,
+  hasValidFilters,
+  useColorFromPallete,
+} from '@components/Metric/util';
 import { GREY_500 } from '@theme/index';
 import SelectEventOrSegmentDropdown from './SelectEventOrSegmentDropdown';
 
@@ -153,11 +157,7 @@ const MetricComponentCard = ({
 
   const handleOperatorChange = (filterIndex: number, selectedOperator: any) => {
     let stepFilters = [...filters];
-    /*
-    While changing operator from `is/is_not` to `contains/does_not_contain`
-    the input field changes from a Selectable Dropdown to an Input Field,
-    hence the selected value needs a reset.
-    */
+
     if (stepFilters[filterIndex].datatype === FilterDataType.STRING) {
       const isMatchingFilter =
         ISFilterOperators.includes(
@@ -191,7 +191,7 @@ const MetricComponentCard = ({
   }, [variant, eventList]);
 
   useEffect(() => {
-    if (filters.every((filter) => filter.values.length)) {
+    if (hasValidFilters(filters)) {
       updateAggregate(variable, { filters });
     }
   }, [filters]);

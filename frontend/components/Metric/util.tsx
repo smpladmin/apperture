@@ -89,6 +89,13 @@ const _isValidAggregation = (aggregation: any) => {
   return Boolean(aggregation.property);
 };
 
+export const hasValidFilters = (filters: WhereFilter[]) => {
+  return filters.every(
+    (filter: WhereFilter) =>
+      filter.values.length || filter.datatype === FilterDataType.BOOL
+  );
+};
+
 export const isValidAggregates = (
   aggregates: MetricAggregate[],
   segmentFilters: MetricSegmentFilter[]
@@ -99,10 +106,7 @@ export const isValidAggregates = (
       (aggregate) =>
         aggregate.reference_id &&
         aggregate.variable &&
-        aggregate.filters.every(
-          (filter: WhereFilter) =>
-            filter.values.length || filter.datatype === FilterDataType.BOOL
-        ) &&
+        hasValidFilters(aggregate.filters) &&
         _isValidAggregation(aggregate.aggregations)
     ) &&
     isEveryCustomSegmentFilterValid(

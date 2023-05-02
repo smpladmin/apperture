@@ -171,7 +171,7 @@ const FunnelComponentCard = ({
     let stepFilters = [...funnelStep.filters];
     /*
     While changing operator from `is/is_not` to `contains/does_not_contain`
-    the input field changes from a Selectable Dropdown to an Input Field,
+    the element to select filter value changes from a Selectable Dropdown to an Input Field,
     hence the selected value needs a reset.
     */
     if (stepFilters[filterIndex].datatype === FilterDataType.STRING) {
