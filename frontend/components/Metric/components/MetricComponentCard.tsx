@@ -23,6 +23,7 @@ import { Trash } from 'phosphor-react';
 import { COLOR_PALLETE_5, useColorFromPallete } from '@components/Metric/util';
 import { GREY_500 } from '@theme/index';
 import SelectEventOrSegmentDropdown from './SelectEventOrSegmentDropdown';
+import { FilterOperatorsDatatypeMap } from '@components/Segments/util';
 
 type MetricComponentCardProps = {
   index: number;
@@ -126,13 +127,27 @@ const MetricComponentCard = ({
   };
 
   const removeFilter = (filterIndex: number) => {
-    let tempFilters = [...filters];
-    tempFilters.splice(filterIndex, 1);
+    let stepFilters = [...filters];
+    stepFilters.splice(filterIndex, 1);
 
-    if (filterIndex === 0 && tempFilters.length)
-      tempFilters[0]['condition'] = FilterConditions.WHERE;
+    if (filterIndex === 0 && stepFilters.length)
+      stepFilters[0]['condition'] = FilterConditions.WHERE;
 
-    setFilters(tempFilters);
+    setFilters(stepFilters);
+  };
+
+  const handleFilterDatatypeChange = (
+    filterIndex: number,
+    selectedDatatype: FilterDataType
+  ) => {
+    let stepFilters = [...filters];
+    // @ts-ignore
+    stepFilters[filterIndex]['operator'] =
+      FilterOperatorsDatatypeMap[selectedDatatype][0];
+    stepFilters[filterIndex]['values'] = [];
+    stepFilters[filterIndex]['datatype'] = selectedDatatype;
+
+    setFilters(stepFilters);
   };
 
   const handleVariantSelection = (variant: MetricVariant) => {
@@ -271,6 +286,7 @@ const MetricComponentCard = ({
                     handleSetFilterProperty={handleSetFilterPropertyValue}
                     handleSetFilterValue={handleSetFilterValue}
                     handleRemoveFilter={removeFilter}
+                    handleFilterDatatypeChange={handleFilterDatatypeChange}
                   />
                 </Flex>
               ))}

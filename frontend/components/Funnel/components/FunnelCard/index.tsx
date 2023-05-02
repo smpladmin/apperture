@@ -15,7 +15,7 @@ import { MapContext } from '@lib/contexts/mapContext';
 import FunnelStepFilterComponent from '../../../StepFilters/StepFilters';
 import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, filter } from 'lodash';
 import { FilterType } from '@lib/domain/segment';
 import { GREY_500, WHITE_DEFAULT } from '@theme/index';
 import { Node } from '@lib/domain/node';
@@ -26,6 +26,7 @@ import {
   FilterOperatorsString,
   FilterDataType,
 } from '@lib/domain/common';
+import { FilterOperatorsDatatypeMap } from '@components/Segments/util';
 
 type FunnelComponentCardProps = {
   index: number;
@@ -96,14 +97,11 @@ const FunnelComponentCard = ({
     setFunnelSteps(tempFunnelSteps);
   };
 
-  const updateStepFilters = useCallback(
-    (stepFilters: WhereFilter[]) => {
-      const tempFunnelSteps = cloneDeep(funnelSteps);
-      tempFunnelSteps[index]['filters'] = stepFilters;
-      setFunnelSteps(tempFunnelSteps);
-    },
-    [funnelSteps]
-  );
+  const updateStepFilters = (stepFilters: WhereFilter[]) => {
+    const tempFunnelSteps = cloneDeep(funnelSteps);
+    tempFunnelSteps[index]['filters'] = stepFilters;
+    setFunnelSteps(tempFunnelSteps);
+  };
 
   const handleAddFilter = (value: string) => {
     const getFunnelFilterCondition = (stepFilters: WhereFilter[]) => {
@@ -146,6 +144,20 @@ const FunnelComponentCard = ({
   const handleSetFilterProperty = (filterIndex: number, property: string) => {
     let stepFilters = [...funnelStep.filters];
     stepFilters[filterIndex]['operand'] = property;
+
+    updateStepFilters(stepFilters);
+  };
+
+  const handleFilterDatatypeChange = (
+    filterIndex: number,
+    selectedDatatype: FilterDataType
+  ) => {
+    let stepFilters = [...funnelStep.filters];
+    // @ts-ignore
+    stepFilters[filterIndex]['operator'] =
+      FilterOperatorsDatatypeMap[selectedDatatype][0];
+    stepFilters[filterIndex]['values'] = [];
+    stepFilters[filterIndex]['datatype'] = selectedDatatype;
 
     updateStepFilters(stepFilters);
   };
@@ -229,6 +241,7 @@ const FunnelComponentCard = ({
                 handleSetFilterProperty={handleSetFilterProperty}
                 handleSetFilterValue={handleSetFilterValue}
                 handleRemoveFilter={handleRemoveFilter}
+                handleFilterDatatypeChange={handleFilterDatatypeChange}
               />
             </Fragment>
           ))}
