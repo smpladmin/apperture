@@ -106,7 +106,6 @@ const SegmentFilter = ({
     selectedDatatype: FilterDataType
   ) => {
     let stepFilters = [...customFilters];
-    // @ts-ignore
     stepFilters[filterIndex]['operator'] =
       FilterOperatorsDatatypeMap[selectedDatatype][0];
     stepFilters[filterIndex]['values'] = [];

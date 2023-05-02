@@ -146,7 +146,6 @@ const MetricComponentCard = ({
     selectedDatatype: FilterDataType
   ) => {
     let stepFilters = [...filters];
-    // @ts-ignore
     stepFilters[filterIndex]['operator'] =
       FilterOperatorsDatatypeMap[selectedDatatype][0];
     stepFilters[filterIndex]['values'] = [];

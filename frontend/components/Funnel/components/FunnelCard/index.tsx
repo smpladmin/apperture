@@ -155,7 +155,6 @@ const FunnelComponentCard = ({
     selectedDatatype: FilterDataType
   ) => {
     let stepFilters = [...funnelStep.filters];
-    // @ts-ignore
     stepFilters[filterIndex]['operator'] =
       FilterOperatorsDatatypeMap[selectedDatatype][0];
     stepFilters[filterIndex]['values'] = [];

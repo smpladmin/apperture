@@ -29,13 +29,11 @@ import {
   isEveryCustomSegmentFilterValid,
   getSelectedSegmentsText,
 } from '../util';
-// import { capitalizeFirstLetter } from '@lib/utils/common';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/services/metricService');
 jest.mock('@lib/services/segmentService');
 jest.mock('../util');
-// jest.mock('@lib/utils/common');
 
 describe('Create Metric', () => {
   let mockedGetEventProperties: jest.Mock;
@@ -53,7 +51,6 @@ describe('Create Metric', () => {
   let mockedIsEveryCustomSegmentFilterValid: jest.Mock;
   let mockedGetSavedSegmentsForDatasourceId: jest.Mock;
   let mockedGetSelectedSegmentsText: jest.Mock;
-  let mockedCapitalizeLetter: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -326,7 +323,6 @@ describe('Create Metric', () => {
     mockedValidateMetricFormula = jest.mocked(validateMetricFormula);
     mockedConvertToTableData = jest.mocked(convertToTableData);
     mockedConvertToTrendData = jest.mocked(convertToTrendData);
-    // mockedCapitalizeLetter = jest.mocked(capitalizeFirstLetter);
     mockedGetDisplayAggregationFunctionText = jest.mocked(
       getDisplayAggregationFunctionText
     );
@@ -378,19 +374,6 @@ describe('Create Metric', () => {
       }
     );
     mockedGetSavedSegmentsForDatasourceId.mockReturnValue(savedSegments);
-    // mockedCapitalizeLetter.mockImplementation((val: string) => {
-    //   const capitalizedFirstLetterMap: { [key: string]: string } = {
-    //     equals: 'Equals',
-    //     is: 'Is',
-    //     'is not': 'Is not',
-    //     total: 'Total',
-    //     'is true': 'Is true',
-    //     'is false': 'Is false',
-    //     contains: 'Contains',
-    //     'does not contain': 'Does not contain',
-    //   };
-    //   return capitalizedFirstLetterMap[val];
-    // });
   });
 
   afterEach(() => {
