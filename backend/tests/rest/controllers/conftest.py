@@ -195,7 +195,7 @@ def notification_service(apperture_user_response):
             reference="639237437483490",
             threshold_type=NotificationThresholdType.PCT,
             user_threshold=ThresholdMap(min=12.0, max=18.0),
-            triggered=True,
+            trigger=True,
         ),
         ComputedNotification(
             name="Alert Metric -Updated",
@@ -207,7 +207,7 @@ def notification_service(apperture_user_response):
             reference="6777439823920337",
             threshold_type=NotificationThresholdType.PCT,
             user_threshold=ThresholdMap(min=1212.0, max=3236.0),
-            triggered=False,
+            trigger=False,
         ),
     ]
 
@@ -222,7 +222,7 @@ def notification_service(apperture_user_response):
             reference="639237437483490",
             threshold_type=None,
             user_threshold=None,
-            triggered=None,
+            trigger=None,
         ),
         ComputedNotification(
             name="Alert Metric -Updated",
@@ -234,7 +234,7 @@ def notification_service(apperture_user_response):
             reference="6777439823920337",
             threshold_type=None,
             user_threshold=None,
-            triggered=None,
+            trigger=None,
         ),
     ]
 

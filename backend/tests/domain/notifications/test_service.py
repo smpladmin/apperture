@@ -187,7 +187,7 @@ class TestNotificationService:
                 reference="639237437483490",
                 threshold_type=None,
                 user_threshold=None,
-                triggered=None,
+                trigger=None,
             ),
             ComputedNotification(
                 name="update2",
@@ -199,7 +199,7 @@ class TestNotificationService:
                 reference="6777439823920337",
                 threshold_type=None,
                 user_threshold=None,
-                triggered=None,
+                trigger=None,
             ),
         ]
 
@@ -213,7 +213,7 @@ class TestNotificationService:
             reference="639237437483490",
             threshold_type=NotificationThresholdType.PCT,
             user_threshold=ThresholdMap(min=0.15, max=0.25),
-            triggered=True,
+            trigger=True,
         )
         self.name = "test"
         self.ds_id = "6384a66e0a397236d9de236c"
