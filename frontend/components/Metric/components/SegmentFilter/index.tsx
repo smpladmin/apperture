@@ -8,14 +8,7 @@ import SelectSegmentsDropdown from './SelectSegmentsDropdown';
 import AddFilterComponent from '@components/StepFilters/components/AddFilter';
 import { MetricSegmentFilter } from '@lib/domain/metric';
 import StepFilter from '@components/StepFilters/StepFilters';
-import {
-  FilterConditions,
-  FilterDataType,
-  FilterOperatorsString,
-  FilterType,
-  GroupConditions,
-  WhereFilter,
-} from '@lib/domain/common';
+import { GroupConditions, WhereFilter } from '@lib/domain/common';
 import cloneDeep from 'lodash/cloneDeep';
 import { getSelectedSegmentsText } from '@components/Metric/util';
 
@@ -46,31 +39,6 @@ const SegmentFilter = ({
     (segmentFilter.custom.filters as WhereFilter[]) || []
   );
 
-  const handleAddFilter = (value: string) => {
-    const getFilterCondition = (filters: WhereFilter[]) => {
-      return !filters.length ? FilterConditions.WHERE : FilterConditions.AND;
-    };
-
-    const newFilter: WhereFilter = {
-      condition: getFilterCondition(customFilters),
-      operand: value,
-      operator: FilterOperatorsString.IS,
-      values: [],
-      type: FilterType.WHERE,
-      all: false,
-      datatype: FilterDataType.STRING,
-    };
-
-    setCustomFilters([...customFilters, newFilter]);
-  };
-
-  useEffect(() => {
-    // update segment filter state
-    const updatedSegmentFilters = cloneDeep(segmentFilters);
-    updatedSegmentFilters[index].custom.filters = customFilters;
-    updateSegmentFilter(updatedSegmentFilters);
-  }, [customFilters]);
-
   const handleRemoveSegmentFilter = (index: number) => {
     updateSegmentFilter([
       {
@@ -83,7 +51,15 @@ const SegmentFilter = ({
         segments: [],
       },
     ]);
+    setCustomFilters([]);
   };
+
+  useEffect(() => {
+    // update segment filter state when custom filter changes
+    const updatedSegmentFilters = cloneDeep(segmentFilters);
+    updatedSegmentFilters[index].custom.filters = customFilters;
+    updateSegmentFilter(updatedSegmentFilters);
+  }, [customFilters]);
 
   return (
     <Flex direction={'column'} gap={'3'}>
@@ -181,9 +157,10 @@ const SegmentFilter = ({
 
           <Flex ml={'-1'} mt={'2'}>
             <AddFilterComponent
+              filters={customFilters}
+              setFilters={setCustomFilters}
               eventProperties={eventProperties}
               loadingEventProperties={loadingEventProperties}
-              handleAddFilter={handleAddFilter}
               hideIndentIcon={true}
             />
           </Flex>

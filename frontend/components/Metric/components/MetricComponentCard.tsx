@@ -8,14 +8,7 @@ import {
   MetricVariant,
 } from '@lib/domain/metric';
 import { Node } from '@lib/domain/node';
-
-import {
-  FilterConditions,
-  FilterDataType,
-  FilterOperatorsString,
-  FilterType,
-  WhereFilter,
-} from '@lib/domain/common';
+import { WhereFilter } from '@lib/domain/common';
 import MetricAggregation from './MetricAggregation';
 import StepFilter from '@components/StepFilters/StepFilters';
 import AddFilterComponent from '@components/StepFilters/components/AddFilter';
@@ -91,24 +84,6 @@ const MetricComponentCard = ({
   };
   const handleRemoveComponent = () => {
     removeAggregate(index);
-  };
-
-  const handleAddFilter = (value: string) => {
-    const getFilterCondition = (filters: WhereFilter[]) => {
-      return !filters.length ? FilterConditions.WHERE : FilterConditions.AND;
-    };
-
-    const newFilter = {
-      condition: getFilterCondition(filters),
-      operand: value,
-      operator: FilterOperatorsString.IS,
-      values: [],
-      type: FilterType.WHERE,
-      all: false,
-      datatype: FilterDataType.STRING,
-    };
-
-    setFilters([...filters, newFilter]);
   };
 
   const handleVariantSelection = (variant: MetricVariant) => {
@@ -253,8 +228,8 @@ const MetricComponentCard = ({
           )}
           <AddFilterComponent
             filters={filters}
+            setFilters={setFilters}
             eventProperties={eventProperties}
-            handleAddFilter={handleAddFilter}
             loadingEventProperties={loadingEventsAndProperties}
             hideIndentIcon
           />

@@ -15,16 +15,10 @@ import FunnelStepFilterComponent from '../../StepFilters/StepFilters';
 import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
 import { cloneDeep } from 'lodash';
-import { FilterType } from '@lib/domain/segment';
 import { GREY_500, WHITE_DEFAULT } from '@theme/index';
 import { Node } from '@lib/domain/node';
 import { DotsSixVertical, Trash } from 'phosphor-react';
-import {
-  WhereFilter,
-  FilterConditions,
-  FilterOperatorsString,
-  FilterDataType,
-} from '@lib/domain/common';
+import { WhereFilter } from '@lib/domain/common';
 
 type FunnelComponentCardProps = {
   index: number;
@@ -106,25 +100,6 @@ const FunnelComponentCard = ({
     // whenever filter state changes, update the funnelStep filters
     updateStepFilters(filters);
   }, [filters]);
-
-  const handleAddFilter = (value: string) => {
-    const getFunnelFilterCondition = (stepFilters: WhereFilter[]) => {
-      return !stepFilters.length
-        ? FilterConditions.WHERE
-        : FilterConditions.AND;
-    };
-
-    const newFilter = {
-      condition: getFunnelFilterCondition(filters),
-      operand: value,
-      operator: FilterOperatorsString.IS,
-      values: [],
-      type: FilterType.WHERE,
-      all: false,
-      datatype: FilterDataType.STRING,
-    };
-    setFilters([...filters, newFilter]);
-  };
 
   return (
     <Flex
@@ -211,10 +186,10 @@ const FunnelComponentCard = ({
       )}
       {funnelStep.event ? (
         <AddFilter
-          filters={funnelStep.filters}
+          filters={filters}
+          setFilters={setFilters}
           eventProperties={eventProperties}
           loadingEventProperties={loadingEventProperties}
-          handleAddFilter={handleAddFilter}
         />
       ) : null}
     </Flex>
