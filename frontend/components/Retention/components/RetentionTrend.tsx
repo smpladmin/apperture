@@ -61,7 +61,7 @@ const RetentionTrend = ({ data, trendScale }: RetentionTrendProps) => {
   }, [trendScale]);
 
   return (
-    <Flex direction={'column'} p={'4'} pt={'6'}>
+    <Flex direction={'column'} p={'4'} pt={'6'} data-testid={'retention-trend'}>
       <LineChart {...graphConfig} data={data} />
     </Flex>
   );

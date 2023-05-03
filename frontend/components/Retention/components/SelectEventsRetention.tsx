@@ -181,9 +181,9 @@ const SelectEventsRetention = ({
                 ref={eventDropdownRef}
               >
                 <Text
-                  color={retentionEvent.event ? 'black.DEFAULT' : 'grey.600'}
+                  color={retentionEvent?.event ? 'black.DEFAULT' : 'grey.600'}
                   fontSize={'xs-14'}
-                  fontWeight={retentionEvent.event ? 500 : 400}
+                  fontWeight={retentionEvent?.event ? 500 : 400}
                   p={'1'}
                   _hover={{
                     background: 'white.400',
@@ -196,7 +196,7 @@ const SelectEventsRetention = ({
                   }}
                   data-testid={'event-selection'}
                 >
-                  {retentionEvent.event || 'Select  Event'}
+                  {retentionEvent?.event || 'Select  Event'}
                 </Text>
                 <SearchableListDropdown
                   isOpen={isDropdownOpen}
@@ -212,7 +212,7 @@ const SelectEventsRetention = ({
             </Flex>
           </Flex>
         </Flex>
-        {Boolean(retentionEvent.filters?.length) && (
+        {Boolean(retentionEvent?.filters?.length) && (
           <Flex direction={'column'} gap={'2'}>
             {retentionEvent.filters.map((filter, index) => (
               <Fragment key={index}>
@@ -229,7 +229,7 @@ const SelectEventsRetention = ({
             ))}
           </Flex>
         )}
-        {retentionEvent.event ? (
+        {retentionEvent?.event ? (
           <AddFilterComponent
             filters={retentionEvent.filters}
             eventProperties={eventProperties}

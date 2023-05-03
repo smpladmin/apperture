@@ -62,7 +62,7 @@ const LeftView = ({
                   lineHeight={'xs-14'}
                   fontWeight={'medium'}
                   color={'black'}
-                  data-testid={'conversion-criteria'}
+                  data-testid={'retention-granularity'}
                 >{`${capitalizeFirstLetter(granularity)}`}</Text>
               </Flex>
             </Card>

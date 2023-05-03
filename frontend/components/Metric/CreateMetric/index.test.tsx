@@ -26,7 +26,6 @@ import {
   getDisplayAggregationFunctionText,
   enableBreakdown,
   checkMetricDefinitionAndAggregateCount,
-  isEveryCustomSegmentFilterValid,
   getSelectedSegmentsText,
 } from '../util';
 
@@ -48,7 +47,6 @@ describe('Create Metric', () => {
   let mockedGetDisplayAggregationFunctionText: jest.Mock;
   let mockedEnableBreakdown: jest.Mock;
   let mockedCheckMetricDefinitionAndAggregateCount: jest.Mock;
-  let mockedIsEveryCustomSegmentFilterValid: jest.Mock;
   let mockedGetSavedSegmentsForDatasourceId: jest.Mock;
   let mockedGetSelectedSegmentsText: jest.Mock;
 
@@ -330,9 +328,6 @@ describe('Create Metric', () => {
     mockedGetSavedSegmentsForDatasourceId = jest.mocked(
       getSavedSegmentsForDatasourceId
     );
-    mockedIsEveryCustomSegmentFilterValid = jest.mocked(
-      isEveryCustomSegmentFilterValid
-    );
     mockedCheckMetricDefinitionAndAggregateCount = jest.mocked(
       checkMetricDefinitionAndAggregateCount
     );
@@ -352,7 +347,6 @@ describe('Create Metric', () => {
     mockedGetCountOfAggregates.mockReturnValue(2);
     mockedConvertToTableData.mockReturnValue(tableData);
     mockedConvertToTrendData.mockReturnValue(trendData);
-    mockedIsEveryCustomSegmentFilterValid.mockReturnValue(true);
     mockedCheckMetricDefinitionAndAggregateCount.mockReturnValue(true);
     mockedGetDisplayAggregationFunctionText.mockImplementation(
       (value: string) => {

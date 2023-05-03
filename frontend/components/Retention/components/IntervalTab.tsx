@@ -22,7 +22,11 @@ export const IntervalTab = ({
     setInterval(index);
   };
   return (
-    <Flex flexDirection={'column'} width={'full'}>
+    <Flex
+      flexDirection={'column'}
+      width={'full'}
+      data-testid={'retention-interval-block'}
+    >
       <Flex
         flexDirection={'row'}
         borderWidth={'0 0 1px 0'}

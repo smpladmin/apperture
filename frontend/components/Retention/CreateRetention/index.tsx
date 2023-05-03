@@ -35,10 +35,7 @@ import {
 import TransientRetentionView from '../components/TransientRetentionView';
 import { Node } from '@lib/domain/node';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
-import {
-  isValidSegmentFilter,
-  replaceEmptyStringWithPlaceholderInExternalSegmentFilter,
-} from '@lib/utils/common';
+import { replaceEmptyStringWithPlaceholderInExternalSegmentFilter } from '@lib/utils/common';
 
 const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   const router = useRouter();
@@ -118,10 +115,7 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   );
 
   useEffect(() => {
-    if (
-      hasValidEvents(retentionEvents) &&
-      hasValidFilterValuesForAllEvents(retentionEvents)
-    ) {
+    if (hasValidRetentionEventAndFilters(retentionEvents, segmentFilters)) {
       setSaveButtonDisabled(false);
     } else {
       setSaveButtonDisabled(true);
