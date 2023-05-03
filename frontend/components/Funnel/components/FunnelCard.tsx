@@ -7,11 +7,11 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import AddFilter from '../../StepFilters/components/AddFilter';
+import AddFilter from '@components/StepFilters/components/AddFilter';
+import FunnelStepFilterComponent from '@components/StepFilters/StepFilters';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { FunnelStep } from '@lib/domain/funnel';
 import { MapContext } from '@lib/contexts/mapContext';
-import FunnelStepFilterComponent from '../../StepFilters/StepFilters';
 import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
 import { cloneDeep } from 'lodash';

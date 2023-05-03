@@ -18,7 +18,7 @@ type WhereSegmentFilterProps = {
   loadingEventProperties: boolean;
 };
 
-const WhereFilter = ({
+const WhereSegmentFilter = ({
   filter,
   filters,
   updateGroupsState,
@@ -73,4 +73,4 @@ const WhereFilter = ({
   );
 };
 
-export default WhereFilter;
+export default WhereSegmentFilter;
