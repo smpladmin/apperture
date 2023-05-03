@@ -15,7 +15,7 @@ import {
   RED_500,
   YELLOW_500,
 } from '@theme/index';
-import { SegmentGroup, WhereSegmentFilter } from '@lib/domain/segment';
+import { SegmentGroup } from '@lib/domain/segment';
 
 export const replaceEmptyStringPlaceholder = (
   aggregates: MetricAggregate[]
@@ -58,9 +58,7 @@ export const getCountOfValidAggregates = (aggregates: MetricAggregate[]) => {
   return validAggregatesWithReferenceId.length;
 };
 
-export const isEveryCustomSegmentFilterValid = (
-  filters: WhereSegmentFilter[]
-) => {
+export const isEveryCustomSegmentFilterValid = (filters: WhereFilter[]) => {
   return filters?.every(
     (filter) => filter.values.length || filter.datatype === FilterDataType.BOOL
   );
@@ -72,9 +70,7 @@ export const isValidMetricSegmentFilter = (
   return segmentFilters.every(
     (filter) =>
       (filter.custom.filters.length || filter.segments.length) &&
-      isEveryCustomSegmentFilterValid(
-        filter.custom.filters as WhereSegmentFilter[]
-      )
+      isEveryCustomSegmentFilterValid(filter.custom.filters as WhereFilter[])
   );
 };
 
@@ -110,7 +106,7 @@ export const isValidAggregates = (
         _isValidAggregation(aggregate.aggregations)
     ) &&
     isEveryCustomSegmentFilterValid(
-      segmentFilters[0].custom.filters as WhereSegmentFilter[]
+      segmentFilters[0].custom.filters as WhereFilter[]
     )
   );
 };

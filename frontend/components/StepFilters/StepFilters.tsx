@@ -16,17 +16,16 @@ import {
 } from '@lib/domain/common';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { trimLabel } from '@lib/utils/common';
-import { WhereSegmentFilter } from '@lib/domain/segment';
 import FilterOptions from './components/FilterOptions';
 import FilterOperator from './components/FilterOperator';
 import FilterValues from './components/FilterValues';
 
 type FilterComponentProps = {
-  filter: WhereFilter | WhereSegmentFilter;
+  filter: WhereFilter;
   index: number;
   eventProperties: string[];
   loadingEventProperties: boolean;
-  filters: WhereFilter[] | WhereSegmentFilter[];
+  filters: WhereFilter[];
   setFilters: Function;
 };
 
@@ -129,6 +128,11 @@ const StepFilter = ({
   ) => {
     let stepFilters = [...filters];
 
+    /*
+    While changing operator from `is/is_not` to `contains/does_not_contain`
+    the filter values element changes from a Selectable Dropdown to an Input Field,
+    hence the selected value needs a reset.
+    */
     if (stepFilters[filterIndex].datatype === FilterDataType.STRING) {
       const isMatchingFilter =
         ISFilterOperators.includes(

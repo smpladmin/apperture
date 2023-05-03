@@ -1,7 +1,6 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import Dropdown from '@components/SearchableDropdown/Dropdown';
 import { FilterOperatorsDatatypeMap, WhereFilter } from '@lib/domain/common';
-import { WhereSegmentFilter } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 import React, { useRef, useState } from 'react';
@@ -12,7 +11,7 @@ const FilterOperator = ({
   handleOperatorChange,
 }: {
   index: number;
-  filter: WhereFilter | WhereSegmentFilter;
+  filter: WhereFilter;
   handleOperatorChange: Function;
 }) => {
   const [isFilterOperatorsListOpen, setIsFilterOperatorsListOpen] =

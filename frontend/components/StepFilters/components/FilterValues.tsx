@@ -5,14 +5,13 @@ import {
   FilterOperatorsString,
   WhereFilter,
 } from '@lib/domain/common';
-import { WhereSegmentFilter } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { getFilterValuesText } from '@lib/utils/common';
 import React, { useRef } from 'react';
 
 type FilterValuesProps = {
   index: number;
-  filter: WhereFilter | WhereSegmentFilter;
+  filter: WhereFilter;
   valueList: string[];
   selectedValues: string[];
   areAllValuesSelected: boolean;

@@ -9,15 +9,13 @@ import AddFilterComponent from '@components/StepFilters/components/AddFilter';
 import { MetricSegmentFilter } from '@lib/domain/metric';
 import StepFilter from '@components/StepFilters/StepFilters';
 import {
+  FilterConditions,
   FilterDataType,
   FilterOperatorsString,
   FilterType,
   GroupConditions,
+  WhereFilter,
 } from '@lib/domain/common';
-import {
-  SegmentFilterConditions,
-  WhereSegmentFilter,
-} from '@lib/domain/segment';
 import cloneDeep from 'lodash/cloneDeep';
 import { getSelectedSegmentsText } from '@components/Metric/util';
 
@@ -45,17 +43,15 @@ const SegmentFilter = ({
   useOnClickOutside(segmentFilterRef, () => setIsSegmentListOpen(false));
 
   const [customFilters, setCustomFilters] = useState(
-    (segmentFilter.custom.filters as WhereSegmentFilter[]) || []
+    (segmentFilter.custom.filters as WhereFilter[]) || []
   );
 
   const handleAddFilter = (value: string) => {
-    const getFilterCondition = (filters: WhereSegmentFilter[]) => {
-      return !filters.length
-        ? SegmentFilterConditions.WHERE
-        : SegmentFilterConditions.AND;
+    const getFilterCondition = (filters: WhereFilter[]) => {
+      return !filters.length ? FilterConditions.WHERE : FilterConditions.AND;
     };
 
-    const newFilter: WhereSegmentFilter = {
+    const newFilter: WhereFilter = {
       condition: getFilterCondition(customFilters),
       operand: value,
       operator: FilterOperatorsString.IS,

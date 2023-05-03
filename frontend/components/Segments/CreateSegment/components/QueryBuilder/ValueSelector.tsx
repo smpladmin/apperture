@@ -1,14 +1,15 @@
-import { SegmentFilter, WhereSegmentFilter } from '@lib/domain/segment';
+import { SegmentFilter } from '@lib/domain/segment';
 import InputValue, { InputValueType } from './InputValue';
 import SelectValue from './SelectValue';
 import {
   FilterDataType,
   FilterOperatorsString,
   ISFilterOperators,
+  WhereFilter,
 } from '@lib/domain/common';
 
 type ValueSelectorProps = {
-  filter: WhereSegmentFilter;
+  filter: WhereFilter;
   filters: SegmentFilter[];
   updateGroupsState: Function;
   index: number;

@@ -1,18 +1,15 @@
 import { Flex, IconButton } from '@chakra-ui/react';
-import {
-  SegmentFilter,
-  SegmentProperty,
-  WhereSegmentFilter,
-} from '@lib/domain/segment';
+import { SegmentFilter, SegmentProperty } from '@lib/domain/segment';
 import React from 'react';
 import FilterConditions from '../FilterConditions';
 import FilterOperator from '../FilterOperator';
 import FilterOptions from '../FilterOptions';
 import SelectEventProperty from '../SelectEventProperty';
 import ValueSelector from '../ValueSelector';
+import { WhereFilter } from '@lib/domain/common';
 
 type WhereSegmentFilterProps = {
-  filter: WhereSegmentFilter;
+  filter: WhereFilter;
   filters: SegmentFilter[];
   updateGroupsState: Function;
   eventProperties: SegmentProperty[];
@@ -21,7 +18,7 @@ type WhereSegmentFilterProps = {
   loadingEventProperties: boolean;
 };
 
-const WhereSegmentFilter = ({
+const WhereFilter = ({
   filter,
   filters,
   updateGroupsState,
@@ -76,4 +73,4 @@ const WhereSegmentFilter = ({
   );
 };
 
-export default WhereSegmentFilter;
+export default WhereFilter;

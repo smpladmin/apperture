@@ -3,6 +3,7 @@ import SearchableListDropdown from '@components/SearchableDropdown/SearchableLis
 import { getWhereAndWhoFilters } from '@components/Segments/util';
 import {
   DateFilterType,
+  FilterConditions,
   FilterDataType,
   FilterOperatorsNumber,
   FilterOperatorsString,
@@ -11,7 +12,6 @@ import {
   FilterItemType,
   FilterType,
   SegmentFilter,
-  SegmentFilterConditions,
   SegmentProperty,
 } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
@@ -37,12 +37,12 @@ const AddFilter = ({
 
   const getWhereFilterCondition = useCallback(
     (whereFilters: SegmentFilter[]) => {
-      if (!whereFilters.length) return SegmentFilterConditions.WHERE;
+      if (!whereFilters.length) return FilterConditions.WHERE;
 
       const lastWhereCondition =
         whereFilters[whereFilters.length - 1]?.condition;
-      if (lastWhereCondition === SegmentFilterConditions.WHERE)
-        return SegmentFilterConditions.AND;
+      if (lastWhereCondition === FilterConditions.WHERE)
+        return FilterConditions.AND;
 
       return lastWhereCondition;
     },
@@ -51,11 +51,11 @@ const AddFilter = ({
 
   const getWhoFilterCondition = useCallback(
     (whoFilters: SegmentFilter[]) => {
-      if (!whoFilters.length) return SegmentFilterConditions.WHO;
+      if (!whoFilters.length) return FilterConditions.WHO;
 
       const lastWhoCondition = whoFilters[whoFilters.length - 1]?.condition;
-      if (lastWhoCondition === SegmentFilterConditions.WHO)
-        return SegmentFilterConditions.AND;
+      if (lastWhoCondition === FilterConditions.WHO)
+        return FilterConditions.AND;
 
       return lastWhoCondition;
     },

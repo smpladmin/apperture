@@ -10,12 +10,11 @@ import {
   FilterOptionMenuType,
   WhereFilter,
 } from '@lib/domain/common';
-import { WhereSegmentFilter } from '@lib/domain/segment';
 
 type FilterOptionsProp = {
   index: number;
   isHovered: boolean;
-  filter: WhereFilter | WhereSegmentFilter;
+  filter: WhereFilter;
   handleFilterDatatypeChange: Function;
 };
 

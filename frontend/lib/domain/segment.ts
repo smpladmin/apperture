@@ -1,25 +1,16 @@
 import {
   DateFilter,
   DateFilterType,
+  FilterConditions,
   FilterDataType,
-  FilterOperators,
   FilterOperatorsNumber,
   GroupConditions,
+  WhereFilter,
 } from './common';
 import { AppertureUser } from './user';
 
-export type WhereSegmentFilter = {
-  condition: SegmentFilterConditions;
-  operand: string;
-  operator: FilterOperators;
-  values: string[];
-  all: boolean;
-  type: FilterType;
-  datatype: FilterDataType;
-};
-
 export type WhoSegmentFilter = {
-  condition: SegmentFilterConditions;
+  condition: FilterConditions;
   triggered: boolean;
   operand: string;
   aggregation: string;
@@ -31,7 +22,7 @@ export type WhoSegmentFilter = {
   datatype: FilterDataType;
 };
 
-export type SegmentFilter = WhereSegmentFilter | WhoSegmentFilter;
+export type SegmentFilter = WhereFilter | WhoSegmentFilter;
 
 export enum FilterType {
   WHERE = 'where',
@@ -46,13 +37,6 @@ export type SegmentProperty = {
 export enum FilterItemType {
   PROPERTY = 'property',
   EVENT = 'event',
-}
-
-export enum SegmentFilterConditions {
-  WHERE = 'where',
-  AND = 'and',
-  OR = 'or',
-  WHO = 'who',
 }
 
 export type SegmentGroup = {

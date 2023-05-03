@@ -1,11 +1,8 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import Dropdown from '@components/SearchableDropdown/Dropdown';
 import { getWhereAndWhoFilters } from '@components/Segments/util';
-import {
-  FilterType,
-  SegmentFilter,
-  SegmentFilterConditions,
-} from '@lib/domain/segment';
+import { FilterConditions } from '@lib/domain/common';
+import { FilterType, SegmentFilter } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useCallback, useRef, useState } from 'react';
 
@@ -15,7 +12,7 @@ type FilterConditionsProps = {
   updateGroupsState: Function;
 };
 
-const FilterConditions = ({
+const FilterCondition = ({
   filter,
   filters,
   updateGroupsState,
@@ -24,10 +21,10 @@ const FilterConditions = ({
     useState(false);
 
   const updateWhereFiltersCondition = useCallback(
-    (whereFilters: SegmentFilter[], value: SegmentFilterConditions) => {
+    (whereFilters: SegmentFilter[], value: FilterConditions) => {
       return whereFilters.map((filter: SegmentFilter) => {
         filter.condition =
-          filter.condition === SegmentFilterConditions.WHERE
+          filter.condition === FilterConditions.WHERE
             ? filter.condition
             : value;
         return filter;
@@ -37,19 +34,17 @@ const FilterConditions = ({
   );
 
   const updateWhoFiltersCondition = useCallback(
-    (whoFilters: SegmentFilter[], value: SegmentFilterConditions) => {
+    (whoFilters: SegmentFilter[], value: FilterConditions) => {
       return whoFilters.map((filter: SegmentFilter) => {
         filter.condition =
-          filter.condition === SegmentFilterConditions.WHO
-            ? filter.condition
-            : value;
+          filter.condition === FilterConditions.WHO ? filter.condition : value;
         return filter;
       });
     },
     [filters]
   );
 
-  const handleSwitchFilterConditions = (value: SegmentFilterConditions) => {
+  const handleSwitchFilterConditions = (value: FilterConditions) => {
     setIsFilterConditionsListOpen(false);
     let { whereFilters, whoFilters } = getWhereAndWhoFilters(filters);
 
@@ -63,18 +58,15 @@ const FilterConditions = ({
     updateGroupsState(newFilters);
   };
 
-  const filterCondtionsValues = [
-    SegmentFilterConditions.AND,
-    SegmentFilterConditions.OR,
-  ];
+  const filterCondtionsValues = [FilterConditions.AND, FilterConditions.OR];
   const filterConditionsRef = useRef(null);
   useOnClickOutside(filterConditionsRef, () =>
     setIsFilterConditionsListOpen(false)
   );
 
   const isConditionWhereOrWho = [
-    SegmentFilterConditions.WHERE,
-    SegmentFilterConditions.WHO,
+    FilterConditions.WHERE,
+    FilterConditions.WHO,
   ].includes(filter?.condition);
 
   return (
@@ -121,4 +113,4 @@ const FilterConditions = ({
   );
 };
 
-export default FilterConditions;
+export default FilterCondition;
