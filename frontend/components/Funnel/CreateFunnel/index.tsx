@@ -1,7 +1,6 @@
-import { Flex, useToast } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import CreateFunnelAction from './CreateFunnelAction';
 import { useEffect, useState } from 'react';
-import FunnelEmptyState from '../components/FunnelEmptyState';
 import {
   ConversionWindowList,
   ConversionWindowObj,
