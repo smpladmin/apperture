@@ -5,12 +5,20 @@ import { useRouter } from 'next/router';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { GREY_500, GREY_700 } from '@theme/index';
 import { ArrowElbowDownRight, Trash } from 'phosphor-react';
-import { WhereFilter } from '@lib/domain/common';
+import {
+  FilterConditions,
+  FilterDataType,
+  FilterOperators,
+  FilterOperatorsDatatypeMap,
+  FilterOperatorsString,
+  ISFilterOperators,
+  WhereFilter,
+} from '@lib/domain/common';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { trimLabel } from '@lib/utils/common';
 import { WhereSegmentFilter } from '@lib/domain/segment';
 import FilterOptions from './components/FilterOptions';
-import FilterOperators from './components/FilterOperators';
+import FilterOperator from './components/FilterOperator';
 import FilterValues from './components/FilterValues';
 
 type FilterComponentProps = {
@@ -18,23 +26,17 @@ type FilterComponentProps = {
   index: number;
   eventProperties: string[];
   loadingEventProperties: boolean;
-  handleRemoveFilter: Function;
-  handleSetFilterValue: Function;
-  handleSetFilterProperty: Function;
-  handleFilterDatatypeChange: Function;
-  handleOperatorChange: Function;
+  filters: WhereFilter[] | WhereSegmentFilter[];
+  setFilters: Function;
 };
 
 const StepFilter = ({
   index,
   filter,
+  filters,
+  setFilters,
   eventProperties,
   loadingEventProperties,
-  handleSetFilterProperty,
-  handleSetFilterValue,
-  handleRemoveFilter,
-  handleFilterDatatypeChange,
-  handleOperatorChange,
 }: FilterComponentProps) => {
   const router = useRouter();
   const { dsId } = router.query;
@@ -83,6 +85,65 @@ const StepFilter = ({
   }, [filter.operand]);
 
   useOnClickOutside(eventPropertyRef, () => setIsPropertyDropdownOpen(false));
+
+  const handleSetFilterValue = (filterIndex: number, values: string[]) => {
+    let stepFilters = [...filters];
+    stepFilters[filterIndex]['values'] = values;
+
+    setFilters(stepFilters);
+  };
+
+  const handleSetFilterProperty = (filterIndex: number, property: string) => {
+    let stepFilters = [...filters];
+    stepFilters[filterIndex]['operand'] = property;
+
+    setFilters(stepFilters);
+  };
+
+  const handleRemoveFilter = (filterIndex: number) => {
+    let stepFilters = [...filters];
+    stepFilters.splice(filterIndex, 1);
+
+    if (filterIndex === 0 && stepFilters.length)
+      stepFilters[0]['condition'] = FilterConditions.WHERE;
+
+    setFilters(stepFilters);
+  };
+
+  const handleFilterDatatypeChange = (
+    filterIndex: number,
+    selectedDatatype: FilterDataType
+  ) => {
+    let stepFilters = [...filters];
+    stepFilters[filterIndex]['operator'] =
+      FilterOperatorsDatatypeMap[selectedDatatype][0];
+    stepFilters[filterIndex]['values'] = [];
+    stepFilters[filterIndex]['datatype'] = selectedDatatype;
+
+    setFilters(stepFilters);
+  };
+
+  const handleOperatorChange = (
+    filterIndex: number,
+    selectedOperator: FilterOperators
+  ) => {
+    let stepFilters = [...filters];
+
+    if (stepFilters[filterIndex].datatype === FilterDataType.STRING) {
+      const isMatchingFilter =
+        ISFilterOperators.includes(
+          stepFilters[filterIndex].operator as FilterOperatorsString
+        ) ===
+        ISFilterOperators.includes(selectedOperator as FilterOperatorsString);
+
+      if (!isMatchingFilter) {
+        stepFilters[index].values = [];
+      }
+    }
+
+    stepFilters[filterIndex].operator = selectedOperator;
+    setFilters(stepFilters);
+  };
 
   const handleSubmitValues = () => {
     handleSetFilterValue(index, selectedValues);
@@ -185,7 +246,7 @@ const StepFilter = ({
               />
             </Box>
 
-            <FilterOperators
+            <FilterOperator
               index={index}
               filter={filter}
               handleOperatorChange={handleOperatorChange}

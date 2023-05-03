@@ -2,17 +2,16 @@ import { Box, Flex, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import React, {
   Fragment,
-  useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
 } from 'react';
-import AddFilter from '../../../StepFilters/components/AddFilter';
+import AddFilter from '../../StepFilters/components/AddFilter';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { FunnelStep } from '@lib/domain/funnel';
 import { MapContext } from '@lib/contexts/mapContext';
-import FunnelStepFilterComponent from '../../../StepFilters/StepFilters';
+import FunnelStepFilterComponent from '../../StepFilters/StepFilters';
 import { useRouter } from 'next/router';
 import { getEventProperties } from '@lib/services/datasourceService';
 import { cloneDeep } from 'lodash';
@@ -25,9 +24,6 @@ import {
   FilterConditions,
   FilterOperatorsString,
   FilterDataType,
-  ISFilterOperators,
-  FilterOperators,
-  FilterOperatorsDatatypeMap,
 } from '@lib/domain/common';
 
 type FunnelComponentCardProps = {
@@ -60,6 +56,7 @@ const FunnelComponentCard = ({
   const [loadingEventProperties, setLoadingEventProperties] =
     useState<boolean>(false);
   const [showCrossIcon, setShowCrossIcon] = useState(false);
+  const [filters, setFilters] = useState(funnelStep?.filters || []);
 
   useOnClickOutside(eventBoxRef, () => {
     setIsEventListOpen(false);
@@ -105,6 +102,11 @@ const FunnelComponentCard = ({
     setFunnelSteps(tempFunnelSteps);
   };
 
+  useEffect(() => {
+    // whenever filter state changes, update the funnelStep filters
+    updateStepFilters(filters);
+  }, [filters]);
+
   const handleAddFilter = (value: string) => {
     const getFunnelFilterCondition = (stepFilters: WhereFilter[]) => {
       return !stepFilters.length
@@ -112,81 +114,16 @@ const FunnelComponentCard = ({
         : FilterConditions.AND;
     };
 
-    const stepFilters = [...funnelStep.filters];
-    stepFilters.push({
-      condition: getFunnelFilterCondition(stepFilters),
+    const newFilter = {
+      condition: getFunnelFilterCondition(filters),
       operand: value,
       operator: FilterOperatorsString.IS,
       values: [],
       type: FilterType.WHERE,
       all: false,
       datatype: FilterDataType.STRING,
-    });
-
-    updateStepFilters(stepFilters);
-  };
-
-  const handleSetFilterValue = (filterIndex: number, values: string[]) => {
-    let stepFilters = [...funnelStep.filters];
-    stepFilters[filterIndex]['values'] = values;
-
-    updateStepFilters(stepFilters);
-  };
-
-  const handleRemoveFilter = (filterIndex: number) => {
-    let stepFilters = [...funnelStep.filters];
-    stepFilters.splice(filterIndex, 1);
-
-    if (filterIndex === 0 && stepFilters.length)
-      stepFilters[0]['condition'] = FilterConditions.WHERE;
-
-    updateStepFilters(stepFilters);
-  };
-
-  const handleSetFilterProperty = (filterIndex: number, property: string) => {
-    let stepFilters = [...funnelStep.filters];
-    stepFilters[filterIndex]['operand'] = property;
-
-    updateStepFilters(stepFilters);
-  };
-
-  const handleFilterDatatypeChange = (
-    filterIndex: number,
-    selectedDatatype: FilterDataType
-  ) => {
-    let stepFilters = [...funnelStep.filters];
-    stepFilters[filterIndex]['operator'] =
-      FilterOperatorsDatatypeMap[selectedDatatype][0];
-    stepFilters[filterIndex]['values'] = [];
-    stepFilters[filterIndex]['datatype'] = selectedDatatype;
-
-    updateStepFilters(stepFilters);
-  };
-
-  const handleOperatorChange = (
-    filterIndex: number,
-    selectedOperator: FilterOperators
-  ) => {
-    let stepFilters = [...funnelStep.filters];
-    /*
-    While changing operator from `is/is_not` to `contains/does_not_contain`
-    the element to select filter value changes from a Selectable Dropdown to an Input Field,
-    hence the selected value needs a reset.
-    */
-    if (stepFilters[filterIndex].datatype === FilterDataType.STRING) {
-      const isMatchingFilter =
-        ISFilterOperators.includes(
-          stepFilters[filterIndex].operator as FilterOperatorsString
-        ) ===
-        ISFilterOperators.includes(selectedOperator as FilterOperatorsString);
-
-      if (!isMatchingFilter) {
-        stepFilters[index].values = [];
-      }
-    }
-    stepFilters[filterIndex].operator = selectedOperator;
-
-    updateStepFilters(stepFilters);
+    };
+    setFilters([...filters, newFilter]);
   };
 
   return (
@@ -263,13 +200,10 @@ const FunnelComponentCard = ({
               <FunnelStepFilterComponent
                 index={index}
                 filter={filter}
+                filters={filters}
+                setFilters={setFilters}
                 eventProperties={eventProperties}
                 loadingEventProperties={loadingEventProperties}
-                handleSetFilterProperty={handleSetFilterProperty}
-                handleSetFilterValue={handleSetFilterValue}
-                handleRemoveFilter={handleRemoveFilter}
-                handleFilterDatatypeChange={handleFilterDatatypeChange}
-                handleOperatorChange={handleOperatorChange}
               />
             </Fragment>
           ))}

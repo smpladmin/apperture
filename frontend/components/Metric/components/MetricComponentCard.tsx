@@ -12,10 +12,8 @@ import { Node } from '@lib/domain/node';
 import {
   FilterConditions,
   FilterDataType,
-  FilterOperatorsDatatypeMap,
   FilterOperatorsString,
   FilterType,
-  ISFilterOperators,
   WhereFilter,
 } from '@lib/domain/common';
 import MetricAggregation from './MetricAggregation';
@@ -91,6 +89,9 @@ const MetricComponentCard = ({
     });
     setReference(selection.id);
   };
+  const handleRemoveComponent = () => {
+    removeAggregate(index);
+  };
 
   const handleAddFilter = (value: string) => {
     const getFilterCondition = (filters: WhereFilter[]) => {
@@ -108,69 +109,6 @@ const MetricComponentCard = ({
     };
 
     setFilters([...filters, newFilter]);
-  };
-
-  const handleSetFilterValue = (filterIndex: number, values: string[]) => {
-    let stepFilters = [...filters];
-    stepFilters[filterIndex]['values'] = values;
-
-    setFilters(stepFilters);
-  };
-
-  const handleSetFilterPropertyValue = (
-    filterIndex: number,
-    property: string
-  ) => {
-    let stepFilters = [...filters];
-    stepFilters[filterIndex]['operand'] = property;
-
-    setFilters(stepFilters);
-  };
-
-  const handleRemoveComponent = () => {
-    removeAggregate(index);
-  };
-
-  const removeFilter = (filterIndex: number) => {
-    let stepFilters = [...filters];
-    stepFilters.splice(filterIndex, 1);
-
-    if (filterIndex === 0 && stepFilters.length)
-      stepFilters[0]['condition'] = FilterConditions.WHERE;
-
-    setFilters(stepFilters);
-  };
-
-  const handleFilterDatatypeChange = (
-    filterIndex: number,
-    selectedDatatype: FilterDataType
-  ) => {
-    let stepFilters = [...filters];
-    stepFilters[filterIndex]['operator'] =
-      FilterOperatorsDatatypeMap[selectedDatatype][0];
-    stepFilters[filterIndex]['values'] = [];
-    stepFilters[filterIndex]['datatype'] = selectedDatatype;
-
-    setFilters(stepFilters);
-  };
-
-  const handleOperatorChange = (filterIndex: number, selectedOperator: any) => {
-    let stepFilters = [...filters];
-
-    if (stepFilters[filterIndex].datatype === FilterDataType.STRING) {
-      const isMatchingFilter =
-        ISFilterOperators.includes(
-          stepFilters[filterIndex].operator as FilterOperatorsString
-        ) ===
-        ISFilterOperators.includes(selectedOperator as FilterOperatorsString);
-
-      if (!isMatchingFilter) {
-        stepFilters[index].values = [];
-      }
-    }
-
-    stepFilters[filterIndex].operator = selectedOperator;
-    setFilters(stepFilters);
   };
 
   const handleVariantSelection = (variant: MetricVariant) => {
@@ -304,13 +242,10 @@ const MetricComponentCard = ({
                   <StepFilter
                     index={index}
                     filter={filter}
+                    filters={filters}
+                    setFilters={setFilters}
                     eventProperties={eventProperties}
                     loadingEventProperties={loadingEventsAndProperties}
-                    handleSetFilterProperty={handleSetFilterPropertyValue}
-                    handleSetFilterValue={handleSetFilterValue}
-                    handleRemoveFilter={removeFilter}
-                    handleFilterDatatypeChange={handleFilterDatatypeChange}
-                    handleOperatorChange={handleOperatorChange}
                   />
                 </Flex>
               ))}

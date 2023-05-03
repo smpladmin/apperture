@@ -106,6 +106,9 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
       return;
     }
 
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
     const getFunnelMetricsData = async () => {
       const [funnelData, trendsData] = await Promise.all([
         getTransientFunnelData(
@@ -113,14 +116,16 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           filterFunnelSteps(funnelSteps),
           dateFilter,
           conversionWindow,
-          randomSequence
+          randomSequence,
+          signal
         ),
         getTransientTrendsData(
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
           dateFilter,
           conversionWindow,
-          randomSequence
+          randomSequence,
+          signal
         ),
       ]);
       setFunnelData(funnelData);
@@ -130,6 +135,8 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
 
     setIsLoading(true);
     getFunnelMetricsData();
+
+    return () => abortController.abort();
   }, [funnelSteps, dateFilter, conversionWindow, randomSequence]);
 
   const handleSaveOrUpdateFunnel = async () => {

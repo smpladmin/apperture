@@ -6,7 +6,7 @@ import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 import React, { useRef, useState } from 'react';
 
-const FilterOperators = ({
+const FilterOperator = ({
   index,
   filter,
   handleOperatorChange,
@@ -85,4 +85,4 @@ const FilterOperators = ({
   );
 };
 
-export default FilterOperators;
+export default FilterOperator;
