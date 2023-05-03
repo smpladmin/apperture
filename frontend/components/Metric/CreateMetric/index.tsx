@@ -14,7 +14,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Node } from '@lib/domain/node';
 import { useRouter } from 'next/router';
 import { getCountOfValidAggregates } from '../util';
-import { DateFilterObj, GroupConditions } from '@lib/domain/common';
+import {
+  DateFilterObj,
+  DateFilterType,
+  GroupConditions,
+} from '@lib/domain/common';
 import ActionHeader from '@components/EventsLayout/ActionHeader';
 import { saveMetric, updateMetric } from '@lib/services/metricService';
 import TransientMetricView from '../components/TransientMetricView';
@@ -52,8 +56,8 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
     savedMetric?.function || ''
   );
   const [dateFilter, setDateFilter] = useState<DateFilterObj>({
-    filter: savedMetric?.dateFilter?.filter || null,
-    type: savedMetric?.dateFilter?.type || null,
+    filter: savedMetric?.dateFilter?.filter || { days: 30 },
+    type: savedMetric?.dateFilter?.type || DateFilterType.LAST,
   });
   const [segmentFilters, setSegmentFilters] = useState<MetricSegmentFilter[]>(
     savedMetric?.segmentFilter || [

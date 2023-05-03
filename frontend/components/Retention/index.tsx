@@ -43,7 +43,7 @@ const Retention = () => {
   });
 
   const [dateFilter, setDateFilter] = useState<DateFilterObj>({
-    filter: { days: 90 },
+    filter: { days: 30 },
     type: DateFilterType.LAST,
   });
 

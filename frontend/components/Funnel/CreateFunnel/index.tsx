@@ -24,7 +24,7 @@ import {
 } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel/util';
-import { DateFilterObj } from '@lib/domain/common';
+import { DateFilterObj, DateFilterType } from '@lib/domain/common';
 import Header from '@components/EventsLayout/ActionHeader';
 import Card from '@components/Card';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
@@ -49,8 +49,8 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
         ]
   );
   const [dateFilter, setDateFilter] = useState<DateFilterObj>({
-    filter: savedFunnel?.dateFilter?.filter || null,
-    type: savedFunnel?.dateFilter?.type || null,
+    filter: savedFunnel?.dateFilter?.filter || { days: 30 },
+    type: savedFunnel?.dateFilter?.type || DateFilterType.LAST,
   });
 
   const [conversionWindow, setConversionWindow] = useState<ConversionWindowObj>(
@@ -199,22 +199,17 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           </Card>
         </ActionPanel>
         <ViewPanel>
-          {isEmpty ? (
-            <Card minHeight={'120'} borderRadius={'16'}>
-              <FunnelEmptyState />
-            </Card>
-          ) : (
-            <TransientFunnelView
-              isLoading={isLoading}
-              funnelData={funnelData}
-              trendsData={trendsData}
-              funnelSteps={funnelSteps}
-              dateFilter={dateFilter}
-              setDateFilter={setDateFilter}
-              conversionWindow={conversionWindow}
-              randomSequence={randomSequence}
-            />
-          )}
+          <TransientFunnelView
+            isLoading={isLoading}
+            isEmpty={isEmpty}
+            funnelData={funnelData}
+            trendsData={trendsData}
+            funnelSteps={funnelSteps}
+            dateFilter={dateFilter}
+            setDateFilter={setDateFilter}
+            conversionWindow={conversionWindow}
+            randomSequence={randomSequence}
+          />
         </ViewPanel>
       </Flex>
     </Flex>
