@@ -61,8 +61,15 @@ class Retention(EventsBase):
             self.date_func(self.table.timestamp) <= Parameter(f"%(end_date)s"),
         ]
 
-        conditions.append(
-            self.table.event_name == Parameter(f"%(start_event)s")
+        conditions.extend(
+            [
+                self.table.event_name == Parameter(f"%(start_event)s"),
+                Field("granularity")
+                <= self.to_start_of_interval_func(
+                    fn.Now(), Interval(**{granularity.value: 1})
+                )
+                - Parameter(f"%(interval)s"),
+            ]
         ) if event_flag else conditions.append(
             self.table.event_name == Parameter(f"%(goal_event)s")
         )

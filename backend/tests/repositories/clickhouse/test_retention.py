@@ -46,7 +46,8 @@ class TestRetentionRepository:
             '"granularity",MIN("timestamp") AS "ts" FROM "events" WHERE '
             '"datasource_id"=%(ds_id)s AND DATE("timestamp")>=%(start_date)s AND '
             'DATE("timestamp")<=%(end_date)s AND "event_name"=%(start_event)s '
-            "GROUP BY 1,2) ,goal_event_sub_query AS (SELECT "
+            'AND "granularity"<=toStartOfInterval(NOW(),INTERVAL \'1 '
+            "DAY')-%(interval)s GROUP BY 1,2) ,goal_event_sub_query AS (SELECT "
             '"user_id",toStartOfInterval("timestamp",INTERVAL \'1 DAY\') AS '
             '"granularity",MAX("timestamp") AS "ts" FROM "events" WHERE '
             '"datasource_id"=%(ds_id)s AND DATE("timestamp")>=%(start_date)s AND '
@@ -104,8 +105,9 @@ class TestRetentionRepository:
                     'SELECT "user_id",toStartOfInterval("timestamp",INTERVAL \'1 DAY\') AS '
                     '"granularity",MIN("timestamp") AS "ts" FROM "events" WHERE '
                     '"datasource_id"=%(ds_id)s AND DATE("timestamp")>=%(start_date)s AND '
-                    'DATE("timestamp")<=%(end_date)s AND "event_name"=%(start_event)s GROUP BY '
-                    "1,2"
+                    'DATE("timestamp")<=%(end_date)s AND "event_name"=%(start_event)s AND '
+                    "\"granularity\"<=toStartOfInterval(NOW(),INTERVAL '1 DAY')-%(interval)s "
+                    "GROUP BY 1,2"
                 ),
             ),
             (
@@ -156,6 +158,7 @@ class TestRetentionRepository:
             '"granularity",MIN("timestamp") AS "ts" FROM "events" WHERE '
             '"datasource_id"=%(ds_id)s AND DATE("timestamp")>=%(start_date)s AND '
             'DATE("timestamp")<=%(end_date)s AND "event_name"=%(start_event)s AND '
+            "\"granularity\"<=toStartOfInterval(NOW(),INTERVAL '1 DAY')-%(interval)s AND "
             '"user_id" IN (SELECT * FROM "events") GROUP BY 1,2'
         )
 
@@ -182,7 +185,8 @@ class TestRetentionRepository:
                     '"granularity",MIN("timestamp") AS "ts" FROM "events" WHERE '
                     '"datasource_id"=%(ds_id)s AND DATE("timestamp")>=%(start_date)s AND '
                     'DATE("timestamp")<=%(end_date)s AND "event_name"=%(start_event)s '
-                    "GROUP BY 1,2) ,goal_event_sub_query AS (SELECT "
+                    'AND "granularity"<=toStartOfInterval(NOW(),INTERVAL \'1 '
+                    "DAY')-%(interval)s GROUP BY 1,2) ,goal_event_sub_query AS (SELECT "
                     '"user_id",toStartOfInterval("timestamp",INTERVAL \'1 DAY\') AS '
                     '"granularity",MAX("timestamp") AS "ts" FROM "events" WHERE '
                     '"datasource_id"=%(ds_id)s AND DATE("timestamp")>=%(start_date)s AND '
