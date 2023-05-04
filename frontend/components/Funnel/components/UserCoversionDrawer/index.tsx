@@ -104,6 +104,7 @@ const UserConversionDrawer = ({
   const handleClose = () => {
     onClose();
     setTableState(TableState.LIST);
+    setStatus(ConversionStatus.CONVERTED);
   };
 
   return (
