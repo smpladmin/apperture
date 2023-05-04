@@ -40,7 +40,7 @@ class RetentionService:
         start_event: EventSelection,
         goal_event: EventSelection,
         date_filter: DateFilter,
-        segment_filter: Union[SegmentFilter, None],
+        segment_filter: Union[List[SegmentFilter], None],
         granularity: Granularity,
         interval: int,
     ) -> List[ComputedRetentionTrend]:
