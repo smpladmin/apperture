@@ -9,11 +9,13 @@ from pypika.terms import ContainsCriterion, Interval, Parameter, Criterion, Fiel
 from clickhouse import Clickhouse
 from domain.retention.models import EventSelection, Granularity
 from repositories.clickhouse.base import EventsBase
+from repositories.clickhouse.utils.filters import Filters
 
 
 class Retention(EventsBase):
-    def __init__(self, clickhouse: Clickhouse = Depends()):
+    def __init__(self, clickhouse: Clickhouse = Depends(), filter_utils: Filters = Depends()):
         super().__init__(clickhouse=clickhouse)
+        self.filter_utils = filter_utils
 
     def compute_retention_trend(
         self,
@@ -39,11 +41,19 @@ class Retention(EventsBase):
             query=self.build_retention_trend_query(
                 segment_filter_criterion=segment_filter_criterion,
                 granularity=granularity,
+                start_event=start_event,
+                goal_event=goal_event,
             ).get_sql(),
             parameters=parameters,
         )
 
-    def build_sub_query(self, granularity: Granularity, event_flag: bool):
+    def build_sub_query(
+        self,
+        granularity: Granularity,
+        event_flag: bool,
+        event: EventSelection,
+        segment_filter_criterion: Union[ContainsCriterion, None],
+    ):
 
         conditions = [
             self.table.datasource_id == Parameter("%(ds_id)s"),
@@ -56,6 +66,15 @@ class Retention(EventsBase):
         ) if event_flag else conditions.append(
             self.table.event_name == Parameter(f"%(goal_event)s")
         )
+
+        if segment_filter_criterion:
+            conditions.append(segment_filter_criterion)
+
+        if event.filters:
+            filter_criterion = self.filter_utils.get_criterion_for_where_filters(
+                filters=event.filters
+            )
+            conditions.extend(filter_criterion)
 
         sub_query = ClickHouseQuery.from_(self.table).select(
             self.table.user_id,
@@ -75,14 +94,22 @@ class Retention(EventsBase):
 
     def build_retention_trend_query(
         self,
+        start_event: EventSelection,
+        goal_event: EventSelection,
         segment_filter_criterion: Union[ContainsCriterion, None],
         granularity: Granularity,
     ):
         start_event_sub_query = self.build_sub_query(
-            granularity=granularity, event_flag=True
+            granularity=granularity,
+            event_flag=True,
+            event=start_event,
+            segment_filter_criterion=segment_filter_criterion,
         )
         goal_event_sub_query = self.build_sub_query(
-            granularity=granularity, event_flag=False
+            granularity=granularity,
+            event_flag=False,
+            event=goal_event,
+            segment_filter_criterion=segment_filter_criterion,
         )
 
         query = ClickHouseQuery.with_(
@@ -144,7 +171,10 @@ class Retention(EventsBase):
     ):
 
         retention_query = self.build_retention_query(
-            granularity=granularity, segment_filter_criterion=segment_filter_criterion
+            granularity=granularity,
+            segment_filter_criterion=segment_filter_criterion,
+            start_event=start_event,
+            goal_event=goal_event,
         )
 
         parameters = {
@@ -169,11 +199,16 @@ class Retention(EventsBase):
 
     def build_retention_query(
         self,
+        start_event: EventSelection,
+        goal_event: EventSelection,
         segment_filter_criterion: Union[ContainsCriterion, None],
         granularity: Granularity,
     ):
         sub_query = self.build_retention_trend_query(
-            segment_filter_criterion=segment_filter_criterion, granularity=granularity
+            segment_filter_criterion=segment_filter_criterion,
+            granularity=granularity,
+            start_event=start_event,
+            goal_event=goal_event,
         )
         query = ClickHouseQuery.from_(sub_query).select(
             fn.Sum(Field("retention_count")) / fn.Sum(Field("total_count"))

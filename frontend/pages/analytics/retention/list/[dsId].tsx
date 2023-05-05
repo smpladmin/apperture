@@ -1,14 +1,12 @@
 import Layout from '@components/Layout';
-import { MapContext } from '@lib/contexts/mapContext';
+import SavedRetentions from '@components/Watchlist/Retention';
 import { AppWithIntegrations } from '@lib/domain/app';
+import { Provider } from '@lib/domain/provider';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
-import { _getNodes } from '@lib/services/datasourceService';
-import { Actions } from '@lib/types/context';
+import { getDatasourceById } from '@lib/utils/common';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
-import { ReactElement, useContext, useEffect } from 'react';
-import { Node } from '@lib/domain/node';
-import Retention from '@components/Retention/CreateRetention';
+import React, { ReactNode } from 'react';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -20,8 +18,11 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
+
   const apps = await _getAppsWithIntegrations(token);
-  const nodes = await _getNodes(token, query.dsId as string);
+  const datasourceId = query.dsId;
+  const provider =
+    getDatasourceById(apps, datasourceId as string)?.provider || '';
 
   if (!apps.length) {
     return {
@@ -32,25 +33,16 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
   return {
-    props: { apps, nodes },
+    props: { apps, provider },
   };
 };
 
-const CreateRetention = ({ nodes }: { nodes: Node[] }) => {
-  const { dispatch } = useContext(MapContext);
-
-  useEffect(() => {
-    dispatch({
-      type: Actions.SET_NODES,
-      payload: nodes,
-    });
-  }, []);
-
-  return <Retention />;
+const ListRetentions = ({ provider }: { provider: Provider }) => {
+  return <SavedRetentions provider={provider} />;
 };
 
-CreateRetention.getLayout = function getLayout(
-  page: ReactElement,
+ListRetentions.getLayout = function getLayout(
+  page: ReactNode,
   apps: AppWithIntegrations[]
 ) {
   return (
@@ -60,4 +52,4 @@ CreateRetention.getLayout = function getLayout(
   );
 };
 
-export default CreateRetention;
+export default ListRetentions;

@@ -8,6 +8,12 @@ import appertureLogo from '@assets/images/apperture-logo.svg';
 import { StaticImageData } from 'next/image';
 import { AppWithIntegrations } from '@lib/domain/app';
 import dayjs from 'dayjs';
+import { WhereSegmentFilter } from '@lib/domain/segment';
+import { ExternalSegmentFilter } from '@lib/domain/common';
+import {
+  replaceEmptyStringPlaceholder,
+  replaceFilterValueWithEmptyStringPlaceholder,
+} from '@components/Segments/util';
 
 export const DEBOUNCED_WAIT_TIME = 500;
 
@@ -111,4 +117,44 @@ export const getFilterValuesText = (values: string[]) => {
 
 export const trimLabel = (label: string, size = 15) => {
   return label.length > size + 3 ? label.slice(0, size) + '...' : label;
+};
+
+export const isEveryCustomSegmentFilterValid = (
+  filters: WhereSegmentFilter[]
+) => {
+  return filters?.every((filter) => filter.values.length);
+};
+
+export const isValidSegmentFilter = (
+  segmentFilters: ExternalSegmentFilter[]
+) => {
+  return segmentFilters.every(
+    (filter) =>
+      (filter.custom.filters.length || filter.segments.length) &&
+      isEveryCustomSegmentFilterValid(
+        filter.custom.filters as WhereSegmentFilter[]
+      )
+  );
+};
+
+export const replacePlaceholderWithEmptyStringInExternalSegmentFilter = (
+  segmentFilters: ExternalSegmentFilter[]
+) => {
+  return segmentFilters.map((segmentFilter) => {
+    const updatedCustomGroup = replaceEmptyStringPlaceholder([
+      segmentFilter.custom,
+    ])[0];
+    return { ...segmentFilter, custom: updatedCustomGroup };
+  });
+};
+
+export const replaceEmptyStringWithPlaceholderInExternalSegmentFilter = (
+  segmentFilters: ExternalSegmentFilter[]
+) => {
+  return segmentFilters.map((segmentFilter) => {
+    const updatedCustomGroup = replaceFilterValueWithEmptyStringPlaceholder([
+      segmentFilter.custom,
+    ])[0];
+    return { ...segmentFilter, custom: updatedCustomGroup };
+  });
 };

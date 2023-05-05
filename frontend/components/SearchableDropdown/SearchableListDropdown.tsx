@@ -51,7 +51,7 @@ const SearchableListDropdown = ({
       placeholderText={placeholderText}
       width={width}
     >
-      {listData.length ? (
+      {listData?.length ? (
         <Box data-testid={'event-property-dropdown-container'}>
           {listData.map((item) => {
             const segmentPropertyItem =

@@ -2,14 +2,22 @@ import { Flex, Text } from '@chakra-ui/react';
 import Card from '@components/Card';
 import React from 'react';
 import GranularityCriteria from '@components/Retention/components/GranularityCriteria';
-import SelectEventsRetention from './components/SelectEventsRetention';
+import SelectEventsRetention from '@components/Retention/components/SelectEventsRetention';
 import { Granularity, RetentionEvents } from '@lib/domain/retention';
+import SegmentFilter from '@components/Metric/components/SegmentFilter';
+import { ExternalSegmentFilter } from '@lib/domain/common';
+import { Node } from '@lib/domain/node';
 
 type CreateRetentionActionProps = {
   retentionEvents: RetentionEvents;
   setRetentionEvents: Function;
   granularity: Granularity;
   setGranularity: Function;
+  segmentFilters: ExternalSegmentFilter[];
+  updateSegmentFilter: Function;
+  loadingEventsAndProperties: boolean;
+  eventProperties: string[];
+  eventList: Node[];
 };
 
 export const CreateRetentionAction = ({
@@ -17,6 +25,11 @@ export const CreateRetentionAction = ({
   setRetentionEvents,
   granularity,
   setGranularity,
+  segmentFilters,
+  updateSegmentFilter,
+  eventProperties,
+  loadingEventsAndProperties,
+  eventList,
 }: CreateRetentionActionProps) => {
   return (
     <Flex direction={'column'} gap={'3'} w={'full'}>
@@ -68,6 +81,17 @@ export const CreateRetentionAction = ({
           setGranularity={setGranularity}
         />
       </Card>
+      {segmentFilters.map((segmentFilter, index) => (
+        <SegmentFilter
+          key={index}
+          index={index}
+          segmentFilter={segmentFilter}
+          updateSegmentFilter={updateSegmentFilter}
+          segmentFilters={segmentFilters}
+          eventProperties={eventProperties}
+          loadingEventProperties={loadingEventsAndProperties}
+        />
+      ))}
     </Flex>
   );
 };

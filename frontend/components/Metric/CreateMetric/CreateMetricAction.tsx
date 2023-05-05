@@ -20,7 +20,6 @@ import {
   MetricVariant,
   ComputedMetric,
   MetricBasicAggregation,
-  MetricSegmentFilter,
 } from '@lib/domain/metric';
 import { cloneDeep, debounce, isEqual } from 'lodash';
 import { Node } from '@lib/domain/node';
@@ -30,7 +29,11 @@ import {
   isValidAggregates,
   replaceEmptyStringPlaceholder,
 } from '@components/Metric/util';
-import { DateFilterObj, WhereFilter } from '@lib/domain/common';
+import {
+  DateFilterObj,
+  ExternalSegmentFilter,
+  WhereFilter,
+} from '@lib/domain/common';
 import Card from '@components/Card';
 import { Function, Plus } from 'phosphor-react';
 import AddBreakdown from '../components/AddBreakdown';
@@ -55,7 +58,7 @@ type CreateMetricActionProps = {
   dateFilter: DateFilterObj;
   metricDefinition: string;
   setMetricDefinition: Function;
-  segmentFilters: MetricSegmentFilter[];
+  segmentFilters: ExternalSegmentFilter[];
   updateSegmentFilter: Function;
 };
 
