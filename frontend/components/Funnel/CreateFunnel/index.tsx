@@ -110,7 +110,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
     const signal = abortController.signal;
 
     const getFunnelMetricsData = async () => {
-      const [funnelData, trendsData] = await Promise.all([
+      const [funnelDataResponse, trendsDataResponse] = await Promise.all([
         getTransientFunnelData(
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
@@ -128,9 +128,12 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           signal
         ),
       ]);
-      setFunnelData(funnelData);
-      setTrendsData(trendsData);
-      setIsLoading(false);
+      // status would be undefined if the call is cancelled
+      if (funnelDataResponse.status && trendsDataResponse.status) {
+        setFunnelData(funnelDataResponse.data || []);
+        setTrendsData(trendsDataResponse.data || []);
+        setIsLoading(false);
+      }
     };
 
     setIsLoading(true);

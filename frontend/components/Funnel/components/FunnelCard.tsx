@@ -50,7 +50,6 @@ const FunnelComponentCard = ({
   const [loadingEventProperties, setLoadingEventProperties] =
     useState<boolean>(false);
   const [showCrossIcon, setShowCrossIcon] = useState(false);
-  const [filters, setFilters] = useState(funnelStep?.filters || []);
 
   useOnClickOutside(eventBoxRef, () => {
     setIsEventListOpen(false);
@@ -81,6 +80,7 @@ const FunnelComponentCard = ({
     const tempFunnelSteps = cloneDeep(funnelSteps);
     tempFunnelSteps[index]['event'] = selection.id;
     setFunnelSteps(tempFunnelSteps);
+    setIsHovered(false);
   };
 
   const handleRemoveFunnelStep = (index: number) => {
@@ -95,11 +95,6 @@ const FunnelComponentCard = ({
     tempFunnelSteps[index]['filters'] = stepFilters;
     setFunnelSteps(tempFunnelSteps);
   };
-
-  useEffect(() => {
-    // whenever filter state changes, update the funnelStep filters
-    updateStepFilters(filters);
-  }, [filters]);
 
   return (
     <Flex
@@ -170,13 +165,13 @@ const FunnelComponentCard = ({
 
       {Boolean(funnelStep.filters.length) && (
         <Flex direction={'column'} gap={'2'}>
-          {funnelStep.filters.map((filter, index) => (
+          {funnelStep.filters.map((filter, index, filters) => (
             <Fragment key={index}>
               <FunnelStepFilterComponent
                 index={index}
                 filter={filter}
                 filters={filters}
-                setFilters={setFilters}
+                setFilters={updateStepFilters}
                 eventProperties={eventProperties}
                 loadingEventProperties={loadingEventProperties}
               />
@@ -186,8 +181,8 @@ const FunnelComponentCard = ({
       )}
       {funnelStep.event ? (
         <AddFilter
-          filters={filters}
-          setFilters={setFilters}
+          filters={funnelStep.filters}
+          setFilters={updateStepFilters}
           eventProperties={eventProperties}
           loadingEventProperties={loadingEventProperties}
         />
