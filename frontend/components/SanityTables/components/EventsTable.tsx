@@ -19,6 +19,7 @@ import {
   getSortedRowModel,
 } from '@tanstack/react-table';
 import { useMemo } from 'react';
+import dayjs from 'dayjs';
 
 type EventsTablesProps = { eventData: SanityData; selectedColumns: string[] };
 
@@ -27,10 +28,13 @@ const EventsTables = ({ eventData, selectedColumns }: EventsTablesProps) => {
 
   const columns = useMemo(() => {
     const generateColumnHeader = () => {
-      return selectedColumns.map((key: any) =>
+      return selectedColumns.map((key: any, index: number) =>
         columnHelper.accessor(key, {
           header: key,
-          cell: (info) => info.getValue(),
+          cell: (info) =>
+            index === 1
+              ? dayjs(info.getValue() as Date).format('D MMM YY, h:mm:ss A')
+              : info.getValue(),
         })
       );
     };

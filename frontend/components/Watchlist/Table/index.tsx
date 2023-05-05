@@ -66,7 +66,10 @@ const WatchlistTable = ({
             columnHelper.accessor('details.updatedAt', {
               cell: (info) => {
                 const updatedAt = info.getValue() as Date;
-                return dayjs.utc(updatedAt).local().format('D MMM YY, h:mmA');
+                return dayjs
+                  .utc(updatedAt)
+                  .local()
+                  .format('D MMM YY, h:mm:ss A');
               },
               header: 'Last Updated',
             }),
