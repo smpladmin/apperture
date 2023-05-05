@@ -188,4 +188,47 @@ describe('Actions', () => {
       expect(cssSelectorInput).toHaveDisplayValue('__next>div');
     });
   });
+
+  describe('date filter', () => {
+    it('should render date funnel component', async () => {
+      mockedIsValidAction.mockReturnValue(true);
+      await renderActionComponent();
+
+      const dateFilter = screen.getByTestId('date-filter');
+      expect(dateFilter).toBeInTheDocument();
+    });
+
+    it('should call switch to 1M filter when clicked on it', async () => {
+      await renderActionComponent();
+      const conditionChips = screen.getAllByTestId('condition-chip');
+      fireEvent.click(conditionChips[3]);
+      const cssSelectorInput = screen.getByTestId('selector-selector-input');
+      fireEvent.change(cssSelectorInput, {
+        target: { value: '__next>div' },
+      });
+      fireEvent.keyDown(cssSelectorInput, { key: 'Enter', code: 'Enter' });
+
+      const oneMonthFilter = screen.getByTestId('month');
+      await act(async () => {
+        fireEvent.click(oneMonthFilter);
+      });
+
+      await waitFor(() => {
+        expect(mockedGetTransientActionEvents).toHaveBeenLastCalledWith(
+          '63d8ef5a7b02dbd1dcf20dc3',
+          [
+            {
+              href: null,
+              selector: '__next>div',
+              text: null,
+              url: null,
+              url_matching: 'contains',
+              event: '$autocapture',
+            },
+          ],
+          { filter: { days: 30 }, type: 'last' }
+        );
+      });
+    });
+  });
 });
