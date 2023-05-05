@@ -3,6 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from domain.actions.models import Action, ActionGroup, CaptureEvent, ComputedAction
+from domain.common.date_models import DateFilter
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
 
@@ -29,6 +30,7 @@ class ActionWithUser(Action, ModelResponse):
 class TransientActionDto(BaseModel):
     datasourceId: str
     groups: List[ActionGroup]
+    dateFilter: Optional[DateFilter]
 
 
 class ComputedActionResponse(ComputedAction):

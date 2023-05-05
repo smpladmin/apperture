@@ -1,11 +1,13 @@
 from datetime import datetime
-from typing import List
+from typing import List, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
 
 from domain.actions.models import Action, ActionGroup, ComputedEventStreamResult
 from domain.clickstream.models import CaptureEvent
+from domain.common.date_models import DateFilter
+from domain.common.date_utils import DateUtils
 from mongo import Mongo
 from repositories.clickhouse.actions import Actions
 from rest.dtos.actions import ComputedActionResponse
@@ -16,9 +18,11 @@ class ActionService:
         self,
         mongo: Mongo = Depends(),
         actions: Actions = Depends(),
+        date_utils: DateUtils = Depends(),
     ):
         self.mongo = mongo
         self.actions = actions
+        self.date_utils = date_utils
 
     def build_action(
         self,
@@ -80,11 +84,28 @@ class ActionService:
             Action.id == PydanticObjectId(action_id),
         ).update({"$set": to_update})
 
+    def extract_date_range(self, date_filter: Union[DateFilter, None]):
+        return (
+            self.date_utils.compute_date_filter(
+                date_filter=date_filter.filter, date_filter_type=date_filter.type
+            )
+            if date_filter and date_filter.filter and date_filter.type
+            else (None, None)
+        )
+
     async def compute_action(
-        self, datasource_id: str, groups: List[ActionGroup]
+        self,
+        datasource_id: str,
+        groups: List[ActionGroup],
+        date_filter: Union[DateFilter, None],
     ) -> List[ComputedActionResponse]:
+        start_date, end_date = self.extract_date_range(date_filter=date_filter)
+
         matching_events = await self.actions.get_matching_events_from_clickstream(
-            datasource_id=datasource_id, groups=groups
+            datasource_id=datasource_id,
+            groups=groups,
+            start_date=start_date,
+            end_date=end_date,
         )
         matching_events = [
             ComputedEventStreamResult(
@@ -99,7 +120,10 @@ class ActionService:
 
         count = (
             await self.actions.get_count_of_matching_event_from_clickstream(
-                datasource_id=datasource_id, groups=groups
+                datasource_id=datasource_id,
+                groups=groups,
+                start_date=start_date,
+                end_date=end_date,
             )
         )[0][0]
 

@@ -100,7 +100,7 @@ async def compute_transient_actions(
     action_service: ActionService = Depends(),
 ):
     return await action_service.compute_action(
-        datasource_id=dto.datasourceId, groups=dto.groups
+        datasource_id=dto.datasourceId, groups=dto.groups, date_filter=dto.dateFilter
     )
 
 

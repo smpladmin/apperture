@@ -1,7 +1,7 @@
 import datetime
 import logging
 import re
-from typing import Any, Dict, List, Tuple, cast
+from typing import Any, Dict, List, Tuple, Union, cast
 
 from beanie import PydanticObjectId
 from pypika import ClickHouseQuery, Criterion, Field, Parameter
@@ -163,19 +163,17 @@ class Actions(EventsBase):
     async def update_events_from_clickstream(self, action: Action, update_action_func):
 
         try:
-            query, params, now = await self.build_update_events_from_clickstream_query(action)
-            self.execute_get_query(
-                query=query, parameters=params
+            query, params, now = await self.build_update_events_from_clickstream_query(
+                action
             )
+            self.execute_get_query(query=query, parameters=params)
             await update_action_func(action_id=action.id, processed_till=now)
             logging.info(f"{action.name} processed till: {now}")
         except Exception as e:
             logging.info(f"Failed executing query for {action.name} with exception {e}")
         return
 
-    async def build_update_events_from_clickstream_query(
-        self, action: Action
-    ):
+    async def build_update_events_from_clickstream_query(self, action: Action):
 
         conditions, params = [], {}
         for index, group in enumerate(action.groups):
@@ -216,16 +214,27 @@ class Actions(EventsBase):
         return query.get_sql(), params, now
 
     async def get_matching_events_from_clickstream(
-        self, datasource_id: str, groups: List[ActionGroup]
+        self,
+        datasource_id: str,
+        groups: List[ActionGroup],
+        start_date: Union[str, None],
+        end_date: Union[str, None],
     ):
         return self.execute_get_query(
             *await self.build_matching_events_from_clickstream_query(
-                datasource_id=datasource_id, groups=groups
+                datasource_id=datasource_id,
+                groups=groups,
+                start_date=start_date,
+                end_date=end_date,
             )
         )
 
     async def build_matching_events_from_clickstream_query(
-        self, datasource_id: str, groups: List[ActionGroup]
+        self,
+        datasource_id: str,
+        groups: List[ActionGroup],
+        start_date: Union[str, None],
+        end_date: Union[str, None],
     ):
         conditions, params = [], {}
         for index, group in enumerate(groups):
@@ -236,6 +245,15 @@ class Actions(EventsBase):
             if len(group_condition) > 0:
                 group_condition.append(self.click_stream_table.event == group.event)
                 conditions.append(Criterion.all(group_condition))
+
+        date_criterion = []
+        if start_date and end_date:
+            date_criterion.extend(
+                [
+                    self.date_func(self.table.timestamp) >= start_date,
+                    self.date_func(self.table.timestamp) <= end_date,
+                ]
+            )
 
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
@@ -246,6 +264,7 @@ class Actions(EventsBase):
                 self.click_stream_table.timestamp,
             )
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
+            .having(Criterion.all(date_criterion))
         )
         query = query.where(Criterion.any(conditions)).limit(100)
         params["ds_id"] = str(datasource_id)
@@ -255,15 +274,24 @@ class Actions(EventsBase):
         self,
         datasource_id: str,
         groups: List[ActionGroup],
+        start_date: Union[str, None],
+        end_date: Union[str, None],
     ):
         return self.execute_get_query(
             *await self.build_count_matching_events_from_clickstream_query(
-                datasource_id=datasource_id, groups=groups
+                datasource_id=datasource_id,
+                groups=groups,
+                start_date=start_date,
+                end_date=end_date,
             )
         )
 
     async def build_count_matching_events_from_clickstream_query(
-        self, datasource_id: str, groups: List[ActionGroup]
+        self,
+        datasource_id: str,
+        groups: List[ActionGroup],
+        start_date: Union[str, None],
+        end_date: Union[str, None],
     ):
         conditions, params = [], {}
         for index, group in enumerate(groups):
@@ -275,11 +303,22 @@ class Actions(EventsBase):
                 group_condition.append(self.click_stream_table.event == group.event)
                 conditions.append(Criterion.all(group_condition))
 
+            date_criterion = []
+            if start_date and end_date:
+                date_criterion.extend(
+                    [
+                        self.date_func(self.table.timestamp) >= start_date,
+                        self.date_func(self.table.timestamp) <= end_date,
+                    ]
+                )
+
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
             .select(fn.Count("*"))
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
+            .having(Criterion.all(date_criterion))
         )
+
         query = query.where(Criterion.any(conditions))
         params["ds_id"] = str(datasource_id)
         return query.get_sql(), params
