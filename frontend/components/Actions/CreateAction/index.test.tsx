@@ -155,7 +155,8 @@ describe('Actions', () => {
               url_matching: 'contains',
               event: '$autocapture',
             },
-          ]
+          ],
+          { filter: { days: 7 }, type: 'last' }
         );
         const eventsTable = screen.getByTestId('listing-table');
         const eventTableBodyRows = screen.getAllByTestId(
@@ -172,7 +173,7 @@ describe('Actions', () => {
         render(
           <RouterContext.Provider
             value={createMockRouter({
-              pathname: '/analytics/action/edit',
+              pathname: '/analytics/action/view',
               query: { actionId: '63d8ef5a7b02dbd1dcf20dc2' },
             })}
           >
