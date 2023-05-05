@@ -665,6 +665,7 @@ def transient_action_data():
                 "event": "$autocapture",
             }
         ],
+        "dateFilter": {"filter": {"days": 7}, "type": "last"},
     }
 
 

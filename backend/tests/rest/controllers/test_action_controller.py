@@ -257,6 +257,7 @@ def test_transient_action(client_init, action_service, transient_action_data):
                     "url_matching": None,
                 }
             ],
+            "date_filter": {"filter": {"days": 7}, "type": "last"},
         }
     )
 

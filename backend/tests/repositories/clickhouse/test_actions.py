@@ -17,6 +17,8 @@ class TestActionsRepository:
         self.repo = repo
         self.datasource_id = PydanticObjectId("636a1c61d715ca6baae65611")
         self.event = CaptureEvent.AUTOCAPTURE
+        self.start_date = "2022-12-01"
+        self.end_date = "2022-12-31"
         self.action = Action(
             datasource_id=self.datasource_id,
             app_id=self.datasource_id,
@@ -55,18 +57,24 @@ class TestActionsRepository:
         self.matching_events_query = (
             'SELECT "event","user_id","properties","timestamp" FROM "clickstream" WHERE '
             '"datasource_id"=%(ds_id)s AND match("element_chain",%(group_0_prepend_0_selector_regex)s) '
-            "AND \"event\"='$autocapture' LIMIT 100"
+            "AND \"event\"='$autocapture' "
+            "HAVING DATE(\"timestamp\")>='2022-12-01' AND "
+            "DATE(\"timestamp\")<='2022-12-31' LIMIT 100"
         )
 
         self.matching_events_query_with_url = (
             'SELECT "event","user_id","properties","timestamp" FROM "clickstream" WHERE '
             '"datasource_id"=%(ds_id)s AND "properties.$current_url" LIKE %(group_0_prepend_url)s '
-            "AND \"event\"='$autocapture' LIMIT 100"
+            "AND \"event\"='$autocapture' "
+            "HAVING DATE(\"timestamp\")>='2022-12-01' AND "
+            "DATE(\"timestamp\")<='2022-12-31' LIMIT 100"
         )
 
         self.count_matching_events_query = (
             'SELECT COUNT(*) FROM "clickstream" WHERE "datasource_id"=%(ds_id)s AND '
-            'match("element_chain",%(group_0_prepend_0_selector_regex)s) AND "event"=\'$autocapture\''
+            'match("element_chain",%(group_0_prepend_0_selector_regex)s) AND "event"=\'$autocapture\' '
+            "HAVING DATE(\"timestamp\")>='2022-12-01' AND "
+            "DATE(\"timestamp\")<='2022-12-31'"
         )
 
     @pytest.mark.asyncio
@@ -75,7 +83,7 @@ class TestActionsRepository:
             action=self.action, update_action_func=AsyncMock()
         )
         self.repo.execute_get_query.assert_called_once_with(
-            **{"query":self.migration_query, "parameters":self.parameters}
+            **{"query": self.migration_query, "parameters": self.parameters}
         )
 
     @pytest.mark.asyncio
@@ -84,13 +92,19 @@ class TestActionsRepository:
     ):
         assert await self.repo.build_update_events_from_clickstream_query(
             action=self.action
-        ) == (self.migration_query, self.parameters, datetime(2023, 1, 4, 11, 28, 38, 194662))
+        ) == (
+            self.migration_query,
+            self.parameters,
+            datetime(2023, 1, 4, 11, 28, 38, 194662),
+        )
 
     @pytest.mark.asyncio
     async def test_build_matching_events_from_clickstream_query(self):
         assert await self.repo.build_matching_events_from_clickstream_query(
             datasource_id="636a1c61d715ca6baae65611",
             groups=self.action.groups,
+            start_date=self.start_date,
+            end_date=self.end_date,
         ) == (self.matching_events_query, self.parameters)
 
     @pytest.mark.asyncio
@@ -105,6 +119,8 @@ class TestActionsRepository:
         assert await self.repo.build_matching_events_from_clickstream_query(
             datasource_id="636a1c61d715ca6baae65611",
             groups=groups,
+            start_date=self.start_date,
+            end_date=self.end_date,
         ) == (self.matching_events_query_with_url, self.parameters_with_url_matching)
 
     @pytest.mark.asyncio
@@ -112,4 +128,6 @@ class TestActionsRepository:
         assert await self.repo.build_count_matching_events_from_clickstream_query(
             datasource_id="636a1c61d715ca6baae65611",
             groups=self.action.groups,
+            start_date=self.start_date,
+            end_date=self.end_date,
         ) == (self.count_matching_events_query, self.parameters)
