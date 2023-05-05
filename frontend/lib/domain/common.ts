@@ -1,3 +1,5 @@
+import { SegmentGroup } from './segment';
+
 export type FixedDateFilter = {
   start_date: string;
   end_date: string;
@@ -88,3 +90,14 @@ export enum GroupConditions {
   AND = 'and',
   OR = 'or',
 }
+
+export type ExternalSegmentFilter = {
+  condition: GroupConditions.OR;
+  includes: boolean;
+  custom: SegmentGroup;
+  segments: {
+    id: string;
+    name: string;
+    groups: SegmentGroup[];
+  }[];
+};

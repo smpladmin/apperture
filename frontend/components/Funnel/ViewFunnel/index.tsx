@@ -17,6 +17,7 @@ import {
 import { getNotificationByReference } from '@lib/services/notificationService';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { replaceFilterValueWithEmptyStringPlaceholder } from '../util';
 import LeftView from './LeftView';
 import RightView from './RightView';
 
@@ -52,6 +53,9 @@ const ViewFunnel = ({
     type: savedFunnel?.conversionWindow?.type || ConversionWindowList.DAYS,
   });
   const [randomSequence] = useState(savedFunnel.randomSequence);
+  const [funnelSteps] = useState(
+    replaceFilterValueWithEmptyStringPlaceholder(savedFunnel.steps)
+  );
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
@@ -154,12 +158,12 @@ const ViewFunnel = ({
         bg={'white.400'}
       >
         <LeftView
-          steps={savedFunnel.steps}
+          steps={funnelSteps}
           conversionWindow={conversionWindow}
           randomSequence={randomSequence}
         />
         <RightView
-          funnelSteps={savedFunnel.steps}
+          funnelSteps={funnelSteps}
           computedFunnel={computedFunnelData}
           computedTrendsData={computedTrendsData}
           isLoading={isLoading}

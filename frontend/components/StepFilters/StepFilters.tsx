@@ -51,7 +51,7 @@ const StepFilter = ({
 
   useEffect(() => {
     // check 'Select all' checkbox if all the options are selected
-    if (selectedValues.length === valueList.length && !loadingPropertyValues) {
+    if (selectedValues.length === valueList?.length && !loadingPropertyValues) {
       setAreAllValuesSelected(true);
     } else {
       setAreAllValuesSelected(false);
@@ -66,7 +66,7 @@ const StepFilter = ({
       );
 
       // adding '(empty string)' is a workaround to handle '' string case for property values
-      const transformedResponse = response.map((res: string[]) =>
+      const transformedResponse = response?.map((res: string[]) =>
         !res[0] ? '(empty string)' : res[0]
       );
 

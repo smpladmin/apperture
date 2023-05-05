@@ -1,12 +1,8 @@
 import { Flex, useDisclosure } from '@chakra-ui/react';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
-import { DateFilterObj } from '@lib/domain/common';
-import {
-  ComputedMetric,
-  Metric,
-  MetricSegmentFilter,
-} from '@lib/domain/metric';
+import { DateFilterObj, ExternalSegmentFilter } from '@lib/domain/common';
+import { ComputedMetric, Metric } from '@lib/domain/metric';
 import { Notifications, NotificationVariant } from '@lib/domain/notification';
 import { computeMetric } from '@lib/services/metricService';
 import { getNotificationByReference } from '@lib/services/notificationService';
@@ -17,6 +13,7 @@ import Alert from '@components/Alerts';
 import ViewHeader from '@components/EventsLayout/ViewHeader';
 import ViewMetricActionPanel from '../components/ViewMetricActionPanel';
 import SavedMetricView from '../components/SavedMetricView';
+import { replaceEmptyStringWithPlaceholderInExternalSegmentFilter } from '@lib/utils/common';
 
 const ViewMetric = ({
   savedMetric,
@@ -39,8 +36,12 @@ const ViewMetric = ({
     filter: savedMetric?.dateFilter?.filter || null,
     type: savedMetric?.dateFilter?.type || null,
   });
-  const [segmentFilters] = useState<MetricSegmentFilter[] | null>(
-    savedMetric?.segmentFilter || null
+  const [segmentFilters] = useState<ExternalSegmentFilter[] | null>(
+    savedMetric?.segmentFilter
+      ? replaceEmptyStringWithPlaceholderInExternalSegmentFilter(
+          savedMetric.segmentFilter
+        )
+      : null
   );
 
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();

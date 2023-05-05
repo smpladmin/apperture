@@ -6,9 +6,12 @@ import { Trash, UsersFour } from 'phosphor-react';
 import React, { useRef, useState } from 'react';
 import SelectSegmentsDropdown from './SelectSegmentsDropdown';
 import AddFilterComponent from '@components/StepFilters/AddFilter';
-import { MetricSegmentFilter } from '@lib/domain/metric';
 import StepFilter from '@components/StepFilters/StepFilters';
-import { FilterType, GroupConditions } from '@lib/domain/common';
+import {
+  ExternalSegmentFilter,
+  FilterType,
+  GroupConditions,
+} from '@lib/domain/common';
 import {
   SegmentFilterConditions,
   SegmentFilterDataType,
@@ -20,11 +23,11 @@ import { getSelectedSegmentsText } from '@components/Metric/util';
 
 type SegmentFilterProps = {
   index: number;
-  segmentFilter: MetricSegmentFilter;
+  segmentFilter: ExternalSegmentFilter;
   updateSegmentFilter: Function;
   loadingEventProperties: boolean;
   eventProperties: string[];
-  segmentFilters: MetricSegmentFilter[];
+  segmentFilters: ExternalSegmentFilter[];
 };
 
 const SegmentFilter = ({
