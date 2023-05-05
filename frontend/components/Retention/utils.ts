@@ -21,24 +21,15 @@ export const hasValidFilterValuesForAllEvents = (
   );
 };
 
-export const replaceEmptyStringWithPlaceholder = (
-  retentionEvent: FunnelStep
+export const substituteEmptyStringWithPlaceholder = (
+  retentionEvent: FunnelStep,
+  reverse = false
 ) => {
+  const toFind = reverse ? '(empty string)' : '';
+  const toReplace = reverse ? '' : '(empty string)';
   const updatedFilters = retentionEvent.filters.map((filter) => {
-    const emptyStringIndex = filter.values.indexOf('');
-    if (emptyStringIndex !== -1)
-      filter.values[emptyStringIndex] = '(empty string)';
-    return filter;
-  });
-  return { ...retentionEvent, filters: updatedFilters };
-};
-
-export const replacePlaceholderWithEmptyString = (
-  retentionEvent: FunnelStep
-) => {
-  const updatedFilters = retentionEvent.filters.map((filter) => {
-    const emptyStringIndex = filter.values.indexOf('(empty string)');
-    if (emptyStringIndex !== -1) filter.values[emptyStringIndex] = '';
+    const emptyStringIndex = filter.values.indexOf(toFind);
+    if (emptyStringIndex !== -1) filter.values[emptyStringIndex] = toReplace;
     return filter;
   });
   return { ...retentionEvent, filters: updatedFilters };

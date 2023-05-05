@@ -13,9 +13,9 @@ from repositories.clickhouse.utils.filters import Filters
 
 
 class Retention(EventsBase):
-    def __init__(self, clickhouse: Clickhouse = Depends()):
+    def __init__(self, clickhouse: Clickhouse = Depends(), filter_utils: Filters = Depends()):
         super().__init__(clickhouse=clickhouse)
-        self.filter_utils = Filters()
+        self.filter_utils = filter_utils
 
     def compute_retention_trend(
         self,

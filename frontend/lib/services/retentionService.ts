@@ -1,5 +1,5 @@
 import { replacePlaceholderWithEmptyStringInExternalSegmentFilter } from './../utils/common';
-import { replacePlaceholderWithEmptyString } from './../../components/Retention/utils';
+import { substituteEmptyStringWithPlaceholder } from './../../components/Retention/utils';
 import { Granularity } from '@lib/domain/retention';
 import {
   AppertureDelete,
@@ -34,8 +34,11 @@ export const getTransientTrendsData = async (
 ) => {
   const retentionRequestBody: RetentionRequestBody = {
     datasourceId: dsId,
-    startEvent: replacePlaceholderWithEmptyString(cloneDeep(startEvent)),
-    goalEvent: replacePlaceholderWithEmptyString(cloneDeep(goalEvent)),
+    startEvent: substituteEmptyStringWithPlaceholder(
+      cloneDeep(startEvent),
+      true
+    ),
+    goalEvent: substituteEmptyStringWithPlaceholder(cloneDeep(goalEvent), true),
     dateFilter,
     granularity,
   };
@@ -67,8 +70,11 @@ export const getTransientRetentionData = async (
 ) => {
   const retentionRequestBody: RetentionRequestBody = {
     datasourceId: dsId,
-    startEvent: replacePlaceholderWithEmptyString(cloneDeep(startEvent)),
-    goalEvent: replacePlaceholderWithEmptyString(cloneDeep(goalEvent)),
+    startEvent: substituteEmptyStringWithPlaceholder(
+      cloneDeep(startEvent),
+      true
+    ),
+    goalEvent: substituteEmptyStringWithPlaceholder(cloneDeep(goalEvent), true),
     dateFilter,
     granularity,
   };
@@ -117,8 +123,11 @@ export const saveRetention = async (
   const retentionRequestBody: RetentionRequestBody = {
     datasourceId: dsId,
     name: retentionName,
-    startEvent: replacePlaceholderWithEmptyString(cloneDeep(startEvent)),
-    goalEvent: replacePlaceholderWithEmptyString(cloneDeep(goalEvent)),
+    startEvent: substituteEmptyStringWithPlaceholder(
+      cloneDeep(startEvent),
+      true
+    ),
+    goalEvent: substituteEmptyStringWithPlaceholder(cloneDeep(goalEvent), true),
     dateFilter,
     granularity,
   };
@@ -149,8 +158,11 @@ export const updateRetention = async (
   const retentionRequestBody: RetentionRequestBody = {
     datasourceId: dsId,
     name: retentionName,
-    startEvent: replacePlaceholderWithEmptyString(cloneDeep(startEvent)),
-    goalEvent: replacePlaceholderWithEmptyString(cloneDeep(goalEvent)),
+    startEvent: substituteEmptyStringWithPlaceholder(
+      cloneDeep(startEvent),
+      true
+    ),
+    goalEvent: substituteEmptyStringWithPlaceholder(cloneDeep(goalEvent), true),
     dateFilter,
     granularity,
   };
