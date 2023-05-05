@@ -149,12 +149,13 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
         }
       );
 
-      const transformedEvents = events.map((event) => {
-        return {
-          id: event.id,
-          type: FilterItemType.EVENT,
-        };
-      });
+      const transformedEvents =
+        events?.map((event) => {
+          return {
+            id: event.id,
+            type: FilterItemType.EVENT,
+          };
+        }) || [];
 
       setEventProperties([...transformedEventProperties, ...transformedEvents]);
       setLoadingEventProperties(false);
