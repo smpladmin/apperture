@@ -1,5 +1,4 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import Card from '@components/Card';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { MapContext } from '@lib/contexts/mapContext';
 import { FunnelStep } from '@lib/domain/funnel';

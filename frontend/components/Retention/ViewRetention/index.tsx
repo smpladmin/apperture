@@ -20,9 +20,9 @@ import {
 import ViewHeader from '@components/EventsLayout/ViewHeader';
 import LeftView from './LeftView';
 import { FunnelStep } from '@lib/domain/funnel';
-import TransientRetentionView from '../components/TransientRetentionView';
+import TransientRetentionView from '@components/Retention/components/TransientRetentionView';
 import { Flex } from '@chakra-ui/react';
-import { replaceEmptyStringWithPlaceholder } from '../utils';
+import { substituteEmptyStringWithPlaceholder } from '@components/Retention/utils';
 import { replaceEmptyStringWithPlaceholderInExternalSegmentFilter } from '@lib/utils/common';
 
 const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
@@ -39,8 +39,8 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
   });
 
   const [retentionEvents] = useState<FunnelStep[]>([
-    replaceEmptyStringWithPlaceholder(savedRetention?.startEvent),
-    replaceEmptyStringWithPlaceholder(savedRetention?.goalEvent),
+    substituteEmptyStringWithPlaceholder(savedRetention?.startEvent),
+    substituteEmptyStringWithPlaceholder(savedRetention?.goalEvent),
   ]);
 
   const [granularity] = useState<Granularity>(

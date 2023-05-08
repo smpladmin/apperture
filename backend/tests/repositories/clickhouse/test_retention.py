@@ -7,12 +7,14 @@ from domain.common.filter_models import FilterOperatorsString, FilterDataType
 from domain.retention.models import EventSelection, Granularity
 from domain.segments.models import WhereSegmentFilter, SegmentFilterConditions
 from repositories.clickhouse.retention import Retention
+from repositories.clickhouse.utils.filters import Filters
 
 
 class TestRetentionRepository:
     def setup_method(self):
         self.clickhouse = MagicMock()
-        repo = Retention(self.clickhouse)
+        self.filter_utils = Filters()
+        repo = Retention(self.clickhouse, self.filter_utils)
         repo.execute_get_query = MagicMock()
         self.repo = repo
         self.datasource_id = "test-id"

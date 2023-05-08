@@ -21,7 +21,7 @@ import {
 import {
   hasValidEvents,
   hasValidRetentionEventAndFilters,
-  replaceEmptyStringWithPlaceholder,
+  substituteEmptyStringWithPlaceholder,
 } from '../utils';
 import { Granularity, Retention } from '@lib/domain/retention';
 import {
@@ -51,7 +51,7 @@ describe('create retention', () => {
   let mockGetEventPropertiesValue: jest.Mock;
   let mockGetTransientRetentionData: jest.Mock;
   let mockHasValidRetentionEventAndFilters: jest.Mock;
-  let mockReplaceEmptyStringWithPlaceholder: jest.Mock;
+  let mockSubstituteEmptyStringWithPlaceholder: jest.Mock;
   let mockGetSavedSegmentsForDatasourceId: jest.Mock;
 
   const addEvent = async (eventName: string) => {
@@ -232,8 +232,8 @@ describe('create retention', () => {
     mockHasValidRetentionEventAndFilters = jest.mocked(
       hasValidRetentionEventAndFilters
     );
-    mockReplaceEmptyStringWithPlaceholder = jest.mocked(
-      replaceEmptyStringWithPlaceholder
+    mockSubstituteEmptyStringWithPlaceholder = jest.mocked(
+      substituteEmptyStringWithPlaceholder
     );
 
     mockGetTransientTrendsData.mockReturnValue(retentionTrendsData);
@@ -242,7 +242,7 @@ describe('create retention', () => {
     mockHasValidRetentionEventAndFilters.mockReturnValue(true);
     mockGetEventProperties.mockReturnValue(eventProperties);
     mockGetEventPropertiesValue.mockReturnValue(eventPropertiesValues);
-    mockReplaceEmptyStringWithPlaceholder.mockImplementation((val: any) => {
+    mockSubstituteEmptyStringWithPlaceholder.mockImplementation((val: any) => {
       return val;
     });
   });

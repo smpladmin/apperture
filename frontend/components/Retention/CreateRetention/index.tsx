@@ -28,9 +28,8 @@ import {
 } from '@lib/services/retentionService';
 import {
   hasValidEvents,
-  hasValidFilterValuesForAllEvents,
   hasValidRetentionEventAndFilters,
-  replaceEmptyStringWithPlaceholder,
+  substituteEmptyStringWithPlaceholder,
 } from '../utils';
 import TransientRetentionView from '../components/TransientRetentionView';
 import { Node } from '@lib/domain/node';
@@ -51,10 +50,10 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   const [retentionEvents, setRetentionEvents] = useState<RetentionEvents>(
     savedRetention?.startEvent && savedRetention?.goalEvent
       ? {
-          startEvent: replaceEmptyStringWithPlaceholder(
+          startEvent: substituteEmptyStringWithPlaceholder(
             savedRetention.startEvent
           ),
-          goalEvent: replaceEmptyStringWithPlaceholder(
+          goalEvent: substituteEmptyStringWithPlaceholder(
             savedRetention.goalEvent
           ),
         }
