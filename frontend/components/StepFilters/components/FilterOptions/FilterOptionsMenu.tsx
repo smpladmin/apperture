@@ -73,7 +73,7 @@ const FilterOptiosMenu = ({
           borderWidth={'1px'}
           borderColor={'white.200'}
           bg={'white.DEFAULT'}
-          w={'76'}
+          w={'50'}
         >
           {menu.submenu.map((submenu: FilterOptionMenuType) => (
             <FilterOptiosMenu

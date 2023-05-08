@@ -62,7 +62,7 @@ const FilterOptions = ({
           borderWidth={'1px'}
           borderColor={'white.200'}
           bg={'white.DEFAULT'}
-          w={'76'}
+          w={'50'}
         >
           {FilterOptionMenu.map((menu) => (
             <FilterOptionsMenu
