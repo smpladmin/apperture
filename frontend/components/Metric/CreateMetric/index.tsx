@@ -15,6 +15,7 @@ import { useRouter } from 'next/router';
 import { getCountOfValidAggregates } from '../util';
 import {
   DateFilterObj,
+  DateFilterType,
   ExternalSegmentFilter,
   GroupConditions,
 } from '@lib/domain/common';
@@ -56,8 +57,8 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
     savedMetric?.function || ''
   );
   const [dateFilter, setDateFilter] = useState<DateFilterObj>({
-    filter: savedMetric?.dateFilter?.filter || null,
-    type: savedMetric?.dateFilter?.type || null,
+    filter: savedMetric?.dateFilter?.filter || { days: 30 },
+    type: savedMetric?.dateFilter?.type || DateFilterType.LAST,
   });
   const [segmentFilters, setSegmentFilters] = useState<ExternalSegmentFilter[]>(
     savedMetric?.segmentFilter
