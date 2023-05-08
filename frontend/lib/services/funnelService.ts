@@ -78,7 +78,7 @@ export const getTransientFunnelData = async (
     },
     { signal }
   );
-  return res.data || [];
+  return res;
 };
 
 export const getTransientTrendsData = async (
@@ -100,7 +100,7 @@ export const getTransientTrendsData = async (
     },
     { signal }
   );
-  return res.data || [];
+  return res;
 };
 
 export const getSavedFunnelsForDatasourceId = async (dsId: string) => {

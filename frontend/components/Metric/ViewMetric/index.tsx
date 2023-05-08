@@ -58,7 +58,7 @@ const ViewMetric = ({
         dateFilter,
         segmentFilters
       );
-      setComputedMetric(result);
+      setComputedMetric(result.data || []);
       setIsLoading(false);
     };
     fetchMetric();

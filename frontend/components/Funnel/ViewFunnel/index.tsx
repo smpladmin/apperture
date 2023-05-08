@@ -60,24 +60,25 @@ const ViewFunnel = ({
 
   useEffect(() => {
     const fetchComputeData = async () => {
-      const [computedFunnelData, computedTrendsData] = await Promise.all([
-        getTransientFunnelData(
-          datasourceId,
-          savedFunnel.steps,
-          dateFilter,
-          conversionWindow,
-          randomSequence
-        ),
-        getTransientTrendsData(
-          datasourceId,
-          savedFunnel.steps,
-          dateFilter,
-          conversionWindow,
-          randomSequence
-        ),
-      ]);
-      setComputedFunnelData(computedFunnelData);
-      setComputedTrendsData(computedTrendsData);
+      const [computedFunnelResponse, computedTrendsResponse] =
+        await Promise.all([
+          getTransientFunnelData(
+            datasourceId,
+            savedFunnel.steps,
+            dateFilter,
+            conversionWindow,
+            randomSequence
+          ),
+          getTransientTrendsData(
+            datasourceId,
+            savedFunnel.steps,
+            dateFilter,
+            conversionWindow,
+            randomSequence
+          ),
+        ]);
+      setComputedFunnelData(computedFunnelResponse.data || []);
+      setComputedTrendsData(computedTrendsResponse.data || []);
       setIsLoading(false);
     };
     setIsLoading(true);

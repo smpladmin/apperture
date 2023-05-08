@@ -51,7 +51,7 @@ export const computeMetric = async (
   }
 
   const res = await ApperturePost('metrics/compute', requestBody, { signal });
-  return res.data || [];
+  return res;
 };
 
 export const _getSavedMetric = async (token: string, metricId: string) => {
