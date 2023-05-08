@@ -391,14 +391,10 @@ class Funnels(EventsBase):
             )
         return sub_query
 
-    def build_conversion_count_query(self, second_last, condition: List):
-        return (
-            ClickHouseQuery.from_(AliasedQuery("final_table"))
-            .select(
-                fn.Count(Field(second_last)),
-                fn.Count(Field(second_last)).distinct(),
-            )
-            .where(Criterion.all(condition))
+    def build_conversion_count_query(self, last):
+        return ClickHouseQuery.from_(AliasedQuery("final_table")).select(
+            fn.Count(Field(last)),
+            fn.Count(Field(last)).distinct(),
         )
 
     def build_analytics_query(
@@ -433,9 +429,22 @@ class Funnels(EventsBase):
             if status == ConversionStatus.DROPPED
             else Field(last).notnull()
         ]
-        count_query = self.build_conversion_count_query(
-            second_last, selection_condition
-        )
+        # count_query = self.build_conversion_count_query(last)
+        count_query = ClickHouseQuery.from_(AliasedQuery("final_table"))
+
+        if status == ConversionStatus.CONVERTED:
+            count_query = count_query.select(
+                fn.Count(Field(last)),
+                fn.Count(Field(last)).distinct(),
+            )
+        else:
+            count_query = count_query.select(
+                (fn.Count(Field(second_last)) - fn.Count(Field(last))),
+                (
+                    fn.Count(Field(second_last)).distinct()
+                    - fn.Count(Field(last)).distinct()
+                ),
+            )
         selection_condition.append(Field(second_last).notnull())
         query = (
             query.select(Field(second_last), count_query)
