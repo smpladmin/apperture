@@ -229,6 +229,19 @@ class Actions(EventsBase):
             )
         )
 
+    def build_date_filter_criterion(
+        self, start_date: Union[str, None], end_date: Union[str, None]
+    ):
+        date_criterion = []
+        if start_date and end_date:
+            date_criterion.extend(
+                [
+                    self.date_func(self.table.timestamp) >= start_date,
+                    self.date_func(self.table.timestamp) <= end_date,
+                ]
+            )
+        return date_criterion
+
     async def build_matching_events_from_clickstream_query(
         self,
         datasource_id: str,
@@ -246,14 +259,9 @@ class Actions(EventsBase):
                 group_condition.append(self.click_stream_table.event == group.event)
                 conditions.append(Criterion.all(group_condition))
 
-        date_criterion = []
-        if start_date and end_date:
-            date_criterion.extend(
-                [
-                    self.date_func(self.table.timestamp) >= start_date,
-                    self.date_func(self.table.timestamp) <= end_date,
-                ]
-            )
+        date_criterion = self.build_date_filter_criterion(
+            start_date=start_date, end_date=end_date
+        )
 
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
@@ -303,14 +311,9 @@ class Actions(EventsBase):
                 group_condition.append(self.click_stream_table.event == group.event)
                 conditions.append(Criterion.all(group_condition))
 
-            date_criterion = []
-            if start_date and end_date:
-                date_criterion.extend(
-                    [
-                        self.date_func(self.table.timestamp) >= start_date,
-                        self.date_func(self.table.timestamp) <= end_date,
-                    ]
-                )
+        date_criterion = self.build_date_filter_criterion(
+            start_date=start_date, end_date=end_date
+        )
 
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
