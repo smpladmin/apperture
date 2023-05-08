@@ -81,17 +81,20 @@ async def test_update_retention(
     assert "635ba034807ab86d8a2aadd8" == update_retention_kwargs["retention_id"]
 
 
-def test_get_transient_retention_trends(
-    client_init, retention_transient_data, retention_trend_response, retention_service
+def test_compute_transient_retention(
+    client_init,
+    retention_transient_data,
+    transient_retention_response,
+    retention_service,
 ):
     response = client_init.post(
-        "/retention/trends/transient?interval=1",
+        "/retention/transient",
         data=json.dumps(retention_transient_data),
     )
     assert response.status_code == 200
-    assert response.json() == retention_trend_response
+    assert response.json() == transient_retention_response
 
-    retention_service.compute_retention_trend.assert_called_with(
+    retention_service.compute_retention.assert_called_with(
         **{
             "datasource_id": "635ba034807ab86d8a2aadd9",
             "date_filter": DateFilter(
@@ -99,7 +102,6 @@ def test_get_transient_retention_trends(
             ),
             "goal_event": EventSelection(event="goal_event", filters=None),
             "granularity": Granularity.DAYS,
-            "interval": 1,
             "segment_filter": None,
             "start_event": EventSelection(event="start_event", filters=None),
         }
@@ -150,34 +152,5 @@ def test_delete_retention(client_init, retention_service):
     retention_service.delete_retention.assert_called_once_with(
         **{
             "retention_id": "6384a65e0a397236d9de236a",
-        }
-    )
-
-
-def test_get_transient_retention(
-    client_init,
-    retention_transient_data,
-    retention_transient_response,
-    retention_service,
-):
-    response = client_init.post(
-        "/retention/transient?page_number=0&page_size=10",
-        data=json.dumps(retention_transient_data),
-    )
-    assert response.status_code == 200
-    assert response.json() == retention_transient_response
-
-    retention_service.compute_retention.assert_called_with(
-        **{
-            "datasource_id": "635ba034807ab86d8a2aadd9",
-            "date_filter": DateFilter(
-                filter=LastDateFilter(days=4), type=DateFilterType.LAST
-            ),
-            "goal_event": EventSelection(event="goal_event", filters=None),
-            "granularity": Granularity.DAYS,
-            "page_number": 0,
-            "page_size": 10,
-            "segment_filter": None,
-            "start_event": EventSelection(event="start_event", filters=None),
         }
     )

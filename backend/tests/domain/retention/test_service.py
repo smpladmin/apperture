@@ -16,8 +16,6 @@ from domain.retention.models import (
     Retention,
     EventSelection,
     Granularity,
-    ComputedRetentionTrend,
-    ComputedRetentionForInterval,
     ComputedRetention,
 )
 from domain.retention.service import RetentionService
@@ -79,12 +77,11 @@ class TestRetentionService:
         Retention.get = AsyncMock()
         Retention.insert = AsyncMock()
         Retention.id = MagicMock(return_value=PydanticObjectId(self.ds_id))
-        self.retention.compute_retention_trend.return_value = [
-            (datetime(2022, 1, 1, 0, 0), 215, 110),
-            (datetime(2022, 1, 2, 0, 0), 206, 108),
-            (datetime(2022, 1, 3, 0, 0), 230, 115),
+        self.retention.compute_retention.return_value = [
+            (datetime(2022, 1, 1, 0, 0), 1, 110, datetime(2022, 1, 1, 0, 0), 215),
+            (datetime(2022, 1, 2, 0, 0), 1, 108, datetime(2022, 1, 2, 0, 0), 206),
+            (datetime(2022, 1, 3, 0, 0), 1, 115, datetime(2022, 1, 3, 0, 0), 230),
         ]
-        self.retention.compute_retention.return_value = [55.16, 10.98, 7.43, 6.13]
         self.date_utils.compute_date_filter.return_value = ("2022-12-01", "2022-12-31")
         self.date_utils.compute_days_in_date_range.return_value = 4
         Retention.enabled = True
@@ -109,39 +106,46 @@ class TestRetentionService:
         )
 
     @pytest.mark.asyncio
-    async def test_compute_retention_trend(self):
-        assert await self.service.compute_retention_trend(
+    async def test_compute_retention(self):
+        assert await self.service.compute_retention(
             datasource_id=self.ds_id,
             start_event=self.start_event,
             goal_event=self.goal_event,
             granularity=Granularity.DAYS,
             segment_filter=None,
             date_filter=self.date_filter,
-            interval=1,
         ) == [
-            ComputedRetentionTrend(
+            ComputedRetention(
                 granularity=datetime(2022, 1, 1, 0, 0),
+                interval=1,
+                interval_name="day 1",
+                initial_users=215,
                 retention_rate=51.16,
                 retained_users=110,
             ),
-            ComputedRetentionTrend(
+            ComputedRetention(
                 granularity=datetime(2022, 1, 2, 0, 0),
+                interval=1,
+                interval_name="day 1",
+                initial_users=206,
                 retention_rate=52.43,
                 retained_users=108,
             ),
-            ComputedRetentionTrend(
+            ComputedRetention(
                 granularity=datetime(2022, 1, 3, 0, 0),
+                interval=1,
+                interval_name="day 1",
+                initial_users=230,
                 retention_rate=50.0,
                 retained_users=115,
             ),
         ]
-        self.retention.compute_retention_trend.assert_called_once_with(
+        self.retention.compute_retention.assert_called_once_with(
             **{
                 "datasource_id": "636a1c61d715ca6baae65611",
                 "end_date": "2022-12-31",
                 "goal_event": EventSelection(event="goal_event", filters=None),
                 "granularity": Granularity.DAYS,
-                "interval": 1,
                 "segment_filter_criterion": None,
                 "start_date": "2022-12-01",
                 "start_event": EventSelection(event="start_event", filters=None),
@@ -207,43 +211,3 @@ class TestRetentionService:
     async def test_add_retention(self):
         await self.service.add_retention(retention=self.retention_obj)
         Retention.insert.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_compute_retention(self):
-        assert await self.service.compute_retention(
-            datasource_id=self.ds_id,
-            start_event=self.start_event,
-            goal_event=self.goal_event,
-            granularity=Granularity.DAYS,
-            segment_filter=None,
-            date_filter=self.date_filter,
-            page_size=10,
-            page_number=0,
-        ) == ComputedRetention(
-            count=4,
-            data=[
-                ComputedRetentionForInterval(name="day 0", value=55.16),
-                ComputedRetentionForInterval(name="day 1", value=10.98),
-                ComputedRetentionForInterval(name="day 2", value=7.43),
-                ComputedRetentionForInterval(name="day 3", value=6.13),
-            ],
-        )
-        self.retention.compute_retention.assert_called_once_with(
-            **{
-                "datasource_id": "636a1c61d715ca6baae65611",
-                "end_date": "2022-12-31",
-                "goal_event": EventSelection(event="goal_event", filters=None),
-                "granularity": Granularity.DAYS,
-                "start_index": 0,
-                "end_index": 4,
-                "segment_filter_criterion": None,
-                "start_date": "2022-12-01",
-                "start_event": EventSelection(event="start_event", filters=None),
-            }
-        )
-        self.date_utils.compute_date_filter.assert_called_once_with(
-            **{
-                "date_filter": LastDateFilter(days=7),
-                "date_filter_type": DateFilterType.LAST,
-            }
-        )
