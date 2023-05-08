@@ -77,9 +77,12 @@ const ViewFunnel = ({
             randomSequence
           ),
         ]);
-      setComputedFunnelData(computedFunnelResponse.data || []);
-      setComputedTrendsData(computedTrendsResponse.data || []);
-      setIsLoading(false);
+      // status would be undefined if the call is cancelled
+      if (computedFunnelResponse?.status && computedTrendsResponse?.status) {
+        setComputedFunnelData(computedFunnelResponse?.data || []);
+        setComputedTrendsData(computedTrendsResponse?.data || []);
+        setIsLoading(false);
+      }
     };
     setIsLoading(true);
     fetchComputeData();

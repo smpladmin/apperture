@@ -171,8 +171,8 @@ const CreateMetricAction = ({
         signal
       );
       // status would be undefined if the call is cancelled
-      if (result.status) {
-        setMetric(result.data);
+      if (result?.status) {
+        setMetric(result?.data);
         setIsLoading(false);
       }
     };

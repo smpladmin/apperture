@@ -130,8 +130,8 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
       ]);
       // status would be undefined if the call is cancelled
       if (funnelDataResponse?.status && trendsDataResponse?.status) {
-        setFunnelData(funnelDataResponse.data || []);
-        setTrendsData(trendsDataResponse.data || []);
+        setFunnelData(funnelDataResponse?.data || []);
+        setTrendsData(trendsDataResponse?.data || []);
         setIsLoading(false);
       }
     };
