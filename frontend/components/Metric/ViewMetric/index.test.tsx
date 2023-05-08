@@ -56,7 +56,10 @@ describe('View Metric', () => {
   ];
 
   const computedMetricResponse = {
-    metric: [],
+    status: 200,
+    data: {
+      metric: [],
+    },
   };
 
   const trendData = [

@@ -67,32 +67,35 @@ describe('Create Metric', () => {
   ];
 
   const computedMetricResponse = {
-    metric: [
-      {
-        date: '2022-10-07',
-        value: 96,
-      },
-      {
-        date: '2022-10-08',
-        value: 135,
-      },
-      {
-        date: '2022-10-09',
-        value: 178,
-      },
-      {
-        date: '2022-10-10',
-        value: 190,
-      },
-      {
-        date: '2022-10-11',
-        value: 115,
-      },
-      {
-        date: '2022-10-12',
-        value: 126,
-      },
-    ],
+    status: 200,
+    data: {
+      metric: [
+        {
+          date: '2022-10-07',
+          value: 96,
+        },
+        {
+          date: '2022-10-08',
+          value: 135,
+        },
+        {
+          date: '2022-10-09',
+          value: 178,
+        },
+        {
+          date: '2022-10-10',
+          value: 190,
+        },
+        {
+          date: '2022-10-11',
+          value: 115,
+        },
+        {
+          date: '2022-10-12',
+          value: 126,
+        },
+      ],
+    },
   };
 
   const tableData = [

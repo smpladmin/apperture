@@ -201,7 +201,6 @@ const CreateMetricAction = ({
 
   useEffect(() => {
     // enable save metric button when aggregate, metric name or definition changes
-
     const currentMetricState = {
       name: metricName,
       function: metricDefinition,

@@ -177,22 +177,25 @@ describe('create funnel', () => {
     });
   };
 
-  const funnelTrendsData = [
-    {
-      conversion: 5.19,
-      firstStepUsers: 578,
-      lastStepUsers: 30,
-      startDate: '2022-11-21T00:00:00',
-      endDate: '2022-11-27T00:00:00',
-    },
-    {
-      conversion: 5.11,
-      firstStepUsers: 978,
-      lastStepUsers: 50,
-      startDate: '2022-11-28T00:00:00',
-      endDate: '2022-12-04T00:00:00',
-    },
-  ];
+  const funnelTrendsData = {
+    status: 200,
+    data: [
+      {
+        conversion: 5.19,
+        firstStepUsers: 578,
+        lastStepUsers: 30,
+        startDate: '2022-11-21T00:00:00',
+        endDate: '2022-11-27T00:00:00',
+      },
+      {
+        conversion: 5.11,
+        firstStepUsers: 978,
+        lastStepUsers: 50,
+        startDate: '2022-11-28T00:00:00',
+        endDate: '2022-12-04T00:00:00',
+      },
+    ],
+  };
   beforeEach(() => {
     mockedGetCountOfValidAddedSteps = jest.mocked(getCountOfValidAddedSteps);
     mockedSearchResult = jest.mocked(getSearchResult);
@@ -444,10 +447,13 @@ describe('create funnel', () => {
     });
 
     it('should  paint the funnel chart/ trend chart when you select atleast two valid events', async () => {
-      mockedGetTransientFunnelData.mockReturnValue([
-        { event: 'Video_Click', users: 2000, conversion: 100 },
-        { event: 'Chapter_Click', users: 1000, conversion: 50 },
-      ]);
+      mockedGetTransientFunnelData.mockReturnValue({
+        status: 200,
+        data: [
+          { event: 'Video_Click', users: 2000, conversion: 100 },
+          { event: 'Chapter_Click', users: 1000, conversion: 50 },
+        ],
+      });
       mockedSearchResult.mockReturnValue([{ id: 'Chapter_Click' }]);
       mockedTransformFunnelData.mockReturnValue([
         { event: ' Video_Click', users: 2000, conversion: 100 },
@@ -699,10 +705,13 @@ describe('create funnel', () => {
 
   describe('date filters on funnels', () => {
     it('should call transient call when date filter is selected', async () => {
-      mockedGetTransientFunnelData.mockReturnValue([
-        { event: 'Video_Click', users: 2000, conversion: 100 },
-        { event: 'Chapter_Click', users: 1000, conversion: 50 },
-      ]);
+      mockedGetTransientFunnelData.mockReturnValue({
+        status: 200,
+        data: [
+          { event: 'Video_Click', users: 2000, conversion: 100 },
+          { event: 'Chapter_Click', users: 1000, conversion: 50 },
+        ],
+      });
       await renderCreateFunnel();
       const eventName = screen.getAllByTestId('event-name');
 
