@@ -593,7 +593,7 @@ describe('create funnel', () => {
       await addEventFilter('city');
 
       const eventFilter = screen.getByTestId('event-filter');
-      fireEvent.mouseOver(eventFilter);
+      fireEvent.mouseEnter(eventFilter);
 
       const filterDatatypeOption = screen.getByTestId('filter-datatype-option');
       fireEvent.click(filterDatatypeOption);
@@ -625,7 +625,7 @@ describe('create funnel', () => {
       await addEventFilter('city');
 
       const eventFilter = screen.getByTestId('event-filter');
-      fireEvent.mouseOver(eventFilter);
+      fireEvent.mouseEnter(eventFilter);
 
       const filterDatatypeOption = screen.getByTestId('filter-datatype-option');
       fireEvent.click(filterDatatypeOption);

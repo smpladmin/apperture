@@ -551,7 +551,7 @@ describe('Create Metric', () => {
       await addFilter();
 
       const eventFilter = screen.getByTestId('event-filter');
-      fireEvent.mouseOver(eventFilter);
+      fireEvent.mouseEnter(eventFilter);
 
       const filterDatatypeOption = screen.getByTestId('filter-datatype-option');
       fireEvent.click(filterDatatypeOption);
@@ -582,7 +582,7 @@ describe('Create Metric', () => {
       await addFilter();
 
       const eventFilter = screen.getByTestId('event-filter');
-      fireEvent.mouseOver(eventFilter);
+      fireEvent.mouseEnter(eventFilter);
 
       const filterDatatypeOption = screen.getByTestId('filter-datatype-option');
       fireEvent.click(filterDatatypeOption);
