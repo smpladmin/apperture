@@ -19,6 +19,9 @@ import {
 } from '@theme/index';
 import { SegmentGroup, WhereSegmentFilter } from '@lib/domain/segment';
 
+
+export const BREAKDOWN_SELECTION_LIMIT = 5;
+
 export const replaceEmptyStringPlaceholder = (
   aggregates: MetricAggregate[]
 ) => {

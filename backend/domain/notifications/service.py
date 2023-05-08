@@ -141,13 +141,13 @@ class NotificationService:
     def compute_notification_values(
         self, data: NotificationData, notification_type: Set[NotificationType]
     ):
-        triggered = False
+        trigger = False
         val = data.value
 
         if NotificationType.ALERT in notification_type:
-            triggered = self.alert_criteria(data, val)
+            trigger = self.alert_criteria(data, val)
 
-        return val, triggered
+        return val, trigger
 
     def compute_update(
         self,
@@ -168,6 +168,7 @@ class NotificationService:
             variant=data.variant,
             value=float("{:.2f}".format(percentage_difference)),
             original_value=float("{:.2f}".format(data.value)),
+            reference=data.reference,
         )
 
         return computed_updates
@@ -179,7 +180,7 @@ class NotificationService:
         return [self.compute_update(data) for data in data_for_updates]
 
     def compute_alert(self, data: NotificationData):
-        value, triggered = self.compute_notification_values(
+        value, trigger = self.compute_notification_values(
             data=data, notification_type={NotificationType.ALERT}
         )
 
@@ -190,9 +191,10 @@ class NotificationService:
             variant=data.variant,
             value=float("{:.2f}".format(value)),
             original_value=float("{:.2f}".format(data.value)),
+            reference=data.reference,
             threshold_type=data.threshold_type,
             user_threshold=data.threshold_value,
-            triggered=triggered,
+            trigger=trigger,
         )
         return computed_alert
 

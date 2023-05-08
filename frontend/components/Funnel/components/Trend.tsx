@@ -6,7 +6,7 @@ import { BLUE_MAIN } from '@theme/index';
 import isEqual from 'lodash/isEqual';
 import React, { useEffect, useRef } from 'react';
 
-const Trend = ({ data }: { data: FunnelTrendsData[] }) => {
+const FunnelTrend = ({ data }: { data: FunnelTrendsData[] }) => {
   const ref = useRef<HTMLDivElement>(null);
   const plot = useRef<{ line: Line | null }>({ line: null });
   const previousData = usePrevious(data);
@@ -57,7 +57,7 @@ const Trend = ({ data }: { data: FunnelTrendsData[] }) => {
       plot.current.line?.destroy();
     };
   }, [data]);
-  return <Box ref={ref} h={'80'} data-testid={'funnel-trend'}></Box>;
+  return <Box ref={ref} data-testid={'funnel-trend'}></Box>;
 };
 
-export default Trend;
+export default FunnelTrend;

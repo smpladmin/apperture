@@ -192,9 +192,10 @@ def notification_service(apperture_user_response):
             variant=NotificationVariant.FUNNEL,
             value=-16.67,
             original_value=0.1,
+            reference="639237437483490",
             threshold_type=NotificationThresholdType.PCT,
             user_threshold=ThresholdMap(min=12.0, max=18.0),
-            triggered=True,
+            trigger=True,
         ),
         ComputedNotification(
             name="Alert Metric -Updated",
@@ -203,9 +204,10 @@ def notification_service(apperture_user_response):
             variant=NotificationVariant.METRIC,
             value=-16.67,
             original_value=0.1,
+            reference="6777439823920337",
             threshold_type=NotificationThresholdType.PCT,
             user_threshold=ThresholdMap(min=1212.0, max=3236.0),
-            triggered=False,
+            trigger=False,
         ),
     ]
 
@@ -217,9 +219,10 @@ def notification_service(apperture_user_response):
             variant=NotificationVariant.FUNNEL,
             value=-16.67,
             original_value=0.1,
+            reference="639237437483490",
             threshold_type=None,
             user_threshold=None,
-            triggered=None,
+            trigger=None,
         ),
         ComputedNotification(
             name="Alert Metric -Updated",
@@ -228,9 +231,10 @@ def notification_service(apperture_user_response):
             variant=NotificationVariant.METRIC,
             value=-16.67,
             original_value=0.1,
+            reference="6777439823920337",
             threshold_type=None,
             user_threshold=None,
-            triggered=None,
+            trigger=None,
         ),
     ]
 
@@ -428,6 +432,7 @@ def funnel_service(apperture_user_response):
                 variant=NotificationVariant.FUNNEL,
                 value=0.2,
                 prev_day_value=0.2,
+                reference="639237437483490",
                 threshold_type="absolute",
                 threshold_value=ThresholdMap(min=12.0, max=18.0),
             )
@@ -767,6 +772,7 @@ def metric_service(apperture_user_response):
                 variant=NotificationVariant.METRIC,
                 value=0.2,
                 prev_day_value=0.2,
+                reference="6777439823920337",
                 threshold_type="absolute",
                 threshold_value=ThresholdMap(min=1212.0, max=3236.0),
             )

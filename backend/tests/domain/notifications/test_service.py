@@ -138,6 +138,7 @@ class TestNotificationService:
                 variant=NotificationVariant.FUNNEL,
                 value=0.10,
                 prev_day_value=0.12,
+                reference="639237437483490",
                 threshold_type=NotificationThresholdType.PCT,
                 threshold_value=ThresholdMap(min=0.15, max=0.25),
             ),
@@ -147,6 +148,7 @@ class TestNotificationService:
                 variant=NotificationVariant.FUNNEL,
                 value=0.10,
                 prev_day_value=0.12,
+                reference="6777439823920337",
                 threshold_type=NotificationThresholdType.ABSOLUTE,
                 threshold_value=ThresholdMap(min=0.15, max=0.25),
             ),
@@ -158,6 +160,7 @@ class TestNotificationService:
             variant=NotificationVariant.FUNNEL,
             value=0.10,
             prev_day_value=0.12,
+            reference="639237437483490",
             threshold_type=NotificationThresholdType.PCT,
             threshold_value=ThresholdMap(min=0.15, max=0.25),
         )
@@ -168,6 +171,7 @@ class TestNotificationService:
             variant=NotificationVariant.FUNNEL,
             value=0.10,
             prev_day_value=0.12,
+            reference="639237437483490",
             threshold_type=NotificationThresholdType.ABSOLUTE,
             threshold_value=ThresholdMap(min=0.15, max=0.25),
         )
@@ -180,9 +184,10 @@ class TestNotificationService:
                 variant=NotificationVariant.FUNNEL,
                 value=-16.67,
                 original_value=0.1,
+                reference="639237437483490",
                 threshold_type=None,
                 user_threshold=None,
-                triggered=None,
+                trigger=None,
             ),
             ComputedNotification(
                 name="update2",
@@ -191,9 +196,10 @@ class TestNotificationService:
                 variant=NotificationVariant.FUNNEL,
                 value=-16.67,
                 original_value=0.1,
+                reference="6777439823920337",
                 threshold_type=None,
                 user_threshold=None,
-                triggered=None,
+                trigger=None,
             ),
         ]
 
@@ -204,9 +210,10 @@ class TestNotificationService:
             variant=NotificationVariant.FUNNEL,
             value=0.1,
             original_value=0.1,
+            reference="639237437483490",
             threshold_type=NotificationThresholdType.PCT,
             user_threshold=ThresholdMap(min=0.15, max=0.25),
-            triggered=True,
+            trigger=True,
         )
         self.name = "test"
         self.ds_id = "6384a66e0a397236d9de236c"
