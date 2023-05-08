@@ -304,8 +304,9 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={() =>
-                handleRedirect('/analytics/retention/create/[dsId]')
+              onClick={
+                () => handleRedirect(' /analytics/retention/list/[dsId]')
+
               }
             />
           </Tooltip>

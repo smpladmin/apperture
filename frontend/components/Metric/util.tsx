@@ -1,13 +1,19 @@
-import { FilterDataType, WhereFilter } from '@lib/domain/common';
+import {
+  ExternalSegmentFilter,
+  FilterDataType,
+  WhereFilter,
+} from '@lib/domain/common';
 import {
   ComputedMetric,
   MetricAggregate,
   MetricBasicAggregation,
-  MetricSegmentFilter,
   MetricTableData,
   MetricTrendData,
 } from '@lib/domain/metric';
-import { convertISODateToReadableDate } from '@lib/utils/common';
+import {
+  convertISODateToReadableDate,
+  isEveryCustomSegmentFilterValid,
+} from '@lib/utils/common';
 import {
   BLUE_500,
   GREEN_500,
@@ -58,14 +64,8 @@ export const getCountOfValidAggregates = (aggregates: MetricAggregate[]) => {
   return validAggregatesWithReferenceId.length;
 };
 
-export const isEveryCustomSegmentFilterValid = (filters: WhereFilter[]) => {
-  return filters?.every(
-    (filter) => filter.values.length || filter.datatype === FilterDataType.BOOL
-  );
-};
-
 export const isValidMetricSegmentFilter = (
-  segmentFilters: MetricSegmentFilter[]
+  segmentFilters: ExternalSegmentFilter[]
 ) => {
   return segmentFilters.every(
     (filter) =>
@@ -94,7 +94,7 @@ export const hasValidFilters = (filters: WhereFilter[]) => {
 
 export const isValidAggregates = (
   aggregates: MetricAggregate[],
-  segmentFilters: MetricSegmentFilter[]
+  segmentFilters: ExternalSegmentFilter[]
 ) => {
   return (
     aggregates.length &&

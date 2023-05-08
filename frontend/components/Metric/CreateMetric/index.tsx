@@ -7,18 +7,22 @@ import {
   MetricAggregate,
   MetricVariant,
   MetricBasicAggregation,
-  MetricSegmentFilter,
 } from '@lib/domain/metric';
 import { getEventProperties, getNodes } from '@lib/services/datasourceService';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Node } from '@lib/domain/node';
 import { useRouter } from 'next/router';
 import { getCountOfValidAggregates } from '../util';
-import { DateFilterObj, GroupConditions } from '@lib/domain/common';
+import {
+  DateFilterObj,
+  ExternalSegmentFilter,
+  GroupConditions,
+} from '@lib/domain/common';
 import ActionHeader from '@components/EventsLayout/ActionHeader';
 import { saveMetric, updateMetric } from '@lib/services/metricService';
 import TransientMetricView from '../components/TransientMetricView';
 import CreateMetricAction from './CreateMetricAction';
+import { replaceEmptyStringWithPlaceholderInExternalSegmentFilter } from '@lib/utils/common';
 
 const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
   const [metric, setMetric] = useState<ComputedMetric[]>([]);
@@ -55,18 +59,22 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
     filter: savedMetric?.dateFilter?.filter || null,
     type: savedMetric?.dateFilter?.type || null,
   });
-  const [segmentFilters, setSegmentFilters] = useState<MetricSegmentFilter[]>(
-    savedMetric?.segmentFilter || [
-      {
-        condition: GroupConditions.OR,
-        includes: true,
-        custom: {
-          condition: GroupConditions.AND,
-          filters: [],
-        },
-        segments: [],
-      },
-    ]
+  const [segmentFilters, setSegmentFilters] = useState<ExternalSegmentFilter[]>(
+    savedMetric?.segmentFilter
+      ? replaceEmptyStringWithPlaceholderInExternalSegmentFilter(
+          savedMetric.segmentFilter
+        )
+      : [
+          {
+            condition: GroupConditions.OR,
+            includes: true,
+            custom: {
+              condition: GroupConditions.AND,
+              filters: [],
+            },
+            segments: [],
+          },
+        ]
   );
   const [isMetricBeingEdited, setIsMetricBeingEdited] = useState(false);
 
@@ -136,7 +144,7 @@ const Metric = ({ savedMetric }: { savedMetric?: Metric }) => {
   };
 
   const updateSegmentFilter = useCallback(
-    (metricSegmentFilter: MetricSegmentFilter[]) => {
+    (metricSegmentFilter: ExternalSegmentFilter[]) => {
       setSegmentFilters(metricSegmentFilter);
     },
     [segmentFilters]

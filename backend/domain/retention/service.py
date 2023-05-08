@@ -40,7 +40,7 @@ class RetentionService:
         start_event: EventSelection,
         goal_event: EventSelection,
         date_filter: DateFilter,
-        segment_filter: Union[SegmentFilter, None],
+        segment_filter: Union[List[SegmentFilter], None],
         granularity: Granularity,
         interval: int,
     ) -> List[ComputedRetentionTrend]:
@@ -69,12 +69,12 @@ class RetentionService:
         return [
             ComputedRetentionTrend(
                 granularity=datetime.combine(granularity, datetime.min.time()),
-                retention_rate="{:.2f}".format(retention_rate * 100),
+                retention_rate="{:.2f}".format((retained_users / total_users) * 100),
                 retained_users=retained_users,
             )
             for (
                 granularity,
-                retention_rate,
+                total_users,
                 retained_users,
             ) in retention_trend_query_response
         ]
@@ -85,7 +85,7 @@ class RetentionService:
         start_event: EventSelection,
         goal_event: EventSelection,
         date_filter: DateFilter,
-        segment_filter: Union[SegmentFilter, None],
+        segment_filter: Union[List[SegmentFilter], None],
         granularity: Granularity,
         page_number: int,
         page_size: int,

@@ -1,3 +1,5 @@
+import { SegmentGroup } from './segment';
+
 export type FixedDateFilter = {
   start_date: string;
   end_date: string;
@@ -99,3 +101,13 @@ export const ISFilterOperators = [
   FilterOperatorsString.IS,
   FilterOperatorsString.IS_NOT,
 ];
+export type ExternalSegmentFilter = {
+  condition: GroupConditions.OR;
+  includes: boolean;
+  custom: SegmentGroup;
+  segments: {
+    id: string;
+    name: string;
+    groups: SegmentGroup[];
+  }[];
+};
