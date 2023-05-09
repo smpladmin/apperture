@@ -48,6 +48,9 @@ class EventsBase(ABC):
         self.to_start_of_interval_func = CustomFunction(
             "toStartOfInterval", ["timestamp", "interval"]
         )
+        self.date_diff_func = CustomFunction(
+            "dateDiff", ["granularity", "date1", "date2"]
+        )
 
     def execute_get_query(self, query: str, parameters: Dict):
         logging.info(f"Executing query: {query}")

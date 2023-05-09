@@ -1,10 +1,7 @@
-import math
 from typing import Union, List, Tuple
-
 from fastapi import Depends
-from pypika import ClickHouseQuery, functions as fn, AliasedQuery, DatePart, NULL
-from pypika.functions import Extract
-from pypika.terms import ContainsCriterion, Interval, Parameter, Criterion, Field, Case
+from pypika import ClickHouseQuery, functions as fn, AliasedQuery
+from pypika.terms import ContainsCriterion, Interval, Parameter, Criterion
 
 from clickhouse import Clickhouse
 from domain.retention.models import EventSelection, Granularity
@@ -13,11 +10,13 @@ from repositories.clickhouse.utils.filters import Filters
 
 
 class Retention(EventsBase):
-    def __init__(self, clickhouse: Clickhouse = Depends(), filter_utils: Filters = Depends()):
+    def __init__(
+        self, clickhouse: Clickhouse = Depends(), filter_utils: Filters = Depends()
+    ):
         super().__init__(clickhouse=clickhouse)
         self.filter_utils = filter_utils
 
-    def compute_retention_trend(
+    def compute_retention(
         self,
         datasource_id: str,
         start_event: EventSelection,
@@ -26,7 +25,6 @@ class Retention(EventsBase):
         end_date: str,
         segment_filter_criterion: Union[ContainsCriterion, None],
         granularity: Granularity,
-        interval: int,
     ) -> List[Tuple]:
         parameters = {
             "ds_id": datasource_id,
@@ -34,16 +32,15 @@ class Retention(EventsBase):
             "goal_event": goal_event.event,
             "start_date": start_date,
             "end_date": end_date,
-            "interval": Interval(**{granularity.value: interval}),
             "epoch_year": self.epoch_year,
         }
         return self.execute_get_query(
-            query=self.build_retention_trend_query(
+            query=self.build_retention_query(
                 segment_filter_criterion=segment_filter_criterion,
                 granularity=granularity,
                 start_event=start_event,
                 goal_event=goal_event,
-            ).get_sql(),
+            ),
             parameters=parameters,
         )
 
@@ -92,7 +89,7 @@ class Retention(EventsBase):
 
         return sub_query
 
-    def build_retention_trend_query(
+    def build_retention_query(
         self,
         start_event: EventSelection,
         goal_event: EventSelection,
@@ -116,101 +113,48 @@ class Retention(EventsBase):
             start_event_sub_query, "start_event_sub_query"
         ).with_(goal_event_sub_query, "goal_event_sub_query")
 
-        conditions = [
-            Extract(DatePart.year, AliasedQuery("goal_event_sub_query").ts)
-            > Parameter("%(epoch_year)s"),
-            AliasedQuery("goal_event_sub_query").ts
-            > AliasedQuery("start_event_sub_query").ts,
-        ]
+        initial_count_query = (
+            ClickHouseQuery.select(
+                AliasedQuery("start_event_sub_query").granularity, fn.Count("*")
+            )
+            .from_(AliasedQuery("start_event_sub_query"))
+            .groupby(1)
+            .orderby(1)
+        )
+
+        retention_count_query = (
+            ClickHouseQuery.select(
+                AliasedQuery("start_event_sub_query").granularity,
+                self.date_diff_func(
+                    granularity.value[:-1],
+                    AliasedQuery("start_event_sub_query").granularity,
+                    AliasedQuery("goal_event_sub_query").granularity,
+                ),
+                fn.Count("*"),
+            )
+            .from_(AliasedQuery("start_event_sub_query"))
+            .inner_join(AliasedQuery("goal_event_sub_query"))
+            .on_field("user_id")
+            .where(
+                AliasedQuery("goal_event_sub_query").ts
+                > AliasedQuery("start_event_sub_query").ts
+            )
+            .groupby(1, 2)
+            .orderby(2, 1)
+        )
+
+        query = query.with_(initial_count_query, "initial_count_query").with_(
+            retention_count_query, "retention_count_query"
+        )
 
         query = (
-            query.from_(AliasedQuery("start_event_sub_query"))
-            .left_join(AliasedQuery("goal_event_sub_query"))
-            .on(
-                (
-                    AliasedQuery("start_event_sub_query").user_id
-                    == AliasedQuery("goal_event_sub_query").user_id
-                )
-                & (
-                    AliasedQuery("start_event_sub_query").granularity
-                    + Parameter(f"%(interval)s")
-                    == AliasedQuery("goal_event_sub_query").granularity
+            (
+                query.from_(AliasedQuery("retention_count_query")).left_join(
+                    AliasedQuery("initial_count_query")
                 )
             )
-            .select(
-                AliasedQuery("start_event_sub_query").granularity,
-                fn.Count(AliasedQuery("start_event_sub_query").user_id)
-                .distinct()
-                .as_("total_count"),
-                fn.Count(
-                    Case()
-                    .when(
-                        Criterion.all(conditions),
-                        AliasedQuery("goal_event_sub_query").user_id,
-                    )
-                    .else_(NULL),
-                ).as_("retention_count"),
-            )
-            .groupby(Field("granularity"))
-            .orderby(Field("granularity"))
+            .on_field("granularity")
+            .select("*")
         )
 
-        return query
-
-    def compute_retention(
-        self,
-        datasource_id: str,
-        start_event: EventSelection,
-        goal_event: EventSelection,
-        start_date: str,
-        end_date: str,
-        segment_filter_criterion: Union[ContainsCriterion, None],
-        granularity: Granularity,
-        start_index: int,
-        end_index: int,
-    ):
-
-        retention_query = self.build_retention_query(
-            granularity=granularity,
-            segment_filter_criterion=segment_filter_criterion,
-            start_event=start_event,
-            goal_event=goal_event,
-        )
-
-        parameters = {
-            "ds_id": datasource_id,
-            "start_event": start_event.event,
-            "goal_event": goal_event.event,
-            "start_date": start_date,
-            "end_date": end_date,
-            "epoch_year": self.epoch_year,
-        }
-
-        results = []
-        for interval in range(start_index, end_index):
-            parameters["interval"] = Interval(**{granularity.value: interval})
-            result = self.execute_get_query(
-                query=retention_query, parameters=parameters
-            )[0][0]
-            result = 0 if math.isnan(result) else result
-            results.append("{:.2f}".format(result * 100))
-
-        return results
-
-    def build_retention_query(
-        self,
-        start_event: EventSelection,
-        goal_event: EventSelection,
-        segment_filter_criterion: Union[ContainsCriterion, None],
-        granularity: Granularity,
-    ):
-        sub_query = self.build_retention_trend_query(
-            segment_filter_criterion=segment_filter_criterion,
-            granularity=granularity,
-            start_event=start_event,
-            goal_event=goal_event,
-        )
-        query = ClickHouseQuery.from_(sub_query).select(
-            fn.Sum(Field("retention_count")) / fn.Sum(Field("total_count"))
-        )
         return query.get_sql()

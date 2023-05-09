@@ -45,17 +45,10 @@ class Retention(Document):
         name = "retention"
 
 
-class ComputedRetentionTrend(BaseModel):
-    granularity: datetime.datetime
-    retention_rate: float
-    retained_users: int
-
-
-class ComputedRetentionForInterval(BaseModel):
-    name: str
-    value: float
-
-
 class ComputedRetention(BaseModel):
-    count: int
-    data: List[ComputedRetentionForInterval]
+    granularity: datetime.datetime
+    interval: int
+    interval_name: str
+    initial_users: int
+    retained_users: int
+    retention_rate: float

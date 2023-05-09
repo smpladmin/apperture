@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import {
   Granularity,
-  RetentionTrendsData,
   RetentionData,
   TrendScale,
   Retention,
@@ -13,10 +12,7 @@ import {
   DateFilterType,
   ExternalSegmentFilter,
 } from '@lib/domain/common';
-import {
-  getTransientRetentionData,
-  getTransientTrendsData,
-} from '@lib/services/retentionService';
+import { getTransientRetentionData } from '@lib/services/retentionService';
 import ViewHeader from '@components/EventsLayout/ViewHeader';
 import LeftView from './LeftView';
 import { FunnelStep } from '@lib/domain/funnel';
@@ -50,17 +46,12 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
   const [trendScale, setTrendScale] = useState<TrendScale>(
     TrendScale.PERCENTAGE
   );
-  const [isTrendsDataLoading, setIsTrendsDataLoading] = useState(true);
-  const [isIntervalDataLoading, setIsIntervalDataLoading] = useState(true);
-  const [trendsData, setTrendsData] = useState<RetentionTrendsData[]>([]);
-  const [retentionData, setRetentionData] = useState<RetentionData>({
-    count: 0,
-    data: [],
-  });
   const [pageNumber, setPageNumber] = useState(0);
   const [interval, setInterval] = useState(0);
+  const [isTrendsDataLoading, setIsTrendsDataLoading] = useState(true);
+  const [isIntervalDataLoading, setIsIntervalDataLoading] = useState(true);
+  const [retentionData, setRetentionData] = useState<RetentionData[]>([]);
   const [isEmpty, setIsEmpty] = useState(savedRetention ? false : true);
-  const pageSize = 10;
   const [segmentFilters] = useState<ExternalSegmentFilter[] | null>(
     savedRetention?.segmentFilter
       ? replaceEmptyStringWithPlaceholderInExternalSegmentFilter(
@@ -70,25 +61,6 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
   );
 
   useEffect(() => {
-    const getTrendsData = async () => {
-      const trendsData = await getTransientTrendsData(
-        datasourceId!!,
-        savedRetention.startEvent,
-        savedRetention.goalEvent,
-        savedRetention.dateFilter,
-        savedRetention.granularity,
-        interval,
-        segmentFilters
-      );
-      setTrendsData(trendsData);
-      setIsTrendsDataLoading(false);
-    };
-
-    setIsTrendsDataLoading(true);
-    getTrendsData();
-  }, [interval]);
-
-  useEffect(() => {
     const getTransientData = async () => {
       const retentionData = await getTransientRetentionData(
         datasourceId!!,
@@ -96,17 +68,17 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
         savedRetention.goalEvent,
         savedRetention.dateFilter,
         savedRetention.granularity,
-        pageNumber,
-        pageSize,
         segmentFilters
       );
       setRetentionData(retentionData);
       setIsIntervalDataLoading(false);
+      setIsTrendsDataLoading(false);
     };
 
     setIsIntervalDataLoading(true);
+    setIsTrendsDataLoading(true);
     getTransientData();
-  }, [pageNumber]);
+  }, []);
 
   const handleEditRetention = () => {
     router.push({
@@ -157,12 +129,11 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
             setTrendScale={setTrendScale}
             isIntervalDataLoading={isIntervalDataLoading}
             isTrendsDataLoading={isTrendsDataLoading}
+            retentionData={retentionData}
+            pageNumber={pageNumber}
+            setPageNumber={setPageNumber}
             interval={interval}
             setInterval={setInterval}
-            retentionData={retentionData}
-            setPageNumber={setPageNumber}
-            pageSize={pageSize}
-            trendsData={trendsData}
           />
         </ViewPanel>
       </Flex>

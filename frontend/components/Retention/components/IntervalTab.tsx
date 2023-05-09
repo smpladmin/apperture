@@ -1,12 +1,12 @@
 import { Flex, Text } from '@chakra-ui/react';
-import { RetentionData } from '@lib/domain/retention';
+import { IntervalData } from '@lib/domain/retention';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 import { CaretLeft, CaretRight } from 'phosphor-react';
 
 type IntervalTabProps = {
   interval: number;
   setInterval: Function;
-  retentionData: RetentionData;
+  intervalData: IntervalData;
   setPageNumber: Function;
   pageSize: number;
 };
@@ -14,7 +14,7 @@ type IntervalTabProps = {
 export const IntervalTab = ({
   interval,
   setInterval,
-  retentionData,
+  intervalData,
   setPageNumber,
   pageSize,
 }: IntervalTabProps) => {
@@ -48,8 +48,9 @@ export const IntervalTab = ({
         >
           <CaretLeft size={16} />
         </Flex>
+
         <Flex w={'full'}>
-          {retentionData.data.map((d, index) => {
+          {intervalData.data.map((d, index) => {
             const intervalNumber = +d.name.split(' ')[1];
             return (
               <Flex
@@ -103,7 +104,7 @@ export const IntervalTab = ({
           borderStyle={'solid'}
           onClick={() => {
             setPageNumber((prevPageNumber: number) =>
-              retentionData.count <= (prevPageNumber + 1) * pageSize
+              intervalData.count <= (prevPageNumber + 1) * pageSize
                 ? prevPageNumber
                 : prevPageNumber + 1
             );

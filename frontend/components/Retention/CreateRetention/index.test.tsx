@@ -14,11 +14,12 @@ import { MapContext } from '@lib/contexts/mapContext';
 import { Node } from '@lib/domain/node';
 import {
   getTransientRetentionData,
-  getTransientTrendsData,
   saveRetention,
   updateRetention,
 } from '@lib/services/retentionService';
 import {
+  convertToIntervalData,
+  convertToTrendsData,
   hasValidEvents,
   hasValidRetentionEventAndFilters,
   substituteEmptyStringWithPlaceholder,
@@ -42,9 +43,7 @@ jest.mock('@lib/services/retentionService');
 jest.mock('@lib/services/datasourceService');
 
 describe('create retention', () => {
-  // let mockedCapitalizeLetter: jest.Mock;
   let mockedHasValidEvents: jest.Mock;
-  let mockGetTransientTrendsData: jest.Mock;
   let mockSaveRetention: jest.Mock;
   let mockUpdateRetention: jest.Mock;
   let mockGetEventProperties: jest.Mock;
@@ -53,6 +52,8 @@ describe('create retention', () => {
   let mockHasValidRetentionEventAndFilters: jest.Mock;
   let mockSubstituteEmptyStringWithPlaceholder: jest.Mock;
   let mockGetSavedSegmentsForDatasourceId: jest.Mock;
+  let mockConvertToIntervalData: jest.Mock;
+  let mockConvertToTrendsData: jest.Mock;
 
   const addEvent = async (eventName: string) => {
     const selectElementByText = screen.getByText(eventName);
@@ -166,38 +167,76 @@ describe('create retention', () => {
     });
   };
 
-  const retentionTrendsData = [
-    {
-      granularity: '2022-11-21T00:00:00',
-      retainedUsers: 100,
-      retentionRate: 66.17,
-    },
-    {
-      granularity: '2022-11-22T00:00:00',
-      retainedUsers: 67,
-      retentionRate: 45.4,
-    },
-
-    {
-      granularity: '2022-11-23T00:00:00',
-      retainedUsers: 45,
-      retentionRate: 33.9,
-    },
-
+  const retentionData = [
     {
       granularity: '2022-11-24T00:00:00',
-      retainedUsers: 22,
-      retentionRate: 24.2,
+      interval: 0,
+      intervalName: 'day 0',
+      initialUsers: 202,
+      retainedUsers: 113,
+      retentionRate: 55.94,
+    },
+    {
+      granularity: '2022-11-25T00:00:00',
+      interval: 0,
+      intervalName: 'day 0',
+      initialUsers: 230,
+      retainedUsers: 112,
+      retentionRate: 48.7,
+    },
+    {
+      granularity: '2022-11-26T00:00:00',
+      interval: 1,
+      intervalName: 'day 1',
+      initialUsers: 206,
+      retainedUsers: 108,
+      retentionRate: 52.43,
+    },
+    {
+      granularity: '2022-11-27T00:00:00',
+      interval: 1,
+      intervalName: 'day 1',
+      initialUsers: 202,
+      retainedUsers: 105,
+      retentionRate: 51.98,
+    },
+    {
+      granularity: '2022-11-26T00:00:00',
+      interval: 2,
+      intervalName: 'day 2',
+      initialUsers: 206,
+      retainedUsers: 108,
+      retentionRate: 52.43,
+    },
+    {
+      granularity: '2022-11-27T00:00:00',
+      interval: 2,
+      intervalName: 'day 2',
+      initialUsers: 202,
+      retainedUsers: 105,
+      retentionRate: 51.98,
     },
   ];
 
-  const retentionData = {
-    count: 4,
+  const retentionTrendsData = [
+    {
+      granularity: '2022-11-24T00:00:00',
+      retainedUsers: 113,
+      retentionRate: 55.94,
+    },
+    {
+      granularity: '2022-11-25T00:00:00',
+      retainedUsers: 112,
+      retentionRate: 48.7,
+    },
+  ];
+
+  const retentionIntervalData = {
+    count: 3,
     data: [
       { name: 'day 0', value: '55.13' },
       { name: 'day 1', value: '31.25' },
       { name: 'day 2', value: '18.9' },
-      { name: 'day 3', value: '10.6' },
     ],
   };
 
@@ -217,7 +256,6 @@ describe('create retention', () => {
   ];
 
   beforeEach(() => {
-    mockGetTransientTrendsData = jest.mocked(getTransientTrendsData);
     mockGetTransientRetentionData = jest.mocked(getTransientRetentionData);
 
     // mockedCapitalizeLetter = jest.mocked(capitalizeFirstLetter);
@@ -226,6 +264,9 @@ describe('create retention', () => {
     mockUpdateRetention = jest.mocked(updateRetention);
     mockGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
     mockGetEventProperties = jest.mocked(getEventProperties);
+    mockConvertToTrendsData = jest.mocked(convertToTrendsData);
+    mockConvertToIntervalData = jest.mocked(convertToIntervalData);
+
     mockGetSavedSegmentsForDatasourceId = jest.mocked(
       getSavedSegmentsForDatasourceId
     );
@@ -236,7 +277,6 @@ describe('create retention', () => {
       substituteEmptyStringWithPlaceholder
     );
 
-    mockGetTransientTrendsData.mockReturnValue(retentionTrendsData);
     mockGetTransientRetentionData.mockReturnValue(retentionData);
     mockedHasValidEvents.mockReturnValue(true);
     mockHasValidRetentionEventAndFilters.mockReturnValue(true);
@@ -245,6 +285,8 @@ describe('create retention', () => {
     mockSubstituteEmptyStringWithPlaceholder.mockImplementation((val: any) => {
       return val;
     });
+    mockConvertToTrendsData.mockReturnValue(retentionTrendsData);
+    mockConvertToIntervalData.mockReturnValue(retentionIntervalData);
   });
 
   afterAll(() => {
@@ -487,7 +529,6 @@ describe('create retention', () => {
       await act(async () => {
         fireEvent.click(intervalTabs[1]);
       });
-      expect(mockGetTransientTrendsData).toBeCalled();
     });
   });
 
@@ -499,7 +540,6 @@ describe('create retention', () => {
         fireEvent.click(oneMonthFilter);
       });
       expect(mockGetTransientRetentionData).toBeCalled();
-      expect(mockGetTransientTrendsData).toBeCalled();
     });
   });
 
@@ -512,7 +552,6 @@ describe('create retention', () => {
       expect(granularityTypes[0].textContent).toEqual('Days');
       fireEvent.click(granularityTypes[0]);
       expect(mockGetTransientRetentionData).toBeCalled();
-      expect(mockGetTransientTrendsData).toBeCalled();
     });
   });
 });
