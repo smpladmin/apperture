@@ -3,13 +3,14 @@ import Card from '@components/Card';
 import DateFilterComponent from '@components/Date/DateFilter';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { DateFilterObj } from '@lib/domain/common';
-import {
-  RetentionData,
-  RetentionTrendsData,
-  TrendScale,
-} from '@lib/domain/retention';
+import { RetentionData, TrendScale } from '@lib/domain/retention';
 import { BLACK_DEFAULT, GREY_500 } from '@theme/index';
 import { Hash, Percent } from 'phosphor-react';
+import { useMemo } from 'react';
+import {
+  convertToIntervalData,
+  convertToTrendsData,
+} from '@components/Retention/utils';
 import IntervalTab from './IntervalTab';
 import RetentionEmptyState from './RetentionEmptyState';
 import RetentionTrend from './RetentionTrend';
@@ -23,12 +24,11 @@ type TransientRetentionViewProps = {
   isDateFilterDisabled?: boolean;
   isIntervalDataLoading: boolean;
   isTrendsDataLoading: boolean;
+  retentionData: RetentionData[];
+  pageNumber: number;
+  setPageNumber: Function;
   interval: number;
   setInterval: Function;
-  retentionData: RetentionData;
-  setPageNumber: Function;
-  pageSize: number;
-  trendsData: RetentionTrendsData[];
 };
 
 const TransientRetentionView = ({
@@ -40,13 +40,21 @@ const TransientRetentionView = ({
   isEmpty,
   isIntervalDataLoading,
   isTrendsDataLoading,
-  interval,
-  setInterval,
   retentionData,
+  pageNumber,
+  interval,
   setPageNumber,
-  pageSize,
-  trendsData,
+  setInterval,
 }: TransientRetentionViewProps) => {
+  const pageSize = 10;
+  const trendsData = useMemo(() => {
+    return convertToTrendsData(retentionData, interval);
+  }, [interval, retentionData]);
+
+  const intervalData = useMemo(() => {
+    return convertToIntervalData(retentionData, pageNumber, pageSize);
+  }, [pageNumber, retentionData]);
+
   return (
     <Flex direction={'column'} gap={'5'}>
       <Flex justifyContent={'space-between'}>
@@ -131,13 +139,17 @@ const TransientRetentionView = ({
                 <LoadingSpinner />
               </Flex>
             ) : (
-              <IntervalTab
-                interval={interval}
-                setInterval={setInterval}
-                retentionData={retentionData}
-                setPageNumber={setPageNumber}
-                pageSize={pageSize}
-              />
+              <>
+                {intervalData.count ? (
+                  <IntervalTab
+                    interval={interval}
+                    setInterval={setInterval}
+                    intervalData={intervalData}
+                    setPageNumber={setPageNumber}
+                    pageSize={pageSize}
+                  />
+                ) : null}
+              </>
             )}
             {isTrendsDataLoading ? (
               <Flex
