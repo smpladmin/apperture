@@ -58,8 +58,6 @@ from domain.retention.models import (
     Retention,
     EventSelection,
     Granularity,
-    ComputedRetentionTrend,
-    ComputedRetentionForInterval,
     ComputedRetention,
 )
 from domain.runlogs.models import RunLog
@@ -192,9 +190,10 @@ def notification_service(apperture_user_response):
             variant=NotificationVariant.FUNNEL,
             value=-16.67,
             original_value=0.1,
+            reference="639237437483490",
             threshold_type=NotificationThresholdType.PCT,
             user_threshold=ThresholdMap(min=12.0, max=18.0),
-            triggered=True,
+            trigger=True,
         ),
         ComputedNotification(
             name="Alert Metric -Updated",
@@ -203,9 +202,10 @@ def notification_service(apperture_user_response):
             variant=NotificationVariant.METRIC,
             value=-16.67,
             original_value=0.1,
+            reference="6777439823920337",
             threshold_type=NotificationThresholdType.PCT,
             user_threshold=ThresholdMap(min=1212.0, max=3236.0),
-            triggered=False,
+            trigger=False,
         ),
     ]
 
@@ -217,9 +217,10 @@ def notification_service(apperture_user_response):
             variant=NotificationVariant.FUNNEL,
             value=-16.67,
             original_value=0.1,
+            reference="639237437483490",
             threshold_type=None,
             user_threshold=None,
-            triggered=None,
+            trigger=None,
         ),
         ComputedNotification(
             name="Alert Metric -Updated",
@@ -228,9 +229,10 @@ def notification_service(apperture_user_response):
             variant=NotificationVariant.METRIC,
             value=-16.67,
             original_value=0.1,
+            reference="6777439823920337",
             threshold_type=None,
             user_threshold=None,
-            triggered=None,
+            trigger=None,
         ),
     ]
 
@@ -283,43 +285,44 @@ def retention_service(apperture_user_response):
         enabled=True,
     )
 
-    retention_trends = [
-        ComputedRetentionTrend(
+    transient_retention = [
+        ComputedRetention(
             granularity=datetime(2022, 11, 24, 0, 0),
+            interval=1,
+            interval_name="day 1",
+            initial_users=202,
             retention_rate=55.94,
             retained_users=113,
         ),
-        ComputedRetentionTrend(
+        ComputedRetention(
             granularity=datetime(2022, 11, 25, 0, 0),
+            interval=1,
+            interval_name="day 1",
+            initial_users=230,
             retention_rate=48.7,
             retained_users=112,
         ),
-        ComputedRetentionTrend(
+        ComputedRetention(
             granularity=datetime(2022, 11, 26, 0, 0),
+            interval=1,
+            interval_name="day 1",
+            initial_users=206,
             retention_rate=52.43,
             retained_users=108,
         ),
-        ComputedRetentionTrend(
+        ComputedRetention(
             granularity=datetime(2022, 11, 27, 0, 0),
+            interval=1,
+            interval_name="day 1",
+            initial_users=202,
             retention_rate=51.98,
             retained_users=105,
         ),
     ]
-    transient_retention = ComputedRetention(
-        count=4,
-        data=[
-            ComputedRetentionForInterval(name="day 0", value=55.16),
-            ComputedRetentionForInterval(name="day 1", value=10.98),
-            ComputedRetentionForInterval(name="day 2", value=7.43),
-            ComputedRetentionForInterval(name="day 3", value=6.13),
-        ],
-    )
     retention_future = asyncio.Future()
     retention_future.set_result(retention)
     retentions_future = asyncio.Future()
     retentions_future.set_result([RetentionWithUser.from_orm(retention)])
-    retention_trends_future = asyncio.Future()
-    retention_trends_future.set_result(retention_trends)
     transient_retention_future = asyncio.Future()
     transient_retention_future.set_result(transient_retention)
 
@@ -333,9 +336,6 @@ def retention_service(apperture_user_response):
     )
     retention_service_mock.compute_retention.return_value = transient_retention_future
     retention_service_mock.get_retentions_for_apps.return_value = retentions_future
-    retention_service_mock.compute_retention_trend.return_value = (
-        retention_trends_future
-    )
     return retention_service_mock
 
 
@@ -428,6 +428,7 @@ def funnel_service(apperture_user_response):
                 variant=NotificationVariant.FUNNEL,
                 value=0.2,
                 prev_day_value=0.2,
+                reference="639237437483490",
                 threshold_type="absolute",
                 threshold_value=ThresholdMap(min=12.0, max=18.0),
             )
@@ -768,6 +769,7 @@ def metric_service(apperture_user_response):
                 variant=NotificationVariant.METRIC,
                 value=0.2,
                 prev_day_value=0.2,
+                reference="6777439823920337",
                 threshold_type="absolute",
                 threshold_value=ThresholdMap(min=1212.0, max=3236.0),
             )
@@ -1467,42 +1469,41 @@ def funnel_response():
 
 
 @pytest.fixture(scope="module")
-def retention_trend_response():
+def transient_retention_response():
     return [
         {
             "granularity": "2022-11-24T00:00:00",
-            "retentionRate": 55.94,
+            "initialUsers": 202,
+            "interval": 1,
+            "intervalName": "day 1",
             "retainedUsers": 113,
+            "retentionRate": 55.94,
         },
         {
             "granularity": "2022-11-25T00:00:00",
-            "retentionRate": 48.7,
+            "initialUsers": 230,
+            "interval": 1,
+            "intervalName": "day 1",
             "retainedUsers": 112,
+            "retentionRate": 48.7,
         },
         {
             "granularity": "2022-11-26T00:00:00",
-            "retentionRate": 52.43,
+            "initialUsers": 206,
+            "interval": 1,
+            "intervalName": "day 1",
             "retainedUsers": 108,
+            "retentionRate": 52.43,
         },
         {
             "granularity": "2022-11-27T00:00:00",
-            "retentionRate": 51.98,
+            "initialUsers": 202,
+            "interval": 1,
+            "intervalName": "day 1",
             "retainedUsers": 105,
+            "retentionRate": 51.98,
         },
     ]
-
-
-@pytest.fixture(scope="module")
-def retention_transient_response():
-    return {
-        "count": 4,
-        "data": [
-            {"name": "day 0", "value": 55.16},
-            {"name": "day 1", "value": 10.98},
-            {"name": "day 2", "value": 7.43},
-            {"name": "day 3", "value": 6.13},
-        ],
-    }
 
 
 @pytest.fixture(scope="module")

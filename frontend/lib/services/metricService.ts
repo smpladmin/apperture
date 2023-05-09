@@ -1,9 +1,11 @@
+import { replaceEmptyStringPlaceholder } from '@components/Metric/util';
+import { DateFilterObj, ExternalSegmentFilter } from '@lib/domain/common';
+import { MetricAggregate } from '@lib/domain/metric';
 import {
-  isValidMetricSegmentFilter,
-  replaceEmptyStringPlaceholder,
-} from '@components/Metric/util';
-import { DateFilterObj } from '@lib/domain/common';
-import { MetricAggregate, MetricSegmentFilter } from '@lib/domain/metric';
+  isValidSegmentFilter,
+  replacePlaceholderWithEmptyStringInExternalSegmentFilter,
+} from '@lib/utils/common';
+import { cloneDeep } from 'lodash';
 import {
   AppertureDelete,
   AppertureGet,
@@ -11,6 +13,7 @@ import {
   ApperturePrivateGet,
   ApperturePut,
 } from './util';
+import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
 
 type MetricRequestBody = {
   name?: string;
@@ -19,7 +22,7 @@ type MetricRequestBody = {
   aggregates: MetricAggregate[];
   breakdown: string[];
   dateFilter?: DateFilterObj;
-  segmentFilter?: MetricSegmentFilter[];
+  segmentFilter?: ExternalSegmentFilter[];
 };
 
 export const computeMetric = async (
@@ -28,7 +31,7 @@ export const computeMetric = async (
   aggregates: MetricAggregate[],
   breakdown: string[],
   dateFilter: DateFilterObj,
-  segmentFilters: MetricSegmentFilter[] | null,
+  segmentFilters: ExternalSegmentFilter[] | null,
   signal?: AbortSignal
 ) => {
   const requestBody: MetricRequestBody = {
@@ -39,8 +42,13 @@ export const computeMetric = async (
     dateFilter,
   };
 
-  if (segmentFilters && isValidMetricSegmentFilter(segmentFilters)) {
-    requestBody.segmentFilter = segmentFilters;
+  if (segmentFilters && isValidSegmentFilter(segmentFilters)) {
+    const updatedSegmentFilters =
+      replacePlaceholderWithEmptyStringInExternalSegmentFilter(
+        cloneDeep(segmentFilters)
+      );
+
+    requestBody.segmentFilter = updatedSegmentFilters;
   }
 
   const res = await ApperturePost('metrics/compute', requestBody, { signal });
@@ -59,7 +67,7 @@ export const saveMetric = async (
   aggregates: MetricAggregate[],
   breakdown: string[],
   dateFilter: DateFilterObj,
-  segmentFilters: MetricSegmentFilter[]
+  segmentFilters: ExternalSegmentFilter[]
 ) => {
   const requestBody: MetricRequestBody = {
     name,
@@ -70,8 +78,13 @@ export const saveMetric = async (
     dateFilter,
   };
 
-  if (segmentFilters && isValidMetricSegmentFilter(segmentFilters)) {
-    requestBody.segmentFilter = segmentFilters;
+  if (segmentFilters && isValidSegmentFilter(segmentFilters)) {
+    const updatedSegmentFilters =
+      replacePlaceholderWithEmptyStringInExternalSegmentFilter(
+        cloneDeep(segmentFilters)
+      );
+
+    requestBody.segmentFilter = updatedSegmentFilters;
   }
 
   const result = await ApperturePost('/metrics', requestBody);
@@ -86,7 +99,7 @@ export const updateMetric = async (
   aggregates: MetricAggregate[],
   breakdown: string[],
   dateFilter: DateFilterObj,
-  segmentFilters: MetricSegmentFilter[]
+  segmentFilters: ExternalSegmentFilter[]
 ) => {
   const requestBody: MetricRequestBody = {
     name,
@@ -97,8 +110,13 @@ export const updateMetric = async (
     dateFilter,
   };
 
-  if (segmentFilters && isValidMetricSegmentFilter(segmentFilters)) {
-    requestBody.segmentFilter = segmentFilters;
+  if (segmentFilters && isValidSegmentFilter(segmentFilters)) {
+    const updatedSegmentFilters =
+      replacePlaceholderWithEmptyStringInExternalSegmentFilter(
+        cloneDeep(segmentFilters)
+      );
+
+    requestBody.segmentFilter = updatedSegmentFilters;
   }
 
   const result = await ApperturePut('/metrics/' + metricId, requestBody);
@@ -123,4 +141,38 @@ export const validateMetricFormula = async (
 
 export const deleteMetric = async (id: string, dsId: string) => {
   return await AppertureDelete(`/metrics/${id}?datasource_id=${dsId}`);
+};
+
+export const _getSavedMetricPrivate = async (
+  apiKey: string,
+  metricId: string
+) => {
+  const res = await ApperturePrivateAPI.get(`/private/metrics/${metricId}`, {
+    headers: { 'apperture-api-key': apiKey },
+  });
+  return res.data;
+};
+
+export const _getTransientTrendsDataPrivate = async (
+  apiKey: string,
+  dsId: string,
+  functions: string,
+  aggregates: MetricAggregate[],
+  breakdown: string[],
+  dateFilter: DateFilterObj | null
+) => {
+  const res = await ApperturePrivateAPI.post(
+    `/private/metrics/compute`,
+    {
+      datasourceId: dsId,
+      function: functions,
+      aggregates: replaceEmptyStringPlaceholder(aggregates),
+      breakdown,
+      dateFilter,
+    },
+    {
+      headers: { 'apperture-api-key': apiKey },
+    }
+  );
+  return res.data || [];
 };

@@ -13,6 +13,7 @@ export enum WatchListItemType {
   FUNNELS = 'funnels',
   SEGMENTS = 'segments',
   ACTIONS = 'actions',
+  RETENTIONS = 'retentions',
 }
 
 const paths = {
@@ -21,6 +22,7 @@ const paths = {
   [WatchListItemType.FUNNELS]: 'funnel/view',
   [WatchListItemType.SEGMENTS]: 'segment/edit',
   [WatchListItemType.ACTIONS]: 'action/edit',
+  [WatchListItemType.RETENTIONS]: 'retention/edit',
 };
 
 export namespace WatchListItemType {

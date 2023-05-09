@@ -20,7 +20,6 @@ import {
   MetricVariant,
   ComputedMetric,
   MetricBasicAggregation,
-  MetricSegmentFilter,
 } from '@lib/domain/metric';
 import { cloneDeep, debounce, isEqual } from 'lodash';
 import { Node } from '@lib/domain/node';
@@ -30,7 +29,11 @@ import {
   isValidAggregates,
   replaceEmptyStringPlaceholder,
 } from '@components/Metric/util';
-import { DateFilterObj, WhereFilter } from '@lib/domain/common';
+import {
+  DateFilterObj,
+  ExternalSegmentFilter,
+  WhereFilter,
+} from '@lib/domain/common';
 import Card from '@components/Card';
 import { Function, Plus } from 'phosphor-react';
 import AddBreakdown from '../components/AddBreakdown';
@@ -55,7 +58,7 @@ type CreateMetricActionProps = {
   dateFilter: DateFilterObj;
   metricDefinition: string;
   setMetricDefinition: Function;
-  segmentFilters: MetricSegmentFilter[];
+  segmentFilters: ExternalSegmentFilter[];
   updateSegmentFilter: Function;
 };
 
@@ -152,15 +155,13 @@ const CreateMetricAction = ({
       const processedAggregate = replaceEmptyStringPlaceholder(
         cloneDeep(aggregates)
       );
-
-      const definition =
-        metricDefinition && metricDefinition.length
-          ? metricDefinition.replace(/\s*/g, '')
-          : aggregates.map((aggregate) => aggregate.variable).join(',');
+      const formattedMetricDefinition = metricDefinition?.length
+        ? metricDefinition.replace(/\s*/g, '')
+        : aggregates.map((aggregate) => aggregate.variable).join(',');
 
       const result: ComputedMetric[] = await computeMetric(
         dsId as string,
-        definition,
+        formattedMetricDefinition,
         processedAggregate,
         breakdown,
         dateFilter,

@@ -8,7 +8,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import SearchableDropdown from '@components/SearchableDropdown/SearchableDropdown';
-import { MetricSegmentFilter } from '@lib/domain/metric';
+import { ExternalSegmentFilter } from '@lib/domain/common';
 import { SegmentWithUser } from '@lib/domain/segment';
 import { getSavedSegmentsForDatasourceId } from '@lib/services/segmentService';
 import cloneDeep from 'lodash/cloneDeep';
@@ -25,9 +25,9 @@ type SelectSegmentsDropdownProps = {
   index: number;
   isSegmentListOpen: boolean;
   setIsSegmentListOpen: Function;
-  segmentFilter: MetricSegmentFilter;
+  segmentFilter: ExternalSegmentFilter;
   updateSegmentFilter: Function;
-  segmentFilters: MetricSegmentFilter[];
+  segmentFilters: ExternalSegmentFilter[];
 };
 
 const SelectSegmentsDropdown = ({
