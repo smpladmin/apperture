@@ -4,6 +4,9 @@ from typing import Union
 from fastapi import FastAPI, Form, Response
 from fastapi.middleware.cors import CORSMiddleware
 from aiokafka import AIOKafkaProducer
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 ROOT_DIR = os.path.abspath(os.curdir)
