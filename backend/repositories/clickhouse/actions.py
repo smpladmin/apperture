@@ -175,7 +175,7 @@ class Actions(EventsBase):
         return
 
     def get_minimum_timestamp_of_events(self, datasource_id: str):
-        params = {}
+        params = {"ds_id": datasource_id}
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
             .select(
@@ -183,7 +183,6 @@ class Actions(EventsBase):
             )
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
         )
-        params["ds_id"] = datasource_id
         return self.execute_get_query(query=query.get_sql(), parameters=params)
 
     def compute_migration_start_and_end_time(self, action: Action):
@@ -245,8 +244,6 @@ class Actions(EventsBase):
             )
         )
 
-        print(query)
-
         query = query.where(Criterion.all(conditions))
         params["ds_id"] = str(action.datasource_id)
         return query.get_sql(), params, end_time
@@ -274,8 +271,8 @@ class Actions(EventsBase):
         if start_date and end_date:
             date_criterion.extend(
                 [
-                    self.date_func(self.table.timestamp) >= start_date,
-                    self.date_func(self.table.timestamp) <= end_date,
+                    self.date_func(Field("timestamp")) >= start_date,
+                    self.date_func(Field("timestamp")) <= end_date,
                 ]
             )
         return date_criterion
@@ -297,9 +294,11 @@ class Actions(EventsBase):
                 group_condition.append(self.click_stream_table.event == group.event)
                 conditions.append(Criterion.all(group_condition))
 
+        criterion = [self.click_stream_table.datasource_id == Parameter("%(ds_id)s")]
         date_criterion = self.build_date_filter_criterion(
             start_date=start_date, end_date=end_date
         )
+        criterion.extend(date_criterion)
 
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
@@ -309,9 +308,9 @@ class Actions(EventsBase):
                 self.click_stream_table.properties,
                 self.click_stream_table.timestamp,
             )
-            .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
-            .having(Criterion.all(date_criterion))
+            .where(Criterion.all(criterion))
         )
+
         query = query.where(Criterion.any(conditions)).limit(100)
         params["ds_id"] = str(datasource_id)
         return query.get_sql(), params
@@ -349,15 +348,16 @@ class Actions(EventsBase):
                 group_condition.append(self.click_stream_table.event == group.event)
                 conditions.append(Criterion.all(group_condition))
 
+        criterion = [self.click_stream_table.datasource_id == Parameter("%(ds_id)s")]
         date_criterion = self.build_date_filter_criterion(
             start_date=start_date, end_date=end_date
         )
+        criterion.extend(date_criterion)
 
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
             .select(fn.Count("*"))
-            .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
-            .having(Criterion.all(date_criterion))
+            .where(Criterion.all(criterion))
         )
 
         query = query.where(Criterion.any(conditions))
