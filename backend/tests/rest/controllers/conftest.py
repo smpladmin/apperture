@@ -560,6 +560,7 @@ def action_service():
         blank_action_future,
         action_future,
     ]
+    action_service_mock.update_events_for_action = mock.AsyncMock()
     return action_service_mock
 
 

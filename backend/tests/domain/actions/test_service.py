@@ -145,6 +145,40 @@ class TestActionService:
         }
 
     @pytest.mark.asyncio
+    async def test_update_events_for_actions(self):
+        self.actions.update_events_from_clickstream.return_value = []
+
+        await self.service.update_events_for_action(action=self.action)
+        assert self.actions.update_events_from_clickstream.call_args.kwargs[
+            "action"
+        ].dict() == {
+            "app_id": PydanticObjectId("636a1c61d715ca6baae65612"),
+            "created_at": ANY,
+            "datasource_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+            "groups": [
+                {
+                    "condition": ActionGroupCondition.OR,
+                    "event": None,
+                    "href": None,
+                    "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
+                    "button",
+                    "tag_name": None,
+                    "text": None,
+                    "url": None,
+                    "url_matching": None,
+                }
+            ],
+            "id": None,
+            "name": "clicked on settings",
+            "event_type": "$autocapture",
+            "processed_till": None,
+            "revision_id": ANY,
+            "updated_at": None,
+            "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+            "enabled": True,
+        }
+
+    @pytest.mark.asyncio
     async def test_get_actions_by_id(self):
         Action.find_one = AsyncMock()
         await self.service.get_action(id=self.id)
