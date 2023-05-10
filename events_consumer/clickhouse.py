@@ -34,3 +34,19 @@ class ClickHouse:
             ],
             settings={"insert_async": True, "wait_for_async_insert": False},
         )
+
+    def save_precision_events(self, events) -> None:
+        """Saves events to ClickHouse."""
+        self.client.insert(
+            "events",
+            events,
+            column_names=[
+                "datasource_id",
+                "timestamp",
+                "provider",
+                "user_id",
+                "event_name",
+                "properties",
+            ],
+            settings={"insert_async": True, "wait_for_async_insert": False},
+        )
