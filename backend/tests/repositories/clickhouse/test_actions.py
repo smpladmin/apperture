@@ -199,21 +199,22 @@ class TestActionsRepository:
         self.repo.get_minimum_timestamp_of_events = MagicMock(
             return_value=[(self.min_timestamp,)]
         )
-        assert self.repo.compute_migration_start_and_end_time(
-            action=self.action, start_time=self.start_time, end_time=self.end_time
-        ) == (
+        assert self.repo.compute_migration_start_and_end_time(action=self.action) == (
             datetime(2023, 1, 4, 11, 28, 38),
             datetime(2023, 1, 5, 11, 28, 38),
         )
 
-    def test_compute_migration_start_and_end_time_with_time_difference_less_than_six_hours(
+    def test_compute_migration_start_and_end_time_with_time_difference_less_than_24_hours(
         self,
     ):
         assert self.repo.compute_migration_start_and_end_time(
-            action=self.action_with_processed_till,
-            start_time=self.past_six_hours_datetime,
-            end_time=self.end_time,
-        ) == (self.past_six_hours_datetime, self.end_time)
+            action=self.action_with_processed_till
+        ) == (
+            self.past_six_hours_datetime,
+            datetime.strptime(
+                datetime.now().strftime(self.date_format), self.date_format
+            ),
+        )
 
     @pytest.mark.asyncio
     async def test_build_matching_events_from_clickstream_query(self):

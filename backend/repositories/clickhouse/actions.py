@@ -186,34 +186,30 @@ class Actions(EventsBase):
         params["ds_id"] = datasource_id
         return self.execute_get_query(query=query.get_sql(), parameters=params)
 
-    def compute_migration_start_and_end_time(
-        self, action: Action, start_time: datetime, end_time: datetime
-    ):
+    def compute_migration_start_and_end_time(self, action: Action):
+        date_format = "%Y-%m-%d %H:%M:%S"
+        start_time, end_time = action.processed_till, datetime.strptime(
+            datetime.now().strftime(date_format), date_format
+        )
+
         if not action.processed_till:
-            start_time = self.get_minimum_timestamp_of_events(
+            [(start_time,),] = self.get_minimum_timestamp_of_events(
                 datasource_id=str(action.datasource_id)
-            )[0][0]
+            )
 
         event_migration_interval = int(os.getenv("EVENT_MIGRATION_INTERVAL", 24))
 
         current_datetime = datetime.now()
-        date_format = "%Y-%m-%d %H:%M:%S"
         given_timestamp = datetime.strptime(str(start_time), date_format)
 
         time_delta = current_datetime - given_timestamp
-
         if time_delta.total_seconds() / 3600 > event_migration_interval:
             end_time = start_time + timedelta(hours=event_migration_interval)
 
         return start_time, end_time
 
     async def build_update_events_from_clickstream_query(self, action: Action):
-        conditions, params, start_time, end_time = (
-            [],
-            {},
-            action.processed_till,
-            datetime.now(),
-        )
+        conditions, params = [], {}
         for index, group in enumerate(action.groups):
             group_condition, group_params = self.filter_click_event(
                 filter=group, prepend=f"group_{index}_prepend"
@@ -237,9 +233,7 @@ class Actions(EventsBase):
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
         )
 
-        start_time, end_time = self.compute_migration_start_and_end_time(
-            action=action, start_time=start_time, end_time=end_time
-        )
+        start_time, end_time = self.compute_migration_start_and_end_time(action=action)
         query = query.where(
             Criterion.all(
                 [
