@@ -170,9 +170,7 @@ class Actions(EventsBase):
             await update_action_func(action_id=action.id, processed_till=now)
             logging.info(f"{action.name} processed till: {now}")
         except Exception as e:
-            logging.info(
-                f"Failed executing query: {query} for {action.name} with exception {e}"
-            )
+            logging.info(f"Failed executing query for {action.name} with exception {e}")
         return
 
     def get_minimum_timestamp_of_events(self, datasource_id: str):
