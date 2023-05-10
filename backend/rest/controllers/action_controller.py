@@ -45,7 +45,7 @@ async def create_action(
         groups=dto.groups,
     )
     await action_service.add_action(action=action)
-    await action_service.update_events_from_clickstream(datasource_id=dto.datasourceId)
+    await action_service.update_events_for_action(action=action)
     return action
 
 

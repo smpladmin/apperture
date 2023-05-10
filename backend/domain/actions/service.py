@@ -41,7 +41,7 @@ class ActionService:
         )
 
     async def get_action_by_name(self, name: str):
-        return await Action.find(Action.name == name).to_list()
+        return await Action.find(Action.name == name, Action.enabled != False).to_list()
 
     async def add_action(self, action: Action):
         action.updated_at = action.created_at
@@ -67,6 +67,11 @@ class ActionService:
             await self.actions.update_events_from_clickstream(
                 action=action, update_action_func=self.update_action_processed_till
             )
+
+    async def update_events_for_action(self, action: Action):
+        await self.actions.update_events_from_clickstream(
+            action=action, update_action_func=self.update_action_processed_till
+        )
 
     async def get_action(self, id: str) -> Action:
         return await Action.find_one(

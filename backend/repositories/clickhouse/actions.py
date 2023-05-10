@@ -1,6 +1,7 @@
-import datetime
+from datetime import datetime, timedelta
 import logging
 import re
+import os
 from typing import Any, Dict, List, Tuple, Union, cast
 
 from beanie import PydanticObjectId
@@ -164,7 +165,7 @@ class Actions(EventsBase):
 
         try:
             query, params, now = await self.build_update_events_from_clickstream_query(
-                action
+                action=action
             )
             self.execute_get_query(query=query, parameters=params)
             await update_action_func(action_id=action.id, processed_till=now)
@@ -173,9 +174,46 @@ class Actions(EventsBase):
             logging.info(f"Failed executing query for {action.name} with exception {e}")
         return
 
-    async def build_update_events_from_clickstream_query(self, action: Action):
+    def get_minimum_timestamp_of_events(self, datasource_id: str):
+        params = {}
+        query = (
+            ClickHouseQuery.from_(self.click_stream_table)
+            .select(
+                fn.Min(self.click_stream_table.timestamp),
+            )
+            .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
+        )
+        params["ds_id"] = datasource_id
+        return self.execute_get_query(query=query.get_sql(), parameters=params)
 
-        conditions, params = [], {}
+    def compute_migration_start_and_end_time(
+        self, action: Action, start_time: datetime, end_time: datetime
+    ):
+        if not action.processed_till:
+            start_time = self.get_minimum_timestamp_of_events(
+                datasource_id=str(action.datasource_id)
+            )[0][0]
+
+        event_migration_interval = int(os.getenv("EVENT_MIGRATION_INTERVAL", 24))
+
+        current_datetime = datetime.now()
+        date_format = "%Y-%m-%d %H:%M:%S"
+        given_timestamp = datetime.strptime(str(start_time), date_format)
+
+        time_delta = current_datetime - given_timestamp
+
+        if time_delta.total_seconds() / 3600 > event_migration_interval:
+            end_time = start_time + timedelta(hours=event_migration_interval)
+
+        return start_time, end_time
+
+    async def build_update_events_from_clickstream_query(self, action: Action):
+        conditions, params, start_time, end_time = (
+            [],
+            {},
+            action.processed_till,
+            datetime.now(),
+        )
         for index, group in enumerate(action.groups):
             group_condition, group_params = self.filter_click_event(
                 filter=group, prepend=f"group_{index}_prepend"
@@ -198,20 +236,26 @@ class Actions(EventsBase):
             )
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
         )
-        if action.processed_till:
-            query = query.where(
-                self.click_stream_table.timestamp
-                > self.parse_datetime_best_effort(action.processed_till)
-            )
 
-        now = datetime.datetime.now()
+        start_time, end_time = self.compute_migration_start_and_end_time(
+            action=action, start_time=start_time, end_time=end_time
+        )
         query = query.where(
-            self.click_stream_table.timestamp <= self.parse_datetime_best_effort(now)
+            Criterion.all(
+                [
+                    self.click_stream_table.timestamp
+                    > self.parse_datetime_best_effort(start_time),
+                    self.click_stream_table.timestamp
+                    <= self.parse_datetime_best_effort(end_time),
+                ]
+            )
         )
 
-        query = query.where(Criterion.any(conditions))
+        print(query)
+
+        query = query.where(Criterion.all(conditions))
         params["ds_id"] = str(action.datasource_id)
-        return query.get_sql(), params, now
+        return query.get_sql(), params, end_time
 
     async def get_matching_events_from_clickstream(
         self,
