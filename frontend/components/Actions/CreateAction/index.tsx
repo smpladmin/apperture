@@ -245,23 +245,23 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
           </Flex>
         </Box>
         <Box w={'full'} overflow={'auto'} pt={'4'} px={'8'}>
-          {isEmpty ? (
-            <Flex justifyContent={'center'} mt={'50'}>
-              <Image src={emptyAction} alt={'empty-action-image'} />
-            </Flex>
-          ) : (
-            <Flex direction={'column'}>
-              <DateFilter
-                dateFilter={dateFilter}
-                setDateFilter={setDateFilter}
-                isDisabled={readOnly}
-              />
+          <Flex direction={'column'}>
+            <DateFilter
+              dateFilter={dateFilter}
+              setDateFilter={setDateFilter}
+              isDisabled={readOnly}
+            />
+            {isEmpty ? (
+              <Flex justifyContent={'center'} mt={'50'}>
+                <Image src={emptyAction} alt={'empty-action-image'} />
+              </Flex>
+            ) : (
               <ActionTable
                 isLoading={isLoading}
                 tableData={transientActionEvents}
               />
-            </Flex>
-          )}
+            )}
+          </Flex>
         </Box>
       </Flex>
     </Box>
