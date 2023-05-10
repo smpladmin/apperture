@@ -52,7 +52,7 @@ def save_events(events):
 
 def save_precision_events(events):
     """Saves events to Events table."""
-    logging.info(f"Saving {len(events)} events")
+    logging.info(f"Saving {len(events)} precision events to events table")
     cs_events = [
         PrecisionEvent.build(
             datasourceId=event["properties"]["token"],
@@ -63,7 +63,7 @@ def save_precision_events(events):
         )
         for event in events
     ]
-    app.clickhouse.save_events(cs_events)
+    app.clickhouse.save_precision_events(cs_events)
     logging.info("Saved precision events")
 
 
@@ -112,7 +112,7 @@ async def process_kafka_messages() -> None:
             precision_events = [
                 event for event in events if event["event"] not in DEFAULT_EVENTS
             ]
-            if len(save_precision_events):
+            if len(precision_events):
                 logging.info(f"Saving precision events: {precision_events}")
                 save_precision_events(precision_events)
             events = []
