@@ -55,7 +55,10 @@ const StreamDataTable = ({
           cell: (info) => (
             <Text data-testid="timestamp-cell" whiteSpace={'nowrap'}>
               <TableCell>
-                {dayjs.utc(info.getValue()).local().format('D MMM YY, h:mmA')}
+                {dayjs
+                  .utc(info.getValue())
+                  .local()
+                  .format('D MMM YY, h:mm:ss A')}
               </TableCell>
             </Text>
           ),

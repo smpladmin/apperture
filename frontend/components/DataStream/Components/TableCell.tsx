@@ -8,6 +8,9 @@ const TableCell = ({ children, ...rest }: { children: any; rest?: any }) => {
       fontWeight={400}
       fontSize={'xs-14'}
       lineHeight={'xs-22'}
+      width={'auto'}
+      maxWidth={'25'}
+      wordBreak={'break-word'}
     >
       {children}
     </Text>

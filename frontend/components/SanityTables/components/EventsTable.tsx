@@ -28,11 +28,11 @@ const EventsTables = ({ eventData, selectedColumns }: EventsTablesProps) => {
 
   const columns = useMemo(() => {
     const generateColumnHeader = () => {
-      return selectedColumns.map((key: any, index: number) =>
+      return selectedColumns.map((key: any) =>
         columnHelper.accessor(key, {
           header: key,
           cell: (info) =>
-            index === 1
+            key === 'timestamp'
               ? dayjs(info.getValue() as Date).format('D MMM YY, h:mm:ss A')
               : info.getValue(),
         })
