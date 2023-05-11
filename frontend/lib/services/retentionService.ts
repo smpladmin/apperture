@@ -23,49 +23,12 @@ type RetentionRequestBody = {
   segmentFilter?: ExternalSegmentFilter[];
 };
 
-export const getTransientTrendsData = async (
-  dsId: string,
-  startEvent: FunnelStep,
-  goalEvent: FunnelStep,
-  dateFilter: DateFilterObj,
-  granularity: Granularity,
-  interval: number,
-  segmentFilters: ExternalSegmentFilter[] | null
-) => {
-  const retentionRequestBody: RetentionRequestBody = {
-    datasourceId: dsId,
-    startEvent: substituteEmptyStringWithPlaceholder(
-      cloneDeep(startEvent),
-      true
-    ),
-    goalEvent: substituteEmptyStringWithPlaceholder(cloneDeep(goalEvent), true),
-    dateFilter,
-    granularity,
-  };
-
-  if (segmentFilters && isValidSegmentFilter(segmentFilters)) {
-    const updatedSegmentFilters =
-      replacePlaceholderWithEmptyStringInExternalSegmentFilter(
-        cloneDeep(segmentFilters)
-      );
-
-    retentionRequestBody.segmentFilter = updatedSegmentFilters;
-  }
-  const res = await ApperturePost(
-    `/retention/trends/transient?interval=${interval}`,
-    retentionRequestBody
-  );
-  return res.data || [];
-};
-
 export const getTransientRetentionData = async (
   dsId: string,
   startEvent: FunnelStep,
   goalEvent: FunnelStep,
   dateFilter: DateFilterObj,
   granularity: Granularity,
-  page_number: number,
-  page_size: number = 10,
   segmentFilters: ExternalSegmentFilter[] | null
 ) => {
   const retentionRequestBody: RetentionRequestBody = {
@@ -87,11 +50,8 @@ export const getTransientRetentionData = async (
 
     retentionRequestBody.segmentFilter = updatedSegmentFilters;
   }
-  const res = await ApperturePost(
-    `/retention/transient?page_number=${page_number}&page_size=${page_size}`,
-    retentionRequestBody
-  );
-  return res.data || { count: 0, data: [] };
+  const res = await ApperturePost(`/retention/transient`, retentionRequestBody);
+  return res.data || [];
 };
 
 export const getSavedRetentionsForDatasourceId = async (dsId: string) => {

@@ -155,15 +155,13 @@ const CreateMetricAction = ({
       const processedAggregate = replaceEmptyStringPlaceholder(
         cloneDeep(aggregates)
       );
-
-      const definition =
-        metricDefinition && metricDefinition.length
-          ? metricDefinition.replace(/\s*/g, '')
-          : aggregates.map((aggregate) => aggregate.variable).join(',');
+      const formattedMetricDefinition = metricDefinition?.length
+        ? metricDefinition.replace(/\s*/g, '')
+        : aggregates.map((aggregate) => aggregate.variable).join(',');
 
       const result = await computeMetric(
         dsId as string,
-        definition,
+        formattedMetricDefinition,
         processedAggregate,
         breakdown,
         dateFilter,

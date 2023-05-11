@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, ANY, patch
+from unittest.mock import AsyncMock, MagicMock, ANY, patch
 
 from domain.notification.service import NotificationService
 from domain.notification.models import (
@@ -17,6 +17,23 @@ class TestNotificationService:
     def setup_method(self):
 
         self.service = NotificationService()
+        # create a mocked instance of the fetcher class and set its return value
+        self.fetcher_mock = AsyncMock()
+        self.fetcher_mock.fetch_screenshot.return_value = (
+            "http://example.com/screenshot.png",
+            "screenshot.png",
+        )
+
+        # create a mocked instance of the saver class and set its return value
+        self.saver_mock = MagicMock()
+        self.saver_mock.save_screenshot_to_s3.return_value = (
+            "http://example.com/screenshot.png"
+        )
+
+        # create a mocked instance of the service class and set its fetcher and saver attributes
+
+        self.service.fetcher = self.fetcher_mock
+        self.service.saver = self.saver_mock
         self.channel = NotificationChannel.SLACK
         self.slack_url = "https://hooks.slack.com/services/T0MUGH/B052MN3/hot22Qj1"
         self.alerts = [
@@ -26,9 +43,10 @@ class TestNotificationService:
                 variant=NotificationVariant.FUNNEL,
                 value=-16.67,
                 original_value=0.1,
+                reference="639237437483490",
                 threshold_type=NotificationThresholdType.PCT,
                 user_threshold=ThresholdMap(min=12.0, max=18.0),
-                triggered=True,
+                trigger=True,
             ),
             Notification(
                 name="Alert Metric",
@@ -36,9 +54,10 @@ class TestNotificationService:
                 variant=NotificationVariant.METRIC,
                 value=-16.67,
                 original_value=0.1,
+                reference="6777439823920337",
                 threshold_type=NotificationThresholdType.PCT,
                 user_threshold=ThresholdMap(min=1212.0, max=3236.0),
-                triggered=False,
+                trigger=False,
             ),
         ]
 
@@ -49,9 +68,10 @@ class TestNotificationService:
                 variant=NotificationVariant.FUNNEL,
                 value=-16.67,
                 original_value=0.1,
+                reference="639237437483490",
                 threshold_type=None,
                 user_threshold=None,
-                triggered=None,
+                trigger=None,
             ),
             Notification(
                 name="Alert Metric",
@@ -59,9 +79,10 @@ class TestNotificationService:
                 variant=NotificationVariant.METRIC,
                 value=-16.67,
                 original_value=0.1,
+                reference="6777439823920337",
                 threshold_type=None,
                 user_threshold=None,
-                triggered=None,
+                trigger=None,
             ),
         ]
 
@@ -72,9 +93,10 @@ class TestNotificationService:
                 variant=NotificationVariant.FUNNEL,
                 value=-16.67,
                 original_value=0.1,
+                reference="639237437483490",
                 threshold_type=NotificationThresholdType.PCT,
                 user_threshold=ThresholdMap(min=12.0, max=18.0),
-                triggered=True,
+                trigger=True,
             ),
             Notification(
                 name="Alert Metric",
@@ -82,9 +104,10 @@ class TestNotificationService:
                 variant=NotificationVariant.METRIC,
                 value=-16.67,
                 original_value=0.1,
+                reference="6777439823920337",
                 threshold_type=NotificationThresholdType.PCT,
                 user_threshold=ThresholdMap(min=1212.0, max=3236.0),
-                triggered=False,
+                trigger=False,
             ),
             Notification(
                 name="Video Funnel",
@@ -92,9 +115,10 @@ class TestNotificationService:
                 variant=NotificationVariant.FUNNEL,
                 value=-16.67,
                 original_value=0.1,
+                reference="639237437483490",
                 threshold_type=None,
                 user_threshold=None,
-                triggered=None,
+                trigger=None,
             ),
             Notification(
                 name="Alert Metric",
@@ -102,9 +126,10 @@ class TestNotificationService:
                 variant=NotificationVariant.METRIC,
                 value=-16.67,
                 original_value=0.1,
+                reference="6777439823920337",
                 threshold_type=None,
                 user_threshold=None,
-                triggered=None,
+                trigger=None,
             ),
         ]
 
@@ -162,9 +187,10 @@ class TestNotificationService:
                     variant=NotificationVariant.FUNNEL,
                     value=-16.67,
                     original_value=0.1,
+                    reference="639237437483490",
                     threshold_type=NotificationThresholdType.PCT,
                     user_threshold=ThresholdMap(min=12.0, max=18.0),
-                    triggered=True,
+                    trigger=True,
                 ),
                 "reduced by more than 16.67% yesterday",
             ),
@@ -175,9 +201,10 @@ class TestNotificationService:
                     variant=NotificationVariant.METRIC,
                     value=-16.67,
                     original_value=0.1,
+                    reference="6777439823920337",
                     threshold_type=NotificationThresholdType.ABSOLUTE,
                     user_threshold=ThresholdMap(min=-3, max=3),
-                    triggered=False,
+                    trigger=False,
                 ),
                 "dropped below -3.0 yesterday",
             ),
@@ -199,18 +226,39 @@ class TestNotificationService:
             mock_post.assert_called_once_with(
                 "https://hooks.slack.com/services/T0MUGH/B052MN3/hot22Qj1",
                 json={
-                    "attachments": [
+                    "blocks": [
                         {
-                            "color": "#9733EE",
-                            "fields": [
-                                {
-                                    "title": "Here is an update! :zap:",
-                                    "value": '"Video Funnel" funnel was 0.1% yesterday. This was 16.67% lower compared to previous day.'
-                                    '\n"Alert Metric" metric was 0.1 yesterday. This was 16.67% lower compared to previous day.',
-                                    "short": "false",
-                                }
-                            ],
-                        }
+                            "type": "header",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Here is an update :zap:",
+                                "emoji": True,
+                            },
+                        },
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": '"Video Funnel" funnel was 0.1% yesterday. This was 16.67% lower compared to previous day.',
+                            },
+                        },
+                        {
+                            "type": "image",
+                            "image_url": "http://example.com/screenshot.png",
+                            "alt_text": "A beautiful image",
+                        },
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": '"Alert Metric" metric was 0.1 yesterday. This was 16.67% lower compared to previous day.',
+                            },
+                        },
+                        {
+                            "type": "image",
+                            "image_url": "http://example.com/screenshot.png",
+                            "alt_text": "A beautiful image",
+                        },
                     ]
                 },
             )
@@ -228,24 +276,44 @@ class TestNotificationService:
             mock_post.assert_called_once_with(
                 "https://hooks.slack.com/services/T0MUGH/B052MN3/hot22Qj1",
                 json={
-                    "attachments": [
+                    "blocks": [
                         {
-                            "color": "#9733EE",
-                            "fields": [
-                                {
-                                    "title": "Here is your alert! :zap:",
-                                    "value": 'Alert! "Video Funnel" reduced by more than 16.67% yesterday'
-                                    '\nAlert! "Alert Metric" reduced by more than 16.67% yesterday',
-                                    "short": "false",
-                                }
-                            ],
-                        }
+                            "type": "header",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Here is an alert :zap:",
+                                "emoji": True,
+                            },
+                        },
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": 'Alert! "Video Funnel" reduced by more than 16.67% yesterday',
+                            },
+                        },
+                        {
+                            "type": "image",
+                            "image_url": "http://example.com/screenshot.png",
+                            "alt_text": "A beautiful image",
+                        },
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": 'Alert! "Alert Metric" reduced by more than 16.67% yesterday',
+                            },
+                        },
+                        {
+                            "type": "image",
+                            "image_url": "http://example.com/screenshot.png",
+                            "alt_text": "A beautiful image",
+                        },
                     ]
                 },
             )
 
     def test_send_notifications(self):
-
         self.service.send_updates = MagicMock()
         self.service.send_alerts = MagicMock()
 
@@ -263,9 +331,10 @@ class TestNotificationService:
                     variant=NotificationVariant.FUNNEL,
                     value=-16.67,
                     original_value=0.1,
+                    reference="639237437483490",
                     threshold_type=None,
                     user_threshold=None,
-                    triggered=None,
+                    trigger=None,
                 ),
                 Notification(
                     name="Alert Metric",
@@ -273,9 +342,10 @@ class TestNotificationService:
                     variant=NotificationVariant.METRIC,
                     value=-16.67,
                     original_value=0.1,
+                    reference="6777439823920337",
                     threshold_type=None,
                     user_threshold=None,
-                    triggered=None,
+                    trigger=None,
                 ),
             ],
             "https://hooks.slack.com/services/T0MUGH/B052MN3/hot22Qj1",
@@ -289,10 +359,33 @@ class TestNotificationService:
                     variant=NotificationVariant.FUNNEL,
                     value=-16.67,
                     original_value=0.1,
+                    reference="639237437483490",
                     threshold_type=NotificationThresholdType.PCT,
                     user_threshold=ThresholdMap(min=12.0, max=18.0),
-                    triggered=True,
+                    trigger=True,
                 )
             ],
             "https://hooks.slack.com/services/T0MUGH/B052MN3/hot22Qj1",
         )
+
+    def test_build_notification_body_notification(self):
+
+        result = self.service.build_notification_body(self.alerts[0])
+        assert result == (
+            {
+                "text": {
+                    "text": 'Alert! "Video Funnel" reduced by more than 16.67% yesterday',
+                    "type": "mrkdwn",
+                },
+                "type": "section",
+            },
+            {
+                "alt_text": "A beautiful image",
+                "image_url": "http://example.com/screenshot.png",
+                "type": "image",
+            },
+        )
+
+    def test_fetch_screenshot_url(self):
+        url = self.service.fetch_screenshot_url(id="12312312", variant="alert")
+        assert "http://example.com/screenshot.png" == url

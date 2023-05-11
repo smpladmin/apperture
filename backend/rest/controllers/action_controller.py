@@ -45,7 +45,7 @@ async def create_action(
         groups=dto.groups,
     )
     await action_service.add_action(action=action)
-    await action_service.update_events_from_clickstream(datasource_id=dto.datasourceId)
+    await action_service.update_events_for_action(action=action)
     return action
 
 
@@ -100,7 +100,7 @@ async def compute_transient_actions(
     action_service: ActionService = Depends(),
 ):
     return await action_service.compute_action(
-        datasource_id=dto.datasourceId, groups=dto.groups
+        datasource_id=dto.datasourceId, groups=dto.groups, date_filter=dto.dateFilter
     )
 
 

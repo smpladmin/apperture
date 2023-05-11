@@ -30,6 +30,7 @@ const RightView = ({
     <ViewPanel>
       <TransientFunnelView
         isLoading={isLoading}
+        isEmpty={false}
         funnelData={computedFunnel}
         trendsData={computedTrendsData}
         funnelSteps={funnelSteps}

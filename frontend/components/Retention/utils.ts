@@ -1,6 +1,11 @@
 import { ExternalSegmentFilter, WhereFilter } from '@lib/domain/common';
 import { FunnelStep } from '@lib/domain/funnel';
-import { RetentionEvents } from '@lib/domain/retention';
+import {
+  IntervalData,
+  RetentionData,
+  RetentionEvents,
+  RetentionTrendsData,
+} from '@lib/domain/retention';
 import { isEveryCustomSegmentFilterValid } from '@lib/utils/common';
 
 const _hasValidFilterValues = (filters: WhereFilter[]) => {
@@ -45,4 +50,45 @@ export const hasValidRetentionEventAndFilters = (
       segmentFilters[0].custom.filters as WhereFilter[]
     )
   );
+};
+
+export const convertToTrendsData = (
+  retentionData: RetentionData[],
+  interval: number
+): RetentionTrendsData[] => {
+  return retentionData
+    .filter((obj) => obj.interval === interval)
+    .map(
+      ({ interval, intervalName, initialUsers, ...retentionTrend }) =>
+        retentionTrend
+    );
+};
+
+export const convertToIntervalData = (
+  retentionData: RetentionData[],
+  pageNumber: number,
+  pageSize: number
+): IntervalData => {
+  const intervalCount =
+    retentionData[retentionData.length - 1]?.interval + 1 || 0;
+  const intervalData = [];
+  for (
+    let i = pageNumber * pageSize;
+    i < Math.min((pageNumber + 1) * pageSize, intervalCount);
+    i++
+  ) {
+    const intervalTrendData = retentionData.filter((obj) => obj.interval === i);
+    const initialUsers = intervalTrendData.reduce((totalUsers, item) => {
+      return totalUsers + item.initialUsers;
+    }, 0);
+    const retainedUsers = intervalTrendData.reduce((totalUsers, item) => {
+      return totalUsers + item.retainedUsers;
+    }, 0);
+    intervalData.push({
+      name: intervalTrendData[0].intervalName,
+      value: parseFloat(((retainedUsers / initialUsers) * 100).toFixed(2)),
+    });
+  }
+
+  return { count: intervalCount, data: intervalData };
 };

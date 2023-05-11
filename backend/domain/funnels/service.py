@@ -294,6 +294,7 @@ class FunnelsService:
             prev_day_value=await self.get_notification_data(
                 notification=notification, days_ago=2
             ),
+            reference=notification.reference,
             threshold_type=NotificationThresholdType.PCT
             if notification.pct_threshold_active
             else NotificationThresholdType.ABSOLUTE,

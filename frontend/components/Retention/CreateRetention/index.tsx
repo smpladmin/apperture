@@ -9,7 +9,6 @@ import { CreateRetentionAction } from './CreateRetentionAction';
 import {
   Granularity,
   RetentionEvents,
-  RetentionTrendsData,
   RetentionData,
   TrendScale,
   Retention,
@@ -22,7 +21,6 @@ import {
 } from '@lib/domain/common';
 import {
   getTransientRetentionData,
-  getTransientTrendsData,
   saveRetention,
   updateRetention,
 } from '@lib/services/retentionService';
@@ -64,7 +62,7 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   );
 
   const [dateFilter, setDateFilter] = useState<DateFilterObj>({
-    filter: savedRetention?.dateFilter?.filter || { days: 90 },
+    filter: savedRetention?.dateFilter?.filter || { days: 30 },
     type: savedRetention?.dateFilter?.type || DateFilterType.LAST,
   });
 
@@ -75,6 +73,8 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   const [trendScale, setTrendScale] = useState<TrendScale>(
     TrendScale.PERCENTAGE
   );
+  const [pageNumber, setPageNumber] = useState(0);
+  const [interval, setInterval] = useState(0);
 
   const [loadingEventsAndProperties, setLoadingEventsAndProperties] =
     useState(false);
@@ -82,16 +82,8 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
   const [eventProperties, setEventProperties] = useState<string[]>([]);
   const [isTrendsDataLoading, setIsTrendsDataLoading] = useState(true);
   const [isIntervalDataLoading, setIsIntervalDataLoading] = useState(true);
-  const [trendsData, setTrendsData] = useState<RetentionTrendsData[]>([]);
-  const [retentionData, setRetentionData] = useState<RetentionData>({
-    count: 0,
-    data: [],
-  });
-  const [pageNumber, setPageNumber] = useState(0);
-  const [interval, setInterval] = useState(0);
+  const [retentionData, setRetentionData] = useState<RetentionData[]>([]);
   const [isEmpty, setIsEmpty] = useState(savedRetention ? false : true);
-  const [trigger, setTrigger] = useState(false);
-  const pageSize = 10;
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
   const [isRetentionBeingEdited, setRetentionBeingEdited] = useState(false);
 
@@ -146,43 +138,6 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
     if (!hasValidRetentionEventAndFilters(retentionEvents, segmentFilters)) {
       return;
     }
-    setInterval(0);
-    setPageNumber(0);
-    setTrigger((prevState: Boolean) => !prevState);
-  }, [retentionEvents, granularity, dateFilter, segmentFilters]);
-
-  useEffect(() => {
-    if (!hasValidRetentionEventAndFilters(retentionEvents, segmentFilters)) {
-      return;
-    }
-
-    const getTrendsData = async () => {
-      const trendsData = await getTransientTrendsData(
-        datasourceId!!,
-        retentionEvents.startEvent,
-        retentionEvents.goalEvent,
-        dateFilter,
-        granularity,
-        interval,
-        segmentFilters
-      );
-      setTrendsData(trendsData);
-      setIsTrendsDataLoading(false);
-    };
-
-    setIsTrendsDataLoading(true);
-    getTrendsData();
-  }, [interval, trigger]);
-
-  useEffect(() => {
-    if (router.pathname.includes('edit')) setRetentionBeingEdited(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hasValidRetentionEventAndFilters(retentionEvents, segmentFilters)) {
-      return;
-    }
-
     const getTransientData = async () => {
       const retentionData = await getTransientRetentionData(
         datasourceId!!,
@@ -190,17 +145,23 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
         retentionEvents.goalEvent,
         dateFilter,
         granularity,
-        pageNumber,
-        pageSize,
         segmentFilters
       );
       setRetentionData(retentionData);
       setIsIntervalDataLoading(false);
+      setIsTrendsDataLoading(false);
+      setPageNumber(0);
+      setInterval(0);
     };
 
+    setIsTrendsDataLoading(true);
     setIsIntervalDataLoading(true);
     getTransientData();
-  }, [pageNumber, trigger]);
+  }, [retentionEvents, granularity, dateFilter, segmentFilters]);
+
+  useEffect(() => {
+    if (router.pathname.includes('edit')) setRetentionBeingEdited(true);
+  }, []);
 
   const handleSaveOrUpdateRetention = async () => {
     const { data, status } = isRetentionBeingEdited
@@ -288,12 +249,11 @@ const Retention = ({ savedRetention }: { savedRetention?: Retention }) => {
             setTrendScale={setTrendScale}
             isIntervalDataLoading={isIntervalDataLoading}
             isTrendsDataLoading={isTrendsDataLoading}
-            interval={interval}
-            setInterval={setInterval}
             retentionData={retentionData}
+            pageNumber={pageNumber}
+            interval={interval}
             setPageNumber={setPageNumber}
-            pageSize={pageSize}
-            trendsData={trendsData}
+            setInterval={setInterval}
           />
         </ViewPanel>
       </Flex>
