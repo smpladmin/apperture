@@ -51,8 +51,18 @@ class ClickStream(NamedTuple):
             userId=user_id,
             element_chain=element_chain,
             event=event,
-            properties=properties,
+            properties=ClickStream.sanitize_properties(properties),
         )
+
+    @staticmethod
+    def sanitize_properties(properties: Dict):
+        if type(properties.get("$elements")) == list:
+            for element in properties["$elements"]:
+                if type(element.get("attr__state")) == str:
+                    element["attr__state"] = element["attr__state"].replace(
+                        "[object Object]", "object Object"
+                    )
+        return properties
 
     @staticmethod
     def build_element_chain(properties_elements):

@@ -10,6 +10,7 @@ import { ConversionStatus, FunnelStep } from '@lib/domain/funnel';
 import { replaceEmptyStringPlaceholder } from '@components/Funnel/util';
 import cloneDeep from 'lodash/cloneDeep';
 import { DateFilterObj } from '@lib/domain/common';
+import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
 
 export const saveFunnel = async (
   dsId: string,
@@ -64,16 +65,21 @@ export const getTransientFunnelData = async (
   steps: FunnelStep[],
   dateFilter: DateFilterObj,
   conversionWindow: ConversionWindowObj,
-  randomSequence: boolean
+  randomSequence: boolean,
+  signal?: AbortSignal
 ) => {
-  const res = await ApperturePost('/funnels/transient', {
-    datasourceId: dsId,
-    steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
-    dateFilter,
-    conversionWindow,
-    randomSequence,
-  });
-  return res.data || [];
+  const res = await ApperturePost(
+    '/funnels/transient',
+    {
+      datasourceId: dsId,
+      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+      dateFilter,
+      conversionWindow,
+      randomSequence,
+    },
+    { signal }
+  );
+  return res;
 };
 
 export const getTransientTrendsData = async (
@@ -81,16 +87,21 @@ export const getTransientTrendsData = async (
   steps: FunnelStep[],
   dateFilter: DateFilterObj,
   conversionWindow: ConversionWindowObj,
-  randomSequence: boolean
+  randomSequence: boolean,
+  signal?: AbortSignal
 ) => {
-  const res = await ApperturePost('/funnels/trends/transient', {
-    datasourceId: dsId,
-    steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
-    dateFilter,
-    conversionWindow,
-    randomSequence,
-  });
-  return res.data || [];
+  const res = await ApperturePost(
+    '/funnels/trends/transient',
+    {
+      datasourceId: dsId,
+      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+      dateFilter,
+      conversionWindow,
+      randomSequence,
+    },
+    { signal }
+  );
+  return res;
 };
 
 export const getSavedFunnelsForDatasourceId = async (dsId: string) => {
@@ -134,4 +145,38 @@ export const getUserProperty = async (
 
 export const deleteFunnel = async (id: string, dsId: string) => {
   return await AppertureDelete(`/funnels/${id}?datasource_id=${dsId}`);
+};
+
+export const _getSavedFunnelPrivate = async (
+  apiKey: string,
+  funnelId: string
+) => {
+  const res = await ApperturePrivateAPI.get(`/private/funnels/${funnelId}`, {
+    headers: { 'apperture-api-key': apiKey },
+  });
+  return res.data;
+};
+
+export const _getTransientTrendsDataPrivate = async (
+  apiKey: string,
+  dsId: string,
+  steps: FunnelStep[],
+  dateFilter: DateFilterObj | null,
+  conversionWindow: ConversionWindowObj | null,
+  randomSequence: boolean
+) => {
+  const res = await ApperturePrivateAPI.post(
+    `/private/funnels/trends/transient`,
+    {
+      datasourceId: dsId,
+      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+      dateFilter,
+      conversionWindow,
+      randomSequence,
+    },
+    {
+      headers: { 'apperture-api-key': apiKey },
+    }
+  );
+  return res.data || [];
 };

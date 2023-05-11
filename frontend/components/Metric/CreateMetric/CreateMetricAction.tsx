@@ -20,7 +20,6 @@ import {
   MetricVariant,
   ComputedMetric,
   MetricBasicAggregation,
-  MetricSegmentFilter,
 } from '@lib/domain/metric';
 import { cloneDeep, debounce, isEqual } from 'lodash';
 import { Node } from '@lib/domain/node';
@@ -30,7 +29,11 @@ import {
   isValidAggregates,
   replaceEmptyStringPlaceholder,
 } from '@components/Metric/util';
-import { DateFilterObj, WhereFilter } from '@lib/domain/common';
+import {
+  DateFilterObj,
+  ExternalSegmentFilter,
+  WhereFilter,
+} from '@lib/domain/common';
 import Card from '@components/Card';
 import { Function, Plus } from 'phosphor-react';
 import AddBreakdown from '../components/AddBreakdown';
@@ -55,7 +58,7 @@ type CreateMetricActionProps = {
   dateFilter: DateFilterObj;
   metricDefinition: string;
   setMetricDefinition: Function;
-  segmentFilters: MetricSegmentFilter[];
+  segmentFilters: ExternalSegmentFilter[];
   updateSegmentFilter: Function;
 };
 
@@ -152,24 +155,24 @@ const CreateMetricAction = ({
       const processedAggregate = replaceEmptyStringPlaceholder(
         cloneDeep(aggregates)
       );
+      const formattedMetricDefinition = metricDefinition?.length
+        ? metricDefinition.replace(/\s*/g, '')
+        : aggregates.map((aggregate) => aggregate.variable).join(',');
 
-      const definition =
-        metricDefinition && metricDefinition.length
-          ? metricDefinition.replace(/\s*/g, '')
-          : aggregates.map((aggregate) => aggregate.variable).join(',');
-
-      const result: ComputedMetric[] = await computeMetric(
+      const result = await computeMetric(
         dsId as string,
-        definition,
+        formattedMetricDefinition,
         processedAggregate,
         breakdown,
         dateFilter,
         segmentFilters,
         signal
       );
-
-      setMetric(result);
-      setIsLoading(false);
+      // status would be undefined if the call is cancelled
+      if (result?.status) {
+        setMetric(result?.data);
+        setIsLoading(false);
+      }
     };
     setIsLoading(true);
     fetchMetric(aggregates);
@@ -196,7 +199,6 @@ const CreateMetricAction = ({
 
   useEffect(() => {
     // enable save metric button when aggregate, metric name or definition changes
-
     const currentMetricState = {
       name: metricName,
       function: metricDefinition,

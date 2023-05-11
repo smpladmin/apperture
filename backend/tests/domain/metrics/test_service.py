@@ -550,6 +550,7 @@ class TestMetricService:
                 variant=NotificationVariant.METRIC,
                 value=0.2,
                 prev_day_value=0.2,
+                reference="63dcfe6a21a93919c672d5bb",
                 threshold_type="absolute",
                 threshold_value=ThresholdMap(min=1212.0, max=3236.0),
             )

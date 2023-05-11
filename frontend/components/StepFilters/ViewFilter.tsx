@@ -1,11 +1,10 @@
 import { Flex, Text } from '@chakra-ui/react';
 import { WhereFilter } from '@lib/domain/common';
-import { WhereSegmentFilter } from '@lib/domain/segment';
 import { getFilterValuesText } from '@lib/utils/common';
 import React from 'react';
 
 type ViewFilterProps = {
-  filter: WhereFilter | WhereSegmentFilter;
+  filter: WhereFilter;
 };
 
 const ViewFilter = ({ filter }: ViewFilterProps) => {

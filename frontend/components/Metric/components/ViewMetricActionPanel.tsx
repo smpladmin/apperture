@@ -1,13 +1,14 @@
 import { Box, Divider, Flex, Text } from '@chakra-ui/react';
 import MetricViewComponentCard from './MetricViewComponentCard';
-import { MetricAggregate, MetricSegmentFilter } from '@lib/domain/metric';
+import { MetricAggregate } from '@lib/domain/metric';
 import Card from '@components/Card';
 import { Function, UsersFour } from 'phosphor-react';
 import { Fragment } from 'react';
 import ViewFilter from '@components/StepFilters/ViewFilter';
-import { WhereSegmentFilter } from '@lib/domain/segment';
 import { getSelectedSegmentsText } from '../util';
 import { GREY_600 } from '@theme/index';
+import { WhereFilter } from '@lib/domain/common';
+import { ExternalSegmentFilter } from '@lib/domain/common';
 
 const ViewMetricActionPanel = ({
   metricDefinition,
@@ -18,7 +19,7 @@ const ViewMetricActionPanel = ({
   metricDefinition: string;
   aggregates: MetricAggregate[];
   breakdown: string[];
-  segmentFilters: MetricSegmentFilter[] | null;
+  segmentFilters: ExternalSegmentFilter[] | null;
 }) => {
   return (
     <Card>
@@ -92,7 +93,7 @@ const ViewMetricActionPanel = ({
         {segmentFilters &&
           segmentFilters.map((segmentFilter, i) => {
             const customSegmentFilters = segmentFilter.custom
-              .filters as WhereSegmentFilter[];
+              .filters as WhereFilter[];
             return (
               <Flex direction={'column'} gap={'3'} key={i}>
                 <Text

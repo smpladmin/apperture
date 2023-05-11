@@ -1,5 +1,6 @@
 import logging
 import clickhouse_connect
+from clickhouse_connect.driver.exceptions import DatabaseError
 
 # ClickHouse configuration.
 CLICKHOUSE_HOST = "clickhouse"
@@ -21,9 +22,19 @@ class ClickHouse:
 
     def save_events(self, events) -> None:
         """Saves events to ClickHouse."""
+        try:
+            self._save(events)
+        except DatabaseError as e:
+            logging.error(f"Error saving events to ClickHouse: {e}")
+            logging.info("Trying to save sequentially")
+            for event in events:
+                self._save([event])
+            logging.info("Saved sequentially")
+
+    def _save(self, events) -> None:
         self.client.insert(
-            "clickstream",
-            events,
+            table="clickstream",
+            data=events,
             column_names=[
                 "datasource_id",
                 "timestamp",

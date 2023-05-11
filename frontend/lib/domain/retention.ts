@@ -1,4 +1,6 @@
+import { AppertureUser as User } from './user';
 import { FunnelStep } from '@lib/domain/funnel';
+import { DateFilterObj, ExternalSegmentFilter } from './common';
 
 export type RetentionEvents = {
   startEvent: FunnelStep;
@@ -16,18 +18,44 @@ export enum TrendScale {
   PERCENTAGE = 'percentage',
 }
 
+export type IntervalTabData = {
+  name: string;
+  value: number;
+};
+
+export type IntervalData = {
+  count: number;
+  data: IntervalTabData[];
+};
+
+export type RetentionData = {
+  granularity: Date;
+  interval: number;
+  intervalName: string;
+  initialUsers: number;
+  retainedUsers: number;
+  retentionRate: number;
+};
+
 export type RetentionTrendsData = {
   granularity: Date;
   retentionRate: number;
   retainedUsers: number;
 };
 
-export type IntervalTabData = {
+export type Retention = {
+  _id: string;
+  datasourceId: string;
+  appId: string;
   name: string;
-  value: number;
+  updatedAt: Date;
+  startEvent: FunnelStep;
+  goalEvent: FunnelStep;
+  dateFilter: DateFilterObj;
+  segmentFilter?: ExternalSegmentFilter[];
+  granularity: Granularity;
 };
 
-export type RetentionData = {
-  count: number;
-  data: IntervalTabData[];
+export type RetentionWithUser = Retention & {
+  user: User;
 };

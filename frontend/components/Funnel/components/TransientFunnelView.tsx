@@ -15,9 +15,11 @@ import DateFilterComponent from '@components/Date/DateFilter';
 import { DateFilterObj } from '@lib/domain/common';
 import Card from '@components/Card';
 import { ArrowRight } from 'phosphor-react';
+import FunnelEmptyState from './FunnelEmptyState';
 
 type TransientFunnelViewProps = {
   isLoading: boolean;
+  isEmpty: boolean;
   funnelData: FunnelData[];
   trendsData: FunnelTrendsData[];
   funnelSteps: FunnelStep[];
@@ -30,6 +32,7 @@ type TransientFunnelViewProps = {
 
 const TransientFunnelView = ({
   isLoading,
+  isEmpty,
   funnelData,
   trendsData,
   funnelSteps,
@@ -73,7 +76,11 @@ const TransientFunnelView = ({
         isDisabled={isDateFilterDisabled}
       />
 
-      {isLoading ? (
+      {isEmpty ? (
+        <Card minHeight={'120'} borderRadius={'16'}>
+          <FunnelEmptyState />
+        </Card>
+      ) : isLoading ? (
         <Flex justifyContent={'center'} alignItems={'center'} h={'full'}>
           <Loader />
         </Flex>

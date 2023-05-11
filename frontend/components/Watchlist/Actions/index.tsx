@@ -42,7 +42,7 @@ const SavedActions = ({ provider }: { provider: Provider }) => {
   const onRowClick = (row: Row<SavedItems>) => {
     const { _id, datasourceId } = row?.original?.details;
     router.push({
-      pathname: `/analytics/action/edit/[id]`,
+      pathname: `/analytics/action/view/[id]`,
       query: { id: _id, dsId: datasourceId },
     });
   };
