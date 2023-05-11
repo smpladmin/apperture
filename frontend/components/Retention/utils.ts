@@ -1,3 +1,4 @@
+import { cloneDeep } from 'lodash';
 import { ExternalSegmentFilter, WhereFilter } from '@lib/domain/common';
 import { FunnelStep } from '@lib/domain/funnel';
 import {
@@ -92,4 +93,44 @@ export const convertToIntervalData = (
   }
 
   return { count: intervalCount, data: intervalData };
+};
+
+export const convertToCohortData = (retentionData: RetentionData[]): any[] => {
+  const retentionDataClone = cloneDeep(retentionData);
+  retentionDataClone.sort(
+    (a, b) =>
+      new Date(a.granularity).valueOf() - new Date(b.granularity).valueOf()
+  );
+
+  const cohortData = [];
+  const indices: number[] = [];
+
+  // indices
+  retentionDataClone.forEach((td, index) => {
+    if (td.interval === 0) indices.push(index);
+  });
+
+  // slice and make object
+  for (let i = 0; i < indices.length; i++) {
+    let chunk: RetentionData[];
+    if (i == indices.length - 1) {
+      chunk = [retentionDataClone[indices[i]]];
+    } else {
+      chunk = retentionDataClone.slice(indices[i], indices[i + 1]);
+    }
+
+    const rowData: any = {
+      cohort: chunk[0].granularity,
+      size: chunk[0].initialUsers,
+    };
+
+    const intervals: any = {};
+    chunk.forEach((ch) => {
+      intervals[ch.intervalName] = ch.retentionRate;
+    });
+
+    rowData.intervals = intervals;
+    cohortData.push(rowData);
+  }
+  return cohortData;
 };

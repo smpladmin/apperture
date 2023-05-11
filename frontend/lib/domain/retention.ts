@@ -59,3 +59,9 @@ export type Retention = {
 export type RetentionWithUser = Retention & {
   user: User;
 };
+
+export type RetentionCohortData = {
+  granularity: string;
+  initialUsers: string;
+  [key: string]: string;
+};

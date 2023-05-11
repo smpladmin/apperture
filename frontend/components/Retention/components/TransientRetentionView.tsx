@@ -8,12 +8,14 @@ import { BLACK_DEFAULT, GREY_500 } from '@theme/index';
 import { Hash, Percent } from 'phosphor-react';
 import { useMemo } from 'react';
 import {
+  convertToCohortData,
   convertToIntervalData,
   convertToTrendsData,
 } from '@components/Retention/utils';
 import IntervalTab from './IntervalTab';
 import RetentionEmptyState from './RetentionEmptyState';
 import RetentionTrend from './RetentionTrend';
+import { RetentionCohort } from './RetentionCohort';
 
 type TransientRetentionViewProps = {
   isEmpty: boolean;
@@ -54,6 +56,12 @@ const TransientRetentionView = ({
   const intervalData = useMemo(() => {
     return convertToIntervalData(retentionData, pageNumber, pageSize);
   }, [pageNumber, retentionData]);
+
+  const cohortData = useMemo(() => {
+    return convertToCohortData(retentionData);
+  }, [retentionData]);
+
+  console.log('cohort data', cohortData);
 
   return (
     <Flex direction={'column'} gap={'5'}>
@@ -135,9 +143,7 @@ const TransientRetentionView = ({
                 justifyContent={'center'}
                 borderBottom={'1px'}
                 borderColor={'grey.400'}
-              >
-                <LoadingSpinner />
-              </Flex>
+              ></Flex>
             ) : (
               <>
                 {intervalData.count ? (
@@ -164,6 +170,27 @@ const TransientRetentionView = ({
               <RetentionTrend data={trendsData} trendScale={trendScale} />
             )}
           </Flex>
+        </Card>
+      )}
+      {isEmpty || !retentionData.length ? (
+        <></>
+      ) : (
+        <Card minHeight={'120'} borderRadius={'16'}>
+          {isTrendsDataLoading ? (
+            <Flex
+              h={'110'}
+              w={'full'}
+              alignItems={'center'}
+              justifyContent={'center'}
+            >
+              <LoadingSpinner />
+            </Flex>
+          ) : (
+            <RetentionCohort
+              isLoading={isTrendsDataLoading}
+              tableData={cohortData}
+            />
+          )}
         </Card>
       )}
     </Flex>
