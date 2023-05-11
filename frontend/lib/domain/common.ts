@@ -91,6 +91,16 @@ export enum GroupConditions {
   OR = 'or',
 }
 
+export const FilterOperatorsDatatypeMap = {
+  [FilterDataType.BOOL]: Object.values(FilterOperatorsBool),
+  [FilterDataType.NUMBER]: Object.values(FilterOperatorsNumber),
+  [FilterDataType.STRING]: Object.values(FilterOperatorsString),
+};
+
+export const ISFilterOperators = [
+  FilterOperatorsString.IS,
+  FilterOperatorsString.IS_NOT,
+];
 export type ExternalSegmentFilter = {
   condition: GroupConditions.OR;
   includes: boolean;

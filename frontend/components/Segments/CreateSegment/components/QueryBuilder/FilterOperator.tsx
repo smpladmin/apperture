@@ -1,19 +1,17 @@
 import { Box, Text, Flex } from '@chakra-ui/react';
-import {
-  SegmentFilter,
-  SegmentFilterDataType,
-  FilterType,
-  WhereSegmentFilter,
-  SegmentFilterOperators,
-  SegmentFilterOperatorsString,
-} from '@lib/domain/segment';
+import { SegmentFilter, FilterType } from '@lib/domain/segment';
 import React, { useState, useRef } from 'react';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { capitalizeFirstLetter } from '@lib/utils/common';
+
 import {
+  FilterDataType,
+  FilterOperators,
   FilterOperatorsDatatypeMap,
+  FilterOperatorsString,
   ISFilterOperators,
-} from '@components/Segments/util';
+  WhereFilter,
+} from '@lib/domain/common';
 
 type FilterOperatorProps = {
   filter: SegmentFilter;
@@ -33,15 +31,15 @@ const FilterOperator = ({
 
   const filterOperatorsValues =
     filter.type === FilterType.WHO
-      ? FilterOperatorsDatatypeMap[SegmentFilterDataType.NUMBER]
-      : FilterOperatorsDatatypeMap[(filter as WhereSegmentFilter).datatype];
+      ? FilterOperatorsDatatypeMap[FilterDataType.NUMBER]
+      : FilterOperatorsDatatypeMap[(filter as WhereFilter).datatype];
 
   const filterOperatorsRef = useRef(null);
   useOnClickOutside(filterOperatorsRef, () =>
     setIsFilterOperatorsListOpen(false)
   );
 
-  const handleSwitchFilterOperators = (value: SegmentFilterOperators) => {
+  const handleSwitchFilterOperators = (value: FilterOperators) => {
     setIsFilterOperatorsListOpen(false);
     const newFilters = [...filters];
     /*
@@ -49,11 +47,10 @@ const FilterOperator = ({
     the input field changes from a Selectable Dropdown to an Input Field,
     hence the selected value needs a reset.
     */
-    if (filter.datatype === SegmentFilterDataType.STRING) {
+    if (filter.datatype === FilterDataType.STRING) {
       const isMatchingFilter =
-        ISFilterOperators.includes(
-          filter.operator as SegmentFilterOperatorsString
-        ) === ISFilterOperators.includes(value as SegmentFilterOperatorsString);
+        ISFilterOperators.includes(filter.operator as FilterOperatorsString) ===
+        ISFilterOperators.includes(value as FilterOperatorsString);
 
       if (!isMatchingFilter) {
         newFilters[index].values = [];

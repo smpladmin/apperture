@@ -1,16 +1,18 @@
 import { Box, Button } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { getWhereAndWhoFilters } from '@components/Segments/util';
-import { DateFilterType } from '@lib/domain/common';
+import {
+  DateFilterType,
+  FilterConditions,
+  FilterDataType,
+  FilterOperatorsNumber,
+  FilterOperatorsString,
+} from '@lib/domain/common';
 import {
   FilterItemType,
   FilterType,
   SegmentFilter,
-  SegmentFilterConditions,
-  SegmentFilterOperatorsNumber,
-  SegmentFilterOperatorsString,
   SegmentProperty,
-  SegmentFilterDataType,
 } from '@lib/domain/segment';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import React, { useCallback, useRef, useState } from 'react';
@@ -35,12 +37,12 @@ const AddFilter = ({
 
   const getWhereFilterCondition = useCallback(
     (whereFilters: SegmentFilter[]) => {
-      if (!whereFilters.length) return SegmentFilterConditions.WHERE;
+      if (!whereFilters.length) return FilterConditions.WHERE;
 
       const lastWhereCondition =
         whereFilters[whereFilters.length - 1]?.condition;
-      if (lastWhereCondition === SegmentFilterConditions.WHERE)
-        return SegmentFilterConditions.AND;
+      if (lastWhereCondition === FilterConditions.WHERE)
+        return FilterConditions.AND;
 
       return lastWhereCondition;
     },
@@ -49,11 +51,11 @@ const AddFilter = ({
 
   const getWhoFilterCondition = useCallback(
     (whoFilters: SegmentFilter[]) => {
-      if (!whoFilters.length) return SegmentFilterConditions.WHO;
+      if (!whoFilters.length) return FilterConditions.WHO;
 
       const lastWhoCondition = whoFilters[whoFilters.length - 1]?.condition;
-      if (lastWhoCondition === SegmentFilterConditions.WHO)
-        return SegmentFilterConditions.AND;
+      if (lastWhoCondition === FilterConditions.WHO)
+        return FilterConditions.AND;
 
       return lastWhoCondition;
     },
@@ -69,11 +71,11 @@ const AddFilter = ({
       whereFilters.push({
         condition: getWhereFilterCondition(whereFilters),
         operand: item.id,
-        operator: SegmentFilterOperatorsString.IS,
+        operator: FilterOperatorsString.IS,
         values: [],
         all: false,
         type: FilterType.WHERE,
-        datatype: SegmentFilterDataType.STRING,
+        datatype: FilterDataType.STRING,
       });
     } else {
       whoFilters.push({
@@ -81,14 +83,14 @@ const AddFilter = ({
         triggered: true,
         operand: item.id,
         aggregation: 'total',
-        operator: SegmentFilterOperatorsNumber.EQ,
+        operator: FilterOperatorsNumber.EQ,
         values: ['1'],
         date_filter: {
           days: 30,
         },
         date_filter_type: DateFilterType.LAST,
         type: FilterType.WHO,
-        datatype: SegmentFilterDataType.NUMBER,
+        datatype: FilterDataType.NUMBER,
       });
     }
     return [...whereFilters, ...whoFilters];

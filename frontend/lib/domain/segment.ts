@@ -1,35 +1,28 @@
-import { DateFilter, DateFilterType, GroupConditions } from './common';
+import {
+  DateFilter,
+  DateFilterType,
+  FilterConditions,
+  FilterDataType,
+  FilterOperatorsNumber,
+  GroupConditions,
+  WhereFilter,
+} from './common';
 import { AppertureUser } from './user';
 
-export type WhereSegmentFilter = {
-  condition: SegmentFilterConditions;
-  operand: string;
-  operator: SegmentFilterOperators;
-  values: string[];
-  all: boolean;
-  type: FilterType;
-  datatype: SegmentFilterDataType;
-};
-
 export type WhoSegmentFilter = {
-  condition: SegmentFilterConditions;
+  condition: FilterConditions;
   triggered: boolean;
   operand: string;
   aggregation: string;
-  operator: SegmentFilterOperatorsNumber;
+  operator: FilterOperatorsNumber;
   values: string[];
   date_filter: DateFilter;
   date_filter_type: DateFilterType;
   type: FilterType;
-  datatype: SegmentFilterDataType;
+  datatype: FilterDataType;
 };
 
-export type SegmentFilter = WhereSegmentFilter | WhoSegmentFilter;
-
-export type SegmentFilterOperators =
-  | SegmentFilterOperatorsBool
-  | SegmentFilterOperatorsNumber
-  | SegmentFilterOperatorsString;
+export type SegmentFilter = WhereFilter | WhoSegmentFilter;
 
 export enum FilterType {
   WHERE = 'where',
@@ -44,13 +37,6 @@ export type SegmentProperty = {
 export enum FilterItemType {
   PROPERTY = 'property',
   EVENT = 'event',
-}
-
-export enum SegmentFilterConditions {
-  WHERE = 'where',
-  AND = 'and',
-  OR = 'or',
-  WHO = 'who',
 }
 
 export type SegmentGroup = {
@@ -80,35 +66,8 @@ export type SegmentWithUser = Segment & {
   user: AppertureUser;
 };
 
-export enum SegmentFilterDataType {
-  STRING = 'String',
-  NUMBER = 'Number',
-  BOOL = 'True/ False',
-}
-
 export type FilterOptionMenuType = {
   id: string | number;
-  label: SegmentFilterDataType | string;
+  label: FilterDataType | string;
   submenu: FilterOptionMenuType[];
 };
-
-export enum SegmentFilterOperatorsString {
-  IS = 'is',
-  IS_NOT = 'is not',
-  CONTAINS = 'contains',
-  DOES_NOT_CONTAIN = 'does not contain',
-}
-
-export enum SegmentFilterOperatorsNumber {
-  EQ = 'equals',
-  NE = 'not equal',
-  GT = 'greater than',
-  GE = 'greater than or equal to',
-  LT = 'less than',
-  LE = 'less than or equal to',
-}
-
-export enum SegmentFilterOperatorsBool {
-  T = 'is true',
-  F = 'is false',
-}

@@ -67,32 +67,35 @@ describe('Create Metric', () => {
   ];
 
   const computedMetricResponse = {
-    metric: [
-      {
-        date: '2022-10-07',
-        value: 96,
-      },
-      {
-        date: '2022-10-08',
-        value: 135,
-      },
-      {
-        date: '2022-10-09',
-        value: 178,
-      },
-      {
-        date: '2022-10-10',
-        value: 190,
-      },
-      {
-        date: '2022-10-11',
-        value: 115,
-      },
-      {
-        date: '2022-10-12',
-        value: 126,
-      },
-    ],
+    status: 200,
+    data: {
+      metric: [
+        {
+          date: '2022-10-07',
+          value: 96,
+        },
+        {
+          date: '2022-10-08',
+          value: 135,
+        },
+        {
+          date: '2022-10-09',
+          value: 178,
+        },
+        {
+          date: '2022-10-10',
+          value: 190,
+        },
+        {
+          date: '2022-10-11',
+          value: 115,
+        },
+        {
+          date: '2022-10-12',
+          value: 126,
+        },
+      ],
+    },
   };
 
   const tableData = [
@@ -471,15 +474,7 @@ describe('Create Metric', () => {
     });
 
     it('should show event name, after selecting it from the dropdown list', async () => {
-      await act(async () => {
-        render(
-          <RouterContext.Provider
-            value={createMockRouter({ query: { dsId: '' } })}
-          >
-            <CreateMetric />
-          </RouterContext.Provider>
-        );
-      });
+      await renderMetricComponent();
 
       const eventOption = screen.getByTestId('event-option');
       fireEvent.click(eventOption);
@@ -502,15 +497,8 @@ describe('Create Metric', () => {
     });
 
     it('should add filter section after clicking on add filter button', async () => {
-      await act(async () => {
-        render(
-          <RouterContext.Provider
-            value={createMockRouter({ query: { dsId: '' } })}
-          >
-            <CreateMetric />
-          </RouterContext.Provider>
-        );
-      });
+      await renderMetricComponent();
+
       await addNewEvent();
       const SELECTED_OPTION = 1;
       //Adding a filter to the "Event or Segment" Component
@@ -550,6 +538,124 @@ describe('Create Metric', () => {
 
       // option 1 is ios
       expect(eventFilterValue.textContent).toEqual('ios');
+    });
+  });
+
+  describe('change datatype of filter', () => {
+    it('should change the filter from string datatype to number', async () => {
+      await renderMetricComponent();
+      await addNewEvent();
+
+      const addFilterButton = screen.getAllByTestId('add-filter-button');
+      fireEvent.click(addFilterButton[0]); // step add filter button
+      await addFilter();
+
+      const eventFilter = screen.getByTestId('event-filter');
+      fireEvent.mouseEnter(eventFilter);
+
+      const filterDatatypeOption = screen.getByTestId('filter-datatype-option');
+      fireEvent.click(filterDatatypeOption);
+
+      const datatypeText = screen.getByText('Data Type');
+      fireEvent.mouseEnter(datatypeText);
+
+      const numberDataType = screen.getByText('Number');
+      await act(async () => {
+        fireEvent.click(numberDataType);
+      });
+
+      const filterOperator = screen.getByTestId('filter-operator');
+      const filterValueInput = screen.queryByTestId('filter-value-input');
+
+      // upon changing datatype to number, default operator 'equals' should be selected
+      // and input field should be visible
+      expect(filterOperator.textContent).toBe('equals');
+      expect(filterValueInput).toBeVisible();
+    });
+
+    it('should change the filter from string datatype to bool, should not see any option to select filter value', async () => {
+      await renderMetricComponent();
+      await addNewEvent();
+
+      const addFilterButton = screen.getAllByTestId('add-filter-button');
+      fireEvent.click(addFilterButton[0]); // step add filter button
+      await addFilter();
+
+      const eventFilter = screen.getByTestId('event-filter');
+      fireEvent.mouseEnter(eventFilter);
+
+      const filterDatatypeOption = screen.getByTestId('filter-datatype-option');
+      fireEvent.click(filterDatatypeOption);
+
+      const datatypeText = screen.getByText('Data Type');
+      fireEvent.mouseEnter(datatypeText);
+
+      const boolDatatype = screen.getByText('True/ False');
+      await act(async () => {
+        fireEvent.click(boolDatatype);
+      });
+
+      const filterOperator = screen.getByTestId('filter-operator');
+      const filterValueInput = screen.queryByTestId('filter-value-input');
+      const filterValuesDropdown = screen.queryByTestId('filter-values');
+
+      // upon changing datatype to bool, default operator  should be selected
+      // and input field should be hidden as well as the select dropdown
+      expect(filterOperator.textContent).toBe('is true');
+      expect(filterValueInput).not.toBeInTheDocument();
+      expect(filterValuesDropdown).not.toBeInTheDocument();
+    });
+  });
+
+  describe('switch operator values', () => {
+    it('should show input field for string datatype when switch operator from `is` to `contains`', async () => {
+      await renderMetricComponent();
+      await addNewEvent();
+
+      const addFilterButton = screen.getAllByTestId('add-filter-button');
+      fireEvent.click(addFilterButton[0]); // step add filter button
+      await addFilter();
+
+      const filterOperatorText = screen.getByTestId('filter-operator');
+      fireEvent.click(filterOperatorText);
+
+      const filterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+
+      const filterOperatorsOptionsText = filterOperatorsOptions.map(
+        (filter) => filter.textContent
+      );
+      expect(filterOperatorsOptionsText).toEqual([
+        'Is',
+        'Is not',
+        'Contains',
+        'Does not contain',
+      ]);
+
+      // click on 'Is not' operator
+      await act(async () => {
+        fireEvent.click(filterOperatorsOptions[1]);
+      });
+      await waitFor(() => {
+        expect(filterOperatorText.textContent).toEqual('is not');
+      });
+
+      fireEvent.click(filterOperatorText);
+      const newFilterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+      // click on 'Contains' operator and check if Input Field is visible
+      await act(async () => {
+        fireEvent.click(newFilterOperatorsOptions[2]);
+      });
+
+      await waitFor(() => {
+        const filterOperatorText = screen.getByTestId('filter-operator');
+        expect(filterOperatorText.textContent).toEqual('contains');
+        const inputField = screen.getByTestId('filter-value-input');
+        expect(inputField).toBeVisible();
+      });
     });
   });
 

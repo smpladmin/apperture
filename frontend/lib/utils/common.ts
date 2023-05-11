@@ -8,8 +8,11 @@ import appertureLogo from '@assets/images/apperture-logo.svg';
 import { StaticImageData } from 'next/image';
 import { AppWithIntegrations } from '@lib/domain/app';
 import dayjs from 'dayjs';
-import { WhereSegmentFilter } from '@lib/domain/segment';
-import { ExternalSegmentFilter } from '@lib/domain/common';
+import {
+  ExternalSegmentFilter,
+  FilterDataType,
+  WhereFilter,
+} from '@lib/domain/common';
 import {
   replaceEmptyStringPlaceholder,
   replaceFilterValueWithEmptyStringPlaceholder,
@@ -119,10 +122,10 @@ export const trimLabel = (label: string, size = 15) => {
   return label.length > size + 3 ? label.slice(0, size) + '...' : label;
 };
 
-export const isEveryCustomSegmentFilterValid = (
-  filters: WhereSegmentFilter[]
-) => {
-  return filters?.every((filter) => filter.values.length);
+export const isEveryCustomSegmentFilterValid = (filters: WhereFilter[]) => {
+  return filters?.every(
+    (filter) => filter.values.length || filter.datatype === FilterDataType.BOOL
+  );
 };
 
 export const isValidSegmentFilter = (
@@ -131,9 +134,7 @@ export const isValidSegmentFilter = (
   return segmentFilters.every(
     (filter) =>
       (filter.custom.filters.length || filter.segments.length) &&
-      isEveryCustomSegmentFilterValid(
-        filter.custom.filters as WhereSegmentFilter[]
-      )
+      isEveryCustomSegmentFilterValid(filter.custom.filters as WhereFilter[])
   );
 };
 

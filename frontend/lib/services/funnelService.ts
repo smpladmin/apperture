@@ -65,16 +65,21 @@ export const getTransientFunnelData = async (
   steps: FunnelStep[],
   dateFilter: DateFilterObj,
   conversionWindow: ConversionWindowObj,
-  randomSequence: boolean
+  randomSequence: boolean,
+  signal?: AbortSignal
 ) => {
-  const res = await ApperturePost('/funnels/transient', {
-    datasourceId: dsId,
-    steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
-    dateFilter,
-    conversionWindow,
-    randomSequence,
-  });
-  return res.data || [];
+  const res = await ApperturePost(
+    '/funnels/transient',
+    {
+      datasourceId: dsId,
+      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+      dateFilter,
+      conversionWindow,
+      randomSequence,
+    },
+    { signal }
+  );
+  return res;
 };
 
 export const getTransientTrendsData = async (
@@ -82,16 +87,21 @@ export const getTransientTrendsData = async (
   steps: FunnelStep[],
   dateFilter: DateFilterObj,
   conversionWindow: ConversionWindowObj,
-  randomSequence: boolean
+  randomSequence: boolean,
+  signal?: AbortSignal
 ) => {
-  const res = await ApperturePost('/funnels/trends/transient', {
-    datasourceId: dsId,
-    steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
-    dateFilter,
-    conversionWindow,
-    randomSequence,
-  });
-  return res.data || [];
+  const res = await ApperturePost(
+    '/funnels/trends/transient',
+    {
+      datasourceId: dsId,
+      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+      dateFilter,
+      conversionWindow,
+      randomSequence,
+    },
+    { signal }
+  );
+  return res;
 };
 
 export const getSavedFunnelsForDatasourceId = async (dsId: string) => {

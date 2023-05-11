@@ -6,7 +6,6 @@ import {
   RetentionEvents,
   RetentionTrendsData,
 } from '@lib/domain/retention';
-import { WhereSegmentFilter } from '@lib/domain/segment';
 import { isEveryCustomSegmentFilterValid } from '@lib/utils/common';
 
 const _hasValidFilterValues = (filters: WhereFilter[]) => {
@@ -48,7 +47,7 @@ export const hasValidRetentionEventAndFilters = (
     hasValidEvents(retentionEvents) &&
     hasValidFilterValuesForAllEvents(retentionEvents) &&
     isEveryCustomSegmentFilterValid(
-      segmentFilters[0].custom.filters as WhereSegmentFilter[]
+      segmentFilters[0].custom.filters as WhereFilter[]
     )
   );
 };

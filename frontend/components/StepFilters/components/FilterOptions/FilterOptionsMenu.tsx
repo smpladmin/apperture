@@ -7,12 +7,14 @@ type FilterOptionMenuProps = {
   menu: FilterOptionMenuType;
   onSubmit: Function;
   datatype: FilterDataType;
+  filterIndex: number;
 };
 
-const FilterOptionMenu = ({
+const FilterOptiosMenu = ({
   menu,
   onSubmit,
   datatype,
+  filterIndex,
 }: FilterOptionMenuProps) => {
   const isSelected = datatype === menu.label;
   const [showSubmenu, setShowSubmenu] = useState(false);
@@ -20,12 +22,12 @@ const FilterOptionMenu = ({
   const handleSubmit = (item: FilterOptionMenuType) => {
     if (item.submenu.length > 0) return;
     setShowSubmenu(false);
-    onSubmit(item);
+    onSubmit(filterIndex, item.label);
   };
 
   return (
     <Box
-      onMouseEnter={() => {
+      onMouseEnter={(e) => {
         setShowSubmenu(true);
       }}
       onMouseLeave={() => {
@@ -41,15 +43,16 @@ const FilterOptionMenu = ({
       <Flex
         alignItems={'center'}
         justifyContent={'space-between'}
-        _hover={{ bg: 'white.100', cursor: 'pointer' }}
-        px={6}
+        _hover={{ bg: 'white.400', cursor: 'pointer' }}
+        px={2}
         py={3}
-        bg={showSubmenu || isSelected ? 'white.100' : ''}
+        bg={isSelected ? 'white.400' : ''}
+        borderRadius={'4'}
       >
         <Text
           fontSize={'xs-14'}
           lineHeight={'xs-14'}
-          fontWeight={'600'}
+          fontWeight={'500'}
           cursor={'pointer'}
           minWidth={'20'}
         >
@@ -61,23 +64,24 @@ const FilterOptionMenu = ({
       </Flex>
       {menu.submenu?.length && showSubmenu ? (
         <Box
-          position={'absolute'}
-          left={'100%'}
-          zIndex={2}
-          p={'3'}
-          borderRadius={'12'}
-          borderWidth={'0.4px'}
-          borderColor={'grey.100'}
-          bg={'white.DEFAULT'}
-          shadow={'0px 0px 4px rgba(0, 0, 0, 0.12)'}
           top={'0'}
+          left={'100%'}
+          position={'absolute'}
+          zIndex={1}
+          borderRadius={'8'}
+          p={'2'}
+          borderWidth={'1px'}
+          borderColor={'white.200'}
+          bg={'white.DEFAULT'}
+          w={'50'}
         >
           {menu.submenu.map((submenu: FilterOptionMenuType) => (
-            <FilterOptionMenu
+            <FilterOptiosMenu
               menu={submenu}
               key={submenu.id}
               datatype={datatype}
               onSubmit={onSubmit}
+              filterIndex={filterIndex}
             />
           ))}
         </Box>
@@ -86,4 +90,4 @@ const FilterOptionMenu = ({
   );
 };
 
-export default FilterOptionMenu;
+export default FilterOptiosMenu;
