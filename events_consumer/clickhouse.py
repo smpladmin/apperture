@@ -46,8 +46,7 @@ class ClickHouse:
             settings={"insert_async": True, "wait_for_async_insert": False},
         )
 
-    def save_precision_events(self, events) -> None:
-        """Saves events to ClickHouse."""
+    def _save_precision_events(self, events) -> None:
         self.client.insert(
             table="events",
             data=events,
@@ -61,3 +60,14 @@ class ClickHouse:
             ],
             settings={"insert_async": True, "wait_for_async_insert": False},
         )
+
+    def save_precision_events(self, events):
+        """Saves precision events to ClickHouse."""
+        try:
+            self._save_precision_events(events)
+        except DatabaseError as e:
+            logging.error(f"Error saving events to Eventstream: {e}")
+            logging.info("Trying to save sequentially")
+            for event in events:
+                self._save_precision_events([event])
+            logging.info("Saved sequentially")
