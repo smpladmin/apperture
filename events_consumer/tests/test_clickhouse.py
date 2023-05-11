@@ -1,8 +1,9 @@
 from datetime import datetime
 from unittest.mock import MagicMock
+
 from clickhouse import ClickHouse
-from models.models import ClickStream, PrecisionEvent
 from clickhouse_connect.driver.exceptions import DatabaseError
+from models.models import ClickStream, PrecisionEvent
 
 
 class TestClickHouse:
@@ -413,8 +414,8 @@ class TestClickHouse:
         self.clickhouse.save_precision_events(events)
 
         self.clickhouse.client.insert.assert_called_once_with(
-            "events",
-            events,
+            table="events",
+            data=events,
             column_names=[
                 "datasource_id",
                 "timestamp",
@@ -425,3 +426,326 @@ class TestClickHouse:
             ],
             settings={"insert_async": True, "wait_for_async_insert": False},
         )
+
+    def test_save_events_sequentially(self):
+        cs_events = [
+            ClickStream(
+                "test_ds_id",
+                datetime(2021, 8, 10, 20, 20, 47, 370000),
+                "test_user_id",
+                "",
+                "$pageview",
+                {
+                    "$browser": "Chrome",
+                    "$browser_language": "en-GB",
+                    "$browser_version": 109,
+                    "$ce_version": 0,
+                    "$current_url": "http://localhost:3000/analytics/app/create",
+                    "$device_id": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
+                    "$device_type": "Desktop",
+                    "$elements": [],
+                    "$event_type": "",
+                    "$host": "localhost:3000",
+                    "$insert_id": "uyvllc1rseh4gdym",
+                    "$lib": "web",
+                    "$lib_version": "1.43.1",
+                    "$os": "Mac OS X",
+                    "$pageview_id": "186348305ce2227-082e406114e4e3-16525635-16a7f0-186348305cf2c5f",
+                    "$pathname": "/analytics/app/create",
+                    "$referrer": "http://localhost:3000/analytics/segment/create/638f1aac8e54760eafc64d70",
+                    "$referring_domain": "localhost:3000",
+                    "$screen_height": 982,
+                    "$screen_width": 1512,
+                    "$session_id": "186348305ca99b-05bdb409c347f-16525635-16a7f0-186348305cb2335",
+                    "$time": 1675918247.37,
+                    "$viewport_height": 780,
+                    "$viewport_width": 1512,
+                    "$window_id": "186348305cc2af1-0d198248776bf4-16525635-16a7f0-186348305cd2d7c",
+                    "currency": "",
+                    "distinct_id": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
+                    "price": 0,
+                    "token": "63d8ef5a7b02dbd1dcf20dcc",
+                },
+            ),
+            ClickStream(
+                "test_ds_id",
+                datetime(2021, 8, 10, 20, 20, 47, 370000),
+                "test_user_id",
+                "",
+                "$pageview",
+                {
+                    "$browser": "Chrome",
+                    "$browser_language": "en-GB",
+                    "$browser_version": 109,
+                    "$ce_version": 0,
+                    "$current_url": "http://localhost:3000/analytics/app/create",
+                    "$device_id": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
+                    "$device_type": "Desktop",
+                    "$elements": [],
+                    "$event_type": "",
+                    "$host": "localhost:3000",
+                    "$insert_id": "uyvllc1rseh4gdym",
+                    "$lib": "web",
+                    "$lib_version": "1.43.1",
+                    "$os": "Mac OS X",
+                    "$pageview_id": "186348305ce2227-082e406114e4e3-16525635-16a7f0-186348305cf2c5f",
+                    "$pathname": "/analytics/app/create",
+                    "$referrer": "http://localhost:3000/analytics/segment/create/638f1aac8e54760eafc64d70",
+                    "$referring_domain": "localhost:3000",
+                    "$screen_height": 982,
+                    "$screen_width": 1512,
+                    "$session_id": "186348305ca99b-05bdb409c347f-16525635-16a7f0-186348305cb2335",
+                    "$time": 1675918247.37,
+                    "$viewport_height": 780,
+                    "$viewport_width": 1512,
+                    "$window_id": "186348305cc2af1-0d198248776bf4-16525635-16a7f0-186348305cd2d7c",
+                    "currency": "",
+                    "distinct_id": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
+                    "price": 0,
+                    "token": "63d8ef5a7b02dbd1dcf20dcc",
+                },
+            ),
+        ]
+
+        self.clickhouse.client.insert.side_effect = [DatabaseError("Test"), 2, 3]
+
+        self.clickhouse.save_events(cs_events)
+
+        assert self.clickhouse.client.insert.call_count == 3
+        assert self.clickhouse.client.insert.call_args_list == [
+            (
+                {
+                    "table": "clickstream",
+                    "data": cs_events,
+                    "column_names": [
+                        "datasource_id",
+                        "timestamp",
+                        "user_id",
+                        "element_chain",
+                        "event",
+                        "properties",
+                    ],
+                    "settings": {"insert_async": True, "wait_for_async_insert": False},
+                },
+            ),
+            (
+                {
+                    "table": "clickstream",
+                    "data": cs_events[0:1],
+                    "column_names": [
+                        "datasource_id",
+                        "timestamp",
+                        "user_id",
+                        "element_chain",
+                        "event",
+                        "properties",
+                    ],
+                    "settings": {"insert_async": True, "wait_for_async_insert": False},
+                },
+            ),
+            (
+                {
+                    "table": "clickstream",
+                    "data": cs_events[1:2],
+                    "column_names": [
+                        "datasource_id",
+                        "timestamp",
+                        "user_id",
+                        "element_chain",
+                        "event",
+                        "properties",
+                    ],
+                    "settings": {"insert_async": True, "wait_for_async_insert": False},
+                },
+            ),
+        ]
+
+    def test_save_precision_events_sequentially(self):
+        events = [
+            PrecisionEvent(
+                datasourceId="63eb4eea19c763c212bc444d",
+                timestamp=datetime.fromtimestamp(1681714333.385),
+                userId="1876b24aecbe52-0fd97ea66a2cdf-1e525634-16a7f0-1876b24aecc171f",
+                provider="apperture",
+                eventName="$autocapture",
+                properties={
+                    "$os": "Mac OS X",
+                    "$browser": "Chrome",
+                    "$device_type": "Desktop",
+                    "$current_url": "https://app.staging.apperture.io/analytics/explore/63eb4eea19c763c212bc444d",
+                    "$host": "app.staging.apperture.io",
+                    "$pathname": "/analytics/explore/63eb4eea19c763c212bc444d",
+                    "$browser_version": 112,
+                    "$browser_language": "en-GB",
+                    "$screen_height": 982,
+                    "$screen_width": 1512,
+                    "$viewport_height": 560,
+                    "$viewport_width": 1512,
+                    "$lib": "web",
+                    "$lib_version": "1.50.4",
+                    "$insert_id": "z0mm9dj9ns9eltcw",
+                    "$time": 1681714333.385,
+                    "distinct_id": "631821697fb64164bfa6609e",
+                    "$device_id": "1876b24aecbe52-0fd97ea66a2cdf-1e525634-16a7f0-1876b24aecc171f",
+                    "$referrer": "$direct",
+                    "$referring_domain": "$direct",
+                    "$user_id": "631821697fb64164bfa6609e",
+                    "$event_type": "click",
+                    "$ce_version": 1,
+                    "$elements": [
+                        {
+                            "tag_name": "i",
+                            "classes": ["ri-newspaper-line"],
+                            "attr__class": "ri-newspaper-line",
+                            "attr__aria-hidden": "true",
+                            "attr__focusable": "false",
+                            "nth_child": 1,
+                            "nth_of_type": 1,
+                            "$el_text": "",
+                        },
+                        {
+                            "tag_name": "button",
+                            "$el_text": "",
+                            "classes": ["chakra-button", "css-vyn3p3"],
+                            "attr__type": "button",
+                            "attr__class": "chakra-button css-vyn3p3",
+                            "attr__aria-label": "Data Stream",
+                            "attr__aria-describedby": "tooltip-:re:",
+                            "nth_child": 11,
+                            "nth_of_type": 7,
+                        },
+                        {
+                            "tag_name": "div",
+                            "classes": ["css-g1rznr"],
+                            "attr__class": "css-g1rznr",
+                            "nth_child": 1,
+                            "nth_of_type": 1,
+                        },
+                        {
+                            "tag_name": "div",
+                            "classes": ["css-87dp0f"],
+                            "attr__class": "css-87dp0f",
+                            "nth_child": 3,
+                            "nth_of_type": 3,
+                        },
+                        {
+                            "tag_name": "div",
+                            "classes": ["css-3h169z"],
+                            "attr__class": "css-3h169z",
+                            "nth_child": 1,
+                            "nth_of_type": 1,
+                        },
+                        {
+                            "tag_name": "div",
+                            "classes": ["css-1xhj18k"],
+                            "attr__class": "css-1xhj18k",
+                            "nth_child": 2,
+                            "nth_of_type": 1,
+                        },
+                        {
+                            "tag_name": "div",
+                            "attr__id": "__next",
+                            "nth_child": 1,
+                            "nth_of_type": 1,
+                        },
+                        {
+                            "tag_name": "body",
+                            "classes": ["chakra-ui-light"],
+                            "attr__class": "chakra-ui-light",
+                            "nth_child": 2,
+                            "nth_of_type": 1,
+                        },
+                    ],
+                    "token": "63eb4eea19c763c212bc444d",
+                    "$session_id": "1878de47cc337dd-0ff3158333e013-1d525634-16a7f0-1878de47cc44210",
+                    "$window_id": "1878df92f1428bf-0a01a1b024ea9d-1d525634-16a7f0-1878df92f153e7b",
+                    "$pageview_id": "1878dfc3d441a2f-0321ef1c72bcde-1d525634-16a7f0-1878dfc3d454b62",
+                },
+            ),
+            PrecisionEvent(
+                datasourceId="63eb4eea19c763c212bc444d",
+                timestamp=datetime.fromtimestamp(1681714333.388),
+                userId="1876b24aecbe52-0fd97ea66a2cdf-1e525634-16a7f0-1876b24aecc171f",
+                provider="apperture",
+                eventName="$pageleave",
+                properties={
+                    "$os": "Mac OS X",
+                    "$browser": "Chrome",
+                    "$device_type": "Desktop",
+                    "$current_url": "https://app.staging.apperture.io/analytics/explore/63eb4eea19c763c212bc444d",
+                    "$host": "app.staging.apperture.io",
+                    "$pathname": "/analytics/explore/63eb4eea19c763c212bc444d",
+                    "$browser_version": 112,
+                    "$browser_language": "en-GB",
+                    "$screen_height": 982,
+                    "$screen_width": 1512,
+                    "$viewport_height": 560,
+                    "$viewport_width": 1512,
+                    "$lib": "web",
+                    "$lib_version": "1.50.4",
+                    "$insert_id": "ph5rf1hs52ji9qgg",
+                    "$time": 1681714333.388,
+                    "distinct_id": "631821697fb64164bfa6609e",
+                    "$device_id": "1876b24aecbe52-0fd97ea66a2cdf-1e525634-16a7f0-1876b24aecc171f",
+                    "$referrer": "$direct",
+                    "$referring_domain": "$direct",
+                    "$user_id": "631821697fb64164bfa6609e",
+                    "token": "63eb4eea19c763c212bc444d",
+                    "$session_id": "1878de47cc337dd-0ff3158333e013-1d525634-16a7f0-1878de47cc44210",
+                    "$window_id": "1878df92f1428bf-0a01a1b024ea9d-1d525634-16a7f0-1878df92f153e7b",
+                    "$pageview_id": "1878dfc3d441a2f-0321ef1c72bcde-1d525634-16a7f0-1878dfc3d454b62",
+                },
+            ),
+        ]
+
+        self.clickhouse.client.insert.side_effect = [DatabaseError("Test"), 2, 3]
+        self.clickhouse.save_precision_events(events)
+
+        assert self.clickhouse.client.insert.call_count == 3
+        assert self.clickhouse.client.insert.call_args_list == [
+            (
+                {
+                    "table": "events",
+                    "data": events,
+                    "column_names": [
+                        "datasource_id",
+                        "timestamp",
+                        "provider",
+                        "user_id",
+                        "event_name",
+                        "properties",
+                    ],
+                    "settings": {"insert_async": True, "wait_for_async_insert": False},
+                },
+            ),
+            (
+                {
+                    "table": "events",
+                    "data": events[0:1],
+                    "column_names": [
+                        "datasource_id",
+                        "timestamp",
+                        "provider",
+                        "user_id",
+                        "event_name",
+                        "properties",
+                    ],
+                    "settings": {"insert_async": True, "wait_for_async_insert": False},
+                },
+            ),
+            (
+                {
+                    "table": "events",
+                    "data": events[1:2],
+                    "column_names": [
+                        "datasource_id",
+                        "timestamp",
+                        "provider",
+                        "user_id",
+                        "event_name",
+                        "properties",
+                    ],
+                    "settings": {"insert_async": True, "wait_for_async_insert": False},
+                },
+            ),
+        ]
