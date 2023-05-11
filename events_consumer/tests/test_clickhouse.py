@@ -281,8 +281,8 @@ class TestClickHouse:
         self.clickhouse.save_precision_events(events)
 
         self.clickhouse.client.insert.assert_called_once_with(
-            "events",
-            events,
+            table="events",
+            data=events,
             column_names=[
                 "datasource_id",
                 "timestamp",
@@ -566,13 +566,13 @@ class TestClickHouse:
         ]
 
         self.clickhouse.client.insert.side_effect = [DatabaseError("Test"), 2, 3]
-        self.clickhouse.save_precision_events(events[0:1])
+        self.clickhouse.save_precision_events(events)
 
-        # assert self.clickhouse.client.insert.call_count == 3
+        assert self.clickhouse.client.insert.call_count == 3
         assert self.clickhouse.client.insert.call_args_list == [
             (
                 {
-                    "table": "event",
+                    "table": "events",
                     "data": events,
                     "column_names": [
                         "datasource_id",
@@ -587,8 +587,23 @@ class TestClickHouse:
             ),
             (
                 {
-                    "table": "event",
+                    "table": "events",
                     "data": events[0:1],
+                    "column_names": [
+                        "datasource_id",
+                        "timestamp",
+                        "provider",
+                        "user_id",
+                        "event_name",
+                        "properties",
+                    ],
+                    "settings": {"insert_async": True, "wait_for_async_insert": False},
+                },
+            ),
+            (
+                {
+                    "table": "events",
+                    "data": events[1:2],
                     "column_names": [
                         "datasource_id",
                         "timestamp",

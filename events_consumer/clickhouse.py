@@ -48,8 +48,8 @@ class ClickHouse:
 
     def _save_precision_events(self, events) -> None:
         self.client.insert(
-            "events",
-            events,
+            table="events",
+            data=events,
             column_names=[
                 "datasource_id",
                 "timestamp",
