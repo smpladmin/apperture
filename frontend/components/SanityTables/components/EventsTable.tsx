@@ -19,6 +19,9 @@ import {
   getSortedRowModel,
 } from '@tanstack/react-table';
 import { useMemo } from 'react';
+import dayjs from 'dayjs';
+import { dateFormat } from '@lib/utils/common';
+
 
 type EventsTablesProps = { eventData: SanityData; selectedColumns: string[] };
 
@@ -30,7 +33,10 @@ const EventsTables = ({ eventData, selectedColumns }: EventsTablesProps) => {
       return selectedColumns.map((key: any) =>
         columnHelper.accessor(key, {
           header: key,
-          cell: (info) => info.getValue(),
+          cell: (info) =>
+            key === 'timestamp'
+              ? dayjs(info.getValue() as Date).format(dateFormat)
+              : info.getValue(),
         })
       );
     };

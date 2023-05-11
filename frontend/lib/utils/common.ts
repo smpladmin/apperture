@@ -19,6 +19,7 @@ import {
 } from '@components/Segments/util';
 
 export const DEBOUNCED_WAIT_TIME = 500;
+export const dateFormat = 'D MMM YY, h:mm:ss A';
 
 export const formatDatalabel = (datalabel: number): string => {
   if (datalabel > 999999999999) {

@@ -60,6 +60,7 @@ const ListingTable = ({
       mt={'4'}
       borderWidth={'0.4px'}
       borderColor={'grey.100'}
+      overflow={'scroll'}
     >
       {showTableCountHeader && (
         <Flex
