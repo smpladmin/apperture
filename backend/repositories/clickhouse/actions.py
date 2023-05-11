@@ -190,6 +190,11 @@ class Actions(EventsBase):
             datetime.now().strftime(date_format), date_format
         )
 
+        if action.processed_till:
+            start_time = datetime.strptime(
+                start_time.strftime(date_format), date_format
+            )
+
         if not action.processed_till:
             [(start_time,),] = self.get_minimum_timestamp_of_events(
                 datasource_id=str(action.datasource_id)
