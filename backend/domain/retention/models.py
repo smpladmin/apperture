@@ -37,7 +37,7 @@ class Retention(Document):
     start_event: EventSelection
     goal_event: EventSelection
     date_filter: DateFilter
-    segment_filter: Optional[SegmentFilter]
+    segment_filter: Optional[List[SegmentFilter]]
     granularity: Granularity
     enabled: bool = True
 
@@ -45,17 +45,10 @@ class Retention(Document):
         name = "retention"
 
 
-class ComputedRetentionTrend(BaseModel):
-    granularity: datetime.datetime
-    retention_rate: float
-    retained_users: int
-
-
-class ComputedRetentionForInterval(BaseModel):
-    name: str
-    value: float
-
-
 class ComputedRetention(BaseModel):
-    count: int
-    data: List[ComputedRetentionForInterval]
+    granularity: datetime.datetime
+    interval: int
+    interval_name: str
+    initial_users: int
+    retained_users: int
+    retention_rate: float

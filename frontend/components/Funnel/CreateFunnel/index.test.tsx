@@ -177,22 +177,25 @@ describe('create funnel', () => {
     });
   };
 
-  const funnelTrendsData = [
-    {
-      conversion: 5.19,
-      firstStepUsers: 578,
-      lastStepUsers: 30,
-      startDate: '2022-11-21T00:00:00',
-      endDate: '2022-11-27T00:00:00',
-    },
-    {
-      conversion: 5.11,
-      firstStepUsers: 978,
-      lastStepUsers: 50,
-      startDate: '2022-11-28T00:00:00',
-      endDate: '2022-12-04T00:00:00',
-    },
-  ];
+  const funnelTrendsData = {
+    status: 200,
+    data: [
+      {
+        conversion: 5.19,
+        firstStepUsers: 578,
+        lastStepUsers: 30,
+        startDate: '2022-11-21T00:00:00',
+        endDate: '2022-11-27T00:00:00',
+      },
+      {
+        conversion: 5.11,
+        firstStepUsers: 978,
+        lastStepUsers: 50,
+        startDate: '2022-11-28T00:00:00',
+        endDate: '2022-12-04T00:00:00',
+      },
+    ],
+  };
   beforeEach(() => {
     mockedGetCountOfValidAddedSteps = jest.mocked(getCountOfValidAddedSteps);
     mockedSearchResult = jest.mocked(getSearchResult);
@@ -226,6 +229,13 @@ describe('create funnel', () => {
       const capitalizedFirstLetterMap: { [key: string]: string } = {
         days: 'Days',
         minutes: 'Minutes',
+        is: 'Is',
+        'is not': 'Is not',
+        total: 'Total',
+        'is true': 'Is true',
+        'is false': 'Is false',
+        contains: 'Contains',
+        'does not contain': 'Does not contain',
       };
       return capitalizedFirstLetterMap[val];
     });
@@ -437,10 +447,13 @@ describe('create funnel', () => {
     });
 
     it('should  paint the funnel chart/ trend chart when you select atleast two valid events', async () => {
-      mockedGetTransientFunnelData.mockReturnValue([
-        { event: 'Video_Click', users: 2000, conversion: 100 },
-        { event: 'Chapter_Click', users: 1000, conversion: 50 },
-      ]);
+      mockedGetTransientFunnelData.mockReturnValue({
+        status: 200,
+        data: [
+          { event: 'Video_Click', users: 2000, conversion: 100 },
+          { event: 'Chapter_Click', users: 1000, conversion: 50 },
+        ],
+      });
       mockedSearchResult.mockReturnValue([{ id: 'Chapter_Click' }]);
       mockedTransformFunnelData.mockReturnValue([
         { event: ' Video_Click', users: 2000, conversion: 100 },
@@ -569,12 +582,136 @@ describe('create funnel', () => {
     });
   });
 
+  describe('change datatype of filter', () => {
+    it('should change the filter from string datatype to number', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+
+      const eventFilter = screen.getByTestId('event-filter');
+      fireEvent.mouseEnter(eventFilter);
+
+      const filterDatatypeOption = screen.getByTestId('filter-datatype-option');
+      fireEvent.click(filterDatatypeOption);
+
+      const datatypeText = screen.getByText('Data Type');
+      fireEvent.mouseEnter(datatypeText);
+
+      const numberDataType = screen.getByText('Number');
+      await act(async () => {
+        fireEvent.click(numberDataType);
+      });
+
+      const filterOperator = screen.getByTestId('filter-operator');
+      const filterValueInput = screen.queryByTestId('filter-value-input');
+
+      // upon changing datatype to number, default operator 'equals' should be selected
+      // and input field should be visible
+      expect(filterOperator.textContent).toBe('equals');
+      expect(filterValueInput).toBeVisible();
+    });
+
+    it('should change the filter from string datatype to bool, should not see any option to select filter value', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+
+      const eventFilter = screen.getByTestId('event-filter');
+      fireEvent.mouseEnter(eventFilter);
+
+      const filterDatatypeOption = screen.getByTestId('filter-datatype-option');
+      fireEvent.click(filterDatatypeOption);
+
+      const datatypeText = screen.getByText('Data Type');
+      fireEvent.mouseEnter(datatypeText);
+
+      const boolDatatype = screen.getByText('True/ False');
+      await act(async () => {
+        fireEvent.click(boolDatatype);
+      });
+
+      const filterOperator = screen.getByTestId('filter-operator');
+      const filterValueInput = screen.queryByTestId('filter-value-input');
+      const filterValuesDropdown = screen.queryByTestId('filter-values');
+
+      // upon changing datatype to bool, default operator  should be selected
+      // and input field should be hidden as well as the select dropdown
+      expect(filterOperator.textContent).toBe('is true');
+      expect(filterValueInput).not.toBeInTheDocument();
+      expect(filterValuesDropdown).not.toBeInTheDocument();
+    });
+  });
+
+  describe('switch operator values', () => {
+    it('should show input field for string datatype when switch operator from `is` to `contains`', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+
+      const filterOperatorText = screen.getByTestId('filter-operator');
+      fireEvent.click(filterOperatorText);
+
+      const filterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+
+      const filterOperatorsOptionsText = filterOperatorsOptions.map(
+        (filter) => filter.textContent
+      );
+      expect(filterOperatorsOptionsText).toEqual([
+        'Is',
+        'Is not',
+        'Contains',
+        'Does not contain',
+      ]);
+
+      // click on 'Is not' operator
+      await act(async () => {
+        fireEvent.click(filterOperatorsOptions[1]);
+      });
+      await waitFor(() => {
+        expect(filterOperatorText.textContent).toEqual('is not');
+      });
+
+      fireEvent.click(filterOperatorText);
+      const newFilterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+      // click on 'Contains' operator and check if Input Field is visible
+      await act(async () => {
+        fireEvent.click(newFilterOperatorsOptions[2]);
+      });
+
+      await waitFor(() => {
+        const filterOperatorText = screen.getByTestId('filter-operator');
+        expect(filterOperatorText.textContent).toEqual('contains');
+        const inputField = screen.getByTestId('filter-value-input');
+        expect(inputField).toBeVisible();
+      });
+    });
+  });
+
   describe('date filters on funnels', () => {
     it('should call transient call when date filter is selected', async () => {
-      mockedGetTransientFunnelData.mockReturnValue([
-        { event: 'Video_Click', users: 2000, conversion: 100 },
-        { event: 'Chapter_Click', users: 1000, conversion: 50 },
-      ]);
+      mockedGetTransientFunnelData.mockReturnValue({
+        status: 200,
+        data: [
+          { event: 'Video_Click', users: 2000, conversion: 100 },
+          { event: 'Chapter_Click', users: 1000, conversion: 50 },
+        ],
+      });
       await renderCreateFunnel();
       const eventName = screen.getAllByTestId('event-name');
 

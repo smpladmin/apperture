@@ -5,26 +5,23 @@ import { GREY_500, GREY_600 } from '@theme/index';
 import { Trash, UsersFour } from 'phosphor-react';
 import React, { useRef, useState } from 'react';
 import SelectSegmentsDropdown from './SelectSegmentsDropdown';
-import AddFilterComponent from '@components/StepFilters/AddFilter';
-import { MetricSegmentFilter } from '@lib/domain/metric';
+import AddFilterComponent from '@components/StepFilters/components/AddFilter';
 import StepFilter from '@components/StepFilters/StepFilters';
-import { FilterType, GroupConditions } from '@lib/domain/common';
 import {
-  SegmentFilterConditions,
-  SegmentFilterDataType,
-  SegmentFilterOperatorsString,
-  WhereSegmentFilter,
-} from '@lib/domain/segment';
+  ExternalSegmentFilter,
+  GroupConditions,
+  WhereFilter,
+} from '@lib/domain/common';
 import cloneDeep from 'lodash/cloneDeep';
 import { getSelectedSegmentsText } from '@components/Metric/util';
 
 type SegmentFilterProps = {
   index: number;
-  segmentFilter: MetricSegmentFilter;
+  segmentFilter: ExternalSegmentFilter;
   updateSegmentFilter: Function;
   loadingEventProperties: boolean;
   eventProperties: string[];
-  segmentFilters: MetricSegmentFilter[];
+  segmentFilters: ExternalSegmentFilter[];
 };
 
 const SegmentFilter = ({
@@ -41,59 +38,7 @@ const SegmentFilter = ({
   const segmentFilterRef = useRef(null);
   useOnClickOutside(segmentFilterRef, () => setIsSegmentListOpen(false));
 
-  const customFilters = segmentFilter.custom.filters as WhereSegmentFilter[];
-
-  const handleAddFilter = (value: string) => {
-    const getFilterCondition = (filters: WhereSegmentFilter[]) => {
-      return !filters.length
-        ? SegmentFilterConditions.WHERE
-        : SegmentFilterConditions.AND;
-    };
-
-    const newFilter: WhereSegmentFilter = {
-      condition: getFilterCondition(customFilters),
-      operand: value,
-      operator: SegmentFilterOperatorsString.IS,
-      values: [],
-      type: FilterType.WHERE,
-      all: false,
-      datatype: SegmentFilterDataType.STRING,
-    };
-
-    const tempFilters = cloneDeep(segmentFilters);
-    tempFilters[index].custom.filters.push(newFilter);
-    updateSegmentFilter(tempFilters);
-  };
-
-  const handleSetFilterValue = (filterIndex: number, values: string[]) => {
-    let stepFilters = [...customFilters];
-    stepFilters[filterIndex]['values'] = values;
-
-    const tempFilters = cloneDeep(segmentFilters);
-    tempFilters[index].custom.filters = stepFilters;
-    updateSegmentFilter(tempFilters);
-  };
-
-  const handleSetFilterProperty = (filterIndex: number, property: string) => {
-    let stepFilters = [...customFilters];
-    stepFilters[filterIndex]['operand'] = property;
-
-    const tempFilters = cloneDeep(segmentFilters);
-    tempFilters[index].custom.filters = stepFilters;
-    updateSegmentFilter(tempFilters);
-  };
-
-  const handleRemoveFilter = (filterIndex: number) => {
-    let stepFilters = [...customFilters];
-    stepFilters.splice(filterIndex, 1);
-
-    if (filterIndex === 0 && stepFilters.length)
-      stepFilters[0]['condition'] = SegmentFilterConditions.WHERE;
-
-    const tempFilters = cloneDeep(segmentFilters);
-    tempFilters[index].custom.filters = stepFilters;
-    updateSegmentFilter(tempFilters);
-  };
+  const customFilters = (segmentFilter.custom.filters as WhereFilter[]) || [];
 
   const handleRemoveSegmentFilter = (index: number) => {
     updateSegmentFilter([
@@ -107,6 +52,12 @@ const SegmentFilter = ({
         segments: [],
       },
     ]);
+  };
+
+  const updateFilters = (customFilters: WhereFilter[]) => {
+    const updatedSegmentFilters = cloneDeep(segmentFilters);
+    updatedSegmentFilters[index].custom.filters = customFilters;
+    updateSegmentFilter(updatedSegmentFilters);
   };
 
   return (
@@ -193,11 +144,10 @@ const SegmentFilter = ({
                     key={index}
                     index={index}
                     filter={filter}
+                    filters={customFilters}
+                    setFilters={updateFilters}
                     eventProperties={eventProperties}
                     loadingEventProperties={loadingEventProperties}
-                    handleSetFilterProperty={handleSetFilterProperty}
-                    handleSetFilterValue={handleSetFilterValue}
-                    handleRemoveFilter={handleRemoveFilter}
                   />
                 );
               })}
@@ -206,9 +156,10 @@ const SegmentFilter = ({
 
           <Flex ml={'-1'} mt={'2'}>
             <AddFilterComponent
+              filters={customFilters}
+              setFilters={updateFilters}
               eventProperties={eventProperties}
               loadingEventProperties={loadingEventProperties}
-              handleAddFilter={handleAddFilter}
               hideIndentIcon={true}
             />
           </Flex>

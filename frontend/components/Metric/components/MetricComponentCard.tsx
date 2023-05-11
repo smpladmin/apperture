@@ -8,19 +8,16 @@ import {
   MetricVariant,
 } from '@lib/domain/metric';
 import { Node } from '@lib/domain/node';
-
-import {
-  FilterConditions,
-  FilterDataType,
-  FilterOperatorsString,
-  FilterType,
-  WhereFilter,
-} from '@lib/domain/common';
+import { WhereFilter } from '@lib/domain/common';
 import MetricAggregation from './MetricAggregation';
 import StepFilter from '@components/StepFilters/StepFilters';
-import AddFilterComponent from '@components/StepFilters/AddFilter';
+import AddFilterComponent from '@components/StepFilters/components/AddFilter';
 import { Trash } from 'phosphor-react';
-import { COLOR_PALLETE_5, useColorFromPallete } from '@components/Metric/util';
+import {
+  COLOR_PALLETE_5,
+  hasValidFilters,
+  useColorFromPallete,
+} from '@components/Metric/util';
 import { GREY_500 } from '@theme/index';
 import SelectEventOrSegmentDropdown from './SelectEventOrSegmentDropdown';
 
@@ -85,54 +82,8 @@ const MetricComponentCard = ({
     });
     setReference(selection.id);
   };
-
-  const handleAddFilter = (value: string) => {
-    const getFilterCondition = (filters: WhereFilter[]) => {
-      return !filters.length ? FilterConditions.WHERE : FilterConditions.AND;
-    };
-
-    const newFilter = {
-      condition: getFilterCondition(filters),
-      operand: value,
-      operator: FilterOperatorsString.IS,
-      values: [],
-      type: FilterType.WHERE,
-      all: false,
-      datatype: FilterDataType.STRING,
-    };
-
-    setFilters([...filters, newFilter]);
-  };
-
-  const handleSetFilterValue = (filterIndex: number, values: string[]) => {
-    let stepFilters = [...filters];
-    stepFilters[filterIndex]['values'] = values;
-
-    setFilters(stepFilters);
-  };
-
-  const handleSetFilterPropertyValue = (
-    filterIndex: number,
-    property: string
-  ) => {
-    let stepFilters = [...filters];
-    stepFilters[filterIndex]['operand'] = property;
-
-    setFilters(stepFilters);
-  };
-
   const handleRemoveComponent = () => {
     removeAggregate(index);
-  };
-
-  const removeFilter = (filterIndex: number) => {
-    let tempFilters = [...filters];
-    tempFilters.splice(filterIndex, 1);
-
-    if (filterIndex === 0 && tempFilters.length)
-      tempFilters[0]['condition'] = FilterConditions.WHERE;
-
-    setFilters(tempFilters);
   };
 
   const handleVariantSelection = (variant: MetricVariant) => {
@@ -152,7 +103,7 @@ const MetricComponentCard = ({
   }, [variant, eventList]);
 
   useEffect(() => {
-    if (filters.every((filter) => filter.values.length)) {
+    if (hasValidFilters(filters)) {
       updateAggregate(variable, { filters });
     }
   }, [filters]);
@@ -266,11 +217,10 @@ const MetricComponentCard = ({
                   <StepFilter
                     index={index}
                     filter={filter}
+                    filters={filters}
+                    setFilters={setFilters}
                     eventProperties={eventProperties}
                     loadingEventProperties={loadingEventsAndProperties}
-                    handleSetFilterProperty={handleSetFilterPropertyValue}
-                    handleSetFilterValue={handleSetFilterValue}
-                    handleRemoveFilter={removeFilter}
                   />
                 </Flex>
               ))}
@@ -278,8 +228,8 @@ const MetricComponentCard = ({
           )}
           <AddFilterComponent
             filters={filters}
+            setFilters={setFilters}
             eventProperties={eventProperties}
-            handleAddFilter={handleAddFilter}
             loadingEventProperties={loadingEventsAndProperties}
             hideIndentIcon
           />

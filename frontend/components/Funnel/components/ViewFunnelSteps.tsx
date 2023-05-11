@@ -54,7 +54,7 @@ function ViewFunnelSteps({ steps }: { steps: FunnelStep[] }) {
               </Flex>
             </Flex>
 
-            {step.filters.map((filter, index) => {
+            {step.filters?.map((filter, index) => {
               return <ViewFilter key={index} filter={filter} />;
             })}
           </Box>

@@ -127,7 +127,8 @@ class FunnelsService:
             end_date=end_date,
             conversion_time=conversion_time,
             random_sequence=random_sequence,
-        )
+        ) or [tuple([0]) * len(steps)]
+
         computed_funnel = [
             ComputedFunnelStep(
                 event=step.event,
@@ -293,6 +294,7 @@ class FunnelsService:
             prev_day_value=await self.get_notification_data(
                 notification=notification, days_ago=2
             ),
+            reference=notification.reference,
             threshold_type=NotificationThresholdType.PCT
             if notification.pct_threshold_active
             else NotificationThresholdType.ABSOLUTE,

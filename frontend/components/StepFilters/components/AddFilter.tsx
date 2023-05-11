@@ -4,25 +4,50 @@ import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { ArrowElbowDownRight } from 'phosphor-react';
 import { GREY_700 } from '@theme/index';
 import React, { useRef, useState } from 'react';
-import { WhereFilter } from '@lib/domain/common';
+import {
+  FilterConditions,
+  FilterDataType,
+  FilterOperatorsString,
+  FilterType,
+  WhereFilter,
+} from '@lib/domain/common';
 
 type FunnelAddFilterComponentProps = {
   eventProperties: string[];
   loadingEventProperties: boolean;
-  handleAddFilter: Function;
-  filters?: WhereFilter[];
+  filters: WhereFilter[];
+  setFilters: Function;
   hideIndentIcon?: boolean;
 };
 
 const AddFilterComponent = ({
   eventProperties,
   loadingEventProperties,
-  handleAddFilter,
   filters,
+  setFilters,
   hideIndentIcon = false,
 }: FunnelAddFilterComponentProps) => {
   const [openDropDown, setOpenDropDown] = useState(false);
   const ref = useRef(null);
+
+  const handleAddFilter = (value: string) => {
+    const getFunnelFilterCondition = (stepFilters: WhereFilter[]) => {
+      return !stepFilters.length
+        ? FilterConditions.WHERE
+        : FilterConditions.AND;
+    };
+
+    const newFilter = {
+      condition: getFunnelFilterCondition(filters),
+      operand: value,
+      operator: FilterOperatorsString.IS,
+      values: [],
+      type: FilterType.WHERE,
+      all: false,
+      datatype: FilterDataType.STRING,
+    };
+    setFilters([...filters, newFilter]);
+  };
 
   const handleSubmit = (value: string) => {
     setOpenDropDown(false);

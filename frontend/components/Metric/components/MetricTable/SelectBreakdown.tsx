@@ -1,10 +1,11 @@
 import { Checkbox, Flex, Text } from '@chakra-ui/react';
-import { COLOR_PALLETE_5 } from '@components/Metric/util';
+import {
+  BREAKDOWN_SELECTION_LIMIT,
+  COLOR_PALLETE_5,
+} from '@components/Metric/util';
 import { Breakdown, MetricTableData } from '@lib/domain/metric';
 import { CellContext } from '@tanstack/react-table';
 import React, { ChangeEvent } from 'react';
-
-const BREAKDOWN_SELECTION_LIMIT = 5;
 
 type SelectBreakdownProps = {
   info: CellContext<MetricTableData, string>;

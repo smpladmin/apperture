@@ -81,6 +81,7 @@ def test_create_action(client_init, action_data, action_service):
         "user_id": PydanticObjectId("63e4da53370789982002e57d"),
         "enabled": True,
     }
+    action_service.update_events_for_action.assert_called_once()
 
 
 def test_create_action_with_error(client_init, action_data, action_service):
@@ -257,6 +258,7 @@ def test_transient_action(client_init, action_service, transient_action_data):
                     "url_matching": None,
                 }
             ],
+            "date_filter": {"filter": {"days": 7}, "type": "last"},
         }
     )
 

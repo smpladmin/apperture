@@ -1,5 +1,6 @@
 from typing import Optional
-from fastapi import Depends, HTTPException, Header
+
+from fastapi import Depends, Header, HTTPException
 
 from settings import apperture_settings
 

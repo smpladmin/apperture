@@ -22,6 +22,8 @@ import {
 } from '@lib/services/actionService';
 import DividerWithItem from '@components/Divider/DividerWithItem';
 import { cloneDeep } from 'lodash';
+import DateFilter from '@components/Date/DateFilter';
+import { DateFilterObj, DateFilterType } from '@lib/domain/common';
 
 const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
   const toast = useToast();
@@ -60,8 +62,14 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
 
   const datasourceId = dsId || savedAction?.datasourceId;
   const readOnly = Boolean(savedAction?.datasourceId);
+
+  const [dateFilter, setDateFilter] = useState<DateFilterObj>({
+    filter: { days: 7 },
+    type: DateFilterType.LAST,
+  });
+
   useEffect(() => {
-    if (pathname.includes('/analytics/action/edit'))
+    if (pathname.includes('/analytics/action/view'))
       setIsActionBeingEdited(true);
   }, []);
 
@@ -89,7 +97,8 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
     const fetchTransientEvents = async () => {
       const res = await getTransientActionEvents(
         datasourceId as string,
-        groups
+        groups,
+        dateFilter
       );
       setTransientActionEvents(res);
       setIsLoading(false);
@@ -97,7 +106,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
 
     fetchTransientEvents();
     setIsLoading(true);
-  }, [groups]);
+  }, [groups, dateFilter]);
 
   const updateGroupAction = useCallback(
     (groups: ActionGroup[]) => {
@@ -141,7 +150,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
     if (response?.status === 200 && response.data) {
       const { _id, datasourceId } = response?.data;
       router.push({
-        pathname: '/analytics/action/edit/[actionId]',
+        pathname: '/analytics/action/view/[actionId]',
         query: { actionId: _id || actionId, dsId: datasourceId },
       });
     }
@@ -165,14 +174,13 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
         isSaveDisabled={isSaveDisabled}
         saveOrUpdateAction={saveOrUpdateAction}
       />
-      <Flex h={'full'} w={'full'}>
+      <Flex h={'full'} w={'full'} pb={'24'}>
         <Box
           pt={'4'}
           px={'5'}
           minW={'106'}
           borderRight={'1px'}
           borderColor={'white.200'}
-          pb={24}
           overflow="auto"
         >
           <Flex justifyContent={'space-between'} alignItems="center">
@@ -237,16 +245,23 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
           </Flex>
         </Box>
         <Box w={'full'} overflow={'auto'} pt={'4'} px={'8'}>
-          {isEmpty ? (
-            <Flex justifyContent={'center'} mt={'50'}>
-              <Image src={emptyAction} alt={'empty-action-image'} />
-            </Flex>
-          ) : (
-            <ActionTable
-              isLoading={isLoading}
-              tableData={transientActionEvents}
+          <Flex direction={'column'}>
+            <DateFilter
+              dateFilter={dateFilter}
+              setDateFilter={setDateFilter}
+              isDisabled={readOnly}
             />
-          )}
+            {isEmpty ? (
+              <Flex justifyContent={'center'} mt={'50'}>
+                <Image src={emptyAction} alt={'empty-action-image'} />
+              </Flex>
+            ) : (
+              <ActionTable
+                isLoading={isLoading}
+                tableData={transientActionEvents}
+              />
+            )}
+          </Flex>
         </Box>
       </Flex>
     </Box>

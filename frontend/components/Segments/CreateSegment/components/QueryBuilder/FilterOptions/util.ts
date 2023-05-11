@@ -1,7 +1,5 @@
-import {
-  FilterOptionMenuType,
-  SegmentFilterDataType,
-} from '@lib/domain/segment';
+import { FilterDataType } from '@lib/domain/common';
+import { FilterOptionMenuType } from '@lib/domain/segment';
 
 export const FilterOptionMenu: FilterOptionMenuType[] = [
   {
@@ -10,17 +8,17 @@ export const FilterOptionMenu: FilterOptionMenuType[] = [
     submenu: [
       {
         id: 'String',
-        label: SegmentFilterDataType.STRING,
+        label: FilterDataType.STRING,
         submenu: [],
       },
       {
         id: 'Number',
-        label: SegmentFilterDataType.NUMBER,
+        label: FilterDataType.NUMBER,
         submenu: [],
       },
       {
         id: 'Bool',
-        label: SegmentFilterDataType.BOOL,
+        label: FilterDataType.BOOL,
         submenu: [],
       },
     ],

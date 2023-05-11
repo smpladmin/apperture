@@ -17,6 +17,7 @@ import {
 import { getNotificationByReference } from '@lib/services/notificationService';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { replaceFilterValueWithEmptyStringPlaceholder } from '../util';
 import LeftView from './LeftView';
 import RightView from './RightView';
 
@@ -52,29 +53,36 @@ const ViewFunnel = ({
     type: savedFunnel?.conversionWindow?.type || ConversionWindowList.DAYS,
   });
   const [randomSequence] = useState(savedFunnel.randomSequence);
+  const [funnelSteps] = useState(
+    replaceFilterValueWithEmptyStringPlaceholder(savedFunnel.steps)
+  );
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
     const fetchComputeData = async () => {
-      const [computedFunnelData, computedTrendsData] = await Promise.all([
-        getTransientFunnelData(
-          datasourceId,
-          savedFunnel.steps,
-          dateFilter,
-          conversionWindow,
-          randomSequence
-        ),
-        getTransientTrendsData(
-          datasourceId,
-          savedFunnel.steps,
-          dateFilter,
-          conversionWindow,
-          randomSequence
-        ),
-      ]);
-      setComputedFunnelData(computedFunnelData);
-      setComputedTrendsData(computedTrendsData);
-      setIsLoading(false);
+      const [computedFunnelResponse, computedTrendsResponse] =
+        await Promise.all([
+          getTransientFunnelData(
+            datasourceId,
+            savedFunnel.steps,
+            dateFilter,
+            conversionWindow,
+            randomSequence
+          ),
+          getTransientTrendsData(
+            datasourceId,
+            savedFunnel.steps,
+            dateFilter,
+            conversionWindow,
+            randomSequence
+          ),
+        ]);
+      // status would be undefined if the call is cancelled
+      if (computedFunnelResponse?.status && computedTrendsResponse?.status) {
+        setComputedFunnelData(computedFunnelResponse?.data || []);
+        setComputedTrendsData(computedTrendsResponse?.data || []);
+        setIsLoading(false);
+      }
     };
     setIsLoading(true);
     fetchComputeData();
@@ -154,12 +162,12 @@ const ViewFunnel = ({
         bg={'white.400'}
       >
         <LeftView
-          steps={savedFunnel.steps}
+          steps={funnelSteps}
           conversionWindow={conversionWindow}
           randomSequence={randomSequence}
         />
         <RightView
-          funnelSteps={savedFunnel.steps}
+          funnelSteps={funnelSteps}
           computedFunnel={computedFunnelData}
           computedTrendsData={computedTrendsData}
           isLoading={isLoading}

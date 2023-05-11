@@ -1,17 +1,15 @@
-from typing import Union, List
+from typing import List, Union
 
 from fastapi import APIRouter, Depends
 
 from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
+from domain.datasources.service import DataSourceService
 from domain.notifications.models import NotificationResponse
 from domain.notifications.service import NotificationService
-from domain.datasources.service import DataSourceService
-
-from rest.middlewares import validate_jwt, get_user
-from rest.dtos.notifications import CreateNotificationDto, NotificationWithUser
 from rest.dtos.apperture_users import AppertureUserResponse as apperture_users
-
+from rest.dtos.notifications import CreateNotificationDto, NotificationWithUser
+from rest.middlewares import get_user, validate_jwt
 
 router = APIRouter(
     tags=["notification"],
@@ -109,10 +107,10 @@ async def update_notification(
         variant=dto.variant,
         reference=dto.reference,
     )
-    notification = await notification_service.update_notification(
+    await notification_service.update_notification(
         notification_id=notification_id, new_notification=new_notification
     )
-    return notification
+    return new_notification
 
 
 @router.delete("/notifications/{notification_id}")

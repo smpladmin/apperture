@@ -58,6 +58,11 @@ services:
     depends_on:
       - backend
       - redis
+  chrome:
+    image: browserless/chrome
+    container_name: 'chrome'
+    ports:
+      - '3001:3000'
   db:
     image: 'mongo'
     container_name: 'mongodb'
@@ -106,6 +111,7 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_BROKER_ID=1
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_CFG_NODE_ID=1
       - ALLOW_PLAINTEXT_LISTENER=yes # FIXME: kafka gives warning for this
     volumes:
       - kafka_data:/bitnami/kafka

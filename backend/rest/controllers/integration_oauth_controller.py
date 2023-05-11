@@ -1,22 +1,22 @@
+import json
 import logging
 import os
-import json
 from typing import Union
 from urllib.parse import urlparse
 
-from starlette.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuthError
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from starlette.responses import RedirectResponse
 
-from domain.apperture_users.models import AppertureUser
-from rest.dtos.oauth import OAuthState
-from domain.apps.service import AppService
-from domain.apperture_users.service import AppertureUserService
-from rest.middlewares import get_user, validate_jwt
-from domain.integrations.models import IntegrationProvider
-from domain.integrations.service import IntegrationService
 from authorisation import OAuthClientFactory, OAuthProvider
 from authorisation.models import IntegrationOAuth, OAuthUser
+from domain.apperture_users.models import AppertureUser
+from domain.apperture_users.service import AppertureUserService
+from domain.apps.service import AppService
+from domain.integrations.models import IntegrationProvider
+from domain.integrations.service import IntegrationService
+from rest.dtos.oauth import OAuthState
+from rest.middlewares import get_user, validate_jwt
 
 router = APIRouter(tags=["integration"], responses={401: {}})
 
@@ -36,7 +36,7 @@ async def oauth_google(
     user: AppertureUser = Depends(get_user),
     redirect_url: str = os.getenv("FRONTEND_LOGIN_REDIRECT_URL"),
 ):
-    redirect_uri = request.url_for("integration_google_authorise")
+    redirect_uri = str(request.url_for("integration_google_authorise"))
     return await oauth.google.authorize_redirect(
         request,
         redirect_uri,
@@ -103,7 +103,7 @@ async def oauth_slack(
     user: AppertureUser = Depends(get_user),
     redirect_url: str = os.getenv("FRONTEND_SLACK_INTEGRATION_REDIRECT_URL"),
 ):
-    redirect_uri = request.url_for("integration_slack_authorize").replace(
+    redirect_uri = str(request.url_for("integration_slack_authorize")).replace(
         "http", "https"
     )
     return await slack_oauth.slack.authorize_redirect(

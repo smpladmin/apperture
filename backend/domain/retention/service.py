@@ -11,10 +11,8 @@ from domain.metrics.models import SegmentFilter
 from domain.retention.models import (
     Granularity,
     EventSelection,
-    ComputedRetentionTrend,
     Retention,
     ComputedRetention,
-    ComputedRetentionForInterval,
 )
 from mongo import Mongo
 from repositories.clickhouse.retention import Retention as RetentionRepository
@@ -34,16 +32,15 @@ class RetentionService:
         self.segment = segment
         self.date_utils = date_utils
 
-    async def compute_retention_trend(
+    async def compute_retention(
         self,
         datasource_id: str,
         start_event: EventSelection,
         goal_event: EventSelection,
         date_filter: DateFilter,
-        segment_filter: Union[SegmentFilter, None],
+        segment_filter: Union[List[SegmentFilter], None],
         granularity: Granularity,
-        interval: int,
-    ) -> List[ComputedRetentionTrend]:
+    ) -> List[ComputedRetention]:
         start_date, end_date = self.date_utils.compute_date_filter(
             date_filter=date_filter.filter, date_filter_type=date_filter.type
         )
@@ -56,7 +53,7 @@ class RetentionService:
             else None
         )
 
-        retention_trend_query_response = self.retention.compute_retention_trend(
+        retention_trend_query_response = self.retention.compute_retention(
             datasource_id=datasource_id,
             start_event=start_event,
             goal_event=goal_event,
@@ -64,69 +61,26 @@ class RetentionService:
             end_date=end_date,
             segment_filter_criterion=segment_filter_criterion,
             granularity=granularity,
-            interval=interval,
         )
         return [
-            ComputedRetentionTrend(
-                granularity=datetime.combine(granularity, datetime.min.time()),
-                retention_rate="{:.2f}".format((retained_users / total_users) * 100),
+            ComputedRetention(
+                granularity=datetime.combine(
+                    goal_event_granularity, datetime.min.time()
+                ),
+                interval=interval,
+                initial_users=initial_users,
                 retained_users=retained_users,
+                retention_rate="{:.2f}".format((retained_users / initial_users) * 100),
+                interval_name=f"{granularity.value[:-1]} {interval}",
             )
             for (
-                granularity,
-                total_users,
+                goal_event_granularity,
+                interval,
                 retained_users,
+                start_event_granularity,
+                initial_users,
             ) in retention_trend_query_response
         ]
-
-    async def compute_retention(
-        self,
-        datasource_id: str,
-        start_event: EventSelection,
-        goal_event: EventSelection,
-        date_filter: DateFilter,
-        segment_filter: Union[SegmentFilter, None],
-        granularity: Granularity,
-        page_number: int,
-        page_size: int,
-    ) -> ComputedRetention:
-        start_date, end_date = self.date_utils.compute_date_filter(
-            date_filter=date_filter.filter, date_filter_type=date_filter.type
-        )
-
-        segment_filter_criterion = (
-            self.segment.build_segment_filter_on_metric_criterion(
-                segment_filter=segment_filter
-            )
-            if segment_filter
-            else None
-        )
-        days_in_date_range = self.date_utils.compute_days_in_date_range(
-            start_date=start_date, end_date=end_date
-        )
-        total_pages = days_in_date_range // granularity.get_days()
-        start_index = min(page_number * page_size, total_pages)
-        end_index = min((page_number + 1) * page_size, total_pages)
-        retention = []
-        if end_index > start_index:
-            retention = self.retention.compute_retention(
-                datasource_id=datasource_id,
-                start_event=start_event,
-                goal_event=goal_event,
-                start_date=start_date,
-                end_date=end_date,
-                segment_filter_criterion=segment_filter_criterion,
-                granularity=granularity,
-                start_index=start_index,
-                end_index=end_index,
-            )
-            retention = [
-                ComputedRetentionForInterval(
-                    name=f"{granularity[:-1]} {start_index+i}", value=value
-                )
-                for i, value in enumerate(retention)
-            ]
-        return ComputedRetention(count=total_pages, data=retention)
 
     def build_retention(
         self,

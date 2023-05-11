@@ -6,16 +6,15 @@ from fastapi import APIRouter, Depends
 
 from authorisation.service import AuthService
 from data_processor_queue.service import DPQueueService
-from domain.apperture_users.service import AppertureUserService
 from domain.actions.service import ActionService
+from domain.apperture_users.service import AppertureUserService
 from domain.common.models import IntegrationProvider
-from domain.properties.service import PropertiesService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
-from domain.funnels.service import FunnelsService
-from domain.metrics.service import MetricService
 from domain.events.service import EventsService
+from domain.funnels.service import FunnelsService
 from domain.integrations.service import IntegrationService
+from domain.metrics.service import MetricService
 from domain.notifications.models import NotificationType, NotificationVariant
 from domain.notifications.service import NotificationService
 from domain.properties.service import PropertiesService
@@ -28,6 +27,12 @@ from rest.dtos.apperture_users import (
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.events import CreateEventDto
+from rest.dtos.funnels import FunnelResponse, FunnelTrendResponse, TransientFunnelDto
+from rest.dtos.metrics import (
+    ComputedMetricStepResponse,
+    MetricsComputeDto,
+    SavedMetricResponse,
+)
 from rest.dtos.notifications import (
     ComputedNotificationResponse,
     TriggerNotificationsDto,
@@ -141,7 +146,7 @@ async def trigger_fetch_for_all_datasources(
 
 
 @router.post("/notifications")
-async def get_notifications(
+async def post_notifications(
     notification_service: NotificationService = Depends(),
     dpq_service: DPQueueService = Depends(),
 ):
@@ -270,3 +275,56 @@ async def create_pending_runlogs(
     runlogs = await runlog_service.create_pending_runlogs(datasource)
     jobs = dpq_service.enqueue_from_runlogs(runlogs)
     return jobs
+
+
+@router.get("/metrics/{id}", response_model=SavedMetricResponse)
+async def get_metric_by_id(
+    id: str,
+    metric_service: MetricService = Depends(),
+):
+    return await metric_service.get_metric_by_id(metric_id=id)
+
+
+@router.post("/metrics/compute", response_model=List[ComputedMetricStepResponse])
+async def compute_metrics(
+    dto: MetricsComputeDto,
+    metric_service: MetricService = Depends(),
+):
+    if metric_service.validate_formula(
+        dto.function, [aggregate.variable for aggregate in dto.aggregates]
+    ):
+        result = await metric_service.compute_metric(
+            datasource_id=str(dto.datasourceId),
+            function=dto.function,
+            aggregates=dto.aggregates,
+            breakdown=dto.breakdown,
+            date_filter=dto.dateFilter,
+            segment_filter=dto.segmentFilter,
+        )
+        return result
+    return [
+        ComputedMetricStepResponse(name=func, series=[])
+        for func in dto.function.split(",")
+    ]
+
+
+@router.get("/funnels/{id}", response_model=FunnelResponse)
+async def get_saved_funnel(
+    id: str,
+    funnel_service: FunnelsService = Depends(),
+):
+    return await funnel_service.get_funnel(id)
+
+
+@router.post("/funnels/trends/transient", response_model=List[FunnelTrendResponse])
+async def get_transient_funnel_trends(
+    dto: TransientFunnelDto,
+    funnel_service: FunnelsService = Depends(),
+):
+    return await funnel_service.get_funnel_trends(
+        datasource_id=dto.datasourceId,
+        steps=dto.steps,
+        date_filter=dto.dateFilter,
+        conversion_window=dto.conversionWindow,
+        random_sequence=dto.randomSequence,
+    )

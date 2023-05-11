@@ -8,8 +8,18 @@ import appertureLogo from '@assets/images/apperture-logo.svg';
 import { StaticImageData } from 'next/image';
 import { AppWithIntegrations } from '@lib/domain/app';
 import dayjs from 'dayjs';
+import {
+  ExternalSegmentFilter,
+  FilterDataType,
+  WhereFilter,
+} from '@lib/domain/common';
+import {
+  replaceEmptyStringPlaceholder,
+  replaceFilterValueWithEmptyStringPlaceholder,
+} from '@components/Segments/util';
 
 export const DEBOUNCED_WAIT_TIME = 500;
+export const dateFormat = 'D MMM YY, h:mm:ss A';
 
 export const formatDatalabel = (datalabel: number): string => {
   if (datalabel > 999999999999) {
@@ -113,4 +123,40 @@ export const trimLabel = (label: string, size = 15) => {
   return label.length > size + 3 ? label.slice(0, size) + '...' : label;
 };
 
-export const dateFormat = 'D MMM YY, h:mm:ss A';
+export const isEveryCustomSegmentFilterValid = (filters: WhereFilter[]) => {
+  return filters?.every(
+    (filter) => filter.values.length || filter.datatype === FilterDataType.BOOL
+  );
+};
+
+export const isValidSegmentFilter = (
+  segmentFilters: ExternalSegmentFilter[]
+) => {
+  return segmentFilters.every(
+    (filter) =>
+      (filter.custom.filters.length || filter.segments.length) &&
+      isEveryCustomSegmentFilterValid(filter.custom.filters as WhereFilter[])
+  );
+};
+
+export const replacePlaceholderWithEmptyStringInExternalSegmentFilter = (
+  segmentFilters: ExternalSegmentFilter[]
+) => {
+  return segmentFilters.map((segmentFilter) => {
+    const updatedCustomGroup = replaceEmptyStringPlaceholder([
+      segmentFilter.custom,
+    ])[0];
+    return { ...segmentFilter, custom: updatedCustomGroup };
+  });
+};
+
+export const replaceEmptyStringWithPlaceholderInExternalSegmentFilter = (
+  segmentFilters: ExternalSegmentFilter[]
+) => {
+  return segmentFilters.map((segmentFilter) => {
+    const updatedCustomGroup = replaceFilterValueWithEmptyStringPlaceholder([
+      segmentFilter.custom,
+    ])[0];
+    return { ...segmentFilter, custom: updatedCustomGroup };
+  });
+};

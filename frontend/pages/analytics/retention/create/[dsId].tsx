@@ -8,7 +8,7 @@ import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
 import { ReactElement, useContext, useEffect } from 'react';
 import { Node } from '@lib/domain/node';
-import Retention from '@components/Retention';
+import Retention from '@components/Retention/CreateRetention';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,

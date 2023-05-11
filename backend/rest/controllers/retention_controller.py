@@ -9,7 +9,6 @@ from domain.retention.service import RetentionService
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.retention import (
     TransientRetentionDto,
-    ComputedRetentionTrendResponse,
     RetentionResponse,
     CreateRetentionDto,
     RetentionWithUser,
@@ -25,29 +24,8 @@ router = APIRouter(
 )
 
 
-@router.post(
-    "/retention/trends/transient", response_model=List[ComputedRetentionTrendResponse]
-)
-async def compute_transient_retention_trend(
-    interval: int,
-    dto: TransientRetentionDto,
-    retention_service: RetentionService = Depends(),
-):
-    return await retention_service.compute_retention_trend(
-        datasource_id=str(dto.datasourceId),
-        start_event=dto.startEvent,
-        goal_event=dto.goalEvent,
-        granularity=dto.granularity,
-        segment_filter=dto.segmentFilter,
-        date_filter=dto.dateFilter,
-        interval=interval,
-    )
-
-
-@router.post("/retention/transient", response_model=ComputedRetentionResponse)
+@router.post("/retention/transient", response_model=List[ComputedRetentionResponse])
 async def compute_transient_retention(
-    page_number: int,
-    page_size: int,
     dto: TransientRetentionDto,
     retention_service: RetentionService = Depends(),
 ):
@@ -58,8 +36,6 @@ async def compute_transient_retention(
         granularity=dto.granularity,
         segment_filter=dto.segmentFilter,
         date_filter=dto.dateFilter,
-        page_number=page_number,
-        page_size=page_size,
     )
 
 
