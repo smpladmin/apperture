@@ -86,21 +86,21 @@ const StepFilter = ({
   useOnClickOutside(eventPropertyRef, () => setIsPropertyDropdownOpen(false));
 
   const handleSetFilterValue = (filterIndex: number, values: string[]) => {
-    let stepFilters = [...filters];
+    const stepFilters = [...filters];
     stepFilters[filterIndex]['values'] = values;
 
     setFilters(stepFilters);
   };
 
   const handleSetFilterProperty = (filterIndex: number, property: string) => {
-    let stepFilters = [...filters];
+    const stepFilters = [...filters];
     stepFilters[filterIndex]['operand'] = property;
 
     setFilters(stepFilters);
   };
 
   const handleRemoveFilter = (filterIndex: number) => {
-    let stepFilters = [...filters];
+    const stepFilters = [...filters];
     stepFilters.splice(filterIndex, 1);
 
     if (filterIndex === 0 && stepFilters.length)
@@ -113,7 +113,7 @@ const StepFilter = ({
     filterIndex: number,
     selectedDatatype: FilterDataType
   ) => {
-    let stepFilters = [...filters];
+    const stepFilters = [...filters];
     stepFilters[filterIndex]['operator'] =
       FilterOperatorsDatatypeMap[selectedDatatype][0];
     stepFilters[filterIndex]['values'] = [];
@@ -126,7 +126,7 @@ const StepFilter = ({
     filterIndex: number,
     selectedOperator: FilterOperators
   ) => {
-    let stepFilters = [...filters];
+    const stepFilters = [...filters];
 
     /*
     While changing operator from `is/is_not` to `contains/does_not_contain`
