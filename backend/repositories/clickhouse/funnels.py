@@ -429,7 +429,6 @@ class Funnels(EventsBase):
             if status == ConversionStatus.DROPPED
             else Field(last).notnull()
         ]
-        # count_query = self.build_conversion_count_query(last)
         count_query = ClickHouseQuery.from_(AliasedQuery("final_table"))
 
         if status == ConversionStatus.CONVERTED:
