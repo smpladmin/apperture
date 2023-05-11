@@ -112,3 +112,5 @@ export const getFilterValuesText = (values: string[]) => {
 export const trimLabel = (label: string, size = 15) => {
   return label.length > size + 3 ? label.slice(0, size) + '...' : label;
 };
+
+export const dateFormat = 'D MMM YY, h:mm:ss A';

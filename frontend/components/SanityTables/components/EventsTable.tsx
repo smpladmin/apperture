@@ -20,6 +20,8 @@ import {
 } from '@tanstack/react-table';
 import { useMemo } from 'react';
 import dayjs from 'dayjs';
+import { dateFormat } from '@lib/utils/common';
+
 
 type EventsTablesProps = { eventData: SanityData; selectedColumns: string[] };
 
@@ -33,7 +35,7 @@ const EventsTables = ({ eventData, selectedColumns }: EventsTablesProps) => {
           header: key,
           cell: (info) =>
             key === 'timestamp'
-              ? dayjs(info.getValue() as Date).format('D MMM YY, h:mm:ss A')
+              ? dayjs(info.getValue() as Date).format(dateFormat)
               : info.getValue(),
         })
       );
