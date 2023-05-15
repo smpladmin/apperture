@@ -16,9 +16,19 @@ import {
   replacePlaceholderWithEmptyStringInExternalSegmentFilter,
 } from '@lib/utils/common';
 
+type FunnelRequestBody = {
+  name?: string;
+  datasourceId: string;
+  steps: FunnelStep[];
+  dateFilter: DateFilterObj | null;
+  conversionWindow: ConversionWindowObj;
+  randomSequence: boolean;
+  segmentFilter?: ExternalSegmentFilter[];
+};
+
 const _addSegmentFilterToRequestBody = (
-  segmentFilters: any,
-  requestBody: any
+  segmentFilters: ExternalSegmentFilter[] | null,
+  requestBody: FunnelRequestBody
 ) => {
   if (segmentFilters && isValidSegmentFilter(segmentFilters)) {
     const updatedSegmentFilters =
@@ -39,7 +49,7 @@ export const saveFunnel = async (
   conversionWindow: ConversionWindowObj,
   segmentFilters: ExternalSegmentFilter[] | null
 ) => {
-  const funnelRequestBody = {
+  const funnelRequestBody: FunnelRequestBody = {
     datasourceId: dsId,
     name: funnelName,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
@@ -64,7 +74,7 @@ export const updateFunnel = async (
   conversionWindow: ConversionWindowObj,
   segmentFilters: ExternalSegmentFilter[] | null
 ) => {
-  const funnelRequestBody = {
+  const funnelRequestBody: FunnelRequestBody = {
     datasourceId: dsId,
     name: funnelName,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
@@ -93,7 +103,7 @@ export const getTransientFunnelData = async (
   segmentFilters: ExternalSegmentFilter[] | null,
   signal?: AbortSignal
 ) => {
-  const funnelRequestBody = {
+  const funnelRequestBody: FunnelRequestBody = {
     datasourceId: dsId,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
     randomSequence,
@@ -118,7 +128,7 @@ export const getTransientTrendsData = async (
   segmentFilters: ExternalSegmentFilter[] | null,
   signal?: AbortSignal
 ) => {
-  const funnelRequestBody = {
+  const funnelRequestBody: FunnelRequestBody = {
     datasourceId: dsId,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
     randomSequence,
@@ -202,11 +212,11 @@ export const _getTransientTrendsDataPrivate = async (
   dsId: string,
   steps: FunnelStep[],
   dateFilter: DateFilterObj | null,
-  conversionWindow: ConversionWindowObj | null,
+  conversionWindow: ConversionWindowObj,
   randomSequence: boolean,
   segmentFilters: ExternalSegmentFilter[] | null
 ) => {
-  const funnelRequestBody = {
+  const funnelRequestBody: FunnelRequestBody = {
     datasourceId: dsId,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
     randomSequence,

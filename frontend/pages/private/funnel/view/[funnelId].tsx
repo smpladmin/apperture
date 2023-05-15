@@ -43,7 +43,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     datasourceId,
     steps,
     dateFilter || null,
-    conversionWindow || null,
+    conversionWindow!!,
     randomSequence,
     segmentFilter || null
   );
