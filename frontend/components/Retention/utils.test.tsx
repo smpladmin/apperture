@@ -1,5 +1,9 @@
 import { RetentionData } from '@lib/domain/retention';
-import { convertToIntervalData, convertToTrendsData } from './utils';
+import {
+  convertToCohortData,
+  convertToIntervalData,
+  convertToTrendsData,
+} from './utils';
 
 const retentionData: RetentionData[] = [
   {
@@ -77,5 +81,20 @@ describe('Data transformation for retention', () => {
         { name: 'day 2', value: 52.21 },
       ],
     });
+  });
+
+  it('should convert retention data to cohort table data', () => {
+    expect(convertToCohortData(retentionData)).toEqual([
+      {
+        cohort: new Date('2022-11-23T18:30:00.000Z'),
+        intervals: { 'day 0': 55.94 },
+        size: 202,
+      },
+      {
+        cohort: new Date('2022-11-24T18:30:00.000Z'),
+        intervals: { 'day 0': 48.7 },
+        size: 230,
+      },
+    ]);
   });
 });

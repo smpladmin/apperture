@@ -61,8 +61,6 @@ const TransientRetentionView = ({
     return convertToCohortData(retentionData);
   }, [retentionData]);
 
-  console.log('cohort data', cohortData);
-
   return (
     <Flex direction={'column'} gap={'5'}>
       <Flex justifyContent={'space-between'}>

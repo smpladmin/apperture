@@ -75,7 +75,7 @@ const CohortTable = ({ columns, tableData, isLoading }: CohortTableProps) => {
                   return (
                     <Td
                       key={cell.id + cellIndex}
-                      data-testid={'cohort-table--body-data'}
+                      data-testid={'cohort-table-body-data'}
                       fontSize={'xs-12'}
                       border="none"
                     >
