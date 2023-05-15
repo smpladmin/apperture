@@ -70,6 +70,7 @@ async def test_update_funnel(
         funnel_data["randomSequence"],
         None,
         None,
+        None,
     )
 
     update_funnel_kwargs = funnel_service.update_funnel.call_args.kwargs
@@ -99,6 +100,7 @@ async def test_update_funnel(
         "date_filter": None,
         "enabled": True,
         "conversion_window": None,
+        "segment_filter": None,
     } == update_funnel_kwargs["new_funnel"].dict()
 
     assert "635ba034807ab86d8a2aadd8" == update_funnel_kwargs["funnel_id"]
@@ -132,6 +134,8 @@ def test_get_funnel_trends(client_init, funnel_trend_response, funnel_service):
             ],
             "date_filter": None,
             "conversion_window": None,
+            "random_sequence": False,
+            "segment_filter": None,
         }
     )
 
@@ -162,6 +166,7 @@ def test_get_transient_funnel_trends(
             "date_filter": None,
             "conversion_window": None,
             "random_sequence": False,
+            "segment_filter": None,
         }
     )
 
@@ -208,6 +213,7 @@ def test_get_funnels(client_init, funnel_service):
             "dateFilter": None,
             "enabled": True,
             "conversionWindow": None,
+            "segmentFilter": None,
         }
     ]
     funnel_service.get_funnels_for_datasource_id.assert_called_once_with(
