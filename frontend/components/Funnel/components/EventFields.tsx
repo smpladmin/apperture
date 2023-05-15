@@ -14,12 +14,16 @@ type funnelSteps = {
   funnelSteps: Array<FunnelStep>;
   setFunnelSteps: Function;
   randomSequence: boolean;
+  eventProperties: string[];
+  loadingEventProperties: boolean;
 };
 
 const EventFields = ({
   funnelSteps,
   setFunnelSteps,
   randomSequence,
+  eventProperties,
+  loadingEventProperties,
 }: funnelSteps) => {
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -63,6 +67,8 @@ const EventFields = ({
                           funnelSteps={funnelSteps}
                           setFunnelSteps={setFunnelSteps}
                           hideNumbers={i != 0 && randomSequence}
+                          eventProperties={eventProperties}
+                          loadingEventProperties={loadingEventProperties}
                         />
                       </Box>
                     )}

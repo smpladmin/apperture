@@ -12,7 +12,7 @@ import {
   IconButton,
   Text,
 } from '@chakra-ui/react';
-import { DateFilterObj } from '@lib/domain/common';
+import { DateFilterObj, ExternalSegmentFilter } from '@lib/domain/common';
 import {
   ConversionStatus,
   ConversionWindowObj,
@@ -34,6 +34,7 @@ type UserConversionDrawerProps = {
   dateFilter: DateFilterObj;
   conversionWindow: ConversionWindowObj;
   randomSequence: boolean;
+  segmentFilters: ExternalSegmentFilter[];
 };
 
 export enum TableState {
@@ -50,6 +51,7 @@ const UserConversionDrawer = ({
   dateFilter,
   conversionWindow,
   randomSequence,
+  segmentFilters,
 }: UserConversionDrawerProps) => {
   const [tableState, setTableState] = useState<TableState>(TableState.PROPERTY);
   const [selectedUser, setSelectedUser] = useState<null | string>(null);
@@ -172,6 +174,7 @@ const UserConversionDrawer = ({
               selectedUser={selectedUser}
               setUserActivity={setUserActivity}
               isTableDataLoading={isTableDataLoading}
+              segmentFilters={segmentFilters}
             />
           </DrawerBody>
 

@@ -9,8 +9,26 @@ import {
 import { ConversionStatus, FunnelStep } from '@lib/domain/funnel';
 import { replaceEmptyStringPlaceholder } from '@components/Funnel/util';
 import cloneDeep from 'lodash/cloneDeep';
-import { DateFilterObj } from '@lib/domain/common';
+import { DateFilterObj, ExternalSegmentFilter } from '@lib/domain/common';
 import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
+import {
+  isValidSegmentFilter,
+  replacePlaceholderWithEmptyStringInExternalSegmentFilter,
+} from '@lib/utils/common';
+
+const _addSegmentFilterToRequestBody = (
+  segmentFilters: any,
+  requestBody: any
+) => {
+  if (segmentFilters && isValidSegmentFilter(segmentFilters)) {
+    const updatedSegmentFilters =
+      replacePlaceholderWithEmptyStringInExternalSegmentFilter(
+        cloneDeep(segmentFilters)
+      );
+
+    requestBody.segmentFilter = updatedSegmentFilters;
+  }
+};
 
 export const saveFunnel = async (
   dsId: string,
@@ -18,7 +36,8 @@ export const saveFunnel = async (
   steps: FunnelStep[],
   randomSequence: boolean,
   dateFilter: DateFilterObj,
-  conversionWindow: ConversionWindowObj
+  conversionWindow: ConversionWindowObj,
+  segmentFilters: ExternalSegmentFilter[] | null
 ) => {
   const funnelRequestBody = {
     datasourceId: dsId,
@@ -28,6 +47,8 @@ export const saveFunnel = async (
     dateFilter,
     conversionWindow,
   };
+
+  _addSegmentFilterToRequestBody(segmentFilters, funnelRequestBody);
 
   const res = await ApperturePost('/funnels', funnelRequestBody);
   return res;
@@ -40,7 +61,8 @@ export const updateFunnel = async (
   steps: FunnelStep[],
   randomSequence: boolean,
   dateFilter: DateFilterObj,
-  conversionWindow: ConversionWindowObj
+  conversionWindow: ConversionWindowObj,
+  segmentFilters: ExternalSegmentFilter[] | null
 ) => {
   const funnelRequestBody = {
     datasourceId: dsId,
@@ -50,6 +72,8 @@ export const updateFunnel = async (
     dateFilter,
     conversionWindow,
   };
+
+  _addSegmentFilterToRequestBody(segmentFilters, funnelRequestBody);
 
   const res = await ApperturePut(`/funnels/${funnelId}`, funnelRequestBody);
   return res;
@@ -66,19 +90,22 @@ export const getTransientFunnelData = async (
   dateFilter: DateFilterObj,
   conversionWindow: ConversionWindowObj,
   randomSequence: boolean,
+  segmentFilters: ExternalSegmentFilter[] | null,
   signal?: AbortSignal
 ) => {
-  const res = await ApperturePost(
-    '/funnels/transient',
-    {
-      datasourceId: dsId,
-      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
-      dateFilter,
-      conversionWindow,
-      randomSequence,
-    },
-    { signal }
-  );
+  const funnelRequestBody = {
+    datasourceId: dsId,
+    steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+    randomSequence,
+    dateFilter,
+    conversionWindow,
+  };
+
+  _addSegmentFilterToRequestBody(segmentFilters, funnelRequestBody);
+
+  const res = await ApperturePost('/funnels/transient', funnelRequestBody, {
+    signal,
+  });
   return res;
 };
 
@@ -88,17 +115,22 @@ export const getTransientTrendsData = async (
   dateFilter: DateFilterObj,
   conversionWindow: ConversionWindowObj,
   randomSequence: boolean,
+  segmentFilters: ExternalSegmentFilter[] | null,
   signal?: AbortSignal
 ) => {
+  const funnelRequestBody = {
+    datasourceId: dsId,
+    steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+    randomSequence,
+    dateFilter,
+    conversionWindow,
+  };
+
+  _addSegmentFilterToRequestBody(segmentFilters, funnelRequestBody);
+
   const res = await ApperturePost(
     '/funnels/trends/transient',
-    {
-      datasourceId: dsId,
-      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
-      dateFilter,
-      conversionWindow,
-      randomSequence,
-    },
+    funnelRequestBody,
     { signal }
   );
   return res;
@@ -115,16 +147,24 @@ export const getConversionData = async (
   status: ConversionStatus,
   dateFilter: DateFilterObj,
   conversionWindow: ConversionWindowObj,
-  randomSequence: boolean
+  randomSequence: boolean,
+  segmentFilters: ExternalSegmentFilter[] | null
 ) => {
-  const res = await ApperturePost('/funnels/analytics/transient', {
+  const funnelRequestBody = {
     datasourceId: dsId,
     steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
     status,
+    randomSequence,
     dateFilter,
     conversionWindow,
-    randomSequence,
-  });
+  };
+
+  _addSegmentFilterToRequestBody(segmentFilters, funnelRequestBody);
+
+  const res = await ApperturePost(
+    '/funnels/analytics/transient',
+    funnelRequestBody
+  );
   return res.data || [];
 };
 
@@ -163,17 +203,22 @@ export const _getTransientTrendsDataPrivate = async (
   steps: FunnelStep[],
   dateFilter: DateFilterObj | null,
   conversionWindow: ConversionWindowObj | null,
-  randomSequence: boolean
+  randomSequence: boolean,
+  segmentFilters: ExternalSegmentFilter[] | null
 ) => {
+  const funnelRequestBody = {
+    datasourceId: dsId,
+    steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
+    randomSequence,
+    dateFilter,
+    conversionWindow,
+  };
+
+  _addSegmentFilterToRequestBody(segmentFilters, funnelRequestBody);
+
   const res = await ApperturePrivateAPI.post(
     `/private/funnels/trends/transient`,
-    {
-      datasourceId: dsId,
-      steps: replaceEmptyStringPlaceholder(cloneDeep(steps)),
-      dateFilter,
-      conversionWindow,
-      randomSequence,
-    },
+    funnelRequestBody,
     {
       headers: { 'apperture-api-key': apiKey },
     }

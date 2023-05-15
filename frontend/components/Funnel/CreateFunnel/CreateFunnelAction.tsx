@@ -5,9 +5,13 @@ import { CaretDown, Plus } from 'phosphor-react';
 import ConversionCriteria from '../components/ConversionCriteria';
 import { stepsSequence } from '../util';
 import Dropdown from '@components/SearchableDropdown/Dropdown';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { BLACK_DEFAULT, GREY_500 } from '@theme/index';
+import { ExternalSegmentFilter } from '@lib/domain/common';
+import { getEventProperties } from '@lib/services/datasourceService';
+import { useRouter } from 'next/router';
+import SegmentFilter from '@components/Metric/components/SegmentFilter';
 
 type CreateFunnelActionProps = {
   funnelSteps: FunnelStep[];
@@ -17,6 +21,8 @@ type CreateFunnelActionProps = {
   setConversionWindow: Function;
   randomSequence: boolean;
   setRandomSequence: Function;
+  segmentFilters: ExternalSegmentFilter[];
+  updateSegmentFilter: Function;
 };
 
 const CreateFunnelAction = ({
@@ -27,9 +33,17 @@ const CreateFunnelAction = ({
   setConversionWindow,
   randomSequence,
   setRandomSequence,
+  segmentFilters,
+  updateSegmentFilter,
 }: CreateFunnelActionProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const sequenceRef = useRef(null);
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  const [eventProperties, setEventProperties] = useState<string[]>([]);
+  const [loadingEventProperties, setLoadingEventProperties] =
+    useState<boolean>(false);
 
   const handleAddNewStep = () => {
     const newField = { event: '', filters: [] };
@@ -38,6 +52,17 @@ const CreateFunnelAction = ({
   };
 
   useOnClickOutside(sequenceRef, () => setIsDropdownOpen(false));
+
+  useEffect(() => {
+    const fetchEventProperties = async () => {
+      const properties = await getEventProperties(dsId as string);
+      setEventProperties(properties);
+      setLoadingEventProperties(false);
+    };
+
+    setLoadingEventProperties(true);
+    fetchEventProperties();
+  }, []);
 
   return (
     <Flex direction={'column'} gap={'3'} w={'full'}>
@@ -122,7 +147,20 @@ const CreateFunnelAction = ({
         funnelSteps={funnelSteps}
         setFunnelSteps={setFunnelSteps}
         randomSequence={randomSequence}
+        eventProperties={eventProperties}
+        loadingEventProperties={loadingEventProperties}
       />
+      {segmentFilters.map((segmentFilter, index) => (
+        <SegmentFilter
+          key={index}
+          index={index}
+          segmentFilter={segmentFilter}
+          updateSegmentFilter={updateSegmentFilter}
+          segmentFilters={segmentFilters}
+          eventProperties={eventProperties}
+          loadingEventProperties={loadingEventProperties}
+        />
+      ))}
       <ConversionCriteria
         conversionWindow={conversionWindow}
         setConversionWindow={setConversionWindow}
