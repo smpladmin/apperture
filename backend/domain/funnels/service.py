@@ -22,6 +22,7 @@ from domain.funnels.models import (
     FunnelStep,
     FunnelTrendsData,
 )
+from domain.metrics.models import SegmentFilter
 from repositories.clickhouse.funnels import Funnels
 from domain.notifications.models import (
     Notification,
@@ -29,6 +30,7 @@ from domain.notifications.models import (
     NotificationThresholdType,
     NotificationVariant,
 )
+from repositories.clickhouse.segments import Segments
 
 
 class FunnelsService:
@@ -36,10 +38,12 @@ class FunnelsService:
         self,
         mongo: Mongo = Depends(),
         funnels: Funnels = Depends(),
+        segment: Segments = Depends(),
         date_utils: DateUtils = Depends(),
     ):
         self.mongo = mongo
         self.funnels = funnels
+        self.segment = segment
         self.date_utils = date_utils
         self.default_conversion_time = ConversionWindowType.DAYS.get_multiplier() * 30
 
@@ -53,6 +57,7 @@ class FunnelsService:
         random_sequence: bool,
         date_filter: Union[DateFilter, None],
         conversion_window: Union[ConversionWindow, None],
+        segment_filter: Union[List[SegmentFilter], None],
     ) -> Funnel:
         return Funnel(
             datasource_id=datasource_id,
@@ -63,6 +68,7 @@ class FunnelsService:
             random_sequence=random_sequence,
             date_filter=date_filter,
             conversion_window=conversion_window,
+            segment_filter=segment_filter,
         )
 
     async def add_funnel(self, funnel: Funnel):
@@ -106,6 +112,18 @@ class FunnelsService:
             else (None, None)
         )
 
+    def get_segment_filter_criterion(
+        self, segment_filter: Union[List[SegmentFilter], None]
+    ):
+        return (
+            (
+                self.segment.build_segment_filter_query(segment_filter=segment_filter),
+                segment_filter[0].includes,
+            )
+            if segment_filter
+            else (None, None)
+        )
+
     async def compute_funnel(
         self,
         ds_id: str,
@@ -113,6 +131,7 @@ class FunnelsService:
         date_filter: Union[DateFilter, None],
         conversion_window: Union[ConversionWindow, None],
         random_sequence: Union[bool, None],
+        segment_filter: Union[List[SegmentFilter], None],
     ) -> List[ComputedFunnelStep]:
 
         start_date, end_date = self.extract_date_range(date_filter=date_filter)
@@ -120,6 +139,11 @@ class FunnelsService:
         conversion_time = self.compute_conversion_time(
             conversion_window=conversion_window
         )
+
+        segment_filter_query, inclusion_criterion = self.get_segment_filter_criterion(
+            segment_filter=segment_filter
+        )
+
         [funnel_stepwise_users_data] = self.funnels.get_users_count(
             ds_id=ds_id,
             steps=steps,
@@ -127,6 +151,8 @@ class FunnelsService:
             end_date=end_date,
             conversion_time=conversion_time,
             random_sequence=random_sequence,
+            segment_filter_query=segment_filter_query,
+            inclusion_criterion=inclusion_criterion,
         ) or [tuple([0]) * len(steps)]
 
         computed_funnel = [
@@ -176,11 +202,17 @@ class FunnelsService:
         date_filter: Union[DateFilter, None],
         conversion_window: Union[ConversionWindow, None],
         random_sequence: Union[bool, None],
+        segment_filter: Union[List[SegmentFilter], None],
     ) -> List[FunnelTrendsData]:
 
         conversion_time = self.compute_conversion_time(
             conversion_window=conversion_window
         )
+
+        segment_filter_query, inclusion_criterion = self.get_segment_filter_criterion(
+            segment_filter=segment_filter
+        )
+
         start_date, end_date = self.extract_date_range(date_filter=date_filter)
 
         conversion_data = self.funnels.get_conversion_trend(
@@ -190,6 +222,8 @@ class FunnelsService:
             end_date=end_date,
             conversion_time=conversion_time,
             random_sequence=random_sequence,
+            segment_filter_query=segment_filter_query,
+            inclusion_criterion=inclusion_criterion,
         )
         return [
             FunnelTrendsData(
@@ -210,11 +244,16 @@ class FunnelsService:
         date_filter: Union[DateFilter, None],
         conversion_window: Union[ConversionWindow, None],
         random_sequence: Union[bool, None],
+        segment_filter: Union[List[SegmentFilter], None],
     ):
         conversion_time = self.compute_conversion_time(
             conversion_window=conversion_window
         )
         start_date, end_date = self.extract_date_range(date_filter=date_filter)
+
+        segment_filter_query, inclusion_criterion = self.get_segment_filter_criterion(
+            segment_filter=segment_filter
+        )
 
         conversion_data = self.funnels.get_conversion_analytics(
             ds_id=datasource_id,
@@ -224,6 +263,8 @@ class FunnelsService:
             end_date=end_date,
             conversion_time=conversion_time,
             random_sequence=random_sequence,
+            segment_filter_query=segment_filter_query,
+            inclusion_criterion=inclusion_criterion,
         )
         user_list = [FunnelEventUserData(id=data[0]) for data in conversion_data]
         count_data = conversion_data[0][1] if conversion_data else [0, 0]
@@ -269,6 +310,10 @@ class FunnelsService:
             conversion_window=funnel.conversion_window
         )
 
+        segment_filter_query, inclusion_criterion = self.get_segment_filter_criterion(
+            segment_filter=funnel.segment_filter
+        )
+
         data = self.funnels.get_users_count(
             ds_id=str(funnel.datasource_id),
             steps=funnel.steps,
@@ -276,6 +321,8 @@ class FunnelsService:
             start_date=date,
             end_date=date,
             random_sequence=funnel.random_sequence,
+            segment_filter_query=segment_filter_query,
+            inclusion_criterion=inclusion_criterion,
         )
 
         first_step_users, *_, last_step_users = data[0]

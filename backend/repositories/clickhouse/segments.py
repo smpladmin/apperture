@@ -60,12 +60,18 @@ class Segments(EventsBase):
         groups.append(segment_filter[0].custom)
         return groups
 
-    def build_segment_filter_on_metric_criterion(
+    def build_segment_filter_query(
         self, segment_filter: List[SegmentFilter]
     ) -> ContainsCriterion:
         groups = self.build_groups(segment_filter=segment_filter)
 
         query = self.build_segment_users_query(groups=groups)
+        return query
+
+    def build_segment_filter_on_metric_criterion(
+        self, segment_filter: List[SegmentFilter]
+    ) -> ContainsCriterion:
+        query = self.build_segment_filter_query(segment_filter=segment_filter)
         return (
             self.table.user_id.isin(query)
             if segment_filter[0].includes

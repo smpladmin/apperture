@@ -4,6 +4,7 @@ from beanie import PydanticObjectId
 from typing import List, Optional, Union
 from pydantic import BaseModel
 from domain.common.date_models import DateFilter
+from domain.metrics.models import SegmentFilter
 
 from domain.segments.models import WhereSegmentFilter
 from repositories.document import Document
@@ -48,6 +49,7 @@ class Funnel(Document):
     random_sequence: bool
     date_filter: Optional[DateFilter]
     conversion_window: Optional[ConversionWindow]
+    segment_filter: Optional[List[SegmentFilter]]
     enabled: bool = True
 
     class Settings:
