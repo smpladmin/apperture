@@ -5,12 +5,18 @@ from unittest.mock import ANY, AsyncMock, MagicMock
 
 import pytest
 from beanie import PydanticObjectId
+from pypika import Table, ClickHouseQuery
 
 from domain.common.date_models import (
     DateFilter,
     DateFilterType,
     FixedDateFilter,
     LastDateFilter,
+)
+from domain.common.filter_models import (
+    FilterDataType,
+    FilterOperatorsNumber,
+    LogicalOperators,
 )
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource
@@ -27,11 +33,17 @@ from domain.funnels.models import (
     FunnelTrendsData,
 )
 from domain.funnels.service import FunnelsService
+from domain.metrics.models import SegmentFilter, SelectedSegments
 from domain.notifications.models import (
     Notification,
     NotificationData,
     NotificationVariant,
     ThresholdMap,
+)
+from domain.segments.models import (
+    SegmentFilterConditions,
+    SegmentGroup,
+    WhereSegmentFilter,
 )
 from tests.utils import filter_response
 
@@ -46,8 +58,12 @@ class TestFunnelService:
         self.mongo = MagicMock()
         self.funnels = MagicMock()
         self.date_utils = MagicMock()
+        self.segment = MagicMock()
         self.service = FunnelsService(
-            mongo=self.mongo, funnels=self.funnels, date_utils=self.date_utils
+            mongo=self.mongo,
+            funnels=self.funnels,
+            segment=self.segment,
+            date_utils=self.date_utils,
         )
         self.ds_id = "636a1c61d715ca6baae65611"
         self.app_id = "636a1c61d715ca6baae65612"
@@ -57,6 +73,36 @@ class TestFunnelService:
         self.date_filter = DateFilter(
             filter=LastDateFilter(days=7), type=DateFilterType.LAST
         )
+        self.segment_filter = [
+            SegmentFilter(
+                condition="and",
+                includes=True,
+                custom=SegmentGroup(
+                    filters=[],
+                    condition=LogicalOperators.AND,
+                ),
+                segments=[
+                    SelectedSegments(
+                        id="48392000212",
+                        name="Segment1",
+                        groups=[
+                            SegmentGroup(
+                                filters=[
+                                    WhereSegmentFilter(
+                                        operand="test",
+                                        operator=FilterOperatorsNumber.EQ,
+                                        values=["1"],
+                                        condition=SegmentFilterConditions.WHERE,
+                                        datatype=FilterDataType.NUMBER,
+                                    )
+                                ],
+                                condition=LogicalOperators.AND,
+                            )
+                        ],
+                    )
+                ],
+            )
+        ]
 
         FindMock = namedtuple("FindMock", ["to_list"])
         Funnel.find = MagicMock(
@@ -84,6 +130,7 @@ class TestFunnelService:
             conversion_window=ConversionWindow(
                 type=ConversionWindowType.MINUTES, value=10
             ),
+            segment_filter=self.segment_filter,
         )
         self.computed_steps = [
             ComputedFunnelStep(
@@ -171,6 +218,9 @@ class TestFunnelService:
                 enabled=True,
             )
         ]
+        self.segment.build_segment_filter_query = MagicMock(
+            return_value=(ClickHouseQuery.from_(Table("test")).select("*"))
+        )
 
     def test_build_funnel(self):
 
@@ -187,6 +237,7 @@ class TestFunnelService:
             conversion_window=ConversionWindow(
                 type=ConversionWindowType.MINUTES, value=10
             ),
+            segment_filter=self.segment_filter,
         )
 
         assert filter_response(funnel.dict()) == filter_response(self.funnel.dict())
@@ -215,6 +266,7 @@ class TestFunnelService:
                 type=ConversionWindowType.MINUTES, value=10
             ),
             random_sequence=False,
+            segment_filter=None,
         )
 
     @pytest.mark.asyncio
@@ -224,28 +276,55 @@ class TestFunnelService:
         self.update_mock.assert_called_once_with(
             {
                 "$set": {
-                    "datasource_id": PydanticObjectId("636a1c61d715ca6baae65611"),
                     "app_id": PydanticObjectId("636a1c61d715ca6baae65612"),
                     "conversion_window": {
                         "type": ConversionWindowType.MINUTES,
                         "value": 10,
                     },
+                    "datasource_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+                    "date_filter": {"filter": {"days": 7}, "type": DateFilterType.LAST},
+                    "enabled": True,
                     "name": "name",
                     "random_sequence": False,
-                    "revision_id": ANY,
-                    "steps": [
+                    "revision_id": None,
+                    "segment_filter": [
                         {
-                            "event": "Login",
-                            "filters": None,
-                        },
+                            "condition": LogicalOperators.AND,
+                            "custom": {
+                                "condition": LogicalOperators.AND,
+                                "filters": [],
+                            },
+                            "includes": True,
+                            "segments": [
+                                {
+                                    "groups": [
+                                        {
+                                            "condition": LogicalOperators.AND,
+                                            "filters": [
+                                                {
+                                                    "all": False,
+                                                    "condition": SegmentFilterConditions.WHERE,
+                                                    "datatype": FilterDataType.NUMBER,
+                                                    "operand": "test",
+                                                    "operator": FilterOperatorsNumber.EQ,
+                                                    "type": SegmentFilterConditions.WHERE,
+                                                    "values": ["1"],
+                                                }
+                                            ],
+                                        }
+                                    ],
+                                    "id": "48392000212",
+                                    "name": "Segment1",
+                                }
+                            ],
+                        }
+                    ],
+                    "steps": [
+                        {"event": "Login", "filters": None},
                         {"event": "Chapter Click", "filters": None},
                     ],
                     "updated_at": ANY,
                     "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
-                    "date_filter": DateFilter(
-                        filter=LastDateFilter(days=7), type=DateFilterType.LAST
-                    ),
-                    "enabled": True,
                 }
             },
         )
@@ -261,6 +340,7 @@ class TestFunnelService:
                     type=ConversionWindowType.MINUTES, value=10
                 ),
                 random_sequence=False,
+                segment_filter=None,
             )
             == self.funnel_trends_data
         )
@@ -279,6 +359,8 @@ class TestFunnelService:
                 "start_date": "2022-12-01",
                 "conversion_time": 600,
                 "random_sequence": False,
+                "inclusion_criterion": None,
+                "segment_filter_query": None,
             }
         )
 
@@ -301,6 +383,7 @@ class TestFunnelService:
                     type=ConversionWindowType.MINUTES, value=10
                 ),
                 random_sequence=False,
+                segment_filter=self.segment_filter,
             )
             == self.funnel_conversion_data
         )
@@ -428,5 +511,54 @@ class TestFunnelService:
                     FunnelStep(event="Chapter Click", filters=None),
                 ],
                 "random_sequence": False,
+                "segment_filter_query": ClickHouseQuery.from_(Table("test")).select(
+                    "*"
+                ),
+                "inclusion_criterion": True,
             }
+        )
+
+    @pytest.mark.parametrize(
+        "segment_filter, result",
+        [
+            (
+                [
+                    SegmentFilter(
+                        condition="and",
+                        includes=True,
+                        custom=SegmentGroup(
+                            filters=[],
+                            condition=LogicalOperators.AND,
+                        ),
+                        segments=[
+                            SelectedSegments(
+                                id="48392000212",
+                                name="Segment1",
+                                groups=[
+                                    SegmentGroup(
+                                        filters=[
+                                            WhereSegmentFilter(
+                                                operand="test",
+                                                operator=FilterOperatorsNumber.EQ,
+                                                values=["1"],
+                                                condition=SegmentFilterConditions.WHERE,
+                                                datatype=FilterDataType.NUMBER,
+                                            )
+                                        ],
+                                        condition=LogicalOperators.AND,
+                                    )
+                                ],
+                            )
+                        ],
+                    )
+                ],
+                (ClickHouseQuery.from_(Table("test")).select("*"), True),
+            ),
+            (None, (None, None)),
+        ],
+    )
+    def test_get_segment_filter_criterion(self, segment_filter, result):
+        assert (
+            self.service.get_segment_filter_criterion(segment_filter=segment_filter)
+            == result
         )
