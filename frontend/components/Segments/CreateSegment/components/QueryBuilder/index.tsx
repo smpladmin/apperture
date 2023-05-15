@@ -6,15 +6,14 @@ import 'remixicon/fonts/remixicon.css';
 import {
   FilterType,
   SegmentFilter,
-  SegmentFilterConditions,
   SegmentGroup,
   SegmentProperty,
-  WhereSegmentFilter,
   WhoSegmentFilter,
 } from '@lib/domain/segment';
 import { cloneDeep } from 'lodash';
 import WhereSegmentFilterComponent from './SegmentFilter/WhereSegmentFilter';
 import WhoSegmentFilterComponent from './SegmentFilter/WhoSegmentFilter';
+import { FilterConditions, WhereFilter } from '@lib/domain/common';
 
 type QueryBuilderProps = {
   eventProperties: SegmentProperty[];
@@ -54,15 +53,15 @@ const QueryBuilder = ({
     // to ensure we don't replace condition on wrong index while solving for where/who conditions
     if (filterIndex < updatedFilters.length) {
       if (
-        conditionRemoved[0]?.condition === SegmentFilterConditions.WHERE &&
+        conditionRemoved[0]?.condition === FilterConditions.WHERE &&
         updatedFilters[filterIndex].type === FilterType.WHERE
       ) {
-        updatedFilters[filterIndex].condition = SegmentFilterConditions.WHERE;
+        updatedFilters[filterIndex].condition = FilterConditions.WHERE;
       }
       // if first 'who' filter type condition is removed from list of filter,
       // then make the next who filter type condition 'who'
-      else if (conditionRemoved[0]?.condition === SegmentFilterConditions.WHO) {
-        updatedFilters[filterIndex].condition = SegmentFilterConditions.WHO;
+      else if (conditionRemoved[0]?.condition === FilterConditions.WHO) {
+        updatedFilters[filterIndex].condition = FilterConditions.WHO;
       }
     }
 
@@ -94,7 +93,7 @@ const QueryBuilder = ({
                 <Flex key={i} data-testid="query-builder">
                   {filter.type === FilterType.WHERE ? (
                     <WhereSegmentFilterComponent
-                      filter={filter as WhereSegmentFilter}
+                      filter={filter as WhereFilter}
                       filters={filters}
                       updateGroupsState={updateGroupsState}
                       eventProperties={eventProperties}

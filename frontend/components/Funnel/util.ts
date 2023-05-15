@@ -1,3 +1,4 @@
+import { FilterDataType } from '@lib/domain/common';
 import { FunnelStep, FunnelData } from '@lib/domain/funnel';
 
 export const getCountOfValidAddedSteps = (steps: FunnelStep[]) => {
@@ -22,7 +23,10 @@ export const filterFunnelSteps = (steps: FunnelStep[]) => {
 
 export const isEveryFunnelStepFiltersValid = (funnelSteps: FunnelStep[]) => {
   return funnelSteps.every((funnelStep) => {
-    return funnelStep.filters.every((filter) => filter.values.length);
+    return funnelStep.filters.every(
+      (filter) =>
+        filter.values.length || filter.datatype === FilterDataType.BOOL
+    );
   });
 };
 

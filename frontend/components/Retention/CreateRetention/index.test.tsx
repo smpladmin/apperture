@@ -577,6 +577,127 @@ describe('create retention', () => {
     });
   });
 
+  describe('change datatype of filter', () => {
+    it('should change the filter from string datatype to number', async () => {
+      await renderRetention();
+
+      const startEvent = screen.getAllByTestId('event-selection')[0];
+      fireEvent.click(startEvent);
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+
+      const eventFilter = screen.getByTestId('event-filter');
+      fireEvent.mouseEnter(eventFilter);
+
+      const filterDatatypeOption = screen.getByTestId('filter-datatype-option');
+      fireEvent.click(filterDatatypeOption);
+
+      const datatypeText = screen.getByText('Data Type');
+      fireEvent.mouseEnter(datatypeText);
+
+      const numberDataType = screen.getByText('Number');
+      await act(async () => {
+        fireEvent.click(numberDataType);
+      });
+
+      const filterOperator = screen.getByTestId('filter-operator');
+      const filterValueInput = screen.queryByTestId('filter-value-input');
+
+      // upon changing datatype to number, default operator 'equals' should be selected
+      // and input field should be visible
+      expect(filterOperator.textContent).toBe('equals');
+      expect(filterValueInput).toBeVisible();
+    });
+
+    it('should change the filter from string datatype to bool, should not see any option to select filter value', async () => {
+      await renderRetention();
+
+      const startEvent = screen.getAllByTestId('event-selection')[0];
+      fireEvent.click(startEvent);
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+
+      const eventFilter = screen.getByTestId('event-filter');
+      fireEvent.mouseEnter(eventFilter);
+
+      const filterDatatypeOption = screen.getByTestId('filter-datatype-option');
+      fireEvent.click(filterDatatypeOption);
+
+      const datatypeText = screen.getByText('Data Type');
+      fireEvent.mouseEnter(datatypeText);
+
+      const boolDatatype = screen.getByText('True/ False');
+      await act(async () => {
+        fireEvent.click(boolDatatype);
+      });
+
+      const filterOperator = screen.getByTestId('filter-operator');
+      const filterValueInput = screen.queryByTestId('filter-value-input');
+      const filterValuesDropdown = screen.queryByTestId('filter-values');
+
+      // upon changing datatype to bool, default operator  should be selected
+      // and input field should be hidden as well as the select dropdown
+      expect(filterOperator.textContent).toBe('is true');
+      expect(filterValueInput).not.toBeInTheDocument();
+      expect(filterValuesDropdown).not.toBeInTheDocument();
+    });
+  });
+
+  describe('switch operator values', () => {
+    it('should show input field for string datatype when switch operator from `is` to `contains`', async () => {
+      await renderRetention();
+
+      const startEvent = screen.getAllByTestId('event-selection')[0];
+      fireEvent.click(startEvent);
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+
+      const filterOperatorText = screen.getByTestId('filter-operator');
+      fireEvent.click(filterOperatorText);
+
+      const filterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+
+      const filterOperatorsOptionsText = filterOperatorsOptions.map(
+        (filter) => filter.textContent
+      );
+      expect(filterOperatorsOptionsText).toEqual([
+        'Is',
+        'Is not',
+        'Contains',
+        'Does not contain',
+      ]);
+
+      // click on 'Is not' operator
+      await act(async () => {
+        fireEvent.click(filterOperatorsOptions[1]);
+      });
+      await waitFor(() => {
+        expect(filterOperatorText.textContent).toEqual('is not');
+      });
+
+      fireEvent.click(filterOperatorText);
+      const newFilterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+      // click on 'Contains' operator and check if Input Field is visible
+      await act(async () => {
+        fireEvent.click(newFilterOperatorsOptions[2]);
+      });
+
+      await waitFor(() => {
+        const filterOperatorText = screen.getByTestId('filter-operator');
+        expect(filterOperatorText.textContent).toEqual('contains');
+        const inputField = screen.getByTestId('filter-value-input');
+        expect(inputField).toBeVisible();
+      });
+    });
+  });
+
   describe('cohort table ', () => {
     it('should display cohort table with retention data', async () => {
       await renderRetention();

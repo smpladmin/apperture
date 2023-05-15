@@ -43,7 +43,7 @@ const ActionTable = ({ isLoading, tableData }: ActionTableProps) => {
           const time = info.getValue() as Date;
           return (
             <EllipsisCell>
-              {dayjs.utc(time).local().format('D MMM YY, h:mmA')}
+              {dayjs.utc(time).local().format('D MMM YY, h:mm:ss A')}
             </EllipsisCell>
           );
         },

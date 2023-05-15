@@ -225,7 +225,7 @@ ch_instance = aws.ec2.Instance(
 ch_volume = aws.ebs.Volume(
     f'{data.get("ec2_clickhouse_name")}-volume',
     availability_zone=ch_instance.availability_zone,
-    size=100,
+    size=128,
 )
 
 aws.ec2.VolumeAttachment(

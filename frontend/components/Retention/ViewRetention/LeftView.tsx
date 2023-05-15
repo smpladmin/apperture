@@ -9,10 +9,9 @@ import { capitalizeFirstLetter } from '@lib/utils/common';
 import { GREY_600 } from '@theme/index';
 import { Granularity } from '@lib/domain/retention';
 import ViewFunnelSteps from '@components/Funnel/components/ViewFunnelSteps';
-import { ExternalSegmentFilter } from '@lib/domain/common';
+import { ExternalSegmentFilter, WhereFilter } from '@lib/domain/common';
 import ViewFilter from '@components/StepFilters/ViewFilter';
 import { getSelectedSegmentsText } from '@components/Metric/util';
-import { WhereSegmentFilter } from '@lib/domain/segment';
 
 type LeftViewProps = {
   retentionEvents: FunnelStep[];
@@ -70,7 +69,7 @@ const LeftView = ({
           {segmentFilters &&
             segmentFilters.map((segmentFilter, i) => {
               const customSegmentFilters = segmentFilter.custom
-                .filters as WhereSegmentFilter[];
+                .filters as WhereFilter[];
               return (
                 <Flex direction={'column'} gap={'3'} key={i}>
                   <Text

@@ -58,8 +58,10 @@ const ViewMetric = ({
         dateFilter,
         segmentFilters
       );
-      setComputedMetric(result);
-      setIsLoading(false);
+      if (result?.status) {
+        setComputedMetric(result?.data);
+        setIsLoading(false);
+      }
     };
     fetchMetric();
   }, []);

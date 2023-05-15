@@ -60,25 +60,29 @@ const ViewFunnel = ({
 
   useEffect(() => {
     const fetchComputeData = async () => {
-      const [computedFunnelData, computedTrendsData] = await Promise.all([
-        getTransientFunnelData(
-          datasourceId,
-          savedFunnel.steps,
-          dateFilter,
-          conversionWindow,
-          randomSequence
-        ),
-        getTransientTrendsData(
-          datasourceId,
-          savedFunnel.steps,
-          dateFilter,
-          conversionWindow,
-          randomSequence
-        ),
-      ]);
-      setComputedFunnelData(computedFunnelData);
-      setComputedTrendsData(computedTrendsData);
-      setIsLoading(false);
+      const [computedFunnelResponse, computedTrendsResponse] =
+        await Promise.all([
+          getTransientFunnelData(
+            datasourceId,
+            savedFunnel.steps,
+            dateFilter,
+            conversionWindow,
+            randomSequence
+          ),
+          getTransientTrendsData(
+            datasourceId,
+            savedFunnel.steps,
+            dateFilter,
+            conversionWindow,
+            randomSequence
+          ),
+        ]);
+      // status would be undefined if the call is cancelled
+      if (computedFunnelResponse?.status && computedTrendsResponse?.status) {
+        setComputedFunnelData(computedFunnelResponse?.data || []);
+        setComputedTrendsData(computedTrendsResponse?.data || []);
+        setIsLoading(false);
+      }
     };
     setIsLoading(true);
     fetchComputeData();

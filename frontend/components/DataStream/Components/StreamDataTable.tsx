@@ -7,7 +7,7 @@ import utc from 'dayjs/plugin/utc';
 import { useMemo } from 'react';
 import EventLabel from './EventLabel';
 import TableCell from './TableCell';
-import { trimLabel } from '@lib/utils/common';
+import { dateFormat, trimLabel } from '@lib/utils/common';
 dayjs.extend(utc);
 
 const StreamDataTable = ({
@@ -55,7 +55,7 @@ const StreamDataTable = ({
           cell: (info) => (
             <Text data-testid="timestamp-cell" whiteSpace={'nowrap'}>
               <TableCell>
-                {dayjs.utc(info.getValue()).local().format('D MMM YY, h:mmA')}
+                {dayjs.utc(info.getValue()).local().format(dateFormat)}
               </TableCell>
             </Text>
           ),

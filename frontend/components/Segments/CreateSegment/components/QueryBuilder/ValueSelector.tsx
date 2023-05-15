@@ -1,15 +1,15 @@
-import { ISFilterOperators } from '@components/Segments/util';
-import {
-  SegmentFilter,
-  SegmentFilterDataType,
-  SegmentFilterOperatorsString,
-  WhereSegmentFilter,
-} from '@lib/domain/segment';
+import { SegmentFilter } from '@lib/domain/segment';
 import InputValue, { InputValueType } from './InputValue';
 import SelectValue from './SelectValue';
+import {
+  FilterDataType,
+  FilterOperatorsString,
+  ISFilterOperators,
+  WhereFilter,
+} from '@lib/domain/common';
 
 type ValueSelectorProps = {
-  filter: WhereSegmentFilter;
+  filter: WhereFilter;
   filters: SegmentFilter[];
   updateGroupsState: Function;
   index: number;
@@ -23,10 +23,8 @@ const ValueSelector = ({
 }: ValueSelectorProps) => {
   return (
     <>
-      {[SegmentFilterDataType.STRING].includes(filter.datatype) ? (
-        ISFilterOperators.includes(
-          filter.operator as SegmentFilterOperatorsString
-        ) ? (
+      {[FilterDataType.STRING].includes(filter.datatype) ? (
+        ISFilterOperators.includes(filter.operator as FilterOperatorsString) ? (
           <SelectValue
             filter={filter}
             filters={filters}
@@ -43,7 +41,7 @@ const ValueSelector = ({
           />
         )
       ) : null}
-      {[SegmentFilterDataType.NUMBER].includes(filter.datatype) ? (
+      {[FilterDataType.NUMBER].includes(filter.datatype) ? (
         <InputValue
           index={index}
           filter={filter}

@@ -64,33 +64,39 @@ describe('View Funnel', () => {
     randomSequence: false,
   };
 
-  const funnelData = [
-    {
-      step: 1,
-      event: 'Video_Click',
-      users: 2000,
-      conversion: 100,
-      drop: 0,
-    },
-    {
-      step: 2,
-      event: 'Chapter_Click',
-      users: 950,
-      conversion: 75,
-      drop: 25,
-    },
-    { step: 3, event: 'Topic_Click', users: 750, conversion: 50, drop: 25 },
-  ];
+  const funnelData = {
+    status: 200,
+    data: [
+      {
+        step: 1,
+        event: 'Video_Click',
+        users: 2000,
+        conversion: 100,
+        drop: 0,
+      },
+      {
+        step: 2,
+        event: 'Chapter_Click',
+        users: 950,
+        conversion: 75,
+        drop: 25,
+      },
+      { step: 3, event: 'Topic_Click', users: 750, conversion: 50, drop: 25 },
+    ],
+  };
 
-  const trendsData = [
-    {
-      conversion: 23.1,
-      startDate: new Date('2022-10-11'),
-      endDate: new Date('2022-10-17'),
-      firstStepUsers: 49,
-      lastStepUsers: 8,
-    },
-  ];
+  const trendsData = {
+    status: 200,
+    data: [
+      {
+        conversion: 23.1,
+        startDate: new Date('2022-10-11'),
+        endDate: new Date('2022-10-17'),
+        firstStepUsers: 49,
+        lastStepUsers: 8,
+      },
+    ],
+  };
 
   const savedNotifications = {
     _id: '63dbc1e62effb8f88f60e240',
