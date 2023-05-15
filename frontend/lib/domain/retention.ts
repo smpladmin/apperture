@@ -61,7 +61,7 @@ export type RetentionWithUser = Retention & {
 };
 
 export type RetentionCohortData = {
-  granularity: string;
-  initialUsers: string;
-  [key: string]: string;
+  cohort: Date;
+  size: string;
+  intervals: { [key: string]: string };
 };

@@ -7,7 +7,7 @@ import {
 
 const retentionData: RetentionData[] = [
   {
-    granularity: new Date('2022-11-24T00:00:00'),
+    granularity: new Date('2022-11-24'),
     interval: 0,
     intervalName: 'day 0',
     initialUsers: 202,
@@ -15,7 +15,7 @@ const retentionData: RetentionData[] = [
     retentionRate: 55.94,
   },
   {
-    granularity: new Date('2022-11-25T00:00:00'),
+    granularity: new Date('2022-11-25'),
     interval: 0,
     intervalName: 'day 0',
     initialUsers: 230,
@@ -23,7 +23,7 @@ const retentionData: RetentionData[] = [
     retentionRate: 48.7,
   },
   {
-    granularity: new Date('2022-11-26T00:00:00'),
+    granularity: new Date('2022-11-26'),
     interval: 1,
     intervalName: 'day 1',
     initialUsers: 206,
@@ -31,7 +31,7 @@ const retentionData: RetentionData[] = [
     retentionRate: 52.43,
   },
   {
-    granularity: new Date('2022-11-27T00:00:00'),
+    granularity: new Date('2022-11-27'),
     interval: 1,
     intervalName: 'day 1',
     initialUsers: 202,
@@ -39,7 +39,7 @@ const retentionData: RetentionData[] = [
     retentionRate: 51.98,
   },
   {
-    granularity: new Date('2022-11-26T00:00:00'),
+    granularity: new Date('2022-11-26'),
     interval: 2,
     intervalName: 'day 2',
     initialUsers: 206,
@@ -47,7 +47,7 @@ const retentionData: RetentionData[] = [
     retentionRate: 52.43,
   },
   {
-    granularity: new Date('2022-11-27T00:00:00'),
+    granularity: new Date('2022-11-27'),
     interval: 2,
     intervalName: 'day 2',
     initialUsers: 202,
@@ -60,12 +60,12 @@ describe('Data transformation for retention', () => {
   it('should convert retention data to trends data for interval i', () => {
     expect(convertToTrendsData(retentionData, 0)).toEqual([
       {
-        granularity: new Date('2022-11-24T00:00:00'),
+        granularity: new Date('2022-11-24'),
         retainedUsers: 113,
         retentionRate: 55.94,
       },
       {
-        granularity: new Date('2022-11-25T00:00:00'),
+        granularity: new Date('2022-11-25'),
         retainedUsers: 112,
         retentionRate: 48.7,
       },
@@ -86,12 +86,12 @@ describe('Data transformation for retention', () => {
   it('should convert retention data to cohort table data', () => {
     expect(convertToCohortData(retentionData)).toEqual([
       {
-        cohort: new Date('2022-11-23T18:30:00.000Z'),
+        cohort: new Date('2022-11-24'),
         intervals: { 'day 0': 55.94 },
         size: 202,
       },
       {
-        cohort: new Date('2022-11-24T18:30:00.000Z'),
+        cohort: new Date('2022-11-25'),
         intervals: { 'day 0': 48.7 },
         size: 230,
       },

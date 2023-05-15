@@ -1,3 +1,4 @@
+import { RetentionCohortData } from './../../lib/domain/retention';
 import { cloneDeep } from 'lodash';
 import { ExternalSegmentFilter, WhereFilter } from '@lib/domain/common';
 import { FunnelStep } from '@lib/domain/funnel';
@@ -94,8 +95,11 @@ export const convertToIntervalData = (
   return { count: intervalCount, data: intervalData };
 };
 
-export const convertToCohortData = (retentionData: RetentionData[]): any[] => {
+export const convertToCohortData = (
+  retentionData: RetentionData[]
+): RetentionCohortData[] => {
   const retentionDataClone = cloneDeep(retentionData);
+
   retentionDataClone.sort(
     (a, b) =>
       new Date(a.granularity).valueOf() - new Date(b.granularity).valueOf()
