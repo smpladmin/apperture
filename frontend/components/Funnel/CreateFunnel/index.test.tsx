@@ -855,7 +855,7 @@ describe('create funnel', () => {
     });
   });
 
-  describe.only('segment filter', () => {
+  describe('segment filter', () => {
     it('should add a segment filter with includes option', async () => {
       await renderCreateFunnel();
 
