@@ -33,7 +33,10 @@ import Header from '@components/EventsLayout/ActionHeader';
 import Card from '@components/Card';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
-import { replaceEmptyStringWithPlaceholderInExternalSegmentFilter } from '@lib/utils/common';
+import {
+  isValidSegmentFilter,
+  replaceEmptyStringWithPlaceholderInExternalSegmentFilter,
+} from '@lib/utils/common';
 
 const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const router = useRouter();
@@ -129,7 +132,8 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
     if (
       getCountOfValidAddedSteps(funnelSteps) < 2 ||
       !isEveryFunnelStepFiltersValid(funnelSteps) ||
-      isStepAdded
+      isStepAdded ||
+      !isValidSegmentFilter(segmentFilters)
     ) {
       setIsStepAdded(false);
       return;
