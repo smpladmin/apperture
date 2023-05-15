@@ -185,6 +185,7 @@ const ViewFunnel = ({
           dateFilter={dateFilter}
           conversionWindow={conversionWindow}
           randomSequence={randomSequence}
+          segmentFilters={segmentFilters}
         />
         <Alert
           name={savedFunnel.name}

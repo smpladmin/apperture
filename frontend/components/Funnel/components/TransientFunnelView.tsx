@@ -28,7 +28,7 @@ type TransientFunnelViewProps = {
   isDateFilterDisabled?: boolean;
   conversionWindow: ConversionWindowObj;
   randomSequence: boolean;
-  segmentFilters: ExternalSegmentFilter[];
+  segmentFilters: ExternalSegmentFilter[] | null;
 };
 
 const TransientFunnelView = ({

@@ -40,7 +40,7 @@ type UserTableViewProps = {
   selectedUser: any;
   setUserActivity: Function;
   isTableDataLoading: boolean;
-  segmentFilters: ExternalSegmentFilter[];
+  segmentFilters: ExternalSegmentFilter[] | null;
 };
 type FunnelEventConversion = {
   converted?: FunnelConversionData;

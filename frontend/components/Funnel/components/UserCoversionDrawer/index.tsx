@@ -34,7 +34,7 @@ type UserConversionDrawerProps = {
   dateFilter: DateFilterObj;
   conversionWindow: ConversionWindowObj;
   randomSequence: boolean;
-  segmentFilters: ExternalSegmentFilter[];
+  segmentFilters: ExternalSegmentFilter[] | null;
 };
 
 export enum TableState {
