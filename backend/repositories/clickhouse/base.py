@@ -1,3 +1,4 @@
+import traceback
 from abc import ABC
 import logging
 from typing import Dict
@@ -61,5 +62,6 @@ class EventsBase(ABC):
             )
             return query_result.result_set
         except Exception as e:
-            logging.info(e)
+            logging.info(repr(e))
+            traceback.print_exc()
             return []
