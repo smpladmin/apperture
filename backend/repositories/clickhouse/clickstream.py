@@ -1,6 +1,6 @@
 from typing import List
 
-from pypika import ClickHouseQuery, Parameter, Order
+from pypika import ClickHouseQuery, Parameter, Order, Interval, Criterion
 from pypika import functions as fn
 
 from repositories.clickhouse.base import EventsBase
@@ -23,6 +23,9 @@ class Clickstream(EventsBase):
 
     def build_get_all_events_query(self, dsId: str):
         parameters = {"dsId": dsId}
+        criterion = [self.click_stream_table.datasource_id == Parameter("%(dsId)s"),
+                     self.click_stream_table.timestamp <= fn.Now(),
+                     self.click_stream_table.timestamp >= fn.Now()-Interval(days=1)]
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
             .select(
@@ -31,8 +34,7 @@ class Clickstream(EventsBase):
                 self.click_stream_table.user_id,
                 self.click_stream_table.properties,
             )
-            .where(self.click_stream_table.datasource_id == Parameter("%(dsId)s"))
-            .where(self.click_stream_table.timestamp <= fn.Now())
+            .where(Criterion.all(criterion))
             .orderby(self.click_stream_table.timestamp, order=Order.desc)
         ).limit(100)
 
