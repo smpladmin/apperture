@@ -1,11 +1,10 @@
 import { createColumnHelper } from '@tanstack/react-table';
 import { useMemo } from 'react';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 import CohortTable from '@components/CohortTable';
 import TableCell from '@components/DataStream/Components/TableCell';
 import { Flex } from '@chakra-ui/react';
-dayjs.extend(utc);
+import { RetentionCohortData } from '@lib/domain/retention';
+import { getUTCFormmatedDate } from '@lib/utils/common';
 
 type RetentionCohortProps = {
   isLoading: boolean;
@@ -16,7 +15,7 @@ export const RetentionCohort = ({
   isLoading,
   tableData,
 }: RetentionCohortProps) => {
-  const columnHelper = createColumnHelper<any>();
+  const columnHelper = createColumnHelper<RetentionCohortData>();
 
   const columns = useMemo(() => {
     const staticColumns = [
@@ -43,7 +42,7 @@ export const RetentionCohort = ({
               lineHeight={'base'}
               fontWeight={'400'}
             >
-              {dayjs.utc(date).local().format('MMM D')}
+              {getUTCFormmatedDate(date, 'MMM D')}
             </TableCell>
           );
         },
@@ -75,35 +74,33 @@ export const RetentionCohort = ({
       }),
     ];
 
-    const dynamicColumns = tableData?.[0]?.intervals
-      ? Object.keys(tableData?.[0]?.intervals).map((key: string) =>
-          columnHelper.accessor(
-            (row) => {
-              return row.intervals[key];
-            },
-            {
-              id: key,
-              header: (info) => {
-                return (
-                  <Flex
-                    whiteSpace={'nowrap'}
-                    textTransform={'capitalize'}
-                    paddingInline={4}
-                    paddingBlock={2}
-                    borderLeft={'1px solid #ededed'}
-                  >
-                    {info?.header?.id}
-                  </Flex>
-                );
-              },
-              cell: (info) => {
-                return info.getValue() ? `${info.getValue()}%` : '';
-              },
-            }
-          )
-        )
-      : [];
-
+    const intervals = tableData?.[0]?.intervals || {};
+    const dynamicColumns = Object.keys(intervals).map((key: string) =>
+      columnHelper.accessor(
+        (row) => {
+          return row.intervals[key];
+        },
+        {
+          id: key,
+          header: (info) => {
+            return (
+              <Flex
+                whiteSpace={'nowrap'}
+                textTransform={'capitalize'}
+                paddingInline={4}
+                paddingBlock={2}
+                borderLeft={'1px solid #ededed'}
+              >
+                {info?.header?.id}
+              </Flex>
+            );
+          },
+          cell: (info) => {
+            return info.getValue() ? `${info.getValue()}%` : '';
+          },
+        }
+      )
+    );
     return [...staticColumns, ...dynamicColumns];
   }, []);
 
