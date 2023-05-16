@@ -4,13 +4,12 @@ from typing import List, Union
 from beanie import PydanticObjectId
 from fastapi import Depends
 
-from domain.actions.models import Action, ActionGroup, ComputedEventStreamResult
+from domain.actions.models import Action, ActionGroup, ComputedEventStreamResult, ComputedAction
 from domain.clickstream.models import CaptureEvent
 from domain.common.date_models import DateFilter
 from domain.common.date_utils import DateUtils
 from mongo import Mongo
 from repositories.clickhouse.actions import Actions
-from rest.dtos.actions import ComputedActionResponse
 
 
 class ActionService:
@@ -103,7 +102,7 @@ class ActionService:
         datasource_id: str,
         groups: List[ActionGroup],
         date_filter: Union[DateFilter, None],
-    ) -> List[ComputedActionResponse]:
+    ) -> ComputedAction:
         start_date, end_date = self.extract_date_range(date_filter=date_filter)
 
         matching_events = await self.actions.get_matching_events_from_clickstream(
@@ -132,7 +131,7 @@ class ActionService:
             )
         )[0][0]
 
-        return ComputedActionResponse(count=count, data=matching_events)
+        return ComputedAction(count=count, data=matching_events)
 
     async def delete_action(self, id=PydanticObjectId):
         selected_action = await Action.find_one(Action.id == id)
