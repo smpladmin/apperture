@@ -8,6 +8,7 @@ import appertureLogo from '@assets/images/apperture-logo.svg';
 import { StaticImageData } from 'next/image';
 import { AppWithIntegrations } from '@lib/domain/app';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import {
   ExternalSegmentFilter,
   FilterDataType,
@@ -18,6 +19,7 @@ import {
   replaceFilterValueWithEmptyStringPlaceholder,
 } from '@components/Segments/util';
 
+dayjs.extend(utc);
 export const DEBOUNCED_WAIT_TIME = 500;
 export const dateFormat = 'D MMM YY, h:mm:ss A';
 
@@ -159,4 +161,11 @@ export const replaceEmptyStringWithPlaceholderInExternalSegmentFilter = (
     ])[0];
     return { ...segmentFilter, custom: updatedCustomGroup };
   });
+};
+
+export const getUTCFormmatedDate = (
+  date: Date,
+  format: string = dateFormat
+) => {
+  return dayjs.utc(date).local().format(format);
 };

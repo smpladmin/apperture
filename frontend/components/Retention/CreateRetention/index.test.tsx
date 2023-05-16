@@ -18,6 +18,7 @@ import {
   updateRetention,
 } from '@lib/services/retentionService';
 import {
+  convertToCohortData,
   convertToIntervalData,
   convertToTrendsData,
   hasValidEvents,
@@ -54,6 +55,7 @@ describe('create retention', () => {
   let mockGetSavedSegmentsForDatasourceId: jest.Mock;
   let mockConvertToIntervalData: jest.Mock;
   let mockConvertToTrendsData: jest.Mock;
+  let mockConvertToCohortData: jest.Mock;
 
   const addEvent = async (eventName: string) => {
     const selectElementByText = screen.getByText(eventName);
@@ -255,6 +257,24 @@ describe('create retention', () => {
     'session_length',
   ];
 
+  const retetentionCohortData = [
+    {
+      cohort: '2022-11-24T00:00:00',
+      size: 105,
+      intervals: { 'day 0': 51.11, 'day 1': 43.46, 'day 2': 28.7 },
+    },
+    {
+      cohort: '2022-11-25T00:00:00',
+      size: 109,
+      intervals: { 'day 0': 57.42, 'day 1': 49.55 },
+    },
+    {
+      cohort: '2022-11-26T00:00:00',
+      size: 103,
+      intervals: { 'day 0': 53.91 },
+    },
+  ];
+
   beforeEach(() => {
     mockGetTransientRetentionData = jest.mocked(getTransientRetentionData);
 
@@ -265,6 +285,7 @@ describe('create retention', () => {
     mockGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
     mockGetEventProperties = jest.mocked(getEventProperties);
     mockConvertToTrendsData = jest.mocked(convertToTrendsData);
+    mockConvertToCohortData = jest.mocked(convertToCohortData);
     mockConvertToIntervalData = jest.mocked(convertToIntervalData);
 
     mockGetSavedSegmentsForDatasourceId = jest.mocked(
@@ -287,6 +308,7 @@ describe('create retention', () => {
     });
     mockConvertToTrendsData.mockReturnValue(retentionTrendsData);
     mockConvertToIntervalData.mockReturnValue(retentionIntervalData);
+    mockConvertToCohortData.mockReturnValue(retetentionCohortData);
   });
 
   afterAll(() => {
@@ -673,6 +695,30 @@ describe('create retention', () => {
         const inputField = screen.getByTestId('filter-value-input');
         expect(inputField).toBeVisible();
       });
+    });
+  });
+
+  describe('cohort table ', () => {
+    it('should display cohort table with retention data', async () => {
+      await renderRetention();
+
+      const cohortTable = screen.getByTestId('cohort-table');
+      expect(cohortTable).toBeInTheDocument();
+
+      const cohortTableBodyRows = screen.getAllByTestId(
+        'cohort-table-body-rows'
+      );
+      expect(cohortTableBodyRows.length).toEqual(3);
+
+      const cohortTableBodyHeaders = screen.getAllByTestId(
+        'cohort-table-headers'
+      );
+      expect(cohortTableBodyHeaders.length).toEqual(5);
+
+      const cohortTableBodyData = screen.getAllByTestId(
+        'cohort-table-body-data'
+      );
+      expect(cohortTableBodyData.length).toEqual(15);
     });
   });
 });

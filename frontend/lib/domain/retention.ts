@@ -59,3 +59,9 @@ export type Retention = {
 export type RetentionWithUser = Retention & {
   user: User;
 };
+
+export type RetentionCohortData = {
+  cohort: Date;
+  size: string;
+  intervals: { [key: string]: string };
+};
