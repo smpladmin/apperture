@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime
 from typing import Dict, List
@@ -119,8 +120,8 @@ class ClickstreamService:
                 event=data[0],
                 timestamp=data[1],
                 uid=data[2],
-                url=data[3].get("$current_url", None),
-                source=data[3].get("$lib", None),
+                url=json.loads(data[3]).get("$current_url", None),
+                source=json.loads(data[3]).get("$lib", None),
             )
             for data in data_list
         ]
