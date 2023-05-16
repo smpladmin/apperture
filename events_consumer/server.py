@@ -12,7 +12,7 @@ from aiokafka import AIOKafkaConsumer
 from clickhouse import ClickHouse
 from dotenv import load_dotenv
 
-from models.models import ClickStream
+from models.models import ClickStream, PrecisionEvent
 
 load_dotenv()
 
@@ -24,6 +24,13 @@ logging.getLogger().setLevel(logging.INFO)
 # Kafka configuration
 KAFKA_BOOTSTRAP_SERVERS = "kafka:9092"
 KAFKA_TOPIC = "clickstream"
+DEFAULT_EVENTS = [
+    "$autocapture",
+    "$pageview",
+    "$pageleave",
+    "$identify",
+    "$rageclick",
+]
 
 
 def save_events(events):
@@ -41,6 +48,23 @@ def save_events(events):
     ]
     app.clickhouse.save_events(cs_events)
     logging.info("Saved events")
+
+
+def save_precision_events(events):
+    """Saves events to Events table."""
+    logging.info(f"Saving {len(events)} precision events to events table")
+    cs_events = [
+        PrecisionEvent.build(
+            datasourceId=event["properties"]["token"],
+            timestamp=event["properties"]["$time"],
+            userId=event["properties"]["$device_id"],
+            eventName=event["event"],
+            properties=event["properties"],
+        )
+        for event in events
+    ]
+    app.clickhouse.save_precision_events(cs_events)
+    logging.info("Saved precision events")
 
 
 async def process_kafka_messages() -> None:
@@ -85,6 +109,12 @@ async def process_kafka_messages() -> None:
         if len(events) >= MAX_RECORDS:
             logging.info(f"Saving events: {events} with offsets: {offsets}")
             save_events(events)
+            precision_events = [
+                event for event in events if event["event"] not in DEFAULT_EVENTS
+            ]
+            if len(precision_events):
+                logging.info(f"Saving precision events: {precision_events}")
+                save_precision_events(precision_events)
             events = []
             offsets = []
             await consumer.commit()

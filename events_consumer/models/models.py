@@ -9,6 +9,8 @@ class CaptureEvent(str, Enum):
     PAGEVIEW = "$pageview"
     PAGELEAVE = "$pageleave"
     AUTOCAPTURE = "$autocapture"
+    RAGECLICK = "$rageclick"
+    IDENTIFY = "$identify"
 
 
 class Element(BaseModel):
@@ -111,3 +113,23 @@ class ClickStream(NamedTuple):
     @staticmethod
     def _escape(input: str) -> str:
         return input.replace('"', r"\"")
+
+
+class PrecisionEvent(NamedTuple):
+    datasourceId: str
+    timestamp: datetime
+    provider: str
+    userId: str
+    eventName: str
+    properties: dict
+
+    @staticmethod
+    def build(datasourceId, timestamp, userId, eventName, properties):
+        return PrecisionEvent(
+            datasourceId=datasourceId,
+            timestamp=datetime.fromtimestamp(timestamp),
+            provider="apperture",
+            userId=userId,
+            eventName=eventName,
+            properties=properties,
+        )

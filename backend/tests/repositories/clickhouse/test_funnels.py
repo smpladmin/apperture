@@ -133,8 +133,8 @@ class TestFunnelsRepository:
             '"table3"."user_id" ELSE NULL END AS "2" FROM table1 LEFT JOIN table2 ON '
             '"table1"."user_id"="table2"."user_id" LEFT JOIN table3 ON '
             '"table1"."user_id"="table3"."user_id") SELECT "1",(SELECT '
-            'COUNT("1"),COUNT(DISTINCT "1") FROM final_table WHERE NOT "2" IS NULL) FROM '
-            'final_table WHERE NOT "2" IS NULL AND NOT "1" IS NULL LIMIT 100'
+            'COUNT("2"),COUNT(DISTINCT "2") FROM final_table) FROM final_table WHERE NOT '
+            '"2" IS NULL AND NOT "1" IS NULL LIMIT 100'
         )
 
     @pytest.mark.parametrize(
