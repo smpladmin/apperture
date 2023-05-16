@@ -23,7 +23,6 @@ import {
 } from '@theme/index';
 import { SegmentGroup } from '@lib/domain/segment';
 
-
 export const BREAKDOWN_SELECTION_LIMIT = 5;
 
 export const replaceEmptyStringPlaceholder = (
@@ -294,5 +293,5 @@ export const getSelectedSegmentsText = (
   const isIncludedOrExcludedText = includes ? 'Includes' : 'Excludes';
   const selectedSegmentsName = selectedSegments.map((seg) => seg.name);
 
-  return `${isIncludedOrExcludedText} ${selectedSegmentsName}`;
+  return `${isIncludedOrExcludedText} ${selectedSegmentsName.join(', ')}`;
 };

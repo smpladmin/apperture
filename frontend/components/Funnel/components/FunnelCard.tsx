@@ -12,8 +12,6 @@ import FunnelStepFilterComponent from '@components/StepFilters/StepFilters';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { FunnelStep } from '@lib/domain/funnel';
 import { MapContext } from '@lib/contexts/mapContext';
-import { useRouter } from 'next/router';
-import { getEventProperties } from '@lib/services/datasourceService';
 import { cloneDeep } from 'lodash';
 import { GREY_500, WHITE_DEFAULT } from '@theme/index';
 import { Node } from '@lib/domain/node';
@@ -26,6 +24,8 @@ type FunnelComponentCardProps = {
   funnelSteps: FunnelStep[];
   setFunnelSteps: Function;
   hideNumbers: boolean;
+  eventProperties: string[];
+  loadingEventProperties: boolean;
 };
 
 const FunnelComponentCard = ({
@@ -34,21 +34,18 @@ const FunnelComponentCard = ({
   funnelSteps,
   setFunnelSteps,
   hideNumbers,
+  eventProperties,
+  loadingEventProperties,
 }: FunnelComponentCardProps) => {
   const {
     state: { nodes },
   } = useContext(MapContext);
 
   const eventBoxRef = useRef(null);
-  const router = useRouter();
-  const { dsId } = router.query;
 
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [isEventListOpen, setIsEventListOpen] = useState<boolean>(false);
   const [eventsList, setEventsList] = useState<Array<Node>>([]);
-  const [eventProperties, setEventProperties] = useState<string[]>([]);
-  const [loadingEventProperties, setLoadingEventProperties] =
-    useState<boolean>(false);
   const [showCrossIcon, setShowCrossIcon] = useState(false);
 
   useOnClickOutside(eventBoxRef, () => {
@@ -63,17 +60,6 @@ const FunnelComponentCard = ({
     if (funnelSteps.length <= 2) setShowCrossIcon(false);
     else setShowCrossIcon(true);
   }, [funnelSteps]);
-
-  useEffect(() => {
-    const fetchEventProperties = async () => {
-      const properties = await getEventProperties(dsId as string);
-      setEventProperties(properties);
-      setLoadingEventProperties(false);
-    };
-
-    setLoadingEventProperties(true);
-    fetchEventProperties();
-  }, []);
 
   const handleEventSelection = (selection: Node) => {
     setIsEventListOpen(false);

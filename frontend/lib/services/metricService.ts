@@ -21,7 +21,7 @@ type MetricRequestBody = {
   function: string;
   aggregates: MetricAggregate[];
   breakdown: string[];
-  dateFilter?: DateFilterObj;
+  dateFilter?: DateFilterObj | null;
   segmentFilter?: ExternalSegmentFilter[];
 };
 
@@ -67,7 +67,7 @@ export const saveMetric = async (
   aggregates: MetricAggregate[],
   breakdown: string[],
   dateFilter: DateFilterObj,
-  segmentFilters: ExternalSegmentFilter[]
+  segmentFilters: ExternalSegmentFilter[] | null
 ) => {
   const requestBody: MetricRequestBody = {
     name,
@@ -159,17 +159,28 @@ export const _getTransientTrendsDataPrivate = async (
   functions: string,
   aggregates: MetricAggregate[],
   breakdown: string[],
-  dateFilter: DateFilterObj | null
+  dateFilter: DateFilterObj | null,
+  segmentFilters: ExternalSegmentFilter[] | null
 ) => {
+  const requestBody: MetricRequestBody = {
+    datasourceId: dsId,
+    function: functions,
+    aggregates: replaceEmptyStringPlaceholder(aggregates),
+    breakdown,
+    dateFilter,
+  };
+
+  if (segmentFilters && isValidSegmentFilter(segmentFilters)) {
+    const updatedSegmentFilters =
+      replacePlaceholderWithEmptyStringInExternalSegmentFilter(
+        cloneDeep(segmentFilters)
+      );
+
+    requestBody.segmentFilter = updatedSegmentFilters;
+  }
   const res = await ApperturePrivateAPI.post(
     `/private/metrics/compute`,
-    {
-      datasourceId: dsId,
-      function: functions,
-      aggregates: replaceEmptyStringPlaceholder(aggregates),
-      breakdown,
-      dateFilter,
-    },
+    requestBody,
     {
       headers: { 'apperture-api-key': apiKey },
     }

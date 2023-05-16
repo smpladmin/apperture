@@ -1466,6 +1466,7 @@ def funnel_response():
         "dateFilter": None,
         "enabled": True,
         "conversionWindow": None,
+        "segmentFilter": None,
     }
 
 
@@ -1663,6 +1664,7 @@ def funnel_data():
             },
         ],
         "randomSequence": False,
+        "segmentFilter": None,
     }
 
 

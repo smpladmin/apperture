@@ -21,6 +21,7 @@ import {
   getSearchResult,
   getFilterValuesText,
   trimLabel,
+  isValidSegmentFilter,
 } from '@lib/utils/common';
 import {
   getEventProperties,
@@ -29,11 +30,13 @@ import {
 import { MapContext } from '@lib/contexts/mapContext';
 import { Funnel } from '@lib/domain/funnel';
 import { Node } from '@lib/domain/node';
+import { getSavedSegmentsForDatasourceId } from '@lib/services/segmentService';
 
 jest.mock('../util');
 jest.mock('@lib/services/funnelService');
 jest.mock('@lib/utils/common');
 jest.mock('@lib/services/datasourceService');
+jest.mock('@lib/services/segmentService');
 
 describe('create funnel', () => {
   let mockedGetCountOfValidAddedSteps: jest.Mock;
@@ -50,6 +53,8 @@ describe('create funnel', () => {
   let mockedCapitalizeLetter: jest.Mock;
   let mockedGetFilterValueText: jest.Mock;
   let mockedTrimLabel: jest.Mock;
+  let mockedIsValidSegmentFilter: jest.Mock;
+  let mockedGetSavedSegmentsForDatasourceId: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -103,9 +108,9 @@ describe('create funnel', () => {
     const addFilterButton = screen.getAllByTestId('add-filter-button');
     fireEvent.click(addFilterButton[stepIndex]);
 
-    const selectCityProperty = screen.getByText(property);
+    const selectProperty = screen.getByText(property);
     await act(async () => {
-      fireEvent.click(selectCityProperty);
+      fireEvent.click(selectProperty);
     });
 
     const addFilterValueButton = screen.getByTestId(
@@ -196,6 +201,96 @@ describe('create funnel', () => {
       },
     ],
   };
+
+  const savedSegments = [
+    {
+      _id: '63d0feda2f4dd4305186cdfa',
+      createdAt: '2023-01-25T10:05:14.446000',
+      updatedAt: '2023-01-25T10:05:14.446000',
+      datasourceId: '63d0a7bfc636cee15d81f579',
+      appId: '63ca46feee94e38b81cda37a',
+      userId: '6374b74e9b36ecf7e0b4f9e4',
+      name: 'Segment 1',
+      description: '',
+      groups: [
+        {
+          filters: [
+            {
+              operand: 'properties.$city',
+              operator: 'is',
+              values: ['Hyderabad', 'Delhi', 'Mumbai', 'Jaipur'],
+              all: false,
+              condition: 'where',
+              datatype: 'String',
+              type: 'where',
+            },
+            {
+              operand: 'Mobile_Number_Added',
+              operator: 'equals',
+              values: ['1'],
+              triggered: true,
+              aggregation: 'total',
+              date_filter: {
+                days: 30,
+              },
+              date_filter_type: 'last',
+              condition: 'who',
+              type: 'who',
+              datatype: 'Number',
+            },
+          ],
+          condition: 'and',
+        },
+      ],
+      columns: ['user_id', 'properties.$city'],
+      enabled: true,
+      user: {
+        firstName: 'Anish',
+        lastName: 'Kaushal',
+        email: 'anish@parallelhq.com',
+        picture:
+          'https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c',
+        slackChannel: null,
+      },
+    },
+    {
+      _id: '63d0feda2f4dd4305186cdfb',
+      createdAt: '2023-01-25T10:05:14.446000',
+      updatedAt: '2023-01-25T10:05:14.446000',
+      datasourceId: '63d0a7bfc636cee15d81f579',
+      appId: '63ca46feee94e38b81cda37a',
+      userId: '6374b74e9b36ecf7e0b4f9e4',
+      name: 'Segment 2',
+      description: '',
+      groups: [
+        {
+          filters: [
+            {
+              operand: 'properties.$city',
+              operator: 'is',
+              values: ['Hyderabad', 'Delhi', 'Mumbai', 'Jaipur'],
+              all: false,
+              condition: 'where',
+              datatype: 'String',
+              type: 'where',
+            },
+          ],
+          condition: 'and',
+        },
+      ],
+      columns: ['user_id', 'properties.$city'],
+      enabled: true,
+      user: {
+        firstName: 'Anish',
+        lastName: 'Kaushal',
+        email: 'anish@parallelhq.com',
+        picture:
+          'https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c',
+        slackChannel: null,
+      },
+    },
+  ];
+
   beforeEach(() => {
     mockedGetCountOfValidAddedSteps = jest.mocked(getCountOfValidAddedSteps);
     mockedSearchResult = jest.mocked(getSearchResult);
@@ -219,6 +314,10 @@ describe('create funnel', () => {
     mockedCapitalizeLetter = jest.mocked(capitalizeFirstLetter);
     mockedGetFilterValueText = jest.mocked(getFilterValuesText);
     mockedTrimLabel = jest.mocked(trimLabel);
+    mockedIsValidSegmentFilter = jest.mocked(isValidSegmentFilter);
+    mockedGetSavedSegmentsForDatasourceId = jest.mocked(
+      getSavedSegmentsForDatasourceId
+    );
 
     mockedGetTransientFunnelTrendsData.mockReturnValue(funnelTrendsData);
     mockedGetCountOfValidAddedSteps.mockReturnValue(2);
@@ -247,6 +346,8 @@ describe('create funnel', () => {
     mockedTrimLabel.mockImplementation((label: string, size = 15) => {
       return label.length > size + 3 ? label.slice(0, size) + '...' : label;
     });
+    mockedIsValidSegmentFilter.mockReturnValue(true);
+    mockedGetSavedSegmentsForDatasourceId.mockReturnValue(savedSegments);
   });
 
   afterAll(() => {
@@ -751,6 +852,89 @@ describe('create funnel', () => {
       expect(conversionInput).toHaveDisplayValue('10');
       expect(mockedGetTransientFunnelData).toHaveBeenCalled();
       expect(mockedGetTransientFunnelTrendsData).toHaveBeenCalled();
+    });
+  });
+
+  describe('segment filter', () => {
+    it('should add a segment filter with includes option', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
+
+      const segmentFilterText = screen.getByTestId('segment-filter-text');
+      fireEvent.click(segmentFilterText);
+
+      const segmentDrodpdownOptions = screen.getAllByTestId(
+        'saved-segment-options'
+      );
+
+      const segmentOptionsText = Array.from(segmentDrodpdownOptions).map(
+        (option) => option.textContent
+      );
+
+      expect(segmentOptionsText).toEqual(['Segment 1', 'Segment 2']);
+
+      const selectAllCheckBox = screen.getByTestId('select-all-checkbox');
+      fireEvent.click(selectAllCheckBox);
+
+      await act(async () => {
+        const addSelectedSegments = screen.getByTestId('select-segments');
+        fireEvent.click(addSelectedSegments);
+      });
+
+      const segmentFilterTextAfterSelectingSegments = screen.getByTestId(
+        'segment-filter-text'
+      );
+
+      expect(segmentFilterTextAfterSelectingSegments.textContent).toEqual(
+        'Includes Segment 1, Segment 2'
+      );
+    });
+
+    it('should add a segment filter with excludes option', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
+
+      const segmentFilterText = screen.getByTestId('segment-filter-text');
+      fireEvent.click(segmentFilterText);
+
+      const excludeUserOption = screen.getByText('Exclude Users');
+      fireEvent.click(excludeUserOption);
+
+      const selectAllCheckBox = screen.getByTestId('select-all-checkbox');
+      fireEvent.click(selectAllCheckBox);
+
+      await act(async () => {
+        const addSelectedSegments = screen.getByTestId('select-segments');
+        fireEvent.click(addSelectedSegments);
+      });
+
+      const segmentFilterTextAfterSelectingSegments = screen.getByTestId(
+        'segment-filter-text'
+      );
+
+      expect(segmentFilterTextAfterSelectingSegments.textContent).toEqual(
+        'Excludes Segment 1, Segment 2'
+      );
+    });
+
+    it('should add a new custom filter in segment group', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
+
+      await addEventFilter('device');
+      const eventFilterValue = screen.getByTestId('event-filter-values');
+
+      // option 1 is ios
+      expect(eventFilterValue.textContent).toEqual('Mumbai, Delhi, +2 more');
     });
   });
 });

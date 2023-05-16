@@ -1,5 +1,5 @@
 import ViewPanel from '@components/EventsLayout/ViewPanel';
-import { DateFilterObj } from '@lib/domain/common';
+import { DateFilterObj, ExternalSegmentFilter } from '@lib/domain/common';
 import {
   ConversionWindowObj,
   FunnelData,
@@ -17,6 +17,7 @@ const RightView = ({
   dateFilter,
   conversionWindow,
   randomSequence,
+  segmentFilters,
 }: {
   funnelSteps: FunnelStep[];
   computedFunnel: FunnelData[];
@@ -25,6 +26,7 @@ const RightView = ({
   dateFilter: DateFilterObj;
   conversionWindow: ConversionWindowObj;
   randomSequence: boolean;
+  segmentFilters: ExternalSegmentFilter[] | null;
 }) => {
   return (
     <ViewPanel>
@@ -39,6 +41,7 @@ const RightView = ({
         isDateFilterDisabled={true}
         conversionWindow={conversionWindow}
         randomSequence={randomSequence}
+        segmentFilters={segmentFilters}
       />
     </ViewPanel>
   );
