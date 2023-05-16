@@ -28,13 +28,14 @@ import {
   DateFilterType,
   ExternalSegmentFilter,
   GroupConditions,
+  WhereFilter,
 } from '@lib/domain/common';
 import Header from '@components/EventsLayout/ActionHeader';
 import Card from '@components/Card';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
 import {
-  isValidSegmentFilter,
+  isEveryCustomSegmentFilterValid,
   replaceEmptyStringWithPlaceholderInExternalSegmentFilter,
 } from '@lib/utils/common';
 
@@ -133,7 +134,9 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
       getCountOfValidAddedSteps(funnelSteps) < 2 ||
       !isEveryFunnelStepFiltersValid(funnelSteps) ||
       isStepAdded ||
-      !isValidSegmentFilter(segmentFilters)
+      !isEveryCustomSegmentFilterValid(
+        segmentFilters[0].custom.filters as WhereFilter[]
+      )
     ) {
       setIsStepAdded(false);
       return;

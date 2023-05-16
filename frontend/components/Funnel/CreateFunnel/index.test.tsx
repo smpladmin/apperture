@@ -21,7 +21,7 @@ import {
   getSearchResult,
   getFilterValuesText,
   trimLabel,
-  isValidSegmentFilter,
+  isEveryCustomSegmentFilterValid,
 } from '@lib/utils/common';
 import {
   getEventProperties,
@@ -314,7 +314,7 @@ describe('create funnel', () => {
     mockedCapitalizeLetter = jest.mocked(capitalizeFirstLetter);
     mockedGetFilterValueText = jest.mocked(getFilterValuesText);
     mockedTrimLabel = jest.mocked(trimLabel);
-    mockedIsValidSegmentFilter = jest.mocked(isValidSegmentFilter);
+    mockedIsValidSegmentFilter = jest.mocked(isEveryCustomSegmentFilterValid);
     mockedGetSavedSegmentsForDatasourceId = jest.mocked(
       getSavedSegmentsForDatasourceId
     );
