@@ -1,25 +1,26 @@
-from datetime import datetime, timedelta
 import logging
+from datetime import datetime, timedelta
 from typing import List, Union
+
 from beanie import PydanticObjectId
 from fastapi import Depends
-from domain.notifications.models import NotificationVariant
 
 from domain.common.date_models import DateFilter, DateFilterType
 from domain.common.date_utils import DateUtils
 from domain.metrics.models import (
-    SegmentsAndEvents,
+    ComputedMetricData,
     ComputedMetricStep,
+    Metric,
     MetricBreakdown,
     MetricValue,
-    ComputedMetricData,
-    Metric,
     SegmentFilter,
+    SegmentsAndEvents,
 )
 from domain.notifications.models import (
     Notification,
     NotificationData,
     NotificationThresholdType,
+    NotificationVariant,
 )
 from mongo import Mongo
 from repositories.clickhouse.metric import Metrics
@@ -64,7 +65,6 @@ class MetricService:
         date_filter: Union[DateFilter, None],
         segment_filter: Union[List[SegmentFilter], None],
     ) -> List[ComputedMetricStep]:
-
         start_date, end_date = (
             self.date_utils.compute_date_filter(
                 date_filter=date_filter.filter, date_filter_type=date_filter.type
@@ -90,9 +90,17 @@ class MetricService:
             end_date=end_date,
             segment_filter_criterion=segment_filter_criterion,
         )
+
+        function_name_lookup_table = {}
+        for aggregate in aggregates:
+            function_name_lookup_table[aggregate.variable] = aggregate.reference_id
+
         if computed_metric is None:
             return [
-                ComputedMetricStep(name=func, series=[]) for func in function.split(",")
+                ComputedMetricStep(
+                    name=function_name_lookup_table.get(func, func), series=[]
+                )
+                for func in function.split(",")
             ]
         keys = ["date"]
         keys.extend(breakdown + function.split(","))
@@ -188,7 +196,11 @@ class MetricService:
                         )
                     )
 
-            computed_metric_steps.append(ComputedMetricStep(name=func, series=series))
+            computed_metric_steps.append(
+                ComputedMetricStep(
+                    name=function_name_lookup_table.get(func, func), series=series
+                )
+            )
 
         return computed_metric_steps
 
