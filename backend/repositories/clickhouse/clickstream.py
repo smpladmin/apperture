@@ -1,6 +1,6 @@
 from typing import List
 
-from pypika import ClickHouseQuery, Parameter, Order, Interval, Criterion
+from pypika import ClickHouseQuery, Parameter, Order, Criterion, Field
 from pypika import functions as fn
 
 from repositories.clickhouse.base import EventsBase
@@ -33,13 +33,8 @@ class Clickstream(EventsBase):
                 self.click_stream_table.event,
                 self.click_stream_table.timestamp,
                 self.click_stream_table.user_id,
-                self.visit_param_extract_string(
-                    self.to_json_string_func(self.click_stream_table.properties),
-                    "$current_url",
-                ),
-                self.visit_param_extract_string(
-                    self.to_json_string_func(self.click_stream_table.properties), "$lib"
-                ),
+                Field(f"properties.$current_url"),
+                Field(f"properties.$lib"),
             )
             .where(Criterion.all(criterion))
             .orderby(self.click_stream_table.timestamp, order=Order.desc)

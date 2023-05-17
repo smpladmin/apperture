@@ -14,7 +14,7 @@ class TestClickStreamRepository:
             query
             == (
                 'SELECT '
-                '"event","timestamp","user_id",visitParamExtractString(toJSONString("properties"),\'$current_url\'),visitParamExtractString(toJSONString("properties"),\'$lib\') '
+                '"event","timestamp","user_id","properties.$current_url","properties.$lib" '
                 'FROM "clickstream" WHERE "datasource_id"=%(dsId)s AND "timestamp"<=NOW() '
                 'ORDER BY "timestamp" DESC LIMIT 100'
             )
