@@ -20,13 +20,9 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 import MetricTable from './MetricTable';
 import Card from '@components/Card';
+import dayjs from 'dayjs';
 
 const graphColors = COLOR_PALLETE_5.map((color) => color.hexaValue);
-
-const formatDateLabel = (date: string) =>
-  String(new Date(date)).split(' ').slice(0, 4).join(' ') +
-  ' at ' +
-  String(new Date(date)).split(' ')[4].split(':').slice(0, 2).join(':');
 
 export const metricChartConfig = {
   padding: 'auto',
@@ -77,7 +73,8 @@ export const metricChartConfig = {
       });
       return `<div id='metric-tooltip'>
       <span class='metric-tooltip date'>${
-        data_list.length && formatDateLabel(data_list[0].date)
+        data_list.length &&
+        dayjs(data_list[0].date).format('ddd MMM DD[,] YYYY [at] HH:mm a')
       } 
                    </span>
       <div class='metric-legend-grid'>
