@@ -35,6 +35,10 @@ class Clickstream(EventsBase):
                 self.click_stream_table.user_id,
                 Field(f"properties.$current_url"),
                 Field(f"properties.$lib"),
+                Field("properties.$event_type"),
+                Field("properties.$elements.attr__aria-label"),
+                Field("properties.$elements.tag_name"),
+                Field("properties.$elements.$el_text"),
             )
             .where(Criterion.all(criterion))
             .orderby(self.click_stream_table.timestamp, order=Order.desc)
