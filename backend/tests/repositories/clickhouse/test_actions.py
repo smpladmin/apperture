@@ -99,21 +99,21 @@ class TestActionsRepository:
         }
 
         self.matching_events_query = (
-            'SELECT "event","user_id","properties","timestamp" FROM "clickstream" WHERE '
-            '"datasource_id"=%(ds_id)s '
-            "AND DATE(\"timestamp\")>='2022-12-01' AND "
-            "DATE(\"timestamp\")<='2022-12-31' "
-            'AND match("element_chain",%(group_0_prepend_0_selector_regex)s) '
-            "AND \"event\"='$autocapture' ORDER BY 4 DESC LIMIT 100"
+            "SELECT "
+            '"event","user_id",visitParamExtractString(toJSONString("properties"),\'$current_url\'),visitParamExtractString(toJSONString("properties"),\'$lib\'),"timestamp" '
+            'FROM "clickstream" WHERE "datasource_id"=%(ds_id)s AND '
+            "DATE(\"timestamp\")>='2022-12-01' AND DATE(\"timestamp\")<='2022-12-31' AND "
+            'match("element_chain",%(group_0_prepend_0_selector_regex)s) AND '
+            "\"event\"='$autocapture' ORDER BY 4 DESC LIMIT 100"
         )
 
         self.matching_events_query_with_url = (
-            'SELECT "event","user_id","properties","timestamp" FROM "clickstream" WHERE '
-            '"datasource_id"=%(ds_id)s '
-            "AND DATE(\"timestamp\")>='2022-12-01' AND "
-            "DATE(\"timestamp\")<='2022-12-31' AND "
-            '"properties.$current_url" LIKE %(group_0_prepend_url)s '
-            "AND \"event\"='$autocapture' ORDER BY 4 DESC LIMIT 100"
+            "SELECT "
+            '"event","user_id",visitParamExtractString(toJSONString("properties"),\'$current_url\'),visitParamExtractString(toJSONString("properties"),\'$lib\'),"timestamp" '
+            'FROM "clickstream" WHERE "datasource_id"=%(ds_id)s AND '
+            "DATE(\"timestamp\")>='2022-12-01' AND DATE(\"timestamp\")<='2022-12-31' AND "
+            '"properties.$current_url" LIKE %(group_0_prepend_url)s AND '
+            "\"event\"='$autocapture' ORDER BY 4 DESC LIMIT 100"
         )
 
         self.count_matching_events_query = (

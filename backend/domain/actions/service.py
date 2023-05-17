@@ -4,7 +4,12 @@ from typing import List, Union
 from beanie import PydanticObjectId
 from fastapi import Depends
 
-from domain.actions.models import Action, ActionGroup, ComputedEventStreamResult, ComputedAction
+from domain.actions.models import (
+    Action,
+    ActionGroup,
+    ComputedEventStreamResult,
+    ComputedAction,
+)
 from domain.clickstream.models import CaptureEvent
 from domain.common.date_models import DateFilter
 from domain.common.date_utils import DateUtils
@@ -113,13 +118,13 @@ class ActionService:
         )
         matching_events = [
             ComputedEventStreamResult(
-                event=event[0],
-                uid=event[1],
-                url=event[2].get("$current_url", None),
-                source=event[2].get("$lib", None),
-                timestamp=event[3],
+                event=event,
+                uid=uid,
+                url=url,
+                source=source,
+                timestamp=timestamp,
             )
-            for event in matching_events
+            for (event, uid, url, source, timestamp) in matching_events
         ]
 
         count = (
