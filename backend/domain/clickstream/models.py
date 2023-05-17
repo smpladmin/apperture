@@ -1,6 +1,7 @@
-from enum import Enum
 import datetime
+from enum import Enum
 from typing import List, NamedTuple, Optional
+
 from pydantic import BaseModel
 
 
@@ -22,9 +23,9 @@ class ClickstreamData(NamedTuple):
 
 
 class ComputedStreamElementProperty(BaseModel):
-    text: List[str]
-    aria_label: List[str]
-    tag_name: List[str]
+    text: str
+    href: str
+    tag_name: str
 
 
 class ComputedStreamEvent(BaseModel):

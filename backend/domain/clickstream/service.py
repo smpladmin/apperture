@@ -127,9 +127,9 @@ class ClickstreamService:
                     name=name,
                     type=type,
                     elements=ComputedStreamElementProperty(
-                        aria_label=aria_label,
-                        text=text,
-                        tag_name=tag_name,
+                        href=href[0] if href else "",
+                        text=text[0] if text else "",
+                        tag_name=tag_name[0] if tag_name else "",
                     ),
                 ),
                 timestamp=timestamp,
@@ -144,9 +144,9 @@ class ClickstreamService:
                 url,
                 source,
                 type,
-                aria_label,
-                text,
                 tag_name,
+                text,
+                href,
             ) in data_list
         ]
         count = self.repository.get_stream_count_by_dsId(dsId)

@@ -10,3 +10,15 @@ export type ClickstreamResponse = {
   count: number;
   data: Clickstream[];
 };
+
+export type ComputedStreamElementProperty = {
+  text: string;
+  href: string;
+  tag_name: string;
+};
+
+export type ComputedStreamEvent = {
+  name: string;
+  type: string;
+  elements: ComputedStreamElementProperty;
+};

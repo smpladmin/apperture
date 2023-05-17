@@ -18,6 +18,7 @@ import {
   replaceEmptyStringPlaceholder,
   replaceFilterValueWithEmptyStringPlaceholder,
 } from '@components/Segments/util';
+import { ComputedStreamEvent } from '@lib/domain/clickstream';
 
 dayjs.extend(utc);
 export const DEBOUNCED_WAIT_TIME = 500;
@@ -171,54 +172,48 @@ export const getUTCFormmatedDate = (
 };
 
 export function autoCaptureEventToDescription(
-  event: Pick<'elements' | 'event' | 'properties'>,
+  event: ComputedStreamEvent,
   shortForm: boolean = false
 ): string {
-  if (event.event !== '$autocapture') {
-    return event.event;
-  }
-
   const getVerb = (): string => {
-    if (event.properties.$event_type === 'click') {
-      return 'clicked';
+    if (event.type === 'click') {
+      return 'Clicked';
     }
-    if (event.properties.$event_type === 'change') {
-      return 'typed something into';
+    if (event.type === 'change') {
+      return 'Typed something into';
     }
-    if (event.properties.$event_type === 'submit') {
-      return 'submitted';
+    if (event.type === 'submit') {
+      return 'Submitted';
     }
 
-    if (event.properties.$event_type === 'touch') {
-      return 'pressed';
+    if (event.type === 'touch') {
+      return 'Pressed';
     }
-    return 'interacted with';
+    return 'Interacted with';
   };
 
   const getTag = (): string => {
-    if (event.elements?.[0]?.tag_name === 'a') {
+    if (event.elements.tag_name === 'a') {
       return 'link';
-    } else if (event.elements?.[0]?.tag_name === 'img') {
+    } else if (event.elements.tag_name === 'img') {
       return 'image';
     }
-    return event.elements?.[0]?.tag_name ?? 'element';
+    return event.elements.tag_name ?? 'element';
   };
 
   const getValue = (): string | null => {
-    if (event.elements?.[0]?.text) {
-      return `${shortForm ? '' : 'with text '}"${event.elements[0].text}"`;
-    } else if (event.elements?.[0]?.attributes?.['attr__aria-label']) {
-      return `${shortForm ? '' : 'with aria label '}"${
-        event.elements[0].attributes['attr__aria-label']
-      }"`;
+    if (event.elements.text) {
+      return `${shortForm ? '' : 'with text '}"${event.elements.text}"`;
+    } else if (event.elements.href) {
+      return `${shortForm ? '' : 'with source '}"${event.elements.href}"`;
     }
-    return null;
+    return '';
   };
 
   if (shortForm) {
-    return [getVerb(), getValue() ?? getTag()].filter((x) => x).join(' ');
+    return `${getVerb()} ${getValue()} ${getTag()}`;
   } else {
     const value = getValue();
-    return [getVerb(), getTag(), value].filter((x) => x).join(' ');
+    return `${getVerb()} ${getTag()} ${getValue()}`;
   }
 }
