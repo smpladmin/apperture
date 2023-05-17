@@ -1,10 +1,8 @@
 import {
   DateFilterObj,
   ExternalSegmentFilter,
-  GroupConditions,
-  WhereFilter,
+  WhereFilter
 } from './common';
-import { SegmentGroup } from './segment';
 import { AppertureUser } from './user';
 
 export enum MetricVariant {
@@ -43,6 +41,7 @@ export type MetricValue = { date: string; value: number };
 export type ComputedMetricData = {
   breakdown: MetricBreakdown[];
   data: MetricValue[];
+  color: string;
 };
 
 export type ComputedMetric = {

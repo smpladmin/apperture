@@ -1,41 +1,42 @@
+import asyncio
 from datetime import datetime
 from unittest import mock
-from unittest.mock import MagicMock, AsyncMock, ANY
-from beanie import PydanticObjectId
-import asyncio
+from unittest.mock import ANY, AsyncMock, MagicMock
 
 import pytest
+from beanie import PydanticObjectId
 from pypika import ClickHouseQuery, Table
-from domain.notifications.models import (
-    Notification,
-    ThresholdMap,
-    NotificationData,
-    NotificationVariant,
-)
-from domain.common.date_models import LastDateFilter, DateFilter, DateFilterType
+
+from domain.common.date_models import DateFilter, DateFilterType, LastDateFilter
 from domain.common.filter_models import (
-    FilterOperatorsNumber,
     FilterDataType,
+    FilterOperatorsNumber,
     LogicalOperators,
 )
 from domain.metrics.models import (
-    Metric,
-    SegmentsAndEvents,
-    SegmentsAndEventsType,
-    SegmentsAndEventsAggregations,
-    ComputedMetricStep,
     ComputedMetricData,
-    MetricValue,
-    MetricBreakdown,
+    ComputedMetricStep,
+    Metric,
     MetricBasicAggregation,
+    MetricBreakdown,
+    MetricValue,
     SegmentFilter,
+    SegmentsAndEvents,
+    SegmentsAndEventsAggregations,
+    SegmentsAndEventsType,
     SelectedSegments,
 )
 from domain.metrics.service import MetricService
+from domain.notifications.models import (
+    Notification,
+    NotificationData,
+    NotificationVariant,
+    ThresholdMap,
+)
 from domain.segments.models import (
+    SegmentFilterConditions,
     SegmentGroup,
     WhereSegmentFilter,
-    SegmentFilterConditions,
 )
 
 
@@ -200,7 +201,7 @@ class TestMetricService:
                 [],
                 [
                     ComputedMetricStep(
-                        name="A",
+                        name="Video_Seen",
                         series=[
                             ComputedMetricData(
                                 breakdown=[],
@@ -224,7 +225,7 @@ class TestMetricService:
                 ["property1"],
                 [
                     ComputedMetricStep(
-                        name="A",
+                        name="Video_Seen",
                         series=[
                             ComputedMetricData(
                                 breakdown=[
@@ -263,7 +264,7 @@ class TestMetricService:
                         ],
                     ),
                     ComputedMetricStep(
-                        name="B",
+                        name="Video_Open",
                         series=[
                             ComputedMetricData(
                                 breakdown=[
@@ -448,7 +449,7 @@ class TestMetricService:
             segment_filter=segment_filter,
         ) == [
             ComputedMetricStep(
-                name="A",
+                name="Video_Seen",
                 series=[
                     ComputedMetricData(
                         breakdown=[],
