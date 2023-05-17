@@ -2,30 +2,21 @@ import { Box, Flex, Text } from '@chakra-ui/react';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import React, {
   Fragment,
-  useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
 } from 'react';
-import AddFilter from '../../../StepFilters/AddFilter';
+import AddFilter from '@components/StepFilters/components/AddFilter';
+import FunnelStepFilterComponent from '@components/StepFilters/StepFilters';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { FunnelStep } from '@lib/domain/funnel';
 import { MapContext } from '@lib/contexts/mapContext';
-import FunnelStepFilterComponent from '../../../StepFilters/StepFilters';
-import { useRouter } from 'next/router';
-import { getEventProperties } from '@lib/services/datasourceService';
 import { cloneDeep } from 'lodash';
-import { FilterType } from '@lib/domain/segment';
 import { GREY_500, WHITE_DEFAULT } from '@theme/index';
 import { Node } from '@lib/domain/node';
 import { DotsSixVertical, Trash } from 'phosphor-react';
-import {
-  WhereFilter,
-  FilterConditions,
-  FilterOperatorsString,
-  FilterDataType,
-} from '@lib/domain/common';
+import { WhereFilter } from '@lib/domain/common';
 
 type FunnelComponentCardProps = {
   index: number;
@@ -33,6 +24,8 @@ type FunnelComponentCardProps = {
   funnelSteps: FunnelStep[];
   setFunnelSteps: Function;
   hideNumbers: boolean;
+  eventProperties: string[];
+  loadingEventProperties: boolean;
 };
 
 const FunnelComponentCard = ({
@@ -41,21 +34,18 @@ const FunnelComponentCard = ({
   funnelSteps,
   setFunnelSteps,
   hideNumbers,
+  eventProperties,
+  loadingEventProperties,
 }: FunnelComponentCardProps) => {
   const {
     state: { nodes },
   } = useContext(MapContext);
 
   const eventBoxRef = useRef(null);
-  const router = useRouter();
-  const { dsId } = router.query;
 
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [isEventListOpen, setIsEventListOpen] = useState<boolean>(false);
   const [eventsList, setEventsList] = useState<Array<Node>>([]);
-  const [eventProperties, setEventProperties] = useState<string[]>([]);
-  const [loadingEventProperties, setLoadingEventProperties] =
-    useState<boolean>(false);
   const [showCrossIcon, setShowCrossIcon] = useState(false);
 
   useOnClickOutside(eventBoxRef, () => {
@@ -71,22 +61,12 @@ const FunnelComponentCard = ({
     else setShowCrossIcon(true);
   }, [funnelSteps]);
 
-  useEffect(() => {
-    const fetchEventProperties = async () => {
-      const properties = await getEventProperties(dsId as string);
-      setEventProperties(properties);
-      setLoadingEventProperties(false);
-    };
-
-    setLoadingEventProperties(true);
-    fetchEventProperties();
-  }, []);
-
   const handleEventSelection = (selection: Node) => {
     setIsEventListOpen(false);
     const tempFunnelSteps = cloneDeep(funnelSteps);
     tempFunnelSteps[index]['event'] = selection.id;
     setFunnelSteps(tempFunnelSteps);
+    setIsHovered(false);
   };
 
   const handleRemoveFunnelStep = (index: number) => {
@@ -96,58 +76,10 @@ const FunnelComponentCard = ({
     setFunnelSteps(tempFunnelSteps);
   };
 
-  const updateStepFilters = useCallback(
-    (stepFilters: WhereFilter[]) => {
-      const tempFunnelSteps = cloneDeep(funnelSteps);
-      tempFunnelSteps[index]['filters'] = stepFilters;
-      setFunnelSteps(tempFunnelSteps);
-    },
-    [funnelSteps]
-  );
-
-  const handleAddFilter = (value: string) => {
-    const getFunnelFilterCondition = (stepFilters: WhereFilter[]) => {
-      return !stepFilters.length
-        ? FilterConditions.WHERE
-        : FilterConditions.AND;
-    };
-
-    const stepFilters = [...funnelStep.filters];
-    stepFilters.push({
-      condition: getFunnelFilterCondition(stepFilters),
-      operand: value,
-      operator: FilterOperatorsString.IS,
-      values: [],
-      type: FilterType.WHERE,
-      all: false,
-      datatype: FilterDataType.STRING,
-    });
-
-    updateStepFilters(stepFilters);
-  };
-
-  const handleSetFilterValue = (filterIndex: number, values: string[]) => {
-    let stepFilters = [...funnelStep.filters];
-    stepFilters[filterIndex]['values'] = values;
-
-    updateStepFilters(stepFilters);
-  };
-
-  const handleRemoveFilter = (filterIndex: number) => {
-    let stepFilters = [...funnelStep.filters];
-    stepFilters.splice(filterIndex, 1);
-
-    if (filterIndex === 0 && stepFilters.length)
-      stepFilters[0]['condition'] = FilterConditions.WHERE;
-
-    updateStepFilters(stepFilters);
-  };
-
-  const handleSetFilterProperty = (filterIndex: number, property: string) => {
-    let stepFilters = [...funnelStep.filters];
-    stepFilters[filterIndex]['operand'] = property;
-
-    updateStepFilters(stepFilters);
+  const updateStepFilters = (stepFilters: WhereFilter[]) => {
+    const tempFunnelSteps = cloneDeep(funnelSteps);
+    tempFunnelSteps[index]['filters'] = stepFilters;
+    setFunnelSteps(tempFunnelSteps);
   };
 
   return (
@@ -219,16 +151,15 @@ const FunnelComponentCard = ({
 
       {Boolean(funnelStep.filters.length) && (
         <Flex direction={'column'} gap={'2'}>
-          {funnelStep.filters.map((filter, index) => (
+          {funnelStep.filters.map((filter, index, filters) => (
             <Fragment key={index}>
               <FunnelStepFilterComponent
                 index={index}
                 filter={filter}
+                filters={filters}
+                setFilters={updateStepFilters}
                 eventProperties={eventProperties}
                 loadingEventProperties={loadingEventProperties}
-                handleSetFilterProperty={handleSetFilterProperty}
-                handleSetFilterValue={handleSetFilterValue}
-                handleRemoveFilter={handleRemoveFilter}
               />
             </Fragment>
           ))}
@@ -237,9 +168,9 @@ const FunnelComponentCard = ({
       {funnelStep.event ? (
         <AddFilter
           filters={funnelStep.filters}
+          setFilters={updateStepFilters}
           eventProperties={eventProperties}
           loadingEventProperties={loadingEventProperties}
-          handleAddFilter={handleAddFilter}
         />
       ) : null}
     </Flex>

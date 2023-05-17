@@ -21,6 +21,7 @@ import {
   getSearchResult,
   getFilterValuesText,
   trimLabel,
+  isEveryCustomSegmentFilterValid,
 } from '@lib/utils/common';
 import {
   getEventProperties,
@@ -29,11 +30,13 @@ import {
 import { MapContext } from '@lib/contexts/mapContext';
 import { Funnel } from '@lib/domain/funnel';
 import { Node } from '@lib/domain/node';
+import { getSavedSegmentsForDatasourceId } from '@lib/services/segmentService';
 
 jest.mock('../util');
 jest.mock('@lib/services/funnelService');
 jest.mock('@lib/utils/common');
 jest.mock('@lib/services/datasourceService');
+jest.mock('@lib/services/segmentService');
 
 describe('create funnel', () => {
   let mockedGetCountOfValidAddedSteps: jest.Mock;
@@ -50,6 +53,8 @@ describe('create funnel', () => {
   let mockedCapitalizeLetter: jest.Mock;
   let mockedGetFilterValueText: jest.Mock;
   let mockedTrimLabel: jest.Mock;
+  let mockedIsValidSegmentFilter: jest.Mock;
+  let mockedGetSavedSegmentsForDatasourceId: jest.Mock;
 
   const eventProperties = [
     'city',
@@ -103,9 +108,9 @@ describe('create funnel', () => {
     const addFilterButton = screen.getAllByTestId('add-filter-button');
     fireEvent.click(addFilterButton[stepIndex]);
 
-    const selectCityProperty = screen.getByText(property);
+    const selectProperty = screen.getByText(property);
     await act(async () => {
-      fireEvent.click(selectCityProperty);
+      fireEvent.click(selectProperty);
     });
 
     const addFilterValueButton = screen.getByTestId(
@@ -177,22 +182,115 @@ describe('create funnel', () => {
     });
   };
 
-  const funnelTrendsData = [
+  const funnelTrendsData = {
+    status: 200,
+    data: [
+      {
+        conversion: 5.19,
+        firstStepUsers: 578,
+        lastStepUsers: 30,
+        startDate: '2022-11-21T00:00:00',
+        endDate: '2022-11-27T00:00:00',
+      },
+      {
+        conversion: 5.11,
+        firstStepUsers: 978,
+        lastStepUsers: 50,
+        startDate: '2022-11-28T00:00:00',
+        endDate: '2022-12-04T00:00:00',
+      },
+    ],
+  };
+
+  const savedSegments = [
     {
-      conversion: 5.19,
-      firstStepUsers: 578,
-      lastStepUsers: 30,
-      startDate: '2022-11-21T00:00:00',
-      endDate: '2022-11-27T00:00:00',
+      _id: '63d0feda2f4dd4305186cdfa',
+      createdAt: '2023-01-25T10:05:14.446000',
+      updatedAt: '2023-01-25T10:05:14.446000',
+      datasourceId: '63d0a7bfc636cee15d81f579',
+      appId: '63ca46feee94e38b81cda37a',
+      userId: '6374b74e9b36ecf7e0b4f9e4',
+      name: 'Segment 1',
+      description: '',
+      groups: [
+        {
+          filters: [
+            {
+              operand: 'properties.$city',
+              operator: 'is',
+              values: ['Hyderabad', 'Delhi', 'Mumbai', 'Jaipur'],
+              all: false,
+              condition: 'where',
+              datatype: 'String',
+              type: 'where',
+            },
+            {
+              operand: 'Mobile_Number_Added',
+              operator: 'equals',
+              values: ['1'],
+              triggered: true,
+              aggregation: 'total',
+              date_filter: {
+                days: 30,
+              },
+              date_filter_type: 'last',
+              condition: 'who',
+              type: 'who',
+              datatype: 'Number',
+            },
+          ],
+          condition: 'and',
+        },
+      ],
+      columns: ['user_id', 'properties.$city'],
+      enabled: true,
+      user: {
+        firstName: 'Anish',
+        lastName: 'Kaushal',
+        email: 'anish@parallelhq.com',
+        picture:
+          'https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c',
+        slackChannel: null,
+      },
     },
     {
-      conversion: 5.11,
-      firstStepUsers: 978,
-      lastStepUsers: 50,
-      startDate: '2022-11-28T00:00:00',
-      endDate: '2022-12-04T00:00:00',
+      _id: '63d0feda2f4dd4305186cdfb',
+      createdAt: '2023-01-25T10:05:14.446000',
+      updatedAt: '2023-01-25T10:05:14.446000',
+      datasourceId: '63d0a7bfc636cee15d81f579',
+      appId: '63ca46feee94e38b81cda37a',
+      userId: '6374b74e9b36ecf7e0b4f9e4',
+      name: 'Segment 2',
+      description: '',
+      groups: [
+        {
+          filters: [
+            {
+              operand: 'properties.$city',
+              operator: 'is',
+              values: ['Hyderabad', 'Delhi', 'Mumbai', 'Jaipur'],
+              all: false,
+              condition: 'where',
+              datatype: 'String',
+              type: 'where',
+            },
+          ],
+          condition: 'and',
+        },
+      ],
+      columns: ['user_id', 'properties.$city'],
+      enabled: true,
+      user: {
+        firstName: 'Anish',
+        lastName: 'Kaushal',
+        email: 'anish@parallelhq.com',
+        picture:
+          'https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c',
+        slackChannel: null,
+      },
     },
   ];
+
   beforeEach(() => {
     mockedGetCountOfValidAddedSteps = jest.mocked(getCountOfValidAddedSteps);
     mockedSearchResult = jest.mocked(getSearchResult);
@@ -216,6 +314,10 @@ describe('create funnel', () => {
     mockedCapitalizeLetter = jest.mocked(capitalizeFirstLetter);
     mockedGetFilterValueText = jest.mocked(getFilterValuesText);
     mockedTrimLabel = jest.mocked(trimLabel);
+    mockedIsValidSegmentFilter = jest.mocked(isEveryCustomSegmentFilterValid);
+    mockedGetSavedSegmentsForDatasourceId = jest.mocked(
+      getSavedSegmentsForDatasourceId
+    );
 
     mockedGetTransientFunnelTrendsData.mockReturnValue(funnelTrendsData);
     mockedGetCountOfValidAddedSteps.mockReturnValue(2);
@@ -226,6 +328,13 @@ describe('create funnel', () => {
       const capitalizedFirstLetterMap: { [key: string]: string } = {
         days: 'Days',
         minutes: 'Minutes',
+        is: 'Is',
+        'is not': 'Is not',
+        total: 'Total',
+        'is true': 'Is true',
+        'is false': 'Is false',
+        contains: 'Contains',
+        'does not contain': 'Does not contain',
       };
       return capitalizedFirstLetterMap[val];
     });
@@ -237,6 +346,8 @@ describe('create funnel', () => {
     mockedTrimLabel.mockImplementation((label: string, size = 15) => {
       return label.length > size + 3 ? label.slice(0, size) + '...' : label;
     });
+    mockedIsValidSegmentFilter.mockReturnValue(true);
+    mockedGetSavedSegmentsForDatasourceId.mockReturnValue(savedSegments);
   });
 
   afterAll(() => {
@@ -437,10 +548,13 @@ describe('create funnel', () => {
     });
 
     it('should  paint the funnel chart/ trend chart when you select atleast two valid events', async () => {
-      mockedGetTransientFunnelData.mockReturnValue([
-        { event: 'Video_Click', users: 2000, conversion: 100 },
-        { event: 'Chapter_Click', users: 1000, conversion: 50 },
-      ]);
+      mockedGetTransientFunnelData.mockReturnValue({
+        status: 200,
+        data: [
+          { event: 'Video_Click', users: 2000, conversion: 100 },
+          { event: 'Chapter_Click', users: 1000, conversion: 50 },
+        ],
+      });
       mockedSearchResult.mockReturnValue([{ id: 'Chapter_Click' }]);
       mockedTransformFunnelData.mockReturnValue([
         { event: ' Video_Click', users: 2000, conversion: 100 },
@@ -569,12 +683,136 @@ describe('create funnel', () => {
     });
   });
 
+  describe('change datatype of filter', () => {
+    it('should change the filter from string datatype to number', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+
+      const eventFilter = screen.getByTestId('event-filter');
+      fireEvent.mouseEnter(eventFilter);
+
+      const filterDatatypeOption = screen.getByTestId('filter-datatype-option');
+      fireEvent.click(filterDatatypeOption);
+
+      const datatypeText = screen.getByText('Data Type');
+      fireEvent.mouseEnter(datatypeText);
+
+      const numberDataType = screen.getByText('Number');
+      await act(async () => {
+        fireEvent.click(numberDataType);
+      });
+
+      const filterOperator = screen.getByTestId('filter-operator');
+      const filterValueInput = screen.queryByTestId('filter-value-input');
+
+      // upon changing datatype to number, default operator 'equals' should be selected
+      // and input field should be visible
+      expect(filterOperator.textContent).toBe('equals');
+      expect(filterValueInput).toBeVisible();
+    });
+
+    it('should change the filter from string datatype to bool, should not see any option to select filter value', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+
+      const eventFilter = screen.getByTestId('event-filter');
+      fireEvent.mouseEnter(eventFilter);
+
+      const filterDatatypeOption = screen.getByTestId('filter-datatype-option');
+      fireEvent.click(filterDatatypeOption);
+
+      const datatypeText = screen.getByText('Data Type');
+      fireEvent.mouseEnter(datatypeText);
+
+      const boolDatatype = screen.getByText('True/ False');
+      await act(async () => {
+        fireEvent.click(boolDatatype);
+      });
+
+      const filterOperator = screen.getByTestId('filter-operator');
+      const filterValueInput = screen.queryByTestId('filter-value-input');
+      const filterValuesDropdown = screen.queryByTestId('filter-values');
+
+      // upon changing datatype to bool, default operator  should be selected
+      // and input field should be hidden as well as the select dropdown
+      expect(filterOperator.textContent).toBe('is true');
+      expect(filterValueInput).not.toBeInTheDocument();
+      expect(filterValuesDropdown).not.toBeInTheDocument();
+    });
+  });
+
+  describe('switch operator values', () => {
+    it('should show input field for string datatype when switch operator from `is` to `contains`', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+
+      const filterOperatorText = screen.getByTestId('filter-operator');
+      fireEvent.click(filterOperatorText);
+
+      const filterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+
+      const filterOperatorsOptionsText = filterOperatorsOptions.map(
+        (filter) => filter.textContent
+      );
+      expect(filterOperatorsOptionsText).toEqual([
+        'Is',
+        'Is not',
+        'Contains',
+        'Does not contain',
+      ]);
+
+      // click on 'Is not' operator
+      await act(async () => {
+        fireEvent.click(filterOperatorsOptions[1]);
+      });
+      await waitFor(() => {
+        expect(filterOperatorText.textContent).toEqual('is not');
+      });
+
+      fireEvent.click(filterOperatorText);
+      const newFilterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+      // click on 'Contains' operator and check if Input Field is visible
+      await act(async () => {
+        fireEvent.click(newFilterOperatorsOptions[2]);
+      });
+
+      await waitFor(() => {
+        const filterOperatorText = screen.getByTestId('filter-operator');
+        expect(filterOperatorText.textContent).toEqual('contains');
+        const inputField = screen.getByTestId('filter-value-input');
+        expect(inputField).toBeVisible();
+      });
+    });
+  });
+
   describe('date filters on funnels', () => {
     it('should call transient call when date filter is selected', async () => {
-      mockedGetTransientFunnelData.mockReturnValue([
-        { event: 'Video_Click', users: 2000, conversion: 100 },
-        { event: 'Chapter_Click', users: 1000, conversion: 50 },
-      ]);
+      mockedGetTransientFunnelData.mockReturnValue({
+        status: 200,
+        data: [
+          { event: 'Video_Click', users: 2000, conversion: 100 },
+          { event: 'Chapter_Click', users: 1000, conversion: 50 },
+        ],
+      });
       await renderCreateFunnel();
       const eventName = screen.getAllByTestId('event-name');
 
@@ -614,6 +852,89 @@ describe('create funnel', () => {
       expect(conversionInput).toHaveDisplayValue('10');
       expect(mockedGetTransientFunnelData).toHaveBeenCalled();
       expect(mockedGetTransientFunnelTrendsData).toHaveBeenCalled();
+    });
+  });
+
+  describe('segment filter', () => {
+    it('should add a segment filter with includes option', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
+
+      const segmentFilterText = screen.getByTestId('segment-filter-text');
+      fireEvent.click(segmentFilterText);
+
+      const segmentDrodpdownOptions = screen.getAllByTestId(
+        'saved-segment-options'
+      );
+
+      const segmentOptionsText = Array.from(segmentDrodpdownOptions).map(
+        (option) => option.textContent
+      );
+
+      expect(segmentOptionsText).toEqual(['Segment 1', 'Segment 2']);
+
+      const selectAllCheckBox = screen.getByTestId('select-all-checkbox');
+      fireEvent.click(selectAllCheckBox);
+
+      await act(async () => {
+        const addSelectedSegments = screen.getByTestId('select-segments');
+        fireEvent.click(addSelectedSegments);
+      });
+
+      const segmentFilterTextAfterSelectingSegments = screen.getByTestId(
+        'segment-filter-text'
+      );
+
+      expect(segmentFilterTextAfterSelectingSegments.textContent).toEqual(
+        'Includes Segment 1, Segment 2'
+      );
+    });
+
+    it('should add a segment filter with excludes option', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
+
+      const segmentFilterText = screen.getByTestId('segment-filter-text');
+      fireEvent.click(segmentFilterText);
+
+      const excludeUserOption = screen.getByText('Exclude Users');
+      fireEvent.click(excludeUserOption);
+
+      const selectAllCheckBox = screen.getByTestId('select-all-checkbox');
+      fireEvent.click(selectAllCheckBox);
+
+      await act(async () => {
+        const addSelectedSegments = screen.getByTestId('select-segments');
+        fireEvent.click(addSelectedSegments);
+      });
+
+      const segmentFilterTextAfterSelectingSegments = screen.getByTestId(
+        'segment-filter-text'
+      );
+
+      expect(segmentFilterTextAfterSelectingSegments.textContent).toEqual(
+        'Excludes Segment 1, Segment 2'
+      );
+    });
+
+    it('should add a new custom filter in segment group', async () => {
+      await renderCreateFunnel();
+
+      const eventName = screen.getAllByTestId('event-name');
+      fireEvent.click(eventName[0]);
+      await addEvent('Video_Click');
+
+      await addEventFilter('device');
+      const eventFilterValue = screen.getByTestId('event-filter-values');
+
+      // option 1 is ios
+      expect(eventFilterValue.textContent).toEqual('Mumbai, Delhi, +2 more');
     });
   });
 });

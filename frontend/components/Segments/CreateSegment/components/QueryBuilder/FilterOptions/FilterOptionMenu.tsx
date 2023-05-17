@@ -1,14 +1,12 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import {
-  FilterOptionMenuType,
-  SegmentFilterDataType,
-} from '@lib/domain/segment';
+import { FilterDataType } from '@lib/domain/common';
+import { FilterOptionMenuType } from '@lib/domain/segment';
 import React, { useState } from 'react';
 
 type FilterOptionMenuProps = {
   menu: FilterOptionMenuType;
   onSubmit: Function;
-  datatype: SegmentFilterDataType;
+  datatype: FilterDataType;
 };
 
 const FilterOptionMenu = ({

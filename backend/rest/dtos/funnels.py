@@ -13,6 +13,7 @@ from domain.funnels.models import (
     FunnelStep,
     FunnelTrendsData,
 )
+from domain.metrics.models import SegmentFilter
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
 
@@ -24,6 +25,7 @@ class CreateFunnelDto(BaseModel):
     randomSequence: bool
     dateFilter: Optional[DateFilter]
     conversionWindow: Optional[ConversionWindow]
+    segmentFilter: Optional[List[SegmentFilter]]
 
 
 class TransientFunnelConversionlDto(BaseModel):
@@ -33,6 +35,7 @@ class TransientFunnelConversionlDto(BaseModel):
     dateFilter: Optional[DateFilter]
     conversionWindow: Optional[ConversionWindow]
     randomSequence: bool
+    segmentFilter: Optional[List[SegmentFilter]]
 
 
 class TransientFunnelDto(BaseModel):
@@ -41,6 +44,7 @@ class TransientFunnelDto(BaseModel):
     dateFilter: Optional[DateFilter]
     conversionWindow: Optional[ConversionWindow]
     randomSequence: Optional[bool]
+    segmentFilter: Optional[List[SegmentFilter]]
 
 
 class FunnelResponse(Funnel, ModelResponse):

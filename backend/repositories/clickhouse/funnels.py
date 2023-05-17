@@ -34,6 +34,8 @@ class Funnels(EventsBase):
         end_date: Union[str, None],
         conversion_time: int,
         random_sequence: Union[bool, None],
+        segment_filter_query: Union[ClickHouseQuery, None],
+        inclusion_criterion: Union[bool, None],
     ) -> List[Tuple]:
         return self.execute_get_query(
             *self.build_trends_query(
@@ -43,6 +45,8 @@ class Funnels(EventsBase):
                 end_date=end_date,
                 conversion_time=conversion_time,
                 random_sequence=random_sequence,
+                segment_filter_query=segment_filter_query,
+                inclusion_criterion=inclusion_criterion,
             )
         )
 
@@ -55,6 +59,8 @@ class Funnels(EventsBase):
         end_date: Union[str, None],
         conversion_time: int,
         random_sequence: Union[bool, None],
+        segment_filter_query: Union[ClickHouseQuery, None],
+        inclusion_criterion: Union[bool, None],
     ):
         if len(steps) == 1:
             return self.get_initial_users(
@@ -63,6 +69,8 @@ class Funnels(EventsBase):
                 status=status,
                 start_date=start_date,
                 end_date=end_date,
+                segment_filter_query=segment_filter_query,
+                inclusion_criterion=inclusion_criterion,
             )
 
         query, parameter = self.build_analytics_query(
@@ -73,6 +81,8 @@ class Funnels(EventsBase):
             end_date=end_date,
             conversion_time=conversion_time,
             random_sequence=random_sequence,
+            segment_filter_query=segment_filter_query,
+            inclusion_criterion=inclusion_criterion,
         )
         return self.execute_get_query(query, parameter)
 
@@ -83,6 +93,8 @@ class Funnels(EventsBase):
         status: ConversionStatus,
         start_date: Union[str, None],
         end_date: Union[str, None],
+        segment_filter_query: Union[ClickHouseQuery, None],
+        inclusion_criterion: Union[bool, None],
     ) -> List[Tuple]:
         if status == ConversionStatus.DROPPED:
             return []
@@ -91,6 +103,7 @@ class Funnels(EventsBase):
             self.table.datasource_id == Parameter("%(ds_id)s"),
             self.table.event_name == Parameter(f"%(event0)s"),
         ]
+
         if start_date and end_date:
             conditions.extend(
                 [
@@ -98,7 +111,18 @@ class Funnels(EventsBase):
                     self.date_func(self.table.timestamp) <= end_date,
                 ]
             )
-        query = ClickHouseQuery.from_(self.table).where(Criterion.all(conditions))
+
+        query = ClickHouseQuery.from_(self.table)
+        if segment_filter_query and inclusion_criterion is not None:
+            query = query.with_(segment_filter_query, "segment_users")
+            conditions.extend(
+                [
+                    self.table.user_id.isin(AliasedQuery("segment_users"))
+                    if inclusion_criterion
+                    else self.table.user_id.notin(AliasedQuery("segment_users"))
+                ]
+            )
+        query = query.where(Criterion.all(conditions))
         count = query.select(
             fn.Count(self.table.user_id),
             fn.Count(self.table.user_id).distinct(),
@@ -120,6 +144,8 @@ class Funnels(EventsBase):
         end_date: Union[str, None],
         conversion_time: int,
         random_sequence: Union[bool, None],
+        segment_filter_query: Union[ClickHouseQuery, None],
+        inclusion_criterion: Union[bool, None],
     ) -> List[Tuple]:
         return self.execute_get_query(
             *self.build_users_query(
@@ -129,6 +155,8 @@ class Funnels(EventsBase):
                 end_date=end_date,
                 conversion_time=conversion_time,
                 random_sequence=random_sequence,
+                segment_filter_query=segment_filter_query,
+                inclusion_criterion=inclusion_criterion,
             )
         )
 
@@ -138,6 +166,8 @@ class Funnels(EventsBase):
         steps: List[FunnelStep],
         start_date: Union[str, None],
         end_date: Union[str, None],
+        segment_filter_query: Union[ClickHouseQuery, None],
+        inclusion_criterion: Union[bool, None],
     ):
         innerQuery = ClickHouseQuery
         parameters = {"ds_id": ds_id, "epoch_year": self.epoch_year}
@@ -149,6 +179,10 @@ class Funnels(EventsBase):
                     self.date_func(self.table.timestamp) <= end_date,
                 ]
             )
+
+        if segment_filter_query:
+            innerQuery = innerQuery.with_(segment_filter_query, "segment_users")
+
         for i, step in enumerate(steps):
             criterion = [
                 self.table.datasource_id == Parameter("%(ds_id)s"),
@@ -159,6 +193,16 @@ class Funnels(EventsBase):
                     filters=step.filters
                 )
                 criterion.extend(filter_criterion)
+
+            if segment_filter_query:
+                criterion.extend(
+                    [
+                        self.table.user_id.isin(AliasedQuery("segment_users"))
+                        if inclusion_criterion
+                        else self.table.user_id.notin(AliasedQuery("segment_users"))
+                    ]
+                )
+
             parameters[f"event{i}"] = step.event
             stepQuery = (
                 ClickHouseQuery.from_(self.table)
@@ -190,9 +234,18 @@ class Funnels(EventsBase):
         start_date: Union[str, None],
         end_date: Union[str, None],
         random_sequence: Union[bool, None],
+        segment_filter_query: Union[ClickHouseQuery, None],
+        inclusion_criterion: Union[bool, None],
     ):
         if random_sequence:
-            return self._anyorder_builder(ds_id, steps, start_date, end_date)
+            return self._anyorder_builder(
+                ds_id=ds_id,
+                steps=steps,
+                start_date=start_date,
+                end_date=end_date,
+                segment_filter_query=segment_filter_query,
+                inclusion_criterion=inclusion_criterion,
+            )
         query = ClickHouseQuery
         parameters = {"ds_id": ds_id, "epoch_year": self.epoch_year}
         date_criterion = []
@@ -203,6 +256,10 @@ class Funnels(EventsBase):
                     self.date_func(self.table.timestamp) <= end_date,
                 ]
             )
+
+        if segment_filter_query:
+            query = query.with_(segment_filter_query, "segment_users")
+
         for i, step in enumerate(steps):
             criterion = [
                 self.table.datasource_id == Parameter("%(ds_id)s"),
@@ -214,6 +271,15 @@ class Funnels(EventsBase):
                 )
                 criterion.extend(filter_criterion)
             parameters[f"event{i}"] = step.event
+
+            if segment_filter_query:
+                criterion.extend(
+                    [
+                        self.table.user_id.isin(AliasedQuery("segment_users"))
+                        if inclusion_criterion
+                        else self.table.user_id.notin(AliasedQuery("segment_users"))
+                    ]
+                )
 
             sub_query = (
                 ClickHouseQuery.from_(self.table)
@@ -238,13 +304,18 @@ class Funnels(EventsBase):
         end_date: Union[str, None],
         conversion_time: int,
         random_sequence: Union[bool, None],
+        segment_filter_query: Union[ClickHouseQuery, None],
+        inclusion_criterion: Union[bool, None],
     ):
+
         query, parameters = self._builder(
             ds_id=ds_id,
             steps=steps,
             start_date=start_date,
             end_date=end_date,
             random_sequence=random_sequence,
+            segment_filter_query=segment_filter_query,
+            inclusion_criterion=inclusion_criterion,
         )
         query = query.from_(AliasedQuery("table1"))
 
@@ -254,6 +325,7 @@ class Funnels(EventsBase):
             )
 
         query = query.select(fn.Count(AliasedQuery("table1").user_id).distinct())
+
         parameters["conversion_time"] = conversion_time
         for i in range(1, len(steps)):
             conditions = [
@@ -297,6 +369,8 @@ class Funnels(EventsBase):
         end_date: Union[str, None],
         conversion_time: int,
         random_sequence: Union[bool, None],
+        segment_filter_query: Union[ClickHouseQuery, None],
+        inclusion_criterion: Union[bool, None],
     ):
         query, parameters = self._builder(
             ds_id=ds_id,
@@ -304,6 +378,8 @@ class Funnels(EventsBase):
             start_date=start_date,
             end_date=end_date,
             random_sequence=random_sequence,
+            segment_filter_query=segment_filter_query,
+            inclusion_criterion=inclusion_criterion,
         )
         query = query.from_(AliasedQuery("table1"))
         parameters["conversion_time"] = conversion_time
@@ -329,6 +405,7 @@ class Funnels(EventsBase):
             self.week_func(AliasedQuery("table1").ts),
             Extract(DatePart.year, AliasedQuery("table1").ts),
         )
+
         query = (
             query.select(
                 fn.Count(
@@ -391,14 +468,10 @@ class Funnels(EventsBase):
             )
         return sub_query
 
-    def build_conversion_count_query(self, second_last, condition: List):
-        return (
-            ClickHouseQuery.from_(AliasedQuery("final_table"))
-            .select(
-                fn.Count(Field(second_last)),
-                fn.Count(Field(second_last)).distinct(),
-            )
-            .where(Criterion.all(condition))
+    def build_conversion_count_query(self, last):
+        return ClickHouseQuery.from_(AliasedQuery("final_table")).select(
+            fn.Count(Field(last)),
+            fn.Count(Field(last)).distinct(),
         )
 
     def build_analytics_query(
@@ -410,13 +483,18 @@ class Funnels(EventsBase):
         end_date: Union[str, None],
         conversion_time: int,
         random_sequence: Union[bool, None],
+        segment_filter_query: Union[ClickHouseQuery, None],
+        inclusion_criterion: Union[bool, None],
     ):
+
         query, parameters = self._builder(
             ds_id=ds_id,
             steps=steps,
             start_date=start_date,
             end_date=end_date,
             random_sequence=random_sequence,
+            segment_filter_query=segment_filter_query,
+            inclusion_criterion=inclusion_criterion,
         )
 
         parameters["conversion_time"] = conversion_time
@@ -433,9 +511,21 @@ class Funnels(EventsBase):
             if status == ConversionStatus.DROPPED
             else Field(last).notnull()
         ]
-        count_query = self.build_conversion_count_query(
-            second_last, selection_condition
-        )
+        count_query = ClickHouseQuery.from_(AliasedQuery("final_table"))
+
+        if status == ConversionStatus.CONVERTED:
+            count_query = count_query.select(
+                fn.Count(Field(last)),
+                fn.Count(Field(last)).distinct(),
+            )
+        else:
+            count_query = count_query.select(
+                (fn.Count(Field(second_last)) - fn.Count(Field(last))),
+                (
+                    fn.Count(Field(second_last)).distinct()
+                    - fn.Count(Field(last)).distinct()
+                ),
+            )
         selection_condition.append(Field(second_last).notnull())
         query = (
             query.select(Field(second_last), count_query)

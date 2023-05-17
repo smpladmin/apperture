@@ -7,6 +7,12 @@ from beanie import PydanticObjectId
 
 from domain.actions.models import Action, ActionGroup, ActionGroupCondition
 from domain.actions.service import ActionService
+from domain.common.date_models import (
+    DateFilter,
+    DateFilterType,
+    FixedDateFilter,
+    LastDateFilter,
+)
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource
 
@@ -20,7 +26,10 @@ class TestActionService:
         DataSource.get_settings = MagicMock()
         self.mongo = MagicMock()
         self.actions = AsyncMock()
-        self.service = ActionService(mongo=self.mongo, actions=self.actions)
+        self.date_utils = MagicMock()
+        self.service = ActionService(
+            mongo=self.mongo, actions=self.actions, date_utils=self.date_utils
+        )
         self.ds_id = "636a1c61d715ca6baae65611"
         self.app_id = "636a1c61d715ca6baae65612"
         self.provider = IntegrationProvider.MIXPANEL
@@ -45,6 +54,10 @@ class TestActionService:
             ],
             event_type="$autocapture",
         )
+        self.date_filter = DateFilter(
+            filter=LastDateFilter(days=7), type=DateFilterType.LAST
+        )
+        self.date_utils.compute_date_filter.return_value = ("2022-12-01", "2022-12-31")
         Action.datasource_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         Action.id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.update_mock = AsyncMock()
@@ -132,6 +145,40 @@ class TestActionService:
         }
 
     @pytest.mark.asyncio
+    async def test_update_events_for_actions(self):
+        self.actions.update_events_from_clickstream.return_value = []
+
+        await self.service.update_events_for_action(action=self.action)
+        assert self.actions.update_events_from_clickstream.call_args.kwargs[
+            "action"
+        ].dict() == {
+            "app_id": PydanticObjectId("636a1c61d715ca6baae65612"),
+            "created_at": ANY,
+            "datasource_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+            "groups": [
+                {
+                    "condition": ActionGroupCondition.OR,
+                    "event": None,
+                    "href": None,
+                    "selector": "#__next > div > div.css-3h169z > div.css-8xl60i > "
+                    "button",
+                    "tag_name": None,
+                    "text": None,
+                    "url": None,
+                    "url_matching": None,
+                }
+            ],
+            "id": None,
+            "name": "clicked on settings",
+            "event_type": "$autocapture",
+            "processed_till": None,
+            "revision_id": ANY,
+            "updated_at": None,
+            "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+            "enabled": True,
+        }
+
+    @pytest.mark.asyncio
     async def test_get_actions_by_id(self):
         Action.find_one = AsyncMock()
         await self.service.get_action(id=self.id)
@@ -147,6 +194,7 @@ class TestActionService:
         await self.service.compute_action(
             datasource_id=self.ds_id,
             groups=self.action.groups,
+            date_filter=self.date_filter,
         )
         self.actions.get_matching_events_from_clickstream.assert_called_once_with(
             **{
@@ -164,6 +212,8 @@ class TestActionService:
                         "url_matching": None,
                     }
                 ],
+                "start_date": "2022-12-01",
+                "end_date": "2022-12-31",
             }
         )
         self.actions.get_count_of_matching_event_from_clickstream.assert_called_once_with(
@@ -182,5 +232,25 @@ class TestActionService:
                         "url_matching": None,
                     }
                 ],
+                "start_date": "2022-12-01",
+                "end_date": "2022-12-31",
             }
         )
+
+    @pytest.mark.parametrize(
+        "date_filter, result",
+        [
+            (None, (None, None)),
+            (
+                DateFilter(
+                    type=DateFilterType.FIXED,
+                    filter=FixedDateFilter(
+                        start_date="2022-01-01", end_date="2023-01-01"
+                    ),
+                ),
+                ("2022-12-01", "2022-12-31"),
+            ),
+        ],
+    )
+    def test_extract_date_range(self, date_filter, result):
+        assert self.service.extract_date_range(date_filter=date_filter) == result

@@ -1,14 +1,20 @@
 from datetime import datetime
-from typing import List
+from typing import List, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
 
-from domain.actions.models import Action, ActionGroup, ComputedEventStreamResult
+from domain.actions.models import (
+    Action,
+    ActionGroup,
+    ComputedEventStreamResult,
+    ComputedAction,
+)
 from domain.clickstream.models import CaptureEvent
+from domain.common.date_models import DateFilter
+from domain.common.date_utils import DateUtils
 from mongo import Mongo
 from repositories.clickhouse.actions import Actions
-from rest.dtos.actions import ComputedActionResponse
 
 
 class ActionService:
@@ -16,9 +22,11 @@ class ActionService:
         self,
         mongo: Mongo = Depends(),
         actions: Actions = Depends(),
+        date_utils: DateUtils = Depends(),
     ):
         self.mongo = mongo
         self.actions = actions
+        self.date_utils = date_utils
 
     def build_action(
         self,
@@ -37,7 +45,7 @@ class ActionService:
         )
 
     async def get_action_by_name(self, name: str):
-        return await Action.find(Action.name == name).to_list()
+        return await Action.find(Action.name == name, Action.enabled != False).to_list()
 
     async def add_action(self, action: Action):
         action.updated_at = action.created_at
@@ -64,6 +72,11 @@ class ActionService:
                 action=action, update_action_func=self.update_action_processed_till
             )
 
+    async def update_events_for_action(self, action: Action):
+        await self.actions.update_events_from_clickstream(
+            action=action, update_action_func=self.update_action_processed_till
+        )
+
     async def get_action(self, id: str) -> Action:
         return await Action.find_one(
             Action.id == PydanticObjectId(id), Action.enabled != False
@@ -80,30 +93,50 @@ class ActionService:
             Action.id == PydanticObjectId(action_id),
         ).update({"$set": to_update})
 
+    def extract_date_range(self, date_filter: Union[DateFilter, None]):
+        return (
+            self.date_utils.compute_date_filter(
+                date_filter=date_filter.filter, date_filter_type=date_filter.type
+            )
+            if date_filter and date_filter.filter and date_filter.type
+            else (None, None)
+        )
+
     async def compute_action(
-        self, datasource_id: str, groups: List[ActionGroup]
-    ) -> List[ComputedActionResponse]:
+        self,
+        datasource_id: str,
+        groups: List[ActionGroup],
+        date_filter: Union[DateFilter, None],
+    ) -> ComputedAction:
+        start_date, end_date = self.extract_date_range(date_filter=date_filter)
+
         matching_events = await self.actions.get_matching_events_from_clickstream(
-            datasource_id=datasource_id, groups=groups
+            datasource_id=datasource_id,
+            groups=groups,
+            start_date=start_date,
+            end_date=end_date,
         )
         matching_events = [
             ComputedEventStreamResult(
-                event=event[0],
-                uid=event[1],
-                url=event[2].get("$current_url", None),
-                source=event[2].get("$lib", None),
-                timestamp=event[3],
+                event=event,
+                uid=uid,
+                url=url,
+                source=source,
+                timestamp=timestamp,
             )
-            for event in matching_events
+            for (event, uid, url, source, timestamp) in matching_events
         ]
 
         count = (
             await self.actions.get_count_of_matching_event_from_clickstream(
-                datasource_id=datasource_id, groups=groups
+                datasource_id=datasource_id,
+                groups=groups,
+                start_date=start_date,
+                end_date=end_date,
             )
         )[0][0]
 
-        return ComputedActionResponse(count=count, data=matching_events)
+        return ComputedAction(count=count, data=matching_events)
 
     async def delete_action(self, id=PydanticObjectId):
         selected_action = await Action.find_one(Action.id == id)

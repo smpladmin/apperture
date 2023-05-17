@@ -12,7 +12,7 @@ import Loader from '@components/LoadingSpinner';
 import UserConversionDrawer from './UserCoversionDrawer';
 import { useRouter } from 'next/router';
 import DateFilterComponent from '@components/Date/DateFilter';
-import { DateFilterObj } from '@lib/domain/common';
+import { DateFilterObj, ExternalSegmentFilter } from '@lib/domain/common';
 import Card from '@components/Card';
 import { ArrowRight } from 'phosphor-react';
 import FunnelEmptyState from './FunnelEmptyState';
@@ -28,6 +28,7 @@ type TransientFunnelViewProps = {
   isDateFilterDisabled?: boolean;
   conversionWindow: ConversionWindowObj;
   randomSequence: boolean;
+  segmentFilters: ExternalSegmentFilter[] | null;
 };
 
 const TransientFunnelView = ({
@@ -41,6 +42,7 @@ const TransientFunnelView = ({
   isDateFilterDisabled = false,
   conversionWindow,
   randomSequence,
+  segmentFilters,
 }: TransientFunnelViewProps) => {
   const {
     isOpen: isDrawerOpen,
@@ -194,6 +196,7 @@ const TransientFunnelView = ({
         dateFilter={dateFilter}
         conversionWindow={conversionWindow}
         randomSequence={randomSequence}
+        segmentFilters={segmentFilters}
       />
     </Flex>
   );

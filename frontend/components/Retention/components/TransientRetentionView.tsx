@@ -3,16 +3,19 @@ import Card from '@components/Card';
 import DateFilterComponent from '@components/Date/DateFilter';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { DateFilterObj } from '@lib/domain/common';
-import {
-  RetentionData,
-  RetentionTrendsData,
-  TrendScale,
-} from '@lib/domain/retention';
+import { RetentionData, TrendScale } from '@lib/domain/retention';
 import { BLACK_DEFAULT, GREY_500 } from '@theme/index';
 import { Hash, Percent } from 'phosphor-react';
+import { useMemo } from 'react';
+import {
+  convertToCohortData,
+  convertToIntervalData,
+  convertToTrendsData,
+} from '@components/Retention/utils';
 import IntervalTab from './IntervalTab';
 import RetentionEmptyState from './RetentionEmptyState';
 import RetentionTrend from './RetentionTrend';
+import { RetentionCohort } from './RetentionCohort';
 
 type TransientRetentionViewProps = {
   isEmpty: boolean;
@@ -23,12 +26,11 @@ type TransientRetentionViewProps = {
   isDateFilterDisabled?: boolean;
   isIntervalDataLoading: boolean;
   isTrendsDataLoading: boolean;
+  retentionData: RetentionData[];
+  pageNumber: number;
+  setPageNumber: Function;
   interval: number;
   setInterval: Function;
-  retentionData: RetentionData;
-  setPageNumber: Function;
-  pageSize: number;
-  trendsData: RetentionTrendsData[];
 };
 
 const TransientRetentionView = ({
@@ -40,13 +42,25 @@ const TransientRetentionView = ({
   isEmpty,
   isIntervalDataLoading,
   isTrendsDataLoading,
-  interval,
-  setInterval,
   retentionData,
+  pageNumber,
+  interval,
   setPageNumber,
-  pageSize,
-  trendsData,
+  setInterval,
 }: TransientRetentionViewProps) => {
+  const pageSize = 10;
+  const trendsData = useMemo(() => {
+    return convertToTrendsData(retentionData, interval);
+  }, [interval, retentionData]);
+
+  const intervalData = useMemo(() => {
+    return convertToIntervalData(retentionData, pageNumber, pageSize);
+  }, [pageNumber, retentionData]);
+
+  const cohortData = useMemo(() => {
+    return convertToCohortData(retentionData);
+  }, [retentionData]);
+
   return (
     <Flex direction={'column'} gap={'5'}>
       <Flex justifyContent={'space-between'}>
@@ -127,17 +141,19 @@ const TransientRetentionView = ({
                 justifyContent={'center'}
                 borderBottom={'1px'}
                 borderColor={'grey.400'}
-              >
-                <LoadingSpinner />
-              </Flex>
+              ></Flex>
             ) : (
-              <IntervalTab
-                interval={interval}
-                setInterval={setInterval}
-                retentionData={retentionData}
-                setPageNumber={setPageNumber}
-                pageSize={pageSize}
-              />
+              <>
+                {intervalData.count ? (
+                  <IntervalTab
+                    interval={interval}
+                    setInterval={setInterval}
+                    intervalData={intervalData}
+                    setPageNumber={setPageNumber}
+                    pageSize={pageSize}
+                  />
+                ) : null}
+              </>
             )}
             {isTrendsDataLoading ? (
               <Flex
@@ -152,6 +168,27 @@ const TransientRetentionView = ({
               <RetentionTrend data={trendsData} trendScale={trendScale} />
             )}
           </Flex>
+        </Card>
+      )}
+      {isEmpty || !retentionData.length ? (
+        <></>
+      ) : (
+        <Card minHeight={'120'} borderRadius={'16'}>
+          {isTrendsDataLoading ? (
+            <Flex
+              h={'110'}
+              w={'full'}
+              alignItems={'center'}
+              justifyContent={'center'}
+            >
+              <LoadingSpinner />
+            </Flex>
+          ) : (
+            <RetentionCohort
+              isLoading={isTrendsDataLoading}
+              tableData={cohortData}
+            />
+          )}
         </Card>
       )}
     </Flex>

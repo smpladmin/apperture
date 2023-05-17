@@ -7,14 +7,14 @@ import {
   Tabs,
   Text,
 } from '@chakra-ui/react';
-import { DateFilterObj } from '@lib/domain/common';
+import { DateFilterObj, ExternalSegmentFilter } from '@lib/domain/common';
 import {
   ConversionStatus,
   ConversionWindowObj,
   FunnelConversionData,
   FunnelStep,
   UserActivityResponse,
-  UserProperty
+  UserProperty,
 } from '@lib/domain/funnel';
 import { getConversionData } from '@lib/services/funnelService';
 import { useEffect, useState } from 'react';
@@ -40,6 +40,7 @@ type UserTableViewProps = {
   selectedUser: any;
   setUserActivity: Function;
   isTableDataLoading: boolean;
+  segmentFilters: ExternalSegmentFilter[] | null;
 };
 type FunnelEventConversion = {
   converted?: FunnelConversionData;
@@ -61,6 +62,7 @@ const UserTableView = ({
   selectedUser,
   setUserActivity,
   isTableDataLoading,
+  segmentFilters,
 }: UserTableViewProps) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [userData, setUserData] = useState<FunnelEventConversion>();
@@ -78,7 +80,8 @@ const UserTableView = ({
           status,
           dateFilter,
           conversionWindow,
-          randomSequence
+          randomSequence,
+          segmentFilters
         );
         setUserData({ ...userData, dropped: data });
       } else if (
@@ -91,7 +94,8 @@ const UserTableView = ({
           status,
           dateFilter,
           conversionWindow,
-          randomSequence
+          randomSequence,
+          segmentFilters
         );
         setUserData({ ...userData, converted: data });
       }

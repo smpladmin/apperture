@@ -18,20 +18,29 @@ export enum TrendScale {
   PERCENTAGE = 'percentage',
 }
 
-export type RetentionTrendsData = {
-  granularity: Date;
-  retentionRate: number;
-  retainedUsers: number;
-};
-
 export type IntervalTabData = {
   name: string;
   value: number;
 };
 
-export type RetentionData = {
+export type IntervalData = {
   count: number;
   data: IntervalTabData[];
+};
+
+export type RetentionData = {
+  granularity: Date;
+  interval: number;
+  intervalName: string;
+  initialUsers: number;
+  retainedUsers: number;
+  retentionRate: number;
+};
+
+export type RetentionTrendsData = {
+  granularity: Date;
+  retentionRate: number;
+  retainedUsers: number;
 };
 
 export type Retention = {
@@ -49,4 +58,10 @@ export type Retention = {
 
 export type RetentionWithUser = Retention & {
   user: User;
+};
+
+export type RetentionCohortData = {
+  cohort: Date;
+  size: string;
+  intervals: { [key: string]: string };
 };

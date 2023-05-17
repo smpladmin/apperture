@@ -20,6 +20,7 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 import MetricTable from './MetricTable';
 import Card from '@components/Card';
+import dayjs from 'dayjs';
 
 const graphColors = COLOR_PALLETE_5.map((color) => color.hexaValue);
 
@@ -67,26 +68,40 @@ export const metricChartConfig = {
       };
     },
     customContent: (_: any, data: any) => {
-      const data_list = data.map((i: any): ComputedMetricData => i.data);
+      const data_list = data.map((i: any): ComputedMetricData => {
+        return { ...i.data, color: i.color };
+      });
       return `<div id='metric-tooltip'>
+      <span class='metric-tooltip date'>${
+        data_list.length &&
+        dayjs
+          .utc(data_list[0].date)
+          .local()
+          .format('ddd MMM DD[,] YYYY [at] HH:mm a')
+      } 
+                   </span>
+      <div class='metric-legend-grid'>
              ${data_list
                .map(
-                 (item: MetricTrendData) =>
-                   `<span class='metric-tooltip series'>${item.series}</span>
+                 (item: {
+                   date: string;
+                   value: number;
+                   series: string;
+                   color: string;
+                 }) =>
+                   `
+                   <div class='metric-tooltip disc' style='background:${
+                     item.color
+                   }'></div>
+                   <span class='metric-tooltip series'>${item.series}</span>
                  <span class='metric-tooltip value'>${formatDatalabel(
                    item.value
-                 )} Events</span>
+                 )}</span>
                    `
                )
                .join('')}
-               <span class='metric-tooltip date'>${
-                 data_list.length &&
-                 String(new Date(data_list[0].date))
-                   .split(' ')
-                   .slice(0, 5)
-                   .join(' ')
-               }
-                   </span>
+               
+         </div>
          </div>`;
     },
   },
@@ -156,7 +171,7 @@ const MetricTrend = ({ data, breakdown }: MetricTrendProps) => {
   return (
     <Flex direction={'column'} gap={'5'}>
       <Card borderRadius={'16'}>
-        <LineChart {...graphConfig} data={trendData} />
+        <LineChart className="metric-trend" {...graphConfig} data={trendData} />
       </Card>
 
       {!!metricTableData?.length && (

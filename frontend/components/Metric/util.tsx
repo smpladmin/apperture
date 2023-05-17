@@ -1,4 +1,8 @@
-import { ExternalSegmentFilter, WhereFilter } from '@lib/domain/common';
+import {
+  ExternalSegmentFilter,
+  FilterDataType,
+  WhereFilter,
+} from '@lib/domain/common';
 import {
   ComputedMetric,
   MetricAggregate,
@@ -17,8 +21,7 @@ import {
   RED_500,
   YELLOW_500,
 } from '@theme/index';
-import { SegmentGroup, WhereSegmentFilter } from '@lib/domain/segment';
-
+import { SegmentGroup } from '@lib/domain/segment';
 
 export const BREAKDOWN_SELECTION_LIMIT = 5;
 
@@ -63,6 +66,16 @@ export const getCountOfValidAggregates = (aggregates: MetricAggregate[]) => {
   return validAggregatesWithReferenceId.length;
 };
 
+export const isValidMetricSegmentFilter = (
+  segmentFilters: ExternalSegmentFilter[]
+) => {
+  return segmentFilters.every(
+    (filter) =>
+      (filter.custom.filters.length || filter.segments.length) &&
+      isEveryCustomSegmentFilterValid(filter.custom.filters as WhereFilter[])
+  );
+};
+
 const _isValidAggregation = (aggregation: any) => {
   if (
     [MetricBasicAggregation.TOTAL, MetricBasicAggregation.UNIQUE].includes(
@@ -72,6 +85,13 @@ const _isValidAggregation = (aggregation: any) => {
     return true;
 
   return Boolean(aggregation.property);
+};
+
+export const hasValidFilters = (filters: WhereFilter[]) => {
+  return filters.every(
+    (filter: WhereFilter) =>
+      filter.values.length || filter.datatype === FilterDataType.BOOL
+  );
 };
 
 export const isValidAggregates = (
@@ -84,13 +104,11 @@ export const isValidAggregates = (
       (aggregate) =>
         aggregate.reference_id &&
         aggregate.variable &&
-        aggregate.filters.every(
-          (filter: WhereFilter) => filter.values.length
-        ) &&
+        hasValidFilters(aggregate.filters) &&
         _isValidAggregation(aggregate.aggregations)
     ) &&
     isEveryCustomSegmentFilterValid(
-      segmentFilters[0].custom.filters as WhereSegmentFilter[]
+      segmentFilters[0].custom.filters as WhereFilter[]
     )
   );
 };
@@ -275,5 +293,5 @@ export const getSelectedSegmentsText = (
   const isIncludedOrExcludedText = includes ? 'Includes' : 'Excludes';
   const selectedSegmentsName = selectedSegments.map((seg) => seg.name);
 
-  return `${isIncludedOrExcludedText} ${selectedSegmentsName}`;
+  return `${isIncludedOrExcludedText} ${selectedSegmentsName.join(', ')}`;
 };

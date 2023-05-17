@@ -1,6 +1,6 @@
 import { Flex } from '@chakra-ui/react';
 import CreateFunnelAction from './CreateFunnelAction';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ConversionWindowList,
   ConversionWindowObj,
@@ -23,11 +23,21 @@ import {
 } from '@lib/services/funnelService';
 import { useRouter } from 'next/router';
 import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Funnel/util';
-import { DateFilterObj, DateFilterType } from '@lib/domain/common';
+import {
+  DateFilterObj,
+  DateFilterType,
+  ExternalSegmentFilter,
+  GroupConditions,
+  WhereFilter,
+} from '@lib/domain/common';
 import Header from '@components/EventsLayout/ActionHeader';
 import Card from '@components/Card';
 import ActionPanel from '@components/EventsLayout/ActionPanel';
 import ViewPanel from '@components/EventsLayout/ViewPanel';
+import {
+  isEveryCustomSegmentFilterValid,
+  replaceEmptyStringWithPlaceholderInExternalSegmentFilter,
+} from '@lib/utils/common';
 
 const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const router = useRouter();
@@ -71,6 +81,30 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
   const [isFunnelBeingEdited, setFunnelBeingEdited] = useState(false);
   const [randomSequence, setRandomSequence] = useState(false);
+  const [segmentFilters, setSegmentFilters] = useState<ExternalSegmentFilter[]>(
+    savedFunnel?.segmentFilter
+      ? replaceEmptyStringWithPlaceholderInExternalSegmentFilter(
+          savedFunnel.segmentFilter
+        )
+      : [
+          {
+            condition: GroupConditions.OR,
+            includes: true,
+            custom: {
+              condition: GroupConditions.AND,
+              filters: [],
+            },
+            segments: [],
+          },
+        ]
+  );
+
+  const updateSegmentFilter = useCallback(
+    (metricSegmentFilter: ExternalSegmentFilter[]) => {
+      setSegmentFilters(metricSegmentFilter);
+    },
+    [segmentFilters]
+  );
 
   useEffect(() => {
     if (getCountOfValidAddedSteps(funnelSteps) >= 2) {
@@ -99,37 +133,58 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
     if (
       getCountOfValidAddedSteps(funnelSteps) < 2 ||
       !isEveryFunnelStepFiltersValid(funnelSteps) ||
-      isStepAdded
+      isStepAdded ||
+      !isEveryCustomSegmentFilterValid(
+        segmentFilters[0].custom.filters as WhereFilter[]
+      )
     ) {
       setIsStepAdded(false);
       return;
     }
 
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
     const getFunnelMetricsData = async () => {
-      const [funnelData, trendsData] = await Promise.all([
+      const [funnelDataResponse, trendsDataResponse] = await Promise.all([
         getTransientFunnelData(
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
           dateFilter,
           conversionWindow,
-          randomSequence
+          randomSequence,
+          segmentFilters,
+          signal
         ),
         getTransientTrendsData(
           datasourceId!!,
           filterFunnelSteps(funnelSteps),
           dateFilter,
           conversionWindow,
-          randomSequence
+          randomSequence,
+          segmentFilters,
+          signal
         ),
       ]);
-      setFunnelData(funnelData);
-      setTrendsData(trendsData);
-      setIsLoading(false);
+      // status would be undefined if the call is cancelled
+      if (funnelDataResponse?.status && trendsDataResponse?.status) {
+        setFunnelData(funnelDataResponse?.data || []);
+        setTrendsData(trendsDataResponse?.data || []);
+        setIsLoading(false);
+      }
     };
 
     setIsLoading(true);
     getFunnelMetricsData();
-  }, [funnelSteps, dateFilter, conversionWindow, randomSequence]);
+
+    return () => abortController.abort();
+  }, [
+    funnelSteps,
+    dateFilter,
+    conversionWindow,
+    randomSequence,
+    segmentFilters,
+  ]);
 
   const handleSaveOrUpdateFunnel = async () => {
     const { data, status } = isFunnelBeingEdited
@@ -140,7 +195,8 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           filterFunnelSteps(funnelSteps),
           randomSequence,
           dateFilter,
-          conversionWindow
+          conversionWindow,
+          segmentFilters
         )
       : await saveFunnel(
           dsId as string,
@@ -148,7 +204,8 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
           filterFunnelSteps(funnelSteps),
           randomSequence,
           dateFilter,
-          conversionWindow
+          conversionWindow,
+          segmentFilters
         );
 
     setSaveButtonDisabled(true);
@@ -194,6 +251,8 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
               setConversionWindow={setConversionWindow}
               randomSequence={randomSequence}
               setRandomSequence={setRandomSequence}
+              segmentFilters={segmentFilters}
+              updateSegmentFilter={updateSegmentFilter}
             />
           </Card>
         </ActionPanel>
@@ -208,6 +267,7 @@ const CreateFunnel = ({ savedFunnel }: { savedFunnel?: Funnel }) => {
             setDateFilter={setDateFilter}
             conversionWindow={conversionWindow}
             randomSequence={randomSequence}
+            segmentFilters={segmentFilters}
           />
         </ViewPanel>
       </Flex>

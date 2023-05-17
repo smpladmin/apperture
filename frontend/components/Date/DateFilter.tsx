@@ -106,6 +106,7 @@ const DateFilter = ({
       variant="outline"
       isDisabled={isDisabled}
       borderRadius={'8'}
+      data-testid={'date-filter'}
     >
       <Button
         borderWidth={'1px'}

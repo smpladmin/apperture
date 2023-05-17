@@ -159,7 +159,7 @@ const CreateMetricAction = ({
         ? metricDefinition.replace(/\s*/g, '')
         : aggregates.map((aggregate) => aggregate.variable).join(',');
 
-      const result: ComputedMetric[] = await computeMetric(
+      const result = await computeMetric(
         dsId as string,
         formattedMetricDefinition,
         processedAggregate,
@@ -168,9 +168,11 @@ const CreateMetricAction = ({
         segmentFilters,
         signal
       );
-
-      setMetric(result);
-      setIsLoading(false);
+      // status would be undefined if the call is cancelled
+      if (result?.status) {
+        setMetric(result?.data);
+        setIsLoading(false);
+      }
     };
     setIsLoading(true);
     fetchMetric(aggregates);
@@ -197,7 +199,6 @@ const CreateMetricAction = ({
 
   useEffect(() => {
     // enable save metric button when aggregate, metric name or definition changes
-
     const currentMetricState = {
       name: metricName,
       function: metricDefinition,

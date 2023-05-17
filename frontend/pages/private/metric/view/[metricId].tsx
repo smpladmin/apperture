@@ -37,6 +37,7 @@ export const getServerSideProps: GetServerSideProps = async ({
     function: metricDefinition,
     breakdown,
     dateFilter,
+    segmentFilter,
   } = savedMetric;
 
   const formattedMetricDefinition = metricDefinition?.length
@@ -49,7 +50,8 @@ export const getServerSideProps: GetServerSideProps = async ({
     formattedMetricDefinition,
     aggregates,
     breakdown,
-    dateFilter || null
+    dateFilter || null,
+    segmentFilter || null
   );
 
   return {

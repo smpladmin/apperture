@@ -24,7 +24,6 @@ jest.mock('@lib/utils/common');
 
 describe('View Retention', () => {
   let mockedTransientRetention: jest.Mock;
-  let mockedTransientTrendsData: jest.Mock;
   let mockedCapitalizeLetter: jest.Mock;
   let mockedGetFilterValueText: jest.Mock;
 
@@ -58,40 +57,56 @@ describe('View Retention', () => {
     updatedAt: new Date(),
   };
 
-  const retentionTrendsData = [
-    {
-      granularity: '2022-11-21T00:00:00',
-      retainedUsers: 100,
-      retentionRate: 66.17,
-    },
-    {
-      granularity: '2022-11-22T00:00:00',
-      retainedUsers: 67,
-      retentionRate: 45.4,
-    },
-
-    {
-      granularity: '2022-11-23T00:00:00',
-      retainedUsers: 45,
-      retentionRate: 33.9,
-    },
-
+  const retentionData = [
     {
       granularity: '2022-11-24T00:00:00',
-      retainedUsers: 22,
-      retentionRate: 24.2,
+      interval: 0,
+      intervalName: 'day 0',
+      initialUsers: 202,
+      retainedUsers: 113,
+      retentionRate: 55.94,
+    },
+    {
+      granularity: '2022-11-25T00:00:00',
+      interval: 0,
+      intervalName: 'day 0',
+      initialUsers: 230,
+      retainedUsers: 112,
+      retentionRate: 48.7,
+    },
+    {
+      granularity: '2022-11-26T00:00:00',
+      interval: 1,
+      intervalName: 'day 1',
+      initialUsers: 206,
+      retainedUsers: 108,
+      retentionRate: 52.43,
+    },
+    {
+      granularity: '2022-11-27T00:00:00',
+      interval: 1,
+      intervalName: 'day 1',
+      initialUsers: 202,
+      retainedUsers: 105,
+      retentionRate: 51.98,
+    },
+    {
+      granularity: '2022-11-26T00:00:00',
+      interval: 2,
+      intervalName: 'day 2',
+      initialUsers: 206,
+      retainedUsers: 108,
+      retentionRate: 52.43,
+    },
+    {
+      granularity: '2022-11-27T00:00:00',
+      interval: 2,
+      intervalName: 'day 2',
+      initialUsers: 202,
+      retainedUsers: 105,
+      retentionRate: 51.98,
     },
   ];
-
-  const retentionData = {
-    count: 4,
-    data: [
-      { name: 'day 0', value: '55.13' },
-      { name: 'day 1', value: '31.25' },
-      { name: 'day 2', value: '18.9' },
-      { name: 'day 3', value: '10.6' },
-    ],
-  };
 
   const renderViewRetention = async (
     router = createMockRouter({ query: { retentionId: '64349843748' } }),
@@ -112,12 +127,10 @@ describe('View Retention', () => {
     mockedTransientRetention = jest.mocked(
       APIService.getTransientRetentionData
     );
-    mockedTransientTrendsData = jest.mocked(APIService.getTransientTrendsData);
     mockedCapitalizeLetter = jest.mocked(capitalizeFirstLetter);
     mockedGetFilterValueText = jest.mocked(getFilterValuesText);
 
     mockedTransientRetention.mockReturnValue(retentionData);
-    mockedTransientTrendsData.mockReturnValue(retentionTrendsData);
     mockedCapitalizeLetter.mockImplementation((val: string) => {
       const capitalizedFirstLetterMap: { [key: string]: string } = {
         days: 'Days',
@@ -200,10 +213,9 @@ describe('View Retention', () => {
     const intervalBlock = screen.getByTestId('retention-interval-block');
     expect(intervalBlock).toBeInTheDocument();
     const intervalTabs = screen.getAllByTestId('interval-tab');
-    expect(intervalTabs.length).toEqual(4);
+    expect(intervalTabs.length).toEqual(3);
     await act(async () => {
       fireEvent.click(intervalTabs[1]);
     });
-    expect(mockedTransientTrendsData).toBeCalled();
   });
 });

@@ -1,17 +1,17 @@
-import datetime
+from datetime import datetime, timedelta
 import logging
 import re
-from typing import Any, Dict, List, Tuple, cast
+import os
+from typing import Any, Dict, List, Tuple, Union, cast
 
 from beanie import PydanticObjectId
-from pypika import ClickHouseQuery, Criterion, Field, Parameter
+from pypika import ClickHouseQuery, Criterion, Field, Parameter, Order
 from pypika import functions as fn
 from pypika import terms
 
 from domain.actions.models import (
     Action,
     ActionGroup,
-    CaptureEvent,
     OperatorType,
     UrlMatching,
 )
@@ -163,20 +163,55 @@ class Actions(EventsBase):
     async def update_events_from_clickstream(self, action: Action, update_action_func):
 
         try:
-            query, params, now = await self.build_update_events_from_clickstream_query(action)
-            self.execute_get_query(
-                query=query, parameters=params
+            query, params, now = await self.build_update_events_from_clickstream_query(
+                action=action
             )
+            self.execute_get_query(query=query, parameters=params)
             await update_action_func(action_id=action.id, processed_till=now)
             logging.info(f"{action.name} processed till: {now}")
         except Exception as e:
             logging.info(f"Failed executing query for {action.name} with exception {e}")
         return
 
-    async def build_update_events_from_clickstream_query(
-        self, action: Action
-    ):
+    def get_minimum_timestamp_of_events(self, datasource_id: str):
+        params = {"ds_id": datasource_id}
+        query = (
+            ClickHouseQuery.from_(self.click_stream_table)
+            .select(
+                fn.Min(self.click_stream_table.timestamp),
+            )
+            .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
+        )
+        return self.execute_get_query(query=query.get_sql(), parameters=params)
 
+    def compute_migration_start_and_end_time(self, action: Action):
+        date_format = "%Y-%m-%d %H:%M:%S"
+        start_time, end_time = action.processed_till, datetime.strptime(
+            datetime.now().strftime(date_format), date_format
+        )
+
+        if action.processed_till:
+            start_time = datetime.strptime(
+                start_time.strftime(date_format), date_format
+            )
+
+        if not action.processed_till:
+            [(start_time,),] = self.get_minimum_timestamp_of_events(
+                datasource_id=str(action.datasource_id)
+            )
+
+        event_migration_interval = int(os.getenv("EVENT_MIGRATION_INTERVAL", 24))
+
+        current_datetime = datetime.now()
+        given_timestamp = datetime.strptime(str(start_time), date_format)
+
+        time_delta = current_datetime - given_timestamp
+        if time_delta.total_seconds() / 3600 > event_migration_interval:
+            end_time = start_time + timedelta(hours=event_migration_interval)
+
+        return start_time, end_time
+
+    async def build_update_events_from_clickstream_query(self, action: Action):
         conditions, params = [], {}
         for index, group in enumerate(action.groups):
             group_condition, group_params = self.filter_click_event(
@@ -200,32 +235,58 @@ class Actions(EventsBase):
             )
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
         )
-        if action.processed_till:
-            query = query.where(
-                self.click_stream_table.timestamp
-                > self.parse_datetime_best_effort(action.processed_till)
-            )
 
-        now = datetime.datetime.now()
+        start_time, end_time = self.compute_migration_start_and_end_time(action=action)
         query = query.where(
-            self.click_stream_table.timestamp <= self.parse_datetime_best_effort(now)
+            Criterion.all(
+                [
+                    self.click_stream_table.timestamp
+                    > self.parse_datetime_best_effort(start_time),
+                    self.click_stream_table.timestamp
+                    <= self.parse_datetime_best_effort(end_time),
+                ]
+            )
         )
 
-        query = query.where(Criterion.any(conditions))
+        query = query.where(Criterion.all(conditions))
         params["ds_id"] = str(action.datasource_id)
-        return query.get_sql(), params, now
+        return query.get_sql(), params, end_time
 
     async def get_matching_events_from_clickstream(
-        self, datasource_id: str, groups: List[ActionGroup]
+        self,
+        datasource_id: str,
+        groups: List[ActionGroup],
+        start_date: Union[str, None],
+        end_date: Union[str, None],
     ):
         return self.execute_get_query(
             *await self.build_matching_events_from_clickstream_query(
-                datasource_id=datasource_id, groups=groups
+                datasource_id=datasource_id,
+                groups=groups,
+                start_date=start_date,
+                end_date=end_date,
             )
         )
 
+    def build_date_filter_criterion(
+        self, start_date: Union[str, None], end_date: Union[str, None]
+    ):
+        date_criterion = []
+        if start_date and end_date:
+            date_criterion.extend(
+                [
+                    self.date_func(Field("timestamp")) >= start_date,
+                    self.date_func(Field("timestamp")) <= end_date,
+                ]
+            )
+        return date_criterion
+
     async def build_matching_events_from_clickstream_query(
-        self, datasource_id: str, groups: List[ActionGroup]
+        self,
+        datasource_id: str,
+        groups: List[ActionGroup],
+        start_date: Union[str, None],
+        end_date: Union[str, None],
     ):
         conditions, params = [], {}
         for index, group in enumerate(groups):
@@ -237,16 +298,30 @@ class Actions(EventsBase):
                 group_condition.append(self.click_stream_table.event == group.event)
                 conditions.append(Criterion.all(group_condition))
 
+        criterion = [self.click_stream_table.datasource_id == Parameter("%(ds_id)s")]
+        date_criterion = self.build_date_filter_criterion(
+            start_date=start_date, end_date=end_date
+        )
+        criterion.extend(date_criterion)
+
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
             .select(
                 self.click_stream_table.event,
                 self.click_stream_table.user_id,
-                self.click_stream_table.properties,
+                self.visit_param_extract_string(
+                    self.to_json_string_func(self.click_stream_table.properties),
+                    "$current_url",
+                ),
+                self.visit_param_extract_string(
+                    self.to_json_string_func(self.click_stream_table.properties), "$lib"
+                ),
                 self.click_stream_table.timestamp,
             )
-            .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
+            .where(Criterion.all(criterion))
+            .orderby(4, order=Order.desc)
         )
+
         query = query.where(Criterion.any(conditions)).limit(100)
         params["ds_id"] = str(datasource_id)
         return query.get_sql(), params
@@ -255,15 +330,24 @@ class Actions(EventsBase):
         self,
         datasource_id: str,
         groups: List[ActionGroup],
+        start_date: Union[str, None],
+        end_date: Union[str, None],
     ):
         return self.execute_get_query(
             *await self.build_count_matching_events_from_clickstream_query(
-                datasource_id=datasource_id, groups=groups
+                datasource_id=datasource_id,
+                groups=groups,
+                start_date=start_date,
+                end_date=end_date,
             )
         )
 
     async def build_count_matching_events_from_clickstream_query(
-        self, datasource_id: str, groups: List[ActionGroup]
+        self,
+        datasource_id: str,
+        groups: List[ActionGroup],
+        start_date: Union[str, None],
+        end_date: Union[str, None],
     ):
         conditions, params = [], {}
         for index, group in enumerate(groups):
@@ -275,11 +359,18 @@ class Actions(EventsBase):
                 group_condition.append(self.click_stream_table.event == group.event)
                 conditions.append(Criterion.all(group_condition))
 
+        criterion = [self.click_stream_table.datasource_id == Parameter("%(ds_id)s")]
+        date_criterion = self.build_date_filter_criterion(
+            start_date=start_date, end_date=end_date
+        )
+        criterion.extend(date_criterion)
+
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
             .select(fn.Count("*"))
-            .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
+            .where(Criterion.all(criterion))
         )
+
         query = query.where(Criterion.any(conditions))
         params["ds_id"] = str(datasource_id)
         return query.get_sql(), params

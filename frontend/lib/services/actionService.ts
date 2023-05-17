@@ -1,6 +1,6 @@
-import { filterEmptyActionSelectors } from './../../components/Actions/utils';
-import { CaptureEvent } from '@lib/domain/action';
-import { ActionGroup } from './../domain/action';
+import { DateFilterObj } from '@lib/domain/common';
+import { filterEmptyActionSelectors } from '@components/Actions/utils';
+import { ActionGroup } from '@lib/domain/action';
 import {
   AppertureDelete,
   AppertureGet,
@@ -8,7 +8,7 @@ import {
   ApperturePrivateGet,
   ApperturePut,
 } from './util';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 
 export const getSavedActionsForDatasourceId = async (dsId: string) => {
   const res = await AppertureGet(`/actions?datasource_id=${dsId}`);
@@ -42,11 +42,13 @@ export const updateAction = async (
 
 export const getTransientActionEvents = async (
   dsId: string,
-  groups: ActionGroup[]
+  groups: ActionGroup[],
+  dateFilter: DateFilterObj
 ) => {
   const res = await ApperturePost('/actions/transient', {
     datasourceId: dsId,
     groups: filterEmptyActionSelectors(cloneDeep(groups)),
+    dateFilter,
   });
   return res.data || [];
 };

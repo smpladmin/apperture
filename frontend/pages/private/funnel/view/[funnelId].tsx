@@ -29,16 +29,23 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
 
-  const { datasourceId, steps, dateFilter, conversionWindow, randomSequence } =
-    savedFunnel;
+  const {
+    datasourceId,
+    steps,
+    dateFilter,
+    conversionWindow,
+    randomSequence,
+    segmentFilter,
+  } = savedFunnel;
 
   const trendsData = await _getTransientTrendsDataPrivate(
     apiKey!!,
     datasourceId,
     steps,
     dateFilter || null,
-    conversionWindow || null,
-    randomSequence
+    conversionWindow!!,
+    randomSequence,
+    segmentFilter || null
   );
 
   return {

@@ -1,4 +1,4 @@
-import { DateFilterObj, WhereFilter } from './common';
+import { DateFilterObj, ExternalSegmentFilter, WhereFilter } from './common';
 import { AppertureUser as User } from './user';
 
 export type FunnelStep = {
@@ -29,6 +29,7 @@ export type Funnel = {
   randomSequence: boolean;
   dateFilter?: DateFilterObj;
   conversionWindow?: ConversionWindowObj;
+  segmentFilter?: ExternalSegmentFilter[];
 };
 
 export type FunnelWithUser = Funnel & {

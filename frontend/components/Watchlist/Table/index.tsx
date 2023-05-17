@@ -16,6 +16,8 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import UserInfo from './UserInfo';
 import Actions from './Actions';
+import { dateFormat } from '@lib/utils/common';
+
 dayjs.extend(utc);
 
 type WatchlistTableProps = {
@@ -66,7 +68,7 @@ const WatchlistTable = ({
             columnHelper.accessor('details.updatedAt', {
               cell: (info) => {
                 const updatedAt = info.getValue() as Date;
-                return dayjs.utc(updatedAt).local().format('D MMM YY, h:mmA');
+                return dayjs.utc(updatedAt).local().format(dateFormat);
               },
               header: 'Last Updated',
             }),

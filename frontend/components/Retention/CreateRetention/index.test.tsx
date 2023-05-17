@@ -14,11 +14,13 @@ import { MapContext } from '@lib/contexts/mapContext';
 import { Node } from '@lib/domain/node';
 import {
   getTransientRetentionData,
-  getTransientTrendsData,
   saveRetention,
   updateRetention,
 } from '@lib/services/retentionService';
 import {
+  convertToCohortData,
+  convertToIntervalData,
+  convertToTrendsData,
   hasValidEvents,
   hasValidRetentionEventAndFilters,
   substituteEmptyStringWithPlaceholder,
@@ -42,9 +44,7 @@ jest.mock('@lib/services/retentionService');
 jest.mock('@lib/services/datasourceService');
 
 describe('create retention', () => {
-  // let mockedCapitalizeLetter: jest.Mock;
   let mockedHasValidEvents: jest.Mock;
-  let mockGetTransientTrendsData: jest.Mock;
   let mockSaveRetention: jest.Mock;
   let mockUpdateRetention: jest.Mock;
   let mockGetEventProperties: jest.Mock;
@@ -53,6 +53,9 @@ describe('create retention', () => {
   let mockHasValidRetentionEventAndFilters: jest.Mock;
   let mockSubstituteEmptyStringWithPlaceholder: jest.Mock;
   let mockGetSavedSegmentsForDatasourceId: jest.Mock;
+  let mockConvertToIntervalData: jest.Mock;
+  let mockConvertToTrendsData: jest.Mock;
+  let mockConvertToCohortData: jest.Mock;
 
   const addEvent = async (eventName: string) => {
     const selectElementByText = screen.getByText(eventName);
@@ -166,38 +169,76 @@ describe('create retention', () => {
     });
   };
 
-  const retentionTrendsData = [
-    {
-      granularity: '2022-11-21T00:00:00',
-      retainedUsers: 100,
-      retentionRate: 66.17,
-    },
-    {
-      granularity: '2022-11-22T00:00:00',
-      retainedUsers: 67,
-      retentionRate: 45.4,
-    },
-
-    {
-      granularity: '2022-11-23T00:00:00',
-      retainedUsers: 45,
-      retentionRate: 33.9,
-    },
-
+  const retentionData = [
     {
       granularity: '2022-11-24T00:00:00',
-      retainedUsers: 22,
-      retentionRate: 24.2,
+      interval: 0,
+      intervalName: 'day 0',
+      initialUsers: 202,
+      retainedUsers: 113,
+      retentionRate: 55.94,
+    },
+    {
+      granularity: '2022-11-25T00:00:00',
+      interval: 0,
+      intervalName: 'day 0',
+      initialUsers: 230,
+      retainedUsers: 112,
+      retentionRate: 48.7,
+    },
+    {
+      granularity: '2022-11-26T00:00:00',
+      interval: 1,
+      intervalName: 'day 1',
+      initialUsers: 206,
+      retainedUsers: 108,
+      retentionRate: 52.43,
+    },
+    {
+      granularity: '2022-11-27T00:00:00',
+      interval: 1,
+      intervalName: 'day 1',
+      initialUsers: 202,
+      retainedUsers: 105,
+      retentionRate: 51.98,
+    },
+    {
+      granularity: '2022-11-26T00:00:00',
+      interval: 2,
+      intervalName: 'day 2',
+      initialUsers: 206,
+      retainedUsers: 108,
+      retentionRate: 52.43,
+    },
+    {
+      granularity: '2022-11-27T00:00:00',
+      interval: 2,
+      intervalName: 'day 2',
+      initialUsers: 202,
+      retainedUsers: 105,
+      retentionRate: 51.98,
     },
   ];
 
-  const retentionData = {
-    count: 4,
+  const retentionTrendsData = [
+    {
+      granularity: '2022-11-24T00:00:00',
+      retainedUsers: 113,
+      retentionRate: 55.94,
+    },
+    {
+      granularity: '2022-11-25T00:00:00',
+      retainedUsers: 112,
+      retentionRate: 48.7,
+    },
+  ];
+
+  const retentionIntervalData = {
+    count: 3,
     data: [
       { name: 'day 0', value: '55.13' },
       { name: 'day 1', value: '31.25' },
       { name: 'day 2', value: '18.9' },
-      { name: 'day 3', value: '10.6' },
     ],
   };
 
@@ -216,8 +257,25 @@ describe('create retention', () => {
     'session_length',
   ];
 
+  const retetentionCohortData = [
+    {
+      cohort: '2022-11-24T00:00:00',
+      size: 105,
+      intervals: { 'day 0': 51.11, 'day 1': 43.46, 'day 2': 28.7 },
+    },
+    {
+      cohort: '2022-11-25T00:00:00',
+      size: 109,
+      intervals: { 'day 0': 57.42, 'day 1': 49.55 },
+    },
+    {
+      cohort: '2022-11-26T00:00:00',
+      size: 103,
+      intervals: { 'day 0': 53.91 },
+    },
+  ];
+
   beforeEach(() => {
-    mockGetTransientTrendsData = jest.mocked(getTransientTrendsData);
     mockGetTransientRetentionData = jest.mocked(getTransientRetentionData);
 
     // mockedCapitalizeLetter = jest.mocked(capitalizeFirstLetter);
@@ -226,6 +284,10 @@ describe('create retention', () => {
     mockUpdateRetention = jest.mocked(updateRetention);
     mockGetEventPropertiesValue = jest.mocked(getEventPropertiesValue);
     mockGetEventProperties = jest.mocked(getEventProperties);
+    mockConvertToTrendsData = jest.mocked(convertToTrendsData);
+    mockConvertToCohortData = jest.mocked(convertToCohortData);
+    mockConvertToIntervalData = jest.mocked(convertToIntervalData);
+
     mockGetSavedSegmentsForDatasourceId = jest.mocked(
       getSavedSegmentsForDatasourceId
     );
@@ -236,7 +298,6 @@ describe('create retention', () => {
       substituteEmptyStringWithPlaceholder
     );
 
-    mockGetTransientTrendsData.mockReturnValue(retentionTrendsData);
     mockGetTransientRetentionData.mockReturnValue(retentionData);
     mockedHasValidEvents.mockReturnValue(true);
     mockHasValidRetentionEventAndFilters.mockReturnValue(true);
@@ -245,6 +306,9 @@ describe('create retention', () => {
     mockSubstituteEmptyStringWithPlaceholder.mockImplementation((val: any) => {
       return val;
     });
+    mockConvertToTrendsData.mockReturnValue(retentionTrendsData);
+    mockConvertToIntervalData.mockReturnValue(retentionIntervalData);
+    mockConvertToCohortData.mockReturnValue(retetentionCohortData);
   });
 
   afterAll(() => {
@@ -487,7 +551,6 @@ describe('create retention', () => {
       await act(async () => {
         fireEvent.click(intervalTabs[1]);
       });
-      expect(mockGetTransientTrendsData).toBeCalled();
     });
   });
 
@@ -499,7 +562,6 @@ describe('create retention', () => {
         fireEvent.click(oneMonthFilter);
       });
       expect(mockGetTransientRetentionData).toBeCalled();
-      expect(mockGetTransientTrendsData).toBeCalled();
     });
   });
 
@@ -512,7 +574,151 @@ describe('create retention', () => {
       expect(granularityTypes[0].textContent).toEqual('Days');
       fireEvent.click(granularityTypes[0]);
       expect(mockGetTransientRetentionData).toBeCalled();
-      expect(mockGetTransientTrendsData).toBeCalled();
+    });
+  });
+
+  describe('change datatype of filter', () => {
+    it('should change the filter from string datatype to number', async () => {
+      await renderRetention();
+
+      const startEvent = screen.getAllByTestId('event-selection')[0];
+      fireEvent.click(startEvent);
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+
+      const eventFilter = screen.getByTestId('event-filter');
+      fireEvent.mouseEnter(eventFilter);
+
+      const filterDatatypeOption = screen.getByTestId('filter-datatype-option');
+      fireEvent.click(filterDatatypeOption);
+
+      const datatypeText = screen.getByText('Data Type');
+      fireEvent.mouseEnter(datatypeText);
+
+      const numberDataType = screen.getByText('Number');
+      await act(async () => {
+        fireEvent.click(numberDataType);
+      });
+
+      const filterOperator = screen.getByTestId('filter-operator');
+      const filterValueInput = screen.queryByTestId('filter-value-input');
+
+      // upon changing datatype to number, default operator 'equals' should be selected
+      // and input field should be visible
+      expect(filterOperator.textContent).toBe('equals');
+      expect(filterValueInput).toBeVisible();
+    });
+
+    it('should change the filter from string datatype to bool, should not see any option to select filter value', async () => {
+      await renderRetention();
+
+      const startEvent = screen.getAllByTestId('event-selection')[0];
+      fireEvent.click(startEvent);
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+
+      const eventFilter = screen.getByTestId('event-filter');
+      fireEvent.mouseEnter(eventFilter);
+
+      const filterDatatypeOption = screen.getByTestId('filter-datatype-option');
+      fireEvent.click(filterDatatypeOption);
+
+      const datatypeText = screen.getByText('Data Type');
+      fireEvent.mouseEnter(datatypeText);
+
+      const boolDatatype = screen.getByText('True/ False');
+      await act(async () => {
+        fireEvent.click(boolDatatype);
+      });
+
+      const filterOperator = screen.getByTestId('filter-operator');
+      const filterValueInput = screen.queryByTestId('filter-value-input');
+      const filterValuesDropdown = screen.queryByTestId('filter-values');
+
+      // upon changing datatype to bool, default operator  should be selected
+      // and input field should be hidden as well as the select dropdown
+      expect(filterOperator.textContent).toBe('is true');
+      expect(filterValueInput).not.toBeInTheDocument();
+      expect(filterValuesDropdown).not.toBeInTheDocument();
+    });
+  });
+
+  describe('switch operator values', () => {
+    it('should show input field for string datatype when switch operator from `is` to `contains`', async () => {
+      await renderRetention();
+
+      const startEvent = screen.getAllByTestId('event-selection')[0];
+      fireEvent.click(startEvent);
+      await addEvent('Video_Click');
+
+      await addEventFilter('city');
+
+      const filterOperatorText = screen.getByTestId('filter-operator');
+      fireEvent.click(filterOperatorText);
+
+      const filterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+
+      const filterOperatorsOptionsText = filterOperatorsOptions.map(
+        (filter) => filter.textContent
+      );
+      expect(filterOperatorsOptionsText).toEqual([
+        'Is',
+        'Is not',
+        'Contains',
+        'Does not contain',
+      ]);
+
+      // click on 'Is not' operator
+      await act(async () => {
+        fireEvent.click(filterOperatorsOptions[1]);
+      });
+      await waitFor(() => {
+        expect(filterOperatorText.textContent).toEqual('is not');
+      });
+
+      fireEvent.click(filterOperatorText);
+      const newFilterOperatorsOptions = screen.getAllByTestId(
+        'filter-operators-options'
+      );
+      // click on 'Contains' operator and check if Input Field is visible
+      await act(async () => {
+        fireEvent.click(newFilterOperatorsOptions[2]);
+      });
+
+      await waitFor(() => {
+        const filterOperatorText = screen.getByTestId('filter-operator');
+        expect(filterOperatorText.textContent).toEqual('contains');
+        const inputField = screen.getByTestId('filter-value-input');
+        expect(inputField).toBeVisible();
+      });
+    });
+  });
+
+  describe('cohort table ', () => {
+    it('should display cohort table with retention data', async () => {
+      await renderRetention();
+
+      const cohortTable = screen.getByTestId('cohort-table');
+      expect(cohortTable).toBeInTheDocument();
+
+      const cohortTableBodyRows = screen.getAllByTestId(
+        'cohort-table-body-rows'
+      );
+      expect(cohortTableBodyRows.length).toEqual(3);
+
+      const cohortTableBodyHeaders = screen.getAllByTestId(
+        'cohort-table-headers'
+      );
+      expect(cohortTableBodyHeaders.length).toEqual(5);
+
+      const cohortTableBodyData = screen.getAllByTestId(
+        'cohort-table-body-data'
+      );
+      expect(cohortTableBodyData.length).toEqual(15);
     });
   });
 });

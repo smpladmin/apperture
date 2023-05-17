@@ -1,5 +1,6 @@
 from datetime import datetime
 from unittest.mock import ANY
+
 from models.models import ClickStream, Element, PrecisionEvent
 
 

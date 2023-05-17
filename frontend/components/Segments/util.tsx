@@ -1,13 +1,11 @@
-import { DateFilterType } from '@lib/domain/common';
 import {
-  FilterType,
-  SegmentFilter,
-  SegmentFilterDataType,
-  SegmentFilterOperatorsBool,
-  SegmentFilterOperatorsNumber,
-  SegmentFilterOperatorsString,
-  SegmentGroup,
-} from '@lib/domain/segment';
+  DateFilterType,
+  FilterDataType,
+  FilterOperatorsBool,
+  FilterOperatorsNumber,
+  FilterOperatorsString,
+} from '@lib/domain/common';
+import { FilterType, SegmentFilter, SegmentGroup } from '@lib/domain/segment';
 import { format } from 'date-fns';
 
 export const DateFilterTypeOptions = [
@@ -27,12 +25,6 @@ export const DateFilterTypeOptions = [
 
 export const getFilteredColumns = (columns: string[]) => {
   return columns.filter((value) => value !== 'user_id');
-};
-
-export const FilterOperatorsDatatypeMap = {
-  [SegmentFilterDataType.BOOL]: Object.values(SegmentFilterOperatorsBool),
-  [SegmentFilterDataType.NUMBER]: Object.values(SegmentFilterOperatorsNumber),
-  [SegmentFilterDataType.STRING]: Object.values(SegmentFilterOperatorsString),
 };
 
 export const getWhereAndWhoFilters = (filters: SegmentFilter[]) => {
@@ -92,8 +84,3 @@ export const getNumberOfDaysBetweenDates = (
   const diff = new Date(endDate)?.valueOf() - new Date(startDate)?.valueOf();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
 };
-
-export const ISFilterOperators = [
-  SegmentFilterOperatorsString.IS,
-  SegmentFilterOperatorsString.IS_NOT,
-];

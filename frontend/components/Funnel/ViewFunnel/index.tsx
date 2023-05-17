@@ -1,7 +1,7 @@
 import { Flex, useDisclosure } from '@chakra-ui/react';
 import Alert from '@components/Alerts';
 import ViewHeader from '@components/EventsLayout/ViewHeader';
-import { DateFilterObj } from '@lib/domain/common';
+import { DateFilterObj, ExternalSegmentFilter } from '@lib/domain/common';
 import {
   ConversionWindowList,
   ConversionWindowObj,
@@ -20,6 +20,7 @@ import { useEffect, useState } from 'react';
 import { replaceFilterValueWithEmptyStringPlaceholder } from '../util';
 import LeftView from './LeftView';
 import RightView from './RightView';
+import { replaceEmptyStringWithPlaceholderInExternalSegmentFilter } from '@lib/utils/common';
 
 const ViewFunnel = ({
   savedFunnel,
@@ -56,29 +57,42 @@ const ViewFunnel = ({
   const [funnelSteps] = useState(
     replaceFilterValueWithEmptyStringPlaceholder(savedFunnel.steps)
   );
+  const [segmentFilters] = useState<ExternalSegmentFilter[] | null>(
+    savedFunnel?.segmentFilter
+      ? replaceEmptyStringWithPlaceholderInExternalSegmentFilter(
+          savedFunnel.segmentFilter
+        )
+      : null
+  );
   const { isOpen: isAlertsSheetOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
     const fetchComputeData = async () => {
-      const [computedFunnelData, computedTrendsData] = await Promise.all([
-        getTransientFunnelData(
-          datasourceId,
-          savedFunnel.steps,
-          dateFilter,
-          conversionWindow,
-          randomSequence
-        ),
-        getTransientTrendsData(
-          datasourceId,
-          savedFunnel.steps,
-          dateFilter,
-          conversionWindow,
-          randomSequence
-        ),
-      ]);
-      setComputedFunnelData(computedFunnelData);
-      setComputedTrendsData(computedTrendsData);
-      setIsLoading(false);
+      const [computedFunnelResponse, computedTrendsResponse] =
+        await Promise.all([
+          getTransientFunnelData(
+            datasourceId,
+            savedFunnel.steps,
+            dateFilter,
+            conversionWindow,
+            randomSequence,
+            segmentFilters
+          ),
+          getTransientTrendsData(
+            datasourceId,
+            savedFunnel.steps,
+            dateFilter,
+            conversionWindow,
+            randomSequence,
+            segmentFilters
+          ),
+        ]);
+      // status would be undefined if the call is cancelled
+      if (computedFunnelResponse?.status && computedTrendsResponse?.status) {
+        setComputedFunnelData(computedFunnelResponse?.data || []);
+        setComputedTrendsData(computedTrendsResponse?.data || []);
+        setIsLoading(false);
+      }
     };
     setIsLoading(true);
     fetchComputeData();
@@ -161,6 +175,7 @@ const ViewFunnel = ({
           steps={funnelSteps}
           conversionWindow={conversionWindow}
           randomSequence={randomSequence}
+          segmentFilters={segmentFilters}
         />
         <RightView
           funnelSteps={funnelSteps}
@@ -170,6 +185,7 @@ const ViewFunnel = ({
           dateFilter={dateFilter}
           conversionWindow={conversionWindow}
           randomSequence={randomSequence}
+          segmentFilters={segmentFilters}
         />
         <Alert
           name={savedFunnel.name}
