@@ -309,13 +309,8 @@ class Actions(EventsBase):
             .select(
                 self.click_stream_table.event,
                 self.click_stream_table.user_id,
-                self.visit_param_extract_string(
-                    self.to_json_string_func(self.click_stream_table.properties),
-                    "$current_url",
-                ),
-                self.visit_param_extract_string(
-                    self.to_json_string_func(self.click_stream_table.properties), "$lib"
-                ),
+                Field(f"properties.$current_url"),
+                Field(f"properties.$lib"),
                 self.click_stream_table.timestamp,
             )
             .where(Criterion.all(criterion))
