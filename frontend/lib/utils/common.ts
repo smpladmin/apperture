@@ -169,3 +169,56 @@ export const getUTCFormmatedDate = (
 ) => {
   return dayjs.utc(date).local().format(format);
 };
+
+export function autoCaptureEventToDescription(
+  event: Pick<'elements' | 'event' | 'properties'>,
+  shortForm: boolean = false
+): string {
+  if (event.event !== '$autocapture') {
+    return event.event;
+  }
+
+  const getVerb = (): string => {
+    if (event.properties.$event_type === 'click') {
+      return 'clicked';
+    }
+    if (event.properties.$event_type === 'change') {
+      return 'typed something into';
+    }
+    if (event.properties.$event_type === 'submit') {
+      return 'submitted';
+    }
+
+    if (event.properties.$event_type === 'touch') {
+      return 'pressed';
+    }
+    return 'interacted with';
+  };
+
+  const getTag = (): string => {
+    if (event.elements?.[0]?.tag_name === 'a') {
+      return 'link';
+    } else if (event.elements?.[0]?.tag_name === 'img') {
+      return 'image';
+    }
+    return event.elements?.[0]?.tag_name ?? 'element';
+  };
+
+  const getValue = (): string | null => {
+    if (event.elements?.[0]?.text) {
+      return `${shortForm ? '' : 'with text '}"${event.elements[0].text}"`;
+    } else if (event.elements?.[0]?.attributes?.['attr__aria-label']) {
+      return `${shortForm ? '' : 'with aria label '}"${
+        event.elements[0].attributes['attr__aria-label']
+      }"`;
+    }
+    return null;
+  };
+
+  if (shortForm) {
+    return [getVerb(), getValue() ?? getTag()].filter((x) => x).join(' ');
+  } else {
+    const value = getValue();
+    return [getVerb(), getTag(), value].filter((x) => x).join(' ');
+  }
+}
