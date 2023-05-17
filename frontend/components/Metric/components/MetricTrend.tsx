@@ -74,7 +74,10 @@ export const metricChartConfig = {
       return `<div id='metric-tooltip'>
       <span class='metric-tooltip date'>${
         data_list.length &&
-        dayjs(data_list[0].date).format('ddd MMM DD[,] YYYY [at] HH:mm a')
+        dayjs
+          .utc(data_list[0].date)
+          .local()
+          .format('ddd MMM DD[,] YYYY [at] HH:mm a')
       } 
                    </span>
       <div class='metric-legend-grid'>
