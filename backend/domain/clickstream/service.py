@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime
 from typing import Dict, List
@@ -116,13 +117,13 @@ class ClickstreamService:
         data_list = self.repository.get_all_data_by_dsId(dsId)
         data_list = [
             ClickstreamResult(
-                event=data[0],
-                timestamp=data[1],
-                uid=data[2],
-                url=data[3].get("$current_url", None),
-                source=data[3].get("$lib", None),
+                event=event,
+                timestamp=timestamp,
+                uid=uid,
+                url=url,
+                source=source,
             )
-            for data in data_list
+            for (event, timestamp, uid, url, source) in data_list
         ]
         count = self.repository.get_stream_count_by_dsId(dsId)
         return {"count": count[0][0], "data": data_list}

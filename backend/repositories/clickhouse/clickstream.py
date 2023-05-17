@@ -23,16 +23,23 @@ class Clickstream(EventsBase):
 
     def build_get_all_events_query(self, dsId: str):
         parameters = {"dsId": dsId}
-        criterion = [self.click_stream_table.datasource_id == Parameter("%(dsId)s"),
-                     self.click_stream_table.timestamp <= fn.Now(),
-                     self.click_stream_table.timestamp >= fn.Now()-Interval(days=1)]
+        criterion = [
+            self.click_stream_table.datasource_id == Parameter("%(dsId)s"),
+            self.click_stream_table.timestamp <= fn.Now(),
+        ]
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
             .select(
                 self.click_stream_table.event,
                 self.click_stream_table.timestamp,
                 self.click_stream_table.user_id,
-                self.click_stream_table.properties,
+                self.visit_param_extract_string(
+                    self.to_json_string_func(self.click_stream_table.properties),
+                    "$current_url",
+                ),
+                self.visit_param_extract_string(
+                    self.to_json_string_func(self.click_stream_table.properties), "$lib"
+                ),
             )
             .where(Criterion.all(criterion))
             .orderby(self.click_stream_table.timestamp, order=Order.desc)

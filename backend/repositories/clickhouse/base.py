@@ -52,6 +52,9 @@ class EventsBase(ABC):
         self.date_diff_func = CustomFunction(
             "dateDiff", ["granularity", "date1", "date2"]
         )
+        self.visit_param_extract_string = CustomFunction(
+            "visitParamExtractString", ["json", "field"]
+        )
 
     def execute_get_query(self, query: str, parameters: Dict):
         logging.info(f"Executing query: {query}")
