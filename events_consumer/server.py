@@ -67,6 +67,15 @@ def save_precision_events(events):
     logging.info("Saved precision events")
 
 
+def to_object(value: str) -> Dict:
+    try:
+        decoded_string = b64decode(value).decode("utf-8")
+    except UnicodeDecodeError:
+        decoded_string = b64decode(value)
+
+    return json.loads(decoded_string)
+
+
 async def process_kafka_messages() -> None:
     """Processes Kafka messages and inserts them into ClickHouse.."""
     consumer = AIOKafkaConsumer(
@@ -90,9 +99,7 @@ async def process_kafka_messages() -> None:
 
         # Decode the base64 encoded JSON
         _events = [
-            json.loads(b64decode(record.value).decode("utf8"))
-            for _, records in data.items()
-            for record in records
+            to_object(record.value) for _, records in data.items() for record in records
         ]
 
         _offsets = [record.offset for _, records in data.items() for record in records]
