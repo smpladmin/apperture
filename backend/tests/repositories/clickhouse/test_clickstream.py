@@ -10,14 +10,12 @@ class TestClickStreamRepository:
         query, parameters = self.repository.build_get_all_events_query(
             dsId=self.datasource_id
         )
-        assert (
-            query
-            == (
-                'SELECT '
-                '"event","timestamp","user_id","properties.$current_url","properties.$lib" '
-                'FROM "clickstream" WHERE "datasource_id"=%(dsId)s AND "timestamp"<=NOW() '
-                'ORDER BY "timestamp" DESC LIMIT 100'
-            )
+        assert query == (
+            "SELECT "
+            '"event","timestamp","user_id","properties.$current_url","properties.$lib",'
+            '"properties.$event_type","properties.$elements.tag_name","properties.$elements.$el_text","properties.$elements.attr__href" '
+            'FROM "clickstream" WHERE "datasource_id"=%(dsId)s AND "timestamp"<=NOW() '
+            'ORDER BY "timestamp" DESC LIMIT 100'
         )
         assert parameters == {"dsId": self.datasource_id}
 
