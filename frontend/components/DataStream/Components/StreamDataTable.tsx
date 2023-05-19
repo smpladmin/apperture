@@ -26,7 +26,7 @@ const StreamDataTable = ({
       return [
         columnHelper.accessor('event', {
           header: 'event',
-          cell: (info) => <EventLabel event={trimLabel(info.getValue())} />,
+          cell: (info) => <EventLabel event={info.getValue()} />,
         }),
         columnHelper.accessor('uid', {
           header: 'u-id',

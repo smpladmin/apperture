@@ -1,8 +1,9 @@
 import { Flex, IconButton, Text } from '@chakra-ui/react';
+import { ComputedStreamEvent } from '@lib/domain/clickstream';
 import { autoCaptureEventToDescription } from '@lib/utils/common';
 import { useState } from 'react';
 
-export const formateventLabel = (event: any) => {
+export const formateventLabel = (event: ComputedStreamEvent) => {
   const label = event.name;
   if (label == '$pageview') return ['ri-eye-fill', 'Pageview'];
   if (label == '$pageleave') return ['ri-delete-back-2-fill', 'Pageleave'];
@@ -13,7 +14,7 @@ export const formateventLabel = (event: any) => {
   return ['ri-edit-box-fill', label];
 };
 
-const EventLabel = ({ event }: { event: any }) => {
+const EventLabel = ({ event }: { event: ComputedStreamEvent }) => {
   const [data, setData] = useState(formateventLabel(event));
   return (
     <Flex alignContent={'center'} alignItems={'center'}>

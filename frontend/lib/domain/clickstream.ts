@@ -1,5 +1,5 @@
 export type Clickstream = {
-  event: string;
+  event: ComputedStreamEvent;
   timestamp: Date;
   uid: string;
   url: string | null;
