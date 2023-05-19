@@ -90,7 +90,11 @@ async def process_kafka_messages() -> None:
 
         # Decode the base64 encoded JSON
         _events = [
-            json.loads(b64decode(record.value))
+            json.loads(
+                b64decode(record.value)
+                .decode("unicode-escape")
+                .encode("utf8", "ignore")
+            )
             for _, records in data.items()
             for record in records
         ]
