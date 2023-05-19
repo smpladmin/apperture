@@ -201,7 +201,7 @@ export function autoCaptureEventToDescription(
     return event.elements.tag_name ?? 'element';
   };
 
-  const getValue = (): string | null => {
+  const getValue = (): string => {
     if (event.elements.text) {
       return `${shortForm ? '' : 'with text '}"${event.elements.text}"`;
     } else if (event.elements.href) {
