@@ -68,6 +68,7 @@ def save_precision_events(events):
 
 
 def to_object(value: str) -> Dict:
+    logging.info(value)
     try:
         decoded_string = b64decode(value).decode("utf-8", errors="surrogateescape")
     except UnicodeDecodeError:
