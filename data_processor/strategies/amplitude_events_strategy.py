@@ -4,6 +4,7 @@ from domain.common.models import DataFormat, IntegrationProvider
 from domain.datasource.models import Credential, DataSource
 from domain.runlog.service import RunLogService
 from fetch.amplitude_events_fetcher import AmplitudeEventsFetcher
+from store.event_properties_saver import EventPropertiesSaver
 from store.events_saver import EventsSaver
 
 from event_processors.amplitude_event_processor import AmplitudeEventProcessor
@@ -21,6 +22,7 @@ class AmplitudeEventsStrategy:
         self.event_processor = AmplitudeEventProcessor()
         self.saver = EventsSaver()
         self.runlog_service = RunLogService()
+        self.properties_saver = EventPropertiesSaver()
 
     def execute(self):
         try:
@@ -37,6 +39,18 @@ class AmplitudeEventsStrategy:
             )
 
             self.runlog_service.update_completed(self.runlog_id)
+
+            logging.info(f"Saving event properties for date - {self.date}")
+            try:
+                self.properties_saver.save(
+                    df=df,
+                    datasource_id=self.datasource.id,
+                    provider=IntegrationProvider.AMPLITUDE,
+                )
+            except Exception as e:
+                logging.info(f"Error while saving event properties for date - {self.date}")
+                logging.debug(e)
+
         except Exception as e:
             self.runlog_service.update_failed(self.runlog_id)
             raise e

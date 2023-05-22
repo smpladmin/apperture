@@ -2,10 +2,11 @@ import gc
 import os, psutil
 import logging
 
-from domain.common.models import DataFormat, IntegrationProvider
+from domain.common.models import IntegrationProvider
 from domain.datasource.models import Credential, DataSource
 from domain.runlog.service import RunLogService
 from fetch.mixpanel_events_fetcher import MixpanelEventsFetcher
+from store.event_properties_saver import EventPropertiesSaver
 from store.events_saver import EventsSaver
 
 from event_processors.mixpanel_event_processor import MixPanelEventProcessor
@@ -23,6 +24,7 @@ class MixpanelEventsStrategy:
         self.event_processor = MixPanelEventProcessor()
         self.saver = EventsSaver()
         self.runlog_service = RunLogService()
+        self.properties_saver = EventPropertiesSaver()
 
     def execute(self):
         try:
@@ -45,11 +47,23 @@ class MixpanelEventsStrategy:
 
                 # Experimenting with garbage collection. Might not be needed.
                 logging.info(
-                    f"Memory = {psutil.Process(os.getpid()).memory_info().rss / 1024**2}Mb"
+                    f"Memory = {psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2}Mb"
                 )
                 gc.collect()
 
-            self.runlog_service.update_completed(self.runlog_id)
+                self.runlog_service.update_completed(self.runlog_id)
+
+                logging.info(f"Saving event properties for date - {self.date}")
+                try:
+                    self.properties_saver.save(
+                        df=events_df,
+                        datasource_id=self.datasource.id,
+                        provider=IntegrationProvider.MIXPANEL,
+                    )
+                except Exception as e:
+                    logging.info(f"Error while saving event properties for date - {self.date}")
+                    logging.debug(e)
+
         except Exception as e:
             self.runlog_service.update_failed(self.runlog_id)
             raise e

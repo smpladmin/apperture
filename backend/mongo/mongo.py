@@ -6,6 +6,7 @@ from domain.datasources.models import DataSource
 from domain.edge.models import BaseEdge
 from domain.edge.models import Edge
 from domain.edge.models import RichEdge
+from domain.event_properties.models import EventProperties
 from domain.integrations.models import Integration
 from domain.apperture_users.models import AppertureUser
 from domain.runlogs.models import RunLog
@@ -39,6 +40,7 @@ class Mongo:
                 Metric,
                 Action,
                 Retention,
+                EventProperties,
             ],
         )
 

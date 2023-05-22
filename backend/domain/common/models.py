@@ -24,3 +24,8 @@ class WatchlistItemType(str, Enum):
 class SavedItems(BaseModel):
     type: WatchlistItemType
     details: Union[Funnel, Notification]
+
+
+class Property(BaseModel):
+    name: str
+    type: str
