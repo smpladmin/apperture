@@ -111,14 +111,14 @@ async def update_events(
     return {"updated": True}
 
 
-@router.post("/event_properties/{ds_id}")
+@router.post("/event_properties/{datasource_id}")
 async def update_event_properties(
-    ds_id: str,
+    datasource_id: str,
     dto: EventPropertiesDto,
     event_properties_service: EventPropertiesService = Depends(),
 ):
     await event_properties_service.update_event_properties(
-        ds_id=ds_id, event_properties=dto
+        datasource_id=datasource_id, event_properties=dto
     )
     return {"updated": True}
 

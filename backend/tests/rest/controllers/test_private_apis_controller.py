@@ -9,6 +9,7 @@ from domain.notifications.models import (
     ThresholdMap,
     NotificationType,
 )
+from rest.dtos.event_properties import EventPropertiesDto
 
 from rest.dtos.events import CreateEventDto
 from domain.common.models import IntegrationProvider
@@ -195,3 +196,23 @@ def test_post_notifications(client_init, notification_service, dpq_service):
         {"job": "a98a10b4-d26e-46fa-aa6f", "user_id": "6374b74e9b36ecf7e0b4f9e4"}
     ]
     dpq_service.enqueue_user_notification.assert_called_with("6374b74e9b36ecf7e0b4f9e4")
+
+
+def test_update_event_properties(
+    client_init, event_properties_service, event_properties_data
+):
+    response = client_init.post(
+        "/private/event_properties/63ce4906f496f7b462ab7e94",
+        data=json.dumps(event_properties_data),
+    )
+    assert response.json() == {"updated": True}
+    event_properties_service.update_event_properties.assert_called_once_with(
+        **{
+            "datasource_id": "63ce4906f496f7b462ab7e94",
+            "event_properties": EventPropertiesDto(
+                event="test-event",
+                properties=["prop1", "prop4", "prop3"],
+                provider="mixpanel",
+            ),
+        }
+    )

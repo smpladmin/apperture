@@ -42,16 +42,14 @@ class ClevertapEventsStrategy:
                         df,
                     )
 
-                    logging.info(f"Saving event properties for event {event} for date - {self.date}")
-                    try:
-                        self.properties_saver.save(
-                            df=df,
-                            datasource_id=self.datasource.id,
-                            provider=IntegrationProvider.CLEVERTAP,
-                        )
-                    except Exception as e:
-                        logging.info(f"Error while saving event properties for event {event} for date - {self.date}")
-                        logging.debug(e)
+                    logging.info(
+                        f"Saving event properties for event {event} for date - {self.date}"
+                    )
+                    self.properties_saver.save(
+                        df=df,
+                        datasource_id=self.datasource.id,
+                        provider=IntegrationProvider.CLEVERTAP,
+                    )
 
             self.runlog_service.update_completed(self.runlog_id)
         except Exception as e:

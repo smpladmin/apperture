@@ -41,15 +41,11 @@ class AmplitudeEventsStrategy:
             self.runlog_service.update_completed(self.runlog_id)
 
             logging.info(f"Saving event properties for date - {self.date}")
-            try:
-                self.properties_saver.save(
-                    df=df,
-                    datasource_id=self.datasource.id,
-                    provider=IntegrationProvider.AMPLITUDE,
-                )
-            except Exception as e:
-                logging.info(f"Error while saving event properties for date - {self.date}")
-                logging.debug(e)
+            self.properties_saver.save(
+                df=df,
+                datasource_id=self.datasource.id,
+                provider=IntegrationProvider.AMPLITUDE,
+            )
 
         except Exception as e:
             self.runlog_service.update_failed(self.runlog_id)

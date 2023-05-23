@@ -15,6 +15,10 @@ def patch_datetime_today(monkeypatch):
         def now(cls):
             return FAKE_TIME
 
+        @classmethod
+        def utcnow(cls):
+            return FAKE_TIME
+
     monkeypatch.setattr(datetime, "datetime", MockDatetime)
 
 

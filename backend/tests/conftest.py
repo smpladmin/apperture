@@ -6,6 +6,7 @@ from unittest import mock
 from domain.actions.service import ActionService
 from domain.apps.service import AppService
 from domain.apperture_users.service import AppertureUserService
+from domain.event_properties.service import EventPropertiesService
 
 from server import app
 from mongo.mongo import Mongo
@@ -47,6 +48,7 @@ def app_init(
     clickstream_service,
     action_service,
     retention_service,
+    event_properties_service,
 ):
 
     print("Setting up App")
@@ -73,6 +75,7 @@ def app_init(
     app.dependency_overrides[ClickstreamService] = lambda: clickstream_service
     app.dependency_overrides[ActionService] = lambda: action_service
     app.dependency_overrides[RetentionService] = lambda: retention_service
+    app.dependency_overrides[EventPropertiesService] = lambda: event_properties_service
     FastAPICache.init(backend=InMemoryBackend(), prefix="apperture-cache")
     yield app
 

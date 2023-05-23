@@ -17,20 +17,28 @@ class EventPropertiesService:
     ):
         self.mongo = mongo
 
-    async def update_event_properties(self, ds_id: str, event_properties: EventPropertiesDto):
+    async def update_event_properties(
+        self, datasource_id: str, event_properties: EventPropertiesDto
+    ):
         event_properties = EventProperties(
-                datasource_id=ds_id,
-                event=event_properties.event,
-                properties=[Property(name=property, type="string")for property in event_properties.properties],
-                provider=event_properties.provider,
-            )
+            datasource_id=datasource_id,
+            event=event_properties.event,
+            properties=[
+                Property(name=property, type="string")
+                for property in event_properties.properties
+            ],
+            provider=event_properties.provider,
+        )
 
         await EventProperties.find_one(
-            EventProperties.datasource_id == PydanticObjectId(ds_id),
-            EventProperties.event == event_properties.event
+            EventProperties.datasource_id == PydanticObjectId(datasource_id),
+            EventProperties.event == event_properties.event,
         ).upsert(
             Set(
-                {EventProperties.properties: event_properties.properties, EventProperties.updated_at: datetime.utcnow()}
+                {
+                    EventProperties.properties: event_properties.properties,
+                    EventProperties.updated_at: datetime.utcnow(),
+                }
             ),
             on_insert=event_properties,
         )
