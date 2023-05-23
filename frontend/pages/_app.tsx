@@ -4,6 +4,7 @@ import '../styles/funnel-tooltip.css';
 import 'react-date-range/dist/styles.css'; // main css file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import '../styles/daterange.css';
+// import '@silevis/reactgrid/styles.css';
 import { AppContext, AppLayoutProps } from 'next/app';
 import { ReactNode, useEffect } from 'react';
 import { ChakraProvider } from '@chakra-ui/react';
