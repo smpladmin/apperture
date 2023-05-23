@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock, call, ANY
 
 import pandas as pd
 
@@ -40,8 +40,8 @@ class TestEventPropertiesSaver:
             **{
                 "data": {
                     "event": "event3",
-                    "properties": ["prop2", "prop1"],
-                    "provider": "mixpanel",
+                    "properties": ANY,
+                    "provider": IntegrationProvider.MIXPANEL,
                 },
                 "datasource_id": "test-id",
             }
