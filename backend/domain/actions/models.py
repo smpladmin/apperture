@@ -22,6 +22,9 @@ class ActionGroupCondition(str, Enum):
 class CaptureEvent(str, Enum):
     AUTOCAPTURE = "$autocapture"
     PAGEVIEW = "$pageview"
+    PAGELEAVE = "$pageleave"
+    RAGECLICK = "$rageclick"
+    IDENTIFY = "$identify"
 
 
 class ActionGroup(BaseModel):

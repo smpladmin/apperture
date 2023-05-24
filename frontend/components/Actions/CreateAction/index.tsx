@@ -6,7 +6,7 @@ import ActionHeader from './components/ActionHeader';
 import SelectorsForm from './components/SelectorsForm';
 import {
   Action,
-  ActionEventData,
+  ActionMetaData,
   ActionGroup,
   CaptureEvent,
   UrlMatching,
@@ -48,7 +48,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
   const [isSaveDisabled, setIsSavedDisabled] = useState(true);
   const [isActionBeingEdited, setIsActionBeingEdited] = useState(false);
   const [transientActionEvents, setTransientActionEvents] =
-    useState<ActionEventData>({
+    useState<ActionMetaData>({
       count: 0,
       data: [],
     });

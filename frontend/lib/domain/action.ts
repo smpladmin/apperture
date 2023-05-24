@@ -30,19 +30,24 @@ export type ActionWithUser = Action & {
 };
 
 export type ActionEventData = {
+  event: CaptureEvent;
+  uid: string;
+  url: string;
+  source: string;
+  timestamp: Date;
+};
+
+export type ActionMetaData = {
   count: number;
-  data: {
-    event: string;
-    uid: string;
-    url: string;
-    source: string;
-    timestamp: Date;
-  }[];
+  data: ActionEventData[];
 };
 
 export enum CaptureEvent {
   AUTOCAPTURE = '$autocapture',
   PAGEVIEW = '$pageview',
+  PAGELEAVE = '$pageleave',
+  RAGECLICK = '$rageclick',
+  IDENTIFY = '$identify',
 }
 
 export enum ConditionType {
