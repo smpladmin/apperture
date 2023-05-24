@@ -24,7 +24,7 @@ class EventPropertiesService:
             datasource_id=datasource_id,
             event=event_properties.event,
             properties=[
-                Property(name=property, type="string")
+                Property(name=property, type="default")
                 for property in event_properties.properties
             ],
             provider=event_properties.provider,

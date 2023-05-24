@@ -44,9 +44,9 @@ class TestEventPropertiesService:
             "event": "event1",
             "id": None,
             "properties": [
-                {"name": "prop1", "type": "string"},
-                {"name": "prop2", "type": "string"},
-                {"name": "prop3", "type": "string"},
+                {"name": "prop1", "type": "default"},
+                {"name": "prop2", "type": "default"},
+                {"name": "prop3", "type": "default"},
             ],
             "provider": IntegrationProvider.MIXPANEL,
             "revision_id": None,
