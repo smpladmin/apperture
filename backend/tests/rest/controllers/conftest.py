@@ -25,6 +25,7 @@ from domain.common.filter_models import (
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
+from domain.event_properties.models import EventProperties
 from domain.events.models import Event, PaginatedEventsData
 from domain.funnels.models import (
     ComputedFunnel,
@@ -623,6 +624,30 @@ def user_service():
     service.get_user_properties.return_value = user_details
 
     return service
+
+
+@pytest.fixture(scope="module")
+def event_properties_service():
+    event_properties_service_mock = mock.AsyncMock()
+    EventProperties.get_settings = mock.MagicMock()
+    event_properties = EventProperties(
+        event="test-event",
+        datasource_id=PydanticObjectId("63ce4906f496f7b462ab7e94"),
+        provider="mixpanel",
+        properties=[
+            Property(name="prop1", type="string"),
+            Property(name="prop2", type="string"),
+            Property(name="prop3", type="string"),
+        ],
+    )
+    update_event_properties_future = asyncio.Future()
+    update_event_properties_future.set_result(event_properties)
+
+    event_properties_service_mock.update_event_properties.return_value = (
+        update_event_properties_future
+    )
+
+    return event_properties_service_mock
 
 
 @pytest.fixture(scope="module")
@@ -1406,6 +1431,15 @@ def funnel_steps_data():
     return {
         "datasource_id": datasource_id,
         "steps": steps,
+    }
+
+
+@pytest.fixture(scope="module")
+def event_properties_data():
+    return {
+        "event": "test-event",
+        "properties": ["prop1", "prop4", "prop3"],
+        "provider": "mixpanel",
     }
 
 

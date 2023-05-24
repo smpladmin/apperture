@@ -42,6 +42,7 @@ class TestClevertapEventsStrategy:
         self.strategy.saver = MagicMock()
 
         self.strategy.event_processor = MagicMock()
+        self.strategy.properties_saver = MagicMock()
 
     def test_execute(self):
         self.strategy.execute()
@@ -50,3 +51,4 @@ class TestClevertapEventsStrategy:
         assert self.strategy.fetcher.get_start_cursor.called
         assert self.strategy.event_processor.process.called
         assert self.strategy.saver.save.called
+        assert self.strategy.properties_saver.save.called
