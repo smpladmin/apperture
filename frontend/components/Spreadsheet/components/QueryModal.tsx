@@ -20,6 +20,7 @@ const QueryModal = ({ setSheetData }: any) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [query, setQuery] = useState('Select event_name from events limit 100');
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
   const { dsId } = router.query;
 
@@ -34,6 +35,9 @@ const QueryModal = ({ setSheetData }: any) => {
     if (response.status === 200) {
       setSheetData(response.data);
       onClose();
+    } else {
+      setError(response?.data?.detail);
+      setIsSubmitButtonDisabled(false);
     }
   };
   return (
@@ -95,6 +99,16 @@ const QueryModal = ({ setSheetData }: any) => {
             >
               Submit
             </Button>
+            {error && !isSubmitButtonDisabled ? (
+              <Text
+                fontSize={'xs-12'}
+                lineHeight={'xs-16'}
+                fontWeight={400}
+                color={'red'}
+              >
+                {error}
+              </Text>
+            ) : null}
           </Flex>
         </ModalBody>
       </ModalContent>

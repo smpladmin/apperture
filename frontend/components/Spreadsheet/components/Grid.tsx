@@ -45,9 +45,13 @@ const getRows = (
   ...data.map<Row>((person, idx) => ({
     rowId: idx,
     cells: headers.map((header) => {
+      const val = person[header];
       return header === 'index'
-        ? { type: 'number', value: person[header] }
-        : { type: 'text', text: person[header] };
+        ? { type: 'number', value: val }
+        : {
+            type: 'text',
+            text: typeof val === 'object' ? JSON.stringify(val) : val,
+          };
     }),
   })),
 ];

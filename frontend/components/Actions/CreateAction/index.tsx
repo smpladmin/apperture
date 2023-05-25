@@ -154,7 +154,7 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
         query: { actionId: _id || actionId, dsId: datasourceId },
       });
     }
-    if (response?.status === 400 && !response.data) {
+    if (response?.status === 400) {
       setIsSavedDisabled(false);
       toast({
         title: 'Action name already exists',

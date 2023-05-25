@@ -13,7 +13,7 @@ export const AppertureGet = async (
   } catch (e) {
     const error = e as AxiosError;
     console.error(error.message);
-    return { status: error.response?.status, data: undefined };
+    return { status: error.response?.status, data: error.response?.data };
   }
 };
 
@@ -30,7 +30,7 @@ export const ApperturePrivateGet = async (
   } catch (e) {
     const error = e as AxiosError;
     console.error(error.message);
-    return { status: error.response?.status, data: undefined };
+    return { status: error.response?.status, data: error.response?.data };
   }
 };
 
@@ -48,7 +48,7 @@ export const ApperturePost = async (
   } catch (e) {
     const error = e as AxiosError;
     console.error(error.message);
-    return { status: error.response?.status, data: undefined };
+    return { status: error.response?.status, data: error.response?.data };
   }
 };
 
@@ -63,7 +63,7 @@ export const ApperturePut = async (
   } catch (e) {
     const error = e as AxiosError;
     console.error(error.message);
-    return { status: error.response?.status, data: undefined };
+    return { status: error.response?.status, data: error.response?.data };
   }
 };
 
@@ -73,6 +73,6 @@ export const AppertureDelete = async (path: string) => {
   } catch (e) {
     const error = e as AxiosError;
     console.error(error.message);
-    return { status: error.response?.status, data: undefined };
+    return { status: error.response?.status, data: error.response?.data };
   }
 };

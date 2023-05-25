@@ -111,5 +111,5 @@ export const getUserActivity = async (
   const response = await AppertureGet(
     `/datasources/${dsId}/events?user_id=${userId}&page_number=${page}`
   );
-  return response.data;
+  return response.data || [];
 };
