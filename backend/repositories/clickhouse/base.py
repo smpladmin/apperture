@@ -1,9 +1,10 @@
 import logging
+import re
 import traceback
 from abc import ABC
 from typing import Dict
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from pypika import CustomFunction, Parameter, Table
 
 from clickhouse import Clickhouse
@@ -76,5 +77,8 @@ class EventsBase(ABC):
             return query_result
         except Exception as e:
             logging.info(repr(e))
+            error_message = re.search(r"DB::Exception:(.*)", repr(e)).group(1)
             traceback.print_exc()
-            return []
+            raise HTTPException(
+                status_code=400, detail=f"Database error:{error_message}"
+            )
