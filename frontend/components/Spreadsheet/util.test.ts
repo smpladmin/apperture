@@ -59,13 +59,13 @@ describe('Spreadhsheet Utils', () => {
       expect(res.slice(0, 10)).toEqual(data);
     });
 
-    it.only('should fill empty rows when data is empty', () => {
+    it('should fill empty rows when data is empty', () => {
       const res = fillRows([], []);
       expect(res.length).toBe(1000);
       expect(res.map((it: any) => it.index)).toEqual(range(1, 1001));
     });
 
-    it.only('should filld empty columns till Z index', () => {
+    it('should filld empty columns till Z index', () => {
       const res = fillHeaders(headers);
 
       expect(res.length).toBe(27);
