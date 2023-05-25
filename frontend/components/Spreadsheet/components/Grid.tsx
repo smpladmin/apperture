@@ -78,6 +78,8 @@ const Grid = ({ sheetData }: any) => {
       rows={rows}
       columns={columns}
       onColumnResized={handleColumnResize}
+      enableColumnSelection
+      enableRowSelection
     />
   );
 };
