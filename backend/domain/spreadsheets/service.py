@@ -14,7 +14,7 @@ class SpreadsheetService:
         self.spreadsheets = spreadsheets
 
     def get_transient_spreadsheets(self, dsId: str, query: str) -> ComputedSpreadsheet:
-        # query = re.sub(r"\s+", " ", query.replace(r"\n\s+", " ").strip())
+        query = re.sub(r"\s+", " ", query.replace(r"\n\s+", " ").strip())
         result = self.spreadsheets.get_transient_spreadsheet(dsId=dsId, query=query)
         response = {"headers": result.column_names, "data": []}
 
