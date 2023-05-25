@@ -104,7 +104,7 @@ const Spreadsheet = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
-      {!isOpen && <Grid sheetData={sheetData} />}
+      {!isOpen ? <Grid sheetData={sheetData} /> : null}
     </>
   );
 };
