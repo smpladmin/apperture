@@ -2195,6 +2195,32 @@ files = [
 dev = ["autoflake", "black", "duckdb (>=0.6)", "isort", "mypy (>=0.990)", "pandas", "pdoc", "pre-commit", "pyspark", "python-dateutil"]
 
 [[package]]
+name = "sqlparser"
+version = "0.0.9"
+description = "This package helps automatically parse and execute sql queries"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "sqlparser-0.0.9-py3-none-any.whl", hash = "sha256:790e6df69bd66103a37bf27c703ad6748939496ef7cd59eb16b20ff77b150998"},
+]
+
+[[package]]
+name = "sqlvalidator"
+version = "0.0.20"
+description = "SQL queries formatting, syntactic and semantic validation"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "sqlvalidator-0.0.20-py3-none-any.whl", hash = "sha256:8820752d9ec5ccb9cc977099edf991f0090acf4f1e4beb0f2fb35a6e1cc03c89"},
+    {file = "sqlvalidator-0.0.20.tar.gz", hash = "sha256:6f399be1bf0ba54a17ad16f6818836c169d17c16306f4cfa6fc883f13b1705fc"},
+]
+
+[package.extras]
+test = ["pytest (==7.2.0)"]
+
+[[package]]
 name = "starlette"
 version = "0.26.1"
 description = "The little ASGI library that shines."
@@ -2447,4 +2473,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "7d1746ac087084c18807f0a6ca3bb8ef66a128409d1571c737bbe986db4d9910"
+content-hash = "e1ebc163a32da23c525f63a2f625f8553fddca98eb156439b91cd6c7f589376c"
