@@ -1,6 +1,6 @@
 import re
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from pypika import ClickHouseQuery
 
 from clickhouse.clickhouse import Clickhouse
@@ -21,4 +21,7 @@ class Spreadsheets(EventsBase):
 
     def get_transient_spreadsheet(self, dsId: str, query: str):
         query = self.parser.validate_query_string(query_string=query, dsId=dsId)
-        return self.execute_query_with_column_names(query, {})
+        try:
+            return self.execute_query_with_column_names(query, {})
+        except:
+            raise HTTPException(status_code=400, detail="Something went wrong")

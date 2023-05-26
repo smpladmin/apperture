@@ -1,7 +1,4 @@
-from typing import List, Optional, Union
-
-from beanie import PydanticObjectId
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from domain.spreadsheets.service import SpreadsheetService
 from rest.dtos.spreadsheets import (
@@ -22,9 +19,6 @@ async def compute_transient_spreadsheets(
     dto: TransientSpreadsheetsDto,
     spreadsheets_service: SpreadsheetService = Depends(),
 ):
-    try:
-        return spreadsheets_service.get_transient_spreadsheets(
-            dsId=dto.datasourceId, query=dto.query
-        )
-    except:
-        raise HTTPException(status_code=400, detail="Something went wrong")
+    return spreadsheets_service.get_transient_spreadsheets(
+        dsId=dto.datasourceId, query=dto.query
+    )

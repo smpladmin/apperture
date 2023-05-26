@@ -13,8 +13,11 @@ class SpreadsheetService:
     ):
         self.spreadsheets = spreadsheets
 
+    def cleanse_query_string(self, query_string: str) -> str:
+        return re.sub(r"\s+|\n+", " ", query_string).strip()
+
     def get_transient_spreadsheets(self, dsId: str, query: str) -> ComputedSpreadsheet:
-        query = re.sub(r"\s+", " ", query.replace(r"\n\s+", " ").strip())
+        query = self.cleanse_query_string(query)
         result = self.spreadsheets.get_transient_spreadsheet(dsId=dsId, query=query)
         response = {"headers": result.column_names, "data": []}
 
