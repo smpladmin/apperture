@@ -40,7 +40,7 @@ const Spreadsheet = () => {
               isSaveButtonDisabled={true}
             />
           </Box>
-          <Flex overflow={'scroll'}>
+          <Flex overflow={'scroll'} data-testid={'react-grid'}>
             <Grid sheetData={sheetData} />
           </Flex>
         </>

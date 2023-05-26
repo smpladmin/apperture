@@ -56,6 +56,7 @@ const QueryModal = ({ isOpen, onClose, setSheetData }: QueryModalProps) => {
         maxWidth="168"
         maxHeight={'calc(100% - 100px)'}
         borderRadius={{ base: '16px', md: '20px' }}
+        data-testid={'query-modal'}
       >
         <ModalHeader
           display={'flex'}
@@ -96,6 +97,7 @@ const QueryModal = ({ isOpen, onClose, setSheetData }: QueryModalProps) => {
               color={'white.DEFAULT'}
               onClick={handleGetTransientSheetData}
               disabled={isSubmitButtonDisabled}
+              data-testid={'submit-button'}
             >
               Submit
             </Button>
@@ -105,6 +107,7 @@ const QueryModal = ({ isOpen, onClose, setSheetData }: QueryModalProps) => {
                 lineHeight={'xs-16'}
                 fontWeight={400}
                 color={'red'}
+                data-testid={'error-text'}
               >
                 {error}
               </Text>
