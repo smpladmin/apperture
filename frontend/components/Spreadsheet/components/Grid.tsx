@@ -1,9 +1,9 @@
 import { Column, Id, ReactGrid, Row } from '@silevis/reactgrid';
-import { cloneDeep, head } from 'lodash';
 import React, { useState } from 'react';
 import { fillHeaders, fillRows } from '../util';
+import { TransientSheetData } from '@lib/domain/spreadsheet';
 
-const getColumns = (headers: any[]): any[] => {
+const getColumns = (headers: string[]): Column[] => {
   return headers.map((header) => {
     if (header === 'index') {
       return { columnId: header, width: 50 };
@@ -12,7 +12,7 @@ const getColumns = (headers: any[]): any[] => {
   });
 };
 
-const getHeaderRow = (headers: any[], originalHeaders: any[]): Row => {
+const getHeaderRow = (headers: string[], originalHeaders: string[]): Row => {
   return {
     rowId: 'header',
     cells: headers.map((header, index) => {
@@ -38,8 +38,8 @@ const getHeaderRow = (headers: any[], originalHeaders: any[]): Row => {
 
 const getRows = (
   data: any[],
-  headers: any[],
-  originalHeaders: any[]
+  headers: string[],
+  originalHeaders: string[]
 ): Row[] => [
   getHeaderRow(headers, originalHeaders),
   ...data.map<Row>((person, idx) => ({
@@ -56,7 +56,7 @@ const getRows = (
   })),
 ];
 
-const Grid = ({ sheetData }: any) => {
+const Grid = ({ sheetData }: { sheetData: TransientSheetData }) => {
   const [columns, setColumns] = useState<Column[]>(
     getColumns(fillHeaders(sheetData.headers))
   );

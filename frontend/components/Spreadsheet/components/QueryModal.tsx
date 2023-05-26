@@ -8,25 +8,25 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
-  useDisclosure,
 } from '@chakra-ui/react';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { getTransientSpreadsheets } from '@lib/services/spreadsheetService';
 import { useRouter } from 'next/router';
 
-const QueryModal = ({ setSheetData }: any) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+type QueryModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  setSheetData: Function;
+};
+
+const QueryModal = ({ isOpen, onClose, setSheetData }: QueryModalProps) => {
   const [query, setQuery] = useState('Select event_name from events limit 100');
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
   const { dsId } = router.query;
-
-  useEffect(() => {
-    onOpen();
-  }, []);
 
   const handleGetTransientSheetData = async () => {
     setIsSubmitButtonDisabled(true);

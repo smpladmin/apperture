@@ -1,6 +1,6 @@
 import { range } from 'lodash';
 
-export const fillRows = (data: any[], headers: any[]) => {
+export const fillRows = (data: any[], headers: string[]) => {
   const currentLength = data.length;
   const otherKeys = generateOtherKeys(headers);
   const keys = [...headers, ...otherKeys];
@@ -23,14 +23,14 @@ export const fillRows = (data: any[], headers: any[]) => {
   return [...dataWitKeys, ...gen];
 };
 
-export const fillHeaders = (headers: any[]) => {
+export const fillHeaders = (headers: string[]) => {
   const gen = generateOtherKeys(headers);
   const updatedHeaders = [...headers, ...gen];
   updatedHeaders.unshift('index');
   return updatedHeaders;
 };
 
-function generateOtherKeys(headers: any[]) {
+function generateOtherKeys(headers: string[]) {
   return range(headers.length + 1, 27).map((i) =>
     String.fromCharCode(65 + i - 1)
   );
