@@ -1,3 +1,4 @@
+from clickhouse_connect.driver.exceptions import DatabaseError
 from fastapi import APIRouter, Depends, HTTPException
 
 from domain.spreadsheets.service import SpreadsheetService
@@ -23,5 +24,5 @@ async def compute_transient_spreadsheets(
         return spreadsheets_service.get_transient_spreadsheets(
             dsId=dto.datasourceId, query=dto.query
         )
-    except Exception as e:
+    except DatabaseError as e:
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")

@@ -1,7 +1,7 @@
 import re
 
 import sqlvalidator
-from fastapi import HTTPException
+from clickhouse_connect.driver.exceptions import DatabaseError
 from sqlglot import condition, parse_one
 
 
@@ -21,17 +21,17 @@ class QueryParser:
 
     def validate_selected_fields(self, selected_fields: list[str]):
         if len(selected_fields) > 10:
-            raise Exception(
+            raise DatabaseError(
                 "Invalid query: Cannot select more than 10 columns",
             )
 
         for field in selected_fields:
             if "*" == field:
-                raise Exception(
+                raise DatabaseError(
                     "Invalid query: Cannot select * from table",
                 )
             if "properties" == field:
-                raise Exception(
+                raise DatabaseError(
                     "Invalid query: Cannot select properties from table",
                 )
 
@@ -40,7 +40,7 @@ class QueryParser:
             re.search("from\s(.\w+)", query_string, re.IGNORECASE).group(1).strip()
         )
         if table_name != "events":
-            raise Exception(
+            raise DatabaseError(
                 "Invalid query: Cannot select from table other than event",
             )
         return table_name
@@ -49,9 +49,9 @@ class QueryParser:
         try:
             parsed_query = sqlvalidator.parse(query_string)
             if not parsed_query.is_valid():
-                raise Exception("DB Error: Invalid query")
+                raise DatabaseError("DB Error: Invalid query")
         except:
-            raise Exception("DB Error: Invalid query")
+            raise DatabaseError("DB Error: Invalid query")
         self.match_select_fields(query_string)
         self.match_table_name(query_string)
 

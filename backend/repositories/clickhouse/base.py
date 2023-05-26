@@ -4,7 +4,8 @@ import traceback
 from abc import ABC
 from typing import Dict
 
-from fastapi import Depends, HTTPException
+from clickhouse_connect.driver.exceptions import DatabaseError
+from fastapi import Depends
 from pypika import CustomFunction, Parameter, Table
 
 from clickhouse import Clickhouse
@@ -79,4 +80,4 @@ class EventsBase(ABC):
             logging.info(repr(e))
             error_message = re.search(r"DB::Exception:(.*)", repr(e)).group(1)
             traceback.print_exc()
-            raise Exception(f"Database error:{error_message}")
+            raise DatabaseError(f"Database error:{error_message}")
