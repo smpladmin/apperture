@@ -79,6 +79,4 @@ class EventsBase(ABC):
             logging.info(repr(e))
             error_message = re.search(r"DB::Exception:(.*)", repr(e)).group(1)
             traceback.print_exc()
-            raise HTTPException(
-                status_code=400, detail=f"Database error:{error_message}"
-            )
+            raise Exception(f"Database error:{error_message}")
