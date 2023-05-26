@@ -216,3 +216,15 @@ def test_update_event_properties(
             ),
         }
     )
+
+
+def test_get_event_properties(client_init, event_properties_service):
+    response = client_init.get("/private/event_properties")
+    assert response.json() == {
+        "63ce4906f496f7b462ab7e84": {"test": ["prop1", "prop4", "prop3"]},
+        "63ce4906f496f7b462ab7e94": {
+            "test": ["prop1", "prop4", "prop3"],
+            "test2": ["prop1", "prop4", "prop3"],
+        },
+    }
+    event_properties_service.get_event_properties.assert_called_once()

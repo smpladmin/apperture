@@ -339,3 +339,10 @@ async def get_transient_funnel_trends(
         random_sequence=dto.randomSequence,
         segment_filter=dto.segmentFilter,
     )
+
+
+@router.get("/event_properties")
+async def get_event_properties(
+    event_properties_service: EventPropertiesService = Depends(),
+):
+    return await event_properties_service.get_event_properties()

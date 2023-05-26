@@ -647,6 +647,14 @@ def event_properties_service():
         update_event_properties_future
     )
 
+    event_properties_service_mock.get_event_properties.return_value = {
+        "63ce4906f496f7b462ab7e94": {
+            "test": ["prop1", "prop4", "prop3"],
+            "test2": ["prop1", "prop4", "prop3"],
+        },
+        "63ce4906f496f7b462ab7e84": {"test": ["prop1", "prop4", "prop3"]},
+    }
+
     return event_properties_service_mock
 
 
