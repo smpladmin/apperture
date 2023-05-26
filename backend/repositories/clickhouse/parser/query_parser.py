@@ -1,5 +1,6 @@
 import re
 
+import sqlvalidator
 from fastapi import HTTPException
 from sqlglot import condition, parse_one
 
@@ -49,6 +50,12 @@ class QueryParser:
         return table_name
 
     def validate_query_string(self, query_string: str, dsId: str):
+        try:
+            parsed_query = sqlvalidator.parse(query_string)
+            if not parsed_query.is_valid():
+                raise HTTPException(status_code=400, detail="DB Error: Invalid query")
+        except:
+            raise HTTPException(status_code=400, detail="DB Error: Invalid query")
         self.match_select_fields(query_string)
         self.match_table_name(query_string)
 
