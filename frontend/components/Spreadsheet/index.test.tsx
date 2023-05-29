@@ -83,7 +83,7 @@ describe('spreadsheet', () => {
       const queryBox = screen.getByRole('textbox');
       // query box should be rendered with default query
       expect(queryBox.textContent).toBe(
-        'Select event_name from events limit 100'
+        'Select user_id, event_name from events'
       );
     });
 
@@ -138,6 +138,81 @@ describe('spreadsheet', () => {
 
       const reactGrid = screen.getByTestId('react-grid');
       expect(reactGrid).toBeVisible();
+    });
+  });
+
+  describe('add new sheet', () => {
+    it('should initally render only one sheet name (Sheet 1) and add sheet button', async () => {
+      renderSpreadsheet();
+
+      const queryModal = screen.getByTestId('query-modal');
+      expect(queryModal).toBeInTheDocument();
+
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      const sheetName = screen.getByTestId('sheet-name');
+      const addSheetButton = screen.getByTestId('add-sheet');
+
+      expect(sheetName.textContent).toBe('Sheet 1');
+      expect(addSheetButton).toBeInTheDocument();
+    });
+
+    it('should add a new sheet by opening query modal', async () => {
+      renderSpreadsheet();
+
+      const queryModal = screen.getByTestId('query-modal');
+      expect(queryModal).toBeInTheDocument();
+
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      const addSheetButton = screen.getByTestId('add-sheet');
+      fireEvent.click(addSheetButton);
+
+      const newSheetUsingQuery = screen.getByTestId('new-sheet-using-query');
+      await act(async () => {
+        fireEvent.click(newSheetUsingQuery);
+      });
+
+      const queryModalAfterAddingSheet = screen.getByTestId('query-modal');
+      expect(queryModalAfterAddingSheet).toBeInTheDocument();
+    });
+
+    it('should add a new blank sheet', async () => {
+      renderSpreadsheet();
+
+      const queryModal = screen.getByTestId('query-modal');
+      expect(queryModal).toBeInTheDocument();
+
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      const addSheetButton = screen.getByTestId('add-sheet');
+      fireEvent.click(addSheetButton);
+
+      const newSheetUsingQuery = screen.getByTestId('new-sheet');
+      await act(async () => {
+        fireEvent.click(newSheetUsingQuery);
+      });
+
+      // direct grid would render when sheet is created using the option
+      const reactGrid = screen.getByTestId('react-grid');
+      expect(reactGrid).toBeVisible();
+
+      const sheetNames = screen.getAllByTestId('sheet-name');
+
+      screen.debug(sheetNames);
+      const expectedSheetName = ['Sheet 1', 'Sheet 2'];
+      sheetNames.forEach((sheet, i) => {
+        expect(sheet.textContent).toEqual(expectedSheetName[i]);
+      });
     });
   });
 });

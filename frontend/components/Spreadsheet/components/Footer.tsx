@@ -50,6 +50,7 @@ const Footer = ({
                 bg={isSelected ? 'grey.700' : 'white.400'}
                 cursor={'pointer'}
                 as={'label'}
+                data-testid={'sheet-name'}
               >
                 <Text
                   fontSize={'xs-12'}

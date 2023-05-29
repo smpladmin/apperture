@@ -41,6 +41,7 @@ const AddSheet = ({
         borderRadius={'0'}
         _hover={{ bg: 'white.400' }}
         _active={{ bg: 'white.400' }}
+        data-testid={'add-sheet'}
       >
         +
       </MenuButton>
@@ -49,11 +50,13 @@ const AddSheet = ({
           fontSize={'xs-14'}
           lineHeight={'xs-14'}
           fontWeight={'400'}
-          _hover={{ bg: 'white.400' }}
-          _active={{ bg: 'white.400' }}
+          _focus={{
+            bg: 'white.400',
+          }}
           onClick={() => {
             handleAddNewSheet(true);
           }}
+          data-testid={'new-sheet-using-query'}
         >
           Create a new sheet using query
         </MenuItem>
@@ -61,10 +64,13 @@ const AddSheet = ({
           fontSize={'xs-14'}
           lineHeight={'xs-14'}
           fontWeight={'400'}
-          _hover={{ bg: 'white.400' }}
+          _focus={{
+            bg: 'white.400',
+          }}
           onClick={() => {
             handleAddNewSheet(false);
           }}
+          data-testid={'new-sheet'}
         >
           Creat a new blank sheet
         </MenuItem>
