@@ -1,13 +1,12 @@
+import logging
+import re
 import traceback
 from abc import ABC
-import logging
 from typing import Dict
+
+from clickhouse_connect.driver.exceptions import DatabaseError
 from fastapi import Depends
-from pypika import (
-    Table,
-    Parameter,
-    CustomFunction,
-)
+from pypika import CustomFunction, Parameter, Table
 
 from clickhouse import Clickhouse
 
@@ -68,3 +67,17 @@ class EventsBase(ABC):
             logging.info(repr(e))
             traceback.print_exc()
             return []
+
+    def execute_query_with_column_names(self, query: str, parameters: Dict):
+        logging.info(f"Executing query: {query}")
+        logging.info(f"Parameters: {parameters}")
+        try:
+            query_result = self.clickhouse.client.query(
+                query=query, parameters=parameters
+            )
+            return query_result
+        except Exception as e:
+            logging.info(repr(e))
+            error_message = re.search(r"DB::Exception:(.*)", repr(e)).group(1)
+            traceback.print_exc()
+            raise DatabaseError(f"Database error:{error_message}")

@@ -1,4 +1,4 @@
-import { Flex, Heading, Text } from '@chakra-ui/react';
+import { Button, Flex, Heading, Text } from '@chakra-ui/react';
 import { Clickstream } from '@lib/domain/clickstream';
 import { getClickstreamData } from '@lib/services/clickStreamService';
 import { useRouter } from 'next/router';
@@ -34,17 +34,44 @@ const ViewStreamData = () => {
 
   return (
     <Flex direction={'column'}>
-      <Heading
-        fontSize={'xs-20'}
-        lineHeight={'xs-21'}
-        p={4}
-        fontWeight={600}
-        borderBottomWidth={1}
+      <Flex
         w={'full'}
-        data-testid={'data-stream-heading'}
+        borderBottomWidth={1}
+        justifyContent={'space-between'}
+        alignItems={'center'}
+        px={4}
       >
-        Data Stream
-      </Heading>
+        <Heading
+          fontSize={'xs-20'}
+          lineHeight={'xs-21'}
+          fontWeight={600}
+          py={'4'}
+          data-testid={'data-stream-heading'}
+        >
+          Data Stream
+        </Heading>
+        <Button
+          py={'2'}
+          px={'4'}
+          bg={'black.400'}
+          variant={'primary'}
+          onClick={() =>
+            router.push({
+              pathname: '/analytics/spreadsheet/[dsId]',
+              query: { dsId },
+            })
+          }
+        >
+          <Text
+            fontSize={'xs-14'}
+            lineHeight={'xs-14'}
+            fontWeight={'500'}
+            color={'white.DEFAULT'}
+          >
+            Explore
+          </Text>
+        </Button>
+      </Flex>
       <Flex direction={'column'} px={10} py={4}>
         <Flex gap={4}>
           <Text

@@ -1,0 +1,143 @@
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import Spreadsheet from './index';
+import { getTransientSpreadsheets } from '@lib/services/spreadsheetService';
+import { RouterContext } from 'next/dist/shared/lib/router-context';
+import { createMockRouter } from '@tests/util';
+import { act } from 'react-dom/test-utils';
+
+jest.mock('@lib/services/spreadsheetService');
+
+describe('spreadsheet', () => {
+  let mockedGetTransientSpreadsheet: jest.Mock;
+  beforeEach(() => {
+    mockedGetTransientSpreadsheet = jest.mocked(getTransientSpreadsheets);
+    mockedGetTransientSpreadsheet.mockReturnValue({
+      status: 200,
+      data: {
+        headers: ['event_name'],
+        data: [
+          {
+            index: 1,
+            event_name: 'Video_Seen',
+          },
+          {
+            index: 2,
+            event_name: 'Thumbs_Up',
+          },
+          {
+            index: 3,
+            event_name: 'WebView_Open',
+          },
+          {
+            index: 4,
+            event_name: 'Video_Seen',
+          },
+          {
+            index: 5,
+            event_name: 'AppOpen',
+          },
+          {
+            index: 6,
+            event_name: '$ae_session',
+          },
+          {
+            index: 7,
+            event_name: 'Login',
+          },
+          {
+            index: 8,
+            event_name: '$ae_session',
+          },
+          {
+            index: 9,
+            event_name: 'Chapter_Click',
+          },
+          {
+            index: 10,
+            event_name: 'Topic_Click',
+          },
+        ],
+      },
+    });
+  });
+
+  const renderSpreadsheet = () =>
+    render(
+      <RouterContext.Provider
+        value={createMockRouter({
+          pathname: '/analytics/spreadsheet',
+          query: { dsId: '654212033222' },
+        })}
+      >
+        <Spreadsheet />
+      </RouterContext.Provider>
+    );
+
+  describe('query modal', () => {
+    it('should render query modal', () => {
+      renderSpreadsheet();
+
+      const queryModal = screen.getByTestId('query-modal');
+      expect(queryModal).toBeInTheDocument();
+
+      const queryBox = screen.getByRole('textbox');
+      // query box should be rendered with default query
+      expect(queryBox.textContent).toBe(
+        'Select event_name from events limit 100'
+      );
+    });
+
+    it('should close query modal if query is executed successfully', async () => {
+      renderSpreadsheet();
+
+      const queryModal = screen.getByTestId('query-modal');
+      expect(queryModal).toBeInTheDocument();
+
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+      const queryModal1 = screen.queryByTestId('query-modal');
+      expect(queryModal1).not.toBeVisible();
+    });
+
+    it('should not close query modal  and show error message, if query is not executed successfully', async () => {
+      mockedGetTransientSpreadsheet.mockReturnValue({
+        status: 400,
+        data: {
+          detail: 'Invalid query: Cannot select properties from table',
+        },
+      });
+
+      renderSpreadsheet();
+      const queryModal = screen.getByTestId('query-modal');
+      expect(queryModal).toBeInTheDocument();
+
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+      const errorMessage = screen.getByTestId('error-text');
+      expect(errorMessage.textContent).toBe(
+        'Invalid query: Cannot select properties from table'
+      );
+    });
+  });
+
+  describe('react grid', () => {
+    it('should render react grid once user submits', async () => {
+      renderSpreadsheet();
+
+      const queryModal = screen.getByTestId('query-modal');
+      expect(queryModal).toBeInTheDocument();
+
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      const reactGrid = screen.getByTestId('react-grid');
+      expect(reactGrid).toBeVisible();
+    });
+  });
+});

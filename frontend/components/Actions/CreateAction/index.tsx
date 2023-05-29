@@ -147,14 +147,14 @@ const CreateAction = ({ savedAction }: { savedAction?: Action }) => {
 
     setIsSavedDisabled(true);
 
-    if (response?.status === 200 && response.data) {
-      const { _id, datasourceId } = response?.data;
+    if (response?.status === 200 && response?.data) {
+      const { _id, datasourceId } = response.data;
       router.push({
         pathname: '/analytics/action/view/[actionId]',
         query: { actionId: _id || actionId, dsId: datasourceId },
       });
     }
-    if (response?.status === 400 && !response.data) {
+    if (response?.status === 400) {
       setIsSavedDisabled(false);
       toast({
         title: 'Action name already exists',
