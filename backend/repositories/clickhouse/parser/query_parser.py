@@ -58,7 +58,7 @@ class QueryParser:
         query_string = (
             parse_one(query_string)
             .where(condition(f"datasource_id='{dsId}'"))
-            .limit(1000)
+            .limit(500)
             .sql()
         )
 

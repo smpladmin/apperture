@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Grid from './components/Grid';
+import Grid from './components/Grid/Grid';
 import QueryModal from './components/QueryModal';
 import { Box, Flex, useDisclosure } from '@chakra-ui/react';
 import EventLayoutHeader from '@components/EventsLayout/ActionHeader';

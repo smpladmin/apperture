@@ -50,6 +50,7 @@ const QueryModal = ({
   const handleGetTransientSheetData = async () => {
     setIsSubmitButtonDisabled(true);
     setLoading(true);
+
     const response = await getTransientSpreadsheets(
       dsId as string,
       sheetData.query

@@ -1,7 +1,14 @@
-import { Column, Id, ReactGrid, Row } from '@silevis/reactgrid';
+import {
+  Column,
+  DefaultCellTypes,
+  Id,
+  ReactGrid,
+  Row,
+} from '@silevis/reactgrid';
 import React, { useState } from 'react';
-import { fillHeaders, fillRows } from '../util';
+import { fillHeaders, fillRows } from '../../util';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
+import { DropdownHeaderCell, DropdownHeaderTemplate } from './DropdownHeader';
 
 const getColumns = (headers: string[]): Column[] => {
   return headers.map((header) => {
@@ -12,7 +19,10 @@ const getColumns = (headers: string[]): Column[] => {
   });
 };
 
-const getHeaderRow = (headers: string[], originalHeaders: string[]): Row => {
+const getHeaderRow = (
+  headers: string[],
+  originalHeaders: string[]
+): Row<DefaultCellTypes | DropdownHeaderCell> => {
   return {
     rowId: 'header',
     cells: headers.map((header, index) => {
@@ -28,7 +38,7 @@ const getHeaderRow = (headers: string[], originalHeaders: string[]): Row => {
         };
       } else {
         return {
-          type: 'header',
+          type: 'dropdownHeader',
           text: header,
         };
       }
@@ -40,7 +50,7 @@ const getRows = (
   data: any[],
   headers: string[],
   originalHeaders: string[]
-): Row[] => [
+): Row<DefaultCellTypes | DropdownHeaderCell>[] => [
   getHeaderRow(headers, originalHeaders),
   ...data.map<Row>((person, idx) => ({
     rowId: idx,
@@ -61,6 +71,8 @@ const Grid = ({ sheetData }: { sheetData: TransientSheetData }) => {
     getColumns(fillHeaders(sheetData.headers))
   );
 
+  const [data, setData] = useState(fillRows(sheetData.data, sheetData.headers));
+
   const rows = getRows(
     fillRows(sheetData.data, sheetData.headers),
     fillHeaders(sheetData.headers),
@@ -77,11 +89,17 @@ const Grid = ({ sheetData }: { sheetData: TransientSheetData }) => {
     });
   };
 
+  const handleDataChange = (value: any) => {
+    console.log('value change', value);
+  };
+
   return (
     <ReactGrid
       rows={rows}
       columns={columns}
       onColumnResized={handleColumnResize}
+      onCellsChanged={handleDataChange}
+      customCellTemplates={{ dropdownHeader: new DropdownHeaderTemplate() }}
       enableColumnSelection
       enableRowSelection
     />
