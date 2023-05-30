@@ -16,6 +16,7 @@ import { getTransientSpreadsheets } from '@lib/services/spreadsheetService';
 import { useRouter } from 'next/router';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
 import { cloneDeep } from 'lodash';
+import LoadingSpinner from '@components/LoadingSpinner';
 
 type QueryModalProps = {
   isOpen: boolean;
@@ -36,6 +37,7 @@ const QueryModal = ({
 }: QueryModalProps) => {
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { dsId } = router.query;
 
@@ -47,10 +49,13 @@ const QueryModal = ({
 
   const handleGetTransientSheetData = async () => {
     setIsSubmitButtonDisabled(true);
+    setLoading(true);
     const response = await getTransientSpreadsheets(
       dsId as string,
       sheetData.query
     );
+
+    setLoading(false);
 
     if (response.status === 200) {
       const toUpdateSheets = cloneDeep(sheetsData);
@@ -127,6 +132,11 @@ const QueryModal = ({
             >
               Submit
             </Button>
+            {loading && (
+              <Flex justifyContent={'center'}>
+                <LoadingSpinner />
+              </Flex>
+            )}
             {error && !isSubmitButtonDisabled ? (
               <Text
                 fontSize={'xs-12'}

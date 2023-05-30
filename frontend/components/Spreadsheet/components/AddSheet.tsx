@@ -54,11 +54,11 @@ const AddSheet = ({
             bg: 'white.400',
           }}
           onClick={() => {
-            handleAddNewSheet(true);
+            handleAddNewSheet(false);
           }}
-          data-testid={'new-sheet-using-query'}
+          data-testid={'new-sheet'}
         >
-          Create a new sheet using query
+          Create a new blank sheet
         </MenuItem>
         <MenuItem
           fontSize={'xs-14'}
@@ -68,11 +68,11 @@ const AddSheet = ({
             bg: 'white.400',
           }}
           onClick={() => {
-            handleAddNewSheet(false);
+            handleAddNewSheet(true);
           }}
-          data-testid={'new-sheet'}
+          data-testid={'new-sheet-using-query'}
         >
-          Creat a new blank sheet
+          Fetch data using SQL
         </MenuItem>
       </MenuList>
     </Menu>
