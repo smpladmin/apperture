@@ -4,7 +4,7 @@ from typing import List, Optional, Union
 from pydantic import BaseModel, validator
 
 from beanie import PydanticObjectId, UnionDoc
-from domain.common.models import IntegrationProvider
+from domain.common.models import IntegrationProvider, Property
 from domain.notifications.models import ThresholdMap
 from repositories import Document
 
@@ -77,6 +77,7 @@ class Node(BaseModel):
     name: str
     provider: str
     source: str = None
+    properties: List[Property]
 
     @validator("source", always=True)
     def composite_name(cls, v, values, **kwargs):
