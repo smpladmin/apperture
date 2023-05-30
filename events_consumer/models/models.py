@@ -133,3 +133,19 @@ class PrecisionEvent(NamedTuple):
             eventName=eventName,
             properties=properties,
         )
+
+
+class EventProperties(NamedTuple):
+    datasourceId: str
+    event: str
+    properties: List
+    provider: str
+
+    @staticmethod
+    def build(datasourceId, event, properties, provider):
+        return EventProperties(
+            datasourceId=datasourceId,
+            event=event,
+            properties=properties,
+            provider=provider,
+        )

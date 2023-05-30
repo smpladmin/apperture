@@ -19,20 +19,10 @@ class EventPropertiesService:
     ):
         self.mongo = mongo
 
-    def create_events_map(self, event_properties: List[EventProperties]):
-        res = defaultdict(dict)
-        for event in event_properties:
-            res[str(event.datasource_id)].setdefault(event.event, []).extend(
-                property.name for property in event.properties
-            )
-        return dict(res)
-
-    async def get_event_properties(self):
-        event_properties = await EventProperties.find(
+    async def get_event_properties(self) -> List[EventProperties]:
+        return await EventProperties.find(
             EventProperties.provider == IntegrationProvider.APPERTURE
         ).to_list()
-
-        return self.create_events_map(event_properties=event_properties)
 
     async def update_event_properties(
         self, datasource_id: str, event_properties: EventPropertiesDto
