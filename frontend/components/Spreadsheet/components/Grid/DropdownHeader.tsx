@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Input, Text } from '@chakra-ui/react';
-import Dropdown from '@components/SearchableDropdown/Dropdown';
+import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import {
   Cell,
   CellTemplate,
@@ -7,11 +7,8 @@ import {
   Uncertain,
   UncertainCompatible,
   getCellProperty,
-  isAlphaNumericKey,
-  isNavigationKey,
-  keyCodes,
 } from '@silevis/reactgrid';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 export interface DropdownHeaderCell extends Cell {
   type: 'dropdownHeader';
@@ -22,16 +19,6 @@ export interface DropdownHeaderCell extends Cell {
 export class DropdownHeaderTemplate
   implements CellTemplate<DropdownHeaderCell>
 {
-  state: { isDropdownOpen: boolean; formula: string };
-  setState: any;
-  constructor() {
-    this.state = {
-      isDropdownOpen: false,
-      formula: '',
-    };
-    this.setState = (value: any) => (this.state = { ...this.state, ...value });
-  }
-
   getCompatibleCell(
     uncertainCell: Uncertain<DropdownHeaderCell>
   ): Compatible<DropdownHeaderCell> {
@@ -39,26 +26,15 @@ export class DropdownHeaderTemplate
     const value = parseFloat(text);
     return { ...uncertainCell, text, value };
   }
-  //   handleKeyDown(
-  //     cell: Compatible<DropdownHeaderCell>,
-  //     keyCode: number,
-  //     ctrl: boolean,
-  //     shift: boolean,
-  //     alt: boolean
-  //   ): { cell: Compatible<DropdownHeaderCell>; enableEditMode: boolean } {
-  //     if (!ctrl && !alt && isAlphaNumericKey(keyCode))
-  //       return { cell, enableEditMode: true };
-  //     return {
-  //       cell,
-  //       enableEditMode: keyCode === keyCodes.POINTER || keyCode === keyCodes.ENTER
-  //     };
-  //   }
 
   update(
     cell: Compatible<DropdownHeaderCell>,
     cellToMerge: UncertainCompatible<DropdownHeaderCell>
   ): Compatible<DropdownHeaderCell> {
-    return this.getCompatibleCell({ ...cell, text: cellToMerge.text });
+    return this.getCompatibleCell({
+      ...cell,
+      text: cellToMerge.text,
+    });
   }
 
   render(
@@ -69,51 +45,37 @@ export class DropdownHeaderTemplate
       commit: boolean
     ) => void
   ): React.ReactNode {
-    let value = cell.text;
-    const handleChange = (e: any) => {
-      value = e.target.value;
-    };
     return (
-      // <div>
-      //   <input
-      //     defaultValue={value}
-      //     // onChange={(e) =>
-      //     // onCellChanged(
-      //     //   this.getCompatibleCell({
-      //     //     ...cell,
-      //     //     text: e.currentTarget.value,
-      //     //     submit: false,
-      //     //   }),
-      //     //   false
-      //     // )
-      //     // }
-      //     onChange={handleChange}
-      //     onClick={(e) => {
-      //       e.stopPropagation();
-      //     }}
-      //     onBlur={(e) =>
-      //       onCellChanged(
-      //         this.getCompatibleCell({ ...cell, text: e.currentTarget.value }),
-      //         (e as any).view?.event?.keyCode !== keyCodes.ESCAPE
-      //       )
-      //     }
-      //     onCopy={(e) => e.stopPropagation()}
-      //     onCut={(e) => e.stopPropagation()}
-      //     onPaste={(e) => e.stopPropagation()}
-      //     onPointerDown={(e) => e.stopPropagation()}
-      //     onKeyDown={(e) => {
-      //       if (isAlphaNumericKey(e.keyCode) || isNavigationKey(e.keyCode))
-      //         e.stopPropagation();
-      //     }}
-      //   />
-      // </div>
-      <FormulaDropDownBox cell={cell} />
+      <FormulaDropDownBox
+        cell={cell}
+        onCellChanged={(text: string) =>
+          onCellChanged(this.getCompatibleCell({ ...cell, text }), true)
+        }
+      />
     );
   }
 }
 
-const FormulaDropDownBox = ({ cell }: any) => {
+const FormulaDropDownBox = ({
+  cell,
+  onCellChanged,
+}: {
+  cell: Compatible<DropdownHeaderCell>;
+  onCellChanged: Function;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [formula, setFormula] = useState('');
+  const [displayFormulaLabel, setDisplayFormulaLabel] = useState('');
+
+  const ref = useRef(null);
+  useOnClickOutside(ref, () => setIsOpen(false));
+
+  const handleSubmitFormula = () => {
+    onCellChanged(formula);
+    setDisplayFormulaLabel(formula);
+    setIsOpen(false);
+  };
+
   return (
     <Flex
       w={'full'}
@@ -122,9 +84,14 @@ const FormulaDropDownBox = ({ cell }: any) => {
       position={'relative'}
       overflow={'initial'}
     >
-      <Text>{cell.text}</Text>
+      <Text>
+        {cell.text} {displayFormulaLabel}
+      </Text>
       <Box>
         <Button
+          p={'0'}
+          bg={'none'}
+          _hover={{ bg: 'none' }}
           h="full"
           borderRadius={0}
           onClick={(e) => {
@@ -136,20 +103,72 @@ const FormulaDropDownBox = ({ cell }: any) => {
         </Button>
         {isOpen && (
           <Box
+            ref={ref}
+            w={'112'}
             position={'absolute'}
             zIndex={1}
             bg={'white.DEFAULT'}
-            border={'1px'}
-            p={'4'}
-            borderColor={'white.400'}
+            px={'4'}
+            py={'5'}
+            borderRadius={'12'}
+            borderWidth={'1px'}
+            borderColor={'white.200'}
+            onPointerDown={(e) => e.stopPropagation()}
           >
-            <Flex direction={'column'} gap={'2'}>
+            <Flex
+              direction={'column'}
+              gap={'4'}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
+                Enter formula
+              </Text>
               <Input
+                defaultValue={formula}
                 ref={(input) => input?.focus()}
-                onChange={(e) => e.stopPropagation()}
-                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  setFormula(e.target.value);
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onKeyDown={(e) => {
+                  e.stopPropagation();
+                }}
+                focusBorderColor={'black.100'}
+                placeholder={'Enter your formula'}
               />
-              <Button>Submit</Button>
+              <Flex gap={'2'} justifyContent={'flex-end'}>
+                <Button
+                  py={'2'}
+                  px={'4'}
+                  bg={'white.200'}
+                  variant={'secondary'}
+                  fontSize={'xs-14'}
+                  lineHeight={'xs-14'}
+                  fontWeight={'500'}
+                  data-testid={'cancel-button'}
+                  onClick={() => {
+                    setIsOpen(false);
+                    setFormula(displayFormulaLabel);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  py={'2'}
+                  px={'4'}
+                  bg={'black.400'}
+                  variant={'primary'}
+                  fontSize={'xs-14'}
+                  lineHeight={'xs-14'}
+                  fontWeight={'500'}
+                  color={'white.DEFAULT'}
+                  data-testid={'submit-button'}
+                  onClick={handleSubmitFormula}
+                >
+                  Done
+                </Button>
+              </Flex>
             </Flex>
           </Box>
         )}

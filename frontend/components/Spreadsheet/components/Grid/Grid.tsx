@@ -1,4 +1,5 @@
 import {
+  CellChange,
   Column,
   DefaultCellTypes,
   Id,
@@ -90,8 +91,10 @@ const Grid = ({ sheetData }: { sheetData: TransientSheetData }) => {
     });
   };
 
-  const handleDataChange = (value: any) => {
-    console.log('value change', value);
+  const handleDataChange = (changedValue: CellChange<any>[]) => {
+    const changedHeaders = changedValue.filter(
+      (value) => value.type === 'dropdownHeader'
+    );
   };
 
   return (
@@ -101,8 +104,6 @@ const Grid = ({ sheetData }: { sheetData: TransientSheetData }) => {
       onColumnResized={handleColumnResize}
       onCellsChanged={handleDataChange}
       customCellTemplates={{ dropdownHeader: new DropdownHeaderTemplate() }}
-      enableColumnSelection
-      enableRowSelection
     />
   );
 };
