@@ -71,8 +71,6 @@ const Grid = ({ sheetData }: { sheetData: TransientSheetData }) => {
     getColumns(fillHeaders(sheetData.headers))
   );
 
-  const [data, setData] = useState(fillRows(sheetData.data, sheetData.headers));
-
   const rows = getRows(
     fillRows(sheetData.data, sheetData.headers),
     fillHeaders(sheetData.headers),

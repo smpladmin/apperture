@@ -1,5 +1,5 @@
-import { Input } from '@chakra-ui/react';
-// import { Dropdown } from '@components/SearchableDropdown/Dropdown';
+import { Box, Button, Flex, Input, Text } from '@chakra-ui/react';
+import Dropdown from '@components/SearchableDropdown/Dropdown';
 import {
   Cell,
   CellTemplate,
@@ -11,6 +11,7 @@ import {
   isNavigationKey,
   keyCodes,
 } from '@silevis/reactgrid';
+import { useState } from 'react';
 
 export interface DropdownHeaderCell extends Cell {
   type: 'dropdownHeader';
@@ -68,55 +69,88 @@ export class DropdownHeaderTemplate
       commit: boolean
     ) => void
   ): React.ReactNode {
-    // if (!isInEditMode) {
-    //   const flagISO = cell.text.toLowerCase(); // ISO 3166-1, 2/3 letters
-    //   const flagURL = `https://restcountries.eu/data/${flagISO}.svg`;
-    //   const alternativeURL = `https://upload.wikimedia.org/wikipedia/commons/0/04/Nuvola_unknown_flag.svg`;
-    //   return (
-    //     <di
-    //       className="rg-flag-wrapper"
-    //       style={{ backgroundImage: `url(${flagURL}), url(${alternativeURL})` }}
-    //     />
-    //   );
-    // }
     let value = cell.text;
     const handleChange = (e: any) => {
       value = e.target.value;
     };
     return (
-      <div>
-        <input
-          defaultValue={value}
-          // onChange={(e) =>
-          // onCellChanged(
-          //   this.getCompatibleCell({
-          //     ...cell,
-          //     text: e.currentTarget.value,
-          //     submit: false,
-          //   }),
-          //   false
-          // )
-          // }
-          onChange={handleChange}
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-          onBlur={(e) =>
-            onCellChanged(
-              this.getCompatibleCell({ ...cell, text: e.currentTarget.value }),
-              (e as any).view?.event?.keyCode !== keyCodes.ESCAPE
-            )
-          }
-          onCopy={(e) => e.stopPropagation()}
-          onCut={(e) => e.stopPropagation()}
-          onPaste={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
-          onKeyDown={(e) => {
-            if (isAlphaNumericKey(e.keyCode) || isNavigationKey(e.keyCode))
-              e.stopPropagation();
-          }}
-        />
-      </div>
+      // <div>
+      //   <input
+      //     defaultValue={value}
+      //     // onChange={(e) =>
+      //     // onCellChanged(
+      //     //   this.getCompatibleCell({
+      //     //     ...cell,
+      //     //     text: e.currentTarget.value,
+      //     //     submit: false,
+      //     //   }),
+      //     //   false
+      //     // )
+      //     // }
+      //     onChange={handleChange}
+      //     onClick={(e) => {
+      //       e.stopPropagation();
+      //     }}
+      //     onBlur={(e) =>
+      //       onCellChanged(
+      //         this.getCompatibleCell({ ...cell, text: e.currentTarget.value }),
+      //         (e as any).view?.event?.keyCode !== keyCodes.ESCAPE
+      //       )
+      //     }
+      //     onCopy={(e) => e.stopPropagation()}
+      //     onCut={(e) => e.stopPropagation()}
+      //     onPaste={(e) => e.stopPropagation()}
+      //     onPointerDown={(e) => e.stopPropagation()}
+      //     onKeyDown={(e) => {
+      //       if (isAlphaNumericKey(e.keyCode) || isNavigationKey(e.keyCode))
+      //         e.stopPropagation();
+      //     }}
+      //   />
+      // </div>
+      <FormulaDropDownBox cell={cell} />
     );
   }
 }
+
+const FormulaDropDownBox = ({ cell }: any) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <Flex
+      w={'full'}
+      alignItems={'center'}
+      justifyContent={'space-between'}
+      position={'relative'}
+    >
+      <Text>{cell.text}</Text>
+      <Box>
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }}
+        >
+          +
+        </Button>
+        {isOpen && (
+          <Box
+            position={'fixed'}
+            zIndex={'999'}
+            bg={'white.DEFAULT'}
+            border={'1px'}
+            p={'4'}
+            borderColor={'white.400'}
+          >
+            <Flex direction={'column'} gap={'2'}>
+              <Input
+                ref={(input) => input?.focus()}
+                onChange={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+              />
+              <Button>Submit</Button>
+            </Flex>
+          </Box>
+        )}
+      </Box>
+    </Flex>
+  );
+};
