@@ -120,10 +120,13 @@ const FormulaDropDownBox = ({ cell }: any) => {
       alignItems={'center'}
       justifyContent={'space-between'}
       position={'relative'}
+      overflow={'initial'}
     >
       <Text>{cell.text}</Text>
       <Box>
         <Button
+          h="full"
+          borderRadius={0}
           onClick={(e) => {
             e.stopPropagation();
             setIsOpen(!isOpen);
@@ -133,8 +136,8 @@ const FormulaDropDownBox = ({ cell }: any) => {
         </Button>
         {isOpen && (
           <Box
-            position={'fixed'}
-            zIndex={'999'}
+            position={'absolute'}
+            zIndex={1}
             bg={'white.DEFAULT'}
             border={'1px'}
             p={'4'}

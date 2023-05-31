@@ -40,6 +40,9 @@ const getHeaderRow = (
         return {
           type: 'dropdownHeader',
           text: header,
+          style: {
+            overflow: 'initial',
+          },
         };
       }
     }),
