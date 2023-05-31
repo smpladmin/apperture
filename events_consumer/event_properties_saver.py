@@ -1,4 +1,5 @@
 import logging
+from flatten_json import flatten
 from collections import defaultdict
 from typing import List, Dict
 
@@ -31,7 +32,7 @@ class EventPropertiesSaver:
                     logging.info("Saving criteria met. Saving to db")
                     data = {
                         "event": precision_event["event"],
-                        "properties": list(precision_event["properties"].keys()),
+                        "properties": list(flatten(precision_event["properties"], ".").keys()),
                         "provider": "apperture",
                     }
                     self._save_data(data=data, datasource_id=datasource_id)
