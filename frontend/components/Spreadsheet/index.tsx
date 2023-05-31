@@ -1,26 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Grid from './components/Grid';
 import QueryModal from './components/QueryModal';
 import { Box, Flex, useDisclosure } from '@chakra-ui/react';
 import EventLayoutHeader from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
+import Footer from './components/Footer';
 
 const Spreadsheet = () => {
-  const { isOpen, onClose } = useDisclosure({ defaultIsOpen: true });
-  const [sheetData, setSheetData] = useState<TransientSheetData>({
-    data: [],
-    headers: [],
-  });
+  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true });
+  const [sheetsData, setSheetsData] = useState<TransientSheetData[]>([
+    {
+      name: 'Sheet 1',
+      query: 'Select user_id, event_name from events',
+      data: [],
+      headers: [],
+    },
+  ]);
   const [workbookName, setWorkbookName] = useState<string>('Untitled Workbook');
   const router = useRouter();
+  const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
 
   return (
     <>
       <QueryModal
         isOpen={isOpen}
         onClose={onClose}
-        setSheetData={setSheetData}
+        sheetData={sheetsData[selectedSheetIndex]}
+        sheetsData={sheetsData}
+        setSheetsData={setSheetsData}
+        selectedSheetIndex={selectedSheetIndex}
       />
       {!isOpen && (
         <>
@@ -41,8 +50,15 @@ const Spreadsheet = () => {
             />
           </Box>
           <Flex overflow={'scroll'} data-testid={'react-grid'}>
-            <Grid sheetData={sheetData} />
+            <Grid sheetData={sheetsData[selectedSheetIndex]} />
           </Flex>
+          <Footer
+            openQueryModal={onOpen}
+            sheetsData={sheetsData}
+            setSheetsData={setSheetsData}
+            selectedSheetIndex={selectedSheetIndex}
+            setSelectedSheetIndex={setSelectedSheetIndex}
+          />
         </>
       )}
     </>

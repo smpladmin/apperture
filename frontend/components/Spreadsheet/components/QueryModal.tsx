@@ -14,32 +14,63 @@ import { sql } from '@codemirror/lang-sql';
 import { useState } from 'react';
 import { getTransientSpreadsheets } from '@lib/services/spreadsheetService';
 import { useRouter } from 'next/router';
+import { TransientSheetData } from '@lib/domain/spreadsheet';
+import { cloneDeep } from 'lodash';
+import LoadingSpinner from '@components/LoadingSpinner';
 
 type QueryModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  setSheetData: Function;
+  sheetData: TransientSheetData;
+  sheetsData: TransientSheetData[];
+  setSheetsData: Function;
+  selectedSheetIndex: number;
 };
 
-const QueryModal = ({ isOpen, onClose, setSheetData }: QueryModalProps) => {
-  const [query, setQuery] = useState('Select event_name from events limit 100');
+const QueryModal = ({
+  isOpen,
+  onClose,
+  sheetData,
+  sheetsData,
+  setSheetsData,
+  selectedSheetIndex,
+}: QueryModalProps) => {
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { dsId } = router.query;
 
+  const handleQueryChange = (query: string) => {
+    const toUpdateSheets = cloneDeep(sheetsData);
+    toUpdateSheets[selectedSheetIndex].query = query;
+    setSheetsData(toUpdateSheets);
+  };
+
   const handleGetTransientSheetData = async () => {
     setIsSubmitButtonDisabled(true);
-    const response = await getTransientSpreadsheets(dsId as string, query);
+    setLoading(true);
+    const response = await getTransientSpreadsheets(
+      dsId as string,
+      sheetData.query
+    );
+
+    setLoading(false);
 
     if (response.status === 200) {
-      setSheetData(response.data);
+      const toUpdateSheets = cloneDeep(sheetsData);
+      toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
+      toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
+      setSheetsData(toUpdateSheets);
+
       onClose();
+      setIsSubmitButtonDisabled(false);
     } else {
       setError(response?.data?.detail);
       setIsSubmitButtonDisabled(false);
     }
   };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -79,11 +110,11 @@ const QueryModal = ({ isOpen, onClose, setSheetData }: QueryModalProps) => {
         <ModalBody px={'9'} overflowY={'auto'} py={'9'}>
           <Flex direction={'column'} gap={'4'}>
             <ReactCodeMirror
-              value={query}
+              value={sheetData.query}
               height="200px"
               extensions={[sql()]}
               onChange={(value) => {
-                setQuery(value);
+                handleQueryChange(value);
               }}
             />
             <Button
@@ -101,6 +132,11 @@ const QueryModal = ({ isOpen, onClose, setSheetData }: QueryModalProps) => {
             >
               Submit
             </Button>
+            {loading && (
+              <Flex justifyContent={'center'}>
+                <LoadingSpinner />
+              </Flex>
+            )}
             {error && !isSubmitButtonDisabled ? (
               <Text
                 fontSize={'xs-12'}
