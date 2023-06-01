@@ -40,6 +40,7 @@ class ClickStream(NamedTuple):
         event: str,
         properties: Dict,
     ):
+        properties = ClickStream.sanitize_properties(properties)
         element_chain = (
             ClickStream.build_element_chain(properties["$elements"])
             if event == CaptureEvent.AUTOCAPTURE
@@ -51,12 +52,15 @@ class ClickStream(NamedTuple):
             userId=user_id,
             element_chain=element_chain,
             event=event,
-            properties=ClickStream.sanitize_properties(properties),
+            properties=properties,
         )
 
     @staticmethod
     def sanitize_properties(properties: Dict):
         if type(properties.get("$elements")) == list:
+            properties["$elements"] = [
+                element for element in properties["$elements"] if element
+            ]
             for element in properties["$elements"]:
                 if type(element.get("attr__state")) == str:
                     element["attr__state"] = element["attr__state"].replace(
