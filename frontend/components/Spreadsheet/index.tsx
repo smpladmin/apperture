@@ -6,6 +6,7 @@ import EventLayoutHeader from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
 import Footer from './components/Footer';
+import { evaluatePrefix, infixToPrefix, isOperand } from './util';
 
 const Spreadsheet = () => {
   const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true });
@@ -20,6 +21,19 @@ const Spreadsheet = () => {
   const [workbookName, setWorkbookName] = useState<string>('Untitled Workbook');
   const router = useRouter();
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
+
+  const parseFormulaHeader = (changedValue: any) => {
+    const header = changedValue?.newCell?.text;
+    console.log(header.split(''));
+    const prefixHeader = infixToPrefix(header);
+    const operands = header.split('').filter((char: string) => isOperand(char));
+    const operandsIndex = operands.map(
+      (operand: string) => operand.toUpperCase().charCodeAt(0) - 64
+    );
+
+    console.log({ operands, operandsIndex, prefixHeader });
+    // evaluatePrefix(prefixHeader, {});
+  };
 
   return (
     <>
@@ -50,7 +64,10 @@ const Spreadsheet = () => {
             />
           </Box>
           <Flex overflow={'scroll'} data-testid={'react-grid'}>
-            <Grid sheetData={sheetsData[selectedSheetIndex]} />
+            <Grid
+              sheetData={sheetsData[selectedSheetIndex]}
+              parseFormulaHeader={parseFormulaHeader}
+            />
           </Flex>
           <Footer
             openQueryModal={onOpen}

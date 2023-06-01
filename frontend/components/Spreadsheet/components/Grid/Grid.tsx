@@ -7,7 +7,7 @@ import {
   Row,
 } from '@silevis/reactgrid';
 import React, { useState } from 'react';
-import { fillHeaders, fillRows } from '../../util';
+import { fillHeaders, fillRows, infixToPrefix } from '../../util';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
 import { DropdownHeaderCell, DropdownHeaderTemplate } from './DropdownHeader';
 
@@ -75,7 +75,13 @@ const getRows = (
   })),
 ];
 
-const Grid = ({ sheetData }: { sheetData: TransientSheetData }) => {
+const Grid = ({
+  sheetData,
+  parseFormulaHeader,
+}: {
+  sheetData: TransientSheetData;
+  parseFormulaHeader: Function;
+}) => {
   const [columns, setColumns] = useState<Column[]>(
     getColumns(fillHeaders(sheetData.headers))
   );
@@ -100,6 +106,7 @@ const Grid = ({ sheetData }: { sheetData: TransientSheetData }) => {
     const changedHeaders = changedValue.filter(
       (value) => value.type === 'dropdownHeader'
     );
+    parseFormulaHeader(changedHeaders[0]);
   };
 
   return (
