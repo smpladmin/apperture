@@ -84,9 +84,7 @@ const FormulaDropDownBox = ({
       position={'relative'}
       overflow={'initial'}
     >
-      <Text>
-        {cell.text} {displayFormulaLabel}
-      </Text>
+      <Text>{cell.text}</Text>
       <Box>
         <Button
           p={'0'}

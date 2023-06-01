@@ -6,7 +6,7 @@ import {
   ReactGrid,
   Row,
 } from '@silevis/reactgrid';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { fillHeaders, fillRows, infixToPrefix } from '../../util';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
 import { DropdownHeaderCell, DropdownHeaderTemplate } from './DropdownHeader';
@@ -26,7 +26,11 @@ const getColumns = (headers: string[]): Column[] => {
     if (header === 'index') {
       return { columnId: header, width: 50 };
     }
-    return { columnId: header, resizable: true };
+    return {
+      columnId: header,
+      resizable: true,
+      width: header.length * 10 > 150 ? header.length * 10 : 150,
+    };
   });
 };
 
@@ -53,6 +57,7 @@ const getHeaderRow = (
           text: header,
           style: {
             overflow: 'initial',
+            background: '#f2f2f2',
           },
         };
       }
@@ -86,11 +91,24 @@ const Grid = ({
     getColumns(fillHeaders(sheetData.headers))
   );
 
-  const rows = getRows(
-    fillRows(sheetData.data, sheetData.headers),
-    fillHeaders(sheetData.headers),
-    sheetData.headers
+  const [rows, setRows] = useState(
+    getRows(
+      fillRows(sheetData.data, sheetData.headers),
+      fillHeaders(sheetData.headers),
+      sheetData.headers
+    )
   );
+
+  useEffect(() => {
+    setColumns(getColumns(fillHeaders(sheetData.headers)));
+    setRows(
+      getRows(
+        fillRows(sheetData.data, sheetData.headers),
+        fillHeaders(sheetData.headers),
+        sheetData.headers
+      )
+    );
+  }, [sheetData]);
 
   const handleColumnResize = (ci: Id, width: number) => {
     setColumns((prevColumns) => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Grid from './components/Grid/Grid';
 import QueryModal from './components/QueryModal';
 import { Box, Flex, useDisclosure } from '@chakra-ui/react';
@@ -6,14 +6,17 @@ import EventLayoutHeader from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
 import Footer from './components/Footer';
-import { evaluatePrefix, infixToPrefix, isOperand } from './util';
+import { evaluatePrefix, infixToPrefix, isOperand, isdigit } from './util';
+import cloneDeep from 'lodash/cloneDeep';
+import { clone } from 'lodash';
 
 const Spreadsheet = () => {
   const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true });
   const [sheetsData, setSheetsData] = useState<TransientSheetData[]>([
     {
       name: 'Sheet 1',
-      query: 'Select user_id, event_name from events',
+      query:
+        'SELECT event_name, COUNT(event_name) FROM events GROUP BY event_name',
       data: [],
       headers: [],
     },
@@ -23,16 +26,43 @@ const Spreadsheet = () => {
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
 
   const parseFormulaHeader = (changedValue: any) => {
-    const header = changedValue?.newCell?.text;
-    console.log(header.split(''));
+    const header = changedValue?.newCell?.text.replace(/\s/g, '');
     const prefixHeader = infixToPrefix(header);
     const operands = header.split('').filter((char: string) => isOperand(char));
     const operandsIndex = operands.map(
-      (operand: string) => operand.toUpperCase().charCodeAt(0) - 64
+      (operand: string) => operand.toUpperCase().charCodeAt(0) - 65
     );
 
-    console.log({ operands, operandsIndex, prefixHeader });
-    // evaluatePrefix(prefixHeader, {});
+    const lookup_table: { [key: string]: any[] } = {};
+
+    operands.forEach((operand: string, index: number) => {
+      if (isdigit(operand)) {
+        lookup_table[operand] = new Array(
+          sheetsData[selectedSheetIndex].data.length
+        ).fill(parseFloat(operand));
+      } else {
+        const currentSheet = sheetsData[selectedSheetIndex];
+        const header = currentSheet.headers[operandsIndex[index]];
+        const valueList = currentSheet.data.map((item) => item[header]);
+        lookup_table[operand] = valueList;
+        // debugger;
+      }
+    });
+    const result = evaluatePrefix(prefixHeader, lookup_table);
+
+    const tempSheetsData = cloneDeep(sheetsData);
+    tempSheetsData[selectedSheetIndex].data = tempSheetsData[
+      selectedSheetIndex
+    ].data.map((item, index) => ({
+      ...item,
+      [header]: result[index],
+    }));
+    tempSheetsData[selectedSheetIndex].headers = [
+      ...tempSheetsData[selectedSheetIndex].headers,
+      header,
+    ];
+
+    setSheetsData(tempSheetsData);
   };
 
   return (
@@ -65,7 +95,7 @@ const Spreadsheet = () => {
           </Box>
           <Flex overflow={'scroll'} data-testid={'react-grid'}>
             <Grid
-              sheetData={sheetsData[selectedSheetIndex]}
+              sheetData={cloneDeep(sheetsData[selectedSheetIndex])}
               parseFormulaHeader={parseFormulaHeader}
             />
           </Flex>

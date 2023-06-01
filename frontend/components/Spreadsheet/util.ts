@@ -69,14 +69,14 @@ class Stack {
   }
 }
 
-const isalpha = (c: string) => {
+export const isalpha = (c: string) => {
   if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
     return true;
   }
   return false;
 };
 
-const isdigit = (c: string) => {
+export const isdigit = (c: string) => {
   if (c >= '0' && c <= '9') {
     return true;
   }
@@ -196,7 +196,8 @@ export const evaluatePrefix = (
   const Stack = [];
 
   for (let j = expression.length - 1; j >= 0; j--) {
-    if (isOperand(expression[j])) Stack.push(lookup_table[expression[j]]);
+    if (isalpha(expression[j]) || isdigit(expression[j]))
+      Stack.push(lookup_table[expression[j]]);
     else {
       const first_operand: any[] = Stack[Stack.length - 1];
       Stack.pop();
