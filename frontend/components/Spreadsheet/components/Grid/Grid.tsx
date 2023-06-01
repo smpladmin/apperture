@@ -11,6 +11,16 @@ import { fillHeaders, fillRows } from '../../util';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
 import { DropdownHeaderCell, DropdownHeaderTemplate } from './DropdownHeader';
 
+const getGridRow = (value: any): DefaultCellTypes => {
+  const cellTypes: { [key: string]: DefaultCellTypes } = {
+    string: { type: 'text', text: value },
+    number: { type: 'number', value: value },
+    object: { type: 'text', text: JSON.stringify(value) },
+  };
+
+  return cellTypes[typeof value];
+};
+
 const getColumns = (headers: string[]): Column[] => {
   return headers.map((header) => {
     if (header === 'index') {
@@ -60,12 +70,7 @@ const getRows = (
     rowId: idx,
     cells: headers.map((header) => {
       const val = person[header];
-      return header === 'index'
-        ? { type: 'number', value: val }
-        : {
-            type: 'text',
-            text: typeof val === 'object' ? JSON.stringify(val) : val,
-          };
+      return getGridRow(val);
     }),
   })),
 ];
