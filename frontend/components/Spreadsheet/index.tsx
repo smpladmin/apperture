@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Grid from './components/Grid/Grid';
 import QueryModal from './components/QueryModal';
 import { Box, Flex, useDisclosure } from '@chakra-ui/react';
@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import { evaluatePrefix, infixToPrefix, isOperand, isdigit } from './util';
 import cloneDeep from 'lodash/cloneDeep';
 import { clone } from 'lodash';
+import { CellChange, CellTemplate } from '@silevis/reactgrid';
 
 const Spreadsheet = () => {
   const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true });
@@ -25,37 +26,43 @@ const Spreadsheet = () => {
   const router = useRouter();
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
 
-  const parseFormulaHeader = (changedValue: any) => {
-    const header = changedValue?.newCell?.text.replace(/\s/g, '');
-    const prefixHeader = infixToPrefix(header);
-    const operands = header.split('').filter((char: string) => isOperand(char));
-    const operandsIndex = operands.map(
-      (operand: string) => operand.toUpperCase().charCodeAt(0) - 65
-    );
+  const getOperands = (newHeader: string) =>
+    newHeader.split('').filter((char: string) => isOperand(char));
 
-    const lookup_table: { [key: string]: any[] } = {};
+  const getOperatorsIndex = (operands: string[]) =>
+    operands.map((operand: string) => operand.toUpperCase().charCodeAt(0) - 65);
 
+  const generateLookupTable = (
+    operands: any,
+
+    sheetsData: TransientSheetData[],
+    selectedSheetIndex: number,
+    operandsIndex: any
+  ) => {
+    const lookupTable: { [key: string]: any[] } = {};
     operands.forEach((operand: string, index: number) => {
       if (isdigit(operand)) {
-        lookup_table[operand] = new Array(
+        lookupTable[operand] = new Array(
           sheetsData[selectedSheetIndex].data.length
         ).fill(parseFloat(operand));
       } else {
         const currentSheet = sheetsData[selectedSheetIndex];
         const header = currentSheet.headers[operandsIndex[index]];
         const valueList = currentSheet.data.map((item) => item[header]);
-        lookup_table[operand] = valueList;
-        // debugger;
+        lookupTable[operand] = valueList;
       }
     });
-    const result = evaluatePrefix(prefixHeader, lookup_table);
 
+    return lookupTable;
+  };
+
+  const updateSelectedSheetDataAndHeaders = (data: any[], header: string) => {
     const tempSheetsData = cloneDeep(sheetsData);
     tempSheetsData[selectedSheetIndex].data = tempSheetsData[
       selectedSheetIndex
     ].data.map((item, index) => ({
       ...item,
-      [header]: result[index],
+      [header]: data[index],
     }));
     tempSheetsData[selectedSheetIndex].headers = [
       ...tempSheetsData[selectedSheetIndex].headers,
@@ -64,6 +71,24 @@ const Spreadsheet = () => {
 
     setSheetsData(tempSheetsData);
   };
+
+  const parseFormulaHeader = useCallback((changedValue: CellChange<any>) => {
+    const newHeader = changedValue?.newCell?.text.replace(/\s/g, '');
+    const prefixHeader = infixToPrefix(newHeader);
+    const operands = getOperands(newHeader);
+    const operandsIndex = getOperatorsIndex(operands);
+
+    const lookupTable = generateLookupTable(
+      operands,
+      sheetsData,
+      selectedSheetIndex,
+      operandsIndex
+    );
+
+    const evaluatedData = evaluatePrefix(prefixHeader, lookupTable);
+
+    updateSelectedSheetDataAndHeaders(evaluatedData, newHeader);
+  }, []);
 
   return (
     <>
