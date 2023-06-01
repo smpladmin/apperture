@@ -72,7 +72,7 @@ const Spreadsheet = () => {
     setSheetsData(tempSheetsData);
   };
 
-  const parseFormulaHeader = useCallback((changedValue: CellChange<any>) => {
+  const evaluateFormulaHeader = useCallback((changedValue: CellChange<any>) => {
     const newHeader = changedValue?.newCell?.text.replace(/\s/g, '');
     const prefixHeader = infixToPrefix(newHeader);
     const operands = getOperands(newHeader);
@@ -121,7 +121,7 @@ const Spreadsheet = () => {
           <Flex overflow={'scroll'} data-testid={'react-grid'}>
             <Grid
               sheetData={cloneDeep(sheetsData[selectedSheetIndex])}
-              parseFormulaHeader={parseFormulaHeader}
+              evaluateFormulaHeader={evaluateFormulaHeader}
             />
           </Flex>
           <Footer

@@ -82,10 +82,10 @@ const getRows = (
 
 const Grid = ({
   sheetData,
-  parseFormulaHeader,
+  evaluateFormulaHeader,
 }: {
   sheetData: TransientSheetData;
-  parseFormulaHeader: Function;
+  evaluateFormulaHeader: Function;
 }) => {
   const [columns, setColumns] = useState<Column[]>(
     getColumns(fillHeaders(sheetData.headers))
@@ -124,7 +124,7 @@ const Grid = ({
     const changedHeaders = changedValue.filter(
       (value) => value.type === 'dropdownHeader'
     );
-    parseFormulaHeader(changedHeaders[0]);
+    evaluateFormulaHeader(changedHeaders[0]);
   };
 
   return (
