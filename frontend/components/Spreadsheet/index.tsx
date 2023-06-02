@@ -32,13 +32,7 @@ const Spreadsheet = () => {
   const getOperatorsIndex = (operands: string[]) =>
     operands.map((operand: string) => operand.toUpperCase().charCodeAt(0) - 65);
 
-  const generateLookupTable = (
-    operands: any,
-
-    sheetsData: TransientSheetData[],
-    selectedSheetIndex: number,
-    operandsIndex: any
-  ) => {
+  const generateLookupTable = (operands: string[], operandsIndex: number[]) => {
     const lookupTable: { [key: string]: any[] } = {};
     operands.forEach((operand: string, index: number) => {
       if (isdigit(operand)) {
@@ -68,27 +62,24 @@ const Spreadsheet = () => {
       ...tempSheetsData[selectedSheetIndex].headers,
       header,
     ];
-
     setSheetsData(tempSheetsData);
   };
 
-  const evaluateFormulaHeader = useCallback((changedValue: CellChange<any>) => {
-    const newHeader = changedValue?.newCell?.text.replace(/\s/g, '');
-    const prefixHeader = infixToPrefix(newHeader);
-    const operands = getOperands(newHeader);
-    const operandsIndex = getOperatorsIndex(operands);
+  const evaluateFormulaHeader = useCallback(
+    (changedValue: CellChange<any>) => {
+      const newHeader = changedValue?.newCell?.text.replace(/\s/g, '');
+      const prefixHeader = infixToPrefix(newHeader);
 
-    const lookupTable = generateLookupTable(
-      operands,
-      sheetsData,
-      selectedSheetIndex,
-      operandsIndex
-    );
+      const operands = getOperands(newHeader);
+      const operandsIndex = getOperatorsIndex(operands);
 
-    const evaluatedData = evaluatePrefix(prefixHeader, lookupTable);
+      const lookupTable = generateLookupTable(operands, operandsIndex);
+      const evaluatedData = evaluatePrefix(prefixHeader, lookupTable);
 
-    updateSelectedSheetDataAndHeaders(evaluatedData, newHeader);
-  }, []);
+      updateSelectedSheetDataAndHeaders(evaluatedData, newHeader);
+    },
+    [sheetsData]
+  );
 
   return (
     <>
