@@ -8,7 +8,7 @@ import { TransientSheetData } from '@lib/domain/spreadsheet';
 import Footer from './components/Footer';
 import { evaluatePrefix, infixToPrefix, isOperand, isdigit } from './util';
 import cloneDeep from 'lodash/cloneDeep';
-import { CellChange } from '@silevis/reactgrid';
+import { CellChange, Id } from '@silevis/reactgrid';
 
 const Spreadsheet = () => {
   const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true });
@@ -48,16 +48,29 @@ const Spreadsheet = () => {
     return lookupTable;
   };
 
-  const updateSelectedSheetDataAndHeaders = (data: any[], header: string) => {
+  const updateSelectedSheetDataAndHeaders = (
+    data: any[],
+    header: string,
+    columnId: string
+  ) => {
     const tempSheetsData = cloneDeep(sheetsData);
+    const headerPadding =
+      columnId.charCodeAt(0) -
+      65 -
+      tempSheetsData[selectedSheetIndex].headers.length;
+
+    const padding = new Array(headerPadding).fill('');
+
     tempSheetsData[selectedSheetIndex].data = tempSheetsData[
       selectedSheetIndex
     ].data.map((item, index) => ({
       ...item,
       [header]: data[index],
+      '': '',
     }));
     tempSheetsData[selectedSheetIndex].headers = [
       ...tempSheetsData[selectedSheetIndex].headers,
+      ...padding,
       header,
     ];
     setSheetsData(tempSheetsData);
@@ -66,6 +79,7 @@ const Spreadsheet = () => {
   const evaluateFormulaHeader = useCallback(
     (changedValue: CellChange<any>) => {
       const newHeader = changedValue?.newCell?.text.replace(/\s/g, '');
+      const columnId = changedValue?.columnId;
       const prefixHeader = infixToPrefix(newHeader);
 
       const operands = getOperands(newHeader);
@@ -74,7 +88,11 @@ const Spreadsheet = () => {
       const lookupTable = generateLookupTable(operands, operandsIndex);
       const evaluatedData = evaluatePrefix(prefixHeader, lookupTable);
 
-      updateSelectedSheetDataAndHeaders(evaluatedData, newHeader);
+      updateSelectedSheetDataAndHeaders(
+        evaluatedData,
+        newHeader,
+        columnId as string
+      );
     },
     [sheetsData]
   );

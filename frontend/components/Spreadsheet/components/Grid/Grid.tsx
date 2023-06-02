@@ -124,7 +124,7 @@ const Grid = ({
     const changedHeaders = changedValue.filter(
       (value) => value.type === 'dropdownHeader'
     );
-    evaluateFormulaHeader(changedHeaders[0]);
+    changedHeaders[0] && evaluateFormulaHeader(changedHeaders[0]);
   };
 
   return (
