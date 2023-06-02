@@ -215,4 +215,39 @@ describe('spreadsheet', () => {
       });
     });
   });
+
+  describe('edit query', () => {
+    it('should render query on grid page', async () => {
+      renderSpreadsheet();
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      const queryText = screen.getByTestId('query-text');
+      expect(queryText.textContent).toBe(
+        'Select user_id, event_name from events'
+      );
+    });
+
+    it('should be able to edit query by clicking on edit query button', async () => {
+      renderSpreadsheet();
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      const editQueryButton = screen.getByTestId('edit-query-button');
+      fireEvent.click(editQueryButton);
+
+      const queryModal = screen.getByTestId('query-modal');
+      expect(queryModal).toBeInTheDocument();
+
+      const queryBox = screen.getByRole('textbox');
+      // query box should be prefiiled with query
+      expect(queryBox.textContent).toBe(
+        'Select user_id, event_name from events'
+      );
+    });
+  });
 });
