@@ -9,7 +9,6 @@ import Footer from './components/Footer';
 import {
   evaluateExpression,
   expressionTokenRegex,
-  infixToPrefix,
   isOperand,
   isdigit,
 } from './util';
@@ -91,9 +90,10 @@ const Spreadsheet = () => {
 
   const evaluateFormulaHeader = useCallback(
     (changedValue: CellChange<any>) => {
-      const newHeader = changedValue?.newCell?.text.replace(/\s/g, '');
+      const newHeader = changedValue?.newCell?.text
+        .replace(/\s/g, '')
+        .toUpperCase();
       const columnId = changedValue?.columnId;
-      const prefixHeader = infixToPrefix(newHeader);
 
       const operands = getOperands(newHeader);
       const operandsIndex = getOperatorsIndex(operands);
