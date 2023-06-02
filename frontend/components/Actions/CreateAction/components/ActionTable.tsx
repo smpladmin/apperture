@@ -6,16 +6,16 @@ import utc from 'dayjs/plugin/utc';
 import EllipsisCell from './EllipsisCell';
 import { capitalizeFirstLetter } from '@lib/utils/common';
 import EventType from './EventType';
-import { ActionEventData } from '@lib/domain/action';
+import { ActionEventData, ActionMetaData } from '@lib/domain/action';
 dayjs.extend(utc);
 
 type ActionTableProps = {
   isLoading: boolean;
-  tableData: ActionEventData;
+  tableData: ActionMetaData;
 };
 
 const ActionTable = ({ isLoading, tableData }: ActionTableProps) => {
-  const columnHelper = createColumnHelper<any>();
+  const columnHelper = createColumnHelper<ActionEventData>();
 
   const columns = useMemo(() => {
     return [

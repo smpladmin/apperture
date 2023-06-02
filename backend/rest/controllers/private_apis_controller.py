@@ -11,6 +11,7 @@ from domain.apperture_users.service import AppertureUserService
 from domain.common.models import IntegrationProvider
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
+from domain.event_properties.service import EventPropertiesService
 from domain.events.service import EventsService
 from domain.funnels.service import FunnelsService
 from domain.integrations.service import IntegrationService
@@ -26,16 +27,13 @@ from rest.dtos.apperture_users import (
 )
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
+from rest.dtos.event_properties import EventPropertiesDto
 from rest.dtos.events import CreateEventDto
 from rest.dtos.funnels import FunnelResponse, FunnelTrendResponse, TransientFunnelDto
 from rest.dtos.metrics import (
     ComputedMetricStepResponse,
     MetricsComputeDto,
     SavedMetricResponse,
-)
-from rest.dtos.notifications import (
-    ComputedNotificationResponse,
-    TriggerNotificationsDto,
 )
 from rest.dtos.properties import PropertiesResponse
 from rest.dtos.runlogs import UpdateRunLogDto
@@ -110,6 +108,18 @@ async def update_events(
     events_service: EventsService = Depends(),
 ):
     await events_service.update_events(dto)
+    return {"updated": True}
+
+
+@router.post("/event_properties/{datasource_id}")
+async def update_event_properties(
+    datasource_id: str,
+    dto: EventPropertiesDto,
+    event_properties_service: EventPropertiesService = Depends(),
+):
+    await event_properties_service.update_event_properties(
+        datasource_id=datasource_id, event_properties=dto
+    )
     return {"updated": True}
 
 

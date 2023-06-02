@@ -4,6 +4,7 @@ from domain.common.models import IntegrationProvider
 from domain.datasource.models import Credential, DataSource
 from domain.runlog.service import RunLogService
 from fetch.clevertap_events_fetcher import ClevertapEventsFetcher
+from store.event_properties_saver import EventPropertiesSaver
 from store.events_saver import EventsSaver
 from .default_events import default_events
 
@@ -22,6 +23,7 @@ class ClevertapEventsStrategy:
         self.event_processor = ClevertapEventProcessor()
         self.saver = EventsSaver()
         self.runlog_service = RunLogService()
+        self.properties_saver = EventPropertiesSaver()
 
     def execute(self):
         try:
@@ -38,6 +40,15 @@ class ClevertapEventsStrategy:
                         self.datasource.id,
                         IntegrationProvider.CLEVERTAP,
                         df,
+                    )
+
+                    logging.info(
+                        f"Saving event properties for event {event} for date - {self.date}"
+                    )
+                    self.properties_saver.save(
+                        df=df,
+                        datasource_id=self.datasource.id,
+                        provider=IntegrationProvider.CLEVERTAP,
                     )
 
             self.runlog_service.update_completed(self.runlog_id)

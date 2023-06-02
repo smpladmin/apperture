@@ -5,12 +5,18 @@ import React from 'react';
 const EventType = ({ value }: { value: CaptureEvent }) => {
   const eventIcon = {
     [CaptureEvent.AUTOCAPTURE]: 'ri-cursor-fill',
+    [CaptureEvent.RAGECLICK]: 'ri-cursor-fill',
+    [CaptureEvent.IDENTIFY]: 'ri-cursor-fill',
     [CaptureEvent.PAGEVIEW]: 'ri-eye-fill',
+    [CaptureEvent.PAGELEAVE]: 'ri-eye-fill',
   };
 
   const formatEventText = {
     [CaptureEvent.AUTOCAPTURE]: 'Autocapture',
+    [CaptureEvent.RAGECLICK]: 'Rageclick',
+    [CaptureEvent.IDENTIFY]: 'Identify',
     [CaptureEvent.PAGEVIEW]: 'Pageview',
+    [CaptureEvent.PAGELEAVE]: 'Pageleave',
   };
   return (
     <Flex alignContent={'center'} alignItems={'center'} gap={'1'}>

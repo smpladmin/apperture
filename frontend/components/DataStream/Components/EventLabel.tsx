@@ -1,14 +1,20 @@
 import { Flex, IconButton, Text } from '@chakra-ui/react';
+import { ComputedStreamEvent } from '@lib/domain/clickstream';
+import { autoCaptureEventToDescription } from '@lib/utils/common';
 import { useState } from 'react';
 
-export const formateventLabel = (label: string) => {
+export const formateventLabel = (event: ComputedStreamEvent) => {
+  const label = event.name;
   if (label == '$pageview') return ['ri-eye-fill', 'Pageview'];
   if (label == '$pageleave') return ['ri-delete-back-2-fill', 'Pageleave'];
-  if (label == '$autocapture') return ['ri-cursor-fill', 'Autocapture'];
-  return ['ri-edit-box-fill', 'Precision'];
+  if (label == '$autocapture')
+    return ['ri-cursor-fill', autoCaptureEventToDescription(event)];
+  if (label == '$identify') return ['ri-cursor-fill', 'Identify'];
+  if (label == '$rageclick') return ['ri-cursor-fill', 'Rage Click'];
+  return ['ri-edit-box-fill', label];
 };
 
-const EventLabel = ({ event }: { event: string }) => {
+const EventLabel = ({ event }: { event: ComputedStreamEvent }) => {
   const [data, setData] = useState(formateventLabel(event));
   return (
     <Flex alignContent={'center'} alignItems={'center'}>

@@ -7,7 +7,13 @@ from fastapi import Depends
 from starlette.concurrency import run_in_threadpool
 
 from clickhouse.clickhouse import Clickhouse
-from domain.clickstream.models import CaptureEvent, ClickstreamData, ClickstreamResult
+from domain.clickstream.models import (
+    CaptureEvent,
+    ClickstreamData,
+    ClickstreamResult,
+    ComputedStreamElementProperty,
+    ComputedStreamEvent,
+)
 from domain.elements.models import Element
 from domain.elements.service import ElementsService
 from repositories.clickhouse.clickstream import Clickstream
@@ -117,13 +123,31 @@ class ClickstreamService:
         data_list = self.repository.get_all_data_by_dsId(dsId)
         data_list = [
             ClickstreamResult(
-                event=event,
+                event=ComputedStreamEvent(
+                    name=name,
+                    type=type,
+                    elements=ComputedStreamElementProperty(
+                        href=href[0] if href else "",
+                        text=text[0] if text else "",
+                        tag_name=tag_name[0] if tag_name else "",
+                    ),
+                ),
                 timestamp=timestamp,
                 uid=uid,
                 url=url,
                 source=source,
             )
-            for (event, timestamp, uid, url, source) in data_list
+            for (
+                name,
+                timestamp,
+                uid,
+                url,
+                source,
+                type,
+                tag_name,
+                text,
+                href,
+            ) in data_list
         ]
         count = self.repository.get_stream_count_by_dsId(dsId)
         return {"count": count[0][0], "data": data_list}

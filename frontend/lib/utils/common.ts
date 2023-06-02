@@ -18,6 +18,7 @@ import {
   replaceEmptyStringPlaceholder,
   replaceFilterValueWithEmptyStringPlaceholder,
 } from '@components/Segments/util';
+import { ComputedStreamEvent } from '@lib/domain/clickstream';
 
 dayjs.extend(utc);
 export const DEBOUNCED_WAIT_TIME = 500;
@@ -169,3 +170,50 @@ export const getUTCFormmatedDate = (
 ) => {
   return dayjs.utc(date).local().format(format);
 };
+
+export function autoCaptureEventToDescription(
+  event: ComputedStreamEvent,
+  shortForm: boolean = false
+): string {
+  const getVerb = (): string => {
+    if (event.type === 'click') {
+      return 'Clicked';
+    }
+    if (event.type === 'change') {
+      return 'Typed something into';
+    }
+    if (event.type === 'submit') {
+      return 'Submitted';
+    }
+
+    if (event.type === 'touch') {
+      return 'Pressed';
+    }
+    return 'Interacted with';
+  };
+
+  const getTag = (): string => {
+    if (event.elements.tag_name === 'a') {
+      return 'link';
+    } else if (event.elements.tag_name === 'img') {
+      return 'image';
+    }
+    return event.elements.tag_name ?? 'element';
+  };
+
+  const getValue = (): string => {
+    if (event.elements.text) {
+      return `${shortForm ? '' : 'with text '}"${event.elements.text}"`;
+    } else if (event.elements.href) {
+      return `${shortForm ? '' : 'with source '}"${event.elements.href}"`;
+    }
+    return '';
+  };
+
+  if (shortForm) {
+    return `${getVerb()} ${getValue()} ${getTag()}`;
+  } else {
+    const value = getValue();
+    return `${getVerb()} ${getTag()} ${getValue()}`;
+  }
+}
