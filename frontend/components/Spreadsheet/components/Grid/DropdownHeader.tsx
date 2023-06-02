@@ -72,8 +72,10 @@ const FormulaDropDownBox = ({
   useOnClickOutside(ref, () => setIsOpen(false));
 
   const handleSubmitFormula = () => {
-    onCellChanged(formula);
-    setDisplayFormulaLabel(formula);
+    if (formula) {
+      onCellChanged(formula);
+      setDisplayFormulaLabel(formula);
+    }
     setIsOpen(false);
   };
 
@@ -133,6 +135,7 @@ const FormulaDropDownBox = ({
                 onPointerDown={(e) => e.stopPropagation()}
                 onKeyDown={(e) => {
                   e.stopPropagation();
+                  e.code === 'Enter' && handleSubmitFormula();
                 }}
                 focusBorderColor={'black.100'}
                 placeholder={'Enter your formula'}
