@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Grid from './components/Grid';
 import QueryModal from './components/QueryModal';
-import { Box, Flex, useDisclosure } from '@chakra-ui/react';
+import { Box, Button, Flex, Text, useDisclosure } from '@chakra-ui/react';
 import EventLayoutHeader from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
@@ -48,6 +48,30 @@ const Spreadsheet = () => {
               handleSave={() => {}}
               isSaveButtonDisabled={true}
             />
+            {sheetsData[selectedSheetIndex].query && (
+              <Flex
+                alignItems={'center'}
+                justifyContent={'space-between'}
+                p={'1'}
+              >
+                <Text fontSize={'xs-12'} lineHeight={'xs-12'} fontWeight={400}>
+                  {sheetsData[selectedSheetIndex].query}
+                </Text>
+
+                <Button
+                  px={'2'}
+                  h={'6'}
+                  bg={'grey.400'}
+                  variant={'secondary'}
+                  fontSize={'xs-12'}
+                  lineHeight={'xs-12'}
+                  fontWeight={'400'}
+                  onClick={() => onOpen()}
+                >
+                  Edit Query
+                </Button>
+              </Flex>
+            )}
           </Box>
           <Flex overflow={'scroll'} data-testid={'react-grid'}>
             <Grid sheetData={sheetsData[selectedSheetIndex]} />

@@ -65,6 +65,7 @@ const QueryModal = ({
 
       onClose();
       setIsSubmitButtonDisabled(false);
+      setError('');
     } else {
       setError(response?.data?.detail);
       setIsSubmitButtonDisabled(false);
