@@ -160,9 +160,39 @@ describe('create funnel', () => {
             value={{
               state: {
                 nodes: [
-                  { id: 'Video_Click', name: 'Video_Click' },
-                  { id: 'Chapter_Click', name: 'Video_Click' },
-                  { id: 'Topic_Click', name: 'Video_Click' },
+                  {
+                    id: 'Video_Click',
+                    name: 'Video_Click',
+                    properties: [
+                      { name: 'city', type: 'default' },
+                      { name: 'device', type: 'default' },
+                      { name: 'country', type: 'default' },
+                      { name: 'app_version', type: 'default' },
+                      { name: 'session_length', type: 'default' },
+                    ],
+                  },
+                  {
+                    id: 'Chapter_Click',
+                    name: 'Video_Click',
+                    properties: [
+                      { name: 'city', type: 'default' },
+                      { name: 'device', type: 'default' },
+                      { name: 'country', type: 'default' },
+                      { name: 'app_version', type: 'default' },
+                      { name: 'session_length', type: 'default' },
+                    ],
+                  },
+                  {
+                    id: 'Topic_Click',
+                    name: 'Video_Click',
+                    properties: [
+                      { name: 'city', type: 'default' },
+                      { name: 'device', type: 'default' },
+                      { name: 'country', type: 'default' },
+                      { name: 'app_version', type: 'default' },
+                      { name: 'session_length', type: 'default' },
+                    ],
+                  },
                 ] as Node[],
                 nodesData: [],
                 activeNode: null,

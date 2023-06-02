@@ -146,7 +146,8 @@ const SegmentFilter = ({
                     filter={filter}
                     filters={customFilters}
                     setFilters={updateFilters}
-                    eventProperties={eventProperties}
+                    allEventProperties={eventProperties}
+                    isSegmentFilter={true}
                     loadingEventProperties={loadingEventProperties}
                   />
                 );
@@ -158,7 +159,8 @@ const SegmentFilter = ({
             <AddFilterComponent
               filters={customFilters}
               setFilters={updateFilters}
-              eventProperties={eventProperties}
+              isSegmentFilter={true}
+              allEventProperties={eventProperties}
               loadingEventProperties={loadingEventProperties}
               hideIndentIcon={true}
             />

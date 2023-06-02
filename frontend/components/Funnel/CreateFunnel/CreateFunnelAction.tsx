@@ -147,8 +147,6 @@ const CreateFunnelAction = ({
         funnelSteps={funnelSteps}
         setFunnelSteps={setFunnelSteps}
         randomSequence={randomSequence}
-        eventProperties={eventProperties}
-        loadingEventProperties={loadingEventProperties}
       />
       {segmentFilters.map((segmentFilter, index) => (
         <SegmentFilter
