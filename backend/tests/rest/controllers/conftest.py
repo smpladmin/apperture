@@ -647,6 +647,39 @@ def event_properties_service():
         update_event_properties_future
     )
 
+    event_properties_service_mock.get_event_properties.return_value = [
+        EventProperties(
+            event="test",
+            datasource_id=PydanticObjectId("63ce4906f496f7b462ab7e94"),
+            provider="mixpanel",
+            properties=[
+                Property(name="prop1", type="string"),
+                Property(name="prop4", type="string"),
+                Property(name="prop3", type="string"),
+            ],
+        ),
+        EventProperties(
+            event="test2",
+            datasource_id=PydanticObjectId("63ce4906f496f7b462ab7e94"),
+            provider="mixpanel",
+            properties=[
+                Property(name="prop1", type="string"),
+                Property(name="prop4", type="string"),
+                Property(name="prop3", type="string"),
+            ],
+        ),
+        EventProperties(
+            event="test",
+            datasource_id=PydanticObjectId("63ce4906f496f7b462ab7e84"),
+            provider="mixpanel",
+            properties=[
+                Property(name="prop1", type="string"),
+                Property(name="prop4", type="string"),
+                Property(name="prop3", type="string"),
+            ],
+        ),
+    ]
+
     return event_properties_service_mock
 
 

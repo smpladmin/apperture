@@ -12,6 +12,7 @@ from aiokafka import AIOKafkaConsumer
 from clickhouse import ClickHouse
 from dotenv import load_dotenv
 
+from event_properties_saver import EventPropertiesSaver
 from models.models import ClickStream, PrecisionEvent
 
 load_dotenv()
@@ -128,6 +129,14 @@ async def process_kafka_messages() -> None:
             offsets = []
             await consumer.commit()
 
+            if len(precision_events):
+                logging.info(
+                    f"Comparing and saving event properties for precision events"
+                )
+                app.event_properties_saver.save_precision_event_properties(
+                    precision_events=precision_events
+                )
+
 
 app = FastAPI()
 
@@ -138,6 +147,7 @@ async def startup_event() -> None:
     asyncio.create_task(process_kafka_messages())
     app.clickhouse = ClickHouse()
     app.clickhouse.connect()
+    app.event_properties_saver = EventPropertiesSaver()
 
 
 @app.on_event("shutdown")
