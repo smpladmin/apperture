@@ -8,6 +8,7 @@ import {
   UncertainCompatible,
   getCellProperty,
 } from '@silevis/reactgrid';
+import { CaretDown } from 'phosphor-react';
 import { useRef, useState } from 'react';
 
 export interface DropdownHeaderCell extends Cell {
@@ -97,7 +98,7 @@ const FormulaDropDownBox = ({
             setIsOpen(!isOpen);
           }}
         >
-          +
+          <CaretDown size={12} />
         </Button>
         {isOpen && (
           <Box

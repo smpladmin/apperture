@@ -1,15 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import Grid from './components/Grid/Grid';
 import QueryModal from './components/QueryModal';
-import { Box, Flex, useDisclosure } from '@chakra-ui/react';
+import { Box, Button, Flex, Text, useDisclosure } from '@chakra-ui/react';
 import EventLayoutHeader from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
 import Footer from './components/Footer';
 import { evaluatePrefix, infixToPrefix, isOperand, isdigit } from './util';
 import cloneDeep from 'lodash/cloneDeep';
-import { clone } from 'lodash';
-import { CellChange, CellTemplate } from '@silevis/reactgrid';
+import { CellChange } from '@silevis/reactgrid';
 
 const Spreadsheet = () => {
   const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true });
@@ -108,6 +107,30 @@ const Spreadsheet = () => {
               handleSave={() => {}}
               isSaveButtonDisabled={true}
             />
+            {sheetsData[selectedSheetIndex].query && (
+              <Flex
+                alignItems={'center'}
+                justifyContent={'space-between'}
+                p={'1'}
+              >
+                <Text fontSize={'xs-12'} lineHeight={'xs-12'} fontWeight={400}>
+                  {sheetsData[selectedSheetIndex].query}
+                </Text>
+
+                <Button
+                  px={'2'}
+                  h={'6'}
+                  bg={'grey.400'}
+                  variant={'secondary'}
+                  fontSize={'xs-12'}
+                  lineHeight={'xs-12'}
+                  fontWeight={'400'}
+                  onClick={() => onOpen()}
+                >
+                  Edit Query
+                </Button>
+              </Flex>
+            )}
           </Box>
           <Flex overflow={'scroll'} data-testid={'react-grid'}>
             <Grid
