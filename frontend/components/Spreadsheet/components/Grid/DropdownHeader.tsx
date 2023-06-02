@@ -97,6 +97,7 @@ const FormulaDropDownBox = ({
             e.stopPropagation();
             setIsOpen(!isOpen);
           }}
+          data-testid={'column-header-icon'}
         >
           <CaretDown size={12} />
         </Button>
@@ -135,6 +136,7 @@ const FormulaDropDownBox = ({
                 }}
                 focusBorderColor={'black.100'}
                 placeholder={'Enter your formula'}
+                data-testid={'formula-input'}
               />
               <Flex gap={'2'} justifyContent={'flex-end'}>
                 <Button
@@ -162,7 +164,7 @@ const FormulaDropDownBox = ({
                   lineHeight={'xs-14'}
                   fontWeight={'500'}
                   color={'white.DEFAULT'}
-                  data-testid={'submit-button'}
+                  data-testid={'done-button'}
                   onClick={handleSubmitFormula}
                 >
                   Done
