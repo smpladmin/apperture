@@ -15,8 +15,7 @@ const Spreadsheet = () => {
   const [sheetsData, setSheetsData] = useState<TransientSheetData[]>([
     {
       name: 'Sheet 1',
-      query:
-        'SELECT event_name, COUNT(event_name) FROM events GROUP BY event_name',
+      query: 'Select user_id, event_name from events',
       data: [],
       headers: [],
     },
@@ -113,7 +112,12 @@ const Spreadsheet = () => {
                 justifyContent={'space-between'}
                 p={'1'}
               >
-                <Text fontSize={'xs-12'} lineHeight={'xs-12'} fontWeight={400}>
+                <Text
+                  fontSize={'xs-12'}
+                  lineHeight={'xs-12'}
+                  fontWeight={400}
+                  data-testid={'query-text'}
+                >
                   {sheetsData[selectedSheetIndex].query}
                 </Text>
 
@@ -126,6 +130,7 @@ const Spreadsheet = () => {
                   lineHeight={'xs-12'}
                   fontWeight={'400'}
                   onClick={() => onOpen()}
+                  data-testid={'edit-query-button'}
                 >
                   Edit Query
                 </Button>
