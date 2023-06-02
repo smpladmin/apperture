@@ -54,7 +54,12 @@ const Spreadsheet = () => {
                 justifyContent={'space-between'}
                 p={'1'}
               >
-                <Text fontSize={'xs-12'} lineHeight={'xs-12'} fontWeight={400}>
+                <Text
+                  fontSize={'xs-12'}
+                  lineHeight={'xs-12'}
+                  fontWeight={400}
+                  data-testid={'query-text'}
+                >
                   {sheetsData[selectedSheetIndex].query}
                 </Text>
 
@@ -67,6 +72,7 @@ const Spreadsheet = () => {
                   lineHeight={'xs-12'}
                   fontWeight={'400'}
                   onClick={() => onOpen()}
+                  data-testid={'edit-query-button'}
                 >
                   Edit Query
                 </Button>
