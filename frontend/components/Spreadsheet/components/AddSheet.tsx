@@ -4,7 +4,7 @@ import React from 'react';
 
 type AddSheetProps = {
   sheetsLength: number;
-  openQueryModal: () => void;
+  openQueryModal: Function;
   setSheetsData: Function;
   setSelectedSheetIndex: Function;
 };
@@ -15,7 +15,7 @@ const AddSheet = ({
   setSheetsData,
   setSelectedSheetIndex,
 }: AddSheetProps) => {
-  const handleAddNewSheet = (withQuery: boolean) => {
+  const handleAddNewSheet = (withQuery: boolean, withNLP: boolean = false) => {
     const newSheet = {
       name: `Sheet ${sheetsLength + 1}`,
       query: withQuery ? 'Select user_id, event_name from events' : '',
@@ -25,7 +25,7 @@ const AddSheet = ({
     setSheetsData((state: TransientSheetData[]) => [...state, newSheet]);
     setSelectedSheetIndex(sheetsLength);
 
-    withQuery && openQueryModal();
+    withQuery && openQueryModal(withNLP);
   };
 
   return (
@@ -73,6 +73,20 @@ const AddSheet = ({
           data-testid={'new-sheet-using-query'}
         >
           Fetch data using SQL
+        </MenuItem>
+        <MenuItem
+          fontSize={'xs-14'}
+          lineHeight={'xs-14'}
+          fontWeight={'400'}
+          _focus={{
+            bg: 'white.400',
+          }}
+          onClick={() => {
+            handleAddNewSheet(true, true);
+          }}
+          data-testid={'new-sheet-using-query'}
+        >
+          Fetch data using Natural Language
         </MenuItem>
       </MenuList>
     </Menu>

@@ -37,6 +37,7 @@ gunicorn = "^20.1.0"
 sqlglot = "^14.0.0"
 sqlvalidator = "^0.0.20"
 sqlparser = "^0.0.9"
+openai = "^0.27.7"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"

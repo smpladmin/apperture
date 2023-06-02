@@ -1,5 +1,6 @@
 from clickhouse_connect.driver.exceptions import DatabaseError
 from fastapi import APIRouter, Depends, HTTPException
+from ai.text_to_sql import text_to_sql
 
 from domain.spreadsheets.service import SpreadsheetService
 from rest.dtos.spreadsheets import (
@@ -21,6 +22,11 @@ async def compute_transient_spreadsheets(
     spreadsheets_service: SpreadsheetService = Depends(),
 ):
     try:
+        if not dto.is_sql:
+            sql_query = text_to_sql(dto.query, dto.datasourceId)
+            return spreadsheets_service.get_transient_spreadsheets(
+                dsId=dto.datasourceId, query=sql_query
+            )
         return spreadsheets_service.get_transient_spreadsheets(
             dsId=dto.datasourceId, query=dto.query
         )
