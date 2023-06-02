@@ -237,16 +237,17 @@ describe('spreadsheet', () => {
         fireEvent.click(submitButton);
       });
 
-      const queryText = screen.getByTestId('query-text');
-      expect(queryText.textContent).toBe(
-        'Select user_id, event_name from events'
-      );
-
       const editQueryButton = screen.getByTestId('edit-query-button');
       fireEvent.click(editQueryButton);
 
       const queryModal = screen.getByTestId('query-modal');
       expect(queryModal).toBeInTheDocument();
+
+      const queryBox = screen.getByRole('textbox');
+      // query box should be prefiiled with query
+      expect(queryBox.textContent).toBe(
+        'Select user_id, event_name from events'
+      );
     });
   });
 });
