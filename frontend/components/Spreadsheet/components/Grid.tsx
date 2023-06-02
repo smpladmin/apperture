@@ -1,4 +1,10 @@
-import { Column, Id, ReactGrid, Row } from '@silevis/reactgrid';
+import {
+  Column,
+  DefaultCellTypes,
+  Id,
+  ReactGrid,
+  Row,
+} from '@silevis/reactgrid';
 import React, { useState } from 'react';
 import { fillHeaders, fillRows } from '../util';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
