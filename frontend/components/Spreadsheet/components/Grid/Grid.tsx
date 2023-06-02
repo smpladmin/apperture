@@ -7,7 +7,7 @@ import {
   Row,
 } from '@silevis/reactgrid';
 import React, { useEffect, useState } from 'react';
-import { fillHeaders, fillRows, infixToPrefix } from '../../util';
+import { fillHeaders, fillRows } from '../../util';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
 import { DropdownHeaderCell, DropdownHeaderTemplate } from './DropdownHeader';
 
@@ -71,10 +71,10 @@ const getRows = (
   originalHeaders: string[]
 ): Row<DefaultCellTypes | DropdownHeaderCell>[] => [
   getHeaderRow(headers, originalHeaders),
-  ...data.map<Row>((person, idx) => ({
+  ...data.map<Row>((data, idx) => ({
     rowId: idx,
     cells: headers.map((header) => {
-      const val = person[header];
+      const val = data[header];
       return getGridRow(val);
     }),
   })),
