@@ -20,8 +20,7 @@ const Spreadsheet = () => {
   const [sheetsData, setSheetsData] = useState<TransientSheetData[]>([
     {
       name: 'Sheet 1',
-      query:
-        'select event_name, count(event_name) from events group by event_name',
+      query: 'Select user_id, event_name from events',
       data: [],
       headers: [],
     },
