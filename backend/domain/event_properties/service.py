@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
+import logging
 from typing import List
 
 from beanie import PydanticObjectId
@@ -51,3 +52,9 @@ class EventPropertiesService:
         )
 
         return event_properties
+
+    async def get_all_properties(self, datasource_id: str):
+        event_properties = await EventProperties.find(
+            EventProperties.datasource_id == PydanticObjectId(datasource_id)
+        ).to_list()
+        return {p.name for ep in event_properties for p in ep.properties}

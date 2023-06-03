@@ -1,8 +1,9 @@
 import logging
+from typing import List
 import openai
 
 
-def generate_prompt(text, ds_id):
+def generate_prompt(text):
     return f"""
     Consider that I have an events table in ClickHouse database with following schema:
 
@@ -18,7 +19,7 @@ def generate_prompt(text, ds_id):
     ENGINE = MergeTree
     ORDER BY timestamp;
 
-    Generate only a ClickHouse SQL query and no other text using following text '{text}'
+    Generate only a ClickHouse Select SQL query and no other text using following text '{text}'
     
     Note that any column which is not present in the events table would be present in properties column
     because it is a JSON datatype column.
@@ -28,9 +29,9 @@ def generate_prompt(text, ds_id):
     """
 
 
-def text_to_sql(text: str, datasource_id: str) -> str:
+def text_to_sql(text: str) -> str:
     logging.info(f"Generating sql for text: {text}")
-    prompt = generate_prompt(text, datasource_id)
+    prompt = generate_prompt(text)
     logging.info(f"GPT prompt: {prompt}")
     response = openai.Completion.create(
         model="text-davinci-003", prompt=prompt, max_tokens=2048, temperature=0.25

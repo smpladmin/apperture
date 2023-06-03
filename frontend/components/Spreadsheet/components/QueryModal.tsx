@@ -123,7 +123,6 @@ const QueryModal = ({
                 focusBorderColor={'black.100'}
                 resize={'none'}
                 onChange={(event) => {
-                  console.log(event);
                   handleQueryChange(event.target.value);
                 }}
               />

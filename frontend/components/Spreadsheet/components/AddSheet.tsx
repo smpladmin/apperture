@@ -84,7 +84,7 @@ const AddSheet = ({
           onClick={() => {
             handleAddNewSheet(true, true);
           }}
-          data-testid={'new-sheet-using-query'}
+          data-testid={'new-sheet-using-nlp'}
         >
           Fetch data using Natural Language
         </MenuItem>
