@@ -39,19 +39,7 @@ class QueryParser:
                 )
 
     def match_table_name(self, query_string: str, dsId: str):
-        table_name = (
-            re.search("from\s(.\w+)", query_string, re.IGNORECASE).group(1).strip()
-        )
-        if table_name != "events":
-            raise BusinessError(
-                "Invalid query: Cannot select from table other than event",
-            )
-        return re.sub(
-            r"FROM\s+events",
-            f"FROM (SELECT * from events WHERE datasource_id = '{dsId}')",
-            query_string,
-            flags=re.IGNORECASE,
-        )
+        return parse_one(query_string).where(condition(f"datasource_id='{dsId}'")).sql()
 
     def assign_query_limit(self, query_string):
         limit = re.search("LIMIT\s(.\w+)", query_string, re.IGNORECASE)
