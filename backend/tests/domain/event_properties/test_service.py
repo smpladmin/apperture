@@ -2,9 +2,10 @@ from collections import namedtuple
 from unittest.mock import MagicMock, AsyncMock, ANY
 
 import pytest
+import datetime
 from beanie import PydanticObjectId
 
-from domain.common.models import IntegrationProvider
+from domain.common.models import IntegrationProvider, Property
 from domain.event_properties.models import EventProperties
 from domain.event_properties.service import EventPropertiesService
 from rest.dtos.event_properties import EventPropertiesDto
@@ -21,10 +22,17 @@ class TestEventPropertiesService:
         EventProperties.datasource_id = MagicMock()
         EventProperties.event = MagicMock()
         EventProperties.properties = MagicMock()
+        EventProperties.provider = MagicMock()
         EventProperties.updated_at = MagicMock()
         EventProperties.find_one = MagicMock(
             return_value=FindOneMock(
                 upsert=AsyncMock(),
+            ),
+        )
+        FindMock = namedtuple("FindMock", ["to_list"])
+        EventProperties.find = MagicMock(
+            return_value=FindMock(
+                to_list=AsyncMock(),
             ),
         )
 
@@ -52,3 +60,9 @@ class TestEventPropertiesService:
             "revision_id": None,
             "updated_at": None,
         }
+
+    @pytest.mark.asyncio
+    async def test_get_event_properties(self):
+        self.event_properties_service.create_events_map = MagicMock()
+        await self.event_properties_service.get_event_properties()
+        EventProperties.find.assert_called_once()

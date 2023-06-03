@@ -208,7 +208,6 @@ describe('spreadsheet', () => {
 
       const sheetNames = screen.getAllByTestId('sheet-name');
 
-      screen.debug(sheetNames);
       const expectedSheetName = ['Sheet 1', 'Sheet 2'];
       sheetNames.forEach((sheet, i) => {
         expect(sheet.textContent).toEqual(expectedSheetName[i]);
