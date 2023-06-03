@@ -6,7 +6,12 @@ import EventLayoutHeader from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
 import Footer from './components/Footer';
-import { evaluatePrefix, infixToPrefix, isOperand, isdigit } from './util';
+import {
+  evaluateExpression,
+  expressionTokenRegex,
+  isOperand,
+  isdigit,
+} from './util';
 import cloneDeep from 'lodash/cloneDeep';
 import { CellChange, Id } from '@silevis/reactgrid';
 
@@ -15,7 +20,8 @@ const Spreadsheet = () => {
   const [sheetsData, setSheetsData] = useState<TransientSheetData[]>([
     {
       name: 'Sheet 1',
-      query: 'Select user_id, event_name from events',
+      query:
+        'select event_name, count(event_name) from events group by event_name',
       data: [],
       headers: [],
     },
@@ -25,7 +31,9 @@ const Spreadsheet = () => {
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
 
   const getOperands = (newHeader: string) =>
-    newHeader.split('').filter((char: string) => isOperand(char));
+    (newHeader.match(expressionTokenRegex) || []).filter((char: string) =>
+      isOperand(char)
+    );
 
   const getOperatorsIndex = (operands: string[]) =>
     operands.map((operand: string) => operand.toUpperCase().charCodeAt(0) - 65);
@@ -76,17 +84,27 @@ const Spreadsheet = () => {
     setSheetsData(tempSheetsData);
   };
 
+  const parseExpression = (prefixHeader: string) => {
+    return prefixHeader.match(expressionTokenRegex) || [''];
+  };
+
   const evaluateFormulaHeader = useCallback(
     (changedValue: CellChange<any>) => {
-      const newHeader = changedValue?.newCell?.text.replace(/\s/g, '');
+      const newHeader = changedValue?.newCell?.text
+        .replace(/\s/g, '')
+        .toUpperCase();
       const columnId = changedValue?.columnId;
-      const prefixHeader = infixToPrefix(newHeader);
 
       const operands = getOperands(newHeader);
       const operandsIndex = getOperatorsIndex(operands);
 
+      const parsedExpression: any[] = parseExpression(newHeader);
+
       const lookupTable = generateLookupTable(operands, operandsIndex);
-      const evaluatedData = evaluatePrefix(prefixHeader, lookupTable);
+      const evaluatedData = evaluateExpression(
+        parsedExpression as string[],
+        lookupTable
+      );
 
       updateSelectedSheetDataAndHeaders(
         evaluatedData,
