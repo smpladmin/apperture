@@ -1,7 +1,7 @@
 import re
 
 import sqlvalidator
-from sqlglot import condition, parse_one
+from sqlglot import condition, exp, parse_one
 
 
 class BusinessError(Exception):
@@ -39,7 +39,13 @@ class QueryParser:
                 )
 
     def match_table_name(self, query_string: str, dsId: str):
-        return parse_one(query_string).where(condition(f"datasource_id='{dsId}'")).sql()
+        parsed_query = parse_one(query_string)
+        for table in parsed_query.find_all(exp.Table):
+            if table.name != "events":
+                raise BusinessError(
+                    "Invalid query: Cannot select from table other than event",
+                )
+        return parsed_query.where(condition(f"datasource_id='{dsId}'")).sql()
 
     def assign_query_limit(self, query_string):
         limit = re.search("LIMIT\s(.\w+)", query_string, re.IGNORECASE)
