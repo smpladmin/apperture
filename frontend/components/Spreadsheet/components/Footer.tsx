@@ -4,7 +4,7 @@ import AddSheet from './AddSheet';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
 
 type FooterProps = {
-  openQueryModal: () => void;
+  openQueryModal: Function;
   sheetsData: TransientSheetData[];
   setSheetsData: Function;
   selectedSheetIndex: number;
@@ -67,7 +67,7 @@ const Footer = ({
       </RadioGroup>
       <AddSheet
         sheetsLength={sheetsData.length}
-        openQueryModal={openQueryModal}
+        openQueryModal={(withNLP: boolean) => openQueryModal(withNLP)}
         setSheetsData={setSheetsData}
         setSelectedSheetIndex={setSelectedSheetIndex}
       />

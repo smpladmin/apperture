@@ -66,3 +66,40 @@ class TestEventPropertiesService:
         self.event_properties_service.create_events_map = MagicMock()
         await self.event_properties_service.get_event_properties()
         EventProperties.find.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_get_all_properties(self):
+        event_properties = [
+            EventProperties(
+                datasource_id=PydanticObjectId("646b0353b152f734f80d6d3b"),
+                event="event1",
+                properties=[
+                    Property(name="prop1", type="default"),
+                    Property(name="prop2", type="default"),
+                ],
+                provider=IntegrationProvider.MIXPANEL,
+            ),
+            EventProperties(
+                datasource_id=PydanticObjectId("646b0353b152f734f80d6d3b"),
+                event="event2",
+                properties=[
+                    Property(name="prop2", type="default"),
+                    Property(name="prop3", type="default"),
+                ],
+                provider=IntegrationProvider.MIXPANEL,
+            ),
+        ]
+
+        FindMock = namedtuple("FindMock", ["to_list"])
+        EventProperties.find = MagicMock(
+            return_value=FindMock(
+                to_list=AsyncMock(return_value=event_properties),
+            ),
+        )
+
+        props = await self.event_properties_service.get_all_properties(
+            datasource_id="646b0353b152f734f80d6d3b"
+        )
+
+        EventProperties.find.assert_called_once()
+        assert props == {"prop1", "prop2", "prop3"}

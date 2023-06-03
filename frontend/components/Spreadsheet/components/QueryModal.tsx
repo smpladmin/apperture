@@ -8,6 +8,7 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
+  Textarea,
 } from '@chakra-ui/react';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
@@ -25,6 +26,7 @@ type QueryModalProps = {
   sheetsData: TransientSheetData[];
   setSheetsData: Function;
   selectedSheetIndex: number;
+  withNLP: boolean;
 };
 
 const QueryModal = ({
@@ -34,6 +36,7 @@ const QueryModal = ({
   sheetsData,
   setSheetsData,
   selectedSheetIndex,
+  withNLP,
 }: QueryModalProps) => {
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
   const [error, setError] = useState('');
@@ -53,7 +56,8 @@ const QueryModal = ({
 
     const response = await getTransientSpreadsheets(
       dsId as string,
-      sheetData.query
+      sheetData.query,
+      !withNLP
     );
 
     setLoading(false);
@@ -111,14 +115,27 @@ const QueryModal = ({
 
         <ModalBody px={'9'} overflowY={'auto'} py={'9'}>
           <Flex direction={'column'} gap={'4'}>
-            <ReactCodeMirror
-              value={sheetData.query}
-              height="200px"
-              extensions={[sql()]}
-              onChange={(value) => {
-                handleQueryChange(value);
-              }}
-            />
+            {withNLP ? (
+              <Textarea
+                value={sheetData.query}
+                bg={'white.100'}
+                height={50}
+                focusBorderColor={'black.100'}
+                resize={'none'}
+                onChange={(event) => {
+                  handleQueryChange(event.target.value);
+                }}
+              />
+            ) : (
+              <ReactCodeMirror
+                value={sheetData.query}
+                height="200px"
+                extensions={[sql()]}
+                onChange={(value) => {
+                  handleQueryChange(value);
+                }}
+              />
+            )}
             <Button
               py={'2'}
               px={'4'}

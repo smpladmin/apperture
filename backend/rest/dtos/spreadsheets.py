@@ -6,6 +6,7 @@ from rest.dtos.model_response import ModelResponse
 class TransientSpreadsheetsDto(BaseModel):
     datasourceId: str
     query: str
+    is_sql: bool = False
 
 
 class ComputedSpreadsheetQueryResponse(ComputedSpreadsheet, ModelResponse):

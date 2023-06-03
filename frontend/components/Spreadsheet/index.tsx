@@ -28,6 +28,12 @@ const Spreadsheet = () => {
   const [workbookName, setWorkbookName] = useState<string>('Untitled Workbook');
   const router = useRouter();
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
+  const [modalWithNLP, setModalWithNLP] = useState(false);
+
+  const onOpenQueryModal = (withNLP: boolean) => {
+    setModalWithNLP(withNLP);
+    onOpen();
+  };
 
   const getOperands = (newHeader: string) =>
     (newHeader.match(expressionTokenRegex) || []).filter((char: string) =>
@@ -123,6 +129,7 @@ const Spreadsheet = () => {
         sheetsData={sheetsData}
         setSheetsData={setSheetsData}
         selectedSheetIndex={selectedSheetIndex}
+        withNLP={modalWithNLP}
       />
       {!isOpen && (
         <>
@@ -179,7 +186,7 @@ const Spreadsheet = () => {
             />
           </Flex>
           <Footer
-            openQueryModal={onOpen}
+            openQueryModal={(withNLP: boolean) => onOpenQueryModal(withNLP)}
             sheetsData={sheetsData}
             setSheetsData={setSheetsData}
             selectedSheetIndex={selectedSheetIndex}
