@@ -216,3 +216,52 @@ def test_update_event_properties(
             ),
         }
     )
+
+
+def test_get_event_properties(client_init, event_properties_service):
+    response = client_init.get("/private/event_properties")
+    assert response.json() == [
+        {
+            "_id": None,
+            "createdAt": ANY,
+            "datasourceId": "63ce4906f496f7b462ab7e94",
+            "event": "test",
+            "properties": [
+                {"name": "prop1", "type": "string"},
+                {"name": "prop4", "type": "string"},
+                {"name": "prop3", "type": "string"},
+            ],
+            "provider": "mixpanel",
+            "revisionId": None,
+            "updatedAt": None,
+        },
+        {
+            "_id": None,
+            "createdAt": ANY,
+            "datasourceId": "63ce4906f496f7b462ab7e94",
+            "event": "test2",
+            "properties": [
+                {"name": "prop1", "type": "string"},
+                {"name": "prop4", "type": "string"},
+                {"name": "prop3", "type": "string"},
+            ],
+            "provider": "mixpanel",
+            "revisionId": None,
+            "updatedAt": None,
+        },
+        {
+            "_id": None,
+            "createdAt": ANY,
+            "datasourceId": "63ce4906f496f7b462ab7e84",
+            "event": "test",
+            "properties": [
+                {"name": "prop1", "type": "string"},
+                {"name": "prop4", "type": "string"},
+                {"name": "prop3", "type": "string"},
+            ],
+            "provider": "mixpanel",
+            "revisionId": None,
+            "updatedAt": None,
+        },
+    ]
+    event_properties_service.get_event_properties.assert_called_once()

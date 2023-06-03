@@ -88,6 +88,8 @@ class RunLogService:
             )
             for r in failed_runlogs
         ]
+        missing_runlogs = await self.get_missing_runlogs(datasource, yesterday)
+        runlogs.extend(missing_runlogs)
 
         if not yesterday in [r.date for r in runlogs]:
             runlogs.append(
@@ -111,3 +113,28 @@ class RunLogService:
         for id, r in zip(result.inserted_ids, runlogs):
             r.id = id
         return runlogs
+
+    async def get_missing_runlogs(self, datasource, yesterday):
+        latest_runlog_list = (
+            await RunLog.find(RunLog.datasource_id == datasource.id)
+            .sort("-date")
+            .limit(1)
+            .to_list()
+        )
+        if not latest_runlog_list:
+            return []
+        [latest_runlog] = latest_runlog_list
+        number_of_runlogs_not_found = (yesterday - latest_runlog.date).days
+        dates = [
+            (yesterday - relativedelta(days=d)).replace(
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0,
+            )
+            for d in range(1, number_of_runlogs_not_found)
+        ]
+        return [
+            RunLog(datasource_id=datasource.id, date=d, status=RunLogStatus.SCHEDULED)
+            for d in dates
+        ]

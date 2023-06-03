@@ -1,8 +1,11 @@
 import re
 
 import sqlvalidator
-from clickhouse_connect.driver.exceptions import DatabaseError
 from sqlglot import condition, parse_one
+
+
+class BusinessError(Exception):
+    pass
 
 
 class QueryParser:
@@ -21,45 +24,53 @@ class QueryParser:
 
     def validate_selected_fields(self, selected_fields: list[str]):
         if len(selected_fields) > 10:
-            raise DatabaseError(
+            raise BusinessError(
                 "Invalid query: Cannot select more than 10 columns",
             )
 
         for field in selected_fields:
             if "*" == field:
-                raise DatabaseError(
+                raise BusinessError(
                     "Invalid query: Cannot select * from table",
                 )
             if "properties" == field:
-                raise DatabaseError(
+                raise BusinessError(
                     "Invalid query: Cannot select properties from table",
                 )
 
-    def match_table_name(self, query_string: str):
+    def match_table_name(self, query_string: str, dsId: str):
         table_name = (
             re.search("from\s(.\w+)", query_string, re.IGNORECASE).group(1).strip()
         )
         if table_name != "events":
-            raise DatabaseError(
+            raise BusinessError(
                 "Invalid query: Cannot select from table other than event",
             )
-        return table_name
+        return re.sub(
+            r"FROM\s+events",
+            f"FROM (SELECT * from events WHERE datasource_id = '{dsId}')",
+            query_string,
+            flags=re.IGNORECASE,
+        )
+
+    def assign_query_limit(self, query_string):
+        limit = re.search("LIMIT\s(.\w+)", query_string, re.IGNORECASE)
+        if not limit:
+            query_string = re.sub("\s*;", "", query_string)
+            return query_string + " LIMIT 500"
+        else:
+            limit = limit.group(1).strip()
+            return query_string + " LIMIT 500" if int(limit) > 500 else query_string
 
     def validate_query_string(self, query_string: str, dsId: str):
         try:
             parsed_query = sqlvalidator.parse(query_string)
             if not parsed_query.is_valid():
-                raise DatabaseError("DB Error: Invalid query")
+                raise BusinessError("DB Error: Invalid query")
         except:
-            raise DatabaseError("DB Error: Invalid query")
+            raise BusinessError("DB Error: Invalid query")
         self.match_select_fields(query_string)
-        self.match_table_name(query_string)
-
-        query_string = (
-            parse_one(query_string)
-            .where(condition(f"datasource_id='{dsId}'"))
-            .limit(1000)
-            .sql()
-        )
+        query_string = self.match_table_name(query_string, dsId)
+        query_string = self.assign_query_limit(query_string)
 
         return query_string

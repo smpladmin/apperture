@@ -27,7 +27,7 @@ from rest.dtos.apperture_users import (
 )
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
-from rest.dtos.event_properties import EventPropertiesDto
+from rest.dtos.event_properties import EventPropertiesDto, EventPropertiesResponse
 from rest.dtos.events import CreateEventDto
 from rest.dtos.funnels import FunnelResponse, FunnelTrendResponse, TransientFunnelDto
 from rest.dtos.metrics import (
@@ -339,3 +339,10 @@ async def get_transient_funnel_trends(
         random_sequence=dto.randomSequence,
         segment_filter=dto.segmentFilter,
     )
+
+
+@router.get("/event_properties", response_model=List[EventPropertiesResponse])
+async def get_event_properties(
+    event_properties_service: EventPropertiesService = Depends(),
+):
+    return await event_properties_service.get_event_properties()

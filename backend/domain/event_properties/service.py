@@ -1,10 +1,12 @@
+from collections import defaultdict
 from datetime import datetime
+from typing import List
 
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Set
 from fastapi import Depends
 
-from domain.common.models import Property
+from domain.common.models import Property, IntegrationProvider
 from domain.event_properties.models import EventProperties
 from mongo import Mongo
 from rest.dtos.event_properties import EventPropertiesDto
@@ -16,6 +18,11 @@ class EventPropertiesService:
         mongo: Mongo = Depends(),
     ):
         self.mongo = mongo
+
+    async def get_event_properties(self) -> List[EventProperties]:
+        return await EventProperties.find(
+            EventProperties.provider == IntegrationProvider.APPERTURE
+        ).to_list()
 
     async def update_event_properties(
         self, datasource_id: str, event_properties: EventPropertiesDto

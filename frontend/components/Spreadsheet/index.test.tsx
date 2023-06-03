@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import Spreadsheet from './index';
 import { getTransientSpreadsheets } from '@lib/services/spreadsheetService';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
@@ -208,11 +208,94 @@ describe('spreadsheet', () => {
 
       const sheetNames = screen.getAllByTestId('sheet-name');
 
-      screen.debug(sheetNames);
       const expectedSheetName = ['Sheet 1', 'Sheet 2'];
       sheetNames.forEach((sheet, i) => {
         expect(sheet.textContent).toEqual(expectedSheetName[i]);
       });
+    });
+  });
+
+  describe('edit query', () => {
+    it('should render query on grid page', async () => {
+      renderSpreadsheet();
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      const queryText = screen.getByTestId('query-text');
+      expect(queryText.textContent).toBe(
+        'Select user_id, event_name from events'
+      );
+    });
+
+    it('should be able to edit query by clicking on edit query button', async () => {
+      renderSpreadsheet();
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      const editQueryButton = screen.getByTestId('edit-query-button');
+      fireEvent.click(editQueryButton);
+
+      const queryModal = screen.getByTestId('query-modal');
+      expect(queryModal).toBeInTheDocument();
+
+      const queryBox = screen.getByRole('textbox');
+      // query box should be prefiiled with query
+      expect(queryBox.textContent).toBe(
+        'Select user_id, event_name from events'
+      );
+    });
+  });
+
+  describe('interactions on column header', () => {
+    it('should open formula box on click on chevron icon on column header', async () => {
+      mockedGetTransientSpreadsheet.mockReturnValue({
+        status: 200,
+        data: {
+          headers: ['event_name', 'count(event_name)'],
+          data: [
+            {
+              index: 1,
+              event_name: 'Video_Seen',
+              'count(event_name)': 5,
+            },
+            {
+              index: 2,
+              event_name: 'Thumbs_Up',
+              'count(event_name)': 15,
+            },
+            {
+              index: 3,
+              event_name: 'WebView_Open',
+              'count(event_name)': 2,
+            },
+          ],
+        },
+      });
+
+      renderSpreadsheet();
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      const columnHeaderIcon = screen.getAllByTestId('column-header-icon');
+      fireEvent.click(columnHeaderIcon[0]);
+
+      const inputFormula = screen.getByTestId('formula-input');
+      fireEvent.change(inputFormula, { target: { value: 'B*2' } });
+      const doneButton = screen.getByTestId('done-button');
+
+      await act(async () => {
+        fireEvent.click(doneButton);
+      });
+
+      // expect to see a new column added in C with formula A+2, therefore text content should be 'B A+2'
+      const newAddedColumn = screen.getByText('C B*2');
+      expect(newAddedColumn).toBeInTheDocument();
     });
   });
 });

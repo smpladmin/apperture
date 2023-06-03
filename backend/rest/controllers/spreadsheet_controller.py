@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from ai.text_to_sql import text_to_sql
 
 from domain.spreadsheets.service import SpreadsheetService
+from repositories.clickhouse.parser.query_parser import BusinessError
 from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
     TransientSpreadsheetsDto,
@@ -30,5 +31,7 @@ async def compute_transient_spreadsheets(
         return spreadsheets_service.get_transient_spreadsheets(
             dsId=dto.datasourceId, query=dto.query
         )
+    except BusinessError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
     except DatabaseError as e:
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
