@@ -67,7 +67,7 @@ const Footer = ({
       </RadioGroup>
       <AddSheet
         sheetsLength={sheetsData.length}
-        openQueryModal={(withNLP: boolean) => openQueryModal(withNLP)}
+        openQueryModal={openQueryModal}
         setSheetsData={setSheetsData}
         setSelectedSheetIndex={setSelectedSheetIndex}
       />

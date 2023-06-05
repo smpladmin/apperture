@@ -248,6 +248,45 @@ describe('spreadsheet', () => {
         'Select user_id, event_name from events'
       );
     });
+
+    it('should show textbox for nlp sheet and codemirror sql editor for SQL sheet when modal is open using edit query', async () => {
+      renderSpreadsheet();
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      // add new sheet using NLP
+      const addSheetButton = screen.getByTestId('add-sheet');
+      fireEvent.click(addSheetButton);
+
+      const newSheetUsingQuery = screen.getByTestId('new-sheet-using-nlp');
+      await act(async () => {
+        fireEvent.click(newSheetUsingQuery);
+      });
+
+      const nlpTextbox = screen.getByTestId('nlp-textbox');
+      expect(nlpTextbox).toBeInTheDocument();
+
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      // switch to sheet 1 and open query modal
+      const sheet1 = screen.getByText('Sheet 1');
+      fireEvent.click(sheet1);
+
+      // open query modal
+      const editQueryButton = screen.getByTestId('edit-query-button');
+      fireEvent.click(editQueryButton);
+
+      // it should see sql editor whose role is textbox and not see nlp-textbox
+      const sqlQueryBox = screen.getByRole('textbox');
+      expect(sqlQueryBox).toBeInTheDocument();
+
+      const nlpTextboxAfterSwitching = screen.queryByTestId('nlp-textbox');
+      expect(nlpTextboxAfterSwitching).not.toBeInTheDocument();
+    });
   });
 
   describe('interactions on column header', () => {
