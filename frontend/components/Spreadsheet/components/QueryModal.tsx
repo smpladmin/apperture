@@ -123,6 +123,7 @@ const QueryModal = ({
                 onChange={(event) => {
                   handleQueryChange(event.target.value);
                 }}
+                data-testid={'nlp-textbox'}
               />
             ) : (
               <ReactCodeMirror
