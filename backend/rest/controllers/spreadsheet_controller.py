@@ -1,8 +1,8 @@
 from clickhouse_connect.driver.exceptions import DatabaseError
 from fastapi import APIRouter, Depends, HTTPException
+
 from ai.text_to_sql import text_to_sql
 from domain.event_properties.service import EventPropertiesService
-
 from domain.spreadsheets.service import SpreadsheetService
 from repositories.clickhouse.parser.query_parser import BusinessError
 from rest.dtos.spreadsheets import (
@@ -28,10 +28,10 @@ async def compute_transient_spreadsheets(
         if not dto.is_sql:
             sql_query = text_to_sql(dto.query)
             return spreadsheets_service.get_transient_spreadsheets(
-                dsId=dto.datasourceId, query=sql_query
+                dsId=dto.datasourceId, query=sql_query, is_sql=dto.is_sql
             )
         return spreadsheets_service.get_transient_spreadsheets(
-            dsId=dto.datasourceId, query=dto.query
+            dsId=dto.datasourceId, query=dto.query, is_sql=dto.is_sql
         )
     except BusinessError as e:
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")

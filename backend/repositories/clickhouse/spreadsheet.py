@@ -15,6 +15,8 @@ class Spreadsheets(EventsBase):
         super().__init__(clickhouse=clickhouse)
         self.parser = parser
 
-    def get_transient_spreadsheet(self, dsId: str, query: str):
-        query = self.parser.validate_query_string(query_string=query, dsId=dsId)
+    def get_transient_spreadsheet(self, dsId: str, query: str, is_sql: bool):
+        query = self.parser.validate_query_string(
+            query_string=query, dsId=dsId, is_sql=is_sql
+        )
         return self.execute_query_with_column_names(query, {})
