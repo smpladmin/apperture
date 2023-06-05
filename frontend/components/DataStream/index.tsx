@@ -50,27 +50,6 @@ const ViewStreamData = () => {
         >
           Data Stream
         </Heading>
-        <Button
-          py={'2'}
-          px={'4'}
-          bg={'black.400'}
-          variant={'primary'}
-          onClick={() =>
-            router.push({
-              pathname: '/analytics/spreadsheet/[dsId]',
-              query: { dsId },
-            })
-          }
-        >
-          <Text
-            fontSize={'xs-14'}
-            lineHeight={'xs-14'}
-            fontWeight={'500'}
-            color={'white.DEFAULT'}
-          >
-            Explore
-          </Text>
-        </Button>
       </Flex>
       <Flex direction={'column'} px={10} py={4}>
         <Flex gap={4}>
