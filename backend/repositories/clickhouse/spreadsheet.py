@@ -16,6 +16,7 @@ class Spreadsheets(EventsBase):
         self.parser = parser
 
     def get_transient_spreadsheet(self, dsId: str, query: str, is_sql: bool):
-        if is_sql:
-            query = self.parser.validate_query_string(query_string=query, dsId=dsId)
+        query = self.parser.validate_query_string(
+            query_string=query, dsId=dsId, is_sql=is_sql
+        )
         return self.execute_query_with_column_names(query, {})

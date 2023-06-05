@@ -38,14 +38,18 @@ class QueryParser:
                     "Invalid query: Cannot select properties from table",
                 )
 
-    def match_table_name(self, query_string: str, dsId: str):
+    def match_table_name(self, query_string: str, dsId: str, is_sql: bool):
         parsed_query = parse_one(query_string)
         for table in parsed_query.find_all(exp.Table):
             if table.name != "events":
                 raise BusinessError(
                     "Invalid query: Cannot select from table other than event",
                 )
-        return parsed_query.where(condition(f"datasource_id='{dsId}'")).sql()
+        return (
+            parsed_query.where(condition(f"datasource_id='{dsId}'")).sql()
+            if not is_sql
+            else query_string
+        )
 
     def assign_query_limit(self, query_string):
         limit = re.search("LIMIT\s(.\w+)", query_string, re.IGNORECASE)
@@ -56,7 +60,7 @@ class QueryParser:
             limit = limit.group(1).strip()
             return query_string + " LIMIT 500" if int(limit) > 500 else query_string
 
-    def validate_query_string(self, query_string: str, dsId: str):
+    def validate_query_string(self, query_string: str, dsId: str, is_sql: bool):
         try:
             parsed_query = sqlvalidator.parse(query_string)
             if not parsed_query.is_valid():
@@ -64,7 +68,7 @@ class QueryParser:
         except:
             raise BusinessError("DB Error: Invalid query")
         self.match_select_fields(query_string)
-        query_string = self.match_table_name(query_string, dsId)
+        query_string = self.match_table_name(query_string, dsId, is_sql)
         query_string = self.assign_query_limit(query_string)
 
         return query_string
