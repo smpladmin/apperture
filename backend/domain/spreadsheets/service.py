@@ -20,7 +20,9 @@ class SpreadsheetService:
         self, dsId: str, query: str, is_sql: bool
     ) -> ComputedSpreadsheet:
         query = self.cleanse_query_string(query)
-        result = self.spreadsheets.get_transient_spreadsheet(dsId=dsId, query=query)
+        result = self.spreadsheets.get_transient_spreadsheet(
+            dsId=dsId, query=query, is_sql=is_sql
+        )
         response = {"headers": result.column_names, "data": []}
 
         for idx, row in enumerate(result.result_set):
