@@ -1,3 +1,4 @@
+import logging
 import re
 
 import sqlvalidator
@@ -60,14 +61,17 @@ class QueryParser:
             limit = limit.group(1).strip()
             return query_string + " LIMIT 500" if int(limit) > 500 else query_string
 
+    def DML_validation(self, query_string):
+        selected_fields_search_pattern = re.compile(
+            r"(UPDATE|INSERT|DELETE|TRUNCATE|DROP)", re.IGNORECASE
+        )
+        if len(re.findall(selected_fields_search_pattern, query_string)):
+            raise BusinessError(
+                "Invalid query: Cannot update data",
+            )
+
     def validate_query_string(self, query_string: str, dsId: str, is_sql: bool):
-        try:
-            parsed_query = sqlvalidator.parse(query_string)
-            if not parsed_query.is_valid():
-                raise BusinessError("DB Error: Invalid query")
-        except:
-            raise BusinessError("DB Error: Invalid query")
-        self.match_select_fields(query_string)
+        self.DML_validation(query_string=query_string)
         query_string = self.match_table_name(query_string, dsId, is_sql)
         query_string = self.assign_query_limit(query_string)
 
