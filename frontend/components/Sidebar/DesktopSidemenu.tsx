@@ -15,6 +15,7 @@ import {
 import { AppWithIntegrations } from '@lib/domain/app';
 import LogoutModal from '@components/Logout';
 import { useRouter } from 'next/router';
+import { HardDrives } from 'phosphor-react';
 
 type SidemenuProps = {
   selectedApp: AppWithIntegrations;
@@ -304,9 +305,40 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={
-                () => handleRedirect(' /analytics/retention/list/[dsId]')
+              onClick={() => handleRedirect('/analytics/retention/list/[dsId]')}
+            />
+          </Tooltip>
 
+          <Tooltip
+            label={'Spreadsheet'}
+            aria-label={'Spreadsheet'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Spreadsheet"
+              icon={
+                isPageActive('spreadsheet') ? (
+                  <HardDrives size={16} weight="fill" />
+                ) : (
+                  <HardDrives size={16} />
+                )
+              }
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={isPageActive('spreadsheet') ? 'black.50' : 'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={() =>
+                handleRedirect('/analytics/spreadsheet/list/[dsId]')
               }
             />
           </Tooltip>
