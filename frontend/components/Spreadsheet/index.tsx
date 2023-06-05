@@ -30,7 +30,6 @@ const Spreadsheet = () => {
   const router = useRouter();
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
 
-
   const getOperands = (newHeader: string) =>
     (newHeader.match(expressionTokenRegex) || []).filter((char: string) =>
       isOperand(char)
@@ -155,7 +154,10 @@ const Spreadsheet = () => {
                   fontWeight={400}
                   data-testid={'query-text'}
                 >
-                  {sheetsData[selectedSheetIndex].query}
+                  {/* {sheetsData[selectedSheetIndex].query.length < 100
+                    ? sheetsData[selectedSheetIndex].query
+                    : sheetsData[selectedSheetIndex].query.slice(0, 100) +
+                      '...'} */}
                 </Text>
 
                 <Button
