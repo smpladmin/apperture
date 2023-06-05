@@ -26,7 +26,6 @@ type QueryModalProps = {
   sheetsData: TransientSheetData[];
   setSheetsData: Function;
   selectedSheetIndex: number;
-  withNLP: boolean;
 };
 
 const QueryModal = ({
@@ -36,7 +35,6 @@ const QueryModal = ({
   sheetsData,
   setSheetsData,
   selectedSheetIndex,
-  withNLP,
 }: QueryModalProps) => {
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(false);
   const [error, setError] = useState('');
@@ -57,7 +55,7 @@ const QueryModal = ({
     const response = await getTransientSpreadsheets(
       dsId as string,
       sheetData.query,
-      !withNLP
+      !sheetData.withNLP
     );
 
     setLoading(false);
@@ -115,7 +113,7 @@ const QueryModal = ({
 
         <ModalBody px={'9'} overflowY={'auto'} py={'9'}>
           <Flex direction={'column'} gap={'4'}>
-            {withNLP ? (
+            {sheetData.withNLP ? (
               <Textarea
                 value={sheetData.query}
                 bg={'white.100'}

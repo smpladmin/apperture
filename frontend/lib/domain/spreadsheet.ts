@@ -3,4 +3,5 @@ export type TransientSheetData = {
   query: string;
   headers: string[];
   data: any[];
+  withNLP: boolean;
 };

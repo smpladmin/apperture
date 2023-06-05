@@ -21,11 +21,12 @@ const AddSheet = ({
       query: withQuery ? 'Select user_id, event_name from events' : '',
       data: [],
       headers: [],
+      withNLP,
     };
     setSheetsData((state: TransientSheetData[]) => [...state, newSheet]);
     setSelectedSheetIndex(sheetsLength);
 
-    withQuery && openQueryModal(withNLP);
+    withQuery && openQueryModal();
   };
 
   return (
