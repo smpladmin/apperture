@@ -13,6 +13,11 @@ class DataSourceVersion(str, Enum):
     DEFAULT = "DEFAULT"
 
 
+class RoleCredential(BaseModel):
+    username: str
+    password: str
+
+
 class DataSource(Document):
     integration_id: Indexed(PydanticObjectId)
     app_id: PydanticObjectId
@@ -22,6 +27,7 @@ class DataSource(Document):
     external_source_id: str
     version: DataSourceVersion
     enabled: bool = True
+    role_credential: Optional[RoleCredential] = Field(hidden=True)
 
     class Settings:
         name = "datasources"

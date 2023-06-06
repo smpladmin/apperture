@@ -1,4 +1,6 @@
 import asyncio
+import random
+import string
 from fastapi_cache.decorator import cache
 
 import httpx
@@ -8,7 +10,12 @@ from fastapi import Depends
 from authorisation.service import AuthService
 from cache.cache import CACHE_EXPIRY_24_HOURS, service_datasource_key_builder
 from domain.common.models import IntegrationProvider
-from domain.datasources.models import DataSource, DataSourceVersion, ProviderDataSource
+from domain.datasources.models import (
+    DataSource,
+    DataSourceVersion,
+    ProviderDataSource,
+    RoleCredential,
+)
 from domain.integrations.models import Credential, Integration
 
 
@@ -54,6 +61,11 @@ class DataSourceService:
     async def get_datasources_for_provider(self, provider: IntegrationProvider):
         return await DataSource.find(DataSource.provider == provider).to_list()
 
+    def randomValueGenerator(self, length=16):
+        characters = string.ascii_letters + string.digits
+        password = "".join(random.choice(characters) for _ in range(length))
+        return password
+
     async def create_datasource(
         self,
         external_source_id: str,
@@ -61,6 +73,8 @@ class DataSourceService:
         version: DataSourceVersion,
         integration: Integration,
     ):
+        username = self.randomValueGenerator()
+        password = self.randomValueGenerator()
         datasource = DataSource(
             external_source_id=external_source_id,
             name=name,
@@ -69,7 +83,12 @@ class DataSourceService:
             user_id=integration.user_id,
             app_id=integration.app_id,
             provider=integration.provider,
+            role_credential=RoleCredential(
+                username=username,
+                password=password,
+            ),
         )
+
         await datasource.insert()
         return datasource
 
