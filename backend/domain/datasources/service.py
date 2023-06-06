@@ -1,11 +1,11 @@
 import asyncio
 import random
 import string
-from fastapi_cache.decorator import cache
 
 import httpx
 from beanie import PydanticObjectId
 from fastapi import Depends
+from fastapi_cache.decorator import cache
 
 from authorisation.service import AuthService
 from cache.cache import CACHE_EXPIRY_24_HOURS, service_datasource_key_builder
@@ -17,15 +17,17 @@ from domain.datasources.models import (
     RoleCredential,
 )
 from domain.integrations.models import Credential, Integration
+from repositories.clickhouse.role import Role
 
 
 class DataSourceService:
-    def __init__(self, auth_service: AuthService = Depends()):
+    def __init__(self, auth_service: AuthService = Depends(), role: Role = Depends()):
         self.provider_datasource_methods = {}
         self.provider_datasource_methods[
             IntegrationProvider.GOOGLE
         ] = self.get_ga_datasources
         self.auth_service = auth_service
+        self.role = role
 
     async def get_provider_datasources(
         self, provider: IntegrationProvider, credential: Credential
@@ -61,7 +63,7 @@ class DataSourceService:
     async def get_datasources_for_provider(self, provider: IntegrationProvider):
         return await DataSource.find(DataSource.provider == provider).to_list()
 
-    def randomValueGenerator(self, length=16):
+    def randomValueGenerator(self, length=32):
         characters = string.ascii_letters + string.digits
         password = "".join(random.choice(characters) for _ in range(length))
         return password
@@ -90,6 +92,9 @@ class DataSourceService:
         )
 
         await datasource.insert()
+        self.role.create_user(username=username, password=password)
+        self.role.create_row_policy(datasource_id=datasource.id, username=username)
+        self.role.grant_select_permission_to_user(username=username)
         return datasource
 
     async def get_enabled_datasources(self):
