@@ -68,6 +68,11 @@ class DataSourceService:
         password = "".join(random.choice(characters) for _ in range(length))
         return password
 
+    def create_user_policy(self, username: str, password: str, datasource_id: str):
+        self.role.create_user(username=username, password=password)
+        self.role.create_row_policy(datasource_id=datasource_id, username=username)
+        self.role.grant_select_permission_to_user(username=username)
+
     async def create_datasource(
         self,
         external_source_id: str,
@@ -92,10 +97,26 @@ class DataSourceService:
         )
 
         await datasource.insert()
-        self.role.create_user(username=username, password=password)
-        self.role.create_row_policy(datasource_id=datasource.id, username=username)
-        self.role.grant_select_permission_to_user(username=username)
+        self.create_user_policy(
+            username=username, password=password, datasource_id=datasource.id
+        )
         return datasource
+
+    async def create_role_credential_and_user_policy(self, datasource_id: str):
+        role_credential = RoleCredential(
+            username=self.randomValueGenerator(), password=self.randomValueGenerator()
+        )
+        await DataSource.find(
+            DataSource.id == PydanticObjectId(datasource_id),
+            DataSource.enabled == True,
+        ).update({"$set": {"role_credential": role_credential}})
+
+        self.create_user_policy(
+            username=role_credential.username,
+            password=role_credential.password,
+            datasource_id=datasource_id,
+        )
+        return role_credential
 
     async def get_enabled_datasources(self):
         return await DataSource.find(DataSource.enabled == True).to_list()
