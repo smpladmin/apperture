@@ -1,10 +1,9 @@
 from fastapi import Depends
 
 from clickhouse.clickhouse import Clickhouse
-from repositories.clickhouse.base import EventsBase
 
 
-class Role(EventsBase):
+class Role:
     def __init__(self, clickhouse: Clickhouse = Depends()):
         self.clickhouse = clickhouse
 

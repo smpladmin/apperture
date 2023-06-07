@@ -27,10 +27,10 @@ async def compute_transient_spreadsheets(
     try:
         if not dto.is_sql:
             sql_query = text_to_sql(dto.query)
-            return spreadsheets_service.get_transient_spreadsheets(
+            return await spreadsheets_service.get_transient_spreadsheets(
                 dsId=dto.datasourceId, query=sql_query, is_sql=dto.is_sql
             )
-        return spreadsheets_service.get_transient_spreadsheets(
+        return await spreadsheets_service.get_transient_spreadsheets(
             dsId=dto.datasourceId, query=dto.query, is_sql=dto.is_sql
         )
     except BusinessError as e:
