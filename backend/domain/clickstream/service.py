@@ -8,12 +8,12 @@ from starlette.concurrency import run_in_threadpool
 
 from clickhouse.clickhouse import Clickhouse
 from domain.clickstream.models import (
-    CaptureEvent,
     ClickstreamData,
     ClickstreamResult,
     ComputedStreamElementProperty,
     ComputedStreamEvent,
 )
+from domain.common.models import CaptureEvent
 from domain.elements.models import Element
 from domain.elements.service import ElementsService
 from repositories.clickhouse.clickstream import Clickstream

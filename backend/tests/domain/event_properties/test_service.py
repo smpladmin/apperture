@@ -2,7 +2,6 @@ from collections import namedtuple
 from unittest.mock import MagicMock, AsyncMock, ANY
 
 import pytest
-import datetime
 from beanie import PydanticObjectId
 
 from domain.common.models import IntegrationProvider, Property

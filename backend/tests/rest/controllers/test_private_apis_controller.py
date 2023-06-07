@@ -9,6 +9,7 @@ from domain.notifications.models import (
     ThresholdMap,
     NotificationType,
 )
+from rest.dtos.clickstream_event_properties import ClickStreamEventPropertiesDto
 from rest.dtos.event_properties import EventPropertiesDto
 
 from rest.dtos.events import CreateEventDto
@@ -265,3 +266,53 @@ def test_get_event_properties(client_init, event_properties_service):
         },
     ]
     event_properties_service.get_event_properties.assert_called_once()
+
+
+def test_update_clickstream_event_properties(
+    client_init, clickstream_event_properties_service, clickstream_event_properties_data
+):
+    response = client_init.post(
+        "/private/clickstream_event_properties",
+        data=json.dumps(clickstream_event_properties_data),
+    )
+    assert response.json() == {"updated": True}
+    clickstream_event_properties_service.update_event_properties.assert_called_once_with(
+        **{
+            "event_properties": ClickStreamEventPropertiesDto(
+                event="$autocapture", properties=["prop1", "prop4", "prop3"]
+            )
+        }
+    )
+
+
+def test_get_clickstream_event_properties(
+    client_init, clickstream_event_properties_service
+):
+    response = client_init.get("/private/clickstream_event_properties")
+    assert response.json() == [
+        {
+            "_id": None,
+            "createdAt": ANY,
+            "event": "$autocapture",
+            "properties": [
+                {"name": "prop1", "type": "string"},
+                {"name": "prop4", "type": "string"},
+                {"name": "prop3", "type": "string"},
+            ],
+            "revisionId": None,
+            "updatedAt": None,
+        },
+        {
+            "_id": None,
+            "createdAt": ANY,
+            "event": "$pageview",
+            "properties": [
+                {"name": "prop1", "type": "string"},
+                {"name": "prop4", "type": "string"},
+                {"name": "prop3", "type": "string"},
+            ],
+            "revisionId": None,
+            "updatedAt": None,
+        },
+    ]
+    clickstream_event_properties_service.get_event_properties.assert_called_once()

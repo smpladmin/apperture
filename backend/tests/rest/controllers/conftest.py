@@ -15,6 +15,7 @@ from domain.actions.models import (
 )
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App
+from domain.clickstream_event_properties.models import ClickStreamEventProperties
 from domain.common.date_models import DateFilter, DateFilterType, LastDateFilter
 from domain.common.filter_models import (
     FilterDataType,
@@ -681,6 +682,47 @@ def event_properties_service():
     ]
 
     return event_properties_service_mock
+
+
+@pytest.fixture(scope="module")
+def clickstream_event_properties_service():
+    clickstream_event_properties_service_mock = mock.AsyncMock()
+    ClickStreamEventProperties.get_settings = mock.MagicMock()
+    clickstream_event_properties = ClickStreamEventProperties(
+        event="$autocapture",
+        properties=[
+            Property(name="prop1", type="string"),
+            Property(name="prop2", type="string"),
+            Property(name="prop3", type="string"),
+        ],
+    )
+    update_event_properties_future = asyncio.Future()
+    update_event_properties_future.set_result(clickstream_event_properties)
+
+    clickstream_event_properties_service_mock.update_event_properties.return_value = (
+        update_event_properties_future
+    )
+
+    clickstream_event_properties_service_mock.get_event_properties.return_value = [
+        ClickStreamEventProperties(
+            event="$autocapture",
+            properties=[
+                Property(name="prop1", type="string"),
+                Property(name="prop4", type="string"),
+                Property(name="prop3", type="string"),
+            ],
+        ),
+        ClickStreamEventProperties(
+            event="$pageview",
+            properties=[
+                Property(name="prop1", type="string"),
+                Property(name="prop4", type="string"),
+                Property(name="prop3", type="string"),
+            ],
+        ),
+    ]
+
+    return clickstream_event_properties_service_mock
 
 
 @pytest.fixture(scope="module")
@@ -1473,6 +1515,14 @@ def event_properties_data():
         "event": "test-event",
         "properties": ["prop1", "prop4", "prop3"],
         "provider": "mixpanel",
+    }
+
+
+@pytest.fixture(scope="module")
+def clickstream_event_properties_data():
+    return {
+        "event": "$autocapture",
+        "properties": ["prop1", "prop4", "prop3"],
     }
 
 

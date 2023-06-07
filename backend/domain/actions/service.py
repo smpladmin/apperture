@@ -10,7 +10,6 @@ from domain.actions.models import (
     ComputedEventStreamResult,
     ComputedAction,
 )
-from domain.clickstream.models import CaptureEvent
 from domain.common.date_models import DateFilter
 from domain.common.date_utils import DateUtils
 from mongo import Mongo

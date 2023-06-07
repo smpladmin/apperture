@@ -8,6 +8,9 @@ from authorisation.service import AuthService
 from data_processor_queue.service import DPQueueService
 from domain.actions.service import ActionService
 from domain.apperture_users.service import AppertureUserService
+from domain.clickstream_event_properties.service import (
+    ClickStreamEventPropertiesService,
+)
 from domain.common.models import IntegrationProvider
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
@@ -24,6 +27,10 @@ from rest.dtos.apperture_users import (
     CreateUserDto,
     PrivateUserResponse,
     ResetPasswordDto,
+)
+from rest.dtos.clickstream_event_properties import (
+    ClickStreamEventPropertiesDto,
+    ClickStreamEventPropertiesResponse,
 )
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
@@ -346,3 +353,24 @@ async def get_event_properties(
     event_properties_service: EventPropertiesService = Depends(),
 ):
     return await event_properties_service.get_event_properties()
+
+
+@router.post("/clickstream_event_properties")
+async def update_clickstream_event_properties(
+    dto: ClickStreamEventPropertiesDto,
+    clickstream_event_properties_service: ClickStreamEventPropertiesService = Depends(),
+):
+    await clickstream_event_properties_service.update_event_properties(
+        event_properties=dto
+    )
+    return {"updated": True}
+
+
+@router.get(
+    "/clickstream_event_properties",
+    response_model=List[ClickStreamEventPropertiesResponse],
+)
+async def get_clickstream_event_properties(
+    clickstream_event_properties_service: ClickStreamEventPropertiesService = Depends(),
+):
+    return await clickstream_event_properties_service.get_event_properties()
