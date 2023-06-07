@@ -26,7 +26,6 @@ class SpreadsheetService:
     ) -> ComputedSpreadsheet:
         query = self.cleanse_query_string(query)
         datasource = await self.datasource_service.get_datasource(dsId)
-        logging.info(datasource.role_credential)
         result = self.spreadsheets.get_transient_spreadsheet(
             query=query,
             username=datasource.role_credential.username,

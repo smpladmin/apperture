@@ -1,3 +1,4 @@
+import logging
 from typing import Union
 
 import clickhouse_connect
@@ -32,9 +33,11 @@ class Spreadsheets(EventsBase):
         username: Union[str, None],
         password: Union[str, None],
     ):
+        query = self.parser.assign_query_limit(query)
         restricted_client = self.get_connection_for_user(
             username=username, password=password
         )
         result = restricted_client.query(query=query)
+        logging.info(query)
         restricted_client.close()
         return result
