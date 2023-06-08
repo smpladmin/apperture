@@ -592,6 +592,10 @@ def events_service():
             ],
         )
     )
+    events_service_mock.get_unique_events.return_value = [
+        ["test1"],
+        ["test2"],
+    ]
     return events_service_mock
 
 
@@ -677,6 +681,29 @@ def event_properties_service():
                 Property(name="prop1", type="string"),
                 Property(name="prop4", type="string"),
                 Property(name="prop3", type="string"),
+            ],
+        ),
+    ]
+
+    event_properties_service_mock.get_event_properties_for_datasource.return_value = [
+        EventProperties(
+            event="test1",
+            datasource_id=PydanticObjectId("63ce4906f496f7b462ab7e94"),
+            provider="mixpanel",
+            properties=[
+                Property(name="prop1", type="string"),
+                Property(name="prop2", type="string"),
+                Property(name="prop3", type="string"),
+            ],
+        ),
+        EventProperties(
+            event="test2",
+            datasource_id=PydanticObjectId("63ce4906f496f7b462ab7e94"),
+            provider="mixpanel",
+            properties=[
+                Property(name="prop4", type="string"),
+                Property(name="prop5", type="string"),
+                Property(name="prop6", type="string"),
             ],
         ),
     ]

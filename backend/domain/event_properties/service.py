@@ -23,6 +23,13 @@ class EventPropertiesService:
             EventProperties.provider == IntegrationProvider.APPERTURE
         ).to_list()
 
+    async def get_event_properties_for_datasource(
+        self, datasource_id: str
+    ) -> List[EventProperties]:
+        return await EventProperties.find(
+            EventProperties.datasource_id == PydanticObjectId(datasource_id)
+        ).to_list()
+
     async def update_event_properties(
         self, datasource_id: str, event_properties: EventPropertiesDto
     ):

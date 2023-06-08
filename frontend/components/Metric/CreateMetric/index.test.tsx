@@ -16,6 +16,7 @@ import {
   computeMetric,
   validateMetricFormula,
 } from '@lib/services/metricService';
+import { Node } from '@lib/domain/node';
 import { getSavedSegmentsForDatasourceId } from '@lib/services/segmentService';
 import CreateMetric from './index';
 import {
@@ -28,6 +29,7 @@ import {
   checkMetricDefinitionAndAggregateCount,
   getSelectedSegmentsText,
 } from '../util';
+import { MapContext } from '@lib/contexts/mapContext';
 
 jest.mock('@lib/services/datasourceService');
 jest.mock('@lib/services/metricService');
@@ -60,10 +62,58 @@ describe('Create Metric', () => {
   ];
 
   const events = [
-    { id: 'App_Open', source: 'Mixpanel' },
-    { id: 'Login', source: 'Mixpanel' },
-    { id: 'Video_Open', source: 'Mixpanel' },
-    { id: 'Video_Seen', source: 'Mixpanel' },
+    {
+      id: 'App_Open',
+      name: 'App_Open',
+      source: 'Mixpanel',
+      properties: [
+        { name: 'city', type: 'default' },
+        { name: 'device', type: 'default' },
+        { name: 'country', type: 'default' },
+        { name: 'app_version', type: 'default' },
+        { name: 'session_length', type: 'default' },
+        { name: 'bluetooth_enabled', type: 'default' },
+      ],
+    },
+    {
+      id: 'Login',
+      name: 'Login',
+      source: 'Mixpanel',
+      properties: [
+        { name: 'city', type: 'default' },
+        { name: 'device', type: 'default' },
+        { name: 'country', type: 'default' },
+        { name: 'app_version', type: 'default' },
+        { name: 'session_length', type: 'default' },
+        { name: 'bluetooth_enabled', type: 'default' },
+      ],
+    },
+    {
+      id: 'Video_Open',
+      name: 'Video_Open',
+      source: 'Mixpanel',
+      properties: [
+        { name: 'city', type: 'default' },
+        { name: 'device', type: 'default' },
+        { name: 'country', type: 'default' },
+        { name: 'app_version', type: 'default' },
+        { name: 'session_length', type: 'default' },
+        { name: 'bluetooth_enabled', type: 'default' },
+      ],
+    },
+    {
+      id: 'Video_Seen',
+      name: 'Video_Seen',
+      source: 'Mixpanel',
+      properties: [
+        { name: 'city', type: 'default' },
+        { name: 'device', type: 'default' },
+        { name: 'country', type: 'default' },
+        { name: 'app_version', type: 'default' },
+        { name: 'session_length', type: 'default' },
+        { name: 'bluetooth_enabled', type: 'default' },
+      ],
+    },
   ];
 
   const computedMetricResponse = {
@@ -273,7 +323,19 @@ describe('Create Metric', () => {
         <RouterContext.Provider
           value={createMockRouter({ query: { dsId: '' } })}
         >
-          <CreateMetric />
+          <MapContext.Provider
+            value={{
+              state: {
+                nodes: events as Node[],
+                nodesData: [],
+                activeNode: null,
+                isNodeSearched: false,
+              },
+              dispatch: () => {},
+            }}
+          >
+            <CreateMetric />
+          </MapContext.Provider>
         </RouterContext.Provider>
       );
     });
@@ -516,15 +578,7 @@ describe('Create Metric', () => {
     });
 
     it('should be able to select value for the filter', async () => {
-      await act(async () => {
-        render(
-          <RouterContext.Provider
-            value={createMockRouter({ query: { dsId: '' } })}
-          >
-            <CreateMetric />
-          </RouterContext.Provider>
-        );
-      });
+      await renderMetricComponent();
       await addNewEvent();
       const SELECTED_OPTION = 1;
 

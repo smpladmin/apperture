@@ -24,8 +24,6 @@ type FunnelComponentCardProps = {
   funnelSteps: FunnelStep[];
   setFunnelSteps: Function;
   hideNumbers: boolean;
-  eventProperties: string[];
-  loadingEventProperties: boolean;
 };
 
 const FunnelComponentCard = ({
@@ -34,8 +32,6 @@ const FunnelComponentCard = ({
   funnelSteps,
   setFunnelSteps,
   hideNumbers,
-  eventProperties,
-  loadingEventProperties,
 }: FunnelComponentCardProps) => {
   const {
     state: { nodes },
@@ -158,8 +154,8 @@ const FunnelComponentCard = ({
                 filter={filter}
                 filters={filters}
                 setFilters={updateStepFilters}
-                eventProperties={eventProperties}
-                loadingEventProperties={loadingEventProperties}
+                event={funnelStep?.event}
+                loadingEventProperties={false}
               />
             </Fragment>
           ))}
@@ -169,8 +165,8 @@ const FunnelComponentCard = ({
         <AddFilter
           filters={funnelStep.filters}
           setFilters={updateStepFilters}
-          eventProperties={eventProperties}
-          loadingEventProperties={loadingEventProperties}
+          event={funnelStep?.event}
+          loadingEventProperties={false}
         />
       ) : null}
     </Flex>

@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime as dt
 from typing import List, Union
 
@@ -10,6 +11,7 @@ from cache.cache import (
 )
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
+from domain.event_properties.service import EventPropertiesService
 from domain.events.service import EventsService
 from rest.dtos.edges import (
     AggregatedEdgeResponse,
@@ -17,7 +19,7 @@ from rest.dtos.edges import (
     NodeSankeyResponse,
     NodeSignificanceResponse,
 )
-from domain.edge.models import TrendType
+from domain.edge.models import TrendType, Node
 from domain.properties.service import PropertiesService
 from rest.dtos.events import EventsResponse
 from rest.middlewares import validate_jwt
@@ -49,9 +51,26 @@ async def get_nodes(
     ds_id: str,
     event_service: EventsService = Depends(),
     ds_service: DataSourceService = Depends(),
+    event_properties_service: EventPropertiesService = Depends(),
 ):
-    datasource = await ds_service.get_datasource(ds_id)
-    return await event_service.get_unique_nodes(datasource)
+    datasource = await ds_service.get_datasource(id=ds_id)
+    event_properties = (
+        await event_properties_service.get_event_properties_for_datasource(
+            datasource_id=ds_id
+        )
+    )
+    events = await event_service.get_unique_events(datasource=datasource)
+
+    event_props_dict = {item.event: item.properties for item in event_properties}
+    return [
+        Node(
+            id=e,
+            name=e,
+            provider=datasource.provider,
+            properties=event_props_dict.get(e, []),
+        )
+        for [e] in events
+    ]
 
 
 @router.get("/datasources/{ds_id}/trends", response_model=list[NodeTrendResponse])

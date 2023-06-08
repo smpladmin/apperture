@@ -219,8 +219,8 @@ const MetricComponentCard = ({
                     filter={filter}
                     filters={filters}
                     setFilters={setFilters}
-                    eventProperties={eventProperties}
-                    loadingEventProperties={loadingEventsAndProperties}
+                    event={aggregate.reference_id}
+                    loadingEventProperties={false}
                   />
                 </Flex>
               ))}
@@ -229,8 +229,8 @@ const MetricComponentCard = ({
           <AddFilterComponent
             filters={filters}
             setFilters={setFilters}
-            eventProperties={eventProperties}
-            loadingEventProperties={loadingEventsAndProperties}
+            event={aggregate.reference_id}
+            loadingEventProperties={false}
             hideIndentIcon
           />
         </>
