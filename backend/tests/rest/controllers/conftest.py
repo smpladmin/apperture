@@ -1992,7 +1992,10 @@ def integration_response():
             "updatedAt": None,
             "userId": "636a1c61d715ca6baae65611",
             "version": "DEFAULT",
-            "roleCredential": None,
+            "roleCredential": {
+                "password": "test_password",
+                "username": "test_username",
+            },
         },
         "provider": "mixpanel",
         "revisionId": ANY,
