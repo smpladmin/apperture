@@ -42,7 +42,7 @@ class QueryParser:
     def match_table_name(self, query_string: str, dsId: str, is_sql: bool):
         parsed_query = parse_one(query_string)
         for table in parsed_query.find_all(exp.Table):
-            if table.name != "events":
+            if table.name not in ["events", "clickstream"]:
                 raise BusinessError(
                     "Invalid query: Cannot select from table other than event",
                 )
