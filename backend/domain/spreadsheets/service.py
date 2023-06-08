@@ -1,8 +1,17 @@
 import re
+from typing import List
 
+from beanie import PydanticObjectId
 from fastapi import Depends
 
-from domain.spreadsheets.models import ComputedSpreadsheet
+from domain import spreadsheets
+from domain.spreadsheets.models import (
+    ColumnType,
+    ComputedSpreadsheet,
+    Spreadsheet,
+    SpreadSheetColumn,
+    WorkBook,
+)
 from repositories.clickhouse.spreadsheet import Spreadsheets
 
 
@@ -12,6 +21,40 @@ class SpreadsheetService:
         spreadsheets: Spreadsheets = Depends(),
     ):
         self.spreadsheets = spreadsheets
+
+    async def add_workbook(self, workbook: WorkBook):
+        workbook.updated_at = workbook.created_at
+        await WorkBook.insert(workbook)
+
+    def build_workbook(
+        self,
+        name: str,
+        datasource_id: PydanticObjectId,
+        spreadsheets: List[Spreadsheet],
+        app_id: PydanticObjectId,
+        user_id: PydanticObjectId,
+    ):
+        return WorkBook(
+            datasource_id=datasource_id,
+            app_id=app_id,
+            user_id=user_id,
+            name=name,
+            spreadsheets=spreadsheets,
+        )
+
+    async def get_workbooks_for_datasource_id(
+        self, datasource_id: str
+    ) -> List[WorkBook]:
+        return await WorkBook.find(
+            WorkBook.datasource_id == PydanticObjectId(datasource_id),
+            WorkBook.enabled,
+        ).to_list()
+
+    async def get_workbooks_by_user_id(self, user_id: str) -> List[WorkBook]:
+        return await WorkBook.find(
+            WorkBook.user_id == PydanticObjectId(user_id),
+            WorkBook.enabled,
+        ).to_list()
 
     def cleanse_query_string(self, query_string: str) -> str:
         return re.sub(r"\s+|\n+", " ", query_string).strip()
@@ -23,7 +66,13 @@ class SpreadsheetService:
         result = self.spreadsheets.get_transient_spreadsheet(
             dsId=dsId, query=query, is_sql=is_sql
         )
-        response = {"headers": result.column_names, "data": []}
+        response = {
+            "headers": [
+                SpreadSheetColumn(name=name, type=ColumnType.QUERY_HEADER)
+                for name in result.column_names
+            ],
+            "data": [],
+        }
 
         for idx, row in enumerate(result.result_set):
             row_data = {"index": idx + 1}
