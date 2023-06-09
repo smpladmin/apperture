@@ -278,7 +278,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           sheets
         )
       : await saveWorkbook(dsId as string, workbookName, sheets);
-    console.log({ data });
+
     if (status === 200) {
       router.push({
         pathname: '/analytics/workbook/edit/[workbookId]',
