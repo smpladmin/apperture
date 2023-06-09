@@ -16,6 +16,7 @@ export const fillRows = (data: any[], headers: SpreadSheetColumn[]) => {
   const currentLength = data.length;
   const otherKeys = generateOtherColumns(headers);
   const columns = [...headers, ...otherKeys];
+
   const gen = range(currentLength + 1, 1001).map((index) => {
     const row: any = {};
     columns.forEach((key) => {

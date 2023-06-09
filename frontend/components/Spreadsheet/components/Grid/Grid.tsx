@@ -38,31 +38,6 @@ const getColumns = (headers: SpreadSheetColumn[]): Column[] => {
   });
 };
 
-const getHeaderCell = (
-  header: SpreadSheetColumn,
-  index: number
-): DefaultCellTypes | DropdownHeaderCell => {
-  if (header.type === ColumnType.QUERY_HEADER) {
-    if (header.name === 'index')
-      return {
-        type: 'header',
-        text: '',
-      };
-    return {
-      type: 'header',
-      text: `${String.fromCharCode(65 + index - 1)} ${header.name}`,
-    };
-  }
-  return {
-    type: 'dropdownHeader',
-    text: header.name,
-    style: {
-      overflow: 'initial',
-      background: '#f2f2f2',
-    },
-  };
-};
-
 const getHeaderRow = (
   headers: SpreadSheetColumn[],
   originalHeaders: SpreadSheetColumn[]
@@ -70,7 +45,26 @@ const getHeaderRow = (
   return {
     rowId: 'header',
     cells: headers.map((header, index) => {
-      return getHeaderCell(header, index);
+      if (originalHeaders.includes(header)) {
+        return {
+          type: 'header',
+          text: `${String.fromCharCode(65 + index - 1)} ${header.name}`,
+        };
+      } else if (header.name === 'index') {
+        return {
+          type: 'header',
+          text: '',
+        };
+      } else {
+        return {
+          type: 'dropdownHeader',
+          text: header.name,
+          style: {
+            overflow: 'initial',
+            background: '#f2f2f2',
+          },
+        };
+      }
     }),
   };
 };
@@ -84,7 +78,7 @@ const getRows = (
   ...data.map<Row>((data, idx) => ({
     rowId: idx,
     cells: headers.map((header) => {
-      const val = data[header.name];
+      const val = data[header.name] || '';
       return getGridRow(val);
     }),
   })),
@@ -134,7 +128,11 @@ const Grid = ({
     const changedHeaders = changedValue.filter(
       (value) => value.type === 'dropdownHeader'
     );
-    changedHeaders[0] && evaluateFormulaHeader(changedHeaders[0]);
+    changedHeaders[0] &&
+      evaluateFormulaHeader(
+        changedHeaders[0]?.newCell.text,
+        changedHeaders[0].columnId
+      );
   };
 
   return (
