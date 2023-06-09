@@ -10,7 +10,7 @@ from rest.dtos.model_response import ModelResponse
 class TransientSpreadsheetsDto(BaseModel):
     datasourceId: str
     query: str
-    isSql: bool = False
+    is_sql: bool = False
 
 
 class ComputedSpreadsheetQueryResponse(ComputedSpreadsheet, ModelResponse):
@@ -22,7 +22,7 @@ class SpreadSheetDto(BaseModel):
     name: str
     headers: List[SpreadSheetColumn]
     is_sql: bool
-    base_query: str
+    query: str
 
 
 class CreateWorkBookDto(BaseModel):

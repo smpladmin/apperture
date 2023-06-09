@@ -26,7 +26,7 @@ class Spreadsheet(BaseModel):
     name: str
     headers: List[SpreadSheetColumn]
     is_sql: bool
-    base_query: str
+    query: str
 
 
 class WorkBook(Document):
