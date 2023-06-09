@@ -1,5 +1,5 @@
 import { Button, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react';
-import { TransientSheetData } from '@lib/domain/spreadsheet';
+import { TransientSheetData } from '@lib/domain/workbook';
 import React from 'react';
 
 type AddSheetProps = {
@@ -15,13 +15,13 @@ const AddSheet = ({
   setSheetsData,
   setSelectedSheetIndex,
 }: AddSheetProps) => {
-  const handleAddNewSheet = (withQuery: boolean, withNLP: boolean = false) => {
+  const handleAddNewSheet = (withQuery: boolean, is_sql: boolean = true) => {
     const newSheet = {
       name: `Sheet ${sheetsLength + 1}`,
       query: withQuery ? 'Select user_id, event_name from events' : '',
       data: [],
       headers: [],
-      withNLP,
+      is_sql,
     };
     setSheetsData((state: TransientSheetData[]) => [...state, newSheet]);
     setSelectedSheetIndex(sheetsLength);
@@ -83,7 +83,7 @@ const AddSheet = ({
             bg: 'white.400',
           }}
           onClick={() => {
-            handleAddNewSheet(true, true);
+            handleAddNewSheet(true, false);
           }}
           data-testid={'new-sheet-using-nlp'}
         >

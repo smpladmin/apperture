@@ -1,7 +1,7 @@
 import { Box, Flex, Radio, RadioGroup, Text } from '@chakra-ui/react';
 import React from 'react';
 import AddSheet from './AddSheet';
-import { TransientSheetData } from '@lib/domain/spreadsheet';
+import { TransientSheetData } from '@lib/domain/workbook';
 
 type FooterProps = {
   openQueryModal: Function;
