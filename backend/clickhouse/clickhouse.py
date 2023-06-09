@@ -1,4 +1,5 @@
 import os
+
 import clickhouse_connect
 
 
@@ -15,6 +16,15 @@ class Clickhouse:
             query_limit=0,
             username=os.getenv("CHDB_ADMIN_USERNAME", "clickhouse_admin"),
             password=os.getenv("CHDB_ADMIN_PASSWORD", "password"),
+        )
+
+    def get_connection_for_user(self, username: str, password: str):
+        return clickhouse_connect.get_client(
+            host="clickhouse",
+            allow_experimental_object_type=1,
+            query_limit=0,
+            username=username,
+            password=password,
         )
 
     def close(self):
