@@ -93,7 +93,10 @@ describe('Spreadhsheet Utils', () => {
         { name: 'event_name', type: ColumnType.QUERY_HEADER },
       ]);
       expect(res.slice(2, 27)).toEqual(
-        range(1, 26).map((i) => String.fromCharCode(65 + i))
+        range(1, 26).map((i) => ({
+          name: String.fromCharCode(65 + i),
+          type: ColumnType.COMPUTED_HEADER,
+        }))
       );
     });
 

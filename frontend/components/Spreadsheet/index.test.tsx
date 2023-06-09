@@ -4,8 +4,9 @@ import { getTransientSpreadsheets } from '@lib/services/workbookService';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from '@tests/util';
 import { act } from 'react-dom/test-utils';
+import { ColumnType } from '@lib/domain/workbook';
 
-jest.mock('@lib/services/spreadsheetService');
+jest.mock('@lib/services/workbookService');
 
 describe('spreadsheet', () => {
   let mockedGetTransientSpreadsheet: jest.Mock;
@@ -14,7 +15,7 @@ describe('spreadsheet', () => {
     mockedGetTransientSpreadsheet.mockReturnValue({
       status: 200,
       data: {
-        headers: ['event_name'],
+        headers: [{ name: 'event_name', type: ColumnType.QUERY_HEADER }],
         data: [
           {
             index: 1,
@@ -294,7 +295,10 @@ describe('spreadsheet', () => {
       mockedGetTransientSpreadsheet.mockReturnValue({
         status: 200,
         data: {
-          headers: ['event_name', 'count(event_name)'],
+          headers: [
+            { name: 'event_name', type: ColumnType.QUERY_HEADER },
+            { name: 'count(event_name)', type: ColumnType.QUERY_HEADER },
+          ],
           data: [
             {
               index: 1,
