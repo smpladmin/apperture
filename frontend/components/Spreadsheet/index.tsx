@@ -21,6 +21,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import {
   getTransientSpreadsheets,
   saveWorkbook,
+  updateWorkbook,
 } from '@lib/services/workbookService';
 import LoadingSpinner from '@components/LoadingSpinner';
 
@@ -50,9 +51,15 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     savedWorkbook?.name || 'Untitled Workbook'
   );
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
+  const [isWorkbookBeingEdited, setWorkbookBeingEdited] = useState(false);
+  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
 
   const router = useRouter();
-  const { dsId } = router.query;
+  const { dsId, workbookId } = router.query;
+
+  useEffect(() => {
+    if (router.pathname.includes('edit')) setWorkbookBeingEdited(true);
+  }, []);
 
   const getOperands = (newHeader: string) =>
     (newHeader.match(expressionTokenRegex) || []).filter((char: string) =>
@@ -253,7 +260,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     }
   }, [selectedSheetIndex]);
 
-  const handleSave = async () => {
+  const handleSaveOrUpdateFunnel = async () => {
     const sheets = sheetsData.map((sheet) => {
       return {
         name: sheet.name,
@@ -263,13 +270,24 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       };
     });
 
-    const res = await saveWorkbook(dsId as string, workbookName, sheets);
+    const { status, data } = isWorkbookBeingEdited
+      ? await updateWorkbook(
+          workbookId as string,
+          dsId as string,
+          workbookName,
+          sheets
+        )
+      : await saveWorkbook(dsId as string, workbookName, sheets);
 
-    if (res.status === 200)
+    if (status === 200) {
       router.push({
-        pathname: `/analytics/workbook/list/[dsId]`,
-        query: { dsId },
+        pathname: '/analytics/workbook/edit/[workbookId]',
+        query: { workbookId: data?.id, dsId },
       });
+      setSaveButtonDisabled(true);
+    } else {
+      setSaveButtonDisabled(false);
+    }
   };
 
   return (
@@ -296,8 +314,8 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
               name={workbookName}
               setName={setWorkbookName}
               handleGoBack={() => router.back()}
-              handleSave={handleSave}
-              isSaveButtonDisabled={false}
+              handleSave={handleSaveOrUpdateFunnel}
+              isSaveButtonDisabled={isSaveButtonDisabled}
             />
             {sheetsData[selectedSheetIndex].query && (
               <Flex

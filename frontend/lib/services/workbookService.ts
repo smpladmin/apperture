@@ -3,6 +3,7 @@ import {
   AppertureGet,
   ApperturePost,
   ApperturePrivateGet,
+  ApperturePut,
 } from '@lib/services/util';
 
 export const getTransientSpreadsheets = (
@@ -33,6 +34,19 @@ export const saveWorkbook = async (
   sheets: Spreadsheet[]
 ) => {
   return await ApperturePost(`/workbooks`, {
+    datasourceId: dsId,
+    name,
+    spreadsheets: sheets,
+  });
+};
+
+export const updateWorkbook = async (
+  workbookId: string,
+  dsId: string,
+  name: string,
+  sheets: Spreadsheet[]
+) => {
+  return await ApperturePut(`/workbooks/${workbookId}`, {
     datasourceId: dsId,
     name,
     spreadsheets: sheets,
