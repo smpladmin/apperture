@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import Spreadsheet from './index';
-import { getTransientSpreadsheets } from '@lib/services/spreadsheetService';
+import { getTransientSpreadsheets } from '@lib/services/workbookService';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from '@tests/util';
 import { act } from 'react-dom/test-utils';

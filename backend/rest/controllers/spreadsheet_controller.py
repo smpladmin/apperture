@@ -28,7 +28,7 @@ router = APIRouter(
 )
 
 
-@router.post("/workbook", response_model=WorkBookResponse)
+@router.post("/workbooks", response_model=WorkBookResponse)
 async def create_workbook(
     dto: CreateWorkBookDto,
     user_id: str = Depends(get_user_id),
@@ -48,7 +48,7 @@ async def create_workbook(
     return workbook
 
 
-@router.get("/workbook", response_model=List[WorkbookWithUser])
+@router.get("/workbooks", response_model=List[WorkbookWithUser])
 async def get_workbooks(
     datasource_id: Union[str, None] = None,
     user: AppertureUser = Depends(get_user),
@@ -67,7 +67,9 @@ async def get_workbooks(
     return workbooks
 
 
-@router.post("/spreadsheets/transient", response_model=ComputedSpreadsheetQueryResponse)
+@router.post(
+    "/workbooks/spreadsheets/transient", response_model=ComputedSpreadsheetQueryResponse
+)
 async def compute_transient_spreadsheets(
     dto: TransientSpreadsheetsDto,
     spreadsheets_service: SpreadsheetService = Depends(),

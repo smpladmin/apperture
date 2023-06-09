@@ -7,7 +7,7 @@ import SavedSheets from '.';
 describe('list saved sheets', () => {
   it('should be able to navigate to create page on clicking new sheet button', () => {
     const router = createMockRouter({
-      pathname: '/analytics/spreadsheet/list',
+      pathname: '/analytics/workbook/list',
       query: { dsId: '63d0a7bfc636cee15d81f579' },
     });
     render(
@@ -20,7 +20,7 @@ describe('list saved sheets', () => {
     fireEvent.click(newSheetButton);
 
     expect(router.push).toHaveBeenCalledWith({
-      pathname: '/analytics/spreadsheet/create/[dsId]',
+      pathname: '/analytics/workbook/create/[dsId]',
       query: { dsId: '63d0a7bfc636cee15d81f579' },
     });
   });

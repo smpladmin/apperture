@@ -8,7 +8,11 @@ import {
 } from '@silevis/reactgrid';
 import React, { useEffect, useState } from 'react';
 import { fillHeaders, fillRows } from '../../util';
-import { TransientSheetData } from '@lib/domain/spreadsheet';
+import {
+  ColumnType,
+  SpreadSheetColumn,
+  TransientSheetData,
+} from '@lib/domain/workbook';
 import { DropdownHeaderCell, DropdownHeaderTemplate } from './DropdownHeader';
 
 const getGridRow = (value: any): DefaultCellTypes => {
@@ -21,60 +25,66 @@ const getGridRow = (value: any): DefaultCellTypes => {
   return cellTypes[typeof value];
 };
 
-const getColumns = (headers: string[]): Column[] => {
+const getColumns = (headers: SpreadSheetColumn[]): Column[] => {
   return headers.map((header) => {
-    if (header === 'index') {
-      return { columnId: header, width: 50 };
+    if (header.name === 'index') {
+      return { columnId: header.name, width: 50 };
     }
     return {
-      columnId: header,
+      columnId: header.name,
       resizable: true,
-      width: header.length * 10 > 150 ? header.length * 10 : 150,
+      width: header.name.length * 10 > 150 ? header.name.length * 10 : 150,
     };
   });
 };
 
+const getHeaderCell = (
+  header: SpreadSheetColumn,
+  index: number
+): DefaultCellTypes | DropdownHeaderCell => {
+  if (header.type === ColumnType.QUERY_HEADER) {
+    if (header.name === 'index')
+      return {
+        type: 'header',
+        text: '',
+      };
+    return {
+      type: 'header',
+      text: `${String.fromCharCode(65 + index - 1)} ${header.name}`,
+    };
+  }
+  return {
+    type: 'dropdownHeader',
+    text: header.name,
+    style: {
+      overflow: 'initial',
+      background: '#f2f2f2',
+    },
+  };
+};
+
 const getHeaderRow = (
-  headers: string[],
-  originalHeaders: string[]
+  headers: SpreadSheetColumn[],
+  originalHeaders: SpreadSheetColumn[]
 ): Row<DefaultCellTypes | DropdownHeaderCell> => {
   return {
     rowId: 'header',
     cells: headers.map((header, index) => {
-      if (originalHeaders.includes(header)) {
-        return {
-          type: 'header',
-          text: `${String.fromCharCode(65 + index - 1)} ${header}`,
-        };
-      } else if (header === 'index') {
-        return {
-          type: 'header',
-          text: '',
-        };
-      } else {
-        return {
-          type: 'dropdownHeader',
-          text: header,
-          style: {
-            overflow: 'initial',
-            background: '#f2f2f2',
-          },
-        };
-      }
+      return getHeaderCell(header, index);
     }),
   };
 };
 
 const getRows = (
   data: any[],
-  headers: string[],
-  originalHeaders: string[]
+  headers: SpreadSheetColumn[],
+  originalHeaders: SpreadSheetColumn[]
 ): Row<DefaultCellTypes | DropdownHeaderCell>[] => [
   getHeaderRow(headers, originalHeaders),
   ...data.map<Row>((data, idx) => ({
     rowId: idx,
     cells: headers.map((header) => {
-      const val = data[header];
+      const val = data[header.name];
       return getGridRow(val);
     }),
   })),

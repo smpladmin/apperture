@@ -8,7 +8,7 @@ from repositories.document import Document
 
 
 class ColumnType(str, Enum):
-    COMPUTED = "COMPUTED"
+    COMPUTED_HEADER = "COMPUTED_HEADER"
     QUERY_HEADER = "QUERY_HEADER"
 
 

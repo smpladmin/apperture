@@ -9,9 +9,11 @@ import React, { useRef, useState } from 'react';
 const Actions = ({
   info,
   handleDelete,
+  disableDelete,
 }: {
   info: CellContext<SavedItems, string>;
   handleDelete: Function;
+  disableDelete: boolean;
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -36,6 +38,7 @@ const Actions = ({
             setIsDropdownOpen(true);
           }}
           data-testid={'action-more-icon'}
+          disabled={disableDelete}
         />
         <Dropdown
           isOpen={isDropdownOpen}

@@ -4,7 +4,12 @@ import QueryModal from './components/QueryModal';
 import { Box, Button, Flex, Text, useDisclosure } from '@chakra-ui/react';
 import EventLayoutHeader from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
-import { TransientSheetData } from '@lib/domain/spreadsheet';
+import {
+  ColumnType,
+  SpreadSheetColumn,
+  TransientSheetData,
+  Workbook,
+} from '@lib/domain/workbook';
 import Footer from './components/Footer';
 import {
   evaluateExpression,
@@ -13,22 +18,49 @@ import {
   isdigit,
 } from './util';
 import cloneDeep from 'lodash/cloneDeep';
-import { CellChange, Id } from '@silevis/reactgrid';
+import { CellChange } from '@silevis/reactgrid';
+import { saveWorkbook } from '@lib/services/workbookService';
 
-const Spreadsheet = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true });
+const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure({
+    defaultIsOpen: savedWorkbook ? false : true,
+  });
   const [sheetsData, setSheetsData] = useState<TransientSheetData[]>([
     {
       name: 'Sheet 1',
       query: 'Select user_id, event_name from events',
       data: [],
       headers: [],
-      withNLP: false,
+      is_sql: true,
     },
   ]);
-  const [workbookName, setWorkbookName] = useState<string>('Untitled Workbook');
-  const router = useRouter();
+
+  const [workbookName, setWorkbookName] = useState<string>(
+    savedWorkbook?.name || 'Untitled Workbook'
+  );
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
+
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  const handleSave = async () => {
+    const sheets = sheetsData.map((sheet) => {
+      return {
+        name: sheet.name,
+        is_sql: sheet.is_sql,
+        headers: sheet.headers,
+        query: sheet.query,
+      };
+    });
+
+    const res = await saveWorkbook(dsId as string, workbookName, sheets);
+
+    if (res.status === 200)
+      router.push({
+        pathname: `/analytics/workbook/list/[dsId]`,
+        query: { dsId },
+      });
+  };
 
   const getOperands = (newHeader: string) =>
     (newHeader.match(expressionTokenRegex) || []).filter((char: string) =>
@@ -48,7 +80,7 @@ const Spreadsheet = () => {
       } else {
         const currentSheet = sheetsData[selectedSheetIndex];
         const header = currentSheet.headers[operandsIndex[index]];
-        const valueList = currentSheet.data.map((item) => item[header]);
+        const valueList = currentSheet.data.map((item) => item[header.name]);
         lookupTable[operand] = valueList;
       }
     });
@@ -58,7 +90,7 @@ const Spreadsheet = () => {
 
   const updateSelectedSheetDataAndHeaders = (
     data: any[],
-    header: string,
+    header: SpreadSheetColumn,
     columnId: string
   ) => {
     const tempSheetsData = cloneDeep(sheetsData);
@@ -73,7 +105,7 @@ const Spreadsheet = () => {
       selectedSheetIndex
     ].data.map((item, index) => ({
       ...item,
-      [header]: data[index],
+      [header.name]: data[index],
       '': '',
     }));
     tempSheetsData[selectedSheetIndex].headers = [
@@ -90,15 +122,16 @@ const Spreadsheet = () => {
 
   const evaluateFormulaHeader = useCallback(
     (changedValue: CellChange<any>) => {
-      const newHeader = changedValue?.newCell?.text
-        .replace(/\s/g, '')
-        .toUpperCase();
+      const newHeader = {
+        name: changedValue?.newCell?.text.replace(/\s/g, '').toUpperCase(),
+        type: ColumnType.COMPUTED_HEADER,
+      };
       const columnId = changedValue?.columnId;
 
-      const operands = getOperands(newHeader);
+      const operands = getOperands(newHeader.name);
       const operandsIndex = getOperatorsIndex(operands);
 
-      const parsedExpression: any[] = parseExpression(newHeader);
+      const parsedExpression: any[] = parseExpression(newHeader.name);
 
       const lookupTable = generateLookupTable(operands, operandsIndex);
       const evaluatedData = evaluateExpression(
@@ -139,8 +172,8 @@ const Spreadsheet = () => {
               name={workbookName}
               setName={setWorkbookName}
               handleGoBack={() => router.back()}
-              handleSave={() => {}}
-              isSaveButtonDisabled={true}
+              handleSave={handleSave}
+              isSaveButtonDisabled={false}
             />
             {sheetsData[selectedSheetIndex].query && (
               <Flex

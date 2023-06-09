@@ -337,9 +337,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               _active={{
                 backgroundColor: 'transparent',
               }}
-              onClick={() =>
-                handleRedirect('/analytics/spreadsheet/list/[dsId]')
-              }
+              onClick={() => handleRedirect('/analytics/workbook/list/[dsId]')}
             />
           </Tooltip>
           <Divider borderColor={'black.50'} opacity={'0.3'} />
