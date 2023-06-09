@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from ai.text_to_sql import text_to_sql
 from domain.apperture_users.models import AppertureUser
-from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
 from domain.event_properties.service import EventPropertiesService
 from domain.spreadsheets.service import SpreadsheetService
@@ -39,7 +38,7 @@ async def create_workbook(
     datasource = await ds_service.get_datasource(dto.datasourceId)
     workbook = spreadsheets_service.build_workbook(
         name=dto.name,
-        datasource_id=dto.datasourceId,
+        datasource_id=datasource.id,
         spreadsheets=dto.spreadsheets,
         user_id=user_id,
         app_id=datasource.app_id,
@@ -54,9 +53,7 @@ async def get_workbooks(
     datasource_id: Union[str, None] = None,
     user: AppertureUser = Depends(get_user),
     spreadsheets_service: SpreadsheetService = Depends(),
-    app_service: AppService = Depends(),
 ):
-    apps = await app_service.get_apps(user=user)
     workbooks = (
         await spreadsheets_service.get_workbooks_for_datasource_id(
             datasource_id=datasource_id
@@ -94,6 +91,6 @@ async def compute_transient_spreadsheets(
 @router.get("/workbooks/{id}", response_model=SavedWorkBookResponse)
 async def get_workbook_by_id(
     id: str,
-    workbook_service: WorkbookService = Depends(),
+    spreadsheets_service: SpreadsheetService = Depends(),
 ):
-    return await workbook_service.get_workbook_by_id(workbook_id=id)
+    return await spreadsheets_service.get_workbook_by_id(workbook_id=id)

@@ -17,6 +17,7 @@ from domain.properties.models import Properties
 from domain.metrics.models import Metric
 from domain.actions.models import Action
 from domain.retention.models import Retention
+from domain.spreadsheets.models import WorkBook
 
 
 class Mongo:
@@ -41,6 +42,7 @@ class Mongo:
                 Action,
                 Retention,
                 EventProperties,
+                WorkBook,
             ],
         )
 
