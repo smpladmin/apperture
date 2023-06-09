@@ -1544,6 +1544,7 @@ def funnel_steps_data():
 @pytest.fixture(scope="module")
 def event_properties_data():
     return {
+        "datasource_id": "63ce4906f496f7b462ab7e94",
         "event": "test-event",
         "properties": ["prop1", "prop4", "prop3"],
         "provider": "mixpanel",

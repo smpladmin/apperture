@@ -40,6 +40,7 @@ class EventPropertiesSaver:
                 ) != set(precision_event["properties"].keys()):
                     logging.info("Saving criteria met. Saving to db")
                     data = {
+                        "datasource_id": datasource_id,
                         "event": precision_event["event"],
                         "properties": list(
                             flatten(precision_event["properties"], ".").keys()
@@ -47,7 +48,7 @@ class EventPropertiesSaver:
                         "provider": "apperture",
                     }
                     self._save_data(
-                        path=f"/private/event_properties/{datasource_id}", data=data
+                        path=f"/private/event_properties", data=data
                     )
 
             # Update events map with the latest properties

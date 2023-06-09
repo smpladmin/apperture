@@ -82,19 +82,21 @@ class TestEventPropertiesSaver:
         calls = [
             call(
                 data={
+                    "datasource_id": "645036d8d659884e40f9caed",
                     "event": "precise event2",
                     "properties": ["$os", "$browser", "$device_type", "token"],
                     "provider": "apperture",
                 },
-                path="/private/event_properties/645036d8d659884e40f9caed",
+                path="/private/event_properties",
             ),
             call(
                 data={
+                    "datasource_id": "645036d8d659884e40f9caed",
                     "event": "precise event",
                     "properties": ["$os", "$browser", "$device_type", "token"],
                     "provider": "apperture",
                 },
-                path="/private/event_properties/645036d8d659884e40f9caed",
+                path="/private/event_properties",
             ),
         ]
         self.service._save_data.assert_has_calls(calls=calls, any_order=True)
@@ -122,19 +124,21 @@ class TestEventPropertiesSaver:
         calls = [
             call(
                 data={
+                    "datasource_id": "645036d8d659884e40f9caed",
                     "event": "precise event2",
                     "properties": ["$os", "$browser", "$device_type", "token"],
                     "provider": "apperture",
                 },
-                path="/private/event_properties/645036d8d659884e40f9caed",
+                path="/private/event_properties",
             ),
             call(
                 data={
+                    "datasource_id": "645036d8d659884e40f9caed",
                     "event": "precise event",
                     "properties": ["$os", "$browser", "$device_type", "token"],
                     "provider": "apperture",
                 },
-                path="/private/event_properties/645036d8d659884e40f9caed",
+                path="/private/event_properties",
             ),
         ]
         self.service._save_data.assert_has_calls(calls=calls, any_order=True)
@@ -179,11 +183,12 @@ class TestEventPropertiesSaver:
         calls = [
             call(
                 data={
+                    "datasource_id": "645036d8d659884e40f9caed",
                     "event": "precise event2",
                     "properties": ["$os", "$browser", "$device_type", "token"],
                     "provider": "apperture",
                 },
-                path="/private/event_properties/645036d8d659884e40f9caed",
+                path="/private/event_properties",
             ),
         ]
         self.service._save_data.assert_has_calls(calls=calls, any_order=True)

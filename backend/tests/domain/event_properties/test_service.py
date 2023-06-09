@@ -38,8 +38,8 @@ class TestEventPropertiesService:
     @pytest.mark.asyncio
     async def test_update_event_properties(self):
         res = await self.event_properties_service.update_event_properties(
-            datasource_id=self.ds_id,
             event_properties=EventPropertiesDto(
+                datasource_id=self.ds_id,
                 event="event1",
                 properties=["prop1", "prop2", "prop3"],
                 provider="mixpanel",

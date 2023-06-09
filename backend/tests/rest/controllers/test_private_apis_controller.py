@@ -203,14 +203,14 @@ def test_update_event_properties(
     client_init, event_properties_service, event_properties_data
 ):
     response = client_init.post(
-        "/private/event_properties/63ce4906f496f7b462ab7e94",
+        "/private/event_properties",
         data=json.dumps(event_properties_data),
     )
     assert response.json() == {"updated": True}
     event_properties_service.update_event_properties.assert_called_once_with(
         **{
-            "datasource_id": "63ce4906f496f7b462ab7e94",
             "event_properties": EventPropertiesDto(
+                datasource_id="63ce4906f496f7b462ab7e94",
                 event="test-event",
                 properties=["prop1", "prop4", "prop3"],
                 provider="mixpanel",
