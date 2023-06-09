@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime as dt
 from typing import List, Union
 
@@ -8,6 +7,10 @@ from cache.cache import (
     CACHE_EXPIRY_24_HOURS,
     datasource_key_builder,
     CACHE_EXPIRY_10_MINUTES,
+)
+from domain.actions.service import ActionService
+from domain.clickstream_event_properties.service import (
+    ClickStreamEventPropertiesService,
 )
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
@@ -24,6 +27,7 @@ from domain.properties.service import PropertiesService
 from rest.dtos.events import EventsResponse
 from rest.middlewares import validate_jwt
 
+from domain.common.models import IntegrationProvider, CaptureEvent
 
 router = APIRouter(
     tags=["datasource"],
@@ -51,7 +55,9 @@ async def get_nodes(
     ds_id: str,
     event_service: EventsService = Depends(),
     ds_service: DataSourceService = Depends(),
+    action_service: ActionService = Depends(),
     event_properties_service: EventPropertiesService = Depends(),
+    clickstream_event_properties_service: ClickStreamEventPropertiesService = Depends(),
 ):
     datasource = await ds_service.get_datasource(id=ds_id)
     event_properties = (
@@ -60,8 +66,36 @@ async def get_nodes(
         )
     )
     events = await event_service.get_unique_events(datasource=datasource)
-
     event_props_dict = {item.event: item.properties for item in event_properties}
+
+    if datasource.provider == IntegrationProvider.APPERTURE:
+        actions = await action_service.get_actions_for_datasource_id(
+            datasource_id=ds_id
+        )
+        clickstream_event_properties = (
+            await clickstream_event_properties_service.get_event_properties()
+        )
+
+        props_map = {
+            CaptureEvent.AUTOCAPTURE: action_service.get_props(
+                event_type=CaptureEvent.AUTOCAPTURE,
+                clickstream_event_properties=clickstream_event_properties,
+            ),
+            CaptureEvent.PAGEVIEW: action_service.get_props(
+                event_type=CaptureEvent.PAGEVIEW,
+                clickstream_event_properties=clickstream_event_properties,
+            ),
+        }
+
+        for action in actions:
+            event_types = {group.event for group in action.groups}
+            action_props = []
+            for event_type in event_types:
+                action_props = action_props + [
+                    item for item in props_map[event_type] if item not in action_props
+                ]
+            event_props_dict[action.name] = action_props
+
     return [
         Node(
             id=e,

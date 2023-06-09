@@ -1,7 +1,7 @@
 from unittest.mock import ANY
 from beanie import PydanticObjectId
 
-from domain.common.models import IntegrationProvider
+from domain.common.models import IntegrationProvider, CaptureEvent
 from domain.datasources.models import DataSourceVersion, DataSource
 from domain.edge.models import TrendType
 
@@ -22,7 +22,7 @@ def test_get_node_significance(client_init, edge_service, node_significance_resp
         "id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "integration_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "name": None,
-        "provider": IntegrationProvider.MIXPANEL,
+        "provider": IntegrationProvider.APPERTURE,
         "revision_id": ANY,
         "updated_at": None,
         "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
@@ -53,7 +53,7 @@ def test_get_node_trends(client_init, edge_service, node_trends_response):
         "id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "integration_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "name": None,
-        "provider": IntegrationProvider.MIXPANEL,
+        "provider": IntegrationProvider.APPERTURE,
         "revision_id": ANY,
         "updated_at": None,
         "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
@@ -86,7 +86,7 @@ def test_get_sankey_nodes(client_init, edge_service, node_sankey_response):
         "id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "integration_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "name": None,
-        "provider": IntegrationProvider.MIXPANEL,
+        "provider": IntegrationProvider.APPERTURE,
         "revision_id": ANY,
         "updated_at": None,
         "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
@@ -200,7 +200,12 @@ def test_get_events_for_user_id(client_init, events_service):
 
 
 def test_get_nodes(
-    client_init, events_service, event_properties_service, datasource_service
+    client_init,
+    events_service,
+    event_properties_service,
+    datasource_service,
+    action_service,
+    clickstream_event_properties_service,
 ):
     response = client_init.get("/datasources/637739d383ea7fda83e72a2d/nodes")
     assert response.status_code == 200
@@ -213,8 +218,8 @@ def test_get_nodes(
                 {"name": "prop2", "type": "string"},
                 {"name": "prop3", "type": "string"},
             ],
-            "provider": "mixpanel",
-            "source": "mixpanel",
+            "provider": "apperture",
+            "source": "apperture",
         },
         {
             "id": "test2",
@@ -224,8 +229,18 @@ def test_get_nodes(
                 {"name": "prop5", "type": "string"},
                 {"name": "prop6", "type": "string"},
             ],
-            "provider": "mixpanel",
-            "source": "mixpanel",
+            "provider": "apperture",
+            "source": "apperture",
+        },
+        {
+            "id": "clicked on settings",
+            "name": "clicked on settings",
+            "properties": [
+                {"name": "prop1", "type": "default"},
+                {"name": "prop2", "type": "default"},
+            ],
+            "provider": "apperture",
+            "source": "apperture",
         },
     ]
     assert events_service.get_unique_events.call_args.kwargs["datasource"].dict() == {
@@ -236,7 +251,7 @@ def test_get_nodes(
         "id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "integration_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "name": None,
-        "provider": "mixpanel",
+        "provider": "apperture",
         "revision_id": None,
         "updated_at": None,
         "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
@@ -248,3 +263,25 @@ def test_get_nodes(
     event_properties_service.get_event_properties_for_datasource.assert_called_once_with(
         **{"datasource_id": "637739d383ea7fda83e72a2d"}
     )
+
+    action_service.get_actions_for_datasource_id.assert_called_once_with(
+        **{"datasource_id": "637739d383ea7fda83e72a2d"}
+    )
+    clickstream_event_properties_service.get_event_properties.assert_called_once()
+    assert (
+        action_service.get_props.call_args.kwargs["event_type"] == CaptureEvent.PAGEVIEW
+    )
+    assert action_service.get_props.call_args.kwargs["clickstream_event_properties"][
+        0
+    ].dict() == {
+        "created_at": ANY,
+        "event": CaptureEvent.AUTOCAPTURE,
+        "id": None,
+        "properties": [
+            {"name": "prop1", "type": "string"},
+            {"name": "prop4", "type": "string"},
+            {"name": "prop3", "type": "string"},
+        ],
+        "revision_id": None,
+        "updated_at": None,
+    }

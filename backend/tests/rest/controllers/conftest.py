@@ -463,7 +463,7 @@ def datasource_service():
         integration_id="636a1c61d715ca6baae65611",
         app_id="636a1c61d715ca6baae65611",
         user_id="636a1c61d715ca6baae65611",
-        provider=IntegrationProvider.MIXPANEL,
+        provider=IntegrationProvider.APPERTURE,
         external_source_id="123",
         version=DataSourceVersion.DEFAULT,
     )
@@ -563,6 +563,10 @@ def action_service():
         action_future,
     ]
     action_service_mock.update_events_for_action = mock.AsyncMock()
+    action_service_mock.get_props.return_value = [
+        Property(name="prop1", type="default"),
+        Property(name="prop2", type="default"),
+    ]
     return action_service_mock
 
 
@@ -595,6 +599,7 @@ def events_service():
     events_service_mock.get_unique_events.return_value = [
         ["test1"],
         ["test2"],
+        ["clicked on settings"],
     ]
     return events_service_mock
 
@@ -2022,7 +2027,7 @@ def integration_response():
             "externalSourceId": "123",
             "integrationId": "636a1c61d715ca6baae65611",
             "name": None,
-            "provider": "mixpanel",
+            "provider": "apperture",
             "revisionId": ANY,
             "updatedAt": None,
             "userId": "636a1c61d715ca6baae65611",
