@@ -96,3 +96,24 @@ async def get_workbook_by_id(
     spreadsheets_service: SpreadsheetService = Depends(),
 ):
     return await spreadsheets_service.get_workbook_by_id(workbook_id=id)
+
+
+@router.put("/workbooks/{id}", response_model=SavedWorkBookResponse)
+async def update_workbook(
+    id: str,
+    dto: CreateWorkBookDto,
+    user_id: str = Depends(get_user_id),
+    ds_service: DataSourceService = Depends(),
+    spreadsheets_service: SpreadsheetService = Depends(),
+):
+    datasource = await ds_service.get_datasource(dto.datasourceId)
+    workbook = spreadsheets_service.build_workbook(
+        name=dto.name,
+        datasource_id=datasource.id,
+        spreadsheets=dto.spreadsheets,
+        user_id=user_id,
+        app_id=datasource.app_id,
+    )
+
+    await spreadsheets_service.update_workbook(workbook=workbook, workbook_id=id)
+    return workbook

@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from typing import List
 
 from beanie import PydanticObjectId
@@ -86,3 +87,13 @@ class SpreadsheetService:
 
     async def get_workbook_by_id(self, workbook_id: str):
         return await WorkBook.find_one(WorkBook.id == PydanticObjectId(workbook_id))
+
+    async def update_workbook(self, workbook_id: str, workbook: WorkBook):
+        entry = workbook.dict()
+        entry.pop("id")
+        entry.pop("created_at")
+        entry["updated_at"] = datetime.utcnow()
+
+        await WorkBook.find_one(
+            WorkBook.id == PydanticObjectId(workbook_id),
+        ).update({"$set": entry})
