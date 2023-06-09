@@ -23,7 +23,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   const apps = await _getAppsWithIntegrations(token);
   const savedWorkbook = await _getSavedWorkbook(
     token,
-    query.workkbookId as string
+    query.workbookId as string
   );
 
   if (!apps.length) {
