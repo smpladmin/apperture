@@ -18,6 +18,7 @@ import { useRouter } from 'next/router';
 import { TransientSheetData } from '@lib/domain/spreadsheet';
 import { cloneDeep } from 'lodash';
 import LoadingSpinner from '@components/LoadingSpinner';
+import { ErrorResponse } from '@lib/services/util';
 
 type QueryModalProps = {
   isOpen: boolean;
@@ -70,7 +71,7 @@ const QueryModal = ({
       setIsSubmitButtonDisabled(false);
       setError('');
     } else {
-      setError(response?.data?.detail);
+      setError((response as ErrorResponse)?.error?.detail);
       setIsSubmitButtonDisabled(false);
     }
   };
