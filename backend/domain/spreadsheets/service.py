@@ -81,3 +81,6 @@ class SpreadsheetService:
             response["data"].append(row_data)
 
         return ComputedSpreadsheet(data=response["data"], headers=response["headers"])
+
+    async def get_workbook_by_id(self, workbook_id: str):
+        return await WorkBook.find_one(WorkBook.id == PydanticObjectId(workbook_id))

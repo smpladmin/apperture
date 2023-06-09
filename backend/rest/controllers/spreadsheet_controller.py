@@ -14,6 +14,7 @@ from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
     CreateWorkBookDto,
+    SavedWorkBookResponse,
     TransientSpreadsheetsDto,
     WorkBookResponse,
     WorkbookWithUser,
@@ -88,3 +89,11 @@ async def compute_transient_spreadsheets(
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
     except DatabaseError as e:
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
+
+
+@router.get("/workbooks/{id}", response_model=SavedWorkBookResponse)
+async def get_workbook_by_id(
+    id: str,
+    workbook_service: WorkbookService = Depends(),
+):
+    return await workbook_service.get_workbook_by_id(workbook_id=id)

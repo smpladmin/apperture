@@ -42,3 +42,8 @@ class WorkbookWithUser(WorkBook, ModelResponse):
     class Config:
         allow_population_by_field_name = True
         orm_mode = True
+
+
+class SavedWorkBookResponse(WorkBook, ModelResponse):
+    class Config:
+        allow_population_by_field_name = True
