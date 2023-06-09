@@ -278,11 +278,11 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           sheets
         )
       : await saveWorkbook(dsId as string, workbookName, sheets);
-
+    console.log({ data });
     if (status === 200) {
       router.push({
         pathname: '/analytics/workbook/edit/[workbookId]',
-        query: { workbookId: data?.id, dsId },
+        query: { workbookId: data?._id || workbookId, dsId },
       });
       setSaveButtonDisabled(true);
     } else {
