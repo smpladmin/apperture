@@ -9,11 +9,11 @@ import React, { useRef, useState } from 'react';
 const Actions = ({
   info,
   handleDelete,
-  disableDelete,
+  disableDelete = false,
 }: {
   info: CellContext<SavedItems, string>;
   handleDelete: Function;
-  disableDelete: boolean;
+  disableDelete?: boolean;
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
