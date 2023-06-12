@@ -28,10 +28,10 @@ async def compute_transient_spreadsheets(
     try:
         datasource = await datasource_service.get_datasource(dto.datasourceId)
 
-        role_credential = (
-            datasource.role_credential
-            if datasource.role_credential
-            else await datasource_service.create_role_credential_and_user_policy(
+        clickhouse_credential = (
+            datasource.clickhouse_credential
+            if datasource.clickhouse_credential
+            else await datasource_service.create_clickhouse_credential_and_user_policy(
                 dto.datasourceId
             )
         )
@@ -40,13 +40,13 @@ async def compute_transient_spreadsheets(
             sql_query = text_to_sql(dto.query)
             return await spreadsheets_service.get_transient_spreadsheets(
                 query=sql_query,
-                username=role_credential.username,
-                password=role_credential.password,
+                username=clickhouse_credential.username,
+                password=clickhouse_credential.password,
             )
         return await spreadsheets_service.get_transient_spreadsheets(
             query=dto.query,
-            username=role_credential.username,
-            password=role_credential.password,
+            username=clickhouse_credential.username,
+            password=clickhouse_credential.password,
         )
     except BusinessError as e:
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")

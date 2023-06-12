@@ -1,10 +1,11 @@
 import logging
+
 from fastapi import Depends
 
 from clickhouse.clickhouse import Clickhouse
 
 
-class Role:
+class ClickHouseRole:
     def __init__(self, clickhouse: Clickhouse = Depends()):
         self.clickhouse = clickhouse
 
