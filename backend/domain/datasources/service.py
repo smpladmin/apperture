@@ -1,5 +1,6 @@
 import asyncio
-import uuid
+import random
+import string
 
 import httpx
 from beanie import PydanticObjectId
@@ -66,8 +67,10 @@ class DataSourceService:
     async def get_datasources_for_provider(self, provider: IntegrationProvider):
         return await DataSource.find(DataSource.provider == provider).to_list()
 
-    def random_value_generator(self):
-        return str(uuid.uuid4())
+    def random_value_generator(self, length=32):
+        characters = string.ascii_letters + string.digits
+        password = "".join(random.choice(characters) for _ in range(length))
+        return password
 
     def create_user_policy(self, username: str, password: str, datasource_id: str):
         self.clickhouse_role.create_user(username=username, password=password)
