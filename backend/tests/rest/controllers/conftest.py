@@ -7,41 +7,72 @@ import pytest
 from beanie import PydanticObjectId
 from fastapi.testclient import TestClient
 
-from domain.actions.models import (Action, ActionGroup, CaptureEvent,
-                                   ComputedEventStreamResult)
+from domain.actions.models import (
+    Action,
+    ActionGroup,
+    CaptureEvent,
+    ComputedEventStreamResult,
+)
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App
-from domain.common.date_models import (DateFilter, DateFilterType,
-                                       LastDateFilter)
-from domain.common.filter_models import (FilterDataType, FilterOperatorsNumber,
-                                         FilterOperatorsString,
-                                         LogicalOperators)
+from domain.common.date_models import DateFilter, DateFilterType, LastDateFilter
+from domain.common.filter_models import (
+    FilterDataType,
+    FilterOperatorsNumber,
+    FilterOperatorsString,
+    LogicalOperators,
+)
 from domain.common.models import IntegrationProvider
-from domain.datasources.models import (ClickHouseCredential, DataSource,
-                                       DataSourceVersion)
+from domain.datasources.models import (
+    ClickHouseCredential,
+    DataSource,
+    DataSourceVersion,
+)
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
 from domain.event_properties.models import EventProperties
 from domain.events.models import Event, PaginatedEventsData
-from domain.funnels.models import (ComputedFunnel, ComputedFunnelStep, Funnel,
-                                   FunnelConversionData, FunnelEventUserData,
-                                   FunnelTrendsData)
+from domain.funnels.models import (
+    ComputedFunnel,
+    ComputedFunnelStep,
+    Funnel,
+    FunnelConversionData,
+    FunnelEventUserData,
+    FunnelTrendsData,
+)
 from domain.integrations.models import Credential, CredentialType, Integration
-from domain.metrics.models import (ComputedMetricData, ComputedMetricStep,
-                                   Metric, MetricValue)
-from domain.notifications.models import (ComputedNotification, Notification,
-                                         NotificationChannel, NotificationData,
-                                         NotificationFrequency,
-                                         NotificationMetric,
-                                         NotificationThresholdType,
-                                         NotificationType, NotificationVariant,
-                                         ThresholdMap)
+from domain.metrics.models import (
+    ComputedMetricData,
+    ComputedMetricStep,
+    Metric,
+    MetricValue,
+)
+from domain.notifications.models import (
+    ComputedNotification,
+    Notification,
+    NotificationChannel,
+    NotificationData,
+    NotificationFrequency,
+    NotificationMetric,
+    NotificationThresholdType,
+    NotificationType,
+    NotificationVariant,
+    ThresholdMap,
+)
 from domain.properties.models import Properties, Property, PropertyDataType
-from domain.retention.models import (ComputedRetention, EventSelection,
-                                     Granularity, Retention)
+from domain.retention.models import (
+    ComputedRetention,
+    EventSelection,
+    Granularity,
+    Retention,
+)
 from domain.runlogs.models import RunLog
-from domain.segments.models import (ComputedSegment, Segment,
-                                    SegmentFilterConditions, SegmentGroup,
-                                    WhereSegmentFilter)
+from domain.segments.models import (
+    ComputedSegment,
+    Segment,
+    SegmentFilterConditions,
+    SegmentGroup,
+    WhereSegmentFilter,
+)
 from domain.spreadsheets.models import ComputedSpreadsheet
 from domain.users.models import UserDetails
 from rest.dtos.actions import ComputedActionResponse
@@ -1965,7 +1996,7 @@ def integration_response():
             "updatedAt": None,
             "userId": "636a1c61d715ca6baae65611",
             "version": "DEFAULT",
-            "roleCredential": {
+            "clickhouseCredential": {
                 "password": "test_password",
                 "username": "test_username",
             },
