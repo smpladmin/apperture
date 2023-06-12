@@ -2,17 +2,19 @@ import json
 
 import pytest
 
+from domain.spreadsheets.models import ColumnType, SpreadSheetColumn
+
 
 @pytest.mark.asyncio
 async def test_compute_transient_spreadsheets(
     client_init, spreadsheets_service, datasource_service, transient_spreadsheet_data
 ):
     response = client_init.post(
-        "/spreadsheets/transient", data=json.dumps(transient_spreadsheet_data)
+        "/workbooks/spreadsheets/transient", data=json.dumps(transient_spreadsheet_data)
     )
     assert response.status_code == 200
     assert response.json() == {
-        "headers": ["event_name"],
+        "headers": [SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)],
         "data": [
             {"index": 1, "event_name": "test_event_1"},
             {"index": 2, "event_name": "test_event_2"},

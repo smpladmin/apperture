@@ -74,7 +74,11 @@ from domain.segments.models import (
     SegmentGroup,
     WhereSegmentFilter,
 )
-from domain.spreadsheets.models import ComputedSpreadsheet
+from domain.spreadsheets.models import (
+    ColumnType,
+    ComputedSpreadsheet,
+    SpreadSheetColumn,
+)
 from domain.users.models import UserDetails
 from rest.dtos.actions import ComputedActionResponse
 from rest.dtos.apperture_users import AppertureUserResponse
@@ -744,7 +748,7 @@ def transient_spreadsheet_data():
 def spreadsheets_service():
     spreadsheets_service_mock = mock.MagicMock()
     computed_spreadsheet = ComputedSpreadsheet(
-        headers=["event_name"],
+        headers=[SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)],
         data=[
             {"index": 1, "event_name": "test_event_1"},
             {"index": 2, "event_name": "test_event_2"},

@@ -3,7 +3,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from domain.spreadsheets.models import ComputedSpreadsheet
+from domain.spreadsheets.models import (
+    ColumnType,
+    ComputedSpreadsheet,
+    SpreadSheetColumn,
+)
 from domain.spreadsheets.service import SpreadsheetService
 
 
@@ -53,5 +57,8 @@ class TestSpreadsheetService:
             query=self.query, username="", password=""
         )
         assert result == ComputedSpreadsheet(
-            headers=["event_name"], data=self.result_data
+            headers=[
+                SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)
+            ],
+            data=self.result_data,
         )
