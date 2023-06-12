@@ -68,7 +68,7 @@ class DataSourceService:
     async def get_datasources_for_provider(self, provider: IntegrationProvider):
         return await DataSource.find(DataSource.provider == provider).to_list()
 
-    def random_value_generator(self, length=32):
+    def generate_random_value(self, length=32):
         characters = string.ascii_letters + string.digits
         password = "".join(random.choice(characters) for _ in range(length))
         return password
@@ -87,8 +87,8 @@ class DataSourceService:
         version: DataSourceVersion,
         integration: Integration,
     ):
-        username = self.random_value_generator()
-        password = self.random_value_generator()
+        username = self.generate_random_value()
+        password = self.generate_random_value()
         datasource = DataSource(
             external_source_id=external_source_id,
             name=name,
@@ -105,8 +105,8 @@ class DataSourceService:
 
     async def create_clickhouse_credential_and_user_policy(self, datasource_id: str):
         clickhouse_credential = ClickHouseCredential(
-            username=self.random_value_generator(),
-            password=self.random_value_generator(),
+            username=self.generate_random_value(),
+            password=self.generate_random_value(),
         )
 
         self.create_user_policy(

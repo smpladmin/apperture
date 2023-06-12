@@ -42,15 +42,15 @@ class TestDataSourceService:
         DataSource.find.assert_called_once()
 
     def test_default_length_for_random_value_generator(self):
-        password = self.service.random_value_generator()
+        password = self.service.generate_random_value()
         assert len(password) == 32
 
     def test_custom_length_for_random_value_generator(self):
-        password = self.service.random_value_generator(length=16)
+        password = self.service.generate_random_value(length=16)
         assert len(password) == 16
 
     def test_password_characters_for_random_value_generator(self):
-        password = self.service.random_value_generator()
+        password = self.service.generate_random_value()
         assert all(c in string.ascii_letters + string.digits for c in password)
 
     def test_create_user_policy(self):
@@ -76,7 +76,7 @@ class TestDataSourceService:
                 update=AsyncMock(),
             ),
         )
-        self.service.random_value_generator = MagicMock(
+        self.service.generate_random_value = MagicMock(
             return_value="sdeweiwew33dssdsdds"
         )
 
