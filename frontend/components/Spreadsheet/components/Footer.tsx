@@ -1,7 +1,17 @@
-import { Box, Flex, Radio, RadioGroup, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Editable,
+  EditableInput,
+  EditablePreview,
+  Flex,
+  Radio,
+  RadioGroup,
+  Text,
+} from '@chakra-ui/react';
 import React from 'react';
 import AddSheet from './AddSheet';
 import { TransientSheetData } from '@lib/domain/workbook';
+import cloneDeep from 'lodash/cloneDeep';
 
 type FooterProps = {
   openQueryModal: Function;
@@ -18,6 +28,12 @@ const Footer = ({
   selectedSheetIndex,
   setSelectedSheetIndex,
 }: FooterProps) => {
+  const updateSheetName = (updatedSheetName: string, index: number) => {
+    const toUpdateSheets = cloneDeep(sheetsData);
+    toUpdateSheets[index].name = updatedSheetName;
+    setSheetsData(toUpdateSheets);
+  };
+
   return (
     <Flex
       position={'sticky'}
@@ -52,13 +68,29 @@ const Footer = ({
                 as={'label'}
                 data-testid={'sheet-name'}
               >
-                <Text
+                <Editable
+                  onChange={(nextValue) => updateSheetName(nextValue, index)}
+                  defaultValue={sheet.name}
                   fontSize={'xs-12'}
                   lineHeight={'xs-12'}
                   fontWeight={'400'}
+                  color={'black.DEFAULT'}
                 >
-                  {sheet.name}
-                </Text>
+                  <EditablePreview
+                    cursor={'pointer'}
+                    p={'2'}
+                    _hover={{ bg: 'white.200' }}
+                    borderRadius={'4'}
+                  />
+                  <EditableInput
+                    border={'1px'}
+                    borderColor={'grey.400'}
+                    borderRadius={'4'}
+                    bg={'white.DEFAULT'}
+                    p={'2'}
+                    data-testid={'entity-name'}
+                  />
+                </Editable>
                 <Radio hidden value={index} />
               </Flex>
             );
