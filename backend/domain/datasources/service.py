@@ -1,6 +1,7 @@
 import asyncio
 import random
 import string
+import uuid
 
 import httpx
 from beanie import PydanticObjectId
@@ -96,16 +97,10 @@ class DataSourceService:
             user_id=integration.user_id,
             app_id=integration.app_id,
             provider=integration.provider,
-            clickhouse_credential=ClickHouseCredential(
-                username=username,
-                password=password,
-            ),
         )
 
         await datasource.insert()
-        self.create_user_policy(
-            username=username, password=password, datasource_id=datasource.id
-        )
+        self.create_clickhouse_credential_and_user_policy(datasource_id=datasource.id)
         return datasource
 
     async def create_clickhouse_credential_and_user_policy(self, datasource_id: str):
@@ -113,16 +108,17 @@ class DataSourceService:
             username=self.random_value_generator(),
             password=self.random_value_generator(),
         )
-        await DataSource.find(
-            DataSource.id == PydanticObjectId(datasource_id),
-            DataSource.enabled == True,
-        ).update({"$set": {"clickhouse_credential": clickhouse_credential}})
 
         self.create_user_policy(
             username=clickhouse_credential.username,
             password=clickhouse_credential.password,
             datasource_id=datasource_id,
         )
+        await DataSource.find(
+            DataSource.id == PydanticObjectId(datasource_id),
+            DataSource.enabled == True,
+        ).update({"$set": {"clickhouse_credential": clickhouse_credential}})
+
         return clickhouse_credential
 
     async def get_enabled_datasources(self):
