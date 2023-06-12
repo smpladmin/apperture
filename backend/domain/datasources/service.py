@@ -87,8 +87,6 @@ class DataSourceService:
         version: DataSourceVersion,
         integration: Integration,
     ):
-        username = self.generate_random_value()
-        password = self.generate_random_value()
         datasource = DataSource(
             external_source_id=external_source_id,
             name=name,

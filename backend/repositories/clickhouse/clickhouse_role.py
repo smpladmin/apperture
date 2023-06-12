@@ -23,6 +23,12 @@ class ClickHouseRole:
             self.clickhouse.admin.query(query=query)
 
     def create_row_policy(self, datasource_id: str, username: str):
-        query = f"CREATE ROW POLICY IF NOT EXISTS pol{datasource_id} ON default.events, default.clickstream USING datasource_id='{datasource_id}' TO {username}"
+        query = f"CREATE ROW POLICY pol{datasource_id} ON default.events, default.clickstream USING datasource_id='{datasource_id}' TO {username}"
 
-        return self.clickhouse.admin.query(query=query)
+        try:
+            return self.clickhouse.admin.query(query=query)
+        except Exception as e:
+            self.clickhouse.admin.query(
+                query="DROP POLICY pol{datasource_id} ON default.events, default.clickstream"
+            )
+            return self.clickhouse.admin.query(query=query)
