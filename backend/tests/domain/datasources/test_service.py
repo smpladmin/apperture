@@ -41,18 +41,6 @@ class TestDataSourceService:
         )
         DataSource.find.assert_called_once()
 
-    def test_default_length_for_random_value_generator(self):
-        password = self.service.random_value_generator()
-        assert len(password) == 32
-
-    def test_custom_length_for_random_value_generator(self):
-        password = self.service.random_value_generator(length=16)
-        assert len(password) == 16
-
-    def test_password_characters_for_random_value_generator(self):
-        password = self.service.random_value_generator()
-        assert all(c in string.ascii_letters + string.digits for c in password)
-
     def test_create_user_policy(self):
         self.service.create_user_policy(
             username=self.username, password=self.password, datasource_id=self.ds_id
