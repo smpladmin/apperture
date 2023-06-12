@@ -10,9 +10,10 @@ from domain.actions.models import (
     ComputedEventStreamResult,
     ComputedAction,
 )
-from domain.clickstream.models import CaptureEvent
+from domain.clickstream_event_properties.models import ClickStreamEventProperties
 from domain.common.date_models import DateFilter
 from domain.common.date_utils import DateUtils
+from domain.common.models import CaptureEvent
 from mongo import Mongo
 from repositories.clickhouse.actions import Actions
 
@@ -143,4 +144,18 @@ class ActionService:
         await selected_action.update({"$set": {"enabled": False}})
         self.actions.delete_processed_events(
             ds_id=selected_action.datasource_id, event=selected_action.name
+        )
+
+    def get_props(
+        self,
+        event_type: CaptureEvent,
+        clickstream_event_properties: List[ClickStreamEventProperties],
+    ):
+        return next(
+            (
+                item.properties
+                for item in clickstream_event_properties
+                if item.event == event_type
+            ),
+            [],
         )

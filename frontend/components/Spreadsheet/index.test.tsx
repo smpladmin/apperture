@@ -105,9 +105,10 @@ describe('spreadsheet', () => {
     it('should not close query modal  and show error message, if query is not executed successfully', async () => {
       mockedGetTransientSpreadsheet.mockReturnValue({
         status: 400,
-        data: {
+        error: {
           detail: 'Invalid query: Cannot select properties from table',
         },
+        data: undefined,
       });
 
       renderSpreadsheet();

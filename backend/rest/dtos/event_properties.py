@@ -8,6 +8,7 @@ from rest.dtos.model_response import ModelResponse
 
 
 class EventPropertiesDto(BaseModel):
+    datasource_id: str
     event: str
     properties: List[str]
     provider: IntegrationProvider

@@ -6,6 +6,9 @@ from unittest import mock
 from domain.actions.service import ActionService
 from domain.apps.service import AppService
 from domain.apperture_users.service import AppertureUserService
+from domain.clickstream_event_properties.service import (
+    ClickStreamEventPropertiesService,
+)
 from domain.event_properties.service import EventPropertiesService
 
 from server import app
@@ -49,6 +52,7 @@ def app_init(
     action_service,
     retention_service,
     event_properties_service,
+    clickstream_event_properties_service,
 ):
 
     print("Setting up App")
@@ -76,6 +80,9 @@ def app_init(
     app.dependency_overrides[ActionService] = lambda: action_service
     app.dependency_overrides[RetentionService] = lambda: retention_service
     app.dependency_overrides[EventPropertiesService] = lambda: event_properties_service
+    app.dependency_overrides[
+        ClickStreamEventPropertiesService
+    ] = lambda: clickstream_event_properties_service
     FastAPICache.init(backend=InMemoryBackend(), prefix="apperture-cache")
     yield app
 

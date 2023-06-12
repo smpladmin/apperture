@@ -1,5 +1,11 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, {
+  ChangeEvent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { getEventPropertiesValue } from '@lib/services/datasourceService';
 import { useRouter } from 'next/router';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
@@ -19,14 +25,17 @@ import { trimLabel } from '@lib/utils/common';
 import FilterOptions from './components/FilterOptions';
 import FilterOperator from './components/FilterOperator';
 import FilterValues from './components/FilterValues';
+import { MapContext } from '@lib/contexts/mapContext';
 
 type FilterComponentProps = {
   filter: WhereFilter;
-  index: number;
-  eventProperties: string[];
+  allEventProperties?: string[];
   loadingEventProperties: boolean;
+  index: number;
+  event?: string;
   filters: WhereFilter[];
   setFilters: Function;
+  isSegmentFilter?: boolean;
 };
 
 const StepFilter = ({
@@ -34,9 +43,28 @@ const StepFilter = ({
   filter,
   filters,
   setFilters,
-  eventProperties,
+  event,
+  allEventProperties = [],
+  isSegmentFilter = false,
   loadingEventProperties,
 }: FilterComponentProps) => {
+  const {
+    state: { nodes },
+  } = useContext(MapContext);
+
+  const [eventProperties, setEventProperties] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (event) {
+      const eventProps = nodes.filter((node) => node.name == event);
+      const props =
+        eventProps.length && eventProps[0].properties
+          ? eventProps[0].properties.map((property) => property.name)
+          : [];
+      setEventProperties(props);
+    }
+  }, [event]);
+
   const router = useRouter();
   const { dsId } = router.query;
 
@@ -243,7 +271,7 @@ const StepFilter = ({
               <SearchableListDropdown
                 isOpen={isPropertyDropdownOpen}
                 isLoading={loadingEventProperties}
-                data={eventProperties}
+                data={isSegmentFilter ? allEventProperties : eventProperties}
                 onSubmit={handlePropertySelection}
                 placeholderText={'Search for properties...'}
                 width={'96'}

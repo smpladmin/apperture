@@ -64,4 +64,4 @@ class PropertiesService:
         properties = await Properties.find_one(
             Properties.datasource_id == PydanticObjectId(ds_id)
         )
-        return [prop.name for prop in properties.properties]
+        return [prop.name for prop in properties.properties] if properties else []

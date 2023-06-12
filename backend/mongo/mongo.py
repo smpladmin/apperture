@@ -2,6 +2,7 @@ from beanie import init_beanie
 import motor, os
 
 from domain.apps.models import App
+from domain.clickstream_event_properties.models import ClickStreamEventProperties
 from domain.datasources.models import DataSource
 from domain.edge.models import BaseEdge
 from domain.edge.models import Edge
@@ -43,6 +44,7 @@ class Mongo:
                 Retention,
                 EventProperties,
                 WorkBook,
+                ClickStreamEventProperties,
             ],
         )
 

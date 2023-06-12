@@ -3,7 +3,7 @@ import SearchableListDropdown from '@components/SearchableDropdown/SearchableLis
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { ArrowElbowDownRight } from 'phosphor-react';
 import { GREY_700 } from '@theme/index';
-import React, { useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   FilterConditions,
   FilterDataType,
@@ -11,9 +11,12 @@ import {
   FilterType,
   WhereFilter,
 } from '@lib/domain/common';
+import { MapContext } from '@lib/contexts/mapContext';
 
 type FunnelAddFilterComponentProps = {
-  eventProperties: string[];
+  allEventProperties?: string[];
+  event?: string;
+  isSegmentFilter?: boolean;
   loadingEventProperties: boolean;
   filters: WhereFilter[];
   setFilters: Function;
@@ -21,12 +24,31 @@ type FunnelAddFilterComponentProps = {
 };
 
 const AddFilterComponent = ({
-  eventProperties,
+  allEventProperties = [],
+  event,
   loadingEventProperties,
   filters,
   setFilters,
   hideIndentIcon = false,
+  isSegmentFilter = false,
 }: FunnelAddFilterComponentProps) => {
+  const {
+    state: { nodes },
+  } = useContext(MapContext);
+
+  const [eventProperties, setEventProperties] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (event) {
+      const eventProps = nodes.filter((node) => node.name == event);
+      const props =
+        eventProps.length && eventProps[0].properties
+          ? eventProps[0].properties.map((property) => property.name)
+          : [];
+      setEventProperties(props);
+    }
+  }, [event]);
+
   const [openDropDown, setOpenDropDown] = useState(false);
   const ref = useRef(null);
 
@@ -86,7 +108,7 @@ const AddFilterComponent = ({
           <SearchableListDropdown
             isOpen={openDropDown}
             isLoading={loadingEventProperties}
-            data={eventProperties}
+            data={isSegmentFilter ? allEventProperties : eventProperties}
             onSubmit={handleSubmit}
             placeholderText={'Search for properties...'}
             width={'96'}

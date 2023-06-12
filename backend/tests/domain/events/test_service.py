@@ -4,7 +4,6 @@ from unittest.mock import MagicMock
 import pytest
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
-from domain.edge.models import Node
 from domain.events.models import Event, PaginatedEventsData
 from domain.events.service import EventsService
 
@@ -66,7 +65,7 @@ class TestEventsService:
         )
 
     @pytest.mark.asyncio
-    async def test_get_unique_nodes(self):
+    async def test_get_unique_events(self):
         """
         should fetch unique events from repository and convert and return them as nodes
         """
@@ -77,31 +76,12 @@ class TestEventsService:
         ]
         self.events_repo.get_unique_events.return_value = events
 
-        nodes = await self.events_service.get_unique_nodes(self.datasource)
+        events = await self.events_service.get_unique_events(self.datasource)
 
         self.events_repo.get_unique_events.assert_called_once_with(
             str(self.datasource.id)
         )
-        assert nodes == [
-            Node(
-                id="otp_sent",
-                name="otp_sent",
-                provider=IntegrationProvider.MIXPANEL,
-                source=IntegrationProvider.MIXPANEL,
-            ),
-            Node(
-                id="otp_received",
-                name="otp_received",
-                provider=IntegrationProvider.MIXPANEL,
-                source=IntegrationProvider.MIXPANEL,
-            ),
-            Node(
-                id="documents_verified",
-                name="documents_verified",
-                provider=IntegrationProvider.MIXPANEL,
-                source="Backend CRM",
-            ),
-        ]
+        assert events == [["otp_sent"], ["otp_received"], ["documents_verified"]]
 
     def test_get_values_for_property(self):
         self.events_repo.get_values_for_property.return_value = [

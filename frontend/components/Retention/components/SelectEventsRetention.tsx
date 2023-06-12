@@ -170,8 +170,8 @@ const SelectEventsRetention = ({
                   filter={filter}
                   filters={retentionEvent.filters}
                   setFilters={updateEventFilters}
-                  eventProperties={eventProperties}
-                  loadingEventProperties={loadingEventProperties}
+                  event={retentionEvent.event}
+                  loadingEventProperties={false}
                 />
               </Fragment>
             ))}
@@ -181,8 +181,8 @@ const SelectEventsRetention = ({
           <AddFilterComponent
             filters={retentionEvent.filters}
             setFilters={updateEventFilters}
-            eventProperties={eventProperties}
-            loadingEventProperties={loadingEventProperties}
+            event={retentionEvent.event}
+            loadingEventProperties={false}
           />
         ) : null}
       </Flex>

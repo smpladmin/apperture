@@ -37,9 +37,9 @@ class EventsService:
             column_names=self.columns,
         )
 
-    async def get_unique_nodes(self, datasource: DataSource):
+    async def get_unique_events(self, datasource: DataSource):
         events = self.events.get_unique_events(str(datasource.id))
-        return [Node(id=e, name=e, provider=datasource.provider) for [e] in events]
+        return events
 
     def get_values_for_property(
         self, datasource_id: str, event_property: str, start_date: str, end_date: str

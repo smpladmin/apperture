@@ -1,16 +1,7 @@
 import datetime
-from enum import Enum
-from typing import List, NamedTuple, Optional
+from typing import NamedTuple, Optional
 
 from pydantic import BaseModel
-
-
-class CaptureEvent(str, Enum):
-    PAGEVIEW = "$pageview"
-    PAGELEAVE = "$pageleave"
-    AUTOCAPTURE = "$autocapture"
-    RAGECLICK = "$rageclick"
-    IDENTIFY = "$identify"
 
 
 class ClickstreamData(NamedTuple):

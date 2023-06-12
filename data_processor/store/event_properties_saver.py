@@ -26,8 +26,8 @@ class EventPropertiesSaver(Saver):
 
             for event, props in event_properties.iteritems():
                 logging.info(f"Saving event properties for event {event}")
-                data = {"event": event, "properties": props, "provider": provider}
-                res = self._save_data(data=data, datasource_id=datasource_id)
+                data = {"datasource_id": datasource_id, "event": event, "properties": props, "provider": provider}
+                res = self._save_data(data=data)
 
                 if not res.ok:
                     logging.error(
@@ -39,5 +39,5 @@ class EventPropertiesSaver(Saver):
             logging.info(f"Error while saving event properties")
             logging.debug(e)
 
-    def _save_data(self, data: Dict, datasource_id: str):
-        return post(path=f"/private/event_properties/{datasource_id}", json=data)
+    def _save_data(self, data: Dict):
+        return post(path=f"/private/event_properties", json=data)
