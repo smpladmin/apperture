@@ -1,10 +1,15 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Grid from './components/Grid/Grid';
 import QueryModal from './components/QueryModal';
 import { Box, Button, Flex, Text, useDisclosure } from '@chakra-ui/react';
 import EventLayoutHeader from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
-import { TransientSheetData } from '@lib/domain/spreadsheet';
+import {
+  ColumnType,
+  SpreadSheetColumn,
+  TransientSheetData,
+  Workbook,
+} from '@lib/domain/workbook';
 import Footer from './components/Footer';
 import {
   evaluateExpression,
@@ -13,22 +18,48 @@ import {
   isdigit,
 } from './util';
 import cloneDeep from 'lodash/cloneDeep';
-import { CellChange, Id } from '@silevis/reactgrid';
+import {
+  getTransientSpreadsheets,
+  saveWorkbook,
+  updateWorkbook,
+} from '@lib/services/workbookService';
+import LoadingSpinner from '@components/LoadingSpinner';
 
-const Spreadsheet = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: true });
-  const [sheetsData, setSheetsData] = useState<TransientSheetData[]>([
+const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
+  if (savedWorkbook) {
+    return savedWorkbook.spreadsheets.map((sheet) => ({ ...sheet, data: [] }));
+  }
+  return [
     {
       name: 'Sheet 1',
       query: 'Select user_id, event_name from events',
       data: [],
       headers: [],
-      withNLP: false,
+      is_sql: true,
     },
-  ]);
-  const [workbookName, setWorkbookName] = useState<string>('Untitled Workbook');
-  const router = useRouter();
+  ];
+};
+
+const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure({
+    defaultIsOpen: savedWorkbook ? false : true,
+  });
+  const [sheetsData, setSheetsData] = useState<TransientSheetData[]>(
+    initializeSheetForSavedWorkbook(savedWorkbook)
+  );
+  const [workbookName, setWorkbookName] = useState<string>(
+    savedWorkbook?.name || 'Untitled Workbook'
+  );
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
+  const [isWorkbookBeingEdited, setWorkbookBeingEdited] = useState(false);
+  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
+
+  const router = useRouter();
+  const { dsId, workbookId } = router.query;
+
+  useEffect(() => {
+    if (router.pathname.includes('edit')) setWorkbookBeingEdited(true);
+  }, []);
 
   const getOperands = (newHeader: string) =>
     (newHeader.match(expressionTokenRegex) || []).filter((char: string) =>
@@ -48,7 +79,7 @@ const Spreadsheet = () => {
       } else {
         const currentSheet = sheetsData[selectedSheetIndex];
         const header = currentSheet.headers[operandsIndex[index]];
-        const valueList = currentSheet.data.map((item) => item[header]);
+        const valueList = currentSheet.data.map((item) => item[header.name]);
         lookupTable[operand] = valueList;
       }
     });
@@ -58,7 +89,7 @@ const Spreadsheet = () => {
 
   const updateSelectedSheetDataAndHeaders = (
     data: any[],
-    header: string,
+    header: SpreadSheetColumn,
     columnId: string
   ) => {
     const tempSheetsData = cloneDeep(sheetsData);
@@ -67,13 +98,16 @@ const Spreadsheet = () => {
       65 -
       tempSheetsData[selectedSheetIndex].headers.length;
 
-    const padding = new Array(headerPadding).fill('');
+    const padding = new Array(headerPadding).fill({
+      name: '',
+      type: ColumnType.QUERY_HEADER,
+    });
 
     tempSheetsData[selectedSheetIndex].data = tempSheetsData[
       selectedSheetIndex
     ].data.map((item, index) => ({
       ...item,
-      [header]: data[index],
+      [header.name]: data[index],
       '': '',
     }));
     tempSheetsData[selectedSheetIndex].headers = [
@@ -89,16 +123,18 @@ const Spreadsheet = () => {
   };
 
   const evaluateFormulaHeader = useCallback(
-    (changedValue: CellChange<any>) => {
-      const newHeader = changedValue?.newCell?.text
-        .replace(/\s/g, '')
-        .toUpperCase();
-      const columnId = changedValue?.columnId;
+    (headerText: string, columnId: string) => {
+      const newHeader = {
+        name: headerText.replace(/\s/g, '').toUpperCase(),
+        type: ColumnType.COMPUTED_HEADER,
+      };
 
-      const operands = getOperands(newHeader);
+      const columnIndex = columnId;
+
+      const operands = getOperands(newHeader.name);
       const operandsIndex = getOperatorsIndex(operands);
 
-      const parsedExpression: any[] = parseExpression(newHeader);
+      const parsedExpression: any[] = parseExpression(newHeader.name);
 
       const lookupTable = generateLookupTable(operands, operandsIndex);
       const evaluatedData = evaluateExpression(
@@ -109,11 +145,150 @@ const Spreadsheet = () => {
       updateSelectedSheetDataAndHeaders(
         evaluatedData,
         newHeader,
-        columnId as string
+        columnIndex as string
       );
     },
     [sheetsData]
   );
+
+  const generateLookupTableFromQueriedData = (
+    operands: string[],
+    operandsIndex: number[],
+    queriedData: any[],
+    headers: SpreadSheetColumn[]
+  ) => {
+    const lookupTable: { [key: string]: any[] } = {};
+    operands.forEach((operand: string, index: number) => {
+      if (isdigit(operand)) {
+        lookupTable[operand] = new Array(queriedData.length).fill(
+          parseFloat(operand)
+        );
+      } else {
+        const header = headers[operandsIndex[index]];
+        const valueList = queriedData.map((item) => item[header.name]);
+        lookupTable[operand] = valueList;
+      }
+    });
+
+    return lookupTable;
+  };
+
+  const getUpdatedQueryData = (
+    data: any[],
+    header: SpreadSheetColumn,
+    queriedData: any[]
+  ) => {
+    queriedData = queriedData.map((item: any, index: number) => ({
+      ...item,
+      [header.name]: data[index],
+      '': '',
+    }));
+    return queriedData;
+  };
+
+  const evaluateDataOnQueriedData = (
+    headerText: string,
+    queriedData: any[],
+    headers: SpreadSheetColumn[]
+  ) => {
+    const newHeader = {
+      name: headerText,
+      type: ColumnType.COMPUTED_HEADER,
+    };
+
+    const operands = getOperands(newHeader.name);
+    const operandsIndex = getOperatorsIndex(operands);
+
+    const parsedExpression: any[] = parseExpression(newHeader.name);
+
+    const lookupTable = generateLookupTableFromQueriedData(
+      operands,
+      operandsIndex,
+      queriedData,
+      headers
+    );
+
+    const evaluatedData = evaluateExpression(
+      parsedExpression as string[],
+      lookupTable
+    );
+
+    return getUpdatedQueryData(evaluatedData, newHeader, queriedData);
+  };
+
+  const hasQueryWithoutData =
+    sheetsData[selectedSheetIndex].query &&
+    !sheetsData[selectedSheetIndex].data.length;
+
+  useEffect(() => {
+    if (!savedWorkbook) return;
+
+    const updateSheetData = (data: any[]) => {
+      const toUpdateSheets = cloneDeep(sheetsData);
+      toUpdateSheets[selectedSheetIndex].data = data;
+      setSheetsData(toUpdateSheets);
+    };
+
+    const fetchData = async (selectedSheet: TransientSheetData) => {
+      const res = await getTransientSpreadsheets(
+        dsId as string,
+        selectedSheet.query,
+        selectedSheet.is_sql
+      );
+      let queriedData = res?.data?.data;
+
+      const computedHeaders = selectedSheet.headers
+        .map((header, index) => ({
+          columnId: String.fromCharCode(65 + index),
+          ...header,
+        }))
+        .filter((header) => header.type === ColumnType.COMPUTED_HEADER);
+
+      computedHeaders.forEach((header) => {
+        queriedData = evaluateDataOnQueriedData(
+          header.name,
+          queriedData,
+          selectedSheet.headers
+        );
+      });
+
+      updateSheetData(queriedData);
+    };
+
+    if (hasQueryWithoutData) {
+      fetchData(sheetsData[selectedSheetIndex]);
+    }
+  }, [selectedSheetIndex]);
+
+  const handleSaveOrUpdateFunnel = async () => {
+    const sheets = sheetsData.map((sheet) => {
+      return {
+        name: sheet.name,
+        is_sql: sheet.is_sql,
+        headers: sheet.headers,
+        query: sheet.query,
+      };
+    });
+
+    const { status, data } = isWorkbookBeingEdited
+      ? await updateWorkbook(
+          workbookId as string,
+          dsId as string,
+          workbookName,
+          sheets
+        )
+      : await saveWorkbook(dsId as string, workbookName, sheets);
+
+    if (status === 200) {
+      router.push({
+        pathname: '/analytics/workbook/edit/[workbookId]',
+        query: { workbookId: data?._id || workbookId, dsId },
+      });
+      setSaveButtonDisabled(true);
+    } else {
+      setSaveButtonDisabled(false);
+    }
+  };
 
   return (
     <>
@@ -139,8 +314,8 @@ const Spreadsheet = () => {
               name={workbookName}
               setName={setWorkbookName}
               handleGoBack={() => router.back()}
-              handleSave={() => {}}
-              isSaveButtonDisabled={true}
+              handleSave={handleSaveOrUpdateFunnel}
+              isSaveButtonDisabled={isSaveButtonDisabled}
             />
             {sheetsData[selectedSheetIndex].query && (
               <Flex
@@ -153,12 +328,7 @@ const Spreadsheet = () => {
                   lineHeight={'xs-12'}
                   fontWeight={400}
                   data-testid={'query-text'}
-                >
-                  {/* {sheetsData[selectedSheetIndex].query.length < 100
-                    ? sheetsData[selectedSheetIndex].query
-                    : sheetsData[selectedSheetIndex].query.slice(0, 100) +
-                      '...'} */}
-                </Text>
+                ></Text>
 
                 <Button
                   px={'2'}
@@ -176,19 +346,32 @@ const Spreadsheet = () => {
               </Flex>
             )}
           </Box>
-          <Flex overflow={'scroll'} data-testid={'react-grid'}>
-            <Grid
-              sheetData={cloneDeep(sheetsData[selectedSheetIndex])}
-              evaluateFormulaHeader={evaluateFormulaHeader}
-            />
-          </Flex>
-          <Footer
-            openQueryModal={onOpen}
-            sheetsData={sheetsData}
-            setSheetsData={setSheetsData}
-            selectedSheetIndex={selectedSheetIndex}
-            setSelectedSheetIndex={setSelectedSheetIndex}
-          />
+          {hasQueryWithoutData ? (
+            <Flex
+              h={'full'}
+              w={'full'}
+              alignItems={'center'}
+              justifyContent={'center'}
+            >
+              <LoadingSpinner />
+            </Flex>
+          ) : (
+            <>
+              <Flex overflow={'scroll'} data-testid={'react-grid'}>
+                <Grid
+                  sheetData={cloneDeep(sheetsData[selectedSheetIndex])}
+                  evaluateFormulaHeader={evaluateFormulaHeader}
+                />
+              </Flex>
+              <Footer
+                openQueryModal={onOpen}
+                sheetsData={sheetsData}
+                setSheetsData={setSheetsData}
+                selectedSheetIndex={selectedSheetIndex}
+                setSelectedSheetIndex={setSelectedSheetIndex}
+              />
+            </>
+          )}
         </>
       )}
     </>

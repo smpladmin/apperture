@@ -13,9 +13,9 @@ import {
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
 import { useState } from 'react';
-import { getTransientSpreadsheets } from '@lib/services/spreadsheetService';
+import { getTransientSpreadsheets } from '@lib/services/workbookService';
 import { useRouter } from 'next/router';
-import { TransientSheetData } from '@lib/domain/spreadsheet';
+import { TransientSheetData } from '@lib/domain/workbook';
 import { cloneDeep } from 'lodash';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { ErrorResponse } from '@lib/services/util';
@@ -56,7 +56,7 @@ const QueryModal = ({
     const response = await getTransientSpreadsheets(
       dsId as string,
       sheetData.query,
-      !sheetData.withNLP
+      sheetData.is_sql
     );
 
     setLoading(false);
@@ -114,7 +114,7 @@ const QueryModal = ({
 
         <ModalBody px={'9'} overflowY={'auto'} py={'9'}>
           <Flex direction={'column'} gap={'4'}>
-            {sheetData.withNLP ? (
+            {!sheetData.is_sql ? (
               <Textarea
                 value={sheetData.query}
                 bg={'white.100'}

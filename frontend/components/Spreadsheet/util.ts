@@ -1,21 +1,26 @@
-import { range } from 'lodash';
+import { ColumnType, SpreadSheetColumn } from '@lib/domain/workbook';
+import { head, range } from 'lodash';
 
 export const expressionTokenRegex = /[A-Za-z]+|[0-9]+|[\+\*-\/\^\(\)]/g;
 
-const generateOtherKeys = (headers: string[]) => {
-  return range(headers.length + 1, 27).map((i) =>
-    String.fromCharCode(65 + i - 1)
-  );
+const generateOtherColumns = (headers: SpreadSheetColumn[]) => {
+  return range(headers.length + 1, 27).map((i) => {
+    return {
+      name: String.fromCharCode(65 + i - 1),
+      type: ColumnType.COMPUTED_HEADER,
+    };
+  });
 };
 
-export const fillRows = (data: any[], headers: string[]) => {
+export const fillRows = (data: any[], headers: SpreadSheetColumn[]) => {
   const currentLength = data.length;
-  const otherKeys = generateOtherKeys(headers);
-  const keys = [...headers, ...otherKeys];
+  const otherKeys = generateOtherColumns(headers);
+  const columns = [...headers, ...otherKeys];
+
   const gen = range(currentLength + 1, 1001).map((index) => {
     const row: any = {};
-    keys.forEach((key) => {
-      row[key] = '';
+    columns.forEach((key) => {
+      row[key.name] = '';
     });
     row['index'] = index;
     return row;
@@ -23,7 +28,7 @@ export const fillRows = (data: any[], headers: string[]) => {
 
   const dataWitKeys = [...data].map((row) => {
     otherKeys.forEach((key) => {
-      row[key] = '';
+      row[key.name] = '';
     });
     return row;
   });
@@ -31,10 +36,10 @@ export const fillRows = (data: any[], headers: string[]) => {
   return [...dataWitKeys, ...gen];
 };
 
-export const fillHeaders = (headers: string[]) => {
-  const gen = generateOtherKeys(headers);
+export const fillHeaders = (headers: SpreadSheetColumn[]) => {
+  const gen = generateOtherColumns(headers);
   const updatedHeaders = [...headers, ...gen];
-  updatedHeaders.unshift('index');
+  updatedHeaders.unshift({ name: 'index', type: ColumnType.QUERY_HEADER });
   return updatedHeaders;
 };
 

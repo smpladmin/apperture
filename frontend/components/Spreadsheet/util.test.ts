@@ -10,6 +10,7 @@ import {
   power,
   subtract,
 } from './util';
+import { ColumnType } from '@lib/domain/workbook';
 
 describe('Spreadhsheet Utils', () => {
   describe('fillRowsAndColumns', () => {
@@ -66,11 +67,12 @@ describe('Spreadhsheet Utils', () => {
           event_name: 'Topic_Click',
         },
       ];
-      headers = ['event_name'];
+      headers = [{ name: 'event_name', type: ColumnType.QUERY_HEADER }];
     });
 
     it('should fill empty rows in the incoming data till 1000 index', () => {
       const res = fillRows(data, headers);
+
       expect(res.length).toBe(1000);
       expect(res.map((it: any) => it.index)).toEqual(range(1, 1001));
       expect(res.slice(0, 10)).toEqual(data);
@@ -86,9 +88,15 @@ describe('Spreadhsheet Utils', () => {
       const res = fillHeaders(headers);
 
       expect(res.length).toBe(27);
-      expect(res.slice(0, 2)).toEqual(['index', 'event_name']);
+      expect(res.slice(0, 2)).toEqual([
+        { name: 'index', type: ColumnType.QUERY_HEADER },
+        { name: 'event_name', type: ColumnType.QUERY_HEADER },
+      ]);
       expect(res.slice(2, 27)).toEqual(
-        range(1, 26).map((i) => String.fromCharCode(65 + i))
+        range(1, 26).map((i) => ({
+          name: String.fromCharCode(65 + i),
+          type: ColumnType.COMPUTED_HEADER,
+        }))
       );
     });
 
