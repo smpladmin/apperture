@@ -77,7 +77,6 @@ class EventPropertiesSaver:
     def save_cs_event_properties(self, events):
         try:
             # Update events map with the latest properties
-            logging.info(self.update_events_map(path=f"/private/clickstream_event_properties"))
             event_properties = [
                 ClickStreamEventProperties.build(
                     event=item["event"],
@@ -87,7 +86,6 @@ class EventPropertiesSaver:
                     path=f"/private/clickstream_event_properties"
                 )
             ]
-            logging.info(f"event_properties: {event_properties}")
             self.cs_events_map = self.create_cs_events_map(
                 event_properties=event_properties
             )
