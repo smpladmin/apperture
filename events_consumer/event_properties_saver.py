@@ -100,7 +100,7 @@ class EventPropertiesSaver:
                 ]
                 props = self.get_distinct_values(list_of_lists=props)
 
-                if set(self.cs_events_map.get(event, [])) != set(props):
+                if not set(props).issubset(set(self.cs_events_map.get(event, []))):
                     logging.info(f"Saving criteria met for {event} event. Saving to db")
                     new_props = self.get_distinct_values(
                         list_of_lists=[props, self.cs_events_map.get(event, [])]
