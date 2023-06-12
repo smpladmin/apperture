@@ -153,3 +153,15 @@ class EventProperties(NamedTuple):
             properties=properties,
             provider=provider,
         )
+
+
+class ClickStreamEventProperties(NamedTuple):
+    event: str
+    properties: List
+
+    @staticmethod
+    def build(event, properties):
+        return ClickStreamEventProperties(
+            event=event,
+            properties=properties,
+        )

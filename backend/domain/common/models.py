@@ -29,3 +29,11 @@ class SavedItems(BaseModel):
 class Property(BaseModel):
     name: str
     type: str
+
+
+class CaptureEvent(str, Enum):
+    AUTOCAPTURE = "$autocapture"
+    PAGEVIEW = "$pageview"
+    PAGELEAVE = "$pageleave"
+    RAGECLICK = "$rageclick"
+    IDENTIFY = "$identify"

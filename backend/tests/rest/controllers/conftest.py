@@ -15,6 +15,7 @@ from domain.actions.models import (
 )
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App
+from domain.clickstream_event_properties.models import ClickStreamEventProperties
 from domain.common.date_models import DateFilter, DateFilterType, LastDateFilter
 from domain.common.filter_models import (
     FilterDataType,
@@ -467,7 +468,7 @@ def datasource_service():
         integration_id="636a1c61d715ca6baae65611",
         app_id="636a1c61d715ca6baae65611",
         user_id="636a1c61d715ca6baae65611",
-        provider=IntegrationProvider.MIXPANEL,
+        provider=IntegrationProvider.APPERTURE,
         external_source_id="123",
         version=DataSourceVersion.DEFAULT,
         clickhouse_credential=ClickHouseCredential(
@@ -577,6 +578,10 @@ def action_service():
         action_future,
     ]
     action_service_mock.update_events_for_action = mock.AsyncMock()
+    action_service_mock.get_props.return_value = [
+        Property(name="prop1", type="default"),
+        Property(name="prop2", type="default"),
+    ]
     return action_service_mock
 
 
@@ -606,6 +611,11 @@ def events_service():
             ],
         )
     )
+    events_service_mock.get_unique_events.return_value = [
+        ["test1"],
+        ["test2"],
+        ["clicked on settings"],
+    ]
     return events_service_mock
 
 
@@ -695,6 +705,29 @@ def event_properties_service():
         ),
     ]
 
+    event_properties_service_mock.get_event_properties_for_datasource.return_value = [
+        EventProperties(
+            event="test1",
+            datasource_id=PydanticObjectId("63ce4906f496f7b462ab7e94"),
+            provider="mixpanel",
+            properties=[
+                Property(name="prop1", type="string"),
+                Property(name="prop2", type="string"),
+                Property(name="prop3", type="string"),
+            ],
+        ),
+        EventProperties(
+            event="test2",
+            datasource_id=PydanticObjectId("63ce4906f496f7b462ab7e94"),
+            provider="mixpanel",
+            properties=[
+                Property(name="prop4", type="string"),
+                Property(name="prop5", type="string"),
+                Property(name="prop6", type="string"),
+            ],
+        ),
+    ]
+
     return event_properties_service_mock
 
 
@@ -727,6 +760,47 @@ def spreadsheets_service():
     )
 
     return spreadsheets_service_mock
+
+
+@pytest.fixture(scope="module")
+def clickstream_event_properties_service():
+    clickstream_event_properties_service_mock = mock.AsyncMock()
+    ClickStreamEventProperties.get_settings = mock.MagicMock()
+    clickstream_event_properties = ClickStreamEventProperties(
+        event="$autocapture",
+        properties=[
+            Property(name="prop1", type="string"),
+            Property(name="prop2", type="string"),
+            Property(name="prop3", type="string"),
+        ],
+    )
+    update_event_properties_future = asyncio.Future()
+    update_event_properties_future.set_result(clickstream_event_properties)
+
+    clickstream_event_properties_service_mock.update_event_properties.return_value = (
+        update_event_properties_future
+    )
+
+    clickstream_event_properties_service_mock.get_event_properties.return_value = [
+        ClickStreamEventProperties(
+            event="$autocapture",
+            properties=[
+                Property(name="prop1", type="string"),
+                Property(name="prop4", type="string"),
+                Property(name="prop3", type="string"),
+            ],
+        ),
+        ClickStreamEventProperties(
+            event="$pageview",
+            properties=[
+                Property(name="prop1", type="string"),
+                Property(name="prop4", type="string"),
+                Property(name="prop3", type="string"),
+            ],
+        ),
+    ]
+
+    return clickstream_event_properties_service_mock
 
 
 @pytest.fixture(scope="module")
@@ -1516,9 +1590,18 @@ def funnel_steps_data():
 @pytest.fixture(scope="module")
 def event_properties_data():
     return {
+        "datasource_id": "63ce4906f496f7b462ab7e94",
         "event": "test-event",
         "properties": ["prop1", "prop4", "prop3"],
         "provider": "mixpanel",
+    }
+
+
+@pytest.fixture(scope="module")
+def clickstream_event_properties_data():
+    return {
+        "event": "$autocapture",
+        "properties": ["prop1", "prop4", "prop3"],
     }
 
 
@@ -1991,7 +2074,7 @@ def integration_response():
             "externalSourceId": "123",
             "integrationId": "636a1c61d715ca6baae65611",
             "name": None,
-            "provider": "mixpanel",
+            "provider": "apperture",
             "revisionId": ANY,
             "updatedAt": None,
             "userId": "636a1c61d715ca6baae65611",

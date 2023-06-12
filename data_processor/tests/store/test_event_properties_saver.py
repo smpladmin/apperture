@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, call, ANY
+from unittest.mock import MagicMock, ANY
 
 import pandas as pd
 
@@ -39,10 +39,10 @@ class TestEventPropertiesSaver:
         self.service._save_data.assert_called_with(
             **{
                 "data": {
+                    "datasource_id": "test-id",
                     "event": "event3",
                     "properties": ANY,
                     "provider": IntegrationProvider.MIXPANEL,
                 },
-                "datasource_id": "test-id",
             }
         )

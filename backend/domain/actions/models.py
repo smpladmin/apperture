@@ -5,6 +5,7 @@ from typing import List, Literal, Optional
 from beanie import PydanticObjectId
 from pydantic import BaseModel
 
+from domain.common.models import CaptureEvent
 from repositories import Document
 
 
@@ -17,14 +18,6 @@ class UrlMatching(str, Enum):
 class ActionGroupCondition(str, Enum):
     AND = "and"
     OR = "or"
-
-
-class CaptureEvent(str, Enum):
-    AUTOCAPTURE = "$autocapture"
-    PAGEVIEW = "$pageview"
-    PAGELEAVE = "$pageleave"
-    RAGECLICK = "$rageclick"
-    IDENTIFY = "$identify"
 
 
 class ActionGroup(BaseModel):

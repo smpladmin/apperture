@@ -1,11 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import Spreadsheet from './index';
-import { getTransientSpreadsheets } from '@lib/services/spreadsheetService';
+import { getTransientSpreadsheets } from '@lib/services/workbookService';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from '@tests/util';
 import { act } from 'react-dom/test-utils';
+import { ColumnType } from '@lib/domain/workbook';
 
-jest.mock('@lib/services/spreadsheetService');
+jest.mock('@lib/services/workbookService');
 
 describe('spreadsheet', () => {
   let mockedGetTransientSpreadsheet: jest.Mock;
@@ -14,7 +15,7 @@ describe('spreadsheet', () => {
     mockedGetTransientSpreadsheet.mockReturnValue({
       status: 200,
       data: {
-        headers: ['event_name'],
+        headers: [{ name: 'event_name', type: ColumnType.QUERY_HEADER }],
         data: [
           {
             index: 1,
@@ -104,9 +105,10 @@ describe('spreadsheet', () => {
     it('should not close query modal  and show error message, if query is not executed successfully', async () => {
       mockedGetTransientSpreadsheet.mockReturnValue({
         status: 400,
-        data: {
+        error: {
           detail: 'Invalid query: Cannot select properties from table',
         },
+        data: undefined,
       });
 
       renderSpreadsheet();
@@ -294,7 +296,10 @@ describe('spreadsheet', () => {
       mockedGetTransientSpreadsheet.mockReturnValue({
         status: 200,
         data: {
-          headers: ['event_name', 'count(event_name)'],
+          headers: [
+            { name: 'event_name', type: ColumnType.QUERY_HEADER },
+            { name: 'count(event_name)', type: ColumnType.QUERY_HEADER },
+          ],
           data: [
             {
               index: 1,

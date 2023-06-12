@@ -41,11 +41,11 @@ class QueryParser:
 
     def match_table_name(self, query_string: str, dsId: str, is_sql: bool):
         parsed_query = parse_one(query_string)
-        for table in parsed_query.find_all(exp.Table):
-            if table.name != "events":
-                raise BusinessError(
-                    "Invalid query: Cannot select from table other than event",
-                )
+        table_names = [table.name for table in parsed_query.find_all(exp.Table)]
+        if "events" not in table_names and "clickstream" not in table_names:
+            raise BusinessError(
+                "Invalid query: Cannot select from table other than event",
+            )
         return (
             parsed_query.where(condition(f"datasource_id='{dsId}'")).sql()
             if not is_sql

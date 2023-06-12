@@ -10,6 +10,17 @@ from domain.actions.service import ActionService
 from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
 from domain.clickstream.service import ClickstreamService
+from domain.clickstream_event_properties.service import (
+    ClickStreamEventPropertiesService,
+)
+from domain.event_properties.service import EventPropertiesService
+
+from server import app
+from mongo.mongo import Mongo
+from clickhouse import Clickhouse
+from rest.middlewares import get_user, get_user_id, validate_jwt, validate_api_key
+from domain.notifications.service import NotificationService
+from domain.funnels.service import FunnelsService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.event_properties.service import EventPropertiesService
@@ -51,6 +62,7 @@ def app_init(
     retention_service,
     event_properties_service,
     spreadsheets_service,
+    clickstream_event_properties_service,
 ):
     print("Setting up App")
     app.dependency_overrides[validate_jwt] = lambda: mock.MagicMock()
@@ -78,6 +90,9 @@ def app_init(
     app.dependency_overrides[RetentionService] = lambda: retention_service
     app.dependency_overrides[EventPropertiesService] = lambda: event_properties_service
     app.dependency_overrides[SpreadsheetService] = lambda: spreadsheets_service
+    app.dependency_overrides[
+        ClickStreamEventPropertiesService
+    ] = lambda: clickstream_event_properties_service
     FastAPICache.init(backend=InMemoryBackend(), prefix="apperture-cache")
     yield app
 

@@ -19,12 +19,12 @@ export const _getEdges = async (token: string, dsId: string) => {
 
 export const _getNodes = async (token: string, dsId: string) => {
   const res = await ApperturePrivateGet(`/datasources/${dsId}/nodes`, token);
-  return res.data;
+  return res.data || [];
 };
 
 export const getNodes = async (dsId: string): Promise<Node[]> => {
   const res = await AppertureGet(`/datasources/${dsId}/nodes`);
-  return res.data;
+  return res.data || [];
 };
 
 export const getTrendsData = async (
@@ -68,13 +68,8 @@ export const getNodeSignificanceData = async (dsId: string, nodeId: string) => {
 };
 
 export const getEventProperties = async (dsId: string): Promise<string[]> => {
-  try {
-    const res = await AppertureAPI.get(`/datasources/${dsId}/event_properties`);
-    return res.data;
-  } catch (e) {
-    console.error((e as AxiosError).message);
-    return [];
-  }
+  const result = await AppertureGet(`/datasources/${dsId}/event_properties`);
+  return result.data || [];
 };
 
 export const getEventPropertiesValue = async (

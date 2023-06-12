@@ -25,6 +25,7 @@ type WatchlistTableProps = {
   onRowClick: Function;
   tableColumns?: ColumnDef<SavedItems, any>[];
   handleDelete: Function;
+  disableDelete?: boolean;
 };
 
 const WatchlistTable = ({
@@ -32,6 +33,7 @@ const WatchlistTable = ({
   onRowClick,
   tableColumns,
   handleDelete,
+  disableDelete = false,
 }: WatchlistTableProps) => {
   const {
     device: { isMobile },
@@ -74,7 +76,11 @@ const WatchlistTable = ({
             }),
             columnHelper.accessor('details._id', {
               cell: (info) => (
-                <Actions info={info} handleDelete={handleDelete} />
+                <Actions
+                  info={info}
+                  handleDelete={handleDelete}
+                  disableDelete={disableDelete}
+                />
               ),
               header: '',
             }),

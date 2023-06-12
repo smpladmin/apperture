@@ -5,6 +5,7 @@ import { MetricWithUser } from '@lib/domain/metric';
 import { NotificationWithUser } from '@lib/domain/notification';
 import { SegmentWithUser } from '@lib/domain/segment';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
+import { WorkbookWithUser } from '@lib/domain/workbook';
 import { CellContext } from '@tanstack/react-table';
 
 export const Details = ({
@@ -17,6 +18,7 @@ export const Details = ({
     | MetricWithUser
     | NotificationWithUser
     | ActionWithUser
+    | WorkbookWithUser
   >;
 }) => {
   const { type, details } = info?.row?.original;

@@ -6,6 +6,7 @@ import { ActionWithUser } from './action';
 import { FunnelWithUser } from './funnel';
 import { MetricWithUser } from './metric';
 import { SegmentWithUser } from './segment';
+import { WorkbookWithUser } from './workbook';
 
 export enum WatchListItemType {
   ALL = 'all',
@@ -14,6 +15,7 @@ export enum WatchListItemType {
   SEGMENTS = 'segments',
   ACTIONS = 'actions',
   RETENTIONS = 'retentions',
+  WORKBOOKS = 'workbooks',
 }
 
 const paths = {
@@ -23,6 +25,7 @@ const paths = {
   [WatchListItemType.SEGMENTS]: 'segment/edit',
   [WatchListItemType.ACTIONS]: 'action/edit',
   [WatchListItemType.RETENTIONS]: 'retention/edit',
+  [WatchListItemType.WORKBOOKS]: 'workbook/create',
 };
 
 export namespace WatchListItemType {
@@ -38,5 +41,6 @@ export type SavedItems = {
     | SegmentWithUser
     | MetricWithUser
     | NotificationWithUser
-    | ActionWithUser;
+    | ActionWithUser
+    | WorkbookWithUser;
 };

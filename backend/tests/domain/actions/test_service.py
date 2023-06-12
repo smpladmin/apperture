@@ -7,13 +7,14 @@ from beanie import PydanticObjectId
 
 from domain.actions.models import Action, ActionGroup, ActionGroupCondition
 from domain.actions.service import ActionService
+from domain.clickstream_event_properties.models import ClickStreamEventProperties
 from domain.common.date_models import (
     DateFilter,
     DateFilterType,
     FixedDateFilter,
     LastDateFilter,
 )
-from domain.common.models import IntegrationProvider
+from domain.common.models import IntegrationProvider, CaptureEvent, Property
 from domain.datasources.models import DataSource
 
 
@@ -24,6 +25,7 @@ class TestActionService:
         Action.enabled = MagicMock(return_value=True)
 
         DataSource.get_settings = MagicMock()
+        ClickStreamEventProperties.get_settings = MagicMock()
         self.mongo = MagicMock()
         self.actions = AsyncMock()
         self.date_utils = MagicMock()
@@ -254,3 +256,17 @@ class TestActionService:
     )
     def test_extract_date_range(self, date_filter, result):
         assert self.service.extract_date_range(date_filter=date_filter) == result
+
+    def test_get_props(self):
+        assert self.service.get_props(
+            event_type=CaptureEvent.AUTOCAPTURE,
+            clickstream_event_properties=[
+                ClickStreamEventProperties(
+                    event=CaptureEvent.AUTOCAPTURE,
+                    properties=[
+                        Property(name="prop1", type="default"),
+                        Property(name="prop2", type="default"),
+                    ],
+                )
+            ],
+        ) == [Property(name='prop1', type='default'), Property(name='prop2', type='default')]

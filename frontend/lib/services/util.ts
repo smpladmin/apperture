@@ -1,6 +1,14 @@
 import { AppertureAPI } from '@lib/apiClient';
 import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
-import { AxiosError, AxiosRequestConfig } from 'axios';
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+
+export type ErrorResponse = {
+  status: number;
+  data: undefined;
+  error: {
+    detail: string;
+  };
+};
 
 export const AppertureGet = async (
   path: string,
@@ -15,8 +23,9 @@ export const AppertureGet = async (
     console.error(error.message);
     return {
       status: error.response?.status,
-      data: error.response?.data as any,
-    };
+      error: error.response?.data || { detail: '' },
+      data: undefined,
+    } as ErrorResponse;
   }
 };
 
@@ -35,8 +44,9 @@ export const ApperturePrivateGet = async (
     console.error(error.message);
     return {
       status: error.response?.status,
-      data: error.response?.data as any,
-    };
+      error: error.response?.data || { detail: '' },
+      data: undefined,
+    } as ErrorResponse;
   }
 };
 
@@ -56,8 +66,9 @@ export const ApperturePost = async (
     console.error(error.message);
     return {
       status: error.response?.status,
-      data: error.response?.data as any,
-    };
+      error: error.response?.data || { detail: '' },
+      data: undefined,
+    } as ErrorResponse;
   }
 };
 
@@ -74,8 +85,9 @@ export const ApperturePut = async (
     console.error(error.message);
     return {
       status: error.response?.status,
-      data: error.response?.data as any,
-    };
+      error: error.response?.data || { detail: '' },
+      data: undefined,
+    } as ErrorResponse;
   }
 };
 
@@ -87,7 +99,8 @@ export const AppertureDelete = async (path: string) => {
     console.error(error.message);
     return {
       status: error.response?.status,
-      data: error.response?.data as any,
-    };
+      error: error.response?.data || { detail: '' },
+      data: undefined,
+    } as ErrorResponse;
   }
 };

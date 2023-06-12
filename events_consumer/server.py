@@ -125,9 +125,12 @@ async def process_kafka_messages() -> None:
             if len(precision_events):
                 logging.info(f"Saving precision events: {precision_events}")
                 save_precision_events(precision_events)
+            tmp = events
             events = []
             offsets = []
             await consumer.commit()
+
+            app.event_properties_saver.save_cs_event_properties(events=tmp)
 
             if len(precision_events):
                 logging.info(

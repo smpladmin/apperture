@@ -1,24 +1,47 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { Provider } from '@lib/domain/provider';
-import { SavedItems } from '@lib/domain/watchlist';
+import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { Row } from '@tanstack/react-table';
 import { useRouter } from 'next/router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import WatchlistTable from '../Table';
+import { getSavedWorkbooksForDatasourceId } from '@lib/services/workbookService';
+import { WorkbookWithUser } from '@lib/domain/workbook';
 
 const SavedSheets = ({ provider }: { provider: Provider }) => {
   const [sheets, setSheets] = useState<SavedItems[]>([]);
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
   const { dsId } = router.query;
 
-  const onRowClick = (row: Row<SavedItems>) => {};
+  useEffect(() => {
+    const getWorkbooks = async () => {
+      let savedWorkbooks =
+        (await getSavedWorkbooksForDatasourceId(dsId as string)) || [];
+      savedWorkbooks = savedWorkbooks.map((workbook: WorkbookWithUser) => {
+        return { type: WatchListItemType.WORKBOOKS, details: workbook };
+      });
+      setSheets(savedWorkbooks);
+      setIsLoading(false);
+    };
+
+    setIsLoading(true);
+    getWorkbooks();
+  }, []);
+
+  const onRowClick = (row: Row<SavedItems>) => {
+    const { _id, datasourceId } = row?.original?.details;
+    router.push({
+      pathname: `/analytics/workbook/edit/[workbookId]`,
+      query: { workbookId: _id, dsId: datasourceId },
+    });
+  };
 
   const handleRedirectToCreateSpreadsheet = () => {
     router.push({
-      pathname: '/analytics/spreadsheet/create/[dsId]',
+      pathname: '/analytics/workbook/create/[dsId]',
       query: { dsId },
     });
   };
@@ -67,6 +90,7 @@ const SavedSheets = ({ provider }: { provider: Provider }) => {
             savedItemsData={sheets}
             onRowClick={onRowClick}
             handleDelete={handleDelete}
+            disableDelete
           />
         )}
       </Box>
