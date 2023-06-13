@@ -41,6 +41,11 @@ async def get_datasources(
     return await ds_service.get_datasources(id)
 
 
+# def get_clickhouse_credentials
+# 1. already existing datsource and no clickhouse credential on app -
+# a. Creatung datasource
+
+
 @router.post("/integrations/{id}/datasources", response_model=list[DataSourceResponse])
 async def create_datasources(
     id: str,
@@ -50,8 +55,11 @@ async def create_datasources(
     ds_service: DataSourceService = Depends(),
     integration_service: IntegrationService = Depends(),
     dpq_service: DPQueueService = Depends(),
+    app_service: AppService = Depends(),
 ):
     integration = await integration_service.get_user_integration(id, user_id)
+    app = await app_service.get_app(id=integration.app_id)
+
     ds_promises = [
         ds_service.create_datasource(
             ds.externalSourceId,
@@ -62,8 +70,15 @@ async def create_datasources(
         for ds in datasource_dtos
     ]
     datasources = await asyncio.gather(*ds_promises)
+
+    if app.clickhouse_credential:
+        ds_service.create_user_policy_for_all_datasources(
+            datasources=datasources, username=app.clickhouse_credential.username
+        )
+
     if trigger_data_processor:
         jobs = [dpq_service.enqueue(str(ds.id)) for ds in datasources]
+
         logging.info(
             f"Scheduled jobs - {jobs} for datasources - {[ds.id for ds in datasources]}"
         )
@@ -98,6 +113,11 @@ async def create_integration(
             DataSourceVersion.DEFAULT,
             integration,
         )
+
+        if app.clickhouse_credential:
+            ds_service.create_user_policy(
+                datasource_id=datasource.id, username=app.clickhouse_credential.username
+            )
 
         if trigger_data_processor:
             runlogs = await runlog_service.create_runlogs(datasource.id)

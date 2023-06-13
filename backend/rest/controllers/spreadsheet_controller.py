@@ -90,12 +90,7 @@ async def compute_transient_spreadsheets(
         )
 
         if not has_app_credential:
-            datasources = datasource_service.get_datasources_for_app_id(app.id)
-            for ds in datasources:
-                await datasource_service.create_user_policy(
-                    username=clickhouse_credential.username,
-                    datasource_id=ds.id,
-                )
+            datasource_service.create_row_policy_for_datasources_by_app(app=app)
 
         if not dto.is_sql:
             sql_query = text_to_sql(dto.query)

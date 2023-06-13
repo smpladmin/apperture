@@ -1,7 +1,6 @@
 import asyncio
-import random
-import string
-import uuid
+from typing import List
+
 
 import httpx
 from beanie import PydanticObjectId
@@ -10,9 +9,9 @@ from fastapi_cache.decorator import cache
 
 from authorisation.service import AuthService
 from cache.cache import CACHE_EXPIRY_24_HOURS, service_datasource_key_builder
+from domain.apps.models import App
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import (
-    ClickHouseCredential,
     DataSource,
     DataSourceVersion,
     ProviderDataSource,
@@ -71,7 +70,11 @@ class DataSourceService:
     async def get_datasources_for_app_id(self, app_id: PydanticObjectId):
         return await DataSource.find(DataSource.app_id == app_id).to_list()
 
-    def create_user_policy(self, username: str, datasource_id: str):
+    def create_user_policy(
+        self,
+        datasource_id: str,
+        username: str,
+    ):
         self.clickhouse_role.create_row_policy(
             datasource_id=datasource_id, username=username
         )
@@ -83,7 +86,7 @@ class DataSourceService:
         name: str,
         version: DataSourceVersion,
         integration: Integration,
-    ):
+    ) -> DataSource:
         datasource = DataSource(
             external_source_id=external_source_id,
             name=name,
@@ -96,6 +99,19 @@ class DataSourceService:
 
         await datasource.insert()
         return datasource
+
+    async def create_user_policy_for_all_datasources(
+        self, datasources: List[DataSource], username: str
+    ):
+        for ds in datasources:
+            await self.create_user_policy(
+                datasource_id=ds.id,
+                username=username,
+            )
+
+    async def create_row_policy_for_datasources_by_app(self, app: App):
+        datasources = await self.get_datasources_for_app_id(app.id)
+        self.create_user_policy_for_all_datasources(datasources=datasources)
 
     async def get_enabled_datasources(self):
         return await DataSource.find(DataSource.enabled == True).to_list()
