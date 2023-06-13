@@ -41,11 +41,6 @@ async def get_datasources(
     return await ds_service.get_datasources(id)
 
 
-# def get_clickhouse_credentials
-# 1. already existing datsource and no clickhouse credential on app -
-# a. Creatung datasource
-
-
 @router.post("/integrations/{id}/datasources", response_model=list[DataSourceResponse])
 async def create_datasources(
     id: str,
@@ -115,7 +110,7 @@ async def create_integration(
         )
 
         if app.clickhouse_credential:
-            ds_service.create_user_policy(
+            ds_service.create_row_policy_for_username(
                 datasource_id=datasource.id, username=app.clickhouse_credential.username
             )
 

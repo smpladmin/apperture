@@ -22,7 +22,7 @@ class AppService:
         password = "".join(random.choice(characters) for _ in range(length))
         return password
 
-    def get_app_database(
+    def create_app_database(
         self,
         name: str,
         username: str,
@@ -33,16 +33,16 @@ class AppService:
             database_name=database_name, username=username
         )
 
-    async def create_clickhouse_user(self, id: PydanticObjectId, name: str):
+    async def create_clickhouse_user(
+        self, id: PydanticObjectId, name: str
+    ) -> ClickHouseCredential:
         username = self.generate_random_value(16) + str(id)
         password = self.generate_random_value()
-        self.get_app_database(name=name, username=username)
+        self.create_app_database(name=name, username=username)
         self.clickhouse_role.create_user(username=username, password=password)
+        self.clickhouse_role.grant_select_permission_to_user(username=username)
 
-        await App.find(
-            App.id == PydanticObjectId(id),
-            App.enabled == True,
-        ).update(
+        await App.find(App.id == PydanticObjectId(id), App.enabled == True,).update(
             {
                 "$set": {
                     "clickhouse_credential": ClickHouseCredential(

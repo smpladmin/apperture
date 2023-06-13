@@ -54,7 +54,7 @@ class TestDataSourceService:
         assert all(c in string.ascii_letters + string.digits for c in password)
 
     def test_create_user_policy(self):
-        self.service.create_user_policy(
+        self.service.create_row_policy_for_username(
             username=self.username, password=self.password, datasource_id=self.ds_id
         )
 
