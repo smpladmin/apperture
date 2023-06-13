@@ -29,6 +29,6 @@ class ClickHouseRole:
             return self.clickhouse.admin.query(query=query)
         except Exception as e:
             self.clickhouse.admin.query(
-                query="DROP POLICY pol{datasource_id} ON default.events, default.clickstream"
+                query=f"DROP POLICY pol{datasource_id} ON default.events, default.clickstream"
             )
             return self.clickhouse.admin.query(query=query)
