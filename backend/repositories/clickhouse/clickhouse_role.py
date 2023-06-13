@@ -32,3 +32,11 @@ class ClickHouseRole:
                 query=f"DROP POLICY pol{datasource_id} ON default.events, default.clickstream"
             )
             return self.clickhouse.admin.query(query=query)
+
+    def grant_permission_to_database(self, database_name: str, username: str):
+        query = f"GRANT ALL ON {database_name}.* TO {username};"
+        return self.clickhouse.admin.query(query=query)
+
+    def create_database_for_app(self, database_name: str):
+        query = f"CREATE DATABASE {database_name}"
+        return self.clickhouse.admin.query(query=query)

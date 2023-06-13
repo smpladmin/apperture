@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from ai.text_to_sql import text_to_sql
 from domain.apperture_users.models import AppertureUser
+from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
 from domain.event_properties.service import EventPropertiesService
 from domain.spreadsheets.service import SpreadsheetService
@@ -74,17 +75,27 @@ async def compute_transient_spreadsheets(
     dto: TransientSpreadsheetsDto,
     spreadsheets_service: SpreadsheetService = Depends(),
     datasource_service: DataSourceService = Depends(),
+    app_service: AppService = Depends(),
 ):
     try:
         datasource = await datasource_service.get_datasource(dto.datasourceId)
+        app = await app_service.get_app(id=datasource.app_id)
+
+        has_app_credential = bool(app.clickhouse_credential)
 
         clickhouse_credential = (
-            datasource.clickhouse_credential
-            if datasource.clickhouse_credential
-            else await datasource_service.create_clickhouse_credential_and_user_policy(
-                dto.datasourceId
-            )
+            app.clickhouse_credential
+            if has_app_credential
+            else await app_service.create_clickhouse_user(app.id)
         )
+
+        if not has_app_credential:
+            datasources = datasource_service.get_datasources_for_app_id(app.id)
+            for ds in datasources:
+                await datasource_service.create_user_policy(
+                    username=clickhouse_credential.username,
+                    datasource_id=ds.id,
+                )
 
         if not dto.is_sql:
             sql_query = text_to_sql(dto.query)

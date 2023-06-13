@@ -68,13 +68,10 @@ class DataSourceService:
     async def get_datasources_for_provider(self, provider: IntegrationProvider):
         return await DataSource.find(DataSource.provider == provider).to_list()
 
-    def generate_random_value(self, length=32):
-        characters = string.ascii_letters + string.digits
-        password = "".join(random.choice(characters) for _ in range(length))
-        return password
+    async def get_datasources_for_app_id(self, app_id: PydanticObjectId):
+        return await DataSource.find(DataSource.app_id == app_id).to_list()
 
-    def create_user_policy(self, username: str, password: str, datasource_id: str):
-        self.clickhouse_role.create_user(username=username, password=password)
+    def create_user_policy(self, username: str, datasource_id: str):
         self.clickhouse_role.create_row_policy(
             datasource_id=datasource_id, username=username
         )
@@ -98,26 +95,7 @@ class DataSourceService:
         )
 
         await datasource.insert()
-        self.create_clickhouse_credential_and_user_policy(datasource_id=datasource.id)
         return datasource
-
-    async def create_clickhouse_credential_and_user_policy(self, datasource_id: str):
-        clickhouse_credential = ClickHouseCredential(
-            username=self.generate_random_value(),
-            password=self.generate_random_value(),
-        )
-
-        self.create_user_policy(
-            username=clickhouse_credential.username,
-            password=clickhouse_credential.password,
-            datasource_id=datasource_id,
-        )
-        await DataSource.find(
-            DataSource.id == PydanticObjectId(datasource_id),
-            DataSource.enabled == True,
-        ).update({"$set": {"clickhouse_credential": clickhouse_credential}})
-
-        return clickhouse_credential
 
     async def get_enabled_datasources(self):
         return await DataSource.find(DataSource.enabled == True).to_list()
