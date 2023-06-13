@@ -14,7 +14,7 @@ class TestRoleRepository:
         self.grant_select_permission_query = (
             f"GRANT SELECT ON events TO {self.username}"
         )
-        self.create_row_policy_query = f"CREATE ROW POLICY IF NOT EXISTS pol{self.dsId} ON default.events, default.clickstream USING datasource_id='{self.dsId}' TO {self.username}"
+        self.create_row_policy_query = f"CREATE ROW POLICY pol{self.dsId} ON default.events, default.clickstream USING datasource_id='{self.dsId}' TO {self.username}"
         self.query = MagicMock()
         self.clickhouse.admin = MagicMock(return_value=self.query)
 
