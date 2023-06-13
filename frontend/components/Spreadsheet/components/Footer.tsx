@@ -1,7 +1,9 @@
-import { Box, Flex, Radio, RadioGroup, Text } from '@chakra-ui/react';
-import React from 'react';
+import { Box, Flex, Input, Radio, RadioGroup, Text } from '@chakra-ui/react';
+import React, { useRef, useState } from 'react';
 import AddSheet from './AddSheet';
 import { TransientSheetData } from '@lib/domain/workbook';
+import cloneDeep from 'lodash/cloneDeep';
+import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 
 type FooterProps = {
   openQueryModal: Function;
@@ -18,6 +20,12 @@ const Footer = ({
   selectedSheetIndex,
   setSelectedSheetIndex,
 }: FooterProps) => {
+  const updateSheetName = (updatedSheetName: string, index: number) => {
+    const toUpdateSheets = cloneDeep(sheetsData);
+    toUpdateSheets[index].name = updatedSheetName;
+    setSheetsData(toUpdateSheets);
+  };
+
   return (
     <Flex
       position={'sticky'}
@@ -29,6 +37,7 @@ const Footer = ({
       borderColor={'grey.700'}
     >
       <Box borderRightWidth={'0.4px'} borderColor={'grey.700'} w={'5'}></Box>
+
       <RadioGroup
         value={selectedSheetIndex}
         onChange={(value: string) => {
@@ -44,21 +53,19 @@ const Footer = ({
                 p={'2'}
                 borderRightWidth={'0.4px'}
                 borderColor={'grey.700'}
-                maxW={'20'}
+                maxW={'30'}
                 alignItems={'center'}
                 justifyContent={'center'}
-                bg={isSelected ? 'grey.700' : 'white.400'}
+                bg={isSelected ? 'grey.400' : 'white.400'}
                 cursor={'pointer'}
                 as={'label'}
                 data-testid={'sheet-name'}
               >
-                <Text
-                  fontSize={'xs-12'}
-                  lineHeight={'xs-12'}
-                  fontWeight={'400'}
-                >
-                  {sheet.name}
-                </Text>
+                <RenameSheet
+                  index={index}
+                  sheet={sheet}
+                  updateSheetName={updateSheetName}
+                />
                 <Radio hidden value={index} />
               </Flex>
             );
@@ -76,3 +83,61 @@ const Footer = ({
 };
 
 export default Footer;
+
+const RenameSheet = ({
+  index,
+  sheet,
+  updateSheetName,
+}: {
+  index: number;
+  sheet: TransientSheetData;
+  updateSheetName: Function;
+}) => {
+  const [showInput, setShowInput] = useState(false);
+  const [name, setName] = useState(sheet.name);
+  const inputRef = useRef(null);
+
+  const handleUpdateName = () => {
+    setShowInput(false);
+    updateSheetName(name, index);
+  };
+
+  useOnClickOutside(inputRef, handleUpdateName);
+  return (
+    <>
+      {showInput ? (
+        <Input
+          autoFocus
+          ref={inputRef}
+          defaultValue={sheet.name}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={handleUpdateName}
+          onKeyDown={(e) => e.key === 'Enter' && handleUpdateName()}
+          fontSize={'xs-12'}
+          lineHeight={'xs-12'}
+          fontWeight={'600'}
+          px={'1'}
+          py={'0'}
+          h={'7'}
+          borderRadius={'4'}
+          focusBorderColor="grey.900"
+          onFocus={(e) => e.target.select()}
+          bg={'white.400'}
+        />
+      ) : (
+        <Text
+          fontSize={'xs-12'}
+          lineHeight={'xs-12'}
+          fontWeight={'400'}
+          onDoubleClick={() => setShowInput(true)}
+          maxW={'25'}
+          textOverflow={'ellipsis'}
+          overflow={'hidden'}
+          whiteSpace={'nowrap'}
+        >
+          {sheet.name}
+        </Text>
+      )}
+    </>
+  );
+};

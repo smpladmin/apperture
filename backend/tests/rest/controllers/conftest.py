@@ -24,7 +24,11 @@ from domain.common.filter_models import (
     LogicalOperators,
 )
 from domain.common.models import IntegrationProvider
-from domain.datasources.models import DataSource, DataSourceVersion
+from domain.datasources.models import (
+    ClickHouseCredential,
+    DataSource,
+    DataSourceVersion,
+)
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
 from domain.event_properties.models import EventProperties
 from domain.events.models import Event, PaginatedEventsData
@@ -44,23 +48,23 @@ from domain.metrics.models import (
     MetricValue,
 )
 from domain.notifications.models import (
+    ComputedNotification,
     Notification,
     NotificationChannel,
+    NotificationData,
     NotificationFrequency,
     NotificationMetric,
+    NotificationThresholdType,
     NotificationType,
     NotificationVariant,
     ThresholdMap,
-    NotificationData,
-    NotificationThresholdType,
-    ComputedNotification,
 )
 from domain.properties.models import Properties, Property, PropertyDataType
 from domain.retention.models import (
-    Retention,
+    ComputedRetention,
     EventSelection,
     Granularity,
-    ComputedRetention,
+    Retention,
 )
 from domain.runlogs.models import RunLog
 from domain.segments.models import (
@@ -69,6 +73,11 @@ from domain.segments.models import (
     SegmentFilterConditions,
     SegmentGroup,
     WhereSegmentFilter,
+)
+from domain.spreadsheets.models import (
+    ColumnType,
+    ComputedSpreadsheet,
+    SpreadSheetColumn,
 )
 from domain.users.models import UserDetails
 from rest.dtos.actions import ComputedActionResponse
@@ -466,13 +475,20 @@ def datasource_service():
         provider=IntegrationProvider.APPERTURE,
         external_source_id="123",
         version=DataSourceVersion.DEFAULT,
+        clickhouse_credential=ClickHouseCredential(
+            username="test_username", password="test_password"
+        ),
     )
     datasource.id = PydanticObjectId("636a1c61d715ca6baae65611")
-
+    clickhouse_credential = ClickHouseCredential(
+        username="test_usernames", password="test_password"
+    )
     datasource_future = asyncio.Future()
     datasource_future.set_result(datasource)
     datasources_future = asyncio.Future()
     datasources_future.set_result([datasource])
+    datasource_credentials_future = asyncio.Future()
+    datasource_credentials_future.set_result(clickhouse_credential)
     datasource_service_mock.get_datasource.return_value = datasource_future
     datasource_service_mock.create_datasource.return_value = datasource_future
     datasource_service_mock.get_datasources_for_apperture.return_value = (
@@ -480,6 +496,9 @@ def datasource_service():
     )
     datasource_service_mock.get_datasources_for_provider.return_value = (
         datasources_future
+    )
+    datasource_service_mock.create_clickhouse_credential_and_user_policy.return_value = (
+        datasource_credentials_future
     )
     return datasource_service_mock
 
@@ -714,6 +733,37 @@ def event_properties_service():
     ]
 
     return event_properties_service_mock
+
+
+@pytest.fixture(scope="module")
+def transient_spreadsheet_data():
+    return {
+        "query": "SELECT  event_name FROM  events WHERE timestamp>=toDate(2023-02-11)",
+        "is_sql": True,
+        "datasourceId": "23412414123123",
+    }
+
+
+@pytest.fixture(scope="module")
+def spreadsheets_service():
+    spreadsheets_service_mock = mock.MagicMock()
+    computed_spreadsheet = ComputedSpreadsheet(
+        headers=[SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)],
+        data=[
+            {"index": 1, "event_name": "test_event_1"},
+            {"index": 2, "event_name": "test_event_2"},
+            {"index": 3, "event_name": "test_event_3"},
+            {"index": 4, "event_name": "test_event_4"},
+            {"index": 5, "event_name": "test_event_5"},
+        ],
+    )
+    spreadsheet_future = asyncio.Future()
+    spreadsheet_future.set_result(computed_spreadsheet)
+    spreadsheets_service_mock.get_transient_spreadsheets.return_value = (
+        spreadsheet_future
+    )
+
+    return spreadsheets_service_mock
 
 
 @pytest.fixture(scope="module")
@@ -2033,6 +2083,10 @@ def integration_response():
             "updatedAt": None,
             "userId": "636a1c61d715ca6baae65611",
             "version": "DEFAULT",
+            "clickhouseCredential": {
+                "password": "test_password",
+                "username": "test_username",
+            },
         },
         "provider": "mixpanel",
         "revisionId": ANY,

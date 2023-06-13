@@ -60,14 +60,17 @@ class SpreadsheetService:
         ).to_list()
 
     def cleanse_query_string(self, query_string: str) -> str:
+        query_string = re.sub(r"--.*\n+", " ", query_string)
         return re.sub(r"\s+|\n+", " ", query_string).strip()
 
-    def get_transient_spreadsheets(
-        self, dsId: str, query: str, is_sql: bool
+    async def get_transient_spreadsheets(
+        self, query: str, username: str, password: str
     ) -> ComputedSpreadsheet:
         query = self.cleanse_query_string(query)
         result = self.spreadsheets.get_transient_spreadsheet(
-            dsId=dsId, query=query, is_sql=is_sql
+            query=query,
+            username=username,
+            password=password,
         )
         response = {
             "headers": [

@@ -73,16 +73,30 @@ async def get_workbooks(
 async def compute_transient_spreadsheets(
     dto: TransientSpreadsheetsDto,
     spreadsheets_service: SpreadsheetService = Depends(),
-    event_properties_service: EventPropertiesService = Depends(),
+    datasource_service: DataSourceService = Depends(),
 ):
     try:
+        datasource = await datasource_service.get_datasource(dto.datasourceId)
+
+        clickhouse_credential = (
+            datasource.clickhouse_credential
+            if datasource.clickhouse_credential
+            else await datasource_service.create_clickhouse_credential_and_user_policy(
+                dto.datasourceId
+            )
+        )
+
         if not dto.is_sql:
             sql_query = text_to_sql(dto.query)
-            return spreadsheets_service.get_transient_spreadsheets(
-                dsId=dto.datasourceId, query=sql_query, is_sql=dto.is_sql
+            return await spreadsheets_service.get_transient_spreadsheets(
+                query=sql_query,
+                username=clickhouse_credential.username,
+                password=clickhouse_credential.password,
             )
-        return spreadsheets_service.get_transient_spreadsheets(
-            dsId=dto.datasourceId, query=dto.query, is_sql=dto.is_sql
+        return await spreadsheets_service.get_transient_spreadsheets(
+            query=dto.query,
+            username=clickhouse_credential.username,
+            password=clickhouse_credential.password,
         )
     except BusinessError as e:
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")

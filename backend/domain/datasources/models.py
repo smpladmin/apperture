@@ -3,6 +3,7 @@ from typing import Optional
 
 from beanie import Indexed, PydanticObjectId
 from pydantic import BaseModel, Field
+
 from domain.common.models import IntegrationProvider
 from repositories.document import Document
 
@@ -11,6 +12,11 @@ class DataSourceVersion(str, Enum):
     V3 = "V3"
     V4 = "V4"
     DEFAULT = "DEFAULT"
+
+
+class ClickHouseCredential(BaseModel):
+    username: str
+    password: str
 
 
 class DataSource(Document):
@@ -22,6 +28,7 @@ class DataSource(Document):
     external_source_id: str
     version: DataSourceVersion
     enabled: bool = True
+    clickhouse_credential: Optional[ClickHouseCredential] = Field(hidden=True)
 
     class Settings:
         name = "datasources"

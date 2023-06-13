@@ -217,6 +217,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   };
 
   const hasQueryWithoutData =
+    savedWorkbook &&
     sheetsData[selectedSheetIndex].query &&
     !sheetsData[selectedSheetIndex].data.length;
 

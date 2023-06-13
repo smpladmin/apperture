@@ -1,11 +1,15 @@
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.inmemory import InMemoryBackend
-import pytest
 from unittest import mock
 
+import pytest
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
+
+from clickhouse import Clickhouse
+from data_processor_queue.service import DPQueueService
 from domain.actions.service import ActionService
-from domain.apps.service import AppService
 from domain.apperture_users.service import AppertureUserService
+from domain.apps.service import AppService
+from domain.clickstream.service import ClickstreamService
 from domain.clickstream_event_properties.service import (
     ClickStreamEventPropertiesService,
 )
@@ -18,17 +22,22 @@ from rest.middlewares import get_user, get_user_id, validate_jwt, validate_api_k
 from domain.notifications.service import NotificationService
 from domain.funnels.service import FunnelsService
 from domain.datasources.service import DataSourceService
-from domain.events.service import EventsService
 from domain.edge.service import EdgeService
-from domain.segments.service import SegmentService
-from domain.properties.service import PropertiesService
-from domain.metrics.service import MetricService
-from domain.users.service import UserService
+from domain.event_properties.service import EventPropertiesService
+from domain.events.service import EventsService
+from domain.funnels.service import FunnelsService
 from domain.integrations.service import IntegrationService
-from domain.runlogs.service import RunLogService
-from data_processor_queue.service import DPQueueService
-from domain.clickstream.service import ClickstreamService
+from domain.metrics.service import MetricService
+from domain.notifications.service import NotificationService
+from domain.properties.service import PropertiesService
 from domain.retention.service import RetentionService
+from domain.runlogs.service import RunLogService
+from domain.segments.service import SegmentService
+from domain.spreadsheets.service import SpreadsheetService
+from domain.users.service import UserService
+from mongo.mongo import Mongo
+from rest.middlewares import get_user, get_user_id, validate_api_key, validate_jwt
+from server import app
 
 
 @pytest.fixture(scope="module")
@@ -52,9 +61,9 @@ def app_init(
     action_service,
     retention_service,
     event_properties_service,
+    spreadsheets_service,
     clickstream_event_properties_service,
 ):
-
     print("Setting up App")
     app.dependency_overrides[validate_jwt] = lambda: mock.MagicMock()
     app.dependency_overrides[validate_api_key] = lambda: mock.MagicMock()
@@ -80,6 +89,7 @@ def app_init(
     app.dependency_overrides[ActionService] = lambda: action_service
     app.dependency_overrides[RetentionService] = lambda: retention_service
     app.dependency_overrides[EventPropertiesService] = lambda: event_properties_service
+    app.dependency_overrides[SpreadsheetService] = lambda: spreadsheets_service
     app.dependency_overrides[
         ClickStreamEventPropertiesService
     ] = lambda: clickstream_event_properties_service

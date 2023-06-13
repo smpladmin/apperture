@@ -1,22 +1,34 @@
-import re
+import logging
+from typing import Union
 
-from fastapi import Depends, HTTPException
-from pypika import ClickHouseQuery
+import clickhouse_connect
+from fastapi import Depends
 
 from clickhouse.clickhouse import Clickhouse
 from repositories.clickhouse.base import EventsBase
 from repositories.clickhouse.parser.query_parser import QueryParser
 
 
-class Spreadsheets(EventsBase):
+class Spreadsheets:
     def __init__(
-        self, clickhouse: Clickhouse = Depends(), parser: QueryParser = Depends()
+        self,
+        clickhouse: Clickhouse = Depends(),
+        parser: QueryParser = Depends(),
     ):
-        super().__init__(clickhouse=clickhouse)
+        self.clickhouse = clickhouse
         self.parser = parser
 
-    def get_transient_spreadsheet(self, dsId: str, query: str, is_sql: bool):
-        query = self.parser.validate_query_string(
-            query_string=query, dsId=dsId, is_sql=is_sql
+    def get_transient_spreadsheet(
+        self,
+        query: str,
+        username: Union[str, None],
+        password: Union[str, None],
+    ):
+        query = self.parser.assign_query_limit(query)
+        restricted_client = self.clickhouse.get_connection_for_user(
+            username=username, password=password
         )
-        return self.execute_query_with_column_names(query, {})
+        result = restricted_client.query(query=query)
+        logging.info(query)
+        restricted_client.close()
+        return result
