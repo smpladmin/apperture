@@ -13,6 +13,7 @@ class ClickHouseRole:
         query = (
             f"CREATE USER {username} IDENTIFIED WITH plaintext_password BY '{password}'"
         )
+        logging.info(f"creating userr {query} ")
 
         return self.clickhouse.admin.query(query=query)
 
@@ -26,17 +27,22 @@ class ClickHouseRole:
         query = f"CREATE ROW POLICY pol{datasource_id} ON default.events, default.clickstream USING datasource_id='{datasource_id}' TO {username}"
 
         try:
+            logging.info(f"policy execution try : {query} ")
             return self.clickhouse.admin.query(query=query)
         except Exception as e:
             self.clickhouse.admin.query(
-                query=f"DROP POLICY pol{datasource_id} ON default.events, default.clickstream"
+                query=f"DROP POLICY IF EXISTS pol{datasource_id} ON default.events, default.clickstream"
             )
+            logging.info(f"policy execution except: {query}")
+
             return self.clickhouse.admin.query(query=query)
 
     def grant_permission_to_database(self, database_name: str, username: str):
-        query = f"GRANT SHOW, SELECT, INSERT, ALTER, CREATE TABLE, CREATE VIEW, DROP TABLE, DROP VIEW, UNDROP TABLE ON {database_name}.* TO {username};"
+        logging.info(f"granting permission for database{database_name} to {username}")
+        query = f"GRANT SHOW, SELECT, INSERT, ALTER, CREATE TABLE, CREATE VIEW, DROP TABLE, DROP VIEW, UNDROP TABLE, TRUNCATE ON {database_name}.* TO {username};"
         return self.clickhouse.admin.query(query=query)
 
     def create_database_for_app(self, database_name: str):
+        logging.info(f"crating databse {database_name}")
         query = f"CREATE DATABASE {database_name}"
         return self.clickhouse.admin.query(query=query)

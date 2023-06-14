@@ -99,18 +99,20 @@ class DataSourceService:
         await datasource.insert()
         return datasource
 
-    async def create_user_policy_for_all_datasources(
+    def create_user_policy_for_all_datasources(
         self, datasources: List[DataSource], username: str
     ):
         for ds in datasources:
-            await self.create_row_policy_for_username(
+            self.create_row_policy_for_username(
                 datasource_id=ds.id,
                 username=username,
             )
 
-    async def create_row_policy_for_datasources_by_app(self, app: App):
+    async def create_row_policy_for_datasources_by_app(self, app: App, username: str):
         datasources = await self.get_datasources_for_app_id(app.id)
-        self.create_user_policy_for_all_datasources(datasources=datasources)
+        self.create_user_policy_for_all_datasources(
+            datasources=datasources, username=username
+        )
 
     async def get_enabled_datasources(self):
         return await DataSource.find(DataSource.enabled == True).to_list()
