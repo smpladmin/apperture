@@ -29,10 +29,6 @@ def test_get_node_significance(client_init, edge_service, node_significance_resp
         "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "version": DataSourceVersion.DEFAULT,
         "enabled": True,
-        "clickhouse_credential": {
-            "password": "test_password",
-            "username": "test_username",
-        },
     } == kwargs["datasource"].dict()
 
     kwargs.pop("datasource")
@@ -64,10 +60,6 @@ def test_get_node_trends(client_init, edge_service, node_trends_response):
         "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "version": DataSourceVersion.DEFAULT,
         "enabled": True,
-        "clickhouse_credential": {
-            "password": "test_password",
-            "username": "test_username",
-        },
     } == kwargs["datasource"].dict()
 
     kwargs.pop("datasource")
@@ -101,10 +93,6 @@ def test_get_sankey_nodes(client_init, edge_service, node_sankey_response):
         "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "version": DataSourceVersion.DEFAULT,
         "enabled": True,
-        "clickhouse_credential": {
-            "password": "test_password",
-            "username": "test_username",
-        },
     } == kwargs["datasource"].dict()
 
     kwargs.pop("datasource")
@@ -269,10 +257,6 @@ def test_get_nodes(
         "updated_at": None,
         "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         "version": "DEFAULT",
-        "clickhouse_credential": {
-            "password": "test_password",
-            "username": "test_username",
-        },
     }
     datasource_service.get_datasource.assert_called_with(
         **{"id": "637739d383ea7fda83e72a2d"}

@@ -70,15 +70,6 @@ class DataSourceService:
     async def get_datasources_for_app_id(self, app_id: PydanticObjectId):
         return await DataSource.find(DataSource.app_id == app_id).to_list()
 
-    def create_row_policy_for_username(
-        self,
-        datasource_id: str,
-        username: str,
-    ):
-        self.clickhouse_role.create_row_policy(
-            datasource_id=datasource_id, username=username
-        )
-
     async def create_datasource(
         self,
         external_source_id: str,
@@ -99,6 +90,15 @@ class DataSourceService:
         await datasource.insert()
         return datasource
 
+    def create_row_policy_for_username(
+        self,
+        datasource_id: str,
+        username: str,
+    ):
+        self.clickhouse_role.create_row_policy(
+            datasource_id=datasource_id, username=username
+        )
+
     def create_user_policy_for_all_datasources(
         self, datasources: List[DataSource], username: str
     ):
@@ -109,6 +109,7 @@ class DataSourceService:
             )
 
     async def create_row_policy_for_datasources_by_app(self, app: App, username: str):
+        print("method called")
         datasources = await self.get_datasources_for_app_id(app.id)
         self.create_user_policy_for_all_datasources(
             datasources=datasources, username=username

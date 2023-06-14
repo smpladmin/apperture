@@ -14,7 +14,7 @@ from domain.actions.models import (
     ComputedEventStreamResult,
 )
 from domain.apperture_users.models import AppertureUser
-from domain.apps.models import App
+from domain.apps.models import App, ClickHouseCredential
 from domain.clickstream_event_properties.models import ClickStreamEventProperties
 from domain.common.date_models import DateFilter, DateFilterType, LastDateFilter
 from domain.common.filter_models import (
@@ -25,7 +25,6 @@ from domain.common.filter_models import (
 )
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import (
-    ClickHouseCredential,
     DataSource,
     DataSourceVersion,
 )
@@ -475,20 +474,13 @@ def datasource_service():
         provider=IntegrationProvider.APPERTURE,
         external_source_id="123",
         version=DataSourceVersion.DEFAULT,
-        clickhouse_credential=ClickHouseCredential(
-            username="test_username", password="test_password"
-        ),
     )
     datasource.id = PydanticObjectId("636a1c61d715ca6baae65611")
-    clickhouse_credential = ClickHouseCredential(
-        username="test_usernames", password="test_password"
-    )
     datasource_future = asyncio.Future()
     datasource_future.set_result(datasource)
     datasources_future = asyncio.Future()
     datasources_future.set_result([datasource])
-    datasource_credentials_future = asyncio.Future()
-    datasource_credentials_future.set_result(clickhouse_credential)
+
     datasource_service_mock.get_datasource.return_value = datasource_future
     datasource_service_mock.create_datasource.return_value = datasource_future
     datasource_service_mock.get_datasources_for_apperture.return_value = (
@@ -496,9 +488,6 @@ def datasource_service():
     )
     datasource_service_mock.get_datasources_for_provider.return_value = (
         datasources_future
-    )
-    datasource_service_mock.create_clickhouse_credential_and_user_policy.return_value = (
-        datasource_credentials_future
     )
     return datasource_service_mock
 
@@ -1055,7 +1044,8 @@ def app_service():
             name="mixpanel1",
             user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
             shared_with=set(),
-        )
+            clickhouse_credential=None,
+        ),
     ]
     app = App(
         id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
@@ -1065,10 +1055,16 @@ def app_service():
         name="mixpanel1",
         user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
         shared_with=set(),
+        clickhouse_credential=None,
+    )
+    clickhouse_credential = (
+        ClickHouseCredential(username="test_username", password="test_password"),
     )
     user_future = asyncio.Future()
     app_service_mock.find_user.return_value = user_future
     app_service_mock.share_app = mock.AsyncMock()
+    app_credentials_future = asyncio.Future()
+    app_credentials_future.set_result(clickhouse_credential)
     apps_future = asyncio.Future()
     apps_future.set_result(apps)
 
@@ -2083,10 +2079,6 @@ def integration_response():
             "updatedAt": None,
             "userId": "636a1c61d715ca6baae65611",
             "version": "DEFAULT",
-            "clickhouseCredential": {
-                "password": "test_password",
-                "username": "test_username",
-            },
         },
         "provider": "mixpanel",
         "revisionId": ANY,

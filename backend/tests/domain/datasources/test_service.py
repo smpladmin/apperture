@@ -1,17 +1,20 @@
-import string
+from datetime import datetime
 from collections import namedtuple
 from unittest.mock import AsyncMock, MagicMock
+from beanie import PydanticObjectId
 
 import pytest
+from domain.apps.models import App
 
 from domain.common.models import IntegrationProvider
-from domain.datasources.models import ClickHouseCredential, DataSource
+from domain.datasources.models import DataSource, DataSourceVersion
 from domain.datasources.service import DataSourceService
 
 
 class TestDataSourceService:
     def setup_method(self):
         DataSource.get_settings = MagicMock()
+        App.get_settings = MagicMock()
         self.clickhouse_role = MagicMock()
         self.service = DataSourceService(
             auth_service=MagicMock(), clickhouse_role=self.clickhouse_role
@@ -30,6 +33,30 @@ class TestDataSourceService:
                 to_list=AsyncMock(),
             ),
         )
+
+        self.app = App(
+            id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+            revision_id=None,
+            created_at=datetime(2022, 11, 8, 7, 57, 35, 691000),
+            updated_at=datetime(2022, 11, 8, 7, 57, 35, 691000),
+            name="mixpanel1",
+            user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+            shared_with=set(),
+            clickhouse_credential=None,
+        )
+        self.datasource = DataSource(
+            integration_id="636a1c61d715ca6baae65611",
+            app_id="636a1c61d715ca6baae65611",
+            user_id="636a1c61d715ca6baae65611",
+            provider=IntegrationProvider.APPERTURE,
+            external_source_id="123",
+            version=DataSourceVersion.DEFAULT,
+        )
+        self.service.get_datasources_for_app_id = MagicMock(
+            return_value=[self.datasource]
+        )
+        self.service.create_user_policy_for_all_datasources = MagicMock()
+
         DataSource.provider = MagicMock(return_value=IntegrationProvider.APPERTURE)
         DataSource.id = MagicMock(return_value=self.ds_id)
         DataSource.enabled = MagicMock(return_value=True)
@@ -41,49 +68,22 @@ class TestDataSourceService:
         )
         DataSource.find.assert_called_once()
 
-    def test_default_length_for_random_value_generator(self):
-        password = self.service.generate_random_value()
-        assert len(password) == 32
-
-    def test_custom_length_for_random_value_generator(self):
-        password = self.service.generate_random_value(length=16)
-        assert len(password) == 16
-
-    def test_password_characters_for_random_value_generator(self):
-        password = self.service.generate_random_value()
-        assert all(c in string.ascii_letters + string.digits for c in password)
-
-    def test_create_user_policy(self):
+    def test_create_row_policy_for_username(self):
         self.service.create_row_policy_for_username(
-            username=self.username, password=self.password, datasource_id=self.ds_id
-        )
-
-        self.clickhouse_role.create_user.assert_called_once_with(
-            username="test_user", password="test_password"
+            username=self.username, datasource_id=self.ds_id
         )
         self.clickhouse_role.create_row_policy.assert_called_once_with(
             datasource_id="636a1c61d715ca6baae65611", username="test_user"
         )
-        self.clickhouse_role.grant_select_permission_to_user.assert_called_once_with(
-            username="test_user"
-        )
 
     @pytest.mark.asyncio
-    async def test_create_clickhouse_credential_and_user_policy(self):
-        FindMock = namedtuple("FindMock", ["update"])
-        DataSource.find = MagicMock(
-            return_value=FindMock(
-                update=AsyncMock(),
-            ),
+    async def test_create_row_policy_for_datasources_by_app(self):
+        self.service.create_row_policy_for_datasources_by_app(
+            app=self.app, username=self.username
         )
-        self.service.generate_random_value = MagicMock(
-            return_value="sdeweiwew33dssdsdds"
+        self.service.get_datasources_for_app_id.assert_called_once_with(
+            app_id=self.app.id
         )
-
-        result = await self.service.create_clickhouse_credential_and_user_policy(
-            datasource_id=self.ds_id
-        )
-        DataSource.find.assert_called_once()
-        assert result == ClickHouseCredential(
-            username="sdeweiwew33dssdsdds", password="sdeweiwew33dssdsdds"
+        self.service.create_user_policy_for_all_datasources.assert_called_once_with(
+            datasources=[self.datasource], username=self.username
         )
