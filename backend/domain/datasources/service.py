@@ -109,7 +109,6 @@ class DataSourceService:
             )
 
     async def create_row_policy_for_datasources_by_app(self, app: App, username: str):
-        print("method called")
         datasources = await self.get_datasources_for_app_id(app.id)
         self.create_user_policy_for_all_datasources(
             datasources=datasources, username=username

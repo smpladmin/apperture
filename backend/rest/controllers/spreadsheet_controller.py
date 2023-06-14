@@ -86,7 +86,7 @@ async def compute_transient_spreadsheets(
         clickhouse_credential = (
             app.clickhouse_credential
             if has_app_credential
-            else await app_service.create_clickhouse_user(id=app.id, name=app.name)
+            else await app_service.create_clickhouse_user(id=app.id, app_name=app.name)
         )
 
         if not has_app_credential:

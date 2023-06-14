@@ -24,24 +24,24 @@ class AppService:
 
     def create_app_database(
         self,
-        name: str,
+        app_name: str,
         username: str,
     ):
-        database_name = re.sub("[^A-Za-z0-9]", "_", name).lower()
+        database_name = re.sub("[^A-Za-z0-9]", "_", app_name).lower()
         self.clickhouse_role.create_database_for_app(database_name=database_name)
         self.clickhouse_role.grant_permission_to_database(
             database_name=database_name, username=username
         )
 
     async def create_clickhouse_user(
-        self, id: PydanticObjectId, name: str
+        self, id: PydanticObjectId, app_name: str
     ) -> ClickHouseCredential:
         username = self.generate_random_value(16) + str(id)
         password = self.generate_random_value()
         self.clickhouse_role.create_user(username=username, password=password)
         self.clickhouse_role.grant_select_permission_to_user(username=username)
 
-        self.create_app_database(name=name, username=username)
+        self.create_app_database(app_name=app_name, username=username)
 
         await App.find(App.id == PydanticObjectId(id), App.enabled == True,).update(
             {
@@ -62,7 +62,7 @@ class AppService:
     ) -> App:
         app = App(name=name, user_id=user.id)
         await app.insert()
-        await self.create_clickhouse_user(id=app.id, name=name)
+        await self.create_clickhouse_user(id=app.id, app_name=name)
         return app
 
     async def get_apps(self, user: AppertureUser) -> List[App]:
