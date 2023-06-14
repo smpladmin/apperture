@@ -1,14 +1,22 @@
+import datetime
 import json
+from beanie import PydanticObjectId
 
 import pytest
+from domain.apps.models import App
 
 from domain.spreadsheets.models import ColumnType, SpreadSheetColumn
 
 
 @pytest.mark.asyncio
 async def test_compute_transient_spreadsheets(
-    client_init, spreadsheets_service, datasource_service, transient_spreadsheet_data
+    client_init,
+    spreadsheets_service,
+    datasource_service,
+    transient_spreadsheet_data,
+    app_service,
 ):
+
     response = client_init.post(
         "/workbooks/spreadsheets/transient", data=json.dumps(transient_spreadsheet_data)
     )
@@ -30,4 +38,25 @@ async def test_compute_transient_spreadsheets(
             "password": "test_password",
         }
     )
-    assert datasource_service.get_datasource.called_once_with("23412414123123")
+    datasource_service.get_datasource.assert_called_once_with("23412414123123")
+    datasource_service.create_row_policy_for_datasources_by_app.assert_called_once_with(
+        **{
+            "app": App(
+                id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+                revision_id=None,
+                created_at=datetime.datetime(2022, 11, 8, 7, 57, 35, 691000),
+                updated_at=datetime.datetime(2022, 11, 8, 7, 57, 35, 691000),
+                name="mixpanel1",
+                user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+                shared_with=set(),
+                enabled=True,
+                clickhouse_credential=None,
+            ),
+            "username": "test_username",
+        }
+    )
+
+    app_service.get_app.called_once_with("636a1c61d715ca6baae65611")
+    app_service.create_clickhouse_user.assert_called_with(
+        **{"id": PydanticObjectId("635ba034807ab86d8a2aadd9"), "app_name": "mixpanel1"}
+    )

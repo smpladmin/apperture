@@ -489,6 +489,7 @@ def datasource_service():
     datasource_service_mock.get_datasources_for_provider.return_value = (
         datasources_future
     )
+    datasource_service_mock.create_row_policy_for_datasources_by_app = mock.AsyncMock()
     return datasource_service_mock
 
 
@@ -1057,8 +1058,8 @@ def app_service():
         shared_with=set(),
         clickhouse_credential=None,
     )
-    clickhouse_credential = (
-        ClickHouseCredential(username="test_username", password="test_password"),
+    clickhouse_credential = ClickHouseCredential(
+        username="test_username", password="test_password"
     )
     user_future = asyncio.Future()
     app_service_mock.find_user.return_value = user_future
@@ -1071,8 +1072,13 @@ def app_service():
     app_future = asyncio.Future()
     app_future.set_result(app)
 
+    clickhouse_credential_future = asyncio.Future()
+    clickhouse_credential_future.set_result(clickhouse_credential)
+
     app_service_mock.get_apps.return_value = apps_future
     app_service_mock.get_user_app.return_value = app_future
+    app_service_mock.get_app.return_value = app_future
+    app_service_mock.create_clickhouse_user.return_value = clickhouse_credential_future
     return app_service_mock
 
 
