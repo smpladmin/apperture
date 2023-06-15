@@ -25,7 +25,7 @@ class ClickHouse:
         try:
             self._save(events)
         except DatabaseError as e:
-            logging.error(f"Error saving events to ClickHouse: {e}")
+            logging.info(f"Exception saving events to ClickHouse: {e}")
             logging.info("Trying to save sequentially")
             for event in events:
                 self._save([event])
@@ -66,7 +66,7 @@ class ClickHouse:
         try:
             self._save_precision_events(events)
         except DatabaseError as e:
-            logging.error(f"Error saving events to Eventstream: {e}")
+            logging.info(f"Exception saving events to Eventstream: {e}")
             logging.info("Trying to save sequentially")
             for event in events:
                 self._save_precision_events([event])

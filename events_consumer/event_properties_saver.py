@@ -65,8 +65,7 @@ class EventPropertiesSaver:
                 event_properties=event_properties
             )
         except Exception as e:
-            logging.info("Error while saving event properties for precise events")
-            logging.info(e)
+            logging.info(f"Exception while saving event properties for precise events: {e}")
 
     def get_distinct_values(self, list_of_lists):
         flattened_list = list(chain.from_iterable(list_of_lists))
@@ -114,8 +113,7 @@ class EventPropertiesSaver:
                     )
 
         except Exception as e:
-            logging.info("Error while saving event properties for clickstream events")
-            logging.info(e)
+            logging.info(f"Exception while saving event properties for clickstream events: {e}")
 
     def _save_data(self, data: Dict, path: str):
         return post(path=path, json=data)
