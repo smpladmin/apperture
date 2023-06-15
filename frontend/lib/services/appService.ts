@@ -1,18 +1,13 @@
 import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
 import { App, AppWithIntegrations } from '@lib/domain/app';
-import { AxiosError } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import { AppertureAPI } from '../apiClient';
+import { ApperturePost, ErrorResponse } from './util';
 
-export const addApp = async (name: string): Promise<App | null> => {
-  try {
-    const app = await AppertureAPI.post('/apps', {
-      name,
-    });
-    return app.data;
-  } catch (error) {
-    console.log((error as AxiosError).message);
-    return null;
-  }
+export const addApp = async (name: string) => {
+  return await ApperturePost('/apps', {
+    name,
+  });
 };
 
 export const _getApp = async (id: string, token: string): Promise<App> => {

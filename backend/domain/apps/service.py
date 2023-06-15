@@ -20,12 +20,12 @@ class AppService:
     def parse_app_name_to_db_name(self, app_name: str):
         return re.sub("[^A-Za-z0-9]", "_", app_name).lower()
 
-    async def get_app_by_database_name(self, name: str):
+    async def get_app_count_by_database_name(self, name: str):
         database_name = self.parse_app_name_to_db_name(app_name=name)
         return await App.find(
             App.clickhouse_credential.databasename == database_name,
             App.enabled != False,
-        )
+        ).count()
 
     def generate_random_value(self, length=32):
         characters = string.ascii_letters + string.digits
@@ -55,7 +55,10 @@ class AppService:
 
         self.create_app_database(app_name=app_name, username=username)
 
-        await App.find(App.id == PydanticObjectId(id), App.enabled == True,).update(
+        await App.find(
+            App.id == PydanticObjectId(id),
+            App.enabled == True,
+        ).update(
             {
                 "$set": {
                     "clickhouse_credential": ClickHouseCredential(
