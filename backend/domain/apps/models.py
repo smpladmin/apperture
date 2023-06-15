@@ -9,6 +9,7 @@ from repositories import Document
 class ClickHouseCredential(BaseModel):
     username: str
     password: str
+    databasename: str
 
 
 class App(Document):

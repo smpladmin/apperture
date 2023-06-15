@@ -17,6 +17,16 @@ class AppService:
     def __init__(self, clickhouse_role: ClickHouseRole = Depends()) -> None:
         self.clickhouse_role = clickhouse_role
 
+    def parse_app_name_to_db_name(self, app_name: str):
+        return re.sub("[^A-Za-z0-9]", "_", app_name).lower()
+
+    async def get_app_by_database_name(self, name: str):
+        database_name = self.parse_app_name_to_db_name(app_name=name)
+        return await App.find(
+            App.clickhouse_credential.databasename == database_name,
+            App.enabled != False,
+        )
+
     def generate_random_value(self, length=32):
         characters = string.ascii_letters + string.digits
         password = "".join(random.choice(characters) for _ in range(length))
@@ -27,7 +37,7 @@ class AppService:
         app_name: str,
         username: str,
     ):
-        database_name = re.sub("[^A-Za-z0-9]", "_", app_name).lower()
+        database_name = self.parse_app_name_to_db_name(app_name=app_name)
         self.clickhouse_role.create_database_for_app(database_name=database_name)
         self.clickhouse_role.grant_permission_to_database(
             database_name=database_name, username=username
@@ -38,25 +48,26 @@ class AppService:
     ) -> ClickHouseCredential:
         username = self.generate_random_value(16) + str(id)
         password = self.generate_random_value()
+        database_name = self.parse_app_name_to_db_name(app_name=app_name)
+
         self.clickhouse_role.create_user(username=username, password=password)
         self.clickhouse_role.grant_select_permission_to_user(username=username)
 
         self.create_app_database(app_name=app_name, username=username)
 
-        await App.find(
-            App.id == PydanticObjectId(id),
-            App.enabled == True,
-        ).update(
+        await App.find(App.id == PydanticObjectId(id), App.enabled == True,).update(
             {
                 "$set": {
                     "clickhouse_credential": ClickHouseCredential(
-                        username=username, password=password
+                        username=username, password=password, databasename=database_name
                     )
                 }
             }
         )
 
-        return ClickHouseCredential(username=username, password=password)
+        return ClickHouseCredential(
+            username=username, password=password, databasename=database_name
+        )
 
     async def create_app(
         self,

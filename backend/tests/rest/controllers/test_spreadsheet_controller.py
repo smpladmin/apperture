@@ -5,7 +5,7 @@ import json
 import pytest
 from beanie import PydanticObjectId
 
-from domain.apps.models import App, ClickHouseCredential
+from domain.apps.models import App
 from domain.spreadsheets.models import ColumnType, SpreadSheetColumn
 
 

@@ -1,6 +1,6 @@
 import asyncio
 from typing import Union
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from domain.apps.models import App
 
 from domain.apps.service import AppService
@@ -28,6 +28,12 @@ async def create_app(
     user: AppertureUser = Depends(get_user),
     app_service: AppService = Depends(),
 ):
+    existing_app = await app_service.get_app_by_database_name(name=app_dto.name)
+    if existing_app:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="App name should be unique",
+        )
     return await app_service.create_app(app_dto.name, user)
 
 

@@ -1056,7 +1056,7 @@ def app_service():
         clickhouse_credential=None,
     )
     clickhouse_credential = ClickHouseCredential(
-        username="test_username", password="test_password"
+        username="test_username", password="test_password", databasename="test_database"
     )
     app_with_credentials = App(
         id=PydanticObjectId("635ba034807ab86d8a2aadd9"),

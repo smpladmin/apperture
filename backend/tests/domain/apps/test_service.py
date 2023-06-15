@@ -107,6 +107,7 @@ class TestAppService:
         assert result == ClickHouseCredential(
             username="sdeweiwew33dssdsdds636a1c61d715ca6baae65611",
             password="sdeweiwew33dssdsdds",
+            databasename="test_app",
         )
         App.find.assert_called_once()
         self.clickhouse_role.create_user.assert_called_with(
