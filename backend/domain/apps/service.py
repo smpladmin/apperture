@@ -43,7 +43,10 @@ class AppService:
 
         self.create_app_database(app_name=app_name, username=username)
 
-        await App.find(App.id == PydanticObjectId(id), App.enabled == True,).update(
+        await App.find(
+            App.id == PydanticObjectId(id),
+            App.enabled == True,
+        ).update(
             {
                 "$set": {
                     "clickhouse_credential": ClickHouseCredential(

@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from unittest import mock
-from unittest.mock import ANY
+from unittest.mock import ANY, AsyncMock
 
 import pytest
 from beanie import PydanticObjectId
@@ -24,10 +24,7 @@ from domain.common.filter_models import (
     LogicalOperators,
 )
 from domain.common.models import IntegrationProvider
-from domain.datasources.models import (
-    DataSource,
-    DataSourceVersion,
-)
+from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
 from domain.event_properties.models import EventProperties
 from domain.events.models import Event, PaginatedEventsData
@@ -1061,6 +1058,16 @@ def app_service():
     clickhouse_credential = ClickHouseCredential(
         username="test_username", password="test_password"
     )
+    app_with_credentials = App(
+        id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        revision_id=None,
+        created_at=datetime(2022, 11, 8, 7, 57, 35, 691000),
+        updated_at=datetime(2022, 11, 8, 7, 57, 35, 691000),
+        name="mixpanel1",
+        user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+        shared_with=set(),
+        clickhouse_credential=clickhouse_credential,
+    )
     user_future = asyncio.Future()
     app_service_mock.find_user.return_value = user_future
     app_service_mock.share_app = mock.AsyncMock()
@@ -1077,7 +1084,7 @@ def app_service():
 
     app_service_mock.get_apps.return_value = apps_future
     app_service_mock.get_user_app.return_value = app_future
-    app_service_mock.get_app.return_value = app_future
+    app_service_mock.get_app = AsyncMock(side_effect=[app_with_credentials, app])
     app_service_mock.create_clickhouse_user.return_value = clickhouse_credential_future
     return app_service_mock
 

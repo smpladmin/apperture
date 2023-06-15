@@ -1,11 +1,11 @@
-from datetime import datetime
 from collections import namedtuple
+from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
-from beanie import PydanticObjectId
 
 import pytest
-from domain.apps.models import App
+from beanie import PydanticObjectId
 
+from domain.apps.models import App
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.datasources.service import DataSourceService
@@ -52,7 +52,7 @@ class TestDataSourceService:
             external_source_id="123",
             version=DataSourceVersion.DEFAULT,
         )
-        self.service.get_datasources_for_app_id = MagicMock(
+        self.service.get_datasources_for_app_id = AsyncMock(
             return_value=[self.datasource]
         )
         self.service.create_user_policy_for_all_datasources = MagicMock()
@@ -78,12 +78,10 @@ class TestDataSourceService:
 
     @pytest.mark.asyncio
     async def test_create_row_policy_for_datasources_by_app(self):
-        self.service.create_row_policy_for_datasources_by_app(
+        await self.service.create_row_policy_for_datasources_by_app(
             app=self.app, username=self.username
         )
-        self.service.get_datasources_for_app_id.assert_called_once_with(
-            app_id=self.app.id
-        )
+        self.service.get_datasources_for_app_id.assert_called_once_with(self.app.id)
         self.service.create_user_policy_for_all_datasources.assert_called_once_with(
             datasources=[self.datasource], username=self.username
         )

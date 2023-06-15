@@ -80,7 +80,6 @@ async def compute_transient_spreadsheets(
     try:
         datasource = await datasource_service.get_datasource(dto.datasourceId)
         app = await app_service.get_app(id=datasource.app_id)
-
         has_app_credential = bool(app.clickhouse_credential)
 
         clickhouse_credential = (
