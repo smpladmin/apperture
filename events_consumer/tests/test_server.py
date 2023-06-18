@@ -1,7 +1,10 @@
 from datetime import datetime
 from unittest.mock import MagicMock
+
+import pytest
+
 from models.models import ClickStream, PrecisionEvent
-from server import save_events, app, save_precision_events
+from server import save_events, app, save_precision_events, is_valid_base64
 
 
 class TestServer:
@@ -520,3 +523,19 @@ class TestServer:
                 ),
             ]
         )
+
+    @pytest.mark.parametrize(
+        "value, result",
+        [
+            (
+                "eyJldmVudCI6IiRwYWdldmlldyIsInByb3BlcnRpZXMiOnsiJG9zIjoiQW5kcm9pZCIsIiRicm93c2VyIjoiQ2hyb21lIiwiJGRldmljZSI6IkFuZHJvaWQiLCIkZGV2aWNlX3R5cGUiOiJNb2JpbGUiLCIkY3VycmVudF91cmwiOiJodHRwczovL3d3dy5zYW5nZWV0aGFtb2JpbGVzLmNvbS9wcm9kdWN0LWRldGFpbHMvYXBwbGUtaXBob25lLTEzLXJlZC0yNTZnYi1tbHE5M2huYS84NTUwIiwiJGhvc3QiOiJ3d3cuc2FuZ2VldGhhbW9iaWxlcy5jb20iLCIkcGF0aG5hbWUiOiIvcHJvZHVjdC1kZXRhaWxzL2FwcGxlLWlwaG9uZS0xMy1yZWQtMjU2Z2ItbWxxOTNobmEvODU1MCIsIiRicm93c2VyX3ZlcnNpb24iOjExNCwiJGJyb3dzZXJfbGFuZ3VhZ2UiOiJlbiIsIiRzY3JlZW5faGVpZ2h0Ijo4NjAsIiRzY3JlZW5fd2lkdGgiOjM4NSwiJHZpZXdwb3J0X2hlaWdodCI6NzM0LCIkdmlld3BvcnRfd2lkdGgiOjM4NCwiJGxpYiI6IndlYiIsIiRsaWJfdmVyc2lvbiI6IjEuNTAuNCIsIiRpbnNlcnRfaWQiOiJrNGtramdzZmk3ZWZuMHlxIiwiJHRpbWUiOjE2ODY5MTc0OTYuMTg4LCJkaXN0aW5jdF9pZCI6IjE4OGI3YzhhNGE4NGMtMGRmOGJkMjNlMDAxM2UtYjQ1NzY1NC01MGQ1Yy0xODhiN2M4YTRhOTk0IiwiJGRldmljZV9pZCI6IjE4OGI3YzhhNGE4NGMtMGRmOGJkMjNlMDAxM2UtYjQ1NzY1NC01MGQ1Yy0xODhiN2M4YTRhOTk0IiwiJHNlYXJjaF9lbmdpbmUiOiJnb29nbGUiLCJ1dG1fc291cmNlIjoiZ29vZ2xlIiwidXRtX2NhbXBhaWduIjoiQXBwbGUtUGVyZm9ybWFuY2VNYXgtTW9iaWxlIiwiZ2NsaWQiOiJFQUlhSVFvYkNoTUlpc3lFMGRUSF93SVZrd3NyQ2gxMEV3a2lFQVFZQWlBQkVnS3M3dkRfQndFIiwiJHJlZmVycmVyIjoiaHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8iLCIkcmVmZXJyaW5nX2RvbWFpbiI6Ind3dy5nb29nbGUuY29tIiwidG9rZW4iOiI2M2VhMzE2YzhlZWQ2MTJkZWM2NjQxZDQiLCIkc2Vzc2lvbl9pZCI6IjE4OGM0MWUzZDdlMTYtMGZiMTA2OWVhOGM0MWUtYjQ1NzY1NC01MGQ1Yy0xODhjNDFlM2Q3ZjEwIiwiJHdpbmRvd19pZCI6IjE4OGM0MWUzZDgwMTRhLTAxM2I1YmFkM2E3NWMtYjQ1NzY1NC01MGQ1Yy0xODhjNDFlM2Q4MTEwOCIsIiRwYWdldmlld19pZCI6IjE4OGM0MWUzZDg2MS0wZTgyYzA0OTViNzIxZi1iNDU3NjU0LTUwZDVjLTE4OGM0MWUzZDg5ZGYifSwidGltZXN0YW1wIjoiMjAyMy0wNi0xNlQxMjoxMTozNi4yMDRaIn0=",
+                True
+            ),
+            (
+                "W",
+                False
+            ),
+        ],
+    )
+    def test_is_valid_base64(self, value, result):
+        assert is_valid_base64(value) == result

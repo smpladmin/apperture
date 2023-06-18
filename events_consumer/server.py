@@ -84,6 +84,7 @@ def is_valid_base64(encoded_string):
         base64.b64decode(encoded_string)
         return True
     except base64.binascii.Error:
+        logging.info(f"Skipping event {encoded_string} due to base64 encoding error.")
         return False
 
 
