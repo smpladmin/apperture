@@ -36,7 +36,6 @@ async def create_workbook(
     ds_service: DataSourceService = Depends(),
     spreadsheets_service: SpreadsheetService = Depends(),
 ):
-    print("dto", dto)
     datasource = await ds_service.get_datasource(dto.datasourceId)
     workbook = spreadsheets_service.build_workbook(
         name=dto.name,

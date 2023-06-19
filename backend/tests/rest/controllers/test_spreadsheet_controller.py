@@ -265,30 +265,3 @@ async def test_update_workbook(client_init, workbook_data, spreadsheets_service)
         ],
         "enabled": True,
     } == spreadsheets_service.update_workbook.call_args.kwargs["workbook"].dict()
-
-    # spreadsheets_service.update_workbook.assert_called_once_with(
-    #     workbook=WorkBook(
-    #         id=PydanticObjectId("63d0df1ea1040a6388a4a34c"),
-    #         revision_id=None,
-    #         updated_at=None,
-    #         created_at=ANY,
-    #         datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
-    #         app_id=PydanticObjectId("63ca46feee94e38b81cda37a"),
-    #         user_id=PydanticObjectId("6374b74e9b36ecf7e0b4f9e4"),
-    #         name="Test Workbook",
-    #         spreadsheets=[
-    #             Spreadsheet(
-    #                 name="Sheet1",
-    #                 headers=[
-    #                     SpreadSheetColumn(
-    #                         name="event_name", type=ColumnType.QUERY_HEADER
-    #                     )
-    #                 ],
-    #                 is_sql=True,
-    #                 query="SELECT  event_name FROM  events",
-    #             )
-    #         ],
-    #         enabled=True,
-    #     ),
-    #     workbook_id="635ba034807ab86d8a2aadd8",
-    # )
