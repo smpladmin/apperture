@@ -1,15 +1,17 @@
 import logging
-from typing import Union
+from typing import List, Union
 
-import clickhouse_connect
 from fastapi import Depends
 
 from clickhouse.clickhouse import Clickhouse
+from domain.spreadsheets.models import ColumnDefinition, ColumnDefinitionType, Formula
 from repositories.clickhouse.base import EventsBase
 from repositories.clickhouse.parser.query_parser import QueryParser
 
+from pypika import ClickHouseQuery, Parameter, functions as fn
 
-class Spreadsheets:
+
+class Spreadsheets(EventsBase):
     def __init__(
         self,
         clickhouse: Clickhouse = Depends(),
@@ -32,3 +34,29 @@ class Spreadsheets:
         logging.info(query)
         restricted_client.close()
         return result
+
+    def get_transient_columns(
+        self, datasource_id: str, columns: List[ColumnDefinition]
+    ):
+        self.execute_get_query(
+            *self.build_transient_columns_query(datasource_id, columns)
+        )
+
+    def build_transient_columns_query(self, datasource_id, columns):
+        query = ClickHouseQuery.from_(self.table).where(
+            self.table.datasource_id == Parameter("%(ds_id)s")
+        )
+        dimensions = [
+            column
+            for column in columns
+            if column.type == ColumnDefinitionType.DIMENSION
+        ]
+        metrics = [
+            column for column in columns if column.type == ColumnDefinitionType.METRIC
+        ]
+
+        query.select(*[d.property for d in dimensions])
+        query.select(*[fn.Count("*") for m in metrics])
+
+        query.groupby(*range(1, len(dimensions) + 1))
+        return query, {"ds_id": datasource_id}

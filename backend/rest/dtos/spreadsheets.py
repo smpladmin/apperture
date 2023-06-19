@@ -2,7 +2,12 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from domain.spreadsheets.models import ComputedSpreadsheet, SpreadSheetColumn, WorkBook
+from domain.spreadsheets.models import (
+    ColumnDefinition,
+    ComputedSpreadsheet,
+    SpreadSheetColumn,
+    WorkBook,
+)
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
 
@@ -11,6 +16,11 @@ class TransientSpreadsheetsDto(BaseModel):
     datasourceId: str
     query: str
     is_sql: bool = False
+
+
+class TransientSpreadsheetColumnDto(BaseModel):
+    datasourceId: str
+    column_definitions: List[ColumnDefinition]
 
 
 class ComputedSpreadsheetQueryResponse(ComputedSpreadsheet, ModelResponse):

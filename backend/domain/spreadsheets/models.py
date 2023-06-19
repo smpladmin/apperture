@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from beanie import PydanticObjectId
 from pydantic import BaseModel
@@ -39,3 +39,19 @@ class WorkBook(Document):
 
     class Settings:
         name = "workbooks"
+
+
+class Formula(str, Enum):
+    COUNT = "count"
+    UNIQUE = "unique"
+
+
+class ColumnDefinitionType(str, Enum):
+    DIMENSION = "dimension"
+    METRIC = "metric"
+
+
+class ColumnDefinition(BaseModel):
+    formula: Formula
+    property: Optional[str]
+    type: ColumnDefinitionType

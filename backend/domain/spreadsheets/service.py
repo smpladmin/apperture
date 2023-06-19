@@ -7,6 +7,7 @@ from fastapi import Depends
 
 from domain import spreadsheets
 from domain.spreadsheets.models import (
+    ColumnDefinition,
     ColumnType,
     ComputedSpreadsheet,
     Spreadsheet,
@@ -100,3 +101,6 @@ class SpreadsheetService:
         await WorkBook.find_one(
             WorkBook.id == PydanticObjectId(workbook_id),
         ).update({"$set": entry})
+
+    def get_transient_column(self, datasource_id: str, columns: List[ColumnDefinition]):
+        return self.spreadsheets.get_transient_columns(datasource_id, columns)
