@@ -96,6 +96,7 @@ async def process_kafka_messages() -> None:
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         value_deserializer=lambda v: v.decode("utf-8"),
         enable_auto_commit=False,
+        fetch_max_bytes=7864320,
     )
     await consumer.start()
     events = []

@@ -52,6 +52,7 @@ async def startup_event():
     global producer
     producer = AIOKafkaProducer(
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+        max_request_size=5242880,
     )
     await producer.start()
 
