@@ -3,8 +3,9 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from domain.spreadsheets.models import (
-    ColumnDefinition,
     ComputedSpreadsheet,
+    DimensionDefinition,
+    MetricDefinition,
     SpreadSheetColumn,
     WorkBook,
 )
@@ -20,7 +21,8 @@ class TransientSpreadsheetsDto(BaseModel):
 
 class TransientSpreadsheetColumnDto(BaseModel):
     datasourceId: str
-    column_definitions: List[ColumnDefinition]
+    dimensions: List[DimensionDefinition]
+    metric: Optional[MetricDefinition]
 
 
 class ComputedSpreadsheetQueryResponse(ComputedSpreadsheet, ModelResponse):

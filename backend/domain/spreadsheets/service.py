@@ -1,15 +1,16 @@
 import re
 from datetime import datetime
-from typing import List
+from typing import List, Optional, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
 
 from domain import spreadsheets
 from domain.spreadsheets.models import (
-    ColumnDefinition,
     ColumnType,
     ComputedSpreadsheet,
+    DimensionDefinition,
+    MetricDefinition,
     Spreadsheet,
     SpreadSheetColumn,
     WorkBook,
@@ -102,5 +103,12 @@ class SpreadsheetService:
             WorkBook.id == PydanticObjectId(workbook_id),
         ).update({"$set": entry})
 
-    def get_transient_column(self, datasource_id: str, columns: List[ColumnDefinition]):
-        return self.spreadsheets.get_transient_columns(datasource_id, columns)
+    def get_transient_column(
+        self,
+        datasource_id: str,
+        dimensions: List[DimensionDefinition],
+        metric: Union[MetricDefinition, None],
+    ):
+        return self.spreadsheets.get_transient_columns(
+            datasource_id, dimensions, metric
+        )

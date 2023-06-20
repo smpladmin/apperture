@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from beanie import PydanticObjectId
 from pydantic import BaseModel
@@ -44,6 +44,7 @@ class WorkBook(Document):
 class Formula(str, Enum):
     COUNT = "count"
     UNIQUE = "unique"
+    COUNTIF = "countif"
 
 
 class ColumnDefinitionType(str, Enum):
@@ -51,7 +52,31 @@ class ColumnDefinitionType(str, Enum):
     METRIC = "metric"
 
 
-class ColumnDefinition(BaseModel):
+class ColumnFilterOperators(str, Enum):
+    EQUALS = "="
+    NOT_EQUALS = "!="
+    GREATER_THAN = ">"
+    LESS_THAN = "<"
+    GREATER_THAN_OR_EQUALS = ">="
+    LESS_THAN_OR_EQUALS = "<="
+    IN = "in"
+    NOT_IN = "not in"
+    CONTAINS = "contains"
+    NOT_CONTAINS = "not contains"
+
+
+class ColumnFilter(BaseModel):
+    operator: ColumnFilterOperators
+    operand: str
+    value: Union[List[int], List[str]]
+
+
+class MetricDefinition(BaseModel):
     formula: Formula
     property: Optional[str]
-    type: ColumnDefinitionType
+    filters: Optional[List[ColumnFilter]]
+
+
+class DimensionDefinition(BaseModel):
+    formula: Formula
+    property: Optional[str]

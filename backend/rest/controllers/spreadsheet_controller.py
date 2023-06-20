@@ -121,7 +121,7 @@ async def compute_transient_column(
     spreadsheets_service: SpreadsheetService = Depends(),
 ):
     return spreadsheets_service.get_transient_column(
-        dto.datasourceId, dto.column_definitions
+        dto.datasourceId, dto.dimensions, dto.metric
     )
 
 

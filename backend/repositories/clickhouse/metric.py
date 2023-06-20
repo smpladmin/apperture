@@ -121,7 +121,6 @@ class Metrics(EventsBase):
 
         agg_funcs = {}
         for i, aggregate in enumerate(aggregates):
-
             subquery_criterion = [
                 self.table.event_name == Parameter(f"%(reference_id_{i})s")
             ]
