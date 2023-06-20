@@ -1,19 +1,19 @@
 import asyncio
 from typing import Union
-from fastapi import APIRouter, Depends, Query
-from domain.apps.models import App
 
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from domain.apperture_users.models import AppertureUser
+from domain.apperture_users.service import AppertureUserService
+from domain.apps.models import App
 from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
 from domain.integrations.models import Integration
 from domain.integrations.service import IntegrationService
-from domain.apperture_users.models import AppertureUser
-from domain.apperture_users.service import AppertureUserService
 from rest.dtos.apps import AppResponse, AppWithIntegrations, CreateAppDto, UpdateAppDto
 from rest.dtos.datasources import DataSourceResponse
 from rest.dtos.integrations import IntegrationWithDataSources
 from rest.middlewares import get_user, get_user_id, validate_jwt
-
 
 router = APIRouter(
     tags=["apps"],
@@ -28,6 +28,12 @@ async def create_app(
     user: AppertureUser = Depends(get_user),
     app_service: AppService = Depends(),
 ):
+    existing_app = await app_service.get_app_count_by_database_name(name=app_dto.name)
+    if existing_app:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please try creating an app with a different name.",
+        )
     return await app_service.create_app(app_dto.name, user)
 
 

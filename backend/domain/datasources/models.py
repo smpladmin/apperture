@@ -14,11 +14,6 @@ class DataSourceVersion(str, Enum):
     DEFAULT = "DEFAULT"
 
 
-class ClickHouseCredential(BaseModel):
-    username: str
-    password: str
-
-
 class DataSource(Document):
     integration_id: Indexed(PydanticObjectId)
     app_id: PydanticObjectId
@@ -28,7 +23,6 @@ class DataSource(Document):
     external_source_id: str
     version: DataSourceVersion
     enabled: bool = True
-    clickhouse_credential: Optional[ClickHouseCredential] = Field(hidden=True)
 
     class Settings:
         name = "datasources"

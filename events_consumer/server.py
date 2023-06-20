@@ -1,5 +1,5 @@
 import asyncio
-from base64 import b64decode
+import base64
 from functools import reduce
 import json
 import logging
@@ -71,12 +71,21 @@ def save_precision_events(events):
 def to_object(value: str) -> Dict:
     logging.info(value)
     try:
-        decoded_string = b64decode(value).decode("utf-8", errors="ignore")
+        decoded_string = base64.b64decode(value).decode("utf-8", errors="ignore")
     except UnicodeDecodeError:
-        logging.error(f"Error decoding string: {value}")
-        decoded_string = b64decode(value)
+        logging.info(f"Exception while decoding string: {value}")
+        decoded_string = base64.b64decode(value)
 
     return json.loads(decoded_string)
+
+
+def is_valid_base64(encoded_string):
+    try:
+        base64.b64decode(encoded_string)
+        return True
+    except base64.binascii.Error:
+        logging.info(f"Skipping event {encoded_string} due to base64 encoding error.")
+        return False
 
 
 async def process_kafka_messages() -> None:
@@ -87,6 +96,7 @@ async def process_kafka_messages() -> None:
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         value_deserializer=lambda v: v.decode("utf-8"),
         enable_auto_commit=False,
+        fetch_max_bytes=7864320,
     )
     await consumer.start()
     events = []
@@ -102,7 +112,10 @@ async def process_kafka_messages() -> None:
 
         # Decode the base64 encoded JSON
         _events = [
-            to_object(record.value) for _, records in data.items() for record in records
+            to_object(record.value)
+            for _, records in data.items()
+            for record in records
+            if is_valid_base64(record.value)
         ]
 
         _offsets = [record.offset for _, records in data.items() for record in records]

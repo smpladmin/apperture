@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from unittest import mock
-from unittest.mock import ANY
+from unittest.mock import ANY, AsyncMock
 
 import pytest
 from beanie import PydanticObjectId
@@ -14,7 +14,7 @@ from domain.actions.models import (
     ComputedEventStreamResult,
 )
 from domain.apperture_users.models import AppertureUser
-from domain.apps.models import App
+from domain.apps.models import App, ClickHouseCredential
 from domain.clickstream_event_properties.models import ClickStreamEventProperties
 from domain.common.date_models import DateFilter, DateFilterType, LastDateFilter
 from domain.common.filter_models import (
@@ -24,11 +24,7 @@ from domain.common.filter_models import (
     LogicalOperators,
 )
 from domain.common.models import IntegrationProvider
-from domain.datasources.models import (
-    ClickHouseCredential,
-    DataSource,
-    DataSourceVersion,
-)
+from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
 from domain.event_properties.models import EventProperties
 from domain.events.models import Event, PaginatedEventsData
@@ -78,6 +74,8 @@ from domain.spreadsheets.models import (
     ColumnType,
     ComputedSpreadsheet,
     SpreadSheetColumn,
+    Spreadsheet,
+    WorkBook,
 )
 from domain.users.models import UserDetails
 from rest.dtos.actions import ComputedActionResponse
@@ -475,20 +473,13 @@ def datasource_service():
         provider=IntegrationProvider.APPERTURE,
         external_source_id="123",
         version=DataSourceVersion.DEFAULT,
-        clickhouse_credential=ClickHouseCredential(
-            username="test_username", password="test_password"
-        ),
     )
     datasource.id = PydanticObjectId("636a1c61d715ca6baae65611")
-    clickhouse_credential = ClickHouseCredential(
-        username="test_usernames", password="test_password"
-    )
     datasource_future = asyncio.Future()
     datasource_future.set_result(datasource)
     datasources_future = asyncio.Future()
     datasources_future.set_result([datasource])
-    datasource_credentials_future = asyncio.Future()
-    datasource_credentials_future.set_result(clickhouse_credential)
+
     datasource_service_mock.get_datasource.return_value = datasource_future
     datasource_service_mock.create_datasource.return_value = datasource_future
     datasource_service_mock.get_datasources_for_apperture.return_value = (
@@ -497,9 +488,7 @@ def datasource_service():
     datasource_service_mock.get_datasources_for_provider.return_value = (
         datasources_future
     )
-    datasource_service_mock.create_clickhouse_credential_and_user_policy.return_value = (
-        datasource_credentials_future
-    )
+    datasource_service_mock.create_row_policy_for_datasources_by_app = mock.AsyncMock()
     return datasource_service_mock
 
 
@@ -745,7 +734,24 @@ def transient_spreadsheet_data():
 
 
 @pytest.fixture(scope="module")
+def workbook_data():
+    return {
+        "name": "Test Workbook",
+        "spreadsheets": [
+            {
+                "name": "Sheet 1",
+                "query": "SELECT  event_name FROM  events WHERE timestamp>=toDate(2023-02-11)",
+                "is_sql": True,
+                "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
+            }
+        ],
+        "datasourceId": "23412414123123",
+    }
+
+
+@pytest.fixture(scope="module")
 def spreadsheets_service():
+    WorkBook.get_settings = mock.MagicMock()
     spreadsheets_service_mock = mock.MagicMock()
     computed_spreadsheet = ComputedSpreadsheet(
         headers=[SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)],
@@ -757,11 +763,43 @@ def spreadsheets_service():
             {"index": 5, "event_name": "test_event_5"},
         ],
     )
+    workbook = WorkBook(
+        id=PydanticObjectId("63d0df1ea1040a6388a4a34c"),
+        datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
+        app_id=PydanticObjectId("63ca46feee94e38b81cda37a"),
+        user_id=PydanticObjectId("6374b74e9b36ecf7e0b4f9e4"),
+        name="Test Workbook",
+        spreadsheets=[
+            Spreadsheet(
+                name="Sheet1",
+                headers=[
+                    SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)
+                ],
+                is_sql=True,
+                query="SELECT  event_name FROM  events",
+            )
+        ],
+        enabled=True,
+    )
+    workbook_future = asyncio.Future()
+    workbook_future.set_result(workbook)
+
     spreadsheet_future = asyncio.Future()
     spreadsheet_future.set_result(computed_spreadsheet)
+    workbooks_future = asyncio.Future()
+    workbooks_future.set_result([workbook])
+
+    spreadsheets_service_mock.build_workbook.return_value = workbook
     spreadsheets_service_mock.get_transient_spreadsheets.return_value = (
         spreadsheet_future
     )
+    spreadsheets_service_mock.get_workbooks_for_datasource_id.return_value = (
+        workbooks_future
+    )
+    spreadsheets_service_mock.get_workbooks_by_user_id.return_value = workbooks_future
+    spreadsheets_service_mock.get_workbook_by_id.return_value = workbook_future
+    spreadsheets_service_mock.add_workbook.return_value = workbook_future
+    spreadsheets_service_mock.update_workbook.return_value = workbook_future
 
     return spreadsheets_service_mock
 
@@ -1055,7 +1093,8 @@ def app_service():
             name="mixpanel1",
             user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
             shared_with=set(),
-        )
+            clickhouse_credential=None,
+        ),
     ]
     app = App(
         id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
@@ -1065,18 +1104,39 @@ def app_service():
         name="mixpanel1",
         user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
         shared_with=set(),
+        clickhouse_credential=None,
+    )
+    clickhouse_credential = ClickHouseCredential(
+        username="test_username", password="test_password", databasename="test_database"
+    )
+    app_with_credentials = App(
+        id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        revision_id=None,
+        created_at=datetime(2022, 11, 8, 7, 57, 35, 691000),
+        updated_at=datetime(2022, 11, 8, 7, 57, 35, 691000),
+        name="mixpanel1",
+        user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+        shared_with=set(),
+        clickhouse_credential=clickhouse_credential,
     )
     user_future = asyncio.Future()
     app_service_mock.find_user.return_value = user_future
     app_service_mock.share_app = mock.AsyncMock()
+    app_credentials_future = asyncio.Future()
+    app_credentials_future.set_result(clickhouse_credential)
     apps_future = asyncio.Future()
     apps_future.set_result(apps)
 
     app_future = asyncio.Future()
     app_future.set_result(app)
 
+    clickhouse_credential_future = asyncio.Future()
+    clickhouse_credential_future.set_result(clickhouse_credential)
+
     app_service_mock.get_apps.return_value = apps_future
     app_service_mock.get_user_app.return_value = app_future
+    app_service_mock.get_app = AsyncMock(side_effect=[app_with_credentials, app])
+    app_service_mock.create_clickhouse_user.return_value = clickhouse_credential_future
     return app_service_mock
 
 
@@ -2083,10 +2143,6 @@ def integration_response():
             "updatedAt": None,
             "userId": "636a1c61d715ca6baae65611",
             "version": "DEFAULT",
-            "clickhouseCredential": {
-                "password": "test_password",
-                "username": "test_username",
-            },
         },
         "provider": "mixpanel",
         "revisionId": ANY,

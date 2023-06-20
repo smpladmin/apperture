@@ -8,11 +8,14 @@ import {
   IconButton,
   Input,
   Text,
+  useToast,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { addApp } from '@lib/services/appService';
+import { ErrorResponse } from '@lib/services/util';
 
 const Create = () => {
+  const toast = useToast();
   const [appName, setAppName] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -24,11 +27,19 @@ const Create = () => {
   }, []);
 
   const handleNextClick = async () => {
-    const app = await addApp(appName);
-    if (app) {
+    const res = await addApp(appName);
+
+    if (res.status === 200) {
       router.push({
         pathname: `/analytics/app/[appId]/integration/select`,
-        query: { appId: app._id, ...router.query },
+        query: { appId: res.data._id, ...router.query },
+      });
+    } else {
+      toast({
+        title: (res as ErrorResponse).error.detail,
+        status: 'error',
+        variant: 'subtle',
+        isClosable: true,
       });
     }
   };

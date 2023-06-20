@@ -17,6 +17,7 @@ class Spreadsheets(EventsBase):
         clickhouse: Clickhouse = Depends(),
         parser: QueryParser = Depends(),
     ):
+        super().__init__(clickhouse=clickhouse)
         self.clickhouse = clickhouse
         self.parser = parser
 
@@ -55,8 +56,8 @@ class Spreadsheets(EventsBase):
             column for column in columns if column.type == ColumnDefinitionType.METRIC
         ]
 
-        query.select(*[d.property for d in dimensions])
-        query.select(*[fn.Count("*") for m in metrics])
+        query = query.select(*[d.property for d in dimensions])
+        query = query.select(*[fn.Count("*") for m in metrics])
 
-        query.groupby(*range(1, len(dimensions) + 1))
-        return query, {"ds_id": datasource_id}
+        query = query.groupby(*range(1, len(dimensions) + 1))
+        return query.get_sql(), {"ds_id": datasource_id}

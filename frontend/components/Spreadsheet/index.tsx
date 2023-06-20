@@ -51,14 +51,14 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     savedWorkbook?.name || 'Untitled Workbook'
   );
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
-  const [isWorkbookBeingEdited, setWorkbookBeingEdited] = useState(false);
+  const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
 
   const router = useRouter();
   const { dsId, workbookId } = router.query;
 
   useEffect(() => {
-    if (router.pathname.includes('edit')) setWorkbookBeingEdited(true);
+    if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
   }, []);
 
   const getOperands = (newHeader: string) =>
