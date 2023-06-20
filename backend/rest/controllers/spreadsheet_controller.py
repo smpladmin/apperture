@@ -15,6 +15,7 @@ from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
     CreateWorkBookDto,
     SavedWorkBookResponse,
+    TransientSpreadsheetColumnDto,
     TransientSpreadsheetsDto,
     WorkBookResponse,
     WorkbookWithUser,
@@ -109,6 +110,19 @@ async def compute_transient_spreadsheets(
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
     except DatabaseError as e:
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
+
+
+@router.post(
+    "/workbooks/spreadsheets/columns/transient",
+    response_model=ComputedSpreadsheetQueryResponse,
+)
+async def compute_transient_column(
+    dto: TransientSpreadsheetColumnDto,
+    spreadsheets_service: SpreadsheetService = Depends(),
+):
+    return spreadsheets_service.get_transient_column(
+        dto.datasourceId, dto.column_definitions
+    )
 
 
 @router.get("/workbooks/{id}", response_model=SavedWorkBookResponse)
