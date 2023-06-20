@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock
 
 from domain.spreadsheets.models import (
-    ColumnDefinitionType,
     ColumnFilter,
     ColumnFilterOperators,
     DimensionDefinition,

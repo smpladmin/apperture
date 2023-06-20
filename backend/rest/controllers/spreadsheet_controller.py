@@ -120,8 +120,8 @@ async def compute_transient_column(
     dto: TransientSpreadsheetColumnDto,
     spreadsheets_service: SpreadsheetService = Depends(),
 ):
-    return spreadsheets_service.get_transient_column(
-        dto.datasourceId, dto.dimensions, dto.metric
+    return spreadsheets_service.get_transient_columns(
+        dto.datasourceId, dto.dimensions, dto.metrics
     )
 
 

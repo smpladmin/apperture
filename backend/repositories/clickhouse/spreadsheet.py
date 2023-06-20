@@ -2,12 +2,11 @@ import logging
 from typing import List, Optional, Union
 
 from fastapi import Depends
-from pypika import ClickHouseQuery, Criterion, Field, Parameter
+from pypika import Case, ClickHouseQuery, Criterion, Field, Parameter
 from pypika import functions as fn
 
 from clickhouse.clickhouse import Clickhouse
 from domain.spreadsheets.models import (
-    ColumnDefinitionType,
     ColumnFilter,
     ColumnFilterOperators,
     DimensionDefinition,
@@ -75,24 +74,23 @@ class Spreadsheets(EventsBase):
         self,
         datasource_id,
         dimensions: List[DimensionDefinition],
-        metric: Union[MetricDefinition, None],
+        metrics: List[MetricDefinition],
     ):
         query = ClickHouseQuery.from_(self.table).where(
             self.table.datasource_id == Parameter("%(ds_id)s")
         )
 
         query = query.select(*[d.property for d in dimensions])
-        if metric and (
-            metric.formula == Formula.COUNT or metric.formula == Formula.COUNTIF
-        ):
-            query = query.select(fn.Count("*"))
 
-        if metric and metric.formula == Formula.COUNTIF:
-            conditions = [
-                self.column_filter_to_condition(column_filter=filter)
-                for filter in metric.filters
-            ]
-            query = query.where(Criterion.all(conditions))
+        for metric in metrics:
+            if metric.formula == Formula.COUNT:
+                query = query.select(fn.Count("*"))
+            if metric.formula == Formula.COUNTIF:
+                conditions = [
+                    self.column_filter_to_condition(column_filter=filter)
+                    for filter in metric.filters
+                ]
+                query = query.select(fn.Count(Case().when(conditions, 1)))
 
         query = query.groupby(*range(1, len(dimensions) + 1))
         return query.get_sql(), {"ds_id": datasource_id}

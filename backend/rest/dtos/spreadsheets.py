@@ -22,7 +22,7 @@ class TransientSpreadsheetsDto(BaseModel):
 class TransientSpreadsheetColumnDto(BaseModel):
     datasourceId: str
     dimensions: List[DimensionDefinition]
-    metric: Optional[MetricDefinition]
+    metrics: List[MetricDefinition]
 
 
 class ComputedSpreadsheetQueryResponse(ComputedSpreadsheet, ModelResponse):

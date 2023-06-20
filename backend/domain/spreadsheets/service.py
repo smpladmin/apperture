@@ -103,12 +103,12 @@ class SpreadsheetService:
             WorkBook.id == PydanticObjectId(workbook_id),
         ).update({"$set": entry})
 
-    def get_transient_column(
+    def get_transient_columns(
         self,
         datasource_id: str,
         dimensions: List[DimensionDefinition],
-        metric: Union[MetricDefinition, None],
+        metrics: List[MetricDefinition],
     ):
         return self.spreadsheets.get_transient_columns(
-            datasource_id, dimensions, metric
+            datasource_id, dimensions, metrics
         )

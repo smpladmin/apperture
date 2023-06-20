@@ -47,11 +47,6 @@ class Formula(str, Enum):
     COUNTIF = "countif"
 
 
-class ColumnDefinitionType(str, Enum):
-    DIMENSION = "dimension"
-    METRIC = "metric"
-
-
 class ColumnFilterOperators(str, Enum):
     EQUALS = "="
     NOT_EQUALS = "!="
