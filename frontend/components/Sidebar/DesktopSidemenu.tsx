@@ -318,7 +318,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
             <IconButton
               aria-label="Spreadsheet"
               icon={
-                isPageActive('spreadsheet') ? (
+                isPageActive('workbook') ? (
                   <HardDrives size={16} weight="fill" />
                 ) : (
                   <HardDrives size={16} />
@@ -327,7 +327,7 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
               rounded={'lg'}
               h={10}
               w={10}
-              bg={isPageActive('spreadsheet') ? 'black.50' : 'black.0'}
+              bg={isPageActive('workbook') ? 'black.50' : 'black.0'}
               fontWeight={'500'}
               color={'grey.100'}
               _hover={{

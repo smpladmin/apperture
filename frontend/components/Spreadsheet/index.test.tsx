@@ -1,6 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import Spreadsheet from './index';
-import { getTransientSpreadsheets } from '@lib/services/workbookService';
+import {
+  getTransientSpreadsheets,
+  saveWorkbook,
+  updateWorkbook,
+} from '@lib/services/workbookService';
 import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from '@tests/util';
 import { act } from 'react-dom/test-utils';
@@ -10,8 +14,12 @@ jest.mock('@lib/services/workbookService');
 
 describe('spreadsheet', () => {
   let mockedGetTransientSpreadsheet: jest.Mock;
+  let mockedSaveWorkbook: jest.Mock;
+  let mockedUpdateWorkbook: jest.Mock;
   beforeEach(() => {
     mockedGetTransientSpreadsheet = jest.mocked(getTransientSpreadsheets);
+    mockedSaveWorkbook = jest.mocked(saveWorkbook);
+    mockedUpdateWorkbook = jest.mocked(updateWorkbook);
     mockedGetTransientSpreadsheet.mockReturnValue({
       status: 200,
       data: {
@@ -60,16 +68,34 @@ describe('spreadsheet', () => {
         ],
       },
     });
+    mockedSaveWorkbook.mockReturnValue({
+      status: 200,
+      data: {
+        _id: '64349843748',
+        datasourceId: '654212033222',
+      },
+    });
+    mockedUpdateWorkbook.mockReturnValue({
+      status: 200,
+      data: {
+        _id: '64349843748',
+        datasourceId: '654212033222',
+      },
+    });
   });
 
-  const renderSpreadsheet = () =>
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const renderSpreadsheet = (
+    router = createMockRouter({
+      pathname: '/analytics/spreadsheet',
+      query: { dsId: '654212033222' },
+    })
+  ) =>
     render(
-      <RouterContext.Provider
-        value={createMockRouter({
-          pathname: '/analytics/spreadsheet',
-          query: { dsId: '654212033222' },
-        })}
-      >
+      <RouterContext.Provider value={router}>
         <Spreadsheet />
       </RouterContext.Provider>
     );
@@ -83,9 +109,9 @@ describe('spreadsheet', () => {
 
       const queryBox = screen.getByRole('textbox');
       // query box should be rendered with default query
-      // expect(queryBox.textContent).toBe(
-      //   'Select user_id, event_name from events'
-      // );
+      expect(queryBox.textContent).toBe(
+        'Select user_id, event_name from events'
+      );
     });
 
     it('should close query modal if query is executed successfully', async () => {
@@ -226,9 +252,6 @@ describe('spreadsheet', () => {
       });
 
       const queryText = screen.getByTestId('query-text');
-      // expect(queryText.textContent).toBe(
-      //   'Select user_id, event_name from events'
-      // );
     });
 
     it('should be able to edit query by clicking on edit query button', async () => {
@@ -246,9 +269,9 @@ describe('spreadsheet', () => {
 
       const queryBox = screen.getByRole('textbox');
       // query box should be prefiiled with query
-      // expect(queryBox.textContent).toBe(
-      //   'Select user_id, event_name from events'
-      // );
+      expect(queryBox.textContent).toBe(
+        'Select user_id, event_name from events'
+      );
     });
 
     it('should show textbox for nlp sheet and codemirror sql editor for SQL sheet when modal is open using edit query', async () => {
@@ -340,6 +363,74 @@ describe('spreadsheet', () => {
       // expect to see a new column added in C with formula A+2, therefore text content should be 'B A+2'
       const newAddedColumn = screen.getByText('C B*2');
       expect(newAddedColumn).toBeInTheDocument();
+    });
+  });
+
+  describe('save/update funnel', () => {
+    const router = createMockRouter({
+      query: { dsId: '654212033222' },
+      pathname: '/analytics/workbook/create/',
+    });
+
+    it('should be able to save workbook and redirect to edit page', async () => {
+      renderSpreadsheet(router);
+
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+      const saveButton = screen.getByTestId('save');
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(router.push).toHaveBeenCalledWith({
+          pathname: '/analytics/workbook/edit/[workbookId]',
+          query: { workbookId: '64349843748', dsId: '654212033222' },
+        });
+      });
+    });
+
+    it('should not be redirected to funnel page if save funnel case fails', async () => {
+      mockedSaveWorkbook.mockReturnValue({
+        status: 500,
+        data: {},
+      });
+
+      renderSpreadsheet(router);
+
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+      const saveButton = screen.getByTestId('save');
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(router.push).toHaveBeenCalledTimes(0);
+      });
+    });
+
+    it('should be update workbook if it is on edit page', async () => {
+      const router = createMockRouter({
+        query: { dsId: '654212033222', workbookId: '64349843748' },
+        pathname: '/analytics/workbook/edit',
+      });
+
+      renderSpreadsheet(router);
+
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+      const saveButton = screen.getByTestId('save');
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(router.push).toHaveBeenCalledWith({
+          pathname: '/analytics/workbook/edit/[workbookId]',
+          query: { workbookId: '64349843748', dsId: '654212033222' },
+        });
+      });
     });
   });
 });

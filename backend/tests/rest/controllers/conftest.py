@@ -74,6 +74,8 @@ from domain.spreadsheets.models import (
     ColumnType,
     ComputedSpreadsheet,
     SpreadSheetColumn,
+    Spreadsheet,
+    WorkBook,
 )
 from domain.users.models import UserDetails
 from rest.dtos.actions import ComputedActionResponse
@@ -732,7 +734,24 @@ def transient_spreadsheet_data():
 
 
 @pytest.fixture(scope="module")
+def workbook_data():
+    return {
+        "name": "Test Workbook",
+        "spreadsheets": [
+            {
+                "name": "Sheet 1",
+                "query": "SELECT  event_name FROM  events WHERE timestamp>=toDate(2023-02-11)",
+                "is_sql": True,
+                "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
+            }
+        ],
+        "datasourceId": "23412414123123",
+    }
+
+
+@pytest.fixture(scope="module")
 def spreadsheets_service():
+    WorkBook.get_settings = mock.MagicMock()
     spreadsheets_service_mock = mock.MagicMock()
     computed_spreadsheet = ComputedSpreadsheet(
         headers=[SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)],
@@ -744,11 +763,43 @@ def spreadsheets_service():
             {"index": 5, "event_name": "test_event_5"},
         ],
     )
+    workbook = WorkBook(
+        id=PydanticObjectId("63d0df1ea1040a6388a4a34c"),
+        datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
+        app_id=PydanticObjectId("63ca46feee94e38b81cda37a"),
+        user_id=PydanticObjectId("6374b74e9b36ecf7e0b4f9e4"),
+        name="Test Workbook",
+        spreadsheets=[
+            Spreadsheet(
+                name="Sheet1",
+                headers=[
+                    SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)
+                ],
+                is_sql=True,
+                query="SELECT  event_name FROM  events",
+            )
+        ],
+        enabled=True,
+    )
+    workbook_future = asyncio.Future()
+    workbook_future.set_result(workbook)
+
     spreadsheet_future = asyncio.Future()
     spreadsheet_future.set_result(computed_spreadsheet)
+    workbooks_future = asyncio.Future()
+    workbooks_future.set_result([workbook])
+
+    spreadsheets_service_mock.build_workbook.return_value = workbook
     spreadsheets_service_mock.get_transient_spreadsheets.return_value = (
         spreadsheet_future
     )
+    spreadsheets_service_mock.get_workbooks_for_datasource_id.return_value = (
+        workbooks_future
+    )
+    spreadsheets_service_mock.get_workbooks_by_user_id.return_value = workbooks_future
+    spreadsheets_service_mock.get_workbook_by_id.return_value = workbook_future
+    spreadsheets_service_mock.add_workbook.return_value = workbook_future
+    spreadsheets_service_mock.update_workbook.return_value = workbook_future
 
     return spreadsheets_service_mock
 

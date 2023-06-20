@@ -1,12 +1,15 @@
-import asyncio
 import datetime
 import json
+from unittest.mock import ANY
 
 import pytest
 from beanie import PydanticObjectId
 
 from domain.apps.models import App
-from domain.spreadsheets.models import ColumnType, SpreadSheetColumn
+from domain.spreadsheets.models import (
+    ColumnType,
+    SpreadSheetColumn,
+)
 
 
 @pytest.mark.asyncio
@@ -98,5 +101,167 @@ async def test_compute_transient_spreadsheets(
         id=PydanticObjectId("636a1c61d715ca6baae65611")
     )
     app_service.create_clickhouse_user.assert_called_once_with(
-        **{"id": PydanticObjectId("635ba034807ab86d8a2aadd9"), "app_name": "mixpanel1"}
+        **{
+            "id": PydanticObjectId("635ba034807ab86d8a2aadd9"),
+            "app_name": "mixpanel1",
+        }
     )
+
+
+@pytest.mark.asyncio
+async def test_get_saved_workbooks(client_init, spreadsheets_service):
+    response = client_init.get("/workbooks?datasource_id=63d0a7bfc636cee15d81f579")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "_id": "63d0df1ea1040a6388a4a34c",
+            "revisionId": None,
+            "createdAt": ANY,
+            "updatedAt": None,
+            "datasourceId": "63d0a7bfc636cee15d81f579",
+            "appId": "63ca46feee94e38b81cda37a",
+            "userId": "6374b74e9b36ecf7e0b4f9e4",
+            "name": "Test Workbook",
+            "spreadsheets": [
+                {
+                    "name": "Sheet1",
+                    "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
+                    "is_sql": True,
+                    "query": "SELECT  event_name FROM  events",
+                }
+            ],
+            "enabled": True,
+            "user": {
+                "id": "635ba034807ab86d8a2aadd8",
+                "firstName": "Test",
+                "lastName": "User",
+                "email": "test@email.com",
+                "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
+                "slackChannel": "#alerts",
+            },
+        }
+    ]
+    spreadsheets_service.get_workbooks_for_datasource_id.assert_called_once_with(
+        **{"datasource_id": "63d0a7bfc636cee15d81f579"}
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_saved_workbooks_by_user_id(client_init, spreadsheets_service):
+    response = client_init.get("/workbooks")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "_id": "63d0df1ea1040a6388a4a34c",
+            "revisionId": None,
+            "createdAt": ANY,
+            "updatedAt": None,
+            "datasourceId": "63d0a7bfc636cee15d81f579",
+            "appId": "63ca46feee94e38b81cda37a",
+            "userId": "6374b74e9b36ecf7e0b4f9e4",
+            "name": "Test Workbook",
+            "spreadsheets": [
+                {
+                    "name": "Sheet1",
+                    "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
+                    "is_sql": True,
+                    "query": "SELECT  event_name FROM  events",
+                }
+            ],
+            "enabled": True,
+            "user": {
+                "id": "635ba034807ab86d8a2aadd8",
+                "firstName": "Test",
+                "lastName": "User",
+                "email": "test@email.com",
+                "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
+                "slackChannel": "#alerts",
+            },
+        }
+    ]
+    spreadsheets_service.get_workbooks_by_user_id.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_get_saved_workbook_by_id(client_init, spreadsheets_service):
+    response = client_init.get("/workbooks/635ba034807ab86d8a2aadd8")
+    assert response.status_code == 200
+    assert response.json() == {
+        "_id": "63d0df1ea1040a6388a4a34c",
+        "appId": "63ca46feee94e38b81cda37a",
+        "createdAt": ANY,
+        "datasourceId": "63d0a7bfc636cee15d81f579",
+        "enabled": True,
+        "name": "Test Workbook",
+        "revisionId": None,
+        "spreadsheets": [
+            {
+                "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
+                "is_sql": True,
+                "name": "Sheet1",
+                "query": "SELECT  event_name FROM  events",
+            }
+        ],
+        "updatedAt": None,
+        "userId": "6374b74e9b36ecf7e0b4f9e4",
+    }
+
+    spreadsheets_service.get_workbook_by_id.assert_called_once_with(
+        **{"workbook_id": "635ba034807ab86d8a2aadd8"},
+    )
+
+
+@pytest.mark.asyncio
+async def test_create_workbook(client_init, workbook_data):
+    response = client_init.post("/workbooks", data=json.dumps(workbook_data))
+    assert response.status_code == 200
+    assert response.json() == {
+        "_id": "63d0df1ea1040a6388a4a34c",
+        "revisionId": None,
+        "createdAt": ANY,
+        "updatedAt": None,
+        "datasourceId": "63d0a7bfc636cee15d81f579",
+        "appId": "63ca46feee94e38b81cda37a",
+        "userId": "6374b74e9b36ecf7e0b4f9e4",
+        "name": "Test Workbook",
+        "spreadsheets": [
+            {
+                "name": "Sheet1",
+                "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
+                "is_sql": True,
+                "query": "SELECT  event_name FROM  events",
+            }
+        ],
+        "enabled": True,
+    }
+
+
+@pytest.mark.asyncio
+async def test_update_workbook(client_init, workbook_data, spreadsheets_service):
+    response = client_init.put(
+        "/workbooks/635ba034807ab86d8a2aadd8", data=json.dumps(workbook_data)
+    )
+    assert response.status_code == 200
+    spreadsheets_service.update_workbook.assert_called_once()
+
+    assert {
+        "id": PydanticObjectId("63d0df1ea1040a6388a4a34c"),
+        "revision_id": None,
+        "created_at": ANY,
+        "updated_at": None,
+        "datasource_id": PydanticObjectId("63d0a7bfc636cee15d81f579"),
+        "app_id": PydanticObjectId("63ca46feee94e38b81cda37a"),
+        "user_id": PydanticObjectId("6374b74e9b36ecf7e0b4f9e4"),
+        "name": "Test Workbook",
+        "spreadsheets": [
+            {
+                "name": "Sheet1",
+                "headers": [{"name": "event_name", "type": ColumnType.QUERY_HEADER}],
+                "is_sql": True,
+                "query": "SELECT  event_name FROM  events",
+            }
+        ],
+        "enabled": True,
+    } == spreadsheets_service.update_workbook.call_args.kwargs["workbook"].dict()
