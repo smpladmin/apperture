@@ -1,7 +1,6 @@
 import asyncio
-import random
-import string
-import uuid
+from typing import List
+
 
 import httpx
 from beanie import PydanticObjectId
@@ -10,9 +9,9 @@ from fastapi_cache.decorator import cache
 
 from authorisation.service import AuthService
 from cache.cache import CACHE_EXPIRY_24_HOURS, service_datasource_key_builder
+from domain.apps.models import App
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import (
-    ClickHouseCredential,
     DataSource,
     DataSourceVersion,
     ProviderDataSource,
@@ -68,17 +67,8 @@ class DataSourceService:
     async def get_datasources_for_provider(self, provider: IntegrationProvider):
         return await DataSource.find(DataSource.provider == provider).to_list()
 
-    def generate_random_value(self, length=32):
-        characters = string.ascii_letters + string.digits
-        password = "".join(random.choice(characters) for _ in range(length))
-        return password
-
-    def create_user_policy(self, username: str, password: str, datasource_id: str):
-        self.clickhouse_role.create_user(username=username, password=password)
-        self.clickhouse_role.create_row_policy(
-            datasource_id=datasource_id, username=username
-        )
-        self.clickhouse_role.grant_select_permission_to_user(username=username)
+    async def get_datasources_for_app_id(self, app_id: PydanticObjectId):
+        return await DataSource.find(DataSource.app_id == app_id).to_list()
 
     async def create_datasource(
         self,
@@ -86,7 +76,7 @@ class DataSourceService:
         name: str,
         version: DataSourceVersion,
         integration: Integration,
-    ):
+    ) -> DataSource:
         datasource = DataSource(
             external_source_id=external_source_id,
             name=name,
@@ -98,26 +88,31 @@ class DataSourceService:
         )
 
         await datasource.insert()
-        self.create_clickhouse_credential_and_user_policy(datasource_id=datasource.id)
         return datasource
 
-    async def create_clickhouse_credential_and_user_policy(self, datasource_id: str):
-        clickhouse_credential = ClickHouseCredential(
-            username=self.generate_random_value(),
-            password=self.generate_random_value(),
+    def create_row_policy_for_username(
+        self,
+        datasource_id: str,
+        username: str,
+    ):
+        self.clickhouse_role.create_row_policy(
+            datasource_id=datasource_id, username=username
         )
 
-        self.create_user_policy(
-            username=clickhouse_credential.username,
-            password=clickhouse_credential.password,
-            datasource_id=datasource_id,
-        )
-        await DataSource.find(
-            DataSource.id == PydanticObjectId(datasource_id),
-            DataSource.enabled == True,
-        ).update({"$set": {"clickhouse_credential": clickhouse_credential}})
+    def create_user_policy_for_all_datasources(
+        self, datasources: List[DataSource], username: str
+    ):
+        for ds in datasources:
+            self.create_row_policy_for_username(
+                datasource_id=ds.id,
+                username=username,
+            )
 
-        return clickhouse_credential
+    async def create_row_policy_for_datasources_by_app(self, app: App, username: str):
+        datasources = await self.get_datasources_for_app_id(app.id)
+        self.create_user_policy_for_all_datasources(
+            datasources=datasources, username=username
+        )
 
     async def get_enabled_datasources(self):
         return await DataSource.find(DataSource.enabled == True).to_list()

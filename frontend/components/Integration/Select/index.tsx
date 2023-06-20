@@ -103,10 +103,10 @@ const SelectProvider = () => {
             <RadioGroup value={provider} onChange={setProvider}>
               <Stack direction="column">
                 <IntegrationSource
-                  sourceName="Google Analytics"
-                  value={Provider.GOOGLE}
-                  imgSrc={gaLogo}
-                  selected={provider === Provider.GOOGLE}
+                  sourceName="Apperture"
+                  value={Provider.APPERTURE}
+                  imgSrc={appertureLogo}
+                  selected={provider === Provider.APPERTURE}
                 />
                 <IntegrationSource
                   sourceName="MixPanel"
@@ -127,10 +127,10 @@ const SelectProvider = () => {
                   selected={provider === Provider.CLEVERTAP}
                 />
                 <IntegrationSource
-                  sourceName="Apperture"
-                  value={Provider.APPERTURE}
-                  imgSrc={appertureLogo}
-                  selected={provider === Provider.APPERTURE}
+                  sourceName="Google Analytics"
+                  value={Provider.GOOGLE}
+                  imgSrc={gaLogo}
+                  selected={provider === Provider.GOOGLE}
                 />
               </Stack>
             </RadioGroup>

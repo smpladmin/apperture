@@ -13,7 +13,6 @@ class ClickHouseRole:
         query = (
             f"CREATE USER {username} IDENTIFIED WITH plaintext_password BY '{password}'"
         )
-
         return self.clickhouse.admin.query(query=query)
 
     def grant_select_permission_to_user(self, username: str):
@@ -29,6 +28,14 @@ class ClickHouseRole:
             return self.clickhouse.admin.query(query=query)
         except Exception as e:
             self.clickhouse.admin.query(
-                query=f"DROP POLICY pol{datasource_id} ON default.events, default.clickstream"
+                query=f"DROP POLICY IF EXISTS pol{datasource_id} ON default.events, default.clickstream"
             )
             return self.clickhouse.admin.query(query=query)
+
+    def grant_permission_to_database(self, database_name: str, username: str):
+        query = f"GRANT SHOW, SELECT, INSERT, ALTER, CREATE TABLE, CREATE VIEW, DROP TABLE, DROP VIEW, UNDROP TABLE, TRUNCATE ON {database_name}.* TO {username};"
+        return self.clickhouse.admin.query(query=query)
+
+    def create_database_for_app(self, database_name: str):
+        query = f"CREATE DATABASE {database_name}"
+        return self.clickhouse.admin.query(query=query)
