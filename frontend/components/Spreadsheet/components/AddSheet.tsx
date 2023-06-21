@@ -21,6 +21,7 @@ const AddSheet = ({
       query: withQuery ? 'Select user_id, event_name from events' : '',
       data: [],
       headers: [],
+      subHeaders: new Array(27).fill(''),
       is_sql,
     };
     setSheetsData((state: TransientSheetData[]) => [...state, newSheet]);
@@ -55,7 +56,7 @@ const AddSheet = ({
             bg: 'white.400',
           }}
           onClick={() => {
-            handleAddNewSheet(false);
+            handleAddNewSheet(false, false);
           }}
           data-testid={'new-sheet'}
         >

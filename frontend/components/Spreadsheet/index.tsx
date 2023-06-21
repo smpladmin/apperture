@@ -27,14 +27,19 @@ import LoadingSpinner from '@components/LoadingSpinner';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
-    return savedWorkbook.spreadsheets.map((sheet) => ({ ...sheet, data: [] }));
+    return savedWorkbook.spreadsheets.map((sheet) => ({
+      ...sheet,
+      data: [],
+      subHeaders: new Array(27).fill(''),
+    }));
   }
   return [
     {
       name: 'Sheet 1',
-      query: 'Select user_id, event_name from events',
+      query: 'Select user_id, count() from events group by user_id',
       data: [],
       headers: [],
+      subHeaders: new Array(27).fill(''),
       is_sql: true,
     },
   ];
@@ -87,34 +92,71 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     return lookupTable;
   };
 
+  useEffect(() => {
+    // console.log('sheets data', sheetsData);
+  }, [sheetsData]);
+
+  const getPaddingHeadersLenth = (
+    columnId: string,
+    existingHeadersLength: number
+  ) => {
+    const toUpdateHeaderIndex = columnId.charCodeAt(0) - 65;
+
+    const toAddPaddingHeadersLength =
+      toUpdateHeaderIndex - existingHeadersLength;
+
+    return toAddPaddingHeadersLength > 0 ? toAddPaddingHeadersLength : 0;
+  };
+
   const updateSelectedSheetDataAndHeaders = (
-    data: any[],
+    evaluatedData: any[],
     header: SpreadSheetColumn,
-    columnId: string
+    columnId: string,
+    oldColumnId: string
   ) => {
     const tempSheetsData = cloneDeep(sheetsData);
-    const headerPadding =
-      columnId.charCodeAt(0) -
-      65 -
-      tempSheetsData[selectedSheetIndex].headers.length;
+    const existingHeaders = tempSheetsData[selectedSheetIndex]?.headers;
 
-    const padding = new Array(headerPadding).fill({
-      name: '',
-      type: ColumnType.QUERY_HEADER,
-    });
+    const existingHeaderIndex = existingHeaders.findIndex(
+      (header) => header.name === oldColumnId
+    );
+
+    const paddingHeadersLength = getPaddingHeadersLenth(
+      columnId,
+      existingHeaders.length
+    );
+
+    const paddedHeaders = Array.from({ length: paddingHeadersLength }).map(
+      (_, index) => ({
+        name: String.fromCharCode(65 + index + existingHeaders.length),
+        type: ColumnType.PADDING_HEADER,
+      })
+    );
 
     tempSheetsData[selectedSheetIndex].data = tempSheetsData[
       selectedSheetIndex
     ].data.map((item, index) => ({
       ...item,
-      [header.name]: data[index],
-      '': '',
+      [header.name]: evaluatedData[index],
     }));
-    tempSheetsData[selectedSheetIndex].headers = [
-      ...tempSheetsData[selectedSheetIndex].headers,
-      ...padding,
-      header,
-    ];
+
+    if (existingHeaderIndex !== -1) {
+      // update exisitng header and subheader
+      // for updating subheaders, need to add 1 to maintain sheets 'index' column
+      tempSheetsData[selectedSheetIndex].headers[existingHeaderIndex] = header;
+      tempSheetsData[selectedSheetIndex].subHeaders[existingHeaderIndex + 1] =
+        header.name;
+    } else {
+      // add new headers and subheaders
+      const columnIndex = columnId.charCodeAt(0) - 65 + 1;
+      tempSheetsData[selectedSheetIndex].headers = [
+        ...existingHeaders,
+        ...paddedHeaders,
+        header,
+      ];
+      tempSheetsData[selectedSheetIndex].subHeaders[columnIndex] = header.name;
+    }
+
     setSheetsData(tempSheetsData);
   };
 
@@ -123,20 +165,18 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   };
 
   const evaluateFormulaHeader = useCallback(
-    (headerText: string, columnId: string) => {
+    (headerText: string, columnId: string, oldColumnId: string) => {
       const newHeader = {
         name: headerText.replace(/\s/g, '').toUpperCase(),
         type: ColumnType.COMPUTED_HEADER,
       };
 
-      const columnIndex = columnId;
-
       const operands = getOperands(newHeader.name);
       const operandsIndex = getOperatorsIndex(operands);
 
       const parsedExpression: any[] = parseExpression(newHeader.name);
-
       const lookupTable = generateLookupTable(operands, operandsIndex);
+
       const evaluatedData = evaluateExpression(
         parsedExpression as string[],
         lookupTable
@@ -145,10 +185,11 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       updateSelectedSheetDataAndHeaders(
         evaluatedData,
         newHeader,
-        columnIndex as string
+        columnId,
+        oldColumnId
       );
     },
-    [sheetsData]
+    [sheetsData, selectedSheetIndex]
   );
 
   const generateLookupTableFromQueriedData = (
@@ -360,6 +401,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             <>
               <Flex overflow={'scroll'} data-testid={'react-grid'}>
                 <Grid
+                  selectedSheetIndex={selectedSheetIndex}
                   sheetData={cloneDeep(sheetsData[selectedSheetIndex])}
                   evaluateFormulaHeader={evaluateFormulaHeader}
                 />

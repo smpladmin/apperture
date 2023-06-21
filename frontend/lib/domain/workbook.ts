@@ -4,6 +4,7 @@ export type TransientSheetData = {
   name: string;
   query: string;
   headers: SpreadSheetColumn[];
+  subHeaders: string[];
   data: any[];
   is_sql: boolean;
 };
@@ -11,6 +12,7 @@ export type TransientSheetData = {
 export enum ColumnType {
   COMPUTED_HEADER = 'COMPUTED_HEADER',
   QUERY_HEADER = 'QUERY_HEADER',
+  PADDING_HEADER = 'PADDING_HEADER',
 }
 
 export type SpreadSheetColumn = {

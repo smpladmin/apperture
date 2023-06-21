@@ -14,6 +14,7 @@ import {
   TransientSheetData,
 } from '@lib/domain/workbook';
 import { DropdownHeaderCell, DropdownHeaderTemplate } from './DropdownHeader';
+import { InputHeaderCell, InputHeaderTemplate } from './InputHeader';
 
 const getGridRow = (value: any): DefaultCellTypes => {
   const cellTypes: { [key: string]: DefaultCellTypes } = {
@@ -33,7 +34,7 @@ const getColumns = (headers: SpreadSheetColumn[]): Column[] => {
     return {
       columnId: header.name,
       resizable: true,
-      width: header.name.length * 10 > 150 ? header.name.length * 10 : 150,
+      width: 240,
     };
   });
 };
@@ -45,26 +46,57 @@ const getHeaderRow = (
   return {
     rowId: 'header',
     cells: headers.map((header, index) => {
-      if (originalHeaders.includes(header)) {
+      if (
+        originalHeaders.includes(header) &&
+        header.type !== ColumnType.PADDING_HEADER
+      ) {
         return {
           type: 'header',
           text: `${String.fromCharCode(65 + index - 1)} ${header.name}`,
         };
-      } else if (header.name === 'index') {
+      }
+      if (header.name === 'index') {
         return {
           type: 'header',
           text: '',
         };
-      } else {
+      }
+      return {
+        type: 'header',
+        text: header.name,
+      };
+    }),
+  };
+};
+
+const getSubHeaderRow = (
+  headers: SpreadSheetColumn[],
+  subHeaders: string[]
+): Row<DefaultCellTypes | InputHeaderCell> => {
+  return {
+    rowId: 'subHeader',
+    cells: headers.map((header, index) => {
+      if (header.name === 'index') {
         return {
-          type: 'dropdownHeader',
-          text: header.name,
-          style: {
-            overflow: 'initial',
-            background: '#f2f2f2',
-          },
+          type: 'header',
+          text: '',
         };
       }
+      if (header.type === ColumnType.QUERY_HEADER) {
+        return {
+          type: 'inputHeader',
+          text: `${subHeaders[index]}`,
+          disable: true,
+        };
+      }
+      if (header.name === 'C' || header.name === 'B+10') {
+        console.log('subheader name', subHeaders[index]);
+      }
+      return {
+        type: 'inputHeader',
+        text: `${subHeaders[index]}`,
+        disable: false,
+      };
     }),
   };
 };
@@ -72,9 +104,11 @@ const getHeaderRow = (
 const getRows = (
   data: any[],
   headers: SpreadSheetColumn[],
-  originalHeaders: SpreadSheetColumn[]
-): Row<DefaultCellTypes | DropdownHeaderCell>[] => [
+  originalHeaders: SpreadSheetColumn[],
+  subHeaders: string[]
+): Row<DefaultCellTypes | DropdownHeaderCell | InputHeaderCell>[] => [
   getHeaderRow(headers, originalHeaders),
+  getSubHeaderRow(headers, subHeaders),
   ...data.map<Row>((data, idx) => ({
     rowId: idx,
     cells: headers.map((header) => {
@@ -85,9 +119,11 @@ const getRows = (
 ];
 
 const Grid = ({
+  selectedSheetIndex,
   sheetData,
   evaluateFormulaHeader,
 }: {
+  selectedSheetIndex: number;
   sheetData: TransientSheetData;
   evaluateFormulaHeader: Function;
 }) => {
@@ -99,9 +135,12 @@ const Grid = ({
     getRows(
       fillRows(sheetData.data, sheetData.headers),
       fillHeaders(sheetData.headers),
-      sheetData.headers
+      sheetData.headers,
+      sheetData.subHeaders
     )
   );
+
+
 
   useEffect(() => {
     setColumns(getColumns(fillHeaders(sheetData.headers)));
@@ -109,10 +148,11 @@ const Grid = ({
       getRows(
         fillRows(sheetData.data, sheetData.headers),
         fillHeaders(sheetData.headers),
-        sheetData.headers
+        sheetData.headers,
+        sheetData.subHeaders
       )
     );
-  }, [sheetData]);
+  }, [sheetData, selectedSheetIndex]);
 
   const handleColumnResize = (ci: Id, width: number) => {
     setColumns((prevColumns) => {
@@ -125,13 +165,15 @@ const Grid = ({
   };
 
   const handleDataChange = (changedValue: CellChange<any>[]) => {
+
     const changedHeaders = changedValue.filter(
-      (value) => value.type === 'dropdownHeader'
+      (value) => value.type === 'inputHeader'
     );
     changedHeaders[0] &&
       evaluateFormulaHeader(
         changedHeaders[0]?.newCell.text,
-        changedHeaders[0].columnId
+        changedHeaders[0]?.columnId,
+        changedHeaders[0]?.previousCell.text
       );
   };
 
@@ -141,7 +183,10 @@ const Grid = ({
       columns={columns}
       onColumnResized={handleColumnResize}
       onCellsChanged={handleDataChange}
-      customCellTemplates={{ dropdownHeader: new DropdownHeaderTemplate() }}
+      customCellTemplates={{
+        dropdownHeader: new DropdownHeaderTemplate(),
+        inputHeader: new InputHeaderTemplate(),
+      }}
     />
   );
 };
