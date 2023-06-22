@@ -10,11 +10,22 @@ from repositories.document import Document
 class ColumnType(str, Enum):
     COMPUTED_HEADER = "COMPUTED_HEADER"
     QUERY_HEADER = "QUERY_HEADER"
+    PADDING_HEADER = "PADDING_HEADER"
+
+
+class SubHeaderColumnType(str, Enum):
+    DIMENSION = ("DIMENSION",)
+    METRIC = ("METRIC",)
 
 
 class SpreadSheetColumn(BaseModel):
     name: str
     type: ColumnType
+
+
+class SubHeaderColumn(BaseModel):
+    name: str
+    type: SubHeaderColumnType
 
 
 class ComputedSpreadsheet(BaseModel):
@@ -25,6 +36,7 @@ class ComputedSpreadsheet(BaseModel):
 class Spreadsheet(BaseModel):
     name: str
     headers: List[SpreadSheetColumn]
+    subHeaders: Optional[List[SubHeaderColumn]]
     is_sql: bool
     query: str
 

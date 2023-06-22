@@ -1,5 +1,5 @@
 import { Button, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react';
-import { TransientSheetData } from '@lib/domain/workbook';
+import { SubHeaderColumnType, TransientSheetData } from '@lib/domain/workbook';
 import React from 'react';
 
 type AddSheetProps = {
@@ -21,9 +21,19 @@ const AddSheet = ({
       query: withQuery ? 'Select user_id, event_name from events' : '',
       data: [],
       headers: [],
-      subHeaders: new Array(27).fill(''),
+      subHeaders: Array.from({ length: 27 }).map((_, index) => {
+        const isBlankSheet = !withQuery && !is_sql;
+        return {
+          name: '',
+          type:
+            isBlankSheet && index === 1
+              ? SubHeaderColumnType.DIMENSION
+              : SubHeaderColumnType.METRIC,
+        };
+      }),
       is_sql,
     };
+
     setSheetsData((state: TransientSheetData[]) => [...state, newSheet]);
     setSelectedSheetIndex(sheetsLength);
 

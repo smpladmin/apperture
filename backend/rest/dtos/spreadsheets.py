@@ -6,6 +6,7 @@ from domain.spreadsheets.models import (
     ColumnDefinition,
     ComputedSpreadsheet,
     SpreadSheetColumn,
+    SubHeaderColumn,
     WorkBook,
 )
 from rest.dtos.apperture_users import AppertureUserResponse
@@ -31,6 +32,7 @@ class ComputedSpreadsheetQueryResponse(ComputedSpreadsheet, ModelResponse):
 class SpreadSheetDto(BaseModel):
     name: str
     headers: List[SpreadSheetColumn]
+    subHeaders: List[SubHeaderColumn]
     is_sql: bool
     query: str
 

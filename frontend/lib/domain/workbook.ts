@@ -4,7 +4,7 @@ export type TransientSheetData = {
   name: string;
   query: string;
   headers: SpreadSheetColumn[];
-  subHeaders: string[];
+  subHeaders: SubHeaderColumn[];
   data: any[];
   is_sql: boolean;
 };
@@ -15,14 +15,25 @@ export enum ColumnType {
   PADDING_HEADER = 'PADDING_HEADER',
 }
 
+export enum SubHeaderColumnType {
+  DIMENSION = 'DIMENSION',
+  METRIC = 'METRIC',
+}
+
 export type SpreadSheetColumn = {
   name: string;
   type: ColumnType;
 };
 
+export type SubHeaderColumn = {
+  name: string;
+  type: SubHeaderColumnType;
+};
+
 export type Spreadsheet = {
   name: string;
   headers: SpreadSheetColumn[];
+  subHeaders: SubHeaderColumn[];
   is_sql: boolean;
   query: string;
 };

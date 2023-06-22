@@ -7,6 +7,7 @@ import { useRouter } from 'next/router';
 import {
   ColumnType,
   SpreadSheetColumn,
+  SubHeaderColumnType,
   TransientSheetData,
   Workbook,
 } from '@lib/domain/workbook';
@@ -30,7 +31,6 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
     return savedWorkbook.spreadsheets.map((sheet) => ({
       ...sheet,
       data: [],
-      subHeaders: new Array(27).fill(''),
     }));
   }
   return [
@@ -39,7 +39,12 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
       query: 'Select user_id, count() from events group by user_id',
       data: [],
       headers: [],
-      subHeaders: new Array(27).fill(''),
+      subHeaders: Array.from({ length: 27 }).map((_, index) => {
+        return {
+          name: '',
+          type: SubHeaderColumnType.METRIC,
+        };
+      }),
       is_sql: true,
     },
   ];
@@ -92,10 +97,6 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     return lookupTable;
   };
 
-  useEffect(() => {
-    // console.log('sheets data', sheetsData);
-  }, [sheetsData]);
-
   const getPaddingHeadersLenth = (
     columnId: string,
     existingHeadersLength: number
@@ -111,11 +112,11 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const updateSelectedSheetDataAndHeaders = (
     evaluatedData: any[],
     header: SpreadSheetColumn,
-    columnId: string,
-    oldColumnId: string
+    columnId: string
   ) => {
     const tempSheetsData = cloneDeep(sheetsData);
     const existingHeaders = tempSheetsData[selectedSheetIndex]?.headers;
+    const oldColumnId = columnId;
 
     const existingHeaderIndex = existingHeaders.findIndex(
       (header) => header.name === oldColumnId
@@ -133,19 +134,13 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       })
     );
 
-    tempSheetsData[selectedSheetIndex].data = tempSheetsData[
-      selectedSheetIndex
-    ].data.map((item, index) => ({
-      ...item,
-      [header.name]: evaluatedData[index],
-    }));
-
     if (existingHeaderIndex !== -1) {
       // update exisitng header and subheader
       // for updating subheaders, need to add 1 to maintain sheets 'index' column
       tempSheetsData[selectedSheetIndex].headers[existingHeaderIndex] = header;
-      tempSheetsData[selectedSheetIndex].subHeaders[existingHeaderIndex + 1] =
-        header.name;
+      tempSheetsData[selectedSheetIndex].subHeaders[
+        existingHeaderIndex + 1
+      ].name = header.name;
     } else {
       // add new headers and subheaders
       const columnIndex = columnId.charCodeAt(0) - 65 + 1;
@@ -154,8 +149,17 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         ...paddedHeaders,
         header,
       ];
-      tempSheetsData[selectedSheetIndex].subHeaders[columnIndex] = header.name;
+      tempSheetsData[selectedSheetIndex].subHeaders[columnIndex].name =
+        header.name;
     }
+
+    // update sheet data with evaluated data
+    tempSheetsData[selectedSheetIndex].data = tempSheetsData[
+      selectedSheetIndex
+    ].data.map((item, index) => ({
+      ...item,
+      [header.name]: evaluatedData[index] || '',
+    }));
 
     setSheetsData(tempSheetsData);
   };
@@ -165,12 +169,11 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   };
 
   const evaluateFormulaHeader = useCallback(
-    (headerText: string, columnId: string, oldColumnId: string) => {
+    (headerText: string, columnId: string) => {
       const newHeader = {
         name: headerText.replace(/\s/g, '').toUpperCase(),
         type: ColumnType.COMPUTED_HEADER,
       };
-
       const operands = getOperands(newHeader.name);
       const operandsIndex = getOperatorsIndex(operands);
 
@@ -182,12 +185,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         lookupTable
       );
 
-      updateSelectedSheetDataAndHeaders(
-        evaluatedData,
-        newHeader,
-        columnId,
-        oldColumnId
-      );
+      updateSelectedSheetDataAndHeaders(evaluatedData, newHeader, columnId);
     },
     [sheetsData, selectedSheetIndex]
   );
@@ -222,7 +220,6 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     queriedData = queriedData.map((item: any, index: number) => ({
       ...item,
       [header.name]: data[index],
-      '': '',
     }));
     return queriedData;
   };
@@ -309,6 +306,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         is_sql: sheet.is_sql,
         headers: sheet.headers,
         query: sheet.query,
+        subHeaders: sheet.subHeaders,
       };
     });
 

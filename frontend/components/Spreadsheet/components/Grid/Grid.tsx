@@ -11,10 +11,13 @@ import { fillHeaders, fillRows } from '../../util';
 import {
   ColumnType,
   SpreadSheetColumn,
+  SubHeaderColumn,
+  SubHeaderColumnType,
   TransientSheetData,
 } from '@lib/domain/workbook';
 import { DropdownHeaderCell, DropdownHeaderTemplate } from './DropdownHeader';
 import { InputHeaderCell, InputHeaderTemplate } from './InputHeader';
+import { WHITE_DEFAULT } from '@theme/index';
 
 const getGridRow = (value: any): DefaultCellTypes => {
   const cellTypes: { [key: string]: DefaultCellTypes } = {
@@ -71,31 +74,44 @@ const getHeaderRow = (
 
 const getSubHeaderRow = (
   headers: SpreadSheetColumn[],
-  subHeaders: string[]
+  subHeaders: SubHeaderColumn[],
+  sheetData: TransientSheetData
 ): Row<DefaultCellTypes | InputHeaderCell> => {
   return {
     rowId: 'subHeader',
     cells: headers.map((header, index) => {
+      const isBlankSheet = !sheetData.is_sql && !sheetData.query;
+      const dimensionSubHeaderCount = subHeaders.reduce(
+        (acc: number, header: SubHeaderColumn) => {
+          if (header.type === SubHeaderColumnType.DIMENSION) acc++;
+          return acc;
+        },
+        0
+      );
+      const showAddButton = isBlankSheet && index === dimensionSubHeaderCount;
       if (header.name === 'index') {
         return {
           type: 'header',
           text: '',
+          style: { background: WHITE_DEFAULT },
         };
       }
       if (header.type === ColumnType.QUERY_HEADER) {
         return {
           type: 'inputHeader',
-          text: `${subHeaders[index]}`,
+          text: `${subHeaders[index].name}`,
           disable: true,
+          showAddButton,
         };
-      }
-      if (header.name === 'C' || header.name === 'B+10') {
-        console.log('subheader name', subHeaders[index]);
       }
       return {
         type: 'inputHeader',
-        text: `${subHeaders[index]}`,
+        text: `${subHeaders[index].name}`,
         disable: false,
+        showAddButton,
+        style: {
+          overflow: 'initial',
+        },
       };
     }),
   };
@@ -105,10 +121,11 @@ const getRows = (
   data: any[],
   headers: SpreadSheetColumn[],
   originalHeaders: SpreadSheetColumn[],
-  subHeaders: string[]
+  subHeaders: SubHeaderColumn[],
+  sheetData: TransientSheetData
 ): Row<DefaultCellTypes | DropdownHeaderCell | InputHeaderCell>[] => [
   getHeaderRow(headers, originalHeaders),
-  getSubHeaderRow(headers, subHeaders),
+  getSubHeaderRow(headers, subHeaders, sheetData),
   ...data.map<Row>((data, idx) => ({
     rowId: idx,
     cells: headers.map((header) => {
@@ -136,11 +153,10 @@ const Grid = ({
       fillRows(sheetData.data, sheetData.headers),
       fillHeaders(sheetData.headers),
       sheetData.headers,
-      sheetData.subHeaders
+      sheetData.subHeaders,
+      sheetData
     )
   );
-
-
 
   useEffect(() => {
     setColumns(getColumns(fillHeaders(sheetData.headers)));
@@ -149,7 +165,8 @@ const Grid = ({
         fillRows(sheetData.data, sheetData.headers),
         fillHeaders(sheetData.headers),
         sheetData.headers,
-        sheetData.subHeaders
+        sheetData.subHeaders,
+        sheetData
       )
     );
   }, [sheetData, selectedSheetIndex]);
@@ -165,15 +182,15 @@ const Grid = ({
   };
 
   const handleDataChange = (changedValue: CellChange<any>[]) => {
-
     const changedHeaders = changedValue.filter(
       (value) => value.type === 'inputHeader'
     );
+
+    if (changedHeaders[0].newCell.addHeader) return;
     changedHeaders[0] &&
       evaluateFormulaHeader(
         changedHeaders[0]?.newCell.text,
-        changedHeaders[0]?.columnId,
-        changedHeaders[0]?.previousCell.text
+        changedHeaders[0]?.columnId
       );
   };
 

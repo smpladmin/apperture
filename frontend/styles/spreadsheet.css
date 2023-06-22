@@ -1,0 +1,13 @@
+.reactgrid-content .rg-pane .rg-cell {
+  font-family: 'Inter';
+  font-size: '0.625rem';
+  line-height: '1rem';
+  font-weight: 400;
+}
+
+.reactgrid-content .rg-pane .rg-cell.rg-number-cell,
+.reactgrid-content .rg-pane .rg-cell .rg-time-cell,
+.reactgrid-content .rg-pane .rg-cell .rg-date-cell {
+  justify-content: flex-start;
+}
+/* $cell-font-size: 0.625rem; */
