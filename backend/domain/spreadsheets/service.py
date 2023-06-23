@@ -5,7 +5,6 @@ from typing import List
 from beanie import PydanticObjectId
 from fastapi import Depends
 
-from domain import spreadsheets
 from domain.spreadsheets.models import (
     ColumnDefinition,
     ColumnType,

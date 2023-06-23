@@ -1,0 +1,46 @@
+import React, { ReactElement } from 'react';
+import { AppWithIntegrations } from '@lib/domain/app';
+import Layout from '@components/Layout';
+import { GetServerSideProps } from 'next';
+import { getAuthToken } from '@lib/utils/request';
+import { _getAppsWithIntegrations } from '@lib/services/appService';
+import DataMart from '@components/DataMart/CreateDataMart';
+
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+  const token = getAuthToken(req);
+  if (!token) {
+    return {
+      props: {},
+    };
+  }
+  const apps = await _getAppsWithIntegrations(token);
+
+  if (!apps.length) {
+    return {
+      redirect: {
+        destination: '/analytics/app/create',
+      },
+      props: {},
+    };
+  }
+  return {
+    props: { apps },
+  };
+};
+
+const CreateDataMart = () => {
+  return <DataMart />;
+};
+
+CreateDataMart.getLayout = function getLayout(
+  page: ReactElement,
+  apps: AppWithIntegrations[]
+) {
+  return (
+    <Layout apps={apps} hideHeader={true}>
+      {page}
+    </Layout>
+  );
+};
+
+export default CreateDataMart;

@@ -3,6 +3,7 @@ import motor, os
 
 from domain.apps.models import App
 from domain.clickstream_event_properties.models import ClickStreamEventProperties
+from domain.datamart.models import DataMart
 from domain.datasources.models import DataSource
 from domain.edge.models import BaseEdge
 from domain.edge.models import Edge
@@ -45,6 +46,7 @@ class Mongo:
                 EventProperties,
                 WorkBook,
                 ClickStreamEventProperties,
+                DataMart,
             ],
         )
 
