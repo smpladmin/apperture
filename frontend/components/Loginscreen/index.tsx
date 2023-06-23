@@ -1,4 +1,4 @@
-import logo from '@assets/images/Logo_login.svg';
+import logo from '@assets/images/apperturelogonew.svg';
 import glogo from '@assets/images/Google_login.svg';
 import Link from 'next/link';
 import {
@@ -9,10 +9,13 @@ import {
   Text,
   Image,
   useDisclosure,
+  FormControl,
+  FormLabel,
+  Input,
 } from '@chakra-ui/react';
 import { BACKEND_BASE_URL } from 'config';
 import LoginWithPasswordModal from './Components/LoginWithPasswordModal';
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 const Loginscreen = () => {
   const { onOpen, onClose, isOpen } = useDisclosure();
@@ -21,48 +24,124 @@ const Loginscreen = () => {
     window?.posthog?.reset?.(true);
   }, []);
 
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const redirectionRef = useRef<any>();
+
+  const handleEmail = (e: any) => {
+    setEmail(e.target.value);
+  };
+  const handlePassword = (e: any) => {
+    setPassword(e.target.value);
+  };
+
+  const handleLogin = (e: any) => {
+    e.preventDefault();
+    if (email && password) redirectionRef.current.click();
+  };
+
   return (
     <Box
       p={8}
-      pt={{ base: 33, md: 40 }}
-      bg="black.400"
-      textColor="white.DEFAULT"
+      pt={{ base: 10, md: 10 }}
+      bg="white.400"
+      textColor="grey.900"
       height={'100%'}
       overflowY={'auto'}
     >
-      <Flex
-        direction="column"
-        justifyContent="space-between"
-        marginX={{ md: 36 }}
-        marginLeft={{ lg: 45 }}
-        height={'full'}
-        gap={8}
-      >
-        <Box>
-          <Box mb={3} h={{ base: 25, md: 30 }} w={{ base: 25, md: 30 }}>
+      <Flex direction="column" alignItems={'center'}>
+        <Box textAlign={'center'}>
+          <Flex w={'full'} justifyContent={'center'}>
             <Image src={logo.src} alt="Apperture logo" />
-          </Box>
+          </Flex>
           <Heading
             as="h1"
-            mt={12}
-            fontSize={{ base: 'sh-34', md: 'sh-56' }}
-            lineHeight={{ base: 'sh-34', md: 'sh-56' }}
-            fontWeight={{ base: '500', md: '400' }}
+            mt={36}
+            fontSize={{ base: 'sh-20', md: 'sh-36' }}
+            lineHeight={{ base: 'sh-20', md: 'sh-36' }}
+            fontWeight={{ base: '600', md: '700' }}
           >
-            Product Analytics <br /> for everyone
+            Welcome to apperture
           </Heading>
           <Text
-            mt={4}
-            fontSize={{ base: 'xs', md: 'lg' }}
+            fontSize={{ base: 'xs-12', md: 'xs-14' }}
             lineHeight={'sh-18'}
-            decoration={'underline'}
             fontWeight={'normal'}
-            textColor={'grey.DEFAULT'}
+            textColor={'grey.500'}
+            maxW={90}
+            m={'auto'}
+            mt={3}
           >
-            Terms of use
+            AI powered spreadsheets for instant answers to complex questions
           </Text>
         </Box>
         <Flex
+          mt={10}
+          p={10}
+          bg={'white'}
+          w={'full'}
+          maxW={120}
+          borderRadius={'12px'}
+          borderWidth={1}
+          borderColor={'grey.400'}
+          gap={7}
+          direction={'column'}
+        >
+          <Box>
+            <a
+              ref={redirectionRef}
+              href={`${BACKEND_BASE_URL}/login/password?email=${email}&password=${password}`}
+            >
+              {''}
+            </a>
+            <form id="login-form" onSubmit={handleLogin}>
+              <FormControl>
+                <Flex direction="column" gap={7}>
+                  <Flex direction="column" gap={3}>
+                    <FormLabel
+                      fontSize={'xs-14'}
+                      lineHeight={'xs-14'}
+                      color={'grey.900'}
+                      mb={0}
+                    >
+                      Email
+                    </FormLabel>
+                    <Input
+                      type="email"
+                      placeholder="John@doe.com"
+                      onChange={handleEmail}
+                    />
+                  </Flex>
+                  <Flex direction="column" gap={3}>
+                    <FormLabel
+                      fontSize={'xs-14'}
+                      lineHeight={'xs-14'}
+                      color={'grey.900'}
+                      mb={0}
+                    >
+                      Password
+                    </FormLabel>
+                    <Input
+                      type="password"
+                      placeholder="xxxxxxxxxxxx"
+                      onChange={handlePassword}
+                    />
+                  </Flex>
+                  <Button
+                    borderWidth={'1px'}
+                    type={'submit'}
+                    form={'login-form'}
+                    variant={'secondary'}
+                  >
+                    Log In
+                  </Button>
+                </Flex>
+              </FormControl>
+            </form>
+          </Box>
+        </Flex>
+
+        {/* <Flex
           mb={2}
           direction={'column'}
           alignItems={'center'}
@@ -116,7 +195,7 @@ const Loginscreen = () => {
             Login with password
           </Text>
           <LoginWithPasswordModal isOpen={isOpen} onClose={onClose} />
-        </Flex>
+        </Flex> */}
       </Flex>
     </Box>
   );
