@@ -42,7 +42,10 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
       subHeaders: Array.from({ length: 27 }).map((_, index) => {
         return {
           name: '',
-          type: SubHeaderColumnType.METRIC,
+          type:
+            index === 1
+              ? SubHeaderColumnType.DIMENSION
+              : SubHeaderColumnType.METRIC,
         };
       }),
       is_sql: true,
@@ -330,6 +333,20 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     }
   };
 
+  const addDimensionColumn = () => {
+    const tempSheetsData = cloneDeep(sheetsData);
+    const existingSubHeaders = tempSheetsData[selectedSheetIndex]?.subHeaders;
+
+    const index = existingSubHeaders
+      .map((h) => h.type)
+      .lastIndexOf(SubHeaderColumnType.DIMENSION);
+
+    tempSheetsData[selectedSheetIndex].subHeaders[index + 1].type =
+      SubHeaderColumnType.DIMENSION;
+
+    setSheetsData(tempSheetsData);
+  };
+
   return (
     <>
       <QueryModal
@@ -402,6 +419,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
                   selectedSheetIndex={selectedSheetIndex}
                   sheetData={cloneDeep(sheetsData[selectedSheetIndex])}
                   evaluateFormulaHeader={evaluateFormulaHeader}
+                  addDimensionColumn={addDimensionColumn}
                 />
               </Flex>
               <Footer

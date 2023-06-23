@@ -139,10 +139,12 @@ const Grid = ({
   selectedSheetIndex,
   sheetData,
   evaluateFormulaHeader,
+  addDimensionColumn,
 }: {
   selectedSheetIndex: number;
   sheetData: TransientSheetData;
   evaluateFormulaHeader: Function;
+  addDimensionColumn: Function;
 }) => {
   const [columns, setColumns] = useState<Column[]>(
     getColumns(fillHeaders(sheetData.headers))
@@ -186,7 +188,10 @@ const Grid = ({
       (value) => value.type === 'inputHeader'
     );
 
-    if (changedHeaders[0].newCell.addHeader) return;
+    if (changedHeaders[0].newCell.addHeader) {
+      return addDimensionColumn();
+    }
+
     changedHeaders[0] &&
       evaluateFormulaHeader(
         changedHeaders[0]?.newCell.text,
