@@ -73,6 +73,7 @@ class TestSpreadsheetService:
         WorkBook.datasource_id = MagicMock(return_value=self.ds_id)
         WorkBook.user_id = MagicMock(return_value=self.ds_id)
         WorkBook.enabled = MagicMock(return_value=True)
+        WorkBook.app_id = MagicMock(return_value=self.ds_id)
         FindMock = namedtuple("FindMock", ["to_list"])
         WorkBook.find = MagicMock(
             return_value=FindMock(
@@ -148,8 +149,13 @@ class TestSpreadsheetService:
         WorkBook.find.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_get_workbooks_by_user_id(self):
+    async def test_get_workbooks_for_user_id(self):
         await self.service.get_workbooks_for_user_id(user_id=self.ds_id)
+        WorkBook.find.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_get_workbooks_for_app(self):
+        await self.service.get_workbooks_for_app(app_id=self.ds_id)
         WorkBook.find.assert_called_once()
 
     @pytest.mark.asyncio

@@ -1,4 +1,5 @@
 import asyncio
+from collections import namedtuple
 from datetime import datetime
 from unittest import mock
 from unittest.mock import ANY, AsyncMock, MagicMock
@@ -60,6 +61,7 @@ class TestMetricService:
         )
         self.id = "6384a65e0a397236d9de236a"
         Metric.id = MagicMock(return_value=self.id)
+        Metric.app_id = MagicMock(return_value=self.id)
         Metric.enabled = True
         self.metric_future = asyncio.Future()
         self.metric_future.set_result(
@@ -132,6 +134,12 @@ class TestMetricService:
         self.metric_future.update = AsyncMock()
         self.update_mock = self.metric_future.update
         Metric.find_one = MagicMock(return_value=self.metric_future)
+        FindMock = namedtuple("FindMock", ["to_list"])
+        Metric.find = MagicMock(
+            return_value=FindMock(
+                to_list=AsyncMock(),
+            ),
+        )
 
         self.date_utils.compute_date_filter.return_value = ("2023-01-22", "2023-01-24")
         self.aggregates = [
@@ -635,3 +643,8 @@ class TestMetricService:
                 "start_date": ANY,
             }
         )
+
+    @pytest.mark.asyncio
+    async def test_get_metric_for_app(self):
+        await self.service.get_metrics_by_app_id(app_id=self.ds_id)
+        Metric.find.assert_called_once()

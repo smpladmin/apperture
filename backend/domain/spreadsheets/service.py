@@ -63,7 +63,7 @@ class SpreadsheetService:
     async def get_workbooks_for_app(self, app_id: str) -> List[WorkBook]:
         return await WorkBook.find(
             WorkBook.app_id == PydanticObjectId(app_id),
-            WorkBook.enabled != False,
+            WorkBook.enabled == True,
         ).to_list()
 
     def cleanse_query_string(self, query_string: str) -> str:

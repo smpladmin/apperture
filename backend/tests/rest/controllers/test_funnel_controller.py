@@ -239,3 +239,43 @@ def test_delete_funnel(client_init, funnel_service, notification_service):
             "datasource_id": "6384a65e0a397236d9de236a",
         }
     )
+
+
+@pytest.mark.asyncio
+async def test_get_saved_funnels_for_app(client_init, funnel_service):
+    response = client_init.get("/funnels?app_id=63d0a7bfc636cee15d81f579")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "_id": "635ba034807ab86d8a2aadd8",
+            "revisionId": None,
+            "createdAt": ANY,
+            "updatedAt": None,
+            "datasourceId": "635ba034807ab86d8a2aadd9",
+            "appId": "635ba034807ab86d8a2aadd7",
+            "userId": "635ba034807ab86d8a2aadda",
+            "name": "name",
+            "steps": [
+                {"event": "Login", "filters": None},
+                {"event": "Chapter_Click", "filters": None},
+                {"event": "Topic_Click", "filters": None},
+            ],
+            "randomSequence": False,
+            "dateFilter": None,
+            "conversionWindow": None,
+            "segmentFilter": None,
+            "enabled": True,
+            "user": {
+                "id": "635ba034807ab86d8a2aadd8",
+                "firstName": "Test",
+                "lastName": "User",
+                "email": "test@email.com",
+                "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
+                "slackChannel": "#alerts",
+            },
+        }
+    ]
+    funnel_service.get_funnels_for_apps.assert_called_once_with(
+        **{"app_ids": [PydanticObjectId("635ba034807ab86d8a2aadd9")]}
+    )
