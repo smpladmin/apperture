@@ -1,5 +1,5 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import sheets from '@assets/images/Sheets.svg';
 import metrics from '@assets/images/Metrics.svg';
 import funnels from '@assets/images/Funnels.svg';
@@ -9,8 +9,19 @@ import pivots from '@assets/images/Pivot.svg';
 import Homecard from '@components/Home/Card';
 import HomeNav from '@components/Home/HomeNav';
 import Table from '@components/Home/Table';
+import { AppertureUser } from '@lib/domain/user';
+import { getAppertureUserInfo } from '@lib/services/userService';
 
 const Home = () => {
+  useEffect(() => {
+    const identifyUser = async () => {
+      const user: AppertureUser = await getAppertureUserInfo();
+
+      window?.posthog?.identify?.(user.id);
+    };
+    identifyUser();
+  }, []);
+
   return (
     <>
       <Box>

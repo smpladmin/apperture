@@ -65,6 +65,11 @@ export const getSavedSegmentsForDatasourceId = async (dsId: string) => {
   return res.data;
 };
 
+export const getSavedSegmentsForApp = async (appId: string) => {
+  const res = await AppertureGet(`/segments?app_id=${appId}`);
+  return res.data;
+};
+
 export const deleteSegment = async (id: string) => {
   const res = await AppertureDelete(`/segments/${id}`);
   return res;
