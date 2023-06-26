@@ -140,7 +140,6 @@ const FormulaDropDownBox = ({
           background={BLUE_MAIN}
           borderRadius={'2px'}
           onPointerDown={(e) => {
-            handleAddHeader();
             e.stopPropagation();
           }}
           _hover={{

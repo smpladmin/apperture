@@ -189,7 +189,7 @@ const Grid = ({
     );
 
     if (changedHeaders[0].newCell.addHeader) {
-      return addDimensionColumn();
+      return addDimensionColumn(changedHeaders[0].columnId);
     }
 
     changedHeaders[0] &&

@@ -333,13 +333,20 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     }
   };
 
-  const addDimensionColumn = () => {
+  const addDimensionColumn = (columnId: string) => {
     const tempSheetsData = cloneDeep(sheetsData);
-    const existingSubHeaders = tempSheetsData[selectedSheetIndex]?.subHeaders;
+    const index = columnId.charCodeAt(0) - 65 + 1;
 
-    const index = existingSubHeaders
-      .map((h) => h.type)
-      .lastIndexOf(SubHeaderColumnType.DIMENSION);
+    /**
+     * 1. Remove last subheader, keeping them constant to 27 for now.
+     * 2. Add subheader on the given columnId/index.
+     * 3. TODO: Shift columns and data.
+     */
+    tempSheetsData[selectedSheetIndex].subHeaders.splice(-1);
+    tempSheetsData[selectedSheetIndex].subHeaders.splice(index, 0, {
+      name: '',
+      type: SubHeaderColumnType.DIMENSION,
+    });
 
     tempSheetsData[selectedSheetIndex].subHeaders[index + 1].type =
       SubHeaderColumnType.DIMENSION;
