@@ -52,12 +52,18 @@ class SpreadsheetService:
             WorkBook.enabled == True,
         ).to_list()
 
-    async def get_workbooks_by_user_id(
+    async def get_workbooks_for_user_id(
         self, user_id: PydanticObjectId
     ) -> List[WorkBook]:
         return await WorkBook.find(
             WorkBook.user_id == user_id,
             WorkBook.enabled == True,
+        ).to_list()
+
+    async def get_workbooks_for_app(self, app_id: str) -> List[WorkBook]:
+        return await WorkBook.find(
+            WorkBook.app_id == PydanticObjectId(app_id),
+            WorkBook.enabled != False,
         ).to_list()
 
     def cleanse_query_string(self, query_string: str) -> str:

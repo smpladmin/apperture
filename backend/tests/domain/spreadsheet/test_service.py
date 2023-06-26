@@ -149,7 +149,7 @@ class TestSpreadsheetService:
 
     @pytest.mark.asyncio
     async def test_get_workbooks_by_user_id(self):
-        await self.service.get_workbooks_by_user_id(user_id=self.ds_id)
+        await self.service.get_workbooks_for_user_id(user_id=self.ds_id)
         WorkBook.find.assert_called_once()
 
     @pytest.mark.asyncio

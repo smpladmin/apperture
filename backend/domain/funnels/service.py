@@ -22,7 +22,7 @@ from domain.funnels.models import (
     FunnelStep,
     FunnelTrendsData,
 )
-from domain.metrics.models import SegmentFilter
+from domain.funnels.models import SegmentFilter
 from repositories.clickhouse.funnels import Funnels
 from domain.notifications.models import (
     Notification,
@@ -283,6 +283,12 @@ class FunnelsService:
     async def get_funnels_for_datasource_id(self, datasource_id: str) -> List[Funnel]:
         return await Funnel.find(
             Funnel.datasource_id == PydanticObjectId(datasource_id),
+            Funnel.enabled != False,
+        ).to_list()
+
+    async def get_funnels_for_user_id(self, user_id: PydanticObjectId):
+        return await Funnel.find(
+            Funnel.user_id == user_id,
             Funnel.enabled != False,
         ).to_list()
 

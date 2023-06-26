@@ -251,7 +251,7 @@ class MetricService:
             Metric.enabled != False,
         ).to_list()
 
-    async def get_metrics_by_user_id(self, user_id: str):
+    async def get_metrics_for_user_id(self, user_id: str):
         return await Metric.find(
             Metric.user_id == PydanticObjectId(user_id),
             Metric.enabled != False,
