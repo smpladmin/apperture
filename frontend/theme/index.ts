@@ -74,6 +74,7 @@ const colors = {
     700: GREY_700,
     800: GREY_800,
     900: ' #212121',
+    1000: '#F8F8FA',
   },
   yellow: { 500: YELLOW_500, 600: '#fac213' },
   green: {
@@ -145,6 +146,7 @@ const spacing = {
   176: '44rem',
   200: '50rem',
   320: '80rem',
+  336: '84rem',
 };
 
 const maxWidth = {

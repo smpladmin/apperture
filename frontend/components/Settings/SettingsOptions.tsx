@@ -35,7 +35,7 @@ const SettingsOptions = () => {
             borderColor={'white.200'}
             onClick={() =>
               router.push({
-                pathname: `/analytics/explore/[dsId]`,
+                pathname: `/analytics/home/[dsId]`,
                 query: { dsId },
               })
             }

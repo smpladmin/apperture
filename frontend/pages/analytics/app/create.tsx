@@ -45,7 +45,7 @@ const Create = () => {
   };
   const handleGoBack = () =>
     router.push({
-      pathname: `/analytics/explore/[dsId]`,
+      pathname: `/analytics/home/[dsId]`,
       query: { dsId: previousDsId, apps: 1 },
     });
 
