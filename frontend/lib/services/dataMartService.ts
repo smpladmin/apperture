@@ -49,7 +49,7 @@ export const _getSavedDataMart = async (token: string, dataMartId: string) => {
 };
 
 export const getSavedDataMartsForDatasourceId = async (dsId: string) => {
-  const res = await AppertureGet(`/datamarts?datasource_id=${dsId}`);
+  const res = await AppertureGet(`/datamart?datasource_id=${dsId}`);
   return res.data;
 };
 

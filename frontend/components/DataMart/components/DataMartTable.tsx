@@ -7,9 +7,10 @@ import ListingTable from '@components/ListingTable';
 type DataMartTableProps = {
   data: any[];
   headers: SpreadSheetColumn[];
+  loader: boolean;
 };
 
-const DataMartTable = ({ data, headers }: DataMartTableProps) => {
+const DataMartTable = ({ data, headers, loader }: DataMartTableProps) => {
   const columnHelper = createColumnHelper<DataMartTableData>();
   const columns = useMemo(() => {
     const dynamicColumns =
@@ -35,7 +36,7 @@ const DataMartTable = ({ data, headers }: DataMartTableProps) => {
       columns={columns}
       tableData={data}
       count={data.length}
-      isLoading={false}
+      isLoading={loader}
     ></ListingTable>
   );
 };

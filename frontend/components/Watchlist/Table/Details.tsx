@@ -2,6 +2,8 @@ import { Flex, Text } from '@chakra-ui/react';
 import { ActionWithUser } from '@lib/domain/action';
 import { Funnel, FunnelWithUser } from '@lib/domain/funnel';
 import { MetricWithUser } from '@lib/domain/metric';
+import { DataMartWithUser } from '@lib/domain/datamart';
+import { RetentionWithUser } from '@lib/domain/retention';
 import { NotificationWithUser } from '@lib/domain/notification';
 import { SegmentWithUser } from '@lib/domain/segment';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
@@ -19,6 +21,8 @@ export const Details = ({
     | NotificationWithUser
     | ActionWithUser
     | WorkbookWithUser
+    | RetentionWithUser
+    | DataMartWithUser
   >;
 }) => {
   const { type, details } = info?.row?.original;

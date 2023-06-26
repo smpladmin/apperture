@@ -18,3 +18,8 @@ export type DataMartObj = {
 export type DataMartWithUser = DataMartObj & {
   user: AppertureUser;
 };
+
+export type DataMartMetaData = {
+  name: string;
+  query: string;
+};

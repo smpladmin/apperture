@@ -6,23 +6,20 @@ from fastapi import Depends
 
 from domain.datamart.models import DataMart
 from mongo import Mongo
-from repositories.clickhouse.datamart import DataMartRepository
 
 
 class DataMartService:
     def __init__(
         self,
         mongo: Mongo = Depends(),
-        datamart_repo: DataMartRepository = Depends(),
     ):
         self.mongo = mongo
-        self.datamart_repo = datamart_repo
 
     def build_datamart_table(
         self,
         datasource_id: PydanticObjectId,
         app_id: PydanticObjectId,
-        user_id: PydanticObjectId,
+        user_id: str,
         name: str,
         query: str,
     ) -> DataMart:
@@ -53,13 +50,15 @@ class DataMartService:
     async def get_datamart_table(self, id: str) -> DataMart:
         return await DataMart.get(PydanticObjectId(id))
 
-    async def get_datamarts_for_app_id(self, app_id: PydanticObjectId) -> List[DataMart]:
+    async def get_datamart_tables_for_app_id(
+        self, app_id: PydanticObjectId
+    ) -> List[DataMart]:
         return await DataMart.find(
             DataMart.app_id == app_id,
             DataMart.enabled != False,
         ).to_list()
 
-    async def delete_datamart(self, datamart_id: str):
+    async def delete_datamart_table(self, datamart_id: str):
         await DataMart.find_one(
             DataMart.id == PydanticObjectId(datamart_id),
         ).update({"$set": {"enabled": False}})

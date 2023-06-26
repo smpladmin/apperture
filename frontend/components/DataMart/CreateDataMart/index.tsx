@@ -1,7 +1,11 @@
-import { Flex } from '@chakra-ui/react';
+import { Box, Flex } from '@chakra-ui/react';
 import { sql } from '@codemirror/lang-sql';
 import Header from '@components/EventsLayout/ActionHeader';
-import { DataMartObj } from '@lib/domain/datamart';
+import {
+  DataMartMetaData,
+  DataMartObj,
+  DataMartTableData,
+} from '@lib/domain/datamart';
 import {
   computeDataMartQuery,
   saveDataMartTable,
@@ -22,11 +26,12 @@ const DataMart = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
     savedDataMart?.name || 'Untitled Table'
   );
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
-  const [tableMetaData, setTableMetaData] = useState<any>({
+  const [isQueryResponseLoading, setIsQueryResponseLoading] = useState(true);
+  const [tableMetaData, setTableMetaData] = useState<DataMartMetaData>({
     name: tableName,
     query: savedDataMart?.query || '',
   });
-  const [queryResult, setQueryResult] = useState<any>({
+  const [queryResult, setQueryResult] = useState<DataMartTableData>({
     data: [],
     headers: [],
   });
@@ -74,16 +79,16 @@ const DataMart = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
   }, [queryResult]);
 
   const fetchData = async () => {
-    const res = await computeDataMartQuery(
-      datasourceId!!,
-      tableMetaData.query,
-      true
-    );
+    setIsQueryResponseLoading(true);
+    const res = tableMetaData.query
+      ? await computeDataMartQuery(datasourceId!!, tableMetaData.query, true)
+      : { data: [], headers: [] };
     let queriedData = res?.data;
     const updatedQueryResult = cloneDeep(queryResult);
     updatedQueryResult.data = queriedData?.data || [];
     updatedQueryResult.headers = queriedData?.headers || [];
     setQueryResult(updatedQueryResult);
+    setIsQueryResponseLoading(false);
   };
 
   useEffect(() => {
@@ -93,7 +98,16 @@ const DataMart = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
   return (
     <Flex direction={'column'} flexGrow={1}>
       <Header
-        handleGoBack={() => router.back()}
+        handleGoBack={
+          isDataMartBeingEdited
+            ? () => {
+                router.push({
+                  pathname: '/analytics/datamart/list/[dsId]',
+                  query: { dsId: datasourceId },
+                });
+              }
+            : () => router.back()
+        }
         name={tableName}
         setName={setTableName}
         handleSave={handleSaveAndUpdate}
@@ -102,14 +116,20 @@ const DataMart = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
         handleRunButtonClick={fetchData}
         isSaved={isDataMartBeingEdited}
       />
-      <ReactCodeMirror
-        value={tableMetaData.query}
-        height="300px"
-        extensions={[sql()]}
-        onChange={(value) => handleQueryChange(value)}
-        style={{ fontSize: '16px' }}
-      />
-      <DataMartTable data={queryResult.data} headers={queryResult.headers} />
+      <Box p={4}>
+        <ReactCodeMirror
+          value={tableMetaData.query}
+          height="300px"
+          extensions={[sql()]}
+          onChange={(value) => handleQueryChange(value)}
+          style={{ fontSize: '16px' }}
+        />
+        <DataMartTable
+          data={queryResult.data}
+          headers={queryResult.headers}
+          loader={isQueryResponseLoading}
+        />
+      </Box>
     </Flex>
   );
 };

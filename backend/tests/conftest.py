@@ -5,6 +5,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 
 from clickhouse import Clickhouse
+
 from data_processor_queue.service import DPQueueService
 from domain.actions.service import ActionService
 from domain.apperture_users.service import AppertureUserService
@@ -35,6 +36,7 @@ from domain.runlogs.service import RunLogService
 from domain.segments.service import SegmentService
 from domain.spreadsheets.service import SpreadsheetService
 from domain.users.service import UserService
+from domain.datamart.service import DataMartService
 from mongo.mongo import Mongo
 from rest.middlewares import get_user, get_user_id, validate_api_key, validate_jwt
 from server import app
@@ -63,6 +65,7 @@ def app_init(
     event_properties_service,
     spreadsheets_service,
     clickstream_event_properties_service,
+    datamart_service,
 ):
     print("Setting up App")
     app.dependency_overrides[validate_jwt] = lambda: mock.MagicMock()
@@ -93,6 +96,7 @@ def app_init(
     app.dependency_overrides[
         ClickStreamEventPropertiesService
     ] = lambda: clickstream_event_properties_service
+    app.dependency_overrides[DataMartService] = lambda: datamart_service
     FastAPICache.init(backend=InMemoryBackend(), prefix="apperture-cache")
     yield app
 
