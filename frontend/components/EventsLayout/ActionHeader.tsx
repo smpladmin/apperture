@@ -93,6 +93,7 @@ const EventLayoutHeader = ({
             borderRadius={'200'}
             variant={'primary'}
             onClick={() => handleRunButtonClick()}
+            data-testid={'run'}
             disabled={false}
             marginRight={4}
           >

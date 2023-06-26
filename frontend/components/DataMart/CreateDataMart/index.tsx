@@ -29,7 +29,7 @@ const DataMart = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
   const [isQueryResponseLoading, setIsQueryResponseLoading] = useState(true);
   const [tableMetaData, setTableMetaData] = useState<DataMartMetaData>({
     name: tableName,
-    query: savedDataMart?.query || '',
+    query: savedDataMart?.query || 'select event_name from events',
   });
   const [queryResult, setQueryResult] = useState<DataMartTableData>({
     data: [],
@@ -123,6 +123,7 @@ const DataMart = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
           extensions={[sql()]}
           onChange={(value) => handleQueryChange(value)}
           style={{ fontSize: '16px' }}
+          data-testid={'sql-editor'}
         />
         <DataMartTable
           data={queryResult.data}
