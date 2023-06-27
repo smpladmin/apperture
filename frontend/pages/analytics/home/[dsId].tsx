@@ -48,7 +48,7 @@ const Home = ({ apps }: { apps: AppWithIntegrations[] }) => {
   return (
     <>
       <Box>
-        <HomeNav />
+        <HomeNav apps={apps} />
         <Flex
           alignItems={'center'}
           justifyContent={'center'}

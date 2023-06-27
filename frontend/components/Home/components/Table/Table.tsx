@@ -46,6 +46,7 @@ import {
 } from '@lib/services/segmentService';
 import { addItemTypeToSavedItems, getAppId } from '@components/Home/util';
 import LoadingSpinner from '@components/LoadingSpinner';
+import Explorations from './Explorations';
 
 const ListingTable = ({ apps }: { apps: AppWithIntegrations[] }) => {
   const [savedLibraryItems, setSavedLibraryItems] = useState<SavedItems[]>([]);
@@ -115,12 +116,13 @@ const ListingTable = ({ apps }: { apps: AppWithIntegrations[] }) => {
     }
   };
 
+  const savedItemsLength = savedLibraryItems.length;
   const columnHelper = createColumnHelper<SavedItems>();
   const columns = useMemo(
     () => [
       columnHelper.accessor('details', {
-        header: 'Name',
-        cell: (info) => <Details info={info} />,
+        header: `Explorations (${savedItemsLength})`,
+        cell: (info) => <Explorations info={info} />,
       }),
       columnHelper.accessor('details.user', {
         cell: (info) => <UserInfo info={info} />,

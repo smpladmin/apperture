@@ -34,6 +34,7 @@ const Actions = ({
             e.stopPropagation();
             setIsDropdownOpen(true);
           }}
+          weight="fill"
         />
         <Dropdown
           isOpen={isDropdownOpen}
