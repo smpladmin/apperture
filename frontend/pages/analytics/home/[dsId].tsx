@@ -1,12 +1,42 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import React, { useEffect } from 'react';
 import HomeNav from '@components/Home/components/HomeNav';
-import Table from '@components/Home/Table';
 import ExploreSection from '@components/Home/components/ExploreSection';
 import { AppertureUser } from '@lib/domain/user';
 import { getAppertureUserInfo } from '@lib/services/userService';
+import { GetServerSideProps } from 'next';
+import { getAuthToken } from '@lib/utils/request';
+import { _getAppsWithIntegrations } from '@lib/services/appService';
+import { AppWithIntegrations } from '@lib/domain/app';
+import ListingTable from '@components/Home/components/Table/Table';
 
-const Home = () => {
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  query,
+}) => {
+  const token = getAuthToken(req);
+  if (!token) {
+    return {
+      props: {},
+    };
+  }
+  const apps = await _getAppsWithIntegrations(token);
+
+  if (!apps.length) {
+    return {
+      redirect: {
+        destination: '/analytics/app/create',
+      },
+      props: {},
+    };
+  }
+
+  return {
+    props: { apps },
+  };
+};
+
+const Home = ({ apps }: { apps: AppWithIntegrations[] }) => {
   useEffect(() => {
     const identifyUser = async () => {
       const user: AppertureUser = await getAppertureUserInfo();
@@ -33,7 +63,7 @@ const Home = () => {
           </Box>
         </Flex>
         <Box paddingX={5}>
-          <Table />
+          <ListingTable apps={apps} />
         </Box>
       </Box>
     </>

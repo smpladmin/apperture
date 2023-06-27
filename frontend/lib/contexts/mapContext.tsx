@@ -11,6 +11,7 @@ const initialState: InitialStateType = {
   activeNode: null,
   isNodeSearched: false,
   nodes: [],
+  activeApp: null,
 };
 
 export const MapContext = createContext<ContextType>({

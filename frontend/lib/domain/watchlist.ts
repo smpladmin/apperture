@@ -25,7 +25,7 @@ const paths = {
   [WatchListItemType.SEGMENTS]: 'segment/edit',
   [WatchListItemType.ACTIONS]: 'action/edit',
   [WatchListItemType.RETENTIONS]: 'retention/edit',
-  [WatchListItemType.WORKBOOKS]: 'workbook/create',
+  [WatchListItemType.WORKBOOKS]: 'workbook/edit',
 };
 
 export namespace WatchListItemType {
@@ -34,13 +34,15 @@ export namespace WatchListItemType {
   }
 }
 
+export type SavedItemsDetails =
+  | FunnelWithUser
+  | SegmentWithUser
+  | MetricWithUser
+  | NotificationWithUser
+  | ActionWithUser
+  | WorkbookWithUser;
+
 export type SavedItems = {
   type: WatchListItemType | NotificationType[];
-  details:
-    | FunnelWithUser
-    | SegmentWithUser
-    | MetricWithUser
-    | NotificationWithUser
-    | ActionWithUser
-    | WorkbookWithUser;
+  details: SavedItemsDetails;
 };
