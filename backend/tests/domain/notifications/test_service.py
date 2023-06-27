@@ -337,9 +337,7 @@ class TestNotificationService:
 
     @pytest.mark.asyncio
     async def test_get_notifications_for_apps(self):
-        await self.service.get_notifications_for_apps(
-            app_ids=[PydanticObjectId("6384a65e0a397236d9de236a")]
-        )
+        await self.service.get_notifications_for_apps(app_id="6384a65e0a397236d9de236a")
         Notification.find.assert_called_once()
 
     @pytest.mark.asyncio

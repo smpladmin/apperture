@@ -1,16 +1,20 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import HomeNav from '@components/Home/components/HomeNav';
 import Table from '@components/Home/Table';
-import { AppWithIntegrations } from '@lib/domain/app';
 import ExploreSection from '@components/Home/components/ExploreSection';
-
-type HomeNavProps = {
-  selectedApp: AppWithIntegrations;
-  openAppsModal: Function;
-};
+import { AppertureUser } from '@lib/domain/user';
+import { getAppertureUserInfo } from '@lib/services/userService';
 
 const Home = () => {
+  useEffect(() => {
+    const identifyUser = async () => {
+      const user: AppertureUser = await getAppertureUserInfo();
+      window?.posthog?.identify?.(user.id);
+    };
+    identifyUser();
+  }, []);
+
   return (
     <>
       <Box>

@@ -98,6 +98,11 @@ export const getSavedNotificationsForDatasourceId = async (dsId: string) => {
   return res.data;
 };
 
+export const getSavedNotificationsForApp = async (appId: string) => {
+  const res = await AppertureGet(`/notifications?app_id=${appId}`);
+  return res.data;
+};
+
 export const updateNotificationActiveState = async (
   id: string,
   notification: Notifications,

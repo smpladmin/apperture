@@ -1,5 +1,6 @@
 import json
 from unittest.mock import ANY
+import pytest
 
 from domain.common.filter_models import FilterOperatorsString, FilterDataType
 from domain.metrics.models import (
@@ -186,4 +187,55 @@ def test_delete_metric(client_init, metric_service, notification_service):
             "reference_id": "6384a65e0a397236d9de236a",
             "datasource_id": "6384a65e0a397236d9de236a",
         }
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_saved_metrics_for_app(client_init, metric_service):
+    response = client_init.get("/metrics?app_id=63d0a7bfc636cee15d81f579")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "_id": "63d0df1ea1040a6388a4a34c",
+            "revisionId": None,
+            "createdAt": ANY,
+            "updatedAt": None,
+            "datasourceId": "63d0a7bfc636cee15d81f579",
+            "appId": "63ca46feee94e38b81cda37a",
+            "userId": "6374b74e9b36ecf7e0b4f9e4",
+            "name": "Video Metric",
+            "function": "A/B",
+            "aggregates": [
+                {
+                    "variable": "A",
+                    "variant": "event",
+                    "aggregations": {"functions": "count", "property": "Video_Seen"},
+                    "reference_id": "Video_Seen",
+                    "filters": [],
+                },
+                {
+                    "variable": "B",
+                    "variant": "event",
+                    "aggregations": {"functions": "count", "property": "Video_Open"},
+                    "reference_id": "Video_Open",
+                    "filters": [],
+                },
+            ],
+            "breakdown": [],
+            "dateFilter": None,
+            "segmentFilter": None,
+            "enabled": True,
+            "user": {
+                "id": "635ba034807ab86d8a2aadd8",
+                "firstName": "Test",
+                "lastName": "User",
+                "email": "test@email.com",
+                "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
+                "slackChannel": "#alerts",
+            },
+        }
+    ]
+    metric_service.get_metrics_by_app_id.assert_called_once_with(
+        **{"app_id": "63d0a7bfc636cee15d81f579"}
     )

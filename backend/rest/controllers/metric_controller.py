@@ -4,6 +4,7 @@ from typing import List, Optional, Union
 from fastapi import APIRouter, Depends
 
 from domain.apperture_users.models import AppertureUser
+from domain.apperture_users.service import AppertureUserService
 from domain.datasources.service import DataSourceService
 from domain.metrics.service import MetricService
 from rest.dtos.apperture_users import AppertureUserResponse
@@ -111,21 +112,27 @@ async def get_all_metrics(
     user_id: str = Depends(get_user_id),
     user: AppertureUser = Depends(get_user),
     metric_service: MetricService = Depends(),
+    user_service: AppertureUserService = Depends(),
 ):
+    metrics = []
     logging.info("PROD DEBUG GETTING ALL METRICS")
+
     if app_id:
         logging.info(f"PROD DEBUG GETTING ALL METRICS BY APP_ID {app_id}")
-        return await metric_service.get_metrics_by_app_id(app_id=app_id)
-    metrics = (
-        await metric_service.get_metrics_for_datasource_id(datasource_id=datasource_id)
-        if datasource_id
-        else await metric_service.get_metrics_by_user_id(user_id=user_id)
-    )
+        metrics = await metric_service.get_metrics_by_app_id(app_id=app_id)
+    elif datasource_id:
+        metrics = await metric_service.get_metrics_for_datasource_id(
+            datasource_id=datasource_id
+        )
+    else:
+        metrics = await metric_service.get_metrics_for_user_id(user_id=user_id)
+
     logging.info(f"Got metrics {metrics} from service")
     metrics = [MetricWithUser.from_orm(m) for m in metrics]
     logging.info(f"ORM metrics: {metrics}")
     for metric in metrics:
-        metric.user = AppertureUserResponse.from_orm(user)
+        apperture_user = await user_service.get_user(id=str(metric.user_id))
+        metric.user = AppertureUserResponse.from_orm(apperture_user)
     logging.info(f"Final metrics: {metrics}")
     return metrics
 
