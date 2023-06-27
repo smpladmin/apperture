@@ -302,3 +302,15 @@ async def test_update_workbook(client_init, workbook_data, spreadsheets_service)
         ],
         "enabled": True,
     } == spreadsheets_service.update_workbook.call_args.kwargs["workbook"].dict()
+
+
+@pytest.mark.asyncio
+async def test_delete_retention(client_init, spreadsheets_service):
+    response = client_init.delete("/workbooks/6384a65e0a397236d9de236a")
+    assert response.status_code == 200
+
+    spreadsheets_service.delete_workbook.assert_called_once_with(
+        **{
+            "workbook_id": "6384a65e0a397236d9de236a",
+        }
+    )

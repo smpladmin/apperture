@@ -806,6 +806,7 @@ def spreadsheets_service():
     spreadsheets_service_mock.get_workbook_by_id.return_value = workbook_future
     spreadsheets_service_mock.add_workbook.return_value = workbook_future
     spreadsheets_service_mock.update_workbook.return_value = workbook_future
+    spreadsheets_service_mock.delete_workbook = mock.AsyncMock()
 
     return spreadsheets_service_mock
 

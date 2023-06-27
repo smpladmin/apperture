@@ -163,3 +163,11 @@ async def update_workbook(
 
     await spreadsheets_service.update_workbook(workbook=workbook, workbook_id=id)
     return workbook
+
+
+@router.delete("/workbooks/{workbook_id}")
+async def delete_segments(
+    workbook_id: str,
+    spreadsheets_service: SpreadsheetService = Depends(),
+):
+    await spreadsheets_service.delete_workbook(workbook_id=workbook_id)

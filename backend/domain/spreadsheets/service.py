@@ -98,6 +98,12 @@ class SpreadsheetService:
     async def get_workbook_by_id(self, workbook_id: str):
         return await WorkBook.find_one(WorkBook.id == PydanticObjectId(workbook_id))
 
+    async def delete_workbook(self, workbook_id: str):
+        await WorkBook.find_one(
+            WorkBook.id == PydanticObjectId(workbook_id),
+        ).update({"$set": {"enabled": False}})
+        return
+
     async def update_workbook(self, workbook_id: str, workbook: WorkBook):
         entry = workbook.dict()
         entry.pop("id")
