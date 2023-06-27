@@ -1,6 +1,6 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import React, { useEffect } from 'react';
-import HomeNav from '@components/Home/components/HomeNav';
+import React, { ReactElement, useEffect } from 'react';
+import HomeNav from '@components/HomeLayout/HomeNav';
 import ExploreSection from '@components/Home/components/ExploreSection';
 import { AppertureUser } from '@lib/domain/user';
 import { getAppertureUserInfo } from '@lib/services/userService';
@@ -9,6 +9,7 @@ import { getAuthToken } from '@lib/utils/request';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { AppWithIntegrations } from '@lib/domain/app';
 import ListingTable from '@components/Home/components/Table/Table';
+import HomeLayout from '@components/HomeLayout';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -48,7 +49,6 @@ const Home = ({ apps }: { apps: AppWithIntegrations[] }) => {
   return (
     <>
       <Box>
-        <HomeNav apps={apps} />
         <Flex
           alignItems={'center'}
           justifyContent={'center'}
@@ -68,6 +68,13 @@ const Home = ({ apps }: { apps: AppWithIntegrations[] }) => {
       </Box>
     </>
   );
+};
+
+Home.getLayout = function getLayout(
+  page: ReactElement,
+  apps: AppWithIntegrations[]
+) {
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
 
 export default Home;

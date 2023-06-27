@@ -124,7 +124,7 @@ const ViewMetric = ({
 
   const handleGoBack = () => {
     router.push({
-      pathname: '/analytics/metric/list/[dsId]',
+      pathname: '/analytics/home/[dsId]',
       query: { dsId: savedMetric.datasourceId },
     });
   };

@@ -83,7 +83,7 @@ const ListingTable = ({ apps }: { apps: AppWithIntegrations[] }) => {
 
     setIsLoading(true);
     fetchSavedItems();
-  }, []);
+  }, [dsId]);
 
   const onRowClick = (row: Row<SavedItems>) => {
     const { _id, datasourceId } = row?.original?.details;
@@ -114,14 +114,17 @@ const ListingTable = ({ apps }: { apps: AppWithIntegrations[] }) => {
       default:
         break;
     }
+
+    setSavedLibraryItems(
+      savedLibraryItems.filter((item) => item.details._id !== id)
+    );
   };
 
-  const savedItemsLength = savedLibraryItems.length;
   const columnHelper = createColumnHelper<SavedItems>();
   const columns = useMemo(
     () => [
       columnHelper.accessor('details', {
-        header: `Explorations (${savedItemsLength})`,
+        header: `Explorations (${savedLibraryItems.length})`,
         cell: (info) => <Explorations info={info} />,
       }),
       columnHelper.accessor('details.user', {
@@ -137,7 +140,7 @@ const ListingTable = ({ apps }: { apps: AppWithIntegrations[] }) => {
         header: '',
       }),
     ],
-    []
+    [savedLibraryItems]
   );
 
   const tableInstance = useReactTable({

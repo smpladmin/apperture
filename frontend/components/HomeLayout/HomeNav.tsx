@@ -15,7 +15,7 @@ import { AppWithIntegrations } from '@lib/domain/app';
 import { useRouter } from 'next/router';
 import AppsModal from '@components/Sidebar/AppsModal';
 import ConfigureAppsModal from '@components/ConfigureAppsModal';
-import { getAppId } from '../util';
+import { getAppId } from '../Home/util';
 
 type HomeNavProps = {
   apps: AppWithIntegrations[];
@@ -113,7 +113,7 @@ const HomeNav = ({ apps }: HomeNavProps) => {
         </Link>
         <Flex onClick={() => onModalOpen('apps')}>
           <Avatar
-            name={'selectedApp.name'}
+            name={selectedApp.name}
             fontWeight={'bold'}
             size="sm"
             textColor={'white'}
