@@ -33,15 +33,23 @@ class TestSpreadSheetRepository:
         query, props = self.spreadsheet_repo.build_transient_columns_query(
             datasource_id,
             columns,
-            MetricDefinition(
-                formula=Formula.COUNT,
-                property=None,
-            ),
+            [
+                MetricDefinition(
+                    formula=Formula.COUNTIF,
+                    filters=[
+                        ColumnFilter(
+                            operator=ColumnFilterOperators.GREATER_THAN,
+                            operand="property.property.amount",
+                            value=[1000000],
+                        ),
+                    ],
+                ),
+            ],
         )
 
         assert (
             query
-            == """SELECT "properties.utm_source","properties.city",COUNT(*) FROM "events" WHERE "datasource_id"=%(ds_id)s GROUP BY 1,2"""
+            == """SELECT "properties.utm_source","properties.city",COUNT(CASE WHEN "property.property.amount">1000000 THEN 1 END) FROM "events" WHERE "datasource_id"=%(ds_id)s GROUP BY 1,2"""
         )
         assert props == {"ds_id": datasource_id}
 
@@ -59,7 +67,7 @@ class TestSpreadSheetRepository:
         ]
 
         query, props = self.spreadsheet_repo.build_transient_columns_query(
-            datasource_id, columns, None
+            datasource_id, columns, []
         )
 
         assert (
@@ -74,10 +82,11 @@ class TestSpreadSheetRepository:
         query, props = self.spreadsheet_repo.build_transient_columns_query(
             datasource_id,
             [],
-            MetricDefinition(
-                formula=Formula.COUNT,
-                property=None,
-            ),
+            [
+                MetricDefinition(
+                    formula=Formula.COUNT,
+                ),
+            ],
         )
 
         assert (
@@ -91,22 +100,23 @@ class TestSpreadSheetRepository:
         query, props = self.spreadsheet_repo.build_transient_columns_query(
             datasource_id,
             [],
-            MetricDefinition(
-                formula=Formula.COUNTIF,
-                property=None,
-                filters=[
-                    ColumnFilter(
-                        operator=ColumnFilterOperators.GREATER_THAN,
-                        operand="property.property.amount",
-                        value=[1000000],
-                    ),
-                ],
-            ),
+            [
+                MetricDefinition(
+                    formula=Formula.COUNTIF,
+                    filters=[
+                        ColumnFilter(
+                            operator=ColumnFilterOperators.GREATER_THAN,
+                            operand="property.property.amount",
+                            value=[1000000],
+                        ),
+                    ],
+                ),
+            ],
         )
 
         assert (
             query
-            == """SELECT COUNT(*) FROM "events" WHERE "datasource_id"=%(ds_id)s AND "property.property.amount">1000000"""
+            == """SELECT COUNT(CASE WHEN "property.property.amount">1000000 THEN 1 END) FROM "events" WHERE "datasource_id"=%(ds_id)s"""
         )
         assert props == {"ds_id": datasource_id}
 
@@ -116,26 +126,27 @@ class TestSpreadSheetRepository:
         query, props = self.spreadsheet_repo.build_transient_columns_query(
             datasource_id,
             [],
-            MetricDefinition(
-                formula=Formula.COUNTIF,
-                property=None,
-                filters=[
-                    ColumnFilter(
-                        operator=ColumnFilterOperators.EQUALS,
-                        operand="property.property,city",
-                        value=["Bangalore"],
-                    ),
-                    ColumnFilter(
-                        operator=ColumnFilterOperators.IN,
-                        operand="property.property,device",
-                        value=["Android", "iPhone"],
-                    ),
-                ],
-            ),
+            [
+                MetricDefinition(
+                    formula=Formula.COUNTIF,
+                    filters=[
+                        ColumnFilter(
+                            operator=ColumnFilterOperators.EQUALS,
+                            operand="property.property.city",
+                            value=["Bangalore"],
+                        ),
+                        ColumnFilter(
+                            operator=ColumnFilterOperators.IN,
+                            operand="property.property.device",
+                            value=["Android", "iPhone"],
+                        ),
+                    ],
+                ),
+            ],
         )
 
         assert (
             query
-            == """SELECT COUNT(*) FROM "events" WHERE "datasource_id"=%(ds_id)s AND "property.property,city"='Bangalore' AND "property.property,device" IN ('Android','iPhone')"""
+            == """SELECT COUNT(CASE WHEN "property.property.city"='Bangalore' AND "property.property.device" IN ('Android','iPhone') THEN 1 END) FROM "events" WHERE "datasource_id"=%(ds_id)s"""
         )
         assert props == {"ds_id": datasource_id}

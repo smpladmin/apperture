@@ -68,8 +68,7 @@ class ColumnFilter(BaseModel):
 
 class MetricDefinition(BaseModel):
     formula: Formula
-    property: Optional[str]
-    filters: Optional[List[ColumnFilter]]
+    filters: List[ColumnFilter] = []
 
 
 class DimensionDefinition(BaseModel):

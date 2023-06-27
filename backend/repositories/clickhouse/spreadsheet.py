@@ -90,7 +90,9 @@ class Spreadsheets(EventsBase):
                     self.column_filter_to_condition(column_filter=filter)
                     for filter in metric.filters
                 ]
-                query = query.select(fn.Count(Case().when(conditions, 1)))
+                query = query.select(
+                    fn.Count(Case().when(Criterion.all(conditions), 1))
+                )
 
         query = query.groupby(*range(1, len(dimensions) + 1))
         return query.get_sql(), {"ds_id": datasource_id}
