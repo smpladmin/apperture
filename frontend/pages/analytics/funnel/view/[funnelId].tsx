@@ -71,15 +71,4 @@ const ViewFunnel = ({
   );
 };
 
-ViewFunnel.getLayout = function getLayout(
-  page: ReactElement,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default ViewFunnel;

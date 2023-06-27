@@ -41,15 +41,4 @@ const SavedActions = ({ provider }: { provider: Provider }) => {
   return <Actions provider={provider} />;
 };
 
-SavedActions.getLayout = function getLayout(
-  page: ReactNode,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default SavedActions;

@@ -71,15 +71,4 @@ const EditFunnel = ({
   return <CreateFunnel savedFunnel={savedFunnel} />;
 };
 
-EditFunnel.getLayout = function getLayout(
-  page: ReactElement,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default EditFunnel;

@@ -5,10 +5,10 @@ import linkicon from '@assets/images/PlusHover.svg';
 interface HomecardProps {
   icon: string;
   text: string;
-  create: string;
+  url: string;
 }
 
-const Homecard: React.FC<HomecardProps> = ({ icon, text, create }) => {
+const Homecard: React.FC<HomecardProps> = ({ icon, text, url }) => {
   const [onHover, setOnHover] = useState(false);
 
   const handleHover = () => {
@@ -31,7 +31,7 @@ const Homecard: React.FC<HomecardProps> = ({ icon, text, create }) => {
       onMouseEnter={handleHover}
       onMouseLeave={handleMouseLeave}
       transition="opacity 0.3s ease"
-      href={create}
+      href={url}
     >
       <Box position="relative">
         <Flex

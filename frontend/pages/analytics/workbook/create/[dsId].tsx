@@ -32,15 +32,4 @@ const Sheet = () => {
   return <Spreadsheet />;
 };
 
-Sheet.getLayout = function getLayout(
-  page: ReactElement,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default Sheet;

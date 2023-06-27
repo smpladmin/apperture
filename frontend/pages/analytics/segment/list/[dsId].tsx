@@ -41,15 +41,4 @@ const ListSegments = ({ provider }: { provider: Provider }) => {
   return <SavedSegments provider={provider} />;
 };
 
-ListSegments.getLayout = function getLayout(
-  page: ReactNode,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default ListSegments;

@@ -33,15 +33,4 @@ const ListNotifications = () => {
   return <SavedNotifications />;
 };
 
-ListNotifications.getLayout = function getLayout(
-  page: ReactNode,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default ListNotifications;

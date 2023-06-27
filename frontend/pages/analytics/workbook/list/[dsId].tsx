@@ -41,15 +41,4 @@ const ListSpreadsheet = ({ provider }: { provider: Provider }) => {
   return <SavedSheets provider={provider} />;
 };
 
-ListSpreadsheet.getLayout = function getLayout(
-  page: ReactNode,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default ListSpreadsheet;

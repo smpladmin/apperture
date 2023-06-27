@@ -71,15 +71,4 @@ const EditRetention = ({
   return <CreateRetention savedRetention={savedRetention} />;
 };
 
-EditRetention.getLayout = function getLayout(
-  page: ReactElement,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default EditRetention;

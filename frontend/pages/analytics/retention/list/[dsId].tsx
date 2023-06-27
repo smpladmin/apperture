@@ -41,15 +41,4 @@ const ListRetentions = ({ provider }: { provider: Provider }) => {
   return <SavedRetentions provider={provider} />;
 };
 
-ListRetentions.getLayout = function getLayout(
-  page: ReactNode,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default ListRetentions;

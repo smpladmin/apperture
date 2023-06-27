@@ -53,15 +53,4 @@ const EditWorkbook = ({ savedWorkbook }: { savedWorkbook: Workbook }) => {
   return <Spreadsheet savedWorkbook={savedWorkbook} />;
 };
 
-EditWorkbook.getLayout = function getLayout(
-  page: ReactElement,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default EditWorkbook;

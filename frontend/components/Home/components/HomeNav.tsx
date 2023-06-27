@@ -4,8 +4,14 @@ import logo from '@assets/images/AppertureWhiteLogo.svg';
 import { GearSix, Database, Stack } from '@phosphor-icons/react';
 import { WHITE_DEFAULT } from '@theme/index';
 import clickStream from '@assets/images/clickstream.svg';
+import { AppWithIntegrations } from '@lib/domain/app';
 
-const HomeNav = () => {
+type HomeNavProps = {
+  selectedApp: AppWithIntegrations;
+  openAppsModal: Function;
+};
+
+const HomeNav = (/*{ selectedApp, openAppsModal }: HomeNavProps*/) => {
   return (
     <Flex
       justifyContent={'space-between'}
@@ -19,7 +25,7 @@ const HomeNav = () => {
         <Link padding={'6px'}>
           <Database size={20} />
         </Link>
-        <Link padding={'6px'}>
+        <Link padding={'6px'} href="/analytics/data/source/">
           <Stack size={20} />
         </Link>
         <Link padding={'6px'}>
@@ -28,11 +34,9 @@ const HomeNav = () => {
         <Link padding={'6px'} href="/analytics/settings">
           <GearSix size={20} />
         </Link>
-        <Flex
-        // onClick={() => openAppsModal()}
-        >
+        <Flex /*onClick={() => openAppsModal()}*/>
           <Avatar
-            name={'name'} //selectedApp.name
+            name={'selectedApp.name'}
             fontWeight={'bold'}
             size="sm"
             textColor={'white'}

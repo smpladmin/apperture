@@ -41,15 +41,4 @@ const ListMetrics = ({ provider }: { provider: Provider }) => {
   return <SavedMetrics provider={provider} />;
 };
 
-ListMetrics.getLayout = function getLayout(
-  page: ReactNode,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default ListMetrics;

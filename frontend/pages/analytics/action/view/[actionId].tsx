@@ -49,15 +49,4 @@ const EditAction = ({ savedAction }: { savedAction: Action }) => {
   return <ActionComponent savedAction={savedAction} />;
 };
 
-EditAction.getLayout = function getLayout(
-  page: ReactNode,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default EditAction;

@@ -53,15 +53,4 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
   return <ViewRetentionComponent savedRetention={savedRetention} />;
 };
 
-ViewRetention.getLayout = function getLayout(
-  page: ReactElement,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default ViewRetention;

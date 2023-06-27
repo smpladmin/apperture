@@ -36,15 +36,4 @@ const CreateAction = () => {
   return <Action />;
 };
 
-CreateAction.getLayout = function getLayout(
-  page: ReactNode,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default CreateAction;

@@ -41,15 +41,4 @@ const ListFunnels = ({ provider }: { provider: Provider }) => {
   return <SavedFunnels provider={provider} />;
 };
 
-ListFunnels.getLayout = function getLayout(
-  page: ReactNode,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default ListFunnels;

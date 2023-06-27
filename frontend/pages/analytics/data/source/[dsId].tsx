@@ -35,14 +35,4 @@ const SanityTables = () => {
   return <Sanity />;
 };
 
-SanityTables.getLayout = function getLayout(
-  page: ReactElement,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
 export default SanityTables;

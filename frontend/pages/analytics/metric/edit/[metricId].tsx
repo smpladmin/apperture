@@ -55,15 +55,4 @@ const EditMetric = ({ savedMetric }: { savedMetric: Metric }) => {
   return <CreateMetric savedMetric={updatedSavedMetric} />;
 };
 
-EditMetric.getLayout = function getLayout(
-  page: ReactElement,
-  apps: AppWithIntegrations[]
-) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
-};
-
 export default EditMetric;
