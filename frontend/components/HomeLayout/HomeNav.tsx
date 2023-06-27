@@ -1,21 +1,23 @@
-import {
-  Avatar,
-  Flex,
-  Image,
-  Box,
-  Link,
-  useDisclosure,
-} from '@chakra-ui/react';
+import { Avatar, Flex, Image, Link, useDisclosure } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import logo from '@assets/images/AppertureWhiteLogo.svg';
-import { GearSix, Database, Stack } from '@phosphor-icons/react';
-import { WHITE_DEFAULT } from '@theme/index';
-import clickStream from '@assets/images/clickstream.svg';
+import {
+  GearSix,
+  Database,
+  Stack,
+  SignOut,
+  SquaresFour,
+  HardDrives,
+} from '@phosphor-icons/react';
+import { GREY_600, WHITE_DEFAULT } from '@theme/index';
+import clickstreamIcon from '@assets/images/clickstream.svg';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { useRouter } from 'next/router';
 import AppsModal from '@components/Sidebar/AppsModal';
 import ConfigureAppsModal from '@components/ConfigureAppsModal';
 import { getAppId } from '../Home/util';
+import { Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
+import { CaretRight } from 'phosphor-react';
 
 type HomeNavProps = {
   apps: AppWithIntegrations[];
@@ -89,6 +91,7 @@ const HomeNav = ({ apps }: HomeNavProps) => {
       navigateToExploreDataSource(defaultDataSourceId);
     }
   };
+
   return (
     <Flex
       justifyContent={'space-between'}
@@ -96,21 +99,198 @@ const HomeNav = ({ apps }: HomeNavProps) => {
       bg={'grey.900'}
       py={5}
       px={6}
+      zIndex={'999'}
     >
-      <Image src={logo.src} color={'white'}></Image>
+      <Image
+        src={logo.src}
+        color={'white'}
+        cursor={'pointer'}
+        onClick={() => {
+          router.push(`/analytics/home/${dsId}`);
+        }}
+      ></Image>
       <Flex color={WHITE_DEFAULT} gap={5} alignItems={'center'}>
-        <Link padding={'6px'}>
-          <Database size={20} />
-        </Link>
-        <Link padding={'6px'} href="/analytics/data/source/">
-          <Stack size={20} />
-        </Link>
-        <Link padding={'6px'}>
-          <Image src={clickStream.src} alt="Clickstream"></Image>
-        </Link>
-        <Link padding={'6px'} href="/analytics/settings">
-          <GearSix size={20} />
-        </Link>
+        <Menu>
+          <MenuButton
+            _hover={{ bg: 'black.500' }}
+            _expanded={{ bg: 'black.500' }}
+            borderRadius={8}
+            padding={'6px'}
+          >
+            <Database size={20} />
+          </MenuButton>
+          <MenuList padding={2} borderRadius={8}>
+            <MenuItem
+              padding={2}
+              paddingY={3}
+              borderRadius={8}
+              _hover={{ bg: 'white.400' }}
+            >
+              <Flex
+                justifyContent={'space-between'}
+                flexDirection={'row'}
+                alignItems={'center'}
+                width={'full'}
+              >
+                <Flex
+                  color={'black.500'}
+                  gap={2}
+                  fontWeight={'500'}
+                  fontSize={'xs-14'}
+                  lineHeight={'lh-130'}
+                  alignItems={'center'}
+                >
+                  <SquaresFour size={16} color={GREY_600} /> Data Management
+                </Flex>
+                <CaretRight size={16} color={GREY_600} />
+              </Flex>
+            </MenuItem>
+            <MenuItem
+              padding={2}
+              paddingY={3}
+              borderRadius={8}
+              _hover={{ bg: 'white.400' }}
+            >
+              <Flex
+                justifyContent={'space-between'}
+                flexDirection={'row'}
+                alignItems={'center'}
+                width={'full'}
+              >
+                <Flex
+                  color={'black.500'}
+                  gap={2}
+                  fontWeight={'500'}
+                  fontSize={'xs-14'}
+                  lineHeight={'lh-130'}
+                  alignItems={'center'}
+                >
+                  <Stack size={16} color={GREY_600} /> Event Stream
+                </Flex>
+                <CaretRight size={16} color={GREY_600} />
+              </Flex>
+            </MenuItem>
+            <MenuItem
+              padding={2}
+              paddingY={3}
+              borderRadius={8}
+              _hover={{ bg: 'white.400' }}
+            >
+              <Flex
+                justifyContent={'space-between'}
+                flexDirection={'row'}
+                alignItems={'center'}
+                width={'full'}
+              >
+                <Flex
+                  color={'black.500'}
+                  gap={2}
+                  fontWeight={'500'}
+                  fontSize={'xs-14'}
+                  lineHeight={'lh-130'}
+                  alignItems={'center'}
+                >
+                  <Image
+                    src={clickstreamIcon.src}
+                    alt={'clickstream'}
+                    width={4}
+                    height={4}
+                  />
+                  Click Stream
+                </Flex>
+                <CaretRight size={16} color={GREY_600} />
+              </Flex>
+            </MenuItem>
+            <MenuItem
+              padding={2}
+              paddingY={3}
+              borderRadius={8}
+              _hover={{ bg: 'white.400' }}
+            >
+              <Flex
+                justifyContent={'space-between'}
+                flexDirection={'row'}
+                alignItems={'center'}
+                width={'full'}
+              >
+                <Flex
+                  color={'black.500'}
+                  gap={2}
+                  fontWeight={'500'}
+                  fontSize={'xs-14'}
+                  lineHeight={'lh-130'}
+                  alignItems={'center'}
+                >
+                  <HardDrives size={16} color={GREY_600} /> Data Mart
+                </Flex>
+                <CaretRight size={16} color={GREY_600} />
+              </Flex>
+            </MenuItem>
+          </MenuList>
+        </Menu>
+        <Menu>
+          <MenuButton
+            _hover={{ bg: 'black.500' }}
+            _expanded={{ bg: 'black.500' }}
+            borderRadius={8}
+            padding={'6px'}
+          >
+            <GearSix size={20} />
+          </MenuButton>
+          <MenuList padding={2} borderRadius={8}>
+            <MenuItem
+              padding={2}
+              paddingY={3}
+              borderRadius={8}
+              _hover={{ bg: 'white.400' }}
+            >
+              <Flex
+                justifyContent={'space-between'}
+                flexDirection={'row'}
+                alignItems={'center'}
+                width={'full'}
+                fontWeight={'500'}
+              >
+                <Flex
+                  color={'black.500'}
+                  gap={2}
+                  fontWeight={'500'}
+                  fontSize={'xs-14'}
+                  lineHeight={'lh-130'}
+                  alignItems={'center'}
+                >
+                  <GearSix size={16} color={GREY_600} /> Integrations
+                </Flex>
+                <CaretRight size={16} color={GREY_600} />
+              </Flex>
+            </MenuItem>
+            <MenuItem
+              padding={2}
+              paddingY={3}
+              borderRadius={8}
+              _hover={{ bg: 'white.400' }}
+            >
+              <Flex
+                justifyContent={'space-between'}
+                flexDirection={'row'}
+                alignItems={'center'}
+                width={'full'}
+              >
+                <Flex
+                  color={'black.500'}
+                  gap={2}
+                  fontWeight={'500'}
+                  fontSize={'xs-14'}
+                  lineHeight={'lh-130'}
+                  alignItems={'center'}
+                >
+                  <SignOut size={16} color={GREY_600} /> Logout
+                </Flex>
+                <CaretRight size={16} color={GREY_600} />
+              </Flex>
+            </MenuItem>
+          </MenuList>
+        </Menu>
         <Flex onClick={() => onModalOpen('apps')}>
           <Avatar
             name={selectedApp.name}

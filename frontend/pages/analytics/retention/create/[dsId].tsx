@@ -1,4 +1,3 @@
-import Layout from '@components/Layout';
 import { MapContext } from '@lib/contexts/mapContext';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
@@ -9,6 +8,7 @@ import { GetServerSideProps } from 'next';
 import { ReactElement, useContext, useEffect } from 'react';
 import { Node } from '@lib/domain/node';
 import Retention from '@components/Retention/CreateRetention';
+import HomeLayout from '@components/HomeLayout';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -47,6 +47,13 @@ const CreateRetention = ({ nodes }: { nodes: Node[] }) => {
   }, []);
 
   return <Retention />;
+};
+
+CreateRetention.getLayout = function getLayout(
+  page: ReactElement,
+  apps: AppWithIntegrations[]
+) {
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
 
 export default CreateRetention;

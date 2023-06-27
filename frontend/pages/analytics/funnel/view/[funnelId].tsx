@@ -1,5 +1,5 @@
 import ViewFunnelComponent from '@components/Funnel/ViewFunnel';
-import Layout from '@components/Layout';
+import HomeLayout from '@components/HomeLayout';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { Funnel } from '@lib/domain/funnel';
 import { Notifications } from '@lib/domain/notification';
@@ -69,6 +69,12 @@ const ViewFunnel = ({
       savedNotification={savedNotification}
     />
   );
+};
+ViewFunnel.getLayout = function getLayout(
+  page: ReactElement,
+  apps: AppWithIntegrations[]
+) {
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
 
 export default ViewFunnel;

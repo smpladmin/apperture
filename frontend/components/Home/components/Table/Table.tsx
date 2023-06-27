@@ -129,7 +129,7 @@ const ListingTable = ({ apps }: { apps: AppWithIntegrations[] }) => {
       }),
       columnHelper.accessor('details.user', {
         cell: (info) => <UserInfo info={info} />,
-        header: 'Created By',
+        header: 'Created by',
       }),
       columnHelper.accessor('details.updatedAt', {
         cell: (info) => <UpdatedAt info={info} />,
@@ -157,6 +157,7 @@ const ListingTable = ({ apps }: { apps: AppWithIntegrations[] }) => {
         Your Library
       </Text>
       <Flex
+        display={'none'} // tempoarily hidden
         mt={5}
         justifyContent={'space-between'}
         flexDirection={'row'}
@@ -219,13 +220,29 @@ const ListingTable = ({ apps }: { apps: AppWithIntegrations[] }) => {
           <LoadingSpinner />
         </Flex>
       ) : (
-        <Table data-testid={'watchlist-table'}>
-          <Thead py={'3'} px={'8'} bg={'white.100'}>
+        <Table data-testid={'watchlist-table'} mt={5}>
+          <Thead
+            py={3}
+            bg={'white'}
+            borderTopWidth={'1px'}
+            borderTopColor={'white.200'}
+          >
             {getHeaderGroups().map((headerGroup) => (
               <Tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <Th key={header.id} data-testid={'watchlist-table-headers'}>
+                    <Th
+                      key={header.id}
+                      data-testid={'watchlist-table-headers'}
+                      fontSize={'xs-12'}
+                      fontWeight={'500'}
+                      lineHeight={'lh-135'}
+                      textTransform={'capitalize'}
+                      letterSpacing={0}
+                      color={'grey.800'}
+                      paddingLeft={2}
+                      borderLeftWidth={1}
+                    >
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext()
@@ -246,7 +263,7 @@ const ListingTable = ({ apps }: { apps: AppWithIntegrations[] }) => {
               >
                 {row.getVisibleCells().map((cell) => {
                   return (
-                    <Td key={cell.id}>
+                    <Td key={cell.id} paddingLeft={2} borderLeftWidth={1}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

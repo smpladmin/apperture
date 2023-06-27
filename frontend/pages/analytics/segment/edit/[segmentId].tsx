@@ -1,4 +1,4 @@
-import Layout from '@components/Layout';
+import HomeLayout from '@components/HomeLayout';
 import CreateSegment from '@components/Segments/CreateSegment';
 import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Segments/util';
 import { AppWithIntegrations } from '@lib/domain/app';
@@ -61,4 +61,10 @@ const EditSegments = ({ savedSegment }: { savedSegment: Segment }) => {
   return <CreateSegment savedSegment={transformSavedSegment} />;
 };
 
+EditSegments.getLayout = function getLayout(
+  page: ReactElement,
+  apps: AppWithIntegrations[]
+) {
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
+};
 export default EditSegments;

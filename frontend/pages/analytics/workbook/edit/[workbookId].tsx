@@ -1,4 +1,4 @@
-import Layout from '@components/Layout';
+import HomeLayout from '@components/HomeLayout';
 import Spreadsheet from '@components/Spreadsheet';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { Workbook } from '@lib/domain/workbook';
@@ -51,6 +51,13 @@ export const getServerSideProps: GetServerSideProps = async ({
 
 const EditWorkbook = ({ savedWorkbook }: { savedWorkbook: Workbook }) => {
   return <Spreadsheet savedWorkbook={savedWorkbook} />;
+};
+
+EditWorkbook.getLayout = function getLayout(
+  page: ReactElement,
+  apps: AppWithIntegrations[]
+) {
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
 
 export default EditWorkbook;

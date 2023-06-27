@@ -5,7 +5,14 @@ import {
   WatchListItemType,
 } from '@lib/domain/watchlist';
 import { CellContext } from '@tanstack/react-table';
-import { DotsThreeOutlineVertical } from 'phosphor-react';
+import { GREY_600 } from '@theme/index';
+import {
+  ChartBar,
+  ChartLineUp,
+  ChartPie,
+  DotsThreeOutlineVertical,
+  Funnel,
+} from 'phosphor-react';
 import React from 'react';
 
 const Explorations = ({
@@ -17,20 +24,25 @@ const Explorations = ({
 
   const getEntityIcon = (type: WatchListItemType) => {
     const icons: { [key in WatchListItemType]: any } = {
-      [WatchListItemType.WORKBOOKS]: <DotsThreeOutlineVertical />,
-      [WatchListItemType.FUNNELS]: '',
-      [WatchListItemType.SEGMENTS]: '',
-      [WatchListItemType.METRICS]: '',
+      [WatchListItemType.WORKBOOKS]: '',
+      [WatchListItemType.FUNNELS]: <Funnel color={GREY_600} size={16} />,
+      [WatchListItemType.SEGMENTS]: <ChartPie color={GREY_600} size={16} />,
+      [WatchListItemType.METRICS]: <ChartLineUp color={GREY_600} size={16} />,
       [WatchListItemType.ACTIONS]: '',
       [WatchListItemType.ALL]: '',
-      [WatchListItemType.RETENTIONS]: '',
+      [WatchListItemType.RETENTIONS]: <ChartBar color={GREY_600} size={16} />,
     };
     return icons[type];
   };
   return (
-    <Flex gap={'1'}>
+    <Flex gap={'3'} alignItems={'center'} minW={'25rem'}>
       {getEntityIcon(type as WatchListItemType)}
-      <Text fontSize={'xs-14'} lineHeight={'xs-14'} fontWeight={'500'}>
+      <Text
+        fontSize={'xs-14'}
+        lineHeight={'lh-130'}
+        fontWeight={'500'}
+        color={'black'}
+      >
         {details?.name}
       </Text>
     </Flex>

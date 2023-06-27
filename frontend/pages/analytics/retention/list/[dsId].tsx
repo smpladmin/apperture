@@ -1,4 +1,4 @@
-import Layout from '@components/Layout';
+import HomeLayout from '@components/HomeLayout';
 import SavedRetentions from '@components/Watchlist/Retention';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { Provider } from '@lib/domain/provider';
@@ -6,7 +6,7 @@ import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { getDatasourceById } from '@lib/utils/common';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
-import React, { ReactNode } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -40,5 +40,13 @@ export const getServerSideProps: GetServerSideProps = async ({
 const ListRetentions = ({ provider }: { provider: Provider }) => {
   return <SavedRetentions provider={provider} />;
 };
+
+ListRetentions.getLayout = function getLayout(
+  page: ReactElement,
+  apps: AppWithIntegrations[]
+) {
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
+};
+
 
 export default ListRetentions;

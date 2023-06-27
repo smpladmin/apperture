@@ -11,9 +11,7 @@ import { useRouter } from 'next/router';
 
 const ExploreSection = () => {
   const router = useRouter();
-  const {
-    query: { dsId },
-  } = router;
+  const { dsId } = router.query;
   return (
     <Flex mt={5} justifyContent={'space-between'}>
       <Homecard

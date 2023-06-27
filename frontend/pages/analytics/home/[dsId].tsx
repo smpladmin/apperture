@@ -1,6 +1,5 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import React, { ReactElement, useEffect } from 'react';
-import HomeNav from '@components/HomeLayout/HomeNav';
 import ExploreSection from '@components/Home/components/ExploreSection';
 import { AppertureUser } from '@lib/domain/user';
 import { getAppertureUserInfo } from '@lib/services/userService';

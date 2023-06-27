@@ -9,6 +9,7 @@ import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
 import { ReactElement, useContext, useEffect } from 'react';
 import { Node } from '@lib/domain/node';
+import HomeLayout from '@components/HomeLayout';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -48,5 +49,14 @@ const CreateFunnel = ({ nodes }: { nodes: Node[] }) => {
 
   return <Funnel />;
 };
+
+CreateFunnel.getLayout = function getLayout(
+  page: ReactElement,
+  apps: AppWithIntegrations[]
+) {
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
+};
+
+
 
 export default CreateFunnel;

@@ -1,10 +1,11 @@
-import React, { ReactNode } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import Action from '@components/Actions/CreateAction';
 import { GetServerSideProps } from 'next';
 import { getAuthToken } from '@lib/utils/request';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { AppWithIntegrations } from '@lib/domain/app';
 import Layout from '@components/Layout';
+import HomeLayout from '@components/HomeLayout';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -34,6 +35,13 @@ export const getServerSideProps: GetServerSideProps = async ({
 
 const CreateAction = () => {
   return <Action />;
+};
+
+CreateAction.getLayout = function getLayout(
+  page: ReactElement,
+  apps: AppWithIntegrations[]
+) {
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
 
 export default CreateAction;

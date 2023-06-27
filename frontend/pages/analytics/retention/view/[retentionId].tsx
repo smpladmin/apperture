@@ -1,5 +1,4 @@
 import ViewRetentionComponent from '@components/Retention/ViewRetention';
-import Layout from '@components/Layout';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { Retention } from '@lib/domain/retention';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
@@ -8,6 +7,7 @@ import { _getNotificationByReference } from '@lib/services/notificationService';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
 import { ReactElement } from 'react';
+import HomeLayout from '@components/HomeLayout';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -51,6 +51,13 @@ export const getServerSideProps: GetServerSideProps = async ({
 
 const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
   return <ViewRetentionComponent savedRetention={savedRetention} />;
+};
+
+ViewRetention.getLayout = function getLayout(
+  page: ReactElement,
+  apps: AppWithIntegrations[]
+) {
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
 
 export default ViewRetention;

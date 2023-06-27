@@ -1,4 +1,3 @@
-import Layout from '@components/Layout';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { getAuthToken } from '@lib/utils/request';
@@ -9,6 +8,7 @@ import { _getSavedMetric } from '@lib/services/metricService';
 import { Metric } from '@lib/domain/metric';
 import { cloneDeep } from 'lodash';
 import { replaceFilterValueWithEmptyStringPlaceholder } from '@components/Metric/util';
+import HomeLayout from '@components/HomeLayout';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -53,6 +53,13 @@ const EditMetric = ({ savedMetric }: { savedMetric: Metric }) => {
   const updatedSavedMetric = { ...savedMetric, aggregates };
 
   return <CreateMetric savedMetric={updatedSavedMetric} />;
+};
+
+EditMetric.getLayout = function getLayout(
+  page: ReactElement,
+  apps: AppWithIntegrations[]
+) {
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
 
 export default EditMetric;

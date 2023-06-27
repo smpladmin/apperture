@@ -1,5 +1,4 @@
 import CreateRetention from '@components/Retention/CreateRetention';
-import Layout from '@components/Layout';
 import { MapContext } from '@lib/contexts/mapContext';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { Retention } from '@lib/domain/retention';
@@ -11,6 +10,7 @@ import { Actions } from '@lib/types/context';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
 import { ReactElement, useContext, useEffect } from 'react';
+import HomeLayout from '@components/HomeLayout';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -69,6 +69,14 @@ const EditRetention = ({
   }, []);
 
   return <CreateRetention savedRetention={savedRetention} />;
+};
+
+
+EditRetention.getLayout = function getLayout(
+  page: ReactElement,
+  apps: AppWithIntegrations[]
+) {
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
 
 export default EditRetention;
