@@ -22,7 +22,7 @@ from domain.funnels.models import (
     FunnelStep,
     FunnelTrendsData,
 )
-from domain.funnels.models import SegmentFilter
+from domain.metrics.models import SegmentFilter
 from repositories.clickhouse.funnels import Funnels
 from domain.notifications.models import (
     Notification,

@@ -7,7 +7,6 @@ export type InitialStateType = {
   activeNode: INode | null;
   isNodeSearched: boolean;
   nodes: Node[];
-  activeApp: App | null;
 };
 
 export interface ContextType {
@@ -20,7 +19,6 @@ export enum Actions {
   SET_ACTIVE_NODE = 'SET_ACTIVE_NODE',
   SET_IS_NODE_SEARCHED = 'SET_IS_NODE_SEARCHED',
   SET_NODES = 'SET_NODES',
-  SET_ACTIVE_APP = 'SET_ACTIVE_APP',
 }
 
 export type LayoutActions =
@@ -39,8 +37,4 @@ export type LayoutActions =
   | {
       type: Actions.SET_NODES;
       payload: Node[];
-    }
-  | {
-      type: Actions.SET_ACTIVE_APP;
-      payload: App;
     };
