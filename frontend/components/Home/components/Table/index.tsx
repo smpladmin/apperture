@@ -11,7 +11,6 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
-import Details from '@components/Watchlist/Table/Details';
 import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import {
   Row,
@@ -152,7 +151,7 @@ const ListingTable = ({ apps }: { apps: AppWithIntegrations[] }) => {
   const { getHeaderGroups, getRowModel } = tableInstance;
 
   return (
-    <Box pt={10} maxW={336} w={'full'} margin={'auto'}>
+    <Box pt={10} maxW={336} w={'full'} margin={'auto'} h={'full'}>
       <Text fontWeight={700} fontSize={'base'} lineHeight={'base'}>
         Your Library
       </Text>
@@ -211,12 +210,7 @@ const ListingTable = ({ apps }: { apps: AppWithIntegrations[] }) => {
       </Flex>
 
       {isLoading ? (
-        <Flex
-          justifyContent={'center'}
-          alignItems={'center'}
-          w={'full'}
-          h={'full'}
-        >
+        <Flex justifyContent={'center'} mt={'20'} w={'full'} h={'full'}>
           <LoadingSpinner />
         </Flex>
       ) : (
@@ -229,7 +223,8 @@ const ListingTable = ({ apps }: { apps: AppWithIntegrations[] }) => {
           >
             {getHeaderGroups().map((headerGroup) => (
               <Tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.map((header, index) => {
+                  const isColumnHeaderExploration = index === 0;
                   return (
                     <Th
                       key={header.id}
@@ -241,7 +236,7 @@ const ListingTable = ({ apps }: { apps: AppWithIntegrations[] }) => {
                       letterSpacing={0}
                       color={'grey.800'}
                       paddingLeft={2}
-                      borderLeftWidth={1}
+                      borderLeftWidth={isColumnHeaderExploration ? 0 : 1}
                     >
                       {flexRender(
                         header.column.columnDef.header,
@@ -262,8 +257,16 @@ const ListingTable = ({ apps }: { apps: AppWithIntegrations[] }) => {
                 data-testid={'table-body-rows'}
               >
                 {row.getVisibleCells().map((cell) => {
+                  const columnHeader = cell.column.columnDef.header as string;
+                  const isColumnHeaderExploration =
+                    columnHeader.includes('Explorations');
+
                   return (
-                    <Td key={cell.id} paddingLeft={2} borderLeftWidth={1}>
+                    <Td
+                      key={cell.id}
+                      paddingLeft={2}
+                      borderLeftWidth={isColumnHeaderExploration ? 0 : 1}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

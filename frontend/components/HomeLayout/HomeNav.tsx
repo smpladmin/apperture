@@ -18,6 +18,7 @@ import ConfigureAppsModal from '@components/ConfigureAppsModal';
 import { getAppId } from '../Home/util';
 import { Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
 import { CaretRight } from 'phosphor-react';
+import LogoutModal from '@components/Logout';
 
 type HomeNavProps = {
   apps: AppWithIntegrations[];
@@ -35,6 +36,8 @@ const HomeNav = ({ apps }: HomeNavProps) => {
     apps.find((a) => a?._id === defaultAppId) || apps?.[0]
   );
 
+  const [hoveredItem, setIsHoveredItem] = useState('');
+
   const { isOpen, onOpen, onClose } = useDisclosure({
     defaultIsOpen: !!router.query.apps,
   });
@@ -45,6 +48,12 @@ const HomeNav = ({ apps }: HomeNavProps) => {
   } = useDisclosure({
     defaultIsOpen: !!router.query.configure,
   });
+
+  const {
+    isOpen: isLogoutModalOpen,
+    onOpen: openLogoutModal,
+    onClose: closeLogoutModal,
+  } = useDisclosure();
 
   useEffect(() => {
     setSelectedApp(apps.find((a) => a?._id === selectedAppId) || apps[0]);
@@ -106,13 +115,16 @@ const HomeNav = ({ apps }: HomeNavProps) => {
         color={'white'}
         cursor={'pointer'}
         onClick={() => {
-          router.push(`/analytics/home/${dsId}`);
+          router.push({
+            pathname: `/analytics/home/[dsId]`,
+            query: { dsId },
+          });
         }}
       ></Image>
       <Flex color={WHITE_DEFAULT} gap={5} alignItems={'center'}>
         <Menu>
           <MenuButton
-            _hover={{ bg: 'black.500' }}
+            _focus={{ bg: 'black.500' }}
             _expanded={{ bg: 'black.500' }}
             borderRadius={8}
             padding={'6px'}
@@ -124,7 +136,15 @@ const HomeNav = ({ apps }: HomeNavProps) => {
               padding={2}
               paddingY={3}
               borderRadius={8}
-              _hover={{ bg: 'white.400' }}
+              _focus={{ bg: 'white.400' }}
+              onClick={() => {
+                router.push({
+                  pathname: `/analytics/action/list/[dsId]`,
+                  query: { dsId },
+                });
+              }}
+              onMouseEnter={() => setIsHoveredItem('Data Management')}
+              onMouseLeave={() => setIsHoveredItem('')}
             >
               <Flex
                 justifyContent={'space-between'}
@@ -142,14 +162,24 @@ const HomeNav = ({ apps }: HomeNavProps) => {
                 >
                   <SquaresFour size={16} color={GREY_600} /> Data Management
                 </Flex>
-                <CaretRight size={16} color={GREY_600} />
+                {hoveredItem === 'Data Management' && (
+                  <CaretRight size={16} color={GREY_600} />
+                )}
               </Flex>
             </MenuItem>
             <MenuItem
               padding={2}
               paddingY={3}
               borderRadius={8}
-              _hover={{ bg: 'white.400' }}
+              _focus={{ bg: 'white.400' }}
+              onClick={() => {
+                router.push({
+                  pathname: `/analytics/data/source/[dsId]`,
+                  query: { dsId },
+                });
+              }}
+              onMouseEnter={() => setIsHoveredItem('Event Stream')}
+              onMouseLeave={() => setIsHoveredItem('')}
             >
               <Flex
                 justifyContent={'space-between'}
@@ -167,14 +197,24 @@ const HomeNav = ({ apps }: HomeNavProps) => {
                 >
                   <Stack size={16} color={GREY_600} /> Event Stream
                 </Flex>
-                <CaretRight size={16} color={GREY_600} />
+                {hoveredItem === 'Event Stream' && (
+                  <CaretRight size={16} color={GREY_600} />
+                )}
               </Flex>
             </MenuItem>
             <MenuItem
               padding={2}
               paddingY={3}
               borderRadius={8}
-              _hover={{ bg: 'white.400' }}
+              _focus={{ bg: 'white.400' }}
+              onClick={() => {
+                router.push({
+                  pathname: `/analytics/data/stream/[dsId]`,
+                  query: { dsId },
+                });
+              }}
+              onMouseEnter={() => setIsHoveredItem('Click Stream')}
+              onMouseLeave={() => setIsHoveredItem('')}
             >
               <Flex
                 justifyContent={'space-between'}
@@ -198,14 +238,24 @@ const HomeNav = ({ apps }: HomeNavProps) => {
                   />
                   Click Stream
                 </Flex>
-                <CaretRight size={16} color={GREY_600} />
+                {hoveredItem === 'Click Stream' && (
+                  <CaretRight size={16} color={GREY_600} />
+                )}
               </Flex>
             </MenuItem>
             <MenuItem
               padding={2}
               paddingY={3}
               borderRadius={8}
-              _hover={{ bg: 'white.400' }}
+              _focus={{ bg: 'white.400' }}
+              onClick={() => {
+                router.push({
+                  pathname: `/analytics/datamart/list/[dsId]`,
+                  query: { dsId },
+                });
+              }}
+              onMouseEnter={() => setIsHoveredItem('Data Mart')}
+              onMouseLeave={() => setIsHoveredItem('')}
             >
               <Flex
                 justifyContent={'space-between'}
@@ -223,14 +273,16 @@ const HomeNav = ({ apps }: HomeNavProps) => {
                 >
                   <HardDrives size={16} color={GREY_600} /> Data Mart
                 </Flex>
-                <CaretRight size={16} color={GREY_600} />
+                {hoveredItem === 'Data Mart' && (
+                  <CaretRight size={16} color={GREY_600} />
+                )}
               </Flex>
             </MenuItem>
           </MenuList>
         </Menu>
         <Menu>
           <MenuButton
-            _hover={{ bg: 'black.500' }}
+            _focus={{ bg: 'black.500' }}
             _expanded={{ bg: 'black.500' }}
             borderRadius={8}
             padding={'6px'}
@@ -242,7 +294,15 @@ const HomeNav = ({ apps }: HomeNavProps) => {
               padding={2}
               paddingY={3}
               borderRadius={8}
-              _hover={{ bg: 'white.400' }}
+              _focus={{ bg: 'white.400' }}
+              onClick={() => {
+                router.push({
+                  pathname: `/analytics/settings/integrations`,
+                  query: { dsId },
+                });
+              }}
+              onMouseEnter={() => setIsHoveredItem('Integrations')}
+              onMouseLeave={() => setIsHoveredItem('')}
             >
               <Flex
                 justifyContent={'space-between'}
@@ -261,14 +321,19 @@ const HomeNav = ({ apps }: HomeNavProps) => {
                 >
                   <GearSix size={16} color={GREY_600} /> Integrations
                 </Flex>
-                <CaretRight size={16} color={GREY_600} />
+                {hoveredItem === 'Integrations' && (
+                  <CaretRight size={16} color={GREY_600} />
+                )}
               </Flex>
             </MenuItem>
             <MenuItem
               padding={2}
               paddingY={3}
               borderRadius={8}
-              _hover={{ bg: 'white.400' }}
+              _focus={{ bg: 'white.400' }}
+              onClick={openLogoutModal}
+              onMouseEnter={() => setIsHoveredItem('Logout')}
+              onMouseLeave={() => setIsHoveredItem('')}
             >
               <Flex
                 justifyContent={'space-between'}
@@ -286,7 +351,9 @@ const HomeNav = ({ apps }: HomeNavProps) => {
                 >
                   <SignOut size={16} color={GREY_600} /> Logout
                 </Flex>
-                <CaretRight size={16} color={GREY_600} />
+                {hoveredItem === 'Logout' && (
+                  <CaretRight size={16} color={GREY_600} />
+                )}
               </Flex>
             </MenuItem>
           </MenuList>
@@ -319,6 +386,7 @@ const HomeNav = ({ apps }: HomeNavProps) => {
         closeConfigureAppsModal={() => onModalClose('configure')}
         app={selectedApp}
       />
+      <LogoutModal isOpen={isLogoutModalOpen} onClose={closeLogoutModal} />
     </Flex>
   );
 };

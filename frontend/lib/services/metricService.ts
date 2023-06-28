@@ -130,7 +130,7 @@ export const getSavedMetricsForDatasourceId = async (dsId: string) => {
 
 export const getSavedMetricsForApp = async (appId: string) => {
   const res = await AppertureGet(`/metrics?app_id=${appId}`);
-  return res.data;
+  return res.data || [];
 };
 
 export const validateMetricFormula = async (

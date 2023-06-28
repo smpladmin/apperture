@@ -6,13 +6,7 @@ import {
 } from '@lib/domain/watchlist';
 import { CellContext } from '@tanstack/react-table';
 import { GREY_600 } from '@theme/index';
-import {
-  ChartBar,
-  ChartLineUp,
-  ChartPie,
-  DotsThreeOutlineVertical,
-  Funnel,
-} from 'phosphor-react';
+import { ChartBar, ChartLineUp, ChartPie, Funnel, Table } from 'phosphor-react';
 import React from 'react';
 
 const Explorations = ({
@@ -24,7 +18,7 @@ const Explorations = ({
 
   const getEntityIcon = (type: WatchListItemType) => {
     const icons: { [key in WatchListItemType]: any } = {
-      [WatchListItemType.WORKBOOKS]: '',
+      [WatchListItemType.WORKBOOKS]: <Table color={GREY_600} size={16} />,
       [WatchListItemType.FUNNELS]: <Funnel color={GREY_600} size={16} />,
       [WatchListItemType.SEGMENTS]: <ChartPie color={GREY_600} size={16} />,
       [WatchListItemType.METRICS]: <ChartLineUp color={GREY_600} size={16} />,
