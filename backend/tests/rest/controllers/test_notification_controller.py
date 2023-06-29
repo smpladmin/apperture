@@ -2,6 +2,7 @@ import json
 from unittest.mock import ANY
 
 from beanie import PydanticObjectId
+import pytest
 
 from domain.notifications.models import (
     NotificationType,
@@ -215,4 +216,51 @@ def test_delete_notification(
         **{
             "notification_id": "6384a65e0a397236d9de236a",
         }
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_saved_retention_for_app(client_init, notification_service):
+    response = client_init.get("/notifications?app_id=63d0a7bfc636cee15d81f579")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "_id": "635ba034807ab86d8a2aadd8",
+            "revisionId": None,
+            "createdAt": ANY,
+            "updatedAt": None,
+            "datasourceId": "635ba034807ab86d8a2aadd9",
+            "userId": "635ba034807ab86d8a2aadda",
+            "appId": "635ba034807ab86d8a2aadd9",
+            "name": "name",
+            "notificationType": ["update"],
+            "metric": "hits",
+            "multiNode": True,
+            "appertureManaged": True,
+            "pctThresholdActive": False,
+            "pctThresholdValues": None,
+            "absoluteThresholdActive": False,
+            "absoluteThresholdValues": None,
+            "formula": "",
+            "variableMap": {},
+            "preferredHourGmt": 5,
+            "frequency": "daily",
+            "preferredChannels": ["slack"],
+            "notificationActive": False,
+            "variant": "node",
+            "reference": "/p/partner/job",
+            "enabled": True,
+            "user": {
+                "id": "635ba034807ab86d8a2aadd8",
+                "firstName": "Test",
+                "lastName": "User",
+                "email": "test@email.com",
+                "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
+                "slackChannel": "#alerts",
+            },
+        }
+    ]
+    notification_service.get_notifications_for_apps.assert_called_once_with(
+        **{"app_id": "63d0a7bfc636cee15d81f579"}
     )

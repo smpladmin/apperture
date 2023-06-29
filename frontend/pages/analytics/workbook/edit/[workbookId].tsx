@@ -1,4 +1,4 @@
-import Layout from '@components/Layout';
+import HomeLayout from '@components/HomeLayout';
 import Spreadsheet from '@components/Spreadsheet';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { Workbook } from '@lib/domain/workbook';
@@ -57,11 +57,7 @@ EditWorkbook.getLayout = function getLayout(
   page: ReactElement,
   apps: AppWithIntegrations[]
 ) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
 
 export default EditWorkbook;

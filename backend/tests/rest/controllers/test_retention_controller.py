@@ -154,3 +154,39 @@ def test_delete_retention(client_init, retention_service):
             "retention_id": "6384a65e0a397236d9de236a",
         }
     )
+
+
+@pytest.mark.asyncio
+async def test_get_saved_retention_for_app(client_init, retention_service):
+    response = client_init.get("/retention?app_id=63d0a7bfc636cee15d81f579")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "_id": "635ba034807ab86d8a2aadd8",
+            "revisionId": None,
+            "createdAt": ANY,
+            "updatedAt": None,
+            "datasourceId": "635ba034807ab86d8a2aadd9",
+            "appId": "635ba034807ab86d8a2aadd7",
+            "userId": "635ba034807ab86d8a2aadda",
+            "name": "name",
+            "startEvent": {"event": "start_event", "filters": None},
+            "goalEvent": {"event": "goal_event", "filters": None},
+            "dateFilter": {"filter": {"days": 4}, "type": "last"},
+            "segmentFilter": None,
+            "granularity": "days",
+            "enabled": True,
+            "user": {
+                "id": "635ba034807ab86d8a2aadd8",
+                "firstName": "Test",
+                "lastName": "User",
+                "email": "test@email.com",
+                "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
+                "slackChannel": "#alerts",
+            },
+        }
+    ]
+    retention_service.get_retentions_for_apps.assert_called_once_with(
+        **{"app_ids": [PydanticObjectId("635ba034807ab86d8a2aadd9")]}
+    )

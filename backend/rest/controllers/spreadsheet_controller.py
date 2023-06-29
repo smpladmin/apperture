@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from ai.text_to_sql import text_to_sql
 from domain.apperture_users.models import AppertureUser
+from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
 from domain.event_properties.service import EventPropertiesService
@@ -53,19 +54,29 @@ async def create_workbook(
 @router.get("/workbooks", response_model=List[WorkbookWithUser])
 async def get_workbooks(
     datasource_id: Union[str, None] = None,
+    app_id: Union[str, None] = None,
     user: AppertureUser = Depends(get_user),
     spreadsheets_service: SpreadsheetService = Depends(),
+    user_service: AppertureUserService = Depends(),
 ):
-    workbooks = (
-        await spreadsheets_service.get_workbooks_for_datasource_id(
+
+    workbooks = []
+
+    if app_id:
+        workbooks = await spreadsheets_service.get_workbooks_for_app(app_id=app_id)
+    elif datasource_id:
+        workbooks = await spreadsheets_service.get_workbooks_for_datasource_id(
             datasource_id=datasource_id
         )
-        if datasource_id
-        else await spreadsheets_service.get_workbooks_by_user_id(user_id=user.id)
-    )
+    else:
+        workbooks = await spreadsheets_service.get_workbooks_for_user_id(
+            user_id=user.id
+        )
+
     workbooks = [WorkbookWithUser.from_orm(f) for f in workbooks]
     for workbook in workbooks:
-        workbook.user = AppertureUserResponse.from_orm(user)
+        apperture_user = await user_service.get_user(id=str(workbook.user_id))
+        workbook.user = AppertureUserResponse.from_orm(apperture_user)
     return workbooks
 
 
@@ -152,3 +163,11 @@ async def update_workbook(
 
     await spreadsheets_service.update_workbook(workbook=workbook, workbook_id=id)
     return workbook
+
+
+@router.delete("/workbooks/{workbook_id}")
+async def delete_segments(
+    workbook_id: str,
+    spreadsheets_service: SpreadsheetService = Depends(),
+):
+    await spreadsheets_service.delete_workbook(workbook_id=workbook_id)

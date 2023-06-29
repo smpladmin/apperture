@@ -148,6 +148,43 @@ async def test_get_saved_workbooks(client_init, spreadsheets_service):
 
 
 @pytest.mark.asyncio
+async def test_get_saved_workbooks_for_app(client_init, spreadsheets_service):
+    response = client_init.get("/workbooks?app_id=63d0a7bfc636cee15d81f579")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "_id": "63d0df1ea1040a6388a4a34c",
+            "revisionId": None,
+            "createdAt": ANY,
+            "updatedAt": None,
+            "datasourceId": "63d0a7bfc636cee15d81f579",
+            "appId": "63ca46feee94e38b81cda37a",
+            "userId": "6374b74e9b36ecf7e0b4f9e4",
+            "name": "Test Workbook",
+            "spreadsheets": [
+                {
+                    "name": "Sheet1",
+                    "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
+                    "is_sql": True,
+                    "query": "SELECT  event_name FROM  events",
+                }
+            ],
+            "enabled": True,
+            "user": {
+                "id": "635ba034807ab86d8a2aadd8",
+                "firstName": "Test",
+                "lastName": "User",
+                "email": "test@email.com",
+                "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
+                "slackChannel": "#alerts",
+            },
+        }
+    ]
+    spreadsheets_service.get_workbooks_for_app.assert_called_once()
+
+
+@pytest.mark.asyncio
 async def test_get_saved_workbooks_by_user_id(client_init, spreadsheets_service):
     response = client_init.get("/workbooks")
 
@@ -181,7 +218,7 @@ async def test_get_saved_workbooks_by_user_id(client_init, spreadsheets_service)
             },
         }
     ]
-    spreadsheets_service.get_workbooks_by_user_id.assert_called_once()
+    spreadsheets_service.get_workbooks_for_user_id.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -265,3 +302,15 @@ async def test_update_workbook(client_init, workbook_data, spreadsheets_service)
         ],
         "enabled": True,
     } == spreadsheets_service.update_workbook.call_args.kwargs["workbook"].dict()
+
+
+@pytest.mark.asyncio
+async def test_delete_retention(client_init, spreadsheets_service):
+    response = client_init.delete("/workbooks/6384a65e0a397236d9de236a")
+    assert response.status_code == 200
+
+    spreadsheets_service.delete_workbook.assert_called_once_with(
+        **{
+            "workbook_id": "6384a65e0a397236d9de236a",
+        }
+    )

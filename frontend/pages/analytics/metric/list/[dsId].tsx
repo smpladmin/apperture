@@ -1,4 +1,4 @@
-import Layout from '@components/Layout';
+import HomeLayout from '@components/HomeLayout';
 import SavedMetrics from '@components/Watchlist/Metrics';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { Provider } from '@lib/domain/provider';
@@ -6,7 +6,7 @@ import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { getDatasourceById } from '@lib/utils/common';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
-import React, { ReactNode } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -42,14 +42,9 @@ const ListMetrics = ({ provider }: { provider: Provider }) => {
 };
 
 ListMetrics.getLayout = function getLayout(
-  page: ReactNode,
+  page: ReactElement,
   apps: AppWithIntegrations[]
 ) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
-
 export default ListMetrics;

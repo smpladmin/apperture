@@ -3,6 +3,7 @@ from typing import List, Union
 from fastapi import APIRouter, Depends
 
 from domain.apperture_users.models import AppertureUser
+from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
 from domain.notifications.models import NotificationResponse
@@ -59,21 +60,28 @@ async def add_notification(
 async def get_notification(
     reference: Union[str, None] = None,
     datasource_id: Union[str, None] = None,
-    user: AppertureUser = Depends(get_user),
+    app_id: Union[str, None] = None,
     notification_service: NotificationService = Depends(),
+    user_service: AppertureUserService = Depends(),
 ):
+    notifications = []
     if reference:
         return await notification_service.get_notification_by_reference(
             reference=reference, datasource_id=datasource_id
+        )
+    elif app_id:
+        notifications = await notification_service.get_notifications_for_apps(
+            app_id=app_id
         )
     else:
         notifications = await notification_service.get_notifications_for_datasource_id(
             datasource_id=datasource_id
         )
-        notifications = [NotificationWithUser.from_orm(f) for f in notifications]
-        for notification in notifications:
-            notification.user = apperture_users.from_orm(user)
-        return notifications
+    notifications = [NotificationWithUser.from_orm(f) for f in notifications]
+    for notification in notifications:
+        apperture_user = await user_service.get_user(id=str(notification.user_id))
+        notification.user = apperture_users.from_orm(apperture_user)
+    return notifications
 
 
 @router.put("/notifications/{notification_id}", response_model=NotificationResponse)

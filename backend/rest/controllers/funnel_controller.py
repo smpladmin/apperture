@@ -3,6 +3,7 @@ from typing import List, Union
 from fastapi import APIRouter, Depends
 
 from domain.apperture_users.models import AppertureUser
+from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
 from domain.funnels.service import FunnelsService
@@ -156,19 +157,29 @@ async def get_transient_funnel_analytics(
 @router.get("/funnels", response_model=List[FunnelWithUser])
 async def get_funnels(
     datasource_id: Union[str, None] = None,
+    app_id: Union[str, None] = None,
     user: AppertureUser = Depends(get_user),
     funnel_service: FunnelsService = Depends(),
     app_service: AppService = Depends(),
+    user_service: AppertureUserService = Depends(),
 ):
-    apps = await app_service.get_apps(user=user)
-    funnels = (
-        await funnel_service.get_funnels_for_datasource_id(datasource_id=datasource_id)
-        if datasource_id
-        else await funnel_service.get_funnels_for_apps(app_ids=[app.id for app in apps])
-    )
+    funnels = []
+    if app_id:
+        apps = await app_service.get_apps(user=user)
+        funnels = await funnel_service.get_funnels_for_apps(
+            app_ids=[app.id for app in apps]
+        )
+    elif datasource_id:
+        funnels = await funnel_service.get_funnels_for_datasource_id(
+            datasource_id=datasource_id
+        )
+    else:
+        funnels = await funnel_service.get_funnels_for_user_id(user_id=user.id)
+
     funnels = [FunnelWithUser.from_orm(f) for f in funnels]
     for funnel in funnels:
-        funnel.user = AppertureUserResponse.from_orm(user)
+        apperture_user = await user_service.get_user(id=str(funnel.user_id))
+        funnel.user = AppertureUserResponse.from_orm(apperture_user)
     return funnels
 
 

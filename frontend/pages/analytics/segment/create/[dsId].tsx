@@ -1,4 +1,4 @@
-import Layout from '@components/Layout';
+import HomeLayout from '@components/HomeLayout';
 import CreateSegment from '@components/Segments/CreateSegment';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
@@ -36,10 +36,7 @@ Segments.getLayout = function getLayout(
   page: ReactElement,
   apps: AppWithIntegrations[]
 ) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
+
 export default Segments;

@@ -1,14 +1,29 @@
-import { Box, Divider, Flex, IconButton, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  IconButton,
+  Text,
+  useDisclosure,
+} from '@chakra-ui/react';
 import Image from 'next/image';
 import React from 'react';
 import 'remixicon/fonts/remixicon.css';
 import slackImage from '@assets/images/slack.svg';
 import { useRouter } from 'next/router';
 import Render from '@components/Render';
+import LogoutModal from '@components/Logout';
 
 const SettingsOptions = () => {
   const router = useRouter();
   const { dsId } = router.query;
+
+  const {
+    isOpen: isLogoutModalOpen,
+    onOpen: openLogoutModal,
+    onClose: closeLogoutModal,
+  } = useDisclosure();
 
   return (
     <Flex
@@ -35,7 +50,7 @@ const SettingsOptions = () => {
             borderColor={'white.200'}
             onClick={() =>
               router.push({
-                pathname: `/analytics/explore/[dsId]`,
+                pathname: `/analytics/home/[dsId]`,
                 query: { dsId },
               })
             }
@@ -107,13 +122,11 @@ const SettingsOptions = () => {
             />
           </Flex>
         </Flex>
-        <Divider
-          display={{ md: 'none' }}
-          orientation="horizontal"
-          borderColor={'white.200'}
-          opacity={1}
-        />
+        <Button variant={'secondary'} onClick={openLogoutModal}>
+          Log Out
+        </Button>
       </Box>
+      <LogoutModal isOpen={isLogoutModalOpen} onClose={closeLogoutModal} />
     </Flex>
   );
 };

@@ -1,0 +1,21 @@
+<svg width="147" height="98" viewBox="0 0 147 98" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_4790_222813)">
+<rect width="147" height="98.0005" rx="7.25928" fill="white"/>
+<rect width="147" height="30.8701" transform="matrix(1 0 0 -1 0 30.8672)" fill="#BCDE85"/>
+<rect x="6.61523" y="7.35156" width="72.765" height="4.41001" rx="2.20501" fill="white"/>
+<rect x="6.61523" y="16.1719" width="87.465" height="4.41001" rx="2.20501" fill="white"/>
+<rect x="82.3203" y="7.35156" width="4.40996" height="4.40998" rx="2.20498" fill="white"/>
+<rect x="97.0195" y="16.1719" width="4.40996" height="4.40998" rx="2.20498" fill="white"/>
+<rect x="89.6699" y="7.35156" width="4.40996" height="4.40998" rx="2.20498" fill="white"/>
+<rect x="104.5" y="16.3359" width="4.40996" height="4.40998" rx="2.20498" fill="white"/>
+<rect width="125.685" height="13.23" transform="matrix(1 0 0 -1 11.0254 52.9219)" fill="#BCDE85" fill-opacity="0.6"/>
+<rect width="125.685" height="13.23" transform="matrix(1 0 0 -1 11.0254 70.5625)" fill="#BCDE85" fill-opacity="0.6"/>
+<rect width="125.685" height="13.23" transform="matrix(1 0 0 -1 11.0254 88.2031)" fill="#BCDE85" fill-opacity="0.6"/>
+</g>
+<rect x="0.367501" y="0.367501" width="146.265" height="97.2655" rx="6.89178" stroke="#DFDFDF" stroke-width="0.735001"/>
+<defs>
+<clipPath id="clip0_4790_222813">
+<rect width="147" height="98.0005" rx="7.25928" fill="white"/>
+</clipPath>
+</defs>
+</svg>
