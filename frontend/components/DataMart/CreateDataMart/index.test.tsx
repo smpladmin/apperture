@@ -171,7 +171,9 @@ describe('create datamart', () => {
     it('should fetch data on executing valid SQL query', async () => {
       await renderDataMart();
       const runButton = screen.getByTestId('run');
-      fireEvent.click(runButton);
+      await act(async () => {
+        fireEvent.click(runButton);
+      });
       expect(mockComputeDataMartQuery).toBeCalled();
     });
   });
@@ -195,7 +197,9 @@ describe('create datamart', () => {
 
       await renderDataMart(router);
       const runButton = screen.getByTestId('run');
-      fireEvent.click(runButton);
+      await act(async () => {
+        fireEvent.click(runButton);
+      });
       const saveButton = screen.getByTestId('save');
       await act(async () => {
         fireEvent.click(saveButton);
@@ -219,7 +223,9 @@ describe('create datamart', () => {
       await renderDataMart();
 
       const saveButton = screen.getByTestId('save');
-      fireEvent.click(saveButton);
+      await act(async () => {
+        fireEvent.click(saveButton);
+      });
 
       await waitFor(() => {
         expect(router.push).toHaveBeenCalledTimes(0);
@@ -245,7 +251,9 @@ describe('create datamart', () => {
       await renderDataMart(router);
 
       const updateButton = screen.getByTestId('save');
-      fireEvent.click(updateButton);
+      await act(async () => {
+        fireEvent.click(updateButton);
+      });
 
       expect(mockUpdateDataMartTable).toHaveBeenCalled();
     });
