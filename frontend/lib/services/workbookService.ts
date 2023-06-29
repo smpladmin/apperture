@@ -1,5 +1,6 @@
 import { Spreadsheet } from '@lib/domain/workbook';
 import {
+  AppertureDelete,
   AppertureGet,
   ApperturePost,
   ApperturePrivateGet,
@@ -23,9 +24,18 @@ export const getSavedWorkbooksForDatasourceId = async (dsId: string) => {
   return res.data;
 };
 
+export const getSavedWorkbooksForApp = async (appId: string) => {
+  const res = await AppertureGet(`/workbooks?app_id=${appId}`);
+  return res.data || [];
+};
+
 export const _getSavedWorkbook = async (token: string, workbookId: string) => {
   const res = await ApperturePrivateGet(`/workbooks/${workbookId}`, token);
   return res.data;
+};
+
+export const deleteWorkbook = async (id: string) => {
+  return await AppertureDelete(`/workbooks/${id}`);
 };
 
 export const saveWorkbook = async (

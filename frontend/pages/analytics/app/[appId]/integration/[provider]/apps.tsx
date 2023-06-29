@@ -48,7 +48,7 @@ const SelectDataSources = ({ datasources }: SelectDataSourcesProps) => {
   const { appId, provider, add, previousDsId } = router.query;
   const handleClose = () =>
     router.push({
-      pathname: `/analytics/explore/[dsId]`,
+      pathname: `/analytics/home/[dsId]`,
       query: { dsId: previousDsId, apps: 1 },
     });
 

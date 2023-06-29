@@ -12,25 +12,27 @@ const Create = () => {
 
   const handleClose = () =>
     router.push({
-      pathname: `/analytics/explore/[dsId]`,
+      pathname: `/analytics/home/[dsId]`,
       query: { dsId: previousDsId, apps: 1 },
     });
-    switch(provider){
-      case Provider.GOOGLE:
-        return <GooglePermission
+  switch (provider) {
+    case Provider.GOOGLE:
+      return (
+        <GooglePermission
           navigateBack={handleGoBack}
           handleClose={handleClose}
           query={{ ...router.query }}
         />
-      case Provider.MIXPANEL:
-        return <MixpanelIntegration add={add} handleClose={handleClose} />
-      case Provider.AMPLITUDE:
-        return<AmplitudeIntegration add={add} handleClose={handleClose} />
-      case Provider.CLEVERTAP:
-        return <ClevertapIntegration add={add} handleClose={handleClose}/>
-      default:
-        return<></>
-    } 
+      );
+    case Provider.MIXPANEL:
+      return <MixpanelIntegration add={add} handleClose={handleClose} />;
+    case Provider.AMPLITUDE:
+      return <AmplitudeIntegration add={add} handleClose={handleClose} />;
+    case Provider.CLEVERTAP:
+      return <ClevertapIntegration add={add} handleClose={handleClose} />;
+    default:
+      return <></>;
+  }
 };
 
 export default Create;

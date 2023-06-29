@@ -265,6 +265,9 @@ def notification_service(apperture_user_response):
     notification_service_mock.get_notifications_for_datasource_id.return_value = (
         notifications_future
     )
+    notification_service_mock.get_notifications_for_apps.return_value = (
+        notifications_future
+    )
     notification_service_mock.fetch_and_delete_notification = mock.AsyncMock()
     notification_service_mock.get_notifications_to_compute.return_value = (
         notification_compute_future
@@ -345,6 +348,7 @@ def retention_service(apperture_user_response):
     retention_service_mock.get_retentions_for_datasource_id.return_value = (
         retentions_future
     )
+    retention_service_mock.get_retentions_for_apps.return_value = retentions_future
     retention_service_mock.compute_retention.return_value = transient_retention_future
     retention_service_mock.get_retentions_for_apps.return_value = retentions_future
     return retention_service_mock
@@ -842,10 +846,13 @@ def spreadsheets_service():
     spreadsheets_service_mock.get_workbooks_for_datasource_id.return_value = (
         workbooks_future
     )
-    spreadsheets_service_mock.get_workbooks_by_user_id.return_value = workbooks_future
+    spreadsheets_service_mock.get_workbooks_for_user_id.return_value = workbooks_future
+    spreadsheets_service_mock.get_workbooks_for_app.return_value = workbooks_future
+
     spreadsheets_service_mock.get_workbook_by_id.return_value = workbook_future
     spreadsheets_service_mock.add_workbook.return_value = workbook_future
     spreadsheets_service_mock.update_workbook.return_value = workbook_future
+    spreadsheets_service_mock.delete_workbook = mock.AsyncMock()
 
     return spreadsheets_service_mock
 
@@ -1048,6 +1055,7 @@ def metric_service(apperture_user_response):
     metric_service.update_metric = mock.AsyncMock()
     metric_service.compute_metric.return_value = computed_metric_future
     metric_service.get_metrics_for_datasource_id.return_value = metrics_future
+    metric_service.get_metrics_by_app_id.return_value = metrics_future
     metric_service.validate_formula.return_value = True
     metric_service.delete_metric = mock.AsyncMock()
     metric_service.get_metric_data_for_notifications.return_value = (
@@ -1112,14 +1120,14 @@ def segment_service(apperture_user_response):
     segment_future = asyncio.Future()
     segment_future.set_result(segment)
 
-    # segments_future = asyncio.Future()
-    # segments_future.set_result([SegmentWithUser.from_orm(segment)])
-
     segment_service.add_segment.return_value = segment
     segment_service.update_segment.return_value = segment
     segment_service.get_segment.return_value = segment
     segment_service.get_segments_for_app.return_value = [segment]
     segment_service.get_segments_for_datasource_id.return_value = [
+        SegmentWithUser.from_orm(segment)
+    ]
+    segment_service.get_segments_for_app.return_value = [
         SegmentWithUser.from_orm(segment)
     ]
     segment_service.delete_segment = mock.AsyncMock()

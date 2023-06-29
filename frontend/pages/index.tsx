@@ -9,7 +9,7 @@ const checkDataSource = (apps: Array<AppWithIntegrations>) => {
   if (dsId) {
     return {
       redirect: {
-        destination: `/analytics/explore/${dsId}`,
+        destination: `/analytics/home/${dsId}`,
       },
       props: {},
     };

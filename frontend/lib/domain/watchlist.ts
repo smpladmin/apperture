@@ -38,15 +38,17 @@ export namespace WatchListItemType {
   }
 }
 
+export type SavedItemsDetails =
+  | FunnelWithUser
+  | SegmentWithUser
+  | MetricWithUser
+  | NotificationWithUser
+  | ActionWithUser
+  | WorkbookWithUser
+  | RetentionWithUser
+  | DataMartWithUser;
+
 export type SavedItems = {
   type: WatchListItemType | NotificationType[];
-  details:
-    | FunnelWithUser
-    | SegmentWithUser
-    | MetricWithUser
-    | NotificationWithUser
-    | ActionWithUser
-    | WorkbookWithUser
-    | RetentionWithUser
-    | DataMartWithUser;
+  details: SavedItemsDetails;
 };

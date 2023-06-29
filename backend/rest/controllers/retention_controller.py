@@ -3,6 +3,7 @@ from typing import List, Union
 from fastapi import APIRouter, Depends
 
 from domain.apperture_users.models import AppertureUser
+from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
 from domain.retention.service import RetentionService
@@ -100,23 +101,29 @@ async def update_retention(
 @router.get("/retention", response_model=List[RetentionWithUser])
 async def get_retention_list(
     datasource_id: Union[str, None] = None,
+    app_id: Union[str, None] = None,
     user: AppertureUser = Depends(get_user),
     retention_service: RetentionService = Depends(),
     app_service: AppService = Depends(),
+    user_service: AppertureUserService = Depends(),
 ):
-    apps = await app_service.get_apps(user=user)
-    retentions = (
-        await retention_service.get_retentions_for_datasource_id(
-            datasource_id=datasource_id
-        )
-        if datasource_id
-        else await retention_service.get_retentions_for_apps(
+    retentions = []
+    if app_id:
+        apps = await app_service.get_apps(user=user)
+        retentions = await retention_service.get_retentions_for_apps(
             app_ids=[app.id for app in apps]
         )
-    )
+    elif datasource_id:
+        retentions = await retention_service.get_retentions_for_datasource_id(
+            datasource_id=datasource_id
+        )
+    else:
+        retentions = await retention_service.get_retentions_for_user_id(user_id=user.id)
+
     retentions = [RetentionWithUser.from_orm(f) for f in retentions]
     for retention in retentions:
-        retention.user = AppertureUserResponse.from_orm(user)
+        apperture_user = await user_service.get_user(id=str(retention.user_id))
+        retention.user = AppertureUserResponse.from_orm(apperture_user)
     return retentions
 
 

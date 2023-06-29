@@ -5,6 +5,7 @@ import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
 import { ReactElement } from 'react';
 import ViewDatastream from '@components/DataStream';
+import HomeLayout from '@components/HomeLayout';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -39,10 +40,7 @@ SanityTables.getLayout = function getLayout(
   page: ReactElement,
   apps: AppWithIntegrations[]
 ) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
+
 export default SanityTables;

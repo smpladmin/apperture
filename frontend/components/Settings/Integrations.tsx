@@ -95,7 +95,7 @@ const Integrations = ({ user }: { user: AppertureUser }) => {
                 borderColor={'white.200'}
                 onClick={() =>
                   router.push({
-                    pathname: `/analytics/settings`,
+                    pathname: `/analytics/home/[dsId]`,
                     query: { dsId },
                   })
                 }

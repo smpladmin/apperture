@@ -1,4 +1,5 @@
 import { INode } from '@antv/g6';
+import { App } from '@lib/domain/app';
 import { Node } from '@lib/domain/node';
 
 export type InitialStateType = {

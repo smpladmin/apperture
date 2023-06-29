@@ -151,6 +151,11 @@ export const getSavedFunnelsForDatasourceId = async (dsId: string) => {
   return res.data;
 };
 
+export const getSavedFunnelsForApp = async (appId: string) => {
+  const res = await AppertureGet(`/funnels?app_id=${appId}`);
+  return res.data || [];
+};
+
 export const getConversionData = async (
   dsId: string,
   steps: FunnelStep[],

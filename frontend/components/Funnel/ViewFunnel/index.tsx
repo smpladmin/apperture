@@ -125,7 +125,7 @@ const ViewFunnel = ({
 
   const handleGoBack = () => {
     router.push({
-      pathname: '/analytics/funnel/list/[dsId]',
+      pathname: '/analytics/home/[dsId]',
       query: { dsId: datasourceId },
     });
   };

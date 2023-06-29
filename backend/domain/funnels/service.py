@@ -286,6 +286,12 @@ class FunnelsService:
             Funnel.enabled != False,
         ).to_list()
 
+    async def get_funnels_for_user_id(self, user_id: PydanticObjectId):
+        return await Funnel.find(
+            Funnel.user_id == user_id,
+            Funnel.enabled != False,
+        ).to_list()
+
     async def delete_funnel(self, funnel_id: str):
         await Funnel.find_one(
             Funnel.id == PydanticObjectId(funnel_id),

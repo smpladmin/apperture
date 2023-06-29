@@ -283,10 +283,15 @@ class TestSegmentService:
         )
 
     @pytest.mark.asyncio
-    async def test_get_funnels_for_datasource_id(self):
+    async def test_get_segments_for_datasource_id(self):
         await self.service.get_segments_for_datasource_id(
             datasource_id="6384a65e0a397236d9de236a"
         )
+        Segment.find.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_get_segments_for_app(self):
+        await self.service.get_segments_for_app(app_id="6384a65e0a397236d9de236a")
         Segment.find.assert_called_once()
 
     @pytest.mark.asyncio

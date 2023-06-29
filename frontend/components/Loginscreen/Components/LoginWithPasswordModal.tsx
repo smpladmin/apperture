@@ -43,9 +43,7 @@ const LoginWithPasswordModal = ({
       <a
         ref={redirectionRef}
         href={`${BACKEND_BASE_URL}/login/password?email=${email}&password=${password}`}
-      >
-        {''}
-      </a>
+      ></a>
       <Modal
         isCentered
         motionPreset="slideInBottom"

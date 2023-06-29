@@ -40,6 +40,9 @@ export const theme = extendTheme({
         dark: {
           bg: 'black.200',
           color: 'white',
+          _hover: {
+            bg: 'grey.900',
+          },
         },
       },
     },
