@@ -6,7 +6,7 @@ describe('Home', () => {
     render(<Login />);
 
     const heading = screen.getByRole('heading', {
-      name: 'Product Analytics for everyone',
+      name: 'Welcome to apperture',
     });
 
     expect(heading).toBeInTheDocument();

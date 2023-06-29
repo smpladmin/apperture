@@ -12,10 +12,15 @@ import {
   FormControl,
   FormLabel,
   Input,
+  InputGroup,
+  InputRightElement,
+  InputLeftElement,
 } from '@chakra-ui/react';
 import { BACKEND_BASE_URL } from 'config';
 import LoginWithPasswordModal from './Components/LoginWithPasswordModal';
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { Envelope, Eye, EyeClosed, LockKey } from 'phosphor-react';
+import { BLACK, GREY_600 } from '@theme/index';
 
 const Loginscreen = () => {
   const { onOpen, onClose, isOpen } = useDisclosure();
@@ -40,6 +45,9 @@ const Loginscreen = () => {
     if (email && password) redirectionRef.current.click();
   };
 
+  const [show, setShow] = React.useState(false);
+  const handleClick = () => setShow(!show);
+
   return (
     <Box
       p={8}
@@ -49,6 +57,10 @@ const Loginscreen = () => {
       height={'100%'}
       overflowY={'auto'}
     >
+      <a
+        ref={redirectionRef}
+        href={`${BACKEND_BASE_URL}/login/password?email=${email}&password=${password}`}
+      ></a>
       <Flex direction="column" alignItems={'center'}>
         <Box textAlign={'center'}>
           <Flex w={'full'} justifyContent={'center'}>
@@ -91,111 +103,124 @@ const Loginscreen = () => {
             <a
               ref={redirectionRef}
               href={`${BACKEND_BASE_URL}/login/password?email=${email}&password=${password}`}
-            >
-              {''}
-            </a>
+            ></a>
             <form id="login-form" onSubmit={handleLogin}>
               <FormControl>
                 <Flex direction="column" gap={7}>
                   <Flex direction="column" gap={3}>
                     <FormLabel
                       fontSize={'xs-14'}
-                      lineHeight={'xs-14'}
+                      lineHeight={'lh-130'}
                       color={'grey.900'}
                       mb={0}
                     >
                       Email
                     </FormLabel>
-                    <Input
-                      type="email"
-                      placeholder="John@doe.com"
-                      onChange={handleEmail}
-                    />
+                    <InputGroup>
+                      <InputLeftElement>
+                        <Envelope size={16} color={GREY_600} />
+                      </InputLeftElement>
+                      <Input
+                        type="email"
+                        placeholder="john.doe@example.com"
+                        onChange={handleEmail}
+                        bg={'white.500'}
+                        fontSize={'xs-12'}
+                        lineHeight={'lh-130'}
+                        focusBorderColor={BLACK}
+                      />
+                    </InputGroup>
                   </Flex>
                   <Flex direction="column" gap={3}>
                     <FormLabel
                       fontSize={'xs-14'}
-                      lineHeight={'xs-14'}
+                      lineHeight={'lh-130'}
                       color={'grey.900'}
                       mb={0}
                     >
                       Password
                     </FormLabel>
-                    <Input
-                      type="password"
-                      placeholder="xxxxxxxxxxxx"
-                      onChange={handlePassword}
-                    />
+
+                    <InputGroup>
+                      <InputLeftElement>
+                        <LockKey size={16} color={GREY_600} />
+                      </InputLeftElement>
+                      <Input
+                        type={show ? 'text' : 'password'}
+                        placeholder="**************"
+                        onChange={handlePassword}
+                        bg={'white.500'}
+                        fontSize={'xs-12'}
+                        lineHeight={'lh-130'}
+                        focusBorderColor={BLACK}
+                      />
+                      <InputRightElement
+                        w={4}
+                        marginRight={3}
+                        cursor={'pointer'}
+                      >
+                        <Flex onClick={handleClick}>
+                          {show ? <Eye /> : <EyeClosed />}
+                        </Flex>
+                      </InputRightElement>
+                    </InputGroup>
                   </Flex>
                   <Button
                     borderWidth={'1px'}
                     type={'submit'}
                     form={'login-form'}
-                    variant={'secondary'}
+                    fontSize={'xs-14'}
+                    lineHeight={'lh-130'}
+                    fontWeight={500}
+                    variant={'dark'}
                   >
-                    Log In
+                    Sign in
                   </Button>
+                  <Flex alignItems={'center'} gap={2}>
+                    <Box flexGrow={'1'} height={'1px'} bg={'white.200'}></Box>
+                    <Text
+                      fontSize={'xs-12'}
+                      lineHeight={'lh-135'}
+                      fontWeight={'medium'}
+                      textColor={'grey.600'}
+                    >
+                      OR
+                    </Text>
+                    <Box flexGrow={'1'} height={'1px'} bg={'white.200'}></Box>
+                  </Flex>
+                  <Link href={`${BACKEND_BASE_URL}/login`}>
+                    <Flex
+                      gap={2}
+                      padding={4}
+                      alignItems={'center'}
+                      justifyContent={'center'}
+                      height={'auto'}
+                      bg={'white'}
+                      borderWidth={1}
+                      borderColor={'grey.400'}
+                      borderStyle={'solid'}
+                      cursor={'pointer'}
+                      borderRadius={'8'}
+                      _hover={{ background: 'white.500' }}
+                    >
+                      <Image src={glogo.src} w={5} />
+                      <Text
+                        fontSize={'xs-14'}
+                        lineHeight={'lh-135'}
+                        fontWeight={'medium'}
+                        textColor={'black'}
+                      >
+                        Continue with Google
+                      </Text>
+                    </Flex>
+                  </Link>
                 </Flex>
               </FormControl>
             </form>
           </Box>
         </Flex>
 
-        {/* <Flex
-          mb={2}
-          direction={'column'}
-          alignItems={'center'}
-          gap={6}
-          maxW={{ md: 141 }}
-        >
-          <Link href={`${BACKEND_BASE_URL}/login`}>
-            <Button
-              p={{ base: 7, md: 10 }}
-              fontSize={{ base: 'base', md: 'sh-20' }}
-              lineHeight={{ base: 'base', md: 'sh-20' }}
-              fontWeight={'semibold'}
-              textColor={'black.100'}
-              w={'full'}
-              gap={{ base: 4, md: 6 }}
-            >
-              <Image src={glogo.src} alt="Google logo" />
-              <Text>Sign up with Google</Text>
-            </Button>
-          </Link>
-          <Text
-            fontSize={{ base: 'xs-14', md: 'sh-20' }}
-            lineHeight={{ base: 'xs-14', md: 'sh-20' }}
-            fontWeight={'normal'}
-            textColor={'grey.DEFAULT'}
-          >
-            Already a user?{' '}
-            <Link href={`${BACKEND_BASE_URL}/login`}>
-              <Text
-                as={'span'}
-                cursor={'pointer'}
-                fontWeight={'medium'}
-                textColor={'white.DEFAULT'}
-                decoration={'underline'}
-              >
-                Log in
-              </Text>
-            </Link>
-          </Text>
-          <Text
-            fontSize={{ base: 'xs-14', md: 'sh-20' }}
-            lineHeight={{ base: 'xs-14', md: 'sh-20' }}
-            as={'span'}
-            cursor={'pointer'}
-            fontWeight={'light'}
-            textColor={'white.DEFAULT'}
-            decoration={'underline'}
-            marginLeft={3}
-            onClick={onOpen}
-          >
-            Login with password
-          </Text>
-          <LoginWithPasswordModal isOpen={isOpen} onClose={onClose} />
-        </Flex> */}
+        {/* <LoginWithPasswordModal isOpen={isOpen} onClose={onClose} /> */}
       </Flex>
     </Box>
   );
