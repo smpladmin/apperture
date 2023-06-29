@@ -216,24 +216,25 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       const sheetData = sheetsData[selectedSheetIndex];
       const isBlankSheet = !sheetData.is_sql && !sheetData.query;
       const index = columnId.toUpperCase().charCodeAt(0) - 64;
-      if (isBlankSheet && headerText.match(/count|unique/i)) {
-        try {
-          if (
-            sheetData.subHeaders[index].type === SubHeaderColumnType.DIMENSION
-          ) {
-            DimensionParser.parse(headerText);
-          } else {
-            Metricparser.parse(headerText);
-          }
-          sheetData.subHeaders[index].name = headerText;
+      if (headerText.match(/count|unique/i)) {
+        if (isBlankSheet)
+          try {
+            if (
+              sheetData.subHeaders[index].type === SubHeaderColumnType.DIMENSION
+            ) {
+              DimensionParser.parse(headerText);
+            } else {
+              Metricparser.parse(headerText);
+            }
+            sheetData.subHeaders[index].name = headerText;
 
-          setRequestTransientColumn({
-            isLoading: true,
-            subheaders: sheetData.subHeaders,
-          });
-        } catch (error) {
-          alert('Invalid syntax: ' + headerText);
-        }
+            setRequestTransientColumn({
+              isLoading: true,
+              subheaders: sheetData.subHeaders,
+            });
+          } catch (error) {
+            alert('Invalid syntax: ' + headerText);
+          }
       } else {
         const newHeader = {
           name: headerText.replace(/\s/g, '').toUpperCase(),
