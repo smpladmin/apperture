@@ -6,11 +6,14 @@ const grammar = `
   = expression
 
 expression
-  = functions/if_statement
+  = unique_function/functions/if_statement
   
 functions = fname:$(chars+) _ "(" _ params:condition_parameters _ ")" {
       return {function: fname.toLowerCase(), condition_parameters: params};
   }
+unique_function = fname:unique _ "("_ property:$(chars+)_")" {
+	return {formula:fname.toLowerCase(), property:property}
+}
 
 if_statement = fname:("if") _ "(" _ params:condition _ ","_ then:$(chars+)_ "," other:$(chars+)_ ")" {
       return {function: fname, condition_parameters: params};
@@ -33,7 +36,8 @@ in_condition = property:$(property+) _ op:"in" _ "["value:$(chars+)  _ rest: (_ 
   }
 
 fname
-  = "count"i / "unique"i / "countif"i
+  = "count"i/ "countif"i
+unique = "unique"i
 
 property
   = [a-zA-Z_.][a-zA-Z_0-9]*
