@@ -1,4 +1,4 @@
-import Layout from '@components/Layout';
+import HomeLayout from '@components/HomeLayout';
 import SavedDataMarts from '@components/Watchlist/DataMart';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { Provider } from '@lib/domain/provider';
@@ -45,11 +45,7 @@ ListDataMarts.getLayout = function getLayout(
   page: ReactNode,
   apps: AppWithIntegrations[]
 ) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
 
 export default ListDataMarts;

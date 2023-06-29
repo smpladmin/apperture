@@ -1,16 +1,13 @@
 import DataMart from '@components/DataMart/CreateDataMart';
-import Layout from '@components/Layout';
-import { MapContext } from '@lib/contexts/mapContext';
+import HomeLayout from '@components/HomeLayout';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { DataMartObj } from '@lib/domain/datamart';
-import { Node } from '@lib/domain/node';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { _getSavedDataMart } from '@lib/services/dataMartService';
 import { _getNodes } from '@lib/services/datasourceService';
-import { Actions } from '@lib/types/context';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
-import { ReactElement, useContext, useEffect } from 'react';
+import { ReactElement } from 'react';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -59,11 +56,7 @@ EditDataMart.getLayout = function getLayout(
   page: ReactElement,
   apps: AppWithIntegrations[]
 ) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
 
 export default EditDataMart;

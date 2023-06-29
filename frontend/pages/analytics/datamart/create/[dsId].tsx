@@ -1,10 +1,10 @@
 import React, { ReactElement } from 'react';
 import { AppWithIntegrations } from '@lib/domain/app';
-import Layout from '@components/Layout';
 import { GetServerSideProps } from 'next';
 import { getAuthToken } from '@lib/utils/request';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import DataMart from '@components/DataMart/CreateDataMart';
+import HomeLayout from '@components/HomeLayout';
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const token = getAuthToken(req);
@@ -36,11 +36,7 @@ CreateDataMart.getLayout = function getLayout(
   page: ReactElement,
   apps: AppWithIntegrations[]
 ) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
 
 export default CreateDataMart;
