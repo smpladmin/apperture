@@ -28,7 +28,7 @@ const paths = {
   [WatchListItemType.SEGMENTS]: 'segment/edit',
   [WatchListItemType.ACTIONS]: 'action/edit',
   [WatchListItemType.RETENTIONS]: 'retention/edit',
-  [WatchListItemType.WORKBOOKS]: 'workbook/create',
+  [WatchListItemType.WORKBOOKS]: 'workbook/edit',
   [WatchListItemType.DATAMARTS]: 'datamart/edit',
 };
 
