@@ -15,7 +15,7 @@ import {
 import { AppWithIntegrations } from '@lib/domain/app';
 import LogoutModal from '@components/Logout';
 import { useRouter } from 'next/router';
-import { HardDrives } from 'phosphor-react';
+import { Database, HardDrives } from 'phosphor-react';
 
 type SidemenuProps = {
   selectedApp: AppWithIntegrations;
@@ -338,6 +338,37 @@ const DesktopSideMenu = ({ selectedApp, openAppsModal }: SidemenuProps) => {
                 backgroundColor: 'transparent',
               }}
               onClick={() => handleRedirect('/analytics/workbook/list/[dsId]')}
+            />
+          </Tooltip>
+          <Tooltip
+            label={'Data Mart'}
+            aria-label={'Data Mart'}
+            bg={'white.DEFAULT'}
+            color={'black.100'}
+          >
+            <IconButton
+              aria-label="Data Mart"
+              icon={
+                isPageActive('datamart') ? (
+                  <Database size={16} weight="fill" />
+                ) : (
+                  <Database size={16} />
+                )
+              }
+              rounded={'lg'}
+              h={10}
+              w={10}
+              bg={isPageActive('datamart') ? 'black.50' : 'black.0'}
+              fontWeight={'500'}
+              color={'grey.100'}
+              _hover={{
+                backgroundColor: 'white.0',
+                color: 'white',
+              }}
+              _active={{
+                backgroundColor: 'transparent',
+              }}
+              onClick={() => handleRedirect('/analytics/datamart/list/[dsId]')}
             />
           </Tooltip>
           <Divider borderColor={'black.50'} opacity={'0.3'} />
