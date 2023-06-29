@@ -119,10 +119,35 @@ async def compute_transient_spreadsheets(
 async def compute_transient_column(
     dto: TransientSpreadsheetColumnDto,
     spreadsheets_service: SpreadsheetService = Depends(),
+    datasource_service: DataSourceService = Depends(),
+    app_service: AppService = Depends(),
 ):
-    return spreadsheets_service.get_transient_columns(
-        dto.datasourceId, dto.dimensions, dto.metrics
-    )
+    try:
+        datasource = await datasource_service.get_datasource(dto.datasourceId)
+        app = await app_service.get_app(id=datasource.app_id)
+        has_app_credential = bool(app.clickhouse_credential)
+
+        clickhouse_credential = (
+            app.clickhouse_credential
+            if has_app_credential
+            else await app_service.create_clickhouse_user(id=app.id, app_name=app.name)
+        )
+
+        if not has_app_credential:
+            await datasource_service.create_row_policy_for_datasources_by_app(
+                app=app, username=clickhouse_credential.username
+            )
+        return spreadsheets_service.get_transient_columns(
+            dto.datasourceId,
+            dto.dimensions,
+            dto.metrics,
+            username=clickhouse_credential.username,
+            password=clickhouse_credential.password,
+        )
+    except BusinessError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
+    except DatabaseError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
 
 
 @router.get("/workbooks/{id}", response_model=SavedWorkBookResponse)

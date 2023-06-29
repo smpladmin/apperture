@@ -47,10 +47,17 @@ class Spreadsheets(EventsBase):
         datasource_id: str,
         dimensions: List[DimensionDefinition],
         metric: Union[MetricDefinition, None],
+        username: Union[str, None],
+        password: Union[str, None],
     ):
-        self.execute_get_query(
+        restricted_client = self.clickhouse.get_connection_for_user(
+            username=username, password=password
+        )
+        result = restricted_client.query(
             *self.build_transient_columns_query(datasource_id, dimensions, metric)
         )
+        restricted_client.close()
+        return result
 
     def column_filter_to_condition(self, column_filter: ColumnFilter):
         if column_filter.operator == ColumnFilterOperators.EQUALS:
@@ -94,5 +101,7 @@ class Spreadsheets(EventsBase):
                     fn.Count(Case().when(Criterion.all(conditions), 1))
                 )
 
-        query = query.groupby(*range(1, len(dimensions) + 1))
+        query = query.groupby(*range(1, len(dimensions) + 1)).limit(1000)
+
+        print("$$$$$$$$ ", query.get_sql())
         return query.get_sql(), {"ds_id": datasource_id}

@@ -108,7 +108,29 @@ class SpreadsheetService:
         datasource_id: str,
         dimensions: List[DimensionDefinition],
         metrics: List[MetricDefinition],
+        username: str,
+        password: str,
     ):
-        return self.spreadsheets.get_transient_columns(
-            datasource_id, dimensions, metrics
+        result = self.spreadsheets.get_transient_columns(
+            datasource_id,
+            dimensions,
+            metrics,
+            username,
+            password,
         )
+
+        response = {
+            "headers": [
+                SpreadSheetColumn(name=name, type=ColumnType.QUERY_HEADER)
+                for name in result.column_names
+            ],
+            "data": [],
+        }
+
+        for idx, row in enumerate(result.result_set):
+            row_data = {"index": idx + 1}
+            for col_idx, column_name in enumerate(result.column_names):
+                row_data[column_name] = row[col_idx]
+            response["data"].append(row_data)
+
+        return ComputedSpreadsheet(data=response["data"], headers=response["headers"])
