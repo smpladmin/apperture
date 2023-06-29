@@ -49,7 +49,7 @@ class TestSpreadSheetRepository:
 
         assert (
             query
-            == """SELECT "properties.utm_source","properties.city",COUNT(CASE WHEN "property.property.amount">1000000 THEN 1 END) FROM "events" WHERE "datasource_id"=%(ds_id)s GROUP BY 1,2"""
+            == """SELECT "properties.utm_source","properties.city",COUNT(CASE WHEN "property.property.amount">1000000 THEN 1 END) FROM "events" WHERE "datasource_id"=%(ds_id)s GROUP BY 1,2 LIMIT 1000"""
         )
         assert props == {"ds_id": datasource_id}
 
@@ -72,7 +72,7 @@ class TestSpreadSheetRepository:
 
         assert (
             query
-            == """SELECT "properties.utm_source","properties.city" FROM "events" WHERE "datasource_id"=%(ds_id)s GROUP BY 1,2"""
+            == """SELECT "properties.utm_source","properties.city" FROM "events" WHERE "datasource_id"=%(ds_id)s GROUP BY 1,2 LIMIT 1000"""
         )
         assert props == {"ds_id": datasource_id}
 
@@ -90,7 +90,8 @@ class TestSpreadSheetRepository:
         )
 
         assert (
-            query == """SELECT COUNT(*) FROM "events" WHERE "datasource_id"=%(ds_id)s"""
+            query
+            == """SELECT COUNT(*) FROM "events" WHERE "datasource_id"=%(ds_id)s LIMIT 1000"""
         )
         assert props == {"ds_id": datasource_id}
 
@@ -116,7 +117,7 @@ class TestSpreadSheetRepository:
 
         assert (
             query
-            == """SELECT COUNT(CASE WHEN "property.property.amount">1000000 THEN 1 END) FROM "events" WHERE "datasource_id"=%(ds_id)s"""
+            == """SELECT COUNT(CASE WHEN "property.property.amount">1000000 THEN 1 END) FROM "events" WHERE "datasource_id"=%(ds_id)s LIMIT 1000"""
         )
         assert props == {"ds_id": datasource_id}
 
@@ -147,6 +148,6 @@ class TestSpreadSheetRepository:
 
         assert (
             query
-            == """SELECT COUNT(CASE WHEN "property.property.city"='Bangalore' AND "property.property.device" IN ('Android','iPhone') THEN 1 END) FROM "events" WHERE "datasource_id"=%(ds_id)s"""
+            == """SELECT COUNT(CASE WHEN "property.property.city"='Bangalore' AND "property.property.device" IN ('Android','iPhone') THEN 1 END) FROM "events" WHERE "datasource_id"=%(ds_id)s LIMIT 1000"""
         )
         assert props == {"ds_id": datasource_id}
