@@ -18,6 +18,8 @@ import {
 import { DropdownHeaderCell, DropdownHeaderTemplate } from './DropdownHeader';
 import { InputHeaderCell, InputHeaderTemplate } from './InputHeader';
 import { WHITE_DEFAULT } from '@theme/index';
+import { Flex } from '@chakra-ui/react';
+import LoadingSpinner from '@components/LoadingSpinner';
 
 const getGridRow = (value: any): DefaultCellTypes => {
   const cellTypes: { [key: string]: DefaultCellTypes } = {
@@ -149,6 +151,15 @@ const Grid = ({
   const [columns, setColumns] = useState<Column[]>(
     getColumns(fillHeaders(sheetData.headers))
   );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [selectedSheetIndex, setIsLoading]);
 
   const [rows, setRows] = useState(
     getRows(
@@ -199,7 +210,7 @@ const Grid = ({
       );
   };
 
-  return (
+  return !isLoading ? (
     <ReactGrid
       rows={rows}
       columns={columns}
@@ -210,6 +221,10 @@ const Grid = ({
         inputHeader: new InputHeaderTemplate(),
       }}
     />
+  ) : (
+    <Flex h={'full'} w={'full'} alignItems={'center'} justifyContent={'center'}>
+      <LoadingSpinner />
+    </Flex>
   );
 };
 

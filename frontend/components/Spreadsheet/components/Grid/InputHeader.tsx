@@ -103,7 +103,6 @@ const FormulaDropDownBox = ({
           defaultValue={cell.text}
           border={'0'}
           onChange={(e) => {
-            e.stopPropagation();
             setFormula(e.target.value);
           }}
           onPointerDown={(e) => e.stopPropagation()}
