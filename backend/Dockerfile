@@ -21,7 +21,7 @@ ENV FASTAPI_ENV=development
 COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . .
-RUN poetry run pytest
+RUN poetry run pytest -vvs
 
 FROM base as dev
 WORKDIR /code
