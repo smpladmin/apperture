@@ -231,8 +231,8 @@ async def test_create_workbook(client_init, workbook_data):
                 "name": "Sheet1",
                 "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
                 "is_sql": True,
-                "query": "SELECT  event_name FROM  events",
                 "subHeaders": None,
+                "query": "SELECT  event_name FROM  events",
             }
         ],
         "enabled": True,
