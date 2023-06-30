@@ -1,7 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import Grid from './components/Grid/Grid';
 import QueryModal from './components/QueryModal';
-import { Box, Button, Flex, Text, useDisclosure } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  Text,
+  useDisclosure,
+  useToast,
+} from '@chakra-ui/react';
 import EventLayoutHeader from '@components/EventsLayout/ActionHeader';
 import { useRouter } from 'next/router';
 import {
@@ -75,6 +82,8 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       isLoading: false,
       subheaders: [],
     });
+  const toast = useToast();
+
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
   const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
@@ -233,7 +242,12 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
               subheaders: sheetData.subHeaders,
             });
           } catch (error) {
-            alert('Invalid syntax: ' + headerText);
+            toast({
+              title: `Invalid function syntax`,
+              status: 'error',
+              variant: 'subtle',
+              isClosable: true,
+            });
           }
       } else {
         const newHeader = {
