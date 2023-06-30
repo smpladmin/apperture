@@ -47,35 +47,34 @@ class Spreadsheets(EventsBase):
         datasource_id: str,
         dimensions: List[DimensionDefinition],
         metric: Union[MetricDefinition, None],
-        username: Union[str, None],
-        password: Union[str, None],
     ):
-        restricted_client = self.clickhouse.get_connection_for_user(
-            username=username, password=password
-        )
-        result = restricted_client.query(
+        return self.execute_query_with_column_names(
             *self.build_transient_columns_query(datasource_id, dimensions, metric)
         )
-        restricted_client.close()
-        return result
 
     def column_filter_to_condition(self, column_filter: ColumnFilter):
-        if column_filter.operator == ColumnFilterOperators.EQUALS:
-            return Field(column_filter.operand) == column_filter.value[0]
-        elif column_filter.operator == ColumnFilterOperators.NOT_EQUALS:
-            return Field(column_filter.operand) != column_filter.value[0]
-        elif column_filter.operator == ColumnFilterOperators.GREATER_THAN:
-            return Field(column_filter.operand) > column_filter.value[0]
-        elif column_filter.operator == ColumnFilterOperators.GREATER_THAN_OR_EQUALS:
-            return Field(column_filter.operand) >= column_filter.value[0]
-        elif column_filter.operator == ColumnFilterOperators.LESS_THAN:
-            return Field(column_filter.operand) < column_filter.value[0]
-        elif column_filter.operator == ColumnFilterOperators.LESS_THAN_OR_EQUALS:
-            return Field(column_filter.operand) <= column_filter.value[0]
-        elif column_filter.operator == ColumnFilterOperators.IN:
-            return Field(column_filter.operand).isin(column_filter.value)
-        elif column_filter.operator == ColumnFilterOperators.NOT_IN:
-            return Field(column_filter.operand).notin(column_filter.value)
+        operator_mapping = {
+            ColumnFilterOperators.EQUALS: Field(column_filter.operand)
+            == column_filter.value[0],
+            ColumnFilterOperators.NOT_EQUALS: Field(column_filter.operand)
+            != column_filter.value[0],
+            ColumnFilterOperators.GREATER_THAN: Field(column_filter.operand)
+            > column_filter.value[0],
+            ColumnFilterOperators.GREATER_THAN_OR_EQUALS: Field(column_filter.operand)
+            >= column_filter.value[0],
+            ColumnFilterOperators.LESS_THAN: Field(column_filter.operand)
+            < column_filter.value[0],
+            ColumnFilterOperators.LESS_THAN_OR_EQUALS: Field(column_filter.operand)
+            <= column_filter.value[0],
+            ColumnFilterOperators.IN: Field(column_filter.operand).isin(
+                column_filter.value
+            ),
+            ColumnFilterOperators.NOT_IN: Field(column_filter.operand).notin(
+                column_filter.value
+            ),
+        }
+
+        return operator_mapping.get(column_filter.operator, None)
 
     def build_transient_columns_query(
         self,
@@ -102,6 +101,4 @@ class Spreadsheets(EventsBase):
                 )
 
         query = query.groupby(*range(1, len(dimensions) + 1)).limit(1000)
-
-        print("$$$$$$$$ ", query.get_sql())
         return query.get_sql(), {"ds_id": datasource_id}
