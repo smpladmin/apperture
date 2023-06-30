@@ -125,8 +125,8 @@ async def test_get_saved_workbooks(client_init, spreadsheets_service):
                     "name": "Sheet1",
                     "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
                     "is_sql": True,
-                    "query": "SELECT  event_name FROM  events",
                     "subHeaders": None,
+                    "query": "SELECT  event_name FROM  events",
                 }
             ],
             "enabled": True,
@@ -165,8 +165,8 @@ async def test_get_saved_workbooks_by_user_id(client_init, spreadsheets_service)
                     "name": "Sheet1",
                     "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
                     "is_sql": True,
-                    "query": "SELECT  event_name FROM  events",
                     "subHeaders": None,
+                    "query": "SELECT  event_name FROM  events",
                 }
             ],
             "enabled": True,
@@ -200,8 +200,8 @@ async def test_get_saved_workbook_by_id(client_init, spreadsheets_service):
                 "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
                 "is_sql": True,
                 "name": "Sheet1",
-                "query": "SELECT  event_name FROM  events",
                 "subHeaders": None,
+                "query": "SELECT  event_name FROM  events",
             }
         ],
         "updatedAt": None,
@@ -261,8 +261,8 @@ async def test_update_workbook(client_init, workbook_data, spreadsheets_service)
                 "name": "Sheet1",
                 "headers": [{"name": "event_name", "type": ColumnType.QUERY_HEADER}],
                 "is_sql": True,
-                "query": "SELECT  event_name FROM  events",
                 "subHeaders": None,
+                "query": "SELECT  event_name FROM  events",
             }
         ],
         "enabled": True,
