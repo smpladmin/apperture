@@ -562,3 +562,8 @@ class TestFunnelService:
             self.service.get_segment_filter_criterion(segment_filter=segment_filter)
             == result
         )
+
+    @pytest.mark.asyncio
+    async def test_get_funnels_for_app(self):
+        await self.service.get_funnels_for_apps(app_ids=[self.ds_id])
+        Funnel.find.assert_called_once()

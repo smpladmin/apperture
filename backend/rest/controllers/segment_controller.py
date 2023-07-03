@@ -1,5 +1,6 @@
 from typing import List, Optional, Union
 from fastapi import APIRouter, Depends
+from domain.apperture_users.service import AppertureUserService
 
 from domain.datasources.service import DataSourceService
 from domain.segments.service import SegmentService
@@ -89,26 +90,29 @@ async def get_segments(
     datasource_id: Union[str, None] = None,
     app_id: Optional[str] = None,
     user_id: str = Depends(get_user_id),
-    user: AppertureUser = Depends(get_user),
     segment_service: SegmentService = Depends(),
+    user_service: AppertureUserService = Depends(),
 ):
+    segments = []
+
     if app_id:
-        return await segment_service.get_segments_for_app(app_id=app_id)
-    segments = (
-        await segment_service.get_segments_for_datasource_id(
+        segments = await segment_service.get_segments_for_app(app_id=app_id)
+    elif datasource_id:
+        segments = await segment_service.get_segments_for_datasource_id(
             datasource_id=datasource_id
         )
-        if datasource_id
-        else await segment_service.get_segments_for_user(user_id=user_id)
-    )
+    else:
+        segments = await segment_service.get_segments_for_user(user_id=user_id)
+
     segments = [SegmentWithUser.from_orm(s) for s in segments]
     for segment in segments:
-        segment.user = AppertureUserResponse.from_orm(user)
+        apperture_user = await user_service.get_user(id=str(segment.user_id))
+        segment.user = AppertureUserResponse.from_orm(apperture_user)
     return segments
 
 
 @router.delete("/segments/{segment_id}")
-async def delete_metrics(
+async def delete_segments(
     segment_id: str,
     segment_service: SegmentService = Depends(),
 ):

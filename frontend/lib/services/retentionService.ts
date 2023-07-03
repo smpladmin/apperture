@@ -59,6 +59,11 @@ export const getSavedRetentionsForDatasourceId = async (dsId: string) => {
   return res.data;
 };
 
+export const getSavedRetentionsForApp = async (appId: string) => {
+  const res = await AppertureGet(`/retention?app_id=${appId}`);
+  return res.data;
+};
+
 export const deleteRetention = async (id: string, dsId: string) => {
   return await AppertureDelete(`/retention/${id}`);
 };

@@ -89,7 +89,7 @@ const ViewRetention = ({ savedRetention }: { savedRetention: Retention }) => {
 
   const handleGoBack = () => {
     router.push({
-      pathname: '/analytics/retention/list/[dsId]',
+      pathname: '/analytics/home/[dsId]',
       query: { dsId: datasourceId },
     });
   };

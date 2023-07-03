@@ -5,11 +5,12 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from ai.text_to_sql import text_to_sql
 from domain.apperture_users.models import AppertureUser
+from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
-from domain.event_properties.service import EventPropertiesService
 from domain.spreadsheets.service import SpreadsheetService
 from repositories.clickhouse.parser.query_parser import BusinessError
+from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
@@ -53,19 +54,29 @@ async def create_workbook(
 @router.get("/workbooks", response_model=List[WorkbookWithUser])
 async def get_workbooks(
     datasource_id: Union[str, None] = None,
+    app_id: Union[str, None] = None,
     user: AppertureUser = Depends(get_user),
     spreadsheets_service: SpreadsheetService = Depends(),
+    user_service: AppertureUserService = Depends(),
 ):
-    workbooks = (
-        await spreadsheets_service.get_workbooks_for_datasource_id(
+
+    workbooks = []
+
+    if app_id:
+        workbooks = await spreadsheets_service.get_workbooks_for_app(app_id=app_id)
+    elif datasource_id:
+        workbooks = await spreadsheets_service.get_workbooks_for_datasource_id(
             datasource_id=datasource_id
         )
-        if datasource_id
-        else await spreadsheets_service.get_workbooks_by_user_id(user_id=user.id)
-    )
+    else:
+        workbooks = await spreadsheets_service.get_workbooks_for_user_id(
+            user_id=user.id
+        )
+
     workbooks = [WorkbookWithUser.from_orm(f) for f in workbooks]
     for workbook in workbooks:
-        workbook.user = AppertureUserResponse.from_orm(user)
+        apperture_user = await user_service.get_user(id=str(workbook.user_id))
+        workbook.user = AppertureUserResponse.from_orm(apperture_user)
     return workbooks
 
 
@@ -73,43 +84,9 @@ async def get_workbooks(
     "/workbooks/spreadsheets/transient", response_model=ComputedSpreadsheetQueryResponse
 )
 async def compute_transient_spreadsheets(
-    dto: TransientSpreadsheetsDto,
-    spreadsheets_service: SpreadsheetService = Depends(),
-    datasource_service: DataSourceService = Depends(),
-    app_service: AppService = Depends(),
+    dto: TransientSpreadsheetsDto, compute_query_action: ComputeQueryAction = Depends()
 ):
-    try:
-        datasource = await datasource_service.get_datasource(dto.datasourceId)
-        app = await app_service.get_app(id=datasource.app_id)
-        has_app_credential = bool(app.clickhouse_credential)
-
-        clickhouse_credential = (
-            app.clickhouse_credential
-            if has_app_credential
-            else await app_service.create_clickhouse_user(id=app.id, app_name=app.name)
-        )
-
-        if not has_app_credential:
-            await datasource_service.create_row_policy_for_datasources_by_app(
-                app=app, username=clickhouse_credential.username
-            )
-
-        if not dto.is_sql:
-            sql_query = text_to_sql(dto.query)
-            return await spreadsheets_service.get_transient_spreadsheets(
-                query=sql_query,
-                username=clickhouse_credential.username,
-                password=clickhouse_credential.password,
-            )
-        return await spreadsheets_service.get_transient_spreadsheets(
-            query=dto.query,
-            username=clickhouse_credential.username,
-            password=clickhouse_credential.password,
-        )
-    except BusinessError as e:
-        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
-    except DatabaseError as e:
-        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
+    return await compute_query_action.compute_query(dto=dto)
 
 
 @router.post(
@@ -161,3 +138,11 @@ async def update_workbook(
 
     await spreadsheets_service.update_workbook(workbook=workbook, workbook_id=id)
     return workbook
+
+
+@router.delete("/workbooks/{workbook_id}")
+async def delete_segments(
+    workbook_id: str,
+    spreadsheets_service: SpreadsheetService = Depends(),
+):
+    await spreadsheets_service.delete_workbook(workbook_id=workbook_id)

@@ -63,7 +63,7 @@ export default function Layout({
 
   const navigateToExploreDataSource = (dsId: string) => {
     router.push({
-      pathname: '/analytics/explore/[dsId]',
+      pathname: '/analytics/home/[dsId]',
       query: { dsId },
     });
   };

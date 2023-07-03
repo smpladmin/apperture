@@ -139,6 +139,14 @@ class RetentionService:
             Retention.enabled != False,
         ).to_list()
 
+    async def get_retentions_for_user_id(
+        self, user_id: PydanticObjectId
+    ) -> List[Retention]:
+        return await Retention.find(
+            Retention.user_id == user_id,
+            Retention.enabled != False,
+        ).to_list()
+
     async def delete_retention(self, retention_id: str):
         await Retention.find_one(
             Retention.id == PydanticObjectId(retention_id),

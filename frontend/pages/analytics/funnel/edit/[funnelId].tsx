@@ -1,4 +1,5 @@
 import CreateFunnel from '@components/Funnel/CreateFunnel';
+import HomeLayout from '@components/HomeLayout';
 import Layout from '@components/Layout';
 import { MapContext } from '@lib/contexts/mapContext';
 import { AppWithIntegrations } from '@lib/domain/app';
@@ -75,11 +76,7 @@ EditFunnel.getLayout = function getLayout(
   page: ReactElement,
   apps: AppWithIntegrations[]
 ) {
-  return (
-    <Layout apps={apps} hideHeader={true}>
-      {page}
-    </Layout>
-  );
+  return <HomeLayout apps={apps}>{page}</HomeLayout>;
 };
 
 export default EditFunnel;

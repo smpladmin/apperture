@@ -5,7 +5,6 @@ from typing import List, Optional, Union
 from beanie import PydanticObjectId
 from fastapi import Depends
 
-from domain import spreadsheets
 from domain.spreadsheets.models import (
     ColumnType,
     ComputedSpreadsheet,
@@ -53,11 +52,17 @@ class SpreadsheetService:
             WorkBook.enabled == True,
         ).to_list()
 
-    async def get_workbooks_by_user_id(
+    async def get_workbooks_for_user_id(
         self, user_id: PydanticObjectId
     ) -> List[WorkBook]:
         return await WorkBook.find(
             WorkBook.user_id == user_id,
+            WorkBook.enabled == True,
+        ).to_list()
+
+    async def get_workbooks_for_app(self, app_id: str) -> List[WorkBook]:
+        return await WorkBook.find(
+            WorkBook.app_id == PydanticObjectId(app_id),
             WorkBook.enabled == True,
         ).to_list()
 
@@ -92,6 +97,12 @@ class SpreadsheetService:
 
     async def get_workbook_by_id(self, workbook_id: str):
         return await WorkBook.find_one(WorkBook.id == PydanticObjectId(workbook_id))
+
+    async def delete_workbook(self, workbook_id: str):
+        await WorkBook.find_one(
+            WorkBook.id == PydanticObjectId(workbook_id),
+        ).update({"$set": {"enabled": False}})
+        return
 
     async def update_workbook(self, workbook_id: str, workbook: WorkBook):
         entry = workbook.dict()

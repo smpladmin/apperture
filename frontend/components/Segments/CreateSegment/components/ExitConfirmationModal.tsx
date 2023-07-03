@@ -32,7 +32,7 @@ const ExitConfirmationModal = ({
 
   const discard = () => {
     router.push({
-      pathname: '/analytics/segment/list/[dsId]',
+      pathname: '/analytics/home/[dsId]',
       query: { dsId },
     });
   };

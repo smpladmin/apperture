@@ -1,3 +1,4 @@
+import { RetentionWithUser } from '@lib/domain/retention';
 import {
   NotificationType,
   NotificationWithUser,
@@ -7,6 +8,7 @@ import { FunnelWithUser } from './funnel';
 import { MetricWithUser } from './metric';
 import { SegmentWithUser } from './segment';
 import { WorkbookWithUser } from './workbook';
+import { DataMartWithUser } from './datamart';
 
 export enum WatchListItemType {
   ALL = 'all',
@@ -16,6 +18,7 @@ export enum WatchListItemType {
   ACTIONS = 'actions',
   RETENTIONS = 'retentions',
   WORKBOOKS = 'workbooks',
+  DATAMARTS = 'datamarts',
 }
 
 const paths = {
@@ -25,7 +28,8 @@ const paths = {
   [WatchListItemType.SEGMENTS]: 'segment/edit',
   [WatchListItemType.ACTIONS]: 'action/edit',
   [WatchListItemType.RETENTIONS]: 'retention/edit',
-  [WatchListItemType.WORKBOOKS]: 'workbook/create',
+  [WatchListItemType.WORKBOOKS]: 'workbook/edit',
+  [WatchListItemType.DATAMARTS]: 'datamart/edit',
 };
 
 export namespace WatchListItemType {
@@ -34,13 +38,17 @@ export namespace WatchListItemType {
   }
 }
 
+export type SavedItemsDetails =
+  | FunnelWithUser
+  | SegmentWithUser
+  | MetricWithUser
+  | NotificationWithUser
+  | ActionWithUser
+  | WorkbookWithUser
+  | RetentionWithUser
+  | DataMartWithUser;
+
 export type SavedItems = {
   type: WatchListItemType | NotificationType[];
-  details:
-    | FunnelWithUser
-    | SegmentWithUser
-    | MetricWithUser
-    | NotificationWithUser
-    | ActionWithUser
-    | WorkbookWithUser;
+  details: SavedItemsDetails;
 };

@@ -228,17 +228,12 @@ class NotificationService:
         return
 
     async def get_notifications_for_apps(
-        self, app_ids: List[PydanticObjectId]
-    ) -> List[SavedItems]:
-
-        notifications = await Notification.find(
-            In(Notification.app_id, app_ids),
+        self, app_id: str
+    ) -> List[NotificationResponse]:
+        return await Notification.find(
+            Notification.app_id == PydanticObjectId(app_id),
             Notification.enabled != False,
         ).to_list()
-        return [
-            SavedItems(type=WatchlistItemType.NOTIFICATIONS, details=notification)
-            for notification in notifications
-        ]
 
     async def get_notifications_for_datasource_id(
         self, datasource_id: str

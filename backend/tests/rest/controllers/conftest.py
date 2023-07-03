@@ -24,6 +24,7 @@ from domain.common.filter_models import (
     LogicalOperators,
 )
 from domain.common.models import IntegrationProvider
+from domain.datamart.models import DataMart
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
 from domain.event_properties.models import EventProperties
@@ -80,6 +81,7 @@ from domain.spreadsheets.models import (
 from domain.users.models import UserDetails
 from rest.dtos.actions import ComputedActionResponse
 from rest.dtos.apperture_users import AppertureUserResponse
+from rest.dtos.datamart import DataMartWithUser
 from rest.dtos.funnels import FunnelWithUser
 from rest.dtos.metrics import MetricWithUser
 from rest.dtos.notifications import NotificationWithUser
@@ -263,6 +265,9 @@ def notification_service(apperture_user_response):
     notification_service_mock.get_notifications_for_datasource_id.return_value = (
         notifications_future
     )
+    notification_service_mock.get_notifications_for_apps.return_value = (
+        notifications_future
+    )
     notification_service_mock.fetch_and_delete_notification = mock.AsyncMock()
     notification_service_mock.get_notifications_to_compute.return_value = (
         notification_compute_future
@@ -343,9 +348,54 @@ def retention_service(apperture_user_response):
     retention_service_mock.get_retentions_for_datasource_id.return_value = (
         retentions_future
     )
+    retention_service_mock.get_retentions_for_apps.return_value = retentions_future
     retention_service_mock.compute_retention.return_value = transient_retention_future
     retention_service_mock.get_retentions_for_apps.return_value = retentions_future
     return retention_service_mock
+
+
+@pytest.fixture(scope="module")
+def datamart_service(apperture_user_response):
+    datamart_service_mock = mock.MagicMock()
+    DataMart.get_settings = mock.MagicMock()
+    datamart = DataMart(
+        id=PydanticObjectId("635ba034807ab86d8a2aadd8"),
+        app_id=PydanticObjectId("635ba034807ab86d8a2aadd7"),
+        datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        name="name",
+        user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+        last_refreshed=datetime(2022, 11, 24, 0, 0),
+        query="select event_name, user_id from events",
+        enabled=True,
+    )
+
+    query_response = ComputedSpreadsheet(
+        headers=[
+            SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER),
+            SpreadSheetColumn(name="user_id", type=ColumnType.QUERY_HEADER),
+        ],
+        data=[
+            {"index": 1, "event_name": "test_event_1", "user_id": "test_user_1"},
+            {"index": 2, "event_name": "test_event_2", "user_id": "test_user_2"},
+            {"index": 3, "event_name": "test_event_3", "user_id": "test_user_2"},
+            {"index": 4, "event_name": "test_event_4", "user_id": "test_user_3"},
+            {"index": 5, "event_name": "test_event_5", "user_id": "test_user_4"},
+        ],
+    )
+    datamart_future = asyncio.Future()
+    datamart_future.set_result(datamart)
+    datamarts_future = asyncio.Future()
+    datamarts_future.set_result([DataMartWithUser.from_orm(datamart)])
+    query_response_future = asyncio.Future()
+    query_response_future.set_result(query_response)
+
+    datamart_service_mock.build_datamart_table.return_value = datamart
+    datamart_service_mock.create_datamart_table.return_value = datamart_future
+    datamart_service_mock.get_datamart_table.return_value = datamart_future
+    datamart_service_mock.update_datamart_table = mock.AsyncMock()
+    datamart_service_mock.delete_datamart_table = mock.AsyncMock()
+    datamart_service_mock.get_datamart_tables_for_app_id.return_value = datamarts_future
+    return datamart_service_mock
 
 
 @pytest.fixture(scope="module")
@@ -797,10 +847,13 @@ def spreadsheets_service():
     spreadsheets_service_mock.get_workbooks_for_datasource_id.return_value = (
         workbooks_future
     )
-    spreadsheets_service_mock.get_workbooks_by_user_id.return_value = workbooks_future
+    spreadsheets_service_mock.get_workbooks_for_user_id.return_value = workbooks_future
+    spreadsheets_service_mock.get_workbooks_for_app.return_value = workbooks_future
+
     spreadsheets_service_mock.get_workbook_by_id.return_value = workbook_future
     spreadsheets_service_mock.add_workbook.return_value = workbook_future
     spreadsheets_service_mock.update_workbook.return_value = workbook_future
+    spreadsheets_service_mock.delete_workbook = mock.AsyncMock()
 
     return spreadsheets_service_mock
 
@@ -1003,6 +1056,7 @@ def metric_service(apperture_user_response):
     metric_service.update_metric = mock.AsyncMock()
     metric_service.compute_metric.return_value = computed_metric_future
     metric_service.get_metrics_for_datasource_id.return_value = metrics_future
+    metric_service.get_metrics_by_app_id.return_value = metrics_future
     metric_service.validate_formula.return_value = True
     metric_service.delete_metric = mock.AsyncMock()
     metric_service.get_metric_data_for_notifications.return_value = (
@@ -1067,14 +1121,14 @@ def segment_service(apperture_user_response):
     segment_future = asyncio.Future()
     segment_future.set_result(segment)
 
-    # segments_future = asyncio.Future()
-    # segments_future.set_result([SegmentWithUser.from_orm(segment)])
-
     segment_service.add_segment.return_value = segment
     segment_service.update_segment.return_value = segment
     segment_service.get_segment.return_value = segment
     segment_service.get_segments_for_app.return_value = [segment]
     segment_service.get_segments_for_datasource_id.return_value = [
+        SegmentWithUser.from_orm(segment)
+    ]
+    segment_service.get_segments_for_app.return_value = [
         SegmentWithUser.from_orm(segment)
     ]
     segment_service.delete_segment = mock.AsyncMock()
@@ -1699,6 +1753,36 @@ def retention_response():
 
 
 @pytest.fixture(scope="module")
+def datamart_response():
+    return {
+        "_id": "635ba034807ab86d8a2aadd8",
+        "createdAt": "2023-04-13T10:10:36.869000",
+        "updatedAt": "2023-04-13T10:11:10.266000",
+        "datasourceId": "635ba034807ab86d8a2aadd9",
+        "appId": "635ba034807ab86d8a2aadd7",
+        "userId": "635ba034807ab86d8a2aadda",
+        "name": "name",
+        "lastRefreshed": "2022-11-24T00:00:00",
+        "query": "select event_name, user_id from events",
+        "enabled": True,
+    }
+
+
+@pytest.fixture(scope="module")
+def transient_datamart_response():
+    return {
+        "data": [
+            {"event_name": "test_event_1", "index": 1},
+            {"event_name": "test_event_2", "index": 2},
+            {"event_name": "test_event_3", "index": 3},
+            {"event_name": "test_event_4", "index": 4},
+            {"event_name": "test_event_5", "index": 5},
+        ],
+        "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
+    }
+
+
+@pytest.fixture(scope="module")
 def funnel_response():
     return {
         "_id": "635ba034807ab86d8a2aadd8",
@@ -1938,6 +2022,24 @@ def retention_data():
         "dateFilter": {"type": "last", "filter": {"days": 4}},
         "granularity": "days",
         "name": "test",
+    }
+
+
+@pytest.fixture(scope="module")
+def datamart_data():
+    return {
+        "datasourceId": "635ba034807ab86d8a2aadd9",
+        "name": "test-table",
+        "query": "select event_name, user_id from events",
+    }
+
+
+@pytest.fixture(scope="module")
+def datamart_transient_data():
+    return {
+        "datasourceId": "635ba034807ab86d8a2aadd9",
+        "is_sql": True,
+        "query": "select event_name, user_id from events",
     }
 
 

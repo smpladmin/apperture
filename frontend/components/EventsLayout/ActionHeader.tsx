@@ -16,6 +16,9 @@ type EventLayoutHeaderProps = {
   setName: Function;
   handleSave: Function;
   isSaveButtonDisabled: boolean;
+  isRunButtonPresent?: boolean;
+  handleRunButtonClick?: Function;
+  isSaved?: boolean;
 };
 
 const EventLayoutHeader = ({
@@ -24,6 +27,9 @@ const EventLayoutHeader = ({
   setName,
   handleSave,
   isSaveButtonDisabled,
+  isRunButtonPresent = false,
+  isSaved = false,
+  handleRunButtonClick = () => {},
 }: EventLayoutHeaderProps) => {
   return (
     <Flex
@@ -52,6 +58,7 @@ const EventLayoutHeader = ({
           }}
           onClick={() => handleGoBack()}
           data-testid={'back-button'}
+          marginLeft={isRunButtonPresent ? 4 : 0}
         />
         <Editable
           onChange={(nextValue) => setName(nextValue)}
@@ -77,25 +84,52 @@ const EventLayoutHeader = ({
           />
         </Editable>
       </Flex>
-      <Button
-        py={'2'}
-        px={'4'}
-        bg={'black.400'}
-        borderRadius={'200'}
-        variant={'primary'}
-        onClick={() => handleSave()}
-        data-testid={'save'}
-        disabled={isSaveButtonDisabled}
-      >
-        <Text
-          fontSize={'xs-14'}
-          lineHeight={'120%'}
-          fontWeight={'500'}
-          color={'white.DEFAULT'}
+      <Flex>
+        {isRunButtonPresent ? (
+          <Button
+            py={'2'}
+            px={'4'}
+            bg={'black.400'}
+            borderRadius={'200'}
+            variant={'primary'}
+            onClick={() => handleRunButtonClick()}
+            data-testid={'run'}
+            disabled={false}
+            marginRight={4}
+          >
+            <Text
+              fontSize={'xs-14'}
+              lineHeight={'120%'}
+              fontWeight={'500'}
+              color={'white.DEFAULT'}
+            >
+              Run
+            </Text>
+          </Button>
+        ) : (
+          <></>
+        )}
+        <Button
+          py={'2'}
+          px={'4'}
+          bg={'black.400'}
+          borderRadius={'200'}
+          variant={'primary'}
+          onClick={() => handleSave()}
+          data-testid={'save'}
+          disabled={isSaveButtonDisabled}
+          marginRight={4}
         >
-          Save
-        </Text>
-      </Button>
+          <Text
+            fontSize={'xs-14'}
+            lineHeight={'120%'}
+            fontWeight={'500'}
+            color={'white.DEFAULT'}
+          >
+            {isSaved ? 'Update' : 'Save'}
+          </Text>
+        </Button>
+      </Flex>
     </Flex>
   );
 };

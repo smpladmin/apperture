@@ -61,7 +61,7 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
         </Box>
       </Flex>
       <Box w={'full'} marginX="auto" maxW={70} mt={12}>
-        <Link href={`/analytics/explore/${router.query.dsId}`}>
+        <Link href={`/analytics/home/${router.query.dsId}`}>
           <Button
             variant={'primary'}
             rounded={'lg'}
@@ -76,7 +76,7 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
             Explore
           </Button>
         </Link>
-        <Link href={`/analytics/explore/${router.query.dsId}`}>
+        <Link href={`/analytics/home/${router.query.dsId}`}>
           <Text
             cursor={'pointer'}
             pt={'4'}
