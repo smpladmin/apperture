@@ -1,5 +1,4 @@
 from collections import namedtuple
-import string
 
 from unittest.mock import AsyncMock, MagicMock
 from beanie import PydanticObjectId
@@ -16,7 +15,10 @@ class TestAppService:
         AppertureUser.get_settings = MagicMock()
 
         self.clickhouse_role = MagicMock()
-        self.service = AppService(clickhouse_role=self.clickhouse_role)
+        self.string_utils = MagicMock()
+        self.service = AppService(
+            clickhouse_role=self.clickhouse_role, string_utils=self.string_utils
+        )
         self.ds_id = "636a1c61d715ca6baae65611"
         self.username = "test_user"
         self.password = "test_password"
@@ -71,18 +73,6 @@ class TestAppService:
             **{"id": None, "app_name": "Test App"}
         )
 
-    def test_default_length_for_random_value_generator(self):
-        password = self.service.generate_random_value()
-        assert len(password) == 32
-
-    def test_custom_length_for_random_value_generator(self):
-        password = self.service.generate_random_value(length=16)
-        assert len(password) == 16
-
-    def test_password_characters_for_random_value_generator(self):
-        password = self.service.generate_random_value()
-        assert all(c in string.ascii_letters + string.digits for c in password)
-
     def test_create_app_database(self):
         self.service.create_app_database(app_name=self.app_name, username=self.username)
 
@@ -95,7 +85,7 @@ class TestAppService:
 
     @pytest.mark.asyncio
     async def test_create_clickhouse_user(self):
-        self.service.generate_random_value = MagicMock(
+        self.service.string_utils.generate_random_value = MagicMock(
             return_value="sdeweiwew33dssdsdds"
         )
         self.service.create_app_database = MagicMock()

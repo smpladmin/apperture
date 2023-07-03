@@ -1,6 +1,6 @@
 import datetime
 import json
-from unittest.mock import ANY
+from unittest.mock import ANY, AsyncMock
 
 import pytest
 from beanie import PydanticObjectId
@@ -58,6 +58,18 @@ async def test_compute_transient_spreadsheets(
     transient_spreadsheet_data,
     app_service,
 ):
+    app_service.get_app = AsyncMock(
+        return_value=App(
+            id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+            revision_id=None,
+            created_at=datetime.datetime(2022, 11, 8, 7, 57, 35, 691000),
+            updated_at=datetime.datetime(2022, 11, 8, 7, 57, 35, 691000),
+            name="mixpanel1",
+            user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+            shared_with=set(),
+            clickhouse_credential=None,
+        )
+    )
     response = client_init.post(
         "/workbooks/spreadsheets/transient", data=json.dumps(transient_spreadsheet_data)
     )

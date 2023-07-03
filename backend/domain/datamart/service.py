@@ -67,9 +67,11 @@ class DataMartService:
         to_update.pop("table_name")
         to_update["updated_at"] = datetime.utcnow()
 
-        existing_table = await DataMart.find_one(
-            DataMart.id == PydanticObjectId(table_id),
-        )
+        existing_table = (
+            await DataMart.find(
+                DataMart.id == PydanticObjectId(table_id),
+            ).to_list()
+        )[0]
         self.datamart_repo.drop_table(
             table_name=existing_table.table_name,
             clickhouse_credential=clickhouse_credential,

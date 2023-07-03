@@ -363,6 +363,7 @@ def datamart_service(apperture_user_response):
         app_id=PydanticObjectId("635ba034807ab86d8a2aadd7"),
         datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
         name="name",
+        table_name="dUKQaHtqxM",
         user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
         last_refreshed=datetime(2022, 11, 24, 0, 0),
         query="select event_name, user_id from events",
@@ -1189,7 +1190,7 @@ def app_service():
 
     app_service_mock.get_apps.return_value = apps_future
     app_service_mock.get_user_app.return_value = app_future
-    app_service_mock.get_app = AsyncMock(side_effect=[app_with_credentials, app])
+    app_service_mock.get_app = AsyncMock(return_value=app_with_credentials)
     app_service_mock.create_clickhouse_user.return_value = clickhouse_credential_future
     return app_service_mock
 
@@ -1761,6 +1762,7 @@ def datamart_response():
         "appId": "635ba034807ab86d8a2aadd7",
         "userId": "635ba034807ab86d8a2aadda",
         "name": "name",
+        "tableName": "dUKQaHtqxM",
         "lastRefreshed": "2022-11-24T00:00:00",
         "query": "select event_name, user_id from events",
         "enabled": True,
