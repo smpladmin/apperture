@@ -45,6 +45,17 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
     return savedWorkbook.spreadsheets.map((sheet) => ({
       ...sheet,
       data: [],
+      subHeaders: sheet.subHeaders
+        ? sheet.subHeaders
+        : Array.from({ length: 27 }).map((_, index) => {
+            return {
+              name: '',
+              type:
+                index === 1 || index === 2
+                  ? SubHeaderColumnType.DIMENSION
+                  : SubHeaderColumnType.METRIC,
+            };
+          }),
     }));
   }
   return [

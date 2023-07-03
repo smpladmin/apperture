@@ -111,6 +111,7 @@ const getSubHeaderRow = (
         text: `${subHeaders[index].name}`,
         disable: false,
         showAddButton,
+        columnType: subHeaders[index].type,
         style: {
           overflow: 'initial',
         },
