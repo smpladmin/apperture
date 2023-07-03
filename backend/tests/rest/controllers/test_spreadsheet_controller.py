@@ -166,6 +166,7 @@ async def test_get_saved_workbooks_for_app(client_init, spreadsheets_service):
                     "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
                     "is_sql": True,
                     "query": "SELECT  event_name FROM  events",
+                    "subHeaders": None,
                 }
             ],
             "enabled": True,
