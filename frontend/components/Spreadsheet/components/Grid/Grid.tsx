@@ -11,9 +11,15 @@ import { fillHeaders, fillRows } from '../../util';
 import {
   ColumnType,
   SpreadSheetColumn,
+  SubHeaderColumn,
+  SubHeaderColumnType,
   TransientSheetData,
 } from '@lib/domain/workbook';
 import { DropdownHeaderCell, DropdownHeaderTemplate } from './DropdownHeader';
+import { InputHeaderCell, InputHeaderTemplate } from './InputHeader';
+import { WHITE_DEFAULT } from '@theme/index';
+import { Flex } from '@chakra-ui/react';
+import LoadingSpinner from '@components/LoadingSpinner';
 
 const getGridRow = (value: any): DefaultCellTypes => {
   const cellTypes: { [key: string]: DefaultCellTypes } = {
@@ -33,7 +39,7 @@ const getColumns = (headers: SpreadSheetColumn[]): Column[] => {
     return {
       columnId: header.name,
       resizable: true,
-      width: header.name.length * 10 > 150 ? header.name.length * 10 : 150,
+      width: 240,
     };
   });
 };
@@ -45,26 +51,70 @@ const getHeaderRow = (
   return {
     rowId: 'header',
     cells: headers.map((header, index) => {
-      if (originalHeaders.includes(header)) {
+      if (
+        originalHeaders.includes(header) &&
+        header.type !== ColumnType.PADDING_HEADER
+      ) {
         return {
           type: 'header',
           text: `${String.fromCharCode(65 + index - 1)} ${header.name}`,
         };
-      } else if (header.name === 'index') {
+      }
+      if (header.name === 'index') {
         return {
           type: 'header',
           text: '',
         };
-      } else {
+      }
+      return {
+        type: 'header',
+        text: header.name,
+      };
+    }),
+  };
+};
+
+const getSubHeaderRow = (
+  headers: SpreadSheetColumn[],
+  subHeaders: SubHeaderColumn[],
+  sheetData: TransientSheetData
+): Row<DefaultCellTypes | InputHeaderCell> => {
+  return {
+    rowId: 'subHeader',
+    cells: headers.map((header, index) => {
+      const isBlankSheet = !sheetData.is_sql && !sheetData.query;
+      const dimensionSubHeaderCount = subHeaders.reduce(
+        (acc: number, header: SubHeaderColumn) => {
+          if (header.type === SubHeaderColumnType.DIMENSION) acc++;
+          return acc;
+        },
+        0
+      );
+      const showAddButton = isBlankSheet && index === dimensionSubHeaderCount;
+      if (header.name === 'index') {
         return {
-          type: 'dropdownHeader',
-          text: header.name,
-          style: {
-            overflow: 'initial',
-            background: '#f2f2f2',
-          },
+          type: 'header',
+          text: '',
+          style: { background: WHITE_DEFAULT },
         };
       }
+      if (header.type === ColumnType.QUERY_HEADER) {
+        return {
+          type: 'inputHeader',
+          text: `${subHeaders[index].name}`,
+          disable: true,
+          showAddButton,
+        };
+      }
+      return {
+        type: 'inputHeader',
+        text: `${subHeaders[index].name}`,
+        disable: false,
+        showAddButton,
+        style: {
+          overflow: 'initial',
+        },
+      };
     }),
   };
 };
@@ -72,9 +122,12 @@ const getHeaderRow = (
 const getRows = (
   data: any[],
   headers: SpreadSheetColumn[],
-  originalHeaders: SpreadSheetColumn[]
-): Row<DefaultCellTypes | DropdownHeaderCell>[] => [
+  originalHeaders: SpreadSheetColumn[],
+  subHeaders: SubHeaderColumn[],
+  sheetData: TransientSheetData
+): Row<DefaultCellTypes | DropdownHeaderCell | InputHeaderCell>[] => [
   getHeaderRow(headers, originalHeaders),
+  getSubHeaderRow(headers, subHeaders, sheetData),
   ...data.map<Row>((data, idx) => ({
     rowId: idx,
     cells: headers.map((header) => {
@@ -85,21 +138,36 @@ const getRows = (
 ];
 
 const Grid = ({
+  selectedSheetIndex,
   sheetData,
   evaluateFormulaHeader,
+  addDimensionColumn,
 }: {
+  selectedSheetIndex: number;
   sheetData: TransientSheetData;
   evaluateFormulaHeader: Function;
+  addDimensionColumn: Function;
 }) => {
   const [columns, setColumns] = useState<Column[]>(
     getColumns(fillHeaders(sheetData.headers))
   );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [selectedSheetIndex, setIsLoading]);
 
   const [rows, setRows] = useState(
     getRows(
       fillRows(sheetData.data, sheetData.headers),
       fillHeaders(sheetData.headers),
-      sheetData.headers
+      sheetData.headers,
+      sheetData.subHeaders,
+      sheetData
     )
   );
 
@@ -109,10 +177,12 @@ const Grid = ({
       getRows(
         fillRows(sheetData.data, sheetData.headers),
         fillHeaders(sheetData.headers),
-        sheetData.headers
+        sheetData.headers,
+        sheetData.subHeaders,
+        sheetData
       )
     );
-  }, [sheetData]);
+  }, [sheetData, selectedSheetIndex]);
 
   const handleColumnResize = (ci: Id, width: number) => {
     setColumns((prevColumns) => {
@@ -126,23 +196,35 @@ const Grid = ({
 
   const handleDataChange = (changedValue: CellChange<any>[]) => {
     const changedHeaders = changedValue.filter(
-      (value) => value.type === 'dropdownHeader'
+      (value) => value.type === 'inputHeader'
     );
+
+    if (changedHeaders[0].newCell.addHeader) {
+      return addDimensionColumn(changedHeaders[0].columnId);
+    }
+
     changedHeaders[0] &&
       evaluateFormulaHeader(
         changedHeaders[0]?.newCell.text,
-        changedHeaders[0].columnId
+        changedHeaders[0]?.columnId
       );
   };
 
-  return (
+  return !isLoading ? (
     <ReactGrid
       rows={rows}
       columns={columns}
       onColumnResized={handleColumnResize}
       onCellsChanged={handleDataChange}
-      customCellTemplates={{ dropdownHeader: new DropdownHeaderTemplate() }}
+      customCellTemplates={{
+        dropdownHeader: new DropdownHeaderTemplate(),
+        inputHeader: new InputHeaderTemplate(),
+      }}
     />
+  ) : (
+    <Flex h={'full'} w={'full'} alignItems={'center'} justifyContent={'center'}>
+      <LoadingSpinner />
+    </Flex>
   );
 };
 

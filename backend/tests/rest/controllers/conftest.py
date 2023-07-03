@@ -74,8 +74,8 @@ from domain.segments.models import (
 from domain.spreadsheets.models import (
     ColumnType,
     ComputedSpreadsheet,
-    SpreadSheetColumn,
     Spreadsheet,
+    SpreadSheetColumn,
     WorkBook,
 )
 from domain.users.models import UserDetails
@@ -793,6 +793,7 @@ def workbook_data():
                 "query": "SELECT  event_name FROM  events WHERE timestamp>=toDate(2023-02-11)",
                 "is_sql": True,
                 "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
+                "subHeaders": [],
             }
         ],
         "datasourceId": "23412414123123",

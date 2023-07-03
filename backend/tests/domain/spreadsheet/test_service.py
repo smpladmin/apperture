@@ -1,14 +1,14 @@
 from collections import namedtuple
 from unittest.mock import ANY, AsyncMock, MagicMock
-from beanie import PydanticObjectId
 
 import pytest
+from beanie import PydanticObjectId
 
 from domain.spreadsheets.models import (
     ColumnType,
     ComputedSpreadsheet,
-    SpreadSheetColumn,
     Spreadsheet,
+    SpreadSheetColumn,
     WorkBook,
 )
 from domain.spreadsheets.service import SpreadsheetService
@@ -138,6 +138,7 @@ class TestSpreadsheetService:
                     ],
                     "is_sql": True,
                     "query": "SELECT  event_name FROM  events",
+                    "subHeaders": None,
                 }
             ],
             "enabled": True,

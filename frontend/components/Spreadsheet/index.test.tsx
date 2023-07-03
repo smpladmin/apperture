@@ -110,7 +110,7 @@ describe('spreadsheet', () => {
       const queryBox = screen.getByRole('textbox');
       // query box should be rendered with default query
       expect(queryBox.textContent).toBe(
-        'Select user_id, event_name from events'
+        'Select user_id, count() from events group by user_id'
       );
     });
 
@@ -270,7 +270,7 @@ describe('spreadsheet', () => {
       const queryBox = screen.getByRole('textbox');
       // query box should be prefiiled with query
       expect(queryBox.textContent).toBe(
-        'Select user_id, event_name from events'
+        'Select user_id, count() from events group by user_id'
       );
     });
 
@@ -315,7 +315,8 @@ describe('spreadsheet', () => {
   });
 
   describe('interactions on column header', () => {
-    it('should open formula box on click on chevron icon on column header', async () => {
+    // skipping this as formula box has been removed.
+    it.skip('should open formula box on click on chevron icon on column header', async () => {
       mockedGetTransientSpreadsheet.mockReturnValue({
         status: 200,
         data: {

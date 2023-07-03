@@ -1,14 +1,15 @@
 import re
 from datetime import datetime
-from typing import List
+from typing import List, Optional, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
 
 from domain.spreadsheets.models import (
-    ColumnDefinition,
     ColumnType,
     ComputedSpreadsheet,
+    DimensionDefinition,
+    MetricDefinition,
     Spreadsheet,
     SpreadSheetColumn,
     WorkBook,
@@ -113,5 +114,30 @@ class SpreadsheetService:
             WorkBook.id == PydanticObjectId(workbook_id),
         ).update({"$set": entry})
 
-    def get_transient_column(self, datasource_id: str, columns: List[ColumnDefinition]):
-        return self.spreadsheets.get_transient_columns(datasource_id, columns)
+    def get_transient_columns(
+        self,
+        datasource_id: str,
+        dimensions: List[DimensionDefinition],
+        metrics: List[MetricDefinition],
+    ):
+        result = self.spreadsheets.get_transient_columns(
+            datasource_id,
+            dimensions,
+            metrics,
+        )
+
+        response = {
+            "headers": [
+                SpreadSheetColumn(name=name, type=ColumnType.QUERY_HEADER)
+                for name in result.column_names
+            ],
+            "data": [],
+        }
+
+        for idx, row in enumerate(result.result_set):
+            row_data = {"index": idx + 1}
+            for col_idx, column_name in enumerate(result.column_names):
+                row_data[column_name] = row[col_idx]
+            response["data"].append(row_data)
+
+        return ComputedSpreadsheet(data=response["data"], headers=response["headers"])

@@ -96,10 +96,19 @@ async def compute_transient_spreadsheets(
 async def compute_transient_column(
     dto: TransientSpreadsheetColumnDto,
     spreadsheets_service: SpreadsheetService = Depends(),
+    datasource_service: DataSourceService = Depends(),
+    app_service: AppService = Depends(),
 ):
-    return spreadsheets_service.get_transient_column(
-        dto.datasourceId, dto.column_definitions
-    )
+    try:
+        return spreadsheets_service.get_transient_columns(
+            dto.datasourceId,
+            dto.dimensions,
+            dto.metrics,
+        )
+    except BusinessError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
+    except DatabaseError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
 
 
 @router.get("/workbooks/{id}", response_model=SavedWorkBookResponse)

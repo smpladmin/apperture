@@ -6,10 +6,7 @@ import pytest
 from beanie import PydanticObjectId
 
 from domain.apps.models import App
-from domain.spreadsheets.models import (
-    ColumnType,
-    SpreadSheetColumn,
-)
+from domain.spreadsheets.models import ColumnType, SpreadSheetColumn
 
 
 @pytest.mark.asyncio
@@ -129,6 +126,7 @@ async def test_get_saved_workbooks(client_init, spreadsheets_service):
                     "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
                     "is_sql": True,
                     "query": "SELECT  event_name FROM  events",
+                    "subHeaders": None,
                 }
             ],
             "enabled": True,
@@ -168,6 +166,7 @@ async def test_get_saved_workbooks_for_app(client_init, spreadsheets_service):
                     "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
                     "is_sql": True,
                     "query": "SELECT  event_name FROM  events",
+                    "subHeaders": None,
                 }
             ],
             "enabled": True,
@@ -204,6 +203,7 @@ async def test_get_saved_workbooks_by_user_id(client_init, spreadsheets_service)
                     "name": "Sheet1",
                     "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
                     "is_sql": True,
+                    "subHeaders": None,
                     "query": "SELECT  event_name FROM  events",
                 }
             ],
@@ -238,6 +238,7 @@ async def test_get_saved_workbook_by_id(client_init, spreadsheets_service):
                 "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
                 "is_sql": True,
                 "name": "Sheet1",
+                "subHeaders": None,
                 "query": "SELECT  event_name FROM  events",
             }
         ],
@@ -268,6 +269,7 @@ async def test_create_workbook(client_init, workbook_data):
                 "name": "Sheet1",
                 "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
                 "is_sql": True,
+                "subHeaders": None,
                 "query": "SELECT  event_name FROM  events",
             }
         ],
@@ -297,6 +299,7 @@ async def test_update_workbook(client_init, workbook_data, spreadsheets_service)
                 "name": "Sheet1",
                 "headers": [{"name": "event_name", "type": ColumnType.QUERY_HEADER}],
                 "is_sql": True,
+                "subHeaders": None,
                 "query": "SELECT  event_name FROM  events",
             }
         ],
