@@ -17,6 +17,7 @@ import {
 import { BLUE_MAIN, WHITE_DEFAULT } from '@theme/index';
 import { useState } from 'react';
 import { Plus } from 'phosphor-react';
+import { SubHeaderColumnType } from '@lib/domain/workbook';
 
 export interface InputHeaderCell extends Cell {
   type: 'inputHeader';
@@ -24,6 +25,7 @@ export interface InputHeaderCell extends Cell {
   disable?: boolean;
   showAddButton?: boolean;
   addHeader?: boolean;
+  columnType?: SubHeaderColumnType;
 }
 
 export class InputHeaderTemplate implements CellTemplate<InputHeaderCell> {
@@ -117,7 +119,13 @@ const FormulaDropDownBox = ({
           onBlur={() => setIsFocus(false)}
           w={'full'}
           focusBorderColor={'black.100'}
-          placeholder={isFocus ? '' : 'Define Column'}
+          placeholder={
+            isFocus
+              ? ''
+              : cell.columnType === SubHeaderColumnType.DIMENSION
+              ? 'Add Dimension'
+              : 'Define Column'
+          }
           _placeholder={{
             fontFamily: 'Inter',
             fontSize: 'xs-12',

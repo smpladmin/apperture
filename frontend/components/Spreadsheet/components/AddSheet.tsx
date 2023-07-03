@@ -26,7 +26,7 @@ const AddSheet = ({
         return {
           name: '',
           type:
-            isBlankSheet && index === 1
+            isBlankSheet && (index === 1 || index === 2)
               ? SubHeaderColumnType.DIMENSION
               : SubHeaderColumnType.METRIC,
         };
