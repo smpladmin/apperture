@@ -187,3 +187,46 @@ class TestDataMartService:
             }
         )
         DataMart.insert.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_refresh_datamart_table(self):
+        await self.service.refresh_datamart_table(
+            datamart_id=self.ds_id,
+            clickhouse_credential=self.clickhouse_credential,
+        )
+        DataMart.find.assert_called_once_with(
+            False,
+        )
+        self.update_mock.assert_called_once_with(
+            {
+                "$set": {
+                    "last_refreshed": ANY,
+                }
+            },
+        )
+        self.service.datamart_repo.create_table.assert_called_once_with(
+            **{
+                "clickhouse_credential": ClickHouseCredential(
+                    username="test-username",
+                    password="test-password",
+                    databasename="test-database",
+                ),
+                "query": ANY,
+                "table_name": ANY,
+            }
+        )
+        self.service.datamart_repo.drop_table.assert_called_once_with(
+            **{
+                "clickhouse_credential": ClickHouseCredential(
+                    username="test-username",
+                    password="test-password",
+                    databasename="test-database",
+                ),
+                "table_name": ANY,
+            }
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_all_apps_with_datamarts(self):
+        await self.service.get_all_apps_with_datamarts()
+        DataMart.find.assert_called_once()

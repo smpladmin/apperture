@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Dict, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
@@ -55,6 +55,34 @@ class DataMartService:
         )
         await DataMart.insert(table)
 
+    async def update_table_action(
+        self,
+        datamart_id: str,
+        clickhouse_credential: ClickHouseCredential,
+        to_update: Dict,
+        query: Union[str, None] = None,
+    ):
+        existing_table = (
+            await DataMart.find(
+                DataMart.id == PydanticObjectId(datamart_id),
+            ).to_list()
+        )[0]
+
+        query = query if query else existing_table.query
+
+        self.datamart_repo.drop_table(
+            table_name=existing_table.table_name,
+            clickhouse_credential=clickhouse_credential,
+        )
+        self.datamart_repo.create_table(
+            query=query,
+            table_name=existing_table.table_name,
+            clickhouse_credential=clickhouse_credential,
+        )
+        await DataMart.find_one(
+            DataMart.id == PydanticObjectId(datamart_id),
+        ).update({"$set": to_update})
+
     async def update_datamart_table(
         self,
         table_id: str,
@@ -67,23 +95,12 @@ class DataMartService:
         to_update.pop("table_name")
         to_update["updated_at"] = datetime.utcnow()
 
-        existing_table = (
-            await DataMart.find(
-                DataMart.id == PydanticObjectId(table_id),
-            ).to_list()
-        )[0]
-        self.datamart_repo.drop_table(
-            table_name=existing_table.table_name,
+        await self.update_table_action(
+            datamart_id=table_id,
             clickhouse_credential=clickhouse_credential,
-        )
-        self.datamart_repo.create_table(
+            to_update=to_update,
             query=new_table.query,
-            table_name=existing_table.table_name,
-            clickhouse_credential=clickhouse_credential,
         )
-        await DataMart.find_one(
-            DataMart.id == PydanticObjectId(table_id),
-        ).update({"$set": to_update})
 
     async def get_datamart_table(self, id: str) -> DataMart:
         return await DataMart.get(PydanticObjectId(id))
@@ -95,6 +112,12 @@ class DataMartService:
             DataMart.app_id == app_id,
             DataMart.enabled != False,
         ).to_list()
+
+    async def get_all_apps_with_datamarts(self) -> List[str]:
+        tables = await DataMart.find(
+            DataMart.enabled != False,
+        ).to_list()
+        return list(set([str(table.app_id) for table in tables]))
 
     async def delete_datamart_table(
         self,
@@ -110,3 +133,13 @@ class DataMartService:
             DataMart.id == PydanticObjectId(datamart_id),
         ).update({"$set": {"enabled": False}})
         return
+
+    async def refresh_datamart_table(
+        self, datamart_id: str, clickhouse_credential: ClickHouseCredential
+    ):
+        to_update = {"last_refreshed": datetime.utcnow()}
+        await self.update_table_action(
+            datamart_id=datamart_id,
+            clickhouse_credential=clickhouse_credential,
+            to_update=to_update,
+        )

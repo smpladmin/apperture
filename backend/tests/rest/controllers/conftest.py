@@ -395,6 +395,10 @@ def datamart_service(apperture_user_response):
     datamart_service_mock.get_datamart_table.return_value = datamart_future
     datamart_service_mock.update_datamart_table = mock.AsyncMock()
     datamart_service_mock.delete_datamart_table = mock.AsyncMock()
+    datamart_service_mock.refresh_datamart_table = mock.AsyncMock()
+    datamart_service_mock.get_all_apps_with_datamarts = mock.AsyncMock(
+        return_value=["635ba034807ab86d8a2aadd8", "63ce4906f496f7b462ab7e84"]
+    )
     datamart_service_mock.get_datamart_tables_for_app_id.return_value = datamarts_future
     return datamart_service_mock
 
@@ -2269,5 +2273,8 @@ def dpq_service():
     dpq_service_mock.enqueue_from_runlogs = mock.MagicMock(return_value=["test"])
     dpq_service_mock.enqueue_user_notification = mock.MagicMock(
         return_value="a98a10b4-d26e-46fa-aa6f"
+    )
+    dpq_service_mock.enqueue_refresh_datamart_for_app = mock.MagicMock(
+        return_value="a98a10b4-d26e-46fa-aa6g"
     )
     return dpq_service_mock

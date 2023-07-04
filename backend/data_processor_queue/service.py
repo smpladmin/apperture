@@ -1,4 +1,3 @@
-from datetime import timedelta
 import logging
 from typing import Union
 from fastapi import Depends
@@ -69,6 +68,14 @@ class DPQueueService:
 
     def enqueue_from_dummy_runlogs(self, runlogs: list[DummyRunLog]):
         return [self.enqueue(str(r.datasource_id)) for r in runlogs]
+
+    def enqueue_refresh_datamart_for_app(self, app_id: str):
+        job = dpq.enqueue(
+            "main.refresh_datamart_tables_for_app",
+            app_id,
+            job_timeout=self.job_timeout,
+        )
+        return job.id
 
     def enqueue_for_provider(
         self,
