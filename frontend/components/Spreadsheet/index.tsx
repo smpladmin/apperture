@@ -1,6 +1,3 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import Grid from './components/Grid/Grid';
-import QueryModal from './components/QueryModal';
 import {
   Box,
   Button,
@@ -10,7 +7,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import EventLayoutHeader from '@components/EventsLayout/ActionHeader';
-import { useRouter } from 'next/router';
+import LoadingSpinner from '@components/LoadingSpinner';
 import {
   ColumnType,
   SpreadSheetColumn,
@@ -18,22 +15,25 @@ import {
   TransientSheetData,
   Workbook,
 } from '@lib/domain/workbook';
-import Footer from './components/Footer';
-import {
-  evaluateExpression,
-  expressionTokenRegex,
-  isOperand,
-  isdigit,
-} from './util';
-import cloneDeep from 'lodash/cloneDeep';
 import {
   getTransientSpreadsheets,
   getWorkbookTransientColumn,
   saveWorkbook,
   updateWorkbook,
 } from '@lib/services/workbookService';
-import LoadingSpinner from '@components/LoadingSpinner';
 import { DimensionParser, Metricparser } from '@lib/utils/parser';
+import cloneDeep from 'lodash/cloneDeep';
+import { useRouter } from 'next/router';
+import { useCallback, useEffect, useState } from 'react';
+import Footer from './components/Footer';
+import Grid from './components/Grid/Grid';
+import QueryModal from './components/QueryModal';
+import {
+  evaluateExpression,
+  expressionTokenRegex,
+  isOperand,
+  isdigit,
+} from './util';
 
 type TransientColumnRequestState = {
   isLoading: boolean;
@@ -119,10 +119,14 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             subheader.name && subheader.type === SubHeaderColumnType.DIMENSION
         );
 
+        const database="default", table='events';
+
         const response = await getWorkbookTransientColumn(
           dsId as string,
           dimensions.map((dimension) => DimensionParser.parse(dimension.name)),
-          metrics.map((metric) => Metricparser.parse(metric.name))
+          metrics.map((metric) => Metricparser.parse(metric.name)),
+          database,
+          table
         );
         const tempSheetsData = cloneDeep(sheetsData);
         tempSheetsData[selectedSheetIndex].headers = response.data.headers;

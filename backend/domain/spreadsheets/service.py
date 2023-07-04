@@ -119,11 +119,15 @@ class SpreadsheetService:
         datasource_id: str,
         dimensions: List[DimensionDefinition],
         metrics: List[MetricDefinition],
+        database: str,
+        table: str,
     ):
         result = self.spreadsheets.get_transient_columns(
             datasource_id,
             dimensions,
             metrics,
+            database,
+            table,
         )
 
         response = {

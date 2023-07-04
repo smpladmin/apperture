@@ -59,7 +59,6 @@ async def get_workbooks(
     spreadsheets_service: SpreadsheetService = Depends(),
     user_service: AppertureUserService = Depends(),
 ):
-
     workbooks = []
 
     if app_id:
@@ -96,14 +95,10 @@ async def compute_transient_spreadsheets(
 async def compute_transient_column(
     dto: TransientSpreadsheetColumnDto,
     spreadsheets_service: SpreadsheetService = Depends(),
-    datasource_service: DataSourceService = Depends(),
-    app_service: AppService = Depends(),
 ):
     try:
         return spreadsheets_service.get_transient_columns(
-            dto.datasourceId,
-            dto.dimensions,
-            dto.metrics,
+            dto.datasourceId, dto.dimensions, dto.metrics, dto.database, dto.table
         )
     except BusinessError as e:
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")

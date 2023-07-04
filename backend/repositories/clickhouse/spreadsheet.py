@@ -2,7 +2,7 @@ import logging
 from typing import List, Optional, Union
 
 from fastapi import Depends
-from pypika import Case, ClickHouseQuery, Criterion, Field, Parameter
+from pypika import Case, ClickHouseQuery, Criterion, Database, Field, Parameter, Table
 from pypika import functions as fn
 
 from clickhouse.clickhouse import Clickhouse
@@ -47,9 +47,13 @@ class Spreadsheets(EventsBase):
         datasource_id: str,
         dimensions: List[DimensionDefinition],
         metric: Union[MetricDefinition, None],
+        database: str,
+        table: str,
     ):
         return self.execute_query_with_column_names(
-            *self.build_transient_columns_query(datasource_id, dimensions, metric)
+            *self.build_transient_columns_query(
+                datasource_id, dimensions, metric, database, table
+            )
         )
 
     def column_filter_to_condition(self, column_filter: ColumnFilter):
@@ -81,8 +85,10 @@ class Spreadsheets(EventsBase):
         datasource_id,
         dimensions: List[DimensionDefinition],
         metrics: List[MetricDefinition],
+        database: str,
+        table: str,
     ):
-        query = ClickHouseQuery.from_(self.table).where(
+        query = ClickHouseQuery.from_(Table(table, schema=database)).where(
             self.table.datasource_id == Parameter("%(ds_id)s")
         )
 
