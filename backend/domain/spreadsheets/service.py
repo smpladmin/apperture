@@ -5,6 +5,7 @@ from typing import List, Optional, Union
 from beanie import PydanticObjectId
 from fastapi import Depends
 
+from domain.apps.models import ClickHouseCredential
 from domain.spreadsheets.models import (
     ColumnType,
     ComputedSpreadsheet,
@@ -121,13 +122,10 @@ class SpreadsheetService:
         metrics: List[MetricDefinition],
         database: str,
         table: str,
+        clickhouse_credentials: ClickHouseCredential,
     ):
         result = self.spreadsheets.get_transient_columns(
-            datasource_id,
-            dimensions,
-            metrics,
-            database,
-            table,
+            datasource_id, dimensions, metrics, database, table, clickhouse_credentials
         )
 
         response = {

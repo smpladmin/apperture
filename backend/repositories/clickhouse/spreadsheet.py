@@ -6,6 +6,7 @@ from pypika import Case, ClickHouseQuery, Criterion, Database, Field, Parameter,
 from pypika import functions as fn
 
 from clickhouse.clickhouse import Clickhouse
+from domain.apps.models import ClickHouseCredential
 from domain.spreadsheets.models import (
     ColumnFilter,
     ColumnFilterOperators,
@@ -49,8 +50,14 @@ class Spreadsheets(EventsBase):
         metric: Union[MetricDefinition, None],
         database: str,
         table: str,
+        clickhouse_credentials: ClickHouseCredential,
     ):
-        return self.execute_query_with_column_names(
+        restricted_client = self.clickhouse.get_connection_for_user(
+            username=clickhouse_credentials.username,
+            password=clickhouse_credentials.password,
+        )
+
+        return restricted_client.query(
             *self.build_transient_columns_query(
                 datasource_id, dimensions, metric, database, table
             )
@@ -88,10 +95,7 @@ class Spreadsheets(EventsBase):
         database: str,
         table: str,
     ):
-        query = ClickHouseQuery.from_(Table(table, schema=database)).where(
-            self.table.datasource_id == Parameter("%(ds_id)s")
-        )
-
+        query = ClickHouseQuery.from_(Table(table, schema=database))
         query = query.select(*[d.property for d in dimensions])
 
         for metric in metrics:
