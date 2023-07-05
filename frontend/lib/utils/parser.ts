@@ -12,17 +12,17 @@ const MetricGrammar = (properties: string[]) => `
 expression
   = countif_function/count_function
   
-countif_function = fname:countif _ "(" _ params:condition_parameters _ ")" {
+countif_function = fname:countif _ params:condition_parameters _ ")" {
       return {formula: fname.toLowerCase(), filters: params};
   }
-countif = "countif"i
-unique_function = fname:unique _ "("_ property:$(chars+)_")" {
-	return {formula:fname.toLowerCase(), property:property}
+countif = "countif("i
+unique_function = fname:unique _ property:$(chars+)_")" {
+	return {formula:fname.toLowerCase().replace('(',''), property:property}
 }
-count_function = fname:$count _"(" _ ")" {
-      return {formula: fname.toLowerCase()};
+count_function = fname:$count _ ")" {
+      return {formula: fname.toLowerCase().replace('(','')};
   }
-count = "count"i 
+count = "count("i 
 if_statement = fname:("if") _ "(" _ params:condition _ ","_ then:$(chars+)_ "," other:$(chars+)_ ")" {
       return {function: fname, condition_parameters: params};
   }
@@ -74,10 +74,10 @@ expression
   = unique_function
   
 functions = fname:$(chars+) _ "(" _ params:condition_parameters _ ")" {
-      return {function: fname.toLowerCase(), condition_parameters: params};
+      return {function: fname.toLowerCase().replace('(',''), condition_parameters: params};
   }
-unique_function = fname:unique _ "("_ property:$(chars+)_")" {
-	return {formula:fname.toLowerCase(), property:property}
+unique_function = fname:unique _ property:property _")" {
+	return {formula:fname.toLowerCase().replace('(',''), property:property}
 }
 
 if_statement = fname:("if") _ "(" _ params:condition _ ","_ then:$(chars+)_ "," other:$(chars+)_ ")" {
@@ -102,7 +102,7 @@ in_condition = property:$(property+) _ op:"in" _ "["value:$(chars+)  _ rest: (_ 
 
 fname
   = "count"i/ "countif"i
-unique = "unique"i
+unique = "unique("i
 
 property
   = ${

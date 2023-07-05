@@ -77,7 +77,8 @@ const getHeaderRow = (
 const getSubHeaderRow = (
   headers: SpreadSheetColumn[],
   subHeaders: SubHeaderColumn[],
-  sheetData: TransientSheetData
+  sheetData: TransientSheetData,
+  properties: string[]
 ): Row<DefaultCellTypes | InputHeaderCell> => {
   return {
     rowId: 'subHeader',
@@ -104,6 +105,10 @@ const getSubHeaderRow = (
           text: `${subHeaders[index].name}`,
           disable: true,
           showAddButton,
+          properties,
+          style: {
+            overflow: 'initial',
+          },
         };
       }
       return {
@@ -111,6 +116,7 @@ const getSubHeaderRow = (
         text: `${subHeaders[index].name}`,
         disable: false,
         showAddButton,
+        properties,
         columnType: subHeaders[index].type,
         style: {
           overflow: 'initial',
@@ -125,10 +131,11 @@ const getRows = (
   headers: SpreadSheetColumn[],
   originalHeaders: SpreadSheetColumn[],
   subHeaders: SubHeaderColumn[],
-  sheetData: TransientSheetData
+  sheetData: TransientSheetData,
+  properties: string[]
 ): Row<DefaultCellTypes | DropdownHeaderCell | InputHeaderCell>[] => [
   getHeaderRow(headers, originalHeaders),
-  getSubHeaderRow(headers, subHeaders, sheetData),
+  getSubHeaderRow(headers, subHeaders, sheetData, properties),
   ...data.map<Row>((data, idx) => ({
     rowId: idx,
     cells: headers.map((header) => {
@@ -154,6 +161,14 @@ const Grid = ({
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const [properties, setproperties] = useState([
+    'user_id',
+    'event_name',
+    'properties.$city',
+    'properties.$os',
+    'properties.$device',
+  ]);
+
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => {
@@ -168,7 +183,8 @@ const Grid = ({
       fillHeaders(sheetData.headers),
       sheetData.headers,
       sheetData.subHeaders,
-      sheetData
+      sheetData,
+      properties
     )
   );
 
@@ -180,7 +196,8 @@ const Grid = ({
         fillHeaders(sheetData.headers),
         sheetData.headers,
         sheetData.subHeaders,
-        sheetData
+        sheetData,
+        properties
       )
     );
   }, [sheetData, selectedSheetIndex]);
