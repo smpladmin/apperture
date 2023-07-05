@@ -18,6 +18,7 @@ import { BLUE_MAIN, WHITE_DEFAULT } from '@theme/index';
 import { useState } from 'react';
 import { Plus } from 'phosphor-react';
 import { SubHeaderColumnType } from '@lib/domain/workbook';
+import { DimensionParser, Metricparser } from '@lib/utils/parser';
 
 export interface InputHeaderCell extends Cell {
   type: 'inputHeader';
@@ -93,6 +94,34 @@ const FormulaDropDownBox = ({
     onCellChanged({ addHeader: true });
   };
 
+  // formula ki static list
+  // events ki list // dynamic
+  // operators kis static list
+
+  //Search ---->
+  //// metric parser se suggestions change , state (to track current position in formula )update in formula.
+  // state -> formula/operand/operator/value
+
+  //{formula:unique,operand:event,operator:null,value:null}
+
+  const suggestFormula = (formula: string) => {
+    try {
+      Metricparser(['user_id', 'event_name']).parse(formula);
+    } catch (err: any) {
+      const pre_message = err.message.replace(/but.*/, '') || '';
+      const post_message = err.message.replace(/.*but/, '') || '';
+      console.log(post_message);
+      const exp = /"([^"]+)"/g;
+      const suggestion = pre_message
+        ?.match(exp)
+        ?.map((name: string) => name.replace(/"/g, ''));
+      const inp = post_message
+        ?.match(exp)
+        ?.map((name: string) => name.replace(/"/g, ''));
+      console.log({ suggestion, inp });
+    }
+  };
+
   return (
     <Flex>
       <InputGroup>
@@ -105,6 +134,7 @@ const FormulaDropDownBox = ({
           defaultValue={cell.text}
           border={'0'}
           onChange={(e) => {
+            suggestFormula(e.target.value);
             setFormula(e.target.value);
           }}
           onPointerDown={(e) => e.stopPropagation()}

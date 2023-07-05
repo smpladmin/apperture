@@ -101,7 +101,6 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
   const router = useRouter();
   const { dsId, workbookId } = router.query;
-
   useEffect(() => {
     if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
   }, []);
@@ -132,12 +131,15 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     );
     const newHeader: SpreadSheetColumn[] = [];
     let i = 0;
-    subheaders.slice(min, max + 1).forEach((subheader) => {
+    subheaders.slice(min, max + 1).forEach((subheader, index) => {
       if (subheader.name) {
         newHeader.push(originalHeader[i]);
         i++;
       } else {
-        newHeader.push({ name: '', type: ColumnType.PADDING_HEADER });
+        newHeader.push({
+          name: String.fromCharCode(65 + index),
+          type: ColumnType.PADDING_HEADER,
+        });
       }
     });
     return newHeader;
@@ -161,8 +163,12 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
         const response = await getWorkbookTransientColumn(
           dsId as string,
-          dimensions.map((dimension) => DimensionParser.parse(dimension.name)),
-          metrics.map((metric) => Metricparser.parse(metric.name)),
+          dimensions.map((dimension) =>
+            DimensionParser(['user_id', 'event_name']).parse(dimension.name)
+          ),
+          metrics.map((metric) =>
+            Metricparser(['user_id', 'event_name']).parse(metric.name)
+          ),
           database,
           table
         );
@@ -288,9 +294,9 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             if (
               sheetData.subHeaders[index].type === SubHeaderColumnType.DIMENSION
             ) {
-              DimensionParser.parse(headerText);
+              DimensionParser(['user_id', 'event_name']).parse(headerText);
             } else {
-              Metricparser.parse(headerText);
+              Metricparser(['user_id', 'event_name']).parse(headerText);
             }
             sheetData.subHeaders[index].name = headerText;
 
@@ -299,6 +305,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
               subheaders: sheetData.subHeaders,
             });
           } catch (error) {
+            console.error(error);
             toast({
               title: `Invalid function syntax`,
               status: 'error',

@@ -1,6 +1,11 @@
 import peg from 'pegjs';
 
-const MetricGrammar = `
+const keywordgenerator = (tokens: string[]) =>
+  tokens.reduce((val: string, token: string, index: number) => {
+    return val + `"${token}"i` + (index != tokens.length - 1 ? ' / ' : '');
+  }, '');
+
+const MetricGrammar = (properties: string[]) => `
   start
   = expression
 
@@ -42,8 +47,11 @@ fname
   = "count"i/ "countif"i
 unique = "unique"i
 
+
 property
-  = [a-zA-Z_.][a-zA-Z_0-9]*
+  = ${
+    properties.length ? keywordgenerator(properties) : '[a-zA-Z_.][a-zA-Z_0-9]*'
+  }
 
 op
   = "=" / "!=" / "<=" /"<"/">="/">"
@@ -55,9 +63,10 @@ _ "whitespace"
   = [ \\t\\n\\r]*
 `;
 
-export const Metricparser = peg.generate(MetricGrammar);
+export const Metricparser = (properties: string[]) =>
+  peg.generate(MetricGrammar(properties || ['event_name', 'user_id']));
 
-const DimensionGrammar = `
+const DimensionGrammar = (properties: string[]) => `
   start
   = expression
 
@@ -96,7 +105,9 @@ fname
 unique = "unique"i
 
 property
-  = [a-zA-Z_.][a-zA-Z_0-9]*
+  = ${
+    properties.length ? keywordgenerator(properties) : '[a-zA-Z_.][a-zA-Z_0-9]*'
+  }
 
 op
   = "=" / "!=" / "<=" /"<"/">="/">"
@@ -108,4 +119,7 @@ _ "whitespace"
   = [ \\t\\n\\r]*
 `;
 
-export const DimensionParser = peg.generate(DimensionGrammar);
+console.log(keywordgenerator(['event_name', 'user_id']));
+
+export const DimensionParser = (properties: string[]) =>
+  peg.generate(DimensionGrammar(properties));
