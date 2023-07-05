@@ -98,7 +98,7 @@ async def compute_transient_column(
     compute_query_action: ComputeQueryAction = Depends(),
 ):
     try:
-        clickhouse_credential = compute_query_action.get_credentials(
+        clickhouse_credential = await compute_query_action.get_credentials(
             datasourceId=dto.datasourceId
         )
 

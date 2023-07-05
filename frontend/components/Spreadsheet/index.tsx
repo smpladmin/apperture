@@ -106,6 +106,43 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
   }, []);
 
+  const arrangeTransientColumnHeader = (
+    subheaders: {
+      name: string;
+      type: SubHeaderColumnType;
+    }[],
+    originalHeader: SpreadSheetColumn[]
+  ) => {
+    const { min, max } = subheaders.reduce(
+      (
+        val: { min: number; max: number },
+        subheader: {
+          name: string;
+          type: SubHeaderColumnType;
+        },
+        index: number
+      ) => {
+        if (subheader.name) {
+          val.min = val.min > index ? index : val.min;
+          val.max = val.max < index ? index : val.max;
+        }
+        return val;
+      },
+      { min: subheaders.length + 1, max: -1 }
+    );
+    const newHeader: SpreadSheetColumn[] = [];
+    let i = 0;
+    subheaders.slice(min, max + 1).forEach((subheader) => {
+      if (subheader.name) {
+        newHeader.push(originalHeader[i]);
+        i++;
+      } else {
+        newHeader.push({ name: '', type: ColumnType.PADDING_HEADER });
+      }
+    });
+    return newHeader;
+  };
+
   useEffect(() => {
     if (requestTranisentColumn.isLoading) {
       const fetchSheetData = async () => {
@@ -119,7 +156,8 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             subheader.name && subheader.type === SubHeaderColumnType.DIMENSION
         );
 
-        const database="default", table='events';
+        const database = 'default',
+          table = 'events';
 
         const response = await getWorkbookTransientColumn(
           dsId as string,
@@ -128,8 +166,12 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           database,
           table
         );
+        const newHeader = arrangeTransientColumnHeader(
+          subheaders,
+          response.data.headers
+        );
         const tempSheetsData = cloneDeep(sheetsData);
-        tempSheetsData[selectedSheetIndex].headers = response.data.headers;
+        tempSheetsData[selectedSheetIndex].headers = newHeader;
         tempSheetsData[selectedSheetIndex].data = response.data.data;
         tempSheetsData[selectedSheetIndex].subHeaders = subheaders;
         setSheetsData(tempSheetsData);
