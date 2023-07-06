@@ -25,6 +25,7 @@ import {
   Metricparser,
 } from '@lib/utils/parser';
 import { isEqual } from 'lodash';
+import { getSearchResult } from '@lib/utils/common';
 
 export interface InputHeaderCell extends Cell {
   type: 'inputHeader';
@@ -124,7 +125,7 @@ const FormulaDropDownBox = ({
   const dimensionFunctionNames = ['unique('];
   const operators = ['=', '!=', '<=', '<', '>=', '>', 'in'];
 
-  const [suggestions, setSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [activeCellState, setActiveCellState] = useState<ActiveCellState>(
     ActiveCellState.FORMULA
   );
@@ -214,7 +215,22 @@ const FormulaDropDownBox = ({
         setActiveCellState(getActiveCellState(newSuggestions.sort()));
       }
 
-      setSuggestions(newSuggestions || []);
+      console.log('new suggestion', newSuggestions, cellState[activeCellState]);
+      try {
+        const cellStateObj = FormulaParser.parse(formula);
+        const searchResults = getSearchResult(
+          newSuggestions,
+          activeCellState === ActiveCellState.VALUE
+            ? cellStateObj[activeCellState]?.[0]
+            : cellStateObj[activeCellState],
+          { keys: [] }
+        );
+        console.log('search results', searchResults);
+
+        setSuggestions(searchResults || []);
+      } catch (err) {
+        setSuggestions(newSuggestions);
+      }
     }
   };
 

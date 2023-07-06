@@ -1,14 +1,14 @@
-import React, { ReactElement, useContext, useEffect } from 'react';
+import React, { ReactElement } from 'react';
 import Spreadsheet from '@components/Spreadsheet';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { GetServerSideProps } from 'next';
 import { getAuthToken } from '@lib/utils/request';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import HomeLayout from '@components/HomeLayout';
-import { _getNodes } from '@lib/services/datasourceService';
-import { Node } from '@lib/domain/node';
-import { Actions } from '@lib/types/context';
-import { MapContext } from '@lib/contexts/mapContext';
+import {
+  _getEventProperties,
+  _getNodes,
+} from '@lib/services/datasourceService';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -21,7 +21,6 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
   const apps = await _getAppsWithIntegrations(token);
-  const nodes = await _getNodes(token, query.dsId as string);
 
   if (!apps.length) {
     return {
@@ -32,20 +31,11 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
   return {
-    props: { apps, nodes },
+    props: { apps },
   };
 };
 
-const Sheet = ({ nodes }: { nodes: Node[] }) => {
-  const { dispatch } = useContext(MapContext);
-
-  useEffect(() => {
-    dispatch({
-      type: Actions.SET_NODES,
-      payload: nodes,
-    });
-  }, []);
-
+const Sheet = ({ eventProperties }: { eventProperties: string[] }) => {
   return <Spreadsheet />;
 };
 

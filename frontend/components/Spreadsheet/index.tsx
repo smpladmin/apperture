@@ -25,7 +25,7 @@ import {
 import { DimensionParser, Metricparser } from '@lib/utils/parser';
 import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Footer from './components/Footer';
 import Grid from './components/Grid/Grid';
 import QueryModal from './components/QueryModal';
@@ -35,7 +35,7 @@ import {
   isOperand,
   isdigit,
 } from './util';
-import { MapContext } from '@lib/contexts/mapContext';
+import { getEventProperties } from '@lib/services/datasourceService';
 
 type TransientColumnRequestState = {
   isLoading: boolean;
@@ -96,11 +96,9 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       subheaders: [],
     });
 
-  const {
-    state: { nodes },
-  } = useContext(MapContext);
-
-  const properties = nodes.map((node) => node.name);
+  const [eventProperties, setEventProperties] = useState<string[]>([]);
+  const router = useRouter();
+  const { dsId, workbookId } = router.query;
 
   const toast = useToast();
 
@@ -108,10 +106,17 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
 
-  const router = useRouter();
-  const { dsId, workbookId } = router.query;
   useEffect(() => {
     if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
+  }, []);
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      const properties: string[] = await getEventProperties(dsId as string);
+      setEventProperties(properties);
+    };
+
+    fetchProperties();
   }, []);
 
   const arrangeTransientColumnHeader = (
@@ -169,9 +174,11 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         const response = await getWorkbookTransientColumn(
           dsId as string,
           dimensions.map((dimension) =>
-            DimensionParser(properties).parse(dimension.name)
+            DimensionParser(eventProperties).parse(dimension.name)
           ),
-          metrics.map((metric) => Metricparser(properties).parse(metric.name)),
+          metrics.map((metric) =>
+            Metricparser(eventProperties).parse(metric.name)
+          ),
           database,
           table
         );
@@ -306,9 +313,9 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             if (
               sheetData.subHeaders[index].type === SubHeaderColumnType.DIMENSION
             ) {
-              DimensionParser(properties).parse(headerText);
+              DimensionParser(eventProperties).parse(headerText);
             } else {
-              Metricparser(properties).parse(headerText);
+              Metricparser(eventProperties).parse(headerText);
             }
             sheetData.subHeaders[index].name = headerText;
 
@@ -581,7 +588,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
                   sheetData={cloneDeep(sheetsData[selectedSheetIndex])}
                   evaluateFormulaHeader={evaluateFormulaHeader}
                   addDimensionColumn={addDimensionColumn}
-                  properties={properties}
+                  properties={eventProperties}
                 />
               </Flex>
               <Footer
