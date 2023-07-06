@@ -306,9 +306,9 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             if (
               sheetData.subHeaders[index].type === SubHeaderColumnType.DIMENSION
             ) {
-              DimensionParser(['user_id', 'event_name']).parse(headerText);
+              DimensionParser(properties).parse(headerText);
             } else {
-              Metricparser(['user_id', 'event_name']).parse(headerText);
+              Metricparser(properties).parse(headerText);
             }
             sheetData.subHeaders[index].name = headerText;
 

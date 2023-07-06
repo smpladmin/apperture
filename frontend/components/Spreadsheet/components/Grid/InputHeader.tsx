@@ -24,6 +24,7 @@ import {
   FormulaParser,
   Metricparser,
 } from '@lib/utils/parser';
+import { isEqual } from 'lodash';
 
 export interface InputHeaderCell extends Cell {
   type: 'inputHeader';
@@ -119,8 +120,9 @@ const FormulaDropDownBox = ({
     'properties.$os': ['one', 'two', 'three'],
     'properties.$device': ['one', 'two', 'three'],
   });
-  const functionNames = ['count(', 'unique(', 'countif('];
-  const operators = ['=', '!=', '<=', '<', '>=', '>'];
+  const metricFunctionNames = ['count(', 'countif('];
+  const dimensionFunctionNames = ['unique('];
+  const operators = ['=', '!=', '<=', '<', '>=', '>', 'in'];
 
   const [suggestions, setSuggestions] = useState([]);
   const [activeCellState, setActiveCellState] = useState<ActiveCellState>(
@@ -166,20 +168,27 @@ const FormulaDropDownBox = ({
     }
   };
 
-  const getActiveCellState = (suggestedValue: string) => {
-    if (functionNames.includes(suggestedValue)) {
+  const getActiveCellState = (suggestedValue: string[]) => {
+    console.log(
+      isEqual(metricFunctionNames.sort(), suggestedValue),
+      metricFunctionNames
+    );
+    if (
+      isEqual(metricFunctionNames.sort(), suggestedValue) ||
+      isEqual(dimensionFunctionNames.sort(), suggestedValue)
+    ) {
       return ActiveCellState.FORMULA;
     }
 
-    if (cell.properties.includes(suggestedValue)) {
+    if (isEqual(cell.properties.sort(), suggestedValue)) {
       return ActiveCellState.OPERAND;
     }
 
-    if (operators.includes(suggestedValue)) {
+    if (isEqual(operators.sort(), suggestedValue)) {
       return ActiveCellState[ActiveCellState.OPERATOR];
     }
 
-    if ([')'].includes(suggestedValue)) return ActiveCellState.EOF;
+    if (suggestedValue.includes(')')) return ActiveCellState.EOF;
 
     return ActiveCellState.VALUE;
   };
@@ -202,7 +211,7 @@ const FormulaDropDownBox = ({
         ?.map((name: string) => name.replace(/"/g, ''));
 
       if (newSuggestions && newSuggestions !== suggestions) {
-        setActiveCellState(getActiveCellState(newSuggestions[0]));
+        setActiveCellState(getActiveCellState(newSuggestions.sort()));
       }
 
       setSuggestions(newSuggestions || []);
