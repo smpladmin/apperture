@@ -11,6 +11,7 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import {
   ColumnType,
   SpreadSheetColumn,
+  SubHeaderColumn,
   SubHeaderColumnType,
   TransientSheetData,
   Workbook,
@@ -24,7 +25,7 @@ import {
 import { DimensionParser, Metricparser } from '@lib/utils/parser';
 import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import Footer from './components/Footer';
 import Grid from './components/Grid/Grid';
 import QueryModal from './components/QueryModal';
@@ -34,6 +35,7 @@ import {
   isOperand,
   isdigit,
 } from './util';
+import { MapContext } from '@lib/contexts/mapContext';
 
 type TransientColumnRequestState = {
   isLoading: boolean;
@@ -93,6 +95,13 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       isLoading: false,
       subheaders: [],
     });
+
+  const {
+    state: { nodes },
+  } = useContext(MapContext);
+
+  const properties = nodes.map((node) => node.name);
+
   const toast = useToast();
 
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
@@ -106,15 +115,12 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   }, []);
 
   const arrangeTransientColumnHeader = (
-    subheaders: {
-      name: string;
-      type: SubHeaderColumnType;
-    }[],
+    subheaders: SubHeaderColumn[],
     originalHeader: SpreadSheetColumn[]
   ) => {
-    const { min, max } = subheaders.reduce(
+    const max = subheaders.reduce(
       (
-        val: { min: number; max: number },
+        max: number,
         subheader: {
           name: string;
           type: SubHeaderColumnType;
@@ -122,16 +128,15 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         index: number
       ) => {
         if (subheader.name) {
-          val.min = val.min > index ? index : val.min;
-          val.max = val.max < index ? index : val.max;
+          max = max < index ? index : max;
         }
-        return val;
+        return max;
       },
-      { min: subheaders.length + 1, max: -1 }
+      -1
     );
     const newHeader: SpreadSheetColumn[] = [];
     let i = 0;
-    subheaders.slice(min, max + 1).forEach((subheader, index) => {
+    subheaders.slice(1, max + 1).forEach((subheader, index) => {
       if (subheader.name) {
         newHeader.push(originalHeader[i]);
         i++;
@@ -164,11 +169,9 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         const response = await getWorkbookTransientColumn(
           dsId as string,
           dimensions.map((dimension) =>
-            DimensionParser(['user_id', 'event_name']).parse(dimension.name)
+            DimensionParser(properties).parse(dimension.name)
           ),
-          metrics.map((metric) =>
-            Metricparser(['user_id', 'event_name']).parse(metric.name)
-          ),
+          metrics.map((metric) => Metricparser(properties).parse(metric.name)),
           database,
           table
         );
@@ -296,7 +299,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     (headerText: string, columnId: string) => {
       const sheetData = sheetsData[selectedSheetIndex];
       const isBlankSheet = !sheetData.is_sql && !sheetData.query;
-      const index = columnId.toUpperCase().charCodeAt(0) - 64;
+      const index = columnId.toUpperCase().charCodeAt(0) - 65 + 1;
       if (headerText.match(/count|unique/i)) {
         if (isBlankSheet)
           try {
@@ -578,6 +581,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
                   sheetData={cloneDeep(sheetsData[selectedSheetIndex])}
                   evaluateFormulaHeader={evaluateFormulaHeader}
                   addDimensionColumn={addDimensionColumn}
+                  properties={properties}
                 />
               </Flex>
               <Footer

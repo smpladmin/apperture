@@ -15,9 +15,9 @@ import {
   UncertainCompatible,
   getCellProperty,
 } from '@silevis/reactgrid';
-import { BLUE_MAIN, WHITE_DEFAULT } from '@theme/index';
+import { BLUE_MAIN, GREY_600, WHITE_DEFAULT } from '@theme/index';
 import { useEffect, useRef, useState } from 'react';
-import { Plus } from 'phosphor-react';
+import { Function, Plus, SquaresFour } from 'phosphor-react';
 import { SubHeaderColumnType } from '@lib/domain/workbook';
 import {
   DimensionParser,
@@ -144,16 +144,6 @@ const FormulaDropDownBox = ({
     onCellChanged({ addHeader: true });
   };
 
-  // formula ki static list
-  // events ki list // dynamic
-  // operators kis static list
-
-  //Search ---->
-  //// metric parser se suggestions change , state (to track current position in formula )update in formula.
-  // state -> formula/operand/operator/value
-
-  //{formula:unique,operand:event,operator:null,value:null}
-
   const generateFormulaString = (cellState: CellState, prevFormula: string) => {
     switch (cellState[ActiveCellState.FORMULA]) {
       case 'count(':
@@ -200,6 +190,9 @@ const FormulaDropDownBox = ({
         ? DimensionParser(cell.properties).parse(formula)
         : Metricparser(cell.properties).parse(formula);
       setSuggestions([]);
+
+      // if valid formula, commit the formula text
+      onCellChanged({ text: formula });
     } catch (err: any) {
       const pre_message = err.message.replace(/but.*/, '') || '';
 
@@ -242,14 +235,23 @@ const FormulaDropDownBox = ({
     suggestFormula(generatedString);
   }, [cellState]);
 
+  const getDisplayIcon = () => {
+    const cellStateIcon = {
+      [ActiveCellState.FORMULA]: <Function size={18} color={GREY_600} />,
+      [ActiveCellState.OPERAND]: <SquaresFour size={18} color={GREY_600} />,
+      [ActiveCellState.OPERATOR]: '',
+      [ActiveCellState.VALUE]: '',
+      [ActiveCellState.EOF]: '',
+    };
+    return cellStateIcon[activeCellState];
+  };
+
   return (
-    <Flex>
-      <Box position={'relative'}>
+    <Flex width={'full'}>
+      <Box position={'relative'} width={'full'}>
         <InputGroup>
           {formula || isFocus ? (
-            <InputLeftElement>
-              <Text>{'='}</Text>
-            </InputLeftElement>
+            <InputLeftElement h={'6'}>=</InputLeftElement>
           ) : null}
           <Input
             ref={inputRef}
@@ -263,12 +265,15 @@ const FormulaDropDownBox = ({
             onKeyDown={(e) => {
               e.stopPropagation();
               e.code === 'Enter' && handleSubmitFormula();
+              setSuggestions([]);
             }}
             onFocus={(e) => {
               e.stopPropagation();
               setIsFocus(true);
             }}
-            onBlur={() => setIsFocus(false)}
+            onBlur={() => {
+              setIsFocus(false);
+            }}
             w={'full'}
             focusBorderColor={'black.100'}
             placeholder={
@@ -284,6 +289,12 @@ const FormulaDropDownBox = ({
               lineHeight: 'xs-12',
               fontWeight: 400,
             }}
+            width={'full'}
+            height={'6'}
+            borderRadius={'0'}
+            fontSize={'xs-12'}
+            lineHeight={'xs-12'}
+            fontWeight={'400'}
             data-testid={'formula-input'}
             disabled={!!cell.disable}
           />
@@ -294,24 +305,37 @@ const FormulaDropDownBox = ({
             position={'absolute'}
             zIndex={1}
             bg={'white.DEFAULT'}
-            px={'4'}
-            py={'5'}
+            p={'2'}
             borderRadius={'12'}
             borderWidth={'1px'}
             borderColor={'white.200'}
             onPointerDown={(e) => e.stopPropagation()}
+            maxHeight={'102'}
+            overflow={'scroll'}
           >
             {suggestions.map((suggestion, index) => {
               return (
-                <Text
+                <Flex
                   key={index}
+                  px={'2'}
+                  py={'3'}
+                  gap={'2'}
+                  alignItems={'center'}
+                  _hover={{ bg: 'white.400' }}
+                  cursor={'pointer'}
                   onClick={() => {
                     handleSubmitSuggestion(suggestion);
                   }}
-                  cursor={'pointer'}
                 >
-                  {suggestion}
-                </Text>
+                  {getDisplayIcon()}
+                  <Text
+                    fontSize={'xs-14'}
+                    lineHeight={'xs-14'}
+                    fontWeight={'500'}
+                  >
+                    {suggestion}
+                  </Text>
+                </Flex>
               );
             })}
           </Box>

@@ -150,24 +150,18 @@ const Grid = ({
   sheetData,
   evaluateFormulaHeader,
   addDimensionColumn,
+  properties,
 }: {
   selectedSheetIndex: number;
   sheetData: TransientSheetData;
   evaluateFormulaHeader: Function;
   addDimensionColumn: Function;
+  properties: string[];
 }) => {
   const [columns, setColumns] = useState<Column[]>(
     getColumns(fillHeaders(sheetData.headers))
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const [properties, setproperties] = useState([
-    'user_id',
-    'event_name',
-    'properties.$city',
-    'properties.$os',
-    'properties.$device',
-  ]);
 
   useEffect(() => {
     setIsLoading(true);
