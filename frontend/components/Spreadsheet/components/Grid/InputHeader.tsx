@@ -16,10 +16,14 @@ import {
   getCellProperty,
 } from '@silevis/reactgrid';
 import { BLUE_MAIN, WHITE_DEFAULT } from '@theme/index';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Plus } from 'phosphor-react';
 import { SubHeaderColumnType } from '@lib/domain/workbook';
-import { DimensionParser, Metricparser } from '@lib/utils/parser';
+import {
+  DimensionParser,
+  FormulaParser,
+  Metricparser,
+} from '@lib/utils/parser';
 
 export interface InputHeaderCell extends Cell {
   type: 'inputHeader';
@@ -106,6 +110,7 @@ const FormulaDropDownBox = ({
 }) => {
   const [formula, setFormula] = useState('');
   const [isFocus, setIsFocus] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [values, setValues] = useState<{ [key: string]: string[] }>({
     user_id: ['one', 'two', 'three'],
@@ -114,7 +119,6 @@ const FormulaDropDownBox = ({
     'properties.$os': ['one', 'two', 'three'],
     'properties.$device': ['one', 'two', 'three'],
   });
-
   const functionNames = ['count(', 'unique(', 'countif('];
   const operators = ['=', '!=', '<=', '<', '>=', '>'];
 
@@ -130,8 +134,6 @@ const FormulaDropDownBox = ({
     [ActiveCellState.EOF]: '',
   });
 
-  const getValuesByPropertyName = (property: string) => values[property];
-
   const handleSubmitFormula = () => {
     if (formula) {
       onCellChanged({ text: formula });
@@ -141,10 +143,6 @@ const FormulaDropDownBox = ({
   const handleAddHeader = () => {
     onCellChanged({ addHeader: true });
   };
-
-  useEffect(() => {
-    console.log(activeCellState);
-  }, [activeCellState]);
 
   // formula ki static list
   // events ki list // dynamic
@@ -166,7 +164,7 @@ const FormulaDropDownBox = ({
         }${cellState[ActiveCellState.OPERATOR]}${
           cellState[ActiveCellState.OPERAND] === 'in'
             ? `[${cellState[ActiveCellState.VALUE].join(',')}]`
-            : values[0] || ''
+            : cellState[ActiveCellState.VALUE][0] || ''
         }${cellState[ActiveCellState.EOF]}`;
       case 'unique(':
         return `${cellState[ActiveCellState.FORMULA]}${
@@ -179,13 +177,14 @@ const FormulaDropDownBox = ({
   };
 
   const getActiveCellState = (suggestedValue: string) => {
+    if (functionNames.includes(suggestedValue)) {
+      return ActiveCellState.FORMULA;
+    }
+
     if (cell.properties.includes(suggestedValue)) {
       return ActiveCellState.OPERAND;
     }
 
-    if (functionNames.includes(suggestedValue)) {
-      return ActiveCellState.FORMULA;
-    }
     if (operators.includes(suggestedValue)) {
       return ActiveCellState[ActiveCellState.OPERATOR];
     }
@@ -210,7 +209,6 @@ const FormulaDropDownBox = ({
         ?.map((name: string) => name.replace(/"/g, ''));
 
       if (newSuggestions && newSuggestions !== suggestions) {
-        console.log(newSuggestions[0], cell.properties[0]);
         setActiveCellState(getActiveCellState(newSuggestions[0]));
       }
 
@@ -221,9 +219,22 @@ const FormulaDropDownBox = ({
   const handleSubmitSuggestion = (suggestion: string) => {
     setCellState((prevState) => ({
       ...prevState,
-      [activeCellState]: suggestion,
+      [activeCellState]:
+        activeCellState === ActiveCellState.VALUE ? [suggestion] : suggestion,
     }));
+    setSuggestions([]);
+    inputRef?.current?.focus();
   };
+
+  useEffect(() => {
+    // parser to extract formula, operand, operator and values
+    try {
+      const cellStateObj = FormulaParser.parse(formula);
+      setCellState(cellStateObj);
+    } catch (err) {
+      console.log('error', err);
+    }
+  }, [activeCellState]);
 
   useEffect(() => {
     const generatedString = generateFormulaString(cellState, formula);
@@ -241,7 +252,7 @@ const FormulaDropDownBox = ({
             </InputLeftElement>
           ) : null}
           <Input
-            defaultValue={cell.text}
+            ref={inputRef}
             value={formula}
             border={'0'}
             onChange={(e) => {
@@ -279,7 +290,7 @@ const FormulaDropDownBox = ({
         </InputGroup>
         {suggestions.length && formula ? (
           <Box
-            w={'112'}
+            w={'96'}
             position={'absolute'}
             zIndex={1}
             bg={'white.DEFAULT'}
@@ -294,7 +305,10 @@ const FormulaDropDownBox = ({
               return (
                 <Text
                   key={index}
-                  onClick={() => handleSubmitSuggestion(suggestion)}
+                  onClick={() => {
+                    handleSubmitSuggestion(suggestion);
+                  }}
+                  cursor={'pointer'}
                 >
                   {suggestion}
                 </Text>

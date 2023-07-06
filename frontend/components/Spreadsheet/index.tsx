@@ -172,15 +172,24 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           database,
           table
         );
-        const newHeader = arrangeTransientColumnHeader(
-          subheaders,
-          response.data.headers
-        );
-        const tempSheetsData = cloneDeep(sheetsData);
-        tempSheetsData[selectedSheetIndex].headers = newHeader;
-        tempSheetsData[selectedSheetIndex].data = response.data.data;
-        tempSheetsData[selectedSheetIndex].subHeaders = subheaders;
-        setSheetsData(tempSheetsData);
+        if (response.status !== 200) {
+          toast({
+            title: 'Something went wrong!',
+            status: 'error',
+            variant: 'subtle',
+            isClosable: true,
+          });
+        } else {
+          const newHeader = arrangeTransientColumnHeader(
+            subheaders,
+            response.data.headers
+          );
+          const tempSheetsData = cloneDeep(sheetsData);
+          tempSheetsData[selectedSheetIndex].headers = newHeader;
+          tempSheetsData[selectedSheetIndex].data = response.data.data;
+          tempSheetsData[selectedSheetIndex].subHeaders = subheaders;
+          setSheetsData(tempSheetsData);
+        }
       };
       fetchSheetData();
     }
