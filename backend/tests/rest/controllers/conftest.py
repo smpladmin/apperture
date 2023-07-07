@@ -363,6 +363,7 @@ def datamart_service(apperture_user_response):
         app_id=PydanticObjectId("635ba034807ab86d8a2aadd7"),
         datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
         name="name",
+        table_name="dUKQaHtqxM",
         user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
         last_refreshed=datetime(2022, 11, 24, 0, 0),
         query="select event_name, user_id from events",
@@ -394,6 +395,10 @@ def datamart_service(apperture_user_response):
     datamart_service_mock.get_datamart_table.return_value = datamart_future
     datamart_service_mock.update_datamart_table = mock.AsyncMock()
     datamart_service_mock.delete_datamart_table = mock.AsyncMock()
+    datamart_service_mock.refresh_datamart_table = mock.AsyncMock()
+    datamart_service_mock.get_all_apps_with_datamarts = mock.AsyncMock(
+        return_value=["635ba034807ab86d8a2aadd8", "63ce4906f496f7b462ab7e84"]
+    )
     datamart_service_mock.get_datamart_tables_for_app_id.return_value = datamarts_future
     return datamart_service_mock
 
@@ -1190,7 +1195,7 @@ def app_service():
 
     app_service_mock.get_apps.return_value = apps_future
     app_service_mock.get_user_app.return_value = app_future
-    app_service_mock.get_app = AsyncMock(side_effect=[app_with_credentials, app])
+    app_service_mock.get_app = AsyncMock(return_value=app_with_credentials)
     app_service_mock.create_clickhouse_user.return_value = clickhouse_credential_future
     return app_service_mock
 
@@ -1762,6 +1767,7 @@ def datamart_response():
         "appId": "635ba034807ab86d8a2aadd7",
         "userId": "635ba034807ab86d8a2aadda",
         "name": "name",
+        "tableName": "dUKQaHtqxM",
         "lastRefreshed": "2022-11-24T00:00:00",
         "query": "select event_name, user_id from events",
         "enabled": True,
@@ -2268,5 +2274,8 @@ def dpq_service():
     dpq_service_mock.enqueue_from_runlogs = mock.MagicMock(return_value=["test"])
     dpq_service_mock.enqueue_user_notification = mock.MagicMock(
         return_value="a98a10b4-d26e-46fa-aa6f"
+    )
+    dpq_service_mock.enqueue_refresh_datamart_for_app = mock.MagicMock(
+        return_value="a98a10b4-d26e-46fa-aa6g"
     )
     return dpq_service_mock

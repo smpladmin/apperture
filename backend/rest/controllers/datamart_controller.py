@@ -1,9 +1,11 @@
+import logging
 from typing import List
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from domain.apperture_users.models import AppertureUser
+from domain.apps.service import AppService
 from domain.datamart.service import DataMartService
 from domain.datasources.service import DataSourceService
 from rest.controllers.actions.compute_query import ComputeQueryAction
@@ -34,9 +36,17 @@ async def save_datamart_table(
     dto: DataMartTableDto,
     datasource_service: DataSourceService = Depends(),
     datamart_service: DataMartService = Depends(),
+    app_service: AppService = Depends(),
     user_id: str = Depends(get_user_id),
 ):
     datasource = await datasource_service.get_datasource(id=dto.datasourceId)
+    app = await app_service.get_app(id=datasource.app_id)
+    if not app.clickhouse_credential:
+        logging.info(f"Restricted user db doesn't exist for app!")
+        raise HTTPException(
+            status_code=401, detail=f"Restricted user db doesn't exist for app: {str(app.id)}"
+        )
+
     datamart_table = datamart_service.build_datamart_table(
         datasource_id=PydanticObjectId(dto.datasourceId),
         app_id=datasource.app_id,
@@ -45,7 +55,9 @@ async def save_datamart_table(
         query=dto.query,
     )
 
-    await datamart_service.create_datamart_table(table=datamart_table)
+    await datamart_service.create_datamart_table(
+        table=datamart_table, clickhouse_credential=app.clickhouse_credential
+    )
     return datamart_table
 
 
@@ -54,10 +66,18 @@ async def update_datamart_table(
     id: str,
     dto: DataMartTableDto,
     datasource_service: DataSourceService = Depends(),
+    app_service: AppService = Depends(),
     datamart_service: DataMartService = Depends(),
     user_id: str = Depends(get_user_id),
 ):
     datasource = await datasource_service.get_datasource(dto.datasourceId)
+    app = await app_service.get_app(id=datasource.app_id)
+    if not app.clickhouse_credential:
+        logging.info(f"Restricted user db doesn't exist for app!")
+        raise HTTPException(
+            status_code=401, detail=f"Restricted user db doesn't exist for app: {str(app.id)}"
+        )
+
     new_datamart_table = datamart_service.build_datamart_table(
         datasource_id=PydanticObjectId(dto.datasourceId),
         app_id=datasource.app_id,
@@ -67,7 +87,9 @@ async def update_datamart_table(
     )
 
     await datamart_service.update_datamart_table(
-        table_id=id, new_table=new_datamart_table
+        table_id=id,
+        new_table=new_datamart_table,
+        clickhouse_credential=app.clickhouse_credential,
     )
     return new_datamart_table
 
@@ -102,5 +124,18 @@ async def get_datamart_tables(
 async def delete_datamart_table(
     id: str,
     datamart_service: DataMartService = Depends(),
+    app_service: AppService = Depends(),
 ):
-    await datamart_service.delete_datamart_table(datamart_id=id)
+    existing_table = await datamart_service.get_datamart_table(id=id)
+    app = await app_service.get_app(id=str(existing_table.app_id))
+    if not app.clickhouse_credential:
+        logging.info(f"Restricted user db doesn't exist for app!")
+        raise HTTPException(
+            status_code=401, detail=f"Restricted user db doesn't exist for app: {str(app.id)}!"
+        )
+
+    await datamart_service.delete_datamart_table(
+        datamart_id=id,
+        table_name=existing_table.table_name,
+        clickhouse_credential=app.clickhouse_credential,
+    )

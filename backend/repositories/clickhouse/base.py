@@ -81,3 +81,20 @@ class EventsBase(ABC):
             error_message = re.search(r"DB::Exception:(.*)", repr(e)).group(1)
             traceback.print_exc()
             raise DatabaseError(f"Database error:{error_message}")
+
+    def execute_query_for_restricted_client(
+        self, query: str, username: str, password: str
+    ):
+        try:
+            restricted_client = self.clickhouse.get_connection_for_user(
+                username=username, password=password
+            )
+            result = restricted_client.query(query=query)
+            logging.info(f"Successfully executed query: {query}")
+            restricted_client.close()
+            return result
+        except Exception as e:
+            logging.info(
+                f"Exception {e} occurred while executing query for restricted user {username}"
+            )
+            return
