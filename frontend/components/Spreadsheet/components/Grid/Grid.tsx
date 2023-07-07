@@ -237,7 +237,12 @@ const Grid = ({
       }}
     />
   ) : (
-    <Flex h={'full'} w={'full'} alignItems={'center'} justifyContent={'center'}>
+    <Flex
+      h={'calc( 100vh - 175px )'}
+      w={'full'}
+      alignItems={'center'}
+      justifyContent={'center'}
+    >
       <LoadingSpinner />
     </Flex>
   );

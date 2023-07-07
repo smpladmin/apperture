@@ -316,9 +316,9 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             if (
               sheetData.subHeaders[index].type === SubHeaderColumnType.DIMENSION
             ) {
-              DimensionParser(eventProperties).parse(headerText);
+              DimensionParser().parse(headerText);
             } else {
-              Metricparser(eventProperties).parse(headerText);
+              Metricparser().parse(headerText);
             }
             sheetData.subHeaders[index].name = headerText;
 
@@ -327,7 +327,6 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
               subheaders: sheetData.subHeaders,
             });
           } catch (error) {
-            console.error(error);
             toast({
               title: `Invalid function syntax`,
               status: 'error',

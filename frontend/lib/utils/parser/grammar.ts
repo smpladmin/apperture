@@ -30,13 +30,15 @@ condition
 
 arithematic_condition = property:$(${
   properties ? 'property' : 'property+'
-}) _ op:$(op) _ value:value {
+}) _ op:$(op) _ value:$(${values?.length ? 'value' : 'value+'}) {
       return {operand: property, operator: op, value: [value]};
   }
 
 in_condition = property:$(${
   properties ? 'property' : '$(property+)'
-}) _ op:"in" _ "["value:$(chars+)  _ rest: (_ "," _ $(chars+))* _ "]" {
+}) _ op:"in" _ "["value:$(${
+  values?.length ? 'value' : 'value+'
+})  _ rest: (_ "," _ $(${values?.length ? 'value' : 'value+'}))* _ "]" {
       return {operand: property, operator: op, value: [value].concat(rest.map((param) => param[3]))};
   }
 
@@ -51,10 +53,10 @@ if_statement = fname:("if") _ "(" _ params:condition _ ","_ then:$(chars+)_ "," 
 
 
 value
-  = ${values ? keywordgenerator(values) : '[a-zA-Z_.][a-zA-Z_0-9$]*'}
+  = ${values?.length ? keywordgenerator(values) : '[a-zA-Z_.$][a-zA-Z_0-9$]*'}
 
 property
-  = ${properties ? keywordgenerator(properties) : '[a-zA-Z_.][a-zA-Z_0-9$]*'}
+  = ${properties ? keywordgenerator(properties) : '[a-zA-Z_.$][a-zA-Z_0-9$]*'}
 
 op
   = "=" / "!=" / "<=" /"<"/">="/">"
@@ -82,7 +84,7 @@ unique_function = fname:unique _ property:${
 unique = "unique("i
 
 property
-  = ${properties ? keywordgenerator(properties) : '[a-zA-Z_.][a-zA-Z_0-9]*'}
+  = ${properties ? keywordgenerator(properties) : '[a-zA-Z_.][a-zA-Z_0-9$]*'}
 
 _ "whitespace"
   = [ \\t\\n\\r]*

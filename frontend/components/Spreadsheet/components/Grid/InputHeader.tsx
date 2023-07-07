@@ -26,6 +26,9 @@ import {
 } from '@lib/utils/parser';
 import { isEqual } from 'lodash';
 import { getSearchResult } from '@lib/utils/common';
+import { getWorkbookTransientColumn } from '@lib/services/workbookService';
+import { useRouter } from 'next/router';
+import LoadingSpinner from '@components/LoadingSpinner';
 
 export interface InputHeaderCell extends Cell {
   type: 'inputHeader';
@@ -114,13 +117,6 @@ const FormulaDropDownBox = ({
   const [isFocus, setIsFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // const [values, setValues] = useState<{ [key: string]: string[] }>({
-  //   user_id: ['one', 'two', 'three'],
-  //   event_name: ['one', 'two', 'three'],
-  //   'properties.$city': ['one', 'two', 'three'],
-  //   'properties.$os': ['one', 'two', 'three'],
-  //   'properties.$device': ['one', 'two', 'three'],
-  // });
   const metricFunctionNames = ['count(', 'countif('];
   const dimensionFunctionNames = ['unique('];
   const operators = ['=', '!=', '<=', '<', '>=', '>', 'in'];
@@ -170,6 +166,40 @@ const FormulaDropDownBox = ({
     }
   };
 
+  const [values, setValues] = useState<string[]>([]);
+  const [isLoadingValue, setIsLoadingValue] = useState(false);
+  const router = useRouter();
+  const { dsId } = router.query;
+  useEffect(() => {
+    if (!cell.properties.includes(cellState.OPERAND)) return;
+    const fetchUniqueValues = async () => {
+      const response = await getWorkbookTransientColumn(
+        dsId as string,
+        [
+          {
+            formula: 'unique',
+            property: cellState.OPERAND,
+          },
+        ],
+        [],
+        'default',
+        'events'
+      );
+      if (response.status === 200) {
+        setValues(
+          response.data.data.map(
+            (value: { [key: string]: string }) => value[cellState.OPERAND]
+          )
+        );
+      } else {
+        setValues([]);
+      }
+      setIsLoadingValue(false);
+    };
+    setIsLoadingValue(true);
+    fetchUniqueValues();
+  }, [cellState.OPERAND]);
+
   const getActiveCellState = (suggestedValues: string[]) => {
     if (
       isEqual(metricFunctionNames.sort(), suggestedValues) ||
@@ -195,7 +225,7 @@ const FormulaDropDownBox = ({
     try {
       cell.columnType === SubHeaderColumnType.DIMENSION
         ? DimensionParser(cell.properties).parse(formula)
-        : Metricparser(cell.properties).parse(formula);
+        : Metricparser(cell.properties, values).parse(formula);
       setSuggestions([]);
 
       // if valid formula, commit the formula text
@@ -246,12 +276,9 @@ const FormulaDropDownBox = ({
   useEffect(() => {
     // parser to extract formula, operand, operator and values
     try {
-      console.log(activeCellState);
       const cellStateObj = FormulaParser.parse(formula);
       setCellState(cellStateObj);
-    } catch (err) {
-      console.log('error', err);
-    }
+    } catch (err) {}
   }, [activeCellState]);
 
   useEffect(() => {
@@ -324,7 +351,7 @@ const FormulaDropDownBox = ({
             disabled={!!cell.disable}
           />
         </InputGroup>
-        {suggestions.length && formula ? (
+        {suggestions?.length && formula ? (
           <Box
             w={'96'}
             position={'absolute'}
@@ -338,31 +365,37 @@ const FormulaDropDownBox = ({
             maxHeight={'102'}
             overflow={'scroll'}
           >
-            {suggestions.map((suggestion, index) => {
-              return (
-                <Flex
-                  key={index}
-                  px={'2'}
-                  py={'3'}
-                  gap={'2'}
-                  alignItems={'center'}
-                  _hover={{ bg: 'white.400' }}
-                  cursor={'pointer'}
-                  onClick={() => {
-                    handleSubmitSuggestion(suggestion);
-                  }}
-                >
-                  {getDisplayIcon()}
-                  <Text
-                    fontSize={'xs-14'}
-                    lineHeight={'xs-14'}
-                    fontWeight={'500'}
+            {!isLoadingValue ? (
+              suggestions.map((suggestion, index) => {
+                return (
+                  <Flex
+                    key={index}
+                    px={'2'}
+                    py={'3'}
+                    gap={'2'}
+                    alignItems={'center'}
+                    _hover={{ bg: 'white.400' }}
+                    cursor={'pointer'}
+                    onClick={() => {
+                      handleSubmitSuggestion(suggestion);
+                    }}
                   >
-                    {suggestion}
-                  </Text>
-                </Flex>
-              );
-            })}
+                    {getDisplayIcon()}
+                    <Text
+                      fontSize={'xs-14'}
+                      lineHeight={'xs-14'}
+                      fontWeight={'500'}
+                    >
+                      {suggestion}
+                    </Text>
+                  </Flex>
+                );
+              })
+            ) : (
+              <Flex justifyContent={'center'}>
+                <LoadingSpinner size={'sm'} />
+              </Flex>
+            )}
           </Box>
         ) : null}
       </Box>
