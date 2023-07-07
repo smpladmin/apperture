@@ -1,6 +1,3 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import Grid from './components/Grid/Grid';
-import QueryModal from './components/QueryModal';
 import {
   Box,
   Button,
@@ -10,7 +7,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import EventLayoutHeader from '@components/EventsLayout/ActionHeader';
-import { useRouter } from 'next/router';
+import LoadingSpinner from '@components/LoadingSpinner';
 import {
   ColumnType,
   SpreadSheetColumn,
@@ -18,22 +15,25 @@ import {
   TransientSheetData,
   Workbook,
 } from '@lib/domain/workbook';
-import Footer from './components/Footer';
-import {
-  evaluateExpression,
-  expressionTokenRegex,
-  isOperand,
-  isdigit,
-} from './util';
-import cloneDeep from 'lodash/cloneDeep';
 import {
   getTransientSpreadsheets,
   getWorkbookTransientColumn,
   saveWorkbook,
   updateWorkbook,
 } from '@lib/services/workbookService';
-import LoadingSpinner from '@components/LoadingSpinner';
 import { DimensionParser, Metricparser } from '@lib/utils/parser';
+import cloneDeep from 'lodash/cloneDeep';
+import { useRouter } from 'next/router';
+import { useCallback, useEffect, useState } from 'react';
+import Footer from './components/Footer';
+import Grid from './components/Grid/Grid';
+import QueryModal from './components/QueryModal';
+import {
+  evaluateExpression,
+  expressionTokenRegex,
+  isOperand,
+  isdigit,
+} from './util';
 
 type TransientColumnRequestState = {
   isLoading: boolean;
@@ -106,6 +106,43 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
   }, []);
 
+  const arrangeTransientColumnHeader = (
+    subheaders: {
+      name: string;
+      type: SubHeaderColumnType;
+    }[],
+    originalHeader: SpreadSheetColumn[]
+  ) => {
+    const { min, max } = subheaders.reduce(
+      (
+        val: { min: number; max: number },
+        subheader: {
+          name: string;
+          type: SubHeaderColumnType;
+        },
+        index: number
+      ) => {
+        if (subheader.name) {
+          val.min = val.min > index ? index : val.min;
+          val.max = val.max < index ? index : val.max;
+        }
+        return val;
+      },
+      { min: subheaders.length + 1, max: -1 }
+    );
+    const newHeader: SpreadSheetColumn[] = [];
+    let i = 0;
+    subheaders.slice(min, max + 1).forEach((subheader) => {
+      if (subheader.name) {
+        newHeader.push(originalHeader[i]);
+        i++;
+      } else {
+        newHeader.push({ name: '', type: ColumnType.PADDING_HEADER });
+      }
+    });
+    return newHeader;
+  };
+
   useEffect(() => {
     if (requestTranisentColumn.isLoading) {
       const fetchSheetData = async () => {
@@ -119,13 +156,22 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             subheader.name && subheader.type === SubHeaderColumnType.DIMENSION
         );
 
+        const database = 'default',
+          table = 'events';
+
         const response = await getWorkbookTransientColumn(
           dsId as string,
           dimensions.map((dimension) => DimensionParser.parse(dimension.name)),
-          metrics.map((metric) => Metricparser.parse(metric.name))
+          metrics.map((metric) => Metricparser.parse(metric.name)),
+          database,
+          table
+        );
+        const newHeader = arrangeTransientColumnHeader(
+          subheaders,
+          response.data.headers
         );
         const tempSheetsData = cloneDeep(sheetsData);
-        tempSheetsData[selectedSheetIndex].headers = response.data.headers;
+        tempSheetsData[selectedSheetIndex].headers = newHeader;
         tempSheetsData[selectedSheetIndex].data = response.data.data;
         tempSheetsData[selectedSheetIndex].subHeaders = subheaders;
         setSheetsData(tempSheetsData);

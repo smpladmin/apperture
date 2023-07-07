@@ -45,11 +45,13 @@ class TestSpreadSheetRepository:
                     ],
                 ),
             ],
+            "default",
+            "events",
         )
 
         assert (
             query
-            == """SELECT "properties.utm_source","properties.city",COUNT(CASE WHEN "property.property.amount">1000000 THEN 1 END) FROM "events" WHERE "datasource_id"=%(ds_id)s GROUP BY 1,2 LIMIT 1000"""
+            == """SELECT "properties.utm_source","properties.city",COUNT(CASE WHEN "property.property.amount">1000000 THEN 1 END) FROM "default"."events" GROUP BY 1,2 LIMIT 1000"""
         )
         assert props == {"ds_id": datasource_id}
 
@@ -67,12 +69,12 @@ class TestSpreadSheetRepository:
         ]
 
         query, props = self.spreadsheet_repo.build_transient_columns_query(
-            datasource_id, columns, []
+            datasource_id, columns, [], "default", "events"
         )
 
         assert (
             query
-            == """SELECT "properties.utm_source","properties.city" FROM "events" WHERE "datasource_id"=%(ds_id)s GROUP BY 1,2 LIMIT 1000"""
+            == """SELECT "properties.utm_source","properties.city" FROM "default"."events" GROUP BY 1,2 LIMIT 1000"""
         )
         assert props == {"ds_id": datasource_id}
 
@@ -87,12 +89,11 @@ class TestSpreadSheetRepository:
                     formula=Formula.COUNT,
                 ),
             ],
+            "default",
+            "events",
         )
 
-        assert (
-            query
-            == """SELECT COUNT(*) FROM "events" WHERE "datasource_id"=%(ds_id)s LIMIT 1000"""
-        )
+        assert query == """SELECT COUNT(*) FROM "default"."events" LIMIT 1000"""
         assert props == {"ds_id": datasource_id}
 
     def test_build_transient_columns_query_with_countif_single(self):
@@ -113,11 +114,13 @@ class TestSpreadSheetRepository:
                     ],
                 ),
             ],
+            "default",
+            "events",
         )
 
         assert (
             query
-            == """SELECT COUNT(CASE WHEN "property.property.amount">1000000 THEN 1 END) FROM "events" WHERE "datasource_id"=%(ds_id)s LIMIT 1000"""
+            == """SELECT COUNT(CASE WHEN "property.property.amount">1000000 THEN 1 END) FROM "default"."events" LIMIT 1000"""
         )
         assert props == {"ds_id": datasource_id}
 
@@ -144,10 +147,12 @@ class TestSpreadSheetRepository:
                     ],
                 ),
             ],
+            "default",
+            "events",
         )
 
         assert (
             query
-            == """SELECT COUNT(CASE WHEN "property.property.city"='Bangalore' AND "property.property.device" IN ('Android','iPhone') THEN 1 END) FROM "events" WHERE "datasource_id"=%(ds_id)s LIMIT 1000"""
+            == """SELECT COUNT(CASE WHEN "property.property.city"='Bangalore' AND "property.property.device" IN ('Android','iPhone') THEN 1 END) FROM "default"."events" LIMIT 1000"""
         )
         assert props == {"ds_id": datasource_id}
