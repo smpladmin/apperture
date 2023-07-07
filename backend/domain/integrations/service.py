@@ -46,12 +46,14 @@ class IntegrationService:
         account_id: str,
         api_key: str,
         secret: str,
+        tableName: str = '',
     ):
         credential = Credential(
             type=CredentialType.API_KEY,
             account_id=account_id,
             api_key=api_key,
             secret=secret,
+            tableName=tableName
         )
         integration = Integration(
             user_id=app.user_id,

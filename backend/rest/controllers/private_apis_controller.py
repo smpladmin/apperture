@@ -19,6 +19,7 @@ from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.event_properties.service import EventPropertiesService
 from domain.events.service import EventsService
+from domain.apidata.service import APIDataService
 from domain.funnels.service import FunnelsService
 from domain.integrations.service import IntegrationService
 from domain.metrics.service import MetricService
@@ -40,6 +41,7 @@ from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.event_properties import EventPropertiesDto, EventPropertiesResponse
 from rest.dtos.events import CreateEventDto
+from rest.dtos.apidata import CreateAPIDataDto
 from rest.dtos.funnels import FunnelResponse, FunnelTrendResponse, TransientFunnelDto
 from rest.dtos.metrics import (
     ComputedMetricStepResponse,
@@ -49,6 +51,8 @@ from rest.dtos.metrics import (
 from rest.dtos.properties import PropertiesResponse
 from rest.dtos.runlogs import UpdateRunLogDto
 from rest.middlewares import validate_api_key
+from repositories.clickhouse.actions import Actions
+from domain.apps.service import AppService
 
 router = APIRouter(
     tags=["private"],
@@ -112,6 +116,19 @@ async def update_edges(
     await edge_service.update_edges(edges, dto.provider, datasource.id)
     return {"updated": True}
 
+@router.post("/apidata/{tableName}")
+async def update_apidata(
+    tableName: str,
+    dto: List[CreateAPIDataDto],
+    api_data_service: APIDataService = Depends(),
+    app_service: AppService = Depends(),
+    ds_service: DataSourceService = Depends(),
+):
+    ds_id = dto[0].datasource_id
+    datasource = await ds_service.get_datasource(ds_id)
+    app = await app_service.get_app(str(datasource.app_id))
+    await api_data_service.update_api_data(dto, app.clickhouse_credential.databasename, tableName)
+    return {"updated": True}
 
 @router.post("/events")
 async def update_events(

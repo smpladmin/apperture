@@ -24,9 +24,9 @@ class TestEdgeRepository:
         ]
         self.parameters = {
             "ds_id": "test-id",
-            "end_date": "2023-01-01",
             "event_name": "test",
             "start_date": "2022-01-01",
+            "end_date": "2023-01-01",
         }
         self.edges_parameters = {
             "ds_id": "test-id",
@@ -55,7 +55,7 @@ class TestEdgeRepository:
             "event,total"
         )
         self.trends_query = (
-            'SELECT EXTRACT(YEAR FROM "timestamp"),date("timestamp"),COUNT(DISTINCT '
+            'SELECT EXTRACT(YEAR FROM "timestamp"),TrendType.DATE("timestamp"),COUNT(DISTINCT '
             '"user_id") AS "users",COUNT(*) AS "hits",MIN("timestamp") AS '
             '"start_date",MAX("timestamp") AS "end_date" FROM "events" WHERE '
             '"datasource_id"=%(ds_id)s AND "event_name"=%(event_name)s AND '

@@ -2206,6 +2206,7 @@ def integration_service():
             api_key="apperture_911",
             account_id="120232",
             secret="6ddqwjeaa",
+            tableName=""
         ),
     )
 
@@ -2223,6 +2224,7 @@ def integration_data():
         "apiKey": "apperture_911",
         "apiSecret": "6ddqwjeaa",
         "provider": IntegrationProvider.MIXPANEL,
+        "tableName":""
     }
 
 
@@ -2237,6 +2239,7 @@ def integration_response():
             "api_key": "apperture_911",
             "refresh_token": None,
             "secret": "6ddqwjeaa",
+            "tableName":"",
             "type": "API_KEY",
         },
         "datasource": {

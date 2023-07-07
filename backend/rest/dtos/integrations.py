@@ -21,6 +21,7 @@ class CreateIntegrationDto(BaseModel):
     accountId: str
     apiKey: str
     apiSecret: str
+    tableName: str
 
 
 class IntegrationWithDataSources(Integration, ModelResponse):

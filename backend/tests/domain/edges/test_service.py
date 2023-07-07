@@ -521,15 +521,15 @@ class TestEdgeService:
                 {
                     "$group": {
                         "_id": {
+                            'TrendType.WEEK': {'$TrendType.WEEK': '$date'},
                             "previous_event": "$previous_event",
-                            "week": {"$week": "$date"},
                             "year": {"$year": "$date"},
                         },
                         "end_date": {"$max": "$date"},
                         "hits": {"$sum": "$hits"},
                         "node": {"$max": "$previous_event"},
                         "start_date": {"$min": "$date"},
-                        "trend": {"$max": {"$week": "$date"}},
+                        'trend': {'$max': {'$TrendType.WEEK': '$date'}},
                         "users": {"$sum": "$users"},
                         "year": {"$max": {"$year": "$date"}},
                     }
@@ -626,7 +626,7 @@ class TestEdgeService:
                         "previous_event": {"$max": "$previous_event"},
                         "hits": {"$sum": "$hits"},
                         "users": {"$sum": "$users"},
-                        "flow": {"$max": "inflow"},
+                        'flow': {'$max': 'SankeyDirection.INFLOW'},
                         "hits_percentage": {"$max": 0},
                         "users_percentage": {"$max": 0},
                     }
@@ -654,7 +654,7 @@ class TestEdgeService:
                                     "previous_event": {"$max": "$previous_event"},
                                     "hits": {"$sum": "$hits"},
                                     "users": {"$sum": "$users"},
-                                    "flow": {"$max": "outflow"},
+                                    'flow': {'$max': 'SankeyDirection.OUTFLOW'},
                                     "hits_percentage": {"$max": 0},
                                     "users_percentage": {"$max": 0},
                                 }

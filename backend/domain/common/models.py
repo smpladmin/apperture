@@ -11,9 +11,10 @@ class IntegrationProvider(str, Enum):
     AMPLITUDE = "amplitude"
     CLEVERTAP = "clevertap"
     APPERTURE = "apperture"
+    API = "api"
 
     def supports_runlogs(self):
-        return self in [self.MIXPANEL, self.AMPLITUDE, self.CLEVERTAP]
+        return self in [self.MIXPANEL, self.AMPLITUDE, self.CLEVERTAP, self.API]
 
 
 class WatchlistItemType(str, Enum):

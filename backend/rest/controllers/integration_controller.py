@@ -99,6 +99,7 @@ async def create_integration(
         dto.accountId,
         dto.apiKey,
         dto.apiSecret,
+        dto.tableName,
     )
 
     if create_datasource:

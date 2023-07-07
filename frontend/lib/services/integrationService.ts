@@ -9,6 +9,7 @@ export const createIntegrationWithDataSource = async (
   accountId: string,
   apiKey: string,
   apiSecret: string,
+  tableName: string,
   config: AxiosRequestConfig = {
     params: { create_datasource: true, trigger_data_processor: true },
   }
@@ -21,6 +22,7 @@ export const createIntegrationWithDataSource = async (
       accountId,
       apiKey,
       apiSecret,
+      tableName,
     },
     config
   );
