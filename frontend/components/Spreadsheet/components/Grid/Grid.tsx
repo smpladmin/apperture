@@ -139,7 +139,9 @@ const getRows = (
   ...data.map<Row>((data, idx) => ({
     rowId: idx,
     cells: headers.map((header) => {
-      const val = data[header.name] || '';
+      const val = data[header.name] === 0 ? '0' : data[header.name] || '';
+      if (header.name.includes('count')) {
+      }
       return getGridRow(val);
     }),
   })),
@@ -221,13 +223,14 @@ const Grid = ({
         changedHeaders[0]?.columnId
       );
   };
-
   return !isLoading ? (
     <ReactGrid
       rows={rows}
       columns={columns}
       onColumnResized={handleColumnResize}
       onCellsChanged={handleDataChange}
+      enableFillHandle
+      enableRangeSelection
       customCellTemplates={{
         dropdownHeader: new DropdownHeaderTemplate(),
         inputHeader: new InputHeaderTemplate(),

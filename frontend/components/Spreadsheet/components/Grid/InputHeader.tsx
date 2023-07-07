@@ -221,9 +221,12 @@ const FormulaDropDownBox = ({
             : cellStateObj[activeCellState],
           { keys: [] }
         );
-        // console.log('search results', searchResults);
 
-        setSuggestions(newSuggestions || []);
+        const suggestions = searchResults?.length
+          ? searchResults
+          : newSuggestions;
+
+        setSuggestions(suggestions);
       } catch (err) {
         setSuggestions(newSuggestions);
       }
@@ -243,11 +246,9 @@ const FormulaDropDownBox = ({
   useEffect(() => {
     // parser to extract formula, operand, operator and values
     try {
-      console.log('formula inside useffect', formula);
+      console.log(activeCellState);
       const cellStateObj = FormulaParser.parse(formula);
-      console.log('cellStateObj', cellStateObj);
       setCellState(cellStateObj);
-      console.log('active cell staet`', activeCellState);
     } catch (err) {
       console.log('error', err);
     }

@@ -5,12 +5,10 @@ import {
   MetricGrammar,
 } from './grammar';
 
-export const Metricparser = (properties: string[]) =>
-  peg.generate(
-    MetricGrammar(properties || ['event_name', 'user_id'], ['Login', 'Logout'])
-  );
+export const Metricparser = (properties?: string[]) =>
+  peg.generate(MetricGrammar(properties, ['Login', 'Logout']));
 
-export const DimensionParser = (properties: string[]) =>
+export const DimensionParser = (properties?: string[]) =>
   peg.generate(DimensionGrammar(properties));
 
 export const FormulaParser = peg.generate(FormulaExtratorGrammar);

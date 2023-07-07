@@ -3,7 +3,7 @@ const keywordgenerator = (tokens: string[]) =>
     return val + `"${token}"` + (index != tokens.length - 1 ? ' / ' : '');
   }, '');
 
-export const MetricGrammar = (properties: string[], values: string[]) => `
+export const MetricGrammar = (properties?: string[], values?: string[]) => `
   start
   = expression
 
@@ -28,11 +28,15 @@ condition_parameters
 condition
   =  arithematic_condition / in_condition
 
-arithematic_condition = property:$(property) _ op:$(op) _ value:value {
+arithematic_condition = property:$(${
+  properties ? 'property' : 'property+'
+}) _ op:$(op) _ value:value {
       return {operand: property, operator: op, value: [value]};
   }
 
-in_condition = property:$(property) _ op:"in" _ "["value:$(chars+)  _ rest: (_ "," _ $(chars+))* _ "]" {
+in_condition = property:$(${
+  properties ? 'property' : '$(property+)'
+}) _ op:"in" _ "["value:$(chars+)  _ rest: (_ "," _ $(chars+))* _ "]" {
       return {operand: property, operator: op, value: [value].concat(rest.map((param) => param[3]))};
   }
 
@@ -47,12 +51,10 @@ if_statement = fname:("if") _ "(" _ params:condition _ ","_ then:$(chars+)_ "," 
 
 
 value
-  = ${values.length ? keywordgenerator(values) : '[a-zA-Z_.][a-zA-Z_0-9]*'}
+  = ${values ? keywordgenerator(values) : '[a-zA-Z_.][a-zA-Z_0-9$]*'}
 
 property
-  = ${
-    properties.length ? keywordgenerator(properties) : '[a-zA-Z_.][a-zA-Z_0-9]*'
-  }
+  = ${properties ? keywordgenerator(properties) : '[a-zA-Z_.][a-zA-Z_0-9$]*'}
 
 op
   = "=" / "!=" / "<=" /"<"/">="/">"
@@ -64,23 +66,23 @@ _ "whitespace"
   = [ \\t\\n\\r]*
 `;
 
-export const DimensionGrammar = (properties: string[]) => `
+export const DimensionGrammar = (properties?: string[]) => `
   start
   = expression
 
 expression
   = unique_function
   
-unique_function = fname:unique _ property:property _")" {
+unique_function = fname:unique _ property:${
+  properties ? 'property' : '$(property+)'
+} _")" {
 	return {formula:fname.toLowerCase().replace('(',''), property:property}
 }
 
 unique = "unique("i
 
 property
-  = ${
-    properties.length ? keywordgenerator(properties) : '[a-zA-Z_.][a-zA-Z_0-9]*'
-  }
+  = ${properties ? keywordgenerator(properties) : '[a-zA-Z_.][a-zA-Z_0-9]*'}
 
 _ "whitespace"
   = [ \\t\\n\\r]*
@@ -135,7 +137,7 @@ function_operand = fname:fname _ property:$(value+) {
 return {
   ...fname,
   OPERAND : property,
-}
+} 
 }
 
 function_operand_operator = function_operand:function_operand _ operator:operator {

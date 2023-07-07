@@ -179,11 +179,9 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         const response = await getWorkbookTransientColumn(
           dsId as string,
           dimensions.map((dimension) =>
-            DimensionParser(eventProperties).parse(dimension.name)
+            DimensionParser().parse(dimension.name)
           ),
-          metrics.map((metric) =>
-            Metricparser(eventProperties).parse(metric.name)
-          ),
+          metrics.map((metric) => Metricparser().parse(metric.name)),
           database,
           table
         );
