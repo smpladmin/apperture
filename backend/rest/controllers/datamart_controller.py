@@ -44,7 +44,7 @@ async def save_datamart_table(
     if not app.clickhouse_credential:
         logging.info(f"Restricted user db doesn't exist for app!")
         raise HTTPException(
-            status_code=401, detail="Restricted user db doesn't exist for app!"
+            status_code=401, detail=f"Restricted user db doesn't exist for app: {str(app.id)}"
         )
 
     datamart_table = datamart_service.build_datamart_table(
@@ -75,7 +75,7 @@ async def update_datamart_table(
     if not app.clickhouse_credential:
         logging.info(f"Restricted user db doesn't exist for app!")
         raise HTTPException(
-            status_code=401, detail="Restricted user db doesn't exist for app!"
+            status_code=401, detail=f"Restricted user db doesn't exist for app: {str(app.id)}"
         )
 
     new_datamart_table = datamart_service.build_datamart_table(
@@ -131,7 +131,7 @@ async def delete_datamart_table(
     if not app.clickhouse_credential:
         logging.info(f"Restricted user db doesn't exist for app!")
         raise HTTPException(
-            status_code=401, detail="Restricted user db doesn't exist for app!"
+            status_code=401, detail=f"Restricted user db doesn't exist for app: {str(app.id)}!"
         )
 
     await datamart_service.delete_datamart_table(
