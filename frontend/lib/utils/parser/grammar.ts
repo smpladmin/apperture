@@ -91,7 +91,7 @@ Expression = function_operand_operator_values_end / function_operand_operator_va
           function_operand_operator / function_operand / fname / empty_input
 
 empty_input = _ { return {
-FORMULA : '',
+  FORMULA : '',
   OPERAND : '',
   OPERATOR :'',
   VALUE :'',
@@ -102,7 +102,7 @@ FORMULA : '',
 fname = fname:("unique("i /"count("i / "countif("i) { 
 
 return {
-FORMULA : fname,
+  FORMULA : fname,
   OPERAND : '',
   OPERATOR :'',
   VALUE :'',
@@ -113,7 +113,7 @@ FORMULA : fname,
 function_without_condition =fname _ ")" 
 {
 return {
-FORMULA : fname,
+  FORMULA : fname,
   OPERAND : '',
   OPERATOR :'',
   VALUE :'',
@@ -123,7 +123,7 @@ FORMULA : fname,
 
 function_operand_end = function_operand:function_operand _ ")"  { 
 return {
-FORMULA : function_operand,
+  FORMULA : function_operand,
   OPERAND : function_operand,
   OPERATOR :'',
   VALUE :'',

@@ -113,7 +113,12 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   useEffect(() => {
     const fetchProperties = async () => {
       const properties: string[] = await getEventProperties(dsId as string);
-      setEventProperties(properties);
+      setEventProperties([
+        'event_name',
+        'user_id',
+        'timestamp',
+        ...properties.map((property) => `properties.${property}`),
+      ]);
     };
 
     fetchProperties();

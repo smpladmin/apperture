@@ -110,17 +110,17 @@ const FormulaDropDownBox = ({
   cell: Compatible<InputHeaderCell>;
   onCellChanged: Function;
 }) => {
-  const [formula, setFormula] = useState('');
+  const [formula, setFormula] = useState(cell.text);
   const [isFocus, setIsFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [values, setValues] = useState<{ [key: string]: string[] }>({
-    user_id: ['one', 'two', 'three'],
-    event_name: ['one', 'two', 'three'],
-    'properties.$city': ['one', 'two', 'three'],
-    'properties.$os': ['one', 'two', 'three'],
-    'properties.$device': ['one', 'two', 'three'],
-  });
+  // const [values, setValues] = useState<{ [key: string]: string[] }>({
+  //   user_id: ['one', 'two', 'three'],
+  //   event_name: ['one', 'two', 'three'],
+  //   'properties.$city': ['one', 'two', 'three'],
+  //   'properties.$os': ['one', 'two', 'three'],
+  //   'properties.$device': ['one', 'two', 'three'],
+  // });
   const metricFunctionNames = ['count(', 'countif('];
   const dimensionFunctionNames = ['unique('];
   const operators = ['=', '!=', '<=', '<', '>=', '>', 'in'];
@@ -140,6 +140,7 @@ const FormulaDropDownBox = ({
   const handleSubmitFormula = () => {
     if (formula) {
       onCellChanged({ text: formula });
+      inputRef?.current?.blur();
     }
   };
 
@@ -169,27 +170,23 @@ const FormulaDropDownBox = ({
     }
   };
 
-  const getActiveCellState = (suggestedValue: string[]) => {
-    console.log(
-      isEqual(metricFunctionNames.sort(), suggestedValue),
-      metricFunctionNames
-    );
+  const getActiveCellState = (suggestedValues: string[]) => {
     if (
-      isEqual(metricFunctionNames.sort(), suggestedValue) ||
-      isEqual(dimensionFunctionNames.sort(), suggestedValue)
+      isEqual(metricFunctionNames.sort(), suggestedValues) ||
+      isEqual(dimensionFunctionNames.sort(), suggestedValues)
     ) {
       return ActiveCellState.FORMULA;
     }
 
-    if (isEqual(cell.properties.sort(), suggestedValue)) {
+    if (isEqual(cell.properties.sort(), suggestedValues)) {
       return ActiveCellState.OPERAND;
     }
 
-    if (isEqual(operators.sort(), suggestedValue)) {
+    if (isEqual(operators.sort(), suggestedValues)) {
       return ActiveCellState[ActiveCellState.OPERATOR];
     }
 
-    if (suggestedValue.includes(')')) return ActiveCellState.EOF;
+    if (suggestedValues.includes(')')) return ActiveCellState.EOF;
 
     return ActiveCellState.VALUE;
   };
@@ -215,7 +212,6 @@ const FormulaDropDownBox = ({
         setActiveCellState(getActiveCellState(newSuggestions.sort()));
       }
 
-      console.log('new suggestion', newSuggestions, cellState[activeCellState]);
       try {
         const cellStateObj = FormulaParser.parse(formula);
         const searchResults = getSearchResult(
@@ -225,9 +221,9 @@ const FormulaDropDownBox = ({
             : cellStateObj[activeCellState],
           { keys: [] }
         );
-        console.log('search results', searchResults);
+        // console.log('search results', searchResults);
 
-        setSuggestions(searchResults || []);
+        setSuggestions(newSuggestions || []);
       } catch (err) {
         setSuggestions(newSuggestions);
       }
@@ -247,8 +243,11 @@ const FormulaDropDownBox = ({
   useEffect(() => {
     // parser to extract formula, operand, operator and values
     try {
+      console.log('formula inside useffect', formula);
       const cellStateObj = FormulaParser.parse(formula);
+      console.log('cellStateObj', cellStateObj);
       setCellState(cellStateObj);
+      console.log('active cell staet`', activeCellState);
     } catch (err) {
       console.log('error', err);
     }

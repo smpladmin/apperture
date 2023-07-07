@@ -211,7 +211,7 @@ const Grid = ({
       (value) => value.type === 'inputHeader'
     );
 
-    if (changedHeaders[0].newCell.addHeader) {
+    if (changedHeaders[0]?.newCell?.addHeader) {
       return addDimensionColumn(changedHeaders[0].columnId);
     }
 

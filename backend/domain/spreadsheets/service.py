@@ -130,7 +130,7 @@ class SpreadsheetService:
 
         response = {
             "headers": [
-                SpreadSheetColumn(name=name, type=ColumnType.QUERY_HEADER)
+                SpreadSheetColumn(name=name, type=ColumnType.COMPUTED_HEADER)
                 for name in result.column_names
             ],
             "data": [],
