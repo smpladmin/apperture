@@ -243,7 +243,10 @@ const FormulaDropDownBox = ({
   const handleSubmitSuggestion = (suggestion: string | string[]) => {
     setCellState((prevState) => ({
       ...prevState,
-      [activeCellState]: suggestion,
+      [activeCellState]:
+        activeCellState === ActiveCellState.VALUE && !Array.isArray(suggestion)
+          ? [suggestion]
+          : suggestion,
     }));
     setSuggestions([]);
     inputRef?.current?.focus();
@@ -258,6 +261,7 @@ const FormulaDropDownBox = ({
   }, [activeCellState]);
 
   useEffect(() => {
+    console.log(cellState);
     const generatedString = generateFormulaString(cellState, formula);
     setFormula(generatedString);
     suggestFormula(generatedString);
