@@ -98,7 +98,7 @@ empty_input = _ { return {
   FORMULA : '',
   OPERAND : '',
   OPERATOR :'',
-  VALUE :'',
+  VALUE :[],
   EOF : ''
 }
 }
@@ -109,7 +109,7 @@ return {
   FORMULA : fname,
   OPERAND : '',
   OPERATOR :'',
-  VALUE :'',
+  VALUE :[],
   EOF : ''
 }
 }
@@ -120,7 +120,7 @@ return {
   FORMULA : fname,
   OPERAND : '',
   OPERATOR :'',
-  VALUE :'',
+  VALUE :[],
   EOF : '',
 }
 }
@@ -130,7 +130,7 @@ return {
   FORMULA : function_operand,
   OPERAND : function_operand,
   OPERATOR :'',
-  VALUE :'',
+  VALUE :[],
   EOF : ')'
 }
 }
@@ -149,7 +149,7 @@ return {
 }
 }
 
-operator = "=" / "!=" / "<=" /"<"/">="/">"
+operator = "=" / "!=" / "<=" /"<"/">="/">"/"in"
 function_operand_operator_values = function_operand_operator:function_operand_operator _ values:$(value+) {
 return {
   ...function_operand_operator,

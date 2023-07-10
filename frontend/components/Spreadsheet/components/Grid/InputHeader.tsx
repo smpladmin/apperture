@@ -135,6 +135,11 @@ const FormulaDropDownBox = ({
     [ActiveCellState.EOF]: '',
   });
 
+  const [values, setValues] = useState<string[]>([]);
+  const [isLoadingValue, setIsLoadingValue] = useState(false);
+  const router = useRouter();
+  const { dsId } = router.query;
+
   const handleSubmitFormula = () => {
     if (formula) {
       onCellChanged({ text: formula });
@@ -151,13 +156,15 @@ const FormulaDropDownBox = ({
       case 'count(':
         return `${cellState[ActiveCellState.FORMULA]})`;
       case 'countif(':
-        return `${cellState[ActiveCellState.FORMULA]}${
-          cellState[ActiveCellState.OPERAND]
-        }${cellState[ActiveCellState.OPERATOR]}${
-          cellState[ActiveCellState.OPERAND] === 'in'
-            ? `[${cellState[ActiveCellState.VALUE].join(',')}]`
-            : cellState[ActiveCellState.VALUE][0] || ''
-        }${cellState[ActiveCellState.EOF]}`;
+        return cellState.OPERATOR === 'in'
+          ? `${cellState[ActiveCellState.FORMULA]} ${
+              cellState[ActiveCellState.OPERAND]
+            } in [${cellState[ActiveCellState.VALUE].join(',')}]`
+          : `${cellState[ActiveCellState.FORMULA]}${
+              cellState[ActiveCellState.OPERAND]
+            }${cellState[ActiveCellState.OPERATOR]}${
+              cellState[ActiveCellState.VALUE][0] || ''
+            }${cellState[ActiveCellState.EOF]}`;
       case 'unique(':
         return `${cellState[ActiveCellState.FORMULA]}${
           cellState[ActiveCellState.OPERAND]
@@ -167,40 +174,6 @@ const FormulaDropDownBox = ({
         return prevFormula;
     }
   };
-
-  const [values, setValues] = useState<string[]>([]);
-  const [isLoadingValue, setIsLoadingValue] = useState(false);
-  const router = useRouter();
-  const { dsId } = router.query;
-  useEffect(() => {
-    if (!cell.properties.includes(cellState.OPERAND)) return;
-    const fetchUniqueValues = async () => {
-      const response = await getWorkbookTransientColumn(
-        dsId as string,
-        [
-          {
-            formula: 'unique',
-            property: cellState.OPERAND,
-          },
-        ],
-        [],
-        'default',
-        'events'
-      );
-      if (response.status === 200) {
-        setValues(
-          response.data.data.map(
-            (value: { [key: string]: string }) => value[cellState.OPERAND]
-          )
-        );
-      } else {
-        setValues([]);
-      }
-      setIsLoadingValue(false);
-    };
-    setIsLoadingValue(true);
-    fetchUniqueValues();
-  }, [cellState.OPERAND]);
 
   const getActiveCellState = (suggestedValues: string[]) => {
     if (
@@ -227,7 +200,7 @@ const FormulaDropDownBox = ({
     try {
       cell.columnType === SubHeaderColumnType.DIMENSION
         ? DimensionParser(cell.properties).parse(formula)
-        : Metricparser(cell.properties, values).parse(formula);
+        : Metricparser(cell.properties, values.slice(0, 500)).parse(formula);
       setSuggestions([]);
 
       // if valid formula, commit the formula text
@@ -288,6 +261,37 @@ const FormulaDropDownBox = ({
     suggestFormula(generatedString);
   }, [cellState]);
 
+  useEffect(() => {
+    if (!cell.properties.includes(cellState.OPERAND)) return;
+
+    const fetchUniqueValues = async () => {
+      const response = await getWorkbookTransientColumn(
+        dsId as string,
+        [
+          {
+            formula: 'unique',
+            property: cellState.OPERAND,
+          },
+        ],
+        [],
+        'default',
+        'events'
+      );
+      if (response.status === 200) {
+        setValues(
+          response.data.data.map(
+            (value: { [key: string]: string }) => value[cellState.OPERAND]
+          )
+        );
+      } else {
+        setValues([]);
+      }
+      setIsLoadingValue(false);
+    };
+    setIsLoadingValue(true);
+    fetchUniqueValues();
+  }, [cellState.OPERAND]);
+
   const getDisplayIcon = () => {
     const cellStateIcon = {
       [ActiveCellState.FORMULA]: <Function size={18} color={GREY_600} />,
@@ -299,11 +303,12 @@ const FormulaDropDownBox = ({
     return cellStateIcon[activeCellState];
   };
 
-  const showDropdown = suggestions?.length && formula;
+  const showDropdown = Boolean(suggestions?.length && formula);
+
   const showCheckboxDropdown =
     showDropdown &&
     activeCellState === ActiveCellState.VALUE &&
-    cellState.OPERAND === 'in';
+    cellState.OPERATOR === 'in';
 
   return (
     <Flex width={'full'}>
@@ -379,7 +384,7 @@ const FormulaDropDownBox = ({
             overflow={'scroll'}
           >
             {!isLoadingValue ? (
-              suggestions.map((suggestion, index) => {
+              suggestions.slice(0, 100).map((suggestion, index) => {
                 return (
                   <Flex
                     key={index}
