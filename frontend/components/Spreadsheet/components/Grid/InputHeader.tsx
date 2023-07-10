@@ -159,7 +159,9 @@ const FormulaDropDownBox = ({
         return cellState.OPERATOR === 'in'
           ? `${cellState[ActiveCellState.FORMULA]} ${
               cellState[ActiveCellState.OPERAND]
-            } in [${cellState[ActiveCellState.VALUE].join(',')}]`
+            } in [${cellState[ActiveCellState.VALUE].join(',')}]${
+              cellState[ActiveCellState.EOF]
+            }`
           : `${cellState[ActiveCellState.FORMULA]}${
               cellState[ActiveCellState.OPERAND]
             }${cellState[ActiveCellState.OPERATOR]}${

@@ -90,9 +90,8 @@ _ "whitespace"
   = [ \\t\\n\\r]*
 `;
 
-export const FormulaExtratorGrammar = `
-Expression = function_operand_operator_values_end / function_operand_operator_values/ 
-          function_operand_operator / function_operand / fname / empty_input
+export const FormulaExtratorGrammar = `Expression = function_operand_operator_values_end/ function_operand_in_operator_values_end/ function_operand_in_operator_values / function_operand_operator_values/ 
+          function_operand_operator/function_operand_in_operator/function_operand_in_operator_values / function_operand / fname / empty_input
 
 empty_input = _ { return {
   FORMULA : '',
@@ -114,7 +113,7 @@ return {
 }
 }
  
-function_without_condition =fname _ ")" 
+function_without_condition =fname _ ")"
 {
 return {
   FORMULA : fname,
@@ -135,25 +134,49 @@ return {
 }
 }
  
-function_operand = fname:fname _ property:$(value+) {
+function_operand = fname:fname _ property:$(value+) _ {
 return {
   ...fname,
   OPERAND : property,
 } 
 }
 
-function_operand_operator = function_operand:function_operand _ operator:operator {
+
+function_operand_operator = function_operand:function_operand _ operator:operator _{
 return {
   ...function_operand,
   OPERATOR :operator,
 }
 }
 
-operator = "=" / "!=" / "<=" /"<"/">="/">"/"in"
-function_operand_operator_values = function_operand_operator:function_operand_operator _ values:$(value+) {
+function_operand_in_operator = function_operand:function_operand _ operator:"in"i _{
+return {
+  ...function_operand,
+  OPERATOR :operator,
+}
+}
+
+operator = "=" / "!=" / "<=" /"<"/">="/">"
+function_operand_operator_values = function_operand_operator:function_operand_operator _ values:$(value+) _{
 return {
   ...function_operand_operator,
   VALUE :[values],
+}
+}
+
+function_operand_in_operator_values =
+function_operand_in_operator:function_operand_in_operator _ "[" _ values:$(value+) _ rest:(_ "," $(value+) )*"]" _{
+return {
+  ...function_operand_in_operator,
+  VALUE :[values].concat(rest.map(item=>item[2]))
+}
+}
+
+function_operand_in_operator_values_end =
+function_operand_in_operator_values:function_operand_in_operator_values _ ")" {
+return {
+  ...function_operand_in_operator_values,
+  EOF : ')'
 }
 }
 
