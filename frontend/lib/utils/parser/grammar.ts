@@ -192,3 +192,147 @@ value = [a-zA-Z_0-9.][a-zA-Z_0-9]*
 _ "whitespace"
   = [ \\t\\n\\r]*
 `;
+
+export const FormulaExtratorGrammarV2 = `
+start = expression
+
+expression = unique / count / countif 
+
+unique =  complete_unique/unique_without_property 
+unique_without_property= fname:"unique("i _
+{
+	return {
+    FORMULA : "unique(",
+  	FILTERS:[],
+  	EOF : ''
+    }
+}
+complete_unique = fname:"unique("i _ property:$(value+) _ ")"
+{
+	return {
+    FORMULA : "unique(",
+  	FILTERS:[
+    {
+    	OPERAND:property,
+        OPERATOR:'',
+        VALUES:[]
+    }
+    ],
+  	EOF : ')'
+    }
+}
+
+count = fname:"count()"i {
+	return {
+    FORMULA : "count(",
+  	FILTERS:[],
+  	EOF : ')'
+    }
+}
+
+countif = count_if_complete / countif_filter / countif_name
+
+countif_name = fname:"countif("_{
+return {
+ FORMULA:"countif(",
+ FILTERS:[],
+ EOF:''
+} }
+
+
+countif_filter= fname:"countif("_  filters:filter _ rest_filters:rest_filters* _ 
+{
+	return {
+    FORMULA:"countif(",
+    FILTERS:[filters].concat(rest_filters),
+    EOF:''
+}
+}
+
+count_if_complete= fname:"countif("_ filters:filter _ rest_filters:rest_filters* _ ")" {
+	return {
+    FORMULA:"countif(",
+    FILTERS:[filters].concat(rest_filters),
+    EOF:')'
+    }
+}
+
+rest_filters= rest_filters_complete / rest_filters_comma
+
+rest_filters_complete=_ ","_ filter:filter _ {return filter}
+rest_filters_comma = _ ',' _ {return {
+	FORMULA:'',
+    OPERATOR:'',
+    VALUES:[]
+}}
+
+
+filter = ( in_condition / arithematic )
+arithematic = arithematic_complete / arithematic_operand_operator/ arithematic_operand
+
+arithematic_operand = property:$(value+)_ {
+return {
+	OPERAND:property,
+    OPERATOR: '',
+    VALUES: []
+    }
+}
+
+arithematic_operand_operator = property:$(value+) _ op:operator _ {
+return {
+	OPERAND:property,
+    OPERATOR: op,
+    VALUES: []
+    }
+}
+
+
+arithematic_complete = property:$(value+) _ op:operator _ value:$(value+) {
+return {
+	OPERAND:property,
+    OPERATOR: op,
+    VALUES: [value]
+    }
+}
+
+in_condition = in_condition_complete / in_condition_till_values / in_condition_operator_operand_sq_bracket_open /in_condition_operator_operand
+
+in_condition_operator_operand_sq_bracket_open = property:$(value+) _ op:"in"i _ "[" {
+return {
+OPERAND:property,
+OPERATOR:"in",
+VALUES:[]
+}
+}
+
+in_condition_operator_operand = property:$(value+) _ op:"in"i _ {
+return {
+OPERAND:property,
+OPERATOR:"in",
+VALUES:[]
+}
+}
+
+in_condition_till_values = property:$(value+) _ op:"in"i _ "[" _ value:$(value+) _ rest:rest_values* _
+{return {
+	OPERAND:property,
+    OPERATOR:"in",
+    VALUES: [value].concat(rest.filter(item=>item)),
+}}
+
+in_condition_complete = property:$(value+) _ op:"in"i _ "[" _ value:$(value+) _ rest:rest_values* _"]"
+{return {
+	OPERAND:property,
+    OPERATOR:"in",
+    VALUES: [value].concat(rest.filter(item=>item)),
+}}
+
+rest_values= rest_values_complete/rest_value_comma
+rest_values_complete =_ "," _ value:$(value+)  {return value}
+rest_value_comma = _ ',' _ {return }
+
+operator = "=" / "!=" / "<=" /"<"/">="/">"
+value = [a-zA-Z_0-9.][a-zA-Z_0-9]*
+
+_ "whitespace"
+  = [ \t\n\r]*`;
