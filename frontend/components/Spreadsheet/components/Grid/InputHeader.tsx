@@ -152,29 +152,45 @@ const FormulaDropDownBox = ({
   };
 
   const generateFormulaString = (cellState: CellState, prevFormula: string) => {
-    switch (cellState[ActiveCellState.FORMULA]) {
+    const { FORMULA, OPERAND, OPERATOR, VALUE, EOF } = cellState;
+
+    switch (FORMULA) {
       case 'count(':
-        return `${cellState[ActiveCellState.FORMULA]})`;
+        return `${FORMULA})`;
       case 'countif(':
-        return cellState.OPERATOR === 'in'
-          ? `${cellState[ActiveCellState.FORMULA]} ${
-              cellState[ActiveCellState.OPERAND]
-            } in [${cellState[ActiveCellState.VALUE].join(',')}]${
-              cellState[ActiveCellState.EOF]
-            }`
-          : `${cellState[ActiveCellState.FORMULA]}${
-              cellState[ActiveCellState.OPERAND]
-            }${cellState[ActiveCellState.OPERATOR]}${
-              cellState[ActiveCellState.VALUE][0] || ''
-            }${cellState[ActiveCellState.EOF]}`;
+        return OPERATOR === 'in'
+          ? `${FORMULA} ${OPERAND} in [${VALUE.join(',')}]${EOF}`
+          : `${FORMULA}${OPERAND}${OPERATOR}${VALUE[0] || ''}${EOF}`;
       case 'unique(':
-        return `${cellState[ActiveCellState.FORMULA]}${
-          cellState[ActiveCellState.OPERAND]
-        }${cellState[ActiveCellState.EOF]}`;
+        return `${FORMULA}${OPERAND}${EOF}`;
 
       default:
         return prevFormula;
     }
+
+    // switch (FORMULA) {
+    //   case 'count(':
+    //     return `${cellState[ActiveCellState.FORMULA]})`;
+    //   case 'countif(':
+    //     return cellState.OPERATOR === 'in'
+    //       ? `${cellState[ActiveCellState.FORMULA]} ${
+    //           cellState[ActiveCellState.OPERAND]
+    //         } in [${cellState[ActiveCellState.VALUE].join(',')}]${
+    //           cellState[ActiveCellState.EOF]
+    //         }`
+    //       : `${cellState[ActiveCellState.FORMULA]}${
+    //           cellState[ActiveCellState.OPERAND]
+    //         }${cellState[ActiveCellState.OPERATOR]}${
+    //           cellState[ActiveCellState.VALUE][0] || ''
+    //         }${cellState[ActiveCellState.EOF]}`;
+    //   case 'unique(':
+    //     return `${cellState[ActiveCellState.FORMULA]}${
+    //       cellState[ActiveCellState.OPERAND]
+    //     }${cellState[ActiveCellState.EOF]}`;
+
+    //   default:
+    //     return prevFormula;
+    // }
   };
 
   const getActiveCellState = (suggestedValues: string[]) => {
