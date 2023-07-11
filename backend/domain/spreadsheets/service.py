@@ -69,7 +69,7 @@ class SpreadsheetService:
 
     def cleanse_query_string(self, query_string: str) -> str:
         query_string = re.sub(r"--.*\n+", " ", query_string)
-        return re.sub(r"\s+|\n+", " ", query_string).strip()
+        return re.sub(r"\n+", " ", query_string).strip()
 
     async def get_transient_spreadsheets(
         self, query: str, username: str, password: str
