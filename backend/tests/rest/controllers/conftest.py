@@ -2234,7 +2234,7 @@ def database_integration_data():
             "port": "3306",
             "username": "test-user",
             "password": "password",
-            "ssh_credential": None,
+            "sshCredential": None,
         },
     }
 
@@ -2246,7 +2246,7 @@ def database_credential_data():
         "port": "3306",
         "username": "test-user",
         "password": "password",
-        "ssh_credential": None,
+        "sshCredential": None,
     }
 
 
