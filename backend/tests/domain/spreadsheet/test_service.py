@@ -86,7 +86,7 @@ class TestSpreadsheetService:
         result = self.service.cleanse_query_string(self.query)
         assert (
             result
-            == "SELECT event_name FROM events WHERE timestamp>=toDate(2023-02-11)"
+            == "SELECT  event_name          FROM  events         WHERE timestamp>=toDate(2023-02-11)"
         )
 
     @pytest.mark.asyncio
