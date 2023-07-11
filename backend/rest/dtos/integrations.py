@@ -1,8 +1,11 @@
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel
 from domain.common.models import IntegrationProvider
-from domain.integrations.models import Credential, Integration
+from domain.integrations.models import (
+    Credential,
+    Integration,
+)
 from rest.dtos.datasources import DataSourceResponse
 from .model_response import ModelResponse
 
@@ -15,12 +18,29 @@ class IntegrationResponse(Integration, ModelResponse):
         orm_mode = True
 
 
+class DatabaseSSHCredential(BaseModel):
+    server: str
+    port: str
+    username: Optional[str]
+    password: Optional[str]
+    sshKey: Optional[str]
+
+
+class DatabaseCredential(BaseModel):
+    host: str
+    port: str
+    username: str
+    password: str
+    overSsh: bool = False
+    sshCredential: Optional[DatabaseSSHCredential]
+
 class CreateIntegrationDto(BaseModel):
     appId: str
     provider: IntegrationProvider
-    accountId: str
-    apiKey: str
-    apiSecret: str
+    accountId: Union[str, None]
+    apiKey: Union[str, None]
+    apiSecret: Union[str, None]
+    databaseCredential: Union[DatabaseCredential, None]
 
 
 class IntegrationWithDataSources(Integration, ModelResponse):
@@ -29,3 +49,12 @@ class IntegrationWithDataSources(Integration, ModelResponse):
 
     class Config:
         orm_mode = True
+
+
+class TestDatabaseDto(BaseModel):
+    host: str
+    port: str
+    username: str
+    password: str
+    overSsh: bool = False
+    sshCredential: Optional[DatabaseSSHCredential]

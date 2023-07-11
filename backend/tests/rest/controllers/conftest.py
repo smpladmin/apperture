@@ -2206,6 +2206,7 @@ def integration_service():
     integration_future = asyncio.Future()
     integration_future.set_result(integration)
     integration_service_mock.create_integration.return_value = integration_future
+    integration_service_mock.test_database_connection.return_value = True
     return integration_service_mock
 
 
@@ -2221,6 +2222,35 @@ def integration_data():
 
 
 @pytest.fixture(scope="module")
+def database_integration_data():
+    return {
+        "appId": "636a1c61d715ca6baae65611",
+        "accountId": None,
+        "apiKey": None,
+        "apiSecret": None,
+        "provider": IntegrationProvider.DATABASE,
+        "databaseCredential": {
+            "host": "127.0.0.1",
+            "port": "3306",
+            "username": "test-user",
+            "password": "password",
+            "ssh_credential": None,
+        },
+    }
+
+
+@pytest.fixture(scope="module")
+def database_credential_data():
+    return {
+        "host": "127.0.0.1",
+        "port": "3306",
+        "username": "test-user",
+        "password": "password",
+        "ssh_credential": None,
+    }
+
+
+@pytest.fixture(scope="module")
 def integration_response():
     return {
         "_id": None,
@@ -2232,6 +2262,7 @@ def integration_response():
             "refresh_token": None,
             "secret": "6ddqwjeaa",
             "type": "API_KEY",
+            "database_credential": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",
