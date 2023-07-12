@@ -10,7 +10,11 @@ from domain.runlogs.service import RunLogService
 from domain.datasources.service import DataSourceService
 from domain.integrations.service import IntegrationService
 from rest.dtos.datasources import CreateDataSourceDto, DataSourceResponse
-from rest.dtos.integrations import CreateIntegrationDto, IntegrationResponse
+from rest.dtos.integrations import (
+    CreateIntegrationDto,
+    IntegrationResponse,
+    TestDatabaseDto,
+)
 from rest.middlewares import get_user_id, validate_jwt
 
 
@@ -99,6 +103,7 @@ async def create_integration(
         dto.accountId,
         dto.apiKey,
         dto.apiSecret,
+        dto.databaseCredential,
     )
 
     if create_datasource:
@@ -124,3 +129,13 @@ async def create_integration(
         return response
 
     return integration
+
+
+@router.post("/integrations/database/test")
+async def check_database_connection(
+    dto: TestDatabaseDto,
+    integration_service: IntegrationService = Depends(),
+):
+    return integration_service.test_database_connection(
+        host=dto.host, port=dto.port, username=dto.username, password=dto.password
+    )

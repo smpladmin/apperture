@@ -1,27 +1,43 @@
+import { DatabaseCredential } from './../domain/integration';
 import { AxiosRequestConfig } from 'axios';
 import { ApperturePost, ApperturePrivateGet } from './util';
 import { ProviderDataSource } from '@lib/domain/datasource';
 import { Provider } from '@lib/domain/provider';
 
+type IntegrationRequestBody = {
+  appId: string;
+  provider: Provider;
+  accountId?: string;
+  apiKey?: string;
+  apiSecret?: string;
+  databaseCredential?: DatabaseCredential;
+};
+
 export const createIntegrationWithDataSource = async (
   appId: string,
   provider: Provider,
-  accountId: string,
-  apiKey: string,
-  apiSecret: string,
+  accountId?: string,
+  apiKey?: string,
+  apiSecret?: string,
+  databaseCredential?: DatabaseCredential,
   config: AxiosRequestConfig = {
-    params: { create_datasource: true, trigger_data_processor: true },
+    params: {
+      create_datasource: true,
+      trigger_data_processor: !databaseCredential,
+    },
   }
 ) => {
+  const integrationRequestBody: IntegrationRequestBody = databaseCredential
+    ? {
+        appId,
+        provider,
+        databaseCredential,
+      }
+    : { appId, provider, accountId, apiKey, apiSecret };
+
   const res = await ApperturePost(
     '/integrations',
-    {
-      appId,
-      provider,
-      accountId,
-      apiKey,
-      apiSecret,
-    },
+    integrationRequestBody,
     config
   );
   return res.data;
@@ -58,6 +74,16 @@ export const saveDataSources = async (
     {
       params: { trigger_data_processor: true },
     }
+  );
+  return res.data;
+};
+
+export const testDatabaseConnection = async (
+  databaseCredential: DatabaseCredential
+) => {
+  const res = await ApperturePost(
+    `/integrations/database/test`,
+    databaseCredential
   );
   return res.data;
 };

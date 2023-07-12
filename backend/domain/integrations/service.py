@@ -1,8 +1,18 @@
+import logging
+from typing import Optional
+import mysql.connector
+
 from beanie import PydanticObjectId
 from authorisation.models import IntegrationOAuth
 from domain.apps.models import App
 from domain.apperture_users.models import AppertureUser
-from .models import Credential, CredentialType, Integration, IntegrationProvider
+from .models import (
+    Credential,
+    CredentialType,
+    Integration,
+    IntegrationProvider,
+    DatabaseCredential,
+)
 
 
 class IntegrationService:
@@ -43,15 +53,20 @@ class IntegrationService:
         self,
         app: App,
         provider: IntegrationProvider,
-        account_id: str,
-        api_key: str,
-        secret: str,
+        account_id: Optional[str],
+        api_key: Optional[str],
+        secret: Optional[str],
+        database_credential: Optional[DatabaseCredential],
     ):
+        credential_type = (
+            CredentialType.DATABASE if database_credential else CredentialType.API_KEY
+        )
         credential = Credential(
-            type=CredentialType.API_KEY,
+            type=credential_type,
             account_id=account_id,
             api_key=api_key,
             secret=secret,
+            database_credential=database_credential,
         )
         integration = Integration(
             user_id=app.user_id,
@@ -61,3 +76,30 @@ class IntegrationService:
         )
         await integration.insert()
         return integration
+
+    def test_database_connection(
+        self, host: str, port: str, username: str, password: str
+    ):
+        connection_successful = False
+        try:
+            # Establish a connection to the MySQL server
+            connection = mysql.connector.connect(
+                host=host,
+                port=port,
+                user=username,
+                password=password,
+            )
+
+            # Check if the connection was successful
+            if connection.is_connected():
+                connection_successful = True
+                logging.info("Connected to MySQL database")
+
+            # Close the connection
+            connection.close()
+            logging.info("Connection closed")
+
+        except mysql.connector.Error as error:
+            logging.info(f"Failed to connect to MySQL database: {error}")
+
+        return connection_successful
