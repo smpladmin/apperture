@@ -126,6 +126,8 @@ async def process_kafka_messages() -> None:
             if is_valid_base64(record.value)
         ]
 
+        _events = [e for e in _events if e]
+
         _offsets = [record.offset for _, records in data.items() for record in records]
 
         # Convert any non-list events to a list
