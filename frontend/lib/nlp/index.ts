@@ -1,4 +1,4 @@
-import fuzz from 'fuzzball';
+import * as fuzz from 'fuzzball';
 
 // prettier-ignore
 const STOP_WORDS = [
@@ -16,7 +16,19 @@ const STOP_WORDS = [
     "wouldn't", "y", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves"
 ];
 
-export const findMatches = (query: string, choices: Array<string>) => {
+export type Choice = {
+  choice: string;
+  updated: string;
+};
+
+export type Match = {
+  word: string;
+  choices: Array<Choice>;
+};
+
+export type Matches = Array<Match>;
+
+export const findMatches = (query: string, choices: Array<string>): Matches => {
   const updatedChoices = preprocessChoices(choices);
   const words = queryToWords(query);
   return words

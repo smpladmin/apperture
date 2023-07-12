@@ -43,6 +43,7 @@
     "react-date-range": "^1.4.0",
     "react-dom": "18.2.0",
     "react-modal-sheet": "^1.7.0",
+    "react-textarea-autosize": "^8.5.2",
     "remixicon": "^2.5.0"
   },
   "devDependencies": {

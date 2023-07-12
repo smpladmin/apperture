@@ -29,6 +29,7 @@ const GREY_600 = '#9E9E9E';
 const GREY_700 = '#BDBDBD';
 const GREY_800 = '#606060';
 const BLACK_500 = '#424242';
+const BLUE_400 = '#4984DF';
 const BLUE_500 = '#5093EC';
 const RED_500 = '#DD6054';
 const PURPLE_500 = '#9131AA';
@@ -76,7 +77,7 @@ const colors = {
     900: ' #212121',
     1000: '#F8F8FA',
   },
-  yellow: { 500: YELLOW_500, 600: '#fac213' },
+  yellow: { 500: YELLOW_500, 600: '#fac213', 800: '#EBAC42' },
   green: {
     DEFAULT: GREEN,
     500: GREEN_500,
@@ -93,6 +94,7 @@ const colors = {
     500: RED_500,
   },
   blue: {
+    400: BLUE_400,
     500: BLUE_500,
   },
   purple: {
