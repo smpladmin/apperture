@@ -4,6 +4,7 @@ from functools import reduce
 import json
 import logging
 import os
+import traceback
 from typing import Dict
 
 from fastapi import FastAPI
@@ -76,7 +77,14 @@ def to_object(value: str) -> Dict:
         logging.info(f"Exception while decoding string: {value}")
         decoded_string = base64.b64decode(value)
 
-    return json.loads(decoded_string)
+    try:
+        return json.loads(decoded_string)
+    except Exception as e:
+        logging.info(repr(e))
+        traceback.print_exc()
+        logging.info(
+            f"Exception while loading event string as json, skipping it: {decoded_string}"
+        )
 
 
 def is_valid_base64(encoded_string):
@@ -117,6 +125,8 @@ async def process_kafka_messages() -> None:
             for record in records
             if is_valid_base64(record.value)
         ]
+
+        _events = [e for e in _events if e]
 
         _offsets = [record.offset for _, records in data.items() for record in records]
 
