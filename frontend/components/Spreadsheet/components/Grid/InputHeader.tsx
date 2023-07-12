@@ -95,6 +95,7 @@ export class InputHeaderTemplate implements CellTemplate<InputHeaderCell> {
 }
 
 enum ActiveCellState {
+  BLANK = 'BLANK',
   FORMULA = 'FORMULA',
   OPERAND = 'OPERAND',
   OPERATOR = 'OPERATOR',
@@ -130,7 +131,7 @@ const FormulaDropDownBox = ({
 
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [activeCellState, setActiveCellState] = useState<ActiveCellState>(
-    ActiveCellState.FORMULA
+    ActiveCellState.BLANK
   );
   const [cellState, setCellState] = useState<CellState>({
     [ActiveCellState.FORMULA]: '',
@@ -214,7 +215,7 @@ const FormulaDropDownBox = ({
       if (newSuggestions && newSuggestions !== suggestions) {
         setActiveCellState(getActiveCellState(newSuggestions.sort()));
       }
-      if (isEqual(newSuggestions, [')'])) {
+      if (newSuggestions.includes(')')) {
         setActiveCellState(ActiveCellState.EOF);
         // setCellState((prevState) => ({ ...prevState, EOF: ')' }));
         return;
@@ -261,6 +262,7 @@ const FormulaDropDownBox = ({
 
   useEffect(() => {
     // parser to extract formula, operand, operator and values
+    if (activeCellState === ActiveCellState.BLANK) return;
     try {
       const cellStateObj = FormulaParser.parse(
         activeCellState === ActiveCellState.EOF ? formula + ')' : formula
@@ -272,6 +274,7 @@ const FormulaDropDownBox = ({
   }, [activeCellState]);
 
   useEffect(() => {
+    if (activeCellState === ActiveCellState.BLANK) return;
     const generatedString = generateFormulaString(cellState, formula);
     setFormula(generatedString);
     suggestFormula(generatedString);
@@ -315,6 +318,7 @@ const FormulaDropDownBox = ({
       [ActiveCellState.OPERATOR]: '',
       [ActiveCellState.VALUE]: '',
       [ActiveCellState.EOF]: '',
+      [ActiveCellState.BLANK]: '',
     };
     return cellStateIcon[activeCellState];
   };

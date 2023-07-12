@@ -90,10 +90,16 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const [workbookName, setWorkbookName] = useState<string>(
     savedWorkbook?.name || 'Untitled Workbook'
   );
+  const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
   const [requestTranisentColumn, setRequestTransientColumn] =
     useState<TransientColumnRequestState>({
-      isLoading: false,
-      subheaders: [],
+      isLoading: Boolean(
+        savedWorkbook?.spreadsheets[selectedSheetIndex].subHeaders.some(
+          (subheader) => typeof subheader === 'string' && subheader?.[0] === '='
+        )
+      ),
+      subheaders:
+        savedWorkbook?.spreadsheets[selectedSheetIndex]?.subHeaders || [],
     });
 
   const [eventProperties, setEventProperties] = useState<string[]>([]);
@@ -102,7 +108,6 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
   const toast = useToast();
 
-  const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
   const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
 
@@ -140,7 +145,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     const newHeader: SpreadSheetColumn[] = [];
     let i = 0;
     subheaders.slice(1, max + 1).forEach((subheader, index) => {
-      if (subheader.name) {
+      if (subheader.name.includes('=')) {
         newHeader.push(originalHeader[i]);
         i++;
       } else {
@@ -159,11 +164,13 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         const { subheaders } = requestTranisentColumn;
         const metrics = subheaders.filter(
           (subheader) =>
-            subheader.name && subheader.type === SubHeaderColumnType.METRIC
+            subheader.name.includes('=') &&
+            subheader.type === SubHeaderColumnType.METRIC
         );
         const dimensions = subheaders.filter(
           (subheader) =>
-            subheader.name && subheader.type === SubHeaderColumnType.DIMENSION
+            subheader.name.includes('') &&
+            subheader.type === SubHeaderColumnType.DIMENSION
         );
 
         const database = 'default',
@@ -442,7 +449,64 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
   useEffect(() => {
     if (!savedWorkbook) return;
+    const hasColumnFetcSubheaderWithoutData =
+      savedWorkbook &&
+      Boolean(
+        savedWorkbook?.spreadsheets[selectedSheetIndex].subHeaders.some(
+          (subheader) =>
+            typeof subheader.name === 'string' && subheader.name?.[0] === '='
+        )
+      ) &&
+      !sheetsData[selectedSheetIndex].data.length;
+    if (hasColumnFetcSubheaderWithoutData) {
+      const fetchSheetData = async () => {
+        const subheaders =
+          savedWorkbook?.spreadsheets[selectedSheetIndex].subHeaders;
+        const metrics = subheaders.filter(
+          (subheader) =>
+            subheader.name.includes('=') &&
+            subheader.type === SubHeaderColumnType.METRIC
+        );
+        const dimensions = subheaders.filter(
+          (subheader) =>
+            subheader.name.includes('=') &&
+            subheader.type === SubHeaderColumnType.DIMENSION
+        );
 
+        const database = 'default',
+          table = 'events';
+
+        const response = await getWorkbookTransientColumn(
+          dsId as string,
+          dimensions.map((dimension) =>
+            DimensionParser().parse(dimension.name)
+          ),
+          metrics.map((metric) => Metricparser().parse(metric.name)),
+          database,
+          table
+        );
+        if (response.status !== 200) {
+          toast({
+            title: 'Something went wrong!',
+            status: 'error',
+            variant: 'subtle',
+            isClosable: true,
+          });
+        } else {
+          const newHeader = arrangeTransientColumnHeader(
+            subheaders,
+            response.data.headers
+          );
+
+          const tempSheetsData = cloneDeep(sheetsData);
+          tempSheetsData[selectedSheetIndex].headers = newHeader;
+          tempSheetsData[selectedSheetIndex].data = response.data.data;
+          tempSheetsData[selectedSheetIndex].subHeaders = subheaders;
+          setSheetsData(tempSheetsData);
+        }
+      };
+      fetchSheetData();
+    }
     const updateSheetData = (data: any[]) => {
       const toUpdateSheets = cloneDeep(sheetsData);
       toUpdateSheets[selectedSheetIndex].data = data;
