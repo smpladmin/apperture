@@ -258,7 +258,6 @@ const FormulaDropDownBox = ({
   }, [activeCellState]);
 
   useEffect(() => {
-    console.log(cellState);
     const generatedString = generateFormulaString(cellState, formula);
     setFormula(generatedString);
     suggestFormula(generatedString);

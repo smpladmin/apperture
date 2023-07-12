@@ -129,14 +129,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     originalHeader: SpreadSheetColumn[]
   ) => {
     const max = subheaders.reduce(
-      (
-        max: number,
-        subheader: {
-          name: string;
-          type: SubHeaderColumnType;
-        },
-        index: number
-      ) => {
+      (max: number, subheader: SubHeaderColumn, index: number) => {
         if (subheader.name) {
           max = max < index ? index : max;
         }
@@ -197,6 +190,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             subheaders,
             response.data.headers
           );
+
           const tempSheetsData = cloneDeep(sheetsData);
           tempSheetsData[selectedSheetIndex].headers = newHeader;
           tempSheetsData[selectedSheetIndex].data = response.data.data;
@@ -244,6 +238,21 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       toUpdateHeaderIndex - existingHeadersLength;
 
     return toAddPaddingHeadersLength > 0 ? toAddPaddingHeadersLength : 0;
+  };
+
+  const getHeaderIndex = (sheetData: TransientSheetData, columnId: string) => {
+    const existingHeaders = sheetData?.headers;
+
+    const existingHeaderIndex = existingHeaders.findIndex(
+      (header) => header.name === columnId
+    );
+
+    if (existingHeaderIndex !== -1) {
+      // add 1 as offset for index header
+      return existingHeaderIndex + 1;
+    } else {
+      return columnId.toUpperCase().charCodeAt(0) - 65 + 1;
+    }
   };
 
   const updateSelectedSheetDataAndHeaders = (
@@ -308,8 +317,10 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const evaluateFormulaHeader = useCallback(
     (headerText: string, columnId: string) => {
       const sheetData = sheetsData[selectedSheetIndex];
+
       const isBlankSheet = !sheetData.is_sql && !sheetData.query;
-      const index = columnId.toUpperCase().charCodeAt(0) - 65 + 1;
+      const index = getHeaderIndex(sheetData, columnId);
+
       if (headerText.match(/count|unique/i)) {
         if (isBlankSheet)
           try {
@@ -320,11 +331,15 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             } else {
               Metricparser().parse(headerText);
             }
-            sheetData.subHeaders[index].name = headerText;
+
+            const tempSheetsData = cloneDeep(sheetsData);
+            tempSheetsData[selectedSheetIndex].subHeaders[index].name =
+              headerText;
+            setSheetsData(tempSheetsData);
 
             setRequestTransientColumn({
               isLoading: true,
-              subheaders: sheetData.subHeaders,
+              subheaders: tempSheetsData[selectedSheetIndex].subHeaders,
             });
           } catch (error) {
             toast({
