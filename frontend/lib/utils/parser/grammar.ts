@@ -90,103 +90,163 @@ _ "whitespace"
   = [ \\t\\n\\r]*
 `;
 
-export const FormulaExtratorGrammar = `Expression = function_operand_operator_values_end/ function_operand_in_operator_values_end/ function_operand_in_operator_values / function_operand_operator_values/ 
-          function_operand_operator/function_operand_in_operator/function_operand_in_operator_values / function_operand / fname / empty_input
+export const FormulaExtratorGrammar = `start = expression
 
-empty_input = _ { return {
-  FORMULA : '',
-  OPERAND : '',
-  OPERATOR :'',
-  VALUE :[],
-  EOF : ''
-}
-}
- 
-fname = fname:("unique("i /"count("i / "countif("i) { 
+expression = unique / countif / count / empty
 
+empty = _ {
 return {
-  FORMULA : fname,
-  OPERAND : '',
-  OPERATOR :'',
-  VALUE :[],
-  EOF : ''
+    FORMULA :'',
+    OPERAND:'',
+        OPERATOR:'',
+        VALUES:[],
+  	EOF : ''
+    }
 }
-}
- 
-function_without_condition =fname _ ")"
+
+unique =  complete_unique/unique_without_property 
+unique_name = "unique()"i/"unique("i/"unique"i/"uniqu"i/"uniq"i/"uni"i/"un"i/"u"i
+unique_without_property= fname:unique_name _
 {
+	return {
+    FORMULA : fname.toLowerCase(),
+    OPERAND:'',
+        OPERATOR:'',
+        VALUES:[]
+   ,
+  	EOF : ''
+    }
+}
+complete_unique = fname:unique_name _ property:$(value+) _ ")"
+{
+	return {
+    FORMULA : fname.toLowerCase(),
+    OPERAND:property,
+        OPERATOR:'',
+        VALUES:[]
+        ,
+  	EOF : ')'
+    }
+}
+
+count_name = "count()"i/"count("i/"count"i/"coun"i/"cou"i/"co"i/"c"i 
+
+count = fname:count_name {
+	return {
+    FORMULA : fname.toLowerCase().replace(')',''),
+    OPERAND:'',
+        OPERATOR:'',
+        VALUES:[]
+        ,
+  	EOF : ''
+    }
+}
+countif = count_if_complete / countif_filter / countif_name
+
+countif_name_states ="countif()"i/"countif("i/"countif"i/"counti"i
+
+countif_name = fname:countif_name_states _{
 return {
-  FORMULA : fname,
-  OPERAND : '',
-  OPERATOR :'',
-  VALUE :[],
-  EOF : '',
+ FORMULA:fname.toLowerCase().replace(')',''),
+ OPERAND:'',
+    OPERATOR:'',
+    VALUES:[],
+ EOF:''
+} }
+
+
+countif_filter= fname:countif_name_states _  filters:filter  _ 
+{
+	return {
+    FORMULA:fname.toLowerCase().replace(')',''),
+    ...filters,
+    EOF:''
 }
 }
 
-function_operand_end = function_operand:function_operand _ ")"  { 
-return {
-  FORMULA : function_operand,
-  OPERAND : function_operand,
-  OPERATOR :'',
-  VALUE :[],
-  EOF : ')'
+count_if_complete= fname:countif_name_states _ filters:filter _ ")" {
+	return {
+    FORMULA:fname.toLowerCase().replace(')',''),
+    ...filters,
+    EOF:')'
+    }
 }
-}
- 
-function_operand = fname:fname _ property:$(value+) _ {
+
+rest_filters= rest_filters_complete / rest_filters_comma
+
+rest_filters_complete=_ ","_ filter:filter _ {return filter}
+rest_filters_comma = _ ',' _ {return {
+	OPERAND:'',
+    OPERATOR:'',
+    VALUES:[]
+}}
+
+
+filter = ( in_condition / arithematic )
+arithematic = arithematic_complete / arithematic_operand_operator/ arithematic_operand
+
+arithematic_operand = property:$(value+)_ {
 return {
-  ...fname,
-  OPERAND : property,
-} 
+	OPERAND:property,
+    OPERATOR: '',
+    VALUES: []
+    }
+}
+
+arithematic_operand_operator = property:$(value+) _ op:operator _ {
+return {
+	OPERAND:property,
+    OPERATOR: op,
+    VALUES: []
+    }
 }
 
 
-function_operand_operator = function_operand:function_operand _ operator:operator _{
+arithematic_complete = property:$(value+) _ op:operator _ value:$(value+) {
 return {
-  ...function_operand,
-  OPERATOR :operator,
+	OPERAND:property,
+    OPERATOR: op,
+    VALUES: [value]
+    }
+}
+
+in_condition = in_condition_complete / in_condition_till_values / in_condition_operator_operand_sq_bracket_open /in_condition_operator_operand
+
+in_condition_operator_operand_sq_bracket_open = property:$(value+) _ op:"in"i _ "[" {
+return {
+OPERAND:property,
+OPERATOR:"in",
+VALUES:[]
 }
 }
 
-function_operand_in_operator = function_operand:function_operand _ operator:"in"i _{
+in_condition_operator_operand = property:$(value+) _ op:"in"i _ {
 return {
-  ...function_operand,
-  OPERATOR :operator,
+OPERAND:property,
+OPERATOR:"in",
+VALUES:[]
 }
 }
+
+in_condition_till_values = property:$(value+) _ op:"in"i _ "[" _ value:$(value+) _ rest:rest_values* _
+{return {
+	OPERAND:property,
+    OPERATOR:"in",
+    VALUES: [value].concat(rest.filter(item=>item)),
+}}
+
+in_condition_complete = property:$(value+) _ op:"in"i _ "[" _ value:$(value+) _ rest:rest_values* _"]"
+{return {
+	OPERAND:property,
+    OPERATOR:"in",
+    VALUES: [value].concat(rest.filter(item=>item)),
+}}
+
+rest_values= rest_values_complete/rest_value_comma
+rest_values_complete =_ "," _ value:$(value+)  {return value}
+rest_value_comma = _ ',' _ {return }
 
 operator = "=" / "!=" / "<=" /"<"/">="/">"
-function_operand_operator_values = function_operand_operator:function_operand_operator _ values:$(value+) _{
-return {
-  ...function_operand_operator,
-  VALUE :[values],
-}
-}
-
-function_operand_in_operator_values =
-function_operand_in_operator:function_operand_in_operator _ "[" _ values:$(value+) _ rest:(_ "," $(value+) )*"]" _{
-return {
-  ...function_operand_in_operator,
-  VALUE :[values].concat(rest.map(item=>item[2]))
-}
-}
-
-function_operand_in_operator_values_end =
-function_operand_in_operator_values:function_operand_in_operator_values _ ")" {
-return {
-  ...function_operand_in_operator_values,
-  EOF : ')'
-}
-}
-
-function_operand_operator_values_end = function_operand_operator_values:function_operand_operator_values _ ")" {
-return {
-  ...function_operand_operator_values,
-  EOF : ')'
-}
-}
-
 value = [a-zA-Z_0-9.][a-zA-Z_0-9]*
 
 _ "whitespace"
