@@ -168,6 +168,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
         const database = 'default',
           table = 'events';
+        console.log(metrics);
 
         const response = await getWorkbookTransientColumn(
           dsId as string,

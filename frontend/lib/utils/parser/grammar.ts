@@ -4,8 +4,7 @@ const keywordgenerator = (tokens: string[]) =>
   }, '');
 
 export const MetricGrammar = (properties?: string[], values?: string[]) => `
-  start
-  = expression
+ start = "="ex:expression {return ex}
 
 expression
   = countif_function/count_function
@@ -21,8 +20,8 @@ count_function = fname:$count _ ")" {
 count = "count("i 
 
 condition_parameters
-  = head:condition tail:(_ "," _ condition)* {
-      return [head].concat(tail.map((param) => param[3]));
+  = head:condition  {
+      return [head];
   }
 
 condition
@@ -69,8 +68,7 @@ _ "whitespace"
 `;
 
 export const DimensionGrammar = (properties?: string[]) => `
-  start
-  = expression
+ start = "="ex:expression {return ex}
 
 expression
   = unique_function
@@ -90,7 +88,8 @@ _ "whitespace"
   = [ \\t\\n\\r]*
 `;
 
-export const FormulaExtratorGrammar = `start = expression
+export const FormulaExtratorGrammar = `
+start = "="ex:expression {return ex}
 
 expression = unique / countif / count / empty
 
@@ -99,7 +98,7 @@ return {
     FORMULA :'',
     OPERAND:'',
         OPERATOR:'',
-        VALUES:[],
+        VALUE:[],
   	EOF : ''
     }
 }
@@ -112,7 +111,7 @@ unique_without_property= fname:unique_name _
     FORMULA : fname.toLowerCase(),
     OPERAND:'',
         OPERATOR:'',
-        VALUES:[]
+        VALUE:[]
    ,
   	EOF : ''
     }
@@ -123,7 +122,7 @@ complete_unique = fname:unique_name _ property:$(value+) _ ")"
     FORMULA : fname.toLowerCase(),
     OPERAND:property,
         OPERATOR:'',
-        VALUES:[]
+        VALUE:[]
         ,
   	EOF : ')'
     }
@@ -136,7 +135,7 @@ count = fname:count_name {
     FORMULA : fname.toLowerCase().replace(')',''),
     OPERAND:'',
         OPERATOR:'',
-        VALUES:[]
+        VALUE:[]
         ,
   	EOF : ''
     }
@@ -150,7 +149,7 @@ return {
  FORMULA:fname.toLowerCase().replace(')',''),
  OPERAND:'',
     OPERATOR:'',
-    VALUES:[],
+    VALUE:[],
  EOF:''
 } }
 
@@ -178,7 +177,7 @@ rest_filters_complete=_ ","_ filter:filter _ {return filter}
 rest_filters_comma = _ ',' _ {return {
 	OPERAND:'',
     OPERATOR:'',
-    VALUES:[]
+    VALUE:[]
 }}
 
 
@@ -189,7 +188,7 @@ arithematic_operand = property:$(value+)_ {
 return {
 	OPERAND:property,
     OPERATOR: '',
-    VALUES: []
+    VALUE: []
     }
 }
 
@@ -197,7 +196,7 @@ arithematic_operand_operator = property:$(value+) _ op:operator _ {
 return {
 	OPERAND:property,
     OPERATOR: op,
-    VALUES: []
+    VALUE: []
     }
 }
 
@@ -206,7 +205,7 @@ arithematic_complete = property:$(value+) _ op:operator _ value:$(value+) {
 return {
 	OPERAND:property,
     OPERATOR: op,
-    VALUES: [value]
+    VALUE: [value]
     }
 }
 
@@ -216,7 +215,7 @@ in_condition_operator_operand_sq_bracket_open = property:$(value+) _ op:"in"i _ 
 return {
 OPERAND:property,
 OPERATOR:"in",
-VALUES:[]
+VALUE:[]
 }
 }
 
@@ -224,7 +223,7 @@ in_condition_operator_operand = property:$(value+) _ op:"in"i _ {
 return {
 OPERAND:property,
 OPERATOR:"in",
-VALUES:[]
+VALUE:[]
 }
 }
 
@@ -232,14 +231,14 @@ in_condition_till_values = property:$(value+) _ op:"in"i _ "[" _ value:$(value+)
 {return {
 	OPERAND:property,
     OPERATOR:"in",
-    VALUES: [value].concat(rest.filter(item=>item)),
+    VALUE: [value].concat(rest.filter(item=>item)),
 }}
 
 in_condition_complete = property:$(value+) _ op:"in"i _ "[" _ value:$(value+) _ rest:rest_values* _"]"
 {return {
 	OPERAND:property,
     OPERATOR:"in",
-    VALUES: [value].concat(rest.filter(item=>item)),
+    VALUE: [value].concat(rest.filter(item=>item)),
 }}
 
 rest_values= rest_values_complete/rest_value_comma
@@ -247,7 +246,7 @@ rest_values_complete =_ "," _ value:$(value+)  {return value}
 rest_value_comma = _ ',' _ {return }
 
 operator = "=" / "!=" / "<=" /"<"/">="/">"
-value = [a-zA-Z_0-9.][a-zA-Z_0-9]*
+value = [a-zA-Z_0-9.$-][a-zA-Z_0-9]*
 
 _ "whitespace"
   = [ \\t\\n\\r]*
@@ -275,7 +274,7 @@ complete_unique = fname:"unique("i _ property:$(value+) _ ")"
     {
     	OPERAND:property,
         OPERATOR:'',
-        VALUES:[]
+        VALUE:[]
     }
     ],
   	EOF : ')'
@@ -323,7 +322,7 @@ rest_filters_complete=_ ","_ filter:filter _ {return filter}
 rest_filters_comma = _ ',' _ {return {
 	FORMULA:'',
     OPERATOR:'',
-    VALUES:[]
+    VALUE:[]
 }}
 
 
@@ -334,7 +333,7 @@ arithematic_operand = property:$(value+)_ {
 return {
 	OPERAND:property,
     OPERATOR: '',
-    VALUES: []
+    VALUE: []
     }
 }
 
@@ -342,7 +341,7 @@ arithematic_operand_operator = property:$(value+) _ op:operator _ {
 return {
 	OPERAND:property,
     OPERATOR: op,
-    VALUES: []
+    VALUE: []
     }
 }
 
@@ -351,7 +350,7 @@ arithematic_complete = property:$(value+) _ op:operator _ value:$(value+) {
 return {
 	OPERAND:property,
     OPERATOR: op,
-    VALUES: [value]
+    VALUE: [value]
     }
 }
 
@@ -361,7 +360,7 @@ in_condition_operator_operand_sq_bracket_open = property:$(value+) _ op:"in"i _ 
 return {
 OPERAND:property,
 OPERATOR:"in",
-VALUES:[]
+VALUE:[]
 }
 }
 
@@ -369,7 +368,7 @@ in_condition_operator_operand = property:$(value+) _ op:"in"i _ {
 return {
 OPERAND:property,
 OPERATOR:"in",
-VALUES:[]
+VALUE:[]
 }
 }
 
@@ -377,14 +376,14 @@ in_condition_till_values = property:$(value+) _ op:"in"i _ "[" _ value:$(value+)
 {return {
 	OPERAND:property,
     OPERATOR:"in",
-    VALUES: [value].concat(rest.filter(item=>item)),
+    VALUE: [value].concat(rest.filter(item=>item)),
 }}
 
 in_condition_complete = property:$(value+) _ op:"in"i _ "[" _ value:$(value+) _ rest:rest_values* _"]"
 {return {
 	OPERAND:property,
     OPERATOR:"in",
-    VALUES: [value].concat(rest.filter(item=>item)),
+    VALUE: [value].concat(rest.filter(item=>item)),
 }}
 
 rest_values= rest_values_complete/rest_value_comma
@@ -392,7 +391,7 @@ rest_values_complete =_ "," _ value:$(value+)  {return value}
 rest_value_comma = _ ',' _ {return }
 
 operator = "=" / "!=" / "<=" /"<"/">="/">"
-value = [a-zA-Z_0-9.][a-zA-Z_0-9]*
+value = [a-zA-Z_0-9.$-][a-zA-Z_0-9]*
 
 _ "whitespace"
   = [ \\t\\n\\r]*`;

@@ -158,16 +158,16 @@ const FormulaDropDownBox = ({
 
   const generateFormulaString = (cellState: CellState, prevFormula: string) => {
     const { FORMULA, OPERAND, OPERATOR, VALUE, EOF } = cellState;
-
+    // console.log(cellState);
     switch (FORMULA) {
       case 'count(':
-        return `${FORMULA})`;
+        return `=${FORMULA})`;
       case 'countif(':
         return OPERATOR === 'in'
-          ? `${FORMULA} ${OPERAND} in [${VALUE.join(',')}]${EOF}`
-          : `${FORMULA}${OPERAND}${OPERATOR}${VALUE[0] || ''}${EOF}`;
+          ? `=${FORMULA} ${OPERAND} in [${VALUE.join(',')}]${EOF}`
+          : `=${FORMULA}${OPERAND}${OPERATOR}${VALUE[0] || ''}${EOF}`;
       case 'unique(':
-        return `${FORMULA}${OPERAND}${EOF}`;
+        return `=${FORMULA}${OPERAND}${EOF}`;
 
       default:
         return prevFormula;
@@ -212,8 +212,15 @@ const FormulaDropDownBox = ({
         ?.match(exp)
         ?.map((name: string) => name.replace(/"/g, ''));
 
+      newSuggestions.includes(')') && console.log(newSuggestions);
       if (newSuggestions && newSuggestions !== suggestions) {
         setActiveCellState(getActiveCellState(newSuggestions.sort()));
+      }
+      if (isEqual(newSuggestions, [')'])) {
+        console.log('EOF reached');
+        setActiveCellState(ActiveCellState.EOF);
+        // setCellState((prevState) => ({ ...prevState, EOF: ')' }));
+        return;
       }
 
       try {
@@ -238,12 +245,18 @@ const FormulaDropDownBox = ({
   };
 
   const handleSubmitSuggestion = (suggestion: string | string[]) => {
-    setCellState((prevState) => ({
-      ...prevState,
+    const updatedValue = {
       [activeCellState]:
         activeCellState === ActiveCellState.VALUE && !Array.isArray(suggestion)
           ? [suggestion]
           : suggestion,
+    };
+    activeCellState === ActiveCellState.VALUE
+      ? (updatedValue[ActiveCellState.EOF] = ')')
+      : null;
+    setCellState((prevState) => ({
+      ...prevState,
+      ...updatedValue,
     }));
     setSuggestions([]);
     inputRef?.current?.focus();
@@ -252,14 +265,23 @@ const FormulaDropDownBox = ({
   useEffect(() => {
     // parser to extract formula, operand, operator and values
     try {
-      const cellStateObj = FormulaParser.parse(formula);
+      activeCellState === 'EOF' &&
+        console.log('Active cell state updated', activeCellState);
+      const cellStateObj = FormulaParser.parse(
+        activeCellState === ActiveCellState.EOF ? formula + ')' : formula
+      );
+      activeCellState === 'EOF' && console.log(cellStateObj);
       setCellState(cellStateObj);
-    } catch (err) {}
+    } catch (err) {
+      activeCellState === 'EOF' && console.log(err);
+    }
   }, [activeCellState]);
 
   useEffect(() => {
     const generatedString = generateFormulaString(cellState, formula);
     setFormula(generatedString);
+    activeCellState === 'EOF' &&
+      console.log('formula complete', generatedString);
     suggestFormula(generatedString);
   }, [cellState]);
 
@@ -316,16 +338,16 @@ const FormulaDropDownBox = ({
     <Flex width={'full'}>
       <Box position={'relative'} width={'full'} ref={dropdownRef}>
         <InputGroup>
-          {formula || isFocus ? (
-            <InputLeftElement h={'6'}>=</InputLeftElement>
-          ) : null}
           <Input
+            padding={0}
+            paddingLeft={'2'}
             ref={inputRef}
             value={formula}
             border={'0'}
             onChange={(e) => {
-              suggestFormula(e.target.value);
-              setFormula(e.target.value);
+              const input = e.target.value;
+              input?.[0] === '=' && suggestFormula(input);
+              setFormula(input);
             }}
             onPointerDown={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
