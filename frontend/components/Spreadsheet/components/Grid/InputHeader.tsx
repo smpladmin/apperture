@@ -158,7 +158,6 @@ const FormulaDropDownBox = ({
 
   const generateFormulaString = (cellState: CellState, prevFormula: string) => {
     const { FORMULA, OPERAND, OPERATOR, VALUE, EOF } = cellState;
-    // console.log(cellState);
     switch (FORMULA) {
       case 'count(':
         return `=${FORMULA})`;
@@ -212,12 +211,10 @@ const FormulaDropDownBox = ({
         ?.match(exp)
         ?.map((name: string) => name.replace(/"/g, ''));
 
-      newSuggestions.includes(')') && console.log(newSuggestions);
       if (newSuggestions && newSuggestions !== suggestions) {
         setActiveCellState(getActiveCellState(newSuggestions.sort()));
       }
       if (isEqual(newSuggestions, [')'])) {
-        console.log('EOF reached');
         setActiveCellState(ActiveCellState.EOF);
         // setCellState((prevState) => ({ ...prevState, EOF: ')' }));
         return;
@@ -265,23 +262,18 @@ const FormulaDropDownBox = ({
   useEffect(() => {
     // parser to extract formula, operand, operator and values
     try {
-      activeCellState === 'EOF' &&
-        console.log('Active cell state updated', activeCellState);
       const cellStateObj = FormulaParser.parse(
         activeCellState === ActiveCellState.EOF ? formula + ')' : formula
       );
-      activeCellState === 'EOF' && console.log(cellStateObj);
       setCellState(cellStateObj);
     } catch (err) {
-      activeCellState === 'EOF' && console.log(err);
+      console.log(err);
     }
   }, [activeCellState]);
 
   useEffect(() => {
     const generatedString = generateFormulaString(cellState, formula);
     setFormula(generatedString);
-    activeCellState === 'EOF' &&
-      console.log('formula complete', generatedString);
     suggestFormula(generatedString);
   }, [cellState]);
 
