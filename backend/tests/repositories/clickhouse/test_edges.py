@@ -55,7 +55,7 @@ class TestEdgeRepository:
             "event,total"
         )
         self.trends_query = (
-            'SELECT EXTRACT(YEAR FROM "timestamp"),TrendType.DATE("timestamp"),COUNT(DISTINCT '
+            'SELECT EXTRACT(YEAR FROM "timestamp"),date("timestamp"),COUNT(DISTINCT '
             '"user_id") AS "users",COUNT(*) AS "hits",MIN("timestamp") AS '
             '"start_date",MAX("timestamp") AS "end_date" FROM "events" WHERE '
             '"datasource_id"=%(ds_id)s AND "event_name"=%(event_name)s AND '
@@ -137,7 +137,7 @@ class TestEdgeRepository:
             event_name=self.event_name,
             start_date=self.start_date,
             end_date=self.end_date,
-            trend_type=TrendType.DATE,
+            trend_type=TrendType.DATE.value,
         ) == (self.trends_query, self.parameters)
 
     def test_get_node_sankey(self):

@@ -503,7 +503,7 @@ class TestEdgeService:
             node="test",
             start_date="2022-01-01",
             end_date="2023-01-01",
-            trend_type=TrendType.WEEK,
+            trend_type=TrendType.WEEK.value,
             is_entrance_node=True,
         )
         self.agg_mock.assert_called_once_with(
@@ -521,7 +521,7 @@ class TestEdgeService:
                 {
                     "$group": {
                         "_id": {
-                            'TrendType.WEEK': {'$TrendType.WEEK': '$date'},
+                            "week": {"$week": "$date"},
                             "previous_event": "$previous_event",
                             "year": {"$year": "$date"},
                         },
@@ -529,7 +529,7 @@ class TestEdgeService:
                         "hits": {"$sum": "$hits"},
                         "node": {"$max": "$previous_event"},
                         "start_date": {"$min": "$date"},
-                        'trend': {'$max': {'$TrendType.WEEK': '$date'}},
+                        "trend": {"$max": {"$week": "$date"}},
                         "users": {"$sum": "$users"},
                         "year": {"$max": {"$year": "$date"}},
                     }
@@ -626,7 +626,7 @@ class TestEdgeService:
                         "previous_event": {"$max": "$previous_event"},
                         "hits": {"$sum": "$hits"},
                         "users": {"$sum": "$users"},
-                        'flow': {'$max': 'SankeyDirection.INFLOW'},
+                        "flow": {"$max": "inflow"},
                         "hits_percentage": {"$max": 0},
                         "users_percentage": {"$max": 0},
                     }
@@ -654,7 +654,7 @@ class TestEdgeService:
                                     "previous_event": {"$max": "$previous_event"},
                                     "hits": {"$sum": "$hits"},
                                     "users": {"$sum": "$users"},
-                                    'flow': {'$max': 'SankeyDirection.OUTFLOW'},
+                                    "flow": {"$max": "outflow"},
                                     "hits_percentage": {"$max": 0},
                                     "users_percentage": {"$max": 0},
                                 }
