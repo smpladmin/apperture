@@ -31,6 +31,7 @@ import { getSearchResult } from '@lib/utils/common';
 import { getWorkbookTransientColumn } from '@lib/services/workbookService';
 import { useRouter } from 'next/router';
 import LoadingSpinner from '@components/LoadingSpinner';
+import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 
 export interface InputHeaderCell extends Cell {
   type: 'inputHeader';
@@ -119,6 +120,10 @@ const FormulaDropDownBox = ({
   const [isFocus, setIsFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const dropdownRef = useRef(null);
+
+  useOnClickOutside(dropdownRef, () => setSuggestions([]));
+
   const metricFunctionNames = ['count(', 'countif('];
   const dimensionFunctionNames = ['unique('];
   const operators = ['=', '!=', '<=', '<', '>=', '>', 'in'];
@@ -167,30 +172,6 @@ const FormulaDropDownBox = ({
       default:
         return prevFormula;
     }
-
-    // switch (FORMULA) {
-    //   case 'count(':
-    //     return `${cellState[ActiveCellState.FORMULA]})`;
-    //   case 'countif(':
-    //     return cellState.OPERATOR === 'in'
-    //       ? `${cellState[ActiveCellState.FORMULA]} ${
-    //           cellState[ActiveCellState.OPERAND]
-    //         } in [${cellState[ActiveCellState.VALUE].join(',')}]${
-    //           cellState[ActiveCellState.EOF]
-    //         }`
-    //       : `${cellState[ActiveCellState.FORMULA]}${
-    //           cellState[ActiveCellState.OPERAND]
-    //         }${cellState[ActiveCellState.OPERATOR]}${
-    //           cellState[ActiveCellState.VALUE][0] || ''
-    //         }${cellState[ActiveCellState.EOF]}`;
-    //   case 'unique(':
-    //     return `${cellState[ActiveCellState.FORMULA]}${
-    //       cellState[ActiveCellState.OPERAND]
-    //     }${cellState[ActiveCellState.EOF]}`;
-
-    //   default:
-    //     return prevFormula;
-    // }
   };
 
   const getActiveCellState = (suggestedValues: string[]) => {
@@ -218,7 +199,7 @@ const FormulaDropDownBox = ({
     try {
       cell.columnType === SubHeaderColumnType.DIMENSION
         ? DimensionParser(cell.properties).parse(formula)
-        : Metricparser(cell.properties, values.slice(0, 500)).parse(formula);
+        : Metricparser(cell.properties, values.slice(0, 200)).parse(formula);
       setSuggestions([]);
 
       // if valid formula, commit the formula text
@@ -334,7 +315,7 @@ const FormulaDropDownBox = ({
 
   return (
     <Flex width={'full'}>
-      <Box position={'relative'} width={'full'}>
+      <Box position={'relative'} width={'full'} ref={dropdownRef}>
         <InputGroup>
           {formula || isFocus ? (
             <InputLeftElement h={'6'}>=</InputLeftElement>
