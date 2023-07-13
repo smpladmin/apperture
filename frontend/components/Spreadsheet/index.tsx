@@ -157,53 +157,53 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     });
     return newHeader;
   };
+  const fetchSheetData = async (subheaders: SubHeaderColumn[]) => {
+    const metrics = subheaders.filter(
+      (subheader) =>
+        subheader.name.match(/^[unique|count]/) &&
+        subheader.type === SubHeaderColumnType.METRIC
+    );
+    const dimensions = subheaders.filter(
+      (subheader) =>
+        subheader.name && subheader.type === SubHeaderColumnType.DIMENSION
+    );
+
+    const database = 'default',
+      table = 'events';
+
+    const response = await getWorkbookTransientColumn(
+      dsId as string,
+      dimensions.map((dimension) => DimensionParser().parse(dimension.name)),
+      metrics.map((metric) => Metricparser().parse(metric.name)),
+      database,
+      table
+    );
+    if (response.status !== 200) {
+      toast({
+        title: 'Something went wrong!',
+        status: 'error',
+        variant: 'subtle',
+        isClosable: true,
+      });
+    } else {
+      const newHeader = arrangeTransientColumnHeader(
+        subheaders,
+        response.data.headers
+      );
+
+      const tempSheetsData = cloneDeep(sheetsData);
+      tempSheetsData[selectedSheetIndex].headers = newHeader;
+      tempSheetsData[selectedSheetIndex].data = response.data.data;
+      tempSheetsData[selectedSheetIndex].subHeaders = subheaders;
+      setSheetsData(tempSheetsData);
+    }
+  };
 
   useEffect(() => {
     if (requestTranisentColumn.isLoading) {
-      const fetchSheetData = async () => {
-        const { subheaders } = requestTranisentColumn;
-        const metrics = subheaders.filter(
-          (subheader) =>
-            subheader.name && subheader.type === SubHeaderColumnType.METRIC
-        );
-        const dimensions = subheaders.filter(
-          (subheader) =>
-            subheader.name && subheader.type === SubHeaderColumnType.DIMENSION
-        );
+      const { subheaders } = requestTranisentColumn;
 
-        const database = 'default',
-          table = 'events';
-
-        const response = await getWorkbookTransientColumn(
-          dsId as string,
-          dimensions.map((dimension) =>
-            DimensionParser().parse(dimension.name)
-          ),
-          metrics.map((metric) => Metricparser().parse(metric.name)),
-          database,
-          table
-        );
-        if (response.status !== 200) {
-          toast({
-            title: 'Something went wrong!',
-            status: 'error',
-            variant: 'subtle',
-            isClosable: true,
-          });
-        } else {
-          const newHeader = arrangeTransientColumnHeader(
-            subheaders,
-            response.data.headers
-          );
-
-          const tempSheetsData = cloneDeep(sheetsData);
-          tempSheetsData[selectedSheetIndex].headers = newHeader;
-          tempSheetsData[selectedSheetIndex].data = response.data.data;
-          tempSheetsData[selectedSheetIndex].subHeaders = subheaders;
-          setSheetsData(tempSheetsData);
-        }
-      };
-      fetchSheetData();
+      fetchSheetData(subheaders);
     }
   }, [requestTranisentColumn]);
 
@@ -326,7 +326,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       const isBlankSheet = !sheetData.is_sql && !sheetData.query;
       const index = getHeaderIndex(sheetData, columnId);
 
-      if (headerText.match(/count|unique/i)) {
+      if (headerText.match(/^[unique|count]/)) {
         if (isBlankSheet)
           try {
             if (
@@ -452,56 +452,15 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       Boolean(
         savedWorkbook?.spreadsheets[selectedSheetIndex].subHeaders.some(
           (subheader) =>
-            typeof subheader.name === 'string' && subheader.name?.[0] === '='
+            typeof subheader.name === 'string' &&
+            subheader.name.match(/^[unique|count]/)
         )
       ) &&
       !sheetsData[selectedSheetIndex].data.length;
     if (hasColumnFetcSubheaderWithoutData) {
-      const fetchSheetData = async () => {
-        const subheaders =
-          savedWorkbook?.spreadsheets[selectedSheetIndex].subHeaders;
-        const metrics = subheaders.filter(
-          (subheader) =>
-            subheader.name && subheader.type === SubHeaderColumnType.METRIC
-        );
-        const dimensions = subheaders.filter(
-          (subheader) =>
-            subheader.name && subheader.type === SubHeaderColumnType.DIMENSION
-        );
-
-        const database = 'default',
-          table = 'events';
-
-        const response = await getWorkbookTransientColumn(
-          dsId as string,
-          dimensions.map((dimension) =>
-            DimensionParser().parse(dimension.name)
-          ),
-          metrics.map((metric) => Metricparser().parse(metric.name)),
-          database,
-          table
-        );
-        if (response.status !== 200) {
-          toast({
-            title: 'Something went wrong!',
-            status: 'error',
-            variant: 'subtle',
-            isClosable: true,
-          });
-        } else {
-          const newHeader = arrangeTransientColumnHeader(
-            subheaders,
-            response.data.headers
-          );
-
-          const tempSheetsData = cloneDeep(sheetsData);
-          tempSheetsData[selectedSheetIndex].headers = newHeader;
-          tempSheetsData[selectedSheetIndex].data = response.data.data;
-          tempSheetsData[selectedSheetIndex].subHeaders = subheaders;
-          setSheetsData(tempSheetsData);
-        }
-      };
-      fetchSheetData();
+      const subheaders =
+        savedWorkbook?.spreadsheets[selectedSheetIndex].subHeaders;
+      fetchSheetData(subheaders);
     }
     const updateSheetData = (data: any[]) => {
       const toUpdateSheets = cloneDeep(sheetsData);
