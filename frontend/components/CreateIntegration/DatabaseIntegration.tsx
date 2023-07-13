@@ -333,7 +333,8 @@ const DatabaseIntegration = ({
                 <FormButton
                   navigateBack={() => router.back()}
                   handleNextClick={handleSubmit(onSubmit)}
-                  disabled={!(isConnectionValid && validateForm())}
+                  // disabled={!(isConnectionValid && validateForm())}
+                  disabled={!validateForm()}
                   nextButtonName={'Submit'}
                 />
                 <Button
