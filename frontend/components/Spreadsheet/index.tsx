@@ -145,7 +145,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     const newHeader: SpreadSheetColumn[] = [];
     let i = 0;
     subheaders.slice(1, max + 1).forEach((subheader, index) => {
-      if (subheader.name.includes('=')) {
+      if (subheader.name) {
         newHeader.push(originalHeader[i]);
         i++;
       } else {
@@ -164,13 +164,11 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         const { subheaders } = requestTranisentColumn;
         const metrics = subheaders.filter(
           (subheader) =>
-            subheader.name.includes('=') &&
-            subheader.type === SubHeaderColumnType.METRIC
+            subheader.name && subheader.type === SubHeaderColumnType.METRIC
         );
         const dimensions = subheaders.filter(
           (subheader) =>
-            subheader.name.includes('') &&
-            subheader.type === SubHeaderColumnType.DIMENSION
+            subheader.name && subheader.type === SubHeaderColumnType.DIMENSION
         );
 
         const database = 'default',
@@ -464,13 +462,11 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           savedWorkbook?.spreadsheets[selectedSheetIndex].subHeaders;
         const metrics = subheaders.filter(
           (subheader) =>
-            subheader.name.includes('=') &&
-            subheader.type === SubHeaderColumnType.METRIC
+            subheader.name && subheader.type === SubHeaderColumnType.METRIC
         );
         const dimensions = subheaders.filter(
           (subheader) =>
-            subheader.name.includes('=') &&
-            subheader.type === SubHeaderColumnType.DIMENSION
+            subheader.name && subheader.type === SubHeaderColumnType.DIMENSION
         );
 
         const database = 'default',

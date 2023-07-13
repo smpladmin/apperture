@@ -4,7 +4,7 @@ const keywordgenerator = (tokens: string[]) =>
   }, '');
 
 export const MetricGrammar = (properties?: string[], values?: string[]) => `
- start = "="ex:expression {return ex}
+ start = ex:expression {return ex}
 
 expression
   = countif_function/count_function
@@ -52,23 +52,29 @@ if_statement = fname:("if") _ "(" _ params:condition _ ","_ then:$(chars+)_ "," 
 
 
 value
-  = ${values?.length ? keywordgenerator(values) : '[a-zA-Z_.$][a-zA-Z_0-9$]*'}
+  = ${
+    values?.length
+      ? `${keywordgenerator(values)} / [a-zA-Z_0-9.@$-][a-zA-Z_0-9@]+`
+      : '[a-zA-Z_0-9.@$-][a-zA-Z_0-9@]*'
+  }
 
 property
-  = ${properties ? keywordgenerator(properties) : '[a-zA-Z_.$][a-zA-Z_0-9$]*'}
+  = ${
+    properties ? keywordgenerator(properties) : '[a-zA-Z_0-9.@$-][a-zA-Z_0-9@]*'
+  }
 
 op
   = "=" / "!=" / "<=" /"<"/">="/">"
 
 chars
-  = [a-zA-Z_0-9.][a-zA-Z_0-9]*
+  = [a-zA-Z_0-9.@$-][a-zA-Z_0-9@]*
 
 _ "whitespace"
   = [ \\t\\n\\r]*
 `;
 
 export const DimensionGrammar = (properties?: string[]) => `
- start = "="ex:expression {return ex}
+ start = ex:expression {return ex}
 
 expression
   = unique_function
@@ -82,14 +88,16 @@ unique_function = fname:unique _ property:${
 unique = "unique("i
 
 property
-  = ${properties ? keywordgenerator(properties) : '[a-zA-Z_.][a-zA-Z_0-9$]*'}
+  = ${
+    properties ? keywordgenerator(properties) : '[a-zA-Z_0-9.@$-][a-zA-Z_0-9@]*'
+  }
 
 _ "whitespace"
   = [ \\t\\n\\r]*
 `;
 
 export const FormulaExtratorGrammar = `
-start = "="ex:expression {return ex}
+start = ex:expression {return ex}
 
 expression = unique / countif / count / empty
 
@@ -246,7 +254,7 @@ rest_values_complete =_ "," _ value:$(value+)  {return value}
 rest_value_comma = _ ',' _ {return }
 
 operator = "=" / "!=" / "<=" /"<"/">="/">"
-value = [a-zA-Z_0-9.$-][a-zA-Z_0-9]*
+value = [a-zA-Z_0-9.@$-][a-zA-Z_0-9@]*
 
 _ "whitespace"
   = [ \\t\\n\\r]*

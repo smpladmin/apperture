@@ -161,13 +161,13 @@ const FormulaDropDownBox = ({
     const { FORMULA, OPERAND, OPERATOR, VALUE, EOF } = cellState;
     switch (FORMULA) {
       case 'count(':
-        return `=${FORMULA})`;
+        return `${FORMULA})`;
       case 'countif(':
         return OPERATOR === 'in'
-          ? `=${FORMULA} ${OPERAND} in [${VALUE.join(',')}]${EOF}`
-          : `=${FORMULA}${OPERAND}${OPERATOR}${VALUE[0] || ''}${EOF}`;
+          ? `${FORMULA} ${OPERAND} in [${VALUE.join(',')}]${EOF}`
+          : `${FORMULA}${OPERAND}${OPERATOR}${VALUE[0] || ''}${EOF}`;
       case 'unique(':
-        return `=${FORMULA}${OPERAND}${EOF}`;
+        return `${FORMULA}${OPERAND}${EOF}`;
 
       default:
         return prevFormula;
@@ -190,7 +190,7 @@ const FormulaDropDownBox = ({
       return ActiveCellState[ActiveCellState.OPERATOR];
     }
 
-    if (suggestedValues.includes(')')) return ActiveCellState.EOF;
+    if (suggestedValues?.includes(')')) return ActiveCellState.EOF;
 
     return ActiveCellState.VALUE;
   };
@@ -215,8 +215,9 @@ const FormulaDropDownBox = ({
       if (newSuggestions && newSuggestions !== suggestions) {
         setActiveCellState(getActiveCellState(newSuggestions.sort()));
       }
-      if (newSuggestions.includes(')')) {
-        setActiveCellState(ActiveCellState.EOF);
+      if (newSuggestions?.includes(')')) {
+        setSuggestions([]);
+        // setActiveCellState(ActiveCellState.EOF);
         // setCellState((prevState) => ({ ...prevState, EOF: ')' }));
         return;
       }
@@ -224,7 +225,7 @@ const FormulaDropDownBox = ({
       try {
         const cellStateObj = FormulaParser.parse(formula);
         const searchResults = getSearchResult(
-          newSuggestions,
+          activeCellState === ActiveCellState.VALUE ? values : newSuggestions,
           activeCellState === ActiveCellState.VALUE
             ? cellStateObj[activeCellState]?.[0]
             : cellStateObj[activeCellState],
@@ -264,9 +265,7 @@ const FormulaDropDownBox = ({
     // parser to extract formula, operand, operator and values
     if (activeCellState === ActiveCellState.BLANK) return;
     try {
-      const cellStateObj = FormulaParser.parse(
-        activeCellState === ActiveCellState.EOF ? formula + ')' : formula
-      );
+      const cellStateObj = FormulaParser.parse(formula);
       setCellState(cellStateObj);
     } catch (err) {
       console.log(err);
@@ -334,15 +333,16 @@ const FormulaDropDownBox = ({
     <Flex width={'full'}>
       <Box position={'relative'} width={'full'} ref={dropdownRef}>
         <InputGroup>
+          {formula || isFocus ? (
+            <InputLeftElement h={'6'}>=</InputLeftElement>
+          ) : null}
           <Input
-            padding={0}
-            paddingLeft={'2'}
             ref={inputRef}
             value={formula}
             border={'0'}
             onChange={(e) => {
               const input = e.target.value;
-              input?.[0] === '=' && suggestFormula(input);
+              suggestFormula(input);
               setFormula(input);
             }}
             onPointerDown={(e) => e.stopPropagation()}
