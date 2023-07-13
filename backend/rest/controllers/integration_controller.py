@@ -96,6 +96,18 @@ async def create_integration(
     runlog_service: RunLogService = Depends(),
     dpq_service: DPQueueService = Depends(),
 ):
+    database_credential = (
+        integration_service.build_database_credential(
+            host=dto.databaseCredential.host,
+            port=dto.databaseCredential.port,
+            username=dto.databaseCredential.username,
+            password=dto.databaseCredential.password,
+            over_ssh=dto.databaseCredential.overSsh,
+            ssh_credential=dto.databaseCredential.sshCredential,
+        )
+        if dto.databaseCredential
+        else None
+    )
     app = await app_service.get_user_app(dto.appId, user_id)
     integration = await integration_service.create_integration(
         app,
@@ -103,7 +115,7 @@ async def create_integration(
         dto.accountId,
         dto.apiKey,
         dto.apiSecret,
-        dto.databaseCredential,
+        database_credential,
     )
 
     if create_datasource:

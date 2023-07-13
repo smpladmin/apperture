@@ -5,6 +5,7 @@ import mysql.connector
 from beanie import PydanticObjectId
 from authorisation.models import IntegrationOAuth
 from domain.apps.models import App
+from rest.dtos.integrations import DatabaseSSHCredentialDto
 from domain.apperture_users.models import AppertureUser
 from .models import (
     Credential,
@@ -12,6 +13,7 @@ from .models import (
     Integration,
     IntegrationProvider,
     DatabaseCredential,
+    DatabaseSSHCredential,
 )
 
 
@@ -76,6 +78,51 @@ class IntegrationService:
         )
         await integration.insert()
         return integration
+
+    def build_database_ssh_credential(
+        self,
+        server: str,
+        port: str,
+        username: Optional[str],
+        password: Optional[str],
+        ssh_key: Optional[str],
+    ):
+        return DatabaseSSHCredential(
+            server=server,
+            port=port,
+            username=username,
+            password=password,
+            ssh_key=ssh_key,
+        )
+
+    def build_database_credential(
+        self,
+        host: str,
+        port: str,
+        username: str,
+        password: str,
+        over_ssh: bool,
+        ssh_credential: Optional[DatabaseSSHCredentialDto],
+    ):
+        db_ssh_credential = (
+            self.build_database_ssh_credential(
+                server=ssh_credential.server,
+                port=ssh_credential.port,
+                username=ssh_credential.username,
+                password=ssh_credential.password,
+                ssh_key=ssh_credential.sshKey,
+            )
+            if ssh_credential
+            else None
+        )
+        return DatabaseCredential(
+            host=host,
+            port=port,
+            username=username,
+            password=password,
+            over_ssh=over_ssh,
+            ssh_credential=db_ssh_credential,
+        )
 
     def test_database_connection(
         self, host: str, port: str, username: str, password: str
