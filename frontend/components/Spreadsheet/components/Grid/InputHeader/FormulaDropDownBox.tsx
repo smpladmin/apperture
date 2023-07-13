@@ -1,24 +1,15 @@
 import {
   Box,
   Button,
-  Checkbox,
-  CheckboxGroup,
   Flex,
   Input,
   InputGroup,
   InputLeftElement,
   Text,
 } from '@chakra-ui/react';
-import {
-  Cell,
-  CellTemplate,
-  Compatible,
-  Uncertain,
-  UncertainCompatible,
-  getCellProperty,
-} from '@silevis/reactgrid';
+import { Compatible } from '@silevis/reactgrid';
 import { BLUE_MAIN, GREY_600, WHITE_DEFAULT } from '@theme/index';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Function, Plus, SquaresFour } from 'phosphor-react';
 import { SubHeaderColumnType } from '@lib/domain/workbook';
 import {
@@ -32,67 +23,8 @@ import { getWorkbookTransientColumn } from '@lib/services/workbookService';
 import { useRouter } from 'next/router';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-
-export interface InputHeaderCell extends Cell {
-  type: 'inputHeader';
-  text: string;
-  disable?: boolean;
-  showAddButton?: boolean;
-  addHeader?: boolean;
-  columnType?: SubHeaderColumnType;
-  properties: string[];
-}
-
-export class InputHeaderTemplate implements CellTemplate<InputHeaderCell> {
-  getCompatibleCell(
-    uncertainCell: Uncertain<InputHeaderCell>
-  ): Compatible<InputHeaderCell> {
-    const text = getCellProperty(uncertainCell, 'text', 'string');
-    const value = parseFloat(text);
-    let addHeader: boolean | undefined;
-    let properties: string[] | undefined;
-    try {
-      addHeader = getCellProperty(uncertainCell, 'addHeader', 'boolean');
-    } catch {
-      addHeader = false;
-    }
-    try {
-      properties = getCellProperty(uncertainCell, 'properties', 'object');
-    } catch {
-      properties = [];
-    }
-    return { ...uncertainCell, text, value, addHeader, properties };
-  }
-
-  update(
-    cell: Compatible<InputHeaderCell>,
-    cellToMerge: UncertainCompatible<InputHeaderCell>
-  ): Compatible<InputHeaderCell> {
-    return this.getCompatibleCell({
-      ...cell,
-      text: cellToMerge.text,
-      addHeader: cellToMerge.addHeader,
-    });
-  }
-
-  render(
-    cell: Compatible<InputHeaderCell>,
-    isInEditMode: boolean,
-    onCellChanged: (cell: Compatible<InputHeaderCell>, commit: boolean) => void
-  ): React.ReactNode {
-    return (
-      <FormulaDropDownBox
-        cell={cell}
-        onCellChanged={(updatedCell: any) =>
-          onCellChanged(
-            this.getCompatibleCell({ ...cell, ...updatedCell }),
-            true
-          )
-        }
-      />
-    );
-  }
-}
+import CheckboxDropdown from './CheckboxDropdown';
+import { InputHeaderCell } from '.';
 
 enum ActiveCellState {
   BLANK = 'BLANK',
@@ -217,8 +149,6 @@ const FormulaDropDownBox = ({
       }
       if (newSuggestions?.includes(')')) {
         setSuggestions([]);
-        // setActiveCellState(ActiveCellState.EOF);
-        // setCellState((prevState) => ({ ...prevState, EOF: ')' }));
         return;
       }
 
@@ -471,129 +401,4 @@ const FormulaDropDownBox = ({
   );
 };
 
-const CheckboxDropdown = ({
-  data,
-  onSubmit,
-  values,
-}: {
-  data: string[];
-  onSubmit: Function;
-  values: string[];
-}) => {
-  const [selectedValues, setSelectedValues] = useState(values);
-  const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
-
-  useEffect(() => {
-    if (selectedValues.length === data.length) {
-      setIsSelectAllChecked(true);
-    } else {
-      setIsSelectAllChecked(false);
-    }
-  }, [selectedValues]);
-
-  const handleAllSelect = (e: ChangeEvent<HTMLInputElement>) => {
-    const checked = e.target.checked;
-    if (checked) {
-      setIsSelectAllChecked(true);
-      setSelectedValues(data);
-    } else {
-      setIsSelectAllChecked(false);
-      setSelectedValues([]);
-    }
-  };
-  return (
-    <Box
-      w={'96'}
-      position={'absolute'}
-      zIndex={1}
-      bg={'white.DEFAULT'}
-      p={'2'}
-      borderRadius={'12'}
-      borderWidth={'1px'}
-      borderColor={'white.200'}
-      onPointerDown={(e) => e.stopPropagation()}
-      maxHeight={'102'}
-      overflow={'scroll'}
-    >
-      <Flex
-        direction={'column'}
-        gap={'3'}
-        data-testid={'property-values-dropdown-container'}
-      >
-        <Box overflowY={'auto'} maxHeight={'70'}>
-          <Checkbox
-            colorScheme={'radioBlack'}
-            px={'2'}
-            py={'3'}
-            w={'full'}
-            isChecked={isSelectAllChecked}
-            onChange={handleAllSelect}
-            _hover={{
-              bg: 'white.100',
-            }}
-            data-testid={'select-all-values'}
-          >
-            <Text
-              fontSize={'xs-14'}
-              lineHeight={'xs-14'}
-              fontWeight={'500'}
-              cursor={'pointer'}
-              color={'black.500'}
-              onPointerDown={(e) => e.stopPropagation()}
-            >
-              {'Select all'}
-            </Text>
-          </Checkbox>
-          <CheckboxGroup
-            value={selectedValues}
-            onChange={(values: string[]) => {
-              setSelectedValues(values);
-            }}
-          >
-            {data.slice(0, 100).map((value: string) => {
-              return (
-                <Flex
-                  as={'label'}
-                  gap={'2'}
-                  px={'2'}
-                  py={'3'}
-                  key={value}
-                  _hover={{
-                    bg: 'white.100',
-                  }}
-                  data-testid={'property-value-dropdown-option'}
-                  borderRadius={'4'}
-                  onPointerDown={(e) => e.stopPropagation()}
-                >
-                  <Checkbox colorScheme={'radioBlack'} value={value}>
-                    <Text
-                      fontSize={'xs-14'}
-                      lineHeight={'xs-14'}
-                      fontWeight={'500'}
-                      cursor={'pointer'}
-                      color={'black.500'}
-                      wordBreak={'break-word'}
-                    >
-                      {value}
-                    </Text>
-                  </Checkbox>
-                </Flex>
-              );
-            })}
-          </CheckboxGroup>
-        </Box>
-        <Button
-          w="full"
-          bg={'black.100'}
-          color={'white.DEFAULT'}
-          variant={'primary'}
-          onClick={() => onSubmit(selectedValues)}
-          data-testid={'add-event-property-values'}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          Add
-        </Button>
-      </Flex>
-    </Box>
-  );
-};
+export default FormulaDropDownBox;

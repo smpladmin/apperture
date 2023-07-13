@@ -3,7 +3,6 @@ import Spreadsheet from '@components/Spreadsheet';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { Workbook } from '@lib/domain/workbook';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
-import { _getNodes } from '@lib/services/datasourceService';
 import { _getSavedWorkbook } from '@lib/services/workbookService';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
@@ -25,7 +24,6 @@ export const getServerSideProps: GetServerSideProps = async ({
     token,
     query.workbookId as string
   );
-  const nodes = await _getNodes(token, query.dsId as string);
 
   if (!apps.length) {
     return {

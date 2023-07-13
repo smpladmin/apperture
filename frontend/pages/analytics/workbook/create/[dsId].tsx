@@ -5,15 +5,8 @@ import { GetServerSideProps } from 'next';
 import { getAuthToken } from '@lib/utils/request';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import HomeLayout from '@components/HomeLayout';
-import {
-  _getEventProperties,
-  _getNodes,
-} from '@lib/services/datasourceService';
 
-export const getServerSideProps: GetServerSideProps = async ({
-  req,
-  query,
-}) => {
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const token = getAuthToken(req);
   if (!token) {
     return {
@@ -35,7 +28,7 @@ export const getServerSideProps: GetServerSideProps = async ({
   };
 };
 
-const Sheet = ({ eventProperties }: { eventProperties: string[] }) => {
+const Sheet = () => {
   return <Spreadsheet />;
 };
 
