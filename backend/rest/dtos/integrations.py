@@ -18,7 +18,7 @@ class IntegrationResponse(Integration, ModelResponse):
         orm_mode = True
 
 
-class DatabaseSSHCredential(BaseModel):
+class DatabaseSSHCredentialDto(BaseModel):
     server: str
     port: str
     username: Optional[str]
@@ -26,13 +26,14 @@ class DatabaseSSHCredential(BaseModel):
     sshKey: Optional[str]
 
 
-class DatabaseCredential(BaseModel):
+class DatabaseCredentialDto(BaseModel):
     host: str
     port: str
     username: str
     password: str
     overSsh: bool = False
-    sshCredential: Optional[DatabaseSSHCredential]
+    sshCredential: Optional[DatabaseSSHCredentialDto]
+
 
 class CreateIntegrationDto(BaseModel):
     appId: str
@@ -40,7 +41,7 @@ class CreateIntegrationDto(BaseModel):
     accountId: Union[str, None]
     apiKey: Union[str, None]
     apiSecret: Union[str, None]
-    databaseCredential: Union[DatabaseCredential, None]
+    databaseCredential: Union[DatabaseCredentialDto, None]
 
 
 class IntegrationWithDataSources(Integration, ModelResponse):
@@ -57,4 +58,4 @@ class TestDatabaseDto(BaseModel):
     username: str
     password: str
     overSsh: bool = False
-    sshCredential: Optional[DatabaseSSHCredential]
+    sshCredential: Optional[DatabaseSSHCredentialDto]

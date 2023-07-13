@@ -39,7 +39,7 @@ type FormData = {
   sshUsername: string;
   sshPassword: string;
   useSshKey: boolean;
-  sshKey: string;
+  sshKey: FileList;
 };
 const DatabaseIntegration = ({
   add,
@@ -49,25 +49,56 @@ const DatabaseIntegration = ({
   const toast = useToast();
   const [isConnectionValid, setIsConnectionValid] = useState(false);
 
-  const onSubmit = async (data: FormData) => {
-    const appId = router.query.appId as string;
-    const provider = router.query.provider as Provider;
+  const getFileContent = async (file: Blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const keyContent = reader.result;
+        try {
+          resolve(keyContent as string);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.readAsText(file);
+    });
+  };
+
+  const processFormData = async (data: FormData) => {
+    let sshFileContent = null;
+    if (data.overSsh && data.useSshKey) {
+      const file = data.sshKey[0];
+      sshFileContent = await getFileContent(file);
+    }
+
     const databaseSshCredential = data.overSsh
       ? {
           server: data.sshServer,
           port: data.sshPort,
           username: data?.sshUsername,
           password: data?.sshPassword,
+          useSshKey: data?.useSshKey,
+          sshKey: sshFileContent,
         }
-      : null;
+      : undefined;
 
     const databaseCredential = {
       host: data.host,
       port: data.port,
       username: data.username,
       password: data.password,
+      overSsh: data.overSsh,
       sshCredential: databaseSshCredential,
     };
+
+    return databaseCredential;
+  };
+
+  const onSubmit = async (data: FormData) => {
+    const appId = router.query.appId as string;
+    const provider = router.query.provider as Provider;
+    const databaseCredential = await processFormData(data);
     const integration = await createIntegrationWithDataSource(
       appId,
       provider,
@@ -87,22 +118,7 @@ const DatabaseIntegration = ({
   };
 
   const onTest = async (data: FormData) => {
-    const databaseSshCredential = data.overSsh
-      ? {
-          server: data.sshServer,
-          port: data.sshPort,
-          username: data?.sshUsername,
-          password: data?.sshPassword,
-        }
-      : undefined;
-
-    const databaseCredential = {
-      host: data.host,
-      port: data.port,
-      username: data.username,
-      password: data.password,
-      sshCredential: databaseSshCredential,
-    };
+    const databaseCredential = await processFormData(data);
     const validConnection = await testDatabaseConnection(
       databaseCredential as DatabaseCredential
     );
@@ -133,8 +149,7 @@ const DatabaseIntegration = ({
       sshPassword: '',
     },
   });
-  // const showSshFields = watch('overSsh', false);
-  const showSshFields = false;
+  const showSshFields = watch('overSsh', false);
   const useSshKey = watch('useSshKey', false);
 
   const validateForm = () => {
@@ -243,11 +258,11 @@ const DatabaseIntegration = ({
                   inputStyle={{ placeholder: 'password', width: '50' }}
                 />
               </Flex>
-              {/* <FormCheckboxField
+              <FormCheckboxField
                 fieldName="overSsh"
                 label="Over SSH"
                 register={register}
-              /> */}
+              />
               {showSshFields && (
                 <Flex direction={'column'} gap={'4'}>
                   <Flex
@@ -318,7 +333,8 @@ const DatabaseIntegration = ({
                 <FormButton
                   navigateBack={() => router.back()}
                   handleNextClick={handleSubmit(onSubmit)}
-                  disabled={!(isConnectionValid && validateForm())}
+                  // disabled={!(isConnectionValid && validateForm())}
+                  disabled={!validateForm()}
                   nextButtonName={'Submit'}
                 />
                 <Button
