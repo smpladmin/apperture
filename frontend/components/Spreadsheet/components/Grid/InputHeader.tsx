@@ -280,7 +280,11 @@ const FormulaDropDownBox = ({
   }, [cellState]);
 
   useEffect(() => {
-    if (!cell.properties.includes(cellState.OPERAND)) return;
+    if (
+      !cell.properties.includes(cellState.OPERAND) ||
+      cell.columnType === SubHeaderColumnType.DIMENSION
+    )
+      return;
 
     const fetchUniqueValues = async () => {
       const response = await getWorkbookTransientColumn(
@@ -423,6 +427,7 @@ const FormulaDropDownBox = ({
                       fontSize={'xs-14'}
                       lineHeight={'xs-14'}
                       fontWeight={'500'}
+                      data-testid="suggestion-text"
                     >
                       {suggestion}
                     </Text>
