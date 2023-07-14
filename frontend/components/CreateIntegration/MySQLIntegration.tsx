@@ -217,7 +217,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
           Enter Details to fetch data from MySQL
         </Heading>
 
-        <Flex w={135}>
+        <Flex w={125}>
           <form onSubmit={handleSubmit(onSubmit)} style={{ width: '100%' }}>
             <Flex direction={'column'} gap={'4'}>
               <FormInputField
@@ -320,7 +320,8 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
                 <FormButton
                   navigateBack={() => router.back()}
                   handleNextClick={handleSubmit(onSubmit)}
-                  disabled={!(isConnectionValid && validateForm())}
+                  // disabled={!(isConnectionValid && validateForm())}
+                  disabled={false}
                   nextButtonName={'Submit'}
                 />
                 <Button
@@ -332,7 +333,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
                   fontWeight={'semibold'}
                   lineHeight={'base'}
                   textColor={'white.100'}
-                  width={{ base: 'full', md: '50' }}
+                  width={{ base: 'full', md: '40' }}
                   onClick={handleTestConnection}
                 >
                   Test
@@ -387,7 +388,6 @@ const FormInputField = ({
         {...register(fieldName, { required: required })}
         borderColor={errors[fieldName] ? 'red' : 'inherit'}
         focusBorderColor={errors[fieldName] ? 'red' : 'black.100'}
-        borderWidth={'1px'}
         {...inputStyle}
         onChange={handleChange}
         size={'lg'}
@@ -399,7 +399,7 @@ const FormInputField = ({
         textColor={'black.400'}
         py={4}
         px={3.5}
-        border={'0.6px'}
+        border={'1px'}
         _placeholder={{
           fontSize: '1rem',
           lineHeight: '1.375rem',
