@@ -6,8 +6,7 @@ from domain.common.models import IntegrationProvider
 from domain.integrations.models import (
     Integration,
     Credential,
-    CredentialType,
-    DatabaseCredential,
+    CredentialType, MySQLCredential,
 )
 
 
@@ -43,13 +42,13 @@ def test_add_database_integration(
         Integration(
             app_id="636a1c61d715ca6baae65611",
             user_id="636a1c61d715ca6baae65611",
-            provider=IntegrationProvider.DATABASE,
+            provider=IntegrationProvider.MYSQL,
             credential=Credential(
-                type=CredentialType.DATABASE,
+                type=CredentialType.MYSQL,
                 api_key=None,
                 account_id=None,
                 secret=None,
-                database_credential=DatabaseCredential(
+                mysql_credential=MySQLCredential(
                     host="127.0.0.1",
                     port="3306",
                     username="test-user",
@@ -72,7 +71,7 @@ def test_add_database_integration(
         "credential": {
             "account_id": None,
             "api_key": None,
-            "database_credential": {
+            "mysql_credential": {
                 "host": "127.0.0.1",
                 "over_ssh": False,
                 "password": "password",
@@ -82,7 +81,7 @@ def test_add_database_integration(
             },
             "refresh_token": None,
             "secret": None,
-            "type": "DATABASE",
+            "type": "MYSQL",
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",
@@ -98,7 +97,7 @@ def test_add_database_integration(
             "userId": "636a1c61d715ca6baae65611",
             "version": "DEFAULT",
         },
-        "provider": "database",
+        "provider": "mysql",
         "revisionId": None,
         "updatedAt": None,
         "userId": "636a1c61d715ca6baae65611",
@@ -109,12 +108,12 @@ def test_check_database_connection(
     client_init, integration_service, database_credential_data
 ):
     response = client_init.post(
-        "/integrations/database/test",
+        "/integrations/mysql/test",
         data=json.dumps(database_credential_data),
     )
     assert response.status_code == 200
     assert response.json() == True
-    integration_service.test_database_connection.assert_called_once_with(
+    integration_service.test_mysql_connection.assert_called_once_with(
         **{
             "host": "127.0.0.1",
             "password": "password",

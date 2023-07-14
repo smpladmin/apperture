@@ -26,7 +26,7 @@ class DatabaseSSHCredentialDto(BaseModel):
     sshKey: Optional[str]
 
 
-class DatabaseCredentialDto(BaseModel):
+class MySQLCredentialDto(BaseModel):
     host: str
     port: str
     username: str
@@ -41,7 +41,7 @@ class CreateIntegrationDto(BaseModel):
     accountId: Union[str, None]
     apiKey: Union[str, None]
     apiSecret: Union[str, None]
-    databaseCredential: Union[DatabaseCredentialDto, None]
+    mySQLCredential: Union[MySQLCredentialDto, None]
 
 
 class IntegrationWithDataSources(Integration, ModelResponse):
@@ -52,7 +52,7 @@ class IntegrationWithDataSources(Integration, ModelResponse):
         orm_mode = True
 
 
-class TestDatabaseDto(BaseModel):
+class TestMySQLConnectionDto(BaseModel):
     host: str
     port: str
     username: str

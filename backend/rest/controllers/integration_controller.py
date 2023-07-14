@@ -13,7 +13,7 @@ from rest.dtos.datasources import CreateDataSourceDto, DataSourceResponse
 from rest.dtos.integrations import (
     CreateIntegrationDto,
     IntegrationResponse,
-    TestDatabaseDto,
+    TestMySQLConnectionDto,
 )
 from rest.middlewares import get_user_id, validate_jwt
 
@@ -96,16 +96,16 @@ async def create_integration(
     runlog_service: RunLogService = Depends(),
     dpq_service: DPQueueService = Depends(),
 ):
-    database_credential = (
-        integration_service.build_database_credential(
-            host=dto.databaseCredential.host,
-            port=dto.databaseCredential.port,
-            username=dto.databaseCredential.username,
-            password=dto.databaseCredential.password,
-            over_ssh=dto.databaseCredential.overSsh,
-            ssh_credential=dto.databaseCredential.sshCredential,
+    mysql_credential = (
+        integration_service.build_mysql_credential(
+            host=dto.mySQLCredential.host,
+            port=dto.mySQLCredential.port,
+            username=dto.mySQLCredential.username,
+            password=dto.mySQLCredential.password,
+            over_ssh=dto.mySQLCredential.overSsh,
+            ssh_credential=dto.mySQLCredential.sshCredential,
         )
-        if dto.databaseCredential
+        if dto.mySQLCredential
         else None
     )
     app = await app_service.get_user_app(dto.appId, user_id)
@@ -115,7 +115,7 @@ async def create_integration(
         dto.accountId,
         dto.apiKey,
         dto.apiSecret,
-        database_credential,
+        mysql_credential,
     )
 
     if create_datasource:
@@ -143,11 +143,11 @@ async def create_integration(
     return integration
 
 
-@router.post("/integrations/database/test")
-async def check_database_connection(
-    dto: TestDatabaseDto,
+@router.post("/integrations/mysql/test")
+async def check_mysql_connection(
+    dto: TestMySQLConnectionDto,
     integration_service: IntegrationService = Depends(),
 ):
-    return integration_service.test_database_connection(
+    return integration_service.test_mysql_connection(
         host=dto.host, port=dto.port, username=dto.username, password=dto.password
     )
