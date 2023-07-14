@@ -373,7 +373,3 @@ class Actions(EventsBase):
     def delete_processed_events(self, ds_id: PydanticObjectId, event: str):
         query = f"DELETE FROM {self.table} WHERE event_name='{event}' AND datasource_id='{ds_id}' SETTINGS allow_experimental_lightweight_delete=1"
         self.execute_get_query(query, {})
-
-    def add_api_table():
-        query = f"CREATE TABLE dummy_table_1 ( id Int32, name String ) ENGINE = MergeTree() ORDER BY id;"
-        self.execute_get_query(query, {})

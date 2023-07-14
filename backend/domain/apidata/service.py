@@ -23,7 +23,7 @@ class APIDataService:
         self.clickhouse = clickhouse.client
         self.columns = [
             "create_time",
-            "datasource_id",
+            "datasourceId",
             "properties",
         ]
         self.apidata_repo=apidata_repo

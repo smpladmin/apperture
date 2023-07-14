@@ -24,30 +24,28 @@ const APIIntegration = ({
   handleClose,
 }: APIIntegrationProps) => {
   const router = useRouter();
-  const [EndPoint, setEndPoint] = useState('');
-  const [Headers, setHeaders] = useState('');
+  const [endPoint, setEndPoint] = useState('');
+  const [headers, setHeaders] = useState('');
   const [tableName, setTableName] = useState('');
   const [validData, setValidData] = useState(false);
 
   useEffect(() => {
-    setValidData(!!(EndPoint && Headers));
-  }, [EndPoint, Headers]);
+    setValidData(!!(endPoint && headers));
+  }, [endPoint, headers]);
 
   const onSubmit = async () => {
     const appId = router.query.appId as string;
     const provider = router.query.provider as Provider;
-console.log("calling create ds with :",appId,provider,EndPoint,Headers,'',tableName)
+console.log("calling create ds with :",appId,provider,endPoint,headers,'',tableName)
     const integration = await createIntegrationWithDataSource(
       appId,
       provider,
-      EndPoint,
-      Headers,
+      endPoint,
+      headers,
       '',
       tableName,
       
     );
-    console.log(" = = = = ==  272 AFTER CALLING createIntegrationWithDataSource , res = ")
-    console.log(integration)
     router.replace({
       pathname: '/analytics/app/[appId]/integration/[provider]/complete',
       query: {
@@ -110,12 +108,12 @@ console.log("calling create ds with :",appId,provider,EndPoint,Headers,'',tableN
               fontSize={'xs-14'}
               lineHeight={'xs-14'}
               display="block"
-              htmlFor="EndPoint"
+              htmlFor="endPoint"
             >
-              API Endpoint
+              API endPoint
             </Text>
             <Input
-              id="EndPoint"
+              id="endPoint"
               size={'lg'}
               width={{ base: 'full', md: 125 }}
               bg={'white.100'}
@@ -123,12 +121,12 @@ console.log("calling create ds with :",appId,provider,EndPoint,Headers,'',tableN
               fontSize={'base'}
               lineHeight={'base'}
               textColor={'black.400'}
-              placeholder="Enter your API endpoint"
+              placeholder="Enter your API endPoint"
               py={4}
               px={3.5}
               focusBorderColor={'black.100'}
               border={'0.6px'}
-              value={EndPoint}
+              value={endPoint}
               onChange={(e) => setEndPoint(e.target.value)}
               _placeholder={{
                 fontSize: '1rem',
@@ -145,12 +143,12 @@ console.log("calling create ds with :",appId,provider,EndPoint,Headers,'',tableN
               fontSize={'xs-14'}
               lineHeight={'xs-14'}
               display="block"
-              htmlFor="Headers"
+              htmlFor="headers"
             >
-              Headers
+              headers
             </Text>
             <Input
-              id="Headers"
+              id="headers"
               size={'lg'}
               width={{ base: 'full', md: 125 }}
               bg={'white.100'}
@@ -163,7 +161,7 @@ console.log("calling create ds with :",appId,provider,EndPoint,Headers,'',tableN
               px={3.5}
               focusBorderColor={'black.100'}
               border={'0.6px'}
-              value={Headers}
+              value={headers}
               onChange={(e) => setHeaders(e.target.value)}
               _placeholder={{
                 fontSize: '1rem',
