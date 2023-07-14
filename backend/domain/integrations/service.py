@@ -12,7 +12,7 @@ from .models import (
     CredentialType,
     Integration,
     IntegrationProvider,
-    DatabaseCredential,
+    MySQLCredential,
     DatabaseSSHCredential,
 )
 
@@ -58,17 +58,17 @@ class IntegrationService:
         account_id: Optional[str],
         api_key: Optional[str],
         secret: Optional[str],
-        database_credential: Optional[DatabaseCredential],
+        mysql_credential: Optional[MySQLCredential],
     ):
         credential_type = (
-            CredentialType.DATABASE if database_credential else CredentialType.API_KEY
+            CredentialType.MYSQL if mysql_credential else CredentialType.API_KEY
         )
         credential = Credential(
             type=credential_type,
             account_id=account_id,
             api_key=api_key,
             secret=secret,
-            database_credential=database_credential,
+            mysql_credential=mysql_credential,
         )
         integration = Integration(
             user_id=app.user_id,
@@ -95,7 +95,7 @@ class IntegrationService:
             ssh_key=ssh_key,
         )
 
-    def build_database_credential(
+    def build_mysql_credential(
         self,
         host: str,
         port: str,
@@ -115,7 +115,7 @@ class IntegrationService:
             if ssh_credential
             else None
         )
-        return DatabaseCredential(
+        return MySQLCredential(
             host=host,
             port=port,
             username=username,
@@ -124,7 +124,7 @@ class IntegrationService:
             ssh_credential=db_ssh_credential,
         )
 
-    def test_database_connection(
+    def test_mysql_connection(
         self, host: str, port: str, username: str, password: str
     ):
         connection_successful = False

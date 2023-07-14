@@ -1,4 +1,4 @@
-import { DatabaseCredential } from './../domain/integration';
+import { MySQLCredential } from '@lib/domain/integration';
 import { AxiosRequestConfig } from 'axios';
 import { ApperturePost, ApperturePrivateGet } from './util';
 import { ProviderDataSource } from '@lib/domain/datasource';
@@ -10,7 +10,7 @@ type IntegrationRequestBody = {
   accountId?: string;
   apiKey?: string;
   apiSecret?: string;
-  databaseCredential?: DatabaseCredential;
+  mySQLCredential?: MySQLCredential;
 };
 
 export const createIntegrationWithDataSource = async (
@@ -19,19 +19,19 @@ export const createIntegrationWithDataSource = async (
   accountId?: string,
   apiKey?: string,
   apiSecret?: string,
-  databaseCredential?: DatabaseCredential,
+  mySQLCredential?: MySQLCredential,
   config: AxiosRequestConfig = {
     params: {
       create_datasource: true,
-      trigger_data_processor: !databaseCredential,
+      trigger_data_processor: !mySQLCredential,
     },
   }
 ) => {
-  const integrationRequestBody: IntegrationRequestBody = databaseCredential
+  const integrationRequestBody: IntegrationRequestBody = mySQLCredential
     ? {
         appId,
         provider,
-        databaseCredential,
+        mySQLCredential,
       }
     : { appId, provider, accountId, apiKey, apiSecret };
 
@@ -78,12 +78,7 @@ export const saveDataSources = async (
   return res.data;
 };
 
-export const testDatabaseConnection = async (
-  databaseCredential: DatabaseCredential
-) => {
-  const res = await ApperturePost(
-    `/integrations/database/test`,
-    databaseCredential
-  );
+export const testMySQLConnection = async (mySQLCredential: MySQLCredential) => {
+  const res = await ApperturePost(`/integrations/mysql/test`, mySQLCredential);
   return res.data;
 };

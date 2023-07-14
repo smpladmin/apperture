@@ -18,7 +18,7 @@ export type DatabaseSSHCredential = {
   sshKey?: string;
 };
 
-export type DatabaseCredential = {
+export type MySQLCredential = {
   host: string;
   port: string;
   username: string;

@@ -6,7 +6,7 @@ export enum Provider {
   AMPLITUDE = 'amplitude',
   CLEVERTAP = 'clevertap',
   APPERTURE = 'apperture',
-  DATABASE = 'database',
+  MYSQL = 'mysql',
 }
 export namespace Provider {
   export function getDisplayName(provider: Provider): string {

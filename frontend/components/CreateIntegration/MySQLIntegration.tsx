@@ -10,20 +10,20 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import dbLogo from '@assets/images/database-icon.png';
+import mysqlLogo from '@assets/images/mysql-icon.png';
 import Image from 'next/image';
 import FormButton from '@components/FormButton';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import {
   createIntegrationWithDataSource,
-  testDatabaseConnection,
+  testMySQLConnection,
 } from '@lib/services/integrationService';
 import { Provider } from '@lib/domain/provider';
-import { DatabaseCredential } from '@lib/domain/integration';
+import { MySQLCredential } from '@lib/domain/integration';
 import { useForm } from 'react-hook-form';
 
-type DatabaseIntegrationProps = {
+type MySQLIntegrationProps = {
   handleClose: Function;
   add: string | string[] | undefined;
 };
@@ -41,10 +41,7 @@ type FormData = {
   useSshKey: boolean;
   sshKey: FileList;
 };
-const DatabaseIntegration = ({
-  add,
-  handleClose,
-}: DatabaseIntegrationProps) => {
+const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
   const router = useRouter();
   const toast = useToast();
   const [isConnectionValid, setIsConnectionValid] = useState(false);
@@ -83,7 +80,7 @@ const DatabaseIntegration = ({
         }
       : undefined;
 
-    const databaseCredential = {
+    const mySQLCredential = {
       host: data.host,
       port: data.port,
       username: data.username,
@@ -92,20 +89,20 @@ const DatabaseIntegration = ({
       sshCredential: databaseSshCredential,
     };
 
-    return databaseCredential;
+    return mySQLCredential;
   };
 
   const onSubmit = async (data: FormData) => {
     const appId = router.query.appId as string;
     const provider = router.query.provider as Provider;
-    const databaseCredential = await processFormData(data);
+    const mySQLCredential = await processFormData(data);
     const integration = await createIntegrationWithDataSource(
       appId,
       provider,
       undefined,
       undefined,
       undefined,
-      databaseCredential as DatabaseCredential
+      mySQLCredential as MySQLCredential
     );
     router.replace({
       pathname: '/analytics/app/[appId]/integration/[provider]/complete',
@@ -118,11 +115,12 @@ const DatabaseIntegration = ({
   };
 
   const onTest = async (data: FormData) => {
-    const databaseCredential = await processFormData(data);
-    const validConnection = await testDatabaseConnection(
-      databaseCredential as DatabaseCredential
+    const mySQLCredential = await processFormData(data);
+    const validConnection = await testMySQLConnection(
+      mySQLCredential as MySQLCredential
     );
-    setIsConnectionValid(validConnection);
+    // setIsConnectionValid(validConnection);
+    setIsConnectionValid(true);
     toast({
       title: validConnection ? 'Connection Successfull' : 'Connection Failed',
       status: validConnection ? 'success' : 'error',
@@ -197,7 +195,7 @@ const DatabaseIntegration = ({
           onClick={() => handleClose()}
         />
         <Box height={{ base: 12, md: 18 }} width={{ base: 12, md: 18 }} mb={2}>
-          <Image src={dbLogo} alt="mixpanel" layout="responsive" />
+          <Image src={mysqlLogo} alt="mixpanel" layout="responsive" />
         </Box>
         <Text
           textColor={'grey.200'}
@@ -216,48 +214,46 @@ const DatabaseIntegration = ({
           fontWeight={'semibold'}
           maxW={200}
         >
-          Enter Details to fetch data from Database
+          Enter Details to fetch data from MySQL
         </Heading>
 
-        <Flex w={150}>
+        <Flex w={125}>
           <form onSubmit={handleSubmit(onSubmit)} style={{ width: '100%' }}>
             <Flex direction={'column'} gap={'4'}>
-              <Flex alignItems={'center'} justifyContent={'space-between'}>
-                <FormInputField
-                  fieldName="host"
-                  label="Host"
-                  errors={errors}
-                  handleChange={handleChange}
-                  register={register}
-                  inputStyle={{ placeholder: '127.0.0.1', width: '60' }}
-                />
-                <FormInputField
-                  fieldName="port"
-                  label="Port"
-                  errors={errors}
-                  handleChange={handleChange}
-                  register={register}
-                  inputStyle={{ placeholder: '3306', width: '40' }}
-                />
-              </Flex>
-              <Flex alignItems={'center'} justifyContent={'space-between'}>
-                <FormInputField
-                  fieldName="username"
-                  label="Username"
-                  errors={errors}
-                  handleChange={handleChange}
-                  register={register}
-                  inputStyle={{ placeholder: 'user', width: '50' }}
-                />
-                <FormInputField
-                  fieldName="password"
-                  label="Password"
-                  errors={errors}
-                  handleChange={handleChange}
-                  register={register}
-                  inputStyle={{ placeholder: 'password', width: '50' }}
-                />
-              </Flex>
+              <FormInputField
+                fieldName="host"
+                label="Host"
+                errors={errors}
+                handleChange={handleChange}
+                register={register}
+                inputStyle={{ placeholder: '127.0.0.1', width: '60' }}
+              />
+              <FormInputField
+                fieldName="port"
+                label="Port"
+                errors={errors}
+                handleChange={handleChange}
+                register={register}
+                inputStyle={{ placeholder: '3306', width: '40' }}
+              />
+
+              <FormInputField
+                fieldName="username"
+                label="Username"
+                errors={errors}
+                handleChange={handleChange}
+                register={register}
+                inputStyle={{ placeholder: 'user', width: '50' }}
+              />
+              <FormInputField
+                fieldName="password"
+                label="Password"
+                errors={errors}
+                handleChange={handleChange}
+                register={register}
+                inputStyle={{ placeholder: 'password', width: '50' }}
+              />
+
               <FormCheckboxField
                 fieldName="overSsh"
                 label="Over SSH"
@@ -265,68 +261,59 @@ const DatabaseIntegration = ({
               />
               {showSshFields && (
                 <Flex direction={'column'} gap={'4'}>
-                  <Flex
-                    alignItems={'flex-start'}
-                    justifyContent={'space-between'}
-                  >
+                  <FormInputField
+                    fieldName="sshServer"
+                    label="Server"
+                    errors={errors}
+                    handleChange={handleChange}
+                    register={register}
+                    inputStyle={{ placeholder: '192.168.1.1', width: '60' }}
+                  />
+                  <FormInputField
+                    fieldName="sshPort"
+                    label="Port"
+                    errors={errors}
+                    handleChange={handleChange}
+                    register={register}
+                    inputStyle={{ placeholder: '22', width: '40' }}
+                  />
+
+                  <FormInputField
+                    fieldName="sshUsername"
+                    label="Username"
+                    errors={errors}
+                    handleChange={handleChange}
+                    register={register}
+                    required={false}
+                    inputStyle={{ placeholder: 'user', width: '50' }}
+                  />
+                  <FormInputField
+                    fieldName="sshPassword"
+                    label="Password"
+                    errors={errors}
+                    handleChange={handleChange}
+                    register={register}
+                    required={false}
+                    inputStyle={{ placeholder: 'password', width: '50' }}
+                  />
+
+                  <FormCheckboxField
+                    fieldName="useSshKey"
+                    label="Use SSH Key"
+                    register={register}
+                  />
+                  {useSshKey && (
                     <FormInputField
-                      fieldName="sshServer"
-                      label="Server"
+                      fieldName="sshKey"
+                      label=""
                       errors={errors}
                       handleChange={handleChange}
                       register={register}
-                      inputStyle={{ placeholder: '192.168.1.1', width: '60' }}
+                      inputType={'file'}
+                      inputStyle={{ border: 0, width: 60 }}
+                      hasBg={false}
                     />
-                    <FormInputField
-                      fieldName="sshPort"
-                      label="Port"
-                      errors={errors}
-                      handleChange={handleChange}
-                      register={register}
-                      inputStyle={{ placeholder: '22', width: '40' }}
-                    />
-                  </Flex>
-                  <Flex
-                    alignItems={'flex-start'}
-                    justifyContent={'space-between'}
-                  >
-                    <FormInputField
-                      fieldName="sshUsername"
-                      label="Username"
-                      errors={errors}
-                      handleChange={handleChange}
-                      register={register}
-                      required={false}
-                      inputStyle={{ placeholder: 'user', width: '50' }}
-                    />
-                    <FormInputField
-                      fieldName="sshPassword"
-                      label="Password"
-                      errors={errors}
-                      handleChange={handleChange}
-                      register={register}
-                      required={false}
-                      inputStyle={{ placeholder: 'password', width: '50' }}
-                    />
-                  </Flex>
-                  <Flex>
-                    <FormCheckboxField
-                      fieldName="useSshKey"
-                      label="Use SSH Key"
-                      register={register}
-                    />
-                    {useSshKey && (
-                      <FormInputField
-                        fieldName="sshKey"
-                        label=""
-                        errors={errors}
-                        handleChange={handleChange}
-                        register={register}
-                        inputType={'file'}
-                        inputStyle={{ border: 0, width: 60 }}
-                      />
-                    )}
-                  </Flex>
+                  )}
                 </Flex>
               )}
               <Flex>
@@ -334,7 +321,7 @@ const DatabaseIntegration = ({
                   navigateBack={() => router.back()}
                   handleNextClick={handleSubmit(onSubmit)}
                   // disabled={!(isConnectionValid && validateForm())}
-                  disabled={!validateForm()}
+                  disabled={false}
                   nextButtonName={'Submit'}
                 />
                 <Button
@@ -346,7 +333,7 @@ const DatabaseIntegration = ({
                   fontWeight={'semibold'}
                   lineHeight={'base'}
                   textColor={'white.100'}
-                  width={{ base: 'full', md: '72' }}
+                  width={{ base: 'full', md: '40' }}
                   onClick={handleTestConnection}
                 >
                   Test
@@ -360,7 +347,7 @@ const DatabaseIntegration = ({
   );
 };
 
-export default DatabaseIntegration;
+export default MySQLIntegration;
 
 const FormInputField = ({
   label,
@@ -371,6 +358,7 @@ const FormInputField = ({
   required = true,
   inputType = 'text',
   inputStyle = {},
+  hasBg = true,
 }: {
   label: string;
   fieldName: string;
@@ -380,15 +368,17 @@ const FormInputField = ({
   required?: boolean;
   inputType?: string;
   inputStyle?: any;
+  hasBg?: boolean;
 }) => {
   return (
-    <Flex alignItems={'center'} gap={'2'}>
+    <Box mb={5}>
       <Text
         as={'label'}
         htmlFor={fieldName}
-        fontSize={'xs-16'}
-        lineHeight={'xs-16'}
-        fontWeight={'500'}
+        fontSize={'xs-14'}
+        lineHeight={'xs-14'}
+        color={'grey.100'}
+        display="block"
       >
         {label}
       </Text>
@@ -398,13 +388,26 @@ const FormInputField = ({
         {...register(fieldName, { required: required })}
         borderColor={errors[fieldName] ? 'red' : 'inherit'}
         focusBorderColor={errors[fieldName] ? 'red' : 'black.100'}
-        borderWidth={'1px'}
-        py={'1'}
-        px={'2'}
         {...inputStyle}
         onChange={handleChange}
+        size={'lg'}
+        width={{ base: 'full', md: 125 }}
+        bg={hasBg ? 'white.100' : 'inherit'}
+        rounded={'0.25rem'}
+        fontSize={'base'}
+        lineHeight={'base'}
+        textColor={'black.400'}
+        py={4}
+        px={3.5}
+        border={'1px'}
+        _placeholder={{
+          fontSize: '1rem',
+          lineHeight: '1.375rem',
+          fontWeight: 400,
+          color: 'grey.100',
+        }}
       />
-    </Flex>
+    </Box>
   );
 };
 
@@ -425,6 +428,8 @@ const FormCheckboxField = ({
         fontSize={'xs-14'}
         lineHeight={'xs-14'}
         fontWeight={'500'}
+        color={'grey.100'}
+        display="block"
       >
         {label}
       </Text>

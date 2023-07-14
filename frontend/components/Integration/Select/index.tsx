@@ -15,7 +15,7 @@ import mixpanelLogo from '@assets/images/mixPanel-icon.png';
 import amplitudeLogo from '@assets/images/amplitude-icon.png';
 import clevertapLogo from '@assets/images/clevertap-icon.png';
 import appertureLogo from '@assets/images/apperture-logo.svg';
-import databaseLogo from '@assets/images/database-icon.png';
+import mysqlLogo from '@assets/images/mysql-icon.png';
 import FormButton from '@components/FormButton';
 import IntegrationSource from '@components/IntegrationSource';
 import { Provider } from '@lib/domain/provider';
@@ -135,10 +135,10 @@ const SelectProvider = () => {
                   selected={provider === Provider.GOOGLE}
                 />
                 <IntegrationSource
-                  sourceName="Database"
-                  value={Provider.DATABASE}
-                  imgSrc={databaseLogo}
-                  selected={provider === Provider.DATABASE}
+                  sourceName="MySQL"
+                  value={Provider.MYSQL}
+                  imgSrc={mysqlLogo}
+                  selected={provider === Provider.MYSQL}
                 />
               </Stack>
             </RadioGroup>

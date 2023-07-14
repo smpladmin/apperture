@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional
 from beanie import Indexed, PydanticObjectId
 from pydantic import BaseModel, Field
 
@@ -10,7 +10,7 @@ from repositories import Document
 class CredentialType(str, Enum):
     OAUTH = "OAUTH"
     API_KEY = "API_KEY"
-    DATABASE = "DATABASE"
+    MYSQL = "MYSQL"
 
 
 class DatabaseSSHCredential(BaseModel):
@@ -24,7 +24,7 @@ class DatabaseSSHCredential(BaseModel):
         allow_population_by_field_name = True
 
 
-class DatabaseCredential(BaseModel):
+class MySQLCredential(BaseModel):
     host: str
     port: str
     username: str
@@ -42,7 +42,7 @@ class Credential(BaseModel):
     refresh_token: Optional[str]
     api_key: Optional[str]
     secret: Optional[str]
-    database_credential: Optional[DatabaseCredential]
+    mysql_credential: Optional[MySQLCredential]
 
     class Config:
         allow_population_by_field_name = True
