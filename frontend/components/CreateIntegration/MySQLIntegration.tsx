@@ -399,7 +399,7 @@ const FormInputField = ({
         textColor={'black.400'}
         py={4}
         px={3.5}
-        border={'1px'}
+        border={hasBg ? '1px' : '0px'}
         _placeholder={{
           fontSize: '1rem',
           lineHeight: '1.375rem',
