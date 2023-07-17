@@ -58,7 +58,7 @@ class IntegrationService:
         account_id: Optional[str],
         api_key: Optional[str],
         secret: Optional[str],
-        tableName: str = '',
+        tableName: Optional[str],
         mysql_credential: Optional[MySQLCredential],
 
     ):
