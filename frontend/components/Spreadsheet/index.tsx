@@ -110,12 +110,16 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
   const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
+  const [loadBODMASColumn, setloadBODMASColumn] = useState<{
+    loading: boolean;
+    data: TransientSheetData | null;
+  }>({
+    loading: false,
+    data: null,
+  });
 
   useEffect(() => {
     if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
-  }, []);
-
-  useEffect(() => {
     const fetchProperties = async () => {
       const properties: string[] = await getEventProperties(dsId as string);
       setEventProperties([
@@ -128,6 +132,91 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
     fetchProperties();
   }, []);
+
+  useEffect(() => {
+    if (requestTranisentColumn.isLoading) {
+      const { subheaders } = requestTranisentColumn;
+
+      fetchSheetData(subheaders);
+    }
+  }, [requestTranisentColumn]);
+
+  const updateSheetData = (data: any[]) => {
+    const toUpdateSheets = cloneDeep(sheetsData);
+    toUpdateSheets[selectedSheetIndex].data = data;
+    setSheetsData(toUpdateSheets);
+  };
+  useEffect(() => {
+    if (!savedWorkbook) return;
+    const hasColumnFetcSubheaderWithoutData =
+      savedWorkbook &&
+      Boolean(
+        savedWorkbook?.spreadsheets[selectedSheetIndex]?.subHeaders.some(
+          (subheader) =>
+            typeof subheader.name === 'string' &&
+            subheader.name.match(/^[unique|count]/)
+        )
+      ) &&
+      !sheetsData[selectedSheetIndex].data.length;
+    if (hasColumnFetcSubheaderWithoutData) {
+      const { subHeaders, headers } =
+        savedWorkbook?.spreadsheets[selectedSheetIndex];
+      fetchSheetData(subHeaders);
+    }
+
+    const fetchData = async (selectedSheet: TransientSheetData) => {
+      const res = await getTransientSpreadsheets(
+        dsId as string,
+        selectedSheet.query,
+        selectedSheet.is_sql
+      );
+      let queriedData = res?.data?.data;
+
+      const computedHeaders = selectedSheet.headers
+        .map((header, index) => ({
+          columnId: String.fromCharCode(65 + index),
+          ...header,
+        }))
+        .filter((header) => header.type === ColumnType.COMPUTED_HEADER);
+
+      computedHeaders.forEach((header) => {
+        queriedData = evaluateDataOnQueriedData(
+          header.name,
+          queriedData,
+          selectedSheet.headers
+        );
+      });
+      updateSheetData(queriedData);
+    };
+
+    if (hasQueryWithoutData) {
+      fetchData(sheetsData[selectedSheetIndex]);
+    }
+  }, [selectedSheetIndex]);
+
+  useEffect(() => {
+    const { data, loading } = loadBODMASColumn;
+    if (!loading) return;
+    if (data) {
+      let queriedData = data?.data;
+      data?.subHeaders
+        .filter(
+          (subheader) =>
+            subheader.name && !subheader.name.match(/^unique|count/)
+        )
+        .forEach((expression) => {
+          queriedData = evaluateDataOnQueriedData(
+            expression?.name,
+            queriedData,
+            data?.headers
+          );
+        });
+      console.log(queriedData);
+      updateSheetData(queriedData);
+
+      setloadBODMASColumn({ loading: false, data: null });
+    }
+  }, [loadBODMASColumn]);
 
   const arrangeTransientColumnHeader = (
     subheaders: SubHeaderColumn[],
@@ -160,10 +249,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     });
     return newHeaders;
   };
-  const fetchSheetData = async (
-    subheaders: SubHeaderColumn[],
-    headers?: SpreadSheetColumn[]
-  ) => {
+  const fetchSheetData = async (subheaders: SubHeaderColumn[]) => {
     const metrics = subheaders.filter(
       (subheader) =>
         subheader.name.match(/^[unique|count]/) &&
@@ -202,16 +288,12 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       tempSheetsData[selectedSheetIndex].data = response.data.data;
       tempSheetsData[selectedSheetIndex].subHeaders = subheaders;
       setSheetsData(tempSheetsData);
+      setloadBODMASColumn({
+        loading: true,
+        data: tempSheetsData[selectedSheetIndex],
+      });
     }
   };
-
-  useEffect(() => {
-    if (requestTranisentColumn.isLoading) {
-      const { subheaders } = requestTranisentColumn;
-
-      fetchSheetData(subheaders);
-    }
-  }, [requestTranisentColumn]);
 
   const getOperands = (newHeader: string) =>
     (newHeader.match(expressionTokenRegex) || []).filter((char: string) =>
@@ -450,59 +532,6 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     savedWorkbook &&
     sheetsData[selectedSheetIndex].query &&
     !sheetsData[selectedSheetIndex].data.length;
-
-  useEffect(() => {
-    if (!savedWorkbook) return;
-    const hasColumnFetcSubheaderWithoutData =
-      savedWorkbook &&
-      Boolean(
-        savedWorkbook?.spreadsheets[selectedSheetIndex]?.subHeaders.some(
-          (subheader) =>
-            typeof subheader.name === 'string' &&
-            subheader.name.match(/^[unique|count]/)
-        )
-      ) &&
-      !sheetsData[selectedSheetIndex].data.length;
-    if (hasColumnFetcSubheaderWithoutData) {
-      const { subHeaders, headers } =
-        savedWorkbook?.spreadsheets[selectedSheetIndex];
-      fetchSheetData(subHeaders, headers);
-    }
-    const updateSheetData = (data: any[]) => {
-      const toUpdateSheets = cloneDeep(sheetsData);
-      toUpdateSheets[selectedSheetIndex].data = data;
-      setSheetsData(toUpdateSheets);
-    };
-
-    const fetchData = async (selectedSheet: TransientSheetData) => {
-      const res = await getTransientSpreadsheets(
-        dsId as string,
-        selectedSheet.query,
-        selectedSheet.is_sql
-      );
-      let queriedData = res?.data?.data;
-
-      const computedHeaders = selectedSheet.headers
-        .map((header, index) => ({
-          columnId: String.fromCharCode(65 + index),
-          ...header,
-        }))
-        .filter((header) => header.type === ColumnType.COMPUTED_HEADER);
-
-      computedHeaders.forEach((header) => {
-        queriedData = evaluateDataOnQueriedData(
-          header.name,
-          queriedData,
-          selectedSheet.headers
-        );
-      });
-      updateSheetData(queriedData);
-    };
-
-    if (hasQueryWithoutData) {
-      fetchData(sheetsData[selectedSheetIndex]);
-    }
-  }, [selectedSheetIndex]);
 
   const handleSaveOrUpdateFunnel = async () => {
     const sheets = sheetsData.map((sheet) => {
