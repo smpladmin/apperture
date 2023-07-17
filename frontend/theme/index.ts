@@ -73,7 +73,7 @@ const colors = {
     600: GREY_600,
     700: GREY_700,
     800: GREY_800,
-    900: ' #212121',
+    900: '#212121',
     1000: '#F8F8FA',
   },
   yellow: { 500: YELLOW_500, 600: '#fac213' },
@@ -93,6 +93,7 @@ const colors = {
     500: RED_500,
   },
   blue: {
+    50: '#E5F2FC',
     500: BLUE_500,
   },
   purple: {
