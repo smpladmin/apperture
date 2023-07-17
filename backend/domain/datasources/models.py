@@ -20,7 +20,7 @@ class DataSource(Document):
     user_id: PydanticObjectId
     provider: IntegrationProvider
     name: Optional[str]
-    external_source_id: str
+    external_source_id: Optional[str]
     version: DataSourceVersion
     enabled: bool = True
 

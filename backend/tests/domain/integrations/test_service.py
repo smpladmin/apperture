@@ -30,6 +30,7 @@ class TestIntegrationService:
             account_id,
             api_key,
             secret,
+            None
         )
 
         assert integration.user_id == user_id
