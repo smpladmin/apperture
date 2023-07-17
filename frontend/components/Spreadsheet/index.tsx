@@ -94,7 +94,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const [requestTranisentColumn, setRequestTransientColumn] =
     useState<TransientColumnRequestState>({
       isLoading: Boolean(
-        savedWorkbook?.spreadsheets[selectedSheetIndex].subHeaders.some(
+        savedWorkbook?.spreadsheets[selectedSheetIndex]?.subHeaders.some(
           (subheader) => typeof subheader === 'string' && subheader?.[0] === '='
         )
       ),
@@ -135,29 +135,35 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   ) => {
     const max = subheaders.reduce(
       (max: number, subheader: SubHeaderColumn, index: number) => {
-        if (subheader.name) {
+        if (subheader.name && subheader.name.match(/^[unique|count]/)) {
           max = max < index ? index : max;
         }
         return max;
       },
       -1
     );
-    const newHeader: SpreadSheetColumn[] = [];
+    const newHeaders: SpreadSheetColumn[] = [];
     let i = 0;
     subheaders.slice(1, max + 1).forEach((subheader, index) => {
-      if (subheader.name) {
-        newHeader.push(originalHeader[i]);
+      if (subheader.name && subheader.name.match(/^[unique|count]/)) {
+        newHeaders.push(originalHeader[i]);
         i++;
+        while (originalHeader[i]?.type === ColumnType.PADDING_HEADER) {
+          i++;
+        }
       } else {
-        newHeader.push({
+        newHeaders.push({
           name: String.fromCharCode(65 + index),
           type: ColumnType.PADDING_HEADER,
         });
       }
     });
-    return newHeader;
+    return newHeaders;
   };
-  const fetchSheetData = async (subheaders: SubHeaderColumn[]) => {
+  const fetchSheetData = async (
+    subheaders: SubHeaderColumn[],
+    headers?: SpreadSheetColumn[]
+  ) => {
     const metrics = subheaders.filter(
       (subheader) =>
         subheader.name.match(/^[unique|count]/) &&
@@ -186,13 +192,13 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         isClosable: true,
       });
     } else {
-      const newHeader = arrangeTransientColumnHeader(
+      const newHeaders = arrangeTransientColumnHeader(
         subheaders,
         response.data.headers
       );
 
       const tempSheetsData = cloneDeep(sheetsData);
-      tempSheetsData[selectedSheetIndex].headers = newHeader;
+      tempSheetsData[selectedSheetIndex].headers = newHeaders;
       tempSheetsData[selectedSheetIndex].data = response.data.data;
       tempSheetsData[selectedSheetIndex].subHeaders = subheaders;
       setSheetsData(tempSheetsData);
@@ -450,7 +456,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     const hasColumnFetcSubheaderWithoutData =
       savedWorkbook &&
       Boolean(
-        savedWorkbook?.spreadsheets[selectedSheetIndex].subHeaders.some(
+        savedWorkbook?.spreadsheets[selectedSheetIndex]?.subHeaders.some(
           (subheader) =>
             typeof subheader.name === 'string' &&
             subheader.name.match(/^[unique|count]/)
@@ -458,9 +464,9 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       ) &&
       !sheetsData[selectedSheetIndex].data.length;
     if (hasColumnFetcSubheaderWithoutData) {
-      const subheaders =
-        savedWorkbook?.spreadsheets[selectedSheetIndex].subHeaders;
-      fetchSheetData(subheaders);
+      const { subHeaders, headers } =
+        savedWorkbook?.spreadsheets[selectedSheetIndex];
+      fetchSheetData(subHeaders, headers);
     }
     const updateSheetData = (data: any[]) => {
       const toUpdateSheets = cloneDeep(sheetsData);
@@ -490,7 +496,6 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           selectedSheet.headers
         );
       });
-
       updateSheetData(queriedData);
     };
 
