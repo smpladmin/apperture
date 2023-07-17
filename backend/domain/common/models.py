@@ -12,6 +12,7 @@ class IntegrationProvider(str, Enum):
     CLEVERTAP = "clevertap"
     APPERTURE = "apperture"
     API = "api"
+    MYSQL = "mysql"
 
     def supports_runlogs(self):
         return self in [self.MIXPANEL, self.AMPLITUDE, self.CLEVERTAP, self.API]

@@ -37,7 +37,7 @@ describe('select integration provider', () => {
     jest.clearAllMocks();
   });
 
-  it('should render 6 integration provider(GA, Mixpanel, Amplitude,Clevertap, Apperture)', () => {
+  it('should render 6 integration provider(GA, Mixpanel, Amplitude,Clevertap, Apperture, Database)', () => {
     render(
       <RouterContext.Provider
         value={createMockRouter({
