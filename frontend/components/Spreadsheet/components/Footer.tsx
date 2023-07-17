@@ -1,12 +1,12 @@
-import { Box, Flex, Input, Radio, RadioGroup, Text } from '@chakra-ui/react';
+import { Button, Flex, Input, Radio, RadioGroup, Text } from '@chakra-ui/react';
 import React, { useRef, useState } from 'react';
-import AddSheet from './AddSheet';
 import { TransientSheetData } from '@lib/domain/workbook';
 import cloneDeep from 'lodash/cloneDeep';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
+import { Plus } from 'phosphor-react';
 
 type FooterProps = {
-  openQueryModal: Function;
+  openSelectSheetOverlay: Function;
   sheetsData: TransientSheetData[];
   setSheetsData: Function;
   selectedSheetIndex: number;
@@ -14,7 +14,7 @@ type FooterProps = {
 };
 
 const Footer = ({
-  openQueryModal,
+  openSelectSheetOverlay,
   sheetsData,
   setSheetsData,
   selectedSheetIndex,
@@ -26,18 +26,23 @@ const Footer = ({
     setSheetsData(toUpdateSheets);
   };
 
+  const handleAddNewSheet = () => {
+    const sheetsLength = sheetsData.length;
+    setSelectedSheetIndex(sheetsLength);
+    openSelectSheetOverlay();
+  };
+
   return (
     <Flex
-      position={'sticky'}
+      position={'fixed'}
+      width={'full'}
       bottom={'0'}
       bg={'white.500'}
       zIndex={'99'}
-      h={'10'}
+      h={'8'}
       borderTopWidth={'0.4px'}
       borderColor={'grey.700'}
     >
-      <Box borderRightWidth={'0.4px'} borderColor={'grey.700'} w={'5'}></Box>
-
       <RadioGroup
         value={selectedSheetIndex}
         onChange={(value: string) => {
@@ -50,13 +55,14 @@ const Footer = ({
             return (
               <Flex
                 key={index}
-                p={'2'}
+                py={'2'}
+                px={'3'}
                 borderRightWidth={'0.4px'}
                 borderColor={'grey.700'}
                 maxW={'30'}
                 alignItems={'center'}
                 justifyContent={'center'}
-                bg={isSelected ? 'grey.400' : 'white.500'}
+                bg={isSelected ? 'blue.50' : 'white.500'}
                 cursor={'pointer'}
                 as={'label'}
                 data-testid={'sheet-name'}
@@ -72,12 +78,19 @@ const Footer = ({
           })}
         </Flex>
       </RadioGroup>
-      <AddSheet
-        sheetsLength={sheetsData.length}
-        openQueryModal={openQueryModal}
-        setSheetsData={setSheetsData}
-        setSelectedSheetIndex={setSelectedSheetIndex}
-      />
+      <Button
+        pt={'2'}
+        pb={'4'}
+        px={'2'}
+        data-testid={'add-sheet'}
+        bg={'white.500'}
+        borderRightWidth={'0.4px'}
+        borderColor={'grey.700'}
+        borderRadius={'0'}
+        onClick={handleAddNewSheet}
+      >
+        <Plus size={16} weight="thin" />
+      </Button>
     </Flex>
   );
 };

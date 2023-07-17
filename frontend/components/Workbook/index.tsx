@@ -35,6 +35,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: any }) => {
   ]);
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
   const [showSqlEditor, setShowSqlEditor] = useState(false);
+  const [showEmptyState, setShowEmptyState] = useState(
+    savedWorkbook ? false : true
+  );
   const {
     isOpen: showSelectSheetOverlay,
     onOpen: openSelectSheetOverlay,
@@ -95,25 +98,34 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: any }) => {
             sheetsData={sheetsData}
           />
         ) : null}
-        <SidePanel />
+        <SidePanel
+          sheetsData={sheetsData}
+          selectedSheetIndex={selectedSheetIndex}
+          setSheetsData={setSheetsData}
+          setShowEmptyState={setShowEmptyState}
+        />
 
         <Box h={'full'} overflowY={'auto'}>
-          {/* <Box>
-            {showSqlEditor ? (
-              <QueryEditor
-                sheetsData={sheetsData}
-                setShowSqlEditor={setShowSqlEditor}
-                selectedSheetIndex={selectedSheetIndex}
-                setSheetsData={setSheetsData}
+          {showEmptyState ? (
+            <EmptySheet />
+          ) : (
+            <Box>
+              {showSqlEditor ? (
+                <QueryEditor
+                  sheetsData={sheetsData}
+                  setShowSqlEditor={setShowSqlEditor}
+                  selectedSheetIndex={selectedSheetIndex}
+                  setSheetsData={setSheetsData}
+                />
+              ) : null}
+              <Grid
+                sheetData={sheetsData[0]}
+                selectedSheetIndex={0}
+                evaluateFormulaHeader={() => {}}
+                addDimensionColumn={() => {}}
               />
-            ) : null}
-            <Grid
-              sheetData={sheetsData[0]}
-              selectedSheetIndex={0}
-              evaluateFormulaHeader={() => {}}
-              addDimensionColumn={() => {}}
-            />
-          </Box> */}
+            </Box>
+          )}
           <EmptySheet />
           <Footer
             openSelectSheetOverlay={openSelectSheetOverlay}

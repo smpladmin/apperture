@@ -38,7 +38,7 @@ const EmptySheet = () => {
             })}
           </Flex>
         ))}
-        <Box position={'absolute'} mt={'33'} zIndex={'2'} left={'45%'}>
+        <Box position={'fixed'} mt={'33'} zIndex={'2'} left={'45%'}>
           <Flex direction={'column'} gap={'2'}>
             <Text fontSize={'xs-16'} lineHeight={'xs-16'} fontWeight={'500'}>
               Start with selecting a table or writing a SQL query

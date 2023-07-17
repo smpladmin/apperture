@@ -4,8 +4,21 @@ import { ArrowLeft, ArrowRight } from 'phosphor-react';
 import React, { useState } from 'react';
 import Connections from './Connections';
 import ConnectorColumns from './ConnectorColumns';
+import { TransientSheetData } from '@lib/domain/workbook';
 
-const SidePanel = () => {
+type SidePanelProps = {
+  sheetsData: TransientSheetData[];
+  setShowEmptyState: Function;
+  setSheetsData: Function;
+  selectedSheetIndex: number;
+};
+
+const SidePanel = ({
+  sheetsData,
+  setShowEmptyState,
+  setSheetsData,
+  selectedSheetIndex,
+}: SidePanelProps) => {
   const [isSidePanelCollapsed, setIsSidePanelCollapsed] = useState(false);
   const [showColumns, setShowColumns] = useState(false);
   const [connectorData, setConnectorData] = useState<any>({});
@@ -25,6 +38,7 @@ const SidePanel = () => {
             <ConnectorColumns
               connectorData={connectorData}
               setShowColumns={setShowColumns}
+              setShowEmptyState={setShowEmptyState}
             />
           ) : (
             <Connections

@@ -13,17 +13,19 @@ import { Eye, PencilLine, Play } from 'phosphor-react';
 import React, { useState } from 'react';
 import { cloneDeep } from 'lodash';
 
+type QueryEditorProps = {
+  sheetsData: TransientSheetData[];
+  setShowSqlEditor: Function;
+  setSheetsData: Function;
+  selectedSheetIndex: number;
+};
+
 const QueryEditor = ({
   sheetsData,
   setShowSqlEditor,
   setSheetsData,
   selectedSheetIndex,
-}: {
-  sheetsData: TransientSheetData[];
-  setShowSqlEditor: Function;
-  setSheetsData: Function;
-  selectedSheetIndex: number;
-}) => {
+}: QueryEditorProps) => {
   const [query, setQuery] = useState(sheetsData[selectedSheetIndex].query);
 
   const handleQueryChange = () => {

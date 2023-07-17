@@ -7,10 +7,30 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { CaretLeft, MagnifyingGlass, Plus } from 'phosphor-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-const ConnectorColumns = ({ connectorData, setShowColumns }: any) => {
+type ConnectorColumnsProps = {
+  connectorData: any;
+  setShowColumns: Function;
+  setShowEmptyState: Function;
+};
+
+const ConnectorColumns = ({
+  connectorData,
+  setShowColumns,
+  setShowEmptyState,
+}: ConnectorColumnsProps) => {
   const { heirarchy, fields } = connectorData;
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+
+  const handleAddColumn = (field: any) => {
+    setSelectedColumns((prevColumns) => [...prevColumns, field]);
+  };
+
+  useEffect(() => {
+    setShowEmptyState(!Boolean(selectedColumns.length));
+  }, [selectedColumns]);
+
   return (
     <Flex direction={'column'} gap={'3'}>
       <Flex alignItems={'center'} gap={'2'} px={'3'}>
@@ -71,6 +91,7 @@ const ConnectorColumns = ({ connectorData, setShowColumns }: any) => {
               _hover={{ bg: 'white.200' }}
               cursor={'pointer'}
               borderRadius={'4'}
+              onClick={() => handleAddColumn(field)}
             >
               <Plus size={14} />
             </Box>
