@@ -20,7 +20,7 @@ export const createIntegrationWithDataSource = async (
   accountId?: string,
   apiKey?: string,
   apiSecret?: string,
-  tableName: string,
+  tableName?: string,
   mySQLCredential?: MySQLCredential,
   config: AxiosRequestConfig = {
     params: {
