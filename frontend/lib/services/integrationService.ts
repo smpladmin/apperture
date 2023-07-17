@@ -10,6 +10,7 @@ type IntegrationRequestBody = {
   accountId?: string;
   apiKey?: string;
   apiSecret?: string;
+  tableName?: string;
   mySQLCredential?: MySQLCredential;
 };
 
