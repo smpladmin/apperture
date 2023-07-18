@@ -1,6 +1,4 @@
-import random
 import re
-import string
 from typing import List
 
 from beanie import PydanticObjectId
@@ -11,11 +9,17 @@ from repositories.clickhouse.clickhouse_role import ClickHouseRole
 
 from ..apperture_users.models import AppertureUser
 from .models import App, ClickHouseCredential
+from ..common.random_string_utils import StringUtils
 
 
 class AppService:
-    def __init__(self, clickhouse_role: ClickHouseRole = Depends()) -> None:
+    def __init__(
+        self,
+        clickhouse_role: ClickHouseRole = Depends(),
+        string_utils: StringUtils = Depends(),
+    ) -> None:
         self.clickhouse_role = clickhouse_role
+        self.string_utils = string_utils
 
     def parse_app_name_to_db_name(self, app_name: str):
         return re.sub("[^A-Za-z0-9]", "_", app_name).lower()
@@ -26,11 +30,6 @@ class AppService:
             App.clickhouse_credential.databasename == database_name,
             App.enabled != False,
         ).count()
-
-    def generate_random_value(self, length=32):
-        characters = string.ascii_letters + string.digits
-        password = "".join(random.choice(characters) for _ in range(length))
-        return password
 
     def create_app_database(
         self,
@@ -46,8 +45,8 @@ class AppService:
     async def create_clickhouse_user(
         self, id: PydanticObjectId, app_name: str
     ) -> ClickHouseCredential:
-        username = self.generate_random_value(16) + str(id)
-        password = self.generate_random_value()
+        username = self.string_utils.generate_random_value(16) + str(id)
+        password = self.string_utils.generate_random_value()
         database_name = self.parse_app_name_to_db_name(app_name=app_name)
 
         self.clickhouse_role.create_user(username=username, password=password)
@@ -55,10 +54,7 @@ class AppService:
 
         self.create_app_database(app_name=app_name, username=username)
 
-        await App.find(
-            App.id == PydanticObjectId(id),
-            App.enabled == True,
-        ).update(
+        await App.find(App.id == PydanticObjectId(id), App.enabled == True,).update(
             {
                 "$set": {
                     "clickhouse_credential": ClickHouseCredential(

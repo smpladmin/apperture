@@ -1,6 +1,5 @@
 import asyncio
-from typing import List
-
+from typing import List, Optional
 
 import httpx
 from beanie import PydanticObjectId
@@ -72,7 +71,7 @@ class DataSourceService:
 
     async def create_datasource(
         self,
-        external_source_id: str,
+        external_source_id: Optional[str],
         name: str,
         version: DataSourceVersion,
         integration: Integration,

@@ -106,3 +106,25 @@ def update_events_from_clickstream():
             y=response.status_code,
         )
     )
+
+
+def refresh_datamart_tables_for_app(app_id: str):
+    logging.info("{x}: {y}".format(x="refresh_datamart_tables_for_app", y="starts"))
+    logging.info("{x}: {y}".format(x="Process running for id", y=app_id))
+    response = post("/private/datamart", {"appId": app_id})
+    logging.info(
+        f"Triggered datamart tables refresh for app: {app_id}, status: {response.status_code}"
+    )
+    logging.info("{x}: {y}".format(x="refresh_datamart_tables_for_app", y="ends"))
+
+
+def trigger_refresh_datamart_for_all_apps():
+    logging.info("{x}: {y}".format(x="Triggering refresh datamart for all apps", y=""))
+    response = post(
+        "/private/apps/datamart",
+    )
+    logging.info(
+        "{x}: {y}".format(
+            x="Triggering refresh datamart for all apps, status", y=response.status_code
+        )
+    )

@@ -2,16 +2,19 @@ import asyncio
 import logging
 from typing import List, Union
 
+from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends
 
 from authorisation.service import AuthService
 from data_processor_queue.service import DPQueueService
 from domain.actions.service import ActionService
 from domain.apperture_users.service import AppertureUserService
+from domain.apps.service import AppService
 from domain.clickstream_event_properties.service import (
     ClickStreamEventPropertiesService,
 )
 from domain.common.models import IntegrationProvider
+from domain.datamart.service import DataMartService
 from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.event_properties.service import EventPropertiesService
@@ -32,6 +35,7 @@ from rest.dtos.clickstream_event_properties import (
     ClickStreamEventPropertiesDto,
     ClickStreamEventPropertiesResponse,
 )
+from rest.dtos.datamart import RefreshDataMartDto
 from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.event_properties import EventPropertiesDto, EventPropertiesResponse
@@ -123,9 +127,7 @@ async def update_event_properties(
     dto: EventPropertiesDto,
     event_properties_service: EventPropertiesService = Depends(),
 ):
-    await event_properties_service.update_event_properties(
-        event_properties=dto
-    )
+    await event_properties_service.update_event_properties(event_properties=dto)
     return {"updated": True}
 
 
@@ -373,3 +375,42 @@ async def get_clickstream_event_properties(
     clickstream_event_properties_service: ClickStreamEventPropertiesService = Depends(),
 ):
     return await clickstream_event_properties_service.get_event_properties()
+
+
+@router.post("/datamart")
+async def refresh_datamart_tables_for_app(
+    dto: RefreshDataMartDto,
+    app_service: AppService = Depends(),
+    datamart_service: DataMartService = Depends(),
+):
+    res = {}
+    app_id = dto.appId
+    app = await app_service.get_app(id=app_id)
+    datamart_tables = await datamart_service.get_datamart_tables_for_app_id(
+        app_id=PydanticObjectId(app_id)
+    )
+
+    for table in datamart_tables:
+        await datamart_service.refresh_datamart_table(
+            datamart_id=str(table.id), clickhouse_credential=app.clickhouse_credential
+        )
+        res[str(table.id)] = "updated"
+    return {app_id: res}
+
+
+@router.post("/apps/datamart")
+async def trigger_refresh_datamart_for_all_apps(
+    datamart_service: DataMartService = Depends(),
+    dpq_service: DPQueueService = Depends(),
+):
+    apps_with_datamart = await datamart_service.get_all_apps_with_datamarts()
+    jobs = [
+        {
+            "app_id": app_id,
+            "jobs": dpq_service.enqueue_refresh_datamart_for_app(app_id),
+        }
+        for app_id in apps_with_datamart
+    ]
+    logging.info("Scheduled jobs for all apps")
+    logging.info(jobs)
+    return jobs
