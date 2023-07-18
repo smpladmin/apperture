@@ -1,6 +1,6 @@
 import { Button, Flex, Input, Radio, RadioGroup, Text } from '@chakra-ui/react';
 import React, { useRef, useState } from 'react';
-import { TransientSheetData } from '@lib/domain/workbook';
+import { SubHeaderColumnType, TransientSheetData } from '@lib/domain/workbook';
 import cloneDeep from 'lodash/cloneDeep';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { Plus } from 'phosphor-react';
@@ -28,6 +28,28 @@ const Footer = ({
 
   const handleAddNewSheet = () => {
     const sheetsLength = sheetsData.length;
+    const newSheet = {
+      name: `Sheet ${sheetsLength + 1}`,
+      query: '',
+      data: [],
+      headers: [],
+      subHeaders: Array.from({ length: 27 }).map((_, index) => {
+        return {
+          name: '',
+          type:
+            index === 1 || index === 2
+              ? SubHeaderColumnType.DIMENSION
+              : SubHeaderColumnType.METRIC,
+        };
+      }),
+      is_sql: true,
+      editMode: false,
+    };
+
+    setSheetsData((prevSheetData: TransientSheetData[]) => [
+      ...prevSheetData,
+      newSheet,
+    ]);
     setSelectedSheetIndex(sheetsLength);
     openSelectSheetOverlay();
   };
