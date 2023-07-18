@@ -8,24 +8,25 @@ import { TransientSheetData } from '@lib/domain/workbook';
 
 const SelectSheet = ({
   sheetsData,
+  setSheetsData,
   closeSelectSheetOverlay,
 }: {
   sheetsData: TransientSheetData[];
+  setSheetsData: Function;
   closeSelectSheetOverlay: () => void;
 }) => {
   const showCloseButton = sheetsData.length > 1;
+
+  const handleCloseOverlay = () => {
+    setSheetsData((prevSheetsData: TransientSheetData[]) => {
+      const tempSheetsData = [...prevSheetsData];
+      tempSheetsData.pop();
+      return tempSheetsData;
+    });
+    closeSelectSheetOverlay();
+  };
   return (
     <>
-      <Flex
-        position={'fixed'}
-        onClick={(e) => e.stopPropagation()}
-        opacity={0.1}
-        background={'black.DEFAULT'}
-        h={'full'}
-        w={'full'}
-        justifyContent={'center'}
-        zIndex={'99'}
-      ></Flex>
       <Box
         position={'fixed'}
         left={'35%'}
@@ -44,7 +45,7 @@ const SelectSheet = ({
             {showCloseButton ? (
               <X
                 size={16}
-                onClick={closeSelectSheetOverlay}
+                onClick={handleCloseOverlay}
                 style={{ cursor: 'pointer' }}
               />
             ) : null}
@@ -136,6 +137,16 @@ const SelectSheet = ({
           </Flex>
         </Flex>
       </Box>
+      <Flex
+        position={'fixed'}
+        onClick={(e) => e.stopPropagation()}
+        opacity={0.1}
+        background={'black.DEFAULT'}
+        h={'full'}
+        w={'full'}
+        justifyContent={'center'}
+        zIndex={'99'}
+      />
     </>
   );
 };

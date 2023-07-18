@@ -31,7 +31,7 @@ const EmptySheet = () => {
                       minWidth={'50'}
                       width={'auto'}
                       h={'3'}
-                    ></Box>
+                    />
                   </Box>
                 </Flex>
               );

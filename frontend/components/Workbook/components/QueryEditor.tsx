@@ -14,17 +14,21 @@ import React, { useState } from 'react';
 import { cloneDeep } from 'lodash';
 
 type QueryEditorProps = {
+  error: string;
   sheetsData: TransientSheetData[];
   setShowSqlEditor: Function;
   setSheetsData: Function;
+  setError: Function;
   selectedSheetIndex: number;
 };
 
 const QueryEditor = ({
+  error,
   sheetsData,
+  selectedSheetIndex,
   setShowSqlEditor,
   setSheetsData,
-  selectedSheetIndex,
+  setError,
 }: QueryEditorProps) => {
   const [query, setQuery] = useState(sheetsData[selectedSheetIndex].query);
 
@@ -32,6 +36,7 @@ const QueryEditor = ({
     const toUpdateSheets = cloneDeep(sheetsData);
     toUpdateSheets[selectedSheetIndex].query = query;
     setSheetsData(toUpdateSheets);
+    setError('');
   };
 
   return (
@@ -62,10 +67,27 @@ const QueryEditor = ({
           setQuery(value);
         }}
       />
-      <Flex gap={'4'} justifyContent={'flex-end'} alignItems={'center'}>
+      {error ? (
+        <Text
+          fontSize={'xs-12'}
+          lineHeight={'xs-16'}
+          fontWeight={400}
+          color={'red'}
+          data-testid={'error-text'}
+        >
+          {error}
+        </Text>
+      ) : null}
+      <Flex
+        gap={'4'}
+        mt={'3'}
+        justifyContent={'flex-end'}
+        alignItems={'center'}
+      >
         <Button
           onClick={() => {
             setShowSqlEditor(false);
+            setError('');
           }}
           border={'0'}
           bg={'transparent'}

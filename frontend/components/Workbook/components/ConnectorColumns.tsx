@@ -1,33 +1,74 @@
 import {
-  Box,
+  Checkbox,
+  CheckboxGroup,
   Flex,
   Input,
   InputGroup,
   InputLeftElement,
   Text,
 } from '@chakra-ui/react';
-import { CaretLeft, MagnifyingGlass, Plus } from 'phosphor-react';
-import React, { useEffect, useState } from 'react';
+import { TransientSheetData } from '@lib/domain/workbook';
+import { getSearchResult } from '@lib/utils/common';
+import { CaretLeft, MagnifyingGlass } from 'phosphor-react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
+
+const generateQuery = (
+  columns: string[],
+  tableName: string,
+  databaseName: string,
+  datasourceId: string
+) => {
+  if (!columns.length) return '';
+  const columnsQuerySubstring = columns.join(', ');
+  return `Select ${columnsQuerySubstring} from ${databaseName}.${tableName} where datasource_id = '${datasourceId}'`;
+};
 
 type ConnectorColumnsProps = {
   connectorData: any;
+  selectedSheetIndex: number;
+  selectedColumns: string[];
   setShowColumns: Function;
   setShowEmptyState: Function;
+  setSheetsData: Function;
+  setSelectedColumns: Function;
 };
 
 const ConnectorColumns = ({
   connectorData,
+  selectedSheetIndex,
   setShowColumns,
   setShowEmptyState,
+  setSheetsData,
+  selectedColumns,
+  setSelectedColumns,
 }: ConnectorColumnsProps) => {
-  const { heirarchy, fields } = connectorData;
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const { heirarchy, fields, database_name, table_name, datasource_id } =
+    connectorData;
 
-  const handleAddColumn = (field: any) => {
-    setSelectedColumns((prevColumns) => [...prevColumns, field]);
+  const [columns, setColumns] = useState<string[]>(fields);
+
+  const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    const searchText = e.target.value;
+    const searchResults = getSearchResult(fields, searchText, { keys: [] });
+    const results = searchResults.length ? searchResults : fields;
+
+    setColumns(results);
   };
 
   useEffect(() => {
+    const query = generateQuery(
+      selectedColumns,
+      table_name,
+      database_name,
+      datasource_id
+    );
+
+    setSheetsData((prevSheetData: TransientSheetData[]) => {
+      const tempSheetsData = [...prevSheetData];
+      tempSheetsData[selectedSheetIndex].query = query;
+      return tempSheetsData;
+    });
+
     setShowEmptyState(!Boolean(selectedColumns.length));
   }, [selectedColumns]);
 
@@ -67,37 +108,44 @@ const ConnectorColumns = ({
             color: 'grey.700',
           }}
           focusBorderColor="black.100"
+          onChange={(e) => onChangeHandler(e)}
         />
       </InputGroup>
-      <Flex direction={'column'}>
-        {fields.map((field: any) => (
-          <Flex
-            justifyContent={'space-between'}
-            alignItems={'center'}
-            py={'2'}
-            px={'3'}
-            key={field}
-          >
-            <Text
-              fontSize={'xs-12'}
-              lineHeight={'xs-12'}
-              fontWeight={'500'}
-              color={'grey.900'}
-            >
-              {field}
-            </Text>
-            <Box
-              p={'1'}
-              _hover={{ bg: 'white.200' }}
+      <CheckboxGroup
+        value={selectedColumns}
+        onChange={(values: string[]) => {
+          setSelectedColumns(values);
+        }}
+      >
+        {columns.map((column) => {
+          return (
+            <Flex
+              key={column}
+              px={2}
+              py={1}
+              gap={3}
+              alignItems={'center'}
+              as={'label'}
               cursor={'pointer'}
+              _hover={{
+                bg: 'white.400',
+              }}
               borderRadius={'4'}
-              onClick={() => handleAddColumn(field)}
             >
-              <Plus size={14} />
-            </Box>
-          </Flex>
-        ))}
-      </Flex>
+              <Checkbox colorScheme={'radioBlack'} value={column} />
+              <Text
+                fontSize={'xs-12'}
+                lineHeight={'xs-12'}
+                fontWeight={'500'}
+                color={'grey.900'}
+                maxWidth={'45'}
+              >
+                {column}
+              </Text>
+            </Flex>
+          );
+        })}
+      </CheckboxGroup>
     </Flex>
   );
 };

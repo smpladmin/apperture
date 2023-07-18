@@ -7,6 +7,7 @@ export type TransientSheetData = {
   subHeaders: SubHeaderColumn[];
   data: any[];
   is_sql: boolean;
+  editMode?: boolean;
 };
 
 export enum ColumnType {
