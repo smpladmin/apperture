@@ -28,8 +28,12 @@ class ConnectionService:
                         database_name="default",
                     )
                 )
-            connection_data.append(group)
-        return Connections(server="ClickHouse", connection_data=connection_data)
+            connection_data.append(group) if group and group.connection_source else None
+        return (
+            Connections(server="ClickHouse", connection_data=connection_data)
+            if connection_data
+            else []
+        )
 
     def get_mysql_connection_group(self, mysql_connections, properties_table: dict):
         connection_data = []
@@ -51,8 +55,12 @@ class ConnectionService:
                     database_name="default",
                 )
             )
-        connection_data.append(group)
-        return Connections(server="MySQL", connection_data=connection_data)
+        connection_data.append(group) if group and group.connection_source else None
+        return (
+            Connections(server="MySQL", connection_data=connection_data)
+            if connection_data
+            else []
+        )
 
     def get_connections_from_datasources(
         self, datasources: List[DataSource], properties_table: dict
@@ -66,12 +74,19 @@ class ConnectionService:
                 clickhouse_connection_table[datasource.provider].append(datasource)
             else:
                 mysql_connections.append(datasource)
-        return [
-            self.get_clickhouse_connection_group(
-                clickhouse_connection_table=clickhouse_connection_table,
-                properties_table=properties_table,
-            ),
-            self.get_mysql_connection_group(
-                mysql_connections=mysql_connections, properties_table=properties_table
-            ),
-        ]
+        clickhouse_server_connections = self.get_clickhouse_connection_group(
+            clickhouse_connection_table=clickhouse_connection_table,
+            properties_table=properties_table,
+        )
+        mysql_server_connections = self.get_mysql_connection_group(
+            mysql_connections=mysql_connections, properties_table=properties_table
+        )
+
+        connections_list = []
+
+        if clickhouse_server_connections:
+            connections_list.append(clickhouse_server_connections)
+        if mysql_server_connections:
+            connections_list.append(mysql_server_connections)
+
+        return connections_list
