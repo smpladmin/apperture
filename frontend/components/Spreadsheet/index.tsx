@@ -211,7 +211,6 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             data?.headers
           );
         });
-      console.log(queriedData);
       updateSheetData(queriedData);
 
       setloadBODMASColumn({ loading: false, data: null });
@@ -224,7 +223,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   ) => {
     const max = subheaders.reduce(
       (max: number, subheader: SubHeaderColumn, index: number) => {
-        if (subheader.name && subheader.name.match(/^[unique|count]/)) {
+        if (subheader.name) {
           max = max < index ? index : max;
         }
         return max;
@@ -240,6 +239,11 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         while (originalHeader[i]?.type === ColumnType.PADDING_HEADER) {
           i++;
         }
+      } else if (subheader.name) {
+        newHeaders.push({
+          name: subheader.name,
+          type: ColumnType.COMPUTED_HEADER,
+        });
       } else {
         newHeaders.push({
           name: String.fromCharCode(65 + index),
