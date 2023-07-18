@@ -9,7 +9,7 @@ class ConnectionService:
         self, datasources: List[DataSource], properties_table: dict
     ):
         connection_table = {}
-        for index, datasource in enumerate(datasources):
+        for datasource in datasources:
             if datasource.provider not in connection_table:
                 connection_table[datasource.provider] = []
             connection_table[datasource.provider].append(datasource)
@@ -33,4 +33,4 @@ class ConnectionService:
                     )
                 )
             connection_data.append(group)
-        return Connections(server="ClickHouse", connection_data=connection_data)
+        return [Connections(server="ClickHouse", connection_data=connection_data)]
