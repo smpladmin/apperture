@@ -1,20 +1,16 @@
 from typing import List
 
+from domain.common.models import IntegrationProvider
 from domain.connections.models import ConnectionGroup, Connections, ConnectionSource
-from domain.datasources.models import DataSource
+from domain.datasources.models import DataSource, ProviderDataSource
 
 
 class ConnectionService:
-    def get_connections_from_datasources(
-        self, datasources: List[DataSource], properties_table: dict
+    def get_clickhouse_connection_group(
+        self, clickhouse_connection_table, properties_table
     ):
-        connection_table = {}
-        for datasource in datasources:
-            if datasource.provider not in connection_table:
-                connection_table[datasource.provider] = []
-            connection_table[datasource.provider].append(datasource)
         connection_data = []
-        for key, value in connection_table.items():
+        for key, value in clickhouse_connection_table.items():
             group = ConnectionGroup(provider=key, connection_source=[])
             for datasource in value:
                 fields = [
@@ -33,4 +29,49 @@ class ConnectionService:
                     )
                 )
             connection_data.append(group)
-        return [Connections(server="ClickHouse", connection_data=connection_data)]
+        return Connections(server="ClickHouse", connection_data=connection_data)
+
+    def get_mysql_connection_group(self, mysql_connections, properties_table: dict):
+        connection_data = []
+        group = ConnectionGroup(
+            provider=IntegrationProvider.MYSQL, connection_source=[]
+        )
+        for datasource in mysql_connections:
+            group.connection_source.append(
+                ConnectionSource(
+                    name=datasource.name
+                    or datasource.external_source_id
+                    or datasource.provider,
+                    fields=[
+                        "event_name",
+                        "user_id",
+                    ],
+                    datasource_id=datasource.id,
+                    table_name="events",
+                    database_name="default",
+                )
+            )
+        connection_data.append(group)
+        return Connections(server="MySQL", connection_data=connection_data)
+
+    def get_connections_from_datasources(
+        self, datasources: List[DataSource], properties_table: dict
+    ):
+        clickhouse_connection_table = {}
+        mysql_connections = []
+        for datasource in datasources:
+            if datasource.provider != IntegrationProvider.MYSQL:
+                if datasource.provider not in clickhouse_connection_table:
+                    clickhouse_connection_table[datasource.provider] = []
+                clickhouse_connection_table[datasource.provider].append(datasource)
+            else:
+                mysql_connections.append(datasource)
+        return [
+            self.get_clickhouse_connection_group(
+                clickhouse_connection_table=clickhouse_connection_table,
+                properties_table=properties_table,
+            ),
+            self.get_mysql_connection_group(
+                mysql_connections=mysql_connections, properties_table=properties_table
+            ),
+        ]
