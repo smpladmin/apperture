@@ -47,8 +47,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: any }) => {
     savedWorkbook ? false : true
   );
   const [connections, setConnections] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+
   const {
     isOpen: showSelectSheetOverlay,
     onOpen: openSelectSheetOverlay,
@@ -106,26 +105,18 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: any }) => {
     if (!sheetData?.query) return;
 
     const fetchTransientSheetData = async () => {
-      setSaveButtonDisabled(true);
-      setIsLoading(true);
-
       const response = await getTransientSpreadsheets(
         dsId as string,
         sheetData.query,
         sheetData.is_sql
       );
 
-      setIsLoading(false);
-      setSaveButtonDisabled(false);
-
       if (response.status === 200) {
         const toUpdateSheets = cloneDeep(sheetsData);
         toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
         toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
         setSheetsData(toUpdateSheets);
-        setError('');
       } else {
-        setError((response as ErrorResponse)?.error?.detail);
       }
     };
 
@@ -170,9 +161,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: any }) => {
               {showSqlEditor ? (
                 <QueryEditor
                   sheetsData={sheetsData}
-                  error={error}
                   selectedSheetIndex={selectedSheetIndex}
-                  setError={setError}
                   setShowSqlEditor={setShowSqlEditor}
                   setSheetsData={setSheetsData}
                 />

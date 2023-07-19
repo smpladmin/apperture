@@ -91,6 +91,7 @@ const Connections = ({
   const handleSubmit = () => {
     setShowColumns(true);
     setSelectedColumns([]);
+    onClose();
   };
 
   return (
