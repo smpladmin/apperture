@@ -8,26 +8,27 @@ import { TransientSheetData } from '@lib/domain/workbook';
 
 type SidePanelProps = {
   connections: any;
+  showColumns: boolean;
   sheetsData: TransientSheetData[];
   selectedSheetIndex: number;
   setShowEmptyState: Function;
   setSheetsData: Function;
   setShowSqlEditor: Function;
+  setShowColumns: Function;
 };
 
 const SidePanel = ({
   connections,
   sheetsData,
+  showColumns,
   setShowEmptyState,
   setSheetsData,
   selectedSheetIndex,
   setShowSqlEditor,
+  setShowColumns,
 }: SidePanelProps) => {
   const [isSidePanelCollapsed, setIsSidePanelCollapsed] = useState(false);
-  const [showColumns, setShowColumns] = useState(false);
   const [connectorData, setConnectorData] = useState<any>({});
-  const [selectedColumns, setSelectedColumns] = useState([]);
-  const [lastConnectionSelected, setLastConnectionSelected] = useState('');
 
   return (
     <Box
@@ -44,24 +45,22 @@ const SidePanel = ({
         <Flex direction={'column'} px={'2'} overflow={'auto'}>
           {showColumns ? (
             <ConnectorColumns
+              sheetsData={sheetsData}
               connectorData={connectorData}
               selectedSheetIndex={selectedSheetIndex}
               setShowColumns={setShowColumns}
               setShowEmptyState={setShowEmptyState}
               setSheetsData={setSheetsData}
-              selectedColumns={selectedColumns}
-              setSelectedColumns={setSelectedColumns}
             />
           ) : (
             <Connections
               connections={connections}
+              selectedSheetIndex={selectedSheetIndex}
+              sheetsData={sheetsData}
+              setSheetsData={setSheetsData}
               setConnectorData={setConnectorData}
               setShowColumns={setShowColumns}
               setShowSqlEditor={setShowSqlEditor}
-              selectedColumns={selectedColumns}
-              setSelectedColumns={setSelectedColumns}
-              lastConnectionSelected={lastConnectionSelected}
-              setLastConnectionSelected={setLastConnectionSelected}
             />
           )}
         </Flex>

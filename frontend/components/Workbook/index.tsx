@@ -6,7 +6,11 @@ import {
   updateWorkbook,
 } from '@lib/services/workbookService';
 import { useRouter } from 'next/router';
-import { SubHeaderColumnType, TransientSheetData } from '@lib/domain/workbook';
+import {
+  SubHeaderColumnType,
+  TransientSheetData,
+  Workbook,
+} from '@lib/domain/workbook';
 import { Box, Flex, useDisclosure } from '@chakra-ui/react';
 import SidePanel from './components/SidePanel';
 import Grid from '@components/Spreadsheet/components/Grid/Grid';
@@ -16,13 +20,31 @@ import SelectSheet from './components/SelectSheet';
 import EmptySheet from './components/EmptySheet';
 import { getConnectionsForApp } from '@lib/services/connectionService';
 import { cloneDeep } from 'lodash';
-import { ErrorResponse } from '@lib/services/util';
 
-const Workbook = ({ savedWorkbook }: { savedWorkbook?: any }) => {
-  const [workbookName, setWorkBookName] = useState('Untitled Workbook');
-  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
-  const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
-  const [sheetsData, setSheetsData] = useState<TransientSheetData[]>([
+const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
+  if (savedWorkbook) {
+    return savedWorkbook.spreadsheets.map((sheet) => ({
+      ...sheet,
+      data: [],
+      subHeaders: sheet.subHeaders
+        ? sheet.subHeaders
+        : Array.from({ length: 27 }).map((_, index) => {
+            return {
+              name: '',
+              type:
+                index === 1 || index === 2
+                  ? SubHeaderColumnType.DIMENSION
+                  : SubHeaderColumnType.METRIC,
+            };
+          }),
+      editMode: sheet?.editMode || true,
+      meta: sheet?.meta || {
+        dsId: '',
+        selectedColumns: [],
+      },
+    }));
+  }
+  return [
     {
       name: 'Sheet 1',
       query: '',
@@ -39,14 +61,28 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: any }) => {
       }),
       is_sql: true,
       editMode: false,
+      meta: {
+        dsId: '',
+        selectedColumns: [],
+      },
     },
-  ]);
+  ];
+};
+
+const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
+  const [workbookName, setWorkBookName] = useState('Untitled Workbook');
+  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
+  const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
+  const [sheetsData, setSheetsData] = useState<TransientSheetData[]>(
+    initializeSheetForSavedWorkbook(savedWorkbook)
+  );
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
   const [showSqlEditor, setShowSqlEditor] = useState(false);
   const [showEmptyState, setShowEmptyState] = useState(
     savedWorkbook ? false : true
   );
   const [connections, setConnections] = useState([]);
+  const [showColumns, setShowColumns] = useState(false);
 
   const {
     isOpen: showSelectSheetOverlay,
@@ -69,6 +105,8 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: any }) => {
         headers: sheet.headers,
         query: sheet.query,
         subHeaders: sheet.subHeaders,
+        editMode: sheet.editMode,
+        meta: sheet.meta,
       };
     });
 
@@ -102,7 +140,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: any }) => {
 
   useEffect(() => {
     const sheetData = sheetsData[selectedSheetIndex];
-    if (!sheetData?.query) return;
+
+    if (sheetData?.query) setShowEmptyState(false);
+    if (!sheetData?.query || sheetData.editMode) return;
 
     const fetchTransientSheetData = async () => {
       const response = await getTransientSpreadsheets(
@@ -116,7 +156,6 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: any }) => {
         toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
         toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
         setSheetsData(toUpdateSheets);
-      } else {
       }
     };
 
@@ -142,9 +181,12 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: any }) => {
             closeSelectSheetOverlay={closeSelectSheetOverlay}
             sheetsData={sheetsData}
             setSheetsData={setSheetsData}
+            setSelectedSheetIndex={setSelectedSheetIndex}
           />
         ) : null}
         <SidePanel
+          showColumns={showColumns}
+          setShowColumns={setShowColumns}
           connections={connections}
           selectedSheetIndex={selectedSheetIndex}
           sheetsData={sheetsData}
@@ -154,19 +196,18 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: any }) => {
         />
 
         <Box h={'full'} overflowY={'auto'}>
+          {showSqlEditor ? (
+            <QueryEditor
+              sheetsData={sheetsData}
+              selectedSheetIndex={selectedSheetIndex}
+              setShowSqlEditor={setShowSqlEditor}
+              setSheetsData={setSheetsData}
+            />
+          ) : null}
           {showEmptyState ? (
             <EmptySheet />
           ) : (
             <>
-              {showSqlEditor ? (
-                <QueryEditor
-                  sheetsData={sheetsData}
-                  selectedSheetIndex={selectedSheetIndex}
-                  setShowSqlEditor={setShowSqlEditor}
-                  setSheetsData={setSheetsData}
-                />
-              ) : null}
-
               <Grid
                 sheetData={sheetsData[selectedSheetIndex]}
                 selectedSheetIndex={selectedSheetIndex}
@@ -181,6 +222,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: any }) => {
             setSelectedSheetIndex={setSelectedSheetIndex}
             setSheetsData={setSheetsData}
             sheetsData={sheetsData}
+            setShowColumns={setShowColumns}
           />
         </Box>
       </Flex>

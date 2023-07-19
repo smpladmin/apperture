@@ -9,7 +9,7 @@ import {
 } from '@chakra-ui/react';
 import { TransientSheetData } from '@lib/domain/workbook';
 import { getSearchResult } from '@lib/utils/common';
-import { CaretLeft, MagnifyingGlass } from 'phosphor-react';
+import { CaretLeft, Columns, MagnifyingGlass } from 'phosphor-react';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 
 const generateQuery = (
@@ -24,28 +24,33 @@ const generateQuery = (
 };
 
 type ConnectorColumnsProps = {
+  sheetsData: TransientSheetData[];
   connectorData: any;
   selectedSheetIndex: number;
-  selectedColumns: string[];
   setShowColumns: Function;
   setShowEmptyState: Function;
   setSheetsData: Function;
-  setSelectedColumns: Function;
+};
+
+const initializeSelectedColumns = (datasource_id: string, meta: any) => {
+  return meta?.dsId === datasource_id ? meta?.selectedColumns || [] : [];
 };
 
 const ConnectorColumns = ({
+  sheetsData,
   connectorData,
   selectedSheetIndex,
   setShowColumns,
   setShowEmptyState,
   setSheetsData,
-  selectedColumns,
-  setSelectedColumns,
 }: ConnectorColumnsProps) => {
   const { heirarchy, fields, database_name, table_name, datasource_id } =
     connectorData;
-
+  const sheetData = sheetsData[selectedSheetIndex];
   const [columns, setColumns] = useState<string[]>(fields);
+  const [selectedColumns, setSelectedColumns] = useState(
+    initializeSelectedColumns(datasource_id, sheetData?.meta)
+  );
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
     const searchText = e.target.value;
@@ -56,6 +61,11 @@ const ConnectorColumns = ({
   };
 
   useEffect(() => {
+    setShowEmptyState((prevState: boolean) => {
+      return sheetData.editMode ? prevState : !Boolean(selectedColumns.length);
+    });
+
+    if (sheetData.editMode) return;
     const query = generateQuery(
       selectedColumns,
       table_name,
@@ -66,10 +76,9 @@ const ConnectorColumns = ({
     setSheetsData((prevSheetData: TransientSheetData[]) => {
       const tempSheetsData = [...prevSheetData];
       tempSheetsData[selectedSheetIndex].query = query;
+      tempSheetsData[selectedSheetIndex].meta.selectedColumns = selectedColumns;
       return tempSheetsData;
     });
-
-    setShowEmptyState(!Boolean(selectedColumns.length));
   }, [selectedColumns]);
 
   return (
@@ -111,43 +120,99 @@ const ConnectorColumns = ({
           onChange={(e) => onChangeHandler(e)}
         />
       </InputGroup>
-      <CheckboxGroup
-        value={selectedColumns}
-        onChange={(values: string[]) => {
-          setSelectedColumns(values);
-        }}
-      >
-        {columns.map((column) => {
-          return (
-            <Flex
-              key={column}
-              px={2}
-              py={1}
-              gap={3}
-              alignItems={'center'}
-              as={'label'}
-              cursor={'pointer'}
-              _hover={{
-                bg: 'white.400',
-              }}
-              borderRadius={'4'}
-            >
-              <Checkbox colorScheme={'radioBlack'} value={column} />
-              <Text
-                fontSize={'xs-12'}
-                lineHeight={'xs-12'}
-                fontWeight={'500'}
-                color={'grey.900'}
-                maxWidth={'45'}
-              >
-                {column}
-              </Text>
-            </Flex>
-          );
-        })}
-      </CheckboxGroup>
+      {sheetData?.editMode ? (
+        <ViewOnlyColumns columns={columns} />
+      ) : (
+        <CheckColumns
+          columns={columns}
+          selectedColumns={selectedColumns}
+          setSelectedColumns={setSelectedColumns}
+        />
+      )}
     </Flex>
   );
 };
 
 export default ConnectorColumns;
+
+const CheckColumns = ({
+  columns,
+  selectedColumns,
+  setSelectedColumns,
+}: {
+  selectedColumns: string[];
+  columns: string[];
+  setSelectedColumns: Function;
+}) => {
+  return (
+    <CheckboxGroup
+      value={selectedColumns}
+      onChange={(values: string[]) => {
+        setSelectedColumns(values);
+      }}
+    >
+      {columns.map((column) => {
+        return (
+          <Flex
+            key={column}
+            px={2}
+            py={1}
+            gap={3}
+            alignItems={'center'}
+            as={'label'}
+            cursor={'pointer'}
+            _hover={{
+              bg: 'white.400',
+            }}
+            borderRadius={'4'}
+          >
+            <Checkbox colorScheme={'radioBlack'} value={column} />
+            <Text
+              fontSize={'xs-12'}
+              lineHeight={'xs-12'}
+              fontWeight={'500'}
+              color={'grey.900'}
+              maxWidth={'45'}
+            >
+              {column}
+            </Text>
+          </Flex>
+        );
+      })}
+    </CheckboxGroup>
+  );
+};
+
+const ViewOnlyColumns = ({ columns }: { columns: string[] }) => {
+  return (
+    <Flex direction={'column'}>
+      {columns.map((column) => {
+        return (
+          <Flex
+            key={column}
+            px={'3'}
+            py={'2'}
+            gap={3}
+            alignItems={'center'}
+            cursor={'pointer'}
+            _hover={{
+              bg: 'white.400',
+            }}
+            borderRadius={'4'}
+          >
+            <Columns size={16} />
+            <Text
+              fontSize={'xs-12'}
+              lineHeight={'xs-12'}
+              fontWeight={'500'}
+              color={'grey.900'}
+              maxWidth={'45'}
+            >
+              {column}
+            </Text>
+          </Flex>
+        );
+      })}
+    </Flex>
+  );
+};

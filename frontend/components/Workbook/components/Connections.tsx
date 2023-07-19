@@ -13,7 +13,7 @@ import {
   InputLeftElement,
   useDisclosure,
 } from '@chakra-ui/react';
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import APIIcon from '@assets/images/api.svg';
 import CSVIcon from '@assets/images/csv.svg';
 import AppertureIcon from '@assets/images/apperture-filled-logo.svg';
@@ -25,27 +25,26 @@ import ClevertapIcon from '@assets/images/clevertap-icon.png';
 import Image from 'next/image';
 import { MagnifyingGlass, Table } from 'phosphor-react';
 import ConfirmationModal from './ConfirmationModal';
+import { TransientSheetData } from '@lib/domain/workbook';
 
 type ConnectionsProps = {
   connections: any[];
-  lastConnectionSelected: string;
-  selectedColumns: string[];
+  sheetsData: TransientSheetData[];
+  setSheetsData: Function;
+  selectedSheetIndex: number;
   setConnectorData: Function;
   setShowColumns: Function;
   setShowSqlEditor: Function;
-  setSelectedColumns: Function;
-  setLastConnectionSelected: Function;
 };
 
 const Connections = ({
   connections,
-  lastConnectionSelected,
-  selectedColumns,
+  sheetsData,
+  setSheetsData,
+  selectedSheetIndex,
   setConnectorData,
   setShowColumns,
   setShowSqlEditor,
-  setSelectedColumns,
-  setLastConnectionSelected,
 }: ConnectionsProps) => {
   const getConnectionIcon = (connectionName: string) => {
     const icons: { [key: string]: any } = {
@@ -61,38 +60,78 @@ const Connections = ({
     return icons[connectionName];
   };
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const sheetData = sheetsData[selectedSheetIndex];
+
+  const [canditate, setCandidate] = useState<{
+    confirmation: boolean;
+    dsId: string;
+  }>({
+    confirmation: false,
+    dsId: '',
+  });
 
   const handleConnectionSelect = (
     connectionData: any,
     heirarchy: string[],
-    currentConnectionSelected: string
+    currentSelectedDsId: string
   ) => {
-    // TODO: find a way to update lastConnectionSelected when modal opens
-    setLastConnectionSelected(currentConnectionSelected);
-
-    setConnectorData({ ...connectionData, heirarchy });
-    setShowSqlEditor(false);
-
-    /* 
-      open confirmation modal when switching to different connection.
-      Note: initally,lastConnectionSelected would be empty, in that case show connectorColumns directly
+    /*
+      open confirmation modal when switching to different connection when sheet is not in edit mode.
+      Note: initally dsId would be empty, in that case show connectorColumns directly
     */
+    const lastSelectedDsId = sheetData?.meta?.dsId;
     if (
-      lastConnectionSelected &&
-      selectedColumns.length &&
-      lastConnectionSelected !== currentConnectionSelected
+      lastSelectedDsId &&
+      !sheetData.editMode &&
+      lastSelectedDsId !== currentSelectedDsId
     ) {
       onOpen();
     } else {
       setShowColumns(true);
+      setSheetsData((prevSheetData: TransientSheetData[]) => {
+        const tempSheetsData = [...prevSheetData];
+        tempSheetsData[selectedSheetIndex].meta.dsId = currentSelectedDsId;
+        return tempSheetsData;
+      });
     }
+
+    setCandidate((prevCandidate) => ({
+      ...prevCandidate,
+      dsId: currentSelectedDsId,
+    }));
+    setConnectorData({ ...connectionData, heirarchy });
+    setShowSqlEditor(false);
   };
 
   const handleSubmit = () => {
-    setShowColumns(true);
-    setSelectedColumns([]);
+    setCandidate((prevCandidate) => ({
+      ...prevCandidate,
+      confirmation: true,
+    }));
     onClose();
   };
+
+  const handleClose = () => {
+    setCandidate((prevCandidate) => ({
+      ...prevCandidate,
+      confirmation: false,
+    }));
+    onClose();
+  };
+
+  useEffect(() => {
+    // only upon submission, set dsId in meta and reset selected columns
+    // and then show connector columns
+    if (canditate.confirmation) {
+      setSheetsData((prevSheetData: TransientSheetData[]) => {
+        const tempSheetsData = [...prevSheetData];
+        tempSheetsData[selectedSheetIndex].meta.dsId = canditate.dsId;
+        tempSheetsData[selectedSheetIndex].meta.selectedColumns = [];
+        return tempSheetsData;
+      });
+      setShowColumns(true);
+    }
+  }, [canditate]);
 
   return (
     <>
@@ -171,8 +210,8 @@ const Connections = ({
                           {connection_source
                             .slice(0, 5)
                             .map((source: any, index: number) => {
-                              const heirarchy = [server, provider];
-                              const currentConnectionSelected = `${server}/${provider}/${source.name}/${index}`;
+                              const heirarchy = [server, provider, source.name];
+                              const currentSelectedDsId = source.datasource_id;
                               return (
                                 <Flex
                                   key={source.name + index}
@@ -186,7 +225,7 @@ const Connections = ({
                                     handleConnectionSelect(
                                       source,
                                       heirarchy,
-                                      currentConnectionSelected
+                                      currentSelectedDsId
                                     );
                                   }}
                                 >
@@ -226,7 +265,7 @@ const Connections = ({
       </Flex>
       <ConfirmationModal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         headerText="Do you want to switch connection?"
         subHeaderText="After changing connection, you will lose all your previous data. Do you want to continue?"
         onSubmit={handleSubmit}

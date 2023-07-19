@@ -9,10 +9,12 @@ import { TransientSheetData } from '@lib/domain/workbook';
 const SelectSheet = ({
   sheetsData,
   setSheetsData,
+  setSelectedSheetIndex,
   closeSelectSheetOverlay,
 }: {
   sheetsData: TransientSheetData[];
   setSheetsData: Function;
+  setSelectedSheetIndex: Function;
   closeSelectSheetOverlay: () => void;
 }) => {
   const showCloseButton = sheetsData.length > 1;
@@ -23,6 +25,7 @@ const SelectSheet = ({
       tempSheetsData.pop();
       return tempSheetsData;
     });
+    setSelectedSheetIndex((prevIndex: number) => prevIndex - 1);
     closeSelectSheetOverlay();
   };
   return (

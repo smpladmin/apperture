@@ -8,6 +8,7 @@ export type TransientSheetData = {
   data: any[];
   is_sql: boolean;
   editMode?: boolean;
+  meta?: any;
 };
 
 export enum ColumnType {
@@ -37,6 +38,8 @@ export type Spreadsheet = {
   subHeaders: SubHeaderColumn[];
   is_sql: boolean;
   query: string;
+  editMode?: boolean;
+  meta?: any;
 };
 
 export type Workbook = {

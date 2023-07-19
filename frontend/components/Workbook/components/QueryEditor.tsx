@@ -18,6 +18,7 @@ import { getTransientSpreadsheets } from '@lib/services/workbookService';
 import { useRouter } from 'next/router';
 import { GREY_400, GREY_900 } from '@theme/index';
 import ConfirmationModal from './ConfirmationModal';
+import LoadingSpinner from '@components/LoadingSpinner';
 
 type QueryEditorProps = {
   sheetsData: TransientSheetData[];
@@ -32,16 +33,17 @@ const QueryEditor = ({
   setShowSqlEditor,
   setSheetsData,
 }: QueryEditorProps) => {
-  const [query, setQuery] = useState(sheetsData[selectedSheetIndex].query);
   const sheetData = sheetsData[selectedSheetIndex];
+
+  const [query, setQuery] = useState(sheetData.query);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { dsId, workbookId } = router.query;
+  const { dsId } = router.query;
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const handleSubmit = () => {
+  const handleEditSelection = () => {
     setSheetsData((prevSheetData: TransientSheetData[]) => {
       const tempSheetData = [...prevSheetData];
       tempSheetData[selectedSheetIndex].editMode = true;
@@ -50,7 +52,7 @@ const QueryEditor = ({
     onClose();
   };
 
-  const fetchTransientSheetData = async (query: string) => {
+  const handleQueryChange = async () => {
     setIsLoading(true);
 
     const response = await getTransientSpreadsheets(
@@ -58,24 +60,17 @@ const QueryEditor = ({
       query,
       sheetData.is_sql
     );
-
     setIsLoading(false);
+    const toUpdateSheets = cloneDeep(sheetsData);
+    toUpdateSheets[selectedSheetIndex].query = query;
 
     if (response.status === 200) {
-      const toUpdateSheets = cloneDeep(sheetsData);
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
       toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
-      setSheetsData(toUpdateSheets);
       setError('');
     } else {
       setError((response as ErrorResponse)?.error?.detail);
     }
-  };
-
-  const handleQueryChange = async () => {
-    await fetchTransientSheetData(query);
-    const toUpdateSheets = cloneDeep(sheetsData);
-    toUpdateSheets[selectedSheetIndex].query = query;
     setSheetsData(toUpdateSheets);
   };
 
@@ -120,7 +115,7 @@ const QueryEditor = ({
           opacity={1}
         />
         <ReactCodeMirror
-          value={sheetsData[selectedSheetIndex].query}
+          value={query}
           height="200px"
           extensions={[sql()]}
           onChange={(value) => {
@@ -175,7 +170,11 @@ const QueryEditor = ({
             disabled={!sheetData.editMode}
           >
             <Flex gap={'1'}>
-              <Play size={16} weight="fill" />
+              {isLoading ? (
+                <LoadingSpinner size={'sm'} />
+              ) : (
+                <Play size={16} weight="fill" />
+              )}
               Run
             </Flex>
           </Button>
@@ -186,7 +185,7 @@ const QueryEditor = ({
         onClose={onClose}
         headerText="Do you want to change mode?"
         subHeaderText="After entering the edit mode, you will lose all your previous data. Do you want to make permanent changes?"
-        onSubmit={handleSubmit}
+        onSubmit={handleEditSelection}
       />
     </>
   );
