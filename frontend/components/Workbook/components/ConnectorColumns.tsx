@@ -11,6 +11,7 @@ import { TransientSheetData } from '@lib/domain/workbook';
 import { getSearchResult } from '@lib/utils/common';
 import { CaretLeft, Columns, MagnifyingGlass } from 'phosphor-react';
 import React, { ChangeEvent, useEffect, useState } from 'react';
+import { FixedSizeList as List } from 'react-window';
 
 const generateQuery = (
   columns: string[],
@@ -151,34 +152,44 @@ const CheckColumns = ({
         setSelectedColumns(values);
       }}
     >
-      {columns.map((column) => {
-        return (
-          <Flex
-            key={column}
-            px={2}
-            py={1}
-            gap={3}
-            alignItems={'center'}
-            as={'label'}
-            cursor={'pointer'}
-            _hover={{
-              bg: 'white.400',
-            }}
-            borderRadius={'4'}
-          >
-            <Checkbox colorScheme={'radioBlack'} value={column} />
-            <Text
-              fontSize={'xs-12'}
-              lineHeight={'xs-12'}
-              fontWeight={'500'}
-              color={'grey.900'}
-              maxWidth={'45'}
+      <List
+        itemData={columns}
+        innerElementType="div"
+        itemCount={columns.length}
+        itemSize={40}
+        height={1000}
+        width={240}
+      >
+        {({ data, index, style }) => {
+          return (
+            <Flex
+              key={index}
+              style={style}
+              px={2}
+              py={1}
+              gap={3}
+              alignItems={'center'}
+              as={'label'}
+              cursor={'pointer'}
+              _hover={{
+                bg: 'white.400',
+              }}
+              borderRadius={'4'}
             >
-              {column}
-            </Text>
-          </Flex>
-        );
-      })}
+              <Checkbox colorScheme={'radioBlack'} value={data[index]} />
+              <Text
+                fontSize={'xs-12'}
+                lineHeight={'xs-12'}
+                fontWeight={'500'}
+                color={'grey.900'}
+                maxWidth={'45'}
+              >
+                {data[index]}
+              </Text>
+            </Flex>
+          );
+        }}
+      </List>
     </CheckboxGroup>
   );
 };
