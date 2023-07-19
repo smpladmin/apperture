@@ -12,6 +12,7 @@ import {
   ColumnType,
   SpreadSheetColumn,
   SubHeaderColumnType,
+  TransientColumnRequestState,
   TransientSheetData,
   Workbook,
 } from '@lib/domain/workbook';
@@ -25,7 +26,7 @@ import { DimensionParser, Metricparser } from '@lib/utils/parser';
 import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
-import Footer from './components/Footer';
+
 import Grid from './components/Grid/Grid';
 import QueryModal from './components/QueryModal';
 import {
@@ -34,11 +35,6 @@ import {
   isOperand,
   isdigit,
 } from './util';
-
-type TransientColumnRequestState = {
-  isLoading: boolean;
-  subheaders: { name: string; type: SubHeaderColumnType }[];
-};
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -437,6 +433,27 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     }
   }, [selectedSheetIndex]);
 
+  const addDimensionColumn = (columnId: string) => {
+    const tempSheetsData = cloneDeep(sheetsData);
+    const index = columnId.charCodeAt(0) - 65 + 1;
+
+    /**
+     * 1. Remove last subheader, keeping them constant to 27 for now.
+     * 2. Add subheader on the given columnId/index.
+     * 3. TODO: Shift columns and data.
+     */
+    tempSheetsData[selectedSheetIndex].subHeaders.splice(-1);
+    tempSheetsData[selectedSheetIndex].subHeaders.splice(index, 0, {
+      name: '',
+      type: SubHeaderColumnType.DIMENSION,
+    });
+
+    tempSheetsData[selectedSheetIndex].subHeaders[index + 1].type =
+      SubHeaderColumnType.DIMENSION;
+
+    setSheetsData(tempSheetsData);
+  };
+
   const handleSaveOrUpdateFunnel = async () => {
     const sheets = sheetsData.map((sheet) => {
       return {
@@ -466,27 +483,6 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     } else {
       setSaveButtonDisabled(false);
     }
-  };
-
-  const addDimensionColumn = (columnId: string) => {
-    const tempSheetsData = cloneDeep(sheetsData);
-    const index = columnId.charCodeAt(0) - 65 + 1;
-
-    /**
-     * 1. Remove last subheader, keeping them constant to 27 for now.
-     * 2. Add subheader on the given columnId/index.
-     * 3. TODO: Shift columns and data.
-     */
-    tempSheetsData[selectedSheetIndex].subHeaders.splice(-1);
-    tempSheetsData[selectedSheetIndex].subHeaders.splice(index, 0, {
-      name: '',
-      type: SubHeaderColumnType.DIMENSION,
-    });
-
-    tempSheetsData[selectedSheetIndex].subHeaders[index + 1].type =
-      SubHeaderColumnType.DIMENSION;
-
-    setSheetsData(tempSheetsData);
   };
 
   return (
@@ -564,13 +560,13 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
                   addDimensionColumn={addDimensionColumn}
                 />
               </Flex>
-              <Footer
-                openQueryModal={onOpen}
+              {/* <Footer
+                // openQueryModal={onOpen}
                 sheetsData={sheetsData}
                 setSheetsData={setSheetsData}
                 selectedSheetIndex={selectedSheetIndex}
                 setSelectedSheetIndex={setSelectedSheetIndex}
-              />
+              /> */}
             </>
           )}
         </>

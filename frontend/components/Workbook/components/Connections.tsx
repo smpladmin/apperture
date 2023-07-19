@@ -88,6 +88,8 @@ const Connections = ({
       onOpen();
     } else {
       setShowColumns(true);
+      console.log('selectedSHeet index', selectedSheetIndex);
+      console.log('sheets Dtaa', sheetsData);
       setSheetsData((prevSheetData: TransientSheetData[]) => {
         const tempSheetsData = [...prevSheetData];
         tempSheetsData[selectedSheetIndex].meta.dsId = currentSelectedDsId;

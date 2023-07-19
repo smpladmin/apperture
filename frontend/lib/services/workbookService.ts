@@ -10,7 +10,7 @@ import {
 export const getTransientSpreadsheets = (
   dsId: string,
   query: string,
-  is_sql: boolean
+  is_sql: boolean = true
 ) => {
   return ApperturePost(`/workbooks/spreadsheets/transient`, {
     datasourceId: dsId,

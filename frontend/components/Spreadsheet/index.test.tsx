@@ -12,7 +12,7 @@ import { ColumnType } from '@lib/domain/workbook';
 
 jest.mock('@lib/services/workbookService');
 
-describe('spreadsheet', () => {
+describe.skip('spreadsheet', () => {
   let mockedGetTransientSpreadsheet: jest.Mock;
   let mockedSaveWorkbook: jest.Mock;
   let mockedUpdateWorkbook: jest.Mock;

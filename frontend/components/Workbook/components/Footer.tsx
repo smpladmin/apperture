@@ -1,6 +1,10 @@
 import { Button, Flex, Input, Radio, RadioGroup, Text } from '@chakra-ui/react';
 import React, { useRef, useState } from 'react';
-import { SubHeaderColumnType, TransientSheetData } from '@lib/domain/workbook';
+import {
+  SheetType,
+  SubHeaderColumnType,
+  TransientSheetData,
+} from '@lib/domain/workbook';
 import cloneDeep from 'lodash/cloneDeep';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { Plus } from 'phosphor-react';
@@ -45,7 +49,12 @@ const Footer = ({
         };
       }),
       is_sql: true,
+      sheetType: SheetType.SIMPLE_SHEET,
       editMode: false,
+      meta: {
+        dsId: '',
+        selectedColumns: [],
+      },
     };
 
     setSheetsData((prevSheetData: TransientSheetData[]) => [

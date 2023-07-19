@@ -6,7 +6,8 @@ export type TransientSheetData = {
   headers: SpreadSheetColumn[];
   subHeaders: SubHeaderColumn[];
   data: any[];
-  is_sql: boolean;
+  is_sql?: boolean;
+  sheetType?: SheetType;
   editMode?: boolean;
   meta?: any;
 };
@@ -32,11 +33,17 @@ export type SubHeaderColumn = {
   type: SubHeaderColumnType;
 };
 
+export enum SheetType {
+  SIMPLE_SHEET = 'SIMPLE_SHEET',
+  PIVOT_SHEET = 'PIVOT_SHEET',
+}
+
 export type Spreadsheet = {
   name: string;
   headers: SpreadSheetColumn[];
   subHeaders: SubHeaderColumn[];
-  is_sql: boolean;
+  is_sql?: boolean;
+  sheetType?: SheetType;
   query: string;
   editMode?: boolean;
   meta?: any;
@@ -53,3 +60,8 @@ export type Workbook = {
 };
 
 export type WorkbookWithUser = Workbook & { user: User };
+
+export type TransientColumnRequestState = {
+  isLoading: boolean;
+  subheaders: { name: string; type: SubHeaderColumnType }[];
+};
