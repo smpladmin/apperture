@@ -7,6 +7,7 @@ from domain.spreadsheets.models import (
     DimensionDefinition,
     MetricDefinition,
     SpreadSheetColumn,
+    SpreadsheetType,
     SubHeaderColumn,
     WorkBook,
 )
@@ -39,6 +40,9 @@ class SpreadSheetDto(BaseModel):
     subHeaders: List[SubHeaderColumn]
     is_sql: bool
     query: str
+    editMode: bool
+    sheetType: SpreadsheetType
+    meta: dict
 
 
 class CreateWorkBookDto(BaseModel):
