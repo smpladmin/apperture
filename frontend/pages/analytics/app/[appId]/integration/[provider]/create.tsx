@@ -2,6 +2,8 @@ import AmplitudeIntegration from '@components/CreateIntegration/AmplitudeIntegra
 import ClevertapIntegration from '@components/CreateIntegration/ClevertapIntegration';
 import GooglePermission from '@components/CreateIntegration/GooglePermission';
 import MixpanelIntegration from '@components/CreateIntegration/MixpanelIntegration';
+import APIIntegration from '@components/CreateIntegration/APIIntegration';
+import MySQLIntegration from '@components/CreateIntegration/MySQLIntegration';
 import { Provider } from '@lib/domain/provider';
 import { useRouter } from 'next/router';
 
@@ -30,6 +32,10 @@ const Create = () => {
       return <AmplitudeIntegration add={add} handleClose={handleClose} />;
     case Provider.CLEVERTAP:
       return <ClevertapIntegration add={add} handleClose={handleClose} />;
+    case Provider.API:
+      return <APIIntegration add={add} handleClose={handleClose} />;
+    case Provider.MYSQL:
+      return <MySQLIntegration add={add} handleClose={handleClose} />;
     default:
       return <></>;
   }

@@ -42,8 +42,10 @@
     "react-beautiful-dnd": "^13.1.1",
     "react-date-range": "^1.4.0",
     "react-dom": "18.2.0",
+    "react-hook-form": "^7.45.1",
     "react-modal-sheet": "^1.7.0",
     "react-textarea-autosize": "^8.5.2",
+    "react-window": "^1.8.9",
     "remixicon": "^2.5.0"
   },
   "devDependencies": {
@@ -55,6 +57,7 @@
     "@types/react-beautiful-dnd": "^13.1.2",
     "@types/react-date-range": "^1.4.4",
     "@types/react-dom": "18.0.6",
+    "@types/react-window": "^1.8.5",
     "autoprefixer": "^10.4.8",
     "eslint": "8.22.0",
     "eslint-config-next": "12.2.5",

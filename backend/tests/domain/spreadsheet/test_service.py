@@ -9,6 +9,7 @@ from domain.spreadsheets.models import (
     ComputedSpreadsheet,
     Spreadsheet,
     SpreadSheetColumn,
+    SpreadsheetType,
     WorkBook,
 )
 from domain.spreadsheets.service import SpreadsheetService
@@ -86,7 +87,7 @@ class TestSpreadsheetService:
         result = self.service.cleanse_query_string(self.query)
         assert (
             result
-            == "SELECT event_name FROM events WHERE timestamp>=toDate(2023-02-11)"
+            == "SELECT  event_name          FROM  events         WHERE timestamp>=toDate(2023-02-11)"
         )
 
     @pytest.mark.asyncio
@@ -114,6 +115,9 @@ class TestSpreadsheetService:
                     ],
                     is_sql=True,
                     query="SELECT  event_name FROM  events",
+                    edit_mode=True,
+                    meta={"dsId": "", "selectedColumns": []},
+                    sheet_type=SpreadsheetType.SIMPLE_SHEET,
                 )
             ],
             datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
@@ -139,6 +143,9 @@ class TestSpreadsheetService:
                     "is_sql": True,
                     "query": "SELECT  event_name FROM  events",
                     "subHeaders": None,
+                    "edit_mode": True,
+                    "sheet_type": SpreadsheetType.SIMPLE_SHEET,
+                    "meta": {"dsId": "", "selectedColumns": []},
                 }
             ],
             "enabled": True,

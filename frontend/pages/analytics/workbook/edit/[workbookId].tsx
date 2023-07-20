@@ -1,13 +1,9 @@
-import HomeLayout from '@components/HomeLayout';
-import Spreadsheet from '@components/Spreadsheet';
-import { AppWithIntegrations } from '@lib/domain/app';
+import WorkbookComponent from '@components/Workbook';
 import { Workbook } from '@lib/domain/workbook';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
-import { _getNodes } from '@lib/services/datasourceService';
 import { _getSavedWorkbook } from '@lib/services/workbookService';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
-import { ReactElement } from 'react';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -20,20 +16,10 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
 
-  const apps = await _getAppsWithIntegrations(token);
   const savedWorkbook = await _getSavedWorkbook(
     token,
     query.workbookId as string
   );
-
-  if (!apps.length) {
-    return {
-      redirect: {
-        destination: '/analytics/app/create',
-      },
-      props: {},
-    };
-  }
 
   if (!savedWorkbook) {
     return {
@@ -45,19 +31,12 @@ export const getServerSideProps: GetServerSideProps = async ({
   }
 
   return {
-    props: { apps, savedWorkbook },
+    props: { savedWorkbook },
   };
 };
 
 const EditWorkbook = ({ savedWorkbook }: { savedWorkbook: Workbook }) => {
-  return <Spreadsheet savedWorkbook={savedWorkbook} />;
-};
-
-EditWorkbook.getLayout = function getLayout(
-  page: ReactElement,
-  apps: AppWithIntegrations[]
-) {
-  return <HomeLayout apps={apps}>{page}</HomeLayout>;
+  return <WorkbookComponent savedWorkbook={savedWorkbook} />;
 };
 
 export default EditWorkbook;

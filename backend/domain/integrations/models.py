@@ -10,14 +10,40 @@ from repositories import Document
 class CredentialType(str, Enum):
     OAUTH = "OAUTH"
     API_KEY = "API_KEY"
+    MYSQL = "MYSQL"
+
+
+class DatabaseSSHCredential(BaseModel):
+    server: str
+    port: str
+    username: Optional[str]
+    password: Optional[str]
+    ssh_key: Optional[str]
+
+    class Config:
+        allow_population_by_field_name = True
+
+
+class MySQLCredential(BaseModel):
+    host: str
+    port: str
+    username: str
+    password: str
+    over_ssh: bool = False
+    ssh_credential: Optional[DatabaseSSHCredential]
+
+    class Config:
+        allow_population_by_field_name = True
 
 
 class Credential(BaseModel):
     type: CredentialType
-    account_id: str
+    account_id: Optional[str]
     refresh_token: Optional[str]
     api_key: Optional[str]
     secret: Optional[str]
+    tableName: Optional[str]
+    mysql_credential: Optional[MySQLCredential]
 
     class Config:
         allow_population_by_field_name = True

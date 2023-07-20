@@ -15,6 +15,8 @@ import mixpanelLogo from '@assets/images/mixPanel-icon.png';
 import amplitudeLogo from '@assets/images/amplitude-icon.png';
 import clevertapLogo from '@assets/images/clevertap-icon.png';
 import appertureLogo from '@assets/images/apperture-logo.svg';
+import apilogo from '@assets/images/apilogo.png';
+import mysqlLogo from '@assets/images/mysql-icon.png';
 import FormButton from '@components/FormButton';
 import IntegrationSource from '@components/IntegrationSource';
 import { Provider } from '@lib/domain/provider';
@@ -43,6 +45,8 @@ const SelectProvider = () => {
         '',
         '',
         '',
+        '',
+        undefined,
         { params: { create_datasource: true, trigger_data_processor: false } }
       );
       router.push({
@@ -103,6 +107,12 @@ const SelectProvider = () => {
             <RadioGroup value={provider} onChange={setProvider}>
               <Stack direction="column">
                 <IntegrationSource
+                  sourceName="Connect an API"
+                  value={Provider.API}
+                  imgSrc={apilogo}
+                  selected={provider === Provider.API}
+                />
+                <IntegrationSource
                   sourceName="Apperture"
                   value={Provider.APPERTURE}
                   imgSrc={appertureLogo}
@@ -131,6 +141,12 @@ const SelectProvider = () => {
                   value={Provider.GOOGLE}
                   imgSrc={gaLogo}
                   selected={provider === Provider.GOOGLE}
+                />
+                <IntegrationSource
+                  sourceName="MySQL"
+                  value={Provider.MYSQL}
+                  imgSrc={mysqlLogo}
+                  selected={provider === Provider.MYSQL}
                 />
               </Stack>
             </RadioGroup>

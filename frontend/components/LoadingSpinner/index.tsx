@@ -1,14 +1,18 @@
-import { Spinner } from '@chakra-ui/react';
+import { ResponsiveValue, Spinner } from '@chakra-ui/react';
 import { BLACK_RUSSIAN } from '@theme/index';
 
-const LoadingSpinner = () => {
+const LoadingSpinner = ({
+  size = 'xl',
+}: {
+  size?: ResponsiveValue<(string & {}) | 'xl' | 'sm' | 'md' | 'lg' | 'xs'>;
+}) => {
   return (
     <Spinner
       thickness="4px"
       speed="0.5s"
       emptyColor="gray.200"
       color={BLACK_RUSSIAN}
-      size="xl"
+      size={size}
       data-testid="funnel-loader"
     />
   );

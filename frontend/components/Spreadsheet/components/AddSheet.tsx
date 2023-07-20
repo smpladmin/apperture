@@ -1,5 +1,13 @@
-import { Button, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react';
+import {
+  Button,
+  Flex,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+} from '@chakra-ui/react';
 import { SubHeaderColumnType, TransientSheetData } from '@lib/domain/workbook';
+import { Plus } from 'phosphor-react';
 import React from 'react';
 
 type AddSheetProps = {
@@ -43,19 +51,21 @@ const AddSheet = ({
   return (
     <Menu>
       <MenuButton
-        as={Button}
+        as={Flex}
         p={'2'}
-        borderRightWidth={'0.4px'}
-        borderColor={'grey.700'}
         alignItems={'center'}
         justifyContent={'center'}
-        bg={'white.500'}
+        borderRightWidth={'0.4px'}
+        borderColor={'grey.700'}
         borderRadius={'0'}
         _hover={{ bg: 'white.400' }}
         _active={{ bg: 'white.400' }}
         data-testid={'add-sheet'}
+        bg={'white.500'}
+        h={'full'}
+        cursor={'pointer'}
       >
-        +
+        <Plus size={16} weight="thin" />
       </MenuButton>
       <MenuList>
         <MenuItem

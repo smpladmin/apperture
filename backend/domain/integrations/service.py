@@ -1,8 +1,23 @@
+import logging
+import os
+import tempfile
+from typing import Optional
+import pymysql
+import sshtunnel
+
 from beanie import PydanticObjectId
 from authorisation.models import IntegrationOAuth
 from domain.apps.models import App
+from rest.dtos.integrations import DatabaseSSHCredentialDto
 from domain.apperture_users.models import AppertureUser
-from .models import Credential, CredentialType, Integration, IntegrationProvider
+from .models import (
+    Credential,
+    CredentialType,
+    Integration,
+    IntegrationProvider,
+    MySQLCredential,
+    DatabaseSSHCredential,
+)
 
 
 class IntegrationService:
@@ -43,15 +58,23 @@ class IntegrationService:
         self,
         app: App,
         provider: IntegrationProvider,
-        account_id: str,
-        api_key: str,
-        secret: str,
+        account_id: Optional[str],
+        api_key: Optional[str],
+        secret: Optional[str],
+        tableName: Optional[str],
+        mysql_credential: Optional[MySQLCredential],
+
     ):
+        credential_type = (
+            CredentialType.MYSQL if mysql_credential else CredentialType.API_KEY
+        )
         credential = Credential(
-            type=CredentialType.API_KEY,
+            type=credential_type,
             account_id=account_id,
             api_key=api_key,
             secret=secret,
+            tableName=tableName,
+            mysql_credential=mysql_credential,
         )
         integration = Integration(
             user_id=app.user_id,
@@ -61,3 +84,127 @@ class IntegrationService:
         )
         await integration.insert()
         return integration
+
+    def build_database_ssh_credential(
+        self,
+        server: str,
+        port: str,
+        username: Optional[str],
+        password: Optional[str],
+        ssh_key: Optional[str],
+    ):
+        return DatabaseSSHCredential(
+            server=server,
+            port=port,
+            username=username,
+            password=password,
+            ssh_key=ssh_key,
+        )
+
+    def build_mysql_credential(
+        self,
+        host: str,
+        port: str,
+        username: str,
+        password: str,
+        over_ssh: bool,
+        ssh_credential: Optional[DatabaseSSHCredentialDto],
+    ):
+        db_ssh_credential = (
+            self.build_database_ssh_credential(
+                server=ssh_credential.server,
+                port=ssh_credential.port,
+                username=ssh_credential.username,
+                password=ssh_credential.password,
+                ssh_key=ssh_credential.sshKey,
+            )
+            if ssh_credential
+            else None
+        )
+        return MySQLCredential(
+            host=host,
+            port=port,
+            username=username,
+            password=password,
+            over_ssh=over_ssh,
+            ssh_credential=db_ssh_credential,
+        )
+
+    def check_mysql_connection(
+        self, host: str, port: str, username: str, password: str
+    ):
+        connection_successful = False
+        try:
+            # Establish a connection to the MySQL server
+            connection = pymysql.connect(
+                host=host,
+                port=int(port),
+                user=username,
+                password=password,
+            )
+
+            # Check if the connection was successful
+            if connection.open:
+                connection_successful = True
+                logging.info("Connected to MySQL database")
+
+            # Close the connection
+            connection.close()
+            logging.info("Connection closed")
+
+        except Exception as e:
+            logging.info(f"Failed to connect to MySQL database with exception: {e}")
+
+        return connection_successful
+
+    def create_temp_file(self, content: str):
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        temp_file.write(content.encode("utf-8"))
+        temp_file.flush()
+        return temp_file.name
+
+    def test_mysql_connection(
+        self,
+        host: str,
+        port: str,
+        username: str,
+        password: str,
+        ssh_credential: Optional[DatabaseSSHCredentialDto],
+    ):
+
+        if ssh_credential:
+            logging.info("SSH credentials exists")
+            ssh_pkey = None
+            if ssh_credential.sshKey:
+                logging.info("SSH key exists, creating temp file to store ssh key")
+                ssh_pkey = self.create_temp_file(ssh_credential.sshKey)
+                logging.info(f"Temporary file name: {ssh_pkey}")
+
+            try:
+                with sshtunnel.SSHTunnelForwarder(
+                    (ssh_credential.server, int(ssh_credential.port)),
+                    ssh_pkey=ssh_pkey,
+                    ssh_username=ssh_credential.username,
+                    ssh_password=ssh_credential.password,
+                    remote_bind_address=(host, int(port)),
+                ) as tunnel:
+                    logging.info(
+                        f"Created SSH tunnel, binding ({host, port}) to ({tunnel.local_bind_host, tunnel.local_bind_port})"
+                    )
+                    if ssh_pkey:
+                        os.remove(ssh_pkey)
+                        logging.info("Removed temporary file")
+                    return self.check_mysql_connection(
+                        host=tunnel.local_bind_host,
+                        port=tunnel.local_bind_port,
+                        username=username,
+                        password=password,
+                    )
+            except Exception as e:
+                logging.info(f"Connection failed with exception: {e}")
+                return False
+
+        else:
+            return self.check_mysql_connection(
+                host=host, port=port, username=username, password=password
+            )

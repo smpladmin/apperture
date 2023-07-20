@@ -11,7 +11,9 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import {
   ColumnType,
   SpreadSheetColumn,
+  SubHeaderColumn,
   SubHeaderColumnType,
+  TransientColumnRequestState,
   TransientSheetData,
   Workbook,
 } from '@lib/domain/workbook';
@@ -25,7 +27,7 @@ import { DimensionParser, Metricparser } from '@lib/utils/parser';
 import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
-import Footer from './components/Footer';
+
 import Grid from './components/Grid/Grid';
 import QueryModal from './components/QueryModal';
 import {
@@ -34,11 +36,7 @@ import {
   isOperand,
   isdigit,
 } from './util';
-
-type TransientColumnRequestState = {
-  isLoading: boolean;
-  subheaders: { name: string; type: SubHeaderColumnType }[];
-};
+import { getEventProperties } from '@lib/services/datasourceService';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -88,97 +86,214 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const [workbookName, setWorkbookName] = useState<string>(
     savedWorkbook?.name || 'Untitled Workbook'
   );
+  const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
   const [requestTranisentColumn, setRequestTransientColumn] =
     useState<TransientColumnRequestState>({
-      isLoading: false,
-      subheaders: [],
+      isLoading: Boolean(
+        savedWorkbook?.spreadsheets[selectedSheetIndex]?.subHeaders.some(
+          (subheader) => typeof subheader === 'string' && subheader?.[0] === '='
+        )
+      ),
+      subheaders:
+        savedWorkbook?.spreadsheets[selectedSheetIndex]?.subHeaders || [],
     });
-  const toast = useToast();
 
-  const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
-  const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
-  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
-
+  const [eventProperties, setEventProperties] = useState<string[]>([]);
   const router = useRouter();
   const { dsId, workbookId } = router.query;
 
+  const toast = useToast();
+
+  const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
+  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
+  const [loadBODMASColumn, setloadBODMASColumn] = useState<{
+    loading: boolean;
+    data: TransientSheetData | null;
+  }>({
+    loading: false,
+    data: null,
+  });
+
   useEffect(() => {
     if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
-  }, []);
+    const fetchProperties = async () => {
+      const properties: string[] = await getEventProperties(dsId as string);
+      setEventProperties([
+        'event_name',
+        'user_id',
+        'timestamp',
+        ...properties.map((property) => `properties.${property}`),
+      ]);
+    };
 
-  const arrangeTransientColumnHeader = (
-    subheaders: {
-      name: string;
-      type: SubHeaderColumnType;
-    }[],
-    originalHeader: SpreadSheetColumn[]
-  ) => {
-    const { min, max } = subheaders.reduce(
-      (
-        val: { min: number; max: number },
-        subheader: {
-          name: string;
-          type: SubHeaderColumnType;
-        },
-        index: number
-      ) => {
-        if (subheader.name) {
-          val.min = val.min > index ? index : val.min;
-          val.max = val.max < index ? index : val.max;
-        }
-        return val;
-      },
-      { min: subheaders.length + 1, max: -1 }
-    );
-    const newHeader: SpreadSheetColumn[] = [];
-    let i = 0;
-    subheaders.slice(min, max + 1).forEach((subheader) => {
-      if (subheader.name) {
-        newHeader.push(originalHeader[i]);
-        i++;
-      } else {
-        newHeader.push({ name: '', type: ColumnType.PADDING_HEADER });
-      }
-    });
-    return newHeader;
-  };
+    fetchProperties();
+  }, []);
 
   useEffect(() => {
     if (requestTranisentColumn.isLoading) {
-      const fetchSheetData = async () => {
-        const { subheaders } = requestTranisentColumn;
-        const metrics = subheaders.filter(
-          (subheader) =>
-            subheader.name && subheader.type === SubHeaderColumnType.METRIC
-        );
-        const dimensions = subheaders.filter(
-          (subheader) =>
-            subheader.name && subheader.type === SubHeaderColumnType.DIMENSION
-        );
+      const { subheaders } = requestTranisentColumn;
 
-        const database = 'default',
-          table = 'events';
-
-        const response = await getWorkbookTransientColumn(
-          dsId as string,
-          dimensions.map((dimension) => DimensionParser.parse(dimension.name)),
-          metrics.map((metric) => Metricparser.parse(metric.name)),
-          database,
-          table
-        );
-        const newHeader = arrangeTransientColumnHeader(
-          subheaders,
-          response.data.headers
-        );
-        const tempSheetsData = cloneDeep(sheetsData);
-        tempSheetsData[selectedSheetIndex].headers = newHeader;
-        tempSheetsData[selectedSheetIndex].data = response.data.data;
-        tempSheetsData[selectedSheetIndex].subHeaders = subheaders;
-        setSheetsData(tempSheetsData);
-      };
-      fetchSheetData();
+      fetchSheetData(subheaders);
     }
   }, [requestTranisentColumn]);
+
+  const updateSheetData = (data: any[]) => {
+    const toUpdateSheets = cloneDeep(sheetsData);
+    toUpdateSheets[selectedSheetIndex].data = data;
+    setSheetsData(toUpdateSheets);
+  };
+  useEffect(() => {
+    if (!savedWorkbook) return;
+    const hasColumnFetcSubheaderWithoutData =
+      savedWorkbook &&
+      Boolean(
+        savedWorkbook?.spreadsheets[selectedSheetIndex]?.subHeaders.some(
+          (subheader) =>
+            typeof subheader.name === 'string' &&
+            subheader.name.match(/^[unique|count]/)
+        )
+      ) &&
+      !sheetsData[selectedSheetIndex].data.length;
+    if (hasColumnFetcSubheaderWithoutData) {
+      const { subHeaders, headers } =
+        savedWorkbook?.spreadsheets[selectedSheetIndex];
+      fetchSheetData(subHeaders);
+    }
+
+    const fetchData = async (selectedSheet: TransientSheetData) => {
+      const res = await getTransientSpreadsheets(
+        dsId as string,
+        selectedSheet.query,
+        selectedSheet.is_sql
+      );
+      let queriedData = res?.data?.data;
+
+      const computedHeaders = selectedSheet.headers
+        .map((header, index) => ({
+          columnId: String.fromCharCode(65 + index),
+          ...header,
+        }))
+        .filter((header) => header.type === ColumnType.COMPUTED_HEADER);
+
+      computedHeaders.forEach((header) => {
+        queriedData = evaluateDataOnQueriedData(
+          header.name,
+          queriedData,
+          selectedSheet.headers
+        );
+      });
+      updateSheetData(queriedData);
+    };
+
+    if (hasQueryWithoutData) {
+      fetchData(sheetsData[selectedSheetIndex]);
+    }
+  }, [selectedSheetIndex]);
+
+  useEffect(() => {
+    const { data, loading } = loadBODMASColumn;
+    if (!loading) return;
+    if (data) {
+      let queriedData = data?.data;
+      data?.subHeaders
+        .filter(
+          (subheader) =>
+            subheader.name && !subheader.name.match(/^unique|count/)
+        )
+        .forEach((expression) => {
+          queriedData = evaluateDataOnQueriedData(
+            expression?.name,
+            queriedData,
+            data?.headers
+          );
+        });
+      updateSheetData(queriedData);
+
+      setloadBODMASColumn({ loading: false, data: null });
+    }
+  }, [loadBODMASColumn]);
+
+  const arrangeTransientColumnHeader = (
+    subheaders: SubHeaderColumn[],
+    originalHeader: SpreadSheetColumn[]
+  ) => {
+    const max = subheaders.reduce(
+      (max: number, subheader: SubHeaderColumn, index: number) => {
+        if (subheader.name) {
+          max = max < index ? index : max;
+        }
+        return max;
+      },
+      -1
+    );
+    const newHeaders: SpreadSheetColumn[] = [];
+    let i = 0;
+    subheaders.slice(1, max + 1).forEach((subheader, index) => {
+      if (subheader.name && subheader.name.match(/^[unique|count]/)) {
+        newHeaders.push(originalHeader[i]);
+        i++;
+        while (originalHeader[i]?.type === ColumnType.PADDING_HEADER) {
+          i++;
+        }
+      } else if (subheader.name) {
+        newHeaders.push({
+          name: subheader.name,
+          type: ColumnType.COMPUTED_HEADER,
+        });
+      } else {
+        newHeaders.push({
+          name: String.fromCharCode(65 + index),
+          type: ColumnType.PADDING_HEADER,
+        });
+      }
+    });
+    return newHeaders;
+  };
+  const fetchSheetData = async (subheaders: SubHeaderColumn[]) => {
+    const metrics = subheaders.filter(
+      (subheader) =>
+        subheader.name.match(/^[unique|count]/) &&
+        subheader.type === SubHeaderColumnType.METRIC
+    );
+    const dimensions = subheaders.filter(
+      (subheader) =>
+        subheader.name && subheader.type === SubHeaderColumnType.DIMENSION
+    );
+
+    const database = 'default',
+      table = 'events';
+
+    const response = await getWorkbookTransientColumn(
+      dsId as string,
+      dimensions.map((dimension) => DimensionParser().parse(dimension.name)),
+      metrics.map((metric) => Metricparser().parse(metric.name)),
+      database,
+      table
+    );
+    if (response.status !== 200) {
+      toast({
+        title: 'Something went wrong!',
+        status: 'error',
+        variant: 'subtle',
+        isClosable: true,
+      });
+    } else {
+      const newHeaders = arrangeTransientColumnHeader(
+        subheaders,
+        response.data.headers
+      );
+
+      const tempSheetsData = cloneDeep(sheetsData);
+      tempSheetsData[selectedSheetIndex].headers = newHeaders;
+      tempSheetsData[selectedSheetIndex].data = response.data.data;
+      tempSheetsData[selectedSheetIndex].subHeaders = subheaders;
+      setSheetsData(tempSheetsData);
+      setloadBODMASColumn({
+        loading: true,
+        data: tempSheetsData[selectedSheetIndex],
+      });
+    }
+  };
 
   const getOperands = (newHeader: string) =>
     (newHeader.match(expressionTokenRegex) || []).filter((char: string) =>
@@ -216,6 +331,21 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       toUpdateHeaderIndex - existingHeadersLength;
 
     return toAddPaddingHeadersLength > 0 ? toAddPaddingHeadersLength : 0;
+  };
+
+  const getHeaderIndex = (sheetData: TransientSheetData, columnId: string) => {
+    const existingHeaders = sheetData?.headers;
+
+    const existingHeaderIndex = existingHeaders.findIndex(
+      (header) => header.name === columnId
+    );
+
+    if (existingHeaderIndex !== -1) {
+      // add 1 as offset for index header
+      return existingHeaderIndex + 1;
+    } else {
+      return columnId.toUpperCase().charCodeAt(0) - 65 + 1;
+    }
   };
 
   const updateSelectedSheetDataAndHeaders = (
@@ -280,23 +410,29 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const evaluateFormulaHeader = useCallback(
     (headerText: string, columnId: string) => {
       const sheetData = sheetsData[selectedSheetIndex];
+
       const isBlankSheet = !sheetData.is_sql && !sheetData.query;
-      const index = columnId.toUpperCase().charCodeAt(0) - 64;
-      if (headerText.match(/count|unique/i)) {
+      const index = getHeaderIndex(sheetData, columnId);
+
+      if (headerText.match(/^[unique|count]/)) {
         if (isBlankSheet)
           try {
             if (
               sheetData.subHeaders[index].type === SubHeaderColumnType.DIMENSION
             ) {
-              DimensionParser.parse(headerText);
+              DimensionParser().parse(headerText);
             } else {
-              Metricparser.parse(headerText);
+              Metricparser().parse(headerText);
             }
-            sheetData.subHeaders[index].name = headerText;
+
+            const tempSheetsData = cloneDeep(sheetsData);
+            tempSheetsData[selectedSheetIndex].subHeaders[index].name =
+              headerText;
+            setSheetsData(tempSheetsData);
 
             setRequestTransientColumn({
               isLoading: true,
-              subheaders: sheetData.subHeaders,
+              subheaders: tempSheetsData[selectedSheetIndex].subHeaders,
             });
           } catch (error) {
             toast({
@@ -396,46 +532,6 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     savedWorkbook &&
     sheetsData[selectedSheetIndex].query &&
     !sheetsData[selectedSheetIndex].data.length;
-
-  useEffect(() => {
-    if (!savedWorkbook) return;
-
-    const updateSheetData = (data: any[]) => {
-      const toUpdateSheets = cloneDeep(sheetsData);
-      toUpdateSheets[selectedSheetIndex].data = data;
-      setSheetsData(toUpdateSheets);
-    };
-
-    const fetchData = async (selectedSheet: TransientSheetData) => {
-      const res = await getTransientSpreadsheets(
-        dsId as string,
-        selectedSheet.query,
-        selectedSheet.is_sql
-      );
-      let queriedData = res?.data?.data;
-
-      const computedHeaders = selectedSheet.headers
-        .map((header, index) => ({
-          columnId: String.fromCharCode(65 + index),
-          ...header,
-        }))
-        .filter((header) => header.type === ColumnType.COMPUTED_HEADER);
-
-      computedHeaders.forEach((header) => {
-        queriedData = evaluateDataOnQueriedData(
-          header.name,
-          queriedData,
-          selectedSheet.headers
-        );
-      });
-
-      updateSheetData(queriedData);
-    };
-
-    if (hasQueryWithoutData) {
-      fetchData(sheetsData[selectedSheetIndex]);
-    }
-  }, [selectedSheetIndex]);
 
   const handleSaveOrUpdateFunnel = async () => {
     const sheets = sheetsData.map((sheet) => {
@@ -562,15 +658,16 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
                   sheetData={cloneDeep(sheetsData[selectedSheetIndex])}
                   evaluateFormulaHeader={evaluateFormulaHeader}
                   addDimensionColumn={addDimensionColumn}
+                  properties={eventProperties}
                 />
               </Flex>
-              <Footer
-                openQueryModal={onOpen}
+              {/* <Footer
+                // openQueryModal={onOpen}
                 sheetsData={sheetsData}
                 setSheetsData={setSheetsData}
                 selectedSheetIndex={selectedSheetIndex}
                 setSelectedSheetIndex={setSelectedSheetIndex}
-              />
+              /> */}
             </>
           )}
         </>

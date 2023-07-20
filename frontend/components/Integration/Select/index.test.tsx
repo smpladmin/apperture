@@ -37,7 +37,7 @@ describe('select integration provider', () => {
     jest.clearAllMocks();
   });
 
-  it('should render 5 integration provider(GA, Mixpanel, Amplitude,Clevertap, Apperture)', () => {
+  it('should render 6 integration provider(GA, Mixpanel, Amplitude,Clevertap, Apperture, Database)', () => {
     render(
       <RouterContext.Provider
         value={createMockRouter({
@@ -50,7 +50,7 @@ describe('select integration provider', () => {
     );
 
     const integrationProvider = screen.getAllByTestId('integration-provider');
-    expect(integrationProvider.length).toBe(5);
+    expect(integrationProvider.length).toBe(7);
   });
 
   it('user gets redirected to complete page when clicked on next button after selecting apperture integration provider', async () => {

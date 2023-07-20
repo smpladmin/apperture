@@ -10,7 +10,11 @@ from domain.runlogs.service import RunLogService
 from domain.datasources.service import DataSourceService
 from domain.integrations.service import IntegrationService
 from rest.dtos.datasources import CreateDataSourceDto, DataSourceResponse
-from rest.dtos.integrations import CreateIntegrationDto, IntegrationResponse
+from rest.dtos.integrations import (
+    CreateIntegrationDto,
+    IntegrationResponse,
+    TestMySQLConnectionDto,
+)
 from rest.middlewares import get_user_id, validate_jwt
 
 
@@ -92,6 +96,18 @@ async def create_integration(
     runlog_service: RunLogService = Depends(),
     dpq_service: DPQueueService = Depends(),
 ):
+    mysql_credential = (
+        integration_service.build_mysql_credential(
+            host=dto.mySQLCredential.host,
+            port=dto.mySQLCredential.port,
+            username=dto.mySQLCredential.username,
+            password=dto.mySQLCredential.password,
+            over_ssh=dto.mySQLCredential.overSsh,
+            ssh_credential=dto.mySQLCredential.sshCredential,
+        )
+        if dto.mySQLCredential
+        else None
+    )
     app = await app_service.get_user_app(dto.appId, user_id)
     integration = await integration_service.create_integration(
         app,
@@ -99,6 +115,8 @@ async def create_integration(
         dto.accountId,
         dto.apiKey,
         dto.apiSecret,
+        dto.tableName,
+        mysql_credential,
     )
 
     if create_datasource:
@@ -124,3 +142,17 @@ async def create_integration(
         return response
 
     return integration
+
+
+@router.post("/integrations/mysql/test")
+async def check_mysql_connection(
+    dto: TestMySQLConnectionDto,
+    integration_service: IntegrationService = Depends(),
+):
+    return integration_service.test_mysql_connection(
+        host=dto.host,
+        port=dto.port,
+        username=dto.username,
+        password=dto.password,
+        ssh_credential=dto.sshCredential,
+    )
