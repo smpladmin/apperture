@@ -3,6 +3,8 @@ from datetime import datetime
 from unittest.mock import ANY, call
 
 from beanie import PydanticObjectId
+
+from domain.apps.models import ClickHouseCredential
 from domain.notifications.models import (
     NotificationData,
     NotificationVariant,
@@ -316,3 +318,40 @@ def test_get_clickstream_event_properties(
         },
     ]
     clickstream_event_properties_service.get_event_properties.assert_called_once()
+
+
+def test_refresh_datamart_tables_for_app(client_init, datamart_service, app_service):
+    response = client_init.post(
+        "/private/datamart", json={"appId": "63ce4906f496f7b462ab7e84"}
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "63ce4906f496f7b462ab7e84": {"635ba034807ab86d8a2aadd8": "updated"}
+    }
+    app_service.get_app.assert_called_with(**{"id": "63ce4906f496f7b462ab7e84"})
+    datamart_service.refresh_datamart_table.assert_called_once_with(
+        **{
+            "clickhouse_credential": ClickHouseCredential(
+                username="test_username",
+                password="test_password",
+                databasename="test_database",
+            ),
+            "datamart_id": "635ba034807ab86d8a2aadd8",
+        }
+    )
+
+
+def test_trigger_refresh_datamart_for_all_apps(
+    client_init, datamart_service, dpq_service
+):
+    response = client_init.post("/private/apps/datamart")
+    assert response.status_code == 200
+    assert response.json() == [
+        {"app_id": "635ba034807ab86d8a2aadd8", "jobs": "a98a10b4-d26e-46fa-aa6g"},
+        {"app_id": "63ce4906f496f7b462ab7e84", "jobs": "a98a10b4-d26e-46fa-aa6g"},
+    ]
+    datamart_service.get_all_apps_with_datamarts.assert_called_once()
+    dpq_service.enqueue_refresh_datamart_for_app.assert_has_calls(
+        calls=[call("635ba034807ab86d8a2aadd8"), call("63ce4906f496f7b462ab7e84")],
+        any_order=True,
+    )

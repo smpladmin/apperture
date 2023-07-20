@@ -41,6 +41,7 @@ class CreateIntegrationDto(BaseModel):
     accountId: Union[str, None]
     apiKey: Union[str, None]
     apiSecret: Union[str, None]
+    tableName: Union[str, None]
     mySQLCredential: Union[MySQLCredentialDto, None]
 
 

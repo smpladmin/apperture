@@ -102,6 +102,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
       undefined,
       undefined,
       undefined,
+      '',
       mySQLCredential as MySQLCredential
     );
     router.replace({

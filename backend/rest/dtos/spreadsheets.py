@@ -24,6 +24,8 @@ class TransientSpreadsheetColumnDto(BaseModel):
     datasourceId: str
     dimensions: List[DimensionDefinition]
     metrics: List[MetricDefinition]
+    database: str
+    table: str
 
 
 class ComputedSpreadsheetQueryResponse(ComputedSpreadsheet, ModelResponse):

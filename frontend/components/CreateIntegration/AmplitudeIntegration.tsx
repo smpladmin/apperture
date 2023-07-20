@@ -42,7 +42,8 @@ const AmplitudeIntegration = ({
       provider,
       projectId,
       apiKey,
-      apiSecret
+      apiSecret,
+      ''
     );
     router.replace({
       pathname: '/analytics/app/[appId]/integration/[provider]/complete',

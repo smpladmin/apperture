@@ -6,6 +6,7 @@ export enum Provider {
   AMPLITUDE = 'amplitude',
   CLEVERTAP = 'clevertap',
   APPERTURE = 'apperture',
+  API = 'api',
   MYSQL = 'mysql',
 }
 export namespace Provider {

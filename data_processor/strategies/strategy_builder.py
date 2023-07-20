@@ -12,6 +12,7 @@ from domain.datasource.models import Credential, DataSource
 from strategies.mixpanel_events_strategy import MixpanelEventsStrategy
 from strategies.amplitude_events_strategy import AmplitudeEventsStrategy
 from strategies.clevertap_events_strategy import ClevertapEventsStrategy
+from strategies.api_data_strategy import APIDataStrategy
 
 
 class StrategyBuilder:
@@ -39,6 +40,7 @@ class StrategyBuilder:
                 ),
             },
             IntegrationProvider.MIXPANEL: {"DEFAULT": MixpanelAnalyticsStrategy()},
+            IntegrationProvider.API: {"DEFAULT": APIDataStrategy()},
         }
         if not strategies[provider][version]:
             raise NotImplementedError(
@@ -65,6 +67,11 @@ class EventsStrategyBuilder:
             },
             IntegrationProvider.CLEVERTAP: {
                 "DEFAULT": ClevertapEventsStrategy(
+                    datasource, credential, runlog_id, date
+                )
+            },
+            IntegrationProvider.API: {
+                "DEFAULT": APIDataStrategy(
                     datasource, credential, runlog_id, date
                 )
             },

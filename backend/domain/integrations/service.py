@@ -61,7 +61,9 @@ class IntegrationService:
         account_id: Optional[str],
         api_key: Optional[str],
         secret: Optional[str],
+        tableName: Optional[str],
         mysql_credential: Optional[MySQLCredential],
+
     ):
         credential_type = (
             CredentialType.MYSQL if mysql_credential else CredentialType.API_KEY
@@ -71,6 +73,7 @@ class IntegrationService:
             account_id=account_id,
             api_key=api_key,
             secret=secret,
+            tableName=tableName,
             mysql_credential=mysql_credential,
         )
         integration = Integration(

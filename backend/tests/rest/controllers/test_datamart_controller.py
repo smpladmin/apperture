@@ -1,10 +1,11 @@
 import json
 from datetime import datetime
-from unittest.mock import ANY
+from unittest.mock import ANY, AsyncMock
 
 import pytest
 from beanie import PydanticObjectId
 
+from domain.apps.models import ClickHouseCredential, App
 from tests.utils import filter_response
 
 
@@ -31,6 +32,7 @@ def test_save_datamart_table(
         "id": PydanticObjectId("635ba034807ab86d8a2aadd8"),
         "last_refreshed": datetime(2022, 11, 24, 0, 0),
         "name": "name",
+        "table_name": "dUKQaHtqxM",
         "query": "select event_name, user_id from events",
         "revision_id": None,
         "updated_at": None,
@@ -52,6 +54,7 @@ def test_get_datamart(client_init, datamart_service, datamart_response):
 async def test_update_datamart(
     client_init,
     datamart_data,
+    app_service,
     datasource_service,
     datamart_response,
     datamart_service,
@@ -86,6 +89,7 @@ async def test_update_datamart(
         "id": PydanticObjectId("635ba034807ab86d8a2aadd8"),
         "last_refreshed": datetime(2022, 11, 24, 0, 0),
         "name": "name",
+        "table_name": "dUKQaHtqxM",
         "query": "select event_name, user_id from events",
         "revision_id": None,
         "updated_at": None,
@@ -93,6 +97,9 @@ async def test_update_datamart(
     } == update_datamart_kwargs["new_table"].dict()
 
     assert "635ba034807ab86d8a2aadd8" == update_datamart_kwargs["table_id"]
+    assert update_datamart_kwargs["clickhouse_credential"] == ClickHouseCredential(
+        username="test_username", password="test_password", databasename="test_database"
+    )
 
 
 def test_compute_transient_datamart(
@@ -131,6 +138,7 @@ def test_get_datamart_list(client_init, datamart_service):
             "enabled": True,
             "lastRefreshed": "2022-11-24T00:00:00",
             "name": "name",
+            "tableName": "dUKQaHtqxM",
             "query": "select event_name, user_id from events",
             "revisionId": None,
             "updatedAt": None,
@@ -150,12 +158,23 @@ def test_get_datamart_list(client_init, datamart_service):
     )
 
 
-def test_delete_datamart(client_init, datamart_service):
+def test_delete_datamart(client_init, datamart_service, app_service):
     response = client_init.delete("/datamart/6384a65e0a397236d9de236a")
     assert response.status_code == 200
 
     datamart_service.delete_datamart_table.assert_called_once_with(
         **{
+            "clickhouse_credential": ClickHouseCredential(
+                username="test_username",
+                password="test_password",
+                databasename="test_database",
+            ),
             "datamart_id": "6384a65e0a397236d9de236a",
+            "table_name": "dUKQaHtqxM",
         }
     )
+
+    datamart_service.get_datamart_table.assert_called_with(
+        **{"id": "6384a65e0a397236d9de236a"}
+    )
+    app_service.get_app.assert_called_with(**{"id": "635ba034807ab86d8a2aadd7"})

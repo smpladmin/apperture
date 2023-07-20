@@ -66,11 +66,15 @@ export const updateWorkbook = async (
 export const getWorkbookTransientColumn = async (
   datasourceId: string,
   dimensions: any[],
-  metrics: any[]
+  metrics: any[],
+  database: string,
+  table: string
 ) => {
   return await ApperturePost(`/workbooks/spreadsheets/columns/transient`, {
     datasourceId,
     dimensions,
     metrics,
+    database,
+    table,
   });
 };

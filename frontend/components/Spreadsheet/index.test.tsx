@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import Spreadsheet from './index';
 import {
   getTransientSpreadsheets,
+  getWorkbookTransientColumn,
   saveWorkbook,
   updateWorkbook,
 } from '@lib/services/workbookService';
@@ -9,17 +10,60 @@ import { RouterContext } from 'next/dist/shared/lib/router-context';
 import { createMockRouter } from '@tests/util';
 import { act } from 'react-dom/test-utils';
 import { ColumnType } from '@lib/domain/workbook';
+import { getEventProperties } from '@lib/services/datasourceService';
 
 jest.mock('@lib/services/workbookService');
+jest.mock('@lib/services/datasourceService');
 
 describe('spreadsheet', () => {
   let mockedGetTransientSpreadsheet: jest.Mock;
   let mockedSaveWorkbook: jest.Mock;
   let mockedUpdateWorkbook: jest.Mock;
+  let mockedGetEventProperties: jest.Mock;
+  let mockedGetWorkbookTransientColumn: jest.Mock;
   beforeEach(() => {
     mockedGetTransientSpreadsheet = jest.mocked(getTransientSpreadsheets);
     mockedSaveWorkbook = jest.mocked(saveWorkbook);
     mockedUpdateWorkbook = jest.mocked(updateWorkbook);
+    mockedGetEventProperties = jest.mocked(getEventProperties);
+    mockedGetWorkbookTransientColumn = jest.mocked(getWorkbookTransientColumn);
+    mockedGetEventProperties.mockReturnValue([
+      'event',
+      'properties.$ae_first_app_open_date',
+      'properties.$ae_session_length',
+      'properties.$ae_updated_version',
+      'properties.$app_build_number',
+      'properties.$app_release',
+    ]);
+    mockedGetWorkbookTransientColumn.mockReturnValue({
+      status: 200,
+      data: {
+        data: [
+          {
+            index: 1,
+            event_name: '$ae_iap',
+          },
+          {
+            index: 2,
+            event_name: 'Search',
+          },
+          {
+            index: 3,
+            event_name: 'Login',
+          },
+          {
+            index: 4,
+            event_name: 'AppOpen',
+          },
+        ],
+        headers: [
+          {
+            name: 'event_name',
+            type: 'COMPUTED_HEADER',
+          },
+        ],
+      },
+    });
     mockedGetTransientSpreadsheet.mockReturnValue({
       status: 200,
       data: {
@@ -88,21 +132,23 @@ describe('spreadsheet', () => {
     jest.clearAllMocks();
   });
 
-  const renderSpreadsheet = (
+  const renderSpreadsheet = async (
     router = createMockRouter({
       pathname: '/analytics/spreadsheet',
       query: { dsId: '654212033222' },
     })
   ) =>
-    render(
-      <RouterContext.Provider value={router}>
-        <Spreadsheet />
-      </RouterContext.Provider>
-    );
+    await act(async () => {
+      render(
+        <RouterContext.Provider value={router}>
+          <Spreadsheet />
+        </RouterContext.Provider>
+      );
+    });
 
   describe('query modal', () => {
-    it('should render query modal', () => {
-      renderSpreadsheet();
+    it('should render query modal', async () => {
+      await renderSpreadsheet();
 
       const queryModal = screen.getByTestId('query-modal');
       expect(queryModal).toBeInTheDocument();
@@ -115,7 +161,7 @@ describe('spreadsheet', () => {
     });
 
     it('should close query modal if query is executed successfully', async () => {
-      renderSpreadsheet();
+      await renderSpreadsheet();
 
       const queryModal = screen.getByTestId('query-modal');
       expect(queryModal).toBeInTheDocument();
@@ -125,7 +171,9 @@ describe('spreadsheet', () => {
         fireEvent.click(submitButton);
       });
       const queryModal1 = screen.queryByTestId('query-modal');
-      expect(queryModal1).not.toBeVisible();
+      await waitFor(() => {
+        expect(queryModal1).not.toBeVisible();
+      });
     });
 
     it('should not close query modal  and show error message, if query is not executed successfully', async () => {
@@ -137,7 +185,7 @@ describe('spreadsheet', () => {
         data: undefined,
       });
 
-      renderSpreadsheet();
+      await renderSpreadsheet();
       const queryModal = screen.getByTestId('query-modal');
       expect(queryModal).toBeInTheDocument();
 
@@ -154,7 +202,7 @@ describe('spreadsheet', () => {
 
   describe('react grid', () => {
     it('should render react grid once user submits', async () => {
-      renderSpreadsheet();
+      await renderSpreadsheet();
 
       const queryModal = screen.getByTestId('query-modal');
       expect(queryModal).toBeInTheDocument();
@@ -171,7 +219,7 @@ describe('spreadsheet', () => {
 
   describe('add new sheet', () => {
     it('should initally render only one sheet name (Sheet 1) and add sheet button', async () => {
-      renderSpreadsheet();
+      await renderSpreadsheet();
 
       const queryModal = screen.getByTestId('query-modal');
       expect(queryModal).toBeInTheDocument();
@@ -189,7 +237,7 @@ describe('spreadsheet', () => {
     });
 
     it('should add a new sheet by opening query modal', async () => {
-      renderSpreadsheet();
+      await renderSpreadsheet();
 
       const queryModal = screen.getByTestId('query-modal');
       expect(queryModal).toBeInTheDocument();
@@ -211,9 +259,7 @@ describe('spreadsheet', () => {
       expect(queryModalAfterAddingSheet).toBeInTheDocument();
     });
 
-    it('should add a new blank sheet', async () => {
-      renderSpreadsheet();
-
+    const createBlankSheet = async () => {
       const queryModal = screen.getByTestId('query-modal');
       expect(queryModal).toBeInTheDocument();
 
@@ -229,6 +275,11 @@ describe('spreadsheet', () => {
       await act(async () => {
         fireEvent.click(newSheetUsingQuery);
       });
+    };
+
+    it('should add a new blank sheet', async () => {
+      await renderSpreadsheet();
+      await createBlankSheet();
 
       // direct grid would render when sheet is created using the option
       const reactGrid = screen.getByTestId('react-grid');
@@ -245,7 +296,7 @@ describe('spreadsheet', () => {
 
   describe('edit query', () => {
     it('should render query on grid page', async () => {
-      renderSpreadsheet();
+      await renderSpreadsheet();
       const submitButton = screen.getByTestId('submit-button');
       await act(async () => {
         fireEvent.click(submitButton);
@@ -255,7 +306,7 @@ describe('spreadsheet', () => {
     });
 
     it('should be able to edit query by clicking on edit query button', async () => {
-      renderSpreadsheet();
+      await renderSpreadsheet();
       const submitButton = screen.getByTestId('submit-button');
       await act(async () => {
         fireEvent.click(submitButton);
@@ -275,7 +326,7 @@ describe('spreadsheet', () => {
     });
 
     it('should show textbox for nlp sheet and codemirror sql editor for SQL sheet when modal is open using edit query', async () => {
-      renderSpreadsheet();
+      await renderSpreadsheet();
       const submitButton = screen.getByTestId('submit-button');
       await act(async () => {
         fireEvent.click(submitButton);
@@ -344,7 +395,7 @@ describe('spreadsheet', () => {
         },
       });
 
-      renderSpreadsheet();
+      await renderSpreadsheet();
       const submitButton = screen.getByTestId('submit-button');
       await act(async () => {
         fireEvent.click(submitButton);
@@ -365,6 +416,145 @@ describe('spreadsheet', () => {
       const newAddedColumn = screen.getByText('C B*2');
       expect(newAddedColumn).toBeInTheDocument();
     });
+
+    it('should show suggestion when typed on Dimension inputHeader', async () => {
+      await renderSpreadsheet();
+      const queryModal = screen.getByTestId('query-modal');
+      expect(queryModal).toBeInTheDocument();
+
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      const addSheetButton = screen.getByTestId('add-sheet');
+      fireEvent.click(addSheetButton);
+
+      const newBlankSheetUsing = screen.getByTestId('new-sheet');
+      await act(async () => {
+        fireEvent.click(newBlankSheetUsing);
+      });
+      const inputFormula = screen.getAllByTestId('formula-input');
+      fireEvent.change(inputFormula[0], { target: { value: 'un' } });
+      const suggestions = screen.getAllByTestId('suggestion-text');
+      expect(suggestions.map((suggestion) => suggestion.textContent)).toEqual([
+        'unique(',
+      ]);
+      await act(async () => {
+        fireEvent.click(suggestions[0]);
+      });
+
+      expect(inputFormula[0]).toHaveDisplayValue('unique(');
+      const propertySuggestions = screen.getAllByTestId('suggestion-text');
+      expect(
+        propertySuggestions.map((suggestion) => suggestion.textContent)
+      ).toEqual([
+        'event_name',
+        'properties.event',
+        'properties.properties.$ae_first_app_open_date',
+        'properties.properties.$ae_session_length',
+        'properties.properties.$ae_updated_version',
+        'properties.properties.$app_build_number',
+        'properties.properties.$app_release',
+        'timestamp',
+        'user_id',
+      ]);
+    });
+    it('should show suggestion when typed on Metric inputHeader', async () => {
+      await renderSpreadsheet();
+      const queryModal = screen.getByTestId('query-modal');
+      expect(queryModal).toBeInTheDocument();
+
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      const addSheetButton = screen.getByTestId('add-sheet');
+      fireEvent.click(addSheetButton);
+
+      const newBlankSheetUsing = screen.getByTestId('new-sheet');
+      await act(async () => {
+        fireEvent.click(newBlankSheetUsing);
+      });
+      const inputFormula = screen.getAllByTestId('formula-input')[2];
+
+      fireEvent.change(inputFormula, { target: { value: 'c' } });
+      const suggestions = screen.getAllByTestId('suggestion-text');
+      expect(suggestions.map((suggestion) => suggestion.textContent)).toEqual([
+        'count(',
+        'countif(',
+      ]);
+      await act(async () => {
+        fireEvent.click(suggestions[0]);
+      });
+
+      expect(inputFormula).toHaveDisplayValue('count()');
+    });
+    it('should show suggestion when typed on Metric inputHeader', async () => {
+      await renderSpreadsheet();
+      const queryModal = screen.getByTestId('query-modal');
+      expect(queryModal).toBeInTheDocument();
+
+      const submitButton = screen.getByTestId('submit-button');
+      await act(async () => {
+        fireEvent.click(submitButton);
+      });
+
+      const addSheetButton = screen.getByTestId('add-sheet');
+      fireEvent.click(addSheetButton);
+
+      const newBlankSheetUsing = screen.getByTestId('new-sheet');
+      await act(async () => {
+        fireEvent.click(newBlankSheetUsing);
+      });
+      const inputFormula = screen.getAllByTestId('formula-input')[2];
+
+      fireEvent.change(inputFormula, { target: { value: 'c' } });
+      const suggestions = screen.getAllByTestId('suggestion-text');
+      expect(suggestions.map((suggestion) => suggestion.textContent)).toEqual([
+        'count(',
+        'countif(',
+      ]);
+      await act(async () => {
+        fireEvent.click(suggestions[1]);
+      });
+
+      expect(inputFormula).toHaveDisplayValue('countif(');
+      const propertySuggestions = screen.getAllByTestId('suggestion-text');
+      expect(
+        propertySuggestions.map((suggestion) => suggestion.textContent)
+      ).toEqual([
+        'event_name',
+        'properties.event',
+        'properties.properties.$ae_first_app_open_date',
+        'properties.properties.$ae_session_length',
+        'properties.properties.$ae_updated_version',
+        'properties.properties.$app_build_number',
+        'properties.properties.$app_release',
+        'timestamp',
+        'user_id',
+      ]);
+      await act(async () => {
+        fireEvent.click(propertySuggestions[0]);
+      });
+      const operatorSuggestions = screen.getAllByTestId('suggestion-text');
+      expect(
+        operatorSuggestions.map((suggestion) => suggestion.textContent)
+      ).toEqual(['!=', '<', '<=', '=', '>', '>=', 'in']);
+      await act(async () => {
+        fireEvent.click(operatorSuggestions[0]);
+      });
+      const valueSuggestions = screen.getAllByTestId('suggestion-text');
+      expect(
+        valueSuggestions.map((suggestion) => suggestion.textContent)
+      ).toEqual(['$ae_iap', 'AppOpen', 'Login', 'Search']);
+      await act(async () => {
+        fireEvent.click(valueSuggestions[0]);
+      });
+
+      expect(inputFormula).toHaveDisplayValue('countif(event_name!=$ae_iap)');
+    });
   });
 
   describe('save/update funnel', () => {
@@ -374,7 +564,7 @@ describe('spreadsheet', () => {
     });
 
     it('should be able to save workbook and redirect to edit page', async () => {
-      renderSpreadsheet(router);
+      await renderSpreadsheet(router);
 
       const submitButton = screen.getByTestId('submit-button');
       await act(async () => {
@@ -397,7 +587,7 @@ describe('spreadsheet', () => {
         data: {},
       });
 
-      renderSpreadsheet(router);
+      await renderSpreadsheet(router);
 
       const submitButton = screen.getByTestId('submit-button');
       await act(async () => {
@@ -417,7 +607,7 @@ describe('spreadsheet', () => {
         pathname: '/analytics/workbook/edit',
       });
 
-      renderSpreadsheet(router);
+      await renderSpreadsheet(router);
 
       const submitButton = screen.getByTestId('submit-button');
       await act(async () => {
