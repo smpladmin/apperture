@@ -503,7 +503,7 @@ class TestEdgeService:
             node="test",
             start_date="2022-01-01",
             end_date="2023-01-01",
-            trend_type=TrendType.WEEK,
+            trend_type=TrendType.WEEK.value,
             is_entrance_node=True,
         )
         self.agg_mock.assert_called_once_with(
@@ -521,8 +521,8 @@ class TestEdgeService:
                 {
                     "$group": {
                         "_id": {
-                            "previous_event": "$previous_event",
                             "week": {"$week": "$date"},
+                            "previous_event": "$previous_event",
                             "year": {"$year": "$date"},
                         },
                         "end_date": {"$max": "$date"},

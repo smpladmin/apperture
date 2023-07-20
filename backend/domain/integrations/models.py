@@ -42,6 +42,7 @@ class Credential(BaseModel):
     refresh_token: Optional[str]
     api_key: Optional[str]
     secret: Optional[str]
+    tableName: Optional[str]
     mysql_credential: Optional[MySQLCredential]
 
     class Config:

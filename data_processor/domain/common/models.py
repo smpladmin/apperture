@@ -6,6 +6,7 @@ class IntegrationProvider(str, Enum):
     MIXPANEL = "mixpanel"
     AMPLITUDE = "amplitude"
     CLEVERTAP = "clevertap"
+    API = "api"
 
 
 class DataFormat(str, Enum):

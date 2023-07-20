@@ -424,7 +424,7 @@ class EdgeService:
                         "previous_event": {"$max": "$previous_event"},
                         "hits": {"$sum": "$hits"},
                         "users": {"$sum": "$users"},
-                        "flow": {"$max": f"{SankeyDirection.INFLOW}"},
+                        "flow": {"$max": f"{SankeyDirection.INFLOW.value}"},
                         "hits_percentage": {"$max": 0},
                         "users_percentage": {"$max": 0},
                     }
@@ -452,7 +452,7 @@ class EdgeService:
                                     "previous_event": {"$max": "$previous_event"},
                                     "hits": {"$sum": "$hits"},
                                     "users": {"$sum": "$users"},
-                                    "flow": {"$max": f"{SankeyDirection.OUTFLOW}"},
+                                    "flow": {"$max": f"{SankeyDirection.OUTFLOW.value}"},
                                     "hits_percentage": {"$max": 0},
                                     "users_percentage": {"$max": 0},
                                 }
