@@ -5,9 +5,10 @@ import React, { useState } from 'react';
 import Connections from './Connections';
 import ConnectorColumns from './ConnectorColumns';
 import { TransientSheetData } from '@lib/domain/workbook';
+import { Connection, ConnectionSource } from '@lib/domain/connections';
 
 type SidePanelProps = {
-  connections: any;
+  connections: Connection[];
   showColumns: boolean;
   sheetsData: TransientSheetData[];
   selectedSheetIndex: number;
@@ -28,7 +29,16 @@ const SidePanel = ({
   setShowColumns,
 }: SidePanelProps) => {
   const [isSidePanelCollapsed, setIsSidePanelCollapsed] = useState(false);
-  const [connectorData, setConnectorData] = useState<any>({});
+  const [connectorData, setConnectorData] = useState<
+    ConnectionSource & { heirarchy: string[] }
+  >({
+    name: '',
+    fields: [],
+    datasource_id: '',
+    table_name: '',
+    database_name: '',
+    heirarchy: [],
+  });
 
   return (
     <Box

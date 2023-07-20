@@ -10,13 +10,20 @@ import {
 export const getTransientSpreadsheets = (
   dsId: string,
   query: string,
-  is_sql: boolean = true
+  is_sql: boolean = true,
+  signal?: AbortSignal
 ) => {
-  return ApperturePost(`/workbooks/spreadsheets/transient`, {
-    datasourceId: dsId,
-    query: query,
-    is_sql,
-  });
+  return ApperturePost(
+    `/workbooks/spreadsheets/transient`,
+    {
+      datasourceId: dsId,
+      query: query,
+      is_sql,
+    },
+    {
+      signal,
+    }
+  );
 };
 
 export const getSavedWorkbooksForDatasourceId = async (dsId: string) => {

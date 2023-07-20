@@ -16,6 +16,7 @@ type FooterProps = {
   selectedSheetIndex: number;
   setSelectedSheetIndex: Function;
   setShowColumns: Function;
+  setShowEditor: Function;
 };
 
 const Footer = ({
@@ -25,6 +26,7 @@ const Footer = ({
   selectedSheetIndex,
   setSelectedSheetIndex,
   setShowColumns,
+  setShowEditor,
 }: FooterProps) => {
   const updateSheetName = (updatedSheetName: string, index: number) => {
     const toUpdateSheets = cloneDeep(sheetsData);
@@ -49,8 +51,8 @@ const Footer = ({
         };
       }),
       is_sql: true,
-      sheetType: SheetType.SIMPLE_SHEET,
-      editMode: false,
+      sheet_type: SheetType.SIMPLE_SHEET,
+      edit_mode: false,
       meta: {
         dsId: '',
         selectedColumns: [],
@@ -63,6 +65,7 @@ const Footer = ({
     ]);
     setSelectedSheetIndex(sheetsLength);
     setShowColumns(false);
+    setShowEditor(false);
     openSelectSheetOverlay();
   };
 
@@ -82,6 +85,7 @@ const Footer = ({
         onChange={(value: string) => {
           setSelectedSheetIndex(+value);
           setShowColumns(false);
+          setShowEditor(false);
         }}
       >
         <Flex h={'full'}>

@@ -26,9 +26,14 @@ import Image from 'next/image';
 import { MagnifyingGlass, Table } from 'phosphor-react';
 import ConfirmationModal from './ConfirmationModal';
 import { TransientSheetData } from '@lib/domain/workbook';
+import {
+  Connection,
+  ConnectionGroup,
+  ConnectionSource,
+} from '@lib/domain/connections';
 
 type ConnectionsProps = {
-  connections: any[];
+  connections: Connection[];
   sheetsData: TransientSheetData[];
   setSheetsData: Function;
   selectedSheetIndex: number;
@@ -82,7 +87,7 @@ const Connections = ({
     const lastSelectedDsId = sheetData?.meta?.dsId;
     if (
       lastSelectedDsId &&
-      !sheetData.editMode &&
+      !sheetData.edit_mode &&
       lastSelectedDsId !== currentSelectedDsId
     ) {
       onOpen();
@@ -177,89 +182,98 @@ const Connections = ({
                 <Divider orientation="horizontal" color={'grey.400'} />
               </Flex>
               <Accordion allowMultiple defaultIndex={[]}>
-                {connection_data.map((dataGroup: any, index: number) => {
-                  const { provider, connection_source } = dataGroup;
+                {connection_data.map(
+                  (dataGroup: ConnectionGroup, index: number) => {
+                    const { provider, connection_source } = dataGroup;
 
-                  return (
-                    <Fragment key={provider + index}>
-                      <AccordionItem border={0}>
-                        <AccordionButton px={'3'} py={'2'} borderRadius={'8'}>
-                          <Box flex="1" textAlign="left">
-                            <Flex gap={'2'}>
-                              <Image
-                                src={getConnectionIcon(provider)}
-                                width={'16'}
-                                height={'16'}
-                                style={{
-                                  minWidth: '16px',
-                                  minHeight: '16px',
-                                }}
-                                alt={'group'}
-                              />
-                              <Text
-                                fontSize={'xs-12'}
-                                lineHeight={'xs-12'}
-                                fontWeight={'500'}
-                                color={'grey.500'}
-                              >
-                                {provider}
-                              </Text>
-                            </Flex>
-                          </Box>
-                          <AccordionIcon />
-                        </AccordionButton>
-                        <AccordionPanel p={0}>
-                          {connection_source
-                            .slice(0, 5)
-                            .map((source: any, index: number) => {
-                              const heirarchy = [server, provider, source.name];
-                              const currentSelectedDsId = source.datasource_id;
-                              return (
-                                <Flex
-                                  key={source.name + index}
-                                  px={'3'}
-                                  py={'2'}
-                                  gap={'2'}
-                                  cursor={'pointer'}
-                                  _hover={{ bg: 'white.200' }}
-                                  borderRadius={'8'}
-                                  onClick={() => {
-                                    handleConnectionSelect(
-                                      source,
-                                      heirarchy,
-                                      currentSelectedDsId
-                                    );
+                    return (
+                      <Fragment key={provider + index}>
+                        <AccordionItem border={0}>
+                          <AccordionButton px={'3'} py={'2'} borderRadius={'8'}>
+                            <Box flex="1" textAlign="left">
+                              <Flex gap={'2'}>
+                                <Image
+                                  src={getConnectionIcon(provider)}
+                                  width={'16'}
+                                  height={'16'}
+                                  style={{
+                                    minWidth: '16px',
+                                    minHeight: '16px',
                                   }}
+                                  alt={'group'}
+                                />
+                                <Text
+                                  fontSize={'xs-12'}
+                                  lineHeight={'xs-12'}
+                                  fontWeight={'500'}
+                                  color={'grey.500'}
                                 >
-                                  <Table size={16} weight="thin" />
-                                  <Text
-                                    fontSize={'xs-12'}
-                                    lineHeight={'xs-12'}
-                                    fontWeight={'500'}
-                                    color={'grey.900'}
-                                  >
-                                    {source.name}
-                                  </Text>
-                                </Flex>
-                              );
-                            })}
-                          {connection_source.length > 5 ? (
-                            <Text
-                              fontSize={'xs-10'}
-                              lineHeight={'xs-10'}
-                              fontWeight={'500'}
-                              color={'black.DEFAULT'}
-                              ml={'9'}
-                              mt={'2'}
-                            >
-                              {`+ ${connection_source.length - 5} more`}
-                            </Text>
-                          ) : null}
-                        </AccordionPanel>
-                      </AccordionItem>
-                    </Fragment>
-                  );
-                })}
+                                  {provider}
+                                </Text>
+                              </Flex>
+                            </Box>
+                            <AccordionIcon />
+                          </AccordionButton>
+                          <AccordionPanel p={0}>
+                            {connection_source
+                              .slice(0, 5)
+                              .map(
+                                (source: ConnectionSource, index: number) => {
+                                  const heirarchy = [
+                                    server,
+                                    provider,
+                                    source.name,
+                                  ];
+                                  const currentSelectedDsId =
+                                    source.datasource_id;
+                                  return (
+                                    <Flex
+                                      key={source.name + index}
+                                      px={'3'}
+                                      py={'2'}
+                                      gap={'2'}
+                                      cursor={'pointer'}
+                                      _hover={{ bg: 'white.200' }}
+                                      borderRadius={'8'}
+                                      onClick={() => {
+                                        handleConnectionSelect(
+                                          source,
+                                          heirarchy,
+                                          currentSelectedDsId
+                                        );
+                                      }}
+                                    >
+                                      <Table size={16} weight="thin" />
+                                      <Text
+                                        fontSize={'xs-12'}
+                                        lineHeight={'xs-12'}
+                                        fontWeight={'500'}
+                                        color={'grey.900'}
+                                      >
+                                        {source.name}
+                                      </Text>
+                                    </Flex>
+                                  );
+                                }
+                              )}
+                            {connection_source.length > 5 ? (
+                              <Text
+                                fontSize={'xs-10'}
+                                lineHeight={'xs-10'}
+                                fontWeight={'500'}
+                                color={'black.DEFAULT'}
+                                ml={'9'}
+                                mt={'2'}
+                              >
+                                {`+ ${connection_source.length - 5} more`}
+                              </Text>
+                            ) : null}
+                          </AccordionPanel>
+                        </AccordionItem>
+                      </Fragment>
+                    );
+                  }
+                )}
               </Accordion>
             </Flex>
           );

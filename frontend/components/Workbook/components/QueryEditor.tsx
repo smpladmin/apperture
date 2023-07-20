@@ -46,7 +46,7 @@ const QueryEditor = ({
   const handleEditSelection = () => {
     setSheetsData((prevSheetData: TransientSheetData[]) => {
       const tempSheetData = [...prevSheetData];
-      tempSheetData[selectedSheetIndex].editMode = true;
+      tempSheetData[selectedSheetIndex].edit_mode = true;
       return tempSheetData;
     });
     onClose();
@@ -86,23 +86,23 @@ const QueryEditor = ({
             borderRadius={'8'}
           >
             <Button
-              borderColor={!sheetData.editMode ? GREY_900 : GREY_400}
-              disabled={sheetData.editMode}
+              borderColor={!sheetData.edit_mode ? GREY_900 : GREY_400}
+              disabled={sheetData.edit_mode}
             >
               <Eye
                 size={12}
-                color={!sheetData.editMode ? GREY_900 : GREY_400}
+                color={!sheetData.edit_mode ? GREY_900 : GREY_400}
               />
             </Button>
             <Button
-              borderColor={sheetData.editMode ? GREY_900 : GREY_400}
+              borderColor={sheetData.edit_mode ? GREY_900 : GREY_400}
               onClick={() => {
-                !sheetData.editMode && onOpen();
+                !sheetData.edit_mode && onOpen();
               }}
             >
               <PencilLine
                 size={12}
-                color={sheetData.editMode ? GREY_900 : GREY_400}
+                color={sheetData.edit_mode ? GREY_900 : GREY_400}
               />
             </Button>
           </ButtonGroup>
@@ -121,7 +121,7 @@ const QueryEditor = ({
           onChange={(value) => {
             setQuery(value);
           }}
-          readOnly={!sheetData.editMode}
+          readOnly={!sheetData.edit_mode}
         />
         {error ? (
           <Text
@@ -167,7 +167,7 @@ const QueryEditor = ({
             py={'6px'}
             borderRadius={'8'}
             onClick={handleQueryChange}
-            disabled={!sheetData.editMode}
+            disabled={!sheetData.edit_mode || isLoading}
           >
             <Flex gap={'1'}>
               {isLoading ? (

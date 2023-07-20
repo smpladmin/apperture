@@ -103,14 +103,8 @@ const SelectSheet = ({
               border={'1px'}
               borderColor={'white.200'}
               borderRadius={'12'}
-              _hover={{
-                borderColor: 'grey.700',
-                boxShadow:
-                  '0px 0px 0px 0px rgba(0, 0, 0, 0.06), 0px 3px 7px 0px rgba(0, 0, 0, 0.06), -2px 13px 13px 0px rgba(0, 0, 0, 0.05), -4px 30px 18px 0px rgba(0, 0, 0, 0.03), -8px 52px 21px 0px rgba(0, 0, 0, 0.01), -12px 82px 23px 0px rgba(0, 0, 0, 0.00)',
-              }}
               cursor={'pointer'}
               flex={'1 1 0'}
-              onClick={closeSelectSheetOverlay}
             >
               <Image
                 src={PivotSheet}

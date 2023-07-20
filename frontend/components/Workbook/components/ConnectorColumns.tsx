@@ -7,6 +7,7 @@ import {
   InputLeftElement,
   Text,
 } from '@chakra-ui/react';
+import { ConnectionSource } from '@lib/domain/connections';
 import { TransientSheetData } from '@lib/domain/workbook';
 import { getSearchResult } from '@lib/utils/common';
 import { CaretLeft, Columns, MagnifyingGlass } from 'phosphor-react';
@@ -26,7 +27,7 @@ const generateQuery = (
 
 type ConnectorColumnsProps = {
   sheetsData: TransientSheetData[];
-  connectorData: any;
+  connectorData: ConnectionSource & { heirarchy: string[] };
   selectedSheetIndex: number;
   setShowColumns: Function;
   setShowEmptyState: Function;
@@ -63,10 +64,10 @@ const ConnectorColumns = ({
 
   useEffect(() => {
     setShowEmptyState((prevState: boolean) => {
-      return sheetData.editMode ? prevState : !Boolean(selectedColumns.length);
+      return sheetData.edit_mode ? prevState : !Boolean(selectedColumns.length);
     });
 
-    if (sheetData.editMode) return;
+    if (sheetData.edit_mode) return;
     const query = generateQuery(
       selectedColumns,
       table_name,
@@ -121,7 +122,7 @@ const ConnectorColumns = ({
           onChange={(e) => onChangeHandler(e)}
         />
       </InputGroup>
-      {sheetData?.editMode ? (
+      {sheetData?.edit_mode ? (
         <ViewOnlyColumns columns={columns} />
       ) : (
         <CheckColumns

@@ -7,8 +7,8 @@ export type TransientSheetData = {
   subHeaders: SubHeaderColumn[];
   data: any[];
   is_sql?: boolean;
-  sheetType?: SheetType;
-  editMode?: boolean;
+  sheet_type?: SheetType;
+  edit_mode?: boolean;
   meta?: any;
 };
 
@@ -43,9 +43,9 @@ export type Spreadsheet = {
   headers: SpreadSheetColumn[];
   subHeaders: SubHeaderColumn[];
   is_sql?: boolean;
-  sheetType?: SheetType;
+  sheet_type?: SheetType;
   query: string;
-  editMode?: boolean;
+  edit_mode?: boolean;
   meta?: any;
 };
 

@@ -32,6 +32,7 @@ import {
   isdigit,
 } from './util';
 import { DimensionParser, Metricparser } from '@lib/utils/parser';
+import { Connection } from '@lib/domain/connections';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -49,8 +50,8 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
                   : SubHeaderColumnType.METRIC,
             };
           }),
-      editMode: sheet?.editMode || true,
-      sheetType: SheetType.SIMPLE_SHEET,
+      edit_mode: sheet?.edit_mode || true,
+      sheet_type: SheetType.SIMPLE_SHEET,
       meta: sheet?.meta || {
         dsId: '',
         selectedColumns: [],
@@ -73,8 +74,8 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
         };
       }),
       is_sql: true,
-      sheetType: SheetType.SIMPLE_SHEET,
-      editMode: false,
+      sheet_type: SheetType.SIMPLE_SHEET,
+      edit_mode: false,
       meta: {
         dsId: '',
         selectedColumns: [],
@@ -95,7 +96,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const [showEmptyState, setShowEmptyState] = useState(
     savedWorkbook ? false : true
   );
-  const [connections, setConnections] = useState([]);
+  const [connections, setConnections] = useState<Connection[]>([]);
   const [showColumns, setShowColumns] = useState(false);
 
   const [requestTranisentColumn, setRequestTransientColumn] =
@@ -127,16 +128,20 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   }, [dsId]);
 
   useEffect(() => {
-    const sheetData = sheetsData[selectedSheetIndex];
+    const sheet = sheetsData[selectedSheetIndex];
 
-    if (sheetData?.query) setShowEmptyState(false);
-    if (!sheetData?.query || sheetData.editMode) return;
+    if (sheet?.query) setShowEmptyState(false);
+    if (!sheet?.query || sheet.edit_mode) return;
+    const abortController = new AbortController();
+
+    const { signal } = abortController;
 
     const fetchTransientSheetData = async () => {
       const response = await getTransientSpreadsheets(
         dsId as string,
-        sheetData.query,
-        sheetData?.is_sql
+        sheet.query,
+        sheet?.is_sql,
+        signal
       );
 
       if (response.status === 200) {
@@ -148,6 +153,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     };
 
     fetchTransientSheetData();
+    return () => abortController.abort();
   }, [sheetsData[selectedSheetIndex]?.query]);
 
   const handleSaveOrUpdateWorkbook = async () => {
@@ -158,9 +164,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         headers: sheet.headers,
         query: sheet.query,
         subHeaders: sheet.subHeaders,
-        editMode: sheet.editMode,
+        edit_mode: sheet.edit_mode,
         meta: sheet.meta,
-        sheetType: sheet.sheetType,
+        sheet_type: sheet.sheet_type,
       };
     });
 
@@ -472,8 +478,8 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
   const hasQueryWithoutData =
     savedWorkbook &&
-    sheetsData[selectedSheetIndex].query &&
-    !sheetsData[selectedSheetIndex].data.length;
+    sheetsData[selectedSheetIndex]?.query &&
+    !sheetsData[selectedSheetIndex]?.data?.length;
 
   useEffect(() => {
     if (!savedWorkbook) return;
@@ -569,7 +575,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           setShowSqlEditor={setShowSqlEditor}
         />
 
-        <Box h={'full'} overflowY={'auto'}>
+        <Box h={'full'} w={'full'} overflowY={'auto'}>
           {showSqlEditor ? (
             <QueryEditor
               sheetsData={sheetsData}
@@ -581,14 +587,14 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           {showEmptyState ? (
             <EmptySheet />
           ) : (
-            <>
+            <Box overflow={'auto'} h={'full'}>
               <Grid
                 sheetData={sheetsData[selectedSheetIndex]}
                 selectedSheetIndex={selectedSheetIndex}
                 evaluateFormulaHeader={evaluateFormulaHeader}
                 addDimensionColumn={addDimensionColumn}
               />
-            </>
+            </Box>
           )}
           <Footer
             openSelectSheetOverlay={openSelectSheetOverlay}
@@ -597,6 +603,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             setSheetsData={setSheetsData}
             sheetsData={sheetsData}
             setShowColumns={setShowColumns}
+            setShowEditor={setShowSqlEditor}
           />
         </Box>
       </Flex>
