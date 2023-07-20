@@ -6,12 +6,13 @@ import {
   InputGroup,
   InputLeftElement,
   Text,
+  useToast,
 } from '@chakra-ui/react';
 import { Compatible } from '@silevis/reactgrid';
 import { BLUE_MAIN, GREY_600, WHITE_DEFAULT } from '@theme/index';
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Function, Plus, SquaresFour } from 'phosphor-react';
-import { SubHeaderColumnType } from '@lib/domain/workbook';
+import { ColumnType, SubHeaderColumnType } from '@lib/domain/workbook';
 import {
   DimensionParser,
   FormulaParser,
@@ -52,6 +53,7 @@ const FormulaDropDownBox = ({
   const [formula, setFormula] = useState(cell.text);
   const [isFocus, setIsFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const toast = useToast();
 
   const dropdownRef = useRef(null);
 
@@ -80,6 +82,15 @@ const FormulaDropDownBox = ({
 
   const handleSubmitFormula = () => {
     if (formula) {
+      if (cell.columnType === SubHeaderColumnType.DIMENSION) {
+        toast({
+          title: `Dimension column does not accept BODMAS equation`,
+          status: 'error',
+          variant: 'subtle',
+          isClosable: true,
+        });
+        return;
+      }
       onCellChanged({ text: formula });
       inputRef?.current?.blur();
     }
@@ -263,6 +274,23 @@ const FormulaDropDownBox = ({
     activeCellState === ActiveCellState.VALUE &&
     cellState.OPERATOR === 'in';
 
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+    const regex = /(?<name>[^\(]*)\(?/;
+    const name = input.match(regex)?.groups?.name || '';
+    if (
+      name &&
+      ['count', 'countif', 'unique'].some(
+        (fname) =>
+          fname.substring(0, name?.length || 0).toLowerCase() ===
+          name.toLowerCase()
+      )
+    ) {
+      suggestFormula(input);
+    }
+    setFormula(input);
+  };
+
   return (
     <Flex width={'full'}>
       <Box position={'relative'} width={'full'} ref={dropdownRef}>
@@ -274,11 +302,7 @@ const FormulaDropDownBox = ({
             ref={inputRef}
             value={formula}
             border={'0'}
-            onChange={(e) => {
-              const input = e.target.value;
-              suggestFormula(input);
-              setFormula(input);
-            }}
+            onChange={handleChange}
             onPointerDown={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
               e.stopPropagation();
