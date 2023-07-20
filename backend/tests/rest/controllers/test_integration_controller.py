@@ -48,6 +48,7 @@ def test_add_database_integration(
                 api_key=None,
                 account_id=None,
                 secret=None,
+                tableName=None,
                 mysql_credential=MySQLCredential(
                     host="127.0.0.1",
                     port="3306",
@@ -81,6 +82,7 @@ def test_add_database_integration(
             },
             "refresh_token": None,
             "secret": None,
+            "tableName": None,
             "type": "MYSQL",
         },
         "datasource": {

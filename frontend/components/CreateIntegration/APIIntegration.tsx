@@ -7,7 +7,7 @@ import {
   Input,
   Text,
 } from '@chakra-ui/react';
-import amplitudeLogo from '@assets/images/amplitude-icon.svg';
+import csvlogo from '@assets/images/apilogo.png';
 import Image from 'next/image';
 import FormButton from '@components/FormButton';
 import { useRouter } from 'next/router';
@@ -15,35 +15,36 @@ import { useEffect, useState } from 'react';
 import { createIntegrationWithDataSource } from '@lib/services/integrationService';
 import { Provider } from '@lib/domain/provider';
 
-type AmplitudeIntegrationProps = {
+type APIIntegrationProps = {
   handleClose: Function;
   add: string | string[] | undefined;
 };
-const AmplitudeIntegration = ({
+const APIIntegration = ({
   add,
   handleClose,
-}: AmplitudeIntegrationProps) => {
+}: APIIntegrationProps) => {
   const router = useRouter();
-  const [projectId, setProjectId] = useState('');
-  const [apiKey, setApiKey] = useState('');
-  const [apiSecret, setApiSecret] = useState('');
+  const [endPoint, setEndPoint] = useState('');
+  const [headers, setHeaders] = useState('');
+  const [tableName, setTableName] = useState('');
   const [validData, setValidData] = useState(false);
 
   useEffect(() => {
-    setValidData(!!(projectId && apiKey && apiSecret));
-  }, [projectId, apiKey, apiSecret]);
+    setValidData(!!(endPoint && headers));
+  }, [endPoint, headers]);
 
   const onSubmit = async () => {
     const appId = router.query.appId as string;
     const provider = router.query.provider as Provider;
-
+console.log("calling create ds with :",appId,provider,endPoint,headers,'',tableName)
     const integration = await createIntegrationWithDataSource(
       appId,
       provider,
-      projectId,
-      apiKey,
-      apiSecret,
-      ''
+      endPoint,
+      headers,
+      '',
+      tableName,
+      
     );
     router.replace({
       pathname: '/analytics/app/[appId]/integration/[provider]/complete',
@@ -78,7 +79,7 @@ const AmplitudeIntegration = ({
           onClick={() => handleClose()}
         />
         <Box height={{ base: 12, md: 18 }} width={{ base: 12, md: 18 }} mb={2}>
-          <Image src={amplitudeLogo} alt="amplitude" layout="responsive" />
+          <Image src={csvlogo} alt="csv" layout="responsive" />
         </Box>
         <Text
           textColor={'grey.200'}
@@ -97,7 +98,7 @@ const AmplitudeIntegration = ({
           fontWeight={'semibold'}
           maxW={200}
         >
-          Enter Details to fetch data from Amplitude
+          Enter Details to fetch data from API
         </Heading>
         <Box>
           <Box mb={5}>
@@ -107,12 +108,12 @@ const AmplitudeIntegration = ({
               fontSize={'xs-14'}
               lineHeight={'xs-14'}
               display="block"
-              htmlFor="projectId"
+              htmlFor="endPoint"
             >
-              Project ID
+              API endPoint
             </Text>
             <Input
-              id="projectId"
+              id="endPoint"
               size={'lg'}
               width={{ base: 'full', md: 125 }}
               bg={'white.100'}
@@ -120,13 +121,13 @@ const AmplitudeIntegration = ({
               fontSize={'base'}
               lineHeight={'base'}
               textColor={'black.400'}
-              placeholder="Enter 7 Digit Project ID"
+              placeholder="Enter your API endPoint"
               py={4}
               px={3.5}
               focusBorderColor={'black.100'}
               border={'0.6px'}
-              value={projectId}
-              onChange={(e) => setProjectId(e.target.value)}
+              value={endPoint}
+              onChange={(e) => setEndPoint(e.target.value)}
               _placeholder={{
                 fontSize: '1rem',
                 lineHeight: '1.375rem',
@@ -142,12 +143,12 @@ const AmplitudeIntegration = ({
               fontSize={'xs-14'}
               lineHeight={'xs-14'}
               display="block"
-              htmlFor="apiKey"
+              htmlFor="headers"
             >
-              API Key
+              headers
             </Text>
             <Input
-              id="apiKey"
+              id="headers"
               size={'lg'}
               width={{ base: 'full', md: 125 }}
               bg={'white.100'}
@@ -155,13 +156,13 @@ const AmplitudeIntegration = ({
               fontSize={'base'}
               lineHeight={'base'}
               textColor={'black.400'}
-              placeholder="Enter 6 Digit API Key"
+              placeholder='{"API-Key": "your-api-key"}'
               py={4}
               px={3.5}
               focusBorderColor={'black.100'}
               border={'0.6px'}
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
+              value={headers}
+              onChange={(e) => setHeaders(e.target.value)}
               _placeholder={{
                 fontSize: '1rem',
                 lineHeight: '1.375rem',
@@ -170,19 +171,19 @@ const AmplitudeIntegration = ({
               }}
             />
           </Box>
-          <Box mb={10}>
+          <Box mb={5}>
             <Text
               as="label"
               color="grey.100"
               fontSize={'xs-14'}
               lineHeight={'xs-14'}
               display="block"
-              htmlFor="apiSecret"
+              htmlFor="tableName"
             >
-              API Secret
+              Table Name
             </Text>
             <Input
-              id="apiSecret"
+              id="tableName"
               size={'lg'}
               width={{ base: 'full', md: 125 }}
               bg={'white.100'}
@@ -190,13 +191,13 @@ const AmplitudeIntegration = ({
               fontSize={'base'}
               lineHeight={'base'}
               textColor={'black.400'}
-              placeholder="Enter API Secret"
+              placeholder='What would you like to call this table'
               py={4}
               px={3.5}
               focusBorderColor={'black.100'}
               border={'0.6px'}
-              value={apiSecret}
-              onChange={(e) => setApiSecret(e.target.value)}
+              value={tableName}
+              onChange={(e) => setTableName(e.target.value)}
               _placeholder={{
                 fontSize: '1rem',
                 lineHeight: '1.375rem',
@@ -205,6 +206,7 @@ const AmplitudeIntegration = ({
               }}
             />
           </Box>
+          
         </Box>
       </Box>
       <Box mb={5}>
@@ -219,4 +221,4 @@ const AmplitudeIntegration = ({
   );
 };
 
-export default AmplitudeIntegration;
+export default APIIntegration;
