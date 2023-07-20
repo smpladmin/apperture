@@ -24,10 +24,12 @@ const GRAY_100 = '#b2b2b5';
 const MEDIUM_BLUE = '#646FD4';
 const BLUE_MAIN = '#5093EC';
 const LOGAN = '#9999B6';
+const GREY_400 = '#DFDFDF';
 const GREY_500 = '#747474';
 const GREY_600 = '#9E9E9E';
 const GREY_700 = '#BDBDBD';
 const GREY_800 = '#606060';
+const GREY_900 = '#212121';
 const BLACK_500 = '#424242';
 const BLUE_500 = '#5093EC';
 const RED_500 = '#DD6054';
@@ -68,12 +70,12 @@ const colors = {
     100: GRAY_100,
     200: ARROW_GRAY,
     300: '#3E3E47',
-    400: '#DFDFDF',
+    400: GREY_400,
     500: GREY_500,
     600: GREY_600,
     700: GREY_700,
     800: GREY_800,
-    900: ' #212121',
+    900: GREY_900,
     1000: '#F8F8FA',
   },
   yellow: { 500: YELLOW_500, 600: '#fac213' },
@@ -93,6 +95,7 @@ const colors = {
     500: RED_500,
   },
   blue: {
+    50: '#E5F2FC',
     500: BLUE_500,
   },
   purple: {
@@ -134,6 +137,7 @@ const spacing = {
   96: '24rem',
   100: '25rem',
   102: '25.5rem',
+  104: '26rem',
   106: '26.5rem',
   108: '27rem',
   110: '27.5rem',
@@ -238,4 +242,6 @@ export {
   GREEN_500,
   ORANGE_500,
   RED_500,
+  GREY_400,
+  GREY_900,
 };

@@ -14,8 +14,13 @@ class ColumnType(str, Enum):
 
 
 class SubHeaderColumnType(str, Enum):
-    DIMENSION = ("DIMENSION",)
-    METRIC = ("METRIC",)
+    DIMENSION = "DIMENSION"
+    METRIC = "METRIC"
+
+
+class SpreadsheetType(str, Enum):
+    SIMPLE_SHEET = "SIMPLE_SHEET"
+    PIVOT_SHEET = "PIVOT_SHEET"
 
 
 class SpreadSheetColumn(BaseModel):
@@ -37,8 +42,11 @@ class Spreadsheet(BaseModel):
     name: str
     headers: List[SpreadSheetColumn]
     subHeaders: Optional[List[SubHeaderColumn]]
-    is_sql: bool
+    is_sql: Optional[bool]
     query: str
+    edit_mode: bool = True
+    sheet_type: Optional[SpreadsheetType]
+    meta: Optional[dict]
 
 
 class WorkBook(Document):

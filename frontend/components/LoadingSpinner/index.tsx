@@ -4,7 +4,7 @@ import { BLACK_RUSSIAN } from '@theme/index';
 const LoadingSpinner = ({
   size = 'xl',
 }: {
-  size?: ResponsiveValue<'xl' | (string & {}) | 'sm' | 'md' | 'lg' | 'xs'>;
+  size?: ResponsiveValue<(string & {}) | 'xl' | 'sm' | 'md' | 'lg' | 'xs'>;
 }) => {
   return (
     <Spinner

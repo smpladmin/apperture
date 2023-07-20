@@ -1,15 +1,15 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import WorkbookHeader from './components/Header';
 import {
-  Box,
-  Button,
-  Flex,
-  Text,
-  useDisclosure,
-  useToast,
-} from '@chakra-ui/react';
-import EventLayoutHeader from '@components/EventsLayout/ActionHeader';
-import LoadingSpinner from '@components/LoadingSpinner';
+  getTransientSpreadsheets,
+  getWorkbookTransientColumn,
+  saveWorkbook,
+  updateWorkbook,
+} from '@lib/services/workbookService';
+import { useRouter } from 'next/router';
 import {
   ColumnType,
+  SheetType,
   SpreadSheetColumn,
   SubHeaderColumn,
   SubHeaderColumnType,
@@ -17,26 +17,25 @@ import {
   TransientSheetData,
   Workbook,
 } from '@lib/domain/workbook';
-import {
-  getTransientSpreadsheets,
-  getWorkbookTransientColumn,
-  saveWorkbook,
-  updateWorkbook,
-} from '@lib/services/workbookService';
-import { DimensionParser, Metricparser } from '@lib/utils/parser';
-import cloneDeep from 'lodash/cloneDeep';
-import { useRouter } from 'next/router';
-import { useCallback, useEffect, useState } from 'react';
-
-import Grid from './components/Grid/Grid';
-import QueryModal from './components/QueryModal';
+import { Box, Flex, useDisclosure, useToast } from '@chakra-ui/react';
+import SidePanel from './components/SidePanel';
+import Grid from '@components/Spreadsheet/components/Grid/Grid';
+import Footer from '@components/Workbook/components/Footer';
+import QueryEditor from './components/QueryEditor';
+import SelectSheet from './components/SelectSheet';
+import EmptySheet from './components/EmptySheet';
+import { getConnectionsForApp } from '@lib/services/connectionService';
+import { cloneDeep } from 'lodash';
 import {
   evaluateExpression,
   expressionTokenRegex,
   isOperand,
   isdigit,
 } from './util';
+import { DimensionParser, Metricparser } from '@lib/utils/parser';
+import { Connection } from '@lib/domain/connections';
 import { getEventProperties } from '@lib/services/datasourceService';
+import LoadingSpinner from '@components/LoadingSpinner';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -54,12 +53,18 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
                   : SubHeaderColumnType.METRIC,
             };
           }),
+      edit_mode: sheet?.edit_mode || true,
+      sheet_type: SheetType.SIMPLE_SHEET,
+      meta: sheet?.meta || {
+        dsId: '',
+        selectedColumns: [],
+      },
     }));
   }
   return [
     {
       name: 'Sheet 1',
-      query: 'Select user_id, count() from events group by user_id',
+      query: '',
       data: [],
       headers: [],
       subHeaders: Array.from({ length: 27 }).map((_, index) => {
@@ -72,40 +77,38 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
         };
       }),
       is_sql: true,
+      sheet_type: SheetType.SIMPLE_SHEET,
+      edit_mode: false,
+      meta: {
+        dsId: '',
+        selectedColumns: [],
+      },
     },
   ];
 };
 
-const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure({
-    defaultIsOpen: savedWorkbook ? false : true,
-  });
+const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
+  const [workbookName, setWorkBookName] = useState('Untitled Workbook');
+  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
+  const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
   const [sheetsData, setSheetsData] = useState<TransientSheetData[]>(
     initializeSheetForSavedWorkbook(savedWorkbook)
   );
-  const [workbookName, setWorkbookName] = useState<string>(
-    savedWorkbook?.name || 'Untitled Workbook'
-  );
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
+  const [showSqlEditor, setShowSqlEditor] = useState(false);
+  const [showEmptyState, setShowEmptyState] = useState(
+    savedWorkbook ? false : true
+  );
+  const [connections, setConnections] = useState<Connection[]>([]);
+  const [showColumns, setShowColumns] = useState(false);
+  const [eventProperties, setEventProperties] = useState<string[]>([]);
+
   const [requestTranisentColumn, setRequestTransientColumn] =
     useState<TransientColumnRequestState>({
-      isLoading: Boolean(
-        savedWorkbook?.spreadsheets[selectedSheetIndex]?.subHeaders.some(
-          (subheader) => typeof subheader === 'string' && subheader?.[0] === '='
-        )
-      ),
-      subheaders:
-        savedWorkbook?.spreadsheets[selectedSheetIndex]?.subHeaders || [],
+      isLoading: false,
+      subheaders: [],
     });
 
-  const [eventProperties, setEventProperties] = useState<string[]>([]);
-  const router = useRouter();
-  const { dsId, workbookId } = router.query;
-
-  const toast = useToast();
-
-  const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
-  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
   const [loadBODMASColumn, setloadBODMASColumn] = useState<{
     loading: boolean;
     data: TransientSheetData | null;
@@ -114,8 +117,94 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     data: null,
   });
 
+  const {
+    isOpen: showSelectSheetOverlay,
+    onOpen: openSelectSheetOverlay,
+    onClose: closeSelectSheetOverlay,
+  } = useDisclosure({ defaultIsOpen: savedWorkbook ? false : true });
+  const toast = useToast();
+  const router = useRouter();
+  const { dsId, workbookId } = router.query;
+
+  useEffect(() => {
+    const fetchConnections = async () => {
+      const res = await getConnectionsForApp(dsId as string);
+      setConnections(res);
+    };
+    fetchConnections();
+  }, [dsId]);
+
+  useEffect(() => {
+    const sheet = sheetsData[selectedSheetIndex];
+
+    if (sheet?.query) setShowEmptyState(false);
+    if (!sheet?.query || sheet.edit_mode) return;
+    const abortController = new AbortController();
+
+    const { signal } = abortController;
+
+    const fetchTransientSheetData = async () => {
+      const response = await getTransientSpreadsheets(
+        dsId as string,
+        sheet.query,
+        sheet?.is_sql,
+        signal
+      );
+
+      if (response.status === 200) {
+        const toUpdateSheets = cloneDeep(sheetsData);
+        toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
+        toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
+        setSheetsData(toUpdateSheets);
+      }
+    };
+
+    fetchTransientSheetData();
+    return () => abortController.abort();
+  }, [sheetsData[selectedSheetIndex]?.query]);
+
+  const handleSaveOrUpdateWorkbook = async () => {
+    const sheets = sheetsData.map((sheet) => {
+      return {
+        name: sheet.name,
+        is_sql: sheet.is_sql,
+        headers: sheet.headers,
+        query: sheet.query,
+        subHeaders: sheet.subHeaders,
+        edit_mode: sheet.edit_mode,
+        meta: sheet.meta,
+        sheet_type: sheet.sheet_type,
+      };
+    });
+
+    const { status, data } = isWorkbookBeingEdited
+      ? await updateWorkbook(
+          workbookId as string,
+          dsId as string,
+          workbookName,
+          sheets
+        )
+      : await saveWorkbook(dsId as string, workbookName, sheets);
+
+    if (status === 200) {
+      router.push({
+        pathname: '/analytics/workbook/edit/[workbookId]',
+        query: { workbookId: data?._id || workbookId, dsId },
+      });
+      setSaveButtonDisabled(true);
+    } else {
+      setSaveButtonDisabled(false);
+    }
+  };
+
+  const hasQueryWithoutData =
+    savedWorkbook &&
+    sheetsData[selectedSheetIndex]?.query &&
+    !sheetsData[selectedSheetIndex]?.data?.length;
+
   useEffect(() => {
     if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
+
     const fetchProperties = async () => {
       const properties: string[] = await getEventProperties(dsId as string);
       setEventProperties([
@@ -137,11 +226,12 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     }
   }, [requestTranisentColumn]);
 
-  const updateSheetData = (data: any[]) => {
+  const updateSheetData = (data: TransientSheetData[]) => {
     const toUpdateSheets = cloneDeep(sheetsData);
     toUpdateSheets[selectedSheetIndex].data = data;
     setSheetsData(toUpdateSheets);
   };
+
   useEffect(() => {
     if (!savedWorkbook) return;
     const hasColumnFetcSubheaderWithoutData =
@@ -528,42 +618,6 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     return getUpdatedQueryData(evaluatedData, newHeader, queriedData);
   };
 
-  const hasQueryWithoutData =
-    savedWorkbook &&
-    sheetsData[selectedSheetIndex].query &&
-    !sheetsData[selectedSheetIndex].data.length;
-
-  const handleSaveOrUpdateFunnel = async () => {
-    const sheets = sheetsData.map((sheet) => {
-      return {
-        name: sheet.name,
-        is_sql: sheet.is_sql,
-        headers: sheet.headers,
-        query: sheet.query,
-        subHeaders: sheet.subHeaders,
-      };
-    });
-
-    const { status, data } = isWorkbookBeingEdited
-      ? await updateWorkbook(
-          workbookId as string,
-          dsId as string,
-          workbookName,
-          sheets
-        )
-      : await saveWorkbook(dsId as string, workbookName, sheets);
-
-    if (status === 200) {
-      router.push({
-        pathname: '/analytics/workbook/edit/[workbookId]',
-        query: { workbookId: data?._id || workbookId, dsId },
-      });
-      setSaveButtonDisabled(true);
-    } else {
-      setSaveButtonDisabled(false);
-    }
-  };
-
   const addDimensionColumn = (columnId: string) => {
     const tempSheetsData = cloneDeep(sheetsData);
     const index = columnId.charCodeAt(0) - 65 + 1;
@@ -586,94 +640,84 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   };
 
   return (
-    <>
-      <QueryModal
-        isOpen={isOpen}
-        onClose={onClose}
-        sheetData={sheetsData[selectedSheetIndex]}
-        sheetsData={sheetsData}
-        setSheetsData={setSheetsData}
-        selectedSheetIndex={selectedSheetIndex}
+    <Flex direction={'column'}>
+      <WorkbookHeader
+        name={workbookName}
+        setName={setWorkBookName}
+        isSaveButtonDisabled={isSaveButtonDisabled}
+        handleSave={handleSaveOrUpdateWorkbook}
+        setShowSqlEditor={setShowSqlEditor}
       />
-      {!isOpen && (
-        <>
-          <Box
-            px={'5'}
-            position={'sticky'}
-            top={'0'}
-            width={'full'}
-            background={'white.400'}
-            zIndex={'99'}
-          >
-            <EventLayoutHeader
-              name={workbookName}
-              setName={setWorkbookName}
-              handleGoBack={() => router.back()}
-              handleSave={handleSaveOrUpdateFunnel}
-              isSaveButtonDisabled={isSaveButtonDisabled}
-            />
-            {sheetsData[selectedSheetIndex].query && (
-              <Flex
-                alignItems={'center'}
-                justifyContent={'space-between'}
-                p={'1'}
-              >
-                <Text
-                  fontSize={'xs-12'}
-                  lineHeight={'xs-12'}
-                  fontWeight={400}
-                  data-testid={'query-text'}
-                ></Text>
+      <Flex
+        direction={'row'}
+        h={'full'}
+        overflow={showEmptyState ? 'hidden' : 'auto'}
+      >
+        {showSelectSheetOverlay ? (
+          <SelectSheet
+            closeSelectSheetOverlay={closeSelectSheetOverlay}
+            sheetsData={sheetsData}
+            setSheetsData={setSheetsData}
+            setSelectedSheetIndex={setSelectedSheetIndex}
+          />
+        ) : null}
+        <SidePanel
+          showColumns={showColumns}
+          setShowColumns={setShowColumns}
+          connections={connections}
+          selectedSheetIndex={selectedSheetIndex}
+          sheetsData={sheetsData}
+          setSheetsData={setSheetsData}
+          setShowEmptyState={setShowEmptyState}
+          setShowSqlEditor={setShowSqlEditor}
+        />
 
-                <Button
-                  px={'2'}
-                  h={'6'}
-                  bg={'grey.400'}
-                  variant={'secondary'}
-                  fontSize={'xs-12'}
-                  lineHeight={'xs-12'}
-                  fontWeight={'400'}
-                  onClick={() => onOpen()}
-                  data-testid={'edit-query-button'}
-                >
-                  Edit Query
-                </Button>
-              </Flex>
-            )}
-          </Box>
-          {hasQueryWithoutData ? (
-            <Flex
-              h={'full'}
-              w={'full'}
-              alignItems={'center'}
-              justifyContent={'center'}
-            >
-              <LoadingSpinner />
-            </Flex>
+        <Box h={'full'} w={'full'} overflowY={'auto'}>
+          {showSqlEditor ? (
+            <QueryEditor
+              sheetsData={sheetsData}
+              selectedSheetIndex={selectedSheetIndex}
+              setShowSqlEditor={setShowSqlEditor}
+              setSheetsData={setSheetsData}
+            />
+          ) : null}
+          {showEmptyState ? (
+            <EmptySheet />
           ) : (
-            <>
-              <Flex overflow={'scroll'} data-testid={'react-grid'}>
+            <Box overflow={'auto'} h={'full'}>
+              {hasQueryWithoutData ? (
+                <Flex
+                  h={'full'}
+                  w={'full'}
+                  alignItems={'center'}
+                  justifyContent={'center'}
+                >
+                  <LoadingSpinner />
+                </Flex>
+              ) : (
                 <Grid
+                  sheetData={sheetsData[selectedSheetIndex]}
                   selectedSheetIndex={selectedSheetIndex}
-                  sheetData={cloneDeep(sheetsData[selectedSheetIndex])}
                   evaluateFormulaHeader={evaluateFormulaHeader}
                   addDimensionColumn={addDimensionColumn}
                   properties={eventProperties}
                 />
-              </Flex>
-              {/* <Footer
-                // openQueryModal={onOpen}
-                sheetsData={sheetsData}
-                setSheetsData={setSheetsData}
-                selectedSheetIndex={selectedSheetIndex}
-                setSelectedSheetIndex={setSelectedSheetIndex}
-              /> */}
-            </>
+              )}
+            </Box>
           )}
-        </>
-      )}
-    </>
+          <Footer
+            openSelectSheetOverlay={openSelectSheetOverlay}
+            selectedSheetIndex={selectedSheetIndex}
+            setSelectedSheetIndex={setSelectedSheetIndex}
+            setSheetsData={setSheetsData}
+            sheetsData={sheetsData}
+            setShowColumns={setShowColumns}
+            setShowEditor={setShowSqlEditor}
+          />
+        </Box>
+      </Flex>
+    </Flex>
   );
 };
 
-export default Spreadsheet;
+export default Workbook;

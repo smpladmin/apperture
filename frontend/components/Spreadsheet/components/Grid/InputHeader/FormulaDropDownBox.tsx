@@ -279,6 +279,7 @@ const FormulaDropDownBox = ({
     const regex = /(?<name>[^\(]*)\(?/;
     const name = input.match(regex)?.groups?.name || '';
     if (
+      cell.showAddButton &&
       name &&
       ['count', 'countif', 'unique'].some(
         (fname) =>
