@@ -16,7 +16,7 @@ class DataMartRepo(EventsBase):
 
     def cleanse_query_string(self, query_string: str) -> str:
         query_string = re.sub(r"--.*\n+", " ", query_string)
-        return re.sub(r"\s+|\n+", " ", query_string).strip()
+        return re.sub(r"\n+", " ", query_string).strip()
 
     def generate_create_table_query(self, query: str, table_name: str, db_name: str):
         create_query = f"CREATE TABLE {db_name}.{table_name}  ENGINE = MergeTree ORDER BY {self.DUMMY_COLUMN} AS SELECT *, 1 AS {self.DUMMY_COLUMN} from ({query})"
