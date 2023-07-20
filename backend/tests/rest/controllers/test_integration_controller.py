@@ -6,7 +6,8 @@ from domain.common.models import IntegrationProvider
 from domain.integrations.models import (
     Integration,
     Credential,
-    CredentialType, MySQLCredential,
+    CredentialType,
+    MySQLCredential,
 )
 
 
@@ -121,5 +122,6 @@ def test_check_database_connection(
             "password": "password",
             "port": "3306",
             "username": "test-user",
+            "ssh_credential": None,
         }
     )

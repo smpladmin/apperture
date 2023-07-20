@@ -38,7 +38,8 @@ sqlglot = "^14.0.0"
 sqlvalidator = "^0.0.20"
 sqlparser = "^0.0.9"
 openai = "^0.27.7"
-mysql-connector-python = "^8.0.33"
+sshtunnel = "^0.4.0"
+pymysql = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
