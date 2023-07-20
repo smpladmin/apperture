@@ -6,7 +6,8 @@ from domain.common.models import IntegrationProvider
 from domain.integrations.models import (
     Integration,
     Credential,
-    CredentialType, MySQLCredential,
+    CredentialType,
+    MySQLCredential,
 )
 
 
@@ -48,6 +49,7 @@ def test_add_database_integration(
                 api_key=None,
                 account_id=None,
                 secret=None,
+                tableName=None,
                 mysql_credential=MySQLCredential(
                     host="127.0.0.1",
                     port="3306",
@@ -81,6 +83,7 @@ def test_add_database_integration(
             },
             "refresh_token": None,
             "secret": None,
+            "tableName": None,
             "type": "MYSQL",
         },
         "datasource": {
@@ -119,5 +122,6 @@ def test_check_database_connection(
             "password": "password",
             "port": "3306",
             "username": "test-user",
+            "ssh_credential": None,
         }
     )

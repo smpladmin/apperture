@@ -24,9 +24,9 @@ class TestEdgeRepository:
         ]
         self.parameters = {
             "ds_id": "test-id",
-            "end_date": "2023-01-01",
             "event_name": "test",
             "start_date": "2022-01-01",
+            "end_date": "2023-01-01",
         }
         self.edges_parameters = {
             "ds_id": "test-id",
@@ -125,7 +125,7 @@ class TestEdgeRepository:
             event_name=self.event_name,
             start_date=self.start_date,
             end_date=self.end_date,
-            trend_type=TrendType.DATE,
+            trend_type=TrendType.DATE.value,
         )
         self.repo.execute_get_query.assert_called_once_with(
             self.trends_query, self.parameters
@@ -137,7 +137,7 @@ class TestEdgeRepository:
             event_name=self.event_name,
             start_date=self.start_date,
             end_date=self.end_date,
-            trend_type=TrendType.DATE,
+            trend_type=TrendType.DATE.value,
         ) == (self.trends_query, self.parameters)
 
     def test_get_node_sankey(self):

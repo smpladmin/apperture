@@ -15,6 +15,7 @@ import mixpanelLogo from '@assets/images/mixPanel-icon.png';
 import amplitudeLogo from '@assets/images/amplitude-icon.png';
 import clevertapLogo from '@assets/images/clevertap-icon.png';
 import appertureLogo from '@assets/images/apperture-logo.svg';
+import apilogo from '@assets/images/apilogo.png';
 import mysqlLogo from '@assets/images/mysql-icon.png';
 import FormButton from '@components/FormButton';
 import IntegrationSource from '@components/IntegrationSource';
@@ -41,6 +42,7 @@ const SelectProvider = () => {
       const integration = await createIntegrationWithDataSource(
         appId as string,
         provider,
+        '',
         '',
         '',
         '',
@@ -104,6 +106,12 @@ const SelectProvider = () => {
           <Box width={'full'} marginBottom={'10'}>
             <RadioGroup value={provider} onChange={setProvider}>
               <Stack direction="column">
+                <IntegrationSource
+                  sourceName="Connect an API"
+                  value={Provider.API}
+                  imgSrc={apilogo}
+                  selected={provider === Provider.API}
+                />
                 <IntegrationSource
                   sourceName="Apperture"
                   value={Provider.APPERTURE}

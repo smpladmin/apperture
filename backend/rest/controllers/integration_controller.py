@@ -115,6 +115,7 @@ async def create_integration(
         dto.accountId,
         dto.apiKey,
         dto.apiSecret,
+        dto.tableName,
         mysql_credential,
     )
 
@@ -149,5 +150,9 @@ async def check_mysql_connection(
     integration_service: IntegrationService = Depends(),
 ):
     return integration_service.test_mysql_connection(
-        host=dto.host, port=dto.port, username=dto.username, password=dto.password
+        host=dto.host,
+        port=dto.port,
+        username=dto.username,
+        password=dto.password,
+        ssh_credential=dto.sshCredential,
     )
