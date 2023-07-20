@@ -76,6 +76,7 @@ from domain.spreadsheets.models import (
     ComputedSpreadsheet,
     Spreadsheet,
     SpreadSheetColumn,
+    SpreadsheetType,
     WorkBook,
 )
 from domain.users.models import UserDetails
@@ -799,6 +800,9 @@ def workbook_data():
                 "is_sql": True,
                 "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
                 "subHeaders": [],
+                "edit_mode": True,
+                "meta": {"dsId": "", "selectedColumns": []},
+                "sheet_type": SpreadsheetType.SIMPLE_SHEET,
             }
         ],
         "datasourceId": "23412414123123",
@@ -833,6 +837,9 @@ def spreadsheets_service():
                 ],
                 is_sql=True,
                 query="SELECT  event_name FROM  events",
+                edit_mode=True,
+                meta={"dsId": "", "selectedColumns": []},
+                sheet_type=SpreadsheetType.SIMPLE_SHEET,
             )
         ],
         enabled=True,

@@ -40,8 +40,8 @@ class SpreadSheetDto(BaseModel):
     subHeaders: List[SubHeaderColumn]
     is_sql: bool
     query: str
-    editMode: bool
-    sheetType: SpreadsheetType
+    edit_mode: bool
+    sheet_type: SpreadsheetType
     meta: dict
 
 
