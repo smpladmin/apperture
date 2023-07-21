@@ -1,3 +1,4 @@
+//source
 import { Flex, Radio, Text } from '@chakra-ui/react';
 import Image, { StaticImageData } from 'next/image';
 import React from 'react';
@@ -17,7 +18,7 @@ const IntegrationSource = ({
 }: IntegrationSourceProps) => {
   return (
     <Flex
-      width={{ base: 'auto', md: '125' }}
+      width={{ base: 'auto', md: '50' }}
       px={'3'}
       py={'4'}
       border={'1px'}
@@ -34,6 +35,7 @@ const IntegrationSource = ({
         justifyContent={'center'}
         gap={'3'}
         data-testid={'integration-provider'}
+        direction={'column'}
       >
         <Flex
           border={'1px'}
@@ -51,7 +53,7 @@ const IntegrationSource = ({
             {sourceName}
           </Text>
         </Flex>
-        <Radio ml={'auto'} value={value} colorScheme={'radioBlack'} />
+        <Radio ml={'auto'} value={value} sx={{ display: 'none' }} />
       </Flex>
     </Flex>
   );
