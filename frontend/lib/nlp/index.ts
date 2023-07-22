@@ -46,7 +46,7 @@ export const findMatches = (query: string, choices: Array<string>): Matches => {
 
 const preprocessChoices = (choices: Array<string>) => {
   return choices.map((choice) => {
-    const updated = choice.replace('properties.', '');
+    const updated = choice.replaceAll('properties.', '');
     return { choice, updated };
   });
 };

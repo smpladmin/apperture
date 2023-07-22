@@ -118,6 +118,7 @@ class TestSpreadsheetService:
                     edit_mode=True,
                     meta={"dsId": "", "selectedColumns": []},
                     sheet_type=SpreadsheetType.SIMPLE_SHEET,
+                    word_replacements=[],
                 )
             ],
             datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
@@ -146,6 +147,7 @@ class TestSpreadsheetService:
                     "edit_mode": True,
                     "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                     "meta": {"dsId": "", "selectedColumns": []},
+                    "word_replacements": [],
                 }
             ],
             "enabled": True,

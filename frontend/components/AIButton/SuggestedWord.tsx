@@ -44,16 +44,13 @@ export default function SuggestedWord({
         >
           Select Property
         </PopoverHeader>
-        <PopoverBody
-          bg={'white'}
-          rounded={'xl'}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Stack direction="row">
+        <PopoverBody bg={'white'} onClick={(e) => e.stopPropagation()}>
+          <Stack direction="row" wrap={'wrap'}>
             {tokens.map((choice, cIndex) => {
               const selected = selectedProperties[word] === choice;
               return (
                 <Flex
+                  mb={1}
                   alignItems={'center'}
                   justifyContent={'space-between'}
                   key={cIndex}

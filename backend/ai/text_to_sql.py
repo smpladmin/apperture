@@ -2,34 +2,23 @@ import logging
 from typing import List
 import openai
 
+from domain.spreadsheets.models import WordReplacement
+
 
 def generate_prompt(text):
     return f"""
-    Consider that I have an events table in ClickHouse database with following schema:
-
-    CREATE TABLE events
-    (
-        datasource_id String,
-        timestamp DateTime,
-        provider String,
-        user_id String,
-        event_name String,
-        properties JSON
-    )
-    ENGINE = MergeTree
-    ORDER BY timestamp;
+    Consider that I have an events table in ClickHouse database.
 
     Generate only a ClickHouse Select SQL query and no other text using following text '{text}'
-    
-    Note that any column which is not present in the events table would be present in properties column
-    because it is a JSON datatype column.
 
-    So for e.g. if the text says 'select user_id and utm_source'.
+    So for e.g. if the text says 'select user_id and properties.utm_source'.
     The generated sql for this text would be 'SELECT user_id, properties.utm_source FROM events'
     """
 
 
-def text_to_sql(text: str) -> str:
+def text_to_sql(text: str, word_replacements: List[WordReplacement]) -> str:
+    for replacement in word_replacements:
+        text = replacement.apply(text)
     logging.info(f"Generating sql for text: {text}")
     prompt = generate_prompt(text)
     logging.info(f"GPT prompt: {prompt}")

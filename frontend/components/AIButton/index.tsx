@@ -10,37 +10,63 @@ import {
   Box,
   BoxProps,
   Flex,
-  Textarea,
-  Text,
-  PopoverCloseButton,
-  PopoverHeader,
   useDisclosure,
-  RadioGroup,
-  Stack,
-  Radio,
-  PopoverFooter,
-  Link,
 } from '@chakra-ui/react';
-import { Check, PaperPlaneRight, Sparkle, X } from 'phosphor-react';
+import { PaperPlaneRight, Sparkle, X } from 'phosphor-react';
 
 import { Choice, findMatches } from '@lib/nlp';
 import EditableTextarea from './EditableTextarea';
+import { WordReplacement } from '@lib/domain/workbook';
 
 type AIButtonProps = BoxProps & {
   properties: Array<string>;
+  query?: string;
+  wordReplacements?: Array<WordReplacement>;
+  onQuery: (query: string, wordSuggestions: Array<WordReplacement>) => void;
 };
 
 const AIButton = forwardRef<AIButtonProps, 'div'>((props, ref) => {
-  const { properties, ...rest } = props;
-  const [text, setText] = useState('');
+  const { properties, query, onQuery, wordReplacements, ...rest } = props;
+  const [text, setText] = useState(query || '');
   const [editing, setEditing] = useState(false);
   const [tokens, setTokens] = useState({});
-  const [selectedProperties, setSelectedProperties] = useState({});
+  const [selectedProperties, setSelectedProperties] = useState<{
+    [key: string]: string;
+  }>({});
+
+  useEffect(() => {
+    console.log(wordReplacements);
+    const properties = wordReplacements?.reduce(
+      (properties: { [key: string]: string }, { word, replacement }) => {
+        properties[word] = replacement;
+        return properties;
+      },
+      {}
+    );
+    setSelectedProperties(properties || {});
+  }, [wordReplacements]);
+
+  useEffect(() => {
+    if (text) {
+      const _tokens = findMatches(text, properties);
+      const tokenMap = _tokens.reduce(
+        (
+          a: { [key: string]: Array<string> },
+          b: { word: string; choices: Array<Choice> }
+        ) => {
+          a[b.word] = b.choices.map((c) => c.choice);
+          return a;
+        },
+        {}
+      );
+      setTokens(tokenMap);
+    }
+  }, []);
 
   const onSubmit = () => {
     setEditing(false);
-    const tokens = findMatches(text, properties);
-    const tokenMap = tokens.reduce(
+    const _tokens = findMatches(text, properties);
+    const tokenMap = _tokens.reduce(
       (
         a: { [key: string]: Array<string> },
         b: { word: string; choices: Array<Choice> }
@@ -51,6 +77,13 @@ const AIButton = forwardRef<AIButtonProps, 'div'>((props, ref) => {
       {}
     );
     setTokens(tokenMap);
+    onQuery(
+      text,
+      Object.keys(selectedProperties).map((k) => ({
+        word: k,
+        replacement: selectedProperties[k],
+      }))
+    );
   };
 
   const { onOpen, onClose, isOpen } = useDisclosure();
@@ -107,7 +140,12 @@ const AIButton = forwardRef<AIButtonProps, 'div'>((props, ref) => {
           )}
         </PopoverTrigger>
 
-        <PopoverContent width={'400px'} minHeight={'140px'} rounded={'xl'}>
+        <PopoverContent
+          width={'400px'}
+          minHeight={'140px'}
+          rounded={'xl'}
+          bg={'white'}
+        >
           <PopoverBody boxShadow="xl" h={'full'} rounded={'xl'} padding={4}>
             <Flex direction={'row'}>
               <Box>
