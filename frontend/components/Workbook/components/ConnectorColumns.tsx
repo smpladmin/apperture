@@ -78,7 +78,9 @@ const ConnectorColumns = ({
     setSheetsData((prevSheetData: TransientSheetData[]) => {
       const tempSheetsData = [...prevSheetData];
       tempSheetsData[selectedSheetIndex].query = query;
-      tempSheetsData[selectedSheetIndex].meta.selectedColumns = selectedColumns;
+      // TODO: should check the double bang !!
+      tempSheetsData[selectedSheetIndex].meta!!.selectedColumns =
+        selectedColumns;
       return tempSheetsData;
     });
   }, [selectedColumns]);

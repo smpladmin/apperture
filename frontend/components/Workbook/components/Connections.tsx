@@ -85,19 +85,19 @@ const Connections = ({
       Note: initally dsId would be empty, in that case show connectorColumns directly
     */
     const lastSelectedDsId = sheetData?.meta?.dsId;
+    console.log({ lastSelectedDsId });
     if (
       lastSelectedDsId &&
       !sheetData.edit_mode &&
       lastSelectedDsId !== currentSelectedDsId
     ) {
+      console.log('onopen');
       onOpen();
     } else {
       setShowColumns(true);
-      console.log('selectedSHeet index', selectedSheetIndex);
-      console.log('sheets Dtaa', sheetsData);
       setSheetsData((prevSheetData: TransientSheetData[]) => {
         const tempSheetsData = [...prevSheetData];
-        tempSheetsData[selectedSheetIndex].meta.dsId = currentSelectedDsId;
+        tempSheetsData[selectedSheetIndex].meta!!.dsId = currentSelectedDsId;
         return tempSheetsData;
       });
     }
@@ -132,8 +132,9 @@ const Connections = ({
     if (canditate.confirmation) {
       setSheetsData((prevSheetData: TransientSheetData[]) => {
         const tempSheetsData = [...prevSheetData];
-        tempSheetsData[selectedSheetIndex].meta.dsId = canditate.dsId;
-        tempSheetsData[selectedSheetIndex].meta.selectedColumns = [];
+        // TODO: should check the double bang !!
+        tempSheetsData[selectedSheetIndex].meta!!.dsId = canditate.dsId;
+        tempSheetsData[selectedSheetIndex].meta!!.selectedColumns = [];
         return tempSheetsData;
       });
       setShowColumns(true);

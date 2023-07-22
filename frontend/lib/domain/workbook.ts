@@ -9,8 +9,14 @@ export type TransientSheetData = {
   is_sql?: boolean;
   sheet_type?: SheetType;
   edit_mode?: boolean;
-  meta?: any;
+  meta?: {
+    dsId: string;
+    selectedColumns: string[];
+  };
+  word_replacements?: Array<WordReplacement>;
 };
+
+export type WordReplacement = { word: string; replacement: string };
 
 export enum ColumnType {
   COMPUTED_HEADER = 'COMPUTED_HEADER',
