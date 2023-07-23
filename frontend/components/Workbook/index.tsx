@@ -102,6 +102,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [showColumns, setShowColumns] = useState(false);
   const [triggerSheetFetch, setTriggerSheetFetch] = useState(1);
+  const [fetchingTransientSheet, setFetchingTransientSheet] = useState(false);
 
   const [requestTranisentColumn, setRequestTransientColumn] =
     useState<TransientColumnRequestState>({
@@ -140,6 +141,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     if (sheet?.query) setShowEmptyState(false);
     if (sheet.is_sql && (!sheet?.query || sheet.edit_mode)) return;
 
+    setFetchingTransientSheet(true);
     const response = await getTransientSpreadsheets(
       sheet.meta?.dsId || (dsId as string),
       sheet.query,
@@ -153,13 +155,24 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
       toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
       setSheetsData(toUpdateSheets);
+    } else {
+      toast({
+        title: 'Something went wrong, try another prompt',
+        status: 'error',
+        variant: 'subtle',
+        isClosable: true,
+      });
     }
+    setFetchingTransientSheet(false);
   };
 
   useEffect(() => {
     const abortController = new AbortController();
     fetchTransientSheetData(abortController);
-    return () => abortController.abort();
+    return () => {
+      setFetchingTransientSheet(false);
+      abortController.abort();
+    };
   }, [
     sheetsData[selectedSheetIndex]?.query,
     JSON.stringify(sheetsData[selectedSheetIndex]?.word_replacements),
@@ -203,6 +216,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
   const hasQueryWithoutData =
     savedWorkbook &&
+    sheetsData[selectedSheetIndex]?.is_sql &&
     sheetsData[selectedSheetIndex]?.query &&
     !sheetsData[selectedSheetIndex]?.data?.length;
 
@@ -731,6 +745,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         bottom={13}
         properties={getProperties}
         wordReplacements={sheetsData[selectedSheetIndex].word_replacements}
+        loading={fetchingTransientSheet}
         onQuery={(updatedQuery, wordReplacements) => {
           const sheetsCopy = cloneDeep(sheetsData);
           sheetsCopy[selectedSheetIndex].is_sql = false;

@@ -58,11 +58,12 @@ const QueryEditor = ({
     const response = await getTransientSpreadsheets(
       dsId as string,
       query,
-      sheetData.is_sql
+      true
     );
     setIsLoading(false);
     const toUpdateSheets = cloneDeep(sheetsData);
     toUpdateSheets[selectedSheetIndex].query = query;
+    toUpdateSheets[selectedSheetIndex].is_sql = true;
 
     if (response.status === 200) {
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;

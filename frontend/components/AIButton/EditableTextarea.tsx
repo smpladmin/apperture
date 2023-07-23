@@ -8,6 +8,7 @@ type EditableTextareaProps = {
   text: string;
   setText: React.Dispatch<React.SetStateAction<string>>;
   tokens: { [key: string]: Array<any> };
+  setTokens: React.Dispatch<React.SetStateAction<{}>>;
   selectedProperties: {};
   setSelectedProperties: React.Dispatch<React.SetStateAction<{}>>;
 };
@@ -18,9 +19,14 @@ export default function EditableTextarea({
   text,
   setText,
   tokens,
+  setTokens,
   selectedProperties,
   setSelectedProperties,
 }: EditableTextareaProps) {
+  const removeToken = (word: string) => {
+    setTokens({ ...tokens, [word]: undefined });
+  };
+
   return editing ? (
     <Textarea
       as={TextareaAutosize}
@@ -57,6 +63,7 @@ export default function EditableTextarea({
                 tokens={tokens[word]}
                 selectedProperties={selectedProperties}
                 setSelectedProperties={setSelectedProperties}
+                removeToken={removeToken}
               />
             );
           }
