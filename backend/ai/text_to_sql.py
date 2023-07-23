@@ -5,21 +5,18 @@ import openai
 from domain.spreadsheets.models import WordReplacement
 
 
-def generate_prompt(text):
+def generate_prompt(text, columns):
     return f"""
-    Consider that I have an events table in ClickHouse database.
-
-    Generate only a ClickHouse Select SQL query and no other text using following text '{text}'
-
-    Note that whenever needed date column is called 'timestamp'.
+    I have a Clickhouse table called events with columns {", ".join(columns)}
+    Generate only a single SQL 'Select' query and no other text using following text '{text}'
     """
 
 
 def text_to_sql(text: str, word_replacements: List[WordReplacement]) -> str:
-    for replacement in word_replacements:
-        text = replacement.apply(text)
     logging.info(f"Generating sql for text: {text}")
-    prompt = generate_prompt(text)
+    prompt = generate_prompt(
+        text, [w.replacement for w in word_replacements] + ["timestamp"]
+    )
     logging.info(f"GPT prompt: {prompt}")
 
     response = openai.ChatCompletion.create(
