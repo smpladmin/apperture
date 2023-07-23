@@ -85,7 +85,6 @@ const Connections = ({
       Note: initally dsId would be empty, in that case show connectorColumns directly
     */
     const lastSelectedDsId = sheetData?.meta?.dsId;
-    console.log({ lastSelectedDsId });
     if (
       lastSelectedDsId &&
       !sheetData.edit_mode &&

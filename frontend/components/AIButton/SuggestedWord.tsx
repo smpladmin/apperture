@@ -12,6 +12,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { Check } from 'phosphor-react';
+import React from 'react';
 
 type SuggestedWordProps = {
   index: number;
@@ -19,6 +20,7 @@ type SuggestedWordProps = {
   tokens: Array<any>;
   selectedProperties: { [key: string]: string };
   setSelectedProperties: React.Dispatch<React.SetStateAction<{}>>;
+  removeToken: (word: string) => void;
 };
 
 export default function SuggestedWord({
@@ -27,6 +29,7 @@ export default function SuggestedWord({
   tokens,
   selectedProperties,
   setSelectedProperties,
+  removeToken,
 }: SuggestedWordProps) {
   return (
     <Popover trigger={'hover'} key={index}>
@@ -96,6 +99,7 @@ export default function SuggestedWord({
                 ...selectedProperties,
                 [word]: undefined,
               });
+              removeToken(word);
             }}
           >
             Remove token
