@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Optional
+
 from beanie import Indexed, PydanticObjectId
 from pydantic import BaseModel, Field
 
@@ -43,6 +44,7 @@ class Credential(BaseModel):
     api_key: Optional[str]
     secret: Optional[str]
     tableName: Optional[str]
+    database: Optional[str]
     mysql_credential: Optional[MySQLCredential]
 
     class Config:

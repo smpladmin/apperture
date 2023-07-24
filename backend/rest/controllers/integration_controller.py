@@ -1,14 +1,15 @@
 import asyncio
 import logging
 from typing import Union
+
 from fastapi import APIRouter, Depends, Query
+
 from data_processor_queue.service import DPQueueService
 from domain.apps.service import AppService
 from domain.datasources.models import DataSourceVersion, ProviderDataSource
-
-from domain.runlogs.service import RunLogService
 from domain.datasources.service import DataSourceService
 from domain.integrations.service import IntegrationService
+from domain.runlogs.service import RunLogService
 from rest.dtos.datasources import CreateDataSourceDto, DataSourceResponse
 from rest.dtos.integrations import (
     CreateIntegrationDto,
@@ -16,7 +17,6 @@ from rest.dtos.integrations import (
     TestMySQLConnectionDto,
 )
 from rest.middlewares import get_user_id, validate_jwt
-
 
 router = APIRouter(
     tags=["integration"],
@@ -116,6 +116,7 @@ async def create_integration(
         dto.apiKey,
         dto.apiSecret,
         dto.tableName,
+        dto.database,
         mysql_credential,
     )
 

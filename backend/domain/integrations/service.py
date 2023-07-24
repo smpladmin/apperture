@@ -2,21 +2,23 @@ import logging
 import os
 import tempfile
 from typing import Optional
+
 import pymysql
 import sshtunnel
-
 from beanie import PydanticObjectId
+
 from authorisation.models import IntegrationOAuth
+from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App
 from rest.dtos.integrations import DatabaseSSHCredentialDto
-from domain.apperture_users.models import AppertureUser
+
 from .models import (
     Credential,
     CredentialType,
+    DatabaseSSHCredential,
     Integration,
     IntegrationProvider,
     MySQLCredential,
-    DatabaseSSHCredential,
 )
 
 
@@ -62,8 +64,8 @@ class IntegrationService:
         api_key: Optional[str],
         secret: Optional[str],
         tableName: Optional[str],
+        database: Optional[str],
         mysql_credential: Optional[MySQLCredential],
-
     ):
         credential_type = (
             CredentialType.MYSQL if mysql_credential else CredentialType.API_KEY
@@ -75,6 +77,7 @@ class IntegrationService:
             secret=secret,
             tableName=tableName,
             mysql_credential=mysql_credential,
+            database=database,
         )
         integration = Integration(
             user_id=app.user_id,
@@ -171,7 +174,6 @@ class IntegrationService:
         password: str,
         ssh_credential: Optional[DatabaseSSHCredentialDto],
     ):
-
         if ssh_credential:
             logging.info("SSH credentials exists")
             ssh_pkey = None

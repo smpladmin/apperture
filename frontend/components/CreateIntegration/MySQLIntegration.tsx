@@ -33,6 +33,7 @@ type FormData = {
   port: string;
   username: string;
   password: string;
+  database: string;
   overSsh: boolean;
   sshServer: string;
   sshPort: string;
@@ -105,6 +106,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
       '',
       mySQLCredential as MySQLCredential
     );
+    console.log(integration);
     router.replace({
       pathname: '/analytics/app/[appId]/integration/[provider]/complete',
       query: {
@@ -142,6 +144,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
       port: '3306',
       username: '',
       password: '',
+      database: '',
       sshServer: '',
       sshPort: '22',
       sshUsername: '',
@@ -253,6 +256,14 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
                 handleChange={handleChange}
                 register={register}
                 inputStyle={{ placeholder: 'password', width: '50' }}
+              />
+              <FormInputField
+                fieldName="database"
+                label="Database"
+                errors={errors}
+                handleChange={handleChange}
+                register={register}
+                inputStyle={{ placeholder: 'database', width: '50' }}
               />
 
               <FormCheckboxField
