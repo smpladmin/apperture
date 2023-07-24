@@ -135,6 +135,10 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     fetchConnections();
   }, [dsId]);
 
+  useEffect(() => {
+    if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
+  }, []);
+
   const fetchTransientSheetData = async (abortController?: AbortController) => {
     const sheet = sheetsData[selectedSheetIndex];
 
