@@ -129,19 +129,6 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
   useEffect(() => {
     const sheet = sheetsData[selectedSheetIndex];
-
-    const isSheetEmpty = !(
-      sheet?.query || sheet?.sheet_type === SheetType.PIVOT_SHEET
-    );
-
-    setShowEmptyState(isSheetEmpty);
-  }, [
-    sheetsData[selectedSheetIndex]?.query,
-    sheetsData[selectedSheetIndex]?.sheet_type,
-  ]);
-
-  useEffect(() => {
-    const sheet = sheetsData[selectedSheetIndex];
     const prevSheet = prevSheetsData?.[selectedSheetIndex];
 
     if (sheet?.query) setShowEmptyState(false);
