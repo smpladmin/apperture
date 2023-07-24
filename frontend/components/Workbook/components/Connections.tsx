@@ -94,10 +94,9 @@ const Connections = ({
       onOpen();
     } else {
       setShowColumns(true);
-
       setSheetsData((prevSheetData: TransientSheetData[]) => {
-        const tempSheetsData = cloneDeep(prevSheetData);
-        tempSheetsData[selectedSheetIndex].meta.dsId = currentSelectedDsId;
+        const tempSheetsData = [...prevSheetData];
+        tempSheetsData[selectedSheetIndex].meta!!.dsId = currentSelectedDsId;
         return tempSheetsData;
       });
     }
@@ -131,9 +130,10 @@ const Connections = ({
     // and then show connector columns
     if (canditate.confirmation) {
       setSheetsData((prevSheetData: TransientSheetData[]) => {
-        const tempSheetsData = cloneDeep(prevSheetData);
-        tempSheetsData[selectedSheetIndex].meta.dsId = canditate.dsId;
-        tempSheetsData[selectedSheetIndex].meta.selectedColumns = [];
+        const tempSheetsData = [...prevSheetData];
+        // TODO: should check the double bang !!
+        tempSheetsData[selectedSheetIndex].meta!!.dsId = canditate.dsId;
+        tempSheetsData[selectedSheetIndex].meta!!.selectedColumns = [];
         return tempSheetsData;
       });
       setShowColumns(true);

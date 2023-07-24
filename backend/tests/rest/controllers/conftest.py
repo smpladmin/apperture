@@ -803,6 +803,7 @@ def workbook_data():
                 "edit_mode": True,
                 "meta": {"dsId": "", "selectedColumns": []},
                 "sheet_type": SpreadsheetType.SIMPLE_SHEET,
+                "word_replacements": [],
             }
         ],
         "datasourceId": "23412414123123",
@@ -2213,7 +2214,7 @@ def integration_service():
             api_key="apperture_911",
             account_id="120232",
             secret="6ddqwjeaa",
-            tableName=""
+            tableName="",
         ),
     )
 
@@ -2232,7 +2233,7 @@ def integration_data():
         "apiKey": "apperture_911",
         "apiSecret": "6ddqwjeaa",
         "provider": IntegrationProvider.MIXPANEL,
-        "tableName":""
+        "tableName": "",
     }
 
 
@@ -2276,7 +2277,7 @@ def integration_response():
             "api_key": "apperture_911",
             "refresh_token": None,
             "secret": "6ddqwjeaa",
-            "tableName":"",
+            "tableName": "",
             "type": "API_KEY",
             "mysql_credential": None,
         },

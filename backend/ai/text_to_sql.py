@@ -2,39 +2,36 @@ import logging
 from typing import List
 import openai
 
+from domain.spreadsheets.models import WordReplacement
 
-def generate_prompt(text):
+
+def generate_prompt(text, columns):
     return f"""
-    Consider that I have an events table in ClickHouse database with following schema:
-
-    CREATE TABLE events
-    (
-        datasource_id String,
-        timestamp DateTime,
-        provider String,
-        user_id String,
-        event_name String,
-        properties JSON
-    )
-    ENGINE = MergeTree
-    ORDER BY timestamp;
-
-    Generate only a ClickHouse Select SQL query and no other text using following text '{text}'
-    
-    Note that any column which is not present in the events table would be present in properties column
-    because it is a JSON datatype column.
-
-    So for e.g. if the text says 'select user_id and utm_source'.
-    The generated sql for this text would be 'SELECT user_id, properties.utm_source FROM events'
+    I have a Clickhouse table called events with columns {", ".join(columns)}
+    Generate only a single SQL 'Select' query and no other text using following text '{text}'
     """
 
 
-def text_to_sql(text: str) -> str:
+def text_to_sql(text: str, word_replacements: List[WordReplacement]) -> str:
     logging.info(f"Generating sql for text: {text}")
-    prompt = generate_prompt(text)
+    prompt = generate_prompt(
+        text, [w.replacement for w in word_replacements] + ["timestamp"]
+    )
     logging.info(f"GPT prompt: {prompt}")
-    response = openai.Completion.create(
-        model="text-davinci-003", prompt=prompt, max_tokens=2048, temperature=0.25
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "system",
+                "content": "You write correct sql queries for only for ClickHouse.",
+            },
+            {"role": "user", "content": prompt},
+        ],
+        max_tokens=2048,
+        temperature=0.25,
     )
     logging.info(f"GPT response: {response}")
-    return response.get("choices", [{}])[0].get("text", "").strip()
+    return (
+        response.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+    )
