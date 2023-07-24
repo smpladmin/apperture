@@ -160,7 +160,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
       toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
       setSheetsData(toUpdateSheets);
-    } else {
+    } else if (!sheet.is_sql) {
       toast({
         title: 'Something went wrong, try another prompt',
         status: 'error',
@@ -175,9 +175,13 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     const sheet = sheetsData[selectedSheetIndex];
     const prevSheet = prevSheetsData?.[selectedSheetIndex];
 
-    if (sheet?.query) setShowEmptyState(false);
-    if (sheet.is_sql && (!sheet?.query || sheet.edit_mode)) return;
-    if (sheet.is_sql && sheet?.query === prevSheet?.query) return;
+    const isSqlSheet = sheet?.is_sql;
+    const hasDifferentQuery = sheet.query !== prevSheet?.query;
+    const hasEditMode = sheet?.edit_mode;
+
+    if (isSqlSheet && (!sheet.query || hasEditMode || !hasDifferentQuery)) {
+      return;
+    }
 
     const abortController = new AbortController();
     fetchTransientSheetData(abortController);
@@ -441,7 +445,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const getHeaderIndex = (sheetData: TransientSheetData, columnId: string) => {
     const existingHeaders = sheetData?.headers;
 
-    const existingHeaderIndex = existingHeaders.findIndex(
+    const existingHeaderIndex = existingHeaders.findLastIndex(
       (header) => header.name === columnId
     );
 

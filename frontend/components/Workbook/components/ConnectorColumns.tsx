@@ -122,14 +122,17 @@ const ConnectorColumns = ({
       firstEmptySubheaderIndex === -1 &&
       subHeaderType === SubHeaderColumnType.DIMENSION
     ) {
+      // add dimensionColumn, once all empty dimensions columns are filled
+      // and then evaluate the dimension
       setDimensionColumn({
         isAdded: subHeaderType === SubHeaderColumnType.DIMENSION,
         column: subHeaderName,
       });
-      // add dimensionColumn, once all empty dimensions columns are filled
-      // and then evaluate the dimension
-      const lastDimensionIndex = dimensionSubheadersLength(subHeaders) - 1;
-      const columnId = headers[lastDimensionIndex]?.name;
+
+      const lastDimensionColumnIndex =
+        dimensionSubheadersLength(subHeaders) - 1;
+
+      const columnId = headers[lastDimensionColumnIndex]?.name;
       addDimensionColumn(columnId);
       return;
     }
@@ -152,6 +155,7 @@ const ConnectorColumns = ({
     const columnId = String.fromCharCode(65 + firstEmptySubheaderIndex - 1);
 
     evaluateFormulaHeader(dimensionColumn.column, columnId);
+    setDimensionColumn((prevState) => ({ ...prevState, isAdded: false }));
   }, [sheetsData]);
 
   return (
