@@ -7,7 +7,7 @@ import {
   Input,
   Text,
 } from '@chakra-ui/react';
-import csvlogo from '@assets/images/apilogo.png';
+import apilogo from '@assets/images/apilogo.png';
 import Image from 'next/image';
 import FormButton from '@components/FormButton';
 import { useRouter } from 'next/router';
@@ -82,14 +82,14 @@ console.log("calling create ds with :",appId,provider,endPoint,headers,'',tableN
                           >
                           <Box>
                             
-                            <Box height={{ base: 12, md: 18 }} width={{ base: 12, md: 18 }} mb={2}>
-                              <Image src={csvlogo} alt="csv" layout="responsive" />
+                            <Box height={{ base: 8, md: 14 }} width={{ base: 8, md: 14 }} mb={2}>
+                              <Image src={apilogo} alt="api" layout="responsive" />
                             </Box>
                             
                             <Heading
                               as={'h2'}
                               mb={{ base: 8, md: 10 }}
-                              fontSize={{ base: '1.74rem', md: '3.5rem' }}
+                              fontSize={{ base: 'sh-18', md: 'sh-18' }}
                               lineHeight={{ base: '2.125rem', md: '4.125rem' }}
                               fontWeight={'semibold'}
                               maxW={200}
