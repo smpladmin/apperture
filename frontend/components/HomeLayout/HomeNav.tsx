@@ -271,7 +271,7 @@ const HomeNav = ({ apps }: HomeNavProps) => {
                   lineHeight={'lh-130'}
                   alignItems={'center'}
                 >
-                  <HardDrives size={16} color={GREY_600} /> Data Mart
+                  <HardDrives size={16} color={GREY_600} /> My Data
                 </Flex>
                 {hoveredItem === 'Data Mart' && (
                   <CaretRight size={16} color={GREY_600} />
