@@ -7,7 +7,7 @@ import {
   Row,
 } from '@silevis/reactgrid';
 import React, { useEffect, useState } from 'react';
-import { fillHeaders, fillRows } from '../../util';
+import { fillHeaders, fillRows } from '../../../Spreadsheet/util';
 import {
   ColumnType,
   SpreadSheetColumn,
@@ -20,6 +20,10 @@ import { InputHeaderCell, InputHeaderTemplate } from './InputHeader';
 import { WHITE_DEFAULT } from '@theme/index';
 import { Flex } from '@chakra-ui/react';
 import LoadingSpinner from '@components/LoadingSpinner';
+import {
+  hasMetricColumnInPivotSheet,
+  isSheetPivotOrBlank,
+} from '@components/Workbook/util';
 
 const getGridRow = (value: any): DefaultCellTypes => {
   const cellTypes: { [key: string]: DefaultCellTypes } = {
@@ -83,7 +87,7 @@ const getSubHeaderRow = (
   return {
     rowId: 'subHeader',
     cells: headers.map((header, index) => {
-      const isBlankSheet = !sheetData.is_sql && !sheetData.query;
+      const isPivotOrBlankSheet = isSheetPivotOrBlank(sheetData);
       const dimensionSubHeaderCount = subHeaders.reduce(
         (acc: number, header: SubHeaderColumn) => {
           if (header.type === SubHeaderColumnType.DIMENSION) acc++;
@@ -91,7 +95,10 @@ const getSubHeaderRow = (
         },
         0
       );
-      const showAddButton = isBlankSheet && index === dimensionSubHeaderCount;
+      const disableAddButton = hasMetricColumnInPivotSheet(sheetData);
+      const showAddButton =
+        isPivotOrBlankSheet && index === dimensionSubHeaderCount;
+
       if (header.name === 'index') {
         return {
           type: 'header',
@@ -105,6 +112,8 @@ const getSubHeaderRow = (
           text: `${subHeaders[index].name}`,
           disable: true,
           showAddButton,
+          disableAddButton,
+          showSuggestions: isPivotOrBlankSheet,
           properties,
           style: {
             overflow: 'initial',
@@ -116,6 +125,8 @@ const getSubHeaderRow = (
         text: `${subHeaders[index].name}`,
         disable: false,
         showAddButton,
+        disableAddButton,
+        showSuggestions: isPivotOrBlankSheet,
         properties,
         columnType: subHeaders[index].type,
         style: {

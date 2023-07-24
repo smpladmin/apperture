@@ -1,4 +1,11 @@
-import { ColumnType, SpreadSheetColumn } from '@lib/domain/workbook';
+import {
+  ColumnType,
+  SheetType,
+  SpreadSheetColumn,
+  SubHeaderColumn,
+  SubHeaderColumnType,
+  TransientSheetData,
+} from '@lib/domain/workbook';
 import { head, range } from 'lodash';
 
 export const expressionTokenRegex = /[A-Za-z]+|[0-9]+|[\+\*-\/\^\(\)]/g;
@@ -167,4 +174,52 @@ export const evaluateExpression = (
   }
 
   return stack.pop();
+};
+
+export const isSheetPivotOrBlank = (sheet: TransientSheetData) => {
+  return (
+    sheet?.sheet_type === SheetType.PIVOT_SHEET ||
+    (!sheet.is_sql && !sheet.query)
+  );
+};
+
+export const hasMetricColumnInPivotSheet = (sheet: TransientSheetData) => {
+  const { subHeaders, sheet_type } = sheet;
+  const isPivotSheet = sheet_type === SheetType.PIVOT_SHEET;
+
+  const filledMetricSubheadersLength = subHeaders.filter(
+    (header) => header.name && header.type === SubHeaderColumnType.METRIC
+  ).length;
+  return !!(isPivotSheet && filledMetricSubheadersLength);
+};
+
+export const getSubheaders = (sheetType?: SheetType) => {
+  const isPivotSheet = sheetType === SheetType.PIVOT_SHEET;
+
+  return Array.from({ length: 27 }).map((_, index) => {
+    return {
+      name: '',
+      type:
+        isPivotSheet && (index === 1 || index === 2)
+          ? SubHeaderColumnType.DIMENSION
+          : SubHeaderColumnType.METRIC,
+    };
+  });
+};
+
+export const findIndexOfFirstEmptySubheader = (
+  subheaders: SubHeaderColumn[],
+  subHeaderType: SubHeaderColumnType
+) => {
+  // ignore 0 index as it is offset for 'index' column in sheet
+  return subheaders.findIndex(
+    (subheader, index) =>
+      index !== 0 && subheader.name === '' && subheader.type === subHeaderType
+  );
+};
+
+export const dimensionSubheadersLength = (subheaders: SubHeaderColumn[]) => {
+  return subheaders.filter(
+    (subheader) => subheader.type === SubHeaderColumnType.DIMENSION
+  ).length;
 };

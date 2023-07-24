@@ -4,16 +4,21 @@ import React from 'react';
 import SimpleSheet from '@assets/images/simple-sheet.svg';
 import PivotSheet from '@assets/images/pivot-sheet.svg';
 import Image from 'next/image';
-import { TransientSheetData } from '@lib/domain/workbook';
+import { SheetType, TransientSheetData } from '@lib/domain/workbook';
+import { getSubheaders } from '../util';
+import { cloneDeep } from 'lodash';
 
 const SelectSheet = ({
   sheetsData,
   setSheetsData,
+  selectedSheetIndex,
+
   setSelectedSheetIndex,
   closeSelectSheetOverlay,
 }: {
   sheetsData: TransientSheetData[];
   setSheetsData: Function;
+  selectedSheetIndex: number;
   setSelectedSheetIndex: Function;
   closeSelectSheetOverlay: () => void;
 }) => {
@@ -21,11 +26,21 @@ const SelectSheet = ({
 
   const handleCloseOverlay = () => {
     setSheetsData((prevSheetsData: TransientSheetData[]) => {
-      const tempSheetsData = [...prevSheetsData];
+      const tempSheetsData = cloneDeep(prevSheetsData);
       tempSheetsData.pop();
       return tempSheetsData;
     });
     setSelectedSheetIndex((prevIndex: number) => prevIndex - 1);
+    closeSelectSheetOverlay();
+  };
+
+  const handleSetSheetType = (sheetType: SheetType) => {
+    setSheetsData((prevSheetsData: TransientSheetData[]) => {
+      const tempSheetsData = cloneDeep(prevSheetsData);
+      tempSheetsData[selectedSheetIndex].sheet_type = sheetType;
+      tempSheetsData[selectedSheetIndex].subHeaders = getSubheaders(sheetType);
+      return tempSheetsData;
+    });
     closeSelectSheetOverlay();
   };
   return (
@@ -69,7 +84,7 @@ const SelectSheet = ({
               }}
               cursor={'pointer'}
               flex={'1 1 0'}
-              onClick={closeSelectSheetOverlay}
+              onClick={() => handleSetSheetType(SheetType.SIMPLE_SHEET)}
             >
               <Image
                 src={SimpleSheet}
@@ -103,8 +118,14 @@ const SelectSheet = ({
               border={'1px'}
               borderColor={'white.200'}
               borderRadius={'12'}
+              _hover={{
+                borderColor: 'grey.700',
+                boxShadow:
+                  '0px 0px 0px 0px rgba(0, 0, 0, 0.06), 0px 3px 7px 0px rgba(0, 0, 0, 0.06), -2px 13px 13px 0px rgba(0, 0, 0, 0.05), -4px 30px 18px 0px rgba(0, 0, 0, 0.03), -8px 52px 21px 0px rgba(0, 0, 0, 0.01), -12px 82px 23px 0px rgba(0, 0, 0, 0.00)',
+              }}
               cursor={'pointer'}
               flex={'1 1 0'}
+              onClick={() => handleSetSheetType(SheetType.PIVOT_SHEET)}
             >
               <Image
                 src={PivotSheet}

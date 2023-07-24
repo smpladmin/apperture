@@ -31,6 +31,7 @@ import {
   ConnectionGroup,
   ConnectionSource,
 } from '@lib/domain/connections';
+import { cloneDeep } from 'lodash';
 
 type ConnectionsProps = {
   connections: Connection[];
@@ -93,10 +94,9 @@ const Connections = ({
       onOpen();
     } else {
       setShowColumns(true);
-      console.log('selectedSHeet index', selectedSheetIndex);
-      console.log('sheets Dtaa', sheetsData);
+
       setSheetsData((prevSheetData: TransientSheetData[]) => {
-        const tempSheetsData = [...prevSheetData];
+        const tempSheetsData = cloneDeep(prevSheetData);
         tempSheetsData[selectedSheetIndex].meta.dsId = currentSelectedDsId;
         return tempSheetsData;
       });
@@ -131,7 +131,7 @@ const Connections = ({
     // and then show connector columns
     if (canditate.confirmation) {
       setSheetsData((prevSheetData: TransientSheetData[]) => {
-        const tempSheetsData = [...prevSheetData];
+        const tempSheetsData = cloneDeep(prevSheetData);
         tempSheetsData[selectedSheetIndex].meta.dsId = canditate.dsId;
         tempSheetsData[selectedSheetIndex].meta.selectedColumns = [];
         return tempSheetsData;

@@ -19,6 +19,7 @@ import { useRouter } from 'next/router';
 import { GREY_400, GREY_900 } from '@theme/index';
 import ConfirmationModal from './ConfirmationModal';
 import LoadingSpinner from '@components/LoadingSpinner';
+import { getSubheaders } from '../util';
 
 type QueryEditorProps = {
   sheetsData: TransientSheetData[];
@@ -45,7 +46,7 @@ const QueryEditor = ({
 
   const handleEditSelection = () => {
     setSheetsData((prevSheetData: TransientSheetData[]) => {
-      const tempSheetData = [...prevSheetData];
+      const tempSheetData = cloneDeep(prevSheetData);
       tempSheetData[selectedSheetIndex].edit_mode = true;
       return tempSheetData;
     });
@@ -67,6 +68,9 @@ const QueryEditor = ({
     if (response.status === 200) {
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
       toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
+      toUpdateSheets[selectedSheetIndex].subHeaders = getSubheaders(
+        toUpdateSheets[selectedSheetIndex].sheet_type
+      );
       setError('');
     } else {
       setError((response as ErrorResponse)?.error?.detail);
@@ -88,6 +92,7 @@ const QueryEditor = ({
             <Button
               borderColor={!sheetData.edit_mode ? GREY_900 : GREY_400}
               disabled={sheetData.edit_mode}
+              borderRight={'1px'}
             >
               <Eye
                 size={12}

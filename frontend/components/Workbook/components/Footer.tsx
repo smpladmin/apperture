@@ -8,6 +8,7 @@ import {
 import cloneDeep from 'lodash/cloneDeep';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { Plus } from 'phosphor-react';
+import { getSubheaders } from '../util';
 
 type FooterProps = {
   openSelectSheetOverlay: Function;
@@ -41,15 +42,7 @@ const Footer = ({
       query: '',
       data: [],
       headers: [],
-      subHeaders: Array.from({ length: 27 }).map((_, index) => {
-        return {
-          name: '',
-          type:
-            index === 1 || index === 2
-              ? SubHeaderColumnType.DIMENSION
-              : SubHeaderColumnType.METRIC,
-        };
-      }),
+      subHeaders: getSubheaders(SheetType.SIMPLE_SHEET),
       is_sql: true,
       sheet_type: SheetType.SIMPLE_SHEET,
       edit_mode: false,
