@@ -1,18 +1,42 @@
 import {
+  Menu,
   Checkbox,
   CheckboxGroup,
   Flex,
   Input,
   InputGroup,
   InputLeftElement,
+  MenuButton,
   Text,
+  MenuList,
+  MenuItem,
 } from '@chakra-ui/react';
 import { ConnectionSource } from '@lib/domain/connections';
-import { TransientSheetData } from '@lib/domain/workbook';
+import {
+  SheetType,
+  SubHeaderColumnType,
+  TransientSheetData,
+} from '@lib/domain/workbook';
 import { getSearchResult } from '@lib/utils/common';
-import { CaretLeft, Columns, MagnifyingGlass } from 'phosphor-react';
+import { CaretLeft, Columns, MagnifyingGlass, Plus } from 'phosphor-react';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { FixedSizeList as List } from 'react-window';
+import {
+  dimensionSubheadersLength,
+  findIndexOfFirstEmptySubheader,
+  hasMetricColumnInPivotSheet,
+} from '../util';
+import cloneDeep from 'lodash/cloneDeep';
+
+type ConnectorColumnsProps = {
+  sheetsData: TransientSheetData[];
+  connectorData: ConnectionSource & { heirarchy: string[] };
+  selectedSheetIndex: number;
+  setShowColumns: Function;
+  setSheetsData: Function;
+  evaluateFormulaHeader: Function;
+  addDimensionColumn: Function;
+};
 
 const generateQuery = (
   columns: string[],
@@ -25,15 +49,6 @@ const generateQuery = (
   return `Select ${columnsQuerySubstring} from ${databaseName}.${tableName} where datasource_id = '${datasourceId}'`;
 };
 
-type ConnectorColumnsProps = {
-  sheetsData: TransientSheetData[];
-  connectorData: ConnectionSource & { heirarchy: string[] };
-  selectedSheetIndex: number;
-  setShowColumns: Function;
-  setShowEmptyState: Function;
-  setSheetsData: Function;
-};
-
 const initializeSelectedColumns = (datasource_id: string, meta: any) => {
   return meta?.dsId === datasource_id ? meta?.selectedColumns || [] : [];
 };
@@ -43,8 +58,9 @@ const ConnectorColumns = ({
   connectorData,
   selectedSheetIndex,
   setShowColumns,
-  setShowEmptyState,
   setSheetsData,
+  evaluateFormulaHeader,
+  addDimensionColumn,
 }: ConnectorColumnsProps) => {
   const { heirarchy, fields, database_name, table_name, datasource_id } =
     connectorData;
@@ -53,6 +69,10 @@ const ConnectorColumns = ({
   const [selectedColumns, setSelectedColumns] = useState(
     initializeSelectedColumns(datasource_id, sheetData?.meta)
   );
+  const [dimensionColumn, setDimensionColumn] = useState({
+    isAdded: false,
+    column: '',
+  });
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
     const searchText = e.target.value;
@@ -63,11 +83,8 @@ const ConnectorColumns = ({
   };
 
   useEffect(() => {
-    setShowEmptyState((prevState: boolean) => {
-      return sheetData.edit_mode ? prevState : !Boolean(selectedColumns.length);
-    });
+    if (sheetData?.edit_mode) return;
 
-    if (sheetData.edit_mode) return;
     const query = generateQuery(
       selectedColumns,
       table_name,
@@ -76,12 +93,64 @@ const ConnectorColumns = ({
     );
 
     setSheetsData((prevSheetData: TransientSheetData[]) => {
-      const tempSheetsData = [...prevSheetData];
+      const tempSheetsData = cloneDeep(prevSheetData);
       tempSheetsData[selectedSheetIndex].query = query;
       tempSheetsData[selectedSheetIndex].meta.selectedColumns = selectedColumns;
       return tempSheetsData;
     });
   }, [selectedColumns]);
+
+  const handleAddMetricOrDimensionSubheader = (
+    selectedColumn: string,
+    subHeaderType: SubHeaderColumnType
+  ) => {
+    const subHeaderName =
+      subHeaderType === SubHeaderColumnType.DIMENSION
+        ? `unique(${selectedColumn})`
+        : 'count()';
+
+    const headers = sheetsData[selectedSheetIndex].headers;
+    const subHeaders = sheetsData[selectedSheetIndex].subHeaders;
+    const firstEmptySubheaderIndex = findIndexOfFirstEmptySubheader(
+      subHeaders,
+      subHeaderType
+    );
+
+    if (
+      firstEmptySubheaderIndex === -1 &&
+      subHeaderType === SubHeaderColumnType.DIMENSION
+    ) {
+      setDimensionColumn({
+        isAdded: subHeaderType === SubHeaderColumnType.DIMENSION,
+        column: subHeaderName,
+      });
+      // add dimensionColumn, once all empty dimensions columns are filled
+      // and then evaluate the dimension
+      const lastDimensionIndex = dimensionSubheadersLength(subHeaders) - 1;
+      const columnId = headers[lastDimensionIndex]?.name;
+      addDimensionColumn(columnId);
+      return;
+    }
+
+    if (firstEmptySubheaderIndex !== -1) {
+      const columnId = String.fromCharCode(65 + firstEmptySubheaderIndex - 1);
+      evaluateFormulaHeader(subHeaderName, columnId);
+    }
+  };
+
+  useEffect(() => {
+    // this effects triggers when sheetsData gets updated while adding a dimension column in sheet
+    if (!dimensionColumn.isAdded) return;
+
+    const subHeaders = sheetsData[selectedSheetIndex].subHeaders;
+    const firstEmptySubheaderIndex = findIndexOfFirstEmptySubheader(
+      subHeaders,
+      SubHeaderColumnType.DIMENSION
+    );
+    const columnId = String.fromCharCode(65 + firstEmptySubheaderIndex - 1);
+
+    evaluateFormulaHeader(dimensionColumn.column, columnId);
+  }, [sheetsData]);
 
   return (
     <Flex direction={'column'} gap={'3'}>
@@ -122,8 +191,13 @@ const ConnectorColumns = ({
           onChange={(e) => onChangeHandler(e)}
         />
       </InputGroup>
-      {sheetData?.edit_mode ? (
+      {sheetData?.edit_mode || hasMetricColumnInPivotSheet(sheetData) ? (
         <ViewOnlyColumns columns={columns} />
+      ) : sheetData?.sheet_type === SheetType.PIVOT_SHEET ? (
+        <PivotColumns
+          columns={columns}
+          handleAddSubHeader={handleAddMetricOrDimensionSubheader}
+        />
       ) : (
         <CheckColumns
           columns={columns}
@@ -225,6 +299,112 @@ const ViewOnlyColumns = ({ columns }: { columns: string[] }) => {
           </Flex>
         );
       })}
+    </Flex>
+  );
+};
+
+const PivotColumns = ({
+  columns,
+  handleAddSubHeader,
+}: {
+  columns: string[];
+  handleAddSubHeader: (
+    selectedColumn: string,
+    subHeaderType: SubHeaderColumnType
+  ) => void;
+}) => {
+  return (
+    <Flex direction={'column'} w={'full'}>
+      <List
+        itemData={columns}
+        innerElementType="div"
+        itemCount={columns.length}
+        itemSize={40}
+        height={1000}
+        width={240}
+      >
+        {({ data, index, style }) => {
+          return (
+            <Flex
+              key={index}
+              justifyContent={'space-between'}
+              alignItems={'center'}
+              py={'2'}
+              px={'3'}
+              style={style}
+            >
+              <Text
+                fontSize={'xs-12'}
+                lineHeight={'xs-12'}
+                fontWeight={'400'}
+                color={'grey.900'}
+                maxWidth={'45'}
+              >
+                {data[index]}
+              </Text>
+
+              <Menu>
+                <MenuButton
+                  _active={{
+                    bg: 'white.200',
+                  }}
+                  _hover={{ bg: 'white.200' }}
+                  p={'1'}
+                  bg={'transparent'}
+                  borderRadius={'4'}
+                >
+                  <Plus size={14} weight="bold" />
+                </MenuButton>
+                <MenuList
+                  minWidth={'30'}
+                  p={'1'}
+                  borderRadius={'4'}
+                  zIndex={'3'}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      handleAddSubHeader(
+                        data[index],
+                        SubHeaderColumnType.DIMENSION
+                      );
+                    }}
+                    _focus={{
+                      backgroundColor: 'white.400',
+                    }}
+                    fontSize={'xs-12'}
+                    lineHeight={'xs-12'}
+                    fontWeight={'500'}
+                    px={'2'}
+                    py={'3'}
+                    borderRadius={'4'}
+                  >
+                    Dimension
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      handleAddSubHeader(
+                        data[index],
+                        SubHeaderColumnType.METRIC
+                      );
+                    }}
+                    _focus={{
+                      backgroundColor: 'white.400',
+                    }}
+                    fontSize={'xs-12'}
+                    lineHeight={'xs-12'}
+                    fontWeight={'500'}
+                    px={'2'}
+                    py={'3'}
+                    borderRadius={'4'}
+                  >
+                    Metric
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            </Flex>
+          );
+        }}
+      </List>
     </Flex>
   );
 };
