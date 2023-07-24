@@ -28,7 +28,10 @@ import IntegrationSource from '@components/IntegrationSource';
 import { Provider } from '@lib/domain/provider';
 import { createIntegrationWithDataSource } from '@lib/services/integrationService';
 import logo from '@assets/images/AppertureWhiteLogo.svg';
- import { CaretRight } from 'phosphor-react';
+ import { FileArrowUp, CaretRight } from 'phosphor-react';
+import onboarding_left_panel from '@assets/images/onboarding_left_panel.svg';
+import {containerStyle, leftContainerStyle, rightContainerOuter, LeftContainerContent, rightContainerInner, TopProgress} from '@components/onboarding';
+
 
 const SelectProvider = () => {
   const [provider, setProvider] = useState<string>('');
@@ -106,184 +109,31 @@ const SelectProvider = () => {
 
 
   return (
-    <Flex
-      flexDirection="row"
-      h="100vh" 
-      bg="grey.900" 
-      px={4}
-    >
-
-      <Box h="33%" bg="grey.900"> 
-        
-        <Box mt={11} width={{ base: 'full' }} maxW={{ md: '150', lg:'150'}}>
-          
-          
-         <Box mt={11} ml={20}>
-          <Image
-            src={logo.src}
-            color={'white'}
-            width={30}
-            cursor={'pointer'}
-            onClick={() => {
-              router.push({
-                pathname: `/analytics/home/[dsId]`,
-                query: { dsId },
-              });
-            }}
-          ></Image> 
-
-          <Heading
-            as="h2"
-            pb={{ base: 8, md: 10 }}
-            fontSize={{ base: 'sh-56', md: 'sh-56' }}
-            lineHeight={{ base: 'sh-28', md: 'sh-56' }}
-            fontWeight="normal"
-            color="white"
-            mt={20}
-          >
-            Data analytics on steroids
-          </Heading>
-          
-
-          <Flex flexDirection="row" alignItems="center" mt={20}>
-              <IconButton
-                aria-label="checkbox-circle-line"
-                icon={<i className="ri-checkbox-circle-line" />}
-                color="grey.700"
-                bg="transparent"
-                fontSize="sh-44"
-                fontWeight="100"
-                
-              />
-              <Text
-                fontSize={{ base: 'sh-20', md: 'sh-20' }}
-                lineHeight={{ base: 'sh-24', md: 'sh-24' }}
-                fontWeight="normal"
-                color="grey.700"
-                ml={4}
-              >
-                Simply plug in your data connection and get started.
-              </Text>
-            </Flex>
-            <Flex flexDirection="row" alignItems="center" mt={10}>
-              <IconButton
-                aria-label="checkbox-circle-line"
-                icon={<i className="ri-checkbox-circle-line" />}
-                color="grey.700"
-                bg="transparent"
-                fontSize="sh-44"
-                fontWeight="100"
-                
-              />
-              <Text
-                fontSize={{ base: 'sh-20', md: 'sh-20' }}
-                lineHeight={{ base: 'sh-24', md: 'sh-24' }}
-                fontWeight="normal"
-                color="grey.700"              
-                ml={4}
-              >
-                Import sh*t ton of data.
-              </Text>
-            </Flex>
-            <Flex flexDirection="row" alignItems="center" mt={10}>
-              <IconButton
-                aria-label="checkbox-circle-line"
-                icon={<i className="ri-checkbox-circle-line" />}
-                color="grey.700"
-                bg="transparent"
-                fontSize="sh-44"
-                fontWeight="100"
-                
-              />
-              <Text
-                fontSize={{ base: 'sh-20', md: 'sh-20' }}
-                lineHeight={{ base: 'sh-24', md: 'sh-24' }}
-                fontWeight="normal"
-                color="grey.700"
-                ml={4}
-              >
-                Get access to a sheet interface that doesn’t crash
-              </Text>
-            </Flex>
-          </Box>
-        </Box>
+    <Box sx={containerStyle}>
+      <Box sx={leftContainerStyle}>
+        <LeftContainerContent/>
       </Box>
 
-      {/* Remaining 2/3 of the screen */}
-      <Flex
-        flexDirection="column"
-        bg="white" // Background color changed to white
-        rounded="lg"
-        p={6}
-        mt={6}
-        mb={6}
-        flexGrow={1} // To occupy the remaining space
-        alignItems="center"
-      >
-      <Flex justifyContent="space-between" alignItems="center" pb={4} >
-        <IconButton
-          aria-label="Go back"
-          icon={<i className="ri-arrow-left-line" />}
-          color="grey.700"
-          bg="transparent"
-          fontSize="sh-20"
-          fontWeight="100"
-          pr={12}
-          _hover={{
-            bg: 'white', // Change hover color to white
-          }}
-          onClick={handleGoBack}
-        />
-        
-          <Flex flexDirection="column" pr={10} justifyContent="center" alignItems="center">
-            <Flex flexDirection="row" justifyContent="center" alignItems="center"> 
-              <i className="ri-checkbox-circle-fill" style={{ fontSize: '24px' }}></i>              
-              <Text fontSize={"sh-18"} fontWeight="semibold" ml={2}>Sign up</Text>
-            </Flex>
-            <Box minW="250px" w="100%" h="2px" bg="black" mt={5}/>
-          </Flex>
-          <Flex flexDirection="column" pr={10} pl={10} justifyContent="center" alignItems="center">
-            <Flex flexDirection="row" justifyContent="center" alignItems="center"> 
-              <i className="ri-checkbox-circle-fill" style={{ fontSize: '24px' }}></i>              
-              <Text fontSize={"sh-18"} fontWeight="semibold" ml={2}>Set up Workspace</Text>
-            </Flex>
-            <Box minW="250px" w="100%" h="2px" bg="black" mt={5}/>
-          </Flex>
-          <Flex flexDirection="column" pl={10} justifyContent="center" alignItems="center">
-            <Text fontSize={"sh-18"} fontWeight="semibold" color="black">Add Datasource</Text>
-            <Box minW="250px" w="100%" h="2px" bg="black" mt={5}/>
-          </Flex>
-        
-        <IconButton
-          aria-label="Close"
-          icon={<i className="ri-close-line" />}
-          color="grey.700"
-          bg="transparent"
-          fontSize="sh-20"
-          fontWeight="100"
-          pl={12}
-          _hover={{
-            bg: 'white', 
-          }}
-          onClick={handleGoBack}
-          
-        />
-      </Flex>
-        <Box width={120} mt={20}>
-        <Heading
-          as="h3"
-          fontSize="sh-36"
-          fontWeight="bold"
-          mb={6}
-          textAlign="center"
-        >
-          Connect to a datasource
-        </Heading>
-         <Text fontSize={"sh-14"} textAlign="center" color="grey.500" fontWeight="normal">Choose from our list of connectors, or just upload a CSV file </Text>
-        </Box>
-
-
-
+      <Box sx={rightContainerOuter}>
+        <Box sx={rightContainerInner}>
+          <Flex
+            flexDirection="column"
+            alignItems="center"
+          >
+            <TopProgress handleGoBack={handleGoBack}/>
+      
+            <Box width={120} mt={10}>
+              <Heading
+                as="h3"
+                fontSize="sh-24"
+                fontWeight="bold"
+                mb={3}
+                textAlign="center"
+              >
+                Connect to a datasource
+              </Heading>
+             <Text fontSize={"xs-12"} textAlign="center" color="grey.500" fontWeight="normal">Choose from our list of connectors, or just upload a CSV file </Text>
+            </Box>
 
         <Box
           borderWidth="1px"
@@ -293,21 +143,21 @@ const SelectProvider = () => {
           p={4}
           display="flex"
           alignItems="center"
-          mt={15}
+          mt={10}
     >
-      <Box flex="1" minW="150">
-        <Text fontSize="lg" fontWeight="semibold" color="gray.900">
+    <FileArrowUp size={30} color="#212121" />
+      <Box flex="1" minW="150" pl={2}>
+        <Text fontSize="xs-14" fontWeight="semibold" color="gray.900">
           Upload a CSV
         </Text>
-        <Text fontSize="md" color="gray.500" mt={2}>
+        <Text fontSize="xs-10" color="gray.500" >
           Select a file to upload
         </Text>
       </Box>
       <IconButton
           aria-label="Go back"
-          icon={<CaretRight size={32} />}
+          icon={<CaretRight size={14} />}
           color="grey.900"
-          fontSize="sh-20"
           fontWeight="100"
           bg="white"
           _hover={{
@@ -317,19 +167,19 @@ const SelectProvider = () => {
     </Box>
 
 
-<Box width={'80%'} mb={'10'} mt="10" >
+    <Box width={'80%'} mb={'10'} mt="10" >
            <RadioGroup value={provider} onChange={setProvider}>
             <SimpleGrid columns={4} spacing={2}>
-              <IntegrationSource sourceName="Connect an API" value={Provider.API} imgSrc={apilogo} selected={provider === Provider.API} />
               <IntegrationSource sourceName="Apperture" value={Provider.APPERTURE} imgSrc={appertureLogo} selected={provider === Provider.APPERTURE} />
+              <IntegrationSource sourceName="MySQL" value={Provider.MYSQL} imgSrc={mysqlLogo} selected={provider === Provider.MYSQL} />
               <IntegrationSource sourceName="MixPanel" value={Provider.MIXPANEL} imgSrc={mixpanelLogo} selected={provider === Provider.MIXPANEL} />
               <IntegrationSource sourceName="Amplitude" value={Provider.AMPLITUDE} imgSrc={amplitudeLogo} selected={provider === Provider.AMPLITUDE} />
               <IntegrationSource sourceName="Clevertap" value={Provider.CLEVERTAP} imgSrc={clevertapLogo} selected={provider === Provider.CLEVERTAP} />
               <IntegrationSource sourceName="Google Analytics" value={Provider.GOOGLE} imgSrc={gaLogo} selected={provider === Provider.GOOGLE} />
-              <IntegrationSource sourceName="MySQL" value={Provider.MYSQL} imgSrc={mysqlLogo} selected={provider === Provider.MYSQL} />
+              <IntegrationSource sourceName="Connect an API" value={Provider.API} imgSrc={apilogo} selected={provider === Provider.API} />
             </SimpleGrid>
           </RadioGroup>
-          </Box>
+    </Box>
 
 
         <Button
@@ -356,6 +206,7 @@ const SelectProvider = () => {
         <Button
           variant="primary"
           mt={6}
+          mb={1}
           rounded="lg"
           bg="black.100"
           p={6}
@@ -371,13 +222,10 @@ const SelectProvider = () => {
         </Button>
 
 
-
-
-         <Box>
-         </Box>
-        
       </Flex>
-    </Flex>
+    </Box>
+    </Box>
+    </Box>
 
 
 

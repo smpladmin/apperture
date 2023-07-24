@@ -18,9 +18,10 @@ const IntegrationSource = ({
 }: IntegrationSourceProps) => {
   return (
     <Flex
-      width={{ base: 'auto', md: '50' }}
+      width={{ base: 'auto', md: '35' }}
+      height={{ base: 'auto', md: '25' }}
       px={'3'}
-      py={'4'}
+      py={'3'}
       border={'1px'}
       rounded={'xl'}
       borderColor={selected ? 'black.100' : 'white.200'}
@@ -39,8 +40,8 @@ const IntegrationSource = ({
       >
         <Flex
           border={'1px'}
-          width={'13'}
-          height={'13'}
+          width={'7'}
+          height={'7'}
           rounded={'full'}
           borderColor={'white.200'}
           alignItems={'center'}
@@ -49,7 +50,7 @@ const IntegrationSource = ({
           <Image src={imgSrc} alt="gaLogo" objectFit="cover" />
         </Flex>
         <Flex direction={'column'}>
-          <Text fontSize={'base'} fontWeight={'500'} lineHeight={'base'}>
+          <Text fontSize={'xs-12'} fontWeight={'500'} lineHeight={'base'}>
             {sourceName}
           </Text>
         </Flex>
