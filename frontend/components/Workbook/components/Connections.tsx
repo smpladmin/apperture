@@ -31,7 +31,7 @@ import {
   ConnectionGroup,
   ConnectionSource,
 } from '@lib/domain/connections';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 
 type ConnectionsProps = {
   connections: Connection[];
@@ -95,7 +95,7 @@ const Connections = ({
     } else {
       setShowColumns(true);
       setSheetsData((prevSheetData: TransientSheetData[]) => {
-        const tempSheetsData = [...prevSheetData];
+        const tempSheetsData = cloneDeep(prevSheetData);
         tempSheetsData[selectedSheetIndex].meta!!.dsId = currentSelectedDsId;
         return tempSheetsData;
       });
@@ -130,7 +130,7 @@ const Connections = ({
     // and then show connector columns
     if (canditate.confirmation) {
       setSheetsData((prevSheetData: TransientSheetData[]) => {
-        const tempSheetsData = [...prevSheetData];
+        const tempSheetsData = cloneDeep(prevSheetData);
         // TODO: should check the double bang !!
         tempSheetsData[selectedSheetIndex].meta!!.dsId = canditate.dsId;
         tempSheetsData[selectedSheetIndex].meta!!.selectedColumns = [];

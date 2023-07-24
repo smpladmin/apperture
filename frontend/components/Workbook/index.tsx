@@ -127,6 +127,19 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     fetchConnections();
   }, [dsId]);
 
+  useEffect(() => {
+    // update empty sheet based on sheet query and its type
+    const sheet = sheetsData[selectedSheetIndex];
+    const isSheetEmpty = !(
+      sheet?.query || sheet?.sheet_type === SheetType.PIVOT_SHEET
+    );
+
+    setShowEmptyState(isSheetEmpty);
+  }, [
+    sheetsData[selectedSheetIndex]?.query,
+    sheetsData[selectedSheetIndex]?.sheet_type,
+  ]);
+
   const fetchTransientSheetData = async (abortController?: AbortController) => {
     const sheet = sheetsData[selectedSheetIndex];
 
