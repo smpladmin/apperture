@@ -120,6 +120,10 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const { dsId, workbookId } = router.query;
 
   useEffect(() => {
+    if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
+  }, []);
+
+  useEffect(() => {
     const fetchConnections = async () => {
       const res = await getConnectionsForApp(dsId as string);
       setConnections(res);
@@ -133,7 +137,6 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     const isSheetEmpty = !(
       sheet?.query || sheet?.sheet_type === SheetType.PIVOT_SHEET
     );
-
     setShowEmptyState(isSheetEmpty);
   }, [
     sheetsData[selectedSheetIndex]?.query,
