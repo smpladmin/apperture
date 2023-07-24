@@ -17,7 +17,13 @@ import {
   TransientSheetData,
   Workbook,
 } from '@lib/domain/workbook';
-import { Box, Flex, useDisclosure, useToast } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  useDisclosure,
+  usePrevious,
+  useToast,
+} from '@chakra-ui/react';
 import SidePanel from './components/SidePanel';
 import Grid from '@components/Workbook/components/Grid/Grid';
 import Footer from '@components/Workbook/components/Footer';
@@ -88,6 +94,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [showColumns, setShowColumns] = useState(false);
   const [eventProperties, setEventProperties] = useState<string[]>([]);
+  const prevSheetsData = usePrevious(sheetsData);
 
   const [requestTranisentColumn, setRequestTransientColumn] =
     useState<TransientColumnRequestState>({
@@ -135,9 +142,11 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
   useEffect(() => {
     const sheet = sheetsData[selectedSheetIndex];
+    const prevSheet = prevSheetsData?.[selectedSheetIndex];
 
     if (sheet?.query) setShowEmptyState(false);
     if (!sheet?.query || sheet.edit_mode) return;
+    if (sheet?.query === prevSheet?.query) return;
     const abortController = new AbortController();
 
     const { signal } = abortController;
