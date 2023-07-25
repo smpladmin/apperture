@@ -148,7 +148,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
     setFetchingTransientSheet(true);
     const response = await getTransientSpreadsheets(
-      sheet.meta?.dsId || (dsId as string),
+      sheet?.meta?.dsId || (dsId as string),
       sheet.query,
       sheet?.is_sql,
       sheet.word_replacements,
@@ -179,7 +179,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     const hasDifferentQuery = sheet.query !== prevSheet?.query;
     const hasEditMode = sheet?.edit_mode;
 
-    if (isSqlSheet && (!sheet.query || hasEditMode || !hasDifferentQuery)) {
+    if ((isSqlSheet && (!sheet.query || hasEditMode)) || !hasDifferentQuery) {
       return;
     }
 
@@ -373,7 +373,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       table = 'events';
 
     const response = await getWorkbookTransientColumn(
-      dsId as string,
+      sheetsData[selectedSheetIndex]?.meta?.dsId || (dsId as string),
       dimensions.map((dimension) => DimensionParser().parse(dimension.name)),
       metrics.map((metric) => Metricparser().parse(metric.name)),
       database,
