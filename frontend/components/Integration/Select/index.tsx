@@ -47,6 +47,7 @@ const SelectProvider = () => {
         '',
         '',
         undefined,
+        undefined,
         { params: { create_datasource: true, trigger_data_processor: false } }
       );
       router.push({
@@ -147,6 +148,12 @@ const SelectProvider = () => {
                   value={Provider.MYSQL}
                   imgSrc={mysqlLogo}
                   selected={provider === Provider.MYSQL}
+                />
+                <IntegrationSource
+                  sourceName="CSV"
+                  value={Provider.CSV}
+                  imgSrc={mysqlLogo}
+                  selected={provider === Provider.CSV}
                 />
               </Stack>
             </RadioGroup>

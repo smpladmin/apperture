@@ -26,3 +26,8 @@ export type MySQLCredential = {
   overSsh: boolean;
   sshCredential?: DatabaseSSHCredential;
 };
+
+export type UploadProgress = {
+  progress: number;
+  isCompleted: boolean;
+};

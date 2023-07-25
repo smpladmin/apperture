@@ -99,7 +99,7 @@ async def compute_transient_column(
 ):
     try:
         clickhouse_credential = await compute_query_action.get_credentials(
-            datasourceId=dto.datasourceId
+            datasource_id=dto.datasourceId
         )
 
         return spreadsheets_service.get_transient_columns(

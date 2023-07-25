@@ -2,12 +2,17 @@ import logging
 import os
 import tempfile
 from typing import Optional
+
+import boto3
 import pymysql
 import sshtunnel
 
 from beanie import PydanticObjectId
+from fastapi import UploadFile, Depends
+
 from authorisation.models import IntegrationOAuth
-from domain.apps.models import App
+from domain.apps.models import App, ClickHouseCredential
+from repositories.clickhouse.integrations import Integrations
 from rest.dtos.integrations import DatabaseSSHCredentialDto
 from domain.apperture_users.models import AppertureUser
 from .models import (
@@ -17,10 +22,14 @@ from .models import (
     IntegrationProvider,
     MySQLCredential,
     DatabaseSSHCredential,
+    CSVCredential,
 )
 
 
 class IntegrationService:
+    def __init__(self, integrations: Integrations = Depends()):
+        self.integrations = integrations
+
     async def create_oauth_integration(
         self,
         user: AppertureUser,
@@ -63,11 +72,15 @@ class IntegrationService:
         secret: Optional[str],
         tableName: Optional[str],
         mysql_credential: Optional[MySQLCredential],
-
+        csv_credential: Optional[CSVCredential],
     ):
-        credential_type = (
-            CredentialType.MYSQL if mysql_credential else CredentialType.API_KEY
-        )
+        if mysql_credential:
+            credential_type = CredentialType.MYSQL
+        elif csv_credential:
+            credential_type = CredentialType.CSV
+        else:
+            credential_type = CredentialType.API_KEY
+
         credential = Credential(
             type=credential_type,
             account_id=account_id,
@@ -75,6 +88,7 @@ class IntegrationService:
             secret=secret,
             tableName=tableName,
             mysql_credential=mysql_credential,
+            csv_credential=csv_credential,
         )
         integration = Integration(
             user_id=app.user_id,
@@ -208,3 +222,33 @@ class IntegrationService:
             return self.check_mysql_connection(
                 host=host, port=port, username=username, password=password
             )
+
+    def upload_csv_to_s3(self, file: UploadFile, s3_key: str):
+        s3_client = boto3.client(
+            "s3",
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        )
+        s3_client.upload_fileobj(
+            Fileobj=file.file, Bucket=os.getenv("S3_BUCKET_NAME"), Key=s3_key
+        )
+        logging.info(f"File uploaded successfully: {s3_key}")
+
+    def delete_file_from_s3(self, s3_key: str):
+        s3_client = boto3.client(
+            "s3",
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        )
+        s3_client.delete_object(Bucket=os.getenv("S3_BUCKET_NAME"), Key=s3_key)
+
+    def create_clickhouse_table_from_csv(
+        self, name: str, clickhouse_credential: ClickHouseCredential, s3_key: str
+    ):
+        self.integrations.create_table_from_csv(
+            name=name,
+            username=clickhouse_credential.username,
+            password=clickhouse_credential.password,
+            db_name=clickhouse_credential.databasename,
+            s3_key=s3_key,
+        )

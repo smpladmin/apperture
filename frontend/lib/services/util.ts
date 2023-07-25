@@ -56,7 +56,8 @@ export const ApperturePost = async (
     | {
         [key: string]: string | number | boolean | Array<any> | object | null;
       }
-    | any[],
+    | any[]
+    | FormData,
   config: AxiosRequestConfig = {}
 ) => {
   try {
