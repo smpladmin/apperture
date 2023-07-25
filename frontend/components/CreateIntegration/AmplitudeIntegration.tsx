@@ -70,11 +70,11 @@ const AmplitudeIntegration = ({
   return (
     <IntegrationContainer >
       
-        { !add ? <LeftContainerRevisit/> : <LeftContainer /> }
+        { add ? <LeftContainerRevisit/> : <LeftContainer /> }
      
       <RightContainer>
           <Flex flexDirection="column" alignItems="center">
-            { !add ? <Box mt={10}></Box> : <TopProgress handleGoBack={handleGoBack} /> }
+            { add ? <Box mt={10}></Box> : <TopProgress handleGoBack={handleGoBack} /> }
             <Flex
               direction={'column'}
               h={'full'}
