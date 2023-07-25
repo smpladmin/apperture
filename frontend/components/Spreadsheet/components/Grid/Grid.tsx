@@ -32,7 +32,7 @@ const getGridRow = (value: any): DefaultCellTypes => {
 };
 
 const getColumns = (headers: SpreadSheetColumn[]): Column[] => {
-  return headers.map((header) => {
+  return headers.map((header, index) => {
     if (header.name === 'index') {
       return { columnId: header.name, width: 50 };
     }

@@ -1,4 +1,4 @@
-import { Spreadsheet } from '@lib/domain/workbook';
+import { Spreadsheet, WordReplacement } from '@lib/domain/workbook';
 import {
   AppertureDelete,
   AppertureGet,
@@ -10,13 +10,22 @@ import {
 export const getTransientSpreadsheets = (
   dsId: string,
   query: string,
-  is_sql: boolean
+  is_sql: boolean = true,
+  word_replacements: Array<WordReplacement> = [],
+  signal?: AbortSignal
 ) => {
-  return ApperturePost(`/workbooks/spreadsheets/transient`, {
-    datasourceId: dsId,
-    query: query,
-    is_sql,
-  });
+  return ApperturePost(
+    `/workbooks/spreadsheets/transient`,
+    {
+      datasourceId: dsId,
+      query: query,
+      is_sql,
+      word_replacements,
+    },
+    {
+      signal,
+    }
+  );
 };
 
 export const getSavedWorkbooksForDatasourceId = async (dsId: string) => {

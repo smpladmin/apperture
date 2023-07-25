@@ -38,8 +38,8 @@ class Spreadsheets(EventsBase):
         restricted_client = self.clickhouse.get_connection_for_user(
             username=username, password=password
         )
-        result = restricted_client.query(query=query)
         logging.info(query)
+        result = restricted_client.query(query=query)
         restricted_client.close()
         return result
 

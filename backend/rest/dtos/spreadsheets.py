@@ -7,7 +7,9 @@ from domain.spreadsheets.models import (
     DimensionDefinition,
     MetricDefinition,
     SpreadSheetColumn,
+    SpreadsheetType,
     SubHeaderColumn,
+    WordReplacement,
     WorkBook,
 )
 from rest.dtos.apperture_users import AppertureUserResponse
@@ -18,6 +20,7 @@ class TransientSpreadsheetsDto(BaseModel):
     datasourceId: str
     query: str
     is_sql: bool = False
+    word_replacements: List[WordReplacement] = []
 
 
 class TransientSpreadsheetColumnDto(BaseModel):
@@ -39,6 +42,10 @@ class SpreadSheetDto(BaseModel):
     subHeaders: List[SubHeaderColumn]
     is_sql: bool
     query: str
+    edit_mode: bool
+    sheet_type: SpreadsheetType
+    meta: dict
+    word_replacements: List[WordReplacement] = []
 
 
 class CreateWorkBookDto(BaseModel):

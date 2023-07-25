@@ -22,7 +22,9 @@ from rest.controllers import (
     apperture_user_controller,
     auth_controller,
     clickstream_controller,
+    connection_controller,
     data_processor_controller,
+    datamart_controller,
     datasource_controller,
     event_capture_controller,
     funnel_controller,
@@ -36,7 +38,6 @@ from rest.controllers import (
     segment_controller,
     spreadsheet_controller,
     user_controller,
-    datamart_controller,
 )
 
 settings = apperture_settings()
@@ -101,6 +102,7 @@ app.include_router(clickstream_controller.router)
 app.include_router(retention_controller.router)
 app.include_router(spreadsheet_controller.router)
 app.include_router(datamart_controller.router)
+app.include_router(connection_controller.router)
 
 
 @app.get("/sentry-debug")

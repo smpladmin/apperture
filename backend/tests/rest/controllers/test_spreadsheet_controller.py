@@ -6,7 +6,7 @@ import pytest
 from beanie import PydanticObjectId
 
 from domain.apps.models import App
-from domain.spreadsheets.models import ColumnType, SpreadSheetColumn
+from domain.spreadsheets.models import ColumnType, SpreadSheetColumn, SpreadsheetType
 
 
 @pytest.mark.asyncio
@@ -139,6 +139,10 @@ async def test_get_saved_workbooks(client_init, spreadsheets_service):
                     "is_sql": True,
                     "query": "SELECT  event_name FROM  events",
                     "subHeaders": None,
+                    "edit_mode": True,
+                    "sheet_type": SpreadsheetType.SIMPLE_SHEET,
+                    "meta": {"dsId": "", "selectedColumns": []},
+                    "word_replacements": [],
                 }
             ],
             "enabled": True,
@@ -179,6 +183,10 @@ async def test_get_saved_workbooks_for_app(client_init, spreadsheets_service):
                     "is_sql": True,
                     "query": "SELECT  event_name FROM  events",
                     "subHeaders": None,
+                    "edit_mode": True,
+                    "sheet_type": SpreadsheetType.SIMPLE_SHEET,
+                    "meta": {"dsId": "", "selectedColumns": []},
+                    "word_replacements": [],
                 }
             ],
             "enabled": True,
@@ -217,6 +225,10 @@ async def test_get_saved_workbooks_by_user_id(client_init, spreadsheets_service)
                     "is_sql": True,
                     "subHeaders": None,
                     "query": "SELECT  event_name FROM  events",
+                    "edit_mode": True,
+                    "sheet_type": SpreadsheetType.SIMPLE_SHEET,
+                    "meta": {"dsId": "", "selectedColumns": []},
+                    "word_replacements": [],
                 }
             ],
             "enabled": True,
@@ -252,6 +264,10 @@ async def test_get_saved_workbook_by_id(client_init, spreadsheets_service):
                 "name": "Sheet1",
                 "subHeaders": None,
                 "query": "SELECT  event_name FROM  events",
+                "edit_mode": True,
+                "sheet_type": SpreadsheetType.SIMPLE_SHEET,
+                "meta": {"dsId": "", "selectedColumns": []},
+                "word_replacements": [],
             }
         ],
         "updatedAt": None,
@@ -283,6 +299,10 @@ async def test_create_workbook(client_init, workbook_data):
                 "is_sql": True,
                 "subHeaders": None,
                 "query": "SELECT  event_name FROM  events",
+                "edit_mode": True,
+                "sheet_type": SpreadsheetType.SIMPLE_SHEET,
+                "meta": {"dsId": "", "selectedColumns": []},
+                "word_replacements": [],
             }
         ],
         "enabled": True,
@@ -313,6 +333,10 @@ async def test_update_workbook(client_init, workbook_data, spreadsheets_service)
                 "is_sql": True,
                 "subHeaders": None,
                 "query": "SELECT  event_name FROM  events",
+                "edit_mode": True,
+                "sheet_type": SpreadsheetType.SIMPLE_SHEET,
+                "meta": {"dsId": "", "selectedColumns": []},
+                "word_replacements": [],
             }
         ],
         "enabled": True,
@@ -320,7 +344,7 @@ async def test_update_workbook(client_init, workbook_data, spreadsheets_service)
 
 
 @pytest.mark.asyncio
-async def test_delete_retention(client_init, spreadsheets_service):
+async def test_delete_workbook(client_init, spreadsheets_service):
     response = client_init.delete("/workbooks/6384a65e0a397236d9de236a")
     assert response.status_code == 200
 
