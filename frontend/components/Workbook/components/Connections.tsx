@@ -90,7 +90,6 @@ const Connections = ({
       !sheetData.edit_mode &&
       lastSelectedDsId !== currentSelectedDsId
     ) {
-      console.log('onopen');
       onOpen();
     } else {
       setShowColumns(true);

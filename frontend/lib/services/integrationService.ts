@@ -11,6 +11,7 @@ type IntegrationRequestBody = {
   apiKey?: string;
   apiSecret?: string;
   tableName?: string;
+  database?: string;
   mySQLCredential?: MySQLCredential;
 };
 
@@ -22,6 +23,7 @@ export const createIntegrationWithDataSource = async (
   apiKey?: string,
   apiSecret?: string,
   tableName?: string,
+  database?: string,
   mySQLCredential?: MySQLCredential,
   config: AxiosRequestConfig = {
     params: {
@@ -35,9 +37,10 @@ export const createIntegrationWithDataSource = async (
         appId,
         provider,
         mySQLCredential,
+        tableName,
+        database,
       }
-    : { appId, provider, accountId, apiKey, apiSecret,tableName };
-
+    : { appId, provider, accountId, apiKey, apiSecret, tableName };
   const res = await ApperturePost(
     '/integrations',
     integrationRequestBody,

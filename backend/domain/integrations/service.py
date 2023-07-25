@@ -1,7 +1,7 @@
 import logging
 import os
 import tempfile
-from typing import Optional
+from typing import List, Optional
 
 import pymysql
 import sshtunnel
@@ -136,35 +136,51 @@ class IntegrationService:
     def check_mysql_connection(
         self, host: str, port: str, username: str, password: str
     ):
-        connection_successful = False
         try:
-            # Establish a connection to the MySQL server
-            connection = pymysql.connect(
-                host=host,
-                port=int(port),
-                user=username,
-                password=password,
+            connection = self.get_mysql_connection(
+                host=host, port=port, username=username, password=password
             )
-
-            # Check if the connection was successful
-            if connection.open:
-                connection_successful = True
-                logging.info("Connected to MySQL database")
-
-            # Close the connection
-            connection.close()
-            logging.info("Connection closed")
+            with connection:
+                if connection.open:
+                    return True
 
         except Exception as e:
             logging.info(f"Failed to connect to MySQL database with exception: {e}")
 
-        return connection_successful
+        return False
 
     def create_temp_file(self, content: str):
         temp_file = tempfile.NamedTemporaryFile(delete=False)
         temp_file.write(content.encode("utf-8"))
         temp_file.flush()
         return temp_file.name
+
+    def create_ssh_tunnel(
+        self, ssh_credential: DatabaseSSHCredentialDto, host: str, port: str
+    ):
+        logging.info("SSH credentials exist")
+        ssh_pkey = None
+        if ssh_credential.sshKey:
+            logging.info("SSH key exists, creating temp file to store ssh key")
+            ssh_pkey = self.create_temp_file(ssh_credential.sshKey)
+            logging.info(f"Temporary file name: {ssh_pkey}")
+
+        try:
+            tunnel = sshtunnel.SSHTunnelForwarder(
+                (ssh_credential.server, int(ssh_credential.port)),
+                ssh_pkey=ssh_pkey,
+                ssh_username=ssh_credential.username,
+                ssh_password=ssh_credential.password,
+                remote_bind_address=(host, int(port)),
+            )
+            tunnel.start()
+            logging.info(
+                f"Created SSH tunnel, binding ({host, port}) to ({tunnel.local_bind_host, tunnel.local_bind_port})"
+            )
+            return tunnel
+        except Exception as e:
+            logging.info(f"Connection failed with exception: {e}")
+            return None
 
     def test_mysql_connection(
         self,
@@ -175,38 +191,70 @@ class IntegrationService:
         ssh_credential: Optional[DatabaseSSHCredentialDto],
     ):
         if ssh_credential:
-            logging.info("SSH credentials exists")
-            ssh_pkey = None
-            if ssh_credential.sshKey:
-                logging.info("SSH key exists, creating temp file to store ssh key")
-                ssh_pkey = self.create_temp_file(ssh_credential.sshKey)
-                logging.info(f"Temporary file name: {ssh_pkey}")
-
-            try:
-                with sshtunnel.SSHTunnelForwarder(
-                    (ssh_credential.server, int(ssh_credential.port)),
-                    ssh_pkey=ssh_pkey,
-                    ssh_username=ssh_credential.username,
-                    ssh_password=ssh_credential.password,
-                    remote_bind_address=(host, int(port)),
-                ) as tunnel:
-                    logging.info(
-                        f"Created SSH tunnel, binding ({host, port}) to ({tunnel.local_bind_host, tunnel.local_bind_port})"
-                    )
-                    if ssh_pkey:
-                        os.remove(ssh_pkey)
-                        logging.info("Removed temporary file")
+            tunnel = self.create_ssh_tunnel(ssh_credential, host, port)
+            if tunnel:
+                with tunnel:
                     return self.check_mysql_connection(
                         host=tunnel.local_bind_host,
                         port=tunnel.local_bind_port,
                         username=username,
                         password=password,
                     )
-            except Exception as e:
-                logging.info(f"Connection failed with exception: {e}")
-                return False
-
         else:
             return self.check_mysql_connection(
                 host=host, port=port, username=username, password=password
             )
+
+    def get_mysql_connection(self, host, port, username, password, database):
+        return (
+            pymysql.connect(
+                host=host,
+                port=int(port),
+                user=username,
+                password=password,
+                database=database,
+            )
+            if database
+            else pymysql.connect(
+                host=host,
+                port=int(port),
+                user=username,
+                password=password,
+            )
+        )
+
+    def get_table_columns(self, connection, table_name) -> List[str]:
+        fields = []
+        with connection:
+            with connection.cursor() as cursor:
+                cursor.execute(f"DESCRIBE {table_name}")
+                results = cursor.fetchall()
+                for result in results:
+                    fields.append(result[0])
+        return fields
+
+    async def get_mysql_connection_details(self, id):
+        integration = await self.get_integration(id)
+        if integration.credential.tableName and integration.credential.database:
+            credential = integration.credential
+            details = {
+                "database": credential.database,
+                "table_name": credential.tableName,
+            }
+            try:
+                connection = self.get_mysql_connection(
+                    host=credential.mysql_credential.host,
+                    port=int(credential.mysql_credential.port),
+                    username=credential.mysql_credential.username,
+                    password=credential.mysql_credential.password,
+                    database=credential.database,
+                )
+                details["fields"] = self.get_table_columns(
+                    connection, credential.tableName
+                )
+                return details
+
+            except Exception as e:
+                logging.info(f"Failed to connect to MySQL database with exception: {e}")
+
+        return None

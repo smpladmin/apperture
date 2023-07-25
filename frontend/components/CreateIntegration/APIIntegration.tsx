@@ -19,10 +19,7 @@ type APIIntegrationProps = {
   handleClose: Function;
   add: string | string[] | undefined;
 };
-const APIIntegration = ({
-  add,
-  handleClose,
-}: APIIntegrationProps) => {
+const APIIntegration = ({ add, handleClose }: APIIntegrationProps) => {
   const router = useRouter();
   const [endPoint, setEndPoint] = useState('');
   const [headers, setHeaders] = useState('');
@@ -36,15 +33,13 @@ const APIIntegration = ({
   const onSubmit = async () => {
     const appId = router.query.appId as string;
     const provider = router.query.provider as Provider;
-console.log("calling create ds with :",appId,provider,endPoint,headers,'',tableName)
     const integration = await createIntegrationWithDataSource(
       appId,
       provider,
       endPoint,
       headers,
       '',
-      tableName,
-      
+      tableName
     );
     router.replace({
       pathname: '/analytics/app/[appId]/integration/[provider]/complete',
@@ -191,7 +186,7 @@ console.log("calling create ds with :",appId,provider,endPoint,headers,'',tableN
               fontSize={'base'}
               lineHeight={'base'}
               textColor={'black.400'}
-              placeholder='What would you like to call this table'
+              placeholder="What would you like to call this table"
               py={4}
               px={3.5}
               focusBorderColor={'black.100'}
@@ -206,7 +201,6 @@ console.log("calling create ds with :",appId,provider,endPoint,headers,'',tableN
               }}
             />
           </Box>
-          
         </Box>
       </Box>
       <Box mb={5}>

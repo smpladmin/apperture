@@ -1,3 +1,4 @@
+import mysqlLogo from '@assets/images/mysql-icon.png';
 import {
   Box,
   Button,
@@ -10,17 +11,16 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import mysqlLogo from '@assets/images/mysql-icon.png';
-import Image from 'next/image';
 import FormButton from '@components/FormButton';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { MySQLCredential } from '@lib/domain/integration';
+import { Provider } from '@lib/domain/provider';
 import {
   createIntegrationWithDataSource,
   testMySQLConnection,
 } from '@lib/services/integrationService';
-import { Provider } from '@lib/domain/provider';
-import { MySQLCredential } from '@lib/domain/integration';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 type MySQLIntegrationProps = {
@@ -34,6 +34,7 @@ type FormData = {
   username: string;
   password: string;
   database: string;
+  table: string;
   overSsh: boolean;
   sshServer: string;
   sshPort: string;
@@ -103,10 +104,10 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
       undefined,
       undefined,
       undefined,
-      '',
+      data.table,
+      data.database,
       mySQLCredential as MySQLCredential
     );
-    console.log(integration);
     router.replace({
       pathname: '/analytics/app/[appId]/integration/[provider]/complete',
       query: {
@@ -144,6 +145,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
       port: '3306',
       username: '',
       password: '',
+      table: '',
       database: '',
       sshServer: '',
       sshPort: '22',
@@ -264,6 +266,14 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
                 handleChange={handleChange}
                 register={register}
                 inputStyle={{ placeholder: 'database', width: '50' }}
+              />
+              <FormInputField
+                fieldName="table"
+                label="Table"
+                errors={errors}
+                handleChange={handleChange}
+                register={register}
+                inputStyle={{ placeholder: 'table', width: '50' }}
               />
 
               <FormCheckboxField
