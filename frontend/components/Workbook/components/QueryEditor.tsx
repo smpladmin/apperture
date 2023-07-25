@@ -10,13 +10,13 @@ import {
 import { TransientSheetData } from '@lib/domain/workbook';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
-import { Eye, PencilLine, Play } from 'phosphor-react';
+import { Eye, PencilSimpleLine, Play } from 'phosphor-react';
 import React, { useState } from 'react';
 import { cloneDeep } from 'lodash';
 import { ErrorResponse } from '@lib/services/util';
 import { getTransientSpreadsheets } from '@lib/services/workbookService';
 import { useRouter } from 'next/router';
-import { GREY_400, GREY_900 } from '@theme/index';
+import { GREY_400, GREY_900, WHITE_200, WHITE_DEFAULT } from '@theme/index';
 import ConfirmationModal from './ConfirmationModal';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { getSubheaders } from '../util';
@@ -57,7 +57,7 @@ const QueryEditor = ({
     setIsLoading(true);
 
     const response = await getTransientSpreadsheets(
-      dsId as string,
+      sheetsData[selectedSheetIndex]?.meta?.dsId || (dsId as string),
       query,
       true
     );
@@ -84,31 +84,35 @@ const QueryEditor = ({
       <Box px={'5'} pt={'4'} pb={'5'}>
         <Flex justifyContent={'space-between'} alignItems={'center'}>
           <Text>Clickhouse</Text>
-          <ButtonGroup
-            size="sm"
-            isAttached
-            variant="outline"
-            borderRadius={'8'}
-          >
+          <ButtonGroup size="sm" isAttached variant="outline">
             <Button
+              px={'3'}
+              py={'2'}
+              borderRadius={'8px 0px 0px 8px'}
               borderColor={!sheetData.edit_mode ? GREY_900 : GREY_400}
-              disabled={sheetData.edit_mode}
+              bg={!sheetData.edit_mode ? WHITE_200 : WHITE_DEFAULT}
               marginInlineEnd={'0 !important'}
             >
               <Eye
-                size={12}
+                size={16}
                 color={!sheetData.edit_mode ? GREY_900 : GREY_400}
+                weight={!sheetData.edit_mode ? 'bold' : 'regular'}
               />
             </Button>
             <Button
+              px={'3'}
+              py={'2'}
+              borderRadius={'0px 8px 8px 0px'}
               borderColor={sheetData.edit_mode ? GREY_900 : GREY_400}
+              bg={sheetData.edit_mode ? WHITE_200 : WHITE_DEFAULT}
               onClick={() => {
                 !sheetData.edit_mode && onOpen();
               }}
             >
-              <PencilLine
-                size={12}
+              <PencilSimpleLine
+                size={16}
                 color={sheetData.edit_mode ? GREY_900 : GREY_400}
+                weight={sheetData.edit_mode ? 'bold' : 'regular'}
               />
             </Button>
           </ButtonGroup>
