@@ -73,7 +73,7 @@ const UserApp = ({ app, openConfigureAppsModal, isSelected }: UserAppProps) => {
                 openConfigureAppsModal();
               }}
             >
-              Configure
+              View Connections
             </Text>
           )}
         </Flex>

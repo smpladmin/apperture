@@ -8,13 +8,12 @@ import logo from '@assets/images/AppertureWhiteLogo.svg';
 import { useRouter } from 'next/router';
 import onboarding_left_panel from '@assets/images/onboarding_left_panel.svg';
 import {
-  containerStyle,
-  leftContainerStyle,
-  rightContainerOuter,
-  LeftContainerContent,
-  rightContainerInner,
   TopProgress,
-} from '@components/onboarding';
+  IntegrationContainer,
+  LeftContainer,
+  RightContainer,
+  LeftContainerRevisit,
+} from '@components/Onboarding';
 
 type GooglePermissionProps = {
   navigateBack: Function;
@@ -40,15 +39,13 @@ const GooglePermission = ({
   const handleGoBack = (): void => router.back();
 
   return (
-    <Box sx={containerStyle}>
-      <Box sx={leftContainerStyle}>
-        <LeftContainerContent />
-      </Box>
-
-      <Box sx={rightContainerOuter}>
-        <Box sx={rightContainerInner}>
+    <IntegrationContainer>
+      
+        { add ? <LeftContainerRevisit/> : <LeftContainer /> }
+     
+      <RightContainer>
           <Flex flexDirection="column" alignItems="center">
-            <TopProgress handleGoBack={handleGoBack} />
+             { add ? <Box mt={10}></Box> : <TopProgress handleGoBack={handleGoBack} /> }
 
             <Flex direction="column" h="full" justifyContent="center" alignItems="center" mt={10}>
               <Box height={{ base: 8, md: 14 }} width={{ base: 8, md: 14 }} mb={10}>
@@ -72,9 +69,8 @@ const GooglePermission = ({
               </Box>
             </Flex>
           </Flex>
-        </Box>
-      </Box>
-    </Box>
+        </RightContainer>
+    </IntegrationContainer>
   );
 };
 

@@ -16,8 +16,13 @@ import { createIntegrationWithDataSource } from '@lib/services/integrationServic
 import { Provider } from '@lib/domain/provider';
 import logo from '@assets/images/AppertureWhiteLogo.svg';
 import onboarding_left_panel from '@assets/images/onboarding_left_panel.svg';
-import {containerStyle, leftContainerStyle, rightContainerOuter, LeftContainerContent, rightContainerInner, TopProgress} from '@components/onboarding';
-
+import {
+  TopProgress,
+  IntegrationContainer,
+  LeftContainer,
+  RightContainer,
+  LeftContainerRevisit,
+} from '@components/Onboarding';
 
 type APIIntegrationProps = {
   handleClose: Function;
@@ -62,18 +67,16 @@ console.log("calling create ds with :",appId,provider,endPoint,headers,'',tableN
   };
 
   return (
-    <Box sx={containerStyle}>
-      <Box sx={leftContainerStyle}>
-        <LeftContainerContent/>
-      </Box>
-
-      <Box sx={rightContainerOuter}>
-        <Box sx={rightContainerInner}>
+    <IntegrationContainer>
+      
+        { add ? <LeftContainerRevisit/> : <LeftContainer /> }
+     
+      <RightContainer>
           <Flex
             flexDirection="column"
             alignItems="center"
           >
-                  <TopProgress handleGoBack={handleGoBack}/>
+                  { add ? <Box mt={10}></Box> : <TopProgress handleGoBack={handleGoBack} /> }
 
                     <Flex
                             direction={'column'}
@@ -121,7 +124,7 @@ console.log("calling create ds with :",appId,provider,endPoint,headers,'',tableN
                                   py={4}
                                   px={3.5}
                                   focusBorderColor={'black.100'}
-                                  border={'0.6px'}
+                                  border={'1px'}
                                   value={endPoint}
                                   onChange={(e) => setEndPoint(e.target.value)}
                                   _placeholder={{
@@ -156,7 +159,7 @@ console.log("calling create ds with :",appId,provider,endPoint,headers,'',tableN
                                   py={4}
                                   px={3.5}
                                   focusBorderColor={'black.100'}
-                                  border={'0.6px'}
+                                  border={'1px'}
                                   value={headers}
                                   onChange={(e) => setHeaders(e.target.value)}
                                   _placeholder={{
@@ -191,7 +194,7 @@ console.log("calling create ds with :",appId,provider,endPoint,headers,'',tableN
                                   py={4}
                                   px={3.5}
                                   focusBorderColor={'black.100'}
-                                  border={'0.6px'}
+                                  border={'1px'}
                                   value={tableName}
                                   onChange={(e) => setTableName(e.target.value)}
                                   _placeholder={{
@@ -213,11 +216,10 @@ console.log("calling create ds with :",appId,provider,endPoint,headers,'',tableN
                               nextButtonName={add ? 'Add Data Source' : 'Create Application'}
                             />
                           </Box>
+                          </Flex>
                         </Flex>
-                      </Flex>
-                    </Box>
-                  </Box>
-                </Box>
+                    </RightContainer>
+    </IntegrationContainer>
 
 
 

@@ -16,8 +16,8 @@ import { useRouter } from 'next/router';
 import AppsModal from '@components/Sidebar/AppsModal';
 import ConfigureAppsModal from '@components/ConfigureAppsModal';
 import { getAppId } from '../Home/util';
-import { Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react';
-import { CaretRight } from 'phosphor-react';
+import { Menu, MenuButton, MenuList, MenuItem, IconButton } from '@chakra-ui/react';
+import { CaretRight, Plus } from 'phosphor-react';
 import LogoutModal from '@components/Logout';
 
 type HomeNavProps = {
@@ -101,6 +101,16 @@ const HomeNav = ({ apps }: HomeNavProps) => {
     }
   };
 
+    const handleAddIntegration = async () => {
+
+      router.push({
+        pathname: `/analytics/app/[appId]/integration/select`,
+
+        query: { appId: defaultAppId , ...router.query , add: 'true'},
+      });
+    
+  };
+
   return (
     <Flex
       justifyContent={'space-between'}
@@ -122,7 +132,7 @@ const HomeNav = ({ apps }: HomeNavProps) => {
         }}
       ></Image>
       <Flex color={WHITE_DEFAULT} gap={5} alignItems={'center'}>
-        <Menu>
+        {/*<Menu>
           <MenuButton
             _focus={{ bg: 'black.500' }}
             _expanded={{ bg: 'black.500' }}
@@ -279,7 +289,28 @@ const HomeNav = ({ apps }: HomeNavProps) => {
               </Flex>
             </MenuItem>
           </MenuList>
-        </Menu>
+        </Menu>*/}
+      <IconButton
+          aria-label="add-datasource"
+          icon={<Plus size={20} />}
+          bg=  'black.800' 
+          padding={'6px'}
+           _hover={{ background: 'black.800' }}
+          onClick={handleAddIntegration}
+        />
+        <IconButton
+          aria-label="add-datasource"
+          icon={<Database size={20} />}
+          bg=  'black.800' 
+          padding={'6px'}
+           _hover={{ background: 'black.800' }}
+          onClick={() => {
+                router.push({
+                  pathname: `/analytics/datamart/list/[dsId]`,
+                  query: { dsId },
+                });
+              }}
+        /> 
         <Menu>
           <MenuButton
             _focus={{ bg: 'black.500' }}
@@ -358,6 +389,8 @@ const HomeNav = ({ apps }: HomeNavProps) => {
             </MenuItem>
           </MenuList>
         </Menu>
+
+            
         <Flex onClick={() => onModalOpen('apps')}>
           <Avatar
             name={selectedApp.name}

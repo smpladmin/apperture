@@ -16,6 +16,22 @@ export const IntegrationContainer = (props: BoxProps) => {
   return <Box {...containerStyle}>{props.children}</Box>;
 };
 
+export const LeftContainer = (props: BoxProps) => {
+  return <Box {...leftContainerStyle}><LeftContainerContent/></Box>;
+};
+
+export const LeftContainerRevisit = (props: BoxProps) => {
+  return <Box {...leftContainerStyle}><LeftContainerContentRevisit/></Box>;
+};
+
+export const RightContainer = (props: BoxProps) => {
+  return <Box {...rightContainerOuter}>
+    <Box {...rightContainerInner}>
+    {props.children}
+    </Box>;
+  </Box>;
+};
+
 export const containerStyle = {
   display: 'flex',
   height: '100vh', // Set the height of the page to the full viewport height
@@ -124,6 +140,52 @@ export const LeftContainerContent = () => {
   );
 };
 
+
+export const LeftContainerContentRevisit = () => {
+  const router = useRouter();
+  const { dsId } = router.query;
+  return (
+    <Flex flexDirection="column" alignItems="left" justifyContent="start">
+      <Box
+        mt={5}
+        ml={5}
+        cursor={'pointer'}
+        onClick={() => {
+          router.push({
+            pathname: `/analytics/home/[dsId]`,
+            query: { dsId },
+          });
+        }}
+      >
+          <Image
+            alt="Go"
+            src={logo.src}
+            color={'white'}
+            width={100}
+            height={32}
+          ></Image>
+      </Box>
+      <Heading
+        as="h2"
+        pb={{ base: 8, md: 10 }}
+        fontSize={{ base: 'sh-44', md: 'sh-44' }}
+        lineHeight={{ base: 'sh-24', md: 'sh-44' }}
+        fontWeight="normal"
+        color="white"
+        mt={20}
+        ml={5}
+      >
+        {' '}
+        Add another Datasource
+      </Heading>
+      
+    </Flex>
+  );
+};
+
+
+
+
 export const TopProgress = (props: any) => {
   const handleGoBack = () => {
     if (props.handleGoBack) {
@@ -189,3 +251,71 @@ export const TopProgress = (props: any) => {
     </Flex>
   );
 };
+
+
+export const TopProgress0 = (props: any) => {
+  const handleGoBack = () => {
+    if (props.handleGoBack) {
+      props.handleGoBack();
+    }
+  };
+  return (
+    <Flex justifyContent="space-between" alignItems="center" pb={4} mt={5}>
+      <IconButton
+        aria-label="Go back"
+        icon={<i className="ri-arrow-left-line" />}
+        color="grey.700"
+        bg="transparent"
+        fontSize="sh-20"
+        fontWeight="100"
+        pr={12}
+        _hover={{
+          bg: 'white', // Change hover color to white
+        }}
+        onClick={handleGoBack}
+      />
+
+      <Flex
+        flexDirection="column"
+        pr={10}
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Flex flexDirection="row" justifyContent="center" alignItems="center">
+          <i className="ri-checkbox-circle-fill" fontSize="xs-10"></i>
+          <Text fontSize={'xs-12'} fontWeight={500} ml={2} color="grey.900">
+            Sign up
+          </Text>
+        </Flex>
+        <Box minW="250px" w="100%" h="2px" bg="black" mt={5} />
+      </Flex>
+      <Flex
+        flexDirection="column"
+        pr={10}
+        pl={10}
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Flex flexDirection="row" justifyContent="center" alignItems="center">
+          
+          <Text fontSize={'xs-12'} fontWeight={500} ml={2} color="grey.900">
+            Set up Workspace
+          </Text>
+        </Flex>
+        <Box minW="250px" w="100%" h="2px" bg="black" mt={5} />
+      </Flex>
+      <Flex
+        flexDirection="column"
+        pl={10}
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Text fontSize={'xs-12'} fontWeight={500} color="grey.900">
+          Add Datasource
+        </Text>
+        <Box minW="250px" w="100%" h="2px" bg="black" mt={5} />
+      </Flex>
+    </Flex>
+  );
+};
+

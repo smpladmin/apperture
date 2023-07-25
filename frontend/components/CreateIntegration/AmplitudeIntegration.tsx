@@ -18,14 +18,12 @@ import logo from '@assets/images/AppertureWhiteLogo.svg';
 import { CaretRight } from 'phosphor-react';
 import onboarding_left_panel from '@assets/images/onboarding_left_panel.svg';
 import {
-  containerStyle,
-  leftContainerStyle,
-  rightContainerOuter,
-  LeftContainerContent,
-  rightContainerInner,
   TopProgress,
   IntegrationContainer,
-} from '@components/onboarding';
+  LeftContainer,
+  RightContainer,
+  LeftContainerRevisit,
+} from '@components/Onboarding';
 
 type AmplitudeIntegrationProps = {
   handleClose: Function;
@@ -67,18 +65,16 @@ const AmplitudeIntegration = ({
         dsId: integration.datasource._id,
       },
     });
-  };
+  }; 
 
   return (
-    <IntegrationContainer>
-      <Box sx={leftContainerStyle}>
-        <LeftContainerContent />
-      </Box>
-
-      <Box sx={rightContainerOuter}>
-        <Box sx={rightContainerInner}>
+    <IntegrationContainer >
+      
+        { !add ? <LeftContainerRevisit/> : <LeftContainer /> }
+     
+      <RightContainer>
           <Flex flexDirection="column" alignItems="center">
-            <TopProgress handleGoBack={handleGoBack} />
+            { !add ? <Box mt={10}></Box> : <TopProgress handleGoBack={handleGoBack} /> }
             <Flex
               direction={'column'}
               h={'full'}
@@ -133,7 +129,7 @@ const AmplitudeIntegration = ({
                       py={4}
                       px={3.5}
                       focusBorderColor={'black.100'}
-                      border={'0.6px'}
+                      border={'1px'}
                       value={projectId}
                       onChange={(e) => setProjectId(e.target.value)}
                       _placeholder={{
@@ -168,7 +164,7 @@ const AmplitudeIntegration = ({
                       py={4}
                       px={3.5}
                       focusBorderColor={'black.100'}
-                      border={'0.6px'}
+                      border={'1px'}
                       value={apiKey}
                       onChange={(e) => setApiKey(e.target.value)}
                       _placeholder={{
@@ -203,7 +199,7 @@ const AmplitudeIntegration = ({
                       py={4}
                       px={3.5}
                       focusBorderColor={'black.100'}
-                      border={'0.6px'}
+                      border={'1px'}
                       value={apiSecret}
                       onChange={(e) => setApiSecret(e.target.value)}
                       _placeholder={{
@@ -228,8 +224,7 @@ const AmplitudeIntegration = ({
               </Box>
             </Flex>
           </Flex>
-        </Box>
-      </Box>
+      </RightContainer>
     </IntegrationContainer>
   );
 };
