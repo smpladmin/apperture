@@ -93,7 +93,7 @@ const QueryEditor = ({
             <Button
               borderColor={!sheetData.edit_mode ? GREY_900 : GREY_400}
               disabled={sheetData.edit_mode}
-              borderRight={'1px'}
+              marginInlineEnd={'0 !important'}
             >
               <Eye
                 size={12}
