@@ -50,6 +50,7 @@ def test_add_database_integration(
                 account_id=None,
                 secret=None,
                 tableName=None,
+                csv_credential=None,
                 mysql_credential=MySQLCredential(
                     host="127.0.0.1",
                     port="3306",
@@ -85,6 +86,7 @@ def test_add_database_integration(
             "secret": None,
             "tableName": None,
             "type": "MYSQL",
+            "csv_credential": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",

@@ -116,6 +116,7 @@ async def update_edges(
     await edge_service.update_edges(edges, dto.provider, datasource.id)
     return {"updated": True}
 
+
 @router.post("/apidata/{tableName}")
 async def update_apidata(
     tableName: str,
@@ -127,8 +128,11 @@ async def update_apidata(
     ds_id = dto[0].datasource_id
     datasource = await ds_service.get_datasource(ds_id)
     app = await app_service.get_app(str(datasource.app_id))
-    await api_data_service.update_api_data(dto, app.clickhouse_credential.databasename, tableName)
+    await api_data_service.update_api_data(
+        dto, app.clickhouse_credential.databasename, tableName
+    )
     return {"updated": True}
+
 
 @router.post("/events")
 async def update_events(

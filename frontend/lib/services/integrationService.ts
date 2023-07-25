@@ -127,4 +127,5 @@ export const createTableWithCSV = async (
   datasourceId: string
 ) => {
   const res = await ApperturePost(`/csv/create`, { fileId, datasourceId });
+  return res.status;
 };

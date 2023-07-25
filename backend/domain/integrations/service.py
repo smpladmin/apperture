@@ -245,7 +245,7 @@ class IntegrationService:
     def create_clickhouse_table_from_csv(
         self, name: str, clickhouse_credential: ClickHouseCredential, s3_key: str
     ):
-        self.integrations.create_table_from_csv(
+        return self.integrations.create_table_from_csv(
             name=name,
             username=clickhouse_credential.username,
             password=clickhouse_credential.password,

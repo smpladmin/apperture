@@ -1,4 +1,11 @@
-import { Box, Button, Flex, IconButton, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  IconButton,
+  Text,
+  useToast,
+} from '@chakra-ui/react';
 import { Provider } from '@lib/domain/provider';
 import { BLACK } from '@theme/index';
 import { useRouter } from 'next/router';
@@ -17,6 +24,8 @@ import { ClipboardText, X } from 'phosphor-react';
 
 const CSVIntegration = () => {
   const router = useRouter();
+  const toast = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const [uploadedFileId, setUploadedFileId] = useState<string>('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploadInitiated, setUploadInitiated] = useState(false);
@@ -43,8 +52,10 @@ const CSVIntegration = () => {
   };
 
   const createIntegration = async () => {
+    setIsLoading(true);
     const appId = router.query.appId as string;
     const provider = router.query.provider as Provider;
+    console.log('id', uploadedFileId);
     const integration = await createIntegrationWithDataSource(
       appId,
       provider,
@@ -55,15 +66,28 @@ const CSVIntegration = () => {
       undefined,
       uploadedFileId
     );
-    await createTableWithCSV(uploadedFileId, integration.datasource._id);
-    router.replace({
-      pathname: '/analytics/app/[appId]/integration/[provider]/complete',
-      query: {
-        appId: router.query.appId,
-        provider: router.query.provider,
-        dsId: integration.datasource._id,
-      },
-    });
+    const statusCode = await createTableWithCSV(
+      uploadedFileId,
+      integration.datasource._id
+    );
+    setIsLoading(false);
+    if (statusCode === 200) {
+      router.replace({
+        pathname: '/analytics/app/[appId]/integration/[provider]/complete',
+        query: {
+          appId: router.query.appId,
+          provider: router.query.provider,
+          dsId: integration.datasource._id,
+        },
+      });
+    } else {
+      toast({
+        title: 'Error while loading data from CSV file',
+        status: 'error',
+        variant: 'subtle',
+        isClosable: true,
+      });
+    }
   };
 
   const handleFileUpload = (file: File) => {
@@ -85,6 +109,7 @@ const CSVIntegration = () => {
   const handleClearFile = async () => {
     setUploadedFile(null);
     setUploadInitiated(false);
+    setUploadComplete(false);
     await deleteCSV(uploadedFile?.name as string);
   };
 
@@ -159,6 +184,7 @@ const CSVIntegration = () => {
             color={'white.DEFAULT'}
             onClick={createIntegration}
             disabled={!uploadComplete}
+            isLoading={isLoading}
           >
             Create Sheet
           </Button>
