@@ -32,6 +32,7 @@ import {
   ConnectionSource,
 } from '@lib/domain/connections';
 import cloneDeep from 'lodash/cloneDeep';
+import { getSubheaders } from '../util';
 
 type ConnectionsProps = {
   connections: Connection[];
@@ -132,8 +133,16 @@ const Connections = ({
       setSheetsData((prevSheetData: TransientSheetData[]) => {
         const tempSheetsData = cloneDeep(prevSheetData);
         // TODO: should check the double bang !!
-        tempSheetsData[selectedSheetIndex].meta!!.dsId = canditate.dsId;
-        tempSheetsData[selectedSheetIndex].meta!!.selectedColumns = [];
+        tempSheetsData[selectedSheetIndex].meta = {
+          dsId: canditate.dsId,
+          selectedColumns: [],
+        };
+        tempSheetsData[selectedSheetIndex].data = [];
+        tempSheetsData[selectedSheetIndex].headers = [];
+        tempSheetsData[selectedSheetIndex].subHeaders = getSubheaders(
+          tempSheetsData[selectedSheetIndex]?.sheet_type
+        );
+
         return tempSheetsData;
       });
       setShowColumns(true);
