@@ -51,7 +51,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
       ...sheet,
       data: [],
       subHeaders: sheet?.subHeaders || getSubheaders(sheet?.sheet_type),
-      edit_mode: sheet?.edit_mode || true,
+      edit_mode: sheet?.edit_mode ?? true,
       sheet_type: sheet?.sheet_type || SheetType.SIMPLE_SHEET,
       meta: sheet?.meta || {
         dsId: '',
@@ -91,6 +91,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const [showEmptyState, setShowEmptyState] = useState(
     savedWorkbook ? false : true
   );
+
   const [connections, setConnections] = useState<Connection[]>([]);
   const [showColumns, setShowColumns] = useState(false);
   const [triggerSheetFetch, setTriggerSheetFetch] = useState(1);
@@ -98,7 +99,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const [requestTranisentColumn, setRequestTransientColumn] =
     useState<TransientColumnRequestState>({
       isLoading: Boolean(
-        savedWorkbook?.spreadsheets[selectedSheetIndex]?.subHeaders.some(
+        sheetsData[selectedSheetIndex]?.subHeaders?.some(
           (subheader) => typeof subheader === 'string' && subheader?.[0] === '='
         )
       ),
@@ -274,7 +275,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     const hasColumnFetcSubheaderWithoutData =
       savedWorkbook &&
       Boolean(
-        savedWorkbook?.spreadsheets[selectedSheetIndex]?.subHeaders.some(
+        sheetsData[selectedSheetIndex]?.subHeaders?.some(
           (subheader) =>
             typeof subheader.name === 'string' &&
             subheader.name.match(/^[unique|count]/)
