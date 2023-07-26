@@ -164,7 +164,7 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       const res = await getTransientSpreadsheets(
         dsId as string,
         selectedSheet.query,
-        selectedSheet.is_sql
+        selectedSheet?.is_sql as boolean
       );
       let queriedData = res?.data?.data;
 
