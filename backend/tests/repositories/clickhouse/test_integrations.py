@@ -22,6 +22,11 @@ class TestIntegrationsRepository:
         calls = [
             call(
                 password="password",
+                query="DROP TABLE IF EXISTS db.test",
+                username="username",
+            ),
+            call(
+                password="password",
                 query="CREATE TABLE db.test ENGINE = MergeTree() ORDER BY tuple() AS "
                 "SELECT * FROM "
                 "s3('https://apperture-clickhouse-backup.s3.ap-south-1.amazonaws.com/s3-key', "
@@ -29,13 +34,7 @@ class TestIntegrationsRepository:
                 "CSVWithNames)",
                 username="username",
             ),
-            call(
-                password="password",
-                query="DROP TABLE IF EXISTS db.test",
-                username="username",
-            ),
         ]
         self.repo.execute_query_for_restricted_client.assert_has_calls(
             calls=calls,
-            any_order=True,
         )
