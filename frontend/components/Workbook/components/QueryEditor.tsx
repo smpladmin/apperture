@@ -7,7 +7,7 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import { TransientSheetData } from '@lib/domain/workbook';
+import { SheetType, TransientSheetData } from '@lib/domain/workbook';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
 import { Eye, PencilSimpleLine, Play } from 'phosphor-react';
@@ -62,6 +62,7 @@ const QueryEditor = ({
       true
     );
     setIsLoading(false);
+
     const toUpdateSheets = cloneDeep(sheetsData);
     toUpdateSheets[selectedSheetIndex].query = query;
     toUpdateSheets[selectedSheetIndex].is_sql = true;
@@ -69,6 +70,7 @@ const QueryEditor = ({
     if (response.status === 200) {
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
       toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
+      toUpdateSheets[selectedSheetIndex].sheet_type = SheetType.SIMPLE_SHEET;
       toUpdateSheets[selectedSheetIndex].subHeaders = getSubheaders(
         toUpdateSheets[selectedSheetIndex].sheet_type
       );
