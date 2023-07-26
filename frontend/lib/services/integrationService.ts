@@ -115,7 +115,7 @@ export const uploadCSV = async (
   if (onProgress) {
     onProgress({ progress: 100, isCompleted: true });
   }
-  return res.data;
+  return res;
 };
 
 export const deleteCSV = async (filename: string) => {
