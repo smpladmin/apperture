@@ -50,11 +50,9 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
     return savedWorkbook.spreadsheets.map((sheet) => ({
       ...sheet,
       data: [],
-      subHeaders: sheet.subHeaders
-        ? sheet.subHeaders
-        : getSubheaders(sheet?.sheet_type),
+      subHeaders: sheet?.subHeaders || getSubheaders(sheet?.sheet_type),
       edit_mode: sheet?.edit_mode || true,
-      sheet_type: SheetType.SIMPLE_SHEET,
+      sheet_type: sheet?.sheet_type || SheetType.SIMPLE_SHEET,
       meta: sheet?.meta || {
         dsId: '',
         selectedColumns: [],
@@ -80,7 +78,9 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
 };
 
 const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
-  const [workbookName, setWorkBookName] = useState('Untitled Workbook');
+  const [workbookName, setWorkBookName] = useState(
+    savedWorkbook?.name || 'Untitled Workbook'
+  );
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
   const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
   const [sheetsData, setSheetsData] = useState<TransientSheetData[]>(
@@ -97,8 +97,13 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const [fetchingTransientSheet, setFetchingTransientSheet] = useState(false);
   const [requestTranisentColumn, setRequestTransientColumn] =
     useState<TransientColumnRequestState>({
-      isLoading: false,
-      subheaders: [],
+      isLoading: Boolean(
+        savedWorkbook?.spreadsheets[selectedSheetIndex]?.subHeaders.some(
+          (subheader) => typeof subheader === 'string' && subheader?.[0] === '='
+        )
+      ),
+      subheaders:
+        savedWorkbook?.spreadsheets[selectedSheetIndex]?.subHeaders || [],
     });
   const [loadBODMASColumn, setloadBODMASColumn] = useState<{
     loading: boolean;
@@ -220,6 +225,13 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       : await saveWorkbook(dsId as string, workbookName, sheets);
 
     if (status === 200) {
+      toast({
+        title: `Workbook ${isWorkbookBeingEdited ? 'updated' : 'saved'}.`,
+        status: 'success',
+        variant: 'subtle',
+        isClosable: true,
+        duration: 2000,
+      });
       router.push({
         pathname: '/analytics/workbook/edit/[workbookId]',
         query: { workbookId: data?._id || workbookId, dsId },
@@ -227,6 +239,13 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       setSaveButtonDisabled(true);
     } else {
       setSaveButtonDisabled(false);
+      toast({
+        title: 'Something went wrong!',
+        status: 'error',
+        variant: 'subtle',
+        isClosable: true,
+        duration: 2000,
+      });
     }
   };
 
@@ -769,6 +788,8 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           sheetsCopy[selectedSheetIndex].is_sql = false;
           sheetsCopy[selectedSheetIndex].query = updatedQuery;
           sheetsCopy[selectedSheetIndex].word_replacements = wordReplacements;
+          sheetsCopy[selectedSheetIndex].edit_mode = true;
+          sheetsCopy[selectedSheetIndex].sheet_type = SheetType.SIMPLE_SHEET;
           setSheetsData(sheetsCopy);
           setTriggerSheetFetch(triggerSheetFetch + 1);
         }}

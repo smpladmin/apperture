@@ -27,6 +27,7 @@ import {
   hasMetricColumnInPivotSheet,
 } from '../util';
 import cloneDeep from 'lodash/cloneDeep';
+import { GREY_600 } from '@theme/index';
 
 type ConnectorColumnsProps = {
   sheetsData: TransientSheetData[];
@@ -158,6 +159,13 @@ const ConnectorColumns = ({
     setDimensionColumn((prevState) => ({ ...prevState, isAdded: false }));
   }, [sheetsData]);
 
+  const isSheetInEditMode = sheetData?.edit_mode;
+  const isSheetQueriedUsingAI = !sheetData?.is_sql;
+  const hasMetricColumn = hasMetricColumnInPivotSheet(sheetData);
+
+  const showViewOnlyColumns =
+    isSheetInEditMode || isSheetQueriedUsingAI || hasMetricColumn;
+
   return (
     <Flex direction={'column'} gap={'3'}>
       <Flex alignItems={'center'} gap={'2'} px={'3'}>
@@ -171,6 +179,7 @@ const ConnectorColumns = ({
           lineHeight={'xs-10'}
           fontWeight={'500'}
           color={'grey.500'}
+          maxWidth={'50'}
         >
           {heirarchy.join('/ ')}
         </Text>
@@ -197,7 +206,7 @@ const ConnectorColumns = ({
           onChange={(e) => onChangeHandler(e)}
         />
       </InputGroup>
-      {sheetData?.edit_mode || hasMetricColumnInPivotSheet(sheetData) ? (
+      {showViewOnlyColumns ? (
         <ViewOnlyColumns columns={columns} />
       ) : sheetData?.sheet_type === SheetType.PIVOT_SHEET ? (
         <PivotColumns
@@ -292,11 +301,11 @@ const ViewOnlyColumns = ({ columns }: { columns: string[] }) => {
             }}
             borderRadius={'4'}
           >
-            <Columns size={16} />
+            <Columns size={16} color={GREY_600} />
             <Text
               fontSize={'xs-12'}
               lineHeight={'xs-12'}
-              fontWeight={'500'}
+              fontWeight={'400'}
               color={'grey.900'}
               maxWidth={'45'}
             >
