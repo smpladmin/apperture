@@ -12,6 +12,7 @@ class CredentialType(str, Enum):
     OAUTH = "OAUTH"
     API_KEY = "API_KEY"
     MYSQL = "MYSQL"
+    CSV = "CSV"
 
 
 class DatabaseSSHCredential(BaseModel):
@@ -23,6 +24,12 @@ class DatabaseSSHCredential(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
+
+
+class CSVCredential(BaseModel):
+    name: str
+    s3_key: str
+    table_name: str
 
 
 class MySQLCredential(BaseModel):
@@ -46,6 +53,7 @@ class Credential(BaseModel):
     tableName: Optional[str]
     database: Optional[str]
     mysql_credential: Optional[MySQLCredential]
+    csv_credential: Optional[CSVCredential]
 
     class Config:
         allow_population_by_field_name = True

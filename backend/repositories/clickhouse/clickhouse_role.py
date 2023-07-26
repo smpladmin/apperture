@@ -1,5 +1,3 @@
-import logging
-
 from fastapi import Depends
 
 from clickhouse.clickhouse import Clickhouse
@@ -34,6 +32,10 @@ class ClickHouseRole:
 
     def grant_permission_to_database(self, database_name: str, username: str):
         query = f"GRANT SHOW, SELECT, INSERT, ALTER, CREATE TABLE, CREATE VIEW, DROP TABLE, DROP VIEW, UNDROP TABLE, TRUNCATE ON {database_name}.* TO {username};"
+        return self.clickhouse.admin.query(query=query)
+
+    def grant_global_permissions_to_user(self, username: str):
+        query = f"GRANT CREATE TEMPORARY TABLE, S3 ON *.* TO {username};"
         return self.clickhouse.admin.query(query=query)
 
     def create_database_for_app(self, database_name: str):

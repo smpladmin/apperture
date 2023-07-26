@@ -28,7 +28,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
 
-import Grid from './components/Grid/Grid';
+import Grid from '../Workbook/components/Grid/Grid';
 import QueryModal from './components/QueryModal';
 import {
   evaluateExpression,

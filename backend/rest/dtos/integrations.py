@@ -43,6 +43,7 @@ class CreateIntegrationDto(BaseModel):
     tableName: Union[str, None]
     database: Union[str, None]
     mySQLCredential: Union[MySQLCredentialDto, None]
+    csvFileId: Union[str, None]
 
 
 class IntegrationWithDataSources(Integration, ModelResponse):
@@ -60,3 +61,13 @@ class TestMySQLConnectionDto(BaseModel):
     password: str
     overSsh: bool = False
     sshCredential: Optional[DatabaseSSHCredentialDto]
+
+
+class CSVCreateDto(BaseModel):
+    fileId: str
+    datasourceId: str
+
+
+class DeleteCSVDto(BaseModel):
+    appId: str
+    filename: str

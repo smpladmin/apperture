@@ -2,19 +2,24 @@ import asyncio
 import logging
 from typing import Union
 
-from fastapi import APIRouter, Depends, Query
-
+from beanie import PydanticObjectId
+from fastapi import APIRouter, Depends, Query, UploadFile, File, Form, HTTPException
 from data_processor_queue.service import DPQueueService
 from domain.apps.service import AppService
 from domain.datasources.models import DataSourceVersion, ProviderDataSource
+from domain.files.service import FilesService
+
+from domain.runlogs.service import RunLogService
 from domain.datasources.service import DataSourceService
 from domain.integrations.service import IntegrationService
-from domain.runlogs.service import RunLogService
+from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.datasources import CreateDataSourceDto, DataSourceResponse
 from rest.dtos.integrations import (
     CreateIntegrationDto,
     IntegrationResponse,
     TestMySQLConnectionDto,
+    CSVCreateDto,
+    DeleteCSVDto,
 )
 from rest.middlewares import get_user_id, validate_jwt
 
@@ -95,6 +100,7 @@ async def create_integration(
     integration_service: IntegrationService = Depends(),
     runlog_service: RunLogService = Depends(),
     dpq_service: DPQueueService = Depends(),
+    files_service: FilesService = Depends(),
 ):
     mysql_credential = (
         integration_service.build_mysql_credential(
@@ -108,6 +114,11 @@ async def create_integration(
         if dto.mySQLCredential
         else None
     )
+    csv_credential = (
+        await files_service.get_csv_credential(id=dto.csvFileId)
+        if dto.csvFileId
+        else None
+    )
     app = await app_service.get_user_app(dto.appId, user_id)
     integration = await integration_service.create_integration(
         app,
@@ -118,6 +129,7 @@ async def create_integration(
         dto.tableName,
         dto.database,
         mysql_credential,
+        csv_credential,
     )
 
     if create_datasource:
@@ -157,3 +169,62 @@ async def check_mysql_connection(
         password=dto.password,
         ssh_credential=dto.sshCredential,
     )
+
+
+@router.post("/integrations/csv/upload")
+async def upload_csv(
+    file: UploadFile = File(...),
+    appId: str = Form(...),
+    integration_service: IntegrationService = Depends(),
+    files_service: FilesService = Depends(),
+):
+    try:
+        s3_key = files_service.build_s3_key(app_id=appId, filename=file.filename)
+        integration_service.upload_csv_to_s3(file=file, s3_key=s3_key)
+        logging.info("CSV uploaded successfully to S3.")
+        return await files_service.add_file(
+            filename=file.filename, s3_key=s3_key, app_id=appId
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/integrations/csv/create")
+async def create_table_with_csv(
+    dto: CSVCreateDto,
+    integration_service: IntegrationService = Depends(),
+    compute_query_action: ComputeQueryAction = Depends(),
+    files_service: FilesService = Depends(),
+):
+    try:
+        file = await files_service.get_file(id=dto.fileId)
+        clickhouse_credential = await compute_query_action.get_credentials(
+            datasource_id=PydanticObjectId(dto.datasourceId)
+        )
+        res = integration_service.create_clickhouse_table_from_csv(
+            name=file.table_name,
+            clickhouse_credential=clickhouse_credential,
+            s3_key=file.s3_key,
+        )
+        if not res:
+            raise HTTPException(status_code=500, detail="Error while parsing CSV file")
+    except Exception as e:
+        logging.info(e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/integrations/csv/delete")
+async def delete_file_from_s3(
+    dto: DeleteCSVDto,
+    integration_service: IntegrationService = Depends(),
+    files_service: FilesService = Depends(),
+):
+    try:
+        s3_key = files_service.build_s3_key(app_id=dto.appId, filename=dto.filename)
+        integration_service.delete_file_from_s3(s3_key=s3_key)
+        logging.info(f"File deleted successfully from S3: {dto.filename}")
+
+    except Exception as e:
+        logging.info(e)
+        raise HTTPException(status_code=500, detail=str(e))

@@ -431,7 +431,7 @@ class TestSegmentsRepository:
             segment_filter=segment_filter
         ).__str__() == (
             '"user_id" IN (WITH group0 AS (SELECT DISTINCT "user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s '
-            'AND toFloat64OrDefault("properties.test") IN (\'1\')) '
+            "AND toFloat64OrDefault(\"properties.test\") IN ('1')) "
             ',group1 AS (SELECT DISTINCT "user_id" FROM "events" WHERE "datasource_id"=%(ds_id)s) '
             'SELECT DISTINCT "group0"."user_id" FROM group0 INTERSECT SELECT DISTINCT "group1"."user_id" FROM group1)'
         )

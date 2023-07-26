@@ -17,6 +17,7 @@ import clevertapLogo from '@assets/images/clevertap-icon.png';
 import appertureLogo from '@assets/images/apperture-logo.svg';
 import apilogo from '@assets/images/apilogo.png';
 import mysqlLogo from '@assets/images/mysql-icon.png';
+import csvLogo from '@assets/images/csv.svg';
 import FormButton from '@components/FormButton';
 import IntegrationSource from '@components/IntegrationSource';
 import { Provider } from '@lib/domain/provider';
@@ -46,6 +47,7 @@ const SelectProvider = () => {
         '',
         '',
         '',
+        undefined,
         undefined,
         { params: { create_datasource: true, trigger_data_processor: false } }
       );
@@ -147,6 +149,12 @@ const SelectProvider = () => {
                   value={Provider.MYSQL}
                   imgSrc={mysqlLogo}
                   selected={provider === Provider.MYSQL}
+                />
+                <IntegrationSource
+                  sourceName="CSV"
+                  value={Provider.CSV}
+                  imgSrc={csvLogo}
+                  selected={provider === Provider.CSV}
                 />
               </Stack>
             </RadioGroup>

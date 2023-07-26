@@ -30,9 +30,7 @@ class EventPropertiesService:
             EventProperties.datasource_id == PydanticObjectId(datasource_id)
         ).to_list()
 
-    async def update_event_properties(
-        self, event_properties: EventPropertiesDto
-    ):
+    async def update_event_properties(self, event_properties: EventPropertiesDto):
         event_properties = EventProperties(
             datasource_id=event_properties.datasource_id,
             event=event_properties.event,
@@ -44,7 +42,8 @@ class EventPropertiesService:
         )
 
         await EventProperties.find_one(
-            EventProperties.datasource_id == PydanticObjectId(event_properties.datasource_id),
+            EventProperties.datasource_id
+            == PydanticObjectId(event_properties.datasource_id),
             EventProperties.event == event_properties.event,
         ).upsert(
             Set(

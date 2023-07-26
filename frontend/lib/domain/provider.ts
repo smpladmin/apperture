@@ -8,6 +8,7 @@ export enum Provider {
   APPERTURE = 'apperture',
   API = 'api',
   MYSQL = 'mysql',
+  CSV = 'csv',
 }
 export namespace Provider {
   export function getDisplayName(provider: Provider): string {

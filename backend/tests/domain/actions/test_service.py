@@ -269,4 +269,7 @@ class TestActionService:
                     ],
                 )
             ],
-        ) == [Property(name='prop1', type='default'), Property(name='prop2', type='default')]
+        ) == [
+            Property(name="prop1", type="default"),
+            Property(name="prop2", type="default"),
+        ]

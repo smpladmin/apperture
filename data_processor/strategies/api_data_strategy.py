@@ -24,25 +24,24 @@ class APIDataStrategy:
         self.saver = APIDataSaver(credential)
         self.runlog_service = RunLogService()
 
-
     def execute(self):
         try:
             self.runlog_service.update_started(self.runlog_id)
             api_data = self.fetcher.fetch()
             events_count = len(api_data)
             logging.info(
-                    f"Processing API chunk for date - {self.date} Chunk size = {events_count}"
-                )
+                f"Processing API chunk for date - {self.date} Chunk size = {events_count}"
+            )
             events_df = self.event_processor.process(api_data)
             logging.info(f"Saving events chunk for date - {self.date}")
             self.saver.save(
-                    self.datasource.id,
-                    IntegrationProvider.API,
-                    events_df,
-                )
+                self.datasource.id,
+                IntegrationProvider.API,
+                events_df,
+            )
             logging.info(
-                    f"Memory = {psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2}Mb"
-                )
+                f"Memory = {psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2}Mb"
+            )
             gc.collect()
             self.runlog_service.update_completed(self.runlog_id)
 

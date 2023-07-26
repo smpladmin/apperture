@@ -93,7 +93,9 @@ async def get_nodes(
             for event_type in event_types:
                 if event_type:
                     action_props = action_props + [
-                        item for item in props_map[event_type] if item not in action_props
+                        item
+                        for item in props_map[event_type]
+                        if item not in action_props
                     ]
             event_props_dict[action.name] = action_props
 

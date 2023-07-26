@@ -26,7 +26,12 @@ class EventPropertiesSaver(Saver):
 
             for event, props in event_properties.iteritems():
                 logging.info(f"Saving event properties for event {event}")
-                data = {"datasource_id": datasource_id, "event": event, "properties": props, "provider": provider}
+                data = {
+                    "datasource_id": datasource_id,
+                    "event": event,
+                    "properties": props,
+                    "provider": provider,
+                }
                 res = self._save_data(data=data)
 
                 if not res.ok:
