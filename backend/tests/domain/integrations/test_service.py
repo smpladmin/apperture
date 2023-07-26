@@ -1,7 +1,7 @@
-from unittest.mock import AsyncMock, MagicMock, patch, ANY
+from unittest.mock import AsyncMock, MagicMock, patch, ANY, Mock
 from beanie import PydanticObjectId
 import pytest
-from domain.apps.models import App
+from domain.apps.models import App, ClickHouseCredential
 from domain.common.models import IntegrationProvider
 from domain.integrations.models import CredentialType, Integration
 from domain.integrations.service import IntegrationService
@@ -12,11 +12,14 @@ class TestIntegrationService:
         App.get_settings = MagicMock()
         Integration.get_settings = MagicMock()
         Integration.insert = AsyncMock()
-        self.service = IntegrationService()
         self.host = "localhost"
         self.port = "3306"
         self.username = "admin"
         self.password = "password"
+        self.integrations = MagicMock()
+        self.service = IntegrationService(integrations=self.integrations)
+        self.s3_client = MagicMock()
+        self.file = MagicMock()
 
     @pytest.mark.asyncio
     async def test_create_integration(self):
@@ -102,3 +105,22 @@ class TestIntegrationService:
             )
 
             assert result == expected_result
+
+    def test_create_clickhouse_table_from_csv(self):
+        self.integrations.create_table_from_csv.return_value = True
+        self.service.create_clickhouse_table_from_csv(
+            name="test",
+            s3_key="/csvs/app-id/test.csv",
+            clickhouse_credential=ClickHouseCredential(
+                username="user", password="password", databasename="db"
+            ),
+        )
+        self.integrations.create_table_from_csv.assert_called_once_with(
+            **{
+                "db_name": "db",
+                "name": "test",
+                "password": "password",
+                "s3_key": "/csvs/app-id/test.csv",
+                "username": "user",
+            }
+        )

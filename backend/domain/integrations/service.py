@@ -29,6 +29,11 @@ from .models import (
 class IntegrationService:
     def __init__(self, integrations: Integrations = Depends()):
         self.integrations = integrations
+        self.s3_client = boto3.client(
+            "s3",
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        )
 
     async def create_oauth_integration(
         self,
@@ -224,23 +229,13 @@ class IntegrationService:
             )
 
     def upload_csv_to_s3(self, file: UploadFile, s3_key: str):
-        s3_client = boto3.client(
-            "s3",
-            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-        )
-        s3_client.upload_fileobj(
+        self.s3_client.upload_fileobj(
             Fileobj=file.file, Bucket=os.getenv("S3_BUCKET_NAME"), Key=s3_key
         )
         logging.info(f"File uploaded successfully: {s3_key}")
 
     def delete_file_from_s3(self, s3_key: str):
-        s3_client = boto3.client(
-            "s3",
-            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-        )
-        s3_client.delete_object(Bucket=os.getenv("S3_BUCKET_NAME"), Key=s3_key)
+        self.s3_client.delete_object(Bucket=os.getenv("S3_BUCKET_NAME"), Key=s3_key)
 
     def create_clickhouse_table_from_csv(
         self, name: str, clickhouse_credential: ClickHouseCredential, s3_key: str

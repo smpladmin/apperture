@@ -171,7 +171,7 @@ async def check_mysql_connection(
     )
 
 
-@router.post("/csv/upload")
+@router.post("/integrations/csv/upload")
 async def upload_csv(
     file: UploadFile = File(...),
     appId: str = Form(...),
@@ -190,7 +190,7 @@ async def upload_csv(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/csv/create")
+@router.post("/integrations/csv/create")
 async def create_table_with_csv(
     dto: CSVCreateDto,
     integration_service: IntegrationService = Depends(),
@@ -214,7 +214,7 @@ async def create_table_with_csv(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/csv/delete")
+@router.post("/integrations/csv/delete")
 async def delete_file_from_s3(
     dto: DeleteCSVDto,
     integration_service: IntegrationService = Depends(),

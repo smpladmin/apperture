@@ -98,18 +98,18 @@ export const uploadCSV = async (
   formData.append('file', file);
   formData.append('appId', appId);
 
-  const res = await ApperturePost(`/csv/upload`, formData, {
+  const res = await ApperturePost(`/integrations/csv/upload`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
     onUploadProgress: (progressEvent) => {
-      const progress = Math.round(
-        (progressEvent.loaded * 100) / progressEvent.total
+      const progress = Math.min(
+        Math.round((progressEvent.loaded * 100) / progressEvent.total),
+        99
       );
       if (onProgress) {
         onProgress({ progress, isCompleted: false });
       }
-      console.log(`Upload progress: ${progress}%`);
     },
   });
   if (onProgress) {
@@ -119,13 +119,16 @@ export const uploadCSV = async (
 };
 
 export const deleteCSV = async (filename: string) => {
-  const res = await ApperturePost(`/csv/delete`, { filename });
+  const res = await ApperturePost(`/integrations/csv/delete`, { filename });
 };
 
 export const createTableWithCSV = async (
   fileId: string,
   datasourceId: string
 ) => {
-  const res = await ApperturePost(`/csv/create`, { fileId, datasourceId });
+  const res = await ApperturePost(`/integrations/csv/create`, {
+    fileId,
+    datasourceId,
+  });
   return res.status;
 };

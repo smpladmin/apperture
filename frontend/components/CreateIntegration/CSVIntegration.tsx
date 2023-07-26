@@ -110,7 +110,7 @@ const CSVIntegration = () => {
     setUploadedFile(null);
     setUploadInitiated(false);
     setUploadComplete(false);
-    await deleteCSV(uploadedFile?.name as string);
+    // await deleteCSV(uploadedFile?.name as string);
   };
 
   return (
