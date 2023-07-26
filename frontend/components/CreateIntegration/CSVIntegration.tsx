@@ -37,7 +37,7 @@ const CSVIntegration = () => {
       setUploadInitiated(true);
       const appId = router.query.appId as string;
 
-      const fileObj = await uploadCSV(
+      const res = await uploadCSV(
         uploadedFile,
         appId,
         (progressUpdate: UploadProgress) => {
@@ -47,7 +47,17 @@ const CSVIntegration = () => {
           }
         }
       );
-      setUploadedFileId(fileObj._id);
+      if (res.status === 200) {
+        setUploadedFileId(res.data._id);
+      } else {
+        handleClearFile();
+        toast({
+          title: 'An error occurred while uploading the file',
+          status: 'error',
+          variant: 'subtle',
+          isClosable: true,
+        });
+      }
     }
   };
 
@@ -55,38 +65,46 @@ const CSVIntegration = () => {
     setIsLoading(true);
     const appId = router.query.appId as string;
     const provider = router.query.provider as Provider;
-    console.log('id', uploadedFileId);
-    const integration = await createIntegrationWithDataSource(
-      appId,
-      provider,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      uploadedFileId
-    );
-    const statusCode = await createTableWithCSV(
-      uploadedFileId,
-      integration.datasource._id
-    );
-    setIsLoading(false);
-    if (statusCode === 200) {
-      router.replace({
-        pathname: '/analytics/app/[appId]/integration/[provider]/complete',
-        query: {
-          appId: router.query.appId,
-          provider: router.query.provider,
-          dsId: integration.datasource._id,
-        },
-      });
-    } else {
+    if (!uploadedFileId) {
       toast({
-        title: 'Error while loading data from CSV file',
+        title: 'An error occurred while uploading the file',
         status: 'error',
         variant: 'subtle',
         isClosable: true,
       });
+    } else {
+      const integration = await createIntegrationWithDataSource(
+        appId,
+        provider,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        uploadedFileId
+      );
+      const statusCode = await createTableWithCSV(
+        uploadedFileId,
+        integration.datasource._id
+      );
+      setIsLoading(false);
+      if (statusCode === 200) {
+        router.replace({
+          pathname: '/analytics/app/[appId]/integration/[provider]/complete',
+          query: {
+            appId: router.query.appId,
+            provider: router.query.provider,
+            dsId: integration.datasource._id,
+          },
+        });
+      } else {
+        toast({
+          title: 'Error while loading data from CSV file',
+          status: 'error',
+          variant: 'subtle',
+          isClosable: true,
+        });
+      }
     }
   };
 

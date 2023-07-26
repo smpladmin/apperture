@@ -187,6 +187,7 @@ async def upload_csv(
         )
 
     except Exception as e:
+        logging.info(f"Exception occured while uploading csv: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
