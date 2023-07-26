@@ -31,6 +31,7 @@ class FilesService:
             table_name=self.extract_tablename_from_filename(filename=filename),
             s3_key=s3_key,
         )
+        file.updated_at = file.created_at
         await File.insert(file)
         return file
 
