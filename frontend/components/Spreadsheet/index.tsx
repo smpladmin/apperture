@@ -554,12 +554,6 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       : await saveWorkbook(dsId as string, workbookName, sheets);
 
     if (status === 200) {
-      toast({
-        title: `Workbook ${isWorkbookBeingEdited ? 'updated' : 'saved'}.`,
-        status: 'success',
-        variant: 'subtle',
-        isClosable: true,
-      });
       router.push({
         pathname: '/analytics/workbook/edit/[workbookId]',
         query: { workbookId: data?._id || workbookId, dsId },
@@ -567,12 +561,6 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       setSaveButtonDisabled(true);
     } else {
       setSaveButtonDisabled(false);
-      toast({
-        title: 'Something went wrong!',
-        status: 'error',
-        variant: 'subtle',
-        isClosable: true,
-      });
     }
   };
 
