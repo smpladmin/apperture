@@ -230,10 +230,6 @@ class IntegrationService:
             )
 
     def upload_csv_to_s3(self, file: UploadFile, s3_key: str):
-        logging.info(f"S3 client: {self.s3_client}")
-        logging.info(f"s3 key: {s3_key}")
-        logging.info(f"file type: {type(file.file)}")
-        logging.info(f"s3 bucket: {self.s3_bucket_name}")
         self.s3_client.upload_fileobj(
             Fileobj=file.file, Bucket=self.s3_bucket_name, Key=s3_key
         )
