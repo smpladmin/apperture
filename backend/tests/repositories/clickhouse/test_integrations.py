@@ -10,6 +10,9 @@ class TestIntegrationsRepository:
         repo.execute_query_for_restricted_client = MagicMock(return_value=True)
         self.repo = repo
         self.datasource_id = "test-id"
+        self.repo.s3_path='https://apperture-clickhouse-backup.s3.ap-south-1.amazonaws.com/'
+        self.repo.aws_access_key='AKIATCYOZQRYPWO7LPWG'
+        self.repo.aws_secret_access_key='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'
 
     def test_create_table_from_csv(self):
         self.repo.create_table_from_csv(

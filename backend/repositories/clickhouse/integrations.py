@@ -1,10 +1,19 @@
 import logging
 import os
 
+from fastapi import Depends
+
+from clickhouse import Clickhouse
 from repositories.clickhouse.base import EventsBase
 
 
 class Integrations(EventsBase):
+    def __init__(self, clickhouse: Clickhouse = Depends()):
+        super().__init__(clickhouse=clickhouse)
+        self.s3_path = os.getenv("S3_PATH")
+        self.aws_access_key = os.getenv('AWS_ACCESS_KEY_ID')
+        self.aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+
     def create_table_from_csv(
         self, name: str, username: str, password: str, db_name: str, s3_key: str
     ):
@@ -13,8 +22,8 @@ class Integrations(EventsBase):
         drop_query_result = self.execute_query_for_restricted_client(
             query=drop_query, username=username, password=password
         )
-        s3_url = os.getenv("S3_PATH") + s3_key
-        create_query = f"CREATE TABLE {db_name}.{name} ENGINE = MergeTree() ORDER BY tuple() AS SELECT * FROM s3('{s3_url}', '{os.getenv('AWS_ACCESS_KEY_ID')}', '{os.getenv('AWS_SECRET_ACCESS_KEY')}', CSVWithNames)"
+        s3_url = self.s3_path + s3_key
+        create_query = f"CREATE TABLE {db_name}.{name} ENGINE = MergeTree() ORDER BY tuple() AS SELECT * FROM s3('{s3_url}', '{self.aws_access_key}', '{self.aws_secret_access_key}', CSVWithNames)"
         logging.info(f"create query: {create_query}")
         create_query_result = self.execute_query_for_restricted_client(
             query=create_query, username=username, password=password
