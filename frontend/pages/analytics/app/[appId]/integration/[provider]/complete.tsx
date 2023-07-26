@@ -24,18 +24,12 @@ type CompleteIntegrationProps = {
 };
 
 
+
 const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
   const [code, setCode] = useState('');
   const router = useRouter();
   const codeAreaRef = useRef(null);
-  const handleCopyCode = () => {
-  if (codeAreaRef.current) {
-    codeAreaRef.current.select();
-    document.execCommand('copy');
-    console.log('Code copied to clipboard:', code);
-    alert
-  }
-};
+  
   return (
     <Flex
       width={'full'}
@@ -48,7 +42,17 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
       px={{ base: 4, md: 0 }}
     >
       <Flex direction={'column'} alignItems={'center'}>
-      {router.query.provider === "apperture" ? <Box></Box>:
+      {router.query.provider === "apperture" ? <Text
+              fontWeight={'bold'}
+              fontSize={'sh-28'}
+              lineHeight={'sh-28'}
+              marginBottom={'2'}
+              color='grey.800'
+              mb={10}
+            >
+              Simply Copy this script to your website header.
+            </Text>
+        :
         <Image
           src={folder.src}
           pb={10}
@@ -60,39 +64,19 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
         {router.query.provider === "apperture" ? 
             <textarea
             ref={codeAreaRef}
-            rows="6" 
-            cols="100" 
+            rows={6}
+            cols={100}
             value= {`<script>!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);posthog.init('${router.query.dsId}', {api_host: 'https://api.apperture.io/events/capture'})</script>`}
             readOnly
-            style={{ resize: 'none', fontSize: '11px', background: '#212121', borderStyle:'solid',
-                  borderWidth: '2px', borderRadius: '10px', scroll:'hidden', color: '#efefef', padding: '5px'
+            style={{ resize: 'none', fontSize: '11px', background: '#efefef', borderStyle:'solid',
+                  borderWidth: '2px', borderRadius: '10px', color: '#212121', padding: '5px'
                   }}
             p-5
           /> 
 
           :<Box></Box>}
 
-        {router.query.provider === "apperture" ? 
-              <Button
-              variant={'primary'}
-              rounded={'lg'}
-              bg={'white.100'}
-              p={6}
-              fontSize={{ base: 'xs-14', md: 'base' }}
-              lineHeight={{ base: 'xs-14', md: 'base' }}
-              fontWeight={'semibold'}
-              textColor={'grey.800'}
-              onClick={handleCopyCode}
-              mt={5}
-              _hover={{ bg: 'white.100' }}
-              borderStyle='solid'
-              borderWidth={1}
-              borderColor='grey.800'
-            >
-              <Clipboard size={32} />
-            </Button>
-
-          :<Box></Box>}
+      
         
         {router.query.provider === "apperture" ? <Box></Box>
         :
@@ -140,7 +124,7 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
             fontSize={'base'}
             lineHeight={'base'}
           >
-             {router.query.provider === "apperture" ? "Skip for now" : "Go to Home" }
+             {router.query.provider === "apperture" ? "I have a mobile app" : "Go to Home" }
           </Text>
         </Link>
       </Box>

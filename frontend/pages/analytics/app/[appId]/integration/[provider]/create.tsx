@@ -23,6 +23,7 @@ const Create = () => {
         <GooglePermission
           navigateBack={handleGoBack}
           handleClose={handleClose}
+          add={add}
           query={{ ...router.query }}
         />
       );

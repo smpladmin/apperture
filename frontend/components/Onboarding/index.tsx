@@ -215,7 +215,7 @@ export const TopProgress = (props: any) => {
         alignItems="center"
       >
         <Flex flexDirection="row" justifyContent="center" alignItems="center">
-          <i className="ri-checkbox-circle-fill" fontSize="xs-10"></i>
+          <i className="ri-checkbox-circle-fill" ></i>
           <Text fontSize={'xs-12'} fontWeight={500} ml={2} color="grey.900">
             Sign up
           </Text>
@@ -230,7 +230,7 @@ export const TopProgress = (props: any) => {
         alignItems="center"
       >
         <Flex flexDirection="row" justifyContent="center" alignItems="center">
-          <i className="ri-checkbox-circle-fill" fontSize="xs-10"></i>
+          <i className="ri-checkbox-circle-fill" ></i>
           <Text fontSize={'xs-12'} fontWeight={500} ml={2} color="grey.900">
             Set up Workspace
           </Text>
@@ -282,7 +282,7 @@ export const TopProgress0 = (props: any) => {
         alignItems="center"
       >
         <Flex flexDirection="row" justifyContent="center" alignItems="center">
-          <i className="ri-checkbox-circle-fill" fontSize="xs-10"></i>
+          <i className="ri-checkbox-circle-fill" ></i>
           <Text fontSize={'xs-12'} fontWeight={500} ml={2} color="grey.900">
             Sign up
           </Text>

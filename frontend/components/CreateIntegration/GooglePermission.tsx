@@ -18,6 +18,7 @@ import {
 type GooglePermissionProps = {
   navigateBack: Function;
   handleClose: Function;
+  add: string | string[] | undefined;
   query: {
     [key in string]: string | string[] | undefined;
   };
@@ -27,6 +28,7 @@ const GooglePermission = ({
   navigateBack,
   handleClose,
   query,
+  add,
 }: GooglePermissionProps) => {
   const link = `${BACKEND_BASE_URL}/integrations/oauth/google?app_id=${query.appId}&redirect_url=${FRONTEND_BASE_URL}/analytics/app/${query.appId}/integration/google/apps`;
   const oauthUrl =
