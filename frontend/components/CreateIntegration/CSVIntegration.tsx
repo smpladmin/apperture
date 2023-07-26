@@ -33,7 +33,10 @@ type CSVIntegrationProps = {
   add: string | string[] | undefined;
 };
 
-const CSVIntegration = ({add,}) => {
+const CSVIntegration = ({
+  add,
+  handleClose,
+}: CSVIntegrationProps) => {
   const router = useRouter();
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
