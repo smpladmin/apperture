@@ -678,11 +678,12 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   };
 
   const getProperties = useMemo(() => {
-    const dsId = sheetsData[selectedSheetIndex].meta?.dsId;
+    const datasourceId =
+      sheetsData[selectedSheetIndex]?.meta?.dsId || (dsId as string);
     for (let connection of connections) {
       for (let connectionGroup of connection.connection_data) {
         for (let connectionSource of connectionGroup.connection_source) {
-          if (connectionSource.datasource_id === dsId) {
+          if (connectionSource.datasource_id === datasourceId) {
             return connectionSource.fields;
           }
         }
