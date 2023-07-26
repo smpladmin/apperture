@@ -71,9 +71,7 @@ class EventsStrategyBuilder:
                 )
             },
             IntegrationProvider.API: {
-                "DEFAULT": APIDataStrategy(
-                    datasource, credential, runlog_id, date
-                )
+                "DEFAULT": APIDataStrategy(datasource, credential, runlog_id, date)
             },
         }
         if not strategies[datasource.provider][datasource.version]:

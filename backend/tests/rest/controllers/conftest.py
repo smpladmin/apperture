@@ -29,6 +29,7 @@ from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
 from domain.event_properties.models import EventProperties
 from domain.events.models import Event, PaginatedEventsData
+from domain.files.models import File
 from domain.funnels.models import (
     ComputedFunnel,
     ComputedFunnelStep,
@@ -37,7 +38,12 @@ from domain.funnels.models import (
     FunnelEventUserData,
     FunnelTrendsData,
 )
-from domain.integrations.models import Credential, CredentialType, Integration
+from domain.integrations.models import (
+    Credential,
+    CredentialType,
+    Integration,
+    CSVCredential,
+)
 from domain.metrics.models import (
     ComputedMetricData,
     ComputedMetricStep,
@@ -910,6 +916,39 @@ def clickstream_event_properties_service():
     ]
 
     return clickstream_event_properties_service_mock
+
+
+@pytest.fixture(scope="module")
+def files_service():
+    files_service_mock = mock.MagicMock()
+    File.get_settings = mock.MagicMock()
+    files_service_mock.build_s3_key.return_value = (
+        "/csv/636a1c61d715ca6baae65611/test.csv"
+    )
+    file_future = asyncio.Future()
+    file_future.set_result(
+        File(
+            filename="test.csv",
+            filetype="csv",
+            app_id="636a1c61d715ca6baae65611",
+            s3_key="/csv/636a1c61d715ca6baae65611/test.csv",
+            table_name="test",
+            enabled=True,
+        )
+    )
+    csv_credential_future = asyncio.Future()
+    csv_credential_future.set_result(
+        CSVCredential(
+            name="test.csv",
+            s3_key="/csv/636a1c61d715ca6baae65611/test.csv",
+            table_name="test",
+        )
+    )
+    files_service_mock.add_file.return_value = file_future
+    files_service_mock.get_file.return_value = file_future
+    files_service_mock.get_csv_credential.return_value = csv_credential_future
+
+    return files_service_mock
 
 
 @pytest.fixture(scope="module")
@@ -2222,6 +2261,8 @@ def integration_service():
     integration_future.set_result(integration)
     integration_service_mock.create_integration.return_value = integration_future
     integration_service_mock.test_mysql_connection.return_value = True
+    integration_service_mock.upload_csv_to_s3.return_value = None
+    integration_service_mock.create_clickhouse_table_from_csv.return_value = True
     return integration_service_mock
 
 
@@ -2256,6 +2297,19 @@ def database_integration_data():
 
 
 @pytest.fixture(scope="module")
+def csv_integration_data():
+    return {
+        "appId": "636a1c61d715ca6baae65611",
+        "accountId": None,
+        "apiKey": None,
+        "apiSecret": None,
+        "provider": IntegrationProvider.MYSQL,
+        "databaseCredential": None,
+        "csvFileId": "636a1c61d715ca6baae65615",
+    }
+
+
+@pytest.fixture(scope="module")
 def database_credential_data():
     return {
         "host": "127.0.0.1",
@@ -2280,6 +2334,7 @@ def integration_response():
             "tableName": "",
             "type": "API_KEY",
             "mysql_credential": None,
+            "csv_credential": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",

@@ -26,6 +26,7 @@ from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.event_properties.service import EventPropertiesService
 from domain.events.service import EventsService
+from domain.files.service import FilesService
 from domain.funnels.service import FunnelsService
 from domain.integrations.service import IntegrationService
 from domain.metrics.service import MetricService
@@ -66,6 +67,7 @@ def app_init(
     spreadsheets_service,
     clickstream_event_properties_service,
     datamart_service,
+    files_service,
 ):
     print("Setting up App")
     app.dependency_overrides[validate_jwt] = lambda: mock.MagicMock()
@@ -93,6 +95,7 @@ def app_init(
     app.dependency_overrides[RetentionService] = lambda: retention_service
     app.dependency_overrides[EventPropertiesService] = lambda: event_properties_service
     app.dependency_overrides[SpreadsheetService] = lambda: spreadsheets_service
+    app.dependency_overrides[FilesService] = lambda: files_service
     app.dependency_overrides[
         ClickStreamEventPropertiesService
     ] = lambda: clickstream_event_properties_service
