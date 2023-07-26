@@ -20,8 +20,20 @@ import {
 import { UploadProgress } from '@lib/domain/integration';
 import { ClipboardText, X } from 'phosphor-react';
 import { CloudArrowUp } from '@phosphor-icons/react';
+import {
+  TopProgress,
+  IntegrationContainer,
+  LeftContainer,
+  RightContainer,
+  LeftContainerRevisit,
+} from '@components/Onboarding';
 
-const CSVIntegration = () => {
+type CSVIntegrationProps = {
+  handleClose: Function;
+  add: string | string[] | undefined;
+};
+
+const CSVIntegration = ({add,}) => {
   const router = useRouter();
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -30,6 +42,8 @@ const CSVIntegration = () => {
   const [uploadInitiated, setUploadInitiated] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [progress, setProgress] = useState<number>(0);
+
+  const handleGoBack = (): void => router.back();
 
   const handleUpload = async () => {
     if (uploadedFile) {
@@ -113,14 +127,26 @@ const CSVIntegration = () => {
   };
 
   return (
-    <Flex direction={'column'} alignItems={'center'} gap={48} margin={162}>
+    <IntegrationContainer >
+      
+        { add ? <LeftContainerRevisit/> : <LeftContainer /> }
+     
+      <RightContainer>
+          <Flex flexDirection="column" alignItems="center">
+            { add ? <Box mt={10}></Box> : <TopProgress handleGoBack={handleGoBack} /> }
+            <Flex
+              direction={'column'}
+              h={'full'}
+              justifyContent={{ base: 'space-between', md: 'start' }}
+            >
+    <Flex direction={'column'} alignItems={'center'} gap={8} margin={8}>
       <Text
         color={'grey.900'}
         fontSize={'sh-28'}
         lineHeight={'base'}
         fontWeight={700}
       >
-        Connect data source
+        Upload a CSV File
       </Text>
 
       {uploadInitiated ? (
@@ -280,6 +306,10 @@ const CSVIntegration = () => {
         </Flex>
       )}
     </Flex>
+    </Flex>
+    </Flex>
+  </RightContainer>
+</IntegrationContainer>
   );
 };
 

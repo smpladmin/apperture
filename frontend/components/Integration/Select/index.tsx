@@ -76,6 +76,15 @@ const SelectProvider = () => {
     });
   };
 
+  const handleCSVUploadClick = async () => {
+    const queryParams = { appId, ...router.query };
+
+    router.push({
+      pathname: `/analytics/app/[appId]/integration/csv/create`,
+      query: queryParams,
+    });
+  };
+
   return (
     <IntegrationContainer >
       
@@ -114,6 +123,8 @@ const SelectProvider = () => {
               display="flex"
               alignItems="center"
               mt={10}
+              onClick={handleCSVUploadClick}
+              cursor={'pointer'}
             >
               <FileArrowUp size={30} color="#212121" />
               <Box flex="1" minW="150" pl={2}>
