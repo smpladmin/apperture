@@ -1,11 +1,18 @@
 from typing import List
 
+from fastapi.params import Depends
+
 from domain.common.models import IntegrationProvider
 from domain.connections.models import ConnectionGroup, Connections, ConnectionSource
 from domain.datasources.models import DataSource, ProviderDataSource
+from repositories.clickhouse.connection import Connection
+from repositories.clickhouse.my_sql import MySql
 
 
 class ConnectionService:
+    def __init__(self, connection: Connection = Depends()):
+        self.connection = connection
+
     def get_clickhouse_connection_group(
         self, clickhouse_connection_table, properties_table
     ):
@@ -52,25 +59,34 @@ class ConnectionService:
             else None
         )
 
-    def get_mysql_connection_group(self, mysql_connections, properties_table: dict):
-        connection_data = []
-        group = ConnectionGroup(
-            provider=IntegrationProvider.MYSQL, connection_source=[]
-        )
-        for datasource in mysql_connections:
-            source = self.get_my_sql_connection_sources(
-                datasource, properties_table[str(datasource.id)]
+    def get_mysql_connection_group(self, mysql_connections, credentials_table: dict):
+        data = []
+        for index, datasource in enumerate(mysql_connections):
+            creds = credentials_table[str(datasource.id)]
+            connection_table = self.connection.get_sql_connection_sources_by_dsid(
+                datasource.id,
+                creds,
             )
-            group.connection_source.append(source) if source else None
-        connection_data.append(group) if group and group.connection_source else None
-        return (
-            Connections(server="MySQL", connection_data=connection_data)
-            if connection_data
-            else []
-        )
+            for database, connections in connection_table.items():
+                if database and connections:
+                    data.append(
+                        Connections(
+                            server=f"MySQL {index+1}",
+                            connection_data=[
+                                ConnectionGroup(
+                                    provider=database,
+                                    connection_source=connections,
+                                )
+                            ],
+                        )
+                    )
+        return data
 
     def get_connections_from_datasources(
-        self, datasources: List[DataSource], properties_table: dict
+        self,
+        datasources: List[DataSource],
+        properties_table: dict,
+        credentials_table: dict,
     ):
         clickhouse_connection_table = {}
         mysql_connections = []
@@ -86,7 +102,7 @@ class ConnectionService:
             properties_table=properties_table,
         )
         mysql_server_connections = self.get_mysql_connection_group(
-            mysql_connections=mysql_connections, properties_table=properties_table
+            mysql_connections=mysql_connections, credentials_table=credentials_table
         )
 
         connections_list = []
@@ -94,6 +110,6 @@ class ConnectionService:
         if clickhouse_server_connections:
             connections_list.append(clickhouse_server_connections)
         if mysql_server_connections:
-            connections_list.append(mysql_server_connections)
+            connections_list.extend(mysql_server_connections)
 
         return connections_list

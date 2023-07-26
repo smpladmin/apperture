@@ -223,38 +223,6 @@ class IntegrationService:
             )
         )
 
-    def get_table_columns(self, connection, table_name) -> List[str]:
-        fields = []
-        with connection:
-            with connection.cursor() as cursor:
-                cursor.execute(f"DESCRIBE {table_name}")
-                results = cursor.fetchall()
-                for result in results:
-                    fields.append(result[0])
-        return fields
-
     async def get_mysql_connection_details(self, id):
         integration = await self.get_integration(id)
-        if integration.credential.tableName and integration.credential.database:
-            credential = integration.credential
-            details = {
-                "database": credential.database,
-                "table_name": credential.tableName,
-            }
-            try:
-                connection = self.get_mysql_connection(
-                    host=credential.mysql_credential.host,
-                    port=int(credential.mysql_credential.port),
-                    username=credential.mysql_credential.username,
-                    password=credential.mysql_credential.password,
-                    database=credential.database,
-                )
-                details["fields"] = self.get_table_columns(
-                    connection, credential.tableName
-                )
-                return details
-
-            except Exception as e:
-                logging.info(f"Failed to connect to MySQL database with exception: {e}")
-
-        return None
+        return integration.credential.mysql_credential

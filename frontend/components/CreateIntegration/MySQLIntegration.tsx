@@ -33,7 +33,6 @@ type FormData = {
   port: string;
   username: string;
   password: string;
-  database: string;
   table: string;
   overSsh: boolean;
   sshServer: string;
@@ -105,7 +104,6 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
       undefined,
       undefined,
       data.table,
-      data.database,
       mySQLCredential as MySQLCredential
     );
     router.replace({
@@ -146,7 +144,6 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
       username: '',
       password: '',
       table: '',
-      database: '',
       sshServer: '',
       sshPort: '22',
       sshUsername: '',
@@ -259,23 +256,6 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
                 register={register}
                 inputStyle={{ placeholder: 'password', width: '50' }}
               />
-              <FormInputField
-                fieldName="database"
-                label="Database"
-                errors={errors}
-                handleChange={handleChange}
-                register={register}
-                inputStyle={{ placeholder: 'database', width: '50' }}
-              />
-              <FormInputField
-                fieldName="table"
-                label="Table"
-                errors={errors}
-                handleChange={handleChange}
-                register={register}
-                inputStyle={{ placeholder: 'table', width: '50' }}
-              />
-
               <FormCheckboxField
                 fieldName="overSsh"
                 label="Over SSH"
