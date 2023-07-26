@@ -10,6 +10,8 @@ import { Provider } from '@lib/domain/provider';
 import { BLACK } from '@theme/index';
 import { useRouter } from 'next/router';
 import { useCallback, useState } from 'react';
+import uploadIcon from '@assets/icons/CloudArrowUp.svg';
+import Image from 'next/image';
 import { useDropzone } from 'react-dropzone';
 import {
   createIntegrationWithDataSource,
@@ -19,7 +21,6 @@ import {
 } from '@lib/services/integrationService';
 import { UploadProgress } from '@lib/domain/integration';
 import { ClipboardText, X } from 'phosphor-react';
-import { CloudArrowUp } from '@phosphor-icons/react';
 
 const CSVIntegration = () => {
   const router = useRouter();
@@ -206,7 +207,12 @@ const CSVIntegration = () => {
             {...getRootProps()}
             width={'100%'}
           >
-            <CloudArrowUp size={54} />
+            <Image
+              width={'54px'}
+              height={'54px'}
+              src={uploadIcon}
+              alt="uploadIcon"
+            />
             <input {...getInputProps()} />
             {isDragActive ? (
               <Text color="teal.500">Drop the file here</Text>
