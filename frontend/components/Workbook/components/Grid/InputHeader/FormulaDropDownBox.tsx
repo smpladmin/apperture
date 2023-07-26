@@ -12,7 +12,7 @@ import { Compatible } from '@silevis/reactgrid';
 import { BLUE_MAIN, GREY_600, WHITE_DEFAULT } from '@theme/index';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Function, Plus, SquaresFour } from 'phosphor-react';
-import { ColumnType, SubHeaderColumnType } from '@lib/domain/workbook';
+import { SubHeaderColumnType } from '@lib/domain/workbook';
 import {
   DimensionParser,
   FormulaParser,
@@ -80,9 +80,16 @@ const FormulaDropDownBox = ({
   const router = useRouter();
   const { dsId } = router.query;
 
+  useEffect(() => {
+    setFormula(cell.text);
+  }, [cell.text]);
+
   const handleSubmitFormula = () => {
     if (formula) {
-      if (cell.columnType === SubHeaderColumnType.DIMENSION) {
+      if (
+        !formula.match(/^unique/) &&
+        cell.columnType === SubHeaderColumnType.DIMENSION
+      ) {
         toast({
           title: `Dimension column does not accept BODMAS equation`,
           status: 'error',
@@ -279,7 +286,7 @@ const FormulaDropDownBox = ({
     const regex = /(?<name>[^\(]*)\(?/;
     const name = input.match(regex)?.groups?.name || '';
     if (
-      cell.showAddButton &&
+      cell?.showSuggestions &&
       name &&
       ['count', 'countif', 'unique'].some(
         (fname) =>
@@ -418,6 +425,7 @@ const FormulaDropDownBox = ({
             handleAddHeader();
             e.stopPropagation();
           }}
+          disabled={!!cell?.disableAddButton}
         >
           <Plus color={WHITE_DEFAULT} size={16} />
         </Button>

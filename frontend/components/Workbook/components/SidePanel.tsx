@@ -12,21 +12,23 @@ type SidePanelProps = {
   showColumns: boolean;
   sheetsData: TransientSheetData[];
   selectedSheetIndex: number;
-  setShowEmptyState: Function;
   setSheetsData: Function;
   setShowSqlEditor: Function;
   setShowColumns: Function;
+  evaluateFormulaHeader: Function;
+  addDimensionColumn: Function;
 };
 
 const SidePanel = ({
   connections,
   sheetsData,
   showColumns,
-  setShowEmptyState,
   setSheetsData,
   selectedSheetIndex,
   setShowSqlEditor,
   setShowColumns,
+  evaluateFormulaHeader,
+  addDimensionColumn,
 }: SidePanelProps) => {
   const [isSidePanelCollapsed, setIsSidePanelCollapsed] = useState(false);
   const [connectorData, setConnectorData] = useState<
@@ -59,8 +61,9 @@ const SidePanel = ({
               connectorData={connectorData}
               selectedSheetIndex={selectedSheetIndex}
               setShowColumns={setShowColumns}
-              setShowEmptyState={setShowEmptyState}
               setSheetsData={setSheetsData}
+              evaluateFormulaHeader={evaluateFormulaHeader}
+              addDimensionColumn={addDimensionColumn}
             />
           ) : (
             <Connections

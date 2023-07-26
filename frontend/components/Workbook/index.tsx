@@ -17,9 +17,15 @@ import {
   TransientSheetData,
   Workbook,
 } from '@lib/domain/workbook';
-import { Box, Flex, useDisclosure, useToast } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  useDisclosure,
+  usePrevious,
+  useToast,
+} from '@chakra-ui/react';
 import SidePanel from './components/SidePanel';
-import Grid from '@components/Spreadsheet/components/Grid/Grid';
+import Grid from '@components/Workbook/components/Grid/Grid';
 import Footer from '@components/Workbook/components/Footer';
 import QueryEditor from './components/QueryEditor';
 import SelectSheet from './components/SelectSheet';
@@ -29,7 +35,9 @@ import { cloneDeep } from 'lodash';
 import {
   evaluateExpression,
   expressionTokenRegex,
+  getSubheaders,
   isOperand,
+  isSheetPivotOrBlank,
   isdigit,
 } from './util';
 import { DimensionParser, Metricparser } from '@lib/utils/parser';
@@ -44,15 +52,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
       data: [],
       subHeaders: sheet.subHeaders
         ? sheet.subHeaders
-        : Array.from({ length: 27 }).map((_, index) => {
-            return {
-              name: '',
-              type:
-                index === 1 || index === 2
-                  ? SubHeaderColumnType.DIMENSION
-                  : SubHeaderColumnType.METRIC,
-            };
-          }),
+        : getSubheaders(sheet?.sheet_type),
       edit_mode: sheet?.edit_mode || true,
       sheet_type: SheetType.SIMPLE_SHEET,
       meta: sheet?.meta || {
@@ -67,15 +67,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
       query: '',
       data: [],
       headers: [],
-      subHeaders: Array.from({ length: 27 }).map((_, index) => {
-        return {
-          name: '',
-          type:
-            index === 1 || index === 2
-              ? SubHeaderColumnType.DIMENSION
-              : SubHeaderColumnType.METRIC,
-        };
-      }),
+      subHeaders: getSubheaders(SheetType.SIMPLE_SHEET),
       is_sql: true,
       sheet_type: SheetType.SIMPLE_SHEET,
       edit_mode: false,
@@ -103,13 +95,11 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const [showColumns, setShowColumns] = useState(false);
   const [triggerSheetFetch, setTriggerSheetFetch] = useState(1);
   const [fetchingTransientSheet, setFetchingTransientSheet] = useState(false);
-
   const [requestTranisentColumn, setRequestTransientColumn] =
     useState<TransientColumnRequestState>({
       isLoading: false,
       subheaders: [],
     });
-
   const [loadBODMASColumn, setloadBODMASColumn] = useState<{
     loading: boolean;
     data: TransientSheetData | null;
@@ -117,6 +107,8 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     loading: false,
     data: null,
   });
+
+  const prevSheetsData = usePrevious(sheetsData);
 
   const {
     isOpen: showSelectSheetOverlay,
@@ -128,6 +120,10 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const { dsId, workbookId } = router.query;
 
   useEffect(() => {
+    if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
+  }, []);
+
+  useEffect(() => {
     const fetchConnections = async () => {
       const res = await getConnectionsForApp(dsId as string);
       setConnections(res);
@@ -136,18 +132,23 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   }, [dsId]);
 
   useEffect(() => {
-    if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
-  }, []);
+    // update empty sheet based on sheet query and its type
+    const sheet = sheetsData[selectedSheetIndex];
+    const isSheetEmpty = !(
+      sheet?.query || sheet?.sheet_type === SheetType.PIVOT_SHEET
+    );
+    setShowEmptyState(isSheetEmpty);
+  }, [
+    sheetsData[selectedSheetIndex]?.query,
+    sheetsData[selectedSheetIndex]?.sheet_type,
+  ]);
 
   const fetchTransientSheetData = async (abortController?: AbortController) => {
     const sheet = sheetsData[selectedSheetIndex];
 
-    if (sheet?.query) setShowEmptyState(false);
-    if (sheet.is_sql && (!sheet?.query || sheet.edit_mode)) return;
-
     setFetchingTransientSheet(true);
     const response = await getTransientSpreadsheets(
-      sheet.meta?.dsId || (dsId as string),
+      sheet?.meta?.dsId || (dsId as string),
       sheet.query,
       sheet?.is_sql,
       sheet.word_replacements,
@@ -159,7 +160,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
       toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
       setSheetsData(toUpdateSheets);
-    } else {
+    } else if (!sheet.is_sql) {
       toast({
         title: 'Something went wrong, try another prompt',
         status: 'error',
@@ -171,6 +172,17 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   };
 
   useEffect(() => {
+    const sheet = sheetsData[selectedSheetIndex];
+    const prevSheet = prevSheetsData?.[selectedSheetIndex];
+
+    const isSqlSheet = sheet?.is_sql;
+    const hasDifferentQuery = sheet.query !== prevSheet?.query;
+    const hasEditMode = sheet?.edit_mode;
+
+    if ((isSqlSheet && (!sheet.query || hasEditMode)) || !hasDifferentQuery) {
+      return;
+    }
+
     const abortController = new AbortController();
     fetchTransientSheetData(abortController);
     return () => {
@@ -361,7 +373,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       table = 'events';
 
     const response = await getWorkbookTransientColumn(
-      dsId as string,
+      sheetsData[selectedSheetIndex]?.meta?.dsId || (dsId as string),
       dimensions.map((dimension) => DimensionParser().parse(dimension.name)),
       metrics.map((metric) => Metricparser().parse(metric.name)),
       database,
@@ -433,7 +445,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const getHeaderIndex = (sheetData: TransientSheetData, columnId: string) => {
     const existingHeaders = sheetData?.headers;
 
-    const existingHeaderIndex = existingHeaders.findIndex(
+    const existingHeaderIndex = existingHeaders.findLastIndex(
       (header) => header.name === columnId
     );
 
@@ -508,11 +520,11 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     (headerText: string, columnId: string) => {
       const sheetData = sheetsData[selectedSheetIndex];
 
-      const isBlankSheet = !sheetData.is_sql && !sheetData.query;
+      const isBlankOrPivotSheet = isSheetPivotOrBlank(sheetData);
       const index = getHeaderIndex(sheetData, columnId);
 
       if (headerText.match(/^[unique|count]/)) {
-        if (isBlankSheet)
+        if (isBlankOrPivotSheet)
           try {
             if (
               sheetData.subHeaders[index].type === SubHeaderColumnType.DIMENSION
@@ -627,7 +639,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
   const addDimensionColumn = (columnId: string) => {
     const tempSheetsData = cloneDeep(sheetsData);
-    const index = columnId.charCodeAt(0) - 65 + 1;
+    const index = getHeaderIndex(sheetsData[selectedSheetIndex], columnId);
 
     /**
      * 1. Remove last subheader, keeping them constant to 27 for now.
@@ -635,7 +647,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
      * 3. TODO: Shift columns and data.
      */
     tempSheetsData[selectedSheetIndex].subHeaders.splice(-1);
-    tempSheetsData[selectedSheetIndex].subHeaders.splice(index, 0, {
+    tempSheetsData[selectedSheetIndex].subHeaders.splice(index + 1, 0, {
       name: '',
       type: SubHeaderColumnType.DIMENSION,
     });
@@ -679,6 +691,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             closeSelectSheetOverlay={closeSelectSheetOverlay}
             sheetsData={sheetsData}
             setSheetsData={setSheetsData}
+            selectedSheetIndex={selectedSheetIndex}
             setSelectedSheetIndex={setSelectedSheetIndex}
           />
         ) : null}
@@ -689,8 +702,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           selectedSheetIndex={selectedSheetIndex}
           sheetsData={sheetsData}
           setSheetsData={setSheetsData}
-          setShowEmptyState={setShowEmptyState}
           setShowSqlEditor={setShowSqlEditor}
+          evaluateFormulaHeader={evaluateFormulaHeader}
+          addDimensionColumn={addDimensionColumn}
         />
 
         <Box h={'full'} w={'full'} overflowY={'auto'}>
@@ -705,7 +719,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           {showEmptyState ? (
             <EmptySheet />
           ) : (
-            <Box overflow={'auto'} h={'full'}>
+            <Box overflow={'auto'} h={'full'} pb={'8'}>
               {hasQueryWithoutData ? (
                 <Flex
                   h={'full'}
