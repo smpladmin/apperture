@@ -1,4 +1,4 @@
-import { MySQLCredential } from '@lib/domain/integration';
+import { MySQLCredential, UploadProgress } from '@lib/domain/integration';
 import { AxiosRequestConfig } from 'axios';
 import { ApperturePost, ApperturePrivateGet } from './util';
 import { ProviderDataSource } from '@lib/domain/datasource';
@@ -12,31 +12,34 @@ type IntegrationRequestBody = {
   apiSecret?: string;
   tableName?: string;
   mySQLCredential?: MySQLCredential;
+  csvFileId?: string;
 };
 
 export const createIntegrationWithDataSource = async (
   appId: string,
   provider: Provider,
-
   accountId?: string,
   apiKey?: string,
   apiSecret?: string,
   tableName?: string,
   mySQLCredential?: MySQLCredential,
+  csvFileId?: string,
   config: AxiosRequestConfig = {
     params: {
       create_datasource: true,
-      trigger_data_processor: !mySQLCredential,
+      trigger_data_processor: !(mySQLCredential || csvFileId),
     },
   }
 ) => {
-  const integrationRequestBody: IntegrationRequestBody = mySQLCredential
-    ? {
-        appId,
-        provider,
-        mySQLCredential,
-      }
-    : { appId, provider, accountId, apiKey, apiSecret,tableName };
+  const integrationRequestBody: IntegrationRequestBody =
+    mySQLCredential || csvFileId
+      ? {
+          appId,
+          provider,
+          mySQLCredential,
+          csvFileId,
+        }
+      : { appId, provider, accountId, apiKey, apiSecret, tableName };
 
   const res = await ApperturePost(
     '/integrations',
@@ -84,4 +87,48 @@ export const saveDataSources = async (
 export const testMySQLConnection = async (mySQLCredential: MySQLCredential) => {
   const res = await ApperturePost(`/integrations/mysql/test`, mySQLCredential);
   return res.data;
+};
+
+export const uploadCSV = async (
+  file: File,
+  appId: string,
+  onProgress?: (progress: UploadProgress) => void
+) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('appId', appId);
+
+  const res = await ApperturePost(`/integrations/csv/upload`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    onUploadProgress: (progressEvent) => {
+      const progress = Math.min(
+        Math.round((progressEvent.loaded * 100) / progressEvent.total),
+        99
+      );
+      if (onProgress) {
+        onProgress({ progress, isCompleted: false });
+      }
+    },
+  });
+  if (onProgress) {
+    onProgress({ progress: 100, isCompleted: true });
+  }
+  return res.data;
+};
+
+export const deleteCSV = async (filename: string) => {
+  const res = await ApperturePost(`/integrations/csv/delete`, { filename });
+};
+
+export const createTableWithCSV = async (
+  fileId: string,
+  datasourceId: string
+) => {
+  const res = await ApperturePost(`/integrations/csv/create`, {
+    fileId,
+    datasourceId,
+  });
+  return res.status;
 };

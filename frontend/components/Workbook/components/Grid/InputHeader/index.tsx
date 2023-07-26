@@ -17,6 +17,8 @@ export interface InputHeaderCell extends Cell {
   addHeader?: boolean;
   columnType?: SubHeaderColumnType;
   properties: string[];
+  showSuggestions?: boolean;
+  disableAddButton?: boolean;
 }
 
 export class InputHeaderTemplate implements CellTemplate<InputHeaderCell> {

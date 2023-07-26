@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import WorkbookHeader from './components/Header';
 import {
   getTransientSpreadsheets,
@@ -17,9 +17,15 @@ import {
   TransientSheetData,
   Workbook,
 } from '@lib/domain/workbook';
-import { Box, Flex, useDisclosure, useToast } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  useDisclosure,
+  usePrevious,
+  useToast,
+} from '@chakra-ui/react';
 import SidePanel from './components/SidePanel';
-import Grid from '@components/Spreadsheet/components/Grid/Grid';
+import Grid from '@components/Workbook/components/Grid/Grid';
 import Footer from '@components/Workbook/components/Footer';
 import QueryEditor from './components/QueryEditor';
 import SelectSheet from './components/SelectSheet';
@@ -29,13 +35,15 @@ import { cloneDeep } from 'lodash';
 import {
   evaluateExpression,
   expressionTokenRegex,
+  getSubheaders,
   isOperand,
+  isSheetPivotOrBlank,
   isdigit,
 } from './util';
 import { DimensionParser, Metricparser } from '@lib/utils/parser';
 import { Connection } from '@lib/domain/connections';
-import { getEventProperties } from '@lib/services/datasourceService';
 import LoadingSpinner from '@components/LoadingSpinner';
+import AIButton from '@components/AIButton';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -44,15 +52,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
       data: [],
       subHeaders: sheet.subHeaders
         ? sheet.subHeaders
-        : Array.from({ length: 27 }).map((_, index) => {
-            return {
-              name: '',
-              type:
-                index === 1 || index === 2
-                  ? SubHeaderColumnType.DIMENSION
-                  : SubHeaderColumnType.METRIC,
-            };
-          }),
+        : getSubheaders(sheet?.sheet_type),
       edit_mode: sheet?.edit_mode || true,
       sheet_type: SheetType.SIMPLE_SHEET,
       meta: sheet?.meta || {
@@ -67,15 +67,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
       query: '',
       data: [],
       headers: [],
-      subHeaders: Array.from({ length: 27 }).map((_, index) => {
-        return {
-          name: '',
-          type:
-            index === 1 || index === 2
-              ? SubHeaderColumnType.DIMENSION
-              : SubHeaderColumnType.METRIC,
-        };
-      }),
+      subHeaders: getSubheaders(SheetType.SIMPLE_SHEET),
       is_sql: true,
       sheet_type: SheetType.SIMPLE_SHEET,
       edit_mode: false,
@@ -101,14 +93,13 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   );
   const [connections, setConnections] = useState<Connection[]>([]);
   const [showColumns, setShowColumns] = useState(false);
-  const [eventProperties, setEventProperties] = useState<string[]>([]);
-
+  const [triggerSheetFetch, setTriggerSheetFetch] = useState(1);
+  const [fetchingTransientSheet, setFetchingTransientSheet] = useState(false);
   const [requestTranisentColumn, setRequestTransientColumn] =
     useState<TransientColumnRequestState>({
       isLoading: false,
       subheaders: [],
     });
-
   const [loadBODMASColumn, setloadBODMASColumn] = useState<{
     loading: boolean;
     data: TransientSheetData | null;
@@ -116,6 +107,8 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     loading: false,
     data: null,
   });
+
+  const prevSheetsData = usePrevious(sheetsData);
 
   const {
     isOpen: showSelectSheetOverlay,
@@ -127,6 +120,10 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const { dsId, workbookId } = router.query;
 
   useEffect(() => {
+    if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
+  }, []);
+
+  useEffect(() => {
     const fetchConnections = async () => {
       const res = await getConnectionsForApp(dsId as string);
       setConnections(res);
@@ -135,33 +132,68 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   }, [dsId]);
 
   useEffect(() => {
+    // update empty sheet based on sheet query and its type
+    const sheet = sheetsData[selectedSheetIndex];
+    const isSheetEmpty = !(
+      sheet?.query || sheet?.sheet_type === SheetType.PIVOT_SHEET
+    );
+    setShowEmptyState(isSheetEmpty);
+  }, [
+    sheetsData[selectedSheetIndex]?.query,
+    sheetsData[selectedSheetIndex]?.sheet_type,
+  ]);
+
+  const fetchTransientSheetData = async (abortController?: AbortController) => {
     const sheet = sheetsData[selectedSheetIndex];
 
-    if (sheet?.query) setShowEmptyState(false);
-    if (!sheet?.query || sheet.edit_mode) return;
+    setFetchingTransientSheet(true);
+    const response = await getTransientSpreadsheets(
+      sheet?.meta?.dsId || (dsId as string),
+      sheet.query,
+      sheet?.is_sql,
+      sheet.word_replacements,
+      abortController?.signal
+    );
+
+    if (response.status === 200) {
+      const toUpdateSheets = cloneDeep(sheetsData);
+      toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
+      toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
+      setSheetsData(toUpdateSheets);
+    } else if (!sheet.is_sql) {
+      toast({
+        title: 'Something went wrong, try another prompt',
+        status: 'error',
+        variant: 'subtle',
+        isClosable: true,
+      });
+    }
+    setFetchingTransientSheet(false);
+  };
+
+  useEffect(() => {
+    const sheet = sheetsData[selectedSheetIndex];
+    const prevSheet = prevSheetsData?.[selectedSheetIndex];
+
+    const isSqlSheet = sheet?.is_sql;
+    const hasDifferentQuery = sheet.query !== prevSheet?.query;
+    const hasEditMode = sheet?.edit_mode;
+
+    if ((isSqlSheet && (!sheet.query || hasEditMode)) || !hasDifferentQuery) {
+      return;
+    }
+
     const abortController = new AbortController();
-
-    const { signal } = abortController;
-
-    const fetchTransientSheetData = async () => {
-      const response = await getTransientSpreadsheets(
-        dsId as string,
-        sheet.query,
-        sheet?.is_sql,
-        signal
-      );
-
-      if (response.status === 200) {
-        const toUpdateSheets = cloneDeep(sheetsData);
-        toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
-        toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
-        setSheetsData(toUpdateSheets);
-      }
+    fetchTransientSheetData(abortController);
+    return () => {
+      setFetchingTransientSheet(false);
+      abortController.abort();
     };
-
-    fetchTransientSheetData();
-    return () => abortController.abort();
-  }, [sheetsData[selectedSheetIndex]?.query]);
+  }, [
+    sheetsData[selectedSheetIndex]?.query,
+    JSON.stringify(sheetsData[selectedSheetIndex]?.word_replacements),
+    triggerSheetFetch,
+  ]);
 
   const handleSaveOrUpdateWorkbook = async () => {
     const sheets = sheetsData.map((sheet) => {
@@ -174,6 +206,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         edit_mode: sheet.edit_mode,
         meta: sheet.meta,
         sheet_type: sheet.sheet_type,
+        word_replacements: sheet.word_replacements,
       };
     });
 
@@ -199,24 +232,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
   const hasQueryWithoutData =
     savedWorkbook &&
+    sheetsData[selectedSheetIndex]?.is_sql &&
     sheetsData[selectedSheetIndex]?.query &&
     !sheetsData[selectedSheetIndex]?.data?.length;
-
-  useEffect(() => {
-    if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
-
-    const fetchProperties = async () => {
-      const properties: string[] = await getEventProperties(dsId as string);
-      setEventProperties([
-        'event_name',
-        'user_id',
-        'timestamp',
-        ...properties.map((property) => `properties.${property}`),
-      ]);
-    };
-
-    fetchProperties();
-  }, []);
 
   useEffect(() => {
     if (requestTranisentColumn.isLoading) {
@@ -254,7 +272,8 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       const res = await getTransientSpreadsheets(
         dsId as string,
         selectedSheet.query,
-        selectedSheet.is_sql
+        selectedSheet.is_sql,
+        selectedSheet.word_replacements
       );
       let queriedData = res?.data?.data;
 
@@ -354,7 +373,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       table = 'events';
 
     const response = await getWorkbookTransientColumn(
-      dsId as string,
+      sheetsData[selectedSheetIndex]?.meta?.dsId || (dsId as string),
       dimensions.map((dimension) => DimensionParser().parse(dimension.name)),
       metrics.map((metric) => Metricparser().parse(metric.name)),
       database,
@@ -426,7 +445,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   const getHeaderIndex = (sheetData: TransientSheetData, columnId: string) => {
     const existingHeaders = sheetData?.headers;
 
-    const existingHeaderIndex = existingHeaders.findIndex(
+    const existingHeaderIndex = existingHeaders.findLastIndex(
       (header) => header.name === columnId
     );
 
@@ -501,11 +520,11 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     (headerText: string, columnId: string) => {
       const sheetData = sheetsData[selectedSheetIndex];
 
-      const isBlankSheet = !sheetData.is_sql && !sheetData.query;
+      const isBlankOrPivotSheet = isSheetPivotOrBlank(sheetData);
       const index = getHeaderIndex(sheetData, columnId);
 
       if (headerText.match(/^[unique|count]/)) {
-        if (isBlankSheet)
+        if (isBlankOrPivotSheet)
           try {
             if (
               sheetData.subHeaders[index].type === SubHeaderColumnType.DIMENSION
@@ -620,7 +639,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
   const addDimensionColumn = (columnId: string) => {
     const tempSheetsData = cloneDeep(sheetsData);
-    const index = columnId.charCodeAt(0) - 65 + 1;
+    const index = getHeaderIndex(sheetsData[selectedSheetIndex], columnId);
 
     /**
      * 1. Remove last subheader, keeping them constant to 27 for now.
@@ -628,7 +647,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
      * 3. TODO: Shift columns and data.
      */
     tempSheetsData[selectedSheetIndex].subHeaders.splice(-1);
-    tempSheetsData[selectedSheetIndex].subHeaders.splice(index, 0, {
+    tempSheetsData[selectedSheetIndex].subHeaders.splice(index + 1, 0, {
       name: '',
       type: SubHeaderColumnType.DIMENSION,
     });
@@ -638,6 +657,20 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
     setSheetsData(tempSheetsData);
   };
+
+  const getProperties = useMemo(() => {
+    const dsId = sheetsData[selectedSheetIndex].meta?.dsId;
+    for (let connection of connections) {
+      for (let connectionGroup of connection.connection_data) {
+        for (let connectionSource of connectionGroup.connection_source) {
+          if (connectionSource.datasource_id === dsId) {
+            return connectionSource.fields;
+          }
+        }
+      }
+    }
+    return [];
+  }, [connections, selectedSheetIndex, sheetsData]);
 
   return (
     <Flex direction={'column'}>
@@ -658,6 +691,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             closeSelectSheetOverlay={closeSelectSheetOverlay}
             sheetsData={sheetsData}
             setSheetsData={setSheetsData}
+            selectedSheetIndex={selectedSheetIndex}
             setSelectedSheetIndex={setSelectedSheetIndex}
           />
         ) : null}
@@ -668,8 +702,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           selectedSheetIndex={selectedSheetIndex}
           sheetsData={sheetsData}
           setSheetsData={setSheetsData}
-          setShowEmptyState={setShowEmptyState}
           setShowSqlEditor={setShowSqlEditor}
+          evaluateFormulaHeader={evaluateFormulaHeader}
+          addDimensionColumn={addDimensionColumn}
         />
 
         <Box h={'full'} w={'full'} overflowY={'auto'}>
@@ -684,7 +719,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           {showEmptyState ? (
             <EmptySheet />
           ) : (
-            <Box overflow={'auto'} h={'full'}>
+            <Box overflow={'auto'} h={'full'} pb={'8'}>
               {hasQueryWithoutData ? (
                 <Flex
                   h={'full'}
@@ -700,7 +735,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
                   selectedSheetIndex={selectedSheetIndex}
                   evaluateFormulaHeader={evaluateFormulaHeader}
                   addDimensionColumn={addDimensionColumn}
-                  properties={eventProperties}
+                  properties={getProperties}
                 />
               )}
             </Box>
@@ -716,6 +751,28 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           />
         </Box>
       </Flex>
+      <AIButton
+        query={
+          !sheetsData[selectedSheetIndex]?.is_sql
+            ? sheetsData[selectedSheetIndex]?.query
+            : ''
+        }
+        zIndex={1}
+        position={'fixed'}
+        right={5}
+        bottom={13}
+        properties={getProperties}
+        wordReplacements={sheetsData[selectedSheetIndex].word_replacements}
+        loading={fetchingTransientSheet}
+        onQuery={(updatedQuery, wordReplacements) => {
+          const sheetsCopy = cloneDeep(sheetsData);
+          sheetsCopy[selectedSheetIndex].is_sql = false;
+          sheetsCopy[selectedSheetIndex].query = updatedQuery;
+          sheetsCopy[selectedSheetIndex].word_replacements = wordReplacements;
+          setSheetsData(sheetsCopy);
+          setTriggerSheetFetch(triggerSheetFetch + 1);
+        }}
+      />
     </Flex>
   );
 };

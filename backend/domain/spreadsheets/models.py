@@ -38,6 +38,14 @@ class ComputedSpreadsheet(BaseModel):
     headers: List[SpreadSheetColumn]
 
 
+class WordReplacement(BaseModel):
+    word: str
+    replacement: str
+
+    def apply(self, text: str):
+        return text.replace(self.word, self.replacement)
+
+
 class Spreadsheet(BaseModel):
     name: str
     headers: List[SpreadSheetColumn]
@@ -47,6 +55,7 @@ class Spreadsheet(BaseModel):
     edit_mode: bool = True
     sheet_type: Optional[SpreadsheetType]
     meta: Optional[dict]
+    word_replacements: List[WordReplacement] = []
 
 
 class WorkBook(Document):

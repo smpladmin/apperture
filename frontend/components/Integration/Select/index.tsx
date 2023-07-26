@@ -18,6 +18,8 @@ import clevertapLogo from '@assets/images/clevertap-icon.png';
 import appertureLogo from '@assets/images/apperture-logo.svg';
 import apilogo from '@assets/images/apilogo.png';
 import mysqlLogo from '@assets/images/mysql-icon.png';
+import csvLogo from '@assets/images/csv.svg';
+import FormButton from '@components/FormButton';
 import IntegrationSource from '@components/IntegrationSource';
 import { Provider } from '@lib/domain/provider';
 import { createIntegrationWithDataSource } from '@lib/services/integrationService';
@@ -54,6 +56,7 @@ const SelectProvider = () => {
         '',
         '',
         '',
+        undefined,
         undefined,
         { params: { create_datasource: true, trigger_data_processor: false } }
       );
@@ -178,6 +181,12 @@ const SelectProvider = () => {
                     imgSrc={apilogo}
                     selected={provider === Provider.API}
                   />
+                  <IntegrationSource
+                  sourceName="CSV"
+                  value={Provider.CSV}
+                  imgSrc={csvLogo}
+                  selected={provider === Provider.CSV}
+                />
                 </SimpleGrid>
               </RadioGroup>
             </Box>
@@ -222,7 +231,6 @@ const SelectProvider = () => {
           </Flex>
 </RightContainer>
     </IntegrationContainer>
-
 
   );
 };

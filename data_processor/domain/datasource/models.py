@@ -29,7 +29,7 @@ class Credential(BaseModel):
     account_id: str = Field(alias="accountId")
     refresh_token: Optional[str] = Field(alias="refreshToken")
     api_key: Optional[str] = Field(alias="apiKey")
-    tableName: Optional[str] 
+    tableName: Optional[str]
     secret: Optional[str]
 
 

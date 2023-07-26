@@ -23,8 +23,8 @@ class ComputeQueryAction:
         self.datasource_service = datasource_service
         self.app_service = app_service
 
-    async def get_credentials(self, datasourceId) -> ClickHouseCredential:
-        datasource = await self.datasource_service.get_datasource(datasourceId)
+    async def get_credentials(self, datasource_id) -> ClickHouseCredential:
+        datasource = await self.datasource_service.get_datasource(datasource_id)
         app = await self.app_service.get_app(id=datasource.app_id)
         has_app_credential = bool(app.clickhouse_credential)
 
@@ -48,7 +48,7 @@ class ComputeQueryAction:
             logging.info(f"Query: {dto.query}")
             clickhouse_credential = await self.get_credentials(dto.datasourceId)
             if not dto.is_sql:
-                sql_query = text_to_sql(dto.query)
+                sql_query = text_to_sql(dto.query, dto.word_replacements)
                 return await self.spreadsheets_service.get_transient_spreadsheets(
                     query=sql_query,
                     username=clickhouse_credential.username,

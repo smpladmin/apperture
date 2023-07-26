@@ -30,6 +30,7 @@
     "dayjs": "^1.11.7",
     "framer-motion": "^7.3.6",
     "fuse.js": "^6.6.2",
+    "fuzzball": "^2.1.2",
     "is-mobile": "^3.1.1",
     "jose": "^4.9.0",
     "lodash": "^4.17.21",
@@ -41,8 +42,10 @@
     "react-beautiful-dnd": "^13.1.1",
     "react-date-range": "^1.4.0",
     "react-dom": "18.2.0",
+    "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.45.1",
     "react-modal-sheet": "^1.7.0",
+    "react-textarea-autosize": "^8.5.2",
     "react-window": "^1.8.9",
     "remixicon": "^2.5.0"
   },

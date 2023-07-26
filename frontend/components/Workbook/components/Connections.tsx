@@ -31,6 +31,8 @@ import {
   ConnectionGroup,
   ConnectionSource,
 } from '@lib/domain/connections';
+import cloneDeep from 'lodash/cloneDeep';
+import { getSubheaders } from '../util';
 
 type ConnectionsProps = {
   connections: Connection[];
@@ -93,11 +95,9 @@ const Connections = ({
       onOpen();
     } else {
       setShowColumns(true);
-      console.log('selectedSHeet index', selectedSheetIndex);
-      console.log('sheets Dtaa', sheetsData);
       setSheetsData((prevSheetData: TransientSheetData[]) => {
-        const tempSheetsData = [...prevSheetData];
-        tempSheetsData[selectedSheetIndex].meta.dsId = currentSelectedDsId;
+        const tempSheetsData = cloneDeep(prevSheetData);
+        tempSheetsData[selectedSheetIndex].meta!!.dsId = currentSelectedDsId;
         return tempSheetsData;
       });
     }
@@ -131,9 +131,18 @@ const Connections = ({
     // and then show connector columns
     if (canditate.confirmation) {
       setSheetsData((prevSheetData: TransientSheetData[]) => {
-        const tempSheetsData = [...prevSheetData];
-        tempSheetsData[selectedSheetIndex].meta.dsId = canditate.dsId;
-        tempSheetsData[selectedSheetIndex].meta.selectedColumns = [];
+        const tempSheetsData = cloneDeep(prevSheetData);
+        // TODO: should check the double bang !!
+        tempSheetsData[selectedSheetIndex].meta = {
+          dsId: canditate.dsId,
+          selectedColumns: [],
+        };
+        tempSheetsData[selectedSheetIndex].data = [];
+        tempSheetsData[selectedSheetIndex].headers = [];
+        tempSheetsData[selectedSheetIndex].subHeaders = getSubheaders(
+          tempSheetsData[selectedSheetIndex]?.sheet_type
+        );
+
         return tempSheetsData;
       });
       setShowColumns(true);

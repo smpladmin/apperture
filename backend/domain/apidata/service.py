@@ -14,6 +14,7 @@ from domain.events.models import (
 from repositories.clickhouse.base import EventsBase
 import json
 
+
 class APIDataService:
     def __init__(
         self,
@@ -26,9 +27,11 @@ class APIDataService:
             "datasourceId",
             "properties",
         ]
-        self.apidata_repo=apidata_repo
+        self.apidata_repo = apidata_repo
 
     async def update_api_data(self, apidata, databasename, tableName):
-        
+
         self.apidata_repo.create_api_table(databasename, tableName)
-        self.apidata_repo.insert_into_api_table(apidata, databasename, tableName,self.columns)
+        self.apidata_repo.insert_into_api_table(
+            apidata, databasename, tableName, self.columns
+        )
