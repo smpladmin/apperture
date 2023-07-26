@@ -24,6 +24,7 @@ class AppertureSettings(BaseSettings):
     profiles_sample_rate: float = 0.5
     sentry_dsn: str = ""
     sentry_environment: str = "test"
+    base_sample_tables: List[str] = []
 
     class Config:
         env_file = ".env"
