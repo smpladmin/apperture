@@ -7,14 +7,25 @@ import {
   ApperturePut,
 } from '@lib/services/util';
 
-export const getTransientSpreadsheets = (
+const convertAPIResponseToDesiredFormat = (rows: any[]) => {
+  return rows.map((row) => {
+    const dataKeys = Object.keys(row);
+
+    dataKeys.forEach((key) => {
+      row[key] = { original: row[key], display: row[key] };
+    });
+    return row;
+  });
+};
+
+export const getTransientSpreadsheets = async (
   dsId: string,
   query: string,
   is_sql: boolean = true,
   word_replacements: Array<WordReplacement> = [],
   signal?: AbortSignal
 ) => {
-  return ApperturePost(
+  const res = await ApperturePost(
     `/workbooks/spreadsheets/transient`,
     {
       datasourceId: dsId,
@@ -26,6 +37,9 @@ export const getTransientSpreadsheets = (
       signal,
     }
   );
+
+  const data = convertAPIResponseToDesiredFormat(res.data.data);
+  return { data: { ...res.data, data }, status: res.status };
 };
 
 export const getSavedWorkbooksForDatasourceId = async (dsId: string) => {
@@ -79,11 +93,14 @@ export const getWorkbookTransientColumn = async (
   database: string,
   table: string
 ) => {
-  return await ApperturePost(`/workbooks/spreadsheets/columns/transient`, {
+  const res = await ApperturePost(`/workbooks/spreadsheets/columns/transient`, {
     datasourceId,
     dimensions,
     metrics,
     database,
     table,
   });
+
+  const data = convertAPIResponseToDesiredFormat(res.data.data);
+  return { data: { ...res.data, data }, status: res.status };
 };

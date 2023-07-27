@@ -1,13 +1,15 @@
 import {
   CellChange,
+  CellLocation,
   Column,
   DefaultCellTypes,
   Id,
+  MenuOption,
   ReactGrid,
   Row,
+  SelectionMode,
 } from '@silevis/reactgrid';
 import React, { useEffect, useState } from 'react';
-import { fillHeaders, fillRows } from '../../../Spreadsheet/util';
 import {
   ColumnType,
   SpreadSheetColumn,
@@ -18,12 +20,16 @@ import {
 import { DropdownHeaderCell, DropdownHeaderTemplate } from './DropdownHeader';
 import { InputHeaderCell, InputHeaderTemplate } from './InputHeader';
 import { WHITE_DEFAULT } from '@theme/index';
-import { Flex } from '@chakra-ui/react';
-import LoadingSpinner from '@components/LoadingSpinner';
 import {
+  convertColumnValuesToPercentage,
   hasMetricColumnInPivotSheet,
   isSheetPivotOrBlank,
+  fillHeaders,
+  fillRows,
+  increaseDecimalPlacesInColumnValues,
+  decreaseDecimalPlacesInColumnValues,
 } from '@components/Workbook/util';
+import { cloneDeep } from 'lodash';
 
 const getGridRow = (value: any): DefaultCellTypes => {
   const cellTypes: { [key: string]: DefaultCellTypes } = {
@@ -150,9 +156,11 @@ const getRows = (
   ...data.map<Row>((data, idx) => ({
     rowId: idx,
     cells: headers.map((header) => {
-      const val = data[header.name] === 0 ? '0' : data[header.name] || '';
-      if (header.name.includes('count')) {
-      }
+      const val =
+        data[header.name]?.display === 0
+          ? '0'
+          : data[header.name]?.display || '';
+
       return getGridRow(val);
     }),
   })),
@@ -160,54 +168,48 @@ const getRows = (
 
 const Grid = ({
   selectedSheetIndex,
-  sheetData,
+  sheetsData,
   evaluateFormulaHeader,
   addDimensionColumn,
   properties,
+  setSheetsData,
 }: {
   selectedSheetIndex: number;
-  sheetData: TransientSheetData;
+  sheetsData: TransientSheetData[];
   evaluateFormulaHeader: Function;
   addDimensionColumn: Function;
   properties: string[];
+  setSheetsData: Function;
 }) => {
+  const sheet = sheetsData[selectedSheetIndex];
   const [columns, setColumns] = useState<Column[]>(
-    getColumns(fillHeaders(sheetData.headers))
+    getColumns(fillHeaders(sheet.headers))
   );
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [selectedSheetIndex, setIsLoading]);
 
   const [rows, setRows] = useState(
     getRows(
-      fillRows(sheetData.data, sheetData.headers),
-      fillHeaders(sheetData.headers),
-      sheetData.headers,
-      sheetData.subHeaders,
-      sheetData,
+      fillRows(sheet.data, sheet.headers),
+      fillHeaders(sheet.headers),
+      sheet.headers,
+      sheet.subHeaders,
+      sheet,
       properties
     )
   );
 
   useEffect(() => {
-    setColumns(getColumns(fillHeaders(sheetData.headers)));
+    setColumns(getColumns(fillHeaders(sheet.headers)));
     setRows(
       getRows(
-        fillRows(sheetData.data, sheetData.headers),
-        fillHeaders(sheetData.headers),
-        sheetData.headers,
-        sheetData.subHeaders,
-        sheetData,
+        fillRows(sheet.data, sheet.headers),
+        fillHeaders(sheet.headers),
+        sheet.headers,
+        sheet.subHeaders,
+        sheet,
         properties
       )
     );
-  }, [sheetData, selectedSheetIndex]);
+  }, [sheet, selectedSheetIndex]);
 
   const handleColumnResize = (ci: Id, width: number) => {
     setColumns((prevColumns) => {
@@ -234,7 +236,61 @@ const Grid = ({
         changedHeaders[0]?.columnId
       );
   };
-  return !isLoading ? (
+
+  const handleContextMenu = (
+    selectedRowIds: Id[],
+    selectedColIds: Id[],
+    selectionMode: SelectionMode,
+    menuOptions: MenuOption[],
+    selectedRanges: CellLocation[][]
+  ): MenuOption[] => {
+    if (selectionMode === 'column')
+      return [
+        {
+          id: 'percentage',
+          label: 'Convert to percentage',
+          handler: (selectedRowIds, selectedColIds) => {
+            setSheetsData((prevSheet: TransientSheetData[]) => {
+              const sheetsCopy = cloneDeep(prevSheet);
+              const data = sheetsCopy[selectedSheetIndex].data;
+              sheetsCopy[selectedSheetIndex].data =
+                convertColumnValuesToPercentage(selectedColIds, data);
+              return sheetsCopy;
+            });
+          },
+        },
+        {
+          id: 'floatingValue',
+          label: 'Increase Decimal Place',
+          handler: (selectedRowIds, selectedColIds) => {
+            setSheetsData((prevSheet: TransientSheetData[]) => {
+              const sheetsCopy = cloneDeep(prevSheet);
+              const data = sheetsCopy[selectedSheetIndex].data;
+              sheetsCopy[selectedSheetIndex].data =
+                increaseDecimalPlacesInColumnValues(selectedColIds, data);
+              return sheetsCopy;
+            });
+          },
+        },
+        {
+          id: 'floatingValue2',
+          label: 'Decrease Decimal Place',
+          handler: (selectedRowIds, selectedColIds) => {
+            setSheetsData((prevSheet: TransientSheetData[]) => {
+              const sheetsCopy = cloneDeep(prevSheet);
+              const data = sheetsCopy[selectedSheetIndex].data;
+              sheetsCopy[selectedSheetIndex].data =
+                decreaseDecimalPlacesInColumnValues(selectedColIds, data);
+              return sheetsCopy;
+            });
+          },
+        },
+      ];
+
+    return [];
+  };
+
+  return (
     <ReactGrid
       rows={rows}
       columns={columns}
@@ -242,20 +298,13 @@ const Grid = ({
       onCellsChanged={handleDataChange}
       enableFillHandle
       enableRangeSelection
+      enableColumnSelection
       customCellTemplates={{
         dropdownHeader: new DropdownHeaderTemplate(),
         inputHeader: new InputHeaderTemplate(),
       }}
+      onContextMenu={handleContextMenu}
     />
-  ) : (
-    <Flex
-      h={'calc( 100vh - 175px )'}
-      w={'full'}
-      alignItems={'center'}
-      justifyContent={'center'}
-    >
-      <LoadingSpinner />
-    </Flex>
   );
 };
 

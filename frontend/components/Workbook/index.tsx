@@ -450,7 +450,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       } else {
         const currentSheet = sheetsData[selectedSheetIndex];
         const header = currentSheet.headers[operandsIndex[index]];
-        const valueList = currentSheet.data.map((item) => item[header.name]);
+        const valueList = currentSheet.data.map(
+          (item) => item[header?.name]?.original || ''
+        );
         lookupTable[operand] = valueList;
       }
     });
@@ -534,7 +536,10 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       selectedSheetIndex
     ].data.map((item, index) => ({
       ...item,
-      [header.name]: evaluatedData[index] || '',
+      [header.name]: {
+        original: evaluatedData[index] || '',
+        display: evaluatedData[index] || '',
+      },
     }));
 
     setSheetsData(tempSheetsData);
@@ -615,7 +620,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         );
       } else {
         const header = headers[operandsIndex[index]];
-        const valueList = queriedData.map((item) => item[header.name]);
+        const valueList = queriedData.map(
+          (item) => item[header?.name]?.original || ''
+        );
         lookupTable[operand] = valueList;
       }
     });
@@ -630,7 +637,10 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   ) => {
     queriedData = queriedData.map((item: any, index: number) => ({
       ...item,
-      [header.name]: data[index],
+      [header.name]: {
+        original: data[index] || '',
+        display: data[index] || '',
+      },
     }));
     return queriedData;
   };
@@ -760,11 +770,12 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
                 </Flex>
               ) : (
                 <Grid
-                  sheetData={sheetsData[selectedSheetIndex]}
+                  sheetsData={sheetsData}
                   selectedSheetIndex={selectedSheetIndex}
                   evaluateFormulaHeader={evaluateFormulaHeader}
                   addDimensionColumn={addDimensionColumn}
                   properties={getProperties}
+                  setSheetsData={setSheetsData}
                 />
               )}
             </Box>
