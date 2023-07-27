@@ -17,9 +17,9 @@ class ConnectionService:
         self, clickhouse_connection_table, properties_table
     ):
         connection_data = []
-        for key, value in clickhouse_connection_table.items():
-            group = ConnectionGroup(provider=key, connection_source=[])
-            for datasource in value:
+        for provider, datasources in clickhouse_connection_table.items():
+            group = ConnectionGroup(provider=provider, connection_source=[])
+            for datasource in datasources:
                 fields = [
                     "properties." + property
                     for property in (

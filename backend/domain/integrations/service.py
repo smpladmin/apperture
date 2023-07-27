@@ -7,12 +7,10 @@ import boto3
 import pymysql
 import sshtunnel
 from beanie import PydanticObjectId
+from fastapi import Depends, UploadFile
 
 from authorisation.models import IntegrationOAuth
 from domain.apperture_users.models import AppertureUser
-from domain.apps.models import App
-from fastapi import UploadFile, Depends
-
 from domain.apps.models import App, ClickHouseCredential
 from repositories.clickhouse.integrations import Integrations
 from rest.dtos.integrations import DatabaseSSHCredentialDto
@@ -20,12 +18,11 @@ from rest.dtos.integrations import DatabaseSSHCredentialDto
 from .models import (
     Credential,
     CredentialType,
+    CSVCredential,
     DatabaseSSHCredential,
     Integration,
     IntegrationProvider,
     MySQLCredential,
-    DatabaseSSHCredential,
-    CSVCredential,
 )
 
 
@@ -225,7 +222,7 @@ class IntegrationService:
                 host=host, port=port, username=username, password=password
             )
 
-    def get_mysql_connection(self, host, port, username, password, database):
+    def get_mysql_connection(self, host, port, username, password, database=None):
         return (
             pymysql.connect(
                 host=host,
