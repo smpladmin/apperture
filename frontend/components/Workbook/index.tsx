@@ -31,7 +31,7 @@ import QueryEditor from './components/QueryEditor';
 import SelectSheet from './components/SelectSheet';
 import EmptySheet from './components/EmptySheet';
 import { getConnectionsForApp } from '@lib/services/connectionService';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import {
   evaluateExpression,
   expressionTokenRegex,
@@ -128,6 +128,14 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   useEffect(() => {
     if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
   }, []);
+
+  useEffect(() => {
+    if (
+      !isEqual(savedWorkbook?.name, workbookName) ||
+      !isEqual(savedWorkbook?.spreadsheets, sheetsData)
+    )
+      setSaveButtonDisabled(false);
+  }, [workbookName, sheetsData]);
 
   useEffect(() => {
     const fetchConnections = async () => {

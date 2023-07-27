@@ -61,7 +61,7 @@ const SavedDataMarts = ({ provider }: { provider: Provider }) => {
     <Box px={{ base: '4', md: '30' }} py={'13'} overflowY={'auto'}>
       <Flex justifyContent={'space-between'}>
         <Text fontSize={'sh-24'} lineHeight={'sh-24'} fontWeight={'600'}>
-          DataMarts
+          My Data
         </Text>
         <Button
           disabled={provider === Provider.GOOGLE}
@@ -77,7 +77,7 @@ const SavedDataMarts = ({ provider }: { provider: Provider }) => {
             lineHeight={'xs-14'}
             fontWeight={'500'}
           >
-            {'+ New DataMart'}
+            {'+ Create Table'}
           </Text>
         </Button>
       </Flex>

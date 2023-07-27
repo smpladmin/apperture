@@ -10,6 +10,8 @@ import { Provider } from '@lib/domain/provider';
 import { BLACK } from '@theme/index';
 import { useRouter } from 'next/router';
 import { useCallback, useState } from 'react';
+import uploadIcon from '@assets/icons/CloudArrowUp.svg';
+import Image from 'next/image';
 import { useDropzone } from 'react-dropzone';
 import {
   createIntegrationWithDataSource,
@@ -20,8 +22,24 @@ import {
 import { UploadProgress } from '@lib/domain/integration';
 import { ClipboardText, X } from 'phosphor-react';
 import { CloudArrowUp } from '@phosphor-icons/react';
+import {
+  TopProgress,
+  IntegrationContainer,
+  LeftContainer,
+  RightContainer,
+  LeftContainerRevisit,
+} from '@components/Onboarding';
 
-const CSVIntegration = () => {
+
+type CSVIntegrationProps = {
+  handleClose: Function;
+  add: string | string[] | undefined;
+};
+
+const CSVIntegration = ({
+  add,
+  handleClose,
+}: CSVIntegrationProps) => {
   const router = useRouter();
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -31,12 +49,14 @@ const CSVIntegration = () => {
   const [uploadComplete, setUploadComplete] = useState(false);
   const [progress, setProgress] = useState<number>(0);
 
+  const handleGoBack = (): void => router.back();
+
   const handleUpload = async () => {
     if (uploadedFile) {
       setUploadInitiated(true);
       const appId = router.query.appId as string;
 
-      const fileObj = await uploadCSV(
+      const res = await uploadCSV(
         uploadedFile,
         appId,
         (progressUpdate: UploadProgress) => {
@@ -46,7 +66,17 @@ const CSVIntegration = () => {
           }
         }
       );
-      setUploadedFileId(fileObj._id);
+      if (res.status === 200) {
+        setUploadedFileId(res.data._id);
+      } else {
+        handleClearFile();
+        toast({
+          title: 'An error occurred while uploading the file',
+          status: 'error',
+          variant: 'subtle',
+          isClosable: true,
+        });
+      }
     }
   };
 
@@ -54,38 +84,46 @@ const CSVIntegration = () => {
     setIsLoading(true);
     const appId = router.query.appId as string;
     const provider = router.query.provider as Provider;
-    console.log('id', uploadedFileId);
-    const integration = await createIntegrationWithDataSource(
-      appId,
-      provider,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      uploadedFileId
-    );
-    const statusCode = await createTableWithCSV(
-      uploadedFileId,
-      integration.datasource._id
-    );
-    setIsLoading(false);
-    if (statusCode === 200) {
-      router.replace({
-        pathname: '/analytics/app/[appId]/integration/[provider]/complete',
-        query: {
-          appId: router.query.appId,
-          provider: router.query.provider,
-          dsId: integration.datasource._id,
-        },
-      });
-    } else {
+    if (!uploadedFileId) {
       toast({
-        title: 'Error while loading data from CSV file',
+        title: 'An error occurred while uploading the file',
         status: 'error',
         variant: 'subtle',
         isClosable: true,
       });
+    } else {
+      const integration = await createIntegrationWithDataSource(
+        appId,
+        provider,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        uploadedFileId
+      );
+      const statusCode = await createTableWithCSV(
+        uploadedFileId,
+        integration.datasource._id
+      );
+      setIsLoading(false);
+      if (statusCode === 200) {
+        router.replace({
+          pathname: '/analytics/app/[appId]/integration/[provider]/complete',
+          query: {
+            appId: router.query.appId,
+            provider: router.query.provider,
+            dsId: integration.datasource._id,
+          },
+        });
+      } else {
+        toast({
+          title: 'Error while loading data from CSV file',
+          status: 'error',
+          variant: 'subtle',
+          isClosable: true,
+        });
+      }
     }
   };
 
@@ -113,14 +151,26 @@ const CSVIntegration = () => {
   };
 
   return (
-    <Flex direction={'column'} alignItems={'center'} gap={48} margin={162}>
+    <IntegrationContainer >
+      
+        { add ? <LeftContainerRevisit/> : <LeftContainer /> }
+     
+      <RightContainer>
+          <Flex flexDirection="column" alignItems="center">
+            { add ? <Box mt={10}></Box> : <TopProgress handleGoBack={handleGoBack} /> }
+            <Flex
+              direction={'column'}
+              h={'full'}
+              justifyContent={{ base: 'space-between', md: 'start' }}
+            >
+    <Flex direction={'column'} alignItems={'center'} gap={8} margin={8}>
       <Text
         color={'grey.900'}
         fontSize={'sh-28'}
         lineHeight={'base'}
         fontWeight={700}
       >
-        Connect data source
+        Upload a CSV File
       </Text>
 
       {uploadInitiated ? (
@@ -206,7 +256,12 @@ const CSVIntegration = () => {
             {...getRootProps()}
             width={'100%'}
           >
-            <CloudArrowUp size={54} />
+            <Image
+              width={'54px'}
+              height={'54px'}
+              src={uploadIcon}
+              alt="uploadIcon"
+            />
             <input {...getInputProps()} />
             {isDragActive ? (
               <Text color="teal.500">Drop the file here</Text>
@@ -280,6 +335,10 @@ const CSVIntegration = () => {
         </Flex>
       )}
     </Flex>
+    </Flex>
+    </Flex>
+  </RightContainer>
+</IntegrationContainer>
   );
 };
 

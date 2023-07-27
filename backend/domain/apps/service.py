@@ -6,6 +6,7 @@ from beanie.operators import In, Or
 from fastapi import Depends
 
 from repositories.clickhouse.clickhouse_role import ClickHouseRole
+from settings import apperture_settings
 
 from ..apperture_users.models import AppertureUser
 from .models import App, ClickHouseCredential
@@ -17,9 +18,11 @@ class AppService:
         self,
         clickhouse_role: ClickHouseRole = Depends(),
         string_utils: StringUtils = Depends(),
+        settings=apperture_settings(),
     ) -> None:
         self.clickhouse_role = clickhouse_role
         self.string_utils = string_utils
+        self.settings = settings
 
     def parse_app_name_to_db_name(self, app_name: str):
         return re.sub("[^A-Za-z0-9]", "_", app_name).lower()
@@ -31,6 +34,9 @@ class AppService:
             App.enabled != False,
         ).count()
 
+    async def get_app_count(self, user_id: PydanticObjectId):
+        return await App.find(App.user_id == user_id).count()
+
     def create_app_database(
         self,
         app_name: str,
@@ -41,7 +47,15 @@ class AppService:
         self.clickhouse_role.grant_permission_to_database(
             database_name=database_name, username=username
         )
-        self.clickhouse_role.grant_global_permissions_to_user(username=username)
+
+    async def create_sample_tables(
+        self, creds: ClickHouseCredential, user_id: PydanticObjectId
+    ):
+        app_count = await self.get_app_count(user_id)
+        if self.settings.base_sample_tables and app_count == 1:
+            self.clickhouse_role.create_sample_tables(
+                self.settings.base_sample_tables, creds.databasename
+            )
 
     async def create_clickhouse_user(
         self, id: PydanticObjectId, app_name: str
@@ -55,19 +69,16 @@ class AppService:
 
         self.create_app_database(app_name=app_name, username=username)
 
-        await App.find(App.id == PydanticObjectId(id), App.enabled == True,).update(
-            {
-                "$set": {
-                    "clickhouse_credential": ClickHouseCredential(
-                        username=username, password=password, databasename=database_name
-                    )
-                }
-            }
-        )
-
-        return ClickHouseCredential(
+        creds = ClickHouseCredential(
             username=username, password=password, databasename=database_name
         )
+
+        await App.find(
+            App.id == PydanticObjectId(id),
+            App.enabled == True,
+        ).update({"$set": {"clickhouse_credential": creds}})
+
+        return creds
 
     async def create_app(
         self,
@@ -76,7 +87,8 @@ class AppService:
     ) -> App:
         app = App(name=name, user_id=user.id)
         await app.insert()
-        await self.create_clickhouse_user(id=app.id, app_name=name)
+        creds = await self.create_clickhouse_user(id=app.id, app_name=name)
+        await self.create_sample_tables(creds, user.id)
         return app
 
     async def get_apps(self, user: AppertureUser) -> List[App]:

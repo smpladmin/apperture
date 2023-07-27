@@ -3,7 +3,7 @@ from typing import Optional
 
 from beanie import PydanticObjectId
 
-from repositories import Document
+from repositories.document import Document
 
 
 class FileType(Enum):
