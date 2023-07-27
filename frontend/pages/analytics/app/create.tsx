@@ -11,6 +11,8 @@ import {
   Text,
   useToast,
   Image,
+  Checkbox,
+  Link,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { addApp } from '@lib/services/appService';
@@ -27,6 +29,7 @@ import {
 const Create = () => {
   const toast = useToast();
   const [appName, setAppName] = useState<string>('');
+  const [isAgreementChecked, setIsAgreementChecked] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const router = useRouter();
@@ -58,6 +61,9 @@ const Create = () => {
       pathname: `/analytics/home/[dsId]`,
       query: { dsId: previousDsId, apps: 1 },
     });
+  const handleAgreementCheckboxChange = () => {
+      setIsAgreementChecked(!isAgreementChecked);
+    };
 
 
 
@@ -85,7 +91,6 @@ const Create = () => {
               >
                 What do you want to call your workspace?
               </Heading>
-             <Text fontSize={"sh-14"} textAlign="center" color="grey.500" fontWeight="normal">Usually people use their team’s name as their workspace</Text>
             </Box>
          <Input
           mt={20}
@@ -116,6 +121,22 @@ const Create = () => {
           value={appName}
           onChange={(e) => setAppName(e.target.value)}
         />
+        <Flex flexDirection="row" alignItems="center" mt={15} >
+        <Checkbox colorScheme={'radioBlack'} isChecked={isAgreementChecked} onChange={handleAgreementCheckboxChange} />
+        <Text
+          fontSize={{ base: 'sh-14', md: 'sh-14' }}
+          lineHeight={{ base: 'sh-18', md: 'sh-18' }}
+          fontWeight="normal"
+          color="grey.800"
+          ml={2}
+        >
+          I agree to the 
+          {' '}<Link href="https://apperture.io" textDecoration="underline">terms and conditions</Link>{' '}
+           and 
+           {' '}<Link href="https://apperture.io" textDecoration="underline">end user license agreement</Link>{' '}
+           .
+        </Text>
+      </Flex>
         <Button
           variant="primary"
           mt={6}
@@ -127,7 +148,7 @@ const Create = () => {
           lineHeight="base"
           textColor="white.100"
           width={{ base: 'full', md: '72' }}
-          disabled={!appName}
+          disabled={!appName || !isAgreementChecked}
           onClick={handleNextClick}
         >
           Next
