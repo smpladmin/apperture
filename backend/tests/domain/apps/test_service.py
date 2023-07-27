@@ -16,8 +16,11 @@ class TestAppService:
 
         self.clickhouse_role = MagicMock()
         self.string_utils = MagicMock()
+        self.settings = MagicMock()
         self.service = AppService(
-            clickhouse_role=self.clickhouse_role, string_utils=self.string_utils
+            clickhouse_role=self.clickhouse_role,
+            string_utils=self.string_utils,
+            settings=self.settings,
         )
         self.ds_id = "636a1c61d715ca6baae65611"
         self.username = "test_user"
@@ -33,10 +36,11 @@ class TestAppService:
         )
         App.id = MagicMock(return_value=self.ds_id)
         App.enabled = MagicMock(return_value=True)
-        FindMock = namedtuple("FindMock", ["update"])
+        self.FindMock = namedtuple("FindMock", ["update", "count"])
         App.find = MagicMock(
-            return_value=FindMock(
+            return_value=self.FindMock(
                 update=AsyncMock(),
+                count=AsyncMock(return_value=2),
             ),
         )
         App.insert = AsyncMock()
@@ -71,6 +75,25 @@ class TestAppService:
         app.insert.assert_called_once()
         self.service.create_clickhouse_user.assert_called_once_with(
             **{"id": None, "app_name": "Test App"}
+        )
+        assert not self.service.clickhouse_role.create_sample_tables.called
+
+    @pytest.mark.asyncio
+    async def test_create_app_with_sample_tables(self):
+        App.find = MagicMock(
+            return_value=self.FindMock(
+                update=AsyncMock(),
+                count=AsyncMock(return_value=1),
+            ),
+        )
+        self.service.string_utils.generate_random_value = MagicMock(
+            return_value="sdeweiwew33dssdsdds"
+        )
+        self.service.settings.base_sample_tables = ["trips"]
+        await self.service.create_app(name=self.app_name, user=self.user)
+
+        self.service.clickhouse_role.create_sample_tables.assert_called_once_with(
+            ["trips"], "test_app"
         )
 
     def test_create_app_database(self):

@@ -54,3 +54,18 @@ class TestRoleRepository:
     def test_create_database(self):
         self.clickhouse_role.create_database_for_app(database_name=self.databasename)
         self.clickhouse.admin.query.assert_called_with(query=self.create_database_query)
+
+    def test_create_sample_tables(self):
+        self.clickhouse_role.create_sample_tables(
+            table_names=["trips", "stream"], database_name="test_app"
+        )
+        self.clickhouse.admin.query.assert_has_calls(
+            [
+                mock.call(
+                    query="CREATE TABLE test_app.trips ENGINE = MergeTree() ORDER BY tuple() AS SELECT * FROM default.trips"
+                ),
+                mock.call(
+                    query="CREATE TABLE test_app.stream ENGINE = MergeTree() ORDER BY tuple() AS SELECT * FROM default.stream"
+                ),
+            ]
+        )

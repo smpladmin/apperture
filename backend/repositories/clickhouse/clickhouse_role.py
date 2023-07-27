@@ -1,3 +1,5 @@
+import logging
+from typing import List
 from fastapi import Depends
 
 from clickhouse.clickhouse import Clickhouse
@@ -41,3 +43,9 @@ class ClickHouseRole:
     def create_database_for_app(self, database_name: str):
         query = f"CREATE DATABASE {database_name}"
         return self.clickhouse.admin.query(query=query)
+
+    def create_sample_tables(self, table_names: List[str], database_name: str):
+        for table in table_names:
+            create_query = f"CREATE TABLE {database_name}.{table} ENGINE = MergeTree() ORDER BY tuple() AS SELECT * FROM default.{table}"
+            logging.info(f"sample table query: {create_query}")
+            self.clickhouse.admin.query(query=create_query)
