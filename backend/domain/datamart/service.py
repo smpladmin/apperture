@@ -39,7 +39,7 @@ class DataMartService:
             app_id=app_id,
             user_id=user_id,
             name=name,
-            table_name=self.string_utils.generate_random_value(length=16),
+            table_name=self.string_utils.extract_tablename_from_filename(filename=name),
             query=query,
             last_refreshed=now,
         )
@@ -61,6 +61,7 @@ class DataMartService:
         clickhouse_credential: ClickHouseCredential,
         to_update: Dict,
         query: Union[str, None] = None,
+        table_name: Union[str, None] = None,
     ):
         existing_table = (
             await DataMart.find(
@@ -69,6 +70,7 @@ class DataMartService:
         )[0]
 
         query = query if query else existing_table.query
+        table_name = table_name if table_name else existing_table.table_name
 
         self.datamart_repo.drop_table(
             table_name=existing_table.table_name,
@@ -76,7 +78,7 @@ class DataMartService:
         )
         self.datamart_repo.create_table(
             query=query,
-            table_name=existing_table.table_name,
+            table_name=table_name,
             clickhouse_credential=clickhouse_credential,
         )
         await DataMart.find_one(
@@ -92,7 +94,6 @@ class DataMartService:
         to_update = new_table.dict()
         to_update.pop("id")
         to_update.pop("created_at")
-        to_update.pop("table_name")
         to_update["updated_at"] = datetime.utcnow()
 
         await self.update_table_action(
@@ -100,6 +101,7 @@ class DataMartService:
             clickhouse_credential=clickhouse_credential,
             to_update=to_update,
             query=new_table.query,
+            table_name=new_table.table_name,
         )
 
     async def get_datamart_table(self, id: str) -> DataMart:
