@@ -36,10 +36,6 @@ class ClickHouseRole:
         query = f"GRANT SHOW, SELECT, INSERT, ALTER, CREATE TABLE, CREATE VIEW, DROP TABLE, DROP VIEW, UNDROP TABLE, TRUNCATE ON {database_name}.* TO {username};"
         return self.clickhouse.admin.query(query=query)
 
-    def grant_global_permissions_to_user(self, username: str):
-        query = f"GRANT CREATE TEMPORARY TABLE, S3 ON *.* TO {username};"
-        return self.clickhouse.admin.query(query=query)
-
     def create_database_for_app(self, database_name: str):
         query = f"CREATE DATABASE {database_name}"
         return self.clickhouse.admin.query(query=query)

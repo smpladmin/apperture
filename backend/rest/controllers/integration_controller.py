@@ -203,13 +203,11 @@ async def create_table_with_csv(
         clickhouse_credential = await compute_query_action.get_credentials(
             datasource_id=PydanticObjectId(dto.datasourceId)
         )
-        res = integration_service.create_clickhouse_table_from_csv(
+        integration_service.create_clickhouse_table_from_csv(
             name=file.table_name,
             clickhouse_credential=clickhouse_credential,
             s3_key=file.s3_key,
         )
-        if not res:
-            raise HTTPException(status_code=500, detail="Error while parsing CSV file")
     except Exception as e:
         logging.info(e)
         raise HTTPException(status_code=500, detail=str(e))

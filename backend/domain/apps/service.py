@@ -47,7 +47,6 @@ class AppService:
         self.clickhouse_role.grant_permission_to_database(
             database_name=database_name, username=username
         )
-        self.clickhouse_role.grant_global_permissions_to_user(username=username)
 
     async def create_sample_tables(
         self, creds: ClickHouseCredential, user_id: PydanticObjectId
