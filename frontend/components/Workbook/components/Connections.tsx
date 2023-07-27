@@ -64,7 +64,7 @@ const Connections = ({
       mysql: DatabaseIcon,
       csv: CSVIcon,
     };
-    return icons[connectionName];
+    return icons[connectionName] || DatabaseIcon;
   };
   const { isOpen, onOpen, onClose } = useDisclosure();
   const sheetData = sheetsData[selectedSheetIndex];
@@ -181,10 +181,13 @@ const Connections = ({
             <Flex direction={'column'} key={server} overflow={'auto'}>
               <Flex alignItems={'center'} py={'2'} px={'3'} mt={'3'}>
                 <Text
+                  as={'span'}
                   fontSize={'xs-12'}
                   lineHeight={'xs-12'}
                   fontWeight={'500'}
                   color={'grey.600'}
+                  whiteSpace={'nowrap'}
+                  mr={1}
                 >
                   {server}
                 </Text>

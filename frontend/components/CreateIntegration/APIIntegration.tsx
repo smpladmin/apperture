@@ -1,37 +1,30 @@
+import apilogo from '@assets/images/apilogo.png';
 import {
   Box,
-  chakra,
   Flex,
   Heading,
-  IconButton,
   Input,
-  Text,
+  Text
 } from '@chakra-ui/react';
-import apilogo from '@assets/images/apilogo.png';
-import Image from 'next/image';
 import FormButton from '@components/FormButton';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import { createIntegrationWithDataSource } from '@lib/services/integrationService';
-import { Provider } from '@lib/domain/provider';
-import logo from '@assets/images/AppertureWhiteLogo.svg';
-import onboarding_left_panel from '@assets/images/onboarding_left_panel.svg';
 import {
-  TopProgress,
   IntegrationContainer,
   LeftContainer,
-  RightContainer,
   LeftContainerRevisit,
+  RightContainer,
+  TopProgress,
 } from '@components/Onboarding';
+import { Provider } from '@lib/domain/provider';
+import { createIntegrationWithDataSource } from '@lib/services/integrationService';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 
 type APIIntegrationProps = {
   handleClose: Function;
   add: string | string[] | undefined;
 };
-const APIIntegration = ({
-  add,
-  handleClose,
-}: APIIntegrationProps) => {
+const APIIntegration = ({ add, handleClose }: APIIntegrationProps) => {
   const router = useRouter();
   const [endPoint, setEndPoint] = useState('');
   const [headers, setHeaders] = useState('');
@@ -46,15 +39,13 @@ const APIIntegration = ({
   const onSubmit = async () => {
     const appId = router.query.appId as string;
     const provider = router.query.provider as Provider;
-console.log("calling create ds with :",appId,provider,endPoint,headers,'',tableName)
     const integration = await createIntegrationWithDataSource(
       appId,
       provider,
       endPoint,
       headers,
       '',
-      tableName,
-      
+      tableName
     );
     router.replace({
       pathname: '/analytics/app/[appId]/integration/[provider]/complete',

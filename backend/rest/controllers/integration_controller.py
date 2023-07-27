@@ -23,7 +23,6 @@ from rest.dtos.integrations import (
 )
 from rest.middlewares import get_user_id, validate_jwt
 
-
 router = APIRouter(
     tags=["integration"],
     dependencies=[Depends(validate_jwt)],
@@ -128,6 +127,7 @@ async def create_integration(
         dto.apiKey,
         dto.apiSecret,
         dto.tableName,
+        dto.database,
         mysql_credential,
         csv_credential,
     )

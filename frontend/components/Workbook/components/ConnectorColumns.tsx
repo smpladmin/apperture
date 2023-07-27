@@ -46,8 +46,15 @@ const generateQuery = (
   datasourceId: string
 ) => {
   if (!columns.length) return '';
-  const columnsQuerySubstring = columns.join(', ');
-  return `Select ${columnsQuerySubstring} from ${databaseName}.${tableName} where datasource_id = '${datasourceId}'`;
+  const columnsQuerySubstring = columns
+    .map((column) => '"' + column + '"')
+    .join(', ');
+  return `Select ${columnsQuerySubstring} from ${databaseName}.${tableName} ${
+    databaseName == 'default' &&
+    (tableName == 'events' || tableName == 'clickstream')
+      ? `where datasource_id = '${datasourceId}'`
+      : ''
+  }`;
 };
 
 const initializeSelectedColumns = (datasource_id: string, meta: any) => {
