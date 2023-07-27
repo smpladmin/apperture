@@ -1,13 +1,24 @@
-import { Box, Flex, IconButton, Text } from '@chakra-ui/react';
+import { Box, Flex, IconButton, Text, Heading } from '@chakra-ui/react';
 import Image from 'next/image';
 import gaLogo from '@assets/images/ga-logo.svg';
 import 'remixicon/fonts/remixicon.css';
 import FormButton from '@components/FormButton';
 import { BACKEND_BASE_URL, FRONTEND_BASE_URL } from 'config';
+import logo from '@assets/images/AppertureWhiteLogo.svg';
+import { useRouter } from 'next/router';
+import onboarding_left_panel from '@assets/images/onboarding_left_panel.svg';
+import {
+  TopProgress,
+  IntegrationContainer,
+  LeftContainer,
+  RightContainer,
+  LeftContainerRevisit,
+} from '@components/Onboarding';
 
 type GooglePermissionProps = {
   navigateBack: Function;
   handleClose: Function;
+  add: string | string[] | undefined;
   query: {
     [key in string]: string | string[] | undefined;
   };
@@ -17,6 +28,7 @@ const GooglePermission = ({
   navigateBack,
   handleClose,
   query,
+  add,
 }: GooglePermissionProps) => {
   const link = `${BACKEND_BASE_URL}/integrations/oauth/google?app_id=${query.appId}&redirect_url=${FRONTEND_BASE_URL}/analytics/app/${query.appId}/integration/google/apps`;
   const oauthUrl =
@@ -25,63 +37,42 @@ const GooglePermission = ({
       : query.previousDsId
       ? link.concat(`?previousDsId=${query.previousDsId}`)
       : link;
+  const router = useRouter();
+  const handleGoBack = (): void => router.back();
 
   return (
-    <Flex direction={'column'}>
-      <Box p={4} px={{ md: 45 }} pt={{ md: 10 }}>
-        <IconButton
-          aria-label="close"
-          variant={'secondary'}
-          icon={<i className="ri-close-fill" />}
-          rounded={'full'}
-          bg={'white.DEFAULT'}
-          border={'1px'}
-          borderColor={'white.200'}
-          onClick={() => handleClose()}
-        />
-      </Box>
-      <Flex
-        width={'full'}
-        direction={'column'}
-        justifyContent={'center'}
-        alignItems={'center'}
-        textAlign={'center'}
-        mt={{ base: '30', md: '20' }}
-      >
-        <Box
-          height={{ base: '20', md: '20' }}
-          width={{ base: '20', md: '20' }}
-          marginBottom={{ base: '13', md: '8' }}
-        >
-          <Image src={gaLogo} alt="google analytics" layout="responsive" />
-        </Box>
-        <Box maxWidth={'82'} paddingX={'4'}>
-          <Text
-            fontWeight={'semibold'}
-            fontSize={'sh-24'}
-            lineHeight={'sh-24'}
-            marginBottom={'2'}
-          >
-            Permission Request
-          </Text>
-          <Text
-            fontSize={{ base: 'xs-14', md: 'base' }}
-            lineHeight={{ base: 'xs-14', md: 'base' }}
-            color={'grey.200'}
-            fontWeight={'normal'}
-          >
-            Apperture wants to connect with your Google Analytics account
-          </Text>
-          <Box mt={'12'}>
-            <FormButton
-              navigateBack={navigateBack}
-              link={oauthUrl}
-              nextButtonName={'Give Access'}
-            />
-          </Box>
-        </Box>
-      </Flex>
-    </Flex>
+    <IntegrationContainer>
+      
+        { add ? <LeftContainerRevisit/> : <LeftContainer /> }
+     
+      <RightContainer>
+          <Flex flexDirection="column" alignItems="center">
+             { add ? <Box mt={10}></Box> : <TopProgress handleGoBack={handleGoBack} /> }
+
+            <Flex direction="column" h="full" justifyContent="center" alignItems="center" mt={10}>
+              <Box height={{ base: 8, md: 14 }} width={{ base: 8, md: 14 }} mb={10}>
+                <Image src={gaLogo} alt="google analytics" layout="responsive" />
+              </Box>
+              <Box maxWidth="82" paddingX="4" justifyContent="center">
+                <Text fontWeight="semibold" fontSize="sh-24" lineHeight="sh-24" marginBottom="2">
+                  Permission Request
+                </Text>
+                <Text
+                  fontSize={{ base: 'xs-14', md: 'base' }}
+                  lineHeight={{ base: 'xs-14', md: 'base' }}
+                  color="grey.200"
+                  fontWeight="normal"
+                >
+                  Apperture wants to connect with your Google Analytics account
+                </Text>
+                <Box mt="12">
+                  <FormButton navigateBack={navigateBack} link={oauthUrl} nextButtonName="Give Access" />
+                </Box>
+              </Box>
+            </Flex>
+          </Flex>
+        </RightContainer>
+    </IntegrationContainer>
   );
 };
 

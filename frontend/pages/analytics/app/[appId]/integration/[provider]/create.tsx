@@ -24,6 +24,7 @@ const Create = () => {
         <GooglePermission
           navigateBack={handleGoBack}
           handleClose={handleClose}
+          add={add}
           query={{ ...router.query }}
         />
       );
@@ -38,7 +39,7 @@ const Create = () => {
     case Provider.MYSQL:
       return <MySQLIntegration add={add} handleClose={handleClose} />;
     case Provider.CSV:
-      return <CSVIntegration />;
+      return <CSVIntegration add={add} handleClose={handleClose} />;
     default:
       return <></>;
   }

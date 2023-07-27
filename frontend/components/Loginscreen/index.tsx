@@ -68,7 +68,7 @@ const Loginscreen = () => {
           </Flex>
           <Heading
             as="h1"
-            mt={36}
+            mt={22}
             fontSize={{ base: 'sh-20', md: 'sh-36' }}
             lineHeight={{ base: 'sh-20', md: 'sh-36' }}
             fontWeight={{ base: '600', md: '700' }}

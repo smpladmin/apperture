@@ -65,7 +65,7 @@ const AppsModal = ({
           pb={{ base: '6', md: '0' }}
           px={{ base: '4', md: '9' }}
         >
-          My Applications
+          My Workspaces
           <ModalCloseButton
             position={'relative'}
             top={0}
@@ -125,10 +125,9 @@ const AppsModal = ({
               color={'grey.200'}
               textAlign={'center'}
             >
-              Switching applications clears out the current configuration and
-              filters.
+              Need multiple workspaces? Contact sales.
             </Text>
-            <Link href={`/analytics/app/create?previousDsId=${dsId}`}>
+            {/*<Link href={`/analytics/app/create?previousDsId=${dsId}`}>
               <Button
                 width={'full'}
                 padding={'4'}
@@ -145,7 +144,7 @@ const AppsModal = ({
               >
                 + Add Application
               </Button>
-            </Link>
+            </Link>*/}
           </Flex>
         </ModalFooter>
       </ModalContent>
