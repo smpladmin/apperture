@@ -247,7 +247,7 @@ export const increaseDecimalPlaces = (
   const updatedDecimalPlaces = Math.min(decimalPlaces + 1, 10);
   const updatedValue =
     typeof formattedValue === 'string' && formattedValue.includes('%')
-      ? `${originalValue.toFixed(updatedDecimalPlaces)}%`
+      ? `${(originalValue * 100).toFixed(updatedDecimalPlaces)}%`
       : originalValue.toFixed(updatedDecimalPlaces);
 
   return updatedValue;
@@ -261,7 +261,7 @@ export const decreaseDecimalPlaces = (
   const updatedDecimalPlaces = Math.max(decimalPlaces - 1, 0);
   const updatedValue =
     typeof formattedValue === 'string' && formattedValue.includes('%')
-      ? `${originalValue.toFixed(updatedDecimalPlaces)}%`
+      ? `${(originalValue * 100).toFixed(updatedDecimalPlaces)}%`
       : originalValue.toFixed(updatedDecimalPlaces);
 
   return updatedValue;
