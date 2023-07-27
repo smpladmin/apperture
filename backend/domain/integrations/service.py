@@ -77,7 +77,6 @@ class IntegrationService:
         api_key: Optional[str],
         secret: Optional[str],
         tableName: Optional[str],
-        database: Optional[str],
         mysql_credential: Optional[MySQLCredential],
         csv_credential: Optional[CSVCredential],
     ):
