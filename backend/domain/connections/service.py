@@ -140,7 +140,8 @@ class ConnectionService:
         datamart_connections = self.get_datamart_connection(
             datamarts=datamarts, datamart_properties=datamart_properties
         )
-        clickhouse_server_connections.connection_data.append(datamart_connections)
+        if datamart_connections.connection_source:
+            clickhouse_server_connections.connection_data.append(datamart_connections)
         mysql_server_connections = self.get_mysql_connection_group(
             mysql_connections=mysql_connections, credentials_table=credentials_table
         )
