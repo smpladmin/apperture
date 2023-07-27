@@ -43,3 +43,6 @@ class FilesService:
         return CSVCredential(
             name=file.filename, s3_key=file.s3_key, table_name=file.table_name
         )
+
+    async def get_file_by_app_id(self, app_id: str) -> File:
+        return await File.find(File.app_id == PydanticObjectId(app_id)).to_list()

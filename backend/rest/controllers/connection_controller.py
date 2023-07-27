@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends
 
+from domain.apps.service import AppService
 from domain.connections.service import ConnectionService
 from domain.datasources.service import DataSourceService
+from domain.files.service import FilesService
 from domain.integrations.service import IntegrationService
 from domain.properties.service import PropertiesService
 from rest.middlewares import validate_jwt
@@ -20,11 +22,14 @@ async def get_clickstream_events(
     connections_service: ConnectionService = Depends(),
     properties_service: PropertiesService = Depends(),
     integration_service: IntegrationService = Depends(),
+    app_service: AppService = Depends(),
 ):
     datasource = await ds_service.get_datasource(dsId)
 
     if datasource:
         app_id = datasource.app_id
+        app = await app_service.get_app(id=str(app_id))
+        clickhouse_credentials = app.clickhouse_credential
         all_datasources = await ds_service.get_datasources_for_app_id(app_id=app_id)
         properties_table = {}
         credentials_table = {}
@@ -34,6 +39,23 @@ async def get_clickstream_events(
                     id=datasource.integration_id
                 )
                 credentials_table[str(datasource.id)] = details
+            elif datasource.provider == "csv":
+                integration = await integration_service.get_integration(
+                    id=str(datasource.integration_id)
+                )
+                table = integration.credential.csv_credential.table_name
+                property = connections_service.get_csv_columns(
+                    username=clickhouse_credentials.username,
+                    password=clickhouse_credentials.password,
+                    database=clickhouse_credentials.databasename,
+                    table=table,
+                )
+                properties_table[str(datasource.id)] = {
+                    "fields": property,
+                    "database": clickhouse_credentials.databasename,
+                    "name": table,
+                    "table": table,
+                }
             else:
                 property = await properties_service.fetch_properties(
                     ds_id=datasource.id

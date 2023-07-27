@@ -5,6 +5,7 @@ from fastapi.params import Depends
 from domain.common.models import IntegrationProvider
 from domain.connections.models import ConnectionGroup, Connections, ConnectionSource
 from domain.datasources.models import DataSource, ProviderDataSource
+from domain.files.models import File
 from repositories.clickhouse.connection import Connection
 from repositories.clickhouse.my_sql import MySql
 
@@ -13,6 +14,11 @@ class ConnectionService:
     def __init__(self, connection: Connection = Depends()):
         self.connection = connection
 
+    def get_csv_columns(self, username, password, database, table):
+        return self.connection.get_clickhouse_table_description(
+            username=username, password=password, database=database, table=table
+        )
+
     def get_clickhouse_connection_group(
         self, clickhouse_connection_table, properties_table
     ):
@@ -20,21 +26,27 @@ class ConnectionService:
         for provider, datasources in clickhouse_connection_table.items():
             group = ConnectionGroup(provider=provider, connection_source=[])
             for datasource in datasources:
+                details = properties_table[str(datasource.id)]
                 fields = [
                     "properties." + property
-                    for property in (
-                        properties_table[str(datasource.id)]["fields"] or []
-                    )
+                    if datasource.provider != IntegrationProvider.CSV
+                    else property
+                    for property in (details["fields"] or [])
                 ]
                 group.connection_source.append(
                     ConnectionSource(
-                        name=datasource.name
-                        or datasource.external_source_id
-                        or datasource.provider,
-                        fields=["event_name", "user_id", *fields],
+                        name=details.get(
+                            "name",
+                            datasource.name
+                            or datasource.external_source_id
+                            or datasource.provider,
+                        ),
+                        fields=["event_name", "user_id", *fields]
+                        if datasource.provider != IntegrationProvider.CSV
+                        else fields,
                         datasource_id=datasource.id,
-                        table_name="events",
-                        database_name="default",
+                        table_name=details.get("name", "events"),
+                        database_name=details.get("database", "default"),
                     )
                 )
             connection_data.append(group) if group and group.connection_source else None
