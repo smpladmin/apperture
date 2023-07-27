@@ -4,6 +4,7 @@ from fastapi.params import Depends
 
 from domain.common.models import IntegrationProvider
 from domain.connections.models import ConnectionGroup, Connections, ConnectionSource
+from domain.datamart.models import DataMart
 from domain.datasources.models import DataSource, ProviderDataSource
 from domain.files.models import File
 from repositories.clickhouse.connection import Connection
@@ -14,7 +15,7 @@ class ConnectionService:
     def __init__(self, connection: Connection = Depends()):
         self.connection = connection
 
-    def get_csv_columns(self, username, password, database, table):
+    def get_clickhouse_table_columns(self, username, password, database, table):
         return self.connection.get_clickhouse_table_description(
             username=username, password=password, database=database, table=table
         )
@@ -94,11 +95,34 @@ class ConnectionService:
                     )
         return data
 
+    def get_datamart_connection(
+        self, datamarts: List[DataMart], datamart_properties: dict
+    ):
+        connection_source = []
+        for datamart in datamarts:
+            details = datamart_properties[str(datamart.id)]
+            connection_source.append(
+                ConnectionSource(
+                    name=details.get(
+                        "name",
+                        "Datamart",
+                    ),
+                    fields=details.get("fields", []),
+                    datasource_id=datamart.datasource_id,
+                    table_name=details.get("table", ""),
+                    database_name=details.get("database", ""),
+                )
+            )
+
+        return ConnectionGroup(provider="datamart", connection_source=connection_source)
+
     def get_connections_from_datasources(
         self,
         datasources: List[DataSource],
         properties_table: dict,
         credentials_table: dict,
+        datamarts: List[DataMart],
+        datamart_properties: dict,
     ):
         clickhouse_connection_table = {}
         mysql_connections = []
@@ -113,6 +137,10 @@ class ConnectionService:
             clickhouse_connection_table=clickhouse_connection_table,
             properties_table=properties_table,
         )
+        datamart_connections = self.get_datamart_connection(
+            datamarts=datamarts, datamart_properties=datamart_properties
+        )
+        clickhouse_server_connections.connection_data.append(datamart_connections)
         mysql_server_connections = self.get_mysql_connection_group(
             mysql_connections=mysql_connections, credentials_table=credentials_table
         )
