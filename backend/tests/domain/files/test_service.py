@@ -12,21 +12,17 @@ class TestFilesService:
         self.clickhouse = MagicMock()
         self.clickhouse.client = MagicMock()
         self.clickhouse.client.insert = MagicMock()
-        self.service = FilesService()
+        self.string_utils = MagicMock()
+        self.service = FilesService(string_utils=self.string_utils)
         File.get_settings = MagicMock()
         File.insert = AsyncMock()
         File.get = AsyncMock()
+        self.string_utils.extract_tablename_from_filename.return_value = "test"
 
     def test_build_s3_key(self):
         assert (
             self.service.build_s3_key(app_id="test-id", filename="test.csv")
             == "csvs/test-id/test.csv"
-        )
-
-    def test_extract_tablename_from_filename(self):
-        assert (
-            self.service.extract_tablename_from_filename(filename="csv file@!12.csv")
-            == "csv_file12"
         )
 
     @pytest.mark.asyncio

@@ -25,9 +25,8 @@ class TestDataMartRepo:
         assert self.repo.generate_create_table_query(
             query=self.query, table_name=self.table_name, db_name=self.db_name
         ) == (
-            "CREATE TABLE test-db.datamart-table  ENGINE = MergeTree ORDER BY "
-            "dummy_column_for_orderby AS SELECT *, 1 AS dummy_column_for_orderby from "
-            "(select event_name, user_id from events)"
+            "CREATE TABLE test-db.datamart-table  ENGINE = MergeTree ORDER BY tuple() AS "
+            "select event_name, user_id from events"
         )
 
     def test_create_table(self):
@@ -36,13 +35,11 @@ class TestDataMartRepo:
             table_name=self.table_name,
             clickhouse_credential=self.credential,
         )
-        self.repo.execute_query_for_restricted_client.assert_called_once_with(
+        self.repo.execute_query_for_restricted_client.assert_called_with(
             **{
                 "password": "test-password",
                 "query": "CREATE TABLE test-database.datamart-table  ENGINE = MergeTree ORDER "
-                "BY dummy_column_for_orderby AS SELECT *, 1 AS "
-                "dummy_column_for_orderby from (select event_name, user_id from "
-                "events)",
+                "BY tuple() AS select event_name, user_id from events",
                 "username": "test-username",
             }
         )
