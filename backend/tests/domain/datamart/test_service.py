@@ -44,7 +44,7 @@ class TestDataMartService:
             user_id=self.user_id,
             name=self.name,
             query="select event_name, user_id from events",
-            table_name="dUKQaHtqxM",
+            table_name="name",
             last_refreshed=datetime(2022, 11, 24, 0, 0),
             enabled=True,
         )
@@ -58,8 +58,8 @@ class TestDataMartService:
         DataMart.enabled = True
         self.service.datamart_repo.create_table = MagicMock()
         self.service.datamart_repo.drop_table = MagicMock()
-        self.service.string_utils.generate_random_value = MagicMock(
-            return_value="dUKQaHtqxM"
+        self.service.string_utils.extract_tablename_from_filename = MagicMock(
+            return_value="name"
         )
         self.clickhouse_credential = ClickHouseCredential(
             username="test-username",
@@ -84,7 +84,7 @@ class TestDataMartService:
             "id": None,
             "last_refreshed": ANY,
             "name": "name",
-            "table_name": "dUKQaHtqxM",
+            "table_name": "name",
             "query": "select event_name, user_id from events",
             "revision_id": None,
             "updated_at": None,
@@ -109,6 +109,7 @@ class TestDataMartService:
                     "enabled": True,
                     "last_refreshed": ANY,
                     "name": "name",
+                    "table_name": "name",
                     "query": "select event_name, user_id from events",
                     "revision_id": None,
                     "updated_at": ANY,
@@ -183,7 +184,7 @@ class TestDataMartService:
                     databasename="test-database",
                 ),
                 "query": "select event_name, user_id from events",
-                "table_name": "dUKQaHtqxM",
+                "table_name": "name",
             }
         )
         DataMart.insert.assert_called_once()
