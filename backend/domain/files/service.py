@@ -8,7 +8,7 @@ from domain.integrations.models import CSVCredential
 
 
 class FilesService:
-    def build_s3_key(self, app_id: str, filename: str):
+    def build_s3_key(self, app_id: str, filename: str) -> str:
         return f"csvs/{app_id}/{filename}"
 
     def extract_tablename_from_filename(self, filename: str) -> str:
