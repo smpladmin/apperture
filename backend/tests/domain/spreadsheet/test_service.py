@@ -4,6 +4,7 @@ from unittest.mock import ANY, AsyncMock, MagicMock
 import pytest
 from beanie import PydanticObjectId
 
+from domain.apps.models import ClickHouseCredential
 from domain.spreadsheets.models import (
     ColumnType,
     ComputedSpreadsheet,
@@ -93,7 +94,8 @@ class TestSpreadsheetService:
     @pytest.mark.asyncio
     async def test_get_transient_spreadsheets(self):
         result = await self.service.get_transient_spreadsheets(
-            query=self.query, username="", password=""
+            query=self.query,
+            credential=ClickHouseCredential(username="", password="", databasename=""),
         )
         assert result == ComputedSpreadsheet(
             headers=[

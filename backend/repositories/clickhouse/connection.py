@@ -17,7 +17,9 @@ class Connection(EventsBase):
         super().__init__(clickhouse=clickhouse)
         self.mysql_client = mysql_client
 
-    def get_db_details_from_connection(self, client_connection, datasource_id: PydanticObjectId, connection_sources):
+    def get_db_details_from_connection(
+        self, client_connection, datasource_id: PydanticObjectId, connection_sources
+    ):
         databases = self.mysql_client.get_dbs(connection=client_connection)
         for database in databases:
             tables = self.mysql_client.get_tables(
@@ -47,8 +49,11 @@ class Connection(EventsBase):
         connection_sources = {}
         try:
             if credentials.ssh_credential:
-                tunnel = self.mysql_client.create_ssh_tunnel(ssh_credential=credentials.ssh_credential,
-                                                host=credentials.host, port=credentials.port)
+                tunnel = self.mysql_client.create_ssh_tunnel(
+                    ssh_credential=credentials.ssh_credential,
+                    host=credentials.host,
+                    port=credentials.port,
+                )
                 with tunnel:
                     client_connection = self.mysql_client.get_mysql_connection(
                         host=tunnel.local_bind_host,
@@ -56,19 +61,25 @@ class Connection(EventsBase):
                         username=credentials.username,
                         password=credentials.password,
                     )
-                    self.get_db_details_from_connection(client_connection=client_connection,
-                                                        datasource_id=datasource_id,
-                                                        connection_sources=connection_sources)
+                    self.get_db_details_from_connection(
+                        client_connection=client_connection,
+                        datasource_id=datasource_id,
+                        connection_sources=connection_sources,
+                    )
                     client_connection.close()
 
             else:
                 client_connection = self.mysql_client.get_mysql_connection(
-                    host=credentials.host, port=credentials.port,
-                    username=credentials.username, password=credentials.password
+                    host=credentials.host,
+                    port=credentials.port,
+                    username=credentials.username,
+                    password=credentials.password,
                 )
-                self.get_db_details_from_connection(client_connection=client_connection,
-                                                    datasource_id=datasource_id,
-                                                    connection_sources=connection_sources)
+                self.get_db_details_from_connection(
+                    client_connection=client_connection,
+                    datasource_id=datasource_id,
+                    connection_sources=connection_sources,
+                )
                 client_connection.close()
 
         except Exception as e:

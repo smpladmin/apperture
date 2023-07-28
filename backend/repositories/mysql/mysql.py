@@ -105,8 +105,11 @@ class MySql(ABC):
         result = MySQLQueryResult(result_set=[], column_names=[])
         try:
             if credential.ssh_credential:
-                tunnel = self.create_ssh_tunnel(ssh_credential=credential.ssh_credential,
-                                                host=credential.host, port=credential.port)
+                tunnel = self.create_ssh_tunnel(
+                    ssh_credential=credential.ssh_credential,
+                    host=credential.host,
+                    port=credential.port,
+                )
                 with tunnel:
                     connection = self.get_mysql_connection(
                         host=tunnel.local_bind_host,
@@ -114,13 +117,17 @@ class MySql(ABC):
                         username=credential.username,
                         password=credential.password,
                     )
-                    self.set_query_result(connection=connection, query=query, result=result)
+                    self.set_query_result(
+                        connection=connection, query=query, result=result
+                    )
                     connection.close()
 
             else:
                 connection = self.get_mysql_connection(
-                    host=credential.host, port=credential.port,
-                    username=credential.username, password=credential.password
+                    host=credential.host,
+                    port=credential.port,
+                    username=credential.username,
+                    password=credential.password,
                 )
                 self.set_query_result(connection=connection, query=query, result=result)
                 connection.close()

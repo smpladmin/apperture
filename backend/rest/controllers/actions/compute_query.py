@@ -1,5 +1,5 @@
 import logging
-from typing import Union, Tuple
+from typing import Union
 
 from clickhouse_connect.driver.exceptions import DatabaseError
 from fastapi import Depends, HTTPException
@@ -30,11 +30,15 @@ class ComputeQueryAction:
         self.app_service = app_service
         self.integration_service = integration_service
 
-    async def get_credentials(self, datasource_id) -> Tuple[Union[ClickHouseCredential, MySQLCredential], DatabaseClient]:
+    async def get_credentials(
+        self, datasource_id: str
+    ) -> Union[ClickHouseCredential, MySQLCredential]:
         datasource = await self.datasource_service.get_datasource(datasource_id)
         if datasource.provider == IntegrationProvider.MYSQL:
-            integration = await self.integration_service.get_integration(id=str(datasource.integration_id))
-            return integration.credential.mysql_credential, DatabaseClient.MYSQL
+            integration = await self.integration_service.get_integration(
+                id=str(datasource.integration_id)
+            )
+            return integration.credential.mysql_credential
         else:
             app = await self.app_service.get_app(id=datasource.app_id)
             has_app_credential = bool(app.clickhouse_credential)
@@ -52,12 +56,21 @@ class ComputeQueryAction:
                     app=app, username=clickhouse_credential.username
                 )
 
-            return clickhouse_credential, DatabaseClient.CLICKHOUSE
+            return clickhouse_credential
+
+    async def get_database_client(self, datasource_id: str) -> DatabaseClient:
+        datasource = await self.datasource_service.get_datasource(datasource_id)
+        return (
+            DatabaseClient.MYSQL
+            if datasource.provider == IntegrationProvider.MYSQL
+            else DatabaseClient.CLICKHOUSE
+        )
 
     async def compute_query(self, dto: TransientSpreadsheetsDto):
         try:
             logging.info(f"Query: {dto.query}")
-            credential, client = await self.get_credentials(dto.datasourceId)
+            credential = await self.get_credentials(dto.datasourceId)
+            client = await self.get_database_client(datasource_id=dto.datasourceId)
 
             if not dto.is_sql:
                 sql_query = text_to_sql(dto.query, dto.word_replacements)

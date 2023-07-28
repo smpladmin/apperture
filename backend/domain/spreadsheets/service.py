@@ -14,7 +14,8 @@ from domain.spreadsheets.models import (
     MetricDefinition,
     Spreadsheet,
     SpreadSheetColumn,
-    WorkBook, DatabaseClient,
+    WorkBook,
+    DatabaseClient,
 )
 from repositories.clickhouse.spreadsheet import Spreadsheets
 from repositories.mysql.mysql import MySql
@@ -22,9 +23,7 @@ from repositories.mysql.mysql import MySql
 
 class SpreadsheetService:
     def __init__(
-        self,
-        spreadsheets: Spreadsheets = Depends(),
-        mysql: MySql = Depends()
+        self, spreadsheets: Spreadsheets = Depends(), mysql: MySql = Depends()
     ):
         self.spreadsheets = spreadsheets
         self.mysql = mysql
@@ -82,11 +81,15 @@ class SpreadsheetService:
         client: DatabaseClient = DatabaseClient.CLICKHOUSE,
     ) -> ComputedSpreadsheet:
         query = self.cleanse_query_string(query)
-        result = self.spreadsheets.get_transient_spreadsheet(
-            query=query,
-            username=credential.username,
-            password=credential.password,
-        ) if client == DatabaseClient.CLICKHOUSE else self.mysql.execute_mysql_query(query=query, credential=credential)
+        result = (
+            self.spreadsheets.get_transient_spreadsheet(
+                query=query,
+                username=credential.username,
+                password=credential.password,
+            )
+            if client == DatabaseClient.CLICKHOUSE
+            else self.mysql.execute_mysql_query(query=query, credential=credential)
+        )
 
         response = {
             "headers": [
