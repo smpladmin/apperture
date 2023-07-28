@@ -4,7 +4,6 @@ from domain.apps.service import AppService
 from domain.connections.service import ConnectionService
 from domain.datamart.service import DataMartService
 from domain.datasources.service import DataSourceService
-from domain.files.service import FilesService
 from domain.integrations.service import IntegrationService
 from domain.properties.service import PropertiesService
 from rest.middlewares import validate_jwt
@@ -79,10 +78,22 @@ async def get_clickstream_events(
                     ds_id=datasource.id
                 )
                 properties_table[str(datasource.id)] = {"fields": property}
+        sample_table_properties = {}
+        for table in app.sample_tables:
+            properties = connections_service.get_clickhouse_table_columns(
+                username=clickhouse_credentials.username,
+                password=clickhouse_credentials.password,
+                database=clickhouse_credentials.databasename,
+                table=table,
+            )
+            sample_table_properties[table] = properties
         return connections_service.get_connections_from_datasources(
             datasources=all_datasources,
             properties_table=properties_table,
             credentials_table=credentials_table,
             datamarts=datamarts,
             datamart_properties=datamart_properties,
+            sample_tables=app.sample_tables,
+            sample_table_properties=sample_table_properties,
+            app_database=clickhouse_credentials.databasename,
         )

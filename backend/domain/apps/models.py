@@ -1,4 +1,4 @@
-from typing import Optional, Set
+from typing import List, Optional, Set
 
 from beanie import Indexed, PydanticObjectId
 from pydantic import BaseModel, Field
@@ -18,6 +18,7 @@ class App(Document):
     shared_with: Set[PydanticObjectId] = set()
     enabled: bool = True
     clickhouse_credential: Optional[ClickHouseCredential] = Field(hidden=True)
+    sample_tables: List[str] = []
 
     class Settings:
         name = "apps"

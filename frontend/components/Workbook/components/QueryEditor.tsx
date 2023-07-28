@@ -11,7 +11,7 @@ import { SheetType, TransientSheetData } from '@lib/domain/workbook';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
 import { Eye, PencilSimpleLine, Play } from 'phosphor-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { cloneDeep } from 'lodash';
 import { ErrorResponse } from '@lib/services/util';
 import { getTransientSpreadsheets } from '@lib/services/workbookService';
@@ -55,6 +55,10 @@ const QueryEditor = ({
     onClose();
   };
 
+  useEffect(() => {
+    setQuery(sheetData.query);
+  }, [sheetData.query]);
+
   const handleQueryChange = async () => {
     setIsLoading(true);
 
@@ -87,7 +91,7 @@ const QueryEditor = ({
     <>
       <Box px={'5'} pt={'4'} pb={'5'}>
         <Flex justifyContent={'space-between'} alignItems={'center'}>
-          <Text>Clickhouse</Text>
+          <Text>Query Editor</Text>
           <ButtonGroup size="sm" isAttached variant="outline">
             <Button
               px={'3'}
