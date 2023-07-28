@@ -1,11 +1,12 @@
 import re
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
 
 from domain.apps.models import ClickHouseCredential
+from domain.integrations.models import MySQLCredential
 from domain.spreadsheets.models import (
     ColumnType,
     ComputedSpreadsheet,
@@ -13,17 +14,20 @@ from domain.spreadsheets.models import (
     MetricDefinition,
     Spreadsheet,
     SpreadSheetColumn,
-    WorkBook,
+    WorkBook, DatabaseClient,
 )
 from repositories.clickhouse.spreadsheet import Spreadsheets
+from repositories.mysql.mysql import MySql
 
 
 class SpreadsheetService:
     def __init__(
         self,
         spreadsheets: Spreadsheets = Depends(),
+        mysql: MySql = Depends()
     ):
         self.spreadsheets = spreadsheets
+        self.mysql = mysql
 
     async def add_workbook(self, workbook: WorkBook):
         workbook.updated_at = workbook.created_at
@@ -72,14 +76,18 @@ class SpreadsheetService:
         return re.sub(r"\n+", " ", query_string).strip()
 
     async def get_transient_spreadsheets(
-        self, query: str, username: str, password: str
+        self,
+        query: str,
+        credential: Union[ClickHouseCredential, MySQLCredential],
+        client: DatabaseClient = DatabaseClient.CLICKHOUSE,
     ) -> ComputedSpreadsheet:
         query = self.cleanse_query_string(query)
         result = self.spreadsheets.get_transient_spreadsheet(
             query=query,
-            username=username,
-            password=password,
-        )
+            username=credential.username,
+            password=credential.password,
+        ) if client == DatabaseClient.CLICKHOUSE else self.mysql.execute_mysql_query(query=query, credential=credential)
+
         response = {
             "headers": [
                 SpreadSheetColumn(name=name, type=ColumnType.QUERY_HEADER)

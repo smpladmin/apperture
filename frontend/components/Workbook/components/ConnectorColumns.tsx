@@ -47,7 +47,7 @@ const generateQuery = (
 ) => {
   if (!columns.length) return '';
   const columnsQuerySubstring = columns
-    .map((column) => '"' + column + '"')
+    .map((column) => (column.includes(' ') ? '"' + column + '"' : column))
     .join(', ');
   return `Select ${columnsQuerySubstring} from ${databaseName}.${tableName} ${
     databaseName == 'default' &&

@@ -4,7 +4,6 @@ from domain.apps.service import AppService
 from domain.connections.service import ConnectionService
 from domain.datamart.service import DataMartService
 from domain.datasources.service import DataSourceService
-from domain.files.service import FilesService
 from domain.integrations.service import IntegrationService
 from domain.properties.service import PropertiesService
 from rest.middlewares import validate_jwt

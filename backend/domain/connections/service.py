@@ -5,10 +5,8 @@ from fastapi.params import Depends
 from domain.common.models import IntegrationProvider
 from domain.connections.models import ConnectionGroup, Connections, ConnectionSource
 from domain.datamart.models import DataMart
-from domain.datasources.models import DataSource, ProviderDataSource
-from domain.files.models import File
+from domain.datasources.models import DataSource
 from repositories.clickhouse.connection import Connection
-from repositories.clickhouse.my_sql import MySql
 
 
 class ConnectionService:

@@ -103,3 +103,13 @@ class MetricDefinition(BaseModel):
 class DimensionDefinition(BaseModel):
     formula: Formula
     property: Optional[str]
+
+
+class DatabaseClient(Enum):
+    MYSQL = "mysql"
+    CLICKHOUSE = "clickhouse"
+
+
+class MySQLQueryResult(BaseModel):
+    result_set: List
+    column_names: List[str]
