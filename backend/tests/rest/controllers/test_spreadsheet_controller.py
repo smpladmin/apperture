@@ -30,6 +30,7 @@ async def test_compute_transient_spreadsheets_with_credentials(
             {"index": 4, "event_name": "test_event_4"},
             {"index": 5, "event_name": "test_event_5"},
         ],
+        "sql": "select * from events",
     }
     spreadsheets_service.get_transient_spreadsheets.assert_called_once_with(
         **{
@@ -80,6 +81,7 @@ async def test_compute_transient_spreadsheets(
             {"index": 4, "event_name": "test_event_4"},
             {"index": 5, "event_name": "test_event_5"},
         ],
+        "sql": "select * from events",
     }
     spreadsheets_service.get_transient_spreadsheets.assert_called_with(
         **{
@@ -142,7 +144,7 @@ async def test_get_saved_workbooks(client_init, spreadsheets_service):
                     "edit_mode": True,
                     "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                     "meta": {"dsId": "", "selectedColumns": []},
-                    "word_replacements": [],
+                    "ai_query": None,
                 }
             ],
             "enabled": True,
@@ -186,7 +188,7 @@ async def test_get_saved_workbooks_for_app(client_init, spreadsheets_service):
                     "edit_mode": True,
                     "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                     "meta": {"dsId": "", "selectedColumns": []},
-                    "word_replacements": [],
+                    "ai_query": None,
                 }
             ],
             "enabled": True,
@@ -228,7 +230,7 @@ async def test_get_saved_workbooks_by_user_id(client_init, spreadsheets_service)
                     "edit_mode": True,
                     "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                     "meta": {"dsId": "", "selectedColumns": []},
-                    "word_replacements": [],
+                    "ai_query": None,
                 }
             ],
             "enabled": True,
@@ -267,7 +269,7 @@ async def test_get_saved_workbook_by_id(client_init, spreadsheets_service):
                 "edit_mode": True,
                 "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                 "meta": {"dsId": "", "selectedColumns": []},
-                "word_replacements": [],
+                "ai_query": None,
             }
         ],
         "updatedAt": None,
@@ -302,7 +304,7 @@ async def test_create_workbook(client_init, workbook_data):
                 "edit_mode": True,
                 "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                 "meta": {"dsId": "", "selectedColumns": []},
-                "word_replacements": [],
+                "ai_query": None,
             }
         ],
         "enabled": True,
@@ -336,7 +338,7 @@ async def test_update_workbook(client_init, workbook_data, spreadsheets_service)
                 "edit_mode": True,
                 "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                 "meta": {"dsId": "", "selectedColumns": []},
-                "word_replacements": [],
+                "ai_query": None,
             }
         ],
         "enabled": True,

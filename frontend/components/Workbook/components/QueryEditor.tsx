@@ -36,7 +36,9 @@ const QueryEditor = ({
 }: QueryEditorProps) => {
   const sheetData = sheetsData[selectedSheetIndex];
 
-  const [query, setQuery] = useState(sheetData.query);
+  const [query, setQuery] = useState(
+    sheetData.is_sql ? sheetData.query : sheetData.aiQuery?.sql || ''
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();

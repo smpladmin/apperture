@@ -1,7 +1,11 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import React from 'react';
 
-const EmptySheet = () => {
+type EmtpySheetProps = {
+  tableSelected: boolean;
+};
+
+const EmptySheet = ({ tableSelected }: EmtpySheetProps) => {
   const rows = 50;
   const columns = 26;
   return (
@@ -39,9 +43,12 @@ const EmptySheet = () => {
           </Flex>
         ))}
         <Box position={'fixed'} mt={'33'} zIndex={'2'} left={'45%'}>
-          <Flex direction={'column'} gap={'2'} textAlign='center'>
+
+          <Flex direction={'column'} gap={'2'} alignItems={'center'}>
             <Text fontSize={'xs-16'} lineHeight={'xs-16'} fontWeight={'500'}>
-              Select columns or Ask AI
+              {tableSelected
+                ? 'Select columns or Ask AI'
+                : 'Start by selecting a table'}
             </Text>
             <Text
               fontSize={'xs-14'}
@@ -51,6 +58,9 @@ const EmptySheet = () => {
               color={'grey.500'}
             >
               You can create any report directly using text input
+              {tableSelected
+                ? 'You can create any report directly using text input'
+                : 'Aggregate and analyse data using excel functions or AI'}
             </Text>
           </Flex>
         </Box>

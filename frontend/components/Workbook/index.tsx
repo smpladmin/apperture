@@ -8,6 +8,7 @@ import {
 } from '@lib/services/workbookService';
 import { useRouter } from 'next/router';
 import {
+  AIQuery,
   ColumnType,
   SheetType,
   SpreadSheetColumn,
@@ -57,6 +58,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
         dsId: '',
         selectedColumns: [],
       },
+      aiQuery: sheet?.ai_query,
     }));
   }
   return [
@@ -73,6 +75,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
         dsId: '',
         selectedColumns: [],
       },
+      aiQuery: undefined,
     },
   ];
 };
@@ -149,12 +152,15 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     // update empty sheet based on sheet query and its type
     const sheet = sheetsData[selectedSheetIndex];
     const isSheetEmpty = !(
-      sheet?.query || sheet?.sheet_type === SheetType.PIVOT_SHEET
+      sheet?.query ||
+      sheet?.aiQuery?.nlQuery ||
+      sheet?.sheet_type === SheetType.PIVOT_SHEET
     );
     setShowEmptyState(isSheetEmpty);
   }, [
     sheetsData[selectedSheetIndex]?.query,
     sheetsData[selectedSheetIndex]?.sheet_type,
+    sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery,
   ]);
 
   const fetchTransientSheetData = async (abortController?: AbortController) => {
@@ -165,14 +171,23 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       sheet?.meta?.dsId || (dsId as string),
       sheet.query,
       sheet?.is_sql,
-      sheet.word_replacements,
+      sheet.aiQuery,
       abortController?.signal
     );
 
     if (response.status === 200) {
       const toUpdateSheets = cloneDeep(sheetsData);
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
-      toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
+      toUpdateSheets[selectedSheetIndex].headers =
+        response?.data?.headers;
+      if (!sheet.is_sql) {
+        const query =
+          toUpdateSheets[selectedSheetIndex].aiQuery || ({} as AIQuery);
+        toUpdateSheets[selectedSheetIndex].aiQuery = {
+          ...query,
+          sql: response?.data?.sql,
+        };
+      }
       setSheetsData(toUpdateSheets);
     } else if (!sheet.is_sql) {
       toast({
@@ -190,10 +205,11 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     const prevSheet = prevSheetsData?.[selectedSheetIndex];
 
     const isSqlSheet = sheet?.is_sql;
-    const hasDifferentQuery = sheet.query !== prevSheet?.query;
+    const hasSameQuery = isSqlSheet
+      ? sheet.query === prevSheet?.query
+      : isEqual(sheet?.aiQuery, prevSheet?.aiQuery);
     const hasEditMode = sheet?.edit_mode;
-
-    if ((isSqlSheet && (!sheet.query || hasEditMode)) || !hasDifferentQuery) {
+    if ((isSqlSheet && (!sheet.query || hasEditMode)) || hasSameQuery) {
       return;
     }
 
@@ -205,7 +221,8 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     };
   }, [
     sheetsData[selectedSheetIndex]?.query,
-    JSON.stringify(sheetsData[selectedSheetIndex]?.word_replacements),
+    sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery,
+    JSON.stringify(sheetsData[selectedSheetIndex]?.aiQuery?.wordReplacements),
     triggerSheetFetch,
   ]);
 
@@ -220,7 +237,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         edit_mode: sheet.edit_mode,
         meta: sheet.meta,
         sheet_type: sheet.sheet_type,
-        word_replacements: sheet.word_replacements,
+        aiQuery: sheet.aiQuery,
       };
     });
 
@@ -301,7 +318,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         dsId as string,
         selectedSheet.query,
         selectedSheet.is_sql,
-        selectedSheet.word_replacements
+        selectedSheet.aiQuery
       );
       let queriedData = res?.data?.data;
 
@@ -746,7 +763,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             />
           ) : null}
           {showEmptyState ? (
-            <EmptySheet />
+            <EmptySheet
+              tableSelected={!!sheetsData[selectedSheetIndex]?.meta?.dsId}
+            />
           ) : (
             <Box overflow={'auto'} h={'full'} pb={'8'}>
               {hasQueryWithoutData ? (
@@ -780,30 +799,46 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           />
         </Box>
       </Flex>
-      <AIButton
-        query={
-          !sheetsData[selectedSheetIndex]?.is_sql
-            ? sheetsData[selectedSheetIndex]?.query
-            : ''
-        }
-        zIndex={1}
-        position={'fixed'}
-        right={5}
-        bottom={13}
-        properties={getProperties}
-        wordReplacements={sheetsData[selectedSheetIndex].word_replacements}
-        loading={fetchingTransientSheet}
-        onQuery={(updatedQuery, wordReplacements) => {
-          const sheetsCopy = cloneDeep(sheetsData);
-          sheetsCopy[selectedSheetIndex].is_sql = false;
-          sheetsCopy[selectedSheetIndex].query = updatedQuery;
-          sheetsCopy[selectedSheetIndex].word_replacements = wordReplacements;
-          sheetsCopy[selectedSheetIndex].edit_mode = true;
-          sheetsCopy[selectedSheetIndex].sheet_type = SheetType.SIMPLE_SHEET;
-          setSheetsData(sheetsCopy);
-          setTriggerSheetFetch(triggerSheetFetch + 1);
-        }}
-      />
+      {sheetsData[selectedSheetIndex]?.meta?.dsId && (
+        <AIButton
+          query={
+            !sheetsData[selectedSheetIndex]?.is_sql
+              ? sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery
+              : ''
+          }
+          zIndex={1}
+          position={'fixed'}
+          right={5}
+          bottom={13}
+          properties={getProperties}
+          wordReplacements={
+            sheetsData[selectedSheetIndex]?.aiQuery?.wordReplacements
+          }
+          loading={fetchingTransientSheet}
+          onQuery={(updatedQuery, wordReplacements) => {
+            const sheetsCopy = cloneDeep(sheetsData);
+            sheetsCopy[selectedSheetIndex].is_sql = false;
+            let query =
+              sheetsCopy[selectedSheetIndex].aiQuery || ({} as AIQuery);
+            query = {
+              ...query,
+              nlQuery: updatedQuery,
+              wordReplacements,
+              sql: '',
+              table:
+                sheetsCopy[selectedSheetIndex]?.meta?.selectedTable || 'events',
+              database:
+                sheetsCopy[selectedSheetIndex]?.meta?.selectedDatabase ||
+                'default',
+            };
+            sheetsCopy[selectedSheetIndex].aiQuery = query;
+            sheetsCopy[selectedSheetIndex].edit_mode = true;
+            sheetsCopy[selectedSheetIndex].sheet_type = SheetType.SIMPLE_SHEET;
+            setSheetsData(sheetsCopy);
+            setTriggerSheetFetch(triggerSheetFetch + 1);
+          }}
+        />
+      )}
     </Flex>
   );
 };

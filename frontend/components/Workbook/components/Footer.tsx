@@ -50,6 +50,7 @@ const Footer = ({
         dsId: '',
         selectedColumns: [],
       },
+      aiQuery: undefined,
     };
 
     setSheetsData((prevSheetData: TransientSheetData[]) => [

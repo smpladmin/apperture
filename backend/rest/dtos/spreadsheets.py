@@ -3,6 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from domain.spreadsheets.models import (
+    AIQuery,
     ComputedSpreadsheet,
     DimensionDefinition,
     MetricDefinition,
@@ -20,7 +21,7 @@ class TransientSpreadsheetsDto(BaseModel):
     datasourceId: str
     query: str
     is_sql: bool = False
-    word_replacements: List[WordReplacement] = []
+    ai_query: Optional[AIQuery]
 
 
 class TransientSpreadsheetColumnDto(BaseModel):
@@ -45,7 +46,7 @@ class SpreadSheetDto(BaseModel):
     edit_mode: bool
     sheet_type: SpreadsheetType
     meta: dict
-    word_replacements: List[WordReplacement] = []
+    ai_query: Optional[AIQuery]
 
 
 class CreateWorkBookDto(BaseModel):
