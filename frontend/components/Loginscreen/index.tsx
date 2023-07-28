@@ -234,7 +234,7 @@ const Loginscreen = () => {
                     fontWeight="normal"
                     color="grey.800"
                   >
-                    I agree to Apperture`&apos;`s
+                    I agree to Apperture&apos;s
                   </Text>
                   <Link href="https://apperture.io/terms-and-conditions"   >Terms and conditions</Link>
                   <Text fontWeight="normal" color="grey.800">and</Text>
