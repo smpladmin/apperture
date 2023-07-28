@@ -23,7 +23,7 @@ import { Envelope, Eye, EyeClosed, LockKey } from 'phosphor-react';
 import { BLACK, GREY_600 } from '@theme/index';
 import {
   IntegrationContainer,
-  LeftContainer,
+  LeftContainerLogin,
   RightContainer,
 } from '@components/Onboarding';
 
@@ -56,7 +56,7 @@ const Loginscreen = () => {
   return (
     <IntegrationContainer>
       
-        <LeftContainer />
+        <LeftContainerLogin />
      
       <RightContainer>
         <Box
