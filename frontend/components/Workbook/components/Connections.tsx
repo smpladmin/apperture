@@ -297,7 +297,7 @@ const Connections = ({
         isOpen={isOpen}
         onClose={handleClose}
         headerText="Do you want to switch connection?"
-        subHeaderText="After changing connection, you will lose all your previous data. Do you want to continue?"
+        subHeaderText="Continuing will clear the current sheet."
         onSubmit={handleSubmit}
       />
     </>

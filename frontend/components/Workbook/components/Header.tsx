@@ -96,7 +96,7 @@ const WorkbookHeader = ({
           >
             <Flex alignItems={'center'} gap={'1'}>
               <Code size={16} />
-              {'SQL Editor'}
+              {'SQL'}
             </Flex>
           </Button>
           <Button

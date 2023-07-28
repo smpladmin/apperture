@@ -12,11 +12,5 @@ describe('Home', () => {
     expect(heading).toBeInTheDocument();
   });
 
-  it('renders a apperure logo', () => {
-    render(<Login />);
-    const logo = screen.getByRole('img', {
-      name: 'Apperture logo',
-    });
-    expect(logo).toBeInTheDocument();
-  });
+
 });

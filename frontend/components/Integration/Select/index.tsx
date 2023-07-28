@@ -92,7 +92,24 @@ const SelectProvider = () => {
      
       <RightContainer>
           <Flex flexDirection="column" alignItems="center">
-            { add ? <Box mt={10}></Box> : <TopProgress handleGoBack={handleGoBack} /> }
+            { add ? 
+                 <Flex flexDirection="column" alignItems="flex-start" w={'full'}> 
+                     <IconButton
+                      aria-label="Go back"
+                      icon={<i className="ri-arrow-left-line" />}
+                      color="grey.800"
+                      bg="transparent"
+                      fontSize="sh-20"
+                      fontWeight="100"
+                      pl={12}
+                      pt={5}
+                      _hover={{
+                        bg: 'white', // Change hover color to white
+                      }}
+                      onClick={handleGoBack}
+                    />
+                </Flex>
+             : <TopProgress handleGoBack={handleGoBack} /> }
 
             <Box width={120} mt={10}>
               <Heading
@@ -114,6 +131,9 @@ const SelectProvider = () => {
               </Text>
             </Box>
 
+            
+
+            <Box width={'80%'} mb={'10'} mt="10">
             <Box
               borderWidth="1px"
               borderColor="gray.300"
@@ -125,9 +145,11 @@ const SelectProvider = () => {
               mt={10}
               onClick={handleCSVUploadClick}
               cursor={'pointer'}
+              mb={10}
             >
               <FileArrowUp size={30} color="#212121" />
-              <Box flex="1" minW="150" pl={2}>
+              
+              <Box flex="1" minW="350" pl={2}>
                 <Text fontSize="xs-14" fontWeight="semibold" color="gray.900">
                   Upload a CSV
                 </Text>
@@ -147,7 +169,6 @@ const SelectProvider = () => {
               />
             </Box>
 
-            <Box width={'80%'} mb={'10'} mt="10">
               <RadioGroup value={provider} onChange={setProvider}>
                 <SimpleGrid columns={4} spacing={2}>
                   <IntegrationSource
@@ -180,12 +201,12 @@ const SelectProvider = () => {
                     imgSrc={clevertapLogo}
                     selected={provider === Provider.CLEVERTAP}
                   />
-                  <IntegrationSource
+                  {/*<IntegrationSource
                     sourceName="Google Analytics"
                     value={Provider.GOOGLE}
                     imgSrc={gaLogo}
                     selected={provider === Provider.GOOGLE}
-                  />
+                  />*/}
                   <IntegrationSource
                     sourceName="Connect an API"
                     value={Provider.API}

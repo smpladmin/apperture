@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { getAuthToken } from '@lib/utils/request';
 import React, { useState, useRef } from 'react';
-import { Clipboard } from 'phosphor-react';
+import { Clipboard, CheckCircle} from 'phosphor-react';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
@@ -53,13 +53,14 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
               Simply Copy this script to your website header.
             </Text>
         :
-        <Image
-          src={folder.src}
-          pb={10}
-          alt="Integration completed"
-          w={39}
-          h={'auto'}
-        />
+        <CheckCircle size={52}  weight="fill" color='GREEN'/>
+        // <Image
+        //   src={folder.src}
+        //   pb={10}
+        //   alt="Integration completed"
+        //   w={39}
+        //   h={'auto'}
+        // />
       }
         {router.query.provider === "apperture" ? 
             <textarea
@@ -80,21 +81,22 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
         
         {router.query.provider === "apperture" ? <Box></Box>
         :
-          <Box maxW={'xs'} w={'full'}>
+          <Box maxW={'600'} w={'full'}>
             <Text
               fontWeight={'bold'}
               fontSize={'sh-28'}
               lineHeight={'sh-28'}
               marginBottom={'2'}
+              pt={10}
             >
-              We are all set!
+              Datasource added sucessfully!
             </Text>
             <Text
               fontSize={{ base: 'xs-14', md: 'base' }}
               lineHeight={{ base: 'xs-14', md: 'base' }}
               color={'grey.200'}
             >
-              “{app.name}” has been created and added to your applications.
+              Analyse data to take better and informed decisions. You can start with our “Sheets” feature
             </Text>
           </Box>
         }
@@ -112,7 +114,7 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
             textColor={'white.100'}
             w={'full'}
           >
-            {router.query.provider === "apperture" ? "Next" : "Explore" }
+            {router.query.provider === "apperture" ? "Next" : "Start Exploring" }
           </Button>
         </Link>
         <Link href={`/analytics/home/${router.query.dsId}`}>

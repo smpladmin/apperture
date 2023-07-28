@@ -54,7 +54,7 @@ const ConfirmationModal = ({
           </Text>
         </ModalHeader>
 
-        <ModalBody px={'8'} pt={'6'} pb={'8'} overflowY={'auto'}>
+        <ModalBody px={'8'} pt={'2'} pb={'8'} overflowY={'auto'}>
           <Flex direction={'column'} gap={'6'}>
             <Text
               fontSize={'xs-14'}
@@ -95,7 +95,7 @@ const ConfirmationModal = ({
                 borderRadius={'8'}
                 onClick={() => onSubmit()}
               >
-                Yes, continue
+                Confirm
               </Button>
             </Flex>
           </Flex>

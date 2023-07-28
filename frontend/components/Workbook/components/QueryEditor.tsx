@@ -197,8 +197,8 @@ const QueryEditor = ({
       <ConfirmationModal
         isOpen={isOpen}
         onClose={onClose}
-        headerText="Do you want to change mode?"
-        subHeaderText="After entering the edit mode, you will lose all your previous data. Do you want to make permanent changes?"
+        headerText="Do you want to chnage the SQL query?"
+        subHeaderText="Note- you will no longer be able to select columns manually."
         onSubmit={handleEditSelection}
       />
     </>
