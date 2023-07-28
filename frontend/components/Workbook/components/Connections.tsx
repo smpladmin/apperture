@@ -136,6 +136,8 @@ const Connections = ({
         tempSheetsData[selectedSheetIndex].meta = {
           dsId: canditate.dsId,
           selectedColumns: [],
+          selectedTable: '',
+          selectedDatabase: '',
         };
         tempSheetsData[selectedSheetIndex].data = [];
         tempSheetsData[selectedSheetIndex].headers = [];

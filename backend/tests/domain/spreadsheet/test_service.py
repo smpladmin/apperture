@@ -5,6 +5,7 @@ import pytest
 from beanie import PydanticObjectId
 
 from domain.spreadsheets.models import (
+    AIQuery,
     ColumnType,
     ComputedSpreadsheet,
     Spreadsheet,
@@ -26,6 +27,7 @@ class TestSpreadsheetService:
         SELECT  event_name -- selecting event
         FROM  events
         WHERE timestamp>=toDate(2023-02-11)"""
+        self.cleaned_query = """SELECT  event_name          FROM  events         WHERE timestamp>=toDate(2023-02-11)"""
         self.spreadsheet.get_transient_spreadsheet = MagicMock()
         self.column_names = ["event_name"]
         self.result_set = [
@@ -100,6 +102,7 @@ class TestSpreadsheetService:
                 SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)
             ],
             data=self.result_data,
+            sql=self.cleaned_query,
         )
 
     def test_build_workbook(self):
@@ -113,12 +116,18 @@ class TestSpreadsheetService:
                             name="event_name", type=ColumnType.QUERY_HEADER
                         )
                     ],
-                    is_sql=True,
-                    query="SELECT  event_name FROM  events",
+                    is_sql=False,
+                    query="",
                     edit_mode=True,
                     meta={"dsId": "", "selectedColumns": []},
                     sheet_type=SpreadsheetType.SIMPLE_SHEET,
-                    word_replacements=[],
+                    ai_query=AIQuery(
+                        nl_query="get me users",
+                        sql="",
+                        word_replacements=[],
+                        table="events",
+                        database="default",
+                    ),
                 )
             ],
             datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
@@ -141,13 +150,19 @@ class TestSpreadsheetService:
                     "headers": [
                         {"name": "event_name", "type": ColumnType.QUERY_HEADER}
                     ],
-                    "is_sql": True,
-                    "query": "SELECT  event_name FROM  events",
+                    "is_sql": False,
+                    "query": "",
                     "subHeaders": None,
                     "edit_mode": True,
                     "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                     "meta": {"dsId": "", "selectedColumns": []},
-                    "word_replacements": [],
+                    "ai_query": {
+                        "nl_query": "get me users",
+                        "sql": "",
+                        "word_replacements": [],
+                        "table": "events",
+                        "database": "default",
+                    },
                 }
             ],
             "enabled": True,

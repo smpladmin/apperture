@@ -48,7 +48,7 @@ class ComputeQueryAction:
             logging.info(f"Query: {dto.query}")
             clickhouse_credential = await self.get_credentials(dto.datasourceId)
             if not dto.is_sql:
-                sql_query = text_to_sql(dto.query, dto.word_replacements)
+                sql_query = text_to_sql(dto.ai_query)
                 return await self.spreadsheets_service.get_transient_spreadsheets(
                     query=sql_query,
                     username=clickhouse_credential.username,

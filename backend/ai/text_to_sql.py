@@ -2,20 +2,23 @@ import logging
 from typing import List
 import openai
 
-from domain.spreadsheets.models import WordReplacement
+from domain.spreadsheets.models import AIQuery, WordReplacement
 
 
-def generate_prompt(text, columns):
+def generate_prompt(text, columns, database, table):
     return f"""
-    I have a Clickhouse table called events with columns {", ".join(columns)}
+    I have a Clickhouse table called {database}.{table} with columns {", ".join(columns)}
     Generate only a single SQL 'Select' query and no other text using following text '{text}'
     """
 
 
-def text_to_sql(text: str, word_replacements: List[WordReplacement]) -> str:
-    logging.info(f"Generating sql for text: {text}")
+def text_to_sql(query: AIQuery) -> str:
+    logging.info(f"Generating sql for text: {query.nl_query}")
     prompt = generate_prompt(
-        text, [w.replacement for w in word_replacements] + ["timestamp"]
+        query.nl_query,
+        [w.replacement for w in query.word_replacements] + ["timestamp"],
+        query.database,
+        query.table,
     )
     logging.info(f"GPT prompt: {prompt}")
 
