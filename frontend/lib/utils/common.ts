@@ -227,17 +227,13 @@ export function autoCaptureEventToDescription(
 export const getAppFromDataSourceId = (
   apps: AppWithIntegrations[],
   datasourceId: string
-): AppWithIntegrations | null => {
-  let foundApp = null;
-  apps.forEach((app) => {
-    const hasDatasource = app.integrations.some((integration) =>
+): AppWithIntegrations | undefined => {
+  const currentApp = apps.find((app) =>
+    app.integrations.some((integration) =>
       integration.datasources.some((ds) => ds._id === datasourceId)
-    );
-    if (hasDatasource) {
-      foundApp = app;
-    }
-  });
-  return foundApp;
+    )
+  );
+  return currentApp;
 };
 
 export const getAllDatasourceProvidersFromApp = (
