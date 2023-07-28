@@ -17,6 +17,8 @@ from domain.datasources.models import (
 )
 from domain.integrations.models import Credential, Integration
 from repositories.clickhouse.clickhouse_role import ClickHouseRole
+from repositories.clickhouse.users import User
+from settings import apperture_settings
 
 
 class DataSourceService:
@@ -24,6 +26,7 @@ class DataSourceService:
         self,
         auth_service: AuthService = Depends(),
         clickhouse_role: ClickHouseRole = Depends(),
+        settings=apperture_settings(),
     ):
         self.provider_datasource_methods = {}
         self.provider_datasource_methods[
@@ -31,6 +34,7 @@ class DataSourceService:
         ] = self.get_ga_datasources
         self.auth_service = auth_service
         self.clickhouse_role = clickhouse_role
+        self.settings = settings
 
     async def get_provider_datasources(
         self, provider: IntegrationProvider, credential: Credential

@@ -223,3 +223,30 @@ export function autoCaptureEventToDescription(
     return `${getVerb()} ${getTag()} ${getValue()}`;
   }
 }
+
+export const getAppFromDataSourceId = (
+  apps: AppWithIntegrations[],
+  datasourceId: string
+): AppWithIntegrations | undefined => {
+  const currentApp = apps.find((app) =>
+    app.integrations.some((integration) =>
+      integration.datasources.some((ds) => ds._id === datasourceId)
+    )
+  );
+  return currentApp;
+};
+
+export const getAllDatasourceProvidersFromApp = (
+  app: AppWithIntegrations
+): string[] => {
+  const integrations = app.integrations;
+  const datasourceProviders = new Set<string>();
+
+  integrations.forEach((integration) => {
+    integration.datasources.forEach((datasource) => {
+      datasourceProviders.add(datasource.provider);
+    });
+  });
+
+  return Array.from(datasourceProviders);
+};

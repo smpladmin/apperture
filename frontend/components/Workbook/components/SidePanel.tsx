@@ -1,13 +1,17 @@
-import { Box, Flex } from '@chakra-ui/react';
+import { Box, Flex, Skeleton } from '@chakra-ui/react';
 import { GREY_500 } from '@theme/index';
 import { ArrowLeft, ArrowRight } from 'phosphor-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Connections from './Connections';
 import ConnectorColumns from './ConnectorColumns';
 import { TransientSheetData } from '@lib/domain/workbook';
 import { Connection, ConnectionSource } from '@lib/domain/connections';
+import { useRouter } from 'next/router';
+import { cloneDeep } from 'lodash';
+import { findConnectionByDatasourceId } from '../util';
 
 type SidePanelProps = {
+  loadingConnections: boolean;
   connections: Connection[];
   showColumns: boolean;
   sheetsData: TransientSheetData[];
@@ -20,6 +24,7 @@ type SidePanelProps = {
 };
 
 const SidePanel = ({
+  loadingConnections,
   connections,
   sheetsData,
   showColumns,
@@ -41,6 +46,29 @@ const SidePanel = ({
     database_name: '',
     heirarchy: [],
   });
+
+  const router = useRouter();
+  const { dsId, selectProvider } = router.query;
+
+  useEffect(() => {
+    if (selectProvider && connections.length) {
+      const connectionSource = findConnectionByDatasourceId(
+        connections,
+        dsId as string
+      );
+
+      setConnectorData({
+        ...connectionSource,
+        heirarchy: ['clickhouse', selectProvider as string],
+      });
+      setSheetsData((prevSheetData: TransientSheetData[]) => {
+        const tempSheetData = cloneDeep(prevSheetData);
+        tempSheetData[selectedSheetIndex].meta!!.dsId = dsId as string;
+        return tempSheetData;
+      });
+      setShowColumns(true);
+    }
+  }, [connections]);
 
   return (
     <Box
@@ -68,6 +96,7 @@ const SidePanel = ({
             />
           ) : (
             <Connections
+              loadingConnections={loadingConnections}
               connections={connections}
               selectedSheetIndex={selectedSheetIndex}
               sheetsData={sheetsData}

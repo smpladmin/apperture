@@ -1,3 +1,4 @@
+import { Connection, ConnectionSource } from '@lib/domain/connections';
 import {
   ColumnType,
   SheetType,
@@ -226,6 +227,27 @@ export const dimensionSubheadersLength = (subheaders: SubHeaderColumn[]) => {
   ).length;
 };
 
+
+export const findConnectionByDatasourceId = (
+  connections: Connection[],
+  datasourceId?: string,
+  table?: string
+) => {
+  for (const connection of connections) {
+    for (const connectionGroup of connection.connection_data) {
+      for (const connectionSource of connectionGroup.connection_source) {
+        if (
+          connectionSource.datasource_id === datasourceId ||
+          (connectionGroup.provider && connectionSource.table_name === table)
+        ) {
+          return connectionSource;
+        }
+      }
+    }
+  }
+  return {} as ConnectionSource;
+};
+
 export const convertToPercentage = (value: number) =>
   `${(value * 100).toFixed(2)}%`;
 
@@ -308,6 +330,7 @@ export const increaseDecimalPlacesInColumnValues = (
     return toUpdateData;
   });
 };
+
 export const decreaseDecimalPlacesInColumnValues = (
   columnIds: Id[],
   columnData: any[]

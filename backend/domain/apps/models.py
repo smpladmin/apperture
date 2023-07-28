@@ -1,4 +1,4 @@
-from typing import Optional, Set
+from typing import List, Optional, Set
 
 from beanie import Indexed, PydanticObjectId
 from pydantic import BaseModel, Field

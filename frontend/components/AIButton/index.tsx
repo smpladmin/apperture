@@ -12,7 +12,7 @@ import {
   Flex,
   useDisclosure,
 } from '@chakra-ui/react';
-import { PaperPlaneRight, Sparkle, X } from 'phosphor-react';
+import { CheckCircle, PaperPlaneRight, Sparkle, X } from 'phosphor-react';
 
 import { Choice, findMatches } from '@lib/nlp';
 import EditableTextarea from './EditableTextarea';
@@ -197,7 +197,11 @@ const AIButton = forwardRef<AIButtonProps, 'div'>((props, ref) => {
                   background: 'blue.400',
                 }}
                 icon={
-                  <PaperPlaneRight size={20} color={'white'} weight="fill" />
+                  editing ? (
+                    <CheckCircle size={20} color={'white'} weight="fill" />
+                  ) : (
+                    <PaperPlaneRight size={20} color={'white'} weight="fill" />
+                  )
                 }
               />
             </Flex>

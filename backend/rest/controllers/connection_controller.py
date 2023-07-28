@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from domain.apps.service import AppService
+from domain.common.models import IntegrationProvider
 from domain.connections.service import ConnectionService
 from domain.datamart.service import DataMartService
 from domain.datasources.service import DataSourceService
@@ -56,11 +57,18 @@ async def get_clickstream_events(
                     id=datasource.integration_id
                 )
                 credentials_table[str(datasource.id)] = details
-            elif datasource.provider == "csv":
+            elif (
+                datasource.provider == "csv"
+                or datasource.provider == IntegrationProvider.SAMPLE
+            ):
                 integration = await integration_service.get_integration(
                     id=str(datasource.integration_id)
                 )
-                table = integration.credential.csv_credential.table_name
+                table = (
+                    integration.credential.csv_credential.table_name
+                    if datasource.provider == "csv"
+                    else integration.credential.tableName
+                )
                 property = connections_service.get_clickhouse_table_columns(
                     username=clickhouse_credentials.username,
                     password=clickhouse_credentials.password,

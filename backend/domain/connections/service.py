@@ -28,7 +28,8 @@ class ConnectionService:
                 details = properties_table[str(datasource.id)]
                 fields = [
                     "properties." + property
-                    if datasource.provider != IntegrationProvider.CSV
+                    if not datasource.provider
+                    in [IntegrationProvider.CSV, IntegrationProvider.SAMPLE]
                     else property
                     for property in (details["fields"] or [])
                 ]
@@ -41,7 +42,8 @@ class ConnectionService:
                             or datasource.provider,
                         ),
                         fields=["event_name", "user_id", *fields]
-                        if datasource.provider != IntegrationProvider.CSV
+                        if not datasource.provider
+                        in [IntegrationProvider.CSV, IntegrationProvider.SAMPLE]
                         else fields,
                         datasource_id=datasource.id,
                         table_name=details.get("name", "events"),
