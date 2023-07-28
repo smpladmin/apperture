@@ -234,11 +234,11 @@ const Loginscreen = () => {
                     fontWeight="normal"
                     color="grey.800"
                   >
-                    I agree to Apperture's
+                    I agree to Apperture`&apos;`s
                   </Text>
-                  <Link href="https://apperture.io/terms-and-conditions"  fontSize={{ base: 'xs-14', md: 'xs-14' }} fontWeight="extrabold" textDecoration="underline"  style={{textDecoration:"underline"}}>Terms and conditions</Link>
+                  <Link href="https://apperture.io/terms-and-conditions"   >Terms and conditions</Link>
                   <Text fontWeight="normal" color="grey.800">and</Text>
-                  <Link href="https://www.apperture.io/privacy-policy" fontWeight="extrabold" >Privacy Policy</Link>
+                  <Link href="https://www.apperture.io/privacy-policy"  >Privacy Policy</Link>
                 </Flex>
                 
               </Box>
