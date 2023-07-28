@@ -1,4 +1,3 @@
-//source
 import { Flex, Radio, Text } from '@chakra-ui/react';
 import Image, { StaticImageData } from 'next/image';
 import React from 'react';

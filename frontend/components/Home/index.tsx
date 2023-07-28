@@ -1,10 +1,22 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ExploreSection from './components/ExploreSection';
 import { AppWithIntegrations } from '@lib/domain/app';
 import ListingTable from './components/Table';
 import { AppertureUser } from '@lib/domain/user';
 import { getAppertureUserInfo } from '@lib/services/userService';
+import { useRouter } from 'next/router';
+import {
+  getAllDatasourceProvidersFromApp,
+  getAppFromDataSourceId,
+} from '@lib/utils/common';
+
+const EventTrackingProviders = [
+  'mixpanel',
+  'clevertap',
+  'apperture',
+  'amplitude',
+];
 
 const Home = ({ apps }: { apps: AppWithIntegrations[] }) => {
   useEffect(() => {
@@ -14,6 +26,28 @@ const Home = ({ apps }: { apps: AppWithIntegrations[] }) => {
     };
     identifyUser();
   }, []);
+
+  const router = useRouter();
+  const { dsId } = router.query;
+
+  const [appId, setAppId] = useState<string>('');
+  useEffect(() => {
+    const app = getAppFromDataSourceId(apps, dsId as string);
+    setAppId(app ? app._id : '');
+  }, [dsId]);
+
+  const hasCurrentSelectedAppEventTrackingProviders = () => {
+    const currentApp = getAppFromDataSourceId(apps, dsId as string);
+    if (currentApp) {
+      const datasourceProvidersInApp =
+        getAllDatasourceProvidersFromApp(currentApp);
+
+      return datasourceProvidersInApp.some((provider) =>
+        EventTrackingProviders.includes(provider)
+      );
+    }
+    return false;
+  };
 
   return (
     <Box h={'full'}>
@@ -27,7 +61,10 @@ const Home = ({ apps }: { apps: AppWithIntegrations[] }) => {
           <Text fontWeight={700} fontSize={'base'} lineHeight={'base'}>
             Start Exploring
           </Text>
-          <ExploreSection />
+          <ExploreSection
+            appId={appId}
+            hasEventTrackingProvider={hasCurrentSelectedAppEventTrackingProviders()}
+          />
         </Box>
       </Flex>
       <Box paddingX={5} h={'full'}>

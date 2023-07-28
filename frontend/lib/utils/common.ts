@@ -223,3 +223,34 @@ export function autoCaptureEventToDescription(
     return `${getVerb()} ${getTag()} ${getValue()}`;
   }
 }
+
+export const getAppFromDataSourceId = (
+  apps: AppWithIntegrations[],
+  datasourceId: string
+): AppWithIntegrations | null => {
+  let foundApp = null;
+  apps.forEach((app) => {
+    const hasDatasource = app.integrations.some((integration) =>
+      integration.datasources.some((ds) => ds._id === datasourceId)
+    );
+    if (hasDatasource) {
+      foundApp = app;
+    }
+  });
+  return foundApp;
+};
+
+export const getAllDatasourceProvidersFromApp = (
+  app: AppWithIntegrations
+): string[] => {
+  const integrations = app.integrations;
+  const datasourceProviders = new Set<string>();
+
+  integrations.forEach((integration) => {
+    integration.datasources.forEach((datasource) => {
+      datasourceProviders.add(datasource.provider);
+    });
+  });
+
+  return Array.from(datasourceProviders);
+};
