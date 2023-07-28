@@ -1,3 +1,4 @@
+import { Connection, ConnectionSource } from '@lib/domain/connections';
 import {
   ColumnType,
   SheetType,
@@ -6,7 +7,7 @@ import {
   SubHeaderColumnType,
   TransientSheetData,
 } from '@lib/domain/workbook';
-import { head, range } from 'lodash';
+import {  range } from 'lodash';
 
 export const expressionTokenRegex = /[A-Za-z]+|[0-9]+|[\+\*-\/\^\(\)]/g;
 
@@ -222,4 +223,20 @@ export const dimensionSubheadersLength = (subheaders: SubHeaderColumn[]) => {
   return subheaders.filter(
     (subheader) => subheader.type === SubHeaderColumnType.DIMENSION
   ).length;
+};
+
+export const findConnectionByDatasourceId = (
+  connections: Connection[],
+  datasourceId: string
+) => {
+  for (const connection of connections) {
+    for (const connectionGroup of connection.connection_data) {
+      for (const connectionSource of connectionGroup.connection_source) {
+        if (connectionSource.datasource_id === datasourceId) {
+          return connectionSource;
+        }
+      }
+    }
+  }
+  return {} as ConnectionSource;
 };

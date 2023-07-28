@@ -144,4 +144,4 @@ class SpreadsheetService:
                 row_data[column_name] = row[col_idx]
             response["data"].append(row_data)
 
-        return ComputedSpreadsheet(data=response["data"], headers=response["headers"])
+        return ComputedSpreadsheet(data=response["data"], headers=response["headers"], sql='')

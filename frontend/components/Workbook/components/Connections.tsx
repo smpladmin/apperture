@@ -12,6 +12,7 @@ import {
   InputGroup,
   InputLeftElement,
   useDisclosure,
+  Skeleton,
 } from '@chakra-ui/react';
 import React, { Fragment, useEffect, useState } from 'react';
 import APIIcon from '@assets/images/api.svg';
@@ -35,6 +36,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { getSubheaders } from '../util';
 
 type ConnectionsProps = {
+  loadingConnections: boolean;
   connections: Connection[];
   sheetsData: TransientSheetData[];
   setSheetsData: Function;
@@ -45,6 +47,7 @@ type ConnectionsProps = {
 };
 
 const Connections = ({
+  loadingConnections,
   connections,
   sheetsData,
   setSheetsData,
@@ -176,6 +179,19 @@ const Connections = ({
             disabled={true}
           />
         </InputGroup>
+        {loadingConnections ? (
+          <Flex direction={'column'} gap={'6'} p={'4'}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                height={'4'}
+                fadeDuration={1}
+                bg={'white.400'}
+                opacity={'0.3'}
+              />
+            ))}
+          </Flex>
+        ) : null}
         {connections.map((connection) => {
           const { server, connection_data } = connection;
 
