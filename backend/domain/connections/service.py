@@ -28,7 +28,8 @@ class ConnectionService:
                 details = properties_table[str(datasource.id)]
                 fields = [
                     "properties." + property
-                    if datasource.provider != IntegrationProvider.CSV
+                    if not datasource.provider
+                    in [IntegrationProvider.CSV, IntegrationProvider.SAMPLE]
                     else property
                     for property in (details["fields"] or [])
                 ]
@@ -41,7 +42,8 @@ class ConnectionService:
                             or datasource.provider,
                         ),
                         fields=["event_name", "user_id", *fields]
-                        if datasource.provider != IntegrationProvider.CSV
+                        if not datasource.provider
+                        in [IntegrationProvider.CSV, IntegrationProvider.SAMPLE]
                         else fields,
                         datasource_id=datasource.id,
                         table_name=details.get("name", "events"),
@@ -114,24 +116,6 @@ class ConnectionService:
 
         return ConnectionGroup(provider="datamart", connection_source=connection_source)
 
-    def get_sample_table_connections(
-        self,
-        tables: List[str],
-        table_properties: dict,
-        database: str,
-    ):
-        sources = [
-            ConnectionSource(
-                name=f"Sample table {table}",
-                fields=table_properties[table],
-                datasource_id=None,
-                table_name=table,
-                database_name=database,
-            )
-            for table in tables
-        ]
-        return ConnectionGroup(provider="sample", connection_source=sources)
-
     def get_connections_from_datasources(
         self,
         datasources: List[DataSource],
@@ -139,9 +123,6 @@ class ConnectionService:
         credentials_table: dict,
         datamarts: List[DataMart],
         datamart_properties: dict,
-        sample_tables: List[str],
-        sample_table_properties: dict,
-        app_database: str,
     ):
         clickhouse_connection_table = {}
         mysql_connections = []
@@ -159,13 +140,6 @@ class ConnectionService:
         datamart_connections = self.get_datamart_connection(
             datamarts=datamarts, datamart_properties=datamart_properties
         )
-        sample_connections = self.get_sample_table_connections(
-            sample_tables,
-            sample_table_properties,
-            app_database,
-        )
-        if sample_connections.connection_source:
-            clickhouse_server_connections.connection_data.append(sample_connections)
         if datamart_connections.connection_source:
             clickhouse_server_connections.connection_data.append(datamart_connections)
         mysql_server_connections = self.get_mysql_connection_group(

@@ -108,7 +108,7 @@ const CSVIntegration = ({ add, handleClose }: CSVIntegrationProps) => {
           pathname: '/analytics/workbook/create/[dsId]',
           query: {
             dsId: integration.datasource._id,
-            selectCSV: true,
+            selectProvider: Provider.CSV,
           },
         });
       } else {

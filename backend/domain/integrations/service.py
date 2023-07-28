@@ -12,6 +12,7 @@ from fastapi import Depends, UploadFile
 from authorisation.models import IntegrationOAuth
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App, ClickHouseCredential
+from repositories.clickhouse.clickhouse_role import ClickHouseRole
 from repositories.clickhouse.integrations import Integrations
 from rest.dtos.integrations import DatabaseSSHCredentialDto
 
@@ -27,7 +28,11 @@ from .models import (
 
 
 class IntegrationService:
-    def __init__(self, integrations: Integrations = Depends()):
+    def __init__(
+        self,
+        integrations: Integrations = Depends(),
+        clickhouse_role: ClickHouseRole = Depends(),
+    ):
         self.integrations = integrations
         self.s3_client = boto3.client(
             "s3",
@@ -35,6 +40,7 @@ class IntegrationService:
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
         )
         self.s3_bucket_name = os.getenv("S3_BUCKET_NAME")
+        self.clickhouse_role = clickhouse_role
 
     async def create_oauth_integration(
         self,
@@ -86,6 +92,11 @@ class IntegrationService:
             credential_type = CredentialType.CSV
         else:
             credential_type = CredentialType.API_KEY
+
+        if provider == IntegrationProvider.SAMPLE:
+            self.clickhouse_role.create_sample_tables(
+                [tableName], app.clickhouse_credential.databasename
+            )
 
         credential = Credential(
             type=credential_type,

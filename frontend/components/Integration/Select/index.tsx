@@ -8,7 +8,7 @@ import {
   SimpleGrid,
   Button,
 } from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import 'remixicon/fonts/remixicon.css';
 import gaLogo from '@assets/images/ga-logo-small.svg';
@@ -31,13 +31,34 @@ import {
   RightContainer,
   LeftContainerRevisit,
 } from '@components/Onboarding';
+import { AppWithIntegrations } from '@lib/domain/app';
 
-const SelectProvider = () => {
+const SelectProvider = ({ apps }: { apps: Array<AppWithIntegrations> }) => {
   const [provider, setProvider] = useState<string>('');
+  const [sampleDsId, setSampleDsId] = useState<string | null>(null);
   const router = useRouter();
   const { appId, add, previousDsId } = router.query;
 
   const handleGoBack = (): void => router.back();
+
+  const getSampleDsId = () => {
+    if (apps) {
+      for (let app of apps) {
+        for (let integration of app.integrations) {
+          for (let ds of integration.datasources) {
+            if (ds.provider === Provider.SAMPLE) {
+              return ds._id;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    setSampleDsId(getSampleDsId());
+  }, [apps]);
 
   const handleClose = () =>
     router.push({
@@ -82,6 +103,17 @@ const SelectProvider = () => {
     router.push({
       pathname: `/analytics/app/[appId]/integration/csv/create`,
       query: queryParams,
+    });
+  };
+
+  const exploreSample = () => {
+    const sampleDsId = getSampleDsId();
+    router.replace({
+      pathname: '/analytics/workbook/create/[dsId]',
+      query: {
+        dsId: sampleDsId,
+        selectProvider: Provider.SAMPLE,
+      },
     });
   };
 
@@ -222,24 +254,27 @@ const SelectProvider = () => {
             </RadioGroup>
           </Box>
 
-          <Button
-            variant="primary"
-            mt={6}
-            rounded="lg"
-            bg="white"
-            p={6}
-            fontSize="base"
-            fontWeight="semibold"
-            lineHeight="base"
-            textColor="grey.900"
-            textDecoration="underline"
-            width={{ base: 'full', md: '72' }}
-            _hover={{
-              bg: 'white',
-            }}
-          >
-            Explore a Sample Dataset
-          </Button>
+          {sampleDsId && (
+            <Button
+              variant="primary"
+              mt={6}
+              rounded="lg"
+              bg="white"
+              p={6}
+              fontSize="base"
+              fontWeight="semibold"
+              lineHeight="base"
+              textColor="grey.900"
+              textDecoration="underline"
+              width={{ base: 'full', md: '72' }}
+              _hover={{
+                bg: 'white',
+              }}
+              onClick={exploreSample}
+            >
+              Explore a Sample Dataset
+            </Button>
+          )}
 
           <Button
             data-testid={'next-button'}

@@ -78,24 +78,6 @@ class TestAppService:
         )
         assert not self.service.clickhouse_role.create_sample_tables.called
 
-    @pytest.mark.asyncio
-    async def test_create_app_with_sample_tables(self):
-        App.find = MagicMock(
-            return_value=self.FindMock(
-                update=AsyncMock(),
-                count=AsyncMock(return_value=1),
-            ),
-        )
-        self.service.string_utils.generate_random_value = MagicMock(
-            return_value="sdeweiwew33dssdsdds"
-        )
-        self.service.settings.base_sample_tables = ["trips"]
-        await self.service.create_app(name=self.app_name, user=self.user)
-
-        self.service.clickhouse_role.create_sample_tables.assert_called_once_with(
-            ["trips"], "test_app"
-        )
-
     def test_create_app_database(self):
         self.service.create_app_database(app_name=self.app_name, username=self.username)
 

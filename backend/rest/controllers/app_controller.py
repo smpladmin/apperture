@@ -7,6 +7,8 @@ from domain.apperture_users.models import AppertureUser
 from domain.apperture_users.service import AppertureUserService
 from domain.apps.models import App
 from domain.apps.service import AppService
+from domain.common.models import IntegrationProvider
+from domain.datasources.models import DataSourceVersion
 from domain.datasources.service import DataSourceService
 from domain.integrations.models import Integration
 from domain.integrations.service import IntegrationService
@@ -14,6 +16,7 @@ from rest.dtos.apps import AppResponse, AppWithIntegrations, CreateAppDto, Updat
 from rest.dtos.datasources import DataSourceResponse
 from rest.dtos.integrations import IntegrationWithDataSources
 from rest.middlewares import get_user, get_user_id, validate_jwt
+from settings import apperture_settings
 
 router = APIRouter(
     tags=["apps"],
@@ -21,12 +24,16 @@ router = APIRouter(
     responses={401: {}},
 )
 
+settings = apperture_settings()
+
 
 @router.post("/apps", response_model=AppResponse)
 async def create_app(
     app_dto: CreateAppDto,
     user: AppertureUser = Depends(get_user),
     app_service: AppService = Depends(),
+    ds_service: DataSourceService = Depends(),
+    integration_service: IntegrationService = Depends(),
 ):
     existing_app = await app_service.get_app_count_by_database_name(name=app_dto.name)
     if existing_app:
@@ -34,7 +41,27 @@ async def create_app(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Please try creating an app with a different name.",
         )
-    return await app_service.create_app(app_dto.name, user)
+    app = await app_service.create_app(app_dto.name, user)
+    app_count = await app_service.get_app_count(user.id)
+    if app_count == 1:
+        for table in settings.base_sample_tables:
+            integration = await integration_service.create_integration(
+                app,
+                IntegrationProvider.SAMPLE,
+                None,
+                None,
+                None,
+                table,
+                None,
+                None,
+            )
+            await ds_service.create_datasource(
+                None,
+                f"Sample table {table}",
+                DataSourceVersion.DEFAULT,
+                integration,
+            )
+    return app
 
 
 @router.get("/apps", response_model=Union[list[AppWithIntegrations], list[AppResponse]])

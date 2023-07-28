@@ -48,10 +48,10 @@ const SidePanel = ({
   });
 
   const router = useRouter();
-  const { dsId, selectCSV } = router.query;
+  const { dsId, selectProvider } = router.query;
 
   useEffect(() => {
-    if (selectCSV && connections.length) {
+    if (selectProvider && connections.length) {
       const connectionSource = findConnectionByDatasourceId(
         connections,
         dsId as string
@@ -59,7 +59,7 @@ const SidePanel = ({
 
       setConnectorData({
         ...connectionSource,
-        heirarchy: ['clickhouse', 'csv'],
+        heirarchy: ['clickhouse', selectProvider as string],
       });
       setSheetsData((prevSheetData: TransientSheetData[]) => {
         const tempSheetData = cloneDeep(prevSheetData);

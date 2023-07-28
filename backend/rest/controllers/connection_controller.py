@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from domain.apps.service import AppService
+from domain.common.models import IntegrationProvider
 from domain.connections.service import ConnectionService
 from domain.datamart.service import DataMartService
 from domain.datasources.service import DataSourceService
@@ -56,11 +57,18 @@ async def get_clickstream_events(
                     id=datasource.integration_id
                 )
                 credentials_table[str(datasource.id)] = details
-            elif datasource.provider == "csv":
+            elif (
+                datasource.provider == "csv"
+                or datasource.provider == IntegrationProvider.SAMPLE
+            ):
                 integration = await integration_service.get_integration(
                     id=str(datasource.integration_id)
                 )
-                table = integration.credential.csv_credential.table_name
+                table = (
+                    integration.credential.csv_credential.table_name
+                    if datasource.provider == "csv"
+                    else integration.credential.tableName
+                )
                 property = connections_service.get_clickhouse_table_columns(
                     username=clickhouse_credentials.username,
                     password=clickhouse_credentials.password,
@@ -78,22 +86,10 @@ async def get_clickstream_events(
                     ds_id=datasource.id
                 )
                 properties_table[str(datasource.id)] = {"fields": property}
-        sample_table_properties = {}
-        for table in app.sample_tables:
-            properties = connections_service.get_clickhouse_table_columns(
-                username=clickhouse_credentials.username,
-                password=clickhouse_credentials.password,
-                database=clickhouse_credentials.databasename,
-                table=table,
-            )
-            sample_table_properties[table] = properties
         return connections_service.get_connections_from_datasources(
             datasources=all_datasources,
             properties_table=properties_table,
             credentials_table=credentials_table,
             datamarts=datamarts,
             datamart_properties=datamart_properties,
-            sample_tables=app.sample_tables,
-            sample_table_properties=sample_table_properties,
-            app_database=clickhouse_credentials.databasename,
         )
