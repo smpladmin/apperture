@@ -71,7 +71,7 @@ async def get_app(
     user_id: str = Depends(get_user_id),
     app_service: AppService = Depends(),
 ):
-    return await app_service.get_user_app(id, user_id)
+    return await app_service.get_shared_or_owned_app(id, user_id)
 
 
 @router.put("/apps/{id}")
