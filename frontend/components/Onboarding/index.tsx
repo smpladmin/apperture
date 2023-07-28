@@ -24,6 +24,10 @@ export const LeftContainerRevisit = (props: BoxProps) => {
   return <Box {...leftContainerStyle}><LeftContainerContentRevisit/></Box>;
 };
 
+export const LeftContainerLogin = (props: BoxProps) => {
+  return <Box {...leftContainerStyle}><LeftContainerContentLogin/></Box>;
+};
+
 export const RightContainer = (props: BoxProps) => {
   return <Box {...rightContainerOuter}>
     <Box {...rightContainerInner}>
@@ -183,10 +187,10 @@ export const LeftContainerContentRevisit = () => {
   );
 };
 
-export const LeftContainerLogin = () => {
+export const LeftContainerContentLogin = () => {
   const router = useRouter();
   return (
-    <Flex flexDirection="column" alignItems="left" justifyContent="start">
+    <Flex flexDirection="column" alignItems="left" justifyContent="start" >
       <Box
         mt={5}
         ml={5}

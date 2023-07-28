@@ -43,7 +43,7 @@ const IntegrationSource = ({
           width={'7'}
           height={'7'}
           rounded={'full'}
-          borderColor={'white.200'}
+          borderColor={'white'}
           alignItems={'center'}
           justifyContent={'center'}
         >
