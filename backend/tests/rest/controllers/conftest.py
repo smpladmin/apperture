@@ -1244,6 +1244,7 @@ def app_service():
 
     app_service_mock.get_apps.return_value = apps_future
     app_service_mock.get_user_app.return_value = app_future
+    app_service_mock.get_shared_or_owned_app.return_value = app_future
     app_service_mock.get_app = AsyncMock(return_value=app_with_credentials)
     app_service_mock.create_clickhouse_user.return_value = clickhouse_credential_future
     return app_service_mock
