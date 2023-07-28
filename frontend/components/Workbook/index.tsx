@@ -178,8 +178,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     if (response.status === 200) {
       const toUpdateSheets = cloneDeep(sheetsData);
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
-      toUpdateSheets[selectedSheetIndex].headers =
-        response?.data?.headers;
+      toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
       if (!sheet.is_sql) {
         const query =
           toUpdateSheets[selectedSheetIndex].aiQuery || ({} as AIQuery);
@@ -704,12 +703,15 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   };
 
   const getProperties = useMemo(() => {
-    const datasourceId =
-      sheetsData[selectedSheetIndex]?.meta?.dsId || (dsId as string);
+    const datasourceId = sheetsData[selectedSheetIndex]?.meta?.dsId;
+    const table = sheetsData[selectedSheetIndex]?.meta?.selectedTable;
     for (let connection of connections) {
       for (let connectionGroup of connection.connection_data) {
         for (let connectionSource of connectionGroup.connection_source) {
-          if (connectionSource.datasource_id === datasourceId) {
+          if (
+            connectionSource.datasource_id === datasourceId ||
+            (connectionGroup.provider && connectionSource.table_name === table)
+          ) {
             return connectionSource.fields;
           }
         }
@@ -764,7 +766,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           ) : null}
           {showEmptyState ? (
             <EmptySheet
-              tableSelected={!!sheetsData[selectedSheetIndex]?.meta?.dsId}
+              tableSelected={
+                !!sheetsData[selectedSheetIndex]?.meta?.selectedTable
+              }
             />
           ) : (
             <Box overflow={'auto'} h={'full'} pb={'8'}>
@@ -799,7 +803,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           />
         </Box>
       </Flex>
-      {sheetsData[selectedSheetIndex]?.meta?.dsId && (
+      {sheetsData[selectedSheetIndex]?.meta?.selectedTable && (
         <AIButton
           query={
             !sheetsData[selectedSheetIndex]?.is_sql
