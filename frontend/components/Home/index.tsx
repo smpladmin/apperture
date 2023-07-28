@@ -33,7 +33,7 @@ const Home = ({ apps }: { apps: AppWithIntegrations[] }) => {
   const [appId, setAppId] = useState<string>('');
   useEffect(() => {
     const app = getAppFromDataSourceId(apps, dsId as string);
-    setAppId(app ? app._id : '');
+    setAppId(app ? app._id : apps[0]._id);
   }, [dsId]);
 
   const hasCurrentSelectedAppEventTrackingProviders = () => {
