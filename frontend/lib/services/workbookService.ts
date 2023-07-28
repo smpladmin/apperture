@@ -44,9 +44,8 @@ export const getTransientSpreadsheets = async (
       signal,
     }
   );
-
-  const data = convertAPIResponseToDesiredFormat(res.data.data);
-  return { data: { ...res.data, data }, status: res.status };
+  const data = convertAPIResponseToDesiredFormat(res.data?.data || []);
+  return { ...res, data: { ...res.data, data } };
 };
 
 export const getSavedWorkbooksForDatasourceId = async (dsId: string) => {
@@ -108,6 +107,6 @@ export const getWorkbookTransientColumn = async (
     table,
   });
 
-  const data = convertAPIResponseToDesiredFormat(res.data.data);
-  return { data: { ...res.data, data }, status: res.status };
+  const data = convertAPIResponseToDesiredFormat(res.data?.data || []);
+  return { ...res, data: { ...res.data, data } };
 };
