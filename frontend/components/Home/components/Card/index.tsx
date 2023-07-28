@@ -1,4 +1,4 @@
-import { Box, Text, Flex, Link, useDisclosure } from '@chakra-ui/react';
+import { Box, Text, Flex, useDisclosure } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import Plus from '@assets/images/PlusHover.svg';
 import { useRouter } from 'next/router';
@@ -24,7 +24,7 @@ const Homecard: React.FC<HomecardProps> = ({
   const [onHover, setOnHover] = useState(false);
   const router = useRouter();
   const handleHover = () => {
-    setOnHover(true);
+    !disable && setOnHover(true);
   };
 
   const handleMouseLeave = () => {
@@ -60,6 +60,7 @@ const Homecard: React.FC<HomecardProps> = ({
             height="full"
             opacity={onHover ? 1 : 0}
             transition="opacity 0.3s ease"
+            zIndex={'1'}
           >
             <Image src={Plus} objectFit="contain" />
           </Flex>
