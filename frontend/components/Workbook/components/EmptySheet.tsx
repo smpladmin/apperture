@@ -13,7 +13,7 @@ const EmptySheet = () => {
     >
       <>
         {Array.from({ length: rows }).map((_, i) => (
-          <Flex direction={'row'} zIndex={'1'} key={i}>
+          <Flex direction={'row'} zIndex={'1'} key={i} filter="blur(3px)">
             {Array.from({ length: columns }).map((_, j) => {
               return (
                 <Flex key={`${i}-${j}`}>
@@ -39,9 +39,9 @@ const EmptySheet = () => {
           </Flex>
         ))}
         <Box position={'fixed'} mt={'33'} zIndex={'2'} left={'45%'}>
-          <Flex direction={'column'} gap={'2'}>
+          <Flex direction={'column'} gap={'2'} textAlign='center'>
             <Text fontSize={'xs-16'} lineHeight={'xs-16'} fontWeight={'500'}>
-              Start with selecting a table or writing a SQL query
+              Select columns or Ask AI
             </Text>
             <Text
               fontSize={'xs-14'}
@@ -50,7 +50,7 @@ const EmptySheet = () => {
               textAlign={'center'}
               color={'grey.500'}
             >
-              Aggregate and analyse data based on different criteria.
+              You can create any report directly using text input
             </Text>
           </Flex>
         </Box>
