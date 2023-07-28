@@ -7,7 +7,7 @@ import {
   ApperturePut,
 } from '@lib/services/util';
 
-const convertAPIResponseToDesiredFormat = (rows: any[]) => {
+const mapApiResponseToDisplayOriginalFormat = (rows: any[]) => {
   return rows.map((row) => {
     const dataKeys = Object.keys(row);
 
@@ -44,7 +44,7 @@ export const getTransientSpreadsheets = async (
       signal,
     }
   );
-  const data = convertAPIResponseToDesiredFormat(res.data?.data || []);
+  const data = mapApiResponseToDisplayOriginalFormat(res.data?.data || []);
   return { ...res, data: { ...res.data, data } };
 };
 
@@ -107,6 +107,6 @@ export const getWorkbookTransientColumn = async (
     table,
   });
 
-  const data = convertAPIResponseToDesiredFormat(res.data?.data || []);
+  const data = mapApiResponseToDisplayOriginalFormat(res.data?.data || []);
   return { ...res, data: { ...res.data, data } };
 };
