@@ -127,7 +127,6 @@ async def create_integration(
         dto.apiKey,
         dto.apiSecret,
         dto.tableName,
-        dto.database,
         mysql_credential,
         csv_credential,
     )
