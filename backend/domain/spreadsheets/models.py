@@ -36,6 +36,7 @@ class SubHeaderColumn(BaseModel):
 class ComputedSpreadsheet(BaseModel):
     data: List[dict]
     headers: List[SpreadSheetColumn]
+    sql: str
 
 
 class WordReplacement(BaseModel):
@@ -44,6 +45,14 @@ class WordReplacement(BaseModel):
 
     def apply(self, text: str):
         return text.replace(self.word, self.replacement)
+
+
+class AIQuery(BaseModel):
+    nl_query: str
+    sql: Optional[str]
+    word_replacements: List[WordReplacement]
+    table: str
+    database: str
 
 
 class Spreadsheet(BaseModel):
@@ -55,7 +64,7 @@ class Spreadsheet(BaseModel):
     edit_mode: bool = True
     sheet_type: Optional[SpreadsheetType]
     meta: Optional[dict]
-    word_replacements: List[WordReplacement] = []
+    ai_query: Optional[AIQuery]
 
 
 class WorkBook(Document):

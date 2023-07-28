@@ -389,6 +389,7 @@ def datamart_service(apperture_user_response):
             {"index": 4, "event_name": "test_event_4", "user_id": "test_user_3"},
             {"index": 5, "event_name": "test_event_5", "user_id": "test_user_4"},
         ],
+        sql="",
     )
     datamart_future = asyncio.Future()
     datamart_future.set_result(datamart)
@@ -829,6 +830,7 @@ def spreadsheets_service():
             {"index": 4, "event_name": "test_event_4"},
             {"index": 5, "event_name": "test_event_5"},
         ],
+        sql="select * from events",
     )
     workbook = WorkBook(
         id=PydanticObjectId("63d0df1ea1040a6388a4a34c"),
@@ -1832,6 +1834,7 @@ def transient_datamart_response():
             {"event_name": "test_event_5", "index": 5},
         ],
         "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
+        "sql": "select * from events",
     }
 
 

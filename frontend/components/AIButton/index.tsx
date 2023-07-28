@@ -37,6 +37,10 @@ const AIButton = forwardRef<AIButtonProps, 'div'>((props, ref) => {
   }>({});
 
   useEffect(() => {
+    setText(query || '');
+  }, [query]);
+
+  useEffect(() => {
     const properties = wordReplacements?.reduce(
       (properties: { [key: string]: string }, { word, replacement }) => {
         properties[word] = replacement;
@@ -51,6 +55,8 @@ const AIButton = forwardRef<AIButtonProps, 'div'>((props, ref) => {
     if (text) {
       const tokenMap = computeTokenMap(text, properties);
       setTokens(tokenMap);
+    } else {
+      setTokens({});
     }
   }, [properties]);
 
@@ -104,7 +110,7 @@ const AIButton = forwardRef<AIButtonProps, 'div'>((props, ref) => {
     }
   };
 
-  const { onOpen, onClose, isOpen } = useDisclosure();
+  const { onOpen, onClose, isOpen } = useDisclosure({ defaultIsOpen: true });
   const firstFieldRef = React.useRef(null);
 
   return (

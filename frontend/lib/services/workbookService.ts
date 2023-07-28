@@ -1,4 +1,4 @@
-import { Spreadsheet, WordReplacement } from '@lib/domain/workbook';
+import { AIQuery, Spreadsheet, WordReplacement } from '@lib/domain/workbook';
 import {
   AppertureDelete,
   AppertureGet,
@@ -11,7 +11,7 @@ export const getTransientSpreadsheets = (
   dsId: string,
   query: string,
   is_sql: boolean = true,
-  word_replacements: Array<WordReplacement> = [],
+  aiQuery?: AIQuery,
   signal?: AbortSignal
 ) => {
   return ApperturePost(
@@ -20,7 +20,14 @@ export const getTransientSpreadsheets = (
       datasourceId: dsId,
       query: query,
       is_sql,
-      word_replacements,
+      ai_query: aiQuery
+        ? {
+            nl_query: aiQuery.nlQuery,
+            word_replacements: aiQuery.wordReplacements,
+            table: aiQuery.table,
+            database: aiQuery.database,
+          }
+        : null,
     },
     {
       signal,

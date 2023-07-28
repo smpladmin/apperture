@@ -106,6 +106,10 @@ const ConnectorColumns = ({
       // TODO: should check the double bang !!
       tempSheetsData[selectedSheetIndex].meta!!.selectedColumns =
         selectedColumns;
+      tempSheetsData[selectedSheetIndex].meta!!.selectedTable = table_name;
+      tempSheetsData[selectedSheetIndex].meta!!.selectedDatabase =
+        database_name;
+
       return tempSheetsData;
     });
   }, [selectedColumns]);
