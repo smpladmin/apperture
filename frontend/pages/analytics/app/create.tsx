@@ -121,22 +121,7 @@ const Create = () => {
           value={appName}
           onChange={(e) => setAppName(e.target.value)}
         />
-        <Flex flexDirection="row" alignItems="center" mt={15} >
-        <Checkbox colorScheme={'radioBlack'} isChecked={isAgreementChecked} onChange={handleAgreementCheckboxChange} />
-        <Text
-          fontSize={{ base: 'sh-14', md: 'sh-14' }}
-          lineHeight={{ base: 'sh-18', md: 'sh-18' }}
-          fontWeight="normal"
-          color="grey.800"
-          ml={2}
-        >
-          I agree to the 
-          {' '}<Link href="https://apperture.io" textDecoration="underline">terms and conditions</Link>{' '}
-           and 
-           {' '}<Link href="https://apperture.io" textDecoration="underline">end user license agreement</Link>{' '}
-           .
-        </Text>
-      </Flex>
+
         <Button
           variant="primary"
           mt={6}
@@ -148,7 +133,7 @@ const Create = () => {
           lineHeight="base"
           textColor="white.100"
           width={{ base: 'full', md: '72' }}
-          disabled={!appName || !isAgreementChecked}
+          disabled={!appName }
           onClick={handleNextClick}
         >
           Next

@@ -102,7 +102,7 @@ export const LeftContainerContent = () => {
         ml={5}
       >
         {' '}
-        Data analytics on steroids
+        Analytics on steroids
       </Heading>
       <Flex flexDirection="row" alignItems="center" mt={10} ml={5} mr={5}>
         <CheckCircle size={28} color="white" />
@@ -220,7 +220,7 @@ export const LeftContainerContentLogin = () => {
         ml={5}
       >
         {' '}
-        Data analytics on steroids
+        Analytics on steroids
       </Heading>
       <Flex flexDirection="row" alignItems="center" mt={10} ml={5} mr={5}>
         <CheckCircle size={28} color="white" />
