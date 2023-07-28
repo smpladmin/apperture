@@ -92,9 +92,8 @@ class EventsBase(ABC):
             result = restricted_client.query(query=query)
             logging.info(f"Successfully executed query: {query}")
             restricted_client.close()
-            return True
+            return result
         except Exception as e:
             logging.info(
                 f"Exception {e} occurred while executing query for restricted user {username}"
             )
-            return False

@@ -6,23 +6,23 @@ from typing import Optional
 import boto3
 import pymysql
 import sshtunnel
-
 from beanie import PydanticObjectId
-from fastapi import UploadFile, Depends
+from fastapi import Depends, UploadFile
 
 from authorisation.models import IntegrationOAuth
+from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App, ClickHouseCredential
 from repositories.clickhouse.integrations import Integrations
 from rest.dtos.integrations import DatabaseSSHCredentialDto
-from domain.apperture_users.models import AppertureUser
+
 from .models import (
     Credential,
     CredentialType,
+    CSVCredential,
+    DatabaseSSHCredential,
     Integration,
     IntegrationProvider,
     MySQLCredential,
-    DatabaseSSHCredential,
-    CSVCredential,
 )
 
 
@@ -153,35 +153,51 @@ class IntegrationService:
     def check_mysql_connection(
         self, host: str, port: str, username: str, password: str
     ):
-        connection_successful = False
         try:
-            # Establish a connection to the MySQL server
-            connection = pymysql.connect(
-                host=host,
-                port=int(port),
-                user=username,
-                password=password,
+            connection = self.get_mysql_connection(
+                host=host, port=port, username=username, password=password
             )
-
-            # Check if the connection was successful
-            if connection.open:
-                connection_successful = True
-                logging.info("Connected to MySQL database")
-
-            # Close the connection
-            connection.close()
-            logging.info("Connection closed")
+            with connection:
+                if connection.open:
+                    return True
 
         except Exception as e:
             logging.info(f"Failed to connect to MySQL database with exception: {e}")
 
-        return connection_successful
+        return False
 
     def create_temp_file(self, content: str):
         temp_file = tempfile.NamedTemporaryFile(delete=False)
         temp_file.write(content.encode("utf-8"))
         temp_file.flush()
         return temp_file.name
+
+    def create_ssh_tunnel(
+        self, ssh_credential: DatabaseSSHCredentialDto, host: str, port: str
+    ):
+        logging.info("SSH credentials exist")
+        ssh_pkey = None
+        if ssh_credential.sshKey:
+            logging.info("SSH key exists, creating temp file to store ssh key")
+            ssh_pkey = self.create_temp_file(ssh_credential.sshKey)
+            logging.info(f"Temporary file name: {ssh_pkey}")
+
+        try:
+            tunnel = sshtunnel.SSHTunnelForwarder(
+                (ssh_credential.server, int(ssh_credential.port)),
+                ssh_pkey=ssh_pkey,
+                ssh_username=ssh_credential.username,
+                ssh_password=ssh_credential.password,
+                remote_bind_address=(host, int(port)),
+            )
+            tunnel.start()
+            logging.info(
+                f"Created SSH tunnel, binding ({host, port}) to ({tunnel.local_bind_host, tunnel.local_bind_port})"
+            )
+            return tunnel
+        except Exception as e:
+            logging.info(f"Connection failed with exception: {e}")
+            return None
 
     def test_mysql_connection(
         self,
@@ -191,43 +207,42 @@ class IntegrationService:
         password: str,
         ssh_credential: Optional[DatabaseSSHCredentialDto],
     ):
-
         if ssh_credential:
-            logging.info("SSH credentials exists")
-            ssh_pkey = None
-            if ssh_credential.sshKey:
-                logging.info("SSH key exists, creating temp file to store ssh key")
-                ssh_pkey = self.create_temp_file(ssh_credential.sshKey)
-                logging.info(f"Temporary file name: {ssh_pkey}")
-
-            try:
-                with sshtunnel.SSHTunnelForwarder(
-                    (ssh_credential.server, int(ssh_credential.port)),
-                    ssh_pkey=ssh_pkey,
-                    ssh_username=ssh_credential.username,
-                    ssh_password=ssh_credential.password,
-                    remote_bind_address=(host, int(port)),
-                ) as tunnel:
-                    logging.info(
-                        f"Created SSH tunnel, binding ({host, port}) to ({tunnel.local_bind_host, tunnel.local_bind_port})"
-                    )
-                    if ssh_pkey:
-                        os.remove(ssh_pkey)
-                        logging.info("Removed temporary file")
+            tunnel = self.create_ssh_tunnel(ssh_credential, host, port)
+            if tunnel:
+                with tunnel:
                     return self.check_mysql_connection(
                         host=tunnel.local_bind_host,
                         port=tunnel.local_bind_port,
                         username=username,
                         password=password,
                     )
-            except Exception as e:
-                logging.info(f"Connection failed with exception: {e}")
-                return False
-
         else:
             return self.check_mysql_connection(
                 host=host, port=port, username=username, password=password
             )
+
+    def get_mysql_connection(self, host, port, username, password, database=None):
+        return (
+            pymysql.connect(
+                host=host,
+                port=int(port),
+                user=username,
+                password=password,
+                database=database,
+            )
+            if database
+            else pymysql.connect(
+                host=host,
+                port=int(port),
+                user=username,
+                password=password,
+            )
+        )
+
+    async def get_mysql_connection_details(self, id):
+        integration = await self.get_integration(id)
+        return integration.credential.mysql_credential
 
     def upload_csv_to_s3(self, file: UploadFile, s3_key: str):
         self.s3_client.upload_fileobj(
@@ -241,10 +256,8 @@ class IntegrationService:
     def create_clickhouse_table_from_csv(
         self, name: str, clickhouse_credential: ClickHouseCredential, s3_key: str
     ):
-        return self.integrations.create_table_from_csv(
+        self.integrations.create_table_from_csv(
             name=name,
-            username=clickhouse_credential.username,
-            password=clickhouse_credential.password,
             db_name=clickhouse_credential.databasename,
             s3_key=s3_key,
         )

@@ -1,34 +1,29 @@
-import os
-import string
-
 from beanie import PydanticObjectId
+from fastapi import Depends
 
+from domain.common.random_string_utils import StringUtils
 from domain.files.models import File, FileType
 from domain.integrations.models import CSVCredential
 
 
 class FilesService:
+    def __init__(
+        self,
+        string_utils: StringUtils = Depends(),
+    ):
+        self.string_utils = string_utils
+
     def build_s3_key(self, app_id: str, filename: str) -> str:
         return f"csvs/{app_id}/{filename}"
-
-    def extract_tablename_from_filename(self, filename: str) -> str:
-        file_name_without_extension = os.path.splitext(filename)[0]
-        file_name_without_extension = file_name_without_extension.strip()
-
-        translator = str.maketrans("", "", string.punctuation)
-        tablename_without_punctuations = file_name_without_extension.translate(
-            translator
-        )
-        tablename = "_".join(tablename_without_punctuations.split())
-
-        return tablename
 
     async def add_file(self, filename: str, s3_key: str, app_id: str) -> File:
         file = File(
             filename=filename,
             filetype=FileType.CSV,
             app_id=PydanticObjectId(app_id),
-            table_name=self.extract_tablename_from_filename(filename=filename),
+            table_name=self.string_utils.extract_tablename_from_filename(
+                filename=filename
+            ),
             s3_key=s3_key,
         )
         file.updated_at = file.created_at
@@ -43,3 +38,6 @@ class FilesService:
         return CSVCredential(
             name=file.filename, s3_key=file.s3_key, table_name=file.table_name
         )
+
+    async def get_file_by_app_id(self, app_id: str) -> File:
+        return await File.find(File.app_id == PydanticObjectId(app_id)).to_list()

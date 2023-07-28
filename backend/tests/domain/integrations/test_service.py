@@ -119,8 +119,6 @@ class TestIntegrationService:
             **{
                 "db_name": "db",
                 "name": "test",
-                "password": "password",
                 "s3_key": "/csvs/app-id/test.csv",
-                "username": "user",
             }
         )

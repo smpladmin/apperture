@@ -19,13 +19,18 @@ class DataMartRepo(EventsBase):
         return re.sub(r"\n+", " ", query_string).strip()
 
     def generate_create_table_query(self, query: str, table_name: str, db_name: str):
-        create_query = f"CREATE TABLE {db_name}.{table_name}  ENGINE = MergeTree ORDER BY {self.DUMMY_COLUMN} AS SELECT *, 1 AS {self.DUMMY_COLUMN} from ({query})"
+        create_query = f"CREATE TABLE {db_name}.{table_name}  ENGINE = MergeTree ORDER BY tuple() AS {query}"
         return create_query
 
     def create_table(
         self, query: str, table_name: str, clickhouse_credential: ClickHouseCredential
     ):
         query = self.cleanse_query_string(query_string=query)
+        self.execute_query_for_restricted_client(
+            query=f"DROP TABLE IF EXISTS {clickhouse_credential.databasename}.{table_name}",
+            username=clickhouse_credential.username,
+            password=clickhouse_credential.password,
+        )
         create_table_query = self.generate_create_table_query(
             query=query,
             table_name=table_name,

@@ -52,6 +52,7 @@ const SidePanel = ({
       borderRightWidth={'0.4px'}
       borderColor={'grey.700'}
       overflowY={'auto'}
+      pb={10}
     >
       {!isSidePanelCollapsed ? (
         <Flex direction={'column'} px={'2'} overflow={'auto'}>
