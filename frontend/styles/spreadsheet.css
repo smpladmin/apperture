@@ -11,3 +11,17 @@
   justify-content: flex-start;
 }
 /* $cell-font-size: 0.625rem; */
+
+.reactgrid-content .rg-context-menu .rg-context-menu-option {
+  padding: 8px 12px;
+  font-size: '0.625rem';
+  font-family: 'Inter';
+  font-weight: 400;
+  line-height: 135%;
+  border-radius: 8px;
+}
+
+.reactgrid-content .rg-context-menu {
+  width: 240px;
+  border-radius: 8px;
+}

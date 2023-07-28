@@ -653,13 +653,13 @@ const Spreadsheet = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           ) : (
             <>
               <Flex overflow={'scroll'} data-testid={'react-grid'}>
-                <Grid
+                {/* <Grid
                   selectedSheetIndex={selectedSheetIndex}
-                  sheetData={cloneDeep(sheetsData[selectedSheetIndex])}
+                  sheetsData={sheetsData}
                   evaluateFormulaHeader={evaluateFormulaHeader}
                   addDimensionColumn={addDimensionColumn}
                   properties={eventProperties}
-                />
+                /> */}
               </Flex>
               {/* <Footer
                 // openQueryModal={onOpen}
