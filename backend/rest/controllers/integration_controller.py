@@ -119,7 +119,7 @@ async def create_integration(
         if dto.csvFileId
         else None
     )
-    app = await app_service.get_user_app(dto.appId, user_id)
+    app = await app_service.get_shared_or_owned_app(dto.appId, user_id)
     integration = await integration_service.create_integration(
         app,
         dto.provider,

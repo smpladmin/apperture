@@ -100,6 +100,16 @@ class AppService:
             App.user_id == PydanticObjectId(user_id),
         )
 
+    async def get_shared_or_owned_app(self, id: str, user_id: str) -> App:
+        uid = PydanticObjectId(user_id)
+        return await App.find_one(
+            App.id == PydanticObjectId(id),
+            Or(
+                App.user_id == uid,
+                In(App.shared_with, [uid]),
+            ),
+        )
+
     async def share_app(self, id: str, owner_id: str, user: AppertureUser):
         app = await self.get_user_app(id, owner_id)
         app.shared_with.add(user.id)

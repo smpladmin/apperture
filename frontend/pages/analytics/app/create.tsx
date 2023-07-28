@@ -120,20 +120,20 @@ const Create = () => {
                 onChange={handleAgreementCheckboxChange}
               />
               <Text
-                fontSize={{ base: 'sh-14', md: 'sh-14' }}
+                fontSize={{ base: 'xs-14', md: 'xs-14' }}
                 lineHeight={{ base: 'sh-18', md: 'sh-18' }}
                 fontWeight="normal"
                 color="grey.800"
                 ml={2}
               >
                 I agree to the{' '}
-                <Link href="https://apperture.io" textDecoration="underline">
-                  terms and conditions
-                </Link>{' '}
-                and{' '}
-                <Link href="https://apperture.io" textDecoration="underline">
-                  end user license agreement
-                </Link>{' '}
+                <Link
+                  href="https://apperture.io/user-agreement"
+                  textDecoration="underline"
+                >
+                  {' '}
+                  user agreement policies
+                </Link>
                 .
               </Text>
             </Flex>
