@@ -229,59 +229,45 @@ const Connections = ({
                             <AccordionIcon />
                           </AccordionButton>
                           <AccordionPanel p={0}>
-                            {connection_source
-                              .slice(0, 5)
-                              .map(
-                                (source: ConnectionSource, index: number) => {
-                                  const heirarchy = [
-                                    server,
-                                    provider,
-                                    source.name,
-                                  ];
-                                  const currentSelectedDsId =
-                                    source.datasource_id;
-                                  return (
-                                    <Flex
-                                      key={source.name + index}
-                                      px={'3'}
-                                      py={'2'}
-                                      gap={'2'}
-                                      cursor={'pointer'}
-                                      _hover={{ bg: 'white.200' }}
-                                      borderRadius={'8'}
-                                      onClick={() => {
-                                        handleConnectionSelect(
-                                          source,
-                                          heirarchy,
-                                          currentSelectedDsId
-                                        );
-                                      }}
+                            {connection_source.map(
+                              (source: ConnectionSource, index: number) => {
+                                const heirarchy = [
+                                  server,
+                                  provider,
+                                  source.name,
+                                ];
+                                const currentSelectedDsId =
+                                  source.datasource_id;
+                                return (
+                                  <Flex
+                                    key={source.name + index}
+                                    px={'3'}
+                                    py={'2'}
+                                    gap={'2'}
+                                    cursor={'pointer'}
+                                    _hover={{ bg: 'white.200' }}
+                                    borderRadius={'8'}
+                                    onClick={() => {
+                                      handleConnectionSelect(
+                                        source,
+                                        heirarchy,
+                                        currentSelectedDsId
+                                      );
+                                    }}
+                                  >
+                                    <Table size={16} weight="thin" />
+                                    <Text
+                                      fontSize={'xs-12'}
+                                      lineHeight={'xs-12'}
+                                      fontWeight={'500'}
+                                      color={'grey.900'}
                                     >
-                                      <Table size={16} weight="thin" />
-                                      <Text
-                                        fontSize={'xs-12'}
-                                        lineHeight={'xs-12'}
-                                        fontWeight={'500'}
-                                        color={'grey.900'}
-                                      >
-                                        {source.name}
-                                      </Text>
-                                    </Flex>
-                                  );
-                                }
-                              )}
-                            {connection_source.length > 5 ? (
-                              <Text
-                                fontSize={'xs-10'}
-                                lineHeight={'xs-10'}
-                                fontWeight={'500'}
-                                color={'black.DEFAULT'}
-                                ml={'9'}
-                                mt={'2'}
-                              >
-                                {`+ ${connection_source.length - 5} more`}
-                              </Text>
-                            ) : null}
+                                      {source.name}
+                                    </Text>
+                                  </Flex>
+                                );
+                              }
+                            )}
                           </AccordionPanel>
                         </AccordionItem>
                       </Fragment>
