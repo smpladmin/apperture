@@ -227,7 +227,6 @@ export const dimensionSubheadersLength = (subheaders: SubHeaderColumn[]) => {
   ).length;
 };
 
-
 export const findConnectionByDatasourceId = (
   connections: Connection[],
   datasourceId?: string,
@@ -297,13 +296,14 @@ export const convertColumnValuesToPercentage = (
     const toUpdateData = { ...data };
 
     columnIds.forEach((column) => {
-      const { original } = toUpdateData[column];
-      if (typeof original === 'number') {
-        toUpdateData[column] = {
-          original,
-          display: convertToPercentage(original),
-        };
-        console.log(toUpdateData[column]);
+      if (toUpdateData?.[column]) {
+        const { original } = toUpdateData?.[column];
+        if (typeof original === 'number') {
+          toUpdateData[column] = {
+            original,
+            display: convertToPercentage(original),
+          };
+        }
       }
     });
 
@@ -319,12 +319,14 @@ export const increaseDecimalPlacesInColumnValues = (
     const toUpdateData = { ...data };
 
     columnIds.forEach((column) => {
-      const { original, display } = toUpdateData[column];
-      if (typeof original === 'number')
-        toUpdateData[column] = {
-          original,
-          display: increaseDecimalPlaces(original, display),
-        };
+      if (toUpdateData?.[column]) {
+        const { original, display } = toUpdateData[column];
+        if (typeof original === 'number')
+          toUpdateData[column] = {
+            original,
+            display: increaseDecimalPlaces(original, display),
+          };
+      }
     });
 
     return toUpdateData;
@@ -339,12 +341,14 @@ export const decreaseDecimalPlacesInColumnValues = (
     const toUpdateData = { ...data };
 
     columnIds.forEach((column) => {
-      const { original, display } = toUpdateData[column];
-      if (typeof original === 'number')
-        toUpdateData[column] = {
-          original,
-          display: decreaseDecimalPlaces(original, display),
-        };
+      if (toUpdateData?.[column]) {
+        const { original, display } = toUpdateData[column];
+        if (typeof original === 'number')
+          toUpdateData[column] = {
+            original,
+            display: decreaseDecimalPlaces(original, display),
+          };
+      }
     });
 
     return toUpdateData;
