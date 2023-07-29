@@ -22,7 +22,7 @@ def test_save_datamart_table(
             "datasource_id": PydanticObjectId("635ba034807ab86d8a2aadd9"),
             "name": "test-table",
             "query": "select event_name, user_id from events",
-            "user_id": "mock-user-id",
+            "user_id": "6374b74e9b36ecf7e0b4f9e4",
         }
     )
     assert datamart_service.create_datamart_table.call_args.kwargs["table"].dict() == {
@@ -75,7 +75,7 @@ async def test_update_datamart(
             "datasource_id": PydanticObjectId("635ba034807ab86d8a2aadd9"),
             "name": "test-table",
             "query": "select event_name, user_id from events",
-            "user_id": "mock-user-id",
+            "user_id": "6374b74e9b36ecf7e0b4f9e4",
         }
     )
 
