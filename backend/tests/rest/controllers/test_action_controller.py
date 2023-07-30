@@ -51,7 +51,7 @@ def test_create_action(client_init, action_data, action_service):
                 )
             ],
             "name": "clicked on settings",
-            "userId": "mock-user-id",
+            "userId": "6374b74e9b36ecf7e0b4f9e4",
         }
     )
     action_service.add_action.assert_called_once()

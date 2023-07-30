@@ -54,7 +54,7 @@ async def test_update_retention(
             "name": "test",
             "segment_filter": None,
             "start_event": EventSelection(event="start_event", filters=None),
-            "user_id": "mock-user-id",
+            "user_id": "6374b74e9b36ecf7e0b4f9e4",
         }
     )
 
