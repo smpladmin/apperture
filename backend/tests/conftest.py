@@ -110,4 +110,4 @@ def app_init(
 
 @pytest.fixture(scope="module")
 def mock_user_id():
-    return "6374b74e9b36ecf7e0b4f9e4"
+    return "mock-user-id"

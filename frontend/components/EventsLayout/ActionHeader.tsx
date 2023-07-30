@@ -9,7 +9,6 @@ import {
 } from '@chakra-ui/react';
 import React from 'react';
 import { ArrowLeft } from 'phosphor-react';
-import LoadingSpinner from '@components/LoadingSpinner';
 
 type EventLayoutHeaderProps = {
   handleGoBack: Function;
@@ -20,8 +19,6 @@ type EventLayoutHeaderProps = {
   isRunButtonPresent?: boolean;
   handleRunButtonClick?: Function;
   isSaved?: boolean;
-  isSaving?: boolean;
-  isQueryRunning?: boolean;
 };
 
 const EventLayoutHeader = ({
@@ -32,8 +29,6 @@ const EventLayoutHeader = ({
   isSaveButtonDisabled,
   isRunButtonPresent = false,
   isSaved = false,
-  isSaving = false,
-  isQueryRunning = false,
   handleRunButtonClick = () => {},
 }: EventLayoutHeaderProps) => {
   return (
@@ -99,20 +94,17 @@ const EventLayoutHeader = ({
             variant={'primary'}
             onClick={() => handleRunButtonClick()}
             data-testid={'run'}
-            disabled={isQueryRunning}
+            disabled={false}
             marginRight={4}
           >
-            <Flex alignItems={'center'} gap={'1'}>
-              {isQueryRunning ? <LoadingSpinner size={'sm'} /> : null}
-              <Text
-                fontSize={'xs-14'}
-                lineHeight={'120%'}
-                fontWeight={'500'}
-                color={'white.DEFAULT'}
-              >
-                Run
-              </Text>
-            </Flex>
+            <Text
+              fontSize={'xs-14'}
+              lineHeight={'120%'}
+              fontWeight={'500'}
+              color={'white.DEFAULT'}
+            >
+              Run
+            </Text>
           </Button>
         ) : (
           <></>
@@ -128,17 +120,14 @@ const EventLayoutHeader = ({
           disabled={isSaveButtonDisabled}
           marginRight={4}
         >
-          <Flex alignItems={'center'} gap={'1'}>
-            {isSaving ? <LoadingSpinner size={'sm'} /> : null}
-            <Text
-              fontSize={'xs-14'}
-              lineHeight={'120%'}
-              fontWeight={'500'}
-              color={'white.DEFAULT'}
-            >
-              {isSaved ? 'Update' : 'Save'}
-            </Text>
-          </Flex>
+          <Text
+            fontSize={'xs-14'}
+            lineHeight={'120%'}
+            fontWeight={'500'}
+            color={'white.DEFAULT'}
+          >
+            {isSaved ? 'Update' : 'Save'}
+          </Text>
         </Button>
       </Flex>
     </Flex>
