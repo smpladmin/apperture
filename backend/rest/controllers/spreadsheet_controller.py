@@ -1,5 +1,4 @@
 from typing import List, Union
-from beanie import PydanticObjectId
 
 from clickhouse_connect.driver.exceptions import DatabaseError
 from fastapi import APIRouter, Depends, HTTPException
@@ -117,16 +116,12 @@ async def compute_transient_column(
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
 
 
-@router.get("/workbooks/{id}", response_model=Union[SavedWorkBookResponse, None])
+@router.get("/workbooks/{id}", response_model=SavedWorkBookResponse)
 async def get_workbook_by_id(
     id: str,
-    user_id: str = Depends(get_user_id),
     spreadsheets_service: SpreadsheetService = Depends(),
 ):
-    workbook = await spreadsheets_service.get_workbook_by_id(workbook_id=id)
-    if workbook.user_id == PydanticObjectId(user_id):
-        return workbook
-    return None
+    return await spreadsheets_service.get_workbook_by_id(workbook_id=id)
 
 
 @router.put("/workbooks/{id}", response_model=SavedWorkBookResponse)
