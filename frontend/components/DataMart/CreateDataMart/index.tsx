@@ -38,6 +38,7 @@ const DataMart = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
 
   const [isDataMartBeingEdited, setIsDataMartBeingEdited] =
     useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (router.pathname.includes('edit')) setIsDataMartBeingEdited(true);
@@ -51,6 +52,8 @@ const DataMart = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
   };
 
   const handleSaveAndUpdate = async () => {
+    setSaveButtonDisabled(true);
+    setIsSaving(true);
     const { data, status } = isDataMartBeingEdited
       ? await updateDataMartTable(
           dataMartId as string,
@@ -68,6 +71,7 @@ const DataMart = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
     } else {
       setSaveButtonDisabled(false);
     }
+    setIsSaving(false);
   };
 
   useEffect(() => {
@@ -113,8 +117,10 @@ const DataMart = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
         handleSave={handleSaveAndUpdate}
         isSaveButtonDisabled={isSaveButtonDisabled}
         isRunButtonPresent={true}
+        isQueryRunning={isQueryResponseLoading}
         handleRunButtonClick={fetchData}
         isSaved={isDataMartBeingEdited}
+        isSaving={isSaving}
       />
       <Box p={4}>
         <ReactCodeMirror
