@@ -15,6 +15,7 @@ export type TransientSheetData = {
     selectedColumns: string[];
     selectedTable: string;
     selectedDatabase: string;
+    selectedSourceId: string;
   };
 };
 

@@ -247,6 +247,22 @@ export const findConnectionByDatasourceId = (
   return {} as ConnectionSource;
 };
 
+export const findConnectionById = (
+  connections: Connection[],
+  sourceId: string | undefined | null
+) => {
+  for (const connection of connections) {
+    for (const connectionGroup of connection.connection_data) {
+      for (const connectionSource of connectionGroup.connection_source) {
+        if (sourceId === connectionSource.id) {
+          return connectionSource;
+        }
+      }
+    }
+  }
+  return {} as ConnectionSource;
+};
+
 export const convertToPercentage = (value: number) =>
   `${(value * 100).toFixed(2)}%`;
 

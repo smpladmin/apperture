@@ -75,25 +75,28 @@ const Connections = ({
   const [canditate, setCandidate] = useState<{
     confirmation: boolean;
     dsId: string;
+    sourceId: string;
   }>({
     confirmation: false,
     dsId: '',
+    sourceId: '',
   });
 
   const handleConnectionSelect = (
     connectionData: any,
     heirarchy: string[],
-    currentSelectedDsId: string
+    currentSelectedDsId: string,
+    currentSelectedSourceId: string
   ) => {
     /*
       open confirmation modal when switching to different connection when sheet is not in edit mode.
       Note: initally dsId would be empty, in that case show connectorColumns directly
     */
-    const lastSelectedDsId = sheetData?.meta?.dsId;
+    const lastSelectedSourceId = sheetData?.meta?.selectedSourceId;
     if (
-      lastSelectedDsId &&
+      lastSelectedSourceId &&
       !sheetData.edit_mode &&
-      lastSelectedDsId !== currentSelectedDsId
+      lastSelectedSourceId !== currentSelectedSourceId
     ) {
       onOpen();
     } else {
@@ -101,6 +104,8 @@ const Connections = ({
       setSheetsData((prevSheetData: TransientSheetData[]) => {
         const tempSheetsData = cloneDeep(prevSheetData);
         tempSheetsData[selectedSheetIndex].meta!!.dsId = currentSelectedDsId;
+        tempSheetsData[selectedSheetIndex].meta!!.selectedSourceId =
+          currentSelectedSourceId;
         return tempSheetsData;
       });
     }
@@ -108,6 +113,7 @@ const Connections = ({
     setCandidate((prevCandidate) => ({
       ...prevCandidate,
       dsId: currentSelectedDsId,
+      sourceId: currentSelectedSourceId,
     }));
     setConnectorData({ ...connectionData, heirarchy });
     setShowSqlEditor(false);
@@ -141,6 +147,7 @@ const Connections = ({
           selectedColumns: [],
           selectedTable: '',
           selectedDatabase: '',
+          selectedSourceId: canditate.sourceId,
         };
         tempSheetsData[selectedSheetIndex].data = [];
         tempSheetsData[selectedSheetIndex].headers = [];
@@ -254,6 +261,7 @@ const Connections = ({
                                 ];
                                 const currentSelectedDsId =
                                   source.datasource_id;
+                                const currentSelectedSourceId = source.id;
                                 return (
                                   <Flex
                                     key={source.name + index}
@@ -267,7 +275,8 @@ const Connections = ({
                                       handleConnectionSelect(
                                         source,
                                         heirarchy,
-                                        currentSelectedDsId
+                                        currentSelectedDsId,
+                                        currentSelectedSourceId
                                       );
                                     }}
                                   >
