@@ -678,7 +678,7 @@ def events_service():
 @pytest.fixture(scope="module")
 def apperture_user_service(mock_find_email_user):
     service = mock.AsyncMock()
-    service.find_user.return_value = mock_find_email_user
+    service.get_user_by_email.return_value = mock_find_email_user
     return service
 
 

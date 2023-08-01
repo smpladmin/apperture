@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from typing import Union
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -109,8 +110,12 @@ async def update_app(
     app_service: AppService = Depends(),
     user_service: AppertureUserService = Depends(),
 ):
-    if dto.share_with_email:
-        user = await user_service.find_user(email=dto.share_with_email)
+    email = dto.share_with_email
+    if email:
+        user = await user_service.get_user_by_email(email=email)
+        if not user:
+            logging.info(f"User doesn't exist. Creating an invited user with email {email}")
+            user = await user_service.create_invited_user(email=email)
         await app_service.share_app(id, user_id, user)
 
 
