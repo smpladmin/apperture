@@ -18,13 +18,7 @@ import {
   TransientSheetData,
   Workbook,
 } from '@lib/domain/workbook';
-import {
-  Box,
-  Flex,
-  useDisclosure,
-  usePrevious,
-  useToast,
-} from '@chakra-ui/react';
+import { Box, Flex, usePrevious, useToast } from '@chakra-ui/react';
 import SidePanel from './components/SidePanel';
 import Grid from '@components/Workbook/components/Grid/Grid';
 import Footer from '@components/Workbook/components/Footer';
@@ -36,7 +30,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import {
   evaluateExpression,
   expressionTokenRegex,
-  findConnectionByDatasourceId,
+  findConnectionById,
   getSubheaders,
   isOperand,
   isSheetPivotOrBlank,
@@ -719,14 +713,8 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   };
 
   const getProperties = useMemo(() => {
-    const datasourceId = sheetsData[selectedSheetIndex]?.meta?.dsId;
-    const table = sheetsData[selectedSheetIndex]?.meta?.selectedTable;
-
-    const connectionSource = findConnectionByDatasourceId(
-      connections,
-      datasourceId,
-      table
-    );
+    const sourceId = sheetsData[selectedSheetIndex]?.meta?.selectedSourceId;
+    const connectionSource = findConnectionById(connections, sourceId);
     return connectionSource?.fields || [];
   }, [connections, selectedSheetIndex, sheetsData]);
 
