@@ -31,3 +31,11 @@ export const removeSlackCredentials = async () => {
     console.error((e as AxiosError).message);
   }
 };
+
+export const updateSheetsVisitedStatus = async () => {
+  try {
+    await AppertureAPI.put('/apperture-users?has_visited_sheets=true');
+  } catch (e) {
+    console.error((e as AxiosError).message);
+  }
+};

@@ -18,7 +18,13 @@ import {
   TransientSheetData,
   Workbook,
 } from '@lib/domain/workbook';
-import { Box, Flex, usePrevious, useToast } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  useDisclosure,
+  usePrevious,
+  useToast,
+} from '@chakra-ui/react';
 import SidePanel from './components/SidePanel';
 import Grid from '@components/Workbook/components/Grid/Grid';
 import Footer from '@components/Workbook/components/Footer';
@@ -40,6 +46,8 @@ import { DimensionParser, Metricparser } from '@lib/utils/parser';
 import { Connection } from '@lib/domain/connections';
 import LoadingSpinner from '@components/LoadingSpinner';
 import AIButton from '@components/AIButton';
+import Coachmarks from './components/Coachmarks';
+import { AppertureUser } from '@lib/domain/user';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -75,7 +83,13 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   ];
 };
 
-const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
+const Workbook = ({
+  savedWorkbook,
+  user,
+}: {
+  savedWorkbook?: Workbook;
+  user?: AppertureUser;
+}) => {
   const [workbookName, setWorkBookName] = useState(
     savedWorkbook?.name || 'Untitled Workbook'
   );
@@ -115,11 +129,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
 
   const prevSheetsData = usePrevious(sheetsData);
 
-  // const {
-  //   isOpen: showSelectSheetOverlay,
-  //   onOpen: openSelectSheetOverlay,
-  //   onClose: closeSelectSheetOverlay,
-  // } = useDisclosure({ defaultIsOpen: savedWorkbook ? false : true });
+  const { isOpen: showCoachMarksModal, onClose: closeCoachMarksModal } =
+    useDisclosure({ defaultIsOpen: !user?.hasVisitedSheets });
+
   const toast = useToast();
   const router = useRouter();
   const { dsId, workbookId } = router.query;
@@ -719,20 +731,21 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   }, [connections, selectedSheetIndex, sheetsData]);
 
   return (
-    <Flex direction={'column'}>
-      <WorkbookHeader
-        name={workbookName}
-        setName={setWorkBookName}
-        isSaveButtonDisabled={isSaveButtonDisabled}
-        handleSave={handleSaveOrUpdateWorkbook}
-        setShowSqlEditor={setShowSqlEditor}
-      />
-      <Flex
-        direction={'row'}
-        h={'full'}
-        overflow={showEmptyState ? 'hidden' : 'auto'}
-      >
-        {/* {showSelectSheetOverlay ? (
+    <>
+      <Flex direction={'column'}>
+        <WorkbookHeader
+          name={workbookName}
+          setName={setWorkBookName}
+          isSaveButtonDisabled={isSaveButtonDisabled}
+          handleSave={handleSaveOrUpdateWorkbook}
+          setShowSqlEditor={setShowSqlEditor}
+        />
+        <Flex
+          direction={'row'}
+          h={'full'}
+          overflow={showEmptyState ? 'hidden' : 'auto'}
+        >
+          {/* {showSelectSheetOverlay ? (
           <SelectSheet
             closeSelectSheetOverlay={closeSelectSheetOverlay}
             sheetsData={sheetsData}
@@ -741,109 +754,113 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             setSelectedSheetIndex={setSelectedSheetIndex}
           />
         ) : null} */}
-        <SidePanel
-          loadingConnections={loadingConnections}
-          showColumns={showColumns}
-          setShowColumns={setShowColumns}
-          connections={connections}
-          selectedSheetIndex={selectedSheetIndex}
-          sheetsData={sheetsData}
-          setSheetsData={setSheetsData}
-          setShowSqlEditor={setShowSqlEditor}
-          evaluateFormulaHeader={evaluateFormulaHeader}
-          addDimensionColumn={addDimensionColumn}
-        />
-
-        <Box h={'full'} w={'full'} overflowY={'auto'}>
-          {showSqlEditor ? (
-            <QueryEditor
-              sheetsData={sheetsData}
-              selectedSheetIndex={selectedSheetIndex}
-              setShowSqlEditor={setShowSqlEditor}
-              setSheetsData={setSheetsData}
-            />
-          ) : null}
-          {showEmptyState ? (
-            <EmptySheet
-              tableSelected={
-                !!sheetsData[selectedSheetIndex]?.meta?.selectedTable
-              }
-            />
-          ) : (
-            <Box overflow={'auto'} h={'full'} pb={'8'}>
-              {hasQueryWithoutData ? (
-                <Flex
-                  h={'full'}
-                  w={'full'}
-                  alignItems={'center'}
-                  justifyContent={'center'}
-                >
-                  <LoadingSpinner />
-                </Flex>
-              ) : (
-                <Grid
-                  sheetsData={sheetsData}
-                  selectedSheetIndex={selectedSheetIndex}
-                  evaluateFormulaHeader={evaluateFormulaHeader}
-                  addDimensionColumn={addDimensionColumn}
-                  properties={getProperties}
-                  setSheetsData={setSheetsData}
-                />
-              )}
-            </Box>
-          )}
-          <Footer
-            openSelectSheetOverlay={() => {}}
-            selectedSheetIndex={selectedSheetIndex}
-            setSelectedSheetIndex={setSelectedSheetIndex}
-            setSheetsData={setSheetsData}
-            sheetsData={sheetsData}
+          <SidePanel
+            loadingConnections={loadingConnections}
+            showColumns={showColumns}
             setShowColumns={setShowColumns}
-            setShowEditor={setShowSqlEditor}
+            connections={connections}
+            selectedSheetIndex={selectedSheetIndex}
+            sheetsData={sheetsData}
+            setSheetsData={setSheetsData}
+            setShowSqlEditor={setShowSqlEditor}
+            evaluateFormulaHeader={evaluateFormulaHeader}
+            addDimensionColumn={addDimensionColumn}
           />
-        </Box>
+
+          <Box h={'full'} w={'full'} overflowY={'auto'}>
+            {showSqlEditor ? (
+              <QueryEditor
+                sheetsData={sheetsData}
+                selectedSheetIndex={selectedSheetIndex}
+                setShowSqlEditor={setShowSqlEditor}
+                setSheetsData={setSheetsData}
+              />
+            ) : null}
+            {showEmptyState ? (
+              <EmptySheet
+                tableSelected={
+                  !!sheetsData[selectedSheetIndex]?.meta?.selectedTable
+                }
+              />
+            ) : (
+              <Box overflow={'auto'} h={'full'} pb={'8'}>
+                {hasQueryWithoutData ? (
+                  <Flex
+                    h={'full'}
+                    w={'full'}
+                    alignItems={'center'}
+                    justifyContent={'center'}
+                  >
+                    <LoadingSpinner />
+                  </Flex>
+                ) : (
+                  <Grid
+                    sheetsData={sheetsData}
+                    selectedSheetIndex={selectedSheetIndex}
+                    evaluateFormulaHeader={evaluateFormulaHeader}
+                    addDimensionColumn={addDimensionColumn}
+                    properties={getProperties}
+                    setSheetsData={setSheetsData}
+                  />
+                )}
+              </Box>
+            )}
+            <Footer
+              openSelectSheetOverlay={() => {}}
+              selectedSheetIndex={selectedSheetIndex}
+              setSelectedSheetIndex={setSelectedSheetIndex}
+              setSheetsData={setSheetsData}
+              sheetsData={sheetsData}
+              setShowColumns={setShowColumns}
+              setShowEditor={setShowSqlEditor}
+            />
+          </Box>
+        </Flex>
+        {sheetsData[selectedSheetIndex]?.meta?.selectedTable && (
+          <AIButton
+            query={
+              !sheetsData[selectedSheetIndex]?.is_sql
+                ? sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery
+                : ''
+            }
+            zIndex={1}
+            position={'fixed'}
+            right={5}
+            bottom={13}
+            properties={getProperties}
+            wordReplacements={
+              sheetsData[selectedSheetIndex]?.aiQuery?.wordReplacements
+            }
+            loading={fetchingTransientSheet}
+            onQuery={(updatedQuery, wordReplacements) => {
+              const sheetsCopy = cloneDeep(sheetsData);
+              sheetsCopy[selectedSheetIndex].is_sql = false;
+              let query =
+                sheetsCopy[selectedSheetIndex].aiQuery || ({} as AIQuery);
+              query = {
+                ...query,
+                nlQuery: updatedQuery,
+                wordReplacements,
+                sql: '',
+                table:
+                  sheetsCopy[selectedSheetIndex]?.meta?.selectedTable ||
+                  'events',
+                database:
+                  sheetsCopy[selectedSheetIndex]?.meta?.selectedDatabase ||
+                  'default',
+              };
+              sheetsCopy[selectedSheetIndex].aiQuery = query;
+              sheetsCopy[selectedSheetIndex].edit_mode = true;
+              sheetsCopy[selectedSheetIndex].sheet_type =
+                SheetType.SIMPLE_SHEET;
+              setSheetsData(sheetsCopy);
+              setTriggerSheetFetch(triggerSheetFetch + 1);
+            }}
+          />
+        )}
       </Flex>
-      {sheetsData[selectedSheetIndex]?.meta?.selectedTable && (
-        <AIButton
-          query={
-            !sheetsData[selectedSheetIndex]?.is_sql
-              ? sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery
-              : ''
-          }
-          zIndex={1}
-          position={'fixed'}
-          right={5}
-          bottom={13}
-          properties={getProperties}
-          wordReplacements={
-            sheetsData[selectedSheetIndex]?.aiQuery?.wordReplacements
-          }
-          loading={fetchingTransientSheet}
-          onQuery={(updatedQuery, wordReplacements) => {
-            const sheetsCopy = cloneDeep(sheetsData);
-            sheetsCopy[selectedSheetIndex].is_sql = false;
-            let query =
-              sheetsCopy[selectedSheetIndex].aiQuery || ({} as AIQuery);
-            query = {
-              ...query,
-              nlQuery: updatedQuery,
-              wordReplacements,
-              sql: '',
-              table:
-                sheetsCopy[selectedSheetIndex]?.meta?.selectedTable || 'events',
-              database:
-                sheetsCopy[selectedSheetIndex]?.meta?.selectedDatabase ||
-                'default',
-            };
-            sheetsCopy[selectedSheetIndex].aiQuery = query;
-            sheetsCopy[selectedSheetIndex].edit_mode = true;
-            sheetsCopy[selectedSheetIndex].sheet_type = SheetType.SIMPLE_SHEET;
-            setSheetsData(sheetsCopy);
-            setTriggerSheetFetch(triggerSheetFetch + 1);
-          }}
-        />
-      )}
-    </Flex>
+      <Coachmarks isOpen={showCoachMarksModal} onClose={closeCoachMarksModal} />
+    </>
   );
 };
 

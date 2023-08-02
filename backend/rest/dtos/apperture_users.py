@@ -19,6 +19,7 @@ class AppertureUserResponse(ModelResponse):
     email: str
     picture: Optional[str]
     slack_channel: Optional[str]
+    has_visited_sheets: Optional[bool]
 
     class Config:
         allow_population_by_field_name = True
