@@ -96,10 +96,10 @@ async def get_apps(
 @router.get("/apps/{id}", response_model=AppResponse)
 async def get_app(
     id: str,
-    user_id: str = Depends(get_user_id),
+    user: AppertureUser = Depends(get_user),
     app_service: AppService = Depends(),
 ):
-    return await app_service.get_shared_or_owned_app(id, user_id)
+    return await app_service.get_shared_or_owned_app(id=id, user=user)
 
 
 @router.put("/apps/{id}")
@@ -114,7 +114,9 @@ async def update_app(
     if email:
         user = await user_service.get_user_by_email(email=email)
         if not user:
-            logging.info(f"User doesn't exist. Creating an invited user with email {email}")
+            logging.info(
+                f"User doesn't exist. Creating an invited user with email {email}"
+            )
             user = await user_service.create_invited_user(email=email)
         await app_service.share_app(id, user_id, user)
 

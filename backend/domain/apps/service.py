@@ -1,12 +1,13 @@
+import logging
 import re
-from typing import List
+from typing import List, Union
 
 from beanie import PydanticObjectId
-from beanie.operators import In, Or
 from fastapi import Depends
 
 from repositories.clickhouse.clickhouse_role import ClickHouseRole
 from settings import apperture_settings
+from utils.mail import GENERIC_EMAIL_DOMAINS
 
 from ..apperture_users.models import AppertureUser
 from .models import App, ClickHouseCredential
@@ -71,12 +72,23 @@ class AppService:
 
         return creds
 
+    def parse_domain_from_email(self, email: str) -> Union[str, None]:
+        try:
+            domain = email.split("@")[-1]
+            if domain not in GENERIC_EMAIL_DOMAINS:
+                return domain
+            return None
+        except Exception as e:
+            logging.info(f"Exception while parsing domain from email: {e}")
+            return None
+
     async def create_app(
         self,
         name: str,
         user: AppertureUser,
     ) -> App:
         app = App(name=name, user_id=user.id)
+        app.domain = self.parse_domain_from_email(email=user.email)
         await app.insert()
         creds = await self.create_clickhouse_user(id=app.id, app_name=name)
         app.clickhouse_credential = creds
@@ -84,11 +96,23 @@ class AppService:
 
     async def get_apps(self, user: AppertureUser) -> List[App]:
         return await App.find(
-            Or(
-                App.user_id == user.id,
-                In(App.shared_with, [user.id]),
-            ),
-            App.enabled == True,
+            {
+                "enabled": True,
+                "$or": [
+                    {
+                        "$or": [
+                            {"user_id": user.id},
+                            {"shared_with": {"$in": [user.id]}},
+                        ],
+                    },
+                    {
+                        "$and": [
+                            {"org_access": True},
+                            {"domain": self.parse_domain_from_email(email=user.email)},
+                        ],
+                    },
+                ],
+            }
         ).to_list()
 
     async def get_app(self, id: str) -> App:
@@ -100,14 +124,25 @@ class AppService:
             App.user_id == PydanticObjectId(user_id),
         )
 
-    async def get_shared_or_owned_app(self, id: str, user_id: str) -> App:
-        uid = PydanticObjectId(user_id)
+    async def get_shared_or_owned_app(self, id: str, user: AppertureUser) -> App:
         return await App.find_one(
-            App.id == PydanticObjectId(id),
-            Or(
-                App.user_id == uid,
-                In(App.shared_with, [uid]),
-            ),
+            {
+                "_id": PydanticObjectId(id),
+                "$or": [
+                    {
+                        "$or": [
+                            {"user_id": user.id},
+                            {"shared_with": {"$in": [user.id]}},
+                        ],
+                    },
+                    {
+                        "$and": [
+                            {"org_access": True},
+                            {"domain": self.parse_domain_from_email(email=user.email)},
+                        ],
+                    },
+                ],
+            }
         )
 
     async def share_app(self, id: str, owner_id: str, user: AppertureUser):

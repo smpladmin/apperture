@@ -12,7 +12,7 @@ class AppertureUser(Document):
     picture: Optional[str]
     slack_channel: Optional[str]
     slack_url: Optional[str]
-    is_invited: Optional[bool] = False
+    is_signed_up: Optional[bool] = True
 
     class Settings:
         name = "users"

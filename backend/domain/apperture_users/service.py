@@ -12,8 +12,10 @@ class AppertureUserService:
             AppertureUser.email == oauth_user.email
         )
         if existing_user:
-            if existing_user.is_invited:
-                return await self._upgrade_invited_user(oauth_user=oauth_user, id=existing_user.id)
+            if not existing_user.is_signed_up:
+                return await self._upgrade_invited_user(
+                    oauth_user=oauth_user, id=existing_user.id
+                )
             else:
                 return existing_user
         return await self._create_user(oauth_user)
@@ -77,10 +79,7 @@ class AppertureUserService:
 
     async def create_invited_user(self, email: str):
         apperture_user = AppertureUser(
-            first_name='',
-            last_name='',
-            email=email,
-            is_invited=True
+            first_name="", last_name="", email=email, is_signed_up=False
         )
         await apperture_user.insert()
         return apperture_user
@@ -89,9 +88,13 @@ class AppertureUserService:
         user = await self._build_user(oauth_user=oauth_user)
         to_update = {
             "updated_at": datetime.utcnow(),
-            "is_invited": False,
+            "is_signed_up": True,
         }
-        to_update.update(user.dict(exclude={"id", "created_at", "email", "updated_at", "is_invited"}))
+        to_update.update(
+            user.dict(
+                exclude={"id", "created_at", "email", "updated_at", "is_signed_up"}
+            )
+        )
 
         await AppertureUser.find_one(
             AppertureUser.id == id,
