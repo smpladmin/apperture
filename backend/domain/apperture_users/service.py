@@ -45,6 +45,7 @@ class AppertureUserService:
             last_name=oauth_user.family_name,
             email=oauth_user.email,
             picture=oauth_user.picture,
+            has_visted_sheets=False,
         )
         await apperture_user.insert()
         return apperture_user
