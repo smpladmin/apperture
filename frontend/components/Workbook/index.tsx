@@ -130,7 +130,9 @@ const Workbook = ({
   const prevSheetsData = usePrevious(sheetsData);
 
   const { isOpen: showCoachMarksModal, onClose: closeCoachMarksModal } =
-    useDisclosure({ defaultIsOpen: !user?.hasVisitedSheets });
+    useDisclosure({
+      defaultIsOpen: savedWorkbook ? false : !user?.hasVisitedSheets,
+    });
 
   const toast = useToast();
   const router = useRouter();
