@@ -56,8 +56,13 @@ const QueryEditor = ({
   };
 
   useEffect(() => {
-    setQuery(sheetData.query);
-  }, [sheetData.query]);
+    if (sheetData.query) {
+      setQuery(sheetData.query);
+    }
+    if (sheetData.aiQuery?.sql) {
+      setQuery(sheetData.aiQuery?.sql);
+    }
+  }, [sheetData.query, sheetData.aiQuery?.sql]);
 
   const handleQueryChange = async () => {
     setIsLoading(true);
