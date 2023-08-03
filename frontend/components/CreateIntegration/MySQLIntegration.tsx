@@ -7,7 +7,7 @@ import {
   Heading,
   Input,
   Text,
-  useToast
+  useToast,
 } from '@chakra-ui/react';
 import FormButton from '@components/FormButton';
 import {
@@ -33,7 +33,6 @@ type MySQLIntegrationProps = {
   add: string | string[] | undefined;
 };
 
-
 type FormData = {
   host: string;
   port: string;
@@ -53,6 +52,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
   const handleGoBack = (): void => router.back();
   const toast = useToast();
   const [isConnectionValid, setIsConnectionValid] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const getFileContent = async (file: Blob) => {
     return new Promise((resolve, reject) => {
@@ -124,12 +124,14 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
   };
 
   const onTest = async (data: FormData) => {
+    setLoading(true);
     const mySQLCredential = await processFormData(data);
     const validConnection = await testMySQLConnection(
       mySQLCredential as MySQLCredential
     );
     // setIsConnectionValid(validConnection);
     setIsConnectionValid(true);
+    setLoading(false);
     toast({
       title: validConnection ? 'Connection Successfull' : 'Connection Failed',
       status: validConnection ? 'success' : 'error',
@@ -184,168 +186,178 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
 
   return (
     <IntegrationContainer>
-      
-       { add ? <LeftContainerRevisit/> : <LeftContainer /> }
-     
+      {add ? <LeftContainerRevisit /> : <LeftContainer />}
+
       <RightContainer>
+        <Flex flexDirection="column" alignItems="center">
+          {add ? (
+            <Box mt={10}></Box>
+          ) : (
+            <TopProgress handleGoBack={handleGoBack} />
+          )}
+
           <Flex
-            flexDirection="column"
-            alignItems="center"
+            direction={'column'}
+            h={'full'}
+            justifyContent={{ base: 'space-between', md: 'start' }}
           >
-                   { add ? <Box mt={10}></Box> : <TopProgress handleGoBack={handleGoBack} /> }
+            <Box>
+              <Box
+                height={{ base: 8, md: 14 }}
+                width={{ base: 8, md: 14 }}
+                mb={2}
+              >
+                <Image src={mysqlLogo} alt="mixpanel" layout="responsive" />
+              </Box>
 
-                    <Flex
-                            direction={'column'}
-                            h={'full'}
-                            justifyContent={{ base: 'space-between', md: 'start' }}
-                          >
-                        <Box>
-                          
-                          <Box height={{ base: 8, md: 14 }} width={{ base: 8, md: 14 }} mb={2}>
-                            <Image src={mysqlLogo} alt="mixpanel" layout="responsive" />
-                          </Box>
-                          
-                          <Heading
-                            as={'h2'}
-                            mb={{ base: 5, md: 5 }}
-                            fontSize={{ base: 'sh-18', md: 'sh-18' }}
-                            lineHeight={{ base: '2.125rem', md: '4.125rem' }}
-                            fontWeight={'semibold'}
-                            maxW={200}
-                          >
-                            Enter Details to fetch data from MySQL
-                          </Heading>
+              <Heading
+                as={'h2'}
+                mb={{ base: 5, md: 5 }}
+                fontSize={{ base: 'sh-18', md: 'sh-18' }}
+                lineHeight={{ base: '2.125rem', md: '4.125rem' }}
+                fontWeight={'semibold'}
+                maxW={200}
+              >
+                Enter Details to fetch data from MySQL
+              </Heading>
 
-                          <Flex w={125}>
-                            <form onSubmit={handleSubmit(onSubmit)} style={{ width: '100%' }}>
-                              <Flex direction={'column'} gap={'4'}>
-                                <FormInputField
-                                  fieldName="host"
-                                  label="Host"
-                                  errors={errors}
-                                  handleChange={handleChange}
-                                  register={register}
-                                  inputStyle={{ placeholder: '127.0.0.1', width: '60' }}
-                                />
-                                <FormInputField
-                                  fieldName="port"
-                                  label="Port"
-                                  errors={errors}
-                                  handleChange={handleChange}
-                                  register={register}
-                                  inputStyle={{ placeholder: '3306', width: '40' }}
-                                />
+              <Flex w={125}>
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  style={{ width: '100%' }}
+                >
+                  <Flex direction={'column'} gap={'4'}>
+                    <FormInputField
+                      fieldName="host"
+                      label="Host"
+                      errors={errors}
+                      handleChange={handleChange}
+                      register={register}
+                      inputStyle={{ placeholder: '127.0.0.1', width: '60' }}
+                    />
+                    <FormInputField
+                      fieldName="port"
+                      label="Port"
+                      errors={errors}
+                      handleChange={handleChange}
+                      register={register}
+                      inputStyle={{ placeholder: '3306', width: '40' }}
+                    />
 
-                                <FormInputField
-                                  fieldName="username"
-                                  label="Username"
-                                  errors={errors}
-                                  handleChange={handleChange}
-                                  register={register}
-                                  inputStyle={{ placeholder: 'user', width: '50' }}
-                                />
-                                <FormInputField
-                                  fieldName="password"
-                                  label="Password"
-                                  errors={errors}
-                                  handleChange={handleChange}
-                                  register={register}
-                                  inputStyle={{ placeholder: 'password', width: '50' }}
-                                />
+                    <FormInputField
+                      fieldName="username"
+                      label="Username"
+                      errors={errors}
+                      handleChange={handleChange}
+                      register={register}
+                      inputStyle={{ placeholder: 'user', width: '50' }}
+                    />
+                    <FormInputField
+                      fieldName="password"
+                      label="Password"
+                      errors={errors}
+                      handleChange={handleChange}
+                      register={register}
+                      inputStyle={{ placeholder: 'password', width: '50' }}
+                    />
 
-                                <FormCheckboxField
-                                  fieldName="overSsh"
-                                  label="Over SSH"
-                                  register={register}
-                                />
-                                {showSshFields && (
-                                  <Flex direction={'column'} gap={'4'}>
-                                    <FormInputField
-                                      fieldName="sshServer"
-                                      label="Server"
-                                      errors={errors}
-                                      handleChange={handleChange}
-                                      register={register}
-                                      inputStyle={{ placeholder: '192.168.1.1', width: '60' }}
-                                    />
-                                    <FormInputField
-                                      fieldName="sshPort"
-                                      label="Port"
-                                      errors={errors}
-                                      handleChange={handleChange}
-                                      register={register}
-                                      inputStyle={{ placeholder: '22', width: '40' }}
-                                    />
+                    <FormCheckboxField
+                      fieldName="overSsh"
+                      label="Over SSH"
+                      register={register}
+                    />
+                    {showSshFields && (
+                      <Flex direction={'column'} gap={'4'}>
+                        <FormInputField
+                          fieldName="sshServer"
+                          label="Server"
+                          errors={errors}
+                          handleChange={handleChange}
+                          register={register}
+                          inputStyle={{
+                            placeholder: '192.168.1.1',
+                            width: '60',
+                          }}
+                        />
+                        <FormInputField
+                          fieldName="sshPort"
+                          label="Port"
+                          errors={errors}
+                          handleChange={handleChange}
+                          register={register}
+                          inputStyle={{ placeholder: '22', width: '40' }}
+                        />
 
-                                    <FormInputField
-                                      fieldName="sshUsername"
-                                      label="Username"
-                                      errors={errors}
-                                      handleChange={handleChange}
-                                      register={register}
-                                      required={false}
-                                      inputStyle={{ placeholder: 'user', width: '50' }}
-                                    />
-                                    <FormInputField
-                                      fieldName="sshPassword"
-                                      label="Password"
-                                      errors={errors}
-                                      handleChange={handleChange}
-                                      register={register}
-                                      required={false}
-                                      inputStyle={{ placeholder: 'password', width: '50' }}
-                                    />
+                        <FormInputField
+                          fieldName="sshUsername"
+                          label="Username"
+                          errors={errors}
+                          handleChange={handleChange}
+                          register={register}
+                          required={false}
+                          inputStyle={{ placeholder: 'user', width: '50' }}
+                        />
+                        <FormInputField
+                          fieldName="sshPassword"
+                          label="Password"
+                          errors={errors}
+                          handleChange={handleChange}
+                          register={register}
+                          required={false}
+                          inputStyle={{ placeholder: 'password', width: '50' }}
+                        />
 
-                                    <FormCheckboxField
-                                      fieldName="useSshKey"
-                                      label="Use SSH Key"
-                                      register={register}
-                                    />
-                                    {useSshKey && (
-                                      <FormInputField
-                                        fieldName="sshKey"
-                                        label=""
-                                        errors={errors}
-                                        handleChange={handleChange}
-                                        register={register}
-                                        inputType={'file'}
-                                        inputStyle={{ border: 0, width: 60 }}
-                                        hasBg={false}
-                                      />
-                                    )}
-                                  </Flex>
-                                )}
-                                <Flex>
-                                  <FormButton
-                                    navigateBack={() => router.back()}
-                                    handleNextClick={handleSubmit(onSubmit)}
-                                    // disabled={!(isConnectionValid && validateForm())}
-                                    disabled={false}
-                                    nextButtonName={'Submit'}
-                                  />
-                                  <Button
-                                    variant={'primary'}
-                                    rounded={'lg'}
-                                    bg={'black.100'}
-                                    p={6}
-                                    fontSize={'base'}
-                                    fontWeight={'semibold'}
-                                    lineHeight={'base'}
-                                    textColor={'white.100'}
-                                    width={{ base: 'full', md: '40' }}
-                                    onClick={handleTestConnection}
-                                  >
-                                    Test
-                                  </Button>
-                                </Flex>
-                              </Flex>
-                            </form>
-                          </Flex>
-                        </Box>
+                        <FormCheckboxField
+                          fieldName="useSshKey"
+                          label="Use SSH Key"
+                          register={register}
+                        />
+                        {useSshKey && (
+                          <FormInputField
+                            fieldName="sshKey"
+                            label=""
+                            errors={errors}
+                            handleChange={handleChange}
+                            register={register}
+                            inputType={'file'}
+                            inputStyle={{ border: 0, width: 60 }}
+                            hasBg={false}
+                          />
+                        )}
                       </Flex>
+                    )}
+                    <Flex>
+                      <FormButton
+                        navigateBack={() => router.back()}
+                        handleNextClick={handleSubmit(onSubmit)}
+                        // disabled={!(isConnectionValid && validateForm())}
+                        disabled={false}
+                        nextButtonName={'Submit'}
+                      />
+                      <Button
+                        isLoading={loading}
+                        variant={'primary'}
+                        rounded={'lg'}
+                        bg={'black.100'}
+                        p={6}
+                        fontSize={'base'}
+                        fontWeight={'semibold'}
+                        lineHeight={'base'}
+                        textColor={'white.100'}
+                        width={{ base: 'full', md: '40' }}
+                        onClick={handleTestConnection}
+                      >
+                        Test
+                      </Button>
                     </Flex>
-                  </RightContainer>
-  </IntegrationContainer>
+                  </Flex>
+                </form>
+              </Flex>
+            </Box>
+          </Flex>
+        </Flex>
+      </RightContainer>
+    </IntegrationContainer>
   );
 };
 
