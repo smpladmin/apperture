@@ -12,8 +12,8 @@ class APIDataFetcher:
         self.tableName = credential.tableName
         self.startdate = date
         self.enddate = date
-        self.date_args = f"?startdate={self.startdate}&enddate={self.enddate}"
-        self.data_url = f"{self.end_point}" + self.date_args
+        self.date_args = f"?start_time={self.startdate}&end_time={self.enddate}"
+        self.data_url = f"{self.end_point}{self.date_args}&offset=0&limit=1000"
 
     def fetch(self):
         response = requests.get(self.data_url, headers=json.loads(self.headers))
