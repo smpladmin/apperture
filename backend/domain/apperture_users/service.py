@@ -45,6 +45,7 @@ class AppertureUserService:
             last_name=oauth_user.family_name,
             email=oauth_user.email,
             picture=oauth_user.picture,
+            has_visted_sheets=False,
         )
         await apperture_user.insert()
         return apperture_user
@@ -66,6 +67,11 @@ class AppertureUserService:
         await AppertureUser.find_one(
             AppertureUser.id == PydanticObjectId(user_id),
         ).update({"$unset": {"slack_url": 1, "slack_channel": 1}})
+
+    async def update_visited_sheets_status(self, user_id):
+        await AppertureUser.find_one(
+            AppertureUser.id == PydanticObjectId(user_id),
+        ).update({"$set": {"has_visted_sheets": True}})
 
     async def find_user(self, email: str):
         return await AppertureUser.find_one(AppertureUser.email == email)

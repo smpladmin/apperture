@@ -168,6 +168,7 @@ async def test_get_saved_workbooks(client_init, spreadsheets_service):
                 "email": "test@email.com",
                 "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
                 "slackChannel": "#alerts",
+                "hasVisitedSheets": False,
             },
         }
     ]
@@ -212,6 +213,7 @@ async def test_get_saved_workbooks_for_app(client_init, spreadsheets_service):
                 "email": "test@email.com",
                 "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
                 "slackChannel": "#alerts",
+                "hasVisitedSheets": False,
             },
         }
     ]
@@ -254,6 +256,7 @@ async def test_get_saved_workbooks_by_user_id(client_init, spreadsheets_service)
                 "email": "test@email.com",
                 "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
                 "slackChannel": "#alerts",
+                "hasVisitedSheets": False,
             },
         }
     ]

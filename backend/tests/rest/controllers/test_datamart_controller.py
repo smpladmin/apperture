@@ -154,6 +154,7 @@ def test_get_datamart_list(client_init, datamart_service):
                 "lastName": "User",
                 "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
                 "slackChannel": "#alerts",
+                "hasVisitedSheets": False,
             },
             "userId": "635ba034807ab86d8a2aadda",
         }

@@ -113,6 +113,7 @@ def apperture_user_response():
             email="test@email.com",
             picture="https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
             slackChannel="#alerts",
+            hasVisitedSheets=False,
         )
     )
 
@@ -1499,6 +1500,7 @@ def saved_segment_with_user():
                 "email": "test@email.com",
                 "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
                 "slackChannel": "#alerts",
+                "hasVisitedSheets": False,
             },
         }
     ]
