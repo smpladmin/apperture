@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState , useRef} from 'react';
 import WorkbookHeader from './components/Header';
 import {
   getTransientSpreadsheets,
@@ -48,6 +48,7 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import AIButton from '@components/AIButton';
 import Coachmarks from './components/Coachmarks';
 import { AppertureUser } from '@lib/domain/user';
+import { ArrowsInLineVertical } from 'phosphor-react';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -732,6 +733,46 @@ const Workbook = ({
     return connectionSource?.fields || [];
   }, [connections, selectedSheetIndex, sheetsData]);
 
+  const [isDragging, setIsDragging] = useState(false);
+  const [startY, setStartY] = useState(0);
+  const [startHeight, setStartHeight] = useState(200);
+  const editorRef = useRef(null);
+  useEffect(() => {
+    if (editorRef.current) {
+      setStartHeight(editorRef.current.offsetHeight);
+    }
+  }, [editorRef]);
+
+  const handleMouseDown = (event) => {
+    setIsDragging(true);
+    setStartY(event.clientY);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (event) => {
+    if (isDragging) {
+      const newHeight = startHeight + (event.clientY - startY);
+      if (newHeight > 0) {
+        setStartHeight(newHeight);
+        setStartY(event.clientY);
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [isDragging]);
+
+
   return (
     <>
       <Flex direction={'column'}>
@@ -771,12 +812,22 @@ const Workbook = ({
 
           <Box h={'full'} w={'full'} overflowY={'auto'}>
             {showSqlEditor ? (
-              <QueryEditor
-                sheetsData={sheetsData}
-                selectedSheetIndex={selectedSheetIndex}
-                setShowSqlEditor={setShowSqlEditor}
-                setSheetsData={setSheetsData}
-              />
+              <Box  alignItems={'center'} justifyContent={'center'}>
+                  <QueryEditor
+                    sheetsData={sheetsData}
+                    selectedSheetIndex={selectedSheetIndex}
+                    setShowSqlEditor={setShowSqlEditor}
+                    setSheetsData={setSheetsData}
+                    height={`${startHeight}px`}
+                  />
+                  <div
+                        className="drag-handle"
+                        onMouseDown={handleMouseDown}
+                      >
+                      <ArrowsInLineVertical size={20} color='#bebebe'/>
+                  </div>
+              </Box>
+                   
             ) : null}
             {showEmptyState ? (
               <EmptySheet
