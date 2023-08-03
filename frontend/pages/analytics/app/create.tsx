@@ -128,7 +128,7 @@ const Create = () => {
               >
                 I agree to the{' '}
                 <Link
-                  href="https://apperture.io/user-agreement"
+                  href="https://apperture.io/end-user-agreement"
                   textDecoration="underline"
                 >
                   {' '}
