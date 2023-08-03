@@ -8,6 +8,7 @@ import {
 } from '@lib/services/workbookService';
 import { useRouter } from 'next/router';
 import {
+  AIQuery,
   ColumnType,
   SheetType,
   SpreadSheetColumn,
@@ -17,13 +18,7 @@ import {
   TransientSheetData,
   Workbook,
 } from '@lib/domain/workbook';
-import {
-  Box,
-  Flex,
-  useDisclosure,
-  usePrevious,
-  useToast,
-} from '@chakra-ui/react';
+import { Box, Flex, usePrevious, useToast } from '@chakra-ui/react';
 import SidePanel from './components/SidePanel';
 import Grid from '@components/Workbook/components/Grid/Grid';
 import Footer from '@components/Workbook/components/Footer';
@@ -35,6 +30,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import {
   evaluateExpression,
   expressionTokenRegex,
+  findConnectionById,
   getSubheaders,
   isOperand,
   isSheetPivotOrBlank,
@@ -57,6 +53,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
         dsId: '',
         selectedColumns: [],
       },
+      aiQuery: sheet?.ai_query,
     }));
   }
   return [
@@ -73,6 +70,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
         dsId: '',
         selectedColumns: [],
       },
+      aiQuery: undefined,
     },
   ];
 };
@@ -113,14 +111,15 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     loading: false,
     data: null,
   });
+  const [loadingConnections, setLoadingConnections] = useState(false);
 
   const prevSheetsData = usePrevious(sheetsData);
 
-  const {
-    isOpen: showSelectSheetOverlay,
-    onOpen: openSelectSheetOverlay,
-    onClose: closeSelectSheetOverlay,
-  } = useDisclosure({ defaultIsOpen: savedWorkbook ? false : true });
+  // const {
+  //   isOpen: showSelectSheetOverlay,
+  //   onOpen: openSelectSheetOverlay,
+  //   onClose: closeSelectSheetOverlay,
+  // } = useDisclosure({ defaultIsOpen: savedWorkbook ? false : true });
   const toast = useToast();
   const router = useRouter();
   const { dsId, workbookId } = router.query;
@@ -141,7 +140,10 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     const fetchConnections = async () => {
       const res = await getConnectionsForApp(dsId as string);
       setConnections(res);
+      setLoadingConnections(false);
     };
+
+    setLoadingConnections(true);
     fetchConnections();
   }, [dsId]);
 
@@ -149,12 +151,15 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     // update empty sheet based on sheet query and its type
     const sheet = sheetsData[selectedSheetIndex];
     const isSheetEmpty = !(
-      sheet?.query || sheet?.sheet_type === SheetType.PIVOT_SHEET
+      sheet?.query ||
+      sheet?.aiQuery?.nlQuery ||
+      sheet?.sheet_type === SheetType.PIVOT_SHEET
     );
     setShowEmptyState(isSheetEmpty);
   }, [
     sheetsData[selectedSheetIndex]?.query,
     sheetsData[selectedSheetIndex]?.sheet_type,
+    sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery,
   ]);
 
   const fetchTransientSheetData = async (abortController?: AbortController) => {
@@ -165,7 +170,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       sheet?.meta?.dsId || (dsId as string),
       sheet.query,
       sheet?.is_sql,
-      sheet.word_replacements,
+      sheet.aiQuery,
       abortController?.signal
     );
 
@@ -173,6 +178,15 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       const toUpdateSheets = cloneDeep(sheetsData);
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
       toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
+      toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
+      if (!sheet.is_sql) {
+        const query =
+          toUpdateSheets[selectedSheetIndex].aiQuery || ({} as AIQuery);
+        toUpdateSheets[selectedSheetIndex].aiQuery = {
+          ...query,
+          sql: response?.data?.sql,
+        };
+      }
       setSheetsData(toUpdateSheets);
     } else if (!sheet.is_sql) {
       toast({
@@ -190,10 +204,11 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     const prevSheet = prevSheetsData?.[selectedSheetIndex];
 
     const isSqlSheet = sheet?.is_sql;
-    const hasDifferentQuery = sheet.query !== prevSheet?.query;
+    const hasSameQuery = isSqlSheet
+      ? sheet.query === prevSheet?.query
+      : isEqual(sheet?.aiQuery, prevSheet?.aiQuery);
     const hasEditMode = sheet?.edit_mode;
-
-    if ((isSqlSheet && (!sheet.query || hasEditMode)) || !hasDifferentQuery) {
+    if ((isSqlSheet && (!sheet.query || hasEditMode)) || hasSameQuery) {
       return;
     }
 
@@ -205,7 +220,8 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
     };
   }, [
     sheetsData[selectedSheetIndex]?.query,
-    JSON.stringify(sheetsData[selectedSheetIndex]?.word_replacements),
+    sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery,
+    JSON.stringify(sheetsData[selectedSheetIndex]?.aiQuery?.wordReplacements),
     triggerSheetFetch,
   ]);
 
@@ -220,7 +236,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         edit_mode: sheet.edit_mode,
         meta: sheet.meta,
         sheet_type: sheet.sheet_type,
-        word_replacements: sheet.word_replacements,
+        aiQuery: sheet.aiQuery,
       };
     });
 
@@ -301,7 +317,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         dsId as string,
         selectedSheet.query,
         selectedSheet.is_sql,
-        selectedSheet.word_replacements
+        selectedSheet.aiQuery
       );
       let queriedData = res?.data?.data;
 
@@ -450,7 +466,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       } else {
         const currentSheet = sheetsData[selectedSheetIndex];
         const header = currentSheet.headers[operandsIndex[index]];
-        const valueList = currentSheet.data.map((item) => item[header.name]);
+        const valueList = currentSheet.data.map(
+          (item) => item[header?.name]?.original || ''
+        );
         lookupTable[operand] = valueList;
       }
     });
@@ -534,7 +552,10 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
       selectedSheetIndex
     ].data.map((item, index) => ({
       ...item,
-      [header.name]: evaluatedData[index] || '',
+      [header.name]: {
+        original: evaluatedData[index] || '',
+        display: evaluatedData[index] || '',
+      },
     }));
 
     setSheetsData(tempSheetsData);
@@ -615,7 +636,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         );
       } else {
         const header = headers[operandsIndex[index]];
-        const valueList = queriedData.map((item) => item[header.name]);
+        const valueList = queriedData.map(
+          (item) => item[header?.name]?.original || ''
+        );
         lookupTable[operand] = valueList;
       }
     });
@@ -630,7 +653,10 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   ) => {
     queriedData = queriedData.map((item: any, index: number) => ({
       ...item,
-      [header.name]: data[index],
+      [header.name]: {
+        original: data[index] || '',
+        display: data[index] || '',
+      },
     }));
     return queriedData;
   };
@@ -687,18 +713,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
   };
 
   const getProperties = useMemo(() => {
-    const datasourceId =
-      sheetsData[selectedSheetIndex]?.meta?.dsId || (dsId as string);
-    for (let connection of connections) {
-      for (let connectionGroup of connection.connection_data) {
-        for (let connectionSource of connectionGroup.connection_source) {
-          if (connectionSource.datasource_id === datasourceId) {
-            return connectionSource.fields;
-          }
-        }
-      }
-    }
-    return [];
+    const sourceId = sheetsData[selectedSheetIndex]?.meta?.selectedSourceId;
+    const connectionSource = findConnectionById(connections, sourceId);
+    return connectionSource?.fields || [];
   }, [connections, selectedSheetIndex, sheetsData]);
 
   return (
@@ -715,7 +732,7 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
         h={'full'}
         overflow={showEmptyState ? 'hidden' : 'auto'}
       >
-        {showSelectSheetOverlay ? (
+        {/* {showSelectSheetOverlay ? (
           <SelectSheet
             closeSelectSheetOverlay={closeSelectSheetOverlay}
             sheetsData={sheetsData}
@@ -723,8 +740,9 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             selectedSheetIndex={selectedSheetIndex}
             setSelectedSheetIndex={setSelectedSheetIndex}
           />
-        ) : null}
+        ) : null} */}
         <SidePanel
+          loadingConnections={loadingConnections}
           showColumns={showColumns}
           setShowColumns={setShowColumns}
           connections={connections}
@@ -746,7 +764,11 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
             />
           ) : null}
           {showEmptyState ? (
-            <EmptySheet />
+            <EmptySheet
+              tableSelected={
+                !!sheetsData[selectedSheetIndex]?.meta?.selectedTable
+              }
+            />
           ) : (
             <Box overflow={'auto'} h={'full'} pb={'8'}>
               {hasQueryWithoutData ? (
@@ -760,17 +782,18 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
                 </Flex>
               ) : (
                 <Grid
-                  sheetData={sheetsData[selectedSheetIndex]}
+                  sheetsData={sheetsData}
                   selectedSheetIndex={selectedSheetIndex}
                   evaluateFormulaHeader={evaluateFormulaHeader}
                   addDimensionColumn={addDimensionColumn}
                   properties={getProperties}
+                  setSheetsData={setSheetsData}
                 />
               )}
             </Box>
           )}
           <Footer
-            openSelectSheetOverlay={openSelectSheetOverlay}
+            openSelectSheetOverlay={() => {}}
             selectedSheetIndex={selectedSheetIndex}
             setSelectedSheetIndex={setSelectedSheetIndex}
             setSheetsData={setSheetsData}
@@ -780,30 +803,46 @@ const Workbook = ({ savedWorkbook }: { savedWorkbook?: Workbook }) => {
           />
         </Box>
       </Flex>
-      <AIButton
-        query={
-          !sheetsData[selectedSheetIndex]?.is_sql
-            ? sheetsData[selectedSheetIndex]?.query
-            : ''
-        }
-        zIndex={1}
-        position={'fixed'}
-        right={5}
-        bottom={13}
-        properties={getProperties}
-        wordReplacements={sheetsData[selectedSheetIndex].word_replacements}
-        loading={fetchingTransientSheet}
-        onQuery={(updatedQuery, wordReplacements) => {
-          const sheetsCopy = cloneDeep(sheetsData);
-          sheetsCopy[selectedSheetIndex].is_sql = false;
-          sheetsCopy[selectedSheetIndex].query = updatedQuery;
-          sheetsCopy[selectedSheetIndex].word_replacements = wordReplacements;
-          sheetsCopy[selectedSheetIndex].edit_mode = true;
-          sheetsCopy[selectedSheetIndex].sheet_type = SheetType.SIMPLE_SHEET;
-          setSheetsData(sheetsCopy);
-          setTriggerSheetFetch(triggerSheetFetch + 1);
-        }}
-      />
+      {sheetsData[selectedSheetIndex]?.meta?.selectedTable && (
+        <AIButton
+          query={
+            !sheetsData[selectedSheetIndex]?.is_sql
+              ? sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery
+              : ''
+          }
+          zIndex={1}
+          position={'fixed'}
+          right={5}
+          bottom={13}
+          properties={getProperties}
+          wordReplacements={
+            sheetsData[selectedSheetIndex]?.aiQuery?.wordReplacements
+          }
+          loading={fetchingTransientSheet}
+          onQuery={(updatedQuery, wordReplacements) => {
+            const sheetsCopy = cloneDeep(sheetsData);
+            sheetsCopy[selectedSheetIndex].is_sql = false;
+            let query =
+              sheetsCopy[selectedSheetIndex].aiQuery || ({} as AIQuery);
+            query = {
+              ...query,
+              nlQuery: updatedQuery,
+              wordReplacements,
+              sql: '',
+              table:
+                sheetsCopy[selectedSheetIndex]?.meta?.selectedTable || 'events',
+              database:
+                sheetsCopy[selectedSheetIndex]?.meta?.selectedDatabase ||
+                'default',
+            };
+            sheetsCopy[selectedSheetIndex].aiQuery = query;
+            sheetsCopy[selectedSheetIndex].edit_mode = true;
+            sheetsCopy[selectedSheetIndex].sheet_type = SheetType.SIMPLE_SHEET;
+            setSheetsData(sheetsCopy);
+            setTriggerSheetFetch(triggerSheetFetch + 1);
+          }}
+        />
+      )}
     </Flex>
   );
 };

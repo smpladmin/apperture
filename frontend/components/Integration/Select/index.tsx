@@ -8,14 +8,14 @@ import {
   SimpleGrid,
   Button,
 } from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import 'remixicon/fonts/remixicon.css';
 import gaLogo from '@assets/images/ga-logo-small.svg';
 import mixpanelLogo from '@assets/images/mixPanel-icon.png';
 import amplitudeLogo from '@assets/images/amplitude-icon.png';
 import clevertapLogo from '@assets/images/clevertap-icon.png';
-import appertureLogo from '@assets/images/apperture-logo.svg';
+import appertureLogo from '@assets/images/apperture-logo-new-small.svg';
 import apilogo from '@assets/images/apilogo.png';
 import mysqlLogo from '@assets/images/mysql-icon.png';
 import csvLogo from '@assets/images/csv.svg';
@@ -29,15 +29,36 @@ import {
   IntegrationContainer,
   LeftContainer,
   RightContainer,
-  LeftContainerRevisit
+  LeftContainerRevisit,
 } from '@components/Onboarding';
+import { AppWithIntegrations } from '@lib/domain/app';
 
-const SelectProvider = () => {
+const SelectProvider = ({ apps }: { apps: Array<AppWithIntegrations> }) => {
   const [provider, setProvider] = useState<string>('');
+  const [sampleDsId, setSampleDsId] = useState<string | null>(null);
   const router = useRouter();
   const { appId, add, previousDsId } = router.query;
 
   const handleGoBack = (): void => router.back();
+
+  const getSampleDsId = () => {
+    if (apps) {
+      for (let app of apps) {
+        for (let integration of app.integrations) {
+          for (let ds of integration.datasources) {
+            if (ds.provider === Provider.SAMPLE) {
+              return ds._id;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    setSampleDsId(getSampleDsId());
+  }, [apps]);
 
   const handleClose = () =>
     router.push({
@@ -85,35 +106,65 @@ const SelectProvider = () => {
     });
   };
 
+  const exploreSample = () => {
+    const sampleDsId = getSampleDsId();
+    router.replace({
+      pathname: '/analytics/workbook/create/[dsId]',
+      query: {
+        dsId: sampleDsId,
+        selectProvider: Provider.SAMPLE,
+      },
+    });
+  };
+
   return (
-    <IntegrationContainer >
-      
-        { add ? <LeftContainerRevisit/> : <LeftContainer /> }
-     
+    <IntegrationContainer>
+      {add ? <LeftContainerRevisit /> : <LeftContainer />}
+
       <RightContainer>
-          <Flex flexDirection="column" alignItems="center">
-            { add ? <Box mt={10}></Box> : <TopProgress handleGoBack={handleGoBack} /> }
+        <Flex flexDirection="column" alignItems="center">
+          {add ? (
+            <Flex flexDirection="column" alignItems="flex-start" w={'full'}>
+              <IconButton
+                aria-label="Go back"
+                icon={<i className="ri-arrow-left-line" />}
+                color="grey.800"
+                bg="transparent"
+                fontSize="sh-20"
+                fontWeight="100"
+                pl={12}
+                pt={5}
+                _hover={{
+                  bg: 'white', // Change hover color to white
+                }}
+                onClick={handleGoBack}
+              />
+            </Flex>
+          ) : (
+            <TopProgress handleGoBack={handleGoBack} />
+          )}
 
-            <Box width={120} mt={10}>
-              <Heading
-                as="h3"
-                fontSize="sh-24"
-                fontWeight="bold"
-                mb={3}
-                textAlign="center"
-              >
-                Connect to a datasource
-              </Heading>
-              <Text
-                fontSize={'xs-12'}
-                textAlign="center"
-                color="grey.500"
-                fontWeight="normal"
-              >
-                Choose from our list of connectors, or just upload a CSV file{' '}
-              </Text>
-            </Box>
+          <Box width={120} mt={10}>
+            <Heading
+              as="h3"
+              fontSize="sh-24"
+              fontWeight="bold"
+              mb={3}
+              textAlign="center"
+            >
+              Connect to a datasource
+            </Heading>
+            <Text
+              fontSize={'xs-12'}
+              textAlign="center"
+              color="grey.500"
+              fontWeight="normal"
+            >
+              Choose from our list of connectors, or just upload a CSV file{' '}
+            </Text>
+          </Box>
 
+          <Box width={'80%'} mb={'10'} mt="10">
             <Box
               borderWidth="1px"
               borderColor="gray.300"
@@ -125,9 +176,11 @@ const SelectProvider = () => {
               mt={10}
               onClick={handleCSVUploadClick}
               cursor={'pointer'}
+              mb={10}
             >
               <FileArrowUp size={30} color="#212121" />
-              <Box flex="1" minW="150" pl={2}>
+
+              <Box flex="1" minW="350" pl={2}>
                 <Text fontSize="xs-14" fontWeight="semibold" color="gray.900">
                   Upload a CSV
                 </Text>
@@ -147,61 +200,61 @@ const SelectProvider = () => {
               />
             </Box>
 
-            <Box width={'80%'} mb={'10'} mt="10">
-              <RadioGroup value={provider} onChange={setProvider}>
-                <SimpleGrid columns={4} spacing={2}>
-                  <IntegrationSource
-                    sourceName="Apperture"
-                    value={Provider.APPERTURE}
-                    imgSrc={appertureLogo}
-                    selected={provider === Provider.APPERTURE}
-                  />
-                  <IntegrationSource
-                    sourceName="MySQL"
-                    value={Provider.MYSQL}
-                    imgSrc={mysqlLogo}
-                    selected={provider === Provider.MYSQL}
-                  />
-                  <IntegrationSource
-                    sourceName="MixPanel"
-                    value={Provider.MIXPANEL}
-                    imgSrc={mixpanelLogo}
-                    selected={provider === Provider.MIXPANEL}
-                  />
-                  <IntegrationSource
-                    sourceName="Amplitude"
-                    value={Provider.AMPLITUDE}
-                    imgSrc={amplitudeLogo}
-                    selected={provider === Provider.AMPLITUDE}
-                  />
-                  <IntegrationSource
-                    sourceName="Clevertap"
-                    value={Provider.CLEVERTAP}
-                    imgSrc={clevertapLogo}
-                    selected={provider === Provider.CLEVERTAP}
-                  />
-                  <IntegrationSource
+            <RadioGroup value={provider} onChange={setProvider}>
+              <SimpleGrid columns={4} spacing={2}>
+                <IntegrationSource
+                  sourceName="Apperture"
+                  value={Provider.APPERTURE}
+                  imgSrc={appertureLogo}
+                  selected={provider === Provider.APPERTURE}
+                />
+                <IntegrationSource
+                  sourceName="MySQL"
+                  value={Provider.MYSQL}
+                  imgSrc={mysqlLogo}
+                  selected={provider === Provider.MYSQL}
+                />
+                <IntegrationSource
+                  sourceName="MixPanel"
+                  value={Provider.MIXPANEL}
+                  imgSrc={mixpanelLogo}
+                  selected={provider === Provider.MIXPANEL}
+                />
+                <IntegrationSource
+                  sourceName="Amplitude"
+                  value={Provider.AMPLITUDE}
+                  imgSrc={amplitudeLogo}
+                  selected={provider === Provider.AMPLITUDE}
+                />
+                <IntegrationSource
+                  sourceName="Clevertap"
+                  value={Provider.CLEVERTAP}
+                  imgSrc={clevertapLogo}
+                  selected={provider === Provider.CLEVERTAP}
+                />
+                {/*<IntegrationSource
                     sourceName="Google Analytics"
                     value={Provider.GOOGLE}
                     imgSrc={gaLogo}
                     selected={provider === Provider.GOOGLE}
-                  />
-                  <IntegrationSource
-                    sourceName="Connect an API"
-                    value={Provider.API}
-                    imgSrc={apilogo}
-                    selected={provider === Provider.API}
-                  />
-                  <IntegrationSource
+                  />*/}
+                <IntegrationSource
+                  sourceName="Connect an API"
+                  value={Provider.API}
+                  imgSrc={apilogo}
+                  selected={provider === Provider.API}
+                />
+                <IntegrationSource
                   sourceName="CSV"
                   value={Provider.CSV}
                   imgSrc={csvLogo}
                   selected={provider === Provider.CSV}
                 />
-                </SimpleGrid>
-              </RadioGroup>
-            </Box>
+              </SimpleGrid>
+            </RadioGroup>
+          </Box>
 
+          {sampleDsId && (
             <Button
               variant="primary"
               mt={6}
@@ -217,32 +270,33 @@ const SelectProvider = () => {
               _hover={{
                 bg: 'white',
               }}
+              onClick={exploreSample}
             >
               Explore a Sample Dataset
             </Button>
+          )}
 
-            <Button
-              data-testid={'next-button'}
-              variant="primary"
-              mt={6}
-              mb={1}
-              rounded="lg"
-              bg="black.100"
-              p={6}
-              fontSize="base"
-              fontWeight="semibold"
-              lineHeight="base"
-              textColor="white.100"
-              width={{ base: 'full', md: '72' }}
-              disabled={!provider}
-              onClick={handleNextClick}
-            >
-              Next
-            </Button>
-          </Flex>
-</RightContainer>
+          <Button
+            data-testid={'next-button'}
+            variant="primary"
+            mt={6}
+            mb={1}
+            rounded="lg"
+            bg="black.100"
+            p={6}
+            fontSize="base"
+            fontWeight="semibold"
+            lineHeight="base"
+            textColor="white.100"
+            width={{ base: 'full', md: '72' }}
+            disabled={!provider}
+            onClick={handleNextClick}
+          >
+            Next
+          </Button>
+        </Flex>
+      </RightContainer>
     </IntegrationContainer>
-
   );
 };
 

@@ -9,39 +9,54 @@ import pivots from '@assets/images/Pivot.svg';
 import Homecard from '@components/Home/components/Card';
 import { useRouter } from 'next/router';
 
-const ExploreSection = () => {
+const ExploreSection = ({
+  appId,
+  hasEventTrackingProvider,
+}: {
+  appId: string;
+  hasEventTrackingProvider: boolean;
+}) => {
   const router = useRouter();
   const { dsId } = router.query;
   return (
     <Flex mt={5} justifyContent={'space-between'}>
       <Homecard
-        icon={sheets.src}
+        appId={appId}
+        icon={sheets}
         text={'Sheets'}
         url={`/analytics/workbook/create/${dsId}`}
       />
       <Homecard
-        icon={metrics.src}
+        appId={appId}
+        icon={metrics}
         text={'Metrics'}
         url={`/analytics/metric/create/${dsId}`}
+        disable={!hasEventTrackingProvider}
       />
 
       <Homecard
-        icon={funnels.src}
+        appId={appId}
+        icon={funnels}
         text={'Funnels'}
         url={`/analytics/funnel/create/${dsId}`}
+        disable={!hasEventTrackingProvider}
       />
       <Homecard
-        icon={retentions.src}
+        appId={appId}
+        icon={retentions}
         text={'Retention'}
         url={`/analytics/retention/create/${dsId}`}
+        disable={!hasEventTrackingProvider}
       />
       <Homecard
-        icon={segments.src}
+        appId={appId}
+        icon={segments}
         text={'Segments'}
         url={`/analytics/segment/create/${dsId}`}
+        disable={!hasEventTrackingProvider}
       />
       <Flex pointerEvents={'none'} opacity={'.4'}>
-        <Homecard icon={pivots.src} text={'Pivot'} url={`#`} />
+        <Homecard appId={appId} icon={pivots} text={'Pivot'} url={`#`} />
       </Flex>
     </Flex>
   );

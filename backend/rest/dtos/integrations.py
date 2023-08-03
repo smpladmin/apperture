@@ -1,12 +1,11 @@
 from typing import Optional, Union
 
 from pydantic import BaseModel
+
 from domain.common.models import IntegrationProvider
-from domain.integrations.models import (
-    Credential,
-    Integration,
-)
+from domain.integrations.models import Credential, Integration
 from rest.dtos.datasources import DataSourceResponse
+
 from .model_response import ModelResponse
 
 
@@ -42,6 +41,7 @@ class CreateIntegrationDto(BaseModel):
     apiKey: Union[str, None]
     apiSecret: Union[str, None]
     tableName: Union[str, None]
+    database: Union[str, None]
     mySQLCredential: Union[MySQLCredentialDto, None]
     csvFileId: Union[str, None]
 

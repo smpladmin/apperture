@@ -1,4 +1,5 @@
 export type ConnectionSource = {
+  id: string;
   name: string;
   fields: string[];
   datasource_id: string;

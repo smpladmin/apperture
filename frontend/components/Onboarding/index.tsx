@@ -24,6 +24,10 @@ export const LeftContainerRevisit = (props: BoxProps) => {
   return <Box {...leftContainerStyle}><LeftContainerContentRevisit/></Box>;
 };
 
+export const LeftContainerLogin = (props: BoxProps) => {
+  return <Box {...leftContainerStyle}><LeftContainerContentLogin/></Box>;
+};
+
 export const RightContainer = (props: BoxProps) => {
   return <Box {...rightContainerOuter}>
     <Box {...rightContainerInner}>
@@ -98,7 +102,7 @@ export const LeftContainerContent = () => {
         ml={5}
       >
         {' '}
-        Data analytics on steroids
+        Analytics on steroids
       </Heading>
       <Flex flexDirection="row" alignItems="center" mt={10} ml={5} mr={5}>
         <CheckCircle size={28} color="white" />
@@ -179,6 +183,81 @@ export const LeftContainerContentRevisit = () => {
         Add another Datasource
       </Heading>
       
+    </Flex>
+  );
+};
+
+export const LeftContainerContentLogin = () => {
+  const router = useRouter();
+  return (
+    <Flex flexDirection="column" alignItems="left" justifyContent="start" >
+      <Box
+        mt={5}
+        ml={5}
+        cursor={'pointer'}
+        onClick={() => {
+          router.push({
+            pathname: `/`,
+          });
+        }}
+      >
+        <Image
+          alt="Go"
+          src={logo.src}
+          color={'white'}
+          width={100}
+          height={32}
+        ></Image>
+      </Box>
+      <Heading
+        as="h2"
+        pb={{ base: 8, md: 10 }}
+        fontSize={{ base: 'sh-44', md: 'sh-44' }}
+        lineHeight={{ base: 'sh-24', md: 'sh-44' }}
+        fontWeight="normal"
+        color="white"
+        mt={20}
+        ml={5}
+      >
+        {' '}
+        Analytics on steroids
+      </Heading>
+      <Flex flexDirection="row" alignItems="center" mt={10} ml={5} mr={5}>
+        <CheckCircle size={28} color="white" />
+        <Text
+          fontSize={{ base: 'sh-14', md: 'sh-14' }}
+          lineHeight={{ base: 'sh-18', md: 'sh-18' }}
+          fontWeight="normal"
+          color="grey.700"
+          ml={4}
+        >
+          Simply plug in your data connection and get started.
+        </Text>
+      </Flex>
+      <Flex flexDirection="row" alignItems="center" mt={5} ml={5} mr={5}>
+        <CheckCircle size={28} color="white" />
+        <Text
+          fontSize={{ base: 'sh-14', md: 'sh-14' }}
+          lineHeight={{ base: 'sh-18', md: 'sh-18' }}
+          fontWeight="normal"
+          color="grey.700"
+          ml={4}
+        >
+          Import GBs of data and see blazing fast performance.
+        </Text>
+      </Flex>
+      <Flex flexDirection="row" alignItems="center" mt={5} ml={5} mr={5}>
+        <CheckCircle size={28} color="white" />
+        <Text
+          fontSize={{ base: 'sh-14', md: 'sh-14' }}
+          lineHeight={{ base: 'sh-18', md: 'sh-18' }}
+          fontWeight="normal"
+          color="grey.700"
+          ml={4}
+        >
+          Get access to a sheet interface that doesn’t crash
+        </Text>
+      </Flex>
     </Flex>
   );
 };

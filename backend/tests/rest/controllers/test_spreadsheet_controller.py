@@ -5,8 +5,13 @@ from unittest.mock import ANY, AsyncMock
 import pytest
 from beanie import PydanticObjectId
 
-from domain.apps.models import App
-from domain.spreadsheets.models import ColumnType, SpreadSheetColumn, SpreadsheetType
+from domain.apps.models import App, ClickHouseCredential
+from domain.spreadsheets.models import (
+    ColumnType,
+    SpreadSheetColumn,
+    SpreadsheetType,
+    DatabaseClient,
+)
 
 
 @pytest.mark.asyncio
@@ -30,15 +35,20 @@ async def test_compute_transient_spreadsheets_with_credentials(
             {"index": 4, "event_name": "test_event_4"},
             {"index": 5, "event_name": "test_event_5"},
         ],
+        "sql": "select * from events",
     }
     spreadsheets_service.get_transient_spreadsheets.assert_called_once_with(
         **{
             "query": "SELECT  event_name FROM  events WHERE timestamp>=toDate(2023-02-11)",
-            "username": "test_username",
-            "password": "test_password",
+            "credential": ClickHouseCredential(
+                username="test_username",
+                password="test_password",
+                databasename="test_database",
+            ),
+            "client": DatabaseClient.CLICKHOUSE,
         }
     )
-    datasource_service.get_datasource.assert_called_once_with("23412414123123")
+    datasource_service.get_datasource.assert_called_with("23412414123123")
     datasource_service.create_row_policy_for_datasources_by_app.assert_not_called()
 
     app_service.get_app.assert_called_once_with(
@@ -80,12 +90,17 @@ async def test_compute_transient_spreadsheets(
             {"index": 4, "event_name": "test_event_4"},
             {"index": 5, "event_name": "test_event_5"},
         ],
+        "sql": "select * from events",
     }
     spreadsheets_service.get_transient_spreadsheets.assert_called_with(
         **{
             "query": "SELECT  event_name FROM  events WHERE timestamp>=toDate(2023-02-11)",
-            "username": "test_username",
-            "password": "test_password",
+            "credential": ClickHouseCredential(
+                username="test_username",
+                password="test_password",
+                databasename="test_database",
+            ),
+            "client": DatabaseClient.CLICKHOUSE,
         }
     )
     datasource_service.get_datasource.assert_called_with("23412414123123")
@@ -142,7 +157,7 @@ async def test_get_saved_workbooks(client_init, spreadsheets_service):
                     "edit_mode": True,
                     "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                     "meta": {"dsId": "", "selectedColumns": []},
-                    "word_replacements": [],
+                    "ai_query": None,
                 }
             ],
             "enabled": True,
@@ -186,7 +201,7 @@ async def test_get_saved_workbooks_for_app(client_init, spreadsheets_service):
                     "edit_mode": True,
                     "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                     "meta": {"dsId": "", "selectedColumns": []},
-                    "word_replacements": [],
+                    "ai_query": None,
                 }
             ],
             "enabled": True,
@@ -228,7 +243,7 @@ async def test_get_saved_workbooks_by_user_id(client_init, spreadsheets_service)
                     "edit_mode": True,
                     "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                     "meta": {"dsId": "", "selectedColumns": []},
-                    "word_replacements": [],
+                    "ai_query": None,
                 }
             ],
             "enabled": True,
@@ -267,7 +282,7 @@ async def test_get_saved_workbook_by_id(client_init, spreadsheets_service):
                 "edit_mode": True,
                 "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                 "meta": {"dsId": "", "selectedColumns": []},
-                "word_replacements": [],
+                "ai_query": None,
             }
         ],
         "updatedAt": None,
@@ -302,7 +317,7 @@ async def test_create_workbook(client_init, workbook_data):
                 "edit_mode": True,
                 "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                 "meta": {"dsId": "", "selectedColumns": []},
-                "word_replacements": [],
+                "ai_query": None,
             }
         ],
         "enabled": True,
@@ -336,7 +351,7 @@ async def test_update_workbook(client_init, workbook_data, spreadsheets_service)
                 "edit_mode": True,
                 "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                 "meta": {"dsId": "", "selectedColumns": []},
-                "word_replacements": [],
+                "ai_query": None,
             }
         ],
         "enabled": True,

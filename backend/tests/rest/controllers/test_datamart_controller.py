@@ -1,11 +1,12 @@
 import json
 from datetime import datetime
-from unittest.mock import ANY, AsyncMock
+from unittest.mock import ANY
 
 import pytest
 from beanie import PydanticObjectId
 
-from domain.apps.models import ClickHouseCredential, App
+from domain.apps.models import ClickHouseCredential
+from domain.spreadsheets.models import DatabaseClient
 from tests.utils import filter_response
 
 
@@ -118,9 +119,13 @@ def test_compute_transient_datamart(
 
     spreadsheets_service.get_transient_spreadsheets.assert_called_once_with(
         **{
-            "password": "test_password",
             "query": "select event_name, user_id from events",
-            "username": "test_username",
+            "credential": ClickHouseCredential(
+                username="test_username",
+                password="test_password",
+                databasename="test_database",
+            ),
+            "client": DatabaseClient.CLICKHOUSE,
         }
     )
 

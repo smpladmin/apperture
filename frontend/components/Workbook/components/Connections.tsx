@@ -12,6 +12,7 @@ import {
   InputGroup,
   InputLeftElement,
   useDisclosure,
+  Skeleton,
 } from '@chakra-ui/react';
 import React, { Fragment, useEffect, useState } from 'react';
 import APIIcon from '@assets/images/api.svg';
@@ -35,6 +36,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { getSubheaders } from '../util';
 
 type ConnectionsProps = {
+  loadingConnections: boolean;
   connections: Connection[];
   sheetsData: TransientSheetData[];
   setSheetsData: Function;
@@ -45,6 +47,7 @@ type ConnectionsProps = {
 };
 
 const Connections = ({
+  loadingConnections,
   connections,
   sheetsData,
   setSheetsData,
@@ -64,7 +67,7 @@ const Connections = ({
       mysql: DatabaseIcon,
       csv: CSVIcon,
     };
-    return icons[connectionName];
+    return icons[connectionName] || DatabaseIcon;
   };
   const { isOpen, onOpen, onClose } = useDisclosure();
   const sheetData = sheetsData[selectedSheetIndex];
@@ -72,25 +75,28 @@ const Connections = ({
   const [canditate, setCandidate] = useState<{
     confirmation: boolean;
     dsId: string;
+    sourceId: string;
   }>({
     confirmation: false,
     dsId: '',
+    sourceId: '',
   });
 
   const handleConnectionSelect = (
     connectionData: any,
     heirarchy: string[],
-    currentSelectedDsId: string
+    currentSelectedDsId: string,
+    currentSelectedSourceId: string
   ) => {
     /*
       open confirmation modal when switching to different connection when sheet is not in edit mode.
       Note: initally dsId would be empty, in that case show connectorColumns directly
     */
-    const lastSelectedDsId = sheetData?.meta?.dsId;
+    const lastSelectedSourceId = sheetData?.meta?.selectedSourceId;
     if (
-      lastSelectedDsId &&
+      lastSelectedSourceId &&
       !sheetData.edit_mode &&
-      lastSelectedDsId !== currentSelectedDsId
+      lastSelectedSourceId !== currentSelectedSourceId
     ) {
       onOpen();
     } else {
@@ -98,6 +104,8 @@ const Connections = ({
       setSheetsData((prevSheetData: TransientSheetData[]) => {
         const tempSheetsData = cloneDeep(prevSheetData);
         tempSheetsData[selectedSheetIndex].meta!!.dsId = currentSelectedDsId;
+        tempSheetsData[selectedSheetIndex].meta!!.selectedSourceId =
+          currentSelectedSourceId;
         return tempSheetsData;
       });
     }
@@ -105,6 +113,7 @@ const Connections = ({
     setCandidate((prevCandidate) => ({
       ...prevCandidate,
       dsId: currentSelectedDsId,
+      sourceId: currentSelectedSourceId,
     }));
     setConnectorData({ ...connectionData, heirarchy });
     setShowSqlEditor(false);
@@ -136,6 +145,9 @@ const Connections = ({
         tempSheetsData[selectedSheetIndex].meta = {
           dsId: canditate.dsId,
           selectedColumns: [],
+          selectedTable: '',
+          selectedDatabase: '',
+          selectedSourceId: canditate.sourceId,
         };
         tempSheetsData[selectedSheetIndex].data = [];
         tempSheetsData[selectedSheetIndex].headers = [];
@@ -174,6 +186,19 @@ const Connections = ({
             disabled={true}
           />
         </InputGroup>
+        {loadingConnections ? (
+          <Flex direction={'column'} gap={'6'} p={'4'}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton
+                key={i}
+                height={'4'}
+                fadeDuration={1}
+                bg={'white.400'}
+                opacity={'0.3'}
+              />
+            ))}
+          </Flex>
+        ) : null}
         {connections.map((connection) => {
           const { server, connection_data } = connection;
 
@@ -181,10 +206,13 @@ const Connections = ({
             <Flex direction={'column'} key={server} overflow={'auto'}>
               <Flex alignItems={'center'} py={'2'} px={'3'} mt={'3'}>
                 <Text
+                  as={'span'}
                   fontSize={'xs-12'}
                   lineHeight={'xs-12'}
                   fontWeight={'500'}
                   color={'grey.600'}
+                  whiteSpace={'nowrap'}
+                  mr={1}
                 >
                   {server}
                 </Text>
@@ -224,59 +252,47 @@ const Connections = ({
                             <AccordionIcon />
                           </AccordionButton>
                           <AccordionPanel p={0}>
-                            {connection_source
-                              .slice(0, 5)
-                              .map(
-                                (source: ConnectionSource, index: number) => {
-                                  const heirarchy = [
-                                    server,
-                                    provider,
-                                    source.name,
-                                  ];
-                                  const currentSelectedDsId =
-                                    source.datasource_id;
-                                  return (
-                                    <Flex
-                                      key={source.name + index}
-                                      px={'3'}
-                                      py={'2'}
-                                      gap={'2'}
-                                      cursor={'pointer'}
-                                      _hover={{ bg: 'white.200' }}
-                                      borderRadius={'8'}
-                                      onClick={() => {
-                                        handleConnectionSelect(
-                                          source,
-                                          heirarchy,
-                                          currentSelectedDsId
-                                        );
-                                      }}
+                            {connection_source.map(
+                              (source: ConnectionSource, index: number) => {
+                                const heirarchy = [
+                                  server,
+                                  provider,
+                                  source.name,
+                                ];
+                                const currentSelectedDsId =
+                                  source.datasource_id;
+                                const currentSelectedSourceId = source.id;
+                                return (
+                                  <Flex
+                                    key={source.name + index}
+                                    px={'3'}
+                                    py={'2'}
+                                    gap={'2'}
+                                    cursor={'pointer'}
+                                    _hover={{ bg: 'white.200' }}
+                                    borderRadius={'8'}
+                                    onClick={() => {
+                                      handleConnectionSelect(
+                                        source,
+                                        heirarchy,
+                                        currentSelectedDsId,
+                                        currentSelectedSourceId
+                                      );
+                                    }}
+                                  >
+                                    <Table size={16} weight="thin" />
+                                    <Text
+                                      fontSize={'xs-12'}
+                                      lineHeight={'xs-12'}
+                                      fontWeight={'500'}
+                                      color={'grey.900'}
                                     >
-                                      <Table size={16} weight="thin" />
-                                      <Text
-                                        fontSize={'xs-12'}
-                                        lineHeight={'xs-12'}
-                                        fontWeight={'500'}
-                                        color={'grey.900'}
-                                      >
-                                        {source.name}
-                                      </Text>
-                                    </Flex>
-                                  );
-                                }
-                              )}
-                            {connection_source.length > 5 ? (
-                              <Text
-                                fontSize={'xs-10'}
-                                lineHeight={'xs-10'}
-                                fontWeight={'500'}
-                                color={'black.DEFAULT'}
-                                ml={'9'}
-                                mt={'2'}
-                              >
-                                {`+ ${connection_source.length - 5} more`}
-                              </Text>
-                            ) : null}
+                                      {source.name}
+                                    </Text>
+                                  </Flex>
+                                );
+                              }
+                            )}
                           </AccordionPanel>
                         </AccordionItem>
                       </Fragment>
@@ -292,7 +308,7 @@ const Connections = ({
         isOpen={isOpen}
         onClose={handleClose}
         headerText="Do you want to switch connection?"
-        subHeaderText="After changing connection, you will lose all your previous data. Do you want to continue?"
+        subHeaderText="Continuing will clear the current sheet."
         onSubmit={handleSubmit}
       />
     </>

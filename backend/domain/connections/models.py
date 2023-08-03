@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from beanie import PydanticObjectId
 from pydantic import BaseModel
@@ -7,7 +7,7 @@ from pydantic import BaseModel
 class ConnectionSource(BaseModel):
     name: str
     fields: List[str]
-    datasource_id: PydanticObjectId
+    datasource_id: Optional[PydanticObjectId]
     table_name: str
     database_name: str
 

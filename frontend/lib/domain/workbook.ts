@@ -9,11 +9,22 @@ export type TransientSheetData = {
   is_sql?: boolean;
   sheet_type?: SheetType;
   edit_mode?: boolean;
+  aiQuery?: AIQuery;
   meta?: {
     dsId: string;
     selectedColumns: string[];
+    selectedTable: string;
+    selectedDatabase: string;
+    selectedSourceId: string;
   };
-  word_replacements?: Array<WordReplacement>;
+};
+
+export type AIQuery = {
+  nlQuery: string;
+  wordReplacements: Array<WordReplacement>;
+  sql?: string;
+  table: string;
+  database: string;
 };
 
 export type WordReplacement = { word: string; replacement: string };
@@ -53,6 +64,7 @@ export type Spreadsheet = {
   query: string;
   edit_mode?: boolean;
   meta?: any;
+  ai_query?: AIQuery;
 };
 
 export type Workbook = {

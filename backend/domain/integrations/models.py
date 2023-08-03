@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Optional
+
 from beanie import Indexed, PydanticObjectId
 from pydantic import BaseModel, Field
 

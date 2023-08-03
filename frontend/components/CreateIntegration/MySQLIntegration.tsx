@@ -1,36 +1,32 @@
+import mysqlLogo from '@assets/images/mysql-icon.png';
 import {
   Box,
   Button,
-  chakra,
   Checkbox,
   Flex,
   Heading,
-  IconButton,
   Input,
   Text,
-  useToast,
+  useToast
 } from '@chakra-ui/react';
-import mysqlLogo from '@assets/images/mysql-icon.png';
-import Image from 'next/image';
 import FormButton from '@components/FormButton';
-import { useRouter } from 'next/router';
-import { useState } from 'react';
+import {
+  IntegrationContainer,
+  LeftContainer,
+  LeftContainerRevisit,
+  RightContainer,
+  TopProgress,
+} from '@components/Onboarding';
+import { MySQLCredential } from '@lib/domain/integration';
+import { Provider } from '@lib/domain/provider';
 import {
   createIntegrationWithDataSource,
   testMySQLConnection,
 } from '@lib/services/integrationService';
-import { Provider } from '@lib/domain/provider';
-import { MySQLCredential } from '@lib/domain/integration';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import logo from '@assets/images/AppertureWhiteLogo.svg';
-import onboarding_left_panel from '@assets/images/onboarding_left_panel.svg';
-import {
-  TopProgress,
-  IntegrationContainer,
-  LeftContainer,
-  RightContainer,
-  LeftContainerRevisit,
-} from '@components/Onboarding';
 
 type MySQLIntegrationProps = {
   handleClose: Function;
@@ -43,6 +39,7 @@ type FormData = {
   port: string;
   username: string;
   password: string;
+  table: string;
   overSsh: boolean;
   sshServer: string;
   sshPort: string;
@@ -113,7 +110,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
       undefined,
       undefined,
       undefined,
-      '',
+      data.table,
       mySQLCredential as MySQLCredential
     );
     router.replace({
@@ -153,6 +150,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
       port: '3306',
       username: '',
       password: '',
+      table: '',
       sshServer: '',
       sshPort: '22',
       sshUsername: '',

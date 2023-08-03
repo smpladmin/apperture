@@ -1,3 +1,4 @@
+import { Connection, ConnectionSource } from '@lib/domain/connections';
 import {
   ColumnType,
   SheetType,
@@ -6,11 +7,12 @@ import {
   SubHeaderColumnType,
   TransientSheetData,
 } from '@lib/domain/workbook';
-import { head, range } from 'lodash';
+import { Id } from '@silevis/reactgrid';
+import { cloneDeep, range } from 'lodash';
 
 export const expressionTokenRegex = /[A-Za-z]+|[0-9]+|[\+\*-\/\^\(\)]/g;
 
-const generateOtherColumns = (headers: SpreadSheetColumn[]) => {
+export const generateOtherColumns = (headers: SpreadSheetColumn[]) => {
   return range(headers.length + 1, 27).map((i) => {
     return {
       name: String.fromCharCode(65 + i - 1),
@@ -27,16 +29,17 @@ export const fillRows = (data: any[], headers: SpreadSheetColumn[]) => {
   const gen = range(currentLength + 1, 1001).map((index) => {
     const row: any = {};
     columns.forEach((key) => {
-      row[key.name] = '';
+      row[key.name] = { original: '', display: '' };
     });
-    row['index'] = index;
+    row['index'] = { original: index, display: index };
     return row;
   });
 
-  const dataWitKeys = [...data].map((row) => {
+  const dataWitKeys = cloneDeep(data).map((row) => {
     otherKeys.forEach((key) => {
-      row[key.name] = '';
+      row[key.name] = { original: '', display: '' };
     });
+
     return row;
   });
 
@@ -222,4 +225,148 @@ export const dimensionSubheadersLength = (subheaders: SubHeaderColumn[]) => {
   return subheaders.filter(
     (subheader) => subheader.type === SubHeaderColumnType.DIMENSION
   ).length;
+};
+
+export const findConnectionByDatasourceId = (
+  connections: Connection[],
+  datasourceId?: string,
+  table?: string
+) => {
+  for (const connection of connections) {
+    for (const connectionGroup of connection.connection_data) {
+      for (const connectionSource of connectionGroup.connection_source) {
+        if (
+          connectionSource.datasource_id === datasourceId ||
+          (connectionGroup.provider && connectionSource.table_name === table)
+        ) {
+          return connectionSource;
+        }
+      }
+    }
+  }
+  return {} as ConnectionSource;
+};
+
+export const findConnectionById = (
+  connections: Connection[],
+  sourceId: string | undefined | null
+) => {
+  for (const connection of connections) {
+    for (const connectionGroup of connection.connection_data) {
+      for (const connectionSource of connectionGroup.connection_source) {
+        if (sourceId === connectionSource.id) {
+          return connectionSource;
+        }
+      }
+    }
+  }
+  return {} as ConnectionSource;
+};
+
+export const convertToPercentage = (value: number) =>
+  `${(value * 100).toFixed(2)}%`;
+
+export const getDecimalPlaces = (number: number | string) => {
+  const numberString = number.toString().trim().replace('%', '');
+  const decimalIndex = numberString.indexOf('.');
+  if (decimalIndex === -1 || decimalIndex === numberString.length - 1) {
+    return 0;
+  }
+
+  return numberString.length - decimalIndex - 1;
+};
+
+export const increaseDecimalPlaces = (
+  originalValue: number,
+  formattedValue: number | string
+) => {
+  const decimalPlaces = getDecimalPlaces(formattedValue);
+  const updatedDecimalPlaces = Math.min(decimalPlaces + 1, 10);
+  const updatedValue =
+    typeof formattedValue === 'string' && formattedValue.includes('%')
+      ? `${(originalValue * 100).toFixed(updatedDecimalPlaces)}%`
+      : originalValue.toFixed(updatedDecimalPlaces);
+
+  return updatedValue;
+};
+
+export const decreaseDecimalPlaces = (
+  originalValue: number,
+  formattedValue: number | string
+) => {
+  const decimalPlaces = getDecimalPlaces(formattedValue);
+  const updatedDecimalPlaces = Math.max(decimalPlaces - 1, 0);
+  const updatedValue =
+    typeof formattedValue === 'string' && formattedValue.includes('%')
+      ? `${(originalValue * 100).toFixed(updatedDecimalPlaces)}%`
+      : originalValue.toFixed(updatedDecimalPlaces);
+
+  return updatedValue;
+};
+
+export const convertColumnValuesToPercentage = (
+  columnIds: Id[],
+  columnData: any[]
+): any[] => {
+  return columnData.map((data) => {
+    const toUpdateData = { ...data };
+
+    columnIds.forEach((column) => {
+      if (toUpdateData?.[column]) {
+        const { original } = toUpdateData?.[column];
+        if (typeof original === 'number') {
+          toUpdateData[column] = {
+            original,
+            display: convertToPercentage(original),
+          };
+        }
+      }
+    });
+
+    return toUpdateData;
+  });
+};
+
+export const increaseDecimalPlacesInColumnValues = (
+  columnIds: Id[],
+  columnData: any[]
+): any[] => {
+  return columnData.map((data) => {
+    const toUpdateData = { ...data };
+
+    columnIds.forEach((column) => {
+      if (toUpdateData?.[column]) {
+        const { original, display } = toUpdateData[column];
+        if (typeof original === 'number')
+          toUpdateData[column] = {
+            original,
+            display: increaseDecimalPlaces(original, display),
+          };
+      }
+    });
+
+    return toUpdateData;
+  });
+};
+
+export const decreaseDecimalPlacesInColumnValues = (
+  columnIds: Id[],
+  columnData: any[]
+): any[] => {
+  return columnData.map((data) => {
+    const toUpdateData = { ...data };
+
+    columnIds.forEach((column) => {
+      if (toUpdateData?.[column]) {
+        const { original, display } = toUpdateData[column];
+        if (typeof original === 'number')
+          toUpdateData[column] = {
+            original,
+            display: decreaseDecimalPlaces(original, display),
+          };
+      }
+    });
+
+    return toUpdateData;
+  });
 };

@@ -11,7 +11,7 @@ import { SheetType, TransientSheetData } from '@lib/domain/workbook';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
 import { Eye, PencilSimpleLine, Play } from 'phosphor-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { cloneDeep } from 'lodash';
 import { ErrorResponse } from '@lib/services/util';
 import { getTransientSpreadsheets } from '@lib/services/workbookService';
@@ -36,7 +36,9 @@ const QueryEditor = ({
 }: QueryEditorProps) => {
   const sheetData = sheetsData[selectedSheetIndex];
 
-  const [query, setQuery] = useState(sheetData.query);
+  const [query, setQuery] = useState(
+    sheetData.is_sql ? sheetData.query : sheetData.aiQuery?.sql || ''
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -52,6 +54,10 @@ const QueryEditor = ({
     });
     onClose();
   };
+
+  useEffect(() => {
+    setQuery(sheetData.query);
+  }, [sheetData.query]);
 
   const handleQueryChange = async () => {
     setIsLoading(true);
@@ -85,7 +91,7 @@ const QueryEditor = ({
     <>
       <Box px={'5'} pt={'4'} pb={'5'}>
         <Flex justifyContent={'space-between'} alignItems={'center'}>
-          <Text>Clickhouse</Text>
+          <Text>Query Editor</Text>
           <ButtonGroup size="sm" isAttached variant="outline">
             <Button
               px={'3'}
@@ -195,8 +201,8 @@ const QueryEditor = ({
       <ConfirmationModal
         isOpen={isOpen}
         onClose={onClose}
-        headerText="Do you want to change mode?"
-        subHeaderText="After entering the edit mode, you will lose all your previous data. Do you want to make permanent changes?"
+        headerText="Do you want to chnage the SQL query?"
+        subHeaderText="Note- you will no longer be able to select columns manually."
         onSubmit={handleEditSelection}
       />
     </>

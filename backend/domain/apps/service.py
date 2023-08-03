@@ -48,15 +48,6 @@ class AppService:
             database_name=database_name, username=username
         )
 
-    async def create_sample_tables(
-        self, creds: ClickHouseCredential, user_id: PydanticObjectId
-    ):
-        app_count = await self.get_app_count(user_id)
-        if self.settings.base_sample_tables and app_count == 1:
-            self.clickhouse_role.create_sample_tables(
-                self.settings.base_sample_tables, creds.databasename
-            )
-
     async def create_clickhouse_user(
         self, id: PydanticObjectId, app_name: str
     ) -> ClickHouseCredential:
@@ -88,7 +79,7 @@ class AppService:
         app = App(name=name, user_id=user.id)
         await app.insert()
         creds = await self.create_clickhouse_user(id=app.id, app_name=name)
-        await self.create_sample_tables(creds, user.id)
+        app.clickhouse_credential = creds
         return app
 
     async def get_apps(self, user: AppertureUser) -> List[App]:
@@ -107,6 +98,16 @@ class AppService:
         return await App.find_one(
             App.id == PydanticObjectId(id),
             App.user_id == PydanticObjectId(user_id),
+        )
+
+    async def get_shared_or_owned_app(self, id: str, user_id: str) -> App:
+        uid = PydanticObjectId(user_id)
+        return await App.find_one(
+            App.id == PydanticObjectId(id),
+            Or(
+                App.user_id == uid,
+                In(App.shared_with, [uid]),
+            ),
         )
 
     async def share_app(self, id: str, owner_id: str, user: AppertureUser):

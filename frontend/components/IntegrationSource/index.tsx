@@ -1,4 +1,3 @@
-//source
 import { Flex, Radio, Text } from '@chakra-ui/react';
 import Image, { StaticImageData } from 'next/image';
 import React from 'react';
@@ -43,7 +42,7 @@ const IntegrationSource = ({
           width={'7'}
           height={'7'}
           rounded={'full'}
-          borderColor={'white.200'}
+          borderColor={'white'}
           alignItems={'center'}
           justifyContent={'center'}
         >

@@ -1,4 +1,4 @@
-import { Spreadsheet, WordReplacement } from '@lib/domain/workbook';
+import { AIQuery, Spreadsheet, WordReplacement } from '@lib/domain/workbook';
 import {
   AppertureDelete,
   AppertureGet,
@@ -7,25 +7,45 @@ import {
   ApperturePut,
 } from '@lib/services/util';
 
-export const getTransientSpreadsheets = (
+const mapApiResponseToDisplayOriginalFormat = (rows: any[]) => {
+  return rows.map((row) => {
+    const dataKeys = Object.keys(row);
+
+    dataKeys.forEach((key) => {
+      row[key] = { original: row[key], display: row[key] };
+    });
+    return row;
+  });
+};
+
+export const getTransientSpreadsheets = async (
   dsId: string,
   query: string,
   is_sql: boolean = true,
-  word_replacements: Array<WordReplacement> = [],
+  aiQuery?: AIQuery,
   signal?: AbortSignal
 ) => {
-  return ApperturePost(
+  const res = await ApperturePost(
     `/workbooks/spreadsheets/transient`,
     {
       datasourceId: dsId,
       query: query,
       is_sql,
-      word_replacements,
+      ai_query: aiQuery
+        ? {
+            nl_query: aiQuery.nlQuery,
+            word_replacements: aiQuery.wordReplacements,
+            table: aiQuery.table,
+            database: aiQuery.database,
+          }
+        : null,
     },
     {
       signal,
     }
   );
+  const data = mapApiResponseToDisplayOriginalFormat(res.data?.data || []);
+  return { ...res, data: { ...res.data, data } };
 };
 
 export const getSavedWorkbooksForDatasourceId = async (dsId: string) => {
@@ -79,11 +99,14 @@ export const getWorkbookTransientColumn = async (
   database: string,
   table: string
 ) => {
-  return await ApperturePost(`/workbooks/spreadsheets/columns/transient`, {
+  const res = await ApperturePost(`/workbooks/spreadsheets/columns/transient`, {
     datasourceId,
     dimensions,
     metrics,
     database,
     table,
   });
+
+  const data = mapApiResponseToDisplayOriginalFormat(res.data?.data || []);
+  return { ...res, data: { ...res.data, data } };
 };

@@ -21,14 +21,14 @@ import { resetServerContext } from 'react-beautiful-dnd';
 import NextNProgress from 'nextjs-progressbar';
 import { GREY_400 } from '@theme/index';
 import { useRouter } from 'next/router';
-import { APPERTURE_PH_KEY, EVENTS_BACKEND_BASE_URL } from 'config';
+import { APPERTURE_PH_KEY, APPERTURE_EVENTS_URL } from 'config';
 type CustomAppProps = {
   device: Device;
 };
 
 if (typeof window !== 'undefined' && window.posthog && APPERTURE_PH_KEY) {
   window.posthog.init(APPERTURE_PH_KEY, {
-    api_host: `${EVENTS_BACKEND_BASE_URL}/events/capture`,
+    api_host: APPERTURE_EVENTS_URL || 'http://events_consumer/events/capture',
     debug: process.env.NODE_ENV === 'development',
   });
 }
