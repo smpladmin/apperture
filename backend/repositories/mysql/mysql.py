@@ -58,6 +58,7 @@ class MySql(ABC):
                 user=username,
                 password=password,
                 database=database,
+                ssl_verify_identity=True,
             )
             if database
             else pymysql.connect(
@@ -65,6 +66,7 @@ class MySql(ABC):
                 port=int(port),
                 user=username,
                 password=password,
+                ssl_verify_identity=True,
             )
         )
 
