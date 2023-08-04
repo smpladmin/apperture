@@ -733,46 +733,7 @@ const Workbook = ({
     return connectionSource?.fields || [];
   }, [connections, selectedSheetIndex, sheetsData]);
 
-  const [isDragging, setIsDragging] = useState(false);
-  const [startY, setStartY] = useState(0);
-  const [startHeight, setStartHeight] = useState(200);
-  const editorRef = useRef(null);
-  useEffect(() => {
-    if (editorRef.current) {
-      setStartHeight(editorRef.current.offsetHeight);
-    }
-  }, [editorRef]);
-
-  const handleMouseDown = (event) => {
-    setIsDragging(true);
-    setStartY(event.clientY);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseMove = (event) => {
-    if (isDragging) {
-      const newHeight = startHeight + (event.clientY - startY);
-      if (newHeight > 0) {
-        setStartHeight(newHeight);
-        setStartY(event.clientY);
-      }
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('mousemove', handleMouseMove);
-
-    return () => {
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, [isDragging]);
-
-
+  
   return (
     <>
       <Flex direction={'column'}>
@@ -818,14 +779,9 @@ const Workbook = ({
                     selectedSheetIndex={selectedSheetIndex}
                     setShowSqlEditor={setShowSqlEditor}
                     setSheetsData={setSheetsData}
-                    height={`${startHeight}px`}
+                    height={`200px`}
                   />
-                  <div
-                        className="drag-handle"
-                        onMouseDown={handleMouseDown}
-                      >
-                      <ArrowsInLineVertical size={20} color='#bebebe'/>
-                  </div>
+                  
               </Box>
                    
             ) : null}

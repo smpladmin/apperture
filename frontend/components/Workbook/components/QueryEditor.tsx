@@ -26,6 +26,7 @@ type QueryEditorProps = {
   setShowSqlEditor: Function;
   setSheetsData: Function;
   selectedSheetIndex: number;
+  height: string;
 };
 
 const QueryEditor = ({
