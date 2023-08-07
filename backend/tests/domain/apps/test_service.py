@@ -61,7 +61,7 @@ class TestAppService:
         app_id = str(PydanticObjectId())
         owner_id = str(PydanticObjectId())
 
-        app = await service.share_app(app_id, owner_id, self.user)
+        app = await service.share_app(app_id, owner_id, [self.user.id])
 
         App.find_one.assert_awaited_once()
         assert app.shared_with == set([old_shared_user_id, self.user.id])

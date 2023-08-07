@@ -71,6 +71,7 @@ const MultiSelectDropdown = ({
         <Flex gap={'2'} flexWrap={'wrap'}>
           {selectedValues.map((value) => (
             <Flex
+              key={value}
               p={'8px'}
               borderRadius={'4px'}
               bgColor={'white.400'}
@@ -124,6 +125,7 @@ const MultiSelectDropdown = ({
         >
           {suggestions.map((suggestion) => (
             <Flex
+              key={suggestion}
               px={4}
               py={'6px'}
               alignItems={'center'}
