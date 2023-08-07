@@ -1,4 +1,4 @@
-import { Box, Flex, Input, Text } from '@chakra-ui/react';
+import { Avatar, Box, Flex, Input, Text } from '@chakra-ui/react';
 import { AppertureUser } from '@lib/domain/user';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { getSearchResult } from '@lib/utils/common';
@@ -19,7 +19,7 @@ const MultiSelectDropdown = ({
   const dropdownContainerRef = useRef(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<AppertureUser[]>([]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -32,7 +32,10 @@ const MultiSelectDropdown = ({
       value,
       {}
     );
-    setSuggestions(searchResults);
+    const userSuggestions = existingUsers.filter((obj) =>
+      searchResults.includes(obj.email)
+    );
+    setSuggestions(userSuggestions);
   };
 
   const handleRemoveSelectedValue = (value: string) => {
@@ -125,32 +128,37 @@ const MultiSelectDropdown = ({
         >
           {suggestions.map((suggestion) => (
             <Flex
-              key={suggestion}
+              key={suggestion.email}
               px={4}
               py={'6px'}
               alignItems={'center'}
-              gap={'5px'}
+              gap={'12px'}
               cursor={'pointer'}
+              onClick={() => submithandler(suggestion.email)}
             >
-              <PaperPlaneTilt size={16} />
-              <Text
-                color={'grey.900'}
-                fontSize={'xs-12'}
-                fontWeight={400}
-                lineHeight={'lh-135'}
-              >
-                Invite
-              </Text>
-              <Text
-                color={'grey.800'}
-                fontSize={'xs-12'}
-                fontWeight={400}
-                lineHeight={'lh-135'}
-                key={suggestion}
-                onClick={() => submithandler(suggestion)}
-              >
-                {suggestion}
-              </Text>
+              <Avatar
+                name={suggestion.firstName}
+                fontWeight={'bold'}
+                size="sm"
+                textColor={'white'}
+                h={{ base: '8', md: '12' }}
+                w={{ base: '8', md: '12' }}
+                fontSize={{ base: 'xs', md: 'xs-14' }}
+                lineHeight={{ base: 'xs', md: 'xs-14' }}
+              />
+              <Flex direction={'column'}>
+                <Text fontSize={'xs-14'} fontWeight={500} lineHeight={'lh-130'}>
+                  {`${suggestion.firstName} ${suggestion.lastName}`}
+                </Text>
+                <Text
+                  fontSize={'xs-12'}
+                  fontWeight={400}
+                  lineHeight={'lh-135'}
+                  color={'grey.800'}
+                >
+                  {suggestion.email}
+                </Text>
+              </Flex>
             </Flex>
           ))}
         </Box>

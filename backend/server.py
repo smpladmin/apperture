@@ -4,6 +4,8 @@ import os
 from dotenv import load_dotenv
 
 from cache import init_cache
+from domain.apps.models import App
+from mongo_migrations.adding_domain_to_apps import update_collection_on_startup
 from settings import apperture_settings
 
 load_dotenv(override=False)
@@ -61,6 +63,9 @@ async def on_startup():
     await mongo.init()
     clickhouse.init()
     init_cache(settings.redis_host, settings.redis_password)
+
+    collection = await App.find_all().to_list()
+    await update_collection_on_startup(collection)
 
 
 async def on_shutdown():

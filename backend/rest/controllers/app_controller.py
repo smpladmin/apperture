@@ -13,7 +13,13 @@ from domain.datasources.models import DataSourceVersion
 from domain.datasources.service import DataSourceService
 from domain.integrations.models import Integration
 from domain.integrations.service import IntegrationService
-from rest.dtos.apps import AppResponse, AppWithIntegrations, CreateAppDto, UpdateAppDto, OrgAccessResponse
+from rest.dtos.apps import (
+    AppResponse,
+    AppWithIntegrations,
+    CreateAppDto,
+    UpdateAppDto,
+    OrgAccessResponse,
+)
 from rest.dtos.datasources import DataSourceResponse
 from rest.dtos.integrations import IntegrationWithDataSources
 from rest.middlewares import get_user, get_user_id, validate_jwt
@@ -124,7 +130,7 @@ async def update_app(
             to_share_with.append(user.id)
         app = await app_service.share_app(id, user_id, to_share_with)
 
-    if dto.orgAccess!=None:
+    if dto.orgAccess != None:
         app = await app_service.switch_org_access(id=id, org_access=dto.orgAccess)
 
     return app

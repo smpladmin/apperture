@@ -145,7 +145,9 @@ class AppService:
             }
         )
 
-    async def share_app(self, id: str, owner_id: str, to_share_with: List[PydanticObjectId]):
+    async def share_app(
+        self, id: str, owner_id: str, to_share_with: List[PydanticObjectId]
+    ):
         app = await self.get_user_app(id, owner_id)
         for user_id in to_share_with:
             app.shared_with.add(user_id)
