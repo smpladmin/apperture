@@ -10,7 +10,7 @@ import {
 import { SheetType, TransientSheetData } from '@lib/domain/workbook';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
-import { Eye, PencilSimpleLine, Play } from 'phosphor-react';
+import { Eye, PencilSimpleLine, Play, X } from 'phosphor-react';
 import React, { useEffect, useState } from 'react';
 import { cloneDeep } from 'lodash';
 import { ErrorResponse } from '@lib/services/util';
@@ -26,6 +26,7 @@ type QueryEditorProps = {
   setShowSqlEditor: Function;
   setSheetsData: Function;
   selectedSheetIndex: number;
+  height: string;
 };
 
 const QueryEditor = ({
@@ -33,6 +34,7 @@ const QueryEditor = ({
   selectedSheetIndex,
   setShowSqlEditor,
   setSheetsData,
+  height,
 }: QueryEditorProps) => {
   const sheetData = sheetsData[selectedSheetIndex];
 
@@ -56,8 +58,13 @@ const QueryEditor = ({
   };
 
   useEffect(() => {
-    setQuery(sheetData.query);
-  }, [sheetData.query]);
+    if (sheetData.query) {
+      setQuery(sheetData.query);
+    }
+    if (sheetData.aiQuery?.sql) {
+      setQuery(sheetData.aiQuery?.sql);
+    }
+  }, [sheetData.query, sheetData.aiQuery?.sql]);
 
   const handleQueryChange = async () => {
     setIsLoading(true);
@@ -98,12 +105,12 @@ const QueryEditor = ({
               py={'2'}
               borderRadius={'8px 0px 0px 8px'}
               borderColor={!sheetData.edit_mode ? GREY_900 : GREY_400}
-              bg={!sheetData.edit_mode ? WHITE_200 : WHITE_DEFAULT}
+              bg={!sheetData.edit_mode ? GREY_400 : WHITE_DEFAULT}
               marginInlineEnd={'0 !important'}
             >
               <Eye
                 size={16}
-                color={!sheetData.edit_mode ? GREY_900 : GREY_400}
+                color={!sheetData.edit_mode ? GREY_900 : GREY_900}
                 weight={!sheetData.edit_mode ? 'bold' : 'regular'}
               />
             </Button>
@@ -112,14 +119,14 @@ const QueryEditor = ({
               py={'2'}
               borderRadius={'0px 8px 8px 0px'}
               borderColor={sheetData.edit_mode ? GREY_900 : GREY_400}
-              bg={sheetData.edit_mode ? WHITE_200 : WHITE_DEFAULT}
+              bg={sheetData.edit_mode ? GREY_400 : WHITE_DEFAULT}
               onClick={() => {
                 !sheetData.edit_mode && onOpen();
               }}
             >
               <PencilSimpleLine
                 size={16}
-                color={sheetData.edit_mode ? GREY_900 : GREY_400}
+                color={sheetData.edit_mode ? GREY_900 : GREY_900}
                 weight={sheetData.edit_mode ? 'bold' : 'regular'}
               />
             </Button>
@@ -134,12 +141,14 @@ const QueryEditor = ({
         />
         <ReactCodeMirror
           value={query}
-          height="200px"
+          height={height}
           extensions={[sql()]}
           onChange={(value) => {
             setQuery(value);
           }}
           readOnly={!sheetData.edit_mode}
+          
+          
         />
         {error ? (
           <Text
@@ -159,21 +168,23 @@ const QueryEditor = ({
           alignItems={'center'}
         >
           <Button
+            fontSize={'xs-14'}
+            lineHeight={'xs-14'}
+            fontWeight={'500'}
+            bg={WHITE_200}
+            pl={'3'}
+            pr={'4'}
+            py={'6px'}
+            borderRadius={'8'}
             onClick={() => {
               setShowSqlEditor(false);
               setError('');
             }}
-            border={'0'}
-            bg={'transparent'}
-            fontSize={'xs-14'}
-            lineHeight={'xs-14'}
-            fontWeight={'400'}
-            py={'6px'}
-            px={'4'}
-            _hover={{ bg: 'white.400' }}
-            borderRadius={'8'}
           >
-            Close
+            <Flex gap={'1'}>
+             <X size={16} weight="fill" />
+              Close
+            </Flex>
           </Button>
           <Button
             fontSize={'xs-14'}

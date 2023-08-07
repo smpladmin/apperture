@@ -96,6 +96,7 @@ def test_get_metrics(client_init, metric_service):
                 "lastName": "User",
                 "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
                 "slackChannel": "#alerts",
+                "hasVisitedSheets": False,
             },
             "userId": "6374b74e9b36ecf7e0b4f9e4",
             "dateFilter": None,
@@ -233,6 +234,7 @@ async def test_get_saved_metrics_for_app(client_init, metric_service):
                 "email": "test@email.com",
                 "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
                 "slackChannel": "#alerts",
+                "hasVisitedSheets": False,
             },
         }
     ]

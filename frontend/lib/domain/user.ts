@@ -5,4 +5,5 @@ export type AppertureUser = {
   email: string;
   picture: string;
   slackChannel: string | null;
+  hasVisitedSheets?: boolean;
 };

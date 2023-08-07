@@ -124,6 +124,7 @@ def test_get_actions(client_init, action_service):
                 "lastName": "User",
                 "picture": "https://lh3.googleusercontent.com/a/ALm5wu2jXzCka6uU7Q-fAAEe88bpPG9_08a_WIzfqHOV=s96-c",
                 "slackChannel": "#alerts",
+                "hasVisitedSheets": False,
             },
             "userId": "63e4da53370789982002e57d",
             "enabled": True,

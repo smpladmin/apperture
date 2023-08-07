@@ -179,11 +179,12 @@ async def upload_csv(
     files_service: FilesService = Depends(),
 ):
     try:
-        s3_key = files_service.build_s3_key(app_id=appId, filename=file.filename)
+        filename = file.filename.replace(" ", "_")
+        s3_key = files_service.build_s3_key(app_id=appId, filename=filename)
         integration_service.upload_csv_to_s3(file=file, s3_key=s3_key)
         logging.info("CSV uploaded successfully to S3.")
         return await files_service.add_file(
-            filename=file.filename, s3_key=s3_key, app_id=appId
+            filename=filename, s3_key=s3_key, app_id=appId
         )
 
     except Exception as e:

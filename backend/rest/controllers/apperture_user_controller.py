@@ -1,5 +1,6 @@
 from typing import List, Union
 
+from typing import Optional
 from fastapi import APIRouter, Depends
 
 from domain.apperture_users.service import AppertureUserService
@@ -27,17 +28,22 @@ async def get_current_user(
         email=user.email,
         picture=user.picture,
         slack_channel=user.slack_channel,
+        has_visited_sheets=user.has_visted_sheets,
     )
 
 
 @router.put("/apperture-users")
 async def remove_slack_credentials(
-    delete_slack_credentials: bool,
+    delete_slack_credentials: Optional[bool] = None,
+    has_visited_sheets: Optional[bool] = None,
     user_id: str = Depends(get_user_id),
     user_service: AppertureUserService = Depends(),
 ):
     if delete_slack_credentials:
         return await user_service.remove_slack_credentials(user_id)
+
+    if has_visited_sheets:
+        return await user_service.update_visited_sheets_status(user_id=user_id)
 
 
 @router.get("/apperture-users", response_model=List[PrivateUserResponse])

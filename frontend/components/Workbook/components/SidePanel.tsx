@@ -1,4 +1,4 @@
-import { Box, Flex, Skeleton } from '@chakra-ui/react';
+import { Box, Flex } from '@chakra-ui/react';
 import { GREY_500 } from '@theme/index';
 import { ArrowLeft, ArrowRight } from 'phosphor-react';
 import React, { useEffect, useState } from 'react';
@@ -39,6 +39,7 @@ const SidePanel = ({
   const [connectorData, setConnectorData] = useState<
     ConnectionSource & { heirarchy: string[] }
   >({
+    id: '',
     name: '',
     fields: [],
     datasource_id: '',
