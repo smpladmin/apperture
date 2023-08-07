@@ -10,7 +10,7 @@ from settings import apperture_settings
 from utils.mail import GENERIC_EMAIL_DOMAINS
 
 from ..apperture_users.models import AppertureUser
-from .models import App, ClickHouseCredential
+from .models import App, ClickHouseCredential, OrgAccess
 from ..common.random_string_utils import StringUtils
 
 
@@ -145,8 +145,23 @@ class AppService:
             }
         )
 
-    async def share_app(self, id: str, owner_id: str, user: AppertureUser):
+    async def share_app(self, id: str, owner_id: str, to_share_with: List[PydanticObjectId]):
         app = await self.get_user_app(id, owner_id)
-        app.shared_with.add(user.id)
+        for user_id in to_share_with:
+            app.shared_with.add(user_id)
         await app.save()
         return app
+
+    async def switch_org_access(self, id: str, org_access: bool):
+        app = await self.get_app(id)
+        app.org_access = org_access
+        await app.save()
+        return app
+
+    async def get_users_for_app(self, app_id: str):
+        app = await App.get(PydanticObjectId(app_id))
+        return [app.user_id] + [user_id for user_id in app.shared_with]
+
+    async def get_user_domain(self, app_id: str):
+        app = await App.get(PydanticObjectId(app_id))
+        return OrgAccess(org_access=app.org_access, domain=app.domain)

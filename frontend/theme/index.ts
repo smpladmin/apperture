@@ -38,6 +38,7 @@ const PURPLE_500 = '#9131AA';
 const YELLOW_500 = '#F6DA53';
 const ORANGE_500 = '#F09E33';
 const GREEN_500 = '#65AC5A';
+const BLUE_800 = '#3762BB';
 
 const colors = {
   black: {
@@ -99,6 +100,7 @@ const colors = {
     400: BLUE_400,
     50: '#E5F2FC',
     500: BLUE_500,
+    800: BLUE_800,
   },
   purple: {
     500: PURPLE_500,
@@ -247,4 +249,5 @@ export {
   RED_500,
   GREY_400,
   GREY_900,
+  BLUE_800,
 };

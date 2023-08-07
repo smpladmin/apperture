@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel
 
-from domain.apps.models import App
+from domain.apps.models import App, OrgAccess
 from rest.dtos.integrations import IntegrationWithDataSources
 from rest.dtos.model_response import ModelResponse
 
@@ -23,4 +23,10 @@ class AppWithIntegrations(App, ModelResponse):
 
 
 class UpdateAppDto(BaseModel):
-    share_with_email: Optional[str]
+    shareWithEmails: Optional[List[str]]
+    orgAccess: Optional[bool]
+
+
+class OrgAccessResponse(OrgAccess, ModelResponse):
+    class Config:
+        allow_population_by_field_name = True

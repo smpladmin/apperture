@@ -12,6 +12,11 @@ class ClickHouseCredential(BaseModel):
     databasename: str
 
 
+class OrgAccess(BaseModel):
+    org_access: bool
+    domain: str
+
+
 class App(Document):
     name: str
     user_id: Indexed(PydanticObjectId)

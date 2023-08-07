@@ -13,7 +13,7 @@ from domain.datasources.models import DataSourceVersion
 from domain.datasources.service import DataSourceService
 from domain.integrations.models import Integration
 from domain.integrations.service import IntegrationService
-from rest.dtos.apps import AppResponse, AppWithIntegrations, CreateAppDto, UpdateAppDto
+from rest.dtos.apps import AppResponse, AppWithIntegrations, CreateAppDto, UpdateAppDto, OrgAccessResponse
 from rest.dtos.datasources import DataSourceResponse
 from rest.dtos.integrations import IntegrationWithDataSources
 from rest.middlewares import get_user, get_user_id, validate_jwt
@@ -110,15 +110,24 @@ async def update_app(
     app_service: AppService = Depends(),
     user_service: AppertureUserService = Depends(),
 ):
-    email = dto.share_with_email
-    if email:
-        user = await user_service.get_user_by_email(email=email)
-        if not user:
-            logging.info(
-                f"User doesn't exist. Creating an invited user with email {email}"
-            )
-            user = await user_service.create_invited_user(email=email)
-        await app_service.share_app(id, user_id, user)
+    emails = dto.shareWithEmails
+    app = None
+    to_share_with = []
+    if emails:
+        for email in emails:
+            user = await user_service.get_user_by_email(email=email)
+            if not user:
+                logging.info(
+                    f"User doesn't exist. Creating an invited user with email {email}"
+                )
+                user = await user_service.create_invited_user(email=email)
+            to_share_with.append(user.id)
+        app = await app_service.share_app(id, user_id, to_share_with)
+
+    if dto.orgAccess!=None:
+        app = await app_service.switch_org_access(id=id, org_access=dto.orgAccess)
+
+    return app
 
 
 async def build_app_with_integrations(
@@ -157,3 +166,11 @@ async def build_integration_with_datasources(
         )
     )
     return integration_wds
+
+
+@router.get("/apps/{id}/domain", response_model=OrgAccessResponse)
+async def get_user_domain(
+    id: str,
+    app_service: AppService = Depends(),
+):
+    return await app_service.get_user_domain(app_id=id)

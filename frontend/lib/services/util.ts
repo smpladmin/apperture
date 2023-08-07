@@ -76,7 +76,14 @@ export const ApperturePost = async (
 export const ApperturePut = async (
   path: string,
   payload: {
-    [key: string]: string | number | boolean | Array<any> | object | null;
+    [key: string]:
+      | string
+      | number
+      | boolean
+      | Array<any>
+      | object
+      | null
+      | string[];
   }
 ) => {
   try {

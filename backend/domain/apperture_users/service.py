@@ -103,3 +103,6 @@ class AppertureUserService:
         return await AppertureUser.find_one(
             AppertureUser.id == id,
         )
+
+    async def get_all_apperture_users(self):
+        return await AppertureUser.find().to_list()

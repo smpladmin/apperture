@@ -1,8 +1,8 @@
 import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
 import { App, AppWithIntegrations } from '@lib/domain/app';
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosError } from 'axios';
 import { AppertureAPI } from '../apiClient';
-import { ApperturePost, ErrorResponse } from './util';
+import { AppertureGet, ApperturePost, ApperturePut } from './util';
 
 export const addApp = async (name: string) => {
   return await ApperturePost('/apps', {
@@ -57,4 +57,21 @@ export const getApps = async (): Promise<Array<App>> => {
     console.log((e as AxiosError).message);
     return [];
   }
+};
+
+export const get_user_domain = async (appId: string) => {
+  const res = await AppertureGet(`/apps/${appId}/domain`);
+  return res.data;
+};
+
+export const update_app = async (
+  appId: string,
+  shareWithEmails: string[] | null,
+  orgAccess: Boolean | null
+) => {
+  const res = await ApperturePut(`/apps/${appId}`, {
+    shareWithEmails,
+    orgAccess,
+  });
+  return res.data;
 };
