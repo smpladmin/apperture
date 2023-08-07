@@ -5,6 +5,7 @@ from typing import Union
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, Query, UploadFile, File, Form, HTTPException
 from data_processor_queue.service import DPQueueService
+from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
 from domain.datasources.models import DataSourceVersion, ProviderDataSource
 from domain.files.service import FilesService
@@ -21,7 +22,7 @@ from rest.dtos.integrations import (
     CSVCreateDto,
     DeleteCSVDto,
 )
-from rest.middlewares import get_user_id, validate_jwt
+from rest.middlewares import get_user_id, validate_jwt, get_user
 
 router = APIRouter(
     tags=["integration"],
@@ -94,7 +95,7 @@ async def create_integration(
     dto: CreateIntegrationDto,
     create_datasource: bool = False,
     trigger_data_processor: bool = False,
-    user_id: str = Depends(get_user_id),
+    user: AppertureUser = Depends(get_user),
     app_service: AppService = Depends(),
     ds_service: DataSourceService = Depends(),
     integration_service: IntegrationService = Depends(),
@@ -119,7 +120,7 @@ async def create_integration(
         if dto.csvFileId
         else None
     )
-    app = await app_service.get_shared_or_owned_app(dto.appId, user_id)
+    app = await app_service.get_shared_or_owned_app(id=dto.appId, user=user)
     integration = await integration_service.create_integration(
         app,
         dto.provider,

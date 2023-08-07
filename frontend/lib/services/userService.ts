@@ -1,6 +1,7 @@
 import { ApperturePrivateAPI } from './../apiClient/client.server';
 import { AppertureAPI } from '../apiClient';
 import { AxiosError } from 'axios';
+import { AppertureGet } from './util';
 
 export const _getAppertureUserInfo = async (token: string) => {
   try {
@@ -38,4 +39,10 @@ export const updateSheetsVisitedStatus = async () => {
   } catch (e) {
     console.error((e as AxiosError).message);
   }
+};
+
+export const get_apperture_users = async (appId: string | null) => {
+  const url = appId ? `/apperture-users?app_id=${appId}` : `/apperture-users`;
+  const res = await AppertureGet(url);
+  return res.data;
 };

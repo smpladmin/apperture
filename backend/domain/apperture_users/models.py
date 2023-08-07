@@ -13,6 +13,7 @@ class AppertureUser(Document):
     slack_channel: Optional[str]
     slack_url: Optional[str]
     has_visted_sheets: bool = True
+    is_signed_up: bool = True
 
     class Settings:
         name = "users"
