@@ -15,6 +15,26 @@ const Sheet = () => {
   const columns = range(27);
   const tableRef = useRef(null);
   const [data, setData] = useState(createRows());
+  const [showEditableCell, setShowEditableCell] = useState(false);
+  const [editableCellStyle, setShowEditableCellStyle] = useState({});
+
+  const handleDoubleClick = (event: any, row: number, col: string) => {
+    const el = event.target;
+    if (el) {
+      const position = el.getBoundingClientRect();
+      console.log('positioning', position);
+      const style = {
+        left: position.x,
+        top: position.y,
+        height: position.height,
+        width: 'fit-content',
+        minWidth: position.width,
+      };
+      setShowEditableCellStyle(style);
+    }
+
+    setShowEditableCell(true);
+  };
 
   return (
     <>
@@ -38,7 +58,7 @@ const Sheet = () => {
                   borderBottomWidth={'0.4px'}
                 >
                   {/* 1 as offset for index */}
-                  {i === 0 ? '' : String.fromCharCode(65 + el - 1)}
+                  {i === 0 ? '' : String.fromCharCode(65 + i - 1)}
                 </Flex>
               </Th>
             ))}
@@ -76,7 +96,9 @@ const Sheet = () => {
                   // contentEditable
                   // onBlur={(event) => handleCellChange(event, rowIndex, colIndex)}
                   // onKeyDown={(event) => handleKeyDown(event, rowIndex, colIndex)}
-                  // onDoubleClick={(e) => handleDoubleClick(e, rowIndex, colIndex)}
+                  onDoubleClick={(e) =>
+                    handleDoubleClick(e, rowIndex, columnId)
+                  }
                   // style={{
                   //   backgroundColor:
                   //     editedCell &&
@@ -103,17 +125,20 @@ const Sheet = () => {
             </Tr>
           ))}
         </Tbody>
-        {/* {showEditableCell && (
-        <Box
-          ref={(el) => el?.focus()}
-          contentEditable
-          position={'absolute'}
-          style={editableCellStyle}
-          zIndex={'99'}
-          border={'1px solid blue'}
-          max
-        ></Box>
-      )} */}
+        {showEditableCell && (
+          <Flex
+            ref={(el) => el?.focus()}
+            contentEditable
+            position={'absolute'}
+            style={editableCellStyle}
+            zIndex={'99'}
+            border={'1px solid blue'}
+            bg={'white.DEFAULT'}
+            alignItems={'center'}
+            px={1}
+            // onBlur={(e) => setShowEditableCell(false)}
+          ></Flex>
+        )}
       </Table>
     </>
   );
