@@ -1,4 +1,4 @@
-from typing import List, Optional, Set
+from typing import Optional, Set, Union
 
 from beanie import Indexed, PydanticObjectId
 from pydantic import BaseModel, Field
@@ -12,10 +12,17 @@ class ClickHouseCredential(BaseModel):
     databasename: str
 
 
+class OrgAccess(BaseModel):
+    org_access: bool
+    domain: str
+
+
 class App(Document):
     name: str
     user_id: Indexed(PydanticObjectId)
     shared_with: Set[PydanticObjectId] = set()
+    domain: Union[str, None] = None
+    org_access: bool = False
     enabled: bool = True
     clickhouse_credential: Optional[ClickHouseCredential] = Field(hidden=True)
 

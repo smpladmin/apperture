@@ -1,10 +1,12 @@
+from typing import List, Union
+
 from typing import Optional
 from fastapi import APIRouter, Depends
 
 from domain.apperture_users.service import AppertureUserService
-from rest.dtos.apperture_users import AppertureUserResponse
-from rest.middlewares import get_user_id, validate_jwt
-
+from domain.apps.service import AppService
+from rest.dtos.apperture_users import AppertureUserResponse, PrivateUserResponse
+from rest.middlewares import get_user_id, validate_jwt, get_user
 
 router = APIRouter(
     tags=["apperture-users"],
@@ -42,3 +44,16 @@ async def remove_slack_credentials(
 
     if has_visited_sheets:
         return await user_service.update_visited_sheets_status(user_id=user_id)
+
+
+@router.get("/apperture-users", response_model=List[PrivateUserResponse])
+async def get_apperture_users(
+    app_id: Union[str, None] = None,
+    user_service: AppertureUserService = Depends(),
+    app_service: AppService = Depends(),
+):
+    if app_id:
+        user_ids = await app_service.get_users_for_app(app_id=app_id)
+        return [await user_service.get_user(id=user_id) for user_id in user_ids]
+    else:
+        return await user_service.get_all_apperture_users()

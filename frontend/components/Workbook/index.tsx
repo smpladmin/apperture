@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState , useRef} from 'react';
 import WorkbookHeader from './components/Header';
 import {
   getTransientSpreadsheets,
@@ -48,6 +48,7 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import AIButton from '@components/AIButton';
 import Coachmarks from './components/Coachmarks';
 import { AppertureUser } from '@lib/domain/user';
+import { ArrowsInLineVertical } from 'phosphor-react';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -732,6 +733,7 @@ const Workbook = ({
     return connectionSource?.fields || [];
   }, [connections, selectedSheetIndex, sheetsData]);
 
+  
   return (
     <>
       <Flex direction={'column'}>
@@ -771,12 +773,17 @@ const Workbook = ({
 
           <Box h={'full'} w={'full'} overflowY={'auto'}>
             {showSqlEditor ? (
-              <QueryEditor
-                sheetsData={sheetsData}
-                selectedSheetIndex={selectedSheetIndex}
-                setShowSqlEditor={setShowSqlEditor}
-                setSheetsData={setSheetsData}
-              />
+              <Box  alignItems={'center'} justifyContent={'center'}>
+                  <QueryEditor
+                    sheetsData={sheetsData}
+                    selectedSheetIndex={selectedSheetIndex}
+                    setShowSqlEditor={setShowSqlEditor}
+                    setSheetsData={setSheetsData}
+                    height={`200px`}
+                  />
+                  
+              </Box>
+                   
             ) : null}
             {showEmptyState ? (
               <EmptySheet

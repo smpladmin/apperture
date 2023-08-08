@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from beanie import PydanticObjectId
 
 from authorisation import OAuthUser
@@ -12,7 +14,12 @@ class AppertureUserService:
             AppertureUser.email == oauth_user.email
         )
         if existing_user:
-            return existing_user
+            if not existing_user.is_signed_up:
+                return await self._upgrade_invited_user(
+                    oauth_user=oauth_user, id=existing_user.id
+                )
+            else:
+                return existing_user
         return await self._create_user(oauth_user)
 
     async def create_user_with_password(
@@ -41,14 +48,17 @@ class AppertureUserService:
         user.password = password_hash
         return await user.save()
 
-    async def _create_user(self, oauth_user: OAuthUser):
-        apperture_user = AppertureUser(
+    async def _build_user(self, oauth_user: OAuthUser):
+        return AppertureUser(
             first_name=oauth_user.given_name,
             last_name=oauth_user.family_name,
             email=oauth_user.email,
             picture=oauth_user.picture,
             has_visted_sheets=False,
         )
+
+    async def _create_user(self, oauth_user: OAuthUser):
+        apperture_user = await self._build_user(oauth_user=oauth_user)
         await apperture_user.insert()
         return apperture_user
 
@@ -75,5 +85,32 @@ class AppertureUserService:
             AppertureUser.id == PydanticObjectId(user_id),
         ).update({"$set": {"has_visted_sheets": True}})
 
-    async def find_user(self, email: str):
-        return await AppertureUser.find_one(AppertureUser.email == email)
+    async def create_invited_user(self, email: str):
+        apperture_user = AppertureUser(
+            first_name="", last_name="", email=email, is_signed_up=False
+        )
+        await apperture_user.insert()
+        return apperture_user
+
+    async def _upgrade_invited_user(self, oauth_user: OAuthUser, id: PydanticObjectId):
+        user = await self._build_user(oauth_user=oauth_user)
+        to_update = {
+            "updated_at": datetime.utcnow(),
+            "is_signed_up": True,
+        }
+        to_update.update(
+            user.dict(
+                exclude={"id", "created_at", "email", "updated_at", "is_signed_up"}
+            )
+        )
+
+        await AppertureUser.find_one(
+            AppertureUser.id == id,
+        ).update({"$set": to_update})
+
+        return await AppertureUser.find_one(
+            AppertureUser.id == id,
+        )
+
+    async def get_all_apperture_users(self):
+        return await AppertureUser.find().to_list()
