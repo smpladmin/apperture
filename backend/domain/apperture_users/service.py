@@ -27,6 +27,20 @@ class AppertureUserService:
     ):
         existing_user = await AppertureUser.find_one(AppertureUser.email == email)
         if existing_user:
+            if not existing_user.is_signed_up:
+                return AppertureUser.find_one(
+                    AppertureUser.id == PydanticObjectId(existing_user.id),
+                ).update(
+                    {
+                        "$set": {
+                            "first_name": first_name,
+                            "last_name": last_name,
+                            "email": email,
+                            "password": password_hash,
+                            "has_visted_sheets": False,
+                        }
+                    }
+                )
             raise BusinessError("User already exists with this email")
 
         apperture_user = AppertureUser(
@@ -34,6 +48,7 @@ class AppertureUserService:
             last_name=last_name,
             email=email,
             password=password_hash,
+            has_visted_sheets=False,
         )
         await apperture_user.insert()
         return apperture_user
@@ -87,7 +102,11 @@ class AppertureUserService:
 
     async def create_invited_user(self, email: str):
         apperture_user = AppertureUser(
-            first_name="", last_name="", email=email, is_signed_up=False
+            first_name="",
+            last_name="",
+            email=email,
+            is_signed_up=False,
+            has_visted_sheets=False,
         )
         await apperture_user.insert()
         return apperture_user
