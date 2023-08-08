@@ -19,6 +19,19 @@ oauth = OAuthClientFactory().init_client(OAuthProvider.GOOGLE)
 settings = apperture_settings()
 
 
+def set_auth_cookie(response: Response, id):
+    jwt = create_access_token({"user_id": str(id)})
+    response.set_cookie(
+        key=settings.cookie_key,
+        value=jwt,
+        domain=os.getenv("COOKIE_DOMAIN"),
+        httponly=True,
+        secure=os.getenv("FASTAPI_ENV") != "development",
+        expires=int(os.getenv("JWT_EXPIRY_MINUTES")) * 60,
+    )
+    return response
+
+
 @router.get("/login")
 async def login(
     request: Request, redirect_url: str = os.getenv("FRONTEND_LOGIN_REDIRECT_URL")
@@ -47,16 +60,7 @@ async def login_with_password(
             headers={"WWW-Authenticate": "Bearer"},
         )
     await user_service.save_password(apperture_user, new_hash)
-    jwt = create_access_token({"user_id": str(apperture_user.id)})
-
-    response.set_cookie(
-        key=settings.cookie_key,
-        value=jwt,
-        domain=os.getenv("COOKIE_DOMAIN"),
-        httponly=True,
-        secure=os.getenv("FASTAPI_ENV") != "development",
-        expires=int(os.getenv("JWT_EXPIRY_MINUTES")) * 60,
-    )
+    response = set_auth_cookie(response=response, id=apperture_user.id)
     return apperture_user
 
 
@@ -125,16 +129,7 @@ async def register(
         apperture_user = await user_service.create_user_with_password(
             dto.first_name, dto.last_name, dto.email, hash
         )
-        jwt = create_access_token({"user_id": str(apperture_user.id)})
-
-        response.set_cookie(
-            key=settings.cookie_key,
-            value=jwt,
-            domain=os.getenv("COOKIE_DOMAIN"),
-            httponly=True,
-            secure=os.getenv("FASTAPI_ENV") != "development",
-            expires=int(os.getenv("JWT_EXPIRY_MINUTES")) * 60,
-        )
+        response = set_auth_cookie(response=response, id=apperture_user.id)
         return apperture_user
     except BusinessError as e:
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
