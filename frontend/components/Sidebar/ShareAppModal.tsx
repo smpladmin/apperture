@@ -117,25 +117,20 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
           Share this workspace
         </ModalHeader>
         <ModalBody overflowY={'auto'} pb={'0'}>
-          <Flex direction={'column'} gap={'24px'}>
+          <Flex direction={'column'} gap={6}>
             <Text>Invite members to collaborate</Text>
             <MultiSelectDropdown
               existingUsers={existingUsers}
               selectedValues={selectedValues}
               setSelectedValues={setSelectedValues}
             />
-            <Stack direction={'column'}>
-              <Text
-                fontSize={'xs-16'}
-                fontWeight={500}
-                marginBottom={5}
-                marginTop={6}
-              >
-                People with access
-              </Text>
+            <Text fontSize={'xs-16'} fontWeight={500}>
+              People with access
+            </Text>
+            <Stack direction={'column'} gap={2}>
               {appUsers.map((user, index) => {
                 return (
-                  <Flex gap={'12px'} alignItems={'center'} key={index}>
+                  <Flex gap={3} alignItems={'center'} key={index}>
                     <Avatar
                       name={user.firstName}
                       fontWeight={'bold'}
@@ -180,12 +175,12 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
             />
           </Flex>
         </ModalBody>
-        <ModalFooter pt={'24px'} pb={'32px'} display={'block'}>
-          <Flex justifyContent={'flex-end'} gap={'8px'}>
+        <ModalFooter pt={6} pb={8} display={'block'}>
+          <Flex justifyContent={'flex-end'} gap={2}>
             <Button
               w={'90px'}
               h={'42px'}
-              px={'16px'}
+              px={4}
               py={'6px'}
               borderRadius={'8px'}
               borderColor={BLACK}
@@ -202,7 +197,7 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
             <Button
               w={'90px'}
               h={'42px'}
-              px={'16px'}
+              px={4}
               py={'6px'}
               borderRadius={'8px'}
               borderColor={BLACK}
