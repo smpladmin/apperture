@@ -1,6 +1,8 @@
 from beanie import PydanticObjectId
 
 from authorisation import OAuthUser
+from repositories.clickhouse.parser.query_parser import BusinessError
+
 from .models import AppertureUser
 
 
@@ -18,7 +20,7 @@ class AppertureUserService:
     ):
         existing_user = await AppertureUser.find_one(AppertureUser.email == email)
         if existing_user:
-            return existing_user
+            raise BusinessError("User already exists with this email")
 
         apperture_user = AppertureUser(
             first_name=first_name,
