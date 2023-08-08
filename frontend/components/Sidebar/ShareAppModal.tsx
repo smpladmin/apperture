@@ -13,7 +13,10 @@ import {
 } from '@chakra-ui/react';
 import { AppertureUser } from '@lib/domain/user';
 import { get_user_domain, update_app } from '@lib/services/appService';
-import { get_apperture_users } from '@lib/services/userService';
+import {
+  getAppertureUserInfo,
+  get_apperture_users,
+} from '@lib/services/userService';
 import { BLACK, WHITE_DEFAULT } from '@theme/index';
 import { useEffect, useState } from 'react';
 import GeneralAccessDropdown from './GeneralAccessDropdown';
@@ -34,6 +37,7 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
     initalDropdownOptions
   );
   const [selectedOption, setSelectedOption] = useState<string>('Restricted');
+  const [currentUserEmail, setCurrentUserEmail] = useState('');
 
   const handleDropdownChange = (newValue: string) => {
     setSelectedOption(newValue);
@@ -59,9 +63,14 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
           setSelectedOption(res.domain);
         }
       };
+      const getCurrentUser = async () => {
+        const currentUser = await getAppertureUserInfo();
+        setCurrentUserEmail(currentUser.email);
+      };
       setUsers();
       setUsersForApp();
       getDomain();
+      getCurrentUser();
     }
   }, [isOpen]);
 
@@ -116,6 +125,14 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
               setSelectedValues={setSelectedValues}
             />
             <Stack direction={'column'}>
+              <Text
+                fontSize={'xs-16'}
+                fontWeight={500}
+                marginBottom={5}
+                marginTop={6}
+              >
+                People with access
+              </Text>
               {appUsers.map((user, index) => {
                 return (
                   <Flex gap={'12px'} alignItems={'center'} key={index}>
@@ -136,7 +153,7 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
                         lineHeight={'lh-130'}
                       >
                         {`${user.firstName} ${user.lastName} ${
-                          index == 0 ? '(Owner)' : ''
+                          currentUserEmail == user.email ? '(you)' : ''
                         }`}
                       </Text>
                       <Text
