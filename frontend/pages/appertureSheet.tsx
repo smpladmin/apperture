@@ -1,4 +1,4 @@
-import Sheet from '@components/AppertureSheets';
+import Sheet from '@components/AppertureSheets/grid';
 import React from 'react';
 
 const AppertureSheet = () => {

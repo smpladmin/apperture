@@ -24,6 +24,8 @@
     "@phosphor-icons/react": "^2.0.6",
     "@silevis/reactgrid": "^4.0.4",
     "@tanstack/react-table": "^8.7.0",
+    "@tanstack/react-virtual": "^3.0.0-alpha.0",
+    "@uidotdev/usehooks": "^2.0.1",
     "@uiw/react-codemirror": "^4.20.2",
     "analytics": "^0.8.1",
     "axios": "^0.27.2",
@@ -46,6 +48,7 @@
     "react-hook-form": "^7.45.1",
     "react-modal-sheet": "^1.7.0",
     "react-textarea-autosize": "^8.5.2",
+    "react-virtualized-auto-sizer": "^1.0.20",
     "react-window": "^1.8.9",
     "remixicon": "^2.5.0",
     "sanitize-html": "^2.11.0"

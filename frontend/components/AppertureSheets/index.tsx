@@ -40,28 +40,54 @@ const Sheet = () => {
     <>
       <Table ref={tableRef} overflow={'auto'}>
         <Thead>
-          <Tr position={'sticky'} top={'0'}>
-            {columns.map((el, i) => (
-              <Th p={'0'} border={0}>
-                <Flex
-                  height={7}
-                  bg={'white.500'}
-                  alignItems={'center'}
-                  justifyContent={'center'}
-                  fontSize={'xs-10'}
-                  lineHeight={'xs-10'}
-                  color={'grey.600'}
-                  fontWeight={'500'}
-                  width={i === 0 ? 15 : 60}
-                  borderColor={'grey.700'}
-                  borderRightWidth={'0.4px'}
-                  borderBottomWidth={'0.4px'}
+          <Tr position={'sticky'} top={0} zIndex={5}>
+            {columns.map((el, i) =>
+              i == 0 ? (
+                <Th
+                  key={i}
+                  p={'0'}
+                  border={0}
+                  position={'sticky'}
+                  top={0}
+                  left={0}
+                  zIndex={5}
                 >
-                  {/* 1 as offset for index */}
-                  {i === 0 ? '' : String.fromCharCode(65 + i - 1)}
-                </Flex>
-              </Th>
-            ))}
+                  <Flex
+                    height={7}
+                    bg={'white.500'}
+                    alignItems={'center'}
+                    justifyContent={'center'}
+                    fontSize={'xs-10'}
+                    lineHeight={'xs-10'}
+                    color={'grey.600'}
+                    fontWeight={'500'}
+                    width={15}
+                    borderColor={'grey.700'}
+                    borderRightWidth={'0.4px'}
+                    borderBottomWidth={'0.4px'}
+                  ></Flex>
+                </Th>
+              ) : (
+                <Th key={i} p={'0'} border={0}>
+                  <Flex
+                    height={7}
+                    bg={'white.500'}
+                    alignItems={'center'}
+                    justifyContent={'center'}
+                    fontSize={'xs-10'}
+                    lineHeight={'xs-10'}
+                    color={'grey.600'}
+                    fontWeight={'500'}
+                    width={60}
+                    borderColor={'grey.700'}
+                    borderRightWidth={'0.4px'}
+                    borderBottomWidth={'0.4px'}
+                  >
+                    {String.fromCharCode(65 + i - 1)}
+                  </Flex>
+                </Th>
+              )
+            )}
           </Tr>
         </Thead>
         <Tbody p={'0'}>
