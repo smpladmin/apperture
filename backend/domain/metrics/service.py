@@ -4,6 +4,7 @@ from typing import List, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
+from beanie.operators import In
 
 from domain.common.date_models import DateFilter, DateFilterType
 from domain.common.date_utils import DateUtils
@@ -245,9 +246,11 @@ class MetricService:
     async def get_metric_by_id(self, metric_id: str):
         return await Metric.find_one(Metric.id == PydanticObjectId(metric_id))
 
-    async def get_metrics_by_app_id(self, app_id: str):
+    async def get_metrics_for_apps(
+        self, app_ids: List[PydanticObjectId]
+    ) -> List[Metric]:
         return await Metric.find(
-            Metric.app_id == PydanticObjectId(app_id),
+            In(Metric.app_id, app_ids),
             Metric.enabled != False,
         ).to_list()
 

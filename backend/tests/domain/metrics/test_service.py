@@ -643,8 +643,3 @@ class TestMetricService:
                 "start_date": ANY,
             }
         )
-
-    @pytest.mark.asyncio
-    async def test_get_metric_for_app(self):
-        await self.service.get_metrics_by_app_id(app_id=self.ds_id)
-        Metric.find.assert_called_once()

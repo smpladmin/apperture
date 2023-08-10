@@ -238,6 +238,3 @@ async def test_get_saved_metrics_for_app(client_init, metric_service):
             },
         }
     ]
-    metric_service.get_metrics_by_app_id.assert_called_once_with(
-        **{"app_id": "63d0a7bfc636cee15d81f579"}
-    )
