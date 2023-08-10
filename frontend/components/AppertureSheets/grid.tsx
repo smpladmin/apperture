@@ -37,6 +37,8 @@ const Sheet = () => {
   const [editableCellStyle, setShowEditableCellStyle] = useState({});
   const [columns, setColumns] = useState<Column[]>(createColumns());
   const [rows, setRows] = useState(createRows(columns));
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [isCommandPressed, setIsCommandPressed] = useState(false);
 
   const staticGrid = React.useRef<VariableSizeGrid>(null);
   const staticGrid2 = React.useRef<VariableSizeGrid>(null);
@@ -124,9 +126,6 @@ const Sheet = () => {
     rowIndex: number;
     style: React.CSSProperties;
   }) => {
-    const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-    const [isCommandPressed, setIsCommandPressed] = useState(false);
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Meta' || event.key === 'Control') {
         setIsCommandPressed(true);
@@ -153,6 +152,11 @@ const Sheet = () => {
       if (isCommandPressed) {
         console.log('if case');
         setSelectedColumns((prevSelectedColumns) => {
+          console.log(
+            'prev selected columns,',
+            prevSelectedColumns,
+            columnName
+          );
           if (prevSelectedColumns.includes(columnName)) {
             return prevSelectedColumns.filter((name) => name !== columnName);
           } else {
