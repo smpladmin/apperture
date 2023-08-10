@@ -1,31 +1,71 @@
-import { Box, Flex, Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
-import { range } from 'lodash';
+import { Box, Flex } from '@chakra-ui/react';
+import { range, throttle } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { VariableSizeGrid as Grid } from 'react-window';
+import {
+  VariableSizeGrid as Grid,
+  GridOnScrollProps,
+  VariableSizeGrid,
+} from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import Nossr from './nossr';
-// import { useWindowSize } from "@uidotdev/usehooks";
+import ColumnResizer from './ColumnResizer';
+
+export type Column = {
+  columnId: string;
+  width: number;
+  resizable?: boolean;
+};
 
 const Sheet = () => {
-  // const { width, height } = useWindowSize();
-  const createRows = () => {
+  const createRows = (columns: Column[]) => {
     const row = {} as { [key: string]: string };
     const singleRow = columns.forEach((column) => {
-      row[String.fromCharCode(65 + column)] = '';
+      row[column.columnId] = '';
     });
     return new Array(1000).fill(row);
   };
 
-  const rows = range(1000);
-  const columns = range(27);
-  const tableRef = useRef(null);
-  const [data, setData] = useState<any[]>([]);
+  const createColumns = () => {
+    const columns: Column[] = range(26).map((column) => ({
+      columnId: String.fromCharCode(65 + column),
+      width: 240,
+      resizable: true,
+    }));
+    return columns;
+  };
+
   const [showEditableCell, setShowEditableCell] = useState(false);
   const [editableCellStyle, setShowEditableCellStyle] = useState({});
+  const [columns, setColumns] = useState<Column[]>(createColumns());
+  const [rows, setRows] = useState(createRows(columns));
+
+  const staticGrid = React.useRef<VariableSizeGrid>(null);
+  const staticGrid2 = React.useRef<VariableSizeGrid>(null);
+  const sheetRef = React.useRef<VariableSizeGrid>(null);
+
+  const handleResize = throttle((columnId: string, width: number) => {
+    setColumns((prevColumns: Column[]) => {
+      const columnIndex = prevColumns.findIndex(
+        (el) => el.columnId === columnId
+      );
+      const resizedColumn = prevColumns[columnIndex];
+      const updatedColumn = { ...resizedColumn, width };
+      prevColumns[columnIndex] = updatedColumn;
+      return [...prevColumns];
+    });
+  }, 100);
 
   useEffect(() => {
-    setData(createRows() as any[]);
-  }, []);
+    staticGrid2.current?.resetAfterIndices({
+      columnIndex: 0,
+      rowIndex: 0,
+      shouldForceUpdate: true,
+    });
+    sheetRef.current?.resetAfterIndices({
+      columnIndex: 0,
+      rowIndex: 0,
+      shouldForceUpdate: true,
+    });
+  }, [columns]);
 
   const handleDoubleClick = (event: any, row: number, col: number) => {
     const el = event.target;
@@ -51,7 +91,7 @@ const Sheet = () => {
   }: {
     columnIndex: number;
     rowIndex: number;
-    style: any;
+    style: React.CSSProperties;
   }) => {
     return (
       <Flex
@@ -75,15 +115,63 @@ const Sheet = () => {
     );
   };
 
-  const IndexCell2 = ({
+  const HeaderCell = ({
     columnIndex,
     rowIndex,
     style,
   }: {
     columnIndex: number;
     rowIndex: number;
-    style: any;
+    style: React.CSSProperties;
   }) => {
+    const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+    const [isCommandPressed, setIsCommandPressed] = useState(false);
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Meta' || event.key === 'Control') {
+        setIsCommandPressed(true);
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (event.key === 'Meta' || event.key === 'Control') {
+        setIsCommandPressed(false);
+      }
+    };
+
+    useEffect(() => {
+      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('keyup', handleKeyUp);
+
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+        document.removeEventListener('keyup', handleKeyUp);
+      };
+    }, []);
+
+    const handleColumnSelection = (columnName: string) => {
+      if (isCommandPressed) {
+        console.log('if case');
+        setSelectedColumns((prevSelectedColumns) => {
+          if (prevSelectedColumns.includes(columnName)) {
+            return prevSelectedColumns.filter((name) => name !== columnName);
+          } else {
+            return [...prevSelectedColumns, columnName];
+          }
+        });
+      } else {
+        setSelectedColumns([columnName]);
+      }
+    };
+
+    useEffect(() => {
+      console.log('selectedColumns', selectedColumns);
+    }, [selectedColumns]);
+
+    useEffect(() => {
+      console.log('command pressed', isCommandPressed);
+    }, [isCommandPressed]);
+
     return (
       <Flex
         height={9}
@@ -100,8 +188,15 @@ const Sheet = () => {
         color={'grey.600'}
         fontWeight={'400'}
         style={style}
+        onClick={() => handleColumnSelection(columns[columnIndex]?.columnId)}
       >
         {String.fromCharCode(65 + columnIndex)}
+        {columns[columnIndex]?.resizable && (
+          <ColumnResizer
+            column={columns[columnIndex]}
+            handleResize={handleResize}
+          />
+        )}
       </Flex>
     );
   };
@@ -133,15 +228,17 @@ const Sheet = () => {
     );
   };
 
-  const staticGrid = React.useRef(null);
-  const staticGrid2 = React.useRef(null);
   const onScroll = useCallback(
-    ({ scrollTop, scrollLeft, scrollUpdateWasRequested }) => {
+    ({
+      scrollTop,
+      scrollLeft,
+      scrollUpdateWasRequested,
+    }: GridOnScrollProps) => {
       if (!scrollUpdateWasRequested) {
-        staticGrid.current.scrollTo({ scrollLeft: 0, scrollTop });
+        staticGrid?.current?.scrollTo({ scrollLeft: 0, scrollTop });
       }
       if (!scrollUpdateWasRequested) {
-        staticGrid2.current.scrollTo({ scrollLeft, scrollTop: 0 });
+        staticGrid2?.current?.scrollTo({ scrollLeft, scrollTop: 0 });
       }
     },
     []
@@ -183,13 +280,13 @@ const Sheet = () => {
                     ref={staticGrid2}
                     style={{ overflowX: 'hidden' }}
                     columnCount={26}
-                    columnWidth={(index) => 240}
+                    columnWidth={(index) => columns[index].width}
                     rowCount={1}
                     rowHeight={(index) => 28}
                     height={28}
                     width={width - 60}
                   >
-                    {IndexCell2}
+                    {HeaderCell}
                   </Grid>
                 </Box>
               </Flex>
@@ -212,10 +309,11 @@ const Sheet = () => {
                 <Box>
                   {/* The Sheet */}
                   <Grid
+                    ref={sheetRef}
                     style={{ scrollbarWidth: 'none' }}
                     onScroll={onScroll}
                     columnCount={26}
-                    columnWidth={(index) => 240}
+                    columnWidth={(index) => columns[index].width}
                     rowCount={1000}
                     rowHeight={(index) => 36}
                     height={height - 28}
