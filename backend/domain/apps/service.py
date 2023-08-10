@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import re
 from typing import List, Union
@@ -167,3 +168,17 @@ class AppService:
     async def get_user_domain(self, app_id: str):
         app = await App.get(PydanticObjectId(app_id))
         return OrgAccess(org_access=app.org_access, domain=app.domain)
+
+    async def is_valid_user_for_app(self, app_id: str, user: AppertureUser):
+        app_users, app_domain = await asyncio.gather(
+            self.get_users_for_app(app_id=app_id), self.get_user_domain(app_id=app_id)
+        )
+
+        if user.id in app_users:
+            return True
+
+        user_email_domain = self.parse_domain_from_email(email=user.email)
+        if app_domain.org_access and user_email_domain == app_domain.domain:
+            return True
+
+        return False
