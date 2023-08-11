@@ -17,6 +17,10 @@ from rest.dtos.retention import (
 )
 
 from rest.middlewares import validate_jwt, get_user_id, get_user
+from rest.middlewares.validate_app_user import (
+    validate_app_user,
+    validate_library_items,
+)
 
 router = APIRouter(
     tags=["retention"],
@@ -25,7 +29,11 @@ router = APIRouter(
 )
 
 
-@router.post("/retention/transient", response_model=List[ComputedRetentionResponse])
+@router.post(
+    "/retention/transient",
+    response_model=List[ComputedRetentionResponse],
+    dependencies=[Depends(validate_app_user)],
+)
 async def compute_transient_retention(
     dto: TransientRetentionDto,
     retention_service: RetentionService = Depends(),
@@ -40,7 +48,11 @@ async def compute_transient_retention(
     )
 
 
-@router.post("/retention", response_model=RetentionResponse)
+@router.post(
+    "/retention",
+    response_model=RetentionResponse,
+    dependencies=[Depends(validate_app_user)],
+)
 async def create_retention(
     dto: CreateRetentionDto,
     user_id: str = Depends(get_user_id),
@@ -64,7 +76,11 @@ async def create_retention(
     return retention
 
 
-@router.get("/retention/{id}", response_model=RetentionResponse)
+@router.get(
+    "/retention/{id}",
+    response_model=RetentionResponse,
+    dependencies=[Depends(validate_library_items)],
+)
 async def get_retention(
     id: str,
     retention_service: RetentionService = Depends(),
@@ -72,7 +88,11 @@ async def get_retention(
     return await retention_service.get_retention(id)
 
 
-@router.put("/retention/{id}", response_model=RetentionResponse)
+@router.put(
+    "/retention/{id}",
+    response_model=RetentionResponse,
+    dependencies=[Depends(validate_app_user)],
+)
 async def update_retention(
     id: str,
     dto: CreateRetentionDto,
@@ -98,7 +118,11 @@ async def update_retention(
     return new_retention
 
 
-@router.get("/retention", response_model=List[RetentionWithUser])
+@router.get(
+    "/retention",
+    response_model=List[RetentionWithUser],
+    dependencies=[Depends(validate_app_user)],
+)
 async def get_retention_list(
     datasource_id: Union[str, None] = None,
     app_id: Union[str, None] = None,
@@ -107,7 +131,6 @@ async def get_retention_list(
     app_service: AppService = Depends(),
     user_service: AppertureUserService = Depends(),
 ):
-    retentions = []
     if app_id:
         apps = await app_service.get_apps(user=user)
         retentions = await retention_service.get_retentions_for_apps(
@@ -127,7 +150,10 @@ async def get_retention_list(
     return retentions
 
 
-@router.delete("/retention/{retention_id}")
+@router.delete(
+    "/retention/{retention_id}",
+    dependencies=[Depends(validate_library_items)],
+)
 async def delete_retention(
     retention_id: str,
     retention_service: RetentionService = Depends(),
