@@ -13,7 +13,7 @@ import {
   VariableSizeGrid,
 } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import ColumnResizer from './ColumnResizer';
+import ColumnResizer from './ColumnResizer2';
 
 export type Column = {
   columnId: string;
@@ -66,6 +66,7 @@ const Sheet = () => {
   }, 100);
 
   useEffect(() => {
+    console.log({ columns });
     staticGrid2.current?.resetAfterIndices({
       columnIndex: 0,
       rowIndex: 0,
@@ -421,11 +422,17 @@ export const HeaderCell = ({
       color={isHeaderSelected ? 'white.DEFAULT' : 'grey.600'}
       fontWeight={'400'}
       style={style}
-      onClick={(e) => handleColumnSelection(e, column?.columnId)}
+      // onClick={(e) => handleColumnSelection(e, column?.columnId)}
     >
       {String.fromCharCode(65 + columnIndex)}
       {column?.resizable && (
-        <ColumnResizer column={column} handleResize={handleResize} />
+        <ColumnResizer
+          column={column}
+          onResize={(columnId, width) => {
+            console.log(columnId, width);
+            handleResize(columnId, width);
+          }}
+        />
       )}
     </Flex>
   );
