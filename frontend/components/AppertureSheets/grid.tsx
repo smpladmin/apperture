@@ -1,6 +1,12 @@
 import { Box, Flex } from '@chakra-ui/react';
 import { range, throttle } from 'lodash';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   VariableSizeGrid as Grid,
   GridOnScrollProps,
@@ -25,9 +31,9 @@ const Sheet = () => {
   };
 
   const createColumns = () => {
-    const columns: Column[] = range(26).map((column) => ({
+    const columns: Column[] = range(26).map((column, i) => ({
       columnId: String.fromCharCode(65 + column),
-      width: 240,
+      width: i === 2 ? 100 : 240,
       resizable: true,
     }));
     return columns;
@@ -39,6 +45,9 @@ const Sheet = () => {
   const [rows, setRows] = useState(createRows(columns));
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [isCommandPressed, setIsCommandPressed] = useState(false);
+  const [selectedColumnsPosition, setSelectedColumnsPosition] = useState<
+    Array<{ columnName: string; left: number; width: number }>
+  >([]);
 
   const staticGrid = React.useRef<VariableSizeGrid>(null);
   const staticGrid2 = React.useRef<VariableSizeGrid>(null);
@@ -117,94 +126,6 @@ const Sheet = () => {
     );
   };
 
-  const HeaderCell = ({
-    columnIndex,
-    rowIndex,
-    style,
-  }: {
-    columnIndex: number;
-    rowIndex: number;
-    style: React.CSSProperties;
-  }) => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Meta' || event.key === 'Control') {
-        setIsCommandPressed(true);
-      }
-    };
-
-    const handleKeyUp = (event: KeyboardEvent) => {
-      if (event.key === 'Meta' || event.key === 'Control') {
-        setIsCommandPressed(false);
-      }
-    };
-
-    useEffect(() => {
-      document.addEventListener('keydown', handleKeyDown);
-      document.addEventListener('keyup', handleKeyUp);
-
-      return () => {
-        document.removeEventListener('keydown', handleKeyDown);
-        document.removeEventListener('keyup', handleKeyUp);
-      };
-    }, []);
-
-    const handleColumnSelection = (columnName: string) => {
-      if (isCommandPressed) {
-        console.log('if case');
-        setSelectedColumns((prevSelectedColumns) => {
-          console.log(
-            'prev selected columns,',
-            prevSelectedColumns,
-            columnName
-          );
-          if (prevSelectedColumns.includes(columnName)) {
-            return prevSelectedColumns.filter((name) => name !== columnName);
-          } else {
-            return [...prevSelectedColumns, columnName];
-          }
-        });
-      } else {
-        setSelectedColumns([columnName]);
-      }
-    };
-
-    useEffect(() => {
-      console.log('selectedColumns', selectedColumns);
-    }, [selectedColumns]);
-
-    useEffect(() => {
-      console.log('command pressed', isCommandPressed);
-    }, [isCommandPressed]);
-
-    return (
-      <Flex
-        height={9}
-        w={15}
-        bg={'white.500'}
-        alignItems={'center'}
-        justifyContent={'center'}
-        borderRightWidth={'0.4px'}
-        borderBottomWidth={'0.4px'}
-        borderColor={'grey.700'}
-        textAlign={'center'}
-        fontSize={'xs-12'}
-        lineHeight={'xs-12'}
-        color={'grey.600'}
-        fontWeight={'400'}
-        style={style}
-        onClick={() => handleColumnSelection(columns[columnIndex]?.columnId)}
-      >
-        {String.fromCharCode(65 + columnIndex)}
-        {columns[columnIndex]?.resizable && (
-          <ColumnResizer
-            column={columns[columnIndex]}
-            handleResize={handleResize}
-          />
-        )}
-      </Flex>
-    );
-  };
-
   const Cell = ({
     columnIndex,
     rowIndex,
@@ -214,15 +135,21 @@ const Sheet = () => {
     rowIndex: number;
     style: any;
   }) => {
+    const column = columns[columnIndex].columnId;
+    const isCellSelected = selectedColumns.includes(column);
     return (
       <Flex
         tabIndex={0}
         alignItems={'center'}
         w={60}
         height={9}
-        borderRightWidth={'0.4px'}
+        borderRightWidth={isCellSelected ? '1px' : '0.4px'}
+        borderLeftWidth={isCellSelected ? '1px' : '0'}
+        backgroundColor={
+          isCellSelected ? 'rgba(53,121,248,.35)' : 'transparent'
+        }
         borderBottomWidth={'0.4px'}
-        borderColor={'grey.700'}
+        borderColor={isCellSelected ? 'blue.500' : 'grey.700'}
         color={'grey.800'}
         style={style}
         onDoubleClick={(e) => handleDoubleClick(e, rowIndex, columnIndex)}
@@ -290,7 +217,24 @@ const Sheet = () => {
                     height={28}
                     width={width - 60}
                   >
-                    {HeaderCell}
+                    {({ columnIndex, rowIndex, style }) => {
+                      return (
+                        <HeaderCell
+                          column={columns[columnIndex]}
+                          columnIndex={columnIndex}
+                          rowIndex={rowIndex}
+                          handleResize={handleResize}
+                          style={style}
+                          selectedColumns={selectedColumns}
+                          setSelectedColumns={setSelectedColumns}
+                          isCommandPressed={isCommandPressed}
+                          setIsCommandPressed={setIsCommandPressed}
+                          setSelectedColumnsPosition={
+                            setSelectedColumnsPosition
+                          }
+                        />
+                      );
+                    }}
                   </Grid>
                 </Box>
               </Flex>
@@ -345,6 +289,23 @@ const Sheet = () => {
                   onBlur={(e) => setShowEditableCell(false)}
                 ></Flex>
               )}
+              {selectedColumnsPosition.map((position) => {
+                const columnIndex = columns.findIndex(
+                  (el) => el.columnId === position.columnName
+                );
+                const width = columns[columnIndex].width;
+                return (
+                  <Box
+                    key={columnIndex}
+                    position={'absolute'}
+                    top={'0'}
+                    left={`${position.left}px`}
+                    width={`${width}px`}
+                    height={'100%'}
+                    backgroundColor={'rgba(53,121,248,.35)'}
+                  ></Box>
+                );
+              })}
             </Flex>
           );
         }}
@@ -354,3 +315,118 @@ const Sheet = () => {
 };
 
 export default Sheet;
+
+export const HeaderCell = ({
+  column,
+  columnIndex,
+  rowIndex,
+  style,
+  handleResize,
+  selectedColumns,
+  setSelectedColumns,
+  isCommandPressed,
+  setIsCommandPressed,
+  setSelectedColumnsPosition,
+}: {
+  column: Column;
+  columnIndex: number;
+  rowIndex: number;
+  style: React.CSSProperties;
+  handleResize: Function;
+  selectedColumns: string[];
+  setSelectedColumns: React.Dispatch<React.SetStateAction<string[]>>;
+  isCommandPressed: boolean;
+  setIsCommandPressed: React.Dispatch<React.SetStateAction<boolean>>;
+  setSelectedColumnsPosition: React.Dispatch<
+    React.SetStateAction<
+      {
+        columnName: string;
+        left: number;
+        width: number;
+      }[]
+    >
+  >;
+}) => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Meta' || event.key === 'Control') {
+      setIsCommandPressed(true);
+    }
+  };
+
+  const handleKeyUp = (event: KeyboardEvent) => {
+    if (event.key === 'Meta' || event.key === 'Control') {
+      setIsCommandPressed(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  const handleColumnSelection = (
+    e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
+    columnName: string
+  ) => {
+    const element = e.currentTarget;
+    const position = element?.getBoundingClientRect();
+
+    const { left, width } = position;
+    if (isCommandPressed) {
+      setSelectedColumns((prevSelectedColumns) => {
+        if (prevSelectedColumns.includes(columnName)) {
+          return prevSelectedColumns.filter((name) => name !== columnName);
+        } else {
+          return [...prevSelectedColumns, columnName];
+        }
+      });
+      // setSelectedColumnsPosition((prevSelectedColumnsPostions) => {
+      //   const prevColumnNames = prevSelectedColumnsPostions.map(
+      //     (el) => el.columnName
+      //   );
+      //   if (prevColumnNames.includes(columnName)) {
+      //     return prevSelectedColumnsPostions.filter(
+      //       (column) => column.columnName !== columnName
+      //     );
+      //   } else {
+      //     return [...prevSelectedColumnsPostions, { columnName, left, width }];
+      //   }
+      // });
+    } else {
+      setSelectedColumns([columnName]);
+      // setSelectedColumnsPosition([{ columnName, left, width }]);
+    }
+  };
+
+  const isHeaderSelected = selectedColumns.includes(column.columnId);
+
+  return (
+    <Flex
+      height={9}
+      w={15}
+      bg={isHeaderSelected ? 'blue.500' : 'white.500'}
+      alignItems={'center'}
+      justifyContent={'center'}
+      borderRightWidth={'0.4px'}
+      borderBottomWidth={'0.4px'}
+      borderColor={'grey.700'}
+      textAlign={'center'}
+      fontSize={'xs-12'}
+      lineHeight={'xs-12'}
+      color={isHeaderSelected ? 'white.DEFAULT' : 'grey.600'}
+      fontWeight={'400'}
+      style={style}
+      onClick={(e) => handleColumnSelection(e, column?.columnId)}
+    >
+      {String.fromCharCode(65 + columnIndex)}
+      {column?.resizable && (
+        <ColumnResizer column={column} handleResize={handleResize} />
+      )}
+    </Flex>
+  );
+};

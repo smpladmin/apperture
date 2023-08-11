@@ -1,11 +1,11 @@
-import { Box, Flex, Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { Flex, Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import { range } from 'lodash';
 import React, { useRef, useState } from 'react';
 
 const Sheet = () => {
   const createRows = () => {
     const row = {} as { [key: string]: string };
-    const singleRow = columns.forEach((column) => {
+    columns.forEach((column) => {
       row[String.fromCharCode(65 + column)] = '';
     });
     return new Array(1000).fill(row);
