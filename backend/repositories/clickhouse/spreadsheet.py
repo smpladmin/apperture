@@ -112,3 +112,35 @@ class Spreadsheets(EventsBase):
 
         query = query.groupby(*range(1, len(dimensions) + 1)).limit(1000)
         return query.get_sql(), {"ds_id": datasource_id}
+
+    def build_transient_expression_query(
+        self, expressions: List[str], variables: dict, database: str, table: str
+    ):
+        query = ClickHouseQuery.from_(Table(table, schema=database))
+        for variable, column in variables.items():
+            query = query.select(Field(column).as_(variable))
+        for expression in expressions:
+            query = query.select((Parameter(expression[1:])).as_(expression))
+        query = query.limit(500)
+        return query.get_sql()
+
+    def compute_transient_expression(
+        self,
+        username: str,
+        password: str,
+        expressions: List[str],
+        variables: dict,
+        database: str,
+        table: str,
+    ):
+        query = self.build_transient_expression_query(
+            variables=variables, expressions=expressions, database=database, table=table
+        )
+
+        logging.info(f"compute_transient_expression query:  {query}")
+        restricted_client = self.clickhouse.get_connection_for_user(
+            username=username,
+            password=password,
+        )
+
+        return restricted_client.query(query=query)

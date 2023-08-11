@@ -24,6 +24,14 @@ class TransientSpreadsheetsDto(BaseModel):
     ai_query: Optional[AIQuery]
 
 
+class TransientExpressionDto(BaseModel):
+    datasourceId: str
+    expression: str
+    variables: dict
+    table: str
+    database: str
+
+
 class TransientSpreadsheetColumnDto(BaseModel):
     datasourceId: str
     dimensions: List[DimensionDefinition]

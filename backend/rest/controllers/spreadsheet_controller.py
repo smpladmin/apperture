@@ -16,6 +16,7 @@ from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
     CreateWorkBookDto,
     SavedWorkBookResponse,
+    TransientExpressionDto,
     TransientSpreadsheetColumnDto,
     TransientSpreadsheetsDto,
     WorkBookResponse,
@@ -86,6 +87,32 @@ async def compute_transient_spreadsheets(
     dto: TransientSpreadsheetsDto, compute_query_action: ComputeQueryAction = Depends()
 ):
     return await compute_query_action.compute_query(dto=dto)
+
+
+@router.post(
+    "/workbooks/spreadsheets/expression/transient",
+)
+async def compute_transient_expression(
+    dto: TransientExpressionDto,
+    spreadsheets_service: SpreadsheetService = Depends(),
+    compute_query_action: ComputeQueryAction = Depends(),
+):
+    try:
+        clickhouse_credential = await compute_query_action.get_credentials(
+            datasource_id=dto.datasourceId
+        )
+        return spreadsheets_service.compute_transient_expression(
+            username=clickhouse_credential.username,
+            password=clickhouse_credential.password,
+            expressions=[dto.expression],
+            variables=dto.variables,
+            table=dto.table,
+            database=dto.database,
+        )
+    except BusinessError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
+    except DatabaseError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
 
 
 @router.post(

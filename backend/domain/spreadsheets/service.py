@@ -10,12 +10,12 @@ from domain.integrations.models import MySQLCredential
 from domain.spreadsheets.models import (
     ColumnType,
     ComputedSpreadsheet,
+    DatabaseClient,
     DimensionDefinition,
     MetricDefinition,
     Spreadsheet,
     SpreadSheetColumn,
     WorkBook,
-    DatabaseClient,
 )
 from repositories.clickhouse.spreadsheet import Spreadsheets
 from repositories.mysql.mysql import MySql
@@ -158,3 +158,23 @@ class SpreadsheetService:
         return ComputedSpreadsheet(
             data=response["data"], headers=response["headers"], sql=""
         )
+
+    def compute_transient_expression(
+        self,
+        username: str,
+        password: str,
+        expressions: List[str],
+        variables: dict,
+        table: str,
+        database: str,
+    ):
+        result = self.spreadsheets.compute_transient_expression(
+            username=username,
+            password=password,
+            expressions=expressions,
+            variables=variables,
+            table=table,
+            database=database,
+        )
+        print(result.column_names)
+        return result.result_set
