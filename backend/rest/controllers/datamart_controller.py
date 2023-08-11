@@ -16,6 +16,7 @@ from rest.dtos.spreadsheets import (
     TransientSpreadsheetsDto,
 )
 from rest.middlewares import validate_jwt, get_user_id, get_user
+from rest.middlewares.validate_app_user import validate_app_user_middleware, validate_library_items_middleware
 
 router = APIRouter(
     tags=["datamart"],
@@ -24,14 +25,15 @@ router = APIRouter(
 )
 
 
-@router.post("/datamart/transient", response_model=ComputedSpreadsheetQueryResponse)
+@router.post("/datamart/transient", response_model=ComputedSpreadsheetQueryResponse,
+             dependencies=[Depends(validate_app_user_middleware)],)
 async def compute_datamart_query(
     dto: TransientSpreadsheetsDto, compute_query_action: ComputeQueryAction = Depends()
 ):
     return await compute_query_action.compute_query(dto=dto)
 
 
-@router.post("/datamart", response_model=DataMartResponse)
+@router.post("/datamart", response_model=DataMartResponse, dependencies=[Depends(validate_app_user_middleware)],)
 async def save_datamart_table(
     dto: DataMartTableDto,
     datasource_service: DataSourceService = Depends(),
@@ -62,7 +64,7 @@ async def save_datamart_table(
     return datamart_table
 
 
-@router.put("/datamart/{id}", response_model=DataMartResponse)
+@router.put("/datamart/{id}", response_model=DataMartResponse, dependencies=[Depends(validate_app_user_middleware)],)
 async def update_datamart_table(
     id: str,
     dto: DataMartTableDto,
@@ -96,7 +98,8 @@ async def update_datamart_table(
     return new_datamart_table
 
 
-@router.get("/datamart/{id}", response_model=DataMartResponse)
+@router.get("/datamart/{id}", response_model=DataMartResponse,
+            dependencies=[Depends(validate_library_items_middleware)],)
 async def get_saved_datamart_table(
     id: str,
     datamart_service: DataMartService = Depends(),
@@ -104,7 +107,8 @@ async def get_saved_datamart_table(
     return await datamart_service.get_datamart_table(id=id)
 
 
-@router.get("/datamart", response_model=List[DataMartWithUser])
+@router.get("/datamart", response_model=List[DataMartWithUser],
+            dependencies=[Depends(validate_app_user_middleware)],)
 async def get_datamart_tables(
     datasource_id: str,
     user: AppertureUser = Depends(get_user),
@@ -122,7 +126,7 @@ async def get_datamart_tables(
     return datamarts
 
 
-@router.delete("/datamart/{id}")
+@router.delete("/datamart/{id}", dependencies=[Depends(validate_library_items_middleware)],)
 async def delete_datamart_table(
     id: str,
     datamart_service: DataMartService = Depends(),

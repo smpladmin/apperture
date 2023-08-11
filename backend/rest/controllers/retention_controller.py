@@ -118,7 +118,11 @@ async def update_retention(
     return new_retention
 
 
-@router.get("/retention", response_model=List[RetentionWithUser])
+@router.get(
+    "/retention",
+    response_model=List[RetentionWithUser],
+    dependencies=[Depends(validate_app_user_middleware)],
+)
 async def get_retention_list(
     datasource_id: Union[str, None] = None,
     app_id: Union[str, None] = None,
@@ -127,7 +131,6 @@ async def get_retention_list(
     app_service: AppService = Depends(),
     user_service: AppertureUserService = Depends(),
 ):
-    retentions = []
     if app_id:
         apps = await app_service.get_apps(user=user)
         retentions = await retention_service.get_retentions_for_apps(
@@ -147,7 +150,10 @@ async def get_retention_list(
     return retentions
 
 
-@router.delete("/retention/{retention_id}")
+@router.delete(
+    "/retention/{retention_id}",
+    dependencies=[Depends(validate_library_items_middleware)],
+)
 async def delete_retention(
     retention_id: str,
     retention_service: RetentionService = Depends(),

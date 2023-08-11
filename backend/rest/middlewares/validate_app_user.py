@@ -1,4 +1,6 @@
 from fastapi import Request, HTTPException, Depends
+
+from domain.actions.models import Action
 from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
 from domain.datamart.models import DataMart
@@ -23,6 +25,7 @@ async def validate_library_items_middleware(
         "retention": Retention,
         "datamart": DataMart,
         "workbooks": WorkBook,
+        "actions": Action,
     }
     request_path = request.scope.get("path")
     path_details = request_path.split("/")
