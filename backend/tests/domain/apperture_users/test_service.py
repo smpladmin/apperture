@@ -4,7 +4,7 @@ import pytest
 
 from domain.apperture_users.models import AppertureUser
 from domain.apperture_users.service import AppertureUserService
-from repositories.clickhouse.parser.query_parser import BusinessError
+from utils.errors import BusinessError
 
 
 class TestUserService:

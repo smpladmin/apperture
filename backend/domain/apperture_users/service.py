@@ -3,7 +3,7 @@ from datetime import datetime
 from beanie import PydanticObjectId
 
 from authorisation import OAuthUser
-from repositories.clickhouse.parser.query_parser import BusinessError
+from utils.errors import BusinessError
 
 from .models import AppertureUser
 
@@ -28,19 +28,13 @@ class AppertureUserService:
         existing_user = await AppertureUser.find_one(AppertureUser.email == email)
         if existing_user:
             if not existing_user.is_signed_up:
-                return AppertureUser.find_one(
-                    AppertureUser.id == PydanticObjectId(existing_user.id),
-                ).update(
-                    {
-                        "$set": {
-                            "first_name": first_name,
-                            "last_name": last_name,
-                            "email": email,
-                            "password": password_hash,
-                            "has_visted_sheets": False,
-                        }
-                    }
-                )
+                existing_user.first_name = first_name
+                existing_user.last_name = last_name
+                existing_user.email = email
+                existing_user.password = password_hash
+                existing_user.has_visted_sheets = False
+                await existing_user.save()
+                return existing_user
             raise BusinessError("User already exists with this email")
 
         apperture_user = AppertureUser(

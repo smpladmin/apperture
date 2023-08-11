@@ -8,10 +8,10 @@ from authorisation import OAuthClientFactory, OAuthProvider
 from authorisation.jwt_auth import create_access_token
 from authorisation.service import AuthService
 from domain.apperture_users.service import AppertureUserService
-from repositories.clickhouse.parser.query_parser import BusinessError
 from rest.dtos.apperture_users import CreateUserDto, ResetPasswordDto
 from rest.middlewares import validate_recaptcha_token
 from settings import apperture_settings
+from utils.errors import BusinessError
 
 router = APIRouter(tags=["auth"])
 
