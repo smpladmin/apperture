@@ -15,6 +15,7 @@ from domain.clickstream_event_properties.service import (
     ClickStreamEventPropertiesService,
 )
 from domain.event_properties.service import EventPropertiesService
+from rest.middlewares.validate_app_user import validate_library_items_middleware, validate_app_user_middleware
 
 from server import app
 from mongo.mongo import Mongo
@@ -72,6 +73,8 @@ def app_init(
     print("Setting up App")
     app.dependency_overrides[validate_jwt] = lambda: mock.MagicMock()
     app.dependency_overrides[validate_api_key] = lambda: mock.MagicMock()
+    app.dependency_overrides[validate_library_items_middleware] = lambda: mock.MagicMock()
+    app.dependency_overrides[validate_app_user_middleware] = lambda: mock.MagicMock()
     app.dependency_overrides[get_user] = lambda: mock.MagicMock()
     app.dependency_overrides[get_user_id] = lambda: mock_user_id
     app.dependency_overrides[Mongo] = lambda: mock.MagicMock()
