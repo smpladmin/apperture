@@ -1,4 +1,3 @@
-import logging
 from typing import List, Optional, Union
 
 from fastapi import APIRouter, Depends
@@ -128,16 +127,11 @@ async def get_all_metrics(
     datasource_id: Union[str, None] = None,
     app_id: Optional[str] = None,
     user_id: str = Depends(get_user_id),
-    user: AppertureUser = Depends(get_user),
     metric_service: MetricService = Depends(),
-    app_service: AppService = Depends(),
     user_service: AppertureUserService = Depends(),
 ):
     if app_id:
-        apps = await app_service.get_apps(user=user)
-        metrics = await metric_service.get_metrics_for_apps(
-            app_ids=[app.id for app in apps]
-        )
+        metrics = await metric_service.get_metrics_by_app_id(app_id=app_id)
     elif datasource_id:
         metrics = await metric_service.get_metrics_for_datasource_id(
             datasource_id=datasource_id

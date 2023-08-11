@@ -15,6 +15,10 @@ from rest.dtos.segments import (
 )
 
 from rest.middlewares import validate_jwt, get_user, get_user_id
+from rest.middlewares.validate_app_user import (
+    validate_app_user_middleware,
+    validate_library_items_middleware,
+)
 
 router = APIRouter(
     tags=["segments"],
@@ -23,7 +27,11 @@ router = APIRouter(
 )
 
 
-@router.post("/segments/transient", response_model=ComputedSegmentResponse)
+@router.post(
+    "/segments/transient",
+    response_model=ComputedSegmentResponse,
+    dependencies=[Depends(validate_app_user_middleware)],
+)
 async def compute_transient_segment(
     dto: TransientSegmentDto,
     segment_service: SegmentService = Depends(),
@@ -35,7 +43,11 @@ async def compute_transient_segment(
     )
 
 
-@router.post("/segments", response_model=SegmentResponse)
+@router.post(
+    "/segments",
+    response_model=SegmentResponse,
+    dependencies=[Depends(validate_app_user_middleware)],
+)
 async def save_segment(
     dto: CreateSegmentDto,
     user: AppertureUser = Depends(get_user),
@@ -55,7 +67,11 @@ async def save_segment(
     return await segment_service.add_segment(segment=segment)
 
 
-@router.put("/segments/{id}", response_model=SegmentResponse)
+@router.put(
+    "/segments/{id}",
+    response_model=SegmentResponse,
+    dependencies=[Depends(validate_app_user_middleware)],
+)
 async def update_segment(
     id: str,
     dto: CreateSegmentDto,
@@ -77,7 +93,11 @@ async def update_segment(
     return segment
 
 
-@router.get("/segments/{segment_id}", response_model=SegmentResponse)
+@router.get(
+    "/segments/{segment_id}",
+    response_model=SegmentResponse,
+    dependencies=[Depends(validate_library_items_middleware)],
+)
 async def get_segment(
     segment_id: str,
     segment_service: SegmentService = Depends(),
@@ -85,7 +105,11 @@ async def get_segment(
     return await segment_service.get_segment(segment_id=segment_id)
 
 
-@router.get("/segments", response_model=List[SegmentWithUser])
+@router.get(
+    "/segments",
+    response_model=List[SegmentWithUser],
+    dependencies=[Depends(validate_app_user_middleware)],
+)
 async def get_segments(
     datasource_id: Union[str, None] = None,
     app_id: Optional[str] = None,
@@ -93,8 +117,6 @@ async def get_segments(
     segment_service: SegmentService = Depends(),
     user_service: AppertureUserService = Depends(),
 ):
-    segments = []
-
     if app_id:
         segments = await segment_service.get_segments_for_app(app_id=app_id)
     elif datasource_id:
@@ -111,7 +133,9 @@ async def get_segments(
     return segments
 
 
-@router.delete("/segments/{segment_id}")
+@router.delete(
+    "/segments/{segment_id}", dependencies=[Depends(validate_library_items_middleware)]
+)
 async def delete_segments(
     segment_id: str,
     segment_service: SegmentService = Depends(),
