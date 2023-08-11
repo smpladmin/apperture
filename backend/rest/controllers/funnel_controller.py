@@ -21,8 +21,8 @@ from rest.dtos.funnels import (
 )
 from rest.middlewares import get_user, get_user_id, validate_jwt
 from rest.middlewares.validate_app_user import (
-    validate_app_user_middleware,
-    validate_library_items_middleware,
+    validate_app_user,
+    validate_library_items,
 )
 
 router = APIRouter(
@@ -35,7 +35,7 @@ router = APIRouter(
 @router.post(
     "/funnels",
     response_model=FunnelResponse,
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def create_funnel(
     dto: CreateFunnelDto,
@@ -67,7 +67,7 @@ async def create_funnel(
 @router.post(
     "/funnels/transient",
     response_model=List[ComputedFunnelStepResponse],
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def compute_transient_funnel(
     dto: TransientFunnelDto,
@@ -86,7 +86,7 @@ async def compute_transient_funnel(
 @router.get(
     "/funnels/{id}",
     response_model=FunnelResponse,
-    dependencies=[Depends(validate_library_items_middleware)],
+    dependencies=[Depends(validate_library_items)],
 )
 async def get_saved_funnel(
     id: str,
@@ -98,7 +98,7 @@ async def get_saved_funnel(
 @router.put(
     "/funnels/{id}",
     response_model=FunnelResponse,
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def update_funnel(
     id: str,
@@ -132,7 +132,7 @@ async def update_funnel(
 @router.get(
     "/funnels/{id}/trends",
     response_model=List[FunnelTrendResponse],
-    dependencies=[Depends(validate_library_items_middleware)],
+    dependencies=[Depends(validate_library_items)],
 )
 async def get_funnel_trends(
     id: str,
@@ -152,7 +152,7 @@ async def get_funnel_trends(
 @router.post(
     "/funnels/trends/transient",
     response_model=List[FunnelTrendResponse],
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def get_transient_funnel_trends(
     dto: TransientFunnelDto,
@@ -171,7 +171,7 @@ async def get_transient_funnel_trends(
 @router.post(
     "/funnels/analytics/transient",
     response_model=FunnelConversionResponseBody,
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def get_transient_funnel_analytics(
     dto: TransientFunnelConversionlDto,
@@ -191,7 +191,7 @@ async def get_transient_funnel_analytics(
 @router.get(
     "/funnels",
     response_model=List[FunnelWithUser],
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def get_funnels(
     datasource_id: Union[str, None] = None,
@@ -221,7 +221,7 @@ async def get_funnels(
 
 
 @router.delete(
-    "/funnels/{funnel_id}", dependencies=[Depends(validate_app_user_middleware)]
+    "/funnels/{funnel_id}", dependencies=[Depends(validate_app_user)]
 )
 async def delete_funnel(
     funnel_id: str,

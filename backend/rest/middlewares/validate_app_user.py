@@ -1,3 +1,6 @@
+from typing import Union
+
+from beanie import PydanticObjectId
 from fastapi import Request, HTTPException, Depends
 
 from domain.actions.models import Action
@@ -13,7 +16,7 @@ from domain.spreadsheets.models import WorkBook
 from rest.middlewares import get_user
 
 
-async def validate_library_items_middleware(
+async def validate_library_items(
     request: Request,
     user: AppertureUser = Depends(get_user),
     app_service: AppService = Depends(),
@@ -43,30 +46,34 @@ async def validate_library_items_middleware(
             raise HTTPException(status_code=403, detail="Access forbidden")
 
 
-async def validate_app_user_middleware(
+def _get_key_from_request(request: Request, key: str) -> Union[str, None]:
+    value = None
+    dto = request._json if hasattr(request, "_json") else None
+
+    if key in request.query_params:
+        value = request.query_params[key]
+    elif dto:
+        value = dto.get(key)
+
+    return value
+
+
+async def _get_app_id_from_datasource_id(datasource_id: str, ds_service: DataSourceService = Depends(),) -> PydanticObjectId:
+    datasource = await ds_service.get_datasource(datasource_id)
+    return datasource.app_id
+
+
+async def validate_app_user(
     request: Request,
     user: AppertureUser = Depends(get_user),
     app_service: AppService = Depends(),
-    ds_service: DataSourceService = Depends(),
 ):
-    ds_id = None
-    app_id = None
-    dto = request._json if hasattr(request, "_json") else None
-
-    if "app_id" in request.query_params:
-        app_id = request.query_params["app_id"]
-    elif dto:
-        app_id = dto.get("appId")
+    app_id = _get_key_from_request(request=request, key="app_id")
 
     if not app_id:
-        if "datasource_id" in request.query_params:
-            ds_id = request.query_params["datasource_id"]
-        elif dto:
-            ds_id = dto.get("datasourceId")
-
-    if ds_id:
-        datasource = await ds_service.get_datasource(ds_id)
-        app_id = datasource.app_id
+        datasource_id = _get_key_from_request(request=request, key="datasource_id")
+        if datasource_id:
+            app_id = await _get_app_id_from_datasource_id(datasource_id=datasource_id)
 
     is_valid_user = await app_service.is_valid_user_for_app(app_id=app_id, user=user)
     if not is_valid_user:

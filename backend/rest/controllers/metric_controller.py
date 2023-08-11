@@ -19,8 +19,8 @@ from rest.dtos.metrics import (
 from rest.middlewares import get_user, get_user_id, validate_jwt
 from domain.notifications.service import NotificationService
 from rest.middlewares.validate_app_user import (
-    validate_app_user_middleware,
-    validate_library_items_middleware,
+    validate_app_user,
+    validate_library_items,
 )
 
 router = APIRouter(
@@ -31,7 +31,7 @@ router = APIRouter(
 @router.post(
     "/metrics/compute",
     response_model=List[ComputedMetricStepResponse],
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def compute_metrics(
     dto: MetricsComputeDto,
@@ -58,7 +58,7 @@ async def compute_metrics(
 @router.post(
     "/metrics",
     response_model=SavedMetricResponse,
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def save_metrics(
     dto: CreateMetricDTO,
@@ -84,7 +84,7 @@ async def save_metrics(
 @router.put(
     "/metrics/{id}",
     response_model=SavedMetricResponse,
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def update_metric(
     id: str,
@@ -121,7 +121,7 @@ async def update_metric(
         List[MetricWithUser],
         List[SavedMetricResponse],
     ],
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def get_all_metrics(
     datasource_id: Union[str, None] = None,
@@ -149,7 +149,7 @@ async def get_all_metrics(
 @router.get(
     "/metrics/{id}",
     response_model=SavedMetricResponse,
-    dependencies=[Depends(validate_library_items_middleware)],
+    dependencies=[Depends(validate_library_items)],
 )
 async def get_metric_by_id(
     id: str,
@@ -169,7 +169,7 @@ async def validate_metric_formula(
 
 
 @router.delete(
-    "/metrics/{metric_id}", dependencies=[Depends(validate_app_user_middleware)]
+    "/metrics/{metric_id}", dependencies=[Depends(validate_app_user)]
 )
 async def delete_metrics(
     metric_id: str,

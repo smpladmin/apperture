@@ -18,8 +18,8 @@ from rest.dtos.retention import (
 
 from rest.middlewares import validate_jwt, get_user_id, get_user
 from rest.middlewares.validate_app_user import (
-    validate_app_user_middleware,
-    validate_library_items_middleware,
+    validate_app_user,
+    validate_library_items,
 )
 
 router = APIRouter(
@@ -32,7 +32,7 @@ router = APIRouter(
 @router.post(
     "/retention/transient",
     response_model=List[ComputedRetentionResponse],
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def compute_transient_retention(
     dto: TransientRetentionDto,
@@ -51,7 +51,7 @@ async def compute_transient_retention(
 @router.post(
     "/retention",
     response_model=RetentionResponse,
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def create_retention(
     dto: CreateRetentionDto,
@@ -79,7 +79,7 @@ async def create_retention(
 @router.get(
     "/retention/{id}",
     response_model=RetentionResponse,
-    dependencies=[Depends(validate_library_items_middleware)],
+    dependencies=[Depends(validate_library_items)],
 )
 async def get_retention(
     id: str,
@@ -91,7 +91,7 @@ async def get_retention(
 @router.put(
     "/retention/{id}",
     response_model=RetentionResponse,
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def update_retention(
     id: str,
@@ -121,7 +121,7 @@ async def update_retention(
 @router.get(
     "/retention",
     response_model=List[RetentionWithUser],
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def get_retention_list(
     datasource_id: Union[str, None] = None,
@@ -152,7 +152,7 @@ async def get_retention_list(
 
 @router.delete(
     "/retention/{retention_id}",
-    dependencies=[Depends(validate_library_items_middleware)],
+    dependencies=[Depends(validate_library_items)],
 )
 async def delete_retention(
     retention_id: str,

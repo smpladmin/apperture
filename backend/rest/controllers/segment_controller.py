@@ -16,8 +16,8 @@ from rest.dtos.segments import (
 
 from rest.middlewares import validate_jwt, get_user, get_user_id
 from rest.middlewares.validate_app_user import (
-    validate_app_user_middleware,
-    validate_library_items_middleware,
+    validate_app_user,
+    validate_library_items,
 )
 
 router = APIRouter(
@@ -30,7 +30,7 @@ router = APIRouter(
 @router.post(
     "/segments/transient",
     response_model=ComputedSegmentResponse,
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def compute_transient_segment(
     dto: TransientSegmentDto,
@@ -46,7 +46,7 @@ async def compute_transient_segment(
 @router.post(
     "/segments",
     response_model=SegmentResponse,
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def save_segment(
     dto: CreateSegmentDto,
@@ -70,7 +70,7 @@ async def save_segment(
 @router.put(
     "/segments/{id}",
     response_model=SegmentResponse,
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def update_segment(
     id: str,
@@ -96,7 +96,7 @@ async def update_segment(
 @router.get(
     "/segments/{segment_id}",
     response_model=SegmentResponse,
-    dependencies=[Depends(validate_library_items_middleware)],
+    dependencies=[Depends(validate_library_items)],
 )
 async def get_segment(
     segment_id: str,
@@ -108,7 +108,7 @@ async def get_segment(
 @router.get(
     "/segments",
     response_model=List[SegmentWithUser],
-    dependencies=[Depends(validate_app_user_middleware)],
+    dependencies=[Depends(validate_app_user)],
 )
 async def get_segments(
     datasource_id: Union[str, None] = None,
@@ -134,7 +134,7 @@ async def get_segments(
 
 
 @router.delete(
-    "/segments/{segment_id}", dependencies=[Depends(validate_library_items_middleware)]
+    "/segments/{segment_id}", dependencies=[Depends(validate_library_items)]
 )
 async def delete_segments(
     segment_id: str,
