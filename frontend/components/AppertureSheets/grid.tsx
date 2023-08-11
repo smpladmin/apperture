@@ -1,19 +1,13 @@
 import { Box, Flex } from '@chakra-ui/react';
 import { range, throttle } from 'lodash';
-import React, {
-  MouseEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   VariableSizeGrid as Grid,
   GridOnScrollProps,
   VariableSizeGrid,
 } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import ColumnResizer from './ColumnResizer2';
+import ColumnResizer from './ColumnResizer';
 
 export type Column = {
   columnId: string;
@@ -33,7 +27,7 @@ const Sheet = () => {
   const createColumns = () => {
     const columns: Column[] = range(26).map((column, i) => ({
       columnId: String.fromCharCode(65 + column),
-      width: i === 2 ? 100 : 240,
+      width: 240,
       resizable: true,
     }));
     return columns;
@@ -45,9 +39,6 @@ const Sheet = () => {
   const [rows, setRows] = useState(createRows(columns));
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [isCommandPressed, setIsCommandPressed] = useState(false);
-  const [selectedColumnsPosition, setSelectedColumnsPosition] = useState<
-    Array<{ columnName: string; left: number; width: number }>
-  >([]);
 
   const staticGrid = React.useRef<VariableSizeGrid>(null);
   const staticGrid2 = React.useRef<VariableSizeGrid>(null);
@@ -63,10 +54,9 @@ const Sheet = () => {
       prevColumns[columnIndex] = updatedColumn;
       return [...prevColumns];
     });
-  }, 100);
+  }, 50);
 
   useEffect(() => {
-    console.log({ columns });
     staticGrid2.current?.resetAfterIndices({
       columnIndex: 0,
       rowIndex: 0,
@@ -123,39 +113,6 @@ const Sheet = () => {
         style={style}
       >
         {rowIndex + 1}
-      </Flex>
-    );
-  };
-
-  const Cell = ({
-    columnIndex,
-    rowIndex,
-    style,
-  }: {
-    columnIndex: number;
-    rowIndex: number;
-    style: any;
-  }) => {
-    const column = columns[columnIndex].columnId;
-    const isCellSelected = selectedColumns.includes(column);
-    return (
-      <Flex
-        tabIndex={0}
-        alignItems={'center'}
-        w={60}
-        height={9}
-        borderRightWidth={isCellSelected ? '1px' : '0.4px'}
-        borderLeftWidth={isCellSelected ? '1px' : '0'}
-        backgroundColor={
-          isCellSelected ? 'rgba(53,121,248,.35)' : 'transparent'
-        }
-        borderBottomWidth={'0.4px'}
-        borderColor={isCellSelected ? 'blue.500' : 'grey.700'}
-        color={'grey.800'}
-        style={style}
-        onDoubleClick={(e) => handleDoubleClick(e, rowIndex, columnIndex)}
-      >
-        Item {rowIndex},{columnIndex}
       </Flex>
     );
   };
@@ -230,9 +187,6 @@ const Sheet = () => {
                           setSelectedColumns={setSelectedColumns}
                           isCommandPressed={isCommandPressed}
                           setIsCommandPressed={setIsCommandPressed}
-                          setSelectedColumnsPosition={
-                            setSelectedColumnsPosition
-                          }
                         />
                       );
                     }}
@@ -268,7 +222,18 @@ const Sheet = () => {
                     height={height - 28}
                     width={width - 60}
                   >
-                    {Cell}
+                    {({ columnIndex, rowIndex, style }) => {
+                      return (
+                        <Cell
+                          column={columns[columnIndex]}
+                          columnIndex={columnIndex}
+                          rowIndex={rowIndex}
+                          style={style}
+                          selectedColumns={selectedColumns}
+                          handleDoubleClick={handleDoubleClick}
+                        />
+                      );
+                    }}
                   </Grid>
                 </Box>
               </Flex>
@@ -288,25 +253,8 @@ const Sheet = () => {
                   alignItems={'center'}
                   px={1}
                   onBlur={(e) => setShowEditableCell(false)}
-                ></Flex>
+                />
               )}
-              {selectedColumnsPosition.map((position) => {
-                const columnIndex = columns.findIndex(
-                  (el) => el.columnId === position.columnName
-                );
-                const width = columns[columnIndex].width;
-                return (
-                  <Box
-                    key={columnIndex}
-                    position={'absolute'}
-                    top={'0'}
-                    left={`${position.left}px`}
-                    width={`${width}px`}
-                    height={'100%'}
-                    backgroundColor={'rgba(53,121,248,.35)'}
-                  ></Box>
-                );
-              })}
             </Flex>
           );
         }}
@@ -327,26 +275,16 @@ export const HeaderCell = ({
   setSelectedColumns,
   isCommandPressed,
   setIsCommandPressed,
-  setSelectedColumnsPosition,
 }: {
   column: Column;
   columnIndex: number;
   rowIndex: number;
   style: React.CSSProperties;
-  handleResize: Function;
+  handleResize: (columnId: string, newWidth: number) => void;
   selectedColumns: string[];
   setSelectedColumns: React.Dispatch<React.SetStateAction<string[]>>;
   isCommandPressed: boolean;
   setIsCommandPressed: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedColumnsPosition: React.Dispatch<
-    React.SetStateAction<
-      {
-        columnName: string;
-        left: number;
-        width: number;
-      }[]
-    >
-  >;
 }) => {
   const handleKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Meta' || event.key === 'Control') {
@@ -386,21 +324,8 @@ export const HeaderCell = ({
           return [...prevSelectedColumns, columnName];
         }
       });
-      // setSelectedColumnsPosition((prevSelectedColumnsPostions) => {
-      //   const prevColumnNames = prevSelectedColumnsPostions.map(
-      //     (el) => el.columnName
-      //   );
-      //   if (prevColumnNames.includes(columnName)) {
-      //     return prevSelectedColumnsPostions.filter(
-      //       (column) => column.columnName !== columnName
-      //     );
-      //   } else {
-      //     return [...prevSelectedColumnsPostions, { columnName, left, width }];
-      //   }
-      // });
     } else {
       setSelectedColumns([columnName]);
-      // setSelectedColumnsPosition([{ columnName, left, width }]);
     }
   };
 
@@ -422,18 +347,49 @@ export const HeaderCell = ({
       color={isHeaderSelected ? 'white.DEFAULT' : 'grey.600'}
       fontWeight={'400'}
       style={style}
-      // onClick={(e) => handleColumnSelection(e, column?.columnId)}
+      onClick={(e) => handleColumnSelection(e, column?.columnId)}
     >
       {String.fromCharCode(65 + columnIndex)}
       {column?.resizable && (
-        <ColumnResizer
-          column={column}
-          onResize={(columnId, width) => {
-            console.log(columnId, width);
-            handleResize(columnId, width);
-          }}
-        />
+        <ColumnResizer column={column} handleResize={handleResize} />
       )}
+    </Flex>
+  );
+};
+
+export const Cell = ({
+  column,
+  columnIndex,
+  rowIndex,
+  style,
+  selectedColumns,
+  handleDoubleClick,
+}: {
+  column: Column;
+  columnIndex: number;
+  rowIndex: number;
+  style: any;
+  selectedColumns: string[];
+  handleDoubleClick: Function;
+}) => {
+  const columnId = column.columnId;
+  const isCellSelected = selectedColumns.includes(columnId);
+  return (
+    <Flex
+      tabIndex={0}
+      alignItems={'center'}
+      w={60}
+      height={9}
+      borderRightWidth={isCellSelected ? '1px' : '0.4px'}
+      borderLeftWidth={isCellSelected ? '1px' : '0'}
+      backgroundColor={isCellSelected ? 'rgba(53,121,248,.35)' : 'transparent'}
+      borderBottomWidth={'0.4px'}
+      borderColor={isCellSelected ? 'blue.500' : 'grey.700'}
+      color={'grey.800'}
+      style={style}
+      onDoubleClick={(e) => handleDoubleClick(e, rowIndex, columnIndex)}
+    >
+      Item {rowIndex},{columnIndex}
     </Flex>
   );
 };
