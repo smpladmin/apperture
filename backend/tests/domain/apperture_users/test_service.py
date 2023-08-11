@@ -1,3 +1,4 @@
+from collections import namedtuple
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -15,6 +16,12 @@ class TestUserService:
         self.new_password = "argon3"
         AppertureUser.get_settings = MagicMock()
         AppertureUser.insert = AsyncMock()
+        FindMock = namedtuple("FindMock", ["to_list"])
+        AppertureUser.find = MagicMock(
+            return_value=FindMock(
+                to_list=AsyncMock(),
+            ),
+        )
 
     @pytest.mark.asyncio
     async def test_create_user_with_password_new_user(self):
@@ -39,3 +46,13 @@ class TestUserService:
         )
 
         assert user == existing_user
+
+    @pytest.mark.asyncio
+    async def test_get_all_apperture_users(self):
+        await self.service.get_all_apperture_users()
+        AppertureUser.find.assert_called_once_with()
+
+    @pytest.mark.asyncio
+    async def test_create_invited_user(self):
+        await self.service.create_invited_user(email="test.mail.com")
+        AppertureUser.insert.assert_called()

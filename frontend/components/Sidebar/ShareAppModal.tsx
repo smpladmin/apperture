@@ -13,7 +13,10 @@ import {
 } from '@chakra-ui/react';
 import { AppertureUser } from '@lib/domain/user';
 import { get_user_domain, update_app } from '@lib/services/appService';
-import { get_apperture_users } from '@lib/services/userService';
+import {
+  getAppertureUserInfo,
+  get_apperture_users,
+} from '@lib/services/userService';
 import { BLACK, WHITE_DEFAULT } from '@theme/index';
 import { useEffect, useState } from 'react';
 import GeneralAccessDropdown from './GeneralAccessDropdown';
@@ -34,6 +37,7 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
     initalDropdownOptions
   );
   const [selectedOption, setSelectedOption] = useState<string>('Restricted');
+  const [currentUserEmail, setCurrentUserEmail] = useState('');
 
   const handleDropdownChange = (newValue: string) => {
     setSelectedOption(newValue);
@@ -59,9 +63,14 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
           setSelectedOption(res.domain);
         }
       };
+      const getCurrentUser = async () => {
+        const currentUser = await getAppertureUserInfo();
+        setCurrentUserEmail(currentUser.email);
+      };
       setUsers();
       setUsersForApp();
       getDomain();
+      getCurrentUser();
     }
   }, [isOpen]);
 
@@ -108,17 +117,20 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
           Share this workspace
         </ModalHeader>
         <ModalBody overflowY={'auto'} pb={'0'}>
-          <Flex direction={'column'} gap={'24px'}>
+          <Flex direction={'column'} gap={6}>
             <Text>Invite members to collaborate</Text>
             <MultiSelectDropdown
               existingUsers={existingUsers}
               selectedValues={selectedValues}
               setSelectedValues={setSelectedValues}
             />
-            <Stack direction={'column'}>
+            <Text fontSize={'xs-16'} fontWeight={500}>
+              People with access
+            </Text>
+            <Stack direction={'column'} gap={2}>
               {appUsers.map((user, index) => {
                 return (
-                  <Flex gap={'12px'} alignItems={'center'} key={index}>
+                  <Flex gap={3} alignItems={'center'} key={index}>
                     <Avatar
                       name={user.firstName}
                       fontWeight={'bold'}
@@ -136,7 +148,7 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
                         lineHeight={'lh-130'}
                       >
                         {`${user.firstName} ${user.lastName} ${
-                          index == 0 ? '(Owner)' : ''
+                          currentUserEmail == user.email ? '(you)' : ''
                         }`}
                       </Text>
                       <Text
@@ -163,12 +175,12 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
             />
           </Flex>
         </ModalBody>
-        <ModalFooter pt={'24px'} pb={'32px'} display={'block'}>
-          <Flex justifyContent={'flex-end'} gap={'8px'}>
+        <ModalFooter pt={6} pb={8} display={'block'}>
+          <Flex justifyContent={'flex-end'} gap={2}>
             <Button
               w={'90px'}
               h={'42px'}
-              px={'16px'}
+              px={4}
               py={'6px'}
               borderRadius={'8px'}
               borderColor={BLACK}
@@ -185,7 +197,7 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
             <Button
               w={'90px'}
               h={'42px'}
-              px={'16px'}
+              px={4}
               py={'6px'}
               borderRadius={'8px'}
               borderColor={BLACK}
