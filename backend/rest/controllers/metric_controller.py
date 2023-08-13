@@ -1,10 +1,10 @@
+import logging
 from typing import List, Optional, Union
 
 from fastapi import APIRouter, Depends
 
 from domain.apperture_users.models import AppertureUser
 from domain.apperture_users.service import AppertureUserService
-from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
 from domain.metrics.service import MetricService
 from rest.dtos.apperture_users import AppertureUserResponse
@@ -18,21 +18,13 @@ from rest.dtos.metrics import (
 )
 from rest.middlewares import get_user, get_user_id, validate_jwt
 from domain.notifications.service import NotificationService
-from rest.middlewares.validate_app_user import (
-    validate_app_user,
-    validate_library_items,
-)
 
 router = APIRouter(
     tags=["metrics"], dependencies=[Depends(validate_jwt)], responses={401: {}}
 )
 
 
-@router.post(
-    "/metrics/compute",
-    response_model=List[ComputedMetricStepResponse],
-    dependencies=[Depends(validate_app_user)],
-)
+@router.post("/metrics/compute", response_model=List[ComputedMetricStepResponse])
 async def compute_metrics(
     dto: MetricsComputeDto,
     metric_service: MetricService = Depends(),
@@ -55,11 +47,7 @@ async def compute_metrics(
     ]
 
 
-@router.post(
-    "/metrics",
-    response_model=SavedMetricResponse,
-    dependencies=[Depends(validate_app_user)],
-)
+@router.post("/metrics", response_model=SavedMetricResponse)
 async def save_metrics(
     dto: CreateMetricDTO,
     user: AppertureUser = Depends(get_user),
@@ -81,11 +69,7 @@ async def save_metrics(
     return await metric_service.add_metric(metric=metric)
 
 
-@router.put(
-    "/metrics/{id}",
-    response_model=SavedMetricResponse,
-    dependencies=[Depends(validate_app_user)],
-)
+@router.put("/metrics/{id}", response_model=SavedMetricResponse)
 async def update_metric(
     id: str,
     dto: CreateMetricDTO,
@@ -121,16 +105,20 @@ async def update_metric(
         List[MetricWithUser],
         List[SavedMetricResponse],
     ],
-    dependencies=[Depends(validate_app_user)],
 )
 async def get_all_metrics(
     datasource_id: Union[str, None] = None,
     app_id: Optional[str] = None,
     user_id: str = Depends(get_user_id),
+    user: AppertureUser = Depends(get_user),
     metric_service: MetricService = Depends(),
     user_service: AppertureUserService = Depends(),
 ):
+    metrics = []
+    logging.info("PROD DEBUG GETTING ALL METRICS")
+
     if app_id:
+        logging.info(f"PROD DEBUG GETTING ALL METRICS BY APP_ID {app_id}")
         metrics = await metric_service.get_metrics_by_app_id(app_id=app_id)
     elif datasource_id:
         metrics = await metric_service.get_metrics_for_datasource_id(
@@ -139,18 +127,17 @@ async def get_all_metrics(
     else:
         metrics = await metric_service.get_metrics_for_user_id(user_id=user_id)
 
+    logging.info(f"Got metrics {metrics} from service")
     metrics = [MetricWithUser.from_orm(m) for m in metrics]
+    logging.info(f"ORM metrics: {metrics}")
     for metric in metrics:
         apperture_user = await user_service.get_user(id=str(metric.user_id))
         metric.user = AppertureUserResponse.from_orm(apperture_user)
+    logging.info(f"Final metrics: {metrics}")
     return metrics
 
 
-@router.get(
-    "/metrics/{id}",
-    response_model=SavedMetricResponse,
-    dependencies=[Depends(validate_library_items)],
-)
+@router.get("/metrics/{id}", response_model=SavedMetricResponse)
 async def get_metric_by_id(
     id: str,
     metric_service: MetricService = Depends(),
@@ -168,9 +155,7 @@ async def validate_metric_formula(
     )
 
 
-@router.delete(
-    "/metrics/{metric_id}", dependencies=[Depends(validate_app_user)]
-)
+@router.delete("/metrics/{metric_id}")
 async def delete_metrics(
     metric_id: str,
     datasource_id: str,
