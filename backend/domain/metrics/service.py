@@ -245,7 +245,7 @@ class MetricService:
     async def get_metric_by_id(self, metric_id: str):
         return await Metric.find_one(Metric.id == PydanticObjectId(metric_id))
 
-    async def get_metrics_by_app_id(self, app_id: str) -> List[Metric]:
+    async def get_metrics_by_app_id(self, app_id: str):
         return await Metric.find(
             Metric.app_id == PydanticObjectId(app_id),
             Metric.enabled != False,
