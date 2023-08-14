@@ -70,7 +70,9 @@ class IntegrationService:
         )
 
     async def get_app_integrations(self, app_id: PydanticObjectId) -> list[Integration]:
-        return await Integration.find(Integration.app_id == app_id).to_list()
+        return await Integration.find(
+            Integration.app_id == app_id, Integration.enabled != False
+        ).to_list()
 
     async def get_integration(self, id: str) -> Integration:
         return await Integration.get(id)

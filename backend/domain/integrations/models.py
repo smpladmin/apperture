@@ -63,6 +63,7 @@ class Integration(Document):
     app_id: Indexed(PydanticObjectId)
     provider: IntegrationProvider
     credential: Credential = Field(hidden=True)
+    enabled: Optional[bool]
 
     class Settings:
         name = "integrations"
