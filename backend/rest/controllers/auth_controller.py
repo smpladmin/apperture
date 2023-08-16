@@ -1,12 +1,13 @@
 import os
-from fastapi import APIRouter, Request, HTTPException, status, Depends
+
 from authlib.integrations.starlette_client import OAuthError
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from starlette.responses import RedirectResponse
 
+from authorisation import OAuthClientFactory, OAuthProvider
 from authorisation.jwt_auth import create_access_token
 from authorisation.service import AuthService
 from domain.apperture_users.service import AppertureUserService
-from authorisation import OAuthClientFactory, OAuthProvider
 from rest.dtos.apperture_users import CreateUserDto
 from settings import apperture_settings
 
@@ -36,6 +37,12 @@ async def login_with_password(
     auth_service: AuthService = Depends(),
 ):
     apperture_user = await user_service.get_user_by_email(email)
+    if not apperture_user:
+        HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     new_hash = auth_service.verify_password(apperture_user.password, password)
     if not new_hash:
         raise HTTPException(
