@@ -1,13 +1,13 @@
 from collections import namedtuple
 from datetime import datetime
-
 from unittest.mock import AsyncMock, MagicMock
-from beanie import PydanticObjectId
 
 import pytest
+from beanie import PydanticObjectId
+
+from domain.apperture_users.models import AppertureUser
 from domain.apps.models import App, ClickHouseCredential, OrgAccess
 from domain.apps.service import AppService
-from domain.apperture_users.models import AppertureUser
 
 
 class TestAppService:
@@ -74,7 +74,12 @@ class TestAppService:
         App.id = MagicMock()
         App.user_id = MagicMock()
         app_id = str(PydanticObjectId())
-        owner_id = str(PydanticObjectId())
+        owner_id = AppertureUser(
+            id=PydanticObjectId(),
+            first_name="asdas",
+            last_name="asdasdA",
+            email="asdas@ada",
+        )
 
         app = await service.share_app(app_id, owner_id, [self.user.id])
 
