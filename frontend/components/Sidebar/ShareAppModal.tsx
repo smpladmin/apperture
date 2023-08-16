@@ -25,13 +25,22 @@ import MultiSelectDropdown from './MultiSelectDropdown';
 type ShareAppModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  setRefreshAppUserList: Function;
   appId: string;
+  users: AppertureUser[];
 };
 
-const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
+const ShareAppModal = ({
+  isOpen,
+  onClose,
+  appId,
+  users,
+  setRefreshAppUserList,
+}: ShareAppModalProps) => {
+  console.log(users);
   const [existingUsers, setExistingUsers] = useState<AppertureUser[]>([]);
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
-  const [appUsers, setAppUsers] = useState<AppertureUser[]>([]);
+  // const [appUsers, setAppUsers] = useState<AppertureUser[]>(users);
   const initalDropdownOptions = ['Restricted'];
   const [dropdownOptions, setDropdownOptions] = useState<string[]>(
     initalDropdownOptions
@@ -50,10 +59,6 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
         const allAppertureUsers = await get_apperture_users(null);
         setExistingUsers(allAppertureUsers);
       };
-      const setUsersForApp = async () => {
-        const users = await get_apperture_users(appId);
-        setAppUsers(users);
-      };
       const getDomain = async () => {
         const res = await get_user_domain(appId);
         if (res?.domain) {
@@ -68,7 +73,6 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
         setCurrentUserEmail(currentUser.email);
       };
       setUsers();
-      setUsersForApp();
       getDomain();
       getCurrentUser();
     }
@@ -123,46 +127,48 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
               existingUsers={existingUsers}
               selectedValues={selectedValues}
               setSelectedValues={setSelectedValues}
+              setRefreshAppUserList={setRefreshAppUserList}
             />
             <Text fontSize={'xs-16'} fontWeight={500}>
               People with access
             </Text>
             <Stack direction={'column'} gap={2}>
-              {appUsers.map((user, index) => {
-                return (
-                  <Flex gap={3} alignItems={'center'} key={index}>
-                    <Avatar
-                      name={user.firstName}
-                      fontWeight={'bold'}
-                      size="sm"
-                      textColor={'white'}
-                      h={{ base: '8', md: '12' }}
-                      w={{ base: '8', md: '12' }}
-                      fontSize={{ base: 'xs', md: 'xs-14' }}
-                      lineHeight={{ base: 'xs', md: 'xs-14' }}
-                    />
-                    <Flex direction={'column'}>
-                      <Text
-                        fontSize={'xs-14'}
-                        fontWeight={500}
-                        lineHeight={'lh-130'}
-                      >
-                        {`${user.firstName} ${user.lastName} ${
-                          currentUserEmail == user.email ? '(you)' : ''
-                        }`}
-                      </Text>
-                      <Text
-                        fontSize={'xs-12'}
-                        fontWeight={400}
-                        lineHeight={'lh-135'}
-                        color={'grey.800'}
-                      >
-                        {user.email}
-                      </Text>
+              {users.length &&
+                users.map((user, index) => {
+                  return (
+                    <Flex gap={3} alignItems={'center'} key={index}>
+                      <Avatar
+                        name={user.firstName}
+                        fontWeight={'bold'}
+                        size="sm"
+                        textColor={'white'}
+                        h={{ base: '8', md: '12' }}
+                        w={{ base: '8', md: '12' }}
+                        fontSize={{ base: 'xs', md: 'xs-14' }}
+                        lineHeight={{ base: 'xs', md: 'xs-14' }}
+                      />
+                      <Flex direction={'column'}>
+                        <Text
+                          fontSize={'xs-14'}
+                          fontWeight={500}
+                          lineHeight={'lh-130'}
+                        >
+                          {`${user.firstName || ''} ${user.lastName || ''} ${
+                            currentUserEmail == user.email ? '(you)' : ''
+                          }`}
+                        </Text>
+                        <Text
+                          fontSize={'xs-12'}
+                          fontWeight={400}
+                          lineHeight={'lh-135'}
+                          color={'grey.800'}
+                        >
+                          {user.email}
+                        </Text>
+                      </Flex>
                     </Flex>
-                  </Flex>
-                );
-              })}
+                  );
+                })}
             </Stack>
 
             <Text fontSize={'xs-16'} fontWeight={500} lineHeight={'lh-120'}>

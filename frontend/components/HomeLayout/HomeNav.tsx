@@ -16,12 +16,24 @@ import { useRouter } from 'next/router';
 import AppsModal from '@components/Sidebar/AppsModal';
 import ConfigureAppsModal from '@components/ConfigureAppsModal';
 import { getAppId } from '../Home/util';
-import { Menu, MenuButton, MenuList, MenuItem, IconButton } from '@chakra-ui/react';
+import {
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  IconButton,
+} from '@chakra-ui/react';
 import { CaretRight, Plus } from 'phosphor-react';
 import LogoutModal from '@components/Logout';
+import { get_app_wise_users } from '@lib/services/userService';
+import { AppertureUser } from '@lib/domain/user';
 
 type HomeNavProps = {
   apps: AppWithIntegrations[];
+};
+export type AppUser = {
+  app: string;
+  users: AppertureUser[];
 };
 
 const HomeNav = ({ apps }: HomeNavProps) => {
@@ -35,6 +47,8 @@ const HomeNav = ({ apps }: HomeNavProps) => {
   const [selectedApp, setSelectedApp] = useState(
     apps.find((a) => a?._id === defaultAppId) || apps?.[0]
   );
+  const [appUserList, setAppUserList] = useState<AppUser[]>([]);
+  const [refreshAppUserList, setRefreshAppUserList] = useState(true);
 
   const [hoveredItem, setIsHoveredItem] = useState('');
 
@@ -54,6 +68,16 @@ const HomeNav = ({ apps }: HomeNavProps) => {
     onOpen: openLogoutModal,
     onClose: closeLogoutModal,
   } = useDisclosure();
+
+  useEffect(() => {
+    if (!refreshAppUserList) return;
+    const fetchAppWiseUsers = async () => {
+      const map = await get_app_wise_users();
+      setAppUserList(map);
+      setRefreshAppUserList(false);
+    };
+    fetchAppWiseUsers();
+  }, [refreshAppUserList]);
 
   useEffect(() => {
     setSelectedApp(apps.find((a) => a?._id === selectedAppId) || apps[0]);
@@ -101,14 +125,12 @@ const HomeNav = ({ apps }: HomeNavProps) => {
     }
   };
 
-    const handleAddIntegration = async () => {
+  const handleAddIntegration = async () => {
+    router.push({
+      pathname: `/analytics/app/[appId]/integration/select`,
 
-      router.push({
-        pathname: `/analytics/app/[appId]/integration/select`,
-
-        query: { appId: defaultAppId , ...router.query , add: 'true'},
-      });
-    
+      query: { appId: defaultAppId, ...router.query, add: 'true' },
+    });
   };
 
   return (
@@ -290,27 +312,27 @@ const HomeNav = ({ apps }: HomeNavProps) => {
             </MenuItem>
           </MenuList>
         </Menu>*/}
-      <IconButton
+        <IconButton
           aria-label="add-datasource"
           icon={<Plus size={20} />}
-          bg=  'black.800' 
+          bg="black.800"
           padding={'6px'}
-           _hover={{ background: 'black.800' }}
+          _hover={{ background: 'black.800' }}
           onClick={handleAddIntegration}
         />
         <IconButton
           aria-label="add-datasource"
           icon={<Database size={20} />}
-          bg=  'black.800' 
+          bg="black.800"
           padding={'6px'}
-           _hover={{ background: 'black.800' }}
+          _hover={{ background: 'black.800' }}
           onClick={() => {
-                router.push({
-                  pathname: `/analytics/datamart/list/[dsId]`,
-                  query: { dsId },
-                });
-              }}
-        /> 
+            router.push({
+              pathname: `/analytics/datamart/list/[dsId]`,
+              query: { dsId },
+            });
+          }}
+        />
         <Menu>
           <MenuButton
             _focus={{ bg: 'black.500' }}
@@ -390,7 +412,6 @@ const HomeNav = ({ apps }: HomeNavProps) => {
           </MenuList>
         </Menu>
 
-            
         <Flex onClick={() => onModalOpen('apps')}>
           <Avatar
             name={selectedApp.name}
@@ -411,6 +432,8 @@ const HomeNav = ({ apps }: HomeNavProps) => {
         onAppSelect={onAppSelect}
         onClose={() => onModalClose('apps')}
         apps={apps}
+        appUserList={appUserList}
+        setRefreshAppUserList={setRefreshAppUserList}
         selectedApp={selectedApp}
         openConfigureAppsModal={() => onModalOpen('configure')}
       />

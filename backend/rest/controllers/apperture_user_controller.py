@@ -1,12 +1,16 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
-from typing import Optional
 from fastapi import APIRouter, Depends
 
+from domain.apperture_users.models import AppertureUser
 from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
-from rest.dtos.apperture_users import AppertureUserResponse, PrivateUserResponse
-from rest.middlewares import get_user_id, validate_jwt, get_user
+from rest.dtos.apperture_users import (
+    AppertureUserResponse,
+    AppWiseUserDto,
+    PrivateUserResponse,
+)
+from rest.middlewares import get_user, get_user_id, validate_jwt
 
 router = APIRouter(
     tags=["apperture-users"],
@@ -46,6 +50,11 @@ async def remove_slack_credentials(
         return await user_service.update_visited_sheets_status(user_id=user_id)
 
 
+async def get_users_for_app(app_id, app_service, user_service):
+    user_ids = await app_service.get_users_for_app(app_id=app_id)
+    return [await user_service.get_user(id=user_id) for user_id in user_ids]
+
+
 @router.get("/apperture-users", response_model=List[PrivateUserResponse])
 async def get_apperture_users(
     app_id: Union[str, None] = None,
@@ -53,7 +62,28 @@ async def get_apperture_users(
     app_service: AppService = Depends(),
 ):
     if app_id:
-        user_ids = await app_service.get_users_for_app(app_id=app_id)
-        return [await user_service.get_user(id=user_id) for user_id in user_ids]
+        return await get_users_for_app(
+            app_id=app_id, app_service=app_service, user_service=user_service
+        )
     else:
         return await user_service.get_all_apperture_users()
+
+
+@router.get("/apperture-users/apps/all", response_model=List[AppWiseUserDto])
+async def get_apperture_users(
+    user: AppertureUser = Depends(get_user),
+    user_service: AppertureUserService = Depends(),
+    app_service: AppService = Depends(),
+):
+    all_apps = await app_service.get_apps(user)
+    response = []
+    for app in all_apps:
+        data = AppWiseUserDto(
+            app=app.id,
+            users=await get_users_for_app(
+                app_id=app.id, app_service=app_service, user_service=user_service
+            ),
+        )
+
+        response.append(data)
+    return response
