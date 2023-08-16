@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import re
 from typing import List, Union
@@ -160,10 +161,23 @@ class AppService:
         await app.save()
         return app
 
-    async def get_users_for_app(self, app_id: str):
+    async def get_users_for_app(self, app_id: str) -> List[PydanticObjectId]:
         app = await App.get(PydanticObjectId(app_id))
         return [app.user_id] + [user_id for user_id in app.shared_with]
 
     async def get_user_domain(self, app_id: str):
         app = await App.get(PydanticObjectId(app_id))
         return OrgAccess(org_access=app.org_access, domain=app.domain)
+
+    async def is_valid_user_for_app(self, app_id: str, user: AppertureUser):
+        app = await self.get_app(id=app_id)
+
+        user_id = user.id
+        if (user_id == app.user_id) or (user_id in app.shared_with):
+            return True
+
+        user_email_domain = self.parse_domain_from_email(email=user.email)
+        if app.org_access and user_email_domain == app.domain:
+            return True
+
+        return False
