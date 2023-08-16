@@ -40,7 +40,8 @@ const ShareAppModal = ({
   console.log(users);
   const [existingUsers, setExistingUsers] = useState<AppertureUser[]>([]);
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
-  const [submitInvitedUser, setSubmitInvitedUser] = useState(false)
+  const [submitInvitedUser, setSubmitInvitedUser] = useState(false);
+  const [refreshUsers, setRefreshUsers] = useState(false);
   const initalDropdownOptions = ['Restricted'];
   const [dropdownOptions, setDropdownOptions] = useState<string[]>(
     initalDropdownOptions
@@ -84,23 +85,28 @@ const ShareAppModal = ({
   };
 
   useEffect(() => {
-    if(!submitInvitedUser ) return
-    const submitData = async()=>{
+    if (!submitInvitedUser) return;
+    const submitData = async () => {
       await update_app(
         appId,
         selectedValues.length ? selectedValues : null,
         !(selectedOption === 'Restricted')
       );
       handleCloseModal();
-      setSubmitInvitedUser(false)
-    }
-    submitData()
-  }, [submitInvitedUser])
-  
+      setSubmitInvitedUser(false);
+      setRefreshUsers(true);
+    };
+    submitData();
+  }, [submitInvitedUser]);
+
+  useEffect(() => {
+    if (!refreshUsers) return;
+    refreshUsers && setRefreshAppUserList(true);
+    setRefreshUsers(false);
+  }, [refreshUsers]);
 
   const handleShareApp = async () => {
-    setSubmitInvitedUser(true)
-    setRefreshAppUserList(true);
+    setSubmitInvitedUser(true);
   };
 
   return (
