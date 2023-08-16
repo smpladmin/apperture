@@ -10,11 +10,7 @@ from authorisation.service import AuthService
 from cache.cache import CACHE_EXPIRY_24_HOURS, service_datasource_key_builder
 from domain.apps.models import App
 from domain.common.models import IntegrationProvider
-from domain.datasources.models import (
-    DataSource,
-    DataSourceVersion,
-    ProviderDataSource,
-)
+from domain.datasources.models import DataSource, DataSourceVersion, ProviderDataSource
 from domain.integrations.models import Credential, Integration
 from repositories.clickhouse.clickhouse_role import ClickHouseRole
 from repositories.clickhouse.users import User
@@ -71,7 +67,9 @@ class DataSourceService:
         return await DataSource.find(DataSource.provider == provider).to_list()
 
     async def get_datasources_for_app_id(self, app_id: PydanticObjectId):
-        return await DataSource.find(DataSource.app_id == app_id).to_list()
+        return await DataSource.find(
+            DataSource.app_id == app_id, DataSource.enabled != False
+        ).to_list()
 
     async def create_datasource(
         self,

@@ -56,10 +56,10 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
       };
       const getDomain = async () => {
         const res = await get_user_domain(appId);
-        if (res.domain) {
+        if (res?.domain) {
           setDropdownOptions((prevValues) => [...prevValues, res.domain]);
         }
-        if (res.orgAccess) {
+        if (res?.orgAccess) {
           setSelectedOption(res.domain);
         }
       };
