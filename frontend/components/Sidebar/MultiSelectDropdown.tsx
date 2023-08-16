@@ -9,12 +9,10 @@ const MultiSelectDropdown = ({
   existingUsers,
   selectedValues,
   setSelectedValues,
-  setRefreshAppUserList,
 }: {
   existingUsers: AppertureUser[];
   selectedValues: string[];
   setSelectedValues: Function;
-  setRefreshAppUserList: Function;
 }) => {
   const [input, setInput] = useState('');
 
@@ -44,7 +42,6 @@ const MultiSelectDropdown = ({
     } else {
       setIsNewUser(false);
     }
-    setRefreshAppUserList(true);
   };
 
   const handleRemoveSelectedValue = (value: string) => {
