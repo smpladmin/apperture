@@ -1,7 +1,7 @@
 from typing import Union
 
 from beanie import PydanticObjectId
-from fastapi import Request, HTTPException, Depends
+from fastapi import Depends, HTTPException, Request
 
 from domain.actions.models import Action
 from domain.apperture_users.models import AppertureUser
@@ -58,22 +58,23 @@ def _get_key_from_request(request: Request, key: str) -> Union[str, None]:
     return value
 
 
-async def _get_app_id_from_datasource_id(datasource_id: str, ds_service: DataSourceService = Depends(),) -> PydanticObjectId:
-    datasource = await ds_service.get_datasource(datasource_id)
-    return datasource.app_id
-
-
 async def validate_app_user(
     request: Request,
     user: AppertureUser = Depends(get_user),
     app_service: AppService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
     app_id = _get_key_from_request(request=request, key="app_id")
 
     if not app_id:
-        datasource_id = _get_key_from_request(request=request, key="datasource_id")
+        datasource_id = (
+            _get_key_from_request(request=request, key="datasource_id")
+            or _get_key_from_request(request=request, key="datasourceId")
+            or _get_key_from_request(request=request, key="dsId")
+        )
         if datasource_id:
-            app_id = await _get_app_id_from_datasource_id(datasource_id=datasource_id)
+            datasource = await ds_service.get_datasource(datasource_id)
+            app_id = datasource.app_id
 
     is_valid_user = await app_service.is_valid_user_for_app(app_id=app_id, user=user)
     if not is_valid_user:
