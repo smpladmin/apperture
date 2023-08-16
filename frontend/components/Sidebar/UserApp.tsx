@@ -12,14 +12,23 @@ import { GREY_500 } from '@theme/index';
 import { Provider } from '@lib/domain/provider';
 import { UserPlus } from '@phosphor-icons/react';
 import ShareAppModal from './ShareAppModal';
+import { AppertureUser } from '@lib/domain/user';
 
 type UserAppProps = {
   app: AppWithIntegrations;
   openConfigureAppsModal: () => void;
+  setRefreshAppUserList: Function;
   isSelected: boolean;
+  users: AppertureUser[];
 };
 
-const UserApp = ({ app, openConfigureAppsModal, isSelected }: UserAppProps) => {
+const UserApp = ({
+  app,
+  openConfigureAppsModal,
+  setRefreshAppUserList,
+  isSelected,
+  users,
+}: UserAppProps) => {
   const getProviders = (app: AppWithIntegrations): string => {
     const providerNames = app.integrations.map((integration: any) => {
       return Provider.getDisplayName(integration.provider);
@@ -27,6 +36,7 @@ const UserApp = ({ app, openConfigureAppsModal, isSelected }: UserAppProps) => {
     const uniqueProviders = [...new Set(providerNames)];
     return uniqueProviders.join(', ');
   };
+
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -121,7 +131,13 @@ const UserApp = ({ app, openConfigureAppsModal, isSelected }: UserAppProps) => {
           </Text>
         </Button>
       </Flex>
-      <ShareAppModal isOpen={isOpen} onClose={onClose} appId={app._id} />
+      <ShareAppModal
+        isOpen={isOpen}
+        onClose={onClose}
+        appId={app._id}
+        users={users}
+        setRefreshAppUserList={setRefreshAppUserList}
+      />
     </>
   );
 };

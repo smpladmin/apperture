@@ -1,6 +1,6 @@
-import { ApperturePrivateAPI } from './../apiClient/client.server';
-import { AppertureAPI } from '../apiClient';
 import { AxiosError } from 'axios';
+import { AppertureAPI } from '../apiClient';
+import { ApperturePrivateAPI } from './../apiClient/client.server';
 import { AppertureGet } from './util';
 
 export const _getAppertureUserInfo = async (token: string) => {
@@ -44,5 +44,11 @@ export const updateSheetsVisitedStatus = async () => {
 export const get_apperture_users = async (appId: string | null) => {
   const url = appId ? `/apperture-users?app_id=${appId}` : `/apperture-users`;
   const res = await AppertureGet(url);
+  return res.data;
+};
+
+export const get_app_wise_users = async () => {
+  console.log('called');
+  const res = await AppertureGet('/apperture-users/apps/all');
   return res.data;
 };

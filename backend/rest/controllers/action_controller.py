@@ -15,6 +15,7 @@ from rest.dtos.actions import (
 )
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.middlewares import get_user, get_user_id, validate_jwt
+from rest.middlewares.validate_app_user import validate_app_user, validate_library_items
 
 router = APIRouter(
     tags=["actions"],
@@ -23,7 +24,7 @@ router = APIRouter(
 )
 
 
-@router.post("/actions", response_model=ActionResponse)
+@router.post("/actions", response_model=ActionResponse, dependencies=[Depends(validate_app_user)], )
 async def create_action(
     dto: CreateActionDto,
     user_id: str = Depends(get_user_id),
@@ -49,7 +50,7 @@ async def create_action(
     return action
 
 
-@router.get("/actions", response_model=List[ActionWithUser])
+@router.get("/actions", response_model=List[ActionWithUser], dependencies=[Depends(validate_app_user)], )
 async def get_actions(
     datasource_id: str,
     action_service: ActionService = Depends(),
@@ -65,7 +66,7 @@ async def get_actions(
     return actions
 
 
-@router.get("/actions/{id}", response_model=ActionResponse)
+@router.get("/actions/{id}", response_model=ActionResponse, dependencies=[Depends(validate_library_items)], )
 async def get_saved_action(
     id: str,
     action_service: ActionService = Depends(),
@@ -73,7 +74,7 @@ async def get_saved_action(
     return await action_service.get_action(id=id)
 
 
-@router.put("/actions/{id}", response_model=ActionResponse)
+@router.put("/actions/{id}", response_model=ActionResponse, dependencies=[Depends(validate_app_user)], )
 async def update_action(
     id: str,
     dto: CreateActionDto,
@@ -94,7 +95,8 @@ async def update_action(
     return action
 
 
-@router.post("/actions/transient", response_model=ComputedActionResponse)
+@router.post("/actions/transient", response_model=ComputedActionResponse,
+             dependencies=[Depends(validate_app_user)], )
 async def compute_transient_actions(
     dto: TransientActionDto,
     action_service: ActionService = Depends(),
@@ -104,7 +106,7 @@ async def compute_transient_actions(
     )
 
 
-@router.delete("/actions/{id}")
+@router.delete("/actions/{id}", dependencies=[Depends(validate_library_items)], )
 async def delete_action(
     id: PydanticObjectId, action_service: ActionService = Depends()
 ):

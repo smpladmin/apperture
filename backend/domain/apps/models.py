@@ -14,7 +14,7 @@ class ClickHouseCredential(BaseModel):
 
 class OrgAccess(BaseModel):
     org_access: bool
-    domain: str
+    domain: Union[str, None]
 
 
 class App(Document):
