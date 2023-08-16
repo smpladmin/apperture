@@ -40,7 +40,7 @@ const ShareAppModal = ({
   console.log(users);
   const [existingUsers, setExistingUsers] = useState<AppertureUser[]>([]);
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
-  // const [appUsers, setAppUsers] = useState<AppertureUser[]>(users);
+  const [submitInvitedUser, setSubmitInvitedUser] = useState(false)
   const initalDropdownOptions = ['Restricted'];
   const [dropdownOptions, setDropdownOptions] = useState<string[]>(
     initalDropdownOptions
@@ -83,13 +83,24 @@ const ShareAppModal = ({
     onClose();
   };
 
+  useEffect(() => {
+    if(!submitInvitedUser ) return
+    const submitData = async()=>{
+      await update_app(
+        appId,
+        selectedValues.length ? selectedValues : null,
+        !(selectedOption === 'Restricted')
+      );
+      handleCloseModal();
+      setSubmitInvitedUser(false)
+    }
+    submitData()
+  }, [submitInvitedUser])
+  
+
   const handleShareApp = async () => {
-    const response = await update_app(
-      appId,
-      selectedValues.length ? selectedValues : null,
-      !(selectedOption === 'Restricted')
-    );
-    handleCloseModal();
+    setSubmitInvitedUser(true)
+    setRefreshAppUserList(true);
   };
 
   return (
@@ -127,7 +138,6 @@ const ShareAppModal = ({
               existingUsers={existingUsers}
               selectedValues={selectedValues}
               setSelectedValues={setSelectedValues}
-              setRefreshAppUserList={setRefreshAppUserList}
             />
             <Text fontSize={'xs-16'} fontWeight={500}>
               People with access
@@ -215,6 +225,7 @@ const ShareAppModal = ({
               fontWeight={500}
               lineHeight={'lh-130'}
               onClick={handleShareApp}
+              isLoading={submitInvitedUser}
             >
               Done
             </Button>

@@ -17,8 +17,8 @@ from rest.dtos.apps import (
     AppResponse,
     AppWithIntegrations,
     CreateAppDto,
-    UpdateAppDto,
     OrgAccessResponse,
+    UpdateAppDto,
 )
 from rest.dtos.datasources import DataSourceResponse
 from rest.dtos.integrations import IntegrationWithDataSources
@@ -112,7 +112,7 @@ async def get_app(
 async def update_app(
     id: str,
     dto: UpdateAppDto,
-    user_id: str = Depends(get_user_id),
+    user: str = Depends(get_user),
     app_service: AppService = Depends(),
     user_service: AppertureUserService = Depends(),
 ):
@@ -121,14 +121,14 @@ async def update_app(
     to_share_with = []
     if emails:
         for email in emails:
-            user = await user_service.get_user_by_email(email=email)
-            if not user:
+            new_user = await user_service.get_user_by_email(email=email)
+            if not new_user:
                 logging.info(
                     f"User doesn't exist. Creating an invited user with email {email}"
                 )
-                user = await user_service.create_invited_user(email=email)
-            to_share_with.append(user.id)
-        app = await app_service.share_app(id, user_id, to_share_with)
+                new_user = await user_service.create_invited_user(email=email)
+            to_share_with.append(new_user.id)
+        app = await app_service.share_app(id, user, to_share_with)
 
     if dto.orgAccess != None:
         app = await app_service.switch_org_access(id=id, org_access=dto.orgAccess)

@@ -107,7 +107,7 @@ const AppsModal = ({
                       key={app._id}
                       app={app}
                       users={
-                        appUserList.find((entry) => entry.app === app._id)
+                        appUserList?.find((entry) => entry.app === app._id)
                           ?.users || []
                       }
                       setRefreshAppUserList={setRefreshAppUserList}

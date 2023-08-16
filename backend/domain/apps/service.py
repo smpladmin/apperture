@@ -11,8 +11,8 @@ from settings import apperture_settings
 from utils.mail import GENERIC_EMAIL_DOMAINS
 
 from ..apperture_users.models import AppertureUser
-from .models import App, ClickHouseCredential, OrgAccess
 from ..common.random_string_utils import StringUtils
+from .models import App, ClickHouseCredential, OrgAccess
 
 
 class AppService:
@@ -147,9 +147,9 @@ class AppService:
         )
 
     async def share_app(
-        self, id: str, owner_id: str, to_share_with: List[PydanticObjectId]
+        self, id: str, user: AppertureUser, to_share_with: List[PydanticObjectId]
     ):
-        app = await self.get_user_app(id, owner_id)
+        app = await self.get_shared_or_owned_app(id, user)
         for user_id in to_share_with:
             app.shared_with.add(user_id)
         await app.save()
