@@ -37,7 +37,6 @@ const ShareAppModal = ({
   users,
   setRefreshAppUserList,
 }: ShareAppModalProps) => {
-  console.log(users);
   const [existingUsers, setExistingUsers] = useState<AppertureUser[]>([]);
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [submitInvitedUser, setSubmitInvitedUser] = useState(false);
