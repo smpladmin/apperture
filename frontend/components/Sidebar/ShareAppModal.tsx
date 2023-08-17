@@ -13,7 +13,10 @@ import {
 } from '@chakra-ui/react';
 import { AppertureUser } from '@lib/domain/user';
 import { get_user_domain, update_app } from '@lib/services/appService';
-import { get_apperture_users } from '@lib/services/userService';
+import {
+  getAppertureUserInfo,
+  get_apperture_users,
+} from '@lib/services/userService';
 import { BLACK, WHITE_DEFAULT } from '@theme/index';
 import { useEffect, useState } from 'react';
 import GeneralAccessDropdown from './GeneralAccessDropdown';
@@ -22,18 +25,28 @@ import MultiSelectDropdown from './MultiSelectDropdown';
 type ShareAppModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  setRefreshAppUserList: Function;
   appId: string;
+  users: AppertureUser[];
 };
 
-const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
+const ShareAppModal = ({
+  isOpen,
+  onClose,
+  appId,
+  users,
+  setRefreshAppUserList,
+}: ShareAppModalProps) => {
   const [existingUsers, setExistingUsers] = useState<AppertureUser[]>([]);
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
-  const [appUsers, setAppUsers] = useState<AppertureUser[]>([]);
+  const [submitInvitedUser, setSubmitInvitedUser] = useState(false);
+  const [refreshUsers, setRefreshUsers] = useState(false);
   const initalDropdownOptions = ['Restricted'];
   const [dropdownOptions, setDropdownOptions] = useState<string[]>(
     initalDropdownOptions
   );
   const [selectedOption, setSelectedOption] = useState<string>('Restricted');
+  const [currentUserEmail, setCurrentUserEmail] = useState('');
 
   const handleDropdownChange = (newValue: string) => {
     setSelectedOption(newValue);
@@ -46,22 +59,22 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
         const allAppertureUsers = await get_apperture_users(null);
         setExistingUsers(allAppertureUsers);
       };
-      const setUsersForApp = async () => {
-        const users = await get_apperture_users(appId);
-        setAppUsers(users);
-      };
       const getDomain = async () => {
         const res = await get_user_domain(appId);
-        if (res.domain) {
+        if (res?.domain) {
           setDropdownOptions((prevValues) => [...prevValues, res.domain]);
         }
-        if (res.orgAccess) {
+        if (res?.orgAccess) {
           setSelectedOption(res.domain);
         }
       };
+      const getCurrentUser = async () => {
+        const currentUser = await getAppertureUserInfo();
+        setCurrentUserEmail(currentUser.email);
+      };
       setUsers();
-      setUsersForApp();
       getDomain();
+      getCurrentUser();
     }
   }, [isOpen]);
 
@@ -70,13 +83,29 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
     onClose();
   };
 
+  useEffect(() => {
+    if (!submitInvitedUser) return;
+    const submitData = async () => {
+      await update_app(
+        appId,
+        selectedValues.length ? selectedValues : null,
+        !(selectedOption === 'Restricted')
+      );
+      handleCloseModal();
+      setSubmitInvitedUser(false);
+      setRefreshUsers(true);
+    };
+    submitData();
+  }, [submitInvitedUser]);
+
+  useEffect(() => {
+    if (!refreshUsers) return;
+    refreshUsers && setRefreshAppUserList(true);
+    setRefreshUsers(false);
+  }, [refreshUsers]);
+
   const handleShareApp = async () => {
-    const response = await update_app(
-      appId,
-      selectedValues.length ? selectedValues : null,
-      !(selectedOption === 'Restricted')
-    );
-    handleCloseModal();
+    setSubmitInvitedUser(true);
   };
 
   return (
@@ -108,49 +137,53 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
           Share this workspace
         </ModalHeader>
         <ModalBody overflowY={'auto'} pb={'0'}>
-          <Flex direction={'column'} gap={'24px'}>
+          <Flex direction={'column'} gap={6}>
             <Text>Invite members to collaborate</Text>
             <MultiSelectDropdown
               existingUsers={existingUsers}
               selectedValues={selectedValues}
               setSelectedValues={setSelectedValues}
             />
-            <Stack direction={'column'}>
-              {appUsers.map((user, index) => {
-                return (
-                  <Flex gap={'12px'} alignItems={'center'} key={index}>
-                    <Avatar
-                      name={user.firstName}
-                      fontWeight={'bold'}
-                      size="sm"
-                      textColor={'white'}
-                      h={{ base: '8', md: '12' }}
-                      w={{ base: '8', md: '12' }}
-                      fontSize={{ base: 'xs', md: 'xs-14' }}
-                      lineHeight={{ base: 'xs', md: 'xs-14' }}
-                    />
-                    <Flex direction={'column'}>
-                      <Text
-                        fontSize={'xs-14'}
-                        fontWeight={500}
-                        lineHeight={'lh-130'}
-                      >
-                        {`${user.firstName} ${user.lastName} ${
-                          index == 0 ? '(Owner)' : ''
-                        }`}
-                      </Text>
-                      <Text
-                        fontSize={'xs-12'}
-                        fontWeight={400}
-                        lineHeight={'lh-135'}
-                        color={'grey.800'}
-                      >
-                        {user.email}
-                      </Text>
+            <Text fontSize={'xs-16'} fontWeight={500}>
+              People with access
+            </Text>
+            <Stack direction={'column'} gap={2}>
+              {users.length &&
+                users.map((user, index) => {
+                  return (
+                    <Flex gap={3} alignItems={'center'} key={index}>
+                      <Avatar
+                        name={user.firstName}
+                        fontWeight={'bold'}
+                        size="sm"
+                        textColor={'white'}
+                        h={{ base: '8', md: '12' }}
+                        w={{ base: '8', md: '12' }}
+                        fontSize={{ base: 'xs', md: 'xs-14' }}
+                        lineHeight={{ base: 'xs', md: 'xs-14' }}
+                      />
+                      <Flex direction={'column'}>
+                        <Text
+                          fontSize={'xs-14'}
+                          fontWeight={500}
+                          lineHeight={'lh-130'}
+                        >
+                          {`${user.firstName || ''} ${user.lastName || ''} ${
+                            currentUserEmail == user.email ? '(you)' : ''
+                          }`}
+                        </Text>
+                        <Text
+                          fontSize={'xs-12'}
+                          fontWeight={400}
+                          lineHeight={'lh-135'}
+                          color={'grey.800'}
+                        >
+                          {user.email}
+                        </Text>
+                      </Flex>
                     </Flex>
-                  </Flex>
-                );
-              })}
+                  );
+                })}
             </Stack>
 
             <Text fontSize={'xs-16'} fontWeight={500} lineHeight={'lh-120'}>
@@ -163,12 +196,12 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
             />
           </Flex>
         </ModalBody>
-        <ModalFooter pt={'24px'} pb={'32px'} display={'block'}>
-          <Flex justifyContent={'flex-end'} gap={'8px'}>
+        <ModalFooter pt={6} pb={8} display={'block'}>
+          <Flex justifyContent={'flex-end'} gap={2}>
             <Button
               w={'90px'}
               h={'42px'}
-              px={'16px'}
+              px={4}
               py={'6px'}
               borderRadius={'8px'}
               borderColor={BLACK}
@@ -185,7 +218,7 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
             <Button
               w={'90px'}
               h={'42px'}
-              px={'16px'}
+              px={4}
               py={'6px'}
               borderRadius={'8px'}
               borderColor={BLACK}
@@ -197,6 +230,7 @@ const ShareAppModal = ({ isOpen, onClose, appId }: ShareAppModalProps) => {
               fontWeight={500}
               lineHeight={'lh-130'}
               onClick={handleShareApp}
+              isLoading={submitInvitedUser}
             >
               Done
             </Button>

@@ -4,7 +4,6 @@ from typing import List, Union
 
 
 from mongo import Mongo
-from fastapi import Depends
 from beanie import PydanticObjectId
 from beanie.operators import In
 from fastapi import Depends
