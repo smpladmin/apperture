@@ -40,14 +40,6 @@ export const Cell = ({
 
   return (
     <Flex
-      //   ref={(el) =>
-      //     currentActiveCell &&
-      //     el?.scrollIntoView({
-      //       behavior: 'instant',
-      //       block: 'nearest',
-      //       inline: 'nearest',
-      //     })
-      //   }
       alignItems={'center'}
       w={60}
       height={6}

@@ -1,6 +1,12 @@
 import { Box, Flex } from '@chakra-ui/react';
 import { range, throttle } from 'lodash';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   VariableSizeGrid as Grid,
   GridOnScrollProps,
@@ -41,8 +47,8 @@ const Sheet = () => {
   const [columns, setColumns] = useState<Column[]>(createColumns());
   const [rows, setRows] = useState(createRows(columns));
 
-  const staticGrid = React.useRef<VariableSizeGrid>(null);
-  const staticGrid2 = React.useRef<VariableSizeGrid>(null);
+  const rowIndexGrid = React.useRef<VariableSizeGrid>(null);
+  const headerGrid = React.useRef<VariableSizeGrid>(null);
   const sheetRef = React.useRef<VariableSizeGrid>(null);
 
   const handleResize = throttle((columnId: string, width: number) => {
@@ -58,7 +64,7 @@ const Sheet = () => {
   }, 50);
 
   useEffect(() => {
-    staticGrid2.current?.resetAfterIndices({
+    headerGrid.current?.resetAfterIndices({
       columnIndex: 0,
       rowIndex: 0,
       shouldForceUpdate: true,
@@ -131,14 +137,30 @@ const Sheet = () => {
       scrollUpdateWasRequested,
     }: GridOnScrollProps) => {
       if (!scrollUpdateWasRequested) {
-        staticGrid?.current?.scrollTo({ scrollLeft: 0, scrollTop });
+        rowIndexGrid?.current?.scrollTo({ scrollTop });
       }
       if (!scrollUpdateWasRequested) {
-        staticGrid2?.current?.scrollTo({ scrollLeft, scrollTop: 0 });
+        headerGrid?.current?.scrollTo({ scrollLeft });
       }
     },
     []
   );
+
+  useEffect(() => {
+    sheetRef.current?.scrollToItem({
+      align: 'smart',
+      columnIndex: currentCell.column,
+      rowIndex: currentCell.row,
+    });
+    rowIndexGrid.current?.scrollToItem({
+      align: 'smart',
+      rowIndex: currentCell.row,
+    });
+    headerGrid.current?.scrollToItem({
+      align: 'smart',
+      columnIndex: currentCell.column,
+    });
+  }, [currentCell]);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -204,7 +226,6 @@ const Sheet = () => {
                 <Box>
                   {/* empty top left corner */}
                   <Grid
-                    ref={staticGrid}
                     columnCount={1}
                     columnWidth={(index) => 60}
                     rowCount={1}
@@ -227,7 +248,7 @@ const Sheet = () => {
                 <Box>
                   {/* Header */}
                   <Grid
-                    ref={staticGrid2}
+                    ref={headerGrid}
                     style={{ overflowX: 'hidden' }}
                     columnCount={26}
                     columnWidth={(index) => columns[index].width}
@@ -254,7 +275,7 @@ const Sheet = () => {
                 <Box>
                   {/* Left Row Indexes */}
                   <Grid
-                    ref={staticGrid}
+                    ref={rowIndexGrid}
                     style={{ overflowY: 'hidden' }}
                     columnCount={1}
                     columnWidth={(index) => 60}
