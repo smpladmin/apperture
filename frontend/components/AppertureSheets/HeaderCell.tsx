@@ -22,6 +22,7 @@ export const HeaderCell = ({
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Meta' || event.key === 'Control') {
+      event.preventDefault();
       dispatch({ type: Actions.SET_IS_COMMAND_PRESSED, payload: true });
     }
   };

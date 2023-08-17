@@ -8,41 +8,38 @@ export const Cell = ({
   columnIndex,
   rowIndex,
   style,
+  data,
   handleDoubleClick,
 }: {
   column: Column;
   columnIndex: number;
   rowIndex: number;
   style: any;
+  data: any;
   handleDoubleClick: Function;
 }) => {
   const { state, dispatch } = useContext(GridContext);
   const { currentCell, selectedColumns } = state;
 
   const columnId = column.columnId;
-  const isCurrentColumnSelected = selectedColumns.includes(columnId);
+  const isCellSelected = selectedColumns.includes(columnId);
 
   const currentActiveCell =
     currentCell.row === rowIndex && currentCell.column === columnIndex;
-  const isCellSelected = isCurrentColumnSelected;
+  // const isCellSelected = isCurrentColumnSelected;
 
-  const handleCellClick = () => {
-    dispatch({
-      type: Actions.SET_CURRENT_CELL,
-      payload: {
-        column: columnIndex,
-        row: rowIndex,
-      },
-    });
+  const value = data[rowIndex][columnId];
 
-    dispatch({ type: Actions.SET_SELECTED_COLUMNS, payload: [] });
-  };
+  if (rowIndex === 1 || (rowIndex === 2 && columnId === 'A')) {
+    console.log({ rowIndex, columnId, value });
+  }
 
   return (
     <Flex
       alignItems={'center'}
       w={60}
       height={6}
+      px={1}
       borderRightWidth={isCellSelected ? '1px' : '0.4px'}
       borderLeftWidth={isCellSelected ? '1px' : '0'}
       backgroundColor={isCellSelected ? 'rgba(53,121,248,.35)' : 'transparent'}
@@ -50,13 +47,17 @@ export const Cell = ({
       borderColor={
         isCellSelected || currentActiveCell ? 'blue.500' : 'grey.700'
       }
+      fontSize={'xs-12'}
       borderWidth={currentActiveCell ? '2px' : ''}
       color={'grey.800'}
       style={style}
-      onDoubleClick={(e) => handleDoubleClick(e, rowIndex, columnIndex)}
-      onClick={handleCellClick}
+      textOverflow={'hidden'}
+      overflow={'hidden'}
+      whiteSpace={'nowrap'}
+      onClick={(e) => handleDoubleClick(e, rowIndex, columnIndex, value)}
+      // onClick={handleCellClick}
     >
-      Item {rowIndex},{columnIndex}
+      {value}
     </Flex>
   );
 };

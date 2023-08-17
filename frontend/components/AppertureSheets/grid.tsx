@@ -1,12 +1,6 @@
 import { Box, Flex } from '@chakra-ui/react';
-import { range, throttle } from 'lodash';
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { cloneDeep, range, throttle } from 'lodash';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import {
   VariableSizeGrid as Grid,
   GridOnScrollProps,
@@ -16,6 +10,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { HeaderCell } from './HeaderCell';
 import { Cell } from './Cell';
 import { Actions, GridContext } from './GridContext';
+import sanitizeHtml from 'sanitize-html';
 
 export type Column = {
   columnId: string;
@@ -27,7 +22,7 @@ const Sheet = () => {
   const createRows = (columns: Column[]) => {
     const row = {} as { [key: string]: string };
     const singleRow = columns.forEach((column) => {
-      row[column.columnId] = '';
+      row[column.columnId] = column.columnId;
     });
     return new Array(1000).fill(row);
   };
@@ -42,7 +37,8 @@ const Sheet = () => {
   };
 
   const { state, dispatch } = useContext(GridContext);
-  const { currentCell, editableCellStyle, showEditableCell } = state;
+  const { currentCell, editableCellStyle, showEditableCell, currentCellValue } =
+    state;
 
   const [columns, setColumns] = useState<Column[]>(createColumns());
   const [rows, setRows] = useState(createRows(columns));
@@ -63,6 +59,89 @@ const Sheet = () => {
     });
   }, 50);
 
+  const handleDoubleClick = (
+    event: React.MouseEvent,
+    rowIndex: number,
+    columnIndex: number,
+    value: string
+  ) => {
+    const el = event.currentTarget;
+
+    dispatch({
+      type: Actions.SET_CURRENT_CELL,
+      payload: {
+        column: columnIndex,
+        row: rowIndex,
+      },
+    });
+    dispatch({ type: Actions.SET_SELECTED_COLUMNS, payload: [] });
+
+    if (event.detail === 2) {
+      // window.removeEventListener('keydown', handleKeyPress);
+
+      if (el) {
+        const position = el.getBoundingClientRect();
+        const style = {
+          left: position.x,
+          top: position.y,
+          height: position.height,
+          width: 'fit-content',
+          minWidth: position.width,
+        };
+        dispatch({
+          type: Actions.SET_EDITABLE_CELL_STYLE,
+          payload: style,
+        });
+      }
+
+      dispatch({
+        type: Actions.SET_CURRENT_CELL_VALUE,
+        payload: value,
+      });
+      dispatch({
+        type: Actions.SET_SHOW_EDITABLE_CELL,
+        payload: true,
+      });
+    }
+  };
+
+  const handleCellChange = (
+    event: any
+    // rowIndex: number,
+    // columnIndex: number
+  ) => {
+    const sanitizeConf = {
+      allowedTags: ['b', 'i', 'a', 'p'],
+      allowedAttributes: { a: ['href'] },
+    };
+    const sanitizedContent = sanitizeHtml(
+      event.currentTarget.innerHTML,
+      sanitizeConf
+    );
+
+    const columnId = columns[currentCell.column].columnId;
+    const rowIndex = currentCell.row;
+
+    console.log('row', { columnId, rowIndex });
+
+    setRows((prevState) => {
+      const tempState = [...prevState];
+      console.log('temp state', tempState[rowIndex][columnId]);
+      tempState[rowIndex] = {
+        ...tempState[rowIndex],
+        [columnId]: sanitizedContent,
+      };
+      // tempState[rowIndex] = sanitizedContent;
+      console.log('tempState', tempState);
+      return tempState;
+    });
+
+    dispatch({
+      type: Actions.SET_SHOW_EDITABLE_CELL,
+      payload: false,
+    });
+  };
+
   useEffect(() => {
     headerGrid.current?.resetAfterIndices({
       columnIndex: 0,
@@ -76,28 +155,76 @@ const Sheet = () => {
     });
   }, [columns]);
 
-  const handleDoubleClick = (event: any, row: number, col: number) => {
-    const el = event.target;
-    if (el) {
-      const position = el.getBoundingClientRect();
-      const style = {
-        left: position.x,
-        top: position.y,
-        height: position.height,
-        width: 'fit-content',
-        minWidth: position.width,
-      };
-      dispatch({
-        type: Actions.SET_EDITABLE_CELL_STYLE,
-        payload: style,
-      });
-    }
-
-    dispatch({
-      type: Actions.SET_SHOW_EDITABLE_CELL,
-      payload: false,
+  useEffect(() => {
+    sheetRef.current?.scrollToItem({
+      align: 'smart',
+      columnIndex: currentCell.column,
+      rowIndex: currentCell.row,
     });
-  };
+    rowIndexGrid.current?.scrollToItem({
+      align: 'smart',
+      rowIndex: currentCell.row,
+    });
+    headerGrid.current?.scrollToItem({
+      align: 'smart',
+      columnIndex: currentCell.column,
+    });
+  }, [currentCell]);
+
+  useEffect(() => {
+    if (showEditableCell) return;
+
+    const handleKeyPress = (event: KeyboardEvent) => {
+      event.preventDefault();
+      const { key } = event;
+
+      switch (key) {
+        case 'ArrowUp':
+          dispatch({
+            type: Actions.SET_CURRENT_CELL,
+            payload: {
+              ...currentCell,
+              row: Math.max(0, currentCell.row - 1),
+            },
+          });
+          break;
+        case 'ArrowDown':
+          dispatch({
+            type: Actions.SET_CURRENT_CELL,
+            payload: {
+              ...currentCell,
+              row: Math.min(rows.length - 1, currentCell.row + 1),
+            },
+          });
+          break;
+        case 'ArrowLeft':
+          dispatch({
+            type: Actions.SET_CURRENT_CELL,
+            payload: {
+              ...currentCell,
+              column: Math.max(0, currentCell.column - 1),
+            },
+          });
+          break;
+        case 'ArrowRight':
+          dispatch({
+            type: Actions.SET_CURRENT_CELL,
+            payload: {
+              ...currentCell,
+              column: Math.min(columns.length - 1, currentCell.column + 1),
+            },
+          });
+          break;
+        default:
+          break;
+      }
+    };
+    window.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [currentCell]);
 
   const IndexCell = ({
     columnIndex,
@@ -145,76 +272,6 @@ const Sheet = () => {
     },
     []
   );
-
-  useEffect(() => {
-    sheetRef.current?.scrollToItem({
-      align: 'smart',
-      columnIndex: currentCell.column,
-      rowIndex: currentCell.row,
-    });
-    rowIndexGrid.current?.scrollToItem({
-      align: 'smart',
-      rowIndex: currentCell.row,
-    });
-    headerGrid.current?.scrollToItem({
-      align: 'smart',
-      columnIndex: currentCell.column,
-    });
-  }, [currentCell]);
-
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      event.preventDefault();
-      const { key } = event;
-
-      switch (key) {
-        case 'ArrowUp':
-          dispatch({
-            type: Actions.SET_CURRENT_CELL,
-            payload: {
-              ...currentCell,
-              row: Math.max(0, currentCell.row - 1),
-            },
-          });
-          break;
-        case 'ArrowDown':
-          dispatch({
-            type: Actions.SET_CURRENT_CELL,
-            payload: {
-              ...currentCell,
-              row: Math.min(rows.length - 1, currentCell.row + 1),
-            },
-          });
-          break;
-        case 'ArrowLeft':
-          dispatch({
-            type: Actions.SET_CURRENT_CELL,
-            payload: {
-              ...currentCell,
-              column: Math.max(0, currentCell.column - 1),
-            },
-          });
-          break;
-        case 'ArrowRight':
-          dispatch({
-            type: Actions.SET_CURRENT_CELL,
-            payload: {
-              ...currentCell,
-              column: Math.min(columns.length - 1, currentCell.column + 1),
-            },
-          });
-          break;
-        default:
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [currentCell]);
 
   return (
     <Box height={'100%'} width={'100%'}>
@@ -308,6 +365,7 @@ const Sheet = () => {
                           rowIndex={rowIndex}
                           style={style}
                           handleDoubleClick={handleDoubleClick}
+                          data={rows}
                         />
                       );
                     }}
@@ -317,24 +375,22 @@ const Sheet = () => {
               {showEditableCell && (
                 <Flex
                   p={2}
-                  whiteSpace={'nowrap'}
-                  spellCheck={false}
-                  maxW={'calc(100% - 20px)'}
+                  // whiteSpace={'nowrap'}
+                  // spellCheck={false}
+                  // maxW={'calc(100% - 20px)'}
                   ref={(el) => el?.focus()}
-                  contentEditable
+                  contentEditable={true}
                   position={'absolute'}
                   style={editableCellStyle}
-                  zIndex={'99'}
+                  zIndex={'9'}
                   border={'1px solid blue'}
                   bg={'white.DEFAULT'}
                   alignItems={'center'}
+                  fontSize={'xs-12'}
                   px={1}
-                  onBlur={(e) =>
-                    dispatch({
-                      type: Actions.SET_SHOW_EDITABLE_CELL,
-                      payload: false,
-                    })
-                  }
+                  h={'6'}
+                  dangerouslySetInnerHTML={{ __html: currentCellValue }}
+                  onBlur={(e) => handleCellChange(e)}
                 />
               )}
             </Flex>

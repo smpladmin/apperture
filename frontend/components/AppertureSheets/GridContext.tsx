@@ -11,6 +11,7 @@ export type InitialStateType = {
   isCommandPressed: boolean;
   showEditableCell: boolean;
   editableCellStyle: any;
+  currentCellValue: string;
 };
 
 export interface ContextType {
@@ -24,6 +25,7 @@ export enum Actions {
   SET_IS_COMMAND_PRESSED = 'SET_IS_COMMAND_PRESSED',
   SET_SHOW_EDITABLE_CELL = 'SET_SHOW_EDITABLE',
   SET_EDITABLE_CELL_STYLE = 'SET_EDITABLE_CELL_STYLE',
+  SET_CURRENT_CELL_VALUE = 'SET_CURRENT_CELL_VALUE',
 }
 
 export type GridActions =
@@ -46,6 +48,10 @@ export type GridActions =
   | {
       type: Actions.SET_EDITABLE_CELL_STYLE;
       payload: any;
+    }
+  | {
+      type: Actions.SET_CURRENT_CELL_VALUE;
+      payload: string;
     };
 
 const initialState: InitialStateType = {
@@ -54,6 +60,7 @@ const initialState: InitialStateType = {
   isCommandPressed: false,
   showEditableCell: false,
   editableCellStyle: {},
+  currentCellValue: '',
 };
 
 export const GridContext = createContext<ContextType>({
@@ -62,7 +69,6 @@ export const GridContext = createContext<ContextType>({
 });
 
 const gridStateReducer = (state = initialState, action: GridActions) => {
-  console.log('action', action);
   switch (action.type) {
     case Actions.SET_CURRENT_CELL: {
       return { ...state, currentCell: action.payload };
@@ -78,6 +84,9 @@ const gridStateReducer = (state = initialState, action: GridActions) => {
     }
     case Actions.SET_EDITABLE_CELL_STYLE: {
       return { ...state, editableCellStyle: { ...action.payload } };
+    }
+    case Actions.SET_CURRENT_CELL_VALUE: {
+      return { ...state, currentCellValue: action.payload };
     }
     default:
       return state;
