@@ -1,7 +1,7 @@
 import { Flex } from '@chakra-ui/react';
 import { Column } from './grid';
 import { useContext } from 'react';
-import { Actions, GridContext } from './GridContext';
+import { GridContext } from './GridContext';
 
 export const Cell = ({
   column,
@@ -18,7 +18,7 @@ export const Cell = ({
   data: any;
   handleDoubleClick: Function;
 }) => {
-  const { state, dispatch } = useContext(GridContext);
+  const { state } = useContext(GridContext);
   const { currentCell, selectedColumns } = state;
 
   const columnId = column.columnId;
@@ -26,13 +26,8 @@ export const Cell = ({
 
   const currentActiveCell =
     currentCell.row === rowIndex && currentCell.column === columnIndex;
-  // const isCellSelected = isCurrentColumnSelected;
 
   const value = data[rowIndex][columnId];
-
-  if (rowIndex === 1 || (rowIndex === 2 && columnId === 'A')) {
-    console.log({ rowIndex, columnId, value });
-  }
 
   return (
     <Flex
@@ -49,15 +44,12 @@ export const Cell = ({
       }
       fontSize={'xs-12'}
       borderWidth={currentActiveCell ? '2px' : ''}
-      color={'grey.800'}
       style={style}
       textOverflow={'hidden'}
       overflow={'hidden'}
       whiteSpace={'nowrap'}
       onClick={(e) => handleDoubleClick(e, rowIndex, columnIndex, value)}
-      // onClick={handleCellClick}
-    >
-      {value}
-    </Flex>
+      dangerouslySetInnerHTML={{ __html: value }}
+    ></Flex>
   );
 };

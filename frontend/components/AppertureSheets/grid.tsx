@@ -22,7 +22,7 @@ const Sheet = () => {
   const createRows = (columns: Column[]) => {
     const row = {} as { [key: string]: string };
     const singleRow = columns.forEach((column) => {
-      row[column.columnId] = column.columnId;
+      row[column.columnId] = '';
     });
     return new Array(1000).fill(row);
   };
@@ -57,7 +57,7 @@ const Sheet = () => {
       prevColumns[columnIndex] = updatedColumn;
       return [...prevColumns];
     });
-  }, 50);
+  }, 15);
 
   const handleDoubleClick = (
     event: React.MouseEvent,
@@ -84,8 +84,9 @@ const Sheet = () => {
         const style = {
           left: position.x,
           top: position.y,
-          height: position.height,
+          minHeight: position.height,
           width: 'fit-content',
+          maxWidth: `calc(100% - ${position.x + 20}px)`,
           minWidth: position.width,
         };
         dispatch({
@@ -122,17 +123,12 @@ const Sheet = () => {
     const columnId = columns[currentCell.column].columnId;
     const rowIndex = currentCell.row;
 
-    console.log('row', { columnId, rowIndex });
-
     setRows((prevState) => {
       const tempState = [...prevState];
-      console.log('temp state', tempState[rowIndex][columnId]);
       tempState[rowIndex] = {
         ...tempState[rowIndex],
         [columnId]: sanitizedContent,
       };
-      // tempState[rowIndex] = sanitizedContent;
-      console.log('tempState', tempState);
       return tempState;
     });
 
@@ -157,16 +153,16 @@ const Sheet = () => {
 
   useEffect(() => {
     sheetRef.current?.scrollToItem({
-      align: 'smart',
+      align: 'auto',
       columnIndex: currentCell.column,
       rowIndex: currentCell.row,
     });
     rowIndexGrid.current?.scrollToItem({
-      align: 'smart',
+      align: 'auto',
       rowIndex: currentCell.row,
     });
     headerGrid.current?.scrollToItem({
-      align: 'smart',
+      align: 'auto',
       columnIndex: currentCell.column,
     });
   }, [currentCell]);
@@ -374,10 +370,8 @@ const Sheet = () => {
               </Flex>
               {showEditableCell && (
                 <Flex
-                  p={2}
-                  // whiteSpace={'nowrap'}
-                  // spellCheck={false}
-                  // maxW={'calc(100% - 20px)'}
+                  whiteSpace={'pre-wrap'}
+                  spellCheck={false}
                   ref={(el) => el?.focus()}
                   contentEditable={true}
                   position={'absolute'}
@@ -388,7 +382,7 @@ const Sheet = () => {
                   alignItems={'center'}
                   fontSize={'xs-12'}
                   px={1}
-                  h={'6'}
+                  pt={'1px'}
                   dangerouslySetInnerHTML={{ __html: currentCellValue }}
                   onBlur={(e) => handleCellChange(e)}
                 />
