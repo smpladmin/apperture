@@ -1,5 +1,6 @@
-from beanie import Indexed
 from typing import Optional
+
+from beanie import Indexed
 
 from repositories import Document
 

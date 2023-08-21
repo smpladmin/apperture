@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import re
 from typing import List, Union
@@ -10,8 +11,8 @@ from settings import apperture_settings
 from utils.mail import GENERIC_EMAIL_DOMAINS
 
 from ..apperture_users.models import AppertureUser
-from .models import App, ClickHouseCredential, OrgAccess
 from ..common.random_string_utils import StringUtils
+from .models import App, ClickHouseCredential, OrgAccess
 
 
 class AppService:
@@ -146,9 +147,9 @@ class AppService:
         )
 
     async def share_app(
-        self, id: str, owner_id: str, to_share_with: List[PydanticObjectId]
+        self, id: str, user: AppertureUser, to_share_with: List[PydanticObjectId]
     ):
-        app = await self.get_user_app(id, owner_id)
+        app = await self.get_shared_or_owned_app(id, user)
         for user_id in to_share_with:
             app.shared_with.add(user_id)
         await app.save()
@@ -160,10 +161,23 @@ class AppService:
         await app.save()
         return app
 
-    async def get_users_for_app(self, app_id: str):
+    async def get_users_for_app(self, app_id: str) -> List[PydanticObjectId]:
         app = await App.get(PydanticObjectId(app_id))
         return [app.user_id] + [user_id for user_id in app.shared_with]
 
     async def get_user_domain(self, app_id: str):
         app = await App.get(PydanticObjectId(app_id))
         return OrgAccess(org_access=app.org_access, domain=app.domain)
+
+    async def is_valid_user_for_app(self, app_id: str, user: AppertureUser):
+        app = await self.get_app(id=app_id)
+
+        user_id = user.id
+        if (user_id == app.user_id) or (user_id in app.shared_with):
+            return True
+
+        user_email_domain = self.parse_domain_from_email(email=user.email)
+        if app.org_access and user_email_domain == app.domain:
+            return True
+
+        return False

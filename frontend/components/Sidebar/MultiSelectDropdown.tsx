@@ -23,22 +23,20 @@ const MultiSelectDropdown = ({
   const [suggestions, setSuggestions] = useState<AppertureUser[]>([]);
   const [isNewUser, setIsNewUser] = useState(false);
 
-  const existingEmails = existingUsers.map((user) => {
+  const existingEmails = existingUsers?.map((user) => {
     return user.email;
   });
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInput(value);
 
-    const searchResults = getSearchResult(existingEmails, value, {
+    const searchResults = getSearchResult(existingUsers, value, {
       threshold: 0.4,
       minMatchCharLength: 2,
       distance: 10,
+      keys: ['email'],
     });
-    const userSuggestions = existingUsers.filter((obj) =>
-      searchResults.includes(obj.email)
-    );
-    setSuggestions(userSuggestions);
+    setSuggestions(searchResults);
     if (emailRegex.test(input) && !existingEmails.includes(input)) {
       setIsNewUser(true);
     } else {
@@ -157,7 +155,7 @@ const MultiSelectDropdown = ({
               <>
                 {suggestions.map((suggestion) => (
                   <Flex
-                    key={suggestion?.email}
+                    key={suggestion?.id}
                     px={4}
                     py={'6px'}
                     alignItems={'center'}
@@ -181,7 +179,9 @@ const MultiSelectDropdown = ({
                         fontWeight={500}
                         lineHeight={'lh-130'}
                       >
-                        {`${suggestion.firstName} ${suggestion.lastName}`}
+                        {`${suggestion.firstName || ''} ${
+                          suggestion.lastName || ''
+                        }`}
                       </Text>
                       <Text
                         fontSize={'xs-12'}

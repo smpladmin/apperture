@@ -53,6 +53,12 @@ async def login_with_password(
 ):
     apperture_user = await user_service.get_user_by_email(dto.email)
     new_hash = auth_service.verify_password(apperture_user.password, dto.password)
+    if not apperture_user:
+        HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     if not new_hash:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -6,12 +6,17 @@ import { AppWithIntegrations } from '@lib/domain/app';
 import AppsModal from '@components/Sidebar/AppsModal';
 import { useRouter } from 'next/router';
 import ConfigureAppsModal from '@components/ConfigureAppsModal';
+import { get_app_wise_users } from '@lib/services/userService';
+import { AppUser } from '@components/HomeLayout/HomeNav';
 
 export default function Layout({
   children,
   apps = [],
   hideHeader = false,
 }: LayoutProps) {
+  const [refreshAppUserList, setRefreshAppUserList] = useState(true);
+
+  const [appUserList, setAppUserList] = useState<AppUser[]>([]);
   const router = useRouter();
   const defaultAppId = apps
     ?.flatMap((app) =>
@@ -36,6 +41,16 @@ export default function Layout({
   } = useDisclosure({
     defaultIsOpen: !!router.query.configure,
   });
+
+  useEffect(() => {
+    if (!refreshAppUserList) return;
+    const fetchAppWiseUsers = async () => {
+      const map = await get_app_wise_users();
+      setAppUserList(map);
+      setRefreshAppUserList(false);
+    };
+    fetchAppWiseUsers();
+  }, [refreshAppUserList]);
 
   useEffect(() => {
     setSelectedApp(apps.find((a) => a?._id === selectedAppId)!!);
@@ -106,6 +121,8 @@ export default function Layout({
         apps={apps}
         selectedApp={selectedApp}
         openConfigureAppsModal={() => onModalOpen('configure')}
+        appUserList={appUserList}
+        setRefreshAppUserList={setRefreshAppUserList}
       />
       <ConfigureAppsModal
         isConfigureAppsModalOpen={isConfigureAppsModalOpen}

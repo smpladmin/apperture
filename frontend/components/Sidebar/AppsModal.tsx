@@ -18,6 +18,7 @@ import { AppWithIntegrations } from '@lib/domain/app';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import UserApp from './UserApp';
+import { AppUser } from '@components/HomeLayout/HomeNav';
 
 type AppsModalProps = {
   isOpen: boolean;
@@ -26,6 +27,8 @@ type AppsModalProps = {
   onAppSelect: Function;
   selectedApp: AppWithIntegrations;
   openConfigureAppsModal: () => void;
+  setRefreshAppUserList: Function;
+  appUserList: AppUser[];
 };
 
 const AppsModal = ({
@@ -35,6 +38,8 @@ const AppsModal = ({
   onAppSelect,
   selectedApp,
   openConfigureAppsModal,
+  setRefreshAppUserList,
+  appUserList,
 }: AppsModalProps) => {
   const router = useRouter();
   const { dsId } = router.query;
@@ -101,6 +106,11 @@ const AppsModal = ({
                     <UserApp
                       key={app._id}
                       app={app}
+                      users={
+                        appUserList?.find((entry) => entry.app === app._id)
+                          ?.users || []
+                      }
+                      setRefreshAppUserList={setRefreshAppUserList}
                       isSelected={app._id === selectedApp._id}
                       openConfigureAppsModal={openConfigureAppsModal}
                     />

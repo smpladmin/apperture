@@ -5,11 +5,11 @@ from unittest.mock import ANY
 from domain.apps.models import ClickHouseCredential
 from domain.common.models import IntegrationProvider
 from domain.integrations.models import (
-    Integration,
     Credential,
     CredentialType,
-    MySQLCredential,
     CSVCredential,
+    Integration,
+    MySQLCredential,
 )
 
 
@@ -108,6 +108,7 @@ def test_add_database_integration(
         "revisionId": None,
         "updatedAt": None,
         "userId": "636a1c61d715ca6baae65611",
+        "enabled": None,
     }
 
 
@@ -201,6 +202,7 @@ def test_add_csv_integration(
         "revisionId": None,
         "updatedAt": None,
         "userId": "636a1c61d715ca6baae65611",
+        "enabled": None,
     }
 
 

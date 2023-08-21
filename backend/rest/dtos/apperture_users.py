@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from beanie import PydanticObjectId
 from pydantic import BaseModel
@@ -36,3 +36,8 @@ class CreateUserDto(BaseModel):
 class ResetPasswordDto(BaseModel):
     email: str
     password: str
+
+
+class AppWiseUserDto(BaseModel):
+    app: PydanticObjectId
+    users: List[AppertureUserResponse]

@@ -41,8 +41,8 @@ from domain.funnels.models import (
 from domain.integrations.models import (
     Credential,
     CredentialType,
-    Integration,
     CSVCredential,
+    Integration,
 )
 from domain.metrics.models import (
     ComputedMetricData,
@@ -2360,6 +2360,7 @@ def integration_response():
         "revisionId": ANY,
         "updatedAt": None,
         "userId": "636a1c61d715ca6baae65611",
+        "enabled": None,
     }
 
 
