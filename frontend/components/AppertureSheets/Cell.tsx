@@ -1,55 +1,59 @@
 import { Flex } from '@chakra-ui/react';
-import { Column } from './grid';
+import { BaseCellProps, Column } from './grid';
 import { useContext } from 'react';
-import { GridContext } from './GridContext';
+import { Actions, GridContext } from './GridContext';
 
-export const Cell = ({
-  column,
-  columnIndex,
-  rowIndex,
-  style,
-  data,
-  handleDoubleClick,
-}: {
-  column: Column;
-  columnIndex: number;
-  rowIndex: number;
-  style: any;
-  data: any;
-  handleDoubleClick: Function;
-}) => {
-  const { state } = useContext(GridContext);
+type CellProps = BaseCellProps;
+
+const Cell = ({ column, columnIndex, rowIndex, style, value }: CellProps) => {
+  const { state, dispatch } = useContext(GridContext);
   const { currentCell, selectedColumns } = state;
 
-  const columnId = column.columnId;
-  const isCellSelected = selectedColumns.includes(columnId);
+  const handleDoubleClick = (
+    event: React.MouseEvent,
+    rowIndex: number,
+    columnIndex: number,
+    value: string | number
+  ) => {
+    const el = event.currentTarget;
 
-  const currentActiveCell =
-    currentCell.row === rowIndex && currentCell.column === columnIndex;
+    if (event.detail === 2) {
+      if (el) {
+        const position = el.getBoundingClientRect();
+        const style = {
+          left: position.x,
+          top: position.y,
+          minHeight: position.height,
+          width: 'fit-content',
+          maxWidth: `calc(100% - ${position.x + 20}px)`,
+          minWidth: position.width,
+        };
+        dispatch({
+          type: Actions.SET_EDITABLE_CELL_STYLE,
+          payload: style,
+        });
+      }
 
-  const value = data[rowIndex][columnId];
+      dispatch({
+        type: Actions.SET_CURRENT_CELL_VALUE,
+        payload: value,
+      });
+      dispatch({
+        type: Actions.SET_SHOW_EDITABLE_CELL,
+        payload: true,
+      });
+    }
+  };
 
   return (
     <Flex
-      alignItems={'center'}
-      w={60}
-      height={6}
+      w={'full'}
+      h={'full'}
       px={1}
-      borderRightWidth={isCellSelected ? '1px' : '0.4px'}
-      borderLeftWidth={isCellSelected ? '1px' : '0'}
-      backgroundColor={isCellSelected ? 'rgba(53,121,248,.35)' : 'transparent'}
-      borderBottomWidth={'0.4px'}
-      borderColor={
-        isCellSelected || currentActiveCell ? 'blue.500' : 'grey.700'
-      }
-      fontSize={'xs-12'}
-      borderWidth={currentActiveCell ? '2px' : ''}
-      style={style}
-      textOverflow={'hidden'}
-      overflow={'hidden'}
-      whiteSpace={'nowrap'}
       onClick={(e) => handleDoubleClick(e, rowIndex, columnIndex, value)}
-      dangerouslySetInnerHTML={{ __html: value }}
-    ></Flex>
+      dangerouslySetInnerHTML={{ __html: String(value) }}
+    />
   );
 };
+
+export default Cell;

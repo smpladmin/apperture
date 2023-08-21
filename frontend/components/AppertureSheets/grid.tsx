@@ -1,5 +1,5 @@
 import { Box, Flex } from '@chakra-ui/react';
-import { cloneDeep, range, throttle } from 'lodash';
+import { range, throttle } from 'lodash';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import {
   VariableSizeGrid as Grid,
@@ -8,9 +8,11 @@ import {
 } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { HeaderCell } from './HeaderCell';
-import { Cell } from './Cell';
+import Cell from './Cell';
 import { Actions, GridContext } from './GridContext';
 import sanitizeHtml from 'sanitize-html';
+import CustomCell from './CustomCell';
+import BaseCell from './BaseCell';
 
 export type Column = {
   columnId: string;
@@ -18,7 +20,35 @@ export type Column = {
   resizable?: boolean;
 };
 
+export type BaseCellProps = {
+  column: Column;
+  columnIndex: number;
+  rowIndex: number;
+  style: any;
+  value: string | number;
+};
+
+const componentMap: Record<string, React.ComponentType<any>> = {
+  cell: Cell,
+  customCell: CustomCell,
+};
+
 const Sheet = () => {
+  const people = [
+    { name: 'Thomas', surname: 'Goldman' },
+    { name: 'Susie', surname: 'Quattro' },
+    { name: '', surname: '' },
+  ];
+
+  const rowCells: any[] = [...people].map((person, idx) => ({
+    rowId: idx,
+    cells: [
+      { type: 'cell', value: person.name },
+      { type: 'cell', value: person.surname },
+      { type: 'customCell', value: 'custom' },
+    ],
+  }));
+
   const createRows = (columns: Column[]) => {
     const row = {} as { [key: string]: string };
     const singleRow = columns.forEach((column) => {
@@ -28,11 +58,20 @@ const Sheet = () => {
   };
 
   const createColumns = () => {
-    const columns: Column[] = range(26).map((column, i) => ({
-      columnId: String.fromCharCode(65 + column),
-      width: 120,
-      resizable: true,
-    }));
+    const columns: Column[] = range(26).map((column, i) => {
+      let columnId;
+      if (i === 0 || i === 1) {
+        let givenColumnsIds = ['name', 'surname'];
+        columnId = givenColumnsIds[i];
+      } else {
+        columnId = String.fromCharCode(65 + i);
+      }
+      return {
+        columnId,
+        width: 120,
+        resizable: true,
+      };
+    });
     return columns;
   };
 
@@ -59,58 +98,7 @@ const Sheet = () => {
     });
   }, 15);
 
-  const handleDoubleClick = (
-    event: React.MouseEvent,
-    rowIndex: number,
-    columnIndex: number,
-    value: string
-  ) => {
-    const el = event.currentTarget;
-
-    dispatch({
-      type: Actions.SET_CURRENT_CELL,
-      payload: {
-        column: columnIndex,
-        row: rowIndex,
-      },
-    });
-    dispatch({ type: Actions.SET_SELECTED_COLUMNS, payload: [] });
-
-    if (event.detail === 2) {
-      // window.removeEventListener('keydown', handleKeyPress);
-
-      if (el) {
-        const position = el.getBoundingClientRect();
-        const style = {
-          left: position.x,
-          top: position.y,
-          minHeight: position.height,
-          width: 'fit-content',
-          maxWidth: `calc(100% - ${position.x + 20}px)`,
-          minWidth: position.width,
-        };
-        dispatch({
-          type: Actions.SET_EDITABLE_CELL_STYLE,
-          payload: style,
-        });
-      }
-
-      dispatch({
-        type: Actions.SET_CURRENT_CELL_VALUE,
-        payload: value,
-      });
-      dispatch({
-        type: Actions.SET_SHOW_EDITABLE_CELL,
-        payload: true,
-      });
-    }
-  };
-
-  const handleCellChange = (
-    event: any
-    // rowIndex: number,
-    // columnIndex: number
-  ) => {
+  const handleCellChange = (event: any) => {
     const sanitizeConf = {
       allowedTags: ['b', 'i', 'a', 'p'],
       allowedAttributes: { a: ['href'] },
@@ -171,8 +159,10 @@ const Sheet = () => {
     if (showEditableCell) return;
 
     const handleKeyPress = (event: KeyboardEvent) => {
-      event.preventDefault();
       const { key } = event;
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+        event.preventDefault();
+      }
 
       switch (key) {
         case 'ArrowUp':
@@ -354,15 +344,27 @@ const Sheet = () => {
                     width={width - 60}
                   >
                     {({ columnIndex, rowIndex, style }) => {
+                      const cellValue =
+                        rowCells[rowIndex]?.cells?.[columnIndex]?.value || '';
+
+                      const baseCellProps: BaseCellProps = {
+                        columnIndex,
+                        rowIndex,
+                        style,
+                        column: columns[columnIndex],
+                        value: cellValue,
+                      };
+
+                      const cellType =
+                        rowCells[rowIndex]?.cells?.[columnIndex]?.type ||
+                        'cell';
+
+                      const CellToRender = componentMap[cellType];
+
                       return (
-                        <Cell
-                          column={columns[columnIndex]}
-                          columnIndex={columnIndex}
-                          rowIndex={rowIndex}
-                          style={style}
-                          handleDoubleClick={handleDoubleClick}
-                          data={rows}
-                        />
+                        <BaseCell {...baseCellProps}>
+                          <CellToRender {...baseCellProps} />
+                        </BaseCell>
                       );
                     }}
                   </Grid>
