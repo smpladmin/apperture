@@ -15,6 +15,7 @@ import {
   InputGroup,
   InputRightElement,
   InputLeftElement,
+  useToast,
 } from '@chakra-ui/react';
 import { BACKEND_BASE_URL } from 'config';
 import LoginWithPasswordModal from './Components/LoginWithPasswordModal';
@@ -26,9 +27,19 @@ import {
   LeftContainerLogin,
   RightContainer,
 } from '@components/Onboarding';
+import RegisterForm from './Components/RegisterForm';
+import { LoginUser } from '@lib/services/userService';
+import { useRouter } from 'next/router';
+
+export enum LoginPageState {
+  LOGIN = 'login',
+  REGISTER = 'register',
+}
 
 const Loginscreen = () => {
   const { onOpen, onClose, isOpen } = useDisclosure();
+  const router = useRouter();
+  const toast = useToast();
 
   useEffect(() => {
     window?.posthog?.reset?.(true);
@@ -36,6 +47,31 @@ const Loginscreen = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [pageState, setPageState] = useState<LoginPageState>(
+    LoginPageState.LOGIN
+  );
+  const [loggingUser, setLoggingUser] = useState(false);
+
+  useEffect(() => {
+    if (!loggingUser) {
+      return;
+    }
+    const userLogin = async () => {
+      const response = await LoginUser(email, password);
+      if (response.status === 200) router.push({ pathname: '/' });
+      else {
+        toast({
+          title: response?.data?.detail || 'Something went wrong!',
+          status: 'error',
+          variant: 'subtle',
+          isClosable: true,
+        });
+      }
+      setLoggingUser(false);
+    };
+    userLogin();
+  }, [loggingUser]);
+
   const redirectionRef = useRef<any>();
 
   const handleEmail = (e: any) => {
@@ -47,7 +83,9 @@ const Loginscreen = () => {
 
   const handleLogin = (e: any) => {
     e.preventDefault();
-    if (email && password) redirectionRef.current.click();
+    if (email && password) {
+      setLoggingUser(true);
+    }
   };
 
   const [show, setShow] = React.useState(false);
@@ -55,9 +93,8 @@ const Loginscreen = () => {
 
   return (
     <IntegrationContainer>
-      
-        <LeftContainerLogin />
-     
+      <LeftContainerLogin />
+
       <RightContainer>
         <Box
           p={8}
@@ -94,161 +131,188 @@ const Loginscreen = () => {
                 Let’s get your account set up
               </Text>
             </Box>
-
-            <Flex
-              mt={5}
-              p={10}
-              bg={'white'}
-              w={'full'}
-              maxW={120}
-              borderRadius={'12px'}
-              borderWidth={0}
-              borderColor={'grey.400'}
-              gap={7}
-              direction={'column'}
-            >
-            <Link href={`${BACKEND_BASE_URL}/login`}>
-                        <Flex
-                          gap={22}
-                          padding={2}
-                          alignItems={'center'}
-                          justifyContent={'start'}
-                          height={'auto'}
-                          bg={'#5093EC'}
-                          borderWidth={1}
-                          borderColor={'grey.400'}
-                          borderStyle={'solid'}
-                          cursor={'pointer'}
-                          borderRadius={'8'}
-                          _hover={{ background: '#5093EC' }}
-                        >
-                          <Image src={glogo.src} w={7} borderRadius={5}/>
-                          <Text
-                            fontSize={'xs-14'}
-                            lineHeight={'lh-135'}
-                            fontWeight={'medium'}
-                            textColor={'white'}
-                          >
-                            Continue with Google
-                          </Text>
-                        </Flex>
-                      </Link>
-                      <Flex alignItems={'center'} gap={2}>
-                        <Box flexGrow={'1'} height={'1px'} bg={'white.200'}></Box>
-                        <Text
-                          fontSize={'xs-12'}
-                          lineHeight={'lh-135'}
-                          fontWeight={'medium'}
-                          textColor={'grey.600'}
-                        >
-                          or continue with
-                        </Text>
-                        <Box flexGrow={'1'} height={'1px'} bg={'white.200'}></Box>
-                      </Flex>
-              <Box>
-                <a
-                  ref={redirectionRef}
-                  href={`${BACKEND_BASE_URL}/login/password?email=${email}&password=${password}`}
-                ></a>
-                <form id="login-form" onSubmit={handleLogin}>
-                  <FormControl>
-                    <Flex direction="column" gap={7}>
-                      <Flex direction="column" gap={3}>
-                        <FormLabel
-                          fontSize={'xs-14'}
-                          lineHeight={'lh-130'}
-                          color={'grey.800'}
-                          mb={0}
-                        >
-                          Email
-                        </FormLabel>
-                        <InputGroup>
-                          <InputLeftElement>
-                            <Envelope size={16} color={GREY_600} />
-                          </InputLeftElement>
-                          <Input
-                            type="email"
-                            placeholder="john.doe@example.com"
-                            onChange={handleEmail}
-                            bg={'white.500'}
-                            fontSize={'xs-12'}
-                            lineHeight={'lh-130'}
-                            focusBorderColor={BLACK}
-                          />
-                        </InputGroup>
-                      </Flex>
-                      <Flex direction="column" gap={3}>
-                        <FormLabel
-                          fontSize={'xs-14'}
-                          lineHeight={'lh-130'}
-                          color={'grey.800'}
-                          mb={0}
-                        >
-                          Password
-                        </FormLabel>
-
-                        <InputGroup>
-                          <InputLeftElement>
-                            <LockKey size={16} color={GREY_600} />
-                          </InputLeftElement>
-                          <Input
-                            type={show ? 'text' : 'password'}
-                            placeholder="**************"
-                            onChange={handlePassword}
-                            bg={'white.500'}
-                            fontSize={'xs-12'}
-                            lineHeight={'lh-130'}
-                            focusBorderColor={BLACK}
-                          />
-                          <InputRightElement
-                            w={4}
-                            marginRight={3}
-                            cursor={'pointer'}
-                          >
-                            <Flex onClick={handleClick}>
-                              {show ? <Eye /> : <EyeClosed />}
-                            </Flex>
-                          </InputRightElement>
-                        </InputGroup>
-                      </Flex>
-                      <Button
-                        borderWidth={'1px'}
-                        type={'submit'}
-                        form={'login-form'}
-                        fontSize={'xs-14'}
-                        lineHeight={'lh-130'}
-                        fontWeight={500}
-                        variant={'dark'}
-                        borderRadius={10}
-                      >
-                        Sign in
-                      </Button>
-                      
-                      
-                    </Flex>
-                  </FormControl>
-                </form>
-                <Flex ml={2} mt={5} gap={1} justifyContent="left" fontSize={{ base: 'xs-12', md: 'xs-12' }}
-                    lineHeight={{ base: 'sh-18', md: 'sh-18' }}>
-                  <Text
-                    fontWeight="normal"
-                    color="grey.800"
+            {pageState === LoginPageState.LOGIN ? (
+              <Flex
+                mt={5}
+                p={10}
+                bg={'white'}
+                w={'full'}
+                maxW={120}
+                borderRadius={'12px'}
+                borderWidth={0}
+                borderColor={'grey.400'}
+                gap={7}
+                direction={'column'}
+              >
+                <Link href={`${BACKEND_BASE_URL}/login`}>
+                  <Flex
+                    gap={22}
+                    padding={2}
+                    alignItems={'center'}
+                    justifyContent={'start'}
+                    height={'auto'}
+                    bg={'#5093EC'}
+                    borderWidth={1}
+                    borderColor={'grey.400'}
+                    borderStyle={'solid'}
+                    cursor={'pointer'}
+                    borderRadius={'8'}
+                    _hover={{ background: '#5093EC' }}
                   >
-                    I agree to Apperture&apos;s
+                    <Image src={glogo.src} w={7} borderRadius={5} />
+                    <Text
+                      fontSize={'xs-14'}
+                      lineHeight={'lh-135'}
+                      fontWeight={'medium'}
+                      textColor={'white'}
+                    >
+                      Continue with Google
+                    </Text>
+                  </Flex>
+                </Link>
+                <Flex alignItems={'center'} gap={2}>
+                  <Box flexGrow={'1'} height={'1px'} bg={'white.200'}></Box>
+                  <Text
+                    fontSize={'xs-12'}
+                    lineHeight={'lh-135'}
+                    fontWeight={'medium'}
+                    textColor={'grey.600'}
+                  >
+                    or continue with
                   </Text>
-                  <Link href="https://apperture.io/terms-and-conditions"   >Terms and conditions</Link>
-                  <Text fontWeight="normal" color="grey.800">and</Text>
-                  <Link href="https://www.apperture.io/privacy-policy"  >Privacy Policy</Link>
+                  <Box flexGrow={'1'} height={'1px'} bg={'white.200'}></Box>
                 </Flex>
-                
-              </Box>
-            </Flex>
+                <Box>
+                  <a
+                    ref={redirectionRef}
+                    href={`${BACKEND_BASE_URL}/login/password?email=${email}&password=${password}`}
+                  ></a>
+                  <form id="login-form" onSubmit={handleLogin}>
+                    <FormControl>
+                      <Flex direction="column" gap={7}>
+                        <Flex direction="column" gap={3}>
+                          <FormLabel
+                            fontSize={'xs-14'}
+                            lineHeight={'lh-130'}
+                            color={'grey.800'}
+                            mb={0}
+                          >
+                            Email
+                          </FormLabel>
+                          <InputGroup>
+                            <InputLeftElement>
+                              <Envelope size={16} color={GREY_600} />
+                            </InputLeftElement>
+                            <Input
+                              type="email"
+                              placeholder="john.doe@example.com"
+                              onChange={handleEmail}
+                              bg={'white.500'}
+                              fontSize={'xs-12'}
+                              lineHeight={'lh-130'}
+                              focusBorderColor={BLACK}
+                            />
+                          </InputGroup>
+                        </Flex>
+                        <Flex direction="column" gap={3}>
+                          <FormLabel
+                            fontSize={'xs-14'}
+                            lineHeight={'lh-130'}
+                            color={'grey.800'}
+                            mb={0}
+                          >
+                            Password
+                          </FormLabel>
+
+                          <InputGroup>
+                            <InputLeftElement>
+                              <LockKey size={16} color={GREY_600} />
+                            </InputLeftElement>
+                            <Input
+                              type={show ? 'text' : 'password'}
+                              placeholder="**************"
+                              onChange={handlePassword}
+                              bg={'white.500'}
+                              fontSize={'xs-12'}
+                              lineHeight={'lh-130'}
+                              focusBorderColor={BLACK}
+                            />
+                            <InputRightElement
+                              w={4}
+                              marginRight={3}
+                              cursor={'pointer'}
+                            >
+                              <Flex onClick={handleClick}>
+                                {show ? <Eye /> : <EyeClosed />}
+                              </Flex>
+                            </InputRightElement>
+                          </InputGroup>
+                        </Flex>
+                        <Flex gap={1}>
+                          <Button
+                            borderWidth={'1px'}
+                            type={'submit'}
+                            form={'login-form'}
+                            fontSize={'xs-14'}
+                            lineHeight={'lh-130'}
+                            fontWeight={500}
+                            variant={'dark'}
+                            borderRadius={10}
+                            w={'50%'}
+                          >
+                            Sign in
+                          </Button>
+                          <Button
+                            borderWidth={'1px'}
+                            form={'login-form'}
+                            fontSize={'xs-14'}
+                            lineHeight={'lh-130'}
+                            fontWeight={500}
+                            borderRadius={10}
+                            variant={'secondary'}
+                            w={'50%'}
+                            onClick={() =>
+                              setPageState(LoginPageState.REGISTER)
+                            }
+                          >
+                            Sign up
+                          </Button>
+                        </Flex>
+                      </Flex>
+                    </FormControl>
+                  </form>
+                  <Flex
+                    ml={2}
+                    mt={5}
+                    gap={1}
+                    justifyContent="left"
+                    fontSize={{ base: 'xs-12', md: 'xs-12' }}
+                    lineHeight={{ base: 'sh-18', md: 'sh-18' }}
+                  >
+                    <Text fontWeight="normal" color="grey.800">
+                      I agree to Apperture&apos;s
+                    </Text>
+                    <Link href="https://apperture.io/terms-and-conditions">
+                      Terms and conditions
+                    </Link>
+                    <Text fontWeight="normal" color="grey.800">
+                      and
+                    </Text>
+                    <Link href="https://www.apperture.io/privacy-policy">
+                      Privacy Policy
+                    </Link>
+                  </Flex>
+                </Box>
+              </Flex>
+            ) : (
+              <RegisterForm setPageState={setPageState} />
+            )}
 
             {/* <LoginWithPasswordModal isOpen={isOpen} onClose={onClose} /> */}
           </Flex>
         </Box>
-    </RightContainer>
-  </IntegrationContainer>
+      </RightContainer>
+    </IntegrationContainer>
   );
 };
 

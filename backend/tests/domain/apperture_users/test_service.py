@@ -2,8 +2,10 @@ from collections import namedtuple
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+
 from domain.apperture_users.models import AppertureUser
 from domain.apperture_users.service import AppertureUserService
+from utils.errors import BusinessError
 
 
 class TestUserService:
@@ -40,19 +42,7 @@ class TestUserService:
         existing_user = MagicMock()
         AppertureUser.email = MagicMock()
         AppertureUser.find_one = AsyncMock(return_value=existing_user)
-
-        user = await self.service.create_user_with_password(
-            self.first_name, self.last_name, self.email, self.password
-        )
-
-        assert user == existing_user
-
-    @pytest.mark.asyncio
-    async def test_get_all_apperture_users(self):
-        await self.service.get_all_apperture_users()
-        AppertureUser.find.assert_called_once_with()
-
-    @pytest.mark.asyncio
-    async def test_create_invited_user(self):
-        await self.service.create_invited_user(email="test.mail.com")
-        AppertureUser.insert.assert_called()
+        with pytest.raises(BusinessError, match="User already exists with this email"):
+            user = await self.service.create_user_with_password(
+                self.first_name, self.last_name, self.email, self.password
+            )

@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends
 from authorisation.service import AuthService
 from data_processor_queue.service import DPQueueService
 from domain.actions.service import ActionService
+from domain.apidata.service import APIDataService
 from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
 from domain.clickstream_event_properties.service import (
@@ -19,7 +20,6 @@ from domain.datasources.service import DataSourceService
 from domain.edge.service import EdgeService
 from domain.event_properties.service import EventPropertiesService
 from domain.events.service import EventsService
-from domain.apidata.service import APIDataService
 from domain.funnels.service import FunnelsService
 from domain.integrations.service import IntegrationService
 from domain.metrics.service import MetricService
@@ -27,11 +27,8 @@ from domain.notifications.models import NotificationType, NotificationVariant
 from domain.notifications.service import NotificationService
 from domain.properties.service import PropertiesService
 from domain.runlogs.service import RunLogService
-from rest.dtos.apperture_users import (
-    CreateUserDto,
-    PrivateUserResponse,
-    ResetPasswordDto,
-)
+from rest.dtos.apidata import CreateAPIDataDto
+from rest.dtos.apperture_users import PrivateUserResponse, ResetPasswordDto
 from rest.dtos.clickstream_event_properties import (
     ClickStreamEventPropertiesDto,
     ClickStreamEventPropertiesResponse,
@@ -41,7 +38,6 @@ from rest.dtos.datasources import PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.event_properties import EventPropertiesDto, EventPropertiesResponse
 from rest.dtos.events import CreateEventDto
-from rest.dtos.apidata import CreateAPIDataDto
 from rest.dtos.funnels import FunnelResponse, FunnelTrendResponse, TransientFunnelDto
 from rest.dtos.metrics import (
     ComputedMetricStepResponse,
@@ -51,8 +47,6 @@ from rest.dtos.metrics import (
 from rest.dtos.properties import PropertiesResponse
 from rest.dtos.runlogs import UpdateRunLogDto
 from rest.middlewares import validate_api_key
-from repositories.clickhouse.actions import Actions
-from domain.apps.service import AppService
 
 router = APIRouter(
     tags=["private"],
@@ -60,18 +54,6 @@ router = APIRouter(
     responses={401: {}},
     prefix="/private",
 )
-
-
-@router.post("/register")
-async def register(
-    dto: CreateUserDto,
-    user_service: AppertureUserService = Depends(),
-    auth_service: AuthService = Depends(),
-):
-    hash = auth_service.hash_password(dto.password)
-    return await user_service.create_user_with_password(
-        dto.first_name, dto.last_name, dto.email, hash
-    )
 
 
 @router.post("/password/reset")
@@ -206,7 +188,6 @@ async def compute_notifications(
     funnel_service: FunnelsService = Depends(),
     metric_service: MetricService = Depends(),
 ):
-
     notifications = await notification_service.get_notifications_to_compute(
         user_id=user_id
     )

@@ -7,7 +7,6 @@ from domain.apperture_users.models import AppertureUser
 from domain.apperture_users.service import AppertureUserService
 from domain.datasources.service import DataSourceService
 from domain.spreadsheets.service import SpreadsheetService
-from repositories.clickhouse.parser.query_parser import BusinessError
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.spreadsheets import (
@@ -21,6 +20,7 @@ from rest.dtos.spreadsheets import (
 )
 from rest.middlewares import get_user, validate_jwt
 from rest.middlewares.get_user import get_user_id
+from utils.errors import BusinessError
 from rest.middlewares.validate_app_user import validate_app_user, validate_library_items
 
 router = APIRouter(
@@ -30,7 +30,11 @@ router = APIRouter(
 )
 
 
-@router.post("/workbooks", response_model=WorkBookResponse, dependencies=[Depends(validate_app_user)], )
+@router.post(
+    "/workbooks",
+    response_model=WorkBookResponse,
+    dependencies=[Depends(validate_app_user)],
+)
 async def create_workbook(
     dto: CreateWorkBookDto,
     user_id: str = Depends(get_user_id),
@@ -50,7 +54,11 @@ async def create_workbook(
     return workbook
 
 
-@router.get("/workbooks", response_model=List[WorkbookWithUser], dependencies=[Depends(validate_app_user)], )
+@router.get(
+    "/workbooks",
+    response_model=List[WorkbookWithUser],
+    dependencies=[Depends(validate_app_user)],
+)
 async def get_workbooks(
     datasource_id: Union[str, None] = None,
     app_id: Union[str, None] = None,
@@ -77,7 +85,8 @@ async def get_workbooks(
 
 
 @router.post(
-    "/workbooks/spreadsheets/transient", response_model=ComputedSpreadsheetQueryResponse,
+    "/workbooks/spreadsheets/transient",
+    response_model=ComputedSpreadsheetQueryResponse,
     dependencies=[Depends(validate_app_user)],
 )
 async def compute_transient_spreadsheets(
@@ -115,8 +124,11 @@ async def compute_transient_column(
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
 
 
-@router.get("/workbooks/{id}", response_model=SavedWorkBookResponse,
-            dependencies=[Depends(validate_library_items)], )
+@router.get(
+    "/workbooks/{id}",
+    response_model=SavedWorkBookResponse,
+    dependencies=[Depends(validate_library_items)],
+)
 async def get_workbook_by_id(
     id: str,
     spreadsheets_service: SpreadsheetService = Depends(),
@@ -124,8 +136,11 @@ async def get_workbook_by_id(
     return await spreadsheets_service.get_workbook_by_id(workbook_id=id)
 
 
-@router.put("/workbooks/{id}", response_model=SavedWorkBookResponse,
-            dependencies=[Depends(validate_app_user)], )
+@router.put(
+    "/workbooks/{id}",
+    response_model=SavedWorkBookResponse,
+    dependencies=[Depends(validate_app_user)],
+)
 async def update_workbook(
     id: str,
     dto: CreateWorkBookDto,
@@ -146,7 +161,10 @@ async def update_workbook(
     return workbook
 
 
-@router.delete("/workbooks/{workbook_id}", dependencies=[Depends(validate_library_items)], )
+@router.delete(
+    "/workbooks/{workbook_id}",
+    dependencies=[Depends(validate_library_items)],
+)
 async def delete_segments(
     workbook_id: str,
     spreadsheets_service: SpreadsheetService = Depends(),
