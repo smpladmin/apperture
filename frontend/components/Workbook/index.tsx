@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState , useRef} from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from 'react';
 import WorkbookHeader from './components/Header';
 import {
   getTransientSpreadsheets,
@@ -620,18 +626,26 @@ const Workbook = ({
           name: headerText.replace(/\s/g, '').toUpperCase(),
           type: ColumnType.COMPUTED_HEADER,
         };
-        const operands = getOperands(newHeader.name);
-        const operandsIndex = getOperatorsIndex(operands);
-
-        const parsedExpression: any[] = parseExpression(newHeader.name);
-        const lookupTable = generateLookupTable(operands, operandsIndex);
-
-        const evaluatedData = evaluateExpression(
-          parsedExpression as string[],
-          lookupTable
-        );
-
-        updateSelectedSheetDataAndHeaders(evaluatedData, newHeader, columnId);
+        const { headers } = sheetsData[selectedSheetIndex];
+        const regex = /[A-Z]+|[^A-Z0-9]|[0-9]+/g;
+        const expression = headerText.slice(1);
+        const splitExpression = expression.match(regex)?.map((elem) => {
+          if (elem >= 'A' && elem <= 'Z') {
+            const code = elem.charCodeAt(0) - 65;
+            return headers[code].name;
+          }
+          return elem;
+        });
+        console.log(splitExpression?.join(''));
+        // const operands = getOperands(newHeader.name);
+        // const operandsIndex = getOperatorsIndex(operands);
+        // const parsedExpression: any[] = parseExpression(newHeader.name);
+        // const lookupTable = generateLookupTable(operands, operandsIndex);
+        // const evaluatedData = evaluateExpression(
+        //   parsedExpression as string[],
+        //   lookupTable
+        // );
+        // updateSelectedSheetDataAndHeaders(evaluatedData, newHeader, columnId);
       }
     },
     [sheetsData, selectedSheetIndex]
@@ -733,7 +747,6 @@ const Workbook = ({
     return connectionSource?.fields || [];
   }, [connections, selectedSheetIndex, sheetsData]);
 
-  
   return (
     <>
       <Flex direction={'column'}>
@@ -773,17 +786,15 @@ const Workbook = ({
 
           <Box h={'full'} w={'full'} overflowY={'auto'}>
             {showSqlEditor ? (
-              <Box  alignItems={'center'} justifyContent={'center'}>
-                  <QueryEditor
-                    sheetsData={sheetsData}
-                    selectedSheetIndex={selectedSheetIndex}
-                    setShowSqlEditor={setShowSqlEditor}
-                    setSheetsData={setSheetsData}
-                    height={`200px`}
-                  />
-                  
+              <Box alignItems={'center'} justifyContent={'center'}>
+                <QueryEditor
+                  sheetsData={sheetsData}
+                  selectedSheetIndex={selectedSheetIndex}
+                  setShowSqlEditor={setShowSqlEditor}
+                  setSheetsData={setSheetsData}
+                  height={`200px`}
+                />
               </Box>
-                   
             ) : null}
             {showEmptyState ? (
               <EmptySheet

@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from beanie import PydanticObjectId
 from pydantic import BaseModel
 
 from domain.spreadsheets.models import (
@@ -79,3 +80,11 @@ class WorkbookWithUser(WorkBook, ModelResponse):
 class SavedWorkBookResponse(WorkBook, ModelResponse):
     class Config:
         allow_population_by_field_name = True
+
+
+class ComputePivotDto(BaseModel):
+    dsId: PydanticObjectId
+    sql: str
+    rows: List[str]
+    columns: List[str]
+    values: List[str]

@@ -178,3 +178,27 @@ class SpreadsheetService:
         )
         print(result.column_names)
         return result.result_set
+
+    def compute_pivot(self, sql, rows, columns, values, username, password):
+        result_set = self.spreadsheets.compute_transient_pivot(
+            sql, rows, columns, values, username, password
+        )
+        data = {}
+        distinct_columns = self.spreadsheets.compute_ordered_distinct_values(
+            sql=sql, values=columns, username=username, password=password
+        )
+        distinct_rows = self.spreadsheets.compute_ordered_distinct_values(
+            sql=sql, values=rows, username=username, password=password
+        )
+        column_dict = {}
+        for column in distinct_columns:
+            column_dict[column[0]] = None
+        for result in result_set:
+            if not data.get(result[0]):
+                data[result[0]] = dict(column_dict)
+            data[result[0]][result[1]] = result[2]
+        return {
+            "rows": [row[0] for row in distinct_rows],
+            "columns": [col[0] for col in distinct_columns],
+            "data": data,
+        }

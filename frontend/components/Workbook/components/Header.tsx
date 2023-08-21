@@ -6,9 +6,15 @@ import {
   EditablePreview,
   Flex,
 } from '@chakra-ui/react';
+import { ChartPie, Percent, PlusCircle, Sigma } from '@phosphor-icons/react';
 import { useRouter } from 'next/router';
 import { ArrowLeft, Code } from 'phosphor-react';
+import Zero from '@assets/icons/NumberCircleZero.svg';
+import DoubleZero from '@assets/icons/NumberCircleDoubleZero.svg';
+
 import React from 'react';
+import Image from 'next/image';
+import PivotIcon from './PivotIcon';
 
 type WorkbookHeaderProps = {
   name: string;
@@ -27,7 +33,7 @@ const WorkbookHeader = ({
 }: WorkbookHeaderProps) => {
   const router = useRouter();
   const { dsId } = router.query;
-
+  const disabledIconStyle = { color: '#bdbdbd', cursor: 'no-drop' };
   return (
     <Box
       position={'sticky'}
@@ -115,6 +121,27 @@ const WorkbookHeader = ({
             {'Save'}
           </Button>
         </Flex>
+      </Flex>
+      <Flex
+        background={'gray.200'}
+        height={9}
+        borderRadius={'13px'}
+        m={'6px 12px'}
+        alignItems={'center'}
+      >
+        <PlusCircle style={{ margin: '6px', ...disabledIconStyle }} />
+        <ChartPie
+          style={{
+            margin: '6px',
+            ...disabledIconStyle,
+          }}
+        />
+
+        <PivotIcon />
+        <Percent style={{ margin: '6px', ...disabledIconStyle }} />
+        <Sigma style={{ margin: '6px', ...disabledIconStyle }} />
+        <Image src={Zero} alt={'Zero'} style={disabledIconStyle} />
+        <Image src={DoubleZero} alt={'Double Zero'} style={disabledIconStyle} />
       </Flex>
       <Box bg={'white.DEFAULT'} h={'8'}></Box>
     </Box>

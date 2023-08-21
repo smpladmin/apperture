@@ -370,3 +370,21 @@ export const decreaseDecimalPlacesInColumnValues = (
     return toUpdateData;
   });
 };
+
+export const generateQuery = (
+  columns: string[],
+  tableName: string,
+  databaseName: string,
+  datasourceId: string
+) => {
+  if (!columns.length) return '';
+  const columnsQuerySubstring = columns
+    .map((column) => (column.includes(' ') ? '"' + column + '"' : column))
+    .join(', ');
+  return `Select ${columnsQuerySubstring} from ${databaseName}.${tableName} ${
+    databaseName == 'default' &&
+    (tableName == 'events' || tableName == 'clickstream')
+      ? `where datasource_id = '${datasourceId}'`
+      : ''
+  }`;
+};

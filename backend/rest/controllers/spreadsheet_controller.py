@@ -12,6 +12,7 @@ from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
+    ComputePivotDto,
     CreateWorkBookDto,
     SavedWorkBookResponse,
     TransientExpressionDto,
@@ -31,7 +32,11 @@ router = APIRouter(
 )
 
 
-@router.post("/workbooks", response_model=WorkBookResponse, dependencies=[Depends(validate_app_user)], )
+@router.post(
+    "/workbooks",
+    response_model=WorkBookResponse,
+    dependencies=[Depends(validate_app_user)],
+)
 async def create_workbook(
     dto: CreateWorkBookDto,
     user_id: str = Depends(get_user_id),
@@ -51,7 +56,11 @@ async def create_workbook(
     return workbook
 
 
-@router.get("/workbooks", response_model=List[WorkbookWithUser], dependencies=[Depends(validate_app_user)], )
+@router.get(
+    "/workbooks",
+    response_model=List[WorkbookWithUser],
+    dependencies=[Depends(validate_app_user)],
+)
 async def get_workbooks(
     datasource_id: Union[str, None] = None,
     app_id: Union[str, None] = None,
@@ -78,7 +87,8 @@ async def get_workbooks(
 
 
 @router.post(
-    "/workbooks/spreadsheets/transient", response_model=ComputedSpreadsheetQueryResponse,
+    "/workbooks/spreadsheets/transient",
+    response_model=ComputedSpreadsheetQueryResponse,
     dependencies=[Depends(validate_app_user)],
 )
 async def compute_transient_spreadsheets(
@@ -142,8 +152,11 @@ async def compute_transient_column(
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
 
 
-@router.get("/workbooks/{id}", response_model=SavedWorkBookResponse,
-            dependencies=[Depends(validate_library_items)], )
+@router.get(
+    "/workbooks/{id}",
+    response_model=SavedWorkBookResponse,
+    dependencies=[Depends(validate_library_items)],
+)
 async def get_workbook_by_id(
     id: str,
     spreadsheets_service: SpreadsheetService = Depends(),
@@ -151,8 +164,11 @@ async def get_workbook_by_id(
     return await spreadsheets_service.get_workbook_by_id(workbook_id=id)
 
 
-@router.put("/workbooks/{id}", response_model=SavedWorkBookResponse,
-            dependencies=[Depends(validate_app_user)], )
+@router.put(
+    "/workbooks/{id}",
+    response_model=SavedWorkBookResponse,
+    dependencies=[Depends(validate_app_user)],
+)
 async def update_workbook(
     id: str,
     dto: CreateWorkBookDto,
@@ -173,9 +189,33 @@ async def update_workbook(
     return workbook
 
 
-@router.delete("/workbooks/{workbook_id}", dependencies=[Depends(validate_library_items)], )
+@router.delete(
+    "/workbooks/{workbook_id}",
+    dependencies=[Depends(validate_library_items)],
+)
 async def delete_segments(
     workbook_id: str,
     spreadsheets_service: SpreadsheetService = Depends(),
 ):
     await spreadsheets_service.delete_workbook(workbook_id=workbook_id)
+
+
+@router.post(
+    "/workbooks/spreadsheets/pivot/transient", dependencies=[Depends(validate_app_user)]
+)
+async def compute_transientpivot(
+    dto: ComputePivotDto,
+    spreadsheets_service: SpreadsheetService = Depends(),
+    compute_query_action: ComputeQueryAction = Depends(),
+):
+    clickhouse_credential = await compute_query_action.get_credentials(
+        datasource_id=dto.dsId
+    )
+    return spreadsheets_service.compute_pivot(
+        sql=dto.sql,
+        rows=dto.rows,
+        columns=dto.columns,
+        values=dto.values,
+        username=clickhouse_credential.username,
+        password=clickhouse_credential.password,
+    )

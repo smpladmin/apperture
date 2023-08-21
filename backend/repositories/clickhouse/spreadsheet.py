@@ -144,3 +144,41 @@ class Spreadsheets(EventsBase):
         )
 
         return restricted_client.query(query=query)
+
+    def compute_transient_pivot(self, sql, rows, columns, values, username, password):
+        sheet_query = f"({sql})"
+        query = ClickHouseQuery.from_(Table("<inner_table>"))
+        for properties in [*rows, *columns]:
+            query = query.select(Field(properties))
+
+        for value in values:
+            query = query.select(fn.Sum(Field(value)))
+
+        for row in rows:
+            query = query.groupby(row).orderby(row)
+
+        for col in columns:
+            query = query.groupby(col).orderby(col)
+        query = query.limit(500)
+        query = query.get_sql().replace('"<inner_table>"', sheet_query)
+        restricted_client = self.clickhouse.get_connection_for_user(
+            username=username,
+            password=password,
+        )
+
+        return restricted_client.query(query=query).result_set
+
+    def compute_ordered_distinct_values(self, sql, values, username, password):
+        sheet_query = f"({sql})"
+        query = ClickHouseQuery.from_(Table("<inner_table>"))
+        for value in values:
+            query = query.select(Field(value))
+            query = query.groupby(value).orderby(value)
+        query = query.limit(500)
+        query = query.get_sql().replace('"<inner_table>"', sheet_query)
+        restricted_client = self.clickhouse.get_connection_for_user(
+            username=username,
+            password=password,
+        )
+
+        return restricted_client.query(query=query).result_set
