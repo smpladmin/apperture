@@ -158,7 +158,19 @@ const Sheet = () => {
   useEffect(() => {
     if (showEditableCell) return;
 
+    const isInputOrTextArea = (
+      element: EventTarget | null
+    ): element is HTMLInputElement | HTMLTextAreaElement => {
+      return (
+        element instanceof HTMLInputElement ||
+        element instanceof HTMLTextAreaElement
+      );
+    };
+
     const handleKeyPress = (event: KeyboardEvent) => {
+      if (isInputOrTextArea(event.target)) {
+        return;
+      }
       const { key } = event;
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
         event.preventDefault();
@@ -201,14 +213,27 @@ const Sheet = () => {
             },
           });
           break;
+        case 'Meta':
+        case 'Control':
+          dispatch({ type: Actions.SET_IS_COMMAND_PRESSED, payload: true });
+          break;
         default:
           break;
       }
     };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (event.key === 'Meta' || event.key === 'Control') {
+        dispatch({ type: Actions.SET_IS_COMMAND_PRESSED, payload: false });
+      }
+    };
+
     window.addEventListener('keydown', handleKeyPress);
+    window.addEventListener('keyup', handleKeyUp);
 
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('keyup', handleKeyUp);
     };
   }, [currentCell]);
 
@@ -387,6 +412,7 @@ const Sheet = () => {
                   pt={'1px'}
                   dangerouslySetInnerHTML={{ __html: currentCellValue }}
                   onBlur={(e) => handleCellChange(e)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCellChange(e)}
                 />
               )}
             </Flex>

@@ -1,5 +1,5 @@
 import { Flex } from '@chakra-ui/react';
-import { BaseCellProps, Column } from './grid';
+import { BaseCellProps, Column } from './Grid';
 import { useContext } from 'react';
 import { Actions, GridContext } from './GridContext';
 
@@ -7,7 +7,6 @@ type CellProps = BaseCellProps;
 
 const Cell = ({ column, columnIndex, rowIndex, style, value }: CellProps) => {
   const { state, dispatch } = useContext(GridContext);
-  const { currentCell, selectedColumns } = state;
 
   const handleDoubleClick = (
     event: React.MouseEvent,
@@ -20,6 +19,7 @@ const Cell = ({ column, columnIndex, rowIndex, style, value }: CellProps) => {
     if (event.detail === 2) {
       if (el) {
         const position = el.getBoundingClientRect();
+
         const style = {
           left: position.x,
           top: position.y,
@@ -28,6 +28,7 @@ const Cell = ({ column, columnIndex, rowIndex, style, value }: CellProps) => {
           maxWidth: `calc(100% - ${position.x + 20}px)`,
           minWidth: position.width,
         };
+
         dispatch({
           type: Actions.SET_EDITABLE_CELL_STYLE,
           payload: style,
@@ -47,8 +48,9 @@ const Cell = ({ column, columnIndex, rowIndex, style, value }: CellProps) => {
 
   return (
     <Flex
-      w={'full'}
-      h={'full'}
+      className="editor-cell"
+      w={'100%'}
+      h={'100%'}
       px={1}
       onClick={(e) => handleDoubleClick(e, rowIndex, columnIndex, value)}
       dangerouslySetInnerHTML={{ __html: String(value) }}

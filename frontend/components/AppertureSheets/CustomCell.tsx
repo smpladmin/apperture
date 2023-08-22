@@ -1,5 +1,5 @@
 import React from 'react';
-import { BaseCellProps } from './grid';
+import { BaseCellProps } from './Grid';
 import { Box, Input } from '@chakra-ui/react';
 
 const CustomCell = (props: BaseCellProps) => {

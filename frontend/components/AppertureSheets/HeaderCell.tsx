@@ -1,5 +1,5 @@
 import { Flex } from '@chakra-ui/react';
-import { Column } from './grid';
+import { Column } from './Grid';
 import { useContext, useEffect } from 'react';
 import ColumnResizer from './ColumnResizer';
 import { Actions, GridContext } from './GridContext';
@@ -19,29 +19,6 @@ export const HeaderCell = ({
 }) => {
   const { state, dispatch } = useContext(GridContext);
   const { isCommandPressed, selectedColumns } = state;
-
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Meta' || event.key === 'Control') {
-      event.preventDefault();
-      dispatch({ type: Actions.SET_IS_COMMAND_PRESSED, payload: true });
-    }
-  };
-
-  const handleKeyUp = (event: KeyboardEvent) => {
-    if (event.key === 'Meta' || event.key === 'Control') {
-      dispatch({ type: Actions.SET_IS_COMMAND_PRESSED, payload: false });
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
-    };
-  }, []);
 
   const handleColumnSelection = (
     e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>,

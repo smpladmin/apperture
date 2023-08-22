@@ -1,5 +1,5 @@
 import GridContextProvider from '@components/AppertureSheets/GridContext';
-import Sheet from '@components/AppertureSheets/grid';
+import Sheet from '@components/AppertureSheets/Grid';
 import React from 'react';
 
 const AppertureSheet = () => {
