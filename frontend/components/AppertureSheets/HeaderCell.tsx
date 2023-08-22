@@ -2,7 +2,7 @@ import { Flex } from '@chakra-ui/react';
 import { useContext } from 'react';
 import ColumnResizer from './ColumnResizer';
 import { Actions, GridContext } from './GridContext';
-import { Column } from './Grid';
+import { Column } from './gridTypes';
 
 export const HeaderCell = ({
   column,

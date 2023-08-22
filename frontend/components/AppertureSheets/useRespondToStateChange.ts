@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { VariableSizeGrid } from 'react-window';
 
 export function useRespondToStateChange(state: any) {

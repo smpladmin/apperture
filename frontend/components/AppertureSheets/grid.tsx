@@ -14,20 +14,7 @@ import { Actions, GridContext } from './GridContext';
 import sanitizeHtml from 'sanitize-html';
 import CustomCell from './CustomCell';
 import BaseCell from './BaseCell';
-
-export type Column = {
-  columnId: string;
-  width: number;
-  resizable?: boolean;
-};
-
-export type BaseCellProps = {
-  column: Column;
-  columnIndex: number;
-  rowIndex: number;
-  style: any;
-  value: string | number;
-};
+import { BaseCellProps, Column } from './gridTypes';
 
 const componentMap: Record<string, React.ComponentType<any>> = {
   cell: Cell,

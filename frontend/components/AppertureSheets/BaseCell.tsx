@@ -1,7 +1,7 @@
 import { Flex } from '@chakra-ui/react';
 import React, { MouseEvent, ReactElement, useContext } from 'react';
 import { Actions, GridContext } from './GridContext';
-import { BaseCellProps } from './Grid';
+import { BaseCellProps } from './gridTypes';
 
 type BaseCellPropsWithChildren = BaseCellProps & { children: ReactElement };
 

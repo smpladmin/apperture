@@ -1,7 +1,7 @@
 import { Flex } from '@chakra-ui/react';
 import { useContext } from 'react';
 import { Actions, GridContext } from './GridContext';
-import { BaseCellProps } from './Grid';
+import { BaseCellProps } from './gridTypes';
 
 const Cell = ({
   column,
