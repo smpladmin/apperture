@@ -10,7 +10,7 @@ export type InitialStateType = {
   selectedColumns: string[];
   isCommandPressed: boolean;
   showEditableCell: boolean;
-  editableCellStyle: any;
+  editableCellStyle: React.CSSProperties;
   currentCellValue: string;
 };
 
@@ -47,7 +47,7 @@ export type GridActions =
     }
   | {
       type: Actions.SET_EDITABLE_CELL_STYLE;
-      payload: any;
+      payload: React.CSSProperties;
     }
   | {
       type: Actions.SET_CURRENT_CELL_VALUE;
