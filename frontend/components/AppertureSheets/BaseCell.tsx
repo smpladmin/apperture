@@ -30,6 +30,7 @@ const BaseCell = ({ children, ...props }: BaseCellPropsWithChildren) => {
 
   return (
     <Flex
+      className="base-cell"
       alignItems={'center'}
       w={60}
       height={6}

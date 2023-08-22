@@ -1,5 +1,5 @@
 import { Flex } from '@chakra-ui/react';
-import { BaseCellProps, Column } from './Grid';
+import { BaseCellProps } from './Grid';
 import { useContext } from 'react';
 import { Actions, GridContext } from './GridContext';
 
@@ -14,7 +14,7 @@ const Cell = ({ column, columnIndex, rowIndex, style, value }: CellProps) => {
     columnIndex: number,
     value: string | number
   ) => {
-    const el = event.currentTarget;
+    const el = event.currentTarget?.parentElement;
 
     if (event.detail === 2) {
       if (el) {
@@ -48,7 +48,6 @@ const Cell = ({ column, columnIndex, rowIndex, style, value }: CellProps) => {
 
   return (
     <Flex
-      className="editor-cell"
       w={'100%'}
       h={'100%'}
       px={1}
