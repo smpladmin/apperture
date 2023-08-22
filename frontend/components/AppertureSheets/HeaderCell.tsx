@@ -1,8 +1,8 @@
 import { Flex } from '@chakra-ui/react';
-import { Column } from './Grid';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import ColumnResizer from './ColumnResizer';
 import { Actions, GridContext } from './GridContext';
+import { Column } from './Grid';
 
 export const HeaderCell = ({
   column,

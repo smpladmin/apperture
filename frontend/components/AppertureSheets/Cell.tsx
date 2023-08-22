@@ -1,11 +1,15 @@
 import { Flex } from '@chakra-ui/react';
-import { BaseCellProps } from './Grid';
 import { useContext } from 'react';
 import { Actions, GridContext } from './GridContext';
+import { BaseCellProps } from './Grid';
 
-type CellProps = BaseCellProps;
-
-const Cell = ({ column, columnIndex, rowIndex, style, value }: CellProps) => {
+const Cell = ({
+  column,
+  columnIndex,
+  rowIndex,
+  style,
+  value,
+}: BaseCellProps) => {
   const { state, dispatch } = useContext(GridContext);
 
   const handleDoubleClick = (
