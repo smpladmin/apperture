@@ -5,6 +5,7 @@ import {
   VariableSizeGrid as Grid,
   GridOnScrollProps,
   VariableSizeGrid,
+  VariableSizeGridProps,
 } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { HeaderCell } from './HeaderCell';
@@ -287,7 +288,7 @@ const Sheet = () => {
   return (
     <Box height={'100%'} width={'100%'}>
       <AutoSizer>
-        {({ height, width }) => {
+        {({ height, width }: { height: number; width: number }) => {
           return (
             <Flex direction={'column'}>
               <Flex direction={'row'}>
