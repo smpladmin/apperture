@@ -194,7 +194,7 @@ class SpreadsheetService:
             )
         if rows and columns and values:
             result_set = self.spreadsheets.compute_transient_pivot(
-                query, rows, columns, values, username, password
+                query, rows, columns, values, username, password, distinct_rows
             )
             data = {}
             column_dict = {}
