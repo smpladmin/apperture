@@ -89,3 +89,24 @@ export type TransientColumnRequestState = {
   isLoading: boolean;
   subheaders: { name: string; type: SubHeaderColumnType }[];
 };
+
+export enum SortingOrder {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
+export type PivotAxisDetail = {
+  name: string;
+  sort_by: string;
+  order_by: SortingOrder;
+  show_total: boolean;
+};
+
+export enum AggregateFunction {
+  SUM = 'SUM',
+}
+
+export type PivotValueDetail = {
+  name: string;
+  function: AggregateFunction;
+};

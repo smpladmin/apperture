@@ -13,6 +13,8 @@ from domain.spreadsheets.models import (
     DatabaseClient,
     DimensionDefinition,
     MetricDefinition,
+    PivotAxisDetail,
+    PivotValueDetail,
     Spreadsheet,
     SpreadSheetColumn,
     WorkBook,
@@ -176,10 +178,17 @@ class SpreadsheetService:
             table=table,
             database=database,
         )
-        print(result.column_names)
         return result.result_set
 
-    def compute_pivot(self, query, rows, columns, values, username, password):
+    def compute_pivot(
+        self,
+        query: str,
+        rows: List[PivotAxisDetail],
+        columns: List[PivotAxisDetail],
+        values: List[PivotValueDetail],
+        username,
+        password,
+    ):
         distinct_columns, distinct_rows = None, None
         if columns:
             distinct_columns = self.spreadsheets.compute_ordered_distinct_values(
@@ -194,7 +203,13 @@ class SpreadsheetService:
             )
         if rows and columns and values:
             result_set = self.spreadsheets.compute_transient_pivot(
-                query, rows, columns, values, username, password, distinct_rows
+                sql=query,
+                rows=rows,
+                columns=columns,
+                values=values,
+                username=username,
+                password=password,
+                rowRange=distinct_rows,
             )
             data = {}
             column_dict = {}

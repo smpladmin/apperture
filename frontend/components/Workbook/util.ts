@@ -1,7 +1,11 @@
 import { Connection, ConnectionSource } from '@lib/domain/connections';
 import {
+  AggregateFunction,
   ColumnType,
+  PivotAxisDetail,
+  PivotValueDetail,
   SheetType,
+  SortingOrder,
   SpreadSheetColumn,
   SubHeaderColumn,
   SubHeaderColumnType,
@@ -548,7 +552,31 @@ export const TransientPivotToSheetData = (
   sheetData[0]['B'] = { original: columnName, display: columnName };
   sheetData[1]['A'] = { original: rowName, display: rowName };
   if (isEmpty(pivotData)) {
-    sheetData[2]['B'] = { original: 'Values', display: 'Values' };
+    if (sheetData[2])
+      sheetData[2]['B'] = { original: 'Values', display: 'Values' };
+    else {
+      sheetData[1]['B'] = { original: 'Values', display: 'Values' };
+    }
   }
   return [headers, sheetData];
+};
+
+export const constructPivotAxisDetailByName = (
+  name: string
+): PivotAxisDetail => {
+  return {
+    name,
+    sort_by: name,
+    order_by: SortingOrder.ASC,
+    show_total: false,
+  };
+};
+
+export const constructPivotValueDetailByName = (
+  name: string
+): PivotValueDetail => {
+  return {
+    name,
+    function: AggregateFunction.SUM,
+  };
 };

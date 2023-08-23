@@ -1,11 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Checkbox, Flex, Select, Text } from '@chakra-ui/react';
 import { CaretLeft, Plus, X } from 'phosphor-react';
-import { TransientSheetData } from '@lib/domain/workbook';
+import {
+  PivotAxisDetail,
+  PivotValueDetail,
+  SortingOrder,
+  TransientSheetData,
+} from '@lib/domain/workbook';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { getTransientPivot } from '@lib/services/workbookService';
-import { TransientPivotToSheetData } from '../util';
+import {
+  TransientPivotToSheetData,
+  constructPivotAxisDetailByName,
+  constructPivotValueDetailByName,
+} from '../util';
 import { cloneDeep } from 'lodash';
 import { table } from 'console';
 
@@ -31,13 +40,15 @@ export const PivotTableSidePanel = ({
   const referenceQuery =
     sheet?.meta?.referenceSheetQuery ||
     `SELECT * FROM ${sheet?.meta?.selectedDatabase}.${sheet?.meta?.selectedTable}`;
-  const [options, setOptions] = useState(sheet?.meta?.selectedOptions || []);
+  const [options, setOptions] = useState<string[]>(
+    sheet?.meta?.selectedOptions || []
+  );
   const [rowDropDown, setRowDropDown] = useState(false);
   const [columnDropDown, setColumnDropDown] = useState(false);
   const [valueDropDown, setValueDropDown] = useState(false);
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [selectedValues, setSelectedValues] = useState<string[]>([]);
+  const [selectedRows, setSelectedRows] = useState<PivotAxisDetail[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<PivotAxisDetail[]>([]);
+  const [selectedValues, setSelectedValues] = useState<PivotValueDetail[]>([]);
 
   const rowBoxref = useRef(null);
   const columnBoxRef = useRef(null);
@@ -73,9 +84,9 @@ export const PivotTableSidePanel = ({
           const { rows, columns, data } = response.data;
           const [headers, sheetData] = TransientPivotToSheetData(
             rows,
-            selectedRows[0] || 'Rows',
+            selectedRows[0]?.name || 'Rows',
             columns,
-            selectedColumns[0] || 'Columns',
+            selectedColumns[0]?.name || 'Columns',
             data || {}
           );
           setSheetsData((prevSheetData: TransientSheetData[]) => {
@@ -102,8 +113,8 @@ export const PivotTableSidePanel = ({
   }, [selectedRows, selectedColumns, selectedValues]);
 
   const handleRowSubmit = (value: string) => {
-    const prevValues = selectedRows;
-    setSelectedRows([value]);
+    const prevValues = selectedRows.map((i) => i.name);
+    setSelectedRows([constructPivotAxisDetailByName(value)]);
 
     setOptions((prevState) => [
       ...prevValues,
@@ -112,9 +123,9 @@ export const PivotTableSidePanel = ({
     setRowDropDown(false);
   };
   const handleColumnSubmit = (value: string) => {
-    const prevValues = selectedColumns;
+    const prevValues = selectedColumns.map((i) => i.name);
 
-    setSelectedColumns([value]);
+    setSelectedColumns([constructPivotAxisDetailByName(value)]);
     setOptions((prevState) => [
       ...prevValues,
       ...prevState.filter((option) => (option != value ? true : false)),
@@ -122,9 +133,9 @@ export const PivotTableSidePanel = ({
     setColumnDropDown(false);
   };
   const handleValueSubmit = (value: string) => {
-    const prevValues = selectedValues;
+    const prevValues = selectedValues.map((i) => i.name);
 
-    setSelectedValues([value]);
+    setSelectedValues([constructPivotValueDetailByName(value)]);
     setOptions((prevState) => [
       ...prevValues,
       ...prevState.filter((option) => (option != value ? true : false)),
@@ -189,9 +200,10 @@ export const PivotTableSidePanel = ({
         <Flex flexDirection={'column'}>
           {selectedRows.map((row) => (
             <PivotAxisDetailCard
-              key={row}
-              name={row}
+              key={row.name}
+              name={row.name}
               onClose={handleCloseRowCard}
+              setDetail={setSelectedRows}
             />
           ))}
         </Flex>
@@ -225,9 +237,10 @@ export const PivotTableSidePanel = ({
         <Flex flexDirection={'column'}>
           {selectedColumns.map((column) => (
             <PivotAxisDetailCard
-              key={column}
-              name={column}
+              key={column.name}
+              name={column.name}
               onClose={handleCloseColumnCard}
+              setDetail={setSelectedColumns}
             />
           ))}
         </Flex>
@@ -261,8 +274,8 @@ export const PivotTableSidePanel = ({
         <Flex flexDirection={'column'}>
           {selectedValues.map((value) => (
             <PivotValueCard
-              key={value}
-              name={value}
+              key={value.name}
+              name={value.name}
               handleClose={handleCloseValueCard}
             />
           ))}
@@ -286,9 +299,11 @@ export const PivotTableSidePanel = ({
 const PivotAxisDetailCard = ({
   name,
   onClose,
+  setDetail,
 }: {
   name: string;
   onClose: (name: string) => void;
+  setDetail: Function;
 }) => {
   return (
     <Flex
@@ -328,9 +343,14 @@ const PivotAxisDetailCard = ({
               borderRadius: '4px',
               border: '0.4px solid #bdbdbd',
             }}
+            onChange={(e) =>
+              setDetail((prevState: PivotAxisDetail[]) => [
+                { ...prevState[0], order_by: e.target.value },
+              ])
+            }
           >
-            <option value="option1">Ascending</option>
-            <option value="option2">Descending</option>
+            <option value={SortingOrder.ASC}>Ascending</option>
+            <option value={SortingOrder.DESC}>Descending</option>
           </select>
         </Flex>
         <Flex
@@ -358,7 +378,15 @@ const PivotAxisDetailCard = ({
           </select>
         </Flex>
       </Flex>
-      <Checkbox size={'sm'} colorScheme="black">
+      <Checkbox
+        size={'sm'}
+        colorScheme="black"
+        onChange={(e) => {
+          setDetail((prevState: PivotAxisDetail[]) => [
+            { ...prevState[0], show_total: e.target.checked },
+          ]);
+        }}
+      >
         <Text
           fontSize={'xs-10'}
           lineHeight={'135%'}

@@ -8,6 +8,8 @@ from domain.spreadsheets.models import (
     ComputedSpreadsheet,
     DimensionDefinition,
     MetricDefinition,
+    PivotAxisDetail,
+    PivotValueDetail,
     SpreadSheetColumn,
     SpreadsheetType,
     SubHeaderColumn,
@@ -85,6 +87,6 @@ class SavedWorkBookResponse(WorkBook, ModelResponse):
 class ComputePivotDto(BaseModel):
     dsId: PydanticObjectId
     query: str
-    rows: List[str]
-    columns: List[str]
-    values: List[str]
+    rows: List[PivotAxisDetail]
+    columns: List[PivotAxisDetail]
+    values: List[PivotValueDetail]
