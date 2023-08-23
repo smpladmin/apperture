@@ -224,14 +224,12 @@ class Spreadsheets(EventsBase):
 
         if axisRange and rangeAxis:
             query = query.where(Field(rangeAxis.name).isin(axisRange))
-
-        query = query.limit(50)
+        else:
+            query = query.limit(50)
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
         restricted_client = self.clickhouse.get_connection_for_user(
             username=username,
             password=password,
         )
-
-        print(f"### {query} ")
 
         return restricted_client.query(query=query).result_set

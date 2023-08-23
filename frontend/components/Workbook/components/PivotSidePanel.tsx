@@ -101,7 +101,6 @@ export const PivotTableSidePanel = ({
       fetchPivotData();
     } else {
       const [headers, sheetData] = TransientPivotToSheetData();
-      console.log(sheetData);
       setSheetsData((prevSheetData: TransientSheetData[]) => {
         const tempSheetsData = cloneDeep(prevSheetData);
         tempSheetsData[selectedSheetIndex].headers = headers;

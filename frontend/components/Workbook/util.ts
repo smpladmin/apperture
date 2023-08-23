@@ -555,7 +555,10 @@ export const TransientPivotToSheetData = (
     if (sheetData[2])
       sheetData[2]['B'] = { original: 'Values', display: 'Values' };
     else {
-      sheetData[1]['B'] = { original: 'Values', display: 'Values' };
+      sheetData[2] = {
+        index: { original: 2, display: 2 },
+        B: { original: 'Values', display: 'Values' },
+      };
     }
   }
   return [headers, sheetData];

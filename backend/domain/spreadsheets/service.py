@@ -192,7 +192,7 @@ class SpreadsheetService:
         data = {}
 
         distinct_columns, distinct_rows = None, None
-
+        column_names, row_names = [], []
         if rows:
             distinct_rows = self.spreadsheets.compute_ordered_distinct_values(
                 reference_query=query,
@@ -215,7 +215,7 @@ class SpreadsheetService:
                 password=password,
                 aggregate=values[0],
                 axisRange=row_names,
-                rangeAxis=rows[0],
+                rangeAxis=rows[0] if rows else None,
             )
             column_names = [column[0] for column in distinct_columns]
             if columns[0].show_total:

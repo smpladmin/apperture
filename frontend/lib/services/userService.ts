@@ -48,7 +48,6 @@ export const get_apperture_users = async (appId: string | null) => {
 };
 
 export const get_app_wise_users = async () => {
-  console.log('called');
   const res = await AppertureGet('/apperture-users/apps/all');
   return res.data;
 };

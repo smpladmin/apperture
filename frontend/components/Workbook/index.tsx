@@ -637,7 +637,7 @@ const Workbook = ({
           }
           return elem;
         });
-        console.log(splitExpression?.join(''));
+        // console.log(splitExpression?.join(''));
         // const operands = getOperands(newHeader.name);
         // const operandsIndex = getOperatorsIndex(operands);
         // const parsedExpression: any[] = parseExpression(newHeader.name);
