@@ -84,7 +84,7 @@ class SavedWorkBookResponse(WorkBook, ModelResponse):
 
 class ComputePivotDto(BaseModel):
     dsId: PydanticObjectId
-    sql: str
+    query: str
     rows: List[str]
     columns: List[str]
     values: List[str]

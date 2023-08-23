@@ -212,7 +212,7 @@ async def compute_transientpivot(
         datasource_id=dto.dsId
     )
     return spreadsheets_service.compute_pivot(
-        sql=dto.sql,
+        query=dto.query,
         rows=dto.rows,
         columns=dto.columns,
         values=dto.values,

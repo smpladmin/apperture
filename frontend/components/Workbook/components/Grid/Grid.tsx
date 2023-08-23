@@ -28,18 +28,9 @@ import {
   fillRows,
   increaseDecimalPlacesInColumnValues,
   decreaseDecimalPlacesInColumnValues,
+  getRows,
 } from '@components/Workbook/util';
 import { cloneDeep } from 'lodash';
-
-const getGridRow = (value: any): DefaultCellTypes => {
-  const cellTypes: { [key: string]: DefaultCellTypes } = {
-    string: { type: 'text', text: value },
-    number: { type: 'number', value: value },
-    object: { type: 'text', text: JSON.stringify(value) },
-  };
-
-  return cellTypes[typeof value];
-};
 
 const getColumns = (headers: SpreadSheetColumn[]): Column[] => {
   return headers.map((header, index) => {
@@ -53,118 +44,6 @@ const getColumns = (headers: SpreadSheetColumn[]): Column[] => {
     };
   });
 };
-
-const getHeaderRow = (
-  headers: SpreadSheetColumn[],
-  originalHeaders: SpreadSheetColumn[]
-): Row<DefaultCellTypes | DropdownHeaderCell> => {
-  return {
-    rowId: 'header',
-    cells: headers.map((header, index) => {
-      if (
-        originalHeaders.includes(header) &&
-        header.type !== ColumnType.PADDING_HEADER
-      ) {
-        return {
-          type: 'header',
-          text: `${String.fromCharCode(65 + index - 1)} ${header.name}`,
-        };
-      }
-      if (header.name === 'index') {
-        return {
-          type: 'header',
-          text: '',
-        };
-      }
-      return {
-        type: 'header',
-        text: header.name,
-      };
-    }),
-  };
-};
-
-const getSubHeaderRow = (
-  headers: SpreadSheetColumn[],
-  subHeaders: SubHeaderColumn[],
-  sheetData: TransientSheetData,
-  properties: string[]
-): Row<DefaultCellTypes | InputHeaderCell> => {
-  return {
-    rowId: 'subHeader',
-    cells: headers.map((header, index) => {
-      const isPivotOrBlankSheet = isSheetPivotOrBlank(sheetData);
-      const dimensionSubHeaderCount = subHeaders.reduce(
-        (acc: number, header: SubHeaderColumn) => {
-          if (header.type === SubHeaderColumnType.DIMENSION) acc++;
-          return acc;
-        },
-        0
-      );
-      const disableAddButton = hasMetricColumnInPivotSheet(sheetData);
-      const showAddButton =
-        isPivotOrBlankSheet && index === dimensionSubHeaderCount;
-
-      if (header.name === 'index') {
-        return {
-          type: 'header',
-          text: '',
-          style: { background: WHITE_DEFAULT },
-        };
-      }
-      if (header.type === ColumnType.QUERY_HEADER) {
-        return {
-          type: 'inputHeader',
-          text: `${subHeaders[index].name}`,
-          disable: true,
-          showAddButton,
-          disableAddButton,
-          showSuggestions: isPivotOrBlankSheet,
-          properties,
-          style: {
-            overflow: 'initial',
-          },
-        };
-      }
-      return {
-        type: 'inputHeader',
-        text: `${subHeaders[index].name}`,
-        disable: false,
-        showAddButton,
-        disableAddButton,
-        showSuggestions: isPivotOrBlankSheet,
-        properties,
-        columnType: subHeaders[index].type,
-        style: {
-          overflow: 'initial',
-        },
-      };
-    }),
-  };
-};
-
-const getRows = (
-  data: any[],
-  headers: SpreadSheetColumn[],
-  originalHeaders: SpreadSheetColumn[],
-  subHeaders: SubHeaderColumn[],
-  sheetData: TransientSheetData,
-  properties: string[]
-): Row<DefaultCellTypes | DropdownHeaderCell | InputHeaderCell>[] => [
-  getHeaderRow(headers, originalHeaders),
-  getSubHeaderRow(headers, subHeaders, sheetData, properties),
-  ...data.map<Row>((data, idx) => ({
-    rowId: idx,
-    cells: headers.map((header) => {
-      const val =
-        data[header.name]?.display === 0
-          ? '0'
-          : data[header.name]?.display || '';
-
-      return getGridRow(val);
-    }),
-  })),
-];
 
 const Grid = ({
   selectedSheetIndex,

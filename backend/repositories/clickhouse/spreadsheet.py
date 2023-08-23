@@ -168,8 +168,10 @@ class Spreadsheets(EventsBase):
 
         return restricted_client.query(query=query).result_set
 
-    def compute_ordered_distinct_values(self, sql, values, username, password):
-        sheet_query = f"({sql})"
+    def compute_ordered_distinct_values(
+        self, reference_query, values, username, password
+    ):
+        sheet_query = f"({reference_query})"
         query = ClickHouseQuery.from_(Table("<inner_table>"))
         for value in values:
             query = query.select(Field(value))

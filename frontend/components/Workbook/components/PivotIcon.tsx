@@ -16,10 +16,13 @@ import {
   Input,
 } from '@chakra-ui/react';
 
-function PivotIcon() {
+function PivotIcon({ addNewPivotSheet }: { addNewPivotSheet: () => void }) {
   const [isHovered, setIsHovered] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const handleClick = () => {};
+  const handleCreate = () => {
+    addNewPivotSheet();
+    onClose();
+  };
   return (
     <Flex
       margin={'6px'}
@@ -86,6 +89,7 @@ function PivotIcon() {
               _hover={{
                 backgroundColor: 'black.400',
               }}
+              onClick={handleCreate}
             >
               Create
             </Button>

@@ -110,3 +110,19 @@ export const getWorkbookTransientColumn = async (
   const data = mapApiResponseToDisplayOriginalFormat(res.data?.data || []);
   return { ...res, data: { ...res.data, data } };
 };
+
+export const getTransientPivot = async (
+  dsId: string,
+  query: string,
+  rows: string[],
+  columns: string[],
+  values: string[]
+) => {
+  return await ApperturePost(`/workbooks/spreadsheets/pivot/transient`, {
+    dsId,
+    query,
+    rows,
+    columns,
+    values,
+  });
+};

@@ -16,6 +16,11 @@ export type TransientSheetData = {
     selectedTable: string;
     selectedDatabase: string;
     selectedSourceId: string;
+    referenceSheetQuery?: string;
+    selectedRows?: string[];
+    selectedOptions?: string[];
+    selectedFilters?: string[];
+    selectedValues?: string[];
   };
 };
 
@@ -53,6 +58,7 @@ export type SubHeaderColumn = {
 export enum SheetType {
   SIMPLE_SHEET = 'SIMPLE_SHEET',
   PIVOT_SHEET = 'PIVOT_SHEET',
+  PIVOT_TABLE = 'PIVOT_TABLE',
 }
 
 export type Spreadsheet = {

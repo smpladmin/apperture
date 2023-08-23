@@ -1,14 +1,15 @@
 import { Box, Flex } from '@chakra-ui/react';
 import { GREY_500 } from '@theme/index';
-import { ArrowLeft, ArrowRight } from 'phosphor-react';
+import { ArrowLeft, ArrowRight, CaretLeft } from 'phosphor-react';
 import React, { useEffect, useState } from 'react';
 import Connections from './Connections';
 import ConnectorColumns from './ConnectorColumns';
-import { TransientSheetData } from '@lib/domain/workbook';
+import { SheetType, TransientSheetData } from '@lib/domain/workbook';
 import { Connection, ConnectionSource } from '@lib/domain/connections';
 import { useRouter } from 'next/router';
 import { cloneDeep } from 'lodash';
 import { findConnectionByDatasourceId } from '../util';
+import { PivotTableSidePanel } from './PivotSidePanel';
 
 type SidePanelProps = {
   loadingConnections: boolean;
@@ -48,6 +49,7 @@ const SidePanel = ({
     heirarchy: [],
   });
 
+  const currentSheet = sheetsData[selectedSheetIndex];
   const router = useRouter();
   const { dsId, selectProvider } = router.query;
 
@@ -84,30 +86,29 @@ const SidePanel = ({
       pb={10}
     >
       {!isSidePanelCollapsed ? (
-        <Flex direction={'column'} px={'2'} overflow={'auto'}>
-          {showColumns ? (
-            <ConnectorColumns
-              sheetsData={sheetsData}
-              connectorData={connectorData}
-              selectedSheetIndex={selectedSheetIndex}
-              setShowColumns={setShowColumns}
-              setSheetsData={setSheetsData}
-              evaluateFormulaHeader={evaluateFormulaHeader}
-              addDimensionColumn={addDimensionColumn}
-            />
-          ) : (
-            <Connections
-              loadingConnections={loadingConnections}
-              connections={connections}
-              selectedSheetIndex={selectedSheetIndex}
-              sheetsData={sheetsData}
-              setSheetsData={setSheetsData}
-              setConnectorData={setConnectorData}
-              setShowColumns={setShowColumns}
-              setShowSqlEditor={setShowSqlEditor}
-            />
-          )}
-        </Flex>
+        currentSheet.sheet_type !== SheetType.PIVOT_TABLE ? (
+          <SheetConnections
+            showColumns={showColumns}
+            sheetsData={sheetsData}
+            connectorData={connectorData}
+            selectedSheetIndex={selectedSheetIndex}
+            setShowColumns={setShowColumns}
+            setSheetsData={setSheetsData}
+            evaluateFormulaHeader={evaluateFormulaHeader}
+            addDimensionColumn={addDimensionColumn}
+            loadingConnections={loadingConnections}
+            connections={connections}
+            setConnectorData={setConnectorData}
+            setShowSqlEditor={setShowSqlEditor}
+          />
+        ) : (
+          <PivotTableSidePanel
+            setShowColumns={setShowColumns}
+            sheet={currentSheet}
+            setSheetsData={setSheetsData}
+            selectedSheetIndex={selectedSheetIndex}
+          />
+        )
       ) : null}
 
       <Box
@@ -142,6 +143,48 @@ const SidePanel = ({
         </Flex>
       </Box>
     </Box>
+  );
+};
+
+const SheetConnections = ({
+  showColumns,
+  sheetsData,
+  connectorData,
+  selectedSheetIndex,
+  setShowColumns,
+  setSheetsData,
+  evaluateFormulaHeader,
+  addDimensionColumn,
+  loadingConnections,
+  connections,
+  setConnectorData,
+  setShowSqlEditor,
+}: any) => {
+  return (
+    <Flex direction={'column'} px={'2'} overflow={'auto'}>
+      {showColumns ? (
+        <ConnectorColumns
+          sheetsData={sheetsData}
+          connectorData={connectorData}
+          selectedSheetIndex={selectedSheetIndex}
+          setShowColumns={setShowColumns}
+          setSheetsData={setSheetsData}
+          evaluateFormulaHeader={evaluateFormulaHeader}
+          addDimensionColumn={addDimensionColumn}
+        />
+      ) : (
+        <Connections
+          loadingConnections={loadingConnections}
+          connections={connections}
+          selectedSheetIndex={selectedSheetIndex}
+          sheetsData={sheetsData}
+          setSheetsData={setSheetsData}
+          setConnectorData={setConnectorData}
+          setShowColumns={setShowColumns}
+          setShowSqlEditor={setShowSqlEditor}
+        />
+      )}
+    </Flex>
   );
 };
 

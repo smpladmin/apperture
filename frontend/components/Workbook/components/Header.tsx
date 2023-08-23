@@ -22,6 +22,7 @@ type WorkbookHeaderProps = {
   isSaveButtonDisabled: boolean;
   handleSave: Function;
   setShowSqlEditor: Function;
+  addNewPivotSheet: () => void;
 };
 
 const WorkbookHeader = ({
@@ -30,6 +31,7 @@ const WorkbookHeader = ({
   isSaveButtonDisabled,
   handleSave,
   setShowSqlEditor,
+  addNewPivotSheet,
 }: WorkbookHeaderProps) => {
   const router = useRouter();
   const { dsId } = router.query;
@@ -128,6 +130,8 @@ const WorkbookHeader = ({
         borderRadius={'13px'}
         m={'6px 12px'}
         alignItems={'center'}
+        px={1}
+        py={3}
       >
         <PlusCircle style={{ margin: '6px', ...disabledIconStyle }} />
         <ChartPie
@@ -137,7 +141,7 @@ const WorkbookHeader = ({
           }}
         />
 
-        <PivotIcon />
+        <PivotIcon addNewPivotSheet={addNewPivotSheet} />
         <Percent style={{ margin: '6px', ...disabledIconStyle }} />
         <Sigma style={{ margin: '6px', ...disabledIconStyle }} />
         <Image src={Zero} alt={'Zero'} style={disabledIconStyle} />

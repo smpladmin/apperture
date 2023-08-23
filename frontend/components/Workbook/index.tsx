@@ -55,6 +55,7 @@ import AIButton from '@components/AIButton';
 import Coachmarks from './components/Coachmarks';
 import { AppertureUser } from '@lib/domain/user';
 import { ArrowsInLineVertical } from 'phosphor-react';
+import PivotGrid from './components/Grid/PivotGrid';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -747,6 +748,39 @@ const Workbook = ({
     return connectionSource?.fields || [];
   }, [connections, selectedSheetIndex, sheetsData]);
 
+  const addNewPivotSheet = () => {
+    const referenceSheet = sheetsData[selectedSheetIndex];
+
+    const sheetsLength = sheetsData.length;
+    const count = sheetsData.filter(
+      (sheet) => sheet.sheet_type === SheetType.PIVOT_TABLE
+    ).length;
+    const newSheet = {
+      name: `Pivot Sheet ${count + 1}`,
+      query: '',
+      data: [],
+      headers: [],
+      subHeaders: getSubheaders(SheetType.SIMPLE_SHEET),
+      is_sql: true,
+      sheet_type: SheetType.PIVOT_TABLE,
+      edit_mode: false,
+      meta: {
+        ...referenceSheet?.meta,
+        referenceSheetQuery: referenceSheet.query,
+        selectedOptions: referenceSheet?.meta?.selectedColumns || [],
+        selectedColumns: [],
+        selectedRows: [],
+        selectedValues: [],
+        selectedFilters: [],
+      },
+    };
+    setSheetsData((prevSheetData: TransientSheetData[]) => [
+      ...prevSheetData,
+      newSheet as TransientSheetData,
+    ]);
+    setSelectedSheetIndex(sheetsLength);
+  };
+
   return (
     <>
       <Flex direction={'column'}>
@@ -756,21 +790,13 @@ const Workbook = ({
           isSaveButtonDisabled={isSaveButtonDisabled}
           handleSave={handleSaveOrUpdateWorkbook}
           setShowSqlEditor={setShowSqlEditor}
+          addNewPivotSheet={addNewPivotSheet}
         />
         <Flex
           direction={'row'}
           h={'full'}
           overflow={showEmptyState ? 'hidden' : 'auto'}
         >
-          {/* {showSelectSheetOverlay ? (
-          <SelectSheet
-            closeSelectSheetOverlay={closeSelectSheetOverlay}
-            sheetsData={sheetsData}
-            setSheetsData={setSheetsData}
-            selectedSheetIndex={selectedSheetIndex}
-            setSelectedSheetIndex={setSelectedSheetIndex}
-          />
-        ) : null} */}
           <SidePanel
             loadingConnections={loadingConnections}
             showColumns={showColumns}
@@ -796,7 +822,9 @@ const Workbook = ({
                 />
               </Box>
             ) : null}
-            {showEmptyState ? (
+            {showEmptyState &&
+            sheetsData[selectedSheetIndex].sheet_type !==
+              SheetType.PIVOT_TABLE ? (
               <EmptySheet
                 tableSelected={
                   !!sheetsData[selectedSheetIndex]?.meta?.selectedTable
@@ -813,6 +841,26 @@ const Workbook = ({
                   >
                     <LoadingSpinner />
                   </Flex>
+                ) : sheetsData[selectedSheetIndex].sheet_type ===
+                  SheetType.SIMPLE_SHEET ? (
+                  <Grid
+                    sheetsData={sheetsData}
+                    selectedSheetIndex={selectedSheetIndex}
+                    evaluateFormulaHeader={evaluateFormulaHeader}
+                    addDimensionColumn={addDimensionColumn}
+                    properties={getProperties}
+                    setSheetsData={setSheetsData}
+                  />
+                ) : sheetsData[selectedSheetIndex].sheet_type ===
+                  SheetType.PIVOT_SHEET ? (
+                  <Grid
+                    sheetsData={sheetsData}
+                    selectedSheetIndex={selectedSheetIndex}
+                    evaluateFormulaHeader={evaluateFormulaHeader}
+                    addDimensionColumn={addDimensionColumn}
+                    properties={getProperties}
+                    setSheetsData={setSheetsData}
+                  />
                 ) : (
                   <Grid
                     sheetsData={sheetsData}
