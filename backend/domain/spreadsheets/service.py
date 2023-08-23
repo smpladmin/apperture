@@ -189,18 +189,41 @@ class SpreadsheetService:
         username,
         password,
     ):
+        data = {}
+
         distinct_columns, distinct_rows = None, None
+
+        if rows:
+            distinct_rows = self.spreadsheets.compute_ordered_distinct_values(
+                reference_query=query,
+                values=rows,
+                username=username,
+                password=password,
+                aggregate=values[0],
+            )
+            row_names = [row[0] for row in distinct_rows]
+            if rows[0].show_total:
+                for row in distinct_rows:
+                    if not data.get(row[0]):
+                        data[row[0]] = {}
+                    data[row[0]]["Total"] = row[1]
         if columns:
             distinct_columns = self.spreadsheets.compute_ordered_distinct_values(
                 reference_query=query,
                 values=columns,
                 username=username,
                 password=password,
+                aggregate=values[0],
+                axisRange=row_names,
+                rangeAxis=rows[0],
             )
-        if rows:
-            distinct_rows = self.spreadsheets.compute_ordered_distinct_values(
-                reference_query=query, values=rows, username=username, password=password
-            )
+            column_names = [column[0] for column in distinct_columns]
+            if columns[0].show_total:
+                for column in distinct_columns:
+                    if not data.get("Total"):
+                        data["Total"] = {}
+                    data["Total"][column[0]] = column[1]
+
         if rows and columns and values:
             result_set = self.spreadsheets.compute_transient_pivot(
                 sql=query,
@@ -209,23 +232,20 @@ class SpreadsheetService:
                 values=values,
                 username=username,
                 password=password,
-                rowRange=distinct_rows,
+                rowRange=row_names,
             )
-            data = {}
-            column_dict = {}
-            for column in distinct_columns:
-                column_dict[column[0]] = None
             for result in result_set:
                 if not data.get(result[0]):
                     data[result[0]] = {}
                 data[result[0]][result[1]] = result[2]
-            return {
-                "rows": [row[0] for row in distinct_rows],
-                "columns": [col[0] for col in distinct_columns],
-                "data": data,
-            }
+
+        if rows and rows[0].show_total:
+            column_names.append("Total")
+        if columns and columns[0].show_total:
+            row_names.append("Total")
+
         return {
-            "rows": [row[0] for row in distinct_rows] if distinct_rows else [],
-            "columns": [col[0] for col in distinct_columns] if distinct_columns else [],
-            "data": {},
+            "rows": row_names if distinct_rows else [],
+            "columns": column_names if distinct_columns else [],
+            "data": data,
         }

@@ -202,6 +202,9 @@ class Spreadsheets(EventsBase):
         values: List[PivotAxisDetail],
         username: str,
         password: str,
+        aggregate: PivotAxisDetail,
+        axisRange: List[Union[str, int, float]] = None,
+        rangeAxis: PivotAxisDetail = None,
     ):
         sheet_query = f"({reference_query})"
         query = ClickHouseQuery.from_(Table("<inner_table>"))
@@ -215,11 +218,20 @@ class Spreadsheets(EventsBase):
                     else SortOrder.desc
                 ),
             )
+
+        if value.show_total:
+            query = query.select(fn.Sum(Field(aggregate.name)))
+
+        if axisRange and rangeAxis:
+            query = query.where(Field(rangeAxis.name).isin(axisRange))
+
         query = query.limit(50)
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
         restricted_client = self.clickhouse.get_connection_for_user(
             username=username,
             password=password,
         )
+
+        print(f"### {query} ")
 
         return restricted_client.query(query=query).result_set
