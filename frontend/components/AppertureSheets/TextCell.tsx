@@ -3,7 +3,7 @@ import { useContext } from 'react';
 import { Actions, GridContext } from './GridContext';
 import { BaseCellProps } from './gridTypes';
 
-const Cell = ({
+const TextCell = ({
   column,
   columnIndex,
   rowIndex,
@@ -61,4 +61,4 @@ const Cell = ({
   );
 };
 
-export default Cell;
+export default TextCell;

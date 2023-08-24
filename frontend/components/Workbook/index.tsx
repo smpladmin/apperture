@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState , useRef} from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from 'react';
 import WorkbookHeader from './components/Header';
 import {
   getTransientSpreadsheets,
@@ -49,6 +55,7 @@ import AIButton from '@components/AIButton';
 import Coachmarks from './components/Coachmarks';
 import { AppertureUser } from '@lib/domain/user';
 import { ArrowsInLineVertical } from 'phosphor-react';
+import AppertureSheet from '@components/AppertureSheets';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -733,7 +740,6 @@ const Workbook = ({
     return connectionSource?.fields || [];
   }, [connections, selectedSheetIndex, sheetsData]);
 
-  
   return (
     <>
       <Flex direction={'column'}>
@@ -773,17 +779,15 @@ const Workbook = ({
 
           <Box h={'full'} w={'full'} overflowY={'auto'}>
             {showSqlEditor ? (
-              <Box  alignItems={'center'} justifyContent={'center'}>
-                  <QueryEditor
-                    sheetsData={sheetsData}
-                    selectedSheetIndex={selectedSheetIndex}
-                    setShowSqlEditor={setShowSqlEditor}
-                    setSheetsData={setSheetsData}
-                    height={`200px`}
-                  />
-                  
+              <Box alignItems={'center'} justifyContent={'center'}>
+                <QueryEditor
+                  sheetsData={sheetsData}
+                  selectedSheetIndex={selectedSheetIndex}
+                  setShowSqlEditor={setShowSqlEditor}
+                  setSheetsData={setSheetsData}
+                  height={`200px`}
+                />
               </Box>
-                   
             ) : null}
             {showEmptyState ? (
               <EmptySheet

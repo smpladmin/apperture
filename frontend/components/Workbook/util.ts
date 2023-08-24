@@ -31,7 +31,7 @@ export const fillRows = (data: any[], headers: SpreadSheetColumn[]) => {
     columns.forEach((key) => {
       row[key.name] = { original: '', display: '' };
     });
-    row['index'] = { original: index, display: index };
+    // row['index'] = { original: index, display: index };
     return row;
   });
 

@@ -11,3 +11,16 @@ export type BaseCellProps = {
   style: any;
   value: string | number;
 };
+
+type Id = number | string;
+type CellValue = {
+  value: string | number;
+};
+
+export type CellChange = {
+  rowId: Id;
+  columnId: Id;
+  type: string;
+  newCell: CellValue;
+  previousCell: CellValue;
+};

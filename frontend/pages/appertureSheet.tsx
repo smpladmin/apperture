@@ -4,9 +4,9 @@ import React from 'react';
 
 const AppertureSheet = () => {
   return (
-    <GridContextProvider>
-      <Sheet />
-    </GridContextProvider>
+    // <GridContextProvider>
+    <Sheet />
+    // </GridContextProvider>
   );
 };
 
