@@ -84,7 +84,7 @@ class TestEventPropertiesSaver:
                 data={
                     "datasource_id": "645036d8d659884e40f9caed",
                     "event": "precise event2",
-                    "properties": ["$os", "$browser", "$device_type", "token"],
+                    "properties": ["$browser", "$device_type", "$os", "token"],
                     "provider": "apperture",
                 },
                 path="/private/event_properties",
@@ -93,7 +93,7 @@ class TestEventPropertiesSaver:
                 data={
                     "datasource_id": "645036d8d659884e40f9caed",
                     "event": "precise event",
-                    "properties": ["$os", "$browser", "$device_type", "token"],
+                    "properties": ["$browser", "$device_type", "$os", "token"],
                     "provider": "apperture",
                 },
                 path="/private/event_properties",
@@ -126,7 +126,7 @@ class TestEventPropertiesSaver:
                 data={
                     "datasource_id": "645036d8d659884e40f9caed",
                     "event": "precise event2",
-                    "properties": ["$os", "$browser", "$device_type", "token"],
+                    "properties": ["$browser", "$device_type", "$os", "token"],
                     "provider": "apperture",
                 },
                 path="/private/event_properties",
@@ -135,7 +135,7 @@ class TestEventPropertiesSaver:
                 data={
                     "datasource_id": "645036d8d659884e40f9caed",
                     "event": "precise event",
-                    "properties": ["$os", "$browser", "$device_type", "token"],
+                    "properties": ["$browser", "$device_type", "$os", "token"],
                     "provider": "apperture",
                 },
                 path="/private/event_properties",
@@ -185,7 +185,7 @@ class TestEventPropertiesSaver:
                 data={
                     "datasource_id": "645036d8d659884e40f9caed",
                     "event": "precise event2",
-                    "properties": ["$os", "$browser", "$device_type", "token"],
+                    "properties": ["$browser", "$device_type", "$os", "token"],
                     "provider": "apperture",
                 },
                 path="/private/event_properties",
