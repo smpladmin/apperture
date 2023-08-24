@@ -19,6 +19,7 @@ from domain.spreadsheets.models import (
     SpreadSheetColumn,
     WorkBook,
 )
+from repositories.clickhouse.parser.query_parser import BusinessError
 from repositories.clickhouse.spreadsheet import Spreadsheets
 from repositories.mysql.mysql import MySql
 
@@ -199,7 +200,7 @@ class SpreadsheetService:
                 values=rows,
                 username=username,
                 password=password,
-                aggregate=values[0],
+                aggregate=values[0] if values else None,
             )
             row_names = [row[0] for row in distinct_rows]
             if rows[0].show_total:
@@ -213,7 +214,7 @@ class SpreadsheetService:
                 values=columns,
                 username=username,
                 password=password,
-                aggregate=values[0],
+                aggregate=values[0] if values else None,
                 axisRange=row_names,
                 rangeAxis=rows[0] if rows else None,
             )
@@ -225,19 +226,22 @@ class SpreadsheetService:
                     data["Total"][column[0]] = column[1]
 
         if rows and columns and values:
-            result_set = self.spreadsheets.compute_transient_pivot(
-                sql=query,
-                rows=rows,
-                columns=columns,
-                values=values,
-                username=username,
-                password=password,
-                rowRange=row_names,
-            )
-            for result in result_set:
-                if not data.get(result[0]):
-                    data[result[0]] = {}
-                data[result[0]][result[1]] = result[2]
+            try:
+                result_set = self.spreadsheets.compute_transient_pivot(
+                    sql=query,
+                    rows=rows,
+                    columns=columns,
+                    values=values,
+                    username=username,
+                    password=password,
+                    rowRange=row_names,
+                )
+                for result in result_set:
+                    if not data.get(result[0]):
+                        data[result[0]] = {}
+                    data[result[0]][result[1]] = result[2]
+            except Exception as e:
+                raise BusinessError("Could not generate pivot table, invalid values")
 
         if rows and rows[0].show_total:
             column_names.append("Total")

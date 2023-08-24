@@ -211,11 +211,14 @@ async def compute_transientpivot(
     clickhouse_credential = await compute_query_action.get_credentials(
         datasource_id=dto.dsId
     )
-    return spreadsheets_service.compute_pivot(
-        query=dto.query,
-        rows=dto.rows,
-        columns=dto.columns,
-        values=dto.values,
-        username=clickhouse_credential.username,
-        password=clickhouse_credential.password,
-    )
+    try:
+        return spreadsheets_service.compute_pivot(
+            query=dto.query,
+            rows=dto.rows,
+            columns=dto.columns,
+            values=dto.values,
+            username=clickhouse_credential.username,
+            password=clickhouse_credential.password,
+        )
+    except BusinessError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")

@@ -20,7 +20,7 @@ from domain.spreadsheets.models import (
     SortingOrder,
 )
 from repositories.clickhouse.base import EventsBase
-from repositories.clickhouse.parser.query_parser import QueryParser
+from repositories.clickhouse.parser.query_parser import BusinessError, QueryParser
 
 
 class Spreadsheets(EventsBase):
@@ -220,7 +220,10 @@ class Spreadsheets(EventsBase):
             )
 
         if value.show_total:
-            query = query.select(fn.Sum(Field(aggregate.name)))
+            if aggregate:
+                query = query.select(fn.Sum(Field(aggregate.name)))
+            else:
+                raise BusinessError("Select Value before finding sum")
 
         if axisRange and rangeAxis:
             query = query.where(Field(rangeAxis.name).isin(axisRange))

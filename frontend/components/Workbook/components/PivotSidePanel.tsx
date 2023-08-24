@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Checkbox, Flex, Select, Text } from '@chakra-ui/react';
+import { Checkbox, Flex, Select, Text, useToast } from '@chakra-ui/react';
 import { CaretLeft, Plus, X } from 'phosphor-react';
 import {
   PivotAxisDetail,
@@ -17,6 +17,7 @@ import {
 } from '../util';
 import { cloneDeep } from 'lodash';
 import { table } from 'console';
+import { ErrorResponse } from '@lib/services/util';
 
 const initialDropdownState = {
   row: false,
@@ -36,6 +37,8 @@ export const PivotTableSidePanel = ({
   setSheetsData: Function;
   selectedSheetIndex: number;
 }) => {
+  const toast = useToast();
+
   const dsId = sheet?.meta?.dsId;
   const referenceQuery =
     sheet?.meta?.referenceSheetQuery ||
@@ -77,6 +80,7 @@ export const PivotTableSidePanel = ({
           selectedColumns,
           selectedValues
         );
+
         if (
           response.data &&
           (response.data.rows || response.data.columns || response.data.data)
@@ -95,6 +99,16 @@ export const PivotTableSidePanel = ({
             tempSheetsData[selectedSheetIndex].data = sheetData;
 
             return tempSheetsData;
+          });
+        }
+        if (response.status !== 200) {
+          toast({
+            title:
+              (response as ErrorResponse).error.detail ||
+              'Something went wrong',
+            status: 'error',
+            variant: 'subtle',
+            isClosable: true,
           });
         }
       };
