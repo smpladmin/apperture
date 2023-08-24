@@ -34,6 +34,7 @@ class EventPropertiesSaver:
             logging.info(f"Precision Events map: {self.precise_events_map}")
             for precision_event in precision_events:
                 datasource_id = precision_event["properties"]["token"]
+                logging.info(f"Datasource ID, Event: {datasource_id}, {precision_event['event']}")
                 logging.info(f"event properties: {set(precision_event['properties'].keys())}")
                 if set(
                     self.precise_events_map.get(datasource_id, {}).get(
