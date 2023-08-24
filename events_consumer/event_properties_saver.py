@@ -31,8 +31,10 @@ class EventPropertiesSaver:
     def save_precision_event_properties(self, precision_events: List):
         try:
             # Iterate over precision events and save them using the post call
+            logging.info(f"Precision Events map: {self.precise_events_map}")
             for precision_event in precision_events:
                 datasource_id = precision_event["properties"]["token"]
+                logging.info(f"event properties: {set(precision_event['properties'].keys())}")
                 if set(
                     self.precise_events_map.get(datasource_id, {}).get(
                         precision_event["event"], []
