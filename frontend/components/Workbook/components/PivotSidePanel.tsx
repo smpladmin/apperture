@@ -4,6 +4,7 @@ import { CaretLeft, Plus, Table, X } from 'phosphor-react';
 import {
   PivotAxisDetail,
   PivotValueDetail,
+  SheetMeta,
   SortingOrder,
   TransientSheetData,
 } from '@lib/domain/workbook';
@@ -26,32 +27,63 @@ const initialDropdownState = {
   filter: false,
 };
 
+const getOptionsForPivot = (
+  sheetsData: TransientSheetData[],
+  selectedSheetIndex: number
+) => {
+  const {
+    referenceSheetIndex,
+    selectedPivotColumns,
+    selectedPivotRows,
+    selectedPivotValues,
+  }: any = sheetsData[selectedSheetIndex]?.meta;
+
+  const selectedValues = [
+    ...(selectedPivotColumns || []),
+    ...(selectedPivotRows || []),
+    ...(selectedPivotValues || []),
+  ].map((value) => value.name);
+
+  const options = sheetsData[
+    referenceSheetIndex
+  ]?.meta?.selectedColumns?.filter(
+    (option) => !selectedValues.includes(option)
+  );
+  return options;
+};
+
 export const PivotTableSidePanel = ({
   setShowColumns,
-  sheet,
   setSheetsData,
   selectedSheetIndex,
+  sheetsData,
 }: {
   setShowColumns: Function;
-  sheet: TransientSheetData;
   setSheetsData: Function;
   selectedSheetIndex: number;
+  sheetsData: TransientSheetData[];
 }) => {
   const toast = useToast();
-
+  const sheet = sheetsData[selectedSheetIndex];
   const dsId = sheet?.meta?.dsId;
   const referenceQuery =
     sheet?.meta?.referenceSheetQuery ||
     `SELECT * FROM ${sheet?.meta?.selectedDatabase}.${sheet?.meta?.selectedTable}`;
   const [options, setOptions] = useState<string[]>(
-    sheet?.meta?.selectedOptions || []
+    getOptionsForPivot(sheetsData, selectedSheetIndex) || []
   );
   const [rowDropDown, setRowDropDown] = useState(false);
   const [columnDropDown, setColumnDropDown] = useState(false);
   const [valueDropDown, setValueDropDown] = useState(false);
-  const [selectedRows, setSelectedRows] = useState<PivotAxisDetail[]>([]);
-  const [selectedColumns, setSelectedColumns] = useState<PivotAxisDetail[]>([]);
-  const [selectedValues, setSelectedValues] = useState<PivotValueDetail[]>([]);
+  const [selectedRows, setSelectedRows] = useState<PivotAxisDetail[]>(
+    sheet?.meta?.selectedPivotRows || []
+  );
+  const [selectedColumns, setSelectedColumns] = useState<PivotAxisDetail[]>(
+    sheet?.meta?.selectedPivotColumns || []
+  );
+  const [selectedValues, setSelectedValues] = useState<PivotValueDetail[]>(
+    sheet?.meta?.selectedPivotValues || []
+  );
 
   const rowBoxref = useRef(null);
   const columnBoxRef = useRef(null);
@@ -95,8 +127,16 @@ export const PivotTableSidePanel = ({
           );
           setSheetsData((prevSheetData: TransientSheetData[]) => {
             const tempSheetsData = cloneDeep(prevSheetData);
+            const oldMeta = tempSheetsData[selectedSheetIndex]?.meta;
             tempSheetsData[selectedSheetIndex].headers = headers;
             tempSheetsData[selectedSheetIndex].data = sheetData;
+            tempSheetsData[selectedSheetIndex].meta = {
+              ...oldMeta,
+              selectedPivotColumns: selectedColumns,
+              selectedPivotRows: selectedRows,
+              selectedPivotValues: selectedValues,
+              selectedPivotOptions: options,
+            };
 
             return tempSheetsData;
           });

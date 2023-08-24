@@ -767,11 +767,12 @@ const Workbook = ({
       meta: {
         ...referenceSheet?.meta,
         referenceSheetQuery: referenceSheet.query,
-        selectedOptions: referenceSheet?.meta?.selectedColumns || [],
-        selectedColumns: [],
-        selectedRows: [],
-        selectedValues: [],
-        selectedFilters: [],
+        selectedPivotOptions: referenceSheet?.meta?.selectedColumns || [],
+        selectedPivotColumns: [],
+        selectedPivotRows: [],
+        selectedPivotValues: [],
+        selectedPivotFilters: [],
+        referenceSheetIndex: selectedSheetIndex,
       },
     };
     setSheetsData((prevSheetData: TransientSheetData[]) => [

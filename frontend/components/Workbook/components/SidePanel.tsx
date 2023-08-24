@@ -104,9 +104,9 @@ const SidePanel = ({
         ) : (
           <PivotTableSidePanel
             setShowColumns={setShowColumns}
-            sheet={currentSheet}
             setSheetsData={setSheetsData}
             selectedSheetIndex={selectedSheetIndex}
+            sheetsData={sheetsData}
           />
         )
       ) : null}

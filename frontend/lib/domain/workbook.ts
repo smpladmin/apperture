@@ -10,18 +10,22 @@ export type TransientSheetData = {
   sheet_type?: SheetType;
   edit_mode?: boolean;
   aiQuery?: AIQuery;
-  meta?: {
-    dsId: string;
-    selectedColumns: string[];
-    selectedTable: string;
-    selectedDatabase: string;
-    selectedSourceId: string;
-    referenceSheetQuery?: string;
-    selectedRows?: string[];
-    selectedOptions?: string[];
-    selectedFilters?: string[];
-    selectedValues?: string[];
-  };
+  meta?: SheetMeta;
+};
+
+export type SheetMeta = {
+  dsId: string;
+  selectedColumns: string[];
+  selectedTable: string;
+  selectedDatabase: string;
+  selectedSourceId: string;
+  referenceSheetQuery?: string;
+  selectedPivotColumns?: PivotAxisDetail[];
+  selectedPivotRows?: PivotAxisDetail[];
+  selectedPivotOptions?: string[];
+  selectedPivotFilters?: string[];
+  selectedPivotValues?: PivotValueDetail[];
+  referenceSheetIndex?: number;
 };
 
 export type AIQuery = {
