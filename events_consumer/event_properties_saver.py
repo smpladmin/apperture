@@ -30,28 +30,6 @@ class EventPropertiesSaver:
 
     def save_precision_event_properties(self, precision_events: List):
         try:
-            # Iterate over precision events and save them using the post call
-            logging.info(f"Precision Events map: {self.precise_events_map}")
-            for precision_event in precision_events:
-                datasource_id = precision_event["properties"]["token"]
-                logging.info(f"Datasource ID, Event: {datasource_id}, {precision_event['event']}")
-                logging.info(f"event properties: {set(precision_event['properties'].keys())}")
-                if set(
-                    self.precise_events_map.get(datasource_id, {}).get(
-                        precision_event["event"], []
-                    )
-                ) != set(precision_event["properties"].keys()):
-                    logging.info("Saving criteria met. Saving to db")
-                    data = {
-                        "datasource_id": datasource_id,
-                        "event": precision_event["event"],
-                        "properties": list(
-                            flatten(precision_event["properties"], ".").keys()
-                        ),
-                        "provider": "apperture",
-                    }
-                    self._save_data(path=f"/private/event_properties", data=data)
-
             # Update events map with the latest properties
             event_properties = [
                 EventProperties.build(
@@ -65,6 +43,40 @@ class EventPropertiesSaver:
             self.precise_events_map = self.create_precise_events_map(
                 event_properties=event_properties
             )
+            logging.info(f"Precision Events map: {self.precise_events_map}")
+
+            # Iterate over precision events and save them using the post call
+            for precision_event in precision_events:
+                datasource_id = precision_event["properties"]["token"]
+                props = list(flatten(precision_event["properties"], ".").keys())
+                logging.info(
+                    f"Datasource ID, Event: {datasource_id}, {precision_event['event']}"
+                )
+                logging.info(f"event properties: {set(props)}")
+                if not set(props).issubset(
+                    set(
+                        self.precise_events_map.get(datasource_id, {}).get(
+                            precision_event["event"], []
+                        )
+                    )
+                ):
+                    new_props = self.get_distinct_values(
+                        list_of_lists=[
+                            props,
+                            self.precise_events_map.get(datasource_id, {}).get(
+                                precision_event["event"], []
+                            ),
+                        ]
+                    )
+                    logging.info("Saving criteria met. Saving to db")
+                    data = {
+                        "datasource_id": datasource_id,
+                        "event": precision_event["event"],
+                        "properties": new_props,
+                        "provider": "apperture",
+                    }
+                    self._save_data(path=f"/private/event_properties", data=data)
+
         except Exception as e:
             logging.info(
                 f"Exception while saving event properties for precise events: {e}"
