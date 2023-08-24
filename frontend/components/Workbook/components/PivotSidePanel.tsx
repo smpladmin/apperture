@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Checkbox, Flex, Select, Text, useToast } from '@chakra-ui/react';
-import { CaretLeft, Plus, X } from 'phosphor-react';
+import { CaretLeft, Plus, Table, X } from 'phosphor-react';
 import {
   PivotAxisDetail,
   PivotValueDetail,
@@ -169,26 +169,26 @@ export const PivotTableSidePanel = ({
     setSelectedValues([]);
   };
   return (
-    <Flex direction={'column'} gap={4} px={5}>
+    <Flex direction={'column'} gap={4}>
       <Flex
         fontSize={'xs-16'}
         fontWeight={500}
         lineHeight={'130%'}
         alignItems={'center'}
         gap={'2'}
+        borderBottom={'0.4px solid #bdbdbd'}
+        px={5}
+        pb={4}
       >
+        <Table height={'20px'} />
         Pivot table editor
-        <CaretLeft
-          size={16}
-          onClick={() => setShowColumns(false)}
-          style={{ cursor: 'pointer' }}
-        />
       </Flex>
       <Flex
         justifyContent={'space-between'}
         fontSize={'xs-14'}
         fontWeight={500}
         lineHeight={'130%'}
+        px={5}
       >
         Row
         <Flex ref={rowBoxref}>
@@ -210,7 +210,7 @@ export const PivotTableSidePanel = ({
         </Flex>
       </Flex>
       {selectedRows?.length ? (
-        <Flex flexDirection={'column'}>
+        <Flex flexDirection={'column'} px={5}>
           {selectedRows.map((row) => (
             <PivotAxisDetailCard
               key={row.name}
@@ -226,6 +226,7 @@ export const PivotTableSidePanel = ({
         fontSize={'xs-14'}
         fontWeight={500}
         lineHeight={'130%'}
+        px={5}
       >
         Columns
         <Flex ref={columnBoxRef}>
@@ -247,7 +248,7 @@ export const PivotTableSidePanel = ({
         </Flex>
       </Flex>
       {selectedColumns?.length ? (
-        <Flex flexDirection={'column'}>
+        <Flex flexDirection={'column'} px={5}>
           {selectedColumns.map((column) => (
             <PivotAxisDetailCard
               key={column.name}
@@ -263,6 +264,7 @@ export const PivotTableSidePanel = ({
         fontSize={'xs-14'}
         fontWeight={500}
         lineHeight={'130%'}
+        px={5}
       >
         Values
         <Flex ref={valueBoxref}>
@@ -284,7 +286,7 @@ export const PivotTableSidePanel = ({
         </Flex>
       </Flex>
       {selectedValues?.length ? (
-        <Flex flexDirection={'column'}>
+        <Flex flexDirection={'column'} px={5}>
           {selectedValues.map((value) => (
             <PivotValueCard
               key={value.name}
@@ -299,6 +301,7 @@ export const PivotTableSidePanel = ({
         fontSize={'xs-14'}
         fontWeight={500}
         lineHeight={'130%'}
+        px={5}
       >
         Filters
         <Flex>
