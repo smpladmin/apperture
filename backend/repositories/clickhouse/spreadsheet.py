@@ -159,6 +159,7 @@ class Spreadsheets(EventsBase):
         username: str,
         password: str,
         rowRange: List[Union[str, int, float]],
+        columnRange: List[Union[str, int, float]],
     ):
         sheet_query = f"({sql})"
         query = ClickHouseQuery.from_(Table("<inner_table>"))
@@ -187,7 +188,14 @@ class Spreadsheets(EventsBase):
                     else SortOrder.desc
                 ),
             )
-        query = query.where(Field(rows[0].name).isin(rowRange))
+        query = query.where(
+            Criterion.all(
+                [
+                    Field(rows[0].name).isin(rowRange),
+                    Field(columns[0].name).isin(columnRange),
+                ]
+            )
+        )
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
         restricted_client = self.clickhouse.get_connection_for_user(
             username=username,
@@ -203,8 +211,10 @@ class Spreadsheets(EventsBase):
         username: str,
         password: str,
         aggregate: PivotAxisDetail,
+        show_total: bool,
         axisRange: List[Union[str, int, float]] = None,
         rangeAxis: PivotAxisDetail = None,
+        limit=50,
     ):
         sheet_query = f"({reference_query})"
         query = ClickHouseQuery.from_(Table("<inner_table>"))
@@ -219,7 +229,7 @@ class Spreadsheets(EventsBase):
                 ),
             )
 
-        if value.show_total:
+        if show_total:
             if aggregate:
                 query = query.select(fn.Sum(Field(aggregate.name)))
             else:
@@ -227,8 +237,8 @@ class Spreadsheets(EventsBase):
 
         if axisRange and rangeAxis:
             query = query.where(Field(rangeAxis.name).isin(axisRange))
-        else:
-            query = query.limit(50)
+
+        query = query.limit(limit)
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
         restricted_client = self.clickhouse.get_connection_for_user(
             username=username,

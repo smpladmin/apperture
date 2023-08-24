@@ -12,10 +12,10 @@ import {
   TransientSheetData,
 } from '@lib/domain/workbook';
 import { DefaultCellTypes, Id, Row } from '@silevis/reactgrid';
+import { WHITE_DEFAULT } from '@theme/index';
 import { cloneDeep, isEmpty, range } from 'lodash';
 import { DropdownHeaderCell } from './components/Grid/DropdownHeader';
 import { InputHeaderCell } from './components/Grid/InputHeader';
-import { WHITE_DEFAULT } from '@theme/index';
 
 export const expressionTokenRegex = /[A-Za-z]+|[0-9]+|[\+\*-\/\^\(\)]/g;
 
@@ -120,7 +120,7 @@ export const getSubHeaderRow = (
       if (header.type === ColumnType.QUERY_HEADER) {
         return {
           type: 'inputHeader',
-          text: `${subHeaders[index].name}`,
+          text: `${subHeaders[index]?.name}`,
           disable: true,
           showAddButton,
           disableAddButton,
@@ -133,13 +133,13 @@ export const getSubHeaderRow = (
       }
       return {
         type: 'inputHeader',
-        text: `${subHeaders[index].name}`,
+        text: `${subHeaders[index]?.name}`,
         disable: false,
         showAddButton,
         disableAddButton,
         showSuggestions: isPivotOrBlankSheet,
         properties,
-        columnType: subHeaders[index].type,
+        columnType: subHeaders[index]?.type,
         style: {
           overflow: 'initial',
         },

@@ -329,14 +329,19 @@ const PivotAxisDetailCard = ({
       borderRadius={'4px'}
       bg={'white.DEFAULT'}
       border="1px solid #bdbdbd"
+      width={'full'}
     >
       <Flex
         justifyContent={'space-between'}
         fontSize={'xs-14'}
         fontWeight={500}
         lineHeight={'130%'}
+        width={'full'}
       >
-        {name} <X onClick={() => onClose(name)} />
+        <Flex maxWidth={'80%'} overflowWrap={'anywhere'}>
+          {name}
+        </Flex>
+        <X cursor={'pointer'} onClick={() => onClose(name)} />
       </Flex>
       <Flex gap={5}>
         <Flex
@@ -438,7 +443,7 @@ const PivotValueCard = ({
         fontWeight={500}
         lineHeight={'130%'}
       >
-        {name}{' '}
+        <Flex maxWidth={'80%'}>{name}</Flex>
         <X
           onClick={() => {
             handleClose(name);
