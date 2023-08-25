@@ -28,6 +28,8 @@ class APIDataSaver(Saver):
 
         df["datasourceId"] = datasource_id
         df["create_time"] = df["properties"].apply(lambda properties: datetime.strptime(properties["data"][APIDateField], "%Y-%m-%d %H:%M:%S"))
+        df["properties"] = df["properties"].apply(lambda properties: {**properties, "data": {**properties["data"], "refresh_time": current_date}})
+
         df = df[["create_time", "datasourceId", "properties"]]
         start_time=min(df['create_time'])
         end_time=max(df['create_time'])
