@@ -99,19 +99,23 @@ async def update_edges(
     return {"updated": True}
 
 
-@router.post("/apidata/{tableName}")
+@router.post("/apidata/{tableName}/{start_time}/{end_time}")
 async def update_apidata(
     tableName: str,
+    start_time: str,
+    end_time:str,
     dto: List[CreateAPIDataDto],
     api_data_service: APIDataService = Depends(),
     app_service: AppService = Depends(),
     ds_service: DataSourceService = Depends(),
 ):
+    if not dto:
+        return {"updated": False, "message": "No data to update."}
     ds_id = dto[0].datasource_id
     datasource = await ds_service.get_datasource(ds_id)
     app = await app_service.get_app(str(datasource.app_id))
     await api_data_service.update_api_data(
-        dto, app.clickhouse_credential.databasename, tableName
+        dto, app.clickhouse_credential.databasename, tableName, start_time, end_time
     )
     return {"updated": True}
 
