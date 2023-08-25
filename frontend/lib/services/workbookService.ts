@@ -110,3 +110,31 @@ export const getWorkbookTransientColumn = async (
   const data = mapApiResponseToDisplayOriginalFormat(res.data?.data || []);
   return { ...res, data: { ...res.data, data } };
 };
+
+export const vlookup = async (
+  datasourceId: string,
+  query: string,
+  isSql: Boolean = false,
+  searchKey: string,
+  columnRange: number[],
+  index: number,
+  aiQuery?: AIQuery
+) => {
+  const res = await ApperturePost(`/workbooks/vlookup`, {
+    datasourceId,
+    query,
+    isSql,
+    searchKey,
+    columnRange,
+    index,
+    aiQuery: aiQuery
+      ? {
+          nl_query: aiQuery.nlQuery,
+          word_replacements: aiQuery.wordReplacements,
+          table: aiQuery.table,
+          database: aiQuery.database,
+        }
+      : null,
+  });
+  return res.data;
+};

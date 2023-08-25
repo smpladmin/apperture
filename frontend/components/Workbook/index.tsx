@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState , useRef} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import WorkbookHeader from './components/Header';
 import {
   getTransientSpreadsheets,
   getWorkbookTransientColumn,
   saveWorkbook,
   updateWorkbook,
+  vlookup,
 } from '@lib/services/workbookService';
 import { useRouter } from 'next/router';
 import {
@@ -29,7 +30,6 @@ import SidePanel from './components/SidePanel';
 import Grid from '@components/Workbook/components/Grid/Grid';
 import Footer from '@components/Workbook/components/Footer';
 import QueryEditor from './components/QueryEditor';
-import SelectSheet from './components/SelectSheet';
 import EmptySheet from './components/EmptySheet';
 import { getConnectionsForApp } from '@lib/services/connectionService';
 import { cloneDeep, isEqual } from 'lodash';
@@ -48,7 +48,6 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import AIButton from '@components/AIButton';
 import Coachmarks from './components/Coachmarks';
 import { AppertureUser } from '@lib/domain/user';
-import { ArrowsInLineVertical } from 'phosphor-react';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -463,6 +462,30 @@ const Workbook = ({
     }
   };
 
+  const generateColumnFromValue = (value: string) => {
+    return Array.from({ length: 1000 }).map((_, index) => {
+      return index === 0 ? value : '';
+    });
+  };
+
+  const fetchVlookUpValue = async (
+    searchKey: string,
+    columnRange: number[],
+    index: number
+  ) => {
+    const sheet = sheetsData[selectedSheetIndex];
+    const response = await vlookup(
+      sheet?.meta?.dsId || (dsId as string),
+      sheet.query,
+      sheet?.is_sql,
+      searchKey,
+      columnRange,
+      index,
+      sheet.aiQuery
+    );
+    return generateColumnFromValue(response);
+  };
+
   const getOperands = (newHeader: string) =>
     (newHeader.match(expressionTokenRegex) || []).filter((char: string) =>
       isOperand(char)
@@ -495,7 +518,7 @@ const Workbook = ({
     columnId: string,
     existingHeadersLength: number
   ) => {
-    const toUpdateHeaderIndex = columnId.charCodeAt(0) - 65;
+    const toUpdateHeaderIndex = +columnId[0] - 1;
 
     const toAddPaddingHeadersLength =
       toUpdateHeaderIndex - existingHeadersLength;
@@ -504,18 +527,19 @@ const Workbook = ({
   };
 
   const getHeaderIndex = (sheetData: TransientSheetData, columnId: string) => {
-    const existingHeaders = sheetData?.headers;
+    // const existingHeaders = sheetData?.headers;
 
-    const existingHeaderIndex = existingHeaders.findLastIndex(
-      (header) => header.name === columnId
-    );
+    // const existingHeaderIndex = existingHeaders.findLastIndex(
+    //   (header) => header.name === columnId
+    // );
 
-    if (existingHeaderIndex !== -1) {
-      // add 1 as offset for index header
-      return existingHeaderIndex + 1;
-    } else {
-      return columnId.toUpperCase().charCodeAt(0) - 65 + 1;
-    }
+    // if (existingHeaderIndex !== -1) {
+    //   // add 1 as offset for index header
+    //   return existingHeaderIndex + 1;
+    // } else {
+    //   return columnId.toUpperCase().charCodeAt(0) - 65 + 1;
+    // }
+    return +columnId[0];
   };
 
   const updateSelectedSheetDataAndHeaders = (
@@ -523,19 +547,17 @@ const Workbook = ({
     header: SpreadSheetColumn,
     columnId: string
   ) => {
+    console.log({ evaluatedData, header, columnId });
+    debugger;
     const tempSheetsData = cloneDeep(sheetsData);
     const existingHeaders = tempSheetsData[selectedSheetIndex]?.headers;
     const oldColumnId = columnId;
 
-    const existingHeaderIndex = existingHeaders.findIndex(
-      (header) => header.name === oldColumnId
-    );
-
+    const existingHeaderIndex = +oldColumnId[0];
     const paddingHeadersLength = getPaddingHeadersLenth(
       columnId,
       existingHeaders.length
     );
-
     const paddedHeaders = Array.from({ length: paddingHeadersLength }).map(
       (_, index) => ({
         name: String.fromCharCode(65 + index + existingHeaders.length),
@@ -552,7 +574,7 @@ const Workbook = ({
       ].name = header.name;
     } else {
       // add new headers and subheaders
-      const columnIndex = columnId.charCodeAt(0) - 65 + 1;
+      const columnIndex = columnId.slice(1).charCodeAt(0) - 65 + 1;
       tempSheetsData[selectedSheetIndex].headers = [
         ...existingHeaders,
         ...paddedHeaders,
@@ -580,12 +602,42 @@ const Workbook = ({
     return prefixHeader.match(expressionTokenRegex) || [''];
   };
 
+  const extractVlookupParameters = (formula: string): string[] | null => {
+    // Regular expression pattern with capturing groups
+    const vlookupPattern =
+      /^VLOOKUP\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*(\d+)\s*,\s*([01])\s*\)$/;
+
+    const match = formula.match(vlookupPattern);
+
+    if (match) {
+      // Extracted parameters are in the captured groups
+      const [, searchKey, range, index, isSorted] = match;
+      return [searchKey, range, index, isSorted];
+    } else {
+      return null;
+    }
+  };
+
+  const extractColumnRange = (range: string) => {
+    const matches = range.match(/[A-Z]+(?=:)|[A-Z](?![A-Z])/g);
+
+    if (matches && matches.length === 2) {
+      const columnRange = matches.map((match) => {
+        return match.toUpperCase().charCodeAt(0) - 65 + 1;
+      });
+      return columnRange;
+    } else {
+      return null;
+    }
+  };
+
   const evaluateFormulaHeader = useCallback(
-    (headerText: string, columnId: string) => {
+    async (headerText: string, columnId: string) => {
       const sheetData = sheetsData[selectedSheetIndex];
 
       const isBlankOrPivotSheet = isSheetPivotOrBlank(sheetData);
       const index = getHeaderIndex(sheetData, columnId);
+      console.log(index, columnId);
 
       if (headerText.match(/^[unique|count]/)) {
         if (isBlankOrPivotSheet)
@@ -615,6 +667,32 @@ const Workbook = ({
               isClosable: true,
             });
           }
+      } else if (headerText.startsWith('VLOOKUP')) {
+        console.log(columnId);
+        const parameters = extractVlookupParameters(headerText);
+        let vlookupColumnData;
+        if (parameters) {
+          const searchKey = parameters[0].trim();
+          const columnRange = extractColumnRange(parameters[1].trim());
+          const index = parseInt(parameters[2].trim());
+          vlookupColumnData = await fetchVlookUpValue(
+            searchKey,
+            columnRange as number[],
+            index
+          );
+        } else {
+          vlookupColumnData = generateColumnFromValue('#VALUE!');
+        }
+        const vlookupHeader = {
+          name: headerText,
+          type: ColumnType.COMPUTED_HEADER,
+        };
+        console.log(columnId);
+        updateSelectedSheetDataAndHeaders(
+          vlookupColumnData,
+          vlookupHeader,
+          columnId
+        );
       } else {
         const newHeader = {
           name: headerText.replace(/\s/g, '').toUpperCase(),
@@ -669,8 +747,8 @@ const Workbook = ({
     queriedData = queriedData.map((item: any, index: number) => ({
       ...item,
       [header.name]: {
-        original: data[index] || '',
-        display: data[index] || '',
+        original: data?.[index] || '',
+        display: data?.[index] || '',
       },
     }));
     return queriedData;
@@ -733,7 +811,6 @@ const Workbook = ({
     return connectionSource?.fields || [];
   }, [connections, selectedSheetIndex, sheetsData]);
 
-  
   return (
     <>
       <Flex direction={'column'}>
@@ -773,17 +850,15 @@ const Workbook = ({
 
           <Box h={'full'} w={'full'} overflowY={'auto'}>
             {showSqlEditor ? (
-              <Box  alignItems={'center'} justifyContent={'center'}>
-                  <QueryEditor
-                    sheetsData={sheetsData}
-                    selectedSheetIndex={selectedSheetIndex}
-                    setShowSqlEditor={setShowSqlEditor}
-                    setSheetsData={setSheetsData}
-                    height={`200px`}
-                  />
-                  
+              <Box alignItems={'center'} justifyContent={'center'}>
+                <QueryEditor
+                  sheetsData={sheetsData}
+                  selectedSheetIndex={selectedSheetIndex}
+                  setShowSqlEditor={setShowSqlEditor}
+                  setSheetsData={setSheetsData}
+                  height={`200px`}
+                />
               </Box>
-                   
             ) : null}
             {showEmptyState ? (
               <EmptySheet
