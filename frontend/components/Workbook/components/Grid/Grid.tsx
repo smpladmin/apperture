@@ -44,10 +44,10 @@ const getGridRow = (value: any): DefaultCellTypes => {
 const getColumns = (headers: SpreadSheetColumn[]): Column[] => {
   return headers.map((header, index) => {
     if (header.name === 'index') {
-      return { columnId: index + header.name, width: 50 };
+      return { columnId: header.name, width: 50 };
     }
     return {
-      columnId: index + header.name,
+      columnId: header.name,
       resizable: true,
       width: 240,
     };

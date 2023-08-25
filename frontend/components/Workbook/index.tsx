@@ -518,7 +518,7 @@ const Workbook = ({
     columnId: string,
     existingHeadersLength: number
   ) => {
-    const toUpdateHeaderIndex = +columnId[0] - 1;
+    const toUpdateHeaderIndex = columnId.charCodeAt(0) - 65;
 
     const toAddPaddingHeadersLength =
       toUpdateHeaderIndex - existingHeadersLength;
@@ -527,19 +527,18 @@ const Workbook = ({
   };
 
   const getHeaderIndex = (sheetData: TransientSheetData, columnId: string) => {
-    // const existingHeaders = sheetData?.headers;
+    const existingHeaders = sheetData?.headers;
 
-    // const existingHeaderIndex = existingHeaders.findLastIndex(
-    //   (header) => header.name === columnId
-    // );
+    const existingHeaderIndex = existingHeaders.findLastIndex(
+      (header) => header.name === columnId
+    );
 
-    // if (existingHeaderIndex !== -1) {
-    //   // add 1 as offset for index header
-    //   return existingHeaderIndex + 1;
-    // } else {
-    //   return columnId.toUpperCase().charCodeAt(0) - 65 + 1;
-    // }
-    return +columnId[0];
+    if (existingHeaderIndex !== -1) {
+      // add 1 as offset for index header
+      return existingHeaderIndex + 1;
+    } else {
+      return columnId.toUpperCase().charCodeAt(0) - 65 + 1;
+    }
   };
 
   const updateSelectedSheetDataAndHeaders = (
@@ -547,13 +546,13 @@ const Workbook = ({
     header: SpreadSheetColumn,
     columnId: string
   ) => {
-    console.log({ evaluatedData, header, columnId });
-    debugger;
     const tempSheetsData = cloneDeep(sheetsData);
     const existingHeaders = tempSheetsData[selectedSheetIndex]?.headers;
     const oldColumnId = columnId;
 
-    const existingHeaderIndex = +oldColumnId[0];
+    const existingHeaderIndex = existingHeaders.findIndex(
+      (header) => header.name === oldColumnId
+    );
     const paddingHeadersLength = getPaddingHeadersLenth(
       columnId,
       existingHeaders.length
@@ -574,7 +573,7 @@ const Workbook = ({
       ].name = header.name;
     } else {
       // add new headers and subheaders
-      const columnIndex = columnId.slice(1).charCodeAt(0) - 65 + 1;
+      const columnIndex = columnId.charCodeAt(0) - 65 + 1;
       tempSheetsData[selectedSheetIndex].headers = [
         ...existingHeaders,
         ...paddedHeaders,
