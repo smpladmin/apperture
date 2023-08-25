@@ -342,13 +342,13 @@ const Workbook = ({
         }))
         .filter((header) => header.type === ColumnType.COMPUTED_HEADER);
 
-      computedHeaders.forEach((header) => {
-        queriedData = evaluateDataOnQueriedData(
+      for (const header of computedHeaders) {
+        queriedData = await evaluateDataOnQueriedData(
           header.name,
           queriedData,
           selectedSheet.headers
         );
-      });
+      }
       updateSheetData(queriedData);
     };
 
@@ -361,22 +361,23 @@ const Workbook = ({
     const { data, loading } = loadBODMASColumn;
     if (!loading) return;
     if (data) {
-      let queriedData = data?.data;
-      data?.subHeaders
-        .filter(
+      (async () => {
+        let queriedData = data?.data;
+        const filteredSubHeaders = data?.subHeaders.filter(
           (subheader) =>
             subheader.name && !subheader.name.match(/^unique|count/)
-        )
-        .forEach((expression) => {
-          queriedData = evaluateDataOnQueriedData(
-            expression?.name,
+        );
+        for (const expression of filteredSubHeaders) {
+          queriedData = await evaluateDataOnQueriedData(
+            expression.name,
             queriedData,
-            data?.headers
+            data.headers
           );
-        });
-      updateSheetData(queriedData);
+        }
 
-      setloadBODMASColumn({ loading: false, data: null });
+        updateSheetData(queriedData);
+        setloadBODMASColumn({ loading: false, data: null });
+      })();
     }
   }, [loadBODMASColumn]);
 
@@ -630,13 +631,24 @@ const Workbook = ({
     }
   };
 
+  const computeVlookup = async (headerText: string) => {
+    const parameters = extractVlookupParameters(headerText);
+    if (parameters) {
+      const searchKey = parameters[0].trim();
+      const columnRange = extractColumnRange(parameters[1].trim());
+      const index = parseInt(parameters[2].trim());
+      return await fetchVlookUpValue(searchKey, columnRange as number[], index);
+    } else {
+      return generateColumnFromValue('#VALUE!');
+    }
+  };
+
   const evaluateFormulaHeader = useCallback(
     async (headerText: string, columnId: string) => {
       const sheetData = sheetsData[selectedSheetIndex];
 
       const isBlankOrPivotSheet = isSheetPivotOrBlank(sheetData);
       const index = getHeaderIndex(sheetData, columnId);
-      console.log(index, columnId);
 
       if (headerText.match(/^[unique|count]/)) {
         if (isBlankOrPivotSheet)
@@ -667,26 +679,11 @@ const Workbook = ({
             });
           }
       } else if (headerText.startsWith('VLOOKUP')) {
-        console.log(columnId);
-        const parameters = extractVlookupParameters(headerText);
-        let vlookupColumnData;
-        if (parameters) {
-          const searchKey = parameters[0].trim();
-          const columnRange = extractColumnRange(parameters[1].trim());
-          const index = parseInt(parameters[2].trim());
-          vlookupColumnData = await fetchVlookUpValue(
-            searchKey,
-            columnRange as number[],
-            index
-          );
-        } else {
-          vlookupColumnData = generateColumnFromValue('#VALUE!');
-        }
         const vlookupHeader = {
           name: headerText,
           type: ColumnType.COMPUTED_HEADER,
         };
-        console.log(columnId);
+        const vlookupColumnData = await computeVlookup(headerText);
         updateSelectedSheetDataAndHeaders(
           vlookupColumnData,
           vlookupHeader,
@@ -753,7 +750,7 @@ const Workbook = ({
     return queriedData;
   };
 
-  const evaluateDataOnQueriedData = (
+  const evaluateDataOnQueriedData = async (
     headerText: string,
     queriedData: any[],
     headers: SpreadSheetColumn[]
@@ -762,24 +759,27 @@ const Workbook = ({
       name: headerText,
       type: ColumnType.COMPUTED_HEADER,
     };
+    let evaluatedData;
+    if (headerText.startsWith('VLOOKUP')) {
+      evaluatedData = await computeVlookup(headerText);
+    } else {
+      const operands = getOperands(newHeader.name);
+      const operandsIndex = getOperatorsIndex(operands);
 
-    const operands = getOperands(newHeader.name);
-    const operandsIndex = getOperatorsIndex(operands);
+      const parsedExpression: any[] = parseExpression(newHeader.name);
 
-    const parsedExpression: any[] = parseExpression(newHeader.name);
+      const lookupTable = generateLookupTableFromQueriedData(
+        operands,
+        operandsIndex,
+        queriedData,
+        headers
+      );
 
-    const lookupTable = generateLookupTableFromQueriedData(
-      operands,
-      operandsIndex,
-      queriedData,
-      headers
-    );
-
-    const evaluatedData = evaluateExpression(
-      parsedExpression as string[],
-      lookupTable
-    );
-
+      evaluatedData = evaluateExpression(
+        parsedExpression as string[],
+        lookupTable
+      );
+    }
     return getUpdatedQueryData(evaluatedData, newHeader, queriedData);
   };
 

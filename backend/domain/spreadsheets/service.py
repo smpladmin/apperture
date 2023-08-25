@@ -162,12 +162,10 @@ class SpreadsheetService:
     async def get_vlookup(
         self, data: List[List[str]], search_key: str, column_index: int
     ):
+        if (column_index < 1) or (column_index > len(data[0])):
+            return "#NULL!"
         for row in data:
             if row[0] == search_key:
-                print(column_index, len(row))
-                if 1 <= column_index <= len(row):
-                    return row[column_index - 1]
-            else:
-                return "#N/A"
+                return row[column_index - 1]
 
-        return None
+        return "#N/A"
