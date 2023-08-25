@@ -15,6 +15,7 @@ import DoubleZero from '@assets/icons/NumberCircleDoubleZero.svg';
 import React from 'react';
 import Image from 'next/image';
 import PivotIcon from './PivotIcon';
+import { SheetType, TransientSheetData } from '@lib/domain/workbook';
 
 type WorkbookHeaderProps = {
   name: string;
@@ -23,6 +24,8 @@ type WorkbookHeaderProps = {
   handleSave: Function;
   setShowSqlEditor: Function;
   addNewPivotSheet: () => void;
+  sheetsData: TransientSheetData[];
+  selectedSheetIndex: number;
 };
 
 const WorkbookHeader = ({
@@ -32,7 +35,10 @@ const WorkbookHeader = ({
   handleSave,
   setShowSqlEditor,
   addNewPivotSheet,
+  sheetsData,
+  selectedSheetIndex,
 }: WorkbookHeaderProps) => {
+  const sheet = sheetsData[selectedSheetIndex];
   const router = useRouter();
   const { dsId } = router.query;
   const disabledIconStyle = { color: '#bdbdbd', cursor: 'no-drop' };
@@ -124,6 +130,7 @@ const WorkbookHeader = ({
           </Button>
         </Flex>
       </Flex>
+
       <Flex
         background={'gray.200'}
         height={9}
@@ -141,7 +148,13 @@ const WorkbookHeader = ({
           }}
         />
 
-        <PivotIcon addNewPivotSheet={addNewPivotSheet} />
+        <PivotIcon
+          addNewPivotSheet={addNewPivotSheet}
+          range={sheet?.name || ''}
+          enabled={
+            sheetsData[selectedSheetIndex].sheet_type !== SheetType.PIVOT_TABLE
+          }
+        />
         <Percent style={{ margin: '6px', ...disabledIconStyle }} />
         <Sigma style={{ margin: '6px', ...disabledIconStyle }} />
         <Image src={Zero} alt={'Zero'} style={disabledIconStyle} />

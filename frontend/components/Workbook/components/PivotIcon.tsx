@@ -16,7 +16,15 @@ import {
   Input,
 } from '@chakra-ui/react';
 
-function PivotIcon({ addNewPivotSheet }: { addNewPivotSheet: () => void }) {
+function PivotIcon({
+  addNewPivotSheet,
+  range,
+  enabled,
+}: {
+  addNewPivotSheet: () => void;
+  range: string;
+  enabled: boolean;
+}) {
   const [isHovered, setIsHovered] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const handleCreate = () => {
@@ -25,6 +33,7 @@ function PivotIcon({ addNewPivotSheet }: { addNewPivotSheet: () => void }) {
   };
   return (
     <Flex
+      opacity={enabled ? 1 : 0.4}
       margin={'6px'}
       padding={'4px'}
       borderRadius={'2px'}
@@ -34,10 +43,10 @@ function PivotIcon({ addNewPivotSheet }: { addNewPivotSheet: () => void }) {
       <Image
         src={PivotTableGif}
         alt={'pivot-table'}
-        style={{ cursor: 'pointer' }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onClick={onOpen}
+        style={{ cursor: enabled ? 'pointer' : 'no-drop' }}
+        onMouseEnter={() => enabled && setIsHovered(true)}
+        onMouseLeave={() => enabled && setIsHovered(false)}
+        onClick={() => enabled && onOpen()}
       />
       <Modal
         isCentered
@@ -54,7 +63,7 @@ function PivotIcon({ addNewPivotSheet }: { addNewPivotSheet: () => void }) {
               Data Range
             </Text>
             <Input
-              placeholder="@"
+              placeholder={range}
               disabled={true}
               borderColor={'gray.400'}
               bg={'gray.100'}

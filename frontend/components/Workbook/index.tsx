@@ -792,6 +792,8 @@ const Workbook = ({
           handleSave={handleSaveOrUpdateWorkbook}
           setShowSqlEditor={setShowSqlEditor}
           addNewPivotSheet={addNewPivotSheet}
+          sheetsData={sheetsData}
+          selectedSheetIndex={selectedSheetIndex}
         />
         <Flex
           direction={'row'}

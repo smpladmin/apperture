@@ -21,6 +21,7 @@ class SubHeaderColumnType(str, Enum):
 class SpreadsheetType(str, Enum):
     SIMPLE_SHEET = "SIMPLE_SHEET"
     PIVOT_SHEET = "PIVOT_SHEET"
+    PIVOT_TABLE = "PIVOT_TABLE"
 
 
 class SpreadSheetColumn(BaseModel):
