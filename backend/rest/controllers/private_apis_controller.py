@@ -296,8 +296,7 @@ async def create_pending_runlogs(
     dpq_service: DPQueueService = Depends(),
 ):
     datasource = await ds_service.get_datasource(ds_id)
-    api_datasources = await ds_service.get_api_datasources()
-    if datasource in api_datasources:
+    if datasource.provider == IntegrationProvider.API:
         runlogs = await runlog_service.create_pending_api_runlogs(datasource.id)
     else:
         runlogs = await runlog_service.create_pending_runlogs(datasource)
