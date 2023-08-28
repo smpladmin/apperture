@@ -26,6 +26,7 @@ import {
   findIndexOfFirstEmptySubheader,
   generateQuery,
   hasMetricColumnInPivotSheet,
+  parseHeaders,
 } from '../util';
 import cloneDeep from 'lodash/cloneDeep';
 import { GREY_600 } from '@theme/index';
@@ -76,8 +77,13 @@ const ConnectorColumns = ({
   useEffect(() => {
     if (sheetData?.edit_mode) return;
 
-    const query = generateQuery(
+    const parsedColumns = parseHeaders(
       selectedColumns,
+      sheetsData[selectedSheetIndex].headers
+    );
+
+    const query = generateQuery(
+      parsedColumns,
       table_name,
       database_name,
       datasource_id

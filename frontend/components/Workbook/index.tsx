@@ -43,10 +43,12 @@ import {
   evaluateExpression,
   expressionTokenRegex,
   findConnectionById,
+  generateQuery,
   getSubheaders,
   isOperand,
   isSheetPivotOrBlank,
   isdigit,
+  parseHeaders,
 } from './util';
 import { DimensionParser, Metricparser } from '@lib/utils/parser';
 import { Connection } from '@lib/domain/connections';
@@ -628,25 +630,26 @@ const Workbook = ({
           type: ColumnType.COMPUTED_HEADER,
         };
         const { headers } = sheetsData[selectedSheetIndex];
-        const regex = /[A-Z]+|[^A-Z0-9]|[0-9]+/g;
-        const expression = headerText.slice(1);
-        const splitExpression = expression.match(regex)?.map((elem) => {
-          if (elem >= 'A' && elem <= 'Z') {
-            const code = elem.charCodeAt(0) - 65;
-            return headers[code].name;
-          }
-          return elem;
+        const columns = [
+          ...headers.map((header) => header.name),
+          headerText.slice(1).toUpperCase(),
+        ];
+        const parsedExpressions = parseHeaders(columns, headers);
+
+        const query = generateQuery(
+          parsedExpressions,
+          sheetsData[selectedSheetIndex].meta?.selectedTable || 'events',
+          sheetsData[selectedSheetIndex].meta?.selectedDatabase || 'default',
+          sheetsData[selectedSheetIndex].meta?.dsId || ''
+        );
+        setSheetsData((prevSheetData: TransientSheetData[]) => {
+          const tempSheetsData = cloneDeep(prevSheetData);
+          tempSheetsData[selectedSheetIndex].query = query;
+          // TODO: should check the double bang !!
+          tempSheetsData[selectedSheetIndex].meta!!.selectedColumns = columns;
+
+          return tempSheetsData;
         });
-        // console.log(splitExpression?.join(''));
-        // const operands = getOperands(newHeader.name);
-        // const operandsIndex = getOperatorsIndex(operands);
-        // const parsedExpression: any[] = parseExpression(newHeader.name);
-        // const lookupTable = generateLookupTable(operands, operandsIndex);
-        // const evaluatedData = evaluateExpression(
-        //   parsedExpression as string[],
-        //   lookupTable
-        // );
-        // updateSelectedSheetDataAndHeaders(evaluatedData, newHeader, columnId);
       }
     },
     [sheetsData, selectedSheetIndex]
