@@ -1,20 +1,35 @@
 import os
 
 from authlib.integrations.starlette_client import OAuthError
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from starlette.responses import RedirectResponse
 
 from authorisation import OAuthClientFactory, OAuthProvider
 from authorisation.jwt_auth import create_access_token
 from authorisation.service import AuthService
 from domain.apperture_users.service import AppertureUserService
-from rest.dtos.apperture_users import CreateUserDto
+from rest.dtos.apperture_users import CreateUserDto, ResetPasswordDto
+from rest.middlewares import validate_recaptcha_token
 from settings import apperture_settings
+from utils.errors import BusinessError
 
 router = APIRouter(tags=["auth"])
 
 oauth = OAuthClientFactory().init_client(OAuthProvider.GOOGLE)
 settings = apperture_settings()
+
+
+def set_auth_cookie(response: Response, id):
+    jwt = create_access_token({"user_id": str(id)})
+    response.set_cookie(
+        key=settings.cookie_key,
+        value=jwt,
+        domain=os.getenv("COOKIE_DOMAIN"),
+        httponly=True,
+        secure=os.getenv("FASTAPI_ENV") != "development",
+        expires=int(os.getenv("JWT_EXPIRY_MINUTES")) * 60,
+    )
+    return response
 
 
 @router.get("/login")
@@ -29,21 +44,21 @@ async def login(
     )
 
 
-@router.get("/login/password")
+@router.post("/login/password")
 async def login_with_password(
-    email: str,
-    password: str,
+    response: Response,
+    dto: ResetPasswordDto,
     user_service: AppertureUserService = Depends(),
     auth_service: AuthService = Depends(),
 ):
-    apperture_user = await user_service.get_user_by_email(email)
+    apperture_user = await user_service.get_user_by_email(dto.email)
+    new_hash = auth_service.verify_password(apperture_user.password, dto.password)
     if not apperture_user:
         HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    new_hash = auth_service.verify_password(apperture_user.password, password)
     if not new_hash:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -51,9 +66,8 @@ async def login_with_password(
             headers={"WWW-Authenticate": "Bearer"},
         )
     await user_service.save_password(apperture_user, new_hash)
-    return await _redirect_with_auth_cookie(
-        os.getenv("FRONTEND_LOGIN_REDIRECT_URL"), str(apperture_user.id)
-    )
+    response = set_auth_cookie(response=response, id=apperture_user.id)
+    return apperture_user
 
 
 @router.get("/authorise")
@@ -107,3 +121,21 @@ async def logout(redirect_url: str = os.getenv("FRONTEND_LOGIN_REDIRECT_URL")):
         max_age=0,
     )
     return response
+
+
+@router.post("/register", dependencies=[Depends(validate_recaptcha_token)])
+async def register(
+    response: Response,
+    dto: CreateUserDto,
+    user_service: AppertureUserService = Depends(),
+    auth_service: AuthService = Depends(),
+):
+    try:
+        hash = auth_service.hash_password(dto.password)
+        apperture_user = await user_service.create_user_with_password(
+            dto.first_name, dto.last_name, dto.email, hash
+        )
+        response = set_auth_cookie(response=response, id=apperture_user.id)
+        return apperture_user
+    except BusinessError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")

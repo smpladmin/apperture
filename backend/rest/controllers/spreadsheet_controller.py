@@ -7,7 +7,6 @@ from domain.apperture_users.models import AppertureUser
 from domain.apperture_users.service import AppertureUserService
 from domain.datasources.service import DataSourceService
 from domain.spreadsheets.service import SpreadsheetService
-from repositories.clickhouse.parser.query_parser import BusinessError
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.spreadsheets import (
@@ -23,6 +22,7 @@ from rest.dtos.spreadsheets import (
 )
 from rest.middlewares import get_user, validate_jwt
 from rest.middlewares.get_user import get_user_id
+from utils.errors import BusinessError
 from rest.middlewares.validate_app_user import validate_app_user, validate_library_items
 
 router = APIRouter(

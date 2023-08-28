@@ -15,6 +15,44 @@ export const _getAppertureUserInfo = async (token: string) => {
   }
 };
 
+export const RegisterUser = async (
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string,
+  token: string
+) => {
+  try {
+    const user = await AppertureAPI.post(
+      '/register',
+      {
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        password,
+      },
+      { headers: { 'recaptcha-token': token } }
+    );
+    return user;
+  } catch (err: any) {
+    console.log(err);
+    return err.response;
+  }
+};
+
+export const LoginUser = async (email: string, password: string) => {
+  try {
+    const user = await AppertureAPI.post('/login/password', {
+      email,
+      password,
+    });
+    return user;
+  } catch (err: any) {
+    console.log(err);
+    return err.response;
+  }
+};
+
 export const getAppertureUserInfo = async () => {
   try {
     const user = await AppertureAPI.get('/apperture-users/me');
