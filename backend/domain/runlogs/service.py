@@ -72,8 +72,8 @@ class RunLogService:
         ]
         for runlog in runlogs:
             runlog.updated_at = runlog.created_at
-        await RunLog.insert_many(runlogs)
-        return await RunLog.find(RunLog.datasource_id == datasource_id).to_list()
+        insert_response = await RunLog.insert_many(runlogs)
+        return await RunLog.find(In(RunLog.id, insert_response.inserted_ids)).to_list()
 
     async def create_pending_runlogs(self, datasource: DataSource):
         yesterday = (datetime.utcnow() - relativedelta(days=1)).replace(
