@@ -625,10 +625,6 @@ const Workbook = ({
             });
           }
       } else {
-        const newHeader = {
-          name: headerText.replace(/\s/g, '').toUpperCase(),
-          type: ColumnType.COMPUTED_HEADER,
-        };
         const { headers } = sheetsData[selectedSheetIndex];
         const columns = [
           ...headers.map((header) => header.name),
