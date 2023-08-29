@@ -74,6 +74,17 @@ const ConnectorColumns = ({
     setColumns(results);
   };
 
+  console.log(
+    sheetsData[selectedSheetIndex]?.meta?.selectedColumns,
+    selectedColumns
+  );
+
+  useEffect(() => {
+    setSelectedColumns(
+      sheetsData[selectedSheetIndex]?.meta?.selectedColumns || []
+    );
+  }, [sheetsData[selectedSheetIndex]?.meta?.selectedColumns]);
+
   useEffect(() => {
     if (sheetData?.edit_mode) return;
 
