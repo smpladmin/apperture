@@ -6,7 +6,7 @@ import {
   Id,
   MenuOption,
   ReactGrid,
-  Row,
+  // Row,
   SelectionMode,
 } from '@silevis/reactgrid';
 import React, { useEffect, useState } from 'react';
@@ -31,7 +31,12 @@ import {
 } from '@components/Workbook/util';
 import { cloneDeep } from 'lodash';
 import AppertureSheet from '@components/AppertureSheets';
-import { CellChange, Column } from '@components/AppertureSheets/gridTypes';
+import {
+  CellChange,
+  Column,
+  Row,
+  TextCell,
+} from '@components/AppertureSheets/types/gridTypes';
 
 const getGridRow = (value: any): DefaultCellTypes => {
   const cellTypes: { [key: string]: DefaultCellTypes } = {
@@ -96,81 +101,136 @@ const getColumns = (headers: SpreadSheetColumn[]): Column[] => {
 //     }),
 //   };
 // };
-const getHeaderRow = (
-  headers: SpreadSheetColumn[],
-  originalHeaders: SpreadSheetColumn[]
-): any => {
-  return {
-    rowId: 'header',
-    cells: originalHeaders
-      .filter((header) => header.name !== 'index')
-      .map((header, index) => {
-        return {
-          type: 'text',
-          value: header.name,
-        };
-      }),
-  };
-};
+// const getHeaderRow = (
+//   headers: SpreadSheetColumn[],
+//   originalHeaders: SpreadSheetColumn[]
+// ): any => {
+//   return {
+//     rowId: 'header',
+//     cells: originalHeaders
+//       .filter((header) => header.name !== 'index')
+//       .map((header, index) => {
+//         return {
+//           type: 'text',
+//           value: header.name,
+//         };
+//       }),
+//   };
+// };
 
 const getSubHeaderRow = (
   headers: SpreadSheetColumn[],
+  originalHeaders: SpreadSheetColumn[],
   subHeaders: SubHeaderColumn[],
   sheetData: TransientSheetData,
   properties: string[]
-): Row<DefaultCellTypes | InputHeaderCell> => {
+): Row<InputHeaderCell> => {
   return {
     rowId: 'subHeader',
-    cells: headers.map((header, index) => {
-      const isPivotOrBlankSheet = isSheetPivotOrBlank(sheetData);
-      const dimensionSubHeaderCount = subHeaders.reduce(
-        (acc: number, header: SubHeaderColumn) => {
-          if (header.type === SubHeaderColumnType.DIMENSION) acc++;
-          return acc;
-        },
-        0
-      );
-      const disableAddButton = hasMetricColumnInPivotSheet(sheetData);
-      const showAddButton =
-        isPivotOrBlankSheet && index === dimensionSubHeaderCount;
+    cells: headers
+      .filter((header) => header.name !== 'index')
+      .map((header, index) => {
+        const isPivotOrBlankSheet = isSheetPivotOrBlank(sheetData);
+        const dimensionSubHeaderCount = subHeaders.reduce(
+          (acc: number, header: SubHeaderColumn) => {
+            if (header.type === SubHeaderColumnType.DIMENSION) acc++;
+            return acc;
+          },
+          0
+        );
+        const disableAddButton = hasMetricColumnInPivotSheet(sheetData);
+        const showAddButton =
+          isPivotOrBlankSheet && index === dimensionSubHeaderCount;
 
-      if (header.name === 'index') {
-        return {
-          type: 'header',
-          text: '',
-          style: { background: WHITE_DEFAULT },
-        };
-      }
-      if (header.type === ColumnType.QUERY_HEADER) {
+        if (header.type === ColumnType.QUERY_HEADER) {
+          return {
+            type: 'inputHeader',
+            text: originalHeaders?.[index]?.name || '',
+            disable: true,
+            showAddButton,
+            disableAddButton,
+            showSuggestions: isPivotOrBlankSheet,
+            properties,
+            style: {
+              overflow: 'initial',
+            },
+          };
+        }
+
         return {
           type: 'inputHeader',
-          text: `${subHeaders[index].name}`,
-          disable: true,
+          text:
+            header.type === ColumnType.PADDING_HEADER
+              ? ''
+              : originalHeaders?.[index]?.name || '',
+          disable: false,
           showAddButton,
           disableAddButton,
           showSuggestions: isPivotOrBlankSheet,
           properties,
-          style: {
-            overflow: 'initial',
-          },
+          columnType: subHeaders[index].type,
         };
-      }
-      return {
-        type: 'inputHeader',
-        text: `${subHeaders[index].name}`,
-        disable: false,
-        showAddButton,
-        disableAddButton,
-        showSuggestions: isPivotOrBlankSheet,
-        properties,
-        columnType: subHeaders[index].type,
-        style: {
-          overflow: 'initial',
-        },
-      };
-    }),
+      }),
   };
 };
+// const getSubHeaderRow = (
+//   headers: SpreadSheetColumn[],
+//   subHeaders: SubHeaderColumn[],
+//   sheetData: TransientSheetData,
+//   properties: string[]
+// ): Row<DefaultCellTypes | InputHeaderCell> => {
+//   return {
+//     rowId: 'subHeader',
+//     cells: headers.map((header, index) => {
+//       const isPivotOrBlankSheet = isSheetPivotOrBlank(sheetData);
+//       const dimensionSubHeaderCount = subHeaders.reduce(
+//         (acc: number, header: SubHeaderColumn) => {
+//           if (header.type === SubHeaderColumnType.DIMENSION) acc++;
+//           return acc;
+//         },
+//         0
+//       );
+//       const disableAddButton = hasMetricColumnInPivotSheet(sheetData);
+//       const showAddButton =
+//         isPivotOrBlankSheet && index === dimensionSubHeaderCount;
+
+//       if (header.name === 'index') {
+//         return {
+//           type: 'header',
+//           text: '',
+//           style: { background: WHITE_DEFAULT },
+//         };
+//       }
+//       if (header.type === ColumnType.QUERY_HEADER) {
+//         return {
+//           type: 'inputHeader',
+//           text: `${subHeaders[index].name}`,
+//           disable: true,
+//           showAddButton,
+//           disableAddButton,
+//           showSuggestions: isPivotOrBlankSheet,
+//           properties,
+//           style: {
+//             overflow: 'initial',
+//           },
+//         };
+//       }
+//       return {
+//         type: 'inputHeader',
+//         text: `${subHeaders[index].name}`,
+//         disable: false,
+//         showAddButton,
+//         disableAddButton,
+//         showSuggestions: isPivotOrBlankSheet,
+//         properties,
+//         columnType: subHeaders[index].type,
+//         style: {
+//           overflow: 'initial',
+//         },
+//       };
+//     }),
+//   };
+// };
 
 // const getRows = (
 //   data: any[],
@@ -202,10 +262,10 @@ const getRows = (
   subHeaders: SubHeaderColumn[],
   sheetData: TransientSheetData,
   properties: string[]
-): any[] => [
-  getHeaderRow(headers, originalHeaders),
-  // getSubHeaderRow(headers, subHeaders, sheetData, properties),
-  ...data.map((data, idx) => ({
+): Row<TextCell | InputHeaderCell>[] => [
+  // getHeaderRow(headers, originalHeaders),
+  getSubHeaderRow(headers, originalHeaders, subHeaders, sheetData, properties),
+  ...data.map<Row<TextCell>>((data, idx) => ({
     rowId: idx,
     cells: headers
       .filter((header) => header.name !== 'index')
@@ -215,7 +275,7 @@ const getRows = (
             ? '0'
             : data[header.name]?.display || '';
 
-        return { type: 'text', value: val };
+        return { type: 'text', text: val };
       }),
   })),
 ];
@@ -292,19 +352,20 @@ const Grid = ({
   //     );
   // };
 
-  const handleDataChange = (changedValue: CellChange[]) => {
-    console.log('handleDataChange', changedValue);
+  const handleDataChange = (
+    changedValue: CellChange<TextCell | InputHeaderCell>[]
+  ) => {
     const changedHeaders = changedValue.filter(
       (value) => value.type === 'inputHeader'
     );
 
-    // if (changedHeaders[0]?.newCell?.addHeader) {
-    //   return addDimensionColumn(changedHeaders[0].columnId);
-    // }
+    if ((changedHeaders[0]?.newCell as InputHeaderCell)?.addHeader) {
+      return addDimensionColumn(changedHeaders[0].columnId);
+    }
 
     changedHeaders[0] &&
       evaluateFormulaHeader(
-        changedHeaders[0]?.newCell.value,
+        changedHeaders[0]?.newCell.text,
         changedHeaders[0]?.columnId
       );
   };
@@ -362,6 +423,8 @@ const Grid = ({
     return [];
   };
 
+  const handleColumnSelections = (selectedColumns: string[]) => {};
+
   return (
     // <ReactGrid
     //   rows={rows}
@@ -382,6 +445,7 @@ const Grid = ({
       columns={columns}
       onColumnResized={handleColumnResize}
       onCellsChanged={handleDataChange}
+      onColumnsSelections={handleColumnSelections}
     />
   );
 };

@@ -199,7 +199,7 @@ export const hasMetricColumnInPivotSheet = (sheet: TransientSheetData) => {
 export const getSubheaders = (sheetType?: SheetType) => {
   const isPivotSheet = sheetType === SheetType.PIVOT_SHEET;
 
-  return Array.from({ length: 27 }).map((_, index) => {
+  return Array.from({ length: 26 }).map((_, index) => {
     return {
       name: '',
       type:

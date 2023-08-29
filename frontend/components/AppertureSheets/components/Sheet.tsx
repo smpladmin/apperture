@@ -8,17 +8,24 @@ import {
 } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { HeaderCell } from './HeaderCell';
-
-import { Actions, GridContext } from './GridContext';
+import { Actions, GridContext } from '../context/GridContext';
 import sanitizeHtml from 'sanitize-html';
-import CustomCell from './CustomCell';
 import BaseCell from './BaseCell';
-import { BaseCellProps, CellChange, Column } from './gridTypes';
-import TextCell from './TextCell';
+import TextCellComponent from './TextCell';
+import InputHeader from './InputHeader';
+import {
+  BaseCellProps,
+  CellChange,
+  Column,
+  InputHeaderCell,
+  Row,
+  TextCell,
+} from '../types/gridTypes';
+import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 
 const componentMap: Record<string, React.ComponentType<any>> = {
-  text: TextCell,
-  customCell: CustomCell,
+  text: TextCellComponent,
+  inputHeader: InputHeader,
 };
 
 const Sheet = ({
@@ -26,44 +33,34 @@ const Sheet = ({
   rows,
   onColumnResized,
   onCellsChanged,
+  onColumnsSelections,
 }: {
   columns: Column[];
-  rows: any[];
+  rows: Row<TextCell | InputHeaderCell>[];
   onColumnResized: (columnId: string, newWidth: number) => void;
-  onCellsChanged: (changedCell: CellChange[]) => void;
+  onCellsChanged: (
+    changedCell: CellChange<TextCell | InputHeaderCell>[]
+  ) => void;
+  onColumnsSelections?: (columnIds: string[]) => void;
 }) => {
-  // const createRows = (columns: Column[]) => {
-  //   const row = {} as { [key: string]: string };
-  //   const singleRow = columns.forEach((column) => {
-  //     row[column.columnId] = '';
-  //   });
-  //   return new Array(1000).fill(row);
-  // };
-
-  // const createColumns = () => {
-  //   const columns: Column[] = range(26).map((column, i) => {
-  //     let columnId;
-  //     if (i === 0 || i === 1) {
-  //       let givenColumnsIds = ['name', 'surname'];
-  //       columnId = givenColumnsIds[i];
-  //     } else {
-  //       columnId = String.fromCharCode(65 + i);
-  //     }
-  //     return {
-  //       columnId,
-  //       width: 120,
-  //       resizable: true,
-  //     };
-  //   });
-  //   return columns;
-  // };
-
   const { state, dispatch } = useContext(GridContext);
-  const { currentCell, editableCellStyle, showEditableCell, currentCellValue } =
-    state;
+  const {
+    currentCell,
+    editableCellStyle,
+    showEditableCell,
+    currentCellValue,
+    isSheetActive,
+    selectedColumns,
+  } = state;
 
-  // const [columns, setColumns] = useState<Column[]>(columns);
-  // const [sheetRows, setSheetRows] = useState(rows);
+  const spreadsheetRef = React.useRef(null);
+
+  useOnClickOutside(spreadsheetRef, () => {
+    dispatch({
+      type: Actions.SET_SHEET_ACTIVE,
+      payload: false,
+    });
+  });
 
   const rowIndexGrid = React.useRef<VariableSizeGrid>(null);
   const headerGrid = React.useRef<VariableSizeGrid>(null);
@@ -86,15 +83,17 @@ const Sheet = ({
     const columnId = columns[currentCell.column].columnId;
     const rowIndex = currentCell.row;
 
-    const changedCell: CellChange = {
+    const changedCell: CellChange<TextCell> = {
       rowId: rowIndex,
       columnId: columnId,
       type: 'text',
       newCell: {
-        value: sanitizedContent,
+        type: 'text',
+        text: sanitizedContent,
       },
       previousCell: {
-        value: currentCellValue,
+        type: 'text',
+        text: currentCellValue,
       },
     };
     onCellsChanged?.([changedCell]);
@@ -135,6 +134,13 @@ const Sheet = ({
   }, [currentCell]);
 
   useEffect(() => {
+    // on column selection, call prop onColumnSelection
+    onColumnsSelections?.(selectedColumns);
+  }, [selectedColumns]);
+
+  useEffect(() => {
+    console.log('sheet active inside effect', isSheetActive);
+
     if (showEditableCell) return;
 
     const isInputOrTextArea = (
@@ -152,6 +158,7 @@ const Sheet = ({
       }
       const { key } = event;
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+        console.log({ key });
         event.preventDefault();
       }
 
@@ -207,12 +214,12 @@ const Sheet = ({
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    window.addEventListener('keyup', handleKeyUp);
+    spreadsheetRef?.current?.addEventListener('keydown', handleKeyPress);
+    spreadsheetRef?.current?.addEventListener('keyup', handleKeyUp);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyPress);
-      window.removeEventListener('keyup', handleKeyUp);
+      spreadsheetRef?.current?.removeEventListener('keydown', handleKeyPress);
+      spreadsheetRef?.current?.removeEventListener('keyup', handleKeyUp);
     };
   }, [currentCell]);
 
@@ -264,7 +271,18 @@ const Sheet = ({
   );
 
   return (
-    <Box height={'100%'} width={'100%'}>
+    <Box
+      height={'100%'}
+      width={'100%'}
+      ref={spreadsheetRef}
+      onClick={
+        () => {}
+        // dispatch({
+        //   type: Actions.SET_SHEET_ACTIVE,
+        //   payload: true,
+        // })
+      }
+    >
       <AutoSizer>
         {({ height, width }: { height: number; width: number }) => {
           return (
@@ -285,6 +303,7 @@ const Sheet = ({
                         style={style}
                         w={60}
                         height={9}
+                        borderTopWidth={'0.4px'}
                         borderRightWidth={'0.4px'}
                         borderBottomWidth={'0.4px'}
                         borderColor={'grey.700'}
@@ -350,24 +369,24 @@ const Sheet = ({
                     overscanRowCount={20}
                   >
                     {({ columnIndex, rowIndex, style }) => {
-                      const cellValue =
-                        rows[rowIndex]?.cells?.[columnIndex]?.value || '';
-                      const cellType =
-                        rows[rowIndex]?.cells?.[columnIndex]?.type || 'text';
+                      const cell = rows[rowIndex]?.cells?.[columnIndex];
+                      const cellType = cell?.type || 'text';
 
                       const baseCellProps: BaseCellProps = {
                         columnIndex,
                         rowIndex,
                         style,
                         column: columns[columnIndex],
-                        value: cellValue,
                       };
 
                       const CellToRender = componentMap[cellType];
-
                       return (
                         <BaseCell {...baseCellProps}>
-                          <CellToRender {...baseCellProps} />
+                          <CellToRender
+                            {...baseCellProps}
+                            cell={cell}
+                            onCellsChanged={onCellsChanged}
+                          />
                         </BaseCell>
                       );
                     }}

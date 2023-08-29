@@ -1,18 +1,28 @@
 import React from 'react';
-import Sheet from './Sheet';
-import GridContextProvider from './GridContext';
-import { CellChange, Column } from './gridTypes';
+import Sheet from './components/Sheet';
+import GridContextProvider from './context/GridContext';
+import {
+  CellChange,
+  Column,
+  InputHeaderCell,
+  Row,
+  TextCell,
+} from './types/gridTypes';
 
 const AppertureSheet = ({
   columns,
   rows,
   onColumnResized,
   onCellsChanged,
+  onColumnsSelections,
 }: {
   columns: Column[];
-  rows: any[];
+  rows: Row<TextCell | InputHeaderCell>[];
   onColumnResized: (columnId: string, newWidth: number) => void;
-  onCellsChanged: (changedCell: CellChange[]) => void;
+  onCellsChanged: (
+    changedCell: CellChange<TextCell | InputHeaderCell>[]
+  ) => void;
+  onColumnsSelections?: (columnIds: string[]) => void;
 }) => {
   return (
     <GridContextProvider>
@@ -21,9 +31,25 @@ const AppertureSheet = ({
         rows={rows}
         onColumnResized={onColumnResized}
         onCellsChanged={onCellsChanged}
+        onColumnsSelections={onColumnsSelections}
       />
     </GridContextProvider>
   );
 };
 
 export default AppertureSheet;
+
+//TextCell, {type:'', value:''}
+
+// input header,
+// type: 'inputHeader';
+//   text: string;
+//   disable?: boolean;
+//   showAddButton?: boolean;
+//   addHeader?: boolean;
+//   columnType?: SubHeaderColumnType;
+//   properties: string[];
+//   showSuggestions?: boolean;
+//   disableAddButton?: boolean;
+
+// {rowId: '', cells: [{type:'text', value: ''}]}

@@ -1,4 +1,4 @@
-import GridContextProvider from '@components/AppertureSheets/GridContext';
+import GridContextProvider from '@components/AppertureSheets/context/GridContext';
 import Sheet from '@components/AppertureSheets';
 import React from 'react';
 

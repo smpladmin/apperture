@@ -1,6 +1,6 @@
 import { Box } from '@chakra-ui/react';
 import React, { useRef } from 'react';
-import { Column } from './gridTypes';
+import { Column } from '../types/gridTypes';
 
 const ColumnResizer = ({
   column,

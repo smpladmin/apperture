@@ -1,8 +1,8 @@
 import { Flex } from '@chakra-ui/react';
 import { useContext } from 'react';
 import ColumnResizer from './ColumnResizer';
-import { Actions, GridContext } from './GridContext';
-import { Column } from './gridTypes';
+import { Actions, GridContext } from '../context/GridContext';
+import { Column } from '../types/gridTypes';
 
 export const HeaderCell = ({
   column,
@@ -48,6 +48,7 @@ export const HeaderCell = ({
       bg={isHeaderSelected ? 'blue.500' : 'white.500'}
       alignItems={'center'}
       justifyContent={'center'}
+      borderTopWidth={'0.4px'}
       borderRightWidth={'0.4px'}
       borderBottomWidth={'0.4px'}
       borderColor={'grey.700'}

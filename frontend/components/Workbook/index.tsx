@@ -554,12 +554,14 @@ const Workbook = ({
       // update exisitng header and subheader
       // for updating subheaders, need to add 1 to maintain sheets 'index' column
       tempSheetsData[selectedSheetIndex].headers[existingHeaderIndex] = header;
-      tempSheetsData[selectedSheetIndex].subHeaders[
-        existingHeaderIndex + 1
-      ].name = header.name;
+      // tempSheetsData[selectedSheetIndex].subHeaders[
+      //   existingHeaderIndex + 1
+      // ].name = header.name;
+      tempSheetsData[selectedSheetIndex].subHeaders[existingHeaderIndex].name =
+        header.name;
     } else {
       // add new headers and subheaders
-      const columnIndex = columnId.charCodeAt(0) - 65 + 1;
+      const columnIndex = columnId.charCodeAt(0) - 65;
       tempSheetsData[selectedSheetIndex].headers = [
         ...existingHeaders,
         ...paddedHeaders,

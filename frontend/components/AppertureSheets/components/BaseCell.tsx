@@ -1,7 +1,7 @@
 import { Flex } from '@chakra-ui/react';
 import React, { MouseEvent, ReactElement, useContext } from 'react';
-import { Actions, GridContext } from './GridContext';
-import { BaseCellProps } from './gridTypes';
+import { Actions, GridContext } from '../context/GridContext';
+import { BaseCellProps } from '../types/gridTypes';
 
 type BaseCellPropsWithChildren = BaseCellProps & { children: ReactElement };
 
@@ -18,14 +18,18 @@ const BaseCell = ({ children, ...props }: BaseCellPropsWithChildren) => {
     currentCell.row === rowIndex && currentCell.column === columnIndex;
 
   const handleClick = (event: MouseEvent) => {
-    dispatch({
-      type: Actions.SET_CURRENT_CELL,
-      payload: {
-        column: columnIndex,
-        row: rowIndex,
-      },
-    });
-    dispatch({ type: Actions.SET_SELECTED_COLUMNS, payload: [] });
+    if (currentCell.column !== columnIndex || currentCell.row !== rowIndex) {
+      dispatch({
+        type: Actions.SET_CURRENT_CELL,
+        payload: {
+          column: columnIndex,
+          row: rowIndex,
+        },
+      });
+    }
+
+    if (selectedColumns.length)
+      dispatch({ type: Actions.SET_SELECTED_COLUMNS, payload: [] });
   };
 
   return (
