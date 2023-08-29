@@ -127,7 +127,7 @@ export const PivotTableSidePanel = ({
           );
           setSheetsData((prevSheetData: TransientSheetData[]) => {
             const tempSheetsData = cloneDeep(prevSheetData);
-            const oldMeta = tempSheetsData[selectedSheetIndex]?.meta;
+            const oldMeta = tempSheetsData[selectedSheetIndex]?.meta!!;
             tempSheetsData[selectedSheetIndex].headers = headers;
             tempSheetsData[selectedSheetIndex].data = sheetData;
             tempSheetsData[selectedSheetIndex].meta = {

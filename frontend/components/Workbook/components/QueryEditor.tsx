@@ -147,8 +147,6 @@ const QueryEditor = ({
             setQuery(value);
           }}
           readOnly={!sheetData.edit_mode}
-          
-          
         />
         {error ? (
           <Text
@@ -182,7 +180,7 @@ const QueryEditor = ({
             }}
           >
             <Flex gap={'1'}>
-             <X size={16} weight="fill" />
+              <X size={16} weight="fill" />
               Close
             </Flex>
           </Button>
