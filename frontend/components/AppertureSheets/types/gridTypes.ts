@@ -19,6 +19,7 @@ type CellValue = {
 export type CellChange<T> = {
   rowId: Id;
   columnId: Id;
+  columnIndex: number;
   type: string;
   newCell: T;
   previousCell: T;

@@ -1,6 +1,6 @@
 import { Box, Flex } from '@chakra-ui/react';
 import { throttle } from 'lodash';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import {
   VariableSizeGrid as Grid,
   GridOnScrollProps,
@@ -86,6 +86,7 @@ const Sheet = ({
     const changedCell: CellChange<TextCell> = {
       rowId: rowIndex,
       columnId: columnId,
+      columnIndex: currentCell.column,
       type: 'text',
       newCell: {
         type: 'text',
@@ -135,12 +136,11 @@ const Sheet = ({
 
   useEffect(() => {
     // on column selection, call prop onColumnSelection
-    onColumnsSelections?.(selectedColumns);
+    const selectedColumnIds = selectedColumns.map((column) => column.columnId);
+    onColumnsSelections?.(selectedColumnIds);
   }, [selectedColumns]);
 
   useEffect(() => {
-    console.log('sheet active inside effect', isSheetActive);
-
     if (showEditableCell) return;
 
     const isInputOrTextArea = (
@@ -153,12 +153,11 @@ const Sheet = ({
     };
 
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (isInputOrTextArea(event.target)) {
+      if (isInputOrTextArea(event.target) || !isSheetActive) {
         return;
       }
       const { key } = event;
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
-        console.log({ key });
         event.preventDefault();
       }
 
@@ -214,14 +213,14 @@ const Sheet = ({
       }
     };
 
-    spreadsheetRef?.current?.addEventListener('keydown', handleKeyPress);
-    spreadsheetRef?.current?.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('keydown', handleKeyPress);
+    document.addEventListener('keyup', handleKeyUp);
 
     return () => {
-      spreadsheetRef?.current?.removeEventListener('keydown', handleKeyPress);
-      spreadsheetRef?.current?.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('keydown', handleKeyPress);
+      document.removeEventListener('keyup', handleKeyUp);
     };
-  }, [currentCell]);
+  }, [currentCell, isSheetActive]);
 
   const IndexCell = ({
     columnIndex,
@@ -275,12 +274,11 @@ const Sheet = ({
       height={'100%'}
       width={'100%'}
       ref={spreadsheetRef}
-      onClick={
-        () => {}
-        // dispatch({
-        //   type: Actions.SET_SHEET_ACTIVE,
-        //   payload: true,
-        // })
+      onClick={() =>
+        dispatch({
+          type: Actions.SET_SHEET_ACTIVE,
+          payload: true,
+        })
       }
     >
       <AutoSizer>

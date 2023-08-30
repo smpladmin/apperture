@@ -19,6 +19,9 @@ export const HeaderCell = ({
 }) => {
   const { state, dispatch } = useContext(GridContext);
   const { isCommandPressed, selectedColumns } = state;
+  const isHeaderSelected = selectedColumns.some(
+    (selectedColumn) => selectedColumn.columnId === column.columnId
+  );
 
   const handleColumnSelection = (
     e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
@@ -27,19 +30,22 @@ export const HeaderCell = ({
     if (isCommandPressed) {
       let columns = [];
 
-      if (selectedColumns.includes(columnName)) {
-        columns = selectedColumns.filter((name) => name !== columnName);
+      if (selectedColumns.some((column) => column.columnId === columnName)) {
+        columns = selectedColumns.filter(
+          (column) => column.columnId !== columnName
+        );
       } else {
-        columns = [...selectedColumns, columnName];
+        columns = [...selectedColumns, { columnIndex, columnId: columnName }];
       }
 
       dispatch({ type: Actions.SET_SELECTED_COLUMNS, payload: columns });
     } else {
-      dispatch({ type: Actions.SET_SELECTED_COLUMNS, payload: [columnName] });
+      dispatch({
+        type: Actions.SET_SELECTED_COLUMNS,
+        payload: [{ columnIndex, columnId: columnName }],
+      });
     }
   };
-
-  const isHeaderSelected = selectedColumns.includes(column.columnId);
 
   return (
     <Flex

@@ -5,9 +5,14 @@ type CurrentCell = {
   column: number;
 };
 
+type SelectedColumn = {
+  columnId: string;
+  columnIndex: number;
+};
+
 export type InitialStateType = {
   currentCell: CurrentCell;
-  selectedColumns: string[];
+  selectedColumns: SelectedColumn[];
   isCommandPressed: boolean;
   showEditableCell: boolean;
   editableCellStyle: React.CSSProperties;
@@ -37,7 +42,7 @@ export type GridActions =
     }
   | {
       type: Actions.SET_SELECTED_COLUMNS;
-      payload: string[];
+      payload: SelectedColumn[];
     }
   | {
       type: Actions.SET_IS_COMMAND_PRESSED;

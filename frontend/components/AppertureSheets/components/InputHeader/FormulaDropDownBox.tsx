@@ -300,37 +300,11 @@ const FormulaDropDownBox = ({
   return (
     <Flex width={'full'}>
       <Box position={'relative'} width={'full'} ref={dropdownRef}>
-        {/* <Box
-          contentEditable={!cell?.disable}
-          dangerouslySetInnerHTML={{ __html: formula }}
-          onInput={handleChange}
-          onKeyDown={(e) => {
-            e.stopPropagation();
-            e.code === 'Enter' && handleSubmitFormula();
-            setSuggestions([]);
-          }}
-          onBlur={() => {
-            setIsFocus(false);
-          }}
-          onClick={(e) => e.stopPropagation()}
-          w={'full'}
-          height={'6'}
-          px={1}
-          borderRadius={'0'}
-          fontSize={'xs-12'}
-          lineHeight={'xs-12'}
-          fontWeight={'600'}
-          data-testid={'formula-input'}
-        /> */}
         <InputGroup p={'0'}>
-          {(!cell?.disable && formula) || isFocus ? (
-            <InputLeftElement h={'6'} p={'0'}>
-              =
-            </InputLeftElement>
-          ) : null}
           <Input
             ref={inputRef}
             value={formula}
+            autoFocus
             border={'0'}
             onChange={handleChange}
             onPointerDown={(e) => e.stopPropagation()}
@@ -349,13 +323,7 @@ const FormulaDropDownBox = ({
             }}
             w={'full'}
             focusBorderColor={'black.100'}
-            placeholder={
-              isFocus
-                ? ''
-                : cell.columnType === SubHeaderColumnType.DIMENSION
-                ? 'Add Dimension'
-                : 'Define Column'
-            }
+            placeholder={''}
             _placeholder={{
               fontFamily: 'Inter',
               fontSize: 'xs-12',

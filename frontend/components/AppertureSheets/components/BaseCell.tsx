@@ -12,7 +12,14 @@ const BaseCell = ({ children, ...props }: BaseCellPropsWithChildren) => {
   const { currentCell, selectedColumns } = state;
 
   const columnId = column.columnId;
-  const isCellSelected = selectedColumns.includes(columnId);
+  const isCellSelected = selectedColumns.some(
+    (selectedColumn) => selectedColumn.columnId === columnId
+  );
+  const isLeftmostCellSelected =
+    isCellSelected &&
+    !selectedColumns.some(
+      (selectedColumn) => selectedColumn.columnIndex === columnIndex - 1
+    );
 
   const currentActiveCell =
     currentCell.row === rowIndex && currentCell.column === columnIndex;
@@ -31,7 +38,6 @@ const BaseCell = ({ children, ...props }: BaseCellPropsWithChildren) => {
     if (selectedColumns.length)
       dispatch({ type: Actions.SET_SELECTED_COLUMNS, payload: [] });
   };
-
   return (
     <Flex
       className="base-cell"
@@ -39,7 +45,7 @@ const BaseCell = ({ children, ...props }: BaseCellPropsWithChildren) => {
       w={60}
       height={6}
       borderRightWidth={isCellSelected ? '1px' : '0.4px'}
-      borderLeftWidth={isCellSelected ? '1px' : '0'}
+      borderLeftWidth={isCellSelected && isLeftmostCellSelected ? '1px' : '0'}
       backgroundColor={isCellSelected ? 'rgba(53,121,248,.35)' : 'transparent'}
       borderBottomWidth={'0.4px'}
       borderColor={

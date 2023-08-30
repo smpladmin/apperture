@@ -38,18 +38,3 @@ const AppertureSheet = ({
 };
 
 export default AppertureSheet;
-
-//TextCell, {type:'', value:''}
-
-// input header,
-// type: 'inputHeader';
-//   text: string;
-//   disable?: boolean;
-//   showAddButton?: boolean;
-//   addHeader?: boolean;
-//   columnType?: SubHeaderColumnType;
-//   properties: string[];
-//   showSuggestions?: boolean;
-//   disableAddButton?: boolean;
-
-// {rowId: '', cells: [{type:'text', value: ''}]}
