@@ -146,6 +146,23 @@ const SidePanel = ({
   );
 };
 
+type SheetConnectionsProps = {
+  showColumns: boolean;
+  sheetsData: TransientSheetData;
+  connectorData: ConnectionSource & {
+    heirarchy: string[];
+  };
+  selectedSheetIndex: number;
+  setShowColumns: Function;
+  setSheetsData: Function;
+  evaluateFormulaHeader: Function;
+  addDimensionColumn: Function;
+  loadingConnections: boolean;
+  connections: Connection[];
+  setConnectorData: Function;
+  setShowSqlEditor: Function;
+};
+
 const SheetConnections = ({
   showColumns,
   sheetsData,
