@@ -56,8 +56,6 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import AIButton from '@components/AIButton';
 import Coachmarks from './components/Coachmarks';
 import { AppertureUser } from '@lib/domain/user';
-import { ArrowsInLineVertical } from 'phosphor-react';
-import PivotGrid from './components/Grid/PivotGrid';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
