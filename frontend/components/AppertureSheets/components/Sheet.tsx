@@ -37,7 +37,11 @@ const Sheet = ({
 }: {
   columns: Column[];
   rows: Row<TextCell | InputHeaderCell>[];
-  onColumnResized: (columnId: string, newWidth: number) => void;
+  onColumnResized: (
+    columnId: string,
+    columnIndex: number,
+    newWidth: number
+  ) => void;
   onCellsChanged: (
     changedCell: CellChange<TextCell | InputHeaderCell>[]
   ) => void;
@@ -66,9 +70,12 @@ const Sheet = ({
   const headerGrid = React.useRef<VariableSizeGrid>(null);
   const sheetRef = React.useRef<VariableSizeGrid>(null);
 
-  const handleResize = throttle((columnId: string, width: number) => {
-    onColumnResized(columnId, width);
-  }, 15);
+  const handleResize = throttle(
+    (columnId: string, columnIndex: number, width: number) => {
+      onColumnResized(columnId, columnIndex, width);
+    },
+    15
+  );
 
   const handleCellChange = (event: any) => {
     const sanitizeConf = {

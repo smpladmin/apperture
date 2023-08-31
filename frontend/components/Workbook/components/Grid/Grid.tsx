@@ -176,9 +176,12 @@ const Grid = ({
     );
   }, [sheet, selectedSheetIndex]);
 
-  const handleColumnResize = (ci: string, width: number) => {
+  const handleColumnResize = (
+    columnId: string,
+    columnIndex: number,
+    width: number
+  ) => {
     setColumns((prevColumns) => {
-      const columnIndex = prevColumns.findIndex((el) => el.columnId === ci);
       const resizedColumn = prevColumns[columnIndex];
       const updatedColumn = { ...resizedColumn, width };
       prevColumns[columnIndex] = updatedColumn;

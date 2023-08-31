@@ -4,12 +4,14 @@ import { Column } from '../types/gridTypes';
 
 const ColumnResizer = ({
   column,
+  columnIndex,
   handleResize,
   maxWidth = 800,
   minWidth = 40,
 }: {
   column: Column;
-  handleResize: (columnId: string, width: number) => void;
+  columnIndex: number;
+  handleResize: (columnId: string, columnIndex: number, width: number) => void;
   maxWidth?: number;
   minWidth?: number;
 }) => {
@@ -40,7 +42,7 @@ const ColumnResizer = ({
       Math.max(minWidth, initialWidth.current + offset)
     );
 
-    handleResize(columnId, newWidth);
+    handleResize(columnId, columnIndex, newWidth);
   };
 
   const handleMouseUp = (e: MouseEvent) => {

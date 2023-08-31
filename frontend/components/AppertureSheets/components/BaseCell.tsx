@@ -13,7 +13,9 @@ const BaseCell = ({ children, ...props }: BaseCellPropsWithChildren) => {
 
   const columnId = column.columnId;
   const isCellSelected = selectedColumns.some(
-    (selectedColumn) => selectedColumn.columnId === columnId
+    (selectedColumn) =>
+      selectedColumn.columnId === columnId &&
+      selectedColumn.columnIndex === columnIndex
   );
   const isLeftmostCellSelected =
     isCellSelected &&

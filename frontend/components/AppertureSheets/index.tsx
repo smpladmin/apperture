@@ -18,7 +18,11 @@ const AppertureSheet = ({
 }: {
   columns: Column[];
   rows: Row<TextCell | InputHeaderCell>[];
-  onColumnResized: (columnId: string, newWidth: number) => void;
+  onColumnResized: (
+    columnId: string,
+    columnIndex: number,
+    newWidth: number
+  ) => void;
   onCellsChanged: (
     changedCell: CellChange<TextCell | InputHeaderCell>[]
   ) => void;

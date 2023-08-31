@@ -15,12 +15,18 @@ export const HeaderCell = ({
   columnIndex: number;
   rowIndex: number;
   style: React.CSSProperties;
-  handleResize: (columnId: string, newWidth: number) => void;
+  handleResize: (
+    columnId: string,
+    columnIndex: number,
+    newWidth: number
+  ) => void;
 }) => {
   const { state, dispatch } = useContext(GridContext);
   const { isCommandPressed, selectedColumns } = state;
   const isHeaderSelected = selectedColumns.some(
-    (selectedColumn) => selectedColumn.columnId === column.columnId
+    (selectedColumn) =>
+      selectedColumn.columnId === column.columnId &&
+      selectedColumn.columnIndex === columnIndex
   );
 
   const handleColumnSelection = (
@@ -68,7 +74,11 @@ export const HeaderCell = ({
     >
       {String.fromCharCode(65 + columnIndex)}
       {column?.resizable && (
-        <ColumnResizer column={column} handleResize={handleResize} />
+        <ColumnResizer
+          column={column}
+          columnIndex={columnIndex}
+          handleResize={handleResize}
+        />
       )}
     </Flex>
   );
