@@ -31,6 +31,7 @@ import {
   getRows,
 } from '@components/Workbook/util';
 import { cloneDeep } from 'lodash';
+import { DraggableWrapper } from '../DraggableWrapper';
 
 const getColumns = (headers: SpreadSheetColumn[]): Column[] => {
   return headers.map((header, index) => {
@@ -170,20 +171,23 @@ const Grid = ({
   };
 
   return (
-    <ReactGrid
-      rows={rows}
-      columns={columns}
-      onColumnResized={handleColumnResize}
-      onCellsChanged={handleDataChange}
-      enableFillHandle
-      enableRangeSelection
-      enableColumnSelection
-      customCellTemplates={{
-        dropdownHeader: new DropdownHeaderTemplate(),
-        inputHeader: new InputHeaderTemplate(),
-      }}
-      onContextMenu={handleContextMenu}
-    />
+    <div style={{ position: 'relative' }}>
+      <ReactGrid
+        rows={rows}
+        columns={columns}
+        onColumnResized={handleColumnResize}
+        onCellsChanged={handleDataChange}
+        enableFillHandle
+        enableRangeSelection
+        enableColumnSelection
+        customCellTemplates={{
+          dropdownHeader: new DropdownHeaderTemplate(),
+          inputHeader: new InputHeaderTemplate(),
+        }}
+        onContextMenu={handleContextMenu}
+      />
+      <DraggableWrapper />
+    </div>
   );
 };
 

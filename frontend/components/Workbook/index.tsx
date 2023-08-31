@@ -58,6 +58,7 @@ import Coachmarks from './components/Coachmarks';
 import { AppertureUser } from '@lib/domain/user';
 import { ArrowsInLineVertical } from 'phosphor-react';
 import PivotGrid from './components/Grid/PivotGrid';
+import { DraggableWrapper } from './components/DraggableWrapper';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
