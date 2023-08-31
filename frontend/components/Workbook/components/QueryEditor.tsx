@@ -147,8 +147,6 @@ const QueryEditor = ({
             setQuery(value);
           }}
           readOnly={!sheetData.edit_mode}
-          
-          
         />
         {error ? (
           <Text
@@ -182,7 +180,7 @@ const QueryEditor = ({
             }}
           >
             <Flex gap={'1'}>
-             <X size={16} weight="fill" />
+              <X size={16} weight="fill" />
               Close
             </Flex>
           </Button>
@@ -212,7 +210,7 @@ const QueryEditor = ({
       <ConfirmationModal
         isOpen={isOpen}
         onClose={onClose}
-        headerText="Do you want to chnage the SQL query?"
+        headerText="Do you want to change the SQL query?"
         subHeaderText="Note- you will no longer be able to select columns manually."
         onSubmit={handleEditSelection}
       />

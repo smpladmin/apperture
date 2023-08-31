@@ -28,6 +28,7 @@ import {
   fillRows,
   increaseDecimalPlacesInColumnValues,
   decreaseDecimalPlacesInColumnValues,
+  getRows,
 } from '@components/Workbook/util';
 import { cloneDeep } from 'lodash';
 import AppertureSheet from '@components/AppertureSheets';

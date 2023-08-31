@@ -19,7 +19,7 @@ type SearchableCheckboxDropdownProps = {
   onAllSelect: Function;
   isSelectAllChecked: boolean;
   selectedValues: string[];
-  dropdownPosition?: string;
+  dropdownPosition?: 'left' | 'right';
   listKey?: keyof SegmentProperty;
   width?: string;
   placeholderText?: string;

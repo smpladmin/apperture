@@ -13,9 +13,10 @@ type SearchableDropdownProps = {
   children: ReactNode;
   data: Array<string | SegmentProperty | Node | SegmentWithUser>;
   setSearchData?: Function;
-  dropdownPosition?: string;
+  dropdownPosition?: 'right' | 'left';
   searchKey?: string;
   placeholderText?: string;
+  top?: string;
   width?: string;
 };
 
@@ -29,6 +30,7 @@ const SearchableDropdown = ({
   searchKey,
   placeholderText = 'Search event or properties...',
   width,
+  top,
 }: SearchableDropdownProps) => {
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
@@ -48,7 +50,12 @@ const SearchableDropdown = ({
   }, [isOpen]);
 
   return (
-    <Dropdown isOpen={isOpen} dropdownPosition={dropdownPosition} width={width}>
+    <Dropdown
+      isOpen={isOpen}
+      dropdownPosition={dropdownPosition}
+      width={width}
+      top={top}
+    >
       {isLoading ? (
         <Flex
           w={width || '76'}

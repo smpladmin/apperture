@@ -24,7 +24,9 @@ import { FixedSizeList as List } from 'react-window';
 import {
   dimensionSubheadersLength,
   findIndexOfFirstEmptySubheader,
+  generateQuery,
   hasMetricColumnInPivotSheet,
+  parseHeaders,
 } from '../util';
 import cloneDeep from 'lodash/cloneDeep';
 import { GREY_600 } from '@theme/index';
@@ -37,24 +39,6 @@ type ConnectorColumnsProps = {
   setSheetsData: Function;
   evaluateFormulaHeader: Function;
   addDimensionColumn: Function;
-};
-
-const generateQuery = (
-  columns: string[],
-  tableName: string,
-  databaseName: string,
-  datasourceId: string
-) => {
-  if (!columns.length) return '';
-  const columnsQuerySubstring = columns
-    .map((column) => (column.includes(' ') ? '"' + column + '"' : column))
-    .join(', ');
-  return `Select ${columnsQuerySubstring} from ${databaseName}.${tableName} ${
-    databaseName == 'default' &&
-    (tableName == 'events' || tableName == 'clickstream')
-      ? `where datasource_id = '${datasourceId}'`
-      : ''
-  }`;
 };
 
 const initializeSelectedColumns = (datasource_id: string, meta: any) => {
@@ -91,10 +75,21 @@ const ConnectorColumns = ({
   };
 
   useEffect(() => {
+    setSelectedColumns(
+      sheetsData[selectedSheetIndex]?.meta?.selectedColumns || []
+    );
+  }, [sheetsData[selectedSheetIndex]?.meta?.selectedColumns]);
+
+  useEffect(() => {
     if (sheetData?.edit_mode) return;
 
-    const query = generateQuery(
+    const parsedColumns = parseHeaders(
       selectedColumns,
+      sheetsData[selectedSheetIndex].headers
+    );
+
+    const query = generateQuery(
+      parsedColumns,
       table_name,
       database_name,
       datasource_id

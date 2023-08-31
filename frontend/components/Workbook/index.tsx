@@ -43,10 +43,12 @@ import {
   evaluateExpression,
   expressionTokenRegex,
   findConnectionById,
+  generateQuery,
   getSubheaders,
   isOperand,
   isSheetPivotOrBlank,
   isdigit,
+  parseHeaders,
 } from './util';
 import { DimensionParser, Metricparser } from '@lib/utils/parser';
 import { Connection } from '@lib/domain/connections';
@@ -54,8 +56,6 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import AIButton from '@components/AIButton';
 import Coachmarks from './components/Coachmarks';
 import { AppertureUser } from '@lib/domain/user';
-import { ArrowsInLineVertical } from 'phosphor-react';
-import AppertureSheet from '@components/AppertureSheets';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -625,22 +625,27 @@ const Workbook = ({
             });
           }
       } else {
-        const newHeader = {
-          name: headerText.replace(/\s/g, '').toUpperCase(),
-          type: ColumnType.COMPUTED_HEADER,
-        };
-        const operands = getOperands(newHeader.name);
-        const operandsIndex = getOperatorsIndex(operands);
+        const { headers } = sheetsData[selectedSheetIndex];
+        const columns = [
+          ...headers.map((header) => header.name),
+          headerText.slice(1).toUpperCase(),
+        ];
+        const parsedExpressions = parseHeaders(columns, headers);
 
-        const parsedExpression: any[] = parseExpression(newHeader.name);
-        const lookupTable = generateLookupTable(operands, operandsIndex);
-
-        const evaluatedData = evaluateExpression(
-          parsedExpression as string[],
-          lookupTable
+        const query = generateQuery(
+          parsedExpressions,
+          sheetsData[selectedSheetIndex].meta?.selectedTable || 'events',
+          sheetsData[selectedSheetIndex].meta?.selectedDatabase || 'default',
+          sheetsData[selectedSheetIndex].meta?.dsId || ''
         );
+        setSheetsData((prevSheetData: TransientSheetData[]) => {
+          const tempSheetsData = cloneDeep(prevSheetData);
+          tempSheetsData[selectedSheetIndex].query = query;
+          // TODO: should check the double bang !!
+          tempSheetsData[selectedSheetIndex].meta!!.selectedColumns = columns;
 
-        updateSelectedSheetDataAndHeaders(evaluatedData, newHeader, columnId);
+          return tempSheetsData;
+        });
       }
     },
     [sheetsData, selectedSheetIndex]
@@ -742,6 +747,40 @@ const Workbook = ({
     return connectionSource?.fields || [];
   }, [connections, selectedSheetIndex, sheetsData]);
 
+  const addNewPivotSheet = () => {
+    const referenceSheet = sheetsData[selectedSheetIndex];
+
+    const sheetsLength = sheetsData.length;
+    const count = sheetsData.filter(
+      (sheet) => sheet.sheet_type === SheetType.PIVOT_TABLE
+    ).length;
+    const newSheet = {
+      name: `Pivot Sheet ${count + 1}`,
+      query: '',
+      data: [],
+      headers: [],
+      subHeaders: getSubheaders(SheetType.SIMPLE_SHEET),
+      is_sql: true,
+      sheet_type: SheetType.PIVOT_TABLE,
+      edit_mode: false,
+      meta: {
+        ...referenceSheet?.meta,
+        referenceSheetQuery: referenceSheet.query,
+        selectedPivotOptions: referenceSheet?.meta?.selectedColumns || [],
+        selectedPivotColumns: [],
+        selectedPivotRows: [],
+        selectedPivotValues: [],
+        selectedPivotFilters: [],
+        referenceSheetIndex: selectedSheetIndex,
+      },
+    };
+    setSheetsData((prevSheetData: TransientSheetData[]) => [
+      ...prevSheetData,
+      newSheet as TransientSheetData,
+    ]);
+    setSelectedSheetIndex(sheetsLength);
+  };
+
   return (
     <>
       <Flex direction={'column'}>
@@ -751,21 +790,15 @@ const Workbook = ({
           isSaveButtonDisabled={isSaveButtonDisabled}
           handleSave={handleSaveOrUpdateWorkbook}
           setShowSqlEditor={setShowSqlEditor}
+          addNewPivotSheet={addNewPivotSheet}
+          sheetsData={sheetsData}
+          selectedSheetIndex={selectedSheetIndex}
         />
         <Flex
           direction={'row'}
           h={'full'}
           overflow={showEmptyState ? 'hidden' : 'auto'}
         >
-          {/* {showSelectSheetOverlay ? (
-          <SelectSheet
-            closeSelectSheetOverlay={closeSelectSheetOverlay}
-            sheetsData={sheetsData}
-            setSheetsData={setSheetsData}
-            selectedSheetIndex={selectedSheetIndex}
-            setSelectedSheetIndex={setSelectedSheetIndex}
-          />
-        ) : null} */}
           <SidePanel
             loadingConnections={loadingConnections}
             showColumns={showColumns}
@@ -791,7 +824,9 @@ const Workbook = ({
                 />
               </Box>
             ) : null}
-            {showEmptyState ? (
+            {showEmptyState &&
+            sheetsData[selectedSheetIndex].sheet_type !==
+              SheetType.PIVOT_TABLE ? (
               <EmptySheet
                 tableSelected={
                   !!sheetsData[selectedSheetIndex]?.meta?.selectedTable
@@ -808,6 +843,26 @@ const Workbook = ({
                   >
                     <LoadingSpinner />
                   </Flex>
+                ) : sheetsData[selectedSheetIndex].sheet_type ===
+                  SheetType.SIMPLE_SHEET ? (
+                  <Grid
+                    sheetsData={sheetsData}
+                    selectedSheetIndex={selectedSheetIndex}
+                    evaluateFormulaHeader={evaluateFormulaHeader}
+                    addDimensionColumn={addDimensionColumn}
+                    properties={getProperties}
+                    setSheetsData={setSheetsData}
+                  />
+                ) : sheetsData[selectedSheetIndex].sheet_type ===
+                  SheetType.PIVOT_SHEET ? (
+                  <Grid
+                    sheetsData={sheetsData}
+                    selectedSheetIndex={selectedSheetIndex}
+                    evaluateFormulaHeader={evaluateFormulaHeader}
+                    addDimensionColumn={addDimensionColumn}
+                    properties={getProperties}
+                    setSheetsData={setSheetsData}
+                  />
                 ) : (
                   <Grid
                     sheetsData={sheetsData}
