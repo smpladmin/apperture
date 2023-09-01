@@ -5,7 +5,7 @@ import { BaseCellProps, CellChange, TextCell } from '../types/gridTypes';
 
 type TextCellProps = BaseCellProps & {
   onCellsChanged: (changedCell: CellChange<TextCell>[]) => void;
-  cell: any;
+  cell: TextCell;
 };
 
 const TextCell = ({ cell, ...props }: TextCellProps) => {

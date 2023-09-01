@@ -51,17 +51,17 @@ const Toolbar = ({
         w={'6'}
         h={'6'}
         borderRadius={'4'}
-        _hover={{ backgroundColor: 'white.200', cursor: 'pointer' }}
+        _hover={{ backgroundColor: 'white.200', cursor: 'no-drop' }}
         justifyContent={'center'}
         alignItems={'center'}
       >
-        <Percent cursor={'pointer'} />
+        <Percent />
       </Flex>
       <Box
         w={'6'}
         h={'6'}
         borderRadius={'4'}
-        _hover={{ backgroundColor: 'white.200', cursor: 'pointer' }}
+        _hover={{ backgroundColor: 'white.200', cursor: 'no-drop' }}
       >
         <Image src={Zero} alt={'Zero'} />
       </Box>
@@ -70,7 +70,7 @@ const Toolbar = ({
         h={'6'}
         pr={'1'}
         borderRadius={'4'}
-        _hover={{ backgroundColor: 'white.200', cursor: 'pointer' }}
+        _hover={{ backgroundColor: 'white.200', cursor: 'no-drop' }}
       >
         <Image src={DoubleZero} alt={'Double Zero'} />
       </Box>

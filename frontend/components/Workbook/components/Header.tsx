@@ -123,35 +123,6 @@ const WorkbookHeader = ({
           </Button>
         </Flex>
       </Flex>
-      {/* <Flex
-        background={'white.500'}
-        height={9}
-        borderRadius={'13px'}
-        alignItems={'center'}
-        px={1}
-        py={3}
-      >
-        <PlusCircle style={{ margin: '6px', ...disabledIconStyle }} />
-        <ChartPie
-          style={{
-            margin: '6px',
-            ...disabledIconStyle,
-          }}
-        />
-
-        <PivotIcon
-          addNewPivotSheet={addNewPivotSheet}
-          range={sheet?.name || ''}
-          enabled={
-            sheetsData[selectedSheetIndex].sheet_type !== SheetType.PIVOT_TABLE
-          }
-        />
-        <Percent style={{ margin: '6px', ...disabledIconStyle }} />
-        <Sigma style={{ margin: '6px', ...disabledIconStyle }} />
-        <Image src={Zero} alt={'Zero'} style={disabledIconStyle} />
-        <Image src={DoubleZero} alt={'Double Zero'} style={disabledIconStyle} />
-      </Flex> */}
-      {/* <Box bg={'white.DEFAULT'} h={'8'}></Box> */}
     </Box>
   );
 };
