@@ -8,7 +8,6 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import { Compatible } from '@silevis/reactgrid';
 import { BLUE_MAIN, GREY_600, WHITE_DEFAULT } from '@theme/index';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Function, Plus, SquaresFour } from 'phosphor-react';
@@ -25,7 +24,6 @@ import { useRouter } from 'next/router';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import CheckboxDropdown from './CheckboxDropdown';
-import { InputHeaderCell } from '.';
 
 enum ActiveCellState {
   BLANK = 'BLANK',
@@ -47,7 +45,7 @@ const FormulaDropDownBox = ({
   cell,
   onCellChanged,
 }: {
-  cell: Compatible<InputHeaderCell>;
+  cell: any;
   onCellChanged: Function;
 }) => {
   const [formula, setFormula] = useState(cell.text);
@@ -85,7 +83,7 @@ const FormulaDropDownBox = ({
   }, [cell.text]);
 
   const handleSubmitFormula = () => {
-    if (formula && formula[0] === '=') {
+    if (formula) {
       if (
         !formula.match(/^unique/) &&
         cell.columnType === SubHeaderColumnType.DIMENSION
@@ -98,9 +96,9 @@ const FormulaDropDownBox = ({
         });
         return;
       }
-      onCellChanged({ text: formula });
-      inputRef?.current?.blur();
     }
+    onCellChanged({ text: formula });
+    inputRef?.current?.blur();
   };
 
   const handleAddHeader = () => {
@@ -302,16 +300,15 @@ const FormulaDropDownBox = ({
   return (
     <Flex width={'full'}>
       <Box position={'relative'} width={'full'} ref={dropdownRef}>
-        <InputGroup>
-          {/* {formula || isFocus ? (
-            <InputLeftElement h={'6'}>=</InputLeftElement>
-          ) : null} */}
+        <InputGroup p={'0'}>
           <Input
             ref={inputRef}
             value={formula}
+            autoFocus
             border={'0'}
             onChange={handleChange}
             onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
               e.stopPropagation();
               e.code === 'Enter' && handleSubmitFormula();
@@ -326,25 +323,23 @@ const FormulaDropDownBox = ({
             }}
             w={'full'}
             focusBorderColor={'black.100'}
-            placeholder={
-              isFocus
-                ? ''
-                : cell.columnType === SubHeaderColumnType.DIMENSION
-                ? 'Add Dimension'
-                : 'Define Column'
-            }
+            placeholder={''}
             _placeholder={{
               fontFamily: 'Inter',
               fontSize: 'xs-12',
               lineHeight: 'xs-12',
               fontWeight: 400,
             }}
+            _disabled={{
+              fontWeight: 600,
+            }}
             width={'full'}
             height={'6'}
+            px={1}
             borderRadius={'0'}
             fontSize={'xs-12'}
             lineHeight={'xs-12'}
-            fontWeight={'400'}
+            fontWeight={'600'}
             data-testid={'formula-input'}
             disabled={!!cell.disable}
           />

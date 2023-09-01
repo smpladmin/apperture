@@ -6,55 +6,51 @@ import {
   Flex,
   Text,
 } from '@chakra-ui/react';
-import { SegmentProperty } from '@lib/domain/segment';
-import React, { useEffect, useState } from 'react';
-import SearchableDropdown from './SearchableDropdown';
+import { ChangeEvent, useEffect, useState } from 'react';
 
-type SearchableCheckboxDropdownProps = {
-  isOpen: boolean;
-  isLoading: boolean;
-  data: Array<string | SegmentProperty>;
-  onSubmit: Function;
-  onSelect: Function;
-  onAllSelect: Function;
-  isSelectAllChecked: boolean;
-  selectedValues: string[];
-  dropdownPosition?: 'left' | 'right';
-  listKey?: keyof SegmentProperty;
-  width?: string;
-  placeholderText?: string;
-};
-
-const SearchableCheckboxDropdown = ({
-  isOpen,
-  isLoading,
+const CheckboxDropdown = ({
   data,
   onSubmit,
-  onSelect,
-  onAllSelect,
-  isSelectAllChecked,
-  selectedValues,
-  dropdownPosition,
-  listKey,
-  width,
-  placeholderText,
-}: SearchableCheckboxDropdownProps) => {
-  const [listData, setListData] = useState<Array<string | SegmentProperty>>([]);
+  values,
+}: {
+  data: string[];
+  onSubmit: Function;
+  values: string[];
+}) => {
+  const [selectedValues, setSelectedValues] = useState(values);
+  const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
 
   useEffect(() => {
-    if (!listData.length) setListData(data);
-  }, [data]);
+    if (selectedValues.length === data.length) {
+      setIsSelectAllChecked(true);
+    } else {
+      setIsSelectAllChecked(false);
+    }
+  }, [selectedValues]);
 
+  const handleAllSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    if (checked) {
+      setIsSelectAllChecked(true);
+      setSelectedValues(data);
+    } else {
+      setIsSelectAllChecked(false);
+      setSelectedValues([]);
+    }
+  };
   return (
-    <SearchableDropdown
-      isOpen={isOpen}
-      isLoading={isLoading}
-      data={data}
-      setSearchData={setListData}
-      dropdownPosition={dropdownPosition}
-      searchKey={listKey}
-      width={width}
-      placeholderText={placeholderText}
+    <Box
+      w={'96'}
+      position={'absolute'}
+      zIndex={1}
+      bg={'white.DEFAULT'}
+      p={'2'}
+      borderRadius={'12'}
+      borderWidth={'1px'}
+      borderColor={'white.200'}
+      onPointerDown={(e) => e.stopPropagation()}
+      maxHeight={'102'}
+      overflow={'scroll'}
     >
       <Flex
         direction={'column'}
@@ -68,7 +64,7 @@ const SearchableCheckboxDropdown = ({
             py={'3'}
             w={'full'}
             isChecked={isSelectAllChecked}
-            onChange={(e) => onAllSelect(e)}
+            onChange={handleAllSelect}
             _hover={{
               bg: 'white.100',
             }}
@@ -80,6 +76,7 @@ const SearchableCheckboxDropdown = ({
               fontWeight={'500'}
               cursor={'pointer'}
               color={'black.500'}
+              onPointerDown={(e) => e.stopPropagation()}
             >
               {'Select all'}
             </Text>
@@ -87,29 +84,25 @@ const SearchableCheckboxDropdown = ({
           <CheckboxGroup
             value={selectedValues}
             onChange={(values: string[]) => {
-              onSelect(values);
+              setSelectedValues(values);
             }}
           >
-            {listData?.slice(0, 100).map((value) => {
-              const segmentPropertyItem =
-                listKey && (value as SegmentProperty)[listKey];
+            {data.slice(0, 100).map((value: string) => {
               return (
                 <Flex
                   as={'label'}
                   gap={'2'}
                   px={'2'}
                   py={'3'}
-                  key={listKey ? segmentPropertyItem : (value as string)}
+                  key={value}
                   _hover={{
                     bg: 'white.100',
                   }}
                   data-testid={'property-value-dropdown-option'}
                   borderRadius={'4'}
+                  onPointerDown={(e) => e.stopPropagation()}
                 >
-                  <Checkbox
-                    colorScheme={'radioBlack'}
-                    value={listKey ? segmentPropertyItem : (value as string)}
-                  >
+                  <Checkbox colorScheme={'radioBlack'} value={value}>
                     <Text
                       fontSize={'xs-14'}
                       lineHeight={'xs-14'}
@@ -118,7 +111,7 @@ const SearchableCheckboxDropdown = ({
                       color={'black.500'}
                       wordBreak={'break-word'}
                     >
-                      {listKey ? segmentPropertyItem : (value as string)}
+                      {value}
                     </Text>
                   </Checkbox>
                 </Flex>
@@ -131,14 +124,15 @@ const SearchableCheckboxDropdown = ({
           bg={'black.100'}
           color={'white.DEFAULT'}
           variant={'primary'}
-          onClick={() => onSubmit()}
+          onClick={() => onSubmit(selectedValues)}
           data-testid={'add-event-property-values'}
+          onPointerDown={(e) => e.stopPropagation()}
         >
           Add
         </Button>
       </Flex>
-    </SearchableDropdown>
+    </Box>
   );
 };
 
-export default SearchableCheckboxDropdown;
+export default CheckboxDropdown;

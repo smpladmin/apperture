@@ -10,13 +10,22 @@ export type TransientSheetData = {
   sheet_type?: SheetType;
   edit_mode?: boolean;
   aiQuery?: AIQuery;
-  meta?: {
-    dsId: string;
-    selectedColumns: string[];
-    selectedTable: string;
-    selectedDatabase: string;
-    selectedSourceId: string;
-  };
+  meta?: SheetMeta;
+};
+
+export type SheetMeta = {
+  dsId: string;
+  selectedColumns: string[];
+  selectedTable: string;
+  selectedDatabase: string;
+  selectedSourceId: string;
+  referenceSheetQuery?: string;
+  selectedPivotColumns?: PivotAxisDetail[];
+  selectedPivotRows?: PivotAxisDetail[];
+  selectedPivotOptions?: string[];
+  selectedPivotFilters?: string[];
+  selectedPivotValues?: PivotValueDetail[];
+  referenceSheetIndex?: number;
 };
 
 export type AIQuery = {
@@ -53,6 +62,7 @@ export type SubHeaderColumn = {
 export enum SheetType {
   SIMPLE_SHEET = 'SIMPLE_SHEET',
   PIVOT_SHEET = 'PIVOT_SHEET',
+  PIVOT_TABLE = 'PIVOT_TABLE',
 }
 
 export type Spreadsheet = {
@@ -82,4 +92,25 @@ export type WorkbookWithUser = Workbook & { user: User };
 export type TransientColumnRequestState = {
   isLoading: boolean;
   subheaders: { name: string; type: SubHeaderColumnType }[];
+};
+
+export enum SortingOrder {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
+export type PivotAxisDetail = {
+  name: string;
+  sort_by: string;
+  order_by: SortingOrder;
+  show_total: boolean;
+};
+
+export enum AggregateFunction {
+  SUM = 'SUM',
+}
+
+export type PivotValueDetail = {
+  name: string;
+  function: AggregateFunction;
 };

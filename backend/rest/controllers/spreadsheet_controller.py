@@ -11,8 +11,10 @@ from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
+    ComputePivotDto,
     CreateWorkBookDto,
     SavedWorkBookResponse,
+    TransientExpressionDto,
     TransientSpreadsheetColumnDto,
     TransientSpreadsheetsDto,
     WorkBookResponse,
@@ -96,6 +98,32 @@ async def compute_transient_spreadsheets(
 
 
 @router.post(
+    "/workbooks/spreadsheets/expression/transient",
+)
+async def compute_transient_expression(
+    dto: TransientExpressionDto,
+    spreadsheets_service: SpreadsheetService = Depends(),
+    compute_query_action: ComputeQueryAction = Depends(),
+):
+    try:
+        clickhouse_credential = await compute_query_action.get_credentials(
+            datasource_id=dto.datasourceId
+        )
+        return spreadsheets_service.compute_transient_expression(
+            username=clickhouse_credential.username,
+            password=clickhouse_credential.password,
+            expressions=[dto.expression],
+            variables=dto.variables,
+            table=dto.table,
+            database=dto.database,
+        )
+    except BusinessError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
+    except DatabaseError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
+
+
+@router.post(
     "/workbooks/spreadsheets/columns/transient",
     response_model=ComputedSpreadsheetQueryResponse,
     dependencies=[Depends(validate_app_user)],
@@ -170,3 +198,27 @@ async def delete_segments(
     spreadsheets_service: SpreadsheetService = Depends(),
 ):
     await spreadsheets_service.delete_workbook(workbook_id=workbook_id)
+
+
+@router.post(
+    "/workbooks/spreadsheets/pivot/transient", dependencies=[Depends(validate_app_user)]
+)
+async def compute_transientpivot(
+    dto: ComputePivotDto,
+    spreadsheets_service: SpreadsheetService = Depends(),
+    compute_query_action: ComputeQueryAction = Depends(),
+):
+    clickhouse_credential = await compute_query_action.get_credentials(
+        datasource_id=dto.dsId
+    )
+    try:
+        return spreadsheets_service.compute_pivot(
+            query=dto.query,
+            rows=dto.rows,
+            columns=dto.columns,
+            values=dto.values,
+            username=clickhouse_credential.username,
+            password=clickhouse_credential.password,
+        )
+    except BusinessError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")

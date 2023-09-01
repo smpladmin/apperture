@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { ConnectionSource } from '@lib/domain/connections';
 import {
+  ColumnType,
   SheetType,
   SubHeaderColumnType,
   TransientSheetData,
@@ -24,7 +25,9 @@ import { FixedSizeList as List } from 'react-window';
 import {
   dimensionSubheadersLength,
   findIndexOfFirstEmptySubheader,
+  generateQuery,
   hasMetricColumnInPivotSheet,
+  parseHeaders,
 } from '../util';
 import cloneDeep from 'lodash/cloneDeep';
 import { GREY_600 } from '@theme/index';
@@ -37,24 +40,6 @@ type ConnectorColumnsProps = {
   setSheetsData: Function;
   evaluateFormulaHeader: Function;
   addDimensionColumn: Function;
-};
-
-const generateQuery = (
-  columns: string[],
-  tableName: string,
-  databaseName: string,
-  datasourceId: string
-) => {
-  if (!columns.length) return '';
-  const columnsQuerySubstring = columns
-    .map((column) => (column.includes(' ') ? '"' + column + '"' : column))
-    .join(', ');
-  return `Select ${columnsQuerySubstring} from ${databaseName}.${tableName} ${
-    databaseName == 'default' &&
-    (tableName == 'events' || tableName == 'clickstream')
-      ? `where datasource_id = '${datasourceId}'`
-      : ''
-  }`;
 };
 
 const initializeSelectedColumns = (datasource_id: string, meta: any) => {
@@ -74,7 +59,7 @@ const ConnectorColumns = ({
     connectorData;
   const sheetData = sheetsData[selectedSheetIndex];
   const [columns, setColumns] = useState<string[]>(fields);
-  const [selectedColumns, setSelectedColumns] = useState(
+  const [selectedColumns, setSelectedColumns] = useState<string[]>(
     initializeSelectedColumns(datasource_id, sheetData?.meta)
   );
   const [dimensionColumn, setDimensionColumn] = useState({
@@ -91,18 +76,38 @@ const ConnectorColumns = ({
   };
 
   useEffect(() => {
+    setSelectedColumns(
+      sheetsData[selectedSheetIndex]?.meta?.selectedColumns || []
+    );
+  }, [sheetsData[selectedSheetIndex]?.meta?.selectedColumns]);
+
+  useEffect(() => {
     if (sheetData?.edit_mode) return;
 
-    const query = generateQuery(
+    const parsedColumns = parseHeaders(
       selectedColumns,
+      sheetsData[selectedSheetIndex].headers
+    );
+
+    const query = generateQuery(
+      parsedColumns,
       table_name,
       database_name,
       datasource_id
     );
 
+    const newHeaders = selectedColumns.map((column) => ({
+      name: column,
+      type:
+        column && column !== "''"
+          ? ColumnType.QUERY_HEADER
+          : ColumnType.PADDING_HEADER,
+    }));
+
     setSheetsData((prevSheetData: TransientSheetData[]) => {
       const tempSheetsData = cloneDeep(prevSheetData);
       tempSheetsData[selectedSheetIndex].query = query;
+      tempSheetsData[selectedSheetIndex].headers = newHeaders;
       // TODO: should check the double bang !!
       tempSheetsData[selectedSheetIndex].meta!!.selectedColumns =
         selectedColumns;

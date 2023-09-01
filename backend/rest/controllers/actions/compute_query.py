@@ -1,5 +1,5 @@
 import logging
-from typing import Union
+from typing import List, Union
 
 from clickhouse_connect.driver.exceptions import DatabaseError
 from fastapi import Depends, HTTPException

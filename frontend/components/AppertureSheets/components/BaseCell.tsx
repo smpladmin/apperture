@@ -1,7 +1,7 @@
 import { Flex } from '@chakra-ui/react';
 import React, { MouseEvent, ReactElement, useContext } from 'react';
-import { Actions, GridContext } from './GridContext';
-import { BaseCellProps } from './gridTypes';
+import { Actions, GridContext } from '../context/GridContext';
+import { BaseCellProps } from '../types/gridTypes';
 
 type BaseCellPropsWithChildren = BaseCellProps & { children: ReactElement };
 
@@ -12,22 +12,34 @@ const BaseCell = ({ children, ...props }: BaseCellPropsWithChildren) => {
   const { currentCell, selectedColumns } = state;
 
   const columnId = column.columnId;
-  const isCellSelected = selectedColumns.includes(columnId);
+  const isCellSelected = selectedColumns.some(
+    (selectedColumn) =>
+      selectedColumn.columnId === columnId &&
+      selectedColumn.columnIndex === columnIndex
+  );
+  const isLeftmostCellSelected =
+    isCellSelected &&
+    !selectedColumns.some(
+      (selectedColumn) => selectedColumn.columnIndex === columnIndex - 1
+    );
 
   const currentActiveCell =
     currentCell.row === rowIndex && currentCell.column === columnIndex;
 
   const handleClick = (event: MouseEvent) => {
-    dispatch({
-      type: Actions.SET_CURRENT_CELL,
-      payload: {
-        column: columnIndex,
-        row: rowIndex,
-      },
-    });
-    dispatch({ type: Actions.SET_SELECTED_COLUMNS, payload: [] });
-  };
+    if (currentCell.column !== columnIndex || currentCell.row !== rowIndex) {
+      dispatch({
+        type: Actions.SET_CURRENT_CELL,
+        payload: {
+          column: columnIndex,
+          row: rowIndex,
+        },
+      });
+    }
 
+    if (selectedColumns.length)
+      dispatch({ type: Actions.SET_SELECTED_COLUMNS, payload: [] });
+  };
   return (
     <Flex
       className="base-cell"
@@ -35,7 +47,7 @@ const BaseCell = ({ children, ...props }: BaseCellPropsWithChildren) => {
       w={60}
       height={6}
       borderRightWidth={isCellSelected ? '1px' : '0.4px'}
-      borderLeftWidth={isCellSelected ? '1px' : '0'}
+      borderLeftWidth={isCellSelected && isLeftmostCellSelected ? '1px' : '0'}
       backgroundColor={isCellSelected ? 'rgba(53,121,248,.35)' : 'transparent'}
       borderBottomWidth={'0.4px'}
       borderColor={

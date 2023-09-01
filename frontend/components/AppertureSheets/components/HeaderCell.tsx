@@ -1,8 +1,8 @@
 import { Flex } from '@chakra-ui/react';
 import { useContext } from 'react';
 import ColumnResizer from './ColumnResizer';
-import { Actions, GridContext } from './GridContext';
-import { Column } from './gridTypes';
+import { Actions, GridContext } from '../context/GridContext';
+import { Column } from '../types/gridTypes';
 
 export const HeaderCell = ({
   column,
@@ -15,10 +15,19 @@ export const HeaderCell = ({
   columnIndex: number;
   rowIndex: number;
   style: React.CSSProperties;
-  handleResize: (columnId: string, newWidth: number) => void;
+  handleResize: (
+    columnId: string,
+    columnIndex: number,
+    newWidth: number
+  ) => void;
 }) => {
   const { state, dispatch } = useContext(GridContext);
   const { isCommandPressed, selectedColumns } = state;
+  const isHeaderSelected = selectedColumns.some(
+    (selectedColumn) =>
+      selectedColumn.columnId === column.columnId &&
+      selectedColumn.columnIndex === columnIndex
+  );
 
   const handleColumnSelection = (
     e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
@@ -27,19 +36,22 @@ export const HeaderCell = ({
     if (isCommandPressed) {
       let columns = [];
 
-      if (selectedColumns.includes(columnName)) {
-        columns = selectedColumns.filter((name) => name !== columnName);
+      if (selectedColumns.some((column) => column.columnId === columnName)) {
+        columns = selectedColumns.filter(
+          (column) => column.columnId !== columnName
+        );
       } else {
-        columns = [...selectedColumns, columnName];
+        columns = [...selectedColumns, { columnIndex, columnId: columnName }];
       }
 
       dispatch({ type: Actions.SET_SELECTED_COLUMNS, payload: columns });
     } else {
-      dispatch({ type: Actions.SET_SELECTED_COLUMNS, payload: [columnName] });
+      dispatch({
+        type: Actions.SET_SELECTED_COLUMNS,
+        payload: [{ columnIndex, columnId: columnName }],
+      });
     }
   };
-
-  const isHeaderSelected = selectedColumns.includes(column.columnId);
 
   return (
     <Flex
@@ -48,6 +60,7 @@ export const HeaderCell = ({
       bg={isHeaderSelected ? 'blue.500' : 'white.500'}
       alignItems={'center'}
       justifyContent={'center'}
+      borderTopWidth={'0.4px'}
       borderRightWidth={'0.4px'}
       borderBottomWidth={'0.4px'}
       borderColor={'grey.700'}
@@ -61,7 +74,11 @@ export const HeaderCell = ({
     >
       {String.fromCharCode(65 + columnIndex)}
       {column?.resizable && (
-        <ColumnResizer column={column} handleResize={handleResize} />
+        <ColumnResizer
+          column={column}
+          columnIndex={columnIndex}
+          handleResize={handleResize}
+        />
       )}
     </Flex>
   );
