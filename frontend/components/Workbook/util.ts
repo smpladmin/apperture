@@ -60,127 +60,6 @@ export const fillHeaders = (headers: SpreadSheetColumn[]) => {
   return updatedHeaders;
 };
 
-export const getHeaderRow = (
-  headers: SpreadSheetColumn[],
-  originalHeaders: SpreadSheetColumn[]
-): Row<DefaultCellTypes | DropdownHeaderCell> => {
-  return {
-    rowId: 'header',
-    cells: headers.map((header, index) => {
-      if (
-        originalHeaders.includes(header) &&
-        header.type !== ColumnType.PADDING_HEADER
-      ) {
-        return {
-          type: 'header',
-          text: `${String.fromCharCode(65 + index - 1)} ${header.name}`,
-        };
-      }
-      if (header.name === 'index') {
-        return {
-          type: 'header',
-          text: '',
-        };
-      }
-      return {
-        type: 'header',
-        text: header.name,
-      };
-    }),
-  };
-};
-export const getSubHeaderRow = (
-  headers: SpreadSheetColumn[],
-  subHeaders: SubHeaderColumn[],
-  sheetData: TransientSheetData,
-  properties: string[]
-): Row<DefaultCellTypes | InputHeaderCell> => {
-  return {
-    rowId: 'subHeader',
-    cells: headers.map((header, index) => {
-      const isPivotOrBlankSheet = isSheetPivotOrBlank(sheetData);
-      const dimensionSubHeaderCount = subHeaders.reduce(
-        (acc: number, header: SubHeaderColumn) => {
-          if (header.type === SubHeaderColumnType.DIMENSION) acc++;
-          return acc;
-        },
-        0
-      );
-      const disableAddButton = hasMetricColumnInPivotSheet(sheetData);
-      const showAddButton =
-        isPivotOrBlankSheet && index === dimensionSubHeaderCount;
-
-      if (header.name === 'index') {
-        return {
-          type: 'header',
-          text: '',
-          style: { background: WHITE_DEFAULT },
-        };
-      }
-      if (header.type === ColumnType.QUERY_HEADER) {
-        return {
-          type: 'inputHeader',
-          text: `${subHeaders[index]?.name}`,
-          disable: true,
-          showAddButton,
-          disableAddButton,
-          showSuggestions: isPivotOrBlankSheet,
-          properties,
-          style: {
-            overflow: 'initial',
-          },
-        };
-      }
-      return {
-        type: 'inputHeader',
-        text: `${subHeaders[index]?.name}`,
-        disable: false,
-        showAddButton,
-        disableAddButton,
-        showSuggestions: isPivotOrBlankSheet,
-        properties,
-        columnType: subHeaders[index]?.type,
-        style: {
-          overflow: 'initial',
-        },
-      };
-    }),
-  };
-};
-
-export const getGridRow = (value: any): DefaultCellTypes => {
-  const cellTypes: { [key: string]: DefaultCellTypes } = {
-    string: { type: 'text', text: value },
-    number: { type: 'number', value: value },
-    object: { type: 'text', text: JSON.stringify(value) },
-  };
-
-  return cellTypes[typeof value];
-};
-
-export const getRows = (
-  data: any[],
-  headers: SpreadSheetColumn[],
-  originalHeaders: SpreadSheetColumn[],
-  subHeaders: SubHeaderColumn[],
-  sheetData: TransientSheetData,
-  properties: string[]
-): Row<DefaultCellTypes | DropdownHeaderCell | InputHeaderCell>[] => [
-  getHeaderRow(headers, originalHeaders),
-  getSubHeaderRow(headers, subHeaders, sheetData, properties),
-  ...data.map<Row>((data, idx) => ({
-    rowId: idx,
-    cells: headers.map((header) => {
-      const val =
-        data[header.name]?.display === 0
-          ? '0'
-          : data[header.name]?.display || '';
-
-      return getGridRow(val);
-    }),
-  })),
-];
-
 export const isalpha = (c: string) => {
   if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
     return true;
@@ -508,9 +387,7 @@ export const generateQuery = (
   if (!columns.length) return '';
   const columnsQuerySubstring = columns
     .map((column) =>
-      column.includes(' ') && !column.includes('AS')
-        ? '"' + column + '"'
-        : column
+      column ? (!column.includes('AS') ? '"' + column + '"' : column) : `''`
     )
     .join(', ');
   return `Select ${columnsQuerySubstring} from ${databaseName}.${tableName} ${
@@ -591,9 +468,9 @@ export const constructPivotValueDetailByName = (
 export const parseHeaders = (columns: string[], headers: SpreadSheetColumn[]) =>
   columns.map((expression) => {
     const operatorRegex = /[+\-*\/^]/;
-    if (operatorRegex.test(expression)) {
+    if (expression.startsWith('=')) {
       const regex = /[A-Z]+|[^A-Z0-9]|[0-9]+/g;
-
+      expression = expression.slice(1);
       const splitExpression = expression.match(regex)?.map((elem) => {
         if (elem >= 'A' && elem <= 'Z') {
           const code = elem.charCodeAt(0) - 65;
@@ -601,8 +478,14 @@ export const parseHeaders = (columns: string[], headers: SpreadSheetColumn[]) =>
         }
         return elem;
       });
-      const finalExpression = `${splitExpression?.join('')} AS "${expression}"`;
+      const finalExpression = `${splitExpression?.join(
+        ''
+      )} AS "=${expression}"`;
+      console.log({ expression, splitExpression, finalExpression, headers });
       return finalExpression;
     }
     return expression;
   });
+
+export const padArray = (arr: any[], value: any = '') =>
+  Array.from(arr, (_, i) => (!(i in arr) ? value : arr[i]));

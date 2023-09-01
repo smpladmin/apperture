@@ -1,12 +1,7 @@
 import {
-  // CellChange,
   CellLocation,
-  // Column,
-  DefaultCellTypes,
   Id,
   MenuOption,
-  ReactGrid,
-  // Row,
   SelectionMode,
 } from '@silevis/reactgrid';
 import React, { useEffect, useState } from 'react';
@@ -17,9 +12,6 @@ import {
   SubHeaderColumnType,
   TransientSheetData,
 } from '@lib/domain/workbook';
-import { DropdownHeaderCell, DropdownHeaderTemplate } from './DropdownHeader';
-import { InputHeaderCell, InputHeaderTemplate } from './InputHeader';
-import { WHITE_DEFAULT } from '@theme/index';
 import {
   convertColumnValuesToPercentage,
   hasMetricColumnInPivotSheet,
@@ -28,13 +20,13 @@ import {
   fillRows,
   increaseDecimalPlacesInColumnValues,
   decreaseDecimalPlacesInColumnValues,
-  getRows,
 } from '@components/Workbook/util';
 import { cloneDeep } from 'lodash';
 import AppertureSheet from '@components/AppertureSheets';
 import {
   CellChange,
   Column,
+  InputHeaderCell,
   Row,
   TextCell,
 } from '@components/AppertureSheets/types/gridTypes';
@@ -79,7 +71,7 @@ const getSubHeaderRow = (
           return {
             type: 'inputHeader',
             text: originalHeaders?.[index]?.name || '',
-            disable: true,
+            disable: false,
             showAddButton,
             disableAddButton,
             showSuggestions: isPivotOrBlankSheet,
@@ -126,7 +118,8 @@ const getRows = (
             ? '0'
             : data[header.name]?.display || '';
 
-        return { type: 'text', text: val };
+        const value = typeof val === 'object' ? JSON.stringify(val) : val;
+        return { type: 'text', text: value };
       }),
   })),
 ];
@@ -138,6 +131,7 @@ const Grid = ({
   addDimensionColumn,
   properties,
   setSheetsData,
+  setHasQueryRunUsingQueryEditor,
 }: {
   selectedSheetIndex: number;
   sheetsData: TransientSheetData[];
@@ -145,6 +139,7 @@ const Grid = ({
   addDimensionColumn: Function;
   properties: string[];
   setSheetsData: Function;
+  setHasQueryRunUsingQueryEditor: Function;
 }) => {
   const sheet = sheetsData[selectedSheetIndex];
 
@@ -201,11 +196,14 @@ const Grid = ({
       return addDimensionColumn(changedHeaders[0].columnId);
     }
 
-    changedHeaders[0] &&
+    if (changedHeaders[0]) {
+      setHasQueryRunUsingQueryEditor(true);
       evaluateFormulaHeader(
         changedHeaders[0]?.newCell.text,
-        changedHeaders[0]?.columnId
+        changedHeaders[0]?.columnId,
+        changedHeaders[0]?.columnIndex
       );
+    }
   };
 
   const handleContextMenu = (

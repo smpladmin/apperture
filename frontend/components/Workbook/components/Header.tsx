@@ -43,14 +43,7 @@ const WorkbookHeader = ({
   const { dsId } = router.query;
   const disabledIconStyle = { color: '#bdbdbd', cursor: 'no-drop' };
   return (
-    <Box
-      position={'sticky'}
-      top={'0'}
-      width={'full'}
-      zIndex={'99'}
-      borderWidth={'0.4px'}
-      borderColor={'grey.700'}
-    >
+    <Box position={'sticky'} top={'0'} width={'full'} zIndex={'99'}>
       <Flex
         background={'white.500'}
         py={'3'}
@@ -130,12 +123,10 @@ const WorkbookHeader = ({
           </Button>
         </Flex>
       </Flex>
-
-      <Flex
-        background={'gray.200'}
+      {/* <Flex
+        background={'white.500'}
         height={9}
         borderRadius={'13px'}
-        m={'6px 12px'}
         alignItems={'center'}
         px={1}
         py={3}
@@ -159,8 +150,8 @@ const WorkbookHeader = ({
         <Sigma style={{ margin: '6px', ...disabledIconStyle }} />
         <Image src={Zero} alt={'Zero'} style={disabledIconStyle} />
         <Image src={DoubleZero} alt={'Double Zero'} style={disabledIconStyle} />
-      </Flex>
-      <Box bg={'white.DEFAULT'} h={'8'}></Box>
+      </Flex> */}
+      {/* <Box bg={'white.DEFAULT'} h={'8'}></Box> */}
     </Box>
   );
 };

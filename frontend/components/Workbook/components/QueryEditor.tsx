@@ -26,7 +26,6 @@ type QueryEditorProps = {
   setShowSqlEditor: Function;
   setSheetsData: Function;
   selectedSheetIndex: number;
-  height: string;
 };
 
 const QueryEditor = ({
@@ -34,7 +33,6 @@ const QueryEditor = ({
   selectedSheetIndex,
   setShowSqlEditor,
   setSheetsData,
-  height,
 }: QueryEditorProps) => {
   const sheetData = sheetsData[selectedSheetIndex];
 
@@ -141,7 +139,7 @@ const QueryEditor = ({
         />
         <ReactCodeMirror
           value={query}
-          height={height}
+          height={'200px'}
           extensions={[sql()]}
           onChange={(value) => {
             setQuery(value);

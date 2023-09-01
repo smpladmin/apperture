@@ -62,7 +62,7 @@ const InputHeaderCell = ({
           lineHeight={'xs-12'}
           fontWeight={'700'}
         >
-          {cell.text}
+          {cell?.text?.[0] === '=' ? cell.text.slice(1) : cell.text}
         </Flex>
       )}
     </>

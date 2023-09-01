@@ -148,7 +148,7 @@ const Sheet = ({
   }, [selectedColumns]);
 
   useEffect(() => {
-    if (showEditableCell) return;
+    if (showEditableCell || !isSheetActive) return;
 
     const isInputOrTextArea = (
       element: EventTarget | null
@@ -160,7 +160,7 @@ const Sheet = ({
     };
 
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (isInputOrTextArea(event.target) || !isSheetActive) {
+      if (isInputOrTextArea(event.target)) {
         return;
       }
       const { key } = event;
@@ -227,7 +227,7 @@ const Sheet = ({
       document.removeEventListener('keydown', handleKeyPress);
       document.removeEventListener('keyup', handleKeyUp);
     };
-  }, [currentCell, isSheetActive]);
+  }, [currentCell, isSheetActive, showEditableCell]);
 
   const IndexCell = ({
     columnIndex,
