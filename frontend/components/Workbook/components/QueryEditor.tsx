@@ -7,7 +7,12 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import { SheetType, TransientSheetData } from '@lib/domain/workbook';
+import {
+  ColumnType,
+  SheetType,
+  SpreadSheetColumn,
+  TransientSheetData,
+} from '@lib/domain/workbook';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
 import { Eye, PencilSimpleLine, Play, X } from 'phosphor-react';
@@ -64,6 +69,16 @@ const QueryEditor = ({
     }
   }, [sheetData.query, sheetData.aiQuery?.sql]);
 
+  const convertEmptyQueryColumnToPaddingHeaders = (
+    headers: SpreadSheetColumn[]
+  ) => {
+    return headers.map((header: SpreadSheetColumn) =>
+      header.name === "''"
+        ? { ...header, type: ColumnType.PADDING_HEADER }
+        : header
+    );
+  };
+
   const handleQueryChange = async () => {
     setIsLoading(true);
 
@@ -80,7 +95,8 @@ const QueryEditor = ({
 
     if (response.status === 200) {
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
-      toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
+      toUpdateSheets[selectedSheetIndex].headers =
+        convertEmptyQueryColumnToPaddingHeaders(response?.data?.headers);
       toUpdateSheets[selectedSheetIndex].sheet_type = SheetType.SIMPLE_SHEET;
       toUpdateSheets[selectedSheetIndex].subHeaders = getSubheaders(
         toUpdateSheets[selectedSheetIndex].sheet_type
