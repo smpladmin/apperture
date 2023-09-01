@@ -114,15 +114,7 @@ const Workbook = ({
     savedWorkbook ? false : true
   );
   const [showSqlEditor, setShowSqlEditor] = useState(false);
-  const [hasQueryRunUsingQueryEditor, setHasQueryRunUsingQueryEditor] =
-    useState(false);
-  // const [editorExecutionState, setEditorExecutionState] = useState<{
-  //   isLoading: boolean;
-  //   error: string;
-  // }>({
-  //   isLoading: false,
-  //   error: '',
-  // });
+  const [isFormulaEdited, setIsFormulaEdited] = useState(false);
 
   const [connections, setConnections] = useState<Connection[]>([]);
   const [showColumns, setShowColumns] = useState(false);
@@ -230,7 +222,7 @@ const Workbook = ({
       });
     }
     setFetchingTransientSheet(false);
-    setHasQueryRunUsingQueryEditor(false);
+    setIsFormulaEdited(false);
   };
 
   useEffect(() => {
@@ -244,24 +236,15 @@ const Workbook = ({
 
     const isInEditMode = sheet?.edit_mode;
 
-    const isInEditModeAndFormulaNotAdded =
-      isInEditMode && !hasQueryRunUsingQueryEditor;
-
-    console.log('checks', {
-      check1: isSqlSheet,
-      check2: !sheet.query || hasQueryRunUsingQueryEditor,
-      check3: hasSameQuery,
-      hasQueryRunUsingQueryEditor,
-    });
-
+    // Note - inEditMode it would only execute, if formula has changed
+    const isFormulaNotChangedInEditMode = isInEditMode && !isFormulaEdited;
     if (
-      (isSqlSheet && (!sheet.query || isInEditModeAndFormulaNotAdded)) ||
+      (isSqlSheet && (!sheet.query || isFormulaNotChangedInEditMode)) ||
       hasSameQuery
     ) {
       return;
     }
 
-    console.log('useeffect qyery', sheet.query);
     const abortController = new AbortController();
     fetchTransientSheetData(abortController);
     return () => {
@@ -273,7 +256,7 @@ const Workbook = ({
     sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery,
     JSON.stringify(sheetsData[selectedSheetIndex]?.aiQuery?.wordReplacements),
     triggerSheetFetch,
-    hasQueryRunUsingQueryEditor,
+    isFormulaEdited,
   ]);
 
   const handleSaveOrUpdateWorkbook = async () => {
@@ -532,10 +515,6 @@ const Workbook = ({
     columnIndex: number,
     existingHeadersLength: number
   ) => {
-    console.log('getPaddingHeadersLength', {
-      columnIndex,
-      existingHeadersLength,
-    });
     const toAddPaddingHeadersLength = columnIndex - existingHeadersLength;
 
     return toAddPaddingHeadersLength > 0 ? toAddPaddingHeadersLength : 0;
@@ -905,9 +884,7 @@ const Workbook = ({
                     addDimensionColumn={addDimensionColumn}
                     properties={getProperties}
                     setSheetsData={setSheetsData}
-                    setHasQueryRunUsingQueryEditor={
-                      setHasQueryRunUsingQueryEditor
-                    }
+                    setIsFormulaEdited={setIsFormulaEdited}
                   />
                 )}
               </Box>

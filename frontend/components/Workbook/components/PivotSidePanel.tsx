@@ -17,7 +17,6 @@ import {
   constructPivotValueDetailByName,
 } from '../util';
 import { cloneDeep } from 'lodash';
-import { table } from 'console';
 import { ErrorResponse } from '@lib/services/util';
 
 const initialDropdownState = {

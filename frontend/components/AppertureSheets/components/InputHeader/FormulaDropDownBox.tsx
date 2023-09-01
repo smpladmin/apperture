@@ -96,9 +96,9 @@ const FormulaDropDownBox = ({
         });
         return;
       }
-      onCellChanged({ text: formula });
-      inputRef?.current?.blur();
     }
+    onCellChanged({ text: formula });
+    inputRef?.current?.blur();
   };
 
   const handleAddHeader = () => {

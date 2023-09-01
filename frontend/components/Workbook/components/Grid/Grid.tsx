@@ -131,7 +131,7 @@ const Grid = ({
   addDimensionColumn,
   properties,
   setSheetsData,
-  setHasQueryRunUsingQueryEditor,
+  setIsFormulaEdited,
 }: {
   selectedSheetIndex: number;
   sheetsData: TransientSheetData[];
@@ -139,7 +139,7 @@ const Grid = ({
   addDimensionColumn: Function;
   properties: string[];
   setSheetsData: Function;
-  setHasQueryRunUsingQueryEditor: Function;
+  setIsFormulaEdited: Function;
 }) => {
   const sheet = sheetsData[selectedSheetIndex];
 
@@ -197,7 +197,7 @@ const Grid = ({
     }
 
     if (changedHeaders[0]) {
-      setHasQueryRunUsingQueryEditor(true);
+      setIsFormulaEdited(true);
       evaluateFormulaHeader(
         changedHeaders[0]?.newCell.text,
         changedHeaders[0]?.columnId,

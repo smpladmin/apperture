@@ -478,10 +478,9 @@ export const parseHeaders = (columns: string[], headers: SpreadSheetColumn[]) =>
         }
         return elem;
       });
-      const finalExpression = `${splitExpression?.join(
-        ''
-      )} AS "=${expression}"`;
-      console.log({ expression, splitExpression, finalExpression, headers });
+      const finalExpression = splitExpression
+        ? `${splitExpression?.join('')} AS "=${expression}"`
+        : '';
       return finalExpression;
     }
     return expression;
