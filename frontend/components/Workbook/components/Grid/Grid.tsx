@@ -31,7 +31,7 @@ import {
   getRows,
 } from '@components/Workbook/util';
 import { cloneDeep } from 'lodash';
-import { DraggableWrapper } from '../DraggableWrapper';
+import { SheetChart } from '../DraggableWrapper';
 
 const getColumns = (headers: SpreadSheetColumn[]): Column[] => {
   return headers.map((header, index) => {
@@ -186,7 +186,7 @@ const Grid = ({
         }}
         onContextMenu={handleContextMenu}
       />
-      <DraggableWrapper />
+      <SheetChart />
     </div>
   );
 };

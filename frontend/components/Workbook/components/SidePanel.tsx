@@ -24,6 +24,20 @@ type SidePanelProps = {
   addDimensionColumn: Function;
 };
 
+enum SidePanelStateType {
+  CONNECTIONS = 'CONNECTIONS',
+  PIVOT = 'PIVOT',
+  CHART = 'CHART',
+}
+
+const calculateSidePanelState = (
+  currentSheet: TransientSheetData
+): SidePanelStateType => {
+  if (currentSheet.sheet_type == SheetType.PIVOT_TABLE)
+    return SidePanelStateType.PIVOT;
+  return SidePanelStateType.CONNECTIONS;
+};
+
 const SidePanel = ({
   loadingConnections,
   connections,
@@ -36,6 +50,10 @@ const SidePanel = ({
   evaluateFormulaHeader,
   addDimensionColumn,
 }: SidePanelProps) => {
+  const currentSheet = sheetsData[selectedSheetIndex];
+  const [SidePanelState, setSidePanelState] = useState<SidePanelStateType>(
+    calculateSidePanelState(currentSheet)
+  );
   const [isSidePanelCollapsed, setIsSidePanelCollapsed] = useState(false);
   const [connectorData, setConnectorData] = useState<
     ConnectionSource & { heirarchy: string[] }
@@ -49,7 +67,6 @@ const SidePanel = ({
     heirarchy: [],
   });
 
-  const currentSheet = sheetsData[selectedSheetIndex];
   const router = useRouter();
   const { dsId, selectProvider } = router.query;
 
@@ -86,7 +103,7 @@ const SidePanel = ({
       pb={10}
     >
       {!isSidePanelCollapsed ? (
-        currentSheet.sheet_type !== SheetType.PIVOT_TABLE ? (
+        SidePanelState === SidePanelStateType.CONNECTIONS ? (
           <SheetConnections
             showColumns={showColumns}
             sheetsData={sheetsData}
@@ -101,14 +118,23 @@ const SidePanel = ({
             setConnectorData={setConnectorData}
             setShowSqlEditor={setShowSqlEditor}
           />
-        ) : (
-          <PivotTableSidePanel
-            setShowColumns={setShowColumns}
-            setSheetsData={setSheetsData}
-            selectedSheetIndex={selectedSheetIndex}
-            sheetsData={sheetsData}
-          />
-        )
+        ) : null
+      ) : null}
+      {SidePanelState === SidePanelStateType.PIVOT ? (
+        <PivotTableSidePanel
+          setShowColumns={setShowColumns}
+          setSheetsData={setSheetsData}
+          selectedSheetIndex={selectedSheetIndex}
+          sheetsData={sheetsData}
+        />
+      ) : null}
+      {SidePanelState === SidePanelStateType.CHART ? (
+        <PivotTableSidePanel
+          setShowColumns={setShowColumns}
+          setSheetsData={setSheetsData}
+          selectedSheetIndex={selectedSheetIndex}
+          sheetsData={sheetsData}
+        />
       ) : null}
 
       <Box

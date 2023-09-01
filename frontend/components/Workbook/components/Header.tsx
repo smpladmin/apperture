@@ -8,7 +8,7 @@ import {
 } from '@chakra-ui/react';
 import { ChartPie, Percent, PlusCircle, Sigma } from '@phosphor-icons/react';
 import { useRouter } from 'next/router';
-import { ArrowLeft, Code } from 'phosphor-react';
+import { ArrowLeft, ChartBar, Code } from 'phosphor-react';
 import Zero from '@assets/icons/NumberCircleZero.svg';
 import DoubleZero from '@assets/icons/NumberCircleDoubleZero.svg';
 
@@ -141,10 +141,9 @@ const WorkbookHeader = ({
         py={3}
       >
         <PlusCircle style={{ margin: '6px', ...disabledIconStyle }} />
-        <ChartPie
+        <ChartBar
           style={{
             margin: '6px',
-            ...disabledIconStyle,
           }}
         />
 
