@@ -1,4 +1,10 @@
-import { AIQuery, Spreadsheet, WordReplacement } from '@lib/domain/workbook';
+import {
+  AIQuery,
+  PivotAxisDetail,
+  PivotValueDetail,
+  Spreadsheet,
+  WordReplacement,
+} from '@lib/domain/workbook';
 import {
   AppertureDelete,
   AppertureGet,
@@ -109,6 +115,22 @@ export const getWorkbookTransientColumn = async (
 
   const data = mapApiResponseToDisplayOriginalFormat(res.data?.data || []);
   return { ...res, data: { ...res.data, data } };
+};
+
+export const getTransientPivot = async (
+  dsId: string,
+  query: string,
+  rows: PivotAxisDetail[],
+  columns: PivotAxisDetail[],
+  values: PivotValueDetail[]
+) => {
+  return await ApperturePost(`/workbooks/spreadsheets/pivot/transient`, {
+    dsId,
+    query,
+    rows,
+    columns,
+    values,
+  });
 };
 
 export const vlookup = async (

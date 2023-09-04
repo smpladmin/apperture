@@ -7,13 +7,14 @@ from domain.apperture_users.models import AppertureUser
 from domain.apperture_users.service import AppertureUserService
 from domain.datasources.service import DataSourceService
 from domain.spreadsheets.service import SpreadsheetService
-from repositories.clickhouse.parser.query_parser import BusinessError
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
+    ComputePivotDto,
     CreateWorkBookDto,
     SavedWorkBookResponse,
+    TransientExpressionDto,
     TransientSpreadsheetColumnDto,
     TransientSpreadsheetsDto,
     WorkBookResponse,
@@ -22,6 +23,7 @@ from rest.dtos.spreadsheets import (
 )
 from rest.middlewares import get_user, validate_jwt
 from rest.middlewares.get_user import get_user_id
+from utils.errors import BusinessError
 from rest.middlewares.validate_app_user import validate_app_user, validate_library_items
 
 router = APIRouter(
@@ -94,6 +96,32 @@ async def compute_transient_spreadsheets(
     dto: TransientSpreadsheetsDto, compute_query_action: ComputeQueryAction = Depends()
 ):
     return await compute_query_action.compute_query(dto=dto)
+
+
+@router.post(
+    "/workbooks/spreadsheets/expression/transient",
+)
+async def compute_transient_expression(
+    dto: TransientExpressionDto,
+    spreadsheets_service: SpreadsheetService = Depends(),
+    compute_query_action: ComputeQueryAction = Depends(),
+):
+    try:
+        clickhouse_credential = await compute_query_action.get_credentials(
+            datasource_id=dto.datasourceId
+        )
+        return spreadsheets_service.compute_transient_expression(
+            username=clickhouse_credential.username,
+            password=clickhouse_credential.password,
+            expressions=[dto.expression],
+            variables=dto.variables,
+            table=dto.table,
+            database=dto.database,
+        )
+    except BusinessError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
+    except DatabaseError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
 
 
 @router.post(
@@ -171,6 +199,30 @@ async def delete_segments(
     spreadsheets_service: SpreadsheetService = Depends(),
 ):
     await spreadsheets_service.delete_workbook(workbook_id=workbook_id)
+
+
+@router.post(
+    "/workbooks/spreadsheets/pivot/transient", dependencies=[Depends(validate_app_user)]
+)
+async def compute_transientpivot(
+    dto: ComputePivotDto,
+    spreadsheets_service: SpreadsheetService = Depends(),
+    compute_query_action: ComputeQueryAction = Depends(),
+):
+    clickhouse_credential = await compute_query_action.get_credentials(
+        datasource_id=dto.dsId
+    )
+    try:
+        return spreadsheets_service.compute_pivot(
+            query=dto.query,
+            rows=dto.rows,
+            columns=dto.columns,
+            values=dto.values,
+            username=clickhouse_credential.username,
+            password=clickhouse_credential.password,
+        )
+    except BusinessError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
 
 
 @router.post("/workbooks/vlookup")

@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from beanie import PydanticObjectId
 from pydantic import BaseModel
 
 from domain.spreadsheets.models import (
@@ -7,6 +8,8 @@ from domain.spreadsheets.models import (
     ComputedSpreadsheet,
     DimensionDefinition,
     MetricDefinition,
+    PivotAxisDetail,
+    PivotValueDetail,
     SpreadSheetColumn,
     SpreadsheetType,
     SubHeaderColumn,
@@ -22,6 +25,14 @@ class TransientSpreadsheetsDto(BaseModel):
     query: str
     is_sql: bool = False
     ai_query: Optional[AIQuery]
+
+
+class TransientExpressionDto(BaseModel):
+    datasourceId: str
+    expression: str
+    variables: dict
+    table: str
+    database: str
 
 
 class TransientSpreadsheetColumnDto(BaseModel):
@@ -79,3 +90,11 @@ class WorkbookWithUser(WorkBook, ModelResponse):
 class SavedWorkBookResponse(WorkBook, ModelResponse):
     class Config:
         allow_population_by_field_name = True
+
+
+class ComputePivotDto(BaseModel):
+    dsId: PydanticObjectId
+    query: str
+    rows: List[PivotAxisDetail]
+    columns: List[PivotAxisDetail]
+    values: List[PivotValueDetail]

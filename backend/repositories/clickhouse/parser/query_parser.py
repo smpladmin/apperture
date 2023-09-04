@@ -4,9 +4,7 @@ import re
 import sqlvalidator
 from sqlglot import condition, exp, parse_one
 
-
-class BusinessError(Exception):
-    pass
+from utils.errors import BusinessError
 
 
 class QueryParser:

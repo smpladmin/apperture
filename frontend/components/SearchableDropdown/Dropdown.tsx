@@ -3,10 +3,11 @@ import React, { ReactNode, useEffect, useRef } from 'react';
 
 type DropdownProps = {
   isOpen: boolean;
-  dropdownPosition?: string;
+  dropdownPosition?: 'right' | 'left';
   maxHeight?: number;
   children: ReactNode;
   minWidth?: string;
+  top?: string;
   width?: string;
 };
 
@@ -17,6 +18,7 @@ const Dropdown = ({
   children,
   minWidth,
   width,
+  top,
 }: DropdownProps) => {
   const dropDownRef = useRef<HTMLDivElement>(null);
 
@@ -49,6 +51,7 @@ const Dropdown = ({
           width={width || 'auto'}
           overflowY={'auto'}
           right={dropdownPosition === 'right' ? 0 : ''}
+          top={top || undefined}
           minWidth={minWidth || 'auto'}
         >
           {children}

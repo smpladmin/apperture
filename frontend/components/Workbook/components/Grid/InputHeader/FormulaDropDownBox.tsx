@@ -85,7 +85,7 @@ const FormulaDropDownBox = ({
   }, [cell.text]);
 
   const handleSubmitFormula = () => {
-    if (formula) {
+    if (formula && formula[0] === '=') {
       if (
         !formula.match(/^unique/) &&
         cell.columnType === SubHeaderColumnType.DIMENSION
@@ -303,9 +303,9 @@ const FormulaDropDownBox = ({
     <Flex width={'full'}>
       <Box position={'relative'} width={'full'} ref={dropdownRef}>
         <InputGroup>
-          {formula || isFocus ? (
+          {/* {formula || isFocus ? (
             <InputLeftElement h={'6'}>=</InputLeftElement>
-          ) : null}
+          ) : null} */}
           <Input
             ref={inputRef}
             value={formula}

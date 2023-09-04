@@ -24,6 +24,7 @@
     "@phosphor-icons/react": "^2.0.6",
     "@silevis/reactgrid": "^4.0.4",
     "@tanstack/react-table": "^8.7.0",
+    "@tanstack/react-virtual": "^3.0.0-beta.54",
     "@uiw/react-codemirror": "^4.20.2",
     "analytics": "^0.8.1",
     "axios": "^0.27.2",
@@ -43,11 +44,14 @@
     "react-date-range": "^1.4.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
+    "react-google-recaptcha": "^3.1.0",
     "react-hook-form": "^7.45.1",
     "react-modal-sheet": "^1.7.0",
     "react-textarea-autosize": "^8.5.2",
+    "react-virtualized-auto-sizer": "^1.0.20",
     "react-window": "^1.8.9",
-    "remixicon": "^2.5.0"
+    "remixicon": "^2.5.0",
+    "sanitize-html": "^2.11.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.5",
@@ -58,7 +62,9 @@
     "@types/react-beautiful-dnd": "^13.1.2",
     "@types/react-date-range": "^1.4.4",
     "@types/react-dom": "18.0.6",
+    "@types/react-google-recaptcha": "^2.1.5",
     "@types/react-window": "^1.8.5",
+    "@types/sanitize-html": "^2.9.0",
     "autoprefixer": "^10.4.8",
     "eslint": "8.22.0",
     "eslint-config-next": "12.2.5",

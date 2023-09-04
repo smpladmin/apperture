@@ -1,5 +1,5 @@
 import logging
-from typing import Union
+from typing import List, Union
 
 from clickhouse_connect.driver.exceptions import DatabaseError
 from fastapi import Depends, HTTPException
@@ -13,8 +13,8 @@ from domain.integrations.models import MySQLCredential
 from domain.integrations.service import IntegrationService
 from domain.spreadsheets.models import DatabaseClient
 from domain.spreadsheets.service import SpreadsheetService
-from repositories.clickhouse.parser.query_parser import BusinessError
 from rest.dtos.spreadsheets import TransientSpreadsheetsDto
+from utils.errors import BusinessError
 
 
 class ComputeQueryAction:

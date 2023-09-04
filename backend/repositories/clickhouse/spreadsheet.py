@@ -2,7 +2,9 @@ import logging
 from typing import List, Union
 
 from fastapi import Depends
-from pypika import Case, ClickHouseQuery, Criterion, Field, Table, AliasedQuery
+from pypika import Case, ClickHouseQuery, Criterion, Field
+from pypika import Order as SortOrder
+from pypika import Table, AliasedQuery
 from pypika import functions as fn
 
 from clickhouse.clickhouse import Clickhouse
@@ -13,8 +15,12 @@ from domain.spreadsheets.models import (
     DimensionDefinition,
     Formula,
     MetricDefinition,
+    PivotAxisDetail,
+    PivotValueDetail,
+    SortingOrder,
 )
 from repositories.clickhouse.base import EventsBase
+from repositories.clickhouse.parser.query_parser import BusinessError, QueryParser
 
 
 class Spreadsheets(EventsBase):
@@ -108,6 +114,135 @@ class Spreadsheets(EventsBase):
 
         query = query.groupby(*range(1, len(dimensions) + 1)).limit(1000)
         return query.get_sql(), {"ds_id": datasource_id}
+
+    def build_transient_expression_query(
+        self, expressions: List[str], variables: dict, database: str, table: str
+    ):
+        query = ClickHouseQuery.from_(Table(table, schema=database))
+        for variable, column in variables.items():
+            query = query.select(Field(column).as_(variable))
+        for expression in expressions:
+            query = query.select((Parameter(expression[1:])).as_(expression))
+        query = query.limit(500)
+        return query.get_sql()
+
+    def compute_transient_expression(
+        self,
+        username: str,
+        password: str,
+        expressions: List[str],
+        variables: dict,
+        database: str,
+        table: str,
+    ):
+        query = self.build_transient_expression_query(
+            variables=variables, expressions=expressions, database=database, table=table
+        )
+
+        logging.info(f"compute_transient_expression query:  {query}")
+        restricted_client = self.clickhouse.get_connection_for_user(
+            username=username,
+            password=password,
+        )
+
+        return restricted_client.query(query=query)
+
+    def compute_transient_pivot(
+        self,
+        sql: str,
+        rows: List[PivotAxisDetail],
+        columns: List[PivotAxisDetail],
+        values: List[PivotValueDetail],
+        username: str,
+        password: str,
+        rowRange: List[Union[str, int, float]],
+        columnRange: List[Union[str, int, float]],
+    ):
+        sheet_query = f"({sql})"
+        query = ClickHouseQuery.from_(Table("<inner_table>"))
+        for properties in [*rows, *columns]:
+            query = query.select(Field(properties.name))
+
+        for value in values:
+            query = query.select(fn.Sum(Field(value.name)))
+
+        for row in rows:
+            query = query.groupby(row.name).orderby(
+                row.name,
+                order=(
+                    SortOrder.asc
+                    if row.order_by is SortingOrder.ASC
+                    else SortOrder.desc
+                ),
+            )
+
+        for col in columns:
+            query = query.groupby(col.name).orderby(
+                col.name,
+                order=(
+                    SortOrder.asc
+                    if col.order_by is SortingOrder.ASC
+                    else SortOrder.desc
+                ),
+            )
+        query = query.where(
+            Criterion.all(
+                [
+                    Field(rows[0].name).isin(rowRange),
+                    Field(columns[0].name).isin(columnRange),
+                ]
+            )
+        )
+        query = query.get_sql().replace('"<inner_table>"', sheet_query)
+        restricted_client = self.clickhouse.get_connection_for_user(
+            username=username,
+            password=password,
+        )
+
+        return restricted_client.query(query=query).result_set
+
+    def compute_ordered_distinct_values(
+        self,
+        reference_query: str,
+        values: List[PivotAxisDetail],
+        username: str,
+        password: str,
+        aggregate: PivotAxisDetail,
+        show_total: bool,
+        axisRange: List[Union[str, int, float]] = None,
+        rangeAxis: PivotAxisDetail = None,
+        limit=50,
+    ):
+        sheet_query = f"({reference_query})"
+        query = ClickHouseQuery.from_(Table("<inner_table>"))
+        for value in values:
+            query = query.select(Field(value.name))
+            query = query.groupby(value.name).orderby(
+                value.name,
+                order=(
+                    SortOrder.asc
+                    if value.order_by is SortingOrder.ASC
+                    else SortOrder.desc
+                ),
+            )
+
+        if show_total:
+            if aggregate:
+                query = query.select(fn.Sum(Field(aggregate.name)))
+            else:
+                raise BusinessError("Select Value before finding sum")
+
+        if axisRange and rangeAxis:
+            query = query.where(Field(rangeAxis.name).isin(axisRange))
+
+        query = query.limit(limit)
+        query = query.get_sql().replace('"<inner_table>"', sheet_query)
+        restricted_client = self.clickhouse.get_connection_for_user(
+            username=username,
+            password=password,
+        )
+
+        return restricted_client.query(query=query).result_set
 
     def build_vlookup_query(
         self,

@@ -7,7 +7,12 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import { SheetType, TransientSheetData } from '@lib/domain/workbook';
+import {
+  ColumnType,
+  SheetType,
+  SpreadSheetColumn,
+  TransientSheetData,
+} from '@lib/domain/workbook';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
 import { Eye, PencilSimpleLine, Play, X } from 'phosphor-react';
@@ -26,7 +31,6 @@ type QueryEditorProps = {
   setShowSqlEditor: Function;
   setSheetsData: Function;
   selectedSheetIndex: number;
-  height: string;
 };
 
 const QueryEditor = ({
@@ -34,7 +38,6 @@ const QueryEditor = ({
   selectedSheetIndex,
   setShowSqlEditor,
   setSheetsData,
-  height,
 }: QueryEditorProps) => {
   const sheetData = sheetsData[selectedSheetIndex];
 
@@ -66,6 +69,16 @@ const QueryEditor = ({
     }
   }, [sheetData.query, sheetData.aiQuery?.sql]);
 
+  const convertEmptyQueryColumnToPaddingHeaders = (
+    headers: SpreadSheetColumn[]
+  ) => {
+    return headers.map((header: SpreadSheetColumn) =>
+      header.name === "''"
+        ? { ...header, type: ColumnType.PADDING_HEADER }
+        : header
+    );
+  };
+
   const handleQueryChange = async () => {
     setIsLoading(true);
 
@@ -82,7 +95,8 @@ const QueryEditor = ({
 
     if (response.status === 200) {
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
-      toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
+      toUpdateSheets[selectedSheetIndex].headers =
+        convertEmptyQueryColumnToPaddingHeaders(response?.data?.headers);
       toUpdateSheets[selectedSheetIndex].sheet_type = SheetType.SIMPLE_SHEET;
       toUpdateSheets[selectedSheetIndex].subHeaders = getSubheaders(
         toUpdateSheets[selectedSheetIndex].sheet_type
@@ -141,14 +155,12 @@ const QueryEditor = ({
         />
         <ReactCodeMirror
           value={query}
-          height={height}
+          height={'200px'}
           extensions={[sql()]}
           onChange={(value) => {
             setQuery(value);
           }}
           readOnly={!sheetData.edit_mode}
-          
-          
         />
         {error ? (
           <Text
@@ -182,7 +194,7 @@ const QueryEditor = ({
             }}
           >
             <Flex gap={'1'}>
-             <X size={16} weight="fill" />
+              <X size={16} weight="fill" />
               Close
             </Flex>
           </Button>
@@ -212,7 +224,7 @@ const QueryEditor = ({
       <ConfirmationModal
         isOpen={isOpen}
         onClose={onClose}
-        headerText="Do you want to chnage the SQL query?"
+        headerText="Do you want to change the SQL query?"
         subHeaderText="Note- you will no longer be able to select columns manually."
         onSubmit={handleEditSelection}
       />

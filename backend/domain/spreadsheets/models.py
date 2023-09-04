@@ -21,6 +21,7 @@ class SubHeaderColumnType(str, Enum):
 class SpreadsheetType(str, Enum):
     SIMPLE_SHEET = "SIMPLE_SHEET"
     PIVOT_SHEET = "PIVOT_SHEET"
+    PIVOT_TABLE = "PIVOT_TABLE"
 
 
 class SpreadSheetColumn(BaseModel):
@@ -122,3 +123,24 @@ class DatabaseClient(Enum):
 class MySQLQueryResult(BaseModel):
     result_set: List
     column_names: List[str]
+
+
+class SortingOrder(Enum):
+    ASC = "ASC"
+    DSC = "DESC"
+
+
+class AggregateFunction(Enum):
+    SUM = "SUM"
+
+
+class PivotAxisDetail(BaseModel):
+    name: str
+    sort_by: str
+    order_by: SortingOrder
+    show_total: bool
+
+
+class PivotValueDetail(BaseModel):
+    name: str
+    function: AggregateFunction

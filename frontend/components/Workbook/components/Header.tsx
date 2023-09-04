@@ -6,9 +6,16 @@ import {
   EditablePreview,
   Flex,
 } from '@chakra-ui/react';
+import { ChartPie, Percent, PlusCircle, Sigma } from '@phosphor-icons/react';
 import { useRouter } from 'next/router';
 import { ArrowLeft, Code } from 'phosphor-react';
+import Zero from '@assets/icons/NumberCircleZero.svg';
+import DoubleZero from '@assets/icons/NumberCircleDoubleZero.svg';
+
 import React from 'react';
+import Image from 'next/image';
+import PivotIcon from './PivotIcon';
+import { SheetType, TransientSheetData } from '@lib/domain/workbook';
 
 type WorkbookHeaderProps = {
   name: string;
@@ -16,6 +23,9 @@ type WorkbookHeaderProps = {
   isSaveButtonDisabled: boolean;
   handleSave: Function;
   setShowSqlEditor: Function;
+  addNewPivotSheet: () => void;
+  sheetsData: TransientSheetData[];
+  selectedSheetIndex: number;
 };
 
 const WorkbookHeader = ({
@@ -24,19 +34,16 @@ const WorkbookHeader = ({
   isSaveButtonDisabled,
   handleSave,
   setShowSqlEditor,
+  addNewPivotSheet,
+  sheetsData,
+  selectedSheetIndex,
 }: WorkbookHeaderProps) => {
+  const sheet = sheetsData[selectedSheetIndex];
   const router = useRouter();
   const { dsId } = router.query;
-
+  const disabledIconStyle = { color: '#bdbdbd', cursor: 'no-drop' };
   return (
-    <Box
-      position={'sticky'}
-      top={'0'}
-      width={'full'}
-      zIndex={'99'}
-      borderWidth={'0.4px'}
-      borderColor={'grey.700'}
-    >
+    <Box position={'sticky'} top={'0'} width={'full'} zIndex={'99'}>
       <Flex
         background={'white.500'}
         py={'3'}
@@ -116,7 +123,6 @@ const WorkbookHeader = ({
           </Button>
         </Flex>
       </Flex>
-      <Box bg={'white.DEFAULT'} h={'8'}></Box>
     </Box>
   );
 };

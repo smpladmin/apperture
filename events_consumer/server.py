@@ -140,13 +140,11 @@ async def process_kafka_messages() -> None:
 
         # Save events to ClickHouse
         if len(events) >= MAX_RECORDS:
-            logging.info(f"Saving events: {events} with offsets: {offsets}")
             save_events(events)
             precision_events = [
                 event for event in events if event["event"] not in DEFAULT_EVENTS
             ]
             if len(precision_events):
-                logging.info(f"Saving precision events: {precision_events}")
                 save_precision_events(precision_events)
             tmp = events
             events = []
