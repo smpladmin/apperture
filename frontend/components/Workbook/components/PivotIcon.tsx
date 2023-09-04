@@ -38,7 +38,7 @@ function PivotIcon({
       padding={'4px'}
       borderRadius={'2px'}
       alignContent={'center'}
-      backgroundColor={isHovered ? 'gray.300' : 'none'}
+      backgroundColor={isHovered ? 'white.200' : 'none'}
     >
       <Image
         src={PivotTableGif}

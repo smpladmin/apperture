@@ -54,6 +54,27 @@ class RunLogService:
         await RunLog.insert_many(runlogs)
         return await RunLog.find(RunLog.datasource_id == datasource_id).to_list()
 
+    async def create_pending_api_runlogs(self, datasource_id: PydanticObjectId):
+        today = datetime.utcnow()
+        max_runlog_days = int(os.getenv("MAX_REFRESH_DAYS", 7))
+        dates = [
+            (today - relativedelta(days=d)).replace(
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0,
+            )
+            for d in range(1, max_runlog_days + 1)
+        ]
+        runlogs = [
+            RunLog(datasource_id=datasource_id, date=d, status=RunLogStatus.SCHEDULED)
+            for d in dates
+        ]
+        for runlog in runlogs:
+            runlog.updated_at = runlog.created_at
+        insert_response = await RunLog.insert_many(runlogs)
+        return await RunLog.find(In(RunLog.id, insert_response.inserted_ids)).to_list()
+
     async def create_pending_runlogs(self, datasource: DataSource):
         yesterday = (datetime.utcnow() - relativedelta(days=1)).replace(
             hour=0,

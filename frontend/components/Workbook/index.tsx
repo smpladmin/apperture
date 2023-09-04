@@ -48,6 +48,7 @@ import {
   isOperand,
   isSheetPivotOrBlank,
   isdigit,
+  padArray,
   parseHeaders,
 } from './util';
 import { DimensionParser, Metricparser } from '@lib/utils/parser';
@@ -56,6 +57,8 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import AIButton from '@components/AIButton';
 import Coachmarks from './components/Coachmarks';
 import { AppertureUser } from '@lib/domain/user';
+import Toolbar from './components/Toolbar';
+import { ErrorResponse } from '@lib/services/util';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -107,10 +110,11 @@ const Workbook = ({
     initializeSheetForSavedWorkbook(savedWorkbook)
   );
   const [selectedSheetIndex, setSelectedSheetIndex] = useState(0);
-  const [showSqlEditor, setShowSqlEditor] = useState(false);
   const [showEmptyState, setShowEmptyState] = useState(
     savedWorkbook ? false : true
   );
+  const [showSqlEditor, setShowSqlEditor] = useState(false);
+  const [isFormulaEdited, setIsFormulaEdited] = useState(false);
 
   const [connections, setConnections] = useState<Connection[]>([]);
   const [showColumns, setShowColumns] = useState(false);
@@ -199,8 +203,7 @@ const Workbook = ({
     if (response.status === 200) {
       const toUpdateSheets = cloneDeep(sheetsData);
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
-      toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
-      toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
+
       if (!sheet.is_sql) {
         const query =
           toUpdateSheets[selectedSheetIndex].aiQuery || ({} as AIQuery);
@@ -219,6 +222,7 @@ const Workbook = ({
       });
     }
     setFetchingTransientSheet(false);
+    setIsFormulaEdited(false);
   };
 
   useEffect(() => {
@@ -229,8 +233,15 @@ const Workbook = ({
     const hasSameQuery = isSqlSheet
       ? sheet.query === prevSheet?.query
       : isEqual(sheet?.aiQuery, prevSheet?.aiQuery);
-    const hasEditMode = sheet?.edit_mode;
-    if ((isSqlSheet && (!sheet.query || hasEditMode)) || hasSameQuery) {
+
+    const isInEditMode = sheet?.edit_mode;
+
+    // Note - inEditMode it would only execute, if formula has changed
+    const isFormulaNotChangedInEditMode = isInEditMode && !isFormulaEdited;
+    if (
+      (isSqlSheet && (!sheet.query || isFormulaNotChangedInEditMode)) ||
+      hasSameQuery
+    ) {
       return;
     }
 
@@ -245,6 +256,7 @@ const Workbook = ({
     sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery,
     JSON.stringify(sheetsData[selectedSheetIndex]?.aiQuery?.wordReplacements),
     triggerSheetFetch,
+    isFormulaEdited,
   ]);
 
   const handleSaveOrUpdateWorkbook = async () => {
@@ -498,14 +510,12 @@ const Workbook = ({
     return lookupTable;
   };
 
-  const getPaddingHeadersLenth = (
+  const getPaddingHeadersLength = (
     columnId: string,
+    columnIndex: number,
     existingHeadersLength: number
   ) => {
-    const toUpdateHeaderIndex = columnId.charCodeAt(0) - 65;
-
-    const toAddPaddingHeadersLength =
-      toUpdateHeaderIndex - existingHeadersLength;
+    const toAddPaddingHeadersLength = columnIndex - existingHeadersLength;
 
     return toAddPaddingHeadersLength > 0 ? toAddPaddingHeadersLength : 0;
   };
@@ -528,7 +538,8 @@ const Workbook = ({
   const updateSelectedSheetDataAndHeaders = (
     evaluatedData: any[],
     header: SpreadSheetColumn,
-    columnId: string
+    columnId: string,
+    columnIndex: number
   ) => {
     const tempSheetsData = cloneDeep(sheetsData);
     const existingHeaders = tempSheetsData[selectedSheetIndex]?.headers;
@@ -538,8 +549,9 @@ const Workbook = ({
       (header) => header.name === oldColumnId
     );
 
-    const paddingHeadersLength = getPaddingHeadersLenth(
+    const paddingHeadersLength = getPaddingHeadersLength(
       columnId,
+      columnIndex,
       existingHeaders.length
     );
 
@@ -554,12 +566,14 @@ const Workbook = ({
       // update exisitng header and subheader
       // for updating subheaders, need to add 1 to maintain sheets 'index' column
       tempSheetsData[selectedSheetIndex].headers[existingHeaderIndex] = header;
-      tempSheetsData[selectedSheetIndex].subHeaders[
-        existingHeaderIndex + 1
-      ].name = header.name;
+      // tempSheetsData[selectedSheetIndex].subHeaders[
+      //   existingHeaderIndex + 1
+      // ].name = header.name;
+      tempSheetsData[selectedSheetIndex].subHeaders[existingHeaderIndex].name =
+        header.name;
     } else {
       // add new headers and subheaders
-      const columnIndex = columnId.charCodeAt(0) - 65 + 1;
+      const columnIndex = columnId.charCodeAt(0) - 65;
       tempSheetsData[selectedSheetIndex].headers = [
         ...existingHeaders,
         ...paddedHeaders,
@@ -588,11 +602,15 @@ const Workbook = ({
   };
 
   const evaluateFormulaHeader = useCallback(
-    (headerText: string, columnId: string) => {
+    (headerText: string, columnId: string, columnIndex: number) => {
       const sheetData = sheetsData[selectedSheetIndex];
 
       const isBlankOrPivotSheet = isSheetPivotOrBlank(sheetData);
-      const index = getHeaderIndex(sheetData, columnId);
+
+      // add 1 for index offset
+      const index = columnIndex
+        ? columnIndex + 1
+        : getHeaderIndex(sheetData, columnId);
 
       if (headerText.match(/^[unique|count]/)) {
         if (isBlankOrPivotSheet)
@@ -623,12 +641,21 @@ const Workbook = ({
             });
           }
       } else {
-        const { headers } = sheetsData[selectedSheetIndex];
-        const columns = [
-          ...headers.map((header) => header.name),
-          headerText.slice(1).toUpperCase(),
-        ];
-        const parsedExpressions = parseHeaders(columns, headers);
+        const newHeader = {
+          name: headerText,
+          type: ColumnType.COMPUTED_HEADER,
+        };
+        const headers = [...sheetsData[selectedSheetIndex].headers];
+
+        const columns = headers.map((header) => header.name);
+        headers[columnIndex] = newHeader;
+        columns[columnIndex] = headerText.toUpperCase();
+        const paddedColumns = padArray(columns);
+        const paddedHeaders = padArray(headers, {
+          name: '',
+          type: ColumnType.PADDING_HEADER,
+        });
+        const parsedExpressions = parseHeaders(paddedColumns, headers);
 
         const query = generateQuery(
           parsedExpressions,
@@ -636,11 +663,15 @@ const Workbook = ({
           sheetsData[selectedSheetIndex].meta?.selectedDatabase || 'default',
           sheetsData[selectedSheetIndex].meta?.dsId || ''
         );
+
         setSheetsData((prevSheetData: TransientSheetData[]) => {
           const tempSheetsData = cloneDeep(prevSheetData);
           tempSheetsData[selectedSheetIndex].query = query;
           // TODO: should check the double bang !!
-          tempSheetsData[selectedSheetIndex].meta!!.selectedColumns = columns;
+          tempSheetsData[selectedSheetIndex].meta!!.selectedColumns =
+            paddedColumns;
+
+          tempSheetsData[selectedSheetIndex].headers = paddedHeaders;
 
           return tempSheetsData;
         });
@@ -792,6 +823,11 @@ const Workbook = ({
           sheetsData={sheetsData}
           selectedSheetIndex={selectedSheetIndex}
         />
+        <Toolbar
+          addNewPivotSheet={addNewPivotSheet}
+          sheetsData={sheetsData}
+          selectedSheetIndex={selectedSheetIndex}
+        />
         <Flex
           direction={'row'}
           h={'full'}
@@ -818,7 +854,6 @@ const Workbook = ({
                   selectedSheetIndex={selectedSheetIndex}
                   setShowSqlEditor={setShowSqlEditor}
                   setSheetsData={setSheetsData}
-                  height={`200px`}
                 />
               </Box>
             ) : null}
@@ -841,26 +876,6 @@ const Workbook = ({
                   >
                     <LoadingSpinner />
                   </Flex>
-                ) : sheetsData[selectedSheetIndex].sheet_type ===
-                  SheetType.SIMPLE_SHEET ? (
-                  <Grid
-                    sheetsData={sheetsData}
-                    selectedSheetIndex={selectedSheetIndex}
-                    evaluateFormulaHeader={evaluateFormulaHeader}
-                    addDimensionColumn={addDimensionColumn}
-                    properties={getProperties}
-                    setSheetsData={setSheetsData}
-                  />
-                ) : sheetsData[selectedSheetIndex].sheet_type ===
-                  SheetType.PIVOT_SHEET ? (
-                  <Grid
-                    sheetsData={sheetsData}
-                    selectedSheetIndex={selectedSheetIndex}
-                    evaluateFormulaHeader={evaluateFormulaHeader}
-                    addDimensionColumn={addDimensionColumn}
-                    properties={getProperties}
-                    setSheetsData={setSheetsData}
-                  />
                 ) : (
                   <Grid
                     sheetsData={sheetsData}
@@ -869,6 +884,7 @@ const Workbook = ({
                     addDimensionColumn={addDimensionColumn}
                     properties={getProperties}
                     setSheetsData={setSheetsData}
+                    setIsFormulaEdited={setIsFormulaEdited}
                   />
                 )}
               </Box>

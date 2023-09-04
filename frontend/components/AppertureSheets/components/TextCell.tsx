@@ -1,21 +1,18 @@
 import { Flex } from '@chakra-ui/react';
 import { useContext } from 'react';
-import { Actions, GridContext } from './GridContext';
-import { BaseCellProps } from './gridTypes';
+import { Actions, GridContext } from '../context/GridContext';
+import { BaseCellProps, CellChange, TextCell } from '../types/gridTypes';
 
-const Cell = ({
-  column,
-  columnIndex,
-  rowIndex,
-  style,
-  value,
-}: BaseCellProps) => {
-  const { state, dispatch } = useContext(GridContext);
+type TextCellProps = BaseCellProps & {
+  onCellsChanged: (changedCell: CellChange<TextCell>[]) => void;
+  cell: TextCell;
+};
+
+const TextCell = ({ cell, ...props }: TextCellProps) => {
+  const { dispatch } = useContext(GridContext);
 
   const handleDoubleClick = (
     event: React.MouseEvent,
-    rowIndex: number,
-    columnIndex: number,
     value: string | number
   ) => {
     const el = event.currentTarget?.parentElement;
@@ -49,16 +46,18 @@ const Cell = ({
       });
     }
   };
+  const value = cell.text || '';
 
   return (
     <Flex
       w={'100%'}
       h={'100%'}
       px={1}
-      onClick={(e) => handleDoubleClick(e, rowIndex, columnIndex, value)}
+      onClick={(e) => handleDoubleClick(e, value)}
       dangerouslySetInnerHTML={{ __html: String(value) }}
+      alignItems={'center'}
     />
   );
 };
 
-export default Cell;
+export default TextCell;

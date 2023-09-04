@@ -43,14 +43,7 @@ const WorkbookHeader = ({
   const { dsId } = router.query;
   const disabledIconStyle = { color: '#bdbdbd', cursor: 'no-drop' };
   return (
-    <Box
-      position={'sticky'}
-      top={'0'}
-      width={'full'}
-      zIndex={'99'}
-      borderWidth={'0.4px'}
-      borderColor={'grey.700'}
-    >
+    <Box position={'sticky'} top={'0'} width={'full'} zIndex={'99'}>
       <Flex
         background={'white.500'}
         py={'3'}
@@ -130,38 +123,6 @@ const WorkbookHeader = ({
           </Button>
         </Flex>
       </Flex>
-
-      <Flex
-        background={'gray.200'}
-        height={9}
-        borderRadius={'13px'}
-        my={1}
-        mx={3}
-        alignItems={'center'}
-        px={1}
-        py={3}
-      >
-        <PlusCircle style={{ margin: '6px', ...disabledIconStyle }} />
-        <ChartPie
-          style={{
-            margin: '6px',
-            ...disabledIconStyle,
-          }}
-        />
-
-        <PivotIcon
-          addNewPivotSheet={addNewPivotSheet}
-          range={sheet?.name || ''}
-          enabled={
-            sheetsData[selectedSheetIndex].sheet_type !== SheetType.PIVOT_TABLE
-          }
-        />
-        <Percent style={{ margin: '6px', ...disabledIconStyle }} />
-        <Sigma style={{ margin: '6px', ...disabledIconStyle }} />
-        <Image src={Zero} alt={'Zero'} style={disabledIconStyle} />
-        <Image src={DoubleZero} alt={'Double Zero'} style={disabledIconStyle} />
-      </Flex>
-      <Box bg={'white.DEFAULT'} h={'8'}></Box>
     </Box>
   );
 };
