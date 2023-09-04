@@ -179,18 +179,11 @@ async def vlookup(
     spreadsheets_service: SpreadsheetService = Depends(),
     compute_query_action: ComputeQueryAction = Depends(),
 ):
-    data = await compute_query_action.compute_query(
-        dto=TransientSpreadsheetsDto(
-            datasourceId=dto.datasourceId,
-            query=dto.query,
-            ai_query=dto.aiQuery,
-            is_sql=dto.isSql,
-        )
-    )
-    data = [
-        list(row.values())[dto.columnRange[0]: dto.columnRange[1] + 1]
-        for row in data.data
-    ]
-    return await spreadsheets_service.get_vlookup(
-        data=data, search_key=dto.searchKey, column_index=dto.index
+    credential = await compute_query_action.get_credentials(dto.datasourceId)
+    return await spreadsheets_service.compute_vlookup(
+        search_query=dto.searchQuery,
+        credential=credential,
+        lookup_query=dto.lookupQuery,
+        lookup_column=dto.lookupColumn,
+        search_column=dto.searchKeyColumn,
     )

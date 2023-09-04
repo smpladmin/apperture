@@ -57,12 +57,10 @@ class CreateWorkBookDto(BaseModel):
 
 class VlookupDto(BaseModel):
     datasourceId: str
-    query: str
-    isSql: bool = False
-    aiQuery: Optional[AIQuery]
-    searchKey: str
-    columnRange: List[int]
-    index: int
+    searchQuery: str
+    lookupQuery: str
+    searchKeyColumn: str
+    lookupColumn: str
 
 
 class WorkBookResponse(WorkBook, ModelResponse):

@@ -17,16 +17,21 @@ from domain.spreadsheets.models import (
     WorkBook,
     DatabaseClient,
 )
+from repositories.clickhouse.parser.query_parser import QueryParser
 from repositories.clickhouse.spreadsheet import Spreadsheets
 from repositories.mysql.mysql import MySql
 
 
 class SpreadsheetService:
     def __init__(
-        self, spreadsheets: Spreadsheets = Depends(), mysql: MySql = Depends()
+        self,
+        spreadsheets: Spreadsheets = Depends(),
+        mysql: MySql = Depends(),
+        parser: QueryParser = Depends(),
     ):
         self.spreadsheets = spreadsheets
         self.mysql = mysql
+        self.parser = parser
 
     async def add_workbook(self, workbook: WorkBook):
         workbook.updated_at = workbook.created_at
@@ -81,6 +86,7 @@ class SpreadsheetService:
         client: DatabaseClient = DatabaseClient.CLICKHOUSE,
     ) -> ComputedSpreadsheet:
         query = self.cleanse_query_string(query)
+        query = self.parser.assign_query_limit(query)
         result = (
             self.spreadsheets.get_transient_spreadsheet(
                 query=query,
@@ -159,13 +165,23 @@ class SpreadsheetService:
             data=response["data"], headers=response["headers"], sql=""
         )
 
-    async def get_vlookup(
-        self, data: List[List[str]], search_key: str, column_index: int
+    async def compute_vlookup(
+        self,
+        credential: ClickHouseCredential,
+        search_query: str,
+        lookup_query: str,
+        search_column: str,
+        lookup_column: str,
     ):
-        if (column_index < 1) or (column_index > len(data[0])):
-            return "#NULL!"
-        for row in data:
-            if row[0] == search_key:
-                return row[column_index - 1]
-
-        return "#N/A"
+        search_query = self.cleanse_query_string(search_query)
+        search_query = self.parser.assign_query_limit(search_query)
+        lookup_query = self.cleanse_query_string(lookup_query)
+        result = self.spreadsheets.get_vlookup(
+            search_query=search_query,
+            lookup_query=lookup_query,
+            search_column=search_column,
+            lookup_column=lookup_column,
+            username=credential.username,
+            password=credential.password,
+        )
+        return result

@@ -52,7 +52,33 @@ class QueryParser:
             else query_string
         )
 
+    def count_selected_columns(self, query: str):
+        # Use regular expressions to find the SELECT clause and the columns inside it.
+        select_match = re.search(r"SELECT (.+?) FROM", query, re.IGNORECASE)
+
+        if select_match:
+            # Extract the content inside the SELECT clause.
+            select_clause = select_match.group(1)
+
+            # Split the SELECT clause by commas, considering quoted strings.
+            selected_columns = []
+            for match in re.finditer(r'(?:[^,"]|"(?:\\.|[^"])*")+', select_clause):
+                selected_columns.append(match.group().strip())
+
+            num_columns = len(selected_columns)
+
+            return num_columns
+
+        # If no SELECT clause is found, return 0 to indicate no columns are selected.
+        return 0
+
     def assign_query_limit(self, query_string):
+        num_cols = self.count_selected_columns(query=query_string)
+
+        query_string = (
+            query_string
+            + f" ORDER BY {','.join([str(i) for i in range(1, num_cols + 1)])}"
+        )
         limit = re.search("LIMIT\s(.\w+)", query_string, re.IGNORECASE)
         if not limit:
             query_string = re.sub("\s*;", "", query_string)

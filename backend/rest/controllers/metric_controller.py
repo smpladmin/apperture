@@ -168,9 +168,7 @@ async def validate_metric_formula(
     )
 
 
-@router.delete(
-    "/metrics/{metric_id}", dependencies=[Depends(validate_app_user)]
-)
+@router.delete("/metrics/{metric_id}", dependencies=[Depends(validate_app_user)])
 async def delete_metrics(
     metric_id: str,
     datasource_id: str,
