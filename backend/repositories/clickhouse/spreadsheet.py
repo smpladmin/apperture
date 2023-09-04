@@ -156,8 +156,6 @@ class Spreadsheets(EventsBase):
         rows: List[PivotAxisDetail],
         columns: List[PivotAxisDetail],
         values: List[PivotValueDetail],
-        username: str,
-        password: str,
         rowRange: List[Union[str, int, float]],
         columnRange: List[Union[str, int, float]],
     ):
@@ -197,19 +195,13 @@ class Spreadsheets(EventsBase):
             )
         )
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
-        restricted_client = self.clickhouse.get_connection_for_user(
-            username=username,
-            password=password,
-        )
 
-        return restricted_client.query(query=query).result_set
+        return self.execute_get_query(query=query, parameters={})
 
     def compute_ordered_distinct_values(
         self,
         reference_query: str,
         values: List[PivotAxisDetail],
-        username: str,
-        password: str,
         aggregate: PivotAxisDetail,
         show_total: bool,
         axisRange: List[Union[str, int, float]] = None,
@@ -240,9 +232,5 @@ class Spreadsheets(EventsBase):
 
         query = query.limit(limit)
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
-        restricted_client = self.clickhouse.get_connection_for_user(
-            username=username,
-            password=password,
-        )
 
-        return restricted_client.query(query=query).result_set
+        return self.execute_get_query(query=query, parameters={})

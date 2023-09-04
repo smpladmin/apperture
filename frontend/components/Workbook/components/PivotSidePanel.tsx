@@ -12,7 +12,7 @@ import SearchableListDropdown from '@components/SearchableDropdown/SearchableLis
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { getTransientPivot } from '@lib/services/workbookService';
 import {
-  TransientPivotToSheetData,
+  transientPivotToSheetData,
   constructPivotAxisDetailByName,
   constructPivotValueDetailByName,
 } from '../util';
@@ -118,7 +118,7 @@ export const PivotTableSidePanel = ({
           (response.data.rows || response.data.columns || response.data.data)
         ) {
           const { rows, columns, data } = response.data;
-          const [headers, sheetData] = TransientPivotToSheetData(
+          const [headers, sheetData] = transientPivotToSheetData(
             rows,
             selectedRows[0]?.name || 'Rows',
             columns,
@@ -154,7 +154,7 @@ export const PivotTableSidePanel = ({
       };
       fetchPivotData();
     } else {
-      const [headers, sheetData] = TransientPivotToSheetData();
+      const [headers, sheetData] = transientPivotToSheetData();
       setSheetsData((prevSheetData: TransientSheetData[]) => {
         const tempSheetsData = cloneDeep(prevSheetData);
         tempSheetsData[selectedSheetIndex].headers = headers;

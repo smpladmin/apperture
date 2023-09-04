@@ -303,9 +303,6 @@ const FormulaDropDownBox = ({
     <Flex width={'full'}>
       <Box position={'relative'} width={'full'} ref={dropdownRef}>
         <InputGroup>
-          {/* {formula || isFocus ? (
-            <InputLeftElement h={'6'}>=</InputLeftElement>
-          ) : null} */}
           <Input
             ref={inputRef}
             value={formula}
