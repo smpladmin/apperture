@@ -62,16 +62,6 @@ class SpreadSheetDto(BaseModel):
     column_format: Optional[dict[int, Formatting]]
 
 
-class Format(BaseModel):
-    percent: bool
-    decimal: int
-
-
-class Formatting(BaseModel):
-    format: Format
-    width: int
-
-
 class CreateWorkBookDto(BaseModel):
     name: str
     spreadsheets: List[SpreadSheetDto]
