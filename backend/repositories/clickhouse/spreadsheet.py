@@ -150,7 +150,7 @@ class Spreadsheets(EventsBase):
 
         return restricted_client.query(query=query)
 
-    def compute_transient_pivot(
+    def build_compute_transient_pivot(
         self,
         sql: str,
         rows: List[PivotAxisDetail],
@@ -195,10 +195,30 @@ class Spreadsheets(EventsBase):
             )
         )
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
+        return query
 
-        return self.execute_get_query(query=query, parameters={})
+    def compute_transient_pivot(
+        self,
+        sql: str,
+        rows: List[PivotAxisDetail],
+        columns: List[PivotAxisDetail],
+        values: List[PivotValueDetail],
+        rowRange: List[Union[str, int, float]],
+        columnRange: List[Union[str, int, float]],
+    ):
+        return self.execute_get_query(
+            query=self.build_compute_transient_pivot(
+                sql=sql,
+                rows=rows,
+                columns=columns,
+                values=values,
+                rowRange=rowRange,
+                columnRange=columnRange,
+            ),
+            parameters={},
+        )
 
-    def compute_ordered_distinct_values(
+    def build_compute_ordered_distinct_values(
         self,
         reference_query: str,
         values: List[PivotAxisDetail],
@@ -232,5 +252,27 @@ class Spreadsheets(EventsBase):
 
         query = query.limit(limit)
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
+        return query
 
-        return self.execute_get_query(query=query, parameters={})
+    def compute_ordered_distinct_values(
+        self,
+        reference_query: str,
+        values: List[PivotAxisDetail],
+        aggregate: PivotAxisDetail,
+        show_total: bool,
+        axisRange: List[Union[str, int, float]] = None,
+        rangeAxis: PivotAxisDetail = None,
+        limit=50,
+    ):
+        return self.execute_get_query(
+            query=self.build_compute_ordered_distinct_values(
+                reference_query=reference_query,
+                values=values,
+                aggregate=aggregate,
+                show_total=show_total,
+                axisRange=axisRange,
+                rangeAxis=rangeAxis,
+                limit=limit,
+            ),
+            parameters={},
+        )
