@@ -101,6 +101,8 @@ const QueryEditor = ({
       toUpdateSheets[selectedSheetIndex].subHeaders = getSubheaders(
         toUpdateSheets[selectedSheetIndex].sheet_type
       );
+      toUpdateSheets[selectedSheetIndex].columnFormat = {};
+
       setError('');
     } else {
       setError((response as ErrorResponse)?.error?.detail);

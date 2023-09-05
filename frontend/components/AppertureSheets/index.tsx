@@ -6,6 +6,7 @@ import {
   Column,
   InputHeaderCell,
   Row,
+  SelectedColumn,
   TextCell,
 } from './types/gridTypes';
 
@@ -26,7 +27,7 @@ const AppertureSheet = ({
   onCellsChanged: (
     changedCell: CellChange<TextCell | InputHeaderCell>[]
   ) => void;
-  onColumnsSelections?: (columnIds: string[]) => void;
+  onColumnsSelections?: (columnIds: SelectedColumn[]) => void;
 }) => {
   return (
     <GridContextProvider>

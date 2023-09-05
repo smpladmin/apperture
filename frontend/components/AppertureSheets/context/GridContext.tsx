@@ -1,13 +1,9 @@
 import { ReactElement, createContext, useReducer } from 'react';
+import { SelectedColumn } from '../types/gridTypes';
 
 type CurrentCell = {
   row: number;
   column: number;
-};
-
-type SelectedColumn = {
-  columnId: string;
-  columnIndex: number;
 };
 
 export type InitialStateType = {

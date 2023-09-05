@@ -154,7 +154,7 @@ const Connections = ({
         tempSheetsData[selectedSheetIndex].subHeaders = getSubheaders(
           tempSheetsData[selectedSheetIndex]?.sheet_type
         );
-
+        tempSheetsData[selectedSheetIndex].columnFormat = {};
         return tempSheetsData;
       });
       setShowColumns(true);
