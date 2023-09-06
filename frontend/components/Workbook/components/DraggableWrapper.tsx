@@ -1,4 +1,5 @@
 import { Flex } from '@chakra-ui/react';
+import { SheetChartDetail } from '@lib/domain/workbook';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { CSSProperties, useRef, useState } from 'react';
 
@@ -17,7 +18,13 @@ const style: CSSProperties = {
   width: 200,
   cursor: 'move',
 };
-export const SheetChart = ({ x = 50, y = 50, height = 722, width = 435 }) => {
+export const SheetChart = ({
+  data,
+  updateChart,
+}: {
+  data: SheetChartDetail;
+  updateChart: (timestamp: number, updatedChartData: SheetChartDetail) => void;
+}) => {
   const boxRef = useRef<HTMLDivElement>(null);
   const [isActive, setIsActive] = useState(false);
   useOnClickOutside(boxRef, () => setIsActive(false));
@@ -25,22 +32,30 @@ export const SheetChart = ({ x = 50, y = 50, height = 722, width = 435 }) => {
   return (
     <Rnd
       default={{
-        x: 50,
-        y: 50,
-        width: 722,
-        height: 435,
+        x: data?.x || 50,
+        y: data?.y || 50,
+        width: data?.width || 722,
+        height: data?.height || 435,
       }}
       style={{
         border: isActive ? '1px solid blue' : '1px solid #bdbdbd',
         background: 'white',
         borderRadius: '4px',
       }}
-      onDragStop={(e, data) => {
-        const { x, y } = data;
-        console.log({ x, y });
+      onDragStop={(e, dragData) => {
+        const { x, y } = dragData;
+        const newData = data;
+        newData.x = x;
+        newData.y = y;
+        updateChart(data.timestamp, newData);
       }}
-      onResizeStop={(e) => {
-        console.log(e);
+      onResizeStop={(_, __, elem, ___, position) => {
+        const newData = data;
+        newData.height = elem.clientHeight;
+        newData.width = elem.clientWidth;
+        newData.x = position.x;
+        newData.y = position.y;
+        updateChart(data.timestamp, newData);
       }}
     >
       {isActive ? <ResizeMarker /> : null}
@@ -49,6 +64,9 @@ export const SheetChart = ({ x = 50, y = 50, height = 722, width = 435 }) => {
         h={'full'}
         ref={boxRef}
         onClick={() => setIsActive(true)}
+        onKeyDown={(e) => {
+          console.log(e);
+        }}
       ></Flex>
     </Rnd>
   );

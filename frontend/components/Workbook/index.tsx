@@ -16,6 +16,7 @@ import { useRouter } from 'next/router';
 import {
   AIQuery,
   ColumnType,
+  SheetChartDetail,
   SheetType,
   SpreadSheetColumn,
   SubHeaderColumn,
@@ -63,6 +64,7 @@ import { SheetChart } from './components/DraggableWrapper';
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
     return savedWorkbook.spreadsheets.map((sheet) => ({
+      charts: [],
       ...sheet,
       data: [],
       subHeaders: sheet?.subHeaders || getSubheaders(sheet?.sheet_type),
@@ -85,6 +87,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
       is_sql: true,
       sheet_type: SheetType.SIMPLE_SHEET,
       edit_mode: false,
+      charts: [],
       meta: {
         dsId: '',
         selectedColumns: [],
@@ -748,6 +751,22 @@ const Workbook = ({
     return connectionSource?.fields || [];
   }, [connections, selectedSheetIndex, sheetsData]);
 
+  const addNewChartToSheet = () => {
+    console.log('Adding new chart', sheetsData[selectedSheetIndex].charts);
+    const tempSheetData = cloneDeep(prevSheetsData);
+    const charts = tempSheetData[selectedSheetIndex].charts;
+    charts.push({
+      x: 50,
+      y: 50,
+      timestamp: Date.now(),
+      height: 435,
+      width: 722,
+      name: 'Untitled Chart',
+    });
+    tempSheetData[selectedSheetIndex].charts = charts;
+    setSheetsData(tempSheetData);
+  };
+
   const addNewPivotSheet = () => {
     const referenceSheet = sheetsData[selectedSheetIndex];
 
@@ -760,6 +779,7 @@ const Workbook = ({
       query: '',
       data: [],
       headers: [],
+      charts: [],
       subHeaders: getSubheaders(SheetType.SIMPLE_SHEET),
       is_sql: true,
       sheet_type: SheetType.PIVOT_TABLE,
@@ -792,6 +812,7 @@ const Workbook = ({
           handleSave={handleSaveOrUpdateWorkbook}
           setShowSqlEditor={setShowSqlEditor}
           addNewPivotSheet={addNewPivotSheet}
+          addNewChartToSheet={addNewChartToSheet}
           sheetsData={sheetsData}
           selectedSheetIndex={selectedSheetIndex}
         />

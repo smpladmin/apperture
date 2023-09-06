@@ -24,6 +24,7 @@ type WorkbookHeaderProps = {
   handleSave: Function;
   setShowSqlEditor: Function;
   addNewPivotSheet: () => void;
+  addNewChartToSheet: () => void;
   sheetsData: TransientSheetData[];
   selectedSheetIndex: number;
 };
@@ -35,6 +36,7 @@ const WorkbookHeader = ({
   handleSave,
   setShowSqlEditor,
   addNewPivotSheet,
+  addNewChartToSheet,
   sheetsData,
   selectedSheetIndex,
 }: WorkbookHeaderProps) => {
@@ -145,6 +147,7 @@ const WorkbookHeader = ({
           style={{
             margin: '6px',
           }}
+          onClick={addNewChartToSheet}
         />
 
         <PivotIcon

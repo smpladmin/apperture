@@ -2,28 +2,21 @@ import {
   CellChange,
   CellLocation,
   Column,
-  DefaultCellTypes,
   Id,
   MenuOption,
   ReactGrid,
-  Row,
   SelectionMode,
 } from '@silevis/reactgrid';
 import React, { useEffect, useState } from 'react';
 import {
-  ColumnType,
+  SheetChartDetail,
   SpreadSheetColumn,
-  SubHeaderColumn,
-  SubHeaderColumnType,
   TransientSheetData,
 } from '@lib/domain/workbook';
-import { DropdownHeaderCell, DropdownHeaderTemplate } from './DropdownHeader';
-import { InputHeaderCell, InputHeaderTemplate } from './InputHeader';
-import { WHITE_DEFAULT } from '@theme/index';
+import { DropdownHeaderTemplate } from './DropdownHeader';
+import { InputHeaderTemplate } from './InputHeader';
 import {
   convertColumnValuesToPercentage,
-  hasMetricColumnInPivotSheet,
-  isSheetPivotOrBlank,
   fillHeaders,
   fillRows,
   increaseDecimalPlacesInColumnValues,
@@ -62,6 +55,7 @@ const Grid = ({
   setSheetsData: Function;
 }) => {
   const sheet = sheetsData[selectedSheetIndex];
+  const [charts, setCharts] = useState(sheet.charts || []);
   const [columns, setColumns] = useState<Column[]>(
     getColumns(fillHeaders(sheet.headers))
   );
@@ -90,6 +84,21 @@ const Grid = ({
       )
     );
   }, [sheet, selectedSheetIndex]);
+
+  useEffect(() => {
+    setCharts(sheetsData[selectedSheetIndex].charts);
+  }, [sheetsData[selectedSheetIndex].charts, selectedSheetIndex]);
+
+  const updateChart = (
+    timestamp: number,
+    updatedChartData: SheetChartDetail
+  ) => {
+    setCharts(
+      charts.map((chart) =>
+        chart.timestamp === timestamp ? updatedChartData : chart
+      )
+    );
+  };
 
   const handleColumnResize = (ci: Id, width: number) => {
     setColumns((prevColumns) => {
@@ -186,7 +195,13 @@ const Grid = ({
         }}
         onContextMenu={handleContextMenu}
       />
-      <SheetChart />
+      {charts?.map((chart, index) => (
+        <SheetChart
+          updateChart={updateChart}
+          data={chart}
+          key={chart.timestamp}
+        />
+      ))}
     </div>
   );
 };
