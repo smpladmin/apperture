@@ -56,6 +56,16 @@ class AIQuery(BaseModel):
     database: str
 
 
+class Format(BaseModel):
+    percent: bool
+    decimal: int
+
+
+class Formatting(BaseModel):
+    format: Optional[Format]
+    width: Optional[int]
+
+
 class Spreadsheet(BaseModel):
     name: str
     headers: List[SpreadSheetColumn]
@@ -66,6 +76,7 @@ class Spreadsheet(BaseModel):
     sheet_type: Optional[SpreadsheetType]
     meta: Optional[dict]
     ai_query: Optional[AIQuery]
+    column_format: Optional[dict[str, Formatting]]
 
 
 class WorkBook(Document):

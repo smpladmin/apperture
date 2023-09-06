@@ -33,12 +33,14 @@ function PivotIcon({
   };
   return (
     <Flex
+      w={'6'}
+      h={'6'}
       opacity={enabled ? 1 : 0.4}
-      margin={'6px'}
       padding={'4px'}
       borderRadius={'2px'}
       alignContent={'center'}
-      backgroundColor={isHovered ? 'white.200' : 'none'}
+      justifyContent={'center'}
+      backgroundColor={isHovered ? 'grey.400' : 'none'}
     >
       <Image
         src={PivotTableGif}

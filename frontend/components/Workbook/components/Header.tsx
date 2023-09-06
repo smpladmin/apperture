@@ -8,7 +8,7 @@ import {
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { ArrowLeft, Code } from 'phosphor-react';
-
+import React from 'react';
 import { TransientSheetData } from '@lib/domain/workbook';
 
 type WorkbookHeaderProps = {
