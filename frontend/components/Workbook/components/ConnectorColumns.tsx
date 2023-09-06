@@ -84,8 +84,12 @@ const ConnectorColumns = ({
   useEffect(() => {
     if (sheetData?.edit_mode) return;
 
+    const filteredSelectedColumns = selectedColumns.filter(
+      (column) => !column.startsWith('=VLOOKUP')
+    );
+
     const parsedColumns = parseHeaders(
-      selectedColumns,
+      filteredSelectedColumns,
       sheetsData[selectedSheetIndex].headers
     );
 

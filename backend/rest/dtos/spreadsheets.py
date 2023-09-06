@@ -72,6 +72,7 @@ class VlookupDto(BaseModel):
     lookupQuery: str
     searchKeyColumn: str
     lookupColumn: str
+    lookupIndexColumn: str
 
 
 class WorkBookResponse(WorkBook, ModelResponse):

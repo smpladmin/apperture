@@ -273,6 +273,7 @@ class SpreadsheetService:
         lookup_query: str,
         search_column: str,
         lookup_column: str,
+        lookup_index_column: str,
     ):
         search_query = self.cleanse_query_string(search_query)
         search_query = self.parser.assign_query_limit(search_query)
@@ -284,5 +285,6 @@ class SpreadsheetService:
             lookup_column=lookup_column,
             username=credential.username,
             password=credential.password,
+            lookup_index_column=lookup_index_column
         )
         return result

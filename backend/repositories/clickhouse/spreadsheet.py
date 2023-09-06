@@ -250,8 +250,9 @@ class Spreadsheets(EventsBase):
         lookup_query: str,
         search_column: str,
         lookup_column: str,
+        lookup_index_column: str,
     ):
-        query = f"with lookup_query as ({lookup_query}), map as (SELECT DISTINCT ON ({search_column}) {search_column}, {lookup_column} AS lookup_column FROM lookup_query ORDER BY {search_column}), cte as ({search_query}) select lookup_column from cte left join map on cte.{search_column} = map.{search_column}"
+        query = f"with lookup_query as ({lookup_query}), map as (SELECT DISTINCT ON ({lookup_index_column}) {lookup_index_column}, {lookup_column} AS lookup_column FROM lookup_query ORDER BY {search_column}), cte as ({search_query}) select lookup_column from cte left join map on cte.{search_column} = map.{lookup_index_column}"
 
         return query
 
@@ -261,6 +262,7 @@ class Spreadsheets(EventsBase):
         lookup_query: str,
         search_column: str,
         lookup_column: str,
+        lookup_index_column: str,
         username: Union[str, None],
         password: Union[str, None],
     ):
@@ -269,8 +271,9 @@ class Spreadsheets(EventsBase):
             lookup_query=lookup_query,
             search_column=search_column,
             lookup_column=lookup_column,
+            lookup_index_column=lookup_index_column,
         )
         result = self.execute_query_for_restricted_client(
             query=query, username=username, password=password
         )
-        return [item for sublist in result.result_set for item in sublist]
+        return [item for sublist in result.result_set for item in sublist] if result else []

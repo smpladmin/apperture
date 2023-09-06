@@ -135,28 +135,19 @@ export const getTransientPivot = async (
 
 export const vlookup = async (
   datasourceId: string,
-  query: string,
-  isSql: Boolean = false,
-  searchKey: string,
-  columnRange: number[],
-  index: number,
-  aiQuery?: AIQuery
+  searchQuery: string,
+  lookupQuery: string,
+  searchKeyColumn: string,
+  lookupColumn: string,
+  lookupIndexColumn: string
 ) => {
   const res = await ApperturePost(`/workbooks/vlookup`, {
     datasourceId,
-    query,
-    isSql,
-    searchKey,
-    columnRange,
-    index,
-    aiQuery: aiQuery
-      ? {
-          nl_query: aiQuery.nlQuery,
-          word_replacements: aiQuery.wordReplacements,
-          table: aiQuery.table,
-          database: aiQuery.database,
-        }
-      : null,
+    searchQuery,
+    lookupQuery,
+    searchKeyColumn,
+    lookupColumn,
+    lookupIndexColumn,
   });
-  return res.data;
+  return res.data || [];
 };

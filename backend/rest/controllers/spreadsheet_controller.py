@@ -238,4 +238,5 @@ async def vlookup(
         lookup_query=dto.lookupQuery,
         lookup_column=dto.lookupColumn,
         search_column=dto.searchKeyColumn,
+        lookup_index_column=dto.lookupIndexColumn,
     )

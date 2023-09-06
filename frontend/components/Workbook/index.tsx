@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useRef,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import WorkbookHeader from './components/Header';
 import {
   getTransientSpreadsheets,
@@ -38,7 +32,7 @@ import Footer from '@components/Workbook/components/Footer';
 import QueryEditor from './components/QueryEditor';
 import EmptySheet from './components/EmptySheet';
 import { getConnectionsForApp } from '@lib/services/connectionService';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep, isEqual, range } from 'lodash';
 import {
   evaluateExpression,
   expressionTokenRegex,
@@ -58,7 +52,6 @@ import AIButton from '@components/AIButton';
 import Coachmarks from './components/Coachmarks';
 import { AppertureUser } from '@lib/domain/user';
 import Toolbar from './components/Toolbar';
-import { ErrorResponse } from '@lib/services/util';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -490,21 +483,21 @@ const Workbook = ({
   };
 
   const fetchVlookUpValue = async (
-    searchKey: string,
-    columnRange: number[],
-    index: number
+    lookupQuery: string | undefined,
+    searchKeyColumn: string,
+    lookupColumn: string | undefined,
+    lookupIndexColumn: string | undefined
   ) => {
     const sheet = sheetsData[selectedSheetIndex];
     const response = await vlookup(
       sheet?.meta?.dsId || (dsId as string),
       sheet.query,
-      sheet?.is_sql,
-      searchKey,
-      columnRange,
-      index,
-      sheet.aiQuery
+      lookupQuery || '',
+      searchKeyColumn,
+      lookupColumn || '',
+      lookupIndexColumn || ''
     );
-    return generateColumnFromValue(response);
+    return response;
   };
 
   const getOperands = (newHeader: string) =>
@@ -566,13 +559,16 @@ const Workbook = ({
     columnId: string,
     columnIndex: number
   ) => {
-    const tempSheetsData = cloneDeep(sheetsData);
-    const existingHeaders = tempSheetsData[selectedSheetIndex]?.headers;
+    const existingHeaders = sheetsData[selectedSheetIndex]?.headers;
     const oldColumnId = columnId;
 
     const existingHeaderIndex = existingHeaders.findIndex(
       (header) => header.name === oldColumnId
     );
+
+    const columns = existingHeaders.map((header) => header.name);
+    columns[columnIndex] = header.name;
+    const paddedColumns = padArray(columns);
 
     const paddingHeadersLength = getPaddingHeadersLength(
       columnId,
@@ -586,39 +582,38 @@ const Workbook = ({
       })
     );
 
-    if (existingHeaderIndex !== -1) {
-      // update exisitng header and subheader
-      // for updating subheaders, need to add 1 to maintain sheets 'index' column
-      tempSheetsData[selectedSheetIndex].headers[existingHeaderIndex] = header;
-      // tempSheetsData[selectedSheetIndex].subHeaders[
-      //   existingHeaderIndex + 1
-      // ].name = header.name;
-      tempSheetsData[selectedSheetIndex].subHeaders[existingHeaderIndex].name =
-        header.name;
-    } else {
-      // add new headers and subheaders
-      const columnIndex = columnId.charCodeAt(0) - 65;
-      tempSheetsData[selectedSheetIndex].headers = [
-        ...existingHeaders,
-        ...paddedHeaders,
-        header,
-      ];
-      tempSheetsData[selectedSheetIndex].subHeaders[columnIndex].name =
-        header.name;
-    }
+    setSheetsData((prevSheetsData: TransientSheetData[]) => {
+      const tempSheetsData = cloneDeep(prevSheetsData);
+      if (existingHeaderIndex !== -1) {
+        // update exisitng header and subheader
+        // for updating subheaders, need to add 1 to maintain sheets 'index' column
+        tempSheetsData[selectedSheetIndex].headers[columnIndex] = header;
+        tempSheetsData[selectedSheetIndex].subHeaders[columnIndex + 1].name =
+          header.name;
+      } else {
+        // add new headers and subheaders
+        tempSheetsData[selectedSheetIndex].headers = [
+          ...existingHeaders,
+          ...paddedHeaders,
+          header,
+        ];
+        tempSheetsData[selectedSheetIndex].subHeaders[columnIndex].name =
+          header.name;
+      }
 
-    // update sheet data with evaluated data
-    tempSheetsData[selectedSheetIndex].data = tempSheetsData[
-      selectedSheetIndex
-    ].data.map((item, index) => ({
-      ...item,
-      [header.name]: {
-        original: evaluatedData[index] || '',
-        display: evaluatedData[index] || '',
-      },
-    }));
-
-    setSheetsData(tempSheetsData);
+      tempSheetsData[selectedSheetIndex].meta!!.selectedColumns = paddedColumns;
+      // update sheet data with evaluated data
+      tempSheetsData[selectedSheetIndex].data = tempSheetsData[
+        selectedSheetIndex
+      ].data.map((item, index) => ({
+        ...item,
+        [header.name]: {
+          original: evaluatedData[index] || '',
+          display: evaluatedData[index] || '',
+        },
+      }));
+      return tempSheetsData;
+    });
   };
 
   const parseExpression = (prefixHeader: string) => {
@@ -628,14 +623,14 @@ const Workbook = ({
   const extractVlookupParameters = (formula: string): string[] | null => {
     // Regular expression pattern with capturing groups
     const vlookupPattern =
-      /^VLOOKUP\(\s*([^,]+)\s*,\s*([^,]+)\s*,\s*(\d+)\s*,\s*([01])\s*\)$/;
+      /^=VLOOKUP\(\s*([^,]+)\s*,\s*(([^,]+)!)??([A-Z]+:[A-Z]+)\s*,\s*(\d+)\s*,\s*([01])\s*\)$/i;
 
     const match = formula.match(vlookupPattern);
 
     if (match) {
       // Extracted parameters are in the captured groups
-      const [, searchKey, range, index, isSorted] = match;
-      return [searchKey, range, index, isSorted];
+      const [, searchColumn, , lookupSheet, range, index, isSorted] = match;
+      return [searchColumn, lookupSheet, range, index, isSorted];
     } else {
       return null;
     }
@@ -654,27 +649,61 @@ const Workbook = ({
     }
   };
 
+  const findLookupSheet = (name: string) => {
+    return sheetsData.find((sheet) => sheet.name === name);
+  };
+
   const computeVlookup = async (headerText: string) => {
     const parameters = extractVlookupParameters(headerText);
     if (parameters) {
-      const searchKey = parameters[0].trim();
-      const columnRange = extractColumnRange(parameters[1].trim());
-      const index = parseInt(parameters[2].trim());
-      return await fetchVlookUpValue(searchKey, columnRange as number[], index);
+      const [searchKey, lookupSheetName = '', range, rangeIndex] =
+        parameters.map((param) => param.trim());
+
+      const searchColumnIndex = searchKey.charCodeAt(0) - 65;
+      const rangeIndexValue = parseInt(rangeIndex);
+      const columnRange = extractColumnRange(range);
+
+      const lookupSheet = lookupSheetName
+        ? findLookupSheet(lookupSheetName)
+        : sheetsData[selectedSheetIndex];
+
+      const lookupColumn = columnRange
+        ? lookupSheet?.headers[columnRange[0] + rangeIndexValue - 2].name
+        : undefined;
+      const searchColumn =
+        sheetsData[selectedSheetIndex].headers[searchColumnIndex].name;
+      const lookupIndexColumn = columnRange
+        ? lookupSheet?.headers[columnRange[0] - 1].name
+        : undefined;
+      if (searchColumn && lookupIndexColumn && lookupColumn) {
+        const vlookupColumn = await fetchVlookUpValue(
+          lookupSheet?.query,
+          searchColumn,
+          lookupColumn,
+          lookupIndexColumn
+        );
+        if (vlookupColumn.length) {
+          return vlookupColumn;
+        } else {
+          return generateColumnFromValue('#N/A');
+        }
+      } else {
+        return generateColumnFromValue('#VALUE!');
+      }
     } else {
-      return generateColumnFromValue('#VALUE!');
+      return generateColumnFromValue('#NULL!');
     }
   };
 
   const evaluateFormulaHeader = useCallback(
-    (headerText: string, columnId: string, columnIndex: number) => {
+    async (headerText: string, columnId: string, columnIndex: number) => {
       const sheetData = sheetsData[selectedSheetIndex];
 
       const isBlankOrPivotSheet = isSheetPivotOrBlank(sheetData);
 
-      // add 1 for index offset
+      // add 1 for 'index' column offset
       const index = columnIndex
-        ? columnIndex + 1
+        ? columnIndex
         : getHeaderIndex(sheetData, columnId);
 
       if (headerText.match(/^[unique|count]/)) {
@@ -705,7 +734,7 @@ const Workbook = ({
               isClosable: true,
             });
           }
-      } else if (headerText.startsWith('VLOOKUP')) {
+      } else if (headerText.toLowerCase().startsWith('=vlookup')) {
         const vlookupHeader = {
           name: headerText,
           type: ColumnType.COMPUTED_HEADER,
@@ -714,7 +743,8 @@ const Workbook = ({
         updateSelectedSheetDataAndHeaders(
           vlookupColumnData,
           vlookupHeader,
-          columnId
+          columnId,
+          columnIndex
         );
       } else {
         const newHeader = {
@@ -805,7 +835,7 @@ const Workbook = ({
       type: ColumnType.COMPUTED_HEADER,
     };
     let evaluatedData;
-    if (headerText.startsWith('VLOOKUP')) {
+    if (headerText.toLowerCase().startsWith('=vlookup')) {
       evaluatedData = await computeVlookup(headerText);
     } else {
       const operands = getOperands(newHeader.name);
