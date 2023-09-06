@@ -181,77 +181,97 @@ class SpreadsheetService:
         )
         return result.result_set
 
+    def get_ordered_distinct_values(self, query, values, **kwargs):
+        return self.spreadsheets.compute_ordered_distinct_values(
+            reference_query=query,
+            values=values,
+            **kwargs,
+        )
+
+    def compute_transient_pivot(self, sql, rows, columns, values, **kwargs):
+        return self.spreadsheets.compute_transient_pivot(
+            sql=sql,
+            rows=rows,
+            columns=columns,
+            values=values,
+            **kwargs,
+        )
+
+    def populate_data(self, data, result_set):
+        for result in result_set:
+            if not data.get(result[0]):
+                data[result[0]] = {}
+            data[result[0]][result[1]] = result[2]
+        return data
+
+    def populate_row_totals(self, data, unique_rows, key):
+        for row in unique_rows:
+            if not data.get(row[0]):
+                data[row[0]] = {}
+            data[row[0]][key] = row[1]
+        return data
+
+    def populate_column_totals(self, data, unique_columns, key):
+        for column in unique_columns:
+            if not data.get(key):
+                data[key] = {}
+            data[key][column[0]] = column[1]
+        return data
+
     def compute_pivot(
         self,
         query: str,
         rows: List[PivotAxisDetail],
         columns: List[PivotAxisDetail],
         values: List[PivotValueDetail],
-        username,
-        password,
     ):
         data = {}
-
-        distinct_columns, distinct_rows = None, None
+        unique_columns, unique_rows = None, None
         column_names, row_names = [], []
+
         if rows:
-            distinct_rows = self.spreadsheets.compute_ordered_distinct_values(
-                reference_query=query,
-                values=rows,
-                username=username,
-                password=password,
+            unique_rows = self.get_ordered_distinct_values(
+                query,
+                rows,
                 aggregate=values[0] if values else None,
-                show_total=(rows[0].show_total or (not columns and values)),
+                show_total=rows[0].show_total or (not columns and values),
             )
-            row_names = [row[0] for row in distinct_rows]
+            row_names = [row[0] for row in unique_rows]
 
         if columns:
-            distinct_columns = self.spreadsheets.compute_ordered_distinct_values(
-                reference_query=query,
-                values=columns,
-                username=username,
-                password=password,
+            unique_columns = self.get_ordered_distinct_values(
+                query,
+                columns,
                 aggregate=values[0] if values else None,
                 axisRange=row_names,
                 rangeAxis=rows[0] if rows else None,
-                show_total=(columns[0].show_total or (not rows and values)),
+                show_total=columns[0].show_total or (not rows and values),
                 limit=25,
             )
-            column_names = [column[0] for column in distinct_columns]
+            column_names = [column[0] for column in unique_columns]
 
         if rows and columns and values:
             try:
-                result_set = self.spreadsheets.compute_transient_pivot(
-                    sql=query,
-                    rows=rows,
-                    columns=columns,
-                    values=values,
-                    username=username,
-                    password=password,
+                result_set = self.compute_transient_pivot(
+                    query,
+                    rows,
+                    columns,
+                    values,
                     rowRange=row_names,
                     columnRange=column_names,
                 )
-                for result in result_set:
-                    if not data.get(result[0]):
-                        data[result[0]] = {}
-                    data[result[0]][result[1]] = result[2]
+                data = self.populate_data(data, result_set)
             except Exception as e:
                 raise BusinessError("Could not generate pivot table, invalid values")
 
         if rows and (rows[0].show_total or (not columns and values)):
             key = f"SUM of {values[0].name}" if (not columns and values) else "Total"
-            for row in distinct_rows:
-                if not data.get(row[0]):
-                    data[row[0]] = {}
-                data[row[0]][key] = row[1]
+            data = self.populate_row_totals(data, unique_rows, key)
             column_names.append(key)
 
         if columns and (columns[0].show_total or (not rows and values)):
             key = f"SUM of {values[0].name}" if (not rows and values) else "Total"
-            for column in distinct_columns:
-                if not data.get(key):
-                    data[key] = {}
-                data[key][column[0]] = column[1]
+            data = self.populate_column_totals(data, unique_columns, key)
             row_names.append(key)
 
         return {
