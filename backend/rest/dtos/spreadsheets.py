@@ -59,7 +59,7 @@ class SpreadSheetDto(BaseModel):
     sheet_type: SpreadsheetType
     meta: dict
     ai_query: Optional[AIQuery]
-    column_format: Optional[dict[int, Formatting]]
+    column_format: Optional[dict[str, Formatting]]
 
 
 class CreateWorkBookDto(BaseModel):
