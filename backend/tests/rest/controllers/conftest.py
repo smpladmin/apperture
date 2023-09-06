@@ -812,6 +812,7 @@ def workbook_data():
                 "meta": {"dsId": "", "selectedColumns": []},
                 "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                 "word_replacements": [],
+                "column_format": None,
             }
         ],
         "datasourceId": "23412414123123",
@@ -850,6 +851,7 @@ def spreadsheets_service():
                 edit_mode=True,
                 meta={"dsId": "", "selectedColumns": []},
                 sheet_type=SpreadsheetType.SIMPLE_SHEET,
+                column_format=None,
             )
         ],
         enabled=True,

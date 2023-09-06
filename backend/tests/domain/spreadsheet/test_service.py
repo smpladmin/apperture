@@ -130,6 +130,7 @@ class TestSpreadsheetService:
                         table="events",
                         database="default",
                     ),
+                    column_format=None,
                 )
             ],
             datasource_id=PydanticObjectId("63d0a7bfc636cee15d81f579"),
@@ -165,6 +166,7 @@ class TestSpreadsheetService:
                         "table": "events",
                         "database": "default",
                     },
+                    "column_format": None,
                 }
             ],
             "enabled": True,
