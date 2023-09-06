@@ -573,7 +573,7 @@ const Workbook = ({
 
     const columns = existingHeaders.map((header) => header.name);
     columns[columnIndex] = header.name;
-    const paddedColumns = padArray(columns);
+    const paddedColumns = padEmptyItemsInArray(columns);
 
     const paddingHeadersLength = getPaddingHeadersLength(
       columnId,
