@@ -1,9 +1,3 @@
-import {
-  CellLocation,
-  Id,
-  MenuOption,
-  SelectionMode,
-} from '@silevis/reactgrid';
 import React, { useEffect, useState } from 'react';
 import {
   ColumnType,
@@ -13,21 +7,20 @@ import {
   TransientSheetData,
 } from '@lib/domain/workbook';
 import {
-  convertColumnValuesToPercentage,
   hasMetricColumnInPivotSheet,
   isSheetPivotOrBlank,
   fillHeaders,
   fillRows,
-  increaseDecimalPlacesInColumnValues,
-  decreaseDecimalPlacesInColumnValues,
+  formatNumber,
 } from '@components/Workbook/util';
-import { cloneDeep } from 'lodash';
+
 import AppertureSheet from '@components/AppertureSheets';
 import {
   CellChange,
   Column,
   InputHeaderCell,
   Row,
+  SelectedColumn,
   TextCell,
 } from '@components/AppertureSheets/types/gridTypes';
 
@@ -71,14 +64,11 @@ const getSubHeaderRow = (
           return {
             type: 'inputHeader',
             text: originalHeaders?.[index]?.name || '',
-            disable: false,
+            disable: true,
             showAddButton,
             disableAddButton,
             showSuggestions: isPivotOrBlankSheet,
             properties,
-            style: {
-              overflow: 'initial',
-            },
           };
         }
 
@@ -112,11 +102,15 @@ const getRows = (
     rowId: idx,
     cells: headers
       .filter((header) => header.name !== 'index')
-      .map((header) => {
-        const val =
-          data[header.name]?.display === 0
-            ? '0'
-            : data[header.name]?.display || '';
+      .map((header, index) => {
+        const originalValue = data[header.name]?.original;
+        let val = originalValue === 0 ? '0' : originalValue || '';
+
+        const format = sheetData?.columnFormat?.[index.toString()]?.format;
+
+        if (format && val) {
+          val = formatNumber(val, format);
+        }
 
         const value = typeof val === 'object' ? JSON.stringify(val) : val;
         return { type: 'text', text: value };
@@ -132,6 +126,7 @@ const Grid = ({
   properties,
   setSheetsData,
   setIsFormulaEdited,
+  setSelectedColumns,
 }: {
   selectedSheetIndex: number;
   sheetsData: TransientSheetData[];
@@ -140,6 +135,7 @@ const Grid = ({
   properties: string[];
   setSheetsData: Function;
   setIsFormulaEdited: Function;
+  setSelectedColumns: Function;
 }) => {
   const sheet = sheetsData[selectedSheetIndex];
 
@@ -206,60 +202,9 @@ const Grid = ({
     }
   };
 
-  const handleContextMenu = (
-    selectedRowIds: Id[],
-    selectedColIds: Id[],
-    selectionMode: SelectionMode,
-    menuOptions: MenuOption[],
-    selectedRanges: CellLocation[][]
-  ): MenuOption[] => {
-    if (selectionMode === 'column')
-      return [
-        {
-          id: 'percentage',
-          label: 'Convert to percentage',
-          handler: (selectedRowIds, selectedColIds) => {
-            setSheetsData((prevSheet: TransientSheetData[]) => {
-              const sheetsCopy = cloneDeep(prevSheet);
-              const data = sheetsCopy[selectedSheetIndex].data;
-              sheetsCopy[selectedSheetIndex].data =
-                convertColumnValuesToPercentage(selectedColIds, data);
-              return sheetsCopy;
-            });
-          },
-        },
-        {
-          id: 'floatingValue',
-          label: 'Increase Decimal Place',
-          handler: (selectedRowIds, selectedColIds) => {
-            setSheetsData((prevSheet: TransientSheetData[]) => {
-              const sheetsCopy = cloneDeep(prevSheet);
-              const data = sheetsCopy[selectedSheetIndex].data;
-              sheetsCopy[selectedSheetIndex].data =
-                increaseDecimalPlacesInColumnValues(selectedColIds, data);
-              return sheetsCopy;
-            });
-          },
-        },
-        {
-          id: 'floatingValue2',
-          label: 'Decrease Decimal Place',
-          handler: (selectedRowIds, selectedColIds) => {
-            setSheetsData((prevSheet: TransientSheetData[]) => {
-              const sheetsCopy = cloneDeep(prevSheet);
-              const data = sheetsCopy[selectedSheetIndex].data;
-              sheetsCopy[selectedSheetIndex].data =
-                decreaseDecimalPlacesInColumnValues(selectedColIds, data);
-              return sheetsCopy;
-            });
-          },
-        },
-      ];
-
-    return [];
+  const handleColumnSelections = (selectedColumns: SelectedColumn[]) => {
+    setSelectedColumns(selectedColumns);
   };
-
-  const handleColumnSelections = (selectedColumns: string[]) => {};
 
   return (
     <AppertureSheet

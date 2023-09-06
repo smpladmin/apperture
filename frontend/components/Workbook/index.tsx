@@ -42,7 +42,7 @@ import {
   isOperand,
   isSheetPivotOrBlank,
   isdigit,
-  padArray,
+  padEmptyItemsInArray,
   parseHeaders,
 } from './util';
 import { DimensionParser, Metricparser } from '@lib/utils/parser';
@@ -52,6 +52,7 @@ import AIButton from '@components/AIButton';
 import Coachmarks from './components/Coachmarks';
 import { AppertureUser } from '@lib/domain/user';
 import Toolbar from './components/Toolbar';
+import { SelectedColumn } from '@components/AppertureSheets/types/gridTypes';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -66,6 +67,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
         selectedColumns: [],
       },
       aiQuery: sheet?.ai_query,
+      columnFormat: sheet?.column_format || {},
     }));
   }
   return [
@@ -78,6 +80,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
       is_sql: true,
       sheet_type: SheetType.SIMPLE_SHEET,
       edit_mode: false,
+      columnFormat: {},
       meta: {
         dsId: '',
         selectedColumns: [],
@@ -131,6 +134,7 @@ const Workbook = ({
     data: null,
   });
   const [loadingConnections, setLoadingConnections] = useState(false);
+  const [selectedColumns, setSelectedColumns] = useState<SelectedColumn[]>([]);
 
   const prevSheetsData = usePrevious(sheetsData);
 
@@ -264,6 +268,7 @@ const Workbook = ({
         meta: sheet.meta,
         sheet_type: sheet.sheet_type,
         aiQuery: sheet.aiQuery,
+        column_format: sheet.columnFormat,
       };
     });
 
@@ -756,8 +761,8 @@ const Workbook = ({
         const columns = headers.map((header) => header.name);
         headers[columnIndex] = newHeader;
         columns[columnIndex] = headerText.toUpperCase();
-        const paddedColumns = padArray(columns);
-        const paddedHeaders = padArray(headers, {
+        const paddedColumns = padEmptyItemsInArray(columns);
+        const paddedHeaders = padEmptyItemsInArray(headers, {
           name: '',
           type: ColumnType.PADDING_HEADER,
         });
@@ -901,6 +906,7 @@ const Workbook = ({
       is_sql: true,
       sheet_type: SheetType.PIVOT_TABLE,
       edit_mode: false,
+      columnFormat: {},
       meta: {
         ...referenceSheet?.meta,
         referenceSheetQuery: referenceSheet.query,
@@ -936,6 +942,8 @@ const Workbook = ({
           addNewPivotSheet={addNewPivotSheet}
           sheetsData={sheetsData}
           selectedSheetIndex={selectedSheetIndex}
+          selectedColumns={selectedColumns}
+          setSheetsData={setSheetsData}
         />
         <Flex
           direction={'row'}
@@ -994,6 +1002,7 @@ const Workbook = ({
                     properties={getProperties}
                     setSheetsData={setSheetsData}
                     setIsFormulaEdited={setIsFormulaEdited}
+                    setSelectedColumns={setSelectedColumns}
                   />
                 )}
               </Box>
@@ -1046,6 +1055,7 @@ const Workbook = ({
               sheetsCopy[selectedSheetIndex].edit_mode = true;
               sheetsCopy[selectedSheetIndex].sheet_type =
                 SheetType.SIMPLE_SHEET;
+              sheetsCopy[selectedSheetIndex].columnFormat = {};
               setSheetsData(sheetsCopy);
               setTriggerSheetFetch(triggerSheetFetch + 1);
             }}

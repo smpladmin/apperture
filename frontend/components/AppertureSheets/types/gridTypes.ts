@@ -12,8 +12,10 @@ export type BaseCellProps = {
 };
 
 type Id = number | string;
-type CellValue = {
-  value: string | number;
+
+export type SelectedColumn = {
+  columnId: string;
+  columnIndex: number;
 };
 
 export type CellChange<T> = {

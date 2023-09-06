@@ -11,11 +11,8 @@ import {
   SubHeaderColumnType,
   TransientSheetData,
 } from '@lib/domain/workbook';
-import { DefaultCellTypes, Id, Row } from '@silevis/reactgrid';
-import { WHITE_DEFAULT } from '@theme/index';
+import { Id } from '@silevis/reactgrid';
 import { cloneDeep, isEmpty, range } from 'lodash';
-import { DropdownHeaderCell } from './components/Grid/DropdownHeader';
-import { InputHeaderCell } from './components/Grid/InputHeader';
 
 export const expressionTokenRegex = /[A-Za-z]+|[0-9]+|[\+\*-\/\^\(\)]/g;
 
@@ -38,7 +35,6 @@ export const fillRows = (data: any[], headers: SpreadSheetColumn[]) => {
     columns.forEach((key) => {
       row[key.name] = { original: '', display: '' };
     });
-    // row['index'] = { original: index, display: index };
     return row;
   });
 
@@ -400,7 +396,7 @@ export const generateQuery = (
 
 // returns headers and formatted data
 
-export const TransientPivotToSheetData = (
+export const transientPivotToSheetData = (
   rows: string[] = [],
   rowName: string = 'Row',
   columns: string[] = [],
@@ -486,5 +482,39 @@ export const parseHeaders = (columns: string[], headers: SpreadSheetColumn[]) =>
     return expression;
   });
 
-export const padArray = (arr: any[], value: any = '') =>
-  Array.from(arr, (_, i) => (!(i in arr) ? value : arr[i]));
+export const padEmptyItemsInArray = (arr: any[], padValue: any = '') =>
+  Array.from(arr, (_, i) => (!(i in arr) ? padValue : arr[i]));
+
+export const calculateMaxDecimalPoints = (
+  arr: {
+    original: string | number;
+    display: string | number;
+  }[]
+): number => {
+  return arr.reduce((maxDecimals, item) => {
+    if (typeof item.original === 'number') {
+      const decimalCount = (item.original.toString().split('.')[1]?.length ||
+        0) as number;
+      return Math.max(maxDecimals, decimalCount);
+    }
+    return maxDecimals;
+  }, 0);
+};
+
+export const formatNumber = (
+  value: number | string,
+  format: { percent: boolean; decimal: number }
+) => {
+  if (typeof value !== 'number') {
+    return value;
+  }
+
+  const { percent, decimal } = format;
+
+  if (percent) {
+    // Convert the number to a percentage
+    value *= 100;
+  }
+  const formattedValue = value.toFixed(decimal);
+  return percent ? `${formattedValue}%` : formattedValue;
+};

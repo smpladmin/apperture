@@ -6,16 +6,10 @@ import {
   EditablePreview,
   Flex,
 } from '@chakra-ui/react';
-import { ChartPie, Percent, PlusCircle, Sigma } from '@phosphor-icons/react';
 import { useRouter } from 'next/router';
 import { ArrowLeft, Code } from 'phosphor-react';
-import Zero from '@assets/icons/NumberCircleZero.svg';
-import DoubleZero from '@assets/icons/NumberCircleDoubleZero.svg';
-
 import React from 'react';
-import Image from 'next/image';
-import PivotIcon from './PivotIcon';
-import { SheetType, TransientSheetData } from '@lib/domain/workbook';
+import { TransientSheetData } from '@lib/domain/workbook';
 
 type WorkbookHeaderProps = {
   name: string;

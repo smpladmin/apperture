@@ -19,6 +19,7 @@ import {
   Column,
   InputHeaderCell,
   Row,
+  SelectedColumn,
   TextCell,
 } from '../types/gridTypes';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
@@ -45,7 +46,7 @@ const Sheet = ({
   onCellsChanged: (
     changedCell: CellChange<TextCell | InputHeaderCell>[]
   ) => void;
-  onColumnsSelections?: (columnIds: string[]) => void;
+  onColumnsSelections?: (columnIds: SelectedColumn[]) => void;
 }) => {
   const { state, dispatch } = useContext(GridContext);
   const {
@@ -143,8 +144,7 @@ const Sheet = ({
 
   useEffect(() => {
     // on column selection, call prop onColumnSelection
-    const selectedColumnIds = selectedColumns.map((column) => column.columnId);
-    onColumnsSelections?.(selectedColumnIds);
+    onColumnsSelections?.(selectedColumns);
   }, [selectedColumns]);
 
   useEffect(() => {

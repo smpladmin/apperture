@@ -147,14 +147,12 @@ class Spreadsheets(EventsBase):
 
         return restricted_client.query(query=query)
 
-    def compute_transient_pivot(
+    def build_compute_transient_pivot(
         self,
         sql: str,
         rows: List[PivotAxisDetail],
         columns: List[PivotAxisDetail],
         values: List[PivotValueDetail],
-        username: str,
-        password: str,
         rowRange: List[Union[str, int, float]],
         columnRange: List[Union[str, int, float]],
     ):
@@ -194,19 +192,33 @@ class Spreadsheets(EventsBase):
             )
         )
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
-        restricted_client = self.clickhouse.get_connection_for_user(
-            username=username,
-            password=password,
+        return query
+
+    def compute_transient_pivot(
+        self,
+        sql: str,
+        rows: List[PivotAxisDetail],
+        columns: List[PivotAxisDetail],
+        values: List[PivotValueDetail],
+        rowRange: List[Union[str, int, float]],
+        columnRange: List[Union[str, int, float]],
+    ):
+        return self.execute_get_query(
+            query=self.build_compute_transient_pivot(
+                sql=sql,
+                rows=rows,
+                columns=columns,
+                values=values,
+                rowRange=rowRange,
+                columnRange=columnRange,
+            ),
+            parameters={},
         )
 
-        return restricted_client.query(query=query).result_set
-
-    def compute_ordered_distinct_values(
+    def build_compute_ordered_distinct_values(
         self,
         reference_query: str,
         values: List[PivotAxisDetail],
-        username: str,
-        password: str,
         aggregate: PivotAxisDetail,
         show_total: bool,
         axisRange: List[Union[str, int, float]] = None,
@@ -237,9 +249,29 @@ class Spreadsheets(EventsBase):
 
         query = query.limit(limit)
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
-        restricted_client = self.clickhouse.get_connection_for_user(
-            username=username,
-            password=password,
+        return query
+
+    def compute_ordered_distinct_values(
+        self,
+        reference_query: str,
+        values: List[PivotAxisDetail],
+        aggregate: PivotAxisDetail,
+        show_total: bool,
+        axisRange: List[Union[str, int, float]] = None,
+        rangeAxis: PivotAxisDetail = None,
+        limit=50,
+    ):
+        return self.execute_get_query(
+            query=self.build_compute_ordered_distinct_values(
+                reference_query=reference_query,
+                values=values,
+                aggregate=aggregate,
+                show_total=show_total,
+                axisRange=axisRange,
+                rangeAxis=rangeAxis,
+                limit=limit,
+            ),
+            parameters={},
         )
 
         return restricted_client.query(query=query).result_set
