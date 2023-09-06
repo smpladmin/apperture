@@ -22,8 +22,8 @@ from rest.dtos.spreadsheets import (
 )
 from rest.middlewares import get_user, validate_jwt
 from rest.middlewares.get_user import get_user_id
-from utils.errors import BusinessError
 from rest.middlewares.validate_app_user import validate_app_user, validate_library_items
+from utils.errors import BusinessError
 
 router = APIRouter(
     tags=["workbooks"],
@@ -203,22 +203,16 @@ async def delete_segments(
 @router.post(
     "/workbooks/spreadsheets/pivot/transient", dependencies=[Depends(validate_app_user)]
 )
-async def compute_transientpivot(
+async def compute_transient_pivot(
     dto: ComputePivotDto,
     spreadsheets_service: SpreadsheetService = Depends(),
-    compute_query_action: ComputeQueryAction = Depends(),
 ):
-    clickhouse_credential = await compute_query_action.get_credentials(
-        datasource_id=dto.dsId
-    )
     try:
         return spreadsheets_service.compute_pivot(
             query=dto.query,
             rows=dto.rows,
             columns=dto.columns,
             values=dto.values,
-            username=clickhouse_credential.username,
-            password=clickhouse_credential.password,
         )
     except BusinessError as e:
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")

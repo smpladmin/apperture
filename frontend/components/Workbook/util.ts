@@ -396,7 +396,7 @@ export const generateQuery = (
 
 // returns headers and formatted data
 
-export const TransientPivotToSheetData = (
+export const transientPivotToSheetData = (
   rows: string[] = [],
   rowName: string = 'Row',
   columns: string[] = [],
