@@ -11,14 +11,13 @@ from domain.spreadsheets.models import (
     PivotValueDetail,
     SortingOrder,
 )
-from repositories.clickhouse.parser.query_parser import QueryParser
 from repositories.clickhouse.spreadsheet import Spreadsheets
 
 
 class TestSpreadSheetRepository:
     def setup_method(self):
         self.spreadsheet_repo = Spreadsheets(
-            clickhouse=MagicMock(), parser=QueryParser()
+            clickhouse=MagicMock()
         )
         self.pivot_axis_row_with_total = PivotAxisDetail(
             name="user_id",

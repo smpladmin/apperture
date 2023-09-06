@@ -19,6 +19,7 @@ from domain.spreadsheets.models import (
     WorkBook,
 )
 from domain.spreadsheets.service import SpreadsheetService
+from repositories.clickhouse.parser.query_parser import QueryParser
 
 
 class TestSpreadsheetService:
@@ -27,12 +28,12 @@ class TestSpreadsheetService:
         WorkBook.get_settings = MagicMock()
         WorkBook.insert = AsyncMock()
         self.ds_id = "636a1c61d715ca6baae65611"
-        self.service = SpreadsheetService(spreadsheets=self.spreadsheet)
+        self.service = SpreadsheetService(spreadsheets=self.spreadsheet, parser=QueryParser())
         self.query = """
         SELECT  event_name -- selecting event
         FROM  events
         WHERE timestamp>=toDate(2023-02-11)"""
-        self.cleaned_query = """SELECT  event_name          FROM  events         WHERE timestamp>=toDate(2023-02-11)"""
+        self.cleaned_query = """SELECT  event_name          FROM  events         WHERE timestamp>=toDate(2023-02-11) ORDER BY 1 LIMIT 500"""
         self.spreadsheet.get_transient_spreadsheet = MagicMock()
         self.column_names = ["event_name"]
         self.result_set = [

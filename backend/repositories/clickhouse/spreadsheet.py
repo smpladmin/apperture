@@ -4,7 +4,7 @@ from typing import List, Union
 from fastapi import Depends
 from pypika import Case, ClickHouseQuery, Criterion, Field
 from pypika import Order as SortOrder
-from pypika import Table, AliasedQuery
+from pypika import Table
 from pypika import functions as fn
 
 from clickhouse.clickhouse import Clickhouse

@@ -662,7 +662,7 @@ const Workbook = ({
     const parameters = extractVlookupParameters(headerText);
     if (parameters) {
       const [searchKey, lookupSheetName = '', range, rangeIndex] =
-        parameters.map((param) => param.trim());
+        parameters.map((param) => param?.trim());
 
       const searchColumnIndex = searchKey.charCodeAt(0) - 65;
       const rangeIndexValue = parseInt(rangeIndex);
