@@ -24,7 +24,9 @@ import { useRouter } from 'next/router';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import CheckboxDropdown from './CheckboxDropdown';
-import ContentEditable, { ContentEditableEvent } from 'react-contenteditable';
+import ContentEditable, {
+  ContentEditableEvent,
+} from 'react-controlled-contenteditable';
 
 enum ActiveCellState {
   BLANK = 'BLANK',
@@ -49,7 +51,7 @@ const FormulaDropDownBox = ({
   cell: any;
   onCellChanged: Function;
 }) => {
-  // const [formula, setFormula] = useState(cell.text);
+  const [formula1, setFormula1] = useState(cell.text);
   const formula = useRef(cell.text);
   const [isFocus, setIsFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -82,13 +84,9 @@ const FormulaDropDownBox = ({
   const router = useRouter();
   const { dsId } = router.query;
 
-  // useEffect(() => {
-  //   setFormula(cell.text);
-  // }, [cell.text]);
-
   useEffect(() => {
-    console.log({ formula1: formula });
-  }, [formula]);
+    setFormula1(cell.text);
+  }, [cell.text]);
 
   const handleSubmitFormula = () => {
     // if (formula) {
@@ -106,8 +104,7 @@ const FormulaDropDownBox = ({
     //   }
     // }
 
-    console.log({ formula: formula.current });
-    onCellChanged({ text: formula.current });
+    onCellChanged({ text: formula1 });
     // inputRef?.current?.blur();
   };
 
@@ -221,7 +218,7 @@ const FormulaDropDownBox = ({
     // parser to extract formula, operand, operator and values
     if (activeCellState === ActiveCellState.BLANK) return;
     try {
-      const cellStateObj = FormulaParser.parse(formula);
+      const cellStateObj = FormulaParser.parse(formula1);
       setCellState(cellStateObj);
     } catch (err) {
       console.log(err);
@@ -305,26 +302,27 @@ const FormulaDropDownBox = ({
     //   suggestFormula(input);
     // }
     formula.current = input;
+    setFormula1(e.target.value);
     // setFormula(input);
   };
 
-  useEffect(() => {
-    // Focus the contentEditable div and move the cursor to the end when the component mounts.
-    if (editableRef?.current) {
-      editableRef?.current.focus();
-      const textNode = editableRef?.current.firstChild;
-      if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-        const range = document.createRange();
-        range.setStart(textNode, textNode.length);
-        range.setEnd(textNode, textNode.length);
-        const selection = window.getSelection();
-        if (selection) {
-          selection.removeAllRanges();
-          selection.addRange(range);
-        }
-      }
-    }
-  }, []);
+  // useEffect(() => {
+  //   // Focus the contentEditable div and move the cursor to the end when the component mounts.
+  //   if (editableRef?.current) {
+  //     editableRef?.current.focus();
+  //     const textNode = editableRef?.current.firstChild;
+  //     if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+  //       const range = document.createRange();
+  //       range.setStart(textNode, textNode.length);
+  //       range.setEnd(textNode, textNode.length);
+  //       const selection = window.getSelection();
+  //       if (selection) {
+  //         selection.removeAllRanges();
+  //         selection.addRange(range);
+  //       }
+  //     }
+  //   }
+  // }, []);
 
   return (
     <Flex width={'full'}>
@@ -388,13 +386,13 @@ const FormulaDropDownBox = ({
           style={{ paddingLeft: '4px' }}
         /> */}
 
-        <div
+        {/* <div
           ref={editableRef}
           contentEditable
-          onBeforeInput={(e: any) => {
-            console.log({ e });
-            if (e?.data) formula.current = e.data;
-          }}
+          // onBeforeInput={(e: any) => {
+          //   console.log({ e });
+          //   if (e?.data) formula.current = e.data;
+          // }}
           suppressContentEditableWarning
           style={{
             border: '1px solid #ccc',
@@ -408,10 +406,26 @@ const FormulaDropDownBox = ({
             e.code === 'Enter' && handleSubmitFormula();
             setSuggestions([]);
           }}
-          dangerouslySetInnerHTML={{ __html: formula.current }}
-        >
-          {cell.text}
-        </div>
+          dangerouslySetInnerHTML={{ __html: cell.text }}
+        ></div> */}
+        <ContentEditable
+          onChange={(e: ContentEditableEvent) => {
+            setFormula1(e.target.value);
+          }}
+          style={{
+            border: '1px solid #ccc',
+            padding: '5px',
+            // minHeight: '30px',
+          }}
+          onKeyDown={(e) => {
+            // e.stopPropagation();
+            e.code === 'Enter' && handleSubmitFormula();
+            setSuggestions([]);
+          }}
+          onClick={(e) => e.stopPropagation()}
+          html={formula1}
+          tagName="div"
+        />
         {showCheckboxDropdown ? (
           <CheckboxDropdown
             data={suggestions}

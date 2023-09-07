@@ -1,4 +1,9 @@
-import WorkbookComponent from '@components/Workbook';
+import dynamic from 'next/dynamic';
+// import WorkbookComponent from '@components/Workbook';
+const WorkbookComponent = dynamic(() => import('@components/Workbook'), {
+  ssr: false,
+});
+
 import { Workbook } from '@lib/domain/workbook';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { _getSavedWorkbook } from '@lib/services/workbookService';

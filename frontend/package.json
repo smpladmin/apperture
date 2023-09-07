@@ -42,6 +42,7 @@
     "react": "18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-contenteditable": "^3.3.7",
+    "react-controlled-contenteditable": "^0.19.4",
     "react-date-range": "^1.4.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
