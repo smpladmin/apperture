@@ -1,6 +1,6 @@
 import { Box, Flex } from '@chakra-ui/react';
 import { throttle } from 'lodash';
-import React, { useCallback, useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import {
   VariableSizeGrid as Grid,
   GridOnScrollProps,
@@ -279,6 +279,10 @@ const Sheet = ({
     []
   );
 
+  const [highlightedColumns, setHighlightedColumns] = useState<
+    Record<number, { color: string }>
+  >({});
+
   return (
     <Box
       height={'100%'}
@@ -388,12 +392,24 @@ const Sheet = ({
                       };
 
                       const CellToRender = componentMap[cellType];
+                      const borderColor = highlightedColumns[columnIndex]
+                        ? highlightedColumns[columnIndex].color
+                        : 'grey.700';
                       return (
-                        <BaseCell {...baseCellProps}>
+                        <BaseCell
+                          {...baseCellProps}
+                          style={{
+                            ...style,
+                            borderX: `2px dotted ${borderColor}`,
+                          }}
+                        >
                           <CellToRender
                             {...baseCellProps}
                             cell={cell}
                             onCellsChanged={onCellsChanged}
+                            onColumnHighlight={(
+                              h: Record<number, { color: string }>
+                            ) => setHighlightedColumns(h)}
                           />
                         </BaseCell>
                       );

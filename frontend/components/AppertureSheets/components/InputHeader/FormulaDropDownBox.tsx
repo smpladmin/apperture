@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Text, useToast } from '@chakra-ui/react';
 import { BLUE_MAIN, GREY_600, WHITE_DEFAULT } from '@theme/index';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Function, Plus, SquaresFour } from 'phosphor-react';
 import { SubHeaderColumnType } from '@lib/domain/workbook';
 import {
@@ -16,6 +16,10 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import CheckboxDropdown from './CheckboxDropdown';
 import { highlightFormula } from './util';
+import {
+  Actions,
+  GridContext,
+} from '@components/AppertureSheets/context/GridContext';
 
 enum ActiveCellState {
   BLANK = 'BLANK',
@@ -36,11 +40,14 @@ type CellState = {
 const FormulaDropDownBox = ({
   cell,
   onCellChanged,
+  onColumnHighlight,
 }: {
   cell: any;
   onCellChanged: Function;
+  onColumnHighlight: Function;
 }) => {
   const [formula, setFormula] = useState(cell.text);
+  const { dispatch } = useContext(GridContext);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
@@ -255,8 +262,21 @@ const FormulaDropDownBox = ({
 
   const handleChange = (e: any) => {
     const _formula = e.currentTarget.textContent || '';
+
     setFormula(_formula);
+
+    // dispatch({
+    //   type: Actions.SET_HIGHLIGHTED_COLUMNS,
+    //   payload: columnColorMapping,
+    // });
   };
+
+  useEffect(() => {
+    if (formula) {
+      const { columnColorMapping } = highlightFormula(formula);
+      onColumnHighlight(columnColorMapping);
+    }
+  }, [formula]);
 
   const handleSubmitFormula = () => {
     if (formula) {
@@ -282,7 +302,9 @@ const FormulaDropDownBox = ({
       <Box position={'relative'} width={'full'} ref={dropdownRef}>
         <Box position={'relative'}>
           <Flex
-            dangerouslySetInnerHTML={{ __html: highlightFormula(formula) }}
+            dangerouslySetInnerHTML={{
+              __html: highlightFormula(formula).highlightedFormula,
+            }}
             position={'absolute'}
             top={0}
             right={0}
@@ -298,7 +320,7 @@ const FormulaDropDownBox = ({
             }}
           />
           <Box
-            ref={editableRef}
+            ref={(el) => el?.focus()}
             px={1}
             position={'relative'}
             color={'transparent'}

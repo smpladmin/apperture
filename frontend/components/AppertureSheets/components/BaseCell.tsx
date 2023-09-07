@@ -9,7 +9,12 @@ const BaseCell = ({ children, ...props }: BaseCellPropsWithChildren) => {
   const { column, rowIndex, columnIndex, style } = props;
 
   const { state, dispatch } = useContext(GridContext);
-  const { currentCell, selectedColumns } = state;
+  const {
+    currentCell,
+    selectedColumns,
+    isHeaderCellInEditMode,
+    highlightedColumns,
+  } = state;
 
   const columnId = column.columnId;
   const isCellSelected = selectedColumns.some(
@@ -40,6 +45,11 @@ const BaseCell = ({ children, ...props }: BaseCellPropsWithChildren) => {
     if (selectedColumns.length)
       dispatch({ type: Actions.SET_SELECTED_COLUMNS, payload: [] });
   };
+
+  const highlightColumn =
+    isHeaderCellInEditMode && highlightedColumns[columnIndex];
+  const highlightColor = highlightedColumns[columnIndex]?.color;
+
   return (
     <Flex
       className="base-cell"
@@ -48,7 +58,7 @@ const BaseCell = ({ children, ...props }: BaseCellPropsWithChildren) => {
       height={6}
       borderRightWidth={isCellSelected ? '1px' : '0.4px'}
       borderLeftWidth={isCellSelected && isLeftmostCellSelected ? '1px' : '0'}
-      backgroundColor={isCellSelected ? 'rgba(53,121,248,.35)' : 'transparent'}
+      backgroundColor={highlightColumn ? highlightColor : 'transparent'}
       borderBottomWidth={'0.4px'}
       borderColor={
         isCellSelected || currentActiveCell ? 'blue.500' : 'grey.700'

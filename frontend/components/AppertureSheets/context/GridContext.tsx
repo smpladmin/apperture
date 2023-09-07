@@ -19,6 +19,7 @@ export type InitialStateType = {
   currentCellValue: string;
   isSheetActive: boolean;
   isHeaderCellInEditMode: boolean;
+  highlightedColumns: Record<number, { color: string }>;
 };
 
 export interface ContextType {
@@ -35,6 +36,7 @@ export enum Actions {
   SET_CURRENT_CELL_VALUE = 'SET_CURRENT_CELL_VALUE',
   SET_SHEET_ACTIVE = 'SET_SHEET_ACTIVE',
   SET_HEADER_CELL_IN_EDIT_MODE = 'SET_HEADER_CELL_IN_EDIT_MODE',
+  SET_HIGHLIGHTED_COLUMNS = 'SET_HIGHLIGHTED_COLUMNS',
 }
 
 export type GridActions =
@@ -67,6 +69,10 @@ export type GridActions =
       payload: boolean;
     }
   | {
+      type: Actions.SET_HIGHLIGHTED_COLUMNS;
+      payload: Record<number, { color: string }>;
+    }
+  | {
       type: Actions.SET_SHEET_ACTIVE;
       payload: boolean;
     };
@@ -80,6 +86,7 @@ const initialState: InitialStateType = {
   currentCellValue: '',
   isSheetActive: true,
   isHeaderCellInEditMode: false,
+  highlightedColumns: {},
 };
 
 export const GridContext = createContext<ContextType>({
@@ -112,6 +119,12 @@ const gridStateReducer = (state = initialState, action: GridActions) => {
     }
     case Actions.SET_HEADER_CELL_IN_EDIT_MODE: {
       return { ...state, isHeaderCellInEditMode: action.payload };
+    }
+    case Actions.SET_HEADER_CELL_IN_EDIT_MODE: {
+      return { ...state, isHeaderCellInEditMode: action.payload };
+    }
+    case Actions.SET_HIGHLIGHTED_COLUMNS: {
+      return { ...state, highlightedColumns: { ...action.payload } };
     }
     default:
       return state;

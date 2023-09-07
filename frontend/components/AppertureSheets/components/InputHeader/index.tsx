@@ -14,11 +14,13 @@ import {
 type InputHeaderCellProps = BaseCellProps & {
   cell: InputHeaderCell;
   onCellsChanged: (changedCell: CellChange<InputHeaderCell>[]) => void;
+  onColumnHighlight: (highlight: any) => void;
 };
 
 const InputHeaderCell = ({
   cell,
   onCellsChanged,
+  onColumnHighlight,
   ...props
 }: InputHeaderCellProps) => {
   const { rowIndex, column, columnIndex } = props;
@@ -39,11 +41,14 @@ const InputHeaderCell = ({
     }
   };
 
+  console.log('rerender');
+
   return (
     <>
       {isHeaderCellInEditMode && isHeaderCellCurrentlyEdited ? (
         <FormulaDropDownBox
           cell={cell}
+          onColumnHighlight={onColumnHighlight}
           onCellChanged={(updatedCell: Partial<typeof cell>) => {
             const changedCell: CellChange<InputHeaderCell> = {
               rowId: rowIndex,
