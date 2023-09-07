@@ -18,6 +18,7 @@ export type InitialStateType = {
   editableCellStyle: React.CSSProperties;
   currentCellValue: string;
   isSheetActive: boolean;
+  isHeaderCellInEditMode: boolean;
 };
 
 export interface ContextType {
@@ -33,6 +34,7 @@ export enum Actions {
   SET_EDITABLE_CELL_STYLE = 'SET_EDITABLE_CELL_STYLE',
   SET_CURRENT_CELL_VALUE = 'SET_CURRENT_CELL_VALUE',
   SET_SHEET_ACTIVE = 'SET_SHEET_ACTIVE',
+  SET_HEADER_CELL_IN_EDIT_MODE = 'SET_HEADER_CELL_IN_EDIT_MODE',
 }
 
 export type GridActions =
@@ -61,6 +63,10 @@ export type GridActions =
       payload: string;
     }
   | {
+      type: Actions.SET_HEADER_CELL_IN_EDIT_MODE;
+      payload: boolean;
+    }
+  | {
       type: Actions.SET_SHEET_ACTIVE;
       payload: boolean;
     };
@@ -73,6 +79,7 @@ const initialState: InitialStateType = {
   editableCellStyle: {},
   currentCellValue: '',
   isSheetActive: true,
+  isHeaderCellInEditMode: false,
 };
 
 export const GridContext = createContext<ContextType>({
@@ -102,6 +109,9 @@ const gridStateReducer = (state = initialState, action: GridActions) => {
     }
     case Actions.SET_SHEET_ACTIVE: {
       return { ...state, isSheetActive: action.payload };
+    }
+    case Actions.SET_HEADER_CELL_IN_EDIT_MODE: {
+      return { ...state, isHeaderCellInEditMode: action.payload };
     }
     default:
       return state;

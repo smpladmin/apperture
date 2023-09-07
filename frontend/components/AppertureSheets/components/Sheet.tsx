@@ -55,6 +55,7 @@ const Sheet = ({
     currentCellValue,
     isSheetActive,
     selectedColumns,
+    isHeaderCellInEditMode,
   } = state;
 
   const spreadsheetRef = React.useRef(null);
@@ -148,7 +149,7 @@ const Sheet = ({
   }, [selectedColumns]);
 
   useEffect(() => {
-    if (showEditableCell || !isSheetActive) return;
+    if (showEditableCell || !isSheetActive || isHeaderCellInEditMode) return;
 
     const isInputOrTextArea = (
       element: EventTarget | null
@@ -164,6 +165,8 @@ const Sheet = ({
         return;
       }
       const { key } = event;
+      console.log({ globalKey: key, event });
+
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
         event.preventDefault();
       }
@@ -227,7 +230,7 @@ const Sheet = ({
       document.removeEventListener('keydown', handleKeyPress);
       document.removeEventListener('keyup', handleKeyUp);
     };
-  }, [currentCell, isSheetActive, showEditableCell]);
+  }, [currentCell, isSheetActive, showEditableCell, isHeaderCellInEditMode]);
 
   const IndexCell = ({
     columnIndex,
@@ -429,3 +432,22 @@ const Sheet = ({
 };
 
 export default Sheet;
+
+// useEffect(() => {
+//   // Focus the contentEditable div and move the cursor to the end when the component mounts.
+//   if (editableRef?.current) {
+//     console.log({ editableRef });
+//     editableRef?.current.focus();
+//     const textNode = editableRef?.current.firstChild;
+//     if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+//       const range = document.createRange();
+//       range.setStart(textNode, textNode.length);
+//       range.setEnd(textNode, textNode.length);
+//       const selection = window.getSelection();
+//       if (selection) {
+//         selection.removeAllRanges();
+//         selection.addRange(range);
+//       }
+//     }
+//   }
+// }, []);

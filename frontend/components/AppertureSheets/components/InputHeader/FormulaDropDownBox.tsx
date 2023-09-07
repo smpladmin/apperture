@@ -9,7 +9,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { BLUE_MAIN, GREY_600, WHITE_DEFAULT } from '@theme/index';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Function, Plus, SquaresFour } from 'phosphor-react';
 import { SubHeaderColumnType } from '@lib/domain/workbook';
 import {
@@ -27,6 +27,8 @@ import CheckboxDropdown from './CheckboxDropdown';
 import ContentEditable, {
   ContentEditableEvent,
 } from 'react-controlled-contenteditable';
+import { highlightFormula } from './util';
+import sanitizeHtml from 'sanitize-html';
 
 enum ActiveCellState {
   BLANK = 'BLANK',
@@ -51,14 +53,13 @@ const FormulaDropDownBox = ({
   cell: any;
   onCellChanged: Function;
 }) => {
-  const [formula1, setFormula1] = useState(cell.text);
-  const formula = useRef(cell.text);
+  const [formula, setFormula] = useState(cell.text);
+
   const [isFocus, setIsFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
   const editableRef = useRef<HTMLDivElement>(null);
-
   const dropdownRef = useRef(null);
 
   useOnClickOutside(dropdownRef, () => setSuggestions([]));
@@ -85,28 +86,8 @@ const FormulaDropDownBox = ({
   const { dsId } = router.query;
 
   useEffect(() => {
-    setFormula1(cell.text);
+    setFormula(cell.text);
   }, [cell.text]);
-
-  const handleSubmitFormula = () => {
-    // if (formula) {
-    //   if (
-    //     !formula.match(/^unique/) &&
-    //     cell.columnType === SubHeaderColumnType.DIMENSION
-    //   ) {
-    //     toast({
-    //       title: `Dimension column does not accept BODMAS equation`,
-    //       status: 'error',
-    //       variant: 'subtle',
-    //       isClosable: true,
-    //     });
-    //     return;
-    //   }
-    // }
-
-    onCellChanged({ text: formula1 });
-    // inputRef?.current?.blur();
-  };
 
   const handleAddHeader = () => {
     onCellChanged({ addHeader: true });
@@ -218,7 +199,7 @@ const FormulaDropDownBox = ({
     // parser to extract formula, operand, operator and values
     if (activeCellState === ActiveCellState.BLANK) return;
     try {
-      const cellStateObj = FormulaParser.parse(formula1);
+      const cellStateObj = FormulaParser.parse(formula);
       setCellState(cellStateObj);
     } catch (err) {
       console.log(err);
@@ -287,42 +268,38 @@ const FormulaDropDownBox = ({
     cellState.OPERATOR === 'in';
 
   const handleChange = (e: ContentEditableEvent) => {
-    const input = e.currentTarget.innerText;
-    // const regex = /(?<name>[^\(]*)\(?/;
-    // const name = input.match(regex)?.groups?.name || '';
-    // if (
-    //   cell?.showSuggestions &&
-    //   name &&
-    //   ['count', 'countif', 'unique'].some(
-    //     (fname) =>
-    //       fname.substring(0, name?.length || 0).toLowerCase() ===
-    //       name.toLowerCase()
-    //   )
-    // ) {
-    //   suggestFormula(input);
-    // }
-    formula.current = input;
-    setFormula1(e.target.value);
-    // setFormula(input);
+    e.stopPropagation();
+    const _formula = e.currentTarget.textContent || '';
+    const sanitizeConf = {
+      allowedTags: ['span'],
+      allowedAttributes: { span: ['style'] },
+    };
+
+    // const highlightedFormula = highlightFormula(formula);
+    // const sanitizedContent = sanitizeHtml(highlightedFormula, sanitizeConf);
+    console.log('formula', { formula, hightlight: highlightFormula(_formula) });
+
+    setFormula(_formula);
   };
 
-  // useEffect(() => {
-  //   // Focus the contentEditable div and move the cursor to the end when the component mounts.
-  //   if (editableRef?.current) {
-  //     editableRef?.current.focus();
-  //     const textNode = editableRef?.current.firstChild;
-  //     if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-  //       const range = document.createRange();
-  //       range.setStart(textNode, textNode.length);
-  //       range.setEnd(textNode, textNode.length);
-  //       const selection = window.getSelection();
-  //       if (selection) {
-  //         selection.removeAllRanges();
-  //         selection.addRange(range);
-  //       }
-  //     }
-  //   }
-  // }, []);
+  const handleSubmitFormula = () => {
+    // if (formula) {
+    //   if (
+    //     !formula.match(/^unique/) &&
+    //     cell.columnType === SubHeaderColumnType.DIMENSION
+    //   ) {
+    //     toast({
+    //       title: `Dimension column does not accept BODMAS equation`,
+    //       status: 'error',
+    //       variant: 'subtle',
+    //       isClosable: true,
+    //     });
+    //     return;
+    //   }
+    // }
+
+    onCellChanged({ text: formula });
+  };
 
   return (
     <Flex width={'full'}>
@@ -371,28 +348,16 @@ const FormulaDropDownBox = ({
             disabled={!!cell.disable}
           />
         </InputGroup> */}
-        {/* <ContentEditable
-          // innerRef={editableRef}
-          html={formula} // innerHTML of the editable div
-          disabled={false} // use true to disable editing
-          onChange={handleChange}
-          onClick={(e) => e.stopPropagation()}
-          onBlur={handleSubmitFormula}
-          // onKeyDown={(e) => {
-          //   e.stopPropagation();
-          //   e.code === 'Enter' && handleSubmitFormula();
-          //   setSuggestions([]);
-          // }}
-          style={{ paddingLeft: '4px' }}
-        /> */}
 
-        {/* <div
+        <div
           ref={editableRef}
           contentEditable
-          // onBeforeInput={(e: any) => {
-          //   console.log({ e });
-          //   if (e?.data) formula.current = e.data;
-          // }}
+          onBeforeInput={(e: any) => {
+            console.log({ e });
+            if (e?.data) {
+              handleChange(e);
+            }
+          }}
           suppressContentEditableWarning
           style={{
             border: '1px solid #ccc',
@@ -400,32 +365,29 @@ const FormulaDropDownBox = ({
             // minHeight: '30px',
           }}
           onClick={(e) => e.stopPropagation()}
-          onInput={handleChange}
+          // onInput={handleChange}
           onKeyDown={(e) => {
             e.stopPropagation();
             e.code === 'Enter' && handleSubmitFormula();
             setSuggestions([]);
           }}
-          dangerouslySetInnerHTML={{ __html: cell.text }}
-        ></div> */}
-        <ContentEditable
-          onChange={(e: ContentEditableEvent) => {
-            setFormula1(e.target.value);
-          }}
+          dangerouslySetInnerHTML={{ __html: highlightFormula(formula) }}
+        ></div>
+        {/* <ContentEditable
+          onChange={handleChange}
           style={{
             border: '1px solid #ccc',
             padding: '5px',
-            // minHeight: '30px',
           }}
-          onKeyDown={(e) => {
-            // e.stopPropagation();
-            e.code === 'Enter' && handleSubmitFormula();
-            setSuggestions([]);
-          }}
-          onClick={(e) => e.stopPropagation()}
-          html={formula1}
+          // onKeyDown={(e) => {
+          //   e.code === 'Enter' && handleSubmitFormula();
+          //   setSuggestions([]);
+          // }}
+          // onBlur={handleSubmitFormula}
+          onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          html={highlightFormula(formula)}
           tagName="div"
-        />
+        /> */}
         {showCheckboxDropdown ? (
           <CheckboxDropdown
             data={suggestions}
