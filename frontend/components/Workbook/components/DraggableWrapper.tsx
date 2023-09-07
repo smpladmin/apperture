@@ -66,7 +66,6 @@ export const SheetChart = ({
       chartData.yAxis.map((axes) => axes.name)
     );
 
-    console.log(plotData);
     const NUMBER_OF_COLUMNS = 30;
 
     plot.current.chart = new Column(ref.current!!, {
@@ -109,7 +108,7 @@ export const SheetChart = ({
       },
       animation: false,
       tooltip: {
-        title: (title, datum) => {
+        title: (title) => {
           return title.split('::').slice(1).join('');
         },
       },
@@ -122,12 +121,17 @@ export const SheetChart = ({
     return () => {
       plot.current?.chart?.destroy();
     };
-  }, [chartData.height, chartData.width, sheetData]);
+  }, [
+    chartData.height,
+    chartData.width,
+    sheetData,
+    chartData.xAxis.map((i) => i.name).join(''),
+    chartData.yAxis.map((i) => i.name).join(''),
+  ]);
 
   const updateName = (name: string) => {
     const newData = chartData;
     newData.name = name.length === 0 ? 'Untitled Chart' : name;
-    console.log(newData);
     updateChart(chartData.timestamp, newData);
   };
 

@@ -13,6 +13,7 @@ import Dropdown from '@components/SearchableDropdown/Dropdown';
 import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { ChartSeries, SheetChartDetail } from '@lib/domain/workbook';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
+import { getSearchResult } from '@lib/utils/common';
 import { Table } from '@phosphor-icons/react';
 import {
   CaretDown,
@@ -24,7 +25,8 @@ import {
   GridFour,
   MagnifyingGlass,
 } from 'phosphor-react';
-import React, { ChangeEvent, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { CHART_COLOR } from './DraggableWrapper';
 
 const ChartSidePanel = ({
   showChartPanel,
@@ -38,19 +40,8 @@ const ChartSidePanel = ({
   updateChart: (timestamp: number, updatedChartData: SheetChartDetail) => void;
 }) => {
   const [isXAxisDropDownOpen, setIsXAxisDropDownOpen] = useState(false);
-  const XAxisDropDownRef = useRef(null);
+  const [isYAxisDropDownOpen, setIsYAxisDropDownOpen] = useState(false);
   const chartTypeRef = useRef(null);
-  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    const searchTerm = e.target.value;
-    if (!searchTerm) {
-      //   setSearchData?.(data);
-      return;
-    }
-    // const results = getSeacrchResult(data, e.target.value, {
-    //   keys: searchKey ? [searchKey] : [],
-    // });
-    // setSearchData?.(results);
-  };
   const updateXAxisValue = (item: ChartSeries) => {
     const oldXAxisValue = data.xAxis;
     const newSeries = [
@@ -63,7 +54,17 @@ const ChartSidePanel = ({
     updateChart(data.timestamp, newData);
     setIsXAxisDropDownOpen(false);
   };
-  useOnClickOutside(XAxisDropDownRef, () => setIsXAxisDropDownOpen(false));
+  const updateYAxisValue = (item: ChartSeries) => {
+    const newSeries = [
+      ...(data.series.filter((serial) => serial.name !== item.name) || []),
+    ];
+    const newData = data;
+    newData.yAxis.push(item);
+    newData.series = newSeries;
+    updateChart(data.timestamp, newData);
+    setIsXAxisDropDownOpen(false);
+  };
+
   if (!data) return <></>;
   return (
     <Flex className="chart-panel" direction={'column'} gap={6}>
@@ -284,71 +285,93 @@ const ChartSidePanel = ({
           <DotsThreeVertical fontSize={'xs-14'} cursor={'pointer'} />
         </Flex>
         {isXAxisDropDownOpen ? (
-          <Box position={'relative'} ref={XAxisDropDownRef}>
-            <Flex
-              position={'absolute'}
-              direction={'column'}
-              gap={'3'}
-              bg="white"
-              mt={1}
-              maxH={'240px'}
-              overflowY={'auto'}
-            >
-              <InputGroup id="x-axis-dropdown">
-                <InputLeftElement>
-                  <MagnifyingGlass size={'18'} />
-                </InputLeftElement>
-                <Input
-                  autoFocus
-                  type="text"
-                  h={'10'}
-                  focusBorderColor="none"
-                  onChange={handleSearch}
-                  border={'none'}
-                  placeholder={''}
-                  _placeholder={{
-                    fontSize: 'xs-14',
-                    lineHeight: 'lh-135',
-                    fontWeight: '400',
-                    textColor: 'grey.600',
-                  }}
-                  data-testid={'dropdown-search-input'}
-                  bg={'white.DEFAULT'}
-                  borderBottom={'0.3px solid'}
-                  borderRadius={0}
-                />
-              </InputGroup>
-              <Flex flexDirection={'column'}>
-                {data.series.map((item) => {
-                  return (
-                    <Flex
-                      w="full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        updateXAxisValue(item);
-                      }}
-                    >
-                      <Text
-                        w="full"
-                        as={'span'}
-                        cursor={'pointer'}
-                        fontSize={'xs-12'}
-                        fontWeight={400}
-                        lineHeight={'135%'}
-                        key={item.name}
-                        px={2}
-                        py={1}
-                        my={2}
-                        _hover={{ background: '#f5f5f5' }}
-                      >
-                        {item.name}
-                      </Text>
-                    </Flex>
-                  );
-                })}
-              </Flex>
-            </Flex>
-          </Box>
+          //   <Box position={'relative'} ref={XAxisDropDownRef}>
+          //     <Flex
+          //       position={'absolute'}
+          //       direction={'column'}
+          //       gap={'3'}
+          //       bg="white"
+          //       mt={1}
+          //       maxH={'240px'}
+          //       overflowY={'auto'}
+          //     >
+          //       <InputGroup id="x-axis-dropdown">
+          //         <InputLeftElement>
+          //           <MagnifyingGlass size={'18'} />
+          //         </InputLeftElement>
+          //         <Input
+          //           autoFocus
+          //           type="text"
+          //           h={'10'}
+          //           focusBorderColor="none"
+          //           onChange={handleSearch}
+          //           border={'none'}
+          //           placeholder={''}
+          //           _placeholder={{
+          //             fontSize: 'xs-14',
+          //             lineHeight: 'lh-135',
+          //             fontWeight: '400',
+          //             textColor: 'grey.600',
+          //           }}
+          //           data-testid={'dropdown-search-input'}
+          //           bg={'white.DEFAULT'}
+          //           borderBottom={'0.3px solid'}
+          //           borderRadius={0}
+          //         />
+          //       </InputGroup>
+          //       <Flex flexDirection={'column'}>
+          //         {(search === ''
+          //           ? data.series
+          //           : getSearchResult(data.series, search, { keys: ['name'] })
+          //         ).map((item) => {
+          //           return (
+          //             <Flex
+          //               w="full"
+          //               onClick={(e) => {
+          //                 e.stopPropagation();
+          //                 updateXAxisValue(item);
+          //               }}
+          //             >
+          //               <Text
+          //                 w="full"
+          //                 as={'span'}
+          //                 cursor={'pointer'}
+          //                 fontSize={'xs-12'}
+          //                 fontWeight={400}
+          //                 lineHeight={'135%'}
+          //                 key={item.name}
+          //                 px={2}
+          //                 py={1}
+          //                 my={2}
+          //                 _hover={{ background: '#f5f5f5' }}
+          //               >
+          //                 {item.name}
+          //               </Text>
+          //             </Flex>
+          //           );
+          //         })}
+          //         {search != '' &&
+          //         !getSearchResult(data.series, search, { keys: ['name'] })
+          //           ?.length ? (
+          //           <Text
+          //             px={'2'}
+          //             py={'3'}
+          //             fontSize={'xs-12'}
+          //             lineHeight={'135%'}
+          //             fontWeight={'400'}
+          //             color={'grey.100'}
+          //           >
+          //             {'No results found...'}
+          //           </Text>
+          //         ) : null}
+          //       </Flex>
+          //     </Flex>
+          //   </Box>
+          <SeriesDropDown
+            series={data.series}
+            updateValue={updateXAxisValue}
+            setIsOpen={setIsXAxisDropDownOpen}
+          />
         ) : null}
       </Flex>
       <Flex
@@ -361,18 +384,28 @@ const ChartSidePanel = ({
         pt={2}
       >
         Series
-        {data.yAxis.map((series) => (
-          <SeriesCard name={series.name} />
+        {data.yAxis.map((series, index) => (
+          <SeriesCard name={series.name} color={CHART_COLOR[index]} />
         ))}
-        <Text
-          fontSize={'xs-12'}
-          fontWeight={500}
-          lineHeight={'135%'}
-          color={'gray.600'}
-          mt={2}
-        >
-          + Add Series
-        </Text>
+        {!isXAxisDropDownOpen && data.yAxis.length < 5 ? (
+          <Text
+            fontSize={'xs-12'}
+            fontWeight={500}
+            lineHeight={'135%'}
+            color={'gray.600'}
+            mt={2}
+            onClick={() => setIsYAxisDropDownOpen(true)}
+          >
+            + Add Series
+          </Text>
+        ) : null}
+        {isYAxisDropDownOpen ? (
+          <SeriesDropDown
+            series={data.series}
+            setIsOpen={setIsYAxisDropDownOpen}
+            updateValue={updateYAxisValue}
+          />
+        ) : null}
       </Flex>
     </Flex>
   );
@@ -418,5 +451,107 @@ const SeriesCard = ({ color = 'blue.800', name = 'Search' }) => {
       </Flex>
       <DotsThreeVertical fontSize={'xs-14'} cursor={'pointer'} />
     </Flex>
+  );
+};
+
+const SeriesDropDown = ({
+  series,
+  updateValue,
+  setIsOpen,
+}: {
+  series: ChartSeries[];
+  updateValue: (item: ChartSeries) => void;
+  setIsOpen: (state: boolean) => void;
+}) => {
+  const ref = useRef(null);
+  useOnClickOutside(ref, () => setIsOpen(false));
+
+  const [search, setSearch] = useState('');
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    const searchTerm = e.target.value;
+    setSearch(searchTerm);
+  };
+  return (
+    <Box position={'relative'} ref={ref}>
+      <Flex
+        position={'absolute'}
+        direction={'column'}
+        gap={'3'}
+        bg="white"
+        mt={1}
+        maxH={'240px'}
+        overflowY={'auto'}
+      >
+        <InputGroup id="x-axis-dropdown">
+          <InputLeftElement>
+            <MagnifyingGlass size={'18'} />
+          </InputLeftElement>
+          <Input
+            autoFocus
+            type="text"
+            h={'10'}
+            focusBorderColor="none"
+            onChange={handleSearch}
+            border={'none'}
+            placeholder={''}
+            _placeholder={{
+              fontSize: 'xs-14',
+              lineHeight: 'lh-135',
+              fontWeight: '400',
+              textColor: 'grey.600',
+            }}
+            data-testid={'dropdown-search-input'}
+            bg={'white.DEFAULT'}
+            borderBottom={'0.3px solid'}
+            borderRadius={0}
+          />
+        </InputGroup>
+        <Flex flexDirection={'column'}>
+          {(search === ''
+            ? series
+            : getSearchResult(series, search, { keys: ['name'] })
+          ).map((item) => {
+            return (
+              <Flex
+                w="full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateValue(item);
+                }}
+              >
+                <Text
+                  w="full"
+                  as={'span'}
+                  cursor={'pointer'}
+                  fontSize={'xs-12'}
+                  fontWeight={400}
+                  lineHeight={'135%'}
+                  key={item.name}
+                  px={2}
+                  py={1}
+                  my={2}
+                  _hover={{ background: '#f5f5f5' }}
+                >
+                  {item.name}
+                </Text>
+              </Flex>
+            );
+          })}
+          {search != '' &&
+          !getSearchResult(series, search, { keys: ['name'] })?.length ? (
+            <Text
+              px={'2'}
+              py={'3'}
+              fontSize={'xs-12'}
+              lineHeight={'135%'}
+              fontWeight={'400'}
+              color={'grey.100'}
+            >
+              {'No results found...'}
+            </Text>
+          ) : null}
+        </Flex>
+      </Flex>
+    </Box>
   );
 };

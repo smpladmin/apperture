@@ -205,7 +205,6 @@ const Workbook = ({
     setChartPanel({ hidden: false, data });
   };
   const hideChartPanel = () => {
-    console.log('hidden');
     setChartPanel({ hidden: true, data: null });
   };
 

@@ -65,6 +65,8 @@ const Grid = ({
     getColumns(fillHeaders(sheet.headers))
   );
 
+  const [charts, setCharts] = useState(sheet.charts);
+
   const [rows, setRows] = useState(
     getRows(
       fillRows(sheet.data, sheet.headers),
@@ -90,9 +92,9 @@ const Grid = ({
     );
   }, [sheet, selectedSheetIndex]);
 
-  // useEffect(() => {
-  //   setCharts(sheetsData[selectedSheetIndex].charts);
-  // }, [sheetsData[selectedSheetIndex].charts, selectedSheetIndex]);
+  useEffect(() => {
+    setCharts(sheetsData[selectedSheetIndex].charts);
+  }, [sheetsData[selectedSheetIndex].charts, selectedSheetIndex]);
 
   const handleColumnResize = (ci: Id, width: number) => {
     setColumns((prevColumns) => {
@@ -189,7 +191,7 @@ const Grid = ({
         }}
         onContextMenu={handleContextMenu}
       />
-      {sheetsData[selectedSheetIndex].charts?.map((chart, index) => (
+      {charts?.map((chart) => (
         <SheetChart
           updateChart={updateChart}
           chartData={chart}
