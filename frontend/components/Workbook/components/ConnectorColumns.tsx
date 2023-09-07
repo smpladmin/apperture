@@ -74,11 +74,6 @@ const ConnectorColumns = ({
     setColumns(results);
   };
 
-  console.log(
-    sheetsData[selectedSheetIndex]?.meta?.selectedColumns,
-    selectedColumns
-  );
-
   useEffect(() => {
     setSelectedColumns(
       sheetsData[selectedSheetIndex]?.meta?.selectedColumns || []

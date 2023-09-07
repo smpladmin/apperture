@@ -1,5 +1,5 @@
 import { Box } from '@chakra-ui/react';
-import React, { ReactNode, useEffect, useRef } from 'react';
+import React, { CSSProperties, ReactNode, useEffect, useRef } from 'react';
 
 type DropdownProps = {
   isOpen: boolean;
@@ -9,6 +9,7 @@ type DropdownProps = {
   minWidth?: string;
   top?: string;
   width?: string;
+  style?: CSSProperties;
 };
 
 const Dropdown = ({
@@ -19,6 +20,7 @@ const Dropdown = ({
   minWidth,
   width,
   top,
+  style,
 }: DropdownProps) => {
   const dropDownRef = useRef<HTMLDivElement>(null);
 
@@ -53,6 +55,7 @@ const Dropdown = ({
           right={dropdownPosition === 'right' ? 0 : ''}
           top={top || undefined}
           minWidth={minWidth || 'auto'}
+          style={style}
         >
           {children}
         </Box>

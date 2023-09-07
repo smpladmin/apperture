@@ -4,12 +4,18 @@ import { ArrowLeft, ArrowRight, CaretLeft } from 'phosphor-react';
 import React, { useEffect, useState } from 'react';
 import Connections from './Connections';
 import ConnectorColumns from './ConnectorColumns';
-import { SheetType, TransientSheetData } from '@lib/domain/workbook';
+import {
+  SheetChartDetail,
+  SheetType,
+  TransientSheetData,
+} from '@lib/domain/workbook';
 import { Connection, ConnectionSource } from '@lib/domain/connections';
 import { useRouter } from 'next/router';
 import { cloneDeep } from 'lodash';
 import { findConnectionByDatasourceId } from '../util';
 import { PivotTableSidePanel } from './PivotSidePanel';
+import { ChartPanelState } from '..';
+import ChartSidePanel from './ChartSidePanel';
 
 type SidePanelProps = {
   loadingConnections: boolean;
@@ -22,6 +28,10 @@ type SidePanelProps = {
   setShowColumns: Function;
   evaluateFormulaHeader: Function;
   addDimensionColumn: Function;
+  chartPanel: ChartPanelState;
+  showChartPanel: (data: SheetChartDetail) => void;
+  hideChartPanel: () => void;
+  updateChart: (timestamp: number, updatedChartData: SheetChartDetail) => void;
 };
 
 enum SidePanelStateType {
@@ -49,6 +59,10 @@ const SidePanel = ({
   setShowColumns,
   evaluateFormulaHeader,
   addDimensionColumn,
+  chartPanel,
+  showChartPanel,
+  hideChartPanel,
+  updateChart,
 }: SidePanelProps) => {
   const currentSheet = sheetsData[selectedSheetIndex];
   const [SidePanelState, setSidePanelState] = useState<SidePanelStateType>(
@@ -69,6 +83,10 @@ const SidePanel = ({
 
   const router = useRouter();
   const { dsId, selectProvider } = router.query;
+
+  useEffect(() => {
+    setSidePanelState(calculateSidePanelState(sheetsData[selectedSheetIndex]));
+  }, [selectedSheetIndex]);
 
   useEffect(() => {
     if (selectProvider && connections.length) {
@@ -101,23 +119,33 @@ const SidePanel = ({
       borderColor={'grey.700'}
       overflowY={'auto'}
       pb={10}
+      className={`side-panel${chartPanel.hidden ? '' : '-chart'}`}
     >
       {!isSidePanelCollapsed ? (
         SidePanelState === SidePanelStateType.CONNECTIONS ? (
-          <SheetConnections
-            showColumns={showColumns}
-            sheetsData={sheetsData}
-            connectorData={connectorData}
-            selectedSheetIndex={selectedSheetIndex}
-            setShowColumns={setShowColumns}
-            setSheetsData={setSheetsData}
-            evaluateFormulaHeader={evaluateFormulaHeader}
-            addDimensionColumn={addDimensionColumn}
-            loadingConnections={loadingConnections}
-            connections={connections}
-            setConnectorData={setConnectorData}
-            setShowSqlEditor={setShowSqlEditor}
-          />
+          chartPanel.hidden ? (
+            <SheetConnections
+              showColumns={showColumns}
+              sheetsData={sheetsData}
+              connectorData={connectorData}
+              selectedSheetIndex={selectedSheetIndex}
+              setShowColumns={setShowColumns}
+              setSheetsData={setSheetsData}
+              evaluateFormulaHeader={evaluateFormulaHeader}
+              addDimensionColumn={addDimensionColumn}
+              loadingConnections={loadingConnections}
+              connections={connections}
+              setConnectorData={setConnectorData}
+              setShowSqlEditor={setShowSqlEditor}
+            />
+          ) : (
+            <ChartSidePanel
+              showChartPanel={showChartPanel}
+              data={chartPanel.data as SheetChartDetail}
+              hideChartPanel={hideChartPanel}
+              updateChart={updateChart}
+            />
+          )
         ) : null
       ) : null}
       {SidePanelState === SidePanelStateType.PIVOT ? (

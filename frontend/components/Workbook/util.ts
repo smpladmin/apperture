@@ -1,3 +1,4 @@
+import { ChartSeries } from './../../lib/domain/workbook';
 import { Connection, ConnectionSource } from '@lib/domain/connections';
 import {
   AggregateFunction,
@@ -606,3 +607,49 @@ export const parseHeaders = (columns: string[], headers: SpreadSheetColumn[]) =>
     }
     return expression;
   });
+
+export const prepareChartSeriesFromSheetData = (data: any): ChartSeries[] => {
+  const types: any = {};
+  if (data && data[0]) {
+    for (const item of data.slice(0, 10)) {
+      for (const key in item) {
+        if (!types[key] || types[key] === 'object') {
+          types[key] = typeof item[key].original;
+        }
+      }
+    }
+  }
+  return Object.keys(types)
+    .filter((key) => key != 'index')
+    .map((key) => ({ name: key, type: types[key] }));
+};
+
+const cleanSheetDataForChart = (data: any) =>
+  data.map((item: any) => {
+    const newItem: any = {};
+    for (const key in item) {
+      if (item[key].original !== null) {
+        newItem[key] = item[key].original;
+      } else {
+        newItem[key] = 0; // Assign null if "original" is null
+      }
+    }
+    return newItem;
+  });
+
+export const chartDataTransformer = (
+  data: any[],
+  xAxis: string,
+  series: string[]
+) => {
+  data = cleanSheetDataForChart(data);
+  return data.flatMap((item) => {
+    return series.flatMap((series_breakdown) => {
+      return {
+        y: item[series_breakdown] || 0,
+        x: `${item.index}::${item[xAxis]}`,
+        series: series_breakdown,
+      };
+    });
+  });
+};

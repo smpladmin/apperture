@@ -15,6 +15,7 @@ import {
 import { useRouter } from 'next/router';
 import {
   AIQuery,
+  ChartType,
   ColumnType,
   SheetChartDetail,
   SheetType,
@@ -50,6 +51,7 @@ import {
   isSheetPivotOrBlank,
   isdigit,
   parseHeaders,
+  prepareChartSeriesFromSheetData,
 } from './util';
 import { DimensionParser, Metricparser } from '@lib/utils/parser';
 import { Connection } from '@lib/domain/connections';
@@ -57,9 +59,6 @@ import LoadingSpinner from '@components/LoadingSpinner';
 import AIButton from '@components/AIButton';
 import Coachmarks from './components/Coachmarks';
 import { AppertureUser } from '@lib/domain/user';
-import { ArrowsInLineVertical } from 'phosphor-react';
-import PivotGrid from './components/Grid/PivotGrid';
-import { SheetChart } from './components/DraggableWrapper';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -97,6 +96,11 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   ];
 };
 
+export type ChartPanelState = {
+  hidden: boolean;
+  data: null | SheetChartDetail;
+};
+
 const Workbook = ({
   savedWorkbook,
   user,
@@ -107,6 +111,10 @@ const Workbook = ({
   const [workbookName, setWorkBookName] = useState(
     savedWorkbook?.name || 'Untitled Workbook'
   );
+  const [chartPanel, setChartPanel] = useState<ChartPanelState>({
+    hidden: true,
+    data: null,
+  });
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
   const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
   const [sheetsData, setSheetsData] = useState<TransientSheetData[]>(
@@ -117,6 +125,9 @@ const Workbook = ({
   const [showEmptyState, setShowEmptyState] = useState(
     savedWorkbook ? false : true
   );
+  // const [charts, setCharts] = useState(
+  //   sheetsData[selectedSheetIndex].charts || []
+  // );
 
   const [connections, setConnections] = useState<Connection[]>([]);
   const [showColumns, setShowColumns] = useState(false);
@@ -189,6 +200,14 @@ const Workbook = ({
     sheetsData[selectedSheetIndex]?.sheet_type,
     sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery,
   ]);
+
+  const showChartPanel = (data: SheetChartDetail) => {
+    setChartPanel({ hidden: false, data });
+  };
+  const hideChartPanel = () => {
+    console.log('hidden');
+    setChartPanel({ hidden: true, data: null });
+  };
 
   const fetchTransientSheetData = async (abortController?: AbortController) => {
     const sheet = sheetsData[selectedSheetIndex];
@@ -752,19 +771,44 @@ const Workbook = ({
   }, [connections, selectedSheetIndex, sheetsData]);
 
   const addNewChartToSheet = () => {
-    console.log('Adding new chart', sheetsData[selectedSheetIndex].charts);
     const tempSheetData = cloneDeep(prevSheetsData);
     const charts = tempSheetData[selectedSheetIndex].charts;
-    charts.push({
+    let series = prepareChartSeriesFromSheetData(
+      tempSheetData[selectedSheetIndex].data
+    );
+    const yAxisValue = series.find((item) => item.type === 'number');
+    series = series.filter((item) => item.name != yAxisValue?.name);
+    const xAxisValue = series.find((item) => item.type === 'number');
+    series = series.filter((item) => item.name != xAxisValue?.name);
+
+    const newChart: SheetChartDetail = {
       x: 50,
       y: 50,
       timestamp: Date.now(),
       height: 435,
       width: 722,
       name: 'Untitled Chart',
-    });
+      type: ChartType.COLUMN,
+      series,
+      xAxis: xAxisValue ? [xAxisValue] : [],
+      yAxis: yAxisValue ? [yAxisValue] : [],
+    };
+    charts.push(newChart);
     tempSheetData[selectedSheetIndex].charts = charts;
     setSheetsData(tempSheetData);
+    showChartPanel(newChart);
+  };
+
+  const updateChart = (
+    timestamp: number,
+    updatedChartData: SheetChartDetail
+  ) => {
+    const tempSheetData = cloneDeep(sheetsData);
+    tempSheetData[selectedSheetIndex].charts = tempSheetData[
+      selectedSheetIndex
+    ].charts.map((chart) =>
+      chart.timestamp === timestamp ? updatedChartData : chart
+    );
   };
 
   const addNewPivotSheet = () => {
@@ -832,6 +876,10 @@ const Workbook = ({
             setShowSqlEditor={setShowSqlEditor}
             evaluateFormulaHeader={evaluateFormulaHeader}
             addDimensionColumn={addDimensionColumn}
+            chartPanel={chartPanel}
+            showChartPanel={showChartPanel}
+            hideChartPanel={hideChartPanel}
+            updateChart={updateChart}
           />
 
           <Box h={'full'} w={'full'} overflowY={'auto'}>
@@ -874,6 +922,9 @@ const Workbook = ({
                     addDimensionColumn={addDimensionColumn}
                     properties={getProperties}
                     setSheetsData={setSheetsData}
+                    showChartPanel={showChartPanel}
+                    hideChartPanel={hideChartPanel}
+                    updateChart={updateChart}
                   />
                 ) : sheetsData[selectedSheetIndex].sheet_type ===
                   SheetType.PIVOT_SHEET ? (
@@ -884,6 +935,9 @@ const Workbook = ({
                     addDimensionColumn={addDimensionColumn}
                     properties={getProperties}
                     setSheetsData={setSheetsData}
+                    showChartPanel={showChartPanel}
+                    hideChartPanel={hideChartPanel}
+                    updateChart={updateChart}
                   />
                 ) : (
                   <Grid
@@ -893,6 +947,9 @@ const Workbook = ({
                     addDimensionColumn={addDimensionColumn}
                     properties={getProperties}
                     setSheetsData={setSheetsData}
+                    showChartPanel={showChartPanel}
+                    hideChartPanel={hideChartPanel}
+                    updateChart={updateChart}
                   />
                 )}
               </Box>

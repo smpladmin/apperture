@@ -116,6 +116,15 @@ export type PivotValueDetail = {
   function: AggregateFunction;
 };
 
+export type ChartSeries = {
+  name: string;
+  type: 'number' | 'string' | 'boolean';
+};
+
+export enum ChartType {
+  COLUMN = 'column',
+}
+
 export type SheetChartDetail = {
   timestamp: number;
   name: string;
@@ -123,4 +132,8 @@ export type SheetChartDetail = {
   y: number;
   height: number;
   width: number;
+  series: ChartSeries[];
+  type: ChartType;
+  xAxis: ChartSeries[];
+  yAxis: ChartSeries[];
 };

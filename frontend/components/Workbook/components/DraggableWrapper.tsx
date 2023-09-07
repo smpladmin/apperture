@@ -1,9 +1,26 @@
-import { Flex } from '@chakra-ui/react';
-import { SheetChartDetail } from '@lib/domain/workbook';
+import {
+  Box,
+  Editable,
+  EditableInput,
+  EditablePreview,
+  Flex,
+  Text,
+} from '@chakra-ui/react';
+import { SheetChartDetail, TransientSheetData } from '@lib/domain/workbook';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import { CSSProperties, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useRef, useState } from 'react';
+import { Column } from '@antv/g2plot';
 
 import { Rnd } from 'react-rnd';
+import { chartDataTransformer } from '../util';
+
+export const CHART_COLOR = [
+  '#3762BB',
+  '#F1AB42',
+  '#DD6054',
+  '#65AC5A',
+  '#9F4DB7',
+];
 
 const style: CSSProperties = {
   display: 'flex',
@@ -19,23 +36,108 @@ const style: CSSProperties = {
   cursor: 'move',
 };
 export const SheetChart = ({
-  data,
+  chartData,
   updateChart,
+  showChartPanel,
+  hideChartPanel,
+  sheetData,
 }: {
-  data: SheetChartDetail;
+  chartData: SheetChartDetail;
   updateChart: (timestamp: number, updatedChartData: SheetChartDetail) => void;
+  sheetData: any;
+  showChartPanel: (data: SheetChartDetail) => void;
+  hideChartPanel: () => void;
 }) => {
   const boxRef = useRef<HTMLDivElement>(null);
   const [isActive, setIsActive] = useState(false);
-  useOnClickOutside(boxRef, () => setIsActive(false));
+  const plot = useRef<{ chart: Column | null }>({ chart: null });
+  useOnClickOutside(boxRef, (e: any) => {
+    setIsActive(false);
+    // hideChartPanel();
+  });
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!chartData) return;
+
+    const plotData = chartDataTransformer(
+      sheetData,
+      chartData.xAxis[0]?.name,
+      chartData.yAxis.map((axes) => axes.name)
+    );
+
+    console.log(plotData);
+    const NUMBER_OF_COLUMNS = 30;
+
+    plot.current.chart = new Column(ref.current!!, {
+      data: plotData,
+      xField: 'x',
+      yField: 'y',
+      seriesField: 'series',
+      autoFit: true,
+      isGroup: true,
+      slider: {
+        start: 0,
+        end:
+          NUMBER_OF_COLUMNS / plotData.length > 1
+            ? 1
+            : NUMBER_OF_COLUMNS / plotData.length,
+        formatter: (val, datum, index) => {
+          return index + 1;
+        },
+      },
+      color: CHART_COLOR,
+      xAxis: {
+        label: {
+          formatter: (text) => {
+            return text.split('::').slice(1).join('');
+          },
+          rotate: (Math.PI * 7) / 4,
+          offsetY: 10,
+          offsetX: -10,
+          style: {
+            fontSize: 9,
+          },
+        },
+      },
+      yAxis: {
+        label: {
+          style: {
+            fontSize: 9,
+          },
+        },
+      },
+      animation: false,
+      tooltip: {
+        title: (title, datum) => {
+          return title.split('::').slice(1).join('');
+        },
+      },
+    });
+
+    // plot.current.chart?.legend('y', { position: 'top' });
+
+    plot.current.chart?.render();
+
+    return () => {
+      plot.current?.chart?.destroy();
+    };
+  }, [chartData.height, chartData.width, sheetData]);
+
+  const updateName = (name: string) => {
+    const newData = chartData;
+    newData.name = name.length === 0 ? 'Untitled Chart' : name;
+    console.log(newData);
+    updateChart(chartData.timestamp, newData);
+  };
 
   return (
     <Rnd
       default={{
-        x: data?.x || 50,
-        y: data?.y || 50,
-        width: data?.width || 722,
-        height: data?.height || 435,
+        x: chartData?.x || 50,
+        y: chartData?.y || 50,
+        width: chartData?.width || 722,
+        height: chartData?.height || 435,
       }}
       style={{
         border: isActive ? '1px solid blue' : '1px solid #bdbdbd',
@@ -44,18 +146,18 @@ export const SheetChart = ({
       }}
       onDragStop={(e, dragData) => {
         const { x, y } = dragData;
-        const newData = data;
+        const newData = chartData;
         newData.x = x;
         newData.y = y;
-        updateChart(data.timestamp, newData);
+        updateChart(chartData.timestamp, newData);
       }}
       onResizeStop={(_, __, elem, ___, position) => {
-        const newData = data;
+        const newData = chartData;
         newData.height = elem.clientHeight;
         newData.width = elem.clientWidth;
         newData.x = position.x;
         newData.y = position.y;
-        updateChart(data.timestamp, newData);
+        updateChart(chartData.timestamp, newData);
       }}
     >
       {isActive ? <ResizeMarker /> : null}
@@ -63,11 +165,36 @@ export const SheetChart = ({
         w={'full'}
         h={'full'}
         ref={boxRef}
-        onClick={() => setIsActive(true)}
-        onKeyDown={(e) => {
-          console.log(e);
+        onClick={() => {
+          setIsActive(true);
+          showChartPanel(chartData);
         }}
-      ></Flex>
+        px={13}
+        py={6}
+        flexDir={'column'}
+      >
+        <Editable
+          onChange={updateName}
+          defaultValue={chartData.name}
+          fontSize={'20px'}
+          fontWeight={600}
+          lineHeight={'120%'}
+          color={'grey.800'}
+          pb={3}
+          width={'fit-content'}
+          borderRadius={0}
+        >
+          <EditablePreview cursor={'pointer'} />
+          <EditableInput
+            borderBottom={'2px'}
+            borderBottomColor={'grey.400'}
+            bg={'white.DEFAULT'}
+            data-testid={'entity-name'}
+            borderRadius={0}
+          />
+        </Editable>
+        <Flex overflow={'hidden'} ref={ref} w={'full'} h={'full'}></Flex>
+      </Flex>
     </Rnd>
   );
 };

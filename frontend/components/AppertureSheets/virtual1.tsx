@@ -31,7 +31,6 @@ const Sheet = () => {
     const el = event.target;
     if (el) {
       const position = el.getBoundingClientRect();
-      console.log('positioning', position);
       const style = {
         left: position.x,
         top: position.y,
@@ -101,7 +100,6 @@ const Sheet = () => {
         </Thead>
         <Tbody p={'0'}>
           {virtualItems.map((row, rowIndex) => {
-            console.log('row', row);
             return (
               <Tr key={rowIndex}>
                 <Td p={0} border={0} position={'sticky'} left={'0'}>
@@ -124,7 +122,6 @@ const Sheet = () => {
                   </Flex>
                 </Td>
                 {Object.keys(data[rowIndex]).map((columnId, colIndex) => {
-                  console.log('data', data[rowIndex], row);
                   return (
                     <Td
                       p={0}

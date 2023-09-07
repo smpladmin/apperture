@@ -46,6 +46,9 @@ const Grid = ({
   addDimensionColumn,
   properties,
   setSheetsData,
+  showChartPanel,
+  hideChartPanel,
+  updateChart,
 }: {
   selectedSheetIndex: number;
   sheetsData: TransientSheetData[];
@@ -53,9 +56,11 @@ const Grid = ({
   addDimensionColumn: Function;
   properties: string[];
   setSheetsData: Function;
+  showChartPanel: (data: SheetChartDetail) => void;
+  hideChartPanel: () => void;
+  updateChart: (timestamp: number, updatedChartData: SheetChartDetail) => void;
 }) => {
   const sheet = sheetsData[selectedSheetIndex];
-  const [charts, setCharts] = useState(sheet.charts || []);
   const [columns, setColumns] = useState<Column[]>(
     getColumns(fillHeaders(sheet.headers))
   );
@@ -85,20 +90,9 @@ const Grid = ({
     );
   }, [sheet, selectedSheetIndex]);
 
-  useEffect(() => {
-    setCharts(sheetsData[selectedSheetIndex].charts);
-  }, [sheetsData[selectedSheetIndex].charts, selectedSheetIndex]);
-
-  const updateChart = (
-    timestamp: number,
-    updatedChartData: SheetChartDetail
-  ) => {
-    setCharts(
-      charts.map((chart) =>
-        chart.timestamp === timestamp ? updatedChartData : chart
-      )
-    );
-  };
+  // useEffect(() => {
+  //   setCharts(sheetsData[selectedSheetIndex].charts);
+  // }, [sheetsData[selectedSheetIndex].charts, selectedSheetIndex]);
 
   const handleColumnResize = (ci: Id, width: number) => {
     setColumns((prevColumns) => {
@@ -195,11 +189,14 @@ const Grid = ({
         }}
         onContextMenu={handleContextMenu}
       />
-      {charts?.map((chart, index) => (
+      {sheetsData[selectedSheetIndex].charts?.map((chart, index) => (
         <SheetChart
           updateChart={updateChart}
-          data={chart}
+          chartData={chart}
           key={chart.timestamp}
+          showChartPanel={showChartPanel}
+          hideChartPanel={hideChartPanel}
+          sheetData={sheetsData[selectedSheetIndex].data}
         />
       ))}
     </div>
