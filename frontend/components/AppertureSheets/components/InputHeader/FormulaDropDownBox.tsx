@@ -1,15 +1,6 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Text,
-  useToast,
-} from '@chakra-ui/react';
+import { Box, Button, Flex, Text, useToast } from '@chakra-ui/react';
 import { BLUE_MAIN, GREY_600, WHITE_DEFAULT } from '@theme/index';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Function, Plus, SquaresFour } from 'phosphor-react';
 import { SubHeaderColumnType } from '@lib/domain/workbook';
 import {
@@ -24,11 +15,7 @@ import { useRouter } from 'next/router';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import CheckboxDropdown from './CheckboxDropdown';
-import ContentEditable, {
-  ContentEditableEvent,
-} from 'react-controlled-contenteditable';
 import { highlightFormula } from './util';
-import sanitizeHtml from 'sanitize-html';
 
 enum ActiveCellState {
   BLANK = 'BLANK',
@@ -55,7 +42,6 @@ const FormulaDropDownBox = ({
 }) => {
   const [formula, setFormula] = useState(cell.text);
 
-  const [isFocus, setIsFocus] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
@@ -206,12 +192,12 @@ const FormulaDropDownBox = ({
     }
   }, [activeCellState]);
 
-  // useEffect(() => {
-  //   if (activeCellState === ActiveCellState.BLANK) return;
-  //   const generatedString = generateFormulaString(cellState, formula);
-  //   setFormula(generatedString);
-  //   suggestFormula(generatedString);
-  // }, [cellState]);
+  useEffect(() => {
+    if (activeCellState === ActiveCellState.BLANK) return;
+    const generatedString = generateFormulaString(cellState, formula);
+    setFormula(generatedString);
+    suggestFormula(generatedString);
+  }, [cellState]);
 
   useEffect(() => {
     if (
@@ -267,36 +253,26 @@ const FormulaDropDownBox = ({
     activeCellState === ActiveCellState.VALUE &&
     cellState.OPERATOR === 'in';
 
-  const handleChange = (e: ContentEditableEvent) => {
-    e.stopPropagation();
+  const handleChange = (e: any) => {
     const _formula = e.currentTarget.textContent || '';
-    const sanitizeConf = {
-      allowedTags: ['span'],
-      allowedAttributes: { span: ['style'] },
-    };
-
-    // const highlightedFormula = highlightFormula(formula);
-    // const sanitizedContent = sanitizeHtml(highlightedFormula, sanitizeConf);
-    console.log('formula', { formula, hightlight: highlightFormula(_formula) });
-
     setFormula(_formula);
   };
 
   const handleSubmitFormula = () => {
-    // if (formula) {
-    //   if (
-    //     !formula.match(/^unique/) &&
-    //     cell.columnType === SubHeaderColumnType.DIMENSION
-    //   ) {
-    //     toast({
-    //       title: `Dimension column does not accept BODMAS equation`,
-    //       status: 'error',
-    //       variant: 'subtle',
-    //       isClosable: true,
-    //     });
-    //     return;
-    //   }
-    // }
+    if (formula) {
+      if (
+        !formula.match(/^unique/) &&
+        cell.columnType === SubHeaderColumnType.DIMENSION
+      ) {
+        toast({
+          title: `Dimension column does not accept BODMAS equation`,
+          status: 'error',
+          variant: 'subtle',
+          isClosable: true,
+        });
+        return;
+      }
+    }
 
     onCellChanged({ text: formula });
   };
@@ -304,90 +280,44 @@ const FormulaDropDownBox = ({
   return (
     <Flex width={'full'}>
       <Box position={'relative'} width={'full'} ref={dropdownRef}>
-        {/* <InputGroup p={'0'}>
-          <Input
-            ref={inputRef}
-            value={formula}
-            autoFocus
-            border={'0'}
-            onChange={handleChange}
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => {
-              e.stopPropagation();
-              e.code === 'Enter' && handleSubmitFormula();
-              setSuggestions([]);
-            }}
-            onFocus={(e) => {
-              e.stopPropagation();
-              setIsFocus(true);
-            }}
-            onBlur={() => {
-              setIsFocus(false);
-            }}
-            w={'full'}
-            focusBorderColor={'black.100'}
-            placeholder={''}
-            _placeholder={{
-              fontFamily: 'Inter',
-              fontSize: 'xs-12',
-              lineHeight: 'xs-12',
-              fontWeight: 400,
-            }}
-            _disabled={{
-              fontWeight: 600,
-            }}
-            width={'full'}
-            height={'6'}
+        <Box position={'relative'}>
+          <Flex
+            dangerouslySetInnerHTML={{ __html: highlightFormula(formula) }}
+            position={'absolute'}
+            top={0}
+            right={0}
+            bottom={0}
+            left={0}
             px={1}
-            borderRadius={'0'}
             fontSize={'xs-12'}
             lineHeight={'xs-12'}
             fontWeight={'600'}
-            data-testid={'formula-input'}
-            disabled={!!cell.disable}
+            alignItems={'center'}
+            sx={{
+              userSelect: 'none',
+            }}
           />
-        </InputGroup> */}
+          <Box
+            ref={editableRef}
+            px={1}
+            position={'relative'}
+            color={'transparent'}
+            sx={{
+              caretColor: 'black',
+            }}
+            contentEditable
+            suppressContentEditableWarning
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              e.code === 'Enter' && handleSubmitFormula();
+              setSuggestions([]);
+            }}
+            onInput={handleChange}
+          >
+            {cell.text}
+          </Box>
+        </Box>
 
-        <div
-          ref={editableRef}
-          contentEditable
-          onBeforeInput={(e: any) => {
-            console.log({ e });
-            if (e?.data) {
-              handleChange(e);
-            }
-          }}
-          suppressContentEditableWarning
-          style={{
-            border: '1px solid #ccc',
-            padding: '5px',
-            // minHeight: '30px',
-          }}
-          onClick={(e) => e.stopPropagation()}
-          // onInput={handleChange}
-          onKeyDown={(e) => {
-            e.stopPropagation();
-            e.code === 'Enter' && handleSubmitFormula();
-            setSuggestions([]);
-          }}
-          dangerouslySetInnerHTML={{ __html: highlightFormula(formula) }}
-        ></div>
-        {/* <ContentEditable
-          onChange={handleChange}
-          style={{
-            border: '1px solid #ccc',
-            padding: '5px',
-          }}
-          // onKeyDown={(e) => {
-          //   e.code === 'Enter' && handleSubmitFormula();
-          //   setSuggestions([]);
-          // }}
-          // onBlur={handleSubmitFormula}
-          onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          html={highlightFormula(formula)}
-          tagName="div"
-        /> */}
         {showCheckboxDropdown ? (
           <CheckboxDropdown
             data={suggestions}
