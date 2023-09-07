@@ -124,7 +124,6 @@ class DataSourceService:
             DataSource.enabled == True,
         ).to_list()
 
-
     async def get_ga_datasources(self, credential: Credential):
         access_token = await self.auth_service.get_access_token(
             credential.refresh_token,

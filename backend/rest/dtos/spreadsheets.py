@@ -68,6 +68,15 @@ class CreateWorkBookDto(BaseModel):
     datasourceId: str
 
 
+class VlookupDto(BaseModel):
+    datasourceId: str
+    searchQuery: str
+    lookupQuery: str
+    searchKeyColumn: str
+    lookupColumn: str
+    lookupIndexColumn: str
+
+
 class WorkBookResponse(WorkBook, ModelResponse):
     class Config:
         allow_population_by_field_name = True

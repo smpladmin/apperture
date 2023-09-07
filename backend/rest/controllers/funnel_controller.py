@@ -220,9 +220,7 @@ async def get_funnels(
     return funnels
 
 
-@router.delete(
-    "/funnels/{funnel_id}", dependencies=[Depends(validate_app_user)]
-)
+@router.delete("/funnels/{funnel_id}", dependencies=[Depends(validate_app_user)])
 async def delete_funnel(
     funnel_id: str,
     datasource_id: str,

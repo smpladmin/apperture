@@ -19,6 +19,7 @@ from rest.dtos.spreadsheets import (
     TransientSpreadsheetsDto,
     WorkBookResponse,
     WorkbookWithUser,
+    VlookupDto,
 )
 from rest.middlewares import get_user, validate_jwt
 from rest.middlewares.get_user import get_user_id
@@ -216,3 +217,20 @@ async def compute_transient_pivot(
         )
     except BusinessError as e:
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
+
+
+@router.post("/workbooks/vlookup")
+async def vlookup(
+    dto: VlookupDto,
+    spreadsheets_service: SpreadsheetService = Depends(),
+    compute_query_action: ComputeQueryAction = Depends(),
+):
+    credential = await compute_query_action.get_credentials(dto.datasourceId)
+    return await spreadsheets_service.compute_vlookup(
+        search_query=dto.searchQuery,
+        credential=credential,
+        lookup_query=dto.lookupQuery,
+        lookup_column=dto.lookupColumn,
+        search_column=dto.searchKeyColumn,
+        lookup_index_column=dto.lookupIndexColumn,
+    )

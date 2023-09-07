@@ -1,10 +1,10 @@
 import logging
-from typing import List, Optional, Union
+from typing import List, Union
 
 from fastapi import Depends
-from pypika import Case, ClickHouseQuery, Criterion, Database, Field
+from pypika import Case, ClickHouseQuery, Criterion, Field
 from pypika import Order as SortOrder
-from pypika import Parameter, Table
+from pypika import Table
 from pypika import functions as fn
 
 from clickhouse.clickhouse import Clickhouse
@@ -27,11 +27,9 @@ class Spreadsheets(EventsBase):
     def __init__(
         self,
         clickhouse: Clickhouse = Depends(),
-        parser: QueryParser = Depends(),
     ):
         super().__init__(clickhouse=clickhouse)
         self.clickhouse = clickhouse
-        self.parser = parser
 
     def get_transient_spreadsheet(
         self,
@@ -39,7 +37,6 @@ class Spreadsheets(EventsBase):
         username: Union[str, None],
         password: Union[str, None],
     ):
-        query = self.parser.assign_query_limit(query)
         restricted_client = self.clickhouse.get_connection_for_user(
             username=username, password=password
         )
@@ -275,4 +272,44 @@ class Spreadsheets(EventsBase):
                 limit=limit,
             ),
             parameters={},
+        )
+
+        return restricted_client.query(query=query).result_set
+
+    def build_vlookup_query(
+        self,
+        search_query: str,
+        lookup_query: str,
+        search_column: str,
+        lookup_column: str,
+        lookup_index_column: str,
+    ):
+        query = f"with lookup_query as ({lookup_query}), map as (SELECT DISTINCT ON ({lookup_index_column}) {lookup_index_column}, {lookup_column} AS lookup_column FROM lookup_query ORDER BY {search_column}), cte as ({search_query}) select lookup_column from cte left join map on cte.{search_column} = map.{lookup_index_column}"
+
+        return query
+
+    def get_vlookup(
+        self,
+        search_query: str,
+        lookup_query: str,
+        search_column: str,
+        lookup_column: str,
+        lookup_index_column: str,
+        username: Union[str, None],
+        password: Union[str, None],
+    ):
+        query = self.build_vlookup_query(
+            search_query=search_query,
+            lookup_query=lookup_query,
+            search_column=search_column,
+            lookup_column=lookup_column,
+            lookup_index_column=lookup_index_column,
+        )
+        result = self.execute_query_for_restricted_client(
+            query=query, username=username, password=password
+        )
+        return (
+            [item for sublist in result.result_set for item in sublist]
+            if result
+            else []
         )

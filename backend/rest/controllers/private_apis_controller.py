@@ -103,7 +103,7 @@ async def update_edges(
 async def update_apidata(
     tableName: str,
     start_time: str,
-    end_time:str,
+    end_time: str,
     dto: List[CreateAPIDataDto],
     api_data_service: APIDataService = Depends(),
     app_service: AppService = Depends(),
