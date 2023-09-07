@@ -28,7 +28,9 @@ class TestSpreadsheetService:
         WorkBook.get_settings = MagicMock()
         WorkBook.insert = AsyncMock()
         self.ds_id = "636a1c61d715ca6baae65611"
-        self.service = SpreadsheetService(spreadsheets=self.spreadsheet, parser=QueryParser())
+        self.service = SpreadsheetService(
+            spreadsheets=self.spreadsheet, parser=QueryParser()
+        )
         self.query = """
         SELECT  event_name -- selecting event
         FROM  events
@@ -490,3 +492,29 @@ class TestSpreadsheetService:
                 "Wednesday": 1754.68,
             },
         }
+
+    @pytest.mark.asyncio
+    async def test_compute_vlookup(self):
+        self.spreadsheet.get_vlookup.return_value = ["test1", "test2"]
+        assert await self.service.compute_vlookup(
+            credential=ClickHouseCredential(
+                username="test_username",
+                password="test_password",
+                databasename="test_database",
+            ),
+            search_query="test search query",
+            lookup_query="test lookup query",
+            lookup_column="lookup_column",
+            lookup_index_column="lookup_index_column",
+            search_column="search_column",
+        ) == ["test1", "test2"]
+
+        self.spreadsheet.get_vlookup.assert_called_once_with(
+            username="test_username",
+            password="test_password",
+            search_query="test search query ORDER BY  LIMIT 500",
+            lookup_query="test lookup query",
+            lookup_column="lookup_column",
+            lookup_index_column="lookup_index_column",
+            search_column="search_column",
+        )

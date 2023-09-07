@@ -377,3 +377,36 @@ async def test_delete_workbook(client_init, spreadsheets_service):
             "workbook_id": "6384a65e0a397236d9de236a",
         }
     )
+
+
+@pytest.mark.asyncio
+async def test_vlookup(client_init, spreadsheets_service):
+    response = client_init.post(
+        "/workbooks/vlookup",
+        json={
+            "datasourceId": "64c8bd3fc190a9e2973469bd",
+            "searchQuery": "select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd'",
+            "lookupQuery": "select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd'",
+            "searchKeyColumn": "event_name",
+            "lookupColumn": "user_id",
+            "lookupIndexColumn": "event_name",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json() == ["test1", "test2"]
+    spreadsheets_service.compute_vlookup.assert_called_once_with(
+        **{
+            "credential": ClickHouseCredential(
+                username="test_username",
+                password="test_password",
+                databasename="test_database",
+            ),
+            "lookup_column": "user_id",
+            "lookup_index_column": "event_name",
+            "search_column": "event_name",
+            "lookup_query": "select event_name, user_id from default.events where "
+            "datasource_id = '64c8bd3fc190a9e2973469bd'",
+            "search_query": "select event_name, user_id from default.events where "
+            "datasource_id = '64c8bd3fc190a9e2973469bd'",
+        }
+    )

@@ -308,4 +308,8 @@ class Spreadsheets(EventsBase):
         result = self.execute_query_for_restricted_client(
             query=query, username=username, password=password
         )
-        return [item for sublist in result.result_set for item in sublist] if result else []
+        return (
+            [item for sublist in result.result_set for item in sublist]
+            if result
+            else []
+        )

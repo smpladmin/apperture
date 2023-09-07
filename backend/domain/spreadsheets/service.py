@@ -305,6 +305,6 @@ class SpreadsheetService:
             lookup_column=lookup_column,
             username=credential.username,
             password=credential.password,
-            lookup_index_column=lookup_index_column
+            lookup_index_column=lookup_index_column,
         )
         return result
