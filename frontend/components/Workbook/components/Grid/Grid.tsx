@@ -16,7 +16,6 @@ import {
   formatNumber,
   generatePivotCellStyles,
 } from '@components/Workbook/util';
-import { cloneDeep } from 'lodash';
 import { SheetChart } from '../DraggableWrapper';
 
 import AppertureSheet from '@components/AppertureSheets';
