@@ -121,6 +121,7 @@ export type PivotAxisDetail = {
 
 export enum AggregateFunction {
   SUM = 'SUM',
+  COUNT = 'COUNT',
 }
 
 export type PivotValueDetail = {
