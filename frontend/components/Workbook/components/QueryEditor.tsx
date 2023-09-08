@@ -156,6 +156,7 @@ const QueryEditor = ({
           opacity={1}
         />
         <ReactCodeMirror
+          x={undefined}
           value={query}
           height={'200px'}
           extensions={[sql()]}

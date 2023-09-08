@@ -130,6 +130,7 @@ const DataMart = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
           onChange={(value) => handleQueryChange(value)}
           style={{ fontSize: '16px' }}
           data-testid={'sql-editor'}
+          x={undefined}
         />
         <DataMartTable
           data={queryResult.data}

@@ -134,6 +134,7 @@ const QueryModal = ({
                 onChange={(value) => {
                   handleQueryChange(value);
                 }}
+                x={undefined}
               />
             )}
             <Button
