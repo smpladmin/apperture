@@ -41,6 +41,7 @@ import { getEventProperties } from '@lib/services/datasourceService';
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
     return savedWorkbook.spreadsheets.map((sheet) => ({
+      charts: [],
       ...sheet,
       data: [],
       subHeaders: sheet.subHeaders
@@ -62,6 +63,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
       query: 'Select user_id, count() from events group by user_id',
       data: [],
       headers: [],
+      charts: [],
       subHeaders: Array.from({ length: 27 }).map((_, index) => {
         return {
           name: '',

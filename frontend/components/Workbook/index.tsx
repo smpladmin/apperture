@@ -10,7 +10,9 @@ import {
 import { useRouter } from 'next/router';
 import {
   AIQuery,
+  ChartType,
   ColumnType,
+  SheetChartDetail,
   SheetType,
   SpreadSheetColumn,
   SubHeaderColumn,
@@ -44,6 +46,7 @@ import {
   isdigit,
   padEmptyItemsInArray,
   parseHeaders,
+  prepareChartSeriesFromSheetData,
 } from './util';
 import { DimensionParser, Metricparser } from '@lib/utils/parser';
 import { Connection } from '@lib/domain/connections';
@@ -57,6 +60,7 @@ import { SelectedColumn } from '@components/AppertureSheets/types/gridTypes';
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
     return savedWorkbook.spreadsheets.map((sheet) => ({
+      charts: [],
       ...sheet,
       data: [],
       subHeaders: sheet?.subHeaders || getSubheaders(sheet?.sheet_type),
@@ -80,6 +84,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
       is_sql: true,
       sheet_type: SheetType.SIMPLE_SHEET,
       edit_mode: false,
+      charts: [],
       columnFormat: {},
       meta: {
         dsId: '',
@@ -88,6 +93,11 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
       aiQuery: undefined,
     },
   ];
+};
+
+export type ChartPanelState = {
+  hidden: boolean;
+  data: null | SheetChartDetail;
 };
 
 const Workbook = ({
@@ -100,6 +110,10 @@ const Workbook = ({
   const [workbookName, setWorkBookName] = useState(
     savedWorkbook?.name || 'Untitled Workbook'
   );
+  const [chartPanel, setChartPanel] = useState<ChartPanelState>({
+    hidden: true,
+    data: null,
+  });
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
   const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
   const [sheetsData, setSheetsData] = useState<TransientSheetData[]>(
@@ -151,6 +165,34 @@ const Workbook = ({
     if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
   }, []);
 
+  const calculatedChartData = useMemo(() => {
+    if (
+      sheetsData[selectedSheetIndex]?.charts?.length &&
+      sheetsData[selectedSheetIndex].data.length
+    ) {
+      const updatedSeries = prepareChartSeriesFromSheetData(
+        sheetsData[selectedSheetIndex].data
+      );
+      const updatedSeriesName = updatedSeries.map((item) => item.name);
+      return sheetsData[selectedSheetIndex].charts.map((chartData) => {
+        chartData.xAxis = chartData.xAxis.filter((x) =>
+          updatedSeriesName.includes(x.name)
+        );
+        chartData.yAxis = chartData.yAxis.filter((y) =>
+          updatedSeriesName.includes(y.name)
+        );
+        const omittedSeries = [...chartData.xAxis, ...chartData.yAxis].map(
+          (data) => data.name
+        );
+        chartData.series = updatedSeries.filter(
+          (data) => !omittedSeries.includes(data.name)
+        );
+        return chartData;
+      });
+    }
+    return [];
+  }, [sheetsData[selectedSheetIndex].data]);
+
   useEffect(() => {
     if (
       !isEqual(savedWorkbook?.name, workbookName) ||
@@ -184,6 +226,13 @@ const Workbook = ({
     sheetsData[selectedSheetIndex]?.sheet_type,
     sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery,
   ]);
+
+  const showChartPanel = (data: SheetChartDetail) => {
+    setChartPanel({ hidden: false, data });
+  };
+  const hideChartPanel = () => {
+    setChartPanel({ hidden: true, data: null });
+  };
 
   const fetchTransientSheetData = async (abortController?: AbortController) => {
     const sheet = sheetsData[selectedSheetIndex];
@@ -269,6 +318,7 @@ const Workbook = ({
         sheet_type: sheet.sheet_type,
         aiQuery: sheet.aiQuery,
         column_format: sheet.columnFormat,
+        charts: sheet.charts,
       };
     });
 
@@ -890,6 +940,48 @@ const Workbook = ({
     return connectionSource?.fields || [];
   }, [connections, selectedSheetIndex, sheetsData]);
 
+  const addNewChartToSheet = () => {
+    const tempSheetData = cloneDeep(prevSheetsData);
+    const charts = tempSheetData[selectedSheetIndex].charts || [];
+    let series = prepareChartSeriesFromSheetData(
+      tempSheetData[selectedSheetIndex].data
+    );
+    const yAxisValue = series.find((item) => item.type === 'number');
+    series = series.filter((item) => item.name != yAxisValue?.name);
+    const xAxisValue = series.find((item) => item.type === 'number');
+    series = series.filter((item) => item.name != xAxisValue?.name);
+
+    const newChart: SheetChartDetail = {
+      x: 50,
+      y: 50,
+      timestamp: Date.now(),
+      height: 435,
+      width: 722,
+      name: 'Untitled Chart',
+      type: ChartType.COLUMN,
+      series,
+      xAxis: xAxisValue ? [xAxisValue] : [],
+      yAxis: yAxisValue ? [yAxisValue] : [],
+    };
+    charts.push(newChart);
+    tempSheetData[selectedSheetIndex].charts = charts;
+    setSheetsData(tempSheetData);
+    showChartPanel(newChart);
+  };
+
+  const updateChart = (
+    timestamp: number,
+    updatedChartData: SheetChartDetail
+  ) => {
+    const tempSheetData = cloneDeep(sheetsData);
+    tempSheetData[selectedSheetIndex].charts = tempSheetData[
+      selectedSheetIndex
+    ].charts.map((chart) =>
+      chart.timestamp === timestamp ? updatedChartData : chart
+    );
+    setSheetsData(tempSheetData);
+  };
+
   const addNewPivotSheet = () => {
     const referenceSheet = sheetsData[selectedSheetIndex];
 
@@ -902,6 +994,7 @@ const Workbook = ({
       query: '',
       data: [],
       headers: [],
+      charts: [],
       subHeaders: getSubheaders(SheetType.SIMPLE_SHEET),
       is_sql: true,
       sheet_type: SheetType.PIVOT_TABLE,
@@ -934,9 +1027,6 @@ const Workbook = ({
           isSaveButtonDisabled={isSaveButtonDisabled}
           handleSave={handleSaveOrUpdateWorkbook}
           setShowSqlEditor={setShowSqlEditor}
-          addNewPivotSheet={addNewPivotSheet}
-          sheetsData={sheetsData}
-          selectedSheetIndex={selectedSheetIndex}
         />
         <Toolbar
           addNewPivotSheet={addNewPivotSheet}
@@ -944,6 +1034,7 @@ const Workbook = ({
           selectedSheetIndex={selectedSheetIndex}
           selectedColumns={selectedColumns}
           setSheetsData={setSheetsData}
+          addNewChartToSheet={addNewChartToSheet}
         />
         <Flex
           direction={'row'}
@@ -961,6 +1052,10 @@ const Workbook = ({
             setShowSqlEditor={setShowSqlEditor}
             evaluateFormulaHeader={evaluateFormulaHeader}
             addDimensionColumn={addDimensionColumn}
+            chartPanel={chartPanel}
+            showChartPanel={showChartPanel}
+            hideChartPanel={hideChartPanel}
+            updateChart={updateChart}
           />
 
           <Box h={'full'} w={'full'} overflowY={'auto'}>
@@ -1001,6 +1096,9 @@ const Workbook = ({
                     addDimensionColumn={addDimensionColumn}
                     properties={getProperties}
                     setSheetsData={setSheetsData}
+                    showChartPanel={showChartPanel}
+                    hideChartPanel={hideChartPanel}
+                    updateChart={updateChart}
                     setIsFormulaEdited={setIsFormulaEdited}
                     setSelectedColumns={setSelectedColumns}
                   />
@@ -1015,6 +1113,7 @@ const Workbook = ({
               sheetsData={sheetsData}
               setShowColumns={setShowColumns}
               setShowEditor={setShowSqlEditor}
+              hideChartPanel={hideChartPanel}
             />
           </Box>
         </Flex>

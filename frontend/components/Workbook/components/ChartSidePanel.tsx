@@ -1,0 +1,621 @@
+import {
+  Box,
+  Flex,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Text,
+} from '@chakra-ui/react';
+import Dropdown from '@components/SearchableDropdown/Dropdown';
+import { ChartSeries, SheetChartDetail } from '@lib/domain/workbook';
+import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
+import { getSearchResult } from '@lib/utils/common';
+import {
+  CaretDown,
+  CaretLeft,
+  ChartBar,
+  ChartLine,
+  ChartPie,
+  DotsThreeVertical,
+  GridFour,
+  MagnifyingGlass,
+  Plus,
+} from 'phosphor-react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { CHART_COLOR } from './DraggableWrapper';
+
+const ChartSidePanel = ({
+  hideChartPanel,
+  data,
+  updateChart,
+}: {
+  hideChartPanel: () => void;
+  data: SheetChartDetail;
+  updateChart: (timestamp: number, updatedChartData: SheetChartDetail) => void;
+}) => {
+  const [isXAxisDropDownOpen, setIsXAxisDropDownOpen] = useState(false);
+  const [isYAxisDropDownOpen, setIsYAxisDropDownOpen] = useState(false);
+  const [isRemoveXAxisDropDownOpen, setIsRemoveXAxisDropDownOpen] =
+    useState(false);
+  const [isChartTypeDropDownOpen, setIsChartTypeDropDownOpen] = useState(false);
+  const chartTypeRef = useRef(null);
+  useOnClickOutside(chartTypeRef, () => setIsChartTypeDropDownOpen(false));
+  const updateXAxisValue = (item: ChartSeries) => {
+    const oldXAxisValue = data.xAxis;
+    const newSeries = [
+      ...(data.series.filter((serial) => serial.name !== item.name) || []),
+      ...oldXAxisValue,
+    ];
+    const newData = data;
+    newData.xAxis = [item];
+    newData.series = newSeries;
+    updateChart(data.timestamp, newData);
+    setIsXAxisDropDownOpen(false);
+  };
+  const updateYAxisValue = (item: ChartSeries) => {
+    const newSeries = [
+      ...(data.series.filter((serial) => serial.name !== item.name) || []),
+    ];
+    const newData = data;
+    newData.yAxis.push(item);
+    newData.series = newSeries;
+    updateChart(data.timestamp, newData);
+    setIsYAxisDropDownOpen(false);
+  };
+
+  const removeXAxisValue = () => {
+    const newData = data;
+    newData.series = [...newData.series, ...newData.xAxis];
+    newData.xAxis = [];
+    updateChart(newData.timestamp, newData);
+    setIsRemoveXAxisDropDownOpen(false);
+  };
+  const removeYAxisValue = (item: ChartSeries) => {
+    const newData = data;
+    newData.series = [...newData.series, item];
+    newData.yAxis = data.yAxis.filter((i) => i.name != item.name);
+    updateChart(newData.timestamp, newData);
+  };
+
+  if (!data) return <></>;
+  return (
+    <Flex className="chart-panel" direction={'column'} gap={6}>
+      <Flex
+        fontSize={'xs-16'}
+        fontWeight={500}
+        lineHeight={'130%'}
+        alignItems={'center'}
+        gap={'2'}
+        borderBottom={'0.4px solid #bdbdbd'}
+        px={5}
+        pb={4}
+      >
+        <CaretLeft
+          height={'20px'}
+          onClick={() => hideChartPanel()}
+          cursor={'pointer'}
+        />
+        Visualise
+      </Flex>
+      <Flex
+        justifyContent={'space-between'}
+        fontSize={'xs-12'}
+        fontWeight={500}
+        lineHeight={'135%'}
+        flexDir={'column'}
+        px={5}
+        pt={2}
+      >
+        Chart type
+        <Box ref={chartTypeRef} position="relative" w={'full'}>
+          <Flex
+            w={'100%'}
+            color={'black.DEFAULT'}
+            fontSize={'xs-14'}
+            lineHeight={'xs-14'}
+            fontWeight={500}
+            h={8}
+            px={3}
+            py={2}
+            mt={2}
+            // onClick={() => !isDisabled && setIsConversionWindowListOpen(true)}
+            alignItems={'center'}
+            gap={'2'}
+            borderRadius={'4px'}
+            border={'1px'}
+            borderColor={'white.200'}
+            cursor={'pointer'}
+            justifyContent={'space-between'}
+            bg="white"
+          >
+            <Flex
+              w="full"
+              bg="white"
+              fontSize={'xs-12'}
+              fontWeight={400}
+              lineHeight={'135%'}
+              gap={2}
+              alignContent={'center'}
+              alignItems={'center'}
+              cursor={'pointer'}
+              onClick={() => setIsChartTypeDropDownOpen(true)}
+            >
+              <ChartBar fontSize={'14px'} />
+              <Text w="full">Columns</Text>
+            </Flex>
+            <CaretDown />
+          </Flex>
+          <Dropdown
+            isOpen={isChartTypeDropDownOpen}
+            width="100%"
+            style={{
+              borderRadius: '4px',
+              boxShadow: `0px 0px 4px 0px rgba(0, 0, 0, 0.12)`,
+              top: '104%',
+              padding: 0,
+            }}
+          >
+            <Flex flexDir={'column'} gap={3} py={2}>
+              <Flex
+                w="full"
+                bg="white"
+                fontSize={'xs-12'}
+                fontWeight={400}
+                lineHeight={'135%'}
+                gap={2}
+                px={3}
+                py={1}
+                alignContent={'center'}
+                alignItems={'center'}
+                opacity={0.3}
+                cursor={'not-allowed'}
+              >
+                <ChartLine fontSize={'14px'} />
+                <Text w="full">Line</Text>
+              </Flex>
+              <Flex
+                w="full"
+                bg="white"
+                fontSize={'xs-12'}
+                fontWeight={400}
+                lineHeight={'135%'}
+                gap={2}
+                px={3}
+                py={1}
+                alignContent={'center'}
+                alignItems={'center'}
+                _hover={{ background: '#f5f5f5' }}
+                cursor={'pointer'}
+                onClick={() => setIsChartTypeDropDownOpen(false)}
+              >
+                <ChartBar fontSize={'14px'} />
+                <Text w="full">Columns</Text>
+              </Flex>
+              <Flex
+                w="full"
+                bg="white"
+                fontSize={'xs-12'}
+                fontWeight={400}
+                lineHeight={'135%'}
+                gap={2}
+                px={3}
+                py={1}
+                alignContent={'center'}
+                alignItems={'center'}
+                opacity={0.3}
+                cursor={'not-allowed'}
+              >
+                <ChartPie fontSize={'14px'} />
+                <Text w="full">Pie</Text>
+              </Flex>
+            </Flex>
+          </Dropdown>
+        </Box>
+      </Flex>
+      <Flex
+        justifyContent={'space-between'}
+        fontSize={'xs-12'}
+        fontWeight={500}
+        lineHeight={'135%'}
+        flexDir={'column'}
+        px={5}
+        pt={2}
+      >
+        Data range
+        <Box ref={chartTypeRef} position="relative" w={'full'}>
+          <Flex
+            w={'100%'}
+            color={'grey.500'}
+            fontSize={'xs-12'}
+            lineHeight={'130%'}
+            fontWeight={400}
+            h={8}
+            px={3}
+            py={2}
+            mt={2}
+            alignItems={'center'}
+            gap={'2'}
+            borderRadius={'4px'}
+            border={'1px'}
+            borderColor={'grey.400'}
+            cursor={'not-allowed'}
+            justifyContent={'space-between'}
+            bg="white.400"
+          >
+            A1:Z1000
+            <GridFour fontSize={'xs-14'} />
+          </Flex>
+        </Box>
+      </Flex>
+      <Flex
+        justifyContent={'space-between'}
+        fontSize={'xs-12'}
+        fontWeight={500}
+        lineHeight={'135%'}
+        flexDir={'column'}
+        px={5}
+        pt={2}
+      >
+        X axis
+        {data.xAxis.length ? (
+          <Flex
+            w={'100%'}
+            color={'black.DEFAULT'}
+            fontSize={'xs-14'}
+            lineHeight={'xs-14'}
+            fontWeight={500}
+            h={8}
+            px={3}
+            py={2}
+            mt={2}
+            alignItems={'center'}
+            gap={'2'}
+            borderRadius={'4px'}
+            border={'1px'}
+            borderColor={'white.200'}
+            justifyContent={'space-between'}
+            bg="white"
+          >
+            <Flex
+              w="full"
+              bg="white"
+              fontSize={'xs-12'}
+              fontWeight={400}
+              lineHeight={'135%'}
+              gap={2}
+              alignContent={'center'}
+              alignItems={'center'}
+              cursor={'pointer'}
+              onClick={() => {
+                setIsXAxisDropDownOpen(true);
+              }}
+            >
+              {data.xAxis.map((item) => (
+                <Text w="full" key={item.name}>
+                  {item.name}
+                </Text>
+              ))}
+            </Flex>
+            <Box position={'relative'}>
+              <DotsThreeVertical
+                fontSize={'xs-14'}
+                cursor={'pointer'}
+                onClick={() => setIsRemoveXAxisDropDownOpen(true)}
+              />
+              {isRemoveXAxisDropDownOpen ? (
+                <RemoveValueDropdown
+                  setIsOpen={setIsRemoveXAxisDropDownOpen}
+                  removeValue={removeXAxisValue}
+                />
+              ) : null}
+            </Box>
+          </Flex>
+        ) : (
+          <Flex
+            w={'100%'}
+            color={'black.DEFAULT'}
+            fontSize={'xs-14'}
+            lineHeight={'xs-14'}
+            fontWeight={500}
+            h={8}
+            px={3}
+            py={2}
+            mt={2}
+            alignItems={'center'}
+            gap={'2'}
+            borderRadius={'4px'}
+            border={'1px'}
+            borderColor={'white.200'}
+            justifyContent={'space-between'}
+            bg="white"
+            cursor={'pointer'}
+            onClick={() => {
+              setIsXAxisDropDownOpen(true);
+            }}
+          >
+            <Flex
+              w="full"
+              bg="white"
+              gap={2}
+              alignContent={'center'}
+              alignItems={'center'}
+              color={'grey.600'}
+            >
+              <Plus
+                fontSize={'xs-14'}
+                cursor={'pointer'}
+                onClick={() => setIsRemoveXAxisDropDownOpen(true)}
+              />
+              <Text
+                fontSize={'12px'}
+                fontWeight={400}
+                lineHeight={'135%'}
+                color={'grey.600'}
+                w="full"
+              >
+                Add X axis
+              </Text>
+            </Flex>
+          </Flex>
+        )}
+        {isXAxisDropDownOpen ? (
+          <SeriesDropDown
+            series={data.series}
+            updateValue={updateXAxisValue}
+            setIsOpen={setIsXAxisDropDownOpen}
+          />
+        ) : null}
+      </Flex>
+      <Flex
+        justifyContent={'space-between'}
+        fontSize={'xs-12'}
+        fontWeight={500}
+        lineHeight={'135%'}
+        flexDir={'column'}
+        px={5}
+        pt={2}
+      >
+        Series
+        {data.yAxis.map((series, index) => (
+          <SeriesCard
+            key={series.name}
+            name={series.name}
+            color={CHART_COLOR[index]}
+            removeValue={() => {
+              removeYAxisValue(series);
+            }}
+          />
+        ))}
+        {!isYAxisDropDownOpen && data.yAxis.length < 5 ? (
+          <Text
+            fontSize={'xs-12'}
+            fontWeight={500}
+            lineHeight={'135%'}
+            color={'gray.600'}
+            mt={2}
+            onClick={() => setIsYAxisDropDownOpen(true)}
+          >
+            + Add Series
+          </Text>
+        ) : null}
+        {isYAxisDropDownOpen ? (
+          <SeriesDropDown
+            series={data.series.filter((series) => series.type === 'number')}
+            setIsOpen={setIsYAxisDropDownOpen}
+            updateValue={updateYAxisValue}
+            position="unset"
+          />
+        ) : null}
+      </Flex>
+    </Flex>
+  );
+};
+
+export default ChartSidePanel;
+
+const SeriesCard = ({
+  color = 'blue.800',
+  name = 'Search',
+  removeValue,
+}: {
+  color: string;
+  name: string;
+  removeValue: () => void;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const handleRemoveValue = () => {
+    removeValue();
+    setIsOpen(false);
+  };
+  return (
+    <Flex
+      w={'100%'}
+      color={'black.DEFAULT'}
+      fontSize={'xs-14'}
+      lineHeight={'xs-14'}
+      fontWeight={500}
+      h={8}
+      px={3}
+      py={2}
+      mt={2}
+      alignItems={'center'}
+      gap={'2'}
+      borderRadius={'4px'}
+      border={'1px'}
+      borderColor={'white.200'}
+      justifyContent={'space-between'}
+      bg="white"
+    >
+      <Flex p={'1px'} border="0.3px solid #dfdfdf">
+        <Flex w={3} h={3} bg={color} borderRadius={1}></Flex>
+      </Flex>
+      <Flex
+        w="full"
+        bg="white"
+        fontSize={'xs-12'}
+        fontWeight={400}
+        lineHeight={'135%'}
+        gap={2}
+        alignContent={'center'}
+        alignItems={'center'}
+      >
+        <Text w="full">{name}</Text>
+      </Flex>
+      <Box position={'relative'}>
+        <DotsThreeVertical
+          fontSize={'xs-14'}
+          cursor={'pointer'}
+          onClick={() => setIsOpen(true)}
+        />
+        {isOpen ? (
+          <RemoveValueDropdown
+            setIsOpen={setIsOpen}
+            removeValue={handleRemoveValue}
+          />
+        ) : null}
+      </Box>
+    </Flex>
+  );
+};
+
+const SeriesDropDown = ({
+  series,
+  updateValue,
+  setIsOpen,
+  position = 'absolute',
+}: {
+  series: ChartSeries[];
+  updateValue: (item: ChartSeries) => void;
+  setIsOpen: (state: boolean) => void;
+  position?: 'absolute' | 'unset';
+}) => {
+  const ref = useRef(null);
+  useOnClickOutside(ref, () => setIsOpen(false));
+
+  const [search, setSearch] = useState('');
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    const searchTerm = e.target.value;
+    setSearch(searchTerm);
+  };
+  return (
+    <Box position={'relative'} ref={ref}>
+      <Flex
+        position={position}
+        direction={'column'}
+        gap={'3'}
+        bg="white"
+        mt={1}
+        maxH={'240px'}
+        overflowY={'auto'}
+      >
+        <InputGroup id="x-axis-dropdown">
+          <InputLeftElement>
+            <MagnifyingGlass size={'18'} />
+          </InputLeftElement>
+          <Input
+            autoFocus
+            type="text"
+            h={'10'}
+            focusBorderColor="none"
+            onChange={handleSearch}
+            border={'none'}
+            placeholder={''}
+            _placeholder={{
+              fontSize: 'xs-14',
+              lineHeight: 'lh-135',
+              fontWeight: '400',
+              textColor: 'grey.600',
+            }}
+            data-testid={'dropdown-search-input'}
+            bg={'white.DEFAULT'}
+            borderBottom={'0.3px solid'}
+            borderRadius={0}
+          />
+        </InputGroup>
+        <Flex flexDirection={'column'}>
+          {(search === ''
+            ? series
+            : getSearchResult(series, search, { keys: ['name'] })
+          ).map((item) => {
+            return (
+              <Flex
+                w="full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateValue(item);
+                }}
+                key={item.name}
+              >
+                <Text
+                  w="full"
+                  as={'span'}
+                  cursor={'pointer'}
+                  fontSize={'xs-12'}
+                  fontWeight={400}
+                  lineHeight={'135%'}
+                  px={2}
+                  py={1}
+                  my={2}
+                  _hover={{ background: '#f5f5f5' }}
+                >
+                  {item.name}
+                </Text>
+              </Flex>
+            );
+          })}
+          {search != '' &&
+          !getSearchResult(series, search, { keys: ['name'] })?.length ? (
+            <Text
+              px={'2'}
+              py={'3'}
+              fontSize={'xs-12'}
+              lineHeight={'135%'}
+              fontWeight={'400'}
+              color={'grey.100'}
+            >
+              {'No results found...'}
+            </Text>
+          ) : null}
+        </Flex>
+      </Flex>
+    </Box>
+  );
+};
+
+const RemoveValueDropdown = ({
+  setIsOpen,
+  removeValue,
+}: {
+  setIsOpen: (state: boolean) => void;
+  removeValue: () => void;
+}) => {
+  const ref = useRef(null);
+  useOnClickOutside(ref, () => setIsOpen(false));
+
+  return (
+    <Flex
+      position={'absolute'}
+      zIndex={2}
+      bg="white"
+      borderRadius={'4px'}
+      w="104px"
+      ref={ref}
+    >
+      <Text
+        w="full"
+        as={'span'}
+        cursor={'pointer'}
+        fontSize={'xs-12'}
+        fontWeight={400}
+        lineHeight={'135%'}
+        px={2}
+        py={1}
+        my={2}
+        _hover={{ background: '#f5f5f5' }}
+        onClick={() => removeValue()}
+      >
+        Remove
+      </Text>
+    </Flex>
+  );
+};

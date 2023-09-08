@@ -336,6 +336,7 @@ class TestSpreadsheetService:
                         "database": "default",
                     },
                     "column_format": None,
+                    "charts": [],
                 }
             ],
             "enabled": True,

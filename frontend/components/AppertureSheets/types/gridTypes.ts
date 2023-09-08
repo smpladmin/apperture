@@ -27,7 +27,7 @@ export type CellChange<T> = {
   previousCell: T;
 };
 
-export type TextCell = { type: 'text'; text: string | number };
+export type TextCell = { type: 'text'; text: string | number; style?: any };
 
 export type InputHeaderCell = {
   type: 'inputHeader';
@@ -39,6 +39,7 @@ export type InputHeaderCell = {
   properties: string[];
   showSuggestions?: boolean;
   disableAddButton?: boolean;
+  style?: any;
 };
 
 export type Row<T> = {

@@ -19,6 +19,7 @@ type SearchableListDropdownProps = {
   placeholderText?: string;
   width?: string;
   top?: string;
+  showIcon?: boolean;
 };
 
 const SearchableListDropdown = ({
@@ -33,6 +34,7 @@ const SearchableListDropdown = ({
   placeholderText,
   width,
   top,
+  showIcon = true,
 }: SearchableListDropdownProps) => {
   const [listData, setListData] = useState<
     Array<string | SegmentProperty | Node>
@@ -81,7 +83,9 @@ const SearchableListDropdown = ({
                   gap={'2'}
                   data-testid={'dropdown-options'}
                 >
-                  <Image src={cursorIcon} alt={'cursor-icon'} />
+                  {showIcon ? (
+                    <Image src={cursorIcon} alt={'cursor-icon'} />
+                  ) : null}
                   <Text
                     fontSize={'xs-14'}
                     lineHeight={'xs-14'}

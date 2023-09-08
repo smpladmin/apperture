@@ -6,6 +6,7 @@ export type TransientSheetData = {
   headers: SpreadSheetColumn[];
   subHeaders: SubHeaderColumn[];
   data: any[];
+  charts: SheetChartDetail[];
   is_sql?: boolean;
   sheet_type?: SheetType;
   edit_mode?: boolean;
@@ -127,4 +128,26 @@ export enum AggregateFunction {
 export type PivotValueDetail = {
   name: string;
   function: AggregateFunction;
+};
+
+export type ChartSeries = {
+  name: string;
+  type: 'number' | 'string' | 'boolean';
+};
+
+export enum ChartType {
+  COLUMN = 'COLUMN',
+}
+
+export type SheetChartDetail = {
+  timestamp: number;
+  name: string;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+  series: ChartSeries[];
+  type: ChartType;
+  xAxis: ChartSeries[];
+  yAxis: ChartSeries[];
 };

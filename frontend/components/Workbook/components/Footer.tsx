@@ -18,6 +18,7 @@ type FooterProps = {
   setSelectedSheetIndex: Function;
   setShowColumns: Function;
   setShowEditor: Function;
+  hideChartPanel: Function;
 };
 
 const Footer = ({
@@ -28,6 +29,7 @@ const Footer = ({
   setSelectedSheetIndex,
   setShowColumns,
   setShowEditor,
+  hideChartPanel,
 }: FooterProps) => {
   const updateSheetName = (updatedSheetName: string, index: number) => {
     const toUpdateSheets = cloneDeep(sheetsData);
@@ -62,6 +64,7 @@ const Footer = ({
     setShowColumns(false);
     setShowEditor(false);
     openSelectSheetOverlay();
+    hideChartPanel();
   };
 
   return (
@@ -81,6 +84,7 @@ const Footer = ({
           setSelectedSheetIndex(+value);
           setShowColumns(false);
           setShowEditor(false);
+          hideChartPanel();
         }}
       >
         <Flex h={'full'}>
