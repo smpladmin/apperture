@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { forwardRef, useContext, useEffect, useState } from 'react';
 import FormulaDropDownBox from './FormulaDropDownBox';
 import {
   BaseCellProps,
@@ -13,20 +13,21 @@ import {
 
 type InputHeaderCellProps = BaseCellProps & {
   cell: InputHeaderCell;
+  ref: any;
   onCellsChanged: (changedCell: CellChange<InputHeaderCell>[]) => void;
   onColumnHighlight: (highlight: any) => void;
 };
 
-const InputHeaderCell = ({
-  cell,
-  onCellsChanged,
-  onColumnHighlight,
-  ...props
-}: InputHeaderCellProps) => {
+const InputHeaderCell = (
+  { cell, onCellsChanged, onColumnHighlight, ...props }: InputHeaderCellProps,
+  ref: any
+) => {
   const { rowIndex, column, columnIndex } = props;
   const { state, dispatch } = useContext(GridContext);
 
-  const { currentCell, isHeaderCellInEditMode } = state;
+  const { currentCell, isHeaderCellInEditMode, headerFormulas } = state;
+
+  const formula = headerFormulas?.[columnIndex] || '';
 
   const isHeaderCellCurrentlyEdited =
     currentCell.row === rowIndex && currentCell.column === columnIndex;
@@ -41,14 +42,12 @@ const InputHeaderCell = ({
     }
   };
 
-  console.log('rerender');
-
   return (
     <>
       {isHeaderCellInEditMode && isHeaderCellCurrentlyEdited ? (
         <FormulaDropDownBox
           cell={cell}
-          onColumnHighlight={onColumnHighlight}
+          formula={formula}
           onCellChanged={(updatedCell: Partial<typeof cell>) => {
             const changedCell: CellChange<InputHeaderCell> = {
               rowId: rowIndex,
@@ -69,6 +68,8 @@ const InputHeaderCell = ({
             });
             onCellsChanged([changedCell]);
           }}
+          {...props}
+          ref={ref}
         />
       ) : (
         <Flex
@@ -89,4 +90,4 @@ const InputHeaderCell = ({
   );
 };
 
-export default InputHeaderCell;
+export default forwardRef(InputHeaderCell);

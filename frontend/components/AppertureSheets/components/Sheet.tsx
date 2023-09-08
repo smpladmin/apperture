@@ -1,6 +1,12 @@
 import { Box, Flex } from '@chakra-ui/react';
 import { throttle } from 'lodash';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   VariableSizeGrid as Grid,
   GridOnScrollProps,
@@ -279,9 +285,13 @@ const Sheet = ({
     []
   );
 
-  const [highlightedColumns, setHighlightedColumns] = useState<
-    Record<number, { color: string }>
-  >({});
+  const highlightedColumnsRef = useRef({});
+
+  console.log({ highlightedColumnsRef });
+
+  // useEffect(() => {
+  //   console.log({ highlightedColumnsRef });
+  // }, [highlightedColumnsRef.current]);
 
   return (
     <Box
@@ -392,8 +402,12 @@ const Sheet = ({
                       };
 
                       const CellToRender = componentMap[cellType];
-                      const borderColor = highlightedColumns[columnIndex]
-                        ? highlightedColumns[columnIndex].color
+                      //@ts-ignore
+                      const borderColor = highlightedColumnsRef?.current?.[
+                        columnIndex
+                      ]
+                        ? //@ts-ignore
+                          highlightedColumnsRef?.current?.[columnIndex].color
                         : 'grey.700';
                       return (
                         <BaseCell
@@ -404,12 +418,11 @@ const Sheet = ({
                           }}
                         >
                           <CellToRender
+                            ref={highlightedColumnsRef}
                             {...baseCellProps}
+                            key={`${columnIndex} ${rowIndex} ${cellType}`}
                             cell={cell}
                             onCellsChanged={onCellsChanged}
-                            onColumnHighlight={(
-                              h: Record<number, { color: string }>
-                            ) => setHighlightedColumns(h)}
                           />
                         </BaseCell>
                       );

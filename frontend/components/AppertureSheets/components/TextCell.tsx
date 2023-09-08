@@ -1,5 +1,5 @@
 import { Flex } from '@chakra-ui/react';
-import { useContext } from 'react';
+import { forwardRef, useContext } from 'react';
 import { Actions, GridContext } from '../context/GridContext';
 import { BaseCellProps, CellChange, TextCell } from '../types/gridTypes';
 
@@ -60,4 +60,4 @@ const TextCell = ({ cell, ...props }: TextCellProps) => {
   );
 };
 
-export default TextCell;
+export default forwardRef(TextCell);

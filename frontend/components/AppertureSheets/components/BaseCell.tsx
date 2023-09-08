@@ -58,7 +58,7 @@ const BaseCell = ({ children, ...props }: BaseCellPropsWithChildren) => {
       height={6}
       borderRightWidth={isCellSelected ? '1px' : '0.4px'}
       borderLeftWidth={isCellSelected && isLeftmostCellSelected ? '1px' : '0'}
-      backgroundColor={highlightColumn ? highlightColor : 'transparent'}
+      backgroundColor={isCellSelected ? 'rgba(53,121,248,.35)' : 'transparent'}
       borderBottomWidth={'0.4px'}
       borderColor={
         isCellSelected || currentActiveCell ? 'blue.500' : 'grey.700'

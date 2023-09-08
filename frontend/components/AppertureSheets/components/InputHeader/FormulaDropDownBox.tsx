@@ -1,6 +1,13 @@
 import { Box, Button, Flex, Text, useToast } from '@chakra-ui/react';
 import { BLUE_MAIN, GREY_600, WHITE_DEFAULT } from '@theme/index';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { Function, Plus, SquaresFour } from 'phosphor-react';
 import { SubHeaderColumnType } from '@lib/domain/workbook';
 import {
@@ -20,6 +27,11 @@ import {
   Actions,
   GridContext,
 } from '@components/AppertureSheets/context/GridContext';
+import {
+  BaseCellProps,
+  InputHeaderCell,
+} from '@components/AppertureSheets/types/gridTypes';
+import ActionHeader from '@components/Actions/CreateAction/components/ActionHeader';
 
 enum ActiveCellState {
   BLANK = 'BLANK',
@@ -37,17 +49,26 @@ type CellState = {
   [ActiveCellState.EOF]: string;
 };
 
-const FormulaDropDownBox = ({
-  cell,
-  onCellChanged,
-  onColumnHighlight,
-}: {
-  cell: any;
+type FormulaDropDownBoxProps = BaseCellProps & {
+  cell: InputHeaderCell;
   onCellChanged: Function;
-  onColumnHighlight: Function;
-}) => {
-  const [formula, setFormula] = useState(cell.text);
-  const { dispatch } = useContext(GridContext);
+  formula: string;
+};
+
+const FormulaDropDownBox = (
+  { cell, onCellChanged, ...props }: FormulaDropDownBoxProps,
+  ref: any
+) => {
+  const { state, dispatch } = useContext(GridContext);
+  const { headerFormulas } = state;
+  const { columnIndex } = props;
+  // const [formula, setFormula] = useState(cell.text);
+  const formula = headerFormulas?.[columnIndex] || '';
+  const [highlightedColumns, setHighlightedColumns] = useState<
+    Record<number, { color: string }>
+  >({});
+
+  const [cellText] = useState(cell.text);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
@@ -56,6 +77,17 @@ const FormulaDropDownBox = ({
   const dropdownRef = useRef(null);
 
   useOnClickOutside(dropdownRef, () => setSuggestions([]));
+
+  useImperativeHandle(
+    ref,
+    () => {
+      // console.log({ highlightedColumns });
+      return highlightedColumns;
+    },
+    [highlightedColumns]
+  );
+
+  console.log({ ref });
 
   const metricFunctionNames = ['count(', 'countif('];
   const dimensionFunctionNames = ['unique('];
@@ -77,10 +109,6 @@ const FormulaDropDownBox = ({
   const [isLoadingValue, setIsLoadingValue] = useState(false);
   const router = useRouter();
   const { dsId } = router.query;
-
-  useEffect(() => {
-    setFormula(cell.text);
-  }, [cell.text]);
 
   const handleAddHeader = () => {
     onCellChanged({ addHeader: true });
@@ -202,7 +230,7 @@ const FormulaDropDownBox = ({
   useEffect(() => {
     if (activeCellState === ActiveCellState.BLANK) return;
     const generatedString = generateFormulaString(cellState, formula);
-    setFormula(generatedString);
+    // setFormula(generatedString);
     suggestFormula(generatedString);
   }, [cellState]);
 
@@ -262,21 +290,32 @@ const FormulaDropDownBox = ({
 
   const handleChange = (e: any) => {
     const _formula = e.currentTarget.textContent || '';
+    const { columnColorMapping } = highlightFormula(_formula);
+    // onColumnHighlight(columnColorMapping);
+    // setFormula(_formula);
+    // setHighlightedColumns(columnColorMapping);
 
-    setFormula(_formula);
+    dispatch({
+      type: Actions.SET_HEADER_FORMULAS,
+      payload: { ...columnColorMapping, [columnIndex]: _formula },
+    });
 
-    // dispatch({
-    //   type: Actions.SET_HIGHLIGHTED_COLUMNS,
-    //   payload: columnColorMapping,
-    // });
+    dispatch({
+      type: Actions.SET_HIGHLIGHTED_COLUMNS,
+      payload: columnColorMapping,
+    });
   };
 
   useEffect(() => {
-    if (formula) {
-      const { columnColorMapping } = highlightFormula(formula);
-      onColumnHighlight(columnColorMapping);
-    }
-  }, [formula]);
+    // editableRef?.current?.focus();
+    console.log('cellText', cellText);
+  }, [cellText]);
+  // useEffect(() => {
+  //   if (formula) {
+  //     const { columnColorMapping } = highlightFormula(formula);
+  //     onColumnHighlight(columnColorMapping);
+  //   }
+  // }, [formula]);
 
   const handleSubmitFormula = () => {
     if (formula) {
@@ -296,6 +335,7 @@ const FormulaDropDownBox = ({
 
     onCellChanged({ text: formula });
   };
+  // console.log('formula', formula);
 
   return (
     <Flex width={'full'}>
@@ -321,8 +361,11 @@ const FormulaDropDownBox = ({
           />
           <Box
             ref={(el) => el?.focus()}
-            px={1}
+            p={1}
             position={'relative'}
+            fontSize={'xs-12'}
+            lineHeight={'xs-12'}
+            fontWeight={'600'}
             color={'transparent'}
             sx={{
               caretColor: 'black',
@@ -336,7 +379,7 @@ const FormulaDropDownBox = ({
             }}
             onInput={handleChange}
           >
-            {cell.text}
+            <bdo dir="rtl">{formula}</bdo>
           </Box>
         </Box>
 
@@ -425,4 +468,4 @@ const FormulaDropDownBox = ({
   );
 };
 
-export default FormulaDropDownBox;
+export default forwardRef(FormulaDropDownBox);
