@@ -29,8 +29,10 @@ const Toolbar = ({
   setSheetsData: React.Dispatch<React.SetStateAction<TransientSheetData[]>>;
   addNewChartToSheet: () => void;
 }) => {
-  const disabledIconStyle = { color: '#bdbdbd', cursor: 'not-allowed' };
   const sheet = sheetsData[selectedSheetIndex];
+
+  const isPivotTable =
+    sheetsData[selectedSheetIndex].sheet_type === SheetType.PIVOT_TABLE;
 
   const handleColumnValueToPercentConversion = () => {
     setSheetsData((prevSheet: TransientSheetData[]) => {
@@ -93,6 +95,7 @@ const Toolbar = ({
       return sheetsCopy;
     });
   };
+
   const handleDecreaseDecimalPlacesInColumnValue = () => {
     setSheetsData((prevSheet: TransientSheetData[]) => {
       const sheetsCopy = cloneDeep(prevSheet);
@@ -150,10 +153,14 @@ const Toolbar = ({
           w={'6'}
           h={'6'}
           borderRadius={'4'}
-          _hover={{ backgroundColor: 'grey.400', cursor: 'pointer' }}
+          _hover={{
+            backgroundColor: 'grey.400',
+            cursor: isPivotTable ? 'not-allowed' : 'pointer',
+          }}
+          opacity={isPivotTable ? '0.4' : 1}
           justifyContent={'center'}
           alignItems={'center'}
-          onClick={addNewChartToSheet}
+          onClick={() => !isPivotTable && addNewChartToSheet()}
         >
           <ChartBar
             style={{

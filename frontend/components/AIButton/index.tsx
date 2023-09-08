@@ -145,10 +145,11 @@ const AIButton = forwardRef<AIButtonProps, 'div'>((props, ref) => {
             </Button>
           ) : (
             <IconButton
-              icon={<X size={20} />}
+              icon={<X size={16} />}
               aria-label="close ask ai button"
               boxShadow={'xl'}
               rounded={'full'}
+              size={'xs'}
               background={'white'}
               _hover={{
                 background: 'white.100',
@@ -164,46 +165,52 @@ const AIButton = forwardRef<AIButtonProps, 'div'>((props, ref) => {
           )}
         </PopoverTrigger>
 
-        <PopoverContent
-          width={'400px'}
-          minHeight={'140px'}
-          rounded={'xl'}
-          bg={'white'}
-        >
+        <PopoverContent width={'85'} height={'26'} rounded={'xl'} bg={'white'}>
           <PopoverBody boxShadow="xl" h={'full'} rounded={'xl'} padding={4}>
-            <Flex direction={'row'}>
-              <Box>
-                <Sparkle size={20} color={'#EBAC42'} weight={'fill'} />
-              </Box>
-              <EditableTextarea
-                editing={editing}
-                setEditing={setEditing}
-                text={text}
-                setText={setText}
-                tokens={tokens}
-                setTokens={setTokens}
-                selectedProperties={selectedProperties}
-                setSelectedProperties={setSelectedProperties}
-              />
-            </Flex>
-            <Flex direction={'row'} justifyContent={'flex-end'} mt={2}>
-              <IconButton
-                isLoading={loading}
-                onClick={onSubmit}
-                aria-label="Get data"
-                background={'#5093EC'}
-                size={'sm'}
-                _hover={{
-                  background: 'blue.400',
-                }}
-                icon={
-                  editing ? (
-                    <CheckCircle size={20} color={'white'} weight="fill" />
-                  ) : (
-                    <PaperPlaneRight size={20} color={'white'} weight="fill" />
-                  )
-                }
-              />
+            <Flex
+              direction={'column'}
+              h={'full'}
+              justifyContent={'space-between'}
+              overflow={'auto'}
+            >
+              <Flex direction={'row'}>
+                <Box>
+                  <Sparkle size={16} color={'#EBAC42'} weight={'fill'} />
+                </Box>
+                <EditableTextarea
+                  editing={editing}
+                  setEditing={setEditing}
+                  text={text}
+                  setText={setText}
+                  tokens={tokens}
+                  setTokens={setTokens}
+                  selectedProperties={selectedProperties}
+                  setSelectedProperties={setSelectedProperties}
+                />
+              </Flex>
+              <Flex direction={'row'} justifyContent={'flex-end'} mt={2}>
+                <IconButton
+                  isLoading={loading}
+                  onClick={onSubmit}
+                  aria-label="Get data"
+                  background={'#5093EC'}
+                  size={'xs'}
+                  _hover={{
+                    background: 'blue.400',
+                  }}
+                  icon={
+                    editing ? (
+                      <CheckCircle size={16} color={'white'} weight="fill" />
+                    ) : (
+                      <PaperPlaneRight
+                        size={16}
+                        color={'white'}
+                        weight="fill"
+                      />
+                    )
+                  }
+                />
+              </Flex>
             </Flex>
           </PopoverBody>
         </PopoverContent>

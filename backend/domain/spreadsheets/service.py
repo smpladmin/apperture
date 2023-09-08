@@ -252,7 +252,7 @@ class SpreadsheetService:
                 axis_range=row_names,
                 range_axis=rows[0] if rows else None,
                 show_total=columns[0].show_total or (not rows and values),
-                limit=25,
+                limit=24,
             )
             column_names = [column[0] for column in unique_columns]
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Checkbox, Flex, Select, Text, useToast } from '@chakra-ui/react';
-import { CaretLeft, Plus, Table, X } from 'phosphor-react';
+import { CaretDown, CaretLeft, Plus, Table, X } from 'phosphor-react';
 import {
   AggregateFunction,
   PivotAxisDetail,
@@ -19,6 +19,8 @@ import {
 } from '../util';
 import { cloneDeep } from 'lodash';
 import { ErrorResponse } from '@lib/services/util';
+import { trimLabel } from '@lib/utils/common';
+import { BLACK_500 } from '@theme/index';
 
 const initialDropdownState = {
   row: false,
@@ -218,17 +220,26 @@ export const PivotTableSidePanel = ({
         gap={'2'}
         borderBottom={'0.4px solid #bdbdbd'}
         px={5}
-        pb={4}
+        pb={3}
+        mt={'-4px'}
       >
         <Table height={'20px'} />
-        Pivot table editor
+        <Text
+          fontSize={'xs-14'}
+          fontWeight={'400'}
+          lineHeight={'xs-14'}
+          color={'grey.900'}
+        >
+          Pivot table editor
+        </Text>
       </Flex>
       <Flex
         justifyContent={'space-between'}
-        fontSize={'xs-14'}
+        fontSize={'xs-12'}
         fontWeight={500}
         lineHeight={'130%'}
         px={5}
+        color={'grey.500'}
       >
         Row
         <Flex ref={rowBoxref}>
@@ -263,10 +274,11 @@ export const PivotTableSidePanel = ({
       ) : null}
       <Flex
         justifyContent={'space-between'}
-        fontSize={'xs-14'}
+        fontSize={'xs-12'}
         fontWeight={500}
         lineHeight={'130%'}
         px={5}
+        color={'grey.500'}
       >
         Columns
         <Flex ref={columnBoxRef}>
@@ -301,10 +313,11 @@ export const PivotTableSidePanel = ({
       ) : null}
       <Flex
         justifyContent={'space-between'}
-        fontSize={'xs-14'}
+        fontSize={'xs-12'}
         fontWeight={500}
         lineHeight={'130%'}
         px={5}
+        color={'grey.500'}
       >
         Values
         <Flex ref={valueBoxref}>
@@ -339,10 +352,11 @@ export const PivotTableSidePanel = ({
       ) : null}
       <Flex
         justifyContent={'space-between'}
-        fontSize={'xs-14'}
+        fontSize={'xs-12'}
         fontWeight={500}
         lineHeight={'130%'}
         px={5}
+        color={'grey.500'}
       >
         Filters
         <Flex>
@@ -369,42 +383,42 @@ const PivotAxisDetailCard = ({
       gap={'10px'}
       borderRadius={'4px'}
       bg={'white.DEFAULT'}
-      border="1px solid #bdbdbd"
+      border="0.4px solid #DFDFDF"
       width={'full'}
     >
       <Flex
         justifyContent={'space-between'}
-        fontSize={'xs-14'}
+        fontSize={'xs-12'}
         fontWeight={500}
         lineHeight={'130%'}
         width={'full'}
+        color={'grey.900'}
       >
-        <Flex maxWidth={'80%'} overflowWrap={'anywhere'}>
-          {name}
+        <Flex maxWidth={'80%'} whiteSpace={'nowrap'}>
+          {trimLabel(name, 30)}
         </Flex>
-        <X cursor={'pointer'} onClick={() => onClose(name)} />
+        <X cursor={'pointer'} size={12} onClick={() => onClose(name)} />
       </Flex>
       <Flex gap={5}>
         <Flex
           fontSize={'xs-10'}
           lineHeight={'135%'}
           fontWeight={400}
-          color={'gray.600'}
+          color={'grey.600'}
           flexDir="column"
           gap={1}
-          maxWidth={`calc(50% - 10px)`}
         >
           Order
-          <select
-            style={{
-              fontSize: 'xs-10',
-              lineHeight: '135%',
-              fontWeight: 400,
-              paddingInline: 2,
-              paddingBlock: 3,
-              borderRadius: '4px',
-              border: '0.4px solid #bdbdbd',
-            }}
+          <Select
+            icon={<CaretDown fontSize={'8px'} color={BLACK_500} />}
+            size={'sm'}
+            fontSize="xs-10"
+            lineHeight="135%"
+            fontWeight={400}
+            color={'grey.900'}
+            borderRadius="4px"
+            border="0.4px solid #bdbdbd"
+            focusBorderColor={'grey.900'}
             onChange={(e) =>
               setDetail((prevState: PivotAxisDetail[]) => [
                 { ...prevState[0], order_by: e.target.value },
@@ -413,31 +427,32 @@ const PivotAxisDetailCard = ({
           >
             <option value={SortingOrder.ASC}>Ascending</option>
             <option value={SortingOrder.DESC}>Descending</option>
-          </select>
+          </Select>
         </Flex>
         <Flex
           fontSize={'xs-10'}
           lineHeight={'135%'}
           fontWeight={400}
-          color={'gray.600'}
+          color={'grey.600'}
           flexDir="column"
           gap={1}
+          flexGrow={1}
           maxWidth={`calc(50% - 10px)`}
         >
           Sort by
-          <select
-            style={{
-              fontSize: 'xs-10',
-              lineHeight: '135%',
-              fontWeight: 400,
-              paddingInline: 2,
-              paddingBlock: 3,
-              borderRadius: '4px',
-              border: '0.4px solid #bdbdbd',
-            }}
+          <Select
+            icon={<CaretDown color={BLACK_500} fontSize={'8px'} />}
+            size={'sm'}
+            fontSize="xs-10"
+            lineHeight="135%"
+            fontWeight={400}
+            color={'grey.900'}
+            borderRadius="4px"
+            border="0.4px solid #bdbdbd"
+            focusBorderColor={'grey.900'}
           >
             <option value="option1">{name}</option>
-          </select>
+          </Select>
         </Flex>
       </Flex>
       <Checkbox
@@ -478,16 +493,18 @@ const PivotValueCard = ({
       gap={'10px'}
       borderRadius={'4px'}
       bg={'white.DEFAULT'}
-      border="1px solid #bdbdbd"
+      border="0.4px solid #DFDFDF"
     >
       <Flex
         justifyContent={'space-between'}
-        fontSize={'xs-14'}
+        fontSize={'xs-12'}
         fontWeight={500}
         lineHeight={'130%'}
+        color={'grey.900'}
       >
-        <Flex maxWidth={'80%'}>{name}</Flex>
+        <Flex maxWidth={'80%'}>{trimLabel(name, 25)}</Flex>
         <X
+          size={12}
           onClick={() => {
             handleClose(name);
           }}
@@ -498,31 +515,32 @@ const PivotValueCard = ({
           fontSize={'xs-10'}
           lineHeight={'135%'}
           fontWeight={400}
-          color={'gray.600'}
+          color={'grey.600'}
           flexDir="column"
           gap={1}
-          maxWidth={'100%'}
+          w={'full'}
         >
           Summarise by
-          <select
-            style={{
-              fontSize: 'xs-10',
-              lineHeight: '135%',
-              fontWeight: 400,
-              paddingInline: 2,
-              paddingBlock: 3,
-              borderRadius: '4px',
-              border: '0.4px solid #bdbdbd',
-            }}
+          <Select
+            icon={<CaretDown color={BLACK_500} fontSize={'8px'} />}
+            size={'sm'}
+            fontSize="xs-10"
+            lineHeight="135%"
+            fontWeight={400}
+            color={'grey.900'}
+            borderRadius="4px"
+            border="0.4px solid #bdbdbd"
+            w={'full'}
             onChange={(e) =>
               setDetail((prevState: PivotValueDetail[]) => [
                 { ...prevState[0], function: e.target.value },
               ])
             }
+            focusBorderColor={'grey.900'}
           >
             <option value={AggregateFunction.SUM}>SUM</option>
             <option value={AggregateFunction.COUNT}>COUNT</option>
-          </select>
+          </Select>
         </Flex>
       </Flex>
     </Flex>

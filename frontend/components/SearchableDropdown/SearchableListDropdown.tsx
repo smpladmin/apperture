@@ -87,11 +87,11 @@ const SearchableListDropdown = ({
                     <Image src={cursorIcon} alt={'cursor-icon'} />
                   ) : null}
                   <Text
-                    fontSize={'xs-14'}
-                    lineHeight={'xs-14'}
-                    fontWeight={'500'}
+                    fontSize={'xs-12'}
+                    lineHeight={'xs-12'}
+                    fontWeight={'400'}
                     wordBreak={'break-word'}
-                    color={'black.500'}
+                    color={'grey.900'}
                   >
                     {listKey ? segmentPropertyItem : (item as string)}
                   </Text>

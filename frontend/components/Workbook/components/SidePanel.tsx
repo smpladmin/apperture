@@ -110,8 +110,8 @@ const SidePanel = ({
 
   return (
     <Box
-      width={isSidePanelCollapsed ? '8' : '62'}
-      minWidth={isSidePanelCollapsed ? '8' : '62'}
+      width={isSidePanelCollapsed ? '8' : '73'}
+      minWidth={isSidePanelCollapsed ? '8' : '73'}
       h={'full'}
       background={'white.500'}
       pt={'4'}
@@ -122,46 +122,48 @@ const SidePanel = ({
       className={`side-panel${chartPanel.hidden ? '' : '-chart'}`}
     >
       {!isSidePanelCollapsed ? (
-        SidePanelState === SidePanelStateType.CONNECTIONS ? (
-          chartPanel.hidden ? (
-            <SheetConnections
-              showColumns={showColumns}
-              sheetsData={sheetsData}
-              connectorData={connectorData}
-              selectedSheetIndex={selectedSheetIndex}
+        <>
+          {SidePanelState === SidePanelStateType.CONNECTIONS ? (
+            chartPanel.hidden ? (
+              <SheetConnections
+                showColumns={showColumns}
+                sheetsData={sheetsData}
+                connectorData={connectorData}
+                selectedSheetIndex={selectedSheetIndex}
+                setShowColumns={setShowColumns}
+                setSheetsData={setSheetsData}
+                evaluateFormulaHeader={evaluateFormulaHeader}
+                addDimensionColumn={addDimensionColumn}
+                loadingConnections={loadingConnections}
+                connections={connections}
+                setConnectorData={setConnectorData}
+                setShowSqlEditor={setShowSqlEditor}
+              />
+            ) : (
+              <ChartSidePanel
+                data={chartPanel.data as SheetChartDetail}
+                hideChartPanel={hideChartPanel}
+                updateChart={updateChart}
+              />
+            )
+          ) : null}
+          {SidePanelState === SidePanelStateType.PIVOT ? (
+            <PivotTableSidePanel
               setShowColumns={setShowColumns}
               setSheetsData={setSheetsData}
-              evaluateFormulaHeader={evaluateFormulaHeader}
-              addDimensionColumn={addDimensionColumn}
-              loadingConnections={loadingConnections}
-              connections={connections}
-              setConnectorData={setConnectorData}
-              setShowSqlEditor={setShowSqlEditor}
+              selectedSheetIndex={selectedSheetIndex}
+              sheetsData={sheetsData}
             />
-          ) : (
-            <ChartSidePanel
-              data={chartPanel.data as SheetChartDetail}
-              hideChartPanel={hideChartPanel}
-              updateChart={updateChart}
+          ) : null}
+          {SidePanelState === SidePanelStateType.CHART ? (
+            <PivotTableSidePanel
+              setShowColumns={setShowColumns}
+              setSheetsData={setSheetsData}
+              selectedSheetIndex={selectedSheetIndex}
+              sheetsData={sheetsData}
             />
-          )
-        ) : null
-      ) : null}
-      {SidePanelState === SidePanelStateType.PIVOT ? (
-        <PivotTableSidePanel
-          setShowColumns={setShowColumns}
-          setSheetsData={setSheetsData}
-          selectedSheetIndex={selectedSheetIndex}
-          sheetsData={sheetsData}
-        />
-      ) : null}
-      {SidePanelState === SidePanelStateType.CHART ? (
-        <PivotTableSidePanel
-          setShowColumns={setShowColumns}
-          setSheetsData={setSheetsData}
-          selectedSheetIndex={selectedSheetIndex}
-          sheetsData={sheetsData}
-        />
+          ) : null}
+        </>
       ) : null}
 
       <Box
@@ -201,7 +203,7 @@ const SidePanel = ({
 
 type SheetConnectionsProps = {
   showColumns: boolean;
-  sheetsData: TransientSheetData;
+  sheetsData: TransientSheetData[];
   connectorData: ConnectionSource & {
     heirarchy: string[];
   };
@@ -229,7 +231,7 @@ const SheetConnections = ({
   connections,
   setConnectorData,
   setShowSqlEditor,
-}: any) => {
+}: SheetConnectionsProps) => {
   return (
     <Flex direction={'column'} px={'2'} overflow={'auto'}>
       {showColumns ? (

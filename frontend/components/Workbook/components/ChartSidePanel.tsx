@@ -21,7 +21,7 @@ import {
   MagnifyingGlass,
   Plus,
 } from 'phosphor-react';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useRef, useState } from 'react';
 import { CHART_COLOR } from './DraggableWrapper';
 
 const ChartSidePanel = ({
@@ -394,6 +394,7 @@ const ChartSidePanel = ({
             color={'gray.600'}
             mt={2}
             onClick={() => setIsYAxisDropDownOpen(true)}
+            cursor={'pointer'}
           >
             + Add Series
           </Text>
@@ -506,7 +507,7 @@ const SeriesDropDown = ({
         bg="white"
         mt={1}
         maxH={'240px'}
-        overflowY={'auto'}
+        overflow={'auto'}
       >
         <InputGroup id="x-axis-dropdown">
           <InputLeftElement>
