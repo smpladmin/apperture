@@ -376,11 +376,13 @@ const Sheet = ({
                     {({ columnIndex, rowIndex, style }) => {
                       const cell = rows[rowIndex]?.cells?.[columnIndex];
                       const cellType = cell?.type || 'text';
-
                       const baseCellProps: BaseCellProps = {
                         columnIndex,
                         rowIndex,
-                        style,
+                        style: {
+                          ...style,
+                          ...cell.style,
+                        },
                         column: columns[columnIndex],
                       };
 

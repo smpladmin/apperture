@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ColumnType,
   SheetChartDetail,
+  SheetType,
   SpreadSheetColumn,
   SubHeaderColumn,
   SubHeaderColumnType,
@@ -13,6 +14,7 @@ import {
   fillHeaders,
   fillRows,
   formatNumber,
+  generatePivotCellStyles,
 } from '@components/Workbook/util';
 import { cloneDeep } from 'lodash';
 import { SheetChart } from '../DraggableWrapper';
@@ -100,9 +102,11 @@ const getRows = (
   subHeaders: SubHeaderColumn[],
   sheetData: TransientSheetData,
   properties: string[]
-): Row<TextCell | InputHeaderCell>[] => [
-  getSubHeaderRow(headers, originalHeaders, subHeaders, sheetData, properties),
-  ...data.map<Row<TextCell>>((data, idx) => ({
+): Row<TextCell | InputHeaderCell>[] => {
+  const isPivot = sheetData.sheet_type === SheetType.PIVOT_TABLE;
+  const lastRow = sheetData.data.length || 10;
+  const lastColumn = sheetData.headers.length || 4;
+  const gridRows = data.map<Row<TextCell>>((data, idx) => ({
     rowId: idx,
     cells: headers
       .filter((header) => header.name !== 'index')
@@ -112,15 +116,36 @@ const getRows = (
 
         const format = sheetData?.columnFormat?.[index.toString()]?.format;
 
+        const style: any = isPivot
+          ? generatePivotCellStyles(idx, index, lastRow, lastColumn, sheetData)
+          : {};
+
         if (format && val) {
           val = formatNumber(val, format);
         }
 
         const value = typeof val === 'object' ? JSON.stringify(val) : val;
-        return { type: 'text', text: value };
+        return {
+          type: 'text',
+          text: value,
+          style,
+        };
       }),
-  })),
-];
+  }));
+  return !isPivot
+    ? [
+        getSubHeaderRow(
+          headers,
+          originalHeaders,
+          subHeaders,
+          sheetData,
+          properties
+        ),
+
+        ...gridRows,
+      ]
+    : gridRows;
+};
 
 const Grid = ({
   selectedSheetIndex,
