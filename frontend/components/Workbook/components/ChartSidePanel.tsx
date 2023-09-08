@@ -378,6 +378,7 @@ const ChartSidePanel = ({
         Series
         {data.yAxis.map((series, index) => (
           <SeriesCard
+            key={series.name}
             name={series.name}
             color={CHART_COLOR[index]}
             removeValue={() => {
