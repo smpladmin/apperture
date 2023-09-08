@@ -66,6 +66,28 @@ class Formatting(BaseModel):
     width: Optional[int]
 
 
+class SpreadSheetChartSeries(BaseModel):
+    name: str
+    type: str
+
+
+class SpreadSheetChartType(Enum):
+    COLUMN = "COLUMN"
+
+
+class SpreadSheetCharts(BaseModel):
+    timestamp: int
+    name: str
+    x: Union[int, float]
+    y: Union[int, float]
+    height: Union[int, float]
+    width: Union[int, float]
+    series: List[SpreadSheetChartSeries]
+    type: SpreadSheetChartType
+    xAxis: List[SpreadSheetChartSeries]
+    yAxis: List[SpreadSheetChartSeries]
+
+
 class Spreadsheet(BaseModel):
     name: str
     headers: List[SpreadSheetColumn]
@@ -77,6 +99,7 @@ class Spreadsheet(BaseModel):
     meta: Optional[dict]
     ai_query: Optional[AIQuery]
     column_format: Optional[dict[str, Formatting]]
+    charts: Optional[List[SpreadSheetCharts]] = []
 
 
 class WorkBook(Document):

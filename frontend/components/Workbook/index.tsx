@@ -166,7 +166,10 @@ const Workbook = ({
   }, []);
 
   const calculatedChartData = useMemo(() => {
-    if (sheetsData[selectedSheetIndex]?.charts?.length) {
+    if (
+      sheetsData[selectedSheetIndex]?.charts?.length &&
+      sheetsData[selectedSheetIndex].data.length
+    ) {
       const updatedSeries = prepareChartSeriesFromSheetData(
         sheetsData[selectedSheetIndex].data
       );
@@ -189,11 +192,6 @@ const Workbook = ({
     }
     return [];
   }, [sheetsData[selectedSheetIndex].data]);
-
-  useEffect(() => {
-    console.log('updated sheet data');
-    console.log(calculatedChartData);
-  }, [calculatedChartData]);
 
   useEffect(() => {
     if (
@@ -320,6 +318,7 @@ const Workbook = ({
         sheet_type: sheet.sheet_type,
         aiQuery: sheet.aiQuery,
         column_format: sheet.columnFormat,
+        charts: sheet.charts,
       };
     });
 
@@ -1114,6 +1113,7 @@ const Workbook = ({
               sheetsData={sheetsData}
               setShowColumns={setShowColumns}
               setShowEditor={setShowSqlEditor}
+              hideChartPanel={hideChartPanel}
             />
           </Box>
         </Flex>

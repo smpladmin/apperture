@@ -135,7 +135,7 @@ export type ChartSeries = {
 };
 
 export enum ChartType {
-  COLUMN = 'column',
+  COLUMN = 'COLUMN',
 }
 
 export type SheetChartDetail = {

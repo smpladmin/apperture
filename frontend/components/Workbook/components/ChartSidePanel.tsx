@@ -37,7 +37,9 @@ const ChartSidePanel = ({
   const [isYAxisDropDownOpen, setIsYAxisDropDownOpen] = useState(false);
   const [isRemoveXAxisDropDownOpen, setIsRemoveXAxisDropDownOpen] =
     useState(false);
+  const [isChartTypeDropDownOpen, setIsChartTypeDropDownOpen] = useState(false);
   const chartTypeRef = useRef(null);
+  useOnClickOutside(chartTypeRef, () => setIsChartTypeDropDownOpen(false));
   const updateXAxisValue = (item: ChartSeries) => {
     const oldXAxisValue = data.xAxis;
     const newSeries = [
@@ -74,8 +76,6 @@ const ChartSidePanel = ({
     newData.yAxis = data.yAxis.filter((i) => i.name != item.name);
     updateChart(newData.timestamp, newData);
   };
-
-  console.log(data);
 
   if (!data) return <></>;
   return (
@@ -138,6 +138,7 @@ const ChartSidePanel = ({
               alignContent={'center'}
               alignItems={'center'}
               cursor={'pointer'}
+              onClick={() => setIsChartTypeDropDownOpen(true)}
             >
               <ChartBar fontSize={'14px'} />
               <Text w="full">Columns</Text>
@@ -145,7 +146,7 @@ const ChartSidePanel = ({
             <CaretDown />
           </Flex>
           <Dropdown
-            isOpen={false}
+            isOpen={isChartTypeDropDownOpen}
             width="100%"
             style={{
               borderRadius: '4px',
@@ -185,6 +186,7 @@ const ChartSidePanel = ({
                 alignItems={'center'}
                 _hover={{ background: '#f5f5f5' }}
                 cursor={'pointer'}
+                onClick={() => setIsChartTypeDropDownOpen(false)}
               >
                 <ChartBar fontSize={'14px'} />
                 <Text w="full">Columns</Text>

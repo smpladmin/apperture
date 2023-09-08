@@ -148,7 +148,6 @@ export const SheetChart = ({
         const newData = chartData;
         newData.x = x;
         newData.y = y;
-        console.log('dragged');
         updateChart(chartData.timestamp, newData);
       }}
       onResizeStop={(_, __, elem, ___, position) => {
