@@ -3,6 +3,7 @@ from typing import List, Optional, Union
 
 from beanie import PydanticObjectId
 from pydantic import BaseModel
+from pypika import functions as fn
 
 from repositories.document import Document
 
@@ -143,6 +144,11 @@ class SortingOrder(Enum):
 
 class AggregateFunction(Enum):
     SUM = "SUM"
+    COUNT = "COUNT"
+
+    def get_pypika_function(self):
+        type_dict = {self.SUM: fn.Sum, self.COUNT: fn.Count}
+        return type_dict.get(self, fn.Sum)
 
 
 class PivotAxisDetail(BaseModel):

@@ -249,8 +249,8 @@ class SpreadsheetService:
                 query,
                 columns,
                 aggregate=values[0] if values else None,
-                axisRange=row_names,
-                rangeAxis=rows[0] if rows else None,
+                axis_range=row_names,
+                range_axis=rows[0] if rows else None,
                 show_total=columns[0].show_total or (not rows and values),
                 limit=25,
             )
@@ -263,8 +263,8 @@ class SpreadsheetService:
                     rows,
                     columns,
                     values,
-                    rowRange=row_names,
-                    columnRange=column_names,
+                    row_range=row_names,
+                    column_range=column_names,
                 )
                 data = self.populate_data(data, result_set)
             except Exception as e:

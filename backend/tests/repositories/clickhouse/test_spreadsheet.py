@@ -40,6 +40,9 @@ class TestSpreadSheetRepository:
         self.pivot_axis_value = PivotValueDetail(
             name="salary", function=AggregateFunction.SUM
         )
+        self.pivot_axis_value_count = PivotValueDetail(
+            name="salary", function=AggregateFunction.COUNT
+        )
 
     def test_build_transient_columns_query(self):
         datasource_id = "test-ds-id"
@@ -187,8 +190,8 @@ class TestSpreadSheetRepository:
             values=[self.pivot_axis_row_without_total],
             aggregate=self.pivot_axis_value,
             show_total=False,
-            axisRange=None,
-            rangeAxis=None,
+            axis_range=None,
+            range_axis=None,
             limit=50,
         )
 
@@ -203,8 +206,8 @@ class TestSpreadSheetRepository:
             values=[self.pivot_axis_row_without_total],
             aggregate=self.pivot_axis_value,
             show_total=True,
-            axisRange=None,
-            rangeAxis=None,
+            axis_range=None,
+            range_axis=None,
             limit=50,
         )
 
@@ -219,7 +222,7 @@ class TestSpreadSheetRepository:
             values=[self.pivot_axis_row_without_total],
             aggregate=self.pivot_axis_value,
             show_total=True,
-            axisRange=[
+            axis_range=[
                 "Sunday",
                 "Monday",
                 "Tuesday",
@@ -228,7 +231,7 @@ class TestSpreadSheetRepository:
                 "Friday",
                 "Saturday",
             ],
-            rangeAxis=PivotAxisDetail(
+            range_axis=PivotAxisDetail(
                 name="weekday",
                 sort_by="weekday",
                 order_by=SortingOrder.ASC,
@@ -248,7 +251,7 @@ class TestSpreadSheetRepository:
             rows=[self.pivot_axis_row_with_total],
             columns=[self.pivot_axis_column_without_total],
             values=[self.pivot_axis_value],
-            rowRange=[
+            row_range=[
                 1,
                 2,
                 3,
@@ -260,7 +263,7 @@ class TestSpreadSheetRepository:
                 9,
                 10,
             ],
-            columnRange=[
+            column_range=[
                 "Sunday",
                 "Monday",
                 "Tuesday",
@@ -274,6 +277,40 @@ class TestSpreadSheetRepository:
         assert (
             result
             == 'SELECT "user_id","weekday",SUM("salary") FROM (SELECT * FROM table) WHERE "user_id" IN (1,2,3,4,5,6,7,8,9,10) AND "weekday" IN (\'Sunday\',\'Monday\',\'Tuesday\',\'Wednesday\',\'Thursday\',\'Friday\',\'Saturday\') GROUP BY "user_id","weekday" ORDER BY "user_id" ASC,"weekday" ASC'
+        )
+
+    def test_build_compute_ordered_distinct_values_for_count(self):
+        result = self.spreadsheet_repo.build_compute_transient_pivot(
+            sql="SELECT * FROM table",
+            rows=[self.pivot_axis_row_with_total],
+            columns=[self.pivot_axis_column_without_total],
+            values=[self.pivot_axis_value_count],
+            row_range=[
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+            ],
+            column_range=[
+                "Sunday",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+            ],
+        )
+
+        assert (
+            result
+            == 'SELECT "user_id","weekday",COUNT("salary") FROM (SELECT * FROM table) WHERE "user_id" IN (1,2,3,4,5,6,7,8,9,10) AND "weekday" IN (\'Sunday\',\'Monday\',\'Tuesday\',\'Wednesday\',\'Thursday\',\'Friday\',\'Saturday\') GROUP BY "user_id","weekday" ORDER BY "user_id" ASC,"weekday" ASC'
         )
 
     def test_get_vlookup(self):
