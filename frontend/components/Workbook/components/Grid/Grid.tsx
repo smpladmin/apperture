@@ -69,7 +69,7 @@ const getSubHeaderRow = (
           return {
             type: 'inputHeader',
             text: originalHeaders?.[index]?.name || '',
-            disable: true,
+            disable: false,
             showAddButton,
             disableAddButton,
             showSuggestions: isPivotOrBlankSheet,
@@ -176,8 +176,6 @@ const Grid = ({
   const [columns, setColumns] = useState<Column[]>(
     getColumns(fillHeaders(sheet.headers))
   );
-
-  const [charts, setCharts] = useState(sheet.charts);
 
   const [rows, setRows] = useState(
     getRows(

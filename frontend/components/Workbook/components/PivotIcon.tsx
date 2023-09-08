@@ -103,24 +103,25 @@ function PivotIcon({
               px={4}
               py={1.5}
               onClick={onClose}
-              lineHeight={'130%'}
               borderRadius={'8'}
+              h={'30px'}
             >
               <Text
                 fontSize={'xs-14'}
                 fontWeight={'500'}
                 color={'grey.900'}
+                lineHeight={'130%'}
                 p={'0'}
               >
                 Cancel
               </Text>
             </Button>
             <Button
+              h={'30px'}
               borderWidth={'1px'}
               type={'submit'}
               form={'login-form'}
               background={'black.100'}
-              color={'white'}
               px={4}
               py={1.5}
               _hover={{
@@ -128,8 +129,6 @@ function PivotIcon({
               }}
               onClick={handleCreate}
               borderRadius={'8'}
-              fontSize={'xs-14'}
-              fontWeight={'500'}
             >
               <Text
                 fontSize={'xs-14'}

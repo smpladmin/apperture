@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Checkbox, Flex, Select, Text, useToast } from '@chakra-ui/react';
-import { CaretLeft, Plus, Table, X } from 'phosphor-react';
+import { CaretDown, CaretLeft, Plus, Table, X } from 'phosphor-react';
 import {
   AggregateFunction,
   PivotAxisDetail,
@@ -20,6 +20,7 @@ import {
 import { cloneDeep } from 'lodash';
 import { ErrorResponse } from '@lib/services/util';
 import { trimLabel } from '@lib/utils/common';
+import { BLACK_500 } from '@theme/index';
 
 const initialDropdownState = {
   row: false,
@@ -408,17 +409,16 @@ const PivotAxisDetailCard = ({
           gap={1}
         >
           Order
-          <select
-            style={{
-              fontSize: 'xs-10',
-              lineHeight: '135%',
-              fontWeight: 400,
-              color: '#212121',
-              paddingInline: 2,
-              paddingBlock: 3,
-              borderRadius: '4px',
-              border: '0.4px solid #bdbdbd',
-            }}
+          <Select
+            icon={<CaretDown fontSize={'8px'} color={BLACK_500} />}
+            size={'sm'}
+            fontSize="xs-10"
+            lineHeight="135%"
+            fontWeight={400}
+            color={'grey.900'}
+            borderRadius="4px"
+            border="0.4px solid #bdbdbd"
+            focusBorderColor={'grey.900'}
             onChange={(e) =>
               setDetail((prevState: PivotAxisDetail[]) => [
                 { ...prevState[0], order_by: e.target.value },
@@ -427,7 +427,7 @@ const PivotAxisDetailCard = ({
           >
             <option value={SortingOrder.ASC}>Ascending</option>
             <option value={SortingOrder.DESC}>Descending</option>
-          </select>
+          </Select>
         </Flex>
         <Flex
           fontSize={'xs-10'}
@@ -440,21 +440,19 @@ const PivotAxisDetailCard = ({
           maxWidth={`calc(50% - 10px)`}
         >
           Sort by
-          <select
-            style={{
-              fontSize: 'xs-10',
-              lineHeight: '135%',
-              fontWeight: 400,
-              color: '#212121',
-              paddingInline: 2,
-              padding: '8px, 12px',
-              paddingBlock: 3,
-              borderRadius: '4px',
-              border: '0.4px solid #bdbdbd',
-            }}
+          <Select
+            icon={<CaretDown color={BLACK_500} fontSize={'8px'} />}
+            size={'sm'}
+            fontSize="xs-10"
+            lineHeight="135%"
+            fontWeight={400}
+            color={'grey.900'}
+            borderRadius="4px"
+            border="0.4px solid #bdbdbd"
+            focusBorderColor={'grey.900'}
           >
             <option value="option1">{name}</option>
-          </select>
+          </Select>
         </Flex>
       </Flex>
       <Checkbox
@@ -499,12 +497,14 @@ const PivotValueCard = ({
     >
       <Flex
         justifyContent={'space-between'}
-        fontSize={'xs-14'}
+        fontSize={'xs-12'}
         fontWeight={500}
         lineHeight={'130%'}
+        color={'grey.900'}
       >
         <Flex maxWidth={'80%'}>{trimLabel(name, 25)}</Flex>
         <X
+          size={12}
           onClick={() => {
             handleClose(name);
           }}
@@ -518,29 +518,29 @@ const PivotValueCard = ({
           color={'grey.600'}
           flexDir="column"
           gap={1}
-          maxWidth={'100%'}
+          w={'full'}
         >
           Summarise by
-          <select
-            style={{
-              fontSize: 'xs-10',
-              lineHeight: '135%',
-              fontWeight: 400,
-              paddingInline: 2,
-              color: '#212121',
-              paddingBlock: 3,
-              borderRadius: '4px',
-              border: '0.4px solid #bdbdbd',
-            }}
+          <Select
+            icon={<CaretDown color={BLACK_500} fontSize={'8px'} />}
+            size={'sm'}
+            fontSize="xs-10"
+            lineHeight="135%"
+            fontWeight={400}
+            color={'grey.900'}
+            borderRadius="4px"
+            border="0.4px solid #bdbdbd"
+            w={'full'}
             onChange={(e) =>
               setDetail((prevState: PivotValueDetail[]) => [
                 { ...prevState[0], function: e.target.value },
               ])
             }
+            focusBorderColor={'grey.900'}
           >
             <option value={AggregateFunction.SUM}>SUM</option>
             <option value={AggregateFunction.COUNT}>COUNT</option>
-          </select>
+          </Select>
         </Flex>
       </Flex>
     </Flex>
