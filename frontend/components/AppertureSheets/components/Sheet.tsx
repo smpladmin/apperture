@@ -418,7 +418,7 @@ const Sheet = ({
                           }}
                         >
                           <CellToRender
-                            ref={highlightedColumnsRef}
+                            // ref={highlightedColumnsRef}
                             {...baseCellProps}
                             key={`${columnIndex} ${rowIndex} ${cellType}`}
                             cell={cell}

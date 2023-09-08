@@ -1,4 +1,4 @@
-import { forwardRef, useContext, useEffect, useState } from 'react';
+import { forwardRef, memo, useContext, useEffect, useState } from 'react';
 import FormulaDropDownBox from './FormulaDropDownBox';
 import {
   BaseCellProps,
@@ -69,7 +69,6 @@ const InputHeaderCell = (
             onCellsChanged([changedCell]);
           }}
           {...props}
-          ref={ref}
         />
       ) : (
         <Flex
@@ -89,5 +88,10 @@ const InputHeaderCell = (
     </>
   );
 };
-
-export default forwardRef(InputHeaderCell);
+export default InputHeaderCell;
+// export default memo(
+//   InputHeaderCell,
+//   (prevProps: InputHeaderCellProps, nextProps: InputHeaderCellProps) => {
+//     return prevProps.cell.text !== nextProps.cell.text;
+//   }
+// );

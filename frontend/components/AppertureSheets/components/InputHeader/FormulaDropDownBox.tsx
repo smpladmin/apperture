@@ -55,6 +55,33 @@ type FormulaDropDownBoxProps = BaseCellProps & {
   formula: string;
 };
 
+function getCaret(el: any) {
+  let caretAt = 0;
+  const sel = window.getSelection();
+
+  if (sel?.rangeCount == 0) {
+    return caretAt;
+  }
+
+  const range = sel?.getRangeAt(0);
+  const preRange = range?.cloneRange();
+  preRange?.selectNodeContents(el);
+  preRange?.setEnd(range?.endContainer, range?.endOffset);
+  caretAt = preRange?.toString()?.length || 0;
+
+  return caretAt;
+}
+
+function setCaret(el: any, offset: any) {
+  let sel = window.getSelection();
+  let range = document.createRange();
+
+  range?.setStart(el.childNodes[0], offset);
+  range?.collapse(true);
+  sel?.removeAllRanges();
+  sel?.addRange(range);
+}
+
 const FormulaDropDownBox = (
   { cell, onCellChanged, ...props }: FormulaDropDownBoxProps,
   ref: any
@@ -74,20 +101,21 @@ const FormulaDropDownBox = (
   const toast = useToast();
 
   const editableRef = useRef<HTMLDivElement>(null);
+  const caretPos = useRef();
   const dropdownRef = useRef(null);
 
   useOnClickOutside(dropdownRef, () => setSuggestions([]));
 
-  useImperativeHandle(
-    ref,
-    () => {
-      // console.log({ highlightedColumns });
-      return highlightedColumns;
-    },
-    [highlightedColumns]
-  );
+  // useImperativeHandle(
+  //   ref,
+  //   () => {
+  //     // console.log({ highlightedColumns });
+  //     return highlightedColumns;
+  //   },
+  //   [highlightedColumns]
+  // );
 
-  console.log({ ref });
+  // console.log({ ref });
 
   const metricFunctionNames = ['count(', 'countif('];
   const dimensionFunctionNames = ['unique('];
@@ -291,7 +319,6 @@ const FormulaDropDownBox = (
   const handleChange = (e: any) => {
     const _formula = e.currentTarget.textContent || '';
     const { columnColorMapping } = highlightFormula(_formula);
-    // onColumnHighlight(columnColorMapping);
     // setFormula(_formula);
     // setHighlightedColumns(columnColorMapping);
 
@@ -306,15 +333,9 @@ const FormulaDropDownBox = (
     });
   };
 
-  useEffect(() => {
-    // editableRef?.current?.focus();
-    console.log('cellText', cellText);
-  }, [cellText]);
   // useEffect(() => {
-  //   if (formula) {
-  //     const { columnColorMapping } = highlightFormula(formula);
-  //     onColumnHighlight(columnColorMapping);
-  //   }
+  //   setCaret(editableRef.current, caretPos.current);
+  //   editableRef?.current?.focus();
   // }, [formula]);
 
   const handleSubmitFormula = () => {
@@ -335,7 +356,6 @@ const FormulaDropDownBox = (
 
     onCellChanged({ text: formula });
   };
-  // console.log('formula', formula);
 
   return (
     <Flex width={'full'}>
@@ -377,9 +397,12 @@ const FormulaDropDownBox = (
               e.code === 'Enter' && handleSubmitFormula();
               setSuggestions([]);
             }}
-            onInput={handleChange}
+            onInput={(e) => {
+              // caretPos.current = getCaret(editableRef.current);
+              handleChange(e);
+            }}
           >
-            <bdo dir="rtl">{formula}</bdo>
+            <bdo dir={'ltr'}>{formula}</bdo>
           </Box>
         </Box>
 
@@ -468,4 +491,20 @@ const FormulaDropDownBox = (
   );
 };
 
-export default forwardRef(FormulaDropDownBox);
+export default FormulaDropDownBox;
+
+// export default React.memo(
+//   FormulaDropDownBox,
+//   (prevProps: FormulaDropDownBoxProps, nextProps: FormulaDropDownBoxProps) => {
+//     return prevProps.cell.text !== nextProps.cell.text;
+//   }
+// );
+
+/* 
+parent re render ->> child re render ->
+
+
+solution -> somehow we are able to retain caret position given we keep formula state at parent level
+
+
+*/

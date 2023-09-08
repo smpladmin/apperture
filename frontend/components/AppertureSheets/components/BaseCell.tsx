@@ -58,13 +58,19 @@ const BaseCell = ({ children, ...props }: BaseCellPropsWithChildren) => {
       height={6}
       borderRightWidth={isCellSelected ? '1px' : '0.4px'}
       borderLeftWidth={isCellSelected && isLeftmostCellSelected ? '1px' : '0'}
-      backgroundColor={isCellSelected ? 'rgba(53,121,248,.35)' : 'transparent'}
+      backgroundColor={
+        highlightColumn
+          ? highlightColor
+          : isCellSelected
+          ? 'rgba(53,121,248,.35)'
+          : 'transparent'
+      }
       borderBottomWidth={'0.4px'}
       borderColor={
         isCellSelected || currentActiveCell ? 'blue.500' : 'grey.700'
       }
+      borderStyle={highlightColumn ? 'dashed' : 'solid'}
       fontSize={'xs-12'}
-      borderWidth={currentActiveCell ? '2px' : ''}
       textOverflow={'hidden'}
       overflow={'hidden'}
       whiteSpace={'nowrap'}
