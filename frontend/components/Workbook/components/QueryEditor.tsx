@@ -7,7 +7,12 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react';
-import { SheetType, TransientSheetData } from '@lib/domain/workbook';
+import {
+  ColumnType,
+  SheetType,
+  SpreadSheetColumn,
+  TransientSheetData,
+} from '@lib/domain/workbook';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
 import { Eye, PencilSimpleLine, Play, X } from 'phosphor-react';
@@ -26,7 +31,6 @@ type QueryEditorProps = {
   setShowSqlEditor: Function;
   setSheetsData: Function;
   selectedSheetIndex: number;
-  height: string;
 };
 
 const QueryEditor = ({
@@ -34,7 +38,6 @@ const QueryEditor = ({
   selectedSheetIndex,
   setShowSqlEditor,
   setSheetsData,
-  height,
 }: QueryEditorProps) => {
   const sheetData = sheetsData[selectedSheetIndex];
 
@@ -66,6 +69,16 @@ const QueryEditor = ({
     }
   }, [sheetData.query, sheetData.aiQuery?.sql]);
 
+  const convertEmptyQueryColumnToPaddingHeaders = (
+    headers: SpreadSheetColumn[]
+  ) => {
+    return headers.map((header: SpreadSheetColumn) =>
+      header.name === "''"
+        ? { ...header, type: ColumnType.PADDING_HEADER }
+        : header
+    );
+  };
+
   const handleQueryChange = async () => {
     setIsLoading(true);
 
@@ -82,11 +95,14 @@ const QueryEditor = ({
 
     if (response.status === 200) {
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
-      toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
+      toUpdateSheets[selectedSheetIndex].headers =
+        convertEmptyQueryColumnToPaddingHeaders(response?.data?.headers);
       toUpdateSheets[selectedSheetIndex].sheet_type = SheetType.SIMPLE_SHEET;
       toUpdateSheets[selectedSheetIndex].subHeaders = getSubheaders(
         toUpdateSheets[selectedSheetIndex].sheet_type
       );
+      toUpdateSheets[selectedSheetIndex].columnFormat = {};
+
       setError('');
     } else {
       setError((response as ErrorResponse)?.error?.detail);
@@ -141,7 +157,7 @@ const QueryEditor = ({
         />
         <ReactCodeMirror
           value={query}
-          height={height}
+          height={'200px'}
           extensions={[sql()]}
           onChange={(value) => {
             setQuery(value);

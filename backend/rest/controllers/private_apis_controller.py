@@ -99,19 +99,23 @@ async def update_edges(
     return {"updated": True}
 
 
-@router.post("/apidata/{tableName}")
+@router.post("/apidata/{tableName}/{start_time}/{end_time}")
 async def update_apidata(
     tableName: str,
+    start_time: str,
+    end_time: str,
     dto: List[CreateAPIDataDto],
     api_data_service: APIDataService = Depends(),
     app_service: AppService = Depends(),
     ds_service: DataSourceService = Depends(),
 ):
+    if not dto:
+        return {"updated": False, "message": "No data to update."}
     ds_id = dto[0].datasource_id
     datasource = await ds_service.get_datasource(ds_id)
     app = await app_service.get_app(str(datasource.app_id))
     await api_data_service.update_api_data(
-        dto, app.clickhouse_credential.databasename, tableName
+        dto, app.clickhouse_credential.databasename, tableName, start_time, end_time
     )
     return {"updated": True}
 
@@ -292,7 +296,10 @@ async def create_pending_runlogs(
     dpq_service: DPQueueService = Depends(),
 ):
     datasource = await ds_service.get_datasource(ds_id)
-    runlogs = await runlog_service.create_pending_runlogs(datasource)
+    if datasource.provider == IntegrationProvider.API:
+        runlogs = await runlog_service.create_pending_api_runlogs(datasource.id)
+    else:
+        runlogs = await runlog_service.create_pending_runlogs(datasource)
     jobs = dpq_service.enqueue_from_runlogs(runlogs)
     return jobs
 

@@ -1,43 +1,126 @@
-import {
-  CellChange,
-  CellLocation,
-  Column,
-  Id,
-  MenuOption,
-  ReactGrid,
-  SelectionMode,
-} from '@silevis/reactgrid';
 import React, { useEffect, useState } from 'react';
 import {
+  ColumnType,
   SheetChartDetail,
   SpreadSheetColumn,
+  SubHeaderColumn,
+  SubHeaderColumnType,
   TransientSheetData,
 } from '@lib/domain/workbook';
-import { DropdownHeaderTemplate } from './DropdownHeader';
-import { InputHeaderTemplate } from './InputHeader';
 import {
-  convertColumnValuesToPercentage,
+  hasMetricColumnInPivotSheet,
+  isSheetPivotOrBlank,
   fillHeaders,
   fillRows,
-  increaseDecimalPlacesInColumnValues,
-  decreaseDecimalPlacesInColumnValues,
-  getRows,
+  formatNumber,
 } from '@components/Workbook/util';
 import { cloneDeep } from 'lodash';
 import { SheetChart } from '../DraggableWrapper';
 
+import AppertureSheet from '@components/AppertureSheets';
+import {
+  CellChange,
+  Column,
+  InputHeaderCell,
+  Row,
+  SelectedColumn,
+  TextCell,
+} from '@components/AppertureSheets/types/gridTypes';
+import { Box } from '@chakra-ui/react';
+
 const getColumns = (headers: SpreadSheetColumn[]): Column[] => {
-  return headers.map((header, index) => {
-    if (header.name === 'index') {
-      return { columnId: header.name, width: 50 };
-    }
-    return {
-      columnId: header.name,
-      resizable: true,
-      width: 240,
-    };
-  });
+  return headers
+    .filter((header) => header.name !== 'index')
+    .map((header, index) => {
+      return {
+        columnId: header.name,
+        resizable: true,
+        width: 120,
+      };
+    });
 };
+
+const getSubHeaderRow = (
+  headers: SpreadSheetColumn[],
+  originalHeaders: SpreadSheetColumn[],
+  subHeaders: SubHeaderColumn[],
+  sheetData: TransientSheetData,
+  properties: string[]
+): Row<InputHeaderCell> => {
+  return {
+    rowId: 'subHeader',
+    cells: headers
+      .filter((header) => header.name !== 'index')
+      .map((header, index) => {
+        const isPivotOrBlankSheet = isSheetPivotOrBlank(sheetData);
+        const dimensionSubHeaderCount = subHeaders.reduce(
+          (acc: number, header: SubHeaderColumn) => {
+            if (header.type === SubHeaderColumnType.DIMENSION) acc++;
+            return acc;
+          },
+          0
+        );
+        const disableAddButton = hasMetricColumnInPivotSheet(sheetData);
+        const showAddButton =
+          isPivotOrBlankSheet && index === dimensionSubHeaderCount;
+
+        if (header.type === ColumnType.QUERY_HEADER) {
+          return {
+            type: 'inputHeader',
+            text: originalHeaders?.[index]?.name || '',
+            disable: true,
+            showAddButton,
+            disableAddButton,
+            showSuggestions: isPivotOrBlankSheet,
+            properties,
+          };
+        }
+
+        return {
+          type: 'inputHeader',
+          text:
+            header.type === ColumnType.PADDING_HEADER
+              ? ''
+              : originalHeaders?.[index]?.name || '',
+          disable: false,
+          showAddButton,
+          disableAddButton,
+          showSuggestions: isPivotOrBlankSheet,
+          properties,
+          columnType: subHeaders[index].type,
+        };
+      }),
+  };
+};
+
+const getRows = (
+  data: any[],
+  headers: SpreadSheetColumn[],
+  originalHeaders: SpreadSheetColumn[],
+  subHeaders: SubHeaderColumn[],
+  sheetData: TransientSheetData,
+  properties: string[]
+): Row<TextCell | InputHeaderCell>[] => [
+  getSubHeaderRow(headers, originalHeaders, subHeaders, sheetData, properties),
+  ...data.map<Row<TextCell>>((data, idx) => ({
+    rowId: idx,
+    cells: headers
+      .filter((header) => header.name !== 'index')
+      .map((header, index) => {
+        const originalValue = data[header.name]?.original;
+        let val = originalValue === 0 ? '0' : originalValue || '';
+
+        const format = sheetData?.columnFormat?.[index.toString()]?.format;
+
+        if (format && val) {
+          val = formatNumber(val, format);
+        }
+
+        const value = typeof val === 'object' ? JSON.stringify(val) : val;
+        return { type: 'text', text: value };
+      }),
+  })),
+];
 
 const Grid = ({
   selectedSheetIndex,
@@ -49,6 +132,8 @@ const Grid = ({
   showChartPanel,
   hideChartPanel,
   updateChart,
+  setIsFormulaEdited,
+  setSelectedColumns,
 }: {
   selectedSheetIndex: number;
   sheetsData: TransientSheetData[];
@@ -59,8 +144,11 @@ const Grid = ({
   showChartPanel: (data: SheetChartDetail) => void;
   hideChartPanel: () => void;
   updateChart: (timestamp: number, updatedChartData: SheetChartDetail) => void;
+  setIsFormulaEdited: Function;
+  setSelectedColumns: Function;
 }) => {
   const sheet = sheetsData[selectedSheetIndex];
+
   const [columns, setColumns] = useState<Column[]>(
     getColumns(fillHeaders(sheet.headers))
   );
@@ -92,13 +180,12 @@ const Grid = ({
     );
   }, [sheet, selectedSheetIndex]);
 
-  // useEffect(() => {
-  //   setCharts(sheetsData[selectedSheetIndex].charts);
-  // }, [sheetsData[selectedSheetIndex].charts, selectedSheetIndex]);
-
-  const handleColumnResize = (ci: Id, width: number) => {
+  const handleColumnResize = (
+    columnId: string,
+    columnIndex: number,
+    width: number
+  ) => {
     setColumns((prevColumns) => {
-      const columnIndex = prevColumns.findIndex((el) => el.columnId === ci);
       const resizedColumn = prevColumns[columnIndex];
       const updatedColumn = { ...resizedColumn, width };
       prevColumns[columnIndex] = updatedColumn;
@@ -106,90 +193,39 @@ const Grid = ({
     });
   };
 
-  const handleDataChange = (changedValue: CellChange<any>[]) => {
+  const handleDataChange = (
+    changedValue: CellChange<TextCell | InputHeaderCell>[]
+  ) => {
     const changedHeaders = changedValue.filter(
       (value) => value.type === 'inputHeader'
     );
 
-    if (changedHeaders[0]?.newCell?.addHeader) {
+    if ((changedHeaders[0]?.newCell as InputHeaderCell)?.addHeader) {
       return addDimensionColumn(changedHeaders[0].columnId);
     }
 
-    changedHeaders[0] &&
+    if (changedHeaders[0]) {
+      setIsFormulaEdited(true);
       evaluateFormulaHeader(
         changedHeaders[0]?.newCell.text,
-        changedHeaders[0]?.columnId
+        changedHeaders[0]?.columnId,
+        changedHeaders[0]?.columnIndex
       );
+    }
   };
 
-  const handleContextMenu = (
-    selectedRowIds: Id[],
-    selectedColIds: Id[],
-    selectionMode: SelectionMode,
-    menuOptions: MenuOption[],
-    selectedRanges: CellLocation[][]
-  ): MenuOption[] => {
-    if (selectionMode === 'column')
-      return [
-        {
-          id: 'percentage',
-          label: 'Convert to percentage',
-          handler: (selectedRowIds, selectedColIds) => {
-            setSheetsData((prevSheet: TransientSheetData[]) => {
-              const sheetsCopy = cloneDeep(prevSheet);
-              const data = sheetsCopy[selectedSheetIndex].data;
-              sheetsCopy[selectedSheetIndex].data =
-                convertColumnValuesToPercentage(selectedColIds, data);
-              return sheetsCopy;
-            });
-          },
-        },
-        {
-          id: 'floatingValue',
-          label: 'Increase Decimal Place',
-          handler: (selectedRowIds, selectedColIds) => {
-            setSheetsData((prevSheet: TransientSheetData[]) => {
-              const sheetsCopy = cloneDeep(prevSheet);
-              const data = sheetsCopy[selectedSheetIndex].data;
-              sheetsCopy[selectedSheetIndex].data =
-                increaseDecimalPlacesInColumnValues(selectedColIds, data);
-              return sheetsCopy;
-            });
-          },
-        },
-        {
-          id: 'floatingValue2',
-          label: 'Decrease Decimal Place',
-          handler: (selectedRowIds, selectedColIds) => {
-            setSheetsData((prevSheet: TransientSheetData[]) => {
-              const sheetsCopy = cloneDeep(prevSheet);
-              const data = sheetsCopy[selectedSheetIndex].data;
-              sheetsCopy[selectedSheetIndex].data =
-                decreaseDecimalPlacesInColumnValues(selectedColIds, data);
-              return sheetsCopy;
-            });
-          },
-        },
-      ];
-
-    return [];
+  const handleColumnSelections = (selectedColumns: SelectedColumn[]) => {
+    setSelectedColumns(selectedColumns);
   };
 
   return (
-    <div style={{ position: 'relative' }}>
-      <ReactGrid
+    <Box position="relative">
+      <AppertureSheet
         rows={rows}
         columns={columns}
         onColumnResized={handleColumnResize}
         onCellsChanged={handleDataChange}
-        enableFillHandle
-        enableRangeSelection
-        enableColumnSelection
-        customCellTemplates={{
-          dropdownHeader: new DropdownHeaderTemplate(),
-          inputHeader: new InputHeaderTemplate(),
-        }}
-        onContextMenu={handleContextMenu}
+        onColumnsSelections={handleColumnSelections}
       />
       {sheet.charts?.map((chart) => (
         <SheetChart
@@ -198,10 +234,10 @@ const Grid = ({
           key={chart.timestamp}
           showChartPanel={showChartPanel}
           hideChartPanel={hideChartPanel}
-          sheetData={sheetsData[selectedSheetIndex].data}
+          sheetData={sheet.data}
         />
       ))}
-    </div>
+    </Box>
   );
 };
 

@@ -11,6 +11,7 @@ export type TransientSheetData = {
   sheet_type?: SheetType;
   edit_mode?: boolean;
   aiQuery?: AIQuery;
+  columnFormat?: ColumnFormat;
   meta?: SheetMeta;
 };
 
@@ -36,6 +37,17 @@ export type AIQuery = {
   table: string;
   database: string;
 };
+
+export type ColumnFormat = Record<
+  string,
+  {
+    format?: {
+      percent: boolean;
+      decimal: number;
+    };
+    width?: number;
+  }
+>;
 
 export type WordReplacement = { word: string; replacement: string };
 
@@ -76,6 +88,7 @@ export type Spreadsheet = {
   edit_mode?: boolean;
   meta?: any;
   ai_query?: AIQuery;
+  column_format?: ColumnFormat;
 };
 
 export type Workbook = {

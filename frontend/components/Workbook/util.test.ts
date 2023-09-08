@@ -1,11 +1,13 @@
 import { cloneDeep, range } from 'lodash';
 import {
   add,
+  calculateMaxDecimalPoints,
   divide,
   evaluateExpression,
   expressionTokenRegex,
   fillHeaders,
   fillRows,
+  formatNumber,
   generateOtherColumns,
   multiply,
   power,
@@ -83,14 +85,12 @@ describe('Spreadhsheet Utils', () => {
       });
 
       expect(res.length).toBe(1000);
-      expect(res.map((it: any) => it.index.display)).toEqual(range(1, 1001));
       expect(res.slice(0, 10)).toEqual(updatedData);
     });
 
     it('should fill empty rows when data is empty', () => {
       const res = fillRows([], []);
       expect(res.length).toBe(1000);
-      expect(res.map((it: any) => it.index.original)).toEqual(range(1, 1001));
     });
 
     it('should filld empty columns till Z index', () => {
@@ -172,6 +172,85 @@ describe('Spreadhsheet Utils', () => {
         36864, 40401, 9, 1296, 144, 1681, 16, 1764, 16, 1681, 4, 1681, 1156,
         15376, 144, 16,
       ]);
+    });
+  });
+
+  describe('calculateMaxDecimalPoints', () => {
+    it('should return 0 for an empty array', () => {
+      const result = calculateMaxDecimalPoints([]);
+      expect(result).toBe(0);
+    });
+
+    it('should return 3 for an array with numbers having 3 decimal places', () => {
+      const input = [
+        { original: 12.34, display: '12.34' },
+        { original: 56.789, display: '56.789' },
+      ];
+      const result = calculateMaxDecimalPoints(input);
+      expect(result).toBe(3);
+    });
+
+    it('should return 0 if there are no numbers in the array', () => {
+      const input = [
+        { original: 'string1', display: 'string1' },
+        { original: 'string2', display: 'string2' },
+      ];
+      const result = calculateMaxDecimalPoints(input);
+      expect(result).toBe(0);
+    });
+
+    it('should return 8 for a mixed array of numbers and strings where max decimal places is 8 in 1.23456789', () => {
+      const input = [
+        { original: 1.23456789, display: '1.23456789' },
+        { original: '12.3456789', display: '12.3456789' },
+        { original: 123.456789, display: '123.456789' },
+      ];
+      const result = calculateMaxDecimalPoints(input);
+      expect(result).toBe(8);
+    });
+  });
+
+  describe('formatNumber', () => {
+    it('should return the input value as-is if it is not a number', () => {
+      const input = 'abc';
+      const format = { percent: false, decimal: 2 };
+      const result = formatNumber(input, format);
+      expect(result).toBe(input);
+    });
+
+    it('should format a number as a percentage with 2 decimal places', () => {
+      const input = 0.1234;
+      const format = { percent: true, decimal: 2 };
+      const result = formatNumber(input, format);
+      expect(result).toBe('12.34%');
+    });
+
+    it('should format a number without percentage symbol with 3 decimal places', () => {
+      const input = 45.6789;
+      const format = { percent: false, decimal: 3 };
+      const result = formatNumber(input, format);
+      expect(result).toBe('45.679');
+    });
+
+    it('should format a number as a percentage with 0 decimal places', () => {
+      const input = 0.1234;
+      const format = { percent: true, decimal: 0 };
+      const result = formatNumber(input, format);
+      expect(result).toBe('12%');
+    });
+
+    it('should handle negative numbers and format as a percentage with 1 decimal place', () => {
+      const input = -0.5678;
+      const format = { percent: true, decimal: 1 };
+      const result = formatNumber(input, format);
+      expect(result).toBe('-56.8%');
+    });
+
+    it('should handle zero and format as a percentage with 2 decimal places', () => {
+      const input = 0;
+      const format = { percent: true, decimal: 2 };
+      const result = formatNumber(input, format);
+      expect(result).toBe('0.00%');
     });
   });
 });

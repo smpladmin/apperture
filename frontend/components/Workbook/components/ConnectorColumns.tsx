@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { ConnectionSource } from '@lib/domain/connections';
 import {
+  ColumnType,
   SheetType,
   SubHeaderColumnType,
   TransientSheetData,
@@ -58,7 +59,7 @@ const ConnectorColumns = ({
     connectorData;
   const sheetData = sheetsData[selectedSheetIndex];
   const [columns, setColumns] = useState<string[]>(fields);
-  const [selectedColumns, setSelectedColumns] = useState(
+  const [selectedColumns, setSelectedColumns] = useState<string[]>(
     initializeSelectedColumns(datasource_id, sheetData?.meta)
   );
   const [dimensionColumn, setDimensionColumn] = useState({
@@ -83,8 +84,12 @@ const ConnectorColumns = ({
   useEffect(() => {
     if (sheetData?.edit_mode) return;
 
+    const filteredSelectedColumns = selectedColumns.filter(
+      (column) => !column.startsWith('=VLOOKUP')
+    );
+
     const parsedColumns = parseHeaders(
-      selectedColumns,
+      filteredSelectedColumns,
       sheetsData[selectedSheetIndex].headers
     );
 
@@ -95,9 +100,18 @@ const ConnectorColumns = ({
       datasource_id
     );
 
+    const newHeaders = selectedColumns.map((column) => ({
+      name: column,
+      type:
+        column && column !== "''"
+          ? ColumnType.QUERY_HEADER
+          : ColumnType.PADDING_HEADER,
+    }));
+
     setSheetsData((prevSheetData: TransientSheetData[]) => {
       const tempSheetsData = cloneDeep(prevSheetData);
       tempSheetsData[selectedSheetIndex].query = query;
+      tempSheetsData[selectedSheetIndex].headers = newHeaders;
       // TODO: should check the double bang !!
       tempSheetsData[selectedSheetIndex].meta!!.selectedColumns =
         selectedColumns;

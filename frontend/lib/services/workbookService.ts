@@ -132,3 +132,22 @@ export const getTransientPivot = async (
     values,
   });
 };
+
+export const vlookup = async (
+  datasourceId: string,
+  searchQuery: string,
+  lookupQuery: string,
+  searchKeyColumn: string,
+  lookupColumn: string,
+  lookupIndexColumn: string
+) => {
+  const res = await ApperturePost(`/workbooks/vlookup`, {
+    datasourceId,
+    searchQuery,
+    lookupQuery,
+    searchKeyColumn,
+    lookupColumn,
+    lookupIndexColumn,
+  });
+  return res.data || [];
+};

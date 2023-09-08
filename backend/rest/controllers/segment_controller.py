@@ -133,9 +133,7 @@ async def get_segments(
     return segments
 
 
-@router.delete(
-    "/segments/{segment_id}", dependencies=[Depends(validate_library_items)]
-)
+@router.delete("/segments/{segment_id}", dependencies=[Depends(validate_library_items)])
 async def delete_segments(
     segment_id: str,
     segment_service: SegmentService = Depends(),

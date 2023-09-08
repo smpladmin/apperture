@@ -3,6 +3,7 @@ from domain.common.models import DataFormat
 from domain.datasource.models import Credential
 import logging
 import json
+from datetime import datetime, timedelta
 
 
 class APIDataFetcher:
@@ -11,7 +12,9 @@ class APIDataFetcher:
         self.headers = credential.api_key
         self.tableName = credential.tableName
         self.startdate = date
-        self.enddate = date
+        self.enddate = (datetime.strptime(date, "%Y-%m-%d")+ timedelta(days=1) ).strftime("%Y-%m-%d")
+
+
         self.date_args = f"?start_time={self.startdate}&end_time={self.enddate}"
         self.data_url = f"{self.end_point}{self.date_args}&offset=0&limit=1000"
 

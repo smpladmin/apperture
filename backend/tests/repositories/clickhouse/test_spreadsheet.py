@@ -1,20 +1,44 @@
 from unittest.mock import MagicMock
 
+from clickhouse_connect.driver.query import QueryResult
+
 from domain.spreadsheets.models import (
+    AggregateFunction,
     ColumnFilter,
     ColumnFilterOperators,
     DimensionDefinition,
     Formula,
     MetricDefinition,
+    PivotAxisDetail,
+    PivotValueDetail,
+    SortingOrder,
 )
-from repositories.clickhouse.parser.query_parser import QueryParser
 from repositories.clickhouse.spreadsheet import Spreadsheets
 
 
 class TestSpreadSheetRepository:
     def setup_method(self):
-        self.spreadsheet_repo = Spreadsheets(
-            clickhouse=MagicMock(), parser=QueryParser()
+        self.spreadsheet_repo = Spreadsheets(clickhouse=MagicMock())
+        self.pivot_axis_row_with_total = PivotAxisDetail(
+            name="user_id",
+            sort_by="user_id",
+            order_by=SortingOrder.ASC,
+            show_total=True,
+        )
+        self.pivot_axis_row_without_total = PivotAxisDetail(
+            name="user_id",
+            sort_by="user_id",
+            order_by=SortingOrder.ASC,
+            show_total=False,
+        )
+        self.pivot_axis_column_without_total = PivotAxisDetail(
+            name="weekday",
+            sort_by="weekday",
+            order_by=SortingOrder.ASC,
+            show_total=False,
+        )
+        self.pivot_axis_value = PivotValueDetail(
+            name="salary", function=AggregateFunction.SUM
         )
 
     def test_build_transient_columns_query(self):
@@ -156,3 +180,130 @@ class TestSpreadSheetRepository:
             == """SELECT COUNT(CASE WHEN "property.property.city"='Bangalore' AND "property.property.device" IN ('Android','iPhone') THEN 1 END) FROM "default"."events" LIMIT 1000"""
         )
         assert props == {"ds_id": datasource_id}
+
+    def test_compute_ordered_distinct_values_no_total(self):
+        result = self.spreadsheet_repo.build_compute_ordered_distinct_values(
+            reference_query="SELECT * FROM events",
+            values=[self.pivot_axis_row_without_total],
+            aggregate=self.pivot_axis_value,
+            show_total=False,
+            axisRange=None,
+            rangeAxis=None,
+            limit=50,
+        )
+
+        assert (
+            result
+            == 'SELECT "user_id" FROM (SELECT * FROM events) GROUP BY "user_id" ORDER BY "user_id" ASC LIMIT 50'
+        )
+
+    def test_compute_ordered_distinct_values_with_total(self):
+        result = self.spreadsheet_repo.build_compute_ordered_distinct_values(
+            reference_query="SELECT * FROM table",
+            values=[self.pivot_axis_row_without_total],
+            aggregate=self.pivot_axis_value,
+            show_total=True,
+            axisRange=None,
+            rangeAxis=None,
+            limit=50,
+        )
+
+        assert (
+            result
+            == 'SELECT "user_id",SUM("salary") FROM (SELECT * FROM table) GROUP BY "user_id" ORDER BY "user_id" ASC LIMIT 50'
+        )
+
+    def test_compute_ordered_distinct_values_with_total_and_range(self):
+        result = self.spreadsheet_repo.build_compute_ordered_distinct_values(
+            reference_query="SELECT * FROM table",
+            values=[self.pivot_axis_row_without_total],
+            aggregate=self.pivot_axis_value,
+            show_total=True,
+            axisRange=[
+                "Sunday",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+            ],
+            rangeAxis=PivotAxisDetail(
+                name="weekday",
+                sort_by="weekday",
+                order_by=SortingOrder.ASC,
+                show_total=True,
+            ),
+            limit=50,
+        )
+
+        assert (
+            result
+            == "SELECT \"user_id\",SUM(\"salary\") FROM (SELECT * FROM table) WHERE \"weekday\" IN ('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday') GROUP BY \"user_id\" ORDER BY \"user_id\" ASC LIMIT 50"
+        )
+
+    def test_build_compute_ordered_distinct_values(self):
+        result = self.spreadsheet_repo.build_compute_transient_pivot(
+            sql="SELECT * FROM table",
+            rows=[self.pivot_axis_row_with_total],
+            columns=[self.pivot_axis_column_without_total],
+            values=[self.pivot_axis_value],
+            rowRange=[
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+            ],
+            columnRange=[
+                "Sunday",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+            ],
+        )
+
+        assert (
+            result
+            == 'SELECT "user_id","weekday",SUM("salary") FROM (SELECT * FROM table) WHERE "user_id" IN (1,2,3,4,5,6,7,8,9,10) AND "weekday" IN (\'Sunday\',\'Monday\',\'Tuesday\',\'Wednesday\',\'Thursday\',\'Friday\',\'Saturday\') GROUP BY "user_id","weekday" ORDER BY "user_id" ASC,"weekday" ASC'
+        )
+
+    def test_get_vlookup(self):
+        self.spreadsheet_repo.execute_query_for_restricted_client = MagicMock(
+            return_value=QueryResult(
+                result_set=[
+                    ["test1"],
+                    ["test2"],
+                ],
+                column_names=("1", "2"),
+                column_types=(),
+            )
+        )
+        assert self.spreadsheet_repo.get_vlookup(
+            search_query="select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd'",
+            lookup_query="select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd'",
+            search_column="event_name",
+            lookup_column="user_id",
+            lookup_index_column="event_name",
+            username="test-user",
+            password="test-password",
+        ) == ["test1", "test2"]
+
+    def test_build_vlookup_query(self):
+        assert self.spreadsheet_repo.build_vlookup_query(
+            search_query="select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd'",
+            lookup_query="select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd'",
+            search_column="event_name",
+            lookup_column="user_id",
+            lookup_index_column="event_name",
+        ) == (
+            "with lookup_query as (select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd'), map as (SELECT DISTINCT ON (event_name) event_name, user_id AS lookup_column FROM lookup_query ORDER BY event_name), cte as (select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd') select lookup_column from cte left join map on cte.event_name = map.event_name"
+        )

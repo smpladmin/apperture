@@ -15,6 +15,7 @@ from domain.spreadsheets.models import (
     SubHeaderColumn,
     WordReplacement,
     WorkBook,
+    Formatting,
 )
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
@@ -58,12 +59,22 @@ class SpreadSheetDto(BaseModel):
     sheet_type: SpreadsheetType
     meta: dict
     ai_query: Optional[AIQuery]
+    column_format: Optional[dict[str, Formatting]]
 
 
 class CreateWorkBookDto(BaseModel):
     name: str
     spreadsheets: List[SpreadSheetDto]
     datasourceId: str
+
+
+class VlookupDto(BaseModel):
+    datasourceId: str
+    searchQuery: str
+    lookupQuery: str
+    searchKeyColumn: str
+    lookupColumn: str
+    lookupIndexColumn: str
 
 
 class WorkBookResponse(WorkBook, ModelResponse):
