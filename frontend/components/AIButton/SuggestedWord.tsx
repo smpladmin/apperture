@@ -53,6 +53,7 @@ export default function SuggestedWord({
               const selected = selectedProperties[word] === choice;
               return (
                 <Flex
+                  className="tokens"
                   mb={1}
                   alignItems={'center'}
                   justifyContent={'space-between'}

@@ -18,6 +18,7 @@ import {
 } from '../util';
 import { cloneDeep } from 'lodash';
 import { ErrorResponse } from '@lib/services/util';
+import { trimLabel } from '@lib/utils/common';
 
 const initialDropdownState = {
   row: false,
@@ -217,17 +218,26 @@ export const PivotTableSidePanel = ({
         gap={'2'}
         borderBottom={'0.4px solid #bdbdbd'}
         px={5}
-        pb={4}
+        pb={3}
+        mt={'-4px'}
       >
         <Table height={'20px'} />
-        Pivot table editor
+        <Text
+          fontSize={'xs-14'}
+          fontWeight={'400'}
+          lineHeight={'xs-14'}
+          color={'grey.900'}
+        >
+          Pivot table editor
+        </Text>
       </Flex>
       <Flex
         justifyContent={'space-between'}
-        fontSize={'xs-14'}
+        fontSize={'xs-12'}
         fontWeight={500}
         lineHeight={'130%'}
         px={5}
+        color={'grey.500'}
       >
         Row
         <Flex ref={rowBoxref}>
@@ -262,10 +272,11 @@ export const PivotTableSidePanel = ({
       ) : null}
       <Flex
         justifyContent={'space-between'}
-        fontSize={'xs-14'}
+        fontSize={'xs-12'}
         fontWeight={500}
         lineHeight={'130%'}
         px={5}
+        color={'grey.500'}
       >
         Columns
         <Flex ref={columnBoxRef}>
@@ -300,10 +311,11 @@ export const PivotTableSidePanel = ({
       ) : null}
       <Flex
         justifyContent={'space-between'}
-        fontSize={'xs-14'}
+        fontSize={'xs-12'}
         fontWeight={500}
         lineHeight={'130%'}
         px={5}
+        color={'grey.500'}
       >
         Values
         <Flex ref={valueBoxref}>
@@ -337,10 +349,11 @@ export const PivotTableSidePanel = ({
       ) : null}
       <Flex
         justifyContent={'space-between'}
-        fontSize={'xs-14'}
+        fontSize={'xs-12'}
         fontWeight={500}
         lineHeight={'130%'}
         px={5}
+        color={'grey.500'}
       >
         Filters
         <Flex>
@@ -367,30 +380,30 @@ const PivotAxisDetailCard = ({
       gap={'10px'}
       borderRadius={'4px'}
       bg={'white.DEFAULT'}
-      border="1px solid #bdbdbd"
+      border="0.4px solid #DFDFDF"
       width={'full'}
     >
       <Flex
         justifyContent={'space-between'}
-        fontSize={'xs-14'}
+        fontSize={'xs-12'}
         fontWeight={500}
         lineHeight={'130%'}
         width={'full'}
+        color={'grey.900'}
       >
-        <Flex maxWidth={'80%'} overflowWrap={'anywhere'}>
-          {name}
+        <Flex maxWidth={'80%'} whiteSpace={'nowrap'}>
+          {trimLabel(name, 30)}
         </Flex>
-        <X cursor={'pointer'} onClick={() => onClose(name)} />
+        <X cursor={'pointer'} size={12} onClick={() => onClose(name)} />
       </Flex>
       <Flex gap={5}>
         <Flex
           fontSize={'xs-10'}
           lineHeight={'135%'}
           fontWeight={400}
-          color={'gray.600'}
+          color={'grey.600'}
           flexDir="column"
           gap={1}
-          maxWidth={`calc(50% - 10px)`}
         >
           Order
           <select
@@ -398,6 +411,7 @@ const PivotAxisDetailCard = ({
               fontSize: 'xs-10',
               lineHeight: '135%',
               fontWeight: 400,
+              color: '#212121',
               paddingInline: 2,
               paddingBlock: 3,
               borderRadius: '4px',
@@ -417,9 +431,10 @@ const PivotAxisDetailCard = ({
           fontSize={'xs-10'}
           lineHeight={'135%'}
           fontWeight={400}
-          color={'gray.600'}
+          color={'grey.600'}
           flexDir="column"
           gap={1}
+          flexGrow={1}
           maxWidth={`calc(50% - 10px)`}
         >
           Sort by
@@ -428,7 +443,9 @@ const PivotAxisDetailCard = ({
               fontSize: 'xs-10',
               lineHeight: '135%',
               fontWeight: 400,
+              color: '#212121',
               paddingInline: 2,
+              padding: '8px, 12px',
               paddingBlock: 3,
               borderRadius: '4px',
               border: '0.4px solid #bdbdbd',
@@ -474,7 +491,7 @@ const PivotValueCard = ({
       gap={'10px'}
       borderRadius={'4px'}
       bg={'white.DEFAULT'}
-      border="1px solid #bdbdbd"
+      border="0.4px solid #DFDFDF"
     >
       <Flex
         justifyContent={'space-between'}
@@ -482,7 +499,7 @@ const PivotValueCard = ({
         fontWeight={500}
         lineHeight={'130%'}
       >
-        <Flex maxWidth={'80%'}>{name}</Flex>
+        <Flex maxWidth={'80%'}>{trimLabel(name, 25)}</Flex>
         <X
           onClick={() => {
             handleClose(name);
@@ -494,7 +511,7 @@ const PivotValueCard = ({
           fontSize={'xs-10'}
           lineHeight={'135%'}
           fontWeight={400}
-          color={'gray.600'}
+          color={'grey.600'}
           flexDir="column"
           gap={1}
           maxWidth={'100%'}
@@ -506,6 +523,7 @@ const PivotValueCard = ({
               lineHeight: '135%',
               fontWeight: 400,
               paddingInline: 2,
+              color: '#212121',
               paddingBlock: 3,
               borderRadius: '4px',
               border: '0.4px solid #bdbdbd',

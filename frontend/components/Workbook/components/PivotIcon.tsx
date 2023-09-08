@@ -15,6 +15,7 @@ import {
   Text,
   Input,
 } from '@chakra-ui/react';
+import { X } from 'phosphor-react';
 
 function PivotIcon({
   addNewPivotSheet,
@@ -56,12 +57,30 @@ function PivotIcon({
         isOpen={isOpen}
         onClose={onClose}
       >
-        <ModalOverlay bg={'none'} shadow={'0px 0px 7px 0px #00000033'} />
-        <ModalContent px={1} py={4}>
-          <ModalHeader>Create pivot table</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody py={1}>
-            <Text color={'gray.500'} fontSize={'14px'}>
+        <ModalOverlay bg={'black.DEFAULT'} opacity={'0.3 !important'} />
+        <ModalContent px={7} py={'6'} w={'111'} h={'52'} m={'0'}>
+          <ModalHeader p={'0'}>
+            <Flex alignItems={'center'} justifyContent={'space-between'}>
+              <Text
+                fontSize={'xs-16'}
+                lineHeight={'xs-16'}
+                fontWeight={'500'}
+                color={'grey.900'}
+              >
+                Create pivot table
+              </Text>
+              <X size={16} cursor={'pointer'} onClick={onClose} />
+            </Flex>
+          </ModalHeader>
+
+          <ModalBody p={'0'}>
+            <Text
+              mt={'5'}
+              color={'grey.600'}
+              fontSize={'xs-14'}
+              lineHeight={'xs-14'}
+              fontWeight={'400'}
+            >
               Data Range
             </Text>
             <Input
@@ -71,11 +90,10 @@ function PivotIcon({
               bg={'gray.100'}
               px={2}
               py={3}
-              mt={3}
-              mb={6}
+              mt={2}
             />
           </ModalBody>
-          <ModalFooter>
+          <ModalFooter p={'0'} mt={5}>
             <Button
               borderWidth={'1px'}
               type={'submit'}
@@ -86,8 +104,16 @@ function PivotIcon({
               py={1.5}
               onClick={onClose}
               lineHeight={'130%'}
+              borderRadius={'8'}
             >
-              Cancel
+              <Text
+                fontSize={'xs-14'}
+                fontWeight={'500'}
+                color={'grey.900'}
+                p={'0'}
+              >
+                Cancel
+              </Text>
             </Button>
             <Button
               borderWidth={'1px'}
@@ -101,8 +127,18 @@ function PivotIcon({
                 backgroundColor: 'black.400',
               }}
               onClick={handleCreate}
+              borderRadius={'8'}
+              fontSize={'xs-14'}
+              fontWeight={'500'}
             >
-              Create
+              <Text
+                fontSize={'xs-14'}
+                fontWeight={'500'}
+                color={'white'}
+                p={'0'}
+              >
+                Create
+              </Text>
             </Button>
           </ModalFooter>
         </ModalContent>

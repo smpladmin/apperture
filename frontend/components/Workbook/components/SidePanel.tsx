@@ -75,8 +75,8 @@ const SidePanel = ({
 
   return (
     <Box
-      width={isSidePanelCollapsed ? '8' : '62'}
-      minWidth={isSidePanelCollapsed ? '8' : '62'}
+      width={isSidePanelCollapsed ? '8' : '73'}
+      minWidth={isSidePanelCollapsed ? '8' : '73'}
       h={'full'}
       background={'white.500'}
       pt={'4'}

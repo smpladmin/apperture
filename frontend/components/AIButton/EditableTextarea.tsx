@@ -1,4 +1,4 @@
-import { Box, Text, Textarea } from '@chakra-ui/react';
+import { Box, Text, Textarea, defineStyle } from '@chakra-ui/react';
 import SuggestedWord from './SuggestedWord';
 import TextareaAutosize from 'react-textarea-autosize';
 
@@ -41,13 +41,18 @@ export default function EditableTextarea({
       border={0}
       resize={'none'}
       padding={0}
-      minRows={3}
+      size={'xs'}
+      minRows={2}
       maxRows={10}
       placeholder="Enter your query here..."
+      fontSize={'xs-12'}
+      lineHeight={'xs-12'}
+      fontWeight={'400'}
+      minHeight={'5'}
     />
   ) : (
     <Box
-      minH={20}
+      // minH={20}
       ml={2}
       lineHeight={'sh-18'}
       onClick={(e) => setEditing(true)}
@@ -67,10 +72,25 @@ export default function EditableTextarea({
               />
             );
           }
-          return <span key={index}>{`${word} `}</span>;
+          return (
+            <Text
+              as={'span'}
+              fontSize={'xs-12'}
+              lineHeight={'xs-12'}
+              fontWeight={'400'}
+              key={index}
+            >{`${word} `}</Text>
+          );
         })
       ) : (
-        <Text color={'grey.600'}>Enter your query here...</Text>
+        <Text
+          color={'grey.600'}
+          fontSize={'xs-12'}
+          fontWeight={'400'}
+          lineHeight={'xs-12'}
+        >
+          Enter your query here...
+        </Text>
       )}
     </Box>
   );
