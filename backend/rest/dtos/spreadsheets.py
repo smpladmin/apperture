@@ -7,15 +7,16 @@ from domain.spreadsheets.models import (
     AIQuery,
     ComputedSpreadsheet,
     DimensionDefinition,
+    Formatting,
     MetricDefinition,
     PivotAxisDetail,
     PivotValueDetail,
+    SpreadSheetCharts,
     SpreadSheetColumn,
     SpreadsheetType,
     SubHeaderColumn,
     WordReplacement,
     WorkBook,
-    Formatting,
 )
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
@@ -60,6 +61,7 @@ class SpreadSheetDto(BaseModel):
     meta: dict
     ai_query: Optional[AIQuery]
     column_format: Optional[dict[str, Formatting]]
+    charts: Optional[List[SpreadSheetCharts]]
 
 
 class CreateWorkBookDto(BaseModel):

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Checkbox, Flex, Select, Text, useToast } from '@chakra-ui/react';
 import { CaretLeft, Plus, Table, X } from 'phosphor-react';
 import {
+  AggregateFunction,
   PivotAxisDetail,
   PivotValueDetail,
   SheetMeta,
@@ -343,6 +344,7 @@ export const PivotTableSidePanel = ({
               key={value.name}
               name={value.name}
               handleClose={handleCloseValueCard}
+              setDetail={setSelectedValues}
             />
           ))}
         </Flex>
@@ -480,9 +482,11 @@ const PivotAxisDetailCard = ({
 const PivotValueCard = ({
   name,
   handleClose,
+  setDetail,
 }: {
   name: string;
   handleClose: (name: string) => void;
+  setDetail: Function;
 }) => {
   return (
     <Flex
@@ -528,8 +532,14 @@ const PivotValueCard = ({
               borderRadius: '4px',
               border: '0.4px solid #bdbdbd',
             }}
+            onChange={(e) =>
+              setDetail((prevState: PivotValueDetail[]) => [
+                { ...prevState[0], function: e.target.value },
+              ])
+            }
           >
-            <option value="option1">SUM</option>
+            <option value={AggregateFunction.SUM}>SUM</option>
+            <option value={AggregateFunction.COUNT}>COUNT</option>
           </select>
         </Flex>
       </Flex>

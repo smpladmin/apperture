@@ -8,9 +8,9 @@ from beanie import PydanticObjectId
 from domain.apps.models import App, ClickHouseCredential
 from domain.spreadsheets.models import (
     ColumnType,
+    DatabaseClient,
     SpreadSheetColumn,
     SpreadsheetType,
-    DatabaseClient,
 )
 
 
@@ -158,6 +158,7 @@ async def test_get_saved_workbooks(client_init, spreadsheets_service):
                     "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                     "meta": {"dsId": "", "selectedColumns": []},
                     "ai_query": None,
+                    "charts": [],
                     "column_format": None,
                 }
             ],
@@ -204,6 +205,7 @@ async def test_get_saved_workbooks_for_app(client_init, spreadsheets_service):
                     "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                     "meta": {"dsId": "", "selectedColumns": []},
                     "ai_query": None,
+                    "charts": [],
                     "column_format": None,
                 }
             ],
@@ -248,6 +250,7 @@ async def test_get_saved_workbooks_by_user_id(client_init, spreadsheets_service)
                     "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                     "meta": {"dsId": "", "selectedColumns": []},
                     "ai_query": None,
+                    "charts": [],
                     "column_format": None,
                 }
             ],
@@ -289,6 +292,7 @@ async def test_get_saved_workbook_by_id(client_init, spreadsheets_service):
                 "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                 "meta": {"dsId": "", "selectedColumns": []},
                 "ai_query": None,
+                "charts": [],
                 "column_format": None,
             }
         ],
@@ -325,6 +329,7 @@ async def test_create_workbook(client_init, workbook_data):
                 "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                 "meta": {"dsId": "", "selectedColumns": []},
                 "ai_query": None,
+                "charts": [],
                 "column_format": None,
             }
         ],
@@ -361,6 +366,7 @@ async def test_update_workbook(client_init, workbook_data, spreadsheets_service)
                 "meta": {"dsId": "", "selectedColumns": []},
                 "ai_query": None,
                 "column_format": None,
+                "charts": [],
             }
         ],
         "enabled": True,

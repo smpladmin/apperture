@@ -1,8 +1,7 @@
 import { Box, Flex } from '@chakra-ui/react';
-import { ChartPie, Percent, PlusCircle } from 'phosphor-react';
+import { ChartBar, ChartPie, Percent, PlusCircle } from 'phosphor-react';
 import React from 'react';
 import PivotIcon from './PivotIcon';
-import { Sigma } from '@phosphor-icons/react';
 import Image from 'next/image';
 import Zero from '@assets/icons/NumberCircleZero.svg';
 import DoubleZero from '@assets/icons/NumberCircleDoubleZero.svg';
@@ -21,12 +20,14 @@ const Toolbar = ({
   addNewPivotSheet,
   selectedColumns,
   setSheetsData,
+  addNewChartToSheet,
 }: {
   sheetsData: TransientSheetData[];
   selectedSheetIndex: number;
   addNewPivotSheet: () => void;
   selectedColumns: SelectedColumn[];
   setSheetsData: React.Dispatch<React.SetStateAction<TransientSheetData[]>>;
+  addNewChartToSheet: () => void;
 }) => {
   const disabledIconStyle = { color: '#bdbdbd', cursor: 'not-allowed' };
   const sheet = sheetsData[selectedSheetIndex];
@@ -152,11 +153,11 @@ const Toolbar = ({
           _hover={{ backgroundColor: 'grey.400', cursor: 'pointer' }}
           justifyContent={'center'}
           alignItems={'center'}
-          onClick={handleColumnValueToPercentConversion}
+          onClick={addNewChartToSheet}
         >
-          <ChartPie
+          <ChartBar
             style={{
-              ...disabledIconStyle,
+              margin: '6px',
             }}
           />
         </Flex>

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
   ColumnType,
+  SheetChartDetail,
+  SheetType,
   SpreadSheetColumn,
   SubHeaderColumn,
   SubHeaderColumnType,
@@ -12,7 +14,9 @@ import {
   fillHeaders,
   fillRows,
   formatNumber,
+  generatePivotCellStyles,
 } from '@components/Workbook/util';
+import { SheetChart } from '../DraggableWrapper';
 
 import AppertureSheet from '@components/AppertureSheets';
 import {
@@ -23,6 +27,7 @@ import {
   SelectedColumn,
   TextCell,
 } from '@components/AppertureSheets/types/gridTypes';
+import { Box } from '@chakra-ui/react';
 
 const getColumns = (headers: SpreadSheetColumn[]): Column[] => {
   return headers
@@ -96,9 +101,11 @@ const getRows = (
   subHeaders: SubHeaderColumn[],
   sheetData: TransientSheetData,
   properties: string[]
-): Row<TextCell | InputHeaderCell>[] => [
-  getSubHeaderRow(headers, originalHeaders, subHeaders, sheetData, properties),
-  ...data.map<Row<TextCell>>((data, idx) => ({
+): Row<TextCell | InputHeaderCell>[] => {
+  const isPivot = sheetData.sheet_type === SheetType.PIVOT_TABLE;
+  const lastRow = sheetData.data.length || 10;
+  const lastColumn = sheetData.headers.length || 4;
+  const gridRows = data.map<Row<TextCell>>((data, idx) => ({
     rowId: idx,
     cells: headers
       .filter((header) => header.name !== 'index')
@@ -108,15 +115,36 @@ const getRows = (
 
         const format = sheetData?.columnFormat?.[index.toString()]?.format;
 
+        const style: any = isPivot
+          ? generatePivotCellStyles(idx, index, lastRow, lastColumn, sheetData)
+          : {};
+
         if (format && val) {
           val = formatNumber(val, format);
         }
 
         const value = typeof val === 'object' ? JSON.stringify(val) : val;
-        return { type: 'text', text: value };
+        return {
+          type: 'text',
+          text: value,
+          style,
+        };
       }),
-  })),
-];
+  }));
+  return !isPivot
+    ? [
+        getSubHeaderRow(
+          headers,
+          originalHeaders,
+          subHeaders,
+          sheetData,
+          properties
+        ),
+
+        ...gridRows,
+      ]
+    : gridRows;
+};
 
 const Grid = ({
   selectedSheetIndex,
@@ -125,6 +153,9 @@ const Grid = ({
   addDimensionColumn,
   properties,
   setSheetsData,
+  showChartPanel,
+  hideChartPanel,
+  updateChart,
   setIsFormulaEdited,
   setSelectedColumns,
 }: {
@@ -134,6 +165,9 @@ const Grid = ({
   addDimensionColumn: Function;
   properties: string[];
   setSheetsData: Function;
+  showChartPanel: (data: SheetChartDetail) => void;
+  hideChartPanel: () => void;
+  updateChart: (timestamp: number, updatedChartData: SheetChartDetail) => void;
   setIsFormulaEdited: Function;
   setSelectedColumns: Function;
 }) => {
@@ -142,6 +176,8 @@ const Grid = ({
   const [columns, setColumns] = useState<Column[]>(
     getColumns(fillHeaders(sheet.headers))
   );
+
+  const [charts, setCharts] = useState(sheet.charts);
 
   const [rows, setRows] = useState(
     getRows(
@@ -207,13 +243,25 @@ const Grid = ({
   };
 
   return (
-    <AppertureSheet
-      rows={rows}
-      columns={columns}
-      onColumnResized={handleColumnResize}
-      onCellsChanged={handleDataChange}
-      onColumnsSelections={handleColumnSelections}
-    />
+    <Box h="full" w="full" position={'relative'}>
+      <AppertureSheet
+        rows={rows}
+        columns={columns}
+        onColumnResized={handleColumnResize}
+        onCellsChanged={handleDataChange}
+        onColumnsSelections={handleColumnSelections}
+      />
+      {sheet.charts?.map((chart) => (
+        <SheetChart
+          updateChart={updateChart}
+          chartData={chart}
+          key={chart.timestamp}
+          showChartPanel={showChartPanel}
+          hideChartPanel={hideChartPanel}
+          sheetData={sheet.data}
+        />
+      ))}
+    </Box>
   );
 };
 

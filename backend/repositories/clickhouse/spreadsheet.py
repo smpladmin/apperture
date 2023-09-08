@@ -2,7 +2,7 @@ import logging
 from typing import List, Union
 
 from fastapi import Depends
-from pypika import Case, ClickHouseQuery, Criterion, Field
+from pypika import Case, ClickHouseQuery, Criterion, Field, Parameter
 from pypika import Order as SortOrder
 from pypika import Table
 from pypika import functions as fn
@@ -153,8 +153,8 @@ class Spreadsheets(EventsBase):
         rows: List[PivotAxisDetail],
         columns: List[PivotAxisDetail],
         values: List[PivotValueDetail],
-        rowRange: List[Union[str, int, float]],
-        columnRange: List[Union[str, int, float]],
+        row_range: List[Union[str, int, float]],
+        column_range: List[Union[str, int, float]],
     ):
         sheet_query = f"({sql})"
         query = ClickHouseQuery.from_(Table("<inner_table>"))
@@ -162,7 +162,9 @@ class Spreadsheets(EventsBase):
             query = query.select(Field(properties.name))
 
         for value in values:
-            query = query.select(fn.Sum(Field(value.name)))
+            query = query.select(
+                value.function.get_pypika_function()(Field(value.name))
+            )
 
         for row in rows:
             query = query.groupby(row.name).orderby(
@@ -186,8 +188,8 @@ class Spreadsheets(EventsBase):
         query = query.where(
             Criterion.all(
                 [
-                    Field(rows[0].name).isin(rowRange),
-                    Field(columns[0].name).isin(columnRange),
+                    Field(rows[0].name).isin(row_range),
+                    Field(columns[0].name).isin(column_range),
                 ]
             )
         )
@@ -200,8 +202,8 @@ class Spreadsheets(EventsBase):
         rows: List[PivotAxisDetail],
         columns: List[PivotAxisDetail],
         values: List[PivotValueDetail],
-        rowRange: List[Union[str, int, float]],
-        columnRange: List[Union[str, int, float]],
+        row_range: List[Union[str, int, float]],
+        column_range: List[Union[str, int, float]],
     ):
         return self.execute_get_query(
             query=self.build_compute_transient_pivot(
@@ -209,8 +211,8 @@ class Spreadsheets(EventsBase):
                 rows=rows,
                 columns=columns,
                 values=values,
-                rowRange=rowRange,
-                columnRange=columnRange,
+                row_range=row_range,
+                column_range=column_range,
             ),
             parameters={},
         )
@@ -221,8 +223,8 @@ class Spreadsheets(EventsBase):
         values: List[PivotAxisDetail],
         aggregate: PivotAxisDetail,
         show_total: bool,
-        axisRange: List[Union[str, int, float]] = None,
-        rangeAxis: PivotAxisDetail = None,
+        axis_range: List[Union[str, int, float]] = None,
+        range_axis: PivotAxisDetail = None,
         limit=50,
     ):
         sheet_query = f"({reference_query})"
@@ -244,8 +246,8 @@ class Spreadsheets(EventsBase):
             else:
                 raise BusinessError("Select Value before finding sum")
 
-        if axisRange and rangeAxis:
-            query = query.where(Field(rangeAxis.name).isin(axisRange))
+        if axis_range and range_axis:
+            query = query.where(Field(range_axis.name).isin(axis_range))
 
         query = query.limit(limit)
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
@@ -257,8 +259,8 @@ class Spreadsheets(EventsBase):
         values: List[PivotAxisDetail],
         aggregate: PivotAxisDetail,
         show_total: bool,
-        axisRange: List[Union[str, int, float]] = None,
-        rangeAxis: PivotAxisDetail = None,
+        axis_range: List[Union[str, int, float]] = None,
+        range_axis: PivotAxisDetail = None,
         limit=50,
     ):
         return self.execute_get_query(
@@ -267,14 +269,12 @@ class Spreadsheets(EventsBase):
                 values=values,
                 aggregate=aggregate,
                 show_total=show_total,
-                axisRange=axisRange,
-                rangeAxis=rangeAxis,
+                axis_range=axis_range,
+                range_axis=range_axis,
                 limit=limit,
             ),
             parameters={},
         )
-
-        return restricted_client.query(query=query).result_set
 
     def build_vlookup_query(
         self,
