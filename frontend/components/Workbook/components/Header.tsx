@@ -9,7 +9,6 @@ import {
 import { useRouter } from 'next/router';
 import { ArrowLeft, Code } from 'phosphor-react';
 import React from 'react';
-import { TransientSheetData } from '@lib/domain/workbook';
 
 type WorkbookHeaderProps = {
   name: string;
@@ -17,10 +16,6 @@ type WorkbookHeaderProps = {
   isSaveButtonDisabled: boolean;
   handleSave: Function;
   setShowSqlEditor: Function;
-  addNewPivotSheet: () => void;
-  addNewChartToSheet: () => void;
-  sheetsData: TransientSheetData[];
-  selectedSheetIndex: number;
 };
 
 const WorkbookHeader = ({
@@ -29,15 +24,9 @@ const WorkbookHeader = ({
   isSaveButtonDisabled,
   handleSave,
   setShowSqlEditor,
-  addNewPivotSheet,
-  addNewChartToSheet,
-  sheetsData,
-  selectedSheetIndex,
 }: WorkbookHeaderProps) => {
-  const sheet = sheetsData[selectedSheetIndex];
   const router = useRouter();
   const { dsId } = router.query;
-  const disabledIconStyle = { color: '#bdbdbd', cursor: 'no-drop' };
   return (
     <Box position={'sticky'} top={'0'} width={'full'} zIndex={'99'}>
       <Flex

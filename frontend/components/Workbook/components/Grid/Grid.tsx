@@ -219,7 +219,7 @@ const Grid = ({
   };
 
   return (
-    <Box position="relative">
+    <Box h="full" w="full" position={'relative'}>
       <AppertureSheet
         rows={rows}
         columns={columns}

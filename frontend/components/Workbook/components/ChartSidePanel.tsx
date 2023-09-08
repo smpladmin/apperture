@@ -1,20 +1,15 @@
 import {
   Box,
-  Button,
   Flex,
   Input,
   InputGroup,
   InputLeftElement,
-  Select,
   Text,
-  background,
 } from '@chakra-ui/react';
 import Dropdown from '@components/SearchableDropdown/Dropdown';
-import SearchableListDropdown from '@components/SearchableDropdown/SearchableListDropdown';
 import { ChartSeries, SheetChartDetail } from '@lib/domain/workbook';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { getSearchResult } from '@lib/utils/common';
-import { Table } from '@phosphor-icons/react';
 import {
   CaretDown,
   CaretLeft,
@@ -30,12 +25,10 @@ import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { CHART_COLOR } from './DraggableWrapper';
 
 const ChartSidePanel = ({
-  showChartPanel,
   hideChartPanel,
   data,
   updateChart,
 }: {
-  showChartPanel: (data: SheetChartDetail) => void;
   hideChartPanel: () => void;
   data: SheetChartDetail;
   updateChart: (timestamp: number, updatedChartData: SheetChartDetail) => void;
@@ -238,7 +231,6 @@ const ChartSidePanel = ({
             px={3}
             py={2}
             mt={2}
-            // onClick={() => !isDisabled && setIsConversionWindowListOpen(true)}
             alignItems={'center'}
             gap={'2'}
             borderRadius={'4px'}
@@ -274,7 +266,6 @@ const ChartSidePanel = ({
             px={3}
             py={2}
             mt={2}
-            // onClick={() => !isDisabled && setIsConversionWindowListOpen(true)}
             alignItems={'center'}
             gap={'2'}
             borderRadius={'4px'}
@@ -328,7 +319,6 @@ const ChartSidePanel = ({
             px={3}
             py={2}
             mt={2}
-            // onClick={() => !isDisabled && setIsConversionWindowListOpen(true)}
             alignItems={'center'}
             gap={'2'}
             borderRadius={'4px'}
@@ -445,7 +435,6 @@ const SeriesCard = ({
       px={3}
       py={2}
       mt={2}
-      // onClick={() => !isDisabled && setIsConversionWindowListOpen(true)}
       alignItems={'center'}
       gap={'2'}
       borderRadius={'4px'}

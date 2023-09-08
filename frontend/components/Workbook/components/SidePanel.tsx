@@ -140,7 +140,6 @@ const SidePanel = ({
             />
           ) : (
             <ChartSidePanel
-              showChartPanel={showChartPanel}
               data={chartPanel.data as SheetChartDetail}
               hideChartPanel={hideChartPanel}
               updateChart={updateChart}

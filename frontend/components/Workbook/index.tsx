@@ -1028,10 +1028,6 @@ const Workbook = ({
           isSaveButtonDisabled={isSaveButtonDisabled}
           handleSave={handleSaveOrUpdateWorkbook}
           setShowSqlEditor={setShowSqlEditor}
-          addNewPivotSheet={addNewPivotSheet}
-          addNewChartToSheet={addNewChartToSheet}
-          sheetsData={sheetsData}
-          selectedSheetIndex={selectedSheetIndex}
         />
         <Toolbar
           addNewPivotSheet={addNewPivotSheet}
@@ -1039,6 +1035,7 @@ const Workbook = ({
           selectedSheetIndex={selectedSheetIndex}
           selectedColumns={selectedColumns}
           setSheetsData={setSheetsData}
+          addNewChartToSheet={addNewChartToSheet}
         />
         <Flex
           direction={'row'}
