@@ -611,7 +611,7 @@ export const parseHeaders = (columns: string[], headers: SpreadSheetColumn[]) =>
 export const prepareChartSeriesFromSheetData = (data: any): ChartSeries[] => {
   const types: any = {};
   if (data && data[0]) {
-    for (const item of data.slice(0, 10)) {
+    for (const item of data) {
       for (const key in item) {
         if (!types[key] || types[key] === 'object') {
           types[key] = typeof item[key].original;

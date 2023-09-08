@@ -167,6 +167,36 @@ const Workbook = ({
     if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
   }, []);
 
+  const calculatedChartData = useMemo(() => {
+    if (sheetsData[selectedSheetIndex]?.charts?.length) {
+      const updatedSeries = prepareChartSeriesFromSheetData(
+        sheetsData[selectedSheetIndex].data
+      );
+      const updatedSeriesName = updatedSeries.map((item) => item.name);
+      return sheetsData[selectedSheetIndex].charts.map((chartData) => {
+        chartData.xAxis = chartData.xAxis.filter((x) =>
+          updatedSeriesName.includes(x.name)
+        );
+        chartData.yAxis = chartData.yAxis.filter((y) =>
+          updatedSeriesName.includes(y.name)
+        );
+        const omittedSeries = [...chartData.xAxis, ...chartData.yAxis].map(
+          (data) => data.name
+        );
+        chartData.series = updatedSeries.filter(
+          (data) => !omittedSeries.includes(data.name)
+        );
+        return chartData;
+      });
+    }
+    return [];
+  }, [sheetsData[selectedSheetIndex].data]);
+
+  useEffect(() => {
+    console.log('updated sheet data');
+    console.log(calculatedChartData);
+  }, [calculatedChartData]);
+
   useEffect(() => {
     if (
       !isEqual(savedWorkbook?.name, workbookName) ||
@@ -771,7 +801,7 @@ const Workbook = ({
 
   const addNewChartToSheet = () => {
     const tempSheetData = cloneDeep(prevSheetsData);
-    const charts = tempSheetData[selectedSheetIndex].charts;
+    const charts = tempSheetData[selectedSheetIndex].charts || [];
     let series = prepareChartSeriesFromSheetData(
       tempSheetData[selectedSheetIndex].data
     );
@@ -808,6 +838,7 @@ const Workbook = ({
     ].charts.map((chart) =>
       chart.timestamp === timestamp ? updatedChartData : chart
     );
+    setSheetsData(tempSheetData);
   };
 
   const addNewPivotSheet = () => {

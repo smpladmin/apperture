@@ -8,7 +8,7 @@ import {
 } from '@chakra-ui/react';
 import { SheetChartDetail, TransientSheetData } from '@lib/domain/workbook';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
-import { CSSProperties, useEffect, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { Column } from '@antv/g2plot';
 
 import { Rnd } from 'react-rnd';
@@ -53,20 +53,24 @@ export const SheetChart = ({
   const plot = useRef<{ chart: Column | null }>({ chart: null });
   useOnClickOutside(boxRef, (e: any) => {
     setIsActive(false);
-    // hideChartPanel();
   });
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!chartData) return;
-
-    const plotData = chartDataTransformer(
+  const plotData = useMemo(() => {
+    return chartDataTransformer(
       sheetData,
       chartData.xAxis[0]?.name,
       chartData.yAxis.map((axes) => axes.name)
     );
+  }, [chartData.xAxis, chartData.yAxis, chartData.series, sheetData]);
+
+  useEffect(() => {
+    if (!plotData) return;
 
     const NUMBER_OF_COLUMNS = 30;
+    const CALCULATED_END =
+      NUMBER_OF_COLUMNS / plotData.length > 1
+        ? 1
+        : NUMBER_OF_COLUMNS / plotData.length;
 
     plot.current.chart = new Column(ref.current!!, {
       data: plotData,
@@ -77,10 +81,7 @@ export const SheetChart = ({
       isGroup: true,
       slider: {
         start: 0,
-        end:
-          NUMBER_OF_COLUMNS / plotData.length > 1
-            ? 1
-            : NUMBER_OF_COLUMNS / plotData.length,
+        end: 1,
         formatter: (val, datum, index) => {
           return index + 1;
         },
@@ -121,13 +122,7 @@ export const SheetChart = ({
     return () => {
       plot.current?.chart?.destroy();
     };
-  }, [
-    chartData.height,
-    chartData.width,
-    sheetData,
-    chartData.xAxis.map((i) => i.name).join(''),
-    chartData.yAxis.map((i) => i.name).join(''),
-  ]);
+  }, [chartData.height, chartData.width, sheetData, plotData]);
 
   const updateName = (name: string) => {
     const newData = chartData;
@@ -153,6 +148,7 @@ export const SheetChart = ({
         const newData = chartData;
         newData.x = x;
         newData.y = y;
+        console.log('dragged');
         updateChart(chartData.timestamp, newData);
       }}
       onResizeStop={(_, __, elem, ___, position) => {

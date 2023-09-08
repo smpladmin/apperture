@@ -92,9 +92,9 @@ const Grid = ({
     );
   }, [sheet, selectedSheetIndex]);
 
-  useEffect(() => {
-    setCharts(sheetsData[selectedSheetIndex].charts);
-  }, [sheetsData[selectedSheetIndex].charts, selectedSheetIndex]);
+  // useEffect(() => {
+  //   setCharts(sheetsData[selectedSheetIndex].charts);
+  // }, [sheetsData[selectedSheetIndex].charts, selectedSheetIndex]);
 
   const handleColumnResize = (ci: Id, width: number) => {
     setColumns((prevColumns) => {
@@ -191,7 +191,7 @@ const Grid = ({
         }}
         onContextMenu={handleContextMenu}
       />
-      {charts?.map((chart) => (
+      {sheet.charts?.map((chart) => (
         <SheetChart
           updateChart={updateChart}
           chartData={chart}

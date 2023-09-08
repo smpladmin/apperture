@@ -24,6 +24,7 @@ import {
   DotsThreeVertical,
   GridFour,
   MagnifyingGlass,
+  Plus,
 } from 'phosphor-react';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { CHART_COLOR } from './DraggableWrapper';
@@ -41,6 +42,8 @@ const ChartSidePanel = ({
 }) => {
   const [isXAxisDropDownOpen, setIsXAxisDropDownOpen] = useState(false);
   const [isYAxisDropDownOpen, setIsYAxisDropDownOpen] = useState(false);
+  const [isRemoveXAxisDropDownOpen, setIsRemoveXAxisDropDownOpen] =
+    useState(false);
   const chartTypeRef = useRef(null);
   const updateXAxisValue = (item: ChartSeries) => {
     const oldXAxisValue = data.xAxis;
@@ -49,8 +52,8 @@ const ChartSidePanel = ({
       ...oldXAxisValue,
     ];
     const newData = data;
-    data.xAxis = [item];
-    data.series = newSeries;
+    newData.xAxis = [item];
+    newData.series = newSeries;
     updateChart(data.timestamp, newData);
     setIsXAxisDropDownOpen(false);
   };
@@ -62,8 +65,24 @@ const ChartSidePanel = ({
     newData.yAxis.push(item);
     newData.series = newSeries;
     updateChart(data.timestamp, newData);
-    setIsXAxisDropDownOpen(false);
+    setIsYAxisDropDownOpen(false);
   };
+
+  const removeXAxisValue = () => {
+    const newData = data;
+    newData.series = [...newData.series, ...newData.xAxis];
+    newData.xAxis = [];
+    updateChart(newData.timestamp, newData);
+    setIsRemoveXAxisDropDownOpen(false);
+  };
+  const removeYAxisValue = (item: ChartSeries) => {
+    const newData = data;
+    newData.series = [...newData.series, item];
+    newData.yAxis = data.yAxis.filter((i) => i.name != item.name);
+    updateChart(newData.timestamp, newData);
+  };
+
+  console.log(data);
 
   if (!data) return <></>;
   return (
@@ -244,129 +263,110 @@ const ChartSidePanel = ({
         pt={2}
       >
         X axis
-        <Flex
-          w={'100%'}
-          color={'black.DEFAULT'}
-          fontSize={'xs-14'}
-          lineHeight={'xs-14'}
-          fontWeight={500}
-          h={8}
-          px={3}
-          py={2}
-          mt={2}
-          // onClick={() => !isDisabled && setIsConversionWindowListOpen(true)}
-          alignItems={'center'}
-          gap={'2'}
-          borderRadius={'4px'}
-          border={'1px'}
-          borderColor={'white.200'}
-          justifyContent={'space-between'}
-          bg="white"
-        >
+        {data.xAxis.length ? (
           <Flex
-            w="full"
-            bg="white"
-            fontSize={'xs-12'}
-            fontWeight={400}
-            lineHeight={'135%'}
-            gap={2}
-            alignContent={'center'}
+            w={'100%'}
+            color={'black.DEFAULT'}
+            fontSize={'xs-14'}
+            lineHeight={'xs-14'}
+            fontWeight={500}
+            h={8}
+            px={3}
+            py={2}
+            mt={2}
+            // onClick={() => !isDisabled && setIsConversionWindowListOpen(true)}
             alignItems={'center'}
+            gap={'2'}
+            borderRadius={'4px'}
+            border={'1px'}
+            borderColor={'white.200'}
+            justifyContent={'space-between'}
+            bg="white"
+          >
+            <Flex
+              w="full"
+              bg="white"
+              fontSize={'xs-12'}
+              fontWeight={400}
+              lineHeight={'135%'}
+              gap={2}
+              alignContent={'center'}
+              alignItems={'center'}
+              cursor={'pointer'}
+              onClick={() => {
+                setIsXAxisDropDownOpen(true);
+              }}
+            >
+              {data.xAxis.map((item) => (
+                <Text w="full" key={item.name}>
+                  {item.name}
+                </Text>
+              ))}
+            </Flex>
+            <Box position={'relative'}>
+              <DotsThreeVertical
+                fontSize={'xs-14'}
+                cursor={'pointer'}
+                onClick={() => setIsRemoveXAxisDropDownOpen(true)}
+              />
+              {isRemoveXAxisDropDownOpen ? (
+                <RemoveValueDropdown
+                  setIsOpen={setIsRemoveXAxisDropDownOpen}
+                  removeValue={removeXAxisValue}
+                />
+              ) : null}
+            </Box>
+          </Flex>
+        ) : (
+          <Flex
+            w={'100%'}
+            color={'black.DEFAULT'}
+            fontSize={'xs-14'}
+            lineHeight={'xs-14'}
+            fontWeight={500}
+            h={8}
+            px={3}
+            py={2}
+            mt={2}
+            // onClick={() => !isDisabled && setIsConversionWindowListOpen(true)}
+            alignItems={'center'}
+            gap={'2'}
+            borderRadius={'4px'}
+            border={'1px'}
+            borderColor={'white.200'}
+            justifyContent={'space-between'}
+            bg="white"
+            cursor={'pointer'}
             onClick={() => {
               setIsXAxisDropDownOpen(true);
             }}
           >
-            {data.xAxis.map((item) => (
-              <Text w="full" key={item.name}>
-                {item.name}
+            <Flex
+              w="full"
+              bg="white"
+              gap={2}
+              alignContent={'center'}
+              alignItems={'center'}
+              color={'grey.600'}
+            >
+              <Plus
+                fontSize={'xs-14'}
+                cursor={'pointer'}
+                onClick={() => setIsRemoveXAxisDropDownOpen(true)}
+              />
+              <Text
+                fontSize={'12px'}
+                fontWeight={400}
+                lineHeight={'135%'}
+                color={'grey.600'}
+                w="full"
+              >
+                Add X axis
               </Text>
-            ))}
+            </Flex>
           </Flex>
-          <DotsThreeVertical fontSize={'xs-14'} cursor={'pointer'} />
-        </Flex>
+        )}
         {isXAxisDropDownOpen ? (
-          //   <Box position={'relative'} ref={XAxisDropDownRef}>
-          //     <Flex
-          //       position={'absolute'}
-          //       direction={'column'}
-          //       gap={'3'}
-          //       bg="white"
-          //       mt={1}
-          //       maxH={'240px'}
-          //       overflowY={'auto'}
-          //     >
-          //       <InputGroup id="x-axis-dropdown">
-          //         <InputLeftElement>
-          //           <MagnifyingGlass size={'18'} />
-          //         </InputLeftElement>
-          //         <Input
-          //           autoFocus
-          //           type="text"
-          //           h={'10'}
-          //           focusBorderColor="none"
-          //           onChange={handleSearch}
-          //           border={'none'}
-          //           placeholder={''}
-          //           _placeholder={{
-          //             fontSize: 'xs-14',
-          //             lineHeight: 'lh-135',
-          //             fontWeight: '400',
-          //             textColor: 'grey.600',
-          //           }}
-          //           data-testid={'dropdown-search-input'}
-          //           bg={'white.DEFAULT'}
-          //           borderBottom={'0.3px solid'}
-          //           borderRadius={0}
-          //         />
-          //       </InputGroup>
-          //       <Flex flexDirection={'column'}>
-          //         {(search === ''
-          //           ? data.series
-          //           : getSearchResult(data.series, search, { keys: ['name'] })
-          //         ).map((item) => {
-          //           return (
-          //             <Flex
-          //               w="full"
-          //               onClick={(e) => {
-          //                 e.stopPropagation();
-          //                 updateXAxisValue(item);
-          //               }}
-          //             >
-          //               <Text
-          //                 w="full"
-          //                 as={'span'}
-          //                 cursor={'pointer'}
-          //                 fontSize={'xs-12'}
-          //                 fontWeight={400}
-          //                 lineHeight={'135%'}
-          //                 key={item.name}
-          //                 px={2}
-          //                 py={1}
-          //                 my={2}
-          //                 _hover={{ background: '#f5f5f5' }}
-          //               >
-          //                 {item.name}
-          //               </Text>
-          //             </Flex>
-          //           );
-          //         })}
-          //         {search != '' &&
-          //         !getSearchResult(data.series, search, { keys: ['name'] })
-          //           ?.length ? (
-          //           <Text
-          //             px={'2'}
-          //             py={'3'}
-          //             fontSize={'xs-12'}
-          //             lineHeight={'135%'}
-          //             fontWeight={'400'}
-          //             color={'grey.100'}
-          //           >
-          //             {'No results found...'}
-          //           </Text>
-          //         ) : null}
-          //       </Flex>
-          //     </Flex>
-          //   </Box>
           <SeriesDropDown
             series={data.series}
             updateValue={updateXAxisValue}
@@ -385,9 +385,15 @@ const ChartSidePanel = ({
       >
         Series
         {data.yAxis.map((series, index) => (
-          <SeriesCard name={series.name} color={CHART_COLOR[index]} />
+          <SeriesCard
+            name={series.name}
+            color={CHART_COLOR[index]}
+            removeValue={() => {
+              removeYAxisValue(series);
+            }}
+          />
         ))}
-        {!isXAxisDropDownOpen && data.yAxis.length < 5 ? (
+        {!isYAxisDropDownOpen && data.yAxis.length < 5 ? (
           <Text
             fontSize={'xs-12'}
             fontWeight={500}
@@ -401,9 +407,10 @@ const ChartSidePanel = ({
         ) : null}
         {isYAxisDropDownOpen ? (
           <SeriesDropDown
-            series={data.series}
+            series={data.series.filter((series) => series.type === 'number')}
             setIsOpen={setIsYAxisDropDownOpen}
             updateValue={updateYAxisValue}
+            position="unset"
           />
         ) : null}
       </Flex>
@@ -413,7 +420,20 @@ const ChartSidePanel = ({
 
 export default ChartSidePanel;
 
-const SeriesCard = ({ color = 'blue.800', name = 'Search' }) => {
+const SeriesCard = ({
+  color = 'blue.800',
+  name = 'Search',
+  removeValue,
+}: {
+  color: string;
+  name: string;
+  removeValue: () => void;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const handleRemoveValue = () => {
+    removeValue();
+    setIsOpen(false);
+  };
   return (
     <Flex
       w={'100%'}
@@ -449,7 +469,19 @@ const SeriesCard = ({ color = 'blue.800', name = 'Search' }) => {
       >
         <Text w="full">{name}</Text>
       </Flex>
-      <DotsThreeVertical fontSize={'xs-14'} cursor={'pointer'} />
+      <Box position={'relative'}>
+        <DotsThreeVertical
+          fontSize={'xs-14'}
+          cursor={'pointer'}
+          onClick={() => setIsOpen(true)}
+        />
+        {isOpen ? (
+          <RemoveValueDropdown
+            setIsOpen={setIsOpen}
+            removeValue={handleRemoveValue}
+          />
+        ) : null}
+      </Box>
     </Flex>
   );
 };
@@ -458,10 +490,12 @@ const SeriesDropDown = ({
   series,
   updateValue,
   setIsOpen,
+  position = 'absolute',
 }: {
   series: ChartSeries[];
   updateValue: (item: ChartSeries) => void;
   setIsOpen: (state: boolean) => void;
+  position?: 'absolute' | 'unset';
 }) => {
   const ref = useRef(null);
   useOnClickOutside(ref, () => setIsOpen(false));
@@ -474,7 +508,7 @@ const SeriesDropDown = ({
   return (
     <Box position={'relative'} ref={ref}>
       <Flex
-        position={'absolute'}
+        position={position}
         direction={'column'}
         gap={'3'}
         bg="white"
@@ -518,6 +552,7 @@ const SeriesDropDown = ({
                   e.stopPropagation();
                   updateValue(item);
                 }}
+                key={item.name}
               >
                 <Text
                   w="full"
@@ -526,7 +561,6 @@ const SeriesDropDown = ({
                   fontSize={'xs-12'}
                   fontWeight={400}
                   lineHeight={'135%'}
-                  key={item.name}
                   px={2}
                   py={1}
                   my={2}
@@ -553,5 +587,43 @@ const SeriesDropDown = ({
         </Flex>
       </Flex>
     </Box>
+  );
+};
+
+const RemoveValueDropdown = ({
+  setIsOpen,
+  removeValue,
+}: {
+  setIsOpen: (state: boolean) => void;
+  removeValue: () => void;
+}) => {
+  const ref = useRef(null);
+  useOnClickOutside(ref, () => setIsOpen(false));
+
+  return (
+    <Flex
+      position={'absolute'}
+      zIndex={2}
+      bg="white"
+      borderRadius={'4px'}
+      w="104px"
+      ref={ref}
+    >
+      <Text
+        w="full"
+        as={'span'}
+        cursor={'pointer'}
+        fontSize={'xs-12'}
+        fontWeight={400}
+        lineHeight={'135%'}
+        px={2}
+        py={1}
+        my={2}
+        _hover={{ background: '#f5f5f5' }}
+        onClick={() => removeValue()}
+      >
+        Remove
+      </Text>
+    </Flex>
   );
 };
