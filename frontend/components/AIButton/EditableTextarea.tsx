@@ -1,4 +1,4 @@
-import { Box, Text, Textarea, defineStyle } from '@chakra-ui/react';
+import { Box, Text, Textarea } from '@chakra-ui/react';
 import SuggestedWord from './SuggestedWord';
 import TextareaAutosize from 'react-textarea-autosize';
 
@@ -41,7 +41,6 @@ export default function EditableTextarea({
       border={0}
       resize={'none'}
       padding={0}
-      size={'xs'}
       minRows={2}
       maxRows={10}
       placeholder="Enter your query here..."
@@ -51,12 +50,7 @@ export default function EditableTextarea({
       minHeight={'5'}
     />
   ) : (
-    <Box
-      // minH={20}
-      ml={2}
-      lineHeight={'sh-18'}
-      onClick={(e) => setEditing(true)}
-    >
+    <Box ml={2} lineHeight={'sh-18'} onClick={(e) => setEditing(true)}>
       {text ? (
         text.split(' ').map((word: string, index: number) => {
           if (tokens[word]) {
