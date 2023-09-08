@@ -83,6 +83,7 @@ export const SheetChart = ({
         start: 0,
         end: 1,
         formatter: (val, datum, index) => {
+          console.log(datum, val);
           return index + 1;
         },
       },
