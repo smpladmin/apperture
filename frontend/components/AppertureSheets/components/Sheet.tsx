@@ -171,7 +171,6 @@ const Sheet = ({
         return;
       }
       const { key } = event;
-      console.log({ globalKey: key, event });
 
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
         event.preventDefault();
@@ -287,11 +286,40 @@ const Sheet = ({
 
   const highlightedColumnsRef = useRef({});
 
-  console.log({ highlightedColumnsRef });
+  const MainCell = useCallback(
+    ({
+      columnIndex,
+      rowIndex,
+      style,
+    }: {
+      columnIndex: number;
+      rowIndex: number;
+      style: React.CSSProperties;
+    }) => {
+      const cell = rows[rowIndex]?.cells?.[columnIndex];
+      const cellType = cell?.type || 'text';
 
-  // useEffect(() => {
-  //   console.log({ highlightedColumnsRef });
-  // }, [highlightedColumnsRef.current]);
+      const baseCellProps: BaseCellProps = {
+        columnIndex,
+        rowIndex,
+        style,
+        column: columns[columnIndex],
+      };
+
+      const CellToRender = componentMap[cellType];
+      return (
+        <BaseCell {...baseCellProps} style={style}>
+          <CellToRender
+            {...baseCellProps}
+            key={`${columnIndex} ${rowIndex} ${cellType}`}
+            cell={cell}
+            onCellsChanged={onCellsChanged}
+          />
+        </BaseCell>
+      );
+    },
+    [rows, columns, onCellsChanged]
+  );
 
   return (
     <Box
@@ -390,43 +418,7 @@ const Sheet = ({
                     width={width - 60}
                     overscanRowCount={20}
                   >
-                    {({ columnIndex, rowIndex, style }) => {
-                      const cell = rows[rowIndex]?.cells?.[columnIndex];
-                      const cellType = cell?.type || 'text';
-
-                      const baseCellProps: BaseCellProps = {
-                        columnIndex,
-                        rowIndex,
-                        style,
-                        column: columns[columnIndex],
-                      };
-
-                      const CellToRender = componentMap[cellType];
-                      //@ts-ignore
-                      const borderColor = highlightedColumnsRef?.current?.[
-                        columnIndex
-                      ]
-                        ? //@ts-ignore
-                          highlightedColumnsRef?.current?.[columnIndex].color
-                        : 'grey.700';
-                      return (
-                        <BaseCell
-                          {...baseCellProps}
-                          style={{
-                            ...style,
-                            borderX: `2px dotted ${borderColor}`,
-                          }}
-                        >
-                          <CellToRender
-                            // ref={highlightedColumnsRef}
-                            {...baseCellProps}
-                            key={`${columnIndex} ${rowIndex} ${cellType}`}
-                            cell={cell}
-                            onCellsChanged={onCellsChanged}
-                          />
-                        </BaseCell>
-                      );
-                    }}
+                    {MainCell}
                   </Grid>
                 </Box>
               </Flex>

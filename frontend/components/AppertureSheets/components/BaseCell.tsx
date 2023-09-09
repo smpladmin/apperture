@@ -50,27 +50,62 @@ const BaseCell = ({ children, ...props }: BaseCellPropsWithChildren) => {
     isHeaderCellInEditMode && highlightedColumns[columnIndex];
   const highlightColor = highlightedColumns[columnIndex]?.color;
 
+  const defaultCellStyleProps = {
+    borderRightWidth: '0.4px',
+    borderLeftWidth: '0',
+    borderBottomWidth: '0.4px',
+    backgroundColor: 'transparent',
+    borderColor: 'grey.700',
+  };
+  const activeCellStyleProps = {
+    borderWidth: '2px',
+    borderColor: 'blue.500',
+  };
+
+  const cellStyleProps = currentActiveCell
+    ? activeCellStyleProps
+    : defaultCellStyleProps;
+
+  const selectedCellStyleProps = isCellSelected
+    ? {
+        borderColor: 'blue.500',
+        backgroundColor: 'rgba(53,121,248,.35)',
+        borderRightWidth: '1px',
+        borderLeftWidth: '1px',
+        borderBottomWidth: '0.4px',
+      }
+    : {};
+
+  const highlightCellStyleProps = highlightColumn
+    ? {
+        borderLeftColor: highlightColor,
+        borderRightColor: highlightColor,
+        borderRightWidth: '2px',
+        borderLeftWidth: '2px',
+        borderLeftStyle: 'dashed',
+        borderRightStyle: 'dashed',
+      }
+    : {};
+
   return (
+    //@ts-ignore
     <Flex
       className="base-cell"
       alignItems={'center'}
       w={60}
       height={6}
-      borderRightWidth={isCellSelected ? '1px' : '0.4px'}
-      borderLeftWidth={isCellSelected && isLeftmostCellSelected ? '1px' : '0'}
-      backgroundColor={
-        highlightColumn
-          ? highlightColor
-          : isCellSelected
-          ? 'rgba(53,121,248,.35)'
-          : 'transparent'
-      }
-      borderBottomWidth={'0.4px'}
-      borderColor={
-        isCellSelected || currentActiveCell ? 'blue.500' : 'grey.700'
-      }
-      borderStyle={highlightColumn ? 'dashed' : 'solid'}
       fontSize={'xs-12'}
+      // borderRightWidth={isCellSelected ? '1px' : '0.4px'}
+      // borderLeftWidth={isCellSelected && isLeftmostCellSelected ? '1px' : '0'}
+      // borderBottomWidth={'0.4px'}
+      // backgroundColor={isCellSelected ? 'rgba(53,121,248,.35)' : 'transparent'}
+      // borderColor={
+      //   isCellSelected || currentActiveCell ? 'blue.500' : 'grey.700'
+      // }
+      // borderWidth={currentActiveCell ? '2px' : ''}
+      {...cellStyleProps}
+      {...selectedCellStyleProps}
+      {...highlightCellStyleProps}
       textOverflow={'hidden'}
       overflow={'hidden'}
       whiteSpace={'nowrap'}
