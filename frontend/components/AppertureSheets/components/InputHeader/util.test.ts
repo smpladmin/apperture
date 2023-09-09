@@ -1,7 +1,7 @@
 import { highlightFormula } from './util';
 
 describe('highlighted formula', () => {
-  it.only('should accept a sting and return a highlighted string', () => {
+  it('should accept a sting and return a highlighted string', () => {
     const formulaString = '=A+B';
     const { highlightedFormula, columnColorMapping } =
       highlightFormula(formulaString);
@@ -18,23 +18,25 @@ describe('highlighted formula', () => {
     const formulaString = '=VLOOKUP(A, Sheet1!A:B, 2, 0)';
     const { highlightedFormula, columnColorMapping } =
       highlightFormula(formulaString);
-    expect(highlightedFormula).toEqual(``);
+    expect(highlightedFormula).toEqual(
+      '=VLOOKUP(<span style="color: #F7981D">A</span>,Sheet1!A:B, 2, 0)'
+    );
     expect(columnColorMapping).toEqual({
-      A: { color: '#F7981D' },
-      B: { color: '#7E3794' },
+      0: { color: '#F7981D' },
     });
   });
 
   it('should accept a sting and return a highlighted string', () => {
-    const formulaString = '=VLOOKUP(A, A:B, 2, 0)';
+    const formulaString = '=VLOOKUP(A, B:C, 2, 0)';
     const { highlightedFormula, columnColorMapping } =
       highlightFormula(formulaString);
     expect(highlightedFormula).toEqual(
-      `=VLOOKUP(<span style=\"color: #F7981D\">A</span>, <span style=\"color: #F7981D\">A</span>:<span style=\"color: #7E3794\">B</span>, 2, 0)`
+      `=VLOOKUP(<span style=\"color: #F7981D\">A</span>,<span style=\"color: #11A9CC\">B:C</span>, 2, 0)`
     );
     expect(columnColorMapping).toEqual({
       0: { color: '#F7981D' },
-      1: { color: '#7E3794' },
+      1: { color: '#11A9CC' },
+      2: { color: '#11A9CC' },
     });
   });
 });

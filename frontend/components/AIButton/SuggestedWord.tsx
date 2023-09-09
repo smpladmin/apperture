@@ -34,7 +34,11 @@ export default function SuggestedWord({
   return (
     <Popover trigger={'hover'} key={index}>
       <PopoverTrigger>
-        <Text display={'inline'} onClick={(e) => e.stopPropagation()}>
+        <Text
+          display={'inline'}
+          onClick={(e) => e.stopPropagation()}
+          fontSize={'xs-12'}
+        >
           <span style={{ textDecoration: 'underline' }}>{word}</span>
           <span>&nbsp;</span>
         </Text>
@@ -43,22 +47,22 @@ export default function SuggestedWord({
         <PopoverHeader
           bg={'white.400'}
           roundedTop={'xl'}
+          fontSize={'xs-12'}
           onClick={(e) => e.stopPropagation()}
         >
           Select Property
         </PopoverHeader>
         <PopoverBody bg={'white'} onClick={(e) => e.stopPropagation()}>
-          <Stack direction="row" wrap={'wrap'}>
+          <Flex direction="row" wrap={'wrap'} gap={2}>
             {tokens.map((choice, cIndex) => {
               const selected = selectedProperties[word] === choice;
               return (
                 <Flex
-                  mb={1}
+                  fontSize={'xs-10'}
                   alignItems={'center'}
                   justifyContent={'space-between'}
                   key={cIndex}
-                  padding={'2px'}
-                  px={'4px'}
+                  px={1.5}
                   border={'1px'}
                   rounded={'md'}
                   borderColor={selected ? 'black' : 'white.200'}
@@ -74,15 +78,15 @@ export default function SuggestedWord({
                   }}
                 >
                   {selected && (
-                    <Box mr={1}>
-                      <Check size={20} />
+                    <Box>
+                      <Check size={12} />
                     </Box>
                   )}
                   {choice}
                 </Flex>
               );
             })}
-          </Stack>
+          </Flex>
         </PopoverBody>
         <PopoverFooter
           bg={'white'}
@@ -90,7 +94,7 @@ export default function SuggestedWord({
           onClick={(e) => e.stopPropagation()}
         >
           <Link
-            fontSize={'xs-12'}
+            fontSize={'xs-10'}
             textDecoration={'underline'}
             color={'grey.500'}
             onClick={(e) => {
