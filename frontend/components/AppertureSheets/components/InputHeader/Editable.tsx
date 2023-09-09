@@ -1,9 +1,13 @@
 import { Box, Flex } from '@chakra-ui/react';
 import { highlightFormula } from './util';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 const Editable = ({ formula, setFormula, handleSubmitFormula }: any) => {
   const initialRef = useRef({ formula });
+
+  useEffect(() => {
+    setFormula({ currentTarget: { textContent: formula } });
+  }, []);
 
   return (
     <>

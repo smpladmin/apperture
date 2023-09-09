@@ -309,7 +309,7 @@ const FormulaDropDownBox = (
       <Box position={'relative'} width={'full'} ref={dropdownRef}>
         <Box position={'relative'}>
           <Editable
-            formula={formula}
+            formula={formula || cell.text}
             setFormula={handleChange}
             handleSubmitFormula={handleSubmitFormula}
           />
