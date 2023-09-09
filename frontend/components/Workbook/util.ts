@@ -1,3 +1,4 @@
+import { ChartSeries } from './../../lib/domain/workbook';
 import { Connection, ConnectionSource } from '@lib/domain/connections';
 import {
   AggregateFunction,
@@ -11,11 +12,8 @@ import {
   SubHeaderColumnType,
   TransientSheetData,
 } from '@lib/domain/workbook';
-import { DefaultCellTypes, Id, Row } from '@silevis/reactgrid';
-import { WHITE_DEFAULT } from '@theme/index';
+import { Id } from '@silevis/reactgrid';
 import { cloneDeep, isEmpty, range } from 'lodash';
-import { DropdownHeaderCell } from './components/Grid/DropdownHeader';
-import { InputHeaderCell } from './components/Grid/InputHeader';
 
 export const expressionTokenRegex = /[A-Za-z]+|[0-9]+|[\+\*-\/\^\(\)]/g;
 
@@ -38,7 +36,6 @@ export const fillRows = (data: any[], headers: SpreadSheetColumn[]) => {
     columns.forEach((key) => {
       row[key.name] = { original: '', display: '' };
     });
-    // row['index'] = { original: index, display: index };
     return row;
   });
 
@@ -486,5 +483,133 @@ export const parseHeaders = (columns: string[], headers: SpreadSheetColumn[]) =>
     return expression;
   });
 
-export const padArray = (arr: any[], value: any = '') =>
-  Array.from(arr, (_, i) => (!(i in arr) ? value : arr[i]));
+export const prepareChartSeriesFromSheetData = (data: any): ChartSeries[] => {
+  const types: any = {};
+  if (data && data[0]) {
+    for (const item of data) {
+      for (const key in item) {
+        if (!types[key] || types[key] === 'object') {
+          types[key] = typeof item[key].original;
+        }
+      }
+    }
+  }
+  return Object.keys(types)
+    .filter((key) => key != 'index')
+    .map((key) => ({ name: key, type: types[key] }));
+};
+
+const cleanSheetDataForChart = (data: any) =>
+  data.map((item: any) => {
+    const newItem: any = {};
+    for (const key in item) {
+      if (item[key].original !== null) {
+        newItem[key] = item[key].original;
+      } else {
+        newItem[key] = 0; // Assign null if "original" is null
+      }
+    }
+    return newItem;
+  });
+
+export const chartDataTransformer = (
+  data: any[],
+  xAxis: string,
+  series: string[]
+) => {
+  data = cleanSheetDataForChart(data);
+  return data.flatMap((item) => {
+    return series.flatMap((series_breakdown) => {
+      return {
+        y: item[series_breakdown] || 0,
+        x: `${item.index}::${item[xAxis]}`,
+        series: series_breakdown,
+      };
+    });
+  });
+};
+export const padEmptyItemsInArray = (arr: any[], padValue: any = '') =>
+  Array.from(arr, (_, i) => (!(i in arr) ? padValue : arr[i]));
+
+export const calculateMaxDecimalPoints = (
+  arr: {
+    original: string | number;
+    display: string | number;
+  }[]
+): number => {
+  return arr.reduce((maxDecimals, item) => {
+    if (typeof item.original === 'number') {
+      const decimalCount = (item.original.toString().split('.')[1]?.length ||
+        0) as number;
+      return Math.max(maxDecimals, decimalCount);
+    }
+    return maxDecimals;
+  }, 0);
+};
+
+export const formatNumber = (
+  value: number | string,
+  format: { percent: boolean; decimal: number }
+) => {
+  if (typeof value !== 'number') {
+    return value;
+  }
+
+  const { percent, decimal } = format;
+
+  if (percent) {
+    // Convert the number to a percentage
+    value *= 100;
+  }
+  const formattedValue = value.toFixed(decimal);
+  return percent ? `${formattedValue}%` : formattedValue;
+};
+
+export const generatePivotCellStyles = (
+  idx: number,
+  index: number,
+  lastRow: number,
+  lastColumn: number,
+  sheetData: any
+) => {
+  //border
+  const style: any = {};
+  style.border = 'none';
+  if (idx == lastRow - 1 && index < lastColumn) {
+    style.borderBottom = '3px solid #424242';
+  }
+  if (idx < lastRow && index == lastColumn) {
+    style.borderLeft = '3px solid #424242';
+  }
+  if (idx === 0 && index === 0) {
+    style.background = 'auto';
+  } else if (idx === 0 && index < lastColumn) {
+    style.background = '#E5F2FC';
+  } else if (index === 0 && idx < lastRow) {
+    style.background = '#F5F5F5';
+  }
+
+  if (sheetData.meta?.selectedPivotRows?.length) {
+    if (idx == 1 && index < lastColumn) {
+      if (index == 0) {
+        style.fontWeight = 700;
+        style.background = '#EDEDED';
+        style.lineHeight = '130%';
+      }
+      style.background = '#EDEDED';
+    }
+  }
+  if (sheetData.meta?.selectedPivotColumns?.length) {
+    if (sheetData.meta.selectedPivotColumns[0].show_total) {
+      if (idx == lastRow - 1 && index < lastColumn) {
+        style.fontWeight = 700;
+        style.background = '#EDEDED';
+        style.fontSize = '10px';
+        style.lineHeight = '130%';
+      } else if (idx == lastRow - 2 && index < lastColumn) {
+        style.borderBottom = '1px solid #212121';
+      }
+    }
+  }
+  return style;
+};

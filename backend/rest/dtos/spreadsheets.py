@@ -7,9 +7,11 @@ from domain.spreadsheets.models import (
     AIQuery,
     ComputedSpreadsheet,
     DimensionDefinition,
+    Formatting,
     MetricDefinition,
     PivotAxisDetail,
     PivotValueDetail,
+    SpreadSheetCharts,
     SpreadSheetColumn,
     SpreadsheetType,
     SubHeaderColumn,
@@ -58,12 +60,23 @@ class SpreadSheetDto(BaseModel):
     sheet_type: SpreadsheetType
     meta: dict
     ai_query: Optional[AIQuery]
+    column_format: Optional[dict[str, Formatting]]
+    charts: Optional[List[SpreadSheetCharts]]
 
 
 class CreateWorkBookDto(BaseModel):
     name: str
     spreadsheets: List[SpreadSheetDto]
     datasourceId: str
+
+
+class VlookupDto(BaseModel):
+    datasourceId: str
+    searchQuery: str
+    lookupQuery: str
+    searchKeyColumn: str
+    lookupColumn: str
+    lookupIndexColumn: str
 
 
 class WorkBookResponse(WorkBook, ModelResponse):

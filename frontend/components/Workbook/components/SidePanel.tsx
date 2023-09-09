@@ -4,12 +4,18 @@ import { ArrowLeft, ArrowRight, CaretLeft } from 'phosphor-react';
 import React, { useEffect, useState } from 'react';
 import Connections from './Connections';
 import ConnectorColumns from './ConnectorColumns';
-import { SheetType, TransientSheetData } from '@lib/domain/workbook';
+import {
+  SheetChartDetail,
+  SheetType,
+  TransientSheetData,
+} from '@lib/domain/workbook';
 import { Connection, ConnectionSource } from '@lib/domain/connections';
 import { useRouter } from 'next/router';
 import { cloneDeep } from 'lodash';
 import { findConnectionByDatasourceId } from '../util';
 import { PivotTableSidePanel } from './PivotSidePanel';
+import { ChartPanelState } from '..';
+import ChartSidePanel from './ChartSidePanel';
 
 type SidePanelProps = {
   loadingConnections: boolean;
@@ -22,6 +28,24 @@ type SidePanelProps = {
   setShowColumns: Function;
   evaluateFormulaHeader: Function;
   addDimensionColumn: Function;
+  chartPanel: ChartPanelState;
+  showChartPanel: (data: SheetChartDetail) => void;
+  hideChartPanel: () => void;
+  updateChart: (timestamp: number, updatedChartData: SheetChartDetail) => void;
+};
+
+enum SidePanelStateType {
+  CONNECTIONS = 'CONNECTIONS',
+  PIVOT = 'PIVOT',
+  CHART = 'CHART',
+}
+
+const calculateSidePanelState = (
+  currentSheet: TransientSheetData
+): SidePanelStateType => {
+  if (currentSheet.sheet_type == SheetType.PIVOT_TABLE)
+    return SidePanelStateType.PIVOT;
+  return SidePanelStateType.CONNECTIONS;
 };
 
 const SidePanel = ({
@@ -35,7 +59,15 @@ const SidePanel = ({
   setShowColumns,
   evaluateFormulaHeader,
   addDimensionColumn,
+  chartPanel,
+  showChartPanel,
+  hideChartPanel,
+  updateChart,
 }: SidePanelProps) => {
+  const currentSheet = sheetsData[selectedSheetIndex];
+  const [SidePanelState, setSidePanelState] = useState<SidePanelStateType>(
+    calculateSidePanelState(currentSheet)
+  );
   const [isSidePanelCollapsed, setIsSidePanelCollapsed] = useState(false);
   const [connectorData, setConnectorData] = useState<
     ConnectionSource & { heirarchy: string[] }
@@ -49,9 +81,12 @@ const SidePanel = ({
     heirarchy: [],
   });
 
-  const currentSheet = sheetsData[selectedSheetIndex];
   const router = useRouter();
   const { dsId, selectProvider } = router.query;
+
+  useEffect(() => {
+    setSidePanelState(calculateSidePanelState(sheetsData[selectedSheetIndex]));
+  }, [selectedSheetIndex]);
 
   useEffect(() => {
     if (selectProvider && connections.length) {
@@ -75,8 +110,8 @@ const SidePanel = ({
 
   return (
     <Box
-      width={isSidePanelCollapsed ? '8' : '62'}
-      minWidth={isSidePanelCollapsed ? '8' : '62'}
+      width={isSidePanelCollapsed ? '8' : '73'}
+      minWidth={isSidePanelCollapsed ? '8' : '73'}
       h={'full'}
       background={'white.500'}
       pt={'4'}
@@ -84,31 +119,51 @@ const SidePanel = ({
       borderColor={'grey.700'}
       overflowY={'auto'}
       pb={10}
+      className={`side-panel${chartPanel.hidden ? '' : '-chart'}`}
     >
       {!isSidePanelCollapsed ? (
-        currentSheet.sheet_type !== SheetType.PIVOT_TABLE ? (
-          <SheetConnections
-            showColumns={showColumns}
-            sheetsData={sheetsData}
-            connectorData={connectorData}
-            selectedSheetIndex={selectedSheetIndex}
-            setShowColumns={setShowColumns}
-            setSheetsData={setSheetsData}
-            evaluateFormulaHeader={evaluateFormulaHeader}
-            addDimensionColumn={addDimensionColumn}
-            loadingConnections={loadingConnections}
-            connections={connections}
-            setConnectorData={setConnectorData}
-            setShowSqlEditor={setShowSqlEditor}
-          />
-        ) : (
-          <PivotTableSidePanel
-            setShowColumns={setShowColumns}
-            setSheetsData={setSheetsData}
-            selectedSheetIndex={selectedSheetIndex}
-            sheetsData={sheetsData}
-          />
-        )
+        <>
+          {SidePanelState === SidePanelStateType.CONNECTIONS ? (
+            chartPanel.hidden ? (
+              <SheetConnections
+                showColumns={showColumns}
+                sheetsData={sheetsData}
+                connectorData={connectorData}
+                selectedSheetIndex={selectedSheetIndex}
+                setShowColumns={setShowColumns}
+                setSheetsData={setSheetsData}
+                evaluateFormulaHeader={evaluateFormulaHeader}
+                addDimensionColumn={addDimensionColumn}
+                loadingConnections={loadingConnections}
+                connections={connections}
+                setConnectorData={setConnectorData}
+                setShowSqlEditor={setShowSqlEditor}
+              />
+            ) : (
+              <ChartSidePanel
+                data={chartPanel.data as SheetChartDetail}
+                hideChartPanel={hideChartPanel}
+                updateChart={updateChart}
+              />
+            )
+          ) : null}
+          {SidePanelState === SidePanelStateType.PIVOT ? (
+            <PivotTableSidePanel
+              setShowColumns={setShowColumns}
+              setSheetsData={setSheetsData}
+              selectedSheetIndex={selectedSheetIndex}
+              sheetsData={sheetsData}
+            />
+          ) : null}
+          {SidePanelState === SidePanelStateType.CHART ? (
+            <PivotTableSidePanel
+              setShowColumns={setShowColumns}
+              setSheetsData={setSheetsData}
+              selectedSheetIndex={selectedSheetIndex}
+              sheetsData={sheetsData}
+            />
+          ) : null}
+        </>
       ) : null}
 
       <Box
@@ -148,7 +203,7 @@ const SidePanel = ({
 
 type SheetConnectionsProps = {
   showColumns: boolean;
-  sheetsData: TransientSheetData;
+  sheetsData: TransientSheetData[];
   connectorData: ConnectionSource & {
     heirarchy: string[];
   };
@@ -176,7 +231,7 @@ const SheetConnections = ({
   connections,
   setConnectorData,
   setShowSqlEditor,
-}: any) => {
+}: SheetConnectionsProps) => {
   return (
     <Flex direction={'column'} px={'2'} overflow={'auto'}>
       {showColumns ? (

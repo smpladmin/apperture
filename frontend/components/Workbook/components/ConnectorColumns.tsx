@@ -84,8 +84,12 @@ const ConnectorColumns = ({
   useEffect(() => {
     if (sheetData?.edit_mode) return;
 
+    const filteredSelectedColumns = selectedColumns.filter(
+      (column) => !column.startsWith('=VLOOKUP')
+    );
+
     const parsedColumns = parseHeaders(
-      selectedColumns,
+      filteredSelectedColumns,
       sheetsData[selectedSheetIndex].headers
     );
 
@@ -264,7 +268,7 @@ const CheckColumns = ({
         itemCount={columns.length}
         itemSize={40}
         height={1000}
-        width={240}
+        width={270}
       >
         {({ data, index, style }) => {
           return (
@@ -286,7 +290,7 @@ const CheckColumns = ({
               <Text
                 fontSize={'xs-12'}
                 lineHeight={'xs-12'}
-                fontWeight={'500'}
+                fontWeight={'400'}
                 color={'grey.900'}
                 maxWidth={'45'}
               >

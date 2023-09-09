@@ -20,16 +20,21 @@ from domain.spreadsheets.models import (
     WorkBook,
 )
 from repositories.clickhouse.parser.query_parser import BusinessError
+from repositories.clickhouse.parser.query_parser import QueryParser
 from repositories.clickhouse.spreadsheet import Spreadsheets
 from repositories.mysql.mysql import MySql
 
 
 class SpreadsheetService:
     def __init__(
-        self, spreadsheets: Spreadsheets = Depends(), mysql: MySql = Depends()
+        self,
+        spreadsheets: Spreadsheets = Depends(),
+        mysql: MySql = Depends(),
+        parser: QueryParser = Depends(),
     ):
         self.spreadsheets = spreadsheets
         self.mysql = mysql
+        self.parser = parser
 
     async def add_workbook(self, workbook: WorkBook):
         workbook.updated_at = workbook.created_at
@@ -84,6 +89,7 @@ class SpreadsheetService:
         client: DatabaseClient = DatabaseClient.CLICKHOUSE,
     ) -> ComputedSpreadsheet:
         query = self.cleanse_query_string(query)
+        query = self.parser.assign_query_limit(query)
         result = (
             self.spreadsheets.get_transient_spreadsheet(
                 query=query,
@@ -243,10 +249,10 @@ class SpreadsheetService:
                 query,
                 columns,
                 aggregate=values[0] if values else None,
-                axisRange=row_names,
-                rangeAxis=rows[0] if rows else None,
+                axis_range=row_names,
+                range_axis=rows[0] if rows else None,
                 show_total=columns[0].show_total or (not rows and values),
-                limit=25,
+                limit=24,
             )
             column_names = [column[0] for column in unique_columns]
 
@@ -257,8 +263,8 @@ class SpreadsheetService:
                     rows,
                     columns,
                     values,
-                    rowRange=row_names,
-                    columnRange=column_names,
+                    row_range=row_names,
+                    column_range=column_names,
                 )
                 data = self.populate_data(data, result_set)
             except Exception as e:
@@ -279,3 +285,26 @@ class SpreadsheetService:
             "columns": column_names,
             "data": data,
         }
+
+    async def compute_vlookup(
+        self,
+        credential: ClickHouseCredential,
+        search_query: str,
+        lookup_query: str,
+        search_column: str,
+        lookup_column: str,
+        lookup_index_column: str,
+    ):
+        search_query = self.cleanse_query_string(search_query)
+        search_query = self.parser.assign_query_limit(search_query)
+        lookup_query = self.cleanse_query_string(lookup_query)
+        result = self.spreadsheets.get_vlookup(
+            search_query=search_query,
+            lookup_query=lookup_query,
+            search_column=search_column,
+            lookup_column=lookup_column,
+            username=credential.username,
+            password=credential.password,
+            lookup_index_column=lookup_index_column,
+        )
+        return result

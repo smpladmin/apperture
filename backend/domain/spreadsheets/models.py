@@ -3,6 +3,7 @@ from typing import List, Optional, Union
 
 from beanie import PydanticObjectId
 from pydantic import BaseModel
+from pypika import functions as fn
 
 from repositories.document import Document
 
@@ -56,6 +57,38 @@ class AIQuery(BaseModel):
     database: str
 
 
+class Format(BaseModel):
+    percent: bool
+    decimal: int
+
+
+class Formatting(BaseModel):
+    format: Optional[Format]
+    width: Optional[int]
+
+
+class SpreadSheetChartSeries(BaseModel):
+    name: str
+    type: str
+
+
+class SpreadSheetChartType(Enum):
+    COLUMN = "COLUMN"
+
+
+class SpreadSheetCharts(BaseModel):
+    timestamp: int
+    name: str
+    x: Union[int, float]
+    y: Union[int, float]
+    height: Union[int, float]
+    width: Union[int, float]
+    series: List[SpreadSheetChartSeries]
+    type: SpreadSheetChartType
+    xAxis: List[SpreadSheetChartSeries]
+    yAxis: List[SpreadSheetChartSeries]
+
+
 class Spreadsheet(BaseModel):
     name: str
     headers: List[SpreadSheetColumn]
@@ -66,6 +99,8 @@ class Spreadsheet(BaseModel):
     sheet_type: Optional[SpreadsheetType]
     meta: Optional[dict]
     ai_query: Optional[AIQuery]
+    column_format: Optional[dict[str, Formatting]]
+    charts: Optional[List[SpreadSheetCharts]] = []
 
 
 class WorkBook(Document):
@@ -132,6 +167,11 @@ class SortingOrder(Enum):
 
 class AggregateFunction(Enum):
     SUM = "SUM"
+    COUNT = "COUNT"
+
+    def get_pypika_function(self):
+        type_dict = {self.SUM: fn.Sum, self.COUNT: fn.Count}
+        return type_dict.get(self, fn.Sum)
 
 
 class PivotAxisDetail(BaseModel):

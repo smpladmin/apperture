@@ -25,6 +25,7 @@ import {
   Column,
   InputHeaderCell,
   Row,
+  SelectedColumn,
   TextCell,
 } from '../types/gridTypes';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
@@ -51,7 +52,7 @@ const Sheet = ({
   onCellsChanged: (
     changedCell: CellChange<TextCell | InputHeaderCell>[]
   ) => void;
-  onColumnsSelections?: (columnIds: string[]) => void;
+  onColumnsSelections?: (columnIds: SelectedColumn[]) => void;
 }) => {
   const { state, dispatch } = useContext(GridContext);
   const {
@@ -150,8 +151,7 @@ const Sheet = ({
 
   useEffect(() => {
     // on column selection, call prop onColumnSelection
-    const selectedColumnIds = selectedColumns.map((column) => column.columnId);
-    onColumnsSelections?.(selectedColumnIds);
+    onColumnsSelections?.(selectedColumns);
   }, [selectedColumns]);
 
   useEffect(() => {
@@ -298,20 +298,21 @@ const Sheet = ({
     }) => {
       const cell = rows[rowIndex]?.cells?.[columnIndex];
       const cellType = cell?.type || 'text';
-
       const baseCellProps: BaseCellProps = {
         columnIndex,
         rowIndex,
-        style,
+        style: {
+          ...style,
+          ...cell.style,
+        },
         column: columns[columnIndex],
       };
 
       const CellToRender = componentMap[cellType];
       return (
-        <BaseCell {...baseCellProps} style={style}>
+        <BaseCell {...baseCellProps}>
           <CellToRender
             {...baseCellProps}
-            key={`${columnIndex} ${rowIndex} ${cellType}`}
             cell={cell}
             onCellsChanged={onCellsChanged}
           />

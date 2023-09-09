@@ -812,6 +812,7 @@ def workbook_data():
                 "meta": {"dsId": "", "selectedColumns": []},
                 "sheet_type": SpreadsheetType.SIMPLE_SHEET,
                 "word_replacements": [],
+                "column_format": None,
             }
         ],
         "datasourceId": "23412414123123",
@@ -850,6 +851,7 @@ def spreadsheets_service():
                 edit_mode=True,
                 meta={"dsId": "", "selectedColumns": []},
                 sheet_type=SpreadsheetType.SIMPLE_SHEET,
+                column_format=None,
             )
         ],
         enabled=True,
@@ -861,6 +863,8 @@ def spreadsheets_service():
     spreadsheet_future.set_result(computed_spreadsheet)
     workbooks_future = asyncio.Future()
     workbooks_future.set_result([workbook])
+    vlookup_future = asyncio.Future()
+    vlookup_future.set_result(["test1", "test2"])
 
     spreadsheets_service_mock.build_workbook.return_value = workbook
     spreadsheets_service_mock.get_transient_spreadsheets.return_value = (
@@ -876,6 +880,7 @@ def spreadsheets_service():
     spreadsheets_service_mock.add_workbook.return_value = workbook_future
     spreadsheets_service_mock.update_workbook.return_value = workbook_future
     spreadsheets_service_mock.delete_workbook = mock.AsyncMock()
+    spreadsheets_service_mock.compute_vlookup.return_value = vlookup_future
 
     return spreadsheets_service_mock
 

@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock
 
+from clickhouse_connect.driver.query import QueryResult
+
 from domain.spreadsheets.models import (
     AggregateFunction,
     ColumnFilter,
@@ -11,15 +13,12 @@ from domain.spreadsheets.models import (
     PivotValueDetail,
     SortingOrder,
 )
-from repositories.clickhouse.parser.query_parser import QueryParser
 from repositories.clickhouse.spreadsheet import Spreadsheets
 
 
 class TestSpreadSheetRepository:
     def setup_method(self):
-        self.spreadsheet_repo = Spreadsheets(
-            clickhouse=MagicMock(), parser=QueryParser()
-        )
+        self.spreadsheet_repo = Spreadsheets(clickhouse=MagicMock())
         self.pivot_axis_row_with_total = PivotAxisDetail(
             name="user_id",
             sort_by="user_id",
@@ -40,6 +39,9 @@ class TestSpreadSheetRepository:
         )
         self.pivot_axis_value = PivotValueDetail(
             name="salary", function=AggregateFunction.SUM
+        )
+        self.pivot_axis_value_count = PivotValueDetail(
+            name="salary", function=AggregateFunction.COUNT
         )
 
     def test_build_transient_columns_query(self):
@@ -188,8 +190,8 @@ class TestSpreadSheetRepository:
             values=[self.pivot_axis_row_without_total],
             aggregate=self.pivot_axis_value,
             show_total=False,
-            axisRange=None,
-            rangeAxis=None,
+            axis_range=None,
+            range_axis=None,
             limit=50,
         )
 
@@ -204,8 +206,8 @@ class TestSpreadSheetRepository:
             values=[self.pivot_axis_row_without_total],
             aggregate=self.pivot_axis_value,
             show_total=True,
-            axisRange=None,
-            rangeAxis=None,
+            axis_range=None,
+            range_axis=None,
             limit=50,
         )
 
@@ -220,7 +222,7 @@ class TestSpreadSheetRepository:
             values=[self.pivot_axis_row_without_total],
             aggregate=self.pivot_axis_value,
             show_total=True,
-            axisRange=[
+            axis_range=[
                 "Sunday",
                 "Monday",
                 "Tuesday",
@@ -229,7 +231,7 @@ class TestSpreadSheetRepository:
                 "Friday",
                 "Saturday",
             ],
-            rangeAxis=PivotAxisDetail(
+            range_axis=PivotAxisDetail(
                 name="weekday",
                 sort_by="weekday",
                 order_by=SortingOrder.ASC,
@@ -249,7 +251,7 @@ class TestSpreadSheetRepository:
             rows=[self.pivot_axis_row_with_total],
             columns=[self.pivot_axis_column_without_total],
             values=[self.pivot_axis_value],
-            rowRange=[
+            row_range=[
                 1,
                 2,
                 3,
@@ -261,7 +263,7 @@ class TestSpreadSheetRepository:
                 9,
                 10,
             ],
-            columnRange=[
+            column_range=[
                 "Sunday",
                 "Monday",
                 "Tuesday",
@@ -275,4 +277,70 @@ class TestSpreadSheetRepository:
         assert (
             result
             == 'SELECT "user_id","weekday",SUM("salary") FROM (SELECT * FROM table) WHERE "user_id" IN (1,2,3,4,5,6,7,8,9,10) AND "weekday" IN (\'Sunday\',\'Monday\',\'Tuesday\',\'Wednesday\',\'Thursday\',\'Friday\',\'Saturday\') GROUP BY "user_id","weekday" ORDER BY "user_id" ASC,"weekday" ASC'
+        )
+
+    def test_build_compute_ordered_distinct_values_for_count(self):
+        result = self.spreadsheet_repo.build_compute_transient_pivot(
+            sql="SELECT * FROM table",
+            rows=[self.pivot_axis_row_with_total],
+            columns=[self.pivot_axis_column_without_total],
+            values=[self.pivot_axis_value_count],
+            row_range=[
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+            ],
+            column_range=[
+                "Sunday",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+            ],
+        )
+
+        assert (
+            result
+            == 'SELECT "user_id","weekday",COUNT("salary") FROM (SELECT * FROM table) WHERE "user_id" IN (1,2,3,4,5,6,7,8,9,10) AND "weekday" IN (\'Sunday\',\'Monday\',\'Tuesday\',\'Wednesday\',\'Thursday\',\'Friday\',\'Saturday\') GROUP BY "user_id","weekday" ORDER BY "user_id" ASC,"weekday" ASC'
+        )
+
+    def test_get_vlookup(self):
+        self.spreadsheet_repo.execute_query_for_restricted_client = MagicMock(
+            return_value=QueryResult(
+                result_set=[
+                    ["test1"],
+                    ["test2"],
+                ],
+                column_names=("1", "2"),
+                column_types=(),
+            )
+        )
+        assert self.spreadsheet_repo.get_vlookup(
+            search_query="select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd'",
+            lookup_query="select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd'",
+            search_column="event_name",
+            lookup_column="user_id",
+            lookup_index_column="event_name",
+            username="test-user",
+            password="test-password",
+        ) == ["test1", "test2"]
+
+    def test_build_vlookup_query(self):
+        assert self.spreadsheet_repo.build_vlookup_query(
+            search_query="select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd'",
+            lookup_query="select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd'",
+            search_column="event_name",
+            lookup_column="user_id",
+            lookup_index_column="event_name",
+        ) == (
+            "with lookup_query as (select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd'), map as (SELECT DISTINCT ON (event_name) event_name, user_id AS lookup_column FROM lookup_query ORDER BY event_name), cte as (select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd') select lookup_column from cte left join map on cte.event_name = map.event_name"
         )

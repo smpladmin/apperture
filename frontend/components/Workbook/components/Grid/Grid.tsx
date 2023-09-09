@@ -1,35 +1,33 @@
-import {
-  CellLocation,
-  Id,
-  MenuOption,
-  SelectionMode,
-} from '@silevis/reactgrid';
 import React, { useEffect, useState } from 'react';
 import {
   ColumnType,
+  SheetChartDetail,
+  SheetType,
   SpreadSheetColumn,
   SubHeaderColumn,
   SubHeaderColumnType,
   TransientSheetData,
 } from '@lib/domain/workbook';
 import {
-  convertColumnValuesToPercentage,
   hasMetricColumnInPivotSheet,
   isSheetPivotOrBlank,
   fillHeaders,
   fillRows,
-  increaseDecimalPlacesInColumnValues,
-  decreaseDecimalPlacesInColumnValues,
+  formatNumber,
+  generatePivotCellStyles,
 } from '@components/Workbook/util';
-import { cloneDeep } from 'lodash';
+import { SheetChart } from '../DraggableWrapper';
+
 import AppertureSheet from '@components/AppertureSheets';
 import {
   CellChange,
   Column,
   InputHeaderCell,
   Row,
+  SelectedColumn,
   TextCell,
 } from '@components/AppertureSheets/types/gridTypes';
+import { Box } from '@chakra-ui/react';
 
 const getColumns = (headers: SpreadSheetColumn[]): Column[] => {
   return headers
@@ -76,9 +74,6 @@ const getSubHeaderRow = (
             disableAddButton,
             showSuggestions: isPivotOrBlankSheet,
             properties,
-            style: {
-              overflow: 'initial',
-            },
           };
         }
 
@@ -106,23 +101,50 @@ const getRows = (
   subHeaders: SubHeaderColumn[],
   sheetData: TransientSheetData,
   properties: string[]
-): Row<TextCell | InputHeaderCell>[] => [
-  getSubHeaderRow(headers, originalHeaders, subHeaders, sheetData, properties),
-  ...data.map<Row<TextCell>>((data, idx) => ({
+): Row<TextCell | InputHeaderCell>[] => {
+  const isPivot = sheetData.sheet_type === SheetType.PIVOT_TABLE;
+  const lastRow = sheetData.data.length || 10;
+  const lastColumn = sheetData.headers.length || 4;
+  const gridRows = data.map<Row<TextCell>>((data, idx) => ({
     rowId: idx,
     cells: headers
       .filter((header) => header.name !== 'index')
-      .map((header) => {
-        const val =
-          data[header.name]?.display === 0
-            ? '0'
-            : data[header.name]?.display || '';
+      .map((header, index) => {
+        const originalValue = data[header.name]?.original;
+        let val = originalValue === 0 ? '0' : originalValue || '';
+
+        const format = sheetData?.columnFormat?.[index.toString()]?.format;
+
+        const style: any = isPivot
+          ? generatePivotCellStyles(idx, index, lastRow, lastColumn, sheetData)
+          : {};
+
+        if (format && val) {
+          val = formatNumber(val, format);
+        }
 
         const value = typeof val === 'object' ? JSON.stringify(val) : val;
-        return { type: 'text', text: value };
+        return {
+          type: 'text',
+          text: value,
+          style,
+        };
       }),
-  })),
-];
+  }));
+  return !isPivot
+    ? [
+        getSubHeaderRow(
+          headers,
+          originalHeaders,
+          subHeaders,
+          sheetData,
+          properties
+        ),
+
+        ...gridRows,
+      ]
+    : gridRows;
+};
 
 const Grid = ({
   selectedSheetIndex,
@@ -131,7 +153,11 @@ const Grid = ({
   addDimensionColumn,
   properties,
   setSheetsData,
+  showChartPanel,
+  hideChartPanel,
+  updateChart,
   setIsFormulaEdited,
+  setSelectedColumns,
 }: {
   selectedSheetIndex: number;
   sheetsData: TransientSheetData[];
@@ -139,7 +165,11 @@ const Grid = ({
   addDimensionColumn: Function;
   properties: string[];
   setSheetsData: Function;
+  showChartPanel: (data: SheetChartDetail) => void;
+  hideChartPanel: () => void;
+  updateChart: (timestamp: number, updatedChartData: SheetChartDetail) => void;
   setIsFormulaEdited: Function;
+  setSelectedColumns: Function;
 }) => {
   const sheet = sheetsData[selectedSheetIndex];
 
@@ -206,69 +236,30 @@ const Grid = ({
     }
   };
 
-  const handleContextMenu = (
-    selectedRowIds: Id[],
-    selectedColIds: Id[],
-    selectionMode: SelectionMode,
-    menuOptions: MenuOption[],
-    selectedRanges: CellLocation[][]
-  ): MenuOption[] => {
-    if (selectionMode === 'column')
-      return [
-        {
-          id: 'percentage',
-          label: 'Convert to percentage',
-          handler: (selectedRowIds, selectedColIds) => {
-            setSheetsData((prevSheet: TransientSheetData[]) => {
-              const sheetsCopy = cloneDeep(prevSheet);
-              const data = sheetsCopy[selectedSheetIndex].data;
-              sheetsCopy[selectedSheetIndex].data =
-                convertColumnValuesToPercentage(selectedColIds, data);
-              return sheetsCopy;
-            });
-          },
-        },
-        {
-          id: 'floatingValue',
-          label: 'Increase Decimal Place',
-          handler: (selectedRowIds, selectedColIds) => {
-            setSheetsData((prevSheet: TransientSheetData[]) => {
-              const sheetsCopy = cloneDeep(prevSheet);
-              const data = sheetsCopy[selectedSheetIndex].data;
-              sheetsCopy[selectedSheetIndex].data =
-                increaseDecimalPlacesInColumnValues(selectedColIds, data);
-              return sheetsCopy;
-            });
-          },
-        },
-        {
-          id: 'floatingValue2',
-          label: 'Decrease Decimal Place',
-          handler: (selectedRowIds, selectedColIds) => {
-            setSheetsData((prevSheet: TransientSheetData[]) => {
-              const sheetsCopy = cloneDeep(prevSheet);
-              const data = sheetsCopy[selectedSheetIndex].data;
-              sheetsCopy[selectedSheetIndex].data =
-                decreaseDecimalPlacesInColumnValues(selectedColIds, data);
-              return sheetsCopy;
-            });
-          },
-        },
-      ];
-
-    return [];
+  const handleColumnSelections = (selectedColumns: SelectedColumn[]) => {
+    setSelectedColumns(selectedColumns);
   };
 
-  const handleColumnSelections = (selectedColumns: string[]) => {};
-
   return (
-    <AppertureSheet
-      rows={rows}
-      columns={columns}
-      onColumnResized={handleColumnResize}
-      onCellsChanged={handleDataChange}
-      onColumnsSelections={handleColumnSelections}
-    />
+    <Box h="full" w="full" position={'relative'}>
+      <AppertureSheet
+        rows={rows}
+        columns={columns}
+        onColumnResized={handleColumnResize}
+        onCellsChanged={handleDataChange}
+        onColumnsSelections={handleColumnSelections}
+      />
+      {sheet.charts?.map((chart) => (
+        <SheetChart
+          updateChart={updateChart}
+          chartData={chart}
+          key={chart.timestamp}
+          showChartPanel={showChartPanel}
+          hideChartPanel={hideChartPanel}
+          sheetData={sheet.data}
+        />
+      ))}
+    </Box>
   );
 };
 

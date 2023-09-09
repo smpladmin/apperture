@@ -1,21 +1,18 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useRef,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import WorkbookHeader from './components/Header';
 import {
   getTransientSpreadsheets,
   getWorkbookTransientColumn,
   saveWorkbook,
   updateWorkbook,
+  vlookup,
 } from '@lib/services/workbookService';
 import { useRouter } from 'next/router';
 import {
   AIQuery,
+  ChartType,
   ColumnType,
+  SheetChartDetail,
   SheetType,
   SpreadSheetColumn,
   SubHeaderColumn,
@@ -35,10 +32,9 @@ import SidePanel from './components/SidePanel';
 import Grid from '@components/Workbook/components/Grid/Grid';
 import Footer from '@components/Workbook/components/Footer';
 import QueryEditor from './components/QueryEditor';
-import SelectSheet from './components/SelectSheet';
 import EmptySheet from './components/EmptySheet';
 import { getConnectionsForApp } from '@lib/services/connectionService';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep, isEqual, range } from 'lodash';
 import {
   evaluateExpression,
   expressionTokenRegex,
@@ -48,8 +44,9 @@ import {
   isOperand,
   isSheetPivotOrBlank,
   isdigit,
-  padArray,
+  padEmptyItemsInArray,
   parseHeaders,
+  prepareChartSeriesFromSheetData,
 } from './util';
 import { DimensionParser, Metricparser } from '@lib/utils/parser';
 import { Connection } from '@lib/domain/connections';
@@ -58,11 +55,12 @@ import AIButton from '@components/AIButton';
 import Coachmarks from './components/Coachmarks';
 import { AppertureUser } from '@lib/domain/user';
 import Toolbar from './components/Toolbar';
-import { ErrorResponse } from '@lib/services/util';
+import { SelectedColumn } from '@components/AppertureSheets/types/gridTypes';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
     return savedWorkbook.spreadsheets.map((sheet) => ({
+      charts: [],
       ...sheet,
       data: [],
       subHeaders: sheet?.subHeaders || getSubheaders(sheet?.sheet_type),
@@ -73,6 +71,7 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
         selectedColumns: [],
       },
       aiQuery: sheet?.ai_query,
+      columnFormat: sheet?.column_format || {},
     }));
   }
   return [
@@ -85,6 +84,8 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
       is_sql: true,
       sheet_type: SheetType.SIMPLE_SHEET,
       edit_mode: false,
+      charts: [],
+      columnFormat: {},
       meta: {
         dsId: '',
         selectedColumns: [],
@@ -92,6 +93,11 @@ const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
       aiQuery: undefined,
     },
   ];
+};
+
+export type ChartPanelState = {
+  hidden: boolean;
+  data: null | SheetChartDetail;
 };
 
 const Workbook = ({
@@ -104,6 +110,10 @@ const Workbook = ({
   const [workbookName, setWorkBookName] = useState(
     savedWorkbook?.name || 'Untitled Workbook'
   );
+  const [chartPanel, setChartPanel] = useState<ChartPanelState>({
+    hidden: true,
+    data: null,
+  });
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
   const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
   const [sheetsData, setSheetsData] = useState<TransientSheetData[]>(
@@ -138,6 +148,7 @@ const Workbook = ({
     data: null,
   });
   const [loadingConnections, setLoadingConnections] = useState(false);
+  const [selectedColumns, setSelectedColumns] = useState<SelectedColumn[]>([]);
 
   const prevSheetsData = usePrevious(sheetsData);
 
@@ -153,6 +164,34 @@ const Workbook = ({
   useEffect(() => {
     if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
   }, []);
+
+  const calculatedChartData = useMemo(() => {
+    if (
+      sheetsData[selectedSheetIndex]?.charts?.length &&
+      sheetsData[selectedSheetIndex].data.length
+    ) {
+      const updatedSeries = prepareChartSeriesFromSheetData(
+        sheetsData[selectedSheetIndex].data
+      );
+      const updatedSeriesName = updatedSeries.map((item) => item.name);
+      return sheetsData[selectedSheetIndex].charts.map((chartData) => {
+        chartData.xAxis = chartData.xAxis.filter((x) =>
+          updatedSeriesName.includes(x.name)
+        );
+        chartData.yAxis = chartData.yAxis.filter((y) =>
+          updatedSeriesName.includes(y.name)
+        );
+        const omittedSeries = [...chartData.xAxis, ...chartData.yAxis].map(
+          (data) => data.name
+        );
+        chartData.series = updatedSeries.filter(
+          (data) => !omittedSeries.includes(data.name)
+        );
+        return chartData;
+      });
+    }
+    return [];
+  }, [sheetsData[selectedSheetIndex].data]);
 
   useEffect(() => {
     if (
@@ -187,6 +226,13 @@ const Workbook = ({
     sheetsData[selectedSheetIndex]?.sheet_type,
     sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery,
   ]);
+
+  const showChartPanel = (data: SheetChartDetail) => {
+    setChartPanel({ hidden: false, data });
+  };
+  const hideChartPanel = () => {
+    setChartPanel({ hidden: true, data: null });
+  };
 
   const fetchTransientSheetData = async (abortController?: AbortController) => {
     const sheet = sheetsData[selectedSheetIndex];
@@ -271,6 +317,8 @@ const Workbook = ({
         meta: sheet.meta,
         sheet_type: sheet.sheet_type,
         aiQuery: sheet.aiQuery,
+        column_format: sheet.columnFormat,
+        charts: sheet.charts,
       };
     });
 
@@ -362,13 +410,13 @@ const Workbook = ({
         }))
         .filter((header) => header.type === ColumnType.COMPUTED_HEADER);
 
-      computedHeaders.forEach((header) => {
-        queriedData = evaluateDataOnQueriedData(
+      for (const header of computedHeaders) {
+        queriedData = await evaluateDataOnQueriedData(
           header.name,
           queriedData,
           selectedSheet.headers
         );
-      });
+      }
       updateSheetData(queriedData);
     };
 
@@ -381,22 +429,23 @@ const Workbook = ({
     const { data, loading } = loadBODMASColumn;
     if (!loading) return;
     if (data) {
-      let queriedData = data?.data;
-      data?.subHeaders
-        .filter(
+      (async () => {
+        let queriedData = data?.data;
+        const filteredSubHeaders = data?.subHeaders.filter(
           (subheader) =>
             subheader.name && !subheader.name.match(/^unique|count/)
-        )
-        .forEach((expression) => {
-          queriedData = evaluateDataOnQueriedData(
-            expression?.name,
+        );
+        for (const expression of filteredSubHeaders) {
+          queriedData = await evaluateDataOnQueriedData(
+            expression.name,
             queriedData,
-            data?.headers
+            data.headers
           );
-        });
-      updateSheetData(queriedData);
+        }
 
-      setloadBODMASColumn({ loading: false, data: null });
+        updateSheetData(queriedData);
+        setloadBODMASColumn({ loading: false, data: null });
+      })();
     }
   }, [loadBODMASColumn]);
 
@@ -482,6 +531,30 @@ const Workbook = ({
     }
   };
 
+  const generateColumnFromValue = (value: string) => {
+    return Array.from({ length: 1000 }).map((_, index) => {
+      return index === 0 ? value : '';
+    });
+  };
+
+  const fetchVlookUpValue = async (
+    lookupQuery: string | undefined,
+    searchKeyColumn: string,
+    lookupColumn: string | undefined,
+    lookupIndexColumn: string | undefined
+  ) => {
+    const sheet = sheetsData[selectedSheetIndex];
+    const response = await vlookup(
+      sheet?.meta?.dsId || (dsId as string),
+      sheet.query,
+      lookupQuery || '',
+      searchKeyColumn,
+      lookupColumn || '',
+      lookupIndexColumn || ''
+    );
+    return response;
+  };
+
   const getOperands = (newHeader: string) =>
     (newHeader.match(expressionTokenRegex) || []).filter((char: string) =>
       isOperand(char)
@@ -541,20 +614,22 @@ const Workbook = ({
     columnId: string,
     columnIndex: number
   ) => {
-    const tempSheetsData = cloneDeep(sheetsData);
-    const existingHeaders = tempSheetsData[selectedSheetIndex]?.headers;
+    const existingHeaders = sheetsData[selectedSheetIndex]?.headers;
     const oldColumnId = columnId;
 
     const existingHeaderIndex = existingHeaders.findIndex(
       (header) => header.name === oldColumnId
     );
 
+    const columns = existingHeaders.map((header) => header.name);
+    columns[columnIndex] = header.name;
+    const paddedColumns = padEmptyItemsInArray(columns);
+
     const paddingHeadersLength = getPaddingHeadersLength(
       columnId,
       columnIndex,
       existingHeaders.length
     );
-
     const paddedHeaders = Array.from({ length: paddingHeadersLength }).map(
       (_, index) => ({
         name: String.fromCharCode(65 + index + existingHeaders.length),
@@ -562,54 +637,128 @@ const Workbook = ({
       })
     );
 
-    if (existingHeaderIndex !== -1) {
-      // update exisitng header and subheader
-      // for updating subheaders, need to add 1 to maintain sheets 'index' column
-      tempSheetsData[selectedSheetIndex].headers[existingHeaderIndex] = header;
-      // tempSheetsData[selectedSheetIndex].subHeaders[
-      //   existingHeaderIndex + 1
-      // ].name = header.name;
-      tempSheetsData[selectedSheetIndex].subHeaders[existingHeaderIndex].name =
-        header.name;
-    } else {
-      // add new headers and subheaders
-      const columnIndex = columnId.charCodeAt(0) - 65;
-      tempSheetsData[selectedSheetIndex].headers = [
-        ...existingHeaders,
-        ...paddedHeaders,
-        header,
-      ];
-      tempSheetsData[selectedSheetIndex].subHeaders[columnIndex].name =
-        header.name;
-    }
+    setSheetsData((prevSheetsData: TransientSheetData[]) => {
+      const tempSheetsData = cloneDeep(prevSheetsData);
+      if (existingHeaderIndex !== -1) {
+        // update exisitng header and subheader
+        // for updating subheaders, need to add 1 to maintain sheets 'index' column
+        tempSheetsData[selectedSheetIndex].headers[columnIndex] = header;
+        tempSheetsData[selectedSheetIndex].subHeaders[columnIndex + 1].name =
+          header.name;
+      } else {
+        // add new headers and subheaders
+        tempSheetsData[selectedSheetIndex].headers = [
+          ...existingHeaders,
+          ...paddedHeaders,
+          header,
+        ];
+        tempSheetsData[selectedSheetIndex].subHeaders[columnIndex].name =
+          header.name;
+      }
 
-    // update sheet data with evaluated data
-    tempSheetsData[selectedSheetIndex].data = tempSheetsData[
-      selectedSheetIndex
-    ].data.map((item, index) => ({
-      ...item,
-      [header.name]: {
-        original: evaluatedData[index] || '',
-        display: evaluatedData[index] || '',
-      },
-    }));
-
-    setSheetsData(tempSheetsData);
+      tempSheetsData[selectedSheetIndex].meta!!.selectedColumns = paddedColumns;
+      // update sheet data with evaluated data
+      tempSheetsData[selectedSheetIndex].data = tempSheetsData[
+        selectedSheetIndex
+      ].data.map((item, index) => ({
+        ...item,
+        [header.name]: {
+          original: evaluatedData[index] || '',
+          display: evaluatedData[index] || '',
+        },
+      }));
+      return tempSheetsData;
+    });
   };
 
   const parseExpression = (prefixHeader: string) => {
     return prefixHeader.match(expressionTokenRegex) || [''];
   };
 
+  const extractVlookupParameters = (formula: string): string[] | null => {
+    // Regular expression pattern with capturing groups
+    const vlookupPattern =
+      /^=VLOOKUP\(\s*([^,]+)\s*,\s*(([^,]+)!)??([A-Z]+:[A-Z]+)\s*,\s*(\d+)\s*,\s*([01])\s*\)$/i;
+
+    const match = formula.match(vlookupPattern);
+
+    if (match) {
+      // Extracted parameters are in the captured groups
+      const [, searchColumn, , lookupSheet, range, index, isSorted] = match;
+      return [searchColumn, lookupSheet, range, index, isSorted];
+    } else {
+      return null;
+    }
+  };
+
+  const extractColumnRange = (range: string) => {
+    const matches = range.match(/[A-Z]+(?=:)|[A-Z](?![A-Z])/g);
+
+    if (matches && matches.length === 2) {
+      const columnRange = matches.map((match) => {
+        return match.toUpperCase().charCodeAt(0) - 65 + 1;
+      });
+      return columnRange;
+    } else {
+      return null;
+    }
+  };
+
+  const findLookupSheet = (name: string) => {
+    return sheetsData.find((sheet) => sheet.name === name);
+  };
+
+  const computeVlookup = async (headerText: string) => {
+    const parameters = extractVlookupParameters(headerText);
+    if (parameters) {
+      const [searchKey, lookupSheetName = '', range, rangeIndex] =
+        parameters.map((param) => param?.trim());
+
+      const searchColumnIndex = searchKey.charCodeAt(0) - 65;
+      const rangeIndexValue = parseInt(rangeIndex);
+      const columnRange = extractColumnRange(range);
+
+      const lookupSheet = lookupSheetName
+        ? findLookupSheet(lookupSheetName)
+        : sheetsData[selectedSheetIndex];
+
+      const lookupColumn = columnRange
+        ? lookupSheet?.headers[columnRange[0] + rangeIndexValue - 2].name
+        : undefined;
+      const searchColumn =
+        sheetsData[selectedSheetIndex].headers[searchColumnIndex].name;
+      const lookupIndexColumn = columnRange
+        ? lookupSheet?.headers[columnRange[0] - 1].name
+        : undefined;
+      if (searchColumn && lookupIndexColumn && lookupColumn) {
+        const vlookupColumn = await fetchVlookUpValue(
+          lookupSheet?.query,
+          searchColumn,
+          lookupColumn,
+          lookupIndexColumn
+        );
+        if (vlookupColumn.length) {
+          return vlookupColumn;
+        } else {
+          return generateColumnFromValue('#N/A');
+        }
+      } else {
+        return generateColumnFromValue('#VALUE!');
+      }
+    } else {
+      return generateColumnFromValue('#NULL!');
+    }
+  };
+
   const evaluateFormulaHeader = useCallback(
-    (headerText: string, columnId: string, columnIndex: number) => {
+    async (headerText: string, columnId: string, columnIndex: number) => {
       const sheetData = sheetsData[selectedSheetIndex];
 
       const isBlankOrPivotSheet = isSheetPivotOrBlank(sheetData);
 
-      // add 1 for index offset
+      // add 1 for 'index' column offset
       const index = columnIndex
-        ? columnIndex + 1
+        ? columnIndex
         : getHeaderIndex(sheetData, columnId);
 
       if (headerText.match(/^[unique|count]/)) {
@@ -640,6 +789,18 @@ const Workbook = ({
               isClosable: true,
             });
           }
+      } else if (headerText.toLowerCase().startsWith('=vlookup')) {
+        const vlookupHeader = {
+          name: headerText,
+          type: ColumnType.COMPUTED_HEADER,
+        };
+        const vlookupColumnData = await computeVlookup(headerText);
+        updateSelectedSheetDataAndHeaders(
+          vlookupColumnData,
+          vlookupHeader,
+          columnId,
+          columnIndex
+        );
       } else {
         const newHeader = {
           name: headerText,
@@ -650,8 +811,8 @@ const Workbook = ({
         const columns = headers.map((header) => header.name);
         headers[columnIndex] = newHeader;
         columns[columnIndex] = headerText.toUpperCase();
-        const paddedColumns = padArray(columns);
-        const paddedHeaders = padArray(headers, {
+        const paddedColumns = padEmptyItemsInArray(columns);
+        const paddedHeaders = padEmptyItemsInArray(headers, {
           name: '',
           type: ColumnType.PADDING_HEADER,
         });
@@ -712,14 +873,14 @@ const Workbook = ({
     queriedData = queriedData.map((item: any, index: number) => ({
       ...item,
       [header.name]: {
-        original: data[index] || '',
-        display: data[index] || '',
+        original: data?.[index] || '',
+        display: data?.[index] || '',
       },
     }));
     return queriedData;
   };
 
-  const evaluateDataOnQueriedData = (
+  const evaluateDataOnQueriedData = async (
     headerText: string,
     queriedData: any[],
     headers: SpreadSheetColumn[]
@@ -728,24 +889,27 @@ const Workbook = ({
       name: headerText,
       type: ColumnType.COMPUTED_HEADER,
     };
+    let evaluatedData;
+    if (headerText.toLowerCase().startsWith('=vlookup')) {
+      evaluatedData = await computeVlookup(headerText);
+    } else {
+      const operands = getOperands(newHeader.name);
+      const operandsIndex = getOperatorsIndex(operands);
 
-    const operands = getOperands(newHeader.name);
-    const operandsIndex = getOperatorsIndex(operands);
+      const parsedExpression: any[] = parseExpression(newHeader.name);
 
-    const parsedExpression: any[] = parseExpression(newHeader.name);
+      const lookupTable = generateLookupTableFromQueriedData(
+        operands,
+        operandsIndex,
+        queriedData,
+        headers
+      );
 
-    const lookupTable = generateLookupTableFromQueriedData(
-      operands,
-      operandsIndex,
-      queriedData,
-      headers
-    );
-
-    const evaluatedData = evaluateExpression(
-      parsedExpression as string[],
-      lookupTable
-    );
-
+      evaluatedData = evaluateExpression(
+        parsedExpression as string[],
+        lookupTable
+      );
+    }
     return getUpdatedQueryData(evaluatedData, newHeader, queriedData);
   };
 
@@ -776,6 +940,48 @@ const Workbook = ({
     return connectionSource?.fields || [];
   }, [connections, selectedSheetIndex, sheetsData]);
 
+  const addNewChartToSheet = () => {
+    const tempSheetData = cloneDeep(prevSheetsData);
+    const charts = tempSheetData[selectedSheetIndex].charts || [];
+    let series = prepareChartSeriesFromSheetData(
+      tempSheetData[selectedSheetIndex].data
+    );
+    const yAxisValue = series.find((item) => item.type === 'number');
+    series = series.filter((item) => item.name != yAxisValue?.name);
+    const xAxisValue = series.find((item) => item.type === 'number');
+    series = series.filter((item) => item.name != xAxisValue?.name);
+
+    const newChart: SheetChartDetail = {
+      x: 50,
+      y: 50,
+      timestamp: Date.now(),
+      height: 435,
+      width: 722,
+      name: 'Untitled Chart',
+      type: ChartType.COLUMN,
+      series,
+      xAxis: xAxisValue ? [xAxisValue] : [],
+      yAxis: yAxisValue ? [yAxisValue] : [],
+    };
+    charts.push(newChart);
+    tempSheetData[selectedSheetIndex].charts = charts;
+    setSheetsData(tempSheetData);
+    showChartPanel(newChart);
+  };
+
+  const updateChart = (
+    timestamp: number,
+    updatedChartData: SheetChartDetail
+  ) => {
+    const tempSheetData = cloneDeep(sheetsData);
+    tempSheetData[selectedSheetIndex].charts = tempSheetData[
+      selectedSheetIndex
+    ].charts.map((chart) =>
+      chart.timestamp === timestamp ? updatedChartData : chart
+    );
+    setSheetsData(tempSheetData);
+  };
+
   const addNewPivotSheet = () => {
     const referenceSheet = sheetsData[selectedSheetIndex];
 
@@ -788,10 +994,12 @@ const Workbook = ({
       query: '',
       data: [],
       headers: [],
+      charts: [],
       subHeaders: getSubheaders(SheetType.SIMPLE_SHEET),
       is_sql: true,
       sheet_type: SheetType.PIVOT_TABLE,
       edit_mode: false,
+      columnFormat: {},
       meta: {
         ...referenceSheet?.meta,
         referenceSheetQuery: referenceSheet.query,
@@ -819,14 +1027,14 @@ const Workbook = ({
           isSaveButtonDisabled={isSaveButtonDisabled}
           handleSave={handleSaveOrUpdateWorkbook}
           setShowSqlEditor={setShowSqlEditor}
-          addNewPivotSheet={addNewPivotSheet}
-          sheetsData={sheetsData}
-          selectedSheetIndex={selectedSheetIndex}
         />
         <Toolbar
           addNewPivotSheet={addNewPivotSheet}
           sheetsData={sheetsData}
           selectedSheetIndex={selectedSheetIndex}
+          selectedColumns={selectedColumns}
+          setSheetsData={setSheetsData}
+          addNewChartToSheet={addNewChartToSheet}
         />
         <Flex
           direction={'row'}
@@ -844,6 +1052,10 @@ const Workbook = ({
             setShowSqlEditor={setShowSqlEditor}
             evaluateFormulaHeader={evaluateFormulaHeader}
             addDimensionColumn={addDimensionColumn}
+            chartPanel={chartPanel}
+            showChartPanel={showChartPanel}
+            hideChartPanel={hideChartPanel}
+            updateChart={updateChart}
           />
 
           <Box h={'full'} w={'full'} overflowY={'auto'}>
@@ -884,7 +1096,11 @@ const Workbook = ({
                     addDimensionColumn={addDimensionColumn}
                     properties={getProperties}
                     setSheetsData={setSheetsData}
+                    showChartPanel={showChartPanel}
+                    hideChartPanel={hideChartPanel}
+                    updateChart={updateChart}
                     setIsFormulaEdited={setIsFormulaEdited}
+                    setSelectedColumns={setSelectedColumns}
                   />
                 )}
               </Box>
@@ -897,6 +1113,7 @@ const Workbook = ({
               sheetsData={sheetsData}
               setShowColumns={setShowColumns}
               setShowEditor={setShowSqlEditor}
+              hideChartPanel={hideChartPanel}
             />
           </Box>
         </Flex>
@@ -937,6 +1154,7 @@ const Workbook = ({
               sheetsCopy[selectedSheetIndex].edit_mode = true;
               sheetsCopy[selectedSheetIndex].sheet_type =
                 SheetType.SIMPLE_SHEET;
+              sheetsCopy[selectedSheetIndex].columnFormat = {};
               setSheetsData(sheetsCopy);
               setTriggerSheetFetch(triggerSheetFetch + 1);
             }}

@@ -25,15 +25,22 @@ router = APIRouter(
 )
 
 
-@router.post("/datamart/transient", response_model=ComputedSpreadsheetQueryResponse,
-             dependencies=[Depends(validate_app_user)], )
+@router.post(
+    "/datamart/transient",
+    response_model=ComputedSpreadsheetQueryResponse,
+    dependencies=[Depends(validate_app_user)],
+)
 async def compute_datamart_query(
     dto: TransientSpreadsheetsDto, compute_query_action: ComputeQueryAction = Depends()
 ):
     return await compute_query_action.compute_query(dto=dto)
 
 
-@router.post("/datamart", response_model=DataMartResponse, dependencies=[Depends(validate_app_user)], )
+@router.post(
+    "/datamart",
+    response_model=DataMartResponse,
+    dependencies=[Depends(validate_app_user)],
+)
 async def save_datamart_table(
     dto: DataMartTableDto,
     datasource_service: DataSourceService = Depends(),
@@ -64,7 +71,11 @@ async def save_datamart_table(
     return datamart_table
 
 
-@router.put("/datamart/{id}", response_model=DataMartResponse, dependencies=[Depends(validate_app_user)], )
+@router.put(
+    "/datamart/{id}",
+    response_model=DataMartResponse,
+    dependencies=[Depends(validate_app_user)],
+)
 async def update_datamart_table(
     id: str,
     dto: DataMartTableDto,
@@ -98,8 +109,11 @@ async def update_datamart_table(
     return new_datamart_table
 
 
-@router.get("/datamart/{id}", response_model=DataMartResponse,
-            dependencies=[Depends(validate_library_items)], )
+@router.get(
+    "/datamart/{id}",
+    response_model=DataMartResponse,
+    dependencies=[Depends(validate_library_items)],
+)
 async def get_saved_datamart_table(
     id: str,
     datamart_service: DataMartService = Depends(),
@@ -107,8 +121,11 @@ async def get_saved_datamart_table(
     return await datamart_service.get_datamart_table(id=id)
 
 
-@router.get("/datamart", response_model=List[DataMartWithUser],
-            dependencies=[Depends(validate_app_user)], )
+@router.get(
+    "/datamart",
+    response_model=List[DataMartWithUser],
+    dependencies=[Depends(validate_app_user)],
+)
 async def get_datamart_tables(
     datasource_id: str,
     user: AppertureUser = Depends(get_user),
@@ -126,7 +143,10 @@ async def get_datamart_tables(
     return datamarts
 
 
-@router.delete("/datamart/{id}", dependencies=[Depends(validate_library_items)], )
+@router.delete(
+    "/datamart/{id}",
+    dependencies=[Depends(validate_library_items)],
+)
 async def delete_datamart_table(
     id: str,
     datamart_service: DataMartService = Depends(),

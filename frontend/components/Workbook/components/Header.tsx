@@ -8,8 +8,7 @@ import {
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { ArrowLeft, Code } from 'phosphor-react';
-
-import { TransientSheetData } from '@lib/domain/workbook';
+import React from 'react';
 
 type WorkbookHeaderProps = {
   name: string;
@@ -17,9 +16,6 @@ type WorkbookHeaderProps = {
   isSaveButtonDisabled: boolean;
   handleSave: Function;
   setShowSqlEditor: Function;
-  addNewPivotSheet: () => void;
-  sheetsData: TransientSheetData[];
-  selectedSheetIndex: number;
 };
 
 const WorkbookHeader = ({
@@ -28,14 +24,9 @@ const WorkbookHeader = ({
   isSaveButtonDisabled,
   handleSave,
   setShowSqlEditor,
-  addNewPivotSheet,
-  sheetsData,
-  selectedSheetIndex,
 }: WorkbookHeaderProps) => {
-  const sheet = sheetsData[selectedSheetIndex];
   const router = useRouter();
   const { dsId } = router.query;
-  const disabledIconStyle = { color: '#bdbdbd', cursor: 'no-drop' };
   return (
     <Box position={'sticky'} top={'0'} width={'full'} zIndex={'99'}>
       <Flex

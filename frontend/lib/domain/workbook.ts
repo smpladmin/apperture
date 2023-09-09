@@ -6,10 +6,12 @@ export type TransientSheetData = {
   headers: SpreadSheetColumn[];
   subHeaders: SubHeaderColumn[];
   data: any[];
+  charts: SheetChartDetail[];
   is_sql?: boolean;
   sheet_type?: SheetType;
   edit_mode?: boolean;
   aiQuery?: AIQuery;
+  columnFormat?: ColumnFormat;
   meta?: SheetMeta;
 };
 
@@ -35,6 +37,17 @@ export type AIQuery = {
   table: string;
   database: string;
 };
+
+export type ColumnFormat = Record<
+  string,
+  {
+    format?: {
+      percent: boolean;
+      decimal: number;
+    };
+    width?: number;
+  }
+>;
 
 export type WordReplacement = { word: string; replacement: string };
 
@@ -75,6 +88,7 @@ export type Spreadsheet = {
   edit_mode?: boolean;
   meta?: any;
   ai_query?: AIQuery;
+  column_format?: ColumnFormat;
 };
 
 export type Workbook = {
@@ -108,9 +122,32 @@ export type PivotAxisDetail = {
 
 export enum AggregateFunction {
   SUM = 'SUM',
+  COUNT = 'COUNT',
 }
 
 export type PivotValueDetail = {
   name: string;
   function: AggregateFunction;
+};
+
+export type ChartSeries = {
+  name: string;
+  type: 'number' | 'string' | 'boolean';
+};
+
+export enum ChartType {
+  COLUMN = 'COLUMN',
+}
+
+export type SheetChartDetail = {
+  timestamp: number;
+  name: string;
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+  series: ChartSeries[];
+  type: ChartType;
+  xAxis: ChartSeries[];
+  yAxis: ChartSeries[];
 };
