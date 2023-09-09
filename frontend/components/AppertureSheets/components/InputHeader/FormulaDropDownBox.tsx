@@ -1,15 +1,6 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Text,
-  useToast,
-} from '@chakra-ui/react';
+import { Box, Button, Flex, Text, useToast } from '@chakra-ui/react';
 import { BLUE_MAIN, GREY_600, WHITE_DEFAULT } from '@theme/index';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Function, Plus, SquaresFour } from 'phosphor-react';
 import { SubHeaderColumnType } from '@lib/domain/workbook';
 import {
@@ -24,6 +15,17 @@ import { useRouter } from 'next/router';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import CheckboxDropdown from './CheckboxDropdown';
+import { highlightFormula } from './util';
+import {
+  Actions,
+  GridContext,
+} from '@components/AppertureSheets/context/GridContext';
+import {
+  BaseCellProps,
+  InputHeaderCell,
+} from '@components/AppertureSheets/types/gridTypes';
+import ActionHeader from '@components/Actions/CreateAction/components/ActionHeader';
+import Editable from './Editable';
 
 enum ActiveCellState {
   BLANK = 'BLANK',
@@ -41,15 +43,25 @@ type CellState = {
   [ActiveCellState.EOF]: string;
 };
 
-const FormulaDropDownBox = ({
-  cell,
-  onCellChanged,
-}: {
-  cell: any;
+type FormulaDropDownBoxProps = BaseCellProps & {
+  cell: InputHeaderCell;
   onCellChanged: Function;
-}) => {
-  const [formula, setFormula] = useState(cell.text);
-  const [isFocus, setIsFocus] = useState(false);
+  formula: string;
+};
+
+const FormulaDropDownBox = (
+  { cell, onCellChanged, ...props }: FormulaDropDownBoxProps,
+  ref: any
+) => {
+  const { state, dispatch } = useContext(GridContext);
+  const { headerFormulas } = state;
+  const { columnIndex } = props;
+  // const [formula, setFormula] = useState(cell.text);
+  const formula = headerFormulas?.[columnIndex] || '';
+  const [highlightedColumns, setHighlightedColumns] = useState<
+    Record<number, { color: string }>
+  >({});
+
   const inputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
@@ -77,29 +89,6 @@ const FormulaDropDownBox = ({
   const [isLoadingValue, setIsLoadingValue] = useState(false);
   const router = useRouter();
   const { dsId } = router.query;
-
-  useEffect(() => {
-    setFormula(cell.text);
-  }, [cell.text]);
-
-  const handleSubmitFormula = () => {
-    if (formula) {
-      if (
-        !formula.match(/^unique/) &&
-        cell.columnType === SubHeaderColumnType.DIMENSION
-      ) {
-        toast({
-          title: `Dimension column does not accept BODMAS equation`,
-          status: 'error',
-          variant: 'subtle',
-          isClosable: true,
-        });
-        return;
-      }
-    }
-    onCellChanged({ text: formula });
-    inputRef?.current?.blur();
-  };
 
   const handleAddHeader = () => {
     onCellChanged({ addHeader: true });
@@ -221,7 +210,7 @@ const FormulaDropDownBox = ({
   useEffect(() => {
     if (activeCellState === ActiveCellState.BLANK) return;
     const generatedString = generateFormulaString(cellState, formula);
-    setFormula(generatedString);
+    // setFormula(generatedString);
     suggestFormula(generatedString);
   }, [cellState]);
 
@@ -279,71 +268,53 @@ const FormulaDropDownBox = ({
     activeCellState === ActiveCellState.VALUE &&
     cellState.OPERATOR === 'in';
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value;
-    const regex = /(?<name>[^\(]*)\(?/;
-    const name = input.match(regex)?.groups?.name || '';
-    if (
-      cell?.showSuggestions &&
-      name &&
-      ['count', 'countif', 'unique'].some(
-        (fname) =>
-          fname.substring(0, name?.length || 0).toLowerCase() ===
-          name.toLowerCase()
-      )
-    ) {
-      suggestFormula(input);
+  const handleChange = (e: any) => {
+    const _formula = e.currentTarget.textContent || '';
+    const { columnColorMapping } = highlightFormula(_formula);
+    // setFormula(_formula);
+    // setHighlightedColumns(columnColorMapping);
+
+    dispatch({
+      type: Actions.SET_HEADER_FORMULAS,
+      payload: { ...columnColorMapping, [columnIndex]: _formula },
+    });
+
+    dispatch({
+      type: Actions.SET_HIGHLIGHTED_COLUMNS,
+      payload: columnColorMapping,
+    });
+  };
+
+  const handleSubmitFormula = () => {
+    if (formula) {
+      if (
+        !formula.match(/^unique/) &&
+        cell.columnType === SubHeaderColumnType.DIMENSION
+      ) {
+        toast({
+          title: `Dimension column does not accept BODMAS equation`,
+          status: 'error',
+          variant: 'subtle',
+          isClosable: true,
+        });
+        return;
+      }
     }
-    setFormula(input);
+
+    onCellChanged({ text: formula });
   };
 
   return (
     <Flex width={'full'}>
       <Box position={'relative'} width={'full'} ref={dropdownRef}>
-        <InputGroup p={'0'}>
-          <Input
-            ref={inputRef}
-            value={formula}
-            autoFocus
-            border={'0'}
-            onChange={handleChange}
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => {
-              e.stopPropagation();
-              e.code === 'Enter' && handleSubmitFormula();
-              setSuggestions([]);
-            }}
-            onFocus={(e) => {
-              e.stopPropagation();
-              setIsFocus(true);
-            }}
-            onBlur={() => {
-              setIsFocus(false);
-            }}
-            w={'full'}
-            focusBorderColor={'black.100'}
-            placeholder={''}
-            _placeholder={{
-              fontFamily: 'Inter',
-              fontSize: 'xs-12',
-              lineHeight: 'xs-12',
-              fontWeight: 400,
-            }}
-            _disabled={{
-              fontWeight: 600,
-            }}
-            width={'full'}
-            height={'6'}
-            px={1}
-            borderRadius={'0'}
-            fontSize={'xs-12'}
-            lineHeight={'xs-12'}
-            fontWeight={'600'}
-            data-testid={'formula-input'}
-            disabled={!!cell.disable}
+        <Box position={'relative'}>
+          <Editable
+            formula={formula || cell.text}
+            setFormula={handleChange}
+            handleSubmitFormula={handleSubmitFormula}
           />
-        </InputGroup>
+        </Box>
+
         {showCheckboxDropdown ? (
           <CheckboxDropdown
             data={suggestions}

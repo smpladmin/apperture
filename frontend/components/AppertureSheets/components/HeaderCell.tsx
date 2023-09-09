@@ -29,6 +29,42 @@ export const HeaderCell = ({
       selectedColumn.columnIndex === columnIndex
   );
 
+  const { currentCell, isHeaderCellInEditMode, highlightedColumns } = state;
+
+  const columnId = column.columnId;
+  const isCellSelected = selectedColumns.some(
+    (selectedColumn) =>
+      selectedColumn.columnId === columnId &&
+      selectedColumn.columnIndex === columnIndex
+  );
+  const isLeftmostCellSelected =
+    isCellSelected &&
+    !selectedColumns.some(
+      (selectedColumn) => selectedColumn.columnIndex === columnIndex - 1
+    );
+
+  const currentActiveCell =
+    currentCell.row === rowIndex && currentCell.column === columnIndex;
+
+  const handleClick = (event: MouseEvent) => {
+    if (currentCell.column !== columnIndex || currentCell.row !== rowIndex) {
+      dispatch({
+        type: Actions.SET_CURRENT_CELL,
+        payload: {
+          column: columnIndex,
+          row: rowIndex,
+        },
+      });
+    }
+
+    if (selectedColumns.length)
+      dispatch({ type: Actions.SET_SELECTED_COLUMNS, payload: [] });
+  };
+
+  const highlightColumn =
+    isHeaderCellInEditMode && highlightedColumns[columnIndex];
+  const highlightColor = highlightedColumns[columnIndex]?.color;
+
   const handleColumnSelection = (
     e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
     columnName: string
@@ -60,10 +96,17 @@ export const HeaderCell = ({
       bg={isHeaderSelected ? 'blue.500' : 'white.500'}
       alignItems={'center'}
       justifyContent={'center'}
-      borderTopWidth={'0.4px'}
-      borderRightWidth={'0.4px'}
-      borderBottomWidth={'0.4px'}
       borderColor={'grey.700'}
+      borderTopWidth={highlightColumn ? '2px' : '0.4px'}
+      borderRightWidth={highlightColumn ? '2px' : '0.4px'}
+      borderLeftWidth={highlightColumn ? '2px' : '0'}
+      borderLeftColor={highlightColumn ? highlightColor : 'grey.700'}
+      borderTopColor={highlightColumn ? highlightColor : 'grey.700'}
+      borderRightColor={highlightColumn ? highlightColor : 'grey.700'}
+      borderRightStyle={highlightColumn ? 'dashed' : 'solid'}
+      borderLeftStyle={highlightColumn ? 'dashed' : 'solid'}
+      borderTopStyle={highlightColumn ? 'dashed' : 'solid'}
+      borderBottomWidth={'0.4px'}
       textAlign={'center'}
       fontSize={'xs-12'}
       lineHeight={'xs-12'}

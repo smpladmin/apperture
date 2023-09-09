@@ -1,6 +1,12 @@
 import { Box, Flex } from '@chakra-ui/react';
 import { throttle } from 'lodash';
-import React, { useCallback, useContext, useEffect } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   VariableSizeGrid as Grid,
   GridOnScrollProps,
@@ -56,6 +62,7 @@ const Sheet = ({
     currentCellValue,
     isSheetActive,
     selectedColumns,
+    isHeaderCellInEditMode,
   } = state;
 
   const spreadsheetRef = React.useRef(null);
@@ -148,7 +155,7 @@ const Sheet = ({
   }, [selectedColumns]);
 
   useEffect(() => {
-    if (showEditableCell || !isSheetActive) return;
+    if (showEditableCell || !isSheetActive || isHeaderCellInEditMode) return;
 
     const isInputOrTextArea = (
       element: EventTarget | null
@@ -164,6 +171,7 @@ const Sheet = ({
         return;
       }
       const { key } = event;
+
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
         event.preventDefault();
       }
@@ -227,7 +235,7 @@ const Sheet = ({
       document.removeEventListener('keydown', handleKeyPress);
       document.removeEventListener('keyup', handleKeyUp);
     };
-  }, [currentCell, isSheetActive, showEditableCell]);
+  }, [currentCell, isSheetActive, showEditableCell, isHeaderCellInEditMode]);
 
   const IndexCell = ({
     columnIndex,
@@ -274,6 +282,44 @@ const Sheet = ({
       }
     },
     []
+  );
+
+  const highlightedColumnsRef = useRef({});
+
+  const MainCell = useCallback(
+    ({
+      columnIndex,
+      rowIndex,
+      style,
+    }: {
+      columnIndex: number;
+      rowIndex: number;
+      style: React.CSSProperties;
+    }) => {
+      const cell = rows[rowIndex]?.cells?.[columnIndex];
+      const cellType = cell?.type || 'text';
+      const baseCellProps: BaseCellProps = {
+        columnIndex,
+        rowIndex,
+        style: {
+          ...style,
+          ...cell.style,
+        },
+        column: columns[columnIndex],
+      };
+
+      const CellToRender = componentMap[cellType];
+      return (
+        <BaseCell {...baseCellProps}>
+          <CellToRender
+            {...baseCellProps}
+            cell={cell}
+            onCellsChanged={onCellsChanged}
+          />
+        </BaseCell>
+      );
+    },
+    [rows, columns, onCellsChanged]
   );
 
   return (
@@ -373,30 +419,7 @@ const Sheet = ({
                     width={width - 60}
                     overscanRowCount={20}
                   >
-                    {({ columnIndex, rowIndex, style }) => {
-                      const cell = rows[rowIndex]?.cells?.[columnIndex];
-                      const cellType = cell?.type || 'text';
-                      const baseCellProps: BaseCellProps = {
-                        columnIndex,
-                        rowIndex,
-                        style: {
-                          ...style,
-                          ...cell.style,
-                        },
-                        column: columns[columnIndex],
-                      };
-
-                      const CellToRender = componentMap[cellType];
-                      return (
-                        <BaseCell {...baseCellProps}>
-                          <CellToRender
-                            {...baseCellProps}
-                            cell={cell}
-                            onCellsChanged={onCellsChanged}
-                          />
-                        </BaseCell>
-                      );
-                    }}
+                    {MainCell}
                   </Grid>
                 </Box>
               </Flex>
@@ -431,3 +454,22 @@ const Sheet = ({
 };
 
 export default Sheet;
+
+// useEffect(() => {
+//   // Focus the contentEditable div and move the cursor to the end when the component mounts.
+//   if (editableRef?.current) {
+//     console.log({ editableRef });
+//     editableRef?.current.focus();
+//     const textNode = editableRef?.current.firstChild;
+//     if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+//       const range = document.createRange();
+//       range.setStart(textNode, textNode.length);
+//       range.setEnd(textNode, textNode.length);
+//       const selection = window.getSelection();
+//       if (selection) {
+//         selection.removeAllRanges();
+//         selection.addRange(range);
+//       }
+//     }
+//   }
+// }, []);

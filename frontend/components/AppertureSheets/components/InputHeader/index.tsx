@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { forwardRef, memo, useContext, useEffect, useState } from 'react';
 import FormulaDropDownBox from './FormulaDropDownBox';
 import {
   BaseCellProps,
@@ -6,32 +6,48 @@ import {
   InputHeaderCell,
 } from '@components/AppertureSheets/types/gridTypes';
 import { Box, Flex, Text } from '@chakra-ui/react';
+import {
+  Actions,
+  GridContext,
+} from '@components/AppertureSheets/context/GridContext';
 
 type InputHeaderCellProps = BaseCellProps & {
   cell: InputHeaderCell;
+  ref: any;
   onCellsChanged: (changedCell: CellChange<InputHeaderCell>[]) => void;
+  onColumnHighlight: (highlight: any) => void;
 };
 
-const InputHeaderCell = ({
-  cell,
-  onCellsChanged,
-  ...props
-}: InputHeaderCellProps) => {
+const InputHeaderCell = (
+  { cell, onCellsChanged, onColumnHighlight, ...props }: InputHeaderCellProps,
+  ref: any
+) => {
   const { rowIndex, column, columnIndex } = props;
-  const [isInEditMode, setIsInEditMode] = useState(false);
+  const { state, dispatch } = useContext(GridContext);
+
+  const { currentCell, isHeaderCellInEditMode, headerFormulas } = state;
+
+  const formula = headerFormulas?.[columnIndex] || '';
+
+  const isHeaderCellCurrentlyEdited =
+    currentCell.row === rowIndex && currentCell.column === columnIndex;
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     if (e.detail === 2) {
       e.stopPropagation();
-      setIsInEditMode(true);
+      dispatch({
+        type: Actions.SET_HEADER_CELL_IN_EDIT_MODE,
+        payload: true,
+      });
     }
   };
 
   return (
     <>
-      {isInEditMode ? (
+      {isHeaderCellInEditMode && isHeaderCellCurrentlyEdited ? (
         <FormulaDropDownBox
           cell={cell}
+          formula={formula}
           onCellChanged={(updatedCell: Partial<typeof cell>) => {
             const changedCell: CellChange<InputHeaderCell> = {
               rowId: rowIndex,
@@ -46,9 +62,13 @@ const InputHeaderCell = ({
                 ...updatedCell,
               },
             };
-            setIsInEditMode(false);
+            dispatch({
+              type: Actions.SET_HEADER_CELL_IN_EDIT_MODE,
+              payload: false,
+            });
             onCellsChanged([changedCell]);
           }}
+          {...props}
         />
       ) : (
         <Flex
@@ -68,5 +88,10 @@ const InputHeaderCell = ({
     </>
   );
 };
-
 export default InputHeaderCell;
+// export default memo(
+//   InputHeaderCell,
+//   (prevProps: InputHeaderCellProps, nextProps: InputHeaderCellProps) => {
+//     return prevProps.cell.text !== nextProps.cell.text;
+//   }
+// );

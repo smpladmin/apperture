@@ -1,3 +1,5 @@
+import { SubHeaderColumnType } from '@lib/domain/workbook';
+
 export type Column = {
   columnId: string;
   width: number;
@@ -35,7 +37,7 @@ export type InputHeaderCell = {
   disable?: boolean;
   showAddButton?: boolean;
   addHeader?: boolean;
-  // columnType?: SubHeaderColumnType;
+  columnType?: SubHeaderColumnType;
   properties: string[];
   showSuggestions?: boolean;
   disableAddButton?: boolean;

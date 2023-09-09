@@ -14,6 +14,9 @@ export type InitialStateType = {
   editableCellStyle: React.CSSProperties;
   currentCellValue: string;
   isSheetActive: boolean;
+  isHeaderCellInEditMode: boolean;
+  highlightedColumns: Record<number, { color: string }>;
+  headerFormulas: Record<number, string>;
 };
 
 export interface ContextType {
@@ -29,6 +32,9 @@ export enum Actions {
   SET_EDITABLE_CELL_STYLE = 'SET_EDITABLE_CELL_STYLE',
   SET_CURRENT_CELL_VALUE = 'SET_CURRENT_CELL_VALUE',
   SET_SHEET_ACTIVE = 'SET_SHEET_ACTIVE',
+  SET_HEADER_CELL_IN_EDIT_MODE = 'SET_HEADER_CELL_IN_EDIT_MODE',
+  SET_HIGHLIGHTED_COLUMNS = 'SET_HIGHLIGHTED_COLUMNS',
+  SET_HEADER_FORMULAS = 'SET_HEADER_FORMULAS',
 }
 
 export type GridActions =
@@ -57,6 +63,18 @@ export type GridActions =
       payload: string;
     }
   | {
+      type: Actions.SET_HEADER_CELL_IN_EDIT_MODE;
+      payload: boolean;
+    }
+  | {
+      type: Actions.SET_HIGHLIGHTED_COLUMNS;
+      payload: Record<number, { color: string }>;
+    }
+  | {
+      type: Actions.SET_HEADER_FORMULAS;
+      payload: string[];
+    }
+  | {
       type: Actions.SET_SHEET_ACTIVE;
       payload: boolean;
     };
@@ -69,6 +87,9 @@ const initialState: InitialStateType = {
   editableCellStyle: {},
   currentCellValue: '',
   isSheetActive: true,
+  isHeaderCellInEditMode: false,
+  highlightedColumns: {},
+  headerFormulas: {},
 };
 
 export const GridContext = createContext<ContextType>({
@@ -98,6 +119,18 @@ const gridStateReducer = (state = initialState, action: GridActions) => {
     }
     case Actions.SET_SHEET_ACTIVE: {
       return { ...state, isSheetActive: action.payload };
+    }
+    case Actions.SET_HEADER_CELL_IN_EDIT_MODE: {
+      return { ...state, isHeaderCellInEditMode: action.payload };
+    }
+    case Actions.SET_HEADER_CELL_IN_EDIT_MODE: {
+      return { ...state, isHeaderCellInEditMode: action.payload };
+    }
+    case Actions.SET_HIGHLIGHTED_COLUMNS: {
+      return { ...state, highlightedColumns: { ...action.payload } };
+    }
+    case Actions.SET_HEADER_FORMULAS: {
+      return { ...state, headerFormulas: { ...action.payload } };
     }
     default:
       return state;
