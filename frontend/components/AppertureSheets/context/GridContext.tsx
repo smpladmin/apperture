@@ -123,9 +123,6 @@ const gridStateReducer = (state = initialState, action: GridActions) => {
     case Actions.SET_HEADER_CELL_IN_EDIT_MODE: {
       return { ...state, isHeaderCellInEditMode: action.payload };
     }
-    case Actions.SET_HEADER_CELL_IN_EDIT_MODE: {
-      return { ...state, isHeaderCellInEditMode: action.payload };
-    }
     case Actions.SET_HIGHLIGHTED_COLUMNS: {
       return { ...state, highlightedColumns: { ...action.payload } };
     }

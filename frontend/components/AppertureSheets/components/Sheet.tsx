@@ -1,12 +1,6 @@
 import { Box, Flex } from '@chakra-ui/react';
 import { throttle } from 'lodash';
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import {
   VariableSizeGrid as Grid,
   GridOnScrollProps,
@@ -237,6 +231,17 @@ const Sheet = ({
     };
   }, [currentCell, isSheetActive, showEditableCell, isHeaderCellInEditMode]);
 
+  const getScrollCoordinatesForGridCells = (): Record<
+    'scrollLeft' | 'scrollTop',
+    number
+  > => {
+    const sheetRefState = sheetRef?.current?.state as unknown as any;
+
+    const scrollLeft = sheetRefState?.scrollLeft || 0;
+    const scrollTop = sheetRefState?.scrollTop || 0;
+    return { scrollLeft, scrollTop };
+  };
+
   const IndexCell = ({
     columnIndex,
     rowIndex,
@@ -284,8 +289,6 @@ const Sheet = ({
     []
   );
 
-  const highlightedColumnsRef = useRef({});
-
   const MainCell = useCallback(
     ({
       columnIndex,
@@ -315,6 +318,7 @@ const Sheet = ({
             {...baseCellProps}
             cell={cell}
             onCellsChanged={onCellsChanged}
+            getScrollCoordinatesForGridCells={getScrollCoordinatesForGridCells}
           />
         </BaseCell>
       );
@@ -333,6 +337,7 @@ const Sheet = ({
           payload: true,
         })
       }
+      position={'relative'}
     >
       <AutoSizer>
         {({ height, width }: { height: number; width: number }) => {
@@ -454,22 +459,3 @@ const Sheet = ({
 };
 
 export default Sheet;
-
-// useEffect(() => {
-//   // Focus the contentEditable div and move the cursor to the end when the component mounts.
-//   if (editableRef?.current) {
-//     console.log({ editableRef });
-//     editableRef?.current.focus();
-//     const textNode = editableRef?.current.firstChild;
-//     if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-//       const range = document.createRange();
-//       range.setStart(textNode, textNode.length);
-//       range.setEnd(textNode, textNode.length);
-//       const selection = window.getSelection();
-//       if (selection) {
-//         selection.removeAllRanges();
-//         selection.addRange(range);
-//       }
-//     }
-//   }
-// }, []);
