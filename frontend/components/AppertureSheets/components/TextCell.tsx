@@ -6,9 +6,17 @@ import { BaseCellProps, CellChange, TextCell } from '../types/gridTypes';
 type TextCellProps = BaseCellProps & {
   onCellsChanged: (changedCell: CellChange<TextCell>[]) => void;
   cell: TextCell;
+  getScrollCoordinatesForGridCells: () => Record<
+    'scrollLeft' | 'scrollTop',
+    number
+  >;
 };
 
-const TextCell = ({ cell, ...props }: TextCellProps) => {
+const TextCell = ({
+  cell,
+  getScrollCoordinatesForGridCells,
+  ...props
+}: TextCellProps) => {
   const { dispatch } = useContext(GridContext);
 
   const handleDoubleClick = (
@@ -19,15 +27,18 @@ const TextCell = ({ cell, ...props }: TextCellProps) => {
 
     if (event.detail === 2) {
       if (el) {
-        const position = el.getBoundingClientRect();
+        const { scrollLeft, scrollTop } = getScrollCoordinatesForGridCells();
+
+        const HEADER_CELL_HEIGHT = 24;
+        const INDEX_CELL_WIDTH = 60;
 
         const style = {
-          left: position.x,
-          top: position.y,
-          minHeight: position.height,
+          left: el.offsetLeft + INDEX_CELL_WIDTH - scrollLeft,
+          top: el.offsetTop + HEADER_CELL_HEIGHT - scrollTop,
+          minHeight: el.offsetHeight,
           width: 'fit-content',
-          maxWidth: `calc(100% - ${position.x + 20}px)`,
-          minWidth: position.width,
+          maxWidth: `calc(100% - ${el.offsetLeft + 20}px)`,
+          minWidth: el.offsetWidth,
         };
 
         dispatch({

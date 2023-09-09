@@ -1,4 +1,4 @@
-import { forwardRef, memo, useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import FormulaDropDownBox from './FormulaDropDownBox';
 import {
   BaseCellProps,
@@ -89,9 +89,3 @@ const InputHeaderCell = (
   );
 };
 export default InputHeaderCell;
-// export default memo(
-//   InputHeaderCell,
-//   (prevProps: InputHeaderCellProps, nextProps: InputHeaderCellProps) => {
-//     return prevProps.cell.text !== nextProps.cell.text;
-//   }
-// );
