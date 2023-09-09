@@ -10,7 +10,7 @@ const Editable = ({ formula, setFormula, handleSubmitFormula }: any) => {
   }, []);
 
   return (
-    <>
+    <Box height={'100%'} outline={'none'}>
       <Flex
         dangerouslySetInnerHTML={{
           __html: highlightFormula(formula).highlightedFormula,
@@ -28,8 +28,12 @@ const Editable = ({ formula, setFormula, handleSubmitFormula }: any) => {
         sx={{
           userSelect: 'none',
         }}
+        outline={'none'}
       />
       <Box
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck="false"
         ref={(el) => el?.focus()}
         p={1}
         position={'relative'}
@@ -52,10 +56,11 @@ const Editable = ({ formula, setFormula, handleSubmitFormula }: any) => {
         onBlur={(e) => {
           handleSubmitFormula();
         }}
+        outline={'none'}
       >
         {initialRef.current.formula}
       </Box>
-    </>
+    </Box>
   );
 };
 

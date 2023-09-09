@@ -251,6 +251,7 @@ const Workbook = ({
       toUpdateSheets[selectedSheetIndex].data = response?.data?.data;
 
       if (!sheet.is_sql) {
+        toUpdateSheets[selectedSheetIndex].headers = response?.data?.headers;
         const query =
           toUpdateSheets[selectedSheetIndex].aiQuery || ({} as AIQuery);
         toUpdateSheets[selectedSheetIndex].aiQuery = {

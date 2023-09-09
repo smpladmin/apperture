@@ -50,7 +50,7 @@ export default function EditableTextarea({
       minHeight={'5'}
     />
   ) : (
-    <Box ml={2} lineHeight={'sh-18'} onClick={(e) => setEditing(true)}>
+    <Box ml={2} lineHeight={'sh-18'} mt={-1} onClick={(e) => setEditing(true)}>
       {text ? (
         text.split(' ').map((word: string, index: number) => {
           if (tokens[word]) {
@@ -78,6 +78,7 @@ export default function EditableTextarea({
         })
       ) : (
         <Text
+          mt={1}
           color={'grey.600'}
           fontSize={'xs-12'}
           fontWeight={'400'}
