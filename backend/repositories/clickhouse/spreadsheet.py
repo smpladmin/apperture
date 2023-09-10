@@ -305,6 +305,7 @@ class Spreadsheets(EventsBase):
             lookup_column=lookup_column,
             lookup_index_column=lookup_index_column,
         )
+        logging.info(f"VLOOKUP Query: {query}")
         result = self.execute_query_for_restricted_client(
             query=query, username=username, password=password
         )
