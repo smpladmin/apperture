@@ -284,7 +284,7 @@ class Spreadsheets(EventsBase):
         lookup_column: str,
         lookup_index_column: str,
     ):
-        query = f"with lookup_query as ({lookup_query}), map as (SELECT DISTINCT ON ({lookup_index_column}) {lookup_index_column}, {lookup_column} AS lookup_column FROM lookup_query ORDER BY {search_column}), cte as ({search_query}) select lookup_column from cte left join map on cte.{search_column} = map.{lookup_index_column}"
+        query = f"with lookup_query as ({lookup_query}), map as (SELECT DISTINCT ON ({lookup_index_column}) {lookup_index_column}, {lookup_column} AS lookup_column FROM lookup_query ORDER BY {lookup_index_column}), cte as ({search_query}) select lookup_column from cte left join map on cte.{search_column} = map.{lookup_index_column}"
 
         return query
 
