@@ -42,7 +42,7 @@ export default function EditableTextarea({
       resize={'none'}
       padding={0}
       minRows={2}
-      maxRows={10}
+      maxRows={12}
       placeholder="Enter your query here..."
       fontSize={'xs-12'}
       lineHeight={'xs-12'}
@@ -50,7 +50,7 @@ export default function EditableTextarea({
       minHeight={'5'}
     />
   ) : (
-    <Box ml={2} lineHeight={'sh-18'} mt={-1} onClick={(e) => setEditing(true)}>
+    <Box ml={2} lineHeight={0.8} mt={-1} onClick={(e) => setEditing(true)}>
       {text ? (
         text.split(' ').map((word: string, index: number) => {
           if (tokens[word]) {

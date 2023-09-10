@@ -62,7 +62,7 @@ export default function SuggestedWord({
                   alignItems={'center'}
                   justifyContent={'space-between'}
                   key={cIndex}
-                  px={1.5}
+                  p={1}
                   border={'1px'}
                   rounded={'md'}
                   borderColor={selected ? 'black' : 'white.200'}

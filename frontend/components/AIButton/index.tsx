@@ -140,6 +140,8 @@ const AIButton = forwardRef<AIButtonProps, 'div'>((props, ref) => {
               rounded={'3xl'}
               border={'1px'}
               borderColor={'grey.700'}
+              p={3}
+              fontSize={'xs-14'}
             >
               Ask AI
             </Button>
@@ -165,15 +167,28 @@ const AIButton = forwardRef<AIButtonProps, 'div'>((props, ref) => {
           )}
         </PopoverTrigger>
 
-        <PopoverContent width={'85'} height={'26'} rounded={'xl'} bg={'white'}>
-          <PopoverBody boxShadow="xl" h={'full'} rounded={'xl'} padding={4}>
+        <PopoverContent
+          width={'85'}
+          minHeight={'26'}
+          rounded={'xl'}
+          bg={'white'}
+        >
+          <PopoverBody
+            boxShadow="xl"
+            minHeight={'26'}
+            h={'full'}
+            rounded={'xl'}
+            padding={4}
+            lineHeight={'xs-12'}
+          >
             <Flex
               direction={'column'}
               h={'full'}
               justifyContent={'space-between'}
               overflow={'auto'}
+              lineHeight={'xs-12'}
             >
-              <Flex direction={'row'}>
+              <Flex direction={'row'} lineHeight={'xs-12'}>
                 <Box>
                   <Sparkle size={16} color={'#EBAC42'} weight={'fill'} />
                 </Box>
