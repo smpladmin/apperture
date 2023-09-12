@@ -3,7 +3,7 @@ import ClevertapIntegration from '@components/CreateIntegration/ClevertapIntegra
 import GooglePermission from '@components/CreateIntegration/GooglePermission';
 import MixpanelIntegration from '@components/CreateIntegration/MixpanelIntegration';
 import APIIntegration from '@components/CreateIntegration/APIIntegration';
-import MySQLIntegration from '@components/CreateIntegration/MySQLIntegration';
+import MySQLIntegration from '@components/CreateIntegration/RelationalDatabaseIntegration';
 import CSVIntegration from '@components/CreateIntegration/CSVIntegration';
 import { Provider } from '@lib/domain/provider';
 import { useRouter } from 'next/router';
