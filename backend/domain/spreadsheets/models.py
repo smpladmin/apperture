@@ -153,6 +153,7 @@ class DimensionDefinition(BaseModel):
 class DatabaseClient(Enum):
     MYSQL = "mysql"
     CLICKHOUSE = "clickhouse"
+    MSSQL = "mssql"
 
 
 class MySQLQueryResult(BaseModel):

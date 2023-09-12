@@ -12,7 +12,13 @@ class CredentialType(str, Enum):
     OAUTH = "OAUTH"
     API_KEY = "API_KEY"
     MYSQL = "MYSQL"
+    MSSQL = "MSSQL"
     CSV = "CSV"
+
+
+class RelationalDatabaseType(str, Enum):
+    MYSQL = "MYSQL"
+    MSSQL = "MSSQL"
 
 
 class DatabaseSSHCredential(BaseModel):
@@ -44,6 +50,17 @@ class MySQLCredential(BaseModel):
         allow_population_by_field_name = True
 
 
+class MsSQLCredential(BaseModel):
+    server: str
+    username: str
+    password: str
+    over_ssh: bool = False
+    ssh_credential: Optional[DatabaseSSHCredential]
+
+    class Config:
+        allow_population_by_field_name = True
+
+
 class Credential(BaseModel):
     type: CredentialType
     account_id: Optional[str]
@@ -52,6 +69,7 @@ class Credential(BaseModel):
     secret: Optional[str]
     tableName: Optional[str]
     mysql_credential: Optional[MySQLCredential]
+    mssql_credential: Optional[MsSQLCredential]
     csv_credential: Optional[CSVCredential]
 
     class Config:

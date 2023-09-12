@@ -6,6 +6,9 @@ import {
   Flex,
   Heading,
   Input,
+  Radio,
+  RadioGroup,
+  Stack,
   Text,
   useToast,
 } from '@chakra-ui/react';
@@ -17,18 +20,21 @@ import {
   RightContainer,
   TopProgress,
 } from '@components/Onboarding';
-import { MySQLCredential } from '@lib/domain/integration';
+import {
+  DatabaseCredential,
+  RelationalDatabaseType,
+} from '@lib/domain/integration';
 import { Provider } from '@lib/domain/provider';
 import {
   createIntegrationWithDataSource,
-  testMySQLConnection,
+  testDatabaseConnection,
 } from '@lib/services/integrationService';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-type MySQLIntegrationProps = {
+type RelationalDatabaseIntegrationProps = {
   handleClose: Function;
   add: string | string[] | undefined;
 };
@@ -46,8 +52,12 @@ type FormData = {
   sshPassword: string;
   useSshKey: boolean;
   sshKey: FileList;
+  databaseType: RelationalDatabaseType;
 };
-const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
+const RelationalDatabaseIntegration = ({
+  add,
+  handleClose,
+}: RelationalDatabaseIntegrationProps) => {
   const router = useRouter();
   const handleGoBack = (): void => router.back();
   const toast = useToast();
@@ -88,22 +98,26 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
         }
       : undefined;
 
-    const mySQLCredential = {
+    const databaseCredential = {
       host: data.host,
       port: data.port,
       username: data.username,
       password: data.password,
       overSsh: data.overSsh,
+      databaseType: data.databaseType,
       sshCredential: databaseSshCredential,
     };
 
-    return mySQLCredential;
+    return databaseCredential;
   };
 
   const onSubmit = async (data: FormData) => {
     const appId = router.query.appId as string;
-    const provider = router.query.provider as Provider;
-    const mySQLCredential = await processFormData(data);
+    const databaseCredential = await processFormData(data);
+    const provider =
+      databaseCredential.databaseType === RelationalDatabaseType.MSSQL
+        ? Provider.MSSQL
+        : Provider.MYSQL;
     const integration = await createIntegrationWithDataSource(
       appId,
       provider,
@@ -111,7 +125,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
       undefined,
       undefined,
       data.table,
-      mySQLCredential as MySQLCredential
+      databaseCredential as DatabaseCredential
     );
     router.replace({
       pathname: '/analytics/app/[appId]/integration/[provider]/complete',
@@ -125,9 +139,10 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
 
   const onTest = async (data: FormData) => {
     setLoading(true);
-    const mySQLCredential = await processFormData(data);
-    const validConnection = await testMySQLConnection(
-      mySQLCredential as MySQLCredential
+    const databaseCredential = await processFormData(data);
+    console.log(databaseCredential);
+    const validConnection = await testDatabaseConnection(
+      databaseCredential as DatabaseCredential
     );
     // setIsConnectionValid(validConnection);
     setIsConnectionValid(true);
@@ -218,7 +233,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
                 fontWeight={'semibold'}
                 maxW={200}
               >
-                Enter Details to fetch data from MySQL
+                Enter Details to fetch data from your Relational Database
               </Heading>
 
               <Flex w={125}>
@@ -227,6 +242,34 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
                   style={{ width: '100%' }}
                 >
                   <Flex direction={'column'} gap={'4'}>
+                    <Flex direction={'column'} gap={'2'} mb={'2'}>
+                      <Text
+                        as={'label'}
+                        fontSize={'xs-14'}
+                        lineHeight={'xs-14'}
+                        color={'grey.100'}
+                        display="block"
+                        htmlFor={'databaseType'}
+                      >
+                        Database Type:
+                      </Text>
+                      <RadioGroup
+                        id={'databaseType'}
+                        defaultValue={RelationalDatabaseType.MYSQL}
+                        fontSize={'xs-14'}
+                        lineHeight={'xs-14'}
+                        colorScheme={'radioBlack'}
+                      >
+                        <Stack spacing={4} direction="row">
+                          <Radio value="MYSQL" {...register('databaseType')}>
+                            MYSQL
+                          </Radio>
+                          <Radio value="MSSQL" {...register('databaseType')}>
+                            MSSQL
+                          </Radio>
+                        </Stack>
+                      </RadioGroup>
+                    </Flex>
                     <FormInputField
                       fieldName="host"
                       label="Host"
@@ -361,7 +404,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
   );
 };
 
-export default MySQLIntegration;
+export default RelationalDatabaseIntegration;
 
 const FormInputField = ({
   label,

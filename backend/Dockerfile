@@ -6,6 +6,7 @@ FROM base as deps
 RUN apt-get update \
   && apt-get install gcc -y \
   && apt-get clean
+RUN apt-get update && apt-get -y install libkrb5-dev libssl-dev libffi-dev freetds-dev freetds-bin openssl unixodbc unixodbc-dev tdsodbc
 WORKDIR /code
 COPY pyproject.toml ./
 COPY poetry.lock ./

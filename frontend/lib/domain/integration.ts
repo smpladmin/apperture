@@ -18,12 +18,18 @@ export type DatabaseSSHCredential = {
   sshKey?: string;
 };
 
-export type MySQLCredential = {
+export enum RelationalDatabaseType {
+  MYSQL = 'MYSQL',
+  MSSQL = 'MSSQL',
+}
+
+export type DatabaseCredential = {
   host: string;
   port: string;
   username: string;
   password: string;
   overSsh: boolean;
+  databaseType: RelationalDatabaseType;
   sshCredential?: DatabaseSSHCredential;
 };
 

@@ -8,6 +8,7 @@ export enum Provider {
   APPERTURE = 'apperture',
   API = 'api',
   MYSQL = 'mysql',
+  MSSQL = 'mssql',
   CSV = 'csv',
   SAMPLE = 'sample',
 }
