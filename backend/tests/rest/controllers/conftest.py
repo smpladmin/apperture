@@ -2271,7 +2271,7 @@ def integration_service():
     integration_future = asyncio.Future()
     integration_future.set_result(integration)
     integration_service_mock.create_integration.return_value = integration_future
-    integration_service_mock.test_mysql_connection.return_value = True
+    integration_service_mock.test_database_connection.return_value = True
     integration_service_mock.upload_csv_to_s3.return_value = None
     integration_service_mock.create_clickhouse_table_from_csv.return_value = True
     return integration_service_mock
@@ -2345,6 +2345,7 @@ def integration_response():
             "tableName": "",
             "type": "API_KEY",
             "mysql_credential": None,
+            "mssql_credential": None,
             "csv_credential": None,
         },
         "datasource": {
