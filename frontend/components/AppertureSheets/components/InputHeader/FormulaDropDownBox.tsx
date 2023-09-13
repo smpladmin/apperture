@@ -82,7 +82,6 @@ const FormulaDropDownBox = ({
   const dimensionFunctionNames = ['unique('];
   const operators = ['=', '!=', '<=', '<', '>=', '>', 'in'];
 
-  // const [suggestions, setSuggestions] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<SheetFormula[]>([]);
   const [selectedFormula, setSelectedFormula] = useState<
     SheetFormula | undefined

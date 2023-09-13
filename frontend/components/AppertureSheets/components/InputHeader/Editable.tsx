@@ -57,7 +57,10 @@ const ContentEditable = ({
       return;
     }
 
-    contentEditableRef.current!!.innerText = formula;
+    if (contentEditableRef.current) {
+      contentEditableRef.current.innerText = formula;
+    }
+
     moveCaretToEndofText();
 
     setUpdateContentEditable(false);

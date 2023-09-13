@@ -402,10 +402,11 @@ const Sheet = ({
                     style={{ overflowY: 'hidden' }}
                     columnCount={1}
                     columnWidth={(index) => 60}
-                    rowCount={1000}
+                    rowCount={rows.length}
                     rowHeight={(index) => 24}
                     height={height - 24}
                     width={60}
+                    overscanRowCount={20}
                   >
                     {IndexCell}
                   </Grid>
