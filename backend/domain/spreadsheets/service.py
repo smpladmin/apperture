@@ -281,12 +281,12 @@ class SpreadsheetService:
                 raise BusinessError("Could not generate pivot table, invalid values")
 
         if rows and (rows[0].show_total or (not columns and values)):
-            key = f"SUM of {values[0].name}" if (not columns and values) else "Total"
+            key = f"{values[0].function} of {values[0].name}" if (not columns and values) else "Total"
             data = self.populate_row_totals(data, unique_rows, key)
             column_names.append(key)
 
         if columns and (columns[0].show_total or (not rows and values)):
-            key = f"SUM of {values[0].name}" if (not rows and values) else "Total"
+            key = f"{values[0].function} of {values[0].name}" if (not rows and values) else "Total"
             data = self.populate_column_totals(data, unique_columns, key)
             row_names.append(key)
 
