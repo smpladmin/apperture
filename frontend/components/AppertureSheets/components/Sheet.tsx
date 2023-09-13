@@ -406,6 +406,7 @@ const Sheet = ({
                     rowHeight={(index) => 24}
                     height={height - 24}
                     width={60}
+                    overscanRowCount={20}
                   >
                     {IndexCell}
                   </Grid>
