@@ -156,7 +156,7 @@ class DatabaseClient(Enum):
     MSSQL = "mssql"
 
 
-class MySQLQueryResult(BaseModel):
+class SQLQueryResult(BaseModel):
     result_set: List
     column_names: List[str]
 

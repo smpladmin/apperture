@@ -174,6 +174,7 @@ class IntegrationService:
         elif database_type == RelationalDatabaseType.MSSQL:
             return MsSQLCredential(
                 server=host,
+                port=port,
                 username=username,
                 password=password,
                 over_ssh=over_ssh,
@@ -195,7 +196,7 @@ class IntegrationService:
                 )
             elif database_type == RelationalDatabaseType.MSSQL:
                 status = self.get_mssql_connection(
-                    host=host, username=username, password=password
+                    host=host, port=port, username=username, password=password
                 )
             return status
 
@@ -280,7 +281,7 @@ class IntegrationService:
         connection.close()
         return status
 
-    def get_mssql_connection(self, host: str, username: str, password: str):
+    def get_mssql_connection(self, host: str, port: str, username: str, password: str):
         connection = pymssql.connect(
             server=host,
             user=username,
@@ -293,6 +294,10 @@ class IntegrationService:
     async def get_mysql_connection_details(self, id):
         integration = await self.get_integration(id)
         return integration.credential.mysql_credential
+
+    async def get_mssql_connection_details(self, id):
+        integration = await self.get_integration(id)
+        return integration.credential.mssql_credential
 
     def upload_csv_to_s3(self, file: UploadFile, s3_key: str):
         self.s3_client.upload_fileobj(

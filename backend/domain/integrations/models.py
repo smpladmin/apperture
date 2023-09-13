@@ -52,6 +52,7 @@ class MySQLCredential(BaseModel):
 
 class MsSQLCredential(BaseModel):
     server: str
+    port: str
     username: str
     password: str
     over_ssh: bool = False

@@ -1,5 +1,5 @@
 import logging
-from typing import List, Union
+from typing import Union
 
 from clickhouse_connect.driver.exceptions import DatabaseError
 from fastapi import Depends, HTTPException
@@ -9,7 +9,7 @@ from domain.apps.models import ClickHouseCredential
 from domain.apps.service import AppService
 from domain.common.models import IntegrationProvider
 from domain.datasources.service import DataSourceService
-from domain.integrations.models import MySQLCredential
+from domain.integrations.models import MySQLCredential, MsSQLCredential
 from domain.integrations.service import IntegrationService
 from domain.spreadsheets.models import DatabaseClient
 from domain.spreadsheets.service import SpreadsheetService
@@ -32,13 +32,17 @@ class ComputeQueryAction:
 
     async def get_credentials(
         self, datasource_id: str
-    ) -> Union[ClickHouseCredential, MySQLCredential]:
+    ) -> Union[ClickHouseCredential, MySQLCredential, MsSQLCredential]:
         datasource = await self.datasource_service.get_datasource(datasource_id)
-        if datasource.provider == IntegrationProvider.MYSQL:
+        provider = datasource.provider
+        if provider in [IntegrationProvider.MYSQL, IntegrationProvider.MSSQL]:
             integration = await self.integration_service.get_integration(
                 id=str(datasource.integration_id)
             )
-            return integration.credential.mysql_credential
+            if provider == IntegrationProvider.MYSQL:
+                return integration.credential.mysql_credential
+            elif provider == IntegrationProvider.MSSQL:
+                return integration.credential.mssql_credential
         else:
             app = await self.app_service.get_app(id=datasource.app_id)
             has_app_credential = bool(app.clickhouse_credential)
@@ -60,11 +64,13 @@ class ComputeQueryAction:
 
     async def get_database_client(self, datasource_id: str) -> DatabaseClient:
         datasource = await self.datasource_service.get_datasource(datasource_id)
-        return (
-            DatabaseClient.MYSQL
-            if datasource.provider == IntegrationProvider.MYSQL
-            else DatabaseClient.CLICKHOUSE
-        )
+        provider = datasource.provider
+        if provider == IntegrationProvider.MYSQL:
+            return DatabaseClient.MYSQL
+        elif provider == IntegrationProvider.MSSQL:
+            return DatabaseClient.MSSQL
+        else:
+            return DatabaseClient.CLICKHOUSE
 
     async def compute_query(self, dto: TransientSpreadsheetsDto):
         try:
