@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Text, useToast } from '@chakra-ui/react';
+import { Box, Button, Flex, Highlight, Text, useToast } from '@chakra-ui/react';
 import { BLUE_MAIN, GREY_600, WHITE_DEFAULT } from '@theme/index';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Function, Plus, SquaresFour } from 'phosphor-react';
@@ -15,7 +15,15 @@ import { useRouter } from 'next/router';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import CheckboxDropdown from './CheckboxDropdown';
-import { highlightFormula } from './util';
+import {
+  SheetFormula,
+  VALID_SHEET_FORMULA_NAMES,
+  extractFormulaName,
+  findActiveFormulaPartIndex,
+  findCommaIndices,
+  highlightFormula,
+  isValidSheetFormula,
+} from './util';
 import {
   Actions,
   GridContext,
@@ -24,8 +32,8 @@ import {
   BaseCellProps,
   InputHeaderCell,
 } from '@components/AppertureSheets/types/gridTypes';
-import ActionHeader from '@components/Actions/CreateAction/components/ActionHeader';
-import Editable from './Editable';
+import ContentEditable from './Editable';
+import { SHEET_FORMULAS } from './util';
 
 enum ActiveCellState {
   BLANK = 'BLANK',
@@ -46,34 +54,44 @@ type CellState = {
 type FormulaDropDownBoxProps = BaseCellProps & {
   cell: InputHeaderCell;
   onCellChanged: Function;
-  formula: string;
 };
 
-const FormulaDropDownBox = (
-  { cell, onCellChanged, ...props }: FormulaDropDownBoxProps,
-  ref: any
-) => {
+const FormulaDropDownBox = ({
+  cell,
+  onCellChanged,
+  ...props
+}: FormulaDropDownBoxProps) => {
   const { state, dispatch } = useContext(GridContext);
   const { headerFormulas } = state;
   const { columnIndex } = props;
-  // const [formula, setFormula] = useState(cell.text);
+
   const formula = headerFormulas?.[columnIndex] || '';
-  const [highlightedColumns, setHighlightedColumns] = useState<
-    Record<number, { color: string }>
-  >({});
 
   const inputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
   const dropdownRef = useRef(null);
 
-  useOnClickOutside(dropdownRef, () => setSuggestions([]));
+  useOnClickOutside(dropdownRef, () => {
+    setSuggestions([]);
+    setSelectedFormula(undefined);
+    handleSubmitFormula();
+  });
 
   const metricFunctionNames = ['count(', 'countif('];
   const dimensionFunctionNames = ['unique('];
   const operators = ['=', '!=', '<=', '<', '>=', '>', 'in'];
 
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  // const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<SheetFormula[]>([]);
+  const [selectedFormula, setSelectedFormula] = useState<
+    SheetFormula | undefined
+  >(undefined);
+  const [formulaHighlightedPart, setFormulaHighlightedPart] =
+    useState<string>();
+  const [caretPosition, setCaretPosition] = useState(0);
+  const [updateContentEditable, setUpdateContentEditable] = useState(false);
+
   const [activeCellState, setActiveCellState] = useState<ActiveCellState>(
     ActiveCellState.BLANK
   );
@@ -261,7 +279,10 @@ const FormulaDropDownBox = (
     return cellStateIcon[activeCellState];
   };
 
-  const showDropdown = Boolean(suggestions?.length && formula);
+  // show dropdown either  formula is selected or formula suggestions are present
+  const showDropdown = Boolean(
+    selectedFormula || (suggestions?.length && formula.startsWith('='))
+  );
 
   const showCheckboxDropdown =
     showDropdown &&
@@ -271,18 +292,39 @@ const FormulaDropDownBox = (
   const handleChange = (e: any) => {
     const _formula = e.currentTarget.textContent || '';
     const { columnColorMapping } = highlightFormula(_formula);
-    // setFormula(_formula);
-    // setHighlightedColumns(columnColorMapping);
 
     dispatch({
       type: Actions.SET_HEADER_FORMULAS,
-      payload: { ...columnColorMapping, [columnIndex]: _formula },
+      payload: { ...headerFormulas, [columnIndex]: _formula },
     });
 
     dispatch({
       type: Actions.SET_HIGHLIGHTED_COLUMNS,
       payload: columnColorMapping,
     });
+
+    const suggestions = getSearchResult<SheetFormula>(
+      SHEET_FORMULAS,
+      _formula,
+      {
+        keys: ['name'],
+        threshold: 0.4,
+        minMatchCharLength: 2,
+        distance: 10,
+      }
+    );
+
+    setSuggestions(suggestions);
+
+    if (isValidSheetFormula(_formula, VALID_SHEET_FORMULA_NAMES)) {
+      const formulaName = extractFormulaName(_formula);
+      const sheetFormula = SHEET_FORMULAS.find(
+        (formula) => formula.name === formulaName
+      );
+      setSelectedFormula(sheetFormula);
+    } else {
+      setSelectedFormula(undefined);
+    }
   };
 
   const handleSubmitFormula = () => {
@@ -304,18 +346,116 @@ const FormulaDropDownBox = (
     onCellChanged({ text: formula });
   };
 
+  const handleSubmitFormulaSuggestion = (suggestion: SheetFormula) => {
+    dispatch({
+      type: Actions.SET_HEADER_FORMULAS,
+      payload: { ...headerFormulas, [columnIndex]: suggestion.value },
+    });
+    setSelectedFormula(suggestion);
+    setFormulaHighlightedPart(suggestion.parts[0]);
+    setUpdateContentEditable(true);
+  };
+
+  useEffect(() => {
+    // on update of caret position, highlight the selected formula part
+    if (selectedFormula) {
+      const formulaParts = selectedFormula?.parts || [];
+      const commaIndices = findCommaIndices(formula);
+
+      const activeFormulaPartIndex = findActiveFormulaPartIndex(
+        caretPosition,
+        commaIndices
+      );
+
+      if (activeFormulaPartIndex < formulaParts.length) {
+        setFormulaHighlightedPart(formulaParts[activeFormulaPartIndex]);
+      }
+    }
+  }, [caretPosition]);
+
   return (
     <Flex width={'full'}>
       <Box position={'relative'} width={'full'} ref={dropdownRef}>
         <Box position={'relative'}>
-          <Editable
+          <ContentEditable
             formula={formula || cell.text}
             setFormula={handleChange}
             handleSubmitFormula={handleSubmitFormula}
+            setCaretPosition={setCaretPosition}
+            updateContentEditable={updateContentEditable}
+            setUpdateContentEditable={setUpdateContentEditable}
           />
         </Box>
 
-        {showCheckboxDropdown ? (
+        {showDropdown && (
+          <Box
+            w={'85'}
+            className="formula-dropdown"
+            position={'fixed'}
+            zIndex={1}
+            bg={selectedFormula ? '#e6f4ea' : 'white.DEFAULT'}
+            borderRadius={'4'}
+            borderWidth={'1px'}
+            borderColor={'white.200'}
+            onPointerDown={(e) => e.stopPropagation()}
+            maxHeight={'102'}
+            overflow={'scroll'}
+          >
+            {selectedFormula ? (
+              <Text
+                p={2}
+                alignItems={'center'}
+                fontSize={'xs-14'}
+                fontWeight={'700'}
+                color={'#137333'}
+                maxW={'80'}
+                whiteSpace={'break-spaces'}
+                fontFamily={'Inconsolata'}
+              >
+                <Highlight
+                  query={formulaHighlightedPart || ''}
+                  styles={{
+                    px: 1,
+                    borderRadius: 2,
+                    bg: '#188038',
+                    color: 'white.DEFAULT',
+                  }}
+                >
+                  {selectedFormula.suggestion}
+                </Highlight>
+              </Text>
+            ) : (
+              suggestions.map((suggestion, index) => {
+                return (
+                  <Flex
+                    key={index}
+                    p={2}
+                    gap={'2'}
+                    alignItems={'center'}
+                    _hover={{ bg: 'white.400' }}
+                    cursor={'pointer'}
+                    onClick={() => {
+                      handleSubmitFormulaSuggestion(suggestion);
+                    }}
+                  >
+                    <Text
+                      fontSize={'xs-14'}
+                      lineHeight={'xs-14'}
+                      fontWeight={'400'}
+                      data-testid="suggestion-text"
+                      color={'grey.900'}
+                      fontFamily={'Inconsolata'}
+                    >
+                      {suggestion.name}
+                    </Text>
+                  </Flex>
+                );
+              })
+            )}
+          </Box>
+        )}
+
+        {/* {showCheckboxDropdown ? (
           <CheckboxDropdown
             data={suggestions}
             values={cellState.VALUE}
@@ -368,7 +508,7 @@ const FormulaDropDownBox = (
               </Flex>
             )}
           </Box>
-        ) : null}
+        ) : null} */}
       </Box>
       {cell.showAddButton && (
         <Button
