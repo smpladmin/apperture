@@ -1,5 +1,5 @@
 import logging
-from typing import Union
+from typing import Union, List
 
 from beanie import PydanticObjectId
 from fastapi import Depends
@@ -33,14 +33,16 @@ class Connection(EventsBase):
         datasource_id: PydanticObjectId,
         connection_sources,
         database_type: RelationalDatabaseType,
+        databases: List[str],
     ):
         if database_type == RelationalDatabaseType.MYSQL:
             client = self.mysql_client
         elif database_type == RelationalDatabaseType.MSSQL:
             client = self.mssql_client
 
-        databases = client.get_dbs(connection=client_connection)
-        for database in databases:
+        all_databases = client.get_dbs(connection=client_connection)
+        databases_with_access = [db for db in databases if db in all_databases]
+        for database in databases_with_access:
             tables = client.get_tables(connection=client_connection, database=database)
             for table in tables:
                 columns = client.get_table_columns(
@@ -91,6 +93,7 @@ class Connection(EventsBase):
                         datasource_id=datasource_id,
                         connection_sources=connection_sources,
                         database_type=database_type,
+                        databases=credentials.databases,
                     )
                     client_connection.close()
 
@@ -108,6 +111,7 @@ class Connection(EventsBase):
                     datasource_id=datasource_id,
                     connection_sources=connection_sources,
                     database_type=database_type,
+                    databases=credentials.databases,
                 )
                 client_connection.close()
 

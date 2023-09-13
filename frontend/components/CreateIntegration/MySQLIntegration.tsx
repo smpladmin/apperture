@@ -34,7 +34,7 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-type RelationalDatabaseIntegrationProps = {
+type MySQLIntegrationProps = {
   handleClose: Function;
   add: string | string[] | undefined;
 };
@@ -44,6 +44,7 @@ type FormData = {
   port: string;
   username: string;
   password: string;
+  databases: string;
   table: string;
   overSsh: boolean;
   sshServer: string;
@@ -54,10 +55,7 @@ type FormData = {
   sshKey: FileList;
   databaseType: RelationalDatabaseType;
 };
-const RelationalDatabaseIntegration = ({
-  add,
-  handleClose,
-}: RelationalDatabaseIntegrationProps) => {
+const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
   const router = useRouter();
   const handleGoBack = (): void => router.back();
   const toast = useToast();
@@ -78,6 +76,12 @@ const RelationalDatabaseIntegration = ({
       };
       reader.readAsText(file);
     });
+  };
+
+  const stringToList = (inputString: string): string[] => {
+    const stringArray = inputString.split(',');
+    const trimmedArray = stringArray.map((item) => item.trim());
+    return trimmedArray;
   };
 
   const processFormData = async (data: FormData) => {
@@ -103,6 +107,7 @@ const RelationalDatabaseIntegration = ({
       port: data.port,
       username: data.username,
       password: data.password,
+      databases: stringToList(data.databases),
       overSsh: data.overSsh,
       databaseType: data.databaseType,
       sshCredential: databaseSshCredential,
@@ -167,6 +172,7 @@ const RelationalDatabaseIntegration = ({
       port: '3306',
       username: '',
       password: '',
+      databases: '',
       table: '',
       sshServer: '',
       sshPort: '22',
@@ -179,7 +185,11 @@ const RelationalDatabaseIntegration = ({
 
   const validateForm = () => {
     const arePrimaryCredsValid = Boolean(
-      watch('host') && watch('port') && watch('username') && watch('password')
+      watch('host') &&
+        watch('port') &&
+        watch('username') &&
+        watch('password') &&
+        watch('databases')
     );
     const areSshCredsValid = watch('overSsh')
       ? Boolean(watch('sshPort') && watch('sshServer'))
@@ -233,9 +243,8 @@ const RelationalDatabaseIntegration = ({
                 fontWeight={'semibold'}
                 maxW={200}
               >
-                Enter Details to fetch data from your Relational Database
+                Enter Details to fetch data from MySQL
               </Heading>
-
               <Flex w={125}>
                 <form
                   onSubmit={handleSubmit(onSubmit)}
@@ -302,6 +311,14 @@ const RelationalDatabaseIntegration = ({
                       handleChange={handleChange}
                       register={register}
                       inputStyle={{ placeholder: 'password', width: '50' }}
+                    />
+                    <FormInputField
+                      fieldName="databases"
+                      label="Databases"
+                      errors={errors}
+                      handleChange={handleChange}
+                      register={register}
+                      inputStyle={{ placeholder: 'databases', width: '50' }}
                     />
 
                     <FormCheckboxField
@@ -404,7 +421,7 @@ const RelationalDatabaseIntegration = ({
   );
 };
 
-export default RelationalDatabaseIntegration;
+export default MySQLIntegration;
 
 const FormInputField = ({
   label,

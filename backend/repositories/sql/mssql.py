@@ -19,11 +19,9 @@ class MsSql(SQLBase):
         )
 
     def get_dbs(self, connection) -> List[str]:
-        results = self.execute_query(
+        return self.execute_query(
             connection=connection, query="SELECT name from sys.databases"
         )
-        dbs_to_connect = ["Apperture_test"]
-        return [result for result in results if result in dbs_to_connect]
 
     def get_connection(self, host, username, password, database=None, port=None):
         return pymssql.connect(

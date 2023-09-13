@@ -95,7 +95,6 @@ class ConnectionService:
                             ],
                         )
                     )
-        print("MySql data", data)
         return data
 
     def get_mssql_connection_group(self, mssql_connections, credentials_table: dict):
@@ -120,7 +119,6 @@ class ConnectionService:
                             ],
                         )
                     )
-        print("MsSql data", data)
         return data
 
     def get_datamart_connection(

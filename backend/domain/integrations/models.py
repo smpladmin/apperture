@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 
 from beanie import Indexed, PydanticObjectId
 from pydantic import BaseModel, Field
@@ -43,6 +43,7 @@ class MySQLCredential(BaseModel):
     port: str
     username: str
     password: str
+    databases: List[str]
     over_ssh: bool = False
     ssh_credential: Optional[DatabaseSSHCredential]
 
@@ -55,6 +56,7 @@ class MsSQLCredential(BaseModel):
     port: str
     username: str
     password: str
+    databases: List[str]
     over_ssh: bool = False
     ssh_credential: Optional[DatabaseSSHCredential]
 

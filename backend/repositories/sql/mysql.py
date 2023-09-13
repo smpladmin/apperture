@@ -19,13 +19,7 @@ class MySql(SQLBase):
         return [result[0] for result in results]
 
     def get_dbs(self, connection) -> List[str]:
-        results = self.execute_query(connection=connection, query="SHOW DATABASES")
-        dbs_to_filter = [
-            "information_schema",
-            "my_sql",
-            "performance_schema",
-        ]
-        return [result for result in results if result not in dbs_to_filter]
+        return self.execute_query(connection=connection, query="SHOW DATABASES")
 
     def get_connection(self, host, port, username, password, database=None):
         return pymysql.connect(

@@ -1,7 +1,7 @@
 import logging
 import os
 import tempfile
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 import boto3
 import pymysql
@@ -147,6 +147,7 @@ class IntegrationService:
         port: str,
         username: str,
         password: str,
+        databases: List[str],
         over_ssh: bool,
         database_type: RelationalDatabaseType,
         ssh_credential: Optional[DatabaseSSHCredentialDto],
@@ -168,6 +169,7 @@ class IntegrationService:
                 port=port,
                 username=username,
                 password=password,
+                databases=databases,
                 over_ssh=over_ssh,
                 ssh_credential=db_ssh_credential,
             )
@@ -177,6 +179,7 @@ class IntegrationService:
                 port=port,
                 username=username,
                 password=password,
+                databases=databases,
                 over_ssh=over_ssh,
                 ssh_credential=db_ssh_credential,
             )

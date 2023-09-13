@@ -111,6 +111,7 @@ async def create_integration(
             port=dto.databaseCredential.port,
             username=dto.databaseCredential.username,
             password=dto.databaseCredential.password,
+            databases=dto.databaseCredential.databases,
             over_ssh=dto.databaseCredential.overSsh,
             ssh_credential=dto.databaseCredential.sshCredential,
             database_type=db_type,

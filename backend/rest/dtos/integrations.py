@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from pydantic import BaseModel
 
@@ -30,6 +30,7 @@ class DatabaseCredentialDto(BaseModel):
     port: str
     username: str
     password: str
+    databases: List[str]
     overSsh: bool = False
     databaseType: RelationalDatabaseType = RelationalDatabaseType.MYSQL
     sshCredential: Optional[DatabaseSSHCredentialDto]
