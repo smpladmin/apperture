@@ -92,15 +92,9 @@ export const SHEET_FORMULAS: SheetFormula[] = [
     parts: ['search_column', 'range', 'index', '[is_sorted]'],
     suggestion: 'VLOOKUP(search_column, range, index, [is_sorted]',
   },
-  {
-    name: 'SUM',
-    value: '=SUM(',
-    parts: ['value1', '[value2...]'],
-    suggestion: 'SUM(value1, [value2...]',
-  },
 ];
 
-export const VALID_SHEET_FORMULA_NAMES = ['VLOOKUP', 'SUM'];
+export const VALID_SHEET_FORMULA_NAMES = ['VLOOKUP'];
 
 export const findCommaIndices = (inputString: string): number[] => {
   return Array.from(inputString).reduce(
