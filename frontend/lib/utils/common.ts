@@ -93,11 +93,11 @@ export const getProviderLogo = (provider: Provider): StaticImageData => {
   }
 };
 
-export const getSearchResult = (
-  data: any[],
+export const getSearchResult = <T>(
+  data: T[],
   query: string,
   options: Fuse.IFuseOptions<any>
-) => {
+): T[] => {
   const fuse = new Fuse(data, options);
   return fuse.search(query).map((result) => result.item);
 };

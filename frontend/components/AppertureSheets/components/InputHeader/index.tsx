@@ -5,7 +5,7 @@ import {
   CellChange,
   InputHeaderCell,
 } from '@components/AppertureSheets/types/gridTypes';
-import { Box, Flex, Text } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import {
   Actions,
   GridContext,
@@ -13,7 +13,6 @@ import {
 
 type InputHeaderCellProps = BaseCellProps & {
   cell: InputHeaderCell;
-  ref: any;
   onCellsChanged: (changedCell: CellChange<InputHeaderCell>[]) => void;
   onColumnHighlight: (highlight: any) => void;
 };
@@ -26,8 +25,6 @@ const InputHeaderCell = (
   const { state, dispatch } = useContext(GridContext);
 
   const { currentCell, isHeaderCellInEditMode, headerFormulas } = state;
-
-  const formula = headerFormulas?.[columnIndex] || '';
 
   const isHeaderCellCurrentlyEdited =
     currentCell.row === rowIndex && currentCell.column === columnIndex;
@@ -47,7 +44,6 @@ const InputHeaderCell = (
       {isHeaderCellInEditMode && isHeaderCellCurrentlyEdited ? (
         <FormulaDropDownBox
           cell={cell}
-          formula={formula}
           onCellChanged={(updatedCell: Partial<typeof cell>) => {
             const changedCell: CellChange<InputHeaderCell> = {
               rowId: rowIndex,

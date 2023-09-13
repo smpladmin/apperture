@@ -12,10 +12,12 @@ export const colors = [
 ];
 
 export const highlightFormula = (formula: string) => {
+  const columnColorMapping: Record<number, { color: string }> = {};
+  if (!formula.startsWith('=')) {
+    return { highlightedFormula: formula, columnColorMapping };
+  }
   const columnRegex = /([A-Z]+)/g;
   const vlookupRegex = /=VLOOKUP\(([^,]+),?\s*([^,]+)?,?([^)]+)?/i;
-
-  const columnColorMapping: Record<number, { color: string }> = {};
 
   let highlightedFormula = formula.replace(
     vlookupRegex,
@@ -74,4 +76,87 @@ export const highlightFormula = (formula: string) => {
   }
 
   return { highlightedFormula, columnColorMapping };
+};
+
+export type SheetFormula = {
+  name: string;
+  value: string;
+  parts: string[];
+  suggestion: string;
+};
+
+export const SHEET_FORMULAS: SheetFormula[] = [
+  {
+    name: 'VLOOKUP',
+    value: '=VLOOKUP(',
+    parts: ['search_column', 'range', 'index', '[is_sorted]'],
+    suggestion: 'VLOOKUP(search_column, range, index, [is_sorted]',
+  },
+  {
+    name: 'SUM',
+    value: '=SUM(',
+    parts: ['value1', '[value2...]'],
+    suggestion: 'SUM(value1, [value2...]',
+  },
+];
+
+export const VALID_SHEET_FORMULA_NAMES = ['VLOOKUP', 'SUM'];
+
+export const findCommaIndices = (inputString: string): number[] => {
+  return Array.from(inputString).reduce(
+    (indices: number[], char: string, index: number) => {
+      if (char === ',') {
+        indices.push(index);
+      }
+      return indices;
+    },
+    []
+  );
+};
+
+export const findActiveFormulaPartIndex = (
+  caretPosition: number,
+  commaIndices: number[]
+): number => {
+  if (caretPosition < commaIndices[0]) {
+    return 0;
+  }
+
+  const lastIndex = commaIndices.length - 1;
+
+  // Check if caretPosition is greater than the last/largest comma index
+  if (caretPosition > commaIndices[lastIndex]) {
+    return commaIndices.length;
+  }
+
+  for (let i = 0; i < commaIndices.length; i++) {
+    if (commaIndices[i] >= caretPosition) {
+      return i;
+    }
+  }
+
+  return 0;
+};
+
+export const extractFormulaName = (formulaName: string): string => {
+  const formulaTextRegex = /=(\w+)\(/; // check strings starts with '=' and ends wih '('
+  const match = formulaName.match(formulaTextRegex); // Extract text between '=' and '('
+
+  if (match && match[1]) return match[1];
+  return '';
+};
+
+export const isValidSheetFormula = (
+  currentFormula: string,
+  formulas: string[]
+): boolean => {
+  const formulaName = extractFormulaName(currentFormula);
+
+  const isValidFunction = formulas.includes(formulaName);
+
+  if (isValidFunction) {
+    return true;
+  }
+
+  return false;
 };
