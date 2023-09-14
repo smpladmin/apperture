@@ -18,6 +18,7 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 FROM base as tests
 WORKDIR /code
+RUN apt-get update && apt-get -y install freetds-dev
 ENV FASTAPI_ENV=development
 COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
@@ -26,6 +27,7 @@ RUN poetry run pytest -vvs
 
 FROM base as dev
 WORKDIR /code
+RUN apt-get update && apt-get -y install freetds-dev
 ENV FASTAPI_ENV=development
 COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
@@ -34,6 +36,7 @@ CMD uvicorn server:app --reload --host 0.0.0.0 --port 8001
 
 FROM base as production
 WORKDIR /code
+RUN apt-get update && apt-get -y install freetds-dev
 ENV FASTAPI_ENV=production
 COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
