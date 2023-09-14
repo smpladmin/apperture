@@ -31,6 +31,7 @@ class Credential(BaseModel):
     api_key: Optional[str] = Field(alias="apiKey")
     tableName: Optional[str]
     secret: Optional[str]
+    api_base_url: Optional[str] = Field(alias="apiBaseUrl")
 
 
 class DataSourceResponse(BaseModel):

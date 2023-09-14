@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from pydantic import BaseModel
 
@@ -44,6 +44,7 @@ class CreateIntegrationDto(BaseModel):
     database: Union[str, None]
     mySQLCredential: Union[MySQLCredentialDto, None]
     csvFileId: Union[str, None]
+    eventList: Union[List[str], None]
 
 
 class IntegrationWithDataSources(Integration, ModelResponse):

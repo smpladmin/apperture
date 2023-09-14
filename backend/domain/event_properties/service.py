@@ -5,7 +5,7 @@ from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Set
 from fastapi import Depends
 
-from domain.common.models import Property, IntegrationProvider
+from domain.common.models import IntegrationProvider, Property
 from domain.event_properties.models import EventProperties
 from mongo import Mongo
 from rest.dtos.event_properties import EventPropertiesDto
@@ -62,3 +62,18 @@ class EventPropertiesService:
             EventProperties.datasource_id == PydanticObjectId(datasource_id)
         ).to_list()
         return {p.name for ep in event_properties for p in ep.properties}
+
+    async def create_event_properties(
+        self,
+        datasource_id: str,
+        event_name: str,
+        properties: List[str],
+        provider: IntegrationProvider,
+    ):
+        property = EventProperties(
+            datasource_id=datasource_id,
+            event=event_name,
+            properties=properties,
+            provider=provider,
+        )
+        await property.insert()

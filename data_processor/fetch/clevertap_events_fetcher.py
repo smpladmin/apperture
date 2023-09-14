@@ -15,11 +15,11 @@ class ClevertapEventsFetcher:
         self.params = (("batch_size", "50000"),)
         self.date = date.replace("-", "")
         self.request_data = {"from": int(self.date), "to": int(self.date)}
-
-        self.data_url = "https://in1.api.clevertap.com/1/events.json"
+        self.data_url = (
+            credential.api_base_url or "https://in1.api.clevertap.com/1/events.json"
+        )
 
     def get_start_cursor(self, event: str):
-
         logging.info(
             f"Beginning to fetch event {event} data from start={self.date} & end={self.date}"
         )

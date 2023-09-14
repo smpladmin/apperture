@@ -53,6 +53,7 @@ class Credential(BaseModel):
     tableName: Optional[str]
     mysql_credential: Optional[MySQLCredential]
     csv_credential: Optional[CSVCredential]
+    api_base_url: Optional[str]
 
     class Config:
         allow_population_by_field_name = True
