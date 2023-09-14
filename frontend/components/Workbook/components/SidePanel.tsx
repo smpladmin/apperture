@@ -1,6 +1,6 @@
 import { Box, Flex } from '@chakra-ui/react';
 import { GREY_500 } from '@theme/index';
-import { ArrowLeft, ArrowRight, CaretLeft } from 'phosphor-react';
+import { ArrowLeft, ArrowRight } from 'phosphor-react';
 import React, { useEffect, useState } from 'react';
 import Connections from './Connections';
 import ConnectorColumns from './ConnectorColumns';
@@ -32,7 +32,6 @@ type SidePanelProps = {
   showChartPanel: (data: SheetChartDetail) => void;
   hideChartPanel: () => void;
   updateChart: (timestamp: number, updatedChartData: SheetChartDetail) => void;
-  setIsSelectedConnectionDatamart: Function;
 };
 
 enum SidePanelStateType {
@@ -64,7 +63,6 @@ const SidePanel = ({
   showChartPanel,
   hideChartPanel,
   updateChart,
-  setIsSelectedConnectionDatamart,
 }: SidePanelProps) => {
   const currentSheet = sheetsData[selectedSheetIndex];
   const [SidePanelState, setSidePanelState] = useState<SidePanelStateType>(
@@ -140,9 +138,6 @@ const SidePanel = ({
                 connections={connections}
                 setConnectorData={setConnectorData}
                 setShowSqlEditor={setShowSqlEditor}
-                setIsSelectedConnectionDatamart={
-                  setIsSelectedConnectionDatamart
-                }
               />
             ) : (
               <ChartSidePanel
@@ -221,7 +216,6 @@ type SheetConnectionsProps = {
   connections: Connection[];
   setConnectorData: Function;
   setShowSqlEditor: Function;
-  setIsSelectedConnectionDatamart: Function;
 };
 
 const SheetConnections = ({
@@ -237,7 +231,6 @@ const SheetConnections = ({
   connections,
   setConnectorData,
   setShowSqlEditor,
-  setIsSelectedConnectionDatamart,
 }: SheetConnectionsProps) => {
   return (
     <Flex direction={'column'} px={'2'} overflow={'auto'}>
@@ -261,7 +254,6 @@ const SheetConnections = ({
           setConnectorData={setConnectorData}
           setShowColumns={setShowColumns}
           setShowSqlEditor={setShowSqlEditor}
-          setIsSelectedConnectionDatamart={setIsSelectedConnectionDatamart}
         />
       )}
     </Flex>

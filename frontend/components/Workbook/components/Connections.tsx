@@ -44,7 +44,6 @@ type ConnectionsProps = {
   setConnectorData: Function;
   setShowColumns: Function;
   setShowSqlEditor: Function;
-  setIsSelectedConnectionDatamart: Function;
 };
 
 const Connections = ({
@@ -56,7 +55,6 @@ const Connections = ({
   setConnectorData,
   setShowColumns,
   setShowSqlEditor,
-  setIsSelectedConnectionDatamart,
 }: ConnectionsProps) => {
   const getConnectionIcon = (connectionName: string) => {
     const icons: { [key: string]: any } = {
@@ -106,12 +104,13 @@ const Connections = ({
       onOpen();
     } else {
       setShowColumns(true);
-      setIsSelectedConnectionDatamart(provider === 'datamart');
       setSheetsData((prevSheetData: TransientSheetData[]) => {
         const tempSheetsData = cloneDeep(prevSheetData);
         tempSheetsData[selectedSheetIndex].meta!!.dsId = currentSelectedDsId;
         tempSheetsData[selectedSheetIndex].meta!!.selectedSourceId =
           currentSelectedSourceId;
+        tempSheetsData[selectedSheetIndex].meta!!.isDatamart =
+          provider === 'datamart';
         return tempSheetsData;
       });
     }
@@ -155,6 +154,7 @@ const Connections = ({
           selectedTable: '',
           selectedDatabase: '',
           selectedSourceId: candidate.sourceId,
+          isDatamart: candidate.provider === 'datamart',
         };
         tempSheetsData[selectedSheetIndex].data = [];
         tempSheetsData[selectedSheetIndex].headers = [];
@@ -165,7 +165,6 @@ const Connections = ({
         return tempSheetsData;
       });
       setShowColumns(true);
-      setIsSelectedConnectionDatamart(candidate.provider === 'datamart');
     }
   }, [candidate]);
 

@@ -114,8 +114,6 @@ const Workbook = ({
     hidden: true,
     data: null,
   });
-  const [isSelectedConnectionDatamart, setIsSelectedConnectionDatamart] =
-    useState(false);
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
   const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
   const [sheetsData, setSheetsData] = useState<TransientSheetData[]>(
@@ -238,7 +236,7 @@ const Workbook = ({
 
   const fetchTransientSheetData = async (abortController?: AbortController) => {
     const sheet = sheetsData[selectedSheetIndex];
-
+    const isSelectedConnectionDatamart = sheet?.meta?.isDatamart;
     setFetchingTransientSheet(true);
     const response = await getTransientSpreadsheets(
       sheet?.meta?.dsId || (dsId as string),
@@ -399,11 +397,14 @@ const Workbook = ({
     }
 
     const fetchData = async (selectedSheet: TransientSheetData) => {
+      const isSelectedConnectionDatamart = selectedSheet?.meta?.isDatamart;
+
       const res = await getTransientSpreadsheets(
         dsId as string,
         selectedSheet.query,
         selectedSheet.is_sql,
-        selectedSheet.aiQuery
+        selectedSheet.aiQuery,
+        isSelectedConnectionDatamart
       );
       let queriedData = res?.data?.data;
 
@@ -1060,7 +1061,6 @@ const Workbook = ({
             showChartPanel={showChartPanel}
             hideChartPanel={hideChartPanel}
             updateChart={updateChart}
-            setIsSelectedConnectionDatamart={setIsSelectedConnectionDatamart}
           />
 
           <Box h={'full'} w={'full'} overflowY={'auto'}>
