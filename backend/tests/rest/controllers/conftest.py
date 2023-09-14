@@ -2346,6 +2346,7 @@ def integration_response():
             "type": "API_KEY",
             "mysql_credential": None,
             "csv_credential": None,
+            "api_base_url": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",
