@@ -471,7 +471,7 @@ export const parseHeaders = (columns: string[], headers: SpreadSheetColumn[]) =>
       const splitExpression = expression.match(regex)?.map((elem) => {
         if (elem >= 'A' && elem <= 'Z') {
           const code = elem.charCodeAt(0) - 65;
-          return '`' + headers[code].name + '`';
+          return '`' + headers[code]?.name + '`';
         }
         return elem;
       });
