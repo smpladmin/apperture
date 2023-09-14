@@ -145,7 +145,6 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
   const onTest = async (data: FormData) => {
     setLoading(true);
     const databaseCredential = await processFormData(data);
-    console.log(databaseCredential);
     const validConnection = await testDatabaseConnection(
       databaseCredential as DatabaseCredential
     );
