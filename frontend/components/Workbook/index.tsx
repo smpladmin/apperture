@@ -832,7 +832,7 @@ const Workbook = ({
           // TODO: should check the double bang !!
           tempSheetsData[selectedSheetIndex].meta!!.selectedColumns =
             paddedColumns;
-
+          tempSheetsData[selectedSheetIndex].is_sql = true;
           tempSheetsData[selectedSheetIndex].headers = paddedHeaders;
 
           return tempSheetsData;
