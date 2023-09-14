@@ -727,7 +727,7 @@ const Workbook = ({
         : sheetsData[selectedSheetIndex];
 
       const lookupColumn = columnRange
-        ? lookupSheet?.headers[columnRange[0] + rangeIndexValue - 2].name
+        ? lookupSheet?.headers[columnRange[0] + rangeIndexValue - 2]?.name
         : undefined;
       const searchColumn =
         sheetsData[selectedSheetIndex].headers[searchColumnIndex].name;

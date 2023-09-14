@@ -149,7 +149,7 @@ const Sheet = ({
   }, [selectedColumns]);
 
   useEffect(() => {
-    if (showEditableCell || !isSheetActive || isHeaderCellInEditMode) return;
+    if (!isSheetActive) return;
 
     const isInputOrTextArea = (
       element: EventTarget | null
@@ -229,7 +229,7 @@ const Sheet = ({
       document.removeEventListener('keydown', handleKeyPress);
       document.removeEventListener('keyup', handleKeyUp);
     };
-  }, [currentCell, isSheetActive, showEditableCell, isHeaderCellInEditMode]);
+  }, [currentCell, isSheetActive]);
 
   const getScrollCoordinatesForGridCells = (): Record<
     'scrollLeft' | 'scrollTop',
@@ -402,10 +402,11 @@ const Sheet = ({
                     style={{ overflowY: 'hidden' }}
                     columnCount={1}
                     columnWidth={(index) => 60}
-                    rowCount={1000}
+                    rowCount={rows.length}
                     rowHeight={(index) => 24}
                     height={height - 24}
                     width={60}
+                    overscanRowCount={20}
                   >
                     {IndexCell}
                   </Grid>
@@ -447,7 +448,10 @@ const Sheet = ({
                   style={editableCellStyle}
                   dangerouslySetInnerHTML={{ __html: currentCellValue }}
                   onBlur={(e) => handleCellChange(e)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleCellChange(e)}
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                    e.key === 'Enter' && handleCellChange(e);
+                  }}
                 />
               )}
             </Flex>

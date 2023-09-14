@@ -384,7 +384,7 @@ export const generateQuery = (
   if (!columns.length) return '';
   const columnsQuerySubstring = columns
     .map((column) =>
-      column ? (!column.includes('AS') ? '"' + column + '"' : column) : `''`
+      column ? (!column.includes('AS') ? '`' + column + '`' : column) : `''`
     )
     .join(', ');
   return `Select ${columnsQuerySubstring} from ${databaseName}.${tableName} ${
@@ -471,12 +471,12 @@ export const parseHeaders = (columns: string[], headers: SpreadSheetColumn[]) =>
       const splitExpression = expression.match(regex)?.map((elem) => {
         if (elem >= 'A' && elem <= 'Z') {
           const code = elem.charCodeAt(0) - 65;
-          return '"' + headers[code]?.name || '' + '"';
+          return '`' + headers[code].name + '`';
         }
         return elem;
       });
       const finalExpression = splitExpression
-        ? `${splitExpression?.join('')} AS "=${expression}"`
+        ? `${splitExpression?.join('')} AS \`=${expression}\``
         : '';
       return finalExpression;
     }
