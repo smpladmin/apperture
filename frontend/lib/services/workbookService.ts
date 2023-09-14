@@ -3,7 +3,6 @@ import {
   PivotAxisDetail,
   PivotValueDetail,
   Spreadsheet,
-  WordReplacement,
 } from '@lib/domain/workbook';
 import {
   AppertureDelete,
@@ -29,6 +28,7 @@ export const getTransientSpreadsheets = async (
   query: string,
   is_sql: boolean = true,
   aiQuery?: AIQuery,
+  isDatamart: boolean = false,
   signal?: AbortSignal
 ) => {
   const res = await ApperturePost(
@@ -37,6 +37,7 @@ export const getTransientSpreadsheets = async (
       datasourceId: dsId,
       query: query,
       is_sql,
+      isDatamart,
       ai_query: aiQuery
         ? {
             nl_query: aiQuery.nlQuery,

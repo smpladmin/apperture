@@ -7,6 +7,8 @@ from fastapi import Depends
 from domain.apps.models import ClickHouseCredential
 from domain.common.random_string_utils import StringUtils
 from domain.datamart.models import DataMart
+from domain.integrations.models import MsSQLCredential
+from domain.spreadsheets.models import DatabaseClient
 from mongo import Mongo
 from repositories.clickhouse.clickhouse_role import ClickHouseRole
 from repositories.clickhouse.datamart import DataMartRepo
@@ -45,14 +47,26 @@ class DataMartService:
         )
 
     async def create_datamart_table(
-        self, table: DataMart, clickhouse_credential: ClickHouseCredential
+        self,
+        table: DataMart,
+        clickhouse_credential: ClickHouseCredential,
+        database_client: DatabaseClient,
+        db_creds: Union[MsSQLCredential, None],
     ):
         table.updated_at = table.created_at
-        self.datamart_repo.create_table(
-            query=table.query,
-            table_name=table.table_name,
-            clickhouse_credential=clickhouse_credential,
-        )
+        if database_client == DatabaseClient.MSSQL:
+            self.datamart_repo.create_mssql_table(
+                query=table.query,
+                table_name=table.table_name,
+                clickhouse_credential=clickhouse_credential,
+                db_creds=db_creds,
+            )
+        else:
+            self.datamart_repo.create_table(
+                query=table.query,
+                table_name=table.table_name,
+                clickhouse_credential=clickhouse_credential,
+            )
         await DataMart.insert(table)
 
     async def update_table_action(
@@ -60,6 +74,8 @@ class DataMartService:
         datamart_id: str,
         clickhouse_credential: ClickHouseCredential,
         to_update: Dict,
+        database_client: DatabaseClient,
+        db_creds: Union[MsSQLCredential, None],
         query: Union[str, None] = None,
         table_name: Union[str, None] = None,
     ):
@@ -76,11 +92,19 @@ class DataMartService:
             table_name=existing_table.table_name,
             clickhouse_credential=clickhouse_credential,
         )
-        self.datamart_repo.create_table(
-            query=query,
-            table_name=table_name,
-            clickhouse_credential=clickhouse_credential,
-        )
+        if database_client == DatabaseClient.MSSQL:
+            self.datamart_repo.create_mssql_table(
+                query=query,
+                table_name=table_name,
+                clickhouse_credential=clickhouse_credential,
+                db_creds=db_creds,
+            )
+        else:
+            self.datamart_repo.create_table(
+                query=query,
+                table_name=table_name,
+                clickhouse_credential=clickhouse_credential,
+            )
         await DataMart.find_one(
             DataMart.id == PydanticObjectId(datamart_id),
         ).update({"$set": to_update})
@@ -89,6 +113,8 @@ class DataMartService:
         self,
         table_id: str,
         new_table: DataMart,
+        database_client: DatabaseClient,
+        db_creds: Union[MsSQLCredential, None],
         clickhouse_credential: ClickHouseCredential,
     ):
         to_update = new_table.dict()
@@ -102,6 +128,8 @@ class DataMartService:
             to_update=to_update,
             query=new_table.query,
             table_name=new_table.table_name,
+            db_creds=db_creds,
+            database_client=database_client,
         )
 
     async def get_datamart_table(self, id: str) -> DataMart:
@@ -144,4 +172,6 @@ class DataMartService:
             datamart_id=datamart_id,
             clickhouse_credential=clickhouse_credential,
             to_update=to_update,
+            database_client=DatabaseClient.CLICKHOUSE,
+            db_creds=None,
         )

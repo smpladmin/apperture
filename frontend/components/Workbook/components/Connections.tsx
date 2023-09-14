@@ -44,6 +44,7 @@ type ConnectionsProps = {
   setConnectorData: Function;
   setShowColumns: Function;
   setShowSqlEditor: Function;
+  setIsSelectedConnectionDatamart: Function;
 };
 
 const Connections = ({
@@ -55,6 +56,7 @@ const Connections = ({
   setConnectorData,
   setShowColumns,
   setShowSqlEditor,
+  setIsSelectedConnectionDatamart,
 }: ConnectionsProps) => {
   const getConnectionIcon = (connectionName: string) => {
     const icons: { [key: string]: any } = {
@@ -72,14 +74,16 @@ const Connections = ({
   const { isOpen, onOpen, onClose } = useDisclosure();
   const sheetData = sheetsData[selectedSheetIndex];
 
-  const [canditate, setCandidate] = useState<{
+  const [candidate, setCandidate] = useState<{
     confirmation: boolean;
     dsId: string;
     sourceId: string;
+    provider: string;
   }>({
     confirmation: false,
     dsId: '',
     sourceId: '',
+    provider: '',
   });
 
   const handleConnectionSelect = (
@@ -92,6 +96,7 @@ const Connections = ({
       open confirmation modal when switching to different connection when sheet is not in edit mode.
       Note: initally dsId would be empty, in that case show connectorColumns directly
     */
+    const provider = heirarchy[1];
     const lastSelectedSourceId = sheetData?.meta?.selectedSourceId;
     if (
       lastSelectedSourceId &&
@@ -101,6 +106,7 @@ const Connections = ({
       onOpen();
     } else {
       setShowColumns(true);
+      setIsSelectedConnectionDatamart(provider === 'datamart');
       setSheetsData((prevSheetData: TransientSheetData[]) => {
         const tempSheetsData = cloneDeep(prevSheetData);
         tempSheetsData[selectedSheetIndex].meta!!.dsId = currentSelectedDsId;
@@ -114,6 +120,7 @@ const Connections = ({
       ...prevCandidate,
       dsId: currentSelectedDsId,
       sourceId: currentSelectedSourceId,
+      provider: provider,
     }));
     setConnectorData({ ...connectionData, heirarchy });
     setShowSqlEditor(false);
@@ -138,16 +145,16 @@ const Connections = ({
   useEffect(() => {
     // only upon submission, set dsId in meta and reset selected columns
     // and then show connector columns
-    if (canditate.confirmation) {
+    if (candidate.confirmation) {
       setSheetsData((prevSheetData: TransientSheetData[]) => {
         const tempSheetsData = cloneDeep(prevSheetData);
         // TODO: should check the double bang !!
         tempSheetsData[selectedSheetIndex].meta = {
-          dsId: canditate.dsId,
+          dsId: candidate.dsId,
           selectedColumns: [],
           selectedTable: '',
           selectedDatabase: '',
-          selectedSourceId: canditate.sourceId,
+          selectedSourceId: candidate.sourceId,
         };
         tempSheetsData[selectedSheetIndex].data = [];
         tempSheetsData[selectedSheetIndex].headers = [];
@@ -158,8 +165,9 @@ const Connections = ({
         return tempSheetsData;
       });
       setShowColumns(true);
+      setIsSelectedConnectionDatamart(candidate.provider === 'datamart');
     }
-  }, [canditate]);
+  }, [candidate]);
 
   return (
     <>

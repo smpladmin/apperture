@@ -159,6 +159,7 @@ class DatabaseClient(Enum):
 class SQLQueryResult(BaseModel):
     result_set: List
     column_names: List[str]
+    column_types: List[str]
 
 
 class SortingOrder(Enum):

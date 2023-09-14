@@ -30,12 +30,36 @@ class ComputeQueryAction:
         self.app_service = app_service
         self.integration_service = integration_service
 
+    async def get_clickhouse_credentials(self, datasource_id: str):
+        datasource = await self.datasource_service.get_datasource(datasource_id)
+        app = await self.app_service.get_app(id=datasource.app_id)
+        has_app_credential = bool(app.clickhouse_credential)
+
+        clickhouse_credential = (
+            app.clickhouse_credential
+            if has_app_credential
+            else await self.app_service.create_clickhouse_user(
+                id=app.id, app_name=app.name
+            )
+        )
+
+        if not has_app_credential:
+            await self.datasource_service.create_row_policy_for_datasources_by_app(
+                app=app, username=clickhouse_credential.username
+            )
+
+        return clickhouse_credential
+
     async def get_credentials(
-        self, datasource_id: str
+        self,
+        datasource_id: str,
+        is_datamart=False,
     ) -> Union[ClickHouseCredential, MySQLCredential, MsSQLCredential]:
         datasource = await self.datasource_service.get_datasource(datasource_id)
         provider = datasource.provider
-        if provider in [IntegrationProvider.MYSQL, IntegrationProvider.MSSQL]:
+        if (
+            provider in [IntegrationProvider.MYSQL, IntegrationProvider.MSSQL]
+        ) and not is_datamart:
             integration = await self.integration_service.get_integration(
                 id=str(datasource.integration_id)
             )
@@ -44,23 +68,7 @@ class ComputeQueryAction:
             elif provider == IntegrationProvider.MSSQL:
                 return integration.credential.mssql_credential
         else:
-            app = await self.app_service.get_app(id=datasource.app_id)
-            has_app_credential = bool(app.clickhouse_credential)
-
-            clickhouse_credential = (
-                app.clickhouse_credential
-                if has_app_credential
-                else await self.app_service.create_clickhouse_user(
-                    id=app.id, app_name=app.name
-                )
-            )
-
-            if not has_app_credential:
-                await self.datasource_service.create_row_policy_for_datasources_by_app(
-                    app=app, username=clickhouse_credential.username
-                )
-
-            return clickhouse_credential
+            return await self.get_clickhouse_credentials(datasource_id=datasource_id)
 
     async def get_database_client(self, datasource_id: str) -> DatabaseClient:
         datasource = await self.datasource_service.get_datasource(datasource_id)
@@ -75,8 +83,13 @@ class ComputeQueryAction:
     async def compute_query(self, dto: TransientSpreadsheetsDto):
         try:
             logging.info(f"Query: {dto.query}")
-            credential = await self.get_credentials(dto.datasourceId)
-            client = await self.get_database_client(datasource_id=dto.datasourceId)
+            credential = await self.get_credentials(
+                datasource_id=dto.datasourceId, is_datamart=dto.isDatamart
+            )
+            if dto.isDatamart:
+                client = DatabaseClient.CLICKHOUSE
+            else:
+                client = await self.get_database_client(datasource_id=dto.datasourceId)
 
             if not dto.is_sql:
                 sql_query = text_to_sql(dto.ai_query)

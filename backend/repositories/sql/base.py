@@ -40,6 +40,7 @@ class SQLBase(ABC):
         cursor = connection.cursor()
         cursor.execute(query)
         result.column_names = [i[0] for i in cursor.description]
+        result.column_types = [i[1] for i in cursor.description]
         result.result_set = list(cursor.fetchall())
 
     def create_temp_file(self, content: str):

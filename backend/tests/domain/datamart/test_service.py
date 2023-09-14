@@ -9,6 +9,7 @@ from domain.apps.models import ClickHouseCredential
 from domain.datamart.models import DataMart
 from domain.datamart.service import DataMartService
 from domain.datasources.models import DataSource
+from domain.spreadsheets.models import DatabaseClient
 
 
 class TestDataMartService:
@@ -97,6 +98,8 @@ class TestDataMartService:
             table_id=self.ds_id,
             new_table=self.datamart_obj,
             clickhouse_credential=self.clickhouse_credential,
+            db_creds=None,
+            database_client=DatabaseClient.CLICKHOUSE,
         )
         DataMart.find.assert_called_once_with(
             False,
@@ -174,7 +177,10 @@ class TestDataMartService:
     @pytest.mark.asyncio
     async def test_create_datamart(self):
         await self.service.create_datamart_table(
-            table=self.datamart_obj, clickhouse_credential=self.clickhouse_credential
+            table=self.datamart_obj,
+            clickhouse_credential=self.clickhouse_credential,
+            db_creds=None,
+            database_client=DatabaseClient.CLICKHOUSE,
         )
         self.service.datamart_repo.create_table.assert_called_once_with(
             **{

@@ -114,6 +114,8 @@ const Workbook = ({
     hidden: true,
     data: null,
   });
+  const [isSelectedConnectionDatamart, setIsSelectedConnectionDatamart] =
+    useState(false);
   const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
   const [isWorkbookBeingEdited, setIsWorkbookBeingEdited] = useState(false);
   const [sheetsData, setSheetsData] = useState<TransientSheetData[]>(
@@ -243,6 +245,7 @@ const Workbook = ({
       sheet.query,
       sheet?.is_sql,
       sheet.aiQuery,
+      isSelectedConnectionDatamart,
       abortController?.signal
     );
 
@@ -1057,6 +1060,7 @@ const Workbook = ({
             showChartPanel={showChartPanel}
             hideChartPanel={hideChartPanel}
             updateChart={updateChart}
+            setIsSelectedConnectionDatamart={setIsSelectedConnectionDatamart}
           />
 
           <Box h={'full'} w={'full'} overflowY={'auto'}>

@@ -210,8 +210,8 @@ async def create_table_with_csv(
 ):
     try:
         file = await files_service.get_file(id=dto.fileId)
-        clickhouse_credential = await compute_query_action.get_credentials(
-            datasource_id=PydanticObjectId(dto.datasourceId)
+        clickhouse_credential = await compute_query_action.get_clickhouse_credentials(
+            datasource_id=dto.datasourceId
         )
         integration_service.create_clickhouse_table_from_csv(
             name=file.table_name,

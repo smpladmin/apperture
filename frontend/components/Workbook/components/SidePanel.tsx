@@ -32,6 +32,7 @@ type SidePanelProps = {
   showChartPanel: (data: SheetChartDetail) => void;
   hideChartPanel: () => void;
   updateChart: (timestamp: number, updatedChartData: SheetChartDetail) => void;
+  setIsSelectedConnectionDatamart: Function;
 };
 
 enum SidePanelStateType {
@@ -63,6 +64,7 @@ const SidePanel = ({
   showChartPanel,
   hideChartPanel,
   updateChart,
+  setIsSelectedConnectionDatamart,
 }: SidePanelProps) => {
   const currentSheet = sheetsData[selectedSheetIndex];
   const [SidePanelState, setSidePanelState] = useState<SidePanelStateType>(
@@ -138,6 +140,9 @@ const SidePanel = ({
                 connections={connections}
                 setConnectorData={setConnectorData}
                 setShowSqlEditor={setShowSqlEditor}
+                setIsSelectedConnectionDatamart={
+                  setIsSelectedConnectionDatamart
+                }
               />
             ) : (
               <ChartSidePanel
@@ -216,6 +221,7 @@ type SheetConnectionsProps = {
   connections: Connection[];
   setConnectorData: Function;
   setShowSqlEditor: Function;
+  setIsSelectedConnectionDatamart: Function;
 };
 
 const SheetConnections = ({
@@ -231,6 +237,7 @@ const SheetConnections = ({
   connections,
   setConnectorData,
   setShowSqlEditor,
+  setIsSelectedConnectionDatamart,
 }: SheetConnectionsProps) => {
   return (
     <Flex direction={'column'} px={'2'} overflow={'auto'}>
@@ -254,6 +261,7 @@ const SheetConnections = ({
           setConnectorData={setConnectorData}
           setShowColumns={setShowColumns}
           setShowSqlEditor={setShowSqlEditor}
+          setIsSelectedConnectionDatamart={setIsSelectedConnectionDatamart}
         />
       )}
     </Flex>

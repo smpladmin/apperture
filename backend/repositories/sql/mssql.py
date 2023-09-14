@@ -31,7 +31,7 @@ class MsSql(SQLBase):
         )
 
     def connect_and_execute_query(self, query: str, credential: MsSQLCredential):
-        result = SQLQueryResult(result_set=[], column_names=[])
+        result = SQLQueryResult(result_set=[], column_names=[], column_types=[])
         try:
             if credential.ssh_credential:
                 tunnel = self.create_ssh_tunnel(
