@@ -52,10 +52,9 @@ class ConnectionService:
                     )
                 )
             connection_data.append(group) if group and group.connection_source else None
-        return (
-            Connections(server="ClickHouse", connection_data=connection_data)
-            if connection_data
-            else []
+        return Connections(
+            server="ClickHouse",
+            connection_data=connection_data if connection_data else [],
         )
 
     def get_my_sql_connection_sources(self, datasource: DataSource, details):
