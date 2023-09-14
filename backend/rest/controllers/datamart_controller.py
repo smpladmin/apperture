@@ -8,6 +8,7 @@ from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
 from domain.datamart.service import DataMartService
 from domain.datasources.service import DataSourceService
+from domain.spreadsheets.models import DatabaseClient
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.datamart import DataMartTableDto, DataMartResponse, DataMartWithUser
@@ -47,7 +48,16 @@ async def save_datamart_table(
     datamart_service: DataMartService = Depends(),
     app_service: AppService = Depends(),
     user_id: str = Depends(get_user_id),
+    compute_query_action: ComputeQueryAction = Depends(),
 ):
+    database_client = await compute_query_action.get_database_client(
+        datasource_id=dto.datasourceId
+    )
+    db_creds = None
+    if database_client == DatabaseClient.MSSQL:
+        db_creds = await compute_query_action.get_credentials(
+            datasource_id=dto.datasourceId
+        )
     datasource = await datasource_service.get_datasource(id=dto.datasourceId)
     app = await app_service.get_app(id=datasource.app_id)
     if not app.clickhouse_credential:
@@ -66,7 +76,10 @@ async def save_datamart_table(
     )
 
     await datamart_service.create_datamart_table(
-        table=datamart_table, clickhouse_credential=app.clickhouse_credential
+        table=datamart_table,
+        clickhouse_credential=app.clickhouse_credential,
+        database_client=database_client,
+        db_creds=db_creds,
     )
     return datamart_table
 
@@ -83,7 +96,16 @@ async def update_datamart_table(
     app_service: AppService = Depends(),
     datamart_service: DataMartService = Depends(),
     user_id: str = Depends(get_user_id),
+    compute_query_action: ComputeQueryAction = Depends(),
 ):
+    database_client = await compute_query_action.get_database_client(
+        datasource_id=dto.datasourceId
+    )
+    db_creds = None
+    if database_client == DatabaseClient.MSSQL:
+        db_creds = await compute_query_action.get_credentials(
+            datasource_id=dto.datasourceId
+        )
     datasource = await datasource_service.get_datasource(dto.datasourceId)
     app = await app_service.get_app(id=datasource.app_id)
     if not app.clickhouse_credential:
@@ -105,6 +127,8 @@ async def update_datamart_table(
         table_id=id,
         new_table=new_datamart_table,
         clickhouse_credential=app.clickhouse_credential,
+        database_client=database_client,
+        db_creds=db_creds,
     )
     return new_datamart_table
 

@@ -61,6 +61,7 @@ async def create_app(
                 table,
                 None,
                 None,
+                None,
             )
             await ds_service.create_datasource(
                 None,

@@ -13,6 +13,7 @@ class IntegrationProvider(str, Enum):
     APPERTURE = "apperture"
     API = "api"
     MYSQL = "mysql"
+    MSSQL = "mssql"
     CSV = "csv"
     SAMPLE = "sample"
 

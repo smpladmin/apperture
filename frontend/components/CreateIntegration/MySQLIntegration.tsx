@@ -6,6 +6,9 @@ import {
   Flex,
   Heading,
   Input,
+  Radio,
+  RadioGroup,
+  Stack,
   Text,
   useToast,
 } from '@chakra-ui/react';
@@ -17,11 +20,14 @@ import {
   RightContainer,
   TopProgress,
 } from '@components/Onboarding';
-import { MySQLCredential } from '@lib/domain/integration';
+import {
+  DatabaseCredential,
+  RelationalDatabaseType,
+} from '@lib/domain/integration';
 import { Provider } from '@lib/domain/provider';
 import {
   createIntegrationWithDataSource,
-  testMySQLConnection,
+  testDatabaseConnection,
 } from '@lib/services/integrationService';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
@@ -38,6 +44,7 @@ type FormData = {
   port: string;
   username: string;
   password: string;
+  databases: string;
   table: string;
   overSsh: boolean;
   sshServer: string;
@@ -46,6 +53,7 @@ type FormData = {
   sshPassword: string;
   useSshKey: boolean;
   sshKey: FileList;
+  databaseType: RelationalDatabaseType;
 };
 const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
   const router = useRouter();
@@ -70,6 +78,12 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
     });
   };
 
+  const stringToList = (inputString: string): string[] => {
+    const stringArray = inputString.split(',');
+    const trimmedArray = stringArray.map((item) => item.trim());
+    return trimmedArray;
+  };
+
   const processFormData = async (data: FormData) => {
     let sshFileContent = null;
     if (data.overSsh && data.useSshKey) {
@@ -88,22 +102,27 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
         }
       : undefined;
 
-    const mySQLCredential = {
+    const databaseCredential = {
       host: data.host,
       port: data.port,
       username: data.username,
       password: data.password,
+      databases: stringToList(data.databases),
       overSsh: data.overSsh,
+      databaseType: data.databaseType,
       sshCredential: databaseSshCredential,
     };
 
-    return mySQLCredential;
+    return databaseCredential;
   };
 
   const onSubmit = async (data: FormData) => {
     const appId = router.query.appId as string;
-    const provider = router.query.provider as Provider;
-    const mySQLCredential = await processFormData(data);
+    const databaseCredential = await processFormData(data);
+    const provider =
+      databaseCredential.databaseType === RelationalDatabaseType.MSSQL
+        ? Provider.MSSQL
+        : Provider.MYSQL;
     const integration = await createIntegrationWithDataSource(
       appId,
       provider,
@@ -111,7 +130,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
       undefined,
       undefined,
       data.table,
-      mySQLCredential as MySQLCredential
+      databaseCredential as DatabaseCredential
     );
     router.replace({
       pathname: '/analytics/app/[appId]/integration/[provider]/complete',
@@ -125,9 +144,9 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
 
   const onTest = async (data: FormData) => {
     setLoading(true);
-    const mySQLCredential = await processFormData(data);
-    const validConnection = await testMySQLConnection(
-      mySQLCredential as MySQLCredential
+    const databaseCredential = await processFormData(data);
+    const validConnection = await testDatabaseConnection(
+      databaseCredential as DatabaseCredential
     );
     // setIsConnectionValid(validConnection);
     setIsConnectionValid(true);
@@ -152,6 +171,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
       port: '3306',
       username: '',
       password: '',
+      databases: '',
       table: '',
       sshServer: '',
       sshPort: '22',
@@ -164,7 +184,11 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
 
   const validateForm = () => {
     const arePrimaryCredsValid = Boolean(
-      watch('host') && watch('port') && watch('username') && watch('password')
+      watch('host') &&
+        watch('port') &&
+        watch('username') &&
+        watch('password') &&
+        watch('databases')
     );
     const areSshCredsValid = watch('overSsh')
       ? Boolean(watch('sshPort') && watch('sshServer'))
@@ -220,13 +244,40 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
               >
                 Enter Details to fetch data from MySQL
               </Heading>
-
               <Flex w={125}>
                 <form
                   onSubmit={handleSubmit(onSubmit)}
                   style={{ width: '100%' }}
                 >
                   <Flex direction={'column'} gap={'4'}>
+                    <Flex direction={'column'} gap={'2'} mb={'2'}>
+                      <Text
+                        as={'label'}
+                        fontSize={'xs-14'}
+                        lineHeight={'xs-14'}
+                        color={'grey.100'}
+                        display="block"
+                        htmlFor={'databaseType'}
+                      >
+                        Database Type:
+                      </Text>
+                      <RadioGroup
+                        id={'databaseType'}
+                        defaultValue={RelationalDatabaseType.MYSQL}
+                        fontSize={'xs-14'}
+                        lineHeight={'xs-14'}
+                        colorScheme={'radioBlack'}
+                      >
+                        <Stack spacing={4} direction="row">
+                          <Radio value="MYSQL" {...register('databaseType')}>
+                            MYSQL
+                          </Radio>
+                          <Radio value="MSSQL" {...register('databaseType')}>
+                            MSSQL
+                          </Radio>
+                        </Stack>
+                      </RadioGroup>
+                    </Flex>
                     <FormInputField
                       fieldName="host"
                       label="Host"
@@ -259,6 +310,14 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
                       handleChange={handleChange}
                       register={register}
                       inputStyle={{ placeholder: 'password', width: '50' }}
+                    />
+                    <FormInputField
+                      fieldName="databases"
+                      label="Databases"
+                      errors={errors}
+                      handleChange={handleChange}
+                      register={register}
+                      inputStyle={{ placeholder: 'databases', width: '50' }}
                     />
 
                     <FormCheckboxField

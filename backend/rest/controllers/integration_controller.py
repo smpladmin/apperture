@@ -9,6 +9,7 @@ from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
 from domain.datasources.models import DataSourceVersion, ProviderDataSource
 from domain.files.service import FilesService
+from domain.integrations.models import RelationalDatabaseType
 
 from domain.runlogs.service import RunLogService
 from domain.datasources.service import DataSourceService
@@ -18,9 +19,9 @@ from rest.dtos.datasources import CreateDataSourceDto, DataSourceResponse
 from rest.dtos.integrations import (
     CreateIntegrationDto,
     IntegrationResponse,
-    TestMySQLConnectionDto,
     CSVCreateDto,
     DeleteCSVDto,
+    DatabaseCredentialDto,
 )
 from rest.middlewares import get_user_id, validate_jwt, get_user
 
@@ -103,18 +104,24 @@ async def create_integration(
     dpq_service: DPQueueService = Depends(),
     files_service: FilesService = Depends(),
 ):
-    mysql_credential = (
-        integration_service.build_mysql_credential(
-            host=dto.mySQLCredential.host,
-            port=dto.mySQLCredential.port,
-            username=dto.mySQLCredential.username,
-            password=dto.mySQLCredential.password,
-            over_ssh=dto.mySQLCredential.overSsh,
-            ssh_credential=dto.mySQLCredential.sshCredential,
+    if dto.databaseCredential:
+        db_type = dto.databaseCredential.databaseType
+        db_credential = integration_service.build_database_credential(
+            host=dto.databaseCredential.host,
+            port=dto.databaseCredential.port,
+            username=dto.databaseCredential.username,
+            password=dto.databaseCredential.password,
+            databases=dto.databaseCredential.databases,
+            over_ssh=dto.databaseCredential.overSsh,
+            ssh_credential=dto.databaseCredential.sshCredential,
+            database_type=db_type,
         )
-        if dto.mySQLCredential
-        else None
-    )
+        if db_type == RelationalDatabaseType.MYSQL:
+            mysql_credential, mssql_credential = db_credential, None
+        elif db_type == RelationalDatabaseType.MSSQL:
+            mysql_credential, mssql_credential = None, db_credential
+    else:
+        mysql_credential, mssql_credential = None, None
     csv_credential = (
         await files_service.get_csv_credential(id=dto.csvFileId)
         if dto.csvFileId
@@ -129,6 +136,7 @@ async def create_integration(
         dto.apiSecret,
         dto.tableName,
         mysql_credential,
+        mssql_credential,
         csv_credential,
     )
 
@@ -157,17 +165,18 @@ async def create_integration(
     return integration
 
 
-@router.post("/integrations/mysql/test")
-async def check_mysql_connection(
-    dto: TestMySQLConnectionDto,
+@router.post("/integrations/database/test")
+async def check_database_connection(
+    dto: DatabaseCredentialDto,
     integration_service: IntegrationService = Depends(),
 ):
-    return integration_service.test_mysql_connection(
+    return integration_service.test_database_connection(
         host=dto.host,
         port=dto.port,
         username=dto.username,
         password=dto.password,
         ssh_credential=dto.sshCredential,
+        database_type=dto.databaseType,
     )
 
 
@@ -201,8 +210,8 @@ async def create_table_with_csv(
 ):
     try:
         file = await files_service.get_file(id=dto.fileId)
-        clickhouse_credential = await compute_query_action.get_credentials(
-            datasource_id=PydanticObjectId(dto.datasourceId)
+        clickhouse_credential = await compute_query_action.get_clickhouse_credentials(
+            datasource_id=dto.datasourceId
         )
         integration_service.create_clickhouse_table_from_csv(
             name=file.table_name,

@@ -29,11 +29,13 @@ class APIDataService:
         ]
         self.apidata_repo = apidata_repo
 
-    async def update_api_data(self, apidata, databasename, tableName, start_time, end_time):
+    async def update_api_data(
+        self, apidata, databasename, tableName, start_time, end_time
+    ):
 
         self.apidata_repo.create_api_table(databasename, tableName)
         self.apidata_repo.clear_api_table_records(
-             databasename, tableName, start_time, end_time, self.columns
+            databasename, tableName, start_time, end_time, self.columns
         )
         self.apidata_repo.insert_into_api_table(
             apidata, databasename, tableName, self.columns

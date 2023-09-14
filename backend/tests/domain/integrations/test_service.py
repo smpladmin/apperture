@@ -3,7 +3,11 @@ from beanie import PydanticObjectId
 import pytest
 from domain.apps.models import App, ClickHouseCredential
 from domain.common.models import IntegrationProvider
-from domain.integrations.models import CredentialType, Integration
+from domain.integrations.models import (
+    CredentialType,
+    Integration,
+    RelationalDatabaseType,
+)
 from domain.integrations.service import IntegrationService
 
 
@@ -33,7 +37,7 @@ class TestIntegrationService:
         tableName = ""
 
         integration = await self.service.create_integration(
-            app, provider, account_id, api_key, secret, tableName, None, None
+            app, provider, account_id, api_key, secret, tableName, None, None, None
         )
 
         assert integration.user_id == user_id
@@ -71,8 +75,13 @@ class TestIntegrationService:
                 )
                 self.service.create_temp_file = MagicMock(return_value="/tmp/temp_file")
 
-                self.service.test_mysql_connection(
-                    self.host, self.port, self.username, self.password, ssh_credential
+                self.service.test_database_connection(
+                    self.host,
+                    self.port,
+                    self.username,
+                    self.password,
+                    RelationalDatabaseType.MYSQL,
+                    ssh_credential,
                 )
 
                 mock_tunnel.assert_called_once_with(
@@ -88,20 +97,26 @@ class TestIntegrationService:
         ssh_credential = None
 
         with patch(
-            "domain.integrations.service.IntegrationService.check_mysql_connection"
-        ) as mock_check_mysql:
+            "domain.integrations.service.IntegrationService.check_db_connection"
+        ) as mock_check_database:
             expected_result = False
-            mock_check_mysql.return_value = expected_result
+            mock_check_database.return_value = expected_result
 
-            result = self.service.test_mysql_connection(
-                self.host, self.port, self.username, self.password, ssh_credential
+            result = self.service.test_database_connection(
+                self.host,
+                self.port,
+                self.username,
+                self.password,
+                RelationalDatabaseType.MYSQL,
+                ssh_credential,
             )
 
-            mock_check_mysql.assert_called_once_with(
+            mock_check_database.assert_called_once_with(
                 host=self.host,
                 port=self.port,
                 username=self.username,
                 password=self.password,
+                database_type=RelationalDatabaseType.MYSQL,
             )
 
             assert result == expected_result

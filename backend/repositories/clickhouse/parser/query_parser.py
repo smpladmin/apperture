@@ -1,9 +1,7 @@
-import logging
 import re
-
-import sqlvalidator
 from sqlglot import condition, exp, parse_one
 
+from domain.spreadsheets.models import DatabaseClient
 from utils.errors import BusinessError
 
 
@@ -70,35 +68,30 @@ class QueryParser:
         # If no SELECT clause is found, return 0 to indicate no columns are selected.
         return 0
 
-    def assign_query_limit(self, query_string):
+    def assign_query_limit(
+        self, query_string, database_client: DatabaseClient = DatabaseClient.CLICKHOUSE
+    ):
         num_cols = self.count_selected_columns(query=query_string)
 
         # Ignoring if order by already present in query string. Need to fix later.
-        if not re.search(r'\bORDER\s+BY\b', query_string, re.IGNORECASE):
+        if not re.search(r"\bORDER\s+BY\b", query_string, re.IGNORECASE):
             query_string = (
                 query_string
                 + f" ORDER BY {','.join([str(i) for i in range(1, num_cols + 1)])}"
             )
-        limit = re.search("LIMIT\s(.\w+)", query_string, re.IGNORECASE)
-        if not limit:
-            query_string = re.sub("\s*;", "", query_string)
-            return query_string + " LIMIT 500"
+        if database_client == DatabaseClient.MSSQL:
+            pattern = r"(?i)\bTOP\s*\(\s*\d+\s*\)"
+            if not re.search(pattern, query_string):
+                # If TOP is not present, add TOP(500) to the query
+                query_string = re.sub(
+                    r"(?i)\bSELECT\b", "SELECT TOP(500)", query_string, count=1
+                )
+            return query_string
         else:
-            limit = limit.group(1).strip()
-            return query_string + " LIMIT 500" if int(limit) > 500 else query_string
-
-    def DML_validation(self, query_string):
-        selected_fields_search_pattern = re.compile(
-            r"(UPDATE|INSERT|DELETE|TRUNCATE|DROP)", re.IGNORECASE
-        )
-        if len(re.findall(selected_fields_search_pattern, query_string)):
-            raise BusinessError(
-                "Invalid query: Cannot update data",
-            )
-
-    def validate_query_string(self, query_string: str, dsId: str, is_sql: bool):
-        self.DML_validation(query_string=query_string)
-        query_string = self.match_table_name(query_string, dsId, is_sql)
-        query_string = self.assign_query_limit(query_string)
-
-        return query_string
+            limit = re.search("LIMIT\s(.\w+)", query_string, re.IGNORECASE)
+            if not limit:
+                query_string = re.sub("\s*;", "", query_string)
+                return query_string + " LIMIT 500"
+            else:
+                limit = limit.group(1).strip()
+                return query_string + " LIMIT 500" if int(limit) > 500 else query_string

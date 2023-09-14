@@ -10,6 +10,7 @@ from domain.integrations.models import (
     CSVCredential,
     Integration,
     MySQLCredential,
+    RelationalDatabaseType,
 )
 
 
@@ -58,6 +59,7 @@ def test_add_database_integration(
                     port="3306",
                     username="test-user",
                     password="password",
+                    databases=["test-db"],
                     ssh_credential=None,
                 ),
             ),
@@ -80,10 +82,12 @@ def test_add_database_integration(
                 "host": "127.0.0.1",
                 "over_ssh": False,
                 "password": "password",
+                "databases": ["test-db"],
                 "port": "3306",
                 "ssh_credential": None,
                 "username": "test-user",
             },
+            "mssql_credential": None,
             "refresh_token": None,
             "secret": None,
             "tableName": None,
@@ -116,18 +120,19 @@ def test_check_database_connection(
     client_init, integration_service, database_credential_data
 ):
     response = client_init.post(
-        "/integrations/mysql/test",
+        "/integrations/database/test",
         data=json.dumps(database_credential_data),
     )
     assert response.status_code == 200
     assert response.json() == True
-    integration_service.test_mysql_connection.assert_called_once_with(
+    integration_service.test_database_connection.assert_called_once_with(
         **{
             "host": "127.0.0.1",
             "password": "password",
             "port": "3306",
             "username": "test-user",
             "ssh_credential": None,
+            "database_type": RelationalDatabaseType.MYSQL,
         }
     )
 
@@ -174,6 +179,7 @@ def test_add_csv_integration(
             "account_id": None,
             "api_key": None,
             "mysql_credential": None,
+            "mssql_credential": None,
             "refresh_token": None,
             "secret": None,
             "tableName": None,
