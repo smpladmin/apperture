@@ -64,7 +64,7 @@ const QueryEditor = ({
     if (sheetData.query) {
       setQuery(sheetData.query);
     }
-    if (sheetData.aiQuery?.sql) {
+    if (!sheetData.is_sql && sheetData.aiQuery?.sql) {
       setQuery(sheetData.aiQuery?.sql);
     }
   }, [sheetData.query, sheetData.aiQuery?.sql]);

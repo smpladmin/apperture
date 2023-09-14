@@ -62,15 +62,13 @@ const getSubHeaderRow = (
           0
         );
         const disableAddButton = hasMetricColumnInPivotSheet(sheetData);
-        const showAddButton =
-          isPivotOrBlankSheet && index === dimensionSubHeaderCount;
 
         if (header.type === ColumnType.QUERY_HEADER) {
           return {
             type: 'inputHeader',
             text: originalHeaders?.[index]?.name || '',
             disable: false,
-            showAddButton,
+            showAddButton: false,
             disableAddButton,
             showSuggestions: isPivotOrBlankSheet,
             properties,
@@ -84,7 +82,7 @@ const getSubHeaderRow = (
               ? ''
               : originalHeaders?.[index]?.name || '',
           disable: false,
-          showAddButton,
+          showAddButton: false,
           disableAddButton,
           showSuggestions: isPivotOrBlankSheet,
           properties,
