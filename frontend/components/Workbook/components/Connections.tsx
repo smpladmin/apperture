@@ -72,14 +72,16 @@ const Connections = ({
   const { isOpen, onOpen, onClose } = useDisclosure();
   const sheetData = sheetsData[selectedSheetIndex];
 
-  const [canditate, setCandidate] = useState<{
+  const [candidate, setCandidate] = useState<{
     confirmation: boolean;
     dsId: string;
     sourceId: string;
+    provider: string;
   }>({
     confirmation: false,
     dsId: '',
     sourceId: '',
+    provider: '',
   });
 
   const handleConnectionSelect = (
@@ -92,6 +94,7 @@ const Connections = ({
       open confirmation modal when switching to different connection when sheet is not in edit mode.
       Note: initally dsId would be empty, in that case show connectorColumns directly
     */
+    const provider = heirarchy[1];
     const lastSelectedSourceId = sheetData?.meta?.selectedSourceId;
     if (
       lastSelectedSourceId &&
@@ -106,6 +109,8 @@ const Connections = ({
         tempSheetsData[selectedSheetIndex].meta!!.dsId = currentSelectedDsId;
         tempSheetsData[selectedSheetIndex].meta!!.selectedSourceId =
           currentSelectedSourceId;
+        tempSheetsData[selectedSheetIndex].meta!!.isDatamart =
+          provider === 'datamart';
         return tempSheetsData;
       });
     }
@@ -114,6 +119,7 @@ const Connections = ({
       ...prevCandidate,
       dsId: currentSelectedDsId,
       sourceId: currentSelectedSourceId,
+      provider: provider,
     }));
     setConnectorData({ ...connectionData, heirarchy });
     setShowSqlEditor(false);
@@ -138,16 +144,17 @@ const Connections = ({
   useEffect(() => {
     // only upon submission, set dsId in meta and reset selected columns
     // and then show connector columns
-    if (canditate.confirmation) {
+    if (candidate.confirmation) {
       setSheetsData((prevSheetData: TransientSheetData[]) => {
         const tempSheetsData = cloneDeep(prevSheetData);
         // TODO: should check the double bang !!
         tempSheetsData[selectedSheetIndex].meta = {
-          dsId: canditate.dsId,
+          dsId: candidate.dsId,
           selectedColumns: [],
           selectedTable: '',
           selectedDatabase: '',
-          selectedSourceId: canditate.sourceId,
+          selectedSourceId: candidate.sourceId,
+          isDatamart: candidate.provider === 'datamart',
         };
         tempSheetsData[selectedSheetIndex].data = [];
         tempSheetsData[selectedSheetIndex].headers = [];
@@ -159,7 +166,7 @@ const Connections = ({
       });
       setShowColumns(true);
     }
-  }, [canditate]);
+  }, [candidate]);
 
   return (
     <>

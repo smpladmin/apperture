@@ -6,7 +6,7 @@ from beanie import PydanticObjectId
 from fastapi import Depends
 
 from domain.apps.models import ClickHouseCredential
-from domain.integrations.models import MySQLCredential
+from domain.integrations.models import MySQLCredential, MsSQLCredential
 from domain.spreadsheets.models import (
     ColumnType,
     ComputedSpreadsheet,
@@ -22,7 +22,8 @@ from domain.spreadsheets.models import (
 from repositories.clickhouse.parser.query_parser import BusinessError
 from repositories.clickhouse.parser.query_parser import QueryParser
 from repositories.clickhouse.spreadsheet import Spreadsheets
-from repositories.mysql.mysql import MySql
+from repositories.sql.mssql import MsSql
+from repositories.sql.mysql import MySql
 
 
 class SpreadsheetService:
@@ -30,10 +31,12 @@ class SpreadsheetService:
         self,
         spreadsheets: Spreadsheets = Depends(),
         mysql: MySql = Depends(),
+        mssql: MsSql = Depends(),
         parser: QueryParser = Depends(),
     ):
         self.spreadsheets = spreadsheets
         self.mysql = mysql
+        self.mssql = mssql
         self.parser = parser
 
     async def add_workbook(self, workbook: WorkBook):
@@ -85,20 +88,27 @@ class SpreadsheetService:
     async def get_transient_spreadsheets(
         self,
         query: str,
-        credential: Union[ClickHouseCredential, MySQLCredential],
+        credential: Union[ClickHouseCredential, MySQLCredential, MsSQLCredential],
         client: DatabaseClient = DatabaseClient.CLICKHOUSE,
     ) -> ComputedSpreadsheet:
         query = self.cleanse_query_string(query)
-        query = self.parser.assign_query_limit(query)
-        result = (
-            self.spreadsheets.get_transient_spreadsheet(
+        query = self.parser.assign_query_limit(
+            query_string=query, database_client=client
+        )
+        if client == DatabaseClient.CLICKHOUSE:
+            result = self.spreadsheets.get_transient_spreadsheet(
                 query=query,
                 username=credential.username,
                 password=credential.password,
             )
-            if client == DatabaseClient.CLICKHOUSE
-            else self.mysql.execute_mysql_query(query=query, credential=credential)
-        )
+        elif client == DatabaseClient.MYSQL:
+            result = self.mysql.connect_and_execute_query(
+                query=query, credential=credential
+            )
+        elif client == DatabaseClient.MSSQL:
+            result = self.mssql.connect_and_execute_query(
+                query=query, credential=credential
+            )
 
         response = {
             "headers": [
@@ -271,12 +281,20 @@ class SpreadsheetService:
                 raise BusinessError("Could not generate pivot table, invalid values")
 
         if rows and (rows[0].show_total or (not columns and values)):
-            key = f"SUM of {values[0].name}" if (not columns and values) else "Total"
+            key = (
+                f"{values[0].function.value} of {values[0].name}"
+                if (not columns and values)
+                else "Total"
+            )
             data = self.populate_row_totals(data, unique_rows, key)
             column_names.append(key)
 
         if columns and (columns[0].show_total or (not rows and values)):
-            key = f"SUM of {values[0].name}" if (not rows and values) else "Total"
+            key = (
+                f"{values[0].function.value} of {values[0].name}"
+                if (not rows and values)
+                else "Total"
+            )
             data = self.populate_column_totals(data, unique_columns, key)
             row_names.append(key)
 

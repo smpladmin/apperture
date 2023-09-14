@@ -17,7 +17,7 @@ router = APIRouter(
 
 
 @router.get("/connections/{dsId}")
-async def get_clickstream_events(
+async def get_connections(
     dsId: str,
     ds_service: DataSourceService = Depends(),
     connections_service: ConnectionService = Depends(),
@@ -52,13 +52,18 @@ async def get_clickstream_events(
                 "table": table,
             }
         for datasource in all_datasources:
-            if datasource.provider == "mysql":
+            if datasource.provider == IntegrationProvider.MYSQL:
                 details = await integration_service.get_mysql_connection_details(
                     id=datasource.integration_id
                 )
                 credentials_table[str(datasource.id)] = details
+            elif datasource.provider == IntegrationProvider.MSSQL:
+                details = await integration_service.get_mssql_connection_details(
+                    id=datasource.integration_id
+                )
+                credentials_table[str(datasource.id)] = details
             elif (
-                datasource.provider == "csv"
+                datasource.provider == IntegrationProvider.CSV
                 or datasource.provider == IntegrationProvider.SAMPLE
             ):
                 integration = await integration_service.get_integration(
@@ -66,7 +71,7 @@ async def get_clickstream_events(
                 )
                 table = (
                     integration.credential.csv_credential.table_name
-                    if datasource.provider == "csv"
+                    if datasource.provider == IntegrationProvider.CSV
                     else integration.credential.tableName
                 )
                 property = connections_service.get_clickhouse_table_columns(

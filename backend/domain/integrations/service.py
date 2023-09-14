@@ -1,10 +1,11 @@
 import logging
 import os
 import tempfile
-from typing import Optional
+from typing import Optional, Union, List
 
 import boto3
 import pymysql
+import pymssql
 import sshtunnel
 from beanie import PydanticObjectId
 from fastapi import Depends, UploadFile
@@ -24,6 +25,8 @@ from .models import (
     Integration,
     IntegrationProvider,
     MySQLCredential,
+    MsSQLCredential,
+    RelationalDatabaseType,
 )
 
 
@@ -86,10 +89,13 @@ class IntegrationService:
         secret: Optional[str],
         tableName: Optional[str],
         mysql_credential: Optional[MySQLCredential],
+        mssql_credential: Optional[MsSQLCredential],
         csv_credential: Optional[CSVCredential],
     ):
         if mysql_credential:
             credential_type = CredentialType.MYSQL
+        elif mssql_credential:
+            credential_type = CredentialType.MSSQL
         elif csv_credential:
             credential_type = CredentialType.CSV
         else:
@@ -107,6 +113,7 @@ class IntegrationService:
             secret=secret,
             tableName=tableName,
             mysql_credential=mysql_credential,
+            mssql_credential=mssql_credential,
             csv_credential=csv_credential,
         )
         integration = Integration(
@@ -134,15 +141,17 @@ class IntegrationService:
             ssh_key=ssh_key,
         )
 
-    def build_mysql_credential(
+    def build_database_credential(
         self,
         host: str,
         port: str,
         username: str,
         password: str,
+        databases: List[str],
         over_ssh: bool,
+        database_type: RelationalDatabaseType,
         ssh_credential: Optional[DatabaseSSHCredentialDto],
-    ):
+    ) -> Union[MySQLCredential, MsSQLCredential]:
         db_ssh_credential = (
             self.build_database_ssh_credential(
                 server=ssh_credential.server,
@@ -154,25 +163,45 @@ class IntegrationService:
             if ssh_credential
             else None
         )
-        return MySQLCredential(
-            host=host,
-            port=port,
-            username=username,
-            password=password,
-            over_ssh=over_ssh,
-            ssh_credential=db_ssh_credential,
-        )
+        if database_type == RelationalDatabaseType.MYSQL:
+            return MySQLCredential(
+                host=host,
+                port=port,
+                username=username,
+                password=password,
+                databases=databases,
+                over_ssh=over_ssh,
+                ssh_credential=db_ssh_credential,
+            )
+        elif database_type == RelationalDatabaseType.MSSQL:
+            return MsSQLCredential(
+                server=host,
+                port=port,
+                username=username,
+                password=password,
+                databases=databases,
+                over_ssh=over_ssh,
+                ssh_credential=db_ssh_credential,
+            )
 
-    def check_mysql_connection(
-        self, host: str, port: str, username: str, password: str
+    def check_db_connection(
+        self,
+        host: str,
+        port: str,
+        username: str,
+        password: str,
+        database_type: RelationalDatabaseType,
     ):
         try:
-            connection = self.get_mysql_connection(
-                host=host, port=port, username=username, password=password
-            )
-            with connection:
-                if connection.open:
-                    return True
+            if database_type == RelationalDatabaseType.MYSQL:
+                status = self.get_mysql_connection(
+                    host=host, port=port, username=username, password=password
+                )
+            elif database_type == RelationalDatabaseType.MSSQL:
+                status = self.get_mssql_connection(
+                    host=host, port=port, username=username, password=password
+                )
+            return status
 
         except Exception as e:
             logging.info(f"Failed to connect to MySQL database with exception: {e}")
@@ -212,52 +241,66 @@ class IntegrationService:
             logging.info(f"Connection failed with exception: {e}")
             return None
 
-    def test_mysql_connection(
+    def test_database_connection(
         self,
         host: str,
         port: str,
         username: str,
         password: str,
+        database_type: RelationalDatabaseType,
         ssh_credential: Optional[DatabaseSSHCredentialDto],
     ):
         if ssh_credential:
             tunnel = self.create_ssh_tunnel(ssh_credential, host, port)
             if tunnel:
                 with tunnel:
-                    return self.check_mysql_connection(
+                    return self.check_db_connection(
                         host=tunnel.local_bind_host,
                         port=tunnel.local_bind_port,
                         username=username,
                         password=password,
+                        database_type=database_type,
                     )
         else:
-            return self.check_mysql_connection(
-                host=host, port=port, username=username, password=password
+            return self.check_db_connection(
+                host=host,
+                port=port,
+                username=username,
+                password=password,
+                database_type=database_type,
             )
 
-    def get_mysql_connection(self, host, port, username, password, database=None):
-        return (
-            pymysql.connect(
-                host=host,
-                port=int(port),
-                user=username,
-                password=password,
-                database=database,
-                ssl_verify_identity=True,
-            )
-            if database
-            else pymysql.connect(
-                host=host,
-                port=int(port),
-                user=username,
-                password=password,
-                ssl_verify_identity=True,
-            )
+    def get_mysql_connection(
+        self, host: str, port: str, username: str, password: str
+    ) -> bool:
+        connection = pymysql.connect(
+            host=host,
+            port=int(port),
+            user=username,
+            password=password,
+            ssl_verify_identity=True,
         )
+        status = connection.open
+        connection.close()
+        return status
+
+    def get_mssql_connection(self, host: str, port: str, username: str, password: str):
+        connection = pymssql.connect(
+            server=host,
+            user=username,
+            password=password,
+        )
+        status = connection._conn.connected
+        connection.close()
+        return status
 
     async def get_mysql_connection_details(self, id):
         integration = await self.get_integration(id)
         return integration.credential.mysql_credential
+
+    async def get_mssql_connection_details(self, id):
+        integration = await self.get_integration(id)
+        return integration.credential.mssql_credential
 
     def upload_csv_to_s3(self, file: UploadFile, s3_key: str):
         self.s3_client.upload_fileobj(

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 
 from beanie import Indexed, PydanticObjectId
 from pydantic import BaseModel, Field
@@ -12,7 +12,13 @@ class CredentialType(str, Enum):
     OAUTH = "OAUTH"
     API_KEY = "API_KEY"
     MYSQL = "MYSQL"
+    MSSQL = "MSSQL"
     CSV = "CSV"
+
+
+class RelationalDatabaseType(str, Enum):
+    MYSQL = "MYSQL"
+    MSSQL = "MSSQL"
 
 
 class DatabaseSSHCredential(BaseModel):
@@ -37,6 +43,20 @@ class MySQLCredential(BaseModel):
     port: str
     username: str
     password: str
+    databases: List[str]
+    over_ssh: bool = False
+    ssh_credential: Optional[DatabaseSSHCredential]
+
+    class Config:
+        allow_population_by_field_name = True
+
+
+class MsSQLCredential(BaseModel):
+    server: str
+    port: str
+    username: str
+    password: str
+    databases: List[str]
     over_ssh: bool = False
     ssh_credential: Optional[DatabaseSSHCredential]
 
@@ -52,6 +72,7 @@ class Credential(BaseModel):
     secret: Optional[str]
     tableName: Optional[str]
     mysql_credential: Optional[MySQLCredential]
+    mssql_credential: Optional[MsSQLCredential]
     csv_credential: Optional[CSVCredential]
     api_base_url: Optional[str]
 

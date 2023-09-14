@@ -236,13 +236,14 @@ const Workbook = ({
 
   const fetchTransientSheetData = async (abortController?: AbortController) => {
     const sheet = sheetsData[selectedSheetIndex];
-
+    const isSelectedConnectionDatamart = sheet?.meta?.isDatamart;
     setFetchingTransientSheet(true);
     const response = await getTransientSpreadsheets(
       sheet?.meta?.dsId || (dsId as string),
       sheet.query,
       sheet?.is_sql,
       sheet.aiQuery,
+      isSelectedConnectionDatamart,
       abortController?.signal
     );
 
@@ -396,11 +397,14 @@ const Workbook = ({
     }
 
     const fetchData = async (selectedSheet: TransientSheetData) => {
+      const isSelectedConnectionDatamart = selectedSheet?.meta?.isDatamart;
+
       const res = await getTransientSpreadsheets(
         dsId as string,
         selectedSheet.query,
         selectedSheet.is_sql,
-        selectedSheet.aiQuery
+        selectedSheet.aiQuery,
+        isSelectedConnectionDatamart
       );
       let queriedData = res?.data?.data;
 
@@ -724,7 +728,7 @@ const Workbook = ({
         : sheetsData[selectedSheetIndex];
 
       const lookupColumn = columnRange
-        ? lookupSheet?.headers[columnRange[0] + rangeIndexValue - 2].name
+        ? lookupSheet?.headers[columnRange[0] + rangeIndexValue - 2]?.name
         : undefined;
       const searchColumn =
         sheetsData[selectedSheetIndex].headers[searchColumnIndex].name;
@@ -832,7 +836,7 @@ const Workbook = ({
           // TODO: should check the double bang !!
           tempSheetsData[selectedSheetIndex].meta!!.selectedColumns =
             paddedColumns;
-
+          tempSheetsData[selectedSheetIndex].is_sql = true;
           tempSheetsData[selectedSheetIndex].headers = paddedHeaders;
 
           return tempSheetsData;

@@ -153,11 +153,13 @@ class DimensionDefinition(BaseModel):
 class DatabaseClient(Enum):
     MYSQL = "mysql"
     CLICKHOUSE = "clickhouse"
+    MSSQL = "mssql"
 
 
-class MySQLQueryResult(BaseModel):
+class SQLQueryResult(BaseModel):
     result_set: List
     column_names: List[str]
+    column_types: List[str]
 
 
 class SortingOrder(Enum):

@@ -1,6 +1,6 @@
 import { Box, Flex } from '@chakra-ui/react';
 import { GREY_500 } from '@theme/index';
-import { ArrowLeft, ArrowRight, CaretLeft } from 'phosphor-react';
+import { ArrowLeft, ArrowRight } from 'phosphor-react';
 import React, { useEffect, useState } from 'react';
 import Connections from './Connections';
 import ConnectorColumns from './ConnectorColumns';

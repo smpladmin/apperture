@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 from pydantic import BaseModel
 
 from domain.common.models import IntegrationProvider
-from domain.integrations.models import Credential, Integration
+from domain.integrations.models import Credential, Integration, RelationalDatabaseType
 from rest.dtos.datasources import DataSourceResponse
 
 from .model_response import ModelResponse
@@ -25,12 +25,14 @@ class DatabaseSSHCredentialDto(BaseModel):
     sshKey: Optional[str]
 
 
-class MySQLCredentialDto(BaseModel):
+class DatabaseCredentialDto(BaseModel):
     host: str
     port: str
     username: str
     password: str
+    databases: List[str]
     overSsh: bool = False
+    databaseType: RelationalDatabaseType = RelationalDatabaseType.MYSQL
     sshCredential: Optional[DatabaseSSHCredentialDto]
 
 
@@ -42,7 +44,7 @@ class CreateIntegrationDto(BaseModel):
     apiSecret: Union[str, None]
     tableName: Union[str, None]
     database: Union[str, None]
-    mySQLCredential: Union[MySQLCredentialDto, None]
+    databaseCredential: Union[DatabaseCredentialDto, None]
     csvFileId: Union[str, None]
     eventList: Union[List[str], None]
 
@@ -53,15 +55,6 @@ class IntegrationWithDataSources(Integration, ModelResponse):
 
     class Config:
         orm_mode = True
-
-
-class TestMySQLConnectionDto(BaseModel):
-    host: str
-    port: str
-    username: str
-    password: str
-    overSsh: bool = False
-    sshCredential: Optional[DatabaseSSHCredentialDto]
 
 
 class CSVCreateDto(BaseModel):

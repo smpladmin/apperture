@@ -26,6 +26,7 @@ class TransientSpreadsheetsDto(BaseModel):
     datasourceId: str
     query: str
     is_sql: bool = False
+    isDatamart: bool = False
     ai_query: Optional[AIQuery]
 
 

@@ -6,6 +6,7 @@ from domain.common.models import IntegrationProvider
 from domain.connections.models import ConnectionGroup, Connections, ConnectionSource
 from domain.datamart.models import DataMart
 from domain.datasources.models import DataSource
+from domain.integrations.models import RelationalDatabaseType
 from repositories.clickhouse.connection import Connection
 
 
@@ -51,10 +52,9 @@ class ConnectionService:
                     )
                 )
             connection_data.append(group) if group and group.connection_source else None
-        return (
-            Connections(server="ClickHouse", connection_data=connection_data)
-            if connection_data
-            else []
+        return Connections(
+            server="ClickHouse",
+            connection_data=connection_data if connection_data else [],
         )
 
     def get_my_sql_connection_sources(self, datasource: DataSource, details):
@@ -77,14 +77,39 @@ class ConnectionService:
         for index, datasource in enumerate(mysql_connections):
             creds = credentials_table[str(datasource.id)]
             connection_table = self.connection.get_sql_connection_sources_by_dsid(
-                datasource.id,
-                creds,
+                datasource_id=datasource.id,
+                credentials=creds,
+                database_type=RelationalDatabaseType.MYSQL,
             )
             for database, connections in connection_table.items():
                 if database and connections:
                     data.append(
                         Connections(
                             server=f"MySQL {index+1}",
+                            connection_data=[
+                                ConnectionGroup(
+                                    provider=database,
+                                    connection_source=connections,
+                                )
+                            ],
+                        )
+                    )
+        return data
+
+    def get_mssql_connection_group(self, mssql_connections, credentials_table: dict):
+        data = []
+        for index, datasource in enumerate(mssql_connections):
+            creds = credentials_table[str(datasource.id)]
+            connection_table = self.connection.get_sql_connection_sources_by_dsid(
+                datasource_id=datasource.id,
+                credentials=creds,
+                database_type=RelationalDatabaseType.MSSQL,
+            )
+            for database, connections in connection_table.items():
+                if database and connections:
+                    data.append(
+                        Connections(
+                            server=f"MsSQL {index+1}",
                             connection_data=[
                                 ConnectionGroup(
                                     provider=database,
@@ -126,13 +151,19 @@ class ConnectionService:
     ):
         clickhouse_connection_table = {}
         mysql_connections = []
+        mssql_connections = []
         for datasource in datasources:
-            if datasource.provider != IntegrationProvider.MYSQL:
+            if datasource.provider not in [
+                IntegrationProvider.MYSQL,
+                IntegrationProvider.MSSQL,
+            ]:
                 if datasource.provider not in clickhouse_connection_table:
                     clickhouse_connection_table[datasource.provider] = []
                 clickhouse_connection_table[datasource.provider].append(datasource)
-            else:
+            elif datasource.provider == IntegrationProvider.MYSQL:
                 mysql_connections.append(datasource)
+            elif datasource.provider == IntegrationProvider.MSSQL:
+                mssql_connections.append(datasource)
         clickhouse_server_connections = self.get_clickhouse_connection_group(
             clickhouse_connection_table=clickhouse_connection_table,
             properties_table=properties_table,
@@ -145,6 +176,9 @@ class ConnectionService:
         mysql_server_connections = self.get_mysql_connection_group(
             mysql_connections=mysql_connections, credentials_table=credentials_table
         )
+        mssql_server_connections = self.get_mssql_connection_group(
+            mssql_connections=mssql_connections, credentials_table=credentials_table
+        )
 
         connections_list = []
 
@@ -152,5 +186,7 @@ class ConnectionService:
             connections_list.append(clickhouse_server_connections)
         if mysql_server_connections:
             connections_list.extend(mysql_server_connections)
+        if mssql_server_connections:
+            connections_list.extend(mssql_server_connections)
 
         return connections_list

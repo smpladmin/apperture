@@ -107,7 +107,7 @@ async def compute_transient_expression(
     compute_query_action: ComputeQueryAction = Depends(),
 ):
     try:
-        clickhouse_credential = await compute_query_action.get_credentials(
+        clickhouse_credential = await compute_query_action.get_clickhouse_credentials(
             datasource_id=dto.datasourceId
         )
         return spreadsheets_service.compute_transient_expression(
@@ -135,7 +135,7 @@ async def compute_transient_column(
     compute_query_action: ComputeQueryAction = Depends(),
 ):
     try:
-        clickhouse_credential = await compute_query_action.get_credentials(
+        clickhouse_credential = await compute_query_action.get_clickhouse_credentials(
             datasource_id=dto.datasourceId
         )
 
@@ -225,7 +225,9 @@ async def vlookup(
     spreadsheets_service: SpreadsheetService = Depends(),
     compute_query_action: ComputeQueryAction = Depends(),
 ):
-    credential = await compute_query_action.get_credentials(dto.datasourceId)
+    credential = await compute_query_action.get_clickhouse_credentials(
+        datasource_id=dto.datasourceId
+    )
     return await spreadsheets_service.compute_vlookup(
         search_query=dto.searchQuery,
         credential=credential,
