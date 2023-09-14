@@ -383,9 +383,18 @@ export const generateQuery = (
 ) => {
   if (!columns.length) return '';
   const columnsQuerySubstring = columns
-    .map((column) =>
-      column ? (!column.includes('AS') ? '"' + column + '"' : column) : `''`
-    )
+    .map((column) => {
+      if (column.startsWith('properties.')) {
+        const split = column.split('.');
+        const newCol = `${split[0]}.'${split.slice(1).join('.')}'`;
+        return `${newCol} AS "${column}"`;
+      }
+      return column
+        ? !column.includes('AS')
+          ? '"' + column + '"'
+          : column
+        : `''`;
+    })
     .join(', ');
   return `Select ${columnsQuerySubstring} from ${databaseName}.${tableName} ${
     databaseName == 'default' &&
