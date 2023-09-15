@@ -100,13 +100,15 @@ const ConnectorColumns = ({
       datasource_id
     );
 
-    const newHeaders = selectedColumns.map((column) => ({
-      name: column,
-      type:
-        column && column !== "''"
-          ? ColumnType.QUERY_HEADER
-          : ColumnType.PADDING_HEADER,
-    }));
+    const newHeaders = selectedColumns.map((column, index) => {
+      const headerType =
+        sheetData.headers[index]?.type || ColumnType.QUERY_HEADER;
+      return {
+        name: column,
+        type:
+          column && column !== "''" ? headerType : ColumnType.PADDING_HEADER,
+      };
+    });
 
     setSheetsData((prevSheetData: TransientSheetData[]) => {
       const tempSheetsData = cloneDeep(prevSheetData);

@@ -165,34 +165,6 @@ const Workbook = ({
     if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
   }, []);
 
-  const calculatedChartData = useMemo(() => {
-    if (
-      sheetsData[selectedSheetIndex]?.charts?.length &&
-      sheetsData[selectedSheetIndex].data.length
-    ) {
-      const updatedSeries = prepareChartSeriesFromSheetData(
-        sheetsData[selectedSheetIndex].data
-      );
-      const updatedSeriesName = updatedSeries.map((item) => item.name);
-      return sheetsData[selectedSheetIndex].charts.map((chartData) => {
-        chartData.xAxis = chartData.xAxis.filter((x) =>
-          updatedSeriesName.includes(x.name)
-        );
-        chartData.yAxis = chartData.yAxis.filter((y) =>
-          updatedSeriesName.includes(y.name)
-        );
-        const omittedSeries = [...chartData.xAxis, ...chartData.yAxis].map(
-          (data) => data.name
-        );
-        chartData.series = updatedSeries.filter(
-          (data) => !omittedSeries.includes(data.name)
-        );
-        return chartData;
-      });
-    }
-    return [];
-  }, [sheetsData[selectedSheetIndex].data]);
-
   useEffect(() => {
     if (
       !isEqual(savedWorkbook?.name, workbookName) ||
@@ -238,6 +210,7 @@ const Workbook = ({
     const sheet = sheetsData[selectedSheetIndex];
     const isSelectedConnectionDatamart = sheet?.meta?.isDatamart;
     setFetchingTransientSheet(true);
+
     const response = await getTransientSpreadsheets(
       sheet?.meta?.dsId || (dsId as string),
       sheet.query,
@@ -380,6 +353,7 @@ const Workbook = ({
 
   useEffect(() => {
     if (!savedWorkbook) return;
+
     const hasColumnFetcSubheaderWithoutData =
       savedWorkbook &&
       Boolean(
@@ -821,7 +795,11 @@ const Workbook = ({
           name: '',
           type: ColumnType.PADDING_HEADER,
         });
-        const parsedExpressions = parseHeaders(paddedColumns, headers);
+
+        const filteredColumns = paddedColumns.filter(
+          (column: string) => !column.toLowerCase().startsWith('=vlookup')
+        );
+        const parsedExpressions = parseHeaders(filteredColumns, headers);
 
         const query = generateQuery(
           parsedExpressions,
