@@ -18,6 +18,7 @@ import clevertapLogo from '@assets/images/clevertap-icon.png';
 import appertureLogo from '@assets/images/apperture-logo-new-small.svg';
 import apilogo from '@assets/images/apilogo.png';
 import mysqlLogo from '@assets/images/mysql-icon.png';
+import mssqlLogo from '@assets/images/mssql-icon.png';
 import csvLogo from '@assets/images/csv.svg';
 import FormButton from '@components/FormButton';
 import IntegrationSource from '@components/IntegrationSource';
@@ -214,6 +215,12 @@ const SelectProvider = ({ apps }: { apps: Array<AppWithIntegrations> }) => {
                   value={Provider.MYSQL}
                   imgSrc={mysqlLogo}
                   selected={provider === Provider.MYSQL}
+                />
+                <IntegrationSource
+                  sourceName="MsSQL"
+                  value={Provider.MSSQL}
+                  imgSrc={mssqlLogo}
+                  selected={provider === Provider.MSSQL}
                 />
                 <IntegrationSource
                   sourceName="MixPanel"

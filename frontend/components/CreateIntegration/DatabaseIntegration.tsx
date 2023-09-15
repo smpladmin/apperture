@@ -1,4 +1,3 @@
-import mysqlLogo from '@assets/images/mysql-icon.png';
 import {
   Box,
   Button,
@@ -6,9 +5,6 @@ import {
   Flex,
   Heading,
   Input,
-  Radio,
-  RadioGroup,
-  Stack,
   Text,
   useToast,
 } from '@chakra-ui/react';
@@ -29,14 +25,15 @@ import {
   createIntegrationWithDataSource,
   testDatabaseConnection,
 } from '@lib/services/integrationService';
-import Image from 'next/image';
+import Image, { StaticImageData } from 'next/image';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-type MySQLIntegrationProps = {
+type DatabaseIntegrationProps = {
   handleClose: Function;
   add: string | string[] | undefined;
+  logo: StaticImageData;
 };
 
 type FormData = {
@@ -53,12 +50,16 @@ type FormData = {
   sshPassword: string;
   useSshKey: boolean;
   sshKey: FileList;
-  databaseType: RelationalDatabaseType;
 };
-const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
+const DatabaseIntegration = ({
+  add,
+  handleClose,
+  logo,
+}: DatabaseIntegrationProps) => {
   const router = useRouter();
   const handleGoBack = (): void => router.back();
   const toast = useToast();
+  const provider = router.query.provider as Provider;
   const [isConnectionValid, setIsConnectionValid] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -109,7 +110,10 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
       password: data.password,
       databases: stringToList(data.databases),
       overSsh: data.overSsh,
-      databaseType: data.databaseType,
+      databaseType:
+        provider === Provider.MYSQL
+          ? RelationalDatabaseType.MYSQL
+          : RelationalDatabaseType.MSSQL,
       sshCredential: databaseSshCredential,
     };
 
@@ -119,10 +123,6 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
   const onSubmit = async (data: FormData) => {
     const appId = router.query.appId as string;
     const databaseCredential = await processFormData(data);
-    const provider =
-      databaseCredential.databaseType === RelationalDatabaseType.MSSQL
-        ? Provider.MSSQL
-        : Provider.MYSQL;
     const integration = await createIntegrationWithDataSource(
       appId,
       provider,
@@ -231,7 +231,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
                 width={{ base: 8, md: 14 }}
                 mb={2}
               >
-                <Image src={mysqlLogo} alt="mixpanel" layout="responsive" />
+                <Image src={logo} alt="mixpanel" layout="responsive" />
               </Box>
 
               <Heading
@@ -242,7 +242,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
                 fontWeight={'semibold'}
                 maxW={200}
               >
-                Enter Details to fetch data from MySQL
+                Enter Details to fetch data from {provider}
               </Heading>
               <Flex w={125}>
                 <form
@@ -250,34 +250,6 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
                   style={{ width: '100%' }}
                 >
                   <Flex direction={'column'} gap={'4'}>
-                    <Flex direction={'column'} gap={'2'} mb={'2'}>
-                      <Text
-                        as={'label'}
-                        fontSize={'xs-14'}
-                        lineHeight={'xs-14'}
-                        color={'grey.100'}
-                        display="block"
-                        htmlFor={'databaseType'}
-                      >
-                        Database Type:
-                      </Text>
-                      <RadioGroup
-                        id={'databaseType'}
-                        defaultValue={RelationalDatabaseType.MYSQL}
-                        fontSize={'xs-14'}
-                        lineHeight={'xs-14'}
-                        colorScheme={'radioBlack'}
-                      >
-                        <Stack spacing={4} direction="row">
-                          <Radio value="MYSQL" {...register('databaseType')}>
-                            MYSQL
-                          </Radio>
-                          <Radio value="MSSQL" {...register('databaseType')}>
-                            MSSQL
-                          </Radio>
-                        </Stack>
-                      </RadioGroup>
-                    </Flex>
                     <FormInputField
                       fieldName="host"
                       label="Host"
@@ -420,7 +392,7 @@ const MySQLIntegration = ({ add, handleClose }: MySQLIntegrationProps) => {
   );
 };
 
-export default MySQLIntegration;
+export default DatabaseIntegration;
 
 const FormInputField = ({
   label,
