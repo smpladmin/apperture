@@ -3,10 +3,12 @@ import ClevertapIntegration from '@components/CreateIntegration/ClevertapIntegra
 import GooglePermission from '@components/CreateIntegration/GooglePermission';
 import MixpanelIntegration from '@components/CreateIntegration/MixpanelIntegration';
 import APIIntegration from '@components/CreateIntegration/APIIntegration';
-import MySQLIntegration from '@components/CreateIntegration/MySQLIntegration';
 import CSVIntegration from '@components/CreateIntegration/CSVIntegration';
 import { Provider } from '@lib/domain/provider';
 import { useRouter } from 'next/router';
+import DatabaseIntegration from '@components/CreateIntegration/DatabaseIntegration';
+import mysqlLogo from '@assets/images/mysql-icon.png';
+import mssqlLogo from '@assets/images/mssql-icon.png';
 
 const Create = () => {
   const router = useRouter();
@@ -37,7 +39,21 @@ const Create = () => {
     case Provider.API:
       return <APIIntegration add={add} handleClose={handleClose} />;
     case Provider.MYSQL:
-      return <MySQLIntegration add={add} handleClose={handleClose} />;
+      return (
+        <DatabaseIntegration
+          add={add}
+          handleClose={handleClose}
+          logo={mysqlLogo}
+        />
+      );
+    case Provider.MSSQL:
+      return (
+        <DatabaseIntegration
+          add={add}
+          handleClose={handleClose}
+          logo={mssqlLogo}
+        />
+      );
     case Provider.CSV:
       return <CSVIntegration add={add} handleClose={handleClose} />;
     default:
