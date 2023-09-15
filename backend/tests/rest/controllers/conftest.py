@@ -2349,6 +2349,7 @@ def integration_response():
             "mysql_credential": None,
             "mssql_credential": None,
             "csv_credential": None,
+            "api_base_url": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",

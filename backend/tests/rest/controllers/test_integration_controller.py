@@ -93,6 +93,7 @@ def test_add_database_integration(
             "tableName": None,
             "type": "MYSQL",
             "csv_credential": None,
+            "api_base_url": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",
@@ -189,6 +190,7 @@ def test_add_csv_integration(
                 "s3_key": "/csv/636a1c61d715ca6baae65611/test.csv",
                 "table_name": "test",
             },
+            "api_base_url": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",

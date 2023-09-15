@@ -1,4 +1,7 @@
 import logging
+import os
+
+import requests
 
 from domain.common.models import IntegrationProvider
 from domain.datasource.models import Credential, DataSource
@@ -25,11 +28,29 @@ class ClevertapEventsStrategy:
         self.runlog_service = RunLogService()
         self.properties_saver = EventPropertiesSaver()
 
+    def get_events(self):
+        logging.info(
+            "{x}: {y}".format(
+                x="Requesting events for datasource", y=self.datasource.id
+            )
+        )
+
+        headers = {
+            f"{os.getenv('BACKEND_API_KEY_NAME')}": os.getenv("BACKEND_API_KEY_SECRET")
+        }
+        response = requests.get(
+            f"{os.getenv('BACKEND_BASE_URL')}/private/integrations/{self.datasource.id}/events",
+            headers=headers,
+        )
+        logging.info("{x}: {y}".format(x="Receieved events:", y=response.status_code))
+        return response.json()
+
     def execute(self):
         try:
             self.runlog_service.update_started(self.runlog_id)
             logging.info(f"Fetching events data for date - {self.date}")
-            for event in default_events:
+            events = self.get_events() or default_events
+            for event in events:
                 for events_data in self.fetcher.fetch(event):
                     logging.info(
                         f"Processing event {event} data for date - {self.date}"
@@ -50,7 +71,6 @@ class ClevertapEventsStrategy:
                         datasource_id=self.datasource.id,
                         provider=IntegrationProvider.CLEVERTAP,
                     )
-
             self.runlog_service.update_completed(self.runlog_id)
         except Exception as e:
             self.runlog_service.update_failed(self.runlog_id)

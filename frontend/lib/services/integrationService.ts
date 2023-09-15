@@ -13,6 +13,7 @@ type IntegrationRequestBody = {
   tableName?: string;
   databaseCredential?: DatabaseCredential;
   csvFileId?: string;
+  eventList?: string[];
 };
 
 export const createIntegrationWithDataSource = async (
@@ -24,6 +25,7 @@ export const createIntegrationWithDataSource = async (
   tableName?: string,
   databaseCredential?: DatabaseCredential,
   csvFileId?: string,
+  eventList?: string[],
   config: AxiosRequestConfig = {
     params: {
       create_datasource: true,
@@ -39,7 +41,7 @@ export const createIntegrationWithDataSource = async (
           databaseCredential,
           csvFileId,
         }
-      : { appId, provider, accountId, apiKey, apiSecret, tableName };
+      : { appId, provider, accountId, apiKey, apiSecret, tableName, eventList };
 
   const res = await ApperturePost(
     '/integrations',

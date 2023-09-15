@@ -3,7 +3,8 @@ import logging
 from typing import Union
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Depends, Query, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
+
 from data_processor_queue.service import DPQueueService
 from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
@@ -13,17 +14,20 @@ from domain.integrations.models import RelationalDatabaseType
 
 from domain.runlogs.service import RunLogService
 from domain.datasources.service import DataSourceService
+from domain.event_properties.service import EventPropertiesService
+from domain.files.service import FilesService
 from domain.integrations.service import IntegrationService
+from domain.runlogs.service import RunLogService
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.datasources import CreateDataSourceDto, DataSourceResponse
 from rest.dtos.integrations import (
     CreateIntegrationDto,
+    DeleteCSVDto,
     IntegrationResponse,
     CSVCreateDto,
-    DeleteCSVDto,
     DatabaseCredentialDto,
 )
-from rest.middlewares import get_user_id, validate_jwt, get_user
+from rest.middlewares import get_user, get_user_id, validate_jwt
 
 router = APIRouter(
     tags=["integration"],
@@ -103,6 +107,7 @@ async def create_integration(
     runlog_service: RunLogService = Depends(),
     dpq_service: DPQueueService = Depends(),
     files_service: FilesService = Depends(),
+    event_property_service: EventPropertiesService = Depends(),
 ):
     if dto.databaseCredential:
         db_type = dto.databaseCredential.databaseType
@@ -152,6 +157,15 @@ async def create_integration(
             ds_service.create_row_policy_for_username(
                 datasource_id=datasource.id, username=app.clickhouse_credential.username
             )
+
+        if dto.eventList:
+            for event in dto.eventList:
+                await event_property_service.create_event_properties(
+                    datasource_id=datasource.id,
+                    event_name=event,
+                    properties=[],
+                    provider=dto.provider,
+                )
 
         if trigger_data_processor:
             runlogs = await runlog_service.create_runlogs(datasource.id)
@@ -237,3 +251,15 @@ async def delete_file_from_s3(
     except Exception as e:
         logging.info(e)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/integrations/{dsId}/events")
+async def get_datasource_events(
+    dsId: str,
+    event_property_service: EventPropertiesService = Depends(),
+):
+    event_properties = await event_property_service.get_event_properties_for_datasource(
+        datasource_id=dsId
+    )
+
+    return [properties.event for properties in event_properties]

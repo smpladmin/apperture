@@ -423,3 +423,15 @@ async def trigger_refresh_datamart_for_all_apps(
     logging.info("Scheduled jobs for all apps")
     logging.info(jobs)
     return jobs
+
+
+@router.get("/integrations/{dsId}/events")
+async def get_datasource_events(
+    dsId: str,
+    event_property_service: EventPropertiesService = Depends(),
+):
+    event_properties = await event_property_service.get_event_properties_for_datasource(
+        datasource_id=dsId
+    )
+
+    return [properties.event for properties in event_properties]
