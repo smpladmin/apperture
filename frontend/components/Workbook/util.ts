@@ -379,7 +379,8 @@ export const generateQuery = (
   columns: string[],
   tableName: string,
   databaseName: string,
-  datasourceId: string
+  datasourceId: string,
+  query?: string
 ) => {
   if (!columns.length) return '';
   const columnsQuerySubstring = columns
@@ -387,15 +388,15 @@ export const generateQuery = (
       column ? (!column.includes('AS') ? '"' + column + '"' : column) : `''`
     )
     .join(', ');
-  return `Select ${columnsQuerySubstring} from ${databaseName}.${tableName} ${
-    databaseName == 'default' &&
-    (tableName == 'events' || tableName == 'clickstream')
-      ? `where datasource_id = '${datasourceId}'`
-      : ''
-  }`;
+  if (!query)
+    return `Select ${columnsQuerySubstring} from ${databaseName}.${tableName} ${
+      databaseName == 'default' &&
+      (tableName == 'events' || tableName == 'clickstream')
+        ? `where datasource_id = '${datasourceId}'`
+        : ''
+    }`;
+  return `Select ${columnsQuerySubstring} from  (${query})`;
 };
-
-// returns headers and formatted data
 
 export const transientPivotToSheetData = (
   rows: string[] = [],

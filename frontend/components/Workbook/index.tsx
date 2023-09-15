@@ -213,7 +213,7 @@ const Workbook = ({
 
     const response = await getTransientSpreadsheets(
       sheet?.meta?.dsId || (dsId as string),
-      sheet.query,
+      sheet?.meta?.generatedQuery || sheet.query,
       sheet?.is_sql,
       sheet.aiQuery,
       isSelectedConnectionDatamart,
@@ -250,17 +250,26 @@ const Workbook = ({
     const sheet = sheetsData[selectedSheetIndex];
     const prevSheet = prevSheetsData?.[selectedSheetIndex];
 
+    const generatedQuery = sheet?.meta?.generatedQuery;
+    const sqlQuery = sheet.query;
+
+    const hasSqlSameQuery =
+      sheet.query === prevSheet?.query &&
+      sheet?.meta?.generatedQuery === prevSheet?.meta?.generatedQuery;
+
+    const hasAISameQuery = isEqual(sheet?.aiQuery, prevSheet?.aiQuery);
+
     const isSqlSheet = sheet?.is_sql;
-    const hasSameQuery = isSqlSheet
-      ? sheet.query === prevSheet?.query
-      : isEqual(sheet?.aiQuery, prevSheet?.aiQuery);
+    const hasSameQuery = isSqlSheet ? hasSqlSameQuery : hasAISameQuery;
 
     const isInEditMode = sheet?.edit_mode;
 
     // Note - inEditMode it would only execute, if formula has changed
     const isFormulaNotChangedInEditMode = isInEditMode && !isFormulaEdited;
+
     if (
-      (isSqlSheet && (!sheet.query || isFormulaNotChangedInEditMode)) ||
+      (isSqlSheet &&
+        ((!sqlQuery && !generatedQuery) || isFormulaNotChangedInEditMode)) ||
       hasSameQuery
     ) {
       return;
@@ -275,6 +284,7 @@ const Workbook = ({
   }, [
     sheetsData[selectedSheetIndex]?.query,
     sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery,
+    sheetsData[selectedSheetIndex]?.meta?.generatedQuery,
     JSON.stringify(sheetsData[selectedSheetIndex]?.aiQuery?.wordReplacements),
     triggerSheetFetch,
     isFormulaEdited,
@@ -375,7 +385,7 @@ const Workbook = ({
 
       const res = await getTransientSpreadsheets(
         dsId as string,
-        selectedSheet.query,
+        selectedSheet?.meta?.generatedQuery || selectedSheet.query,
         selectedSheet.is_sql,
         selectedSheet.aiQuery,
         isSelectedConnectionDatamart
@@ -801,16 +811,23 @@ const Workbook = ({
         );
         const parsedExpressions = parseHeaders(filteredColumns, headers);
 
+        const sheet = sheetsData[selectedSheetIndex];
+
+        // in edit mode, evaluate BODMAS on top of user written query
         const query = generateQuery(
           parsedExpressions,
-          sheetsData[selectedSheetIndex].meta?.selectedTable || 'events',
-          sheetsData[selectedSheetIndex].meta?.selectedDatabase || 'default',
-          sheetsData[selectedSheetIndex].meta?.dsId || ''
+          sheet.meta?.selectedTable || 'events',
+          sheet.meta?.selectedDatabase || 'default',
+          sheet.meta?.dsId || '',
+          sheet.edit_mode ? sheet.query : undefined
         );
 
         setSheetsData((prevSheetData: TransientSheetData[]) => {
           const tempSheetsData = cloneDeep(prevSheetData);
-          tempSheetsData[selectedSheetIndex].query = query;
+
+          tempSheetsData[selectedSheetIndex].edit_mode
+            ? (tempSheetsData[selectedSheetIndex].meta!!.generatedQuery = query)
+            : (tempSheetsData[selectedSheetIndex].query = query);
           // TODO: should check the double bang !!
           tempSheetsData[selectedSheetIndex].meta!!.selectedColumns =
             paddedColumns;
@@ -985,7 +1002,8 @@ const Workbook = ({
       columnFormat: {},
       meta: {
         ...referenceSheet?.meta,
-        referenceSheetQuery: referenceSheet.query,
+        referenceSheetQuery:
+          referenceSheet?.meta?.generatedQuery || referenceSheet.query,
         selectedPivotOptions: referenceSheet?.meta?.selectedColumns || [],
         selectedPivotColumns: [],
         selectedPivotRows: [],
