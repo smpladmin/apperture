@@ -29,6 +29,7 @@ export type SheetMeta = {
   selectedPivotValues?: PivotValueDetail[];
   referenceSheetIndex?: number;
   isDatamart?: boolean;
+  generatedQuery?: string;
 };
 
 export type AIQuery = {

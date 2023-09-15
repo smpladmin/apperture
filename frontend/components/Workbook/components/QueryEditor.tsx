@@ -61,13 +61,17 @@ const QueryEditor = ({
   };
 
   useEffect(() => {
-    if (sheetData.query) {
-      setQuery(sheetData.query);
+    if (sheetData.is_sql) {
+      setQuery(sheetData?.meta?.generatedQuery || sheetData.query);
     }
     if (!sheetData.is_sql && sheetData.aiQuery?.sql) {
       setQuery(sheetData.aiQuery?.sql);
     }
-  }, [sheetData.query, sheetData.aiQuery?.sql]);
+  }, [
+    sheetData.query,
+    sheetData.aiQuery?.sql,
+    sheetData?.meta?.generatedQuery,
+  ]);
 
   const convertEmptyQueryColumnToPaddingHeaders = (
     headers: SpreadSheetColumn[]
@@ -102,6 +106,7 @@ const QueryEditor = ({
         toUpdateSheets[selectedSheetIndex].sheet_type
       );
       toUpdateSheets[selectedSheetIndex].columnFormat = {};
+      toUpdateSheets[selectedSheetIndex].meta!!.generatedQuery = undefined;
 
       setError('');
     } else {

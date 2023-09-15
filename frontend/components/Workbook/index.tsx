@@ -165,34 +165,6 @@ const Workbook = ({
     if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
   }, []);
 
-  const calculatedChartData = useMemo(() => {
-    if (
-      sheetsData[selectedSheetIndex]?.charts?.length &&
-      sheetsData[selectedSheetIndex].data.length
-    ) {
-      const updatedSeries = prepareChartSeriesFromSheetData(
-        sheetsData[selectedSheetIndex].data
-      );
-      const updatedSeriesName = updatedSeries.map((item) => item.name);
-      return sheetsData[selectedSheetIndex].charts.map((chartData) => {
-        chartData.xAxis = chartData.xAxis.filter((x) =>
-          updatedSeriesName.includes(x.name)
-        );
-        chartData.yAxis = chartData.yAxis.filter((y) =>
-          updatedSeriesName.includes(y.name)
-        );
-        const omittedSeries = [...chartData.xAxis, ...chartData.yAxis].map(
-          (data) => data.name
-        );
-        chartData.series = updatedSeries.filter(
-          (data) => !omittedSeries.includes(data.name)
-        );
-        return chartData;
-      });
-    }
-    return [];
-  }, [sheetsData[selectedSheetIndex].data]);
-
   useEffect(() => {
     if (
       !isEqual(savedWorkbook?.name, workbookName) ||
@@ -238,9 +210,10 @@ const Workbook = ({
     const sheet = sheetsData[selectedSheetIndex];
     const isSelectedConnectionDatamart = sheet?.meta?.isDatamart;
     setFetchingTransientSheet(true);
+
     const response = await getTransientSpreadsheets(
       sheet?.meta?.dsId || (dsId as string),
-      sheet.query,
+      sheet?.meta?.generatedQuery || sheet.query,
       sheet?.is_sql,
       sheet.aiQuery,
       isSelectedConnectionDatamart,
@@ -277,17 +250,25 @@ const Workbook = ({
     const sheet = sheetsData[selectedSheetIndex];
     const prevSheet = prevSheetsData?.[selectedSheetIndex];
 
+    const generatedQuery = sheet?.meta?.generatedQuery;
+    const sqlQuery = sheet.query;
+
+    const hasSameSqlQuery =
+      sheet.query === prevSheet?.query &&
+      sheet?.meta?.generatedQuery === prevSheet?.meta?.generatedQuery;
+
+    const hasSameAIQuery = isEqual(sheet?.aiQuery, prevSheet?.aiQuery);
+
     const isSqlSheet = sheet?.is_sql;
-    const hasSameQuery = isSqlSheet
-      ? sheet.query === prevSheet?.query
-      : isEqual(sheet?.aiQuery, prevSheet?.aiQuery);
+    const hasSameQuery = isSqlSheet ? hasSameSqlQuery : hasSameAIQuery;
 
     const isInEditMode = sheet?.edit_mode;
 
     // Note - inEditMode it would only execute, if formula has changed
     const isFormulaNotChangedInEditMode = isInEditMode && !isFormulaEdited;
+    const isSqlSheetEmpty = !sqlQuery && !generatedQuery;
     if (
-      (isSqlSheet && (!sheet.query || isFormulaNotChangedInEditMode)) ||
+      (isSqlSheet && (isSqlSheetEmpty || isFormulaNotChangedInEditMode)) ||
       hasSameQuery
     ) {
       return;
@@ -302,6 +283,7 @@ const Workbook = ({
   }, [
     sheetsData[selectedSheetIndex]?.query,
     sheetsData[selectedSheetIndex]?.aiQuery?.nlQuery,
+    sheetsData[selectedSheetIndex]?.meta?.generatedQuery,
     JSON.stringify(sheetsData[selectedSheetIndex]?.aiQuery?.wordReplacements),
     triggerSheetFetch,
     isFormulaEdited,
@@ -380,6 +362,7 @@ const Workbook = ({
 
   useEffect(() => {
     if (!savedWorkbook) return;
+
     const hasColumnFetcSubheaderWithoutData =
       savedWorkbook &&
       Boolean(
@@ -401,7 +384,7 @@ const Workbook = ({
 
       const res = await getTransientSpreadsheets(
         dsId as string,
-        selectedSheet.query,
+        selectedSheet?.meta?.generatedQuery || selectedSheet.query,
         selectedSheet.is_sql,
         selectedSheet.aiQuery,
         isSelectedConnectionDatamart
@@ -821,18 +804,31 @@ const Workbook = ({
           name: '',
           type: ColumnType.PADDING_HEADER,
         });
-        const parsedExpressions = parseHeaders(paddedColumns, headers);
 
+        // filter VLOOKUP formula columns while extracting columns to generate query for BODMAS
+        const filteredColumns = paddedColumns.filter(
+          (column: string) => !column.toLowerCase().startsWith('=vlookup')
+        );
+        const parsedExpressions = parseHeaders(filteredColumns, headers);
+
+        const sheet = sheetsData[selectedSheetIndex];
+        const sheetQuery = sheet?.is_sql ? sheet.query : sheet?.aiQuery?.sql;
+
+        // in edit mode, evaluate BODMAS on top of user written query
         const query = generateQuery(
           parsedExpressions,
-          sheetsData[selectedSheetIndex].meta?.selectedTable || 'events',
-          sheetsData[selectedSheetIndex].meta?.selectedDatabase || 'default',
-          sheetsData[selectedSheetIndex].meta?.dsId || ''
+          sheet.meta?.selectedTable || 'events',
+          sheet.meta?.selectedDatabase || 'default',
+          sheet.meta?.dsId || '',
+          sheet.edit_mode ? sheetQuery : undefined
         );
 
         setSheetsData((prevSheetData: TransientSheetData[]) => {
           const tempSheetsData = cloneDeep(prevSheetData);
-          tempSheetsData[selectedSheetIndex].query = query;
+
+          tempSheetsData[selectedSheetIndex].edit_mode
+            ? (tempSheetsData[selectedSheetIndex].meta!!.generatedQuery = query)
+            : (tempSheetsData[selectedSheetIndex].query = query);
           // TODO: should check the double bang !!
           tempSheetsData[selectedSheetIndex].meta!!.selectedColumns =
             paddedColumns;
@@ -1007,7 +1003,8 @@ const Workbook = ({
       columnFormat: {},
       meta: {
         ...referenceSheet?.meta,
-        referenceSheetQuery: referenceSheet.query,
+        referenceSheetQuery:
+          referenceSheet?.meta?.generatedQuery || referenceSheet.query,
         selectedPivotOptions: referenceSheet?.meta?.selectedColumns || [],
         selectedPivotColumns: [],
         selectedPivotRows: [],
