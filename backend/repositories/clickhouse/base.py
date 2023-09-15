@@ -97,3 +97,4 @@ class EventsBase(ABC):
             logging.info(
                 f"Exception {e} occurred while executing query for restricted user {username}"
             )
+            return None

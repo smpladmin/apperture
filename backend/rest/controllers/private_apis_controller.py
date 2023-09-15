@@ -400,10 +400,10 @@ async def refresh_datamart_tables_for_app(
     )
 
     for table in datamart_tables:
-        await datamart_service.refresh_datamart_table(
+        refresh_status = await datamart_service.refresh_datamart_table(
             datamart_id=str(table.id), clickhouse_credential=app.clickhouse_credential
         )
-        res[str(table.id)] = "updated"
+        res[str(table.id)] = "updated" if refresh_status else "failed"
     return {app_id: res}
 
 

@@ -32,7 +32,7 @@ class DataMartRepo(EventsBase):
 
     def create_table(
         self, query: str, table_name: str, clickhouse_credential: ClickHouseCredential
-    ):
+    ) -> bool:
         query = self.cleanse_query_string(query_string=query)
         self.execute_query_for_restricted_client(
             query=f"DROP TABLE IF EXISTS {clickhouse_credential.databasename}.{table_name}",
@@ -50,9 +50,12 @@ class DataMartRepo(EventsBase):
             username=clickhouse_credential.username,
             password=clickhouse_credential.password,
         )
-        self.logger.info(
-            f"Created a clickhouse table {table_name} in {clickhouse_credential.databasename} database for user {clickhouse_credential.username}"
-        )
+        if result:
+            self.logger.info(
+                f"Created a clickhouse table {table_name} in {clickhouse_credential.databasename} database for user {clickhouse_credential.username}"
+            )
+            return True
+        return False
 
     def limit_query(self, query_string: str):
         pattern = r"(?i)\bTOP\s*\(\s*\d+\s*\)"
@@ -111,14 +114,15 @@ class DataMartRepo(EventsBase):
             create_table_query.rstrip(", ") + ") ENGINE = MergeTree() ORDER BY tuple();"
         )
         self.logger.info(f"Executing create table query: {create_table_query}")
-        self.execute_query_for_restricted_client(
+        create_status = self.execute_query_for_restricted_client(
             query=create_table_query,
             username=clickhouse_credential.username,
             password=clickhouse_credential.password,
         )
-        self.logger.info(
-            f"Created a clickhouse table {table_name} in {clickhouse_credential.databasename} database for user {clickhouse_credential.username}"
-        )
+        if create_status:
+            self.logger.info(
+                f"Created a clickhouse table {table_name} in {clickhouse_credential.databasename} database for user {clickhouse_credential.username}"
+            )
 
         # Build the INSERT INTO query
         insert_query = (
@@ -131,12 +135,17 @@ class DataMartRepo(EventsBase):
 
         insert_query = insert_query.rstrip(",")
         self.logger.info(f"Executing insert into table query: {insert_query}")
-        self.execute_query_for_restricted_client(
+        insert_status = self.execute_query_for_restricted_client(
             query=insert_query,
             username=clickhouse_credential.username,
             password=clickhouse_credential.password,
         )
-        self.logger.info(f"Successfully inserted data into the table")
+        if insert_status:
+            self.logger.info(f"Successfully inserted data into the table")
+
+        if create_status and insert_status:
+            return True
+        return False
 
     def drop_table(self, table_name: str, clickhouse_credential: ClickHouseCredential):
         query = (

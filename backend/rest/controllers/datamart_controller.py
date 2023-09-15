@@ -75,13 +75,18 @@ async def save_datamart_table(
         query=dto.query,
     )
 
-    await datamart_service.create_datamart_table(
+    creation_status = await datamart_service.create_datamart_table(
         table=datamart_table,
         clickhouse_credential=app.clickhouse_credential,
         database_client=database_client,
         db_creds=db_creds,
     )
-    return datamart_table
+    if creation_status:
+        return datamart_table
+    else:
+        raise HTTPException(
+            status_code=500, detail="Error while creating table in clickhouse"
+        )
 
 
 @router.put(
@@ -123,14 +128,19 @@ async def update_datamart_table(
         query=dto.query,
     )
 
-    await datamart_service.update_datamart_table(
+    update_status = await datamart_service.update_datamart_table(
         table_id=id,
         new_table=new_datamart_table,
         clickhouse_credential=app.clickhouse_credential,
         database_client=database_client,
         db_creds=db_creds,
     )
-    return new_datamart_table
+    if update_status:
+        return new_datamart_table
+    else:
+        raise HTTPException(
+            status_code=500, detail="Error while creating table in clickhouse"
+        )
 
 
 @router.get(

@@ -1,4 +1,4 @@
-import { Box, Flex } from '@chakra-ui/react';
+import { Box, Flex, useToast } from '@chakra-ui/react';
 import { sql } from '@codemirror/lang-sql';
 import Header from '@components/EventsLayout/ActionHeader';
 import {
@@ -11,6 +11,7 @@ import {
   saveDataMartTable,
   updateDataMartTable,
 } from '@lib/services/dataMartService';
+import { ErrorResponse } from '@lib/services/util';
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { cloneDeep } from 'lodash';
 import { useRouter } from 'next/router';
@@ -19,6 +20,7 @@ import DataMartTable from '../components/DataMartTable';
 
 const DataMart = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
   const router = useRouter();
+  const toast = useToast();
   const { dsId, dataMartId } = router.query;
 
   const datasourceId = (dsId as string) || savedDataMart?.datasourceId;
@@ -54,7 +56,7 @@ const DataMart = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
   const handleSaveAndUpdate = async () => {
     setSaveButtonDisabled(true);
     setIsSaving(true);
-    const { data, status } = isDataMartBeingEdited
+    const response = isDataMartBeingEdited
       ? await updateDataMartTable(
           dataMartId as string,
           datasourceId!!,
@@ -62,13 +64,18 @@ const DataMart = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
           tableName
         )
       : await saveDataMartTable(datasourceId!!, tableMetaData.query, tableName);
-    setIsDataMartBeingEdited(true);
-    if (status === 200) {
+    if (response.status === 200) {
       router.push({
         pathname: '/analytics/datamart/edit/[dataMartId]',
-        query: { dataMartId: data?._id || dataMartId, datasourceId },
+        query: { dataMartId: response.data?._id || dataMartId, datasourceId },
       });
     } else {
+      toast({
+        title: (response as ErrorResponse)?.error?.detail,
+        status: 'error',
+        variant: 'subtle',
+        isClosable: true,
+      });
       setSaveButtonDisabled(false);
     }
     setIsSaving(false);
