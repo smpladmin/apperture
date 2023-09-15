@@ -45,12 +45,12 @@ describe('select integration provider', () => {
           query: { appId: '636a1c61d715ca6baae65612' },
         })}
       >
-        <SelectProvider />
+        <SelectProvider apps={[]} />
       </RouterContext.Provider>
     );
 
     const integrationProvider = screen.getAllByTestId('integration-provider');
-    expect(integrationProvider.length).toBe(7);
+    expect(integrationProvider.length).toBe(8);
   });
 
   it('user gets redirected to complete page when clicked on next button after selecting apperture integration provider', async () => {
@@ -61,7 +61,7 @@ describe('select integration provider', () => {
 
     render(
       <RouterContext.Provider value={router}>
-        <SelectProvider />
+        <SelectProvider apps={[]} />
       </RouterContext.Provider>
     );
 
@@ -92,7 +92,7 @@ describe('select integration provider', () => {
 
     render(
       <RouterContext.Provider value={router}>
-        <SelectProvider />
+        <SelectProvider apps={[]} />
       </RouterContext.Provider>
     );
 
