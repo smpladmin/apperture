@@ -812,6 +812,7 @@ const Workbook = ({
         const parsedExpressions = parseHeaders(filteredColumns, headers);
 
         const sheet = sheetsData[selectedSheetIndex];
+        const sheetQuery = sheet?.is_sql ? sheet.query : sheet?.aiQuery?.sql;
 
         // in edit mode, evaluate BODMAS on top of user written query
         const query = generateQuery(
@@ -819,7 +820,7 @@ const Workbook = ({
           sheet.meta?.selectedTable || 'events',
           sheet.meta?.selectedDatabase || 'default',
           sheet.meta?.dsId || '',
-          sheet.edit_mode ? sheet.query : undefined
+          sheet.edit_mode ? sheetQuery : undefined
         );
 
         setSheetsData((prevSheetData: TransientSheetData[]) => {
