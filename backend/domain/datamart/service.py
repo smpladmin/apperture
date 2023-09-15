@@ -55,19 +55,21 @@ class DataMartService:
     ):
         table.updated_at = table.created_at
         if database_client == DatabaseClient.MSSQL:
-            self.datamart_repo.create_mssql_table(
+            creation_status = self.datamart_repo.create_mssql_table(
                 query=table.query,
                 table_name=table.table_name,
                 clickhouse_credential=clickhouse_credential,
                 db_creds=db_creds,
             )
         else:
-            self.datamart_repo.create_table(
+            creation_status = self.datamart_repo.create_table(
                 query=table.query,
                 table_name=table.table_name,
                 clickhouse_credential=clickhouse_credential,
             )
-        await DataMart.insert(table)
+        if creation_status:
+            await DataMart.insert(table)
+        return creation_status
 
     async def update_table_action(
         self,
@@ -93,21 +95,23 @@ class DataMartService:
             clickhouse_credential=clickhouse_credential,
         )
         if database_client == DatabaseClient.MSSQL:
-            self.datamart_repo.create_mssql_table(
+            update_status = self.datamart_repo.create_mssql_table(
                 query=query,
                 table_name=table_name,
                 clickhouse_credential=clickhouse_credential,
                 db_creds=db_creds,
             )
         else:
-            self.datamart_repo.create_table(
+            update_status = self.datamart_repo.create_table(
                 query=query,
                 table_name=table_name,
                 clickhouse_credential=clickhouse_credential,
             )
-        await DataMart.find_one(
-            DataMart.id == PydanticObjectId(datamart_id),
-        ).update({"$set": to_update})
+        if update_status:
+            await DataMart.find_one(
+                DataMart.id == PydanticObjectId(datamart_id),
+            ).update({"$set": to_update})
+        return update_status
 
     async def update_datamart_table(
         self,
@@ -122,7 +126,7 @@ class DataMartService:
         to_update.pop("created_at")
         to_update["updated_at"] = datetime.utcnow()
 
-        await self.update_table_action(
+        update_status = await self.update_table_action(
             datamart_id=table_id,
             clickhouse_credential=clickhouse_credential,
             to_update=to_update,
@@ -131,6 +135,7 @@ class DataMartService:
             db_creds=db_creds,
             database_client=database_client,
         )
+        return update_status
 
     async def get_datamart_table(self, id: str) -> DataMart:
         return await DataMart.get(PydanticObjectId(id))
@@ -168,10 +173,11 @@ class DataMartService:
         self, datamart_id: str, clickhouse_credential: ClickHouseCredential
     ):
         to_update = {"last_refreshed": datetime.utcnow()}
-        await self.update_table_action(
+        refresh_status = await self.update_table_action(
             datamart_id=datamart_id,
             clickhouse_credential=clickhouse_credential,
             to_update=to_update,
             database_client=DatabaseClient.CLICKHOUSE,
             db_creds=None,
         )
+        return refresh_status
