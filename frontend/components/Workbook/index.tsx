@@ -253,23 +253,22 @@ const Workbook = ({
     const generatedQuery = sheet?.meta?.generatedQuery;
     const sqlQuery = sheet.query;
 
-    const hasSqlSameQuery =
+    const hasSameSqlQuery =
       sheet.query === prevSheet?.query &&
       sheet?.meta?.generatedQuery === prevSheet?.meta?.generatedQuery;
 
-    const hasAISameQuery = isEqual(sheet?.aiQuery, prevSheet?.aiQuery);
+    const hasSameAIQuery = isEqual(sheet?.aiQuery, prevSheet?.aiQuery);
 
     const isSqlSheet = sheet?.is_sql;
-    const hasSameQuery = isSqlSheet ? hasSqlSameQuery : hasAISameQuery;
+    const hasSameQuery = isSqlSheet ? hasSameSqlQuery : hasSameAIQuery;
 
     const isInEditMode = sheet?.edit_mode;
 
     // Note - inEditMode it would only execute, if formula has changed
     const isFormulaNotChangedInEditMode = isInEditMode && !isFormulaEdited;
-
+    const isSqlSheetEmpty = !sqlQuery && !generatedQuery;
     if (
-      (isSqlSheet &&
-        ((!sqlQuery && !generatedQuery) || isFormulaNotChangedInEditMode)) ||
+      (isSqlSheet && (isSqlSheetEmpty || isFormulaNotChangedInEditMode)) ||
       hasSameQuery
     ) {
       return;
@@ -806,6 +805,7 @@ const Workbook = ({
           type: ColumnType.PADDING_HEADER,
         });
 
+        // filter VLOOKUP formula columns while extracting columns to generate query for BODMAS
         const filteredColumns = paddedColumns.filter(
           (column: string) => !column.toLowerCase().startsWith('=vlookup')
         );

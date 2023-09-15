@@ -102,11 +102,12 @@ const ConnectorColumns = ({
 
     const newHeaders = selectedColumns.map((column, index) => {
       const headerType =
-        sheetData.headers[index]?.type || ColumnType.QUERY_HEADER;
+        column && column !== "''"
+          ? sheetData.headers[index]?.type || ColumnType.QUERY_HEADER
+          : ColumnType.PADDING_HEADER;
       return {
         name: column,
-        type:
-          column && column !== "''" ? headerType : ColumnType.PADDING_HEADER,
+        type: headerType,
       };
     });
 
