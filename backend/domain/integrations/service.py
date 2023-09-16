@@ -1,11 +1,11 @@
 import logging
 import os
 import tempfile
-from typing import Optional, Union, List
+from typing import List, Optional, Union
 
 import boto3
-import pymysql
 import pymssql
+import pymysql
 import sshtunnel
 from beanie import PydanticObjectId
 from fastapi import Depends, UploadFile
@@ -24,8 +24,8 @@ from .models import (
     DatabaseSSHCredential,
     Integration,
     IntegrationProvider,
-    MySQLCredential,
     MsSQLCredential,
+    MySQLCredential,
     RelationalDatabaseType,
 )
 
@@ -91,6 +91,7 @@ class IntegrationService:
         mysql_credential: Optional[MySQLCredential],
         mssql_credential: Optional[MsSQLCredential],
         csv_credential: Optional[CSVCredential],
+        api_base_url: Optional[str] = None,
     ):
         if mysql_credential:
             credential_type = CredentialType.MYSQL
@@ -115,6 +116,7 @@ class IntegrationService:
             mysql_credential=mysql_credential,
             mssql_credential=mssql_credential,
             csv_credential=csv_credential,
+            api_base_url=api_base_url,
         )
         integration = Integration(
             user_id=app.user_id,

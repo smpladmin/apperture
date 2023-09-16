@@ -8,24 +8,22 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from data_processor_queue.service import DPQueueService
 from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
+from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSourceVersion, ProviderDataSource
-from domain.files.service import FilesService
-from domain.integrations.models import RelationalDatabaseType
-
-from domain.runlogs.service import RunLogService
 from domain.datasources.service import DataSourceService
 from domain.event_properties.service import EventPropertiesService
 from domain.files.service import FilesService
+from domain.integrations.models import RelationalDatabaseType
 from domain.integrations.service import IntegrationService
 from domain.runlogs.service import RunLogService
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.datasources import CreateDataSourceDto, DataSourceResponse
 from rest.dtos.integrations import (
     CreateIntegrationDto,
-    DeleteCSVDto,
-    IntegrationResponse,
     CSVCreateDto,
     DatabaseCredentialDto,
+    DeleteCSVDto,
+    IntegrationResponse,
 )
 from rest.middlewares import get_user, get_user_id, validate_jwt
 
@@ -133,6 +131,10 @@ async def create_integration(
         else None
     )
     app = await app_service.get_shared_or_owned_app(id=dto.appId, user=user)
+    api_base_url = None
+    if dto.provider is IntegrationProvider.CLEVERTAP:
+        api_base_url = "https://eu1.api.clevertap.com/1/events.json"
+
     integration = await integration_service.create_integration(
         app,
         dto.provider,
@@ -143,6 +145,7 @@ async def create_integration(
         mysql_credential,
         mssql_credential,
         csv_credential,
+        api_base_url=api_base_url,
     )
 
     if create_datasource:
