@@ -28,15 +28,15 @@ class EventsSaver(Saver):
             ]
         ]
 
-        chunks = np.array_split(df, 10)
-        for chunk in chunks:
-            events = chunk.to_json(orient="values")
-            res = self._save_data(events)
-            if not res.ok:
-                raise Exception(
-                    f"Error saving data for datasource_id {datasource_id}, response status - {res.status_code} - {res.content}"
-                )
-            logging.info("SAVED")
+        # chunks = np.array_split(df, 10)
+        # for chunk in chunks:
+        events = df.to_json(orient="values")
+        res = self._save_data(events)
+        if not res.ok:
+            raise Exception(
+                f"Error saving data for datasource_id {datasource_id}, response status - {res.status_code} - {res.content}"
+            )
+        logging.info("SAVED")
 
     def _save_data(self, data):
         return requests.post(
