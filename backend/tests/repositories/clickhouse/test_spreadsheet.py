@@ -247,7 +247,7 @@ class TestSpreadSheetRepository:
 
     def test_build_compute_ordered_distinct_values(self):
         result = self.spreadsheet_repo.build_compute_transient_pivot(
-            sql="SELECT * FROM table",
+            query="SELECT * FROM table",
             rows=[self.pivot_axis_row_with_total],
             columns=[self.pivot_axis_column_without_total],
             values=[self.pivot_axis_value],
@@ -281,7 +281,7 @@ class TestSpreadSheetRepository:
 
     def test_build_compute_ordered_distinct_values_for_count(self):
         result = self.spreadsheet_repo.build_compute_transient_pivot(
-            sql="SELECT * FROM table",
+            query="SELECT * FROM table",
             rows=[self.pivot_axis_row_with_total],
             columns=[self.pivot_axis_column_without_total],
             values=[self.pivot_axis_value_count],
