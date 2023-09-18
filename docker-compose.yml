@@ -51,6 +51,7 @@ services:
     depends_on:
       - backend
       - redis
+      - clickhouse
   scheduler:
     build:
       context: ./scheduler

@@ -6,12 +6,15 @@ import requests
 from apperture.backend_action import post
 
 from domain.common.models import IntegrationProvider
+from store import Clickhouse
 from .saver import Saver
 
 
 class EventsSaver(Saver):
-    def __init__(self):
-        pass
+    def __init__(
+        self,
+    ):
+        self.clickhouse = Clickhouse()
 
     def save(self, datasource_id: str, provider: IntegrationProvider, df: pd.DataFrame):
         df["provider"] = provider.value
@@ -39,7 +42,7 @@ class EventsSaver(Saver):
         logging.info("SAVED")
 
     def _save_data(self, data):
-        self.client.insert(
+        self.clickhouse.insert(
             "events",
             data,
             column_names=[
