@@ -8,6 +8,8 @@ from apperture.backend_action import post
 from domain.common.models import IntegrationProvider
 from .saver import Saver
 
+import clickhouse_connect
+
 
 class EventsSaver(Saver):
     def __init__(self):
@@ -39,12 +41,20 @@ class EventsSaver(Saver):
         logging.info("SAVED")
 
     def _save_data(self, data):
-        return requests.post(
-            f"{os.getenv('BACKEND_BASE_URL')}/private/events",
-            headers={
-                f"{os.getenv('BACKEND_API_KEY_NAME')}": os.getenv(
-                    "BACKEND_API_KEY_SECRET"
-                )
-            },
-            data=data,
+        client = clickhouse_connect.get_client(
+            host="clickhouse",
+            allow_experimental_object_type=1,
+            query_limit=0,
+        )
+        client.insert(
+            "events",
+            data,
+            column_names=[
+                "datasource_id",
+                "timestamp",
+                "provider",
+                "user_id",
+                "event_name",
+                "properties",
+            ],
         )
