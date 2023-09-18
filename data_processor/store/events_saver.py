@@ -8,8 +8,6 @@ from apperture.backend_action import post
 from domain.common.models import IntegrationProvider
 from .saver import Saver
 
-import clickhouse_connect
-
 
 class EventsSaver(Saver):
     def __init__(self):
@@ -41,12 +39,7 @@ class EventsSaver(Saver):
         logging.info("SAVED")
 
     def _save_data(self, data):
-        client = clickhouse_connect.get_client(
-            host="clickhouse",
-            allow_experimental_object_type=1,
-            query_limit=0,
-        )
-        client.insert(
+        self.client.insert(
             "events",
             data,
             column_names=[
