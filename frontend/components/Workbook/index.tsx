@@ -812,7 +812,8 @@ const Workbook = ({
         const parsedExpressions = parseHeaders(filteredColumns, headers);
 
         const sheet = sheetsData[selectedSheetIndex];
-        const sheetQuery = sheet?.is_sql ? sheet.query : sheet?.aiQuery?.sql;
+
+        const sheetQuery = sheet.query || sheet?.aiQuery?.sql;
 
         // in edit mode, evaluate BODMAS on top of user written query
         const query = generateQuery(
@@ -1157,6 +1158,7 @@ const Workbook = ({
               sheetsCopy[selectedSheetIndex].sheet_type =
                 SheetType.SIMPLE_SHEET;
               sheetsCopy[selectedSheetIndex].columnFormat = {};
+              sheetsCopy[selectedSheetIndex].meta!!.generatedQuery = undefined;
               setSheetsData(sheetsCopy);
               setTriggerSheetFetch(triggerSheetFetch + 1);
             }}
