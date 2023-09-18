@@ -540,7 +540,7 @@ export const calculateMaxDecimalPoints = (
 ): number => {
   return arr.reduce((maxDecimals, item) => {
     if (typeof item.original === 'number') {
-      const decimalCount = (item.original.toString().split('.')[1]?.length ||
+      const decimalCount = (item.display.toString().split('.')[1]?.length ||
         0) as number;
       return Math.max(maxDecimals, decimalCount);
     }
