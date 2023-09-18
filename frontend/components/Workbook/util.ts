@@ -614,3 +614,12 @@ export const generatePivotCellStyles = (
   }
   return style;
 };
+
+export const roundOffValueToOneDecimalPlace = (
+  value: string | number | object
+) => {
+  if (typeof value === 'number') {
+    return Math.round(value * 10) / 10;
+  }
+  return value;
+};

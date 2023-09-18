@@ -15,6 +15,7 @@ import {
   fillRows,
   formatNumber,
   generatePivotCellStyles,
+  roundOffValueToOneDecimalPlace,
 } from '@components/Workbook/util';
 import { SheetChart } from '../DraggableWrapper';
 
@@ -109,10 +110,13 @@ const getRows = (
       .filter((header) => header.name !== 'index')
       .map((header, index) => {
         const originalValue = data[header.name]?.original;
-        const displayValue = data[header.name]?.display ?? '';
-        let cellValue = displayValue;
 
-        const cellFormat = sheetData?.columnFormat?.[index.toString()]?.format;
+        // TODO: Avoid rounding off here again, once we have all calculations being executed on backend
+        const displayValue = roundOffValueToOneDecimalPlace(
+          data[header.name]?.display ?? ''
+        );
+
+        let cellValue = displayValue;
 
         const style: React.CSSProperties = isPivot
           ? generatePivotCellStyles(idx, index, lastRow, lastColumn, sheetData)
@@ -130,6 +134,7 @@ const getRows = (
           cellValue = numberFormat.format(num);
         }
 
+        const cellFormat = sheetData?.columnFormat?.[index.toString()]?.format;
         if (cellFormat && cellValue) {
           // format number using original value
           cellValue = formatNumber(originalValue, cellFormat);

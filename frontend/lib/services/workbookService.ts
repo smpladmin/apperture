@@ -1,3 +1,4 @@
+import { roundOffValueToOneDecimalPlace } from '@components/Workbook/util';
 import {
   AIQuery,
   PivotAxisDetail,
@@ -17,10 +18,7 @@ const mapApiResponseToDisplayOriginalFormat = (rows: any[]) => {
     const dataKeys = Object.keys(row);
 
     dataKeys.forEach((key) => {
-      let displayValue = row[key];
-      if (typeof row[key] === 'number') {
-        displayValue = Math.round(displayValue * 100) / 100;
-      }
+      const displayValue = roundOffValueToOneDecimalPlace(row[key]);
       row[key] = { original: row[key], display: displayValue };
     });
     return row;

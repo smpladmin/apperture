@@ -894,25 +894,9 @@ const Workbook = ({
     let evaluatedData;
     if (headerText.toLowerCase().startsWith('=vlookup')) {
       evaluatedData = await computeVlookup(headerText);
-    } else {
-      const operands = getOperands(newHeader.name);
-      const operandsIndex = getOperatorsIndex(operands);
-
-      const parsedExpression: any[] = parseExpression(newHeader.name);
-
-      const lookupTable = generateLookupTableFromQueriedData(
-        operands,
-        operandsIndex,
-        queriedData,
-        headers
-      );
-
-      evaluatedData = evaluateExpression(
-        parsedExpression as string[],
-        lookupTable
-      );
+      return getUpdatedQueryData(evaluatedData, newHeader, queriedData);
     }
-    return getUpdatedQueryData(evaluatedData, newHeader, queriedData);
+    return queriedData;
   };
 
   const addDimensionColumn = (columnId: string) => {
