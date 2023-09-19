@@ -26,6 +26,7 @@ Babel = "^2.10.3"
 flatten-json = "^0.1.13"
 psutil = "^5.9.4"
 pyppeteer = "^1.0.2"
+clickhouse-connect = "0.3.6"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
