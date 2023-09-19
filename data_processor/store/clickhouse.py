@@ -16,4 +16,4 @@ class Clickhouse:
         self.client.close()
 
     def __del__(self):
-        self.client.close()
+        self.close()
