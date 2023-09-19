@@ -170,14 +170,18 @@ class DataMartService:
         return
 
     async def refresh_datamart_table(
-        self, datamart_id: str, clickhouse_credential: ClickHouseCredential
+        self,
+        datamart_id: str,
+        clickhouse_credential: ClickHouseCredential,
+        database_client: DatabaseClient = DatabaseClient.CLICKHOUSE,
+        db_creds: Union[MsSQLCredential, MsSQLCredential, None] = None,
     ):
         to_update = {"last_refreshed": datetime.utcnow()}
         refresh_status = await self.update_table_action(
             datamart_id=datamart_id,
             clickhouse_credential=clickhouse_credential,
             to_update=to_update,
-            database_client=DatabaseClient.CLICKHOUSE,
-            db_creds=None,
+            database_client=database_client,
+            db_creds=db_creds,
         )
         return refresh_status

@@ -27,6 +27,9 @@ from domain.notifications.models import NotificationType, NotificationVariant
 from domain.notifications.service import NotificationService
 from domain.properties.service import PropertiesService
 from domain.runlogs.service import RunLogService
+from domain.spreadsheets.models import DatabaseClient
+
+from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apidata import CreateAPIDataDto
 from rest.dtos.apperture_users import PrivateUserResponse, ResetPasswordDto
 from rest.dtos.clickstream_event_properties import (
@@ -391,6 +394,7 @@ async def refresh_datamart_tables_for_app(
     dto: RefreshDataMartDto,
     app_service: AppService = Depends(),
     datamart_service: DataMartService = Depends(),
+    compute_query_action: ComputeQueryAction = Depends(),
 ):
     res = {}
     app_id = dto.appId
@@ -400,8 +404,20 @@ async def refresh_datamart_tables_for_app(
     )
 
     for table in datamart_tables:
+        datasource_id = str(table.datasource_id)
+        database_client = await compute_query_action.get_database_client(
+            datasource_id=datasource_id
+        )
+        db_credential = None
+        if database_client != DatabaseClient.CLICKHOUSE:
+            db_credential = await compute_query_action.get_credentials(
+                datasource_id=datasource_id
+            )
         refresh_status = await datamart_service.refresh_datamart_table(
-            datamart_id=str(table.id), clickhouse_credential=app.clickhouse_credential
+            datamart_id=str(table.id),
+            clickhouse_credential=app.clickhouse_credential,
+            db_creds=db_credential,
+            database_client=database_client,
         )
         res[str(table.id)] = "updated" if refresh_status else "failed"
     return {app_id: res}
