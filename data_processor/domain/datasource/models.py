@@ -1,5 +1,6 @@
+import datetime
 from enum import Enum
-from typing import Optional
+from typing import NamedTuple, Optional
 from pydantic import BaseModel, Field
 
 from domain.common.models import IntegrationProvider
@@ -37,3 +38,12 @@ class Credential(BaseModel):
 class DataSourceResponse(BaseModel):
     datasource: DataSource
     credential: Credential
+
+
+class CreateEvent(NamedTuple):
+    datasourceId: str
+    timestamp: datetime.datetime
+    provider: IntegrationProvider
+    userId: str
+    eventName: str
+    properties: dict
