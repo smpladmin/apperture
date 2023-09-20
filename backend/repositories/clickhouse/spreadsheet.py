@@ -149,14 +149,14 @@ class Spreadsheets(EventsBase):
 
     def build_compute_transient_pivot(
         self,
-        sql: str,
+        query: str,
         rows: List[PivotAxisDetail],
         columns: List[PivotAxisDetail],
         values: List[PivotValueDetail],
         row_range: List[Union[str, int, float]],
         column_range: List[Union[str, int, float]],
     ):
-        sheet_query = f"({sql})"
+        sheet_query = f"({query})"
         query = ClickHouseQuery.from_(Table("<inner_table>"))
         for properties in [*rows, *columns]:
             query = query.select(Field(properties.name))
@@ -198,7 +198,7 @@ class Spreadsheets(EventsBase):
 
     def compute_transient_pivot(
         self,
-        sql: str,
+        query: str,
         rows: List[PivotAxisDetail],
         columns: List[PivotAxisDetail],
         values: List[PivotValueDetail],
@@ -207,7 +207,7 @@ class Spreadsheets(EventsBase):
     ):
         return self.execute_get_query(
             query=self.build_compute_transient_pivot(
-                sql=sql,
+                query=query,
                 rows=rows,
                 columns=columns,
                 values=values,
@@ -221,7 +221,7 @@ class Spreadsheets(EventsBase):
         self,
         reference_query: str,
         values: List[PivotAxisDetail],
-        aggregate: PivotAxisDetail,
+        aggregate: Union[PivotValueDetail, None],
         show_total: bool,
         axis_range: List[Union[str, int, float]] = None,
         range_axis: PivotAxisDetail = None,
@@ -242,7 +242,9 @@ class Spreadsheets(EventsBase):
 
         if show_total:
             if aggregate:
-                query = query.select(fn.Sum(Field(aggregate.name)))
+                query = query.select(
+                    aggregate.function.get_pypika_function()(Field(aggregate.name))
+                )
             else:
                 raise BusinessError("Select Value before finding sum")
 
@@ -256,17 +258,17 @@ class Spreadsheets(EventsBase):
     def compute_ordered_distinct_values(
         self,
         reference_query: str,
-        values: List[PivotAxisDetail],
-        aggregate: PivotAxisDetail,
+        values_to_fetch: List[PivotAxisDetail],
+        aggregate: Union[PivotValueDetail, None],
         show_total: bool,
-        axis_range: List[Union[str, int, float]] = None,
-        range_axis: PivotAxisDetail = None,
-        limit=50,
+        axis_range: Union[List[Union[str, int, float]], None] = None,
+        range_axis: Union[PivotAxisDetail, None] = None,
+        limit: int = 50,
     ):
         return self.execute_get_query(
             query=self.build_compute_ordered_distinct_values(
                 reference_query=reference_query,
-                values=values,
+                values=values_to_fetch,
                 aggregate=aggregate,
                 show_total=show_total,
                 axis_range=axis_range,
