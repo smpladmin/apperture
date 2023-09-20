@@ -95,6 +95,7 @@ const SavedDataMarts = ({ provider }: { provider: Provider }) => {
           </Flex>
         ) : (
           <WatchlistTable
+            type={WatchListItemType.DATAMARTS}
             savedItemsData={dataMarts}
             onRowClick={onRowClick}
             handleDelete={handleDelete}
