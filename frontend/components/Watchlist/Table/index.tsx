@@ -9,7 +9,7 @@ import {
 } from '@tanstack/react-table';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@chakra-ui/react';
 import Details from './Details';
-import { SavedItems } from '@lib/domain/watchlist';
+import { SavedItems, WatchListItemType } from '@lib/domain/watchlist';
 import { AppertureContext } from '@lib/contexts/appertureContext';
 import { AppertureUser as User } from '@lib/domain/user';
 import dayjs from 'dayjs';
@@ -21,6 +21,7 @@ import { dateFormat } from '@lib/utils/common';
 dayjs.extend(utc);
 
 type WatchlistTableProps = {
+  type?: WatchListItemType;
   savedItemsData: SavedItems[];
   onRowClick: Function;
   tableColumns?: ColumnDef<SavedItems, any>[];
@@ -29,6 +30,7 @@ type WatchlistTableProps = {
 };
 
 const WatchlistTable = ({
+  type,
   savedItemsData,
   onRowClick,
   tableColumns,
@@ -67,13 +69,18 @@ const WatchlistTable = ({
               cell: (info) => <UserInfo info={info} />,
               header: 'Created By',
             }),
-            columnHelper.accessor('details.updatedAt', {
-              cell: (info) => {
-                const updatedAt = info.getValue() as Date;
-                return dayjs.utc(updatedAt).local().format(dateFormat);
-              },
-              header: 'Last Updated',
-            }),
+            columnHelper.accessor(
+              type === WatchListItemType.DATAMARTS
+                ? 'details.lastRefreshed'
+                : 'details.updatedAt',
+              {
+                cell: (info) => {
+                  const updatedAt = info.getValue() as Date;
+                  return dayjs.utc(updatedAt).local().format(dateFormat);
+                },
+                header: 'Last Updated',
+              }
+            ),
             columnHelper.accessor('details._id', {
               cell: (info) => (
                 <Actions
