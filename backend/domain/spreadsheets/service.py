@@ -96,7 +96,7 @@ class SpreadsheetService:
             query_string=query, database_client=client
         )
         if client == DatabaseClient.CLICKHOUSE:
-            result = self.spreadsheets.get_transient_spreadsheet(
+            result = self.spreadsheets.execute_query_for_restricted_client(
                 query=query,
                 username=credential.username,
                 password=credential.password,

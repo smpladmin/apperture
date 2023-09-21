@@ -20,7 +20,7 @@ from domain.spreadsheets.models import (
     SortingOrder,
 )
 from repositories.clickhouse.base import EventsBase
-from repositories.clickhouse.parser.query_parser import BusinessError, QueryParser
+from repositories.clickhouse.parser.query_parser import BusinessError
 
 
 class Spreadsheets(EventsBase):
@@ -31,20 +31,6 @@ class Spreadsheets(EventsBase):
         super().__init__(clickhouse=clickhouse)
         self.clickhouse = clickhouse
 
-    def get_transient_spreadsheet(
-        self,
-        query: str,
-        username: Union[str, None],
-        password: Union[str, None],
-    ):
-        restricted_client = self.clickhouse.get_connection_for_user(
-            username=username, password=password
-        )
-        logging.info(query)
-        result = restricted_client.query(query=query)
-        restricted_client.close()
-        return result
-
     def get_transient_columns(
         self,
         datasource_id: str,
@@ -54,15 +40,14 @@ class Spreadsheets(EventsBase):
         table: str,
         clickhouse_credentials: ClickHouseCredential,
     ):
-        restricted_client = self.clickhouse.get_connection_for_user(
+        query, params = self.build_transient_columns_query(
+            datasource_id, dimensions, metric, database, table
+        )
+        return self.execute_query_for_restricted_client(
+            query=query,
+            parameters=params,
             username=clickhouse_credentials.username,
             password=clickhouse_credentials.password,
-        )
-
-        return restricted_client.query(
-            *self.build_transient_columns_query(
-                datasource_id, dimensions, metric, database, table
-            )
         )
 
     def column_filter_to_condition(self, column_filter: ColumnFilter):
@@ -140,12 +125,9 @@ class Spreadsheets(EventsBase):
         )
 
         logging.info(f"compute_transient_expression query:  {query}")
-        restricted_client = self.clickhouse.get_connection_for_user(
-            username=username,
-            password=password,
+        return self.execute_query_for_restricted_client(
+            query=query, username=username, password=password
         )
-
-        return restricted_client.query(query=query)
 
     def build_compute_transient_pivot(
         self,

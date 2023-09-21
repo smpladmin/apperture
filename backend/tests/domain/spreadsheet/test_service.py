@@ -46,7 +46,7 @@ class TestSpreadsheetService:
             tuple(["test_event_5"]),
         ]
         QueryResult = namedtuple("query_result", ["result_set", "column_names"])
-        self.spreadsheet.get_transient_spreadsheet = MagicMock(
+        self.spreadsheet.execute_query_for_restricted_client = MagicMock(
             return_value=QueryResult(
                 result_set=self.result_set,
                 column_names=self.column_names,
