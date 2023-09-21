@@ -121,6 +121,7 @@ async def update_app(
     app = None
     to_share_with = []
     if emails:
+        emails = [email.lower() for email in emails]
         for email in emails:
             new_user = await user_service.get_user_by_email(email=email)
             if not new_user:
