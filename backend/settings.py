@@ -25,6 +25,7 @@ class AppertureSettings(BaseSettings):
     sentry_dsn: str = ""
     sentry_environment: str = "test"
     base_sample_tables: List[str] = []
+    clickhouse_max_execution_time_seconds: int = 120
 
     class Config:
         env_file = ".env"
