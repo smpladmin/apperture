@@ -93,6 +93,6 @@ class EventsBase(ABC):
         try:
             query = f"KILL query WHERE query_id ='{id}'"
             logging.info(query)
-            self.clickhouse.client.query(query=query)
+            self.clickhouse.admin.query(query=query)
         except Exception as e:
             logging.info(repr(e))
