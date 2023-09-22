@@ -1,5 +1,5 @@
 import { Box, Flex } from '@chakra-ui/react';
-import { ChartBar, ChartPie, Percent, PlusCircle } from 'phosphor-react';
+import { ChartBar, Percent } from 'phosphor-react';
 import React from 'react';
 import PivotIcon from './PivotIcon';
 import Image from 'next/image';

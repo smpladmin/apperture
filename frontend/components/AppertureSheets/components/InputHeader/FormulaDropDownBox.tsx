@@ -404,12 +404,12 @@ const FormulaDropDownBox = ({
               <Text
                 p={2}
                 alignItems={'center'}
-                fontSize={'xs-14'}
+                fontSize={'xs-12'}
                 fontWeight={'700'}
                 color={'#137333'}
                 maxW={'80'}
                 whiteSpace={'break-spaces'}
-                fontFamily={'Inconsolata'}
+                fontFamily={'Roboto Mono'}
               >
                 <Highlight
                   query={formulaHighlightedPart || ''}
@@ -438,12 +438,12 @@ const FormulaDropDownBox = ({
                     }}
                   >
                     <Text
-                      fontSize={'xs-14'}
+                      fontSize={'xs-12'}
                       lineHeight={'xs-14'}
                       fontWeight={'400'}
                       data-testid="suggestion-text"
                       color={'grey.900'}
-                      fontFamily={'Inconsolata'}
+                      fontFamily={'Roboto Mono'}
                     >
                       {suggestion.name}
                     </Text>

@@ -20,7 +20,7 @@ from domain.spreadsheets.models import (
     SortingOrder,
 )
 from repositories.clickhouse.base import EventsBase
-from repositories.clickhouse.parser.query_parser import BusinessError, QueryParser
+from repositories.clickhouse.parser.query_parser import BusinessError
 
 
 class Spreadsheets(EventsBase):
@@ -66,15 +66,14 @@ class Spreadsheets(EventsBase):
         table: str,
         clickhouse_credentials: ClickHouseCredential,
     ):
-        restricted_client = self.clickhouse.get_connection_for_user(
+        query, params = self.build_transient_columns_query(
+            datasource_id, dimensions, metric, database, table
+        )
+        return self.execute_query_for_restricted_client(
+            query=query,
+            parameters=params,
             username=clickhouse_credentials.username,
             password=clickhouse_credentials.password,
-        )
-
-        return restricted_client.query(
-            *self.build_transient_columns_query(
-                datasource_id, dimensions, metric, database, table
-            )
         )
 
     def column_filter_to_condition(self, column_filter: ColumnFilter):
@@ -152,23 +151,20 @@ class Spreadsheets(EventsBase):
         )
 
         logging.info(f"compute_transient_expression query:  {query}")
-        restricted_client = self.clickhouse.get_connection_for_user(
-            username=username,
-            password=password,
+        return self.execute_query_for_restricted_client(
+            query=query, username=username, password=password
         )
-
-        return restricted_client.query(query=query)
 
     def build_compute_transient_pivot(
         self,
-        sql: str,
+        query: str,
         rows: List[PivotAxisDetail],
         columns: List[PivotAxisDetail],
         values: List[PivotValueDetail],
         row_range: List[Union[str, int, float]],
         column_range: List[Union[str, int, float]],
     ):
-        sheet_query = f"({sql})"
+        sheet_query = f"({query})"
         query = ClickHouseQuery.from_(Table("<inner_table>"))
         for properties in [*rows, *columns]:
             query = query.select(Field(properties.name))
@@ -210,7 +206,7 @@ class Spreadsheets(EventsBase):
 
     def compute_transient_pivot(
         self,
-        sql: str,
+        query: str,
         rows: List[PivotAxisDetail],
         columns: List[PivotAxisDetail],
         values: List[PivotValueDetail],
@@ -219,7 +215,7 @@ class Spreadsheets(EventsBase):
     ):
         return self.execute_get_query(
             query=self.build_compute_transient_pivot(
-                sql=sql,
+                query=query,
                 rows=rows,
                 columns=columns,
                 values=values,
@@ -233,7 +229,7 @@ class Spreadsheets(EventsBase):
         self,
         reference_query: str,
         values: List[PivotAxisDetail],
-        aggregate: PivotAxisDetail,
+        aggregate: Union[PivotValueDetail, None],
         show_total: bool,
         axis_range: List[Union[str, int, float]] = None,
         range_axis: PivotAxisDetail = None,
@@ -254,7 +250,9 @@ class Spreadsheets(EventsBase):
 
         if show_total:
             if aggregate:
-                query = query.select(fn.Sum(Field(aggregate.name)))
+                query = query.select(
+                    aggregate.function.get_pypika_function()(Field(aggregate.name))
+                )
             else:
                 raise BusinessError("Select Value before finding sum")
 
@@ -268,17 +266,17 @@ class Spreadsheets(EventsBase):
     def compute_ordered_distinct_values(
         self,
         reference_query: str,
-        values: List[PivotAxisDetail],
-        aggregate: PivotAxisDetail,
+        values_to_fetch: List[PivotAxisDetail],
+        aggregate: Union[PivotValueDetail, None],
         show_total: bool,
-        axis_range: List[Union[str, int, float]] = None,
-        range_axis: PivotAxisDetail = None,
-        limit=50,
+        axis_range: Union[List[Union[str, int, float]], None] = None,
+        range_axis: Union[PivotAxisDetail, None] = None,
+        limit: int = 50,
     ):
         return self.execute_get_query(
             query=self.build_compute_ordered_distinct_values(
                 reference_query=reference_query,
-                values=values,
+                values=values_to_fetch,
                 aggregate=aggregate,
                 show_total=show_total,
                 axis_range=axis_range,

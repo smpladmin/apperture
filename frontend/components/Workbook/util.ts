@@ -549,7 +549,7 @@ export const calculateMaxDecimalPoints = (
 ): number => {
   return arr.reduce((maxDecimals, item) => {
     if (typeof item.original === 'number') {
-      const decimalCount = (item.original.toString().split('.')[1]?.length ||
+      const decimalCount = (item.display.toString().split('.')[1]?.length ||
         0) as number;
       return Math.max(maxDecimals, decimalCount);
     }
@@ -622,4 +622,13 @@ export const generatePivotCellStyles = (
     }
   }
   return style;
+};
+
+export const roundOffValueToOneDecimalPlace = (
+  value: string | number | object
+) => {
+  if (typeof value === 'number') {
+    return Math.round(value * 10) / 10;
+  }
+  return value;
 };

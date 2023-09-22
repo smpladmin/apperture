@@ -25,6 +25,7 @@ class AppertureUserService:
     async def create_user_with_password(
         self, first_name: str, last_name: str, email: str, password_hash: str
     ):
+        email = email.lower()
         existing_user = await AppertureUser.find_one(AppertureUser.email == email)
         if existing_user:
             if not existing_user.is_signed_up:
@@ -48,6 +49,7 @@ class AppertureUserService:
         return apperture_user
 
     async def reset_user_password(self, email: str, hashed_password: str):
+        email = email.lower()
         await AppertureUser.find_one(AppertureUser.email == email).update(
             {"$set": {"password": hashed_password}}
         )

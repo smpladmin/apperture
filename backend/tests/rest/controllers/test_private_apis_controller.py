@@ -11,6 +11,7 @@ from domain.notifications.models import (
     ThresholdMap,
     NotificationType,
 )
+from domain.spreadsheets.models import DatabaseClient
 from rest.dtos.clickstream_event_properties import ClickStreamEventPropertiesDto
 from rest.dtos.event_properties import EventPropertiesDto
 
@@ -337,6 +338,8 @@ def test_refresh_datamart_tables_for_app(client_init, datamart_service, app_serv
                 databasename="test_database",
             ),
             "datamart_id": "635ba034807ab86d8a2aadd8",
+            "database_client": DatabaseClient.CLICKHOUSE,
+            "db_creds": None,
         }
     )
 

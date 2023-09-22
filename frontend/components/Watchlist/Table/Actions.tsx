@@ -4,6 +4,7 @@ import Dropdown from '@components/SearchableDropdown/Dropdown';
 import { SavedItems } from '@lib/domain/watchlist';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { CellContext } from '@tanstack/react-table';
+import { DotsThree } from 'phosphor-react';
 import React, { useRef, useState } from 'react';
 
 const Actions = ({
@@ -28,7 +29,7 @@ const Actions = ({
         <IconButton
           aria-label="more"
           variant={'secondary'}
-          icon={<i className="ri-more-fill"></i>}
+          icon={<DotsThree size={24} />}
           rounded={'full'}
           bg={'white.DEFAULT'}
           border={'1px'}

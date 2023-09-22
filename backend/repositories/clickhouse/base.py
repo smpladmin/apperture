@@ -1,11 +1,11 @@
 import logging
-import re
 import traceback
 from abc import ABC
-from typing import Dict
+from typing import Dict, Sequence, Union
 
-from clickhouse_connect.driver.exceptions import DatabaseError
-from fastapi import Depends
+from clickhouse_connect.driver.query import QueryResult
+from fastapi import Depends, HTTPException
+from pymysql import DatabaseError
 from pypika import CustomFunction, Parameter, Table
 
 from clickhouse import Clickhouse
@@ -55,7 +55,7 @@ class EventsBase(ABC):
             "visitParamExtractString", ["json", "field"]
         )
 
-    def execute_get_query(self, query: str, parameters: Dict):
+    def execute_get_query(self, query: str, parameters: Dict) -> Sequence:
         logging.info(f"Executing query: {query}")
         logging.info(f"Parameters: {parameters}")
         try:
@@ -68,36 +68,26 @@ class EventsBase(ABC):
             traceback.print_exc()
             return []
 
-    def execute_query_with_column_names(self, query: str, parameters: Dict):
-        logging.info(f"Executing query: {query}")
-        logging.info(f"Parameters: {parameters}")
-        try:
-            query_result = self.clickhouse.client.query(
-                query=query, parameters=parameters
-            )
-            return query_result
-        except Exception as e:
-            logging.info(repr(e))
-            error_message = re.search(r"DB::Exception:(.*)", repr(e)).group(1)
-            traceback.print_exc()
-            raise DatabaseError(f"Database error:{error_message}")
-
     def execute_query_for_restricted_client(
-        self, query: str, username: str, password: str
-    ):
+        self,
+        query: str,
+        username: str,
+        password: str,
+        parameters: Union[Dict, None] = None,
+    ) -> Union[QueryResult, None]:
         try:
+            params = parameters if parameters else {}
             restricted_client = self.clickhouse.get_connection_for_user(
                 username=username, password=password
             )
-            result = restricted_client.query(query=query)
+            result = restricted_client.query(query=query, parameters=params)
             logging.info(f"Successfully executed query: {query}")
             restricted_client.close()
             return result
         except Exception as e:
-            logging.info(
-                f"Exception {e} occurred while executing query for restricted user {username}"
-            )
-            return None
+            logging.info(repr(e))
+            traceback.print_exc()
+            raise HTTPException(status_code=400, detail=str(e))
 
     def kill_query(self, id: str):
         try:
@@ -106,6 +96,3 @@ class EventsBase(ABC):
             self.clickhouse.client.query(query=query)
         except Exception as e:
             logging.info(repr(e))
-            error_message = re.search(r"DB::Exception:(.*)", repr(e)).group(1)
-            traceback.print_exc()
-            raise DatabaseError(f"Database error:{error_message}")
