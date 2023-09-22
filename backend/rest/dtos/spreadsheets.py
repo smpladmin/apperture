@@ -15,7 +15,6 @@ from domain.spreadsheets.models import (
     SpreadSheetColumn,
     SpreadsheetType,
     SubHeaderColumn,
-    WordReplacement,
     WorkBook,
 )
 from rest.dtos.apperture_users import AppertureUserResponse

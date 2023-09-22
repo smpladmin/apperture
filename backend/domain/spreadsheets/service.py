@@ -6,7 +6,7 @@ from beanie import PydanticObjectId
 from fastapi import Depends
 
 from domain.apps.models import ClickHouseCredential
-from domain.integrations.models import MsSQLCredential, MySQLCredential
+from domain.integrations.models import MySQLCredential, MsSQLCredential
 from domain.spreadsheets.models import (
     ColumnType,
     ComputedSpreadsheet,
@@ -100,7 +100,12 @@ class SpreadsheetService:
                 query=query,
                 username=credential.username,
                 password=credential.password,
-                query_id=query_id,
+                settings={
+                    "replace_running_query": 1,
+                    "query_id": query_id,
+                }
+                if query_id
+                else None,
             )
         elif client == DatabaseClient.MYSQL:
             result = self.mysql.connect_and_execute_query(
@@ -311,6 +316,3 @@ class SpreadsheetService:
             lookup_index_column=lookup_index_column,
         )
         return result
-
-    def kill_query(self, id: str):
-        self.spreadsheets.kill_query(id)

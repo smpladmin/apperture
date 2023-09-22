@@ -2,10 +2,16 @@ import logging
 from typing import List, Union
 
 from fastapi import Depends
-from pypika import Case, ClickHouseQuery, Criterion, Field
-from pypika import Order as SortOrder
-from pypika import Parameter, Table
-from pypika import functions as fn
+from pypika import (
+    Case,
+    ClickHouseQuery,
+    Criterion,
+    Field,
+    Parameter,
+    Table,
+    Order as SortOrder,
+    functions as fn,
+)
 
 from clickhouse.clickhouse import Clickhouse
 from domain.apps.models import ClickHouseCredential
@@ -30,32 +36,6 @@ class Spreadsheets(EventsBase):
     ):
         super().__init__(clickhouse=clickhouse)
         self.clickhouse = clickhouse
-
-    def get_transient_spreadsheet(
-        self,
-        query: str,
-        username: Union[str, None],
-        password: Union[str, None],
-        query_id: Union[str, None] = None,
-    ):
-        restricted_client = self.clickhouse.get_connection_for_user(
-            username=username, password=password
-        )
-        logging.info(query)
-        settings = (
-            {
-                "replace_running_query": 1,
-                "query_id": query_id,
-            }
-            if query_id
-            else {}
-        )
-        result = restricted_client.query(
-            query=query,
-            settings=settings,
-        )
-        restricted_client.close()
-        return result
 
     def get_transient_columns(
         self,
