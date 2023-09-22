@@ -16,15 +16,19 @@ import {
 import ReactCodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
 import { Eye, PencilSimpleLine, Play, X } from 'phosphor-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { cloneDeep } from 'lodash';
 import { ErrorResponse } from '@lib/services/util';
-import { getTransientSpreadsheets } from '@lib/services/workbookService';
+import {
+  cancelTransientSpreadsheetQuery,
+  getTransientSpreadsheets,
+} from '@lib/services/workbookService';
 import { useRouter } from 'next/router';
 import { GREY_400, GREY_900, WHITE_200, WHITE_DEFAULT } from '@theme/index';
 import ConfirmationModal from './ConfirmationModal';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { getSubheaders } from '../util';
+import { uuid } from 'uuidv4';
 
 type QueryEditorProps = {
   sheetsData: TransientSheetData[];
@@ -48,6 +52,10 @@ const QueryEditor = ({
   const [error, setError] = useState('');
   const router = useRouter();
   const { dsId } = router.query;
+  const abortControllerRef = useRef<{
+    controller: AbortController;
+    id: string;
+  } | null>(null);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -82,14 +90,28 @@ const QueryEditor = ({
         : header
     );
   };
+  const handleQueryCancel = async () => {
+    if (abortControllerRef.current) {
+      const { controller, id } = abortControllerRef.current;
+      controller.abort();
+      const response = await cancelTransientSpreadsheetQuery(id);
+      console.log({ response });
+    }
+  };
 
   const handleQueryChange = async () => {
     setIsLoading(true);
-
+    const controller = new AbortController();
+    const queryId = uuid();
+    abortControllerRef.current = { controller, id: queryId };
     const response = await getTransientSpreadsheets(
       sheetsData[selectedSheetIndex]?.meta?.dsId || (dsId as string),
       query,
-      true
+      true,
+      undefined,
+      false,
+      controller.signal,
+      queryId
     );
     setIsLoading(false);
 
@@ -214,8 +236,8 @@ const QueryEditor = ({
             pr={'4'}
             py={'6px'}
             borderRadius={'8'}
-            onClick={handleQueryChange}
-            disabled={!sheetData.edit_mode || isLoading}
+            onClick={isLoading ? handleQueryCancel : handleQueryChange}
+            disabled={!sheetData.edit_mode}
           >
             <Flex gap={'1'}>
               {isLoading ? (
@@ -223,7 +245,7 @@ const QueryEditor = ({
               ) : (
                 <Play size={16} weight="fill" />
               )}
-              Run
+              {isLoading ? 'Cancel' : 'Run'}
             </Flex>
           </Button>
         </Flex>

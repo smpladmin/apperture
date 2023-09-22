@@ -98,3 +98,14 @@ class EventsBase(ABC):
                 f"Exception {e} occurred while executing query for restricted user {username}"
             )
             return None
+
+    def kill_query(self, id: str):
+        try:
+            query = f"KILL query WHERE query_id ='{id}'"
+            logging.info(query)
+            self.clickhouse.client.query(query=query)
+        except Exception as e:
+            logging.info(repr(e))
+            error_message = re.search(r"DB::Exception:(.*)", repr(e)).group(1)
+            traceback.print_exc()
+            raise DatabaseError(f"Database error:{error_message}")

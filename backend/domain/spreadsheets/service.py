@@ -327,3 +327,6 @@ class SpreadsheetService:
             lookup_index_column=lookup_index_column,
         )
         return result
+
+    def kill_query(self, id: str):
+        self.spreadsheets.kill_query(id)

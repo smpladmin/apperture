@@ -17,9 +17,9 @@ from rest.dtos.spreadsheets import (
     TransientExpressionDto,
     TransientSpreadsheetColumnDto,
     TransientSpreadsheetsDto,
+    VlookupDto,
     WorkBookResponse,
     WorkbookWithUser,
-    VlookupDto,
 )
 from rest.middlewares import get_user, validate_jwt
 from rest.middlewares.get_user import get_user_id
@@ -199,6 +199,11 @@ async def delete_segments(
     spreadsheets_service: SpreadsheetService = Depends(),
 ):
     await spreadsheets_service.delete_workbook(workbook_id=workbook_id)
+
+
+@router.delete("/workbooks/kill/query/{id}")
+def kill_workbook_query(id: str, spreadsheets_service: SpreadsheetService = Depends()):
+    spreadsheets_service.kill_query(id=id)
 
 
 @router.post(
