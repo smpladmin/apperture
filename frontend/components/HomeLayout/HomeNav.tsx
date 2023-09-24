@@ -384,6 +384,40 @@ const HomeNav = ({ apps }: HomeNavProps) => {
               paddingY={3}
               borderRadius={8}
               _focus={{ bg: 'white.400' }}
+              onClick={() => {
+                router.push({
+                  pathname: `/analytics/settings/apiKey`,
+                });
+              }}
+              onMouseEnter={() => setIsHoveredItem('API Key')}
+              onMouseLeave={() => setIsHoveredItem('')}
+            >
+              <Flex
+                justifyContent={'space-between'}
+                flexDirection={'row'}
+                alignItems={'center'}
+                width={'full'}
+              >
+                <Flex
+                  color={'black.500'}
+                  gap={2}
+                  fontWeight={'500'}
+                  fontSize={'xs-14'}
+                  lineHeight={'lh-130'}
+                  alignItems={'center'}
+                >
+                  <SignOut size={16} color={GREY_600} /> API Key
+                </Flex>
+                {hoveredItem === 'API Key' && (
+                  <CaretRight size={16} color={GREY_600} />
+                )}
+              </Flex>
+            </MenuItem>
+            <MenuItem
+              padding={2}
+              paddingY={3}
+              borderRadius={8}
+              _focus={{ bg: 'white.400' }}
               onClick={openLogoutModal}
               onMouseEnter={() => setIsHoveredItem('Logout')}
               onMouseLeave={() => setIsHoveredItem('')}
