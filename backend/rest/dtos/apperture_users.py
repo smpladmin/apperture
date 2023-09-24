@@ -20,6 +20,7 @@ class AppertureUserResponse(ModelResponse):
     picture: Optional[str]
     slack_channel: Optional[str]
     has_visited_sheets: Optional[bool]
+    api_key: Optional[str]
 
     class Config:
         allow_population_by_field_name = True

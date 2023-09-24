@@ -33,6 +33,7 @@ async def get_current_user(
         picture=user.picture,
         slack_channel=user.slack_channel,
         has_visited_sheets=user.has_visted_sheets,
+        api_key=user.api_key,
     )
 
 

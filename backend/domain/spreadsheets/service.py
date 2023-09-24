@@ -119,7 +119,7 @@ class SpreadsheetService:
         }
 
         for idx, row in enumerate(result.result_set):
-            row_data = {"index": idx + 1}
+            row_data = {}
             for col_idx, column_name in enumerate(result.column_names):
                 row_data[column_name] = row[col_idx]
             response["data"].append(row_data)

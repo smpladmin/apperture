@@ -79,6 +79,9 @@ class AppertureUserService:
     async def get_user_by_email(self, email: str):
         return await AppertureUser.find_one(AppertureUser.email == email)
 
+    async def get_user_by_api_key(self, api_key: str):
+        return await AppertureUser.find_one(AppertureUser.api_key == api_key)
+
     async def save_slack_credentials(self, user_id, slack_url, slack_channel):
         await AppertureUser.find_one(
             AppertureUser.id == PydanticObjectId(user_id),
@@ -95,6 +98,11 @@ class AppertureUserService:
         await AppertureUser.find_one(
             AppertureUser.id == PydanticObjectId(user_id),
         ).update({"$set": {"has_visted_sheets": True}})
+
+    async def update_api_key(self, user_id: str, api_key: str):
+        await AppertureUser.find_one(
+            AppertureUser.id == PydanticObjectId(user_id),
+        ).update({"$set": {"api_key": api_key}})
 
     async def create_invited_user(self, email: str):
         apperture_user = AppertureUser(
