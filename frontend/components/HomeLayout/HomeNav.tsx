@@ -23,7 +23,7 @@ import {
   MenuItem,
   IconButton,
 } from '@chakra-ui/react';
-import { CaretRight, Plus } from 'phosphor-react';
+import { CaretRight, Key, Plus } from 'phosphor-react';
 import LogoutModal from '@components/Logout';
 import { get_app_wise_users } from '@lib/services/userService';
 import { AppertureUser } from '@lib/domain/user';
@@ -387,6 +387,7 @@ const HomeNav = ({ apps }: HomeNavProps) => {
               onClick={() => {
                 router.push({
                   pathname: `/analytics/settings/apiKey`,
+                  query: { dsId },
                 });
               }}
               onMouseEnter={() => setIsHoveredItem('API Key')}
@@ -406,7 +407,7 @@ const HomeNav = ({ apps }: HomeNavProps) => {
                   lineHeight={'lh-130'}
                   alignItems={'center'}
                 >
-                  <SignOut size={16} color={GREY_600} /> API Key
+                  <Key size={16} color={GREY_600} /> API Key
                 </Flex>
                 {hoveredItem === 'API Key' && (
                   <CaretRight size={16} color={GREY_600} />
