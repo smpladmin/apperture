@@ -20,7 +20,7 @@ const APIKey = ({ user }: { user: AppertureUser }) => {
     navigator.clipboard.writeText(apiKey);
     setIsCopied(true);
 
-    // Reset the "copied" state after 3 seconds
+    // Reset the "copied" state after 2 seconds
     setTimeout(() => {
       setIsCopied(false);
     }, 2000);
