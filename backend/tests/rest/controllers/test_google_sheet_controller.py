@@ -1,4 +1,5 @@
 import json
+from domain.apperture_users.models import AppertureUser
 from domain.apps.models import ClickHouseCredential
 
 from domain.spreadsheets.models import ColumnType, DatabaseClient, SpreadSheetColumn
@@ -34,3 +35,48 @@ def test_compute_transient_result(
             "client": DatabaseClient.CLICKHOUSE,
         }
     )
+
+
+def test_get_connections(
+    client_init,
+    apperture_user_service,
+    app_service,
+):
+    user = AppertureUser(
+        first_name="mock",
+        last_name="mock",
+        email="test@email.com",
+        picture="",
+        api_key="mock-api-key",
+    )
+    user.id = "1234"
+    apperture_user_service.get_user_by_api_key.return_value = user
+
+    response = client_init.get(
+        "/apperture/google-sheets/connections", headers={"api-key": "mock-api-key"}
+    )
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "server": "ClickHouse",
+            "connection_data": [
+                {
+                    "provider": "datamart",
+                    "connection_source": [
+                        {
+                            "name": "name",
+                            "fields": [],
+                            "datasource_id": "635ba034807ab86d8a2aadd9",
+                            "table_name": "dUKQaHtqxM",
+                            "database_name": "test_database",
+                        }
+                    ],
+                }
+            ],
+        }
+    ]
+
+    apperture_user_service.get_user_by_api_key.assert_called_once_with(
+        **{"api_key": "mock-api-key"}
+    )
+    app_service.get_app_for_user.assert_called_once_with(**{"user_id": "1234"})
