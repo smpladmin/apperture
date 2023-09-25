@@ -54,11 +54,11 @@ class TestSpreadsheetService:
         )
 
         self.result_data = [
-            {"index": 1, "event_name": "test_event_1"},
-            {"index": 2, "event_name": "test_event_2"},
-            {"index": 3, "event_name": "test_event_3"},
-            {"index": 4, "event_name": "test_event_4"},
-            {"index": 5, "event_name": "test_event_5"},
+            {"event_name": "test_event_1"},
+            {"event_name": "test_event_2"},
+            {"event_name": "test_event_3"},
+            {"event_name": "test_event_4"},
+            {"event_name": "test_event_5"},
         ]
         self.workbook = WorkBook(
             id=PydanticObjectId("63d0df1ea1040a6388a4a34c"),

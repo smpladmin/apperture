@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, Header
-from pydantic import BaseModel
 from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
 
@@ -9,7 +8,7 @@ from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
     TransientSpreadsheetsDto,
 )
-from rest.middlewares import validate_api_key_and_user, validate_app_user
+from rest.middlewares import validate_api_key_and_user
 
 
 router = APIRouter(

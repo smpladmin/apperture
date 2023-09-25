@@ -20,7 +20,13 @@ from rest.middlewares.validate_app_user import validate_library_items, validate_
 from server import app
 from mongo.mongo import Mongo
 from clickhouse import Clickhouse
-from rest.middlewares import get_user, get_user_id, validate_jwt, validate_api_key
+from rest.middlewares import (
+    get_user,
+    get_user_id,
+    validate_jwt,
+    validate_api_key,
+    validate_api_key_and_user,
+)
 from domain.notifications.service import NotificationService
 from domain.funnels.service import FunnelsService
 from domain.datasources.service import DataSourceService
@@ -40,7 +46,6 @@ from domain.spreadsheets.service import SpreadsheetService
 from domain.users.service import UserService
 from domain.datamart.service import DataMartService
 from mongo.mongo import Mongo
-from rest.middlewares import get_user, get_user_id, validate_api_key, validate_jwt
 from server import app
 
 
@@ -73,6 +78,7 @@ def app_init(
     print("Setting up App")
     app.dependency_overrides[validate_jwt] = lambda: mock.MagicMock()
     app.dependency_overrides[validate_api_key] = lambda: mock.MagicMock()
+    app.dependency_overrides[validate_api_key_and_user] = lambda: mock.MagicMock()
     app.dependency_overrides[validate_library_items] = lambda: mock.MagicMock()
     app.dependency_overrides[validate_app_user] = lambda: mock.MagicMock()
     app.dependency_overrides[get_user] = lambda: mock.MagicMock()
