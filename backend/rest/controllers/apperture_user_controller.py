@@ -6,8 +6,8 @@ from domain.apperture_users.models import AppertureUser
 from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
 from rest.dtos.apperture_users import (
-    AppertureUserResponse,
     AppWiseUserDto,
+    AppertureUserWithAPIKey,
     PrivateUserResponse,
 )
 from rest.middlewares import get_user, get_user_id, validate_jwt
@@ -19,13 +19,13 @@ router = APIRouter(
 )
 
 
-@router.get("/apperture-users/me", response_model=AppertureUserResponse)
+@router.get("/apperture-users/me", response_model=AppertureUserWithAPIKey)
 async def get_current_user(
     user_id: str = Depends(get_user_id),
     user_service: AppertureUserService = Depends(),
 ):
     user = await user_service.get_user(user_id)
-    return AppertureUserResponse(
+    return AppertureUserWithAPIKey(
         id=user_id,
         first_name=user.first_name,
         last_name=user.last_name,
