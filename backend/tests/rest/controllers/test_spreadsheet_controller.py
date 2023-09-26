@@ -29,11 +29,11 @@ async def test_compute_transient_spreadsheets_with_credentials(
     assert response.json() == {
         "headers": [SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)],
         "data": [
-            {"index": 1, "event_name": "test_event_1"},
-            {"index": 2, "event_name": "test_event_2"},
-            {"index": 3, "event_name": "test_event_3"},
-            {"index": 4, "event_name": "test_event_4"},
-            {"index": 5, "event_name": "test_event_5"},
+            {"event_name": "test_event_1"},
+            {"event_name": "test_event_2"},
+            {"event_name": "test_event_3"},
+            {"event_name": "test_event_4"},
+            {"event_name": "test_event_5"},
         ],
         "sql": "select * from events",
     }
@@ -46,6 +46,7 @@ async def test_compute_transient_spreadsheets_with_credentials(
                 databasename="test_database",
             ),
             "client": DatabaseClient.CLICKHOUSE,
+            "serializeResult": False,
         }
     )
     datasource_service.get_datasource.assert_called_with("23412414123123")
@@ -84,11 +85,11 @@ async def test_compute_transient_spreadsheets(
     assert response.json() == {
         "headers": [SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)],
         "data": [
-            {"index": 1, "event_name": "test_event_1"},
-            {"index": 2, "event_name": "test_event_2"},
-            {"index": 3, "event_name": "test_event_3"},
-            {"index": 4, "event_name": "test_event_4"},
-            {"index": 5, "event_name": "test_event_5"},
+            {"event_name": "test_event_1"},
+            {"event_name": "test_event_2"},
+            {"event_name": "test_event_3"},
+            {"event_name": "test_event_4"},
+            {"event_name": "test_event_5"},
         ],
         "sql": "select * from events",
     }
@@ -101,6 +102,7 @@ async def test_compute_transient_spreadsheets(
                 databasename="test_database",
             ),
             "client": DatabaseClient.CLICKHOUSE,
+            "serializeResult": False,
         }
     )
     datasource_service.get_datasource.assert_called_with("23412414123123")

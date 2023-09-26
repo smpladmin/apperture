@@ -276,6 +276,27 @@ class TestSpreadsheetService:
             sql=self.cleaned_query,
         )
 
+    @pytest.mark.asyncio
+    async def test_get_transient_spreadsheets_with_serialized_result(self):
+        result = await self.service.get_transient_spreadsheets(
+            query=self.query,
+            credential=ClickHouseCredential(username="", password="", databasename=""),
+            serializeResult=True,
+        )
+        assert result == ComputedSpreadsheet(
+            headers=[
+                SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)
+            ],
+            data=[
+                ("test_event_1",),
+                ("test_event_2",),
+                ("test_event_3",),
+                ("test_event_4",),
+                ("test_event_5",),
+            ],
+            sql=self.cleaned_query,
+        )
+
     def test_build_workbook(self):
         workbook = self.service.build_workbook(
             name="Test Workbook",

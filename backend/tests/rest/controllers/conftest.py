@@ -799,6 +799,16 @@ def transient_spreadsheet_data():
 
 
 @pytest.fixture(scope="module")
+def transient_spreadsheet_data_with_serialize_result():
+    return {
+        "query": "SELECT  event_name FROM  events WHERE timestamp>=toDate(2023-02-11)",
+        "is_sql": True,
+        "datasourceId": "23412414123123",
+        "serializeResult": True,
+    }
+
+
+@pytest.fixture(scope="module")
 def workbook_data():
     return {
         "name": "Test Workbook",
@@ -827,11 +837,11 @@ def spreadsheets_service():
     computed_spreadsheet = ComputedSpreadsheet(
         headers=[SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)],
         data=[
-            {"index": 1, "event_name": "test_event_1"},
-            {"index": 2, "event_name": "test_event_2"},
-            {"index": 3, "event_name": "test_event_3"},
-            {"index": 4, "event_name": "test_event_4"},
-            {"index": 5, "event_name": "test_event_5"},
+            {"event_name": "test_event_1"},
+            {"event_name": "test_event_2"},
+            {"event_name": "test_event_3"},
+            {"event_name": "test_event_4"},
+            {"event_name": "test_event_5"},
         ],
         sql="select * from events",
     )
@@ -1840,11 +1850,11 @@ def datamart_response():
 def transient_datamart_response():
     return {
         "data": [
-            {"event_name": "test_event_1", "index": 1},
-            {"event_name": "test_event_2", "index": 2},
-            {"event_name": "test_event_3", "index": 3},
-            {"event_name": "test_event_4", "index": 4},
-            {"event_name": "test_event_5", "index": 5},
+            {"event_name": "test_event_1"},
+            {"event_name": "test_event_2"},
+            {"event_name": "test_event_3"},
+            {"event_name": "test_event_4"},
+            {"event_name": "test_event_5"},
         ],
         "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
         "sql": "select * from events",

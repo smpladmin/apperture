@@ -6,21 +6,21 @@ from domain.spreadsheets.models import ColumnType, DatabaseClient, SpreadSheetCo
 
 
 def test_compute_transient_result(
-    client_init, spreadsheets_service, transient_spreadsheet_data
+    client_init, spreadsheets_service, transient_spreadsheet_data_with_serialize_result
 ):
     response = client_init.post(
         "/apperture/google-sheets/transient",
-        data=json.dumps(transient_spreadsheet_data),
+        data=json.dumps(transient_spreadsheet_data_with_serialize_result),
     )
     assert response.status_code == 200
     assert response.json() == {
         "headers": [SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)],
         "data": [
-            {"index": 1, "event_name": "test_event_1"},
-            {"index": 2, "event_name": "test_event_2"},
-            {"index": 3, "event_name": "test_event_3"},
-            {"index": 4, "event_name": "test_event_4"},
-            {"index": 5, "event_name": "test_event_5"},
+            {"event_name": "test_event_1"},
+            {"event_name": "test_event_2"},
+            {"event_name": "test_event_3"},
+            {"event_name": "test_event_4"},
+            {"event_name": "test_event_5"},
         ],
         "sql": "select * from events",
     }
@@ -33,6 +33,7 @@ def test_compute_transient_result(
                 databasename="test_database",
             ),
             "client": DatabaseClient.CLICKHOUSE,
+            "serializeResult": True,
         }
     )
 
