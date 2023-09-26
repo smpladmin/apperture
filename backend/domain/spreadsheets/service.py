@@ -90,6 +90,7 @@ class SpreadsheetService:
         query: str,
         credential: Union[ClickHouseCredential, MySQLCredential, MsSQLCredential],
         client: DatabaseClient = DatabaseClient.CLICKHOUSE,
+        serializeResult: bool = False,
     ) -> ComputedSpreadsheet:
         query = self.cleanse_query_string(query)
         query = self.parser.assign_query_limit(
@@ -124,9 +125,8 @@ class SpreadsheetService:
                 row_data[column_name] = row[col_idx]
             response["data"].append(row_data)
 
-        return ComputedSpreadsheet(
-            data=response["data"], headers=response["headers"], sql=query
-        )
+        data = result.result_set if serializeResult else response["data"]
+        return ComputedSpreadsheet(data=data, headers=response["headers"], sql=query)
 
     async def get_workbook_by_id(self, workbook_id: str):
         return await WorkBook.find_one(WorkBook.id == PydanticObjectId(workbook_id))

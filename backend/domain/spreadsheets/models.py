@@ -36,7 +36,7 @@ class SubHeaderColumn(BaseModel):
 
 
 class ComputedSpreadsheet(BaseModel):
-    data: List[dict]
+    data: List
     headers: List[SpreadSheetColumn]
     sql: str
 

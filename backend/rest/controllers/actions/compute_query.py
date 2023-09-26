@@ -94,10 +94,16 @@ class ComputeQueryAction:
             if not dto.is_sql:
                 sql_query = text_to_sql(dto.ai_query)
                 return await self.spreadsheets_service.get_transient_spreadsheets(
-                    query=sql_query, credential=credential, client=client
+                    query=sql_query,
+                    credential=credential,
+                    client=client,
+                    serializeResult=dto.serializeResult,
                 )
             return await self.spreadsheets_service.get_transient_spreadsheets(
-                query=dto.query, credential=credential, client=client
+                query=dto.query,
+                credential=credential,
+                client=client,
+                serializeResult=dto.serializeResult,
             )
         except BusinessError as e:
             raise HTTPException(
