@@ -26,8 +26,7 @@ const mapApiResponseToDisplayOriginalFormat = (rows: any[]) => {
 };
 
 export const cancelTransientSpreadsheetQuery = async (query_id: string) => {
-  console.log('kill', query_id);
-  return await AppertureDelete(`/workbooks/kill/query/${query_id}`);
+  return await AppertureDelete(`/workbooks/query/${query_id}`);
 };
 
 export const getTransientSpreadsheets = async (

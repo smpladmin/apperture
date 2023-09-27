@@ -94,8 +94,7 @@ const QueryEditor = ({
     if (abortControllerRef.current) {
       const { controller, id } = abortControllerRef.current;
       controller.abort();
-      const response = await cancelTransientSpreadsheetQuery(id);
-      console.log({ response });
+      const response = await cancelTransientSpreadsheetQuery(id); 
     }
   };
 

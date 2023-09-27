@@ -201,7 +201,7 @@ async def delete_segments(
     await spreadsheets_service.delete_workbook(workbook_id=workbook_id)
 
 
-@router.delete("/workbooks/kill/query/{id}")
+@router.delete("/workbooks/query/{id}")
 def kill_workbook_query(id: str, spreadsheets_service: SpreadsheetService = Depends()):
     return spreadsheets_service.spreadsheets.kill_query(query_id=id)
 
