@@ -11,7 +11,7 @@ from domain.common.models import IntegrationProvider
 from domain.datasources.service import DataSourceService
 from domain.integrations.models import MySQLCredential, MsSQLCredential
 from domain.integrations.service import IntegrationService
-from domain.spreadsheets.models import DatabaseClient
+from domain.spreadsheets.models import ComputedSpreadsheet, DatabaseClient
 from domain.spreadsheets.service import SpreadsheetService
 from rest.dtos.spreadsheets import TransientSpreadsheetsDto
 from utils.errors import BusinessError
@@ -80,6 +80,20 @@ class ComputeQueryAction:
         else:
             return DatabaseClient.CLICKHOUSE
 
+    async def get_transient_spreadsheets(
+        self,
+        query: str,
+        credential: Union[ClickHouseCredential, MySQLCredential, MsSQLCredential],
+        client: DatabaseClient,
+        serializeResult: bool = False,
+    ) -> ComputedSpreadsheet:
+        return await self.spreadsheets_service.get_transient_spreadsheets(
+            query=query,
+            credential=credential,
+            client=client,
+            serializeResult=serializeResult,
+        )
+
     async def compute_query(self, dto: TransientSpreadsheetsDto):
         try:
             logging.info(f"Query: {dto.query}")
@@ -93,17 +107,11 @@ class ComputeQueryAction:
 
             if not dto.is_sql:
                 sql_query = text_to_sql(dto.ai_query)
-                return await self.spreadsheets_service.get_transient_spreadsheets(
-                    query=sql_query,
-                    credential=credential,
-                    client=client,
-                    serializeResult=dto.serializeResult,
+                return await self.get_transient_spreadsheets(
+                    query=sql_query, credential=credential, client=client
                 )
-            return await self.spreadsheets_service.get_transient_spreadsheets(
-                query=dto.query,
-                credential=credential,
-                client=client,
-                serializeResult=dto.serializeResult,
+            return await self.get_transient_spreadsheets(
+                query=dto.query, credential=credential, client=client
             )
         except BusinessError as e:
             raise HTTPException(

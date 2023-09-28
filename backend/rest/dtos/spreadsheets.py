@@ -28,7 +28,6 @@ class TransientSpreadsheetsDto(BaseModel):
     is_sql: bool = False
     isDatamart: bool = False
     ai_query: Optional[AIQuery]
-    serializeResult: bool = False
 
 
 class TransientExpressionDto(BaseModel):

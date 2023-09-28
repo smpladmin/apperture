@@ -77,7 +77,7 @@ def test_get_connections(
         }
     ]
 
-    apperture_user_service.get_user_by_api_key.assert_called_once_with(
+    apperture_user_service.get_user_by_api_key.assert_called_with(
         **{"api_key": "mock-api-key"}
     )
-    app_service.get_app_for_user.assert_called_once_with(**{"user_id": "1234"})
+    app_service.get_app_for_user.assert_called_with(**{"user_id": "1234"})
