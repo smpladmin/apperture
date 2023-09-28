@@ -26,7 +26,7 @@ class AppConnections:
         self.properties_service = properties_service
         self.connections_service = connections_service
 
-    async def get_app_connections(self, app: App):
+    async def get_app_connections(self, app: App, allow_sql_connections: bool = True):
         clickhouse_credentials = app.clickhouse_credential
         all_datasources = await self.ds_service.get_datasources_for_app_id(
             app_id=app.id
@@ -52,12 +52,18 @@ class AppConnections:
                 "table": table,
             }
         for datasource in all_datasources:
-            if datasource.provider == IntegrationProvider.MYSQL:
+            if (
+                datasource.provider == IntegrationProvider.MYSQL
+                and allow_sql_connections
+            ):
                 details = await self.integration_service.get_mysql_connection_details(
                     id=datasource.integration_id
                 )
                 credentials_table[str(datasource.id)] = details
-            elif datasource.provider == IntegrationProvider.MSSQL:
+            elif (
+                datasource.provider == IntegrationProvider.MSSQL
+                and allow_sql_connections
+            ):
                 details = await self.integration_service.get_mssql_connection_details(
                     id=datasource.integration_id
                 )
@@ -97,4 +103,5 @@ class AppConnections:
             credentials_table=credentials_table,
             datamarts=datamarts,
             datamart_properties=datamart_properties,
+            allow_sql_connections=allow_sql_connections,
         )
