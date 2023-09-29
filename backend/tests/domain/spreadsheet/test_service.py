@@ -35,7 +35,8 @@ class TestSpreadsheetService:
         SELECT  event_name -- selecting event
         FROM  events
         WHERE timestamp>=toDate(2023-02-11)"""
-        self.cleaned_query = """SELECT  event_name          FROM  events         WHERE timestamp>=toDate(2023-02-11) ORDER BY 1 LIMIT 500"""
+        self.cleaned_query = "SELECT  event_name          FROM  events         WHERE timestamp>=toDate(2023-02-11)"
+        self.cleaned_query_with_limit = """SELECT  event_name          FROM  events         WHERE timestamp>=toDate(2023-02-11) ORDER BY 1 LIMIT 500"""
         self.spreadsheet.get_transient_spreadsheet = MagicMock()
         self.column_names = ["event_name"]
         self.result_set = [
@@ -273,7 +274,7 @@ class TestSpreadsheetService:
                 SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)
             ],
             data=self.result_data,
-            sql=self.cleaned_query,
+            sql=self.cleaned_query_with_limit,
         )
 
     @pytest.mark.asyncio
