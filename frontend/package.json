@@ -53,7 +53,8 @@
     "react-virtualized-auto-sizer": "^1.0.20",
     "react-window": "^1.8.9",
     "remixicon": "^2.5.0",
-    "sanitize-html": "^2.11.0"
+    "sanitize-html": "^2.11.0",
+    "uuidv4": "^6.2.13"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.5",
