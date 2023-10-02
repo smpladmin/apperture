@@ -34,6 +34,7 @@ def test_compute_transient_result(
             ),
             "client": DatabaseClient.CLICKHOUSE,
             "serializeResult": True,
+            "query_id": None,
         }
     )
 
