@@ -55,6 +55,7 @@ const APIKey = ({ user }: { user: AppertureUser }) => {
               <CheckCircle size={24} weight="fill" color={GREEN_500} />
             ) : (
               <Copy
+                data-testid={'copy-button'}
                 size={24}
                 weight="fill"
                 cursor={'pointer'}
