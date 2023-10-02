@@ -47,6 +47,7 @@ async def test_compute_transient_spreadsheets_with_credentials(
             ),
             "client": DatabaseClient.CLICKHOUSE,
             "serializeResult": False,
+            "query_id": None,
         }
     )
     datasource_service.get_datasource.assert_called_with("23412414123123")
@@ -103,6 +104,7 @@ async def test_compute_transient_spreadsheets(
             ),
             "client": DatabaseClient.CLICKHOUSE,
             "serializeResult": False,
+            "query_id": None,
         }
     )
     datasource_service.get_datasource.assert_called_with("23412414123123")

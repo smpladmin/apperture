@@ -2,10 +2,16 @@ import logging
 from typing import List, Union
 
 from fastapi import Depends
-from pypika import Case, ClickHouseQuery, Criterion, Field, Parameter
-from pypika import Order as SortOrder
-from pypika import Table
-from pypika import functions as fn
+from pypika import (
+    Case,
+    ClickHouseQuery,
+    Criterion,
+    Field,
+    Parameter,
+    Table,
+    Order as SortOrder,
+    functions as fn,
+)
 
 from clickhouse.clickhouse import Clickhouse
 from domain.apps.models import ClickHouseCredential

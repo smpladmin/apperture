@@ -127,6 +127,7 @@ def test_compute_transient_datamart(
             ),
             "client": DatabaseClient.CLICKHOUSE,
             "serializeResult": False,
+            "query_id": None,
         }
     )
 

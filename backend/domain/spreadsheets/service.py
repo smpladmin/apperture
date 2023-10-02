@@ -19,8 +19,7 @@ from domain.spreadsheets.models import (
     SpreadSheetColumn,
     WorkBook,
 )
-from repositories.clickhouse.parser.query_parser import BusinessError
-from repositories.clickhouse.parser.query_parser import QueryParser
+from repositories.clickhouse.parser.query_parser import BusinessError, QueryParser
 from repositories.clickhouse.spreadsheet import Spreadsheets
 from repositories.sql.mssql import MsSql
 from repositories.sql.mysql import MySql
@@ -89,6 +88,7 @@ class SpreadsheetService:
         self,
         query: str,
         credential: Union[ClickHouseCredential, MySQLCredential, MsSQLCredential],
+        query_id: Union[str, None] = None,
         client: DatabaseClient = DatabaseClient.CLICKHOUSE,
         serializeResult: bool = False,
     ) -> ComputedSpreadsheet:
@@ -103,6 +103,12 @@ class SpreadsheetService:
                 query=query,
                 username=credential.username,
                 password=credential.password,
+                settings={
+                    "replace_running_query": 1,
+                    "query_id": query_id,
+                }
+                if query_id
+                else None,
             )
         elif client == DatabaseClient.MYSQL:
             result = self.mysql.connect_and_execute_query(

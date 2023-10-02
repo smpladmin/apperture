@@ -3,11 +3,10 @@ import traceback
 from abc import ABC
 from typing import Dict, Sequence, Union
 
-from clickhouse_connect.driver.query import QueryResult
+from clickhouse import Clickhouse
 from fastapi import Depends, HTTPException
 from pypika import CustomFunction, Parameter, Table
-
-from clickhouse import Clickhouse
+from clickhouse_connect.driver.query import QueryResult
 
 
 class EventsBase(ABC):
@@ -73,13 +72,17 @@ class EventsBase(ABC):
         username: str,
         password: str,
         parameters: Union[Dict, None] = None,
+        settings: Union[Dict, None] = None,
     ) -> Union[QueryResult, None]:
         try:
             params = parameters if parameters else {}
+            settings = settings if settings else {}
             restricted_client = self.clickhouse.get_connection_for_user(
                 username=username, password=password
             )
-            result = restricted_client.query(query=query, parameters=params)
+            result = restricted_client.query(
+                query=query, parameters=params, settings=settings
+            )
             logging.info(f"Successfully executed query: {query}")
             restricted_client.close()
             return result
@@ -87,3 +90,13 @@ class EventsBase(ABC):
             logging.info(repr(e))
             traceback.print_exc()
             raise HTTPException(status_code=400, detail=str(e))
+
+    def kill_query(self, query_id: str):
+        try:
+            query = f"KILL query WHERE query_id ='{query_id}'"
+            logging.info(query)
+            self.clickhouse.admin.query(query=query)
+            return True
+        except Exception as e:
+            logging.info(repr(e))
+            return False

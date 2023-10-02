@@ -25,13 +25,18 @@ const mapApiResponseToDisplayOriginalFormat = (rows: any[]) => {
   });
 };
 
+export const cancelTransientSpreadsheetQuery = async (query_id: string) => {
+  return await AppertureDelete(`/workbooks/query/${query_id}`);
+};
+
 export const getTransientSpreadsheets = async (
   dsId: string,
   query: string,
   is_sql: boolean = true,
   aiQuery?: AIQuery,
   isDatamart: boolean = false,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  query_id?: string
 ) => {
   const res = await ApperturePost(
     `/workbooks/spreadsheets/transient`,
@@ -48,6 +53,7 @@ export const getTransientSpreadsheets = async (
             database: aiQuery.database,
           }
         : null,
+      query_id: query_id || null,
     },
     {
       signal,
