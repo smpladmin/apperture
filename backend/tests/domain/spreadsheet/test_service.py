@@ -295,7 +295,7 @@ class TestSpreadsheetService:
                 ("test_event_4",),
                 ("test_event_5",),
             ],
-            sql=self.cleaned_query,
+            sql=self.cleaned_query_with_limit,
         )
 
     def test_build_workbook(self):

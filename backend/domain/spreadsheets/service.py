@@ -93,10 +93,8 @@ class SpreadsheetService:
         serializeResult: bool = False,
     ) -> ComputedSpreadsheet:
         query = self.cleanse_query_string(query)
-        query = (
-            self.parser.assign_query_limit(query_string=query, database_client=client)
-            if not serializeResult
-            else query
+        query = self.parser.assign_query_limit(
+            query_string=query, database_client=client
         )
         if client == DatabaseClient.CLICKHOUSE:
             result = self.spreadsheets.execute_query_for_restricted_client(
