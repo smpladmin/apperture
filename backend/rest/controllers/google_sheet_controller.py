@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
 from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
-from domain.spreadsheets.models import DatabaseClient
+from domain.spreadsheets.models import AIQuery, DatabaseClient
 
 from rest.controllers.actions.app_connections import AppConnections
 from rest.controllers.actions.compute_query import ComputeQueryAction
@@ -11,6 +11,7 @@ from rest.dtos.spreadsheets import (
 )
 from rest.middlewares import validate_api_key_and_user
 from clickhouse_connect.driver.exceptions import DatabaseError
+from ai.text_to_sql import text_to_sql
 
 
 router = APIRouter(
@@ -50,10 +51,25 @@ async def compute_transient_spreadsheets(
     user = await user_service.get_user_by_api_key(api_key=api_key)
     app = await app_service.get_app_for_user(user_id=str(user.id))
     clickhouse_credentials = app.clickhouse_credential
+    query = dto.query
+
+    if not dto.isSql and dto.tableData:
+        table = dto.tableData.tableName
+        word_replacements = dto.tableData.wordReplacements
+        database = (
+            "default" if table == "events" else clickhouse_credentials.databasename
+        )
+        ai_query = AIQuery(
+            nl_query=query,
+            word_replacements=word_replacements,
+            database=database,
+            table=table,
+        )
+        query = text_to_sql(query=ai_query)
 
     try:
         return await compute_query_action.get_transient_spreadsheets(
-            query=dto.query,
+            query=query,
             credential=clickhouse_credentials,
             client=DatabaseClient.CLICKHOUSE,
             serializeResult=True,
