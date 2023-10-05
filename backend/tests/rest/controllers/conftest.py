@@ -801,10 +801,7 @@ def transient_spreadsheet_data():
 @pytest.fixture(scope="module")
 def transient_spreadsheet_data_with_serialize_result():
     return {
-        "query": "SELECT  event_name FROM  events WHERE timestamp>=toDate(2023-02-11)",
-        "is_sql": True,
-        "datasourceId": "23412414123123",
-        "serializeResult": True,
+        "query": "SELECT  event_name FROM  events WHERE timestamp>=toDate(2023-02-11)"
     }
 
 
