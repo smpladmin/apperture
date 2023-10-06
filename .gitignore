@@ -166,6 +166,4 @@ frontend/public/__ENV.js
 .flaskenv*
 
 # airflow
-airflow/config
 airflow/logs
-airflow/plugins
