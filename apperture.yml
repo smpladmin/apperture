@@ -1,5 +1,225 @@
-version: '3.7'
+version: '3.8'
 services:
+  airflow-init:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/airflow:latest
+    command:
+     - -c
+     - |
+      function ver() {
+        printf "%04d%04d%04d%04d" $${1//./ }
+      }
+      airflow_version=$$(AIRFLOW__LOGGING__LOGGING_LEVEL=INFO && gosu airflow airflow version)
+      airflow_version_comparable=$$(ver $${airflow_version})
+      min_airflow_version=2.2.0
+      min_airflow_version_comparable=$$(ver $${min_airflow_version})
+      if (( airflow_version_comparable < min_airflow_version_comparable )); then
+        echo
+        echo -e "\033[1;31mERROR!!!: Too old Airflow version $${airflow_version}!\e[0m"
+        echo "The minimum Airflow version supported: $${min_airflow_version}. Only use this or higher!"
+        echo
+        exit 1
+      fi
+      if [[ -z "" ]]; then
+        echo
+        echo -e "\033[1;33mWARNING!!!: AIRFLOW_UID not set!\e[0m"
+        echo "If you are on Linux, you SHOULD follow the instructions below to set "
+        echo "AIRFLOW_UID environment variable, otherwise files will be owned by root."
+        echo "For other operating systems you can get rid of the warning with manually created .env file:"
+        echo "    See: https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#setting-the-right-airflow-user"
+        echo
+      fi
+      one_meg=1048576
+      mem_available=$$(($$(getconf _PHYS_PAGES) * $$(getconf PAGE_SIZE) / one_meg))
+      cpus_available=$$(grep -cE 'cpu[0-9]+' /proc/stat)
+      disk_available=$$(df / | tail -1 | awk '{print $$4}')
+      warning_resources="false"
+      if (( mem_available < 4000 )) ; then
+        echo
+        echo -e "\033[1;33mWARNING!!!: Not enough memory available for Docker.\e[0m"
+        echo "At least 4GB of memory required. You have $$(numfmt --to iec $$((mem_available * one_meg)))"
+        echo
+        warning_resources="true"
+      fi
+      if (( cpus_available < 2 )); then
+        echo
+        echo -e "\033[1;33mWARNING!!!: Not enough CPUS available for Docker.\e[0m"
+        echo "At least 2 CPUs recommended. You have $${cpus_available}"
+        echo
+        warning_resources="true"
+      fi
+      if (( disk_available < one_meg * 10 )); then
+        echo
+        echo -e "\033[1;33mWARNING!!!: Not enough Disk space available for Docker.\e[0m"
+        echo "At least 10 GBs recommended. You have $$(numfmt --to iec $$((disk_available * 1024 )))"
+        echo
+        warning_resources="true"
+      fi
+      if [[ $${warning_resources} == "true" ]]; then
+        echo
+        echo -e "\033[1;33mWARNING!!!: You have not enough resources to run Airflow (see above)!\e[0m"
+        echo "Please follow the instructions to increase amount of resources available:"
+        echo "   https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#before-you-begin"
+        echo
+      fi
+      mkdir -p /sources/logs /sources/dags /sources/plugins
+      chown -R ":0" /sources/{logs,dags,plugins}
+      exec /entrypoint airflow version
+    user: 0:0
+    environment:
+      AIRFLOW__CELERY__BROKER_URL: redis://:2a49678b99e3bfbf33de89ba65899a0e@redis:6379/0
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+      _AIRFLOW_DB_MIGRATE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_PASSWORD: airflow
+      _AIRFLOW_WWW_USER_USERNAME: airflow
+    volumes:
+     - airflow_data:/sources
+    networks:
+     - net
+    logging:
+      driver: json-file
+  airflow-scheduler:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/airflow:latest
+    command:
+     - scheduler
+    user: '50000:0'
+    environment:
+      AIRFLOW__CELERY__BROKER_URL: redis://:2a49678b99e3bfbf33de89ba65899a0e@redis:6379/0
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+    networks:
+     - net
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: airflow-scheduler
+    deploy:
+      labels:
+        swarmpit.service.deployment.autoredeploy: 'true'
+      placement:
+        constraints:
+         - node.hostname == worker2
+      resources:
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+        limits:
+          cpus: '0.5'
+          memory: 512M
+  airflow-triggerer:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/airflow:latest
+    command:
+     - triggerer
+    user: '50000:0'
+    environment:
+      AIRFLOW__CELERY__BROKER_URL: redis://:2a49678b99e3bfbf33de89ba65899a0e@redis:6379/0
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+    networks:
+     - net
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: airflow-triggerer
+    deploy:
+      labels:
+        swarmpit.service.deployment.autoredeploy: 'true'
+      placement:
+        constraints:
+         - node.hostname == worker2
+      resources:
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+        limits:
+          cpus: '0.5'
+          memory: 512M
+  airflow-webserver:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/airflow:latest
+    command:
+     - webserver
+    user: '50000:0'
+    environment:
+      AIRFLOW__CELERY__BROKER_URL: redis://:2a49678b99e3bfbf33de89ba65899a0e@redis:6379/0
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+    ports:
+     - 8080:8080
+    networks:
+     - net
+     - traefik-public
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: airflow-webserver
+    deploy:
+      labels:
+        traefik.http.routers.airflow-webserver-http.middlewares: https-redirect
+        traefik.http.routers.airflow-webserver-http.entrypoints: http
+        traefik.http.routers.airflow-webserver-https.tls: 'true'
+        swarmpit.service.deployment.autoredeploy: 'true'
+        traefik.http.routers.airflow-webserver-https.rule: Host(`airflow.staging.apperture.io`)
+        traefik.http.routers.airflow-webserver-http.rule: Host(`airflow.staging.apperture.io`)
+        traefik.constraint-label: traefik-public
+        traefik.http.routers.airflow-webserver-https.entrypoints: https
+        traefik.http.services.airflow-webserver.loadbalancer.server.port: '8080'
+        traefik.docker.network: traefik-public
+        traefik.enable: 'true'
+        traefik.http.routers.airflow-webserver-https.tls.certresolver: le
+      placement:
+        constraints:
+         - node.hostname == worker2
+      resources:
+        reservations:
+          cpus: '0.6'
+          memory: 512M
+        limits:
+          cpus: '0.9'
+          memory: 1024M
+  airflow-worker:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/airflow:latest
+    command:
+     - celery
+     - worker
+    user: '50000:0'
+    environment:
+      AIRFLOW__CELERY__BROKER_URL: redis://:2a49678b99e3bfbf33de89ba65899a0e@redis:6379/0
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+      DUMB_INIT_SETSID: '0'
+    networks:
+     - net
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: airflow-worker
+    deploy:
+      labels:
+        swarmpit.service.deployment.autoredeploy: 'true'
+      placement:
+        constraints:
+         - node.hostname == worker2
+      resources:
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+        limits:
+          cpus: '0.5'
+          memory: 512M
   alertmanager:
     image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/alertmanager:latest
     networks:
@@ -12,6 +232,7 @@ services:
     logging:
       driver: json-file
     deploy:
+      replicas: 0
       labels:
         swarmpit.service.deployment.autoredeploy: 'true'
       resources:
@@ -39,12 +260,12 @@ services:
     deploy:
       labels:
         traefik.http.routers.backend-https.service: backend
-        traefik.http.routers.backend-docs.rule: Host(`api.staging.apperture.io`) &&
-          PathPrefix(`/docs`, `/openapi.json`, `/redoc`)
+        traefik.http.routers.backend-docs.rule: Host(`apiv1.staging.apperture.io`)
+          && PathPrefix(`/docs`, `/openapi.json`, `/redoc`)
         traefik.http.routers.backend-http.service: backend
         traefik.http.routers.backend-docs.tls: 'true'
-        traefik.http.routers.backend-http.rule: Host(`api.staging.apperture.io`)
-        traefik.http.middlewares.docs-auth.basicauth.users: <username>:<aprhashedpassword>
+        traefik.http.routers.backend-http.rule: Host(`apiv1.staging.apperture.io`)
+        traefik.http.middlewares.docs-auth.basicauth.users: apperture_admin:$$apr1$$Ywq8BlBR$$ZsGmf2ZQji8GVD13SqmgS.
         traefik.http.routers.backend-https.tls.certresolver: le
         swarmpit.service.deployment.autoredeploy: 'true'
         traefik.http.routers.backend-http.entrypoints: http
@@ -58,7 +279,7 @@ services:
         traefik.http.routers.backend-https.tls: 'true'
         traefik.docker.network: traefik-public
         traefik.enable: 'true'
-        traefik.http.routers.backend-https.rule: Host(`api.staging.apperture.io`)
+        traefik.http.routers.backend-https.rule: Host(`apiv1.staging.apperture.io`)
         traefik.http.routers.backend-http.middlewares: https-redirect
         traefik.http.routers.backend-docs.middlewares: docs-auth
       update_config:
@@ -74,18 +295,6 @@ services:
         limits:
           cpus: '1.0'
           memory: 2048M
-  chrome:
-    image: browserless/chrome
-    networks:
-     - net
-    deploy:
-      resources:
-        reservations:
-          cpus: '0.25'
-          memory: 128M
-        limits:
-          cpus: '0.5'
-          memory: 256M
   clickhouse:
     image: clickhouse/clickhouse-server:latest
     ports:
@@ -116,7 +325,7 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-group: apperture-staging-log-group
+        awslogs-group: apperture-staging-events-log-group
         awslogs-region: ap-south-1
         awslogs-stream: dataprocessor
     deploy:
@@ -130,38 +339,18 @@ services:
           memory: 1000M
         limits:
           memory: 7800M
-  events_producer:
-    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/events_producer:latest
-    networks:
-     - net
-    logging:
-      driver: awslogs
-      options:
-        awslogs-group: apperture-staging-log-group
-        awslogs-region: ap-south-1
-        awslogs-stream: events_producer
-    deploy:
-      labels:
-        swarmpit.service.deployment.autoredeploy: 'true'
-      resources:
-        reservations:
-          cpus: '0.5'
-          memory: 512M
-        limits:
-          cpus: '1.0'
-          memory: 2048M
   events_consumer:
     image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/events_consumer:latest
-    secrets:
-     -
-      source: events_consumer.env
-      target: /code/.env
     networks:
      - net
+    secrets:
+     -
+      source: events_consumer2.env
+      target: /code/.env
     logging:
       driver: awslogs
       options:
-        awslogs-group: apperture-staging-log-group
+        awslogs-group: apperture-staging-events-log-group
         awslogs-region: ap-south-1
         awslogs-stream: events_consumer
     deploy:
@@ -174,14 +363,52 @@ services:
         limits:
           cpus: '1.0'
           memory: 2048M
-  frontend:
-    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/frontend:88358f6
+  events_producer:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/events_producer:latest
     networks:
      - net
      - traefik-public
     secrets:
      -
-      source: frontend.env
+      source: events_producer.env
+      target: /code/.env
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-events-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: events_producer
+    deploy:
+      labels:
+        traefik.http.routers.events_producer-https.tls.certresolver: le
+        traefik.http.services.events_producer.loadbalancer.server.port: '8002'
+        traefik.http.routers.events_producer-https.service: events_producer
+        traefik.http.routers.events_producer-http.entrypoints: http
+        swarmpit.service.deployment.autoredeploy: 'true'
+        traefik.http.routers.events_producer-http.service: events_producer
+        traefik.http.routers.events_producer-http.middlewares: https-redirect
+        traefik.constraint-label: traefik-public
+        traefik.http.routers.events_producer-https.entrypoints: https
+        traefik.http.routers.events_producer-https.tls: 'true'
+        traefik.docker.network: traefik-public
+        traefik.enable: 'true'
+        traefik.http.routers.events_producer-http.rule: Host(`api.staging.apperture.io`)
+        traefik.http.routers.events_producer-https.rule: Host(`api.staging.apperture.io`)
+      resources:
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+        limits:
+          cpus: '1.0'
+          memory: 2048M
+  frontend:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/frontend:latest
+    networks:
+     - net
+     - traefik-public
+    secrets:
+     -
+      source: frontend1.env
       target: /code/.env
     logging:
       driver: awslogs
@@ -214,37 +441,90 @@ services:
           cpus: '0.5'
           memory: 512M
   kafka:
-    image: 'bitnami/kafka:latest'
-    ports:
-      - '9092:9092'
+    image: bitnami/kafka:latest
     environment:
-      - KAFKA_ENABLE_KRAFT=yes
-      - KAFKA_KRAFT_CLUSTER_ID=OTMwNzFhYTY1ODNiNGE5OT
-      - KAFKA_CFG_PROCESS_ROLES=broker,controller
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
-      - KAFKA_BROKER_ID=1
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
-      - KAFKA_CFG_MAX_REQUEST_SIZE=5242880
-      - KAFKA_CFG_MESSAGE_MAX_BYTES=5242880
-      - KAFKA_CFG_REPLICA_FETCH_MAX_BYTES=7864320
-      - ALLOW_PLAINTEXT_LISTENER=yes # FIXME: kafka gives warning for this
-    deploy:
-      placement:
-        constraints:
-         - node.hostname == worker3
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_BROKER_ID: '1'
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_ENABLE_KRAFT: 'yes'
+      KAFKA_KRAFT_CLUSTER_ID: OTMwNzFhYTY1ODNiNGE5OT
+    ports:
+     - 9092:9092
     volumes:
-      - kafka_data:/bitnami/kafka
+     - kafka_data:/bitnami/kafka
     networks:
      - net
     logging:
       driver: json-file
+    deploy:
+      placement:
+        constraints:
+         - node.hostname == worker1
+  metabase:
+    image: bjeanes/metabase-clickhouse:latest
+    networks:
+     - net
+     - traefik-public
+    logging:
+      driver: json-file
+    deploy:
+      labels:
+        traefik.http.routers.metabase-https.tls.certresolver: le
+        traefik.http.routers.metabase-https.tls: 'true'
+        traefik.http.routers.metabase-https.entrypoints: https
+        traefik.http.routers.metabase-https.service: metabase
+        traefik.http.routers.metabase-http.rule: Host(`metabase.staging.apperture.io`)
+        traefik.http.routers.metabase-http.entrypoints: http
+        traefik.http.routers.metabase-http.service: metabase
+        traefik.http.routers.metabase.middlewares: metabase-auth
+        traefik.http.routers.metabase-http.middlewares: https-redirect
+        traefik.constraint-label: traefik-public
+        traefik.http.middlewares.metabase-auth.basicauth.users: apperture_admin:$$apr1$$Ywq8BlBR$$ZsGmf2ZQji8GVD13SqmgS.
+        traefik.http.routers.metabase-https.rule: Host(`metabase.staging.apperture.io`)
+        traefik.docker.network: traefik-public
+        traefik.enable: 'true'
+        traefik.http.services.metabase.loadbalancer.server.port: '3000'
+      resources:
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+        limits:
+          cpus: '1.5'
+          memory: 2048M
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_USER: airflow
+    ports:
+     - 5432:5432
+    volumes:
+     - postgres_data:/var/lib/postgresql/data
+    networks:
+     - net
+    logging:
+      driver: json-file
+    deploy:
+      placement:
+        constraints:
+         - node.hostname == worker2
+      resources:
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+        limits:
+          cpus: '0.5'
+          memory: 256M
   redis:
     image: bitnami/redis:latest
     environment:
-      REDIS_PASSWORD: <redispassword>
+      REDIS_PASSWORD: ecc2191feb78c9c5be63458428b30812
     ports:
      - 6379:6379
     volumes:
@@ -296,7 +576,13 @@ networks:
   traefik-public:
     external: true
 volumes:
+  airflow_data:
+    external: true
   apperture_redisdata:
+    external: true
+  kafka_data:
+    external: true
+  postgres_data:
     external: true
 secrets:
   alertmanager.env:
@@ -305,7 +591,11 @@ secrets:
     external: true
   data_processor1.env:
     external: true
-  frontend.env:
+  events_consumer2.env:
+    external: true
+  events_producer.env:
+    external: true
+  frontend1.env:
     external: true
   scheduler.env:
     external: true
