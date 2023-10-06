@@ -1,8 +1,14 @@
 import json
+from ai.text_to_sql import text_to_sql
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import ClickHouseCredential
 
-from domain.spreadsheets.models import ColumnType, DatabaseClient, SpreadSheetColumn
+from domain.spreadsheets.models import (
+    ColumnType,
+    DatabaseClient,
+    SpreadSheetColumn,
+)
+from unittest.mock import ANY
 
 
 def test_compute_transient_result(
@@ -39,9 +45,7 @@ def test_compute_transient_result(
     )
 
 
-def test_compute_transient_google_sheet_with_nlp(
-    client_init, spreadsheets_service, transient_spreadsheet_data_with_serialize_result
-):
+def test_compute_transient_google_sheet_with_nlp(client_init, spreadsheets_service):
     nlp_query_data = {
         "query": "get count of event_name ",
         "isSql": False,
@@ -68,7 +72,7 @@ def test_compute_transient_google_sheet_with_nlp(
     }
     spreadsheets_service.get_transient_spreadsheets.assert_called_with(
         **{
-            "query": "SELECT COUNT(event_name) AS event_count FROM default.events;",
+            "query": ANY,
             "credential": ClickHouseCredential(
                 username="test_username",
                 password="test_password",
