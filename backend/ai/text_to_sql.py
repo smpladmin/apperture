@@ -9,7 +9,7 @@ def generate_prompt(text, columns, database, table):
     return f"""
     I have a Clickhouse table called {database}.{table} with columns {", ".join(columns)}
     Generate only a single SQL 'Select' query and no other text using following text '{text}'
-    and incase column name have spaces or any special character, wrap it with quotes
+    and incase column name have spaces or any special character, wrap it within quotes
     while generating query
     """
 
