@@ -95,7 +95,10 @@ async def get_workbooks(
 async def compute_transient_spreadsheets(
     dto: TransientSpreadsheetsDto, compute_query_action: ComputeQueryAction = Depends()
 ):
-    return await compute_query_action.compute_query(dto=dto)
+    result = await compute_query_action.compute_query(dto=dto)
+    return compute_query_action.create_spreadsheet_with_custom_headers(
+        column_names=result.headers, data=result.data, sql=result.sql
+    )
 
 
 @router.post(
