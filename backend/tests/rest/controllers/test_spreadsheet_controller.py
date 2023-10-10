@@ -46,7 +46,6 @@ async def test_compute_transient_spreadsheets_with_credentials(
                 databasename="test_database",
             ),
             "client": DatabaseClient.CLICKHOUSE,
-            "serializeResult": False,
             "query_id": None,
         }
     )
@@ -103,7 +102,6 @@ async def test_compute_transient_spreadsheets(
                 databasename="test_database",
             ),
             "client": DatabaseClient.CLICKHOUSE,
-            "serializeResult": False,
             "query_id": None,
         }
     )
