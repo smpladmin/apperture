@@ -42,7 +42,7 @@ def create_dag(datasource_id: str, default_args: Dict) -> DAG:
             datasource = ti.xcom_pull(task_ids="get_datasource", key="datasource")
             api_data = APIDataFetcher(
                 credential=datasource.credential,
-                date=pendulum.today().format("YYYY-MM-DD"),
+                date=pendulum.today().subtract(days=1).format("YYYY-MM-DD"),
             ).fetch()
             ti.xcom_push("api_data", api_data)
 
