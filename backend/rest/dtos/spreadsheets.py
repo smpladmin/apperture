@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from domain.spreadsheets.models import (
     AIQuery,
     ComputedSpreadsheet,
+    ComputedSpreadsheetWithCustomHeaders,
     DimensionDefinition,
     Formatting,
     MetricDefinition,
@@ -46,7 +47,9 @@ class TransientSpreadsheetColumnDto(BaseModel):
     table: str
 
 
-class ComputedSpreadsheetQueryResponse(ComputedSpreadsheet, ModelResponse):
+class ComputedSpreadsheetQueryResponse(
+    ComputedSpreadsheetWithCustomHeaders, ModelResponse
+):
     class Config:
         allow_population_by_field_name = True
 

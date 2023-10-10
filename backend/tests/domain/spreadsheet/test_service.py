@@ -191,7 +191,7 @@ class TestSpreadsheetService:
             },
         }
 
-        self.result_set = [
+        self.pivot_result_set = [
             (21, "Friday", 666.19),
             (21, "Monday", 1692.88),
             (21, "Saturday", 423.24),
@@ -270,31 +270,8 @@ class TestSpreadsheetService:
             credential=ClickHouseCredential(username="", password="", databasename=""),
         )
         assert result == ComputedSpreadsheet(
-            headers=[
-                SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)
-            ],
-            data=self.result_data,
-            sql=self.cleaned_query_with_limit,
-        )
-
-    @pytest.mark.asyncio
-    async def test_get_transient_spreadsheets_with_serialized_result(self):
-        result = await self.service.get_transient_spreadsheets(
-            query=self.query,
-            credential=ClickHouseCredential(username="", password="", databasename=""),
-            serializeResult=True,
-        )
-        assert result == ComputedSpreadsheet(
-            headers=[
-                SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)
-            ],
-            data=[
-                ("test_event_1",),
-                ("test_event_2",),
-                ("test_event_3",),
-                ("test_event_4",),
-                ("test_event_5",),
-            ],
+            headers=self.column_names,
+            data=self.result_set,
             sql=self.cleaned_query_with_limit,
         )
 
@@ -403,7 +380,7 @@ class TestSpreadsheetService:
         assert WorkBook.find_one.called
 
     def test_populate_data(self):
-        result = self.service.populate_data(data={}, result_set=self.result_set)
+        result = self.service.populate_data(data={}, result_set=self.pivot_result_set)
         assert result == self.populated_pivot_data
 
     def test_populate_row_totals(self):

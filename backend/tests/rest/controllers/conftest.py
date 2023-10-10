@@ -80,6 +80,7 @@ from domain.segments.models import (
 from domain.spreadsheets.models import (
     ColumnType,
     ComputedSpreadsheet,
+    ComputedSpreadsheetWithCustomHeaders,
     Spreadsheet,
     SpreadSheetColumn,
     SpreadsheetType,
@@ -378,7 +379,7 @@ def datamart_service(apperture_user_response):
         enabled=True,
     )
 
-    query_response = ComputedSpreadsheet(
+    query_response = ComputedSpreadsheetWithCustomHeaders(
         headers=[
             SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER),
             SpreadSheetColumn(name="user_id", type=ColumnType.QUERY_HEADER),
@@ -831,7 +832,7 @@ def workbook_data():
 def spreadsheets_service():
     WorkBook.get_settings = mock.MagicMock()
     spreadsheets_service_mock = mock.MagicMock()
-    computed_spreadsheet = ComputedSpreadsheet(
+    computed_spreadsheet_with_headers = ComputedSpreadsheetWithCustomHeaders(
         headers=[SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)],
         data=[
             {"event_name": "test_event_1"},
@@ -839,6 +840,17 @@ def spreadsheets_service():
             {"event_name": "test_event_3"},
             {"event_name": "test_event_4"},
             {"event_name": "test_event_5"},
+        ],
+        sql="select * from events",
+    )
+    computed_spreadsheet = ComputedSpreadsheet(
+        headers=["event_name"],
+        data=[
+            ("test_event_1",),
+            ("test_event_2",),
+            ("test_event_3",),
+            ("test_event_4",),
+            ("test_event_5",),
         ],
         sql="select * from events",
     )

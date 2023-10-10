@@ -13,7 +13,7 @@ router = APIRouter(
 )
 
 
-@router.post("/api-key/generate")
+@router.post("/api-key")
 async def generate_api_key(
     user_id: str = Depends(get_user_id),
     user_service: AppertureUserService = Depends(),

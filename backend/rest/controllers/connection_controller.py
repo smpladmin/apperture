@@ -8,7 +8,7 @@ from domain.datasources.service import DataSourceService
 from domain.integrations.service import IntegrationService
 from domain.properties.service import PropertiesService
 from rest.middlewares import validate_jwt
-from rest.controllers.actions.app_connections import AppConnections
+from rest.controllers.actions.app_connections import AppConnectionsAction
 
 
 router = APIRouter(
@@ -22,7 +22,7 @@ router = APIRouter(
 async def get_connections(
     dsId: str,
     ds_service: DataSourceService = Depends(),
-    app_connections: AppConnections = Depends(),
+    app_connections_action: AppConnectionsAction = Depends(),
     app_service: AppService = Depends(),
 ):
     datasource = await ds_service.get_datasource(dsId)
@@ -30,6 +30,6 @@ async def get_connections(
     if datasource:
         app_id = datasource.app_id
         app = await app_service.get_app(id=str(app_id))
-        return await app_connections.get_app_connections(app=app)
+        return await app_connections_action.get_app_connections(app=app)
 
     return []

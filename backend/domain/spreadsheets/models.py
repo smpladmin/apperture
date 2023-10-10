@@ -37,6 +37,12 @@ class SubHeaderColumn(BaseModel):
 
 class ComputedSpreadsheet(BaseModel):
     data: List
+    headers: List[str]
+    sql: str
+
+
+class ComputedSpreadsheetWithCustomHeaders(BaseModel):
+    data: List[dict]
     headers: List[SpreadSheetColumn]
     sql: str
 
