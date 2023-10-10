@@ -9,7 +9,7 @@ from domain.integrations.service import IntegrationService
 from domain.properties.service import PropertiesService
 
 
-class AppConnections:
+class AppConnectionsAction:
     def __init__(
         self,
         app_service: AppService = Depends(),
