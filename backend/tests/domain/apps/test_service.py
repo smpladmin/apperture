@@ -37,6 +37,7 @@ class TestAppService:
         )
         App.id = MagicMock(return_value=self.ds_id)
         App.enabled = MagicMock(return_value=True)
+        App.user_id = MagicMock(return_value=self.ds_id)
         self.FindMock = namedtuple("FindMock", ["update", "count"])
         App.find = MagicMock(
             return_value=self.FindMock(
@@ -149,6 +150,11 @@ class TestAppService:
         App.get.assert_called_once_with(
             PydanticObjectId("636a1c61d715ca6baae65611"),
         )
+
+    @pytest.mark.asyncio
+    async def test_get_app_for_user(self):
+        await self.service.get_app_for_user(user_id=self.ds_id)
+        App.find_one.assert_called()
 
     @pytest.mark.asyncio
     async def test_get_users_for_app(self):

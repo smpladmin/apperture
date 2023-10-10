@@ -26,6 +26,10 @@ class AppertureUserResponse(ModelResponse):
         orm_mode = True
 
 
+class AppertureUserWithAPIKey(AppertureUserResponse):
+    api_key: Optional[str]
+
+
 class CreateUserDto(BaseModel):
     first_name: str
     last_name: str

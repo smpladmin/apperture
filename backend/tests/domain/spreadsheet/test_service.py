@@ -35,7 +35,8 @@ class TestSpreadsheetService:
         SELECT  event_name -- selecting event
         FROM  events
         WHERE timestamp>=toDate(2023-02-11)"""
-        self.cleaned_query = """SELECT  event_name          FROM  events         WHERE timestamp>=toDate(2023-02-11) ORDER BY 1 LIMIT 500"""
+        self.cleaned_query = "SELECT  event_name          FROM  events         WHERE timestamp>=toDate(2023-02-11)"
+        self.cleaned_query_with_limit = """SELECT  event_name          FROM  events         WHERE timestamp>=toDate(2023-02-11) ORDER BY 1 LIMIT 500"""
         self.spreadsheet.get_transient_spreadsheet = MagicMock()
         self.column_names = ["event_name"]
         self.result_set = [
@@ -54,11 +55,11 @@ class TestSpreadsheetService:
         )
 
         self.result_data = [
-            {"index": 1, "event_name": "test_event_1"},
-            {"index": 2, "event_name": "test_event_2"},
-            {"index": 3, "event_name": "test_event_3"},
-            {"index": 4, "event_name": "test_event_4"},
-            {"index": 5, "event_name": "test_event_5"},
+            {"event_name": "test_event_1"},
+            {"event_name": "test_event_2"},
+            {"event_name": "test_event_3"},
+            {"event_name": "test_event_4"},
+            {"event_name": "test_event_5"},
         ]
         self.workbook = WorkBook(
             id=PydanticObjectId("63d0df1ea1040a6388a4a34c"),
@@ -190,7 +191,7 @@ class TestSpreadsheetService:
             },
         }
 
-        self.result_set = [
+        self.pivot_result_set = [
             (21, "Friday", 666.19),
             (21, "Monday", 1692.88),
             (21, "Saturday", 423.24),
@@ -269,11 +270,9 @@ class TestSpreadsheetService:
             credential=ClickHouseCredential(username="", password="", databasename=""),
         )
         assert result == ComputedSpreadsheet(
-            headers=[
-                SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)
-            ],
-            data=self.result_data,
-            sql=self.cleaned_query,
+            headers=self.column_names,
+            data=self.result_set,
+            sql=self.cleaned_query_with_limit,
         )
 
     def test_build_workbook(self):
@@ -381,7 +380,7 @@ class TestSpreadsheetService:
         assert WorkBook.find_one.called
 
     def test_populate_data(self):
-        result = self.service.populate_data(data={}, result_set=self.result_set)
+        result = self.service.populate_data(data={}, result_set=self.pivot_result_set)
         assert result == self.populated_pivot_data
 
     def test_populate_row_totals(self):

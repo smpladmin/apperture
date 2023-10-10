@@ -18,6 +18,7 @@ from clickhouse import Clickhouse
 from mongo import Mongo
 from rest.controllers import (
     action_controller,
+    api_key_controller,
     app_controller,
     apperture_user_controller,
     auth_controller,
@@ -38,6 +39,7 @@ from rest.controllers import (
     segment_controller,
     spreadsheet_controller,
     user_controller,
+    google_sheet_controller,
 )
 
 settings = apperture_settings()
@@ -103,6 +105,8 @@ app.include_router(retention_controller.router)
 app.include_router(spreadsheet_controller.router)
 app.include_router(datamart_controller.router)
 app.include_router(connection_controller.router)
+app.include_router(api_key_controller.router)
+app.include_router(google_sheet_controller.router)
 
 
 @app.get("/sentry-debug")

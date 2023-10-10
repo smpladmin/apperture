@@ -23,7 +23,7 @@ import {
   MenuItem,
   IconButton,
 } from '@chakra-ui/react';
-import { CaretRight, Plus } from 'phosphor-react';
+import { CaretRight, Key, Plus } from 'phosphor-react';
 import LogoutModal from '@components/Logout';
 import { get_app_wise_users } from '@lib/services/userService';
 import { AppertureUser } from '@lib/domain/user';
@@ -375,6 +375,41 @@ const HomeNav = ({ apps }: HomeNavProps) => {
                   <GearSix size={16} color={GREY_600} /> Integrations
                 </Flex>
                 {hoveredItem === 'Integrations' && (
+                  <CaretRight size={16} color={GREY_600} />
+                )}
+              </Flex>
+            </MenuItem>
+            <MenuItem
+              padding={2}
+              paddingY={3}
+              borderRadius={8}
+              _focus={{ bg: 'white.400' }}
+              onClick={() => {
+                router.push({
+                  pathname: `/analytics/settings/apiKey`,
+                  query: { dsId },
+                });
+              }}
+              onMouseEnter={() => setIsHoveredItem('API Key')}
+              onMouseLeave={() => setIsHoveredItem('')}
+            >
+              <Flex
+                justifyContent={'space-between'}
+                flexDirection={'row'}
+                alignItems={'center'}
+                width={'full'}
+              >
+                <Flex
+                  color={'black.500'}
+                  gap={2}
+                  fontWeight={'500'}
+                  fontSize={'xs-14'}
+                  lineHeight={'lh-130'}
+                  alignItems={'center'}
+                >
+                  <Key size={16} color={GREY_600} /> API Key
+                </Flex>
+                {hoveredItem === 'API Key' && (
                   <CaretRight size={16} color={GREY_600} />
                 )}
               </Flex>

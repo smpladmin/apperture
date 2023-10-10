@@ -125,6 +125,11 @@ class AppService:
             App.user_id == PydanticObjectId(user_id),
         )
 
+    async def get_app_for_user(self, user_id: str) -> App:
+        return await App.find_one(
+            App.user_id == PydanticObjectId(user_id), App.enabled == True
+        )
+
     async def get_shared_or_owned_app(self, id: str, user: AppertureUser) -> App:
         return await App.find_one(
             {

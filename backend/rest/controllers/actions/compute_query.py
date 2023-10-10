@@ -1,5 +1,5 @@
 import logging
-from typing import Union
+from typing import List, Union
 
 from clickhouse_connect.driver.exceptions import DatabaseError
 from fastapi import Depends, HTTPException
@@ -11,7 +11,13 @@ from domain.common.models import IntegrationProvider
 from domain.datasources.service import DataSourceService
 from domain.integrations.models import MsSQLCredential, MySQLCredential
 from domain.integrations.service import IntegrationService
-from domain.spreadsheets.models import DatabaseClient
+from domain.spreadsheets.models import (
+    ColumnType,
+    ComputedSpreadsheet,
+    ComputedSpreadsheetWithCustomHeaders,
+    DatabaseClient,
+    SpreadSheetColumn,
+)
 from domain.spreadsheets.service import SpreadsheetService
 from rest.dtos.spreadsheets import TransientSpreadsheetsDto
 from utils.errors import BusinessError
@@ -80,6 +86,20 @@ class ComputeQueryAction:
         else:
             return DatabaseClient.CLICKHOUSE
 
+    async def get_transient_spreadsheets(
+        self,
+        query: str,
+        credential: Union[ClickHouseCredential, MySQLCredential, MsSQLCredential],
+        client: DatabaseClient,
+        query_id: Union[str, None] = None,
+    ) -> ComputedSpreadsheet:
+        return await self.spreadsheets_service.get_transient_spreadsheets(
+            query=query,
+            credential=credential,
+            query_id=query_id,
+            client=client,
+        )
+
     async def compute_query(self, dto: TransientSpreadsheetsDto):
         try:
             logging.info(f"Query: {dto.query}")
@@ -93,13 +113,13 @@ class ComputeQueryAction:
 
             if not dto.is_sql:
                 sql_query = text_to_sql(dto.ai_query)
-                return await self.spreadsheets_service.get_transient_spreadsheets(
+                return await self.get_transient_spreadsheets(
                     query=sql_query,
                     credential=credential,
                     client=client,
                     query_id=dto.query_id,
                 )
-            return await self.spreadsheets_service.get_transient_spreadsheets(
+            return await self.get_transient_spreadsheets(
                 query=dto.query,
                 credential=credential,
                 client=client,
@@ -113,3 +133,22 @@ class ComputeQueryAction:
             raise HTTPException(
                 status_code=400, detail=str(e) or "Something went wrong"
             )
+
+    def create_spreadsheet_with_custom_headers(
+        self, column_names: List[str], data: List[List], sql: str
+    ) -> ComputedSpreadsheetWithCustomHeaders:
+        headers = [
+            SpreadSheetColumn(name=name, type=ColumnType.QUERY_HEADER)
+            for name in column_names
+        ]
+        data_dict = []
+
+        for idx, row in enumerate(data):
+            row_data = {}
+            for col_idx, column_name in enumerate(column_names):
+                row_data[column_name] = row[col_idx]
+            data_dict.append(row_data)
+
+        return ComputedSpreadsheetWithCustomHeaders(
+            data=data_dict, headers=headers, sql=sql
+        )
