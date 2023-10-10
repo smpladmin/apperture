@@ -1,2 +1,2 @@
-lxml
-beautifulsoup4
+pandas
+requests

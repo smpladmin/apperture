@@ -37,7 +37,7 @@ from rest.dtos.clickstream_event_properties import (
     ClickStreamEventPropertiesResponse,
 )
 from rest.dtos.datamart import RefreshDataMartDto
-from rest.dtos.datasources import PrivateDataSourceResponse
+from rest.dtos.datasources import PrivateDataSourceResponse, DataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.event_properties import EventPropertiesDto, EventPropertiesResponse
 from rest.dtos.events import CreateEventDto
@@ -451,3 +451,11 @@ async def get_datasource_events(
     )
 
     return [properties.event for properties in event_properties]
+
+
+@router.get("/datasources", response_model=List[DataSourceResponse])
+async def get_datasource_events(
+    provider: IntegrationProvider,
+    ds_service: DataSourceService = Depends(),
+):
+    return await ds_service.get_datasources_for_provider(provider=provider)
