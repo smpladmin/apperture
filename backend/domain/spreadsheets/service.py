@@ -116,22 +116,8 @@ class SpreadsheetService:
                 query=query, credential=credential
             )
 
-        response = {
-            "headers": [
-                SpreadSheetColumn(name=name, type=ColumnType.QUERY_HEADER)
-                for name in result.column_names
-            ],
-            "data": [],
-        }
-
-        for idx, row in enumerate(result.result_set):
-            row_data = {"index": idx + 1}
-            for col_idx, column_name in enumerate(result.column_names):
-                row_data[column_name] = row[col_idx]
-            response["data"].append(row_data)
-
         return ComputedSpreadsheet(
-            data=response["data"], headers=response["headers"], sql=query
+            data=result.result_set, headers=result.column_names, sql=query
         )
 
     async def get_workbook_by_id(self, workbook_id: str):

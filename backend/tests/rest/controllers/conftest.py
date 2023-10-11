@@ -80,6 +80,7 @@ from domain.segments.models import (
 from domain.spreadsheets.models import (
     ColumnType,
     ComputedSpreadsheet,
+    ComputedSpreadsheetWithCustomHeaders,
     Spreadsheet,
     SpreadSheetColumn,
     SpreadsheetType,
@@ -378,7 +379,7 @@ def datamart_service(apperture_user_response):
         enabled=True,
     )
 
-    query_response = ComputedSpreadsheet(
+    query_response = ComputedSpreadsheetWithCustomHeaders(
         headers=[
             SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER),
             SpreadSheetColumn(name="user_id", type=ColumnType.QUERY_HEADER),
@@ -553,6 +554,7 @@ def datasource_service():
         datasources_future
     )
     datasource_service_mock.create_row_policy_for_datasources_by_app = mock.AsyncMock()
+    datasource_service_mock.get_datasources_for_app_id = mock.AsyncMock()
     return datasource_service_mock
 
 
@@ -798,6 +800,13 @@ def transient_spreadsheet_data():
 
 
 @pytest.fixture(scope="module")
+def transient_spreadsheet_data_with_serialize_result():
+    return {
+        "query": "SELECT  event_name FROM  events WHERE timestamp>=toDate(2023-02-11)"
+    }
+
+
+@pytest.fixture(scope="module")
 def workbook_data():
     return {
         "name": "Test Workbook",
@@ -823,14 +832,25 @@ def workbook_data():
 def spreadsheets_service():
     WorkBook.get_settings = mock.MagicMock()
     spreadsheets_service_mock = mock.MagicMock()
-    computed_spreadsheet = ComputedSpreadsheet(
+    computed_spreadsheet_with_headers = ComputedSpreadsheetWithCustomHeaders(
         headers=[SpreadSheetColumn(name="event_name", type=ColumnType.QUERY_HEADER)],
         data=[
-            {"index": 1, "event_name": "test_event_1"},
-            {"index": 2, "event_name": "test_event_2"},
-            {"index": 3, "event_name": "test_event_3"},
-            {"index": 4, "event_name": "test_event_4"},
-            {"index": 5, "event_name": "test_event_5"},
+            {"event_name": "test_event_1"},
+            {"event_name": "test_event_2"},
+            {"event_name": "test_event_3"},
+            {"event_name": "test_event_4"},
+            {"event_name": "test_event_5"},
+        ],
+        sql="select * from events",
+    )
+    computed_spreadsheet = ComputedSpreadsheet(
+        headers=["event_name"],
+        data=[
+            ("test_event_1",),
+            ("test_event_2",),
+            ("test_event_3",),
+            ("test_event_4",),
+            ("test_event_5",),
         ],
         sql="select * from events",
     )
@@ -1248,10 +1268,14 @@ def app_service():
     clickhouse_credential_future = asyncio.Future()
     clickhouse_credential_future.set_result(clickhouse_credential)
 
+    app_with_credentials_future = asyncio.Future()
+    app_with_credentials_future.set_result(app_with_credentials)
+
     app_service_mock.get_apps.return_value = apps_future
     app_service_mock.get_user_app.return_value = app_future
     app_service_mock.get_shared_or_owned_app.return_value = app_future
     app_service_mock.get_app = AsyncMock(return_value=app_with_credentials)
+    app_service_mock.get_app_for_user.return_value = app_with_credentials_future
     app_service_mock.create_clickhouse_user.return_value = clickhouse_credential_future
     return app_service_mock
 
@@ -1835,11 +1859,11 @@ def datamart_response():
 def transient_datamart_response():
     return {
         "data": [
-            {"event_name": "test_event_1", "index": 1},
-            {"event_name": "test_event_2", "index": 2},
-            {"event_name": "test_event_3", "index": 3},
-            {"event_name": "test_event_4", "index": 4},
-            {"event_name": "test_event_5", "index": 5},
+            {"event_name": "test_event_1"},
+            {"event_name": "test_event_2"},
+            {"event_name": "test_event_3"},
+            {"event_name": "test_event_4"},
+            {"event_name": "test_event_5"},
         ],
         "headers": [{"name": "event_name", "type": "QUERY_HEADER"}],
         "sql": "select * from events",

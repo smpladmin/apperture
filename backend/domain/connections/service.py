@@ -148,6 +148,7 @@ class ConnectionService:
         credentials_table: dict,
         datamarts: List[DataMart],
         datamart_properties: dict,
+        allow_sql_connections: bool = True,
     ):
         clickhouse_connection_table = {}
         mysql_connections = []
@@ -160,9 +161,15 @@ class ConnectionService:
                 if datasource.provider not in clickhouse_connection_table:
                     clickhouse_connection_table[datasource.provider] = []
                 clickhouse_connection_table[datasource.provider].append(datasource)
-            elif datasource.provider == IntegrationProvider.MYSQL:
+            elif (
+                datasource.provider == IntegrationProvider.MYSQL
+                and allow_sql_connections
+            ):
                 mysql_connections.append(datasource)
-            elif datasource.provider == IntegrationProvider.MSSQL:
+            elif (
+                datasource.provider == IntegrationProvider.MSSQL
+                and allow_sql_connections
+            ):
                 mssql_connections.append(datasource)
         clickhouse_server_connections = self.get_clickhouse_connection_group(
             clickhouse_connection_table=clickhouse_connection_table,
@@ -184,9 +191,9 @@ class ConnectionService:
 
         if clickhouse_server_connections:
             connections_list.append(clickhouse_server_connections)
-        if mysql_server_connections:
+        if mysql_server_connections and allow_sql_connections:
             connections_list.extend(mysql_server_connections)
-        if mssql_server_connections:
+        if mssql_server_connections and allow_sql_connections:
             connections_list.extend(mssql_server_connections)
 
         return connections_list
