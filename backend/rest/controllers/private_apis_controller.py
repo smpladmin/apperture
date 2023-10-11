@@ -28,7 +28,6 @@ from domain.notifications.service import NotificationService
 from domain.properties.service import PropertiesService
 from domain.runlogs.service import RunLogService
 from domain.spreadsheets.models import DatabaseClient
-
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apidata import CreateAPIDataDto
 from rest.dtos.apperture_users import PrivateUserResponse, ResetPasswordDto
@@ -149,6 +148,15 @@ async def update_runlog(
 ):
     runlog = await service.update_runlog(id, dto.status)
     return runlog
+
+
+@router.get("/runlogs/events/{id}", responses={404: {}})
+async def get_runlog_events(
+    id: str,
+    service: RunLogService = Depends(),
+):
+    events = await service.get_runlog_events(id)
+    return events
 
 
 @router.post("/datasources")

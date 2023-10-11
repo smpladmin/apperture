@@ -1,8 +1,10 @@
 from datetime import datetime
 from enum import Enum
+from typing import List, Optional
 
 from beanie import PydanticObjectId
 from pydantic import BaseModel
+
 from repositories import Document
 
 
@@ -18,6 +20,7 @@ class RunLog(Document):
     datasource_id: PydanticObjectId
     date: datetime
     status: RunLogStatus
+    events: Optional[List[str]] = []
 
     class Settings:
         name = "runlogs"

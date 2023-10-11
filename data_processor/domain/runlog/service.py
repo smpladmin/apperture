@@ -26,3 +26,13 @@ class RunLogService:
                 )
             },
         )
+
+    def get_events_list(self, runlog_id: str):
+        return requests.get(
+            f"{os.getenv('BACKEND_BASE_URL')}/private/runlogs/events/{runlog_id}",
+            headers={
+                f"{os.getenv('BACKEND_API_KEY_NAME')}": os.getenv(
+                    "BACKEND_API_KEY_SECRET"
+                )
+            },
+        ).json()
