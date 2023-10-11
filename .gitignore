@@ -167,3 +167,5 @@ frontend/public/__ENV.js
 
 # airflow
 airflow/logs
+airflow/airflow-webserver.pid
+airflow/airflow-worker.pid
