@@ -66,7 +66,7 @@ services:
       exec /entrypoint airflow version
     user: 0:0
     environment:
-      AIRFLOW__CELERY__BROKER_URL: redis://:2a49678b99e3bfbf33de89ba65899a0e@redis:6379/0
+      AIRFLOW__CELERY__BROKER_URL: redis://:ecc2191feb78c9c5be63458428b30812@redis:6379/0
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
@@ -92,7 +92,7 @@ services:
      - scheduler
     user: '50000:0'
     environment:
-      AIRFLOW__CELERY__BROKER_URL: redis://:2a49678b99e3bfbf33de89ba65899a0e@redis:6379/0
+      AIRFLOW__CELERY__BROKER_URL: redis://:ecc2191feb78c9c5be63458428b30812@redis:6379/0
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
@@ -127,7 +127,7 @@ services:
      - triggerer
     user: '50000:0'
     environment:
-      AIRFLOW__CELERY__BROKER_URL: redis://:2a49678b99e3bfbf33de89ba65899a0e@redis:6379/0
+      AIRFLOW__CELERY__BROKER_URL: redis://:ecc2191feb78c9c5be63458428b30812@redis:6379/0
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
@@ -162,7 +162,7 @@ services:
      - webserver
     user: '50000:0'
     environment:
-      AIRFLOW__CELERY__BROKER_URL: redis://:2a49678b99e3bfbf33de89ba65899a0e@redis:6379/0
+      AIRFLOW__CELERY__BROKER_URL: redis://:ecc2191feb78c9c5be63458428b30812@redis:6379/0
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
@@ -212,7 +212,7 @@ services:
      - worker
     user: '50000:0'
     environment:
-      AIRFLOW__CELERY__BROKER_URL: redis://:2a49678b99e3bfbf33de89ba65899a0e@redis:6379/0
+      AIRFLOW__CELERY__BROKER_URL: redis://:ecc2191feb78c9c5be63458428b30812@redis:6379/0
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
@@ -224,24 +224,14 @@ services:
       source: airflow1.env
       target: /opt/airflow/.env
     logging:
-      driver: awslogs
-      options:
-        awslogs-group: apperture-staging-log-group
-        awslogs-region: ap-south-1
-        awslogs-stream: airflow-worker
+      driver: json-file
     deploy:
       labels:
         swarmpit.service.deployment.autoredeploy: 'true'
       placement:
         constraints:
          - node.role != manager
-      resources:
-        reservations:
-          cpus: '0.6'
-          memory: 256M
-        limits:
-          cpus: '0.9'
-          memory: 512M
+         - node.hostname != worker2
   alertmanager:
     image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/alertmanager:latest
     networks:
