@@ -44,10 +44,12 @@ class TestClevertapEventsStrategy:
         self.strategy.event_processor = MagicMock()
         self.strategy.properties_saver = MagicMock()
         self.strategy.get_events = MagicMock(return_value=[])
+        self.strategy.runlog_service.get_events_list = MagicMock(return_value=[])
 
     def test_execute(self):
         self.strategy.execute()
         assert self.strategy.runlog_service.update_started.called
+        assert self.strategy.runlog_service.get_events_list.called
         assert self.strategy.fetcher.open.called
         assert self.strategy.fetcher.get_start_cursor.called
         assert self.strategy.event_processor.process.called

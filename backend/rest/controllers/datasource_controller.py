@@ -1,33 +1,37 @@
+import logging
 from datetime import datetime as dt
 from typing import List, Union
 
+from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends
 from fastapi_cache.decorator import cache
+
 from cache.cache import (
+    CACHE_EXPIRY_10_MINUTES,
     CACHE_EXPIRY_24_HOURS,
     datasource_key_builder,
-    CACHE_EXPIRY_10_MINUTES,
 )
+from data_processor_queue.service import DPQueueService
 from domain.actions.service import ActionService
 from domain.clickstream_event_properties.service import (
     ClickStreamEventPropertiesService,
 )
+from domain.common.models import CaptureEvent, IntegrationProvider
 from domain.datasources.service import DataSourceService
+from domain.edge.models import Node, TrendType
 from domain.edge.service import EdgeService
 from domain.event_properties.service import EventPropertiesService
 from domain.events.service import EventsService
+from domain.properties.service import PropertiesService
+from domain.runlogs.service import RunLogService
 from rest.dtos.edges import (
     AggregatedEdgeResponse,
-    NodeTrendResponse,
     NodeSankeyResponse,
     NodeSignificanceResponse,
+    NodeTrendResponse,
 )
-from domain.edge.models import TrendType, Node
-from domain.properties.service import PropertiesService
 from rest.dtos.events import EventsResponse
 from rest.middlewares import validate_jwt
-
-from domain.common.models import IntegrationProvider, CaptureEvent
 
 router = APIRouter(
     tags=["datasource"],
@@ -210,3 +214,26 @@ async def get_events(
         page_number=page_number,
         page_size=page_size,
     )
+
+
+@router.put("/datasources/event/ingestion/{ds_id}")
+async def event_ingestion(
+    ds_id: str,
+    dto: List[str],
+    runlog_service: RunLogService = Depends(),
+    dpq_service: DPQueueService = Depends(),
+    event_property_service: EventPropertiesService = Depends(),
+    ds_service: DataSourceService = Depends(),
+):
+    datasource = await ds_service.get_datasource(ds_id)
+    for event in dto:
+        await event_property_service.create_event_properties(
+            datasource_id=datasource.id,
+            event_name=event,
+            properties=[],
+            provider=datasource.provider,
+        )
+    runlogs = await runlog_service.create_runlogs_with_events(datasource.id, events=dto)
+    jobs = dpq_service.enqueue_from_runlogs(runlogs)
+    logging.info(f"Scheduled {len(jobs)} for data processing")
+    return {"success": 200, "events": dto}

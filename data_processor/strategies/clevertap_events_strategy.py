@@ -49,7 +49,13 @@ class ClevertapEventsStrategy:
         try:
             self.runlog_service.update_started(self.runlog_id)
             logging.info(f"Fetching events data for date - {self.date}")
-            events = self.get_events() or default_events
+            runlog_events = self.runlog_service.get_events_list(self.runlog_id)
+            events = (
+                runlog_events
+                if runlog_events
+                else (self.get_events() or default_events)
+            )
+
             for event in events:
                 for events_data in self.fetcher.fetch(event):
                     logging.info(

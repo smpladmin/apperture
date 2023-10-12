@@ -1,13 +1,15 @@
-from datetime import datetime
 import logging
 import os
+from datetime import datetime
+from typing import List
+
+from beanie import PydanticObjectId
 from beanie.operators import In
 from dateutil.parser import parse
-from beanie import PydanticObjectId
 from dateutil.relativedelta import relativedelta
 from fastapi import Depends
-from domain.datasources.models import DataSource
 
+from domain.datasources.models import DataSource
 from domain.runlogs.models import DummyRunLog, RunLog, RunLogStatus
 from mongo.mongo import Mongo
 
@@ -33,6 +35,10 @@ class RunLogService:
         await runlog.save()
         return runlog
 
+    async def get_runlog_events(self, id: str) -> List[str]:
+        runlog = await RunLog.get(id)
+        return runlog.events
+
     async def create_runlogs(self, datasource_id: PydanticObjectId):
         today = datetime.utcnow()
         max_runlog_days = int(os.getenv("MAX_RUNLOG_DAYS", 2))
@@ -53,6 +59,36 @@ class RunLogService:
             runlog.updated_at = runlog.created_at
         await RunLog.insert_many(runlogs)
         return await RunLog.find(RunLog.datasource_id == datasource_id).to_list()
+
+    async def create_runlogs_with_events(
+        self, datasource_id: PydanticObjectId, events: List[str] = []
+    ):
+        today = datetime.utcnow()
+        max_runlog_days = int(os.getenv("MAX_RUNLOG_DAYS", 2))
+        dates = [
+            (today - relativedelta(days=d)).replace(
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0,
+            )
+            for d in range(1, max_runlog_days + 1)
+        ]
+        runlogs = [
+            RunLog(
+                datasource_id=datasource_id,
+                date=d,
+                status=RunLogStatus.SCHEDULED,
+                events=events,
+            )
+            for d in dates
+        ]
+        for runlog in runlogs:
+            runlog.updated_at = runlog.created_at
+        await RunLog.insert_many(runlogs)
+        return await RunLog.find(
+            RunLog.datasource_id == datasource_id, RunLog.events == events
+        ).to_list()
 
     async def create_pending_api_runlogs(self, datasource_id: PydanticObjectId):
         today = datetime.utcnow()
