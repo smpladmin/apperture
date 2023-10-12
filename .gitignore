@@ -169,3 +169,5 @@ frontend/public/__ENV.js
 airflow/logs
 airflow/airflow-webserver.pid
 airflow/airflow-worker.pid
+airflow/airflow.cfg
+airflow/webserver_config.py
