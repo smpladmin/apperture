@@ -57,7 +57,11 @@ class APIDataSaver(Saver):
     def _save_data(self, data, tableName, start_time, end_time):
         data = data.to_json(orient="values")
         return requests.post(
-            f"http://backend:8001/private/apidata/{tableName}/{start_time}/{end_time}",
-            headers={"apperture-api-key": "aeb47e74a662452451c25ad604937597"},
+            f"{os.getenv('BACKEND_BASE_URL')}/private/apidata/{tableName}/{start_time}/{end_time}",
+            headers={
+                f"{os.getenv('BACKEND_API_KEY_NAME')}": os.getenv(
+                    "BACKEND_API_KEY_SECRET"
+                )
+            },
             data=data,
         )
