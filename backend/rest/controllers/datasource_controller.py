@@ -1,8 +1,8 @@
 import logging
 from datetime import datetime as dt
 from typing import List, Union
-from beanie import PydanticObjectId
 
+from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends
 from fastapi_cache.decorator import cache
 
@@ -222,12 +222,18 @@ async def event_ingestion(
     dto: List[str],
     runlog_service: RunLogService = Depends(),
     dpq_service: DPQueueService = Depends(),
+    event_property_service: EventPropertiesService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
-    print(f"### Events: {dto}")
-    runlogs = await runlog_service.create_runlogs_with_events(
-        PydanticObjectId(ds_id), events=dto
-    )
-    print(f"### RUNLOGS: {runlogs}")
+    datasource = await ds_service.get_datasource(ds_id)
+    for event in dto:
+        await event_property_service.create_event_properties(
+            datasource_id=datasource.id,
+            event_name=event,
+            properties=[],
+            provider=datasource.provider,
+        )
+    runlogs = await runlog_service.create_runlogs_with_events(datasource.id, events=dto)
     jobs = dpq_service.enqueue_from_runlogs(runlogs)
     logging.info(f"Scheduled {len(jobs)} for data processing")
     return {"success": 200, "events": dto}
