@@ -93,4 +93,4 @@ datasources = datasource_service.get_datasource_ids_for_provider(
 )
 
 for datasource_id in datasources:
-    create_dag(datasource_id=datasource_id, num_days=3)
+    create_dag(datasource_id=datasource_id, num_days=7)
