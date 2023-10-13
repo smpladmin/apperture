@@ -169,3 +169,22 @@ frontend/public/__ENV.js
 airflow/logs
 airflow/airflow-webserver.pid
 airflow/airflow-worker.pid
+
+# npm
+google_sheet_plugin/node_modules
+
+# clasp files
+google_sheet_plugin/creds.json
+
+# certs
+google_sheet_plugin/*.pem
+google_sheet_plugin/certs/
+
+# build
+google_sheet_plugin/dist/
+
+# mac
+google_sheet_plugin/.DS_Store
+
+#secret
+google_sheet_plugin/.env
