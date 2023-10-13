@@ -1,12 +1,11 @@
-import logging
-import os
-import pandas as pd
-import requests
-
-from domain.datasource.models import Credential, IntegrationProvider
-from .saver import Saver
 import json
+import logging
+import pandas as pd
+
+from .saver import Saver
 from datetime import datetime
+from apperture.backend_action import post
+from domain.datasource.models import Credential, IntegrationProvider
 
 
 class APIDataSaver(Saver):
@@ -56,12 +55,6 @@ class APIDataSaver(Saver):
 
     def _save_data(self, data, tableName, start_time, end_time):
         data = data.to_json(orient="values")
-        return requests.post(
-            f"{os.getenv('BACKEND_BASE_URL')}/private/apidata/{tableName}/{start_time}/{end_time}",
-            headers={
-                f"{os.getenv('BACKEND_API_KEY_NAME')}": os.getenv(
-                    "BACKEND_API_KEY_SECRET"
-                )
-            },
-            data=data,
+        return post(
+            path=f"/private/apidata/{tableName}/{start_time}/{end_time}", data=data
         )
