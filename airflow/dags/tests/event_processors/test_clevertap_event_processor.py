@@ -1,4 +1,4 @@
-from dags.event_processors.clevertap_event_processor import ClevertapEventProcessor
+from event_processors.clevertap_event_processor import ClevertapEventProcessor
 from .clevertap_sample import json
 
 

@@ -1,9 +1,9 @@
 import logging
 from typing import List
 
-from dags.domain.datasource.models import DataSource
-from dags.domain.datasource.models import DataSourceResponse
-from dags.apperture.backend_action import get
+from domain.datasource.models import DataSource
+from domain.datasource.models import DataSourceResponse
+from apperture.backend_action import get
 
 
 class DataSourceService:
