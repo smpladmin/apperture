@@ -88,9 +88,9 @@ def create_dag(datasource_id: str, num_days: int):
     api_data_loader(datasource_id=datasource_id, num_days=num_days)
 
 
-datasources = datasource_service.get_datasource_ids_for_provider(
+datasources = datasource_service.get_datasources_for_provider(
     provider=IntegrationProvider.API
 )
 
-for datasource_id in datasources:
-    create_dag(datasource_id=datasource_id, num_days=7)
+for datasource in datasources:
+    create_dag(datasource_id=datasource.id, num_days=7)

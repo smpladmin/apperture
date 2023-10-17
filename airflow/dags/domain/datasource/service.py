@@ -17,13 +17,13 @@ class DataSourceService:
         logging.info("{x}: {y}".format(x="get_datasource_with_credential", y="ends"))
         return ds
 
-    def get_datasource_ids_for_provider(self, provider: str) -> List:
+    def get_datasources_for_provider(self, provider: str) -> List[DataSource]:
         logging.info("{x}: {y}".format(x="get_datasources_for_provider", y="starts"))
 
         res = get(path=f"/private/datasources?provider={provider}")
         ds_list = res.json()
-        logging.info("{x}: {y}".format(x="get_datasource_with_credential", y="ends"))
-        return [ds["_id"] for ds in ds_list]
+        logging.info("{x}: {y}".format(x="get_datasource_for_provider", y="ends"))
+        return [DataSource(**ds) for ds in ds_list]
 
     def get_events(self, datasource: DataSource):
         logging.info(
