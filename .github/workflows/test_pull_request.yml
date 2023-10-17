@@ -24,6 +24,8 @@ jobs:
               - 'events_consumer/**'
             frontend:
               - 'frontend/**'
+            airflow:
+              - 'airflow/**'
       - name: Testing Backend code
         if: steps.filter.outputs.backend == 'true'
         run: |
@@ -48,3 +50,9 @@ jobs:
         run: |
           cd frontend
           docker build . --target builder
+
+      - name: Testing Airflow code
+        if: steps.filter.outputs.airflow == 'true'
+        run: |
+          cd airflow
+          docker build . --target tests
