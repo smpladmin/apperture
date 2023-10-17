@@ -16,7 +16,7 @@ class TestClevertapEventsFetcher:
             refreshToken=None,
             apiKey=None,
             tableName=None,
-            apiBaseUrl=None
+            apiBaseUrl=None,
         )
         self.event = "UTM Visited"
 

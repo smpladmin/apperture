@@ -5,11 +5,13 @@ from typing import Dict, Union
 from airflow.decorators import task, dag, task_group
 
 from store.events_saver import EventsSaver
+from utils.utils import replace_invalid_characters
 from domain.datasource.service import DataSourceService
 from store.event_properties_saver import EventPropertiesSaver
 from fetch.clevertap_events_fetcher import ClevertapEventsFetcher
 from event_processors.clevertap_event_processor import ClevertapEventProcessor
 from domain.datasource.models import IntegrationProvider, Credential, DataSource
+
 
 datasource_service = DataSourceService()
 provider = IntegrationProvider.CLEVERTAP
@@ -26,7 +28,9 @@ def get_datasource_and_credential(
 @task()
 def fetch(credential: Credential, event: str, **kwargs):
     date = (kwargs["execution_date"] - timedelta(days=1)).format("YYYY-MM-DD")
-    return list(ClevertapEventsFetcher(credential=credential, date=date).fetch(event=event))
+    return list(
+        ClevertapEventsFetcher(credential=credential, date=date).fetch(event=event)
+    )
 
 
 @task(max_active_tis_per_dag=5)
@@ -61,7 +65,7 @@ def process_save(event: str, events_data, datasource_id: str):
 
 def create_dag(datasource_id: str, event: str):
     @dag(
-        dag_id=f"clevertap_data_loader_{datasource_id}_{event.replace(' ', '_')}",
+        dag_id=f"clevertap_data_loader_{datasource_id}_{replace_invalid_characters(input_string=event)}",
         description=f"Clevertap event: {event} daily refresh for {datasource_id}",
         schedule="0 7 * * *",
         start_date=pendulum.datetime(
@@ -71,16 +75,20 @@ def create_dag(datasource_id: str, event: str):
         tags=[f"clevertap-daily-data-fetch-{datasource_id}"],
     )
     def clevertap_data_loader(datasource_id: str, event: str):
-        datasource_with_credential = get_datasource_and_credential(datasource_id=datasource_id)
-        clevertap_data = fetch(credential=datasource_with_credential["credential"], event=event)
-        process_save.partial(datasource_id=datasource_id, event=event).expand(events_data=clevertap_data)
+        datasource_with_credential = get_datasource_and_credential(
+            datasource_id=datasource_id
+        )
+        clevertap_data = fetch(
+            credential=datasource_with_credential["credential"], event=event
+        )
+        process_save.partial(datasource_id=datasource_id, event=event).expand(
+            events_data=clevertap_data
+        )
 
     clevertap_data_loader(datasource_id=datasource_id, event=event)
 
 
-datasources = datasource_service.get_datasources_for_provider(
-    provider=provider
-)
+datasources = datasource_service.get_datasources_for_provider(provider=provider)
 
 for datasource in datasources:
     events = datasource_service.get_events(datasource=datasource)
