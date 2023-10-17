@@ -2,7 +2,7 @@ import logging
 import json
 import requests
 
-from domain.datasource.models import Credential
+from dags.domain.datasource.models import Credential
 
 
 class ClevertapEventsFetcher:

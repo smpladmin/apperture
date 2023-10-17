@@ -4,8 +4,8 @@ import pandas as pd
 
 from .saver import Saver
 from datetime import datetime
-from apperture.backend_action import post
-from domain.datasource.models import Credential, IntegrationProvider
+from dags.apperture.backend_action import post
+from dags.domain.datasource.models import Credential, IntegrationProvider
 
 
 class APIDataSaver(Saver):
