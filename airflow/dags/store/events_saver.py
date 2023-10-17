@@ -4,8 +4,8 @@ import logging
 from typing import List
 import pandas as pd
 
-from dags.domain.datasource.models import IntegrationProvider, CreateEvent
-from dags.store.clickhouse import Clickhouse
+from domain.datasource.models import IntegrationProvider, CreateEvent
+from store.clickhouse import Clickhouse
 from .saver import Saver
 
 

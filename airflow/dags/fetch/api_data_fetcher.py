@@ -1,5 +1,5 @@
 import requests
-from dags.domain.datasource.models import Credential
+from domain.datasource.models import Credential
 import logging
 import json
 from datetime import datetime, timedelta

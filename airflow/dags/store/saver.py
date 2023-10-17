@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import pandas as pd
 
-from dags.domain.datasource.models import IntegrationProvider
+from domain.datasource.models import IntegrationProvider
 
 
 class Saver(ABC):

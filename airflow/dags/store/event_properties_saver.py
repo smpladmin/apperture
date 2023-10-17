@@ -2,9 +2,9 @@ import logging
 import pandas as pd
 from typing import List, Dict
 
-from dags.store.saver import Saver
-from dags.domain.datasource.models import IntegrationProvider
-from dags.apperture.backend_action import post
+from store.saver import Saver
+from domain.datasource.models import IntegrationProvider
+from apperture.backend_action import post
 
 
 class EventPropertiesSaver(Saver):

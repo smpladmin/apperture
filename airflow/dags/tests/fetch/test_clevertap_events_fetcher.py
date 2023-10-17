@@ -1,8 +1,8 @@
 from unittest.mock import MagicMock
 
-from dags.fetch.clevertap_events_fetcher import ClevertapEventsFetcher
+from fetch.clevertap_events_fetcher import ClevertapEventsFetcher
 from .clevertap_sample import response, cursor_response
-from dags.domain.datasource.models import Credential, CredentialType
+from domain.datasource.models import Credential, CredentialType
 
 
 class TestClevertapEventsFetcher:
