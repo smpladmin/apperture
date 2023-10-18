@@ -1,15 +1,14 @@
 import pendulum
-
-from datetime import timedelta
 from typing import Dict, Union
+from datetime import timedelta, datetime
 from airflow.decorators import task, dag, task_group
 
 from store.api_data_saver import APIDataSaver
+from utils.utils import DATA_FETCH_DAYS_OFFSET
 from fetch.api_data_fetcher import APIDataFetcher
 from domain.datasource.service import DataSourceService
 from event_processors.api_data_processor import APIDataProcessor
 from domain.datasource.models import IntegrationProvider, DataSource, Credential
-
 
 datasource_service = DataSourceService()
 
@@ -25,7 +24,7 @@ def get_datasource_and_credential(
 @task
 def get_last_n_days(n: int, **kwargs):
     return [
-        (kwargs["execution_date"] - timedelta(days=i)).format("YYYY-MM-DD")
+        (kwargs["logical_date"] - timedelta(days=i)).format("YYYY-MM-DD")
         for i in range(1, n + 1)
     ]
 
@@ -39,12 +38,12 @@ def fetch(credential: Credential, date: str):
     ).fetch()
 
 
-@task
+@task(trigger_rule="all_done")
 def process(api_data):
     return APIDataProcessor().process(events_data=api_data)
 
 
-@task
+@task(trigger_rule="all_done")
 def save(datasource: DataSource, credential: Credential, processed_api_data):
     APIDataSaver(credential=credential).save(
         datasource_id=datasource.id,
@@ -64,13 +63,14 @@ def fetch_process_save(date: str, credential: Credential, datasource: DataSource
     )
 
 
-def create_dag(datasource_id: str, num_days: int):
+def create_dag(datasource_id: str, num_days: int, created_date: datetime):
     @dag(
         dag_id=f"api_data_loader_{datasource_id}",
         description=f"API datasource daily refresh for {datasource_id}",
         schedule="0 7 * * *",
-        start_date=pendulum.datetime(
-            2023, 10, 13, tz=pendulum.timezone("Asia/Kolkata")
+        start_date=pendulum.instance(
+            created_date - timedelta(days=DATA_FETCH_DAYS_OFFSET),
+            tz=pendulum.timezone("Asia/Kolkata"),
         ),
         catchup=False,
         tags=["api-daily-data-fetch"],
@@ -93,4 +93,6 @@ datasources = datasource_service.get_datasources_for_provider(
 )
 
 for datasource in datasources:
-    create_dag(datasource_id=datasource.id, num_days=7)
+    create_dag(
+        datasource_id=datasource.id, num_days=7, created_date=datasource.createdAt
+    )

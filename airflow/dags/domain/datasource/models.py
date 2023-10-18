@@ -1,7 +1,7 @@
-import datetime
 from enum import Enum
-from typing import Optional, NamedTuple
+from datetime import datetime
 from pydantic import BaseModel, Field
+from typing import Optional, NamedTuple
 
 
 class CredentialType(str, Enum):
@@ -35,6 +35,7 @@ class IntegrationProvider(str, Enum):
 
 class DataSource(BaseModel):
     id: str = Field(alias="_id")
+    createdAt: datetime
     provider: IntegrationProvider
     name: Optional[str]
     external_source_id: str = Field(alias="externalSourceId")
@@ -48,7 +49,7 @@ class DataSourceResponse(BaseModel):
 
 class CreateEvent(NamedTuple):
     datasourceId: str
-    timestamp: datetime.datetime
+    timestamp: datetime
     provider: IntegrationProvider
     userId: str
     eventName: str
