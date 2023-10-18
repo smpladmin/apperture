@@ -24,7 +24,7 @@ class EventPropertiesSaver(Saver):
                 lambda x: self.find_union(x["properties"].to_list())
             )
 
-            for event, props in event_properties.iteritems():
+            for event, props in event_properties.items():
                 logging.info(f"Saving event properties for event {event}")
                 data = {
                     "datasource_id": datasource_id,
@@ -42,7 +42,7 @@ class EventPropertiesSaver(Saver):
                     logging.info("SAVED")
         except Exception as e:
             logging.info(f"Error while saving event properties")
-            logging.debug(e)
+            logging.info(e)
 
     def _save_data(self, data: Dict):
         return post(path=f"/private/event_properties", json=data)
