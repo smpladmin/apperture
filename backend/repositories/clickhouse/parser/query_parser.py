@@ -1,4 +1,5 @@
 import re
+
 from sqlglot import condition, exp, parse_one
 
 from domain.spreadsheets.models import DatabaseClient
@@ -73,12 +74,22 @@ class QueryParser:
     ):
         num_cols = self.count_selected_columns(query=query_string)
 
+        match_limit = re.search(r"limit\s+(\d+)", query_string, re.IGNORECASE)
+        limit = 500
+        if match_limit:
+            parsed_limit = int(match_limit.group(1))
+            limit = parsed_limit if parsed_limit < 500 else limit
+            query_string = re.sub(
+                r"limit\s+(\d+)", "", query_string, re.IGNORECASE
+            ).strip()
+
         # Ignoring if order by already present in query string. Need to fix later.
         if not re.search(r"\bORDER\s+BY\b", query_string, re.IGNORECASE):
             query_string = (
                 query_string
                 + f" ORDER BY {','.join([str(i) for i in range(1, num_cols + 1)])}"
             )
+
         if database_client == DatabaseClient.MSSQL:
             pattern = r"(?i)\bTOP\s*\(\s*\d+\s*\)"
             if not re.search(pattern, query_string):
@@ -88,10 +99,4 @@ class QueryParser:
                 )
             return query_string
         else:
-            limit = re.search("LIMIT\s(.\w+)", query_string, re.IGNORECASE)
-            if not limit:
-                query_string = re.sub("\s*;", "", query_string)
-                return query_string + " LIMIT 500"
-            else:
-                limit = limit.group(1).strip()
-                return query_string + " LIMIT 500" if int(limit) > 500 else query_string
+            return query_string + f" LIMIT {limit}"
