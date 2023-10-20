@@ -26,7 +26,7 @@ class APIData(EventsBase):
     def clear_api_table_records(
         self, databasename, tableName, start_time, end_time, columns
     ):
-        query = f"ALTER TABLE {databasename}.{tableName} DELETE where toDate(create_time) >= toDate('{start_time}') and toDate(create_time) <= toDate('{end_time}');"
+        query = f"DELETE from {databasename}.{tableName} where toDate(create_time) >= toDate('{start_time}') and toDate(create_time) <= toDate('{end_time}');"
         self.clickhouse.command(query, {})
         return True
 
