@@ -88,7 +88,10 @@ def create_dag(datasource_id: str, created_date: datetime):
         dag_id=f"clevertap_data_loader_{datasource_id}",
         description=f"Clevertap daily refresh for {datasource_id}",
         schedule="0 8 * * *",
-        start_date=pendulum.datetime(2023, 9, 25, tz=pendulum.timezone("Asia/Kolkata")),
+        start_date=pendulum.instance(
+            created_date - timedelta(days=DATA_FETCH_DAYS_OFFSET),
+            tz=pendulum.timezone("Asia/Kolkata"),
+        ),
         params={
             "events": Param(
                 [],
@@ -111,7 +114,7 @@ def create_dag(datasource_id: str, created_date: datetime):
                 description="Select end date (Leave empty to fetch data for the day prior to the logical date)",
             ),
         },
-        catchup=datasource_id == "6509750db0a6a9c81de824d5",
+        catchup=False,
         tags=[f"clevertap-daily-data-fetch"],
     )
     def clevertap_data_loader():
