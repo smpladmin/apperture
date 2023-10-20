@@ -30,15 +30,39 @@ def get_datasource_and_credential(
 @task
 def get_events(datasource: DataSource, **kwargs) -> List:
     param_events = kwargs["params"]["events"]
-    events = param_events if param_events else datasource_service.get_events(datasource=datasource)
+    events = (
+        param_events
+        if param_events
+        else datasource_service.get_events(datasource=datasource)
+    )
     print(f"Loading data for following events: {events}")
     return events
 
 
+def generate_dates(start_date: str, end_date: str) -> List[str]:
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+    return [
+        (start_date + timedelta(days=i)).strftime("%Y-%m-%d")
+        for i in range((end_date - start_date).days + 1)
+    ]
+
+
+@task
+def get_run_dates(**kwargs):
+    start_date = kwargs["params"]["start_date"]
+    end_date = kwargs["params"]["end_date"]
+    if start_date and end_date:
+        run_dates = generate_dates(start_date=start_date, end_date=end_date)
+    else:
+        run_dates = [(kwargs["logical_date"] - timedelta(days=1)).format("YYYY-MM-DD")]
+    print(f"Loading data for the following dates: {run_dates}")
+    return run_dates
+
+
 @task(max_active_tis_per_dag=5)
-def load_data(datasource_id: str, credential: Credential, event: str, **kwargs):
-    date = (kwargs["logical_date"] - timedelta(days=1)).format("YYYY-MM-DD")
-    print(f"Loading data for {date}")
+def load_data(datasource_id: str, credential: Credential, event: str, date: str):
+    print(f"Loading data for event: {event} date: {date}")
     for events_data in ClevertapEventsFetcher(credential=credential, date=date).fetch(
         event=event
     ):
@@ -73,8 +97,22 @@ def create_dag(datasource_id: str, created_date: datetime):
                 [],
                 description="""Add specific events to fetch data for.
                                Add 1 event per line.
-                               Leave empty to fetch for all events""",
-            )
+                               (Leave empty to fetch for all events)""",
+            ),
+            "start_date": Param(
+                "",
+                type=["string", "null"],
+                format="datetime",
+                title="start_date",
+                description="Select start date (Leave empty to fetch data for the day prior to the logical date)",
+            ),
+            "end_date": Param(
+                "",
+                type=["string", "null"],
+                format="datetime",
+                title="end_date",
+                description="Select end date (Leave empty to fetch data for the day prior to the logical date)",
+            ),
         },
         catchup=False,
         tags=[f"clevertap-daily-data-fetch-{datasource_id}"],
@@ -83,11 +121,12 @@ def create_dag(datasource_id: str, created_date: datetime):
         datasource_with_credential = get_datasource_and_credential(
             datasource_id=datasource_id
         )
+        run_dates = get_run_dates()
         events = get_events(datasource=datasource_with_credential["datasource"])
         load_data.partial(
             datasource_id=datasource_id,
             credential=datasource_with_credential["credential"],
-        ).expand(event=events)
+        ).expand(event=events, date=run_dates)
 
     clevertap_data_loader()
 
