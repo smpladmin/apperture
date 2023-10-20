@@ -64,7 +64,9 @@ class DataSourceService:
         ).to_list()
 
     async def get_datasources_for_provider(self, provider: IntegrationProvider):
-        return await DataSource.find(DataSource.provider == provider).to_list()
+        return await DataSource.find(
+            DataSource.provider == provider, DataSource.enabled != False
+        ).to_list()
 
     async def get_datasources_for_app_id(self, app_id: PydanticObjectId):
         return await DataSource.find(
