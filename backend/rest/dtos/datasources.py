@@ -1,3 +1,4 @@
+from typing import List
 from beanie import PydanticObjectId
 from pydantic import BaseModel, Field
 from domain.datasources.models import DataSource, DataSourceVersion
@@ -25,3 +26,9 @@ class CredentialResponse(Credential, ModelResponse):
 class PrivateDataSourceResponse(BaseModel):
     datasource: DataSourceResponse
     credential: CredentialResponse
+
+
+class DiffEventIngestionDto(BaseModel):
+    events: List[str]
+    start_date: str
+    end_date: str

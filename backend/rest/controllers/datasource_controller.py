@@ -24,6 +24,7 @@ from domain.event_properties.service import EventPropertiesService
 from domain.events.service import EventsService
 from domain.properties.service import PropertiesService
 from domain.runlogs.service import RunLogService
+from rest.dtos.datasources import DiffEventIngestionDto
 from rest.dtos.edges import (
     AggregatedEdgeResponse,
     NodeSankeyResponse,
@@ -219,21 +220,23 @@ async def get_events(
 @router.put("/datasources/event/ingestion/{ds_id}")
 async def event_ingestion(
     ds_id: str,
-    dto: List[str],
+    dto: DiffEventIngestionDto,
     runlog_service: RunLogService = Depends(),
     dpq_service: DPQueueService = Depends(),
     event_property_service: EventPropertiesService = Depends(),
     ds_service: DataSourceService = Depends(),
 ):
     datasource = await ds_service.get_datasource(ds_id)
-    for event in dto:
+    for event in dto.events:
         await event_property_service.create_event_properties(
             datasource_id=datasource.id,
             event_name=event,
             properties=[],
             provider=datasource.provider,
         )
-    runlogs = await runlog_service.create_runlogs_with_events(datasource.id, events=dto)
+    runlogs = await runlog_service.create_runlogs_with_events_and_dates(
+        datasource.id, dto.start_date, dto.end_date, events=dto.events
+    )
     jobs = dpq_service.enqueue_from_runlogs(runlogs)
     logging.info(f"Scheduled {len(jobs)} for data processing")
     return {"success": 200, "events": dto}
