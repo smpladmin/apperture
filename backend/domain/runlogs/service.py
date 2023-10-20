@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 from beanie import PydanticObjectId
@@ -74,6 +74,42 @@ class RunLogService:
             )
             for d in range(1, max_runlog_days + 1)
         ]
+        runlogs = [
+            RunLog(
+                datasource_id=datasource_id,
+                date=d,
+                status=RunLogStatus.SCHEDULED,
+                events=events,
+            )
+            for d in dates
+        ]
+        for runlog in runlogs:
+            runlog.updated_at = runlog.created_at
+        await RunLog.insert_many(runlogs)
+        return await RunLog.find(
+            RunLog.datasource_id == datasource_id, RunLog.events == events
+        ).to_list()
+
+    async def create_runlogs_with_events_and_dates(
+        self,
+        datasource_id: PydanticObjectId,
+        start_date: str,
+        end_date: str,
+        events: List[str] = [],
+    ):
+        start = datetime.strptime(start_date, "%Y-%m-%d")
+        end = datetime.strptime(end_date, "%Y-%m-%d")
+
+        dates = [
+            (start + timedelta(days=x)).replace(
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0,
+            )
+            for x in range(0, (end - start).days + 1)
+        ]
+
         runlogs = [
             RunLog(
                 datasource_id=datasource_id,
