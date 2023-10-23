@@ -55,7 +55,7 @@ def get_run_dates(**kwargs):
     if start_date and end_date:
         run_dates = generate_dates(start_date=start_date, end_date=end_date)
     else:
-        run_dates = [(kwargs["logical_date"] - timedelta(days=1)).format("YYYY-MM-DD")]
+        run_dates = [kwargs["logical_date"].format("YYYY-MM-DD")]
     print(f"Loading data for the following dates: {run_dates}")
     return run_dates
 

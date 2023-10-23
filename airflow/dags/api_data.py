@@ -25,7 +25,7 @@ def get_datasource_and_credential(
 def get_last_n_days(n: int, **kwargs):
     return [
         (kwargs["logical_date"] - timedelta(days=i)).format("YYYY-MM-DD")
-        for i in range(1, n + 1)
+        for i in range(0, n)
     ]
 
 
