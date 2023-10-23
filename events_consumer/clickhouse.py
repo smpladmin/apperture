@@ -56,8 +56,8 @@ class ClickHouse:
             first_half = events[:mid]
             second_half = events[mid:]
 
-            self.save_events(first_half)
-            self.save_events(second_half)
+            self.rsave_events(first_half)
+            self.rsave_events(second_half)
 
     def _save(self, events) -> None:
         self.client.insert(
