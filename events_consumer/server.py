@@ -48,7 +48,7 @@ def save_events(events):
         )
         for event in events
     ]
-    app.clickhouse.save_events(cs_events)
+    app.clickhouse.rsave_events(cs_events)
     logging.info("Saved events")
 
 

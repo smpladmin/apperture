@@ -31,6 +31,34 @@ class ClickHouse:
                 self._save([event])
             logging.info("Saved sequentially")
 
+    def rsave_events(self, events):
+        """Saves events to clickHouse with recursive retries using split backoff."""
+        if not events:
+            return
+
+        if len(events) == 1:
+            try:
+                self._save(events)
+            except Exception as e:
+                # Skip saving this event.
+                logging.info(
+                    f"Error encountered for event {events[0]}: {e}. Cannot split further."
+                )
+            return
+
+        try:
+            self._save(events)
+        except Exception as e:
+            logging.info(f"Exception saving events to ClickHouse: {e}")
+            logging.info("Trying to split and save")
+
+            mid = len(events) // 2
+            first_half = events[:mid]
+            second_half = events[mid:]
+
+            self.save_events(first_half)
+            self.save_events(second_half)
+
     def _save(self, events) -> None:
         self.client.insert(
             table="clickstream",
