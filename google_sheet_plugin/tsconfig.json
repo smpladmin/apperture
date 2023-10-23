@@ -2,6 +2,28 @@
   "compilerOptions": {
     "types": ["gas-types-detailed"],
     "jsx": "react",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "lib": ["dom", "es2019"]
+    // "lib": ["dom", "dom.iterable", "esnext"]
   }
 }
+
+// socket -> polling avoid ,
+
+// query -> SELECT event from events
+
+// ChatSession:
+//  id
+//  name
+//  dsId
+//  sheetRef: optional
+//  chats: [Chat]
+//  query: optional
+//  createdAt
+//  updatedAt
+
+// Chat:
+//  user : ID/AI (optional[PydanticObjectId])
+//  text:
+//  createdAt:
+//  UpdatedAt:

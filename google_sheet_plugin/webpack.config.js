@@ -47,34 +47,16 @@ const devDialogEntry = './dev/index.js';
 // define client entry points and output names
 const clientEntrypoints = [
   {
-    name: 'CLIENT - Dialog Demo',
-    entry: './src/client/dialog-demo/index.js',
-    filename: 'dialog-demo', // we'll add the .html suffix to these
-    template: './src/client/dialog-demo/index.html',
+    name: 'CLIENT - Auth Page',
+    entry: './src/client/auth-sidebar/index.js',
+    filename: 'auth-sidebar',
+    template: './src/client/auth-sidebar/index.html',
   },
   {
-    name: 'CLIENT - Dialog Demo Bootstrap',
-    entry: './src/client/dialog-demo-bootstrap/index.js',
-    filename: 'dialog-demo-bootstrap',
-    template: './src/client/dialog-demo-bootstrap/index.html',
-  },
-  {
-    name: 'CLIENT - Dialog Demo MUI',
-    entry: './src/client/dialog-demo-mui/index.js',
-    filename: 'dialog-demo-mui',
-    template: './src/client/dialog-demo-mui/index.html',
-  },
-  {
-    name: 'CLIENT - Dialog Demo Tailwind CSS',
-    entry: './src/client/dialog-demo-tailwindcss/index.js',
-    filename: 'dialog-demo-tailwindcss',
-    template: './src/client/dialog-demo-tailwindcss/index.html',
-  },
-  {
-    name: 'CLIENT - Sidebar About Page',
-    entry: './src/client/sidebar-about-page/index.js',
-    filename: 'sidebar-about-page',
-    template: './src/client/sidebar-about-page/index.html',
+    name: 'CLIENT - Database Page',
+    entry: './src/client/database-sidebar/index.js',
+    filename: 'database-sidebar',
+    template: './src/client/database-sidebar/index.html',
   },
 ];
 
@@ -191,6 +173,8 @@ const DynamicCdnWebpackPluginConfig = {
     const packageSuffix = isProd ? '.min.js' : '.js';
     const moduleDetails = moduleToCdn(packageName, packageVersion, options);
 
+    // console.log('module details', moduleDetails);
+
     // don't externalize react during development due to issue with react-refresh
     // https://github.com/pmmmwh/react-refresh-webpack-plugin/issues/334
     if (!isProd && packageName === 'react') {
@@ -201,29 +185,6 @@ const DynamicCdnWebpackPluginConfig = {
     // "name" should match the package being imported
     // "var" is important to get right -- this should be the exposed global. Look up "webpack externals" for info.
     switch (packageName) {
-      case 'react-transition-group':
-        return {
-          name: packageName,
-          var: 'ReactTransitionGroup',
-          version: packageVersion,
-          url: `https://unpkg.com/react-transition-group@${packageVersion}/dist/react-transition-group${packageSuffix}`,
-        };
-      case 'react-bootstrap':
-        return {
-          name: packageName,
-          var: 'ReactBootstrap',
-          version: packageVersion,
-          url: `https://unpkg.com/react-bootstrap@${packageVersion}/dist/react-bootstrap${packageSuffix}`,
-        };
-      case '@mui/material':
-        return {
-          name: packageName,
-          var: 'MaterialUI',
-          version: packageVersion,
-          url: `https://unpkg.com/@mui/material@${packageVersion}/umd/material-ui.${
-            isProd ? 'production.min.js' : 'development.js'
-          }`,
-        };
       case '@emotion/react':
         return {
           name: packageName,

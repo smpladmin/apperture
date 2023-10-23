@@ -1,24 +1,33 @@
-import {
-  onOpen,
-  openDialog,
-  openDialogBootstrap,
-  openDialogMUI,
-  openDialogTailwindCSS,
-  openAboutSidebar,
-} from './ui';
+import { onOpen, openAuthSidebar, openDatabaseSidebar } from './ui';
 
-import { getSheetsData, addSheet, deleteSheet, setActiveSheet } from './sheets';
+import {
+  showAlert,
+  getLoggedInUserEmail,
+  getActiveCell,
+  fetchConnections,
+  executeQuery,
+  getSavedWorkbooks,
+  getSpreadsheetId,
+  populateDataInSheet,
+  saveSheetQuery,
+  updateSheetQuery,
+  getSheetQueries,
+} from './sheets';
 
 // Public functions must be exported as named exports
 export {
   onOpen,
-  openDialog,
-  openDialogBootstrap,
-  openDialogMUI,
-  openDialogTailwindCSS,
-  openAboutSidebar,
-  getSheetsData,
-  addSheet,
-  deleteSheet,
-  setActiveSheet,
+  openAuthSidebar,
+  openDatabaseSidebar,
+  showAlert,
+  getLoggedInUserEmail,
+  getActiveCell,
+  fetchConnections,
+  executeQuery,
+  getSavedWorkbooks,
+  getSpreadsheetId,
+  populateDataInSheet,
+  saveSheetQuery,
+  updateSheetQuery,
+  getSheetQueries,
 };
