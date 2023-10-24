@@ -45,6 +45,7 @@ from domain.segments.service import SegmentService
 from domain.spreadsheets.service import SpreadsheetService
 from domain.users.service import UserService
 from domain.datamart.service import DataMartService
+from domain.google_sheet.service import GoogleSheetService
 from mongo.mongo import Mongo
 from server import app
 
@@ -74,6 +75,7 @@ def app_init(
     clickstream_event_properties_service,
     datamart_service,
     files_service,
+    google_sheet_service,
 ):
     print("Setting up App")
     app.dependency_overrides[validate_jwt] = lambda: mock.MagicMock()
@@ -104,6 +106,7 @@ def app_init(
     app.dependency_overrides[RetentionService] = lambda: retention_service
     app.dependency_overrides[EventPropertiesService] = lambda: event_properties_service
     app.dependency_overrides[SpreadsheetService] = lambda: spreadsheets_service
+    app.dependency_overrides[GoogleSheetService] = lambda: google_sheet_service
     app.dependency_overrides[FilesService] = lambda: files_service
     app.dependency_overrides[
         ClickStreamEventPropertiesService

@@ -1,7 +1,14 @@
 from typing import List
 
 from beanie import PydanticObjectId
+from pydantic import BaseModel
 from repositories.document import Document
+
+
+class SheetReference(BaseModel):
+    sheet_name: str
+    row_index: int
+    column_index: int
 
 
 class SheetQuery(Document):
@@ -11,7 +18,7 @@ class SheetQuery(Document):
     query: str
     spreadsheet_id: str
     chats: List[dict]
-    sheet_reference: dict
+    sheet_reference: SheetReference
     enabled: bool = True
 
     class Settings:
