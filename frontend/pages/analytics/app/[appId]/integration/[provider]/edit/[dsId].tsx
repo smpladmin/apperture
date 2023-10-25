@@ -10,7 +10,7 @@ import DatabaseIntegration from '@components/CreateIntegration/DatabaseIntegrati
 import mysqlLogo from '@assets/images/mysql-icon.png';
 import mssqlLogo from '@assets/images/mssql-icon.png';
 
-const Create = () => {
+const Edit = () => {
   const router = useRouter();
   const { appId, provider, add, previousDsId } = router.query;
   const handleGoBack = () => router.back();
@@ -70,4 +70,4 @@ const Create = () => {
   }
 };
 
-export default Create;
+export default Edit;

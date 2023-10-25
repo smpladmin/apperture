@@ -27,7 +27,7 @@ from domain.integrations.models import Credential
 from domain.integrations.service import IntegrationService
 from domain.properties.service import PropertiesService
 from domain.runlogs.service import RunLogService
-from rest.dtos.datasources import DiffEventIngestionDto
+from rest.dtos.datasources import DataSourceResponse, DiffEventIngestionDto
 from rest.dtos.edges import (
     AggregatedEdgeResponse,
     NodeSankeyResponse,
@@ -246,7 +246,7 @@ async def event_ingestion(
     return {"success": 200, "events": dto}
 
 
-@router.get("/datasources/apps/{app_id}", response_model=List[DataSource])
+@router.get("/datasources/apps/{app_id}", response_model=List[DataSourceResponse])
 async def get_datasources_by_app_id(
     app_id: str,
     ds_service: DataSourceService = Depends(),

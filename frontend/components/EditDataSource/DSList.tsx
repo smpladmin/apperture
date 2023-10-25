@@ -170,12 +170,14 @@ function DSList({
             <Flex
               gap={2}
               cursor={
-                datasource.provider !== Provider.CSV ? 'pointer' : 'inherit'
+                [Provider.CSV, Provider.APPERTURE].includes(datasource.provider)
+                  ? 'inherit'
+                  : 'pointer'
               }
               onClick={() =>
-                datasource.provider !== Provider.CSV
-                  ? handleEditDatasource(datasource)
-                  : null
+                [Provider.CSV, Provider.APPERTURE].includes(datasource.provider)
+                  ? null
+                  : handleEditDatasource(datasource)
               }
             >
               <Table color={GREY_600} size={16} />
