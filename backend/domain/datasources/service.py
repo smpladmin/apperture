@@ -177,3 +177,9 @@ class DataSourceService:
                         )
                     )
         return datasources
+
+    async def delete_datasource(self, ds_id: PydanticObjectId):
+        await DataSource.find_one(
+            DataSource.id == ds_id,
+        ).update({"$set": {"enabled": False}})
+        return

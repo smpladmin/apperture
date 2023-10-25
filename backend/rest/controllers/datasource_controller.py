@@ -17,6 +17,7 @@ from domain.clickstream_event_properties.service import (
     ClickStreamEventPropertiesService,
 )
 from domain.common.models import CaptureEvent, IntegrationProvider
+from domain.datasources.models import DataSource
 from domain.datasources.service import DataSourceService
 from domain.edge.models import Node, TrendType
 from domain.edge.service import EdgeService
@@ -245,6 +246,14 @@ async def event_ingestion(
     return {"success": 200, "events": dto}
 
 
+@router.get("/datasources/apps/{app_id}", response_model=List[DataSource])
+async def get_datasources_by_app_id(
+    app_id: str,
+    ds_service: DataSourceService = Depends(),
+):
+    return await ds_service.get_datasources_for_app_id(PydanticObjectId(app_id))
+
+
 @router.get("/datasources/{ds_id}/credentials", response_model=Credential)
 async def get_credentials(
     ds_id: str,
@@ -266,4 +275,13 @@ async def update_credentials(
     datasource = await ds_service.get_datasource(ds_id)
     await integration_service.update_credentials(datasource.integration_id, dto)
 
+    return {"success": "ok"}
+
+
+@router.delete("/datasources/{ds_id}")
+async def delete_datasources(
+    ds_id: str,
+    ds_service: DataSourceService = Depends(),
+):
+    await ds_service.delete_datasource(PydanticObjectId(ds_id))
     return {"success": "ok"}

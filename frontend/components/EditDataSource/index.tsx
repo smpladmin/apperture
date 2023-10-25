@@ -6,19 +6,33 @@ import { Plus } from 'phosphor-react';
 import React, { useEffect, useState } from 'react';
 import DSList from './DSList';
 import { Provider } from '@lib/domain/provider';
+import { getDatasourceByAppId } from '@lib/services/datasourceService';
+import { DataSource } from '@lib/domain/datasource';
 
 function EditDataSource({ apps }: any) {
   const router = useRouter();
+  const [refresh, setRefresh] = useState(false);
 
   const { appId } = router.query;
+  const getDatasources = async () => {
+    const datasources = await getDatasourceByAppId(appId as string);
 
-  const [currentApp, setCurrentApp] = useState<AppWithIntegrations>(
-    apps.apps?.filter((i: AppWithIntegrations) => i._id == appId)?.[0] ||
-      apps.apps?.[0]
-  );
-  const [integrations, setIntegrations] = useState(
-    groupBy(currentApp.integrations, (item) => item.provider)
-  );
+    setIntegrations(groupBy(datasources, (item) => item.provider));
+  };
+  useEffect(() => {
+    if (appId) getDatasources();
+  }, [appId]);
+  useEffect(() => {
+    if (refresh) {
+      getDatasources();
+      setRefresh(false);
+    }
+  }, [refresh]);
+
+  const [integrations, setIntegrations] = useState<
+    Record<string, DataSource[]>
+  >({});
+
   const handleAddIntegration = async () => {
     router.push({
       pathname: `/analytics/app/[appId]/integration/select`,
@@ -50,14 +64,12 @@ function EditDataSource({ apps }: any) {
       </Flex>
       <Flex w="full" direction={'column'}>
         {Object.keys(integrations).map((key) => {
-          const datasources = unionBy(
-            integrations[key].flatMap((integration) => integration.datasources)
-          );
           return (
             <DSList
               key={key}
               provider={key as Provider}
-              datasources={datasources}
+              datasources={integrations[key]}
+              setRefresh={setRefresh}
             />
           );
         })}

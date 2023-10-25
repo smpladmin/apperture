@@ -1,5 +1,10 @@
 import { SanityData } from './../domain/eventData';
-import { AppertureGet, ApperturePrivateGet, ApperturePut } from './util';
+import {
+  AppertureDelete,
+  AppertureGet,
+  ApperturePrivateGet,
+  ApperturePut,
+} from './util';
 import { AppertureAPI } from '@lib/apiClient';
 import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
 import { Node } from '@lib/domain/node';
@@ -110,6 +115,11 @@ export const getUserActivity = async (
   return response.data;
 };
 
+export const getDatasourceByAppId = async (app_id: string) => {
+  const response = await AppertureGet(`/datasources/apps/${app_id}`);
+  return response.data;
+};
+
 export const getCredentials = async (dsId: string): Promise<Credential> => {
   const response = await AppertureGet(`/datasources/${dsId}/credentials`);
   return response.data;
@@ -123,5 +133,10 @@ export const updateCredentials = async (
     `/datasources/${dsId}/credentials`,
     credential
   );
+  return response;
+};
+
+export const deleteDatasource = async (dsId: string) => {
+  const response = AppertureDelete(`/datasources/${dsId}`);
   return response;
 };

@@ -25,6 +25,7 @@ import Dropdown from '@components/SearchableDropdown/Dropdown';
 import { useOnClickOutside } from '@lib/hooks/useOnClickOutside';
 import { dateFormat } from '@lib/utils/common';
 import dayjs from 'dayjs';
+import { deleteDatasource } from '@lib/services/datasourceService';
 const IconProvider = ({
   provider,
   style,
@@ -113,9 +114,11 @@ const IconProvider = ({
 function DSList({
   provider,
   datasources,
+  setRefresh,
 }: {
   provider: Provider;
   datasources: DataSource[];
+  setRefresh: Function;
 }) {
   const router = useRouter();
 
@@ -131,7 +134,7 @@ function DSList({
   };
 
   return (
-    <Flex w="full" direction={'column'} overflow={'hidden'}>
+    <Flex w="full" direction={'column'}>
       <Flex
         w="full"
         alignItems={'center'}
@@ -202,7 +205,7 @@ function DSList({
                     .local()
                     .format(dateFormat)}`}
                 </Text>
-                <DropdownMenu />
+                <DropdownMenu dsId={datasource._id} setRefresh={setRefresh} />
               </Flex>
             </Flex>
           </Flex>
@@ -212,11 +215,20 @@ function DSList({
   );
 }
 
-function DropdownMenu() {
+function DropdownMenu({
+  dsId,
+  setRefresh,
+}: {
+  dsId: string;
+  setRefresh: Function;
+}) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   const dropdownRef = useRef(null);
   useOnClickOutside(dropdownRef, () => setIsDropdownOpen(false));
+  const handleDelete = async () => {
+    await deleteDatasource(dsId);
+    setRefresh(true);
+  };
   return (
     <Box
       position={'relative'}
@@ -237,19 +249,19 @@ function DropdownMenu() {
       />
       <Dropdown
         isOpen={isDropdownOpen}
-        dropdownPosition={'left'}
+        dropdownPosition={'right'}
         minWidth={'30'}
-        style={{ position: 'fixed', right: '100px' }}
       >
         <Flex
           gap={'2'}
           alignItems={'center'}
+          cursor={'pointer'}
           _hover={{ bg: 'white.100' }}
           p={'2'}
           borderRadius={'4'}
           onClick={(e) => {
             e.stopPropagation();
-            // onOpen();
+            handleDelete();
           }}
           data-testid={'table-action-delete'}
         >
