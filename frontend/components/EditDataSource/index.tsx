@@ -13,7 +13,7 @@ function EditDataSource({ apps }: any) {
   const router = useRouter();
   const [refresh, setRefresh] = useState(false);
 
-  const { appId } = router.query;
+  const appId = router.query.appId || apps[0]._id;
   const getDatasources = async () => {
     const datasources = await getDatasourceByAppId(appId as string);
 
