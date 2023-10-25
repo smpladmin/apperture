@@ -12,8 +12,10 @@ import {
 import { serverFunctions } from '../../utils/serverFunctions';
 import {
   computeTokenMap,
+  getAllTableColumns,
   getCurrentSheetActiveCell,
-  getProperties,
+  getTableColumnMap,
+  getfilteredTableColumnMap,
 } from '../lib/util';
 import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
@@ -114,13 +116,23 @@ const QueryEditor = ({
     setPrompt('');
 
     if (prompt.toLowerCase() !== 'view queries') {
-      const properties = getProperties(connections, 'industry');
+      const tableColumnMap = getTableColumnMap(connections);
+      const properties = getAllTableColumns(tableColumnMap);
+
       const tokenMap = computeTokenMap(prompt, properties);
       const wordReplacements = Object.keys(tokenMap).map((k) => ({
         word: k,
         replacement: tokenMap[k][0],
       }));
-      const tableData = { tableName: 'industry', wordReplacements };
+      const filteredColumnMap = getfilteredTableColumnMap(
+        tableColumnMap,
+        wordReplacements
+      );
+      const tableData = {
+        tableName: '',
+        wordReplacements: wordReplacements,
+        tableColumnMap: filteredColumnMap,
+      };
 
       setLoading(true);
       const response = await serverFunctions.executeQuery(

@@ -51,7 +51,7 @@ export const populateDataInSheet = (
 
 export const fetchConnections = (apiKey: string) => {
   const apiUrl =
-    'https://7008-2405-201-7002-80c5-3dce-59ea-7208-a17a.ngrok-free.app/apperture/google-sheets/connections';
+    'https://api2.apperture.io/apperture/google-sheets/connections';
   const userEmail = getLoggedInUserEmail();
   const options = {
     headers: {
@@ -77,8 +77,7 @@ export const fetchConnections = (apiKey: string) => {
 };
 
 export const getSavedWorkbooks = (apiKey: string) => {
-  const apiUrl =
-    'https://7008-2405-201-7002-80c5-3dce-59ea-7208-a17a.ngrok-free.app/apperture/google-sheets/workbooks';
+  const apiUrl = 'https://api2.apperture.io/apperture/google-sheets/workbooks';
   const userEmail = getLoggedInUserEmail();
   const options = {
     headers: {
@@ -118,8 +117,7 @@ export const executeQuery = (
   selectedTableData: any,
   sheetReference: SheetReference
 ) => {
-  const apiUrl =
-    'https://7008-2405-201-7002-80c5-3dce-59ea-7208-a17a.ngrok-free.app/apperture/google-sheets/transient';
+  const apiUrl = 'https://api2.apperture.io/apperture/google-sheets/transient';
   const userEmail = getLoggedInUserEmail();
 
   const payload = {
@@ -177,7 +175,7 @@ export const saveSheetQuery = (
   sheetReference: SheetReference
 ) => {
   const apiUrl =
-    'https://7008-2405-201-7002-80c5-3dce-59ea-7208-a17a.ngrok-free.app/apperture/google-sheets/sheet-query';
+    'https://api2.apperture.io/apperture/google-sheets/sheet-query';
   const userEmail = getLoggedInUserEmail();
   const spreadsheetId = getSpreadsheetId();
 
@@ -225,7 +223,7 @@ export const updateSheetQuery = (
   messages: any[],
   sheetReference: SheetReference
 ) => {
-  const apiUrl = `https://7008-2405-201-7002-80c5-3dce-59ea-7208-a17a.ngrok-free.app/apperture/google-sheets/sheet-query/${queryId}`;
+  const apiUrl = `https://api2.apperture.io/apperture/google-sheets/sheet-query/${queryId}`;
   const userEmail = getLoggedInUserEmail();
   const spreadsheetId = getSpreadsheetId();
 
@@ -267,7 +265,7 @@ export const updateSheetQuery = (
 
 export const getSheetQueries = (apiKey: string) => {
   const sheetId = getSpreadsheetId();
-  const apiUrl = `https://7008-2405-201-7002-80c5-3dce-59ea-7208-a17a.ngrok-free.app/apperture/google-sheets/sheet-query/${sheetId}`;
+  const apiUrl = `https://api2.apperture.io/apperture/google-sheets/sheet-query/${sheetId}`;
   const userEmail = getLoggedInUserEmail();
   const options = {
     headers: {

@@ -1,5 +1,5 @@
 import Fuse from 'fuse.js';
-import { Connection, Workbook } from './types';
+import { Connection, WordReplacement, Workbook } from './types';
 import * as fuzzball from 'fuzzball';
 
 // prettier-ignore
@@ -91,9 +91,34 @@ export const getTableColumnMap = (connections: Connection[]) => {
   return tableColumnMap;
 };
 
-export const getProperties = (connections: Connection[], tableName: string) => {
-  const tableColumnMap = getTableColumnMap(connections);
-  return tableColumnMap[tableName];
+export const getAllTableColumns = (
+  tableColumnMap: Record<string, string[]>
+): string[] => {
+  const uniqueColumnsSet: Set<string> = new Set();
+  for (const columnList of Object.values(tableColumnMap)) {
+    columnList.forEach((column) => uniqueColumnsSet.add(column));
+  }
+  return [...uniqueColumnsSet];
+};
+
+export const getfilteredTableColumnMap = (
+  tableColumnMap: Record<string, string[]>,
+  wordReplacements: WordReplacement[]
+) => {
+  const requiredColumns = new Set(
+    wordReplacements.map((item) => item.replacement)
+  );
+  const filteredColumnMap: Record<string, string[]> = {};
+
+  for (const table in tableColumnMap) {
+    const columns = tableColumnMap[table].filter((column) =>
+      requiredColumns.has(column)
+    );
+    if (columns.length > 0) {
+      filteredColumnMap[table] = columns;
+    }
+  }
+  return filteredColumnMap;
 };
 
 export const getDateFromTimestamp = (dateObj: Date) => {
