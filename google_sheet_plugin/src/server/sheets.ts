@@ -51,7 +51,7 @@ export const populateDataInSheet = (
 
 export const fetchConnections = (apiKey: string) => {
   const apiUrl =
-    'https://6377-2409-40d7-b-f584-ed-a5fe-d90d-1ee.ngrok-free.app/apperture/google-sheets/connections';
+    'https://7008-2405-201-7002-80c5-3dce-59ea-7208-a17a.ngrok-free.app/apperture/google-sheets/connections';
   const userEmail = getLoggedInUserEmail();
   const options = {
     headers: {
@@ -78,7 +78,7 @@ export const fetchConnections = (apiKey: string) => {
 
 export const getSavedWorkbooks = (apiKey: string) => {
   const apiUrl =
-    'https://6377-2409-40d7-b-f584-ed-a5fe-d90d-1ee.ngrok-free.app/apperture/google-sheets/workbooks';
+    'https://7008-2405-201-7002-80c5-3dce-59ea-7208-a17a.ngrok-free.app/apperture/google-sheets/workbooks';
   const userEmail = getLoggedInUserEmail();
   const options = {
     headers: {
@@ -119,7 +119,7 @@ export const executeQuery = (
   sheetReference: SheetReference
 ) => {
   const apiUrl =
-    'https://6377-2409-40d7-b-f584-ed-a5fe-d90d-1ee.ngrok-free.app/apperture/google-sheets/transient';
+    'https://7008-2405-201-7002-80c5-3dce-59ea-7208-a17a.ngrok-free.app/apperture/google-sheets/transient';
   const userEmail = getLoggedInUserEmail();
 
   const payload = {
@@ -177,16 +177,22 @@ export const saveSheetQuery = (
   sheetReference: SheetReference
 ) => {
   const apiUrl =
-    'https://6377-2409-40d7-b-f584-ed-a5fe-d90d-1ee.ngrok-free.app/apperture/google-sheets/sheet-query';
+    'https://7008-2405-201-7002-80c5-3dce-59ea-7208-a17a.ngrok-free.app/apperture/google-sheets/sheet-query';
   const userEmail = getLoggedInUserEmail();
   const spreadsheetId = getSpreadsheetId();
+
+  const reference = {
+    sheet_name: sheetReference.sheetName,
+    row_index: sheetReference.rowIndex,
+    column_index: sheetReference.columnIndex,
+  };
 
   const payload = {
     name,
     spreadsheetId,
     query,
     chats: messages,
-    sheetReference,
+    sheetReference: reference,
   };
 
   const options = {
@@ -219,16 +225,22 @@ export const updateSheetQuery = (
   messages: any[],
   sheetReference: SheetReference
 ) => {
-  const apiUrl = `https://6377-2409-40d7-b-f584-ed-a5fe-d90d-1ee.ngrok-free.app/apperture/google-sheets/sheet-query/${queryId}`;
+  const apiUrl = `https://7008-2405-201-7002-80c5-3dce-59ea-7208-a17a.ngrok-free.app/apperture/google-sheets/sheet-query/${queryId}`;
   const userEmail = getLoggedInUserEmail();
   const spreadsheetId = getSpreadsheetId();
+
+  const reference = {
+    sheet_name: sheetReference.sheetName,
+    row_index: sheetReference.rowIndex,
+    column_index: sheetReference.columnIndex,
+  };
 
   const payload = {
     name,
     spreadsheetId,
     query,
     chats: messages,
-    sheetReference,
+    sheetReference: reference,
   };
 
   const options = {
@@ -255,7 +267,7 @@ export const updateSheetQuery = (
 
 export const getSheetQueries = (apiKey: string) => {
   const sheetId = getSpreadsheetId();
-  const apiUrl = `https://6377-2409-40d7-b-f584-ed-a5fe-d90d-1ee.ngrok-free.app/apperture/google-sheets/sheet-query/${sheetId}`;
+  const apiUrl = `https://7008-2405-201-7002-80c5-3dce-59ea-7208-a17a.ngrok-free.app/apperture/google-sheets/sheet-query/${sheetId}`;
   const userEmail = getLoggedInUserEmail();
   const options = {
     headers: {
@@ -270,7 +282,18 @@ export const getSheetQueries = (apiKey: string) => {
     const status = response.getResponseCode();
     if (status === 200) {
       const data = response.getContentText();
-      return JSON.parse(data); // getContentText returns a response of type string
+      const parsedData = JSON.parse(data); // getContentText returns a response of type string
+
+      const sheetQueries = parsedData.map((query) => {
+        const sheetReference = query.sheetReference;
+        const reference = {
+          sheetName: sheetReference.sheet_name,
+          rowIndex: sheetReference.row_index,
+          columnIndex: sheetReference.column_index,
+        };
+        return { ...query, sheetReference: reference };
+      });
+      return sheetQueries;
     }
     return [];
   } catch (error) {

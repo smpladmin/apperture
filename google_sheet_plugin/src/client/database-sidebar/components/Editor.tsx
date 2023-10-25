@@ -40,7 +40,7 @@ const QueryEditor = ({
   const [prompt, setPrompt] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isQueryEdited, setIsQueryEdited] = useState(isExistingQuerySelected);
-  const [queryId, setQueryId] = useState('');
+  const [queryId, setQueryId] = useState(selectedSheetQuery?._id || '');
   const [user, setUser] = useState('');
   const [loading, setLoading] = useState(false);
   const [resultRange, setResultRange] = useState({
@@ -153,16 +153,17 @@ const QueryEditor = ({
   useEffect(() => {
     if (!messages.length) return;
 
-    // google sheet return columnIndex and row index starting from 1
     const { sheetName, rowIndex, columnIndex } = activeCell;
 
+    // google sheet return columnIndex and row index starting from 1
     const rangeStart = `${String.fromCharCode(
       65 + columnIndex - 1
     )}${rowIndex}`;
 
+    // subtract 1 from columnsLength to get accurate column range
     const rangeEnd = `${String.fromCharCode(
-      65 + columnIndex + resultRange.columns - 1
-    )}${rowIndex + resultRange.rows - 1}`;
+      65 + columnIndex - 1 + resultRange.columns - 1
+    )}${rowIndex + resultRange.rows}`;
 
     const queryName = `${sheetName} ${rangeStart}:${rangeEnd}`;
 
