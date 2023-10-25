@@ -7,10 +7,10 @@ from datetime import timedelta, datetime
 from airflow.decorators import task, dag
 
 from store.events_saver import EventsSaver
-from utils.utils import DATA_FETCH_DAYS_OFFSET
 from domain.datasource.service import DataSourceService
 from store.event_properties_saver import EventPropertiesSaver
 from fetch.clevertap_events_fetcher import ClevertapEventsFetcher
+from utils.utils import DATA_FETCH_DAYS_OFFSET, AIRFLOW_INIT_DATE
 from event_processors.clevertap_event_processor import ClevertapEventProcessor
 from domain.datasource.models import IntegrationProvider, Credential, DataSource
 
@@ -114,7 +114,7 @@ def create_dag(datasource_id: str, created_date: datetime):
                 description="Select end date (Leave empty to fetch data for the day prior to the logical date)",
             ),
         },
-        catchup=False,
+        catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=[f"clevertap-daily-data-fetch"],
     )
     def clevertap_data_loader():

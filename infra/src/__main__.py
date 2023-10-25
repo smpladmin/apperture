@@ -180,7 +180,7 @@ for i in range(1, data.get("ec2_private_count") + 1):
         key_name=keypair.key_name,
         subnet_id=publicsubnet.id,
         associate_public_ip_address=True,
-        root_block_device={"volume_size": 100 if i == 1 else 30 },
+        root_block_device={"volume_size": 100 if i == 1 else 30},
         tags={
             "Name": f"{data.get('ec2_private_name')}-{i}",
             "Swarm": f"worker-{i}",
@@ -211,7 +211,7 @@ ch_volume = aws.ebs.Volume(
     size=1024,
     iops=16000,
     throughput=1000,
-    type="gp3"
+    type="gp3",
 )
 
 aws.ec2.VolumeAttachment(
