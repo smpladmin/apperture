@@ -17,23 +17,30 @@ import {
   TopProgress,
 } from '@components/Onboarding';
 import {
+  CredentialType,
+  Credential,
   DatabaseCredential,
   RelationalDatabaseType,
 } from '@lib/domain/integration';
 import { Provider } from '@lib/domain/provider';
+import {
+  getCredentials,
+  updateCredentials,
+} from '@lib/services/datasourceService';
 import {
   createIntegrationWithDataSource,
   testDatabaseConnection,
 } from '@lib/services/integrationService';
 import Image, { StaticImageData } from 'next/image';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 type DatabaseIntegrationProps = {
   handleClose: Function;
   add: string | string[] | undefined;
   logo: StaticImageData;
+  edit?: boolean;
 };
 
 type FormData = {
@@ -55,6 +62,7 @@ const DatabaseIntegration = ({
   add,
   handleClose,
   logo,
+  edit = false,
 }: DatabaseIntegrationProps) => {
   const router = useRouter();
   const handleGoBack = (): void => router.back();
@@ -62,6 +70,7 @@ const DatabaseIntegration = ({
   const provider = router.query.provider as Provider;
   const [isConnectionValid, setIsConnectionValid] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sshKey, setSshKey] = useState<string>('');
 
   const getFileContent = async (file: Blob) => {
     return new Promise((resolve, reject) => {
@@ -120,6 +129,61 @@ const DatabaseIntegration = ({
     return databaseCredential;
   };
 
+  const onUpdate = async (data: FormData) => {
+    const { dsId, provider } = router.query;
+
+    const credentials: Credential = {
+      type: provider === 'mysql' ? CredentialType.MYSQL : CredentialType.MSSQL,
+      mssql_credential: {
+        server: data.host,
+        port: data.port,
+        username: data.username,
+        password: data.password,
+        databases: [data.databases],
+        over_ssh: data.overSsh,
+        ssh_credential: {
+          server: data.sshServer,
+          port: data.sshPort,
+          username: data.sshUsername,
+          password: data.sshPassword,
+          sshKey,
+        },
+      },
+      mysql_credential: {
+        host: data.host,
+        port: data.port,
+        username: data.username,
+        password: data.password,
+        databases: [data.databases],
+        over_ssh: data.overSsh,
+        ssh_credential: {
+          server: data.sshServer,
+          port: data.sshPort,
+          username: data.sshUsername,
+          password: data.sshPassword,
+          sshKey,
+        },
+      },
+    };
+    const response = await updateCredentials(dsId as string, credentials);
+    if (response.status === 200) {
+      toast({
+        title: 'Credentials updated successfully',
+        status: 'success',
+        variant: 'subtle',
+        isClosable: true,
+      });
+      router.back();
+    } else {
+      toast({
+        title: 'An error occurred while updating credentials',
+        status: 'error',
+        variant: 'subtle',
+        isClosable: true,
+      });
+    }
+  };
+
   const onSubmit = async (data: FormData) => {
     const appId = router.query.appId as string;
     const databaseCredential = await processFormData(data);
@@ -165,6 +229,7 @@ const DatabaseIntegration = ({
     watch,
     formState: { errors },
     trigger,
+    reset,
   } = useForm<FormData>({
     defaultValues: {
       host: '',
@@ -208,6 +273,62 @@ const DatabaseIntegration = ({
     setIsConnectionValid(false);
   };
 
+  useEffect(() => {
+    if (!edit) return;
+    const getDatasourceCredentials = async () => {
+      const { dsId } = router.query;
+      const credentials = await getCredentials(dsId as string);
+      setSshKey(
+        credentials.mysql_credential?.ssh_credential?.sshKey ||
+          credentials.mssql_credential?.ssh_credential?.sshKey ||
+          ''
+      );
+      reset({
+        host:
+          credentials.type === CredentialType.MSSQL
+            ? credentials.mssql_credential?.server || ''
+            : credentials.mysql_credential?.host || '',
+        port:
+          credentials.type === CredentialType.MSSQL
+            ? credentials.mssql_credential?.port || '3306'
+            : credentials.mysql_credential?.port || '3306',
+        username:
+          credentials.type === CredentialType.MSSQL
+            ? credentials.mssql_credential?.username || ''
+            : credentials.mysql_credential?.username || '',
+        password:
+          credentials.type === CredentialType.MSSQL
+            ? credentials.mssql_credential?.password || ''
+            : credentials.mysql_credential?.password || '',
+        databases:
+          credentials.type === CredentialType.MSSQL
+            ? credentials.mssql_credential?.databases[0] || ''
+            : credentials.mysql_credential?.databases[0] || '',
+        table:
+          credentials.type === CredentialType.MSSQL
+            ? credentials.tableName || ''
+            : credentials.tableName || '',
+        sshServer:
+          credentials.type === CredentialType.MSSQL
+            ? credentials.mssql_credential?.ssh_credential?.server || ''
+            : credentials.mysql_credential?.ssh_credential?.server || '',
+        sshPort:
+          credentials.type === CredentialType.MSSQL
+            ? credentials.mssql_credential?.ssh_credential?.port || '22'
+            : credentials.mysql_credential?.ssh_credential?.port || '22',
+        sshUsername:
+          credentials.type === CredentialType.MSSQL
+            ? credentials.mssql_credential?.ssh_credential?.username || ''
+            : credentials.mysql_credential?.ssh_credential?.username || '',
+        sshPassword:
+          credentials.type === CredentialType.MSSQL
+            ? credentials.mssql_credential?.ssh_credential?.password || ''
+            : credentials.mysql_credential?.ssh_credential?.password || '',
+      });
+    };
+    getDatasourceCredentials();
+  }, [edit]);
+
   return (
     <IntegrationContainer>
       {add ? <LeftContainerRevisit /> : <LeftContainer />}
@@ -246,7 +367,9 @@ const DatabaseIntegration = ({
               </Heading>
               <Flex w={125}>
                 <form
-                  onSubmit={handleSubmit(onSubmit)}
+                  onSubmit={
+                    edit ? handleSubmit(onUpdate) : handleSubmit(onSubmit)
+                  }
                   style={{ width: '100%' }}
                 >
                   <Flex direction={'column'} gap={'4'}>
@@ -360,26 +483,30 @@ const DatabaseIntegration = ({
                     <Flex>
                       <FormButton
                         navigateBack={() => router.back()}
-                        handleNextClick={handleSubmit(onSubmit)}
+                        handleNextClick={
+                          edit ? handleSubmit(onUpdate) : handleSubmit(onSubmit)
+                        }
                         // disabled={!(isConnectionValid && validateForm())}
                         disabled={false}
                         nextButtonName={'Submit'}
                       />
-                      <Button
-                        isLoading={loading}
-                        variant={'primary'}
-                        rounded={'lg'}
-                        bg={'black.100'}
-                        p={6}
-                        fontSize={'base'}
-                        fontWeight={'semibold'}
-                        lineHeight={'base'}
-                        textColor={'white.100'}
-                        width={{ base: 'full', md: '40' }}
-                        onClick={handleTestConnection}
-                      >
-                        Test
-                      </Button>
+                      {edit ? null : (
+                        <Button
+                          isLoading={loading}
+                          variant={'primary'}
+                          rounded={'lg'}
+                          bg={'black.100'}
+                          p={6}
+                          fontSize={'base'}
+                          fontWeight={'semibold'}
+                          lineHeight={'base'}
+                          textColor={'white.100'}
+                          width={{ base: 'full', md: '40' }}
+                          onClick={handleTestConnection}
+                        >
+                          Test
+                        </Button>
+                      )}
                     </Flex>
                   </Flex>
                 </form>

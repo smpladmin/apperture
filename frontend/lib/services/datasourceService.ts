@@ -1,9 +1,10 @@
 import { SanityData } from './../domain/eventData';
-import { AppertureGet, ApperturePrivateGet } from './util';
+import { AppertureGet, ApperturePrivateGet, ApperturePut } from './util';
 import { AppertureAPI } from '@lib/apiClient';
 import { ApperturePrivateAPI } from '@lib/apiClient/client.server';
 import { Node } from '@lib/domain/node';
 import { AxiosError } from 'axios';
+import { Credential } from '@lib/domain/integration';
 
 export const _getEdges = async (token: string, dsId: string) => {
   try {
@@ -107,4 +108,20 @@ export const getUserActivity = async (
     `/datasources/${dsId}/events?user_id=${userId}&page_number=${page}`
   );
   return response.data;
+};
+
+export const getCredentials = async (dsId: string): Promise<Credential> => {
+  const response = await AppertureGet(`/datasources/${dsId}/credentials`);
+  return response.data;
+};
+
+export const updateCredentials = async (
+  dsId: string,
+  credential: Credential
+) => {
+  const response = await ApperturePut(
+    `/datasources/${dsId}/credentials`,
+    credential
+  );
+  return response;
 };

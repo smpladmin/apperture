@@ -3,7 +3,15 @@ from typing import List, Optional, Union
 from pydantic import BaseModel
 
 from domain.common.models import IntegrationProvider
-from domain.integrations.models import Credential, Integration, RelationalDatabaseType
+from domain.integrations.models import (
+    Credential,
+    CredentialType,
+    CSVCredential,
+    Integration,
+    MsSQLCredential,
+    MySQLCredential,
+    RelationalDatabaseType,
+)
 from rest.dtos.datasources import DataSourceResponse
 
 from .model_response import ModelResponse
@@ -65,3 +73,16 @@ class CSVCreateDto(BaseModel):
 class DeleteCSVDto(BaseModel):
     appId: str
     filename: str
+
+
+class CredentialDto(BaseModel):
+    type: Optional[CredentialType]
+    account_id: Optional[str]
+    refresh_token: Optional[str]
+    api_key: Optional[str]
+    secret: Optional[str]
+    tableName: Optional[str]
+    mysql_credential: Optional[MySQLCredential]
+    mssql_credential: Optional[MsSQLCredential]
+    csv_credential: Optional[CSVCredential]
+    api_base_url: Optional[str]

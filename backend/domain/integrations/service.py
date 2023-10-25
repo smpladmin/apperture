@@ -321,3 +321,9 @@ class IntegrationService:
             db_name=clickhouse_credential.databasename,
             s3_key=s3_key,
         )
+
+    async def update_credentials(self, id: PydanticObjectId, credential: Credential):
+        await Integration.find_one(
+            Integration.id == id,
+        ).update({"$set": {"credential": credential}})
+        return

@@ -22,6 +22,8 @@ from domain.edge.models import Node, TrendType
 from domain.edge.service import EdgeService
 from domain.event_properties.service import EventPropertiesService
 from domain.events.service import EventsService
+from domain.integrations.models import Credential
+from domain.integrations.service import IntegrationService
 from domain.properties.service import PropertiesService
 from domain.runlogs.service import RunLogService
 from rest.dtos.datasources import DiffEventIngestionDto
@@ -32,6 +34,7 @@ from rest.dtos.edges import (
     NodeTrendResponse,
 )
 from rest.dtos.events import EventsResponse
+from rest.dtos.integrations import CredentialDto
 from rest.middlewares import validate_jwt
 
 router = APIRouter(
@@ -240,3 +243,27 @@ async def event_ingestion(
     jobs = dpq_service.enqueue_from_runlogs(runlogs)
     logging.info(f"Scheduled {len(jobs)} for data processing")
     return {"success": 200, "events": dto}
+
+
+@router.get("/datasources/{ds_id}/credentials", response_model=Credential)
+async def get_credentials(
+    ds_id: str,
+    ds_service: DataSourceService = Depends(),
+    integration_service: IntegrationService = Depends(),
+):
+    datasource = await ds_service.get_datasource(ds_id)
+    integration = await integration_service.get_integration(datasource.integration_id)
+    return integration.credential or {}
+
+
+@router.put("/datasources/{ds_id}/credentials")
+async def update_credentials(
+    ds_id: str,
+    dto: Credential,
+    ds_service: DataSourceService = Depends(),
+    integration_service: IntegrationService = Depends(),
+):
+    datasource = await ds_service.get_datasource(ds_id)
+    await integration_service.update_credentials(datasource.integration_id, dto)
+
+    return {"success": "ok"}

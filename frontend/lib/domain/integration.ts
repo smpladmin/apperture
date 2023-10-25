@@ -37,3 +37,50 @@ export type UploadProgress = {
   progress: number;
   isCompleted: boolean;
 };
+
+export enum CredentialType {
+  OAUTH = 'OAUTH',
+  API_KEY = 'API_KEY',
+  MYSQL = 'MYSQL',
+  MSSQL = 'MSSQL',
+  CSV = 'CSV',
+}
+
+export type MsSQLCredential = {
+  server: string;
+  port: string;
+  username: string;
+  password: string;
+  databases: string[];
+  over_ssh: boolean;
+  ssh_credential?: DatabaseSSHCredential;
+};
+
+export type MySQLCredential = {
+  host: string;
+  port: string;
+  username: string;
+  password: string;
+  databases: string[];
+  over_ssh: boolean;
+  ssh_credential?: DatabaseSSHCredential;
+};
+
+export type CSVCredential = {
+  name: string;
+  s3_key: string;
+  table_name: string;
+};
+
+export type Credential = {
+  type: CredentialType;
+  account_id?: string;
+  refresh_token?: string;
+  api_key?: string;
+  secret?: string;
+  tableName?: string;
+  mysql_credential?: MySQLCredential;
+  mssql_credential?: MsSQLCredential;
+  csv_credential?: CSVCredential;
+  api_base_url?: string;
+};

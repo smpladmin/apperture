@@ -22,6 +22,7 @@ type GooglePermissionProps = {
   query: {
     [key in string]: string | string[] | undefined;
   };
+  edit?: boolean;
 };
 
 const GooglePermission = ({
@@ -29,6 +30,7 @@ const GooglePermission = ({
   handleClose,
   query,
   add,
+  edit = false,
 }: GooglePermissionProps) => {
   const link = `${BACKEND_BASE_URL}/integrations/oauth/google?app_id=${query.appId}&redirect_url=${FRONTEND_BASE_URL}/analytics/app/${query.appId}/integration/google/apps`;
   const oauthUrl =
@@ -42,36 +44,58 @@ const GooglePermission = ({
 
   return (
     <IntegrationContainer>
-      
-        { add ? <LeftContainerRevisit/> : <LeftContainer /> }
-     
-      <RightContainer>
-          <Flex flexDirection="column" alignItems="center">
-             { add ? <Box mt={10}></Box> : <TopProgress handleGoBack={handleGoBack} /> }
+      {add ? <LeftContainerRevisit /> : <LeftContainer />}
 
-            <Flex direction="column" h="full" justifyContent="center" alignItems="center" mt={10}>
-              <Box height={{ base: 8, md: 14 }} width={{ base: 8, md: 14 }} mb={10}>
-                <Image src={gaLogo} alt="google analytics" layout="responsive" />
+      <RightContainer>
+        <Flex flexDirection="column" alignItems="center">
+          {add ? (
+            <Box mt={10}></Box>
+          ) : (
+            <TopProgress handleGoBack={handleGoBack} />
+          )}
+
+          <Flex
+            direction="column"
+            h="full"
+            justifyContent="center"
+            alignItems="center"
+            mt={10}
+          >
+            <Box
+              height={{ base: 8, md: 14 }}
+              width={{ base: 8, md: 14 }}
+              mb={10}
+            >
+              <Image src={gaLogo} alt="google analytics" layout="responsive" />
+            </Box>
+            <Box maxWidth="82" paddingX="4" justifyContent="center">
+              <Text
+                fontWeight="semibold"
+                fontSize="sh-24"
+                lineHeight="sh-24"
+                marginBottom="2"
+              >
+                Permission Request
+              </Text>
+              <Text
+                fontSize={{ base: 'xs-14', md: 'base' }}
+                lineHeight={{ base: 'xs-14', md: 'base' }}
+                color="grey.200"
+                fontWeight="normal"
+              >
+                Apperture wants to connect with your Google Analytics account
+              </Text>
+              <Box mt="12">
+                <FormButton
+                  navigateBack={navigateBack}
+                  link={oauthUrl}
+                  nextButtonName="Give Access"
+                />
               </Box>
-              <Box maxWidth="82" paddingX="4" justifyContent="center">
-                <Text fontWeight="semibold" fontSize="sh-24" lineHeight="sh-24" marginBottom="2">
-                  Permission Request
-                </Text>
-                <Text
-                  fontSize={{ base: 'xs-14', md: 'base' }}
-                  lineHeight={{ base: 'xs-14', md: 'base' }}
-                  color="grey.200"
-                  fontWeight="normal"
-                >
-                  Apperture wants to connect with your Google Analytics account
-                </Text>
-                <Box mt="12">
-                  <FormButton navigateBack={navigateBack} link={oauthUrl} nextButtonName="Give Access" />
-                </Box>
-              </Box>
-            </Flex>
+            </Box>
           </Flex>
-        </RightContainer>
+        </Flex>
+      </RightContainer>
     </IntegrationContainer>
   );
 };
