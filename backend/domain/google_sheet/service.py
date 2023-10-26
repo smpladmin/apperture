@@ -16,7 +16,7 @@ class GoogleSheetService:
         user_id: PydanticObjectId,
         spreadsheet_id: str,
         query: str,
-        chats: List[dict],
+        chats: List,
         sheet_reference: dict,
     ) -> SheetQuery:
         return SheetQuery(

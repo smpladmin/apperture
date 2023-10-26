@@ -91,18 +91,11 @@ const QueryEditor = ({
     setLoading(false);
   };
 
-  const handleNonSqlMessage = async () => {
+  const handleNLPMessage = async () => {
     const messageType =
       prompt.toLowerCase() === 'view queries'
         ? MessageType.VIEW_QUERIES
         : MessageType.NLP_TEXT;
-
-    const appertureMessage = {
-      sender: 'apperture',
-      text: 'Sure, Here are your results!',
-      type: MessageType.RESPONSE_TEXT,
-      timestamp: new Date().toString(),
-    };
 
     setMessages((prevMsg) => [
       ...prevMsg,
@@ -128,10 +121,13 @@ const QueryEditor = ({
         tableColumnMap,
         wordReplacements
       );
+
+      //Temp: To make sure that NLP works with old backend which involves selecting a table
+      const selectedTable = Object.keys(filteredColumnMap)?.[0];
       const tableData = {
-        tableName: '',
+        tableName: selectedTable || '',
         wordReplacements: wordReplacements,
-        tableColumnMap: filteredColumnMap,
+        // tableColumnMap: filteredColumnMap,
       };
 
       setLoading(true);
@@ -150,6 +146,17 @@ const QueryEditor = ({
       setCode(response.sql);
       setLoading(false);
 
+      const text = response?.headers?.length
+        ? 'Sure, Here are your results!'
+        : 'Try again! Maybe with different prompt';
+
+      const appertureMessage = {
+        sender: 'apperture',
+        text,
+        type: MessageType.RESPONSE_TEXT,
+        timestamp: new Date().toString(),
+      };
+
       setMessages((prevMsg) => [...prevMsg, appertureMessage]);
     }
   };
@@ -158,7 +165,7 @@ const QueryEditor = ({
     if (isSql) {
       handleSqlMessage();
     } else {
-      handleNonSqlMessage();
+      handleNLPMessage();
     }
   };
 

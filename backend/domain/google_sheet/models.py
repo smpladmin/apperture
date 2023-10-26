@@ -17,7 +17,7 @@ class SheetQuery(Document):
     name: str
     query: str
     spreadsheet_id: str
-    chats: List[dict]
+    chats: List
     sheet_reference: SheetReference
     enabled: bool = True
 

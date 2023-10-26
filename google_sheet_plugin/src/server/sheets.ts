@@ -189,7 +189,7 @@ export const saveSheetQuery = (
     name,
     spreadsheetId,
     query,
-    chats: messages,
+    chats: [],
     sheetReference: reference,
   };
 
@@ -237,7 +237,7 @@ export const updateSheetQuery = (
     name,
     spreadsheetId,
     query,
-    chats: messages,
+    chats: [],
     sheetReference: reference,
   };
 

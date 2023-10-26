@@ -148,7 +148,10 @@ const ListConnections = ({ connections }: ListConnectionsProps) => {
                                             );
                                           }}
                                         >
-                                          <i className="ph ph-table"></i>
+                                          <i
+                                            className="ph ph-table"
+                                            style={{ color: '#9E9E9E' }}
+                                          ></i>
                                           <Text
                                             fontSize={'12px'}
                                             lineHeight={'16px'}
@@ -221,8 +224,8 @@ const ListColumns = ({
             setShowColumns(false);
             setConnectorData(null);
           }}
-          style={{ cursor: 'pointer' }}
-        ></i>
+          style={{ color: '#9E9E9E' }}
+        />
         <Text
           fontSize={'12px'}
           fontWeight={'400'}
@@ -275,7 +278,10 @@ const ListColumns = ({
               }}
               borderRadius={'4'}
             >
-              <i className="ph ph-columns"></i>
+              <Box minW={'16px'} minH={'16px'}>
+                <i className="ph ph-columns" style={{ color: '#9E9E9E' }}></i>
+              </Box>
+
               <Text
                 fontSize={'12px'}
                 lineHeight={'16px'}

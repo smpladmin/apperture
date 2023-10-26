@@ -28,7 +28,7 @@ class CreateSheetQueryDto(BaseModel):
     name: str
     query: str
     spreadsheetId: str
-    chats: List[dict]
+    chats: List
     sheetReference: dict
 
 
