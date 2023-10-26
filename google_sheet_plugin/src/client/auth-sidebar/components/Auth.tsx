@@ -1,7 +1,6 @@
 import { Box, Button, Flex, Image, Input } from '@chakra-ui/react';
 import React, { FormEvent, useState } from 'react';
 import { serverFunctions } from '../../utils/serverFunctions';
-import AppertureSvg from './AppertureSvg';
 
 const Auth = () => {
   const [value, setValue] = useState('');
@@ -15,7 +14,7 @@ const Auth = () => {
   return (
     <Box p={'2'}>
       <Flex justifyContent={'center'} mb={'4'}>
-        <AppertureSvg />
+        <Image src={'https://cdn.apperture.io/apperture-name.svg'} />
       </Flex>
       <form onSubmit={onSubmit}>
         <Flex direction={'column'} gap={'2'} alignItems={'center'}>
