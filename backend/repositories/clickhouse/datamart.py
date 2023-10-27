@@ -21,7 +21,7 @@ class DataMartRepo(EventsBase):
         self.DUMMY_COLUMN = "dummy_column_for_orderby"
         self.logger = logging.getLogger(name=__name__)
         self.mssql_client = mssql_client
-        self.chunk_size = int(os.getenv("CLICKHOUSE_INSERT_CHUNK_SIZE"))
+        self.chunk_size = int(os.getenv("CLICKHOUSE_INSERT_CHUNK_SIZE", 10000))
 
     def cleanse_query_string(self, query_string: str) -> str:
         query_string = re.sub(r"--.*\n+", " ", query_string)
