@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 
 DATA_FETCH_DAYS_OFFSET = 100
-AIRFLOW_INIT_DATE = datetime(2023, 10, 20, 0, 0, 0, 0)
+AIRFLOW_INIT_DATE = datetime(2023, 10, 25, 0, 0, 0, 0)
 
 
 def replace_invalid_characters(input_string):
