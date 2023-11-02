@@ -1,8 +1,9 @@
 import asyncio
 import logging
+import os
 from typing import Union
 
-from beanie import PydanticObjectId
+import requests
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
 from data_processor_queue.service import DPQueueService
@@ -31,6 +32,10 @@ router = APIRouter(
     tags=["integration"],
     dependencies=[Depends(validate_jwt)],
     responses={401: {}},
+)
+
+KAFKA_CONNECTOR_BASE_URL = os.getenv(
+    "KAFKA_CONNECTOR_BASE_URL", "http://connect:8083/connectors/"
 )
 
 
@@ -266,3 +271,46 @@ async def get_datasource_events(
     )
 
     return [properties.event for properties in event_properties]
+
+
+@router.post("/integrations/{id}/cdc/connectors")
+async def create_cdc_connector(
+    id: str,
+    integration_service: IntegrationService = Depends(),
+):
+    integration = await integration_service.get_integration(id=id)
+    credential = integration.credential.cdc_credential
+    headers = {"Accept": "application/json", "Content-Type": "application/json"}
+    data = {
+        "name": f"cdc_{id}",
+        "config": {
+            "connector.class": credential.server_type.get_connector_class(),
+            "database.hostname": credential.server,
+            "database.port": "1433",
+            "database.user": credential.username,
+            "database.password": credential.password,
+            "database.names": credential.database,
+            "topic.prefix": f"cdc_{id}",
+            "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
+            "schema.history.internal.kafka.topic": f"schemahistory.cdc_{id}",
+            "table.include.list": credential.tables,
+            "database.encrypt": False,
+            "snapshot.mode": "initial",
+        },
+    }
+    return requests.post(
+        url=KAFKA_CONNECTOR_BASE_URL, json=data, headers=headers
+    ).json()
+
+
+@router.delete("/integrations/cdc/connectors/{id}")
+async def delete_cdc_connector(
+    id: str,
+):
+    requests.delete(url=f"{KAFKA_CONNECTOR_BASE_URL}{id}")
+    return {"success"}
+
+
+@router.get("/integrations/cdc/connectors")
+async def get_cdc_connectors():
+    return requests.get(url=KAFKA_CONNECTOR_BASE_URL).json()

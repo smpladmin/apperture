@@ -321,3 +321,8 @@ class IntegrationService:
             db_name=clickhouse_credential.databasename,
             s3_key=s3_key,
         )
+
+    async def get_integrations_with_cdc(self) -> List[Integration]:
+        return await Integration.find(
+            Integration.credential.cdc_credential != None
+        ).to_list()

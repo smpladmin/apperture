@@ -41,6 +41,7 @@ from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.event_properties import EventPropertiesDto, EventPropertiesResponse
 from rest.dtos.events import CreateEventDto
 from rest.dtos.funnels import FunnelResponse, FunnelTrendResponse, TransientFunnelDto
+from rest.dtos.integrations import IntegrationResponseWithCredentials
 from rest.dtos.metrics import (
     ComputedMetricStepResponse,
     MetricsComputeDto,
@@ -467,3 +468,26 @@ async def get_datasource_events(
     ds_service: DataSourceService = Depends(),
 ):
     return await ds_service.get_datasources_for_provider(provider=provider)
+
+
+@router.get(
+    "/integrations/cdc", response_model=List[IntegrationResponseWithCredentials]
+)
+async def get_integrations_with_cdc(
+    integration_service: IntegrationService = Depends(),
+    app_service: AppService = Depends(),
+):
+    integrations = await integration_service.get_integrations_with_cdc()
+    response = []
+    for integration in integrations:
+        app = await app_service.get_app(id=integration.app_id)
+        response.append(
+            IntegrationResponseWithCredentials(
+                id=integration.id,
+                app_id=integration.app_id,
+                provider=integration.provider,
+                cdc_credential=integration.credential.cdc_credential,
+                clickhouse_credential=app.clickhouse_credential,
+            )
+        )
+    return response

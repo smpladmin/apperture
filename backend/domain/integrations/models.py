@@ -64,6 +64,33 @@ class MsSQLCredential(BaseModel):
         allow_population_by_field_name = True
 
 
+class ServerType(str, Enum):
+    MYSQL = "mysql"
+    MSSQL = "mssql"
+
+    def get_connector_class(self):
+        connector_class_dict = {
+            self.MYSQL: "mysql.MySqlConnector",
+            self.MSSQL: "sqlserver.SqlServerConnector",
+        }
+        return "io.debezium.connector." + connector_class_dict.get(
+            self, "sqlserver.SqlServerConnector"
+        )
+
+
+class CdcCredential(BaseModel):
+    server: str
+    port: str
+    username: str
+    password: str
+    server_type: ServerType
+    database: str
+    tables: str
+
+    class Config:
+        allow_population_by_field_name = True
+
+
 class Credential(BaseModel):
     type: CredentialType
     account_id: Optional[str]
@@ -73,6 +100,7 @@ class Credential(BaseModel):
     tableName: Optional[str]
     mysql_credential: Optional[MySQLCredential]
     mssql_credential: Optional[MsSQLCredential]
+    cdc_credential: Optional[CdcCredential]
     csv_credential: Optional[CSVCredential]
     api_base_url: Optional[str]
 
