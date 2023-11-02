@@ -3,10 +3,12 @@ import traceback
 from abc import ABC
 from typing import Dict, Sequence, Union
 
-from clickhouse import Clickhouse
+from clickhouse_connect.driver.query import QueryResult
 from fastapi import Depends, HTTPException
 from pypika import CustomFunction, Parameter, Table
-from clickhouse_connect.driver.query import QueryResult
+
+from clickhouse import Clickhouse
+from clickhouse.clickhouse_client_factory import ClickHouseClientFactory
 
 
 class EventsBase(ABC):
@@ -61,6 +63,45 @@ class EventsBase(ABC):
                 query=query, parameters=parameters
             )
             return query_result.result_set
+        except Exception as e:
+            logging.info(repr(e))
+            traceback.print_exc()
+            return []
+
+    async def execute_query_for_app(
+        self, app_id: str, query: str, parameters: Dict
+    ) -> Sequence:
+        logging.info(f"Executing query: {query}")
+        logging.info(f"Parameters: {parameters}")
+        try:
+            client = await ClickHouseClientFactory.get_client(app_id)
+            query_result = client.query(query=query, parameters=parameters)
+            return query_result.result_set
+        except Exception as e:
+            logging.info(repr(e))
+            traceback.print_exc()
+            return []
+
+    async def execute_query_for_app_restricted_clients(
+        self,
+        app_id: str,
+        query: str,
+        parameters: Dict,
+        settings: Union[Dict, None] = None,
+    ) -> Sequence:
+        logging.info(f"Executing query: {query}")
+        logging.info(f"Parameters: {parameters}")
+        try:
+            params = parameters if parameters else {}
+            settings = settings if settings else {}
+            client = await ClickHouseClientFactory.get_restricted_client(app_id)
+            if client:
+                query_result = client.query(
+                    query=query, params=params, settings=settings
+                )
+                return query_result
+            else:
+                raise Exception("Connection error")
         except Exception as e:
             logging.info(repr(e))
             traceback.print_exc()

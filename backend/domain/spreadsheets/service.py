@@ -4,9 +4,11 @@ from typing import List, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
+from pymysql import DatabaseError
 
+from clickhouse.clickhouse_client_factory import ClickHouseClientFactory
 from domain.apps.models import ClickHouseCredential
-from domain.integrations.models import MySQLCredential, MsSQLCredential
+from domain.integrations.models import MsSQLCredential, MySQLCredential
 from domain.spreadsheets.models import (
     ColumnType,
     ComputedSpreadsheet,
@@ -86,6 +88,7 @@ class SpreadsheetService:
 
     async def get_transient_spreadsheets(
         self,
+        app_id: str,
         query: str,
         credential: Union[ClickHouseCredential, MySQLCredential, MsSQLCredential],
         query_id: Union[str, None] = None,
@@ -96,17 +99,20 @@ class SpreadsheetService:
             query_string=query, database_client=client
         )
         if client == DatabaseClient.CLICKHOUSE:
-            result = self.spreadsheets.execute_query_for_restricted_client(
+            result = await self.spreadsheets.execute_query_for_app_restricted_clients(
+                app_id=app_id,
                 query=query,
-                username=credential.username,
-                password=credential.password,
                 settings={
                     "replace_running_query": 1,
                     "query_id": query_id,
                 }
                 if query_id
                 else None,
+                parameters={},
             )
+            print(result)
+            if not result:
+                raise DatabaseError("Query execution failed")
         elif client == DatabaseClient.MYSQL:
             result = self.mysql.connect_and_execute_query(
                 query=query, credential=credential
@@ -212,6 +218,7 @@ class SpreadsheetService:
 
     def compute_pivot(
         self,
+        app_id: str,
         query: str,
         rows: List[PivotAxisDetail],
         columns: List[PivotAxisDetail],
@@ -223,6 +230,7 @@ class SpreadsheetService:
 
         if rows:
             unique_rows = self.spreadsheets.compute_ordered_distinct_values(
+                app_id=app_id,
                 reference_query=query,
                 values_to_fetch=rows,
                 aggregate=values[0] if values else None,
@@ -232,6 +240,7 @@ class SpreadsheetService:
 
         if columns:
             unique_columns = self.spreadsheets.compute_ordered_distinct_values(
+                app_id=app_id,
                 reference_query=query,
                 values_to_fetch=columns,
                 aggregate=values[0] if values else None,
@@ -245,6 +254,7 @@ class SpreadsheetService:
         if rows and columns and values:
             try:
                 result_set = self.spreadsheets.compute_transient_pivot(
+                    app_id=app_id,
                     query=query,
                     rows=rows,
                     columns=columns,

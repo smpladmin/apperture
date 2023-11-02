@@ -76,9 +76,9 @@ class ComputeQueryAction:
         else:
             return await self.get_clickhouse_credentials(datasource_id=datasource_id)
 
-    async def get_database_client(self, datasource_id: str) -> DatabaseClient:
-        datasource = await self.datasource_service.get_datasource(datasource_id)
-        provider = datasource.provider
+    async def get_database_client(
+        self, provider: IntegrationProvider
+    ) -> DatabaseClient:
         if provider == IntegrationProvider.MYSQL:
             return DatabaseClient.MYSQL
         elif provider == IntegrationProvider.MSSQL:
@@ -88,19 +88,23 @@ class ComputeQueryAction:
 
     async def get_transient_spreadsheets(
         self,
+        app_id: str,
         query: str,
         credential: Union[ClickHouseCredential, MySQLCredential, MsSQLCredential],
         client: DatabaseClient,
         query_id: Union[str, None] = None,
     ) -> ComputedSpreadsheet:
         return await self.spreadsheets_service.get_transient_spreadsheets(
+            app_id=app_id,
             query=query,
             credential=credential,
             query_id=query_id,
             client=client,
         )
 
-    async def compute_query(self, dto: TransientSpreadsheetsDto):
+    async def compute_query(
+        self, app_id: str, provider: IntegrationProvider, dto: TransientSpreadsheetsDto
+    ):
         try:
             logging.info(f"Query: {dto.query}")
             credential = await self.get_credentials(
@@ -109,17 +113,19 @@ class ComputeQueryAction:
             if dto.isDatamart:
                 client = DatabaseClient.CLICKHOUSE
             else:
-                client = await self.get_database_client(datasource_id=dto.datasourceId)
+                client = await self.get_database_client(provider=provider)
 
             if not dto.is_sql:
                 sql_query = text_to_sql(dto.ai_query)
                 return await self.get_transient_spreadsheets(
+                    app_id=app_id,
                     query=sql_query,
                     credential=credential,
                     client=client,
                     query_id=dto.query_id,
                 )
             return await self.get_transient_spreadsheets(
+                app_id=app_id,
                 query=dto.query,
                 credential=credential,
                 client=client,

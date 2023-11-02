@@ -93,12 +93,22 @@ async def get_workbooks(
     dependencies=[Depends(validate_app_user)],
 )
 async def compute_transient_spreadsheets(
-    dto: TransientSpreadsheetsDto, compute_query_action: ComputeQueryAction = Depends()
+    dto: TransientSpreadsheetsDto,
+    compute_query_action: ComputeQueryAction = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
-    result = await compute_query_action.compute_query(dto=dto)
-    return compute_query_action.create_spreadsheet_with_custom_headers(
-        column_names=result.headers, data=result.data, sql=result.sql
-    )
+    try:
+        datasource = await ds_service.get_datasource(dto.datasourceId)
+        result = await compute_query_action.compute_query(
+            app_id=str(datasource.app_id), provider=datasource.provider, dto=dto
+        )
+        return compute_query_action.create_spreadsheet_with_custom_headers(
+            column_names=result.headers, data=result.data, sql=result.sql
+        )
+    except BusinessError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
+    except DatabaseError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
 
 
 @router.post(
@@ -215,9 +225,12 @@ def kill_workbook_query(id: str, spreadsheets_service: SpreadsheetService = Depe
 async def compute_transient_pivot(
     dto: ComputePivotDto,
     spreadsheets_service: SpreadsheetService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
     try:
+        datasource = await ds_service.get_datasource(dto.dsId)
         return spreadsheets_service.compute_pivot(
+            app_id=str(datasource.app_id),
             query=dto.query,
             rows=dto.rows,
             columns=dto.columns,
@@ -244,3 +257,12 @@ async def vlookup(
         search_column=dto.searchKeyColumn,
         lookup_index_column=dto.lookupIndexColumn,
     )
+
+
+@router.get("/workbooks/test/{app_id}")
+async def test_workbook(
+    app_id=str,
+    spreadsheets_service: SpreadsheetService = Depends(),
+):
+    await spreadsheets_service.run_remote_query(query="", app_id=app_id)
+    return {}

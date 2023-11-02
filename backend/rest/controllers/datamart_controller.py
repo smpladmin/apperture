@@ -11,12 +11,12 @@ from domain.datasources.service import DataSourceService
 from domain.spreadsheets.models import DatabaseClient
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apperture_users import AppertureUserResponse
-from rest.dtos.datamart import DataMartTableDto, DataMartResponse, DataMartWithUser
+from rest.dtos.datamart import DataMartResponse, DataMartTableDto, DataMartWithUser
 from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
     TransientSpreadsheetsDto,
 )
-from rest.middlewares import validate_jwt, get_user_id, get_user
+from rest.middlewares import get_user, get_user_id, validate_jwt
 from rest.middlewares.validate_app_user import validate_app_user, validate_library_items
 
 router = APIRouter(
@@ -32,9 +32,14 @@ router = APIRouter(
     dependencies=[Depends(validate_app_user)],
 )
 async def compute_datamart_query(
-    dto: TransientSpreadsheetsDto, compute_query_action: ComputeQueryAction = Depends()
+    dto: TransientSpreadsheetsDto,
+    compute_query_action: ComputeQueryAction = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
-    result = await compute_query_action.compute_query(dto=dto)
+    datasource = await ds_service.get_datasource(dto.datasourceId)
+    result = await compute_query_action.compute_query(
+        app_id=datasource.app_id, provider=datasource.provider, dto=dto
+    )
     return compute_query_action.create_spreadsheet_with_custom_headers(
         column_names=result.headers, data=result.data, sql=result.sql
     )

@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 
 from cache import init_cache
+from clickhouse.clickhouse_client_factory import ClickHouseClientFactory
 from settings import apperture_settings
 
 load_dotenv(override=False)
@@ -29,6 +30,7 @@ from rest.controllers import (
     datasource_controller,
     event_capture_controller,
     funnel_controller,
+    google_sheet_controller,
     integration_controller,
     integration_oauth_controller,
     metric_controller,
@@ -39,7 +41,6 @@ from rest.controllers import (
     segment_controller,
     spreadsheet_controller,
     user_controller,
-    google_sheet_controller,
 )
 
 settings = apperture_settings()
@@ -57,6 +58,7 @@ if settings.sentry_dsn:
 
 async def on_startup():
     mongo = Mongo()
+    ClickHouseClientFactory()
     clickhouse = Clickhouse()
     app.dependency_overrides[Mongo] = lambda: mongo
     app.dependency_overrides[Clickhouse] = lambda: clickhouse
@@ -70,6 +72,7 @@ async def on_shutdown():
     clickhouse: Clickhouse = app.dependency_overrides[Clickhouse]()
     await mongo.close()
     clickhouse.close()
+    ClickHouseClientFactory.close_all_client_connection()
 
 
 app = FastAPI(on_startup=[on_startup], on_shutdown=[on_shutdown])

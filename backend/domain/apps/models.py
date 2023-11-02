@@ -6,10 +6,18 @@ from pydantic import BaseModel, Field
 from repositories import Document
 
 
+class ClickHouseRemoteConnectionCreds(BaseModel):
+    host: str
+    port: str
+    username: str
+    password: str
+
+
 class ClickHouseCredential(BaseModel):
     username: str
     password: str
     databasename: str
+    remote_connection: Optional[ClickHouseRemoteConnectionCreds]
 
 
 class OrgAccess(BaseModel):
