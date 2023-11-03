@@ -1,9 +1,12 @@
 from typing import List, Optional, Union
 
 from pydantic import BaseModel
-
 from domain.common.models import IntegrationProvider
-from domain.integrations.models import Credential, Integration, RelationalDatabaseType
+from domain.integrations.models import (
+    Credential,
+    Integration,
+    RelationalDatabaseType,
+)
 from rest.dtos.datasources import DataSourceResponse
 
 from .model_response import ModelResponse

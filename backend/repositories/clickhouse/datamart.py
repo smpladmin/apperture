@@ -1,14 +1,14 @@
+import os
 import re
 import logging
-from datetime import datetime
-
 from fastapi import Depends
-
+from datetime import datetime
 from clickhouse import Clickhouse
+
+from repositories.sql.mssql import MsSql
+from repositories.clickhouse.base import EventsBase
 from domain.apps.models import ClickHouseCredential
 from domain.integrations.models import MsSQLCredential
-from repositories.clickhouse.base import EventsBase
-from repositories.sql.mssql import MsSql
 
 
 class DataMartRepo(EventsBase):
@@ -21,6 +21,7 @@ class DataMartRepo(EventsBase):
         self.DUMMY_COLUMN = "dummy_column_for_orderby"
         self.logger = logging.getLogger(name=__name__)
         self.mssql_client = mssql_client
+        self.chunk_size = int(os.getenv("CLICKHOUSE_INSERT_CHUNK_SIZE", 10000))
 
     def cleanse_query_string(self, query_string: str) -> str:
         query_string = re.sub(r"--.*\n+", " ", query_string)
@@ -89,9 +90,6 @@ class DataMartRepo(EventsBase):
             username=clickhouse_credential.username,
             password=clickhouse_credential.password,
         )
-        data_to_insert = self.mssql_client.connect_and_execute_query(
-            query=query, credential=db_creds
-        )
         mssql_clickhouse_datatype_map = {
             1: "String",
             2: "Binary",
@@ -99,15 +97,23 @@ class DataMartRepo(EventsBase):
             4: "DateTime",
             5: "Int32",
         }
+
+        connection = self.mssql_client.get_connection(
+            host=db_creds.server,
+            username=db_creds.username,
+            password=db_creds.password,
+        )
+        cursor = connection.cursor()
+        cursor.execute(query)
+        column_names = [i[0] for i in cursor.description]
         column_types = [
-            mssql_clickhouse_datatype_map[c_type]
-            for c_type in data_to_insert.column_types
+            mssql_clickhouse_datatype_map[desc[1]] for desc in cursor.description
         ]
 
         # Build the CREATE TABLE query
         create_table_query = f"CREATE TABLE IF NOT EXISTS {clickhouse_credential.databasename}.{table_name} ("
 
-        for name, data_type in zip(data_to_insert.column_names, column_types):
+        for name, data_type in zip(column_names, column_types):
             create_table_query += f"{name} {data_type}, "
 
         create_table_query = (
@@ -123,29 +129,39 @@ class DataMartRepo(EventsBase):
             self.logger.info(
                 f"Created a clickhouse table {table_name} in {clickhouse_credential.databasename} database for user {clickhouse_credential.username}"
             )
+        else:
+            self.logger.info("Create table query failed")
+            return False
 
-        # Build the INSERT INTO query
-        insert_query = (
-            f"INSERT INTO {clickhouse_credential.databasename}.{table_name} VALUES"
-        )
+        while True:
+            rows = cursor.fetchmany(size=self.chunk_size)
+            if not rows:
+                break
 
-        for row in data_to_insert.result_set:
-            formatted_values = ", ".join(map(self.format_datetime, row))
-            insert_query += f" ({formatted_values}),"
+            # Build the INSERT INTO query
+            insert_query = (
+                f"INSERT INTO {clickhouse_credential.databasename}.{table_name} VALUES"
+            )
+            for row in rows:
+                formatted_values = ", ".join(map(self.format_datetime, row))
+                insert_query += f" ({formatted_values}),"
 
-        insert_query = insert_query.rstrip(",")
-        self.logger.info(f"Executing insert into table query: {insert_query}")
-        insert_status = self.execute_query_for_restricted_client(
-            query=insert_query,
-            username=clickhouse_credential.username,
-            password=clickhouse_credential.password,
-        )
-        if insert_status:
-            self.logger.info(f"Successfully inserted data into the table")
+            insert_query = insert_query.rstrip(",")
+            self.logger.info(
+                f"Executing insert into table query for {self.chunk_size} rows: {insert_query}"
+            )
+            insert_status = self.execute_query_for_restricted_client(
+                query=insert_query,
+                username=clickhouse_credential.username,
+                password=clickhouse_credential.password,
+            )
+            if insert_status:
+                self.logger.info(f"Successfully inserted data into the table")
+            else:
+                self.logger.info("Insert into table query failed")
+                return False
 
-        if create_status and insert_status:
-            return True
-        return False
+        return True
 
     def drop_table(self, table_name: str, clickhouse_credential: ClickHouseCredential):
         query = (

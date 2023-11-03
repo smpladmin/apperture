@@ -2421,6 +2421,7 @@ def integration_response():
             "type": "API_KEY",
             "mysql_credential": None,
             "mssql_credential": None,
+            "cdc_credential": None,
             "csv_credential": None,
             "api_base_url": None,
         },

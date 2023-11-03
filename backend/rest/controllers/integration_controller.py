@@ -2,7 +2,6 @@ import asyncio
 import logging
 from typing import Union
 
-from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
 from data_processor_queue.service import DPQueueService

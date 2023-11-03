@@ -31,6 +31,7 @@ from domain.spreadsheets.models import DatabaseClient
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apidata import CreateAPIDataDto
 from rest.dtos.apperture_users import PrivateUserResponse, ResetPasswordDto
+from rest.dtos.cdc import CdcCredentials
 from rest.dtos.clickstream_event_properties import (
     ClickStreamEventPropertiesDto,
     ClickStreamEventPropertiesResponse,
@@ -467,3 +468,24 @@ async def get_datasource_events(
     ds_service: DataSourceService = Depends(),
 ):
     return await ds_service.get_datasources_for_provider(provider=provider)
+
+
+@router.get("/cdc", response_model=List[CdcCredentials])
+async def get_cdc_credentials(
+    integration_service: IntegrationService = Depends(),
+    app_service: AppService = Depends(),
+):
+    integrations = await integration_service.get_integrations_with_cdc()
+    response = []
+    for integration in integrations:
+        app = await app_service.get_app(id=integration.app_id)
+        response.append(
+            CdcCredentials(
+                id=integration.id,
+                app_id=integration.app_id,
+                provider=integration.provider,
+                cdc_credential=integration.credential.cdc_credential,
+                clickhouse_credential=app.clickhouse_credential,
+            )
+        )
+    return response
