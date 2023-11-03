@@ -31,6 +31,7 @@ from domain.spreadsheets.models import DatabaseClient
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apidata import CreateAPIDataDto
 from rest.dtos.apperture_users import PrivateUserResponse, ResetPasswordDto
+from rest.dtos.cdc import CdcCredentials
 from rest.dtos.clickstream_event_properties import (
     ClickStreamEventPropertiesDto,
     ClickStreamEventPropertiesResponse,
@@ -41,7 +42,6 @@ from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.event_properties import EventPropertiesDto, EventPropertiesResponse
 from rest.dtos.events import CreateEventDto
 from rest.dtos.funnels import FunnelResponse, FunnelTrendResponse, TransientFunnelDto
-from rest.dtos.integrations import IntegrationResponseWithCredentials
 from rest.dtos.metrics import (
     ComputedMetricStepResponse,
     MetricsComputeDto,
@@ -470,10 +470,8 @@ async def get_datasource_events(
     return await ds_service.get_datasources_for_provider(provider=provider)
 
 
-@router.get(
-    "/integrations/cdc", response_model=List[IntegrationResponseWithCredentials]
-)
-async def get_integrations_with_cdc(
+@router.get("/cdc", response_model=List[CdcCredentials])
+async def get_cdc_credentials(
     integration_service: IntegrationService = Depends(),
     app_service: AppService = Depends(),
 ):
@@ -482,7 +480,7 @@ async def get_integrations_with_cdc(
     for integration in integrations:
         app = await app_service.get_app(id=integration.app_id)
         response.append(
-            IntegrationResponseWithCredentials(
+            CdcCredentials(
                 id=integration.id,
                 app_id=integration.app_id,
                 provider=integration.provider,

@@ -85,7 +85,7 @@ class CdcCredential(BaseModel):
     password: str
     server_type: ServerType
     database: str
-    tables: str
+    tables: List[str]
 
     class Config:
         allow_population_by_field_name = True

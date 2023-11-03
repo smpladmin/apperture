@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 from pydantic import BaseModel
 
@@ -21,13 +22,13 @@ class CdcCredential(BaseModel):
     password: str
     server_type: IntegrationProvider
     database: str
-    tables: str
+    tables: List[str]
 
     class Config:
         allow_population_by_field_name = True
 
 
-class Integration(BaseModel):
+class CdcIntegration(BaseModel):
     id: str
     appId: str
     provider: IntegrationProvider

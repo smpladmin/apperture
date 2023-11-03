@@ -1,5 +1,5 @@
 from apperture.backend_action import get
-from models.models import Integration
+from models.models import CdcIntegration
 
 
 class CDCIntegrations:
@@ -10,19 +10,17 @@ class CDCIntegrations:
 
     def get_cdc_integrations(self):
         self.integrations = [
-            Integration(**integration)
-            for integration in get(path="/private/integrations/cdc").json()
+            CdcIntegration(**cdc_integration)
+            for cdc_integration in get(path="/private/cdc").json()
         ]
 
         for integration in self.integrations:
             cdc_cred = integration.cdcCredential
-            tables = cdc_cred.tables.split(",")
-            tables = [table.strip() for table in tables]
-            for table in tables:
-                topic = f"cdc_{integration.id}.{cdc_cred.database}.{table}"
+            for table in cdc_cred.tables:
+                topic = f"cdc_{integration.id}.{cdc_cred.database}.dbo.{table}"
                 self.topics.append(topic)
                 self.cdc_buckets[topic] = {
                     "data": [],
                     "ch_db": integration.clickhouseCredential.databasename,
-                    "ch_table": f"cdc_{table.replace('.', '_')}",
+                    "ch_table": f"cdc_{table}",
                 }

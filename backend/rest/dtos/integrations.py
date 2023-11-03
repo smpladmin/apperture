@@ -1,15 +1,11 @@
 from typing import List, Optional, Union
 
 from pydantic import BaseModel
-from beanie import PydanticObjectId
-
-from domain.apps.models import ClickHouseCredential
 from domain.common.models import IntegrationProvider
 from domain.integrations.models import (
     Credential,
     Integration,
     RelationalDatabaseType,
-    CdcCredential,
 )
 from rest.dtos.datasources import DataSourceResponse
 
@@ -22,17 +18,6 @@ class IntegrationResponse(Integration, ModelResponse):
 
     class Config:
         orm_mode = True
-
-
-class IntegrationResponseWithCredentials(ModelResponse):
-    id: PydanticObjectId
-    app_id: PydanticObjectId
-    provider: IntegrationProvider
-    cdc_credential: CdcCredential
-    clickhouse_credential: ClickHouseCredential
-
-    class Config:
-        allow_population_by_field_name = True
 
 
 class DatabaseSSHCredentialDto(BaseModel):
