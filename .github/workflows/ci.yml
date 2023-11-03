@@ -33,6 +33,8 @@ jobs:
               - 'events_consumer/**'
             airflow:
               - 'airflow/**'
+            cdc_consumer:
+              - 'cdc_consumer/**'
 
       - name: Set short commit-sha
         id: commit
@@ -132,6 +134,18 @@ jobs:
           IMAGE_TAG: latest
         run: |
           cd events_consumer
+          docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+
+      - name: Build and Push CDC Consumer
+        if: steps.filter.outputs.cdc_consumer == 'true'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: cdc_consumer
+          IMAGE_TAG: latest
+        run: |
+          cd cdc_consumer
           docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
