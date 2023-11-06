@@ -8,7 +8,7 @@ from repositories import Document
 
 class ClickHouseRemoteConnectionCreds(BaseModel):
     host: str
-    port: str
+    port: int
     username: str
     password: str
 
@@ -17,7 +17,6 @@ class ClickHouseCredential(BaseModel):
     username: str
     password: str
     databasename: str
-    remote_connection: Optional[ClickHouseRemoteConnectionCreds]
 
 
 class OrgAccess(BaseModel):
@@ -33,6 +32,7 @@ class App(Document):
     org_access: bool = False
     enabled: bool = True
     clickhouse_credential: Optional[ClickHouseCredential] = Field(hidden=True)
+    remote_connection: Optional[ClickHouseRemoteConnectionCreds] = Field(hidden=True)
 
     class Settings:
         name = "apps"

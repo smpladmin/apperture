@@ -104,7 +104,7 @@ class IntegrationService:
 
         if provider == IntegrationProvider.SAMPLE:
             self.clickhouse_role.create_sample_tables(
-                [tableName], app.clickhouse_credential.databasename
+                [tableName], app.clickhouse_credential.databasename, app_id=str(app.id)
             )
 
         credential = Credential(

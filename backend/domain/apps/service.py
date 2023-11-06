@@ -43,11 +43,14 @@ class AppService:
         self,
         app_name: str,
         username: str,
+        app_id: str,
     ):
         database_name = self.parse_app_name_to_db_name(app_name=app_name)
-        self.clickhouse_role.create_database_for_app(database_name=database_name)
+        self.clickhouse_role.create_database_for_app(
+            database_name=database_name, app_id=app_id
+        )
         self.clickhouse_role.grant_permission_to_database(
-            database_name=database_name, username=username
+            database_name=database_name, username=username, app_id=app_id
         )
 
     async def create_clickhouse_user(
@@ -57,10 +60,14 @@ class AppService:
         password = self.string_utils.generate_random_value()
         database_name = self.parse_app_name_to_db_name(app_name=app_name)
 
-        self.clickhouse_role.create_user(username=username, password=password)
-        self.clickhouse_role.grant_select_permission_to_user(username=username)
+        await self.clickhouse_role.create_user(
+            username=username, password=password, app_id=str(id)
+        )
+        await self.clickhouse_role.grant_select_permission_to_user(
+            username=username, app_id=str(id)
+        )
 
-        self.create_app_database(app_name=app_name, username=username)
+        self.create_app_database(app_name=app_name, username=username, app_id=str(id))
 
         creds = ClickHouseCredential(
             username=username, password=password, databasename=database_name

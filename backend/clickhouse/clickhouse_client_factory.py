@@ -1,4 +1,5 @@
 import logging
+from typing import Union
 
 import clickhouse_connect
 from beanie import PydanticObjectId
@@ -10,30 +11,60 @@ settings = apperture_settings()
 
 
 class ClickHouseClient:
-    def __init__(self, app_id, host, port, user, password):
-        self.app_id = app_id
+    def __init__(self, app: App):
+        self.app = app
 
         self.connection = clickhouse_connect.get_client(
-            host=host,
-            username=user,
-            password=password,
+            host=app.remote_connection.host if app.remote_connection else "clickhouse",
+            port=app.remote_connection.port if app.remote_connection else 0,
+            username=app.remote_connection.username if app.remote_connection else None,
+            password=app.remote_connection.password if app.remote_connection else "",
             allow_experimental_object_type=1,
             query_limit=0,
             max_execution_time=settings.clickhouse_max_execution_time_seconds,
-            port=port,
         )
 
-    def query(self, query, params={}, settings={}):
-        return self.connection.query(query=query, parameters=params, settings=settings)
+        self.admin_connection = (
+            self.connection
+            if app.remote_connection
+            else clickhouse_connect.get_client(
+                host=app.remote_connection.host
+                if app.remote_connection
+                else "clickhouse",
+                port=app.remote_connection.port if app.remote_connection else 0,
+                username=app.remote_connection.username
+                if app.remote_connection
+                else None,
+                password=app.remote_connection.password
+                if app.remote_connection
+                else "",
+                allow_experimental_object_type=1,
+                query_limit=0,
+                max_execution_time=settings.clickhouse_max_execution_time_seconds,
+            )
+        )
+        self.restricted_connection = clickhouse_connect.get_client(
+            host=app.remote_connection.host if app.remote_connection else "clickhouse",
+            port=app.remote_connection.port if app.remote_connection else 0,
+            username=app.clickhouse_credential.username
+            if app.clickhouse_credential and app.clickhouse_credential.username
+            else None,
+            password=app.clickhouse_credential.password
+            if app.clickhouse_credential and app.clickhouse_credential.password
+            else "",
+            allow_experimental_object_type=1,
+            query_limit=0,
+            max_execution_time=settings.clickhouse_max_execution_time_seconds,
+        )
 
     def close(self):
         self.connection.close()
+        self.admin_connection.close()
+        self.restricted_connection.close()
 
 
 class ClickHouseClientFactory:
     __clients = {}
-    __restricted_clients = {}
-    __credentials = {}
 
     def __init__(self):
         if ClickHouseClientFactory.__clients:
@@ -49,75 +80,16 @@ class ClickHouseClientFactory:
         logging.info(ClickHouseClientFactory.__clients)
 
     @staticmethod
-    async def get_app_connection_creds(app_id: str):
-        results = await App.find(App.id == PydanticObjectId(app_id)).to_list()
-        credentials = (
-            results[0].clickhouse_credential
-            if results
-            and results[0].clickhouse_credential
-            and results[0].clickhouse_credential
-            else None
-        )
-        if credentials and not credentials.remote_connection:
-            ClickHouseClientFactory.__credentials[app_id] = credentials
-            ClickHouseClientFactory.__clients[
-                app_id
-            ] = ClickHouseClientFactory.__clients["default"]
-        elif not credentials:
-            logging.info("Using default credentials")
-            ClickHouseClientFactory.__credentials[app_id] = "default"
-            ClickHouseClientFactory.__clients[
-                app_id
-            ] = ClickHouseClientFactory.__clients["default"]
-        else:
-            ClickHouseClientFactory.__credentials[app_id] = credentials
-
-            print(ClickHouseClientFactory.__credentials)
-
-    @staticmethod
     async def get_client(app_id) -> ClickHouseClient:
-        if app_id not in ClickHouseClientFactory.__credentials:
-            await ClickHouseClientFactory.get_app_connection_creds(app_id)
-
         if app_id not in ClickHouseClientFactory.__clients:
             logging.info(f"NEW client created:  % {app_id}")
-            credentials = ClickHouseClientFactory.__credentials[
-                app_id
-            ].remote_connection
+            apps = await App.find(App.id == PydanticObjectId(app_id)).to_list()
+            logging.info(f"App: {app}")
+            app = apps[0]
 
-            ClickHouseClientFactory.__clients[app_id] = ClickHouseClient(
-                app_id=app_id,
-                host=credentials.host,
-                port=credentials.port,
-                user=credentials.username,
-                password=credentials.password,
-            )
+            ClickHouseClientFactory.__clients[app_id] = ClickHouseClient(app)
         logging.info(f"Returning client for:  % {app_id}")
         return ClickHouseClientFactory.__clients[app_id]
-
-    @staticmethod
-    async def get_restricted_client(app_id) -> ClickHouseClient:
-        print(ClickHouseClientFactory.__credentials)
-        if app_id not in ClickHouseClientFactory.__credentials:
-            await ClickHouseClientFactory.get_app_connection_creds(app_id)
-
-        if app_id not in ClickHouseClientFactory.__restricted_clients:
-            logging.info(f"NEW restricted client created:  % {app_id}")
-            credentials = ClickHouseClientFactory.__credentials[app_id]
-
-            ClickHouseClientFactory.__restricted_clients[app_id] = ClickHouseClient(
-                app_id=app_id,
-                host=credentials.remote_connection.host
-                if credentials.remote_connection
-                else "clickhouse",
-                port=credentials.remote_connection.port
-                if credentials.remote_connection
-                else 8123,
-                user=credentials.username,
-                password=credentials.password,
-            )
-        logging.info(f"Returning restricted client for:  % {app_id}")
-        return ClickHouseClientFactory.__restricted_clients[app_id]
 
     @staticmethod
     def close_all_client_connection():

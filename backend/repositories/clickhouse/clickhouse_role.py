@@ -1,47 +1,58 @@
 import logging
 from typing import List
+
 from fastapi import Depends
 
 from clickhouse.clickhouse import Clickhouse
+from clickhouse.clickhouse_client_factory import ClickHouseClientFactory
 
 
 class ClickHouseRole:
-    def __init__(self, clickhouse: Clickhouse = Depends()):
-        self.clickhouse = clickhouse
-
-    def create_user(self, username: str, password: str):
+    async def create_user(self, username: str, password: str, app_id: str):
         query = (
             f"CREATE USER {username} IDENTIFIED WITH plaintext_password BY '{password}'"
         )
-        return self.clickhouse.admin.query(query=query)
+        client = await ClickHouseClientFactory.get_client(app_id)
 
-    def grant_select_permission_to_user(self, username: str):
+        return client.admin_connection.query(query=query)
+
+    async def grant_select_permission_to_user(self, username: str, app_id: str):
         granted_tables = ["events", "clickstream"]
+        client = await ClickHouseClientFactory.get_client(app_id)
         for table in granted_tables:
             query = f"GRANT SELECT ON {table} TO {username};"
-            self.clickhouse.admin.query(query=query)
+            client.admin_connection.query(query=query)
 
-    def create_row_policy(self, datasource_id: str, username: str):
+    async def create_row_policy(self, datasource_id: str, username: str, app_id: str):
         query = f"CREATE ROW POLICY pol{datasource_id} ON default.events, default.clickstream USING datasource_id='{datasource_id}' TO {username}"
-
+        client = await ClickHouseClientFactory.get_client(app_id)
         try:
-            return self.clickhouse.admin.query(query=query)
+            return client.admin_connection.query(query=query)
         except Exception as e:
-            self.clickhouse.admin.query(
+            client.admin_connection.query(
                 query=f"DROP POLICY IF EXISTS pol{datasource_id} ON default.events, default.clickstream"
             )
-            return self.clickhouse.admin.query(query=query)
+            return client.admin_connection.query(query=query)
 
-    def grant_permission_to_database(self, database_name: str, username: str):
+    async def grant_permission_to_database(
+        self, database_name: str, username: str, app_id: str
+    ):
         query = f"GRANT SHOW, SELECT, INSERT, ALTER, CREATE TABLE, CREATE VIEW, DROP TABLE, DROP VIEW, UNDROP TABLE, TRUNCATE ON {database_name}.* TO {username};"
-        return self.clickhouse.admin.query(query=query)
+        client = await ClickHouseClientFactory.get_client(app_id)
 
-    def create_database_for_app(self, database_name: str):
+        return client.admin_connection.query(query=query)
+
+    async def create_database_for_app(self, database_name: str, app_id: str):
         query = f"CREATE DATABASE {database_name}"
-        return self.clickhouse.admin.query(query=query)
+        client = await ClickHouseClientFactory.get_client(app_id)
+        return client.admin_connection.query(query=query)
 
-    def create_sample_tables(self, table_names: List[str], database_name: str):
+    async def create_sample_tables(
+        self, table_names: List[str], database_name: str, app_id: str
+    ):
+        client = await ClickHouseClientFactory.get_client(app_id)
+
         for table in table_names:
             create_query = f"CREATE TABLE {database_name}.{table} ENGINE = MergeTree() ORDER BY tuple() AS SELECT * FROM default.{table}"
             logging.info(f"sample table query: {create_query}")
-            self.clickhouse.admin.query(query=create_query)
+            client.admin_connection.query(query=create_query)

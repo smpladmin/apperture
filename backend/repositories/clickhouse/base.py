@@ -75,7 +75,7 @@ class EventsBase(ABC):
         logging.info(f"Parameters: {parameters}")
         try:
             client = await ClickHouseClientFactory.get_client(app_id)
-            query_result = client.query(query=query, parameters=parameters)
+            query_result = client.connection.query(query=query, parameters=parameters)
             return query_result.result_set
         except Exception as e:
             logging.info(repr(e))
@@ -94,10 +94,10 @@ class EventsBase(ABC):
         try:
             params = parameters if parameters else {}
             settings = settings if settings else {}
-            client = await ClickHouseClientFactory.get_restricted_client(app_id)
+            client = await ClickHouseClientFactory.get_client(app_id)
             if client:
-                query_result = client.query(
-                    query=query, params=params, settings=settings
+                query_result = client.connection.query(
+                    query=query, parameters=params, settings=settings
                 )
                 return query_result
             else:
