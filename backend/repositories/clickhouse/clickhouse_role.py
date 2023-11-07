@@ -13,7 +13,6 @@ class ClickHouseRole:
             f"CREATE USER {username} IDENTIFIED WITH sha256_password BY '{password}'"
         )
         client = await ClickHouseClientFactory.get_client(app_id)
-        logging.info(f"###client {client.app}")
         return client.admin_query(query=query)
 
     async def grant_select_permission_to_user(self, username: str, app_id: str):

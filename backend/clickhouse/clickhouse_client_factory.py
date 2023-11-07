@@ -95,23 +95,19 @@ class ClickHouseClientFactory:
                 max_execution_time=apperture_settings.clickhouse_max_execution_time_seconds,
             )
         }
-        logging.info(ClickHouseClientFactory.__clients)
 
     @staticmethod
     async def get_client(app_id) -> ClickHouseClient:
         if app_id not in ClickHouseClientFactory.__clients:
-            logging.info(f"NEW client created:  % {app_id}")
             apps = await App.find(App.id == PydanticObjectId(app_id)).to_list()
-            logging.info(apps)
             app = apps[0]
 
             ClickHouseClientFactory.__clients[app_id] = ClickHouseClient(app)
-        logging.info(f"Returning client for:  % {app_id}")
         return ClickHouseClientFactory.__clients[app_id]
 
     @staticmethod
     def close_all_client_connection():
         for app_id, client in (ClickHouseClientFactory.__clients).items():
-            print(f"Closing client connection for: % {app_id}")
+            logging.info(f"Closing client connection for: % {app_id}")
             client.close()
-        print("All connections closed")
+        logging.info("All connections closed")
