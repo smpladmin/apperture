@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.8'
 services:
   airflow-scheduler:
     image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/airflow:latest
@@ -221,6 +221,23 @@ services:
         limits:
           cpus: '1.0'
           memory: 2048M
+  cdc_consumer:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/cdc_consumer:latest
+    networks:
+     - net
+    secrets:
+     -
+      source: cdc_consumer.env
+      target: /code/.env
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-events-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: cdc_consumer
+    deploy:
+      labels:
+        swarmpit.service.deployment.autoredeploy: 'true'
   clickhouse:
     image: clickhouse/clickhouse-server:latest
     ports:
@@ -237,6 +254,26 @@ services:
     logging:
       driver: json-file
     deploy:
+      placement:
+        constraints:
+         - node.hostname == worker3ch
+  connect:
+    image: debezium/connect:2.4
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      CONFIG_STORAGE_TOPIC: my_connect_configs
+      GROUP_ID: '1'
+      OFFSET_STORAGE_TOPIC: my_connect_offsets
+      STATUS_STORAGE_TOPIC: my_connect_statuses
+    ports:
+     - 8083:8083
+    networks:
+     - net
+    logging:
+      driver: json-file
+    deploy:
+      labels:
+        swarmpit.service.deployment.autoredeploy: 'true'
       placement:
         constraints:
          - node.hostname == worker3ch
@@ -392,36 +429,6 @@ services:
       placement:
         constraints:
          - node.hostname == worker1
-  connect:
-    image: quay.io/debezium/connect:2.4
-    ports:
-      - 8083:8083
-    networks:
-      - net
-    logging:
-      driver: json-file
-    deploy:
-      labels:
-        swarmpit.service.deployment.autoredeploy: 'true'
-    environment:
-      - BOOTSTRAP_SERVERS=kafka:9092
-      - GROUP_ID=1
-      - CONFIG_STORAGE_TOPIC=my_connect_configs
-      - OFFSET_STORAGE_TOPIC=my_connect_offsets
-      - STATUS_STORAGE_TOPIC=my_connect_statuses
-  cdc_consumer:
-    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/cdc_consumer:latest
-    networks:
-      - net
-    logging:
-      driver: awslogs
-      options:
-        awslogs-group: apperture-staging-events-log-group
-        awslogs-region: ap-south-1
-        awslogs-stream: cdc_consumer
-    deploy:
-      labels:
-        swarmpit.service.deployment.autoredeploy: 'true'
   metabase:
     image: bjeanes/metabase-clickhouse:latest
     networks:
@@ -547,6 +554,8 @@ secrets:
   alertmanager.env:
     external: true
   backend.env:
+    external: true
+  cdc_consumer.env:
     external: true
   data_processor1.env:
     external: true
