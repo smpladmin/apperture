@@ -62,7 +62,7 @@ class AppService:
         self, id: PydanticObjectId, app_name: str
     ) -> ClickHouseCredential:
         username = self.string_utils.generate_random_value(16) + str(id)
-        password = self.string_utils.generate_random_value()
+        password = "@" + self.string_utils.generate_random_value()
         database_name = self.parse_app_name_to_db_name(app_name=app_name)
 
         await self.clickhouse_role.create_user(

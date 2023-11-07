@@ -10,7 +10,7 @@ from clickhouse.clickhouse_client_factory import ClickHouseClientFactory
 class ClickHouseRole:
     async def create_user(self, username: str, password: str, app_id: str):
         query = (
-            f"CREATE USER {username} IDENTIFIED WITH sha256_password BY '@{password}'"
+            f"CREATE USER {username} IDENTIFIED WITH sha256_password BY '{password}'"
         )
         client = await ClickHouseClientFactory.get_client(app_id)
         logging.info(f"###client {client.app}")

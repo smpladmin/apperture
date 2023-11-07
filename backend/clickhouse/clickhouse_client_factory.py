@@ -38,6 +38,7 @@ class ClickHouseClient:
                 max_execution_time=apperture_settings.clickhouse_max_execution_time_seconds,
             )
         )
+        self.restricted_connection = None
 
     def resticted_client_query(self, query, parameters={}, settings={}):
         if not self.restricted_connection:
@@ -64,12 +65,12 @@ class ClickHouseClient:
             query=query, parameters=parameters, settings=settings
         )
 
-    def admin_query(self, query, parameters, settings=None):
+    def admin_query(self, query, parameters={}, settings={}):
         return self.admin_connection.query(
             query=query, parameters=parameters, settings=settings
         )
 
-    def query(self, query, parameters, settings=None):
+    def query(self, query, parameters={}, settings={}):
         return self.connection.query(
             query=query, parameters=parameters, settings=settings
         )
