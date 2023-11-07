@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import re
-from typing import List, Union
+from typing import List, Optional, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
@@ -12,7 +12,12 @@ from utils.mail import GENERIC_EMAIL_DOMAINS
 
 from ..apperture_users.models import AppertureUser
 from ..common.random_string_utils import StringUtils
-from .models import App, ClickHouseCredential, OrgAccess
+from .models import (
+    App,
+    ClickHouseCredential,
+    ClickHouseRemoteConnectionCreds,
+    OrgAccess,
+)
 
 
 class AppService:
@@ -94,8 +99,9 @@ class AppService:
         self,
         name: str,
         user: AppertureUser,
+        remote_connection: ClickHouseRemoteConnectionCreds = None,
     ) -> App:
-        app = App(name=name, user_id=user.id)
+        app = App(name=name, user_id=user.id, remote_connection=remote_connection)
         app.domain = self.parse_domain_from_email(email=user.email)
         await app.insert()
         creds = await self.create_clickhouse_user(id=app.id, app_name=name)

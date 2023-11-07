@@ -48,7 +48,7 @@ async def create_app(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Please try creating an app with a different name.",
         )
-    app = await app_service.create_app(app_dto.name, user)
+    app = await app_service.create_app(app_dto.name, user, app_dto.remote_connection)
     app_count = await app_service.get_app_count(user.id)
     if app_count == 1:
         for table in settings.base_sample_tables:

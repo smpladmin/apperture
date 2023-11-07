@@ -5,8 +5,7 @@ from typing import List, Union
 from beanie import PydanticObjectId
 from fastapi import Depends
 from pymysql import DatabaseError
-
-from clickhouse.clickhouse_client_factory import ClickHouseClientFactory
+ 
 from domain.apps.models import ClickHouseCredential
 from domain.integrations.models import MsSQLCredential, MySQLCredential
 from domain.spreadsheets.models import (
