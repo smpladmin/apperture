@@ -327,3 +327,8 @@ class IntegrationService:
             Integration.id == id,
         ).update({"$set": {"credential": credential}})
         return
+
+    async def get_integrations_with_cdc(self) -> List[Integration]:
+        return await Integration.find(
+            Integration.credential.cdc_credential != None
+        ).to_list()

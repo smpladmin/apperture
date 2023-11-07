@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  cdc_consumer:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/cdc_consumer:latest
+    networks:
+     - apperture_net
+    secrets:
+     -
+      source: cdc_consumer_1k_earliest.env
+      target: /code/.env
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: apperture-prod-events-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: cdc_consumer
+  connect:
+    image: debezium/connect:2.4
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      CONFIG_STORAGE_TOPIC: my_connect_configs
+      GROUP_ID: '1'
+      OFFSET_STORAGE_TOPIC: my_connect_offsets
+      STATUS_STORAGE_TOPIC: my_connect_statuses
+    ports:
+     - 8083:8083
+    networks:
+     - apperture_net
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: apperture-prod-events-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: connect
+networks:
+  apperture_net:
+    external: true
+secrets:
+  cdc_consumer_1k_earliest.env:
+    external: true

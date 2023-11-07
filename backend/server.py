@@ -23,6 +23,7 @@ from rest.controllers import (
     app_controller,
     apperture_user_controller,
     auth_controller,
+    cdc_controller,
     clickstream_controller,
     connection_controller,
     data_processor_controller,
@@ -110,6 +111,7 @@ app.include_router(datamart_controller.router)
 app.include_router(connection_controller.router)
 app.include_router(api_key_controller.router)
 app.include_router(google_sheet_controller.router)
+app.include_router(cdc_controller.router)
 
 
 @app.get("/sentry-debug")

@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "types": ["gas-types-detailed"],
+    "jsx": "react",
+    "esModuleInterop": true,
+    "lib": ["dom", "es2019"],
+    "downlevelIteration": true
+  }
+}

@@ -4,10 +4,10 @@ from datetime import timedelta, datetime
 from airflow.decorators import task, dag, task_group
 
 from store.api_data_saver import APIDataSaver
-from utils.utils import DATA_FETCH_DAYS_OFFSET
 from fetch.api_data_fetcher import APIDataFetcher
 from domain.datasource.service import DataSourceService
 from event_processors.api_data_processor import APIDataProcessor
+from utils.utils import DATA_FETCH_DAYS_OFFSET, AIRFLOW_INIT_DATE
 from domain.datasource.models import IntegrationProvider, DataSource, Credential
 
 datasource_service = DataSourceService()
@@ -72,7 +72,7 @@ def create_dag(datasource_id: str, num_days: int, created_date: datetime):
             created_date - timedelta(days=DATA_FETCH_DAYS_OFFSET),
             tz=pendulum.timezone("Asia/Kolkata"),
         ),
-        catchup=False,
+        catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=["api-daily-data-fetch"],
     )
     def api_data_loader(datasource_id: str, num_days: int):

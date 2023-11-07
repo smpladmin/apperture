@@ -86,6 +86,8 @@ from domain.spreadsheets.models import (
     SpreadsheetType,
     WorkBook,
 )
+from domain.google_sheet.models import SheetQuery, SheetReference
+
 from domain.users.models import UserDetails
 from rest.dtos.actions import ComputedActionResponse
 from rest.dtos.apperture_users import AppertureUserResponse
@@ -903,6 +905,53 @@ def spreadsheets_service():
     spreadsheets_service_mock.compute_vlookup.return_value = vlookup_future
 
     return spreadsheets_service_mock
+
+
+@pytest.fixture(scope="module")
+def sheet_query_data():
+    return {
+        "name": "test2",
+        "chats": [],
+        "query": "Select * from events LIMIT 500",
+        "spreadsheetId": "1wk7863jhstoPkL",
+        "sheetReference": {"sheet_name": "Sheet1", "row_index": 1, "column_index": 1},
+    }
+
+
+@pytest.fixture(scope="module")
+def google_sheet_service(apperture_user_response):
+    google_sheet_service_mock = mock.MagicMock()
+    SheetQuery.get_settings = mock.MagicMock()
+
+    google_sheet_query = SheetQuery(
+        name="Sheet1 A1:F50",
+        app_id=PydanticObjectId("63ca46feee94e38b81cda37a"),
+        user_id=PydanticObjectId("6374b74e9b36ecf7e0b4f9e4"),
+        query="Select * from events LIMIT 500",
+        spreadsheet_id="1wk7863jhstoPkL",
+        chats=[],
+        sheet_reference=SheetReference(
+            sheet_name="Sheet1", row_index=1, column_index=1
+        ),
+        enabled=True,
+    )
+
+    google_sheet_queries_future = asyncio.Future()
+    google_sheet_queries_future.set_result([google_sheet_query])
+
+    google_sheet_query_future = asyncio.Future()
+    google_sheet_query_future.set_result(google_sheet_query)
+
+    google_sheet_service_mock.build_sheet_query.return_value = google_sheet_query
+    google_sheet_service_mock.get_sheet_queries_by_spreadsheet_id.return_value = (
+        google_sheet_queries_future
+    )
+    google_sheet_service_mock.add_sheet_query.return_value = google_sheet_query_future
+    google_sheet_service_mock.update_sheet_query.return_value = (
+        google_sheet_query_future
+    )
+
+    return google_sheet_service_mock
 
 
 @pytest.fixture(scope="module")
@@ -2372,6 +2421,7 @@ def integration_response():
             "type": "API_KEY",
             "mysql_credential": None,
             "mssql_credential": None,
+            "cdc_credential": None,
             "csv_credential": None,
             "api_base_url": None,
         },
