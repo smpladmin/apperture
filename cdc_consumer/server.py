@@ -75,7 +75,7 @@ async def process_kafka_messages() -> None:
                     values["payload"].get("after")
                 )
 
-        if total_records > 1:
+        if total_records > MAX_RECORDS:
             logging.info(
                 f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS}"
             )
