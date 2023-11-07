@@ -23,4 +23,5 @@ class CDCIntegrations:
                     "data": [],
                     "ch_db": integration.clickhouseCredential.databasename,
                     "ch_table": f"cdc_{table}",
+                    "data_types": [],
                 }

@@ -43,7 +43,6 @@ async def create_cdc_connector(
             "snapshot.mode": "initial",
         },
     }
-    print(data)
     return requests.post(
         url=KAFKA_CONNECTOR_BASE_URL, json=data, headers=headers
     ).json()
