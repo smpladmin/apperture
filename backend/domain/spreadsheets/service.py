@@ -5,7 +5,7 @@ from typing import List, Union
 from beanie import PydanticObjectId
 from fastapi import Depends
 from pymysql import DatabaseError
- 
+
 from domain.apps.models import ClickHouseCredential
 from domain.integrations.models import MsSQLCredential, MySQLCredential
 from domain.spreadsheets.models import (
@@ -109,7 +109,6 @@ class SpreadsheetService:
                 else None,
                 parameters={},
             )
-            print(result)
             if not result:
                 raise DatabaseError("Query execution failed")
         elif client == DatabaseClient.MYSQL:

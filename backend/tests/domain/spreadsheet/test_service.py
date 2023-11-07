@@ -31,6 +31,7 @@ class TestSpreadsheetService:
         self.service = SpreadsheetService(
             spreadsheets=self.spreadsheet, parser=QueryParser()
         )
+
         self.query = """
         SELECT  event_name -- selecting event
         FROM  events
@@ -46,6 +47,10 @@ class TestSpreadsheetService:
             tuple(["test_event_4"]),
             tuple(["test_event_5"]),
         ]
+        resultMock = namedtuple("result", ["result_set", "column_names"])
+        self.spreadsheet.execute_query_for_app_restricted_clients = AsyncMock(
+            return_value=resultMock(self.result_set, self.column_names)
+        )
         QueryResult = namedtuple("query_result", ["result_set", "column_names"])
         self.spreadsheet.execute_query_for_restricted_client = MagicMock(
             return_value=QueryResult(
@@ -268,6 +273,7 @@ class TestSpreadsheetService:
         result = await self.service.get_transient_spreadsheets(
             query=self.query,
             credential=ClickHouseCredential(username="", password="", databasename=""),
+            app_id=self.workbook.app_id,
         )
         assert result == ComputedSpreadsheet(
             headers=self.column_names,

@@ -100,7 +100,7 @@ async def compute_transient_spreadsheets(
     try:
         datasource = await ds_service.get_datasource(dto.datasourceId)
         result = await compute_query_action.compute_query(
-            app_id=str(datasource.app_id), provider=datasource.provider, dto=dto
+            app_id=str(datasource.app_id), dto=dto
         )
         return compute_query_action.create_spreadsheet_with_custom_headers(
             column_names=result.headers, data=result.data, sql=result.sql

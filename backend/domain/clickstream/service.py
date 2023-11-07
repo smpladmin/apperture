@@ -7,6 +7,7 @@ from fastapi import Depends
 from starlette.concurrency import run_in_threadpool
 
 from clickhouse.clickhouse import Clickhouse
+from clickhouse.clickhouse_client_factory import ClickHouseClientFactory
 from domain.clickstream.models import (
     ClickstreamData,
     ClickstreamResult,
@@ -78,11 +79,7 @@ class ClickstreamService:
             properties=properties,
         )
 
-    async def update_events(
-        self,
-        datasource_id: str,
-        events: List[Dict],
-    ):
+    async def update_events(self, datasource_id: str, events: List[Dict], app_id: str):
         clickstream_data = [
             self.build_clickstream_data(
                 datasource_id=datasource_id,
@@ -93,8 +90,9 @@ class ClickstreamService:
             )
             for event in events
         ]
+        client = await ClickHouseClientFactory.get_client(app_id)
         try:
-            self.clickhouse.insert(
+            client.connection.insert(
                 self.table,
                 clickstream_data,
                 column_names=self.columns,
@@ -104,7 +102,7 @@ class ClickstreamService:
             logging.error(e)
             logging.info("Error inserting")
             logging.info(clickstream_data)
-            self.clickhouse.insert(
+            client.connection.insert(
                 self.error_table,
                 [
                     (

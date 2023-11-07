@@ -94,12 +94,10 @@ class DataSourceService:
         return datasource
 
     async def create_row_policy_for_username(
-        self,
-        datasource_id: str,
-        username: str,
+        self, datasource_id: str, username: str, app_id: str
     ):
         await self.clickhouse_role.create_row_policy(
-            datasource_id=datasource_id, username=username
+            datasource_id=datasource_id, username=username, app_id=app_id
         )
 
     async def create_user_policy_for_all_datasources(
@@ -107,8 +105,7 @@ class DataSourceService:
     ):
         for ds in datasources:
             await self.create_row_policy_for_username(
-                datasource_id=ds.id,
-                username=username,
+                datasource_id=ds.id, username=username, app_id=str(ds.app_id)
             )
 
     async def create_row_policy_for_datasources_by_app(self, app: App, username: str):

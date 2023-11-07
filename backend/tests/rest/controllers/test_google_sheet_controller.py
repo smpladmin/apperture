@@ -1,14 +1,10 @@
 import json
+from unittest.mock import ANY
+
 from ai.text_to_sql import text_to_sql
 from domain.apperture_users.models import AppertureUser
 from domain.apps.models import ClickHouseCredential
-
-from domain.spreadsheets.models import (
-    ColumnType,
-    DatabaseClient,
-    SpreadSheetColumn,
-)
-from unittest.mock import ANY
+from domain.spreadsheets.models import ColumnType, DatabaseClient, SpreadSheetColumn
 
 
 def test_compute_transient_result(
@@ -40,6 +36,7 @@ def test_compute_transient_result(
             ),
             "client": DatabaseClient.CLICKHOUSE,
             "query_id": None,
+            "app_id": "635ba034807ab86d8a2aadd9",
         }
     )
 

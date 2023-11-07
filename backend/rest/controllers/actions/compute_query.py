@@ -76,9 +76,9 @@ class ComputeQueryAction:
         else:
             return await self.get_clickhouse_credentials(datasource_id=datasource_id)
 
-    async def get_database_client(
-        self, provider: IntegrationProvider
-    ) -> DatabaseClient:
+    async def get_database_client(self, datasource_id: str) -> DatabaseClient:
+        datasource = await self.datasource_service.get_datasource(datasource_id)
+        provider = datasource.provider
         if provider == IntegrationProvider.MYSQL:
             return DatabaseClient.MYSQL
         elif provider == IntegrationProvider.MSSQL:
@@ -102,9 +102,7 @@ class ComputeQueryAction:
             client=client,
         )
 
-    async def compute_query(
-        self, app_id: str, provider: IntegrationProvider, dto: TransientSpreadsheetsDto
-    ):
+    async def compute_query(self, app_id: str, dto: TransientSpreadsheetsDto):
         try:
             logging.info(f"Query: {dto.query}")
             credential = await self.get_credentials(
@@ -113,7 +111,7 @@ class ComputeQueryAction:
             if dto.isDatamart:
                 client = DatabaseClient.CLICKHOUSE
             else:
-                client = await self.get_database_client(provider=provider)
+                client = await self.get_database_client(datasource_id=dto.datasourceId)
 
             if not dto.is_sql:
                 sql_query = text_to_sql(dto.ai_query)

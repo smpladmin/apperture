@@ -102,8 +102,8 @@ class ClickHouseClientFactory:
         if app_id not in ClickHouseClientFactory.__clients:
             logging.info(f"NEW client created:  % {app_id}")
             apps = await App.find(App.id == PydanticObjectId(app_id)).to_list()
+            logging.info(apps)
             app = apps[0]
-            logging.info(f"App: {app}")
 
             ClickHouseClientFactory.__clients[app_id] = ClickHouseClient(app)
         logging.info(f"Returning client for:  % {app_id}")

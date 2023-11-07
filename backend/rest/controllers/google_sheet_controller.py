@@ -1,19 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from clickhouse_connect.driver.exceptions import DatabaseError
+from fastapi import APIRouter, Depends, Header, HTTPException
+
+from ai.text_to_sql import text_to_sql
 from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
 from domain.spreadsheets.models import AIQuery, DatabaseClient
-
 from rest.controllers.actions.app_connections import AppConnectionsAction
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.google_sheet import (
     ComputedTransientSpreadsheetResponse,
     TransientGoogleSheetsDto,
 )
-
 from rest.middlewares import validate_api_key_and_user
-from clickhouse_connect.driver.exceptions import DatabaseError
-from ai.text_to_sql import text_to_sql
-
 
 router = APIRouter(
     tags=["google-sheets"],
@@ -73,6 +71,7 @@ async def compute_transient_spreadsheets(
             query=query,
             credential=clickhouse_credentials,
             client=DatabaseClient.CLICKHOUSE,
+            app_id=str(app.id),
         )
     except DatabaseError as e:
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")

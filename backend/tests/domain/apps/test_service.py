@@ -60,8 +60,8 @@ class TestAppService:
                 org_access=False,
             ),
         )
-        self.clickhouse_role.create_user = MagicMock()
-        self.clickhouse_role.grant_select_permission_to_user = MagicMock()
+        self.clickhouse_role.create_user = AsyncMock()
+        self.clickhouse_role.grant_select_permission_to_user = AsyncMock()
         self.clickhouse_role.create_database_for_app = MagicMock()
         self.clickhouse_role.grant_permission_to_database = MagicMock()
 
@@ -100,13 +100,15 @@ class TestAppService:
         assert not self.service.clickhouse_role.create_sample_tables.called
 
     def test_create_app_database(self):
-        self.service.create_app_database(app_name=self.app_name, username=self.username)
+        self.service.create_app_database(
+            app_name=self.app_name, username=self.username, app_id=""
+        )
 
         self.clickhouse_role.create_database_for_app.assert_called_with(
-            **{"database_name": "test_app"}
+            **{"database_name": "test_app", "app_id": ""}
         )
         self.clickhouse_role.grant_permission_to_database.assert_called_with(
-            **{"database_name": "test_app", "username": "test_user"}
+            **{"database_name": "test_app", "username": "test_user", "app_id": ""}
         )
 
     @pytest.mark.asyncio
@@ -122,23 +124,28 @@ class TestAppService:
 
         assert result == ClickHouseCredential(
             username="sdeweiwew33dssdsdds636a1c61d715ca6baae65611",
-            password="sdeweiwew33dssdsdds",
+            password="@sdeweiwew33dssdsdds",
             databasename="test_app",
         )
         App.find.assert_called_once()
         self.clickhouse_role.create_user.assert_called_with(
             **{
                 "username": "sdeweiwew33dssdsdds636a1c61d715ca6baae65611",
-                "password": "sdeweiwew33dssdsdds",
+                "password": "@sdeweiwew33dssdsdds",
+                "app_id": "636a1c61d715ca6baae65611",
             }
         )
         self.clickhouse_role.grant_select_permission_to_user.assert_called_with(
-            **{"username": "sdeweiwew33dssdsdds636a1c61d715ca6baae65611"}
+            **{
+                "username": "sdeweiwew33dssdsdds636a1c61d715ca6baae65611",
+                "app_id": "636a1c61d715ca6baae65611",
+            }
         )
         self.service.create_app_database.assert_called_once_with(
             **{
                 "app_name": "Test App",
                 "username": "sdeweiwew33dssdsdds636a1c61d715ca6baae65611",
+                "app_id": "636a1c61d715ca6baae65611",
             }
         )
 
