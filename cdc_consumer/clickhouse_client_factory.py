@@ -6,7 +6,6 @@ import clickhouse_connect
 from models.models import ClickHouseRemoteConnectionCred
 
 
-
 class ClickHouseClient:
     def __init__(
         self,

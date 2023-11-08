@@ -44,17 +44,17 @@ class AppService:
     async def get_app_count(self, user_id: PydanticObjectId):
         return await App.find(App.user_id == user_id).count()
 
-    def create_app_database(
+    async def create_app_database(
         self,
         app_name: str,
         username: str,
         app_id: str,
     ):
         database_name = self.parse_app_name_to_db_name(app_name=app_name)
-        self.clickhouse_role.create_database_for_app(
+        await self.clickhouse_role.create_database_for_app(
             database_name=database_name, app_id=app_id
         )
-        self.clickhouse_role.grant_permission_to_database(
+        await self.clickhouse_role.grant_permission_to_database(
             database_name=database_name, username=username, app_id=app_id
         )
 
@@ -72,7 +72,9 @@ class AppService:
             username=username, app_id=str(id)
         )
 
-        self.create_app_database(app_name=app_name, username=username, app_id=str(id))
+        await self.create_app_database(
+            app_name=app_name, username=username, app_id=str(id)
+        )
 
         creds = ClickHouseCredential(
             username=username, password=password, databasename=database_name

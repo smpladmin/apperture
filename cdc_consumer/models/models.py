@@ -41,4 +41,3 @@ class ClickHouseRemoteConnectionCred(BaseModel):
     port: int
     username: str
     password: str
-    

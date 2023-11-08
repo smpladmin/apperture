@@ -1,6 +1,5 @@
 from typing import Union
 from apperture.backend_action import get
-from clickhouse_client_factory import ClickHouseClientFactory
 from models.models import CdcIntegration, ClickHouseRemoteConnectionCred
 
 
@@ -28,10 +27,6 @@ class CDCIntegrations:
 
         for integration in self.integrations:
             cdc_cred = integration.cdcCredential
-            # ch_server_credential=self.get_clickhouse_server_credentials_for_app(integration.appId)
-            # ch_client = ClickHouseClientFactory.get_client(
-            #     app_id=integration.app_id, clickhouse_server_credentials=ch_server_credential
-            # )
             for table in cdc_cred.tables:
                 topic = f"cdc_{integration.id}.{cdc_cred.database}.dbo.{table}"
                 self.topics.append(topic)
@@ -40,6 +35,8 @@ class CDCIntegrations:
                     "ch_db": integration.clickhouseCredential.databasename,
                     "ch_table": f"cdc_{table}",
                     "data_types": [],
-                    "ch_server_credential": self.get_clickhouse_server_credentials_for_app(app_id=integration.appId),
+                    "ch_server_credential": self.get_clickhouse_server_credentials_for_app(
+                        app_id=integration.appId
+                    ),
                     "app_id": integration.appId,
                 }

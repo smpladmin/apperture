@@ -36,7 +36,7 @@ class ClickHouseRole:
     async def grant_permission_to_database(
         self, database_name: str, username: str, app_id: str
     ):
-        query = f"GRANT SHOW, SELECT, INSERT, ALTER, CREATE TABLE, CREATE VIEW, DROP TABLE, DROP VIEW, UNDROP TABLE, TRUNCATE ON {database_name}.* TO {username};"
+        query = f"GRANT SHOW, SELECT, INSERT, ALTER, CREATE TABLE, CREATE VIEW, DROP TABLE, DROP VIEW, TRUNCATE ON {database_name}.* TO {username};"
         client = await ClickHouseClientFactory.get_client(app_id)
 
         return client.admin_query(query=query)

@@ -103,7 +103,7 @@ async def process_kafka_messages() -> None:
                         table=table,
                         database=database,
                         clickhouse_server_credential=clickhouse_server_credential,
-                        app_id=app_id
+                        app_id=app_id,
                     )
                     logging.info(
                         "Successfully saved data to clickhouse, Emptying the topic bucket"
@@ -125,7 +125,6 @@ async def startup_event() -> None:
     """Starts processing Kafka messages when the app starts."""
     asyncio.create_task(process_kafka_messages())
     app.clickhouse = ClickHouse()
-    app.clickhouse.connect()
     app.cdc_integrations = CDCIntegrations()
 
 
@@ -133,4 +132,3 @@ async def startup_event() -> None:
 async def shutdown_event() -> None:
     """Shuts down the app."""
     logging.info("Shutting down")
-    app.clickhouse.disconnect()
