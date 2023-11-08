@@ -25,7 +25,7 @@ class TestRoleRepository:
         )
         self.create_row_policy_query = f"CREATE ROW POLICY pol{self.dsId} ON default.events, default.clickstream USING datasource_id='{self.dsId}' TO {self.username}"
         self.create_database_query = f"CREATE DATABASE {self.databasename}"
-        self.grant_permission_to_database_query = f"GRANT SHOW, SELECT, INSERT, ALTER, CREATE TABLE, CREATE VIEW, DROP TABLE, DROP VIEW, UNDROP TABLE, TRUNCATE ON {self.databasename}.* TO {self.username};"
+        self.grant_permission_to_database_query = f"GRANT SHOW, SELECT, INSERT, ALTER, CREATE TABLE, CREATE VIEW, DROP TABLE, DROP VIEW, TRUNCATE ON {self.databasename}.* TO {self.username};"
         self.query = MagicMock()
         FindMock = namedtuple("FindMock", ["to_list"])
         App.id = MagicMock()

@@ -62,8 +62,8 @@ class TestAppService:
         )
         self.clickhouse_role.create_user = AsyncMock()
         self.clickhouse_role.grant_select_permission_to_user = AsyncMock()
-        self.clickhouse_role.create_database_for_app = MagicMock()
-        self.clickhouse_role.grant_permission_to_database = MagicMock()
+        self.clickhouse_role.create_database_for_app = AsyncMock()
+        self.clickhouse_role.grant_permission_to_database = AsyncMock()
 
     @pytest.mark.asyncio
     async def test_share_app(self):
@@ -99,8 +99,9 @@ class TestAppService:
         )
         assert not self.service.clickhouse_role.create_sample_tables.called
 
-    def test_create_app_database(self):
-        self.service.create_app_database(
+    @pytest.mark.asyncio
+    async def test_create_app_database(self):
+        await self.service.create_app_database(
             app_name=self.app_name, username=self.username, app_id=""
         )
 
@@ -116,7 +117,7 @@ class TestAppService:
         self.service.string_utils.generate_random_value = MagicMock(
             return_value="sdeweiwew33dssdsdds"
         )
-        self.service.create_app_database = MagicMock()
+        self.service.create_app_database = AsyncMock()
 
         result = await self.service.create_clickhouse_user(
             id=PydanticObjectId(self.id), app_name=self.app_name
