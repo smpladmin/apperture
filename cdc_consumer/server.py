@@ -63,13 +63,17 @@ async def process_kafka_messages() -> None:
                 topic = record.topic
                 if not app.cdc_integrations.cdc_buckets.get(topic):
                     logging.info(f"Bucket not found for topic: {topic}")
+                    continue
 
+                if not record.value:
+                    logging.info(f"Value not present for record: {record}")
+                    continue
                 values = json.loads(record.value)
                 if not app.cdc_integrations.cdc_buckets[topic]["data_types"]:
                     app.cdc_integrations.cdc_buckets[topic]["data_types"] = values[
                         "schema"
                     ]["fields"][1]["fields"]
-                logging.info(f"Pushing data to {topic} bucket")
+                # logging.info(f"Pushing data to {topic} bucket")
                 app.cdc_integrations.cdc_buckets[record.topic]["data"].append(
                     values["payload"].get("after")
                 )
