@@ -1,8 +1,11 @@
 import logging
-from typing import List
+from typing import List, Union
 
 import clickhouse_connect
 from clickhouse_connect.driver.exceptions import DatabaseError
+from clickhouse_client_factory import ClickHouseClientFactory
+
+from models.models import ClickHouseRemoteConnectionCred
 
 # ClickHouse configuration.
 CLICKHOUSE_HOST = "clickhouse"
@@ -23,11 +26,11 @@ class ClickHouse:
         self.client.close()
 
     def save_events(
-        self, events, columns: List[str], table: str, database: str
+        self, events, columns: List[str], table: str, database: str, clickhouse_server_credential:Union[ClickHouseRemoteConnectionCred, None], appId:str
     ) -> None:
         """Saves events to ClickHouse."""
         try:
-            self._save(events=events, columns=columns, table=table, database=database)
+            self._save(events=events, columns=columns, table=table, database=database, clickhouse_server_credential=clickhouse_server_credential, appId=appId)
         except DatabaseError as e:
             logging.info(f"Exception saving events to ClickHouse: {e}")
             logging.info("Trying to save sequentially")
@@ -37,7 +40,10 @@ class ClickHouse:
                 )
             logging.info("Saved sequentially")
 
-    def _save(self, events, columns: List[str], table: str, database: str) -> None:
+    def _save(self, events, columns: List[str], table: str, database: str, clickhouse_server_credential:Union[ClickHouseRemoteConnectionCred, None], appId:str) -> None:
+        clickhouse_client = ClickHouseClientFactory.get_client(
+            app_id=app_id, clickhouse_server_credentials=clickhouse_server_credential
+        )
         self.client.insert(
             table=table,
             data=events,
