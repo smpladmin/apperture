@@ -2,7 +2,6 @@ import os
 import json
 import asyncio
 import logging
-from typing import List
 
 from aiokafka import AIOKafkaConsumer
 from dotenv import load_dotenv
@@ -17,17 +16,6 @@ logging.getLogger().setLevel(logging.INFO)
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
 MAX_RECORDS = int(os.getenv("MAX_RECORDS", "10000"))
 AUTO_OFFSET_RESET = os.getenv("AUTO_OFFSET_RESET", "latest")
-
-
-def handle_none_values(values: List, topic: str):
-    res = []
-    datatypes = app.cdc_integrations.cdc_buckets[topic]["data_types"]
-    for i, value in enumerate(values):
-        if (not value) and datatypes[i]["type"] == "string":
-            res.append("NULL")
-        else:
-            res.append(value)
-    return res
 
 
 async def process_kafka_messages() -> None:
@@ -69,10 +57,10 @@ async def process_kafka_messages() -> None:
                     logging.info(f"Value not present for record: {record}")
                     continue
                 values = json.loads(record.value)
-                if not app.cdc_integrations.cdc_buckets[topic]["data_types"]:
-                    app.cdc_integrations.cdc_buckets[topic]["data_types"] = values[
-                        "schema"
-                    ]["fields"][1]["fields"]
+                # if not app.cdc_integrations.cdc_buckets[topic]["data_types"]:
+                #     app.cdc_integrations.cdc_buckets[topic]["data_types"] = values[
+                #         "schema"
+                #     ]["fields"][1]["fields"]
                 # logging.info(f"Pushing data to {topic} bucket")
                 app.cdc_integrations.cdc_buckets[record.topic]["data"].append(
                     values["payload"].get("after")
@@ -90,16 +78,14 @@ async def process_kafka_messages() -> None:
                 logging.info(
                     f"Inserting data for topic {topic} into {table} table of {database}"
                 )
-                to_insert = bucket["data"]
+                # Not handling delete operations
+                to_insert = list(filter(None, bucket["data"]))
                 if to_insert:
                     logging.info(
                         f"Data present in {topic} bucket len: {len(to_insert)}, Saving to clickhouse"
                     )
                     columns = to_insert[0].keys()
-                    events = [
-                        handle_none_values(values=data.values(), topic=topic)
-                        for data in to_insert
-                    ]
+                    events = [data.values() for data in to_insert]
                     app.clickhouse.save_events(
                         events=events,
                         columns=columns,
