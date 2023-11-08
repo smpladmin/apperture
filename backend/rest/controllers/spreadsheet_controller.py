@@ -229,7 +229,7 @@ async def compute_transient_pivot(
 ):
     try:
         datasource = await ds_service.get_datasource(dto.dsId)
-        return spreadsheets_service.compute_pivot(
+        return await spreadsheets_service.compute_pivot(
             app_id=str(datasource.app_id),
             query=dto.query,
             rows=dto.rows,

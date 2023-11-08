@@ -103,7 +103,7 @@ class IntegrationService:
             credential_type = CredentialType.API_KEY
 
         if provider == IntegrationProvider.SAMPLE:
-            self.clickhouse_role.create_sample_tables(
+            await self.clickhouse_role.create_sample_tables(
                 [tableName], app.clickhouse_credential.databasename, app_id=str(app.id)
             )
 

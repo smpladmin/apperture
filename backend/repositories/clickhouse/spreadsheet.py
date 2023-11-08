@@ -178,7 +178,7 @@ class Spreadsheets(EventsBase):
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
         return query
 
-    def compute_transient_pivot(
+    async def compute_transient_pivot(
         self,
         app_id: str,
         query: str,
@@ -188,9 +188,9 @@ class Spreadsheets(EventsBase):
         row_range: List[Union[str, int, float]],
         column_range: List[Union[str, int, float]],
     ):
-        return self.execute_query_for_app(
+        return await self.execute_query_for_app(
+            app_id=app_id,
             query=self.build_compute_transient_pivot(
-                app_id=app_id,
                 query=query,
                 rows=rows,
                 columns=columns,
@@ -239,7 +239,7 @@ class Spreadsheets(EventsBase):
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
         return query
 
-    def compute_ordered_distinct_values(
+    async def compute_ordered_distinct_values(
         self,
         app_id: str,
         reference_query: str,
@@ -250,7 +250,7 @@ class Spreadsheets(EventsBase):
         range_axis: Union[PivotAxisDetail, None] = None,
         limit: int = 50,
     ):
-        return self.execute_query_for_app(
+        return await self.execute_query_for_app(
             app_id=app_id,
             query=self.build_compute_ordered_distinct_values(
                 reference_query=reference_query,

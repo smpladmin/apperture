@@ -214,7 +214,7 @@ class SpreadsheetService:
             data[key][column[0]] = column[1]
         return data
 
-    def compute_pivot(
+    async def compute_pivot(
         self,
         app_id: str,
         query: str,
@@ -227,7 +227,7 @@ class SpreadsheetService:
         column_names, row_names = [], []
 
         if rows:
-            unique_rows = self.spreadsheets.compute_ordered_distinct_values(
+            unique_rows = await self.spreadsheets.compute_ordered_distinct_values(
                 app_id=app_id,
                 reference_query=query,
                 values_to_fetch=rows,
@@ -237,7 +237,7 @@ class SpreadsheetService:
             row_names = [row[0] for row in unique_rows]
 
         if columns:
-            unique_columns = self.spreadsheets.compute_ordered_distinct_values(
+            unique_columns = await self.spreadsheets.compute_ordered_distinct_values(
                 app_id=app_id,
                 reference_query=query,
                 values_to_fetch=columns,
@@ -251,7 +251,7 @@ class SpreadsheetService:
 
         if rows and columns and values:
             try:
-                result_set = self.spreadsheets.compute_transient_pivot(
+                result_set = await self.spreadsheets.compute_transient_pivot(
                     app_id=app_id,
                     query=query,
                     rows=rows,
