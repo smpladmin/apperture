@@ -34,7 +34,6 @@ class CDCIntegrations:
                     "data": [],
                     "ch_db": integration.clickhouseCredential.databasename,
                     "ch_table": f"cdc_{table}",
-                    "data_types": [],
                     "ch_server_credential": self.get_clickhouse_server_credentials_for_app(
                         app_id=integration.appId
                     ),
