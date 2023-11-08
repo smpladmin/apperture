@@ -40,7 +40,6 @@ async def process_kafka_messages() -> None:
         group_id="cdc",
         bootstrap_servers="kafka:9092",
         auto_offset_reset=AUTO_OFFSET_RESET,
-        value_deserializer=lambda v: v.decode("utf-8"),
         enable_auto_commit=False,
         fetch_max_bytes=7864320,
     )
