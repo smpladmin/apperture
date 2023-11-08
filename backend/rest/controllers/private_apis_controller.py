@@ -9,6 +9,7 @@ from authorisation.service import AuthService
 from data_processor_queue.service import DPQueueService
 from domain.actions.service import ActionService
 from domain.apidata.service import APIDataService
+from domain.apperture_users.models import AppertureUser
 from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
 from domain.clickstream_event_properties.service import (
@@ -31,13 +32,14 @@ from domain.spreadsheets.models import DatabaseClient
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apidata import CreateAPIDataDto
 from rest.dtos.apperture_users import PrivateUserResponse, ResetPasswordDto
+from rest.dtos.apps import PrivateAppDetailsResponse
 from rest.dtos.cdc import CdcCredentials
 from rest.dtos.clickstream_event_properties import (
     ClickStreamEventPropertiesDto,
     ClickStreamEventPropertiesResponse,
 )
 from rest.dtos.datamart import RefreshDataMartDto
-from rest.dtos.datasources import PrivateDataSourceResponse, DataSourceResponse
+from rest.dtos.datasources import DataSourceResponse, PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.event_properties import EventPropertiesDto, EventPropertiesResponse
 from rest.dtos.events import CreateEventDto
@@ -489,3 +491,14 @@ async def get_cdc_credentials(
             )
         )
     return response
+
+
+@router.get("/app/remote-connection/{dsId}/", response_model=PrivateAppDetailsResponse)
+async def get_app_remote_connection_by_dsId(
+    dsId: str,
+    ds_service: DataSourceService = Depends(),
+    app_service: AppService = Depends(),
+):
+    datasource = await ds_service.get_datasource(dsId)
+    app = await app_service.get_app(id=datasource.app_id)
+    return PrivateAppDetailsResponse(app=app, remote_connection=app.remote_connection)

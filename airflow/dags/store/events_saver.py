@@ -3,6 +3,8 @@ import json
 import logging
 from typing import List
 import pandas as pd
+from airflow.dags.store.clickhouse_client_factory import ClickHouseClientFactory
+from apperture.backend_action import get
 
 from domain.datasource.models import IntegrationProvider, CreateEvent
 from store.clickhouse import Clickhouse
@@ -48,15 +50,23 @@ class EventsSaver(Saver):
             )
             for event in data
         ]
-        self.clickhouse.client.insert(
-            "events",
-            events,
-            column_names=[
-                "datasource_id",
-                "timestamp",
-                "provider",
-                "user_id",
-                "event_name",
-                "properties",
-            ],
-        )
+        if events:
+            response = get(f"/private/app/remote-connection/{events[0][0]}")
+            if response.ok:
+                payload = response.json()
+                client = ClickHouseClientFactory.get_client(
+                    app_id=payload["app"]["_id"],
+                    connection_detail=payload["remote_connection"],
+                )
+                client.connection.insert(
+                    "events",
+                    events,
+                    column_names=[
+                        "datasource_id",
+                        "timestamp",
+                        "provider",
+                        "user_id",
+                        "event_name",
+                        "properties",
+                    ],
+                )

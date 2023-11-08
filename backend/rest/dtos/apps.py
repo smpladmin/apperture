@@ -32,3 +32,8 @@ class UpdateAppDto(BaseModel):
 class OrgAccessResponse(OrgAccess, ModelResponse):
     class Config:
         allow_population_by_field_name = True
+
+
+class PrivateAppDetailsResponse(BaseModel):
+    app: App
+    remote_connection: Optional[ClickHouseRemoteConnectionCreds]
