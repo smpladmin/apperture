@@ -23,7 +23,7 @@ class TestDataSourceService:
         FindMock = namedtuple("FindMock", ["to_list"])
 
         self.clickhouse_role.create_user = MagicMock()
-        self.clickhouse_role.create_row_policy = MagicMock()
+        self.clickhouse_role.create_row_policy = AsyncMock()
         self.clickhouse_role.grant_select_permission_to_user = MagicMock()
 
         self.username = "test_user"
@@ -55,7 +55,7 @@ class TestDataSourceService:
         self.service.get_datasources_for_app_id = AsyncMock(
             return_value=[self.datasource]
         )
-        self.service.create_user_policy_for_all_datasources = MagicMock()
+        self.service.create_user_policy_for_all_datasources = AsyncMock()
 
         DataSource.provider = MagicMock(return_value=IntegrationProvider.APPERTURE)
         DataSource.id = MagicMock(return_value=self.ds_id)
@@ -68,12 +68,15 @@ class TestDataSourceService:
         )
         DataSource.find.assert_called_once()
 
-    def test_create_row_policy_for_username(self):
-        self.service.create_row_policy_for_username(
-            username=self.username, datasource_id=self.ds_id
+    @pytest.mark.asyncio
+    async def test_create_row_policy_for_username(self):
+        await self.service.create_row_policy_for_username(
+            username=self.username, datasource_id=self.ds_id, app_id=self.app.id
         )
         self.clickhouse_role.create_row_policy.assert_called_once_with(
-            datasource_id="636a1c61d715ca6baae65611", username="test_user"
+            datasource_id="636a1c61d715ca6baae65611",
+            username="test_user",
+            app_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
         )
 
     @pytest.mark.asyncio

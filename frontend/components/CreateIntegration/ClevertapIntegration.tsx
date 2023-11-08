@@ -25,14 +25,21 @@ import {
   LeftContainerRevisit,
 } from '@components/Onboarding';
 import { CaretRight, CheckCircle, FileArrowUp } from 'phosphor-react';
+import {
+  getCredentials,
+  updateCredentials,
+} from '@lib/services/datasourceService';
+import { CredentialType, Credential } from '@lib/domain/integration';
 
 type ClevertapIntegrationProps = {
   handleClose: Function;
   add: string | string[] | undefined;
+  edit?: boolean;
 };
 const ClevertapIntegration = ({
   add,
   handleClose,
+  edit = false,
 }: ClevertapIntegrationProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -49,6 +56,45 @@ const ClevertapIntegration = ({
     setValidData(!!(projectId && apiKey && apiSecret && eventList.length));
   }, [projectId, apiKey, apiSecret, eventList]);
 
+  useEffect(() => {
+    if (!edit) return;
+    const getDatasourceCredentials = async () => {
+      const { dsId } = router.query;
+      const credentials = await getCredentials(dsId as string);
+      setApiSecret(credentials?.secret || '');
+      setApiKey(credentials?.api_key || '');
+      setProjectId(credentials?.account_id || '');
+    };
+    getDatasourceCredentials();
+  }, [edit]);
+
+  const onUpdate = async () => {
+    const { dsId } = router.query;
+
+    const credentials: Credential = {
+      type: CredentialType.API_KEY,
+      account_id: projectId,
+      secret: apiSecret,
+      api_key: apiKey,
+    };
+    const response = await updateCredentials(dsId as string, credentials);
+    if (response.status === 200) {
+      toast({
+        title: 'Credentials updated successfully',
+        status: 'success',
+        variant: 'subtle',
+        isClosable: true,
+      });
+      router.back();
+    } else {
+      toast({
+        title: 'An error occurred while updating credentials',
+        status: 'error',
+        variant: 'subtle',
+        isClosable: true,
+      });
+    }
+  };
   const onSubmit = async () => {
     const appId = router.query.appId as string;
     const provider = router.query.provider as Provider;
@@ -301,9 +347,15 @@ const ClevertapIntegration = ({
             <Box mb={5}>
               <FormButton
                 navigateBack={() => router.back()}
-                handleNextClick={() => onSubmit()}
+                handleNextClick={() => (edit ? onUpdate() : onSubmit())}
                 disabled={!validData}
-                nextButtonName={add ? 'Add Data Source' : 'Create Application'}
+                nextButtonName={
+                  edit
+                    ? 'Update Credentials'
+                    : add
+                    ? 'Add Data Source'
+                    : 'Create Application'
+                }
               />
             </Box>
           </Flex>

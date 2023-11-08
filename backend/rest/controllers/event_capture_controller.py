@@ -1,6 +1,6 @@
 import json
-from base64 import b64decode
 import os
+from base64 import b64decode
 from typing import Union
 
 from fastapi import APIRouter, Depends, Form, Response
@@ -40,8 +40,11 @@ async def capture_click_stream(
         payloads[0]["properties"]["token"]
     )
     if datasource:
+        ds = datasource[0]
         await clickstream_service.update_events(
-            datasource_id=payloads[0]["properties"]["token"], events=payloads
+            datasource_id=payloads[0]["properties"]["token"],
+            events=payloads,
+            app_id=ds.app_id,
         )
     else:
         return {"success": False}

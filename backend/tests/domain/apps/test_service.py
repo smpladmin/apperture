@@ -60,10 +60,10 @@ class TestAppService:
                 org_access=False,
             ),
         )
-        self.clickhouse_role.create_user = MagicMock()
-        self.clickhouse_role.grant_select_permission_to_user = MagicMock()
-        self.clickhouse_role.create_database_for_app = MagicMock()
-        self.clickhouse_role.grant_permission_to_database = MagicMock()
+        self.clickhouse_role.create_user = AsyncMock()
+        self.clickhouse_role.grant_select_permission_to_user = AsyncMock()
+        self.clickhouse_role.create_database_for_app = AsyncMock()
+        self.clickhouse_role.grant_permission_to_database = AsyncMock()
 
     @pytest.mark.asyncio
     async def test_share_app(self):
@@ -99,14 +99,17 @@ class TestAppService:
         )
         assert not self.service.clickhouse_role.create_sample_tables.called
 
-    def test_create_app_database(self):
-        self.service.create_app_database(app_name=self.app_name, username=self.username)
+    @pytest.mark.asyncio
+    async def test_create_app_database(self):
+        await self.service.create_app_database(
+            app_name=self.app_name, username=self.username, app_id=""
+        )
 
         self.clickhouse_role.create_database_for_app.assert_called_with(
-            **{"database_name": "test_app"}
+            **{"database_name": "test_app", "app_id": ""}
         )
         self.clickhouse_role.grant_permission_to_database.assert_called_with(
-            **{"database_name": "test_app", "username": "test_user"}
+            **{"database_name": "test_app", "username": "test_user", "app_id": ""}
         )
 
     @pytest.mark.asyncio
@@ -114,7 +117,7 @@ class TestAppService:
         self.service.string_utils.generate_random_value = MagicMock(
             return_value="sdeweiwew33dssdsdds"
         )
-        self.service.create_app_database = MagicMock()
+        self.service.create_app_database = AsyncMock()
 
         result = await self.service.create_clickhouse_user(
             id=PydanticObjectId(self.id), app_name=self.app_name
@@ -122,23 +125,28 @@ class TestAppService:
 
         assert result == ClickHouseCredential(
             username="sdeweiwew33dssdsdds636a1c61d715ca6baae65611",
-            password="sdeweiwew33dssdsdds",
+            password="@sdeweiwew33dssdsdds",
             databasename="test_app",
         )
         App.find.assert_called_once()
         self.clickhouse_role.create_user.assert_called_with(
             **{
                 "username": "sdeweiwew33dssdsdds636a1c61d715ca6baae65611",
-                "password": "sdeweiwew33dssdsdds",
+                "password": "@sdeweiwew33dssdsdds",
+                "app_id": "636a1c61d715ca6baae65611",
             }
         )
         self.clickhouse_role.grant_select_permission_to_user.assert_called_with(
-            **{"username": "sdeweiwew33dssdsdds636a1c61d715ca6baae65611"}
+            **{
+                "username": "sdeweiwew33dssdsdds636a1c61d715ca6baae65611",
+                "app_id": "636a1c61d715ca6baae65611",
+            }
         )
         self.service.create_app_database.assert_called_once_with(
             **{
                 "app_name": "Test App",
                 "username": "sdeweiwew33dssdsdds636a1c61d715ca6baae65611",
+                "app_id": "636a1c61d715ca6baae65611",
             }
         )
 

@@ -34,3 +34,10 @@ class CdcIntegration(BaseModel):
     provider: IntegrationProvider
     cdcCredential: CdcCredential
     clickhouseCredential: ClickHouseCredential
+
+
+class ClickHouseRemoteConnectionCred(BaseModel):
+    host: str
+    port: int
+    username: str
+    password: str

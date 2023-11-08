@@ -93,27 +93,24 @@ class DataSourceService:
         await datasource.insert()
         return datasource
 
-    def create_row_policy_for_username(
-        self,
-        datasource_id: str,
-        username: str,
+    async def create_row_policy_for_username(
+        self, datasource_id: str, username: str, app_id: str
     ):
-        self.clickhouse_role.create_row_policy(
-            datasource_id=datasource_id, username=username
+        await self.clickhouse_role.create_row_policy(
+            datasource_id=datasource_id, username=username, app_id=app_id
         )
 
-    def create_user_policy_for_all_datasources(
+    async def create_user_policy_for_all_datasources(
         self, datasources: List[DataSource], username: str
     ):
         for ds in datasources:
-            self.create_row_policy_for_username(
-                datasource_id=ds.id,
-                username=username,
+            await self.create_row_policy_for_username(
+                datasource_id=ds.id, username=username, app_id=str(ds.app_id)
             )
 
     async def create_row_policy_for_datasources_by_app(self, app: App, username: str):
         datasources = await self.get_datasources_for_app_id(app.id)
-        self.create_user_policy_for_all_datasources(
+        await self.create_user_policy_for_all_datasources(
             datasources=datasources, username=username
         )
 
@@ -177,3 +174,9 @@ class DataSourceService:
                         )
                     )
         return datasources
+
+    async def delete_datasource(self, ds_id: PydanticObjectId):
+        await DataSource.find_one(
+            DataSource.id == ds_id,
+        ).update({"$set": {"enabled": False}})
+        return

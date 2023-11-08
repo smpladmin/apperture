@@ -1,13 +1,15 @@
-from typing import Optional, List
+from typing import List, Optional
+
 from pydantic import BaseModel
 
-from domain.apps.models import App, OrgAccess
+from domain.apps.models import App, ClickHouseRemoteConnectionCreds, OrgAccess
 from rest.dtos.integrations import IntegrationWithDataSources
 from rest.dtos.model_response import ModelResponse
 
 
 class CreateAppDto(BaseModel):
     name: str
+    remote_connection: Optional[ClickHouseRemoteConnectionCreds]
 
 
 class AppResponse(App, ModelResponse):
@@ -30,3 +32,9 @@ class UpdateAppDto(BaseModel):
 class OrgAccessResponse(OrgAccess, ModelResponse):
     class Config:
         allow_population_by_field_name = True
+
+
+class ClickHouseRemoteConnectionCredsResponse(
+    ClickHouseRemoteConnectionCreds, ModelResponse
+):
+    pass

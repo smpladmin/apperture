@@ -35,6 +35,7 @@ class IntegrationProvider(str, Enum):
 
 class DataSource(BaseModel):
     id: str = Field(alias="_id")
+    appId: str
     createdAt: datetime
     provider: IntegrationProvider
     name: Optional[str]
@@ -54,3 +55,10 @@ class CreateEvent(NamedTuple):
     userId: str
     eventName: str
     properties: dict
+
+
+class ClickHouseRemoteConnectionCred(BaseModel):
+    host: str
+    port: int
+    username: str
+    password: str

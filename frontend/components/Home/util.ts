@@ -8,7 +8,7 @@ export const getAppId = (apps: AppWithIntegrations[], dsId: string) => {
         app?.integrations.flatMap((integration) => integration.datasources)
       )
       .find((app) => app?._id === dsId)?.appId ||
-    apps[0]?.integrations[0]?.datasources[0]?._id
+    apps[0]?.integrations[0]?.datasources[0]?.appId
   );
 };
 

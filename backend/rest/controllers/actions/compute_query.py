@@ -88,19 +88,21 @@ class ComputeQueryAction:
 
     async def get_transient_spreadsheets(
         self,
+        app_id: str,
         query: str,
         credential: Union[ClickHouseCredential, MySQLCredential, MsSQLCredential],
         client: DatabaseClient,
         query_id: Union[str, None] = None,
     ) -> ComputedSpreadsheet:
         return await self.spreadsheets_service.get_transient_spreadsheets(
+            app_id=app_id,
             query=query,
             credential=credential,
             query_id=query_id,
             client=client,
         )
 
-    async def compute_query(self, dto: TransientSpreadsheetsDto):
+    async def compute_query(self, app_id: str, dto: TransientSpreadsheetsDto):
         try:
             logging.info(f"Query: {dto.query}")
             credential = await self.get_credentials(
@@ -114,12 +116,14 @@ class ComputeQueryAction:
             if not dto.is_sql:
                 sql_query = text_to_sql(dto.ai_query)
                 return await self.get_transient_spreadsheets(
+                    app_id=app_id,
                     query=sql_query,
                     credential=credential,
                     client=client,
                     query_id=dto.query_id,
                 )
             return await self.get_transient_spreadsheets(
+                app_id=app_id,
                 query=dto.query,
                 credential=credential,
                 client=client,

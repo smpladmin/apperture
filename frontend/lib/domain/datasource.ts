@@ -20,4 +20,5 @@ export type DataSource = {
   name: string | null;
   version: DataSourceVersion;
   externalSourceId: string;
+  updatedAt?: string;
 };

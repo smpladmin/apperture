@@ -82,6 +82,8 @@ async def process_kafka_messages() -> None:
             for topic, bucket in app.cdc_integrations.cdc_buckets.items():
                 table = bucket["ch_table"]
                 database = bucket["ch_db"]
+                clickhouse_server_credential = bucket["ch_server_credential"]
+                app_id = bucket["app_id"]
                 logging.info(
                     f"Inserting data for topic {topic} into {table} table of {database}"
                 )
@@ -100,6 +102,8 @@ async def process_kafka_messages() -> None:
                         columns=columns,
                         table=table,
                         database=database,
+                        clickhouse_server_credential=clickhouse_server_credential,
+                        app_id=app_id,
                     )
                     logging.info(
                         "Successfully saved data to clickhouse, Emptying the topic bucket"
@@ -121,7 +125,6 @@ async def startup_event() -> None:
     """Starts processing Kafka messages when the app starts."""
     asyncio.create_task(process_kafka_messages())
     app.clickhouse = ClickHouse()
-    app.clickhouse.connect()
     app.cdc_integrations = CDCIntegrations()
 
 
@@ -129,4 +132,3 @@ async def startup_event() -> None:
 async def shutdown_event() -> None:
     """Shuts down the app."""
     logging.info("Shutting down")
-    app.clickhouse.disconnect()

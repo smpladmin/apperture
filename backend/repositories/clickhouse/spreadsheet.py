@@ -2,16 +2,10 @@ import logging
 from typing import List, Union
 
 from fastapi import Depends
-from pypika import (
-    Case,
-    ClickHouseQuery,
-    Criterion,
-    Field,
-    Parameter,
-    Table,
-    Order as SortOrder,
-    functions as fn,
-)
+from pypika import Case, ClickHouseQuery, Criterion, Field
+from pypika import Order as SortOrder
+from pypika import Parameter, Table
+from pypika import functions as fn
 
 from clickhouse.clickhouse import Clickhouse
 from domain.apps.models import ClickHouseCredential
@@ -184,8 +178,9 @@ class Spreadsheets(EventsBase):
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
         return query
 
-    def compute_transient_pivot(
+    async def compute_transient_pivot(
         self,
+        app_id: str,
         query: str,
         rows: List[PivotAxisDetail],
         columns: List[PivotAxisDetail],
@@ -193,7 +188,8 @@ class Spreadsheets(EventsBase):
         row_range: List[Union[str, int, float]],
         column_range: List[Union[str, int, float]],
     ):
-        return self.execute_get_query(
+        return await self.execute_query_for_app(
+            app_id=app_id,
             query=self.build_compute_transient_pivot(
                 query=query,
                 rows=rows,
@@ -243,8 +239,9 @@ class Spreadsheets(EventsBase):
         query = query.get_sql().replace('"<inner_table>"', sheet_query)
         return query
 
-    def compute_ordered_distinct_values(
+    async def compute_ordered_distinct_values(
         self,
+        app_id: str,
         reference_query: str,
         values_to_fetch: List[PivotAxisDetail],
         aggregate: Union[PivotValueDetail, None],
@@ -253,7 +250,8 @@ class Spreadsheets(EventsBase):
         range_axis: Union[PivotAxisDetail, None] = None,
         limit: int = 50,
     ):
-        return self.execute_get_query(
+        return await self.execute_query_for_app(
+            app_id=app_id,
             query=self.build_compute_ordered_distinct_values(
                 reference_query=reference_query,
                 values=values_to_fetch,

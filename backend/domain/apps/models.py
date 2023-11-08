@@ -6,6 +6,13 @@ from pydantic import BaseModel, Field
 from repositories import Document
 
 
+class ClickHouseRemoteConnectionCreds(BaseModel):
+    host: str
+    port: int
+    username: str
+    password: str
+
+
 class ClickHouseCredential(BaseModel):
     username: str
     password: str
@@ -25,6 +32,7 @@ class App(Document):
     org_access: bool = False
     enabled: bool = True
     clickhouse_credential: Optional[ClickHouseCredential] = Field(hidden=True)
+    remote_connection: Optional[ClickHouseRemoteConnectionCreds] = Field(hidden=True)
 
     class Settings:
         name = "apps"

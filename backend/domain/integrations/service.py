@@ -103,8 +103,8 @@ class IntegrationService:
             credential_type = CredentialType.API_KEY
 
         if provider == IntegrationProvider.SAMPLE:
-            self.clickhouse_role.create_sample_tables(
-                [tableName], app.clickhouse_credential.databasename
+            await self.clickhouse_role.create_sample_tables(
+                [tableName], app.clickhouse_credential.databasename, app_id=str(app.id)
             )
 
         credential = Credential(
@@ -321,6 +321,12 @@ class IntegrationService:
             db_name=clickhouse_credential.databasename,
             s3_key=s3_key,
         )
+
+    async def update_credentials(self, id: PydanticObjectId, credential: Credential):
+        await Integration.find_one(
+            Integration.id == id,
+        ).update({"$set": {"credential": credential}})
+        return
 
     async def get_integrations_with_cdc(self) -> List[Integration]:
         return await Integration.find(

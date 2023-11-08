@@ -104,7 +104,6 @@ class DPQueueService:
         description: str,
         args,
     ):
-        logging.info(args)
         job = scheduler.cron(
             cron,
             job_name,

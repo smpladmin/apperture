@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import re
-from typing import List, Union
+from typing import List, Optional, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
@@ -12,7 +12,12 @@ from utils.mail import GENERIC_EMAIL_DOMAINS
 
 from ..apperture_users.models import AppertureUser
 from ..common.random_string_utils import StringUtils
-from .models import App, ClickHouseCredential, OrgAccess
+from .models import (
+    App,
+    ClickHouseCredential,
+    ClickHouseRemoteConnectionCreds,
+    OrgAccess,
+)
 
 
 class AppService:
@@ -39,28 +44,37 @@ class AppService:
     async def get_app_count(self, user_id: PydanticObjectId):
         return await App.find(App.user_id == user_id).count()
 
-    def create_app_database(
+    async def create_app_database(
         self,
         app_name: str,
         username: str,
+        app_id: str,
     ):
         database_name = self.parse_app_name_to_db_name(app_name=app_name)
-        self.clickhouse_role.create_database_for_app(database_name=database_name)
-        self.clickhouse_role.grant_permission_to_database(
-            database_name=database_name, username=username
+        await self.clickhouse_role.create_database_for_app(
+            database_name=database_name, app_id=app_id
+        )
+        await self.clickhouse_role.grant_permission_to_database(
+            database_name=database_name, username=username, app_id=app_id
         )
 
     async def create_clickhouse_user(
         self, id: PydanticObjectId, app_name: str
     ) -> ClickHouseCredential:
         username = self.string_utils.generate_random_value(16) + str(id)
-        password = self.string_utils.generate_random_value()
+        password = "@" + self.string_utils.generate_random_value()
         database_name = self.parse_app_name_to_db_name(app_name=app_name)
 
-        self.clickhouse_role.create_user(username=username, password=password)
-        self.clickhouse_role.grant_select_permission_to_user(username=username)
+        await self.clickhouse_role.create_user(
+            username=username, password=password, app_id=str(id)
+        )
+        await self.clickhouse_role.grant_select_permission_to_user(
+            username=username, app_id=str(id)
+        )
 
-        self.create_app_database(app_name=app_name, username=username)
+        await self.create_app_database(
+            app_name=app_name, username=username, app_id=str(id)
+        )
 
         creds = ClickHouseCredential(
             username=username, password=password, databasename=database_name
@@ -87,8 +101,9 @@ class AppService:
         self,
         name: str,
         user: AppertureUser,
+        remote_connection: ClickHouseRemoteConnectionCreds = None,
     ) -> App:
-        app = App(name=name, user_id=user.id)
+        app = App(name=name, user_id=user.id, remote_connection=remote_connection)
         app.domain = self.parse_domain_from_email(email=user.email)
         await app.insert()
         creds = await self.create_clickhouse_user(id=app.id, app_name=name)

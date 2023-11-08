@@ -23,7 +23,7 @@ import {
   MenuItem,
   IconButton,
 } from '@chakra-ui/react';
-import { CaretRight, Key, Plus } from 'phosphor-react';
+import { CaretRight, GitFork, Key, Plus } from 'phosphor-react';
 import LogoutModal from '@components/Logout';
 import { get_app_wise_users } from '@lib/services/userService';
 import { AppertureUser } from '@lib/domain/user';
@@ -125,11 +125,9 @@ const HomeNav = ({ apps }: HomeNavProps) => {
     }
   };
 
-  const handleAddIntegration = async () => {
+  const handleEditDatasource = async () => {
     router.push({
-      pathname: `/analytics/app/[appId]/integration/select`,
-
-      query: { appId: defaultAppId, ...router.query, add: 'true' },
+      pathname: `/analytics/home/edit/${selectedAppId}`,
     });
   };
 
@@ -314,11 +312,11 @@ const HomeNav = ({ apps }: HomeNavProps) => {
         </Menu>*/}
         <IconButton
           aria-label="add-datasource"
-          icon={<Plus size={20} />}
+          icon={<GitFork size={20} />}
           bg="black.800"
           padding={'6px'}
           _hover={{ background: 'black.800' }}
-          onClick={handleAddIntegration}
+          onClick={handleEditDatasource}
         />
         <IconButton
           aria-label="add-datasource"
