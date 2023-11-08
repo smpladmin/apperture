@@ -1,4 +1,5 @@
 import logging
+from store.clickhouse_client_factory import ClickHouseClientFactory
 import pendulum
 
 from airflow.models import Param
@@ -12,7 +13,12 @@ from store.event_properties_saver import EventPropertiesSaver
 from fetch.clevertap_events_fetcher import ClevertapEventsFetcher
 from utils.utils import DATA_FETCH_DAYS_OFFSET, AIRFLOW_INIT_DATE
 from event_processors.clevertap_event_processor import ClevertapEventProcessor
-from domain.datasource.models import IntegrationProvider, Credential, DataSource
+from domain.datasource.models import (
+    IntegrationProvider,
+    Credential,
+    DataSource,
+    ClickHouseRemoteConnectionCred,
+)
 
 
 datasource_service = DataSourceService()
@@ -25,6 +31,15 @@ def get_datasource_and_credential(
 ) -> Dict[str, Union[DataSource, Credential]]:
     datasource = datasource_service.get_datasource_with_credential(id=datasource_id)
     return {"datasource": datasource.datasource, "credential": datasource.credential}
+
+
+@task
+def get_clickhouse_server_credential(
+    datasource: DataSource,
+) -> Union[ClickHouseRemoteConnectionCred, None]:
+    return datasource_service.get_clickhouse_server_credentials_for_app(
+        app_id=datasource.appId
+    )
 
 
 @task
@@ -61,7 +76,13 @@ def get_run_dates(**kwargs):
 
 
 @task(max_active_tis_per_dag=5)
-def load_data(datasource_id: str, credential: Credential, event: str, date: str):
+def load_data(
+    datasource: DataSource,
+    credential: Credential,
+    event: str,
+    date: str,
+    clickhouse_server_credential: Union[ClickHouseRemoteConnectionCred, None],
+):
     print(f"Loading data for event: {event} date: {date}")
     for events_data in ClevertapEventsFetcher(credential=credential, date=date).fetch(
         event=event
@@ -70,9 +91,11 @@ def load_data(datasource_id: str, credential: Credential, event: str, date: str)
         df = ClevertapEventProcessor().process(events_data, event)
         logging.info(f"Saving event {event} data for date - {date}")
         EventsSaver().save(
-            datasource_id,
-            IntegrationProvider.CLEVERTAP,
-            df,
+            datasource_id=datasource.id,
+            provider=IntegrationProvider.CLEVERTAP,
+            df=df,
+            clickhouse_server_credential=clickhouse_server_credential,
+            app_id=datasource.appId,
         )
 
         logging.info(f"Saving event properties for event {event} for date - {date}")
@@ -121,11 +144,17 @@ def create_dag(datasource_id: str, created_date: datetime):
         datasource_with_credential = get_datasource_and_credential(
             datasource_id=datasource_id
         )
+        datasource = datasource_with_credential["datasource"]
         run_dates = get_run_dates()
-        events = get_events(datasource=datasource_with_credential["datasource"])
+        events = get_events(datasource=datasource)
+        clickhouse_server_credential = get_clickhouse_server_credential(
+            datasource=datasource
+        )
+
         load_data.partial(
-            datasource_id=datasource_id,
+            datasource=datasource,
             credential=datasource_with_credential["credential"],
+            clickhouse_server_credential=clickhouse_server_credential,
         ).expand(event=events, date=run_dates)
 
     clevertap_data_loader()

@@ -1,7 +1,7 @@
 import logging
-from typing import List
+from typing import List, Union
 
-from domain.datasource.models import DataSource
+from domain.datasource.models import DataSource, ClickHouseRemoteConnectionCred
 from domain.datasource.models import DataSourceResponse
 from apperture.backend_action import get
 
@@ -32,3 +32,13 @@ class DataSourceService:
         response = get(path=f"/private/integrations/{datasource.id}/events")
         logging.info("{x}: {y}".format(x="Receieved events:", y=response.status_code))
         return response.json()
+
+    def get_clickhouse_server_credentials_for_app(
+        self, app_id: str
+    ) -> Union[ClickHouseRemoteConnectionCred, None]:
+        response = get(f"/private/apps/clickhouse_server_credential/{app_id}")
+        return (
+            ClickHouseRemoteConnectionCred(**response.json())
+            if response.json()
+            else None
+        )

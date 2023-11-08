@@ -34,6 +34,7 @@ class OrgAccessResponse(OrgAccess, ModelResponse):
         allow_population_by_field_name = True
 
 
-class PrivateAppDetailsResponse(BaseModel):
-    app: App
-    remote_connection: Optional[ClickHouseRemoteConnectionCreds]
+class ClickHouseRemoteConnectionCredsResponse(
+    ClickHouseRemoteConnectionCreds, ModelResponse
+):
+    pass

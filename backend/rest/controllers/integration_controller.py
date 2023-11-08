@@ -157,7 +157,9 @@ async def create_integration(
 
         if app.clickhouse_credential:
             ds_service.create_row_policy_for_username(
-                datasource_id=datasource.id, username=app.clickhouse_credential.username
+                datasource_id=datasource.id,
+                username=app.clickhouse_credential.username,
+                app_id=str(app.id),
             )
 
         if dto.eventList:
