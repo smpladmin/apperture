@@ -57,14 +57,18 @@ async def process_kafka_messages() -> None:
                     logging.info(f"Value not present for record: {record}")
                     continue
                 values = json.loads(record.value)
-                # if not app.cdc_integrations.cdc_buckets[topic]["data_types"]:
-                #     app.cdc_integrations.cdc_buckets[topic]["data_types"] = values[
-                #         "schema"
-                #     ]["fields"][1]["fields"]
-                # logging.info(f"Pushing data to {topic} bucket")
-                app.cdc_integrations.cdc_buckets[record.topic]["data"].append(
-                    values["payload"].get("after")
-                )
+                after = values["payload"].get("after")
+                before = values["payload"].get("before")
+                if after:
+                    after["is_deleted"] = 0
+                    app.cdc_integrations.cdc_buckets[record.topic]["data"].append(after)
+                elif before:
+                    logging.info(f"Deleting Row: {before}")
+                    before["is_deleted"] = 1
+                    app.cdc_integrations.cdc_buckets[record.topic]["data"].append(before)
+                else:
+                    logging.info("Skipping, before and after values not present in payload")
+                    continue
 
         if total_records > MAX_RECORDS:
             logging.info(
@@ -98,12 +102,12 @@ async def process_kafka_messages() -> None:
                         "Successfully saved data to clickhouse, Emptying the topic bucket"
                     )
 
-            total_records = 0
-            app.cdc_integrations.get_cdc_integrations()
             logging.info(
-                "Setting total records to 0, refreshing buckets and committing"
+                "Committing, setting total records to 0 and refreshing buckets"
             )
             await consumer.commit()
+            total_records = 0
+            app.cdc_integrations.get_cdc_integrations()
 
 
 app = FastAPI()
