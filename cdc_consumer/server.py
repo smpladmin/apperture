@@ -13,7 +13,7 @@ from clickhouse import ClickHouse
 load_dotenv()
 logging.getLogger().setLevel(logging.INFO)
 
-TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
+TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "600000"))
 MAX_RECORDS = int(os.getenv("MAX_RECORDS", "10000"))
 AUTO_OFFSET_RESET = os.getenv("AUTO_OFFSET_RESET", "latest")
 
@@ -59,12 +59,15 @@ async def process_kafka_messages() -> None:
                 values = json.loads(record.value)
                 after = values["payload"].get("after")
                 before = values["payload"].get("before")
+                shard = app.cdc_integrations.cdc_buckets[record.topic]["shard"]
                 if after:
                     after["is_deleted"] = 0
+                    after["shard"] = shard
                     app.cdc_integrations.cdc_buckets[record.topic]["data"].append(after)
                 elif before:
                     logging.info(f"Deleting Row: {before}")
                     before["is_deleted"] = 1
+                    before["shard"] = shard
                     app.cdc_integrations.cdc_buckets[record.topic]["data"].append(before)
                 else:
                     logging.info("Skipping, before and after values not present in payload")
