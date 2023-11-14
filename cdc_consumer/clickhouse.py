@@ -59,6 +59,4 @@ class ClickHouse:
             column_names=columns,
             settings={"insert_async": True, "wait_for_async_insert": False},
         )
-        logging.info("Executing optimize query")
-        clickhouse_client.connection.query(f"OPTIMIZE TABLE {database}.{table} FINAL CLEANUP")
         clickhouse_client.close()
