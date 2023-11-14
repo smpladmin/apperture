@@ -19,5 +19,7 @@ async def get_clickstream_events(
 ):
     datasource = await ds_service.get_datasource(dsId)
     if datasource:
-        return clickstream_service.get_data_by_id(dsId=dsId)
+        return await clickstream_service.get_data_by_id(
+            dsId=dsId, app_id=str(datasource.app_id)
+        )
     return {"count": 0, "data": []}

@@ -313,13 +313,18 @@ class IntegrationService:
     def delete_file_from_s3(self, s3_key: str):
         self.s3_client.delete_object(Bucket=self.s3_bucket_name, Key=s3_key)
 
-    def create_clickhouse_table_from_csv(
-        self, name: str, clickhouse_credential: ClickHouseCredential, s3_key: str
+    async def create_clickhouse_table_from_csv(
+        self,
+        name: str,
+        clickhouse_credential: ClickHouseCredential,
+        s3_key: str,
+        app_id: str,
     ):
-        self.integrations.create_table_from_csv(
+        await self.integrations.create_table_from_csv(
             name=name,
             db_name=clickhouse_credential.databasename,
             s3_key=s3_key,
+            app_id=app_id,
         )
 
     async def update_credentials(self, id: PydanticObjectId, credential: Credential):

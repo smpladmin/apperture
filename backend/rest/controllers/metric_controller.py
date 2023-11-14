@@ -7,21 +7,18 @@ from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
 from domain.datasources.service import DataSourceService
 from domain.metrics.service import MetricService
+from domain.notifications.service import NotificationService
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.metrics import (
+    ComputedMetricStepResponse,
     CreateMetricDTO,
+    MetricFormulaDto,
     MetricsComputeDto,
     MetricWithUser,
     SavedMetricResponse,
-    ComputedMetricStepResponse,
-    MetricFormulaDto,
 )
 from rest.middlewares import get_user, get_user_id, validate_jwt
-from domain.notifications.service import NotificationService
-from rest.middlewares.validate_app_user import (
-    validate_app_user,
-    validate_library_items,
-)
+from rest.middlewares.validate_app_user import validate_app_user, validate_library_items
 
 router = APIRouter(
     tags=["metrics"], dependencies=[Depends(validate_jwt)], responses={401: {}}
@@ -36,12 +33,15 @@ router = APIRouter(
 async def compute_metrics(
     dto: MetricsComputeDto,
     metric_service: MetricService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
     if metric_service.validate_formula(
         dto.function, [aggregate.variable for aggregate in dto.aggregates]
     ):
+        ds = await ds_service.get_datasource(dto.datasourceId)
         result = await metric_service.compute_metric(
             datasource_id=str(dto.datasourceId),
+            app_id=str(ds.app_id),
             function=dto.function,
             aggregates=dto.aggregates,
             breakdown=dto.breakdown,

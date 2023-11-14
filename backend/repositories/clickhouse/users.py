@@ -1,13 +1,16 @@
-from .base import EventsBase
 from typing import Union
-from pypika import ClickHouseQuery, Criterion, Parameter, Order
+
+from pypika import ClickHouseQuery, Criterion, Order, Parameter
+
+from .base import EventsBase
 
 
 class User(EventsBase):
-    def get_user_properties(
-        self, user_id: str, datasource_id: str, event: Union[str, None]
+    async def get_user_properties(
+        self, user_id: str, datasource_id: str, app_id: str, event: Union[str, None]
     ):
-        return self.execute_get_query(
+        return await self.execute_query_for_app(
+            app_id=app_id,
             *self.build_get_user_properties_query(user_id, datasource_id, event)
         )
 

@@ -2,17 +2,17 @@ from copy import deepcopy
 from typing import List, Union
 
 from pypika import (
+    AliasedQuery,
     ClickHouseQuery,
     Criterion,
-    functions as fn,
-    analytics as an,
-    AliasedQuery,
     CustomFunction,
     DatePart,
     Order,
-    terms,
     Parameter,
 )
+from pypika import analytics as an
+from pypika import functions as fn
+from pypika import terms
 
 from domain.edge.models import SankeyDirection
 from repositories.clickhouse.base import EventsBase
@@ -33,9 +33,9 @@ class Edges(EventsBase):
             "end_date": end_date,
         }
 
-    def get_edges(self, ds_id: str, start_date: str, end_date: str):
-        return self.execute_get_query(
-            *self.build_edges_query(ds_id, start_date, end_date)
+    async def get_edges(self, ds_id: str, start_date: str, end_date: str, app_id: str):
+        return await self.execute_query_for_app(
+            app_id=app_id, *self.build_edges_query(ds_id, start_date, end_date)
         )
 
     def build_edges_query(self, ds_id: str, start_date: str, end_date: str):
@@ -68,11 +68,14 @@ class Edges(EventsBase):
             "end_date": end_date,
         }
 
-    def get_node_significance(
-        self, ds_id: str, event_name: str, start_date: str, end_date: str
+    async def get_node_significance(
+        self, ds_id: str, event_name: str, start_date: str, end_date: str, app_id: str
     ):
-        return self.execute_get_query(
-            *self.build_node_significance_query(ds_id, event_name, start_date, end_date)
+        return await self.execute_query_for_app(
+            app_id=app_id,
+            *self.build_node_significance_query(
+                ds_id, event_name, start_date, end_date
+            ),
         )
 
     def _build_significance_subquery(self, criterion: List):
@@ -104,7 +107,7 @@ class Edges(EventsBase):
             ds_id, event_name, start_date, end_date
         )
 
-    def get_node_trends(
+    async def get_node_trends(
         self,
         ds_id: str,
         event_name: str,
@@ -112,7 +115,7 @@ class Edges(EventsBase):
         end_date: str,
         trend_type: str,
     ):
-        return self.execute_get_query(
+        return await self.execute_query_for_app(
             *self.build_node_trends_query(
                 ds_id, event_name, start_date, end_date, trend_type
             )
@@ -146,11 +149,12 @@ class Edges(EventsBase):
             ds_id, event_name, start_date, end_date
         )
 
-    def get_node_sankey(
-        self, ds_id: str, event_name: str, start_date: str, end_date: str
+    async def get_node_sankey(
+        self, ds_id: str, event_name: str, start_date: str, end_date: str, app_id: str
     ):
-        return self.execute_get_query(
-            *self.build_node_sankey_query(ds_id, event_name, start_date, end_date)
+        return await self.execute_query_for_app(
+            app_id=app_id,
+            *self.build_node_sankey_query(ds_id, event_name, start_date, end_date),
         )
 
     def _build_sankey_subquery(self, extra_criterion: Union[List, None] = None):

@@ -117,8 +117,8 @@ class ClickstreamService:
                 column_names=self.columns,
             )
 
-    def get_data_by_id(self, dsId: str):
-        data_list = self.repository.get_all_data_by_dsId(dsId)
+    async def get_data_by_id(self, dsId: str, app_id: str):
+        data_list = await self.repository.get_all_data_by_dsId(dsId, app_id=app_id)
         data_list = [
             ClickstreamResult(
                 event=ComputedStreamEvent(
@@ -147,5 +147,5 @@ class ClickstreamService:
                 href,
             ) in data_list
         ]
-        count = self.repository.get_stream_count_by_dsId(dsId)
+        count = await self.repository.get_stream_count_by_dsId(dsId=dsId, app_id=app_id)
         return {"count": count[0][0], "data": data_list}

@@ -60,11 +60,11 @@ if settings.sentry_dsn:
 async def on_startup():
     mongo = Mongo()
     ClickHouseClientFactory()
-    clickhouse = Clickhouse()
+    # clickhouse = Clickhouse()
     app.dependency_overrides[Mongo] = lambda: mongo
     app.dependency_overrides[Clickhouse] = lambda: clickhouse
     await mongo.init()
-    clickhouse.init()
+    # clickhouse.init()
     init_cache(settings.redis_host, settings.redis_password)
 
 

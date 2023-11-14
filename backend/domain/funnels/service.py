@@ -2,8 +2,6 @@ import logging
 from datetime import datetime
 from typing import List, Union
 
-
-from mongo import Mongo
 from beanie import PydanticObjectId
 from beanie.operators import In
 from fastapi import Depends
@@ -22,13 +20,14 @@ from domain.funnels.models import (
     FunnelTrendsData,
 )
 from domain.metrics.models import SegmentFilter
-from repositories.clickhouse.funnels import Funnels
 from domain.notifications.models import (
     Notification,
     NotificationData,
     NotificationThresholdType,
     NotificationVariant,
 )
+from mongo import Mongo
+from repositories.clickhouse.funnels import Funnels
 from repositories.clickhouse.segments import Segments
 
 
@@ -126,13 +125,13 @@ class FunnelsService:
     async def compute_funnel(
         self,
         ds_id: str,
+        app_id: str,
         steps: List[FunnelStep],
         date_filter: Union[DateFilter, None],
         conversion_window: Union[ConversionWindow, None],
         random_sequence: Union[bool, None],
         segment_filter: Union[List[SegmentFilter], None],
     ) -> List[ComputedFunnelStep]:
-
         start_date, end_date = self.extract_date_range(date_filter=date_filter)
 
         conversion_time = self.compute_conversion_time(
@@ -143,7 +142,7 @@ class FunnelsService:
             segment_filter=segment_filter
         )
 
-        [funnel_stepwise_users_data] = self.funnels.get_users_count(
+        [funnel_stepwise_users_data] = await self.funnels.get_users_count(
             ds_id=ds_id,
             steps=steps,
             start_date=start_date,
@@ -197,13 +196,13 @@ class FunnelsService:
     async def get_funnel_trends(
         self,
         datasource_id: str,
+        app_id: str,
         steps: List[FunnelStep],
         date_filter: Union[DateFilter, None],
         conversion_window: Union[ConversionWindow, None],
         random_sequence: Union[bool, None],
         segment_filter: Union[List[SegmentFilter], None],
     ) -> List[FunnelTrendsData]:
-
         conversion_time = self.compute_conversion_time(
             conversion_window=conversion_window
         )
@@ -214,8 +213,9 @@ class FunnelsService:
 
         start_date, end_date = self.extract_date_range(date_filter=date_filter)
 
-        conversion_data = self.funnels.get_conversion_trend(
+        conversion_data = await self.funnels.get_conversion_trend(
             ds_id=datasource_id,
+            app_id=app_id,
             steps=steps,
             start_date=start_date,
             end_date=end_date,
@@ -238,6 +238,7 @@ class FunnelsService:
     async def get_user_conversion(
         self,
         datasource_id: str,
+        app_id: str,
         steps: List[FunnelStep],
         status: ConversionStatus,
         date_filter: Union[DateFilter, None],
@@ -254,8 +255,9 @@ class FunnelsService:
             segment_filter=segment_filter
         )
 
-        conversion_data = self.funnels.get_conversion_analytics(
+        conversion_data = await self.funnels.get_conversion_analytics(
             ds_id=datasource_id,
+            app_id=app_id,
             steps=steps,
             status=status,
             start_date=start_date,
@@ -319,8 +321,9 @@ class FunnelsService:
             segment_filter=funnel.segment_filter
         )
 
-        data = self.funnels.get_users_count(
+        data = await self.funnels.get_users_count(
             ds_id=str(funnel.datasource_id),
+            app_id=str(funnel.app_id),
             steps=funnel.steps,
             conversion_time=conversion_time,
             start_date=date,

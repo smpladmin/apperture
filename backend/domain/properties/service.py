@@ -1,14 +1,13 @@
 import logging
 from datetime import datetime
-
-import numpy as np
 from typing import List
 
+import numpy as np
 from beanie import PydanticObjectId
 from beanie.odm.operators.update.general import Set
 from fastapi import Depends
 
-from domain.properties.models import Property, Properties, PropertyDataType
+from domain.properties.models import Properties, Property, PropertyDataType
 from mongo import Mongo
 from repositories.clickhouse.events import Events
 
@@ -22,19 +21,23 @@ class PropertiesService:
         self.mongo = mongo
         self.events = events
 
-    def validate_properties(self, all_props: List[str], date: str, ds_id: str):
+    async def validate_properties(
+        self, all_props: List[str], date: str, ds_id: str, app_id: str
+    ):
         value_counts = np.array(
-            self.events.get_distinct_values_for_properties(
+            await self.events.get_distinct_values_for_properties(
                 all_props=all_props, ds_id=ds_id, date=date
             )[0]
         )
         all_props = np.array(all_props)
         return (all_props[value_counts > 1]).tolist()
 
-    async def refresh_properties(self, ds_id: str) -> Properties:
-        [(all_properties, date)] = self.events.get_event_properties(datasource_id=ds_id)
-        valid_props = self.validate_properties(
-            all_props=all_properties, date=date, ds_id=ds_id
+    async def refresh_properties(self, ds_id: str, app_id: str) -> Properties:
+        [(all_properties, date)] = self.events.get_event_properties(
+            datasource_id=ds_id, app_id=app_id
+        )
+        valid_props = await self.validate_properties(
+            all_props=all_properties, date=date, ds_id=ds_id, app_id=app_id
         )
         props = [
             Property(name=prop, type=PropertyDataType.DEFAULT) for prop in valid_props

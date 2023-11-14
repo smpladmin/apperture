@@ -1,37 +1,34 @@
 import copy
+import datetime
 from typing import List, Union
 
 from fastapi import Depends
+from pypika import (
+    AliasedQuery,
+    ClickHouseQuery,
+    Criterion,
+    CustomFunction,
+    Field,
+    Order,
+    Parameter,
+)
+from pypika import analytics as an
+from pypika import functions as fn
+from pypika.dialects import ClickHouseQueryBuilder
 from pypika.terms import ContainsCriterion
 
 from clickhouse import Clickhouse
-from domain.common.filter_models import (
-    LogicalOperators,
-)
+from domain.common.filter_models import LogicalOperators
 from domain.metrics.models import SegmentFilter
-from repositories.clickhouse.base import EventsBase
 from domain.segments.models import (
+    SegmentDateFilterType,
     SegmentFilterConditions,
-    SegmentGroup,
     SegmentFixedDateFilter,
+    SegmentGroup,
     SegmentLastDateFilter,
     SegmentSinceDateFilter,
-    SegmentDateFilterType,
 )
-from pypika import (
-    ClickHouseQuery,
-    Parameter,
-    Field,
-    Criterion,
-    AliasedQuery,
-    analytics as an,
-    functions as fn,
-    Order,
-    CustomFunction,
-)
-from pypika.dialects import ClickHouseQueryBuilder
-import datetime
-
+from repositories.clickhouse.base import EventsBase
 from repositories.clickhouse.utils.filters import Filters
 
 
@@ -262,9 +259,10 @@ class Segments(EventsBase):
         )
         return query.get_sql(with_alias=True)
 
-    def get_segment_data(
+    async def get_segment_data(
         self,
         datasource_id: str,
+        app_id: str,
         groups: List[SegmentGroup],
         columns: List[str],
     ):
@@ -273,8 +271,8 @@ class Segments(EventsBase):
             groups=groups,
         )
 
-        user_data = self.execute_get_query(
-            query=segment_users_query.get_sql(), parameters=params
+        user_data = await self.execute_query_for_app(
+            app_id=app_id, query=segment_users_query.get_sql(), parameters=params
         )
         user_ids = list(set([x[0] for x in user_data]))
         segment_count = len(user_ids)
@@ -291,13 +289,12 @@ class Segments(EventsBase):
             column_data_query = self.build_valid_column_data_query(
                 column=column, segment_user_ids=user_ids
             )
-            column_data = self.execute_get_query(
-                query=column_data_query, parameters=params
+            column_data = await self.execute_query_for_app(
+                app_id=app_id, query=column_data_query, parameters=params
             )
             uids = [uid for (data, uid) in column_data]
 
             for row in segment_data:
-
                 if row["user_id"] in uids:
                     row[column] = column_data[uids.index(row["user_id"])][0]
                 else:
