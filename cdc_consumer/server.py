@@ -54,7 +54,7 @@ async def process_kafka_messages() -> None:
                     continue
 
                 if not record.value:
-                    logging.info(f"Value not present for record: {record}")
+                    # logging.info(f"Value not present for record: {record}")
                     continue
                 values = json.loads(record.value)
                 after = values["payload"].get("after")
@@ -70,7 +70,7 @@ async def process_kafka_messages() -> None:
                 #     before["shard"] = shard
                 #     app.cdc_integrations.cdc_buckets[record.topic]["data"].append(before)
                 else:
-                    logging.info("Skipping, before and after values not present in payload")
+                    # logging.info("Skipping, before and after values not present in payload")
                     continue
 
         if total_records > MAX_RECORDS:
