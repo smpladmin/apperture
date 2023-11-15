@@ -65,7 +65,7 @@ async def process_kafka_messages() -> None:
                     after["shard"] = shard
                     app.cdc_integrations.cdc_buckets[record.topic]["data"].append(after)
                 elif before:
-                    logging.info(f"Deleting Row: {before}")
+                    # logging.info(f"Deleting Row: {before}")
                     before["is_deleted"] = 1
                     before["shard"] = shard
                     app.cdc_integrations.cdc_buckets[record.topic]["data"].append(before)
