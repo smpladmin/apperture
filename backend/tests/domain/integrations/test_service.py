@@ -37,7 +37,16 @@ class TestIntegrationService:
         tableName = ""
 
         integration = await self.service.create_integration(
-            app, provider, account_id, api_key, secret, tableName, None, None, None
+            app,
+            provider,
+            account_id,
+            api_key,
+            secret,
+            tableName,
+            None,
+            None,
+            None,
+            None,
         )
 
         assert integration.user_id == user_id

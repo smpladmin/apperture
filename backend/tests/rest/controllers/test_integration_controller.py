@@ -95,6 +95,7 @@ def test_add_database_integration(
             "type": "MYSQL",
             "csv_credential": None,
             "api_base_url": None,
+            "branch_credential": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",
@@ -193,6 +194,7 @@ def test_add_csv_integration(
                 "table_name": "test",
             },
             "api_base_url": None,
+            "branch_credential": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",
