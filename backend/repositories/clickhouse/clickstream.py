@@ -15,11 +15,15 @@ class Clickstream(EventsBase):
 
     async def get_all_data_by_dsId(self, dsId: str, app_id: str) -> List[any]:
         query, parameters = self.build_get_all_events_query(dsId)
-        return await self.execute_query_for_app(query=query, parameters=parameters)
+        return await self.execute_query_for_app(
+            query=query, parameters=parameters, app_id=app_id
+        )
 
     async def get_stream_count_by_dsId(self, dsId: str, app_id: str):
         query, parameters = self.build_count_all_events_query(dsId)
-        return await self.execute_query_for_app(query=query, parameters=parameters)
+        return await self.execute_query_for_app(
+            query=query, parameters=parameters, app_id=app_id
+        )
 
     def build_get_all_events_query(self, dsId: str):
         parameters = {"dsId": dsId}

@@ -114,11 +114,13 @@ class Edges(EventsBase):
         start_date: str,
         end_date: str,
         trend_type: str,
+        app_id: str,
     ):
         return await self.execute_query_for_app(
+            app_id=app_id,
             *self.build_node_trends_query(
                 ds_id, event_name, start_date, end_date, trend_type
-            )
+            ),
         )
 
     def build_node_trends_query(

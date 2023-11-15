@@ -9,7 +9,9 @@ from repositories.clickhouse.base import EventsBase
 class Events(EventsBase):
     async def get_unique_events(self, datasource_id: str, app_id: str):
         query, params = self.build_unique_events_query(datasource_id)
-        return await self.execute_query_for_app(query, params)
+        return await self.execute_query_for_app(
+            query=query, parameters=params, app_id=app_id
+        )
 
     async def get_events(
         self,
@@ -83,7 +85,7 @@ class Events(EventsBase):
         )
         return query.get_sql(), params
 
-    async def get_event_properties(self, datasource_id: str, app_id):
+    async def get_event_properties(self, datasource_id: str, app_id: str):
         return await self.execute_query_for_app(
             app_id=app_id, *self.build_event_properties_query(datasource_id)
         )

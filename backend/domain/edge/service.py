@@ -256,12 +256,13 @@ class EdgeService:
                 .to_list()
             )
         else:
-            trends = self.edges.get_node_trends(
+            trends = await self.edges.get_node_trends(
                 ds_id=str(datasource.id),
                 event_name=node,
                 start_date=start_date,
                 end_date=end_date,
                 trend_type=trend_type,
+                app_id=str(datasource.app_id)
             )
             return [
                 NodeTrend(
