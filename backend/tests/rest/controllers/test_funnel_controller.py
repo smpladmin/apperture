@@ -121,6 +121,7 @@ def test_get_funnel_trends(client_init, funnel_trend_response, funnel_service):
     funnel_service.get_funnel_trends.assert_called_once_with(
         **{
             "datasource_id": "635ba034807ab86d8a2aadd9",
+            "app_id": "635ba034807ab86d8a2aadd7",
             "steps": [
                 FunnelStep(
                     event="Login",
@@ -152,6 +153,7 @@ def test_get_transient_funnel_trends(
     funnel_service.get_funnel_trends.assert_called_with(
         **{
             "datasource_id": "636a1c61d715ca6baae65611",
+            "app_id": "636a1c61d715ca6baae65611",
             "steps": [
                 FunnelStep(
                     event="Login",

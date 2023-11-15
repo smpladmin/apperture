@@ -4,7 +4,7 @@ from unittest.mock import ANY
 import pytest
 from beanie import PydanticObjectId
 
-from domain.common.date_models import DateFilter, LastDateFilter, DateFilterType
+from domain.common.date_models import DateFilter, DateFilterType, LastDateFilter
 from domain.retention.models import EventSelection, Granularity
 from tests.utils import filter_response
 
@@ -104,6 +104,7 @@ def test_compute_transient_retention(
             "granularity": Granularity.DAYS,
             "segment_filter": None,
             "start_event": EventSelection(event="start_event", filters=None),
+            "app_id": "636a1c61d715ca6baae65611",
         }
     )
 

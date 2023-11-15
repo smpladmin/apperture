@@ -1,6 +1,8 @@
-from unittest.mock import AsyncMock, MagicMock, patch, ANY, Mock
-from beanie import PydanticObjectId
+from unittest.mock import ANY, AsyncMock, MagicMock, Mock, patch
+
 import pytest
+from beanie import PydanticObjectId
+
 from domain.apps.models import App, ClickHouseCredential
 from domain.common.models import IntegrationProvider
 from domain.integrations.models import (
@@ -17,6 +19,7 @@ class TestIntegrationService:
         Integration.get_settings = MagicMock()
         Integration.insert = AsyncMock()
         self.host = "localhost"
+        self.app_id = "test-app-id"
         self.port = "3306"
         self.username = "admin"
         self.password = "password"
@@ -121,9 +124,11 @@ class TestIntegrationService:
 
             assert result == expected_result
 
-    def test_create_clickhouse_table_from_csv(self):
-        self.integrations.create_table_from_csv.return_value = True
-        self.service.create_clickhouse_table_from_csv(
+    @pytest.mark.asyncio
+    async def test_create_clickhouse_table_from_csv(self):
+        self.integrations.create_table_from_csv = AsyncMock(return_value=True)
+        await self.service.create_clickhouse_table_from_csv(
+            app_id=self.app_id,
             name="test",
             s3_key="/csvs/app-id/test.csv",
             clickhouse_credential=ClickHouseCredential(
@@ -135,5 +140,6 @@ class TestIntegrationService:
                 "db_name": "db",
                 "name": "test",
                 "s3_key": "/csvs/app-id/test.csv",
-            }
+            },
+            app_id="test-app-id"
         )

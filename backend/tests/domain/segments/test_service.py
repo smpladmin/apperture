@@ -1,22 +1,22 @@
 from collections import namedtuple
-from unittest.mock import MagicMock, ANY, AsyncMock
+from unittest.mock import ANY, AsyncMock, MagicMock
 
 import pytest
 from beanie import PydanticObjectId
 
 from domain.common.filter_models import (
-    FilterOperatorsString,
     FilterDataType,
+    FilterOperatorsString,
     LogicalOperators,
 )
-from domain.segments.service import SegmentService
 from domain.segments.models import (
-    WhereSegmentFilter,
-    SegmentFilterConditions,
-    SegmentGroup,
     ComputedSegment,
     Segment,
+    SegmentFilterConditions,
+    SegmentGroup,
+    WhereSegmentFilter,
 )
+from domain.segments.service import SegmentService
 
 
 class TestSegmentService:
@@ -27,6 +27,7 @@ class TestSegmentService:
         self.mongo = MagicMock()
         self.service = SegmentService(segments=self.segments, mongo=self.mongo)
         self.ds_id = "63771fc960527aba9354399c"
+        self.app_id = "63771fc960527aba9354399a"
         Segment.app_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         Segment.datasource_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.filters = [
@@ -79,6 +80,7 @@ class TestSegmentService:
 
     @pytest.mark.asyncio
     async def test_compute_segment(self):
+        self.segments.get_segment_data = AsyncMock()
         self.segments.get_segment_data.return_value = [
             {"user_id": "a", "prop1": "b", "prop2": "c", "prop3": "d"},
             {"user_id": "e", "prop1": "f", "prop2": "g", "prop3": "h"},
@@ -87,6 +89,7 @@ class TestSegmentService:
             datasource_id=self.ds_id,
             columns=self.columns,
             groups=self.groups,
+            app_id=self.app_id,
         ) == ComputedSegment(
             count=2,
             data=[
@@ -98,6 +101,7 @@ class TestSegmentService:
             **{
                 "columns": ["prop1", "prop2", "prop3"],
                 "datasource_id": self.ds_id,
+                "app_id": "63771fc960527aba9354399a",
                 "groups": [
                     SegmentGroup(
                         filters=[

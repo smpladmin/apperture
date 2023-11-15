@@ -60,6 +60,7 @@ class TestMetricService:
             filter=LastDateFilter(days=3), type=DateFilterType.LAST
         )
         self.id = "6384a65e0a397236d9de236a"
+        self.app_id = "6384a65e0a397236d9de236a"
         Metric.id = MagicMock(return_value=self.id)
         Metric.app_id = MagicMock(return_value=self.id)
         Metric.enabled = True
@@ -389,7 +390,7 @@ class TestMetricService:
     )
     @pytest.mark.asyncio
     async def test_compute_metric(self, query_result, function, breakdown, result):
-        self.metric.compute_query.return_value = query_result
+        self.metric.compute_query = AsyncMock(return_value=query_result)
         assert (
             await self.service.compute_metric(
                 datasource_id=self.ds_id,
@@ -398,17 +399,20 @@ class TestMetricService:
                 breakdown=breakdown,
                 date_filter=self.date_filter,
                 segment_filter=None,
+                app_id=self.app_id,
             )
             == result
         )
 
     @pytest.mark.asyncio
     async def test_compute_metric_with_segment_filter(self):
-        self.metric.compute_query.return_value = [
-            (datetime(2023, 1, 22).date(), 518),
-            (datetime(2023, 1, 23).date(), 418),
-            (datetime(2023, 1, 24).date(), 318),
-        ]
+        self.metric.compute_query = AsyncMock(
+            return_value=[
+                (datetime(2023, 1, 22).date(), 518),
+                (datetime(2023, 1, 23).date(), 418),
+                (datetime(2023, 1, 24).date(), 318),
+            ]
+        )
 
         self.segment.build_segment_filter_on_metric_criterion = MagicMock(
             return_value=(
@@ -450,6 +454,7 @@ class TestMetricService:
 
         assert await self.service.compute_metric(
             datasource_id=self.ds_id,
+            app_id=self.app_id,
             aggregates=self.aggregates,
             function="A",
             breakdown=[],
@@ -530,6 +535,7 @@ class TestMetricService:
                 ],
                 "breakdown": [],
                 "datasource_id": "636a1c61d715ca6baae65611",
+                "app_id": "6384a65e0a397236d9de236a",
                 "end_date": "2023-01-24",
                 "function": "A",
                 "segment_filter_criterion": '"user_id" IN (SELECT * FROM "test")',
@@ -602,7 +608,7 @@ class TestMetricService:
             return_value='"user_id" IN (SELECT * FROM "test")'
         )
 
-        self.metric.compute_query = MagicMock(
+        self.metric.compute_query = AsyncMock(
             return_value=[(datetime(2023, 4, 13, 6, 34, 32, 876000), 1500.0)]
         )
         assert (
@@ -637,6 +643,7 @@ class TestMetricService:
                 ],
                 "breakdown": [],
                 "datasource_id": "63d0a7bfc636cee15d81f579",
+                "app_id": "63ca46feee94e38b81cda37a",
                 "end_date": ANY,
                 "function": "A*2",
                 "segment_filter_criterion": '"user_id" IN (SELECT * FROM "test")',

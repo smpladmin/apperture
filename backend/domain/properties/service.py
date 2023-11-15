@@ -24,11 +24,10 @@ class PropertiesService:
     async def validate_properties(
         self, all_props: List[str], date: str, ds_id: str, app_id: str
     ):
-        value_counts = np.array(
-            await self.events.get_distinct_values_for_properties(
-                all_props=all_props, ds_id=ds_id, date=date
-            )[0]
+        properties = await self.events.get_distinct_values_for_properties(
+            all_props=all_props, ds_id=ds_id, date=date
         )
+        value_counts = np.array(properties[0])
         all_props = np.array(all_props)
         return (all_props[value_counts > 1]).tolist()
 

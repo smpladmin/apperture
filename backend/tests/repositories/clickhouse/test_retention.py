@@ -3,9 +3,9 @@ from unittest.mock import MagicMock
 import pytest
 from pypika import ClickHouseQuery
 
-from domain.common.filter_models import FilterOperatorsString, FilterDataType
+from domain.common.filter_models import FilterDataType, FilterOperatorsString
 from domain.retention.models import EventSelection, Granularity
-from domain.segments.models import WhereSegmentFilter, SegmentFilterConditions
+from domain.segments.models import SegmentFilterConditions, WhereSegmentFilter
 from repositories.clickhouse.retention import Retention
 from repositories.clickhouse.utils.filters import Filters
 
@@ -18,6 +18,7 @@ class TestRetentionRepository:
         repo.execute_get_query = MagicMock()
         self.repo = repo
         self.datasource_id = "test-id"
+        self.app_id = "test-app-id"
         self.start_date = "2022-12-01"
         self.end_date = "2022-12-31"
         self.start_event = EventSelection(event="start_event", filters=None)
@@ -65,9 +66,11 @@ class TestRetentionRepository:
             '"retention_count_query"."granularity"="initial_count_query"."granularity"'
         )
 
-    def test_compute_retention(self):
-        self.repo.compute_retention(
+    @pytest.mark.sasyncio
+    async def test_compute_retention(self):
+        await self.repo.compute_retention(
             datasource_id=self.datasource_id,
+            app_id=self.app_id,
             start_date=self.start_date,
             end_date=self.end_date,
             start_event=self.start_event,

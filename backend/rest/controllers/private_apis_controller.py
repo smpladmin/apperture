@@ -278,7 +278,7 @@ async def refresh_properties(
     if ds_id:
         ds = await ds_service.get_datasource(ds_id)
         return await properties_service.refresh_properties(
-            ds_id=ds_id, app_id=str(ds.app_idx)
+            ds_id=ds_id, app_id=str(ds.app_id)
         )
     else:
         return await properties_service.refresh_properties_for_all_datasources()

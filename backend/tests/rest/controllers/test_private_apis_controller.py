@@ -5,18 +5,17 @@ from unittest.mock import ANY, call
 from beanie import PydanticObjectId
 
 from domain.apps.models import ClickHouseCredential
+from domain.common.models import IntegrationProvider
 from domain.notifications.models import (
     NotificationData,
+    NotificationType,
     NotificationVariant,
     ThresholdMap,
-    NotificationType,
 )
 from domain.spreadsheets.models import DatabaseClient
 from rest.dtos.clickstream_event_properties import ClickStreamEventPropertiesDto
 from rest.dtos.event_properties import EventPropertiesDto
-
 from rest.dtos.events import CreateEventDto
-from domain.common.models import IntegrationProvider
 
 
 def test_update_events(client_init, events_service, events_data):
@@ -60,7 +59,7 @@ def test_refresh_properties(client_init, properties_service):
         "updatedAt": None,
     }
     properties_service.refresh_properties.assert_called_once_with(
-        **{"ds_id": "635ba034807ab86d8a2aadd9"}
+        **{"ds_id": "635ba034807ab86d8a2aadd9", "app_id": "636a1c61d715ca6baae65611"}
     )
 
     response1 = client_init.put("/private/properties")

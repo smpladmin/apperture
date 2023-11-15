@@ -1,15 +1,16 @@
 import json
 from unittest.mock import ANY
+
 import pytest
 
-from domain.common.filter_models import FilterOperatorsString, FilterDataType
+from domain.common.filter_models import FilterDataType, FilterOperatorsString
 from domain.metrics.models import (
-    SegmentsAndEvents,
-    SegmentsAndEventsType,
-    SegmentsAndEventsAggregations,
     MetricBasicAggregation,
+    SegmentsAndEvents,
+    SegmentsAndEventsAggregations,
+    SegmentsAndEventsType,
 )
-from domain.segments.models import WhereSegmentFilter, SegmentFilterConditions
+from domain.segments.models import SegmentFilterConditions, WhereSegmentFilter
 
 
 def test_compute_metric(
@@ -51,6 +52,7 @@ def test_compute_metric(
             ],
             "breakdown": [],
             "datasource_id": "638f1aac8e54760eafc64d70",
+            "app_id": "636a1c61d715ca6baae65611",
             "date_filter": None,
             "segment_filter": None,
             "function": "A",
