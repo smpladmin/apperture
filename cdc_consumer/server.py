@@ -61,14 +61,14 @@ async def process_kafka_messages() -> None:
                 before = values["payload"].get("before")
                 shard = app.cdc_integrations.cdc_buckets[record.topic]["shard"]
                 if after:
-                    # after["is_deleted"] = 0
+                    after["is_deleted"] = 0
                     after["shard"] = shard
                     app.cdc_integrations.cdc_buckets[record.topic]["data"].append(after)
-                # elif before:
-                #     logging.info(f"Deleting Row: {before}")
-                #     before["is_deleted"] = 1
-                #     before["shard"] = shard
-                #     app.cdc_integrations.cdc_buckets[record.topic]["data"].append(before)
+                elif before:
+                    logging.info(f"Deleting Row: {before}")
+                    before["is_deleted"] = 1
+                    before["shard"] = shard
+                    app.cdc_integrations.cdc_buckets[record.topic]["data"].append(before)
                 else:
                     # logging.info("Skipping, before and after values not present in payload")
                     continue
@@ -85,7 +85,6 @@ async def process_kafka_messages() -> None:
                 logging.info(
                     f"Inserting data for topic {topic} into {table} table of {database}"
                 )
-                # Not handling delete operations
                 to_insert = list(filter(None, bucket["data"]))
                 if to_insert:
                     logging.info(
