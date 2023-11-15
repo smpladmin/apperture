@@ -14,6 +14,7 @@ class CredentialType(str, Enum):
     MYSQL = "MYSQL"
     MSSQL = "MSSQL"
     CSV = "CSV"
+    BRANCH = "BRANCH"
 
 
 class RelationalDatabaseType(str, Enum):
@@ -36,6 +37,12 @@ class CSVCredential(BaseModel):
     name: str
     s3_key: str
     table_name: str
+
+
+class BranchCredential(BaseModel):
+    app_id:str
+    branch_key:str
+    branch_secret:str
 
 
 class MySQLCredential(BaseModel):
@@ -102,6 +109,7 @@ class Credential(BaseModel):
     mssql_credential: Optional[MsSQLCredential]
     cdc_credential: Optional[CdcCredential]
     csv_credential: Optional[CSVCredential]
+    branch_credential: Optional[BranchCredential]
     api_base_url: Optional[str]
 
     class Config:

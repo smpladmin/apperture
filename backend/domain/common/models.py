@@ -16,6 +16,7 @@ class IntegrationProvider(str, Enum):
     MSSQL = "mssql"
     CSV = "csv"
     SAMPLE = "sample"
+    BRANCH = "branch"
 
     def supports_runlogs(self):
         return self in [self.MIXPANEL, self.AMPLITUDE, self.CLEVERTAP, self.API]
