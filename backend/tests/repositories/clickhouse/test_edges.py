@@ -129,13 +129,14 @@ class TestEdgeRepository:
     async def test_get_node_trends(self):
         await self.repo.get_node_trends(
             ds_id=self.datasource_id,
+            app_id=self.app_id,
             event_name=self.event_name,
             start_date=self.start_date,
             end_date=self.end_date,
             trend_type=TrendType.DATE.value,
         )
         self.repo.execute_query_for_app.assert_called_once_with(
-            self.trends_query, self.parameters
+            self.trends_query, self.parameters, app_id=self.app_id
         )
 
     def test_build_node_trends_query(self):

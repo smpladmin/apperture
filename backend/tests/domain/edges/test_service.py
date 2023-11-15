@@ -552,23 +552,25 @@ class TestEdgeService:
     @pytest.mark.asyncio
     async def test_get_node_trends_others(self):
         self.datasource.id = "test-id"
-        self.service.edges.get_node_trends.return_value = (
-            (
-                2022,
-                1,
-                1111,
-                6488,
-                datetime(2022, 11, 6, 0, 0),
-                datetime(2022, 11, 12, 0, 0),
-            ),
-            (
-                2022,
-                2,
-                1371,
-                6972,
-                datetime(2022, 11, 13, 0, 0),
-                datetime(2022, 11, 19, 0, 0),
-            ),
+        self.service.edges.get_node_trends = AsyncMock(
+            return_value=(
+                (
+                    2022,
+                    1,
+                    1111,
+                    6488,
+                    datetime(2022, 11, 6, 0, 0),
+                    datetime(2022, 11, 12, 0, 0),
+                ),
+                (
+                    2022,
+                    2,
+                    1371,
+                    6972,
+                    datetime(2022, 11, 13, 0, 0),
+                    datetime(2022, 11, 19, 0, 0),
+                ),
+            )
         )
         assert [
             NodeTrend(
@@ -605,7 +607,8 @@ class TestEdgeService:
                 "event_name": "test",
                 "start_date": "2022-01-01",
                 "trend_type": TrendType.WEEK,
-            }
+            },
+            app_id="636a1c61d715ca6baae65611"
         )
 
     @pytest.mark.asyncio
