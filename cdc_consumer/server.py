@@ -2,7 +2,6 @@ import os
 import json
 import asyncio
 import logging
-from typing import List
 
 from aiokafka import AIOKafkaConsumer
 from dotenv import load_dotenv
@@ -14,20 +13,9 @@ from clickhouse import ClickHouse
 load_dotenv()
 logging.getLogger().setLevel(logging.INFO)
 
-TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
+TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "600000"))
 MAX_RECORDS = int(os.getenv("MAX_RECORDS", "10000"))
 AUTO_OFFSET_RESET = os.getenv("AUTO_OFFSET_RESET", "latest")
-
-
-def handle_none_values(values: List, topic: str):
-    res = []
-    datatypes = app.cdc_integrations.cdc_buckets[topic]["data_types"]
-    for i, value in enumerate(values):
-        if (not value) and datatypes[i]["type"] == "string":
-            res.append("NULL")
-        else:
-            res.append(value)
-    return res
 
 
 async def process_kafka_messages() -> None:
@@ -40,7 +28,6 @@ async def process_kafka_messages() -> None:
         group_id="cdc",
         bootstrap_servers="kafka:9092",
         auto_offset_reset=AUTO_OFFSET_RESET,
-        value_deserializer=lambda v: v.decode("utf-8"),
         enable_auto_commit=False,
         fetch_max_bytes=7864320,
     )
@@ -64,16 +51,27 @@ async def process_kafka_messages() -> None:
                 topic = record.topic
                 if not app.cdc_integrations.cdc_buckets.get(topic):
                     logging.info(f"Bucket not found for topic: {topic}")
+                    continue
 
+                if not record.value:
+                    # logging.info(f"Value not present for record: {record}")
+                    continue
                 values = json.loads(record.value)
-                if not app.cdc_integrations.cdc_buckets[topic]["data_types"]:
-                    app.cdc_integrations.cdc_buckets[topic]["data_types"] = values[
-                        "schema"
-                    ]["fields"][1]["fields"]
-                logging.info(f"Pushing data to {topic} bucket")
-                app.cdc_integrations.cdc_buckets[record.topic]["data"].append(
-                    values["payload"].get("after")
-                )
+                after = values["payload"].get("after")
+                before = values["payload"].get("before")
+                shard = app.cdc_integrations.cdc_buckets[record.topic]["shard"]
+                if after:
+                    # after["is_deleted"] = 0
+                    after["shard"] = shard
+                    app.cdc_integrations.cdc_buckets[record.topic]["data"].append(after)
+                # elif before:
+                #     logging.info(f"Deleting Row: {before}")
+                #     before["is_deleted"] = 1
+                #     before["shard"] = shard
+                #     app.cdc_integrations.cdc_buckets[record.topic]["data"].append(before)
+                else:
+                    # logging.info("Skipping, before and after values not present in payload")
+                    continue
 
         if total_records > MAX_RECORDS:
             logging.info(
@@ -87,16 +85,14 @@ async def process_kafka_messages() -> None:
                 logging.info(
                     f"Inserting data for topic {topic} into {table} table of {database}"
                 )
-                to_insert = bucket["data"]
+                # Not handling delete operations
+                to_insert = list(filter(None, bucket["data"]))
                 if to_insert:
                     logging.info(
                         f"Data present in {topic} bucket len: {len(to_insert)}, Saving to clickhouse"
                     )
                     columns = to_insert[0].keys()
-                    events = [
-                        handle_none_values(values=data.values(), topic=topic)
-                        for data in to_insert
-                    ]
+                    events = [data.values() for data in to_insert]
                     app.clickhouse.save_events(
                         events=events,
                         columns=columns,
@@ -109,12 +105,12 @@ async def process_kafka_messages() -> None:
                         "Successfully saved data to clickhouse, Emptying the topic bucket"
                     )
 
-            total_records = 0
-            app.cdc_integrations.get_cdc_integrations()
             logging.info(
-                "Setting total records to 0, refreshing buckets and committing"
+                "Committing, setting total records to 0 and refreshing buckets"
             )
             await consumer.commit()
+            total_records = 0
+            app.cdc_integrations.get_cdc_integrations()
 
 
 app = FastAPI()
