@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 
 DATA_FETCH_DAYS_OFFSET = 100
+BRANCH_DATA_FETCH_DAYS_OFFSET = 7
 AIRFLOW_INIT_DATE = datetime(2023, 10, 25, 0, 0, 0, 0)
 
 

@@ -32,7 +32,7 @@ from domain.spreadsheets.models import DatabaseClient
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apidata import CreateAPIDataDto
 from rest.dtos.apperture_users import PrivateUserResponse, ResetPasswordDto
-from rest.dtos.apps import ClickHouseRemoteConnectionCredsResponse
+from rest.dtos.apps import AppDatabaseResponse, ClickHouseRemoteConnectionCredsResponse
 from rest.dtos.cdc import CdcCredentials
 from rest.dtos.clickstream_event_properties import (
     ClickStreamEventPropertiesDto,
@@ -497,9 +497,23 @@ async def get_cdc_credentials(
     "/apps/clickhouse_server_credential/{app_id}/",
     response_model=Union[ClickHouseRemoteConnectionCredsResponse, None],
 )
-async def get_app_remote_connection_by_dsId(
+async def get_app_remote_connection(
     app_id: str,
     app_service: AppService = Depends(),
 ):
     app = await app_service.get_app(id=app_id)
     return app.remote_connection
+
+
+@router.get(
+    "/apps/database/{app_id}",
+    response_model=Union[AppDatabaseResponse, None],
+)
+async def get_app_database(
+    app_id: str,
+    app_service: AppService = Depends(),
+):
+    app = await app_service.get_app(id=app_id)
+    return AppDatabaseResponse(
+        name=app.name, database_credentials=app.clickhouse_credential
+    )

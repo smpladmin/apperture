@@ -1,7 +1,11 @@
 import logging
 from typing import List, Union
 
-from domain.datasource.models import DataSource, ClickHouseRemoteConnectionCred
+from domain.datasource.models import (
+    AppDatabaseResponse,
+    DataSource,
+    ClickHouseRemoteConnectionCred,
+)
 from domain.datasource.models import DataSourceResponse
 from apperture.backend_action import get
 
@@ -42,3 +46,7 @@ class DataSourceService:
             if response.json()
             else None
         )
+
+    def get_database_for_app(self, app_id: str) -> AppDatabaseResponse:
+        response = get(f"/private/apps/database/{app_id}")
+        return AppDatabaseResponse(**response.json())

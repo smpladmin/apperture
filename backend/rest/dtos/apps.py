@@ -2,7 +2,12 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from domain.apps.models import App, ClickHouseRemoteConnectionCreds, OrgAccess
+from domain.apps.models import (
+    App,
+    ClickHouseCredential,
+    ClickHouseRemoteConnectionCreds,
+    OrgAccess,
+)
 from rest.dtos.integrations import IntegrationWithDataSources
 from rest.dtos.model_response import ModelResponse
 
@@ -10,6 +15,11 @@ from rest.dtos.model_response import ModelResponse
 class CreateAppDto(BaseModel):
     name: str
     remote_connection: Optional[ClickHouseRemoteConnectionCreds]
+
+
+class AppDatabaseResponse(BaseModel):
+    name: str
+    database_credentials: ClickHouseCredential
 
 
 class AppResponse(App, ModelResponse):
