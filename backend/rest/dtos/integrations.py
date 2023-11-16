@@ -44,6 +44,12 @@ class DatabaseCredentialDto(BaseModel):
     sshCredential: Optional[DatabaseSSHCredentialDto]
 
 
+class BranchCredentialDto(BaseModel):
+    appId:str
+    branchKey:str
+    branchSecret:str
+
+
 class CreateIntegrationDto(BaseModel):
     appId: str
     provider: IntegrationProvider
@@ -55,6 +61,7 @@ class CreateIntegrationDto(BaseModel):
     databaseCredential: Union[DatabaseCredentialDto, None]
     csvFileId: Union[str, None]
     eventList: Union[List[str], None]
+    branchCredential:Union[BranchCredentialDto, None]
 
 
 class IntegrationWithDataSources(Integration, ModelResponse):

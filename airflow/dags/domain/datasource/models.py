@@ -7,16 +7,24 @@ from typing import Optional, NamedTuple
 class CredentialType(str, Enum):
     OAUTH = "OAUTH"
     API_KEY = "API_KEY"
+    BRANCH = "BRANCH"
+
+
+class BranchCredential(BaseModel):
+    app_id: str
+    branch_key: str
+    branch_secret: str
 
 
 class Credential(BaseModel):
     type: CredentialType
-    account_id: str = Field(alias="accountId")
+    account_id: Optional[str] = Field(alias="accountId")
     refresh_token: Optional[str] = Field(alias="refreshToken")
     api_key: Optional[str] = Field(alias="apiKey")
     tableName: Optional[str]
     secret: Optional[str]
     api_base_url: Optional[str] = Field(alias="apiBaseUrl")
+    branch_credential: Optional[BranchCredential] = Field(alias="branchCredential")
 
 
 class DataSourceVersion(str, Enum):
@@ -31,6 +39,7 @@ class IntegrationProvider(str, Enum):
     AMPLITUDE = "amplitude"
     CLEVERTAP = "clevertap"
     API = "api"
+    BRANCH = "branch"
 
 
 class DataSource(BaseModel):
@@ -39,7 +48,7 @@ class DataSource(BaseModel):
     createdAt: datetime
     provider: IntegrationProvider
     name: Optional[str]
-    external_source_id: str = Field(alias="externalSourceId")
+    external_source_id: Optional[str] = Field(alias="externalSourceId")
     version: DataSourceVersion
 
 
@@ -62,3 +71,14 @@ class ClickHouseRemoteConnectionCred(BaseModel):
     port: int
     username: str
     password: str
+
+
+class ClickHouseCredential(BaseModel):
+    username: str
+    password: str
+    databasename: str
+
+
+class AppDatabaseResponse(BaseModel):
+    name: str
+    database_credentials: ClickHouseCredential

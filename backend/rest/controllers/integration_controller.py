@@ -129,6 +129,16 @@ async def create_integration(
         if dto.csvFileId
         else None
     )
+    branch_credential = (
+        integration_service.build_branch_credential(
+            app_id=dto.branchCredential.appId,
+            branch_key=dto.branchCredential.branchKey,
+            branch_secret=dto.branchCredential.branchSecret,
+        )
+        if dto.branchCredential
+        else None
+    )
+
     app = await app_service.get_shared_or_owned_app(id=dto.appId, user=user)
     api_base_url = None
     if dto.provider is IntegrationProvider.CLEVERTAP:
@@ -144,6 +154,7 @@ async def create_integration(
         mysql_credential,
         mssql_credential,
         csv_credential,
+        branch_credential,
         api_base_url=api_base_url,
     )
 

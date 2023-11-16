@@ -2424,6 +2424,7 @@ def integration_response():
             "cdc_credential": None,
             "csv_credential": None,
             "api_base_url": None,
+            "branch_credential": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",

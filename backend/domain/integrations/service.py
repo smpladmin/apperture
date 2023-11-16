@@ -18,6 +18,7 @@ from repositories.clickhouse.integrations import Integrations
 from rest.dtos.integrations import DatabaseSSHCredentialDto
 
 from .models import (
+    BranchCredential,
     Credential,
     CredentialType,
     CSVCredential,
@@ -91,6 +92,7 @@ class IntegrationService:
         mysql_credential: Optional[MySQLCredential],
         mssql_credential: Optional[MsSQLCredential],
         csv_credential: Optional[CSVCredential],
+        branch_credential: Optional[BranchCredential],
         api_base_url: Optional[str] = None,
     ):
         if mysql_credential:
@@ -99,6 +101,8 @@ class IntegrationService:
             credential_type = CredentialType.MSSQL
         elif csv_credential:
             credential_type = CredentialType.CSV
+        elif branch_credential:
+            credential_type = CredentialType.BRANCH
         else:
             credential_type = CredentialType.API_KEY
 
@@ -116,6 +120,7 @@ class IntegrationService:
             mysql_credential=mysql_credential,
             mssql_credential=mssql_credential,
             csv_credential=csv_credential,
+            branch_credential=branch_credential,
             api_base_url=api_base_url,
         )
         integration = Integration(
@@ -141,6 +146,11 @@ class IntegrationService:
             username=username,
             password=password,
             ssh_key=ssh_key,
+        )
+
+    def build_branch_credential(self, app_id: str, branch_key: str, branch_secret: str):
+        return BranchCredential(
+            app_id=app_id, branch_key=branch_key, branch_secret=branch_secret
         )
 
     def build_database_credential(
