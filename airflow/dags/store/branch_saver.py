@@ -23,14 +23,14 @@ class BranchDataSaver:
     def convert_header_to_attribute(self, headers):
         attr = ""
         for header in headers:
-            attr += header.replace('"', "") + (
-                " datetime ," if header == '"timestamp"' else " String ,"
-            )
+            attr += header + (" datetime ," if header == "timestamp" else " String ,")
         return attr
 
     def create_table(self, table_name, column_names, database_name):
         attributes = self.convert_header_to_attribute(column_names)
         create_table_query = f"CREATE TABLE IF NOT EXISTS {database_name}.{table_name} ({attributes}) ENGINE = MergeTree ORDER BY timestamp"
+        logging.info("### CREATE QUERY")
+        logging.info(create_table_query)
         self.client.query(create_table_query)
 
     def save(self, table_name, event_data, database_name="default"):
