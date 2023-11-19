@@ -15,6 +15,7 @@ class CredentialType(str, Enum):
     MSSQL = "MSSQL"
     CSV = "CSV"
     BRANCH = "BRANCH"
+    FACEBOOK_ADS = "FACEBOOK_ADS"
 
 
 class RelationalDatabaseType(str, Enum):
@@ -40,9 +41,14 @@ class CSVCredential(BaseModel):
 
 
 class BranchCredential(BaseModel):
-    app_id:str
-    branch_key:str
-    branch_secret:str
+    app_id: str
+    branch_key: str
+    branch_secret: str
+
+
+class FacebookAdsCredential(BaseModel):
+    account_ids: List[str]
+    access_token: str
 
 
 class MySQLCredential(BaseModel):
@@ -111,6 +117,7 @@ class Credential(BaseModel):
     csv_credential: Optional[CSVCredential]
     branch_credential: Optional[BranchCredential]
     api_base_url: Optional[str]
+    facebook_ads_credential: Optional[FacebookAdsCredential]
 
     class Config:
         allow_population_by_field_name = True
