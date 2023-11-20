@@ -20,8 +20,17 @@ class FacebookAdsDataSaver:
 
     def convert_header_to_attribute(self, headers: List[str]):
         attr = ""
+        int_cols = ["impressions", "clicks", "reach"]
+        float_cols = ["cpm", "cpp", "cpc", "spend", "ctr"]
         for header in headers:
-            attr += header + (" datetime ," if header == "date" else " String ,")
+            if header in int_cols:
+                attr += header + " Int64,"
+            elif header in float_cols:
+                attr += header + " Float64,"
+            elif header == "date":
+                attr += header + " datetime,"
+            else:
+                attr += header + " String,"
         return attr
 
     def create_table(
