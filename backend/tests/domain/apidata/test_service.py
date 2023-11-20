@@ -36,6 +36,7 @@ class TestApiService:
             None,
             None,
             None,
+            None,
         )
 
         assert integration.user_id == user_id

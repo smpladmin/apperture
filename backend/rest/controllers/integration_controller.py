@@ -139,6 +139,21 @@ async def create_integration(
         else None
     )
 
+    cdc_cred = dto.cdcCredential
+    cdc_credential = (
+        integration_service.build_cdc_credential(
+            server=cdc_cred.server,
+            port=cdc_cred.port,
+            username=cdc_cred.username,
+            password=cdc_cred.password,
+            server_type=cdc_cred.serverType,
+            database=cdc_cred.database,
+            tables=cdc_cred.tables,
+        )
+        if cdc_cred
+        else None
+    )
+
     app = await app_service.get_shared_or_owned_app(id=dto.appId, user=user)
     api_base_url = None
     if dto.provider is IntegrationProvider.CLEVERTAP:
@@ -153,10 +168,21 @@ async def create_integration(
         dto.tableName,
         mysql_credential,
         mssql_credential,
+        cdc_credential,
         csv_credential,
         branch_credential,
         api_base_url=api_base_url,
     )
+
+    if cdc_credential and app.clickhouse_credential:
+        tables = await integration_service.create_cdc_tables(
+            cdc_credential=cdc_credential,
+            app_id=str(app.id),
+            ch_db=app.clickhouse_credential.databasename,
+        )
+        integration_service.create_cdc_connector(
+            credential=cdc_credential, tables=tables
+        )
 
     if create_datasource:
         datasource = await ds_service.create_datasource(
