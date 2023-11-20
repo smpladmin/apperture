@@ -12,8 +12,8 @@ from event_processors.facebook_ads_data_processor import FacebookAdsDataProcesso
 from store.facebook_ads_saver import FacebookAdsDataSaver
 
 from utils.utils import (
-    BRANCH_DATA_FETCH_DAYS_OFFSET,
     AIRFLOW_INIT_DATE,
+    FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET,
 )
 from domain.datasource.models import (
     AppDatabaseResponse,
@@ -83,16 +83,16 @@ def get_run_dates(**kwargs):
 
 @task(max_active_tis_per_dag=5)
 def process_and_save(
+    ads: List[dict],
     datasource: DataSource,
     credential: Credential,
     database_details: AppDatabaseResponse,
-    ad: dict,
     date: str,
     clickhouse_server_credential: Union[ClickHouseRemoteConnectionCred, None],
 ):
     data = FacebookAdsFetcher(
         credential=credential.facebook_ads_credential, date=date
-    ).fetch_ad_insights(ad=ad)
+    ).fetch_ads_insights(ads=ads)
     processed_data = FacebookAdsDataProcessor().process(data)
 
     saver = FacebookAdsDataSaver(
@@ -112,7 +112,7 @@ def create_dag(datasource_id: str, created_date: datetime):
         description=f"Facebook ads daily refresh for {datasource_id}",
         schedule="0 8 * * *",
         start_date=pendulum.instance(
-            created_date - timedelta(days=BRANCH_DATA_FETCH_DAYS_OFFSET),
+            created_date - timedelta(days=FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET),
             tz=pendulum.timezone("Asia/Kolkata"),
         ),
         params={
@@ -148,11 +148,12 @@ def create_dag(datasource_id: str, created_date: datetime):
 
         ads = fetch_ads(credential=credential)
         process_and_save.partial(
+            ads=ads,
             datasource=datasource,
             credential=credential,
             database_details=app_database_details,
             clickhouse_server_credential=clickhouse_server_credential,
-        ).expand(ad=ads, date=run_dates)
+        ).expand(date=run_dates)
 
     facebook_ads_data_loader()
 

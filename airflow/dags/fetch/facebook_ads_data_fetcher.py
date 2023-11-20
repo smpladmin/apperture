@@ -10,11 +10,13 @@ class FacebookAdsFetcher:
     def __init__(self, credential: FacebookAdsCredential, date: str):
         self.ads_params = {
             "fields": "id,name",
+            "limit": 25,
             "access_token": credential.access_token,
         }
         self.insights_params = {
             "fields": "account_id,account_name,campaign_id,campaign_name,adset_id,adset_name,impressions,clicks,spend,account_currency,cpm,cpc,ctr,cpp,reach",
             "breakdowns": "age,gender",
+            "limit": 25,
             "time_range": f"{{'since':'{date}','until':'{date}'}}",
             "access_token": credential.access_token,
         }
@@ -79,29 +81,33 @@ class FacebookAdsFetcher:
                 f"Could not fetch insights for {ad_id}: {insights_response.json()}"
             )
 
-    def fetch_ad_insights(self, ad: dict):
+    def fetch_ads_insights(self, ads: List[dict]):
         insights_data = []
 
-        after = None
-        has_next_page = True
+        for ad in ads:
+            after = None
+            has_next_page = True
 
-        while has_next_page:
-            response = self.get_ad_insights(ad_id=ad["id"], after=after)
-            data = response["data"]
-            date = datetime.strptime(self.date, "%Y-%m-%d")
+            while has_next_page:
+                response = self.get_ad_insights(ad_id=ad["id"], after=after)
+                data = response["data"]
+                date = datetime.strptime(self.date, "%Y-%m-%d")
 
-            for entry in data:
-                entry.update({"ad_id": ad["id"], "ad_name": ad["name"], "date": date})
+                for entry in data:
+                    entry.update(
+                        {"ad_id": ad["id"], "ad_name": ad["name"], "date": date}
+                    )
 
-            insights_data.extend(data)
+                insights_data.extend(data)
 
-            if (
-                "paging" in response
-                and "next" in response["paging"]
-                and "cursors" in response["paging"]
-            ):
-                after = response["paging"]["cursors"]["after"]
-            else:
-                has_next_page = False
+                if (
+                    "paging" in response
+                    and "next" in response["paging"]
+                    and "cursors" in response["paging"]
+                ):
+                    after = response["paging"]["cursors"]["after"]
+                else:
+                    has_next_page = False
 
+        logging.info(f"Fetched {len(insights_data)} insights")
         return insights_data
