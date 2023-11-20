@@ -13,7 +13,20 @@ class FacebookAdsDataProcessor(EventProcessor):
 
     def process_dataframe(self, ads_data: pd.DataFrame):
         if not ads_data.empty:
-            ads_data = ads_data.fillna("")
+            numeric_cols = [
+                "impressions",
+                "clicks",
+                "reach",
+                "cpp",
+                "cpc",
+                "cpm",
+                "spend",
+                "ctr",
+            ]
+            ads_data[numeric_cols] = ads_data[numeric_cols].apply(
+                pd.to_numeric, errors="coerce"
+            )
+            ads_data[numeric_cols] = ads_data[numeric_cols].fillna(0)
             ads_data["date"] = ads_data["date"].apply(
                 lambda x: datetime.strptime(str(x), "%Y-%m-%d %H:%M:%S")
             )
