@@ -2425,6 +2425,7 @@ def integration_response():
             "csv_credential": None,
             "api_base_url": None,
             "branch_credential": None,
+            "facebook_ads_credential": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",

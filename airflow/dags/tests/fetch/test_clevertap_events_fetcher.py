@@ -18,6 +18,7 @@ class TestClevertapEventsFetcher:
             tableName=None,
             apiBaseUrl=None,
             branchCredential=None,
+            facebookAdsCredential=None,
         )
         self.event = "UTM Visited"
 
