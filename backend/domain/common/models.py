@@ -18,6 +18,7 @@ class IntegrationProvider(str, Enum):
     SAMPLE = "sample"
     BRANCH = "branch"
     CDC = "cdc"
+    FACEBOOK_ADS = "facebook_ads"
 
     def supports_runlogs(self):
         return self in [self.MIXPANEL, self.AMPLITUDE, self.CLEVERTAP, self.API]
