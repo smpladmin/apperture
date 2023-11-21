@@ -181,7 +181,7 @@ async def create_integration(
             ch_db=app.clickhouse_credential.databasename,
         )
         integration_service.create_cdc_connector(
-            credential=cdc_credential, tables=tables
+            credential=cdc_credential, tables=tables, integration_id=integration.id
         )
 
     if create_datasource:
