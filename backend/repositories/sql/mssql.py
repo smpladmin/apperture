@@ -13,9 +13,30 @@ class MsSql(SQLBase):
             connection=connection, query=f"EXEC sp_columns {table_name}", index=3
         )
 
+    def get_table_description(self, connection, table_name: str, database: str):
+        """
+
+        @param connection:
+        @param table_name:
+        @param database:
+        @return: List of lists containing column_name, datatype and nullable.
+        """
+        query = f"USE {database}; EXEC sp_columns {table_name}"
+        cursor = connection.cursor()
+        cursor.execute(query)
+        results = cursor.fetchall()
+        return [[result[3], result[5], result[10]] for result in results]
+
     def get_tables(self, connection, database: str) -> List[str]:
         return self.execute_query(
             connection=connection, query=f"USE {database}; SELECT name from sys.tables"
+        )
+
+    def get_cdc_tables(self, connection, database: str) -> List[str]:
+        return self.execute_query(
+            connection=connection,
+            query=f"USE {database}; EXEC sys.sp_cdc_help_change_data_capture",
+            index=1,
         )
 
     def get_dbs(self, connection) -> List[str]:
@@ -24,11 +45,12 @@ class MsSql(SQLBase):
         )
 
     def get_connection(self, host, username, password, database=None, port=None):
-        return pymssql.connect(
-            server=host,
-            user=username,
-            password=password,
-        )
+        kwargs = {"server": host, "user": username, "password": password}
+        if database:
+            kwargs["database"] = database
+        if port:
+            kwargs["port"] = port
+        return pymssql.connect(**kwargs)
 
     def connect_and_execute_query(self, query: str, credential: MsSQLCredential):
         result = SQLQueryResult(result_set=[], column_names=[], column_types=[])

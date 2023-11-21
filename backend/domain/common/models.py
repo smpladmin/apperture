@@ -17,6 +17,7 @@ class IntegrationProvider(str, Enum):
     CSV = "csv"
     SAMPLE = "sample"
     BRANCH = "branch"
+    CDC = "cdc"
     FACEBOOK_ADS = "facebook_ads"
 
     def supports_runlogs(self):

@@ -15,6 +15,7 @@ class CredentialType(str, Enum):
     MSSQL = "MSSQL"
     CSV = "CSV"
     BRANCH = "BRANCH"
+    CDC = "CDC"
     FACEBOOK_ADS = "FACEBOOK_ADS"
 
 

@@ -11,6 +11,7 @@ from domain.integrations.models import (
     MsSQLCredential,
     MySQLCredential,
     RelationalDatabaseType,
+    ServerType,
 )
 from rest.dtos.datasources import DataSourceResponse
 
@@ -44,6 +45,16 @@ class DatabaseCredentialDto(BaseModel):
     sshCredential: Optional[DatabaseSSHCredentialDto]
 
 
+class CdcCredentialDto(BaseModel):
+    server: str
+    port: str
+    username: str
+    password: str
+    serverType: ServerType
+    database: str
+    tables: List[str]
+
+
 class BranchCredentialDto(BaseModel):
     appId: str
     branchKey: str
@@ -62,6 +73,7 @@ class CreateIntegrationDto(BaseModel):
     csvFileId: Union[str, None]
     eventList: Union[List[str], None]
     branchCredential: Union[BranchCredentialDto, None]
+    cdcCredential: Union[CdcCredentialDto, None]
 
 
 class IntegrationWithDataSources(Integration, ModelResponse):
