@@ -446,11 +446,11 @@ class IntegrationService:
 
         return tables
 
-    def create_cdc_connector(self, tables: List[str], credential: CdcCredential):
+    def create_cdc_connector(self, tables: List[str], credential: CdcCredential, integration_id: str):
         logging.info("Creating cdc connector")
         headers = {"Accept": "application/json", "Content-Type": "application/json"}
         data = {
-            "name": f"cdc_{id}",
+            "name": f"cdc_{integration_id}",
             "config": {
                 "connector.class": credential.server_type.get_connector_class(),
                 "database.hostname": credential.server,
@@ -458,9 +458,9 @@ class IntegrationService:
                 "database.user": credential.username,
                 "database.password": credential.password,
                 "database.names": credential.database,
-                "topic.prefix": f"cdc_{id}",
+                "topic.prefix": f"cdc_{integration_id}",
                 "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
-                "schema.history.internal.kafka.topic": f"schemahistory.cdc_{id}",
+                "schema.history.internal.kafka.topic": f"schemahistory.cdc_{integration_id}",
                 "table.include.list": ", ".join(["dbo." + table for table in tables]),
                 "database.encrypt": False,
                 "snapshot.mode": "initial",
