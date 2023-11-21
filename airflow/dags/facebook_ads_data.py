@@ -81,7 +81,7 @@ def get_run_dates(**kwargs):
     return run_dates
 
 
-@task(max_active_tis_per_dag=5)
+@task(max_active_tis_per_dag=1)
 def process_and_save(
     ads: List[dict],
     datasource: DataSource,
