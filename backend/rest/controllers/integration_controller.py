@@ -140,25 +140,24 @@ async def create_integration(
     )
 
     cdc_cred = dto.cdcCredential
-    if not cdc_cred.tables:
-        connection = integration_service.get_cdc_connection(host=cdc_cred.server, port=cdc_cred.port,
-                                                            username=cdc_cred.username, password=cdc_cred.password)
-        cdc_tables = integration_service.get_cdc_tables(connection=connection, database=cdc_cred.database)
+    if cdc_cred:
+        if not cdc_cred.tables:
+            connection = integration_service.get_cdc_connection(host=cdc_cred.server, port=cdc_cred.port,
+                                                                username=cdc_cred.username, password=cdc_cred.password)
+            cdc_tables = integration_service.get_cdc_tables(connection=connection, database=cdc_cred.database)
+        else:
+            cdc_tables = cdc_cred.tables
+        cdc_credential = integration_service.build_cdc_credential(
+                server=cdc_cred.server,
+                port=cdc_cred.port,
+                username=cdc_cred.username,
+                password=cdc_cred.password,
+                server_type=cdc_cred.serverType,
+                database=cdc_cred.database,
+                tables=cdc_tables,
+            )
     else:
-        cdc_tables = cdc_cred.tables
-    cdc_credential = (
-        integration_service.build_cdc_credential(
-            server=cdc_cred.server,
-            port=cdc_cred.port,
-            username=cdc_cred.username,
-            password=cdc_cred.password,
-            server_type=cdc_cred.serverType,
-            database=cdc_cred.database,
-            tables=cdc_tables,
-        )
-        if cdc_cred
-        else None
-    )
+        cdc_credential = None
 
     app = await app_service.get_shared_or_owned_app(id=dto.appId, user=user)
     api_base_url = None
