@@ -47,6 +47,7 @@ class TestIntegrationService:
             None,
             None,
             None,
+            None,
         )
 
         assert integration.user_id == user_id

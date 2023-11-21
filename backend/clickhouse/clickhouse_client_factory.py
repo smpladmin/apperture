@@ -1,11 +1,10 @@
 import logging
 import os
-from typing import Union
 
 import clickhouse_connect
 from beanie import PydanticObjectId
 
-from domain.apps.models import App, ClickHouseCredential
+from domain.apps.models import App
 from settings import apperture_settings
 
 apperture_settings = apperture_settings()

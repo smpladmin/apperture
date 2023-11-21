@@ -68,7 +68,9 @@ async def process_kafka_messages() -> None:
                     # logging.info(f"Deleting Row: {before}")
                     before["is_deleted"] = 1
                     before["shard"] = shard
-                    app.cdc_integrations.cdc_buckets[record.topic]["data"].append(before)
+                    app.cdc_integrations.cdc_buckets[record.topic]["data"].append(
+                        before
+                    )
                 else:
                     # logging.info("Skipping, before and after values not present in payload")
                     continue
