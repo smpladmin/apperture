@@ -106,10 +106,11 @@ class DataMartService:
                 app_id=str(existing_table.app_id),
             )
         else:
-            update_status = self.datamart_repo.create_table(
+            update_status = await self.datamart_repo.create_table(
                 query=query,
                 table_name=table_name,
                 clickhouse_credential=clickhouse_credential,
+                app_id=str(existing_table.app_id),
             )
         if update_status:
             await DataMart.find_one(

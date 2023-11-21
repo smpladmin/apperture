@@ -1,6 +1,6 @@
 from collections import namedtuple
 from datetime import datetime
-from unittest.mock import MagicMock, AsyncMock, ANY
+from unittest.mock import ANY, AsyncMock, MagicMock
 
 import pytest
 from beanie import PydanticObjectId
@@ -129,6 +129,7 @@ class TestDataMartService:
                 ),
                 "query": "select event_name, user_id from events",
                 "table_name": ANY,
+                "app_id": ANY,
             }
         )
         self.service.datamart_repo.drop_table.assert_called_once_with(
@@ -224,6 +225,7 @@ class TestDataMartService:
                 ),
                 "query": ANY,
                 "table_name": ANY,
+                "app_id": ANY,
             }
         )
         self.service.datamart_repo.drop_table.assert_called_once_with(
