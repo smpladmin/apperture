@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class IntegrationProvider(str, Enum):
     MYSQL = "mysql"
     MSSQL = "mssql"
+    CDC = "cdc"
 
 
 class ClickHouseCredential(BaseModel):
