@@ -140,19 +140,24 @@ async def create_integration(
     )
 
     cdc_cred = dto.cdcCredential
-    cdc_credential = (
-        integration_service.build_cdc_credential(
-            server=cdc_cred.server,
-            port=cdc_cred.port,
-            username=cdc_cred.username,
-            password=cdc_cred.password,
-            server_type=cdc_cred.serverType,
-            database=cdc_cred.database,
-            tables=cdc_cred.tables,
-        )
-        if cdc_cred
-        else None
-    )
+    if cdc_cred:
+        if not cdc_cred.tables:
+            connection = integration_service.get_cdc_connection(host=cdc_cred.server, port=cdc_cred.port,
+                                                                username=cdc_cred.username, password=cdc_cred.password)
+            cdc_tables = integration_service.get_cdc_tables(connection=connection, database=cdc_cred.database)
+        else:
+            cdc_tables = cdc_cred.tables
+        cdc_credential = integration_service.build_cdc_credential(
+                server=cdc_cred.server,
+                port=cdc_cred.port,
+                username=cdc_cred.username,
+                password=cdc_cred.password,
+                server_type=cdc_cred.serverType,
+                database=cdc_cred.database,
+                tables=cdc_tables,
+            )
+    else:
+        cdc_credential = None
 
     app = await app_service.get_shared_or_owned_app(id=dto.appId, user=user)
     api_base_url = None
@@ -175,13 +180,13 @@ async def create_integration(
     )
 
     if cdc_credential and app.clickhouse_credential:
-        tables = await integration_service.create_cdc_tables(
+        await integration_service.create_cdc_tables(
             cdc_credential=cdc_credential,
             app_id=str(app.id),
             ch_db=app.clickhouse_credential.databasename,
         )
         integration_service.create_cdc_connector(
-            credential=cdc_credential, tables=tables, integration_id=integration.id
+            credential=cdc_credential, tables=cdc_credential.tables, integration_id=integration.id
         )
 
     if create_datasource:

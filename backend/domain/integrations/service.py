@@ -378,7 +378,7 @@ class IntegrationService:
 
     async def get_integrations_with_cdc(self) -> List[Integration]:
         return await Integration.find(
-            Integration.credential.cdc_credential != None
+            Integration.provider == IntegrationProvider.CDC
         ).to_list()
 
     def generate_create_table_query(self, table: str, database: str, table_description):
@@ -410,28 +410,33 @@ class IntegrationService:
         client.query(query=query)
         logging.info(f"Successfully created table.")
 
+    def get_cdc_tables(self, connection, database) -> List[str]:
+        return self.mssql.get_cdc_tables(connection=connection, database=database)
+
+    def get_cdc_connection(self, host, port, username, password):
+        return self.mssql.get_connection(
+            host=host,
+            port=port,
+            username=username,
+            password=password,
+        )
+
     async def create_cdc_tables(
         self,
         cdc_credential: CdcCredential,
         app_id: str,
         ch_db: str,
-    ) -> List[str]:
-        connection = self.mssql.get_connection(
+    ):
+        connection = self.get_cdc_connection(
             host=cdc_credential.server,
             port=cdc_credential.port,
             username=cdc_credential.username,
             password=cdc_credential.password,
         )
         database = cdc_credential.database
-        cdc_tables = self.mssql.get_cdc_tables(connection=connection, database=database)
         ch_client = await ClickHouseClientFactory.get_client(app_id=app_id)
-        tables = (
-            [table for table in cdc_tables if table in cdc_credential.tables]
-            if cdc_credential.tables
-            else cdc_tables
-        )
-        logging.info(f"Creating these cdc tables in clickhouse: {tables}")
-        for table in tables:
+        logging.info(f"Creating these cdc tables in clickhouse: {cdc_credential.tables}")
+        for table in cdc_credential.tables:
             logging.info(
                 f"Creating sql server table {database}.{table} in {ch_db} database"
             )
@@ -443,8 +448,6 @@ class IntegrationService:
                 table=table, database=ch_db, table_description=table_description
             )
             self.create_ch_table(client=ch_client, query=create_query)
-
-        return tables
 
     def create_cdc_connector(self, tables: List[str], credential: CdcCredential, integration_id: str):
         logging.info("Creating cdc connector")
