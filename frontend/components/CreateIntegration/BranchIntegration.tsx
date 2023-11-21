@@ -1,22 +1,12 @@
-import {
-  Box,
-  chakra,
-  Flex,
-  Heading,
-  IconButton,
-  Input,
-  Text,
-  useToast,
-} from '@chakra-ui/react';
-import clevertapLogo from '@assets/images/clevertap-icon.png';
+import { Box, Flex, Heading, Input, Text, useToast } from '@chakra-ui/react';
+import BranchLogo from '@assets/images/branch.png';
 import Image from 'next/image';
 import FormButton from '@components/FormButton';
 import { useRouter } from 'next/router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createIntegrationWithDataSource } from '@lib/services/integrationService';
 import { Provider } from '@lib/domain/provider';
 
-import Papa from 'papaparse';
 import {
   TopProgress,
   IntegrationContainer,
@@ -24,37 +14,38 @@ import {
   RightContainer,
   LeftContainerRevisit,
 } from '@components/Onboarding';
-import { CaretRight, CheckCircle, FileArrowUp } from 'phosphor-react';
 import {
   getCredentials,
   updateCredentials,
 } from '@lib/services/datasourceService';
-import { CredentialType, Credential } from '@lib/domain/integration';
+import {
+  CredentialType,
+  Credential,
+  BranchCredential,
+} from '@lib/domain/integration';
 
-type ClevertapIntegrationProps = {
+type BranchIntegrationProps = {
   handleClose: Function;
   add: string | string[] | undefined;
   edit?: boolean;
 };
-const ClevertapIntegration = ({
+const BranchIntegration = ({
   add,
   handleClose,
   edit = false,
-}: ClevertapIntegrationProps) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+}: BranchIntegrationProps) => {
   const router = useRouter();
-  const [projectId, setProjectId] = useState('');
+  const [branchAppId, setBranchAppId] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [apiSecret, setApiSecret] = useState('');
   const [validData, setValidData] = useState(false);
-  const [eventList, setEventList] = useState<string[]>([]);
   const toast = useToast();
 
   const handleGoBack = (): void => router.back();
 
   useEffect(() => {
-    setValidData(!!(projectId && apiKey && apiSecret && eventList.length));
-  }, [projectId, apiKey, apiSecret, eventList]);
+    setValidData(!!(branchAppId && apiKey && apiSecret));
+  }, [branchAppId, apiKey, apiSecret]);
 
   useEffect(() => {
     if (!edit) return;
@@ -63,7 +54,7 @@ const ClevertapIntegration = ({
       const credentials = await getCredentials(dsId as string);
       setApiSecret(credentials?.secret || '');
       setApiKey(credentials?.api_key || '');
-      setProjectId(credentials?.account_id || '');
+      setBranchAppId(credentials?.account_id || '');
     };
     getDatasourceCredentials();
   }, [edit]);
@@ -73,7 +64,7 @@ const ClevertapIntegration = ({
 
     const credentials: Credential = {
       type: CredentialType.API_KEY,
-      account_id: projectId,
+      account_id: branchAppId,
       secret: apiSecret,
       api_key: apiKey,
     };
@@ -98,18 +89,22 @@ const ClevertapIntegration = ({
   const onSubmit = async () => {
     const appId = router.query.appId as string;
     const provider = router.query.provider as Provider;
+    const branchCredential: BranchCredential = {
+      appId: branchAppId,
+      branchKey: apiKey,
+      branchSecret: apiSecret,
+    };
 
     const integration = await createIntegrationWithDataSource(
       appId,
       provider,
-      projectId,
+      branchAppId,
       apiKey,
       apiSecret,
       '',
       undefined,
       undefined,
-      undefined,
-      eventList
+      branchCredential
     );
     router.replace({
       pathname: '/analytics/app/[appId]/integration/[provider]/complete',
@@ -144,11 +139,7 @@ const ClevertapIntegration = ({
                 width={{ base: 8, md: 14 }}
                 mb={2}
               >
-                <Image
-                  src={clevertapLogo}
-                  alt="clevertap"
-                  layout="responsive"
-                />
+                <Image src={BranchLogo} alt="branch" layout="responsive" />
               </Box>
 
               <Heading
@@ -159,85 +150,9 @@ const ClevertapIntegration = ({
                 fontWeight={'semibold'}
                 maxW={200}
               >
-                Enter Details to fetch data from Clevertap
+                Enter Details to fetch data from Branch
               </Heading>
               <Box>
-                <Box
-                  borderWidth="1px"
-                  borderColor="gray.300"
-                  borderRadius={'20'}
-                  rounded="md"
-                  p={4}
-                  display="flex"
-                  alignItems="center"
-                  onClick={() => {
-                    if (fileInputRef?.current) {
-                      fileInputRef.current.click();
-                    }
-                  }}
-                  cursor={'pointer'}
-                  mb={5}
-                >
-                  {eventList.length ? (
-                    <CheckCircle size={30} color="#212121" />
-                  ) : (
-                    <FileArrowUp size={30} color="#212121" />
-                  )}
-
-                  <Box flex="1" minW="350" pl={2}>
-                    <Text
-                      fontSize="xs-14"
-                      fontWeight="semibold"
-                      color="gray.900"
-                    >
-                      Upload a CSV
-                    </Text>
-                    <Text fontSize="xs-10" color="gray.500">
-                      Select a file to upload
-                    </Text>
-                  </Box>
-                  <input
-                    type="file"
-                    accept=".csv"
-                    ref={fileInputRef}
-                    style={{ visibility: 'hidden', width: 0 }}
-                    onChange={(e) => {
-                      if (e.target?.files?.[0]) {
-                        const file = e.target?.files?.[0];
-                        Papa.parse(file, {
-                          complete: (file: any) => {
-                            if (
-                              Object.keys(file.data[0]).includes('event_name')
-                            ) {
-                              const event_list = file.data
-                                .map((i: any) => i?.event_name)
-                                .filter(
-                                  (
-                                    elem: string,
-                                    index: number,
-                                    array: string[]
-                                  ) => array.indexOf(elem) === index
-                                );
-                              setEventList(event_list);
-                            } else {
-                              toast({
-                                title: `Invalid file structure`,
-                                status: 'error',
-                                variant: 'subtle',
-                                isClosable: true,
-                              });
-                            }
-                          },
-                          header: true,
-                          dynamicTyping: true,
-                          skipEmptyLines: true,
-                          transformHeader: (header) =>
-                            header.toLowerCase().replace(/\W/g, '_'),
-                        });
-                      }
-                    }}
-                  />
-                </Box>
                 <Box mb={5}>
                   <Text
                     as="label"
@@ -245,12 +160,12 @@ const ClevertapIntegration = ({
                     fontSize={'xs-14'}
                     lineHeight={'xs-14'}
                     display="block"
-                    htmlFor="projectId"
+                    htmlFor="branchAppId"
                   >
-                    Project ID
+                    App ID
                   </Text>
                   <Input
-                    id="projectId"
+                    id="branchAppId"
                     size={'lg'}
                     width={{ base: 'full', md: 125 }}
                     bg={'white.100'}
@@ -258,13 +173,13 @@ const ClevertapIntegration = ({
                     fontSize={'base'}
                     lineHeight={'base'}
                     textColor={'black.400'}
-                    placeholder="Enter 7 Digit Project ID"
+                    placeholder="Enter App ID"
                     py={4}
                     px={3.5}
                     focusBorderColor={'black.100'}
                     border={'1px'}
-                    value={projectId}
-                    onChange={(e) => setProjectId(e.target.value)}
+                    value={branchAppId}
+                    onChange={(e) => setBranchAppId(e.target.value)}
                     _placeholder={{
                       fontSize: '1rem',
                       lineHeight: '1.375rem',
@@ -293,7 +208,7 @@ const ClevertapIntegration = ({
                     fontSize={'base'}
                     lineHeight={'base'}
                     textColor={'black.400'}
-                    placeholder="Enter 6 Digit API Key"
+                    placeholder="Enter API Key"
                     py={4}
                     px={3.5}
                     focusBorderColor={'black.100'}
@@ -366,4 +281,4 @@ const ClevertapIntegration = ({
   );
 };
 
-export default ClevertapIntegration;
+export default BranchIntegration;

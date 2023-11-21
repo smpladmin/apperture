@@ -33,6 +33,12 @@ export type DatabaseCredential = {
   sshCredential?: DatabaseSSHCredential;
 };
 
+export type BranchCredential = {
+  appId: string;
+  branchKey: string;
+  branchSecret: string;
+};
+
 export type UploadProgress = {
   progress: number;
   isCompleted: boolean;

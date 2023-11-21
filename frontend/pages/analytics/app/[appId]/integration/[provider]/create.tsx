@@ -9,6 +9,7 @@ import { useRouter } from 'next/router';
 import DatabaseIntegration from '@components/CreateIntegration/DatabaseIntegration';
 import mysqlLogo from '@assets/images/mysql-icon.png';
 import mssqlLogo from '@assets/images/mssql-icon.png';
+import BranchIntegration from '@components/CreateIntegration/BranchIntegration';
 
 const Create = () => {
   const router = useRouter();
@@ -36,6 +37,8 @@ const Create = () => {
       return <AmplitudeIntegration add={add} handleClose={handleClose} />;
     case Provider.CLEVERTAP:
       return <ClevertapIntegration add={add} handleClose={handleClose} />;
+    case Provider.BRANCH:
+      return <BranchIntegration add={add} handleClose={handleClose} />;
     case Provider.API:
       return <APIIntegration add={add} handleClose={handleClose} />;
     case Provider.MYSQL:
