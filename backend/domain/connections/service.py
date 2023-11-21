@@ -14,9 +14,11 @@ class ConnectionService:
     def __init__(self, connection: Connection = Depends()):
         self.connection = connection
 
-    def get_clickhouse_table_columns(self, username, password, database, table):
-        return self.connection.get_clickhouse_table_description(
-            username=username, password=password, database=database, table=table
+    async def get_clickhouse_table_columns(self, database, table, app_id):
+        return await self.connection.get_clickhouse_table_description(
+            app_id=app_id,
+            database=database,
+            table=table,
         )
 
     def get_clickhouse_connection_group(

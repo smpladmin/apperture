@@ -117,15 +117,12 @@ async def compute_transient_spreadsheets(
 async def compute_transient_expression(
     dto: TransientExpressionDto,
     spreadsheets_service: SpreadsheetService = Depends(),
-    compute_query_action: ComputeQueryAction = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
     try:
-        clickhouse_credential = await compute_query_action.get_clickhouse_credentials(
-            datasource_id=dto.datasourceId
-        )
-        return spreadsheets_service.compute_transient_expression(
-            username=clickhouse_credential.username,
-            password=clickhouse_credential.password,
+        ds = await ds_service.get_datasource(dto.datasourceId)
+        return await spreadsheets_service.compute_transient_expression(
+            app_id=str(ds.app_id),
             expressions=[dto.expression],
             variables=dto.variables,
             table=dto.table,
@@ -145,20 +142,18 @@ async def compute_transient_expression(
 async def compute_transient_column(
     dto: TransientSpreadsheetColumnDto,
     spreadsheets_service: SpreadsheetService = Depends(),
-    compute_query_action: ComputeQueryAction = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
     try:
-        clickhouse_credential = await compute_query_action.get_clickhouse_credentials(
-            datasource_id=dto.datasourceId
-        )
+        ds = await ds_service.get_datasource(dto.datasourceId)
 
-        return spreadsheets_service.get_transient_columns(
+        return await spreadsheets_service.get_transient_columns(
             dto.datasourceId,
             dto.dimensions,
             dto.metrics,
             dto.database,
             dto.table,
-            clickhouse_credential,
+            app_id=str(ds.app_id),
         )
     except BusinessError as e:
         raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
@@ -244,14 +239,12 @@ async def compute_transient_pivot(
 async def vlookup(
     dto: VlookupDto,
     spreadsheets_service: SpreadsheetService = Depends(),
-    compute_query_action: ComputeQueryAction = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
-    credential = await compute_query_action.get_clickhouse_credentials(
-        datasource_id=dto.datasourceId
-    )
+    ds = await ds_service.get_datasource(dto.datasourceId)
     return await spreadsheets_service.compute_vlookup(
         search_query=dto.searchQuery,
-        credential=credential,
+        app_id=str(ds.app_id),
         lookup_query=dto.lookupQuery,
         lookup_column=dto.lookupColumn,
         search_column=dto.searchKeyColumn,

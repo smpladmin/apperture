@@ -119,11 +119,11 @@ class Connection(EventsBase):
             logging.info(f"Connection refused {e}")
         return connection_sources
 
-    def get_clickhouse_table_description(self, username, password, database, table):
+    async def get_clickhouse_table_description(self, database, table, app_id):
         try:
             columns = []
-            result = self.execute_query_for_restricted_client(
-                f"DESCRIBE {database}.{table}", username=username, password=password
+            result = await self.execute_query_for_app_restricted_clients(
+                f"DESCRIBE {database}.{table}", app_id=app_id
             ).result_set
             for row in result:
                 columns.append(row[0])

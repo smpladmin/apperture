@@ -1,5 +1,5 @@
-from unittest.mock import MagicMock
-
+from unittest.mock import AsyncMock, MagicMock
+import pytest
 from domain.apps.models import ClickHouseCredential
 from repositories.clickhouse.datamart import DataMartRepo
 
@@ -11,10 +11,11 @@ class TestDataMartRepo:
         repo.execute_get_query = MagicMock()
         self.repo = repo
         self.datasource_id = "test-id"
+        self.app_id = "test-app-id"
         self.table_name = "datamart-table"
         self.db_name = "test-db"
         self.query = "select event_name, user_id from events"
-        self.repo.execute_query_for_restricted_client = MagicMock()
+        self.repo.execute_query_for_app_restricted_clients = AsyncMock()
         self.credential = ClickHouseCredential(
             username="test-username",
             password="test-password",
@@ -29,29 +30,32 @@ class TestDataMartRepo:
             "select event_name, user_id from events"
         )
 
-    def test_create_table(self):
-        self.repo.create_table(
+    @pytest.mark.asyncio
+    async def test_create_table(self):
+        await self.repo.create_table(
             query=self.query,
             table_name=self.table_name,
             clickhouse_credential=self.credential,
+            app_id=self.app_id,
         )
-        self.repo.execute_query_for_restricted_client.assert_called_with(
+        self.repo.execute_query_for_app_restricted_clients.assert_called_with(
             **{
-                "password": "test-password",
                 "query": "CREATE TABLE test-database.datamart-table  ENGINE = MergeTree ORDER "
                 "BY tuple() AS select event_name, user_id from events",
-                "username": "test-username",
+                "app_id": "test-app-id",
             }
         )
 
-    def test_drop_table(self):
-        self.repo.drop_table(
-            table_name=self.table_name, clickhouse_credential=self.credential
+    @pytest.mark.asyncio
+    async def test_drop_table(self):
+        await self.repo.drop_table(
+            table_name=self.table_name,
+            clickhouse_credential=self.credential,
+            app_id=self.app_id,
         )
-        self.repo.execute_query_for_restricted_client.assert_called_once_with(
+        self.repo.execute_query_for_app_restricted_clients.assert_called_once_with(
             **{
-                "password": "test-password",
                 "query": "DROP TABLE IF EXISTS test-database.datamart-table",
-                "username": "test-username",
+                "app_id": "test-app-id",
             }
         )

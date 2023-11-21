@@ -31,23 +31,20 @@ class Spreadsheets(EventsBase):
         super().__init__(clickhouse=clickhouse)
         self.clickhouse = clickhouse
 
-    def get_transient_columns(
+    async def get_transient_columns(
         self,
         datasource_id: str,
         dimensions: List[DimensionDefinition],
         metric: Union[MetricDefinition, None],
         database: str,
         table: str,
-        clickhouse_credentials: ClickHouseCredential,
+        app_id: str,
     ):
         query, params = self.build_transient_columns_query(
             datasource_id, dimensions, metric, database, table
         )
-        return self.execute_query_for_restricted_client(
-            query=query,
-            parameters=params,
-            username=clickhouse_credentials.username,
-            password=clickhouse_credentials.password,
+        return await self.execute_query_for_app_restricted_clients(
+            query=query, parameters=params, app_id=app_id
         )
 
     def column_filter_to_condition(self, column_filter: ColumnFilter):
@@ -111,22 +108,21 @@ class Spreadsheets(EventsBase):
         query = query.limit(500)
         return query.get_sql()
 
-    def compute_transient_expression(
+    async def compute_transient_expression(
         self,
-        username: str,
-        password: str,
         expressions: List[str],
         variables: dict,
         database: str,
         table: str,
+        app_id: str,
     ):
         query = self.build_transient_expression_query(
             variables=variables, expressions=expressions, database=database, table=table
         )
 
         logging.info(f"compute_transient_expression query:  {query}")
-        return self.execute_query_for_restricted_client(
-            query=query, username=username, password=password
+        return await self.execute_query_for_app_restricted_clients(
+            query=query, app_id=app_id
         )
 
     def build_compute_transient_pivot(
@@ -276,15 +272,14 @@ class Spreadsheets(EventsBase):
 
         return query
 
-    def get_vlookup(
+    async def get_vlookup(
         self,
         search_query: str,
         lookup_query: str,
         search_column: str,
         lookup_column: str,
         lookup_index_column: str,
-        username: Union[str, None],
-        password: Union[str, None],
+        app_id: str,
     ):
         query = self.build_vlookup_query(
             search_query=search_query,
@@ -294,8 +289,9 @@ class Spreadsheets(EventsBase):
             lookup_index_column=lookup_index_column,
         )
         logging.info(f"VLOOKUP Query: {query}")
-        result = self.execute_query_for_restricted_client(
-            query=query, username=username, password=password
+        result = await self.execute_query_for_app_restricted_clients(
+            query=query,
+            app_id=app_id,
         )
         return (
             [item for sublist in result.result_set for item in sublist]

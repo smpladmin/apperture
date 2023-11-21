@@ -143,17 +143,17 @@ class SpreadsheetService:
             WorkBook.id == PydanticObjectId(workbook_id),
         ).update({"$set": entry})
 
-    def get_transient_columns(
+    async def get_transient_columns(
         self,
         datasource_id: str,
         dimensions: List[DimensionDefinition],
         metrics: List[MetricDefinition],
         database: str,
         table: str,
-        clickhouse_credentials: ClickHouseCredential,
+        app_id: str,
     ):
-        result = self.spreadsheets.get_transient_columns(
-            datasource_id, dimensions, metrics, database, table, clickhouse_credentials
+        result = await self.spreadsheets.get_transient_columns(
+            datasource_id, dimensions, metrics, database, table, app_id=app_id
         )
 
         response = {
@@ -174,18 +174,16 @@ class SpreadsheetService:
             data=response["data"], headers=response["headers"], sql=""
         )
 
-    def compute_transient_expression(
+    async def compute_transient_expression(
         self,
-        username: str,
-        password: str,
+        app_id: str,
         expressions: List[str],
         variables: dict,
         table: str,
         database: str,
     ):
-        result = self.spreadsheets.compute_transient_expression(
-            username=username,
-            password=password,
+        result = await self.spreadsheets.compute_transient_expression(
+            app_id=app_id,
             expressions=expressions,
             variables=variables,
             table=table,
@@ -290,7 +288,7 @@ class SpreadsheetService:
 
     async def compute_vlookup(
         self,
-        credential: ClickHouseCredential,
+        app_id: str,
         search_query: str,
         lookup_query: str,
         search_column: str,
@@ -300,13 +298,12 @@ class SpreadsheetService:
         search_query = self.cleanse_query_string(search_query)
         search_query = self.parser.assign_query_limit(search_query)
         lookup_query = self.cleanse_query_string(lookup_query)
-        result = self.spreadsheets.get_vlookup(
+        result = await self.spreadsheets.get_vlookup(
             search_query=search_query,
             lookup_query=lookup_query,
             search_column=search_column,
             lookup_column=lookup_column,
-            username=credential.username,
-            password=credential.password,
+            app_id=app_id,
             lookup_index_column=lookup_index_column,
         )
         return result

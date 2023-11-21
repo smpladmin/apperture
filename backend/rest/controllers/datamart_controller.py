@@ -205,4 +205,5 @@ async def delete_datamart_table(
         datamart_id=id,
         table_name=existing_table.table_name,
         clickhouse_credential=app.clickhouse_credential,
+        app_id=str(app.id),
     )

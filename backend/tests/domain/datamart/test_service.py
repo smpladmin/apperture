@@ -57,8 +57,8 @@ class TestDataMartService:
         DataMart.insert = AsyncMock()
         DataMart.id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         DataMart.enabled = True
-        self.service.datamart_repo.create_table = MagicMock()
-        self.service.datamart_repo.drop_table = MagicMock()
+        self.service.datamart_repo.create_table = AsyncMock()
+        self.service.datamart_repo.drop_table = AsyncMock()
         self.service.string_utils.extract_tablename_from_filename = MagicMock(
             return_value="name"
         )
@@ -139,6 +139,7 @@ class TestDataMartService:
                     databasename="test-database",
                 ),
                 "table_name": ANY,
+                "app_id": ANY,
             }
         )
 
@@ -155,6 +156,7 @@ class TestDataMartService:
             datamart_id="6384a65e0a397236d9de236a",
             table_name="dUKQaHtqxM",
             clickhouse_credential=self.clickhouse_credential,
+            app_id="6384a65e0a397236d9de2362",
         )
         DataMart.find_one.assert_called_once()
         self.service.datamart_repo.drop_table.assert_called_once_with(
@@ -165,7 +167,8 @@ class TestDataMartService:
                     databasename="test-database",
                 ),
                 "table_name": "dUKQaHtqxM",
-            }
+            },
+            app_id="6384a65e0a397236d9de2362"
         )
         self.update_mock.assert_called_once_with({"$set": {"enabled": False}})
 
@@ -191,6 +194,7 @@ class TestDataMartService:
                 ),
                 "query": "select event_name, user_id from events",
                 "table_name": "name",
+                "app_id": "636a1c61d715ca6baae65612",
             }
         )
         DataMart.insert.assert_called_once()
@@ -230,6 +234,7 @@ class TestDataMartService:
                     databasename="test-database",
                 ),
                 "table_name": ANY,
+                "app_id": ANY,
             }
         )
 

@@ -88,7 +88,7 @@ class EventsBase(ABC):
         self,
         app_id: str,
         query: str,
-        parameters: Dict,
+        parameters: Dict = None,
         settings: Union[Dict, None] = None,
     ) -> Sequence:
         logging.info(f"Executing query: {query}")

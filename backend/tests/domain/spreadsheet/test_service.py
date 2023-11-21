@@ -501,13 +501,9 @@ class TestSpreadsheetService:
 
     @pytest.mark.asyncio
     async def test_compute_vlookup(self):
-        self.spreadsheet.get_vlookup.return_value = ["test1", "test2"]
+        self.spreadsheet.get_vlookup = AsyncMock(return_value=["test1", "test2"])
         assert await self.service.compute_vlookup(
-            credential=ClickHouseCredential(
-                username="test_username",
-                password="test_password",
-                databasename="test_database",
-            ),
+            app_id="test-app-id",
             search_query="test search query",
             lookup_query="test lookup query",
             lookup_column="lookup_column",
@@ -516,8 +512,7 @@ class TestSpreadsheetService:
         ) == ["test1", "test2"]
 
         self.spreadsheet.get_vlookup.assert_called_once_with(
-            username="test_username",
-            password="test_password",
+            app_id="test-app-id",
             search_query="test search query ORDER BY  LIMIT 500",
             lookup_query="test lookup query",
             lookup_column="lookup_column",
