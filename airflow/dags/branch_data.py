@@ -13,8 +13,7 @@ from airflow.decorators import task, dag
 
 from store.events_saver import EventsSaver
 from domain.datasource.service import DataSourceService
-from store.event_properties_saver import EventPropertiesSaver
-from fetch.clevertap_events_fetcher import ClevertapEventsFetcher
+
 from utils.utils import (
     BRANCH_DATA_FETCH_DAYS_OFFSET,
     AIRFLOW_INIT_DATE,

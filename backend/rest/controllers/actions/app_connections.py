@@ -1,4 +1,5 @@
 from fastapi import Depends
+
 from domain.apps.models import App
 from domain.apps.service import AppService
 from domain.common.models import IntegrationProvider
@@ -39,9 +40,8 @@ class AppConnectionsAction:
         )
         for datamart in datamarts:
             table = datamart.table_name
-            property = self.connections_service.get_clickhouse_table_columns(
-                username=clickhouse_credentials.username,
-                password=clickhouse_credentials.password,
+            property = await self.connections_service.get_clickhouse_table_columns(
+                app_id=str(app.id),
                 database=clickhouse_credentials.databasename,
                 table=table,
             )
@@ -80,9 +80,8 @@ class AppConnectionsAction:
                     if datasource.provider == IntegrationProvider.CSV
                     else integration.credential.tableName
                 )
-                property = self.connections_service.get_clickhouse_table_columns(
-                    username=clickhouse_credentials.username,
-                    password=clickhouse_credentials.password,
+                property = await self.connections_service.get_clickhouse_table_columns(
+                    app_id=str(app.id),
                     database=clickhouse_credentials.databasename,
                     table=table,
                 )

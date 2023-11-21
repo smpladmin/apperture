@@ -405,12 +405,8 @@ async def test_vlookup(client_init, spreadsheets_service):
     assert response.status_code == 200
     assert response.json() == ["test1", "test2"]
     spreadsheets_service.compute_vlookup.assert_called_once_with(
+        app_id="636a1c61d715ca6baae65611",
         **{
-            "credential": ClickHouseCredential(
-                username="test_username",
-                password="test_password",
-                databasename="test_database",
-            ),
             "lookup_column": "user_id",
             "lookup_index_column": "event_name",
             "search_column": "event_name",
@@ -418,5 +414,5 @@ async def test_vlookup(client_init, spreadsheets_service):
             "datasource_id = '64c8bd3fc190a9e2973469bd'",
             "search_query": "select event_name, user_id from default.events where "
             "datasource_id = '64c8bd3fc190a9e2973469bd'",
-        }
+        },
     )

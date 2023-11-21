@@ -179,7 +179,8 @@ def test_delete_datamart(client_init, datamart_service, app_service):
             ),
             "datamart_id": "6384a65e0a397236d9de236a",
             "table_name": "dUKQaHtqxM",
-        }
+        },
+        app_id="635ba034807ab86d8a2aadd9"
     )
 
     datamart_service.get_datamart_table.assert_called_with(

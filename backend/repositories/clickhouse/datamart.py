@@ -1,14 +1,15 @@
+import logging
 import os
 import re
-import logging
-from fastapi import Depends
 from datetime import datetime
-from clickhouse import Clickhouse
 
-from repositories.sql.mssql import MsSql
-from repositories.clickhouse.base import EventsBase
+from fastapi import Depends
+
+from clickhouse import Clickhouse
 from domain.apps.models import ClickHouseCredential
 from domain.integrations.models import MsSQLCredential
+from repositories.clickhouse.base import EventsBase
+from repositories.sql.mssql import MsSql
 
 
 class DataMartRepo(EventsBase):
@@ -31,14 +32,17 @@ class DataMartRepo(EventsBase):
         create_query = f"CREATE TABLE {db_name}.{table_name}  ENGINE = MergeTree ORDER BY tuple() AS {query}"
         return create_query
 
-    def create_table(
-        self, query: str, table_name: str, clickhouse_credential: ClickHouseCredential
+    async def create_table(
+        self,
+        query: str,
+        table_name: str,
+        clickhouse_credential: ClickHouseCredential,
+        app_id: str,
     ) -> bool:
         query = self.cleanse_query_string(query_string=query)
-        self.execute_query_for_restricted_client(
+        await self.execute_query_for_app_restricted_clients(
             query=f"DROP TABLE IF EXISTS {clickhouse_credential.databasename}.{table_name}",
-            username=clickhouse_credential.username,
-            password=clickhouse_credential.password,
+            app_id=app_id,
         )
         create_table_query = self.generate_create_table_query(
             query=query,
@@ -46,10 +50,8 @@ class DataMartRepo(EventsBase):
             db_name=clickhouse_credential.databasename,
         )
         self.logger.info(f"Executing create table query: {create_table_query}")
-        result = self.execute_query_for_restricted_client(
-            query=create_table_query,
-            username=clickhouse_credential.username,
-            password=clickhouse_credential.password,
+        result = await self.execute_query_for_app_restricted_clients(
+            query=create_table_query, app_id=app_id
         )
         if result:
             self.logger.info(
@@ -76,19 +78,19 @@ class DataMartRepo(EventsBase):
             return "NULL"
         return str(value)
 
-    def create_mssql_table(
+    async def create_mssql_table(
         self,
         query: str,
         table_name: str,
+        app_id: str,
         clickhouse_credential: ClickHouseCredential,
         db_creds: MsSQLCredential,
     ):
         query = self.cleanse_query_string(query_string=query)
         query = self.limit_query(query_string=query)
-        self.execute_query_for_restricted_client(
+        await self.execute_query_for_app_restricted_clients(
             query=f"DROP TABLE IF EXISTS {clickhouse_credential.databasename}.{table_name}",
-            username=clickhouse_credential.username,
-            password=clickhouse_credential.password,
+            app_id=app_id,
         )
         mssql_clickhouse_datatype_map = {
             1: "String",
@@ -120,10 +122,8 @@ class DataMartRepo(EventsBase):
             create_table_query.rstrip(", ") + ") ENGINE = MergeTree() ORDER BY tuple();"
         )
         self.logger.info(f"Executing create table query: {create_table_query}")
-        create_status = self.execute_query_for_restricted_client(
-            query=create_table_query,
-            username=clickhouse_credential.username,
-            password=clickhouse_credential.password,
+        create_status = await self.execute_query_for_app_restricted_clients(
+            query=create_table_query, app_id=app_id
         )
         if create_status:
             self.logger.info(
@@ -150,10 +150,9 @@ class DataMartRepo(EventsBase):
             self.logger.info(
                 f"Executing insert into table query for {self.chunk_size} rows: {insert_query}"
             )
-            insert_status = self.execute_query_for_restricted_client(
+            insert_status = await self.execute_query_for_app_restricted_clients(
                 query=insert_query,
-                username=clickhouse_credential.username,
-                password=clickhouse_credential.password,
+                app_id=app_id,
             )
             if insert_status:
                 self.logger.info(f"Successfully inserted data into the table")
@@ -163,15 +162,16 @@ class DataMartRepo(EventsBase):
 
         return True
 
-    def drop_table(self, table_name: str, clickhouse_credential: ClickHouseCredential):
+    async def drop_table(
+        self, table_name: str, clickhouse_credential: ClickHouseCredential, app_id: str
+    ):
         query = (
             f"DROP TABLE IF EXISTS {clickhouse_credential.databasename}.{table_name}"
         )
         self.logger.info(f"Executing drop table query: {query}")
-        result = self.execute_query_for_restricted_client(
+        result = await self.execute_query_for_app_restricted_clients(
             query=query,
-            username=clickhouse_credential.username,
-            password=clickhouse_credential.password,
+            app_id=app_id,
         )
         self.logger.info(
             f"Dropped a clickhouse table {table_name} from {clickhouse_credential.databasename} database for user {clickhouse_credential.username}"

@@ -1,4 +1,5 @@
-from unittest.mock import MagicMock
+import pytest
+from unittest.mock import AsyncMock, MagicMock
 
 from clickhouse_connect.driver.query import QueryResult
 
@@ -313,8 +314,9 @@ class TestSpreadSheetRepository:
             == 'SELECT "user_id","weekday",COUNT("salary") FROM (SELECT * FROM table) WHERE "user_id" IN (1,2,3,4,5,6,7,8,9,10) AND "weekday" IN (\'Sunday\',\'Monday\',\'Tuesday\',\'Wednesday\',\'Thursday\',\'Friday\',\'Saturday\') GROUP BY "user_id","weekday" ORDER BY "user_id" ASC,"weekday" ASC'
         )
 
-    def test_get_vlookup(self):
-        self.spreadsheet_repo.execute_query_for_restricted_client = MagicMock(
+    @pytest.mark.asyncio
+    async def test_get_vlookup(self):
+        self.spreadsheet_repo.execute_query_for_app_restricted_clients = AsyncMock(
             return_value=QueryResult(
                 result_set=[
                     ["test1"],
@@ -324,14 +326,13 @@ class TestSpreadSheetRepository:
                 column_types=(),
             )
         )
-        assert self.spreadsheet_repo.get_vlookup(
+        assert await self.spreadsheet_repo.get_vlookup(
             search_query="select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd'",
             lookup_query="select event_name, user_id from default.events where datasource_id = '64c8bd3fc190a9e2973469bd'",
             search_column="event_name",
             lookup_column="user_id",
             lookup_index_column="event_name",
-            username="test-user",
-            password="test-password",
+            app_id="test-app-id",
         ) == ["test1", "test2"]
 
     def test_build_vlookup_query(self):

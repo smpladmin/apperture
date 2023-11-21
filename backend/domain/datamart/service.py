@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
@@ -55,17 +55,19 @@ class DataMartService:
     ):
         table.updated_at = table.created_at
         if database_client == DatabaseClient.MSSQL:
-            creation_status = self.datamart_repo.create_mssql_table(
+            creation_status = await self.datamart_repo.create_mssql_table(
                 query=table.query,
                 table_name=table.table_name,
                 clickhouse_credential=clickhouse_credential,
                 db_creds=db_creds,
+                app_id=str(table.app_id),
             )
         else:
-            creation_status = self.datamart_repo.create_table(
+            creation_status = await self.datamart_repo.create_table(
                 query=table.query,
                 table_name=table.table_name,
                 clickhouse_credential=clickhouse_credential,
+                app_id=str(table.app_id),
             )
         if creation_status:
             await DataMart.insert(table)
@@ -90,16 +92,18 @@ class DataMartService:
         query = query if query else existing_table.query
         table_name = table_name if table_name else existing_table.table_name
 
-        self.datamart_repo.drop_table(
+        await self.datamart_repo.drop_table(
             table_name=existing_table.table_name,
             clickhouse_credential=clickhouse_credential,
+            app_id=str(existing_table.app_id),
         )
         if database_client == DatabaseClient.MSSQL:
-            update_status = self.datamart_repo.create_mssql_table(
+            update_status = await self.datamart_repo.create_mssql_table(
                 query=query,
                 table_name=table_name,
                 clickhouse_credential=clickhouse_credential,
                 db_creds=db_creds,
+                app_id=str(existing_table.app_id),
             )
         else:
             update_status = self.datamart_repo.create_table(
@@ -158,10 +162,13 @@ class DataMartService:
         self,
         datamart_id: str,
         table_name: str,
+        app_id: str,
         clickhouse_credential: ClickHouseCredential,
     ):
-        self.datamart_repo.drop_table(
-            table_name=table_name, clickhouse_credential=clickhouse_credential
+        await self.datamart_repo.drop_table(
+            table_name=table_name,
+            clickhouse_credential=clickhouse_credential,
+            app_id=app_id,
         )
 
         await DataMart.find_one(
