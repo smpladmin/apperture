@@ -1,5 +1,6 @@
 import {
-  BranchCredential,
+  BranchCredentialDto,
+  CredentialType,
   DatabaseCredential,
   UploadProgress,
 } from '@lib/domain/integration';
@@ -8,7 +9,7 @@ import { ApperturePost, ApperturePrivateGet } from './util';
 import { ProviderDataSource } from '@lib/domain/datasource';
 import { Provider } from '@lib/domain/provider';
 
-type IntegrationRequestBody = {
+export type IntegrationRequestBody = {
   appId: string;
   provider: Provider;
   accountId?: string;
@@ -16,7 +17,7 @@ type IntegrationRequestBody = {
   apiSecret?: string;
   tableName?: string;
   databaseCredential?: DatabaseCredential;
-  branchCredential?: BranchCredential;
+  branchCredential?: BranchCredentialDto;
   csvFileId?: string;
   eventList?: string[];
 };
@@ -30,7 +31,7 @@ export const createIntegrationWithDataSource = async (
   tableName?: string,
   databaseCredential?: DatabaseCredential,
   csvFileId?: string,
-  branchCredential?: BranchCredential,
+  branchCredential?: BranchCredentialDto,
   eventList?: string[],
   config: AxiosRequestConfig = {
     params: {

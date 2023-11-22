@@ -21,7 +21,7 @@ import {
 import {
   CredentialType,
   Credential,
-  BranchCredential,
+  BranchCredentialDto,
 } from '@lib/domain/integration';
 
 type BranchIntegrationProps = {
@@ -51,10 +51,10 @@ const BranchIntegration = ({
     if (!edit) return;
     const getDatasourceCredentials = async () => {
       const { dsId } = router.query;
-      const credentials = await getCredentials(dsId as string);
-      setApiSecret(credentials?.secret || '');
-      setApiKey(credentials?.api_key || '');
-      setBranchAppId(credentials?.account_id || '');
+      const credentials: Credential = await getCredentials(dsId as string);
+      setApiSecret(credentials?.branch_credential?.branch_secret || '');
+      setApiKey(credentials?.branch_credential?.branch_key || '');
+      setBranchAppId(credentials?.branch_credential?.app_id || '');
     };
     getDatasourceCredentials();
   }, [edit]);
@@ -63,10 +63,12 @@ const BranchIntegration = ({
     const { dsId } = router.query;
 
     const credentials: Credential = {
-      type: CredentialType.API_KEY,
-      account_id: branchAppId,
-      secret: apiSecret,
-      api_key: apiKey,
+      type: CredentialType.BRANCH,
+      branch_credential: {
+        branch_key: apiKey,
+        branch_secret: apiSecret,
+        app_id: branchAppId,
+      },
     };
     const response = await updateCredentials(dsId as string, credentials);
     if (response.status === 200) {
@@ -89,7 +91,7 @@ const BranchIntegration = ({
   const onSubmit = async () => {
     const appId = router.query.appId as string;
     const provider = router.query.provider as Provider;
-    const branchCredential: BranchCredential = {
+    const branchCredential: BranchCredentialDto = {
       appId: branchAppId,
       branchKey: apiKey,
       branchSecret: apiSecret,
