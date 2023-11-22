@@ -8,11 +8,13 @@ import DoubleZero from '@assets/icons/NumberCircleDoubleZero.svg';
 import {
   ColumnFormat,
   SheetType,
+  SpreadSheetColumn,
   TransientSheetData,
 } from '@lib/domain/workbook';
 import { cloneDeep } from 'lodash';
 import { SelectedColumn } from '@components/AppertureSheets/types/gridTypes';
 import { calculateMaxDecimalPoints } from '../util';
+import { DownloadSimple } from '@phosphor-icons/react';
 
 const Toolbar = ({
   sheetsData,
@@ -56,6 +58,33 @@ const Toolbar = ({
       };
       return sheetsCopy;
     });
+  };
+
+  const convertSheetsDataToTsv = (
+    headers: SpreadSheetColumn[],
+    data: any[]
+  ) => {
+    const header = headers.map((value) => value.name).join('\t');
+    const rows = data.map((row: Object) =>
+      Object.values(row)
+        .map((value) => value.original)
+        .join('\t')
+    );
+    return `${header}\n${rows.join('\n')}`;
+  };
+
+  const handleSheetDataDownload = () => {
+    const sheetData = sheetsData[selectedSheetIndex];
+    const tsv = convertSheetsDataToTsv(sheetData.headers, sheetData.data);
+
+    const blob = new Blob([tsv], { type: 'text/tsv' });
+
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${sheetData.name}.tsv`;
+    link.click();
+
+    URL.revokeObjectURL(link.href);
   };
 
   const handleIncreaseDecimalPlacesInColumnValue = () => {
@@ -206,6 +235,17 @@ const Toolbar = ({
         >
           <Image src={DoubleZero} alt={'Double Zero'} />
         </Box>
+        <Flex
+          w={'6'}
+          h={'6'}
+          borderRadius={'4'}
+          _hover={{ backgroundColor: 'grey.400', cursor: 'pointer' }}
+          justifyContent={'center'}
+          alignItems={'center'}
+          onClick={handleSheetDataDownload}
+        >
+          <DownloadSimple />
+        </Flex>
       </Flex>
     </Flex>
   );
