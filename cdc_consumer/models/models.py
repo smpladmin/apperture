@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List
+from typing import List, Union
 
 from pydantic import BaseModel
 
@@ -29,16 +29,17 @@ class CdcCredential(BaseModel):
         allow_population_by_field_name = True
 
 
+class ClickHouseRemoteConnectionCred(BaseModel):
+    host: str
+    port: int
+    username: str
+    password: str
+
+
 class CdcIntegration(BaseModel):
     id: str
     appId: str
     provider: IntegrationProvider
     cdcCredential: CdcCredential
     clickhouseCredential: ClickHouseCredential
-
-
-class ClickHouseRemoteConnectionCred(BaseModel):
-    host: str
-    port: int
-    username: str
-    password: str
+    remoteConnection: Union[ClickHouseRemoteConnectionCred, None]
