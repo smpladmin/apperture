@@ -126,7 +126,7 @@ def create_dag(datasource_id: str, created_date: datetime):
     @dag(
         dag_id=f"branch_data_loader_{datasource_id}",
         description=f"Branch daily refresh for {datasource_id}",
-        schedule="0 8 * * *",
+        schedule="0 12 * * *",
         start_date=pendulum.instance(
             created_date - timedelta(days=BRANCH_DATA_FETCH_DAYS_OFFSET),
             tz=pendulum.timezone("Asia/Kolkata"),
