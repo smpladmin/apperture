@@ -68,10 +68,12 @@ class AppConnectionsAction:
                     id=datasource.integration_id
                 )
                 credentials_table[str(datasource.id)] = details
-            elif (
-                datasource.provider == IntegrationProvider.CSV
-                or datasource.provider == IntegrationProvider.SAMPLE
-            ):
+            elif datasource.provider in [
+                IntegrationProvider.CSV,
+                IntegrationProvider.SAMPLE,
+                IntegrationProvider.GOOGLE_ADS,
+                IntegrationProvider.FACEBOOK_ADS,
+            ]:
                 integration = await self.integration_service.get_integration(
                     id=str(datasource.integration_id)
                 )
