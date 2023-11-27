@@ -78,7 +78,9 @@ def to_object(value: str) -> Dict:
         decoded_string = base64.b64decode(value)
 
     try:
-        cleaned_string = ''.join(char for char in decoded_string if ord(char) < 0xD800 or ord(char) > 0xDFFF)
+        cleaned_string = decoded_string.encode(
+            encoding="utf-8", errors="ignore"
+        ).decode()
         return json.loads(cleaned_string)
     except Exception as e:
         logging.info(repr(e))

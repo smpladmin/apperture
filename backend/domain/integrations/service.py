@@ -435,7 +435,9 @@ class IntegrationService:
         )
         database = cdc_credential.database
         ch_client = await ClickHouseClientFactory.get_client(app_id=app_id)
-        logging.info(f"Creating these cdc tables in clickhouse: {cdc_credential.tables}")
+        logging.info(
+            f"Creating these cdc tables in clickhouse: {cdc_credential.tables}"
+        )
         for table in cdc_credential.tables:
             logging.info(
                 f"Creating sql server table {database}.{table} in {ch_db} database"
@@ -449,7 +451,9 @@ class IntegrationService:
             )
             self.create_ch_table(client=ch_client, query=create_query)
 
-    def create_cdc_connector(self, tables: List[str], credential: CdcCredential, integration_id: str):
+    def create_cdc_connector(
+        self, tables: List[str], credential: CdcCredential, integration_id: str
+    ):
         logging.info("Creating cdc connector")
         headers = {"Accept": "application/json", "Content-Type": "application/json"}
         data = {
