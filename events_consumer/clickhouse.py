@@ -60,6 +60,7 @@ class ClickHouse:
             self.rsave_events(second_half)
 
     def _save(self, events) -> None:
+        logging.info(f"saving: {events}")
         self.client.insert(
             table="clickstream",
             data=events,
