@@ -9,6 +9,7 @@ class CredentialType(str, Enum):
     API_KEY = "API_KEY"
     BRANCH = "BRANCH"
     FACEBOOK_ADS = "FACEBOOK_ADS"
+    GOOGLE_ADS = "GOOGLE_ADS"
 
 
 class BranchCredential(BaseModel):
@@ -50,6 +51,7 @@ class IntegrationProvider(str, Enum):
     API = "api"
     BRANCH = "branch"
     FACEBOOK_ADS = "facebook_ads"
+    GOOGLE_ADS = "google_ads"
 
 
 class DataSource(BaseModel):

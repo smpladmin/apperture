@@ -7,7 +7,7 @@ from domain.datasource.models import ClickHouseRemoteConnectionCred
 from store.clickhouse_client_factory import ClickHouseClientFactory
 
 
-class FacebookAdsDataSaver:
+class GoogleAdsDataSaver:
     def __init__(
         self,
         app_id,
@@ -20,8 +20,15 @@ class FacebookAdsDataSaver:
 
     def convert_header_to_attribute(self, headers: List[str]):
         attr_list = []
-        int_cols = ["impressions", "clicks", "reach"]
-        float_cols = ["cpm", "cpp", "cpc", "spend", "ctr"]
+        int_cols = ["impressions", "clicks", "interactions", "cost_micros"]
+        float_cols = [
+            "average_cpm",
+            "average_cpc",
+            "average_cpv",
+            "average_cpe",
+            "average_cost",
+            "ctr",
+        ]
         for header in headers:
             if header in int_cols:
                 attr_list.append(header + " Int64")
@@ -29,6 +36,8 @@ class FacebookAdsDataSaver:
                 attr_list.append(header + " Float64")
             elif header == "date":
                 attr_list.append(header + " datetime")
+            elif header == "ad_headlines":
+                attr_list.append(header + " Array(String)")
             else:
                 attr_list.append(header + " String")
         attr = ", ".join(attr_list)
