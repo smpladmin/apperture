@@ -488,7 +488,7 @@ async def get_cdc_credentials(
                 provider=integration.provider,
                 cdc_credential=integration.credential.cdc_credential,
                 clickhouse_credential=app.clickhouse_credential,
-                remote_connection=app.remote_connection
+                remote_connection=app.remote_connection,
             )
         )
     return response
