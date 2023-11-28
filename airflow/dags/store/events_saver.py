@@ -64,15 +64,18 @@ class EventsSaver(Saver):
             for event in data
         ]
 
-        clickhouse_client.connection.insert(
-            "events",
-            events,
-            column_names=[
-                "datasource_id",
-                "timestamp",
-                "provider",
-                "user_id",
-                "event_name",
-                "properties",
-            ],
-        )
+        if events:
+            clickhouse_client.connection.insert(
+                "events",
+                events,
+                column_names=[
+                    "datasource_id",
+                    "timestamp",
+                    "provider",
+                    "user_id",
+                    "event_name",
+                    "properties",
+                ],
+            )
+        else:
+            logging.info("No events to insert")

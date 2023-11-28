@@ -75,7 +75,7 @@ def get_run_dates(**kwargs):
     return run_dates
 
 
-@task(max_active_tis_per_dag=2)
+@task(max_active_tis_per_dag=1)
 def load_data(
     datasource: DataSource,
     credential: Credential,
