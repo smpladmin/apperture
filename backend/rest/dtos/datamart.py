@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -27,4 +28,4 @@ class DataMartWithUser(DataMart, ModelResponse):
 
 
 class RefreshDataMartDto(BaseModel):
-    appId: str
+    datamartId: str

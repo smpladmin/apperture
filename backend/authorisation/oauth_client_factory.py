@@ -1,11 +1,12 @@
 import os
 import json
+from typing import Optional
 
 from oauthlib.common import to_unicode
 from starlette.config import Config
 from authlib.integrations.starlette_client import OAuth
 
-from .oauth_provider import OAuthProvider
+from .oauth_provider import GoogleOauthContext, OAuthProvider
 
 
 class OAuthClientFactory:
@@ -25,14 +26,32 @@ class OAuthClientFactory:
         self,
         provider: OAuthProvider,
         scope="openid email profile",
+        google_oauth_context: Optional[GoogleOauthContext] = None,
     ) -> OAuth:
         if provider not in self._init_map:
             raise NotImplementedError(
                 f"OAuth not implemented for given provider - {provider}"
             )
+
+        if (
+            provider == OAuthProvider.GOOGLE
+            and google_oauth_context == GoogleOauthContext.SHEET
+        ):
+            client_id = os.environ.get("GOOGLE_SHEET_CLIENT_ID")
+            client_secret = os.environ.get("GOOGLE_SHEET_CLIENT_SECRET")
+            return self._init_map[provider](scope, client_id, client_secret)
+
         return self._init_map[provider](scope)
 
-    def _google_oauth_client(self, scope: str):
+    def _google_oauth_client(self, scope: str, client_id=None, client_secret=None):
+        if client_id and client_secret:
+            starlette_config = Config(
+                environ={
+                    "GOOGLE_CLIENT_ID": client_id,
+                    "GOOGLE_CLIENT_SECRET": client_secret,
+                }
+            )
+            self.oauth = OAuth(starlette_config)
         self.oauth.register(
             name="google",
             server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",

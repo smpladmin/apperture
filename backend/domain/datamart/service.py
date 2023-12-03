@@ -13,6 +13,11 @@ from mongo import Mongo
 from repositories.clickhouse.clickhouse_role import ClickHouseRole
 from repositories.clickhouse.datamart import DataMartRepo
 
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+import os
+
 
 class DataMartService:
     def __init__(
@@ -153,11 +158,20 @@ class DataMartService:
             DataMart.enabled != False,
         ).to_list()
 
-    async def get_all_apps_with_datamarts(self) -> List[str]:
-        tables = await DataMart.find(
+    async def get_datamarts(self) -> List[DataMart]:
+        return await DataMart.find(
             DataMart.enabled != False,
         ).to_list()
+
+    async def get_all_apps_with_datamarts(self) -> List[str]:
+        tables = await self.get_datamarts()
         return list(set([str(table.app_id) for table in tables]))
+
+    async def update_datamart_refresh_token_for_user(self, user_id: str, token: str):
+        await DataMart.find_all(
+            DataMart.user_id == PydanticObjectId(user_id),
+        ).update({"$set": {"google_sheet.refresh_token": token}})
+        return
 
     async def delete_datamart_table(
         self,
@@ -193,3 +207,42 @@ class DataMartService:
             db_creds=db_creds,
         )
         return refresh_status
+
+    def initialize_google_sheet_service(self, access_token: str, refresh_token: str):
+        creds = Credentials(
+            access_token,
+            refresh_token=refresh_token,
+            token_uri=os.environ["TOKEN_URI"],
+            client_id=os.environ["GOOGLE_SHEET_CLIENT_ID"],
+            client_secret=os.environ["GOOGLE_SHEET_CLIENT_SECRET"],
+        )
+
+        try:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            return build("sheets", "v4", credentials=creds)
+        except:
+            raise Exception("Could not validate credentials")
+
+    async def push_to_sheet(self, datamart: DataMart):
+        service = self.initialize_google_sheet_service(
+            access_token="", refresh_token=datamart.google_sheet.refresh_token
+        )
+
+        try:
+            result = await self.datamart_repo.execute_query_for_app_restricted_clients(
+                app_id=str(datamart.app_id), query=datamart.query
+            )
+            columns = list(result.column_names)
+            data = [list(entry) for entry in result.result_set]
+            sheet_data = [columns] + data
+
+            sheet = service.spreadsheets()
+            sheet.values().update(
+                spreadsheetId=datamart.google_sheet.spreadsheet_id,
+                range=datamart.google_sheet.sheet_range,
+                valueInputOption="USER_ENTERED",
+                body={"values": sheet_data},
+            ).execute()
+        except:
+            raise Exception("Could not push data to sheet")

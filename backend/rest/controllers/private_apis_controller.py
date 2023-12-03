@@ -38,7 +38,7 @@ from rest.dtos.clickstream_event_properties import (
     ClickStreamEventPropertiesDto,
     ClickStreamEventPropertiesResponse,
 )
-from rest.dtos.datamart import RefreshDataMartDto
+from rest.dtos.datamart import DataMartResponse, RefreshDataMartDto
 from rest.dtos.datasources import DataSourceResponse, PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.event_properties import EventPropertiesDto, EventPropertiesResponse
@@ -400,6 +400,11 @@ async def get_clickstream_event_properties(
     return await clickstream_event_properties_service.get_event_properties()
 
 
+@router.get("/datamart", response_model=List[DataMartResponse])
+async def get_datamarts(datamart_service: DataMartService = Depends()):
+    return await datamart_service.get_datamarts()
+
+
 @router.post("/datamart")
 async def refresh_datamart_tables_for_app(
     dto: RefreshDataMartDto,
@@ -407,31 +412,33 @@ async def refresh_datamart_tables_for_app(
     datamart_service: DataMartService = Depends(),
     compute_query_action: ComputeQueryAction = Depends(),
 ):
-    res = {}
-    app_id = dto.appId
+    datamart = await datamart_service.get_datamart_table(id=dto.datamartId)
+    app_id = datamart.app_id
     app = await app_service.get_app(id=app_id)
-    datamart_tables = await datamart_service.get_datamart_tables_for_app_id(
-        app_id=PydanticObjectId(app_id)
-    )
 
-    for table in datamart_tables:
-        datasource_id = str(table.datasource_id)
-        database_client = await compute_query_action.get_database_client(
+    datasource_id = str(datamart.datasource_id)
+    database_client = await compute_query_action.get_database_client(
+        datasource_id=datasource_id
+    )
+    db_credential = None
+    if database_client != DatabaseClient.CLICKHOUSE:
+        db_credential = await compute_query_action.get_credentials(
             datasource_id=datasource_id
         )
-        db_credential = None
-        if database_client != DatabaseClient.CLICKHOUSE:
-            db_credential = await compute_query_action.get_credentials(
-                datasource_id=datasource_id
-            )
-        refresh_status = await datamart_service.refresh_datamart_table(
-            datamart_id=str(table.id),
-            clickhouse_credential=app.clickhouse_credential,
-            db_creds=db_credential,
-            database_client=database_client,
-        )
-        res[str(table.id)] = "updated" if refresh_status else "failed"
-    return {app_id: res}
+
+    if datamart.google_sheet.enable_sheet_push:
+        await datamart_service.push_to_sheet(datamart=datamart)
+
+    refresh_status = await datamart_service.refresh_datamart_table(
+        datamart_id=str(datamart.id),
+        clickhouse_credential=app.clickhouse_credential,
+        db_creds=db_credential,
+        database_client=database_client,
+    )
+    if refresh_status:
+        return True
+    else:
+        raise Exception(f"Could not refresh datamart {datamart.name}")
 
 
 @router.post("/apps/datamart")
@@ -488,7 +495,7 @@ async def get_cdc_credentials(
                 provider=integration.provider,
                 cdc_credential=integration.credential.cdc_credential,
                 clickhouse_credential=app.clickhouse_credential,
-                remote_connection=app.remote_connection
+                remote_connection=app.remote_connection,
             )
         )
     return response
