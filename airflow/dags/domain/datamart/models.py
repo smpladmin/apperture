@@ -1,26 +1,40 @@
 import datetime
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, Field
 
 
+class TimeUnit(str, Enum):
+    MINUTES = "minutes"
+    HOURS = "hours"
+    DAYS = "days"
+
+
+class UpdateFrequency(BaseModel):
+    interval: int
+    unit: TimeUnit
+
+
+class Spreadsheet(BaseModel):
+    id: str
+    name: str
+
+
 class GoogleSheet(BaseModel):
-    refresh_token: str
     enable_sheet_push: bool
-    spreadsheet_id: str
+    spreadsheet: Spreadsheet
     sheet_range: str
 
 
 class Datamart(BaseModel):
     id: str = Field(alias="_id")
-    datasourceId: str
-    appId: str
-    userId: str
+    datasource_id: str = Field(alias="datasourceId")
+    app_id: str = Field(alias="appId")
     name: str
-    tableName: str
-    lastRefreshed: datetime.datetime
+    table_name: str == Field(alias="tableName")
     query: str
     enabled: bool
-    frequency: Optional[int]
-    googleSheet: Optional[GoogleSheet]
-    createdAt: datetime.datetime
+    update_frequency: Optional[UpdateFrequency] = Field(alias="updateFrequency")
+    google_sheet: Optional[GoogleSheet] = Field(alias="googleSheet")
+    created_at: datetime.datetime = Field(alias="googleSheet")

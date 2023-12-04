@@ -1,7 +1,9 @@
-import datetime
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel
+from domain.spreadsheets.models import DatabaseClient
+from domain.apps.models import ClickHouseCredential
+from domain.integrations.models import MsSQLCredential, MySQLCredential
 
 from domain.datamart.models import DataMart
 from rest.dtos.apperture_users import AppertureUserResponse
@@ -27,5 +29,12 @@ class DataMartWithUser(DataMart, ModelResponse):
         orm_mode = True
 
 
+class PushDatamartToSheetDto(BaseModel):
+    datamartId: str
+
+
 class RefreshDataMartDto(BaseModel):
     datamartId: str
+    appId: str
+    databaseCredential: Union[ClickHouseCredential, MySQLCredential, MsSQLCredential]
+    databaseClient: DatabaseClient

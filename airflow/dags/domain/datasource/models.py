@@ -23,6 +23,34 @@ class FacebookAdsCredential(BaseModel):
     access_token: str
 
 
+class DatabaseSSHCredential(BaseModel):
+    server: str
+    port: str
+    username: Optional[str]
+    password: Optional[str]
+    ssh_key: Optional[str]
+
+
+class MySQLCredential(BaseModel):
+    host: str
+    port: str
+    username: str
+    password: str
+    databases: List[str]
+    over_ssh: bool = False
+    ssh_credential: Optional[DatabaseSSHCredential]
+
+
+class MsSQLCredential(BaseModel):
+    server: str
+    port: str
+    username: str
+    password: str
+    databases: List[str]
+    over_ssh: bool = False
+    ssh_credential: Optional[DatabaseSSHCredential]
+
+
 class Credential(BaseModel):
     type: CredentialType
     account_id: Optional[str] = Field(alias="accountId")
@@ -31,6 +59,8 @@ class Credential(BaseModel):
     tableName: Optional[str]
     secret: Optional[str]
     api_base_url: Optional[str] = Field(alias="apiBaseUrl")
+    mssql_credential: Optional[MsSQLCredential] = Field(alias="mssqlCredential")
+    mysql_credential: Optional[MySQLCredential] = Field(alias="mysqlCredential")
     branch_credential: Optional[BranchCredential] = Field(alias="branchCredential")
     facebook_ads_credential: Optional[FacebookAdsCredential] = Field(
         alias="facebookAdsCredential"
@@ -43,6 +73,12 @@ class DataSourceVersion(str, Enum):
     DEFAULT = "DEFAULT"
 
 
+class DatabaseClient(str, Enum):
+    MYSQL = "mysql"
+    CLICKHOUSE = "clickhouse"
+    MSSQL = "mssql"
+
+
 class IntegrationProvider(str, Enum):
     GOOGLE = "google"
     MIXPANEL = "mixpanel"
@@ -52,6 +88,8 @@ class IntegrationProvider(str, Enum):
     BRANCH = "branch"
     FACEBOOK_ADS = "facebook_ads"
     GOOGLE_ADS = "google_ads"
+    MYSQL = "mysql"
+    MSSQL = "mssql"
 
 
 class DataSource(BaseModel):
