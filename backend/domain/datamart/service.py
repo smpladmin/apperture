@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 from typing import Dict, List, Union
 
 from beanie import PydanticObjectId
@@ -170,7 +171,7 @@ class DataMartService:
     async def update_datamart_refresh_token_for_user(self, user_id: str, token: str):
         await DataMart.find_all(
             DataMart.user_id == PydanticObjectId(user_id),
-        ).update({"$set": {"google_sheet.refresh_token": token}})
+        ).update({"$set": {"refresh_token": token}})
         return
 
     async def delete_datamart_table(
@@ -208,9 +209,9 @@ class DataMartService:
         )
         return refresh_status
 
-    def initialize_google_sheet_service(self, access_token: str, refresh_token: str):
+    def initialize_google_drive_service(self, access_token: str, refresh_token: str):
         creds = Credentials(
-            access_token,
+            access_token=access_token,
             refresh_token=refresh_token,
             token_uri=os.environ["TOKEN_URI"],
             client_id=os.environ["GOOGLE_SHEET_CLIENT_ID"],
@@ -220,13 +221,58 @@ class DataMartService:
         try:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
+            return build("drive", "v3", credentials=creds)
+        except:
+            raise Exception("Could not validate credentials")
+
+    def retrieve_all_files(drive_service, page_token=None):
+        all_files = []
+
+        while True:
+            result = (
+                drive_service.files()
+                .list(
+                    q="mimeType='application/vnd.google-apps.spreadsheet'",
+                    fields="nextPageToken, files(id, name)",
+                    pageToken=page_token,
+                )
+                .execute()
+            )
+
+            files = result.get("files", [])
+            all_files.extend(files)
+
+            page_token = result.get("nextPageToken")
+            if not page_token:
+                break
+
+        return all_files
+
+    def get_google_sheets(self, refresh_token: str):
+        service = self.initialize_google_sheet_service(
+            access_token="", refresh_token=refresh_token
+        )
+
+        self.retrieve_all_files(drive_service=service)
+
+    def initialize_google_sheet_service(self, access_token: str, refresh_token: str):
+        creds = Credentials(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_uri=os.environ["TOKEN_URI"],
+            client_id=os.environ["GOOGLE_SHEET_CLIENT_ID"],
+            client_secret=os.environ["GOOGLE_SHEET_CLIENT_SECRET"],
+        )
+        try:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
             return build("sheets", "v4", credentials=creds)
         except:
             raise Exception("Could not validate credentials")
 
-    async def push_to_sheet(self, datamart: DataMart):
+    async def push_to_google_sheet(self, datamart: DataMart):
         service = self.initialize_google_sheet_service(
-            access_token="", refresh_token=datamart.google_sheet.refresh_token
+            access_token="", refresh_token=datamart.refresh_token
         )
 
         try:
@@ -239,10 +285,10 @@ class DataMartService:
 
             sheet = service.spreadsheets()
             sheet.values().update(
-                spreadsheetId=datamart.google_sheet.spreadsheet_id,
+                spreadsheetId=datamart.google_sheet.spreadsheet.id,
                 range=datamart.google_sheet.sheet_range,
                 valueInputOption="USER_ENTERED",
                 body={"values": sheet_data},
             ).execute()
-        except:
-            raise Exception("Could not push data to sheet")
+        except Exception as e:
+            logging.info(e)

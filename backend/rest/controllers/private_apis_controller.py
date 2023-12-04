@@ -38,7 +38,11 @@ from rest.dtos.clickstream_event_properties import (
     ClickStreamEventPropertiesDto,
     ClickStreamEventPropertiesResponse,
 )
-from rest.dtos.datamart import DataMartResponse, RefreshDataMartDto
+from rest.dtos.datamart import (
+    DataMartResponse,
+    PushDatamartToSheetDto,
+    RefreshDataMartDto,
+)
 from rest.dtos.datasources import DataSourceResponse, PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.event_properties import EventPropertiesDto, EventPropertiesResponse
@@ -405,40 +409,34 @@ async def get_datamarts(datamart_service: DataMartService = Depends()):
     return await datamart_service.get_datamarts()
 
 
-@router.post("/datamart")
-async def refresh_datamart_tables_for_app(
+@router.post("/datamart/google_sheet")
+async def push_to_sheet(
+    dto: PushDatamartToSheetDto, datamart_service: DataMartService = Depends()
+):
+    datamart = await datamart_service.get_datamart_table(id=dto.datamartId)
+    try:
+        await datamart_service.push_to_google_sheet(datamart=datamart)
+    except:
+        raise Exception("Could not push to google sheet")
+
+
+@router.post("/datamart/refresh")
+async def refresh_datamart_tables(
     dto: RefreshDataMartDto,
     app_service: AppService = Depends(),
     datamart_service: DataMartService = Depends(),
-    compute_query_action: ComputeQueryAction = Depends(),
 ):
-    datamart = await datamart_service.get_datamart_table(id=dto.datamartId)
-    app_id = datamart.app_id
-    app = await app_service.get_app(id=app_id)
-
-    datasource_id = str(datamart.datasource_id)
-    database_client = await compute_query_action.get_database_client(
-        datasource_id=datasource_id
-    )
-    db_credential = None
-    if database_client != DatabaseClient.CLICKHOUSE:
-        db_credential = await compute_query_action.get_credentials(
-            datasource_id=datasource_id
-        )
-
-    if datamart.google_sheet.enable_sheet_push:
-        await datamart_service.push_to_sheet(datamart=datamart)
-
+    app = await app_service.get_app(id=dto.appId)
     refresh_status = await datamart_service.refresh_datamart_table(
-        datamart_id=str(datamart.id),
+        datamart_id=dto.datamartId,
         clickhouse_credential=app.clickhouse_credential,
-        db_creds=db_credential,
-        database_client=database_client,
+        db_creds=dto.databaseCredential,
+        database_client=dto.databaseClient,
     )
     if refresh_status:
         return True
     else:
-        raise Exception(f"Could not refresh datamart {datamart.name}")
+        raise Exception(f"Could not refresh datamart {dto.datamartId}")
 
 
 @router.post("/apps/datamart")

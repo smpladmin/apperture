@@ -219,7 +219,7 @@ async def delete_datamart_table(
 
 oauth = OAuthClientFactory().init_client(
     provider=OAuthProvider.GOOGLE,
-    scope="https://www.googleapis.com/auth/spreadsheets",
+    scope="https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.readonly",
     google_oauth_context=GoogleOauthContext.SHEET,
 )
 

@@ -1,4 +1,5 @@
 import datetime
+from enum import Enum
 from typing import Optional
 
 from beanie import PydanticObjectId
@@ -6,10 +7,25 @@ from pydantic import BaseModel, Field
 from repositories import Document
 
 
+class TimeUnit(str, Enum):
+    MINUTES = "minutes"
+    HOURS = "hours"
+    DAYS = "days"
+
+
+class UpdateFrequency(BaseModel):
+    interval: int
+    unit: TimeUnit
+
+
+class Spreadsheet(BaseModel):
+    id: str
+    name: str
+
+
 class GoogleSheet(BaseModel):
-    refresh_token: str = Field(hidden=True)
-    enable_sheet_push: bool
-    spreadsheet_id: str
+    enable_sheet_push: bool = False
+    spreadsheet: Spreadsheet
     sheet_range: str
 
 
@@ -22,8 +38,9 @@ class DataMart(Document):
     last_refreshed: datetime.datetime
     query: str
     enabled: bool = True
+    refresh_token: Optional[str] = Field(hidden=True)
     google_sheet: Optional[GoogleSheet]
-    frequency: Optional[int]
+    update_frequency: Optional[UpdateFrequency]
 
     class Settings:
         name = "datamart"
