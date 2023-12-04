@@ -37,4 +37,4 @@ class Datamart(BaseModel):
     enabled: bool
     update_frequency: Optional[UpdateFrequency] = Field(alias="updateFrequency")
     google_sheet: Optional[GoogleSheet] = Field(alias="googleSheet")
-    created_at: datetime.datetime = Field(alias="googleSheet")
+    created_at: datetime.datetime = Field(alias="createdAt")

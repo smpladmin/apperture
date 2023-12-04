@@ -6,7 +6,7 @@ from domain.datasource.models import Credential, CredentialType
 from fetch.google_ads_data_fetcher import GoogleAdsFetcher
 
 
-class TestClevertapEventsFetcher:
+class TestGoogleAdsEventsFetcher:
     def setup_method(self):
         self.credential = Credential(
             type=CredentialType.GOOGLE_ADS,
@@ -18,6 +18,8 @@ class TestClevertapEventsFetcher:
             apiBaseUrl=None,
             branchCredential=None,
             facebookAdsCredential=None,
+            mssqlCredential=None,
+            mysqlCredential=None,
         )
         self.date = "2023-11-23"
         self.fetcher = GoogleAdsFetcher(self.credential, self.date)
