@@ -38,6 +38,9 @@ def test_save_datamart_table(
         "revision_id": None,
         "updated_at": None,
         "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
+        "google_sheet": None,
+        "refresh_token": None,
+        "update_frequency": None,
     }
 
 
@@ -95,6 +98,9 @@ async def test_update_datamart(
         "revision_id": None,
         "updated_at": None,
         "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
+        "google_sheet": None,
+        "refresh_token": None,
+        "update_frequency": None,
     } == update_datamart_kwargs["new_table"].dict()
 
     assert "635ba034807ab86d8a2aadd8" == update_datamart_kwargs["table_id"]
@@ -149,6 +155,9 @@ def test_get_datamart_list(client_init, datamart_service):
             "query": "select event_name, user_id from events",
             "revisionId": None,
             "updatedAt": None,
+            "googleSheet": None,
+            "refreshToken": None,
+            "updateFrequency": None,
             "user": {
                 "email": "test@email.com",
                 "firstName": "Test",

@@ -321,29 +321,6 @@ def test_get_clickstream_event_properties(
     clickstream_event_properties_service.get_event_properties.assert_called_once()
 
 
-def test_refresh_datamart_tables_for_app(client_init, datamart_service, app_service):
-    response = client_init.post(
-        "/private/datamart", json={"appId": "63ce4906f496f7b462ab7e84"}
-    )
-    assert response.status_code == 200
-    assert response.json() == {
-        "63ce4906f496f7b462ab7e84": {"635ba034807ab86d8a2aadd8": "updated"}
-    }
-    app_service.get_app.assert_called_with(**{"id": "63ce4906f496f7b462ab7e84"})
-    datamart_service.refresh_datamart_table.assert_called_once_with(
-        **{
-            "clickhouse_credential": ClickHouseCredential(
-                username="test_username",
-                password="test_password",
-                databasename="test_database",
-            ),
-            "datamart_id": "635ba034807ab86d8a2aadd8",
-            "database_client": DatabaseClient.CLICKHOUSE,
-            "db_creds": None,
-        }
-    )
-
-
 def test_trigger_refresh_datamart_for_all_apps(
     client_init, datamart_service, dpq_service
 ):

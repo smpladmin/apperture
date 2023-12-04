@@ -1901,6 +1901,9 @@ def datamart_response():
         "lastRefreshed": "2022-11-24T00:00:00",
         "query": "select event_name, user_id from events",
         "enabled": True,
+        "googleSheet": None,
+        "refreshToken": None,
+        "updateFrequency": None,
     }
 
 

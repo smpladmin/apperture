@@ -90,6 +90,9 @@ class TestDataMartService:
             "revision_id": None,
             "updated_at": None,
             "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+            "google_sheet": None,
+            "refresh_token": None,
+            "update_frequency": None,
         }
 
     @pytest.mark.asyncio
@@ -117,6 +120,9 @@ class TestDataMartService:
                     "revision_id": None,
                     "updated_at": ANY,
                     "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+                    "google_sheet": None,
+                    "refresh_token": None,
+                    "update_frequency": None,
                 }
             },
         )
