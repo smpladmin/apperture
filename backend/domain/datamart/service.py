@@ -169,9 +169,10 @@ class DataMartService:
         return list(set([str(table.app_id) for table in tables]))
 
     async def update_datamart_refresh_token_for_user(self, user_id: str, token: str):
-        await DataMart.find_all(
+        await DataMart.find(
             DataMart.user_id == PydanticObjectId(user_id),
-        ).update({"$set": {"refresh_token": token}})
+            DataMart.enabled != False,
+        ).update_many({"$set": {"refresh_token": token}})
         return
 
     async def delete_datamart_table(
