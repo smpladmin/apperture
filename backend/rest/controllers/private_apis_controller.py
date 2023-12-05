@@ -415,7 +415,12 @@ async def push_to_sheet(
 ):
     datamart = await datamart_service.get_datamart_table(id=dto.datamartId)
     try:
-        await datamart_service.push_to_google_sheet(datamart=datamart)
+        await datamart_service.push_to_google_sheet(
+            refresh_token=datamart.refresh_token,
+            app_id=str(datamart.app_id),
+            query=datamart.query,
+            google_sheet=datamart.google_sheet,
+        )
     except:
         raise Exception("Could not push to google sheet")
 

@@ -1,14 +1,13 @@
 import logging
 from typing import List, Union
 
-from requests import post
 from domain.datasource.models import (
     ClickHouseCredential,
     DatabaseClient,
     MsSQLCredential,
     MySQLCredential,
 )
-from apperture.backend_action import get
+from apperture.backend_action import get, post
 from .models import Datamart
 
 
@@ -32,15 +31,19 @@ class DatamartService:
     ):
         logging.info("{x}: {y}".format(x="refresh datamart", y="start"))
         try:
-            post(
-                "/private/datamart/refresh",
-                {
+            logging.info(f"database credential, {database_credential}")
+            response = post(
+                path="/private/datamart/refresh",
+                json={
                     "datamartId": datamart_id,
                     "appId": app_id,
                     "databaseClient": database_client,
-                    "databaseCredential": database_credential,
+                    "databaseCredential": database_credential.dict(),
                 },
             )
+            if response.status_code != 200:
+                raise Exception(f"Could not refresh datamart for : {datamart_id}")
+
         except:
             raise Exception(f"Could not refresh datamart for : {datamart_id}")
         logging.info("{x}: {y}".format(x="refresh datamart", y="end"))
@@ -48,7 +51,13 @@ class DatamartService:
     def push_datamart_to_google_sheet(self, datamart_id: str):
         logging.info("{x}: {y}".format(x="push datamart to google sheet", y="start"))
         try:
-            post("/private/datamart/google_sheet", {"datamartId": datamart_id})
+            response = post(
+                path="/private/datamart/google_sheet", json={"datamartId": datamart_id}
+            )
+            if response.status_code != 200:
+                raise Exception(
+                    f"Could not push datamart: {datamart_id} to google sheet"
+                )
         except:
-            raise Exception(f"Could not push datamart  : {datamart_id} to google sheet")
+            raise Exception(f"Could not push datamart: {datamart_id} to google sheet")
         logging.info("{x}: {y}".format(x="push datamart to google sheet", y="end"))

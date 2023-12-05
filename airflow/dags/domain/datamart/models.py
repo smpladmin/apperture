@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from enum import Enum
 from typing import Optional
 
@@ -32,9 +32,9 @@ class Datamart(BaseModel):
     datasource_id: str = Field(alias="datasourceId")
     app_id: str = Field(alias="appId")
     name: str
-    table_name: str == Field(alias="tableName")
+    table_name: str = Field(alias="tableName")
     query: str
     enabled: bool
     update_frequency: Optional[UpdateFrequency] = Field(alias="updateFrequency")
     google_sheet: Optional[GoogleSheet] = Field(alias="googleSheet")
-    created_at: datetime.datetime = Field(alias="createdAt")
+    created_at: datetime = Field(alias="createdAt")

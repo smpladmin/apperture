@@ -119,7 +119,7 @@ def create_dag(datamart: Datamart, datasource_id: str, created_date: datetime):
     @dag(
         dag_id=f"datamart_data_loader_{datamart.table_name}_{datamart.id}",
         description=f"Datamart datasource daily refresh for {datamart.table_name}_{datamart.id}",
-        schedule={calculate_schedule(datamart=datamart)},
+        schedule=calculate_schedule(datamart=datamart),
         start_date=pendulum.instance(
             created_date if created_date > DATAMART_INIT_DATE else DATAMART_INIT_DATE,
             tz=pendulum.timezone("Asia/Kolkata"),

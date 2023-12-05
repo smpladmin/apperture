@@ -7,7 +7,7 @@ from fastapi import Depends
 
 from domain.apps.models import ClickHouseCredential
 from domain.common.random_string_utils import StringUtils
-from domain.datamart.models import DataMart
+from domain.datamart.models import DataMart, GoogleSheet
 from domain.integrations.models import MsSQLCredential
 from domain.spreadsheets.models import DatabaseClient
 from mongo import Mongo
@@ -212,7 +212,7 @@ class DataMartService:
 
     def initialize_google_drive_service(self, access_token: str, refresh_token: str):
         creds = Credentials(
-            access_token=access_token,
+            access_token,
             refresh_token=refresh_token,
             token_uri=os.environ["TOKEN_URI"],
             client_id=os.environ["GOOGLE_SHEET_CLIENT_ID"],
@@ -250,7 +250,7 @@ class DataMartService:
         return all_files
 
     def get_google_sheets(self, refresh_token: str):
-        service = self.initialize_google_sheet_service(
+        service = self.initialize_google_drive_service(
             access_token="", refresh_token=refresh_token
         )
 
@@ -258,7 +258,7 @@ class DataMartService:
 
     def initialize_google_sheet_service(self, access_token: str, refresh_token: str):
         creds = Credentials(
-            access_token=access_token,
+            access_token,
             refresh_token=refresh_token,
             token_uri=os.environ["TOKEN_URI"],
             client_id=os.environ["GOOGLE_SHEET_CLIENT_ID"],
@@ -271,14 +271,16 @@ class DataMartService:
         except:
             raise Exception("Could not validate credentials")
 
-    async def push_to_google_sheet(self, datamart: DataMart):
+    async def push_to_google_sheet(
+        self, refresh_token: str, app_id: str, query: str, google_sheet: GoogleSheet
+    ):
         service = self.initialize_google_sheet_service(
-            access_token="", refresh_token=datamart.refresh_token
+            access_token="", refresh_token=refresh_token
         )
 
         try:
             result = await self.datamart_repo.execute_query_for_app_restricted_clients(
-                app_id=str(datamart.app_id), query=datamart.query
+                app_id=app_id, query=query
             )
             columns = list(result.column_names)
             data = [list(entry) for entry in result.result_set]
@@ -286,8 +288,8 @@ class DataMartService:
 
             sheet = service.spreadsheets()
             sheet.values().update(
-                spreadsheetId=datamart.google_sheet.spreadsheet.id,
-                range=datamart.google_sheet.sheet_range,
+                spreadsheetId=google_sheet.spreadsheet.id,
+                range=google_sheet.sheet_range,
                 valueInputOption="USER_ENTERED",
                 body={"values": sheet_data},
             ).execute()

@@ -10,6 +10,10 @@ class CredentialType(str, Enum):
     BRANCH = "BRANCH"
     FACEBOOK_ADS = "FACEBOOK_ADS"
     GOOGLE_ADS = "GOOGLE_ADS"
+    MYSQL = "MYSQL"
+    MSSQL = "MSSQL"
+    CSV = "CSV"
+    CDC = "CDC"
 
 
 class BranchCredential(BaseModel):
@@ -84,12 +88,15 @@ class IntegrationProvider(str, Enum):
     MIXPANEL = "mixpanel"
     AMPLITUDE = "amplitude"
     CLEVERTAP = "clevertap"
+    APPERTURE = "apperture"
     API = "api"
     BRANCH = "branch"
+    CDC = "cdc"
     FACEBOOK_ADS = "facebook_ads"
     GOOGLE_ADS = "google_ads"
     MYSQL = "mysql"
     MSSQL = "mssql"
+    CSV = "csv"
 
 
 class DataSource(BaseModel):
