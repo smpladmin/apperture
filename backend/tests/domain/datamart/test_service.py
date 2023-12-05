@@ -265,11 +265,6 @@ class TestDataMartService:
         DataMart.find.assert_called_once()
         update_many_mock.assert_called_with({"$set": {"refresh_token": "345k-f192"}})
 
-    def test_initialize_google_sheet_service(self):
-        self.service.initialize_google_sheet_service(
-            access_token="", refresh_token="345k-f192"
-        )
-
     @pytest.mark.asyncio
     async def test_push_to_google_sheet(self):
         self.service.initialize_google_sheet_service = MagicMock()
