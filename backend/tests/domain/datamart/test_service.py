@@ -6,7 +6,7 @@ import pytest
 from beanie import PydanticObjectId
 
 from domain.apps.models import ClickHouseCredential
-from domain.datamart.models import DataMart
+from domain.datamart.models import DataMart, GoogleSheet, Spreadsheet
 from domain.datamart.service import DataMartService
 from domain.datasources.models import DataSource
 from domain.spreadsheets.models import DatabaseClient
@@ -38,6 +38,7 @@ class TestDataMartService:
             ),
         )
         DataMart.app_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
+        DataMart.user_id = MagicMock(return_value=PydanticObjectId(self.user_id))
         DataMart.datasource_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         self.datamart_obj = DataMart(
             datasource_id=self.ds_id,
@@ -250,3 +251,84 @@ class TestDataMartService:
     async def test_get_all_apps_with_datamarts(self):
         await self.service.get_all_apps_with_datamarts()
         DataMart.find.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_update_datamart_refresh_token_for_user(self):
+        FindMock = namedtuple("FindMock", ["update_many"])
+        update_many_mock = AsyncMock()
+        DataMart.find = MagicMock(
+            return_value=FindMock(update_many=update_many_mock),
+        )
+        await self.service.update_datamart_refresh_token_for_user(
+            user_id=self.user_id, token="345k-f192"
+        )
+        DataMart.find.assert_called_once()
+        update_many_mock.assert_called_with({"$set": {"refresh_token": "345k-f192"}})
+
+    def test_initialize_google_sheet_service(self):
+        self.service.initialize_google_sheet_service(
+            access_token="", refresh_token="345k-f192"
+        )
+
+    @pytest.mark.asyncio
+    async def test_push_to_google_sheet(self):
+        self.service.initialize_google_sheet_service = MagicMock()
+
+        await self.service.push_to_google_sheet(
+            refresh_token="345k-f192",
+            app_id="635ba034807ab86d8a2aadd7",
+            query="select event_name, user_id from events",
+            google_sheet=GoogleSheet(
+                enable_sheet_push=True,
+                spreadsheet=Spreadsheet(id="1vwpp022-383kl", name="Test Spreadsheet"),
+                sheet_range="Sheet1!A1",
+            ),
+        )
+
+        self.service.datamart_repo.execute_query_for_app_restricted_clients.assert_called_once_with(
+            query="select event_name, user_id from events",
+            app_id="635ba034807ab86d8a2aadd7",
+        )
+        self.service.initialize_google_sheet_service.assert_called_with(
+            access_token="", refresh_token="345k-f192"
+        )
+
+    def test_retrieve_all_files(self):
+        drive_service_mock = MagicMock()
+        files_data = [
+            {"id": "file_id_1", "name": "File 1"},
+            {"id": "file_id_2", "name": "File 2"},
+        ]
+        next_page_token = None
+
+        drive_service_mock.files.return_value.list.return_value.execute.return_value = {
+            "files": files_data,
+            "nextPageToken": next_page_token,
+        }
+
+        all_files = self.service.retrieve_all_files(drive_service_mock)
+
+        drive_service_mock.files.assert_called_once()
+        drive_service_mock.files.return_value.list.assert_called_once_with(
+            q="mimeType='application/vnd.google-apps.spreadsheet'",
+            fields="nextPageToken, files(id, name)",
+            pageToken=None,
+        )
+
+        assert all_files == files_data
+
+    def test_get_google_sheets(self):
+        drive_service_mock = MagicMock()
+        self.service.initialize_google_drive_service = MagicMock(
+            return_value=drive_service_mock
+        )
+        self.service.retrieve_all_files = MagicMock()
+
+        self.service.get_google_sheets(refresh_token="345k-f192")
+
+        self.service.initialize_google_drive_service.assert_called_with(
+            access_token="", refresh_token="345k-f192"
+        )
+        self.service.retrieve_all_files.assert_called_with(
+            drive_service=drive_service_mock
+        )

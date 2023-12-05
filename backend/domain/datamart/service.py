@@ -212,7 +212,7 @@ class DataMartService:
 
     def initialize_google_drive_service(self, access_token: str, refresh_token: str):
         creds = Credentials(
-            access_token,
+            token=access_token,
             refresh_token=refresh_token,
             token_uri=os.environ["TOKEN_URI"],
             client_id=os.environ["GOOGLE_SHEET_CLIENT_ID"],
@@ -226,7 +226,7 @@ class DataMartService:
         except:
             raise Exception("Could not validate credentials")
 
-    def retrieve_all_files(drive_service, page_token=None):
+    def retrieve_all_files(self, drive_service, page_token=None):
         all_files = []
 
         while True:
@@ -258,7 +258,7 @@ class DataMartService:
 
     def initialize_google_sheet_service(self, access_token: str, refresh_token: str):
         creds = Credentials(
-            access_token,
+            token=access_token,
             refresh_token=refresh_token,
             token_uri=os.environ["TOKEN_URI"],
             client_id=os.environ["GOOGLE_SHEET_CLIENT_ID"],
