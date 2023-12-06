@@ -42,22 +42,23 @@ class DatamartService:
                 },
             )
             if response.status_code != 200:
-                raise Exception(f"Could not refresh datamart for : {datamart_id}")
+                raise Exception(f"Error: {response.json()}")
 
         except:
             raise Exception(f"Could not refresh datamart for : {datamart_id}")
         logging.info("{x}: {y}".format(x="refresh datamart", y="end"))
 
-    def push_datamart_to_google_sheet(self, datamart_id: str):
+    def push_datamart_to_target(self, datamart_id: str, target: str):
         logging.info("{x}: {y}".format(x="push datamart to google sheet", y="start"))
         try:
             response = post(
-                path="/private/datamart/google_sheet", json={"datamartId": datamart_id}
+                path="/private/{datamart_id}?target={target}",
+                json={
+                    "datamartId": datamart_id,
+                },
             )
             if response.status_code != 200:
-                raise Exception(
-                    f"Could not push datamart: {datamart_id} to google sheet"
-                )
+                raise Exception(f"Error: {response.json()}")
         except:
             raise Exception(f"Could not push datamart: {datamart_id} to google sheet")
         logging.info("{x}: {y}".format(x="push datamart to google sheet", y="end"))

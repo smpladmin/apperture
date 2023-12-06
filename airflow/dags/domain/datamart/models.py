@@ -27,6 +27,11 @@ class GoogleSheet(BaseModel):
     sheet_range: str
 
 
+class APICredential(BaseModel):
+    url: str
+    headers: str
+
+
 class Datamart(BaseModel):
     id: str = Field(alias="_id")
     datasource_id: str = Field(alias="datasourceId")
@@ -37,4 +42,5 @@ class Datamart(BaseModel):
     enabled: bool
     update_frequency: Optional[UpdateFrequency] = Field(alias="updateFrequency")
     google_sheet: Optional[GoogleSheet] = Field(alias="googleSheet")
+    api_credential: Optional[APICredential] = Field(alias="apiCredential")
     created_at: datetime = Field(alias="createdAt")

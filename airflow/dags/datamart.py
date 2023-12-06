@@ -45,15 +45,13 @@ def get_database_client(datasource: DataSource) -> DatabaseClient:
 
 @task
 def get_database_credentials(
-    datasource: DataSource, credential: Credential, database_client: DatabaseClient
+    datasource: DataSource, credential: Credential
 ) -> Union[MySQLCredential, MsSQLCredential, ClickHouseCredential]:
-    if database_client != DatabaseClient.CLICKHOUSE:
-        provider = datasource.provider
-        if provider in [IntegrationProvider.MYSQL, IntegrationProvider.MSSQL]:
-            if provider == IntegrationProvider.MYSQL:
-                return credential.mysql_credential
-            elif provider == IntegrationProvider.MSSQL:
-                return credential.mssql_credential
+    provider = datasource.provider
+    if provider == IntegrationProvider.MYSQL:
+        return credential.mysql_credential
+    elif provider == IntegrationProvider.MSSQL:
+        return credential.mssql_credential
     else:
         database_details = datasource_service.get_database_for_app(
             app_id=datasource.appId
@@ -63,7 +61,14 @@ def get_database_credentials(
 
 @task(trigger_rule="all_done")
 def push_datamart_to_google_sheet(datamart: Datamart):
-    datamart_service.push_datamart_to_google_sheet(datamart_id=datamart.id)
+    datamart_service.push_datamart_to_target(
+        datamart_id=datamart.id, target="google_sheet"
+    )
+
+
+@task(trigger_rule="all_done")
+def push_datamart_to_api(datamart: Datamart):
+    datamart_service.push_datamart_to_target(datamart_id=datamart.id, target="api")
 
 
 @task(trigger_rule="all_done")
@@ -89,6 +94,9 @@ def refresh_datamart(
 ):
     if datamart.google_sheet and datamart.google_sheet.enable_sheet_push:
         push_datamart_to_google_sheet(datamart=datamart)
+
+    if datamart.api_credential:
+        push_datamart_to_api(datamart=datamart)
 
     refresh_datamart_table(
         datamart=datamart,
@@ -136,7 +144,6 @@ def create_dag(datamart: Datamart, datasource_id: str, created_date: datetime):
         database_credentials = get_database_credentials(
             datasource=datasource,
             credential=credential,
-            database_client=database_client,
         )
 
         refresh_datamart(
