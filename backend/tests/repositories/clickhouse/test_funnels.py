@@ -1,7 +1,7 @@
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from pypika import Table, ClickHouseQuery
+from pypika import ClickHouseQuery, Table
 
 from domain.common.filter_models import FilterDataType, FilterOperatorsString
 from domain.funnels.models import FunnelStep
@@ -13,9 +13,10 @@ class TestFunnelsRepository:
     def setup_method(self):
         self.clickhouse = MagicMock()
         repo = Funnels(self.clickhouse)
-        repo.execute_get_query = MagicMock()
         self.repo = repo
+        self.repo.execute_query_for_app = AsyncMock()
         self.datasource_id = "test-id"
+        self.app_id = "test-app-id"
         self.steps = [
             FunnelStep(event="Video_Open", filters=[]),
             FunnelStep(event="Video_Seen", filters=[]),
@@ -198,8 +199,11 @@ class TestFunnelsRepository:
             ),
         ],
     )
-    def test_get_users_count(self, start_date, end_date, inclusion_criterion, result):
-        self.repo.get_users_count(
+    @pytest.mark.asyncio
+    async def test_get_users_count(
+        self, start_date, end_date, inclusion_criterion, result
+    ):
+        await self.repo.get_users_count(
             ds_id=self.datasource_id,
             steps=self.steps,
             start_date=start_date,
@@ -208,11 +212,15 @@ class TestFunnelsRepository:
             random_sequence=False,
             segment_filter_query=self.segment_filter_query,
             inclusion_criterion=inclusion_criterion,
+            app_id=self.app_id,
         )
-        self.repo.execute_get_query.assert_called_once_with(result, self.parameters)
+        self.repo.execute_query_for_app.assert_called_once_with(
+            result, self.parameters, app_id=self.app_id
+        )
 
-    def test_get_conversion_trend(self):
-        self.repo.get_conversion_trend(
+    @pytest.mark.asyncio
+    async def test_get_conversion_trend(self):
+        await self.repo.get_conversion_trend(
             ds_id=self.datasource_id,
             steps=self.steps,
             start_date=self.start_date,
@@ -221,9 +229,12 @@ class TestFunnelsRepository:
             random_sequence=False,
             segment_filter_query=self.segment_filter_query,
             inclusion_criterion=self.inclusion_criterion,
+            app_id=self.app_id,
         )
-        self.repo.execute_get_query.assert_called_once_with(
-            self.trends_query_with_date_filter, self.parameters
+        self.repo.execute_query_for_app.assert_called_once_with(
+            self.trends_query_with_date_filter,
+            self.parameters,
+            app_id=self.app_id,
         )
 
     def test_build_users_query(self):
@@ -390,12 +401,14 @@ class TestFunnelsRepository:
             ),
         ],
     )
-    def test_get_anyorder_users_count(
+    @pytest.mark.asyncio
+    async def test_get_anyorder_users_count(
         self, start_date, end_date, inclusion_criterion, anyorder_result
     ):
-        self.repo.get_users_count(
+        await self.repo.get_users_count(
             ds_id=self.datasource_id,
             steps=self.steps,
+            app_id=self.app_id,
             start_date=start_date,
             end_date=end_date,
             conversion_time=600,
@@ -403,12 +416,13 @@ class TestFunnelsRepository:
             segment_filter_query=self.segment_filter_query,
             inclusion_criterion=inclusion_criterion,
         )
-        self.repo.execute_get_query.assert_called_once_with(
-            anyorder_result, self.parameters
+        self.repo.execute_query_for_app.assert_called_once_with(
+            anyorder_result, self.parameters, app_id=self.app_id
         )
 
-    def test_get_anyorder_conversion_trend(self):
-        self.repo.get_conversion_trend(
+    @pytest.mark.asyncio
+    async def test_get_anyorder_conversion_trend(self):
+        await self.repo.get_conversion_trend(
             ds_id=self.datasource_id,
             steps=self.steps,
             start_date=self.start_date,
@@ -417,7 +431,10 @@ class TestFunnelsRepository:
             random_sequence=True,
             segment_filter_query=None,
             inclusion_criterion=None,
+            app_id=self.app_id,
         )
-        self.repo.execute_get_query.assert_called_once_with(
-            self.anyorder_trends_query_with_date_filter, self.parameters
+        self.repo.execute_query_for_app.assert_called_once_with(
+            self.anyorder_trends_query_with_date_filter,
+            self.parameters,
+            app_id=self.app_id,
         )

@@ -2,8 +2,8 @@ from unittest.mock import ANY
 
 from beanie import PydanticObjectId
 
-from domain.common.models import IntegrationProvider, CaptureEvent
-from domain.datasources.models import DataSourceVersion, DataSource
+from domain.common.models import CaptureEvent, IntegrationProvider
+from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import TrendType
 
 
@@ -155,6 +155,7 @@ def test_get_events_for_demo_table(client_init, events_service):
     events_service.get_events.assert_called_once_with(
         **{
             "datasource_id": "637739d383ea7fda83e72a2d",
+            "app_id": "636a1c61d715ca6baae65611",
             "is_aux": False,
             "table_name": "All",
             "page_number": 0,
@@ -191,6 +192,7 @@ def test_get_events_for_user_id(client_init, events_service):
     events_service.get_events.assert_called_with(
         **{
             "datasource_id": "637739d383ea7fda83e72a2d",
+            "app_id": "636a1c61d715ca6baae65611",
             "is_aux": False,
             "page_number": 0,
             "page_size": 100,

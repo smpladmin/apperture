@@ -275,13 +275,16 @@ async def create_table_with_csv(
     integration_service: IntegrationService = Depends(),
     compute_query_action: ComputeQueryAction = Depends(),
     files_service: FilesService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
     try:
+        ds = await ds_service.get_datasource(dto.datasourceId)
         file = await files_service.get_file(id=dto.fileId)
         clickhouse_credential = await compute_query_action.get_clickhouse_credentials(
             datasource_id=dto.datasourceId
         )
-        integration_service.create_clickhouse_table_from_csv(
+        await integration_service.create_clickhouse_table_from_csv(
+            app_id=str(ds.app_id),
             name=file.table_name,
             clickhouse_credential=clickhouse_credential,
             s3_key=file.s3_key,

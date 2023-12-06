@@ -1,9 +1,10 @@
 from textwrap import dedent
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
-from pypika import Table, Parameter, ClickHouseQuery, AliasedQuery
+import pytest
+from pypika import AliasedQuery, ClickHouseQuery, Parameter, Table
 
-from domain.edge.models import TrendType, SankeyDirection
+from domain.edge.models import SankeyDirection, TrendType
 from repositories.clickhouse.edges import Edges
 
 
@@ -11,10 +12,11 @@ class TestEdgeRepository:
     def setup_method(self):
         self.clickhouse = MagicMock()
         repo = Edges(self.clickhouse)
-        repo.execute_get_query = MagicMock()
+        repo.execute_query_for_app = AsyncMock()
         self.table = Table("events")
         self.repo = repo
         self.datasource_id = "test-id"
+        self.app_id = "test-app-id"
         self.event_name = "test"
         self.start_date = "2022-01-01"
         self.end_date = "2023-01-01"
@@ -83,14 +85,16 @@ class TestEdgeRepository:
             "GROUP BY 1,2,3 ORDER BY 4 DESC"
         )
 
-    def test_get_edges(self):
-        self.repo.get_edges(
+    @pytest.mark.asyncio
+    async def test_get_edges(self):
+        await self.repo.get_edges(
             ds_id=self.datasource_id,
             start_date=self.start_date,
             end_date=self.end_date,
+            app_id=self.app_id,
         )
-        self.repo.execute_get_query.assert_called_once_with(
-            self.edges_query, self.edges_parameters
+        self.repo.execute_query_for_app.assert_called_once_with(
+            self.edges_query, self.edges_parameters, app_id=self.app_id
         )
 
     def test_build_edges_query(self):
@@ -100,15 +104,17 @@ class TestEdgeRepository:
             end_date=self.end_date,
         ) == (self.edges_query, self.edges_parameters)
 
-    def test_get_node_significance(self):
-        self.repo.get_node_significance(
+    @pytest.mark.asyncio
+    async def test_get_node_significance(self):
+        await self.repo.get_node_significance(
             ds_id=self.datasource_id,
             event_name=self.event_name,
             start_date=self.start_date,
             end_date=self.end_date,
+            app_id=self.app_id,
         )
-        self.repo.execute_get_query.assert_called_once_with(
-            self.significance_query, self.parameters
+        self.repo.execute_query_for_app.assert_called_once_with(
+            self.significance_query, self.parameters, app_id=self.app_id
         )
 
     def test_build_node_significance_query(self):
@@ -119,16 +125,18 @@ class TestEdgeRepository:
             end_date=self.end_date,
         ) == (self.significance_query, self.parameters)
 
-    def test_get_node_trends(self):
-        self.repo.get_node_trends(
+    @pytest.mark.asyncio
+    async def test_get_node_trends(self):
+        await self.repo.get_node_trends(
             ds_id=self.datasource_id,
+            app_id=self.app_id,
             event_name=self.event_name,
             start_date=self.start_date,
             end_date=self.end_date,
             trend_type=TrendType.DATE.value,
         )
-        self.repo.execute_get_query.assert_called_once_with(
-            self.trends_query, self.parameters
+        self.repo.execute_query_for_app.assert_called_once_with(
+            self.trends_query, self.parameters, app_id=self.app_id
         )
 
     def test_build_node_trends_query(self):
@@ -140,15 +148,17 @@ class TestEdgeRepository:
             trend_type=TrendType.DATE.value,
         ) == (self.trends_query, self.parameters)
 
-    def test_get_node_sankey(self):
-        self.repo.get_node_sankey(
+    @pytest.mark.asyncio
+    async def test_get_node_sankey(self):
+        await self.repo.get_node_sankey(
             ds_id=self.datasource_id,
             event_name=self.event_name,
             start_date=self.start_date,
             end_date=self.end_date,
+            app_id=self.app_id,
         )
-        self.repo.execute_get_query.assert_called_once_with(
-            self.sankey_query, self.parameters
+        self.repo.execute_query_for_app.assert_called_once_with(
+            self.sankey_query, self.parameters, app_id=self.app_id
         )
 
     def test_build_node_sankey_query(self):

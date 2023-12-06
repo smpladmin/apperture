@@ -84,6 +84,20 @@ class EventsBase(ABC):
             traceback.print_exc()
             return []
 
+    async def execute_query_for_app_admin(
+        self, app_id: str, query: str, parameters: Dict
+    ) -> Sequence:
+        logging.info(f"Executing query: {query}")
+        logging.info(f"Parameters: {parameters}")
+        try:
+            client = await ClickHouseClientFactory.get_client(app_id)
+            query_result = client.admin_query(query=query, parameters=parameters)
+            return query_result.result_set
+        except Exception as e:
+            logging.info(repr(e))
+            traceback.print_exc()
+            return []
+
     async def execute_query_for_app_restricted_clients(
         self,
         app_id: str,

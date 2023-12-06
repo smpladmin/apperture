@@ -26,11 +26,13 @@ class SegmentService:
     async def compute_segment(
         self,
         datasource_id: str,
+        app_id: str,
         groups: List[SegmentGroup],
         columns: List[str],
     ) -> ComputedSegment:
-        segment, count = self.segments.get_segment_data(
+        segment, count = await self.segments.get_segment_data(
             datasource_id=datasource_id,
+            app_id=app_id,
             groups=groups,
             columns=columns,
         )

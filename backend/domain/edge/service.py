@@ -1,29 +1,27 @@
 import asyncio
 from copy import deepcopy
-from typing import List
 from datetime import datetime as dt
 from datetime import timedelta
-from typing import Union
+from typing import List, Union
+
 from beanie import PydanticObjectId
 from fastapi import Depends
+
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource
 from domain.edge.models import (
-    Edge,
-    BaseEdge,
-    RichEdge,
     AggregatedEdge,
-    NodeTrend,
+    BaseEdge,
+    Edge,
     NodeSankey,
     NodeSignificance,
+    NodeTrend,
     NotificationNodeData,
-    TrendType,
+    RichEdge,
     SankeyDirection,
+    TrendType,
 )
-from domain.notifications.models import (
-    Notification,
-    NotificationThresholdType,
-)
+from domain.notifications.models import Notification, NotificationThresholdType
 from mongo.mongo import Mongo
 from repositories.clickhouse.edges import Edges
 
@@ -185,8 +183,11 @@ class EdgeService:
                 .to_list()
             )
         else:
-            edges_tuples = self.edges.get_edges(
-                ds_id=str(datasource.id), start_date=start_date, end_date=end_date
+            edges_tuples = await self.edges.get_edges(
+                ds_id=str(datasource.id),
+                start_date=start_date,
+                end_date=end_date,
+                app_id=str(datasource.app_id),
             )
             edges = [
                 AggregatedEdge(
@@ -255,12 +256,13 @@ class EdgeService:
                 .to_list()
             )
         else:
-            trends = self.edges.get_node_trends(
+            trends = await self.edges.get_node_trends(
                 ds_id=str(datasource.id),
                 event_name=node,
                 start_date=start_date,
                 end_date=end_date,
                 trend_type=trend_type,
+                app_id=str(datasource.app_id)
             )
             return [
                 NodeTrend(
@@ -471,11 +473,12 @@ class EdgeService:
                 .to_list()
             )
         else:
-            sankey_nodes = self.edges.get_node_sankey(
+            sankey_nodes = await self.edges.get_node_sankey(
                 ds_id=str(datasource.id),
                 event_name=node,
                 start_date=start_date,
                 end_date=end_date,
+                app_id=str(datasource.app_id),
             )
             sankey_nodes = [
                 NodeSankey(
@@ -564,11 +567,12 @@ class EdgeService:
         else:
             (
                 (node_users, total_users, node_hits, total_hits),
-            ) = self.edges.get_node_significance(
+            ) = await self.edges.get_node_significance(
                 ds_id=str(datasource.id),
                 event_name=node,
                 start_date=start_date,
                 end_date=end_date,
+                app_id=str(datasource.app_id),
             )
             return [
                 NodeSignificance(
@@ -625,7 +629,6 @@ class EdgeService:
         self,
         notifications: List[Notification],
     ) -> List[NotificationNodeData]:
-
         node_data_for_notifications = (
             [
                 NotificationNodeData(

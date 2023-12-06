@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Union, List
+from typing import List, Union
 
 from beanie import PydanticObjectId
 from beanie.odm.operators.find.comparison import In
@@ -9,10 +9,10 @@ from domain.common.date_models import DateFilter
 from domain.common.date_utils import DateUtils
 from domain.metrics.models import SegmentFilter
 from domain.retention.models import (
-    Granularity,
-    EventSelection,
-    Retention,
     ComputedRetention,
+    EventSelection,
+    Granularity,
+    Retention,
 )
 from mongo import Mongo
 from repositories.clickhouse.retention import Retention as RetentionRepository
@@ -35,6 +35,7 @@ class RetentionService:
     async def compute_retention(
         self,
         datasource_id: str,
+        app_id: str,
         start_event: EventSelection,
         goal_event: EventSelection,
         date_filter: DateFilter,
@@ -53,8 +54,9 @@ class RetentionService:
             else None
         )
 
-        retention_trend_query_response = self.retention.compute_retention(
+        retention_trend_query_response = await self.retention.compute_retention(
             datasource_id=datasource_id,
+            app_id=app_id,
             start_event=start_event,
             goal_event=goal_event,
             start_date=start_date,

@@ -7,8 +7,8 @@ from fastapi import Depends
 from domain.actions.models import (
     Action,
     ActionGroup,
-    ComputedEventStreamResult,
     ComputedAction,
+    ComputedEventStreamResult,
 )
 from domain.clickstream_event_properties.models import ClickStreamEventProperties
 from domain.common.date_models import DateFilter
@@ -108,6 +108,7 @@ class ActionService:
         datasource_id: str,
         groups: List[ActionGroup],
         date_filter: Union[DateFilter, None],
+        app_id: PydanticObjectId,
     ) -> ComputedAction:
         start_date, end_date = self.extract_date_range(date_filter=date_filter)
 
@@ -116,6 +117,7 @@ class ActionService:
             groups=groups,
             start_date=start_date,
             end_date=end_date,
+            app_id=str(app_id),
         )
         matching_events = [
             ComputedEventStreamResult(
@@ -132,6 +134,7 @@ class ActionService:
             await self.actions.get_count_of_matching_event_from_clickstream(
                 datasource_id=datasource_id,
                 groups=groups,
+                app_id=str(app_id),
                 start_date=start_date,
                 end_date=end_date,
             )
@@ -142,8 +145,10 @@ class ActionService:
     async def delete_action(self, id=PydanticObjectId):
         selected_action = await Action.find_one(Action.id == id)
         await selected_action.update({"$set": {"enabled": False}})
-        self.actions.delete_processed_events(
-            ds_id=selected_action.datasource_id, event=selected_action.name
+        await self.actions.delete_processed_events(
+            ds_id=selected_action.datasource_id,
+            event=selected_action.name,
+            app_id=str(selected_action.app_id),
         )
 
     def get_props(

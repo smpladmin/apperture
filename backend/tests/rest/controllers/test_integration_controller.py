@@ -270,5 +270,6 @@ def test_create_table_with_csv(client_init, integration_service, files_service):
             ),
             "name": "test",
             "s3_key": "/csv/636a1c61d715ca6baae65611/test.csv",
+            "app_id": "636a1c61d715ca6baae65611",
         }
     )

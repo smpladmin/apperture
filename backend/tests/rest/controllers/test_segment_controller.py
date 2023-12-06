@@ -4,15 +4,15 @@ from unittest.mock import ANY
 from beanie import PydanticObjectId
 
 from domain.common.filter_models import (
-    FilterOperatorsString,
     FilterDataType,
     FilterOperatorsNumber,
+    FilterOperatorsString,
     LogicalOperators,
 )
 from domain.segments.models import (
+    SegmentFilterConditions,
     SegmentGroup,
     WhereSegmentFilter,
-    SegmentFilterConditions,
 )
 
 
@@ -28,6 +28,7 @@ def test_compute_transient_segment(
         **{
             "columns": ["properties.$app_release", "properties.$city"],
             "datasource_id": "63771fc960527aba9354399c",
+            "app_id": "636a1c61d715ca6baae65611",
             "groups": [
                 SegmentGroup(
                     filters=[

@@ -30,9 +30,10 @@ class Metrics(EventsBase):
         super().__init__(clickhouse=clickhouse)
         self.filter_utils = Filters()
 
-    def compute_query(
+    async def compute_query(
         self,
         datasource_id: str,
+        app_id: str,
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
         function: str,
@@ -53,7 +54,9 @@ class Metrics(EventsBase):
         return (
             None
             if query is None
-            else self.execute_get_query(query=query, parameters=parameters)
+            else await self.execute_query_for_app(
+                app_id=app_id, query=query, parameters=parameters
+            )
         )
 
     def limit_compute_query(

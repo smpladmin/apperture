@@ -1,24 +1,24 @@
-import pytest
 from unittest.mock import MagicMock, call
 
+import pytest
 from pypika import CustomFunction
 
 from domain.common.filter_models import (
-    FilterOperatorsString,
     FilterDataType,
     FilterOperatorsNumber,
+    FilterOperatorsString,
     LogicalOperators,
 )
 from domain.metrics.models import SegmentFilter, SelectedSegments
 from domain.segments.models import (
-    SegmentGroup,
-    WhoSegmentFilter,
-    WhereSegmentFilter,
+    SegmentDateFilterType,
     SegmentFilterConditions,
     SegmentFixedDateFilter,
+    SegmentGroup,
     SegmentLastDateFilter,
     SegmentSinceDateFilter,
-    SegmentDateFilterType,
+    WhereSegmentFilter,
+    WhoSegmentFilter,
 )
 from repositories.clickhouse.segments import Segments
 
@@ -31,6 +31,7 @@ class TestSegmentsRepository:
         self.repo = repo
         self.convert_to_float_func = CustomFunction("toFloat64OrDefault", ["string"])
         self.datasource_id = "test-id"
+        self.app_id = "test-app-id"
         self.filters = [
             WhereSegmentFilter(
                 operator=FilterOperatorsString.IS,
@@ -302,11 +303,13 @@ class TestSegmentsRepository:
             )
         )
 
-    def test_get_segment_data_for_single_group(self):
-        self.repo.get_segment_data(
+    @pytest.mark.sasyncio
+    async def test_get_segment_data_for_single_group(self):
+        await self.repo.get_segment_data(
             datasource_id=self.datasource_id,
             groups=self.groups[1:2],
             columns=self.columns,
+            app_id=self.app_id,
         )
         calls = [
             call(
@@ -327,11 +330,13 @@ class TestSegmentsRepository:
 
         self.repo.execute_get_query.assert_has_calls(calls=calls, any_order=True)
 
-    def test_get_segment_data_for_multiple_groups(self):
-        self.repo.get_segment_data(
+    @pytest.mark.sasyncio
+    async def test_get_segment_data_for_multiple_groups(self):
+        await self.repo.get_segment_data(
             datasource_id=self.datasource_id,
             groups=self.groups,
             columns=self.columns,
+            app_id=self.app_id,
         )
         calls = [
             call(

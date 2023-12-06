@@ -1,4 +1,6 @@
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from repositories.clickhouse.events import Events
 
@@ -7,9 +9,11 @@ class TestEventsRepository:
     def setup_method(self):
         self.clickhouse = MagicMock()
         repo = Events(clickhouse=self.clickhouse)
+        repo.execute_query_for_app = AsyncMock()
         repo.execute_get_query = MagicMock()
         self.repo = repo
         self.datasource_id = "test-id"
+        self.app_id = "tes-app-id"
         self.date = "2022-01-01"
         self.all_props = ["prop1", "prop2", "prop3"]
         self.event_properties_params = {"ds_id": "test-id"}
@@ -42,12 +46,16 @@ class TestEventsRepository:
             "AND \"event_name\" NOT LIKE '%%/%%' AND \"event_name\" NOT LIKE '%%?%%'"
         )
 
-    def test_get_event_properties(self):
-        self.repo.get_event_properties(
+    @pytest.mark.sasyncio
+    async def test_get_event_properties(self):
+        await self.repo.get_event_properties(
             datasource_id=self.datasource_id,
+            app_id=self.app_id,
         )
-        self.repo.execute_get_query.assert_called_once_with(
-            self.event_properties_query, self.event_properties_params
+        self.repo.execute_query_for_app.assert_called_once_with(
+            self.event_properties_query,
+            self.event_properties_params,
+            app_id=self.app_id,
         )
 
     def test_build_event_properties_query(self):
@@ -55,14 +63,16 @@ class TestEventsRepository:
             datasource_id=self.datasource_id
         ) == (self.event_properties_query, self.event_properties_params)
 
-    def test_get_distinct_values_for_properties(self):
-        self.repo.get_distinct_values_for_properties(
+    @pytest.mark.sasyncio
+    async def test_get_distinct_values_for_properties(self):
+        await self.repo.get_distinct_values_for_properties(
             ds_id=self.datasource_id,
+            app_id=self.app_id,
             date=self.date,
             all_props=self.all_props,
         )
-        self.repo.execute_get_query.assert_called_once_with(
-            self.distinct_counts_query, self.distinct_counts_params
+        self.repo.execute_query_for_app.assert_called_once_with(
+            self.distinct_counts_query, self.distinct_counts_params, app_id=self.app_id
         )
 
     def test_build_distinct_values_for_properties_query(self):
@@ -72,15 +82,19 @@ class TestEventsRepository:
             all_props=self.all_props,
         ) == (self.distinct_counts_query, self.distinct_counts_params)
 
-    def test_get_values_for_property(self):
-        self.repo.get_values_for_property(
+    @pytest.mark.sasyncio
+    async def test_get_values_for_property(self):
+        await self.repo.get_values_for_property(
             datasource_id=self.datasource_id,
             event_property="country",
             start_date="1970-01-01",
             end_date=self.date,
+            app_id=self.app_id,
         )
-        self.repo.execute_get_query.assert_called_once_with(
-            self.values_for_property_query, self.values_for_property_param
+        self.repo.execute_query_for_app.assert_called_once_with(
+            self.values_for_property_query,
+            self.values_for_property_param,
+            app_id=self.app_id,
         )
 
     def test_build_get_values_for_property_query(self):
@@ -103,11 +117,16 @@ class TestEventsRepository:
             {},
         )
 
-    def test_get_events(self):
+    @pytest.mark.sasyncio
+    async def test_get_events(self):
         self.repo.get_events(
-            datasource_id=self.datasource_id, user_id=None, page_number=0, page_size=100
+            datasource_id=self.datasource_id,
+            user_id=None,
+            page_number=0,
+            page_size=100,
+            app_id=self.app_id,
         )
-        self.repo.execute_get_query.assert_called_once_with(
+        self.repo.execute_query_for_app.assert_called_once_with(
             'SELECT "event_name","timestamp","user_id","properties.properties.$city" FROM '
             '"events" WHERE "datasource_id"=%(ds_id)s LIMIT 100',
             {"ds_id": "test-id"},

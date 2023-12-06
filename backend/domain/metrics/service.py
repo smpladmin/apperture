@@ -59,6 +59,7 @@ class MetricService:
     async def compute_metric(
         self,
         datasource_id: str,
+        app_id: str,
         function: str,
         aggregates: List[SegmentsAndEvents],
         breakdown: List[str],
@@ -81,8 +82,9 @@ class MetricService:
             else None
         )
 
-        computed_metric = self.metric.compute_query(
+        computed_metric = await self.metric.compute_query(
             datasource_id=datasource_id,
+            app_id=app_id,
             aggregates=aggregates,
             breakdown=breakdown,
             function=function,
@@ -294,8 +296,9 @@ class MetricService:
             else None
         )
 
-        data = self.metric.compute_query(
+        data = await self.metric.compute_query(
             datasource_id=str(metric.datasource_id),
+            app_id=str(metric.app_id),
             aggregates=metric.aggregates,
             breakdown=metric.breakdown,
             function=metric.function,
