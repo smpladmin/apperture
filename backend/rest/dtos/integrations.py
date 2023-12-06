@@ -74,6 +74,7 @@ class CreateIntegrationDto(BaseModel):
     eventList: Union[List[str], None]
     branchCredential: Union[BranchCredentialDto, None]
     cdcCredential: Union[CdcCredentialDto, None]
+    tataIvrToken: Union[str, None]
 
 
 class IntegrationWithDataSources(Integration, ModelResponse):

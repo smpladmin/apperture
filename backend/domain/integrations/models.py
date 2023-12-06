@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, List
+from typing import List, Optional
 
 from beanie import Indexed, PydanticObjectId
 from pydantic import BaseModel, Field
@@ -17,6 +17,7 @@ class CredentialType(str, Enum):
     BRANCH = "BRANCH"
     CDC = "CDC"
     FACEBOOK_ADS = "FACEBOOK_ADS"
+    TATA_IVR = "TATA_IVR"
 
 
 class RelationalDatabaseType(str, Enum):
@@ -119,6 +120,7 @@ class Credential(BaseModel):
     branch_credential: Optional[BranchCredential]
     api_base_url: Optional[str]
     facebook_ads_credential: Optional[FacebookAdsCredential]
+    tata_ivr_token: Optional[str]
 
     class Config:
         allow_population_by_field_name = True

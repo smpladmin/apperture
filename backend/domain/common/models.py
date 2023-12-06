@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Union
+
 from pydantic import BaseModel
+
 from domain.funnels.models import Funnel
 from domain.notifications.models import Notification
 
@@ -19,6 +21,7 @@ class IntegrationProvider(str, Enum):
     BRANCH = "branch"
     CDC = "cdc"
     FACEBOOK_ADS = "facebook_ads"
+    TATA_IVR = "tata_ivr"
 
     def supports_runlogs(self):
         return self in [self.MIXPANEL, self.AMPLITUDE, self.CLEVERTAP, self.API]

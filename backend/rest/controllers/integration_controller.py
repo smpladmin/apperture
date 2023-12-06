@@ -142,20 +142,26 @@ async def create_integration(
     cdc_cred = dto.cdcCredential
     if cdc_cred:
         if not cdc_cred.tables:
-            connection = integration_service.get_cdc_connection(host=cdc_cred.server, port=cdc_cred.port,
-                                                                username=cdc_cred.username, password=cdc_cred.password)
-            cdc_tables = integration_service.get_cdc_tables(connection=connection, database=cdc_cred.database)
-        else:
-            cdc_tables = cdc_cred.tables
-        cdc_credential = integration_service.build_cdc_credential(
-                server=cdc_cred.server,
+            connection = integration_service.get_cdc_connection(
+                host=cdc_cred.server,
                 port=cdc_cred.port,
                 username=cdc_cred.username,
                 password=cdc_cred.password,
-                server_type=cdc_cred.serverType,
-                database=cdc_cred.database,
-                tables=cdc_tables,
             )
+            cdc_tables = integration_service.get_cdc_tables(
+                connection=connection, database=cdc_cred.database
+            )
+        else:
+            cdc_tables = cdc_cred.tables
+        cdc_credential = integration_service.build_cdc_credential(
+            server=cdc_cred.server,
+            port=cdc_cred.port,
+            username=cdc_cred.username,
+            password=cdc_cred.password,
+            server_type=cdc_cred.serverType,
+            database=cdc_cred.database,
+            tables=cdc_tables,
+        )
     else:
         cdc_credential = None
 
@@ -177,6 +183,7 @@ async def create_integration(
         csv_credential,
         branch_credential,
         api_base_url=api_base_url,
+        tata_ivr_token=dto.tataIvrToken,
     )
 
     if cdc_credential and app.clickhouse_credential:
@@ -186,7 +193,9 @@ async def create_integration(
             ch_db=app.clickhouse_credential.databasename,
         )
         integration_service.create_cdc_connector(
-            credential=cdc_credential, tables=cdc_credential.tables, integration_id=integration.id
+            credential=cdc_credential,
+            tables=cdc_credential.tables,
+            integration_id=integration.id,
         )
 
     if create_datasource:
