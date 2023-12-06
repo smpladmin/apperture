@@ -210,8 +210,11 @@ async def get_events(
     user_id: Union[str, None] = None,
     is_aux: bool = False,
     events_service: EventsService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
-    return events_service.get_events(
+    ds = await ds_service.get_datasource(ds_id)
+    return await events_service.get_events(
+        app_id=str(ds.app_id),
         datasource_id=ds_id,
         is_aux=is_aux,
         table_name=table_name,

@@ -14,7 +14,7 @@ from domain.common.date_models import (
     FixedDateFilter,
     LastDateFilter,
 )
-from domain.common.models import IntegrationProvider, CaptureEvent, Property
+from domain.common.models import CaptureEvent, IntegrationProvider, Property
 from domain.datasources.models import DataSource
 
 
@@ -197,6 +197,7 @@ class TestActionService:
             datasource_id=self.ds_id,
             groups=self.action.groups,
             date_filter=self.date_filter,
+            app_id=self.app_id,
         )
         self.actions.get_matching_events_from_clickstream.assert_called_once_with(
             **{
@@ -216,7 +217,8 @@ class TestActionService:
                 ],
                 "start_date": "2022-12-01",
                 "end_date": "2022-12-31",
-            }
+            },
+            app_id="636a1c61d715ca6baae65612"
         )
         self.actions.get_count_of_matching_event_from_clickstream.assert_called_once_with(
             **{
@@ -236,7 +238,8 @@ class TestActionService:
                 ],
                 "start_date": "2022-12-01",
                 "end_date": "2022-12-31",
-            }
+            },
+            app_id="636a1c61d715ca6baae65612"
         )
 
     @pytest.mark.parametrize(

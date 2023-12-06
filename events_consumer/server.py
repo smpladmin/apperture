@@ -5,7 +5,7 @@ import json
 import logging
 import os
 import traceback
-from typing import Dict
+from typing import Dict, List
 
 from fastapi import FastAPI
 from aiokafka import AIOKafkaConsumer
@@ -25,7 +25,7 @@ logging.getLogger().setLevel(logging.INFO)
 
 # Kafka configuration
 KAFKA_BOOTSTRAP_SERVERS = "kafka:9092"
-KAFKA_TOPIC = "clickstream"
+KAFKA_TOPICS = ["clickstream", "flutter_eventstream"]
 DEFAULT_EVENTS = [
     "$autocapture",
     "$pageview",
@@ -50,6 +50,22 @@ def save_events(events):
     ]
     app.clickhouse.save_events(cs_events)
     logging.info("Saved events")
+
+
+def save_flutter_events(events):
+    logging.info(f"Saving {len(events)} flutter events")
+    flutter_events = [
+        PrecisionEvent.build(
+            datasourceId=event["datasource_id"],
+            timestamp=event["timestamp"],
+            userId=event["distinct_id"],
+            eventName=event["event"],
+            properties=event["properties"],
+        )
+        for event in events
+    ]
+    app.clickhouse.save_precision_events(flutter_events)
+    logging.info("Saved flutter events")
 
 
 def save_precision_events(events):
@@ -78,7 +94,8 @@ def to_object(value: str) -> Dict:
         decoded_string = base64.b64decode(value)
 
     try:
-        return json.loads(decoded_string)
+        cleaned_string = decoded_string.replace("\\ud83e", "")
+        return json.loads(cleaned_string)
     except Exception as e:
         logging.info(repr(e))
         traceback.print_exc()
@@ -96,10 +113,18 @@ def is_valid_base64(encoded_string):
         return False
 
 
+def generate_flutter_events_from_record(record) -> List:
+    value = json.loads(record.value)
+    for event in value["batch"]:
+        event["datasource_id"] = value["api_key"]
+
+    return value["batch"]
+
+
 async def process_kafka_messages() -> None:
     """Processes Kafka messages and inserts them into ClickHouse.."""
     consumer = AIOKafkaConsumer(
-        KAFKA_TOPIC,
+        *KAFKA_TOPICS,
         group_id="clickstream",
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         value_deserializer=lambda v: v.decode("utf-8"),
@@ -108,7 +133,10 @@ async def process_kafka_messages() -> None:
     )
     await consumer.start()
     events = []
+    flutter_events = []
     offsets = []
+    cs_records = []
+    flutter_records = []
     while True:
         # Get messages from Kafka
         data = await consumer.getmany(
@@ -119,47 +147,69 @@ async def process_kafka_messages() -> None:
             continue
 
         # Decode the base64 encoded JSON
-        _events = [
-            to_object(record.value)
-            for _, records in data.items()
-            for record in records
-            if is_valid_base64(record.value)
-        ]
+        for topic_partition, records in data.items():
+            if topic_partition.topic == "clickstream":
+                cs_records.extend(records)
+            else:
+                flutter_records.extend(records)
 
-        _events = [e for e in _events if e]
+        if cs_records:
+            _events = [
+                to_object(record.value)
+                for record in cs_records
+                if is_valid_base64(record.value)
+            ]
 
-        _offsets = [record.offset for _, records in data.items() for record in records]
+            _events = [e for e in _events if e]
 
-        # Convert any non-list events to a list
-        _events = [e if type(e) == list else [e] for e in _events]
+            _offsets = [record.offset for record in cs_records]
 
-        # Flatten the list of lists
-        events.extend(list(reduce(lambda a, b: a + b, _events)))
-        offsets.extend(_offsets)
-        logging.info(f"Collected {len(events)} events")
+            # Convert any non-list events to a list
+            _events = [e if type(e) == list else [e] for e in _events]
+
+            # Flatten the list of lists
+            events.extend(list(reduce(lambda a, b: a + b, _events)))
+            offsets.extend(_offsets)
+            cs_records = []
+            logging.info(f"Collected {len(events)} clickstream events")
+
+        if flutter_records:
+            for record in flutter_records:
+                flutter_events.extend(
+                    generate_flutter_events_from_record(record=record)
+                )
+
+            flutter_records = []
+            logging.info(f"Collected {len(flutter_events)} flutter events")
 
         # Save events to ClickHouse
-        if len(events) >= MAX_RECORDS:
-            save_events(events)
-            precision_events = [
-                event for event in events if event["event"] not in DEFAULT_EVENTS
-            ]
-            if len(precision_events):
-                save_precision_events(precision_events)
-            tmp = events
-            events = []
-            offsets = []
+        if (len(events) + len(flutter_events)) >= MAX_RECORDS:
+            cs_events = []
+            if events:
+                save_events(events)
+                precision_events = [
+                    event for event in events if event["event"] not in DEFAULT_EVENTS
+                ]
+                if len(precision_events):
+                    save_precision_events(precision_events)
+                cs_events = events
+                events = []
+                offsets = []
+            if flutter_events:
+                save_flutter_events(events=flutter_events)
+                logging.info(flutter_events)
             await consumer.commit()
 
-            app.event_properties_saver.save_cs_event_properties(events=tmp)
+            if cs_events:
+                app.event_properties_saver.save_cs_event_properties(events=cs_events)
 
-            if len(precision_events):
-                logging.info(
-                    f"Comparing and saving event properties for precision events"
-                )
-                app.event_properties_saver.save_precision_event_properties(
-                    precision_events=precision_events
-                )
+                if len(precision_events):
+                    logging.info(
+                        f"Comparing and saving event properties for precision events"
+                    )
+                    app.event_properties_saver.save_precision_event_properties(
+                        precision_events=precision_events
+                    )
 
 
 app = FastAPI()

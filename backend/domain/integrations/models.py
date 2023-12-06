@@ -18,6 +18,7 @@ class CredentialType(str, Enum):
     CDC = "CDC"
     FACEBOOK_ADS = "FACEBOOK_ADS"
     TATA_IVR = "TATA_IVR"
+    GOOGLE_ADS = "GOOGLE_ADS"
 
 
 class RelationalDatabaseType(str, Enum):

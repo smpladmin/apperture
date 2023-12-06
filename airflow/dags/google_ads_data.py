@@ -1,15 +1,14 @@
-import logging
 import pendulum
 
 from airflow.models import Param
-from typing import Dict, Union, List
+from typing import Any, Dict, Union, List
 from datetime import timedelta, datetime
-from airflow.decorators import task, dag
+from airflow.decorators import task, dag, task_group
 
 from domain.datasource.service import DataSourceService
-from fetch.facebook_ads_data_fetcher import FacebookAdsFetcher
-from event_processors.facebook_ads_data_processor import FacebookAdsDataProcessor
-from store.facebook_ads_saver import FacebookAdsDataSaver
+from fetch.google_ads_data_fetcher import GoogleAdsFetcher
+from event_processors.google_ads_data_processor import GoogleAdsDataProcessor
+from store.google_ads_data_saver import GoogleAdsDataSaver
 
 from utils.utils import (
     AIRFLOW_INIT_DATE,
@@ -25,7 +24,7 @@ from domain.datasource.models import (
 
 
 datasource_service = DataSourceService()
-provider = IntegrationProvider.FACEBOOK_ADS
+provider = IntegrationProvider.GOOGLE_ADS
 
 
 @task
@@ -52,14 +51,6 @@ def get_app_database(
     return datasource_service.get_database_for_app(app_id=datasource.appId)
 
 
-@task
-def fetch_ads(credential: Credential) -> List[dict]:
-    date = datetime.now().strftime("%Y-%m-%d")
-    return FacebookAdsFetcher(
-        credential=credential.facebook_ads_credential, date=date
-    ).fetch_ads()
-
-
 def generate_dates(start_date: str, end_date: str) -> List[str]:
     start_date = datetime.strptime(start_date, "%Y-%m-%d")
     end_date = datetime.strptime(end_date, "%Y-%m-%d")
@@ -81,35 +72,58 @@ def get_run_dates(**kwargs):
     return run_dates
 
 
-@task(max_active_tis_per_dag=1)
-def process_and_save(
-    ads: List[dict],
+@task(trigger_rule="all_done")
+def fetch_ads_data(credential: Credential, date: str) -> List[dict]:
+    return GoogleAdsFetcher(credential=credential, date=date).fetch_ads_data()
+
+
+@task(trigger_rule="all_done")
+def process(data):
+    return GoogleAdsDataProcessor().process(data)
+
+
+@task(trigger_rule="all_done")
+def save(
     datasource: DataSource,
     credential: Credential,
-    database_details: AppDatabaseResponse,
-    date: str,
     clickhouse_server_credential: Union[ClickHouseRemoteConnectionCred, None],
+    database_details: AppDatabaseResponse,
+    processed_data,
 ):
-    data = FacebookAdsFetcher(
-        credential=credential.facebook_ads_credential, date=date
-    ).fetch_ads_insights(ads=ads)
-    processed_data = FacebookAdsDataProcessor().process(data)
-
-    saver = FacebookAdsDataSaver(
+    GoogleAdsDataSaver(
         app_id=datasource.appId,
         clickhouse_server_credentials=clickhouse_server_credential,
-    )
-    saver.save(
+    ).save(
         event_data=processed_data,
         table_name=credential.tableName,
         database_name=database_details.database_credentials.databasename,
     )
 
 
+@task_group
+def fetch_process_save(
+    date: str,
+    datasource: DataSource,
+    credential: Credential,
+    database_details: AppDatabaseResponse,
+    clickhouse_server_credential: Union[ClickHouseRemoteConnectionCred, None],
+):
+    data = fetch_ads_data(credential=credential, date=date)
+    processed_data = process(data)
+
+    save(
+        datasource=datasource,
+        credential=credential,
+        clickhouse_server_credential=clickhouse_server_credential,
+        database_details=database_details,
+        processed_data=processed_data,
+    )
+
+
 def create_dag(datasource_id: str, created_date: datetime):
     @dag(
-        dag_id=f"facebook_ads_data_loader_{datasource_id}",
-        description=f"Facebook ads daily refresh for {datasource_id}",
+        dag_id=f"google_ads_data_loader_{datasource_id}",
+        description=f"google ads daily refresh for {datasource_id}",
         schedule="0 8 * * *",
         start_date=pendulum.instance(
             created_date - timedelta(days=FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET),
@@ -132,9 +146,9 @@ def create_dag(datasource_id: str, created_date: datetime):
             ),
         },
         catchup=(created_date > AIRFLOW_INIT_DATE),
-        tags=[f"facebook-ads-daily-data-fetch"],
+        tags=[f"google-ads-daily-data-fetch"],
     )
-    def facebook_ads_data_loader():
+    def google_ads_data_loader():
         datasource_with_credential = get_datasource_and_credential(
             datasource_id=datasource_id
         )
@@ -146,16 +160,14 @@ def create_dag(datasource_id: str, created_date: datetime):
         )
         app_database_details = get_app_database(datasource=datasource)
 
-        ads = fetch_ads(credential=credential)
-        process_and_save.partial(
-            ads=ads,
+        fetch_process_save.partial(
             datasource=datasource,
             credential=credential,
             database_details=app_database_details,
             clickhouse_server_credential=clickhouse_server_credential,
         ).expand(date=run_dates)
 
-    facebook_ads_data_loader()
+    google_ads_data_loader()
 
 
 datasources = datasource_service.get_datasources_for_provider(provider=provider)

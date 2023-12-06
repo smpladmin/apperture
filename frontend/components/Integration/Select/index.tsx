@@ -11,7 +11,6 @@ import {
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import 'remixicon/fonts/remixicon.css';
-import gaLogo from '@assets/images/ga-logo-small.svg';
 import mixpanelLogo from '@assets/images/mixPanel-icon.png';
 import amplitudeLogo from '@assets/images/amplitude-icon.png';
 import clevertapLogo from '@assets/images/clevertap-icon.png';
@@ -20,7 +19,7 @@ import apilogo from '@assets/images/apilogo.png';
 import mysqlLogo from '@assets/images/mysql-icon.png';
 import mssqlLogo from '@assets/images/mssql-icon.png';
 import csvLogo from '@assets/images/csv.svg';
-import FormButton from '@components/FormButton';
+import branchLogo from '@assets/images/branch.png';
 import IntegrationSource from '@components/IntegrationSource';
 import { Provider } from '@lib/domain/provider';
 import { createIntegrationWithDataSource } from '@lib/services/integrationService';
@@ -78,6 +77,7 @@ const SelectProvider = ({ apps }: { apps: Array<AppWithIntegrations> }) => {
         '',
         '',
         '',
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -203,7 +203,7 @@ const SelectProvider = ({ apps }: { apps: Array<AppWithIntegrations> }) => {
             </Box>
 
             <RadioGroup value={provider} onChange={setProvider}>
-              <SimpleGrid columns={4} spacing={2}>
+              <SimpleGrid columns={5} spacing={2}>
                 <IntegrationSource
                   sourceName="Apperture"
                   value={Provider.APPERTURE}
@@ -257,6 +257,12 @@ const SelectProvider = ({ apps }: { apps: Array<AppWithIntegrations> }) => {
                   value={Provider.CSV}
                   imgSrc={csvLogo}
                   selected={provider === Provider.CSV}
+                />
+                <IntegrationSource
+                  sourceName="Branch"
+                  value={Provider.BRANCH}
+                  imgSrc={branchLogo}
+                  selected={provider === Provider.BRANCH}
                 />
               </SimpleGrid>
             </RadioGroup>

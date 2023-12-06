@@ -246,6 +246,7 @@ def test_transient_action(client_init, action_service, transient_action_data):
     action_service.compute_action.assert_called_once_with(
         **{
             "datasource_id": "63e4da53370789982002e57d",
+            "app_id": PydanticObjectId("636a1c61d715ca6baae65611"),
             "groups": [
                 {
                     "condition": "or",

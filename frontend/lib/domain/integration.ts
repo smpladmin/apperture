@@ -33,6 +33,18 @@ export type DatabaseCredential = {
   sshCredential?: DatabaseSSHCredential;
 };
 
+export type BranchCredentialDto = {
+  appId: string;
+  branchKey: string;
+  branchSecret: string;
+};
+
+export type BranchCredential = {
+  app_id: string;
+  branch_key: string;
+  branch_secret: string;
+};
+
 export type UploadProgress = {
   progress: number;
   isCompleted: boolean;
@@ -44,6 +56,7 @@ export enum CredentialType {
   MYSQL = 'MYSQL',
   MSSQL = 'MSSQL',
   CSV = 'CSV',
+  BRANCH = 'BRANCH',
 }
 
 export type MsSQLCredential = {
@@ -83,4 +96,5 @@ export type Credential = {
   mssql_credential?: MsSQLCredential;
   csv_credential?: CSVCredential;
   api_base_url?: string;
+  branch_credential?: BranchCredential;
 };

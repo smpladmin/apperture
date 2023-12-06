@@ -119,9 +119,14 @@ async def update_action(
 async def compute_transient_actions(
     dto: TransientActionDto,
     action_service: ActionService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
+    datasource = await ds_service.get_datasource(dto.datasourceId)
     return await action_service.compute_action(
-        datasource_id=dto.datasourceId, groups=dto.groups, date_filter=dto.dateFilter
+        datasource_id=dto.datasourceId,
+        groups=dto.groups,
+        date_filter=dto.dateFilter,
+        app_id=datasource.app_id,
     )
 
 

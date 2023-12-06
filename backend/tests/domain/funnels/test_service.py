@@ -5,7 +5,7 @@ from unittest.mock import ANY, AsyncMock, MagicMock
 
 import pytest
 from beanie import PydanticObjectId
-from pypika import Table, ClickHouseQuery
+from pypika import ClickHouseQuery, Table
 
 from domain.common.date_models import (
     DateFilter,
@@ -177,11 +177,11 @@ class TestFunnelService:
             unique_users=2,
         )
 
-        self.funnels.get_users_count = MagicMock()
+        self.funnels.get_users_count = AsyncMock()
         self.funnels.get_users_count.return_value = [(100, 40)]
-        self.funnels.get_conversion_trend = MagicMock()
+        self.funnels.get_conversion_trend = AsyncMock()
         self.funnels.get_conversion_trend.return_value = self.conversion_data
-        self.funnels.get_conversion_analytics = MagicMock()
+        self.funnels.get_conversion_analytics = AsyncMock()
         self.funnels.get_conversion_analytics.return_value = self.user_data
         FindOneMock = namedtuple("FindOneMock", ["update"])
         self.update_mock = AsyncMock()
@@ -223,7 +223,6 @@ class TestFunnelService:
         )
 
     def test_build_funnel(self):
-
         funnel = self.service.build_funnel(
             datasource_id=PydanticObjectId(self.ds_id),
             app_id=PydanticObjectId(self.app_id),
@@ -267,6 +266,7 @@ class TestFunnelService:
             ),
             random_sequence=False,
             segment_filter=None,
+            app_id=self.app_id,
         )
 
     @pytest.mark.asyncio
@@ -341,6 +341,7 @@ class TestFunnelService:
                 ),
                 random_sequence=False,
                 segment_filter=None,
+                app_id=self.app_id,
             )
             == self.funnel_trends_data
         )
@@ -361,7 +362,8 @@ class TestFunnelService:
                 "random_sequence": False,
                 "inclusion_criterion": None,
                 "segment_filter_query": None,
-            }
+            },
+            app_id="636a1c61d715ca6baae65612",
         )
 
     @pytest.mark.asyncio
@@ -384,6 +386,7 @@ class TestFunnelService:
                 ),
                 random_sequence=False,
                 segment_filter=self.segment_filter,
+                app_id=self.app_id,
             )
             == self.funnel_conversion_data
         )
@@ -492,7 +495,7 @@ class TestFunnelService:
         self.service.get_funnel = MagicMock(return_value=funnel_future)
         self.service.compute_conversion_time = MagicMock(return_value=9600000)
 
-        self.funnels.get_users_count = MagicMock(return_value=[(200, 10, 40)])
+        self.funnels.get_users_count = AsyncMock(return_value=[(200, 10, 40)])
         assert (
             await self.service.get_notification_data(
                 notification=self.funnel_notifications[0], days_ago=2
@@ -515,7 +518,8 @@ class TestFunnelService:
                     "*"
                 ),
                 "inclusion_criterion": True,
-            }
+            },
+            app_id="636a1c61d715ca6baae65612",
         )
 
     @pytest.mark.parametrize(

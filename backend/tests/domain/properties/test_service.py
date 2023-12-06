@@ -1,6 +1,6 @@
 from collections import namedtuple
 from unittest import mock
-from unittest.mock import MagicMock, AsyncMock, ANY
+from unittest.mock import ANY, AsyncMock, MagicMock
 
 import pytest
 from beanie import PydanticObjectId
@@ -24,14 +24,22 @@ class TestPropertiesService:
         self.all_props = ["prop1", "prop2", "prop3", "prop4"]
         self.date = "2022-01-01"
         self.ds_id = "637739d383ea7fda83e72a2d"
+        self.app_id = "637739d383ea7fda83e72a2e"
         Properties.datasource_id = MagicMock(return_value=PydanticObjectId(self.ds_id))
         Properties.properties = MagicMock(return_value=self.all_props)
 
-    def test_validate_properties(self):
-        self.events.get_distinct_values_for_properties.return_value = ([1, 5, 13, 1],)
-        assert self.service.validate_properties(
-            all_props=self.all_props, date=self.date, ds_id=self.ds_id
-        ) == ["prop2", "prop3"]
+    @pytest.mark.asyncio
+    async def test_validate_properties(self):
+        self.events.get_distinct_values_for_properties = AsyncMock(
+            return_value=([1, 5, 13, 1],)
+        )
+        result = await self.service.validate_properties(
+            all_props=self.all_props,
+            date=self.date,
+            ds_id=self.ds_id,
+            app_id=self.app_id,
+        )
+        result == ["prop2", "prop3"]
         self.events.get_distinct_values_for_properties.assert_called_once_with(
             **{
                 "all_props": self.all_props,
@@ -43,8 +51,12 @@ class TestPropertiesService:
     @pytest.mark.asyncio
     async def test_refresh_properties(self):
         self.events.get_event_properties.return_value = [(self.all_props, self.date)]
-        self.events.get_distinct_values_for_properties.return_value = ([1, 5, 13, 1],)
-        properties = await self.service.refresh_properties(ds_id=self.ds_id)
+        self.events.get_distinct_values_for_properties = AsyncMock(
+            return_value=([1, 5, 13, 1],)
+        )
+        properties = await self.service.refresh_properties(
+            ds_id=self.ds_id, app_id=self.app_id
+        )
         assert properties.dict() == {
             "created_at": ANY,
             "datasource_id": PydanticObjectId(self.ds_id),

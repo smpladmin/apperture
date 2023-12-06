@@ -20,10 +20,7 @@ from rest.dtos.funnels import (
     TransientFunnelDto,
 )
 from rest.middlewares import get_user, get_user_id, validate_jwt
-from rest.middlewares.validate_app_user import (
-    validate_app_user,
-    validate_library_items,
-)
+from rest.middlewares.validate_app_user import validate_app_user, validate_library_items
 
 router = APIRouter(
     tags=["funnels"],
@@ -72,9 +69,13 @@ async def create_funnel(
 async def compute_transient_funnel(
     dto: TransientFunnelDto,
     funnel_service: FunnelsService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
+    ds = await ds_service.get_datasource(dto.datasourceId)
+
     return await funnel_service.compute_funnel(
         ds_id=dto.datasourceId,
+        app_id=str(ds.app_id),
         steps=dto.steps,
         date_filter=dto.dateFilter,
         conversion_window=dto.conversionWindow,
@@ -141,6 +142,7 @@ async def get_funnel_trends(
     funnel = await funnel_service.get_funnel(id)
     return await funnel_service.get_funnel_trends(
         datasource_id=str(funnel.datasource_id),
+        app_id=str(funnel.app_id),
         steps=funnel.steps,
         date_filter=funnel.date_filter,
         conversion_window=funnel.conversion_window,
@@ -157,9 +159,12 @@ async def get_funnel_trends(
 async def get_transient_funnel_trends(
     dto: TransientFunnelDto,
     funnel_service: FunnelsService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
+    ds = await ds_service.get_datasource(dto.datasourceId)
     return await funnel_service.get_funnel_trends(
         datasource_id=dto.datasourceId,
+        app_id=str(ds.app_id),
         steps=dto.steps,
         date_filter=dto.dateFilter,
         conversion_window=dto.conversionWindow,
@@ -176,9 +181,12 @@ async def get_transient_funnel_trends(
 async def get_transient_funnel_analytics(
     dto: TransientFunnelConversionlDto,
     funnel_service: FunnelsService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
+    ds = await ds_service.get_datasource(dto.datasourceId)
     return await funnel_service.get_user_conversion(
         datasource_id=dto.datasourceId,
+        app_id=str(ds.app_id),
         steps=dto.steps,
         status=dto.status,
         date_filter=dto.dateFilter,

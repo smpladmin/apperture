@@ -37,9 +37,13 @@ router = APIRouter(
 async def compute_transient_retention(
     dto: TransientRetentionDto,
     retention_service: RetentionService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
+    ds = await ds_service.get_datasource(dto.datasourceId)
+
     return await retention_service.compute_retention(
         datasource_id=str(dto.datasourceId),
+        app_id=str(ds.app_id),
         start_event=dto.startEvent,
         goal_event=dto.goalEvent,
         granularity=dto.granularity,

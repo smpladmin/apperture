@@ -11,6 +11,7 @@ export enum Provider {
   MSSQL = 'mssql',
   CSV = 'csv',
   SAMPLE = 'sample',
+  BRANCH = 'branch',
 }
 export namespace Provider {
   export function getDisplayName(provider: Provider): string {

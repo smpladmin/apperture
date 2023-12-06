@@ -32,7 +32,12 @@ class ConnectionService:
                 fields = [
                     "properties." + property
                     if not datasource.provider
-                    in [IntegrationProvider.CSV, IntegrationProvider.SAMPLE]
+                    in [
+                        IntegrationProvider.CSV,
+                        IntegrationProvider.SAMPLE,
+                        IntegrationProvider.GOOGLE_ADS,
+                        IntegrationProvider.FACEBOOK_ADS,
+                    ]
                     else property
                     for property in (details["fields"] or [])
                 ]
@@ -46,7 +51,12 @@ class ConnectionService:
                         ),
                         fields=["event_name", "user_id", *fields]
                         if not datasource.provider
-                        in [IntegrationProvider.CSV, IntegrationProvider.SAMPLE]
+                        in [
+                            IntegrationProvider.CSV,
+                            IntegrationProvider.SAMPLE,
+                            IntegrationProvider.GOOGLE_ADS,
+                            IntegrationProvider.FACEBOOK_ADS,
+                        ]
                         else fields,
                         datasource_id=datasource.id,
                         table_name=details.get("name", "events"),

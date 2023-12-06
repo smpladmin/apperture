@@ -1,15 +1,17 @@
 from typing import Union
+
 from fastapi import Depends
+
 from clickhouse.clickhouse import Clickhouse
 from domain.datasources.models import DataSource
 from domain.edge.models import Node
-from repositories.clickhouse.events import Events
 from domain.events.models import (
-    PaginatedEventsData,
-    Event,
     AuxTable1Event,
     AuxTable2Event,
+    Event,
+    PaginatedEventsData,
 )
+from repositories.clickhouse.events import Events
 
 
 class EventsService:
@@ -38,7 +40,9 @@ class EventsService:
         )
 
     async def get_unique_events(self, datasource: DataSource):
-        events = self.events.get_unique_events(str(datasource.id))
+        events = await self.events.get_unique_events(
+            datasource_id=str(datasource.id), app_id=str(datasource.app_id)
+        )
         return events
 
     def get_values_for_property(
@@ -51,7 +55,7 @@ class EventsService:
             end_date=end_date,
         )
 
-    def get_events(
+    async def get_events(
         self,
         datasource_id: str,
         is_aux: bool,
@@ -59,10 +63,11 @@ class EventsService:
         user_id: Union[str, None],
         page_number: int,
         page_size: int,
+        app_id: str,
     ) -> PaginatedEventsData:
         if is_aux:
-            events = self.events.get_aux_events(
-                datasource_id=datasource_id, table_name=table_name
+            events = await self.events.get_aux_events(
+                app_id=app_id, datasource_id=datasource_id, table_name=table_name
             )
             count = len(events)
             events = events[:100] if len(events) > 100 else events
@@ -78,14 +83,15 @@ class EventsService:
                 ]
             )
         else:
-            events = self.events.get_events(
+            events = await self.events.get_events(
+                app_id=app_id,
                 datasource_id=datasource_id,
                 user_id=user_id,
                 page_number=page_number,
                 page_size=page_size,
             )
-            ((count,),) = self.events.get_events_count(
-                datasource_id=datasource_id, user_id=user_id
+            ((count,),) = await self.events.get_events_count(
+                app_id=app_id, datasource_id=datasource_id, user_id=user_id
             )
             data = (
                 [Event(name=name, timestamp=timestamp) for (name, timestamp) in events]

@@ -10,6 +10,7 @@ class CredentialType(str, Enum):
     BRANCH = "BRANCH"
     FACEBOOK_ADS = "FACEBOOK_ADS"
     TATA_IVR = "TATA_IVR"
+    GOOGLE_ADS = "GOOGLE_ADS"
 
 
 class BranchCredential(BaseModel):
@@ -53,6 +54,7 @@ class IntegrationProvider(str, Enum):
     BRANCH = "branch"
     FACEBOOK_ADS = "facebook_ads"
     TATA_IVR = "tata_ivr"
+    GOOGLE_ADS = "google_ads"
 
 
 class DataSource(BaseModel):

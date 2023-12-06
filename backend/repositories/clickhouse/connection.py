@@ -122,9 +122,10 @@ class Connection(EventsBase):
     async def get_clickhouse_table_description(self, database, table, app_id):
         try:
             columns = []
-            result = await self.execute_query_for_app_restricted_clients(
-                f"DESCRIBE {database}.{table}", app_id=app_id
-            ).result_set
+            response = await self.execute_query_for_app_restricted_clients(
+                query=f"DESCRIBE {database}.{table}", app_id=app_id
+            )
+            result = response.result_set
             for row in result:
                 columns.append(row[0])
             return columns

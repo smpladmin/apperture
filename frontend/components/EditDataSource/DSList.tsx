@@ -8,6 +8,7 @@ import gaLogo from '@assets/images/ga-logo-small.svg';
 import mixpanelLogo from '@assets/images/mixPanel-icon.png';
 import amplitudeLogo from '@assets/images/amplitude-icon.png';
 import clevertapLogo from '@assets/images/clevertap-icon.png';
+import branchLogo from '@assets/images/branch.png';
 import appertureLogo from '@assets/images/apperture-logo-new-small.svg';
 import apilogo from '@assets/images/apilogo.png';
 import mysqlLogo from '@assets/images/mysql-icon.png';
@@ -73,6 +74,10 @@ const IconProvider = ({
           alt="gaLogo"
           objectFit="cover"
         />
+      );
+    case Provider.BRANCH:
+      return (
+        <Image style={style} src={branchLogo} alt="gaLogo" objectFit="cover" />
       );
     case Provider.APPERTURE:
       return (

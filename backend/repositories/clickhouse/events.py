@@ -1,32 +1,34 @@
 from typing import List, Union
-from pypika import (
-    ClickHouseQuery,
-    Parameter,
-    functions as fn,
-    Criterion,
-    Field,
-)
+
+from pypika import ClickHouseQuery, Criterion, Field, Parameter
+from pypika import functions as fn
 
 from repositories.clickhouse.base import EventsBase
 
 
 class Events(EventsBase):
-    def get_unique_events(self, datasource_id: str):
+    async def get_unique_events(self, datasource_id: str, app_id: str):
         query, params = self.build_unique_events_query(datasource_id)
-        return self.execute_get_query(query, params)
+        return await self.execute_query_for_app(
+            query=query, parameters=params, app_id=app_id
+        )
 
-    def get_events(
+    async def get_events(
         self,
         datasource_id: str,
         user_id: Union[str, None],
         page_number: int,
         page_size: int,
+        app_id: str,
     ):
-        return self.execute_get_query(
-            *self.build_events_query(datasource_id, user_id, page_number, page_size)
+        return await self.execute_query_for_app(
+            app_id=app_id,
+            *self.build_events_query(datasource_id, user_id, page_number, page_size),
         )
 
-    def get_events_count(self, datasource_id: str, user_id: Union[str, None]):
+    async def get_events_count(
+        self, datasource_id: str, app_id: str, user_id: Union[str, None]
+    ):
         params = {"ds_id": datasource_id}
         query = (
             ClickHouseQuery.from_(self.table)
@@ -36,7 +38,9 @@ class Events(EventsBase):
         if user_id:
             params["user_id"] = user_id
             query = query.where(self.table.user_id == Parameter("%(user_id)s"))
-        return self.execute_get_query(query.get_sql(), params)
+        return await self.execute_query_for_app(
+            app_id=app_id, query=query.get_sql(), parameters=params
+        )
 
     def build_events_query(
         self,
@@ -81,8 +85,10 @@ class Events(EventsBase):
         )
         return query.get_sql(), params
 
-    def get_event_properties(self, datasource_id: str):
-        return self.execute_get_query(*self.build_event_properties_query(datasource_id))
+    async def get_event_properties(self, datasource_id: str, app_id: str):
+        return await self.execute_query_for_app(
+            app_id=app_id, *self.build_event_properties_query(datasource_id)
+        )
 
     def build_event_properties_query(self, datasource_id: str):
         query = (
@@ -98,11 +104,12 @@ class Events(EventsBase):
         )
         return query.get_sql(), {"ds_id": datasource_id}
 
-    def get_distinct_values_for_properties(
-        self, all_props: List[str], date: str, ds_id: str
+    async def get_distinct_values_for_properties(
+        self, all_props: List[str], date: str, ds_id: str, app_id: str
     ):
-        return self.execute_get_query(
-            *self.build_distinct_values_for_properties_query(all_props, date, ds_id)
+        return await self.execute_query_for_app(
+            app_id=app_id,
+            *self.build_distinct_values_for_properties_query(all_props, date, ds_id),
         )
 
     def build_distinct_values_for_properties_query(
@@ -121,13 +128,19 @@ class Events(EventsBase):
         )
         return query.get_sql(), {"ds_id": ds_id, "date": date}
 
-    def get_values_for_property(
-        self, datasource_id: str, event_property: str, start_date: str, end_date: str
+    async def get_values_for_property(
+        self,
+        datasource_id: str,
+        event_property: str,
+        start_date: str,
+        end_date: str,
+        app_id: str,
     ):
-        return self.execute_get_query(
+        return await self.execute_query_for_app(
+            app_id=app_id,
             *self.build_values_for_property_query(
                 datasource_id, event_property, start_date, end_date
-            )
+            ),
         )
 
     def build_values_for_property_query(
@@ -158,9 +171,9 @@ class Events(EventsBase):
         )
         return query.get_sql(), {}
 
-    def get_aux_events(self, datasource_id: str, table_name: str):
-        return self.execute_get_query(
-            *self.build_aux_events_query(datasource_id, table_name)
+    async def get_aux_events(self, datasource_id: str, table_name: str, app_id: str):
+        return await self.execute_query_for_app(
+            app_id=app_id, *self.build_aux_events_query(datasource_id, table_name)
         )
 
     def build_aux_events_query(self, datasource_id: str, table_name: str):
