@@ -38,6 +38,7 @@ from domain.funnels.models import (
     FunnelEventUserData,
     FunnelTrendsData,
 )
+from domain.google_sheet.models import SheetQuery, SheetReference
 from domain.integrations.models import (
     Credential,
     CredentialType,
@@ -86,8 +87,6 @@ from domain.spreadsheets.models import (
     SpreadsheetType,
     WorkBook,
 )
-from domain.google_sheet.models import SheetQuery, SheetReference
-
 from domain.users.models import UserDetails
 from rest.dtos.actions import ComputedActionResponse
 from rest.dtos.apperture_users import AppertureUserResponse
@@ -2426,6 +2425,7 @@ def integration_response():
             "api_base_url": None,
             "branch_credential": None,
             "facebook_ads_credential": None,
+            "tata_ivr_token": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",
