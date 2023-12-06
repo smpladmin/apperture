@@ -1905,6 +1905,7 @@ def datamart_response():
         "googleSheet": None,
         "refreshToken": None,
         "updateFrequency": None,
+        "apiCredential": None, 
     }
 
 

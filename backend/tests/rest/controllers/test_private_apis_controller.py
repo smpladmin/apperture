@@ -368,7 +368,7 @@ def test_push_to_sheet_success(
     datamart_service.get_datamart_table.return_value = datamart_future
 
     response = client_init.post(
-        "/private/datamart/google_sheet",
+        "/private/datamart/635ba034807ab86d8a2aadd8?target=google_sheet",
         data=json.dumps({"datamartId": "635ba034807ab86d8a2aadd8"}),
     )
     assert response.status_code == 200
@@ -378,13 +378,19 @@ def test_push_to_sheet_success(
     )
     datamart_service.push_to_google_sheet.assert_awaited_once_with(
         refresh_token="44110/g-Vkq",
-        app_id="635ba034807ab86d8a2aadd7",
-        query="select event_name, user_id from events",
         google_sheet=GoogleSheet(
             enable_sheet_push=True,
             spreadsheet=Spreadsheet(id="1vwpp022-383kl", name="Test Spreadsheet"),
             sheet_range="Sheet1!A1",
         ),
+        columns=["event_name"],
+        data=[
+            ("test_event_1",),
+            ("test_event_2",),
+            ("test_event_3",),
+            ("test_event_4",),
+            ("test_event_5",),
+        ],
     )
 
 

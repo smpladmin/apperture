@@ -76,6 +76,9 @@ class TestDataMartService:
             user_id=self.user_id,
             name=self.name,
             query="select event_name, user_id from events",
+            update_frequency=None,
+            google_sheet=None,
+            api_credential=None,
         )
 
         assert datamart.dict() == {
@@ -94,6 +97,7 @@ class TestDataMartService:
             "google_sheet": None,
             "refresh_token": None,
             "update_frequency": None,
+            "api_credential": None,
         }
 
     @pytest.mark.asyncio
@@ -124,6 +128,7 @@ class TestDataMartService:
                     "google_sheet": None,
                     "refresh_token": None,
                     "update_frequency": None,
+                    "api_credential": None,
                 }
             },
         )
@@ -271,19 +276,15 @@ class TestDataMartService:
 
         await self.service.push_to_google_sheet(
             refresh_token="345k-f192",
-            app_id="635ba034807ab86d8a2aadd7",
-            query="select event_name, user_id from events",
             google_sheet=GoogleSheet(
                 enable_sheet_push=True,
                 spreadsheet=Spreadsheet(id="1vwpp022-383kl", name="Test Spreadsheet"),
                 sheet_range="Sheet1!A1",
             ),
+            columns=["id", "name"],
+            data=[["1", "abc"], ["2", "def"]],
         )
 
-        self.service.datamart_repo.execute_query_for_app_restricted_clients.assert_called_once_with(
-            query="select event_name, user_id from events",
-            app_id="635ba034807ab86d8a2aadd7",
-        )
         self.service.initialize_google_sheet_service.assert_called_with(
             access_token="", refresh_token="345k-f192"
         )
