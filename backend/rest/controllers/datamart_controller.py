@@ -87,6 +87,9 @@ async def save_datamart_table(
         user_id=user_id,
         name=dto.name,
         query=dto.query,
+        update_frequency=dto.updateFrequency,
+        google_sheet=dto.googleSheet,
+        api_credential=dto.apiCredential,
     )
 
     creation_status = await datamart_service.create_datamart_table(
@@ -140,6 +143,9 @@ async def update_datamart_table(
         user_id=user_id,
         name=dto.name,
         query=dto.query,
+        update_frequency=dto.updateFrequency,
+        google_sheet=dto.googleSheet,
+        api_credential=dto.apiCredential,
     )
 
     update_status = await datamart_service.update_datamart_table(
@@ -259,3 +265,37 @@ async def datamart_google_authorise(
         logging.error(e)
 
     return RedirectResponse(state["redirect_url"])
+
+
+@router.post("/datamart/{id}")
+async def push_to_sheet(
+    id: str,
+    target: str,
+    datamart_service: DataMartService = Depends(),
+    compute_query_action: ComputeQueryAction = Depends(),
+):
+    datamart = await datamart_service.get_datamart_table(id=id)
+    try:
+        compute_query_dto = TransientSpreadsheetsDto(
+            datasourceId=str(datamart.datasource_id), query=datamart.query, is_sql=True
+        )
+        result = await compute_query_action.compute_query(
+            app_id=str(datamart.app_id), dto=compute_query_dto
+        )
+
+        if target == "google_sheet":
+            await datamart_service.push_to_google_sheet(
+                refresh_token=datamart.refresh_token,
+                google_sheet=datamart.google_sheet,
+                columns=result.headers,
+                data=result.data,
+            )
+
+        if target == "api":
+            await datamart_service.push_to_api(
+                api_credential=datamart.api_credential,
+                columns=result.headers,
+                data=result.data,
+            )
+    except:
+        raise Exception("Could not push to {target}")

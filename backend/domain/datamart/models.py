@@ -1,6 +1,6 @@
 import datetime
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 
 from beanie import PydanticObjectId
 from pydantic import BaseModel, Field
@@ -29,6 +29,11 @@ class GoogleSheet(BaseModel):
     sheet_range: str
 
 
+class APICredential(BaseModel):
+    url: str
+    headers: str
+
+
 class DataMart(Document):
     datasource_id: PydanticObjectId
     app_id: PydanticObjectId
@@ -41,6 +46,7 @@ class DataMart(Document):
     refresh_token: Optional[str] = Field(hidden=True)
     google_sheet: Optional[GoogleSheet]
     update_frequency: Optional[UpdateFrequency]
+    api_credential: Optional[APICredential]
 
     class Settings:
         name = "datamart"

@@ -6,6 +6,7 @@ from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends
 
 from authorisation.service import AuthService
+from rest.dtos.spreadsheets import TransientSpreadsheetsDto
 from data_processor_queue.service import DPQueueService
 from domain.actions.service import ActionService
 from domain.apidata.service import APIDataService
@@ -409,20 +410,38 @@ async def get_datamarts(datamart_service: DataMartService = Depends()):
     return await datamart_service.get_datamarts()
 
 
-@router.post("/datamart/google_sheet")
+@router.post("/datamart/{id}")
 async def push_to_sheet(
-    dto: PushDatamartToSheetDto, datamart_service: DataMartService = Depends()
+    id: str,
+    target: str,
+    datamart_service: DataMartService = Depends(),
+    compute_query_action: ComputeQueryAction = Depends(),
 ):
-    datamart = await datamart_service.get_datamart_table(id=dto.datamartId)
+    datamart = await datamart_service.get_datamart_table(id=id)
     try:
-        await datamart_service.push_to_google_sheet(
-            refresh_token=datamart.refresh_token,
-            app_id=str(datamart.app_id),
-            query=datamart.query,
-            google_sheet=datamart.google_sheet,
+        compute_query_dto = TransientSpreadsheetsDto(
+            datasourceId=str(datamart.datasource_id), query=datamart.query, is_sql=True
         )
+        result = await compute_query_action.compute_query(
+            app_id=str(datamart.app_id), dto=compute_query_dto
+        )
+
+        if target == "google_sheet":
+            await datamart_service.push_to_google_sheet(
+                refresh_token=datamart.refresh_token,
+                google_sheet=datamart.google_sheet,
+                columns=result.headers,
+                data=result.data,
+            )
+
+        if target == "api":
+            await datamart_service.push_to_api(
+                api_credential=datamart.api_credential,
+                columns=result.headers,
+                data=result.data,
+            )
     except:
-        raise Exception("Could not push to google sheet")
+        raise Exception("Could not push to {target}")
 
 
 @router.post("/datamart/refresh")

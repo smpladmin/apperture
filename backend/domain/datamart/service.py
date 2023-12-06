@@ -1,13 +1,15 @@
 from datetime import datetime
+import json
 import logging
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
+import requests
 
 from domain.apps.models import ClickHouseCredential
 from domain.common.random_string_utils import StringUtils
-from domain.datamart.models import DataMart, GoogleSheet
+from domain.datamart.models import APICredential, DataMart, GoogleSheet, UpdateFrequency
 from domain.integrations.models import MsSQLCredential
 from domain.spreadsheets.models import DatabaseClient
 from mongo import Mongo
@@ -40,6 +42,9 @@ class DataMartService:
         user_id: str,
         name: str,
         query: str,
+        update_frequency: Optional[UpdateFrequency],
+        google_sheet: Optional[GoogleSheet],
+        api_credential: Optional[APICredential],
     ) -> DataMart:
         now = datetime.now()
         return DataMart(
@@ -50,6 +55,9 @@ class DataMartService:
             table_name=self.string_utils.extract_tablename_from_filename(filename=name),
             query=query,
             last_refreshed=now,
+            update_frequency=update_frequency,
+            google_sheet=google_sheet,
+            api_credential=api_credential,
         )
 
     async def create_datamart_table(
@@ -250,11 +258,14 @@ class DataMartService:
         return all_files
 
     def get_google_sheets(self, refresh_token: str):
-        service = self.initialize_google_drive_service(
-            access_token="", refresh_token=refresh_token
-        )
+        try:
+            service = self.initialize_google_drive_service(
+                access_token="", refresh_token=refresh_token
+            )
 
-        self.retrieve_all_files(drive_service=service)
+            self.retrieve_all_files(drive_service=service)
+        except Exception as e:
+            logging.info(e)
 
     def initialize_google_sheet_service(self, access_token: str, refresh_token: str):
         creds = Credentials(
@@ -272,20 +283,17 @@ class DataMartService:
             raise Exception("Could not validate credentials")
 
     async def push_to_google_sheet(
-        self, refresh_token: str, app_id: str, query: str, google_sheet: GoogleSheet
+        self,
+        refresh_token: str,
+        google_sheet: GoogleSheet,
+        columns: List[str],
+        data: List,
     ):
-        service = self.initialize_google_sheet_service(
-            access_token="", refresh_token=refresh_token
-        )
-
         try:
-            result = await self.datamart_repo.execute_query_for_app_restricted_clients(
-                app_id=app_id, query=query
+            service = self.initialize_google_sheet_service(
+                access_token="", refresh_token=refresh_token
             )
-            columns = list(result.column_names)
-            data = [list(entry) for entry in result.result_set]
             sheet_data = [columns] + data
-
             sheet = service.spreadsheets()
             sheet.values().update(
                 spreadsheetId=google_sheet.spreadsheet.id,
@@ -293,5 +301,18 @@ class DataMartService:
                 valueInputOption="USER_ENTERED",
                 body={"values": sheet_data},
             ).execute()
+        except Exception as e:
+            logging.info(e)
+
+    async def push_to_api(
+        self, api_credential: APICredential, columns: List[str], data: List
+    ):
+        try:
+            url = api_credential.url
+            headers = json.loads(api_credential.headers)
+            payload: {columns, data}
+
+            requests.post(url=url, headers=headers, json=payload)
+
         except Exception as e:
             logging.info(e)

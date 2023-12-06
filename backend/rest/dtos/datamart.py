@@ -5,7 +5,7 @@ from domain.spreadsheets.models import DatabaseClient
 from domain.apps.models import ClickHouseCredential
 from domain.integrations.models import MsSQLCredential, MySQLCredential
 
-from domain.datamart.models import DataMart
+from domain.datamart.models import DataMart, GoogleSheet, UpdateFrequency, APICredential
 from rest.dtos.apperture_users import AppertureUserResponse
 from rest.dtos.model_response import ModelResponse
 
@@ -14,6 +14,9 @@ class DataMartTableDto(BaseModel):
     datasourceId: str
     name: str
     query: str
+    updateFrequency: Optional[UpdateFrequency]
+    googleSheet: Optional[GoogleSheet]
+    apiCredential: Optional[APICredential]
 
 
 class DataMartResponse(DataMart, ModelResponse):
