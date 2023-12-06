@@ -32,7 +32,7 @@ class DataMartWithUser(DataMart, ModelResponse):
         orm_mode = True
 
 
-class PushDatamartToSheetDto(BaseModel):
+class PushDatamartDto(BaseModel):
     datamartId: str
 
 

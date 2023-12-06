@@ -41,7 +41,7 @@ from rest.dtos.clickstream_event_properties import (
 )
 from rest.dtos.datamart import (
     DataMartResponse,
-    PushDatamartToSheetDto,
+    PushDatamartDto,
     RefreshDataMartDto,
 )
 from rest.dtos.datasources import DataSourceResponse, PrivateDataSourceResponse
@@ -410,14 +410,14 @@ async def get_datamarts(datamart_service: DataMartService = Depends()):
     return await datamart_service.get_datamarts()
 
 
-@router.post("/datamart/{id}")
+@router.post("/datamart")
 async def push_to_sheet(
-    id: str,
     target: str,
+    dto: PushDatamartDto,
     datamart_service: DataMartService = Depends(),
     compute_query_action: ComputeQueryAction = Depends(),
 ):
-    datamart = await datamart_service.get_datamart_table(id=id)
+    datamart = await datamart_service.get_datamart_table(id=dto.datamartId)
     try:
         compute_query_dto = TransientSpreadsheetsDto(
             datasourceId=str(datamart.datasource_id), query=datamart.query, is_sql=True

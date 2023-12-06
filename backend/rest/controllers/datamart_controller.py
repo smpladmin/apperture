@@ -18,7 +18,12 @@ from domain.datasources.service import DataSourceService
 from domain.spreadsheets.models import DatabaseClient
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apperture_users import AppertureUserResponse
-from rest.dtos.datamart import DataMartResponse, DataMartTableDto, DataMartWithUser
+from rest.dtos.datamart import (
+    DataMartResponse,
+    DataMartTableDto,
+    DataMartWithUser,
+    PushDatamartDto,
+)
 from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
     TransientSpreadsheetsDto,
@@ -267,14 +272,14 @@ async def datamart_google_authorise(
     return RedirectResponse(state["redirect_url"])
 
 
-@router.post("/datamart/{id}")
+@router.post("/datamart")
 async def push_to_sheet(
-    id: str,
     target: str,
+    dto: PushDatamartDto,
     datamart_service: DataMartService = Depends(),
     compute_query_action: ComputeQueryAction = Depends(),
 ):
-    datamart = await datamart_service.get_datamart_table(id=id)
+    datamart = await datamart_service.get_datamart_table(id=dto.datamartId)
     try:
         compute_query_dto = TransientSpreadsheetsDto(
             datasourceId=str(datamart.datasource_id), query=datamart.query, is_sql=True

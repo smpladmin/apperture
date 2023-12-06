@@ -368,7 +368,7 @@ def test_push_to_sheet_success(
     datamart_service.get_datamart_table.return_value = datamart_future
 
     response = client_init.post(
-        "/private/datamart/635ba034807ab86d8a2aadd8?target=google_sheet",
+        "/private/datamart?target=google_sheet",
         data=json.dumps({"datamartId": "635ba034807ab86d8a2aadd8"}),
     )
     assert response.status_code == 200

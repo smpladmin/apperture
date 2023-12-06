@@ -52,7 +52,7 @@ class DatamartService:
         logging.info("{x}: {y}".format(x="push datamart to google sheet", y="start"))
         try:
             response = post(
-                path="/private/{datamart_id}?target={target}",
+                path="/private/datamart?target={target}",
                 json={
                     "datamartId": datamart_id,
                 },
