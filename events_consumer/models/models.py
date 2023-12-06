@@ -131,7 +131,9 @@ class PrecisionEvent(NamedTuple):
     def build(datasourceId, timestamp, userId, eventName, properties):
         return PrecisionEvent(
             datasourceId=datasourceId,
-            timestamp=datetime.fromtimestamp(timestamp),
+            timestamp=datetime.fromisoformat(timestamp[:-1])
+            if isinstance(timestamp, str)
+            else datetime.fromtimestamp(timestamp),
             provider="apperture",
             userId=userId,
             eventName=eventName,
