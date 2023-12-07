@@ -18,6 +18,9 @@ class MySql(SQLBase):
         results = cursor.fetchall()
         return [result[0] for result in results]
 
+    def get_cdc_tables(self, connection, database: str) -> List[str]:
+        return self.get_tables(connection=connection, database=database)
+
     def get_dbs(self, connection) -> List[str]:
         return self.execute_query(connection=connection, query="SHOW DATABASES")
 
@@ -65,3 +68,16 @@ class MySql(SQLBase):
         except Exception as e:
             logging.info(f"Connection refused {e}")
         return result
+
+    def get_table_description(self, connection, table_name: str, database: str):
+        """
+        @param connection:
+        @param table_name:
+        @param database:
+        @return: List of lists containing column_name, datatype and nullable.
+        """
+        cursor = connection.cursor()
+        cursor.execute(f"USE {database};")
+        cursor.execute(f"SHOW COLUMNS FROM {table_name}")
+        results = cursor.fetchall()
+        return [[result[0], result[1], result[2] == "YES"] for result in results]
