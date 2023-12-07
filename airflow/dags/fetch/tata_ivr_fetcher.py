@@ -59,4 +59,7 @@ class TataIVREventsFetcher:
                     logging.info(f"Fetched {total_data} out of {count} ✅")
                     have_more_data = False
             else:
+                logging.info(f"Cannot fetch data! ❌")
+                logging.info(f"{response.json()}")
                 have_more_data = False
+                raise Exception(f"Request failed")

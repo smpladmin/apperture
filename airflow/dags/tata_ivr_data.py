@@ -32,12 +32,8 @@ def get_datasource_and_credential(
 
 
 def generate_dates(start_date: datetime, end_date: datetime) -> List[datetime]:
-    logging.info(
-        f"Date types start_date: {type(start_date)} end_date: {type(end_date)}"
-    )
     start_date = datetime.strptime(start_date, "%Y-%m-%d")
     end_date = datetime.strptime(end_date, "%Y-%m-%d")
-    f"Date types start_date: {type(start_date)} end_date: {type(end_date)}"
 
     return [
         (start_date + timedelta(days=i))
@@ -64,18 +60,6 @@ def get_clickhouse_server_credential(
     return datasource_service.get_clickhouse_server_credentials_for_app(
         app_id=datasource.appId
     )
-
-
-@task
-def get_events(datasource: DataSource, **kwargs) -> List:
-    param_events = kwargs["params"]["events"]
-    events = (
-        param_events
-        if param_events
-        else datasource_service.get_events(datasource=datasource)
-    )
-    print(f"Loading data for following events: {events}")
-    return events
 
 
 @task(max_active_tis_per_dag=1)
