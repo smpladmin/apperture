@@ -18,7 +18,7 @@ class TestClevertapEventsFetcher:
             apiBaseUrl=None,
             branchCredential=None,
             facebookAdsCredential=None,
-            tata_ivr_token=None,
+            tataIvrToken=None,
         )
         self.date = "2023-11-23"
         self.fetcher = GoogleAdsFetcher(self.credential, self.date)
