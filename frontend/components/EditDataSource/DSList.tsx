@@ -14,6 +14,7 @@ import apilogo from '@assets/images/apilogo.png';
 import mysqlLogo from '@assets/images/mysql-icon.png';
 import mssqlLogo from '@assets/images/mssql-icon.png';
 import csvLogo from '@assets/images/csvicon.png';
+import tataLogo from '@assets/images/tata.png';
 import { useRouter } from 'next/router';
 import { GREY_500, GREY_600 } from '@theme/index';
 import {
@@ -104,6 +105,10 @@ const IconProvider = ({
       return (
         <Image style={style} src={csvLogo} alt="gaLogo" objectFit="cover" />
       );
+    case Provider.TATA_IVR:
+      return (
+        <Image style={style} src={tataLogo} alt="gaLogo" objectFit="cover" />
+      );
     default:
       return (
         <Image
@@ -114,6 +119,13 @@ const IconProvider = ({
         />
       );
   }
+};
+
+const generateProviderName = (provider: Provider) => {
+  const name = provider.replace(/_/g, ' ');
+  return [Provider.TATA_IVR, Provider.CSV].includes(provider)
+    ? name.toUpperCase()
+    : name[0].toLocaleUpperCase() + name.slice(1);
 };
 
 function DSList({
@@ -155,9 +167,9 @@ function DSList({
           fontSize={'xs-14'}
           lineHeight={'18px'}
           fontWeight={500}
-          textTransform={'capitalize'}
+          // textTransform={'capitalize'}
         >
-          {provider}
+          {generateProviderName(provider)}
         </Text>
       </Flex>
       {datasources.map((datasource) => {

@@ -57,6 +57,7 @@ export enum CredentialType {
   MSSQL = 'MSSQL',
   CSV = 'CSV',
   BRANCH = 'BRANCH',
+  TATA_IVR = 'TATA_IVR',
 }
 
 export type MsSQLCredential = {
@@ -97,4 +98,5 @@ export type Credential = {
   csv_credential?: CSVCredential;
   api_base_url?: string;
   branch_credential?: BranchCredential;
+  tata_ivr_token?: string;
 };

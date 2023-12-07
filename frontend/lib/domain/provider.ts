@@ -12,6 +12,7 @@ export enum Provider {
   CSV = 'csv',
   SAMPLE = 'sample',
   BRANCH = 'branch',
+  TATA_IVR = 'tata_ivr',
 }
 export namespace Provider {
   export function getDisplayName(provider: Provider): string {
