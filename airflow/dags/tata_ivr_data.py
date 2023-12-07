@@ -35,8 +35,10 @@ def generate_dates(start_date: datetime, end_date: datetime) -> List[datetime]:
     logging.info(
         f"Date types start_date: {type(start_date)} end_date: {type(end_date)}"
     )
-    # start_date = datetime.strptime(start_date, "%Y-%m-%d")
-    # end_date = datetime.strptime(end_date, "%Y-%m-%d")
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+    f"Date types start_date: {type(start_date)} end_date: {type(end_date)}"
+
     return [
         (start_date + timedelta(days=i))
         for i in range((end_date - start_date).days + 1)
@@ -136,7 +138,6 @@ def create_dag(datasource_id: str, created_date: datetime):
         )
         datasource = datasource_with_credential["datasource"]
         run_dates = get_run_dates()
-        events = get_events(datasource=datasource)
         clickhouse_server_credential = get_clickhouse_server_credential(
             datasource=datasource
         )
