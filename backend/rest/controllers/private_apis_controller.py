@@ -6,10 +6,13 @@ from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends
 
 from authorisation.service import AuthService
+from domain.datamart_actions.service import DatamartActionService
+from domain.datamart_actions.models import ActionType
+from rest.dtos.datamart_actions import DatamartActionsResponse, PushDatamartDto
+from rest.dtos.spreadsheets import TransientSpreadsheetsDto
 from data_processor_queue.service import DPQueueService
 from domain.actions.service import ActionService
 from domain.apidata.service import APIDataService
-from domain.apperture_users.models import AppertureUser
 from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
 from domain.clickstream_event_properties.service import (
@@ -38,7 +41,11 @@ from rest.dtos.clickstream_event_properties import (
     ClickStreamEventPropertiesDto,
     ClickStreamEventPropertiesResponse,
 )
-from rest.dtos.datamart import RefreshDataMartDto
+from rest.dtos.datamart import (
+    DataMartDto,
+    DataMartResponse,
+    RefreshDataMartDto,
+)
 from rest.dtos.datasources import DataSourceResponse, PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
 from rest.dtos.event_properties import EventPropertiesDto, EventPropertiesResponse
@@ -408,6 +415,68 @@ async def get_clickstream_event_properties(
     clickstream_event_properties_service: ClickStreamEventPropertiesService = Depends(),
 ):
     return await clickstream_event_properties_service.get_event_properties()
+
+
+@router.get("/datamart_actions", response_model=List[DatamartActionsResponse])
+async def get_datamart_actions(
+    datamart_action_service: DatamartActionService = Depends(),
+):
+    return await datamart_action_service.get_datamart_actions()
+
+
+@router.post("/datamart_actions")
+async def push_to_sheet(
+    dto: PushDatamartDto,
+    datamart_service: DataMartService = Depends(),
+    datamart_action_service: DatamartActionService = Depends(),
+    apperture_user_service: AppertureUserService = Depends(),
+    compute_query_action: ComputeQueryAction = Depends(),
+):
+    datamart = await datamart_service.get_datamart_table(id=dto.datamartId)
+    user = await apperture_user_service.get_user(id=str(datamart.user_id))
+    try:
+        compute_query_dto = TransientSpreadsheetsDto(
+            datasourceId=str(datamart.datasource_id), query=datamart.query, is_sql=True
+        )
+        result = await compute_query_action.compute_query(
+            app_id=str(datamart.app_id), dto=compute_query_dto
+        )
+
+        if dto.type == ActionType.GOOGLE_SHEET:
+            await datamart_action_service.push_to_google_sheet(
+                refresh_token=user.sheet_token,
+                google_sheet=dto.meta,
+                columns=result.headers,
+                data=result.data,
+            )
+
+        if dto.type == ActionType.API:
+            await datamart_action_service.push_to_api(
+                api_credential=dto.meta,
+                columns=result.headers,
+                data=result.data,
+            )
+    except:
+        raise Exception("Could not push to {target}")
+
+
+@router.post("/datamart/refresh")
+async def refresh_datamart_tables(
+    dto: DataMartDto,
+    app_service: AppService = Depends(),
+    datamart_service: DataMartService = Depends(),
+):
+    app = await app_service.get_app(id=dto.appId)
+    refresh_status = await datamart_service.refresh_datamart_table(
+        datamart_id=dto.datamartId,
+        clickhouse_credential=app.clickhouse_credential,
+        db_creds=dto.databaseCredential,
+        database_client=dto.databaseClient,
+    )
+    if refresh_status:
+        return True
+    else:
+        raise Exception(f"Could not refresh datamart {dto.datamartId}")
 
 
 @router.post("/datamart")

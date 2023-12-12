@@ -7,7 +7,7 @@ from domain.apperture_users.service import AppertureUserService
 from domain.apps.service import AppService
 from rest.dtos.apperture_users import (
     AppWiseUserDto,
-    AppertureUserWithAPIKey,
+    AppertureUserWithPrivateFields,
     PrivateUserResponse,
 )
 from rest.middlewares import get_user, get_user_id, validate_jwt
@@ -19,13 +19,13 @@ router = APIRouter(
 )
 
 
-@router.get("/apperture-users/me", response_model=AppertureUserWithAPIKey)
+@router.get("/apperture-users/me", response_model=AppertureUserWithPrivateFields)
 async def get_current_user(
     user_id: str = Depends(get_user_id),
     user_service: AppertureUserService = Depends(),
 ):
     user = await user_service.get_user(user_id)
-    return AppertureUserWithAPIKey(
+    return AppertureUserWithPrivateFields(
         id=user_id,
         first_name=user.first_name,
         last_name=user.last_name,
@@ -34,6 +34,7 @@ async def get_current_user(
         slack_channel=user.slack_channel,
         has_visited_sheets=user.has_visted_sheets,
         api_key=user.api_key,
+        sheet_token=user.sheet_token,
     )
 
 

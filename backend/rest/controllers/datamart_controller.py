@@ -1,23 +1,36 @@
 import logging
 from typing import List
+import os
+import json
+
+from fastapi import APIRouter, Depends, HTTPException, Request
+from starlette.responses import RedirectResponse
 
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends, HTTPException
+from authorisation import OAuthClientFactory, OAuthProvider
+from authorisation.oauth_provider import GoogleOauthContext
 
 from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
 from domain.datamart.service import DataMartService
+from domain.apperture_users.service import AppertureUserService
 from domain.datasources.service import DataSourceService
 from domain.spreadsheets.models import DatabaseClient
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apperture_users import AppertureUserResponse
-from rest.dtos.datamart import DataMartResponse, DataMartTableDto, DataMartWithUser
+from rest.dtos.datamart import (
+    DataMartResponse,
+    DataMartTableDto,
+    DataMartWithUser,
+)
 from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
     TransientSpreadsheetsDto,
 )
 from rest.middlewares import get_user, get_user_id, validate_jwt
 from rest.middlewares.validate_app_user import validate_app_user, validate_library_items
+
 
 router = APIRouter(
     tags=["datamart"],
@@ -207,3 +220,48 @@ async def delete_datamart_table(
         clickhouse_credential=app.clickhouse_credential,
         app_id=str(app.id),
     )
+
+
+oauth = OAuthClientFactory().init_client(
+    provider=OAuthProvider.GOOGLE,
+    scope="https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.readonly",
+    google_oauth_context=GoogleOauthContext.SHEET,
+)
+
+
+@router.get("/datamart/oauth/google", dependencies=[Depends(validate_jwt)])
+async def oauth_google(
+    request: Request,
+    user: AppertureUser = Depends(get_user),
+    redirect_url: str = os.getenv("FRONTEND_LOGIN_REDIRECT_URL"),
+):
+    redirect_uri = str(request.url_for("datamart_google_authorise")).replace(
+        "http", "https"
+    )
+    return await oauth.google.authorize_redirect(
+        request,
+        redirect_uri,
+        state=json.dumps({"user_id": str(user.id), "redirect_url": redirect_url}),
+        prompt="consent",
+        access_type="offline",
+    )
+
+
+@router.get("/datamart/oauth/google/authorise")
+async def datamart_google_authorise(
+    request: Request,
+    state: str,
+    apperture_user_service: AppertureUserService = Depends(),
+):
+    state = json.loads(state)
+    try:
+        access_token = await oauth.google.authorize_access_token(request)
+        refresh_token = access_token.get("refresh_token")
+
+        await apperture_user_service.update_sheet_token(
+            user_id=state["user_id"], token=refresh_token
+        )
+    except Exception as e:
+        logging.error(e)
+
+    return RedirectResponse(state["redirect_url"])

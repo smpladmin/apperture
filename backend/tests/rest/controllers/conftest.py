@@ -407,6 +407,7 @@ def datamart_service(apperture_user_response):
     datamart_service_mock.update_datamart_table = mock.AsyncMock()
     datamart_service_mock.delete_datamart_table = mock.AsyncMock()
     datamart_service_mock.refresh_datamart_table = mock.AsyncMock()
+    datamart_service_mock.push_to_google_sheet = mock.AsyncMock()
     datamart_service_mock.get_all_apps_with_datamarts = mock.AsyncMock(
         return_value=["635ba034807ab86d8a2aadd8", "63ce4906f496f7b462ab7e84"]
     )
@@ -1899,7 +1900,7 @@ def datamart_response():
         "tableName": "dUKQaHtqxM",
         "lastRefreshed": "2022-11-24T00:00:00",
         "query": "select event_name, user_id from events",
-        "enabled": True,
+        "enabled": True, 
     }
 
 

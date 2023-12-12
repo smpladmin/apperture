@@ -17,6 +17,7 @@ class AppertureUser(Document):
     has_visted_sheets: bool = True
     is_signed_up: bool = True
     api_key: Optional[str] = Field(hidden=True)
+    sheet_token: Optional[str] = Field(hidden=True)
 
     class Settings:
         name = "users"

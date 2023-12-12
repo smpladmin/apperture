@@ -11,6 +11,10 @@ class CredentialType(str, Enum):
     FACEBOOK_ADS = "FACEBOOK_ADS"
     TATA_IVR = "TATA_IVR"
     GOOGLE_ADS = "GOOGLE_ADS"
+    MYSQL = "MYSQL"
+    MSSQL = "MSSQL"
+    CSV = "CSV"
+    CDC = "CDC"
 
 
 class BranchCredential(BaseModel):
@@ -24,6 +28,34 @@ class FacebookAdsCredential(BaseModel):
     access_token: str
 
 
+class DatabaseSSHCredential(BaseModel):
+    server: str
+    port: str
+    username: Optional[str]
+    password: Optional[str]
+    ssh_key: Optional[str]
+
+
+class MySQLCredential(BaseModel):
+    host: str
+    port: str
+    username: str
+    password: str
+    databases: List[str]
+    over_ssh: bool = False
+    ssh_credential: Optional[DatabaseSSHCredential]
+
+
+class MsSQLCredential(BaseModel):
+    server: str
+    port: str
+    username: str
+    password: str
+    databases: List[str]
+    over_ssh: bool = False
+    ssh_credential: Optional[DatabaseSSHCredential]
+
+
 class Credential(BaseModel):
     type: CredentialType
     account_id: Optional[str] = Field(alias="accountId")
@@ -32,6 +64,8 @@ class Credential(BaseModel):
     tableName: Optional[str]
     secret: Optional[str]
     api_base_url: Optional[str] = Field(alias="apiBaseUrl")
+    mssql_credential: Optional[MsSQLCredential] = Field(alias="mssqlCredential")
+    mysql_credential: Optional[MySQLCredential] = Field(alias="mysqlCredential")
     branch_credential: Optional[BranchCredential] = Field(alias="branchCredential")
     facebook_ads_credential: Optional[FacebookAdsCredential] = Field(
         alias="facebookAdsCredential"
@@ -45,16 +79,27 @@ class DataSourceVersion(str, Enum):
     DEFAULT = "DEFAULT"
 
 
+class DatabaseClient(str, Enum):
+    MYSQL = "mysql"
+    CLICKHOUSE = "clickhouse"
+    MSSQL = "mssql"
+
+
 class IntegrationProvider(str, Enum):
     GOOGLE = "google"
     MIXPANEL = "mixpanel"
     AMPLITUDE = "amplitude"
     CLEVERTAP = "clevertap"
+    APPERTURE = "apperture"
     API = "api"
     BRANCH = "branch"
+    CDC = "cdc"
     FACEBOOK_ADS = "facebook_ads"
     TATA_IVR = "tata_ivr"
     GOOGLE_ADS = "google_ads"
+    MYSQL = "mysql"
+    MSSQL = "mssql"
+    CSV = "csv"
 
 
 class DataSource(BaseModel):

@@ -99,6 +99,11 @@ class AppertureUserService:
             AppertureUser.id == PydanticObjectId(user_id),
         ).update({"$set": {"has_visted_sheets": True}})
 
+    async def update_sheet_token(self, user_id, token: str):
+        await AppertureUser.find_one(
+            AppertureUser.id == PydanticObjectId(user_id),
+        ).update({"$set": {"sheet_token": token}})
+
     async def update_api_key(self, user_id: str, api_key: str):
         await AppertureUser.find_one(
             AppertureUser.id == PydanticObjectId(user_id),

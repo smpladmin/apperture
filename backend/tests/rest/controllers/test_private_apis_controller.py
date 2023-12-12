@@ -1,8 +1,12 @@
 import json
 from datetime import datetime
 from unittest.mock import ANY, call
+import asyncio
+
 
 from beanie import PydanticObjectId
+import pytest
+from domain.datamart.models import DataMart
 
 from domain.apps.models import ClickHouseCredential
 from domain.common.models import IntegrationProvider
@@ -320,6 +324,22 @@ def test_get_clickstream_event_properties(
     clickstream_event_properties_service.get_event_properties.assert_called_once()
 
 
+def test_trigger_refresh_datamart_for_all_apps(
+    client_init, datamart_service, dpq_service
+):
+    response = client_init.post("/private/apps/datamart")
+    assert response.status_code == 200
+    assert response.json() == [
+        {"app_id": "635ba034807ab86d8a2aadd8", "jobs": "a98a10b4-d26e-46fa-aa6g"},
+        {"app_id": "63ce4906f496f7b462ab7e84", "jobs": "a98a10b4-d26e-46fa-aa6g"},
+    ]
+    datamart_service.get_all_apps_with_datamarts.assert_called_once()
+    dpq_service.enqueue_refresh_datamart_for_app.assert_has_calls(
+        calls=[call("635ba034807ab86d8a2aadd8"), call("63ce4906f496f7b462ab7e84")],
+        any_order=True,
+    )
+
+
 def test_refresh_datamart_tables_for_app(client_init, datamart_service, app_service):
     response = client_init.post(
         "/private/datamart", json={"appId": "63ce4906f496f7b462ab7e84"}
@@ -343,17 +363,69 @@ def test_refresh_datamart_tables_for_app(client_init, datamart_service, app_serv
     )
 
 
-def test_trigger_refresh_datamart_for_all_apps(
-    client_init, datamart_service, dpq_service
+@pytest.mark.asyncio
+async def test_refresh_datamart_tables_success(
+    client_init,
+    datamart_service,
 ):
-    response = client_init.post("/private/apps/datamart")
-    assert response.status_code == 200
-    assert response.json() == [
-        {"app_id": "635ba034807ab86d8a2aadd8", "jobs": "a98a10b4-d26e-46fa-aa6g"},
-        {"app_id": "63ce4906f496f7b462ab7e84", "jobs": "a98a10b4-d26e-46fa-aa6g"},
-    ]
-    datamart_service.get_all_apps_with_datamarts.assert_called_once()
-    dpq_service.enqueue_refresh_datamart_for_app.assert_has_calls(
-        calls=[call("635ba034807ab86d8a2aadd8"), call("63ce4906f496f7b462ab7e84")],
-        any_order=True,
+    datamart_service.refresh_datamart_table.return_value = True
+    response = client_init.post(
+        "/private/datamart/refresh",
+        data=json.dumps(
+            {
+                "datamartId": "635ba034807ab86d8a2aadd8",
+                "appId": "635ba034807ab86d8a2aadd7",
+                "databaseClient": "clickhouse",
+                "databaseCredential": {
+                    "username": "test_username",
+                    "password": "test_password",
+                    "databasename": "test_database",
+                },
+            }
+        ),
     )
+    assert response.status_code == 200
+    datamart_service.refresh_datamart_table.assert_awaited_with(
+        datamart_id="635ba034807ab86d8a2aadd8",
+        clickhouse_credential=ClickHouseCredential(
+            username="test_username",
+            password="test_password",
+            databasename="test_database",
+        ),
+        db_creds=ClickHouseCredential(
+            username="test_username",
+            password="test_password",
+            databasename="test_database",
+        ),
+        database_client=DatabaseClient.CLICKHOUSE,
+    )
+    assert response.json() is True
+
+
+@pytest.mark.asyncio
+async def test_refresh_datamart_tables_failure(
+    client_init,
+    datamart_service,
+):
+    datamart_service.refresh_datamart_table.return_value = False
+
+    with pytest.raises(Exception) as exc_info:
+        response = client_init.post(
+            "/private/datamart/refresh",
+            data=json.dumps(
+                {
+                    "datamartId": "635ba034807ab86d8a2aadd8",
+                    "appId": "635ba034807ab86d8a2aadd7",
+                    "databaseClient": "clickhouse",
+                    "databaseCredential": {
+                        "username": "test_username",
+                        "password": "test_password",
+                        "databasename": "test_database",
+                    },
+                }
+            ),
+        )
+        assert response.status_code == 200
+    assert (
+        str(exc_info.value)
+    ) == "Could not refresh datamart 635ba034807ab86d8a2aadd8"

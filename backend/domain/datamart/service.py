@@ -1,8 +1,11 @@
 from datetime import datetime
+
+import logging
 from typing import Dict, List, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
+
 
 from domain.apps.models import ClickHouseCredential
 from domain.common.random_string_utils import StringUtils
@@ -12,6 +15,11 @@ from domain.spreadsheets.models import DatabaseClient
 from mongo import Mongo
 from repositories.clickhouse.clickhouse_role import ClickHouseRole
 from repositories.clickhouse.datamart import DataMartRepo
+
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+import os
 
 
 class DataMartService:
@@ -153,10 +161,13 @@ class DataMartService:
             DataMart.enabled != False,
         ).to_list()
 
-    async def get_all_apps_with_datamarts(self) -> List[str]:
-        tables = await DataMart.find(
+    async def get_datamarts(self) -> List[DataMart]:
+        return await DataMart.find(
             DataMart.enabled != False,
         ).to_list()
+
+    async def get_all_apps_with_datamarts(self) -> List[str]:
+        tables = await self.get_datamarts()
         return list(set([str(table.app_id) for table in tables]))
 
     async def delete_datamart_table(
@@ -193,3 +204,52 @@ class DataMartService:
             db_creds=db_creds,
         )
         return refresh_status
+
+    def initialize_google_drive_service(self, access_token: str, refresh_token: str):
+        creds = Credentials(
+            token=access_token,
+            refresh_token=refresh_token,
+            token_uri=os.environ["TOKEN_URI"],
+            client_id=os.environ["GOOGLE_SHEET_CLIENT_ID"],
+            client_secret=os.environ["GOOGLE_SHEET_CLIENT_SECRET"],
+        )
+
+        try:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            return build("drive", "v3", credentials=creds)
+        except:
+            raise Exception("Could not validate credentials")
+
+    def retrieve_all_files(self, drive_service, page_token=None):
+        all_files = []
+
+        while True:
+            result = (
+                drive_service.files()
+                .list(
+                    q="mimeType='application/vnd.google-apps.spreadsheet'",
+                    fields="nextPageToken, files(id, name)",
+                    pageToken=page_token,
+                )
+                .execute()
+            )
+
+            files = result.get("files", [])
+            all_files.extend(files)
+
+            page_token = result.get("nextPageToken")
+            if not page_token:
+                break
+
+        return all_files
+
+    def get_google_sheets(self, refresh_token: str):
+        try:
+            service = self.initialize_google_drive_service(
+                access_token="", refresh_token=refresh_token
+            )
+
+            self.retrieve_all_files(drive_service=service)
+        except Exception as e:
+            logging.info(e)
