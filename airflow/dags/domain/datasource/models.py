@@ -9,6 +9,7 @@ class CredentialType(str, Enum):
     API_KEY = "API_KEY"
     BRANCH = "BRANCH"
     FACEBOOK_ADS = "FACEBOOK_ADS"
+    TATA_IVR = "TATA_IVR"
     GOOGLE_ADS = "GOOGLE_ADS"
     MYSQL = "MYSQL"
     MSSQL = "MSSQL"
@@ -69,6 +70,7 @@ class Credential(BaseModel):
     facebook_ads_credential: Optional[FacebookAdsCredential] = Field(
         alias="facebookAdsCredential"
     )
+    tata_ivr_token: Optional[str] = Field(alias="tataIvrToken")
 
 
 class DataSourceVersion(str, Enum):
@@ -93,6 +95,7 @@ class IntegrationProvider(str, Enum):
     BRANCH = "branch"
     CDC = "cdc"
     FACEBOOK_ADS = "facebook_ads"
+    TATA_IVR = "tata_ivr"
     GOOGLE_ADS = "google_ads"
     MYSQL = "mysql"
     MSSQL = "mssql"
@@ -139,3 +142,29 @@ class ClickHouseCredential(BaseModel):
 class AppDatabaseResponse(BaseModel):
     name: str
     database_credentials: ClickHouseCredential
+
+
+class TataIvrEvents(NamedTuple):
+    id: str
+    timestamp: datetime
+    datasource_id: str
+    call_id: str
+    uuid: str
+    date: str
+    time: str
+    end_stamp: datetime
+    missed_agents: str
+    status: str
+    direction: str
+    call_duration: int
+    answered_seconds: int
+    minutes_consumed: int
+    broadcast_id: str
+    dtmf_input: str
+    client_number: str
+    hangup_cause: str
+    did_number: str
+    contact_details: str
+    recording_url: str
+    service: str
+    properties: dict

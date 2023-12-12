@@ -35,9 +35,13 @@ router = APIRouter(
 async def compute_transient_segment(
     dto: TransientSegmentDto,
     segment_service: SegmentService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
+    ds = await ds_service.get_datasource(dto.datasourceId)
+
     return await segment_service.compute_segment(
         datasource_id=str(dto.datasourceId),
+        app_id=str(ds.app_id),
         groups=dto.groups,
         columns=dto.columns,
     )

@@ -1,20 +1,15 @@
-from datetime import datetime, timedelta
 import logging
-import re
 import os
+import re
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Tuple, Union, cast
 
 from beanie import PydanticObjectId
-from pypika import ClickHouseQuery, Criterion, Field, Parameter, Order
+from pypika import ClickHouseQuery, Criterion, Field, Order, Parameter
 from pypika import functions as fn
 from pypika import terms
 
-from domain.actions.models import (
-    Action,
-    ActionGroup,
-    OperatorType,
-    UrlMatching,
-)
+from domain.actions.models import Action, ActionGroup, OperatorType, UrlMatching
 from repositories.clickhouse.base import EventsBase
 from repositories.clickhouse.parser.action_parser_utils import Selector
 
@@ -161,19 +156,20 @@ class Actions(EventsBase):
             return [re.escape(text).replace("\\ ", " ") for text in ok_values]
 
     async def update_events_from_clickstream(self, action: Action, update_action_func):
-
         try:
             query, params, now = await self.build_update_events_from_clickstream_query(
                 action=action
             )
-            self.execute_get_query(query=query, parameters=params)
+            await self.execute_query_for_app(
+                query=query, parameters=params, app_id=action.app_id
+            )
             await update_action_func(action_id=action.id, processed_till=now)
             logging.info(f"{action.name} processed till: {now}")
         except Exception as e:
             logging.info(f"Failed executing query for {action.name} with exception {e}")
         return
 
-    def get_minimum_timestamp_of_events(self, datasource_id: str):
+    async def get_minimum_timestamp_of_events(self, datasource_id: str, app_id: str):
         params = {"ds_id": datasource_id}
         query = (
             ClickHouseQuery.from_(self.click_stream_table)
@@ -182,9 +178,11 @@ class Actions(EventsBase):
             )
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
         )
-        return self.execute_get_query(query=query.get_sql(), parameters=params)
+        return await self.execute_query_for_app(
+            query=query.get_sql(), parameters=params, app_id=app_id
+        )
 
-    def compute_migration_start_and_end_time(self, action: Action):
+    async def compute_migration_start_and_end_time(self, action: Action):
         date_format = "%Y-%m-%d %H:%M:%S"
         start_time, end_time = action.processed_till, datetime.strptime(
             datetime.now().strftime(date_format), date_format
@@ -196,8 +194,10 @@ class Actions(EventsBase):
             )
 
         if not action.processed_till:
-            [(start_time,),] = self.get_minimum_timestamp_of_events(
-                datasource_id=str(action.datasource_id)
+            [
+                (start_time,),
+            ] = await self.get_minimum_timestamp_of_events(
+                datasource_id=str(action.datasource_id), app_id=str(action.app_id)
             )
 
         event_migration_interval = int(os.getenv("EVENT_MIGRATION_INTERVAL", 24))
@@ -236,7 +236,9 @@ class Actions(EventsBase):
             .where(self.click_stream_table.datasource_id == Parameter("%(ds_id)s"))
         )
 
-        start_time, end_time = self.compute_migration_start_and_end_time(action=action)
+        start_time, end_time = await self.compute_migration_start_and_end_time(
+            action=action
+        )
         query = query.where(
             Criterion.all(
                 [
@@ -258,14 +260,16 @@ class Actions(EventsBase):
         groups: List[ActionGroup],
         start_date: Union[str, None],
         end_date: Union[str, None],
+        app_id: str,
     ):
-        return self.execute_get_query(
+        return await self.execute_query_for_app(
+            app_id=app_id,
             *await self.build_matching_events_from_clickstream_query(
                 datasource_id=datasource_id,
                 groups=groups,
                 start_date=start_date,
                 end_date=end_date,
-            )
+            ),
         )
 
     def build_date_filter_criterion(
@@ -324,12 +328,14 @@ class Actions(EventsBase):
     async def get_count_of_matching_event_from_clickstream(
         self,
         datasource_id: str,
+        app_id: str,
         groups: List[ActionGroup],
         start_date: Union[str, None],
         end_date: Union[str, None],
     ):
-        return self.execute_get_query(
-            *await self.build_count_matching_events_from_clickstream_query(
+        return await self.execute_query_for_app(
+            app_id=app_id
+            * await self.build_count_matching_events_from_clickstream_query(
                 datasource_id=datasource_id,
                 groups=groups,
                 start_date=start_date,
@@ -370,6 +376,8 @@ class Actions(EventsBase):
         params["ds_id"] = str(datasource_id)
         return query.get_sql(), params
 
-    def delete_processed_events(self, ds_id: PydanticObjectId, event: str):
+    async def delete_processed_events(
+        self, ds_id: PydanticObjectId, event: str, app_id: str
+    ):
         query = f"DELETE FROM {self.table} WHERE event_name='{event}' AND datasource_id='{ds_id}' SETTINGS allow_experimental_lightweight_delete=1"
-        self.execute_get_query(query, {})
+        await self.execute_query_for_app(query=query, parameters={}, app_id=app_id)

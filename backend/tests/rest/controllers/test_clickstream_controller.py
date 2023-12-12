@@ -27,5 +27,5 @@ def test_get_clickstream_events(client_init, datasource_service, clickstream_ser
         ],
     }
     clickstream_service.get_data_by_id.assert_called_once_with(
-        dsId="63d8ef5a7b02dbd1dcf20dcc"
+        dsId="63d8ef5a7b02dbd1dcf20dcc", app_id="636a1c61d715ca6baae65611"
     )

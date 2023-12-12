@@ -1,26 +1,21 @@
+from collections import namedtuple
 from datetime import datetime
+from unittest.mock import ANY, AsyncMock, MagicMock
 
 import pytest
-from unittest.mock import ANY
-from collections import namedtuple
 from beanie import PydanticObjectId
-from unittest.mock import MagicMock, AsyncMock
 
-from domain.common.date_models import (
-    DateFilter,
-    LastDateFilter,
-    DateFilterType,
-)
+from domain.common.date_models import DateFilter, DateFilterType, LastDateFilter
 from domain.common.models import IntegrationProvider
+from domain.datasources.models import DataSource
 from domain.retention.models import (
-    Retention,
+    ComputedRetention,
     EventSelection,
     Granularity,
-    ComputedRetention,
+    Retention,
 )
 from domain.retention.service import RetentionService
 from tests.utils import filter_response
-from domain.datasources.models import DataSource
 
 
 class TestRetentionService:
@@ -77,11 +72,13 @@ class TestRetentionService:
         Retention.get = AsyncMock()
         Retention.insert = AsyncMock()
         Retention.id = MagicMock(return_value=PydanticObjectId(self.ds_id))
-        self.retention.compute_retention.return_value = [
-            (datetime(2022, 1, 1, 0, 0), 1, 110, datetime(2022, 1, 1, 0, 0), 215),
-            (datetime(2022, 1, 2, 0, 0), 1, 108, datetime(2022, 1, 2, 0, 0), 206),
-            (datetime(2022, 1, 3, 0, 0), 1, 115, datetime(2022, 1, 3, 0, 0), 230),
-        ]
+        self.retention.compute_retention = AsyncMock(
+            return_value=[
+                (datetime(2022, 1, 1, 0, 0), 1, 110, datetime(2022, 1, 1, 0, 0), 215),
+                (datetime(2022, 1, 2, 0, 0), 1, 108, datetime(2022, 1, 2, 0, 0), 206),
+                (datetime(2022, 1, 3, 0, 0), 1, 115, datetime(2022, 1, 3, 0, 0), 230),
+            ]
+        )
         self.date_utils.compute_date_filter.return_value = ("2022-12-01", "2022-12-31")
         self.date_utils.compute_days_in_date_range.return_value = 4
         Retention.enabled = True
@@ -109,6 +106,7 @@ class TestRetentionService:
     async def test_compute_retention(self):
         assert await self.service.compute_retention(
             datasource_id=self.ds_id,
+            app_id=self.app_id,
             start_event=self.start_event,
             goal_event=self.goal_event,
             granularity=Granularity.DAYS,
@@ -143,6 +141,7 @@ class TestRetentionService:
         self.retention.compute_retention.assert_called_once_with(
             **{
                 "datasource_id": "636a1c61d715ca6baae65611",
+                "app_id": "636a1c61d715ca6baae65612",
                 "end_date": "2022-12-31",
                 "goal_event": EventSelection(event="goal_event", filters=None),
                 "granularity": Granularity.DAYS,

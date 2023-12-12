@@ -280,12 +280,15 @@ async def slack_url(
 async def refresh_properties(
     ds_id: Union[str, None] = None,
     properties_service: PropertiesService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
-    return (
-        await properties_service.refresh_properties(ds_id=ds_id)
-        if ds_id
-        else await properties_service.refresh_properties_for_all_datasources()
-    )
+    if ds_id:
+        ds = await ds_service.get_datasource(ds_id)
+        return await properties_service.refresh_properties(
+            ds_id=ds_id, app_id=str(ds.app_id)
+        )
+    else:
+        return await properties_service.refresh_properties_for_all_datasources()
 
 
 @router.post("/click_stream")
@@ -337,12 +340,16 @@ async def get_metric_by_id(
 async def compute_metrics(
     dto: MetricsComputeDto,
     metric_service: MetricService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
     if metric_service.validate_formula(
         dto.function, [aggregate.variable for aggregate in dto.aggregates]
     ):
+        ds = await ds_service.get_datasource(dto.datasourceId)
+
         result = await metric_service.compute_metric(
             datasource_id=str(dto.datasourceId),
+            app_id=str(ds.app_id),
             function=dto.function,
             aggregates=dto.aggregates,
             breakdown=dto.breakdown,
@@ -368,9 +375,12 @@ async def get_saved_funnel(
 async def get_transient_funnel_trends(
     dto: TransientFunnelDto,
     funnel_service: FunnelsService = Depends(),
+    ds_service: DataSourceService = Depends(),
 ):
+    ds = await ds_service.get_datasource(dto.datasourceId)
     return await funnel_service.get_funnel_trends(
         datasource_id=dto.datasourceId,
+        app_id=str(ds.app_id),
         steps=dto.steps,
         date_filter=dto.dateFilter,
         conversion_window=dto.conversionWindow,

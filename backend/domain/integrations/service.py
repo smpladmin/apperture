@@ -14,10 +14,7 @@ from fastapi import Depends, UploadFile
 from authorisation.models import IntegrationOAuth
 from clickhouse.clickhouse_client_factory import ClickHouseClientFactory
 from domain.apperture_users.models import AppertureUser
-from domain.apps.models import (
-    App,
-    ClickHouseCredential,
-)
+from domain.apps.models import App, ClickHouseCredential
 from repositories.clickhouse.clickhouse_role import ClickHouseRole
 from repositories.clickhouse.integrations import Integrations
 from repositories.sql.mssql import MsSql
@@ -26,6 +23,7 @@ from utils.mssql_clickhouse_datatypes import MSSQL_CLICKHOUSE_DATATYPE_MAPPING
 
 from .models import (
     BranchCredential,
+    CdcCredential,
     Credential,
     CredentialType,
     CSVCredential,
@@ -36,7 +34,6 @@ from .models import (
     MySQLCredential,
     RelationalDatabaseType,
     ServerType,
-    CdcCredential,
 )
 
 
@@ -109,6 +106,7 @@ class IntegrationService:
         csv_credential: Optional[CSVCredential],
         branch_credential: Optional[BranchCredential],
         api_base_url: Optional[str] = None,
+        tata_ivr_token: Optional[str] = None,
     ):
         if mysql_credential:
             credential_type = CredentialType.MYSQL
@@ -120,6 +118,8 @@ class IntegrationService:
             credential_type = CredentialType.BRANCH
         elif cdc_credential:
             credential_type = CredentialType.CDC
+        elif tata_ivr_token:
+            credential_type = CredentialType.TATA_IVR
         else:
             credential_type = CredentialType.API_KEY
 
@@ -140,6 +140,7 @@ class IntegrationService:
             cdc_credential=cdc_credential,
             branch_credential=branch_credential,
             api_base_url=api_base_url,
+            tata_ivr_token=tata_ivr_token,
         )
         integration = Integration(
             user_id=app.user_id,
@@ -361,13 +362,18 @@ class IntegrationService:
     def delete_file_from_s3(self, s3_key: str):
         self.s3_client.delete_object(Bucket=self.s3_bucket_name, Key=s3_key)
 
-    def create_clickhouse_table_from_csv(
-        self, name: str, clickhouse_credential: ClickHouseCredential, s3_key: str
+    async def create_clickhouse_table_from_csv(
+        self,
+        name: str,
+        clickhouse_credential: ClickHouseCredential,
+        s3_key: str,
+        app_id: str,
     ):
-        self.integrations.create_table_from_csv(
+        await self.integrations.create_table_from_csv(
             name=name,
             db_name=clickhouse_credential.databasename,
             s3_key=s3_key,
+            app_id=app_id,
         )
 
     async def update_credentials(self, id: PydanticObjectId, credential: Credential):
@@ -435,7 +441,9 @@ class IntegrationService:
         )
         database = cdc_credential.database
         ch_client = await ClickHouseClientFactory.get_client(app_id=app_id)
-        logging.info(f"Creating these cdc tables in clickhouse: {cdc_credential.tables}")
+        logging.info(
+            f"Creating these cdc tables in clickhouse: {cdc_credential.tables}"
+        )
         for table in cdc_credential.tables:
             logging.info(
                 f"Creating sql server table {database}.{table} in {ch_db} database"
@@ -449,7 +457,9 @@ class IntegrationService:
             )
             self.create_ch_table(client=ch_client, query=create_query)
 
-    def create_cdc_connector(self, tables: List[str], credential: CdcCredential, integration_id: str):
+    def create_cdc_connector(
+        self, tables: List[str], credential: CdcCredential, integration_id: str
+    ):
         logging.info("Creating cdc connector")
         headers = {"Accept": "application/json", "Content-Type": "application/json"}
         data = {

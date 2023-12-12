@@ -21,6 +21,7 @@ class TestClevertapEventsFetcher:
             facebookAdsCredential=None,
             mssqlCredential=None,
             mysqlCredential=None,
+            tataIvrToken=None,
         )
         self.event = "UTM Visited"
 

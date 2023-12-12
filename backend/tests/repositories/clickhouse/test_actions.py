@@ -1,6 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, ANY
+from unittest.mock import ANY, AsyncMock, MagicMock
 
 import pytest
 from beanie import PydanticObjectId
@@ -8,9 +8,9 @@ from beanie import PydanticObjectId
 from domain.actions.models import (
     Action,
     ActionGroup,
+    ActionGroupCondition,
     CaptureEvent,
     UrlMatching,
-    ActionGroupCondition,
 )
 from repositories.clickhouse.actions import Actions
 
@@ -20,9 +20,10 @@ class TestActionsRepository:
         self.clickhouse = MagicMock()
         repo = Actions(self.clickhouse)
         Action.get_settings = MagicMock()
-        repo.execute_get_query = MagicMock()
+        repo.execute_query_for_app = AsyncMock()
         self.repo = repo
         self.datasource_id = PydanticObjectId("636a1c61d715ca6baae65611")
+        self.app_id = PydanticObjectId("636a1c61d715ca6baae6561f")
         self.event = CaptureEvent.AUTOCAPTURE
         self.start_date = "2022-12-01"
         self.end_date = "2022-12-31"
@@ -167,15 +168,16 @@ class TestActionsRepository:
             "updated_at": None,
             "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
         }
-        self.repo.execute_get_query.assert_called_once_with(
-            **{"parameters": self.parameters, "query": self.migration_query}
+        self.repo.execute_query_for_app.assert_called_once_with(
+            **{"parameters": self.parameters, "query": self.migration_query},
+            app_id=PydanticObjectId("636a1c61d715ca6baae65611")
         )
 
     @pytest.mark.asyncio
     async def test_build_update_events_from_clickstream_query(
         self, patch_datetime_today
     ):
-        self.repo.get_minimum_timestamp_of_events = MagicMock(
+        self.repo.get_minimum_timestamp_of_events = AsyncMock(
             return_value=[(self.min_timestamp,)]
         )
         assert await self.repo.build_update_events_from_clickstream_query(
@@ -186,33 +188,45 @@ class TestActionsRepository:
             datetime(2023, 1, 5, 11, 28, 38),
         )
         self.repo.get_minimum_timestamp_of_events.assert_called_once_with(
-            **{"datasource_id": "636a1c61d715ca6baae65611"}
+            **{
+                "datasource_id": "636a1c61d715ca6baae65611",
+                "app_id": "636a1c61d715ca6baae65611",
+            }
         )
 
-    def test_get_minimum_timestamp_of_events(self):
-        self.repo.get_minimum_timestamp_of_events(datasource_id=str(self.datasource_id))
-        self.repo.execute_get_query.assert_called_once_with(
+    @pytest.mark.sasyncio
+    async def test_get_minimum_timestamp_of_events(self):
+        await self.repo.get_minimum_timestamp_of_events(
+            datasource_id=str(self.datasource_id), app_id=str(self.app_id)
+        )
+        self.repo.execute_query_for_app.assert_called_once_with(
             **{
                 "parameters": self.min_timestamp_params,
                 "query": self.min_timestamp_query,
             }
         )
 
-    def test_compute_migration_start_and_end_time(self):
-        self.repo.get_minimum_timestamp_of_events = MagicMock(
+    @pytest.mark.asyncio
+    async def test_compute_migration_start_and_end_time(self):
+        self.repo.get_minimum_timestamp_of_events = AsyncMock(
             return_value=[(self.min_timestamp,)]
         )
-        assert self.repo.compute_migration_start_and_end_time(action=self.action) == (
+        result = await self.repo.compute_migration_start_and_end_time(
+            action=self.action
+        )
+        result == (
             datetime(2023, 1, 4, 11, 28, 38),
             datetime(2023, 1, 5, 11, 28, 38),
         )
 
-    def test_compute_migration_start_and_end_time_with_time_difference_less_than_24_hours(
+    @pytest.mark.asyncio
+    async def test_compute_migration_start_and_end_time_with_time_difference_less_than_24_hours(
         self,
     ):
-        assert self.repo.compute_migration_start_and_end_time(
+        result = await self.repo.compute_migration_start_and_end_time(
             action=self.action_with_processed_till
-        ) == (
+        )
+        result == (
             self.past_six_hours_datetime,
             datetime.strptime(
                 datetime.now().strftime(self.date_format), self.date_format

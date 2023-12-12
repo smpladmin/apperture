@@ -1,3 +1,4 @@
+import json
 import os
 from typing import Union
 
@@ -5,6 +6,12 @@ from fastapi import FastAPI, Form, Response
 from fastapi.middleware.cors import CORSMiddleware
 from aiokafka import AIOKafkaProducer
 from dotenv import load_dotenv
+
+from starlette.types import Message
+from starlette.requests import Request
+from starlette.middleware.base import BaseHTTPMiddleware
+import gzip
+from models import FlutterBatchData
 
 load_dotenv()
 
@@ -20,6 +27,28 @@ KAFKA_TOPIC = "clickstream"
 
 
 producer = None
+
+
+class GZipedMiddleware(BaseHTTPMiddleware):
+    async def set_body(self, request: Request):
+        receive_ = await request._receive()
+        if (
+            "gzip" in request.headers.getlist("Content-Encoding")
+            and "/events/capture/batch" in request.url.path
+        ):
+            data = gzip.decompress(receive_.get("body"))
+            receive_["body"] = data
+
+        async def receive() -> Message:
+            return receive_
+
+        request._receive = receive
+
+    async def dispatch(self, request, call_next):
+        await self.set_body(request)
+        response = await call_next(request)
+        return response
+
 
 app = FastAPI()
 
@@ -45,6 +74,8 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS", "HEAD"],
     allow_headers=["*"],
 )
+
+app.add_middleware(GZipedMiddleware)
 
 
 @app.on_event("startup")
@@ -77,11 +108,41 @@ async def capture_event(
 @app.post("/events/capture/decide/")
 async def analyse_decide_call(
     v: str,
-    ip: str,
-    _: str,
-    ver: str,
+    ip: Union[str, None] = None,
+    _: Union[str, None] = None,
+    ver: Union[str, None] = None,
 ):
-    return {"config": {"enable_collect_everything": True}, "sessionRecording": False}
+    response = {
+        "config": {"enable_collect_everything": True},
+        "sessionRecording": False,
+    }
+    if v == "2":
+        response.update(
+            {
+                "toolbarParams": {},
+                "isAuthenticated": False,
+                "supportedCompression": ["gzip", "gzip-js"],
+                "featureFlags": {},
+                "capturePerformance": False,
+                "autocapture_opt_out": False,
+                "autocaptureExceptions": False,
+                "surveys": False,
+                "siteApps": [],
+                "elementsChainAsString": False,
+            }
+        )
+    return response
+
+
+@app.post("/events/capture/batch")
+async def capture_click_stream(
+    data: FlutterBatchData,
+):
+    """Capture an event and send it to Kafka."""
+    kafka_topic = "flutter_eventstream"
+    value = json.dumps(data.dict())
+    await producer.send_and_wait(kafka_topic, value=value.encode("utf-8"))
+    return {"status": "ok"}
 
 
 @app.get("/events/capture/static/array.js")

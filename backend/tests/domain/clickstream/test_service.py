@@ -1,5 +1,5 @@
 import datetime
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -23,6 +23,7 @@ class TestClickstreamService:
             elements_service=self.elements_service,
         )
         self.datasource_id = "63d8ef5a7b02dbd1dcf20dcc"
+        self.app_id = "63d8ef5a7b02dbd1dcf20dcd"
         self.clickstream_data_response = {
             "count": 105,
             "data": [
@@ -102,12 +103,14 @@ class TestClickstreamService:
                 [],
             ),
         ]
-        self.clickstream.get_all_data_by_dsId = MagicMock(
+        self.clickstream.get_all_data_by_dsId = AsyncMock(
             return_value=self.clickstream_data_list
         )
-        self.clickstream.get_stream_count_by_dsId = MagicMock(return_value=[[(105)]])
+        self.clickstream.get_stream_count_by_dsId = AsyncMock(return_value=[[(105)]])
 
     @pytest.mark.asyncio
     async def test_get_data_by_id(self):
-        result = self.service.get_data_by_id(self.datasource_id)
+        result = await self.service.get_data_by_id(
+            self.datasource_id, app_id=self.app_id
+        )
         assert result == self.clickstream_data_response

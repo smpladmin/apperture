@@ -1,5 +1,7 @@
 import logging
-from store.clickhouse_client_factory import ClickHouseClientFactory
+from store.tata_ivr_saver import TataIVRDataSaver
+from event_processors.tata_ivr_event_processor import TataIVREventProcessor
+from fetch.tata_ivr_fetcher import TataIVREventsFetcher
 import pendulum
 
 from airflow.models import Param
@@ -7,12 +9,8 @@ from typing import Dict, Union, List
 from datetime import timedelta, datetime
 from airflow.decorators import task, dag
 
-from store.events_saver import EventsSaver
 from domain.datasource.service import DataSourceService
-from store.event_properties_saver import EventPropertiesSaver
-from fetch.clevertap_events_fetcher import ClevertapEventsFetcher
 from utils.utils import DATA_FETCH_DAYS_OFFSET, AIRFLOW_INIT_DATE
-from event_processors.clevertap_event_processor import ClevertapEventProcessor
 from domain.datasource.models import (
     IntegrationProvider,
     Credential,
@@ -22,7 +20,7 @@ from domain.datasource.models import (
 
 
 datasource_service = DataSourceService()
-provider = IntegrationProvider.CLEVERTAP
+provider = IntegrationProvider.TATA_IVR
 
 
 @task
@@ -33,32 +31,12 @@ def get_datasource_and_credential(
     return {"datasource": datasource.datasource, "credential": datasource.credential}
 
 
-@task
-def get_clickhouse_server_credential(
-    datasource: DataSource,
-) -> Union[ClickHouseRemoteConnectionCred, None]:
-    return datasource_service.get_clickhouse_server_credentials_for_app(
-        app_id=datasource.appId
-    )
-
-
-@task
-def get_events(datasource: DataSource, **kwargs) -> List:
-    param_events = kwargs["params"]["events"]
-    events = (
-        param_events
-        if param_events
-        else datasource_service.get_events(datasource=datasource)
-    )
-    print(f"Loading data for following events: {events}")
-    return events
-
-
-def generate_dates(start_date: str, end_date: str) -> List[str]:
+def generate_dates(start_date: datetime, end_date: datetime) -> List[datetime]:
     start_date = datetime.strptime(start_date, "%Y-%m-%d")
     end_date = datetime.strptime(end_date, "%Y-%m-%d")
+
     return [
-        (start_date + timedelta(days=i)).strftime("%Y-%m-%d")
+        (start_date + timedelta(days=i))
         for i in range((end_date - start_date).days + 1)
     ]
 
@@ -70,46 +48,44 @@ def get_run_dates(**kwargs):
     if start_date and end_date:
         run_dates = generate_dates(start_date=start_date, end_date=end_date)
     else:
-        run_dates = [kwargs["logical_date"].format("YYYY-MM-DD")]
+        run_dates = [kwargs["logical_date"]]
     print(f"Loading data for the following dates: {run_dates}")
     return run_dates
+
+
+@task
+def get_clickhouse_server_credential(
+    datasource: DataSource,
+) -> Union[ClickHouseRemoteConnectionCred, None]:
+    return datasource_service.get_clickhouse_server_credentials_for_app(
+        app_id=datasource.appId
+    )
 
 
 @task(max_active_tis_per_dag=1)
 def load_data(
     datasource: DataSource,
     credential: Credential,
-    event: str,
-    date: str,
+    date: datetime,
     clickhouse_server_credential: Union[ClickHouseRemoteConnectionCred, None],
 ):
-    print(f"Loading data for event: {event} date: {date}")
-    for events_data in ClevertapEventsFetcher(credential=credential, date=date).fetch(
-        event=event
-    ):
-        logging.info(f"Processing event {event} data for date - {date}")
-        df = ClevertapEventProcessor().process(events_data, event)
-        logging.info(f"Saving event {event} data for date - {date}")
-        EventsSaver().save(
-            datasource_id=datasource.id,
-            provider=IntegrationProvider.CLEVERTAP,
-            df=df,
-            clickhouse_server_credential=clickhouse_server_credential,
-            app_id=datasource.appId,
+    print(f"Loading data for date: {date}")
+    saver = TataIVRDataSaver(
+        app_id=datasource.appId,
+        clickhouse_server_credentials=clickhouse_server_credential,
+    )
+    for events in TataIVREventsFetcher(credential=credential, date=date).fetch():
+        event_data = TataIVREventProcessor().process(
+            events_data=events, datasource_id=str(datasource.id)
         )
-
-        logging.info(f"Saving event properties for event {event} for date - {date}")
-        EventPropertiesSaver().save(
-            df=df,
-            datasource_id=datasource.id,
-            provider=IntegrationProvider.CLEVERTAP,
-        )
+        logging.info(f"Processed {event_data.shape} data")
+        saver.save(event_data=event_data)
 
 
 def create_dag(datasource_id: str, created_date: datetime):
     @dag(
-        dag_id=f"clevertap_data_loader_{datasource_id}",
-        description=f"Clevertap daily refresh for {datasource_id}",
+        dag_id=f"tata_ivr_data_ingestion_{datasource_id}",
+        description=f"TATA IVR daily refresh for {datasource_id}",
         schedule="0 8 * * *",
         start_date=pendulum.instance(
             created_date - timedelta(days=DATA_FETCH_DAYS_OFFSET),
@@ -146,7 +122,6 @@ def create_dag(datasource_id: str, created_date: datetime):
         )
         datasource = datasource_with_credential["datasource"]
         run_dates = get_run_dates()
-        events = get_events(datasource=datasource)
         clickhouse_server_credential = get_clickhouse_server_credential(
             datasource=datasource
         )
@@ -155,7 +130,7 @@ def create_dag(datasource_id: str, created_date: datetime):
             datasource=datasource,
             credential=datasource_with_credential["credential"],
             clickhouse_server_credential=clickhouse_server_credential,
-        ).expand(event=events, date=run_dates)
+        ).expand(date=run_dates)
 
     clevertap_data_loader()
 

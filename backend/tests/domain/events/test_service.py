@@ -1,7 +1,8 @@
 from datetime import datetime
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+
 from domain.common.models import IntegrationProvider
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.events.models import Event, PaginatedEventsData
@@ -14,11 +15,13 @@ class TestEventsService:
         self.clickhouse.client = MagicMock()
         self.clickhouse.client.insert = MagicMock()
         self.events_repo = MagicMock()
+        self.events_repo.get_events = AsyncMock()
         DataSource.get_settings = MagicMock()
         self.events_service = EventsService(self.clickhouse, self.events_repo)
         self.props = ["prop1", "prop2", "prop3", "prop4"]
         self.date = "2022-01-01"
         self.ds_id = "test-id"
+        self.app_id = "test-app-id"
         self.datasource = DataSource(
             integration_id="636a1c61d715ca6baae65611",
             app_id="636a1c61d715ca6baae65611",
@@ -74,12 +77,12 @@ class TestEventsService:
             ["otp_received"],
             ["documents_verified"],
         ]
-        self.events_repo.get_unique_events.return_value = events
+        self.events_repo.get_unique_events = AsyncMock(return_value=events)
 
         events = await self.events_service.get_unique_events(self.datasource)
 
         self.events_repo.get_unique_events.assert_called_once_with(
-            str(self.datasource.id)
+            datasource_id=str(self.datasource.id), app_id="636a1c61d715ca6baae65611"
         )
         assert events == [["otp_sent"], ["otp_received"], ["documents_verified"]]
 
@@ -103,7 +106,8 @@ class TestEventsService:
             }
         )
 
-    def test_get_events(self):
+    @pytest.mark.asyncio
+    async def test_get_events(self):
         self.events_repo.get_events.return_value = [
             (
                 "Content_Like",
@@ -118,16 +122,18 @@ class TestEventsService:
                 "Delhi",
             ),
         ]
-        self.events_repo.get_events_count.return_value = ((2,),)
+        self.events_repo.get_events_count = AsyncMock(return_value=((2,),))
 
-        assert self.events_service.get_events(
+        result = await self.events_service.get_events(
             datasource_id=self.ds_id,
             is_aux=False,
             table_name="All",
             user_id=None,
             page_number=0,
             page_size=100,
-        ) == PaginatedEventsData(
+            app_id=self.app_id,
+        )
+        result == PaginatedEventsData(
             count=2,
             page_number=0,
             data=[
@@ -152,10 +158,12 @@ class TestEventsService:
                 "page_number": 0,
                 "page_size": 100,
                 "user_id": None,
-            }
+            },
+            app_id="test-app-id"
         )
 
-    def test_get_events_for_user_id(self):
+    @pytest.mark.asyncio
+    async def test_get_events_for_user_id(self):
         self.events_repo.get_events.return_value = [
             (
                 "Content_Like",
@@ -166,16 +174,18 @@ class TestEventsService:
                 datetime(2023, 1, 13, 15, 23, 41),
             ),
         ]
-        self.events_repo.get_events_count.return_value = ((2,),)
+        self.events_repo.get_events_count = AsyncMock(return_value=((2,),))
 
-        assert self.events_service.get_events(
+        result = await self.events_service.get_events(
             datasource_id=self.ds_id,
             user_id="test-user",
             page_number=3,
             page_size=100,
             table_name="events",
             is_aux=False,
-        ) == PaginatedEventsData(
+            app_id=self.app_id,
+        )
+        result == PaginatedEventsData(
             count=2,
             page_number=4,
             data=[
@@ -200,5 +210,6 @@ class TestEventsService:
                 "page_number": 3,
                 "page_size": 100,
                 "user_id": "test-user",
-            }
+            },
+            app_id="test-app-id"
         )

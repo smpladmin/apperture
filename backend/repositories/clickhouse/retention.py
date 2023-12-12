@@ -16,9 +16,10 @@ class Retention(EventsBase):
         super().__init__(clickhouse=clickhouse)
         self.filter_utils = filter_utils
 
-    def compute_retention(
+    async def compute_retention(
         self,
         datasource_id: str,
+        app_id: str,
         start_event: EventSelection,
         goal_event: EventSelection,
         start_date: str,
@@ -34,7 +35,8 @@ class Retention(EventsBase):
             "end_date": end_date,
             "epoch_year": self.epoch_year,
         }
-        return self.execute_get_query(
+        return await self.execute_query_for_app(
+            app_id=app_id,
             query=self.build_retention_query(
                 segment_filter_criterion=segment_filter_criterion,
                 granularity=granularity,
@@ -51,7 +53,6 @@ class Retention(EventsBase):
         event: EventSelection,
         segment_filter_criterion: Union[ContainsCriterion, None],
     ):
-
         conditions = [
             self.table.datasource_id == Parameter("%(ds_id)s"),
             self.date_func(self.table.timestamp) >= Parameter(f"%(start_date)s"),

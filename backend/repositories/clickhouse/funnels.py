@@ -26,9 +26,10 @@ class Funnels(EventsBase):
         super().__init__(clickhouse=clickhouse)
         self.filter_utils = Filters()
 
-    def get_conversion_trend(
+    async def get_conversion_trend(
         self,
         ds_id: str,
+        app_id: str,
         steps: List[FunnelStep],
         start_date: Union[str, None],
         end_date: Union[str, None],
@@ -37,7 +38,8 @@ class Funnels(EventsBase):
         segment_filter_query: Union[ClickHouseQuery, None],
         inclusion_criterion: Union[bool, None],
     ) -> List[Tuple]:
-        return self.execute_get_query(
+        return await self.execute_query_for_app(
+            app_id=app_id,
             *self.build_trends_query(
                 ds_id=ds_id,
                 steps=steps,
@@ -47,12 +49,13 @@ class Funnels(EventsBase):
                 random_sequence=random_sequence,
                 segment_filter_query=segment_filter_query,
                 inclusion_criterion=inclusion_criterion,
-            )
+            ),
         )
 
-    def get_conversion_analytics(
+    async def get_conversion_analytics(
         self,
         ds_id: str,
+        app_id: str,
         steps: List[FunnelStep],
         status: ConversionStatus,
         start_date: Union[str, None],
@@ -63,8 +66,9 @@ class Funnels(EventsBase):
         inclusion_criterion: Union[bool, None],
     ):
         if len(steps) == 1:
-            return self.get_initial_users(
+            return await self.get_initial_users(
                 ds_id=ds_id,
+                app_id=app_id,
                 steps=steps,
                 status=status,
                 start_date=start_date,
@@ -84,11 +88,14 @@ class Funnels(EventsBase):
             segment_filter_query=segment_filter_query,
             inclusion_criterion=inclusion_criterion,
         )
-        return self.execute_get_query(query, parameter)
+        return await self.execute_query_for_app(
+            app_id=app_id, query=query, parameters=parameter
+        )
 
-    def get_initial_users(
+    async def get_initial_users(
         self,
         ds_id: str,
+        app_id: str,
         steps: List[FunnelStep],
         status: ConversionStatus,
         start_date: Union[str, None],
@@ -127,18 +134,20 @@ class Funnels(EventsBase):
             fn.Count(self.table.user_id),
             fn.Count(self.table.user_id).distinct(),
         )
-        return self.execute_get_query(
-            query.select(self.table.user_id, count).limit(100).get_sql(),
-            {
+        return await self.execute_query_for_app(
+            app_id=app_id,
+            query=query.select(self.table.user_id, count).limit(100).get_sql(),
+            parameters={
                 "ds_id": ds_id,
                 "epoch_year": self.epoch_year,
                 "event0": steps[0].event,
             },
         )
 
-    def get_users_count(
+    async def get_users_count(
         self,
         ds_id: str,
+        app_id: str,
         steps: List[FunnelStep],
         start_date: Union[str, None],
         end_date: Union[str, None],
@@ -147,7 +156,8 @@ class Funnels(EventsBase):
         segment_filter_query: Union[ClickHouseQuery, None],
         inclusion_criterion: Union[bool, None],
     ) -> List[Tuple]:
-        return self.execute_get_query(
+        return await self.execute_query_for_app(
+            app_id=app_id,
             *self.build_users_query(
                 ds_id=ds_id,
                 steps=steps,
@@ -157,7 +167,7 @@ class Funnels(EventsBase):
                 random_sequence=random_sequence,
                 segment_filter_query=segment_filter_query,
                 inclusion_criterion=inclusion_criterion,
-            )
+            ),
         )
 
     def _anyorder_builder(
@@ -307,7 +317,6 @@ class Funnels(EventsBase):
         segment_filter_query: Union[ClickHouseQuery, None],
         inclusion_criterion: Union[bool, None],
     ):
-
         query, parameters = self._builder(
             ds_id=ds_id,
             steps=steps,
@@ -486,7 +495,6 @@ class Funnels(EventsBase):
         segment_filter_query: Union[ClickHouseQuery, None],
         inclusion_criterion: Union[bool, None],
     ):
-
         query, parameters = self._builder(
             ds_id=ds_id,
             steps=steps,

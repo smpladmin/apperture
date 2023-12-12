@@ -38,6 +38,7 @@ from domain.funnels.models import (
     FunnelEventUserData,
     FunnelTrendsData,
 )
+from domain.google_sheet.models import SheetQuery, SheetReference
 from domain.integrations.models import (
     Credential,
     CredentialType,
@@ -86,8 +87,6 @@ from domain.spreadsheets.models import (
     SpreadsheetType,
     WorkBook,
 )
-from domain.google_sheet.models import SheetQuery, SheetReference
-
 from domain.users.models import UserDetails
 from rest.dtos.actions import ComputedActionResponse
 from rest.dtos.apperture_users import AppertureUserResponse
@@ -565,7 +564,7 @@ def datasource_service():
 def clickstream_service():
     clickstream_service_mock = mock.AsyncMock()
     clickstream_service_mock.update_events = mock.AsyncMock()
-    clickstream_service_mock.get_data_by_id = mock.MagicMock(
+    clickstream_service_mock.get_data_by_id = mock.AsyncMock(
         return_value={
             "count": 2,
             "data": [
@@ -653,7 +652,7 @@ def events_service():
     events_service_mock.get_values_for_property = mock.MagicMock(
         return_value=[["Philippines"], ["Hong Kong"]]
     )
-    events_service_mock.get_events = mock.MagicMock(
+    events_service_mock.get_events = mock.AsyncMock(
         return_value=PaginatedEventsData(
             count=2,
             page_number=0,
@@ -2347,7 +2346,9 @@ def integration_service():
     integration_service_mock.create_integration.return_value = integration_future
     integration_service_mock.test_database_connection.return_value = True
     integration_service_mock.upload_csv_to_s3.return_value = None
-    integration_service_mock.create_clickhouse_table_from_csv.return_value = True
+    integration_service_mock.create_clickhouse_table_from_csv = AsyncMock(
+        return_value=True
+    )
     return integration_service_mock
 
 
@@ -2427,6 +2428,7 @@ def integration_response():
             "api_base_url": None,
             "branch_credential": None,
             "facebook_ads_credential": None,
+            "tata_ivr_token": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",
