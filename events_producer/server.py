@@ -112,7 +112,26 @@ async def analyse_decide_call(
     _: Union[str, None] = None,
     ver: Union[str, None] = None,
 ):
-    return {"config": {"enable_collect_everything": True}, "sessionRecording": False}
+    response = {
+        "config": {"enable_collect_everything": True},
+        "sessionRecording": False,
+    }
+    if v == "2":
+        response.update(
+            {
+                "toolbarParams": {},
+                "isAuthenticated": False,
+                "supportedCompression": ["gzip", "gzip-js"],
+                "featureFlags": {},
+                "capturePerformance": False,
+                "autocapture_opt_out": False,
+                "autocaptureExceptions": False,
+                "surveys": False,
+                "siteApps": [],
+                "elementsChainAsString": False,
+            }
+        )
+    return response
 
 
 @app.post("/events/capture/batch")
