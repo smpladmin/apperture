@@ -5,7 +5,7 @@ DATA_FETCH_DAYS_OFFSET = 14
 BRANCH_DATA_FETCH_DAYS_OFFSET = 7
 FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET = 2
 AIRFLOW_INIT_DATE = datetime(2023, 10, 25, 0, 0, 0, 0)
-DATAMART_INIT_DATE = datetime(2023, 12, 13, 0, 0, 0, 0)
+DATAMART_INIT_DATE = datetime(2023, 12, 12, 0, 0, 0, 0)
 
 
 def replace_invalid_characters(input_string):

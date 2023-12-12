@@ -457,7 +457,7 @@ async def push_to_sheet(
                 data=result.data,
             )
     except:
-        raise Exception("Could not push to {target}")
+        raise Exception(f"Could not push to {dto.type}")
 
 
 @router.post("/datamart/refresh")
