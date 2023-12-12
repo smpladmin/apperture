@@ -123,6 +123,7 @@ class DatamartActionService:
             ).execute()
         except Exception as e:
             logging.info(e)
+            raise Exception(f"Error: {e}")
 
     async def push_to_api(
         self, api_credential: APIMeta, columns: List[str], data: List
@@ -136,3 +137,4 @@ class DatamartActionService:
 
         except Exception as e:
             logging.info(e)
+            raise Exception(f"Error: {e}")
