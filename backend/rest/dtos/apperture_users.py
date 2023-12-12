@@ -26,8 +26,9 @@ class AppertureUserResponse(ModelResponse):
         orm_mode = True
 
 
-class AppertureUserWithAPIKey(AppertureUserResponse):
+class AppertureUserWithPrivateFields(AppertureUserResponse):
     api_key: Optional[str]
+    sheet_token: Optional[str]
 
 
 class CreateUserDto(BaseModel):

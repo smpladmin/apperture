@@ -6,7 +6,7 @@ import pytest
 from beanie import PydanticObjectId
 
 from domain.apps.models import ClickHouseCredential
-from domain.datamart.models import DataMart, GoogleSheet, Spreadsheet
+from domain.datamart.models import DataMart
 from domain.datamart.service import DataMartService
 from domain.datasources.models import DataSource
 from domain.spreadsheets.models import DatabaseClient
@@ -76,9 +76,6 @@ class TestDataMartService:
             user_id=self.user_id,
             name=self.name,
             query="select event_name, user_id from events",
-            update_frequency=None,
-            google_sheet=None,
-            api_credential=None,
         )
 
         assert datamart.dict() == {
@@ -94,10 +91,6 @@ class TestDataMartService:
             "revision_id": None,
             "updated_at": None,
             "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
-            "google_sheet": None,
-            "refresh_token": None,
-            "update_frequency": None,
-            "api_credential": None,
         }
 
     @pytest.mark.asyncio
@@ -125,10 +118,6 @@ class TestDataMartService:
                     "revision_id": None,
                     "updated_at": ANY,
                     "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
-                    "google_sheet": None,
-                    "refresh_token": None,
-                    "update_frequency": None,
-                    "api_credential": None,
                 }
             },
         )
@@ -256,38 +245,6 @@ class TestDataMartService:
     async def test_get_all_apps_with_datamarts(self):
         await self.service.get_all_apps_with_datamarts()
         DataMart.find.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_update_datamart_refresh_token_for_user(self):
-        FindMock = namedtuple("FindMock", ["update_many"])
-        update_many_mock = AsyncMock()
-        DataMart.find = MagicMock(
-            return_value=FindMock(update_many=update_many_mock),
-        )
-        await self.service.update_datamart_refresh_token_for_user(
-            user_id=self.user_id, token="345k-f192"
-        )
-        DataMart.find.assert_called_once()
-        update_many_mock.assert_called_with({"$set": {"refresh_token": "345k-f192"}})
-
-    @pytest.mark.asyncio
-    async def test_push_to_google_sheet(self):
-        self.service.initialize_google_sheet_service = MagicMock()
-
-        await self.service.push_to_google_sheet(
-            refresh_token="345k-f192",
-            google_sheet=GoogleSheet(
-                enable_sheet_push=True,
-                spreadsheet=Spreadsheet(id="1vwpp022-383kl", name="Test Spreadsheet"),
-                sheet_range="Sheet1!A1",
-            ),
-            columns=["id", "name"],
-            data=[["1", "abc"], ["2", "def"]],
-        )
-
-        self.service.initialize_google_sheet_service.assert_called_with(
-            access_token="", refresh_token="345k-f192"
-        )
 
     def test_retrieve_all_files(self):
         drive_service_mock = MagicMock()

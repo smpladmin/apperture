@@ -14,6 +14,7 @@ from authorisation.oauth_provider import GoogleOauthContext
 from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
 from domain.datamart.service import DataMartService
+from domain.apperture_users.service import AppertureUserService
 from domain.datasources.service import DataSourceService
 from domain.spreadsheets.models import DatabaseClient
 from rest.controllers.actions.compute_query import ComputeQueryAction
@@ -22,7 +23,6 @@ from rest.dtos.datamart import (
     DataMartResponse,
     DataMartTableDto,
     DataMartWithUser,
-    PushDatamartDto,
 )
 from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
@@ -92,9 +92,6 @@ async def save_datamart_table(
         user_id=user_id,
         name=dto.name,
         query=dto.query,
-        update_frequency=dto.updateFrequency,
-        google_sheet=dto.googleSheet,
-        api_credential=dto.apiCredential,
     )
 
     creation_status = await datamart_service.create_datamart_table(
@@ -148,9 +145,6 @@ async def update_datamart_table(
         user_id=user_id,
         name=dto.name,
         query=dto.query,
-        update_frequency=dto.updateFrequency,
-        google_sheet=dto.googleSheet,
-        api_credential=dto.apiCredential,
     )
 
     update_status = await datamart_service.update_datamart_table(
@@ -241,7 +235,9 @@ async def oauth_google(
     user: AppertureUser = Depends(get_user),
     redirect_url: str = os.getenv("FRONTEND_LOGIN_REDIRECT_URL"),
 ):
-    redirect_uri = str(request.url_for("datamart_google_authorise"))
+    redirect_uri = str(request.url_for("datamart_google_authorise")).replace(
+        "http", "https"
+    )
     return await oauth.google.authorize_redirect(
         request,
         redirect_uri,
@@ -255,52 +251,17 @@ async def oauth_google(
 async def datamart_google_authorise(
     request: Request,
     state: str,
-    datamart_service: DataMartService = Depends(),
+    apperture_user_service: AppertureUserService = Depends(),
 ):
     state = json.loads(state)
     try:
         access_token = await oauth.google.authorize_access_token(request)
         refresh_token = access_token.get("refresh_token")
 
-        await datamart_service.update_datamart_refresh_token_for_user(
+        await apperture_user_service.update_sheet_token(
             user_id=state["user_id"], token=refresh_token
         )
-
     except Exception as e:
         logging.error(e)
 
     return RedirectResponse(state["redirect_url"])
-
-
-@router.post("/datamart")
-async def push_to_sheet(
-    target: str,
-    dto: PushDatamartDto,
-    datamart_service: DataMartService = Depends(),
-    compute_query_action: ComputeQueryAction = Depends(),
-):
-    datamart = await datamart_service.get_datamart_table(id=dto.datamartId)
-    try:
-        compute_query_dto = TransientSpreadsheetsDto(
-            datasourceId=str(datamart.datasource_id), query=datamart.query, is_sql=True
-        )
-        result = await compute_query_action.compute_query(
-            app_id=str(datamart.app_id), dto=compute_query_dto
-        )
-
-        if target == "google_sheet":
-            await datamart_service.push_to_google_sheet(
-                refresh_token=datamart.refresh_token,
-                google_sheet=datamart.google_sheet,
-                columns=result.headers,
-                data=result.data,
-            )
-
-        if target == "api":
-            await datamart_service.push_to_api(
-                api_credential=datamart.api_credential,
-                columns=result.headers,
-                data=result.data,
-            )
-    except:
-        raise Exception("Could not push to {target}")

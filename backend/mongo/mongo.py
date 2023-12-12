@@ -22,6 +22,7 @@ from domain.actions.models import Action
 from domain.retention.models import Retention
 from domain.spreadsheets.models import WorkBook
 from domain.google_sheet.models import SheetQuery
+from domain.datamart_actions.models import DatamartActions
 
 
 class Mongo:
@@ -51,6 +52,7 @@ class Mongo:
                 DataMart,
                 File,
                 SheetQuery,
+                DatamartActions,
             ],
         )
 

@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Link, Text } from '@chakra-ui/react';
 import LoadingSpinner from '@components/LoadingSpinner';
 import { DataMartWithUser } from '@lib/domain/datamart';
 import { Provider } from '@lib/domain/provider';
@@ -11,6 +11,7 @@ import { Row } from '@tanstack/react-table';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import WatchlistTable from '../Table';
+import { BACKEND_BASE_URL, FRONTEND_BASE_URL } from 'config';
 
 const SavedDataMarts = ({ provider }: { provider: Provider }) => {
   const [dataMarts, setDataMarts] = useState<SavedItems[]>([]);
@@ -57,29 +58,34 @@ const SavedDataMarts = ({ provider }: { provider: Provider }) => {
     setRenderDataMart(true);
   };
 
+  const Outh_Link = `${BACKEND_BASE_URL}/datamart/oauth/google?redirect_url=${FRONTEND_BASE_URL}/analytics/datamart/list/${dsId}`;
+
   return (
     <Box px={{ base: '4', md: '30' }} py={'13'} overflowY={'auto'}>
       <Flex justifyContent={'space-between'}>
         <Text fontSize={'sh-24'} lineHeight={'sh-24'} fontWeight={'600'}>
           My Data
         </Text>
-        <Button
-          disabled={provider === Provider.GOOGLE}
-          variant={'primary'}
-          bg={'black.100'}
-          px={'6'}
-          py={'4'}
-          onClick={handleRedirectToCreateDataMart}
-        >
-          <Text
-            color={'white.DEFAULT'}
-            fontSize={'xs-14'}
-            lineHeight={'xs-14'}
-            fontWeight={'500'}
+        <Flex>
+          <Link href={Outh_Link}>Connect to Google Sheets</Link>
+          <Button
+            disabled={provider === Provider.GOOGLE}
+            variant={'primary'}
+            bg={'black.100'}
+            px={'6'}
+            py={'4'}
+            onClick={handleRedirectToCreateDataMart}
           >
-            {'+ Create Table'}
-          </Text>
-        </Button>
+            <Text
+              color={'white.DEFAULT'}
+              fontSize={'xs-14'}
+              lineHeight={'xs-14'}
+              fontWeight={'500'}
+            >
+              {'+ Create Table'}
+            </Text>
+          </Button>
+        </Flex>
       </Flex>
 
       <Box mt={'7'}>

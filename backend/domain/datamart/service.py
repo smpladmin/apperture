@@ -1,15 +1,15 @@
 from datetime import datetime
-import json
+
 import logging
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
-import requests
+
 
 from domain.apps.models import ClickHouseCredential
 from domain.common.random_string_utils import StringUtils
-from domain.datamart.models import APICredential, DataMart, GoogleSheet, UpdateFrequency
+from domain.datamart.models import DataMart
 from domain.integrations.models import MsSQLCredential
 from domain.spreadsheets.models import DatabaseClient
 from mongo import Mongo
@@ -42,9 +42,6 @@ class DataMartService:
         user_id: str,
         name: str,
         query: str,
-        update_frequency: Optional[UpdateFrequency],
-        google_sheet: Optional[GoogleSheet],
-        api_credential: Optional[APICredential],
     ) -> DataMart:
         now = datetime.now()
         return DataMart(
@@ -55,9 +52,6 @@ class DataMartService:
             table_name=self.string_utils.extract_tablename_from_filename(filename=name),
             query=query,
             last_refreshed=now,
-            update_frequency=update_frequency,
-            google_sheet=google_sheet,
-            api_credential=api_credential,
         )
 
     async def create_datamart_table(
@@ -176,13 +170,6 @@ class DataMartService:
         tables = await self.get_datamarts()
         return list(set([str(table.app_id) for table in tables]))
 
-    async def update_datamart_refresh_token_for_user(self, user_id: str, token: str):
-        await DataMart.find(
-            DataMart.user_id == PydanticObjectId(user_id),
-            DataMart.enabled != False,
-        ).update_many({"$set": {"refresh_token": token}})
-        return
-
     async def delete_datamart_table(
         self,
         datamart_id: str,
@@ -264,55 +251,5 @@ class DataMartService:
             )
 
             self.retrieve_all_files(drive_service=service)
-        except Exception as e:
-            logging.info(e)
-
-    def initialize_google_sheet_service(self, access_token: str, refresh_token: str):
-        creds = Credentials(
-            token=access_token,
-            refresh_token=refresh_token,
-            token_uri=os.environ["TOKEN_URI"],
-            client_id=os.environ["GOOGLE_SHEET_CLIENT_ID"],
-            client_secret=os.environ["GOOGLE_SHEET_CLIENT_SECRET"],
-        )
-        try:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            return build("sheets", "v4", credentials=creds)
-        except:
-            raise Exception("Could not validate credentials")
-
-    async def push_to_google_sheet(
-        self,
-        refresh_token: str,
-        google_sheet: GoogleSheet,
-        columns: List[str],
-        data: List,
-    ):
-        try:
-            service = self.initialize_google_sheet_service(
-                access_token="", refresh_token=refresh_token
-            )
-            sheet_data = [columns] + data
-            sheet = service.spreadsheets()
-            sheet.values().update(
-                spreadsheetId=google_sheet.spreadsheet.id,
-                range=google_sheet.sheet_range,
-                valueInputOption="USER_ENTERED",
-                body={"values": sheet_data},
-            ).execute()
-        except Exception as e:
-            logging.info(e)
-
-    async def push_to_api(
-        self, api_credential: APICredential, columns: List[str], data: List
-    ):
-        try:
-            url = api_credential.url
-            headers = json.loads(api_credential.headers)
-            payload: {columns, data}
-
-            requests.post(url=url, headers=headers, json=payload)
-
         except Exception as e:
             logging.info(e)

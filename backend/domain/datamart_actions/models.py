@@ -1,8 +1,9 @@
-from datetime import datetime
-from enum import Enum
-from typing import Optional, Union
+from repositories import Document
+from pydantic import BaseModel
+from beanie import PydanticObjectId
 
-from pydantic import BaseModel, Field
+from enum import Enum
+from typing import Union
 
 
 class ActionType(str, Enum):
@@ -63,13 +64,15 @@ class GoogleSheetMeta(BaseModel):
     sheet: str
 
 
-class DatamartActions(BaseModel):
-    id: str = Field(alias="_id")
-    datasource_id: str = Field(alias="datasourceId")
-    app_id: str = Field(alias="appId")
-    datamart_id: str = Field(alias="datamartId")
+class DatamartActions(Document):
+    datasource_id: PydanticObjectId
+    app_id: PydanticObjectId
+    user_id: PydanticObjectId
+    datamart_id: PydanticObjectId
     type: ActionType
     schedule: Union[WeeklySchedule, MonthlySchedule, DailySchedule, HourlySchedule]
     meta: Union[GoogleSheetMeta, APIMeta, TableMeta]
-    created_at: datetime = Field(alias="createdAt")
-    enabled: bool
+    enabled: bool = True
+
+    class Settings:
+        name = "datamart_actions"
