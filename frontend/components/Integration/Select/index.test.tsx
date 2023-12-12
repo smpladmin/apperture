@@ -50,7 +50,7 @@ describe('select integration provider', () => {
     );
 
     const integrationProvider = screen.getAllByTestId('integration-provider');
-    expect(integrationProvider.length).toBe(9);
+    expect(integrationProvider.length).toBe(10);
   });
 
   it('user gets redirected to complete page when clicked on next button after selecting apperture integration provider', async () => {

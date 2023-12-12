@@ -10,6 +10,7 @@ import DatabaseIntegration from '@components/CreateIntegration/DatabaseIntegrati
 import mysqlLogo from '@assets/images/mysql-icon.png';
 import mssqlLogo from '@assets/images/mssql-icon.png';
 import BranchIntegration from '@components/CreateIntegration/BranchIntegration';
+import TataIVRIntegration from '@components/CreateIntegration/TataIVRIntegration';
 
 const Edit = () => {
   const router = useRouter();
@@ -47,6 +48,10 @@ const Edit = () => {
     case Provider.BRANCH:
       return (
         <BranchIntegration add={add} handleClose={handleClose} edit={true} />
+      );
+    case Provider.TATA_IVR:
+      return (
+        <TataIVRIntegration add={add} handleClose={handleClose} edit={true} />
       );
     case Provider.API:
       return <APIIntegration add={add} handleClose={handleClose} edit={true} />;

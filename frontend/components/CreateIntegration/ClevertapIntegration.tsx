@@ -109,6 +109,7 @@ const ClevertapIntegration = ({
       undefined,
       undefined,
       undefined,
+      undefined,
       eventList
     );
     router.replace({

@@ -20,6 +20,7 @@ export type IntegrationRequestBody = {
   branchCredential?: BranchCredentialDto;
   csvFileId?: string;
   eventList?: string[];
+  tataIvrAuthToken?: string;
 };
 
 export const createIntegrationWithDataSource = async (
@@ -32,6 +33,7 @@ export const createIntegrationWithDataSource = async (
   databaseCredential?: DatabaseCredential,
   csvFileId?: string,
   branchCredential?: BranchCredentialDto,
+  tataIvrAuthToken?: string,
   eventList?: string[],
   config: AxiosRequestConfig = {
     params: {
@@ -41,13 +43,14 @@ export const createIntegrationWithDataSource = async (
   }
 ) => {
   const integrationRequestBody: IntegrationRequestBody =
-    databaseCredential || csvFileId || branchCredential
+    databaseCredential || csvFileId || branchCredential || tataIvrAuthToken
       ? {
           appId,
           provider,
           databaseCredential,
           csvFileId,
           branchCredential,
+          tataIvrAuthToken,
         }
       : { appId, provider, accountId, apiKey, apiSecret, tableName, eventList };
 

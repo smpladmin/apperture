@@ -20,6 +20,7 @@ import mysqlLogo from '@assets/images/mysql-icon.png';
 import mssqlLogo from '@assets/images/mssql-icon.png';
 import csvLogo from '@assets/images/csv.svg';
 import branchLogo from '@assets/images/branch.png';
+import tataLogo from '@assets/images/tata.png';
 import IntegrationSource from '@components/IntegrationSource';
 import { Provider } from '@lib/domain/provider';
 import { createIntegrationWithDataSource } from '@lib/services/integrationService';
@@ -77,6 +78,7 @@ const SelectProvider = ({ apps }: { apps: Array<AppWithIntegrations> }) => {
         '',
         '',
         '',
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -263,6 +265,12 @@ const SelectProvider = ({ apps }: { apps: Array<AppWithIntegrations> }) => {
                   value={Provider.BRANCH}
                   imgSrc={branchLogo}
                   selected={provider === Provider.BRANCH}
+                />
+                <IntegrationSource
+                  sourceName="TATA IVR"
+                  value={Provider.TATA_IVR}
+                  imgSrc={tataLogo}
+                  selected={provider === Provider.TATA_IVR}
                 />
               </SimpleGrid>
             </RadioGroup>

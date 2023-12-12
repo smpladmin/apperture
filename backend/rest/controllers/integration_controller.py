@@ -183,6 +183,7 @@ async def create_integration(
         csv_credential,
         branch_credential,
         api_base_url=api_base_url,
+        tata_ivr_token=dto.tataIvrAuthToken,
     )
 
     if cdc_credential and app.clickhouse_credential:
