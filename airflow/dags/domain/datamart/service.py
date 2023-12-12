@@ -54,7 +54,7 @@ class DatamartActionsService:
         meta: Union[GoogleSheetMeta, APIMeta, TableMeta],
         type: str,
     ):
-        logging.info("{x}: {y}".format(x="push datamart to {type}", y="start"))
+        logging.info("{x}: {y}".format(x=f"push datamart to {type}", y="start"))
         try:
             response = post(
                 path=f"/private/datamart_actions",
@@ -64,4 +64,4 @@ class DatamartActionsService:
                 raise Exception(f"Error: {response.json()}")
         except:
             raise Exception(f"Could not push datamart: {datamart_id} to  {type}")
-        logging.info("{x}: {y}".format(x="push datamart to {type}", y="end"))
+        logging.info("{x}: {y}".format(x=f"push datamart to {type}", y="end"))
