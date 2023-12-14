@@ -46,26 +46,31 @@ div#__next > div {
   height: 100%;
 }
 
-.cm-editor{
-background: #EDEDED;
-border-radius: 10px;
-border-style: solid;
-border-color: #efefef;
-border-width: 1px;
+.cm-editor {
+  background: '';
+  border-radius: '';
+  border-style: '';
+  border-color: '';
+  border-width: '';
 }
-.cm-content{
-font-family: 'Inter', sans-serif;
+
+.cm-content {
+  font-family: 'Inter', sans-serif;
+}
+
+.cm-gutters {
+  background: '' !important;
+  border-width: '';
 }
 
 .drag-handle {
-  cursor: row-resize; 
+  cursor: row-resize;
   width: 90%;
   display: flex;
   justify-content: center;
   align-items: center;
   background: #f6f6f6;
-  height: 3px ;
+  height: 3px;
   margin: auto;
   margin-bottom: 40px;
 }
-
