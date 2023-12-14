@@ -48,6 +48,7 @@ const ExitConfirmationModal = ({
     >
       <ModalOverlay backdropFilter={'blur(20px)'} bg={'grey.0'} />
       <ModalContent
+        bg={'white.DEFAULT'}
         margin={'1rem'}
         maxWidth="168"
         maxHeight={'calc(100% - 100px)'}

@@ -40,7 +40,7 @@ const DeleteAction = ({ handleDelete }: { handleDelete: Function }) => {
         onClose={onClose}
       >
         <ModalOverlay backdropFilter={'blur(10px)'} bg={'grey.0'} />
-        <ModalContent>
+        <ModalContent bg={'white.DEFAULT'}>
           <ModalHeader>Delete Action</ModalHeader>
           <ModalCloseButton />
           <ModalBody>Are you sure you want to delete this action?</ModalBody>

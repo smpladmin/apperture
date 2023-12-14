@@ -39,7 +39,7 @@ const FormButton = ({
             lineHeight={'base'}
             textColor={'white.100'}
             width={{ base: 'full', md: '72' }}
-            disabled={disabled}
+            isDisabled={disabled}
             data-testid={'next-button'}
           >
             {nextButtonName}
@@ -56,7 +56,7 @@ const FormButton = ({
           lineHeight={'base'}
           textColor={'white.100'}
           width={{ base: 'full', md: '72' }}
-          disabled={disabled}
+          isDisabled={disabled}
           onClick={() => handleNextClick?.()}
           data-testid={'next-button'}
         >

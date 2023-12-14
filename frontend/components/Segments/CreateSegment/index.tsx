@@ -259,7 +259,7 @@ const CreateSegment = ({ savedSegment }: CreateSegmentProp) => {
           _hover={{
             bg: 'grey.200',
           }}
-          disabled={isSaveDisabled}
+          isDisabled={isSaveDisabled}
           data-testid={'open-save-segment-modal'}
         >
           Save

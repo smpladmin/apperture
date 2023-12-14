@@ -77,6 +77,7 @@ const DateFilter = () => {
         rounded={'2xl'}
         margin={'1rem'}
         maxHeight={'calc(100% - 100px)'}
+        bg={'white.DEFAULT'}
       >
         <ModalHeader
           display={'flex'}

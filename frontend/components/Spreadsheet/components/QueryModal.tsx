@@ -88,6 +88,7 @@ const QueryModal = ({
     >
       <ModalOverlay backdropFilter={'blur(20px)'} bg={'grey.0'} />
       <ModalContent
+        bg={'white.DEFAULT'}
         margin={'1rem'}
         maxWidth="168"
         maxHeight={'calc(100% - 100px)'}
@@ -146,7 +147,7 @@ const QueryModal = ({
               fontWeight={'500'}
               color={'white.DEFAULT'}
               onClick={handleGetTransientSheetData}
-              disabled={isSubmitButtonDisabled}
+              isDisabled={isSubmitButtonDisabled}
               data-testid={'submit-button'}
             >
               Submit

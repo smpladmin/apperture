@@ -67,6 +67,7 @@ const Coachmarks = ({
       >
         <ModalOverlay opacity={'0.8 !important'} bg={'black.DEFAULT'} />
         <ModalContent
+          bg={'white.DEFAULT'}
           width={'175'}
           borderRadius={'12'}
           position={'absolute'}

@@ -316,7 +316,7 @@ const RegisterForm = ({ setPageState }: { setPageState: Function }) => {
                   variant={'dark'}
                   borderRadius={10}
                   w={'50%'}
-                  disabled={!token}
+                  isDisabled={!token}
                 >
                   Sign up
                 </Button>

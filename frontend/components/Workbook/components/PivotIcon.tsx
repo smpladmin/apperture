@@ -58,7 +58,14 @@ function PivotIcon({
         onClose={onClose}
       >
         <ModalOverlay bg={'black.DEFAULT'} opacity={'0.3 !important'} />
-        <ModalContent px={7} py={'6'} w={'111'} h={'52'} m={'0'}>
+        <ModalContent
+          bg={'white.DEFAULT'}
+          px={7}
+          py={'6'}
+          w={'111'}
+          h={'52'}
+          m={'0'}
+        >
           <ModalHeader p={'0'}>
             <Flex alignItems={'center'} justifyContent={'space-between'}>
               <Text

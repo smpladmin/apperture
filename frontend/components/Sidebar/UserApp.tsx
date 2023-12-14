@@ -116,7 +116,7 @@ const UserApp = ({
           paddingLeft={3}
           paddingRight={4}
           bgColor={'inherit'}
-          disabled={!isSelected}
+          isDisabled={!isSelected}
           _hover={{ bg: 'transparent' }}
           onClick={onOpen}
         >

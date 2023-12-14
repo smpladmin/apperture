@@ -60,6 +60,7 @@ const ConfigureAppsModal = ({
     >
       <ModalOverlay backdropFilter={'blur(20px)'} bg={'grey.0'} />
       <ModalContent
+        bg={'white.DEFAULT'}
         h={{ base: 'full', md: 'auto' }}
         rounded={{ base: 0, md: '2xl' }}
         maxWidth={{ base: 'full', md: '168' }}
@@ -104,7 +105,7 @@ const ConfigureAppsModal = ({
               bg={'white.DEFAULT'}
               border={'1px'}
               borderColor={'white.200'}
-              disabled={true}
+              isDisabled={true}
             />
           </Flex>
           <Flex justifyContent={'space-between'} py={'2'}>

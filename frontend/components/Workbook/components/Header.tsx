@@ -101,7 +101,7 @@ const WorkbookHeader = ({
             bg={'black.DEFAULT'}
             color={'white.DEFAULT'}
             borderRadius={'8'}
-            disabled={isSaveButtonDisabled}
+            isDisabled={isSaveButtonDisabled}
             onClick={() => handleSave()}
           >
             {'Save'}

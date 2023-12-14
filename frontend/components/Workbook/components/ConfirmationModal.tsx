@@ -40,6 +40,7 @@ const ConfirmationModal = ({
         maxWidth="120"
         maxHeight={'calc(100% - 100px)'}
         borderRadius={'12'}
+        bg={'white.DEFAULT'}
       >
         <ModalHeader
           display={'flex'}

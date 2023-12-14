@@ -37,7 +37,7 @@ const AlertMetricOption = ({ option, isChecked }: AlertMetricOptionProps) => {
       >
         {option.label}
       </Text>
-      <Radio value={option.name} hidden disabled={option.isDisabled} />
+      <Radio value={option.name} hidden isDisabled={option.isDisabled} />
     </Flex>
   );
 };

@@ -51,7 +51,7 @@ const LoginWithPasswordModal = ({
         onClose={onClose}
       >
         <ModalOverlay backdropFilter={'blur(10px)'} bg={'grey.0'} />
-        <ModalContent>
+        <ModalContent bg={'white.DEFAULT'}>
           <ModalHeader></ModalHeader>
           <ModalCloseButton />
           <ModalBody>

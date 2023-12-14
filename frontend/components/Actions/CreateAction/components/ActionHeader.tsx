@@ -121,7 +121,7 @@ const ActionHeader = ({
           _hover={{
             bg: 'grey.200',
           }}
-          disabled={isSaveDisabled}
+          isDisabled={isSaveDisabled}
           onClick={() => saveOrUpdateAction()}
           data-testid={'save-button'}
         >

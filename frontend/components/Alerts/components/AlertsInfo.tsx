@@ -250,7 +250,7 @@ const AlertsInfo = ({
         textColor={'white.100'}
         w={'full'}
         mt={'4'}
-        disabled={
+        isDisabled={
           !Boolean(notificationType.length) ||
           (thresholdMetric === ThresholdMetricType.Percentage &&
             !percentageValue)
