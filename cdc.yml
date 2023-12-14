@@ -6,12 +6,12 @@ services:
      - apperture_net
     secrets:
      -
-      source: cdc_consumer_10k_earliest_timeout_10M.env
+      source: cdc_consumer_200k_earliest.env
       target: /code/.env
     logging:
       driver: awslogs
       options:
-        awslogs-group: apperture-prod-events-log-group
+        awslogs-group: apperture-prod-cdc
         awslogs-region: ap-south-1
         awslogs-stream: cdc_consumer
     deploy:
@@ -19,7 +19,7 @@ services:
         constraints:
          - node.hostname != jupyter
   connect:
-    image: debezium/connect:2.4
+    image: debezium/connect:latest
     environment:
       BOOTSTRAP_SERVERS: kafka:9092
       CONFIG_STORAGE_TOPIC: my_connect_configs
@@ -34,16 +34,16 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-group: apperture-prod-events-log-group
+        awslogs-group: apperture-prod-cdc
         awslogs-region: ap-south-1
         awslogs-stream: connect
     deploy:
       placement:
         constraints:
-          - node.hostname == worker4
+         - node.hostname != jupyter
 networks:
   apperture_net:
     external: true
 secrets:
-  cdc_consumer_10k_earliest_timeout_10M.env:
+  cdc_consumer_200k_earliest.env:
     external: true
