@@ -147,9 +147,12 @@ async def create_integration(
                 port=cdc_cred.port,
                 username=cdc_cred.username,
                 password=cdc_cred.password,
+                server_type=cdc_cred.serverType,
             )
             cdc_tables = integration_service.get_cdc_tables(
-                connection=connection, database=cdc_cred.database
+                connection=connection,
+                database=cdc_cred.database,
+                server_type=cdc_cred.serverType,
             )
         else:
             cdc_tables = cdc_cred.tables

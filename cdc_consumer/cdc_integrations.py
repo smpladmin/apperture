@@ -1,5 +1,5 @@
 from apperture.backend_action import get
-from models.models import CdcIntegration
+from models.models import CdcIntegration, IntegrationProvider
 
 
 class CDCIntegrations:
@@ -17,7 +17,11 @@ class CDCIntegrations:
         for integration in self.integrations:
             cdc_cred = integration.cdcCredential
             for table in cdc_cred.tables:
-                topic = f"cdc_{integration.id}.{cdc_cred.database}.dbo.{table}"
+                topic = (
+                    f"cdc_{integration.id}.{cdc_cred.database}.dbo.{table}"
+                    if cdc_cred.server_type == IntegrationProvider.MSSQL
+                    else f"cdc_{integration.id}.{cdc_cred.database}.{table}"
+                )
                 self.topics.append(topic)
                 self.cdc_buckets[topic] = {
                     "data": [],

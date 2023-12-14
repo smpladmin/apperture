@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 import tempfile
 from typing import List, Optional, Union
 
@@ -18,8 +19,10 @@ from domain.apps.models import App, ClickHouseCredential
 from repositories.clickhouse.clickhouse_role import ClickHouseRole
 from repositories.clickhouse.integrations import Integrations
 from repositories.sql.mssql import MsSql
+from repositories.sql.mysql import MySql
 from rest.dtos.integrations import DatabaseSSHCredentialDto
 from utils.mssql_clickhouse_datatypes import MSSQL_CLICKHOUSE_DATATYPE_MAPPING
+from utils.mysql_clickhouse_datatypes import MYSQL_CLICKHOUSE_DATATYPE_MAPPING
 
 from .models import (
     BranchCredential,
@@ -42,10 +45,12 @@ class IntegrationService:
         self,
         integrations: Integrations = Depends(),
         mssql: MsSql = Depends(),
+        mysql: MySql = Depends(),
         clickhouse_role: ClickHouseRole = Depends(),
     ):
         self.integrations = integrations
         self.mssql = mssql
+        self.mysql = mysql
         self.s3_client = boto3.client(
             "s3",
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
@@ -387,15 +392,20 @@ class IntegrationService:
             Integration.provider == IntegrationProvider.CDC
         ).to_list()
 
-    def generate_create_table_query(self, table: str, database: str, table_description):
+    def generate_create_table_query(
+        self, table: str, database: str, table_description, server_type: ServerType
+    ):
         prefix = f"CREATE TABLE IF NOT EXISTS {database}.{table} ("
         columns_query = ""
         key_column = None
+        mapping = (
+            MSSQL_CLICKHOUSE_DATATYPE_MAPPING
+            if server_type == ServerType.MSSQL
+            else MYSQL_CLICKHOUSE_DATATYPE_MAPPING
+        )
         for i, column_description in enumerate(table_description):
             columns_query += f"{column_description[0]} "
-            datatype = MSSQL_CLICKHOUSE_DATATYPE_MAPPING[
-                column_description[1].lower().split()[0]
-            ]
+            datatype = mapping[column_description[1].lower().split()[0].split("(")[0]]
             if not key_column:
                 if datatype.startswith("Int"):
                     key_column = column_description
@@ -416,11 +426,17 @@ class IntegrationService:
         client.query(query=query)
         logging.info(f"Successfully created table.")
 
-    def get_cdc_tables(self, connection, database) -> List[str]:
-        return self.mssql.get_cdc_tables(connection=connection, database=database)
+    def get_cdc_tables(
+        self, connection, database, server_type: ServerType
+    ) -> List[str]:
+        client = self.mssql if server_type == ServerType.MSSQL else self.mysql
+        return client.get_cdc_tables(connection=connection, database=database)
 
-    def get_cdc_connection(self, host, port, username, password):
-        return self.mssql.get_connection(
+    def get_cdc_connection(
+        self, host, port, username, password, server_type: ServerType
+    ):
+        client = self.mssql if server_type == ServerType.MSSQL else self.mysql
+        return client.get_connection(
             host=host,
             port=port,
             username=username,
@@ -438,22 +454,28 @@ class IntegrationService:
             port=cdc_credential.port,
             username=cdc_credential.username,
             password=cdc_credential.password,
+            server_type=cdc_credential.server_type,
         )
         database = cdc_credential.database
         ch_client = await ClickHouseClientFactory.get_client(app_id=app_id)
         logging.info(
             f"Creating these cdc tables in clickhouse: {cdc_credential.tables}"
         )
+        server_type = cdc_credential.server_type
+        client = self.mssql if server_type == ServerType.MSSQL else self.mysql
         for table in cdc_credential.tables:
             logging.info(
-                f"Creating sql server table {database}.{table} in {ch_db} database"
+                f"Creating {server_type} table {database}.{table} in {ch_db} database"
             )
-            table_description = self.mssql.get_table_description(
+            table_description = client.get_table_description(
                 connection=connection, table_name=table, database=database
             )
             logging.info(f"Table description: {table_description}")
             create_query = self.generate_create_table_query(
-                table=table, database=ch_db, table_description=table_description
+                table=table,
+                database=ch_db,
+                table_description=table_description,
+                server_type=server_type,
             )
             self.create_ch_table(client=ch_client, query=create_query)
 
@@ -462,22 +484,38 @@ class IntegrationService:
     ):
         logging.info("Creating cdc connector")
         headers = {"Accept": "application/json", "Content-Type": "application/json"}
+        server_type = credential.server_type
+        config = {
+            "connector.class": credential.server_type.get_connector_class(),
+            "database.hostname": credential.server,
+            "database.port": credential.port,
+            "database.user": credential.username,
+            "database.password": credential.password,
+            "database.names": credential.database,
+            "topic.prefix": f"cdc_{integration_id}",
+            "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
+            "schema.history.internal.kafka.topic": f"schemahistory.cdc_{integration_id}",
+        }
+        if server_type == ServerType.MSSQL:
+            config.update(
+                {
+                    "table.include.list": ", ".join(
+                        ["dbo." + table for table in tables]
+                    ),
+                    "database.encrypt": False,
+                    "snapshot.mode": "initial",
+                }
+            )
+        elif server_type == ServerType.MYSQL:
+            config.update(
+                {
+                    "database.server.id": str(int(time.time())),
+                    "include.schema.changes": "true",
+                }
+            )
         data = {
             "name": f"cdc_{integration_id}",
-            "config": {
-                "connector.class": credential.server_type.get_connector_class(),
-                "database.hostname": credential.server,
-                "database.port": "1433",
-                "database.user": credential.username,
-                "database.password": credential.password,
-                "database.names": credential.database,
-                "topic.prefix": f"cdc_{integration_id}",
-                "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
-                "schema.history.internal.kafka.topic": f"schemahistory.cdc_{integration_id}",
-                "table.include.list": ", ".join(["dbo." + table for table in tables]),
-                "database.encrypt": False,
-                "snapshot.mode": "initial",
-            },
+            "config": config,
         }
         return requests.post(
             url=self.kafka_connector_base_url, json=data, headers=headers
