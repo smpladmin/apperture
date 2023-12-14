@@ -12,15 +12,14 @@ services:
       AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     networks:
      - apperture_net
-    dns: 8.8.8.8
     secrets:
      -
-      source: airflow.env
+      source: airflow_latest_1.env
       target: /opt/airflow/.env
     logging:
       driver: awslogs
       options:
-        awslogs-group: apperture-prod-log-group
+        awslogs-group: apperture-prod-airflow
         awslogs-region: ap-south-1
         awslogs-stream: airflow-scheduler
     deploy:
@@ -31,11 +30,9 @@ services:
          - node.hostname == worker4
       resources:
         reservations:
-          cpus: '0.4'
           memory: 400M
         limits:
-          cpus: '0.7'
-          memory: 650M
+          memory: 1024M
   airflow-triggerer:
     image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/airflow:latest
     command:
@@ -48,15 +45,14 @@ services:
       AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     networks:
      - apperture_net
-    dns: 8.8.8.8
     secrets:
      -
-      source: airflow.env
+      source: airflow_latest_1.env
       target: /opt/airflow/.env
     logging:
       driver: awslogs
       options:
-        awslogs-group: apperture-prod-log-group
+        awslogs-group: apperture-prod-airflow
         awslogs-region: ap-south-1
         awslogs-stream: airflow-triggerer
     deploy:
@@ -87,15 +83,14 @@ services:
     networks:
      - apperture_net
      - traefik-public
-    dns: 8.8.8.8
     secrets:
      -
-      source: airflow.env
+      source: airflow_latest_1.env
       target: /opt/airflow/.env
     logging:
       driver: awslogs
       options:
-        awslogs-group: apperture-prod-log-group
+        awslogs-group: apperture-prod-airflow
         awslogs-region: ap-south-1
         awslogs-stream: airflow-webserver
     deploy:
@@ -129,13 +124,16 @@ services:
       DUMB_INIT_SETSID: '0'
     networks:
      - apperture_net
-    dns: 8.8.8.8
     secrets:
      -
-      source: airflow.env
+      source: airflow_latest_1.env
       target: /opt/airflow/.env
     logging:
-      driver: json-file
+      driver: awslogs
+      options:
+        awslogs-group: apperture-prod-airflow
+        awslogs-region: ap-south-1
+        awslogs-stream: airflow-worker
     deploy:
       labels:
         swarmpit.service.deployment.autoredeploy: 'true'
@@ -169,5 +167,5 @@ volumes:
   postgres_data:
     external: true
 secrets:
-  airflow.env:
+  airflow_latest_1.env:
     external: true
