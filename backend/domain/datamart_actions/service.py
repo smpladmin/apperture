@@ -7,14 +7,11 @@ from fastapi import Depends
 
 from domain.datamart_actions.models import (
     DatamartActions,
-    HourlySchedule,
-    DailySchedule,
     GoogleSheetMeta,
-    MonthlySchedule,
+    Schedule,
     TableMeta,
     APIMeta,
     ActionType,
-    WeeklySchedule,
 )
 from mongo import Mongo
 import requests
@@ -40,7 +37,7 @@ class DatamartActionService:
         user_id: str,
         type: ActionType,
         meta: Union[GoogleSheetMeta, APIMeta, TableMeta],
-        schedule: Union[WeeklySchedule, MonthlySchedule, DailySchedule, HourlySchedule],
+        schedule: Schedule,
     ) -> DatamartActions:
         return DatamartActions(
             datasource_id=datasource_id,
