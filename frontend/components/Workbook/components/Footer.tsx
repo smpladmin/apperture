@@ -79,7 +79,7 @@ const Footer = ({
       borderColor={'grey.700'}
     >
       <RadioGroup
-        value={selectedSheetIndex}
+        value={String(selectedSheetIndex)}
         onChange={(value: string) => {
           setSelectedSheetIndex(+value);
           setShowColumns(false);
@@ -110,7 +110,7 @@ const Footer = ({
                   sheet={sheet}
                   updateSheetName={updateSheetName}
                 />
-                <Radio hidden value={index} />
+                <Radio hidden value={String(index)} />
               </Flex>
             );
           })}
