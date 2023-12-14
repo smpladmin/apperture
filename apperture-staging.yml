@@ -429,6 +429,58 @@ services:
       placement:
         constraints:
          - node.hostname == worker1
+  kafka2:
+    image: bitnami/kafka:latest
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_BROKER_ID: '2'
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_NODE_ID: '2'
+      KAFKA_CFG_PROCESS_ROLES: broker
+      KAFKA_ENABLE_KRAFT: 'yes'
+      KAFKA_KRAFT_CLUSTER_ID: OTMwNzFhYTY1ODNiNGE5OT
+    ports:
+     - 9092:9092
+    volumes:
+     - kafka_data2:/bitnami/kafka
+    networks:
+     - net
+    logging:
+      driver: json-file
+    deploy:
+      placement:
+        constraints:
+         - node.hostname == worker2
+  kafka3:
+    image: bitnami/kafka:latest
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_BROKER_ID: '3'
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9092
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_NODE_ID: '3'
+      KAFKA_CFG_PROCESS_ROLES: broker
+      KAFKA_ENABLE_KRAFT: 'yes'
+      KAFKA_KRAFT_CLUSTER_ID: OTMwNzFhYTY1ODNiNGE5OT
+    ports:
+     - 9092:9092
+    volumes:
+     - kafka_data3:/bitnami/kafka
+    networks:
+     - net
+    logging:
+      driver: json-file
+    deploy:
+      placement:
+        constraints:
+         - node.hostname == worker3
   metabase:
     image: bjeanes/metabase-clickhouse:latest
     networks:
@@ -545,6 +597,10 @@ volumes:
   apperture_redisdata:
     external: true
   kafka_data:
+    external: true
+  kafka_data2:
+    external: true
+  kafka_data3:
     external: true
   postgres_data:
     external: true

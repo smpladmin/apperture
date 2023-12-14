@@ -49,7 +49,7 @@ services:
     volumes:
       - ./events_producer:/code
     depends_on:
-      - kafka1
+      - kafka
   events_consumer:
     restart: on-failure
     build:
@@ -58,7 +58,7 @@ services:
     volumes:
       - ./events_consumer:/code
     depends_on:
-      - kafka1
+      - kafka
   cdc_consumer:
     restart: on-failure
     build:
@@ -67,7 +67,7 @@ services:
     volumes:
       - ./cdc_consumer:/code
     depends_on:
-      - kafka1
+      - kafka
   data_processor:
     build:
       context: ./data_processor
@@ -122,9 +122,9 @@ services:
     volumes:
       - ch_data:/var/lib/clickhouse/
       - ch_logs:/var/log/clickhouse-server/
-  kafka1:
+  kafka:
     image: "bitnami/kafka:latest"
-    container_name: kafka1
+    container_name: kafka
     ports:
       - "9092:9092"
     environment:
@@ -132,11 +132,11 @@ services:
       - KAFKA_KRAFT_CLUSTER_ID=OTMwNzFhYTY1ODNiNGE5OT
       - KAFKA_CFG_PROCESS_ROLES=broker,controller
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://kafka1:9092,CONTROLLER://kafka1:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka1:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_BROKER_ID=1
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
       - KAFKA_CFG_NODE_ID=1
       - KAFKA_CFG_MAX_REQUEST_SIZE=5242880
       - KAFKA_CFG_MESSAGE_MAX_BYTES=5242880
@@ -161,7 +161,7 @@ services:
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka2:9092
       - KAFKA_BROKER_ID=2
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
       - KAFKA_CFG_NODE_ID=2
       - KAFKA_CFG_MAX_REQUEST_SIZE=5242880
       - KAFKA_CFG_MESSAGE_MAX_BYTES=5242880
@@ -183,7 +183,7 @@ services:
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka3:9092
       - KAFKA_BROKER_ID=3
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
       - KAFKA_CFG_NODE_ID=3
       - KAFKA_CFG_MAX_REQUEST_SIZE=5242880
       - KAFKA_CFG_MESSAGE_MAX_BYTES=5242880
