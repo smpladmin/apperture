@@ -444,7 +444,7 @@ services:
       KAFKA_ENABLE_KRAFT: 'yes'
       KAFKA_KRAFT_CLUSTER_ID: OTMwNzFhYTY1ODNiNGE5OT
     ports:
-     - 9092:9092
+     - 9093:9092
     volumes:
      - kafka_data2:/bitnami/kafka
     networks:
@@ -454,7 +454,7 @@ services:
     deploy:
       placement:
         constraints:
-         - node.hostname == worker2
+         - node.hostname == worker1
   kafka3:
     image: bitnami/kafka:latest
     environment:
@@ -470,7 +470,7 @@ services:
       KAFKA_ENABLE_KRAFT: 'yes'
       KAFKA_KRAFT_CLUSTER_ID: OTMwNzFhYTY1ODNiNGE5OT
     ports:
-     - 9092:9092
+     - 9094:9092
     volumes:
      - kafka_data3:/bitnami/kafka
     networks:
@@ -480,7 +480,7 @@ services:
     deploy:
       placement:
         constraints:
-         - node.hostname == worker3
+         - node.hostname == worker2
   metabase:
     image: bjeanes/metabase-clickhouse:latest
     networks:
