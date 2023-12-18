@@ -3,8 +3,10 @@ import { AppWithIntegrations } from '@lib/domain/app';
 import { GetServerSideProps } from 'next';
 import { getAuthToken } from '@lib/utils/request';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
-import DataMart from '@components/DataMart/CreateDataMart';
 import HomeLayout from '@components/HomeLayout';
+import { _getAppertureUserInfo } from '@lib/services/userService';
+import { AppertureUser } from '@lib/domain/user';
+import Scripts from '@components/Scripts';
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const token = getAuthToken(req);
@@ -14,6 +16,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     };
   }
   const apps = await _getAppsWithIntegrations(token);
+  const user = await _getAppertureUserInfo(token);
 
   if (!apps.length) {
     return {
@@ -24,12 +27,14 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     };
   }
   return {
-    props: { apps },
+    props: { apps, user },
   };
 };
 
-const CreateDataMart = () => {
-  return <DataMart />;
+const CreateDataMart = ({ user }: { user: AppertureUser }) => {
+  const isUserAuthenticatedWithGoogleSheet = !!user.sheetToken;
+
+  return <Scripts isAuthenticated={isUserAuthenticatedWithGoogleSheet} />;
 };
 
 CreateDataMart.getLayout = function getLayout(

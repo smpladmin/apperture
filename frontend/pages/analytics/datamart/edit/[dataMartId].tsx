@@ -1,10 +1,14 @@
-import DataMart from '@components/DataMart/CreateDataMart';
 import HomeLayout from '@components/HomeLayout';
+import Scripts from '@components/Scripts';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { DataMartObj } from '@lib/domain/datamart';
+import { DatamartActions } from '@lib/domain/datamartActions';
+import { AppertureUser } from '@lib/domain/user';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { _getSavedDataMart } from '@lib/services/dataMartService';
+import { _getSavedDatamartActionsForDatamartId } from '@lib/services/datamartActionService';
 import { _getNodes } from '@lib/services/datasourceService';
+import { _getAppertureUserInfo } from '@lib/services/userService';
 import { getAuthToken } from '@lib/utils/request';
 import { GetServerSideProps } from 'next';
 import { ReactElement } from 'react';
@@ -21,6 +25,8 @@ export const getServerSideProps: GetServerSideProps = async ({
   }
 
   const apps = await _getAppsWithIntegrations(token);
+  const user = await _getAppertureUserInfo(token);
+
   const savedDataMart = await _getSavedDataMart(
     token,
     query.dataMartId as string
@@ -33,6 +39,10 @@ export const getServerSideProps: GetServerSideProps = async ({
       props: {},
     };
   }
+  const savedDatamartActions = await _getSavedDatamartActionsForDatamartId(
+    savedDataMart._id,
+    token
+  );
 
   if (!savedDataMart) {
     return {
@@ -44,12 +54,28 @@ export const getServerSideProps: GetServerSideProps = async ({
   }
 
   return {
-    props: { apps, savedDataMart },
+    props: { apps, savedDataMart, savedDatamartActions, user },
   };
 };
 
-const EditDataMart = ({ savedDataMart }: { savedDataMart: DataMartObj }) => {
-  return <DataMart savedDataMart={savedDataMart} />;
+const EditDataMart = ({
+  savedDataMart,
+  savedDatamartActions,
+  user,
+}: {
+  savedDataMart: DataMartObj;
+  savedDatamartActions: DatamartActions[];
+  user: AppertureUser;
+}) => {
+  const isUserAuthenticatedWithGoogleSheet = !!user.sheetToken;
+
+  return (
+    <Scripts
+      savedDatamart={savedDataMart}
+      savedDatamartActions={savedDatamartActions}
+      isAuthenticated={isUserAuthenticatedWithGoogleSheet}
+    />
+  );
 };
 
 EditDataMart.getLayout = function getLayout(

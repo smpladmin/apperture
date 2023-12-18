@@ -58,8 +58,6 @@ const SavedDataMarts = ({ provider }: { provider: Provider }) => {
     setRenderDataMart(true);
   };
 
-  const Outh_Link = `${BACKEND_BASE_URL}/datamart/oauth/google?redirect_url=${FRONTEND_BASE_URL}/analytics/datamart/list/${dsId}`;
-
   return (
     <Box px={{ base: '4', md: '30' }} py={'13'} overflowY={'auto'}>
       <Flex justifyContent={'space-between'}>
@@ -67,9 +65,6 @@ const SavedDataMarts = ({ provider }: { provider: Provider }) => {
           My Data
         </Text>
         <Flex alignItems={'center'} gap={'2'}>
-          <Link href={Outh_Link}>
-            <Button>Connect to Google Sheets</Button>
-          </Link>
           <Button
             isDisabled={provider === Provider.GOOGLE}
             variant={'primary'}

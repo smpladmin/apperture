@@ -7,7 +7,7 @@ import {
   Flex,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { ArrowLeft, Code } from 'phosphor-react';
+import { ArrowLeft } from 'phosphor-react';
 import React from 'react';
 
 type ScriptHeaderProps = {
@@ -27,7 +27,6 @@ const ScriptHeader = ({
 }: ScriptHeaderProps) => {
   const router = useRouter();
   const { dsId } = router.query;
-  console.log('isDisabled', isSaveButtonDisabled);
   return (
     <Box position={'sticky'} top={'0'} width={'full'} zIndex={'99'}>
       <Flex

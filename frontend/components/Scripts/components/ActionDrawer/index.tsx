@@ -11,16 +11,43 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { CaretLeft, Plus, X } from 'phosphor-react';
+import ActionSteps from './ActionSteps';
+import { useRouter } from 'next/router';
+import { DatamartActions } from '@lib/domain/datamartActions';
+import SavedActionsList from './SavedActionsList';
+import EmptyCreateAction from '@assets/images/create-action.svg';
+import Image from 'next/image';
 
 type ActionDrawerProps = {
   isOpen: boolean;
   onClose: () => void;
+  datamartId: string;
+  workbookName: string;
+  savedDatamartActions?: DatamartActions[];
+  isAuthenticated?: boolean;
 };
 
-const ActionDrawer = ({ isOpen, onClose }: ActionDrawerProps) => {
-  const [isActionBeingCreated, setIsActionBeingCreated] = useState(false);
+const ActionDrawer = ({
+  isOpen,
+  onClose,
+  datamartId,
+  workbookName,
+  savedDatamartActions,
+  isAuthenticated,
+}: ActionDrawerProps) => {
+  const router = useRouter();
+  const { showActionDrawer } = router.query;
+  const [isActionBeingCreated, setIsActionBeingCreated] = useState(
+    !!showActionDrawer
+  );
+  const [isCreateActionDisabled, setIsCreateActionDisabled] = useState(true);
+  const [triggerSave, setTriggerSave] = useState(false);
+  const [datamartActions, setDatartActions] = useState<DatamartActions[]>(
+    savedDatamartActions || []
+  );
+
   return (
-    <Drawer size={'md'} isOpen={isOpen} placement="right" onClose={onClose}>
+    <Drawer size={'lg'} isOpen={isOpen} placement="right" onClose={onClose}>
       <DrawerOverlay bg={'black.DEFAULT'} opacity={'0.8 !important'} />
       <DrawerContent bg={'white.DEFAULT'}>
         <DrawerHeader
@@ -48,18 +75,48 @@ const ActionDrawer = ({ isOpen, onClose }: ActionDrawerProps) => {
 
         <DrawerBody px={'6'} py={'12'} overflow={'scroll'} maxH={'full'}>
           {isActionBeingCreated ? (
-            <></>
+            <ActionSteps
+              datamartId={datamartId}
+              workbookName={workbookName}
+              triggerSave={triggerSave}
+              setTriggerSave={setTriggerSave}
+              setIsActionBeingCreated={setIsActionBeingCreated}
+              setIsCreateActionDisabled={setIsCreateActionDisabled}
+              setDatartActions={setDatartActions}
+              onClose={onClose}
+              isAuthenticated={isAuthenticated}
+            />
+          ) : datamartActions.length ? (
+            <SavedActionsList datamartActions={datamartActions} />
           ) : (
-            <>
-              <Text
-                fontSize={'xs-14'}
-                fontWeight={'500'}
-                lineHeight={'xs-14'}
-                color={'grey.800'}
-              >
-                CURRENT ACTIONS
-              </Text>
-            </>
+            <Flex
+              mt={'20'}
+              justifyContent={'center'}
+              direction={'column'}
+              gap={'14'}
+            >
+              <Image src={EmptyCreateAction} alt={'create action'} />
+              <Flex direction={'column'} gap={'2'} justifyContent={'center'}>
+                <Text
+                  fontSize={'sh-24'}
+                  lineHeight={'sh-24'}
+                  fontWeight={'700'}
+                  color={'grey.900'}
+                  textAlign={'center'}
+                >
+                  Create new action
+                </Text>
+                <Text
+                  fontSize={'xs-14'}
+                  lineHeight={'xs-14'}
+                  fontWeight={'400'}
+                  color={'grey.700'}
+                  textAlign={'center'}
+                >
+                  Send the result automatically. Anywhere you like.
+                </Text>
+              </Flex>
+            </Flex>
           )}
         </DrawerBody>
 
@@ -81,8 +138,13 @@ const ActionDrawer = ({ isOpen, onClose }: ActionDrawerProps) => {
             alignItems={'center'}
             gap={'2'}
             onClick={() => {
-              isActionBeingCreated ? () => {} : setIsActionBeingCreated(true);
+              isActionBeingCreated
+                ? setTriggerSave(true)
+                : setIsActionBeingCreated(true);
             }}
+            isDisabled={
+              isActionBeingCreated && (isCreateActionDisabled || triggerSave)
+            }
           >
             {isActionBeingCreated ? (
               'Confirm'

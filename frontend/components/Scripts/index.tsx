@@ -13,14 +13,23 @@ import {
   updateDataMartTable,
 } from '@lib/services/dataMartService';
 import { ErrorResponse } from '@lib/services/util';
+import { DatamartActions } from '@lib/domain/datamartActions';
 
-const Scripts = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
+const Scripts = ({
+  savedDatamart,
+  savedDatamartActions,
+  isAuthenticated,
+}: {
+  savedDatamart?: DataMartObj;
+  savedDatamartActions?: DatamartActions[];
+  isAuthenticated?: boolean;
+}) => {
   const [isQueryResponseLoading, setIsQueryResponseLoading] = useState(true);
   const [name, setName] = useState<string>(
-    savedDataMart?.name || 'Untitled Table'
+    savedDatamart?.name || 'Untitled Table'
   );
 
-  const [query, setQuery] = useState(savedDataMart?.query || '');
+  const [query, setQuery] = useState(savedDatamart?.query || '');
   const [queryResult, setQueryResult] = useState<DataMartTableData>({
     data: [],
     headers: [],
@@ -32,15 +41,21 @@ const Scripts = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
 
   const toast = useToast();
   const router = useRouter();
-  const { dsId, dataMartId } = router.query;
-  const datasourceId = (dsId as string) || savedDataMart?.datasourceId;
-  const [savedDatamrtId, setDatamartId] = useState(
-    (dataMartId as string) || ''
+  const { dsId, dataMartId, showActionDrawer } = router.query;
+  const datasourceId = (dsId as string) || savedDatamart?.datasourceId;
+  const [savedDatamartId, setDatamartId] = useState(
+    (dataMartId as string) || '65802488a58c1206d54429fb'
   );
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure({
+    defaultIsOpen: !!showActionDrawer,
+  });
 
-  const openActionDrawer = () => {
+  const openActionDrawer = async () => {
+    if (!savedDatamartId) {
+      const response = await saveDataMartTable(datasourceId!!, query, name);
+      setDatamartId(response.data?._id);
+    }
     onOpen();
   };
 
@@ -48,21 +63,26 @@ const Scripts = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
     setIsQueryResponseLoading(true);
     const res = await computeDataMartQuery(datasourceId!!, query, true);
     if (res.status === 200) {
-      let queriedData = res?.data;
+      const queriedData = res?.data;
       setQueryResult({
         data: queriedData?.data,
         headers: queriedData?.headers,
       });
       setSaveButtonDisabled(false);
     } else {
+      setQueryResult({
+        data: [],
+        headers: [],
+      });
       setError((res as ErrorResponse)?.error?.detail);
     }
     setIsQueryResponseLoading(false);
   };
 
   useEffect(() => {
-    if (router.pathname.includes('edit')) setIsDataMartBeingEdited(true);
-  }, []);
+    if (router.pathname.includes('edit') || savedDatamartId)
+      setIsDataMartBeingEdited(true);
+  }, [savedDatamartId]);
 
   useEffect(() => {
     fetchData();
@@ -71,14 +91,13 @@ const Scripts = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
   const handleSaveAndUpdate = async () => {
     setSaveButtonDisabled(true);
     const response = isDataMartBeingEdited
-      ? await updateDataMartTable(savedDatamrtId, datasourceId!!, query, name)
+      ? await updateDataMartTable(savedDatamartId, datasourceId!!, query, name)
       : await saveDataMartTable(datasourceId!!, query, name);
     if (response.status === 200) {
       router.push({
         pathname: '/analytics/datamart/edit/[dataMartId]',
         query: { dataMartId: response.data?._id || dataMartId, datasourceId },
       });
-      setDatamartId(response.data?._id);
     } else {
       toast({
         title: (response as ErrorResponse)?.error?.detail,
@@ -118,7 +137,14 @@ const Scripts = ({ savedDataMart }: { savedDataMart?: DataMartObj }) => {
           />
         </Flex>
       </Flex>
-      <ActionDrawer isOpen={isOpen} onClose={onClose} />
+      <ActionDrawer
+        isOpen={isOpen}
+        onClose={onClose}
+        datamartId={savedDatamartId}
+        workbookName={name}
+        savedDatamartActions={savedDatamartActions}
+        isAuthenticated={isAuthenticated}
+      />
     </>
   );
 };
