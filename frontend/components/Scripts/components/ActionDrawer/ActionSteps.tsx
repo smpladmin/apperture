@@ -18,11 +18,12 @@ import ScheduleAction from './ScheduleAction';
 import {
   getGoogleSpreadsheets,
   saveDatamartAction,
+  updateDatamartAction,
 } from '@lib/services/datamartActionService';
 import {
   ActionMeta,
   ActionType,
-  DatamartActions,
+  DatamartAction,
   Schedule,
 } from '@lib/domain/datamartActions';
 import { isValidMeta, isValidSchedule } from '@components/Scripts/util';
@@ -31,13 +32,13 @@ import { useRouter } from 'next/router';
 type ActionStepsProps = {
   datamartId: string;
   workbookName: string;
-  action?: DatamartActions;
+  action?: DatamartAction;
   triggerSave: boolean;
   setTriggerSave: React.Dispatch<React.SetStateAction<boolean>>;
   setIsActionBeingCreated: React.Dispatch<React.SetStateAction<boolean>>;
   setIsCreateActionDisabled: React.Dispatch<React.SetStateAction<boolean>>;
   onClose: () => void;
-  setDatartActions: React.Dispatch<React.SetStateAction<DatamartActions[]>>;
+  setDatartActions: React.Dispatch<React.SetStateAction<DatamartAction[]>>;
   isAuthenticated?: boolean;
 };
 
@@ -116,13 +117,21 @@ const ActionSteps = ({
     // save action when clicked on confirm
     if (!triggerSave) return;
 
-    const handleSave = async () => {
-      const res = await saveDatamartAction(
-        datamartId,
-        selectedAction!!,
-        meta as ActionMeta,
-        schedule as Schedule
-      );
+    const handleSaveOrUpdate = async () => {
+      const res = action
+        ? await updateDatamartAction(
+            action._id,
+            datamartId,
+            selectedAction!!,
+            meta as ActionMeta,
+            schedule as Schedule
+          )
+        : await saveDatamartAction(
+            datamartId,
+            selectedAction!!,
+            meta as ActionMeta,
+            schedule as Schedule
+          );
       if (res.status === 200) {
         setTriggerSave(false);
         setIsActionBeingCreated(false);
@@ -138,7 +147,7 @@ const ActionSteps = ({
       onClose();
       setIsCreateActionDisabled(true);
     };
-    handleSave();
+    handleSaveOrUpdate();
   }, [triggerSave]);
 
   return (

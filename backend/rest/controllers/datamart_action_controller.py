@@ -1,9 +1,10 @@
-from typing import List, Optional, Union
+from typing import List, Union
 
 from fastapi import APIRouter, Depends
 from fastapi import APIRouter, Depends
 from domain.apperture_users.service import AppertureUserService
 from domain.datamart.service import DataMartService
+from domain.datamart_actions.models import DatamartActions
 from domain.datamart_actions.service import DatamartActionService
 from rest.dtos.datamart_actions import DatamartActionsDto, DatamartActionsResponse
 
@@ -105,7 +106,8 @@ async def update_datamart_action(
         meta=dto.meta,
     )
     await datamart_action_service.update_datamart_action(id=id, action=datamart_action)
-    return datamart_action
+    updated_datamart_action = DatamartActions(**datamart_action.dict(), _id=id)
+    return updated_datamart_action
 
 
 @router.delete(

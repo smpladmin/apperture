@@ -44,7 +44,7 @@ export type Schedule = {
   frequency: ActionFrequency;
 };
 
-export type DatamartActions = {
+export type DatamartAction = {
   _id: string;
   datasourceId: string;
   datamartId: string;

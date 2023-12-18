@@ -13,7 +13,7 @@ import {
   updateDataMartTable,
 } from '@lib/services/dataMartService';
 import { ErrorResponse } from '@lib/services/util';
-import { DatamartActions } from '@lib/domain/datamartActions';
+import { DatamartAction } from '@lib/domain/datamartActions';
 
 const Scripts = ({
   savedDatamart,
@@ -21,7 +21,7 @@ const Scripts = ({
   isAuthenticated,
 }: {
   savedDatamart?: DataMartObj;
-  savedDatamartActions?: DatamartActions[];
+  savedDatamartActions?: DatamartAction[];
   isAuthenticated?: boolean;
 }) => {
   const [isQueryResponseLoading, setIsQueryResponseLoading] = useState(true);
@@ -44,7 +44,7 @@ const Scripts = ({
   const { dsId, dataMartId, showActionDrawer } = router.query;
   const datasourceId = (dsId as string) || savedDatamart?.datasourceId;
   const [savedDatamartId, setDatamartId] = useState(
-    (dataMartId as string) || '65802488a58c1206d54429fb'
+    (dataMartId as string) || ''
   );
 
   const { isOpen, onOpen, onClose } = useDisclosure({
@@ -121,7 +121,7 @@ const Scripts = ({
         />
       </Flex>
       <Flex direction={'row'} h={'full'} borderTop={'0.4px solid #BDBDBD'}>
-        <SidePanel />
+        <SidePanel savedDatamartDsId={savedDatamart?.datasourceId} />
         <Flex direction={'column'} width={'full'} overflow={'auto'}>
           <QueryEditor
             query={query}

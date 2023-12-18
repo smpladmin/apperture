@@ -13,7 +13,7 @@ import {
 import { CaretLeft, Plus, X } from 'phosphor-react';
 import ActionSteps from './ActionSteps';
 import { useRouter } from 'next/router';
-import { DatamartActions } from '@lib/domain/datamartActions';
+import { DatamartAction } from '@lib/domain/datamartActions';
 import SavedActionsList from './SavedActionsList';
 import EmptyCreateAction from '@assets/images/create-action.svg';
 import Image from 'next/image';
@@ -23,7 +23,7 @@ type ActionDrawerProps = {
   onClose: () => void;
   datamartId: string;
   workbookName: string;
-  savedDatamartActions?: DatamartActions[];
+  savedDatamartActions?: DatamartAction[];
   isAuthenticated?: boolean;
 };
 
@@ -42,9 +42,10 @@ const ActionDrawer = ({
   );
   const [isCreateActionDisabled, setIsCreateActionDisabled] = useState(true);
   const [triggerSave, setTriggerSave] = useState(false);
-  const [datamartActions, setDatartActions] = useState<DatamartActions[]>(
+  const [datamartActions, setDatartActions] = useState<DatamartAction[]>(
     savedDatamartActions || []
   );
+  const [action, setAction] = useState<DatamartAction>();
 
   return (
     <Drawer size={'lg'} isOpen={isOpen} placement="right" onClose={onClose}>
@@ -77,6 +78,7 @@ const ActionDrawer = ({
           {isActionBeingCreated ? (
             <ActionSteps
               datamartId={datamartId}
+              action={action}
               workbookName={workbookName}
               triggerSave={triggerSave}
               setTriggerSave={setTriggerSave}
@@ -87,7 +89,12 @@ const ActionDrawer = ({
               isAuthenticated={isAuthenticated}
             />
           ) : datamartActions.length ? (
-            <SavedActionsList datamartActions={datamartActions} />
+            <SavedActionsList
+              datamartActions={datamartActions}
+              setDatartActions={setDatartActions}
+              setIsActionBeingCreated={setIsActionBeingCreated}
+              setAction={setAction}
+            />
           ) : (
             <Flex
               mt={'20'}

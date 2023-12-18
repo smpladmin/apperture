@@ -33,8 +33,8 @@ const TimeSelect = ({
       <Select
         icon={<CaretDown fontSize={'14px'} color={GREY_600} />}
         size={'sm'}
-        minWidth={'18'}
-        width={'18'}
+        minWidth={'20'}
+        width={'20'}
         fontSize={'xs-12'}
         lineHeight={'xs-12'}
         fontWeight={'400'}

@@ -1,27 +1,44 @@
-import { Box, Flex, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Text,
+  useDisclosure,
+} from '@chakra-ui/react';
 import { TypeNameMap, describeSchedule } from '@components/Scripts/util';
 import {
   APIMeta,
   ActionType,
-  DatamartActions,
+  DatamartAction,
   GoogleSheetMeta,
   TableMeta,
 } from '@lib/domain/datamartActions';
-import { GREY_600 } from '@theme/index';
+import { GREY_600, GREY_700 } from '@theme/index';
 import Image from 'next/image';
-import { Clock, DotsThreeVertical } from 'phosphor-react';
+import { Clock, DotsThreeVertical, Pencil, Trash } from 'phosphor-react';
 import React from 'react';
 import GoogleSheetLogo from '@assets/images/google-sheets-logo.svg';
 import APILogo from '@assets/images/api-logo-new.svg';
 import TableLogo from '@assets/images/table.svg';
+import ConfirmationModal from '@components/ConfirmationModal';
+import { deleteDatamartAction } from '@lib/services/datamartActionService';
 
 const SavedActionsList = ({
   datamartActions,
+  setDatartActions,
+  setIsActionBeingCreated,
+  setAction,
 }: {
-  datamartActions: DatamartActions[];
+  datamartActions: DatamartAction[];
+  setDatartActions: React.Dispatch<React.SetStateAction<DatamartAction[]>>;
+  setIsActionBeingCreated: React.Dispatch<React.SetStateAction<boolean>>;
+  setAction: React.Dispatch<React.SetStateAction<DatamartAction | undefined>>;
 }) => {
   const groupedActions = datamartActions.reduce(
-    (acc: Record<string, Array<DatamartActions>>, action) => {
+    (acc: Record<string, Array<DatamartAction>>, action) => {
       const { type } = action;
       if (!acc[type]) {
         acc[type] = [];
@@ -41,7 +58,13 @@ const SavedActionsList = ({
     return logos[actionType];
   };
 
-  console.log({ datamartActions });
+  const handleDelete = async (action: DatamartAction) => {
+    await deleteDatamartAction(action._id);
+    const updatedDatamartActions = datamartActions.filter(
+      (datamartAction) => datamartAction._id !== action._id
+    );
+    setDatartActions(updatedDatamartActions);
+  };
 
   return (
     <Box h={'full'} w={'full'} overflow={'auto'}>
@@ -112,11 +135,71 @@ const SavedActionsList = ({
                           {describeSchedule(action?.schedule)}
                         </Text>
                       </Flex>
-                      <DotsThreeVertical
-                        weight="bold"
-                        size={16}
-                        color={GREY_600}
-                      />
+                      <Menu>
+                        <MenuButton
+                          _active={{
+                            bg: 'white.200',
+                          }}
+                          _hover={{ bg: 'white.200' }}
+                          p={'1'}
+                          bg={'transparent'}
+                          borderRadius={'4'}
+                        >
+                          <DotsThreeVertical
+                            weight="bold"
+                            size={16}
+                            color={GREY_600}
+                          />
+                        </MenuButton>
+                        <MenuList
+                          minWidth={'30'}
+                          p={'1'}
+                          borderRadius={'4'}
+                          zIndex={'3'}
+                        >
+                          <MenuItem
+                            onClick={() => {
+                              setAction(action);
+                              setIsActionBeingCreated(true);
+                            }}
+                            _focus={{
+                              backgroundColor: 'white.400',
+                            }}
+                            fontSize={'xs-12'}
+                            lineHeight={'xs-12'}
+                            fontWeight={'400'}
+                            color={'grey.900'}
+                            px={'2'}
+                            py={'3'}
+                            borderRadius={'4'}
+                          >
+                            <Flex gap={'1'} alignItems={'center'}>
+                              <Pencil size={12} color={GREY_700} />
+                              Edit
+                            </Flex>
+                          </MenuItem>
+                          <MenuItem
+                            onClick={() => {
+                              handleDelete(action);
+                            }}
+                            _focus={{
+                              backgroundColor: 'white.400',
+                            }}
+                            fontSize={'xs-12'}
+                            lineHeight={'xs-12'}
+                            fontWeight={'400'}
+                            color={'grey.900'}
+                            px={'2'}
+                            py={'3'}
+                            borderRadius={'4'}
+                          >
+                            <Flex gap={'1'} alignItems={'center'}>
+                              <Trash size={12} color={GREY_700} />
+                              Delete
+                            </Flex>
+                          </MenuItem>
+                        </MenuList>
+                      </Menu>
                     </Flex>
                   );
                 })}

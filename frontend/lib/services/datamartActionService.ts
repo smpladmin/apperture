@@ -1,16 +1,10 @@
-import {
-  ActionType,
-  ActionMeta,
-  Schedule,
-  DatamartActions,
-} from '@lib/domain/datamartActions';
+import { ActionType, ActionMeta, Schedule } from '@lib/domain/datamartActions';
 import {
   AppertureDelete,
   AppertureGet,
   ApperturePost,
   ApperturePrivateGet,
   ApperturePut,
-  ErrorResponse,
 } from './util';
 
 export const saveDatamartAction = async (

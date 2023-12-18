@@ -2,7 +2,7 @@ import HomeLayout from '@components/HomeLayout';
 import Scripts from '@components/Scripts';
 import { AppWithIntegrations } from '@lib/domain/app';
 import { DataMartObj } from '@lib/domain/datamart';
-import { DatamartActions } from '@lib/domain/datamartActions';
+import { DatamartAction } from '@lib/domain/datamartActions';
 import { AppertureUser } from '@lib/domain/user';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
 import { _getSavedDataMart } from '@lib/services/dataMartService';
@@ -64,7 +64,7 @@ const EditDataMart = ({
   user,
 }: {
   savedDataMart: DataMartObj;
-  savedDatamartActions: DatamartActions[];
+  savedDatamartActions: DatamartAction[];
   user: AppertureUser;
 }) => {
   const isUserAuthenticatedWithGoogleSheet = !!user.sheetToken;

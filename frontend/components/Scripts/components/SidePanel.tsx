@@ -6,7 +6,7 @@ import { Connection, ConnectionSource } from '@lib/domain/connections';
 import { useRouter } from 'next/router';
 import { getConnectionsForApp } from '@lib/services/connectionService';
 
-const SidePanel = () => {
+const SidePanel = ({ savedDatamartDsId }: { savedDatamartDsId?: string }) => {
   const [loadingConnections, setLoadingConnections] = useState(false);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [connectorData, setConnectorData] = useState<
@@ -26,7 +26,9 @@ const SidePanel = () => {
 
   useEffect(() => {
     const fetchConnections = async () => {
-      const res = await getConnectionsForApp(dsId as string);
+      const res = await getConnectionsForApp(
+        savedDatamartDsId || (dsId as string)
+      );
       setConnections(res);
       setLoadingConnections(false);
     };
