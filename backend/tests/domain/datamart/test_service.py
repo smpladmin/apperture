@@ -277,7 +277,7 @@ class TestDataMartService:
         )
         self.service.retrieve_all_files = MagicMock()
 
-        self.service.get_google_sheets(refresh_token="345k-f192")
+        self.service.get_google_spreadsheets(refresh_token="345k-f192")
 
         self.service.initialize_google_drive_service.assert_called_with(
             access_token="", refresh_token="345k-f192"

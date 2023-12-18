@@ -8,11 +8,8 @@ from domain.datamart_actions.models import (
     ActionType,
     DatamartActions,
     GoogleSheetMeta,
-    HourlySchedule,
-    DailySchedule,
-    MonthlySchedule,
     TableMeta,
-    WeeklySchedule,
+    Schedule,
 )
 from rest.dtos.model_response import ModelResponse
 
@@ -26,7 +23,7 @@ class PushDatamartDto(BaseModel):
 class DatamartActionsDto(BaseModel):
     datamartId: str
     type: ActionType
-    schedule: Union[WeeklySchedule, MonthlySchedule, DailySchedule, HourlySchedule]
+    schedule: Schedule
     meta: Union[GoogleSheetMeta, APIMeta, TableMeta]
 
 

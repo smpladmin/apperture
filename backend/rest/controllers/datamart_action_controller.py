@@ -2,6 +2,7 @@ from typing import List, Optional, Union
 
 from fastapi import APIRouter, Depends
 from fastapi import APIRouter, Depends
+from domain.apperture_users.service import AppertureUserService
 from domain.datamart.service import DataMartService
 from domain.datamart_actions.service import DatamartActionService
 from rest.dtos.datamart_actions import DatamartActionsDto, DatamartActionsResponse
@@ -18,18 +19,6 @@ router = APIRouter(
 
 
 @router.get(
-    "/datamart_actions/{id}",
-    response_model=DatamartActionsResponse,
-    dependencies=[Depends(validate_library_items)],
-)
-async def get_saved_datamart_action(
-    id: str,
-    datamart_action_service: DatamartActionService = Depends(),
-):
-    return await datamart_action_service.get_datamart_action(id=id)
-
-
-@router.get(
     "/datamart_actions",
     response_model=List[DatamartActionsResponse],
 )
@@ -42,6 +31,32 @@ async def get_saved_datamart_actions(
             datamart_id=datamart_id
         )
     return await datamart_action_service.get_datamart_actions()
+
+
+@router.get(
+    "/datamart_actions/google_sheets/",
+    response_model=List,
+)
+async def get_spreadsheets(
+    user_id: str = Depends(get_user_id),
+    user_service: AppertureUserService = Depends(),
+    datamart_action_service: DatamartActionService = Depends(),
+):
+    user = await user_service.get_user(id=user_id)
+    return datamart_action_service.get_google_spreadsheets(
+        refresh_token=user.sheet_token
+    )
+
+
+@router.get(
+    "/datamart_actions/{id}",
+    response_model=DatamartActionsResponse,
+)
+async def get_saved_datamart_action(
+    id: str,
+    datamart_action_service: DatamartActionService = Depends(),
+):
+    return await datamart_action_service.get_datamart_action(id=id)
 
 
 @router.post(
@@ -91,3 +106,13 @@ async def update_datamart_action(
     )
     await datamart_action_service.update_datamart_action(id=id, action=datamart_action)
     return datamart_action
+
+
+@router.delete(
+    "/datamart_actions/{id}",
+)
+async def delete_datamart_action(
+    id: str,
+    datamart_action_service: DatamartActionService = Depends(),
+):
+    await datamart_action_service.delete_datamart_actions(id=id)

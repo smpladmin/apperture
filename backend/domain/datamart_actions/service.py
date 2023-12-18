@@ -7,14 +7,11 @@ from fastapi import Depends
 
 from domain.datamart_actions.models import (
     DatamartActions,
-    HourlySchedule,
-    DailySchedule,
+    Schedule,
     GoogleSheetMeta,
-    MonthlySchedule,
-    TableMeta,
     APIMeta,
     ActionType,
-    WeeklySchedule,
+    TableMeta,
 )
 from mongo import Mongo
 import requests
@@ -40,7 +37,7 @@ class DatamartActionService:
         user_id: str,
         type: ActionType,
         meta: Union[GoogleSheetMeta, APIMeta, TableMeta],
-        schedule: Union[WeeklySchedule, MonthlySchedule, DailySchedule, HourlySchedule],
+        schedule: Schedule,
     ) -> DatamartActions:
         return DatamartActions(
             datasource_id=datasource_id,
@@ -85,13 +82,26 @@ class DatamartActionService:
             DatamartActions.enabled != False,
         ).to_list()
 
+    async def delete_datamart_actions(self, id: str):
+        await DatamartActions.find_one(
+            DatamartActions.id == PydanticObjectId(id),
+        ).update({"$set": {"enabled": False}})
+        return
+
+    def get_google_credentials(self, access_token: str, refresh_token: str):
+        creds_dict = {
+            "token": access_token,
+            "refresh_token": refresh_token,
+            "token_uri": os.environ["TOKEN_URI"],
+            "client_id": os.environ["GOOGLE_SHEET_CLIENT_ID"],
+            "client_secret": os.environ["GOOGLE_SHEET_CLIENT_SECRET"],
+        }
+
+        return Credentials.from_authorized_user_info(creds_dict)
+
     def initialize_google_sheet_service(self, access_token: str, refresh_token: str):
-        creds = Credentials(
-            token=access_token,
-            refresh_token=refresh_token,
-            token_uri=os.environ["TOKEN_URI"],
-            client_id=os.environ["GOOGLE_SHEET_CLIENT_ID"],
-            client_secret=os.environ["GOOGLE_SHEET_CLIENT_SECRET"],
+        creds = self.get_google_credentials(
+            access_token=access_token, refresh_token=refresh_token
         )
         try:
             if creds and creds.expired and creds.refresh_token:
@@ -138,3 +148,67 @@ class DatamartActionService:
         except Exception as e:
             logging.info(e)
             raise Exception(f"Error: {e}")
+
+    def initialize_google_drive_service(self, access_token: str, refresh_token: str):
+        creds = self.get_google_credentials(
+            access_token=access_token, refresh_token=refresh_token
+        )
+        try:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            return build("drive", "v3", credentials=creds)
+        except:
+            raise Exception("Could not validate credentials")
+
+    def retrieve_all_files(self, drive_service, page_token=None):
+        all_files = []
+
+        while True:
+            result = (
+                drive_service.files()
+                .list(
+                    q="mimeType='application/vnd.google-apps.spreadsheet'",
+                    fields="nextPageToken, files(id, name)",
+                    pageToken=page_token,
+                )
+                .execute()
+            )
+
+            files = result.get("files", [])
+            all_files.extend(files)
+
+            page_token = result.get("nextPageToken")
+            if not page_token:
+                break
+
+        return all_files
+
+    def get_sheet_names(self, service, spreadsheet_id):
+        sheet_metadata = (
+            service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+        )
+        sheets = sheet_metadata.get("sheets", [])
+        sheet_names = []
+        for sheet in sheets:
+            sheet_names.append(sheet["properties"]["title"])
+
+        return sheet_names
+
+    def get_google_spreadsheets(self, refresh_token: str):
+        try:
+            drive_service = self.initialize_google_drive_service(
+                access_token="", refresh_token=refresh_token
+            )
+            sheet_service = self.initialize_google_sheet_service(
+                access_token="", refresh_token=refresh_token
+            )
+
+            spreadsheets = self.retrieve_all_files(drive_service=drive_service)
+            for spreadsheet in spreadsheets:
+                sheets = self.get_sheet_names(
+                    service=sheet_service, spreadsheet_id=spreadsheet["id"]
+                )
+                spreadsheet["sheets"] = sheets
+            return spreadsheets
+        except Exception as e:
+            logging.info(e)
