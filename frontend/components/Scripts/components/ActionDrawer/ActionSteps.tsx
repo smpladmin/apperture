@@ -33,6 +33,7 @@ type ActionStepsProps = {
   datamartId: string;
   workbookName: string;
   action?: DatamartAction;
+  setAction: React.Dispatch<React.SetStateAction<DatamartAction | undefined>>;
   triggerSave: boolean;
   setTriggerSave: React.Dispatch<React.SetStateAction<boolean>>;
   setIsActionBeingCreated: React.Dispatch<React.SetStateAction<boolean>>;
@@ -45,6 +46,7 @@ type ActionStepsProps = {
 const ActionSteps = ({
   datamartId,
   action,
+  setAction,
   workbookName,
   triggerSave,
   setTriggerSave,
@@ -110,6 +112,8 @@ const ActionSteps = ({
     ) {
       setIsCreateActionDisabled(false);
       setActiveStep(3);
+    } else {
+      setIsCreateActionDisabled(true);
     }
   }, [selectedAction, meta, schedule]);
 
@@ -135,7 +139,13 @@ const ActionSteps = ({
       if (res.status === 200) {
         setTriggerSave(false);
         setIsActionBeingCreated(false);
-        setDatartActions((prevActions) => [...prevActions, res?.data]);
+        if (action)
+          setDatartActions((prevActions) => {
+            return prevActions.map((action) =>
+              action._id === res?.data?._id ? res?.data : action
+            );
+          });
+        else setDatartActions((prevActions) => [...prevActions, res?.data]);
       } else {
         toast({
           title: 'Something went wrong. Try again!',
@@ -146,6 +156,7 @@ const ActionSteps = ({
       }
       onClose();
       setIsCreateActionDisabled(true);
+      setAction(undefined);
     };
     handleSaveOrUpdate();
   }, [triggerSave]);

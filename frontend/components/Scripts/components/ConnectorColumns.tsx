@@ -87,7 +87,6 @@ const ViewOnlyColumns = ({ columns }: { columns: string[] }) => {
             py={'2'}
             gap={3}
             alignItems={'center'}
-            cursor={'pointer'}
             _hover={{
               bg: 'white.400',
             }}

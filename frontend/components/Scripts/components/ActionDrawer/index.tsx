@@ -63,7 +63,10 @@ const ActionDrawer = ({
                 <CaretLeft
                   size={20}
                   cursor={'pointer'}
-                  onClick={() => setIsActionBeingCreated(false)}
+                  onClick={() => {
+                    setIsActionBeingCreated(false);
+                    setAction(undefined);
+                  }}
                 />
               )}
               <Text fontSize={'sh-20'} fontWeight={'600'} lineHeight={'sh-20'}>
@@ -79,6 +82,7 @@ const ActionDrawer = ({
             <ActionSteps
               datamartId={datamartId}
               action={action}
+              setAction={setAction}
               workbookName={workbookName}
               triggerSave={triggerSave}
               setTriggerSave={setTriggerSave}

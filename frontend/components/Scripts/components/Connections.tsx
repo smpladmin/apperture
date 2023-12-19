@@ -7,6 +7,9 @@ import MixpanelIcon from '@assets/images/mixpanel-new.svg';
 import GAIcon from '@assets/images/ga-logo-small.svg';
 import AmplitudeIcon from '@assets/images/amplitude-icon.svg';
 import ClevertapIcon from '@assets/images/clevertap-icon.png';
+import BranchIcon from '@assets/images/branch.png';
+import GoogleAds from '@assets/images/google-ads.svg';
+import FacebookLogo from '@assets/images/facebook-logo.svg';
 import Image from 'next/image';
 import {
   Accordion,
@@ -59,6 +62,9 @@ const Connections = ({
       apperture: AppertureIcon,
       mysql: DatabaseIcon,
       csv: CSVIcon,
+      branch: BranchIcon,
+      google_ads: GoogleAds,
+      facebook_ads: FacebookLogo,
     };
     return icons[connectionName] || DatabaseIcon;
   };

@@ -47,7 +47,7 @@ const DaySelect = ({
       onChange={(e) => {
         setSchedule((prevSchedule) => ({
           ...prevSchedule,
-          time: e.target.value,
+          day: e.target.value,
         }));
       }}
     >

@@ -32,11 +32,11 @@ export const isValidSchedule = (schedule: Schedule) => {
     case ActionFrequency.HOURLY:
       return true;
     case ActionFrequency.DAILY:
-      return time !== undefined && period !== undefined;
+      return time && period;
     case ActionFrequency.WEEKLY:
-      return time !== undefined && period !== undefined && day !== undefined;
+      return time && period && day;
     case ActionFrequency.MONTHLY:
-      return time !== undefined && period !== undefined && date !== undefined;
+      return time && period && date;
     default:
       return false;
   }
@@ -65,7 +65,7 @@ export const describeSchedule = (schedule: Schedule) => {
     case ActionFrequency.MONTHLY:
       const splitDate = date ? date.split('-') : [];
       const dayOfMonth = splitDate.length === 3 ? splitDate[2] : '';
-      return `Monthly on ${time} ${period} at ${dayOfMonth}`;
+      return `Monthly on ${time} ${period} every ${dayOfMonth}th `;
     default:
       return 'Invalid Schedule';
   }

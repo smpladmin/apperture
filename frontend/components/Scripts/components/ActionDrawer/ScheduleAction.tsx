@@ -34,7 +34,6 @@ const ScheduleAction = ({ schedule, setSchedule }: ScheduleActionProps) => {
             day: null,
             date: null,
             time: null,
-            period: null,
           }));
         }}
       >

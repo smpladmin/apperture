@@ -85,6 +85,7 @@ const Scripts = ({
   }, [savedDatamartId]);
 
   useEffect(() => {
+    if (!query) return;
     fetchData();
   }, []);
 
@@ -96,7 +97,7 @@ const Scripts = ({
     if (response.status === 200) {
       router.push({
         pathname: '/analytics/datamart/edit/[dataMartId]',
-        query: { dataMartId: response.data?._id || dataMartId, datasourceId },
+        query: { dataMartId: response.data?._id || savedDatamartId, dsId },
       });
     } else {
       toast({
