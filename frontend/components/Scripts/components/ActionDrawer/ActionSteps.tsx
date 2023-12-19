@@ -77,25 +77,7 @@ const ActionSteps = ({
     action?.schedule || {}
   );
 
-  const [spreadsheets, setSpreadsheets] = useState<
-    Array<{
-      id: string;
-      name: string;
-      sheets: string[];
-    }>
-  >([]);
-  const [loadingSpreadsheets, setLoadingSpreadsheets] = useState(false);
   const toast = useToast();
-
-  useEffect(() => {
-    const getSpreadsheets = async () => {
-      setLoadingSpreadsheets(true);
-      const res = await getGoogleSpreadsheets();
-      setSpreadsheets(res?.data || []);
-      setLoadingSpreadsheets(false);
-    };
-    getSpreadsheets();
-  }, []);
 
   useEffect(() => {
     // check if meta entered is valid, then proceed to setting frequency
@@ -204,10 +186,8 @@ const ActionSteps = ({
                     meta={meta}
                     setMeta={setMeta}
                     isAuthenticated={isAuthenticated}
-                    spreadsheets={spreadsheets}
                     datamartId={datamartId}
                     workbookName={workbookName}
-                    loadingSpreadsheets={loadingSpreadsheets}
                   />
                 ) : (
                   index === 2 &&

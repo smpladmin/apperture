@@ -199,16 +199,15 @@ class DatamartActionService:
             drive_service = self.initialize_google_drive_service(
                 access_token="", refresh_token=refresh_token
             )
-            sheet_service = self.initialize_google_sheet_service(
-                access_token="", refresh_token=refresh_token
-            )
-
             spreadsheets = self.retrieve_all_files(drive_service=drive_service)
-            for spreadsheet in spreadsheets:
-                sheets = self.get_sheet_names(
-                    service=sheet_service, spreadsheet_id=spreadsheet["id"]
-                )
-                spreadsheet["sheets"] = sheets
             return spreadsheets
         except Exception as e:
             logging.info(e)
+
+    def get_spreadsheet_sheets(self, refresh_token: str, spreadsheet_id: str):
+        sheet_service = self.initialize_google_sheet_service(
+            access_token="", refresh_token=refresh_token
+        )
+        return self.get_sheet_names(
+            service=sheet_service, spreadsheet_id=spreadsheet_id
+        )

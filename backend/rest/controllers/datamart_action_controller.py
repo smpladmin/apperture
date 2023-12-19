@@ -35,7 +35,7 @@ async def get_saved_datamart_actions(
 
 
 @router.get(
-    "/datamart_actions/google_sheets/",
+    "/datamart_actions/google/spreadsheets",
     response_model=List,
 )
 async def get_spreadsheets(
@@ -46,6 +46,22 @@ async def get_spreadsheets(
     user = await user_service.get_user(id=user_id)
     return datamart_action_service.get_google_spreadsheets(
         refresh_token=user.sheet_token
+    )
+
+
+@router.get(
+    "/datamart_actions/google/sheets/{spreadsheet_id}",
+    response_model=List,
+)
+async def get_spreadsheets(
+    spreadsheet_id: str,
+    user_id: str = Depends(get_user_id),
+    user_service: AppertureUserService = Depends(),
+    datamart_action_service: DatamartActionService = Depends(),
+):
+    user = await user_service.get_user(id=user_id)
+    return datamart_action_service.get_spreadsheet_sheets(
+        refresh_token=user.sheet_token, spreadsheet_id=spreadsheet_id
     )
 
 

@@ -63,5 +63,9 @@ export const deleteDatamartAction = async (id: string) => {
 };
 
 export const getGoogleSpreadsheets = async () => {
-  return await AppertureGet('/datamart_actions/google_sheets/');
+  return await AppertureGet(`/datamart_actions/google/spreadsheets`);
+};
+
+export const getSpreadsheetSheets = async (id: string) => {
+  return await AppertureGet(`/datamart_actions/google/sheets/${id}`);
 };
