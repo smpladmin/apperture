@@ -1,19 +1,16 @@
 import logging
 import pendulum
-from typing import Dict, Optional, Union
-from datetime import datetime
-from utils.utils import DATAMART_INIT_DATE
+from typing import Dict, Union
+from datetime import datetime, timedelta
+from utils.utils import get_cron_expression, FREQUENCY_DELTAS
 from airflow.decorators import dag, task, task_group
 
 
 from domain.datamart.models import (
     DatamartActions,
     ActionType,
-    HourlySchedule,
-    DailySchedule,
-    WeeklySchedule,
+    Schedule,
     Frequency,
-    MonthlySchedule,
 )
 from domain.datasource.service import DataSourceService
 from domain.datamart.service import DatamartActionsService
@@ -120,56 +117,21 @@ def refresh_datamart(
         )
 
 
-def get_daily_schedule_cron_expression(
-    time_str: str, period: str, day: Optional[str], date: Optional[str]
-):
-    time_obj = datetime.strptime(time_str + " " + period, "%I:%M %p")
-    hour_24 = time_obj.strftime("%H")
-    minute = time_obj.strftime("%M")
-
-    if day:
-        days_of_week = {
-            "Monday": 1,
-            "Tuesday": 2,
-            "Wednesday": 3,
-            "Thursday": 4,
-            "Friday": 5,
-            "Saturday": 6,
-            "Sunday": 0,
-        }
-
-        cron_day = days_of_week[day]
-        return f"{minute} {hour_24} * * {cron_day}"
-
-    if date:
-        day = date.split("-")[0]
-        return f"{minute} {hour_24} {day} * *"
-
-    return f"{minute} {hour_24} * * *"
-
-
-def calculate_schedule(
-    schedule: Union[WeeklySchedule, MonthlySchedule, DailySchedule, HourlySchedule]
-) -> str:
+def calculate_schedule(schedule: Schedule) -> str:
     if schedule.frequency == Frequency.HOURLY:
         return "0 * * * *"
 
-    if schedule.frequency == Frequency.DAILY:
-        return get_daily_schedule_cron_expression(
-            time_str=schedule.time, period=schedule.period, day=None, date=None
-        )
+    return get_cron_expression(
+        time_str=schedule.time,
+        period=schedule.period,
+        day=schedule.day if schedule.frequency == Frequency.WEEKLY else None,
+        date=schedule.date if schedule.frequency == Frequency.MONTHLY else None,
+    )
 
-    if schedule.frequency == Frequency.WEEKLY:
-        return get_daily_schedule_cron_expression(
-            time_str=schedule.time, period=schedule.period, day=schedule.day, date=None
-        )
 
-    if schedule.frequency == Frequency.MONTHLY:
-        return get_daily_schedule_cron_expression(
-            time_str=schedule.time, period=schedule.period, day=None, date=schedule.date
-        )
-
-    return "0 8 * * *"
+def calculate_start_date(created_date: datetime, schedule: Schedule) -> datetime:
+    delta = FREQUENCY_DELTAS.get(schedule.frequency, timedelta(days=1))
+    return created_date - delta
 
 
 def create_dag(
@@ -180,10 +142,13 @@ def create_dag(
         description=f"Datamart datasource daily refresh for {datamart_action.type}_{datamart_action.id}",
         schedule=calculate_schedule(schedule=datamart_action.schedule),
         start_date=pendulum.instance(
-            created_date if created_date > DATAMART_INIT_DATE else DATAMART_INIT_DATE,
+            calculate_start_date(
+                created_date=created_date, schedule=datamart_action.schedule
+            ),
             tz=pendulum.timezone("Asia/Kolkata"),
         ),
         tags=["datamart-scheduled-data-fetch"],
+        catchup=False,
     )
     def datamart_loader():
         datasource_with_credential = get_datasource_and_credential(
