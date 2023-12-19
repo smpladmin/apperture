@@ -30,6 +30,8 @@ from rest.dtos.spreadsheets import (
 )
 from rest.middlewares import get_user, get_user_id, validate_jwt
 from rest.middlewares.validate_app_user import validate_app_user, validate_library_items
+from clickhouse_connect.driver.exceptions import DatabaseError
+from utils.errors import BusinessError
 
 
 router = APIRouter(
@@ -49,11 +51,18 @@ async def compute_datamart_query(
     compute_query_action: ComputeQueryAction = Depends(),
     ds_service: DataSourceService = Depends(),
 ):
-    datasource = await ds_service.get_datasource(dto.datasourceId)
-    result = await compute_query_action.compute_query(app_id=datasource.app_id, dto=dto)
-    return compute_query_action.create_spreadsheet_with_custom_headers(
-        column_names=result.headers, data=result.data, sql=result.sql
-    )
+    try:
+        datasource = await ds_service.get_datasource(dto.datasourceId)
+        result = await compute_query_action.compute_query(
+            app_id=datasource.app_id, dto=dto
+        )
+        return compute_query_action.create_spreadsheet_with_custom_headers(
+            column_names=result.headers, data=result.data, sql=result.sql
+        )
+    except BusinessError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
+    except DatabaseError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
 
 
 @router.post(

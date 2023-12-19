@@ -24,7 +24,7 @@ const Scripts = ({
   savedDatamartActions?: DatamartAction[];
   isAuthenticated?: boolean;
 }) => {
-  const [isQueryResponseLoading, setIsQueryResponseLoading] = useState(true);
+  const [isQueryResponseLoading, setIsQueryResponseLoading] = useState(false);
   const [name, setName] = useState<string>(
     savedDatamart?.name || 'Untitled Table'
   );
@@ -69,6 +69,7 @@ const Scripts = ({
         headers: queriedData?.headers,
       });
       setSaveButtonDisabled(false);
+      setError('');
     } else {
       setQueryResult({
         data: [],

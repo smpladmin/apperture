@@ -9,6 +9,7 @@ from pypika import CustomFunction, Parameter, Table
 
 from clickhouse import Clickhouse
 from clickhouse.clickhouse_client_factory import ClickHouseClientFactory
+from clickhouse_connect.driver.exceptions import DatabaseError
 
 
 class EventsBase(ABC):
@@ -118,6 +119,10 @@ class EventsBase(ABC):
                 return query_result
             else:
                 raise Exception("Connection error")
+        except DatabaseError as e:
+            raise HTTPException(
+                status_code=400, detail=str(e) or "Something went wrong"
+            )
         except Exception as e:
             logging.info(repr(e))
             traceback.print_exc()
