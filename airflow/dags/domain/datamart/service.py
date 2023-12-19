@@ -8,17 +8,17 @@ from domain.datasource.models import (
     MySQLCredential,
 )
 from apperture.backend_action import get, post
-from .models import APIMeta, DatamartActions, GoogleSheetMeta, TableMeta
+from .models import APIMeta, DatamartAction, GoogleSheetMeta, TableMeta
 
 
 class DatamartActionsService:
-    def get_datamart_actions(self) -> List[DatamartActions]:
+    def get_datamart_actions(self) -> List[DatamartAction]:
         logging.info("{x}: {y}".format(x="get all datamarts", y=""))
         response = get(
             "/private/datamart_actions",
         )
         datamart_list = response.json()
-        return [DatamartActions(**ds) for ds in datamart_list]
+        return [DatamartAction(**ds) for ds in datamart_list]
 
     def refresh_table_action(
         self,

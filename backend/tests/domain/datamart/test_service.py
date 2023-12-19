@@ -96,53 +96,11 @@ class TestDataMartService:
     @pytest.mark.asyncio
     async def test_update_datamart(self):
         await self.service.update_datamart_table(
-            table_id=self.ds_id,
+            id=self.ds_id,
             new_table=self.datamart_obj,
-            clickhouse_credential=self.clickhouse_credential,
-            db_creds=None,
-            database_client=DatabaseClient.CLICKHOUSE,
         )
-        DataMart.find.assert_called_once_with(
+        DataMart.find_one.assert_called_once_with(
             False,
-        )
-        self.update_mock.assert_called_once_with(
-            {
-                "$set": {
-                    "app_id": PydanticObjectId("636a1c61d715ca6baae65612"),
-                    "datasource_id": PydanticObjectId("636a1c61d715ca6baae65611"),
-                    "enabled": True,
-                    "last_refreshed": ANY,
-                    "name": "name",
-                    "table_name": "name",
-                    "query": "select event_name, user_id from events",
-                    "revision_id": None,
-                    "updated_at": ANY,
-                    "user_id": PydanticObjectId("636a1c61d715ca6baae65611"),
-                }
-            },
-        )
-        self.service.datamart_repo.create_table.assert_called_once_with(
-            **{
-                "clickhouse_credential": ClickHouseCredential(
-                    username="test-username",
-                    password="test-password",
-                    databasename="test-database",
-                ),
-                "query": "select event_name, user_id from events",
-                "table_name": ANY,
-                "app_id": ANY,
-            }
-        )
-        self.service.datamart_repo.drop_table.assert_called_once_with(
-            **{
-                "clickhouse_credential": ClickHouseCredential(
-                    username="test-username",
-                    password="test-password",
-                    databasename="test-database",
-                ),
-                "table_name": ANY,
-                "app_id": ANY,
-            }
         )
 
     @pytest.mark.asyncio
@@ -245,43 +203,3 @@ class TestDataMartService:
     async def test_get_all_apps_with_datamarts(self):
         await self.service.get_all_apps_with_datamarts()
         DataMart.find.assert_called_once()
-
-    def test_retrieve_all_files(self):
-        drive_service_mock = MagicMock()
-        files_data = [
-            {"id": "file_id_1", "name": "File 1"},
-            {"id": "file_id_2", "name": "File 2"},
-        ]
-        next_page_token = None
-
-        drive_service_mock.files.return_value.list.return_value.execute.return_value = {
-            "files": files_data,
-            "nextPageToken": next_page_token,
-        }
-
-        all_files = self.service.retrieve_all_files(drive_service_mock)
-
-        drive_service_mock.files.assert_called_once()
-        drive_service_mock.files.return_value.list.assert_called_once_with(
-            q="mimeType='application/vnd.google-apps.spreadsheet'",
-            fields="nextPageToken, files(id, name)",
-            pageToken=None,
-        )
-
-        assert all_files == files_data
-
-    def test_get_google_sheets(self):
-        drive_service_mock = MagicMock()
-        self.service.initialize_google_drive_service = MagicMock(
-            return_value=drive_service_mock
-        )
-        self.service.retrieve_all_files = MagicMock()
-
-        self.service.get_google_spreadsheets(refresh_token="345k-f192")
-
-        self.service.initialize_google_drive_service.assert_called_with(
-            access_token="", refresh_token="345k-f192"
-        )
-        self.service.retrieve_all_files.assert_called_with(
-            drive_service=drive_service_mock
-        )

@@ -14,6 +14,7 @@ from domain.clickstream.service import ClickstreamService
 from domain.clickstream_event_properties.service import (
     ClickStreamEventPropertiesService,
 )
+from domain.datamart_actions.service import DatamartActionService
 from domain.event_properties.service import EventPropertiesService
 from rest.middlewares.validate_app_user import validate_library_items, validate_app_user
 
@@ -76,6 +77,7 @@ def app_init(
     datamart_service,
     files_service,
     google_sheet_service,
+    datamart_action_service,
 ):
     print("Setting up App")
     app.dependency_overrides[validate_jwt] = lambda: mock.MagicMock()
@@ -112,6 +114,7 @@ def app_init(
         ClickStreamEventPropertiesService
     ] = lambda: clickstream_event_properties_service
     app.dependency_overrides[DataMartService] = lambda: datamart_service
+    app.dependency_overrides[DatamartActionService] = lambda: datamart_action_service
     FastAPICache.init(backend=InMemoryBackend(), prefix="apperture-cache")
     yield app
 

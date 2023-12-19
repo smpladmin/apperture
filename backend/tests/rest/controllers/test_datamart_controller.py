@@ -1,11 +1,13 @@
 import json
 from datetime import datetime
-from unittest.mock import ANY
+from unittest.mock import ANY, AsyncMock, MagicMock
 
 import pytest
 from beanie import PydanticObjectId
 
 from domain.apps.models import ClickHouseCredential
+from domain.datamart.models import DataMart
+from domain.datamart_actions.models import DatamartAction
 from domain.spreadsheets.models import DatabaseClient
 from tests.utils import filter_response
 
@@ -25,20 +27,7 @@ def test_save_datamart_table(
             "user_id": "mock-user-id",
         }
     )
-    assert datamart_service.create_datamart_table.call_args.kwargs["table"].dict() == {
-        "app_id": PydanticObjectId("635ba034807ab86d8a2aadd7"),
-        "created_at": ANY,
-        "datasource_id": PydanticObjectId("635ba034807ab86d8a2aadd9"),
-        "enabled": True,
-        "id": PydanticObjectId("635ba034807ab86d8a2aadd8"),
-        "last_refreshed": datetime(2022, 11, 24, 0, 0),
-        "name": "name",
-        "table_name": "dUKQaHtqxM",
-        "query": "select event_name, user_id from events",
-        "revision_id": None,
-        "updated_at": None,
-        "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
-    }
+    datamart_service.save_datamart.assert_called_once()
 
 
 def test_get_datamart(client_init, datamart_service, datamart_response):
@@ -97,10 +86,7 @@ async def test_update_datamart(
         "user_id": PydanticObjectId("635ba034807ab86d8a2aadda"),
     } == update_datamart_kwargs["new_table"].dict()
 
-    assert "635ba034807ab86d8a2aadd8" == update_datamart_kwargs["table_id"]
-    assert update_datamart_kwargs["clickhouse_credential"] == ClickHouseCredential(
-        username="test_username", password="test_password", databasename="test_database"
-    )
+    assert "635ba034807ab86d8a2aadd8" == update_datamart_kwargs["id"]
 
 
 def test_compute_transient_datamart(
@@ -166,7 +152,9 @@ def test_get_datamart_list(client_init, datamart_service):
     )
 
 
-def test_delete_datamart(client_init, datamart_service, app_service):
+def test_delete_datamart(
+    client_init, datamart_service, app_service, datamart_action_service
+):
     response = client_init.delete("/datamart/6384a65e0a397236d9de236a")
     assert response.status_code == 200
 
@@ -187,3 +175,6 @@ def test_delete_datamart(client_init, datamart_service, app_service):
         **{"id": "6384a65e0a397236d9de236a"}
     )
     app_service.get_app.assert_called_with(**{"id": "635ba034807ab86d8a2aadd7"})
+    datamart_action_service.delete_datamart_actions_for_datamart.assert_called_with(
+        datamart_id="6384a65e0a397236d9de236a"
+    )

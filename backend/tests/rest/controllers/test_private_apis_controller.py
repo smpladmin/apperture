@@ -366,15 +366,16 @@ def test_refresh_datamart_tables_for_app(client_init, datamart_service, app_serv
 @pytest.mark.asyncio
 async def test_refresh_datamart_tables_success(
     client_init,
-    datamart_service,
+    datamart_action_service,
 ):
-    datamart_service.refresh_datamart_table.return_value = True
+    # datamart_action_service.refresh_table_action.return_value = True
     response = client_init.post(
-        "/private/datamart/refresh",
+        "/private/datamart_actions/refresh",
         data=json.dumps(
             {
                 "datamartId": "635ba034807ab86d8a2aadd8",
                 "appId": "635ba034807ab86d8a2aadd7",
+                "tableName": "test_sql",
                 "databaseClient": "clickhouse",
                 "databaseCredential": {
                     "username": "test_username",
@@ -385,37 +386,45 @@ async def test_refresh_datamart_tables_success(
         ),
     )
     assert response.status_code == 200
-    datamart_service.refresh_datamart_table.assert_awaited_with(
-        datamart_id="635ba034807ab86d8a2aadd8",
+    datamart_action_service.refresh_table_action.assert_called_once_with(
+        app_id="635ba034807ab86d8a2aadd7",
         clickhouse_credential=ClickHouseCredential(
             username="test_username",
             password="test_password",
             databasename="test_database",
         ),
-        db_creds=ClickHouseCredential(
+        database_credential=ClickHouseCredential(
             username="test_username",
             password="test_password",
             databasename="test_database",
         ),
         database_client=DatabaseClient.CLICKHOUSE,
+        table_name="test_sql",
+        query="select event_name, user_id from events",
     )
+
     assert response.json() is True
 
 
 @pytest.mark.asyncio
 async def test_refresh_datamart_tables_failure(
     client_init,
-    datamart_service,
+    datamart_action_service,
 ):
-    datamart_service.refresh_datamart_table.return_value = False
+    refresh_table_action_future = asyncio.Future()
+    refresh_table_action_future.set_result(True)
+    datamart_action_service.refresh_table_action.return_value = (
+        refresh_table_action_future
+    )
 
     with pytest.raises(Exception) as exc_info:
         response = client_init.post(
-            "/private/datamart/refresh",
+            "/private/datamart_actions/refresh",
             data=json.dumps(
                 {
                     "datamartId": "635ba034807ab86d8a2aadd8",
                     "appId": "635ba034807ab86d8a2aadd7",
+                    "tableName": "test_sql",
                     "databaseClient": "clickhouse",
                     "databaseCredential": {
                         "username": "test_username",
@@ -426,6 +435,6 @@ async def test_refresh_datamart_tables_failure(
             ),
         )
         assert response.status_code == 200
-    assert (
-        str(exc_info.value)
-    ) == "Could not refresh datamart 635ba034807ab86d8a2aadd8"
+        assert (
+            str(exc_info.value)
+        ) == "Could not refresh datamart 635ba034807ab86d8a2aadd8"

@@ -7,7 +7,7 @@ from airflow.decorators import dag, task, task_group
 
 
 from domain.datamart.models import (
-    DatamartActions,
+    DatamartAction,
     ActionType,
     Schedule,
     Frequency,
@@ -65,7 +65,7 @@ def get_database_credentials(
 
 
 @task(trigger_rule="all_done")
-def push_datamart_to_google_sheet(datamart_action: DatamartActions):
+def push_datamart_to_google_sheet(datamart_action: DatamartAction):
     logging.info(f"Pushing data to google sheet: {datamart_action.meta}")
     datamart_action_service.push_datamart_to_target(
         datamart_id=datamart_action.datamart_id,
@@ -75,7 +75,7 @@ def push_datamart_to_google_sheet(datamart_action: DatamartActions):
 
 
 @task(trigger_rule="all_done")
-def push_datamart_to_api(datamart_action: DatamartActions):
+def push_datamart_to_api(datamart_action: DatamartAction):
     logging.info(f"Pushing data to API: {datamart_action.meta}")
     datamart_action_service.push_datamart_to_target(
         datamart_id=datamart_action.datamart_id,
@@ -86,7 +86,7 @@ def push_datamart_to_api(datamart_action: DatamartActions):
 
 @task(trigger_rule="all_done")
 def refresh_table_action(
-    datamart_actions: DatamartActions,
+    datamart_actions: DatamartAction,
     database_client: DatabaseClient,
     database_credential: Union[MySQLCredential, MsSQLCredential, ClickHouseCredential],
 ):
@@ -102,7 +102,7 @@ def refresh_table_action(
 
 @task_group
 def refresh_datamart_action(
-    datamart_action: DatamartActions,
+    datamart_action: DatamartAction,
     database_client: DatabaseClient,
     database_credential: Union[MySQLCredential, MsSQLCredential, ClickHouseCredential],
 ):
@@ -138,7 +138,7 @@ def calculate_start_date(created_date: datetime, schedule: Schedule) -> datetime
 
 
 def create_dag(
-    datamart_action: DatamartActions, datasource_id: str, created_date: datetime
+    datamart_action: DatamartAction, datasource_id: str, created_date: datetime
 ):
     @dag(
         dag_id=f"datamart_action_loader_{datamart_action.type}_{datamart_action.id}",

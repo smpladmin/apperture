@@ -47,7 +47,7 @@ class GoogleSheetMeta(BaseModel):
     sheet: str
 
 
-class DatamartActions(BaseModel):
+class DatamartAction(BaseModel):
     id: str = Field(alias="_id")
     datasource_id: str = Field(alias="datasourceId")
     app_id: str = Field(alias="appId")

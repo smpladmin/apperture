@@ -9,7 +9,7 @@ from domain.integrations.models import MsSQLCredential, MySQLCredential
 from domain.spreadsheets.models import DatabaseClient
 
 from domain.datamart_actions.models import (
-    DatamartActions,
+    DatamartAction,
     Schedule,
     GoogleSheetMeta,
     APIMeta,
@@ -44,8 +44,8 @@ class DatamartActionService:
         type: ActionType,
         meta: Union[GoogleSheetMeta, APIMeta, TableMeta],
         schedule: Schedule,
-    ) -> DatamartActions:
-        return DatamartActions(
+    ) -> DatamartAction:
+        return DatamartAction(
             datasource_id=datasource_id,
             app_id=app_id,
             user_id=user_id,
@@ -55,21 +55,21 @@ class DatamartActionService:
             meta=meta,
         )
 
-    async def save_datamart_action(self, datamart_action: DatamartActions):
-        return await DatamartActions.insert(datamart_action)
+    async def save_datamart_action(self, datamart_action: DatamartAction):
+        return await DatamartAction.insert(datamart_action)
 
     async def update_datamart_action(
         self,
         id: str,
-        action: DatamartActions,
+        action: DatamartAction,
     ):
         to_update = action.dict()
         to_update.pop("id")
         to_update.pop("created_at")
         to_update["updated_at"] = datetime.utcnow()
 
-        await DatamartActions.find_one(
-            DatamartActions.id == PydanticObjectId(id),
+        await DatamartAction.find_one(
+            DatamartAction.id == PydanticObjectId(id),
         ).update({"$set": to_update})
 
     async def refresh_table_action(
@@ -82,7 +82,7 @@ class DatamartActionService:
         ],
         query: str,
         table_name: str,
-    ):
+    ) -> bool:
         await self.datamart_repo.drop_table(
             table_name=table_name,
             clickhouse_credential=clickhouse_credential,
@@ -105,31 +105,31 @@ class DatamartActionService:
             )
         return update_status
 
-    async def get_datamart_action(self, id: str) -> DatamartActions:
-        return await DatamartActions.get(PydanticObjectId(id))
+    async def get_datamart_action(self, id: str) -> DatamartAction:
+        return await DatamartAction.get(PydanticObjectId(id))
 
     async def get_datamart_actions_for_datamart(
         self, datamart_id: str
-    ) -> List[DatamartActions]:
-        return await DatamartActions.find(
-            DatamartActions.datamart_id == PydanticObjectId(datamart_id),
-            DatamartActions.enabled != False,
+    ) -> List[DatamartAction]:
+        return await DatamartAction.find(
+            DatamartAction.datamart_id == PydanticObjectId(datamart_id),
+            DatamartAction.enabled != False,
         ).to_list()
 
-    async def get_datamart_actions(self) -> List[DatamartActions]:
-        return await DatamartActions.find(
-            DatamartActions.enabled != False,
+    async def get_datamart_actions(self) -> List[DatamartAction]:
+        return await DatamartAction.find(
+            DatamartAction.enabled != False,
         ).to_list()
 
     async def delete_datamart_actions(self, id: str):
-        await DatamartActions.find_one(
-            DatamartActions.id == PydanticObjectId(id),
+        await DatamartAction.find_one(
+            DatamartAction.id == PydanticObjectId(id),
         ).update({"$set": {"enabled": False}})
         return
 
     async def delete_datamart_actions_for_datamart(self, datamart_id: str):
-        await DatamartActions.find(
-            DatamartActions.datamart_id == PydanticObjectId(datamart_id),
+        await DatamartAction.find(
+            DatamartAction.datamart_id == PydanticObjectId(datamart_id),
         ).update_many({"$set": {"enabled": False}})
         return
 

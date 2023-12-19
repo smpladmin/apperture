@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from domain.datamart_actions.models import (
     APIMeta,
     ActionType,
-    DatamartActions,
+    DatamartAction,
     GoogleSheetMeta,
     TableMeta,
     Schedule,
@@ -38,6 +38,6 @@ class DatamartActionsDto(BaseModel):
     meta: Union[GoogleSheetMeta, APIMeta, TableMeta]
 
 
-class DatamartActionsResponse(DatamartActions, ModelResponse):
+class DatamartActionsResponse(DatamartAction, ModelResponse):
     class Config:
         allow_population_by_field_name = True
