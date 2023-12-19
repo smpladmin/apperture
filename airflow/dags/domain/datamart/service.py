@@ -8,7 +8,7 @@ from domain.datasource.models import (
     MySQLCredential,
 )
 from apperture.backend_action import get, post
-from .models import APIMeta, DatamartActions, GoogleSheetMeta, TableMeta, ActionType
+from .models import APIMeta, DatamartActions, GoogleSheetMeta, TableMeta
 
 
 class DatamartActionsService:
