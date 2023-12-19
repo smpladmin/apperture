@@ -25,18 +25,18 @@ export const TypeNameMap = {
   [ActionType.TABLE]: 'Table',
 };
 
-export const isValidSchedule = (schedule: Schedule) => {
+export const isValidSchedule = (schedule: Schedule): boolean => {
   const { frequency, time, period, day, date } = schedule || {};
 
   switch (frequency) {
     case ActionFrequency.HOURLY:
       return true;
     case ActionFrequency.DAILY:
-      return time && period;
+      return !!(time && period);
     case ActionFrequency.WEEKLY:
-      return time && period && day;
+      return !!(time && period && day);
     case ActionFrequency.MONTHLY:
-      return time && period && date;
+      return !!(time && period && date);
     default:
       return false;
   }
@@ -65,7 +65,7 @@ export const describeSchedule = (schedule: Schedule) => {
     case ActionFrequency.MONTHLY:
       const splitDate = date ? date.split('-') : [];
       const dayOfMonth = splitDate.length === 3 ? splitDate[2] : '';
-      return `Monthly on ${time} ${period} every ${dayOfMonth}th `;
+      return `Monthly on ${time} ${period} every ${dayOfMonth}th`;
     default:
       return 'Invalid Schedule';
   }
