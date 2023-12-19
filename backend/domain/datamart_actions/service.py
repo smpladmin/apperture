@@ -88,6 +88,12 @@ class DatamartActionService:
         ).update({"$set": {"enabled": False}})
         return
 
+    async def delete_datamart_actions_for_datamart(self, datamart_id: str):
+        await DatamartActions.find(
+            DatamartActions.datamart_id == PydanticObjectId(datamart_id),
+        ).update_many({"$set": {"enabled": False}})
+        return
+
     def get_google_credentials(self, access_token: str, refresh_token: str):
         creds_dict = {
             "token": access_token,

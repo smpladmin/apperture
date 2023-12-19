@@ -15,6 +15,7 @@ from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
 from domain.datamart.service import DataMartService
 from domain.apperture_users.service import AppertureUserService
+from domain.datamart_actions.service import DatamartActionService
 from domain.datasources.service import DataSourceService
 from domain.spreadsheets.models import DatabaseClient
 from rest.controllers.actions.compute_query import ComputeQueryAction
@@ -212,6 +213,7 @@ async def get_datamart_tables(
 async def delete_datamart_table(
     id: str,
     datamart_service: DataMartService = Depends(),
+    datamart_action_service: DatamartActionService = Depends(),
     app_service: AppService = Depends(),
 ):
     existing_table = await datamart_service.get_datamart_table(id=id)
@@ -229,6 +231,8 @@ async def delete_datamart_table(
         clickhouse_credential=app.clickhouse_credential,
         app_id=str(app.id),
     )
+
+    await datamart_action_service.delete_datamart_actions_for_datamart(datamart_id=id)
 
 
 oauth = OAuthClientFactory().init_client(
