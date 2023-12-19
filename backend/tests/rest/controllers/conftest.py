@@ -373,7 +373,7 @@ def retention_service(apperture_user_response):
 
 @pytest.fixture(scope="module")
 def datamart_action_service(apperture_user_response):
-    datamart_service_mock = mock.MagicMock()
+    datamart_action_service_mock = mock.MagicMock()
     DatamartAction.get_settings = mock.MagicMock()
 
     datamart_action = DatamartAction(
@@ -392,19 +392,44 @@ def datamart_action_service(apperture_user_response):
         ),
         enabled=True,
     )
+    spreadsheets = [
+        {"id": "1qFp3w6nKRhvVc", "name": "Test"},
+        {"id": "1n0-0y3hrr6B16oicXjw0Mg", "name": "TSS Report"},
+        {"id": "1abavuF9ocO4JU1C_01gBub", "name": "Testing 1"},
+    ]
+    sheet_names = [
+        "Sheet1",
+        "Sheet2",
+        "Sheet3",
+    ]
+    datamart_action_future = asyncio.Future()
+    datamart_action_future.set_result(datamart_action)
     datamart_actions_future = asyncio.Future()
-    datamart_actions_future.set_result(datamart_action)
+    datamart_actions_future.set_result([datamart_action])
 
     refresh_table_action_future = asyncio.Future()
     refresh_table_action_future.set_result(True)
 
-    datamart_service_mock.save_datamart = mock.AsyncMock()
-    datamart_service_mock.delete_datamart_actions_for_datamart = mock.AsyncMock()
-    datamart_service_mock.refresh_table_action.return_value = (
+    datamart_action_service_mock.build_datamart_action.return_value = datamart_action
+    datamart_action_service_mock.save_datamart_action.return_value = (
+        datamart_action_future
+    )
+    datamart_action_service_mock.get_datamart_action.return_value = (
+        datamart_action_future
+    )
+    datamart_action_service_mock.get_datamart_actions_for_datamart.return_value = (
+        datamart_actions_future
+    )
+    datamart_action_service_mock.refresh_table_action.return_value = (
         refresh_table_action_future
     )
+    datamart_action_service_mock.get_google_spreadsheets.return_value = spreadsheets
+    datamart_action_service_mock.get_sheet_names.return_value = sheet_names
+    datamart_action_service_mock.delete_datamart_actions_for_datamart = mock.AsyncMock()
+    datamart_action_service_mock.update_datamart_action = mock.AsyncMock()
+    datamart_action_service_mock.delete_datamart_action = mock.AsyncMock()
 
-    return datamart_service_mock
+    return datamart_action_service_mock
 
 
 @pytest.fixture(scope="module")
@@ -1948,6 +1973,30 @@ def datamart_response():
 
 
 @pytest.fixture(scope="module")
+def datamart_action_response():
+    return {
+        "_id": "635ba034807ab86d8a2aadd8",
+        "datasourceId": "635ba034807ab86d8a2aadd9",
+        "appId": "635ba034807ab86d8a2aadd7",
+        "userId": "635ba034807ab86d8a2aad10",
+        "datamartId": "635ba034807ab86d8a2aad11",
+        "type": "google_sheet",
+        "schedule": {
+            "time": None,
+            "period": None,
+            "date": None,
+            "day": None,
+            "frequency": "hourly",
+        },
+        "meta": {
+            "spreadsheet": {"id": "1qu87sylkjuesopp98", "name": "Test"},
+            "sheet": "Sheet1",
+        },
+        "enabled": True,
+    }
+
+
+@pytest.fixture(scope="module")
 def transient_datamart_response():
     return {
         "data": [
@@ -2211,6 +2260,19 @@ def datamart_data():
         "datasourceId": "635ba034807ab86d8a2aadd9",
         "name": "test-table",
         "query": "select event_name, user_id from events",
+    }
+
+
+@pytest.fixture(scope="module")
+def datamart_action_data():
+    return {
+        "datamartId": "635ba034807ab86d8a2aadd9",
+        "type": "google_sheet",
+        "schedule": {"frequency": "hourly"},
+        "meta": {
+            "spreadsheet": {"id": "1qu87sylkjuesopp98", "name": "Test"},
+            "sheet": "Sheet1",
+        },
     }
 
 

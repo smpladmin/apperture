@@ -57,7 +57,7 @@ async def get_spreadsheets(
     "/datamart_actions/google/sheets/{spreadsheet_id}",
     response_model=List,
 )
-async def get_spreadsheets(
+async def get_sheet_names(
     spreadsheet_id: str,
     user_id: str = Depends(get_user_id),
     user_service: AppertureUserService = Depends(),
@@ -138,4 +138,4 @@ async def delete_datamart_action(
     id: str,
     datamart_action_service: DatamartActionService = Depends(),
 ):
-    await datamart_action_service.delete_datamart_actions(id=id)
+    await datamart_action_service.delete_datamart_action(id=id)

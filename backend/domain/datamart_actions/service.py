@@ -121,7 +121,7 @@ class DatamartActionService:
             DatamartAction.enabled != False,
         ).to_list()
 
-    async def delete_datamart_actions(self, id: str):
+    async def delete_datamart_action(self, id: str):
         await DatamartAction.find_one(
             DatamartAction.id == PydanticObjectId(id),
         ).update({"$set": {"enabled": False}})
@@ -186,7 +186,7 @@ class DatamartActionService:
         try:
             url = api_credential.url
             headers = json.loads(api_credential.headers)
-            payload: {columns, data}
+            payload = {"columns": columns, "data": data}
 
             requests.post(url=url, headers=headers, json=payload)
 

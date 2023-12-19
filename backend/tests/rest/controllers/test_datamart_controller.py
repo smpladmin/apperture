@@ -145,6 +145,31 @@ def test_get_datamart_list(client_init, datamart_service):
                 "hasVisitedSheets": False,
             },
             "userId": "635ba034807ab86d8a2aadda",
+            "actions": [
+                {
+                    "_id": "635ba034807ab86d8a2aadd8",
+                    "revisionId": None,
+                    "createdAt": ANY,
+                    "updatedAt": None,
+                    "datasourceId": "635ba034807ab86d8a2aadd9",
+                    "appId": "635ba034807ab86d8a2aadd7",
+                    "userId": "635ba034807ab86d8a2aad10",
+                    "datamartId": "635ba034807ab86d8a2aad11",
+                    "type": "google_sheet",
+                    "schedule": {
+                        "time": None,
+                        "period": None,
+                        "date": None,
+                        "day": None,
+                        "frequency": "hourly",
+                    },
+                    "meta": {
+                        "spreadsheet": {"id": "1qu87sylkjuesopp98", "name": "Test"},
+                        "sheet": "Sheet1",
+                    },
+                    "enabled": True,
+                }
+            ],
         }
     ]
     datamart_service.get_datamart_tables_for_app_id.assert_called_once_with(
