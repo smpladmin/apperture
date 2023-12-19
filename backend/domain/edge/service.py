@@ -262,7 +262,7 @@ class EdgeService:
                 start_date=start_date,
                 end_date=end_date,
                 trend_type=trend_type,
-                app_id=str(datasource.app_id)
+                app_id=str(datasource.app_id),
             )
             return [
                 NodeTrend(
