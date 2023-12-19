@@ -40,42 +40,44 @@ const Configuration = ({
   const { dsId, showActionDrawer } = router.query;
   const Outh_Link = `${BACKEND_BASE_URL}/datamart/oauth/google?redirect_url=${FRONTEND_BASE_URL}/analytics/datamart/edit/${datamartId}?showActionDrawer=1&dsId=${dsId}`;
 
+  const [loadingSpreadsheets, setLoadingSpreadsheets] = useState(false);
+  const [loadingSheets, setLoadingSheets] = useState(false);
+
+  const [sheetNames, setSheetNames] = useState<string[]>([]);
+  const [spreadsheets, setSpreadsheets] = useState<
+    Array<{
+      id: string;
+      name: string;
+    }>
+  >([]);
+
+  const spreadsheetId = (meta as GoogleSheetMeta)?.spreadsheet?.id;
+
+  useEffect(() => {
+    if (selectedAction !== ActionType.GOOGLE_SHEET) return;
+
+    const getSpreadsheets = async () => {
+      setLoadingSpreadsheets(true);
+      const res = await getGoogleSpreadsheets();
+      setSpreadsheets(res?.data || []);
+      setLoadingSpreadsheets(false);
+    };
+    getSpreadsheets();
+  }, []);
+
+  useEffect(() => {
+    if (!spreadsheetId || selectedAction !== ActionType.GOOGLE_SHEET) return;
+
+    const getSheets = async () => {
+      setLoadingSheets(true);
+      const res = await getSpreadsheetSheets(spreadsheetId);
+      setSheetNames(res?.data || []);
+      setLoadingSheets(false);
+    };
+    getSheets();
+  }, [spreadsheetId]);
+
   if (selectedAction === ActionType.GOOGLE_SHEET) {
-    const [loadingSpreadsheets, setLoadingSpreadsheets] = useState(false);
-    const [loadingSheets, setLoadingSheets] = useState(false);
-
-    const [sheetNames, setSheetNames] = useState<string[]>([]);
-    const [spreadsheets, setSpreadsheets] = useState<
-      Array<{
-        id: string;
-        name: string;
-      }>
-    >([]);
-
-    const spreadsheetId = (meta as GoogleSheetMeta)?.spreadsheet?.id;
-
-    useEffect(() => {
-      const getSpreadsheets = async () => {
-        setLoadingSpreadsheets(true);
-        const res = await getGoogleSpreadsheets();
-        setSpreadsheets(res?.data || []);
-        setLoadingSpreadsheets(false);
-      };
-      getSpreadsheets();
-    }, []);
-
-    useEffect(() => {
-      if (!spreadsheetId) return;
-
-      const getSheets = async () => {
-        setLoadingSheets(true);
-        const res = await getSpreadsheetSheets(spreadsheetId);
-        setSheetNames(res?.data || []);
-        setLoadingSheets(false);
-      };
-      getSheets();
-    }, [spreadsheetId]);
-
     return (
       <Box mt={'4'}>
         {isAuthenticated || showActionDrawer ? (
