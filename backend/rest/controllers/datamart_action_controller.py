@@ -1,7 +1,11 @@
+import logging
 from typing import List, Union
 
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi import APIRouter, Depends
-from fastapi import APIRouter, Depends
+from domain.apps.service import AppService
+from domain.spreadsheets.models import DatabaseClient
+from rest.controllers.actions.compute_query import ComputeQueryAction
 from domain.apperture_users.service import AppertureUserService
 from domain.datamart.service import DataMartService
 from domain.datamart_actions.models import DatamartActions
@@ -60,7 +64,7 @@ async def get_spreadsheets(
     datamart_action_service: DatamartActionService = Depends(),
 ):
     user = await user_service.get_user(id=user_id)
-    return datamart_action_service.get_spreadsheet_sheets(
+    return datamart_action_service.get_sheet_names(
         refresh_token=user.sheet_token, spreadsheet_id=spreadsheet_id
     )
 
@@ -103,6 +107,7 @@ async def save_datamart_action(
 
 @router.put(
     "/datamart_actions/{id}",
+    response_model=DatamartActionsResponse,
 )
 async def update_datamart_action(
     id: str,

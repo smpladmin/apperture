@@ -75,27 +75,9 @@ async def save_datamart_table(
     dto: DataMartTableDto,
     datasource_service: DataSourceService = Depends(),
     datamart_service: DataMartService = Depends(),
-    app_service: AppService = Depends(),
     user_id: str = Depends(get_user_id),
-    compute_query_action: ComputeQueryAction = Depends(),
 ):
-    database_client = await compute_query_action.get_database_client(
-        datasource_id=dto.datasourceId
-    )
-    db_creds = None
-    if database_client == DatabaseClient.MSSQL:
-        db_creds = await compute_query_action.get_credentials(
-            datasource_id=dto.datasourceId
-        )
     datasource = await datasource_service.get_datasource(id=dto.datasourceId)
-    app = await app_service.get_app(id=datasource.app_id)
-    if not app.clickhouse_credential:
-        logging.info(f"Restricted user db doesn't exist for app!")
-        raise HTTPException(
-            status_code=401,
-            detail=f"Restricted user db doesn't exist for app: {str(app.id)}",
-        )
-
     datamart_table = datamart_service.build_datamart_table(
         datasource_id=PydanticObjectId(dto.datasourceId),
         app_id=datasource.app_id,
@@ -103,19 +85,7 @@ async def save_datamart_table(
         name=dto.name,
         query=dto.query,
     )
-
-    creation_status = await datamart_service.create_datamart_table(
-        table=datamart_table,
-        clickhouse_credential=app.clickhouse_credential,
-        database_client=database_client,
-        db_creds=db_creds,
-    )
-    if creation_status:
-        return datamart_table
-    else:
-        raise HTTPException(
-            status_code=500, detail="Error while creating table in clickhouse"
-        )
+    return await datamart_service.save_datamart(datamart=datamart_table)
 
 
 @router.put(
@@ -127,27 +97,10 @@ async def update_datamart_table(
     id: str,
     dto: DataMartTableDto,
     datasource_service: DataSourceService = Depends(),
-    app_service: AppService = Depends(),
     datamart_service: DataMartService = Depends(),
     user_id: str = Depends(get_user_id),
-    compute_query_action: ComputeQueryAction = Depends(),
 ):
-    database_client = await compute_query_action.get_database_client(
-        datasource_id=dto.datasourceId
-    )
-    db_creds = None
-    if database_client == DatabaseClient.MSSQL:
-        db_creds = await compute_query_action.get_credentials(
-            datasource_id=dto.datasourceId
-        )
     datasource = await datasource_service.get_datasource(dto.datasourceId)
-    app = await app_service.get_app(id=datasource.app_id)
-    if not app.clickhouse_credential:
-        logging.info(f"Restricted user db doesn't exist for app!")
-        raise HTTPException(
-            status_code=401,
-            detail=f"Restricted user db doesn't exist for app: {str(app.id)}",
-        )
 
     new_datamart_table = datamart_service.build_datamart_table(
         datasource_id=PydanticObjectId(dto.datasourceId),
@@ -157,19 +110,11 @@ async def update_datamart_table(
         query=dto.query,
     )
 
-    update_status = await datamart_service.update_datamart_table(
-        table_id=id,
+    await datamart_service.update_datamart_table(
+        id=id,
         new_table=new_datamart_table,
-        clickhouse_credential=app.clickhouse_credential,
-        database_client=database_client,
-        db_creds=db_creds,
     )
-    if update_status:
-        return new_datamart_table
-    else:
-        raise HTTPException(
-            status_code=500, detail="Error while creating table in clickhouse"
-        )
+    return new_datamart_table
 
 
 @router.get(

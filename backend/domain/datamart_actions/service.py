@@ -1,9 +1,12 @@
 from datetime import datetime
 import logging
-from typing import List, Union
+from typing import Dict, List, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends
+from domain.apps.models import ClickHouseCredential
+from domain.integrations.models import MsSQLCredential, MySQLCredential
+from domain.spreadsheets.models import DatabaseClient
 
 from domain.datamart_actions.models import (
     DatamartActions,
@@ -20,14 +23,17 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 import os
+from repositories.clickhouse.datamart import DataMartRepo
 
 
 class DatamartActionService:
     def __init__(
         self,
         mongo: Mongo = Depends(),
+        datamart_repo: DataMartRepo = Depends(),
     ):
         self.mongo = mongo
+        self.datamart_repo = datamart_repo
 
     def build_datamart_action(
         self,
@@ -65,6 +71,39 @@ class DatamartActionService:
         await DatamartActions.find_one(
             DatamartActions.id == PydanticObjectId(id),
         ).update({"$set": to_update})
+
+    async def refresh_table_action(
+        self,
+        app_id: str,
+        clickhouse_credential: ClickHouseCredential,
+        database_client: DatabaseClient,
+        database_credential: Union[
+            ClickHouseCredential, MySQLCredential, MsSQLCredential
+        ],
+        query: str,
+        table_name: str,
+    ):
+        await self.datamart_repo.drop_table(
+            table_name=table_name,
+            clickhouse_credential=clickhouse_credential,
+            app_id=app_id,
+        )
+        if database_client == DatabaseClient.MSSQL:
+            update_status = await self.datamart_repo.create_mssql_table(
+                query=query,
+                table_name=table_name,
+                clickhouse_credential=clickhouse_credential,
+                db_creds=database_credential,
+                app_id=app_id,
+            )
+        else:
+            update_status = await self.datamart_repo.create_table(
+                query=query,
+                table_name=table_name,
+                clickhouse_credential=clickhouse_credential,
+                app_id=app_id,
+            )
+        return update_status
 
     async def get_datamart_action(self, id: str) -> DatamartActions:
         return await DatamartActions.get(PydanticObjectId(id))
@@ -189,17 +228,6 @@ class DatamartActionService:
 
         return all_files
 
-    def get_sheet_names(self, service, spreadsheet_id):
-        sheet_metadata = (
-            service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
-        )
-        sheets = sheet_metadata.get("sheets", [])
-        sheet_names = []
-        for sheet in sheets:
-            sheet_names.append(sheet["properties"]["title"])
-
-        return sheet_names
-
     def get_google_spreadsheets(self, refresh_token: str):
         try:
             drive_service = self.initialize_google_drive_service(
@@ -210,10 +238,16 @@ class DatamartActionService:
         except Exception as e:
             logging.info(e)
 
-    def get_spreadsheet_sheets(self, refresh_token: str, spreadsheet_id: str):
+    def get_sheet_names(self, refresh_token: str, spreadsheet_id: str):
         sheet_service = self.initialize_google_sheet_service(
             access_token="", refresh_token=refresh_token
         )
-        return self.get_sheet_names(
-            service=sheet_service, spreadsheet_id=spreadsheet_id
+        sheet_metadata = (
+            sheet_service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         )
+        sheets = sheet_metadata.get("sheets", [])
+        sheet_names = []
+        for sheet in sheets:
+            sheet_names.append(sheet["properties"]["title"])
+
+        return sheet_names

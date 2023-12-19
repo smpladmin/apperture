@@ -20,7 +20,7 @@ class DatamartActionsService:
         datamart_list = response.json()
         return [DatamartActions(**ds) for ds in datamart_list]
 
-    def refresh_datamart(
+    def refresh_table_action(
         self,
         datamart_id: str,
         app_id: str,
@@ -28,14 +28,16 @@ class DatamartActionsService:
         database_credential: Union[
             MySQLCredential, MsSQLCredential, ClickHouseCredential
         ],
+        table_name: str,
     ):
         logging.info("{x}: {y}".format(x="refresh datamart", y="start"))
         try:
             logging.info(f"database credential, {database_credential}")
             response = post(
-                path="/private/datamart/refresh",
+                path="/private/datamart_actions/refresh",
                 json={
                     "datamartId": datamart_id,
+                    "tableName": table_name,
                     "appId": app_id,
                     "databaseClient": database_client,
                     "databaseCredential": database_credential.dict(),

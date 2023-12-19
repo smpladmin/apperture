@@ -12,12 +12,23 @@ from domain.datamart_actions.models import (
     Schedule,
 )
 from rest.dtos.model_response import ModelResponse
+from domain.spreadsheets.models import DatabaseClient
+from domain.apps.models import ClickHouseCredential
+from domain.integrations.models import MsSQLCredential, MySQLCredential
 
 
 class PushDatamartDto(BaseModel):
     datamartId: str
     meta: Union[GoogleSheetMeta, APIMeta, TableMeta]
     type: ActionType
+
+
+class RefreshTableActionDto(BaseModel):
+    datamartId: str
+    tableName: str
+    appId: str
+    databaseCredential: Union[ClickHouseCredential, MySQLCredential, MsSQLCredential]
+    databaseClient: DatabaseClient
 
 
 class DatamartActionsDto(BaseModel):

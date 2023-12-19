@@ -16,11 +16,6 @@ from mongo import Mongo
 from repositories.clickhouse.clickhouse_role import ClickHouseRole
 from repositories.clickhouse.datamart import DataMartRepo
 
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
-import os
-
 
 class DataMartService:
     def __init__(
@@ -53,6 +48,9 @@ class DataMartService:
             query=query,
             last_refreshed=now,
         )
+
+    async def save_datamart(self, datamart: DataMart):
+        return await DataMart.insert(datamart)
 
     async def create_datamart_table(
         self,
@@ -128,27 +126,17 @@ class DataMartService:
 
     async def update_datamart_table(
         self,
-        table_id: str,
+        id: str,
         new_table: DataMart,
-        database_client: DatabaseClient,
-        db_creds: Union[MsSQLCredential, None],
-        clickhouse_credential: ClickHouseCredential,
     ):
         to_update = new_table.dict()
         to_update.pop("id")
         to_update.pop("created_at")
         to_update["updated_at"] = datetime.utcnow()
 
-        update_status = await self.update_table_action(
-            datamart_id=table_id,
-            clickhouse_credential=clickhouse_credential,
-            to_update=to_update,
-            query=new_table.query,
-            table_name=new_table.table_name,
-            db_creds=db_creds,
-            database_client=database_client,
-        )
-        return update_status
+        await DataMart.find_one(
+            DataMart.id == PydanticObjectId(id),
+        ).update({"$set": to_update})
 
     async def get_datamart_table(self, id: str) -> DataMart:
         return await DataMart.get(PydanticObjectId(id))
