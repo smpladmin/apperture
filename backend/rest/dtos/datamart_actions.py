@@ -38,6 +38,7 @@ class DatamartActionsDto(BaseModel):
     meta: Union[GoogleSheetMeta, APIMeta, TableMeta]
 
 
-class DatamartActionsResponse(DatamartAction, ModelResponse):
+class DatamartActionResponse(DatamartAction, ModelResponse):
     class Config:
         allow_population_by_field_name = True
+        orm_mode = True

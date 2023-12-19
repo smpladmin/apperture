@@ -289,11 +289,7 @@ const Configuration = ({
             border={'1px'}
             borderColor={'grey.700'}
             value={(meta as TableMeta)?.name || getTableName(workbookName)}
-            onChange={(e) => {
-              setMeta((prevMeta: APIMeta) => {
-                return { ...prevMeta, name: e.target.value };
-              });
-            }}
+            disabled
           />
         </Flex>
       </Flex>

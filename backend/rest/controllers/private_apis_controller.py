@@ -9,7 +9,7 @@ from authorisation.service import AuthService
 from domain.datamart_actions.service import DatamartActionService
 from domain.datamart_actions.models import ActionType
 from rest.dtos.datamart_actions import (
-    DatamartActionsResponse,
+    DatamartActionResponse,
     PushDatamartDto,
     RefreshTableActionDto,
 )
@@ -417,7 +417,7 @@ async def get_clickstream_event_properties(
     return await clickstream_event_properties_service.get_event_properties()
 
 
-@router.get("/datamart_actions", response_model=List[DatamartActionsResponse])
+@router.get("/datamart_actions", response_model=List[DatamartActionResponse])
 async def get_datamart_actions(
     datamart_action_service: DatamartActionService = Depends(),
 ):

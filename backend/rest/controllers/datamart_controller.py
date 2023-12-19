@@ -25,6 +25,7 @@ from rest.dtos.datamart import (
     DataMartTableDto,
     DataMartWithUser,
 )
+from rest.dtos.datamart_actions import DatamartActionResponse
 from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
     TransientSpreadsheetsDto,
@@ -139,6 +140,7 @@ async def get_datamart_tables(
     user: AppertureUser = Depends(get_user),
     datasource_service: DataSourceService = Depends(),
     datamart_service: DataMartService = Depends(),
+    datamart_action_service: DatamartActionService = Depends(),
 ):
     datasource = await datasource_service.get_datasource(id=datasource_id)
     datamarts = await datamart_service.get_datamart_tables_for_app_id(
@@ -147,7 +149,15 @@ async def get_datamart_tables(
     datamarts = [DataMartWithUser.from_orm(d) for d in datamarts]
 
     for datamart in datamarts:
+        datamart_actions = (
+            await datamart_action_service.get_datamart_actions_for_datamart(
+                datamart_id=datamart.id
+            )
+        )
+        actions = [DatamartActionResponse.from_orm(d) for d in datamart_actions]
         datamart.user = AppertureUserResponse.from_orm(user)
+        datamart.actions = actions
+
     return datamarts
 
 

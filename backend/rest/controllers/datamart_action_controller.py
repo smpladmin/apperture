@@ -10,7 +10,7 @@ from domain.apperture_users.service import AppertureUserService
 from domain.datamart.service import DataMartService
 from domain.datamart_actions.models import DatamartAction
 from domain.datamart_actions.service import DatamartActionService
-from rest.dtos.datamart_actions import DatamartActionsDto, DatamartActionsResponse
+from rest.dtos.datamart_actions import DatamartActionsDto, DatamartActionResponse
 
 from rest.middlewares import get_user_id, validate_jwt
 from rest.middlewares.validate_app_user import validate_library_items
@@ -25,7 +25,7 @@ router = APIRouter(
 
 @router.get(
     "/datamart_actions",
-    response_model=List[DatamartActionsResponse],
+    response_model=List[DatamartActionResponse],
 )
 async def get_saved_datamart_actions(
     datamart_id: Union[str, None] = None,
@@ -71,7 +71,7 @@ async def get_spreadsheets(
 
 @router.get(
     "/datamart_actions/{id}",
-    response_model=DatamartActionsResponse,
+    response_model=DatamartActionResponse,
 )
 async def get_saved_datamart_action(
     id: str,
@@ -82,7 +82,7 @@ async def get_saved_datamart_action(
 
 @router.post(
     "/datamart_actions",
-    response_model=DatamartActionsResponse,
+    response_model=DatamartActionResponse,
 )
 async def save_datamart_action(
     dto: DatamartActionsDto,
@@ -107,7 +107,7 @@ async def save_datamart_action(
 
 @router.put(
     "/datamart_actions/{id}",
-    response_model=DatamartActionsResponse,
+    response_model=DatamartActionResponse,
 )
 async def update_datamart_action(
     id: str,

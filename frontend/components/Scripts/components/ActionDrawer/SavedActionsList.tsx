@@ -6,7 +6,6 @@ import {
   MenuItem,
   MenuList,
   Text,
-  useDisclosure,
 } from '@chakra-ui/react';
 import { TypeNameMap, describeSchedule } from '@components/Scripts/util';
 import {
@@ -23,7 +22,6 @@ import React from 'react';
 import GoogleSheetLogo from '@assets/images/google-sheets-logo.svg';
 import APILogo from '@assets/images/api-logo-new.svg';
 import TableLogo from '@assets/images/table.svg';
-import ConfirmationModal from '@components/ConfirmationModal';
 import { deleteDatamartAction } from '@lib/services/datamartActionService';
 
 const SavedActionsList = ({

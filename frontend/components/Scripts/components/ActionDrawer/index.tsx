@@ -73,7 +73,15 @@ const ActionDrawer = ({
                 Schedule an action
               </Text>
             </Flex>
-            <X size={20} cursor={'pointer'} onClick={onClose} />
+            <X
+              size={20}
+              cursor={'pointer'}
+              onClick={() => {
+                setIsActionBeingCreated(false);
+                setAction(undefined);
+                onClose();
+              }}
+            />
           </Flex>
         </DrawerHeader>
 
