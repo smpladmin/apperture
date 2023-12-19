@@ -46,7 +46,7 @@ def get_cron_expression(
         return f"{minute} {hour_24} * * {cron_day}"
 
     if date:
-        day = date.split("-")[0]
+        day = date.split("-")[2]  # date format is YYYY-MM-DD
         return f"{minute} {hour_24} {day} * *"
 
     return f"{minute} {hour_24} * * *"
