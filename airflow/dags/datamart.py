@@ -1,19 +1,16 @@
 import logging
 import pendulum
-from typing import Dict, Optional, Union
-from datetime import datetime
-from utils.utils import DATAMART_INIT_DATE
+from typing import Dict, Union
+from datetime import datetime, timedelta
+from utils.utils import get_cron_expression, FREQUENCY_DELTAS
 from airflow.decorators import dag, task, task_group
 
 
 from domain.datamart.models import (
-    DatamartActions,
+    DatamartAction,
     ActionType,
-    HourlySchedule,
-    DailySchedule,
-    WeeklySchedule,
+    Schedule,
     Frequency,
-    MonthlySchedule,
 )
 from domain.datasource.service import DataSourceService
 from domain.datamart.service import DatamartActionsService
@@ -68,7 +65,8 @@ def get_database_credentials(
 
 
 @task(trigger_rule="all_done")
-def push_datamart_to_google_sheet(datamart_action: DatamartActions):
+def push_datamart_to_google_sheet(datamart_action: DatamartAction):
+    logging.info(f"Pushing data to google sheet: {datamart_action.meta}")
     datamart_action_service.push_datamart_to_target(
         datamart_id=datamart_action.datamart_id,
         type=datamart_action.type,
@@ -77,7 +75,8 @@ def push_datamart_to_google_sheet(datamart_action: DatamartActions):
 
 
 @task(trigger_rule="all_done")
-def push_datamart_to_api(datamart_action: DatamartActions):
+def push_datamart_to_api(datamart_action: DatamartAction):
+    logging.info(f"Pushing data to API: {datamart_action.meta}")
     datamart_action_service.push_datamart_to_target(
         datamart_id=datamart_action.datamart_id,
         type=datamart_action.type,
@@ -86,23 +85,24 @@ def push_datamart_to_api(datamart_action: DatamartActions):
 
 
 @task(trigger_rule="all_done")
-def refresh_datamart_table(
-    datamart_actions: DatamartActions,
+def refresh_table_action(
+    datamart_action: DatamartAction,
     database_client: DatabaseClient,
     database_credential: Union[MySQLCredential, MsSQLCredential, ClickHouseCredential],
 ):
-    logging.info("Refreshing datamart table")
-    datamart_action_service.refresh_datamart(
-        datamart_id=datamart_actions.id,
-        app_id=datamart_actions.app_id,
+    logging.info(f"Refreshing datamart action table: {datamart_action.meta}")
+    datamart_action_service.refresh_table_action(
+        datamart_id=datamart_action.datamart_id,
+        app_id=datamart_action.app_id,
         database_client=database_client,
         database_credential=database_credential,
+        table_name=datamart_action.meta.name,
     )
 
 
 @task_group
-def refresh_datamart(
-    datamart_action: DatamartActions,
+def refresh_datamart_action(
+    datamart_action: DatamartAction,
     database_client: DatabaseClient,
     database_credential: Union[MySQLCredential, MsSQLCredential, ClickHouseCredential],
 ):
@@ -113,77 +113,45 @@ def refresh_datamart(
         push_datamart_to_api(datamart_action=datamart_action)
 
     if datamart_action.type == ActionType.TABLE:
-        refresh_datamart_table(
-            datamart_actions=datamart_action,
+        refresh_table_action(
+            datamart_action=datamart_action,
             database_client=database_client,
             database_credential=database_credential,
         )
 
 
-def get_daily_schedule_cron_expression(
-    time_str: str, period: str, day: Optional[str], date: Optional[str]
-):
-    time_obj = datetime.strptime(time_str + " " + period, "%I:%M %p")
-    hour_24 = time_obj.strftime("%H")
-    minute = time_obj.strftime("%M")
-
-    if day:
-        days_of_week = {
-            "Monday": 1,
-            "Tuesday": 2,
-            "Wednesday": 3,
-            "Thursday": 4,
-            "Friday": 5,
-            "Saturday": 6,
-            "Sunday": 0,
-        }
-
-        cron_day = days_of_week[day]
-        return f"{minute} {hour_24} * * {cron_day}"
-
-    if date:
-        day = date.split("-")[0]
-        return f"{minute} {hour_24} {day} * *"
-
-    return f"{minute} {hour_24} * * *"
-
-
-def calculate_schedule(
-    schedule: Union[WeeklySchedule, MonthlySchedule, DailySchedule, HourlySchedule]
-) -> str:
+def calculate_schedule(schedule: Schedule) -> str:
     if schedule.frequency == Frequency.HOURLY:
         return "0 * * * *"
 
-    if schedule.frequency == Frequency.DAILY:
-        return get_daily_schedule_cron_expression(
-            time_str=schedule.time, period=schedule.period, day=None, date=None
-        )
+    return get_cron_expression(
+        time_str=schedule.time,
+        period=schedule.period,
+        day=schedule.day if schedule.frequency == Frequency.WEEKLY else None,
+        date=schedule.date if schedule.frequency == Frequency.MONTHLY else None,
+    )
 
-    if schedule.frequency == Frequency.WEEKLY:
-        return get_daily_schedule_cron_expression(
-            time_str=schedule.time, period=schedule.period, day=schedule.day, date=None
-        )
 
-    if schedule.frequency == Frequency.MONTHLY:
-        return get_daily_schedule_cron_expression(
-            time_str=schedule.time, period=schedule.period, day=None, date=schedule.date
-        )
-
-    return "0 8 * * *"
+def calculate_start_date(created_date: datetime, schedule: Schedule) -> datetime:
+    delta = FREQUENCY_DELTAS.get(schedule.frequency, timedelta(days=1))
+    return created_date - delta
 
 
 def create_dag(
-    datamart_action: DatamartActions, datasource_id: str, created_date: datetime
+    datamart_action: DatamartAction, datasource_id: str, created_date: datetime
 ):
     @dag(
         dag_id=f"datamart_action_loader_{datamart_action.type}_{datamart_action.id}",
         description=f"Datamart datasource daily refresh for {datamart_action.type}_{datamart_action.id}",
         schedule=calculate_schedule(schedule=datamart_action.schedule),
         start_date=pendulum.instance(
-            created_date if created_date > DATAMART_INIT_DATE else DATAMART_INIT_DATE,
+            calculate_start_date(
+                created_date=created_date, schedule=datamart_action.schedule
+            ),
             tz=pendulum.timezone("Asia/Kolkata"),
         ),
         tags=["datamart-scheduled-data-fetch"],
+        catchup=False,
     )
     def datamart_loader():
         datasource_with_credential = get_datasource_and_credential(
@@ -197,7 +165,7 @@ def create_dag(
             credential=credential,
         )
 
-        refresh_datamart(
+        refresh_datamart_action(
             datamart_action=datamart_action,
             database_client=database_client,
             database_credential=database_credentials,

@@ -69,18 +69,13 @@ const WatchlistTable = ({
               cell: (info) => <UserInfo info={info} />,
               header: 'Created By',
             }),
-            columnHelper.accessor(
-              type === WatchListItemType.DATAMARTS
-                ? 'details.lastRefreshed'
-                : 'details.updatedAt',
-              {
-                cell: (info) => {
-                  const updatedAt = info.getValue() as Date;
-                  return dayjs.utc(updatedAt).local().format(dateFormat);
-                },
-                header: 'Last Updated',
-              }
-            ),
+            columnHelper.accessor('details.updatedAt', {
+              cell: (info) => {
+                const updatedAt = info.getValue() as Date;
+                return dayjs.utc(updatedAt).local().format(dateFormat);
+              },
+              header: 'Last Updated',
+            }),
             columnHelper.accessor('details._id', {
               cell: (info) => (
                 <Actions

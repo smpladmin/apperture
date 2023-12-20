@@ -15,6 +15,7 @@ from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
 from domain.datamart.service import DataMartService
 from domain.apperture_users.service import AppertureUserService
+from domain.datamart_actions.service import DatamartActionService
 from domain.datasources.service import DataSourceService
 from domain.spreadsheets.models import DatabaseClient
 from rest.controllers.actions.compute_query import ComputeQueryAction
@@ -24,12 +25,15 @@ from rest.dtos.datamart import (
     DataMartTableDto,
     DataMartWithUser,
 )
+from rest.dtos.datamart_actions import DatamartActionResponse
 from rest.dtos.spreadsheets import (
     ComputedSpreadsheetQueryResponse,
     TransientSpreadsheetsDto,
 )
 from rest.middlewares import get_user, get_user_id, validate_jwt
 from rest.middlewares.validate_app_user import validate_app_user, validate_library_items
+from clickhouse_connect.driver.exceptions import DatabaseError
+from utils.errors import BusinessError
 
 
 router = APIRouter(
@@ -49,11 +53,18 @@ async def compute_datamart_query(
     compute_query_action: ComputeQueryAction = Depends(),
     ds_service: DataSourceService = Depends(),
 ):
-    datasource = await ds_service.get_datasource(dto.datasourceId)
-    result = await compute_query_action.compute_query(app_id=datasource.app_id, dto=dto)
-    return compute_query_action.create_spreadsheet_with_custom_headers(
-        column_names=result.headers, data=result.data, sql=result.sql
-    )
+    try:
+        datasource = await ds_service.get_datasource(dto.datasourceId)
+        result = await compute_query_action.compute_query(
+            app_id=datasource.app_id, dto=dto
+        )
+        return compute_query_action.create_spreadsheet_with_custom_headers(
+            column_names=result.headers, data=result.data, sql=result.sql
+        )
+    except BusinessError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
+    except DatabaseError as e:
+        raise HTTPException(status_code=400, detail=str(e) or "Something went wrong")
 
 
 @router.post(
@@ -65,27 +76,9 @@ async def save_datamart_table(
     dto: DataMartTableDto,
     datasource_service: DataSourceService = Depends(),
     datamart_service: DataMartService = Depends(),
-    app_service: AppService = Depends(),
     user_id: str = Depends(get_user_id),
-    compute_query_action: ComputeQueryAction = Depends(),
 ):
-    database_client = await compute_query_action.get_database_client(
-        datasource_id=dto.datasourceId
-    )
-    db_creds = None
-    if database_client == DatabaseClient.MSSQL:
-        db_creds = await compute_query_action.get_credentials(
-            datasource_id=dto.datasourceId
-        )
     datasource = await datasource_service.get_datasource(id=dto.datasourceId)
-    app = await app_service.get_app(id=datasource.app_id)
-    if not app.clickhouse_credential:
-        logging.info(f"Restricted user db doesn't exist for app!")
-        raise HTTPException(
-            status_code=401,
-            detail=f"Restricted user db doesn't exist for app: {str(app.id)}",
-        )
-
     datamart_table = datamart_service.build_datamart_table(
         datasource_id=PydanticObjectId(dto.datasourceId),
         app_id=datasource.app_id,
@@ -93,19 +86,7 @@ async def save_datamart_table(
         name=dto.name,
         query=dto.query,
     )
-
-    creation_status = await datamart_service.create_datamart_table(
-        table=datamart_table,
-        clickhouse_credential=app.clickhouse_credential,
-        database_client=database_client,
-        db_creds=db_creds,
-    )
-    if creation_status:
-        return datamart_table
-    else:
-        raise HTTPException(
-            status_code=500, detail="Error while creating table in clickhouse"
-        )
+    return await datamart_service.save_datamart(datamart=datamart_table)
 
 
 @router.put(
@@ -117,27 +98,10 @@ async def update_datamart_table(
     id: str,
     dto: DataMartTableDto,
     datasource_service: DataSourceService = Depends(),
-    app_service: AppService = Depends(),
     datamart_service: DataMartService = Depends(),
     user_id: str = Depends(get_user_id),
-    compute_query_action: ComputeQueryAction = Depends(),
 ):
-    database_client = await compute_query_action.get_database_client(
-        datasource_id=dto.datasourceId
-    )
-    db_creds = None
-    if database_client == DatabaseClient.MSSQL:
-        db_creds = await compute_query_action.get_credentials(
-            datasource_id=dto.datasourceId
-        )
     datasource = await datasource_service.get_datasource(dto.datasourceId)
-    app = await app_service.get_app(id=datasource.app_id)
-    if not app.clickhouse_credential:
-        logging.info(f"Restricted user db doesn't exist for app!")
-        raise HTTPException(
-            status_code=401,
-            detail=f"Restricted user db doesn't exist for app: {str(app.id)}",
-        )
 
     new_datamart_table = datamart_service.build_datamart_table(
         datasource_id=PydanticObjectId(dto.datasourceId),
@@ -147,19 +111,11 @@ async def update_datamart_table(
         query=dto.query,
     )
 
-    update_status = await datamart_service.update_datamart_table(
-        table_id=id,
+    await datamart_service.update_datamart_table(
+        id=id,
         new_table=new_datamart_table,
-        clickhouse_credential=app.clickhouse_credential,
-        database_client=database_client,
-        db_creds=db_creds,
     )
-    if update_status:
-        return new_datamart_table
-    else:
-        raise HTTPException(
-            status_code=500, detail="Error while creating table in clickhouse"
-        )
+    return new_datamart_table
 
 
 @router.get(
@@ -184,6 +140,7 @@ async def get_datamart_tables(
     user: AppertureUser = Depends(get_user),
     datasource_service: DataSourceService = Depends(),
     datamart_service: DataMartService = Depends(),
+    datamart_action_service: DatamartActionService = Depends(),
 ):
     datasource = await datasource_service.get_datasource(id=datasource_id)
     datamarts = await datamart_service.get_datamart_tables_for_app_id(
@@ -192,7 +149,15 @@ async def get_datamart_tables(
     datamarts = [DataMartWithUser.from_orm(d) for d in datamarts]
 
     for datamart in datamarts:
+        datamart_actions = (
+            await datamart_action_service.get_datamart_actions_for_datamart(
+                datamart_id=datamart.id
+            )
+        )
+        actions = [DatamartActionResponse.from_orm(d) for d in datamart_actions]
         datamart.user = AppertureUserResponse.from_orm(user)
+        datamart.actions = actions
+
     return datamarts
 
 
@@ -203,6 +168,7 @@ async def get_datamart_tables(
 async def delete_datamart_table(
     id: str,
     datamart_service: DataMartService = Depends(),
+    datamart_action_service: DatamartActionService = Depends(),
     app_service: AppService = Depends(),
 ):
     existing_table = await datamart_service.get_datamart_table(id=id)
@@ -220,6 +186,8 @@ async def delete_datamart_table(
         clickhouse_credential=app.clickhouse_credential,
         app_id=str(app.id),
     )
+
+    await datamart_action_service.delete_datamart_actions_for_datamart(datamart_id=id)
 
 
 oauth = OAuthClientFactory().init_client(

@@ -49,6 +49,7 @@ const ConfirmationModal = ({
         maxWidth="168"
         maxHeight={'calc(100% - 100px)'}
         borderRadius={{ base: '16px', md: '20px' }}
+        bg={'white.DEFAULT'}
         data-testid={'confirmation-modal'}
       >
         <ModalHeader

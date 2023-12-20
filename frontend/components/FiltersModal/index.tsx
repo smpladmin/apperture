@@ -44,6 +44,7 @@ const FiltersModal = ({
         rounded={'2xl'}
         margin={{ base: '0', md: '4' }}
         maxHeight={'calc(100% - 100px)'}
+        bg={'white.DEFAULT'}
       >
         <ModalHeader
           display={'flex'}

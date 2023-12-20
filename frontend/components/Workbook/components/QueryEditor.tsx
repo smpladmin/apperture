@@ -94,7 +94,7 @@ const QueryEditor = ({
     if (abortControllerRef.current) {
       const { controller, id } = abortControllerRef.current;
       controller.abort();
-      const response = await cancelTransientSpreadsheetQuery(id); 
+      const response = await cancelTransientSpreadsheetQuery(id);
     }
   };
 
@@ -236,7 +236,7 @@ const QueryEditor = ({
             py={'6px'}
             borderRadius={'8'}
             onClick={isLoading ? handleQueryCancel : handleQueryChange}
-            disabled={!sheetData.edit_mode}
+            isDisabled={!sheetData.edit_mode}
           >
             <Flex gap={'1'}>
               {isLoading ? (

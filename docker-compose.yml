@@ -132,7 +132,7 @@ services:
       - KAFKA_KRAFT_CLUSTER_ID=OTMwNzFhYTY1ODNiNGE5OT
       - KAFKA_CFG_PROCESS_ROLES=broker,controller
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_BROKER_ID=1
@@ -143,7 +143,54 @@ services:
       - KAFKA_CFG_REPLICA_FETCH_MAX_BYTES=7864320
       - ALLOW_PLAINTEXT_LISTENER=yes # FIXME: kafka gives warning for this
     volumes:
-      - kafka_data:/bitnami/kafka
+      - kafka_data1:/bitnami/kafka
+    depends_on:
+      - kafka2
+      - kafka3
+  kafka2:
+    image: "bitnami/kafka:latest"
+    container_name: kafka2
+    ports:
+      - "9093:9093"
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_KRAFT_CLUSTER_ID=OTMwNzFhYTY1ODNiNGE5OT
+      - KAFKA_CFG_PROCESS_ROLES=broker
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://kafka2:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka2:9092
+      - KAFKA_BROKER_ID=2
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_CFG_NODE_ID=2
+      - KAFKA_CFG_MAX_REQUEST_SIZE=5242880
+      - KAFKA_CFG_MESSAGE_MAX_BYTES=5242880
+      - KAFKA_CFG_REPLICA_FETCH_MAX_BYTES=7864320
+      - ALLOW_PLAINTEXT_LISTENER=yes # FIXME: kafka gives warning for this
+    volumes:
+      - kafka_data2:/bitnami/kafka
+  kafka3:
+    image: "bitnami/kafka:latest"
+    container_name: kafka3
+    ports:
+      - "9094:9094"
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_KRAFT_CLUSTER_ID=OTMwNzFhYTY1ODNiNGE5OT
+      - KAFKA_CFG_PROCESS_ROLES=broker
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://kafka3:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka3:9092
+      - KAFKA_BROKER_ID=3
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_CFG_NODE_ID=3
+      - KAFKA_CFG_MAX_REQUEST_SIZE=5242880
+      - KAFKA_CFG_MESSAGE_MAX_BYTES=5242880
+      - KAFKA_CFG_REPLICA_FETCH_MAX_BYTES=7864320
+      - ALLOW_PLAINTEXT_LISTENER=yes # FIXME: kafka gives warning for this
+    volumes:
+      - kafka_data3:/bitnami/kafka
   connect:
     image: quay.io/debezium/connect:2.4
     container_name: connect
@@ -197,4 +244,6 @@ volumes:
   redisdata: {}
   ch_data: {}
   ch_logs: {}
-  kafka_data: {}
+  kafka_data1: {}
+  kafka_data2: {}
+  kafka_data3: {}

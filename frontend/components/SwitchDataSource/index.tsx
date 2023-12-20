@@ -62,6 +62,7 @@ const SwitchDataSource = ({
     >
       <ModalOverlay backdropFilter={'blur(20px)'} />
       <ModalContent
+        bg={'white.DEFAULT'}
         margin={'1rem'}
         maxWidth="168"
         maxHeight={'calc(100% - 100px)'}

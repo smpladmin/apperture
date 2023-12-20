@@ -19,9 +19,13 @@ class Integrations(EventsBase):
     ):
         drop_query = f"DROP TABLE IF EXISTS {db_name}.{name}"
         logging.info(f"drop query: {drop_query}")
-        await self.execute_query_for_app_admin(app_id=app_id, query=drop_query)
+        await self.execute_query_for_app_admin(
+            app_id=app_id, query=drop_query, parameters={}
+        )
 
         s3_url = self.s3_path + s3_key
         create_query = f"CREATE TABLE {db_name}.{name} ENGINE = MergeTree() ORDER BY tuple() AS SELECT * FROM s3('{s3_url}', '{self.aws_access_key}', '{self.aws_secret_access_key}', CSVWithNames)"
         logging.info(f"create query: {create_query}")
-        await self.execute_query_for_app_admin(app_id=app_id, query=create_query)
+        await self.execute_query_for_app_admin(
+            app_id=app_id, query=create_query, parameters={}
+        )

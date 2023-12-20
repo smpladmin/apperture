@@ -65,7 +65,11 @@ const EventOptions = ({
               >
                 {option.label}
               </Text>
-              <Radio value={option.value} hidden disabled={option.isDisabled} />
+              <Radio
+                value={option.value}
+                hidden
+                isDisabled={option.isDisabled}
+              />
             </Flex>
           );
         })}

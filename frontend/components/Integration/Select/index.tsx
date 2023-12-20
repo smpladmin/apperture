@@ -311,7 +311,7 @@ const SelectProvider = ({ apps }: { apps: Array<AppWithIntegrations> }) => {
             lineHeight="base"
             textColor="white.100"
             width={{ base: 'full', md: '72' }}
-            disabled={!provider}
+            isDisabled={!provider}
             onClick={handleNextClick}
           >
             Next

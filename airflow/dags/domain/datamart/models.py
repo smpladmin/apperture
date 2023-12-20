@@ -20,27 +20,11 @@ class Frequency(str, Enum):
     MONTHLY = "monthly"
 
 
-class HourlySchedule(BaseModel):
-    frequency: Frequency
-
-
-class DailySchedule(BaseModel):
-    time: str
-    period: str
-    frequency: Frequency
-
-
-class WeeklySchedule(BaseModel):
-    time: str
-    period: str
-    day: str
-    frequency: Frequency
-
-
-class MonthlySchedule(BaseModel):
-    time: str
-    period: str
-    date: str
+class Schedule(BaseModel):
+    time: Optional[str]
+    period: Optional[str]
+    date: Optional[str]
+    day: Optional[str]
     frequency: Frequency
 
 
@@ -63,13 +47,13 @@ class GoogleSheetMeta(BaseModel):
     sheet: str
 
 
-class DatamartActions(BaseModel):
+class DatamartAction(BaseModel):
     id: str = Field(alias="_id")
     datasource_id: str = Field(alias="datasourceId")
     app_id: str = Field(alias="appId")
     datamart_id: str = Field(alias="datamartId")
     type: ActionType
-    schedule: Union[WeeklySchedule, MonthlySchedule, DailySchedule, HourlySchedule]
+    schedule: Schedule
     meta: Union[GoogleSheetMeta, APIMeta, TableMeta]
     created_at: datetime = Field(alias="createdAt")
     enabled: bool

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from beanie import PydanticObjectId
 
 from enum import Enum
-from typing import Union
+from typing import Optional, Union
 
 
 class ActionType(str, Enum):
@@ -21,27 +21,11 @@ class Frequency(str, Enum):
     MONTHLY = "monthly"
 
 
-class HourlySchedule(BaseModel):
-    frequency: Frequency
-
-
-class DailySchedule(BaseModel):
-    time: str
-    period: str
-    frequency: Frequency
-
-
-class WeeklySchedule(BaseModel):
-    time: str
-    period: str
-    day: str
-    frequency: Frequency
-
-
-class MonthlySchedule(BaseModel):
-    time: str
-    period: str
-    date: str
+class Schedule(BaseModel):
+    time: Optional[str]
+    period: Optional[str]
+    date: Optional[str]
+    day: Optional[str]
     frequency: Frequency
 
 
@@ -64,13 +48,13 @@ class GoogleSheetMeta(BaseModel):
     sheet: str
 
 
-class DatamartActions(Document):
+class DatamartAction(Document):
     datasource_id: PydanticObjectId
     app_id: PydanticObjectId
     user_id: PydanticObjectId
     datamart_id: PydanticObjectId
     type: ActionType
-    schedule: Union[WeeklySchedule, MonthlySchedule, DailySchedule, HourlySchedule]
+    schedule: Schedule
     meta: Union[GoogleSheetMeta, APIMeta, TableMeta]
     enabled: bool = True
 

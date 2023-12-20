@@ -7,11 +7,17 @@ import {
   deleteDataMart,
   getSavedDataMartsForDatasourceId,
 } from '@lib/services/dataMartService';
-import { Row } from '@tanstack/react-table';
+import { CellContext, Row, createColumnHelper } from '@tanstack/react-table';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import WatchlistTable from '../Table';
-import { BACKEND_BASE_URL, FRONTEND_BASE_URL } from 'config';
+import Details from '../Table/Details';
+import UserInfo from '../Table/UserInfo';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import Actions from '../Table/Actions';
+import { dateFormat } from '@lib/utils/common';
+import DatamartActionsType from './DatamartActionsType';
 
 const SavedDataMarts = ({ provider }: { provider: Provider }) => {
   const [dataMarts, setDataMarts] = useState<SavedItems[]>([]);
@@ -57,8 +63,42 @@ const SavedDataMarts = ({ provider }: { provider: Provider }) => {
     await deleteDataMart(id);
     setRenderDataMart(true);
   };
-
-  const Outh_Link = `${BACKEND_BASE_URL}/datamart/oauth/google?redirect_url=${FRONTEND_BASE_URL}/analytics/datamart/list/${dsId}`;
+  const columnHelper = createColumnHelper<SavedItems>();
+  const columns = useMemo(() => {
+    return [
+      columnHelper.accessor('details', {
+        header: 'Name',
+        cell: (info) => <Details info={info} />,
+      }),
+      columnHelper.accessor('details.actions', {
+        header: 'Actions',
+        cell: (info: CellContext<SavedItems, DataMartWithUser>) => (
+          <DatamartActionsType info={info} />
+        ),
+      }),
+      columnHelper.accessor('details.user', {
+        cell: (info) => <UserInfo info={info} />,
+        header: 'Created By',
+      }),
+      columnHelper.accessor('details.updatedAt', {
+        cell: (info) => {
+          const updatedAt = info.getValue() as Date;
+          return dayjs.utc(updatedAt).local().format(dateFormat);
+        },
+        header: 'Last Updated',
+      }),
+      columnHelper.accessor('details._id', {
+        cell: (info) => (
+          <Actions
+            info={info}
+            handleDelete={handleDelete}
+            disableDelete={false}
+          />
+        ),
+        header: '',
+      }),
+    ];
+  }, []);
 
   return (
     <Box px={{ base: '4', md: '30' }} py={'13'} overflowY={'auto'}>
@@ -67,9 +107,8 @@ const SavedDataMarts = ({ provider }: { provider: Provider }) => {
           My Data
         </Text>
         <Flex alignItems={'center'} gap={'2'}>
-          <Link href={Outh_Link}><Button>Connect to Google Sheets</Button></Link>
           <Button
-            disabled={provider === Provider.GOOGLE}
+            isDisabled={provider === Provider.GOOGLE}
             variant={'primary'}
             bg={'black.100'}
             px={'6'}
@@ -102,6 +141,7 @@ const SavedDataMarts = ({ provider }: { provider: Provider }) => {
         ) : (
           <WatchlistTable
             type={WatchListItemType.DATAMARTS}
+            tableColumns={columns}
             savedItemsData={dataMarts}
             onRowClick={onRowClick}
             handleDelete={handleDelete}

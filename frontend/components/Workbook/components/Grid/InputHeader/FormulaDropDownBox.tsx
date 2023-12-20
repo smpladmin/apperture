@@ -422,7 +422,7 @@ const FormulaDropDownBox = ({
             handleAddHeader();
             e.stopPropagation();
           }}
-          disabled={!!cell?.disableAddButton}
+          isDisabled={!!cell?.disableAddButton}
         >
           <Plus color={WHITE_DEFAULT} size={16} />
         </Button>

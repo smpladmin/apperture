@@ -49,6 +49,7 @@ const EventDetailsModal = ({
         pt={0}
         marginY={0}
         overflowY={'auto'}
+        bg={'white.DEFAULT'}
       >
         <ModalHeader
           display={'flex'}
