@@ -229,6 +229,7 @@ class TestIntegrationService:
                     "topic.prefix": "cdc_test_id",
                     "database.dbname": "cdc",
                     "table.include.list": "public.test_table_1, public.test_table_2",
+                    "publication.autocreate.mode": "filtered",
                     "plugin.name": "pgoutput",
                 },
             ),
