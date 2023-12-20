@@ -65,9 +65,18 @@ const DataMartTable = ({ data, headers, loading }: DataMartTableProps) => {
         fontSize={'xs-12'}
         fontWeight={'500'}
         lineHeight={'xs-12'}
-        color={'grey.800'}
+        color={'grey.900'}
+        gap={'2'}
+        alignItems={'center'}
+        h={'7'}
       >
-        Data
+        {`Data`}
+        <Text
+          fontSize={'xs-12'}
+          fontWeight={'500'}
+          lineHeight={'xs-12'}
+          color={'grey.800'}
+        >{`Showing ${data.length} rows`}</Text>
       </Flex>
       {loading ? (
         <Flex
