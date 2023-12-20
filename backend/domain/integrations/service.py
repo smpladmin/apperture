@@ -502,6 +502,7 @@ class IntegrationService:
                     "table.include.list": ", ".join(
                         ["public." + table for table in tables]
                     ),
+                    "publication.autocreate.mode": "filtered",
                     "plugin.name": "pgoutput",
                 }
             )
