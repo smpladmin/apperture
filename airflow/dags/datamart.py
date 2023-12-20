@@ -7,7 +7,7 @@ from airflow.decorators import dag, task, task_group
 
 
 from domain.datamart.models import (
-    DatamartActions,
+    DatamartAction,
     ActionType,
     Schedule,
     Frequency,
@@ -65,7 +65,8 @@ def get_database_credentials(
 
 
 @task(trigger_rule="all_done")
-def push_datamart_to_google_sheet(datamart_action: DatamartActions):
+def push_datamart_to_google_sheet(datamart_action: DatamartAction):
+    logging.info(f"Pushing data to google sheet: {datamart_action.meta}")
     datamart_action_service.push_datamart_to_target(
         datamart_id=datamart_action.datamart_id,
         type=datamart_action.type,
@@ -74,7 +75,8 @@ def push_datamart_to_google_sheet(datamart_action: DatamartActions):
 
 
 @task(trigger_rule="all_done")
-def push_datamart_to_api(datamart_action: DatamartActions):
+def push_datamart_to_api(datamart_action: DatamartAction):
+    logging.info(f"Pushing data to API: {datamart_action.meta}")
     datamart_action_service.push_datamart_to_target(
         datamart_id=datamart_action.datamart_id,
         type=datamart_action.type,
@@ -83,23 +85,24 @@ def push_datamart_to_api(datamart_action: DatamartActions):
 
 
 @task(trigger_rule="all_done")
-def refresh_datamart_table(
-    datamart_actions: DatamartActions,
+def refresh_table_action(
+    datamart_action: DatamartAction,
     database_client: DatabaseClient,
     database_credential: Union[MySQLCredential, MsSQLCredential, ClickHouseCredential],
 ):
-    logging.info("Refreshing datamart table")
-    datamart_action_service.refresh_datamart(
-        datamart_id=datamart_actions.id,
-        app_id=datamart_actions.app_id,
+    logging.info(f"Refreshing datamart action table: {datamart_action.meta}")
+    datamart_action_service.refresh_table_action(
+        datamart_id=datamart_action.datamart_id,
+        app_id=datamart_action.app_id,
         database_client=database_client,
         database_credential=database_credential,
+        table_name=datamart_action.meta.name,
     )
 
 
 @task_group
-def refresh_datamart(
-    datamart_action: DatamartActions,
+def refresh_datamart_action(
+    datamart_action: DatamartAction,
     database_client: DatabaseClient,
     database_credential: Union[MySQLCredential, MsSQLCredential, ClickHouseCredential],
 ):
@@ -110,8 +113,8 @@ def refresh_datamart(
         push_datamart_to_api(datamart_action=datamart_action)
 
     if datamart_action.type == ActionType.TABLE:
-        refresh_datamart_table(
-            datamart_actions=datamart_action,
+        refresh_table_action(
+            datamart_action=datamart_action,
             database_client=database_client,
             database_credential=database_credential,
         )
@@ -135,7 +138,7 @@ def calculate_start_date(created_date: datetime, schedule: Schedule) -> datetime
 
 
 def create_dag(
-    datamart_action: DatamartActions, datasource_id: str, created_date: datetime
+    datamart_action: DatamartAction, datasource_id: str, created_date: datetime
 ):
     @dag(
         dag_id=f"datamart_action_loader_{datamart_action.type}_{datamart_action.id}",
@@ -162,7 +165,7 @@ def create_dag(
             credential=credential,
         )
 
-        refresh_datamart(
+        refresh_datamart_action(
             datamart_action=datamart_action,
             database_client=database_client,
             database_credential=database_credentials,

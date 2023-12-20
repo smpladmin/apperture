@@ -3,8 +3,8 @@ from datetime import datetime
 from typing import List, Union
 
 from beanie import PydanticObjectId
-from fastapi import Depends
-from pymysql import DatabaseError
+from fastapi import Depends, HTTPException
+from clickhouse_connect.driver.exceptions import DatabaseError
 
 from domain.apps.models import ClickHouseCredential
 from domain.integrations.models import MsSQLCredential, MySQLCredential
@@ -97,27 +97,32 @@ class SpreadsheetService:
         query = self.parser.assign_query_limit(
             query_string=query, database_client=client
         )
-        if client == DatabaseClient.CLICKHOUSE:
-            result = await self.spreadsheets.execute_query_for_app_restricted_clients(
-                app_id=app_id,
-                query=query,
-                settings={
-                    "replace_running_query": 1,
-                    "query_id": query_id,
-                }
-                if query_id
-                else None,
-                parameters={},
-            )
-            if not result:
-                raise DatabaseError("Query execution failed")
-        elif client == DatabaseClient.MYSQL:
-            result = self.mysql.connect_and_execute_query(
-                query=query, credential=credential
-            )
-        elif client == DatabaseClient.MSSQL:
-            result = self.mssql.connect_and_execute_query(
-                query=query, credential=credential
+        try:
+            if client == DatabaseClient.CLICKHOUSE:
+                result = (
+                    await self.spreadsheets.execute_query_for_app_restricted_clients(
+                        app_id=app_id,
+                        query=query,
+                        settings={
+                            "replace_running_query": 1,
+                            "query_id": query_id,
+                        }
+                        if query_id
+                        else None,
+                        parameters={},
+                    )
+                )
+            elif client == DatabaseClient.MYSQL:
+                result = self.mysql.connect_and_execute_query(
+                    query=query, credential=credential
+                )
+            elif client == DatabaseClient.MSSQL:
+                result = self.mssql.connect_and_execute_query(
+                    query=query, credential=credential
+                )
+        except DatabaseError as e:
+            raise HTTPException(
+                status_code=400, detail=str(e) or "Something went wrong"
             )
 
         return ComputedSpreadsheet(

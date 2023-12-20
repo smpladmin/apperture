@@ -1,3 +1,4 @@
+import { DatamartAction } from './datamartActions';
 import { AppertureUser } from './user';
 import { SpreadSheetColumn } from './workbook';
 
@@ -17,6 +18,7 @@ export type DataMartObj = {
 
 export type DataMartWithUser = DataMartObj & {
   user: AppertureUser;
+  actions?: DatamartAction[];
 };
 
 export type DataMartMetaData = {

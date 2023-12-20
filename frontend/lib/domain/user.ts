@@ -7,4 +7,5 @@ export type AppertureUser = {
   slackChannel: string | null;
   hasVisitedSheets?: boolean;
   apiKey?: string;
+  sheetToken?: string;
 };

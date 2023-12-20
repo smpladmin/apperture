@@ -25,6 +25,13 @@ from domain.common.filter_models import (
 )
 from domain.common.models import IntegrationProvider
 from domain.datamart.models import DataMart
+from domain.datamart_actions.models import (
+    ActionType,
+    DatamartAction,
+    GoogleSheetMeta,
+    Schedule,
+    Spreadsheet as GoogleSpreadsheet,
+)
 from domain.datasources.models import DataSource, DataSourceVersion
 from domain.edge.models import Edge, NodeSankey, NodeSignificance, NodeTrend
 from domain.event_properties.models import EventProperties
@@ -365,6 +372,67 @@ def retention_service(apperture_user_response):
 
 
 @pytest.fixture(scope="module")
+def datamart_action_service(apperture_user_response):
+    datamart_action_service_mock = mock.MagicMock()
+    DatamartAction.get_settings = mock.MagicMock()
+
+    datamart_action = DatamartAction(
+        id=PydanticObjectId("635ba034807ab86d8a2aadd8"),
+        app_id=PydanticObjectId("635ba034807ab86d8a2aadd7"),
+        datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        user_id=PydanticObjectId("635ba034807ab86d8a2aad10"),
+        datamart_id=PydanticObjectId("635ba034807ab86d8a2aad11"),
+        type=ActionType.GOOGLE_SHEET,
+        meta=GoogleSheetMeta(
+            spreadsheet=GoogleSpreadsheet(id="1qu87sylkjuesopp98", name="Test"),
+            sheet="Sheet1",
+        ),
+        schedule=Schedule(
+            frequency="hourly", time=None, period=None, date=None, day=None
+        ),
+        enabled=True,
+    )
+    spreadsheets = [
+        {"id": "1qFp3w6nKRhvVc", "name": "Test"},
+        {"id": "1n0-0y3hrr6B16oicXjw0Mg", "name": "TSS Report"},
+        {"id": "1abavuF9ocO4JU1C_01gBub", "name": "Testing 1"},
+    ]
+    sheet_names = [
+        "Sheet1",
+        "Sheet2",
+        "Sheet3",
+    ]
+    datamart_action_future = asyncio.Future()
+    datamart_action_future.set_result(datamart_action)
+    datamart_actions_future = asyncio.Future()
+    datamart_actions_future.set_result([datamart_action])
+
+    refresh_table_action_future = asyncio.Future()
+    refresh_table_action_future.set_result(True)
+
+    datamart_action_service_mock.build_datamart_action.return_value = datamart_action
+    datamart_action_service_mock.save_datamart_action.return_value = (
+        datamart_action_future
+    )
+    datamart_action_service_mock.get_datamart_action.return_value = (
+        datamart_action_future
+    )
+    datamart_action_service_mock.get_datamart_actions_for_datamart.return_value = (
+        datamart_actions_future
+    )
+    datamart_action_service_mock.refresh_table_action.return_value = (
+        refresh_table_action_future
+    )
+    datamart_action_service_mock.get_google_spreadsheets.return_value = spreadsheets
+    datamart_action_service_mock.get_sheet_names.return_value = sheet_names
+    datamart_action_service_mock.delete_datamart_actions_for_datamart = mock.AsyncMock()
+    datamart_action_service_mock.update_datamart_action = mock.AsyncMock()
+    datamart_action_service_mock.delete_datamart_action = mock.AsyncMock()
+
+    return datamart_action_service_mock
+
+
+@pytest.fixture(scope="module")
 def datamart_service(apperture_user_response):
     datamart_service_mock = mock.MagicMock()
     DataMart.get_settings = mock.MagicMock()
@@ -407,7 +475,7 @@ def datamart_service(apperture_user_response):
     datamart_service_mock.update_datamart_table = mock.AsyncMock()
     datamart_service_mock.delete_datamart_table = mock.AsyncMock()
     datamart_service_mock.refresh_datamart_table = mock.AsyncMock()
-    datamart_service_mock.push_to_google_sheet = mock.AsyncMock()
+    datamart_service_mock.save_datamart.return_value = datamart_future
     datamart_service_mock.get_all_apps_with_datamarts = mock.AsyncMock(
         return_value=["635ba034807ab86d8a2aadd8", "63ce4906f496f7b462ab7e84"]
     )
@@ -1900,7 +1968,31 @@ def datamart_response():
         "tableName": "dUKQaHtqxM",
         "lastRefreshed": "2022-11-24T00:00:00",
         "query": "select event_name, user_id from events",
-        "enabled": True, 
+        "enabled": True,
+    }
+
+
+@pytest.fixture(scope="module")
+def datamart_action_response():
+    return {
+        "_id": "635ba034807ab86d8a2aadd8",
+        "datasourceId": "635ba034807ab86d8a2aadd9",
+        "appId": "635ba034807ab86d8a2aadd7",
+        "userId": "635ba034807ab86d8a2aad10",
+        "datamartId": "635ba034807ab86d8a2aad11",
+        "type": "google_sheet",
+        "schedule": {
+            "time": None,
+            "period": None,
+            "date": None,
+            "day": None,
+            "frequency": "hourly",
+        },
+        "meta": {
+            "spreadsheet": {"id": "1qu87sylkjuesopp98", "name": "Test"},
+            "sheet": "Sheet1",
+        },
+        "enabled": True,
     }
 
 
@@ -2168,6 +2260,19 @@ def datamart_data():
         "datasourceId": "635ba034807ab86d8a2aadd9",
         "name": "test-table",
         "query": "select event_name, user_id from events",
+    }
+
+
+@pytest.fixture(scope="module")
+def datamart_action_data():
+    return {
+        "datamartId": "635ba034807ab86d8a2aadd9",
+        "type": "google_sheet",
+        "schedule": {"frequency": "hourly"},
+        "meta": {
+            "spreadsheet": {"id": "1qu87sylkjuesopp98", "name": "Test"},
+            "sheet": "Sheet1",
+        },
     }
 
 

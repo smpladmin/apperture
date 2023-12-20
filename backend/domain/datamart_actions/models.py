@@ -48,7 +48,7 @@ class GoogleSheetMeta(BaseModel):
     sheet: str
 
 
-class DatamartActions(Document):
+class DatamartAction(Document):
     datasource_id: PydanticObjectId
     app_id: PydanticObjectId
     user_id: PydanticObjectId

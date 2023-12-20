@@ -1,10 +1,16 @@
-from typing import List, Optional, Union
+import logging
+from typing import List, Union
 
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi import APIRouter, Depends
-from fastapi import APIRouter, Depends
+from domain.apps.service import AppService
+from domain.spreadsheets.models import DatabaseClient
+from rest.controllers.actions.compute_query import ComputeQueryAction
+from domain.apperture_users.service import AppertureUserService
 from domain.datamart.service import DataMartService
+from domain.datamart_actions.models import DatamartAction
 from domain.datamart_actions.service import DatamartActionService
-from rest.dtos.datamart_actions import DatamartActionsDto, DatamartActionsResponse
+from rest.dtos.datamart_actions import DatamartActionsDto, DatamartActionResponse
 
 from rest.middlewares import get_user_id, validate_jwt
 from rest.middlewares.validate_app_user import validate_library_items
@@ -18,20 +24,8 @@ router = APIRouter(
 
 
 @router.get(
-    "/datamart_actions/{id}",
-    response_model=DatamartActionsResponse,
-    dependencies=[Depends(validate_library_items)],
-)
-async def get_saved_datamart_action(
-    id: str,
-    datamart_action_service: DatamartActionService = Depends(),
-):
-    return await datamart_action_service.get_datamart_action(id=id)
-
-
-@router.get(
     "/datamart_actions",
-    response_model=List[DatamartActionsResponse],
+    response_model=List[DatamartActionResponse],
 )
 async def get_saved_datamart_actions(
     datamart_id: Union[str, None] = None,
@@ -44,9 +38,51 @@ async def get_saved_datamart_actions(
     return await datamart_action_service.get_datamart_actions()
 
 
+@router.get(
+    "/datamart_actions/google/spreadsheets",
+    response_model=List,
+)
+async def get_spreadsheets(
+    user_id: str = Depends(get_user_id),
+    user_service: AppertureUserService = Depends(),
+    datamart_action_service: DatamartActionService = Depends(),
+):
+    user = await user_service.get_user(id=user_id)
+    return datamart_action_service.get_google_spreadsheets(
+        refresh_token=user.sheet_token
+    )
+
+
+@router.get(
+    "/datamart_actions/google/sheets/{spreadsheet_id}",
+    response_model=List,
+)
+async def get_sheet_names(
+    spreadsheet_id: str,
+    user_id: str = Depends(get_user_id),
+    user_service: AppertureUserService = Depends(),
+    datamart_action_service: DatamartActionService = Depends(),
+):
+    user = await user_service.get_user(id=user_id)
+    return datamart_action_service.get_sheet_names(
+        refresh_token=user.sheet_token, spreadsheet_id=spreadsheet_id
+    )
+
+
+@router.get(
+    "/datamart_actions/{id}",
+    response_model=DatamartActionResponse,
+)
+async def get_saved_datamart_action(
+    id: str,
+    datamart_action_service: DatamartActionService = Depends(),
+):
+    return await datamart_action_service.get_datamart_action(id=id)
+
+
 @router.post(
     "/datamart_actions",
-    response_model=DatamartActionsResponse,
+    response_model=DatamartActionResponse,
 )
 async def save_datamart_action(
     dto: DatamartActionsDto,
@@ -71,6 +107,7 @@ async def save_datamart_action(
 
 @router.put(
     "/datamart_actions/{id}",
+    response_model=DatamartActionResponse,
 )
 async def update_datamart_action(
     id: str,
@@ -90,4 +127,15 @@ async def update_datamart_action(
         meta=dto.meta,
     )
     await datamart_action_service.update_datamart_action(id=id, action=datamart_action)
-    return datamart_action
+    updated_datamart_action = DatamartAction(**datamart_action.dict(), _id=id)
+    return updated_datamart_action
+
+
+@router.delete(
+    "/datamart_actions/{id}",
+)
+async def delete_datamart_action(
+    id: str,
+    datamart_action_service: DatamartActionService = Depends(),
+):
+    await datamart_action_service.delete_datamart_action(id=id)
