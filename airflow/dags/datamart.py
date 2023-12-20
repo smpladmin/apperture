@@ -86,14 +86,14 @@ def push_datamart_to_api(datamart_action: DatamartAction):
 
 @task(trigger_rule="all_done")
 def refresh_table_action(
-    datamart_actions: DatamartAction,
+    datamart_action: DatamartAction,
     database_client: DatabaseClient,
     database_credential: Union[MySQLCredential, MsSQLCredential, ClickHouseCredential],
 ):
-    logging.info("Refreshing datamart action table")
+    logging.info(f"Refreshing datamart action table: {datamart_action.meta}")
     datamart_action_service.refresh_table_action(
-        datamart_id=datamart_actions.datamart_id,
-        app_id=datamart_actions.app_id,
+        datamart_id=datamart_action.datamart_id,
+        app_id=datamart_action.app_id,
         database_client=database_client,
         database_credential=database_credential,
         table_name=datamart_action.meta.name,
@@ -114,7 +114,7 @@ def refresh_datamart_action(
 
     if datamart_action.type == ActionType.TABLE:
         refresh_table_action(
-            datamart_actions=datamart_action,
+            datamart_action=datamart_action,
             database_client=database_client,
             database_credential=database_credential,
         )

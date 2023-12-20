@@ -368,7 +368,6 @@ async def test_refresh_datamart_tables_success(
     client_init,
     datamart_action_service,
 ):
-    # datamart_action_service.refresh_table_action.return_value = True
     response = client_init.post(
         "/private/datamart_actions/refresh",
         data=json.dumps(
