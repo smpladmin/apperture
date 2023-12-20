@@ -1969,33 +1969,6 @@ def datamart_response():
         "lastRefreshed": "2022-11-24T00:00:00",
         "query": "select event_name, user_id from events",
         "enabled": True,
-<<<<<<< HEAD
-=======
-    }
-
-
-@pytest.fixture(scope="module")
-def datamart_action_response():
-    return {
-        "_id": "635ba034807ab86d8a2aadd8",
-        "datasourceId": "635ba034807ab86d8a2aadd9",
-        "appId": "635ba034807ab86d8a2aadd7",
-        "userId": "635ba034807ab86d8a2aad10",
-        "datamartId": "635ba034807ab86d8a2aad11",
-        "type": "google_sheet",
-        "schedule": {
-            "time": None,
-            "period": None,
-            "date": None,
-            "day": None,
-            "frequency": "hourly",
-        },
-        "meta": {
-            "spreadsheet": {"id": "1qu87sylkjuesopp98", "name": "Test"},
-            "sheet": "Sheet1",
-        },
-        "enabled": True,
->>>>>>> main
     }
 
 
