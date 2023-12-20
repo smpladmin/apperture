@@ -96,6 +96,7 @@ const SaveSegmentModal = ({
     >
       <ModalOverlay backdropFilter={'blur(20px)'} bg={'grey.0'} />
       <ModalContent
+        bg={'white.DEFAULT'}
         margin={'1rem'}
         maxWidth="168"
         maxHeight={'calc(100% - 100px)'}
@@ -220,7 +221,7 @@ const SaveSegmentModal = ({
               height={'auto'}
               bg={'black.100'}
               color={'white.DEFAULT'}
-              disabled={!segmentName}
+              isDisabled={!segmentName}
               onClick={handleSave}
               data-testid={'save-segment'}
             >

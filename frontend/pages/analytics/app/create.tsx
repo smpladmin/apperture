@@ -148,7 +148,7 @@ const Create = () => {
               lineHeight="base"
               textColor="white.100"
               width={{ base: 'full', md: '72' }}
-              disabled={!appName || !isAgreementChecked}
+              isDisabled={!appName || !isAgreementChecked}
               onClick={handleNextClick}
             >
               Next

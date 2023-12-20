@@ -312,7 +312,7 @@ const HomeNav = ({ apps }: HomeNavProps) => {
         </Menu>*/}
         <IconButton
           aria-label="add-datasource"
-          icon={<GitFork size={20} />}
+          icon={<GitFork size={20} color={WHITE_DEFAULT} />}
           bg="black.800"
           padding={'6px'}
           _hover={{ background: 'black.800' }}
@@ -320,7 +320,7 @@ const HomeNav = ({ apps }: HomeNavProps) => {
         />
         <IconButton
           aria-label="add-datasource"
-          icon={<Database size={20} />}
+          icon={<Database size={20} color={WHITE_DEFAULT} />}
           bg="black.800"
           padding={'6px'}
           _hover={{ background: 'black.800' }}

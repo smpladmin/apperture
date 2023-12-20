@@ -77,7 +77,7 @@ const SavedActions = ({ provider }: { provider: Provider }) => {
           </Text>
         </Flex>
         <Button
-          disabled={!(provider === Provider.APPERTURE)}
+          isDisabled={!(provider === Provider.APPERTURE)}
           variant={'primary'}
           bg={'black.100'}
           px={'6'}

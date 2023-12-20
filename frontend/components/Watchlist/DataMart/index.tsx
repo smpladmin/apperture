@@ -67,9 +67,11 @@ const SavedDataMarts = ({ provider }: { provider: Provider }) => {
           My Data
         </Text>
         <Flex alignItems={'center'} gap={'2'}>
-          <Link href={Outh_Link}><Button>Connect to Google Sheets</Button></Link>
+          <Link href={Outh_Link}>
+            <Button>Connect to Google Sheets</Button>
+          </Link>
           <Button
-            disabled={provider === Provider.GOOGLE}
+            isDisabled={provider === Provider.GOOGLE}
             variant={'primary'}
             bg={'black.100'}
             px={'6'}

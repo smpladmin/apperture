@@ -126,7 +126,7 @@ const SelectSegmentsDropdown = ({
       {
         <>
           <RadioGroup
-            value={+includes}
+            value={String(includes)}
             onChange={(value) => {
               setIncludes(Boolean(+value));
             }}
@@ -158,7 +158,7 @@ const SelectSegmentsDropdown = ({
                     >
                       {option.label}
                     </Text>
-                    <Radio value={option.value} hidden />
+                    <Radio value={String(option.value)} hidden />
                   </Flex>
                 );
               })}

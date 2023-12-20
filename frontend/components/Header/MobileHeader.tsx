@@ -62,7 +62,7 @@ const MobileHeader = ({
 
         <Drawer placement="left" isOpen={isDrawerOpen} onClose={closeDrawer}>
           <DrawerOverlay backdropFilter="auto" backdropBlur="20px" />
-          <DrawerContent>
+          <DrawerContent bg={'white.DEFAULT'}>
             <DrawerBody p={0}>
               <MobileSidemenu
                 closeDrawer={closeDrawer}

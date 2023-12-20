@@ -73,7 +73,7 @@ const ProviderModal = ({
       size={'4xl'}
     >
       <ModalOverlay opacity={'0.8 !important'} bg={'black.DEFAULT'} />
-      <ModalContent width={'175'} borderRadius={'12'}>
+      <ModalContent width={'175'} borderRadius={'12'} bg={'white.DEFAULT'}>
         <ModalBody py={'8'} px={'7'}>
           <Flex direction={'column'} gap={'8'}>
             <Flex direction={'column'} alignItems={'center'} gap={'4'}>
@@ -152,7 +152,7 @@ const ProviderModal = ({
                 fontWeight={'500'}
                 textColor="white.100"
                 bg="black.100"
-                disabled={!provider}
+                isDisabled={!provider}
                 onClick={handleRedirect}
               >
                 Continue

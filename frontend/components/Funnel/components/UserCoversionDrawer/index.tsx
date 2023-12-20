@@ -122,7 +122,7 @@ const UserConversionDrawer = ({
           bg={'grey.0'}
           opacity={'0.95'}
         />
-        <DrawerContent>
+        <DrawerContent bg={'white.DEFAULT'}>
           <DrawerCloseButton />
           <DrawerHeader paddingRight={10}>
             {tableState == TableState.LIST ? (

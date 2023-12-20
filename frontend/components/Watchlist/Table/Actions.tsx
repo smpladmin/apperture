@@ -39,7 +39,7 @@ const Actions = ({
             setIsDropdownOpen(true);
           }}
           data-testid={'action-more-icon'}
-          disabled={disableDelete}
+          isDisabled={disableDelete}
         />
         <Dropdown
           isOpen={isDropdownOpen}

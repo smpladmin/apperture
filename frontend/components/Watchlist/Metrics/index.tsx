@@ -65,7 +65,7 @@ const SavedMetrics = ({ provider }: { provider: Provider }) => {
           Metrics
         </Text>
         <Button
-          disabled={provider === Provider.GOOGLE}
+          isDisabled={provider === Provider.GOOGLE}
           variant={'primary'}
           bg={'black.100'}
           px={'6'}
