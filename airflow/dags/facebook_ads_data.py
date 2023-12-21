@@ -133,6 +133,10 @@ def create_dag(datasource_id: str, created_date: datetime):
         },
         catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=[f"facebook-ads-daily-data-fetch"],
+        default_args={
+            "retries": 2,
+            "retry_delay": timedelta(minutes=30),
+        },
     )
     def facebook_ads_data_loader():
         datasource_with_credential = get_datasource_and_credential(

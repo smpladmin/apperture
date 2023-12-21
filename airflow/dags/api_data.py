@@ -74,6 +74,10 @@ def create_dag(datasource_id: str, num_days: int, created_date: datetime):
         ),
         catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=["api-daily-data-fetch"],
+        default_args={
+            "retries": 2,
+            "retry_delay": timedelta(minutes=5),
+        },
     )
     def api_data_loader(datasource_id: str, num_days: int):
         datasource_with_credential = get_datasource_and_credential(

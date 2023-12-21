@@ -142,6 +142,10 @@ def create_dag(datasource_id: str, created_date: datetime):
         },
         catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=[f"branch-daily-data-fetch"],
+        default_args={
+            "retries": 3,
+            "retry_delay": timedelta(minutes=15),
+        },
     )
     def branch_data_sync():
         datasource_with_credential = get_datasource_and_credential(

@@ -152,6 +152,10 @@ def create_dag(
         ),
         tags=["datamart-scheduled-data-fetch"],
         catchup=False,
+        default_args={
+            "retries": 2,
+            "retry_delay": timedelta(minutes=5),
+        },
     )
     def datamart_loader():
         datasource_with_credential = get_datasource_and_credential(

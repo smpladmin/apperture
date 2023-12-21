@@ -1,9 +1,5 @@
-import logging
 import requests
 
-import gzip
-import os
-import tempfile
 import pandas as pd
 from domain.datasource.models import BranchCredential
 
@@ -31,7 +27,7 @@ class BranchDataFetcher:
             json=self.request_data,
             params=self.params,
         )
-        if events_data_response.ok:
+        if events_data_response.ok and events_data_response.json():
             return events_data_response.json()
         else:
             raise Exception(f"Could not fetch DATA: {events_data_response.json()}")
