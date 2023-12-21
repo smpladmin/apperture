@@ -15,6 +15,7 @@ import gzip
 from models import FlutterBatchData
 
 load_dotenv()
+logging.getLogger().setLevel(logging.INFO)
 
 
 ROOT_DIR = os.path.abspath(os.curdir)
