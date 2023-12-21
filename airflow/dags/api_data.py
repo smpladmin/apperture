@@ -7,7 +7,12 @@ from store.api_data_saver import APIDataSaver
 from fetch.api_data_fetcher import APIDataFetcher
 from domain.datasource.service import DataSourceService
 from event_processors.api_data_processor import APIDataProcessor
-from utils.utils import DATA_FETCH_DAYS_OFFSET, AIRFLOW_INIT_DATE
+from utils.utils import (
+    DAG_RETRIES,
+    DAG_RETRY_DELAY,
+    DATA_FETCH_DAYS_OFFSET,
+    AIRFLOW_INIT_DATE,
+)
 from domain.datasource.models import IntegrationProvider, DataSource, Credential
 
 datasource_service = DataSourceService()
@@ -75,8 +80,8 @@ def create_dag(datasource_id: str, num_days: int, created_date: datetime):
         catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=["api-daily-data-fetch"],
         default_args={
-            "retries": 2,
-            "retry_delay": timedelta(minutes=5),
+            "retries": DAG_RETRIES,
+            "retry_delay": timedelta(minutes=DAG_RETRY_DELAY),
         },
     )
     def api_data_loader(datasource_id: str, num_days: int):

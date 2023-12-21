@@ -17,6 +17,7 @@ from domain.datasource.service import DataSourceService
 from utils.utils import (
     BRANCH_DATA_FETCH_DAYS_OFFSET,
     AIRFLOW_INIT_DATE,
+    DAG_RETRIES,
 )
 from event_processors.clevertap_event_processor import ClevertapEventProcessor
 from domain.datasource.models import (
@@ -143,8 +144,9 @@ def create_dag(datasource_id: str, created_date: datetime):
         catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=[f"branch-daily-data-fetch"],
         default_args={
-            "retries": 3,
-            "retry_delay": timedelta(minutes=15),
+            "retries": DAG_RETRIES,
+            "retry_delay": timedelta(minutes=10),
+            "retry_exponential_backoff": True,
         },
     )
     def branch_data_sync():

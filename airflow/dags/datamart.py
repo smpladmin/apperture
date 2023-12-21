@@ -2,7 +2,12 @@ import logging
 import pendulum
 from typing import Dict, Union
 from datetime import datetime, timedelta
-from utils.utils import get_cron_expression, FREQUENCY_DELTAS
+from utils.utils import (
+    DAG_RETRIES,
+    DAG_RETRY_DELAY,
+    get_cron_expression,
+    FREQUENCY_DELTAS,
+)
 from airflow.decorators import dag, task, task_group
 
 
@@ -153,8 +158,8 @@ def create_dag(
         tags=["datamart-scheduled-data-fetch"],
         catchup=False,
         default_args={
-            "retries": 2,
-            "retry_delay": timedelta(minutes=5),
+            "retries": DAG_RETRIES,
+            "retry_delay": timedelta(minutes=DAG_RETRY_DELAY),
         },
     )
     def datamart_loader():

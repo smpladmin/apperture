@@ -12,6 +12,8 @@ from store.google_ads_data_saver import GoogleAdsDataSaver
 
 from utils.utils import (
     AIRFLOW_INIT_DATE,
+    DAG_RETRIES,
+    DAG_RETRY_DELAY,
     FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET,
 )
 from domain.datasource.models import (
@@ -148,8 +150,8 @@ def create_dag(datasource_id: str, created_date: datetime):
         catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=[f"google-ads-daily-data-fetch"],
         default_args={
-            "retries": 2,
-            "retry_delay": timedelta(minutes=5),
+            "retries": DAG_RETRIES,
+            "retry_delay": timedelta(minutes=DAG_RETRY_DELAY),
         },
     )
     def google_ads_data_loader():

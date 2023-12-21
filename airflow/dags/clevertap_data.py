@@ -11,7 +11,12 @@ from store.events_saver import EventsSaver
 from domain.datasource.service import DataSourceService
 from store.event_properties_saver import EventPropertiesSaver
 from fetch.clevertap_events_fetcher import ClevertapEventsFetcher
-from utils.utils import DATA_FETCH_DAYS_OFFSET, AIRFLOW_INIT_DATE
+from utils.utils import (
+    DAG_RETRIES,
+    DAG_RETRY_DELAY,
+    DATA_FETCH_DAYS_OFFSET,
+    AIRFLOW_INIT_DATE,
+)
 from event_processors.clevertap_event_processor import ClevertapEventProcessor
 from domain.datasource.models import (
     IntegrationProvider,
@@ -140,8 +145,8 @@ def create_dag(datasource_id: str, created_date: datetime):
         catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=[f"clevertap-daily-data-fetch"],
         default_args={
-            "retries": 2,
-            "retry_delay": timedelta(minutes=5),
+            "retries": DAG_RETRIES,
+            "retry_delay": timedelta(minutes=DAG_RETRY_DELAY),
         },
     )
     def clevertap_data_loader():

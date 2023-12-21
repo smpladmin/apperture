@@ -13,6 +13,7 @@ from store.facebook_ads_saver import FacebookAdsDataSaver
 
 from utils.utils import (
     AIRFLOW_INIT_DATE,
+    DAG_RETRIES,
     FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET,
 )
 from domain.datasource.models import (
@@ -131,11 +132,12 @@ def create_dag(datasource_id: str, created_date: datetime):
                 description="Select end date (Leave empty to fetch data for the day prior to the logical date)",
             ),
         },
-        catchup=(created_date > AIRFLOW_INIT_DATE),
+        catchup=False,
         tags=[f"facebook-ads-daily-data-fetch"],
         default_args={
-            "retries": 2,
-            "retry_delay": timedelta(minutes=30),
+            "retries": DAG_RETRIES,
+            "retry_delay": timedelta(minutes=15),
+            "retry_exponential_backoff": True,
         },
     )
     def facebook_ads_data_loader():
