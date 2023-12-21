@@ -16,6 +16,8 @@ logging.getLogger().setLevel(logging.INFO)
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "600000"))
 MAX_RECORDS = int(os.getenv("MAX_RECORDS", "10000"))
 AUTO_OFFSET_RESET = os.getenv("AUTO_OFFSET_RESET", "latest")
+KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092").split(",")
+logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
 
 async def process_kafka_messages() -> None:
@@ -26,7 +28,7 @@ async def process_kafka_messages() -> None:
     consumer = AIOKafkaConsumer(
         *app.cdc_integrations.topics,
         group_id="cdc",
-        bootstrap_servers="kafka:9092",
+        bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         auto_offset_reset=AUTO_OFFSET_RESET,
         enable_auto_commit=False,
         fetch_max_bytes=7864320,

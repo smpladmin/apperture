@@ -410,7 +410,7 @@ services:
       KAFKA_BROKER_ID: '1'
       KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093,2@kafka2:9093,3@kafka3:9093
       KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CFG_NODE_ID: '1'
@@ -424,7 +424,11 @@ services:
     networks:
      - net
     logging:
-      driver: json-file
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: kafka
     deploy:
       placement:
         constraints:
@@ -436,21 +440,25 @@ services:
       KAFKA_BROKER_ID: '2'
       KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093,2@kafka2:9093,3@kafka3:9093
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CFG_NODE_ID: '2'
-      KAFKA_CFG_PROCESS_ROLES: broker
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
       KAFKA_ENABLE_KRAFT: 'yes'
       KAFKA_KRAFT_CLUSTER_ID: OTMwNzFhYTY1ODNiNGE5OT
     ports:
-     - 9092:9092
+     - 9093:9092
     volumes:
      - kafka_data2:/bitnami/kafka
     networks:
      - net
     logging:
-      driver: json-file
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: kafka2
     deploy:
       placement:
         constraints:
@@ -462,25 +470,29 @@ services:
       KAFKA_BROKER_ID: '3'
       KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9092
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093,2@kafka2:9093,3@kafka3:9093
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CFG_NODE_ID: '3'
-      KAFKA_CFG_PROCESS_ROLES: broker
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
       KAFKA_ENABLE_KRAFT: 'yes'
       KAFKA_KRAFT_CLUSTER_ID: OTMwNzFhYTY1ODNiNGE5OT
     ports:
-     - 9092:9092
+     - 9094:9092
     volumes:
      - kafka_data3:/bitnami/kafka
     networks:
      - net
     logging:
-      driver: json-file
+      driver: awslogs
+      options:
+        awslogs-group: apperture-staging-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: kafka3
     deploy:
       placement:
         constraints:
-         - node.hostname == worker3
+         - node.hostname == worker2
   metabase:
     image: bjeanes/metabase-clickhouse:latest
     networks:
