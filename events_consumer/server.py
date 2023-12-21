@@ -21,10 +21,13 @@ load_dotenv()
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
 MAX_RECORDS = int(os.getenv("MAX_RECORDS", "1000"))
 
+
 logging.getLogger().setLevel(logging.INFO)
 
 # Kafka configuration
-KAFKA_BOOTSTRAP_SERVERS = "kafka:9092"
+KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092").split(",")
+logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
+
 KAFKA_TOPICS = ["clickstream", "flutter_eventstream"]
 DEFAULT_EVENTS = [
     "$autocapture",
