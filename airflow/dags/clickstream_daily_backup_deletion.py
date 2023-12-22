@@ -41,15 +41,6 @@ def delete_backup(current_date):
     ),
     catchup=False,
     tags=[f"clickstream-backup-deletion"],
-    params={
-        "date": Param(
-            "",
-            type=["string", "null"],
-            format="datetime",
-            title="date",
-            description="Delete backup for given date (Leave empty for the logical date)",
-        ),
-    },
 )
 def generate_dag():
     date = datetime.now(tz=pendulum.timezone("Asia/Kolkata")) - timedelta(days=3)
