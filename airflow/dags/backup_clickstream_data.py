@@ -14,21 +14,21 @@ load_dotenv(override=False)
 
 @task
 def store_backup(current_date, current_hour):
-    backup_folder = "inc_prod_backup"
+    backup_folder = os.getenv("CLICKSTREAM_BACKUP_FOLDER")
     s3_url = "https://apperture-clickhouse-backup.s3.ap-south-1.amazonaws.com"
 
     logging.info(
         f"Creating clickstream backup at {current_date}:{current_hour}HH, storing at {backup_folder}"
     )
     s3_path = f"{s3_url}/{backup_folder}/{current_date}/{current_hour}/"
-    key_id = "AKIATCYOZQRYMITBDHSX"
-    secret_key = "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"
+    key_id = os.getenv("S3_ACCESS_KEY_ID")
+    secret_key = os.getenv("S3_SECRET_ACCESS_KEY")
 
     table = "clickstream"
     client = clickhouse_connect.get_client(host="clickhouse")
     with client:
         query = f"BACKUP TABLE {table} TO S3('{s3_path}', '{key_id}', '{secret_key}') SETTINGS base_backup = S3('{s3_url}/backup', '{key_id}','{secret_key}')"
-        logging.info(f"Starting to store backup")
+        logging.info(f"Starting to store backup:: {query}")
         client.command(query)
         logging.info("Backup stored successfully")
 

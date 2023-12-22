@@ -14,11 +14,11 @@ load_dotenv(override=False)
 
 @task
 def delete_backup(current_date):
-    backup_folder = "inc_prod_backup"
+    backup_folder = os.getenv("CLICKSTREAM_BACKUP_FOLDER")
 
     logging.info(f"DELETING clickstream backup at {current_date}, from {backup_folder}")
-    key_id = "AKIATCYOZQRYMITBDHSX"
-    secret_key = "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"
+    key_id = os.getenv("S3_ACCESS_KEY_ID")
+    secret_key = os.getenv("S3_SECRET_ACCESS_KEY")
     bucket_name = "apperture-clickhouse-backup"
 
     s3 = boto3.client("s3", aws_access_key_id=key_id, aws_secret_access_key=secret_key)
