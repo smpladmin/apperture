@@ -2,7 +2,7 @@ import logging
 from store.clickhouse_client_factory import ClickHouseClientFactory
 import pendulum
 
-from airflow.models import Param
+from airflow.models import Param, Variable
 from typing import Dict, Union, List
 from datetime import timedelta, datetime
 from airflow.decorators import task, dag
@@ -112,6 +112,13 @@ def load_data(
 
 
 def create_dag(datasource_id: str, created_date: datetime):
+    clevertap_task_retries = int(
+        Variable.get("clevertap_task_retries", default_var=DAG_RETRIES)
+    )
+    clevertap_task_retry_delay = int(
+        Variable.get("clevertap_task_retry_delay", default_var=DAG_RETRY_DELAY)
+    )
+
     @dag(
         dag_id=f"clevertap_data_loader_{datasource_id}",
         description=f"Clevertap daily refresh for {datasource_id}",
@@ -145,8 +152,8 @@ def create_dag(datasource_id: str, created_date: datetime):
         catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=[f"clevertap-daily-data-fetch"],
         default_args={
-            "retries": DAG_RETRIES,
-            "retry_delay": timedelta(minutes=DAG_RETRY_DELAY),
+            "retries": clevertap_task_retries,
+            "retry_delay": timedelta(minutes=clevertap_task_retry_delay),
         },
     )
     def clevertap_data_loader():

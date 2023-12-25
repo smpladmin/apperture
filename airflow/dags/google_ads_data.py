@@ -1,6 +1,6 @@
 import pendulum
 
-from airflow.models import Param
+from airflow.models import Param, Variable
 from typing import Any, Dict, Union, List
 from datetime import timedelta, datetime
 from airflow.decorators import task, dag, task_group
@@ -123,6 +123,13 @@ def fetch_process_save(
 
 
 def create_dag(datasource_id: str, created_date: datetime):
+    google_ads_task_retries = int(
+        Variable.get("google_ads_task_retries", default_var=DAG_RETRIES)
+    )
+    google_ads_task_retry_delay = int(
+        Variable.get("google_ads_task_retry_delay", default_var=DAG_RETRY_DELAY)
+    )
+
     @dag(
         dag_id=f"google_ads_data_loader_{datasource_id}",
         description=f"google ads daily refresh for {datasource_id}",
@@ -150,8 +157,8 @@ def create_dag(datasource_id: str, created_date: datetime):
         catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=[f"google-ads-daily-data-fetch"],
         default_args={
-            "retries": DAG_RETRIES,
-            "retry_delay": timedelta(minutes=DAG_RETRY_DELAY),
+            "retries": google_ads_task_retries,
+            "retry_delay": timedelta(minutes=google_ads_task_retry_delay),
         },
     )
     def google_ads_data_loader():
