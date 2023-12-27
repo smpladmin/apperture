@@ -19,6 +19,10 @@ class SQLBase(ABC):
         pass
 
     @abstractmethod
+    def get_cdc_tables(self, connection, database: str) -> List[str]:
+        pass
+
+    @abstractmethod
     def get_dbs(self, connection) -> List[str]:
         pass
 

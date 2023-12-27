@@ -27,35 +27,9 @@ async def create_cdc_connector(
     integration = await integration_service.get_integration(id=id)
     credential = integration.credential.cdc_credential
     headers = {"Accept": "application/json", "Content-Type": "application/json"}
-    server_type = credential.server_type
-    config = {
-        "connector.class": credential.server_type.get_connector_class(),
-        "database.hostname": credential.server,
-        "database.port": credential.port,
-        "database.user": credential.username,
-        "database.password": credential.password,
-        "database.names": credential.database,
-        "topic.prefix": f"cdc_{id}",
-        "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
-        "schema.history.internal.kafka.topic": f"schemahistory.cdc_{id}",
-    }
-    if server_type == ServerType.MSSQL:
-        config.update(
-            {
-                "table.include.list": ", ".join(
-                    ["dbo." + table for table in credential.tables]
-                ),
-                "database.encrypt": False,
-                "snapshot.mode": "initial",
-            }
-        )
-    elif server_type == ServerType.MYSQL:
-        config.update(
-            {
-                "database.server.id": str(int(time.time())),
-                "include.schema.changes": "true",
-            }
-        )
+    config = integration_service.generate_connector_config(
+        tables=credential.tables, credential=credential, integration_id=id
+    )
     data = {
         "name": f"cdc_{id}",
         "config": config,

@@ -17,11 +17,12 @@ class CDCIntegrations:
         for integration in self.integrations:
             cdc_cred = integration.cdcCredential
             for table in cdc_cred.tables:
-                topic = (
-                    f"cdc_{integration.id}.{cdc_cred.database}.dbo.{table}"
-                    if cdc_cred.server_type == IntegrationProvider.MSSQL
-                    else f"cdc_{integration.id}.{cdc_cred.database}.{table}"
-                )
+                if cdc_cred.server_type == IntegrationProvider.MSSQL:
+                    topic = f"cdc_{integration.id}.{cdc_cred.database}.dbo.{table}"
+                elif cdc_cred.server_type == IntegrationProvider.POSTGRESQL:
+                    topic = f"cdc_{integration.id}.public.{table}"
+                else:
+                    topic = f"cdc_{integration.id}.{cdc_cred.database}.{table}"
                 self.topics.append(topic)
                 self.cdc_buckets[topic] = {
                     "data": [],
