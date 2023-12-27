@@ -97,7 +97,7 @@ def to_object(value: str) -> Dict:
         decoded_string = base64.b64decode(value)
 
     try:
-        cleaned_string = decoded_string.replace("\\ud83e", "")
+        cleaned_string = decoded_string.replace("\\ud83e", "").replace("\\ud83c", "")
         return json.loads(cleaned_string)
     except Exception as e:
         logging.info(repr(e))
