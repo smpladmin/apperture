@@ -32,25 +32,25 @@ KAFKA_TOPIC = "clickstream"
 producer = None
 
 
-class GZipedMiddleware(BaseHTTPMiddleware):
-    async def set_body(self, request: Request):
-        receive_ = await request._receive()
-        if (
-            "gzip" in request.headers.getlist("Content-Encoding")
-            and "/events/capture/batch" in request.url.path
-        ):
-            data = gzip.decompress(receive_.get("body"))
-            receive_["body"] = data
+# class GZipedMiddleware(BaseHTTPMiddleware):
+#     async def set_body(self, request: Request):
+#         receive_ = await request._receive()
+#         if (
+#             "gzip" in request.headers.getlist("Content-Encoding")
+#             and "/events/capture/batch" in request.url.path
+#         ):
+#             data = gzip.decompress(receive_.get("body"))
+#             receive_["body"] = data
 
-        async def receive() -> Message:
-            return receive_
+#         async def receive() -> Message:
+#             return receive_
 
-        request._receive = receive
+#         request._receive = receive
 
-    async def dispatch(self, request, call_next):
-        await self.set_body(request)
-        response = await call_next(request)
-        return response
+#     async def dispatch(self, request, call_next):
+#         await self.set_body(request)
+#         response = await call_next(request)
+#         return response
 
 
 app = FastAPI()
@@ -78,7 +78,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(GZipedMiddleware)
+# app.add_middleware(GZipedMiddleware)
 
 
 @app.on_event("startup")
@@ -137,15 +137,15 @@ async def analyse_decide_call(
     return response
 
 
-@app.post("/events/capture/batch")
-async def capture_click_stream(
-    data: FlutterBatchData,
-):
-    """Capture an event and send it to Kafka."""
-    kafka_topic = "flutter_eventstream"
-    value = json.dumps(data.dict())
-    await producer.send_and_wait(kafka_topic, value=value.encode("utf-8"))
-    return {"status": "ok"}
+# @app.post("/events/capture/batch")
+# async def capture_click_stream(
+#     data: FlutterBatchData,
+# ):
+#     """Capture an event and send it to Kafka."""
+#     kafka_topic = "flutter_eventstream"
+#     value = json.dumps(data.dict())
+#     await producer.send_and_wait(kafka_topic, value=value.encode("utf-8"))
+#     return {"status": "ok"}
 
 
 @app.get("/events/capture/static/array.js")
