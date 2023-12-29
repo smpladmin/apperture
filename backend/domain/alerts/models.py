@@ -1,0 +1,48 @@
+from repositories import Document
+from pydantic import BaseModel
+from beanie import PydanticObjectId
+
+from enum import Enum
+from typing import List, Optional, Union
+
+
+class AlertType(str, Enum):
+    SCHEDULED = "scheduled"
+    TRIGGERED = "triggered"
+
+
+class Frequency(str, Enum):
+    HOURLY = "hourly"
+    DAILY = "daily"
+    WEEKLY = "weekly"
+    MONTHLY = "monthly"
+
+
+class Schedule(BaseModel):
+    time: Optional[str]
+    period: Optional[str]
+    date: Optional[str]
+    day: Optional[str]
+    frequency: Frequency
+
+
+class SlackChannel(BaseModel):
+    name: str
+    slack_channel: Optional[str]
+    slack_url: Optional[str]
+
+
+class EmailChannel(BaseModel):
+    name: str
+    emails: List[str]
+
+
+class Alert(Document):
+    datasource_id: PydanticObjectId
+    type: AlertType
+    schedule: Schedule
+    channel: Union[SlackChannel, EmailChannel]
+    enabled: bool = True
+
+    class Settings:
+        name = "alerts"

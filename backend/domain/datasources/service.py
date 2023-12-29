@@ -73,6 +73,12 @@ class DataSourceService:
             DataSource.app_id == app_id, DataSource.enabled != False
         ).to_list()
 
+    async def get_datasource_for_integration_id(self, integration_id: PydanticObjectId):
+        return await DataSource.find_one(
+            DataSource.integration_id == PydanticObjectId(integration_id),
+            DataSource.enabled != False,
+        )
+
     async def create_datasource(
         self,
         external_source_id: Optional[str],

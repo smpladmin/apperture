@@ -1,11 +1,13 @@
 import asyncio
 import logging
-from typing import List, Union
+from typing import List, Optional, Union
 
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends
 
 from authorisation.service import AuthService
+from rest.dtos.alerts import AlertResponse
+from domain.alerts.service import AlertService
 from domain.datamart_actions.service import DatamartActionService
 from domain.datamart_actions.models import ActionType
 from rest.dtos.datamart_actions import (
@@ -547,11 +549,18 @@ async def get_datasource_events(
     return [properties.event for properties in event_properties]
 
 
-@router.get("/datasources", response_model=List[DataSourceResponse])
+@router.get(
+    "/datasources", response_model=Union[DataSourceResponse, List[DataSourceResponse]]
+)
 async def get_datasource_events(
     provider: IntegrationProvider,
+    integration_id: Optional[str] = None,
     ds_service: DataSourceService = Depends(),
 ):
+    if integration_id:
+        return await ds_service.get_datasource_for_integration_id(
+            integration_id=integration_id
+        )
     return await ds_service.get_datasources_for_provider(provider=provider)
 
 
@@ -601,3 +610,19 @@ async def get_app_database(
     return AppDatabaseResponse(
         name=app.name, database_credentials=app.clickhouse_credential
     )
+
+
+@router.get(
+    "/alerts",
+    response_model=Union[AlertResponse, List[AlertResponse]],
+)
+async def get_alert_config(
+    datasource_id: Optional[str] = None,
+    alert_service: AlertService = Depends(),
+):
+    if datasource_id:
+        return await alert_service.get_alerts_for_datasource(
+            datasource_id=datasource_id
+        )
+
+    return await alert_service.get_alerts()
