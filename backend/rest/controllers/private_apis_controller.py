@@ -632,22 +632,6 @@ async def get_alert_config(
     return await alert_service.get_alerts()
 
 
-def get_intergation_id(log: str):
-    id_pattern = re.compile(r"cdc_(\w+)")
-    match = id_pattern.search(log)
-
-    if match:
-        extracted_id = match.group(1)
-        return extracted_id
-    else:
-        return None
-
-
-def get_error_message(log: str):
-    error_index = log.find("ERROR")
-    return log[error_index + len("ERROR") :].strip()
-
-
 @router.post("/transient/alerts")
 async def process_incoming_alerts(
     dto: dict,
@@ -656,28 +640,9 @@ async def process_incoming_alerts(
     alert_service: AlertService = Depends(),
 ):
     if source == "cdc":
-        decoded_data = b64decode(dto["awslogs"]["data"])
-        decompressed_data = gzip.decompress(decoded_data).decode("utf-8")
-
-        log_events = json.loads(decompressed_data)["logEvents"]
-
-        logs_by_integration_id = {}
-
-        for log_event in log_events:
-            integration_id = get_intergation_id(log_event["message"])
-
-            if integration_id:
-                if integration_id not in logs_by_integration_id:
-                    logs_by_integration_id[integration_id] = set()
-
-                error_message = get_error_message(log_event["message"])
-                logs_by_integration_id[integration_id].add(error_message)
-
-            else:
-                pass  # post message internally to alerts
-
-        logs_by_integration_id = {k: list(v) for k, v in logs_by_integration_id.items()}
-
+        logs_by_integration_id = alert_service.extract_cdc_logs_by_integration_id(
+            logs_data=dto["awslogs"]["data"]
+        )
         for integration_id, error_messages in logs_by_integration_id.items():
             datasource = await datasource_service.get_datasource_for_integration_id(
                 integration_id=integration_id

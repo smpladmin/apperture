@@ -1,4 +1,8 @@
 import logging
+import gzip
+import json
+import re
+
 from typing import Optional, Union
 
 import requests
@@ -6,6 +10,8 @@ from domain.alerts.models import Alert, AlertType, EmailChannel, Schedule, Slack
 from mongo import Mongo
 from fastapi import Depends
 from beanie import PydanticObjectId
+
+from base64 import b64decode
 
 
 class AlertService:
@@ -48,6 +54,42 @@ class AlertService:
             Alert.type == AlertType.SCHEDULED,
             Alert.enabled == True,
         ).to_list()
+
+    def get_intergation_id_from_cdc_error_log(self, log: str):
+        id_pattern = re.compile(r"cdc_(\w+)")
+        match = id_pattern.search(log)
+
+        if match:
+            extracted_id = match.group(1)
+            return extracted_id
+        else:
+            return None
+
+    def get_error_message(self, log: str):
+        error_index = log.find("ERROR")
+        return log[error_index + len("ERROR") :].strip()
+
+    def extract_cdc_logs_by_integration_id(self, logs_data: str):
+        decoded_data = b64decode(logs_data)
+        decompressed_data = gzip.decompress(decoded_data).decode("utf-8")
+
+        log_events = json.loads(decompressed_data)["logEvents"]
+
+        logs_by_integration_id = {}
+
+        for log_event in log_events:
+            integration_id = self.get_intergation_id_from_cdc_error_log(
+                log_event["message"]
+            )
+
+            if integration_id:
+                logs_by_integration_id.setdefault(integration_id, set()).add(
+                    self.get_error_message(log_event["message"])
+                )
+            else:
+                pass  # Handle internal alerts here
+
+        return {k: list(v) for k, v in logs_by_integration_id.items()}
 
     def post_message_to_slack(
         self, slack_url: str, message: str, alert_type: AlertType
