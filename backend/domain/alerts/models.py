@@ -9,6 +9,7 @@ from typing import List, Optional, Union
 class AlertType(str, Enum):
     SCHEDULED = "scheduled"
     TRIGGERED = "triggered"
+    CDC_ERROR = "cdc_error"
 
 
 class Frequency(str, Enum):
@@ -28,8 +29,8 @@ class Schedule(BaseModel):
 
 class SlackChannel(BaseModel):
     name: str
-    slack_channel: Optional[str]
-    slack_url: Optional[str]
+    slack_channel: str
+    slack_url: str
 
 
 class EmailChannel(BaseModel):
@@ -40,7 +41,7 @@ class EmailChannel(BaseModel):
 class Alert(Document):
     datasource_id: PydanticObjectId
     type: AlertType
-    schedule: Schedule
+    schedule: Optional[Schedule]
     channel: Union[SlackChannel, EmailChannel]
     enabled: bool = True
 

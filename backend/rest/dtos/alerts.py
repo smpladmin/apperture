@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 from pydantic import BaseModel
 from domain.alerts.models import Alert, AlertType, EmailChannel, Schedule, SlackChannel
 from rest.dtos.model_response import ModelResponse
@@ -7,7 +7,7 @@ from rest.dtos.model_response import ModelResponse
 class AlertDto(BaseModel):
     datasourceId: str
     type: AlertType
-    schedule: Schedule
+    schedule: Optional[Schedule]
     channel: Union[SlackChannel, EmailChannel]
 
 

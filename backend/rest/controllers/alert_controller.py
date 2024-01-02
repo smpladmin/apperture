@@ -1,5 +1,5 @@
 import logging
-from typing import List, Union
+from typing import List, Optional, Union
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi import APIRouter, Depends
