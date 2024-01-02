@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import gzip
 import json
@@ -37,6 +38,20 @@ class AlertService:
 
     async def save_alert_config(self, alert: Alert):
         return await Alert.insert(alert)
+
+    async def update_alert_config(
+        self,
+        id: str,
+        alert: Alert,
+    ):
+        to_update = alert.dict()
+        to_update.pop("id")
+        to_update.pop("created_at")
+        to_update["updated_at"] = datetime.utcnow()
+
+        await Alert.find_one(
+            Alert.id == PydanticObjectId(id),
+        ).update({"$set": to_update})
 
     async def get_alert_config_for_datasource(self, datasource_id: str):
         return await Alert.find_one(

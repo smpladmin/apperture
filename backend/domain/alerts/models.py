@@ -7,8 +7,6 @@ from typing import List, Optional, Union
 
 
 class AlertType(str, Enum):
-    SCHEDULED = "scheduled"
-    TRIGGERED = "triggered"
     CDC_ERROR = "cdc_error"
 
 
