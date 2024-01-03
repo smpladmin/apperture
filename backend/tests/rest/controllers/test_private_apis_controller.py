@@ -6,6 +6,7 @@ import asyncio
 
 from beanie import PydanticObjectId
 import pytest
+from domain.alerts.models import AlertType
 from domain.datamart.models import DataMart
 
 from domain.apps.models import ClickHouseCredential
@@ -437,3 +438,34 @@ async def test_refresh_datamart_tables_failure(
         assert (
             str(exc_info.value)
         ) == "Could not refresh datamart 635ba034807ab86d8a2aadd8"
+
+
+# @pytest.mark.asyncio
+# async def test_process_incoming_alerts_post_message_to_slack(
+#     client_init, alert_service, datasource_service
+# ):
+#     client_init.post(
+#         "/private/transient/alerts?source=cdc",
+#         data=json.dumps({"awslogs": {"data": "WNQoP784334ksdd89LPuytT"}}),
+#     )
+#     alert_service.extract_cdc_logs_by_integration_id.assert_called_with(
+#         **{"logs_data": "WNQoP784334ksdd89LPuytT"}
+#     )
+#     datasource_service.get_datasource_for_integration_id.call_count == 2
+
+#     assert alert_service.post_message_to_slack.call_count == 3
+#     alert_service.post_message_to_slack.assert_any_call(
+#         slack_url="https://hooks.slack.com/services/T0BV42/B06A09V",
+#         message="Error message 1. Kindly check your database connection or cdc access for your database.",
+#         alert_type=AlertType.CDC_ERROR,
+#     )
+#     alert_service.post_message_to_slack.assert_any_call(
+#         slack_url="https://hooks.slack.com/services/T0BV42/B06A09V",
+#         message="Error message 2. Kindly check your database connection or cdc access for your database.",
+#         alert_type=AlertType.CDC_ERROR,
+#     )
+#     alert_service.post_message_to_slack.assert_called_with(
+#         slack_url="https://hooks.slack.com/services/T0BV42/B06A09V",
+#         message="Error message 3. Kindly check your database connection or cdc access for your database.",
+#         alert_type=AlertType.CDC_ERROR,
+#     )

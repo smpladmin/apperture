@@ -6,6 +6,7 @@ from unittest.mock import ANY, AsyncMock
 import pytest
 from beanie import PydanticObjectId
 from fastapi.testclient import TestClient
+from domain.alerts.models import Alert, AlertType, SlackChannel
 
 from domain.actions.models import (
     Action,
@@ -372,6 +373,39 @@ def retention_service(apperture_user_response):
 
 
 @pytest.fixture(scope="module")
+def alert_service(apperture_user_response):
+    alert_service_mock = mock.MagicMock()
+    Alert.get_settings = mock.MagicMock()
+
+    alert = Alert(
+        id=PydanticObjectId("6595348f0b3ea77062d31ab1"),
+        datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        type=AlertType.CDC_ERROR,
+        schedule=None,
+        channel=SlackChannel(
+            type="slack",
+            slack_channel="alerts",
+            slack_url="https://hooks.slack.com/services/T0BV42/B06A09V",
+        ),
+    )
+
+    alert_future = asyncio.Future()
+    alert_future.set_result(alert)
+
+    alert_service_mock.build_alert_config.return_value = alert
+    alert_service_mock.save_alert_config.return_value = alert_future
+    alert_service_mock.update_alert_config = mock.AsyncMock()
+    alert_service_mock.get_alert_for_datasource_id_with_alert_type.return_value = (
+        alert_future
+    )
+    alert_service_mock.extract_cdc_logs_by_integration_id.return_value = {
+        "integration_id_1": ["Error message 1", "Error message 2"],
+        "integration_id_2": ["Error message 3"],
+    }
+    return alert_service_mock
+
+
+@pytest.fixture(scope="module")
 def datamart_action_service(apperture_user_response):
     datamart_action_service_mock = mock.MagicMock()
     DatamartAction.get_settings = mock.MagicMock()
@@ -625,6 +659,9 @@ def datasource_service():
     )
     datasource_service_mock.create_row_policy_for_datasources_by_app = mock.AsyncMock()
     datasource_service_mock.get_datasources_for_app_id = mock.AsyncMock()
+    datasource_service_mock.get_datasource_for_integration_id.return_value = (
+        datasource_future
+    )
     return datasource_service_mock
 
 
@@ -1997,6 +2034,22 @@ def datamart_action_response():
 
 
 @pytest.fixture(scope="module")
+def alert_response():
+    return {
+        "_id": "6595348f0b3ea77062d31ab1",
+        "datasourceId": "635ba034807ab86d8a2aadd9",
+        "type": "cdc_error",
+        "schedule": None,
+        "channel": {
+            "type": "slack",
+            "slack_channel": "alerts",
+            "slack_url": "https://hooks.slack.com/services/T0BV42/B06A09V",
+        },
+        "enabled": True,
+    }
+
+
+@pytest.fixture(scope="module")
 def transient_datamart_response():
     return {
         "data": [
@@ -2260,6 +2313,20 @@ def datamart_data():
         "datasourceId": "635ba034807ab86d8a2aadd9",
         "name": "test-table",
         "query": "select event_name, user_id from events",
+    }
+
+
+@pytest.fixture(scope="module")
+def alert_data():
+    return {
+        "datasourceId": "635ba034807ab86d8a2aadd9",
+        "type": "cdc_error",
+        "schedule": None,
+        "channel": {
+            "type": "slack",
+            "slack_channel": "alerts",
+            "slack_url": "https://hooks.slack.com/services/T0BV42/B06A09V",
+        },
     }
 
 

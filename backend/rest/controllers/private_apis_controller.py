@@ -1,11 +1,17 @@
 import asyncio
+import gzip
+import json
 import logging
+import re
 from typing import List, Optional, Union
+from fastapi_limiter.depends import RateLimiter
 
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends
+from base64 import b64decode
 
 from authorisation.service import AuthService
+from domain.alerts.models import AlertType
 from rest.dtos.alerts import AlertResponse
 from domain.alerts.service import AlertService
 from domain.datamart_actions.service import DatamartActionService
@@ -623,15 +629,49 @@ async def get_app_database(
 
 @router.get(
     "/alerts",
-    response_model=Union[AlertResponse, List[AlertResponse]],
+    response_model=List[AlertResponse],
 )
 async def get_alert_config(
     datasource_id: Optional[str] = None,
     alert_service: AlertService = Depends(),
 ):
     if datasource_id:
-        return await alert_service.get_alerts_for_datasource(
+        return await alert_service.get_alert_config_for_datasource(
             datasource_id=datasource_id
         )
 
     return await alert_service.get_alerts()
+
+
+@router.post(
+    "/transient/alerts",
+    dependencies=[Depends(RateLimiter(times=1, minutes=1))],
+)
+async def process_incoming_alerts(
+    dto: dict,
+    source: Optional[str] = None,
+    datasource_service: DataSourceService = Depends(),
+    alert_service: AlertService = Depends(),
+):
+    if source == "cdc":
+        logs_by_integration_id = alert_service.extract_cdc_logs_by_integration_id(
+            logs_data=dto["awslogs"]["data"]
+        )
+        for integration_id, error_messages in logs_by_integration_id.items():
+            datasource = await datasource_service.get_datasource_for_integration_id(
+                integration_id=integration_id
+            )
+            if datasource:
+                config = (
+                    await alert_service.get_alert_for_datasource_id_with_alert_type(
+                        datasource_id=datasource.id, alert_type=AlertType.CDC_ERROR
+                    )
+                )
+                channel = config.channel
+                if channel.type == "slack":
+                    for error_message in error_messages:
+                        alert_service.post_message_to_slack(
+                            slack_url=channel.slack_url,
+                            message=f"{error_message}. Kindly check your database connection or cdc access for your database.",
+                            alert_type=config.type,
+                        )

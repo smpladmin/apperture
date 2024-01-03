@@ -1,8 +1,9 @@
 import logging
 import os
+import redis.asyncio as redisio
+from fastapi_limiter import FastAPILimiter
 
 from dotenv import load_dotenv
-
 from cache import init_cache
 from clickhouse.clickhouse_client_factory import ClickHouseClientFactory
 from settings import apperture_settings
@@ -65,6 +66,13 @@ async def on_startup():
     clickhouse = Clickhouse()
     app.dependency_overrides[Mongo] = lambda: mongo
     app.dependency_overrides[Clickhouse] = lambda: clickhouse
+    redis = redisio.from_url(
+        f"redis://{settings.redis_host}",
+        encoding="utf-8",
+        decode_responses=True,
+        password=settings.redis_password,
+    )
+    await FastAPILimiter.init(redis)
     await mongo.init()
     clickhouse.init()
     init_cache(settings.redis_host, settings.redis_password)
@@ -76,6 +84,7 @@ async def on_shutdown():
     await mongo.close()
     clickhouse.close()
     ClickHouseClientFactory.close_all_client_connection()
+    await FastAPILimiter.close()
 
 
 app = FastAPI(on_startup=[on_startup], on_shutdown=[on_shutdown])

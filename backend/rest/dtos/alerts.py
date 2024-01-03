@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Optional, Union
 from pydantic import BaseModel
 from domain.alerts.models import Alert, AlertType, EmailChannel, Schedule, SlackChannel
 from rest.dtos.model_response import ModelResponse

@@ -1,7 +1,4 @@
-import logging
-from typing import List, Union
-
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi import APIRouter, Depends
 from domain.alerts.models import Alert
 from domain.alerts.service import AlertService
@@ -32,3 +29,23 @@ async def save_alert_config(
         channel=dto.channel,
     )
     return await alert_service.save_alert_config(alert=alert)
+
+
+@router.put(
+    "/alerts/{id}",
+    response_model=AlertResponse,
+)
+async def update_alert_config(
+    id: str,
+    dto: AlertDto,
+    alert_service: AlertService = Depends(),
+):
+    alert = alert_service.build_alert_config(
+        datasource_id=dto.datasourceId,
+        schedule=dto.schedule,
+        type=dto.type,
+        channel=dto.channel,
+    )
+    await alert_service.update_alert_config(id=id, alert=alert)
+    updated_alert = Alert(**alert.dict(), _id=id)
+    return updated_alert
