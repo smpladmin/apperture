@@ -84,6 +84,7 @@ async def on_shutdown():
     await mongo.close()
     clickhouse.close()
     ClickHouseClientFactory.close_all_client_connection()
+    await FastAPILimiter.close()
 
 
 app = FastAPI(on_startup=[on_startup], on_shutdown=[on_shutdown])

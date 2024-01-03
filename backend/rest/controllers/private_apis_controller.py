@@ -4,7 +4,6 @@ import json
 import logging
 import re
 from typing import List, Optional, Union
-from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
 
 from beanie import PydanticObjectId

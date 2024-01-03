@@ -19,7 +19,6 @@ from domain.datamart_actions.service import DatamartActionService
 from domain.event_properties.service import EventPropertiesService
 from rest.middlewares.validate_app_user import validate_library_items, validate_app_user
 
-from server import app
 from mongo.mongo import Mongo
 from clickhouse import Clickhouse
 from rest.middlewares import (
