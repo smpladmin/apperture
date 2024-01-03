@@ -4,6 +4,8 @@ import json
 import logging
 import re
 from typing import List, Optional, Union
+from fastapi_limiter import FastAPILimiter
+from fastapi_limiter.depends import RateLimiter
 
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Depends
@@ -633,7 +635,10 @@ async def get_alert_config(
     return await alert_service.get_alerts()
 
 
-@router.post("/transient/alerts")
+@router.post(
+    "/transient/alerts",
+    dependencies=[Depends(RateLimiter(times=1, minutes=1))],
+)
 async def process_incoming_alerts(
     dto: dict,
     source: Optional[str] = None,
