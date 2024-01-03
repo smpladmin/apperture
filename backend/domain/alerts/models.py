@@ -9,8 +9,7 @@ from domain.datamart_actions.models import Schedule
 
 
 class AlertType(str, Enum):
-    SCHEDULED = "scheduled"
-    TRIGGERED = "triggered"
+    CDC_ERROR = "cdc_error"
     CDC_DB_COUNT = "cdc_db_count"
     CDC_TABLE_COUNT = "cdc_table_count"
 
