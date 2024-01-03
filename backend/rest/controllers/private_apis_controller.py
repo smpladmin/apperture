@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends
 from base64 import b64decode
 
 from authorisation.service import AuthService
+from domain.alerts.models import AlertType
 from rest.dtos.alerts import AlertResponse
 from domain.alerts.service import AlertService
 from domain.datamart_actions.service import DatamartActionService
@@ -618,7 +619,7 @@ async def get_app_database(
 
 @router.get(
     "/alerts",
-    response_model=Union[AlertResponse, List[AlertResponse]],
+    response_model=List[AlertResponse],
 )
 async def get_alert_config(
     datasource_id: Optional[str] = None,
@@ -648,14 +649,16 @@ async def process_incoming_alerts(
                 integration_id=integration_id
             )
             if datasource:
-                config = await alert_service.get_alert_config_for_datasource(
-                    datasource_id=datasource.id
+                config = (
+                    await alert_service.get_alert_for_datasource_id_with_alert_type(
+                        datasource_id=datasource.id, alert_type=AlertType.CDC_ERROR
+                    )
                 )
                 channel = config.channel
-                if channel.name == "slack":
+                if channel.type == "slack":
                     for error_message in error_messages:
                         alert_service.post_message_to_slack(
                             slack_url=channel.slack_url,
-                            message=error_message,
+                            message=f"{error_message}. Kindly check your database connection or cdc access for your database.",
                             alert_type=config.type,
                         )

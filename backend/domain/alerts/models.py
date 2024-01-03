@@ -26,13 +26,13 @@ class Schedule(BaseModel):
 
 
 class SlackChannel(BaseModel):
-    name: str
+    type: str
     slack_channel: str
     slack_url: str
 
 
 class EmailChannel(BaseModel):
-    name: str
+    type: str
     emails: List[str]
 
 

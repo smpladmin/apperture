@@ -54,19 +54,22 @@ class AlertService:
         ).update({"$set": to_update})
 
     async def get_alert_config_for_datasource(self, datasource_id: str):
+        return await Alert.find(
+            Alert.datasource_id == PydanticObjectId(datasource_id),
+            Alert.enabled == True,
+        ).to_list()
+
+    async def get_alert_for_datasource_id_with_alert_type(
+        self, datasource_id: str, alert_type: str
+    ) -> Alert:
         return await Alert.find_one(
             Alert.datasource_id == PydanticObjectId(datasource_id),
+            Alert.type == alert_type,
             Alert.enabled == True,
         )
 
     async def get_alerts(self):
         return await Alert.find(
-            Alert.enabled == True,
-        ).to_list()
-
-    async def get_scheduled_alerts(self):
-        return await Alert.find(
-            Alert.type == AlertType.SCHEDULED,
             Alert.enabled == True,
         ).to_list()
 
@@ -89,7 +92,6 @@ class AlertService:
         decompressed_data = gzip.decompress(decoded_data).decode("utf-8")
 
         log_events = json.loads(decompressed_data)["logEvents"]
-
         logs_by_integration_id = {}
 
         for log_event in log_events:
@@ -122,7 +124,7 @@ class AlertService:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"{message}. Kindly check your database connection or cdc access for your database.",
+                    "text": message,
                 },
             },
         ]
