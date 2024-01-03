@@ -43,6 +43,7 @@ from rest.controllers import (
     spreadsheet_controller,
     user_controller,
     datamart_action_controller,
+    alert_controller,
 )
 
 settings = apperture_settings()
@@ -114,6 +115,7 @@ app.include_router(api_key_controller.router)
 app.include_router(google_sheet_controller.router)
 app.include_router(cdc_controller.router)
 app.include_router(datamart_action_controller.router)
+app.include_router(alert_controller.router)
 
 
 @app.get("/sentry-debug")

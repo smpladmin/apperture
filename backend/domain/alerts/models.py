@@ -5,31 +5,20 @@ from beanie import PydanticObjectId
 from enum import Enum
 from typing import List, Optional, Union
 
+from domain.datamart_actions.models import Schedule
+
 
 class AlertType(str, Enum):
     SCHEDULED = "scheduled"
     TRIGGERED = "triggered"
-
-
-class Frequency(str, Enum):
-    HOURLY = "hourly"
-    DAILY = "daily"
-    WEEKLY = "weekly"
-    MONTHLY = "monthly"
-
-
-class Schedule(BaseModel):
-    time: Optional[str]
-    period: Optional[str]
-    date: Optional[str]
-    day: Optional[str]
-    frequency: Frequency
+    CDC_DB_COUNT = "cdc_db_count"
+    CDC_TABLE_COUNT = "cdc_table_count"
 
 
 class SlackChannel(BaseModel):
     name: str
-    slack_channel: Optional[str]
-    slack_url: Optional[str]
+    slack_channel: str
+    slack_url: str
 
 
 class EmailChannel(BaseModel):
@@ -40,7 +29,8 @@ class EmailChannel(BaseModel):
 class Alert(Document):
     datasource_id: PydanticObjectId
     type: AlertType
-    schedule: Schedule
+    schedule: Optional[Schedule]
+    table: Optional[str]
     channel: Union[SlackChannel, EmailChannel]
     enabled: bool = True
 
