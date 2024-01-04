@@ -71,6 +71,7 @@ class TestAlertService:
             "id": None,
             "revision_id": None,
             "schedule": None,
+            "table": None,
             "type": AlertType.CDC_ERROR,
             "updated_at": None,
         }

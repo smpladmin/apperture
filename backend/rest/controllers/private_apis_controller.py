@@ -572,10 +572,19 @@ async def get_datasource_events(
 
 @router.get("/cdc", response_model=List[CdcCredentials])
 async def get_cdc_credentials(
+    datasource_id: Optional[str] = None,
     integration_service: IntegrationService = Depends(),
+    datasource_service: DataSourceService = Depends(),
     app_service: AppService = Depends(),
 ):
-    integrations = await integration_service.get_integrations_with_cdc()
+    if datasource_id:
+        datasource = await datasource_service.get_datasource(id=datasource_id)
+        integrations = [
+            await integration_service.get_integration(id=datasource.integration_id)
+        ]
+    else:
+        integrations = await integration_service.get_integrations_with_cdc()
+
     response = []
     for integration in integrations:
         app = await app_service.get_app(id=integration.app_id)

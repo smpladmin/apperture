@@ -2040,6 +2040,7 @@ def alert_response():
         "datasourceId": "635ba034807ab86d8a2aadd9",
         "type": "cdc_error",
         "schedule": None,
+        "table": None,
         "channel": {
             "type": "slack",
             "slack_channel": "alerts",

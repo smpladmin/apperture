@@ -7,6 +7,7 @@ from rest.dtos.model_response import ModelResponse
 class AlertDto(BaseModel):
     datasourceId: str
     type: AlertType
+    table: Optional[str]
     schedule: Optional[Schedule]
     channel: Union[SlackChannel, EmailChannel]
 

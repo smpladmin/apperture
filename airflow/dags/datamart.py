@@ -2,7 +2,7 @@ import logging
 import pendulum
 from typing import Dict, Union
 from datetime import datetime, timedelta
-from utils.utils import get_cron_expression, FREQUENCY_DELTAS
+from utils.utils import get_cron_expression, FREQUENCY_DELTAS, calculate_schedule
 from airflow.decorators import dag, task, task_group
 
 
@@ -118,18 +118,6 @@ def refresh_datamart_action(
             database_client=database_client,
             database_credential=database_credential,
         )
-
-
-def calculate_schedule(schedule: Schedule) -> str:
-    if schedule.frequency == Frequency.HOURLY:
-        return "0 * * * *"
-
-    return get_cron_expression(
-        time_str=schedule.time,
-        period=schedule.period,
-        day=schedule.day if schedule.frequency == Frequency.WEEKLY else None,
-        date=schedule.date if schedule.frequency == Frequency.MONTHLY else None,
-    )
 
 
 def calculate_start_date(created_date: datetime, schedule: Schedule) -> datetime:
