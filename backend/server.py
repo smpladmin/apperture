@@ -1,6 +1,6 @@
 import logging
 import os
-import redis.asyncio as redisio
+import redis.asyncio as aioredis
 from fastapi_limiter import FastAPILimiter
 
 from dotenv import load_dotenv
@@ -60,22 +60,25 @@ if settings.sentry_dsn:
     )
 
 
+async def init_rate_limiter(redis_host: str, redis_password: str):
+    redis = aioredis.from_url(
+        f"redis://:{redis_password}@{redis_host}",
+        encoding="utf8",
+        decode_responses=True,
+    )
+    await FastAPILimiter.init(redis)
+
+
 async def on_startup():
     mongo = Mongo()
     ClickHouseClientFactory()
     clickhouse = Clickhouse()
     app.dependency_overrides[Mongo] = lambda: mongo
     app.dependency_overrides[Clickhouse] = lambda: clickhouse
-    redis = redisio.from_url(
-        f"redis://{settings.redis_host}",
-        encoding="utf-8",
-        decode_responses=True,
-        password=settings.redis_password,
-    )
-    await FastAPILimiter.init(redis)
     await mongo.init()
     clickhouse.init()
     init_cache(settings.redis_host, settings.redis_password)
+    init_rate_limiter(settings.redis_host, settings.redis_password)
 
 
 async def on_shutdown():

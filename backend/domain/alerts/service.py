@@ -11,6 +11,7 @@ from domain.alerts.models import Alert, AlertType, EmailChannel, Schedule, Slack
 from mongo import Mongo
 from fastapi import Depends
 from beanie import PydanticObjectId
+import os
 
 from base64 import b64decode
 
@@ -21,6 +22,7 @@ class AlertService:
         mongo: Mongo = Depends(),
     ):
         self.mongo = mongo
+        self.apperture_slack_url = os.environ.get("APPERTURE_SLACK_URL")
 
     def build_alert_config(
         self,
@@ -87,27 +89,6 @@ class AlertService:
         error_index = log.find("ERROR")
         return log[error_index + len("ERROR") :].strip()
 
-    def extract_cdc_logs_by_integration_id(self, logs_data: str):
-        decoded_data = b64decode(logs_data)
-        decompressed_data = gzip.decompress(decoded_data).decode("utf-8")
-
-        log_events = json.loads(decompressed_data)["logEvents"]
-        logs_by_integration_id = {}
-
-        for log_event in log_events:
-            integration_id = self.get_intergation_id_from_cdc_error_log(
-                log_event["message"]
-            )
-
-            if integration_id:
-                logs_by_integration_id.setdefault(integration_id, set()).add(
-                    self.get_error_message(log_event["message"])
-                )
-            else:
-                pass  # Handle internal alerts here
-
-        return {k: list(v) for k, v in logs_by_integration_id.items()}
-
     def post_message_to_slack(
         self, slack_url: str, message: str, alert_type: AlertType
     ):
@@ -138,3 +119,29 @@ class AlertService:
         except Exception as e:
             logging.log(f"Failed to send alert to Slack {slack_url}")
         return
+
+    def extract_cdc_logs_by_integration_id(self, logs_data: str):
+        decoded_data = b64decode(logs_data)
+        decompressed_data = gzip.decompress(decoded_data).decode("utf-8")
+
+        log_events = json.loads(decompressed_data)["logEvents"]
+        logs_by_integration_id = {}
+
+        for log_event in log_events:
+            integration_id = self.get_intergation_id_from_cdc_error_log(
+                log_event["message"]
+            )
+            error_message = self.get_error_message(log_event["message"])
+            if integration_id:
+                logs_by_integration_id.setdefault(integration_id, set()).add(
+                    error_message
+                )
+            else:
+                # post anonymous error to internal slack channel
+                self.post_message_to_slack(
+                    slack_url=self.apperture_slack_url,
+                    message=self.get_error_message(log_event["message"]),
+                    alert_type=AlertType.CDC_ERROR,
+                )
+
+        return {k: list(v) for k, v in logs_by_integration_id.items()}

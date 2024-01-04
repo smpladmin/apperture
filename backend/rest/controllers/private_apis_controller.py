@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends
 from base64 import b64decode
 
 from authorisation.service import AuthService
-from domain.alerts.models import AlertType
+from domain.alerts.models import AlertType, ChannelType
 from rest.dtos.alerts import AlertResponse
 from domain.alerts.service import AlertService
 from domain.datamart_actions.service import DatamartActionService
@@ -659,7 +659,7 @@ async def process_incoming_alerts(
                     )
                 )
                 channel = config.channel
-                if channel.type == "slack":
+                if channel.type == ChannelType.SLACK:
                     for error_message in error_messages:
                         alert_service.post_message_to_slack(
                             slack_url=channel.slack_url,

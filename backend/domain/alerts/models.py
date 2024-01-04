@@ -10,6 +10,11 @@ class AlertType(str, Enum):
     CDC_ERROR = "cdc_error"
 
 
+class ChannelType(str, Enum):
+    SLACK = "slack"
+    EMAIL = "email"
+
+
 class Frequency(str, Enum):
     HOURLY = "hourly"
     DAILY = "daily"
@@ -26,13 +31,13 @@ class Schedule(BaseModel):
 
 
 class SlackChannel(BaseModel):
-    type: str
+    type: ChannelType
     slack_channel: str
     slack_url: str
 
 
 class EmailChannel(BaseModel):
-    type: str
+    type: ChannelType
     emails: List[str]
 
 
