@@ -17,14 +17,19 @@ class AlertType(str, Enum):
     CDC_TABLE_COUNT = "cdc_table_count"
 
 
+class ChannelType(str, Enum):
+    SLACK = "slack"
+    EMAIL = "email"
+
+
 class SlackChannel(BaseModel):
-    name: str
+    type: ChannelType
     slack_channel: str
     slack_url: str
 
 
 class EmailChannel(BaseModel):
-    name: str
+    type: ChannelType
     emails: List[str]
 
 
