@@ -1,9 +1,9 @@
 import logging
 import os
 import pendulum
+from utils.utils import DAG_RETRIES, DAG_RETRY_DELAY
 
-from airflow.models import Param
-
+from airflow.models import Variable
 from datetime import timedelta, datetime
 import clickhouse_connect
 from airflow.decorators import task, dag
@@ -33,6 +33,14 @@ def store_backup(current_date, current_hour):
         logging.info("Backup stored successfully")
 
 
+clickstream_backup_task_retries = int(
+    Variable.get("clickstream_backup_task_retries", default_var=DAG_RETRIES)
+)
+clickstream_backup_task_retry_delay = int(
+    Variable.get("clickstream_backup_task_retry_delay", default_var=DAG_RETRY_DELAY)
+)
+
+
 @dag(
     dag_id=f"clickstream-data-backup",
     description=f"Hourly backup of clickstream data",
@@ -43,6 +51,10 @@ def store_backup(current_date, current_hour):
     ),
     catchup=False,
     tags=[f"clickstream-hourly-backup"],
+    default_args={
+        "retries": clickstream_backup_task_retries,
+        "retry_delay": timedelta(minutes=clickstream_backup_task_retry_delay),
+    },
 )
 def create_backup():
     date = datetime.now(tz=pendulum.timezone("Asia/Kolkata"))
