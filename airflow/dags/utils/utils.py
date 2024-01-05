@@ -8,6 +8,8 @@ DATA_FETCH_DAYS_OFFSET = 14
 BRANCH_DATA_FETCH_DAYS_OFFSET = 7
 FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET = 2
 AIRFLOW_INIT_DATE = datetime(2023, 10, 25, 0, 0, 0, 0)
+DAG_RETRIES = 3
+DAG_RETRY_DELAY = 5  # (in minutes)
 
 
 def replace_invalid_characters(input_string):
