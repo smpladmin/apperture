@@ -23,13 +23,31 @@ def delete_backup(current_date):
     bucket_name = "apperture-clickhouse-backup"
 
     s3 = boto3.client("s3", aws_access_key_id=key_id, aws_secret_access_key=secret_key)
-    response = s3.list_objects_v2(
-        Bucket=bucket_name, Prefix=backup_folder + f"/{current_date}"
-    )
-    for obj in response["Contents"]:
-        folder = obj["Key"]
-        print(f"Deleting {folder}")
-        s3.delete_object(Bucket=bucket_name, Key=folder)
+    continuation_token = None
+    while True:
+        response = (
+            s3.list_objects_v2(
+                Bucket=bucket_name,
+                Prefix=backup_folder + f"/{current_date}",
+                ContinuationToken=continuation_token,
+            )
+            if continuation_token
+            else s3.list_objects_v2(
+                Bucket=bucket_name, Prefix=backup_folder + f"/{current_date}"
+            )
+        )
+        objects_to_delete = []
+        for obj in response["Contents"]:
+            objects_to_delete.append({"Key": obj["Key"]})
+        if objects_to_delete:
+            s3.delete_objects(Bucket=bucket_name, Delete={"Objects": objects_to_delete})
+        print(
+            f"Deleted {len(objects_to_delete)} objects from {bucket_name}/{backup_folder}/{current_date}"
+        )
+        if response["IsTruncated"]:
+            continuation_token = response["NextContinuationToken"]
+        else:
+            break
 
 
 clickstream_backup_deletion_task_retries = int(
