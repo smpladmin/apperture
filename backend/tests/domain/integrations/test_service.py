@@ -1,4 +1,4 @@
-from unittest.mock import ANY, AsyncMock, MagicMock, Mock, patch
+from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
 import pytest
 from beanie import PydanticObjectId
@@ -9,6 +9,8 @@ from domain.integrations.models import (
     CredentialType,
     Integration,
     RelationalDatabaseType,
+    CdcCredential,
+    ServerType,
 )
 from domain.integrations.service import IntegrationService
 
@@ -27,6 +29,8 @@ class TestIntegrationService:
         self.service = IntegrationService(integrations=self.integrations)
         self.s3_client = MagicMock()
         self.file = MagicMock()
+        self.tables = ["test_table_1", "test_table_2"]
+        self.integration_id = "test_id"
 
     @pytest.mark.asyncio
     async def test_create_integration(self):
@@ -152,4 +156,131 @@ class TestIntegrationService:
                 "s3_key": "/csvs/app-id/test.csv",
             },
             app_id="test-app-id"
+        )
+
+    @pytest.mark.parametrize(
+        "credential, config",
+        [
+            (
+                CdcCredential(
+                    server="server",
+                    port="port",
+                    username="user",
+                    password="password",
+                    server_type="mysql",
+                    database="cdc",
+                    tables=[],
+                ),
+                {
+                    "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+                    "database.hostname": "server",
+                    "database.port": "port",
+                    "database.user": "user",
+                    "database.password": "password",
+                    "topic.prefix": "cdc_test_id",
+                    "database.names": "cdc",
+                    "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
+                    "schema.history.internal.kafka.topic": "schemahistory.cdc_test_id",
+                    "database.server.id": ANY,
+                    "include.schema.changes": "true",
+                },
+            ),
+            (
+                CdcCredential(
+                    server="server",
+                    port="port",
+                    username="user",
+                    password="password",
+                    server_type="mssql",
+                    database="cdc",
+                    tables=[],
+                ),
+                {
+                    "connector.class": "io.debezium.connector.sqlserver.SqlServerConnector",
+                    "database.hostname": "server",
+                    "database.port": "port",
+                    "database.user": "user",
+                    "database.password": "password",
+                    "topic.prefix": "cdc_test_id",
+                    "database.names": "cdc",
+                    "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
+                    "schema.history.internal.kafka.topic": "schemahistory.cdc_test_id",
+                    "table.include.list": "dbo.test_table_1, dbo.test_table_2",
+                    "database.encrypt": False,
+                    "snapshot.mode": "initial",
+                },
+            ),
+            (
+                CdcCredential(
+                    server="server",
+                    port="port",
+                    username="user",
+                    password="password",
+                    server_type="psql",
+                    database="cdc",
+                    tables=[],
+                ),
+                {
+                    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+                    "database.hostname": "server",
+                    "database.port": "port",
+                    "database.user": "user",
+                    "database.password": "password",
+                    "topic.prefix": "cdc_test_id",
+                    "database.dbname": "cdc",
+                    "table.include.list": "public.test_table_1, public.test_table_2",
+                    "publication.autocreate.mode": "filtered",
+                    "plugin.name": "pgoutput",
+                },
+            ),
+        ],
+    )
+    def test_generate_connector_config(self, credential, config):
+        assert (
+            self.service.generate_connector_config(
+                tables=self.tables,
+                credential=credential,
+                integration_id=self.integration_id,
+            )
+            == config
+        )
+
+    @pytest.mark.parametrize(
+        "server_type, table_description",
+        [
+            (
+                ServerType.MYSQL,
+                [
+                    ["column1", "int", 0],
+                    ["column2", "varchar", 1],
+                    ["column3", "time", 0],
+                ],
+            ),
+            (
+                ServerType.MSSQL,
+                [
+                    ["column1", "int", 0],
+                    ["column2", "text", 1],
+                    ["column3", "datetime", 0],
+                ],
+            ),
+            (
+                ServerType.POSTGRESQL,
+                [
+                    ["column1", "integer", 0],
+                    ["column2", "character", 1],
+                    ["column3", "date", 0],
+                ],
+            ),
+        ],
+    )
+    def test_generate_create_table_query(self, server_type, table_description):
+        assert (
+            self.service.generate_create_table_query(
+                table="cdc_table",
+                database="cdc",
+                table_description=table_description,
+                server_type=server_type,
+            )
+            == "CREATE TABLE IF NOT EXISTS cdc.cdc_table (column1 Int32 ,column2 Nullable(String) ,column3 Int64 ,is_deleted UInt8, shard String) ENGINE = ReplacingMergeTree(column1, is_deleted) ORDER BY (column1, shard)"
         )

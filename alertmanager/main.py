@@ -23,10 +23,12 @@ ALERT_MUTE_ITERATIONS = int(os.getenv("ALERT_MUTE_ITERATIONS", "5"))
 ITERATION_SECONDS = int(os.getenv("ITERATION_SECONDS", "120"))
 CPU_THRESHOLD = float(os.getenv("CPU_THRESHOLD", "60"))
 MEMORY_THRESHOLD = float(os.getenv("MEMORY_THRESHOLD", "60"))
+DISK_THRESHOLD = float(os.getenv("DISK_THRESHOLD", "60"))
 ENV = os.getenv("ENV", "LOCAL")
 
 # Set up the initial alert status dictionary
 alert_status = {}
+node_alert_status = {}
 
 
 # Define a function to get the running tasks from Swarmpit
@@ -79,14 +81,72 @@ def get_running_tasks():
         return []
 
 
-def build_message(task):
+# Define a function to get nodes from Swarmpit
+def get_active_nodes():
+    try:
+        # Make the API call to get all nodes
+        nodes = requests.get(
+            f"{SWARMPIT_API_ENDPOINT}/nodes",
+            headers={"Authorization": SWARMPIT_AUTH_TOKEN},
+        ).json()
+        logging.info(f"Got {len(nodes)} nodes from Swarmpit.")
+
+        # Get the running nodes with high CPU or memory utilization
+        active_nodes = [
+            node
+            for node in nodes
+            if node["state"] == "ready"
+            and node["stats"]
+            and (
+                node["stats"]["cpu"]["usedPercentage"] > CPU_THRESHOLD
+                or node["stats"]["memory"]["usedPercentage"] > MEMORY_THRESHOLD
+                or node["stats"]["disk"]["usedPercentage"] > DISK_THRESHOLD
+            )
+        ]
+
+        # Check if any of the running tasks have already been flagged for high utilization
+        for node in active_nodes:
+            if node["id"] in node_alert_status:
+                node_alert_status[node["id"]]["count"] += 1
+            else:
+                node_alert_status[node["id"]] = {"status": "alert", "count": 1}
+
+        # Check if any previously flagged tasks have low utilization now
+        node_ids = list(node_alert_status.keys())
+        for node_id in node_ids:
+            if node_id not in [node["id"] for node in active_nodes]:
+                node_alert_status.pop(node_id, None)
+            elif (
+                node_alert_status[node_id]["count"] == 1
+                or node_alert_status[node_id]["count"] % ALERT_MUTE_ITERATIONS == 0
+            ):
+                node_alert_status[node_id]["status"] = "alert"
+            else:
+                node_alert_status[node_id]["status"] = "wait"
+
+        # Return the running tasks with high CPU or memory utilization
+        return active_nodes
+
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error getting running nodes from Swarmpit: {e}")
+        return []
+
+
+def build_message_for_task(task):
     return f"Task <{SWARMPIT_ENDPOINT}/#/services/{task['serviceName']}|{task['taskName']}> has high CPU or Memory utilization ({task['stats']['cpuPercentage']:.4f}% CPU, {task['stats']['memoryPercentage']:.4f}% memory)."
 
 
+def build_message_for_node(node):
+    return f"Node <{SWARMPIT_ENDPOINT}/#/nodes/{node['nodeName']}> has high CPU | Memory | Disk utilization ({node['stats']['cpu']['usedPercentage']:.4f}% CPU, {node['stats']['memory']['usedPercentage']:.4f}% memory, {node['stats']['disk']['usedPercentage']:.4f}% disk)."
+
+
 # Define a function to send a Slack alert for a given task
-def send_slack_alert(tasks):
-    task_messages = "\n".join([build_message(task) for task in tasks])
-    message = f":rotating_light: *ENV: {ENV}* \n{task_messages}"
+def send_slack_alert(tasks=None, nodes=None):
+    if tasks:
+        messages = "\n".join([build_message_for_task(task) for task in tasks])
+    else:
+        messages = "\n".join([build_message_for_node(node) for node in nodes])
+    message = f":rotating_light: *ENV: {ENV}* \n{messages}"
     logging.info(f"Sending Slack alert: {message}")
 
     try:
@@ -103,15 +163,26 @@ def send_slack_alert(tasks):
 while True:
     logging.info("Getting running tasks from Swarmpit...")
     running_tasks = get_running_tasks()
+    active_nodes = get_active_nodes()
 
     # Send Slack alerts for any running tasks with high CPU or memory utilization
     alert_tasks = [
         task for task in running_tasks if alert_status[task["id"]]["status"] == "alert"
     ]
     if alert_tasks:
-        send_slack_alert(alert_tasks)
+        send_slack_alert(tasks=alert_tasks)
     else:
-        logging.info("No alerts")
+        logging.info("No task alerts")
+
+    alert_nodes = [
+        node
+        for node in active_nodes
+        if node_alert_status[node["id"]]["status"] == "alert"
+    ]
+    if alert_nodes:
+        send_slack_alert(nodes=alert_nodes)
+    else:
+        logging.info("No node alerts")
 
     logging.info(f"Sleeping for {ITERATION_SECONDS} seconds...")
 

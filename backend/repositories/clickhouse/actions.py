@@ -194,9 +194,7 @@ class Actions(EventsBase):
             )
 
         if not action.processed_till:
-            [
-                (start_time,),
-            ] = await self.get_minimum_timestamp_of_events(
+            [(start_time,),] = await self.get_minimum_timestamp_of_events(
                 datasource_id=str(action.datasource_id), app_id=str(action.app_id)
             )
 

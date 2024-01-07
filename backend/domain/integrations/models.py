@@ -6,6 +6,9 @@ from pydantic import BaseModel, Field
 
 from domain.common.models import IntegrationProvider
 from repositories import Document
+from utils.mssql_clickhouse_datatypes import MSSQL_CLICKHOUSE_DATATYPE_MAPPING
+from utils.mysql_clickhouse_datatypes import MYSQL_CLICKHOUSE_DATATYPE_MAPPING
+from utils.psql_clickhouse_datatypes import PSQL_CLICKHOUSE_DATATYPE_MAPPING
 
 
 class CredentialType(str, Enum):
@@ -83,15 +86,23 @@ class MsSQLCredential(BaseModel):
 class ServerType(str, Enum):
     MYSQL = "mysql"
     MSSQL = "mssql"
+    POSTGRESQL = "psql"
 
     def get_connector_class(self):
         connector_class_dict = {
             self.MYSQL: "mysql.MySqlConnector",
             self.MSSQL: "sqlserver.SqlServerConnector",
+            self.POSTGRESQL: "postgresql.PostgresConnector",
         }
-        return "io.debezium.connector." + connector_class_dict.get(
-            self, "sqlserver.SqlServerConnector"
-        )
+        return "io.debezium.connector." + connector_class_dict.get(self)
+
+    def get_datatype_mapping(self):
+        datatype_mapping = {
+            self.MYSQL: MYSQL_CLICKHOUSE_DATATYPE_MAPPING,
+            self.MSSQL: MSSQL_CLICKHOUSE_DATATYPE_MAPPING,
+            self.POSTGRESQL: PSQL_CLICKHOUSE_DATATYPE_MAPPING,
+        }
+        return datatype_mapping.get(self)
 
 
 class CdcCredential(BaseModel):

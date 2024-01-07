@@ -148,6 +148,7 @@ async def create_integration(
                 username=cdc_cred.username,
                 password=cdc_cred.password,
                 server_type=cdc_cred.serverType,
+                database=cdc_cred.database,
             )
             cdc_tables = integration_service.get_cdc_tables(
                 connection=connection,
