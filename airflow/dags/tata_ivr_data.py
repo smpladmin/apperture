@@ -4,13 +4,18 @@ from event_processors.tata_ivr_event_processor import TataIVREventProcessor
 from fetch.tata_ivr_fetcher import TataIVREventsFetcher
 import pendulum
 
-from airflow.models import Param
+from airflow.models import Param, Variable
 from typing import Dict, Union, List
 from datetime import timedelta, datetime
 from airflow.decorators import task, dag
 
 from domain.datasource.service import DataSourceService
-from utils.utils import DATA_FETCH_DAYS_OFFSET, AIRFLOW_INIT_DATE
+from utils.utils import (
+    DAG_RETRIES,
+    DAG_RETRY_DELAY,
+    DATA_FETCH_DAYS_OFFSET,
+    AIRFLOW_INIT_DATE,
+)
 from domain.datasource.models import (
     IntegrationProvider,
     Credential,
@@ -83,6 +88,13 @@ def load_data(
 
 
 def create_dag(datasource_id: str, created_date: datetime):
+    tata_ivr_task_retries = int(
+        Variable.get("tata_ivr_task_retries", default_var=DAG_RETRIES)
+    )
+    tata_ivr_task_retry_delay = int(
+        Variable.get("tata_ivr_task_retry_delay", default_var=DAG_RETRY_DELAY)
+    )
+
     @dag(
         dag_id=f"tata_ivr_data_ingestion_{datasource_id}",
         description=f"TATA IVR daily refresh for {datasource_id}",
@@ -115,6 +127,10 @@ def create_dag(datasource_id: str, created_date: datetime):
         },
         catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=[f"clevertap-daily-data-fetch"],
+        default_args={
+            "retries": tata_ivr_task_retries,
+            "retry_delay": timedelta(minutes=tata_ivr_task_retry_delay),
+        },
     )
     def clevertap_data_loader():
         datasource_with_credential = get_datasource_and_credential(

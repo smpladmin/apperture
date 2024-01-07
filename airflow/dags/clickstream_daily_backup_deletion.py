@@ -1,8 +1,9 @@
 import logging
 import os
 import pendulum
-
 from utils.utils import DAG_RETRIES, DAG_RETRY_DELAY
+
+from airflow.models import Variable
 
 from airflow.models import Variable
 from datetime import timedelta, datetime
@@ -48,6 +49,17 @@ def delete_backup(current_date):
             continuation_token = response["NextContinuationToken"]
         else:
             break
+
+
+clickstream_backup_deletion_task_retries = int(
+    Variable.get("clickstream_backup_deletion_task_retries", default_var=DAG_RETRIES)
+)
+clickstream_backup_deletion_task_retry_delay = int(
+    Variable.get(
+        "clickstream_backup_deletion_task_retry_delay",
+        default_var=DAG_RETRY_DELAY,
+    )
+)
 
 
 clickstream_backup_deletion_task_retries = int(

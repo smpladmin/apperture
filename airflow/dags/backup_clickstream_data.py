@@ -4,6 +4,7 @@ import pendulum
 from utils.utils import DAG_RETRIES, DAG_RETRY_DELAY
 
 from airflow.models import Variable
+
 from datetime import timedelta, datetime
 import clickhouse_connect
 from airflow.decorators import task, dag
