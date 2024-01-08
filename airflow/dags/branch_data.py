@@ -6,7 +6,7 @@ from fetch.branch_data_fetcher import BranchDataFetcher
 from store.clickhouse_client_factory import ClickHouseClientFactory
 import pendulum
 
-from airflow.models import Param
+from airflow.models import Param, Variable
 from typing import Dict, Union, List
 from datetime import timedelta, datetime
 from airflow.decorators import task, dag
@@ -17,6 +17,8 @@ from domain.datasource.service import DataSourceService
 from utils.utils import (
     BRANCH_DATA_FETCH_DAYS_OFFSET,
     AIRFLOW_INIT_DATE,
+    DAG_RETRIES,
+    DAG_RETRY_DELAY,
 )
 from event_processors.clevertap_event_processor import ClevertapEventProcessor
 from domain.datasource.models import (
@@ -123,6 +125,13 @@ def get_app_database(
 
 
 def create_dag(datasource_id: str, created_date: datetime):
+    branch_task_retries = int(
+        Variable.get("branch_task_retries", default_var=DAG_RETRIES)
+    )
+    branch_task_retry_delay = int(
+        Variable.get("branch_task_retry_delay", default_var=DAG_RETRY_DELAY)
+    )
+
     @dag(
         dag_id=f"branch_data_loader_{datasource_id}",
         description=f"Branch daily refresh for {datasource_id}",
@@ -142,6 +151,11 @@ def create_dag(datasource_id: str, created_date: datetime):
         },
         catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=[f"branch-daily-data-fetch"],
+        default_args={
+            "retries": branch_task_retries,
+            "retry_delay": timedelta(minutes=branch_task_retry_delay),
+            "retry_exponential_backoff": True,
+        },
     )
     def branch_data_sync():
         datasource_with_credential = get_datasource_and_credential(
