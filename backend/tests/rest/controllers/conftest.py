@@ -6,7 +6,13 @@ from unittest.mock import ANY, AsyncMock
 import pytest
 from beanie import PydanticObjectId
 from fastapi.testclient import TestClient
-from domain.alerts.models import Alert, AlertType, SlackChannel
+from domain.alerts.models import (
+    Alert,
+    AlertType,
+    SlackChannel,
+    Threshold,
+    ThresholdType,
+)
 
 from domain.actions.models import (
     Action,
@@ -387,6 +393,7 @@ def alert_service(apperture_user_response):
             slack_channel="alerts",
             slack_url="https://hooks.slack.com/services/T0BV42/B06A09V",
         ),
+        threshold=Threshold(type=ThresholdType.ABSOLUTE, value=100),
     )
 
     alert_future = asyncio.Future()
@@ -2047,6 +2054,8 @@ def alert_response():
             "slack_url": "https://hooks.slack.com/services/T0BV42/B06A09V",
         },
         "enabled": True,
+        "threshold": {"type": "absolute", "value": 100},
+        "frequencyAlert": None,
     }
 
 

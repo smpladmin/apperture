@@ -7,7 +7,14 @@ import re
 from typing import Optional, Union
 
 import requests
-from domain.alerts.models import Alert, AlertType, EmailChannel, Schedule, SlackChannel
+from domain.alerts.models import (
+    Alert,
+    AlertType,
+    EmailChannel,
+    Schedule,
+    SlackChannel,
+    Threshold,
+)
 from mongo import Mongo
 from fastapi import Depends
 from beanie import PydanticObjectId
@@ -30,12 +37,14 @@ class AlertService:
         type: AlertType,
         schedule: Optional[Schedule],
         channel: Union[SlackChannel, EmailChannel],
+        threshold: Threshold,
     ) -> Alert:
         return Alert(
             datasource_id=datasource_id,
             type=type,
             schedule=schedule,
             channel=channel,
+            threshold=threshold,
         )
 
     async def save_alert_config(self, alert: Alert):

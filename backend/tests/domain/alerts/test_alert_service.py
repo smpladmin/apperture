@@ -5,7 +5,13 @@ from beanie import PydanticObjectId
 import pytest
 from domain.alerts.service import AlertService
 from domain.datasources.models import DataSource
-from domain.alerts.models import Alert, AlertType, SlackChannel
+from domain.alerts.models import (
+    Alert,
+    AlertType,
+    SlackChannel,
+    Threshold,
+    ThresholdType,
+)
 
 
 class TestAlertService:
@@ -38,6 +44,7 @@ class TestAlertService:
             ),
             schedule=None,
             enabled=True,
+            threshold=Threshold(type=ThresholdType.ABSOLUTE, value=100),
         )
 
         FindOneMock = namedtuple("FindOneMock", ["update"])
@@ -57,6 +64,7 @@ class TestAlertService:
                 "slack_channel": "alerts",
                 "slack_url": "https://hooks.slack.com/services/T0BV42/B06A09V",
             },
+            threshold=Threshold(type=ThresholdType.ABSOLUTE, value=100),
         )
 
         assert alert.dict() == {
@@ -74,6 +82,8 @@ class TestAlertService:
             "table": None,
             "type": AlertType.CDC_ERROR,
             "updated_at": None,
+            "frequency_alert": None,
+            "threshold": {"type": ThresholdType.ABSOLUTE, "value": 100},
         }
 
     @pytest.mark.asyncio

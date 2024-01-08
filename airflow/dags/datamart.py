@@ -7,7 +7,7 @@ from utils.utils import (
     DAG_RETRY_DELAY,
     get_cron_expression,
     FREQUENCY_DELTAS,
-    calculate_schedule
+    calculate_schedule,
 )
 from airflow.decorators import dag, task, task_group
 from airflow.models import Variable
