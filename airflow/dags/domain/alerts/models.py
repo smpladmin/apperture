@@ -15,6 +15,7 @@ class AlertType(str, Enum):
     CDC_ERROR = "cdc_error"
     CDC_DB_COUNT = "cdc_db_count"
     CDC_TABLE_COUNT = "cdc_table_count"
+    TABLE_FREQUENCY = "table_frequency"
 
 
 class ChannelType(str, Enum):
@@ -33,12 +34,31 @@ class EmailChannel(BaseModel):
     emails: List[str]
 
 
+class ThresholdType(str, Enum):
+    PERCENTAGE = "percentage"
+    ABSOLUTE = "absolute"
+
+
+class Threshold(BaseModel):
+    type: ThresholdType
+    value: int
+
+
+class FrequencyAlertMeta(BaseModel):
+    last_n_minutes: int
+    timestamp_column: str
+    sleep_hours_start: Optional[int]
+    sleep_hours_end: Optional[int]
+
+
 class Alert(BaseModel):
     id: str = Field(alias="_id")
     datasourceId: str
     createdAt: datetime
     table: Optional[str]
     type: AlertType
+    threshold: Threshold
+    frequencyAlert: Optional[FrequencyAlertMeta]
     schedule: Optional[Schedule]
     channel: Union[SlackChannel, EmailChannel]
     enabled: bool = True

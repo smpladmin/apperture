@@ -1,7 +1,13 @@
 import logging
 
 from domain.alerts.service import AlertsService
-from domain.alerts.models import AlertType, CdcCredential, ClickHouseCredential, Alert
+from domain.alerts.models import (
+    AlertType,
+    CdcCredential,
+    ClickHouseCredential,
+    Alert,
+    ThresholdType,
+)
 import pendulum
 
 from typing import Dict, Union
@@ -34,12 +40,17 @@ def get_cdc_cred(
 
 
 @task
-def get_source_db_count(source_db_cred: CdcCredential):
+def get_source_db_row_count(source_db_cred: CdcCredential):
     return alerts_service.get_row_counts_for_source_db(cdc_cred=source_db_cred)
 
 
 @task
-def get_ch_db_count(
+def get_source_db_column_count(source_db_cred: CdcCredential):
+    return alerts_service.get_column_counts_for_source_db(cdc_cred=source_db_cred)
+
+
+@task
+def get_ch_db_row_count(
     app_id: str,
     ch_cred: ClickHouseCredential,
     clickhouse_server_credential: Union[ClickHouseRemoteConnectionCred, None],
@@ -52,16 +63,50 @@ def get_ch_db_count(
 
 
 @task
-def create_alert_message(source_db_count, ch_db_count):
-    common_table_counts = [
+def get_ch_db_column_count(
+    app_id: str,
+    ch_cred: ClickHouseCredential,
+    clickhouse_server_credential: Union[ClickHouseRemoteConnectionCred, None],
+):
+    return alerts_service.get_column_counts_for_ch_db(
+        app_id=app_id,
+        ch_cred=ch_cred,
+        clickhouse_server_credential=clickhouse_server_credential,
+    )
+
+
+@task
+def create_alert_message(
+    source_db_row_count, ch_db_row_count, source_db_column_count, ch_db_column_count
+):
+    row_counts = [
         (table, count1, count2)
-        for table, count1 in source_db_count
-        for table2, count2 in ch_db_count
+        for table, count1 in source_db_row_count
+        for table2, count2 in ch_db_row_count
         if table == table2
     ]
-    message = "Table \t Source DB \t Clickhouse \n"
-    for table, count1, count2 in common_table_counts:
-        message += f"{table}: {count1}, {count2} \n"
+    column_counts = [
+        (table, count1, count2)
+        for table, count1 in source_db_column_count
+        for table2, count2 in ch_db_column_count
+        if table == table2
+    ]
+    message = "ROW COUNT: \n Table \t Source DB \t Clickhouse \n"
+    for table, count1, count2 in row_counts:
+        threshold_crossed = False
+        if alert.threshold.type == ThresholdType.ABSOLUTE:
+            threshold_crossed = (count1 - count2) > alert.threshold.value
+        elif alert.threshold.type == ThresholdType.PERCENTAGE:
+            threshold_crossed = (count1 - count2) * 100 / count1 > alert.threshold.value
+        if threshold_crossed:
+            message += f"{table}: {count1}, {count2} \n"
+
+    message += "\n COLUMN COUNT: \n Table \t Source DB \t Clickhouse \n"
+    for table, count1, count2 in column_counts:
+
+        # Clickhouse table has 2 additional columns: is_deleted and shard
+        if count1 + 2 != count2:
+            message += f"{table}: {count1}, {count2-2} \n"
 
     payload = [
         {
@@ -107,17 +152,30 @@ def create_dag(datasource_id: str, alert: Alert, created_date: datetime):
         creds = get_cdc_cred(datasource_id=datasource_id)
 
         # Step 2: Get Source DB count
-        source_db_count = get_source_db_count(source_db_cred=creds["source_db_cred"])
+        source_db_row_count = get_source_db_row_count(
+            source_db_cred=creds["source_db_cred"]
+        )
+        source_db_column_count = get_source_db_column_count(
+            source_db_cred=creds["source_db_cred"]
+        )
 
         # Step 3: Get CH DB count
-        ch_db_count = get_ch_db_count(
+        ch_db_row_count = get_ch_db_row_count(
+            app_id=creds["app_id"],
+            ch_cred=creds["ch_cred"],
+            clickhouse_server_credential=creds["remote_connection"],
+        )
+        ch_db_column_count = get_ch_db_column_count(
             app_id=creds["app_id"],
             ch_cred=creds["ch_cred"],
             clickhouse_server_credential=creds["remote_connection"],
         )
         # Step 4: Create payload
         alert_message = create_alert_message(
-            source_db_count=source_db_count, ch_db_count=ch_db_count
+            source_db_row_count=source_db_row_count,
+            ch_db_row_count=ch_db_row_count,
+            source_db_column_count=source_db_column_count,
+            ch_db_column_count=ch_db_column_count,
         )
 
         # Step 5: Dispatch Alert
