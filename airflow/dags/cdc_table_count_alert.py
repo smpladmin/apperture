@@ -1,5 +1,3 @@
-import logging
-
 from domain.alerts.service import AlertsService
 from domain.alerts.models import AlertType, CdcCredential, ClickHouseCredential, Alert
 import pendulum
@@ -24,7 +22,6 @@ def get_cdc_cred(
     datasource_id: str,
 ) -> Dict:
     cdc_cred = alerts_service.get_cdc_cred(datasource_id=datasource_id)
-    logging.info(f"Cred: {cdc_cred}")
     return {
         "source_db_cred": cdc_cred.cdcCredential,
         "remote_connection": cdc_cred.remoteConnection,
@@ -43,6 +40,7 @@ def get_source_db_count(source_db_cred: CdcCredential, table: str):
 @task
 def get_ch_db_count(
     app_id: str,
+    source_db_cred: CdcCredential,
     ch_cred: ClickHouseCredential,
     clickhouse_server_credential: Union[ClickHouseRemoteConnectionCred, None],
     table: str,
@@ -50,6 +48,7 @@ def get_ch_db_count(
     return alerts_service.get_row_counts_for_ch_table(
         app_id=app_id,
         ch_cred=ch_cred,
+        shard=source_db_cred.database,
         clickhouse_server_credential=clickhouse_server_credential,
         table=table,
     )
@@ -65,7 +64,7 @@ def create_alert_message(source_db_count, ch_db_count, table):
             "type": "header",
             "text": {
                 "type": "plain_text",
-                "text": f"Alert - CDC Table Count {table}:zap:",
+                "text": f"Alert - CDC Table Count for {table}:zap:",
                 "emoji": True,
             },
         },
@@ -111,6 +110,7 @@ def create_dag(datasource_id: str, alert: Alert, created_date: datetime):
             ch_cred=creds["ch_cred"],
             clickhouse_server_credential=creds["remote_connection"],
             table=alert.table,
+            source_db_cred=creds["source_db_cred"]
         )
 
         alert_message = create_alert_message(

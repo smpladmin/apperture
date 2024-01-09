@@ -1,5 +1,3 @@
-import logging
-
 from domain.alerts.service import AlertsService
 from domain.alerts.models import (
     AlertType,
@@ -30,7 +28,6 @@ def get_cdc_cred(
     datasource_id: str,
 ) -> Dict:
     cdc_cred = alerts_service.get_cdc_cred(datasource_id=datasource_id)
-    logging.info(f"Cred: {cdc_cred}")
     return {
         "source_db_cred": cdc_cred.cdcCredential,
         "remote_connection": cdc_cred.remoteConnection,

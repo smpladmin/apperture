@@ -197,11 +197,12 @@ class AlertsService:
     def get_row_counts_for_ch_table(
         self,
         app_id: str,
+        shard: str,
         ch_cred: ClickHouseCredential,
         clickhouse_server_credential: Union[ClickHouseRemoteConnectionCred, None],
         table: str,
     ):
-        query = f"select count(*) from {ch_cred.databasename}.{table}"
+        query = f"select count(*) from {ch_cred.databasename}.{table} where shard='{shard}'"
         return self.execute_ch_query(
             app_id=app_id,
             clickhouse_server_credential=clickhouse_server_credential,
