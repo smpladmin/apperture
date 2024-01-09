@@ -2,12 +2,19 @@ import pendulum
 from typing import Dict, Union
 from datetime import timedelta, datetime
 from airflow.decorators import task, dag, task_group
+from airflow.models import Variable
+
 
 from store.api_data_saver import APIDataSaver
 from fetch.api_data_fetcher import APIDataFetcher
 from domain.datasource.service import DataSourceService
 from event_processors.api_data_processor import APIDataProcessor
-from utils.utils import DATA_FETCH_DAYS_OFFSET, AIRFLOW_INIT_DATE
+from utils.utils import (
+    DAG_RETRIES,
+    DAG_RETRY_DELAY,
+    DATA_FETCH_DAYS_OFFSET,
+    AIRFLOW_INIT_DATE,
+)
 from domain.datasource.models import IntegrationProvider, DataSource, Credential
 
 datasource_service = DataSourceService()
@@ -64,6 +71,11 @@ def fetch_process_save(date: str, credential: Credential, datasource: DataSource
 
 
 def create_dag(datasource_id: str, num_days: int, created_date: datetime):
+    api_task_retries = int(Variable.get("api_task_retries", default_var=DAG_RETRIES))
+    api_task_retry_delay = int(
+        Variable.get("api_task_retry_delay", default_var=DAG_RETRY_DELAY)
+    )
+
     @dag(
         dag_id=f"api_data_loader_{datasource_id}",
         description=f"API datasource daily refresh for {datasource_id}",
@@ -74,6 +86,10 @@ def create_dag(datasource_id: str, num_days: int, created_date: datetime):
         ),
         catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=["api-daily-data-fetch"],
+        default_args={
+            "retries": api_task_retries,
+            "retry_delay": timedelta(minutes=api_task_retry_delay),
+        },
     )
     def api_data_loader(datasource_id: str, num_days: int):
         datasource_with_credential = get_datasource_and_credential(

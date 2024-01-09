@@ -2,8 +2,14 @@ import logging
 import pendulum
 from typing import Dict, Union
 from datetime import datetime, timedelta
-from utils.utils import get_cron_expression, FREQUENCY_DELTAS, calculate_schedule
+from utils.utils import (
+    DAG_RETRIES,
+    DAG_RETRY_DELAY,
+    FREQUENCY_DELTAS,
+    calculate_schedule,
+)
 from airflow.decorators import dag, task, task_group
+from airflow.models import Variable
 
 
 from domain.datamart.models import (
@@ -128,6 +134,13 @@ def calculate_start_date(created_date: datetime, schedule: Schedule) -> datetime
 def create_dag(
     datamart_action: DatamartAction, datasource_id: str, created_date: datetime
 ):
+    datamart_action_task_retries = int(
+        Variable.get("datamart_action_task_retries", default_var=DAG_RETRIES)
+    )
+    datamart_action_task_retry_delay = int(
+        Variable.get("datamart_action_task_retry_delay", default_var=DAG_RETRY_DELAY)
+    )
+
     @dag(
         dag_id=f"datamart_action_loader_{datamart_action.type}_{datamart_action.id}",
         description=f"Datamart datasource daily refresh for {datamart_action.type}_{datamart_action.id}",
@@ -140,6 +153,10 @@ def create_dag(
         ),
         tags=["datamart-scheduled-data-fetch"],
         catchup=False,
+        default_args={
+            "retries": datamart_action_task_retries,
+            "retry_delay": timedelta(minutes=datamart_action_task_retry_delay),
+        },
     )
     def datamart_loader():
         datasource_with_credential = get_datasource_and_credential(

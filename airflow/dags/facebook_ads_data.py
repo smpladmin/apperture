@@ -1,7 +1,7 @@
 import logging
 import pendulum
 
-from airflow.models import Param
+from airflow.models import Param, Variable
 from typing import Dict, Union, List
 from datetime import timedelta, datetime
 from airflow.decorators import task, dag
@@ -13,6 +13,8 @@ from store.facebook_ads_saver import FacebookAdsDataSaver
 
 from utils.utils import (
     AIRFLOW_INIT_DATE,
+    DAG_RETRIES,
+    DAG_RETRY_DELAY,
     FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET,
 )
 from domain.datasource.models import (
@@ -107,6 +109,13 @@ def process_and_save(
 
 
 def create_dag(datasource_id: str, created_date: datetime):
+    facebook_ads_task_retries = int(
+        Variable.get("facebook_ads_task_retries", default_var=DAG_RETRIES)
+    )
+    facebook_ads_task_retry_delay = int(
+        Variable.get("facebook_ads_task_retry_delay", default_var=DAG_RETRY_DELAY)
+    )
+
     @dag(
         dag_id=f"facebook_ads_data_loader_{datasource_id}",
         description=f"Facebook ads daily refresh for {datasource_id}",
@@ -131,8 +140,13 @@ def create_dag(datasource_id: str, created_date: datetime):
                 description="Select end date (Leave empty to fetch data for the day prior to the logical date)",
             ),
         },
-        catchup=(created_date > AIRFLOW_INIT_DATE),
+        catchup=False,
         tags=[f"facebook-ads-daily-data-fetch"],
+        default_args={
+            "retries": facebook_ads_task_retries,
+            "retry_delay": timedelta(minutes=facebook_ads_task_retry_delay),
+            "retry_exponential_backoff": True,
+        },
     )
     def facebook_ads_data_loader():
         datasource_with_credential = get_datasource_and_credential(
