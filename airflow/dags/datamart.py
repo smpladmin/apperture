@@ -165,6 +165,7 @@ def create_dag(
         ),
         tags=["datamart-scheduled-data-fetch"],
         catchup=False,
+        is_paused_upon_creation=False,
         default_args={
             "retries": datamart_action_task_retries,
             "retry_delay": timedelta(minutes=datamart_action_task_retry_delay),
