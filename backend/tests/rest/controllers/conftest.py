@@ -380,6 +380,7 @@ def alert_service(apperture_user_response):
     alert = Alert(
         id=PydanticObjectId("6595348f0b3ea77062d31ab1"),
         datasource_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+        user_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
         type=AlertType.CDC_ERROR,
         schedule=None,
         channel=SlackChannel(
@@ -2038,6 +2039,7 @@ def alert_response():
     return {
         "_id": "6595348f0b3ea77062d31ab1",
         "datasourceId": "635ba034807ab86d8a2aadd9",
+        "userId": "635ba034807ab86d8a2aadd9",
         "type": "cdc_error",
         "schedule": None,
         "table": None,

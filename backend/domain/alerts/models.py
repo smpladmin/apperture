@@ -32,6 +32,7 @@ class EmailChannel(BaseModel):
 
 class Alert(Document):
     datasource_id: PydanticObjectId
+    user_id: PydanticObjectId
     type: AlertType
     schedule: Optional[Schedule]
     table: Optional[str]

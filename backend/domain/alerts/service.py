@@ -27,12 +27,14 @@ class AlertService:
     def build_alert_config(
         self,
         datasource_id: PydanticObjectId,
+        user_id: str,
         type: AlertType,
         schedule: Optional[Schedule],
         channel: Union[SlackChannel, EmailChannel],
     ) -> Alert:
         return Alert(
             datasource_id=datasource_id,
+            user_id=user_id,
             type=type,
             schedule=schedule,
             channel=channel,
