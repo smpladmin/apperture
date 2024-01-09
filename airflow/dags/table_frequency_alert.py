@@ -5,19 +5,18 @@ import pytz
 from domain.alerts.service import AlertsService
 from domain.alerts.models import (
     AlertType,
-    CdcCredential,
     Alert,
     ThresholdType,
 )
 import pendulum
 
-from typing import Dict
+from typing import Dict, Union
 from datetime import datetime
 from airflow.decorators import task, dag
 
 from utils.utils import calculate_schedule
 from domain.datasource.models import (
-    IntegrationProvider,
+    IntegrationProvider, ClickHouseCredential, ClickHouseRemoteConnectionCred,
 )
 
 
@@ -40,14 +39,18 @@ def get_cdc_cred(
 
 
 @task
-def get_source_table_row_frequency(
-    source_db_cred: CdcCredential,
+def get_ch_table_row_frequency(
+    app_id: str,
+    ch_cred: ClickHouseCredential,
+    clickhouse_server_credential: Union[ClickHouseRemoteConnectionCred, None],
     table: str,
     last_n_minutes: int,
     timestamp_column: str,
 ):
-    return alerts_service.get_row_frequency_for_source_table(
-        cdc_cred=source_db_cred,
+    return alerts_service.get_row_frequency_for_ch_table(
+        app_id=app_id,
+        ch_cred=ch_cred,
+        clickhouse_server_credential=clickhouse_server_credential,
         table=table,
         last_n_minutes=last_n_minutes,
         timestamp_column=timestamp_column,
@@ -116,8 +119,10 @@ def create_dag(datasource_id: str, alert: Alert, created_date: datetime):
         creds = get_cdc_cred(datasource_id=datasource_id)
 
         # Step 2: Get source table frequency
-        count = get_source_table_row_frequency(
-            source_db_cred=creds["source_db_cred"],
+        count = get_ch_table_row_frequency(
+            app_id=creds["app_id"],
+            ch_cred=creds["ch_cred"],
+            clickhouse_server_credential=creds["remote_connection"],
             table=alert.table,
             last_n_minutes=alert.frequencyAlert.last_n_minutes,
             timestamp_column=alert.frequencyAlert.timestamp_column,

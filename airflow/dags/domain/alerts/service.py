@@ -127,6 +127,22 @@ class AlertsService:
         logging.info(f"Query Result:{result}")
         return result
 
+    def get_row_frequency_for_ch_table(
+        self,
+        app_id: str,
+        ch_cred: ClickHouseCredential,
+        clickhouse_server_credential: Union[ClickHouseRemoteConnectionCred, None],
+        table: str,
+        last_n_minutes: int,
+        timestamp_column: str,
+    ):
+        query = f"SELECT count(*) AS record_count FROM {ch_cred.databasename}.{table} WHERE toDateTime({timestamp_column}/1000) >= now() - INTERVAL {last_n_minutes} minute"
+        return self.execute_ch_query(
+            app_id=app_id,
+            clickhouse_server_credential=clickhouse_server_credential,
+            query=query,
+        )
+
     def get_column_counts_for_source_db(self, cdc_cred: CdcCredential):
         query_map = {
             "mysql": f"SELECT table_name, COUNT(column_name) AS num_columns FROM information_schema.columns WHERE table_schema = {cdc_cred.database} GROUP BY table_name;",
