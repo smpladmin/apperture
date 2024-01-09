@@ -28,6 +28,9 @@ async def save_alert_config(
         schedule=dto.schedule,
         type=dto.type,
         channel=dto.channel,
+        table=dto.table,
+        threshold=dto.threshold,
+        frequency_alert=dto.frequencyAlert,
     )
     return await alert_service.save_alert_config(alert=alert)
 
@@ -48,6 +51,9 @@ async def update_alert_config(
         schedule=dto.schedule,
         type=dto.type,
         channel=dto.channel,
+        table=dto.table,
+        threshold=dto.threshold,
+        frequency_alert=dto.frequencyAlert,
     )
     await alert_service.update_alert_config(id=id, alert=alert)
     updated_alert = Alert(**alert.dict(), _id=id)
