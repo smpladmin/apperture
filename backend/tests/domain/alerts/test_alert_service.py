@@ -67,6 +67,8 @@ class TestAlertService:
                 "slack_url": "https://hooks.slack.com/services/T0BV42/B06A09V",
             },
             threshold=Threshold(type=ThresholdType.ABSOLUTE, value=100),
+            table=None,
+            frequency_alert=None,
         )
 
         assert alert.dict() == {
