@@ -2332,6 +2332,7 @@ def datamart_data():
 def alert_data():
     return {
         "datasourceId": "635ba034807ab86d8a2aadd9",
+        "userId": "635ba034807ab86d8a2aadd9",
         "type": "cdc_error",
         "schedule": None,
         "channel": {

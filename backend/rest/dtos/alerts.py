@@ -11,7 +11,7 @@ class AlertDto(BaseModel):
     type: AlertType
     table: Optional[str]
     schedule: Optional[Schedule]
-    threshold: Threshold
+    threshold: Optional[Threshold]
     frequencyAlert: Optional[FrequencyAlertMeta]
     channel: Union[SlackChannel, EmailChannel]
 

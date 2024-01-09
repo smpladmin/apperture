@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends
-from fastapi import APIRouter, Depends
 from domain.alerts.models import Alert
 from domain.alerts.service import AlertService
 from rest.dtos.alerts import AlertDto, AlertResponse

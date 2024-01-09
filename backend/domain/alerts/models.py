@@ -52,7 +52,7 @@ class Alert(Document):
     datasource_id: PydanticObjectId
     user_id: PydanticObjectId
     type: AlertType
-    threshold: Threshold
+    threshold: Optional[Threshold]
     schedule: Optional[Schedule]
     table: Optional[str]
     frequency_alert: Optional[FrequencyAlertMeta]

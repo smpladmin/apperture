@@ -57,7 +57,7 @@ class Alert(BaseModel):
     createdAt: datetime
     table: Optional[str]
     type: AlertType
-    threshold: Threshold
+    threshold: Optional[Threshold]
     frequencyAlert: Optional[FrequencyAlertMeta]
     schedule: Optional[Schedule]
     channel: Union[SlackChannel, EmailChannel]
