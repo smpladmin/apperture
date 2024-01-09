@@ -11,6 +11,7 @@ from domain.alerts.models import (
     Alert,
     AlertType,
     EmailChannel,
+    FrequencyAlertMeta,
     Schedule,
     SlackChannel,
     Threshold,
@@ -38,7 +39,9 @@ class AlertService:
         type: AlertType,
         schedule: Optional[Schedule],
         channel: Union[SlackChannel, EmailChannel],
-        threshold: Threshold,
+        threshold: Optional[Threshold],
+        table: Optional[str],
+        frequency_alert: Optional[FrequencyAlertMeta],
     ) -> Alert:
         return Alert(
             datasource_id=datasource_id,
@@ -47,6 +50,8 @@ class AlertService:
             schedule=schedule,
             channel=channel,
             threshold=threshold,
+            table=table,
+            frequency_alert=frequency_alert,
         )
 
     async def save_alert_config(self, alert: Alert):

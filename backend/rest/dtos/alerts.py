@@ -7,7 +7,6 @@ from rest.dtos.model_response import ModelResponse
 
 class AlertDto(BaseModel):
     datasourceId: str
-    userId: str
     type: AlertType
     table: Optional[str]
     schedule: Optional[Schedule]

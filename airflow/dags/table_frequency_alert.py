@@ -14,7 +14,9 @@ from airflow.decorators import task, dag
 
 from utils.utils import calculate_schedule
 from domain.datasource.models import (
-    IntegrationProvider, ClickHouseCredential, ClickHouseRemoteConnectionCred,
+    IntegrationProvider,
+    ClickHouseCredential,
+    ClickHouseRemoteConnectionCred,
 )
 
 
@@ -87,11 +89,15 @@ def dispatch_alert(slack_url, payload, count):
     if sleep_start and sleep_end:
         indian_timezone = pytz.timezone("Asia/Kolkata")
         current_hour = datetime.now(tz=indian_timezone).hour
-        if (current_hour >= sleep_start) and (current_hour < sleep_end):
+        if (sleep_start <= sleep_end) and (sleep_start <= current_hour < sleep_end):
+            in_sleep = True
+        elif (sleep_start > sleep_end) and (
+            current_hour >= sleep_start or current_hour < sleep_end
+        ):
             in_sleep = True
     if (
         alert.threshold.type == ThresholdType.ABSOLUTE
-        and (count[0][0] > alert.threshold.value)
+        and (count[0][0] < alert.threshold.value)
         and (not in_sleep)
     ):
         alerts_service.dispatch_alert(slack_url=slack_url, payload=payload)
