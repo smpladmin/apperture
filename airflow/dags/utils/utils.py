@@ -2,7 +2,7 @@ import re
 from datetime import datetime, timedelta
 from typing import Optional
 
-from domain.datamart.models import Frequency
+from domain.datamart.models import Frequency, Schedule
 
 DATA_FETCH_DAYS_OFFSET = 14
 BRANCH_DATA_FETCH_DAYS_OFFSET = 7
@@ -52,3 +52,15 @@ def get_cron_expression(
         return f"{minute} {hour_24} {day} * *"
 
     return f"{minute} {hour_24} * * *"
+
+
+def calculate_schedule(schedule: Schedule) -> str:
+    if schedule.frequency == Frequency.HOURLY:
+        return "0 * * * *"
+
+    return get_cron_expression(
+        time_str=schedule.time,
+        period=schedule.period,
+        day=schedule.day if schedule.frequency == Frequency.WEEKLY else None,
+        date=schedule.date if schedule.frequency == Frequency.MONTHLY else None,
+    )

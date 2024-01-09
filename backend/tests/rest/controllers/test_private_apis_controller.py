@@ -6,6 +6,7 @@ import asyncio
 
 from beanie import PydanticObjectId
 import pytest
+from domain.alerts.models import AlertType
 from domain.datamart.models import DataMart
 
 from domain.apps.models import ClickHouseCredential

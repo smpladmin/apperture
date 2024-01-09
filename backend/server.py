@@ -1,8 +1,9 @@
 import logging
 import os
+import redis.asyncio as aioredis
+from fastapi_limiter import FastAPILimiter
 
 from dotenv import load_dotenv
-
 from cache import init_cache
 from clickhouse.clickhouse_client_factory import ClickHouseClientFactory
 from settings import apperture_settings
@@ -43,6 +44,7 @@ from rest.controllers import (
     spreadsheet_controller,
     user_controller,
     datamart_action_controller,
+    alert_controller,
 )
 
 settings = apperture_settings()
@@ -58,6 +60,15 @@ if settings.sentry_dsn:
     )
 
 
+async def init_rate_limiter(redis_host: str, redis_password: str):
+    redis = aioredis.from_url(
+        f"redis://:{redis_password}@{redis_host}",
+        encoding="utf8",
+        decode_responses=True,
+    )
+    await FastAPILimiter.init(redis)
+
+
 async def on_startup():
     mongo = Mongo()
     ClickHouseClientFactory()
@@ -67,6 +78,7 @@ async def on_startup():
     await mongo.init()
     clickhouse.init()
     init_cache(settings.redis_host, settings.redis_password)
+    await init_rate_limiter(settings.redis_host, settings.redis_password)
 
 
 async def on_shutdown():
@@ -114,6 +126,7 @@ app.include_router(api_key_controller.router)
 app.include_router(google_sheet_controller.router)
 app.include_router(cdc_controller.router)
 app.include_router(datamart_action_controller.router)
+app.include_router(alert_controller.router)
 
 
 @app.get("/sentry-debug")
