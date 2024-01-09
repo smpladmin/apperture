@@ -78,7 +78,7 @@ async def on_startup():
     await mongo.init()
     clickhouse.init()
     init_cache(settings.redis_host, settings.redis_password)
-    init_rate_limiter(settings.redis_host, settings.redis_password)
+    await init_rate_limiter(settings.redis_host, settings.redis_password)
 
 
 async def on_shutdown():
@@ -87,7 +87,6 @@ async def on_shutdown():
     await mongo.close()
     clickhouse.close()
     ClickHouseClientFactory.close_all_client_connection()
-    await FastAPILimiter.close()
 
 
 app = FastAPI(on_startup=[on_startup], on_shutdown=[on_shutdown])

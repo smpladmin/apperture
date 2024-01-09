@@ -50,6 +50,7 @@ class FrequencyAlertMeta(BaseModel):
 
 class Alert(Document):
     datasource_id: PydanticObjectId
+    user_id: PydanticObjectId
     type: AlertType
     threshold: Threshold
     schedule: Optional[Schedule]

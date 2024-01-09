@@ -21,9 +21,11 @@ router = APIRouter(
 async def save_alert_config(
     dto: AlertDto,
     alert_service: AlertService = Depends(),
+    user_id: str = Depends(get_user_id),
 ):
     alert = alert_service.build_alert_config(
         datasource_id=dto.datasourceId,
+        user_id=user_id,
         schedule=dto.schedule,
         type=dto.type,
         channel=dto.channel,
@@ -39,9 +41,11 @@ async def update_alert_config(
     id: str,
     dto: AlertDto,
     alert_service: AlertService = Depends(),
+    user_id: str = Depends(get_user_id),
 ):
     alert = alert_service.build_alert_config(
         datasource_id=dto.datasourceId,
+        user_id=user_id,
         schedule=dto.schedule,
         type=dto.type,
         channel=dto.channel,

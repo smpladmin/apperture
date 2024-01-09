@@ -37,6 +37,7 @@ class TestAlertService:
         self.alert = Alert(
             datasource_id=self.ds_id,
             type=AlertType.CDC_ERROR,
+            user_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
             channel=SlackChannel(
                 type="slack",
                 slack_channel="https://hooks.slack.com/services/T0BV42/B06A09V",
@@ -57,6 +58,7 @@ class TestAlertService:
     def test_build_alert_config(self):
         alert = self.service.build_alert_config(
             datasource_id=PydanticObjectId(self.ds_id),
+            user_id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
             type=AlertType.CDC_ERROR,
             schedule=None,
             channel={
@@ -75,6 +77,7 @@ class TestAlertService:
             },
             "created_at": ANY,
             "datasource_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+            "user_id": PydanticObjectId("635ba034807ab86d8a2aadd9"),
             "enabled": True,
             "id": None,
             "revision_id": None,

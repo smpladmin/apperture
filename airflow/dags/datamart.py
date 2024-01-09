@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from utils.utils import (
     DAG_RETRIES,
     DAG_RETRY_DELAY,
-    get_cron_expression,
     FREQUENCY_DELTAS,
     calculate_schedule,
 )

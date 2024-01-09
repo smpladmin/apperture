@@ -34,6 +34,7 @@ class AlertService:
     def build_alert_config(
         self,
         datasource_id: PydanticObjectId,
+        user_id: str,
         type: AlertType,
         schedule: Optional[Schedule],
         channel: Union[SlackChannel, EmailChannel],
@@ -41,6 +42,7 @@ class AlertService:
     ) -> Alert:
         return Alert(
             datasource_id=datasource_id,
+            user_id=user_id,
             type=type,
             schedule=schedule,
             channel=channel,
@@ -135,6 +137,7 @@ class AlertService:
 
         log_events = json.loads(decompressed_data)["logEvents"]
         logs_by_integration_id = {}
+        anonymous_logs = set()
 
         for log_event in log_events:
             integration_id = self.get_intergation_id_from_cdc_error_log(
@@ -146,11 +149,14 @@ class AlertService:
                     error_message
                 )
             else:
-                # post anonymous error to internal slack channel
-                self.post_message_to_slack(
-                    slack_url=self.apperture_slack_url,
-                    message=self.get_error_message(log_event["message"]),
-                    alert_type=AlertType.CDC_ERROR,
-                )
+                anonymous_logs.add(error_message)
+
+        # Post anonymous errors to internal Slack channel
+        for error in anonymous_logs:
+            self.post_message_to_slack(
+                slack_url=self.apperture_slack_url,
+                message=error,
+                alert_type=AlertType.CDC_ERROR,
+            )
 
         return {k: list(v) for k, v in logs_by_integration_id.items()}
