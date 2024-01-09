@@ -8,6 +8,7 @@ from domain.datasources.models import DataSource
 from domain.alerts.models import (
     Alert,
     AlertType,
+    ChannelType,
     SlackChannel,
     Threshold,
     ThresholdType,
@@ -164,3 +165,26 @@ class TestAlertService:
                     ],
                 },
             )
+
+    def test_dispatch_batch_of_error_logs_slack(self):
+        self.service.post_message_to_slack = MagicMock()
+        mock_slack_channel = MagicMock()
+        mock_slack_channel.type = ChannelType.SLACK
+        mock_slack_channel.slack_url = "https://example.com/slack"
+        mock_slack_channel.slack_channel = "alerts"
+
+        alert_type = AlertType.CDC_ERROR
+        error_messages = ["Error 1", "Error 2", "Error 3"]
+
+        self.service.dispatch_batch_of_error_logs(
+            channel=mock_slack_channel,
+            alert_type=alert_type,
+            error_messages=error_messages,
+        )
+
+        self.service.post_message_to_slack.call_count == 3
+        self.service.post_message_to_slack.assert_any_call(
+            slack_url="https://example.com/slack",
+            message="Error 1",
+            alert_type=alert_type,
+        )
