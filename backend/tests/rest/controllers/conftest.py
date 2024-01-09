@@ -403,6 +403,7 @@ def alert_service(apperture_user_response):
     alert_service_mock.build_alert_config.return_value = alert
     alert_service_mock.save_alert_config.return_value = alert_future
     alert_service_mock.update_alert_config = mock.AsyncMock()
+    alert_service_mock.dispatch_batch_of_error_logs = mock.AsyncMock()
     alert_service_mock.get_alert_for_datasource_id_with_alert_type.return_value = (
         alert_future
     )

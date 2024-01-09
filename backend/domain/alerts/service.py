@@ -4,12 +4,13 @@ import gzip
 import json
 import re
 
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import requests
 from domain.alerts.models import (
     Alert,
     AlertType,
+    ChannelType,
     EmailChannel,
     Schedule,
     SlackChannel,
@@ -30,6 +31,7 @@ class AlertService:
     ):
         self.mongo = mongo
         self.apperture_slack_url = os.environ.get("APPERTURE_SLACK_URL")
+        self.apperture_slack_channel = "alerts"
 
     def build_alert_config(
         self,
@@ -131,6 +133,20 @@ class AlertService:
             logging.log(f"Failed to send alert to Slack {slack_url}")
         return
 
+    def dispatch_batch_of_error_logs(
+        self,
+        channel: Union[SlackChannel, EmailChannel],
+        alert_type: AlertType,
+        error_messages: List[str],
+    ):
+        if channel.type == ChannelType.SLACK:
+            for error in error_messages:
+                self.post_message_to_slack(
+                    slack_url=channel.slack_url,
+                    message=error,
+                    alert_type=alert_type,
+                )
+
     def extract_cdc_logs_by_integration_id(self, logs_data: str):
         decoded_data = b64decode(logs_data)
         decompressed_data = gzip.decompress(decoded_data).decode("utf-8")
@@ -152,11 +168,14 @@ class AlertService:
                 anonymous_logs.add(error_message)
 
         # Post anonymous errors to internal Slack channel
-        for error in anonymous_logs:
-            self.post_message_to_slack(
+        self.dispatch_batch_of_error_logs(
+            channel=SlackChannel(
+                type=ChannelType.SLACK,
                 slack_url=self.apperture_slack_url,
-                message=error,
-                alert_type=AlertType.CDC_ERROR,
-            )
+                slack_channel=self.apperture_slack_channel,
+            ),
+            alert_type=AlertType.CDC_ERROR,
+            error_messages=list(anonymous_logs),
+        )
 
         return {k: list(v) for k, v in logs_by_integration_id.items()}
