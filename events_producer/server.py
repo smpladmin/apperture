@@ -1,12 +1,13 @@
 import json
 import logging
 import os
-from typing import Union
+from typing import Union, Callable
 
 from fastapi import FastAPI, Form, Response
 from fastapi.middleware.cors import CORSMiddleware
 from aiokafka import AIOKafkaProducer
 from dotenv import load_dotenv
+from fastapi.routing import APIRoute
 
 from starlette.types import Message
 from starlette.requests import Request
@@ -52,8 +53,29 @@ producer = None
 #         response = await call_next(request)
 #         return response
 
+class GzipRequest(Request):
+    async def body(self) -> bytes:
+        if not hasattr(self, "_body"):
+            body = await super().body()
+            if "gzip" in self.headers.getlist("Content-Encoding"):
+                body = gzip.decompress(body)
+            self._body = body
+        return self._body
+
+
+class GzipRoute(APIRoute):
+    def get_route_handler(self) -> Callable:
+        original_route_handler = super().get_route_handler()
+
+        async def custom_route_handler(request: Request) -> Response:
+            request = GzipRequest(request.scope, request.receive)
+            return await original_route_handler(request)
+
+        return custom_route_handler
+
 
 app = FastAPI()
+app.router.route_class = GzipRoute
 
 allowed_origins = [
     "https://app.apperture.io",
@@ -137,15 +159,15 @@ async def analyse_decide_call(
     return response
 
 
-# @app.post("/events/capture/batch")
-# async def capture_click_stream(
-#     data: FlutterBatchData,
-# ):
-#     """Capture an event and send it to Kafka."""
-#     kafka_topic = "flutter_eventstream"
-#     value = json.dumps(data.dict())
-#     await producer.send_and_wait(kafka_topic, value=value.encode("utf-8"))
-#     return {"status": "ok"}
+@app.post("/events/capture/batch")
+async def capture_click_stream(
+    data: FlutterBatchData,
+):
+    """Capture an event and send it to Kafka."""
+    kafka_topic = "flutter_eventstream"
+    value = json.dumps(data.dict())
+    await producer.send_and_wait(kafka_topic, value=value.encode("utf-8"))
+    return {"status": "ok"}
 
 
 @app.get("/events/capture/static/array.js")
