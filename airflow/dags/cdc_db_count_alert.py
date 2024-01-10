@@ -94,7 +94,9 @@ def create_alert_message(
         if alert.threshold.type == ThresholdType.ABSOLUTE:
             threshold_crossed = (count1 - count2) > alert.threshold.value
         elif alert.threshold.type == ThresholdType.PERCENTAGE:
-            threshold_crossed = (count1 - count2) * 100 / count1 > alert.threshold.value
+            threshold_crossed = (
+                ((count1 - count2) * 100 / count1) if count1 else 100
+            ) > alert.threshold.value
         if threshold_crossed:
             message += f"{table}: {count1}, {count2} \n"
 

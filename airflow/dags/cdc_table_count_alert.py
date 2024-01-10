@@ -110,7 +110,7 @@ def create_dag(datasource_id: str, alert: Alert, created_date: datetime):
             ch_cred=creds["ch_cred"],
             clickhouse_server_credential=creds["remote_connection"],
             table=alert.table,
-            source_db_cred=creds["source_db_cred"]
+            source_db_cred=creds["source_db_cred"],
         )
 
         alert_message = create_alert_message(

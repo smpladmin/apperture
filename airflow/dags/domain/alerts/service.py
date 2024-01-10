@@ -202,7 +202,9 @@ class AlertsService:
         clickhouse_server_credential: Union[ClickHouseRemoteConnectionCred, None],
         table: str,
     ):
-        query = f"select count(*) from {ch_cred.databasename}.{table} where shard='{shard}'"
+        query = (
+            f"select count(*) from {ch_cred.databasename}.{table} where shard='{shard}'"
+        )
         return self.execute_ch_query(
             app_id=app_id,
             clickhouse_server_credential=clickhouse_server_credential,
