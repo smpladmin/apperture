@@ -165,6 +165,7 @@ class AlertsService:
         clickhouse_client = ClickHouseClientFactory.get_client(
             app_id=app_id, clickhouse_server_credentials=clickhouse_server_credential
         )
+        logging.info(f"Executing query: {query}")
         result = clickhouse_client.query(query=query).result_set
         return result
 

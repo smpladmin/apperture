@@ -74,7 +74,7 @@ def get_ch_db_column_count(
 
 @task
 def create_alert_message(
-    source_db_row_count, ch_db_row_count, source_db_column_count, ch_db_column_count
+    source_db_row_count, ch_db_row_count, source_db_column_count, ch_db_column_count, alert
 ):
     row_counts = [
         (table, count1, count2)
@@ -175,6 +175,7 @@ def create_dag(datasource_id: str, alert: Alert, created_date: datetime):
             ch_db_row_count=ch_db_row_count,
             source_db_column_count=source_db_column_count,
             ch_db_column_count=ch_db_column_count,
+            alert=alert
         )
 
         # Step 5: Dispatch Alert

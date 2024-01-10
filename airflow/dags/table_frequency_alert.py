@@ -81,7 +81,7 @@ def create_alert_message(count, table, last_n_minutes):
 
 
 @task
-def dispatch_alert(slack_url, payload, count):
+def dispatch_alert(payload, count, alert):
     in_sleep = False
     sleep_start, sleep_end = (
         alert.frequencyAlert.sleep_hours_start,
@@ -103,7 +103,7 @@ def dispatch_alert(slack_url, payload, count):
         and (count[0][0] < alert.threshold.value)
         and (not in_sleep)
     ):
-        alerts_service.dispatch_alert(slack_url=slack_url, payload=payload)
+        alerts_service.dispatch_alert(slack_url=alert.channel.slack_url, payload=payload)
 
 
 def create_dag(datasource_id: str, alert: Alert, created_date: datetime):
@@ -143,7 +143,7 @@ def create_dag(datasource_id: str, alert: Alert, created_date: datetime):
 
         # Step 4: Dispatch Alert
         dispatch_alert(
-            payload=alert_message, slack_url=alert.channel.slack_url, count=count
+            payload=alert_message, count=count, alert=alert
         )
 
     compute_cdc_db_count_alert()
