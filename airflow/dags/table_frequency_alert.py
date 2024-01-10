@@ -1,3 +1,4 @@
+import logging
 import pytz
 
 from domain.alerts.service import AlertsService
@@ -86,6 +87,7 @@ def dispatch_alert(slack_url, payload, count):
         alert.frequencyAlert.sleep_hours_start,
         alert.frequencyAlert.sleep_hours_end,
     )
+    logging.info(f"Sleep hours start: {sleep_start}, Sleep hours end: {sleep_end}")
     if sleep_start and sleep_end:
         indian_timezone = pytz.timezone("Asia/Kolkata")
         current_hour = datetime.now(tz=indian_timezone).hour
@@ -95,6 +97,7 @@ def dispatch_alert(slack_url, payload, count):
             current_hour >= sleep_start or current_hour < sleep_end
         ):
             in_sleep = True
+    logging.info(f"Count: {count[0][0]}, Insleep: {in_sleep}")
     if (
         alert.threshold.type == ThresholdType.ABSOLUTE
         and (count[0][0] < alert.threshold.value)
