@@ -90,6 +90,7 @@ def save_precision_events(events):
 
 
 def to_object(value: str) -> Dict:
+    logging.debug(value)
     try:
         decoded_string = base64.b64decode(value).decode("utf-8", errors="ignore")
     except UnicodeDecodeError:
@@ -174,7 +175,7 @@ async def process_kafka_messages() -> None:
             events.extend(list(reduce(lambda a, b: a + b, _events)))
             offsets.extend(_offsets)
             cs_records = []
-            # logging.debug(f"Collected {len(events)} clickstream events")
+            logging.debug(f"Collected {len(events)} clickstream events")
 
         if flutter_records:
             for record in flutter_records:
@@ -183,7 +184,7 @@ async def process_kafka_messages() -> None:
                 )
 
             flutter_records = []
-            # logging.debug(f"Collected {len(flutter_events)} flutter events")
+            logging.debug(f"Collected {len(flutter_events)} flutter events")
 
         # Save events to ClickHouse
         if (len(events) + len(flutter_events)) >= MAX_RECORDS:
