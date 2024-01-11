@@ -20,13 +20,14 @@ load_dotenv()
 
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
 MAX_RECORDS = int(os.getenv("MAX_RECORDS", "1000"))
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
 
-logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(LOG_LEVEL)
 
 # Kafka configuration
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092").split(",")
-logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
+logging.debug(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
 KAFKA_TOPICS = ["clickstream", "flutter_eventstream"]
 DEFAULT_EVENTS = [
@@ -40,7 +41,7 @@ DEFAULT_EVENTS = [
 
 def save_events(events):
     """Saves events to ClickHouse."""
-    logging.info(f"Saving {len(events)} events")
+    logging.debug(f"Saving {len(events)} events")
     cs_events = [
         ClickStream.build(
             datasource_id=event["properties"]["token"],
@@ -56,7 +57,7 @@ def save_events(events):
 
 
 def save_flutter_events(events):
-    logging.info(f"Saving {len(events)} flutter events")
+    logging.debug(f"Saving {len(events)} flutter events")
     flutter_events = [
         PrecisionEvent.build(
             datasourceId=event["datasource_id"],
@@ -73,7 +74,7 @@ def save_flutter_events(events):
 
 def save_precision_events(events):
     """Saves events to Events table."""
-    logging.info(f"Saving {len(events)} precision events to events table")
+    logging.debug(f"Saving {len(events)} precision events to events table")
     cs_events = [
         PrecisionEvent.build(
             datasourceId=event["properties"]["token"],
@@ -89,11 +90,11 @@ def save_precision_events(events):
 
 
 def to_object(value: str) -> Dict:
-    logging.info(value)
+    logging.debug(value)
     try:
         decoded_string = base64.b64decode(value).decode("utf-8", errors="ignore")
     except UnicodeDecodeError:
-        logging.info(f"Exception while decoding string: {value}")
+        logging.debug(f"Exception while decoding string: {value}")
         decoded_string = base64.b64decode(value)
 
     try:
@@ -104,9 +105,9 @@ def to_object(value: str) -> Dict:
         )
         return json.loads(cleaned_string)
     except Exception as e:
-        logging.info(repr(e))
+        logging.debug(repr(e))
         traceback.print_exc()
-        logging.info(
+        logging.debug(
             f"Exception while loading event string as json, skipping it: {decoded_string}"
         )
 
@@ -116,7 +117,7 @@ def is_valid_base64(encoded_string):
         base64.b64decode(encoded_string)
         return True
     except base64.binascii.Error:
-        logging.info(f"Skipping event {encoded_string} due to base64 encoding error.")
+        logging.debug(f"Skipping event {encoded_string} due to base64 encoding error.")
         return False
 
 
@@ -178,7 +179,7 @@ async def process_kafka_messages() -> None:
             events.extend(list(reduce(lambda a, b: a + b, _events)))
             offsets.extend(_offsets)
             cs_records = []
-            logging.info(f"Collected {len(events)} clickstream events")
+            logging.debug(f"Collected {len(events)} clickstream events")
 
         if flutter_records:
             for record in flutter_records:
@@ -187,7 +188,7 @@ async def process_kafka_messages() -> None:
                 )
 
             flutter_records = []
-            logging.info(f"Collected {len(flutter_events)} flutter events")
+            logging.debug(f"Collected {len(flutter_events)} flutter events")
 
         # Save events to ClickHouse
         if (len(events) + len(flutter_events)) >= MAX_RECORDS:
@@ -204,14 +205,14 @@ async def process_kafka_messages() -> None:
                 offsets = []
             if flutter_events:
                 save_flutter_events(events=flutter_events)
-                logging.info(flutter_events)
+                logging.debug(flutter_events)
             await consumer.commit()
 
             if cs_events:
                 app.event_properties_saver.save_cs_event_properties(events=cs_events)
 
                 if len(precision_events):
-                    logging.info(
+                    logging.debug(
                         f"Comparing and saving event properties for precision events"
                     )
                     app.event_properties_saver.save_precision_event_properties(
@@ -234,5 +235,5 @@ async def startup_event() -> None:
 @app.on_event("shutdown")
 async def shutdown_event() -> None:
     """Shuts down the app."""
-    logging.info("Shutting down")
+    logging.debug("Shutting down")
     app.clickhouse.disconnect()

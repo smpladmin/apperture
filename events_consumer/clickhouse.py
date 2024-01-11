@@ -15,7 +15,7 @@ class ClickHouse:
             host="clickhouse",
             query_limit=0,
         )
-        logging.info("Connected to ClickHouse")
+        logging.debug("Connected to ClickHouse")
 
     def disconnect(self):
         self.client.close()
@@ -25,11 +25,11 @@ class ClickHouse:
         try:
             self._save(events)
         except DatabaseError as e:
-            logging.info(f"Exception saving events to ClickHouse: {e}")
-            logging.info("Trying to save sequentially")
+            logging.debug(f"Exception saving events to ClickHouse: {e}")
+            logging.debug("Trying to save sequentially")
             for event in events:
                 self._save([event])
-            logging.info("Saved sequentially")
+            logging.debug("Saved sequentially")
 
     def rsave_events(self, events):
         """Saves events to clickHouse with recursive retries using split backoff."""
@@ -41,7 +41,7 @@ class ClickHouse:
                 self._save(events)
             except Exception as e:
                 # Skip saving this event.
-                logging.info(
+                logging.debug(
                     f"Error encountered for event {events[0]}: {e}. Cannot split further."
                 )
             return
@@ -49,8 +49,8 @@ class ClickHouse:
         try:
             self._save(events)
         except Exception as e:
-            logging.info(f"Exception saving events to ClickHouse: {e}")
-            logging.info("Trying to split and save")
+            logging.debug(f"Exception saving events to ClickHouse: {e}")
+            logging.debug("Trying to split and save")
 
             mid = len(events) // 2
             first_half = events[:mid]
@@ -94,8 +94,8 @@ class ClickHouse:
         try:
             self._save_precision_events(events)
         except DatabaseError as e:
-            logging.info(f"Exception saving events to Eventstream: {e}")
-            logging.info("Trying to save sequentially")
+            logging.debug(f"Exception saving events to Eventstream: {e}")
+            logging.debug("Trying to save sequentially")
             for event in events:
                 self._save_precision_events([event])
-            logging.info("Saved sequentially")
+            logging.debug("Saved sequentially")
