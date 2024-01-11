@@ -43,16 +43,16 @@ class EventPropertiesSaver:
             self.precise_events_map = self.create_precise_events_map(
                 event_properties=event_properties
             )
-            logging.info(f"Precision Events map: {self.precise_events_map}")
+            logging.debug(f"Precision Events map: {self.precise_events_map}")
 
             # Iterate over precision events and save them using the post call
             for precision_event in precision_events:
                 datasource_id = precision_event["properties"]["token"]
                 props = list(flatten(precision_event["properties"], ".").keys())
-                logging.info(
+                logging.debug(
                     f"Datasource ID, Event: {datasource_id}, {precision_event['event']}"
                 )
-                logging.info(f"event properties: {set(props)}")
+                logging.debug(f"event properties: {set(props)}")
                 if not set(props).issubset(
                     set(
                         self.precise_events_map.get(datasource_id, {}).get(
@@ -68,7 +68,7 @@ class EventPropertiesSaver:
                             ),
                         ]
                     )
-                    logging.info("Saving criteria met. Saving to db")
+                    logging.debug("Saving criteria met. Saving to db")
                     data = {
                         "datasource_id": datasource_id,
                         "event": precision_event["event"],
@@ -78,7 +78,7 @@ class EventPropertiesSaver:
                     self._save_data(path=f"/private/event_properties", data=data)
 
         except Exception as e:
-            logging.info(
+            logging.debug(
                 f"Exception while saving event properties for precise events: {e}"
             )
 
@@ -103,10 +103,10 @@ class EventPropertiesSaver:
             self.cs_events_map = self.create_cs_events_map(
                 event_properties=event_properties
             )
-            logging.info(f"Clickstream Events map: {self.cs_events_map}")
+            logging.debug(f"Clickstream Events map: {self.cs_events_map}")
 
             for event in [CaptureEvent.AUTOCAPTURE, CaptureEvent.PAGEVIEW]:
-                logging.info(f"Saving properties for event: {event}")
+                logging.debug(f"Saving properties for event: {event}")
                 props = [
                     list(flatten(e["properties"], ".").keys())
                     for e in events
@@ -115,7 +115,9 @@ class EventPropertiesSaver:
                 props = self.get_distinct_values(list_of_lists=props)
 
                 if not set(props).issubset(set(self.cs_events_map.get(event, []))):
-                    logging.info(f"Saving criteria met for {event} event. Saving to db")
+                    logging.debug(
+                        f"Saving criteria met for {event} event. Saving to db"
+                    )
                     new_props = self.get_distinct_values(
                         list_of_lists=[props, self.cs_events_map.get(event, [])]
                     )
@@ -128,7 +130,7 @@ class EventPropertiesSaver:
                     )
 
         except Exception as e:
-            logging.info(
+            logging.debug(
                 f"Exception while saving event properties for clickstream events: {e}"
             )
 
