@@ -205,6 +205,8 @@ async def process_kafka_messages() -> None:
             if flutter_events:
                 save_flutter_events(events=flutter_events)
                 logging.info(flutter_events)
+                flutter_events = []
+
             await consumer.commit()
 
             if cs_events:
