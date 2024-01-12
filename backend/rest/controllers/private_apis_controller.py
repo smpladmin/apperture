@@ -654,24 +654,23 @@ async def process_incoming_alerts(
     alert_service: AlertService = Depends(),
 ):
     if source == "cdc":
-        logs_by_integration_id = alert_service.extract_cdc_logs_by_integration_id(
-            logs_data=dto["awslogs"]["data"]
-        )
-        for integration_id, error_messages in logs_by_integration_id.items():
-            datasource = await datasource_service.get_datasource_for_integration_id(
-                integration_id=integration_id
+        try:
+            logs_by_integration_id = alert_service.extract_cdc_logs_by_integration_id(
+                logs_data=dto["awslogs"]["data"]
             )
-            if datasource:
+            for integration_id, error_messages in logs_by_integration_id.items():
+                datasource = await datasource_service.get_datasource_for_integration_id(
+                    integration_id=integration_id
+                )
                 config = (
                     await alert_service.get_alert_for_datasource_id_with_alert_type(
                         datasource_id=datasource.id, alert_type=AlertType.CDC_ERROR
                     )
                 )
-                channel = config.channel
-                if channel.type == ChannelType.SLACK:
-                    for error_message in error_messages:
-                        alert_service.post_message_to_slack(
-                            slack_url=channel.slack_url,
-                            message=f"{error_message}. Kindly check your database connection or cdc access for your database.",
-                            alert_type=config.type,
-                        )
+                alert_service.dispatch_batch_of_error_logs(
+                    channel=config.channel,
+                    alert_type=config.type,
+                    error_messages=error_messages,
+                )
+        except Exception as e:
+            logging.error(f"Failed to process error logs: {e}")
