@@ -208,7 +208,6 @@ class TestIntegrationService:
                     "table.include.list": "dbo.test_table_1, dbo.test_table_2",
                     "database.encrypt": False,
                     "snapshot.mode": "initial",
-                    "snapshot.isolation.mode": "snapshot",
                     "snapshot.lock.timeout.ms": "50000",
                 },
             ),
