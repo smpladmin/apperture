@@ -522,7 +522,7 @@ class IntegrationService:
                         ),
                         "database.encrypt": False,
                         "snapshot.mode": "initial",
-                        "snapshot.lock.timeout.ms": "50000",
+                        "snapshot.lock.timeout.ms": "100000",
                     }
                 )
             elif server_type == ServerType.MYSQL:
