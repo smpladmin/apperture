@@ -59,6 +59,26 @@ services:
       - ./events_consumer:/code
     depends_on:
       - kafka
+  event_logs_producer:
+    restart: on-failure
+    build:
+      context: ./event_logs_producer
+      target: dev
+    ports:
+      - "8084:8084"
+    volumes:
+      - ./event_logs_producer:/code
+    depends_on:
+      - kafka
+  event_logs_consumer:
+    restart: on-failure
+    build:
+      context: ./event_logs_consumer
+      target: dev
+    volumes:
+      - ./event_logs_consumer:/code
+    depends_on:
+      - kafka
   cdc_consumer:
     restart: on-failure
     build:
