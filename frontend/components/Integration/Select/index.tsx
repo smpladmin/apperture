@@ -22,6 +22,7 @@ import csvLogo from '@assets/images/csv.svg';
 import branchLogo from '@assets/images/branch.png';
 import tataLogo from '@assets/images/tata.png';
 import IntegrationSource from '@components/IntegrationSource';
+import EventLogsLogo from '@assets/images/event-logs-logo.png';
 import { Provider } from '@lib/domain/provider';
 import { createIntegrationWithDataSource } from '@lib/services/integrationService';
 import { FileArrowUp, CaretRight } from 'phosphor-react';
@@ -275,7 +276,7 @@ const SelectProvider = ({ apps }: { apps: Array<AppWithIntegrations> }) => {
                 <IntegrationSource
                   sourceName="Event Logs"
                   value={Provider.EVENT_LOGS}
-                  imgSrc={appertureLogo}
+                  imgSrc={EventLogsLogo}
                   selected={provider === Provider.EVENT_LOGS}
                 />
               </SimpleGrid>

@@ -1,6 +1,6 @@
 import { Box, Flex, Heading, Input, Text, useToast } from '@chakra-ui/react';
 import Image from 'next/image';
-import AppertureLogo from '@assets/images/apperture-logo-new.svg';
+import EventLogsLogo from '@assets/images/event-logs-logo.png';
 import FormButton from '@components/FormButton';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -79,7 +79,13 @@ const EventLogsIntegration = ({
                 width={{ base: 8, md: 14 }}
                 mb={2}
               >
-                <Image src={AppertureLogo} alt="branch" layout="responsive" />
+                <Image
+                  src={EventLogsLogo}
+                  alt="branch"
+                  layout="responsive"
+                  width={'56'}
+                  height={'56'}
+                />
               </Box>
 
               <Box>
@@ -124,8 +130,8 @@ const EventLogsIntegration = ({
                     lineHeight={'xs-12'}
                     w={'125'}
                   >
-                    Same table names across multiple datasources sources would
-                    merge data in single table, different names save data into
+                    Same table names across multiple datasources would merge
+                    data in single table, different names would save data into
                     distinct tables.
                   </Text>
                 </Flex>
