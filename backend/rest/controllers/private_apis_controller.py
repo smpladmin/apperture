@@ -12,7 +12,6 @@ from base64 import b64decode
 
 from authorisation.service import AuthService
 from rest.dtos.integrations import (
-    IntegrationResponse,
     IntergationResponseWithCredential,
 )
 from domain.alerts.models import AlertType, ChannelType
@@ -53,7 +52,6 @@ from rest.dtos.apidata import CreateAPIDataDto
 from rest.dtos.apperture_users import PrivateUserResponse, ResetPasswordDto
 from rest.dtos.apps import (
     AppDatabaseResponse,
-    AppResponse,
     AppResponseWithCredentials,
     ClickHouseRemoteConnectionCredsResponse,
 )

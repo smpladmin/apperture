@@ -37,6 +37,7 @@ class AppResponseWithCredentials(ModelResponse):
     enabled: bool = True
     clickhouse_credential: Optional[ClickHouseCredential]
     remote_connection: Optional[ClickHouseRemoteConnectionCreds]
+    api_key: Optional[str]
 
     class Config:
         allow_population_by_field_name = True

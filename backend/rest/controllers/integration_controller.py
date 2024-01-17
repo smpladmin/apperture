@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from typing import Union
+import uuid
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
@@ -208,6 +209,9 @@ async def create_integration(
             app_id=str(app.id),
             database=app.clickhouse_credential.databasename,
         )
+        if not app.api_key:
+            key = uuid.uuid4()
+            await app_service.update_api_key(app_id=str(app.id), api_key=str(key))
 
     if create_datasource:
         datasource = await ds_service.create_datasource(

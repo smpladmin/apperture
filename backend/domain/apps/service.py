@@ -201,3 +201,8 @@ class AppService:
             return True
 
         return False
+
+    async def update_api_key(self, app_id: str, api_key: str):
+        await App.find_one(
+            App.id == PydanticObjectId(app_id),
+        ).update({"$set": {"api_key": api_key}})

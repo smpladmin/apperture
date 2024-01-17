@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from domain.apperture_users.service import AppertureUserService
+from domain.apps.service import AppService
 
 from rest.middlewares import validate_jwt
 from rest.middlewares.get_user import get_user_id
@@ -15,9 +15,9 @@ router = APIRouter(
 
 @router.post("/api-key")
 async def generate_api_key(
-    user_id: str = Depends(get_user_id),
-    user_service: AppertureUserService = Depends(),
+    app_id: str,
+    app_service: AppService = Depends(),
 ):
     key = uuid.uuid4()
-    await user_service.update_api_key(user_id=user_id, api_key=str(key))
+    await app_service.update_api_key(app_id=app_id, api_key=str(key))
     return key

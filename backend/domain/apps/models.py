@@ -33,6 +33,7 @@ class App(Document):
     enabled: bool = True
     clickhouse_credential: Optional[ClickHouseCredential] = Field(hidden=True)
     remote_connection: Optional[ClickHouseRemoteConnectionCreds] = Field(hidden=True)
+    api_key: Optional[str] = Field(hidden=True)
 
     class Settings:
         name = "apps"

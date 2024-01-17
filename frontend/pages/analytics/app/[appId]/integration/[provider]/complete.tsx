@@ -91,8 +91,8 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
             <Box
               fontWeight={'400'}
               fontSize={'xs-14'}
-                lineHeight={'xs-14'}
-                borderRadius={'4'}
+              lineHeight={'xs-14'}
+              borderRadius={'4'}
               marginBottom={'2'}
               p={2}
               border={'1px'}
@@ -100,7 +100,7 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
               borderColor={'grey.800'}
               bg={'white.400'}
             >
-              {`${EVENT_LOGS_BASE_URL}/event_logs/capture/${dsId}`}
+              {`${EVENT_LOGS_BASE_URL}/eventlogs?datasource_id=${dsId}`}
             </Box>
 
             <Text fontWeight={'400'} fontSize={'xs-14'} lineHeight={'xs-14'}>
