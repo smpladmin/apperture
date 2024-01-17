@@ -46,7 +46,6 @@ def fetch_values_from_kafka_records(data, app):
                 continue
 
             values = json.loads(record.value)
-            logging.info(f"record  and value: {record} {values}")
             app.event_logs_datasources.datasource_with_credentials[record.topic][
                 "data"
             ].append(values)
@@ -66,7 +65,7 @@ def save_topic_data_to_clickhouse(app):
             logging.info(
                 f"Data present in {topic} bucket len: {len(to_insert)}, Saving to {database}.{table}"
             )
-            columns = to_insert[0].keys()
+            columns = ["event", "key", "data", "added_time", "datasource_id"]
             events = [
                 [
                     data.get("event", ""),
@@ -80,7 +79,7 @@ def save_topic_data_to_clickhouse(app):
                 ]
                 for data in to_insert
             ]
-            logging.info(f"events: {events}")
+            logging.info(f"Inserting data : {events}")
 
             app.clickhouse.save_events(
                 events=events,
@@ -130,10 +129,6 @@ async def process_kafka_messages() -> None:
                 f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS}"
             )
             save_topic_data_to_clickhouse(app=app)
-
-            logging.info(
-                f"sdsdsdsdsd, {app.event_logs_datasources.datasource_with_credentials}"
-            )
 
             await consumer.commit()
             total_records = 0
