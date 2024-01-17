@@ -12,7 +12,7 @@ class EventLogsDatasources:
         ).json()
 
         for datasource in event_logs_datasources:
-            topic = f"event_logs_{datasource['_id']}"
+            topic = f"eventlogs_{datasource['_id']}"
             if not self.datasource_with_credentials.get(topic):
                 integration = get(
                     path=f"/private/integrations/{datasource['integrationId']}"

@@ -52,6 +52,7 @@ from rest.dtos.apidata import CreateAPIDataDto
 from rest.dtos.apperture_users import PrivateUserResponse, ResetPasswordDto
 from rest.dtos.apps import (
     AppDatabaseResponse,
+    AppResponse,
     AppResponseWithCredentials,
     ClickHouseRemoteConnectionCredsResponse,
 )
@@ -720,3 +721,17 @@ async def get_app_database(
         provider=integration.provider,
         credential=integration.credential,
     )
+
+
+@router.get(
+    "/apps",
+    response_model=Union[AppResponse, List[AppResponse], None],
+)
+async def get_apps_for_provider(
+    api_key: Optional[str] = None,
+    app_service: AppService = Depends(),
+):
+    if api_key:
+        return await app_service.get_app_by_api_key(api_key=api_key)
+
+    return await app_service.get_all_apps()

@@ -2,10 +2,15 @@ import json
 import logging
 import os
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from aiokafka import AIOKafkaProducer
 from dotenv import load_dotenv
+
+from cache import init_cache
+from rest.middlewares.validate_app_api_key import (
+    validate_app_api_key,
+)
 
 load_dotenv()
 logging.getLogger().setLevel(logging.INFO)
@@ -13,6 +18,8 @@ logging.getLogger().setLevel(logging.INFO)
 
 # Kafka configuration
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092").split(",")
+REDIS_HOST = os.getenv("REDIS_HOST", "redis")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
 logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
 producer = None
@@ -34,6 +41,7 @@ async def startup_event():
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         max_request_size=5242880,
     )
+    init_cache(redis_host=REDIS_HOST, redis_password=REDIS_PASSWORD)
     await producer.start()
 
 
@@ -42,12 +50,15 @@ async def shutdown_event():
     await producer.stop()
 
 
-@app.post("/event_logs/capture/{datasource_id}")
+@app.post(
+    "/eventlogs",
+    dependencies=[Depends(validate_app_api_key)],
+)
 async def capture_event_logs(
     datasource_id: str,
     data: dict,
 ):
-    kafka_topic = f"event_logs_{datasource_id}"
+    kafka_topic = f"eventlogs_{datasource_id}"
     # update data with datasource_id to track apperture datasource associated with log stream
     data.update({"datasource_id": datasource_id})
     value = json.dumps(data)

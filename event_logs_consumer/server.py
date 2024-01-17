@@ -18,7 +18,7 @@ from event_logs_datasources import EventLogsDatasources
 load_dotenv()
 
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
-MAX_RECORDS = int(os.getenv("MAX_RECORDS", "3"))
+MAX_RECORDS = int(os.getenv("MAX_RECORDS", "2"))
 
 
 logging.getLogger().setLevel(logging.INFO)
@@ -61,23 +61,26 @@ def save_topic_data_to_clickhouse(app):
         database = bucket["ch_db"]
         clickhouse_server_credential = bucket["ch_server_credential"]
         app_id = bucket["app_id"]
-        logging.info(f"Inserting data for topic {topic} into {database}.{table}")
         to_insert = list(filter(None, bucket["data"]))
         if to_insert:
             logging.info(
-                f"Data present in {topic} bucket len: {len(to_insert)}, Saving to clickhouse"
+                f"Data present in {topic} bucket len: {len(to_insert)}, Saving to {database}.{table}"
             )
             columns = to_insert[0].keys()
             events = [
                 [
-                    data["event"],
-                    data["key"],
-                    data["data"],
-                    datetime.strptime(data["added_time"], "%Y-%m-%d %H:%M:%S"),
-                    data["datasource_id"],
+                    data.get("event", ""),
+                    data.get("key", ""),
+                    data.get("data", {}),
+                    datetime.strptime(
+                        data.get("added_time", "1970-01-01 00:00:00"),
+                        "%Y-%m-%d %H:%M:%S",
+                    ),
+                    data.get("datasource_id", ""),
                 ]
                 for data in to_insert
             ]
+            logging.info(f"events: {events}")
 
             app.clickhouse.save_events(
                 events=events,
@@ -87,6 +90,7 @@ def save_topic_data_to_clickhouse(app):
                 clickhouse_server_credential=clickhouse_server_credential,
                 app_id=app_id,
             )
+            app.event_logs_datasources.datasource_with_credentials[topic]["data"] = []
             logging.info(
                 "Successfully saved data to clickhouse, Emptying the topic bucket"
             )
@@ -126,6 +130,10 @@ async def process_kafka_messages() -> None:
                 f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS}"
             )
             save_topic_data_to_clickhouse(app=app)
+
+            logging.info(
+                f"sdsdsdsdsd, {app.event_logs_datasources.datasource_with_credentials}"
+            )
 
             await consumer.commit()
             total_records = 0

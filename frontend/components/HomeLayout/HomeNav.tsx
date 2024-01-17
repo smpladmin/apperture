@@ -127,7 +127,8 @@ const HomeNav = ({ apps }: HomeNavProps) => {
 
   const handleEditDatasource = async () => {
     router.push({
-      pathname: `/analytics/home/edit/${selectedAppId}`,
+      pathname: `/analytics/home/edit/[appId]`,
+      query: { dsId, appId: selectedAppId },
     });
   };
 

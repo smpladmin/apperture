@@ -206,3 +206,9 @@ class AppService:
         await App.find_one(
             App.id == PydanticObjectId(app_id),
         ).update({"$set": {"api_key": api_key}})
+
+    async def get_all_apps(self) -> List[App]:
+        return await App.find(App.enabled == True).to_list()
+
+    async def get_app_by_api_key(self, api_key: str) -> List[App]:
+        return await App.find_one(App.api_key == api_key, App.enabled == True)
