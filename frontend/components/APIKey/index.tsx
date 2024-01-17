@@ -1,16 +1,19 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
-import { AppertureUser } from '@lib/domain/user';
+import { App } from '@lib/domain/app';
 import { generateAPIKey } from '@lib/services/apiKeyService';
 import { GREEN_500 } from '@theme/index';
+import { useRouter } from 'next/router';
 import { CheckCircle, Copy } from 'phosphor-react';
 import React, { useState } from 'react';
 
-const APIKey = ({ user }: { user: AppertureUser }) => {
-  const [apiKey, setApiKey] = useState(user?.apiKey || '');
+const APIKey = ({ app }: { app: App }) => {
+  const [apiKey, setApiKey] = useState(app?.apiKey || '');
   const [isCopied, setIsCopied] = useState(false);
+  const router = useRouter();
+  const { appId } = router.query;
 
   const handleGenerateAPIKey = async () => {
-    const { status, data } = await generateAPIKey();
+    const { status, data } = await generateAPIKey(appId as string);
     if (status === 200) {
       setApiKey(data);
     }

@@ -272,6 +272,12 @@ const SelectProvider = ({ apps }: { apps: Array<AppWithIntegrations> }) => {
                   imgSrc={tataLogo}
                   selected={provider === Provider.TATA_IVR}
                 />
+                <IntegrationSource
+                  sourceName="Event Logs"
+                  value={Provider.EVENT_LOGS}
+                  imgSrc={appertureLogo}
+                  selected={provider === Provider.EVENT_LOGS}
+                />
               </SimpleGrid>
             </RadioGroup>
           </Box>

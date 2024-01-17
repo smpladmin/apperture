@@ -349,7 +349,7 @@ const HomeNav = ({ apps }: HomeNavProps) => {
               onClick={() => {
                 router.push({
                   pathname: `/analytics/settings/integrations`,
-                  query: { dsId },
+                  query: { dsId, appId: selectedAppId },
                 });
               }}
               onMouseEnter={() => setIsHoveredItem('Integrations')}
@@ -384,8 +384,8 @@ const HomeNav = ({ apps }: HomeNavProps) => {
               _focus={{ bg: 'white.400' }}
               onClick={() => {
                 router.push({
-                  pathname: `/analytics/settings/apiKey`,
-                  query: { dsId },
+                  pathname: `/analytics/settings/apiKey/[appId]`,
+                  query: { dsId, appId: selectedAppId },
                 });
               }}
               onMouseEnter={() => setIsHoveredItem('API Key')}

@@ -1,6 +1,5 @@
 import { Button, Flex, Text } from '@chakra-ui/react';
-import { AppWithIntegrations } from '@lib/domain/app';
-import { groupBy, unionBy } from 'lodash';
+import { groupBy } from 'lodash';
 import { useRouter } from 'next/router';
 import { Plus } from 'phosphor-react';
 import React, { useEffect, useState } from 'react';
