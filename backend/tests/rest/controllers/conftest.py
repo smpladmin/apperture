@@ -2515,6 +2515,7 @@ def integration_service():
     integration_service_mock = mock.MagicMock()
     Integration.get_settings = mock.MagicMock()
     integration = Integration(
+        id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
         app_id="636a1c61d715ca6baae65611",
         user_id="636a1c61d715ca6baae65611",
         provider=IntegrationProvider.MIXPANEL,
@@ -2529,12 +2530,14 @@ def integration_service():
 
     integration_future = asyncio.Future()
     integration_future.set_result(integration)
+    integration_service_mock.get_integration.return_value = integration_future
     integration_service_mock.create_integration.return_value = integration_future
     integration_service_mock.test_database_connection.return_value = True
     integration_service_mock.upload_csv_to_s3.return_value = None
     integration_service_mock.create_clickhouse_table_from_csv = AsyncMock(
         return_value=True
     )
+    integration_service_mock.create_event_logs_table = AsyncMock()
     return integration_service_mock
 
 
@@ -2583,6 +2586,19 @@ def csv_integration_data():
 
 
 @pytest.fixture(scope="module")
+def event_logs_integration_data():
+    return {
+        "appId": "636a1c61d715ca6baae65611",
+        "accountId": None,
+        "apiKey": None,
+        "apiSecret": None,
+        "provider": IntegrationProvider.EVENT_LOGS,
+        "databaseCredential": None,
+        "tableName": "event_logs",
+    }
+
+
+@pytest.fixture(scope="module")
 def database_credential_data():
     return {
         "host": "127.0.0.1",
@@ -2597,7 +2613,7 @@ def database_credential_data():
 @pytest.fixture(scope="module")
 def integration_response():
     return {
-        "_id": None,
+        "_id": "635ba034807ab86d8a2aadd9",
         "appId": "636a1c61d715ca6baae65611",
         "createdAt": ANY,
         "credential": {

@@ -28,6 +28,7 @@ class TestAppService:
         self.password = "test_password"
         self.app_name = "Test App"
         self.id = "636a1c61d715ca6baae65611"
+        self.api_key = "37462-bg372f-ut89m"
         self.user = AppertureUser(
             id=PydanticObjectId("636a1c61d715ca6baae65611"),
             first_name="mock",
@@ -36,6 +37,7 @@ class TestAppService:
             picture="",
         )
         App.id = MagicMock(return_value=self.ds_id)
+        App.api_key = MagicMock(return_value=self.api_key)
         App.enabled = MagicMock(return_value=True)
         App.user_id = MagicMock(return_value=self.ds_id)
         self.FindMock = namedtuple("FindMock", ["update", "count"])
@@ -210,3 +212,32 @@ class TestAppService:
                 ],
             }
         )
+
+    @pytest.mark.asyncio
+    async def test_update_api_key(self):
+        FindOneMock = namedtuple("FindOneMock", ["update"])
+        self.update_mock = AsyncMock()
+        App.find_one = MagicMock(return_value=FindOneMock(update=self.update_mock))
+        await self.service.update_api_key(
+            app_id=self.id,
+            api_key=self.api_key,
+        )
+        self.update_mock.assert_called_once_with(
+            {"$set": {"api_key": "37462-bg372f-ut89m"}}
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_app_by_api_key(self):
+        App.find_one = AsyncMock()
+        await self.service.get_app_by_api_key(
+            api_key=self.api_key,
+        )
+        App.find_one.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_get_all_apps(self):
+        FindMock = namedtuple("FindMock", ["to_list"])
+        list_mock = AsyncMock()
+        App.find = MagicMock(return_value=FindMock(to_list=list_mock))
+        await self.service.get_all_apps()
+        App.find.assert_called()

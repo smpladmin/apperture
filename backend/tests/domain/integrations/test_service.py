@@ -285,3 +285,30 @@ class TestIntegrationService:
             )
             == "CREATE TABLE IF NOT EXISTS cdc.cdc_table (column1 Int32 ,column2 Nullable(String) ,column3 Int64 ,is_deleted UInt8, shard String) ENGINE = ReplacingMergeTree(column1, is_deleted) ORDER BY (column1, shard)"
         )
+
+    @pytest.mark.asyncio
+    async def test_create_event_logs_table(self):
+        with patch(
+            "clickhouse.clickhouse_client_factory.ClickHouseClientFactory.get_client"
+        ) as mock_client_factory:
+            mock_client_factory.return_value = "123"
+            self.service.create_ch_table = MagicMock()
+
+            await self.service.create_event_logs_table(
+                table="cdc_table", app_id=self.app_id, database="test"
+            )
+            self.service.create_ch_table.assert_called_with(
+                **{
+                    "client": "123",
+                    "query": "\n"
+                    "            CREATE TABLE IF NOT EXISTS test.cdc_table (\n"
+                    "                event String,\n"
+                    "                key String,\n"
+                    "                data JSON,\n"
+                    "                added_time DateTime,\n"
+                    "                datasource_id String,\n"
+                    "            ) ENGINE = MergeTree\n"
+                    "            ORDER BY added_time\n"
+                    "        ",
+                }
+            )

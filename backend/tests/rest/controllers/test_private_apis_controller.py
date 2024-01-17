@@ -438,3 +438,63 @@ async def test_refresh_datamart_tables_failure(
         assert (
             str(exc_info.value)
         ) == "Could not refresh datamart 635ba034807ab86d8a2aadd8"
+
+
+@pytest.mark.asyncio
+async def test_get_app(
+    client_init,
+    app_service,
+):
+    response = client_init.get("/private/apps/635ba034807ab86d8a2aadd9")
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": "635ba034807ab86d8a2aadd9",
+        "name": "mixpanel1",
+        "userId": "635ba034807ab86d8a2aadda",
+        "sharedWith": [],
+        "domain": None,
+        "orgAccess": False,
+        "enabled": True,
+        "clickhouseCredential": {
+            "username": "test_username",
+            "password": "test_password",
+            "databasename": "test_database",
+        },
+        "remoteConnection": None,
+        "apiKey": None,
+    }
+    app_service.get_app.assert_called_with(**{"id": "635ba034807ab86d8a2aadd9"})
+
+
+@pytest.mark.asyncio
+async def test_get_integration(
+    client_init,
+    integration_service,
+):
+    response = client_init.get("/private/integrations/635ba034807ab86d8a2aadd9")
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": "635ba034807ab86d8a2aadd9",
+        "appId": "636a1c61d715ca6baae65611",
+        "userId": "636a1c61d715ca6baae65611",
+        "provider": "mixpanel",
+        "credential": {
+            "type": "API_KEY",
+            "account_id": "120232",
+            "refresh_token": None,
+            "api_key": "apperture_911",
+            "secret": "6ddqwjeaa",
+            "tableName": "",
+            "mysql_credential": None,
+            "mssql_credential": None,
+            "cdc_credential": None,
+            "csv_credential": None,
+            "branch_credential": None,
+            "api_base_url": None,
+            "facebook_ads_credential": None,
+            "tata_ivr_token": None,
+        },
+    }
+    integration_service.get_integration.assert_called_with(
+        **{"id": "635ba034807ab86d8a2aadd9"}
+    )
