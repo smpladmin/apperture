@@ -30,7 +30,7 @@ services:
         awslogs-region: ap-south-1
         awslogs-stream: event_logs_producer
     deploy:
-      replicas: 2
+      replicas: 1
       labels:
         traefik.http.routers.event_logs_producer-https.tls.certresolver: le
         traefik.http.services.event_logs_producer.loadbalancer.server.port: '8084'

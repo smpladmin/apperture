@@ -30,6 +30,26 @@ logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 total_records = 0
 
 
+def format_date_string_to_desired_format(
+    date_str, output_date_format="%Y-%m-%d %H:%M:%S"
+):
+    date_formats = [
+        "%Y-%m-%dT%H:%M:%S.%fZ",
+        "%Y-%m-%d %H:%M:%S.%f",
+        "%Y-%m-%d %H:%M:%S",
+    ]
+
+    for date_format in date_formats:
+        try:
+            dt_object = datetime.strptime(date_str, date_format)
+            result_date_str = dt_object.strftime(output_date_format)
+            return datetime.strptime(result_date_str, output_date_format)
+        except ValueError:
+            pass
+
+    return None
+
+
 def fetch_values_from_kafka_records(data, app):
     global total_records
     for _, records in data.items():
@@ -63,24 +83,26 @@ def save_topic_data_to_clickhouse(app):
         to_insert = list(filter(None, bucket["data"]))
         if to_insert:
             logging.info(
-                f"Data present in {topic} bucket len: {len(to_insert)}, Saving to {database}.{table}"
+                f"Data present in {topic} bucket {to_insert}, Saving {len(to_insert)} entires to {database}.{table}"
             )
+
             columns = ["event", "key", "data", "added_time", "datasource_id"]
             events = [
                 [
                     data.get("event", ""),
                     data.get("key", ""),
                     data.get("data", {}),
-                    datetime.strptime(
-                        data.get("added_time", "1970-01-01 00:00:00"),
-                        "%Y-%m-%d %H:%M:%S",
+                    format_date_string_to_desired_format(
+                        data.get(
+                            "added_time",
+                            "1970-01-01 00:00:00",
+                        )
                     ),
                     data.get("datasource_id", ""),
                 ]
                 for data in to_insert
             ]
             logging.info(f"Inserting data : {events}")
-
             app.clickhouse.save_events(
                 events=events,
                 columns=columns,

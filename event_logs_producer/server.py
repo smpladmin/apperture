@@ -8,6 +8,7 @@ from aiokafka import AIOKafkaProducer
 from dotenv import load_dotenv
 
 from cache import init_cache
+from domain.event_logs.models import EventLogsDto
 from rest.middlewares.validate_app_api_key import (
     validate_app_api_key,
 )
@@ -56,12 +57,13 @@ async def shutdown_event():
 )
 async def capture_event_logs(
     datasource_id: str,
-    data: dict,
+    dto: EventLogsDto,
 ):
     kafka_topic = f"eventlogs_{datasource_id}"
     # update data with datasource_id to track apperture datasource associated with log stream
-    data.update({"datasource_id": datasource_id})
-    value = json.dumps(data)
+    updated_dto = dict(dto)
+    updated_dto.update({"datasource_id": datasource_id})
+    value = json.dumps(updated_dto)
 
     await producer.send_and_wait(kafka_topic, value=value.encode("utf-8"))
     return {"status": "ok"}
