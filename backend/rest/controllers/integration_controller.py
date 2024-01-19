@@ -4,6 +4,7 @@ from typing import Union
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
+from cache.cache import clear_cache
 from data_processor_queue.service import DPQueueService
 from domain.apperture_users.models import AppertureUser
 from domain.apps.service import AppService
@@ -233,6 +234,7 @@ async def create_integration(
 
         response = IntegrationResponse.from_orm(integration)
         response.datasource = datasource
+        await clear_cache(f"apperture-cache::get_connections:{str(datasource.app_id)}")
         return response
 
     return integration
