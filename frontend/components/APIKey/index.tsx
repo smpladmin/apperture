@@ -40,7 +40,7 @@ const APIKey = ({ app }: { app: App }) => {
       {apiKey ? (
         <>
           <Text fontSize={'xs-16'} fontWeight={'500'} lineHeight={'xs-16'}>
-            Your API Key
+            {`${app.name}'s API Key:`} 
           </Text>
           <Flex alignItems={'center'} gap={'2'}>
             <Box
