@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "appy-backend"
+version = "0.1.0"
+description = ""
+authors = ["rnaidu <rahul@parallelhq.com>"]
+readme = "README.md"
+packages = [{include = "appy_backend"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.105.0"
+uvicorn = {extras = ["standard"], version = "^0.24.0.post1"}
+python-dotenv = "^1.0.0"
+openai = "^1.4.0"
+sse-starlette = "^1.8.2"
+tiktoken = "^0.5.2"
+weaviate-client = "==3.*"
+pydantic-settings = "^2.1.0"
+gunicorn = "^21.2.0"
+fastapi-cache2 = "^0.2.1"
+pytest = "^7.4.4"
+google-cloud-language = "^2.12.0"
+beanie = "^1.24.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
