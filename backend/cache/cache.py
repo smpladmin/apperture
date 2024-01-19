@@ -21,7 +21,6 @@ def init_cache(redis_host: str, redis_password: str):
 
 async def clear_cache(cache_key):
     await FastAPICache.clear(key=cache_key)
-    logging.info(f"Clearing cache for cache key: {cache_key}")
 
 
 def datasource_key_builder(
@@ -63,5 +62,4 @@ def connections_key_builder(
     prefix = FastAPICache.get_prefix()
     query_params = ":".join(request.query_params.values())
     cache_key = f"{prefix}:{namespace}:{func.__name__}:{query_params}"
-    logging.info(f"Using cache key: {cache_key}")
     return cache_key
