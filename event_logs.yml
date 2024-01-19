@@ -3,7 +3,7 @@ services:
   event_logs_consumer:
     image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/event_logs_consumer:latest
     networks:
-     - net
+     - apperture_net
     logging:
       driver: awslogs
       options:
@@ -21,7 +21,7 @@ services:
   event_logs_producer:
     image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/event_logs_producer:latest
     networks:
-     - net
+     - apperture_net
      - traefik-public
     logging:
       driver: awslogs
@@ -56,4 +56,8 @@ services:
         limits:
           cpus: '1.0'
           memory: 2048M
-  
+networks:
+  apperture_net:
+    external: true
+  traefik-public:
+    external: true
