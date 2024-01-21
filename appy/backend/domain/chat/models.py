@@ -1,5 +1,6 @@
 from beanie import PydanticObjectId
-
+from typing import NamedTuple, List
+from enum import Enum
 from repositories.document import Document
 
 
@@ -20,3 +21,16 @@ class Chat(Document):
 
     class Settings:
         name = "chats"
+
+
+class ReturnType(str, Enum):
+    STRING = "str"
+    FLOAT = "float"
+    INT = "int"
+    DATAFRAME = "dataframe"
+
+
+class ChatQueries(NamedTuple):
+    query: str
+    return_type: ReturnType = ReturnType.STRING
+    query_params: List[str] = []

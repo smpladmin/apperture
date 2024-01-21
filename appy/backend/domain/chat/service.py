@@ -8,6 +8,7 @@ from fastapi import Depends
 from domain.chat.models import ChatSettings, Chat
 from domain.knowledge.models import FAQ
 from repositories.knowledge import KnowledgeRepository
+from repositories.chat import ChatRepository
 from rest.dtos.chat import ChatSettingsUpdate
 
 from vectorstore import VectorStore
@@ -18,10 +19,12 @@ class ChatService:
     def __init__(
         self,
         knowledge_repo: Annotated[KnowledgeRepository, Depends()],
+        chat_repo: Annotated[ChatRepository, Depends()],
         vectorstore: Annotated[VectorStore, Depends()],
     ):
         self.vectorstore = vectorstore
         self.knowledge_repo = knowledge_repo
+        self.chat_repo = chat_repo
         self.openai_client = AsyncOpenAI()
 
     async def get_chat_history(self, user_id: PydanticObjectId, history_length: int):
@@ -79,7 +82,7 @@ class ChatService:
 
         answer = await self._generate(messages, query_id)
         logging.info(f"{query_id} Final Answer: {answer}")
-
+        # await self.chat_repo.extract_and_parse_system_message(answer)
         await self.save_user_chat(
             query_id=query_id, user_id=user_id, question=question, answer=answer
         )
@@ -145,3 +148,6 @@ class ChatService:
 
     async def get_chat_settings(self, user_id: PydanticObjectId) -> ChatSettings:
         return await ChatSettings.find_one(ChatSettings.user_id == user_id)
+
+    def parse_chat_answers(self, answer: str):
+        return self.chat_repo.extract_and_parse_system_message(answer)

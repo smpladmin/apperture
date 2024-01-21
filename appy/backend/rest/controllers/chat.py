@@ -49,3 +49,11 @@ async def get_chat_settings(
     chat_service: ChatService = Depends(),
 ):
     return await chat_service.get_chat_settings(user_id=PydanticObjectId(user_id))
+
+
+@router.get("/chat/parsed/message")
+def get_parsed_answer(
+    answer: str,
+    chat_service: ChatService = Depends(),
+):
+    return chat_service.parse_chat_answers(answer)
