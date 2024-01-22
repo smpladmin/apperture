@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+from typing import Optional
 import requests
 from fastapi import APIRouter, Depends
 
@@ -50,3 +51,21 @@ async def delete_cdc_connector(
 @router.get("/cdc")
 async def get_cdc_connectors():
     return requests.get(url=KAFKA_CONNECTOR_BASE_URL).json()
+
+
+@router.post("/cdc/{name}/restart")
+async def restart_cdc_connector(
+    name: str, includeTasks: Optional[bool] = None, onlyFailed: Optional[bool] = None
+):
+    query_params = {}
+    if includeTasks is not None:
+        query_params["includeTasks"] = includeTasks
+    if onlyFailed is not None:
+        query_params["onlyFailed"] = onlyFailed
+
+    response = requests.post(
+        url=f"{KAFKA_CONNECTOR_BASE_URL}{name}/restart",
+        json={},
+        params=query_params,
+    )
+    return
