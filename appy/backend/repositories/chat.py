@@ -1,7 +1,9 @@
 import re
 import logging
 
-# import clickhouse_connect
+import clickhouse_connect
+from tabulate import tabulate
+
 # import pandas as pd
 
 from domain.chat.models import ChatQueries, ReturnType
@@ -9,11 +11,11 @@ from domain.chat.models import ChatQueries, ReturnType
 queries = [
     ChatQueries(
         query="""
-            SELECT toDate(properties.data."Order Date") as dt,
+            SELECT total_sales FROM (SELECT toDate(properties.data."Order Date") as dt,
                    SUM(properties.data."Total Order Value") as total_sales
             FROM sangeethamobiles_com.sangeetha_sales_api_data
             WHERE dt = yesterday()
-            GROUP BY 1
+            GROUP BY 1)
         """,
         return_type=ReturnType.STRING,
     ),
@@ -117,19 +119,7 @@ queries = [
     ),
     ChatQueries(
         query="""
-            SELECT (yest - dbyest) / dbyest
-            FROM (
-                SELECT date, sum((average_cpc * clicks) / 1000000) as yest
-                FROM sangeethamobiles_com.google_ads
-                WHERE date_diff('day', date, toDate(now())) = 1
-                GROUP BY 1
-            ) a
-            LEFT JOIN (
-                SELECT date, sum((average_cpc * clicks) / 1000000) as dbyest
-                FROM sangeethamobiles_com.google_ads
-                WHERE date_diff('day', date, toDate(now())) = 2
-                GROUP BY 1
-            ) b ON a.date = b.date
+             select (yest-dbyest)/dbyest from ( select date, sum((average_cpc*clicks)/1000000) as yest from sangeethamobiles_com.google_ads where date_diff('day', date ,toDate(now())) = 1 group by 1 )a left join ( select date, sum((average_cpc*clicks)/1000000) as dbyest from sangeethamobiles_com.google_ads where date_diff('day', date ,toDate(now())) = 2 group by 1 )b on 1=1
         """
     ),
 ]
@@ -137,7 +127,7 @@ queries = [
 
 class ChatRepository:
     def __init__(self):
-        self.client = {}
+        self.client = clickhouse_connect.get_client()
         self.queries = []
 
     def execute(self, query):
@@ -289,11 +279,14 @@ class ChatRepository:
         def replace(match):
             value = int(match.group(1))
             logging.info(f"match : {queries[value-1].query}")
-
-            value_word_mapping = {1: "One", 2: "Two", 3: "Three", 4: "Four"}
-            return value_word_mapping.get(
-                value, match.group(0)
-            )  # Use the original if not found in mapping
+            query = queries[value - 1].query
+            result = self.client.query(query).result_set
+            result = self.client.query(query).result_set
+            if len(result) == 1:
+                if len(result[0]) == 1:
+                    return result[0][0]
+            table = "\n" + tabulate(result) + "\n"
+            return table.replace(r"\n", "\n")
 
         result = re.sub(pattern, replace, text)
         return result
