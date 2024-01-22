@@ -13,5 +13,5 @@ class EventLogsDatasourcesBucket(BaseModel):
     data: list
     ch_db: str
     ch_table: str
-    ch_server_credential: Optional[str]
+    ch_server_credential: Optional[ClickHouseCredentials]
     app_id: str
