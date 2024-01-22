@@ -22,14 +22,14 @@ class ClickHouse:
 
     def save_events(self, events) -> None:
         """Saves events to ClickHouse."""
+        logging.info(f"No. of events to be saved: {len(events)}")
         try:
             self._save(events)
         except DatabaseError as e:
-            logging.debug(f"Exception saving events to ClickHouse: {e}")
-            logging.debug("Trying to save sequentially")
-            for event in events:
-                self._save([event])
-            logging.debug("Saved sequentially")
+            logging.info(f"Exception saving events to ClickHouse: {e}")
+            logging.info("Trying to save recursively")
+            self.rsave_events(events=events)
+            logging.info("Saving recursively ends")
 
     def rsave_events(self, events):
         """Saves events to clickHouse with recursive retries using split backoff."""
@@ -37,20 +37,14 @@ class ClickHouse:
             return
 
         if len(events) == 1:
-            try:
-                self._save(events)
-            except Exception as e:
-                # Skip saving this event.
-                logging.debug(
-                    f"Error encountered for event {events[0]}: {e}. Cannot split further."
-                )
+            self._save(events)
             return
 
         try:
             self._save(events)
         except Exception as e:
-            logging.debug(f"Exception saving events to ClickHouse: {e}")
-            logging.debug("Trying to split and save")
+            logging.info(f"Exception saving events to ClickHouse: {e}")
+            logging.info("Trying to split and save")
 
             mid = len(events) // 2
             first_half = events[:mid]
@@ -60,6 +54,7 @@ class ClickHouse:
             self.rsave_events(second_half)
 
     def _save(self, events) -> None:
+        logging.info(f"Saving {len(events)} events")
         self.client.insert(
             table="clickstream",
             data=events,
@@ -73,6 +68,7 @@ class ClickHouse:
             ],
             settings={"insert_async": True, "wait_for_async_insert": False},
         )
+        logging.info(f"Saved {len(events)} events")
 
     def _save_precision_events(self, events) -> None:
         self.client.insert(
@@ -94,8 +90,8 @@ class ClickHouse:
         try:
             self._save_precision_events(events)
         except DatabaseError as e:
-            logging.debug(f"Exception saving events to Eventstream: {e}")
-            logging.debug("Trying to save sequentially")
+            logging.info(f"Exception saving events to Eventstream: {e}")
+            logging.info("Trying to save sequentially")
             for event in events:
                 self._save_precision_events([event])
-            logging.debug("Saved sequentially")
+            logging.info("Saved sequentially")
