@@ -1,8 +1,11 @@
 import asyncio
+import datetime
 import json
 from unittest.mock import ANY
 
-from domain.apps.models import ClickHouseCredential
+from beanie import PydanticObjectId
+
+from domain.apps.models import App, ClickHouseCredential
 from domain.common.models import IntegrationProvider
 from domain.integrations.models import (
     Credential,
@@ -273,5 +276,86 @@ def test_create_table_with_csv(client_init, integration_service, files_service):
             "name": "test",
             "s3_key": "/csv/636a1c61d715ca6baae65611/test.csv",
             "app_id": "636a1c61d715ca6baae65611",
+        }
+    )
+
+
+def test_add_event_log_integration(
+    client_init,
+    event_logs_integration_data,
+    integration_service,
+    app_service,
+):
+    integration_future = asyncio.Future()
+    integration_future.set_result(
+        Integration(
+            app_id="636a1c61d715ca6baae65611",
+            user_id="636a1c61d715ca6baae65611",
+            provider=IntegrationProvider.EVENT_LOGS,
+            credential=Credential(
+                type=CredentialType.EVENT_LOGS,
+                api_key=None,
+                account_id=None,
+                secret=None,
+                tableName="event_logs",
+                csv_credential=None,
+                mysql_credential=None,
+            ),
+        )
+    )
+    app_with_credentials_future = asyncio.Future()
+    app_with_credentials_future.set_result(
+        App(
+            id=PydanticObjectId("635ba034807ab86d8a2aadd9"),
+            name="mixpanel1",
+            user_id=PydanticObjectId("635ba034807ab86d8a2aadda"),
+            shared_with=set(),
+            clickhouse_credential=ClickHouseCredential(
+                username="test_username",
+                password="test_password",
+                databasename="test_database",
+            ),
+            api_key=None,
+        )
+    )
+    integration_service.create_integration.return_value = integration_future
+    app_service.get_shared_or_owned_app.return_value = app_with_credentials_future
+    response = client_init.post(
+        "/integrations?create_datasource=false&trigger_data_processor=false",
+        data=json.dumps(event_logs_integration_data),
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "_id": None,
+        "revisionId": None,
+        "createdAt": ANY,
+        "updatedAt": None,
+        "userId": "636a1c61d715ca6baae65611",
+        "appId": "636a1c61d715ca6baae65611",
+        "provider": "event_logs",
+        "credential": {
+            "type": "EVENT_LOGS",
+            "account_id": None,
+            "refresh_token": None,
+            "api_key": None,
+            "secret": None,
+            "tableName": "event_logs",
+            "mysql_credential": None,
+            "mssql_credential": None,
+            "cdc_credential": None,
+            "csv_credential": None,
+            "branch_credential": None,
+            "api_base_url": None,
+            "facebook_ads_credential": None,
+            "tata_ivr_token": None,
+        },
+        "enabled": None,
+        "datasource": None,
+    }
+    integration_service.create_event_logs_table.assert_called_with(
+        **{
+            "app_id": "635ba034807ab86d8a2aadd9",
+            "database": "test_database",
+            "table": "event_logs",
         }
     )

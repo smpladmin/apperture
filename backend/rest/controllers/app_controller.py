@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from typing import Union
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -15,6 +16,7 @@ from domain.integrations.models import Integration
 from domain.integrations.service import IntegrationService
 from rest.dtos.apps import (
     AppResponse,
+    AppResponseWithCredentials,
     AppWithIntegrations,
     CreateAppDto,
     OrgAccessResponse,
@@ -102,13 +104,22 @@ async def get_apps(
     return apps_wi
 
 
-@router.get("/apps/{id}", response_model=AppResponse)
+@router.get("/apps/{id}", response_model=AppResponseWithCredentials)
 async def get_app(
     id: str,
     user: AppertureUser = Depends(get_user),
     app_service: AppService = Depends(),
 ):
-    return await app_service.get_shared_or_owned_app(id=id, user=user)
+    app = await app_service.get_shared_or_owned_app(id=id, user=user)
+    return AppResponseWithCredentials(
+        id=app.id,
+        name=app.name,
+        user_id=app.user_id,
+        domain=app.domain,
+        org_access=app.org_access,
+        shared_with=app.shared_with,
+        api_key=app.api_key,
+    )
 
 
 @router.put("/apps/{id}")
@@ -184,3 +195,13 @@ async def get_user_domain(
     app_service: AppService = Depends(),
 ):
     return await app_service.get_user_domain(app_id=id)
+
+
+@router.post("/apps/{id}/api-key")
+async def generate_api_key(
+    id: str,
+    app_service: AppService = Depends(),
+):
+    key = uuid.uuid4()
+    await app_service.update_api_key(app_id=id, api_key=str(key))
+    return key

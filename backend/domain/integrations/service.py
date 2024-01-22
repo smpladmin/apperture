@@ -483,6 +483,20 @@ class IntegrationService:
             )
             self.create_ch_table(client=ch_client, query=create_query)
 
+    async def create_event_logs_table(self, table: str, app_id: str, database: str):
+        client = await ClickHouseClientFactory.get_client(app_id=app_id)
+        create_table_query = f"""
+            CREATE TABLE IF NOT EXISTS {database}.{table} (
+                event String,
+                key String,
+                data JSON,
+                added_time DateTime,
+                datasource_id String,
+            ) ENGINE = MergeTree
+            ORDER BY added_time
+        """
+        self.create_ch_table(client=client, query=create_table_query)
+
     def generate_connector_config(
         self, tables: List[str], credential: CdcCredential, integration_id: str
     ):

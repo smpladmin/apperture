@@ -1,4 +1,5 @@
-from typing import List, Optional
+from typing import List, Optional, Set, Union
+from beanie import PydanticObjectId
 
 from pydantic import BaseModel
 
@@ -24,6 +25,22 @@ class AppDatabaseResponse(BaseModel):
 
 class AppResponse(App, ModelResponse):
     pass
+
+
+class AppResponseWithCredentials(ModelResponse):
+    id: PydanticObjectId
+    name: str
+    user_id: PydanticObjectId
+    shared_with: Set[PydanticObjectId]
+    domain: Union[str, None] = None
+    org_access: bool = False
+    enabled: bool = True
+    clickhouse_credential: Optional[ClickHouseCredential]
+    remote_connection: Optional[ClickHouseRemoteConnectionCreds]
+    api_key: Optional[str]
+
+    class Config:
+        allow_population_by_field_name = True
 
 
 class AppWithIntegrations(App, ModelResponse):

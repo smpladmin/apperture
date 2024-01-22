@@ -22,6 +22,7 @@ class CredentialType(str, Enum):
     FACEBOOK_ADS = "FACEBOOK_ADS"
     TATA_IVR = "TATA_IVR"
     GOOGLE_ADS = "GOOGLE_ADS"
+    EVENT_LOGS = "EVENT_LOGS"
 
 
 class RelationalDatabaseType(str, Enum):

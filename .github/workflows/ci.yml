@@ -35,6 +35,10 @@ jobs:
               - 'airflow/**'
             cdc_consumer:
               - 'cdc_consumer/**'
+            event_logs_producer:
+              - 'event_logs_producer/**'
+            event_logs_consumer:
+              - 'event_logs_consumer/**'
 
       - name: Set short commit-sha
         id: commit
@@ -158,6 +162,30 @@ jobs:
           IMAGE_TAG: latest
         run: |
           cd airflow
+          docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+
+      - name: Build and Push Event Logs Producer
+        if: steps.filter.outputs.event_logs_producer == 'true'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: event_logs_producer
+          IMAGE_TAG: latest
+        run: |
+          cd event_logs_producer
+          docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+      
+      - name: Build and Push Event Logs Consumer
+        if: steps.filter.outputs.event_logs_consumer == 'true'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: event_logs_consumer
+          IMAGE_TAG: latest
+        run: |
+          cd event_logs_consumer
           docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags

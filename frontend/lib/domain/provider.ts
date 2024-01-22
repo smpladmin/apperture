@@ -13,6 +13,7 @@ export enum Provider {
   SAMPLE = 'sample',
   BRANCH = 'branch',
   TATA_IVR = 'tata_ivr',
+  EVENT_LOGS = 'event_logs',
 }
 export namespace Provider {
   export function getDisplayName(provider: Provider): string {

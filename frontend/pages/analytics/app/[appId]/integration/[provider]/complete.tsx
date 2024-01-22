@@ -1,4 +1,4 @@
-import { Flex, Box, Text, Button } from '@chakra-ui/react';
+import { Flex, Box, Text, Button, Highlight } from '@chakra-ui/react';
 import { GetServerSideProps } from 'next';
 import { _getApp } from '@lib/services/appService';
 import { App } from '@lib/domain/app';
@@ -7,12 +7,14 @@ import { useRouter } from 'next/router';
 import { getAuthToken } from '@lib/utils/request';
 import React, { useState, useRef } from 'react';
 import { CheckCircle } from 'phosphor-react';
+import { EVENT_LOGS_BASE_URL } from 'config';
 
 export const getServerSideProps: GetServerSideProps = async ({
   req,
   query,
 }) => {
   const app = await _getApp(query.appId as string, getAuthToken(req) as string);
+
   return {
     props: { app },
   };
@@ -27,6 +29,8 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
   const router = useRouter();
   const codeAreaRef = useRef(null);
 
+  const { provider, dsId, appId } = router.query;
+
   return (
     <Flex
       width={'full'}
@@ -39,7 +43,7 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
       px={{ base: 4, md: 0 }}
     >
       <Flex direction={'column'} alignItems={'center'}>
-        {router.query.provider === 'apperture' ? (
+        {provider === 'apperture' ? (
           <Text
             fontWeight={'bold'}
             fontSize={'sh-28'}
@@ -53,7 +57,7 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
         ) : (
           <CheckCircle size={52} weight="fill" color="GREEN" />
         )}
-        {router.query.provider === 'apperture' ? (
+        {provider === 'apperture' ? (
           <textarea
             ref={codeAreaRef}
             rows={6}
@@ -72,12 +76,70 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
             }}
             p-5
           />
-        ) : (
-          <Box></Box>
-        )}
+        ) : provider === 'event_logs' ? (
+          <Flex direction={'column'} gap={'3'}>
+            <Text
+              fontWeight={'bold'}
+              fontSize={'sh-20'}
+              lineHeight={'sh-20'}
+              marginBottom={'2'}
+              pt={10}
+            >
+              Your Webhook Url:
+            </Text>
 
-        {router.query.provider === 'apperture' ? (
-          <Box></Box>
+            <Box
+              fontWeight={'400'}
+              fontSize={'xs-14'}
+              lineHeight={'xs-14'}
+              borderRadius={'4'}
+              marginBottom={'2'}
+              p={2}
+              border={'1px'}
+              borderStyle={'dashed'}
+              borderColor={'grey.800'}
+              bg={'white.400'}
+            >
+              {`${EVENT_LOGS_BASE_URL}/eventlogs?datasource_id=${dsId}`}
+            </Box>
+
+            <Text fontWeight={'400'} fontSize={'xs-14'} lineHeight={'xs-14'}>
+              Add following header while sending events to above url:
+            </Text>
+            <Text>
+              <Highlight
+                query={`{"apperture-api-key": "${app?.apiKey}"}`}
+                styles={{
+                  px: '2',
+                  py: '2',
+                  bg: 'white.400',
+                  fontSize: 'xs-14',
+                  fontWeight: '600',
+                }}
+              >
+                {`{"apperture-api-key": "${app?.apiKey}"}`}
+              </Highlight>
+            </Text>
+            <Text
+              fontWeight={'500'}
+              fontSize={'xs-12'}
+              lineHeight={'xs-12'}
+              cursor={'pointer'}
+              _hover={{
+                color: 'blue.800',
+              }}
+              color={'blue.400'}
+              textDecoration={'underline'}
+              onClick={() =>
+                router.push({
+                  pathname: '/analytics/settings/apiKey/[appId]',
+                  query: { dsId, appId },
+                })
+              }
+            >
+              You can also get your app/workspace api key here!
+            </Text>
+          </Flex>
         ) : (
           <Box maxW={'600'} w={'full'}>
             <Text
@@ -113,7 +175,7 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
             textColor={'white.100'}
             w={'full'}
           >
-            {router.query.provider === 'apperture' ? 'Next' : 'Start Exploring'}
+            {provider === 'apperture' ? 'Next' : 'Start Exploring'}
           </Button>
         </Link>
         <Link href={`/analytics/home/${router.query.dsId}`}>
@@ -125,9 +187,7 @@ const CompleteIntegration = ({ app }: CompleteIntegrationProps) => {
             fontSize={'base'}
             lineHeight={'base'}
           >
-            {router.query.provider === 'apperture'
-              ? 'I have a mobile app'
-              : 'Go to Home'}
+            {provider === 'apperture' ? 'I have a mobile app' : 'Go to Home'}
           </Text>
         </Link>
       </Box>

@@ -1,4 +1,5 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Optional
+from beanie import PydanticObjectId
 
 from pydantic import BaseModel
 
@@ -24,6 +25,17 @@ class IntegrationResponse(Integration, ModelResponse):
 
     class Config:
         orm_mode = True
+
+
+class IntergationResponseWithCredential(ModelResponse):
+    id: PydanticObjectId
+    app_id: PydanticObjectId
+    user_id: PydanticObjectId
+    provider: IntegrationProvider
+    credential: Optional[Credential]
+
+    class Config:
+        allow_population_by_field_name = True
 
 
 class DatabaseSSHCredentialDto(BaseModel):
@@ -64,17 +76,17 @@ class BranchCredentialDto(BaseModel):
 class CreateIntegrationDto(BaseModel):
     appId: str
     provider: IntegrationProvider
-    accountId: Union[str, None]
-    apiKey: Union[str, None]
-    apiSecret: Union[str, None]
-    tableName: Union[str, None]
-    database: Union[str, None]
-    databaseCredential: Union[DatabaseCredentialDto, None]
-    csvFileId: Union[str, None]
-    eventList: Union[List[str], None]
-    branchCredential: Union[BranchCredentialDto, None]
-    cdcCredential: Union[CdcCredentialDto, None]
-    tataIvrAuthToken: Union[str, None]
+    accountId: Optional[str]
+    apiKey: Optional[str]
+    apiSecret: Optional[str]
+    tableName: Optional[str]
+    database: Optional[str]
+    databaseCredential: Optional[DatabaseCredentialDto]
+    csvFileId: Optional[str]
+    eventList: Optional[List[str]]
+    branchCredential: Optional[BranchCredentialDto]
+    cdcCredential: Optional[CdcCredentialDto]
+    tataIvrAuthToken: Optional[str]
 
 
 class IntegrationWithDataSources(Integration, ModelResponse):

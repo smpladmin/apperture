@@ -11,6 +11,9 @@ from fastapi import APIRouter, Depends
 from base64 import b64decode
 
 from authorisation.service import AuthService
+from rest.dtos.integrations import (
+    IntergationResponseWithCredential,
+)
 from domain.alerts.models import AlertType, ChannelType
 from rest.dtos.alerts import AlertResponse
 from domain.alerts.service import AlertService
@@ -47,7 +50,12 @@ from domain.spreadsheets.models import DatabaseClient
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apidata import CreateAPIDataDto
 from rest.dtos.apperture_users import PrivateUserResponse, ResetPasswordDto
-from rest.dtos.apps import AppDatabaseResponse, ClickHouseRemoteConnectionCredsResponse
+from rest.dtos.apps import (
+    AppDatabaseResponse,
+    AppResponse,
+    AppResponseWithCredentials,
+    ClickHouseRemoteConnectionCredsResponse,
+)
 from rest.dtos.cdc import CdcCredentials
 from rest.dtos.clickstream_event_properties import (
     ClickStreamEventPropertiesDto,
@@ -674,3 +682,56 @@ async def process_incoming_alerts(
                 )
         except Exception as e:
             logging.error(f"Failed to process error logs: {e}")
+
+
+@router.get(
+    "/apps/{app_id}",
+    response_model=Union[AppResponseWithCredentials, None],
+)
+async def get_app(
+    app_id: str,
+    app_service: AppService = Depends(),
+):
+    app = await app_service.get_app(id=app_id)
+    return AppResponseWithCredentials(
+        id=app.id,
+        name=app.name,
+        user_id=app.user_id,
+        domain=app.domain,
+        org_access=app.org_access,
+        shared_with=app.shared_with,
+        clickhouse_credential=app.clickhouse_credential,
+        remote_connection=app.remote_connection,
+    )
+
+
+@router.get(
+    "/integrations/{integration_id}",
+    response_model=Union[IntergationResponseWithCredential, None],
+)
+async def get_app_database(
+    integration_id: str,
+    integration_service: IntegrationService = Depends(),
+):
+    integration = await integration_service.get_integration(id=integration_id)
+    return IntergationResponseWithCredential(
+        id=integration.id,
+        user_id=integration.user_id,
+        appId=integration.app_id,
+        provider=integration.provider,
+        credential=integration.credential,
+    )
+
+
+@router.get(
+    "/apps",
+    response_model=Union[AppResponse, List[AppResponse], None],
+)
+async def get_apps_for_provider(
+    api_key: Optional[str] = None,
+    app_service: AppService = Depends(),
+):
+    if api_key:
+        return await app_service.get_app_by_api_key(api_key=api_key)
+
+    return await app_service.get_all_apps()

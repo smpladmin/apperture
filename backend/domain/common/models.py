@@ -23,6 +23,7 @@ class IntegrationProvider(str, Enum):
     FACEBOOK_ADS = "facebook_ads"
     TATA_IVR = "tata_ivr"
     GOOGLE_ADS = "google_ads"
+    EVENT_LOGS = "event_logs"
 
     def supports_runlogs(self):
         return self in [self.MIXPANEL, self.AMPLITUDE, self.CLEVERTAP, self.API]

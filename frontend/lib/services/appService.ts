@@ -75,3 +75,7 @@ export const update_app = async (
   });
   return res.data;
 };
+
+export const generateAPIKey = async (appId: string) => {
+  return await ApperturePost(`/apps/${appId}/api-key`, {});
+};

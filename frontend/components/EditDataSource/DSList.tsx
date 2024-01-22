@@ -187,12 +187,20 @@ function DSList({
             <Flex
               gap={2}
               cursor={
-                [Provider.CSV, Provider.APPERTURE].includes(datasource.provider)
+                [
+                  Provider.CSV,
+                  Provider.APPERTURE,
+                  Provider.EVENT_LOGS,
+                ].includes(datasource.provider)
                   ? 'inherit'
                   : 'pointer'
               }
               onClick={() =>
-                [Provider.CSV, Provider.APPERTURE].includes(datasource.provider)
+                [
+                  Provider.CSV,
+                  Provider.APPERTURE,
+                  Provider.EVENT_LOGS,
+                ].includes(datasource.provider)
                   ? null
                   : handleEditDatasource(datasource)
               }
