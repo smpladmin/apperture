@@ -3,14 +3,14 @@ from typing import Union
 
 import clickhouse_connect
 
-from models.models import ClickHouseRemoteConnectionCred
+from models.models import ClickHouseCredentials
 
 
 class ClickHouseClient:
     def __init__(
         self,
         app_id: str,
-        connection_detail: Union[ClickHouseRemoteConnectionCred, None],
+        connection_detail: Union[ClickHouseCredentials, None],
     ):
         self.app_id = app_id
         self.connection_detail = connection_detail
@@ -39,7 +39,7 @@ class ClickHouseClientFactory:
     @staticmethod
     def get_client(
         app_id: str,
-        clickhouse_server_credentials: Union[ClickHouseRemoteConnectionCred, None],
+        clickhouse_server_credentials: Union[ClickHouseCredentials, None],
     ) -> ClickHouseClient:
         if app_id not in ClickHouseClientFactory.__clients:
             ClickHouseClientFactory.__clients[app_id] = ClickHouseClient(

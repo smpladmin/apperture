@@ -18,7 +18,7 @@ from event_logs_datasources import EventLogsDatasources
 load_dotenv()
 
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
-MAX_RECORDS = int(os.getenv("MAX_RECORDS", "2"))
+MAX_RECORDS = int(os.getenv("MAX_RECORDS", "100"))
 
 
 logging.getLogger().setLevel(logging.INFO)
@@ -51,7 +51,7 @@ def format_date_string_to_desired_format(
     return None
 
 
-def fetch_values_from_kafka_records(data, app):
+def fetch_values_from_kafka_records(data, event_logs_datasources: EventLogsDatasources):
     global total_records
     for _, records in data.items():
         total_records += len(records)
@@ -59,7 +59,7 @@ def fetch_values_from_kafka_records(data, app):
         for record in records:
             topic = record.topic
 
-            if not app.event_logs_datasources.datasource_with_credentials.get(topic):
+            if not event_logs_datasources.datasource_with_credentials.get(topic):
                 logging.info(f"Bucket not found for topic: {topic}")
                 continue
 
@@ -67,21 +67,23 @@ def fetch_values_from_kafka_records(data, app):
                 continue
 
             values = json.loads(record.value)
-            app.event_logs_datasources.datasource_with_credentials[record.topic][
-                "data"
-            ].append(values)
+            event_logs_datasources.datasource_with_credentials[
+                record.topic
+            ].data.append(values)
 
 
-def save_topic_data_to_clickhouse(app):
+def save_topic_data_to_clickhouse(
+    clickhouse, event_logs_datasources: EventLogsDatasources
+):
     for (
         topic,
         bucket,
-    ) in app.event_logs_datasources.datasource_with_credentials.items():
-        table = bucket["ch_table"]
-        database = bucket["ch_db"]
-        clickhouse_server_credential = bucket["ch_server_credential"]
-        app_id = bucket["app_id"]
-        to_insert = list(filter(None, bucket["data"]))
+    ) in event_logs_datasources.datasource_with_credentials.items():
+        table = bucket.ch_table
+        database = bucket.ch_db
+        clickhouse_server_credential = bucket.ch_server_credential
+        app_id = bucket.app_id
+        to_insert = list(filter(None, bucket.data))
         if to_insert:
             logging.info(
                 f"Data present in {topic} bucket {to_insert}, Saving {len(to_insert)} entires to {database}.{table}"
@@ -103,8 +105,7 @@ def save_topic_data_to_clickhouse(app):
                 ]
                 for data in to_insert
             ]
-            logging.info(f"Inserting data : {events}")
-            app.clickhouse.save_events(
+            clickhouse.save_events(
                 events=events,
                 columns=columns,
                 table=table,
@@ -112,7 +113,7 @@ def save_topic_data_to_clickhouse(app):
                 clickhouse_server_credential=clickhouse_server_credential,
                 app_id=app_id,
             )
-            app.event_logs_datasources.datasource_with_credentials[topic]["data"] = []
+            event_logs_datasources.datasource_with_credentials[topic].data = []
             logging.info(
                 "Successfully saved data to clickhouse, Emptying the topic bucket"
             )
@@ -131,7 +132,6 @@ async def process_kafka_messages() -> None:
         value_deserializer=lambda v: v.decode("utf-8"),
         enable_auto_commit=False,
         fetch_max_bytes=7864320,
-        auto_offset_reset="earliest",
     )
 
     global total_records
@@ -145,13 +145,18 @@ async def process_kafka_messages() -> None:
         if not data:
             continue
 
-        fetch_values_from_kafka_records(data=data, app=app)
+        fetch_values_from_kafka_records(
+            data=data, event_logs_datasources=app.event_logs_datasources
+        )
 
         if total_records > MAX_RECORDS:
             logging.info(
                 f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS}"
             )
-            save_topic_data_to_clickhouse(app=app)
+            save_topic_data_to_clickhouse(
+                clickhouse=app.clickhouse,
+                event_logs_datasources=app.event_logs_datasources,
+            )
 
             await consumer.commit()
             total_records = 0

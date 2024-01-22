@@ -1,7 +1,7 @@
 import logging
 from typing import List, Union
 
-from models.models import ClickHouseRemoteConnectionCred
+from models.models import ClickHouseCredentials
 from clickhouse_client_factory import ClickHouseClientFactory
 from clickhouse_connect.driver.exceptions import DatabaseError
 
@@ -13,7 +13,7 @@ class ClickHouse:
         columns: List[str],
         table: str,
         database: str,
-        clickhouse_server_credential: Union[ClickHouseRemoteConnectionCred, None],
+        clickhouse_server_credential: Union[ClickHouseCredentials, None],
         app_id: str,
     ) -> None:
         """Saves events to ClickHouse."""
@@ -46,7 +46,7 @@ class ClickHouse:
         columns: List[str],
         table: str,
         database: str,
-        clickhouse_server_credential: Union[ClickHouseRemoteConnectionCred, None],
+        clickhouse_server_credential: Union[ClickHouseCredentials, None],
         app_id: str,
     ) -> None:
         clickhouse_client = ClickHouseClientFactory.get_client(
