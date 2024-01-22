@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from typing import Union
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -117,8 +118,6 @@ async def get_app(
         domain=app.domain,
         org_access=app.org_access,
         shared_with=app.shared_with,
-        clickhouse_credential=app.clickhouse_credential,
-        remote_connection=app.remote_connection,
         api_key=app.api_key,
     )
 
@@ -196,3 +195,13 @@ async def get_user_domain(
     app_service: AppService = Depends(),
 ):
     return await app_service.get_user_domain(app_id=id)
+
+
+@router.post("/apps/{id}/api-key")
+async def generate_api_key(
+    id: str,
+    app_service: AppService = Depends(),
+):
+    key = uuid.uuid4()
+    await app_service.update_api_key(app_id=id, api_key=str(key))
+    return key

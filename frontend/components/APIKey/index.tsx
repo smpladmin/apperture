@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import { App } from '@lib/domain/app';
-import { generateAPIKey } from '@lib/services/apiKeyService';
+import { generateAPIKey } from '@lib/services/appService';
 import { GREEN_500 } from '@theme/index';
 import { useRouter } from 'next/router';
 import { CheckCircle, Copy } from 'phosphor-react';
@@ -40,7 +40,7 @@ const APIKey = ({ app }: { app: App }) => {
       {apiKey ? (
         <>
           <Text fontSize={'xs-16'} fontWeight={'500'} lineHeight={'xs-16'}>
-            {`${app.name}'s API Key:`} 
+            {`App ${app.name}'s API key:`}
           </Text>
           <Flex alignItems={'center'} gap={'2'}>
             <Box
