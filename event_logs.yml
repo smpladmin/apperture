@@ -44,8 +44,8 @@ services:
         traefik.http.routers.event_logs_producer-https.tls: 'true'
         traefik.docker.network: traefik-public
         traefik.enable: 'true'
-        traefik.http.routers.event_logs_producer-http.rule: Host(`api3.apperture.io`)
-        traefik.http.routers.event_logs_producer-https.rule: Host(`api3.apperture.io`)
+        traefik.http.routers.event_logs_producer-http.rule: Host(`events.apperture.io`)
+        traefik.http.routers.event_logs_producer-https.rule: Host(`events.apperture.io`)
       update_config:
         delay: 5s
         order: start-first
