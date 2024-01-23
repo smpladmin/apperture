@@ -28,17 +28,31 @@ class ClickHouse:
             )
         except DatabaseError as e:
             logging.info(f"Exception saving events to ClickHouse: {e}")
-            logging.info("Trying to save sequentially")
-            for event in events:
-                self._save(
-                    events=[event],
-                    columns=columns,
-                    table=table,
-                    database=database,
-                    app_id=app_id,
-                    clickhouse_server_credential=clickhouse_server_credential,
-                )
-            logging.info("Saved sequentially")
+            logging.info("Trying to save recursively")
+            self.rsave_events(events=events)
+            logging.info("Saving recursively ends")
+
+    def rsave_events(self, events):
+        """Saves events to clickHouse with recursive retries using split backoff."""
+        if not events:
+            return
+
+        if len(events) == 1:
+            self._save(events)
+            return
+
+        try:
+            self._save(events)
+        except Exception as e:
+            logging.info(f"Exception saving events to ClickHouse: {e}")
+            logging.info("Trying to split and save")
+
+            mid = len(events) // 2
+            first_half = events[:mid]
+            second_half = events[mid:]
+
+            self.rsave_events(first_half)
+            self.rsave_events(second_half)
 
     def _save(
         self,
