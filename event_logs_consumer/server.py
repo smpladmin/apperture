@@ -92,6 +92,7 @@ def save_topic_data_to_clickhouse(
             columns = [
                 "event_name",
                 "added_time",
+                "table",
                 "mobile",
                 "task_id",
                 "account_id",
@@ -103,6 +104,7 @@ def save_topic_data_to_clickhouse(
                 [
                     data.get("event_name", ""),
                     format_date_string_to_desired_format(data.get("added_time")),
+                    data.get("table", ""),
                     data.get("mobile", ""),
                     data.get("task_id", ""),
                     data.get("account_id", ""),
