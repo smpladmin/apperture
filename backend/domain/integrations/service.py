@@ -487,10 +487,14 @@ class IntegrationService:
         client = await ClickHouseClientFactory.get_client(app_id=app_id)
         create_table_query = f"""
             CREATE TABLE IF NOT EXISTS {database}.{table} (
-                event String,
+                event_name String,
+                added_time DateTime,
+                table String,
+                mobile String,
+                task_id String,
+                account_id String,
                 key String,
                 data JSON,
-                added_time DateTime,
                 datasource_id String,
             ) ENGINE = MergeTree
             ORDER BY added_time

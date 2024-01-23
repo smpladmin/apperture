@@ -89,22 +89,30 @@ def save_topic_data_to_clickhouse(
                 f"Data present in {topic} bucket {to_insert}, Saving {len(to_insert)} entires to {database}.{table}"
             )
 
-            columns = ["event", "key", "data", "added_time", "datasource_id"]
+            columns = [
+                "event_name",
+                "added_time",
+                "mobile",
+                "task_id",
+                "account_id",
+                "key",
+                "data",
+                "datasource_id",
+            ]
             events = [
                 [
-                    data.get("event", ""),
+                    data.get("event_name", ""),
+                    format_date_string_to_desired_format(data.get("added_time")),
+                    data.get("mobile", ""),
+                    data.get("task_id", ""),
+                    data.get("account_id", ""),
                     data.get("key", ""),
                     data.get("data", {}),
-                    format_date_string_to_desired_format(
-                        data.get(
-                            "added_time",
-                            "1970-01-01 00:00:00",
-                        )
-                    ),
                     data.get("datasource_id", ""),
                 ]
                 for data in to_insert
             ]
+            logging.info(f"events: {events}")
             clickhouse.save_events(
                 events=events,
                 columns=columns,

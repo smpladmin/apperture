@@ -61,8 +61,17 @@ async def capture_event_logs(
 ):
     kafka_topic = f"eventlogs_{datasource_id}"
     # update data with datasource_id to track apperture datasource associated with log stream
-    updated_dto = dict(dto)
-    updated_dto.update({"datasource_id": datasource_id})
+    updated_dto = {
+        "event_name": dto.event.eventName,
+        "added_time": dto.event.addedTime,
+        "table": dto.event.table,
+        "mobile": dto.event.mobile or "",
+        "task_id": dto.event.task_id or "",
+        "account_id": dto.event.account_id or "",
+        "key": dto.event.key or "",
+        "data": dto.event.data,
+        "datasource_id": datasource_id,
+    }
     value = json.dumps(updated_dto)
 
     await producer.send_and_wait(kafka_topic, value=value.encode("utf-8"))
