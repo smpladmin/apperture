@@ -18,7 +18,7 @@ from event_logs_datasources import EventLogsDatasources
 load_dotenv()
 
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
-MAX_RECORDS = int(os.getenv("MAX_RECORDS", "100"))
+MAX_RECORDS = int(os.getenv("MAX_RECORDS", "1"))
 
 
 logging.getLogger().setLevel(logging.INFO)
@@ -43,7 +43,12 @@ def format_date_string_to_desired_format(
 
     for date_format in date_formats:
         try:
-            if "%f" in date_format and len(date_str.split(".")[-1]) > 6:
+            if (
+                "%f" in date_format
+                and "." in date_str
+                and len(date_str.split(".")[-1]) > 6
+            ):
+                logging.info("removing milliseconfs")
                 milliseconds_part = date_str.split(".")[-1]
                 digits_to_remove = len(milliseconds_part) - 6
                 date_str = date_str[:-digits_to_remove]
@@ -51,7 +56,8 @@ def format_date_string_to_desired_format(
             result_date_str = dt_object.strftime(output_date_format)
             return datetime.strptime(result_date_str, output_date_format)
         except ValueError as e:
-            logging.info(f"Couldn't convert date str : {e}")
+            pass
+            # logging.info(f"Couldn't convert date str : {e}")
 
     return None
 
