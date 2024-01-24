@@ -31,10 +31,11 @@ total_records = 0
 
 
 def format_date_string_to_desired_format(
-    date_str, output_date_format="%Y-%m-%d %H:%M:%S"
+    date_str: str, output_date_format="%Y-%m-%d %H:%M:%S"
 ):
     date_formats = [
         "%Y-%m-%dT%H:%M:%S.%fZ",
+        "%Y-%m-%dT%H:%M:%S.%f",
         "%Y-%m-%d %H:%M:%S.%f",
         "%Y-%m-%d %H:%M:%S",
         "%d-%m-%Y %H:%M",
@@ -42,11 +43,15 @@ def format_date_string_to_desired_format(
 
     for date_format in date_formats:
         try:
+            if "%f" in date_format and len(date_str.split(".")[-1]) > 6:
+                milliseconds_part = date_str.split(".")[-1]
+                digits_to_remove = len(milliseconds_part) - 6
+                date_str = date_str[:-digits_to_remove]
             dt_object = datetime.strptime(date_str, date_format)
             result_date_str = dt_object.strftime(output_date_format)
             return datetime.strptime(result_date_str, output_date_format)
-        except ValueError:
-            pass
+        except ValueError as e:
+            logging.info(f"Couldn't convert date str : {e}")
 
     return None
 
