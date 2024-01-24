@@ -48,7 +48,6 @@ def format_date_string_to_desired_format(
                 and "." in date_str
                 and len(date_str.split(".")[-1]) > 6
             ):
-                logging.info("removing milliseconfs")
                 milliseconds_part = date_str.split(".")[-1]
                 digits_to_remove = len(milliseconds_part) - 6
                 date_str = date_str[:-digits_to_remove]
