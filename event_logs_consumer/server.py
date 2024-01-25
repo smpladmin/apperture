@@ -56,7 +56,6 @@ def format_date_string_to_desired_format(
             return datetime.strptime(result_date_str, output_date_format)
         except ValueError as e:
             pass
-            # logging.info(f"Couldn't convert date str : {e}")
 
     return None
 

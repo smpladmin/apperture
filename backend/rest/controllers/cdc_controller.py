@@ -53,6 +53,13 @@ async def get_cdc_connectors():
     return requests.get(url=KAFKA_CONNECTOR_BASE_URL).json()
 
 
+@router.get("/cdc/{name}")
+async def get_cdc_connectors(
+    name: str,
+):
+    return requests.get(url=f"{KAFKA_CONNECTOR_BASE_URL}{name}").json()
+
+
 @router.post("/cdc/{name}/restart")
 async def restart_cdc_connector(
     name: str, includeTasks: Optional[bool] = None, onlyFailed: Optional[bool] = None
@@ -63,9 +70,21 @@ async def restart_cdc_connector(
     if onlyFailed is not None:
         query_params["onlyFailed"] = onlyFailed
 
-    response = requests.post(
+    return requests.post(
         url=f"{KAFKA_CONNECTOR_BASE_URL}{name}/restart",
         json={},
         params=query_params,
-    )
-    return
+    ).json()
+
+
+@router.put("/cdc/{name}/config")
+async def update_cdc_connector(name: str, dto: dict):
+    try:
+        headers = {"Accept": "application/json", "Content-Type": "application/json"}
+        return requests.put(
+            url=f"{KAFKA_CONNECTOR_BASE_URL}{name}/config",
+            json=dto,
+            headers=headers,
+        ).json()
+    except Exception as e:
+        logging.info(f"Error updating connector configuration: {e}")

@@ -86,11 +86,12 @@ async def process_kafka_messages() -> None:
                 database = bucket["ch_db"]
                 clickhouse_server_credential = bucket["ch_server_credential"]
                 app_id = bucket["app_id"]
-                logging.info(
-                    f"Inserting data for topic {topic} into {table} table of {database}"
-                )
+
                 to_insert = list(filter(None, bucket["data"]))
                 if to_insert:
+                    logging.info(
+                        f"Inserting data for topic {topic} into {table} table of {database}"
+                    )
                     logging.info(
                         f"Data present in {topic} bucket len: {len(to_insert)}, Saving to clickhouse"
                     )
