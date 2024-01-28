@@ -1,9 +1,12 @@
 import logging
 import os
+import re
 import time
 from typing import Optional
 import requests
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from domain.apps.service import AppService
+from domain.cdc.service import CDCService
 
 from domain.integrations.models import ServerType
 from rest.middlewares import validate_jwt
@@ -60,31 +63,45 @@ async def get_cdc_connectors(
     return requests.get(url=f"{KAFKA_CONNECTOR_BASE_URL}{name}").json()
 
 
-@router.post("/cdc/{name}/restart")
-async def restart_cdc_connector(
-    name: str, includeTasks: Optional[bool] = None, onlyFailed: Optional[bool] = None
-):
-    query_params = {}
-    if includeTasks is not None:
-        query_params["includeTasks"] = includeTasks
-    if onlyFailed is not None:
-        query_params["onlyFailed"] = onlyFailed
+def extract_integration_id_from_connector_name(name):
+    id_pattern = re.compile(r"cdc_(\w+)")
+    match = id_pattern.search(name)
 
-    return requests.post(
-        url=f"{KAFKA_CONNECTOR_BASE_URL}{name}/restart",
-        json={},
-        params=query_params,
-    ).json()
+    if match:
+        extracted_id = match.group(1)
+        return extracted_id
+    else:
+        return None
 
 
 @router.put("/cdc/{name}/config")
-async def update_cdc_connector(name: str, dto: dict):
+async def update_cdc_connector(
+    name: str,
+    dto: dict,
+    resume: Optional[bool] = False,
+    resume_date: Optional[str] = None,
+    integration_service: IntegrationService = Depends(),
+    cdc_service: CDCService = Depends(),
+    app_service: AppService = Depends(),
+):
     try:
+        config_json = dto
+        if resume:
+            connector = requests.get(url=f"{KAFKA_CONNECTOR_BASE_URL}{name}").json()
+            config = connector["config"]
+
+            integration_id = extract_integration_id_from_connector_name(config["name"])
+            integration = await integration_service.get_integration(id=integration_id)
+            app = await app_service.get_app(id=integration.app_id)
+            config_json = await cdc_service.generate_update_connector_config_to_resume(
+                config=config, app=app, date=resume_date
+            )
+
         headers = {"Accept": "application/json", "Content-Type": "application/json"}
         return requests.put(
             url=f"{KAFKA_CONNECTOR_BASE_URL}{name}/config",
-            json=dto,
+            json=config_json,
             headers=headers,
         ).json()
     except Exception as e:
-        logging.info(f"Error updating connector configuration: {e}")
+        raise HTTPException(status_code=400, detail=e)
