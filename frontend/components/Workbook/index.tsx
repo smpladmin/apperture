@@ -1,13 +1,17 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import WorkbookHeader from './components/Header';
 import {
-  getTransientSpreadsheets,
-  getWorkbookTransientColumn,
-  saveWorkbook,
-  updateWorkbook,
-  vlookup,
-} from '@lib/services/workbookService';
-import { useRouter } from 'next/router';
+  Box,
+  Flex,
+  useDisclosure,
+  usePrevious,
+  useToast,
+} from '@chakra-ui/react';
+import AIButton from '@components/AIButton';
+import { SelectedColumn } from '@components/AppertureSheets/types/gridTypes';
+import LoadingSpinner from '@components/LoadingSpinner';
+import Footer from '@components/Workbook/components/Footer';
+import Grid from '@components/Workbook/components/Grid/Grid';
+import { Connection } from '@lib/domain/connections';
+import { AppertureUser } from '@lib/domain/user';
 import {
   AIQuery,
   ChartType,
@@ -21,22 +25,25 @@ import {
   TransientSheetData,
   Workbook,
 } from '@lib/domain/workbook';
-import {
-  Box,
-  Flex,
-  useDisclosure,
-  usePrevious,
-  useToast,
-} from '@chakra-ui/react';
-import SidePanel from './components/SidePanel';
-import Grid from '@components/Workbook/components/Grid/Grid';
-import Footer from '@components/Workbook/components/Footer';
-import QueryEditor from './components/QueryEditor';
-import EmptySheet from './components/EmptySheet';
 import { getConnectionsForApp } from '@lib/services/connectionService';
-import { cloneDeep, isEqual, range } from 'lodash';
 import {
-  evaluateExpression,
+  getTransientSpreadsheets,
+  getWorkbookTransientColumn,
+  saveWorkbook,
+  updateWorkbook,
+  vlookup,
+} from '@lib/services/workbookService';
+import { DimensionParser, Metricparser } from '@lib/utils/parser';
+import { cloneDeep, isEqual } from 'lodash';
+import { useRouter } from 'next/router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import Coachmarks from './components/Coachmarks';
+import EmptySheet from './components/EmptySheet';
+import WorkbookHeader from './components/Header';
+import QueryEditor from './components/QueryEditor';
+import SidePanel from './components/SidePanel';
+import Toolbar from './components/Toolbar';
+import {
   expressionTokenRegex,
   findConnectionById,
   generateQuery,
@@ -46,16 +53,8 @@ import {
   isdigit,
   padEmptyItemsInArray,
   parseHeaders,
-  prepareChartSeriesFromSheetData,
+  prepareChartSeriesFromSheetData
 } from './util';
-import { DimensionParser, Metricparser } from '@lib/utils/parser';
-import { Connection } from '@lib/domain/connections';
-import LoadingSpinner from '@components/LoadingSpinner';
-import AIButton from '@components/AIButton';
-import Coachmarks from './components/Coachmarks';
-import { AppertureUser } from '@lib/domain/user';
-import Toolbar from './components/Toolbar';
-import { SelectedColumn } from '@components/AppertureSheets/types/gridTypes';
 
 const initializeSheetForSavedWorkbook = (savedWorkbook?: Workbook) => {
   if (savedWorkbook) {
@@ -160,6 +159,7 @@ const Workbook = ({
   const toast = useToast();
   const router = useRouter();
   const { dsId, workbookId } = router.query;
+  const { selectedApp } = window?.localStorage;
 
   useEffect(() => {
     if (router.pathname.includes('edit')) setIsWorkbookBeingEdited(true);
@@ -175,7 +175,10 @@ const Workbook = ({
 
   useEffect(() => {
     const fetchConnections = async () => {
-      const res = await getConnectionsForApp(dsId as string);
+      const res = await getConnectionsForApp(
+        dsId as string,
+        selectedApp as string
+      );
       setConnections(res);
       setLoadingConnections(false);
     };

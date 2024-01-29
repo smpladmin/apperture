@@ -43,6 +43,7 @@ const AppsModal = ({
 }: AppsModalProps) => {
   const router = useRouter();
   const { dsId } = router.query;
+  window?.localStorage?.setItem('selectedApp', selectedApp._id);
 
   return (
     <Modal
