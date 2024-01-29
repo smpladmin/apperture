@@ -47,7 +47,7 @@ class CDCService:
         )
 
         return {
-            f"snapshot.select.statement.overrides.{database}.{table}": f"select * from {database}.dbo.{table} where toDate({column}) >= '{date}'"
+            f"snapshot.select.statement.overrides.dbo.{table}": f"select * from {database}.dbo.{table} where CONVERT(DATE, {column}) >= '{date}'"
         }
 
     async def generate_update_connector_config_to_resume(
@@ -55,7 +55,12 @@ class CDCService:
     ):
         tables = config["table.include.list"].split(",")
         database = config["database.names"]
-        snapshot_override_tables = config.get("snapshot.select.statement.overrides", "")
+        snapshot_override_str = config.get("snapshot.select.statement.overrides", "")
+        snapshot_override_tables = (
+            set()
+            if not snapshot_override_str
+            else set(snapshot_override_str.split(","))
+        )
 
         for table in tables:
             table_name_without_dbo = table.split(".")[-1]
@@ -65,12 +70,14 @@ class CDCService:
                         database=database,
                         table=table_name_without_dbo,
                         app=app,
-                        date=date,
+                        date_str=date,
                     )
                 )
                 config.update(snapshot_override_query_key_pair)
-                snapshot_override_tables += f"{table_name_without_dbo}, "
+                snapshot_override_tables.add(table)
 
         if snapshot_override_tables:
-            config["snapshot.select.statement.overrides"] = snapshot_override_tables
+            config["snapshot.select.statement.overrides"] = ", ".join(
+                snapshot_override_tables
+            )
         return config

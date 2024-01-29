@@ -91,14 +91,14 @@ class TestCdcService:
             table="test_table",
             app=self.app,
         ) == {
-            "snapshot.select.statement.overrides.test_db.test_table": "select * from test_db.dbo.test_table where toDate(added_time) >= '2024-01-28'"
+            "snapshot.select.statement.overrides.dbo.test_table": "select * from test_db.dbo.test_table where CONVERT(DATE, added_time) >= '2024-01-28'"
         }
 
     @pytest.mark.asyncio
     async def test_generate_update_connector_config_to_resume(self):
         self.service.get_snapshot_override_query = AsyncMock(
             return_value={
-                "snapshot.select.statement.overrides.your_database.t_account": "select * from your_database.dbo.t_account where toDate(added_time) >= '2022-01-01'"
+                "snapshot.select.statement.overrides.dbo.t_account": "select * from your_database.dbo.t_account where CONVERT(DATE, added_time) >= '2022-01-01'"
             }
         )
 
@@ -119,6 +119,6 @@ class TestCdcService:
             "table.include.list": "dbo.t_account, dbo.test_1",
             "snapshot.mode": "initial",
             "snapshot.lock.timeout.ms": "100000",
-            "snapshot.select.statement.overrides.your_database.t_account": "select * from your_database.dbo.t_account where toDate(added_time) >= '2022-01-01'",
-            "snapshot.select.statement.overrides": "t_account, ",
+            "snapshot.select.statement.overrides.dbo.t_account": "select * from your_database.dbo.t_account where CONVERT(DATE, added_time) >= '2022-01-01'",
+            "snapshot.select.statement.overrides": "dbo.t_account",
         }
