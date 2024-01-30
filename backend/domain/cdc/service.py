@@ -4,7 +4,7 @@ from domain.apps.models import App
 from clickhouse.clickhouse_client_factory import ClickHouseClientFactory
 from utils.cdc_tables import (
     DEFAULT_START_DATE_FOR_CDC_TABLES,
-    WIOM_CDC_TABLES_WITH_ADDED_TIME_COLUMN,
+    WIOM_CDC_TABLES_WITH_TIME_COLUMN,
 )
 
 
@@ -64,13 +64,15 @@ class CDCService:
 
         for table in tables:
             table_name_without_dbo = table.split(".")[-1]
-            if table_name_without_dbo in WIOM_CDC_TABLES_WITH_ADDED_TIME_COLUMN:
+            if table_name_without_dbo in WIOM_CDC_TABLES_WITH_TIME_COLUMN:
+                date_column = WIOM_CDC_TABLES_WITH_TIME_COLUMN[table_name_without_dbo]
                 snapshot_override_query_key_pair = (
                     await self.get_snapshot_override_query(
                         database=database,
                         table=table_name_without_dbo,
                         app=app,
                         date_str=date,
+                        date_column=date_column,
                     )
                 )
                 config.update(snapshot_override_query_key_pair)
