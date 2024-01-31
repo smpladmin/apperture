@@ -26,14 +26,21 @@ KAFKA_CONNECTOR_BASE_URL = os.getenv(
 @router.post("/cdc")
 async def create_cdc_connector(
     id: str,
+    dto: dict,
     integration_service: IntegrationService = Depends(),
 ):
-    integration = await integration_service.get_integration(id=id)
-    credential = integration.credential.cdc_credential
+    config = {}
     headers = {"Accept": "application/json", "Content-Type": "application/json"}
-    config = integration_service.generate_connector_config(
-        tables=credential.tables, credential=credential, integration_id=id
-    )
+
+    if dto:
+        config = dto
+    else:
+        integration = await integration_service.get_integration(id=id)
+        credential = integration.credential.cdc_credential
+        config = integration_service.generate_connector_config(
+            tables=credential.tables, credential=credential, integration_id=id
+        )
+
     data = {
         "name": f"cdc_{id}",
         "config": config,

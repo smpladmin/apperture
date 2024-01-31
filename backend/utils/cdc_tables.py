@@ -28,6 +28,7 @@ WIOM_CDC_TABLES_WITH_TIME_COLUMN = {
     "lead_allocation": "created_at",
     "t_router_user_mapping": "created_on",
     "t_router_bandwidth": "timestamp",
+    "t_wiom_lead_installation": "created_at",
 }
 
 
