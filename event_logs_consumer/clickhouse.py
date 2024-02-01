@@ -29,20 +29,49 @@ class ClickHouse:
         except DatabaseError as e:
             logging.info(f"Exception saving events to ClickHouse: {e}")
             logging.info("Trying to save recursively")
-            self.rsave_events(events=events)
+            self.rsave_events(
+                events=events,
+                columns=columns,
+                table=table,
+                database=database,
+                clickhouse_server_credential=clickhouse_server_credential,
+                app_id=app_id,
+            )
             logging.info("Saving recursively ends")
 
-    def rsave_events(self, events):
+    def rsave_events(
+        self,
+        events,
+        columns: List[str],
+        table: str,
+        database: str,
+        clickhouse_server_credential: Union[ClickHouseCredentials, None],
+        app_id: str,
+    ):
         """Saves events to clickHouse with recursive retries using split backoff."""
         if not events:
             return
 
         if len(events) == 1:
-            self._save(events)
+            self._save(
+                events=events,
+                columns=columns,
+                table=table,
+                database=database,
+                clickhouse_server_credential=clickhouse_server_credential,
+                app_id=app_id,
+            )
             return
 
         try:
-            self._save(events)
+            self._save(
+                events=events,
+                columns=columns,
+                table=table,
+                database=database,
+                clickhouse_server_credential=clickhouse_server_credential,
+                app_id=app_id,
+            )
         except Exception as e:
             logging.info(f"Exception saving events to ClickHouse: {e}")
             logging.info("Trying to split and save")
@@ -51,8 +80,22 @@ class ClickHouse:
             first_half = events[:mid]
             second_half = events[mid:]
 
-            self.rsave_events(first_half)
-            self.rsave_events(second_half)
+            self.rsave_events(
+                events=first_half,
+                columns=columns,
+                table=table,
+                database=database,
+                clickhouse_server_credential=clickhouse_server_credential,
+                app_id=app_id,
+            )
+            self.rsave_events(
+                events=second_half,
+                columns=columns,
+                table=table,
+                database=database,
+                clickhouse_server_credential=clickhouse_server_credential,
+                app_id=app_id,
+            )
 
     def _save(
         self,
