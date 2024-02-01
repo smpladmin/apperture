@@ -29,6 +29,8 @@ logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
 total_records = 0
 
+KEYS_TYPECAST_TO_STRING = os.getenv("KEYS_TYPECAST_TO_STRING", ["lat", "lng"])
+
 
 def format_date_string_to_desired_format(
     date_str: str, output_date_format="%Y-%m-%d %H:%M:%S"
@@ -58,6 +60,14 @@ def format_date_string_to_desired_format(
             pass
 
     return None
+
+
+def convert_object_keys_to_string(data: dict):
+    for key in data.keys():
+        if key in KEYS_TYPECAST_TO_STRING:
+            data[key] = str(data[key])
+
+    return data
 
 
 def fetch_values_from_kafka_records(data, event_logs_datasources: EventLogsDatasources):
@@ -118,7 +128,7 @@ def save_topic_data_to_clickhouse(
                     data.get("task_id", ""),
                     data.get("account_id", ""),
                     data.get("key", ""),
-                    data.get("data", {}),
+                    convert_object_keys_to_string(data.get("data", {})),
                     data.get("datasource_id", ""),
                 ]
                 for data in to_insert
