@@ -15,6 +15,7 @@ class CredentialType(str, Enum):
     MSSQL = "MSSQL"
     CSV = "CSV"
     CDC = "CDC"
+    EVENT_LOGS = "EVENT_LOGS"
 
 
 class BranchCredential(BaseModel):
@@ -100,6 +101,7 @@ class IntegrationProvider(str, Enum):
     MYSQL = "mysql"
     MSSQL = "mssql"
     CSV = "csv"
+    EVENT_LOGS = "event_logs"
 
 
 class DataSource(BaseModel):
