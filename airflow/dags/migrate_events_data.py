@@ -125,6 +125,8 @@ def create_dag(datasource_id: str):
     facebook_ads_data_loader()
 
 
-datasource_id = "65b1f642f3213a617bbedf8f"
+# This was used for migrating data for wiom prod events from booking_logs and tasklogs
+# Any migration ahead of similar type can be refered from this
 
-create_dag(datasource_id=datasource_id)
+# datasource_id = "65b1f642f3213a617bbedf8f"
+# create_dag(datasource_id=datasource_id)
