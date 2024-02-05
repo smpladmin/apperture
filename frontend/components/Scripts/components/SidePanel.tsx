@@ -23,13 +23,11 @@ const SidePanel = ({ savedDatamartDsId }: { savedDatamartDsId?: string }) => {
   const [showColumns, setShowColumns] = useState(false);
   const router = useRouter();
   const { dsId } = router.query;
-  const { selectedApp } = window?.localStorage;
 
   useEffect(() => {
     const fetchConnections = async () => {
       const res = await getConnectionsForApp(
-        savedDatamartDsId || (dsId as string),
-        selectedApp as string
+        savedDatamartDsId || (dsId as string)
       );
       setConnections(res);
       setLoadingConnections(false);
