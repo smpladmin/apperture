@@ -9,7 +9,6 @@ from fastapi_cache.decorator import cache
 from cache.cache import (
     CACHE_EXPIRY_10_MINUTES,
     CACHE_EXPIRY_24_HOURS,
-    clear_cache,
     datasource_key_builder,
 )
 from data_processor_queue.service import DPQueueService
@@ -287,7 +286,5 @@ async def delete_datasources(
     ds_id: str,
     ds_service: DataSourceService = Depends(),
 ):
-    ds = await ds_service.get_datasource(id=ds_id)
     await ds_service.delete_datasource(PydanticObjectId(ds_id))
-    await clear_cache(f"apperture-cache::get_connections:{ds.app_id}")
     return {"success": "ok"}
