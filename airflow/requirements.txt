@@ -6,3 +6,4 @@ google-ads==22.1.0
 pymysql
 pymssql
 psycopg2-binary
+ratelimit

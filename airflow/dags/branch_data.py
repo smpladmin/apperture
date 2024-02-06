@@ -1,8 +1,11 @@
 from datetime import datetime
 import logging
 from store.branch_saver import BranchDataSaver
-from event_processors.branch_event_processor import BranchEventProcessor
-from fetch.branch_data_fetcher import BranchDataFetcher
+from event_processors.branch_event_processor import (
+    BranchEventProcessor,
+    BranchSummaryEventProcessor,
+)
+from fetch.branch_data_fetcher import BranchDataFetcher, BranchSummaryDataFetcher
 from store.clickhouse_client_factory import ClickHouseClientFactory
 import pendulum
 
@@ -70,6 +73,17 @@ def create_branch_fetcher(credential: Credential, **kwargs):
 
 
 @task
+def create_branch_summary_fetcher(credential: Credential, **kwargs):
+    date = (
+        kwargs["params"]["run_date"]
+        if kwargs["params"]["run_date"]
+        else kwargs["logical_date"].format("YYYY-MM-DD")
+    )
+    logging.info(f"RUNNING FOR DATE {date}")
+    return BranchSummaryDataFetcher(credential=credential.branch_credential, date=date)
+
+
+@task
 def get_event_links(fetcher: BranchDataFetcher):
     return fetcher.get_branch_details()
 
@@ -98,6 +112,32 @@ def process_and_save_events(
                 table_name=table,
                 database_name=database_details.database_credentials.databasename,
                 event_data=clean_data,
+                column_types={},
+            )
+
+
+@task
+def process_and_save_summary_events(
+    fetcher: BranchSummaryDataFetcher,
+    event_sources: List[str],
+    database_details: AppDatabaseResponse,
+    clickhouse_server_credentials: Union[ClickHouseRemoteConnectionCred, None],
+):
+    saver = BranchDataSaver(
+        app_id=datasource.appId,
+        clickhouse_server_credentials=clickhouse_server_credentials,
+    )
+    for event_source in event_sources:
+        for events in fetcher.fetch_branch_summary(event_source=event_source):
+            source = "_".join(event_source.split("_")[1:])
+            clean_data = BranchSummaryEventProcessor().process(
+                events_data=events, source=source
+            )
+            saver.save(
+                table_name=f"summary_{source}",
+                database_name=database_details.database_credentials.databasename,
+                event_data=clean_data,
+                column_types={source: "Int"},
             )
 
 
@@ -137,7 +177,7 @@ def create_dag(datasource_id: str, created_date: datetime):
         description=f"Branch daily refresh for {datasource_id}",
         schedule="0 12 * * *",
         start_date=pendulum.instance(
-            created_date - timedelta(days=BRANCH_DATA_FETCH_DAYS_OFFSET),
+            created_date - timedelta(days=100),
             tz=pendulum.timezone("Asia/Kolkata"),
         ),
         params={
@@ -177,6 +217,53 @@ def create_dag(datasource_id: str, created_date: datetime):
         )
 
     branch_data_sync()
+
+    @dag(
+        dag_id=f"branch_summary_data_loader_{datasource_id}",
+        description=f"Branch summary data daily ingestion for {datasource_id}",
+        schedule="0 12 * * *",
+        start_date=pendulum.instance(
+            created_date - timedelta(days=100),
+            tz=pendulum.timezone("Asia/Kolkata"),
+        ),
+        params={
+            "run_date": Param(
+                "",
+                type=["string", "null"],
+                format="datetime",
+                title="run_date",
+                description="Select run date (Leave empty to fetch data for the day prior to the logical date)",
+            ),
+        },
+        catchup=(created_date > AIRFLOW_INIT_DATE),
+        tags=[f"branch-daily-summary-data-fetch"],
+        default_args={
+            "retries": branch_task_retries,
+            "retry_delay": timedelta(minutes=branch_task_retry_delay),
+            "retry_exponential_backoff": True,
+        },
+    )
+    def branch_summary_data_ingestion():
+        datasource_with_credential = get_datasource_and_credential(
+            datasource_id=datasource_id
+        )
+        datasource = datasource_with_credential["datasource"]
+        credential = datasource_with_credential["credential"]
+        clickhouse_server_credential = get_clickhouse_server_credential(
+            datasource=datasource
+        )
+        app_database_details = get_app_database(datasource=datasource)
+        fetcher = create_branch_summary_fetcher(credential=credential)
+        event_sources = ["eo_install", "xx_click", "eo_click", "eo_open"]
+
+        process_and_save_summary_events(
+            event_sources=event_sources,
+            fetcher=fetcher,
+            database_details=app_database_details,
+            clickhouse_server_credentials=clickhouse_server_credential,
+        )
+
+    branch_summary_data_ingestion()
 
 
 datasources = datasource_service.get_datasources_for_provider(provider=provider)
