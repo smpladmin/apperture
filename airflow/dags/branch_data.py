@@ -237,11 +237,11 @@ def create_dag(datasource_id: str, created_date: datetime):
         },
         catchup=(created_date > AIRFLOW_INIT_DATE),
         tags=[f"branch-daily-summary-data-fetch"],
-        default_args={
-            "retries": branch_task_retries,
-            "retry_delay": timedelta(minutes=branch_task_retry_delay),
-            "retry_exponential_backoff": True,
-        },
+        # default_args={
+        #     "retries": branch_task_retries,
+        #     "retry_delay": timedelta(minutes=branch_task_retry_delay),
+        #     "retry_exponential_backoff": True,
+        # },
     )
     def branch_summary_data_ingestion():
         datasource_with_credential = get_datasource_and_credential(
